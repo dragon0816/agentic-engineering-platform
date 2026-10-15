@@ -33,22 +33,24 @@ VAULT = Path(r"C:\Users\Chi_L\AppData\Local\AEP\rs-k")
 OUT = HERE / "references"
 TIMEOUT_SECONDS = 900
 
-PROMPT = chr(10).join((
-    'You are writing a REFERENCE ANSWER for a benchmark question about the R&S Knowledge Vault in the current folder.',  # noqa: E501
-    'Answer ONLY from files in this folder. Search with Grep and Glob, read with Read. Do not use outside knowledge.',  # noqa: E501
-    'If the Vault does not contain enough evidence, say so (sufficient=false) and say what is missing.',  # noqa: E501
-    '',
-    'Question ({qid}): {question}',
-    '',
-    'Reply with ONE JSON object and nothing else:',
-    '{{"answer": "a concise answer, 3-8 sentences, only what the Vault supports",',
-    ' "key_points": [{{"point": "one fact a correct answer must contain",',
-    '                  "source": "relative/path/inside/the/vault.md",',
-    '                  "quote": "a short VERBATIM excerpt (10-200 characters) copied exactly from that file"}}],',  # noqa: E501
-    ' "sufficient": true,',
-    ' "missing": "what the Vault lacks, or empty"}}',
-    'Give 2-8 key points. Every key point needs a source file and an exact quote.',
-))
+PROMPT = chr(10).join(
+    (
+        "You are writing a REFERENCE ANSWER for a benchmark question about the R&S Knowledge Vault in the current folder.",  # noqa: E501
+        "Answer ONLY from files in this folder. Search with Grep and Glob, read with Read. Do not use outside knowledge.",  # noqa: E501
+        "If the Vault does not contain enough evidence, say so (sufficient=false) and say what is missing.",  # noqa: E501
+        "",
+        "Question ({qid}): {question}",
+        "",
+        "Reply with ONE JSON object and nothing else:",
+        '{{"answer": "a concise answer, 3-8 sentences, only what the Vault supports",',
+        ' "key_points": [{{"point": "one fact a correct answer must contain",',
+        '                  "source": "relative/path/inside/the/vault.md",',
+        '                  "quote": "a short VERBATIM excerpt (10-200 characters) copied exactly from that file"}}],',  # noqa: E501
+        ' "sufficient": true,',
+        ' "missing": "what the Vault lacks, or empty"}}',
+        "Give 2-8 key points. Every key point needs a source file and an exact quote.",
+    )
+)
 
 
 def _normal(text: str) -> str:
@@ -74,7 +76,7 @@ def _json_object(text: str) -> dict[str, Any] | None:
     if start < 0 or end <= start:
         return None
     try:
-        value = json.loads(text[start:end + 1])
+        value = json.loads(text[start : end + 1])
     except ValueError:
         return None
     return value if isinstance(value, dict) else None
@@ -87,11 +89,32 @@ def answer(question: dict[str, Any]) -> dict[str, Any]:
     prompt = PROMPT.format(qid=question["id"], question=question["text"])
     started = time.monotonic()
     done = subprocess.run(
-        [claude, "-p", prompt, "--output-format", "json", "--allowedTools", "Read", "Grep",
-         "Glob", "--disallowedTools", "Bash", "Edit", "Write", "WebFetch", "WebSearch",
-         "--strict-mcp-config"],
-        cwd=VAULT, capture_output=True, text=True, encoding="utf-8", errors="replace",
-        timeout=TIMEOUT_SECONDS, stdin=subprocess.DEVNULL)
+        [
+            claude,
+            "-p",
+            prompt,
+            "--output-format",
+            "json",
+            "--allowedTools",
+            "Read",
+            "Grep",
+            "Glob",
+            "--disallowedTools",
+            "Bash",
+            "Edit",
+            "Write",
+            "WebFetch",
+            "WebSearch",
+            "--strict-mcp-config",
+        ],
+        cwd=VAULT,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=TIMEOUT_SECONDS,
+        stdin=subprocess.DEVNULL,
+    )
     seconds = round(time.monotonic() - started, 1)
     try:
         envelope = json.loads(done.stdout)
@@ -100,13 +123,18 @@ def answer(question: dict[str, Any]) -> dict[str, Any]:
     body = _json_object(str(envelope.get("result") or "")) or {}
     points = verify(list(body.get("key_points") or []))
     return {
-        "id": question["id"], "question": question["text"],
+        "id": question["id"],
+        "question": question["text"],
         "tags": {k: v for k, v in question.items() if k not in ("id", "text")},
-        "answer": body.get("answer"), "sufficient": body.get("sufficient"),
-        "missing": body.get("missing"), "key_points": points,
+        "answer": body.get("answer"),
+        "sufficient": body.get("sufficient"),
+        "missing": body.get("missing"),
+        "key_points": points,
         "verified_points": sum(1 for p in points if p["verified"]),
-        "author": "claude-code", "written_at": datetime.now(UTC).isoformat(timespec="seconds"),
-        "seconds": seconds, "num_turns": envelope.get("num_turns"),
+        "author": "claude-code",
+        "written_at": datetime.now(UTC).isoformat(timespec="seconds"),
+        "seconds": seconds,
+        "num_turns": envelope.get("num_turns"),
         "cost_usd_estimate": envelope.get("total_cost_usd"),
         "error": None if body else (str(envelope.get("result") or done.stderr)[:500]),
     }
@@ -130,11 +158,13 @@ def main() -> int:
             print(f"{qid}: kept")
             continue
         record = answer(bank[qid])
-        target.write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\n",
-                          encoding="utf-8")
-        print(f"{qid}: {record['verified_points']}/{len(record['key_points'])} points verified, "
-              f"sufficient={record['sufficient']}, {record['seconds']} s, "
-              f"{record['num_turns']} turns, ~${record['cost_usd_estimate']}", flush=True)
+        target.write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        print(
+            f"{qid}: {record['verified_points']}/{len(record['key_points'])} points verified, "
+            f"sufficient={record['sufficient']}, {record['seconds']} s, "
+            f"{record['num_turns']} turns, ~${record['cost_usd_estimate']}",
+            flush=True,
+        )
     return 0
 
 

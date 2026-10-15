@@ -32,15 +32,17 @@ from models.credentials import EnvironmentCredentials, StaticCredentials
 @pytest.fixture
 def platform(tmp_path: Path) -> Iterator[SharedPlatformApplication]:
     app = SharedPlatformApplication.empty(
-        administrators=("platform-admin",), registry_path=tmp_path / "registry.sqlite")
+        administrators=("platform-admin",), registry_path=tmp_path / "registry.sqlite"
+    )
     with app:
         yield app
 
 
 def _agent_login(app: SharedPlatformApplication) -> str:
     member = _signed_in(app, "leo", "member")
-    status, issued = request(app.member_base_url + "/v1/member/logins/issue-agent",
-                             authorization=member, body={})
+    status, issued = request(
+        app.member_base_url + "/v1/member/logins/issue-agent", authorization=member, body={}
+    )
     assert status == 200
     return str(issued["login"])
 
@@ -49,13 +51,15 @@ def _installed(tmp_path: Path) -> HostLayout:
     layout = HostLayout.under(tmp_path / "workspace")
     layout.workflows.mkdir(parents=True)
     (layout.workflows / "lab__weekly-check__0.3.0.json").write_text(
-        json.dumps(workflow_manifest(), indent=2) + "\n", encoding="utf-8")
+        json.dumps(workflow_manifest(), indent=2) + "\n", encoding="utf-8"
+    )
     return layout
 
 
 def _publisher(app: SharedPlatformApplication, login: str) -> MemberPortalPublisher:
     binding = PlatformPublishBinding(
-        member_portal_url=app.member_base_url, credential={"name": "platform_member_login"})
+        member_portal_url=app.member_base_url, credential={"name": "platform_member_login"}
+    )
     return MemberPortalPublisher(binding, StaticCredentials({"platform_member_login": login}))
 
 
@@ -73,13 +77,16 @@ def test_an_installed_workflow_is_submitted_listed_and_approved(
     assert [s["submission_id"] for s in publisher.submissions()] == [submitted["submission_id"]]
 
     reviewer = _signed_in(platform, "leo-review", "platform_admin")
-    status, _ = request(platform.member_base_url + "/v1/member/admin/submissions/approve",
-                        authorization=reviewer,
-                        body={"submission_id": submitted["submission_id"], "evidence": "ok"})
+    status, _ = request(
+        platform.member_base_url + "/v1/member/admin/submissions/approve",
+        authorization=reviewer,
+        body={"submission_id": submitted["submission_id"], "evidence": "ok"},
+    )
     assert status == 200
     assert publisher.submissions()[0]["status"] == "approved"
     published = platform.state.packages.get(
-        AssetIdentity(namespace="lab", name="weekly-check", version="1.0.0"))
+        AssetIdentity(namespace="lab", name="weekly-check", version="1.0.0")
+    )
     assert published is not None and published.metadata.owner.id == "leo"
 
 
@@ -114,7 +121,8 @@ def test_without_a_login_or_a_platform_the_member_is_told_what_to_do(
     platform: SharedPlatformApplication, tmp_path: Path
 ) -> None:
     binding = PlatformPublishBinding(
-        member_portal_url=platform.member_base_url, credential={"name": "platform_member_login"})
+        member_portal_url=platform.member_base_url, credential={"name": "platform_member_login"}
+    )
     unmapped = MemberPortalPublisher(binding, EnvironmentCredentials({}, environ={}))
     with pytest.raises(PublishError, match="login_missing"):
         unmapped.submissions()
@@ -123,18 +131,22 @@ def test_without_a_login_or_a_platform_the_member_is_told_what_to_do(
     with pytest.raises(PublishError, match="authentication_failed"):
         wrong.submissions()
     gone = MemberPortalPublisher(
-        PlatformPublishBinding(member_portal_url="http://127.0.0.1:9",
-                               credential={"name": "x"}, timeout_seconds=2),
-        StaticCredentials({"x": "login-1:secret"}))
+        PlatformPublishBinding(
+            member_portal_url="http://127.0.0.1:9", credential={"name": "x"}, timeout_seconds=2
+        ),
+        StaticCredentials({"x": "login-1:secret"}),
+    )
     with pytest.raises(PublishError, match="platform_unreachable"):
         gone.submissions()
 
 
 def test_the_asset_must_be_installed_and_named_exactly(tmp_path: Path) -> None:
     layout = _installed(tmp_path)
-    for reference, code in (("lab/weekly-check", "bad_reference"),
-                            ("lab/weekly-check@9.9.9", "not_installed"),
-                            ("lab/weekly-check@0.3.0", "not_installed")):
+    for reference, code in (
+        ("lab/weekly-check", "bad_reference"),
+        ("lab/weekly-check@9.9.9", "not_installed"),
+        ("lab/weekly-check@0.3.0", "not_installed"),
+    ):
         kind = "skill" if reference.endswith("0.3.0") else "workflow"
         with pytest.raises(PublishError, match=code):
             installed_manifest(layout, kind, reference)  # type: ignore[arg-type]
@@ -142,19 +154,27 @@ def test_the_asset_must_be_installed_and_named_exactly(tmp_path: Path) -> None:
 
 def test_the_publish_binding_holds_no_secret_and_needs_https_beyond_loopback() -> None:
     with pytest.raises(ValueError, match="https"):
-        PlatformPublishBinding(member_portal_url="http://172.25.228.141:8776",
-                               credential={"name": "platform_member_login"})
+        PlatformPublishBinding(
+            member_portal_url="http://172.25.228.141:8776",
+            credential={"name": "platform_member_login"},
+        )
     with pytest.raises(ValueError):
-        PlatformPublishBinding.model_validate({
-            "member_portal_url": "http://127.0.0.1:28776",
-            "credential": {"name": "platform_member_login", "value": "secret"}})
-    ok = PlatformPublishBinding(member_portal_url="http://127.0.0.1:28776/",
-                                credential={"name": "platform_member_login"})
+        PlatformPublishBinding.model_validate(
+            {
+                "member_portal_url": "http://127.0.0.1:28776",
+                "credential": {"name": "platform_member_login", "value": "secret"},
+            }
+        )
+    ok = PlatformPublishBinding(
+        member_portal_url="http://127.0.0.1:28776/", credential={"name": "platform_member_login"}
+    )
     assert ok.member_portal_url == "http://127.0.0.1:28776"
 
 
 def test_the_cli_publishes_lists_and_withdraws(
-    platform: SharedPlatformApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    platform: SharedPlatformApplication,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     from test_host_runtime import config
@@ -164,18 +184,36 @@ def test_the_cli_publishes_lists_and_withdraws(
     layout = _installed(tmp_path)
     host = config(
         workspace_root=str(layout.workspace_root),
-        credentials=[{"secret": "platform_member_login",
-                      "environment_variable": "AEP_TEST_MEMBER_LOGIN"}],
-        publishing={"member_portal_url": platform.member_base_url,
-                    "credential": {"name": "platform_member_login"}},
+        credentials=[
+            {"secret": "platform_member_login", "environment_variable": "AEP_TEST_MEMBER_LOGIN"}
+        ],
+        publishing={
+            "member_portal_url": platform.member_base_url,
+            "credential": {"name": "platform_member_login"},
+        },
     )
     path = tmp_path / "host.json"
     path.write_text(host.model_dump_json(), encoding="utf-8")
     monkeypatch.setenv("AEP_TEST_MEMBER_LOGIN", _agent_login(platform))
     base = ["assets", "--config", str(path)]
 
-    assert main([*base, "publish", "--kind", "workflow", "--asset", "lab/weekly-check@0.3.0",
-                 "--change", "patch", "--note", "first"]) == 0
+    assert (
+        main(
+            [
+                *base,
+                "publish",
+                "--kind",
+                "workflow",
+                "--asset",
+                "lab/weekly-check@0.3.0",
+                "--change",
+                "patch",
+                "--note",
+                "first",
+            ]
+        )
+        == 0
+    )
     submitted = json.loads(capsys.readouterr().out)["result"]
     assert submitted["identity"]["version"] == "1.0.0" and submitted["note"] == "first"
     assert main([*base, "submissions"]) == 0
@@ -189,8 +227,14 @@ def test_the_cli_publishes_lists_and_withdraws(
 def test_agent_web_offers_publishing_beside_the_marketplace() -> None:
     from host_runtime.web_page import PAGE
 
-    for hook in ('id="publish-card"', 'id="publish-asset"', 'id="publish-go"',
-                 "/api/publishing/submit", "/api/publishing/withdraw", "loadPublishing()"):
+    for hook in (
+        'id="publish-card"',
+        'id="publish-asset"',
+        'id="publish-go"',
+        "/api/publishing/submit",
+        "/api/publishing/withdraw",
+        "loadPublishing()",
+    ):
         assert hook in PAGE
 
 
@@ -214,11 +258,15 @@ def test_agent_web_saves_a_pasted_code_for_this_user_and_never_echoes_it() -> No
 
     saved: dict[str, str] = {}
     config = SimpleNamespace(
-        publishing=PlatformPublishBinding(member_portal_url="http://127.0.0.1:28776",
-                                          credential={"name": "platform_member_login"}),
-        credential_environment=lambda: {"platform_member_login": "AEP_PLATFORM_MEMBER_LOGIN"})
-    web = SimpleNamespace(runtime=SimpleNamespace(config=config),
-                          user_environment=lambda name, value: saved.__setitem__(name, value))
+        publishing=PlatformPublishBinding(
+            member_portal_url="http://127.0.0.1:28776", credential={"name": "platform_member_login"}
+        ),
+        credential_environment=lambda: {"platform_member_login": "AEP_PLATFORM_MEMBER_LOGIN"},
+    )
+    web = SimpleNamespace(
+        runtime=SimpleNamespace(config=config),
+        user_environment=lambda name, value: saved.__setitem__(name, value),
+    )
     code = "login-0123456789abcdef:" + "S" * 43
     reply = AgentWeb.connect_publishing(web, "  " + code + "\n")  # type: ignore[arg-type]
     assert reply == {"ok": True} and saved == {"AEP_PLATFORM_MEMBER_LOGIN": code}
@@ -248,7 +296,9 @@ def test_the_publisher_sends_the_chosen_visibility(
 
 
 def test_the_cli_publishes_a_manifest_file_with_a_chosen_visibility(
-    platform: SharedPlatformApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    platform: SharedPlatformApplication,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     from test_host_runtime import config
@@ -257,10 +307,13 @@ def test_the_cli_publishes_a_manifest_file_with_a_chosen_visibility(
 
     host = config(
         workspace_root=str(tmp_path / "workspace"),
-        credentials=[{"secret": "platform_member_login",
-                      "environment_variable": "AEP_TEST_MEMBER_LOGIN"}],
-        publishing={"member_portal_url": platform.member_base_url,
-                    "credential": {"name": "platform_member_login"}},
+        credentials=[
+            {"secret": "platform_member_login", "environment_variable": "AEP_TEST_MEMBER_LOGIN"}
+        ],
+        publishing={
+            "member_portal_url": platform.member_base_url,
+            "credential": {"name": "platform_member_login"},
+        },
     )
     path = tmp_path / "host.json"
     path.write_text(host.model_dump_json(), encoding="utf-8")
@@ -269,8 +322,11 @@ def test_the_cli_publishes_a_manifest_file_with_a_chosen_visibility(
 
     assert main([*base, "--file", str(SAMPLE), "--visibility", "team"]) == 0
     submitted = json.loads(capsys.readouterr().out)["result"]
-    assert submitted["identity"] == {"namespace": "company-agent", "name": "sync-test",
-                                     "version": "1.0.0"}
+    assert submitted["identity"] == {
+        "namespace": "company-agent",
+        "name": "sync-test",
+        "version": "1.0.0",
+    }
     # The sample names team engineering as owner, and leo belongs to it.
     assert submitted["owner"] == {"type": "team", "id": "engineering"}
     assert submitted["visibility"] == "team"
@@ -300,18 +356,26 @@ def test_the_sync_test_sample_is_a_harmless_read_only_workflow(tmp_path: Path) -
     raw = json.loads(SAMPLE.read_text(encoding="utf-8"))
     manifest = WorkflowManifest.model_validate(raw)
     metadata = manifest.metadata
-    assert (metadata.identity.namespace, metadata.identity.name) == ("company-agent",
-                                                                     "sync-test")
+    assert (metadata.identity.namespace, metadata.identity.name) == ("company-agent", "sync-test")
     assert metadata.owner.model_dump() == {"type": "team", "id": "engineering"}
     assert metadata.visibility == "organization"
     installed = InstalledCapabilities()
-    installed.register(personal_proof_fixture_read_spec(), Recorder(), Echo, Out,
-                       ExecutionDependencies(central_required=False))
+    installed.register(
+        personal_proof_fixture_read_spec(),
+        Recorder(),
+        Echo,
+        Out,
+        ExecutionDependencies(central_required=False),
+    )
     bridge = BridgeExecutor(installed, LocalPolicy(()))
     chat = ChatAuthoring(
-        tmp_path / "chat", bridge=lambda: bridge, namespace="company-agent",
-        workflows_dir=tmp_path / "workflows", grants_file=tmp_path / "grants.json",
-        skills_dir=tmp_path / "skills")
+        tmp_path / "chat",
+        bridge=lambda: bridge,
+        namespace="company-agent",
+        workflows_dir=tmp_path / "workflows",
+        grants_file=tmp_path / "grants.json",
+        skills_dir=tmp_path / "skills",
+    )
     checked = ExternalAuthoring(chat, "owner", "cli").check_workflow(raw)
     assert checked["ok"] is True and checked["read_only"] is True, checked
 
@@ -322,28 +386,45 @@ def test_agent_web_asks_who_can_use_it_and_passes_it_on(tmp_path: Path) -> None:
     from host_runtime.web import AgentWeb
     from host_runtime.web_page import PAGE
 
-    for hook in ('id="publish-visibility"', '<option value="team">Only my team</option>',
-                 '<option value="organization">Everyone in the organization</option>',
-                 'id="publish-audience"', 'visibility: el("publish-visibility").value'):
+    for hook in (
+        'id="publish-visibility"',
+        '<option value="team">Only my team</option>',
+        '<option value="organization">Everyone in the organization</option>',
+        'id="publish-audience"',
+        'visibility: el("publish-visibility").value',
+    ):
         assert hook in PAGE, hook
     sent: list[Any] = []
 
     class Publisher:
         def submit(self, *args: Any) -> dict[str, Any]:
             sent.append(args)
-            return {"identity": {"namespace": "lab", "name": "weekly-check",
-                                 "version": "1.0.0"}}
+            return {"identity": {"namespace": "lab", "name": "weekly-check", "version": "1.0.0"}}
 
     tasks = SimpleNamespace(start=lambda *a: "t", finish=lambda *a: None)
     web = SimpleNamespace(
-        _publisher=lambda: Publisher(), tasks=lambda: tasks,
-        runtime=SimpleNamespace(layout=_installed(tmp_path),
-                                config=SimpleNamespace(publishing=None)))
-    reply = AgentWeb.publish_asset(web, "workflow", "lab/weekly-check@0.3.0",  # type: ignore[arg-type]
-                                   "minor", "", "team")
+        _publisher=lambda: Publisher(),
+        tasks=lambda: tasks,
+        runtime=SimpleNamespace(
+            layout=_installed(tmp_path), config=SimpleNamespace(publishing=None)
+        ),
+    )
+    reply = AgentWeb.publish_asset(
+        web,
+        "workflow",
+        "lab/weekly-check@0.3.0",  # type: ignore[arg-type]
+        "minor",
+        "",
+        "team",
+    )
     assert reply["ok"] is True and sent[0][-1] == "team"
-    AgentWeb.publish_asset(web, "workflow", "lab/weekly-check@0.3.0",  # type: ignore[arg-type]
-                           "minor", "")
+    AgentWeb.publish_asset(
+        web,
+        "workflow",
+        "lab/weekly-check@0.3.0",  # type: ignore[arg-type]
+        "minor",
+        "",
+    )
     assert sent[1][-1] is None
 
 
@@ -355,7 +436,8 @@ def _no_browser() -> bool:
 
 @pytest.mark.skipif(_no_browser(), reason="no Chromium browser is installed")
 def test_the_who_can_use_it_choice_renders_in_a_real_browser(
-    platform: SharedPlatformApplication, tmp_path: Path,
+    platform: SharedPlatformApplication,
+    tmp_path: Path,
 ) -> None:
     import threading
     import time
@@ -366,12 +448,21 @@ def test_the_who_can_use_it_choice_renders_in_a_real_browser(
     from host_runtime.web import AgentWeb, AgentWebServer
     from integrations.browser import Browser
 
-    config, layout = ready(tmp_path, config_changes={
-        "publishing": {"member_portal_url": platform.member_base_url,
-                       "credential": {"name": "platform_member_login"}},
-        "credentials": [{"secret": "platform_member_login",
-                         "environment_variable": "AEP_TEST_UNSET_MEMBER_LOGIN"}],
-    })
+    config, layout = ready(
+        tmp_path,
+        config_changes={
+            "publishing": {
+                "member_portal_url": platform.member_base_url,
+                "credential": {"name": "platform_member_login"},
+            },
+            "credentials": [
+                {
+                    "secret": "platform_member_login",
+                    "environment_variable": "AEP_TEST_UNSET_MEMBER_LOGIN",
+                }
+            ],
+        },
+    )
     path = host_json(tmp_path, config)
     with build_runtime(config, layout=layout) as runtime:
         served = AgentWebServer(AgentWeb(runtime, config_path=path))
@@ -384,8 +475,9 @@ def test_the_who_can_use_it_choice_renders_in_a_real_browser(
             browser._evaluate('document.getElementById("nav-capabilities").click(); 0')
             measure = (
                 'JSON.stringify(["publish-visibility","publish-audience"].map(id => {const r ='
-                ' document.getElementById(id).getBoundingClientRect(); return [r.width,'
-                ' r.height];}))')
+                " document.getElementById(id).getBoundingClientRect(); return [r.width,"
+                " r.height];}))"
+            )
             deadline = time.monotonic() + 20
             size = [[0, 0], [0, 0]]
             while size[0][1] == 0 and time.monotonic() < deadline:
@@ -393,10 +485,11 @@ def test_the_who_can_use_it_choice_renders_in_a_real_browser(
                 size = json.loads(str(browser._evaluate(measure)))
             assert size[0][0] > 100 and size[0][1] > 20, size
             assert size[1][1] > 10, size
-            browser._evaluate('const s = document.getElementById("publish-visibility");'
-                              ' s.value = "team"; s.dispatchEvent(new Event("change")); 0')
-            text = str(browser._evaluate(
-                'document.getElementById("publish-audience").textContent'))
+            browser._evaluate(
+                'const s = document.getElementById("publish-visibility");'
+                ' s.value = "team"; s.dispatchEvent(new Event("change")); 0'
+            )
+            text = str(browser._evaluate('document.getElementById("publish-audience").textContent'))
             assert "Only my team" in text and "Member Portal" in text
         finally:
             browser.close()

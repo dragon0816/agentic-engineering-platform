@@ -31,10 +31,21 @@ from typing import Any
 HERE = Path(__file__).resolve().parent
 QUESTIONS = HERE / "questions" / "questions.json"
 STATUSES = ("PASS", "INSUFFICIENT_KNOWLEDGE", "FAIL", "NEEDS_HUMAN_REVIEW", "SYSTEM_ERROR")
-SHORT = {"PASS": "PASS", "INSUFFICIENT_KNOWLEDGE": "INSUFFICIENT", "FAIL": "FAIL",
-         "NEEDS_HUMAN_REVIEW": "NEEDS_HUMAN_REVIEW", "SYSTEM_ERROR": "SYSTEM_ERROR"}
+SHORT = {
+    "PASS": "PASS",
+    "INSUFFICIENT_KNOWLEDGE": "INSUFFICIENT",
+    "FAIL": "FAIL",
+    "NEEDS_HUMAN_REVIEW": "NEEDS_HUMAN_REVIEW",
+    "SYSTEM_ERROR": "SYSTEM_ERROR",
+}
 ACCEPTABLE = {"PASS", "INSUFFICIENT_KNOWLEDGE"}
-RANK = {"PASS": 3, "INSUFFICIENT_KNOWLEDGE": 2, "NEEDS_HUMAN_REVIEW": 1, "FAIL": 0, "SYSTEM_ERROR": 0}
+RANK = {
+    "PASS": 3,
+    "INSUFFICIENT_KNOWLEDGE": 2,
+    "NEEDS_HUMAN_REVIEW": 1,
+    "FAIL": 0,
+    "SYSTEM_ERROR": 0,
+}
 ROUTES = ("direct", "tool", "none")
 
 
@@ -77,15 +88,17 @@ def load_questions(path: Path = QUESTIONS) -> dict[str, dict[str, Any]]:
 def tags(question: dict[str, Any]) -> dict[str, str]:
     """Market, product family, type and difficulty; foundation questions carry
     technical/topic tags instead, as in run.py's report."""
-    return {"market": question.get("market", "foundation"),
-            "product": question.get("product", question.get("technical", "foundation")),
-            "type": question.get("type", "foundation"),
-            "difficulty": question.get("difficulty", "foundation")}
+    return {
+        "market": question.get("market", "foundation"),
+        "product": question.get("product", question.get("technical", "foundation")),
+        "type": question.get("type", "foundation"),
+        "difficulty": question.get("difficulty", "foundation"),
+    }
 
 
 def _cell(text: Any, limit: int = 140) -> str:
     flat = " ".join(str(text or "").split()).replace("|", "/")
-    return flat if len(flat) <= limit else flat[:limit - 1] + "…"
+    return flat if len(flat) <= limit else flat[: limit - 1] + "…"
 
 
 def _pct(part: int, whole: int) -> str:
@@ -97,8 +110,9 @@ def _p90(values: list[float]) -> float:
     return ordered[max(0, math.ceil(0.9 * len(ordered)) - 1)]
 
 
-def transitions(old: dict[str, dict[str, Any]], new: dict[str, dict[str, Any]],
-                ids: list[str]) -> dict[str, Any]:
+def transitions(
+    old: dict[str, dict[str, Any]], new: dict[str, dict[str, Any]], ids: list[str]
+) -> dict[str, Any]:
     """Improved / regressed / unchanged counts and every status change."""
     counts: collections.Counter[str] = collections.Counter()
     changes = []
@@ -111,23 +125,38 @@ def transitions(old: dict[str, dict[str, Any]], new: dict[str, dict[str, Any]],
         kind = "improved" if delta > 0 else "regressed" if delta < 0 else "changed, same rank"
         counts[kind] += 1
         reason = after.get("why") or (f"was: {before.get('why')}" if before.get("why") else "")
-        changes.append({"id": qid, "kind": kind, "old": before["status"], "new": after["status"],
-                        "old_route": before.get("route"), "new_route": after.get("route"),
-                        "reason": reason})
+        changes.append(
+            {
+                "id": qid,
+                "kind": kind,
+                "old": before["status"],
+                "new": after["status"],
+                "old_route": before.get("route"),
+                "new_route": after.get("route"),
+                "reason": reason,
+            }
+        )
     return {"counts": counts, "changes": changes}
 
 
 def compare(runs: list[Run], questions: dict[str, dict[str, Any]]) -> str:
     shared = sorted(set.intersection(*(set(r.results) for r in runs)))
     names = [r.name for r in runs]
-    lines = ["# knowledge_v1 run comparison", "",
-             "Generated offline by `benchmarks/knowledge_v1/compare.py` from the stored `result.json` files.", "",
-             "| Run | Started | Commit | Grader | Questions | Compared | Left out |", "|---|---|---|---|---|---|---|"]
+    lines = [
+        "# knowledge_v1 run comparison",
+        "",
+        "Generated offline by `benchmarks/knowledge_v1/compare.py` from the stored `result.json` files.",
+        "",
+        "| Run | Started | Commit | Grader | Questions | Compared | Left out |",
+        "|---|---|---|---|---|---|---|",
+    ]
     for run in runs:
         graders = sorted({str(r.get("grader")) for r in run.results.values()})
-        lines.append(f"| {run.name} | {run.meta.get('started', '')} | `{str(run.meta.get('commit', ''))[:7]}` | "
-                     f"{', '.join(graders)} | {len(run.results)} | {len(shared)} | "
-                     f"{len(run.results) - len(shared)} |")
+        lines.append(
+            f"| {run.name} | {run.meta.get('started', '')} | `{str(run.meta.get('commit', ''))[:7]}` | "
+            f"{', '.join(graders)} | {len(run.results)} | {len(shared)} | "
+            f"{len(run.results) - len(shared)} |"
+        )
     lines.append("")
     if any(len(r.results) != len(shared) for r in runs):
         lines += [f"Only the {len(shared)} questions present in every run are compared below.", ""]
@@ -137,17 +166,32 @@ def compare(runs: list[Run], questions: dict[str, dict[str, Any]]) -> str:
     meta = {qid: tags(questions.get(qid, {})) for qid in shared}
 
     # Status totals.
-    lines += ["## Status", "", "| Status | " + " | ".join(names) + " |", "|---|" + "---|" * len(runs)]
+    lines += [
+        "## Status",
+        "",
+        "| Status | " + " | ".join(names) + " |",
+        "|---|" + "---|" * len(runs),
+    ]
     status_counts = [collections.Counter(r["status"] for r in p.values()) for p in picked]
-    lines.append("| **acceptable** | " + " | ".join(
-        f"**{_pct(c['PASS'] + c['INSUFFICIENT_KNOWLEDGE'], len(shared))}**" for c in status_counts) + " |")
+    lines.append(
+        "| **acceptable** | "
+        + " | ".join(
+            f"**{_pct(c['PASS'] + c['INSUFFICIENT_KNOWLEDGE'], len(shared))}**"
+            for c in status_counts
+        )
+        + " |"
+    )
     for status in STATUSES:
         lines.append(f"| {status} | " + " | ".join(str(c[status]) for c in status_counts) + " |")
     lines.append("")
 
     # Route x status, one table per run.
-    lines += ["## Route × status", "", "| Run | Route | Questions | " + " | ".join(SHORT[s] for s in STATUSES)
-              + " | PASS rate |", "|---|---|---|" + "---|" * (len(STATUSES) + 1)]
+    lines += [
+        "## Route × status",
+        "",
+        "| Run | Route | Questions | " + " | ".join(SHORT[s] for s in STATUSES) + " | PASS rate |",
+        "|---|---|---|" + "---|" * (len(STATUSES) + 1),
+    ]
     for name, results in zip(names, picked, strict=True):
         by_route: dict[str, collections.Counter[str]] = collections.defaultdict(collections.Counter)
         for result in results.values():
@@ -156,17 +200,28 @@ def compare(runs: list[Run], questions: dict[str, dict[str, Any]]) -> str:
             counts = by_route.get(route, collections.Counter())
             total = sum(counts.values())
             rate = f"{round(100 * counts['PASS'] / total)}%" if total else "–"
-            lines.append(f"| {name} | {route} | {total} | " + " | ".join(str(counts[s]) for s in STATUSES)
-                         + f" | {rate} |")
+            lines.append(
+                f"| {name} | {route} | {total} | "
+                + " | ".join(str(counts[s]) for s in STATUSES)
+                + f" | {rate} |"
+            )
     lines.append("")
 
     # Breakdowns by question tag: acceptable and PASS per run.
-    for key, title in (("market", "market"), ("product", "product family"), ("type", "question type"),
-                       ("difficulty", "difficulty")):
+    for key, title in (
+        ("market", "market"),
+        ("product", "product family"),
+        ("type", "question type"),
+        ("difficulty", "difficulty"),
+    ):
         groups = sorted({m[key] for m in meta.values()})
         header = "| " + title + " | n | " + " | ".join(f"{n} acc / PASS" for n in names)
-        lines += [f"## By {title}", "", header + (" | Δ acc |" if len(runs) > 1 else " |"),
-                  "|---|---|" + "---|" * (len(runs) + (1 if len(runs) > 1 else 0))]
+        lines += [
+            f"## By {title}",
+            "",
+            header + (" | Δ acc |" if len(runs) > 1 else " |"),
+            "|---|---|" + "---|" * (len(runs) + (1 if len(runs) > 1 else 0)),
+        ]
         for group in groups:
             ids = [q for q in shared if meta[q][key] == group]
             cells, accs = [], []
@@ -179,33 +234,52 @@ def compare(runs: list[Run], questions: dict[str, dict[str, Any]]) -> str:
         lines.append("")
 
     # Gap types.
-    gap_counts = [collections.Counter(r.get("gap") for r in p.values() if r.get("gap")) for p in picked]
+    gap_counts = [
+        collections.Counter(r.get("gap") for r in p.values() if r.get("gap")) for p in picked
+    ]
     gaps = sorted(set().union(*gap_counts))
-    lines += ["## Gap types", "", "| Gap | " + " | ".join(names) + " |", "|---|" + "---|" * len(runs)]
+    lines += [
+        "## Gap types",
+        "",
+        "| Gap | " + " | ".join(names) + " |",
+        "|---|" + "---|" * len(runs),
+    ]
     lines += [f"| {gap} | " + " | ".join(str(c[gap]) for c in gap_counts) + " |" for gap in gaps]
     lines.append("")
 
     # Reviewer verdicts.
-    lines += ["## Reviewer verdicts", "",
-              "Over answers the reviewer read (citations all verified); overreach = at least one claim listed "
-              "as going beyond the passages.", "",
-              "| Run | Reviewed | Verdict given | Supported | Reasonable | Confidence high / medium / low "
-              "| With overreach | Overreach items per answer |", "|---|---|---|---|---|---|---|---|"]
+    lines += [
+        "## Reviewer verdicts",
+        "",
+        "Over answers the reviewer read (citations all verified); overreach = at least one claim listed "
+        "as going beyond the passages.",
+        "",
+        "| Run | Reviewed | Verdict given | Supported | Reasonable | Confidence high / medium / low "
+        "| With overreach | Overreach items per answer |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
     for name, results in zip(names, picked, strict=True):
         reviews = [r["review"] for r in results.values() if isinstance(r.get("review"), dict)]
         given = [v for v in reviews if v.get("ok")]
         confidence = collections.Counter(str(v.get("confidence")) for v in given)
         reaching = [len(v.get("overreach") or []) for v in given]
         mean_items = f"{statistics.mean(reaching):.1f}" if reaching else "–"
-        lines.append(f"| {name} | {len(reviews)} | {len(given)} | "
-                     f"{_pct(sum(1 for v in given if v.get('supported')), len(given))} | "
-                     f"{_pct(sum(1 for v in given if v.get('reasonable')), len(given))} | "
-                     f"{confidence['high']} / {confidence['medium']} / {confidence['low']} | "
-                     f"{_pct(sum(1 for n in reaching if n), len(given))} | {mean_items} |")
+        lines.append(
+            f"| {name} | {len(reviews)} | {len(given)} | "
+            f"{_pct(sum(1 for v in given if v.get('supported')), len(given))} | "
+            f"{_pct(sum(1 for v in given if v.get('reasonable')), len(given))} | "
+            f"{confidence['high']} / {confidence['medium']} / {confidence['low']} | "
+            f"{_pct(sum(1 for n in reaching if n), len(given))} | {mean_items} |"
+        )
     lines.append("")
 
     # Latency per route.
-    lines += ["## Latency (seconds)", "", "| Run | Route | n | median | p90 |", "|---|---|---|---|---|"]
+    lines += [
+        "## Latency (seconds)",
+        "",
+        "| Run | Route | n | median | p90 |",
+        "|---|---|---|---|---|",
+    ]
     for name, results in zip(names, picked, strict=True):
         by_route: dict[str, list[float]] = collections.defaultdict(list)
         for result in results.values():
@@ -215,15 +289,21 @@ def compare(runs: list[Run], questions: dict[str, dict[str, Any]]) -> str:
         for route in [*ROUTES, "all"]:
             values = by_route.get(route)
             if values:
-                lines.append(f"| {name} | {route} | {len(values)} | {statistics.median(values):.1f} | "
-                             f"{_p90(values):.1f} |")
+                lines.append(
+                    f"| {name} | {route} | {len(values)} | {statistics.median(values):.1f} | "
+                    f"{_p90(values):.1f} |"
+                )
     lines.append("")
 
     # Citations.
-    lines += ["## Citations", "",
-              "Checked answers are those whose citations were checked against the Vault.", "",
-              "| Run | Checked answers | Citations | Per checked answer | Verified in the Vault |",
-              "|---|---|---|---|---|"]
+    lines += [
+        "## Citations",
+        "",
+        "Checked answers are those whose citations were checked against the Vault.",
+        "",
+        "| Run | Checked answers | Citations | Per checked answer | Verified in the Vault |",
+        "|---|---|---|---|---|",
+    ]
     for name, results in zip(names, picked, strict=True):
         checked = [r["citations"] for r in results.values() if isinstance(r.get("citations"), list)]
         total = sum(len(c) for c in checked)
@@ -237,21 +317,36 @@ def compare(runs: list[Run], questions: dict[str, dict[str, Any]]) -> str:
         old_name, new_name = names[index - 1], names[index]
         moved = transitions(picked[index - 1], picked[index], shared)
         counts = moved["counts"]
-        lines += [f"## Transitions {old_name} → {new_name}", "",
-                  f"Improved {counts['improved']}, regressed {counts['regressed']}, "
-                  f"unchanged {counts['unchanged']}"
-                  + (f", changed at the same rank {counts['changed, same rank']}"
-                     if counts["changed, same rank"] else "") + f" (of {len(shared)}).", ""]
+        lines += [
+            f"## Transitions {old_name} → {new_name}",
+            "",
+            f"Improved {counts['improved']}, regressed {counts['regressed']}, "
+            f"unchanged {counts['unchanged']}"
+            + (
+                f", changed at the same rank {counts['changed, same rank']}"
+                if counts["changed, same rank"]
+                else ""
+            )
+            + f" (of {len(shared)}).",
+            "",
+        ]
         if moved["changes"]:
-            lines += ["| Question | Change | Old → new | Route | Tags | Reason (new run) |",
-                      "|---|---|---|---|---|---|"]
+            lines += [
+                "| Question | Change | Old → new | Route | Tags | Reason (new run) |",
+                "|---|---|---|---|---|---|",
+            ]
             for change in moved["changes"]:
-                route = (change["new_route"] if change["old_route"] == change["new_route"]
-                         else f"{change['old_route']} → {change['new_route']}")
+                route = (
+                    change["new_route"]
+                    if change["old_route"] == change["new_route"]
+                    else f"{change['old_route']} → {change['new_route']}"
+                )
                 tag = meta[change["id"]]
-                lines.append(f"| {change['id']} | {change['kind']} | {SHORT[change['old']]} → "
-                             f"{SHORT[change['new']]} | {route} | {_cell(tag['market'], 30)}; "
-                             f"{_cell(tag['type'], 20)} | {_cell(change['reason'])} |")
+                lines.append(
+                    f"| {change['id']} | {change['kind']} | {SHORT[change['old']]} → "
+                    f"{SHORT[change['new']]} | {route} | {_cell(tag['market'], 30)}; "
+                    f"{_cell(tag['type'], 20)} | {_cell(change['reason'])} |"
+                )
             lines.append("")
     return "\n".join(lines) + "\n"
 

@@ -34,10 +34,31 @@ FAULT = STATE / "expense_fault.json"
 EVENTS = STATE / "expense_events.jsonl"
 PAGE_SIZE = 8
 STATUSES = ("", "Draft", "Submitted", "Approved", "Rejected")
-COLUMNS = ("ExpenseID", "EmployeeID", "EmployeeName", "ProjectID", "ExpenseDate", "Category",
-           "Currency", "Amount", "Status")
-EXPORT_COLUMNS = ("ExpenseID", "EmployeeID", "EmployeeName", "ProjectID", "ExpenseDate", "Category",
-                  "Currency", "Amount", "Status", "ReceiptID", "Description", "MissingReceipt")
+COLUMNS = (
+    "ExpenseID",
+    "EmployeeID",
+    "EmployeeName",
+    "ProjectID",
+    "ExpenseDate",
+    "Category",
+    "Currency",
+    "Amount",
+    "Status",
+)
+EXPORT_COLUMNS = (
+    "ExpenseID",
+    "EmployeeID",
+    "EmployeeName",
+    "ProjectID",
+    "ExpenseDate",
+    "Category",
+    "Currency",
+    "Amount",
+    "Status",
+    "ReceiptID",
+    "Description",
+    "MissingReceipt",
+)
 
 
 def event(name: str, **detail: Any) -> None:
@@ -92,8 +113,9 @@ class ExpenseApp:
 
         table = ttk.Frame(root)
         table.pack(fill="both", expand=True, padx=8)
-        self.tree = ttk.Treeview(table, columns=COLUMNS, show="headings", height=PAGE_SIZE,
-                                 selectmode="browse")
+        self.tree = ttk.Treeview(
+            table, columns=COLUMNS, show="headings", height=PAGE_SIZE, selectmode="browse"
+        )
         widths = (90, 70, 170, 70, 95, 80, 70, 100, 90)
         for column, width in zip(COLUMNS, widths, strict=True):
             self.tree.heading(column, text=column)
@@ -109,8 +131,12 @@ class ExpenseApp:
         self.next_button.pack(side="left", padx=4)
         self.count_label = ttk.Label(bar, text="Total 0 rows · Page 0 / 0")
         self.count_label.pack(side="left", padx=12)
-        ttk.Button(bar, text="Export Excel 匯出 Excel", command=lambda: self.export("xlsx")).pack(side="right")
-        ttk.Button(bar, text="Export CSV 匯出 CSV", command=lambda: self.export("csv")).pack(side="right", padx=4)
+        ttk.Button(bar, text="Export Excel 匯出 Excel", command=lambda: self.export("xlsx")).pack(
+            side="right"
+        )
+        ttk.Button(bar, text="Export CSV 匯出 CSV", command=lambda: self.export("csv")).pack(
+            side="right", padx=4
+        )
         ttk.Button(bar, text="Details 明細", command=self.details).pack(side="right", padx=4)
         self.status_bar = ttk.Label(root, text="Ready", relief="sunken", anchor="w")
         self.status_bar.pack(fill="x", side="bottom")
@@ -132,18 +158,25 @@ class ExpenseApp:
         return entry
 
     def filters(self) -> dict[str, str]:
-        return {"employee": self.employee.get(), "project": self.project.get(),
-                "from": self.date_from.get().strip(), "to": self.date_to.get().strip(),
-                "status": self.status.get()}
+        return {
+            "employee": self.employee.get(),
+            "project": self.project.get(),
+            "from": self.date_from.get().strip(),
+            "to": self.date_to.get().strip(),
+            "status": self.status.get(),
+        }
 
     def query(self) -> None:
         chosen = self.filters()
         for key in ("from", "to"):
             if chosen[key] and not valid_date(chosen[key]):
-                messagebox.showerror("查詢錯誤 Query error", f"日期格式錯誤：{chosen[key]}（需為 YYYY-MM-DD）")
+                messagebox.showerror(
+                    "查詢錯誤 Query error", f"日期格式錯誤：{chosen[key]}（需為 YYYY-MM-DD）"
+                )
                 return
         self.rows = [
-            e for e in self.expenses
+            e
+            for e in self.expenses
             if (not chosen["employee"] or e["EmployeeID"] == chosen["employee"])
             and (not chosen["project"] or e["ProjectID"] == chosen["project"])
             and (not chosen["status"] or e["Status"] == chosen["status"])
@@ -170,10 +203,12 @@ class ExpenseApp:
     def render(self) -> None:
         self.tree.delete(*self.tree.get_children())
         start = (self.page - 1) * PAGE_SIZE
-        for row in self.rows[start:start + PAGE_SIZE]:
+        for row in self.rows[start : start + PAGE_SIZE]:
             self.tree.insert("", "end", iid=row["ExpenseID"], values=[row[c] for c in COLUMNS])
         pages = self.pages() if self.rows else 0
-        self.count_label.config(text=f"Total {len(self.rows)} rows · Page {self.page if self.rows else 0} / {pages}")
+        self.count_label.config(
+            text=f"Total {len(self.rows)} rows · Page {self.page if self.rows else 0} / {pages}"
+        )
         self.prev_button.state(["!disabled"] if self.page > 1 else ["disabled"])
         self.next_button.state(["!disabled"] if self.page < self.pages() else ["disabled"])
 
@@ -189,12 +224,25 @@ class ExpenseApp:
         dialog.transient(self.root)
         frame = ttk.Frame(dialog, padding=10)
         frame.pack(fill="both", expand=True)
-        fields = ("ExpenseID", "EmployeeID", "EmployeeName", "ProjectID", "ExpenseDate", "Category",
-                  "Currency", "Amount", "Status", "ReceiptID", "MissingReceipt")
+        fields = (
+            "ExpenseID",
+            "EmployeeID",
+            "EmployeeName",
+            "ProjectID",
+            "ExpenseDate",
+            "Category",
+            "Currency",
+            "Amount",
+            "Status",
+            "ReceiptID",
+            "MissingReceipt",
+        )
         for index, field in enumerate(fields):
             ttk.Label(frame, text=f"{field}:").grid(row=index, column=0, sticky="e", padx=4, pady=1)
             value = ttk.Entry(frame, width=42)
-            value.insert(0, str(row[field]).lower() if field == "MissingReceipt" else str(row[field]))
+            value.insert(
+                0, str(row[field]).lower() if field == "MissingReceipt" else str(row[field])
+            )
             value.state(["readonly"])
             value.grid(row=index, column=1, sticky="w")
         ttk.Label(frame, text="Description:").grid(row=len(fields), column=0, sticky="ne", padx=4)
@@ -209,19 +257,26 @@ class ExpenseApp:
 
     def export(self, kind: str) -> None:
         if not self.rows:
-            if not messagebox.askyesno("匯出 Export", "目前結果為 0 筆，仍要匯出只有表頭的檔案嗎？"):
+            if not messagebox.askyesno(
+                "匯出 Export", "目前結果為 0 筆，仍要匯出只有表頭的檔案嗎？"
+            ):
                 return
         extension = ".csv" if kind == "csv" else ".xlsx"
         path = filedialog.asksaveasfilename(
-            parent=self.root, title="Save As 另存新檔", defaultextension=extension,
+            parent=self.root,
+            title="Save As 另存新檔",
+            defaultextension=extension,
             initialfile=f"expenses_export{extension}",
-            filetypes=[("CSV", "*.csv")] if kind == "csv" else [("Excel workbook", "*.xlsx")])
+            filetypes=[("CSV", "*.csv")] if kind == "csv" else [("Excel workbook", "*.xlsx")],
+        )
         if not path:
             event("export_cancelled", kind=kind)
             return
         if export_should_fail():
             event("export_failed_injected", kind=kind, path=path)
-            messagebox.showerror("匯出失敗 Export failed", "暫時無法寫入，請重試。 (Temporary write failure, retry)")
+            messagebox.showerror(
+                "匯出失敗 Export failed", "暫時無法寫入，請重試。 (Temporary write failure, retry)"
+            )
             return
         try:
             if kind == "csv":

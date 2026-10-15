@@ -86,7 +86,10 @@ class CompletionCheckResult(Contract):
     check_id: Symbol
     status: Literal["passed", "failed"]
     code: Literal[
-        "checked", "artifact_not_reported", "artifact_missing", "artifact_empty",
+        "checked",
+        "artifact_not_reported",
+        "artifact_missing",
+        "artifact_empty",
         "artifact_digest_mismatch",
     ]
     observed_sha256: Sha256 | None = None
@@ -410,7 +413,9 @@ class CompletionValidator:
             if not content:
                 results.append(
                     CompletionCheckResult(
-                        check_id=check.check_id, status="failed", code="artifact_empty",
+                        check_id=check.check_id,
+                        status="failed",
+                        code="artifact_empty",
                         size_bytes=0,
                     )
                 )

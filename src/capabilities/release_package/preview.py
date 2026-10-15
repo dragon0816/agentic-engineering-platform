@@ -42,7 +42,7 @@ def _checked_out_branch(checkout: Path) -> str:
     prefix = "ref: refs/heads/"
     if not value.startswith(prefix):
         raise ReleasePreviewError("detached_checkout")
-    return value[len(prefix):]
+    return value[len(prefix) :]
 
 
 def _changed(checkout: Path, relative: str, content: bytes) -> bool:

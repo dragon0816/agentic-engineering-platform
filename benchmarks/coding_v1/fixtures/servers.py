@@ -19,7 +19,9 @@ WEB = Path(__file__).resolve().parent / "web"
 ROUTES = {
     "/t10/catalog": "t10/catalog.html",
     "/t11/list": "t11/list.html",
-    "/t12/a": "t12/a.html", "/t12/b": "t12/b.html", "/t12/c": "t12/c.html",
+    "/t12/a": "t12/a.html",
+    "/t12/b": "t12/b.html",
+    "/t12/c": "t12/c.html",
     "/t13/list": "t13/list.html",
     **{f"/t11/item/{n}": f"t11/item{n}.html" for n in range(1, 5)},
     **{f"/t13/item/{n}": f"t13/item{n}.html" for n in (1, 2, 3, 4)},
@@ -48,8 +50,14 @@ class FixtureServer:
 
             def _record(self, status: int) -> None:
                 with server._lock:
-                    server.log.append({"t": time.time(), "method": self.command,
-                                       "path": self.path, "status": status})
+                    server.log.append(
+                        {
+                            "t": time.time(),
+                            "method": self.command,
+                            "path": self.path,
+                            "status": status,
+                        }
+                    )
 
             def do_GET(self) -> None:  # noqa: N802
                 path = self.path.split("?", 1)[0]
@@ -61,8 +69,11 @@ class FixtureServer:
                     token = (self.headers.get("Authorization") or "").removeprefix("Bearer ")
                     ok = token in server.tokens
                     self._record(200 if ok else 401)
-                    body = json.dumps({"items": [{"id": "A1", "value": 42}, {"id": "A2", "value": 7}]}
-                                      if ok else {"error": "unauthorized"})
+                    body = json.dumps(
+                        {"items": [{"id": "A1", "value": 42}, {"id": "A2", "value": 7}]}
+                        if ok
+                        else {"error": "unauthorized"}
+                    )
                     self._reply(200 if ok else 401, body.encode(), "application/json")
                     return
                 page = ROUTES.get(path)

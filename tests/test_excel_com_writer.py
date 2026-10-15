@@ -38,8 +38,12 @@ def test_comments_alignment_and_colour_sort_use_excel_row_operations(
     assert aligned.VerticalAlignment == -4160
     assert aligned.WrapText is True
     writer.sort_highlighted_rows(
-        path, "weekly report temp", key_column="A", last_column="G",
-        last_row=4, colour="#FFF2CC",
+        path,
+        "weekly report temp",
+        key_column="A",
+        last_column="G",
+        last_row=4,
+        colour="#FFF2CC",
     )
     worksheet.Sort.SortFields.Add.assert_called_once()
     assert worksheet.Sort.SortFields.Add.call_args.kwargs["SortOn"] == 1
@@ -50,7 +54,8 @@ def test_comments_alignment_and_colour_sort_use_excel_row_operations(
 
 
 def test_colour_sort_moves_hidden_records_and_restores_visibility(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     worksheet = MagicMock()
     worksheet.FilterMode = False
@@ -59,8 +64,8 @@ def test_colour_sort_moves_hidden_records_and_restores_visibility(
     worksheet.UsedRange.Column = 1
     worksheet.UsedRange.Columns.Count = 7
     rows = {number: MagicMock(Hidden=number == 3) for number in (2, 3, 4)}
-    worksheet.Rows.side_effect = (
-        lambda number: rows[number] if isinstance(number, int) else MagicMock()
+    worksheet.Rows.side_effect = lambda number: (
+        rows[number] if isinstance(number, int) else MagicMock()
     )
     marker = MagicMock()
     worksheet.Sort.Apply.side_effect = lambda: setattr(marker, "Value", ((4,), (2,), (3,)))
@@ -71,8 +76,12 @@ def test_colour_sort_moves_hidden_records_and_restores_visibility(
     monkeypatch.setattr(writer, "_sheet", lambda _path, _sheet: worksheet)
 
     writer.sort_highlighted_rows(
-        tmp_path / "copy.xlsx", "weekly report temp", key_column="A",
-        last_column="G", last_row=4, colour="#FFF2CC",
+        tmp_path / "copy.xlsx",
+        "weekly report temp",
+        key_column="A",
+        last_column="G",
+        last_row=4,
+        colour="#FFF2CC",
     )
 
     assert ranges["H1"].Value == "__AEP_ROW_ID__"
@@ -86,7 +95,8 @@ def test_colour_sort_moves_hidden_records_and_restores_visibility(
 
 
 def test_colour_sort_refuses_active_filter_before_mutation(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     worksheet = MagicMock()
     worksheet.FilterMode = True
@@ -96,8 +106,12 @@ def test_colour_sort_refuses_active_filter_before_mutation(
 
     with pytest.raises(WorkbookWriteError) as refused:
         writer.sort_highlighted_rows(
-            tmp_path / "copy.xlsx", "weekly report temp", key_column="A",
-            last_column="G", last_row=4, colour="#FFF2CC",
+            tmp_path / "copy.xlsx",
+            "weekly report temp",
+            key_column="A",
+            last_column="G",
+            last_row=4,
+            colour="#FFF2CC",
         )
     assert refused.value.code == "write_failed"
     worksheet.Rows.assert_not_called()
@@ -105,7 +119,8 @@ def test_colour_sort_refuses_active_filter_before_mutation(
 
 
 def test_rich_comment_uses_excel_getcharacters_and_rolls_back_on_format_failure(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     worksheet = MagicMock()
     target = worksheet.Range.return_value
@@ -116,10 +131,17 @@ def test_rich_comment_uses_excel_getcharacters_and_rolls_back_on_format_failure(
     monkeypatch.setattr(writer, "_sheet", lambda _path, _sheet: worksheet)
     path = tmp_path / "copy.xlsx"
 
-    assert writer.rich_prepend(
-        path, "weekly report temp", "G2", text="new head",
-        colour="#FF0000", tail_colour="#000000",
-    ) is True
+    assert (
+        writer.rich_prepend(
+            path,
+            "weekly report temp",
+            "G2",
+            text="new head",
+            colour="#FF0000",
+            tail_colour="#000000",
+        )
+        is True
+    )
     assert target.Value == "new head\nold tail"
     assert [call.args for call in target.GetCharacters.call_args_list] == [(1, 9), (10, 8)]
     target.Characters.assert_not_called()
@@ -129,22 +151,29 @@ def test_rich_comment_uses_excel_getcharacters_and_rolls_back_on_format_failure(
     target.GetCharacters.side_effect = AttributeError("GetCharacters unavailable")
     with pytest.raises(WorkbookWriteError) as refused:
         writer.rich_prepend(
-            path, "weekly report temp", "G2", text="new head",
-            colour="#FF0000", tail_colour="#000000",
+            path,
+            "weekly report temp",
+            "G2",
+            text="new head",
+            colour="#FF0000",
+            tail_colour="#000000",
         )
     assert refused.value.code == "write_failed"
     assert target.Value == "old tail", "a failed colour must not leave unformatted new text"
 
 
 def test_recolour_existing_comment_uses_excel_getcharacters(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     worksheet = MagicMock()
     monkeypatch.setattr(excel_writer, "require_com", lambda: None)
     writer = ExcelComWriter()
     monkeypatch.setattr(writer, "_sheet", lambda _path, _sheet: worksheet)
     writer.set_rich(
-        tmp_path / "copy.xlsx", "weekly report temp", "G2",
+        tmp_path / "copy.xlsx",
+        "weekly report temp",
+        "G2",
         (TextRun(text="new", colour="#FF0000"), TextRun(text="old", colour="#000000")),
     )
     target = worksheet.Range.return_value

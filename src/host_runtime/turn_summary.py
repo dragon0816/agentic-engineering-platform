@@ -16,15 +16,28 @@ from typing import Any
 from agent.gateway import ConversationToolExecution, GatewayConversationResult
 
 MAX_SUMMARY_CHARS = 2_500
-_KEEP = ("candidate_id", "workflow", "revision", "digest", "read_only", "approval_id", "run_id",
-         "status", "url", "downloads", "installed_as", "app")
+_KEEP = (
+    "candidate_id",
+    "workflow",
+    "revision",
+    "digest",
+    "read_only",
+    "approval_id",
+    "run_id",
+    "status",
+    "url",
+    "downloads",
+    "installed_as",
+    "app",
+)
 
 
 def _host(data: Any) -> str:
     if isinstance(data, list):
         listed = [
             {key: item.get(key) for key in ("candidate_id", "workflow", "status")}
-            for item in data[:5] if isinstance(item, dict)
+            for item in data[:5]
+            if isinstance(item, dict)
         ]
         return f"{len(data)} item(s) {json.dumps(listed, ensure_ascii=False)}"
     if not isinstance(data, dict):
@@ -58,11 +71,13 @@ def _line(item: ConversationToolExecution) -> str:
             details = {
                 "exit_code": data.get("exit_code"),
                 "files": [f.get("path") for f in files[:10] if isinstance(f, dict)]
-                if isinstance(files, list) else None,
+                if isinstance(files, list)
+                else None,
                 "script": data.get("script_path"),
             }
-            line += " " + json.dumps({k: v for k, v in details.items() if v not in (None, [])},
-                                     ensure_ascii=False)
+            line += " " + json.dumps(
+                {k: v for k, v in details.items() if v not in (None, [])}, ensure_ascii=False
+            )
         return line
     return f"- {item.name}"
 

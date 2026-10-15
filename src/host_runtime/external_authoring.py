@@ -45,11 +45,19 @@ AGENT_NAME = re.compile(r"^[a-z0-9][a-z0-9-]{0,31}$")
 WORKFLOW_FORMAT: dict[str, JsonValue] = {
     "name": "kebab-case name; the host adds namespace, owner and version",
     "description": "one sentence",
-    "parameters": [{"name": "snake_case", "label": "the question asked for it",
-                    "kind": "text", "scope": "runtime", "required": True}],
+    "parameters": [
+        {
+            "name": "snake_case",
+            "label": "the question asked for it",
+            "kind": "text",
+            "scope": "runtime",
+            "required": True,
+        }
+    ],
     "parameters become the form": (
         "Agent Web draws the run form and Telegram asks the questions from the parameters "
-        "alone; never write a GUI. Choose the kind and presentation fields so both work."),
+        "alone; never write a GUI. Choose the kind and presentation fields so both work."
+    ),
     "parameter kinds": {
         "text": "one line of text; pattern and min_length apply",
         "integer": "a whole number; minimum and maximum apply",
@@ -57,59 +65,78 @@ WORKFLOW_FORMAT: dict[str, JsonValue] = {
         "date": "YYYY-MM-DD; a date picker on the Web",
         "boolean": "yes or no; a checkbox on the Web, Yes/No buttons on Telegram",
         "select": "one value (or several with multiple: true) from choices, options or "
-                  "choices_source; buttons on Telegram",
+        "choices_source; buttons on Telegram",
         "text_list": "several lines of text",
         "emails": "several email addresses",
         "file": "a path to an existing file on the Host (typed)",
         "folder": "a path to an existing folder on the Host (typed)",
         "upload": "files the person uploads (Web file picker, Telegram documents); the "
-                  "run gets their stored absolute paths, a list when multiple",
+        "run gets their stored absolute paths, a list when multiple",
     },
     "parameter fields": {
         "scope": "runtime (asked every run) or static (a per-install setting on the "
-                 "Settings page, never asked at run time)",
+        "Settings page, never asked at run time)",
         "required": "true: the run cannot start without it",
         "default": "the value used when the person gives none; must fit the kind",
         "help": "one short line shown under the field",
         "examples": "up to 5 sample values, shown as a placeholder",
-        "choices": "[{value, label}] for select or text_list; options: [values] is the "
-                   "shorthand",
+        "choices": "[{value, label}] for select or text_list; options: [values] is the shorthand",
         "choices_source": "a list read when the form opens: fn:<function>?arg={field} or "
-                          "ref:<published set>; {field} names an earlier field or a static "
-                          "setting. fn:folder_files?folder={setting}&accept=.json lists the "
-                          "file names in a folder",
+        "ref:<published set>; {field} names an earlier field or a static "
+        "setting. fn:folder_files?folder={setting}&accept=.json lists the "
+        "file names in a folder",
         "allow_other": "select only, not with multiple: the choices are suggestions and "
-                       "any typed value is accepted (pick or type)",
+        "any typed value is accepted (pick or type)",
         "multiple": "select, file or upload: several values (a list)",
-        "accept": "file, folder or upload: allowed extensions, e.g. [\".json\"]",
+        "accept": 'file, folder or upload: allowed extensions, e.g. [".json"]',
         "pattern": "text: a regular expression the whole value must match",
         "min_length": "text: the shortest allowed value",
         "minimum/maximum": "integer or number bounds",
         "order": "0-99999; the question order (depended-on fields first)",
         "group": "identity: who or what the run is for; asked first and offered as "
-                 "\"same as last time\"",
+        '"same as last time"',
         "needs": "names of earlier fields this one depends on",
         "channels": "where it is shown: web, telegram, schedule, agent (default all)",
         "confirm": "true: a privileged choice (e.g. send mail); confirmed before the run and "
-                   "never filled by a model",
+        "never filled by a model",
     },
     "parameter examples": [
-        {"name": "customer", "label": "Which customer?", "kind": "select",
-         "choices": [{"value": "northwind", "label": "Northwind Ltd"}, {"value": "globex"}],
-         "allow_other": True, "group": "identity", "required": True},
-        {"name": "month_start", "label": "First day of the month", "kind": "date",
-         "required": True},
-        {"name": "inputs", "label": "Input workbooks", "kind": "upload", "multiple": True,
-         "accept": [".xlsx", ".csv"]},
+        {
+            "name": "customer",
+            "label": "Which customer?",
+            "kind": "select",
+            "choices": [{"value": "northwind", "label": "Northwind Ltd"}, {"value": "globex"}],
+            "allow_other": True,
+            "group": "identity",
+            "required": True,
+        },
+        {
+            "name": "month_start",
+            "label": "First day of the month",
+            "kind": "date",
+            "required": True,
+        },
+        {
+            "name": "inputs",
+            "label": "Input workbooks",
+            "kind": "upload",
+            "multiple": True,
+            "accept": [".xlsx", ".csv"],
+        },
     ],
-    "steps": [{"capability": "namespace/name@1.2.3 from the catalog",
-               "inputs": {"<input field>": "an input source"}}],
-    "checks": [{"check_id": "snake_case", "step_index": 0,
-                "kind": "files_nonempty", "pattern": "*.xlsx"}],
+    "steps": [
+        {
+            "capability": "namespace/name@1.2.3 from the catalog",
+            "inputs": {"<input field>": "an input source"},
+        }
+    ],
+    "checks": [
+        {"check_id": "snake_case", "step_index": 0, "kind": "files_nonempty", "pattern": "*.xlsx"}
+    ],
     "checks note": "what a successful run must produce; the Host checks it after the "
-                   "steps. A check has exactly check_id, step_index, kind "
-                   "(files_nonempty, file_exists or data_nonempty) and an optional pattern "
-                   "(a file-name glob for the file kinds); any other key is refused.",
+    "steps. A check has exactly check_id, step_index, kind "
+    "(files_nonempty, file_exists or data_nonempty) and an optional pattern "
+    "(a file-name glob for the file kinds); any other key is refused.",
     "input sources": [
         {"source": "fixed", "value": "any JSON the Workflow fixes"},
         {"source": "run", "path": ["<parameter>"], "note": "[] is all run values"},
@@ -119,18 +146,39 @@ WORKFLOW_FORMAT: dict[str, JsonValue] = {
         "name": "monthly-expense-summary",
         "description": "Summarize the month's uploaded expense CSV files into one workbook.",
         "parameters": [
-            {"name": "month_start", "label": "First day of the month", "kind": "date",
-             "required": True},
-            {"name": "inputs", "label": "Expense CSV files", "kind": "upload",
-             "multiple": True, "accept": [".csv"], "required": True},
+            {
+                "name": "month_start",
+                "label": "First day of the month",
+                "kind": "date",
+                "required": True,
+            },
+            {
+                "name": "inputs",
+                "label": "Expense CSV files",
+                "kind": "upload",
+                "multiple": True,
+                "accept": [".csv"],
+                "required": True,
+            },
         ],
-        "steps": [{"capability": "coding/run-python@1.0.0", "inputs": {
-            "request": {"source": "fixed", "value": {
-                "workspace": "<a folder under coding_workspace_roots>",
-                "script": "import json, os ... write output/expenses-<month>.xlsx"}},
-            "arguments": {"source": "run", "path": []}}}],
-        "checks": [{"check_id": "workbook", "step_index": 0, "kind": "files_nonempty",
-                    "pattern": "*.xlsx"}],
+        "steps": [
+            {
+                "capability": "coding/run-python@1.0.0",
+                "inputs": {
+                    "request": {
+                        "source": "fixed",
+                        "value": {
+                            "workspace": "<a folder under coding_workspace_roots>",
+                            "script": "import json, os ... write output/expenses-<month>.xlsx",
+                        },
+                    },
+                    "arguments": {"source": "run", "path": []},
+                },
+            }
+        ],
+        "checks": [
+            {"check_id": "workbook", "step_index": 0, "kind": "files_nonempty", "pattern": "*.xlsx"}
+        ],
     },
     "rules": [
         "Each step's inputs must fit that capability's input_schema (aep_capability).",
@@ -147,12 +195,17 @@ SKILL_FORMAT: dict[str, JsonValue] = {
     "alias": "identifier people type, e.g. expense_report (letters, digits, _)",
     "instructions": "the guidance the resident Agent follows when this Skill is selected",
     "selector_hint": "optional, at most 240 characters: English and Chinese keywords that "
-                     "say what this Skill is for and how it differs from others",
-    "commands": [{"name": "identifier", "kind": "capability|workflow",
-                  "target": "namespace/name@1.2.3, installed (see the catalog)"}],
+    "say what this Skill is for and how it differs from others",
+    "commands": [
+        {
+            "name": "identifier",
+            "kind": "capability|workflow",
+            "target": "namespace/name@1.2.3, installed (see the catalog)",
+        }
+    ],
     "default_command": "optional, one of the command names",
     "harness_guidance": "optional {domains: [workflow|knowledge|coding], required_evidence, "
-                        "context_required, fallback: needs_input|stop|retry, max_retries}",
+    "context_required, fallback: needs_input|stop|retry, max_retries}",
     "procedure": "optional, Knowledge Skills only; must validate as a KnowledgeProcedure",
     "not allowed": ["rules", "script_tools"],
 }
@@ -161,7 +214,8 @@ SKILL_FORMAT: dict[str, JsonValue] = {
 CATALOG_GUIDE = (
     "Compact catalog. Read the full Workflow format with aep_workflow_format and the Skill "
     "format with aep_skill_format; read one capability's input schema with aep_capability "
-    "before using it in a step. Use only the targets listed here, at the exact version.")
+    "before using it in a step. Use only the targets listed here, at the exact version."
+)
 CATALOG_BUDGET_CHARS = 15_000
 PURPOSE_CHARS = 140
 
@@ -190,8 +244,7 @@ def _within_budget(catalog: dict[str, JsonValue]) -> dict[str, JsonValue]:
                 entry.pop("inputs", None)
                 parameters = entry.get("parameters")
                 if isinstance(parameters, list):
-                    entry["parameters"] = [p["name"] for p in parameters
-                                           if isinstance(p, dict)]
+                    entry["parameters"] = [p["name"] for p in parameters if isinstance(p, dict)]
     omitted: dict[str, JsonValue] = {}
     for key in ("skills", "workflows", "capabilities"):
         entries = catalog[key]
@@ -234,28 +287,45 @@ class ExternalAuthoring:
                     properties = None
                 if isinstance(properties, dict):
                     fields = list(properties)
-            capabilities.append({
-                "target": _target(spec.identity), "purpose": _purpose(spec.description),
-                "side_effect": spec.side_effect, "inputs": fields})
+            capabilities.append(
+                {
+                    "target": _target(spec.identity),
+                    "purpose": _purpose(spec.description),
+                    "side_effect": spec.side_effect,
+                    "inputs": fields,
+                }
+            )
         workflows: list[JsonValue] = [
-            {"target": _target(m.metadata.identity), "owner": m.metadata.owner.id,
-             "parameters": [{"name": p.name, "kind": p.kind, "required": p.required}
-                            for p in m.parameters]}
+            {
+                "target": _target(m.metadata.identity),
+                "owner": m.metadata.owner.id,
+                "parameters": [
+                    {"name": p.name, "kind": p.kind, "required": p.required} for p in m.parameters
+                ],
+            }
             for m in self.chat.installed_workflows()
         ]
         skills: list[JsonValue] = []
         if self.chat.skills_dir is not None:
             skills = [
-                {"target": _target(m.metadata.identity), "alias": m.alias,
-                 "owner": m.metadata.owner.id, "commands": [c.name for c in m.commands]}
+                {
+                    "target": _target(m.metadata.identity),
+                    "alias": m.alias,
+                    "owner": m.metadata.owner.id,
+                    "commands": [c.name for c in m.commands],
+                }
                 for m in installed_skills(self.chat.skills_dir)
             ]
         catalog: dict[str, JsonValue] = {
-            "actor": self.actor, "namespace": self.chat.namespace,
+            "actor": self.actor,
+            "namespace": self.chat.namespace,
             "how_to": CATALOG_GUIDE,
             # Where a coding/run-python step's workspace may be.
             "coding_workspace_roots": list(self.chat.coding_workspace_roots),
-            "capabilities": capabilities, "workflows": workflows, "skills": skills}
+            "capabilities": capabilities,
+            "workflows": workflows,
+            "skills": skills,
+        }
         return _within_budget(catalog)
 
     def capability(self, target: str) -> dict[str, JsonValue]:
@@ -263,8 +333,12 @@ class ExternalAuthoring:
         is namespace/name@version or just the name."""
         wanted = target.strip()
         for spec in self.chat.installed.discover():
-            if wanted not in (_target(spec.identity), spec.name, spec.identity.name,
-                              f"{spec.identity.namespace}/{spec.name}"):
+            if wanted not in (
+                _target(spec.identity),
+                spec.name,
+                spec.identity.name,
+                f"{spec.identity.namespace}/{spec.name}",
+            ):
                 continue
             binding = self.chat.installed.get(spec.identity)
             schema: JsonValue = None
@@ -273,11 +347,18 @@ class ExternalAuthoring:
                     schema = binding.input_model.model_json_schema()
                 except Exception:  # noqa: BLE001 - a schema that cannot render is omitted
                     schema = None
-            return {"ok": True, "target": _target(spec.identity),
-                    "description": spec.description, "side_effect": spec.side_effect,
-                    "input_schema": schema}
-        return {"ok": False, "code": "capability_unknown",
-                "next": "pick a target from aep_catalog's capabilities"}
+            return {
+                "ok": True,
+                "target": _target(spec.identity),
+                "description": spec.description,
+                "side_effect": spec.side_effect,
+                "input_schema": schema,
+            }
+        return {
+            "ok": False,
+            "code": "capability_unknown",
+            "next": "pick a target from aep_catalog's capabilities",
+        }
 
     @staticmethod
     def workflow_format() -> dict[str, JsonValue]:
@@ -294,27 +375,48 @@ class ExternalAuthoring:
             latest[item.candidate_id] = self.chat.external_view(item)
         return {
             "workflows": [
-                {"candidate_id": c.candidate_id, "workflow": _target(c.draft.metadata.identity),
-                 "status": c.status, "source": c.source, "digest": digest(c.draft),
-                 "last_approval": latest.get(c.candidate_id)}
-                for c in self.chat.candidates(self.actor)[:50]],
+                {
+                    "candidate_id": c.candidate_id,
+                    "workflow": _target(c.draft.metadata.identity),
+                    "status": c.status,
+                    "source": c.source,
+                    "digest": digest(c.draft),
+                    "last_approval": latest.get(c.candidate_id),
+                }
+                for c in self.chat.candidates(self.actor)[:50]
+            ],
             "skills": [
-                {"candidate_id": c.candidate_id, "skill": _target(c.draft.metadata.identity),
-                 "status": c.status, "source": c.source, "digest": skill_digest(c.draft),
-                 "last_approval": latest.get(c.candidate_id)}
-                for c in (self.chat.skill_candidates(self.actor)
-                          if self.chat.skills_dir is not None else [])[:50]],
+                {
+                    "candidate_id": c.candidate_id,
+                    "skill": _target(c.draft.metadata.identity),
+                    "status": c.status,
+                    "source": c.source,
+                    "digest": skill_digest(c.draft),
+                    "last_approval": latest.get(c.candidate_id),
+                }
+                for c in (
+                    self.chat.skill_candidates(self.actor)
+                    if self.chat.skills_dir is not None
+                    else []
+                )[:50]
+            ],
         }
 
     def get(self, candidate_id: str) -> dict[str, JsonValue]:
         """A candidate in full: the caller, or another agent, wrote it."""
         if candidate_id.startswith("sk-"):
             skill = self.chat.skill_candidate(candidate_id, self.actor)
-            return {"candidate_id": candidate_id, "status": skill.status,
-                    "skill": skill.draft.model_dump(mode="json")}
+            return {
+                "candidate_id": candidate_id,
+                "status": skill.status,
+                "skill": skill.draft.model_dump(mode="json"),
+            }
         item = self.chat.candidate(candidate_id, self.actor)
-        return {"candidate_id": candidate_id, "status": item.status,
-                "workflow": item.draft.model_dump(mode="json")}
+        return {
+            "candidate_id": candidate_id,
+            "status": item.status,
+            "workflow": item.draft.model_dump(mode="json"),
+        }
 
     def status(self, approval_id: str) -> dict[str, JsonValue]:
         return self.chat.external_view(self.chat.approval(approval_id, self.actor))
@@ -325,20 +427,29 @@ class ExternalAuthoring:
         manifest, problems = self.chat.check(self.actor, raw)
         if manifest is None:
             return {"ok": False, "problems": list(problems)}
-        return {"ok": True, "workflow": _target(manifest.metadata.identity),
-                "read_only": self.chat.read_only(manifest)}
+        return {
+            "ok": True,
+            "workflow": _target(manifest.metadata.identity),
+            "read_only": self.chat.read_only(manifest),
+        }
 
     def submit_workflow(
         self, raw: dict[str, Any], title: str, candidate_id: str | None = None
     ) -> dict[str, JsonValue]:
-        item, problems = self.chat.draft(self.actor, None, title, raw, candidate_id,
-                                         source=self.source)
+        item, problems = self.chat.draft(
+            self.actor, None, title, raw, candidate_id, source=self.source
+        )
         if item is None:
             return {"ok": False, "problems": list(problems)}
-        return {"ok": True, "candidate_id": item.candidate_id,
-                "workflow": _target(item.draft.metadata.identity), "revision": item.revision,
-                "digest": digest(item.draft), "read_only": self.chat.read_only(item.draft),
-                "next": "run it with test values (aep_run_workflow), then ask to install it"}
+        return {
+            "ok": True,
+            "candidate_id": item.candidate_id,
+            "workflow": _target(item.draft.metadata.identity),
+            "revision": item.revision,
+            "digest": digest(item.draft),
+            "read_only": self.chat.read_only(item.draft),
+            "next": "run it with test values (aep_run_workflow), then ask to install it",
+        }
 
     def run_workflow(
         self, candidate_id: str, arguments: dict[str, JsonValue]
@@ -349,22 +460,36 @@ class ExternalAuthoring:
             # Read-only, or the installed version unchanged: installing was the
             # owner's approval, as in conversations (harness unification U6).
             result = self.chat.execute(
-                self.actor, item, arguments,
-                f"external-{'installed' if installed else 'read-only'}:{candidate_id}")
-            return {"ok": True, "ran": True, "run": run_codes(result),
-                    "note": "statuses and codes only; the owner sees the data in Agent Web"}
-        request = self.chat.request(self.actor, None, "run", candidate_id, arguments,
-                                    source=self.source)
-        return {"ok": True, "ran": False, "approval_id": request.approval_id,
-                "next": "nothing ran; it waits for the owner's approval in Agent Web. "
-                        "Check it with aep_status."}
+                self.actor,
+                item,
+                arguments,
+                f"external-{'installed' if installed else 'read-only'}:{candidate_id}",
+            )
+            return {
+                "ok": True,
+                "ran": True,
+                "run": run_codes(result),
+                "note": "statuses and codes only; the owner sees the data in Agent Web",
+            }
+        request = self.chat.request(
+            self.actor, None, "run", candidate_id, arguments, source=self.source
+        )
+        return {
+            "ok": True,
+            "ran": False,
+            "approval_id": request.approval_id,
+            "next": "nothing ran; it waits for the owner's approval in Agent Web. "
+            "Check it with aep_status.",
+        }
 
     def install_workflow(self, candidate_id: str) -> dict[str, JsonValue]:
-        request = self.chat.request(self.actor, None, "install", candidate_id,
-                                    source=self.source)
-        return {"ok": True, "approval_id": request.approval_id,
-                "next": "nothing is installed yet; it waits for the owner's approval in "
-                        "Agent Web. Check it with aep_status."}
+        request = self.chat.request(self.actor, None, "install", candidate_id, source=self.source)
+        return {
+            "ok": True,
+            "approval_id": request.approval_id,
+            "next": "nothing is installed yet; it waits for the owner's approval in "
+            "Agent Web. Check it with aep_status.",
+        }
 
     # -- Skills ------------------------------------------------------------
 
@@ -377,21 +502,31 @@ class ExternalAuthoring:
     def submit_skill(
         self, raw: dict[str, Any], title: str, candidate_id: str | None = None
     ) -> dict[str, JsonValue]:
-        item, problems = self.chat.draft_skill(self.actor, title, raw, candidate_id,
-                                               source=self.source)
+        item, problems = self.chat.draft_skill(
+            self.actor, title, raw, candidate_id, source=self.source
+        )
         if item is None:
             return {"ok": False, "problems": list(problems)}
-        return {"ok": True, "candidate_id": item.candidate_id,
-                "skill": _target(item.draft.metadata.identity), "alias": item.draft.alias,
-                "revision": item.revision, "digest": skill_digest(item.draft),
-                "next": "ask to install it (aep_install_skill); the owner approves it"}
+        return {
+            "ok": True,
+            "candidate_id": item.candidate_id,
+            "skill": _target(item.draft.metadata.identity),
+            "alias": item.draft.alias,
+            "revision": item.revision,
+            "digest": skill_digest(item.draft),
+            "next": "ask to install it (aep_install_skill); the owner approves it",
+        }
 
     def install_skill(self, candidate_id: str) -> dict[str, JsonValue]:
-        request = self.chat.request(self.actor, None, "install_skill", candidate_id,
-                                    source=self.source)
-        return {"ok": True, "approval_id": request.approval_id,
-                "next": "nothing is installed yet; it waits for the owner's approval in "
-                        "Agent Web, and the host uses it after a restart."}
+        request = self.chat.request(
+            self.actor, None, "install_skill", candidate_id, source=self.source
+        )
+        return {
+            "ok": True,
+            "approval_id": request.approval_id,
+            "next": "nothing is installed yet; it waits for the owner's approval in "
+            "Agent Web, and the host uses it after a restart.",
+        }
 
 
 def guarded(call: Callable[[], dict[str, JsonValue]]) -> dict[str, JsonValue]:
@@ -409,11 +544,13 @@ def build(config_path: Path, agent: str) -> ExternalAuthoring:
     from host_runtime.host import build_gateway, load_authorization, load_membership
 
     config = CompanyHostConfiguration.model_validate_json(
-        config_path.read_text(encoding="utf-8-sig"))
+        config_path.read_text(encoding="utf-8-sig")
+    )
     layout = HostLayout.under(config.workspace_root)
     membership = load_membership(config, layout)
-    gateway = build_gateway(config, layout, load_authorization(config, layout),
-                            membership=membership)
+    gateway = build_gateway(
+        config, layout, load_authorization(config, layout), membership=membership
+    )
     chat = ChatAuthoring(
         layout.workspace_root / "authoring" / "chat",
         bridge=lambda: gateway.bridge,
@@ -422,7 +559,8 @@ def build(config_path: Path, agent: str) -> ExternalAuthoring:
         grants_file=layout.grants,
         skills_dir=layout.skills,
         coding_workspace_roots=(
-            () if config.coding is None else tuple(config.coding.workspace_roots)),
+            () if config.coding is None else tuple(config.coding.workspace_roots)
+        ),
     )
     return ExternalAuthoring(chat, config.device.registered_by, agent)
 
@@ -444,14 +582,26 @@ def creator_text(name: str) -> str:
 
 
 def server_command(python: str, config_path: Path, agent: str) -> tuple[str, list[str]]:
-    return python, ["-m", "host_runtime.cli", "mcp", "--config", str(config_path.resolve()),
-                    "--agent", agent]
+    return python, [
+        "-m",
+        "host_runtime.cli",
+        "mcp",
+        "--config",
+        str(config_path.resolve()),
+        "--agent",
+        agent,
+    ]
 
 
 def assistant_command(python: str, config_path: Path) -> tuple[str, list[str]]:
     """The Knowledge and Workflow tools, through the running Agent Web."""
-    return python, ["-m", "host_runtime.cli", "assistant-mcp", "--config",
-                    str(config_path.resolve())]
+    return python, [
+        "-m",
+        "host_runtime.cli",
+        "assistant-mcp",
+        "--config",
+        str(config_path.resolve()),
+    ]
 
 
 def connect(agent: str, project: Path, config_path: Path, python: str) -> list[str]:
@@ -478,20 +628,42 @@ def connect(agent: str, project: Path, config_path: Path, python: str) -> list[s
         servers = current.setdefault("mcpServers", {})
         servers["aep"] = {"type": "stdio", "command": command, "args": arguments}
         servers["aep-assistant"] = {"type": "stdio", "command": helper, "args": helper_args}
-        settings.write_text(json.dumps(current, ensure_ascii=False, indent=2) + "\n",
-                            encoding="utf-8")
-        lines.append(f"wrote {settings} (servers 'aep' and 'aep-assistant'); Claude Code asks "
-                     "you to trust them once")
+        settings.write_text(
+            json.dumps(current, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+        lines.append(
+            f"wrote {settings} (servers 'aep' and 'aep-assistant'); Claude Code asks "
+            "you to trust them once"
+        )
     elif agent == "codex":
-        lines += ["Add this to ~/.codex/config.toml (or run connect --user):", "",
-                  "[mcp_servers.aep]", f"command = {json.dumps(command)}",
-                  f"args = {json.dumps(arguments)}", "", '[mcp_servers."aep-assistant"]',
-                  f"command = {json.dumps(helper)}", f"args = {json.dumps(helper_args)}", ""]
+        lines += [
+            "Add this to ~/.codex/config.toml (or run connect --user):",
+            "",
+            "[mcp_servers.aep]",
+            f"command = {json.dumps(command)}",
+            f"args = {json.dumps(arguments)}",
+            "",
+            '[mcp_servers."aep-assistant"]',
+            f"command = {json.dumps(helper)}",
+            f"args = {json.dumps(helper_args)}",
+            "",
+        ]
     else:
-        block = {"mcpServers": {
-            "aep": {"type": "local", "command": command, "args": arguments, "tools": ["*"]},
-            "aep-assistant": {"type": "local", "command": helper, "args": helper_args,
-                              "tools": ["*"]}}}
-        lines += ["Add this server to ~/.copilot/mcp-config.json:", "",
-                  json.dumps(block, indent=2), ""]
+        block = {
+            "mcpServers": {
+                "aep": {"type": "local", "command": command, "args": arguments, "tools": ["*"]},
+                "aep-assistant": {
+                    "type": "local",
+                    "command": helper,
+                    "args": helper_args,
+                    "tools": ["*"],
+                },
+            }
+        }
+        lines += [
+            "Add this server to ~/.copilot/mcp-config.json:",
+            "",
+            json.dumps(block, indent=2),
+            "",
+        ]
     return lines

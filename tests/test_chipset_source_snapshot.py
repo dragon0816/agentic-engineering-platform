@@ -134,9 +134,7 @@ def test_candidate_commits_only_after_verified_copyback(tmp_path: Path) -> None:
     now = datetime(2026, 10, 3, 9, tzinfo=UTC)
     _, candidate = prepare_diff(state, book, [row(chipset_models="QCA6688")])
     with pytest.raises(ValueError, match="verified target copyback"):
-        commit_candidate(
-            state, book, candidate, taken_at=now, verified_copyback=False
-        )
+        commit_candidate(state, book, candidate, taken_at=now, verified_copyback=False)
     assert not state.exists()
     first = commit_candidate(state, book, candidate, taken_at=now, verified_copyback=True)
     assert first.is_file()
@@ -163,16 +161,28 @@ def test_commit_is_atomic_and_retains_recent_baselines(tmp_path: Path) -> None:
     book = "x.xlsx"
     now = datetime(2026, 10, 3, 9, tzinfo=UTC)
     first = commit_candidate(
-        state, book, build([row(chipset_models="A")]),
-        taken_at=now, verified_copyback=True, keep=2,
+        state,
+        book,
+        build([row(chipset_models="A")]),
+        taken_at=now,
+        verified_copyback=True,
+        keep=2,
     )
     second = commit_candidate(
-        state, book, build([row(chipset_models="B")]),
-        taken_at=now + timedelta(microseconds=1), verified_copyback=True, keep=2,
+        state,
+        book,
+        build([row(chipset_models="B")]),
+        taken_at=now + timedelta(microseconds=1),
+        verified_copyback=True,
+        keep=2,
     )
     third = commit_candidate(
-        state, book, build([row(chipset_models="C")]),
-        taken_at=now + timedelta(seconds=1), verified_copyback=True, keep=2,
+        state,
+        book,
+        build([row(chipset_models="C")]),
+        taken_at=now + timedelta(seconds=1),
+        verified_copyback=True,
+        keep=2,
     )
     assert first != second != third
     kept = set(third.parent.glob("*.json"))

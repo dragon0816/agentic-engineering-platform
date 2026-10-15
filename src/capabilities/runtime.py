@@ -120,7 +120,10 @@ class LocalPolicy:
     conversation model chose by itself waits for the person to confirm it."""
 
     def __init__(
-        self, grants: tuple[CapabilityGrant, ...] = (), *, owner_mode: bool = False,
+        self,
+        grants: tuple[CapabilityGrant, ...] = (),
+        *,
+        owner_mode: bool = False,
     ) -> None:
         self.owner_mode = owner_mode
         self._grants: dict[tuple[str, tuple[str, str, str]], CapabilityGrant] = {}

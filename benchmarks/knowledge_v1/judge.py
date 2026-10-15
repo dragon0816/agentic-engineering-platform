@@ -58,8 +58,9 @@ def endpoint_from_host(host_json: Path, alias: str = "company") -> tuple[ModelEn
     host = json.loads(host_json.read_text(encoding="utf-8"))
     entry = next(e for e in host["models"]["catalog"]["endpoints"] if e["alias"] == alias)
     secret = entry.get("credential", {}).get("name")
-    mapped = next((s.get("environment_variable") for s in _secrets(host) if s.get("secret") == secret),
-                  None)
+    mapped = next(
+        (s.get("environment_variable") for s in _secrets(host) if s.get("secret") == secret), None
+    )
     if not mapped:
         raise SystemExit(f"host.json maps no environment variable for {secret!r}")
     return ModelEndpoint.model_validate(entry), mapped
@@ -86,25 +87,38 @@ class Judge:
     def __init__(self, host_json: Path) -> None:
         endpoint, variable = endpoint_from_host(host_json)
         self.alias = endpoint.alias
-        self.client = OpenAICompatible(endpoint, credential=lambda: os.environ[variable],
-                                       timeout_s=180.0)
+        self.client = OpenAICompatible(
+            endpoint, credential=lambda: os.environ[variable], timeout_s=180.0
+        )
 
     def review(self, question: str, answer: str, passages: list[dict[str, Any]]) -> dict[str, Any]:
         def source(passage: dict[str, Any]) -> str:
             citation = passage.get("citation") or {}
             return str(citation.get("wiki_page") or citation.get("raw_ref") or "")
 
-        shown = "\n\n".join(
-            f"[{p['number']}] ({source(p)})\n{str(p.get('text') or '')[:MAX_PASSAGE_CHARS]}"
-            for p in passages[:MAX_PASSAGES]) or "(the answer cites no passages)"
+        shown = (
+            "\n\n".join(
+                f"[{p['number']}] ({source(p)})\n{str(p.get('text') or '')[:MAX_PASSAGE_CHARS]}"
+                for p in passages[:MAX_PASSAGES]
+            )
+            or "(the answer cites no passages)"
+        )
         request = ModelRequest(
-            trace=TraceIdentifiers(trace_id="knowledge-v1-judge", request_id="judge", span_id="judge"),
+            trace=TraceIdentifiers(
+                trace_id="knowledge-v1-judge", request_id="judge", span_id="judge"
+            ),
             model_alias=self.alias,
-            messages=(ModelMessage(role="system", text=RUBRIC),
-                      ModelMessage(role="user", text=f"Question:\n{question}\n\nAnswer:\n{answer}\n\n"
-                                                     f"Cited passages:\n{shown}")),
+            messages=(
+                ModelMessage(role="system", text=RUBRIC),
+                ModelMessage(
+                    role="user",
+                    text=f"Question:\n{question}\n\nAnswer:\n{answer}\n\nCited passages:\n{shown}",
+                ),
+            ),
             requirements=ModelRequirements(structured_output=True),
-            output_contract="knowledge_v1_review", max_output_tokens=4000)
+            output_contract="knowledge_v1_review",
+            max_output_tokens=4000,
+        )
         response = self.client.generate(request)
         if response.failure is not None:
             return {"ok": False, "error": response.failure.code, "version": JUDGE_VERSION}
@@ -114,7 +128,15 @@ class Judge:
                 verdict = json.loads(response.text)
             except ValueError:
                 return {"ok": False, "error": "unparseable_review", "version": JUDGE_VERSION}
-        if not isinstance(verdict.get("supported"), bool) or not isinstance(verdict.get("reasonable"), bool):
+        if not isinstance(verdict.get("supported"), bool) or not isinstance(
+            verdict.get("reasonable"), bool
+        ):
             return {"ok": False, "error": "incomplete_review", "version": JUDGE_VERSION}
-        return {"ok": True, "version": JUDGE_VERSION, **{k: verdict.get(k) for k in (
-            "supported", "reasonable", "overreach", "reason", "confidence")}}
+        return {
+            "ok": True,
+            "version": JUDGE_VERSION,
+            **{
+                k: verdict.get(k)
+                for k in ("supported", "reasonable", "overreach", "reason", "confidence")
+            },
+        }

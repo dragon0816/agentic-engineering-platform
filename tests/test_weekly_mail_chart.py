@@ -23,7 +23,6 @@ requires_matplotlib = pytest.mark.skipif(
 )
 
 
-
 def decoded(png: bytes) -> tuple[int, int, list[list[tuple[int, int, int]]]]:
     """Width, height and pixels, read with the standard library only."""
     assert png[:8] == b"\x89PNG\r\n\x1a\n", "not a PNG"

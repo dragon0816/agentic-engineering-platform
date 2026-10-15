@@ -59,7 +59,7 @@ def settings() -> TeamTicketsSettings:
 def test_source_jql_and_managed_column_mapping_are_preserved() -> None:
     assert build_jql(settings(), "statusCategory != Done") == (
         'project = MRT1CV AND reporter in ("CHI_L", "peng_k") '
-        'AND (statusCategory != Done) ORDER BY created DESC'
+        "AND (statusCategory != Done) ORDER BY created DESC"
     )
     activity = format_activity(
         [
@@ -82,8 +82,7 @@ def test_source_jql_and_managed_column_mapping_are_preserved() -> None:
     assert values["Created"] == "2026-10-02 09:15"
     assert values["Resolution"] == "Unresolved"
     assert values["Jira activity"] == (
-        "[2026-10-03 08:00 Leo]\nlatest\nline\n\n"
-        "[2026-10-02 08:00 jerry]\nolder"
+        "[2026-10-03 08:00 Leo]\nlatest\nline\n\n[2026-10-02 08:00 jerry]\nolder"
     )
 
 

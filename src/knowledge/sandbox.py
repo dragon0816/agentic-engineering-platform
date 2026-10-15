@@ -34,8 +34,16 @@ SCHEMA = "aep.knowledge-sandbox.v1"
 BASE = ".base"
 # A project vault's drop/ holds every original; a sandbox pulls the folders it
 # works on instead (docs/phases/KNOWLEDGE_COLLAB.md section 3).
-_SKIPPED = {".ingest-backup", ".ingest-snapshot", ".plans", ".condense-cache", ".git", RECORD,
-            BASE, "drop"}
+_SKIPPED = {
+    ".ingest-backup",
+    ".ingest-snapshot",
+    ".plans",
+    ".condense-cache",
+    ".git",
+    RECORD,
+    BASE,
+    "drop",
+}
 # Windows refuses longer paths unless long paths are enabled system-wide
 # (rs-k has 188-character Raw asset paths; k2 live run, 2026-10-11).
 MAX_PATH = 259
@@ -89,9 +97,17 @@ class Sandboxes:
             raise SandboxError("invalid_sandbox_id")
         return folder
 
-    def create(self, base_name: str, base_root: Path, *, label: str, actor: str,
-               domain: str | None = None, scope: str | None = None,
-               progress: Callable[[str, int, int, str], None] | None = None) -> SandboxInfo:
+    def create(
+        self,
+        base_name: str,
+        base_root: Path,
+        *,
+        label: str,
+        actor: str,
+        domain: str | None = None,
+        scope: str | None = None,
+        progress: Callable[[str, int, int, str], None] | None = None,
+    ) -> SandboxInfo:
         """Copy the base vault into a new sandbox. `progress(phase, done, total,
         current)` is told how far the copy is, for the page's progress bar."""
         try:
@@ -104,15 +120,23 @@ class Sandboxes:
         folder = self._folder(sandbox_id)
         if progress is not None:
             progress("counting", 0, 0, "counting the project vault's files")
-        copied_files = [os.path.relpath(os.path.join(d, f), base.root)
-                        for d, dirs, files in os.walk(base.root)
-                        if not set(Path(d).relative_to(base.root).parts) & _SKIPPED
-                        for f in files if f not in _SKIPPED]
+        copied_files = [
+            os.path.relpath(os.path.join(d, f), base.root)
+            for d, dirs, files in os.walk(base.root)
+            if not set(Path(d).relative_to(base.root).parts) & _SKIPPED
+            for f in files
+            if f not in _SKIPPED
+        ]
         longest = max(map(len, copied_files), default=0)
         if os.name == "nt" and len(str(folder)) + 1 + len(BASE) + 1 + longest > MAX_PATH:
             raise SandboxError("path_too_long")
-        snapshot_files = sum(1 for area in TEXT_AREAS if (base.root / area).is_dir()
-                             for p in (base.root / area).rglob("*") if p.is_file())
+        snapshot_files = sum(
+            1
+            for area in TEXT_AREAS
+            if (base.root / area).is_dir()
+            for p in (base.root / area).rglob("*")
+            if p.is_file()
+        )
         snapshot_files += sum(1 for name in ROOT_FILES if (base.root / name).is_file())
         total = len(copied_files) + snapshot_files
         done = 0
@@ -128,8 +152,12 @@ class Sandboxes:
         if progress is not None:
             progress("copying", 0, total, "")
         self.root.mkdir(parents=True, exist_ok=True)
-        shutil.copytree(base.root, folder, copy_function=copy,
-                        ignore=lambda _dir, names: [n for n in names if n in _SKIPPED])
+        shutil.copytree(
+            base.root,
+            folder,
+            copy_function=copy,
+            ignore=lambda _dir, names: [n for n in names if n in _SKIPPED],
+        )
         (folder / "drop").mkdir(exist_ok=True)
         for area in TEXT_AREAS:
             if (base.root / area).is_dir():
@@ -141,10 +169,18 @@ class Sandboxes:
         if progress is not None:
             progress("checking", total, total, "recording the vault's fingerprint")
         info = SandboxInfo(
-            sandbox_id=sandbox_id, base_name=base_name, base_root=str(base.root.resolve()),
-            base_raw_sha256=raw_digest(base), base_content_sha256=knowledge_digest(base),
-            base_decisions_sha256=decision_digest(base), label=label, created_by=actor,
-            created_at=stamp.isoformat(timespec="seconds"), domain=domain, scope=scope)
+            sandbox_id=sandbox_id,
+            base_name=base_name,
+            base_root=str(base.root.resolve()),
+            base_raw_sha256=raw_digest(base),
+            base_content_sha256=knowledge_digest(base),
+            base_decisions_sha256=decision_digest(base),
+            label=label,
+            created_by=actor,
+            created_at=stamp.isoformat(timespec="seconds"),
+            domain=domain,
+            scope=scope,
+        )
         (folder / RECORD).write_text(info.model_dump_json(indent=1), encoding="utf-8")
         return info
 
@@ -162,7 +198,9 @@ class Sandboxes:
         for folder in sorted(self.root.iterdir()):
             record = folder / RECORD
             if folder.name != DISCARDED and record.is_file():
-                found.append(SandboxInfo.model_validate(json.loads(record.read_text(encoding="utf-8"))))
+                found.append(
+                    SandboxInfo.model_validate(json.loads(record.read_text(encoding="utf-8")))
+                )
         return tuple(found)
 
     def open(self, sandbox_id: str) -> tuple[SandboxInfo, Vault]:

@@ -59,9 +59,7 @@ class MarketCase(Contract):
 
     @model_validator(mode="after")
     def evidence_shape(self) -> Self:
-        if {item.kind for item in self.evidence} != {
-            "market_requirement", "product_capability"
-        }:
+        if {item.kind for item in self.evidence} != {"market_requirement", "product_capability"}:
             raise ValueError("case needs both market and product Raw evidence")
         if len({item.raw_ref for item in self.evidence}) != len(self.evidence):
             raise ValueError("Raw evidence paths must be unique")
@@ -137,10 +135,13 @@ def evaluate_case(
                 1 <= number <= len(cited)
                 and cited[number - 1].citation.kind == "raw"
                 and cited[number - 1].citation.raw_ref in expected
-                and any(name.casefold() in cited[number - 1].text.casefold()
-                        for name in case.products)
-                and any(target.casefold() in cited[number - 1].text.casefold()
-                        for target in case.market_targets)
+                and any(
+                    name.casefold() in cited[number - 1].text.casefold() for name in case.products
+                )
+                and any(
+                    target.casefold() in cited[number - 1].text.casefold()
+                    for target in case.market_targets
+                )
                 for number in refs
             ):
                 unsupported.append(sentence.strip())
@@ -161,8 +162,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Audit pinned Raw market-fit evidence")
     parser.add_argument("--vault", required=True, type=Path)
     parser.add_argument(
-        "--case", type=Path,
-        default=Path(__file__).resolve().parents[2] / "evaluation/knowledge/rs-market-v1.json"
+        "--case",
+        type=Path,
+        default=Path(__file__).resolve().parents[2] / "evaluation/knowledge/rs-market-v1.json",
     )
     parser.add_argument("--answer-record", type=Path)
     args = parser.parse_args(argv)
@@ -171,7 +173,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             KnowledgeAnswerRecord.model_validate_json(
                 args.answer_record.read_text(encoding="utf-8-sig")
             )
-            if args.answer_record else None
+            if args.answer_record
+            else None
         )
         report = evaluate_case(Vault(args.vault), load_case(args.case), answer=record)
     except (OSError, ValueError) as error:

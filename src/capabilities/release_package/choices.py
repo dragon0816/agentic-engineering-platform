@@ -59,8 +59,10 @@ def _index_headers() -> dict[str, str]:
 def _readiness(base_url: str, fetch: Fetch) -> list[Choice]:
     token = os.environ.get("OPS_TOKEN", "")
     query = urllib.parse.urlencode({"limit": 500})
-    status, text = fetch(f"{base_url.strip().rstrip('/')}/api/chipsets?{query}",
-                         {"X-Ops-Token": token} if token else {})
+    status, text = fetch(
+        f"{base_url.strip().rstrip('/')}/api/chipsets?{query}",
+        {"X-Ops-Token": token} if token else {},
+    )
     if status >= 400:
         raise ValueError(f"the readiness table answered {status}")
     rows = ((json.loads(text).get("data") or {}).get("chipsets")) or []
@@ -90,7 +92,9 @@ def _index_packages(base_url: str, fetch: Fetch) -> list[Choice]:
 
 
 def chipset_choices(
-    settings: Mapping[str, Any], _arguments: Mapping[str, str], fetch: Fetch | None = None,
+    settings: Mapping[str, Any],
+    _arguments: Mapping[str, str],
+    fetch: Fetch | None = None,
 ) -> list[Choice]:
     """Chipset ids, from the readiness table or else the package index."""
     getter = _fetch(fetch)
@@ -111,7 +115,9 @@ def chipset_choices(
 
 
 def version_choices(
-    settings: Mapping[str, Any], arguments: Mapping[str, str], fetch: Fetch | None = None,
+    settings: Mapping[str, Any],
+    arguments: Mapping[str, str],
+    fetch: Fetch | None = None,
 ) -> list[Choice]:
     """The versions of `package` on the index, releases first, newest first."""
     base = str(settings.get("artifactory_base_url") or "").strip()

@@ -129,24 +129,30 @@ def lookup_published_version(
     Never raises: an unreachable index falls back, as in the source."""
     if not base_url.strip():
         return ""
-    package = (chipset_id if chipset_id.startswith(PACKAGE_PREFIX)
-               else f"{PACKAGE_PREFIX}{chipset_id}")
+    package = (
+        chipset_id if chipset_id.startswith(PACKAGE_PREFIX) else f"{PACKAGE_PREFIX}{chipset_id}"
+    )
     try:
-        status, text = fetch(index_url(base_url, package),
-                             {"Authorization": f"Bearer {token}"} if token else {})
+        status, text = fetch(
+            index_url(base_url, package), {"Authorization": f"Bearer {token}"} if token else {}
+        )
         if status == 404:
             raise LookupError("no such package")
         if status >= 400:
             raise RuntimeError(f"index answered {status}")
         versions = parse_simple_index(text, package)
     except Exception as error:  # noqa: BLE001 - falling back is the point
-        log(f"WARN could not read published versions of {package} "
-            f"({type(error).__name__}); falling back to the readiness table")
+        log(
+            f"WARN could not read published versions of {package} "
+            f"({type(error).__name__}); falling back to the readiness table"
+        )
         return ""
     newest = newest_release(versions)
     if not newest:
-        log(f"WARN {package} has no published release "
-            f"({len(versions)} version(s), all pre-release); falling back")
+        log(
+            f"WARN {package} has no published release "
+            f"({len(versions)} version(s), all pre-release); falling back"
+        )
         return ""
     log(f"chipsetVersion {newest} (newest published release of {package})")
     return newest
@@ -160,14 +166,17 @@ def lookup_readiness_version(
     if not base:
         raise VersionLookupError(
             "chipsetVersion was not given and no readiness table is configured, so it "
-            "cannot be looked up. Give chipsetVersion, or configure the lookup.")
+            "cannot be looked up. Give chipsetVersion, or configure the lookup."
+        )
     query = urllib.parse.urlencode({"q": chipset_id, "limit": 50})
     try:
-        status, text = fetch(f"{base}/api/chipsets?{query}",
-                             {"X-Ops-Token": token} if token else {})
+        status, text = fetch(
+            f"{base}/api/chipsets?{query}", {"X-Ops-Token": token} if token else {}
+        )
     except OSError as error:
         raise VersionLookupError(
-            f"could not reach the readiness table ({type(error).__name__})") from None
+            f"could not reach the readiness table ({type(error).__name__})"
+        ) from None
     if status >= 400:
         raise VersionLookupError(f"the readiness table refused the lookup ({status})")
     try:
@@ -175,17 +184,20 @@ def lookup_readiness_version(
     except (ValueError, AttributeError):
         raise VersionLookupError("the readiness table answered something unreadable") from None
     wanted = chipset_id.strip().lower().removeprefix(PACKAGE_PREFIX)
-    exact = [r for r in rows
-             if str(r.get("name", "")).lower().removeprefix(PACKAGE_PREFIX) == wanted]
+    exact = [
+        r for r in rows if str(r.get("name", "")).lower().removeprefix(PACKAGE_PREFIX) == wanted
+    ]
     if not exact:
         raise VersionLookupError(
             f"{chipset_id!r} is not in the chipset readiness table. Either its pipeline "
             "is not passing, or workflow 12 has not run since it was added. Pass "
-            "chipsetVersion explicitly to go ahead anyway.")
+            "chipsetVersion explicitly to go ahead anyway."
+        )
     tag = exact[0].get("tag")
     if not tag:
         raise VersionLookupError(
             f"{chipset_id!r} is in the readiness table but has no tag, so there is no "
-            "version to pin. Tag the chipset repository, or pass chipsetVersion.")
+            "version to pin. Tag the chipset repository, or pass chipsetVersion."
+        )
     log(f"chipsetVersion {tag} (from the readiness table, scanned {exact[0].get('scanned_at')})")
     return str(tag)

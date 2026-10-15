@@ -31,11 +31,18 @@ def _build() -> str:
     """The code in use: the git commit (with a dirty mark) or the package version."""
     source = Path(__file__).resolve().parents[2]
     try:
-        head = subprocess.run(["git", "-C", str(source), "rev-parse", "--short", "HEAD"],
-                              capture_output=True, text=True, timeout=5).stdout.strip()
-        dirty = subprocess.run(["git", "-C", str(source), "status", "--porcelain",
-                                "--untracked-files=no"],
-                               capture_output=True, text=True, timeout=5).stdout.strip()
+        head = subprocess.run(
+            ["git", "-C", str(source), "rev-parse", "--short", "HEAD"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        ).stdout.strip()
+        dirty = subprocess.run(
+            ["git", "-C", str(source), "status", "--porcelain", "--untracked-files=no"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        ).stdout.strip()
         if head:
             return head + ("+dirty" if dirty else "")
     except (OSError, subprocess.SubprocessError):
@@ -60,17 +67,18 @@ def strategy(runtime: Any) -> dict[str, Any]:
     config = runtime.config
     skills = sorted(
         f"{m.metadata.identity.namespace}/{m.metadata.identity.name}@{m.metadata.identity.version}"
-        for m in runtime.agent.gateway.router.commands.skills.manifests())
+        for m in runtime.agent.gateway.router.commands.skills.manifests()
+    )
     accelerator = config.decision_accelerator
     return {
         "build": _build(),
         "model_alias": None if config.models is None else config.models.routing_alias,
         "accelerator": f"{accelerator.provider}:{getattr(accelerator, 'mode', '')}",
         "limits": f"turns={MAX_CONVERSATION_TURNS},tools={MAX_CONVERSATION_TOOL_CALLS},"
-                  f"out={CONVERSATION_MAX_OUTPUT_TOKENS}",
+        f"out={CONVERSATION_MAX_OUTPUT_TOKENS}",
         "skills_digest": hashlib.sha256("\n".join(skills).encode()).hexdigest()[:12],
-        "strategy_label": str(settings(runtime.layout.workspace_root).get("strategy_label")
-                              or "") or None,
+        "strategy_label": str(settings(runtime.layout.workspace_root).get("strategy_label") or "")
+        or None,
     }
 
 

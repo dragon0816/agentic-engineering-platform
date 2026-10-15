@@ -29,7 +29,8 @@ CALL_TIMEOUT_SECONDS = 300
 NOT_RUNNING = (
     "AEP Agent Web is not running on this computer, so AEP's Knowledge and Workflows are not "
     "reachable. Ask the person to open it (the 'AEP Agent' shortcut, or `aep-host open "
-    "--config <host.json>`), then try again. Do not answer from memory instead.")
+    "--config <host.json>`), then try again. Do not answer from memory instead."
+)
 
 Post = Callable[[str, bytes, dict[str, str], float], bytes]
 
@@ -58,8 +59,9 @@ def endpoint(workspace: Path) -> tuple[str, str] | None:
 
 
 class Bridge:
-    def __init__(self, workspace: Path | None, version: str, post: Post = _post,
-                 problem: str = "") -> None:
+    def __init__(
+        self, workspace: Path | None, version: str, post: Post = _post, problem: str = ""
+    ) -> None:
         # None when host.json could not be read: the server still starts, so
         # the agent shows it connected and each call says what is wrong.
         self.workspace = workspace
@@ -68,9 +70,14 @@ class Bridge:
         self._post = post
 
     def _tool_error(self, ident: Any, text: str) -> dict[str, Any]:
-        return _result(ident, {"content": [{"type": "text", "text": text}],
-                               "structuredContent": {"ok": False, "code": "agent_web_unavailable"},
-                               "isError": True})
+        return _result(
+            ident,
+            {
+                "content": [{"type": "text", "text": text}],
+                "structuredContent": {"ok": False, "code": "agent_web_unavailable"},
+                "isError": True,
+            },
+        )
 
     def handle(self, message: dict[str, Any]) -> dict[str, Any] | None:
         method = message.get("method")
@@ -80,18 +87,29 @@ class Bridge:
             return None
         if method == "initialize":
             asked = str(params.get("protocolVersion") or "")
-            return _result(ident, {
-                "protocolVersion": asked if asked in PROTOCOL_VERSIONS else PROTOCOL_VERSIONS[0],
-                "capabilities": {"tools": {"listChanged": False}},
-                "serverInfo": {"name": "aep-assistant", "version": self.version},
-                "instructions": INSTRUCTIONS,
-            })
+            return _result(
+                ident,
+                {
+                    "protocolVersion": asked
+                    if asked in PROTOCOL_VERSIONS
+                    else PROTOCOL_VERSIONS[0],
+                    "capabilities": {"tools": {"listChanged": False}},
+                    "serverInfo": {"name": "aep-assistant", "version": self.version},
+                    "instructions": INSTRUCTIONS,
+                },
+            )
         if method == "ping":
             return _result(ident, {})
         if method == "tools/list":
-            return _result(ident, {"tools": [
-                {"name": name, "description": text, "inputSchema": schema}
-                for name, (text, schema) in TOOLS.items()]})
+            return _result(
+                ident,
+                {
+                    "tools": [
+                        {"name": name, "description": text, "inputSchema": schema}
+                        for name, (text, schema) in TOOLS.items()
+                    ]
+                },
+            )
         if method == "tools/call":
             if self.workspace is None:
                 return self._tool_error(ident, self.problem or NOT_RUNNING)
@@ -101,15 +119,21 @@ class Bridge:
             url, token = found
             body = json.dumps(message, ensure_ascii=False).encode("utf-8")
             try:
-                raw = self._post(url, body, {"Content-Type": "application/json",
-                                             "Authorization": f"Bearer {token}"},
-                                 CALL_TIMEOUT_SECONDS)
+                raw = self._post(
+                    url,
+                    body,
+                    {"Content-Type": "application/json", "Authorization": f"Bearer {token}"},
+                    CALL_TIMEOUT_SECONDS,
+                )
                 reply = json.loads(raw)
             except (urllib.error.URLError, OSError, ValueError):
                 return self._tool_error(ident, NOT_RUNNING)
             return reply if isinstance(reply, dict) else self._tool_error(ident, NOT_RUNNING)
-        return {"jsonrpc": "2.0", "id": ident,
-                "error": {"code": -32601, "message": f"method not found: {method}"}}
+        return {
+            "jsonrpc": "2.0",
+            "id": ident,
+            "error": {"code": -32601, "message": f"method not found: {method}"},
+        }
 
     def serve(self, source: IO[bytes], sink: IO[bytes]) -> None:
         for raw in source:
@@ -120,12 +144,21 @@ class Bridge:
             try:
                 message = json.loads(line)
             except ValueError:
-                reply = {"jsonrpc": "2.0", "id": None,
-                         "error": {"code": -32700, "message": "parse error"}}
+                reply = {
+                    "jsonrpc": "2.0",
+                    "id": None,
+                    "error": {"code": -32700, "message": "parse error"},
+                }
             else:
-                reply = self.handle(message) if isinstance(message, dict) else {
-                    "jsonrpc": "2.0", "id": None,
-                    "error": {"code": -32600, "message": "invalid request"}}
+                reply = (
+                    self.handle(message)
+                    if isinstance(message, dict)
+                    else {
+                        "jsonrpc": "2.0",
+                        "id": None,
+                        "error": {"code": -32600, "message": "invalid request"},
+                    }
+                )
             if reply is not None:
                 sink.write((json.dumps(reply, ensure_ascii=False) + "\n").encode("utf-8"))
                 sink.flush()

@@ -76,7 +76,8 @@ class ReferenceQuery:
                 return None
             wanted[tag] = str(answer)
         return [
-            item for item in items
+            item
+            for item in items
             if all(item.tags.get(tag) == value for tag, value in wanted.items())
         ]
 
@@ -123,9 +124,7 @@ class ReferenceSetStore:
                 connection.close()
         return None if row is None else ReferenceSet.model_validate_json(row[0])
 
-    def resolve(
-        self, source: str, answers: Mapping[str, Any]
-    ) -> list[ReferenceItem] | None:
+    def resolve(self, source: str, answers: Mapping[str, Any]) -> list[ReferenceItem] | None:
         """The current choices for a `ref:` source, or None if the set was never
         published or a needed earlier answer is missing."""
         query = ReferenceQuery(source)
@@ -136,17 +135,25 @@ class ReferenceSetStore:
 
 
 def publish_values(
-    store: ReferenceSetStore, name: str, values: Iterable[Any], *, published_by: str,
+    store: ReferenceSetStore,
+    name: str,
+    values: Iterable[Any],
+    *,
+    published_by: str,
 ) -> ReferenceSet:
     """Publish plain strings or `{value, label, tags}` mappings as one set."""
     items = [
         ReferenceItem(value=item) if isinstance(item, str) else ReferenceItem.model_validate(item)
         for item in values
     ]
-    return store.publish(ReferenceSet(
-        name=name, items=tuple(items), published_by=published_by,
-        published_at=datetime.now(UTC),
-    ))
+    return store.publish(
+        ReferenceSet(
+            name=name,
+            items=tuple(items),
+            published_by=published_by,
+            published_at=datetime.now(UTC),
+        )
+    )
 
 
 def as_json(items: list[ReferenceItem]) -> list[dict[str, Any]]:

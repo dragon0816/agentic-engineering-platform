@@ -54,15 +54,22 @@ def is_test_path(path: str, test_folder: str = "tests") -> bool:
     parts = PurePosixPath(path).parts
     name = parts[-1] if parts else ""
     return (
-        test_folder in parts[:-1] or "tests" in parts[:-1]
-        or name.startswith("test_") or name.endswith("_test.py") or name == "conftest.py"
+        test_folder in parts[:-1]
+        or "tests" in parts[:-1]
+        or name.startswith("test_")
+        or name.endswith("_test.py")
+        or name == "conftest.py"
     )
 
 
 def _relative(path: str) -> str:
     candidate = PurePosixPath(path.strip().replace("\\", "/"))
-    if candidate.is_absolute() or ".." in candidate.parts or not candidate.parts \
-            or ":" in candidate.parts[0]:
+    if (
+        candidate.is_absolute()
+        or ".." in candidate.parts
+        or not candidate.parts
+        or ":" in candidate.parts[0]
+    ):
         raise CapabilityRefused("coding_path_invalid")
     return candidate.as_posix()
 
@@ -103,8 +110,12 @@ class CodingChangeHandler:
             raise CapabilityRefused("coding_model_unavailable")
         python = Path(self.binding.runner_python)
         try:
-            runner = RestrictedRunner(python, RunnerLimits(
-                timeout_seconds=self.binding.timeout_seconds, memory_mb=self.binding.memory_mb))
+            runner = RestrictedRunner(
+                python,
+                RunnerLimits(
+                    timeout_seconds=self.binding.timeout_seconds, memory_mb=self.binding.memory_mb
+                ),
+            )
         except RunnerError as error:
             raise CapabilityRefused(error.code) from None
         if self.binding.require_network_block and not self.rule_present(python):
@@ -116,8 +127,9 @@ class CodingChangeHandler:
             raise CapabilityRefused(f"coding_{error.code}") from None
         commands = DeclaredCommands()
         commands.register(NEW_COMMAND, PytestCommand("new", runner, run.run_dir, self.extra_env))
-        commands.register(SUITE_COMMAND,
-                          PytestCommand("suite", runner, run.run_dir, self.extra_env))
+        commands.register(
+            SUITE_COMMAND, PytestCommand("suite", runner, run.run_dir, self.extra_env)
+        )
         harness_request = CodingHarnessRequest(
             workspace=WorkspaceSnapshot(
                 root=str(run.worktree),
@@ -129,11 +141,15 @@ class CodingChangeHandler:
             allowed_commands=(NEW_COMMAND, SUITE_COMMAND),
             cases=(*new_cases(tests), suite_case(repository.test_folder)),
             skill_versions=(f"{SKILL.namespace}/{SKILL.name}@{SKILL.version}",),
-            budget=HarnessBudget(max_repair_attempts=request.max_repairs,
-                                 max_commands=2 * (request.max_repairs + 1)),
+            budget=HarnessBudget(
+                max_repair_attempts=request.max_repairs, max_commands=2 * (request.max_repairs + 1)
+            ),
         )
         author = ModelChangeAuthor(
-            self.model, self.model_alias, trace, self._context(run.worktree, file, tests),
+            self.model,
+            self.model_alias,
+            trace,
+            self._context(run.worktree, file, tests),
             local_only=self.local_only,
         )
         evidence = run.run_dir / "result.json"
@@ -143,9 +159,14 @@ class CodingChangeHandler:
             evidence.write_text(json.dumps({"stopped": error.code}), encoding="utf-8")
             raise CapabilityRefused(error.code) from None
         diff = git_worktree.diff(run.worktree)
-        evidence.write_text(json.dumps(
-            {"result": result.model_dump(mode="json"), "diff": diff}, ensure_ascii=False,
-            indent=2), encoding="utf-8")
+        evidence.write_text(
+            json.dumps(
+                {"result": result.model_dump(mode="json"), "diff": diff},
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
         if result.status != "validated":
             assert result.failure is not None
             raise CapabilityRefused(result.failure.code)
@@ -156,8 +177,11 @@ class CodingChangeHandler:
             summary=result.plan.summary,
             attempts=len(result.changes),
             commands=tuple(
-                CommandSummary(command=item.command, status=item.status,
-                               failures=tuple(f.message[:500] for f in item.failures[:3]))
+                CommandSummary(
+                    command=item.command,
+                    status=item.status,
+                    failures=tuple(f.message[:500] for f in item.failures[:3]),
+                )
                 for item in result.commands
             ),
             diff=diff[:MAX_DIFF_CHARS] or "(no difference)",
@@ -190,7 +214,8 @@ class CodingChangeHandler:
         for path in files[:MAX_CONTEXT_FILES]:
             target = worktree / path
             context[path] = (
-                target.read_text(encoding="utf-8", errors="replace") if target.is_file()
+                target.read_text(encoding="utf-8", errors="replace")
+                if target.is_file()
                 else "(this file does not exist yet)"
             )
         return context

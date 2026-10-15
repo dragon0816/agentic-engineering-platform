@@ -44,18 +44,25 @@ def _task(skill: SkillManifest, *, max_retries: int = 1) -> TaskContract:
     ("filename", "domain", "stages", "evidence", "fallback"),
     (
         (
-            "knowledge-evidence.json", "knowledge",
+            "knowledge-evidence.json",
+            "knowledge",
             ("collect_context", "execute", "validate"),
-            ("raw_citations",), "needs_input",
+            ("raw_citations",),
+            "needs_input",
         ),
         (
-            "workflow-check.json", "workflow", ("execute", "validate"),
-            ("workflow_run", "artifact_check"), "stop",
+            "workflow-check.json",
+            "workflow",
+            ("execute", "validate"),
+            ("workflow_run", "artifact_check"),
+            "stop",
         ),
         (
-            "coding-verify.json", "coding",
+            "coding-verify.json",
+            "coding",
             ("collect_context", "execute", "validate"),
-            ("new_test", "regression_test"), "retry",
+            ("new_test", "regression_test"),
+            "retry",
         ),
     ),
 )

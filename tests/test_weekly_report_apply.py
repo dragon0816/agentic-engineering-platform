@@ -148,8 +148,14 @@ class RecordingWriter:
         self._record("format", list(operations))
 
     def sort_highlighted_rows(
-        self, path: Path, sheet: str, *, key_column: str, last_column: str,
-        last_row: int, colour: str,
+        self,
+        path: Path,
+        sheet: str,
+        *,
+        key_column: str,
+        last_column: str,
+        last_row: int,
+        colour: str,
     ) -> None:
         self._record("sort_highlighted_rows", (key_column, last_column, last_row, colour))
 

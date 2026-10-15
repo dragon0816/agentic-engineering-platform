@@ -62,9 +62,14 @@ class ConversationMessage(Contract):
         `Authorization: Bearer <token>` from a document must not lose the whole
         turn (coding_v1 fix-run-010 T09). The check below stays as a backstop."""
         if isinstance(data, dict):
-            data = {**data, **{key: SECRET_PATTERN.sub(REDACTED, data[key])
-                               for key in ("text", "tool_summary")
-                               if isinstance(data.get(key), str)}}
+            data = {
+                **data,
+                **{
+                    key: SECRET_PATTERN.sub(REDACTED, data[key])
+                    for key in ("text", "tool_summary")
+                    if isinstance(data.get(key), str)
+                },
+            }
         return data
 
     @model_validator(mode="after")

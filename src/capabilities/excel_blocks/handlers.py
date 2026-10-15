@@ -30,33 +30,37 @@ from common.base import Contract, Text
 from common.execution import RequestContext
 from integrations import excel
 
-READ_SHEET_SPEC = CapabilitySpec.model_validate({
-    "identity": {"namespace": "excel", "name": "read-sheet", "version": "1.0.0"},
-    "name": "excel.read_sheet",
-    "description": "Read one workbook sheet as rows keyed by its header row",
-    "input_contract": "excel.read-sheet.input.v1",
-    "output_contract": "excel.rows.v1",
-    "side_effect": "read",
-    "policy": {"required_permissions": ["excel.read"], "policy_refs": ["excel-policy"]},
-})
+READ_SHEET_SPEC = CapabilitySpec.model_validate(
+    {
+        "identity": {"namespace": "excel", "name": "read-sheet", "version": "1.0.0"},
+        "name": "excel.read_sheet",
+        "description": "Read one workbook sheet as rows keyed by its header row",
+        "input_contract": "excel.read-sheet.input.v1",
+        "output_contract": "excel.rows.v1",
+        "side_effect": "read",
+        "policy": {"required_permissions": ["excel.read"], "policy_refs": ["excel-policy"]},
+    }
+)
 
-UPSERT_SPEC = CapabilitySpec.model_validate({
-    "identity": {"namespace": "excel", "name": "upsert-rows", "version": "1.0.0"},
-    "name": "excel.upsert_rows",
-    "description": (
-        "Update rows by a key column and append new keys; never deletes rows or "
-        "touches other columns"
-    ),
-    "input_contract": "excel.upsert-rows.input.v1",
-    "output_contract": "excel.upsert-rows.output.v1",
-    "side_effect": "write",
-    "policy": {
-        "risk": "low",
-        "approval_required": True,
-        "required_permissions": ["excel.write"],
-        "policy_refs": ["excel-policy"],
-    },
-})
+UPSERT_SPEC = CapabilitySpec.model_validate(
+    {
+        "identity": {"namespace": "excel", "name": "upsert-rows", "version": "1.0.0"},
+        "name": "excel.upsert_rows",
+        "description": (
+            "Update rows by a key column and append new keys; never deletes rows or "
+            "touches other columns"
+        ),
+        "input_contract": "excel.upsert-rows.input.v1",
+        "output_contract": "excel.upsert-rows.output.v1",
+        "side_effect": "write",
+        "policy": {
+            "risk": "low",
+            "approval_required": True,
+            "required_permissions": ["excel.write"],
+            "policy_refs": ["excel-policy"],
+        },
+    }
+)
 
 _INTEGER = re.compile(r"^-?\d{1,15}$")
 _DECIMAL = re.compile(r"^-?\d{1,15}\.\d{1,10}$")
@@ -119,13 +123,15 @@ class ReadSheetHandler:
         request = ReadSheetRequest.model_validate(inputs)
         try:
             headers, rows = await asyncio.to_thread(
-                excel.read_rows, Path(request.workbook), request.sheet)
+                excel.read_rows, Path(request.workbook), request.sheet
+            )
         except excel.WorkbookError as error:
             raise _refuse(error) from None
         return SheetRows(
             headers=headers,
-            rows=tuple({h: cell for h, cell in zip(headers, row, strict=False) if h}
-                       for row in rows),
+            rows=tuple(
+                {h: cell for h, cell in zip(headers, row, strict=False) if h} for row in rows
+            ),
         )
 
 
@@ -160,7 +166,8 @@ class UpsertHandler:
         if request.key not in headers:
             raise CapabilityRefused("excel_key_column_missing")
         columns = request.columns or tuple(
-            name for name in headers if name and any(name in row for row in request.rows))
+            name for name in headers if name and any(name in row for row in request.rows)
+        )
         missing = [name for name in columns if name not in headers]
         if missing:
             raise CapabilityRefused("excel_column_missing")
@@ -198,7 +205,8 @@ class UpsertHandler:
                 for name in columns:
                     if name in row:
                         sheet.cell(row=next_row, column=index[name]).value = _typed(
-                            _cell_text(row[name]))
+                            _cell_text(row[name])
+                        )
                 existing[key] = next_row
                 next_row += 1
                 added.append(key)
@@ -211,5 +219,10 @@ class UpsertHandler:
             backup = str(target)
             book.save(path)
         book.close()
-        return UpsertResult(added=tuple(added), updated=tuple(updated), unchanged=unchanged,
-                            written=write and changed, backup=backup)
+        return UpsertResult(
+            added=tuple(added),
+            updated=tuple(updated),
+            unchanged=unchanged,
+            written=write and changed,
+            backup=backup,
+        )

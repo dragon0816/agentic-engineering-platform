@@ -78,89 +78,136 @@ class BenchmarkReport(Contract):
         return tuple(r.path for r in self.results if r.regression)
 
     def summary(self) -> dict[str, Any]:
-        return {**json.loads(self.model_dump_json()), "sandbox_score": self.sandbox_score,
-                "project_score": self.project_score, "regressions": list(self.regressions)}
+        return {
+            **json.loads(self.model_dump_json()),
+            "sandbox_score": self.sandbox_score,
+            "project_score": self.project_score,
+            "regressions": list(self.regressions),
+        }
 
 
 def catalog_for(vault: Vault, asset: AssetIdentity, actor: str) -> KnowledgeCatalog:
     """A one-version catalog over a vault that is not installed."""
     manifest = KnowledgeManifest(
         metadata=AssetMetadata(
-            identity=asset, owner=Owner(type="user", id=actor), visibility="private",
+            identity=asset,
+            owner=Owner(type="user", id=actor),
+            visibility="private",
             lifecycle="published",
-            business_approval=BusinessApproval(status="approved", reviewer=actor,
-                                               evidence="sandbox-benchmark"),
-            validation_refs=("sandbox-benchmark",)),
-        domain=asset.namespace, vault_ref=str(vault.root.resolve()),
-        raw_sha256=raw_digest(vault), decisions_sha256=decision_digest(vault),
-        content_sha256=knowledge_digest(vault))
+            business_approval=BusinessApproval(
+                status="approved", reviewer=actor, evidence="sandbox-benchmark"
+            ),
+            validation_refs=("sandbox-benchmark",),
+        ),
+        domain=asset.namespace,
+        vault_ref=str(vault.root.resolve()),
+        raw_sha256=raw_digest(vault),
+        decisions_sha256=decision_digest(vault),
+        content_sha256=knowledge_digest(vault),
+    )
     catalog = KnowledgeCatalog()
     catalog.register(manifest, vault)
     return catalog
 
 
-def questions_for(sandbox: Vault, fallback: Path | None,
-                  sets: tuple[str, ...]) -> tuple[tuple[Question, ...], tuple[str, ...]]:
+def questions_for(
+    sandbox: Vault, fallback: Path | None, sets: tuple[str, ...]
+) -> tuple[tuple[Question, ...], tuple[str, ...]]:
     """(gradable questions, ungraded paths) of the chosen sets; the sandbox's own
     checks/questions first, so a maintainer can edit questions with the rules."""
     root = sandbox.root / "checks" / "questions"
     found = load(root if root.is_dir() or fallback is None else fallback)
     chosen = [q for q in found if q.set in sets]
-    return (tuple(q for q in chosen if q.must or q.must_not),
-            tuple(q.path for q in chosen if not (q.must or q.must_not)))
+    return (
+        tuple(q for q in chosen if q.must or q.must_not),
+        tuple(q.path for q in chosen if not (q.must or q.must_not)),
+    )
 
 
 def run_benchmark(
-    ask: Ask, *, sandbox_id: str, sandbox: Vault, project: Vault, sets: tuple[str, ...],
-    actor: str, skill: AssetIdentity | None, questions_fallback: Path | None = None,
+    ask: Ask,
+    *,
+    sandbox_id: str,
+    sandbox: Vault,
+    project: Vault,
+    sets: tuple[str, ...],
+    actor: str,
+    skill: AssetIdentity | None,
+    questions_fallback: Path | None = None,
     run_id: str | None = None,
 ) -> BenchmarkReport:
     """Run synchronously, saving the report after every question in
     `<sandbox>/.benchmarks/<run id>.json` so a page can follow it."""
     run = run_id or f"bench-{datetime.now(UTC).strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:4]}"
     questions, ungraded = questions_for(sandbox, questions_fallback, sets)
-    report = BenchmarkReport(run_id=run, sandbox_id=sandbox_id, sets=sets,
-                             started_at=datetime.now(UTC).isoformat(timespec="seconds"),
-                             total=len(questions), ungraded=ungraded)
+    report = BenchmarkReport(
+        run_id=run,
+        sandbox_id=sandbox_id,
+        sets=sets,
+        started_at=datetime.now(UTC).isoformat(timespec="seconds"),
+        total=len(questions),
+        ungraded=ungraded,
+    )
     folder = sandbox.root / RESULTS
     folder.mkdir(exist_ok=True)
     path = folder / f"{run}.json"
 
     def save(current: BenchmarkReport) -> None:
-        path.write_text(json.dumps(current.summary(), ensure_ascii=False, indent=1),
-                        encoding="utf-8")
+        path.write_text(
+            json.dumps(current.summary(), ensure_ascii=False, indent=1), encoding="utf-8"
+        )
 
     save(report)
     try:
         sides = {
-            "sandbox": (AssetIdentity(namespace="engineering", name="sandbox",
-                                      version="0.0.0-candidate"), sandbox),
-            "project": (AssetIdentity(namespace="engineering", name="project",
-                                      version="0.0.0-current"), project),
+            "sandbox": (
+                AssetIdentity(namespace="engineering", name="sandbox", version="0.0.0-candidate"),
+                sandbox,
+            ),
+            "project": (
+                AssetIdentity(namespace="engineering", name="project", version="0.0.0-current"),
+                project,
+            ),
         }
-        catalogs = {name: (asset, catalog_for(vault, asset, actor))
-                    for name, (asset, vault) in sides.items()}
+        catalogs = {
+            name: (asset, catalog_for(vault, asset, actor))
+            for name, (asset, vault) in sides.items()
+        }
 
         def answer(name: str, question: Question) -> SideResult:
             asset, catalog = catalogs[name]
-            reply = ask(KnowledgeAskRequest(asset=asset, question=question.text, skill=skill),
-                        catalog)
+            reply = ask(
+                KnowledgeAskRequest(asset=asset, question=question.text, skill=skill), catalog
+            )
             text = str(reply.get("answer") or "")
-            return SideResult(ok=bool(reply.get("ok")), grade=grade(question, text),
-                              answer=text[:4000])
+            return SideResult(
+                ok=bool(reply.get("ok")), grade=grade(question, text), answer=text[:4000]
+            )
 
         results: list[QuestionResult] = []
         with ThreadPoolExecutor(max_workers=2) as pool:
             for question in questions:
-                mine, theirs = (pool.submit(answer, "sandbox", question),
-                                pool.submit(answer, "project", question))
-                results.append(QuestionResult(path=question.path, set=question.set,
-                                              question=question.text, sandbox=mine.result(),
-                                              project=theirs.result()))
+                mine, theirs = (
+                    pool.submit(answer, "sandbox", question),
+                    pool.submit(answer, "project", question),
+                )
+                results.append(
+                    QuestionResult(
+                        path=question.path,
+                        set=question.set,
+                        question=question.text,
+                        sandbox=mine.result(),
+                        project=theirs.result(),
+                    )
+                )
                 report = report.model_copy(update={"results": tuple(results)})
                 save(report)
-        report = report.model_copy(update={
-            "status": "finished", "finished_at": datetime.now(UTC).isoformat(timespec="seconds")})
+        report = report.model_copy(
+            update={
+                "status": "finished",
+                "finished_at": datetime.now(UTC).isoformat(timespec="seconds"),
+            }
+        )
     except Exception as failure:  # noqa: BLE001 - the page shows why a run stopped
         report = report.model_copy(update={"status": "failed", "error": type(failure).__name__})
     save(report)

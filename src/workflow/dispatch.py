@@ -92,16 +92,20 @@ class BridgeExecutor:
     async def execute(self, invocation: CapabilityInvocation) -> CapabilityResult:
         """Every capability call, as a Bridge-layer `tool.completed` span."""
         target = getattr(invocation, "target", None)
-        tool_id = None if target is None else (
-            f"{target.namespace}/{target.name}@{target.version}")
+        tool_id = None if target is None else (f"{target.namespace}/{target.name}@{target.version}")
         telemetry.note_tool()
-        with telemetry.span("capability", attributes={"tool_id": tool_id, "layer": "bridge"},
-                            completed="tool.completed") as step:
+        with telemetry.span(
+            "capability",
+            attributes={"tool_id": tool_id, "layer": "bridge"},
+            completed="tool.completed",
+        ) as step:
             result = await self._execute(invocation)
             if result.status != "succeeded":
-                step.update(status="failed", outcome=result.status,
-                            failure_code=None if result.failure is None
-                            else result.failure.code)
+                step.update(
+                    status="failed",
+                    outcome=result.status,
+                    failure_code=None if result.failure is None else result.failure.code,
+                )
             return result
 
     async def _execute(self, invocation: CapabilityInvocation) -> CapabilityResult:
@@ -150,8 +154,9 @@ class BridgeExecutor:
         except CapabilityRefused as refusal:
             # The handler named why; only the code, and where in the request, travel.
             if refusal.where:
-                return self._failure(call, refusal.code, invoked=True,
-                                     message=f"Refused at {refusal.where}")
+                return self._failure(
+                    call, refusal.code, invoked=True, message=f"Refused at {refusal.where}"
+                )
             return self._failure(call, refusal.code, invoked=True)
         except TransientCapabilityError:
             return self._failure(

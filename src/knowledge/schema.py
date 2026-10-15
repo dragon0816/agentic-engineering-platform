@@ -87,7 +87,8 @@ def ingest_conventions(vault: Vault, raw_ref: str, built_in: str) -> Conventions
         return Conventions(schema, "vault")
     text = schema + "".join(
         f"\n\n---\n\n# Rules for this source's category ({name})\n\n{rules}"
-        for name, rules in found)
+        for name, rules in found
+    )
     return Conventions(text, "vault", " + ".join(name for name, _ in found))
 
 
@@ -125,8 +126,7 @@ def answer_rules(vault: Vault, question: str) -> list[tuple[str, str]]:
         topics = _topics(fields.get("topics", ""))
         if topics and not any(topic in asked for topic in topics):
             continue
-        found.append((fields.get("name") or path.parent.name,
-                      body.strip()[:MAX_ANSWER_RULE_CHARS]))
+        found.append((fields.get("name") or path.parent.name, body.strip()[:MAX_ANSWER_RULE_CHARS]))
     return found
 
 
@@ -137,7 +137,8 @@ def answer_rules_text(vault: Vault, question: str) -> str:
     if not rules:
         return ""
     text = "".join(f"\n\n## {name}\n{body}" for name, body in rules)
-    section = ("\n\nKnowledge base answer rules, written by the knowledge base's "
-               "maintainers (they refine the guidance above; citation rules still apply):"
-               + text)
+    section = (
+        "\n\nKnowledge base answer rules, written by the knowledge base's "
+        "maintainers (they refine the guidance above; citation rules still apply):" + text
+    )
     return section.replace("{", "{{").replace("}", "}}")

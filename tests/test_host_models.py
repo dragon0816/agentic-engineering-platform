@@ -91,10 +91,7 @@ def configured(tmp_path: Path, **changes: Any) -> tuple[Any, Any]:
 
 def test_editable_loopback_gateway_default_is_a_valid_non_secret_host_fragment() -> None:
     template = (
-        Path(__file__).resolve().parents[1]
-        / "deploy"
-        / "windows-preview"
-        / "gateway-default.json"
+        Path(__file__).resolve().parents[1] / "deploy" / "windows-preview" / "gateway-default.json"
     )
     fragment = json.loads(template.read_text(encoding="utf-8"))
     config = CompanyHostConfiguration.model_validate(

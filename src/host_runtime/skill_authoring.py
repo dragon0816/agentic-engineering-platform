@@ -78,9 +78,13 @@ def assemble_skill(raw: dict[str, Any], *, namespace: str, owner: str) -> dict[s
     for command in raw.get("commands") or []:
         if not isinstance(command, dict):
             continue
-        commands.append({"name": command.get("name"),
-                         "kind": command.get("kind") or "capability",
-                         "target": _identity(command.get("target"))})
+        commands.append(
+            {
+                "name": command.get("name"),
+                "kind": command.get("kind") or "capability",
+                "target": _identity(command.get("target")),
+            }
+        )
     assembled: dict[str, Any] = {
         "metadata": {
             "identity": {"namespace": namespace, "name": name, "version": "1.0.0"},
@@ -125,8 +129,11 @@ def check_skill(
 ) -> tuple[SkillManifest | None, list[str]]:
     """Validate an assembled Skill against this Host; the problems are what
     the author must fix."""
-    problems = [f"{field}: an authored Skill may not set {field}; the installer configures it"
-                for field in REFUSED_FIELDS if raw.get(field)]
+    problems = [
+        f"{field}: an authored Skill may not set {field}; the installer configures it"
+        for field in REFUSED_FIELDS
+        if raw.get(field)
+    ]
     instructions = raw.get("instructions")
     if not isinstance(instructions, str) or not instructions.strip():
         problems.append("instructions: required, the guidance the model follows")
@@ -142,27 +149,34 @@ def check_skill(
     try:
         manifest = SkillManifest.model_validate(manifest_data)
     except ValidationError as error:
-        return None, [f"{'.'.join(str(p) for p in e['loc'])}: {e['msg']}"
-                      for e in error.errors()[:8]]
+        return None, [
+            f"{'.'.join(str(p) for p in e['loc'])}: {e['msg']}" for e in error.errors()[:8]
+        ]
     have_workflows = {_target(m.metadata.identity) for m in workflows}
     for index, command in enumerate(manifest.commands):
         if command.kind == "capability" and installed.get(command.target) is None:
             problems.append(
-                f"commands.{index}: capability {_target(command.target)} is not installed")
+                f"commands.{index}: capability {_target(command.target)} is not installed"
+            )
         if command.kind == "workflow" and _target(command.target) not in have_workflows:
             problems.append(
-                f"commands.{index}: Workflow {_target(command.target)} is not installed")
+                f"commands.{index}: Workflow {_target(command.target)} is not installed"
+            )
     if manifest.procedure:
         guidance = manifest.harness_guidance
         if guidance is None or "knowledge" not in guidance.domains:
-            problems.append("procedure: only a Knowledge Skill (harness_guidance.domains "
-                            "includes \"knowledge\") may carry a procedure")
+            problems.append(
+                "procedure: only a Knowledge Skill (harness_guidance.domains "
+                'includes "knowledge") may carry a procedure'
+            )
         else:
             try:
                 KnowledgeProcedure.model_validate(manifest.procedure)
             except ValidationError as error:
-                problems.extend(f"procedure.{'.'.join(str(p) for p in e['loc'])}: {e['msg']}"
-                                for e in error.errors()[:6])
+                problems.extend(
+                    f"procedure.{'.'.join(str(p) for p in e['loc'])}: {e['msg']}"
+                    for e in error.errors()[:6]
+                )
     identity = manifest.metadata.identity
     for other in skills:
         theirs = other.metadata.identity
@@ -170,12 +184,15 @@ def check_skill(
             continue
         owner = (other.metadata.owner.type, other.metadata.owner.id)
         if theirs.name == identity.name and owner != ("user", actor):
-            problems.append(f"name: '{identity.name}' already belongs to {owner[1]}; choose "
-                            "another name, or ask its owner to let you co-edit it")
+            problems.append(
+                f"name: '{identity.name}' already belongs to {owner[1]}; choose "
+                "another name, or ask its owner to let you co-edit it"
+            )
             break
         if theirs.name != identity.name and other.alias == manifest.alias:
-            problems.append(f"alias: '{manifest.alias}' is already used by "
-                            f"{theirs.namespace}/{theirs.name}; choose another alias")
+            problems.append(
+                f"alias: '{manifest.alias}' is already used by "
+                f"{theirs.namespace}/{theirs.name}; choose another alias"
+            )
             break
     return (None, problems) if problems else (manifest, [])
-

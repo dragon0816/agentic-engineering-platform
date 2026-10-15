@@ -38,8 +38,10 @@ NOW = datetime(2026, 10, 15, 9, 0, tzinfo=UTC)
 
 def _app(tmp_path: Path, moment: list[datetime]) -> SharedPlatformApplication:
     return SharedPlatformApplication.empty(
-        administrators=("platform-admin",), registry_path=tmp_path / "registry.sqlite",
-        clock=lambda: moment[0])
+        administrators=("platform-admin",),
+        registry_path=tmp_path / "registry.sqlite",
+        clock=lambda: moment[0],
+    )
 
 
 def _url(app: SharedPlatformApplication, operation: str) -> str:
@@ -54,8 +56,7 @@ def _ticket(app: SharedPlatformApplication, session: str) -> str:
 
 
 def _redeem(app: SharedPlatformApplication, ticket: str) -> tuple[int, dict[str, Any]]:
-    return request(_url(app, "sign-in/ticket"), authorization=f"Ticket {ticket}",
-                   method="POST")
+    return request(_url(app, "sign-in/ticket"), authorization=f"Ticket {ticket}", method="POST")
 
 
 def test_a_ticket_needs_a_member_session_and_signs_a_browser_in_once(tmp_path: Path) -> None:
@@ -64,12 +65,16 @@ def test_a_ticket_needs_a_member_session_and_signs_a_browser_in_once(tmp_path: P
         leo = _signed_in(app, "leo", "member")
         # No session, a login instead of a session, or a fake session: refused.
         assert request(_url(app, "browser-ticket"), body={})[0] == 401
-        assert request(_url(app, "browser-ticket"), authorization="Login a:b",
-                       body={})[0] == 401
-        assert request(_url(app, "browser-ticket"), authorization="Bearer s-1:nope",
-                       body={})[0] == 401
-        assert request(_url(app, "browser-ticket"), authorization=leo,
-                       body={"actor": "root"})[1]["code"] == "invalid_request"
+        assert request(_url(app, "browser-ticket"), authorization="Login a:b", body={})[0] == 401
+        assert (
+            request(_url(app, "browser-ticket"), authorization="Bearer s-1:nope", body={})[0] == 401
+        )
+        assert (
+            request(_url(app, "browser-ticket"), authorization=leo, body={"actor": "root"})[1][
+                "code"
+            ]
+            == "invalid_request"
+        )
 
         status, issued = request(_url(app, "browser-ticket"), authorization=leo, body={})
         assert status == 200
@@ -85,28 +90,38 @@ def test_a_ticket_needs_a_member_session_and_signs_a_browser_in_once(tmp_path: P
         status, me = request(_url(app, "me"), authorization=browser, body={})
         assert status == 200 and me["actor"] == "leo"
         # The same browser login a password sign-in gives, renewable.
-        status, renewed = request(_url(app, "session"), method="POST",
-                                  authorization=f"Login {signed['login']}")
+        status, renewed = request(
+            _url(app, "session"), method="POST", authorization=f"Login {signed['login']}"
+        )
         assert status == 200 and renewed["session"]
-        [login] = [g for g in app.state.logins.active("leo", now=NOW)
-                   if g.label == TICKET_LOGIN_LABEL]
+        [login] = [
+            g for g in app.state.logins.active("leo", now=NOW) if g.label == TICKET_LOGIN_LABEL
+        ]
         assert login.login_id == signed["login"].partition(":")[0]
         session_id, _, session_secret = signed["session"].partition(":")
-        assert app.state.sessions.authenticate(
-            session_id, session_secret, now=NOW).method == TICKET_METHOD
+        assert (
+            app.state.sessions.authenticate(session_id, session_secret, now=NOW).method
+            == TICKET_METHOD
+        )
 
         # Single use: the same ticket again is refused.
         status, again = _redeem(app, ticket)
         assert (status, again["code"]) == (409, "ticket_used")
         # A made-up or tampered ticket.
         assert _redeem(app, "ticket-0000000000000000:" + "x" * 43)[1]["code"] == (
-            "authentication_failed")
+            "authentication_failed"
+        )
         fresh = _ticket(app, leo)
         assert _redeem(app, fresh.partition(":")[0] + ":" + "y" * 43)[1]["code"] == (
-            "authentication_failed")
+            "authentication_failed"
+        )
         assert _redeem(app, fresh)[0] == 200
-        assert request(_url(app, "sign-in/ticket"), method="POST",
-                       authorization="Bearer " + fresh)[1]["code"] == "authentication_failed"
+        assert (
+            request(_url(app, "sign-in/ticket"), method="POST", authorization="Bearer " + fresh)[1][
+                "code"
+            ]
+            == "authentication_failed"
+        )
 
 
 def test_a_ticket_expires_after_a_minute(tmp_path: Path) -> None:
@@ -135,12 +150,14 @@ def test_a_disabled_member_gets_no_ticket_and_cannot_redeem_one(tmp_path: Path) 
         assert (status, refused["code"]) == (403, "actor_disabled")
         status, refused = _redeem(app, before)
         assert (status, refused["code"]) == (403, "actor_disabled")
-        assert not [g for g in app.state.logins.active("leo", now=NOW)
-                    if g.label == TICKET_LOGIN_LABEL]
+        assert not [
+            g for g in app.state.logins.active("leo", now=NOW) if g.label == TICKET_LOGIN_LABEL
+        ]
 
 
 def test_tickets_are_stored_as_fingerprints_and_never_read_from_a_query(
-    tmp_path: Path, capfd: pytest.CaptureFixture[str],
+    tmp_path: Path,
+    capfd: pytest.CaptureFixture[str],
 ) -> None:
     moment = [NOW]
     with _app(tmp_path, moment) as app:
@@ -158,8 +175,9 @@ def test_tickets_are_stored_as_fingerprints_and_never_read_from_a_query(
 
         # A ticket in a query string is not a route, and is not used up.
         for path in (f"sign-in/ticket?ticket={ticket}", f"browser-ticket?ticket={ticket}"):
-            status, refused = request(_url(app, path), method="POST",
-                                      authorization=f"Ticket {ticket}")
+            status, refused = request(
+                _url(app, path), method="POST", authorization=f"Ticket {ticket}"
+            )
             assert (status, refused["code"]) == (404, "invalid_request")
         status, refused = request(app.member_base_url + f"/?ticket={ticket}")
         assert status == 404
@@ -174,10 +192,16 @@ def test_a_new_ticket_sign_in_replaces_the_earlier_one(tmp_path: Path) -> None:
         leo = _signed_in(app, "leo", "member")
         first = _redeem(app, _ticket(app, leo))[1]
         second = _redeem(app, _ticket(app, leo))[1]
-        assert request(_url(app, "session"), method="POST",
-                       authorization=f"Login {first['login']}")[0] != 200
-        assert request(_url(app, "session"), method="POST",
-                       authorization=f"Login {second['login']}")[0] == 200
+        assert (
+            request(_url(app, "session"), method="POST", authorization=f"Login {first['login']}")[0]
+            != 200
+        )
+        assert (
+            request(_url(app, "session"), method="POST", authorization=f"Login {second['login']}")[
+                0
+            ]
+            == 200
+        )
         # The Personal Agent's and other browsers' logins are untouched.
         labels = [g.label for g in app.state.logins.active("leo", now=NOW)]
         assert labels.count(TICKET_LOGIN_LABEL) == 1
@@ -188,10 +212,18 @@ def test_a_new_ticket_sign_in_replaces_the_earlier_one(tmp_path: Path) -> None:
 
 
 def test_the_portal_page_redeems_the_ticket_and_drops_the_fragment() -> None:
-    for hook in ('fragment.get("ticket")', '"/v1/member/sign-in/ticket"', "Ticket ${code}",
-                 "signInWithTicket", 'p.get("ticket")', 'fragment.get("asset")',
-                 "openAskedAsset", "history.replaceState(null,\"\",location.pathname)",
-                 "ticket_expired", "ticket_used"):
+    for hook in (
+        'fragment.get("ticket")',
+        '"/v1/member/sign-in/ticket"',
+        "Ticket ${code}",
+        "signInWithTicket",
+        'p.get("ticket")',
+        'fragment.get("asset")',
+        "openAskedAsset",
+        'history.replaceState(null,"",location.pathname)',
+        "ticket_expired",
+        "ticket_used",
+    ):
         assert hook in PAGE, hook
     # The fragment is dropped before anything else runs.
     assert PAGE.index("history.replaceState(null") < PAGE.index("async function api(")
@@ -202,7 +234,8 @@ def test_a_ticket_signs_the_browser_in_on_the_asked_tab_and_asset(tmp_path: Path
     from integrations.browser import Browser
 
     platform = SharedPlatformApplication.empty(
-        administrators=("platform-admin",), registry_path=tmp_path / "registry.sqlite")
+        administrators=("platform-admin",), registry_path=tmp_path / "registry.sqlite"
+    )
     with platform as app:
         _published(app)
         engineer = _signed_in(app, "engineer", "member")
@@ -220,27 +253,35 @@ def test_a_ticket_signs_the_browser_in_on_the_asked_tab_and_asset(tmp_path: Path
 
         try:
             ticket = _ticket(app, engineer)
-            browser.navigate(app.member_base_url
-                             + f"/#ticket={ticket}&bridge=bridge-x&tab=marketplace"
-                             + "&asset=lab/weekly-check@1.0.0")
+            browser.navigate(
+                app.member_base_url
+                + f"/#ticket={ticket}&bridge=bridge-x&tab=marketplace"
+                + "&asset=lab/weekly-check@1.0.0"
+            )
             until(lambda: js('document.getElementById("actor").textContent') == "engineer")
             assert "ticket" not in str(js("location.href"))
             assert js('!document.getElementById("panel-marketplace").hidden') is True
-            until(lambda: "Run parameters" in str(js(
-                'document.getElementById("detail-content").textContent')))
-            assert js('document.getElementById("detail-title").textContent') == (
-                "lab/weekly-check")
+            until(
+                lambda: (
+                    "Run parameters"
+                    in str(js('document.getElementById("detail-content").textContent'))
+                )
+            )
+            assert js('document.getElementById("detail-title").textContent') == ("lab/weekly-check")
             width = js('document.getElementById("asset-detail").getBoundingClientRect().width')
             assert float(width) > 300
-            assert str(js('localStorage.getItem("aep.marketplace.login.v1")')).startswith(
-                "login-")
+            assert str(js('localStorage.getItem("aep.marketplace.login.v1")')).startswith("login-")
             # The same ticket again: used up; this browser stays signed in by
             # its stored login.
             js("localStorage.clear(); 0")
             browser.navigate("about:blank")
             browser.navigate(app.member_base_url + f"/#ticket={ticket}")
-            until(lambda: "already used" in str(js(
-                'document.getElementById("sign-in-status").textContent')))
+            until(
+                lambda: (
+                    "already used"
+                    in str(js('document.getElementById("sign-in-status").textContent'))
+                )
+            )
             assert "ticket" not in str(js("location.href"))
         finally:
             browser.close()

@@ -33,7 +33,8 @@ def test_jobs_are_recorded_and_a_restart_marks_running_ones_interrupted(tmp_path
 
 
 def test_a_busy_file_is_retried_and_never_fails_the_job(
-        tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     calls = {"n": 0}
     real = Path.replace
 
@@ -47,8 +48,9 @@ def test_a_busy_file_is_retried_and_never_fails_the_job(
     log = TaskLog(tmp_path)
     log.start("preview", "Preview 1")
     assert calls["n"] == 3 and len(TaskLog(tmp_path).records()) == 1
-    monkeypatch.setattr(Path, "replace", lambda self, target: (_ for _ in ()).throw(
-        PermissionError("always")))
+    monkeypatch.setattr(
+        Path, "replace", lambda self, target: (_ for _ in ()).throw(PermissionError("always"))
+    )
     log.start("preview", "Preview 2")  # not saved, but no error and still listed
     assert len(log.records()) == 2
 
@@ -64,11 +66,25 @@ class _Store:
     def runs(self, *, kind: str, limit: int) -> list[dict[str, Any]]:
         assert kind == "workflow_run"
         return [
-            {"run_id": "run-1", "started_at": "2026-10-13T01:00:00+00:00", "ended_at": None,
-             "complete": False, "status": "running", "outcome": None, "duration_ms": None},
-            {"run_id": "run-2", "started_at": "2026-10-12T23:35:38+00:00",
-             "ended_at": "2026-10-12T23:36:45+00:00", "complete": True, "status": "failed",
-             "outcome": "failed", "duration_ms": 67087.1, "tool_calls": 6},
+            {
+                "run_id": "run-1",
+                "started_at": "2026-10-13T01:00:00+00:00",
+                "ended_at": None,
+                "complete": False,
+                "status": "running",
+                "outcome": None,
+                "duration_ms": None,
+            },
+            {
+                "run_id": "run-2",
+                "started_at": "2026-10-12T23:35:38+00:00",
+                "ended_at": "2026-10-12T23:36:45+00:00",
+                "complete": True,
+                "status": "failed",
+                "outcome": "failed",
+                "duration_ms": 67087.1,
+                "tool_calls": 6,
+            },
         ]
 
     def run_events(self, run_id: str, limit: int) -> list[dict[str, Any]]:
@@ -79,7 +95,8 @@ def test_workflow_runs_come_from_telemetry_and_merge_newest_first(tmp_path: Path
     found = workflow_tasks(_Store())
     assert [(t.title, t.status) for t in found] == [
         ("engineering/sde-weekly-report@1.0.0", "running"),
-        ("engineering/sde-weekly-report@1.0.0", "failed")]
+        ("engineering/sde-weekly-report@1.0.0", "failed"),
+    ]
     assert found[1].summary == "6 steps"
     log = TaskLog(tmp_path)
     log.start("convert", "Convert 1 original(s)")
@@ -94,10 +111,16 @@ def test_a_convert_from_the_page_appears_in_the_task_list(
     server, _ = served_pipeline
     made = _step(server, "sandbox-create", {"base": "k-test", "label": "tasks"})
     sandbox = made["data"]["sandbox_id"]
-    assert _step(server, "drop-add", {"sandbox_id": sandbox, "name": "a.txt",
-                                      "data_base64": "aGVsbG8K"})["ok"]
-    assert json.loads(fetch(base(server) + "/api/knowledge/convert/start", token=server.token,
-                            body={"sandbox_id": sandbox, "mode": "dry_run"}).body)["ok"]
+    assert _step(
+        server, "drop-add", {"sandbox_id": sandbox, "name": "a.txt", "data_base64": "aGVsbG8K"}
+    )["ok"]
+    assert json.loads(
+        fetch(
+            base(server) + "/api/knowledge/convert/start",
+            token=server.token,
+            body={"sandbox_id": sandbox, "mode": "dry_run"},
+        ).body
+    )["ok"]
     deadline = time.monotonic() + 30
     while True:
         tasks = json.loads(fetch(base(server) + "/api/tasks", token=server.token).body)["tasks"]
@@ -110,6 +133,11 @@ def test_a_convert_from_the_page_appears_in_the_task_list(
 
 
 def test_the_page_has_a_tasks_tab() -> None:
-    for hook in ('id="nav-tasks"', 'id="panel-tasks"', "/api/tasks", "loadTasks",
-                 'id="task-counts"'):
+    for hook in (
+        'id="nav-tasks"',
+        'id="panel-tasks"',
+        "/api/tasks",
+        "loadTasks",
+        'id="task-counts"',
+    ):
         assert hook in PAGE

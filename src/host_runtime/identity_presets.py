@@ -34,7 +34,8 @@ MAX_VALUE_CHARS = 500
 
 def identity_fields(manifest: WorkflowManifest) -> tuple[str, ...]:
     return tuple(
-        field.name for field in manifest.parameters
+        field.name
+        for field in manifest.parameters
         if field.scope == "runtime" and field.group == IDENTITY_GROUP
     )
 
@@ -81,8 +82,7 @@ class IdentityPresets:
         """Keep this run's identity values; a failure to write is not the run's."""
         names = identity_fields(manifest)
         values = {
-            name: arguments[name] for name in names
-            if name in arguments and _plain(arguments[name])
+            name: arguments[name] for name in names if name in arguments and _plain(arguments[name])
         }
         if not values:
             return

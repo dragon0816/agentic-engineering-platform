@@ -106,7 +106,8 @@ def test_replace_preserves_source_format_order_and_writes_only_the_temp_sheet(
     assert count == 1
     assert sheet.events[0] == ("UsedRange", "Clear", None)
     assert sheet.events[1] == (
-        "A1:C2", "Value2",
+        "A1:C2",
+        "Value2",
         (headers, ("Q", "new", "Q4")),
     )
     row_fill = ("A2:C2", "Interior.Color", writer._bgr(rules.colours.tracked))
@@ -127,7 +128,10 @@ def test_protected_sheet_is_refused_before_opening_excel(
     writer = _writer(monkeypatch, sheet)
     with pytest.raises(ValueError, match="protected_sheet"):
         writer.replace(
-            tmp_path / "copy.xlsm", "  CHIPSET_REQUIREMENT  ", ("Status",), (),
+            tmp_path / "copy.xlsm",
+            "  CHIPSET_REQUIREMENT  ",
+            ("Status",),
+            (),
             compile_rules(ChipsetRuleset()),
         )
     assert sheet.events == []
@@ -140,8 +144,12 @@ def test_replace_refuses_metadata_mismatch_before_clearing_sheet(
     writer = _writer(monkeypatch, sheet)
     with pytest.raises(ValueError, match="format_records_length"):
         writer.replace(
-            tmp_path / "copy.xlsm", "temp", ("Status",), ({"Status": "new"},),
-            compile_rules(ChipsetRuleset()), format_records=(),
+            tmp_path / "copy.xlsm",
+            "temp",
+            ("Status",),
+            ({"Status": "new"},),
+            compile_rules(ChipsetRuleset()),
+            format_records=(),
         )
     assert sheet.events == []
 
@@ -153,7 +161,10 @@ def test_hidden_trace_requires_format_metadata_before_writing(
     writer = _writer(monkeypatch, sheet)
     with pytest.raises(ValueError, match="format_records_missing_match"):
         writer.replace(
-            tmp_path / "copy.xlsm", "temp", ("Status",), ({"Status": "new"},),
+            tmp_path / "copy.xlsm",
+            "temp",
+            ("Status",),
+            ({"Status": "new"},),
             compile_rules(ChipsetRuleset()),
         )
     assert sheet.events == []
@@ -171,7 +182,9 @@ def test_com_failure_is_a_stable_write_error(
     monkeypatch.setattr(sheet, "Range", broken)
     with pytest.raises(WorkbookWriteError) as caught:
         writer.replace(
-            tmp_path / "copy.xlsm", "temp", ("Status",),
+            tmp_path / "copy.xlsm",
+            "temp",
+            ("Status",),
             ({"Status": "new", "_Match": "new"},),
             compile_rules(ChipsetRuleset()),
         )

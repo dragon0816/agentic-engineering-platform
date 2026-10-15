@@ -46,8 +46,9 @@ def run_harness(plan: AgentHarnessPlan, actions: HarnessActions) -> AgentHarness
     run = start_harness(plan)
     attempt = 0
     while run.phase not in ("validated", "needs_input", "failed"):
-        telemetry.emit("state.entered", status="started", state=run.phase,
-                       attributes={"loop_index": attempt})
+        telemetry.emit(
+            "state.entered", status="started", state=run.phase, attributes={"loop_index": attempt}
+        )
         try:
             if run.phase == "collecting":
                 run = observe_context(run, actions.collect_context())
@@ -58,20 +59,32 @@ def run_harness(plan: AgentHarnessPlan, actions: HarnessActions) -> AgentHarness
                 for check in checks:
                     # The validator and its verdict, never a claim of correctness.
                     telemetry.emit(
-                        "verification.completed", state="validating",
+                        "verification.completed",
+                        state="validating",
                         status="succeeded" if check.status == "passed" else "failed",
-                        attributes={"validator": check.check_id, "loop_index": attempt})
+                        attributes={"validator": check.check_id, "loop_index": attempt},
+                    )
                 run = validate_run(run, checks)
                 if run.phase not in ("validated", "needs_input", "failed"):
                     attempt += 1
-                    telemetry.emit("retry.scheduled", state="validating", attributes={
-                        "retry_reason": "validation_failed", "loop_index": attempt})
+                    telemetry.emit(
+                        "retry.scheduled",
+                        state="validating",
+                        attributes={"retry_reason": "validation_failed", "loop_index": attempt},
+                    )
         except HarnessActionFailure as error:
-            telemetry.emit("state.entered", status="failed", state="stopped",
-                           attributes={"failure_code": error.code})
+            telemetry.emit(
+                "state.entered",
+                status="failed",
+                state="stopped",
+                attributes={"failure_code": error.code},
+            )
             return stop_harness(run, error.code, needs_input=error.needs_input)
-    telemetry.emit("state.entered", status="succeeded" if run.phase == "validated"
-                   else "failed", state=run.phase)
+    telemetry.emit(
+        "state.entered",
+        status="succeeded" if run.phase == "validated" else "failed",
+        state=run.phase,
+    )
     return run
 
 
@@ -85,8 +98,12 @@ async def run_harness_async(plan: AgentHarnessPlan, actions: Any) -> AgentHarnes
     run = start_harness(plan)
     attempt = 0
     while run.phase not in ("validated", "needs_input", "failed"):
-        telemetry.emit("state.entered", status="started", state=run.phase,
-                       attributes={"loop_index": attempt, "domain": plan.domain})
+        telemetry.emit(
+            "state.entered",
+            status="started",
+            state=run.phase,
+            attributes={"loop_index": attempt, "domain": plan.domain},
+        )
         try:
             if run.phase == "collecting":
                 run = observe_context(run, await _maybe(actions.collect_context()))
@@ -96,18 +113,30 @@ async def run_harness_async(plan: AgentHarnessPlan, actions: Any) -> AgentHarnes
                 checks = tuple(await _maybe(actions.validate()))
                 for check in checks:
                     telemetry.emit(
-                        "verification.completed", state="validating",
+                        "verification.completed",
+                        state="validating",
                         status="succeeded" if check.status == "passed" else "failed",
-                        attributes={"validator": check.check_id, "loop_index": attempt})
+                        attributes={"validator": check.check_id, "loop_index": attempt},
+                    )
                 run = validate_run(run, checks)
                 if run.phase not in ("validated", "needs_input", "failed"):
                     attempt += 1
-                    telemetry.emit("retry.scheduled", state="validating", attributes={
-                        "retry_reason": "validation_failed", "loop_index": attempt})
+                    telemetry.emit(
+                        "retry.scheduled",
+                        state="validating",
+                        attributes={"retry_reason": "validation_failed", "loop_index": attempt},
+                    )
         except HarnessActionFailure as error:
-            telemetry.emit("state.entered", status="failed", state="stopped",
-                           attributes={"failure_code": error.code})
+            telemetry.emit(
+                "state.entered",
+                status="failed",
+                state="stopped",
+                attributes={"failure_code": error.code},
+            )
             return stop_harness(run, error.code, needs_input=error.needs_input)
-    telemetry.emit("state.entered", status="succeeded" if run.phase == "validated"
-                   else "failed", state=run.phase)
+    telemetry.emit(
+        "state.entered",
+        status="succeeded" if run.phase == "validated" else "failed",
+        state=run.phase,
+    )
     return run

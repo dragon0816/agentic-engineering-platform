@@ -1214,11 +1214,14 @@ def test_with_a_hand_written_grants_file_sync_installs_files_only(
             planned = layout.workflows / "engineering__read-local-file__1.0.0.json"
             assert planned.read_bytes() == platform.artifacts[ref]
             assert {item.identity.name for item in runtime.state.installed()} == {
-                "read-local-file", "file-skill"}
+                "read-local-file",
+                "file-skill",
+            }
             assert layout.grants.read_bytes() == written
             assert not layout.authorization.exists()
             kept = DeviceAuthorization.model_validate_json(
-                layout.platform_selections.read_text(encoding="utf-8"))
+                layout.platform_selections.read_text(encoding="utf-8")
+            )
             assert kept.bridge_id == BRIDGE and len(kept.selections) == 3
             assert [url.rsplit("/", 1)[-1] for url in counting.calls] == ["sync"]
             # Again: nothing new to install, still files only.
@@ -1230,4 +1233,6 @@ def test_with_a_hand_written_grants_file_sync_installs_files_only(
             config, layout=layout, resolver=StaticCredentials({"platform_token": SECRET})
         ) as restarted:
             assert {item.identity.name for item in restarted.state.installed()} == {
-                "read-local-file", "file-skill"}
+                "read-local-file",
+                "file-skill",
+            }

@@ -53,7 +53,11 @@ def ensure_helper(cache_dir: Path, source: Path = SOURCE) -> Path:
     cache_dir.mkdir(parents=True, exist_ok=True)
     partial = cache_dir / (EXE_NAME + ".building")
     command = [
-        str(framework / "csc.exe"), "/nologo", "/codepage:65001", "/target:exe", "/optimize+",
+        str(framework / "csc.exe"),
+        "/nologo",
+        "/codepage:65001",
+        "/target:exe",
+        "/optimize+",
         f"/out:{partial}",
         f"/reference:{framework / 'WPF' / 'UIAutomationClient.dll'}",
         f"/reference:{framework / 'WPF' / 'UIAutomationTypes.dll'}",
@@ -76,8 +80,10 @@ def run_actions(exe: Path, request: dict[str, Any], timeout_s: float) -> dict[st
     """Run one request through a fresh helper process and return its JSON result."""
     try:
         run = subprocess.run(
-            [str(exe)], input=json.dumps(request, ensure_ascii=False).encode("utf-8"),
-            capture_output=True, timeout=timeout_s,
+            [str(exe)],
+            input=json.dumps(request, ensure_ascii=False).encode("utf-8"),
+            capture_output=True,
+            timeout=timeout_s,
             creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
         )
     except subprocess.TimeoutExpired:

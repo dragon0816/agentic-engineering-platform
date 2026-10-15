@@ -176,8 +176,14 @@ class WorkbookWriter(Protocol):
     def format(self, path: Path, sheet: str, operations: Sequence[FormatOperation]) -> None: ...
 
     def sort_highlighted_rows(
-        self, path: Path, sheet: str, *, key_column: str, last_column: str,
-        last_row: int, colour: str,
+        self,
+        path: Path,
+        sheet: str,
+        *,
+        key_column: str,
+        last_column: str,
+        last_row: int,
+        colour: str,
     ) -> None: ...
 
     def cell_text(self, path: Path, sheet: str, cell: str) -> str: ...
@@ -571,8 +577,14 @@ class ExcelComWriter:
             raise WorkbookWriteError("write_failed") from None
 
     def sort_highlighted_rows(
-        self, path: Path, sheet: str, *, key_column: str, last_column: str,
-        last_row: int, colour: str,
+        self,
+        path: Path,
+        sheet: str,
+        *,
+        key_column: str,
+        last_column: str,
+        last_row: int,
+        colour: str,
     ) -> None:
         """Sort complete rows by Key fill while preserving manually hidden rows.
 
@@ -587,10 +599,7 @@ class ExcelComWriter:
         try:
             if bool(worksheet.FilterMode):
                 raise WorkbookWriteError("write_failed")
-            hidden = {
-                row: bool(worksheet.Rows(row).Hidden)
-                for row in range(2, last_row + 1)
-            }
+            hidden = {row: bool(worksheet.Rows(row).Hidden) for row in range(2, last_row + 1)}
             has_hidden = any(hidden.values())
             helper_column: str | None = None
             if has_hidden:
@@ -620,8 +629,7 @@ class ExcelComWriter:
             if helper_column is not None:
                 moved = worksheet.Range(f"{helper_column}2:{helper_column}{last_row}").Value
                 to_hide = [
-                    row for row, original in enumerate(moved, start=2)
-                    if hidden[int(original[0])]
+                    row for row, original in enumerate(moved, start=2) if hidden[int(original[0])]
                 ]
                 worksheet.Columns(helper_column).Delete()
                 for row in to_hide:

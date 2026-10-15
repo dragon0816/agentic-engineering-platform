@@ -61,8 +61,9 @@ def _invite(app: SharedPlatformApplication, actor: str, role: str = "member") ->
     return proof.bearer
 
 
-def _join(app: SharedPlatformApplication, actor: str, password: str | None = GOOD,
-          role: str = "member") -> dict[str, Any]:
+def _join(
+    app: SharedPlatformApplication, actor: str, password: str | None = GOOD, role: str = "member"
+) -> dict[str, Any]:
     """Accept an invitation, setting a password in the same step."""
     status, reply = request(
         app.member_base_url + "/v1/member/sign-in",
@@ -139,23 +140,29 @@ def test_invitation_sets_the_password_then_account_and_password_sign_in(tmp_path
     with _app(tmp_path, moment) as app:
         invitation = _invite(app, "leo")
         # Checking the link uses nothing up and says whose it is.
-        status, checked = request(_url(app, "sign-in/check"),
-                                  authorization=f"Invitation {invitation}", method="POST")
+        status, checked = request(
+            _url(app, "sign-in/check"), authorization=f"Invitation {invitation}", method="POST"
+        )
         assert status == 200
         assert checked["purpose"] == "invitation" and checked["actor"] == "leo"
         assert checked["password_set"] is False
         # A rejected password does not use up the invitation.
-        status, refused = request(_url(app, "sign-in"), authorization=f"Invitation {invitation}",
-                                  body={"password": "leo-password-1"})
+        status, refused = request(
+            _url(app, "sign-in"),
+            authorization=f"Invitation {invitation}",
+            body={"password": "leo-password-1"},
+        )
         assert status == 400 and refused["code"] == "password_rejected"
         assert refused["reason"] == "contains_account" and "leo-password-1" not in str(refused)
-        status, joined = request(_url(app, "sign-in"), authorization=f"Invitation {invitation}",
-                                 body={"password": GOOD})
+        status, joined = request(
+            _url(app, "sign-in"), authorization=f"Invitation {invitation}", body={"password": GOOD}
+        )
         assert status == 200 and set(joined) == {"session", "login", "expires_at"}
         assert app.state.passwords.record("leo").set_by == "invitation"  # type: ignore[union-attr]
         # The invitation is single use.
-        status, again = request(_url(app, "sign-in"), authorization=f"Invitation {invitation}",
-                                body={"password": GOOD})
+        status, again = request(
+            _url(app, "sign-in"), authorization=f"Invitation {invitation}", body={"password": GOOD}
+        )
         assert (status, again) == (409, {"code": "invitation_used"})
 
         status, signed = _password(app, "leo", GOOD)
@@ -163,8 +170,9 @@ def test_invitation_sets_the_password_then_account_and_password_sign_in(tmp_path
         status, me = request(_url(app, "me"), authorization=f"Bearer {signed['session']}", body={})
         assert status == 200 and me["actor"] == "leo"
         # The stored login renews the session as an invitation's does.
-        status, renewed = request(_url(app, "session"), authorization=f"Login {signed['login']}",
-                                  method="POST")
+        status, renewed = request(
+            _url(app, "session"), authorization=f"Login {signed['login']}", method="POST"
+        )
         assert status == 200 and "session" in renewed
         # An empty invitation body still signs in (automation, older pages).
         bare = _join(app, "anna", password=None)
@@ -217,17 +225,23 @@ def test_a_member_sets_a_password_once_and_changes_it_with_the_current_one(
         session = f"Bearer {joined['session']}"
         status, state = request(_url(app, "password/status"), authorization=session, body={})
         assert (status, state) == (200, {"password_set": False, "set_at": None})
-        status, refused = request(_url(app, "password/change"), authorization=session,
-                                  body={"current_password": GOOD, "new_password": OTHER})
+        status, refused = request(
+            _url(app, "password/change"),
+            authorization=session,
+            body={"current_password": GOOD, "new_password": OTHER},
+        )
         assert (status, refused) == (409, {"code": "password_not_set"})
-        status, weak = request(_url(app, "password/set"), authorization=session,
-                               body={"password": "too short"})
+        status, weak = request(
+            _url(app, "password/set"), authorization=session, body={"password": "too short"}
+        )
         assert status == 400 and weak["reason"] == "too_short"
-        status, done = request(_url(app, "password/set"), authorization=session,
-                               body={"password": GOOD})
+        status, done = request(
+            _url(app, "password/set"), authorization=session, body={"password": GOOD}
+        )
         assert (status, done) == (200, {"password_set": True})
-        status, again = request(_url(app, "password/set"), authorization=session,
-                                body={"password": OTHER})
+        status, again = request(
+            _url(app, "password/set"), authorization=session, body={"password": OTHER}
+        )
         assert (status, again) == (409, {"code": "password_already_set"})
         assert _password(app, "anna", GOOD)[0] == 200
 
@@ -236,21 +250,37 @@ def test_a_member_sets_a_password_once_and_changes_it_with_the_current_one(
         status, agent = request(_url(app, "logins/issue-agent"), authorization=session, body={})
         assert status == 200
 
-        status, wrong = request(_url(app, "password/change"), authorization=session,
-                                body={"current_password": OTHER, "new_password": OTHER})
+        status, wrong = request(
+            _url(app, "password/change"),
+            authorization=session,
+            body={"current_password": OTHER, "new_password": OTHER},
+        )
         assert (status, wrong) == (401, {"code": "authentication_failed"})
-        status, changed = request(_url(app, "password/change"), authorization=session,
-                                  body={"current_password": GOOD, "new_password": OTHER})
+        status, changed = request(
+            _url(app, "password/change"),
+            authorization=session,
+            body={"current_password": GOOD, "new_password": OTHER},
+        )
         assert status == 200 and set(changed) == {"session", "login", "expires_at"}
         # The other browser and every old session are signed out; the Agent
         # login and the new login of this browser work.
-        assert request(_url(app, "session"), authorization=f"Login {other_browser['login']}",
-                       method="POST")[0] == 401
+        assert (
+            request(
+                _url(app, "session"), authorization=f"Login {other_browser['login']}", method="POST"
+            )[0]
+            == 401
+        )
         assert request(_url(app, "me"), authorization=session, body={})[0] == 401
-        assert request(_url(app, "session"), authorization=f"Login {agent['login']}",
-                       method="POST")[0] == 200
-        assert request(_url(app, "session"), authorization=f"Login {changed['login']}",
-                       method="POST")[0] == 200
+        assert (
+            request(_url(app, "session"), authorization=f"Login {agent['login']}", method="POST")[0]
+            == 200
+        )
+        assert (
+            request(_url(app, "session"), authorization=f"Login {changed['login']}", method="POST")[
+                0
+            ]
+            == 200
+        )
         assert _password(app, "anna", GOOD)[0] == 401
         assert _password(app, "anna", OTHER)[0] == 200
 
@@ -261,67 +291,98 @@ def test_reset_link_is_single_use_expires_and_revokes_browser_logins(tmp_path: P
         admin = f"Bearer {_join(app, 'root', role='platform_admin')['session']}"
         leo = _join(app, "leo")
         leo_session = f"Bearer {leo['session']}"
-        status, agent = request(_url(app, "logins/issue-agent"), authorization=leo_session,
-                                body={})
+        status, agent = request(_url(app, "logins/issue-agent"), authorization=leo_session, body={})
         assert status == 200
 
         # Members cannot issue reset links or sign others out.
-        for operation, body in (("admin/members/password-reset", {"actor": "root"}),
-                                ("admin/members/sign-out", {"actor": "root"}),
-                                ("admin/members/credentials", {})):
+        for operation, body in (
+            ("admin/members/password-reset", {"actor": "root"}),
+            ("admin/members/sign-out", {"actor": "root"}),
+            ("admin/members/credentials", {}),
+        ):
             assert request(_url(app, operation), authorization=leo_session, body=body) == (
-                403, {"code": "not_administrator"})
-        assert request(_url(app, "admin/members/password-reset"), authorization=admin,
-                       body={"actor": "nobody"}) == (403, {"code": "actor_unknown"})
-        assert request(_url(app, "admin/members/password-reset"), authorization=admin,
-                       body={"actor": "leo", "valid_for_minutes": 0})[0] == 400
+                403,
+                {"code": "not_administrator"},
+            )
+        assert request(
+            _url(app, "admin/members/password-reset"), authorization=admin, body={"actor": "nobody"}
+        ) == (403, {"code": "actor_unknown"})
+        assert (
+            request(
+                _url(app, "admin/members/password-reset"),
+                authorization=admin,
+                body={"actor": "leo", "valid_for_minutes": 0},
+            )[0]
+            == 400
+        )
 
-        status, first = request(_url(app, "admin/members/password-reset"), authorization=admin,
-                                body={"actor": "leo", "valid_for_minutes": 30})
+        status, first = request(
+            _url(app, "admin/members/password-reset"),
+            authorization=admin,
+            body={"actor": "leo", "valid_for_minutes": 30},
+        )
         assert status == 200 and first["url"].startswith(app.member_base_url + "/#reset=reset-")
-        status, link = request(_url(app, "admin/members/password-reset"), authorization=admin,
-                               body={"actor": "leo"})
+        status, link = request(
+            _url(app, "admin/members/password-reset"), authorization=admin, body={"actor": "leo"}
+        )
         assert status == 200
         old_code = first["url"].split("#reset=", 1)[1]
         code = link["url"].split("#reset=", 1)[1]
         # A newer link replaces the earlier one.
-        assert request(_url(app, "sign-in/check"), authorization=f"Reset {old_code}",
-                       method="POST") == (401, {"code": "reset_link_revoked"})
-        status, checked = request(_url(app, "sign-in/check"), authorization=f"Reset {code}",
-                                  method="POST")
+        assert request(
+            _url(app, "sign-in/check"), authorization=f"Reset {old_code}", method="POST"
+        ) == (401, {"code": "reset_link_revoked"})
+        status, checked = request(
+            _url(app, "sign-in/check"), authorization=f"Reset {code}", method="POST"
+        )
         assert status == 200 and checked["purpose"] == "reset" and checked["actor"] == "leo"
-        status, overview = request(_url(app, "admin/members/credentials"), authorization=admin,
-                                   body={})
+        status, overview = request(
+            _url(app, "admin/members/credentials"), authorization=admin, body={}
+        )
         row = next(item for item in overview["members"] if item["actor"] == "leo")
         assert row["password_set"] is True and row["reset_link_expires_at"] is not None
         assert row["active_logins"] == 2  # this browser and the Agent
 
         wrong = code[:-4] + "AAAA"
-        assert request(_url(app, "password/reset"), authorization=f"Reset {wrong}",
-                       body={"password": OTHER}) == (401, {"code": "authentication_failed"})
-        status, weak = request(_url(app, "password/reset"), authorization=f"Reset {code}",
-                               body={"password": "password1234"})
+        assert request(
+            _url(app, "password/reset"), authorization=f"Reset {wrong}", body={"password": OTHER}
+        ) == (401, {"code": "authentication_failed"})
+        status, weak = request(
+            _url(app, "password/reset"),
+            authorization=f"Reset {code}",
+            body={"password": "password1234"},
+        )
         assert status == 400 and weak["reason"] == "too_common"
-        status, reset = request(_url(app, "password/reset"), authorization=f"Reset {code}",
-                                body={"password": OTHER})
+        status, reset = request(
+            _url(app, "password/reset"), authorization=f"Reset {code}", body={"password": OTHER}
+        )
         assert status == 200 and set(reset) == {"session", "login", "expires_at"}
-        assert request(_url(app, "password/reset"), authorization=f"Reset {code}",
-                       body={"password": OTHER}) == (409, {"code": "reset_link_used"})
+        assert request(
+            _url(app, "password/reset"), authorization=f"Reset {code}", body={"password": OTHER}
+        ) == (409, {"code": "reset_link_used"})
         # Old browser login and session are gone; the Agent login stays.
-        assert request(_url(app, "session"), authorization=f"Login {leo['login']}",
-                       method="POST")[0] == 401
+        assert (
+            request(_url(app, "session"), authorization=f"Login {leo['login']}", method="POST")[0]
+            == 401
+        )
         assert request(_url(app, "me"), authorization=leo_session, body={})[0] == 401
-        assert request(_url(app, "session"), authorization=f"Login {agent['login']}",
-                       method="POST")[0] == 200
+        assert (
+            request(_url(app, "session"), authorization=f"Login {agent['login']}", method="POST")[0]
+            == 200
+        )
         assert _password(app, "leo", OTHER)[0] == 200
 
         # Expiry.
-        status, late = request(_url(app, "admin/members/password-reset"), authorization=admin,
-                               body={"actor": "leo", "valid_for_minutes": 5})
+        status, late = request(
+            _url(app, "admin/members/password-reset"),
+            authorization=admin,
+            body={"actor": "leo", "valid_for_minutes": 5},
+        )
         moment[0] = NOW + timedelta(minutes=6)
         late_code = late["url"].split("#reset=", 1)[1]
-        assert request(_url(app, "password/reset"), authorization=f"Reset {late_code}",
-                       body={"password": GOOD}) == (401, {"code": "reset_link_expired"})
+        assert request(
+            _url(app, "password/reset"), authorization=f"Reset {late_code}", body={"password": GOOD}
+        ) == (401, {"code": "reset_link_expired"})
 
 
 def test_a_disabled_member_cannot_reset_or_renew_and_force_sign_out_ends_everything(
@@ -331,35 +392,42 @@ def test_a_disabled_member_cannot_reset_or_renew_and_force_sign_out_ends_everyth
     with _app(tmp_path, moment) as app:
         admin = f"Bearer {_join(app, 'root', role='platform_admin')['session']}"
         leo = _join(app, "leo")
-        status, agent = request(_url(app, "logins/issue-agent"),
-                                authorization=f"Bearer {leo['session']}", body={})
+        status, agent = request(
+            _url(app, "logins/issue-agent"), authorization=f"Bearer {leo['session']}", body={}
+        )
         assert status == 200
-        status, out = request(_url(app, "admin/members/sign-out"), authorization=admin,
-                              body={"actor": "leo"})
-        assert (status, out) == (200, {"actor": "leo", "logins_revoked": 2,
-                                       "sessions_revoked": 1})
+        status, out = request(
+            _url(app, "admin/members/sign-out"), authorization=admin, body={"actor": "leo"}
+        )
+        assert (status, out) == (200, {"actor": "leo", "logins_revoked": 2, "sessions_revoked": 1})
         # Force sign-out revokes the Personal Agent login too.
         for login in (leo["login"], agent["login"]):
-            assert request(_url(app, "session"), authorization=f"Login {login}",
-                           method="POST")[0] == 401
+            assert (
+                request(_url(app, "session"), authorization=f"Login {login}", method="POST")[0]
+                == 401
+            )
         assert _password(app, "leo", GOOD)[0] == 200  # the password still works
 
         signed = _password(app, "leo", GOOD)[1]
-        status, link = request(_url(app, "admin/members/password-reset"), authorization=admin,
-                               body={"actor": "leo"})
+        status, link = request(
+            _url(app, "admin/members/password-reset"), authorization=admin, body={"actor": "leo"}
+        )
         app.state.enrollment.disable_user("platform-admin", "leo")
         code = link["url"].split("#reset=", 1)[1]
-        assert request(_url(app, "password/reset"), authorization=f"Reset {code}",
-                       body={"password": OTHER}) == (401, {"code": "authentication_failed"})
-        assert request(_url(app, "session"), authorization=f"Login {signed['login']}",
-                       method="POST") == (403, {"code": "actor_disabled"})
+        assert request(
+            _url(app, "password/reset"), authorization=f"Reset {code}", body={"password": OTHER}
+        ) == (401, {"code": "authentication_failed"})
+        assert request(
+            _url(app, "session"), authorization=f"Login {signed['login']}", method="POST"
+        ) == (403, {"code": "actor_disabled"})
         assert _password(app, "leo", GOOD) == (401, {"code": "authentication_failed"})
         # The link was not used up by the refused attempt.
         assert app.state.passwords.pending_reset("leo", moment[0]) is not None
 
 
 def test_passwords_survive_a_restart_and_are_never_stored_returned_or_logged(
-    tmp_path: Path, caplog: pytest.LogCaptureFixture,
+    tmp_path: Path,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     caplog.set_level(logging.DEBUG)
     moment = [NOW]
@@ -371,10 +439,12 @@ def test_passwords_survive_a_restart_and_are_never_stored_returned_or_logged(
         admin = f"Bearer {admin_reply['session']}"
         replies.append(_password(app, "leo", GOOD))
         replies.append(_password(app, "leo", OTHER))
-        replies.append(request(_url(app, "admin/members/credentials"), authorization=admin,
-                               body={}))
-        replies.append(request(_url(app, "sign-in"), authorization="Invitation x:y",
-                               body={"password": OTHER}))
+        replies.append(
+            request(_url(app, "admin/members/credentials"), authorization=admin, body={})
+        )
+        replies.append(
+            request(_url(app, "sign-in"), authorization="Invitation x:y", body={"password": OTHER})
+        )
     stored = (tmp_path / "registry.sqlite").read_bytes()
     with sqlite3.connect(tmp_path / "registry.sqlite") as connection:
         rows = connection.execute("SELECT payload FROM identity_passwords").fetchall()
@@ -404,14 +474,29 @@ def test_reset_link_issue_rejects_short_secrets_and_bad_lifetimes() -> None:
 
 def test_the_page_has_the_password_sign_in_hooks() -> None:
     for hook in (
-        'id="password-form"', 'id="signin-account"', 'autocomplete="username"',
-        'id="signin-password"', 'autocomplete="current-password"', 'id="link-entry"',
-        'id="set-password-form"', 'autocomplete="new-password"', 'id="password-open"',
-        'id="password-panel"', 'id="password-notice"', 'id="member-reset-result"',
-        "/v1/member/sign-in/password", "/v1/member/sign-in/check", "/v1/member/password/reset",
-        "/v1/member/password/change", "/v1/member/password/set", "/v1/member/password/status",
-        "/v1/member/admin/members/password-reset", "/v1/member/admin/members/sign-out",
-        "/v1/member/admin/members/credentials", 'fragment.get("reset")', "Force sign-out",
+        'id="password-form"',
+        'id="signin-account"',
+        'autocomplete="username"',
+        'id="signin-password"',
+        'autocomplete="current-password"',
+        'id="link-entry"',
+        'id="set-password-form"',
+        'autocomplete="new-password"',
+        'id="password-open"',
+        'id="password-panel"',
+        'id="password-notice"',
+        'id="member-reset-result"',
+        "/v1/member/sign-in/password",
+        "/v1/member/sign-in/check",
+        "/v1/member/password/reset",
+        "/v1/member/password/change",
+        "/v1/member/password/set",
+        "/v1/member/password/status",
+        "/v1/member/admin/members/password-reset",
+        "/v1/member/admin/members/sign-out",
+        "/v1/member/admin/members/credentials",
+        'fragment.get("reset")',
+        "Force sign-out",
         "Password reset link",
     ):
         assert hook in PAGE, hook
@@ -441,13 +526,24 @@ def test_the_sign_in_screen_in_a_real_browser(tmp_path: Path) -> None:
             assert check()
 
         def shown(element: str) -> bool:
-            return bool(js(f'(e => !!e && e.getClientRects().length > 0)'
-                           f'(document.getElementById("{element}"))'))
+            return bool(
+                js(
+                    f"(e => !!e && e.getClientRects().length > 0)"
+                    f'(document.getElementById("{element}"))'
+                )
+            )
 
         def box(element: str) -> list[float]:
-            return list(json.loads(str(js(
-                f'JSON.stringify((r => [r.width, r.height])(document.getElementById('
-                f'"{element}").getBoundingClientRect()))'))))
+            return list(
+                json.loads(
+                    str(
+                        js(
+                            f"JSON.stringify((r => [r.width, r.height])(document.getElementById("
+                            f'"{element}").getBoundingClientRect()))'
+                        )
+                    )
+                )
+            )
 
         try:
             browser.navigate(app.member_base_url + "/")
@@ -464,36 +560,49 @@ def test_the_sign_in_screen_in_a_real_browser(tmp_path: Path) -> None:
             # First time: the invitation opens "Set your password".
             browser.navigate(app.member_base_url + f"/#invitation={invitation}")
             until(lambda: shown("set-password-form"))
-            assert js('location.hash') == ""
+            assert js("location.hash") == ""
             assert not shown("password-form")
             assert js('document.getElementById("new-account").value') == "leo.chi"
             width, height = box("set-password-form")
             assert 280 <= width <= 470 and 300 <= height <= 700, (width, height)
-            js('document.getElementById("new-password").value="short";'
-               'document.getElementById("new-password-again").value="short";'
-               'document.getElementById("set-password").click(); 0')
-            until(lambda: "12 characters" in str(js(
-                'document.getElementById("set-password-status").textContent')))
-            js(f'document.getElementById("new-password").value={json.dumps(GOOD)};'
-               f'document.getElementById("new-password-again").value={json.dumps(GOOD)};'
-               'document.getElementById("set-password").click(); 0')
+            js(
+                'document.getElementById("new-password").value="short";'
+                'document.getElementById("new-password-again").value="short";'
+                'document.getElementById("set-password").click(); 0'
+            )
+            until(
+                lambda: (
+                    "12 characters"
+                    in str(js('document.getElementById("set-password-status").textContent'))
+                )
+            )
+            js(
+                f'document.getElementById("new-password").value={json.dumps(GOOD)};'
+                f'document.getElementById("new-password-again").value={json.dumps(GOOD)};'
+                'document.getElementById("set-password").click(); 0'
+            )
             until(lambda: shown("workspace"))
             assert js('document.getElementById("actor").textContent') == "leo.chi"
-            until(lambda: js('passwordSet') is True)
+            until(lambda: js("passwordSet") is True)
             assert not shown("password-notice")
 
             # Sign out, then sign in with account and password.
             js('document.getElementById("sign-out").click(); 0')
             until(lambda: shown("password-form"))
-            js('document.getElementById("signin-account").value="leo.chi";'
-               'document.getElementById("signin-password").value="wrong password 99";'
-               'document.getElementById("password-sign-in").click(); 0')
-            until(lambda: "wrong" in str(js(
-                'document.getElementById("sign-in-status").textContent')))
+            js(
+                'document.getElementById("signin-account").value="leo.chi";'
+                'document.getElementById("signin-password").value="wrong password 99";'
+                'document.getElementById("password-sign-in").click(); 0'
+            )
+            until(
+                lambda: "wrong" in str(js('document.getElementById("sign-in-status").textContent'))
+            )
             assert js('document.getElementById("signin-password").value') == ""
-            js('document.getElementById("signin-account").value="leo.chi";'
-               f'document.getElementById("signin-password").value={json.dumps(GOOD)};'
-               'document.getElementById("password-sign-in").click(); 0')
+            js(
+                'document.getElementById("signin-account").value="leo.chi";'
+                f'document.getElementById("signin-password").value={json.dumps(GOOD)};'
+                'document.getElementById("password-sign-in").click(); 0'
+            )
             until(lambda: shown("workspace"))
             assert GOOD not in str(js("JSON.stringify(localStorage)"))
 
@@ -501,13 +610,14 @@ def test_the_sign_in_screen_in_a_real_browser(tmp_path: Path) -> None:
             js('document.getElementById("password-open").click(); 0')
             until(lambda: shown("password-panel"))
             assert shown("pw-current-field")
-            js(f'document.getElementById("pw-current").value={json.dumps(GOOD)};'
-               f'document.getElementById("pw-new").value={json.dumps(OTHER)};'
-               f'document.getElementById("pw-again").value={json.dumps(OTHER)};'
-               'document.getElementById("pw-save").click(); 0')
-            until(lambda: "changed" in str(js(
-                'document.getElementById("pw-status").textContent')))
-            assert js('document.documentElement.scrollWidth <= window.innerWidth + 1') is True
+            js(
+                f'document.getElementById("pw-current").value={json.dumps(GOOD)};'
+                f'document.getElementById("pw-new").value={json.dumps(OTHER)};'
+                f'document.getElementById("pw-again").value={json.dumps(OTHER)};'
+                'document.getElementById("pw-save").click(); 0'
+            )
+            until(lambda: "changed" in str(js('document.getElementById("pw-status").textContent')))
+            assert js("document.documentElement.scrollWidth <= window.innerWidth + 1") is True
         finally:
             browser.close()
             browser.discard_profile()

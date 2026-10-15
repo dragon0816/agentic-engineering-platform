@@ -147,9 +147,7 @@ def apply_plan(
             format_records=plan.format_records,
         )
         after_sheets = writer.sheet_names(working)
-        if set(after_sheets) - {settings.temp_sheet} != set(before_sheets) - {
-            settings.temp_sheet
-        }:
+        if set(after_sheets) - {settings.temp_sheet} != set(before_sheets) - {settings.temp_sheet}:
             raise CapabilityRefused("sheets_changed")
         finished = True
     finally:

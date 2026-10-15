@@ -76,8 +76,9 @@ class PracticeSite:
             def log_message(self, format: str, *args: object) -> None:  # noqa: A002
                 return
 
-            def _send(self, body: bytes, status: int = 200,
-                      content_type: str = "text/html; charset=utf-8") -> None:
+            def _send(
+                self, body: bytes, status: int = 200, content_type: str = "text/html; charset=utf-8"
+            ) -> None:
                 self.send_response(status)
                 self.send_header("Content-Type", content_type)
                 self.send_header("Content-Length", str(len(body)))
@@ -87,12 +88,17 @@ class PracticeSite:
             def do_GET(self) -> None:  # noqa: N802 - http.server's name
                 url = urlparse(self.path)
                 if url.path == "/":
-                    self._send(_page("出貨查詢", (
-                        "<form action=/orders method=get>"
-                        "<label for=customer>客戶代碼</label> "
-                        "<input id=customer name=customer> "
-                        "<button type=submit>查詢</button></form>"
-                    )))
+                    self._send(
+                        _page(
+                            "出貨查詢",
+                            (
+                                "<form action=/orders method=get>"
+                                "<label for=customer>客戶代碼</label> "
+                                "<input id=customer name=customer> "
+                                "<button type=submit>查詢</button></form>"
+                            ),
+                        )
+                    )
                 elif url.path == "/orders":
                     customer = parse_qs(url.query).get("customer", [""])[0].strip().upper()
                     self._send(_page(f"出貨查詢結果 {customer}", site._table(customer)))
@@ -142,13 +148,19 @@ class PracticeSite:
             elif item.order in self.notified:
                 action = "已通知"
             else:
-                action = (f"<form action=/notify method=post><input type=hidden name=order "
-                          f"value={item.order}><button type=submit>標記已通知</button></form>")
+                action = (
+                    f"<form action=/notify method=post><input type=hidden name=order "
+                    f"value={item.order}><button type=submit>標記已通知</button></form>"
+                )
             cells = (item.order, item.item, str(item.quantity), item.ship_date, item.status)
-            body.append("<tr>" + "".join(f"<td>{html.escape(cell)}</td>" for cell in cells)
-                        + f"<td>{action}</td></tr>")
-        return (f"<table id=orders><thead><tr>{head}</tr></thead>"
-                f"<tbody>{''.join(body)}</tbody></table>")
+            body.append(
+                "<tr>"
+                + "".join(f"<td>{html.escape(cell)}</td>" for cell in cells)
+                + f"<td>{action}</td></tr>"
+            )
+        return (
+            f"<table id=orders><thead><tr>{head}</tr></thead><tbody>{''.join(body)}</tbody></table>"
+        )
 
 
 def write_workbook(path: Path) -> Path:
@@ -247,9 +259,15 @@ def write_sop_pdf(path: Path, browser: str | None = None) -> Path:
         source.write_text(SOP_HTML, encoding="utf-8")
         printed = Path(folder) / "sop.pdf"
         process = subprocess.Popen(
-            [executable, "--headless", "--disable-gpu", "--no-pdf-header-footer",
-             f"--user-data-dir={Path(folder) / 'profile'}",
-             f"--print-to-pdf={printed}", source.as_uri()],
+            [
+                executable,
+                "--headless",
+                "--disable-gpu",
+                "--no-pdf-header-footer",
+                f"--user-data-dir={Path(folder) / 'profile'}",
+                f"--print-to-pdf={printed}",
+                source.as_uri(),
+            ],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )

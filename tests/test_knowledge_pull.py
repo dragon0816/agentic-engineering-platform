@@ -12,9 +12,11 @@ from knowledge.sandbox import Sandboxes
 
 def _project(tmp_path: Path) -> tuple[KnowledgePipeline, Path]:
     base = _base(tmp_path)
-    for rel, data in {"drop/Market/AI/deck.txt": "AI market deck\n",
-                      "drop/Market/5G.txt": "5G market\n",
-                      "drop/Productions/cmx.txt": "CMX500 spec\n"}.items():
+    for rel, data in {
+        "drop/Market/AI/deck.txt": "AI market deck\n",
+        "drop/Market/5G.txt": "5G market\n",
+        "drop/Productions/cmx.txt": "CMX500 spec\n",
+    }.items():
         (base / rel).parent.mkdir(parents=True, exist_ok=True)
         (base / rel).write_text(data, encoding="utf-8")
     pipeline = KnowledgePipeline(Sandboxes(tmp_path / "workspace"), {"rs-k": base})
@@ -48,7 +50,9 @@ def test_an_original_already_ingested_is_not_pulled(tmp_path: Path) -> None:
     (base / "raw/Productions/cmx.md").write_text(
         f"---\nsource_id: {source.source_id}\nsource_sha256: {source.sha256}\n"
         f"original_ref: {source.original_ref}\nraw_ref: raw/Productions/cmx.md\n"
-        "extractor: text\ncreated: 2026-10-11\n---\nCMX500 spec\n", encoding="utf-8")
+        "extractor: text\ncreated: 2026-10-11\n---\nCMX500 spec\n",
+        encoding="utf-8",
+    )
     sandbox = pipeline.create_sandbox("rs-k", "prod", "leo.chi").sandbox_id
     pulled = pipeline.pull(sandbox, ("Productions",))
     assert pulled.copied == () and pulled.already_ingested == ("Productions/cmx.txt",)
@@ -68,15 +72,15 @@ def test_pull_stays_inside_the_project_drop(tmp_path: Path) -> None:
         pipeline.pull(sandbox, ("Nope",))
 
 
-def test_an_original_known_to_legacy_raw_by_its_hash_prefix_is_not_pulled(
-        tmp_path: Path) -> None:
+def test_an_original_known_to_legacy_raw_by_its_hash_prefix_is_not_pulled(tmp_path: Path) -> None:
     import hashlib
 
     pipeline, base = _project(tmp_path)
     prefix = hashlib.sha256((base / "drop/Market/5G.txt").read_bytes()).hexdigest()[:16]
     (base / "raw/Market").mkdir(parents=True)
     (base / "raw/Market/5G.md").write_text(
-        f"---\ntitle: 5G\ntype: raw\nsource_sha: {prefix}\n---\n5G market\n", encoding="utf-8")
+        f"---\ntitle: 5G\ntype: raw\nsource_sha: {prefix}\n---\n5G market\n", encoding="utf-8"
+    )
     sandbox = pipeline.create_sandbox("rs-k", "legacy", "leo.chi").sandbox_id
     pulled = pipeline.pull(sandbox, ("Market",))
     assert pulled.already_ingested == ("Market/5G.txt",)

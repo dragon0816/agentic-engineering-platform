@@ -33,7 +33,8 @@ class JevShadowLog:
 
     def _append(self, record: dict[str, Any]) -> None:
         line = json.dumps(
-            {"at": datetime.now(UTC).isoformat(), **record}, ensure_ascii=False,
+            {"at": datetime.now(UTC).isoformat(), **record},
+            ensure_ascii=False,
             separators=(",", ":"),
         )
         with self._lock:
@@ -42,26 +43,30 @@ class JevShadowLog:
                 handle.write(line + "\n")
 
     def decision(self, request: SkillCandidateRequest, shadow: DecisionShadow) -> None:
-        self._append({
-            "kind": "shadow",
-            "trace_id": request.context.trace.trace_id,
-            "offered": [tool.name for tool in request.tools],
-            "outcome": shadow.outcome,
-            "chosen": shadow.value,
-            "confidence": shadow.confidence,
-            "reason": shadow.reason_code,
-            "latency_ms": round(shadow.latency_ms, 1),
-            "probabilities": shadow.metadata.get("probabilities"),
-            "choice_confidence": shadow.metadata.get("choice_confidence"),
-        })
+        self._append(
+            {
+                "kind": "shadow",
+                "trace_id": request.context.trace.trace_id,
+                "offered": [tool.name for tool in request.tools],
+                "outcome": shadow.outcome,
+                "chosen": shadow.value,
+                "confidence": shadow.confidence,
+                "reason": shadow.reason_code,
+                "latency_ms": round(shadow.latency_ms, 1),
+                "probabilities": shadow.metadata.get("probabilities"),
+                "choice_confidence": shadow.metadata.get("choice_confidence"),
+            }
+        )
 
     def conversation(self, result: GatewayConversationResult) -> None:
-        self._append({
-            "kind": "turn",
-            "trace_id": result.trace.trace_id,
-            "status": result.status,
-            "called": [item.name for item in result.tools],
-        })
+        self._append(
+            {
+                "kind": "turn",
+                "trace_id": result.trace.trace_id,
+                "status": result.status,
+                "called": [item.name for item in result.tools],
+            }
+        )
 
 
 def skill_accelerator(

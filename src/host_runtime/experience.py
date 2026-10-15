@@ -37,8 +37,9 @@ EXCERPT = 1500
 FAILED_TOOL = re.compile(r"(\w[\w.-]*): failed \((\w+)\)")
 EVIDENCE_GAP = {"knowledge_insufficient_evidence", "knowledge_not_grounded"}
 
-Signal = Literal["rating", "harness_gave_up", "evidence_gap", "question_set_failure",
-                 "regression", "run_failed"]
+Signal = Literal[
+    "rating", "harness_gave_up", "evidence_gap", "question_set_failure", "regression", "run_failed"
+]
 
 
 class ExperienceSettings(Contract):
@@ -92,8 +93,10 @@ class ExperienceStore:
         self.path = workspace / STORE_FILE
         self._lock = threading.Lock()
         with self._connect() as conn:
-            conn.execute("CREATE TABLE IF NOT EXISTS cases (case_id TEXT PRIMARY KEY,"
-                         " created_at TEXT NOT NULL, status TEXT NOT NULL, record TEXT NOT NULL)")
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS cases (case_id TEXT PRIMARY KEY,"
+                " created_at TEXT NOT NULL, status TEXT NOT NULL, record TEXT NOT NULL)"
+            )
             conn.execute("CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT)")
 
     def _connect(self) -> sqlite3.Connection:
@@ -108,28 +111,36 @@ class ExperienceStore:
                 cursor = conn.execute(
                     "INSERT OR IGNORE INTO cases (case_id, created_at, status, record)"
                     " VALUES (?, ?, ?, ?)",
-                    (case.case_id, case.created_at, case.status, case.model_dump_json()))
+                    (case.case_id, case.created_at, case.status, case.model_dump_json()),
+                )
                 added += cursor.rowcount
         return added
 
     def cases(self, status: str | None = None) -> list[ExperienceCase]:
         with self._connect() as conn:
             rows = conn.execute(
-                "SELECT record FROM cases" + (" WHERE status = ?" if status else "")
-                + " ORDER BY created_at", (status,) if status else ()).fetchall()
+                "SELECT record FROM cases"
+                + (" WHERE status = ?" if status else "")
+                + " ORDER BY created_at",
+                (status,) if status else (),
+            ).fetchall()
         return [ExperienceCase.model_validate_json(row[0]) for row in rows]
 
     def mark_reviewed(self, case_ids: Iterable[str], review_id: str) -> None:
         with self._lock, self._connect() as conn:
             for case_id in case_ids:
-                row = conn.execute("SELECT record FROM cases WHERE case_id = ?",
-                                   (case_id,)).fetchone()
+                row = conn.execute(
+                    "SELECT record FROM cases WHERE case_id = ?", (case_id,)
+                ).fetchone()
                 if row is None:
                     continue
                 case = ExperienceCase.model_validate_json(row[0]).model_copy(
-                    update={"status": "reviewed", "review_id": review_id})
-                conn.execute("UPDATE cases SET status = ?, record = ? WHERE case_id = ?",
-                             ("reviewed", case.model_dump_json(), case_id))
+                    update={"status": "reviewed", "review_id": review_id}
+                )
+                conn.execute(
+                    "UPDATE cases SET status = ?, record = ? WHERE case_id = ?",
+                    ("reviewed", case.model_dump_json(), case_id),
+                )
 
     def prune(self, retention_days: int, now: datetime | None = None) -> int:
         cutoff = ((now or datetime.now(UTC)) - timedelta(days=retention_days)).isoformat()
@@ -143,11 +154,15 @@ class ExperienceStore:
 
     def set_meta(self, key: str, value: str) -> None:
         with self._lock, self._connect() as conn:
-            conn.execute("INSERT INTO meta (key, value) VALUES (?, ?) ON CONFLICT(key)"
-                         " DO UPDATE SET value = excluded.value", (key, value))
+            conn.execute(
+                "INSERT INTO meta (key, value) VALUES (?, ?) ON CONFLICT(key)"
+                " DO UPDATE SET value = excluded.value",
+                (key, value),
+            )
 
 
 # -- harvesters ----------------------------------------------------------------
+
 
 def from_conversations(records: Iterable[Any]) -> list[ExperienceCase]:
     """Answers that were rated down, failed, needed input, or whose tools failed."""
@@ -160,9 +175,11 @@ def from_conversations(records: Iterable[Any]) -> list[ExperienceCase]:
                 continue
             failures = FAILED_TOOL.findall(message.tool_summary or "")
             code = failures[0][1] if failures else None
-            knowledge = any(tool.startswith("knowledge") for tool, _ in failures) or bool(
-                code and code.startswith("knowledge_")) or "knowledge__" in (
-                message.tool_summary or "")
+            knowledge = (
+                any(tool.startswith("knowledge") for tool, _ in failures)
+                or bool(code and code.startswith("knowledge_"))
+                or "knowledge__" in (message.tool_summary or "")
+            )
             signal: Signal | None = None
             if message.feedback is not None and message.feedback.rating == "down":
                 signal = "rating"
@@ -172,13 +189,19 @@ def from_conversations(records: Iterable[Any]) -> list[ExperienceCase]:
                 signal = "harness_gave_up"
             if signal is None:
                 continue
-            found.append(ExperienceCase(
-                case_id=_id("conversation", record.session_id, message.message_id, signal),
-                created_at=message.created_at.astimezone(UTC).isoformat(),
-                domain="knowledge" if knowledge else "conversation", signal=signal,
-                subject=_clip(question), answer=_clip(message.text), failure_code=code,
-                rating_note=_clip(message.feedback.note) if message.feedback else None,
-                source=f"conversation:{record.session_id}/{message.message_id}"))
+            found.append(
+                ExperienceCase(
+                    case_id=_id("conversation", record.session_id, message.message_id, signal),
+                    created_at=message.created_at.astimezone(UTC).isoformat(),
+                    domain="knowledge" if knowledge else "conversation",
+                    signal=signal,
+                    subject=_clip(question),
+                    answer=_clip(message.text),
+                    failure_code=code,
+                    rating_note=_clip(message.feedback.note) if message.feedback else None,
+                    source=f"conversation:{record.session_id}/{message.message_id}",
+                )
+            )
     return found
 
 
@@ -197,20 +220,27 @@ def from_benchmarks(sandbox_root: Path) -> list[ExperienceCase]:
             grade = side.get("grade") or {}
             if grade.get("passed", True):
                 continue
-            signal: Signal = "regression" if result.get("path") in regressions \
-                else "question_set_failure"
+            signal: Signal = (
+                "regression" if result.get("path") in regressions else "question_set_failure"
+            )
             missing = ", ".join(grade.get("missing") or ())
             said = ", ".join(grade.get("forbidden") or ())
-            found.append(ExperienceCase(
-                case_id=_id("benchmark", sandbox, report.get("run_id", ""),
-                            str(result.get("path"))),
-                created_at=str(report.get("started_at") or datetime.now(UTC).isoformat()),
-                domain="knowledge", signal=signal, subject=_clip(result.get("question")),
-                answer=_clip(side.get("answer")),
-                failure_code="missing_terms" if missing else "forbidden_terms",
-                rating_note=_clip(f"missing: {missing}; said: {said}"),
-                rule=f"checks/questions/{result.get('path')}",
-                source=f"benchmark:{sandbox}/{report.get('run_id')}"))
+            found.append(
+                ExperienceCase(
+                    case_id=_id(
+                        "benchmark", sandbox, report.get("run_id", ""), str(result.get("path"))
+                    ),
+                    created_at=str(report.get("started_at") or datetime.now(UTC).isoformat()),
+                    domain="knowledge",
+                    signal=signal,
+                    subject=_clip(result.get("question")),
+                    answer=_clip(side.get("answer")),
+                    failure_code="missing_terms" if missing else "forbidden_terms",
+                    rating_note=_clip(f"missing: {missing}; said: {said}"),
+                    rule=f"checks/questions/{result.get('path')}",
+                    source=f"benchmark:{sandbox}/{report.get('run_id')}",
+                )
+            )
     return found
 
 
@@ -219,8 +249,9 @@ def _run_detail(conn: sqlite3.Connection, run_id: str) -> dict[str, str]:
     from a run's telemetry events."""
     detail: dict[str, str] = {}
     try:
-        rows = conn.execute("SELECT record FROM events WHERE run_id = ? ORDER BY sequence",
-                            (run_id,)).fetchall()
+        rows = conn.execute(
+            "SELECT record FROM events WHERE run_id = ? ORDER BY sequence", (run_id,)
+        ).fetchall()
     except sqlite3.Error:
         return detail
     for (record,) in rows:
@@ -262,17 +293,25 @@ def from_telemetry(path: Path) -> list[ExperienceCase]:
             detail = _run_detail(conn, str(run_id))
             code = detail.get("failure_code") or str(data.get("outcome") or "failed")
             name = detail.get("workflow_id") or detail.get("task_id") or skill or kind
-            step = (f"step {detail['step_index']} " if "step_index" in detail else "") + \
-                detail.get("tool_id", "")
+            step = (f"step {detail['step_index']} " if "step_index" in detail else "") + detail.get(
+                "tool_id", ""
+            )
             subject = f"{'Workflow' if kind == 'workflow_run' else 'Coding task'} {name}" + (
-                f": {step.strip()} failed ({code})" if step.strip() else f" failed ({code})")
-            found.append(ExperienceCase(
-                case_id=_id("telemetry", str(run_id)), created_at=str(started or ""),
-                domain="coding" if kind == "coding_change" else "workflow",
-                signal="run_failed", subject=_clip(subject), failure_code=code[:80],
-                # Versions of one Workflow fail for one reason: group without the version.
-                rule=name.split("@")[0] if name != kind else None,
-                source=f"telemetry:{run_id}"))
+                f": {step.strip()} failed ({code})" if step.strip() else f" failed ({code})"
+            )
+            found.append(
+                ExperienceCase(
+                    case_id=_id("telemetry", str(run_id)),
+                    created_at=str(started or ""),
+                    domain="coding" if kind == "coding_change" else "workflow",
+                    signal="run_failed",
+                    subject=_clip(subject),
+                    failure_code=code[:80],
+                    # Versions of one Workflow fail for one reason: group without the version.
+                    rule=name.split("@")[0] if name != kind else None,
+                    source=f"telemetry:{run_id}",
+                )
+            )
     finally:
         conn.close()
     return found

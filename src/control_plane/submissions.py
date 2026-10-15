@@ -121,9 +121,17 @@ class SubmissionStore:
             self._conn.execute(
                 "INSERT INTO submissions (submission_id, namespace, name, version, submitter,"
                 " status, submitted_at, record, artifact) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (item.submission_id, identity.namespace, identity.name, identity.version,
-                 item.submitter, item.status, item.submitted_at.astimezone(UTC).isoformat(),
-                 item.model_dump_json(), artifact),
+                (
+                    item.submission_id,
+                    identity.namespace,
+                    identity.name,
+                    identity.version,
+                    item.submitter,
+                    item.status,
+                    item.submitted_at.astimezone(UTC).isoformat(),
+                    item.model_dump_json(),
+                    artifact,
+                ),
             )
 
     def update(self, item: AssetSubmission, *, expected: SubmissionStatus) -> bool:
@@ -166,7 +174,8 @@ class SubmissionStore:
                 rows = self._conn.execute("SELECT record FROM submissions").fetchall()
                 items = [AssetSubmission.model_validate_json(row[0]) for row in rows]
         chosen = [
-            item for item in items
+            item
+            for item in items
             if (submitter is None or item.submitter == submitter)
             and (status is None or item.status == status)
         ]
@@ -255,20 +264,18 @@ class SubmissionService:
         return tuple(
             item.metadata.identity.version
             for item in self.packages.discover()
-            if (item.metadata.identity.namespace, item.metadata.identity.name)
-            == (namespace, name)
+            if (item.metadata.identity.namespace, item.metadata.identity.name) == (namespace, name)
         )
 
     def _pending(self, namespace: str, name: str) -> tuple[AssetSubmission, ...]:
         return tuple(
-            item for item in self.store.list(status="pending")
+            item
+            for item in self.store.list(status="pending")
             if (item.identity.namespace, item.identity.name) == (namespace, name)
         )
 
     def _dependencies_present(self, manifest: SkillManifest, actor: str) -> bool:
-        pending = {
-            item.identity for item in self.store.list(submitter=actor, status="pending")
-        }
+        pending = {item.identity for item in self.store.list(submitter=actor, status="pending")}
         for command in manifest.commands:
             if command.kind != "workflow":
                 continue
@@ -320,9 +327,7 @@ class SubmissionService:
                     ).model_dump(mode="json"),
                     "provenance": [
                         *(entry.model_dump(mode="json") for entry in original.provenance),
-                        Provenance(source=SUBMISSION_SOURCE, author=actor).model_dump(
-                            mode="json"
-                        ),
+                        Provenance(source=SUBMISSION_SOURCE, author=actor).model_dump(mode="json"),
                     ],
                     "package": None,
                 }
@@ -446,9 +451,7 @@ class SubmissionService:
                 ) from None
             return self._decide(item, status="approved", reviewer=actor, reason=None)
 
-    def reject(
-        self, reviewer: AuthenticatedActor, request: AssetRejectRequest
-    ) -> AssetSubmission:
+    def reject(self, reviewer: AuthenticatedActor, request: AssetRejectRequest) -> AssetSubmission:
         actor, _ = self._member(reviewer)
         decision = AssetRejectRequest.model_validate(request)
         held = self.store.get(decision.submission_id)

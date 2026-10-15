@@ -49,11 +49,36 @@ EMPLOYEES = [
     {"EmployeeID": "E006", "EmployeeName": "Kenji Sato"},
 ]
 PROJECTS = [
-    {"ProjectID": "P001", "ProjectName": "5G RF 驗證平台", "CustomerID": "C001", "OwnerEmployeeID": "E001"},
-    {"ProjectID": "P002", "ProjectName": "Wafer Probe Upgrade", "CustomerID": "C002", "OwnerEmployeeID": "E003"},
-    {"ProjectID": "P003", "ProjectName": "Acme 產線自動化", "CustomerID": "C001", "OwnerEmployeeID": "E002"},
-    {"ProjectID": "P004", "ProjectName": "EMC Chamber Retrofit", "CustomerID": "C003", "OwnerEmployeeID": "E004"},
-    {"ProjectID": "P005", "ProjectName": "Acme Limited 校正服務", "CustomerID": "C007", "OwnerEmployeeID": "E005"},
+    {
+        "ProjectID": "P001",
+        "ProjectName": "5G RF 驗證平台",
+        "CustomerID": "C001",
+        "OwnerEmployeeID": "E001",
+    },
+    {
+        "ProjectID": "P002",
+        "ProjectName": "Wafer Probe Upgrade",
+        "CustomerID": "C002",
+        "OwnerEmployeeID": "E003",
+    },
+    {
+        "ProjectID": "P003",
+        "ProjectName": "Acme 產線自動化",
+        "CustomerID": "C001",
+        "OwnerEmployeeID": "E002",
+    },
+    {
+        "ProjectID": "P004",
+        "ProjectName": "EMC Chamber Retrofit",
+        "CustomerID": "C003",
+        "OwnerEmployeeID": "E004",
+    },
+    {
+        "ProjectID": "P005",
+        "ProjectName": "Acme Limited 校正服務",
+        "CustomerID": "C007",
+        "OwnerEmployeeID": "E005",
+    },
 ]
 PROJECT_OF = {"C001": ["P001", "P003"], "C002": ["P002"], "C003": ["P004"], "C007": ["P005"]}
 CONTACTS = {
@@ -84,8 +109,15 @@ def lines_for(rng: random.Random, currency: str, max_lines: int) -> list[dict[st
     for product_id, name, base in rng.sample(PRODUCTS, rng.randint(1, max_lines)):
         price = (base * CURRENCY_SCALE[currency]).quantize(CENT, rounding=ROUND_HALF_UP)
         qty = rng.randint(1, 6)
-        out.append({"ProductID": product_id, "ProductName": name, "Quantity": qty,
-                    "UnitPrice": money(price), "LineAmount": money(price * qty)})
+        out.append(
+            {
+                "ProductID": product_id,
+                "ProductName": name,
+                "Quantity": qty,
+                "UnitPrice": money(price),
+                "LineAmount": money(price * qty),
+            }
+        )
     return out
 
 
@@ -96,42 +128,71 @@ def customer_project(rng: random.Random, customer: str) -> str:
 
 # Orders: (date, status, customer, currency); 20 in 2026-09 of which 14 Open.
 ORDER_PLAN = [
-    ("2026-08-03", "Closed", "C001", "TWD"), ("2026-08-07", "Closed", "C002", "USD"),
-    ("2026-08-12", "Open", "C003", "EUR"), ("2026-08-15", "Cancelled", "C004", "TWD"),
-    ("2026-08-19", "Closed", "C007", "TWD"), ("2026-08-22", "Open", "C005", "USD"),
-    ("2026-08-27", "Closed", "C001", "USD"), ("2026-08-31", "Open", "C006", "EUR"),
-    ("2026-09-01", "Open", "C001", "TWD"), ("2026-09-02", "Open", "C002", "TWD"),
-    ("2026-09-03", "Closed", "C003", "EUR"), ("2026-09-04", "Open", "C007", "USD"),
-    ("2026-09-05", "Open", "C004", "TWD"), ("2026-09-08", "Cancelled", "C001", "USD"),
-    ("2026-09-09", "Open", "C005", "USD"), ("2026-09-10", "Open", "C008", "TWD"),
-    ("2026-09-11", "Closed", "C002", "TWD"), ("2026-09-14", "Open", "C003", "EUR"),
-    ("2026-09-15", "Open", "C001", "EUR"), ("2026-09-16", "Open", "C006", "EUR"),
-    ("2026-09-18", "Closed", "C007", "TWD"), ("2026-09-21", "Open", "C002", "USD"),
-    ("2026-09-22", "Cancelled", "C005", "USD"), ("2026-09-24", "Open", "C004", "TWD"),
-    ("2026-09-25", "Closed", "C001", "TWD"), ("2026-09-28", "Open", "C008", "USD"),
-    ("2026-09-30", "Open", "C007", "EUR"), ("2026-09-30", "Open", "C003", "TWD"),
-    ("2026-10-01", "Open", "C001", "USD"), ("2026-10-02", "Open", "C002", "TWD"),
-    ("2026-10-06", "Closed", "C003", "EUR"), ("2026-10-09", "Open", "C001", "TWD"),
-    ("2026-10-14", "Cancelled", "C006", "USD"), ("2026-10-20", "Open", "C007", "TWD"),
-    ("2026-10-27", "Closed", "C004", "TWD"), ("2026-10-31", "Open", "C001", "EUR"),
+    ("2026-08-03", "Closed", "C001", "TWD"),
+    ("2026-08-07", "Closed", "C002", "USD"),
+    ("2026-08-12", "Open", "C003", "EUR"),
+    ("2026-08-15", "Cancelled", "C004", "TWD"),
+    ("2026-08-19", "Closed", "C007", "TWD"),
+    ("2026-08-22", "Open", "C005", "USD"),
+    ("2026-08-27", "Closed", "C001", "USD"),
+    ("2026-08-31", "Open", "C006", "EUR"),
+    ("2026-09-01", "Open", "C001", "TWD"),
+    ("2026-09-02", "Open", "C002", "TWD"),
+    ("2026-09-03", "Closed", "C003", "EUR"),
+    ("2026-09-04", "Open", "C007", "USD"),
+    ("2026-09-05", "Open", "C004", "TWD"),
+    ("2026-09-08", "Cancelled", "C001", "USD"),
+    ("2026-09-09", "Open", "C005", "USD"),
+    ("2026-09-10", "Open", "C008", "TWD"),
+    ("2026-09-11", "Closed", "C002", "TWD"),
+    ("2026-09-14", "Open", "C003", "EUR"),
+    ("2026-09-15", "Open", "C001", "EUR"),
+    ("2026-09-16", "Open", "C006", "EUR"),
+    ("2026-09-18", "Closed", "C007", "TWD"),
+    ("2026-09-21", "Open", "C002", "USD"),
+    ("2026-09-22", "Cancelled", "C005", "USD"),
+    ("2026-09-24", "Open", "C004", "TWD"),
+    ("2026-09-25", "Closed", "C001", "TWD"),
+    ("2026-09-28", "Open", "C008", "USD"),
+    ("2026-09-30", "Open", "C007", "EUR"),
+    ("2026-09-30", "Open", "C003", "TWD"),
+    ("2026-10-01", "Open", "C001", "USD"),
+    ("2026-10-02", "Open", "C002", "TWD"),
+    ("2026-10-06", "Closed", "C003", "EUR"),
+    ("2026-10-09", "Open", "C001", "TWD"),
+    ("2026-10-14", "Cancelled", "C006", "USD"),
+    ("2026-10-20", "Open", "C007", "TWD"),
+    ("2026-10-27", "Closed", "C004", "TWD"),
+    ("2026-10-31", "Open", "C001", "EUR"),
 ]
 TERMS = ["NET10", "NET15", "NET20", "NET30", "NET5", "NET0"]
 
 # Invoices: (invoice date, due date, paid share). The 2026-09 rows cover
 # overdue, due-today, zero-balance and partial payments.
 INVOICE_PLAN = [
-    ("2026-08-06", "2026-08-21", "0.5"), ("2026-08-10", "2026-09-09", "1"),
-    ("2026-08-20", "2026-09-04", "0.5"), ("2026-08-25", "2026-09-24", "0"),
-    ("2026-08-29", "2026-09-28", "1"), ("2026-08-31", "2026-09-30", "0"),
-    ("2026-09-01", "2026-09-16", "0"), ("2026-09-02", "2026-09-12", "1"),
-    ("2026-09-05", "2026-09-20", "0.4"), ("2026-09-08", "2026-10-08", "0"),
-    ("2026-09-10", "2026-09-30", "0"), ("2026-09-12", "2026-09-22", "0"),
-    ("2026-09-15", "2026-09-30", "0.25"), ("2026-09-16", "2026-10-16", "1"),
-    ("2026-09-18", "2026-09-28", "1"), ("2026-09-20", "2026-10-20", "0.6"),
-    ("2026-09-22", "2026-09-27", "0.5"), ("2026-09-25", "2026-10-25", "0"),
+    ("2026-08-06", "2026-08-21", "0.5"),
+    ("2026-08-10", "2026-09-09", "1"),
+    ("2026-08-20", "2026-09-04", "0.5"),
+    ("2026-08-25", "2026-09-24", "0"),
+    ("2026-08-29", "2026-09-28", "1"),
+    ("2026-08-31", "2026-09-30", "0"),
+    ("2026-09-01", "2026-09-16", "0"),
+    ("2026-09-02", "2026-09-12", "1"),
+    ("2026-09-05", "2026-09-20", "0.4"),
+    ("2026-09-08", "2026-10-08", "0"),
+    ("2026-09-10", "2026-09-30", "0"),
+    ("2026-09-12", "2026-09-22", "0"),
+    ("2026-09-15", "2026-09-30", "0.25"),
+    ("2026-09-16", "2026-10-16", "1"),
+    ("2026-09-18", "2026-09-28", "1"),
+    ("2026-09-20", "2026-10-20", "0.6"),
+    ("2026-09-22", "2026-09-27", "0.5"),
+    ("2026-09-25", "2026-10-25", "0"),
     ("2026-09-30", "2026-09-30", "0"),
-    ("2026-10-02", "2026-11-01", "0"), ("2026-10-07", "2026-10-22", "1"),
-    ("2026-10-12", "2026-11-11", "0"), ("2026-10-20", "2026-10-30", "0.5"),
+    ("2026-10-02", "2026-11-01", "0"),
+    ("2026-10-07", "2026-10-22", "1"),
+    ("2026-10-12", "2026-11-11", "0"),
+    ("2026-10-20", "2026-10-30", "0.5"),
     ("2026-10-28", "2026-11-27", "0"),
 ]
 
@@ -143,20 +204,24 @@ def build_orders(rng: random.Random) -> list[dict[str, object]]:
         for number, line in enumerate(lines, 1):
             line["LineNo"] = number * 10
             line.pop("ProductName")
-        orders.append({
-            "OrderID": f"00450{index + 101:05d}",
-            "CustomerID": customer,
-            "CustomerName": next(c["CustomerName"] for c in CUSTOMERS if c["CustomerID"] == customer),
-            "ProjectID": customer_project(rng, customer),
-            "OrderDate": when,
-            "Status": status,
-            "Currency": currency,
-            "NetAmount": money(sum(Decimal(str(x["LineAmount"])) for x in lines)),
-            "CustomerContact": CONTACTS[customer],
-            "PaymentTerms": rng.choice(TERMS),
-            "SalesRep": rng.choice(EMPLOYEES)["EmployeeID"],
-            "Lines": lines,
-        })
+        orders.append(
+            {
+                "OrderID": f"00450{index + 101:05d}",
+                "CustomerID": customer,
+                "CustomerName": next(
+                    c["CustomerName"] for c in CUSTOMERS if c["CustomerID"] == customer
+                ),
+                "ProjectID": customer_project(rng, customer),
+                "OrderDate": when,
+                "Status": status,
+                "Currency": currency,
+                "NetAmount": money(sum(Decimal(str(x["LineAmount"])) for x in lines)),
+                "CustomerContact": CONTACTS[customer],
+                "PaymentTerms": rng.choice(TERMS),
+                "SalesRep": rng.choice(EMPLOYEES)["EmployeeID"],
+                "Lines": lines,
+            }
+        )
     # One C001 order has no payment terms recorded yet: a missing detail field.
     next(o for o in orders if o["OrderDate"] == "2026-10-09")["PaymentTerms"] = ""
     return orders
@@ -166,26 +231,33 @@ def build_invoices(rng: random.Random, orders: list[dict[str, object]]) -> list[
     used: set[str] = set()
     invoices = []
     for index, (when, due, share) in enumerate(INVOICE_PLAN):
-        candidates = [o for o in orders if o["Status"] != "Cancelled" and o["OrderID"] not in used
-                      and d(str(o["OrderDate"])) <= d(when) - timedelta(days=1)]
+        candidates = [
+            o
+            for o in orders
+            if o["Status"] != "Cancelled"
+            and o["OrderID"] not in used
+            and d(str(o["OrderDate"])) <= d(when) - timedelta(days=1)
+        ]
         order = candidates[-1] if index % 3 else rng.choice(candidates)
         used.add(str(order["OrderID"]))
         if order["PaymentTerms"]:
             order["PaymentTerms"] = f"NET{(d(due) - d(when)).days}"
         amount = Decimal(str(order["NetAmount"]))
         paid = (amount * Decimal(share)).quantize(CENT, rounding=ROUND_HALF_UP)
-        invoices.append({
-            "InvoiceID": f"00900{index + 201:05d}",
-            "OrderID": order["OrderID"],
-            "CustomerID": order["CustomerID"],
-            "ProjectID": order["ProjectID"],
-            "InvoiceDate": when,
-            "DueDate": due,
-            "Currency": order["Currency"],
-            "Amount": money(amount),
-            "PaidAmount": money(paid),
-            "Balance": money(amount - paid),
-        })
+        invoices.append(
+            {
+                "InvoiceID": f"00900{index + 201:05d}",
+                "OrderID": order["OrderID"],
+                "CustomerID": order["CustomerID"],
+                "ProjectID": order["ProjectID"],
+                "InvoiceDate": when,
+                "DueDate": due,
+                "Currency": order["Currency"],
+                "Amount": money(amount),
+                "PaidAmount": money(paid),
+                "Balance": money(amount - paid),
+            }
+        )
     return invoices
 
 
@@ -243,28 +315,36 @@ DESCRIPTIONS = {
     "Supplies": ["治具耗材", "USB-C adapters", "RF 接頭與轉接器\nSMA x4"],
 }
 EMPLOYEE_PROJECTS = {
-    "E001": ["P001", "P003"], "E002": ["P003", "P005"], "E003": ["P002", "P004"],
-    "E004": ["P004", "P001"], "E005": ["P005", "P002"], "E006": ["P002"],
+    "E001": ["P001", "P003"],
+    "E002": ["P003", "P005"],
+    "E003": ["P002", "P004"],
+    "E004": ["P004", "P001"],
+    "E005": ["P005", "P002"],
+    "E006": ["P002"],
 }
 
 
 def build_expenses(rng: random.Random) -> list[dict[str, object]]:
     out = []
     for index, (emp, when, category, currency, amount, status, missing) in enumerate(EXPENSE_PLAN):
-        out.append({
-            "ExpenseID": f"EXP-{index + 1:05d}",
-            "EmployeeID": emp,
-            "EmployeeName": next(e["EmployeeName"] for e in EMPLOYEES if e["EmployeeID"] == emp),
-            "ProjectID": rng.choice(EMPLOYEE_PROJECTS[emp]),
-            "ExpenseDate": when,
-            "Category": category,
-            "Currency": currency,
-            "Amount": money(amount),
-            "Status": status,
-            "ReceiptID": "" if missing else f"RC{rng.randint(100000, 999999)}",
-            "Description": rng.choice(DESCRIPTIONS[category]),
-            "MissingReceipt": missing,
-        })
+        out.append(
+            {
+                "ExpenseID": f"EXP-{index + 1:05d}",
+                "EmployeeID": emp,
+                "EmployeeName": next(
+                    e["EmployeeName"] for e in EMPLOYEES if e["EmployeeID"] == emp
+                ),
+                "ProjectID": rng.choice(EMPLOYEE_PROJECTS[emp]),
+                "ExpenseDate": when,
+                "Category": category,
+                "Currency": currency,
+                "Amount": money(amount),
+                "Status": status,
+                "ReceiptID": "" if missing else f"RC{rng.randint(100000, 999999)}",
+                "Description": rng.choice(DESCRIPTIONS[category]),
+                "MissingReceipt": missing,
+            }
+        )
     out.sort(key=lambda e: (str(e["ExpenseDate"]), str(e["ExpenseID"])))
     return out
 
@@ -309,20 +389,24 @@ def build_quotes(rng: random.Random) -> list[dict[str, object]]:
     for index, (when, valid, status, customer, currency, discount) in enumerate(QUOTE_PLAN):
         lines = lines_for(rng, currency, 4)
         subtotal = sum(Decimal(str(x["LineAmount"])) for x in lines)
-        net = (subtotal * (Decimal(100) - discount) / Decimal(100)).quantize(CENT, rounding=ROUND_HALF_UP)
-        out.append({
-            "QuoteID": f"Q{index + 1:04d}",
-            "CustomerID": customer,
-            "ProjectID": customer_project(rng, customer),
-            "QuoteDate": when,
-            "ValidUntil": valid,
-            "Status": status,
-            "Currency": currency,
-            "Subtotal": money(subtotal),
-            "DiscountPercent": str(discount),
-            "NetAmount": money(net),
-            "Lines": lines,
-        })
+        net = (subtotal * (Decimal(100) - discount) / Decimal(100)).quantize(
+            CENT, rounding=ROUND_HALF_UP
+        )
+        out.append(
+            {
+                "QuoteID": f"Q{index + 1:04d}",
+                "CustomerID": customer,
+                "ProjectID": customer_project(rng, customer),
+                "QuoteDate": when,
+                "ValidUntil": valid,
+                "Status": status,
+                "Currency": currency,
+                "Subtotal": money(subtotal),
+                "DiscountPercent": str(discount),
+                "NetAmount": money(net),
+                "Lines": lines,
+            }
+        )
     # P003 needs an accepted quote in October so the October P003 rerun has data.
     october = next(q for q in out if q["QuoteDate"] == "2026-10-01")
     october["ProjectID"] = "P003"
@@ -338,13 +422,20 @@ def main() -> None:
     source = {
         "seed": SEED,
         "period": {"from": "2026-08-01", "to": "2026-10-31"},
-        "customers": CUSTOMERS, "employees": EMPLOYEES, "projects": PROJECTS,
-        "sales_orders": orders, "invoices": invoices, "expenses": expenses, "quotes": quotes,
+        "customers": CUSTOMERS,
+        "employees": EMPLOYEES,
+        "projects": PROJECTS,
+        "sales_orders": orders,
+        "invoices": invoices,
+        "expenses": expenses,
+        "quotes": quotes,
     }
     target = HERE / "source.json"
     target.write_text(json.dumps(source, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    print(f"wrote {target} ({len(orders)} orders, {len(invoices)} invoices, "
-          f"{len(expenses)} expenses, {len(quotes)} quotes)")
+    print(
+        f"wrote {target} ({len(orders)} orders, {len(invoices)} invoices, "
+        f"{len(expenses)} expenses, {len(quotes)} quotes)"
+    )
 
 
 if __name__ == "__main__":

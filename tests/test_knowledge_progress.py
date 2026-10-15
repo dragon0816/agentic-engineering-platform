@@ -41,8 +41,13 @@ def test_keys_are_checked_and_unknown_keys_read_nothing() -> None:
 
 
 def test_the_page_shows_a_progress_bar_for_long_steps() -> None:
-    for hook in ('id="kp-progress-bar"', "kpWithProgress", "/api/knowledge/progress",
-                 "progress_key: key", "Opening the sandbox: rules (2/5)"):
+    for hook in (
+        'id="kp-progress-bar"',
+        "kpWithProgress",
+        "/api/knowledge/progress",
+        "progress_key: key",
+        "Opening the sandbox: rules (2/5)",
+    ):
         assert hook in PAGE
 
 

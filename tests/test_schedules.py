@@ -23,9 +23,7 @@ def definition(
         owner="engineer",
         target_kind=kind,
         target=AssetIdentity(namespace="engineering", name="weekly-report", version="1.0.0"),
-        recurrence=Recurrence(
-            kind="weekly", timezone="Asia/Taipei", at=time(9, 0), weekdays=(1,)
-        ),
+        recurrence=Recurrence(kind="weekly", timezone="Asia/Taipei", at=time(9, 0), weekdays=(1,)),
         runtime_inputs={"week": "2026_40W"},
         initial_status="active" if initially_active else "paused",
     )
@@ -99,12 +97,15 @@ def test_claim_is_durable_exact_and_reopen_does_not_duplicate(tmp_path: Path) ->
         assert done.status == "succeeded"
         assert reopened.pending_claims() == ()
         assert reopened.history("weekly-report", owner="engineer") == (done,)
-        assert reopened.record_outcome(
-            claims[0].idempotency_key,
-            owner="engineer",
-            status="succeeded",
-            result_code="workflow_succeeded",
-        ) == done
+        assert (
+            reopened.record_outcome(
+                claims[0].idempotency_key,
+                owner="engineer",
+                status="succeeded",
+                result_code="workflow_succeeded",
+            )
+            == done
+        )
         with pytest.raises(ScheduleStoreError, match="outcome_conflict"):
             reopened.record_outcome(
                 claims[0].idempotency_key,

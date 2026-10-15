@@ -67,8 +67,13 @@ def parse(text: str, *, set_name: str, path: str) -> Question | None:
                 current.append(term)
         elif line.strip() and not line.startswith((" ", "\t")):
             current = None
-    return Question(set=set_name, path=path, text=question, must=tuple(lists["must"]),
-                    must_not=tuple(lists["must_not"]))
+    return Question(
+        set=set_name,
+        path=path,
+        text=question,
+        must=tuple(lists["must"]),
+        must_not=tuple(lists["must_not"]),
+    )
 
 
 def load(root: Path) -> tuple[Question, ...]:
@@ -79,8 +84,9 @@ def load(root: Path) -> tuple[Question, ...]:
             rel = path.relative_to(root)
             set_name = rel.parts[0] if len(rel.parts) > 1 else ""
             try:
-                question = parse(path.read_text(encoding="utf-8"), set_name=set_name,
-                                 path=rel.as_posix())
+                question = parse(
+                    path.read_text(encoding="utf-8"), set_name=set_name, path=rel.as_posix()
+                )
             except (OSError, UnicodeDecodeError):
                 continue
             if question is not None:
@@ -99,10 +105,14 @@ def default_sets(available: list[str] | dict[str, int], scope: tuple[str, ...]) 
     """The sets whose categories all lie in the sandbox's pulled scope. Every
     folder of a pulled path counts: `Productions/VNA` selects `productions/`,
     `vna/` and `productions_vna/`, not the other product lines' sets."""
-    pulled = frozenset(category(part) for folder in scope for part in folder.split("/")
-                       if part.strip())
-    return tuple(name for name in available
-                 if name and set_categories(name) and set_categories(name) <= pulled)
+    pulled = frozenset(
+        category(part) for folder in scope for part in folder.split("/") if part.strip()
+    )
+    return tuple(
+        name
+        for name in available
+        if name and set_categories(name) and set_categories(name) <= pulled
+    )
 
 
 def grade(question: Question, answer: str) -> Grade:

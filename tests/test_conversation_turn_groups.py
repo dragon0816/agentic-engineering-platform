@@ -35,7 +35,8 @@ class _ChatGateway:
     ) -> GatewayReply:
         self.calls.append(json.loads(body))
         return GatewayReply(
-            200, {"choices": [{"index": 0, "message": {"role": "assistant", "content": "ok"}}]},
+            200,
+            {"choices": [{"index": 0, "message": {"role": "assistant", "content": "ok"}}]},
         )
 
 
@@ -61,12 +62,20 @@ def test_a_message_cannot_carry_the_other_roles_annotations() -> None:
     now = datetime.now(UTC)
     with pytest.raises(ValueError, match="rates an answer"):
         ConversationMessage(
-            message_id="m1", role="user", text="q", created_at=now, status="submitted",
+            message_id="m1",
+            role="user",
+            text="q",
+            created_at=now,
+            status="submitted",
             feedback=MessageFeedback(rating="up", updated_at=now),
         )
     with pytest.raises(ValueError, match="only a question replies"):
         ConversationMessage(
-            message_id="m2", role="assistant", text="a", created_at=now, status="answered",
+            message_id="m2",
+            role="assistant",
+            text="a",
+            created_at=now,
+            status="answered",
             reply_to="m0",
         )
 
@@ -88,20 +97,30 @@ def test_reply_keeps_the_chosen_exchange_directly_before_the_new_question(
             )
         record = web.conversations(session)["selected"]
         first_answer = record["messages"][1]["message_id"]
-        reply = web.conversation_turn(ConversationTurnRequest(
-            session_id=session, message="follow up", reply_to=first_answer,
-        ))
+        reply = web.conversation_turn(
+            ConversationTurnRequest(
+                session_id=session,
+                message="follow up",
+                reply_to=first_answer,
+            )
+        )
         assert reply["ok"] is True
         # The window of three keeps the replied exchange even though it is old.
         assert [item["content"] for item in transport.calls[-1]["messages"][1:]] == [
-            "question 0", "ok", "follow up",
+            "question 0",
+            "ok",
+            "follow up",
         ]
         stored = web.conversations(session)["selected"]["messages"]
         assert stored[-2]["reply_to"] == first_answer
         calls = len(transport.calls)
-        unknown = web.conversation_turn(ConversationTurnRequest(
-            session_id=session, message="again", reply_to="message-unknown",
-        ))
+        unknown = web.conversation_turn(
+            ConversationTurnRequest(
+                session_id=session,
+                message="again",
+                reply_to="message-unknown",
+            )
+        )
         assert unknown["answer"]["status"] == "needs_input"
         assert len(transport.calls) == calls
 
@@ -116,9 +135,14 @@ def test_feedback_annotates_one_answer_without_rewriting_the_transcript(
         web.conversation_turn(ConversationTurnRequest(session_id=session, message="hello"))
         before = web.conversations(session)["selected"]
         answer_id = before["messages"][1]["message_id"]
-        saved = web.conversation_feedback(ConversationFeedbackRequest(
-            session_id=session, message_id=answer_id, rating="down", note="  缺 option 證據 ",
-        ))
+        saved = web.conversation_feedback(
+            ConversationFeedbackRequest(
+                session_id=session,
+                message_id=answer_id,
+                rating="down",
+                note="  缺 option 證據 ",
+            )
+        )
         assert saved["ok"] is True
         assert saved["feedback"]["rating"] == "down"
         assert saved["feedback"]["note"] == "缺 option 證據"
@@ -126,19 +150,28 @@ def test_feedback_annotates_one_answer_without_rewriting_the_transcript(
         assert after["updated_at"] == before["updated_at"]
         assert after["messages"][1]["text"] == before["messages"][1]["text"]
         assert after["messages"][1]["feedback"]["rating"] == "down"
-        changed = web.conversation_feedback(ConversationFeedbackRequest(
-            session_id=session, message_id=answer_id, rating="neutral",
-        ))
+        changed = web.conversation_feedback(
+            ConversationFeedbackRequest(
+                session_id=session,
+                message_id=answer_id,
+                rating="neutral",
+            )
+        )
         assert changed["feedback"] == {**changed["feedback"], "rating": "neutral", "note": None}
         question_id = after["messages"][0]["message_id"]
-        refused = web.conversation_feedback(ConversationFeedbackRequest(
-            session_id=session, message_id=question_id, rating="up",
-        ))
+        refused = web.conversation_feedback(
+            ConversationFeedbackRequest(
+                session_id=session,
+                message_id=question_id,
+                rating="up",
+            )
+        )
         assert refused == {"ok": False, "code": "conversation_message_unknown"}
         # The transcript still accepts new turns after an annotation.
-        assert web.conversation_turn(
-            ConversationTurnRequest(session_id=session, message="next")
-        )["ok"] is True
+        assert (
+            web.conversation_turn(ConversationTurnRequest(session_id=session, message="next"))["ok"]
+            is True
+        )
         assert len(web.conversations(session)["selected"]["messages"]) == 4
 
 
@@ -154,7 +187,8 @@ def test_feedback_endpoint_is_authenticated_and_validated(tmp_path: Path) -> Non
                 base(server) + "/api/conversations", token=server.token, body={}
             ).json()["conversation"]
             fetch(
-                base(server) + "/api/conversations/turn", token=server.token,
+                base(server) + "/api/conversations/turn",
+                token=server.token,
                 body={"session_id": created["session_id"], "message": "hello"},
             )
             selected = fetch(
@@ -163,15 +197,22 @@ def test_feedback_endpoint_is_authenticated_and_validated(tmp_path: Path) -> Non
             ).json()["selected"]
             body = {
                 "session_id": created["session_id"],
-                "message_id": selected["messages"][1]["message_id"], "rating": "up",
+                "message_id": selected["messages"][1]["message_id"],
+                "rating": "up",
             }
             assert fetch(endpoint_url, body=body).status == 401
-            assert fetch(endpoint_url, token=server.token,
-                         body={**body, "rating": "great"}).status == 400
+            assert (
+                fetch(endpoint_url, token=server.token, body={**body, "rating": "great"}).status
+                == 400
+            )
             accepted = fetch(endpoint_url, token=server.token, body=body)
             assert accepted.status == 200 and accepted.json()["feedback"]["rating"] == "up"
-            assert fetch(endpoint_url, token=server.token,
-                         body={**body, "message_id": "message-x"}).status == 404
+            assert (
+                fetch(
+                    endpoint_url, token=server.token, body={**body, "message_id": "message-x"}
+                ).status
+                == 404
+            )
         finally:
             server.shutdown()
             server.server_close()
@@ -190,9 +231,14 @@ def _script() -> str:
 
 def test_the_page_groups_turns_with_rating_reply_and_context_menu() -> None:
     for expected in (
-        'id="turn-menu"', 'id="reply-chip"', 'id="reply-chip-clear"',
-        '"/api/conversations/feedback"', '"contextmenu"', "reply_to: entry.replyTo",
-        'role", "group"', "aria-pressed",
+        'id="turn-menu"',
+        'id="reply-chip"',
+        'id="reply-chip-clear"',
+        '"/api/conversations/feedback"',
+        '"contextmenu"',
+        "reply_to: entry.replyTo",
+        'role", "group"',
+        "aria-pressed",
     ):
         assert expected in PAGE, expected
     section = _script().split(START, 1)[1].split(END, 1)[0]
@@ -244,8 +290,9 @@ assert.ok(content(api.feedbackSummary({rating: "up", note: HOSTILE})).includes(H
 """
     script = tmp_path / "turns.js"
     script.write_text(
-        harness.replace("__SOURCE__", json.dumps(source))
-        .replace("__HOSTILE__", json.dumps("<img src=x onerror=alert(1)>")),
+        harness.replace("__SOURCE__", json.dumps(source)).replace(
+            "__HOSTILE__", json.dumps("<img src=x onerror=alert(1)>")
+        ),
         encoding="utf-8",
     )
     completed = subprocess.run(
@@ -264,9 +311,7 @@ def test_each_session_row_offers_a_confirmed_delete() -> None:
 
 def test_public_backend_switch_updates_the_selector_before_reloading() -> None:
     script = _script()
-    start = script.split('el("backend-public-start").addEventListener', 1)[1].split(
-        "\n});\n", 1
-    )[0]
+    start = script.split('el("backend-public-start").addEventListener', 1)[1].split("\n});\n", 1)[0]
     assert start.index('el("conversation-backend").value = activeBackend') < start.index(
         "await loadChat(activeConversation)"
     )

@@ -38,11 +38,14 @@ name: wifi7-instruments
 
 
 def _questions(root: Path) -> None:
-    for rel, text in {"market/q1.md": WIFI7.replace("Wi-Fi 7", "Wi-Fi 7 market"),
-                      "productions/q2.md": WIFI7,
-                      "market_productions/q3.md": WIFI7.replace("FSWX", "CMX500"),
-                      "vna/q4.md": WIFI7, "general.md": WIFI7,
-                      "market/free.md": "# 自由格式的題目\n\n先確認:\n  - ZNA-B8\n"}.items():
+    for rel, text in {
+        "market/q1.md": WIFI7.replace("Wi-Fi 7", "Wi-Fi 7 market"),
+        "productions/q2.md": WIFI7,
+        "market_productions/q3.md": WIFI7.replace("FSWX", "CMX500"),
+        "vna/q4.md": WIFI7,
+        "general.md": WIFI7,
+        "market/free.md": "# 自由格式的題目\n\n先確認:\n  - ZNA-B8\n",
+    }.items():
         (root / rel).parent.mkdir(parents=True, exist_ok=True)
         (root / rel).write_text(text, encoding="utf-8")
 
@@ -63,10 +66,12 @@ def test_sets_follow_folders_and_the_scope_picks_the_defaults(tmp_path: Path) ->
     assert names == ["", "market", "market_productions", "productions", "vna"]
     # Plural and order do not matter: "Productions/CMX500" is the production category.
     assert default_sets(names, ("Market/AI", "Productions/CMX500")) == (
-        "market", "market_productions", "productions")
+        "market",
+        "market_productions",
+        "productions",
+    )
     assert default_sets(names, ("Market",)) == ("market",)
-    assert default_sets(["productions_market"], ("market", "production")) == (
-        "productions_market",)
+    assert default_sets(["productions_market"], ("market", "production")) == ("productions_market",)
     free = next(q for q in found if q.path == "market/free.md")
     assert free.must == () and free.must_not == ()  # not gradable; reported, not guessed
 
@@ -84,9 +89,15 @@ def test_a_benchmark_compares_sandbox_and_project_and_finds_regressions(tmp_path
         text = "FSWX 與 K91BE" if side == "project" else "CMX500 與 K91BE"
         return {"ok": True, "answer": text}
 
-    report = run_benchmark(ask, sandbox_id="sb-x", sandbox=sandbox, project=project,
-                           sets=("market", "productions", "market_productions"),
-                           actor="leo.chi", skill=None)
+    report = run_benchmark(
+        ask,
+        sandbox_id="sb-x",
+        sandbox=sandbox,
+        project=project,
+        sets=("market", "productions", "market_productions"),
+        actor="leo.chi",
+        skill=None,
+    )
     assert report.status == "finished" and report.total == 3
     assert report.ungraded == ("market/free.md",)
     assert set(report.regressions) == {"market/q1.md", "productions/q2.md"}
@@ -102,15 +113,25 @@ def test_a_vault_that_is_not_installed_is_asked_through_the_harness(tmp_path: Pa
     asset = AssetIdentity(namespace="engineering", name="sandbox", version="0.0.0-candidate")
     catalog = catalog_for(vault, asset, "leo.chi")
     assert catalog.get(asset) is not None
-    installed = SimpleNamespace(handler=KnowledgeQueryHandler(KnowledgeCatalog(), object(),  # type: ignore[arg-type]
-                                                              alias="company"))
+    installed = SimpleNamespace(
+        handler=KnowledgeQueryHandler(
+            KnowledgeCatalog(),
+            object(),  # type: ignore[arg-type]
+            alias="company",
+        )
+    )
     runtime = SimpleNamespace(
         actor="leo.chi",
-        agent=SimpleNamespace(gateway=SimpleNamespace(bridge=SimpleNamespace(
-            installed=SimpleNamespace(get=lambda _identity: installed)))))
+        agent=SimpleNamespace(
+            gateway=SimpleNamespace(
+                bridge=SimpleNamespace(installed=SimpleNamespace(get=lambda _identity: installed))
+            )
+        ),
+    )
     other = AssetIdentity(namespace="engineering", name="other", version="1.0.0")
     reply = KnowledgeHarness(runtime, None).ask(
-        KnowledgeAskRequest(asset=other, question="EVM?"), catalog=catalog)
+        KnowledgeAskRequest(asset=other, question="EVM?"), catalog=catalog
+    )
     # A version the catalog does not hold is refused exactly as on the Bridge route.
     assert reply["ok"] is False
     assert reply["outcome"]["capability"]["failure"]["code"] == "knowledge_version_not_found"
@@ -118,14 +139,22 @@ def test_a_vault_that_is_not_installed_is_asked_through_the_harness(tmp_path: Pa
 
 
 def test_the_knowledge_tab_offers_pull_and_benchmark() -> None:
-    for hook in ('id="kp-pull"', 'id="kp-bench"', "/api/knowledge/benchmark/start",
-                 '"question-sets"', '"drop-folders"'):
+    for hook in (
+        'id="kp-pull"',
+        'id="kp-bench"',
+        "/api/knowledge/benchmark/start",
+        '"question-sets"',
+        '"drop-folders"',
+    ):
         assert hook in PAGE
 
 
 def test_a_product_line_sandbox_runs_its_own_and_the_shared_sets() -> None:
     names = ["productions", "vna", "oscilloscope", "market_vna", "productions_vna"]
-    assert default_sets(names, ("Productions/VNA",)) == ("productions", "vna",
-                                                         "productions_vna")
+    assert default_sets(names, ("Productions/VNA",)) == ("productions", "vna", "productions_vna")
     assert default_sets(names, ("Productions/VNA", "Market")) == (
-        "productions", "vna", "market_vna", "productions_vna")
+        "productions",
+        "vna",
+        "market_vna",
+        "productions_vna",
+    )

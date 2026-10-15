@@ -47,9 +47,7 @@ class FacetRelation(Contract):
     citation: Citation
 
 
-def connected_facets(
-    names: tuple[str, ...], edges: tuple[tuple[str, str], ...]
-) -> bool:
+def connected_facets(names: tuple[str, ...], edges: tuple[tuple[str, str], ...]) -> bool:
     """Every requested facet must be connected by direct Raw relationships."""
     if len(names) < 2:
         return True
@@ -80,9 +78,7 @@ class KnowledgeEvidenceAssessment(Contract):
         observed = {item.name for item in self.observations}
         if len(observed) != len(self.observations):
             raise ValueError("facet observations must be unique")
-        expected_missing = tuple(
-            item.name for item in self.observations if not item.passages
-        )
+        expected_missing = tuple(item.name for item in self.observations if not item.passages)
         if self.missing_facets != expected_missing:
             raise ValueError("missing facets must match observations")
         connected = connected_facets(
@@ -136,7 +132,8 @@ def passage_number(passages: tuple[Passage, ...], target: Passage) -> int | None
     """Retrieval scores may differ for the same Raw section across Skill queries."""
     return next(
         (
-            index for index, passage in enumerate(passages, 1)
+            index
+            for index, passage in enumerate(passages, 1)
             if passage.citation == target.citation
             and passage.text == SECRET_PATTERN.sub(REDACTED, target.text)
         ),
@@ -166,15 +163,50 @@ class KnowledgeEvidenceSummary(Contract):
 
 
 _CLAIM_STOPWORDS = {
-    "about", "after", "also", "answer", "because", "before", "could", "from", "have",
-    "into", "only", "other", "that", "their", "there", "these", "this", "those",
-    "with", "would", "should", "source", "sources", "evidence", "raw", "資料", "來源",
-    "證據", "可以", "需要", "以及", "因此", "目前", "根據", "這些", "該項",
+    "about",
+    "after",
+    "also",
+    "answer",
+    "because",
+    "before",
+    "could",
+    "from",
+    "have",
+    "into",
+    "only",
+    "other",
+    "that",
+    "their",
+    "there",
+    "these",
+    "this",
+    "those",
+    "with",
+    "would",
+    "should",
+    "source",
+    "sources",
+    "evidence",
+    "raw",
+    "資料",
+    "來源",
+    "證據",
+    "可以",
+    "需要",
+    "以及",
+    "因此",
+    "目前",
+    "根據",
+    "這些",
+    "該項",
 }
 
 
 def answer_claims_overlap_raw(
-    answer: Answer, *, inference_label: str | None = None, allow_wiki: bool = False,
+    answer: Answer,
+    *,
+    inference_label: str | None = None,
+    allow_wiki: bool = False,
 ) -> bool:
     """Reject obvious citation laundering; this is not semantic entailment.
 
@@ -200,7 +232,8 @@ def answer_claims_overlap_raw(
         numbers = cited_numbers(sentence)
         sources = [
             answer.passages[number - 1].text
-            for number in numbers if 1 <= number <= len(answer.passages)
+            for number in numbers
+            if 1 <= number <= len(answer.passages)
             and citable(answer.passages[number - 1], allow_wiki)
         ]
         if not sources:
@@ -214,8 +247,7 @@ def answer_claims_overlap_raw(
         if not stated_numbers <= source_numbers:
             return False
         claim_terms = {
-            term for term in tokens(claim)
-            if len(term) >= 2 and term not in _CLAIM_STOPWORDS
+            term for term in tokens(claim) if len(term) >= 2 and term not in _CLAIM_STOPWORDS
         }
         source_terms = set(tokens(source_text))
         if not claim_terms or len(claim_terms & source_terms) < min(2, len(claim_terms)):
@@ -253,15 +285,15 @@ def _names_focus(raw_ref: str | None, focus: KnowledgeFocusHint) -> bool:
     """A Raw file named for the focus (e.g. an NTN whitepaper) is focused context."""
     name = PurePosixPath(raw_ref or "").stem
     return any(
-        re.search(
-            rf"(?<![A-Za-z0-9]){re.escape(term)}(?![A-Za-z0-9])", name, re.IGNORECASE
-        )
+        re.search(rf"(?<![A-Za-z0-9]){re.escape(term)}(?![A-Za-z0-9])", name, re.IGNORECASE)
         for term in focus.evidence_terms
     )
 
 
 def _source_supports_focused_use_case(
-    source: Passage, entity: str, focus: KnowledgeFocusHint,
+    source: Passage,
+    entity: str,
+    focus: KnowledgeFocusHint,
 ) -> bool:
     """Allow a product use case to inherit a nearby market-context sentence.
 
@@ -285,15 +317,18 @@ def _source_supports_focused_use_case(
             continue
         if document_focus:
             return True
-        neighbors = " ".join(sentences[max(0, index - 2):index + 3]).casefold()
+        neighbors = " ".join(sentences[max(0, index - 2) : index + 3]).casefold()
         if any(term.casefold() in neighbors for term in focus.evidence_terms):
             return True
     return False
 
 
 def unsupported_product_recommendations(
-    answer: Answer, question: str, procedure: KnowledgeProcedure,
-    *, allow_wiki: bool = False,
+    answer: Answer,
+    question: str,
+    procedure: KnowledgeProcedure,
+    *,
+    allow_wiki: bool = False,
 ) -> tuple[str, ...]:
     """Find recommendations supported only by a broad market/product listing.
 
@@ -306,8 +341,11 @@ def unsupported_product_recommendations(
     if focus is None:
         return ()
     product = next(
-        (facet for facet in procedure.requested_facets(question)
-         if facet.name == "product_option_spec"),
+        (
+            facet
+            for facet in procedure.requested_facets(question)
+            if facet.name == "product_option_spec"
+        ),
         None,
     )
     if product is None:
@@ -316,10 +354,11 @@ def unsupported_product_recommendations(
     for line in answer.text.splitlines():
         if not _RECOMMENDATION.search(line):
             continue
-        entities = tuple(dict.fromkeys(
-            match.group(0).upper()
-            for match in _RECOMMENDED_PRODUCT_ID.finditer(line)
-        ))
+        entities = tuple(
+            dict.fromkeys(
+                match.group(0).upper() for match in _RECOMMENDED_PRODUCT_ID.finditer(line)
+            )
+        )
         if not entities:
             continue
         sources = tuple(
@@ -330,8 +369,7 @@ def unsupported_product_recommendations(
         )
         for entity in entities:
             supported = any(
-                _source_supports_focused_use_case(source, entity, focus)
-                for source in sources
+                _source_supports_focused_use_case(source, entity, focus) for source in sources
             )
             if not supported:
                 rejected.append(line)
@@ -340,8 +378,11 @@ def unsupported_product_recommendations(
 
 
 def omit_unsupported_product_recommendations(
-    answer: Answer, question: str, procedure: KnowledgeProcedure,
-    *, allow_wiki: bool = False,
+    answer: Answer,
+    question: str,
+    procedure: KnowledgeProcedure,
+    *,
+    allow_wiki: bool = False,
 ) -> Answer:
     """Preserve independently cited claims after dropping weak recommendations."""
     rejected = unsupported_product_recommendations(
@@ -349,13 +390,13 @@ def omit_unsupported_product_recommendations(
     )
     if not rejected:
         return answer
-    remaining = "\n".join(
-        line for line in answer.text.splitlines() if line not in rejected
-    ).strip()
-    return answer.model_copy(update={
-        "status": "answered" if remaining else "uncited",
-        "text": remaining,
-    })
+    remaining = "\n".join(line for line in answer.text.splitlines() if line not in rejected).strip()
+    return answer.model_copy(
+        update={
+            "status": "answered" if remaining else "uncited",
+            "text": remaining,
+        }
+    )
 
 
 def answer_concerns_subject(answer: Answer, subject: str, *, allow_wiki: bool = False) -> bool:
@@ -369,18 +410,22 @@ def answer_concerns_subject(answer: Answer, subject: str, *, allow_wiki: bool = 
     if folded in answer.text.casefold():
         return True
     return any(
-        folded in PurePosixPath(
+        folded
+        in PurePosixPath(
             answer.passages[number - 1].citation.raw_ref
-            or answer.passages[number - 1].citation.wiki_page or ""
+            or answer.passages[number - 1].citation.wiki_page
+            or ""
         ).stem.casefold()
         for number in cited_numbers(answer.text)
-        if 1 <= number <= len(answer.passages)
-        and citable(answer.passages[number - 1], allow_wiki)
+        if 1 <= number <= len(answer.passages) and citable(answer.passages[number - 1], allow_wiki)
     )
 
 
 def omit_unverified_answer_lines(
-    answer: Answer, *, inference_label: str | None = None, allow_wiki: bool = False,
+    answer: Answer,
+    *,
+    inference_label: str | None = None,
+    allow_wiki: bool = False,
 ) -> Answer:
     """Retain independently supported lines of a partly faulty model answer.
 
@@ -391,19 +436,29 @@ def omit_unverified_answer_lines(
         return answer
     kept = keep_supported_lines(
         answer.text,
-        lambda line: line if answer_claims_overlap_raw(
-            answer.model_copy(update={"text": line}), inference_label=inference_label,
-            allow_wiki=allow_wiki,
-        ) else "",
+        lambda line: (
+            line
+            if answer_claims_overlap_raw(
+                answer.model_copy(update={"text": line}),
+                inference_label=inference_label,
+                allow_wiki=allow_wiki,
+            )
+            else ""
+        ),
     )
     remaining = (
-        cap_labeled_inferences(kept, inference_label) if inference_label
-        else kept if cited_claim_sentences(kept) else ""
+        cap_labeled_inferences(kept, inference_label)
+        if inference_label
+        else kept
+        if cited_claim_sentences(kept)
+        else ""
     )
-    return answer.model_copy(update={
-        "status": "answered" if remaining else "uncited",
-        "text": remaining,
-    })
+    return answer.model_copy(
+        update={
+            "status": "answered" if remaining else "uncited",
+            "text": remaining,
+        }
+    )
 
 
 def _evidence_words(text: str) -> str:
@@ -415,17 +470,18 @@ def _evidence_words(text: str) -> str:
 
 
 def evidence_excerpt(
-    text: str, *, subject: str | None, terms: tuple[str, ...],
+    text: str,
+    *,
+    subject: str | None,
+    terms: tuple[str, ...],
     priority_patterns: tuple[str, ...] = (),
 ) -> str:
     """Choose a readable, topic-bearing sentence from a cited Raw section."""
     prose = _evidence_words(text)
-    sentences = [
-        sentence.strip(" -•\t")
-        for sentence in re.split(r"(?<=[.!?。！？])\s+|\n", prose)
-    ]
+    sentences = [sentence.strip(" -•\t") for sentence in re.split(r"(?<=[.!?。！？])\s+|\n", prose)]
     meaningful = [
-        sentence for sentence in sentences
+        sentence
+        for sentence in sentences
         if len(sentence) >= 25 and sum(char.isalpha() for char in sentence) >= 15
     ]
     if not meaningful:
@@ -435,8 +491,7 @@ def evidence_excerpt(
         lowered = sentence.casefold()
         score = 3 if subject and subject.casefold() in lowered else 0
         score += 6 * sum(
-            bool(re.search(pattern, sentence, re.IGNORECASE))
-            for pattern in priority_patterns
+            bool(re.search(pattern, sentence, re.IGNORECASE)) for pattern in priority_patterns
         )
         score += sum(term.casefold() in lowered for term in terms)
         return score, -len(sentence)
@@ -446,7 +501,8 @@ def evidence_excerpt(
 
 
 def extractive_relation_answer(
-    question: str, assessment: KnowledgeEvidenceAssessment,
+    question: str,
+    assessment: KnowledgeEvidenceAssessment,
     procedure: KnowledgeProcedure,
 ) -> Answer | None:
     """Keep cited direct Raw statements when model synthesis cannot be validated."""
@@ -467,7 +523,8 @@ def extractive_relation_answer(
         sentences = re.split(r"(?<=[.!?。！？])\s+|\n", _evidence_words(passage.text))
         linked = next(
             (
-                sentence.strip(" -•\t") for sentence in sentences
+                sentence.strip(" -•\t")
+                for sentence in sentences
                 if 45 <= len(sentence.strip()) <= 500
                 and not sentence.lstrip().startswith(("|", "#"))
                 and not re.search(r"\b(?:them|those|these)\b", sentence, re.IGNORECASE)
@@ -475,12 +532,16 @@ def extractive_relation_answer(
                     "/PR/" in (passage.citation.raw_ref or "")
                     and re.search(
                         r"unique|comprehensive|empower|all .* technologies",
-                        sentence, re.IGNORECASE,
+                        sentence,
+                        re.IGNORECASE,
                     )
                 )
                 if _relation_pairs(
-                    passage.model_copy(update={"text": sentence}), facets, subject,
-                    focus, procedure.relation_terms,
+                    passage.model_copy(update={"text": sentence}),
+                    facets,
+                    subject,
+                    focus,
+                    procedure.relation_terms,
                 )
             ),
             None,
@@ -492,14 +553,17 @@ def extractive_relation_answer(
     if not extracts:
         return None
     answer = Answer(
-        question=question, status="answered", passages=selected,
+        question=question,
+        status="answered",
+        passages=selected,
         text="\n\n".join(extracts),
     )
     return answer if answer_claims_overlap_raw(answer) else None
 
 
 def extractive_observation_answer(
-    question: str, assessment: KnowledgeEvidenceAssessment,
+    question: str,
+    assessment: KnowledgeEvidenceAssessment,
     procedure: KnowledgeProcedure,
 ) -> Answer | None:
     """Return cited source facts when model synthesis cannot be grounded.
@@ -526,7 +590,8 @@ def extractive_observation_answer(
             if number is None:
                 continue
             excerpt = evidence_excerpt(
-                passage.text, subject=subject,
+                passage.text,
+                subject=subject,
                 terms=facet.support_terms + facet.link_terms,
                 priority_patterns=(facet.entity_pattern,) if facet.entity_pattern else (),
             )
@@ -546,7 +611,8 @@ def extractive_observation_answer(
             if number is None:
                 continue
             excerpt = evidence_excerpt(
-                passage.text, subject=subject,
+                passage.text,
+                subject=subject,
                 terms=procedure.relation_terms,
             )
             if len(excerpt) >= 25:
@@ -555,7 +621,9 @@ def extractive_observation_answer(
     if not lines:
         return None
     answer = Answer(
-        question=question, status="answered", passages=selected,
+        question=question,
+        status="answered",
+        passages=selected,
         text="\n".join(lines),
     )
     checked = omit_unverified_answer_lines(answer)
@@ -563,15 +631,23 @@ def extractive_observation_answer(
 
 
 def _supports_facet(
-    passage: Passage, facet: KnowledgeFacetInstruction, subject: str | None,
-    focus: KnowledgeFocusHint | None, question: str, *, allow_wiki: bool = False,
+    passage: Passage,
+    facet: KnowledgeFacetInstruction,
+    subject: str | None,
+    focus: KnowledgeFocusHint | None,
+    question: str,
+    *,
+    allow_wiki: bool = False,
 ) -> bool:
     if not citable(passage, allow_wiki):
         return False
     # Source areas name Raw folders; a curated Wiki page is not filed by them.
-    if passage.citation.kind == "raw" and facet.source_areas and not any(
-        (passage.citation.raw_ref or "").startswith(area)
-        for area in facet.source_areas
+    if (
+        passage.citation.kind == "raw"
+        and facet.source_areas
+        and not any(
+            (passage.citation.raw_ref or "").startswith(area) for area in facet.source_areas
+        )
     ):
         return False
     content = _evidence_words(passage.text).casefold()
@@ -589,17 +665,20 @@ def _supports_facet(
         return False
     if facet.entity_pattern and not re.search(facet.entity_pattern, source_identity, re.IGNORECASE):
         return False
-    if facet.comparison_terms and subject is not None and not any(
-        subject.casefold() in sentence.casefold()
-        and any(term.casefold() in sentence.casefold() for term in facet.comparison_terms)
-        and any(term.casefold() in sentence.casefold() for term in facet.support_terms)
-        for sentence in re.split(r"(?<=[.!?。！？])\s+|\n", content)
+    if (
+        facet.comparison_terms
+        and subject is not None
+        and not any(
+            subject.casefold() in sentence.casefold()
+            and any(term.casefold() in sentence.casefold() for term in facet.comparison_terms)
+            and any(term.casefold() in sentence.casefold() for term in facet.support_terms)
+            for sentence in re.split(r"(?<=[.!?。！？])\s+|\n", content)
+        )
     ):
         return False
     for requirement in facet.evidence_requirements:
         if re.search(requirement.question_pattern, question, re.IGNORECASE) and not any(
-            re.search(pattern, content, re.IGNORECASE)
-            for pattern in requirement.evidence_patterns
+            re.search(pattern, content, re.IGNORECASE) for pattern in requirement.evidence_patterns
         ):
             return False
     return (facet.focus_is_support and focus_found) or any(
@@ -608,8 +687,12 @@ def _supports_facet(
 
 
 def facet_supported_by(
-    passage: Passage, facet_name: str, procedure: KnowledgeProcedure, question: str,
-    *, allow_wiki: bool = False,
+    passage: Passage,
+    facet_name: str,
+    procedure: KnowledgeProcedure,
+    question: str,
+    *,
+    allow_wiki: bool = False,
 ) -> bool:
     """Whether one passage meets the Skill's own rule for a facet.
 
@@ -621,7 +704,11 @@ def facet_supported_by(
     if facet is None:
         return False
     return _supports_facet(
-        passage, facet, procedure.subject(question), procedure.focus(question), question,
+        passage,
+        facet,
+        procedure.subject(question),
+        procedure.focus(question),
+        question,
         allow_wiki=allow_wiki,
     )
 
@@ -632,7 +719,8 @@ def _relation_pairs(
     subject: str | None,
     focus: KnowledgeFocusHint | None,
     terms: tuple[str, ...],
-    *, allow_wiki: bool = False,
+    *,
+    allow_wiki: bool = False,
 ) -> tuple[tuple[str, str], ...]:
     if not citable(passage, allow_wiki):
         return ()
@@ -642,34 +730,38 @@ def _relation_pairs(
         if not any(term.casefold() in lowered for term in terms):
             continue
         present = [
-            facet.name for facet in facets
+            facet.name
+            for facet in facets
             if (not facet.include_subject or subject is None or subject.casefold() in lowered)
             and (
-                (
-                    facet.link_subject and subject is not None
-                    and subject.casefold() in lowered
-                ) or (
-                    facet.focus_is_link and focus is not None
+                (facet.link_subject and subject is not None and subject.casefold() in lowered)
+                or (
+                    facet.focus_is_link
+                    and focus is not None
                     and any(term.casefold() in lowered for term in focus.evidence_terms)
-                ) or (
+                )
+                or (
                     any(
                         term.casefold() in lowered
                         for term in (facet.link_terms or facet.support_terms)
                     )
-                    and (facet.entity_pattern is None or re.search(
-                        facet.entity_pattern, sentence, re.IGNORECASE
-                    ))
+                    and (
+                        facet.entity_pattern is None
+                        or re.search(facet.entity_pattern, sentence, re.IGNORECASE)
+                    )
                 )
             )
         ]
         for left_index, left in enumerate(present):
-            for right in present[left_index + 1:]:
+            for right in present[left_index + 1 :]:
                 pairs.add((left, right))
     return tuple(sorted(pairs))
 
 
 def _diverse_passages(
-    passages: tuple[Passage, ...], *, limit: int,
+    passages: tuple[Passage, ...],
+    *,
+    limit: int,
     entity_pattern: str | None = None,
 ) -> tuple[Passage, ...]:
     """Keep distinct sources and, for product discovery, instrument families."""
@@ -681,6 +773,7 @@ def _diverse_passages(
             unique.append(passage)
             seen_citations.add(citation)
     if entity_pattern is not None:
+
         def source_tier(passage: Passage) -> int:
             ref = passage.citation.raw_ref or ""
             if "/PR/" in ref:
@@ -693,11 +786,13 @@ def _diverse_passages(
     seen_families: set[str] = set()
     if entity_pattern is not None:
         for passage in unique:
-            families = tuple(dict.fromkeys(
-                family.group(0).upper()
-                for matched in re.finditer(entity_pattern, passage.text, re.IGNORECASE)
-                if (family := re.match(r"[A-Za-z]+", matched.group(0))) is not None
-            ))
+            families = tuple(
+                dict.fromkeys(
+                    family.group(0).upper()
+                    for matched in re.finditer(entity_pattern, passage.text, re.IGNORECASE)
+                    if (family := re.match(r"[A-Za-z]+", matched.group(0))) is not None
+                )
+            )
             novel = next((family for family in families if family not in seen_families), None)
             if novel is not None:
                 selected.append(passage)
@@ -721,7 +816,9 @@ def _diverse_passages(
 
 
 def _interleave_passages(
-    groups: tuple[tuple[Passage, ...], ...], *, limit: int,
+    groups: tuple[tuple[Passage, ...], ...],
+    *,
+    limit: int,
     entity_pattern: str | None = None,
 ) -> tuple[Passage, ...]:
     """Give each Skill discovery query a chance to surface a distinct source."""
@@ -736,7 +833,8 @@ def _interleave_passages(
 
 
 def _direct_product_use_case(
-    sentence: str, focus: KnowledgeFocusHint,
+    sentence: str,
+    focus: KnowledgeFocusHint,
     entity_pattern: str,
 ) -> bool:
     visible = _evidence_words(sentence)
@@ -748,8 +846,11 @@ def _direct_product_use_case(
 
 
 def assess_knowledge_evidence(
-    vault: Vault, question: str, procedure: KnowledgeProcedure,
-    *, snapshot: RetrievalSnapshot | None = None,
+    vault: Vault,
+    question: str,
+    procedure: KnowledgeProcedure,
+    *,
+    snapshot: RetrievalSnapshot | None = None,
 ) -> KnowledgeEvidenceAssessment:
     """Run each Skill query once, then use its fallback only for missing facets."""
     facets = procedure.requested_facets(question)
@@ -758,63 +859,84 @@ def assess_knowledge_evidence(
     subject = procedure.subject(question)
     focus = procedure.focus(question)
     snapshot = snapshot or RetrievalSnapshot(vault)
+
     def facet_queries(facet: KnowledgeFacetInstruction) -> tuple[str, ...]:
         searches = (
             facet.discovery_queries
-            if subject is None and facet.discovery_queries else facet.search_queries
+            if subject is None and facet.discovery_queries
+            else facet.search_queries
         )
         prefix = " ".join(
-            part for part in (
+            part
+            for part in (
                 subject if facet.search_subject or facet.include_subject else None,
                 focus.query if focus else None,
-            ) if part
+            )
+            if part
         )
         return tuple(f"{prefix} {search}".strip() for search in searches)
 
     planned = tuple(facet_queries(facet) for facet in facets)
-    queries = [
-        searches[0] for searches in planned
-    ]
+    queries = [searches[0] for searches in planned]
     relation_required = procedure.require_relation_for_combination and len(facets) > 1
+
     def search(
-        queries: tuple[str, ...], *, k: int, min_raw: int,
+        queries: tuple[str, ...],
+        *,
+        k: int,
+        min_raw: int,
     ) -> tuple[tuple[Passage, ...], ...]:
         if procedure.wiki_index_first:
             return snapshot.wiki_guided_batch(
-                queries, k=k, min_raw=min_raw,
+                queries,
+                k=k,
+                min_raw=min_raw,
                 index_k=procedure.wiki_index_hits,
             )
         return snapshot.batch(queries, k=k, min_raw=min_raw)
+
     batches = search(tuple(queries), k=12, min_raw=12)
+
     def eligible(
-        batch: tuple[Passage, ...], facet: KnowledgeFacetInstruction,
+        batch: tuple[Passage, ...],
+        facet: KnowledgeFacetInstruction,
     ) -> tuple[Passage, ...]:
         return tuple(
-            passage for passage in batch
+            passage
+            for passage in batch
             if _supports_facet(passage, facet, subject, focus, question)
         )
 
     def ranked_eligible(
-        batch: tuple[Passage, ...], facet: KnowledgeFacetInstruction,
+        batch: tuple[Passage, ...],
+        facet: KnowledgeFacetInstruction,
         query: str,
     ) -> tuple[Passage, ...]:
         found = eligible(batch, facet)
         if facet.collect_all_queries:
-            def accepts(passage: Passage) -> bool:
-                return _supports_facet(
-                    passage, facet, subject, focus, question
-                )
 
-            guided = snapshot.matching_wiki_sources(
-                query, accepts=accepts, k=facet.max_passages,
-                index_k=procedure.wiki_index_hits,
-            ) if procedure.wiki_index_first else ()
+            def accepts(passage: Passage) -> bool:
+                return _supports_facet(passage, facet, subject, focus, question)
+
+            guided = (
+                snapshot.matching_wiki_sources(
+                    query,
+                    accepts=accepts,
+                    k=facet.max_passages,
+                    index_k=procedure.wiki_index_hits,
+                )
+                if procedure.wiki_index_first
+                else ()
+            )
             full = snapshot.matching_raw(
-                query, accepts=accepts, k=24,
+                query,
+                accepts=accepts,
+                k=24,
             )
             found = (*guided, *full, *found)
         return _diverse_passages(
-            found, limit=facet.max_passages,
+            found,
+            limit=facet.max_passages,
             entity_pattern=facet.entity_pattern if facet.collect_all_queries else None,
         )
 
@@ -826,32 +948,32 @@ def assess_knowledge_evidence(
     attempts = [1] * len(facets)
     for attempt in range(1, max(len(searches) for searches in planned)):
         missing_indices = [
-            index for index, _facet in enumerate(facets)
+            index
+            for index, _facet in enumerate(facets)
             if (facets[index].collect_all_queries or not accepted[index])
             and attempt < len(planned[index])
         ]
         if not missing_indices:
             break
-        retry_queries = tuple(
-            planned[index][attempt]
-            for index in missing_indices
-        )
+        retry_queries = tuple(planned[index][attempt] for index in missing_indices)
         retry_batches = search(retry_queries, k=12, min_raw=12)
         for index, batch in zip(missing_indices, retry_batches, strict=True):
             attempts[index] += 1
             found = ranked_eligible(batch, facets[index], planned[index][attempt])
             groups[index].append(found)
             accepted[index] = _interleave_passages(
-                tuple(groups[index]), limit=facets[index].max_passages,
+                tuple(groups[index]),
+                limit=facets[index].max_passages,
                 entity_pattern=(
-                    facets[index].entity_pattern
-                    if facets[index].collect_all_queries else None
+                    facets[index].entity_pattern if facets[index].collect_all_queries else None
                 ),
             )
     for index, facet in enumerate(facets):
         if not accepted[index]:
+
             def accepts(
-                passage: Passage, item: KnowledgeFacetInstruction = facet,
+                passage: Passage,
+                item: KnowledgeFacetInstruction = facet,
             ) -> bool:
                 return _supports_facet(passage, item, subject, focus, question)
 
@@ -874,13 +996,9 @@ def assess_knowledge_evidence(
                     followed.add(raw_ref)
                     if not any(
                         direct(sentence)
-                        for sentence in re.split(
-                            r"(?<=[.!?。！？])\s+|\n+", passage.text
-                        )
+                        for sentence in re.split(r"(?<=[.!?。！？])\s+|\n+", passage.text)
                     ):
-                        better = snapshot.source_section(
-                            raw_ref, matches_sentence=direct
-                        )
+                        better = snapshot.source_section(raw_ref, matches_sentence=direct)
                         if better is not None and _supports_facet(
                             better, facet, subject, focus, question
                         ):
@@ -898,23 +1016,34 @@ def assess_knowledge_evidence(
     if relation_required:
         relation_queries = [
             *(
-                " ".join(part for part in (
-                    subject, focus.query if focus else None, search,
-                ) if part)
+                " ".join(
+                    part
+                    for part in (
+                        subject,
+                        focus.query if focus else None,
+                        search,
+                    )
+                    if part
+                )
                 for search in procedure.relation_search_queries
             ),
             *(
-                " ".join(part for part in (
-                    subject, focus.query if focus else None,
-                    facets[left].search_queries[0], facets[right].search_queries[0],
-                ) if part)
-                for left in range(len(facets)) for right in range(left + 1, len(facets))
+                " ".join(
+                    part
+                    for part in (
+                        subject,
+                        focus.query if focus else None,
+                        facets[left].search_queries[0],
+                        facets[right].search_queries[0],
+                    )
+                    if part
+                )
+                for left in range(len(facets))
+                for right in range(left + 1, len(facets))
             ),
         ][:7]
         relation_batches = search(tuple(relation_queries), k=12, min_raw=12)
-        relation_candidates = tuple(
-            passage for batch in relation_batches for passage in batch
-        )
+        relation_candidates = tuple(passage for batch in relation_batches for passage in batch)
     else:
         relation_candidates = ()
     relation_pairs = tuple(
@@ -970,15 +1099,18 @@ def assess_knowledge_evidence(
         relations=relations,
         context_passages=tuple(context_passages),
         wiki_context=tuple(
-            _safe_passage(item) for item in snapshot.wiki_index_context(
-                question, index_k=procedure.wiki_index_hits
-            )
-        ) if procedure.wiki_index_first else (),
+            _safe_passage(item)
+            for item in snapshot.wiki_index_context(question, index_k=procedure.wiki_index_hits)
+        )
+        if procedure.wiki_index_first
+        else (),
     )
 
 
 def assess_wiki_primary(
-    passages: tuple[Passage, ...], question: str, procedure: KnowledgeProcedure,
+    passages: tuple[Passage, ...],
+    question: str,
+    procedure: KnowledgeProcedure,
 ) -> KnowledgeEvidenceAssessment:
     """Observe the Skill's requested facets in Wiki-primary evidence.
 
@@ -996,10 +1128,9 @@ def assess_wiki_primary(
         FacetObservation(
             name=facet.name,
             passages=tuple(
-                passage for passage in safe
-                if _supports_facet(
-                    passage, facet, subject, focus, question, allow_wiki=True
-                )
+                passage
+                for passage in safe
+                if _supports_facet(passage, facet, subject, focus, question, allow_wiki=True)
             )[:6],
             attempts=1,
         )

@@ -83,13 +83,17 @@ class CodingHarness:
         are the Host check, and a repair retries from execute. The result, its
         events and its failure codes are what this harness always returned."""
         checked = CodingHarnessRequest.model_validate(request)
-        with telemetry.run("coding_change", trace_id=trace.trace_id,
-                           attributes={"skill_id": checked.skill_versions[0]}):
+        with telemetry.run(
+            "coding_change",
+            trace_id=trace.trace_id,
+            attributes={"skill_id": checked.skill_versions[0]},
+        ):
             result = self._run(trace, checked)
-            telemetry.set_run(outcome=result.status,
-                              status="succeeded" if result.status == "validated" else "failed",
-                              failure_code=None if result.failure is None
-                              else result.failure.code)
+            telemetry.set_run(
+                outcome=result.status,
+                status="succeeded" if result.status == "validated" else "failed",
+                failure_code=None if result.failure is None else result.failure.code,
+            )
             return result
 
     def _run(self, trace: TraceIdentifiers, checked: CodingHarnessRequest) -> CodingHarnessResult:
@@ -97,11 +101,14 @@ class CodingHarness:
         plan = build_plan(
             task_id=f"coding-{checked.workspace.starting_revision[:12]}",
             task_sha256=hashlib.sha256(checked.model_dump_json().encode()).hexdigest(),
-            domain="coding", skill=_skill_identity(checked.skill_versions[0]),
+            domain="coding",
+            skill=_skill_identity(checked.skill_versions[0]),
             # The Host's budget decides; the guidance only says "repair".
             guidance=SkillHarnessGuidance(domains=("coding",), fallback="retry", max_retries=3),
-            host_checks=(DECLARED_CHECK,), max_retries=checked.budget.max_repair_attempts,
-            retry_from="execute", exhausted_code="repair_budget_exceeded",
+            host_checks=(DECLARED_CHECK,),
+            max_retries=checked.budget.max_repair_attempts,
+            retry_from="execute",
+            exhausted_code="repair_budget_exceeded",
         )
         run = run_harness(plan, actions)
         if actions.plan is None:  # the author's plan never arrived
@@ -114,12 +121,15 @@ class CodingHarness:
             except WorkspaceRefused as error:
                 return actions.stopped(trace, error.code)
             return CodingHarnessResult(
-                trace=trace, workspace=checked.workspace, status="validated",
-                plan=actions.plan, changes=tuple(actions.changes),
-                commands=tuple(actions.outcomes), events=tuple(actions.events),
+                trace=trace,
+                workspace=checked.workspace,
+                status="validated",
+                plan=actions.plan,
+                changes=tuple(actions.changes),
+                commands=tuple(actions.outcomes),
+                events=tuple(actions.events),
                 skill_versions=checked.skill_versions,
-                artifact=ArtifactRecord(path=checked.artifact_path,
-                                        sha256=sha256_bytes(artifact)),
+                artifact=ArtifactRecord(path=checked.artifact_path, sha256=sha256_bytes(artifact)),
             )
         return actions.stopped(trace, run.failure_code or "harness_failed")
 
@@ -260,12 +270,14 @@ class CodingActions:
             self.events.append(HarnessEvent(sequence=len(self.events), kind="repair_requested"))
             self.attempt += 1
             self.candidate = self.harness.author.repair(
-                self.request, self.plan, self.failure, self.attempt)
+                self.request, self.plan, self.failure, self.attempt
+            )
             self.failure = None
         assert self.candidate is not None
         try:
-            self.harness._apply(self.workspace_or_refuse(), self.request, self.candidate,
-                                self.changes)
+            self.harness._apply(
+                self.workspace_or_refuse(), self.request, self.candidate, self.changes
+            )
         except WorkspaceRefused as error:
             raise HarnessActionFailure(error.code) from None
         self.events.append(HarnessEvent(sequence=len(self.events), kind="changed"))
@@ -274,21 +286,31 @@ class CodingActions:
     def validate(self) -> tuple[HarnessCheckResult, ...]:
         assert self.plan is not None
         try:
-            outcome = self.harness._validate(self.workspace_or_refuse(), self.request,
-                                             self.plan, self.outcomes)
+            outcome = self.harness._validate(
+                self.workspace_or_refuse(), self.request, self.plan, self.outcomes
+            )
         except WorkspaceRefused as error:
             raise HarnessActionFailure(error.code) from None
         passed = outcome.status == "passed"
-        self.events.append(HarnessEvent(
-            sequence=len(self.events), kind="validated" if passed else "validation_failed",
-            code=None if passed else "validation_failed"))
+        self.events.append(
+            HarnessEvent(
+                sequence=len(self.events),
+                kind="validated" if passed else "validation_failed",
+                code=None if passed else "validation_failed",
+            )
+        )
         if not passed:
             self.failure = outcome
-        return (HarnessCheckResult(check_id=DECLARED_CHECK,
-                                   status="passed" if passed else "failed",
-                                   evidence_ref=f"commands-{len(self.outcomes)}"),)
+        return (
+            HarnessCheckResult(
+                check_id=DECLARED_CHECK,
+                status="passed" if passed else "failed",
+                evidence_ref=f"commands-{len(self.outcomes)}",
+            ),
+        )
 
     def stopped(self, trace: TraceIdentifiers, code: str) -> CodingHarnessResult:
         assert self.plan is not None
-        return self.harness._stopped(trace, self.request, self.plan, self.events, code,
-                                     self.outcomes, self.changes)
+        return self.harness._stopped(
+            trace, self.request, self.plan, self.events, code, self.outcomes, self.changes
+        )

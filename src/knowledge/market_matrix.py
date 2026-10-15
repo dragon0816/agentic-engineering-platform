@@ -38,23 +38,28 @@ PRODUCT_FAMILIES: tuple[tuple[ProductFamily, str, tuple[str, ...]], ...] = (
 )
 TARGET_MARKETS: tuple[tuple[TargetMarket, str, tuple[str, ...]], ...] = (
     (
-        "wireless_communications", "Wireless communications",
+        "wireless_communications",
+        "Wireless communications",
         ("wireless", "5G", "6G", "Wi-Fi", "WLAN", "Bluetooth", "cellular", "無線", "通訊"),
     ),
     (
-        "aerospace_defense", "Aerospace / defense",
+        "aerospace_defense",
+        "Aerospace / defense",
         ("aerospace", "defense", "defence", "radar", "satellite", "航太", "國防", "雷達"),
     ),
     (
-        "automotive", "Automotive",
+        "automotive",
+        "Automotive",
         ("automotive", "vehicle", "V2X", "ADAS", "汽車", "車用"),
     ),
     (
-        "ai_server", "AI server",
+        "ai_server",
+        "AI server",
         ("AI server", "AI data center", "AI datacenter", "GPU server", "AI伺服器", "AI資料中心"),
     ),
     (
-        "semiconductor", "Semiconductor",
+        "semiconductor",
+        "Semiconductor",
         ("semiconductor", "wafer", "foundry", "chiplet", "IC test", "半導體", "晶圓"),
     ),
 )
@@ -86,9 +91,7 @@ MARKET_QUESTIONS: dict[TargetMarket, str] = {
     "aerospace_defense": (
         "Which radar/satellite waveform, frequency, power and qualification requirements matter?"
     ),
-    "automotive": (
-        "Which connectivity, V2X, radar or in-vehicle standard and test stage matter?"
-    ),
+    "automotive": ("Which connectivity, V2X, radar or in-vehicle standard and test stage matter?"),
     "ai_server": (
         "Which AI-server interconnect, signal/power-integrity metric and data rate matter?"
     ),
@@ -181,7 +184,9 @@ class MarketCellSufficiency(Contract):
         if tuple(item.facet for item in self.discovery_evidence) != expected_evidence:
             raise ValueError("discovery evidence does not match its level")
         if tuple(item.facet for item in self.missing_evidence) != (
-            "market_requirements", "product_options", "customer_use_case"
+            "market_requirements",
+            "product_options",
+            "customer_use_case",
         ):
             raise ValueError("all three evidence needs must remain explicit")
         return self
@@ -310,22 +315,38 @@ def discover_market_matrix(
                 product_only.setdefault(
                     row,
                     _evidence(
-                        "product", product_match, document.source, entry.raw_ref,
-                        section_number, section.text, section.page, section.slide,
+                        "product",
+                        product_match,
+                        document.source,
+                        entry.raw_ref,
+                        section_number,
+                        section.text,
+                        section.page,
+                        section.slide,
                     ),
                 )
                 for column, market_match in enumerate(markets):
-                    if market_match is not None and (
-                        nearby := _nearby(
-                            section.text, _PRODUCT_PATTERNS[row], _MARKET_PATTERNS[column]
+                    if (
+                        market_match is not None
+                        and (
+                            nearby := _nearby(
+                                section.text, _PRODUCT_PATTERNS[row], _MARKET_PATTERNS[column]
+                            )
                         )
-                    ) is not None:
+                        is not None
+                    ):
                         joint.setdefault(
                             (row, column),
                             _evidence(
-                                "same_section", nearby[0], document.source, entry.raw_ref,
-                                section_number, section.text, section.page,
-                                section.slide, nearby[1],
+                                "same_section",
+                                nearby[0],
+                                document.source,
+                                entry.raw_ref,
+                                section_number,
+                                section.text,
+                                section.page,
+                                section.slide,
+                                nearby[1],
                             ),
                         )
             for column, market_match in enumerate(markets):
@@ -333,8 +354,14 @@ def discover_market_matrix(
                     market_only.setdefault(
                         column,
                         _evidence(
-                            "market", market_match, document.source, entry.raw_ref,
-                            section_number, section.text, section.page, section.slide,
+                            "market",
+                            market_match,
+                            document.source,
+                            entry.raw_ref,
+                            section_number,
+                            section.text,
+                            section.page,
+                            section.slide,
                         ),
                     )
     cells: list[MatrixCell] = []

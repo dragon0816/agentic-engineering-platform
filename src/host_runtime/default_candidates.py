@@ -63,9 +63,7 @@ def workflow11_preview_candidate() -> DefaultCandidate:
     _require_exact_read_only_preview(source, PREVIEW_SPECS)
     permissions = tuple(
         dict.fromkeys(
-            permission
-            for spec in PREVIEW_SPECS
-            for permission in spec.policy.required_permissions
+            permission for spec in PREVIEW_SPECS for permission in spec.policy.required_permissions
         )
     )
     policy_refs = tuple(
@@ -83,10 +81,12 @@ def workflow11_preview_candidate() -> DefaultCandidate:
                     "source": "dragon0816/rs_workflow_system:workflows/11_jira_weekly_report.json",
                     "revision": SOURCE_REVISION,
                 },
-                {"source": (
-                    "agentic-engineering-platform:"
-                    "capabilities.weekly_report.manifest.preview_workflow"
-                )},
+                {
+                    "source": (
+                        "agentic-engineering-platform:"
+                        "capabilities.weekly_report.manifest.preview_workflow"
+                    )
+                },
             ],
             "compatibility": {"contract_version": "1", "platforms": ["windows"]},
             "business_approval": {"status": "pending"},
@@ -111,9 +111,7 @@ def export_default_candidates(directory: Path) -> tuple[Path, ...]:
     candidate = workflow11_preview_candidate()
     identity = candidate.manifest.metadata.identity
     target = (
-        directory
-        / "candidates"
-        / f"{identity.namespace}__{identity.name}__{identity.version}.json"
+        directory / "candidates" / f"{identity.namespace}__{identity.name}__{identity.version}.json"
     )
     if target.exists():
         if target.read_bytes() != candidate.content:

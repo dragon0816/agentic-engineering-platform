@@ -56,8 +56,7 @@ class NccPrepareHandler:
 
 def render_plan(plan: NccPlan) -> NccRendered:
     if plan.dry_run:
-        return NccRendered(written=False, verdict=plan.verdict,
-                           missing_photos=plan.missing_photos)
+        return NccRendered(written=False, verdict=plan.verdict, missing_photos=plan.missing_photos)
     output = Path(plan.output_path)
     if not output.parent.is_dir():
         raise DocumentError("ncc_output_dir_missing")
@@ -83,4 +82,3 @@ class NccRenderHandler:
             return await asyncio.to_thread(render_plan, step.plan)
         except DocumentError as error:
             raise CapabilityRefused(str(error)) from None
-

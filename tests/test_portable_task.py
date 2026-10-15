@@ -37,9 +37,7 @@ def task() -> TaskContract:
         objective="Create the reviewed report",
         skills=(AssetIdentity(namespace="engineering", name="report", version="1.0.0"),),
         resource_refs=("source-document",),
-        expected_outputs=(
-            ExpectedOutput(output_id="report", artifact_ref="report-artifact"),
-        ),
+        expected_outputs=(ExpectedOutput(output_id="report", artifact_ref="report-artifact"),),
         checks=(CompletionCheck(check_id="report-present", output_id="report", kind="nonempty"),),
     )
 
@@ -62,9 +60,7 @@ def test_task_contract_requires_exact_outputs_and_checks() -> None:
             original.model_dump() | {"resource_refs": ("source-document", "source-document")}
         )
     with pytest.raises(ValidationError, match="requires a classifier"):
-        TaskContract.model_validate(
-            original.model_dump() | {"declared_classification": "PUBLIC"}
-        )
+        TaskContract.model_validate(original.model_dump() | {"declared_classification": "PUBLIC"})
     capability = AssetIdentity(namespace="engineering", name="read", version="1.0.0")
     with pytest.raises(ValidationError, match="allowed and prohibited"):
         TaskContract.model_validate(

@@ -16,16 +16,21 @@ CASES = Path(__file__).resolve().parents[1] / "evaluation/knowledge/scenarios-v1
 def test_suite_covers_standalone_and_combined_strategy_without_asserting_facts() -> None:
     suite = KnowledgeScenarioSuite.model_validate_json(CASES.read_text(encoding="utf-8"))
     assert {case.facets[0] for case in suite.cases if case.tier == "standalone"} == {
-        "market_trend", "product_option_spec", "technical_knowledge", "competitor"
+        "market_trend",
+        "product_option_spec",
+        "technical_knowledge",
+        "competitor",
     }
     facets = ("market_trend", "product_option_spec", "technical_knowledge", "competitor")
     assert {frozenset(case.facets) for case in suite.cases} == {
-        frozenset(items) for size in range(1, 5)
-        for items in combinations(facets, size)
+        frozenset(items) for size in range(1, 5) for items in combinations(facets, size)
     }
     strategy = next(case for case in suite.cases if "swot" in case.outputs)
     assert set(strategy.facets) == {
-        "market_trend", "product_option_spec", "technical_knowledge", "competitor"
+        "market_trend",
+        "product_option_spec",
+        "technical_knowledge",
+        "competitor",
     }
     assert {"strategy", "swot", "execution_actions"} <= set(strategy.outputs)
     assert all(case.evidence_rule == "raw_citations_or_explicit_gap" for case in suite.cases)
@@ -58,7 +63,8 @@ def test_strategy_cannot_pass_as_a_single_facet_or_omit_competitor() -> None:
 def test_suite_rejects_an_omitted_combination_even_with_fifteen_cases() -> None:
     payload = json.loads(CASES.read_text(encoding="utf-8"))
     missing = next(
-        index for index, case in enumerate(payload["cases"])
+        index
+        for index, case in enumerate(payload["cases"])
         if case["case_id"] == "market-technical-wireless"
     )
     payload["cases"][missing] = dict(payload["cases"][missing])

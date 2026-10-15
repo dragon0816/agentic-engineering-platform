@@ -43,20 +43,31 @@ def _line(passage: Passage, titles: dict[str, str]) -> str:
 
 
 def _plan(
-    model: ModelClient, alias: str, trace: TraceIdentifiers, question: str,
-    shown: list[Passage], relevant: list[str], titles: dict[str, str],
+    model: ModelClient,
+    alias: str,
+    trace: TraceIdentifiers,
+    question: str,
+    shown: list[Passage],
+    relevant: list[str],
+    titles: dict[str, str],
 ) -> dict[str, object]:
     request = ModelRequest(
-        trace=trace, model_alias=alias,
+        trace=trace,
+        model_alias=alias,
         messages=(
             ModelMessage(role="system", text=PLANNER_PROMPT),
-            ModelMessage(role="user", text=(
-                f"Question: {question}\n\nAlready marked relevant: "
-                f"{', '.join(titles.get(page, page) for page in relevant) or '(none)'}\n\n"
-                "Search results:\n" + "\n".join(_line(item, titles) for item in shown))),
+            ModelMessage(
+                role="user",
+                text=(
+                    f"Question: {question}\n\nAlready marked relevant: "
+                    f"{', '.join(titles.get(page, page) for page in relevant) or '(none)'}\n\n"
+                    "Search results:\n" + "\n".join(_line(item, titles) for item in shown)
+                ),
+            ),
         ),
         requirements=ModelRequirements(structured_output=True),
-        output_contract="knowledge_search_plan", max_output_tokens=1500,
+        output_contract="knowledge_search_plan",
+        max_output_tokens=1500,
     )
     try:
         response = model.generate(request)
@@ -74,9 +85,17 @@ def _plan(
 
 
 def search_rounds(
-    snapshot: RetrievalSnapshot, model: ModelClient, alias: str, trace: TraceIdentifiers,
-    question: str, first: tuple[Passage, ...], *, rounds: int,
-    k: int = 36, max_chars: int = 40000, per_page: int = SECTIONS_PER_PAGE,
+    snapshot: RetrievalSnapshot,
+    model: ModelClient,
+    alias: str,
+    trace: TraceIdentifiers,
+    question: str,
+    first: tuple[Passage, ...],
+    *,
+    rounds: int,
+    k: int = 36,
+    max_chars: int = 40000,
+    per_page: int = SECTIONS_PER_PAGE,
     rank_text: str | None = None,
 ) -> tuple[Passage, ...]:
     """The evidence set: pages the model marked relevant lead, then the first
@@ -116,8 +135,9 @@ def search_rounds(
             if page and page in seen and page not in relevant:
                 relevant.append(page)
         asked = decision.get("queries")
-        queries = [str(item) for item in asked if str(item).strip()] \
-            if isinstance(asked, list) else []
+        queries = (
+            [str(item) for item in asked if str(item).strip()] if isinstance(asked, list) else []
+        )
         shown = []
         if decision.get("done") is True or not queries:
             break
@@ -134,8 +154,10 @@ def search_rounds(
         selected.append(passage)
         chars += len(passage.text)
 
-    ranked = [snapshot.wiki_page_sections(page, rank_text or question, k=per_page)
-              for page in relevant[:MAX_RELEVANT]]
+    ranked = [
+        snapshot.wiki_page_sections(page, rank_text or question, k=per_page)
+        for page in relevant[:MAX_RELEVANT]
+    ]
     for sections in ranked:
         for passage in sections[:SECTIONS_PER_PAGE]:
             add(passage)

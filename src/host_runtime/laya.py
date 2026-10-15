@@ -73,8 +73,9 @@ def ssh_config_host(path: Path, alias: str = "laya") -> dict[str, Any]:
     return found
 
 
-def current_settings(config: CompanyHostConfiguration, ssh_config: Path | None = None
-                     ) -> LayaSettings:
+def current_settings(
+    config: CompanyHostConfiguration, ssh_config: Path | None = None
+) -> LayaSettings:
     """The card's values: the saved ones, or what host.json and the person's
     SSH config already say."""
     if config.laya is not None:
@@ -87,8 +88,11 @@ def current_settings(config: CompanyHostConfiguration, ssh_config: Path | None =
         port = urlparse(accelerator.endpoint or "").port
         if port is not None and port >= 1024:
             values["local_port"] = port
-        values.update(mode=accelerator.mode, timeout_ms=max(100, accelerator.timeout_ms),
-                      confidence_threshold=accelerator.confidence_threshold)
+        values.update(
+            mode=accelerator.mode,
+            timeout_ms=max(100, accelerator.timeout_ms),
+            confidence_threshold=accelerator.confidence_threshold,
+        )
         if accelerator.egress_approval is not None:
             values["approval_ref"] = accelerator.egress_approval.approval_ref
     try:
@@ -97,8 +101,9 @@ def current_settings(config: CompanyHostConfiguration, ssh_config: Path | None =
         return LayaSettings()
 
 
-def accelerator_for(settings: LayaSettings, previous: DecisionAcceleratorConfig,
-                    credentials: dict[str, str]) -> DecisionAcceleratorConfig:
+def accelerator_for(
+    settings: LayaSettings, previous: DecisionAcceleratorConfig, credentials: dict[str, str]
+) -> DecisionAcceleratorConfig:
     """The `decision_accelerator` the card's values mean. Settings the card
     does not show (credential name, model, decision types, list length) are
     kept from the previous configuration."""
@@ -107,31 +112,49 @@ def accelerator_for(settings: LayaSettings, previous: DecisionAcceleratorConfig,
     if settings.approval_ref is None:
         raise LayaError("egress_approval_missing")
     jev = previous if previous.provider == "JEV" else None
-    credential = jev.credential if jev is not None and jev.credential else SecretRef(
-        name=DEFAULT_CREDENTIAL)
+    credential = (
+        jev.credential if jev is not None and jev.credential else SecretRef(name=DEFAULT_CREDENTIAL)
+    )
     if credential.name not in credentials:
         raise LayaError("credential_unmapped")
     return DecisionAcceleratorConfig(
-        provider="JEV", endpoint=ENDPOINT.format(port=settings.local_port),
+        provider="JEV",
+        endpoint=ENDPOINT.format(port=settings.local_port),
         credential=credential,
         model_profile=jev.model_profile if jev is not None else DEFAULT_MODEL,
-        timeout_ms=settings.timeout_ms, confidence_threshold=settings.confidence_threshold,
-        enabled_decision_types=jev.enabled_decision_types if jev is not None
+        timeout_ms=settings.timeout_ms,
+        confidence_threshold=settings.confidence_threshold,
+        enabled_decision_types=jev.enabled_decision_types
+        if jev is not None
         else ("skill_selection",),
         mode=settings.mode,
         skill_max_tools=jev.skill_max_tools if jev is not None else DEFAULT_MAX_TOOLS,
-        egress_approval=AcceleratorEgressApproval(approval_ref=settings.approval_ref))
+        egress_approval=AcceleratorEgressApproval(approval_ref=settings.approval_ref),
+    )
 
 
 def tunnel_command(settings: LayaSettings, ssh: str = "ssh") -> list[str]:
     """One argument per item, never a shell line; host and user are validated
     names, so neither can become an ssh option."""
     return [
-        ssh, "-N", "-o", "BatchMode=yes", "-o", "ExitOnForwardFailure=yes",
-        "-o", "ServerAliveInterval=30", "-o", "ServerAliveCountMax=3",
-        "-p", str(settings.ssh_port),
-        "-L", f"127.0.0.1:{settings.local_port}:127.0.0.1:{settings.remote_port}",
-        "-l", settings.ssh_user, "--", settings.ssh_host,
+        ssh,
+        "-N",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ExitOnForwardFailure=yes",
+        "-o",
+        "ServerAliveInterval=30",
+        "-o",
+        "ServerAliveCountMax=3",
+        "-p",
+        str(settings.ssh_port),
+        "-L",
+        f"127.0.0.1:{settings.local_port}:127.0.0.1:{settings.remote_port}",
+        "-l",
+        settings.ssh_user,
+        "--",
+        settings.ssh_host,
     ]
 
 
@@ -140,12 +163,16 @@ def probe(local_port: int, timeout: float = 2.0) -> dict[str, Any]:
     started = time.monotonic()
     try:
         with urllib.request.urlopen(  # noqa: S310 - a fixed loopback URL
-                f"http://127.0.0.1:{local_port}/health", timeout=timeout) as reply:
+            f"http://127.0.0.1:{local_port}/health", timeout=timeout
+        ) as reply:
             ok = reply.status == 200
     except (urllib.error.URLError, OSError, ValueError) as error:
         return {"reachable": False, "ms": None, "error": type(error).__name__}
-    return {"reachable": ok, "ms": round((time.monotonic() - started) * 1000, 1),
-            "error": None if ok else "unexpected_status"}
+    return {
+        "reachable": ok,
+        "ms": round((time.monotonic() - started) * 1000, 1),
+        "error": None if ok else "unexpected_status",
+    }
 
 
 def last_decision(log: Path) -> dict[str, Any] | None:
@@ -181,12 +208,12 @@ def bind_to_this_process(pid: int) -> Any:
         return None
     try:
         job = win32job.CreateJobObject(None, "")
-        limits = win32job.QueryInformationJobObject(
-            job, win32job.JobObjectExtendedLimitInformation)
+        limits = win32job.QueryInformationJobObject(job, win32job.JobObjectExtendedLimitInformation)
         limits["BasicLimitInformation"]["LimitFlags"] = win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
         win32job.SetInformationJobObject(job, win32job.JobObjectExtendedLimitInformation, limits)
         handle = win32api.OpenProcess(
-            win32con.PROCESS_SET_QUOTA | win32con.PROCESS_TERMINATE, False, pid)
+            win32con.PROCESS_SET_QUOTA | win32con.PROCESS_TERMINATE, False, pid
+        )
         win32job.AssignProcessToJobObject(job, handle)
         return job
     except Exception:  # noqa: BLE001 - the tunnel works without it
@@ -196,9 +223,15 @@ def bind_to_this_process(pid: int) -> Any:
 class SshTunnel:
     """`ssh -N` kept open while Agent Web runs."""
 
-    def __init__(self, settings: LayaSettings, *, popen: Popen = subprocess.Popen,
-                 ssh: str | None = None, sleep: Callable[[float], None] = time.sleep,
-                 bind: Callable[[int], Any] = bind_to_this_process) -> None:
+    def __init__(
+        self,
+        settings: LayaSettings,
+        *,
+        popen: Popen = subprocess.Popen,
+        ssh: str | None = None,
+        sleep: Callable[[float], None] = time.sleep,
+        bind: Callable[[int], Any] = bind_to_this_process,
+    ) -> None:
         self.settings = settings
         self._popen = popen
         self._ssh = ssh or shutil.which("ssh") or "ssh"
@@ -227,8 +260,12 @@ class SshTunnel:
         self.state = "stopped"
 
     def status(self) -> dict[str, Any]:
-        return {"state": self.state, "error": self.error, "restarts": self.restarts,
-                "since": self.since}
+        return {
+            "state": self.state,
+            "error": self.error,
+            "restarts": self.restarts,
+            "since": self.since,
+        }
 
     def _run(self) -> None:
         attempt = 0
@@ -237,8 +274,12 @@ class SshTunnel:
             flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
             try:
                 self._process = self._popen(
-                    tunnel_command(self.settings, self._ssh), stdin=subprocess.DEVNULL,
-                    stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, creationflags=flags)
+                    tunnel_command(self.settings, self._ssh),
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.PIPE,
+                    creationflags=flags,
+                )
             except OSError as error:
                 self.state, self.error = "failed", f"ssh_not_started:{type(error).__name__}"
                 return

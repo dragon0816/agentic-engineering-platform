@@ -53,8 +53,14 @@ def new_card_id(prefix: str) -> str:
 class CardStore(Generic[Record]):
     """Pending records of one kind, persisted so a restart keeps them."""
 
-    def __init__(self, path: Path, model: type[Record], *, keep: int = 200,
-                 clock: Callable[[], datetime] | None = None) -> None:
+    def __init__(
+        self,
+        path: Path,
+        model: type[Record],
+        *,
+        keep: int = 200,
+        clock: Callable[[], datetime] | None = None,
+    ) -> None:
         self.path = path
         self.model = model
         self.keep = keep
@@ -93,13 +99,15 @@ class CardStore(Generic[Record]):
         return record.status == "pending" and self.now() >= record.expires_at
 
     def _save(self) -> None:
-        newest = sorted(self._records.values(), key=lambda item: item.created_at,
-                        reverse=True)[: self.keep]
+        newest = sorted(self._records.values(), key=lambda item: item.created_at, reverse=True)[
+            : self.keep
+        ]
         self._records = {item.card_id: item for item in newest}
         self.path.parent.mkdir(parents=True, exist_ok=True)
         temporary = self.path.with_suffix(".tmp")
-        text = json.dumps([item.model_dump(mode="json") for item in newest],
-                          ensure_ascii=False, indent=1)
+        text = json.dumps(
+            [item.model_dump(mode="json") for item in newest], ensure_ascii=False, indent=1
+        )
         # A scanner may hold the file for a moment on Windows; the record
         # stays in memory if it still cannot be written.
         for attempt in range(REPLACE_ATTEMPTS):

@@ -29,8 +29,11 @@ from workflow.engine import InstalledWorkflows, WorkflowEngine
 RS = AssetIdentity(namespace="engineering", name="rs-knowledge", version="1.0.0")
 HR = AssetIdentity(namespace="people", name="hr-policies", version="2.0.0")
 VAULTS = [
-    KnowledgeVaultTool(asset=RS, purpose="R&S instrument specs, options and markets",
-                       boundaries="prices and customer data"),
+    KnowledgeVaultTool(
+        asset=RS,
+        purpose="R&S instrument specs, options and markets",
+        boundaries="prices and customer data",
+    ),
     KnowledgeVaultTool(asset=HR, purpose="company HR policies"),
 ]
 
@@ -52,47 +55,88 @@ class CallsVault(FakeModel):
     def generate(self, item: ModelRequest) -> ModelResponse:
         self.calls.append(item)
         if len(self.calls) == 1:
-            return ModelResponse(trace=item.trace, model_alias=item.model_alias, tool_calls=(
-                ModelToolCall(call_id="c1", name=self.name, arguments=self.arguments),))
+            return ModelResponse(
+                trace=item.trace,
+                model_alias=item.model_alias,
+                tool_calls=(ModelToolCall(call_id="c1", name=self.name, arguments=self.arguments),),
+            )
         return ModelResponse(trace=item.trace, model_alias=item.model_alias, text="answered")
 
 
 PROCEDURE = {
     "intent_patterns": ["CMP180"],
-    "facets": [{"name": "technical_knowledge", "request_patterns": ["standard"],
-                "search_queries": ["CMP180 standards"], "support_terms": ["standard"]}],
+    "facets": [
+        {
+            "name": "technical_knowledge",
+            "request_patterns": ["standard"],
+            "search_queries": ["CMP180 standards"],
+            "support_terms": ["standard"],
+        }
+    ],
     "citation_policy": "wiki_primary",
 }
 
 
-def gateway(model: FakeModel, handler: Recording, *, vaults: bool = True,
-            procedure: dict[str, Any] | None = None,
-            harness_procedure: dict[str, Any] | None = None) -> Gateway:
+def gateway(
+    model: FakeModel,
+    handler: Recording,
+    *,
+    vaults: bool = True,
+    procedure: dict[str, Any] | None = None,
+    harness_procedure: dict[str, Any] | None = None,
+) -> Gateway:
     skills = SkillRegistry()
-    skills.register(SkillManifest.model_validate({
-        "metadata": {
-            "identity": {"namespace": "engineering", "name": "knowledge-query",
-                         "version": "1.0.0"},
-            "owner": {"type": "team", "id": "engineering"}, "visibility": "organization",
-            "lifecycle": "published",
-        },
-        "alias": "knowledge",
-        "instructions": "Answers require Raw citations.",
-        "commands": [{"name": "ask", "kind": "capability",
-                      "target": KNOWLEDGE_QUERY_SPEC.identity.model_dump()}],
-        "default_command": "ask",
-        **({"procedure": procedure} if procedure else {}),
-    }))
+    skills.register(
+        SkillManifest.model_validate(
+            {
+                "metadata": {
+                    "identity": {
+                        "namespace": "engineering",
+                        "name": "knowledge-query",
+                        "version": "1.0.0",
+                    },
+                    "owner": {"type": "team", "id": "engineering"},
+                    "visibility": "organization",
+                    "lifecycle": "published",
+                },
+                "alias": "knowledge",
+                "instructions": "Answers require Raw citations.",
+                "commands": [
+                    {
+                        "name": "ask",
+                        "kind": "capability",
+                        "target": KNOWLEDGE_QUERY_SPEC.identity.model_dump(),
+                    }
+                ],
+                "default_command": "ask",
+                **({"procedure": procedure} if procedure else {}),
+            }
+        )
+    )
     installed = InstalledCapabilities()
-    installed.register(KNOWLEDGE_QUERY_SPEC, handler, KnowledgeQueryRequest, Report,
-                       ExecutionDependencies(central_required=False))
-    bridge = BridgeExecutor(installed, LocalPolicy((CapabilityGrant(
-        actor="engineer", asset=KNOWLEDGE_QUERY_SPEC.identity,
-        permissions=KNOWLEDGE_QUERY_SPEC.policy.required_permissions,
-        policy_refs=KNOWLEDGE_QUERY_SPEC.policy.policy_refs,
-    ),)))
+    installed.register(
+        KNOWLEDGE_QUERY_SPEC,
+        handler,
+        KnowledgeQueryRequest,
+        Report,
+        ExecutionDependencies(central_required=False),
+    )
+    bridge = BridgeExecutor(
+        installed,
+        LocalPolicy(
+            (
+                CapabilityGrant(
+                    actor="engineer",
+                    asset=KNOWLEDGE_QUERY_SPEC.identity,
+                    permissions=KNOWLEDGE_QUERY_SPEC.policy.required_permissions,
+                    policy_refs=KNOWLEDGE_QUERY_SPEC.policy.policy_refs,
+                ),
+            )
+        ),
+    )
     return Gateway(
-        RequestRouter(CommandRouter(skills), model=model), bridge,
+        RequestRouter(CommandRouter(skills), model=model),
+        bridge,
         WorkflowEngine(InstalledWorkflows(), bridge),
         knowledge_vaults=(lambda: VAULTS) if vaults else None,
         knowledge_capability=KNOWLEDGE_QUERY_SPEC.identity,
@@ -102,8 +146,11 @@ def gateway(model: FakeModel, handler: Recording, *, vaults: bool = True,
 
 def converse(model: FakeModel, handler: Recording, **kwargs: Any) -> Any:
     question = "CMP180 支援哪些標準？"
-    return asyncio.run(gateway(model, handler, **kwargs).converse(
-        request(question), (ModelMessage(role="user", text=question),)))
+    return asyncio.run(
+        gateway(model, handler, **kwargs).converse(
+            request(question), (ModelMessage(role="user", text=question),)
+        )
+    )
 
 
 def test_each_vault_is_a_tool_described_by_its_purpose_and_asks_only_the_question() -> None:
@@ -120,8 +167,10 @@ def test_each_vault_is_a_tool_described_by_its_purpose_and_asks_only_the_questio
 
 
 def test_the_model_cannot_point_a_vault_tool_at_another_vault() -> None:
-    model = CallsVault("knowledge__rs-knowledge",
-                       {"question": "salaries?", "asset": HR.model_dump(), "procedure": None})
+    model = CallsVault(
+        "knowledge__rs-knowledge",
+        {"question": "salaries?", "asset": HR.model_dump(), "procedure": None},
+    )
     handler = Recording()
     converse(model, handler)
     assert handler.inputs[0].asset == RS and handler.inputs[0].procedure is None
@@ -132,34 +181,45 @@ def test_without_a_vault_provider_the_command_stays_one_generic_tool() -> None:
     result = converse(model, handler, vaults=False)
     assert [tool.name for tool in model.calls[0].tools] == ["knowledge__ask"]
     failure = result.tools[0].capability.failure
-    assert failure is not None and failure.code == "invalid_input"   # the old behaviour
+    assert failure is not None and failure.code == "invalid_input"  # the old behaviour
 
 
 def test_a_manifest_without_purpose_keeps_its_published_bytes() -> None:
     from knowledge.evolution import KnowledgeManifest
 
     data = {
-        "metadata": {"identity": RS.model_dump(), "owner": {"type": "team", "id": "rf"},
-                     "visibility": "organization"},
-        "domain": "rf-instruments", "vault_ref": "C:/vault",
-        "raw_sha256": "0" * 64, "decisions_sha256": "1" * 64, "content_sha256": "2" * 64,
+        "metadata": {
+            "identity": RS.model_dump(),
+            "owner": {"type": "team", "id": "rf"},
+            "visibility": "organization",
+        },
+        "domain": "rf-instruments",
+        "vault_ref": "C:/vault",
+        "raw_sha256": "0" * 64,
+        "decisions_sha256": "1" * 64,
+        "content_sha256": "2" * 64,
     }
     plain = KnowledgeManifest.model_validate(data)
     assert "purpose" not in plain.model_dump(mode="json")
     assert "boundaries" not in plain.model_dump_json()
     described = KnowledgeManifest.model_validate(
-        {**data, "purpose": "R&S specs", "boundaries": "no prices"})
+        {**data, "purpose": "R&S specs", "boundaries": "no prices"}
+    )
     assert described.model_dump(mode="json")["purpose"] == "R&S specs"
 
 
 def test_a_vault_tool_carries_the_installed_skills_procedure() -> None:
     """knowledge_v1 sample-001: the tool route passed no procedure (raw-only, no
     facets, 800 tokens) and passed 9 of 58 questions against 22 of 34 direct."""
-    model = CallsVault("knowledge__rs-knowledge",
-                       {"question": "CMP180 standards?", "procedure": None})
+    model = CallsVault(
+        "knowledge__rs-knowledge", {"question": "CMP180 standards?", "procedure": None}
+    )
     handler = Recording()
-    asyncio.run(gateway(model, handler, procedure=PROCEDURE).converse(
-        request("CMP180 standards?"), (ModelMessage(role="user", text="CMP180 standards?"),)))
+    asyncio.run(
+        gateway(model, handler, procedure=PROCEDURE).converse(
+            request("CMP180 standards?"), (ModelMessage(role="user", text="CMP180 standards?"),)
+        )
+    )
     received = handler.inputs[0].procedure
     assert received is not None and received.citation_policy == "wiki_primary"
     assert [facet.name for facet in received.facets] == ["technical_knowledge"]
@@ -171,8 +231,11 @@ def test_a_vault_tool_from_a_skill_without_one_uses_the_harness_procedure() -> N
     while the direct route uses company-agent/knowledge-query; both now ask alike."""
     model = CallsVault("knowledge__rs-knowledge", {"question": "CMP180 standards?"})
     handler = Recording()
-    asyncio.run(gateway(model, handler, harness_procedure=PROCEDURE).converse(
-        request("CMP180 standards?"), (ModelMessage(role="user", text="CMP180 standards?"),)))
+    asyncio.run(
+        gateway(model, handler, harness_procedure=PROCEDURE).converse(
+            request("CMP180 standards?"), (ModelMessage(role="user", text="CMP180 standards?"),)
+        )
+    )
     received = handler.inputs[0].procedure
     assert received is not None and received.citation_policy == "wiki_primary"
 
@@ -185,16 +248,30 @@ def test_the_host_offers_the_procedure_of_exactly_one_harness_knowledge_skill() 
 
     fixture = Path(__file__).parent / "fixtures/harness_skills/knowledge-evidence-v1.5.json"
     harness = SkillManifest.model_validate(json.loads(fixture.read_text(encoding="utf-8")))
-    plain = SkillManifest.model_validate({
-        "metadata": {"identity": {"namespace": "engineering", "name": "knowledge-query",
-                                  "version": "1.0.0"},
-                     "owner": {"type": "team", "id": "engineering"},
-                     "visibility": "organization", "lifecycle": "published"},
-        "alias": "knowledge", "instructions": "Answers require Raw citations.",
-        "commands": [{"name": "ask", "kind": "capability",
-                      "target": KNOWLEDGE_QUERY_SPEC.identity.model_dump()}],
-        "default_command": "ask",
-    })
+    plain = SkillManifest.model_validate(
+        {
+            "metadata": {
+                "identity": {
+                    "namespace": "engineering",
+                    "name": "knowledge-query",
+                    "version": "1.0.0",
+                },
+                "owner": {"type": "team", "id": "engineering"},
+                "visibility": "organization",
+                "lifecycle": "published",
+            },
+            "alias": "knowledge",
+            "instructions": "Answers require Raw citations.",
+            "commands": [
+                {
+                    "name": "ask",
+                    "kind": "capability",
+                    "target": KNOWLEDGE_QUERY_SPEC.identity.model_dump(),
+                }
+            ],
+            "default_command": "ask",
+        }
+    )
     skills = SkillRegistry()
     skills.register(plain)
     assert _harness_knowledge_procedure(skills)() is None
@@ -202,7 +279,7 @@ def test_the_host_offers_the_procedure_of_exactly_one_harness_knowledge_skill() 
     assert _harness_knowledge_procedure(skills)() == harness.procedure
     second = harness.model_copy(update={"alias": "another_candidate"})
     skills.register(second)
-    assert _harness_knowledge_procedure(skills)() is None   # ambiguous: offer none
+    assert _harness_knowledge_procedure(skills)() is None  # ambiguous: offer none
 
 
 def test_the_vault_question_asks_for_the_persons_question_without_added_instructions() -> None:

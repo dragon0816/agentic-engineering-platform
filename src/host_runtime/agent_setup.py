@@ -39,8 +39,11 @@ from host_runtime.workspace import write_atomically
 
 AgentName = Literal["claude-code", "codex", "copilot"]
 AGENT_NAMES: tuple[AgentName, ...] = ("claude-code", "codex", "copilot")
-LABELS: dict[str, str] = {"claude-code": "Claude Code", "codex": "Codex",
-                          "copilot": "GitHub Copilot CLI"}
+LABELS: dict[str, str] = {
+    "claude-code": "Claude Code",
+    "codex": "Codex",
+    "copilot": "GitHub Copilot CLI",
+}
 EXECUTABLES: dict[str, str] = {"claude-code": "claude", "codex": "codex", "copilot": "copilot"}
 SKILLS = ("aep-workflow-creator", "aep-skill-creator", "aep-knowledge")
 AUTHORING_SERVER = "aep"
@@ -108,19 +111,23 @@ def places(agent: AgentName, environment: Environment) -> AgentPlaces:
         # Codex reads personal skills from ~/.agents/skills and MCP servers
         # from [mcp_servers.<name>] in $CODEX_HOME/config.toml (~/.codex).
         codex_home = environment._dir("CODEX_HOME", home / ".codex")
-        return AgentPlaces(agent, codex_home, home / ".agents" / "skills",
-                           codex_home / "config.toml", "codex")
+        return AgentPlaces(
+            agent, codex_home, home / ".agents" / "skills", codex_home / "config.toml", "codex"
+        )
     # The Copilot CLI reads personal skills from ~/.copilot/skills and MCP
     # servers from ~/.copilot/mcp-config.json; COPILOT_HOME moves both.
     copilot_home = environment._dir("COPILOT_HOME", home / ".copilot")
-    return AgentPlaces(agent, copilot_home, copilot_home / "skills",
-                       copilot_home / "mcp-config.json", "copilot")
+    return AgentPlaces(
+        agent, copilot_home, copilot_home / "skills", copilot_home / "mcp-config.json", "copilot"
+    )
 
 
 def detected(agent: AgentName, environment: Environment) -> bool:
     """Installed: its command is on PATH, or its configuration folder exists."""
-    return (environment.which(EXECUTABLES[agent]) is not None
-            or places(agent, environment).config_dir.is_dir())
+    return (
+        environment.which(EXECUTABLES[agent]) is not None
+        or places(agent, environment).config_dir.is_dir()
+    )
 
 
 @dataclass(frozen=True)
@@ -133,8 +140,15 @@ class Launch:
     def server(self, name: str, agent: AgentName) -> tuple[str, list[str]]:
         config = str(self.config.resolve())
         if name == AUTHORING_SERVER:
-            return self.python, ["-m", "host_runtime.cli", "mcp", "--config", config,
-                                 "--agent", agent]
+            return self.python, [
+                "-m",
+                "host_runtime.cli",
+                "mcp",
+                "--config",
+                config,
+                "--agent",
+                agent,
+            ]
         return self.python, ["-m", "host_runtime.cli", "assistant-mcp", "--config", config]
 
 
@@ -199,8 +213,12 @@ def _toml_block(launch: Launch, agent: AgentName) -> str:
     lines = [TOML_BEGIN]
     for name in SERVERS:
         command, args = launch.server(name, agent)
-        lines += [f"[mcp_servers.{json.dumps(name)}]", f"command = {json.dumps(command)}",
-                  f"args = {json.dumps(args)}", ""]
+        lines += [
+            f"[mcp_servers.{json.dumps(name)}]",
+            f"command = {json.dumps(command)}",
+            f"args = {json.dumps(args)}",
+            "",
+        ]
     lines[-1] = TOML_END
     return "\n".join(lines) + "\n"
 
@@ -237,20 +255,23 @@ def install(agent: AgentName, environment: Environment, launch: Launch) -> Chang
             changes.lines.append(f"  kept your own skill {folder} (not AEP's; not replaced)")
             continue
         changes.write(folder / "SKILL.md", skill_text(name))
-        changes.write(marker, json.dumps({"managed_by": "aep", "skill": name,
-                                          "version": version}) + "\n")
-    changes.lines.append(f"  skills {', '.join(SKILLS)} in {where.skills_dir} "
-                         f"(version {version})")
+        changes.write(
+            marker, json.dumps({"managed_by": "aep", "skill": name, "version": version}) + "\n"
+        )
+    changes.lines.append(f"  skills {', '.join(SKILLS)} in {where.skills_dir} (version {version})")
     if where.mcp_format == "codex":
         text = where.mcp_file.read_text(encoding="utf-8-sig") if where.mcp_file.is_file() else ""
         base = _without_block(text)
         clash = [name for name in SERVERS if name in _toml_servers(base)]
         if clash:
-            changes.lines.append(f"  kept your own MCP server(s) {', '.join(clash)} in "
-                                 f"{where.mcp_file}; AEP's were not added")
+            changes.lines.append(
+                f"  kept your own MCP server(s) {', '.join(clash)} in "
+                f"{where.mcp_file}; AEP's were not added"
+            )
         else:
-            joined = base.rstrip("\n") + ("\n\n" if base.strip() else "") + \
-                _toml_block(launch, agent)
+            joined = (
+                base.rstrip("\n") + ("\n\n" if base.strip() else "") + _toml_block(launch, agent)
+            )
             _toml_servers(joined)  # never write a file the agent cannot read
             changes.write(where.mcp_file, joined)
             changes.lines.append(f"  MCP servers {', '.join(SERVERS)} in {where.mcp_file}")
@@ -288,8 +309,9 @@ def remove(agent: AgentName, environment: Environment) -> Changes:
             text = where.mcp_file.read_text(encoding="utf-8-sig")
             if TOML_BEGIN in text:
                 changes.write(where.mcp_file, _without_block(text))
-                changes.lines.append(f"  removed MCP servers {', '.join(SERVERS)} from "
-                                     f"{where.mcp_file}")
+                changes.lines.append(
+                    f"  removed MCP servers {', '.join(SERVERS)} from {where.mcp_file}"
+                )
     elif where.mcp_file.is_file():
         data = _read_json(where.mcp_file)
         servers = data.get("mcpServers")
@@ -298,10 +320,10 @@ def remove(agent: AgentName, environment: Environment) -> Changes:
             for name in gone:
                 del servers[name]
             if gone:
-                changes.write(where.mcp_file,
-                              json.dumps(data, ensure_ascii=False, indent=2) + "\n")
-                changes.lines.append(f"  removed MCP servers {', '.join(gone)} from "
-                                     f"{where.mcp_file}")
+                changes.write(where.mcp_file, json.dumps(data, ensure_ascii=False, indent=2) + "\n")
+                changes.lines.append(
+                    f"  removed MCP servers {', '.join(gone)} from {where.mcp_file}"
+                )
     return changes
 
 
@@ -322,8 +344,9 @@ def status(agent: AgentName, environment: Environment) -> dict[str, Any]:
     problem = None
     try:
         if where.mcp_format == "codex":
-            text = (where.mcp_file.read_text(encoding="utf-8-sig")
-                    if where.mcp_file.is_file() else "")
+            text = (
+                where.mcp_file.read_text(encoding="utf-8-sig") if where.mcp_file.is_file() else ""
+            )
             if TOML_BEGIN in text:
                 found = _toml_servers(text)
                 servers = {name: name in found for name in SERVERS}
@@ -335,19 +358,29 @@ def status(agent: AgentName, environment: Environment) -> dict[str, Any]:
         problem = f"{where.mcp_file} could not be read: {type(error).__name__}"
     installed = [v for v in skills.values() if v not in (None, "yours")]
     return {
-        "agent": agent, "label": LABELS[agent], "detected": detected(agent, environment),
-        "skills_dir": str(where.skills_dir), "mcp_file": str(where.mcp_file),
-        "skills": skills, "servers": servers, "version": current,
+        "agent": agent,
+        "label": LABELS[agent],
+        "detected": detected(agent, environment),
+        "skills_dir": str(where.skills_dir),
+        "mcp_file": str(where.mcp_file),
+        "skills": skills,
+        "servers": servers,
+        "version": current,
         "installed": bool(installed) or any(servers.values()),
-        "current": len(installed) == len(SKILLS) and all(v == current for v in installed)
+        "current": len(installed) == len(SKILLS)
+        and all(v == current for v in installed)
         and all(servers.values()),
         "problem": problem,
     }
 
 
 def apply(
-    action: Literal["install", "remove"], targets: tuple[AgentName, ...],
-    environment: Environment, launch: Launch | None, *, only_detected: bool = True,
+    action: Literal["install", "remove"],
+    targets: tuple[AgentName, ...],
+    environment: Environment,
+    launch: Launch | None,
+    *,
+    only_detected: bool = True,
 ) -> list[str]:
     """Install or remove for several agents and say what changed. With
     `only_detected`, an agent that is not on this computer is skipped."""
@@ -365,9 +398,11 @@ def apply(
         except (OSError, ValueError) as error:
             lines.append(f"{LABELS[agent]}: not changed ({error})")
             continue
-        verb = ("installed/updated" if action == "install" else "removed") \
-            if changes.changed else ("already up to date" if action == "install"
-                                     else "nothing of AEP's to remove")
+        verb = (
+            ("installed/updated" if action == "install" else "removed")
+            if changes.changed
+            else ("already up to date" if action == "install" else "nothing of AEP's to remove")
+        )
         lines.append(f"{LABELS[agent]}: {verb}")
         lines.extend(changes.lines)
     return lines

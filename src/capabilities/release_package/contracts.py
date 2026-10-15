@@ -97,7 +97,8 @@ class IsolatedApplyStepInput(ReleasePreviewStepInput):
 
     def isolated_settings(self) -> IsolatedApplySettings:
         return IsolatedApplySettings(
-            checkout_path=self.checkout_path, inbox_path=self.inbox_path,
+            checkout_path=self.checkout_path,
+            inbox_path=self.inbox_path,
             allowed_root=self.allowed_root,
         )
 

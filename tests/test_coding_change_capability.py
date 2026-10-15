@@ -41,31 +41,47 @@ class Replies:
 
     def generate(self, request: ModelRequest) -> ModelResponse:
         answer = self.answers.pop(0)
-        return ModelResponse(trace=request.trace, model_alias=request.model_alias,
-                             text=json.dumps(answer), structured_output=answer)
+        return ModelResponse(
+            trace=request.trace,
+            model_alias=request.model_alias,
+            text=json.dumps(answer),
+            structured_output=answer,
+        )
 
 
 PLAN = {"summary": "Add double", "purpose": "implement double"}
 
 
-def handler(tmp_path: Path, model: Replies | None, *, blocked: bool = True,
-            python: str = BASE_PYTHON) -> tuple[CodingChangeHandler, Path]:
+def handler(
+    tmp_path: Path, model: Replies | None, *, blocked: bool = True, python: str = BASE_PYTHON
+) -> tuple[CodingChangeHandler, Path]:
     repo = repository(tmp_path)
-    binding = CodingHostBinding.model_validate({
-        "runner_python": python,
-        "repositories": [{"name": "practice", "path": str(repo), "writable": ["src/**/*.py"]}],
-        "timeout_seconds": 60,
-    })
+    binding = CodingHostBinding.model_validate(
+        {
+            "runner_python": python,
+            "repositories": [{"name": "practice", "path": str(repo), "writable": ["src/**/*.py"]}],
+            "timeout_seconds": 60,
+        }
+    )
     return CodingChangeHandler(
-        binding, tmp_path / "runs", model=model, model_alias="gateway",
-        rule_present=lambda _python: blocked, extra_env=SITE,
+        binding,
+        tmp_path / "runs",
+        model=model,
+        model_alias="gateway",
+        rule_present=lambda _python: blocked,
+        extra_env=SITE,
     ), repo
 
 
 def ask(**changes: Any) -> CodingChangeStepInput:
-    request = {"repository": "practice", "requirement": "Add double(value).",
-               "file": "src/calc/double.py", "tests": ["tests/test_double.py"],
-               "max_repairs": 1, **changes}
+    request = {
+        "repository": "practice",
+        "requirement": "Add double(value).",
+        "file": "src/calc/double.py",
+        "tests": ["tests/test_double.py"],
+        "max_repairs": 1,
+        **changes,
+    }
     return CodingChangeStepInput(request=CodingChangeRequest.model_validate(request))
 
 
@@ -77,7 +93,10 @@ def test_a_wrong_first_version_is_repaired_and_left_uncommitted_for_review(
     result = run.change(TRACE, ask())
     assert result.summary == "Add double" and result.attempts == 2 and not result.committed
     assert [(item.command, item.status) for item in result.commands] == [
-        ("pytest-new", "failed"), ("pytest-new", "passed"), ("pytest-suite", "passed")]
+        ("pytest-new", "failed"),
+        ("pytest-new", "passed"),
+        ("pytest-suite", "passed"),
+    ]
     assert "+    return value * 2" in result.diff
     worktree = Path(result.worktree)
     assert (worktree / "src" / "calc" / "double.py").read_text() == RIGHT
@@ -98,16 +117,19 @@ def test_a_run_that_never_passes_is_refused_with_its_evidence_kept(tmp_path: Pat
     assert json.loads(evidence.read_text(encoding="utf-8"))["result"]["status"] == "failed"
 
 
-@pytest.mark.parametrize(("changes", "code"), [
-    ({"repository": "elsewhere"}, "coding_repository_unknown"),
-    ({"file": "tests/test_double.py"}, "coding_file_is_a_test"),
-    ({"file": "src/calc/conftest.py"}, "coding_file_is_a_test"),
-    ({"file": "pyproject.toml"}, "coding_file_not_writable"),
-    ({"file": "../outside.py"}, "coding_path_invalid"),
-    ({"file": "C:/Windows/x.py"}, "coding_path_invalid"),
-    ({"tests": ["tests/test_missing.py"]}, "coding_test_not_found"),
-    ({"tests": ["src/calc/ops.py"]}, "coding_test_not_a_test_file"),
-])
+@pytest.mark.parametrize(
+    ("changes", "code"),
+    [
+        ({"repository": "elsewhere"}, "coding_repository_unknown"),
+        ({"file": "tests/test_double.py"}, "coding_file_is_a_test"),
+        ({"file": "src/calc/conftest.py"}, "coding_file_is_a_test"),
+        ({"file": "pyproject.toml"}, "coding_file_not_writable"),
+        ({"file": "../outside.py"}, "coding_path_invalid"),
+        ({"file": "C:/Windows/x.py"}, "coding_path_invalid"),
+        ({"tests": ["tests/test_missing.py"]}, "coding_test_not_found"),
+        ({"tests": ["src/calc/ops.py"]}, "coding_test_not_a_test_file"),
+    ],
+)
 def test_what_a_person_can_fix_is_refused_before_anything_runs(
     tmp_path: Path, changes: dict[str, Any], code: str
 ) -> None:
@@ -151,8 +173,14 @@ def test_a_host_with_coding_installs_the_capability_and_lists_its_repositories(
     from capabilities.coding_change.manifest import CHANGE_SPEC, REPOSITORIES_FUNCTION
     from host_runtime.host import build_runtime, choice_sources
 
-    binding = CodingHostBinding.model_validate({"runner_python": BASE_PYTHON, "repositories": [
-        {"name": "practice", "path": str(tmp_path / "repo"), "writable": ["src/**/*.py"]}]})
+    binding = CodingHostBinding.model_validate(
+        {
+            "runner_python": BASE_PYTHON,
+            "repositories": [
+                {"name": "practice", "path": str(tmp_path / "repo"), "writable": ["src/**/*.py"]}
+            ],
+        }
+    )
     plain, layout = ready(tmp_path)
     config = plain.model_copy(update={"coding": binding})
     with build_runtime(config, layout=layout) as runtime:
@@ -170,13 +198,20 @@ def test_doctor_names_what_coding_still_needs(tmp_path: Path) -> None:
 
     repo = repository(tmp_path)
     plain, _ = ready(tmp_path / "host")
-    binding = {"runner_python": BASE_PYTHON, "repositories": [
-        {"name": "practice", "path": str(repo), "writable": ["src/**/*.py"]},
-        {"name": "plain", "path": str(tmp_path), "writable": ["*.py"]}]}
+    binding = {
+        "runner_python": BASE_PYTHON,
+        "repositories": [
+            {"name": "practice", "path": str(repo), "writable": ["src/**/*.py"]},
+            {"name": "plain", "path": str(tmp_path), "writable": ["*.py"]},
+        ],
+    }
     config = plain.model_copy(update={"coding": CodingHostBinding.model_validate(binding)})
     check = inspect_coding(config, rule_present=lambda _python: False)
     assert check.status == "failed"
     assert "New-NetFirewallRule" in check.detail and "plain is not a git checkout" in check.detail
-    launcher = plain.model_copy(update={"coding": CodingHostBinding.model_validate(
-        {**binding, "runner_python": sys.executable})})
+    launcher = plain.model_copy(
+        update={
+            "coding": CodingHostBinding.model_validate({**binding, "runner_python": sys.executable})
+        }
+    )
     assert "venv launcher" in inspect_coding(launcher).detail

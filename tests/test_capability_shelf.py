@@ -43,7 +43,8 @@ REFERENCE = "lab/weekly-check@1.0.0"
 @pytest.fixture
 def app(tmp_path: Path) -> Iterator[SharedPlatformApplication]:
     platform = SharedPlatformApplication.empty(
-        administrators=("platform-admin",), registry_path=tmp_path / "registry.sqlite")
+        administrators=("platform-admin",), registry_path=tmp_path / "registry.sqlite"
+    )
     with platform:
         yield platform
 
@@ -61,7 +62,8 @@ def _local_workflow(layout: HostLayout, name: str = "local-check") -> str:
     manifest = WorkflowManifest.model_validate(workflow_manifest(name, "1.0.0"))
     layout.workflows.mkdir(parents=True, exist_ok=True)
     (layout.workflows / f"lab__{name}__1.0.0.json").write_text(
-        manifest.model_dump_json(), encoding="utf-8")
+        manifest.model_dump_json(), encoding="utf-8"
+    )
     return f"lab/{name}@1.0.0"
 
 
@@ -94,8 +96,7 @@ def test_switching_a_workflow_off_and_on_moves_its_file_and_the_live_offer(
         assert engine.workflows.get(identity) is None  # no longer offered, no restart
         listed = web.assets()
         assert "local-check" not in [w["name"] for w in listed["workflows"]]
-        assert [(d["kind"], d["name"]) for d in listed["disabled"]] == [
-            ("workflow", "local-check")]
+        assert [(d["kind"], d["name"]) for d in listed["disabled"]] == [("workflow", "local-check")]
         assert web.switch_asset("workflow", reference, False)["code"] == "not_installed"
 
         on = web.switch_asset("workflow", reference, True)
@@ -115,8 +116,13 @@ def test_a_skill_is_not_switched_on_beside_another_version_of_its_alias(
     skill = next(item for item in shipped() if isinstance(item, SkillManifest))
     _write(layout.skills, skill)
     identity = skill.metadata.identity
-    older = skill.model_copy(update={"metadata": skill.metadata.model_copy(update={
-        "identity": identity.model_copy(update={"version": "0.0.1"})})})
+    older = skill.model_copy(
+        update={
+            "metadata": skill.metadata.model_copy(
+                update={"identity": identity.model_copy(update={"version": "0.0.1"})}
+            )
+        }
+    )
     _write(layout.skills / "disabled", older)
     with build_runtime(config) as runtime:
         web = AgentWeb(runtime)
@@ -126,8 +132,9 @@ def test_a_skill_is_not_switched_on_beside_another_version_of_its_alias(
         assert (listed["kind"], listed["version"]) == ("skill", "0.0.1")
         refused = web.switch_asset("skill", reference, True)
         assert refused["code"] == "alias_in_use" and "one" in refused["message"]
-        assert (layout.skills / "disabled" / f"{identity.namespace}__{identity.name}__0.0.1"
-                ".json").is_file()
+        assert (
+            layout.skills / "disabled" / f"{identity.namespace}__{identity.name}__0.0.1.json"
+        ).is_file()
 
         current = f"{identity.namespace}/{identity.name}@{identity.version}"
         skills = runtime.agent.gateway.router.commands.skills
@@ -145,13 +152,15 @@ def test_removing_moves_the_file_to_a_dated_folder_and_refuses_shipped_assets(
     shipped_workflow = next(item for item in shipped() if isinstance(item, WorkflowManifest))
     shipped_path = _write(layout.workflows, shipped_workflow)
     shipped_identity = shipped_workflow.metadata.identity
-    shipped_reference = (f"{shipped_identity.namespace}/{shipped_identity.name}"
-                         f"@{shipped_identity.version}")
+    shipped_reference = (
+        f"{shipped_identity.namespace}/{shipped_identity.name}@{shipped_identity.version}"
+    )
     assert ("workflow", *shipped_identity.key) in shipped_keys()
     with build_runtime(config) as runtime:
         web = AgentWeb(runtime)
-        [flag] = [w["shipped"] for w in web.assets()["workflows"]
-                  if w["name"] == shipped_identity.name]
+        [flag] = [
+            w["shipped"] for w in web.assets()["workflows"] if w["name"] == shipped_identity.name
+        ]
         assert flag is True
 
         refused = web.remove_asset("workflow", shipped_reference)
@@ -170,13 +179,18 @@ def test_removing_moves_the_file_to_a_dated_folder_and_refuses_shipped_assets(
         assert kept.name == "lab__local-check__1.0.0.json"
         assert removed["kept_at"] in removed["message"].replace("workspace\\", "")
         WorkflowManifest.model_validate_json(kept.read_text(encoding="utf-8"))  # intact
-        [line] = (layout.workspace_root / "removed" / JOURNAL).read_text(
-            encoding="utf-8").splitlines()
+        [line] = (
+            (layout.workspace_root / "removed" / JOURNAL).read_text(encoding="utf-8").splitlines()
+        )
         record = json.loads(line)
         assert record["asset"] == reference and record["actor"] == runtime.actor
         assert record["to"].endswith("lab__local-check__1.0.0.json")
-        assert runtime.agent.gateway.engine.workflows.get(AssetIdentity(
-            namespace="lab", name="local-check", version="1.0.0")) is None
+        assert (
+            runtime.agent.gateway.engine.workflows.get(
+                AssetIdentity(namespace="lab", name="local-check", version="1.0.0")
+            )
+            is None
+        )
         assert "local-check" not in [w["name"] for w in web.assets()["workflows"]]
         assert web.remove_asset("workflow", reference)["code"] == "not_installed"
 
@@ -190,24 +204,38 @@ def _published(app: SharedPlatformApplication, visibility: str = "organization")
     portal = app.member_base_url + "/v1/member/"
     leo = _signed_in(app, "leo", "member")
     admin = _signed_in(app, "leo-admin", "platform_admin")
-    status, submitted = request(portal + "assets/submit", authorization=leo, body={
-        "kind": "workflow", "change": "minor", "visibility": visibility,
-        "manifest": workflow_manifest()})
+    status, submitted = request(
+        portal + "assets/submit",
+        authorization=leo,
+        body={
+            "kind": "workflow",
+            "change": "minor",
+            "visibility": visibility,
+            "manifest": workflow_manifest(),
+        },
+    )
     assert status == 200, submitted
-    assert request(portal + "admin/submissions/approve", authorization=admin, body={
-        "submission_id": submitted["submission"]["submission_id"],
-        "evidence": "read it"})[0] == 200
+    assert (
+        request(
+            portal + "admin/submissions/approve",
+            authorization=admin,
+            body={"submission_id": submitted["submission"]["submission_id"], "evidence": "read it"},
+        )[0]
+        == 200
+    )
 
 
 def test_add_to_this_agent_selects_as_the_member_syncs_and_removal_is_consistent(
-    app: SharedPlatformApplication, tmp_path: Path,
+    app: SharedPlatformApplication,
+    tmp_path: Path,
 ) -> None:
     _published(app)
     path, layout = _host(tmp_path)
     grants = layout.grants.read_bytes()
     engineer = _signed_in(app, "engineer", "member")
-    with build_runtime(CompanyHostConfiguration.model_validate_json(
-            path.read_text("utf-8")), layout=layout) as runtime:
+    with build_runtime(
+        CompanyHostConfiguration.model_validate_json(path.read_text("utf-8")), layout=layout
+    ) as runtime:
         web = _web(runtime, path, {})
         assert web.update_shared_platform(_card(app, _agent_login(app, engineer)))["ok"]
         [entry] = [i for i in web.platform()["catalog"] if i["name"] == "weekly-check"]
@@ -253,14 +281,14 @@ def test_add_to_this_agent_selects_as_the_member_syncs_and_removal_is_consistent
         assert web.add_to_agent("workflow", REFERENCE)["installed"] is True
         package = app.state.packages.get(AssetIdentity(**IDENTITY))
         assert package is not None and package.metadata.package is not None
-        assert installed.read_bytes() == app.state.artifacts[
-            package.metadata.package.artifact_ref]
+        assert installed.read_bytes() == app.state.artifacts[package.metadata.package.artifact_ref]
         listed_tasks = json.dumps(web.task_list())
         assert "Add lab/weekly-check@1.0.0 to this Agent" in listed_tasks
 
 
 def test_add_to_this_agent_explains_what_is_missing(
-    app: SharedPlatformApplication, tmp_path: Path,
+    app: SharedPlatformApplication,
+    tmp_path: Path,
 ) -> None:
     _published(app)
     # No shared platform at all.
@@ -272,8 +300,9 @@ def test_add_to_this_agent_explains_what_is_missing(
         assert AgentWeb(runtime).add_to_agent("workflow", "x")["code"] == "bad_reference"
 
     path, layout = _host(tmp_path)
-    with build_runtime(CompanyHostConfiguration.model_validate_json(
-            path.read_text("utf-8")), layout=layout) as runtime:
+    with build_runtime(
+        CompanyHostConfiguration.model_validate_json(path.read_text("utf-8")), layout=layout
+    ) as runtime:
         web = _web(runtime, path, {})
         # The old platform, no publishing configured yet.
         assert web.add_to_agent("workflow", REFERENCE)["code"] == "publishing_not_configured"
@@ -283,16 +312,18 @@ def test_add_to_this_agent_explains_what_is_missing(
         assert missing["code"] == "login_missing" and "Personal Agent code" in missing["message"]
         # A code, but this PC is not enrolled for that member.
         engineer = _signed_in(app, "engineer", "member")
-        assert web.update_shared_platform(
-            _card(app, _agent_login(app, engineer), enroll=False))["ok"]
+        assert web.update_shared_platform(_card(app, _agent_login(app, engineer), enroll=False))[
+            "ok"
+        ]
         assert runtime.platform is not None
         assert runtime.platform.binding.token_id == OLD_PLATFORM["token_id"]
         unenrolled = web.add_to_agent("workflow", REFERENCE)
         assert unenrolled["code"] == "actor_not_admitted"
         assert "Enroll this PC" in unenrolled["message"]
         # The portal stops answering (a dropped tunnel).
-        assert web.update_shared_platform({**_card(app, enroll=False),
-                                           "member_portal_url": "http://127.0.0.1:9"})["ok"]
+        assert web.update_shared_platform(
+            {**_card(app, enroll=False), "member_portal_url": "http://127.0.0.1:9"}
+        )["ok"]
         gone = web.add_to_agent("workflow", REFERENCE)
         assert gone["code"] == "platform_unreachable" and "Settings" in gone["message"]
         assert not (layout.workflows / "lab__weekly-check__1.0.0.json").exists()
@@ -314,19 +345,33 @@ def test_the_routes_need_the_token_and_a_named_asset(tmp_path: Path) -> None:
         thread.start()
         try:
             url = base(server)
-            for route in ("/api/assets/switch", "/api/assets/remove", "/api/platform/add",
-                          "/api/platform/unselect"):
+            for route in (
+                "/api/assets/switch",
+                "/api/assets/remove",
+                "/api/platform/add",
+                "/api/platform/unselect",
+            ):
                 assert fetch(url + route, body={}).status == 401
-                assert fetch(url + route, token=server.token, body={"kind": "workflow"}
-                             ).status == 400
-            switched: Any = fetch(url + "/api/assets/switch", token=server.token, body={
-                "kind": "workflow", "asset": reference, "enabled": False}).json()
+                assert (
+                    fetch(url + route, token=server.token, body={"kind": "workflow"}).status == 400
+                )
+            switched: Any = fetch(
+                url + "/api/assets/switch",
+                token=server.token,
+                body={"kind": "workflow", "asset": reference, "enabled": False},
+            ).json()
             assert switched["ok"] is True
-            removed: Any = fetch(url + "/api/assets/remove", token=server.token, body={
-                "kind": "workflow", "asset": reference}).json()
+            removed: Any = fetch(
+                url + "/api/assets/remove",
+                token=server.token,
+                body={"kind": "workflow", "asset": reference},
+            ).json()
             assert removed["ok"] is True and "removed" in removed["kept_at"]
-            unconfigured: Any = fetch(url + "/api/platform/add", token=server.token, body={
-                "kind": "workflow", "asset": reference}).json()
+            unconfigured: Any = fetch(
+                url + "/api/platform/add",
+                token=server.token,
+                body={"kind": "workflow", "asset": reference},
+            ).json()
             assert unconfigured["code"] == "platform_not_configured"
         finally:
             server.shutdown()
@@ -337,14 +382,29 @@ def test_the_routes_need_the_token_and_a_named_asset(tmp_path: Path) -> None:
 def test_the_page_lists_drafts_with_installed_assets_and_opens_library_cards() -> None:
     from host_runtime.web_page import PAGE
 
-    for hook in ('id="cap-filters"', 'id="cap-filter-drafts"', 'id="cap-filter-disabled"',
-                 '"role", "switch"', 'id="asset-confirm"', '"/api/assets/switch"',
-                 '"/api/assets/remove"', '"/api/drafts/install"', '"/api/drafts/delete"',
-                 '"/api/platform/add"', '"/api/platform/unselect"', '"aria-expanded"',
-                 "+ Add to this Agent", "Remove selection", "Discard draft",
-                 "Remove from this Agent", "Draft \u2014 not installed",
-                 "renderAssets(done.assets)", "done.restart_required", 'id="platform-sync"',
-                 "Sync again"):
+    for hook in (
+        'id="cap-filters"',
+        'id="cap-filter-drafts"',
+        'id="cap-filter-disabled"',
+        '"role", "switch"',
+        'id="asset-confirm"',
+        '"/api/assets/switch"',
+        '"/api/assets/remove"',
+        '"/api/drafts/install"',
+        '"/api/drafts/delete"',
+        '"/api/platform/add"',
+        '"/api/platform/unselect"',
+        '"aria-expanded"',
+        "+ Add to this Agent",
+        "Remove selection",
+        "Discard draft",
+        "Remove from this Agent",
+        "Draft \u2014 not installed",
+        "renderAssets(done.assets)",
+        "done.restart_required",
+        'id="platform-sync"',
+        "Sync again",
+    ):
         assert hook in PAGE, hook
     assert "我的草稿" not in PAGE and 'id="drafts-card"' not in PAGE
     script = PAGE.split("<script>", 1)[1].split("</script>", 1)[0]
@@ -367,11 +427,19 @@ def test_the_capability_list_works_in_a_real_browser(tmp_path: Path) -> None:
     config, layout = ready(tmp_path)
     _local_workflow(layout, "local-check")
     _local_workflow(layout, "quiet-check")
-    draft = {"candidate_id": "wf-test", "kind": "workflow", "asset": "lab/draft-check@1.0.0",
-             "title": "Draft check", "description": "From an external agent.",
-             "source": "external:claude-code", "updated_at": "2026-10-15T10:00:00+08:00",
-             "steps": ["files/read-file@1.0.0"], "parameters": [], "last_run": None,
-             "detail": "{}"}
+    draft = {
+        "candidate_id": "wf-test",
+        "kind": "workflow",
+        "asset": "lab/draft-check@1.0.0",
+        "title": "Draft check",
+        "description": "From an external agent.",
+        "source": "external:claude-code",
+        "updated_at": "2026-10-15T10:00:00+08:00",
+        "steps": ["files/read-file@1.0.0"],
+        "parameters": [],
+        "last_run": None,
+        "detail": "{}",
+    }
     with build_runtime(config) as runtime:
         web = AgentWeb(runtime)
         assert web.switch_asset("workflow", "lab/quiet-check@1.0.0", False)["ok"]
@@ -392,41 +460,67 @@ def test_the_capability_list_works_in_a_real_browser(tmp_path: Path) -> None:
             raise AssertionError(expression)
 
         def size(selector: str) -> list[int]:
-            return json.loads(str(browser._evaluate(
-                "JSON.stringify((() => { const r = document.querySelector("
-                + json.dumps(selector) + ").getBoundingClientRect();"
-                " return [Math.round(r.width), Math.round(r.height)]; })())")))
+            return json.loads(
+                str(
+                    browser._evaluate(
+                        "JSON.stringify((() => { const r = document.querySelector("
+                        + json.dumps(selector)
+                        + ").getBoundingClientRect();"
+                        " return [Math.round(r.width), Math.round(r.height)]; })())"
+                    )
+                )
+            )
 
         try:
             browser.navigate(served.address)
             browser._evaluate('document.getElementById("nav-capabilities").click()')
             browser._evaluate('document.getElementById("cap-tab-workflows").click()')
             wait('document.querySelectorAll("#capability-list .cap-row").length >= 4')
-            states = json.loads(str(browser._evaluate(
-                'JSON.stringify([...document.querySelectorAll("#capability-list .cap-row")]'
-                '.map((r) => r.dataset.state))')))
+            states = json.loads(
+                str(
+                    browser._evaluate(
+                        'JSON.stringify([...document.querySelectorAll("#capability-list .cap-row")]'
+                        ".map((r) => r.dataset.state))"
+                    )
+                )
+            )
             assert states[0] == "draft" and states[-1] == "disabled", states
             assert set(states[1:-1]) == {"installed"}
-            for selector in ("#cap-filter-drafts", ".cap-row .switch",
-                             '.cap-row[data-state="draft"] .btn', ".detail-actions .danger"):
+            for selector in (
+                "#cap-filter-drafts",
+                ".cap-row .switch",
+                '.cap-row[data-state="draft"] .btn',
+                ".detail-actions .danger",
+            ):
                 width, height = size(selector)
                 assert width >= 44 and height >= 44, (selector, width, height)
-            detail = str(browser._evaluate(
-                'document.getElementById("capability-detail-content").innerText'))
+            detail = str(
+                browser._evaluate('document.getElementById("capability-detail-content").innerText')
+            )
             assert "Discard draft" in detail and "Install" in detail
 
             browser._evaluate('document.getElementById("cap-filter-disabled").click()')
-            assert json.loads(str(browser._evaluate(
-                'JSON.stringify([...document.querySelectorAll("#capability-list .cap-row")]'
-                '.map((r) => r.dataset.state))'))) == ["disabled"]
+            assert json.loads(
+                str(
+                    browser._evaluate(
+                        'JSON.stringify([...document.querySelectorAll("#capability-list .cap-row")]'
+                        ".map((r) => r.dataset.state))"
+                    )
+                )
+            ) == ["disabled"]
             browser._evaluate('document.getElementById("cap-filter-installed").click()')
-            browser._evaluate('[...document.querySelectorAll(".cap-item")].find((b) => '
-                              'b.textContent.includes("local-check")).click()')
-            browser._evaluate('[...document.querySelectorAll(".detail-actions button")]'
-                              '.find((b) => b.textContent.includes("Remove")).click()')
+            browser._evaluate(
+                '[...document.querySelectorAll(".cap-item")].find((b) => '
+                'b.textContent.includes("local-check")).click()'
+            )
+            browser._evaluate(
+                '[...document.querySelectorAll(".detail-actions button")]'
+                '.find((b) => b.textContent.includes("Remove")).click()'
+            )
             wait('document.getElementById("asset-confirm").open')
-            assert "local-check" in str(browser._evaluate(
-                'document.getElementById("asset-confirm-title").textContent'))
+            assert "local-check" in str(
+                browser._evaluate('document.getElementById("asset-confirm-title").textContent')
+            )
             browser._evaluate('document.getElementById("asset-confirm-cancel").click()')
             wait('!document.getElementById("asset-confirm").open')
             assert (layout.workflows / "lab__local-check__1.0.0.json").is_file()
@@ -441,7 +535,8 @@ def test_the_capability_list_works_in_a_real_browser(tmp_path: Path) -> None:
 
 @pytest.mark.skipif(browser_path() is None, reason="no Chromium browser is installed")
 def test_add_to_this_agent_redraws_the_card_and_the_list_without_a_reload(
-    app: SharedPlatformApplication, tmp_path: Path,
+    app: SharedPlatformApplication,
+    tmp_path: Path,
 ) -> None:
     """Owner 2026-10-15: installing from the Library is one action; the
     answer updates the card's badge, the list on the left (the new Workflow
@@ -456,8 +551,9 @@ def test_add_to_this_agent_redraws_the_card_and_the_list_without_a_reload(
     _published(app)
     path, layout = _host(tmp_path)
     engineer = _signed_in(app, "engineer", "member")
-    with build_runtime(CompanyHostConfiguration.model_validate_json(
-            path.read_text("utf-8")), layout=layout) as runtime:
+    with build_runtime(
+        CompanyHostConfiguration.model_validate_json(path.read_text("utf-8")), layout=layout
+    ) as runtime:
         web = _web(runtime, path, {})
         assert web.update_shared_platform(_card(app, _agent_login(app, engineer)))["ok"]
         served = AgentWebServer(web)
@@ -480,26 +576,37 @@ def test_add_to_this_agent_redraws_the_card_and_the_list_without_a_reload(
             browser._evaluate('document.getElementById("nav-capabilities").click()')
             browser._evaluate('document.getElementById("market-tab-workflow").click()')
             wait('document.querySelectorAll("#catalog .market-head").length === 1')
-            before = int(str(browser._evaluate(
-                'document.getElementById("count-workflows").textContent')))
-            browser._evaluate('window.notReloaded = true')
+            before = int(
+                str(browser._evaluate('document.getElementById("count-workflows").textContent'))
+            )
+            browser._evaluate("window.notReloaded = true")
             browser._evaluate('document.querySelector("#catalog .market-head").click()')
             browser._evaluate('document.querySelector(".market-detail button.go").click()')
             wait('document.querySelector("#catalog .status-badge").textContent === "Installed"')
             assert browser._evaluate("window.notReloaded") is True
             row = browser._evaluate(
-                '(document.querySelector(".cap-item[aria-current=true] small") || {})'
-                '.textContent')
+                '(document.querySelector(".cap-item[aria-current=true] small") || {}).textContent'
+            )
             assert row == "lab/weekly-check@1.0.0", row
-            assert browser._evaluate('document.getElementById("cap-tab-workflows")'
-                                     '.getAttribute("aria-selected")') == "true"
-            assert int(str(browser._evaluate(
-                'document.getElementById("count-workflows").textContent'))) == before + 1
-            status = str(browser._evaluate(
-                'document.getElementById("platform-sync-result").textContent'))
+            assert (
+                browser._evaluate(
+                    'document.getElementById("cap-tab-workflows").getAttribute("aria-selected")'
+                )
+                == "true"
+            )
+            assert (
+                int(
+                    str(browser._evaluate('document.getElementById("count-workflows").textContent'))
+                )
+                == before + 1
+            )
+            status = str(
+                browser._evaluate('document.getElementById("platform-sync-result").textContent')
+            )
             assert "now selected" in status and "grants.json" in status, status
-            assert "now selected" in str(browser._evaluate(
-                'document.querySelector(".market-outcome").textContent'))
+            assert "now selected" in str(
+                browser._evaluate('document.querySelector(".market-outcome").textContent')
+            )
             assert (layout.workflows / "lab__weekly-check__1.0.0.json").is_file()
         finally:
             browser.close()

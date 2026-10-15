@@ -279,9 +279,11 @@ class TruncatingModel(VisionModel):
     def generate(self, request: ModelRequest) -> ModelResponse:
         if (request.max_output_tokens or 0) < self.enough:
             self.requests.append(request)
-            return ModelResponse(trace=request.trace, model_alias=request.model_alias,
-                                 failure=Failure(code="model_output_truncated",
-                                                 message="output token limit"))
+            return ModelResponse(
+                trace=request.trace,
+                model_alias=request.model_alias,
+                failure=Failure(code="model_output_truncated", message="output token limit"),
+            )
         return super().generate(request)
 
 
@@ -301,6 +303,10 @@ def test_each_described_picture_is_reported_for_the_progress_bar(tmp_path: Path)
     intake = DropIntake(vault, [ImageExtractor()], describer=describer)
     drop(vault, "drop/deck.img", b"anything")
     heard: list[tuple[int, int]] = []
-    intake.intake("drop/deck.img", mode="apply", today=TODAY,
-                  on_image=lambda done, total: heard.append((done, total)))
+    intake.intake(
+        "drop/deck.img",
+        mode="apply",
+        today=TODAY,
+        on_image=lambda done, total: heard.append((done, total)),
+    )
     assert heard[-1] == (2, 2) and heard[0][1] == 2  # two distinct pictures

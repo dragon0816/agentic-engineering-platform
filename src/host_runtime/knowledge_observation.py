@@ -61,11 +61,17 @@ class KnowledgeBridgeActions:
     def execute(self) -> str:
         self.result = self._ask()
         code = self._code(self.result)
-        if (not self.result["ok"] and self.broadened is not None
-                and code in {"knowledge_insufficient_evidence", "knowledge_not_grounded"}
-                and self.attempt - 1 < self.retry_budget):
-            telemetry.emit("retry.scheduled", state="executing", attributes={
-                "retry_reason": code, "loop_index": self.attempt})
+        if (
+            not self.result["ok"]
+            and self.broadened is not None
+            and code in {"knowledge_insufficient_evidence", "knowledge_not_grounded"}
+            and self.attempt - 1 < self.retry_budget
+        ):
+            telemetry.emit(
+                "retry.scheduled",
+                state="executing",
+                attributes={"retry_reason": code, "loop_index": self.attempt},
+            )
             self.result = self._ask()
         if not self.result["ok"]:
             outcome = self.result.get("outcome") or {}
@@ -74,9 +80,7 @@ class KnowledgeBridgeActions:
             code = failure.get("code") or "knowledge_query_failed"
             raise HarnessActionFailure(
                 code,
-                needs_input=code in {
-                    "knowledge_insufficient_evidence", "knowledge_not_grounded"
-                },
+                needs_input=code in {"knowledge_insufficient_evidence", "knowledge_not_grounded"},
             )
         return "bridge_knowledge_answer"
 
@@ -89,7 +93,9 @@ class KnowledgeBridgeActions:
             status = "failed"
         else:
             status = (
-                "passed" if checked.answer.text.strip() and checked.cited_passages
+                "passed"
+                if checked.answer.text.strip()
+                and checked.cited_passages
                 and checked.citation_policy == self._citation_policy()
                 else "failed"
             )
@@ -100,7 +106,8 @@ class KnowledgeBridgeActions:
                 check_id="answer_nonempty",
                 status=status,
                 evidence_ref=(
-                    "unmet_skill_evidence" if set(self.required_evidence) - {"raw_citations"}
+                    "unmet_skill_evidence"
+                    if set(self.required_evidence) - {"raw_citations"}
                     else "bridge_raw_record"
                 ),
             ),
@@ -118,7 +125,8 @@ class KnowledgeBridgeActions:
                 HarnessCheckResult(
                     check_id="claim_support",
                     status=(
-                        "passed" if checked is not None and self._claims_supported(checked)
+                        "passed"
+                        if checked is not None and self._claims_supported(checked)
                         else "failed"
                     ),
                     evidence_ref="bridge_claim_overlap",
@@ -143,13 +151,16 @@ class KnowledgeBridgeActions:
         allow_wiki = checked.citation_policy == "wiki_primary"
         return (
             answer_claims_overlap_raw(
-                checked.answer, inference_label=self._inference_label(),
+                checked.answer,
+                inference_label=self._inference_label(),
                 allow_wiki=allow_wiki,
             )
             and (
                 self.procedure is None
                 or not unsupported_product_recommendations(
-                    checked.answer, checked.answer.question, self.procedure,
+                    checked.answer,
+                    checked.answer.question,
+                    self.procedure,
                     allow_wiki=allow_wiki,
                 )
             )
@@ -184,8 +195,7 @@ class KnowledgeBridgeActions:
         cited = {item.citation.model_dump_json() for item in checked.cited_passages}
         observations = {item.name: item for item in assessment.facets}
         cited_relations = tuple(
-            item for item in assessment.relations
-            if item.citation.model_dump_json() in cited
+            item for item in assessment.relations if item.citation.model_dump_json() in cited
         )
         allow_wiki = checked.citation_policy == "wiki_primary"
 
@@ -197,7 +207,10 @@ class KnowledgeBridgeActions:
                 and checked.citation_policy == self._citation_policy()
                 and any(
                     facet_supported_by(
-                        passage, facet, self.procedure, checked.answer.question,
+                        passage,
+                        facet,
+                        self.procedure,
+                        checked.answer.question,
                         allow_wiki=allow_wiki,
                     )
                     for passage in checked.cited_passages
@@ -205,7 +218,8 @@ class KnowledgeBridgeActions:
             )
 
         missing = [
-            facet for facet in self.required_facets
+            facet
+            for facet in self.required_facets
             if not (
                 (
                     facet in observations
@@ -214,21 +228,17 @@ class KnowledgeBridgeActions:
                         for citation in observations[facet].citations
                     )
                 )
-                or any(
-                    facet in (relation.left, relation.right)
-                    for relation in cited_relations
-                )
+                or any(facet in (relation.left, relation.right) for relation in cited_relations)
                 or cited_support(facet)
             )
         ]
         linked = connected_facets(
             self.required_facets,
-            tuple(
-                (item.left, item.right) for item in cited_relations
-            ),
+            tuple((item.left, item.right) for item in cited_relations),
         )
         relation_status = (
-            "supported" if self.relation_required and linked
+            "supported"
+            if self.relation_required and linked
             else ("missing" if self.relation_required else "not_requested")
         )
         return {
@@ -237,12 +247,8 @@ class KnowledgeBridgeActions:
             ),
             "missing_facets": missing,
             "relation_status": relation_status,
-            "retrieval_attempts": {
-                item.name: item.attempts for item in assessment.facets
-            },
-            "claim_status": (
-                "supported" if self._claims_supported(checked) else "unverified"
-            ),
+            "retrieval_attempts": {item.name: item.attempts for item in assessment.facets},
+            "claim_status": ("supported" if self._claims_supported(checked) else "unverified"),
         }
 
     @staticmethod

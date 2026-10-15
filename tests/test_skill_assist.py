@@ -11,8 +11,9 @@ from host_runtime.web_page import PAGE
 from models.contracts import ModelRequest, ModelResponse, ModelStreamEvent
 
 TRACE = TraceIdentifiers(trace_id="t", request_id="r", span_id="s")
-PROPOSAL = ("---\nname: ingest-market\nmode: procedure\napplies_to: raw/Market\n---\n\n"
-            "# ingest-market\n")
+PROPOSAL = (
+    "---\nname: ingest-market\nmode: procedure\napplies_to: raw/Market\n---\n\n# ingest-market\n"
+)
 
 
 class _Model:
@@ -23,8 +24,11 @@ class _Model:
     def generate(self, request: ModelRequest) -> ModelResponse:
         self.requests.append(request)
         if self.fail:
-            return ModelResponse(trace=request.trace, model_alias=request.model_alias,
-                                 failure=Failure(code="model_http_error", message="503"))
+            return ModelResponse(
+                trace=request.trace,
+                model_alias=request.model_alias,
+                failure=Failure(code="model_http_error", message="503"),
+            )
         return ModelResponse(trace=request.trace, model_alias=request.model_alias, text=self.text)
 
     def stream(self, request: ModelRequest) -> Iterator[ModelStreamEvent]:
@@ -32,9 +36,17 @@ class _Model:
 
 
 def _assist(model: Any, turns: list[Turn]) -> Any:
-    return assist(model, "company", guide="GUIDE {braces}", template="TEMPLATE",
-                  path="skills/ingest-market/SKILL.md", current="old rules",
-                  sample="a market deck", turns=turns, trace=TRACE)
+    return assist(
+        model,
+        "company",
+        guide="GUIDE {braces}",
+        template="TEMPLATE",
+        path="skills/ingest-market/SKILL.md",
+        current="old rules",
+        sample="a market deck",
+        turns=turns,
+        trace=TRACE,
+    )
 
 
 def test_the_assistant_sees_guide_template_file_and_sample_and_proposes() -> None:
@@ -59,11 +71,21 @@ def test_a_question_back_has_no_proposal_and_failures_are_reported() -> None:
 def test_the_page_offers_the_assistant() -> None:
     # The file pane shows a diff view (Previous above Current, aligned while scrolling)
     # beside the AI session, with a splitter between; tabs are Preview and Markdown.
-    for hook in ('id="kp-assist-send"', "/api/knowledge/skill-assist", 'data-tab="preview"',
-                 'data-tab="md"', 'id="kp-pane-file"', 'id="kp-block-prev"',
-                 'id="kp-block-cur"', 'id="kp-cur-gutter"', 'id="kp-pane-ai"',
-                 'class="kp-split"', 'class="kp-max"', 'id="kp-rule-revert"',
-                 "avatarWorking(1)"):
+    for hook in (
+        'id="kp-assist-send"',
+        "/api/knowledge/skill-assist",
+        'data-tab="preview"',
+        'data-tab="md"',
+        'id="kp-pane-file"',
+        'id="kp-block-prev"',
+        'id="kp-block-cur"',
+        'id="kp-cur-gutter"',
+        'id="kp-pane-ai"',
+        'class="kp-split"',
+        'class="kp-max"',
+        'id="kp-rule-revert"',
+        "avatarWorking(1)",
+    ):
         assert hook in PAGE
     assert 'data-tab="diff"' not in PAGE
     assert "Use this version" not in PAGE
@@ -73,12 +95,21 @@ def test_the_assistant_reports_its_states_and_checks_the_frontmatter() -> None:
     from host_runtime.skill_assist import check_proposal
 
     states: list[str] = []
-    reply = assist(_Model(f"Done.\n\n```markdown\n{PROPOSAL}```\n"), "company", guide="G",
-                   template="T", path="skills/ingest-market/SKILL.md", current="old",
-                   sample=None, turns=[Turn(role="user", text="x")], trace=TRACE,
-                   on_state=states.append)
+    reply = assist(
+        _Model(f"Done.\n\n```markdown\n{PROPOSAL}```\n"),
+        "company",
+        guide="G",
+        template="T",
+        path="skills/ingest-market/SKILL.md",
+        current="old",
+        sample=None,
+        turns=[Turn(role="user", text="x")],
+        trace=TRACE,
+        on_state=states.append,
+    )
     assert states == ["asking", "checking"] and reply.warnings == ()
     assert check_proposal("---\nname: x\nmode: procedure\n---\nbody\n") == (
-        "an ingest rule needs applies_to: raw/<category>",)
+        "an ingest rule needs applies_to: raw/<category>",
+    )
     assert check_proposal("no frontmatter") == ("the proposal has no frontmatter",)
     assert check_proposal("---\nmode: answer\n---\nx\n") == ("frontmatter has no name",)

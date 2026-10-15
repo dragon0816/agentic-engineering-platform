@@ -211,9 +211,7 @@ class SqliteRegistry:
         `admit_member_version`. The rule is applied inside the same
         transaction as the insert, so two publishers cannot both pass it."""
         member = TypeAdapter(Symbol).validate_python(publisher)
-        return self._publish(
-            package, artifact=artifact, admit=(member, tuple(groups), change)
-        )
+        return self._publish(package, artifact=artifact, admit=(member, tuple(groups), change))
 
     def _publish(
         self,

@@ -127,9 +127,7 @@ def resident_with_write(
         write_spec(), writer, Probe, Report, ExecutionDependencies(central_required=False)
     )
     runner.workflows.register(write_workflow())
-    runner.bridge.policy = LocalPolicy(
-        grants() + ((WRITE_GRANT,) if bridge_write_grant else ())
-    )
+    runner.bridge.policy = LocalPolicy(grants() + ((WRITE_GRANT,) if bridge_write_grant else ()))
     return resident, runner, writer
 
 

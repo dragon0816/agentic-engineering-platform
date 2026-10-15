@@ -229,9 +229,7 @@ def _tracked(row: ProjectItem, settings: WeeklyReportSettings) -> bool:
     if settings.tracked_key_prefix is None:
         return True
     carried = CARRIED_KEY.match(dict(row.fields).get("Title") or row.title)
-    return carried is not None and carried.group(1).startswith(
-        f"{settings.tracked_key_prefix}-"
-    )
+    return carried is not None and carried.group(1).startswith(f"{settings.tracked_key_prefix}-")
 
 
 #: Migrated issues keep the old Excel weekly log under this heading, as
@@ -313,7 +311,9 @@ def _as_item(
         sales=_field(fields, settings.sales_fields),
         instrument=_field(fields, settings.instrument_fields),
         updated=row.updated or None,
-        comments=tuple(comments) if comments is not None else tuple(
+        comments=tuple(comments)
+        if comments is not None
+        else tuple(
             ReportComment(created=comment.created or None, body=comment.body)
             for comment in row.comments
         ),
@@ -477,8 +477,14 @@ class ApplyHandler:
                 sheet=self.settings.temp_sheet,
                 digest_before=item.plan.sheet_digest,
                 digest_after=item.plan.sheet_digest,
-                inserted=0, updated=0, highlighted=0, new_rows_marked=0,
-                recoloured=0, prepended=0, linked=0, retired_fills=0,
+                inserted=0,
+                updated=0,
+                highlighted=0,
+                new_rows_marked=0,
+                recoloured=0,
+                prepended=0,
+                linked=0,
+                retired_fills=0,
                 skipped=True,
             )
         return await asyncio.to_thread(self._apply, item.plan)
@@ -552,7 +558,9 @@ class MailHandler:
             return WeeklyMailDrafted(
                 week=window.week,
                 subject=mail.subject(window, prefix=self.settings.mail_subject_prefix),
-                matched=0, counted=0, skipped=True,
+                matched=0,
+                counted=0,
+                skipped=True,
             )
         activity = effort.active_items(
             issues,

@@ -78,10 +78,15 @@ def main() -> int:
     questions = load()
     picked = sample(questions)
     (HERE / "questions" / "questions.json").write_text(
-        json.dumps({"source_sha256": SOURCE_SHA256, "questions": questions},
-                   ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        json.dumps(
+            {"source_sha256": SOURCE_SHA256, "questions": questions}, ensure_ascii=False, indent=1
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     (HERE / "questions" / "sample.json").write_text(
-        json.dumps([q["id"] for q in picked], indent=1) + "\n", encoding="utf-8")
+        json.dumps([q["id"] for q in picked], indent=1) + "\n", encoding="utf-8"
+    )
     print(f"{len(questions)} questions, sample of {len(picked)}")
     return 0
 

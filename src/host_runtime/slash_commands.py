@@ -39,8 +39,10 @@ COMMANDS = (
     SlashCommandSpec(
         name="run_workflow",
         invocation="/run ",
-        description=("Run an installed Workflow by its unique number, such as /run 11, or open "
-                     "its run form by name, such as /run weekly-report."),
+        description=(
+            "Run an installed Workflow by its unique number, such as /run 11, or open "
+            "its run form by name, such as /run weekly-report."
+        ),
     ),
     SlashCommandSpec(
         name="wiki_convert",

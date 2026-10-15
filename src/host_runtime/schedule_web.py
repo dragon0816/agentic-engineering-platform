@@ -95,9 +95,7 @@ def handle(
             return 201, {"ok": True, "schedule": _run(created)}
         if path in ("/api/schedules/pause", "/api/schedules/resume"):
             selected = ScheduleSelectRequest.model_validate(body)
-            record = control.set_active(
-                selected.schedule_id, active=path.endswith("/resume")
-            )
+            record = control.set_active(selected.schedule_id, active=path.endswith("/resume"))
             return 200, {"ok": True, "schedule": _run(record)}
         if path == "/api/schedules/grant":
             granted = ScheduleGrantRequest.model_validate(body)

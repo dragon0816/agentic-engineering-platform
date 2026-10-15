@@ -306,6 +306,12 @@ class ControlPlaneService:
 
 _REQUEST_TITLES = frozenset(
     model.__name__
-    for model in (AdvertiseRequest, SyncRequest, ReportRequest, PollRequest, SettleRequest,
-                  FeedbackRequest)
+    for model in (
+        AdvertiseRequest,
+        SyncRequest,
+        ReportRequest,
+        PollRequest,
+        SettleRequest,
+        FeedbackRequest,
+    )
 )

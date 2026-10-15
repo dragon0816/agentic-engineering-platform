@@ -229,9 +229,7 @@ class SqliteScheduleStore:
         return ScheduledRun.model_validate_json(row[0])
 
     @staticmethod
-    def _owned_schedule(
-        conn: sqlite3.Connection, schedule_id: str, owner: str
-    ) -> ScheduleRecord:
+    def _owned_schedule(conn: sqlite3.Connection, schedule_id: str, owner: str) -> ScheduleRecord:
         row = conn.execute(
             "SELECT owner, record FROM schedules WHERE schedule_id = ?", (schedule_id,)
         ).fetchone()
@@ -287,9 +285,14 @@ class SqliteScheduleStore:
     def list(self, *, owner: str) -> tuple[ScheduleRecord, ...]:
         with self._lock:
             try:
-                rows = self._connection().execute(
-                    "SELECT record FROM schedules WHERE owner = ? ORDER BY schedule_id", (owner,)
-                ).fetchall()
+                rows = (
+                    self._connection()
+                    .execute(
+                        "SELECT record FROM schedules WHERE owner = ? ORDER BY schedule_id",
+                        (owner,),
+                    )
+                    .fetchall()
+                )
                 return tuple(ScheduleRecord.model_validate_json(row[0]) for row in rows)
             except (sqlite3.Error, ValidationError):
                 raise ScheduleStoreError("unavailable") from None
@@ -426,10 +429,14 @@ class SqliteScheduleStore:
         """Outstanding claims survive restart; a worker must reconcile before retry."""
         with self._lock:
             try:
-                rows = self._connection().execute(
-                    "SELECT record FROM scheduled_runs WHERE status = 'claimed'"
-                    " ORDER BY due_at, schedule_id"
-                ).fetchall()
+                rows = (
+                    self._connection()
+                    .execute(
+                        "SELECT record FROM scheduled_runs WHERE status = 'claimed'"
+                        " ORDER BY due_at, schedule_id"
+                    )
+                    .fetchall()
+                )
                 return tuple(ScheduledRun.model_validate_json(row[0]) for row in rows)
             except (sqlite3.Error, ValidationError):
                 raise ScheduleStoreError("unavailable") from None
@@ -460,9 +467,7 @@ class SqliteScheduleStore:
             self._update_run(conn, outcome)
             return outcome
 
-    def history(
-        self, schedule_id: str, *, owner: str, limit: int = 50
-    ) -> tuple[ScheduledRun, ...]:
+    def history(self, schedule_id: str, *, owner: str, limit: int = 50) -> tuple[ScheduledRun, ...]:
         if type(limit) is not int or not 1 <= limit <= 100:
             raise ValueError("history limit must be 1..100")
         with self._lock:
@@ -488,20 +493,22 @@ class SqliteScheduleStore:
     def awaiting_approval(self, *, owner: str) -> tuple[ScheduledRun, ...]:
         with self._lock:
             try:
-                rows = self._connection().execute(
-                    "SELECT r.record FROM scheduled_runs AS r"
-                    " JOIN schedules AS s ON s.schedule_id = r.schedule_id"
-                    " WHERE r.status = 'awaiting_approval' AND s.owner = ?"
-                    " ORDER BY r.due_at, r.schedule_id",
-                    (owner,),
-                ).fetchall()
+                rows = (
+                    self._connection()
+                    .execute(
+                        "SELECT r.record FROM scheduled_runs AS r"
+                        " JOIN schedules AS s ON s.schedule_id = r.schedule_id"
+                        " WHERE r.status = 'awaiting_approval' AND s.owner = ?"
+                        " ORDER BY r.due_at, r.schedule_id",
+                        (owner,),
+                    )
+                    .fetchall()
+                )
                 return tuple(ScheduledRun.model_validate_json(row[0]) for row in rows)
             except (sqlite3.Error, ValidationError):
                 raise ScheduleStoreError("unavailable") from None
 
-    def await_approval(
-        self, key: str, *, owner: str, side_effect: SideEffect
-    ) -> ScheduledRun:
+    def await_approval(self, key: str, *, owner: str, side_effect: SideEffect) -> ScheduledRun:
         """A claim that dispatched nothing now waits for a per-run decision.
 
         It no longer blocks the schedule, because nothing uncertain happened.
@@ -678,8 +685,7 @@ class SqliteScheduleStore:
         conn: sqlite3.Connection, schedule_id: str, by: str, at: datetime
     ) -> ScheduleGrantRecord | None:
         row = conn.execute(
-            "SELECT grant_seq, record FROM schedule_grants"
-            " WHERE schedule_id = ? AND active = 1",
+            "SELECT grant_seq, record FROM schedule_grants WHERE schedule_id = ? AND active = 1",
             (schedule_id,),
         ).fetchone()
         if row is None:
@@ -715,9 +721,7 @@ class SqliteScheduleStore:
             except (sqlite3.Error, ValidationError):
                 raise ScheduleStoreError("unavailable") from None
 
-    def grant_history(
-        self, schedule_id: str, *, owner: str
-    ) -> tuple[ScheduleGrantRecord, ...]:
+    def grant_history(self, schedule_id: str, *, owner: str) -> tuple[ScheduleGrantRecord, ...]:
         with self._lock:
             try:
                 conn = self._connection()

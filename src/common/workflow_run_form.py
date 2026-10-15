@@ -96,8 +96,9 @@ def _spans(text: str, manifest: WorkflowManifest) -> list[tuple[int, int]]:
             pattern = _EDGE_BEFORE + "(" + body + ")" + _EDGE_AFTER
         else:
             # Only right after the verb: "run push", "執行 push workflow".
-            pattern = (_RUN_VERB + r"\s*(?:the\s+)?(?:workflow\s+)?[「『\"']?(" + body + ")"
-                       + _EDGE_AFTER)
+            pattern = (
+                _RUN_VERB + r"\s*(?:the\s+)?(?:workflow\s+)?[「『\"']?(" + body + ")" + _EDGE_AFTER
+            )
         for match in re.finditer(pattern, text, re.IGNORECASE):
             found.append(match.span(1))
     return found
@@ -124,10 +125,12 @@ def run_intent(text: str, manifests: Iterable[WorkflowManifest]) -> RunIntent | 
         return None
     # Drop a match lying inside another Workflow's longer match.
     kept = [
-        (manifest, span) for manifest, span in matched
+        (manifest, span)
+        for manifest, span in matched
         if not any(
             other_span != span and other_span[0] <= span[0] and span[1] <= other_span[1]
-            for other, other_span in matched if other is not manifest
+            for other, other_span in matched
+            if other is not manifest
         )
     ]
     chosen = {item.metadata.identity.key: item for item, _ in kept}
@@ -152,8 +155,7 @@ def _convert(field: WorkflowParameter, raw: str) -> Any:
         except ValueError:
             return None
     if field.multiple or field.kind in ("text_list", "emails"):
-        return [_choice(field, part.strip()) for part in re.split(r"[,|]", value)
-                if part.strip()]
+        return [_choice(field, part.strip()) for part in re.split(r"[,|]", value) if part.strip()]
     if field.kind == "select":
         return _choice(field, value)
     return value
@@ -206,7 +208,8 @@ def _kept(fields: Iterable[WorkflowParameter], values: Mapping[str, Any]) -> dic
 
 
 def person_prefill(
-    manifest: WorkflowManifest, values: Mapping[str, Any],
+    manifest: WorkflowManifest,
+    values: Mapping[str, Any],
     channels: tuple[ParameterChannel, ...] = ("web", "telegram"),
 ) -> dict[str, Any]:
     """Values a person gave: runtime fields shown on a person's form, valid."""
@@ -223,9 +226,7 @@ def agent_prefill(manifest: WorkflowManifest, values: Mapping[str, Any]) -> dict
     return _kept(agent_fields(manifest), values)
 
 
-def missing_settings(
-    manifest: WorkflowManifest, stored: Mapping[str, Any]
-) -> list[dict[str, str]]:
+def missing_settings(manifest: WorkflowManifest, stored: Mapping[str, Any]) -> list[dict[str, str]]:
     """Required settings (`scope: static`) with neither a value nor a default."""
     return [
         {"name": field.name, "label": field.label}
@@ -235,9 +236,11 @@ def missing_settings(
 
 
 def form_offer(
-    manifest: WorkflowManifest, prefill: Mapping[str, Any],
+    manifest: WorkflowManifest,
+    prefill: Mapping[str, Any],
     settings: Callable[[WorkflowManifest], Mapping[str, Any]] | None = None,
-    *, origin: str = "rule",
+    *,
+    origin: str = "rule",
 ) -> dict[str, Any]:
     """The hand-off the channels render. Settings that cannot be read count
     as not set, so the form points to the settings page rather than failing."""
@@ -265,9 +268,11 @@ def offer_message(offer: Mapping[str, Any]) -> str:
     missing = offer.get("missing_settings") or []
     if missing:
         names = ", ".join(str(item.get("label") or item.get("name")) for item in missing)
-        return (f"{title} cannot run yet: these settings are not set: {names}. Settings are "
-                f"set once on the Workflow's settings page (Capabilities > Workflows > "
-                f"{title} > Settings), not in the chat.")
+        return (
+            f"{title} cannot run yet: these settings are not set: {names}. Settings are "
+            f"set once on the Workflow's settings page (Capabilities > Workflows > "
+            f"{title} > Settings), not in the chat."
+        )
     text = f"Run {title}: fill in the form below and press Run."
     if offer.get("prefill"):
         text += " The values you already gave are filled in; check them first."

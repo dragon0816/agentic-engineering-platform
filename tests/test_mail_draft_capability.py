@@ -41,18 +41,24 @@ def test_a_draft_is_saved_with_the_document_attached(tmp_path: Path) -> None:
     writer = RecordingDraftWriter()
     result = _run(
         MailDraftHandler(lambda: writer),
-        subject="公館站改善服務規劃", html_body="<p>已產出</p>",
-        to=[" reviewer@example.com ", ""], cc=["lead@example.com"],
+        subject="公館站改善服務規劃",
+        html_body="<p>已產出</p>",
+        to=[" reviewer@example.com ", ""],
+        cc=["lead@example.com"],
         attachments=[str(document)],
     )
     assert result.drafted is True and result.skipped is False
     assert result.to == ("reviewer@example.com",) and result.attachments == 1
     assert result.entry_id == "recorded-1"
-    assert writer.drafts == [MailDraft(
-        subject="公館站改善服務規劃", html_body="<p>已產出</p>",
-        to=("reviewer@example.com",), cc=("lead@example.com",),
-        attachments=(str(document),),
-    )]
+    assert writer.drafts == [
+        MailDraft(
+            subject="公館站改善服務規劃",
+            html_body="<p>已產出</p>",
+            to=("reviewer@example.com",),
+            cc=("lead@example.com",),
+            attachments=(str(document),),
+        )
+    ]
 
 
 def test_a_skipped_step_touches_no_mailbox() -> None:
@@ -73,8 +79,13 @@ def test_refusals_carry_a_code_and_no_content(tmp_path: Path) -> None:
         _run(handler, subject=" ", html_body="b", to=["a@example.com"])
     assert raised.value.code == "draft_content_missing"
     with pytest.raises(CapabilityRefused) as raised:
-        _run(handler, subject="s", html_body="b", to=["a@example.com"],
-             attachments=[str(tmp_path / "absent.docx")])
+        _run(
+            handler,
+            subject="s",
+            html_body="b",
+            to=["a@example.com"],
+            attachments=[str(tmp_path / "absent.docx")],
+        )
     assert raised.value.code == "attachment_missing"
 
     class Broken:
@@ -92,6 +103,7 @@ def test_a_best_effort_draft_reports_its_failure_instead_of_failing() -> None:
         def save(self, draft: MailDraft) -> object:
             raise DraftError("outlook_missing")
 
-    result = _run(MailDraftHandler(Broken), subject="s", html_body="b",
-                  to=["a@example.com"], best_effort=True)
+    result = _run(
+        MailDraftHandler(Broken), subject="s", html_body="b", to=["a@example.com"], best_effort=True
+    )
     assert result.drafted is False and result.error == "outlook_missing"

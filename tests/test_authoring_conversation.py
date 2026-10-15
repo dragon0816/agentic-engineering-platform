@@ -37,10 +37,12 @@ SOP = "每日出貨追蹤：打開出貨查詢網站，輸入客戶代碼查詢�
 def installed() -> InstalledCapabilities:
     blocks = InstalledCapabilities()
     binding = WebHostBinding(allowed_origins=("http://127.0.0.1:1",))
-    blocks.register(READ_SPEC, WebScriptHandler(binding, Path("p"), "read"), WebScript,
-                    WebScriptResult, LOCAL)
-    blocks.register(ACT_SPEC, WebScriptHandler(binding, Path("p"), "act"), WebScript,
-                    WebScriptResult, LOCAL)
+    blocks.register(
+        READ_SPEC, WebScriptHandler(binding, Path("p"), "read"), WebScript, WebScriptResult, LOCAL
+    )
+    blocks.register(
+        ACT_SPEC, WebScriptHandler(binding, Path("p"), "act"), WebScript, WebScriptResult, LOCAL
+    )
     blocks.register(SELECT_SPEC, SelectHandler(), SelectRequest, SelectResult, LOCAL)
     blocks.register(UPSERT_SPEC, UpsertHandler(Path("b")), UpsertRequest, UpsertResult, LOCAL)
     return blocks
@@ -55,35 +57,51 @@ class Scripted:
         self.requests.append(request)
         answer = self.answers.pop(0)
         if isinstance(answer, Failure):
-            return ModelResponse(trace=request.trace, model_alias=request.model_alias,
-                                 failure=answer)
+            return ModelResponse(
+                trace=request.trace, model_alias=request.model_alias, failure=answer
+            )
         if isinstance(answer, str):
             return ModelResponse(trace=request.trace, model_alias=request.model_alias, text=answer)
-        return ModelResponse(trace=request.trace, model_alias=request.model_alias,
-                             text=json.dumps(answer, ensure_ascii=False), structured_output=answer)
+        return ModelResponse(
+            trace=request.trace,
+            model_alias=request.model_alias,
+            text=json.dumps(answer, ensure_ascii=False),
+            structured_output=answer,
+        )
 
 
 def turn(model: Scripted, turns: tuple[AuthoringTurn, ...] = ()) -> Any:
-    return author_turn(SOP, turns, None, installed(), model=model, model_alias="gateway",
-                       trace=TRACE, namespace="engineering")
+    return author_turn(
+        SOP,
+        turns,
+        None,
+        installed(),
+        model=model,
+        model_alias="gateway",
+        trace=TRACE,
+        namespace="engineering",
+    )
 
 
 def test_a_question_comes_back_without_a_workflow() -> None:
-    model = Scripted({"reply": "需要網站網址", "questions": ["出貨查詢網站的網址是？"],
-                      "workflow": None})
+    model = Scripted(
+        {"reply": "需要網站網址", "questions": ["出貨查詢網站的網址是？"], "workflow": None}
+    )
     answer = turn(model)
     assert answer.workflow is None and answer.questions == ("出貨查詢網站的網址是？",)
     prompt = model.requests[0].messages
     assert "web/read@1.0.0" in prompt[0].text and SOP in prompt[1].text
-    assert '"name": "web.read"' in prompt[1].text        # the installed catalogue
+    assert '"name": "web.read"' in prompt[1].text  # the installed catalogue
 
 
 def test_a_draft_that_would_not_run_goes_back_with_its_problems() -> None:
     broken = shipment_workflow().model_dump(mode="json")
     broken["steps"][0]["capability"]["name"] = "browse"
     good = shipment_workflow().model_dump(mode="json")
-    model = Scripted({"reply": "草稿", "questions": [], "workflow": broken},
-                     {"reply": "修好了", "questions": [], "workflow": good})
+    model = Scripted(
+        {"reply": "草稿", "questions": [], "workflow": broken},
+        {"reply": "修好了", "questions": [], "workflow": good},
+    )
     answer = turn(model, (AuthoringTurn(role="owner", text="網址是 http://127.0.0.1:1"),))
     assert answer.workflow is not None and answer.attempts == 2 and answer.reply == "修好了"
     assert "would not run here" in model.requests[1].messages[1].text
@@ -100,15 +118,34 @@ def test_an_unusable_model_stops_with_the_problems_named() -> None:
 def test_the_host_fills_in_what_the_model_may_not_decide() -> None:
     from capabilities.workflow_author.conversation import assemble
 
-    raw = {"name": "Daily Shipment Tracking", "description": "追蹤出貨",
-           "metadata": {"visibility": "public", "lifecycle": "published",
-                        "owner": {"type": "team", "id": "everyone"}},
-           "parameters": [{"name": "customer", "label": "哪個客戶？", "kind": "text",
-                           "scope": "runtime", "required": True}],
-           "steps": [{"capability": "web/read@1.0.0", "name": "ignored",
-                      "inputs": {"actions": {"source": "fixed", "value": [
-                          {"do": "open", "url": "{site}/"}]},
-                                 "values": {"source": "run", "path": []}}}]}
+    raw = {
+        "name": "Daily Shipment Tracking",
+        "description": "追蹤出貨",
+        "metadata": {
+            "visibility": "public",
+            "lifecycle": "published",
+            "owner": {"type": "team", "id": "everyone"},
+        },
+        "parameters": [
+            {
+                "name": "customer",
+                "label": "哪個客戶？",
+                "kind": "text",
+                "scope": "runtime",
+                "required": True,
+            }
+        ],
+        "steps": [
+            {
+                "capability": "web/read@1.0.0",
+                "name": "ignored",
+                "inputs": {
+                    "actions": {"source": "fixed", "value": [{"do": "open", "url": "{site}/"}]},
+                    "values": {"source": "run", "path": []},
+                },
+            }
+        ],
+    }
     built = assemble(raw, namespace="engineering", owner="leo.chi", installed=installed())
     from common.assets import WorkflowManifest
 

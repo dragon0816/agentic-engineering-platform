@@ -47,46 +47,102 @@ def case_attributes(record: dict[str, Any], folder: Path) -> dict[str, Any]:
     except (OSError, ValueError, KeyError):
         exchanges = []
     seconds = record.get("elapsed_seconds")
-    return {"duration_ms": int(seconds * 1000) if isinstance(seconds, int | float) else None,
-            "blocked_layer": record.get("blocked_layer"),
-            "tool_calls": record.get("tool_calls") if isinstance(record.get("tool_calls"), int)
-            else None,
-            "human_interventions": record.get("human_interventions"),
-            "checks_total": len(checks), "checks_passed": sum(1 for c in checks if c.get("ok")),
-            "aep_trace_ids": trace_ids(exchanges)}
+    return {
+        "duration_ms": int(seconds * 1000) if isinstance(seconds, int | float) else None,
+        "blocked_layer": record.get("blocked_layer"),
+        "tool_calls": record.get("tool_calls")
+        if isinstance(record.get("tool_calls"), int)
+        else None,
+        "human_interventions": record.get("human_interventions"),
+        "checks_total": len(checks),
+        "checks_passed": sum(1 for c in checks if c.get("ok")),
+        "aep_trace_ids": trace_ids(exchanges),
+    }
+
 
 SAP_PORT = 8810
 SAP_URL = f"http://127.0.0.1:{SAP_PORT}/"
-TASKS = ["W01", "W02", "W03", "W04", "D01", "D02", "D03", "D04", "C01", "C02", "C03", "C04", "X01", "X02", "X03"]
+TASKS = [
+    "W01",
+    "W02",
+    "W03",
+    "W04",
+    "D01",
+    "D02",
+    "D03",
+    "D04",
+    "C01",
+    "C02",
+    "C03",
+    "C04",
+    "X01",
+    "X02",
+    "X03",
+]
 SMOKE = ["W01", "D01", "C01"]
 LIMIT_S = {t: 1800 if t.startswith("X") else 900 for t in TASKS}
-SCENARIO = {"W04": {"sap": "expire_session_once"}, "D04": {"expense": "export_fail_once"},
-            "C04": {"quote": "transient_once"}}
+SCENARIO = {
+    "W04": {"sap": "expire_session_once"},
+    "D04": {"expense": "export_fail_once"},
+    "C04": {"quote": "transient_once"},
+}
 NEEDS = {"W": ("sap",), "D": ("expense",), "C": ("quote",)}
-SYSTEMS = {"W01": ["sap"], "W02": ["sap"], "W03": ["sap"], "W04": ["sap"],
-           "D01": ["expense"], "D02": ["expense"], "D03": ["expense"], "D04": ["expense"],
-           "C01": ["quote"], "C02": ["quote"], "C03": ["quote"], "C04": ["quote"],
-           "X01": ["sap", "expense", "quote"], "X02": ["sap", "expense", "quote"], "X03": ["sap", "expense", "quote"]}
+SYSTEMS = {
+    "W01": ["sap"],
+    "W02": ["sap"],
+    "W03": ["sap"],
+    "W04": ["sap"],
+    "D01": ["expense"],
+    "D02": ["expense"],
+    "D03": ["expense"],
+    "D04": ["expense"],
+    "C01": ["quote"],
+    "C02": ["quote"],
+    "C03": ["quote"],
+    "C04": ["quote"],
+    "X01": ["sap", "expense", "quote"],
+    "X02": ["sap", "expense", "quote"],
+    "X03": ["sap", "expense", "quote"],
+}
 MANUAL = {"sap": "sap_manual.md", "expense": "expense_manual.md", "quote": "quote_cli_manual.md"}
 RERUN = {
     # New values only: the output name is the Workflow's own; the operator takes the
     # workbook the rerun wrote (owner spec §9: rerun the same Workflow, no code change).
-    "W01": ("請使用你剛才產生的 workflow，不要修改程式碼，只改參數：起訖日期 2026-08-01 到 2026-08-31、"
-            "status 改為 Closed。輸出檔名請自行決定，不要覆蓋第一次的結果。", "rerun"),
-    "D01": ("請使用你剛才產生的 workflow，不要修改程式碼，只改參數：員工 E002、期間 2026-08-01 到 2026-08-31。輸出檔名請自行決定，不要覆蓋第一次的結果。",
-            "rerun"),
-    "C01": ("請使用你剛才產生的 workflow，不要修改程式碼，只改參數：CustomerID C002、期間 2026-08-01 到 "
-            "2026-10-31。輸出檔名請自行決定，不要覆蓋第一次的結果。", "rerun"),
-    "X01": ("請使用你剛才產生的 workflow，不要修改程式碼，只改參數：期間 2026-08-01 到 2026-08-31。輸出檔名請自行決定，不要覆蓋第一次的結果。", "rerun"),
+    "W01": (
+        "請使用你剛才產生的 workflow，不要修改程式碼，只改參數：起訖日期 2026-08-01 到 2026-08-31、"
+        "status 改為 Closed。輸出檔名請自行決定，不要覆蓋第一次的結果。",
+        "rerun",
+    ),
+    "D01": (
+        "請使用你剛才產生的 workflow，不要修改程式碼，只改參數：員工 E002、期間 2026-08-01 到 2026-08-31。輸出檔名請自行決定，不要覆蓋第一次的結果。",
+        "rerun",
+    ),
+    "C01": (
+        "請使用你剛才產生的 workflow，不要修改程式碼，只改參數：CustomerID C002、期間 2026-08-01 到 "
+        "2026-10-31。輸出檔名請自行決定，不要覆蓋第一次的結果。",
+        "rerun",
+    ),
+    "X01": (
+        "請使用你剛才產生的 workflow，不要修改程式碼，只改參數：期間 2026-08-01 到 2026-08-31。輸出檔名請自行決定，不要覆蓋第一次的結果。",
+        "rerun",
+    ),
 }
-X02_ANSWER = ("費用限 C001 對應專案的 Approved；訂單排除 Cancelled；報價全部保留。關注條件為截至 2026-09-30 "
-              "已逾期未收的發票、缺收據費用、ValidUntil 小於 2026-09-30 且非 Accepted 的報價。使用附件匯率，不要用即時匯率。")
+X02_ANSWER = (
+    "費用限 C001 對應專案的 Approved；訂單排除 Cancelled；報價全部保留。關注條件為截至 2026-09-30 "
+    "已逾期未收的發票、缺收據費用、ValidUntil 小於 2026-09-30 且非 Accepted 的報價。使用附件匯率，不要用即時匯率。"
+)
 # `expense_app\b` is the mock's module, not an export named expense_approved_*.csv
 # (the looser pattern flagged fix-008 D02 and X01; notes only, no status change).
-BYPASS = re.compile(r"source\.json|operator[\\/]+data|operator[\\/]+state|expense_app\b|quote_cli\.cli|"
-                    r"from\s+quote_cli|import\s+quote_cli|business_workflow_lab[\\/]+operator", re.I)
-SUBPROCESS_BLOCKED = re.compile(r"WinError 1816|Not enough quota|PermissionError.*(subprocess|CreateProcess)|"
-                                r"_winapi\.CreateProcess", re.I)
+BYPASS = re.compile(
+    r"source\.json|operator[\\/]+data|operator[\\/]+state|expense_app\b|quote_cli\.cli|"
+    r"from\s+quote_cli|import\s+quote_cli|business_workflow_lab[\\/]+operator",
+    re.I,
+)
+SUBPROCESS_BLOCKED = re.compile(
+    r"WinError 1816|Not enough quota|PermissionError.*(subprocess|CreateProcess)|"
+    r"_winapi\.CreateProcess",
+    re.I,
+)
 
 
 def sha256(path: Path) -> str:
@@ -94,8 +150,13 @@ def sha256(path: Path) -> str:
 
 
 def cli_help() -> str:
-    run = subprocess.run([sys.executable, str(LAB / "quote_cli_mock" / "run_quote_cli.py"), "--help"],
-                         capture_output=True, text=True, encoding="utf-8", timeout=60)
+    run = subprocess.run(
+        [sys.executable, str(LAB / "quote_cli_mock" / "run_quote_cli.py"), "--help"],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=60,
+    )
     return run.stdout.strip()
 
 
@@ -111,8 +172,11 @@ def start_sap() -> subprocess.Popen[bytes] | None:
     if sap_running():
         return None
     log = (LAB / "operator" / "state" / "sap_server.log").open("ab")
-    proc = subprocess.Popen([sys.executable, str(LAB / "sap_mock" / "server.py"), "--port", str(SAP_PORT)],
-                            stdout=log, stderr=subprocess.STDOUT)
+    proc = subprocess.Popen(
+        [sys.executable, str(LAB / "sap_mock" / "server.py"), "--port", str(SAP_PORT)],
+        stdout=log,
+        stderr=subprocess.STDOUT,
+    )
     for _ in range(50):
         if sap_running():
             return proc
@@ -133,7 +197,11 @@ def prepare(task: str, folder: Path, help_text: str) -> tuple[Path, str]:
     attachments += [template, "fx_rates.csv"]
     for system in SYSTEMS[task]:
         body = (LAB / "manuals" / MANUAL[system]).read_text(encoding="utf-8")
-        body = body.replace("{SAP_URL}", SAP_URL).replace("{LAB}", str(LAB)).replace("{CLI_HELP}", help_text)
+        body = (
+            body.replace("{SAP_URL}", SAP_URL)
+            .replace("{LAB}", str(LAB))
+            .replace("{CLI_HELP}", help_text)
+        )
         (workspace / "input" / MANUAL[system]).write_text(body, encoding="utf-8")
         attachments.append(MANUAL[system])
     if task == "X03":
@@ -143,21 +211,28 @@ def prepare(task: str, folder: Path, help_text: str) -> tuple[Path, str]:
             attachments.append("x01_workflow\\（X01 產生的 workflow 與程式）")
     request = (LAB / "prompts" / f"{task}.md").read_text(encoding="utf-8").strip()
     listing = "\n".join(f"  - input\\{name}" for name in attachments)
-    prompt = (f"{request}\n\n---\n環境說明（操作者提供）\n"
-              f"- 今天日期：2026-10-06（Asia/Taipei）\n"
-              f"- 本題 workspace：{workspace}\n"
-              f"- 附件（在 workspace 的 input 資料夾）：\n{listing}\n"
-              f"- 交付物請寫到 workspace 的 output 資料夾；需要可重跑的 workflow 時，請建立成本平台的 workflow。")
+    prompt = (
+        f"{request}\n\n---\n環境說明（操作者提供）\n"
+        f"- 今天日期：2026-10-06（Asia/Taipei）\n"
+        f"- 本題 workspace：{workspace}\n"
+        f"- 附件（在 workspace 的 input 資料夾）：\n{listing}\n"
+        f"- 交付物請寫到 workspace 的 output 資料夾；需要可重跑的 workflow 時，請建立成本平台的 workflow。"
+    )
     (folder / "prompt.md").write_text(prompt + "\n", encoding="utf-8")
     return workspace, prompt
 
 
-FOLLOW_UP = ("（操作者已按下核准，執行結果已附在對話中。）請檢查結果並繼續；"
-             "完成時說明產出了哪些檔案。")
+FOLLOW_UP = (
+    "（操作者已按下核准，執行結果已附在對話中。）請檢查結果並繼續；完成時說明產出了哪些檔案。"
+)
 
 
-def settle(session: AgentWebSession, deadline: float, interventions: list[dict[str, Any]],
-           decided: list[dict[str, Any]]) -> None:
+def settle(
+    session: AgentWebSession,
+    deadline: float,
+    interventions: list[dict[str, Any]],
+    decided: list[dict[str, Any]],
+) -> None:
     """Press the owner's approve button for each request the Agent made (spec §10: recorded
     as an intervention), then tell it the result is in the conversation."""
     for _ in range(6):
@@ -165,17 +240,31 @@ def settle(session: AgentWebSession, deadline: float, interventions: list[dict[s
         if not pending or time.monotonic() > deadline:
             return
         for item in pending:
-            reply = session.decide(item["approval_id"], "approve",
-                                   max(60.0, deadline - time.monotonic()))
+            reply = session.decide(
+                item["approval_id"], "approve", max(60.0, deadline - time.monotonic())
+            )
             approval = reply.get("approval") or {}
             result = approval.get("result") if isinstance(approval.get("result"), dict) else {}
-            decided.append({"approval_id": item["approval_id"], "kind": item["kind"],
-                            "workflow": item.get("workflow"), "arguments": item.get("arguments"),
-                            "status": approval.get("status"), "run_id": result.get("run_id"),
-                            "run_status": result.get("status"), "digest": result.get("digest"),
-                            "text": str(reply.get("text") or "")[:800]})
-            interventions.append({"kind": "operator pressed the owner's approve button",
-                                  "approval_id": item["approval_id"], "summary": item["summary"]})
+            decided.append(
+                {
+                    "approval_id": item["approval_id"],
+                    "kind": item["kind"],
+                    "workflow": item.get("workflow"),
+                    "arguments": item.get("arguments"),
+                    "status": approval.get("status"),
+                    "run_id": result.get("run_id"),
+                    "run_status": result.get("status"),
+                    "digest": result.get("digest"),
+                    "text": str(reply.get("text") or "")[:800],
+                }
+            )
+            interventions.append(
+                {
+                    "kind": "operator pressed the owner's approve button",
+                    "approval_id": item["approval_id"],
+                    "summary": item["summary"],
+                }
+            )
         session.send(FOLLOW_UP, max(60.0, deadline - time.monotonic()))
 
 
@@ -184,37 +273,54 @@ CONTINUE = "繼續"
 
 def stopped_at_budget(exchange: dict[str, Any]) -> bool:
     convo = (((exchange.get("reply") or {}).get("answer") or {}).get("outcome") or {}).get(
-        "conversation") or {}
+        "conversation"
+    ) or {}
     return (convo.get("failure") or {}).get("code") == "tool_loop_limit"
 
 
-def keep_going(session: AgentWebSession, deadline: float, interventions: list[dict[str, Any]],
-               decided: list[dict[str, Any]]) -> None:
+def keep_going(
+    session: AgentWebSession,
+    deadline: float,
+    interventions: list[dict[str, Any]],
+    decided: list[dict[str, Any]],
+) -> None:
     """A person answers 繼續 when a turn ran out of tool calls (at most 3 times, each recorded)."""
     for _ in range(3):
         turns = [x for x in session.exchanges if "decided" not in x]
         if not turns or not stopped_at_budget(turns[-1]) or time.monotonic() > deadline - 60:
             return
-        interventions.append({"kind": "operator replied 繼續 after the turn's tool budget ran out",
-                              "text": CONTINUE})
+        interventions.append(
+            {"kind": "operator replied 繼續 after the turn's tool budget ran out", "text": CONTINUE}
+        )
         session.send(CONTINUE, max(60.0, deadline - time.monotonic()))
         settle(session, deadline, interventions, decided)
 
 
-def authored_runs(exchanges: list[dict[str, Any]], decided: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def authored_runs(
+    exchanges: list[dict[str, Any]], decided: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
     """Platform Workflow runs: read-only runs the host did at once, and approved runs."""
     out = []
     for exchange in exchanges:
         convo = (((exchange.get("reply") or {}).get("answer") or {}).get("outcome") or {}).get(
-            "conversation") or {}
+            "conversation"
+        ) or {}
         for tool in convo.get("tools") or []:
             host = tool.get("host") or {}
             data = host.get("data") if isinstance(host.get("data"), dict) else {}
             if tool.get("name") == "authoring__run_workflow" and data.get("run_id"):
-                out.append({"run_id": data["run_id"], "digest": data.get("digest"),
-                            "status": data.get("status")})
-    out += [{"run_id": d["run_id"], "digest": d["digest"], "status": d["run_status"]}
-            for d in decided if d.get("run_id")]
+                out.append(
+                    {
+                        "run_id": data["run_id"],
+                        "digest": data.get("digest"),
+                        "status": data.get("status"),
+                    }
+                )
+    out += [
+        {"run_id": d["run_id"], "digest": d["digest"], "status": d["run_status"]}
+        for d in decided
+        if d.get("run_id")
+    ]
     return out
 
 
@@ -223,38 +329,56 @@ def drafted(exchanges: list[dict[str, Any]]) -> int:
     count = 0
     for exchange in exchanges:
         convo = (((exchange.get("reply") or {}).get("answer") or {}).get("outcome") or {}).get(
-            "conversation") or {}
-        count += sum(1 for tool in convo.get("tools") or []
-                     if tool.get("name") == "authoring__draft_workflow")
+            "conversation"
+        ) or {}
+        count += sum(
+            1
+            for tool in convo.get("tools") or []
+            if tool.get("name") == "authoring__draft_workflow"
+        )
     return count
 
 
 def tree_hashes(folder: Path) -> dict[str, str]:
     if not folder.is_dir():
         return {}
-    return {p.relative_to(folder).as_posix(): sha256(p) for p in sorted(folder.rglob("*")) if p.is_file()}
+    return {
+        p.relative_to(folder).as_posix(): sha256(p)
+        for p in sorted(folder.rglob("*"))
+        if p.is_file()
+    }
 
 
 def script_runs(exchanges: list[dict[str, Any]]) -> list[dict[str, Any]]:
     out = []
     for exchange in exchanges:
-        convo = (((exchange.get("reply") or {}).get("answer") or {}).get("outcome") or {}).get("conversation") or {}
+        convo = (((exchange.get("reply") or {}).get("answer") or {}).get("outcome") or {}).get(
+            "conversation"
+        ) or {}
         for tool in convo.get("tools") or []:
             if tool.get("name") != "coding__run":
                 continue
             steps = (tool.get("workflow") or {}).get("step_results") or []
             data = steps[0].get("data") if steps else None
             data = data if isinstance(data, dict) else {}
-            out.append({"exit_code": data.get("exit_code"), "timed_out": data.get("timed_out"),
-                        "script": data.get("script_path"), "output_tail": str(data.get("output") or "")[-600:],
-                        "refused": (tool.get("failure") or {}).get("code")})
+            out.append(
+                {
+                    "exit_code": data.get("exit_code"),
+                    "timed_out": data.get("timed_out"),
+                    "script": data.get("script_path"),
+                    "output_tail": str(data.get("output") or "")[-600:],
+                    "refused": (tool.get("failure") or {}).get("code"),
+                }
+            )
     return out
 
 
 def conversation_failures(exchanges: list[dict[str, Any]]) -> list[str]:
     out = []
     for exchange in exchanges:
-        convo = (((exchange.get("reply") or {}).get("answer") or {}).get("outcome") or {}).get("conversation") or {}
+        convo = (((exchange.get("reply") or {}).get("answer") or {}).get("outcome") or {}).get(
+            "conversation"
+        ) or {}
         failure = (convo.get("failure") or {}).get("code")
         if failure:
             out.append(failure)
@@ -263,35 +387,47 @@ def conversation_failures(exchanges: list[dict[str, Any]]) -> list[str]:
     return out
 
 
-def interfaces(task_events: dict[str, list[dict[str, Any]]], runs: list[dict[str, Any]],
-               bypass: list[str]) -> tuple[list[str], dict[str, Any]]:
+def interfaces(
+    task_events: dict[str, list[dict[str, Any]]], runs: list[dict[str, Any]], bypass: list[str]
+) -> tuple[list[str], dict[str, Any]]:
     used, evidence = [], {}
     sap = [e for e in task_events["sap"] if e["event"] not in {"operator_reset"}]
     if sap:
         agents = sorted({str(e.get("ua", "")) for e in sap if e.get("ua")})
         browser = any("Mozilla" in a for a in agents)
         used.append("browser (SAP web)" if browser else "HTTP client script (SAP web, no browser)")
-        evidence["sap"] = {"user_agents": agents, "browser": browser,
-                           "logins": sum(1 for e in sap if e["event"] == "login" and e.get("ok")),
-                           "queries": sum(1 for e in sap if e["event"] == "query"),
-                           "details": sorted({str(e.get("id")) for e in sap if e["event"] == "detail"}),
-                           "exports": sum(1 for e in sap if e["event"] == "export"),
-                           "session_expired": sum(1 for e in sap if e["event"] == "session_expired_injected")}
+        evidence["sap"] = {
+            "user_agents": agents,
+            "browser": browser,
+            "logins": sum(1 for e in sap if e["event"] == "login" and e.get("ok")),
+            "queries": sum(1 for e in sap if e["event"] == "query"),
+            "details": sorted({str(e.get("id")) for e in sap if e["event"] == "detail"}),
+            "exports": sum(1 for e in sap if e["event"] == "export"),
+            "session_expired": sum(1 for e in sap if e["event"] == "session_expired_injected"),
+        }
     expense = [e for e in task_events["expense"] if e["event"] not in {"operator_reset"}]
     if expense:
         used.append("desktop GUI (Expense)")
         evidence["expense"] = [e["event"] for e in expense]
     quote = [e for e in task_events["quote"] if e["event"] not in {"operator_reset"}]
-    process = [e for e in quote if e["event"] != "command"
-               or str(e.get("argv0", "")).replace("\\", "/").endswith(
-                   ("quote_cli/__main__.py", "run_quote_cli.py"))]
+    process = [
+        e
+        for e in quote
+        if e["event"] != "command"
+        or str(e.get("argv0", ""))
+        .replace("\\", "/")
+        .endswith(("quote_cli/__main__.py", "run_quote_cli.py"))
+    ]
     if process:
         used.append("CLI subprocess (quote)")
-        evidence["quote"] = [{"event": e["event"], "argv": e.get("argv"), "argv0": e.get("argv0")}
-                             for e in quote]
+        evidence["quote"] = [
+            {"event": e["event"], "argv": e.get("argv"), "argv0": e.get("argv0")} for e in quote
+        ]
     elif quote:
         used.append("quote CLI imported in-process (not a CLI run)")
-        evidence["quote_in_process"] = [{"event": e["event"], "argv0": e.get("argv0")} for e in quote]
+        evidence["quote_in_process"] = [
+            {"event": e["event"], "argv0": e.get("argv0")} for e in quote
+        ]
     if runs:
         used.append("coding execution (restricted runner)")
     if bypass:
@@ -299,8 +435,15 @@ def interfaces(task_events: dict[str, list[dict[str, Any]]], runs: list[dict[str
     return used, evidence
 
 
-def run_task(task: str, run_dir: Path, base: str, token: str, help_text: str,
-             results: dict[str, dict[str, Any]], variant_override: str | None = None) -> dict[str, Any]:
+def run_task(
+    task: str,
+    run_dir: Path,
+    base: str,
+    token: str,
+    help_text: str,
+    results: dict[str, dict[str, Any]],
+    variant_override: str | None = None,
+) -> dict[str, Any]:
     label = task if variant_override is None else f"{task}-{variant_override}"
     folder = run_dir / label
     folder.mkdir(parents=True, exist_ok=True)
@@ -320,10 +463,17 @@ def run_task(task: str, run_dir: Path, base: str, token: str, help_text: str,
     asked = None
     if task == "X02" and not first["timed_out"]:
         reply = answer_text(first)
-        asked = bool(re.search(r"[?？]", reply) and re.search(r"(費用|關注|status|狀態|條件|專案|規則)", reply, re.I))
+        asked = bool(
+            re.search(r"[?？]", reply)
+            and re.search(r"(費用|關注|status|狀態|條件|專案|規則)", reply, re.I)
+        )
         if asked:
-            interventions.append({"kind": "scripted clarification (operator answer fixed by the spec)",
-                                  "text": X02_ANSWER})
+            interventions.append(
+                {
+                    "kind": "scripted clarification (operator answer fixed by the spec)",
+                    "text": X02_ANSWER,
+                }
+            )
             session.send(X02_ANSWER, max(60.0, limit - (time.monotonic() - started)))
     output = workspace / "output"
     deadline = started + limit
@@ -342,37 +492,56 @@ def run_task(task: str, run_dir: Path, base: str, token: str, help_text: str,
     if task in RERUN and variant_override is None and first_book is not None:
         message, variant = RERUN[task]
         rerun_started = time.time()
-        interventions.append({"kind": "operator rerun request (spec §9 second parameter set)", "text": message})
+        interventions.append(
+            {"kind": "operator rerun request (spec §9 second parameter set)", "text": message}
+        )
         mark = len(session.exchanges)
         # Workflow code the Agent had settled on before the rerun was asked for:
         # versions it ran, and versions the owner installed for reuse (grader 1.3).
         ready = {r["digest"] for r in first_runs if r.get("digest")} | {
-            d["digest"] for d in decided
-            if d.get("kind") == "install" and d.get("status") == "approved" and d.get("digest")}
+            d["digest"]
+            for d in decided
+            if d.get("kind") == "install" and d.get("status") == "approved" and d.get("digest")
+        }
         session.send(message, max(60.0, deadline - time.monotonic()))
         settle(session, deadline, interventions, decided)
         keep_going(session, deadline, interventions, decided)
-        rerun_runs = [r for r in authored_runs(session.exchanges[mark:], decided)
-                      if r not in first_runs]
+        rerun_runs = [
+            r for r in authored_runs(session.exchanges[mark:], decided) if r not in first_runs
+        ]
         revised = drafted(session.exchanges[mark:])
         # Same Workflow code (spec: "使用你剛才產生的 workflow，不要修改程式碼"): every
         # rerun used code that was run or installed before the request, and no
         # draft or revision followed the request.
-        workflow_same = bool(rerun_runs) and not revised and all(
-            r.get("digest") in ready for r in rerun_runs)
+        workflow_same = (
+            bool(rerun_runs) and not revised and all(r.get("digest") in ready for r in rerun_runs)
+        )
         # The rerun's workbook: the newest one written after the rerun was asked for.
-        fresh = [p for p in output.rglob("*.xlsx") if not p.name.startswith("~$")
-                 and p.stat().st_mtime >= rerun_started]
+        fresh = [
+            p
+            for p in output.rglob("*.xlsx")
+            if not p.name.startswith("~$") and p.stat().st_mtime >= rerun_started
+        ]
         rerun_book = max(fresh, key=lambda p: p.stat().st_mtime) if fresh else None
         if rerun_book is not None:
             shutil.copy2(rerun_book, folder / "rerun_result.xlsx")
-        rerun_checks = grade_workbook(task, variant, rerun_book, answer_text(session.exchanges[-1]), output)
+        rerun_checks = grade_workbook(
+            task, variant, rerun_book, answer_text(session.exchanges[-1]), output
+        )
     duration = time.monotonic() - started
     task_events = {s: events(s, offsets[s]) for s in ("sap", "expense", "quote")}
     runs = script_runs(session.exchanges)
-    scripts = sorted((workspace / ".aep-run").rglob("*.py")) if (workspace / ".aep-run").is_dir() else []
-    bypass = sorted({f"{p.relative_to(workspace).as_posix()}: {m.group(0)}" for p in scripts
-                     for m in [BYPASS.search(p.read_text(encoding="utf-8", errors="replace"))] if m})
+    scripts = (
+        sorted((workspace / ".aep-run").rglob("*.py")) if (workspace / ".aep-run").is_dir() else []
+    )
+    bypass = sorted(
+        {
+            f"{p.relative_to(workspace).as_posix()}: {m.group(0)}"
+            for p in scripts
+            for m in [BYPASS.search(p.read_text(encoding="utf-8", errors="replace"))]
+            if m
+        }
+    )
     used, evidence = interfaces(task_events, runs, bypass)
     replies = "\n".join(answer_text(x) for x in session.exchanges)
     variant = variant_override or "main"
@@ -381,20 +550,39 @@ def run_task(task: str, run_dir: Path, base: str, token: str, help_text: str,
     if task == "W04":
         sap = evidence.get("sap", {})
         sap_events = [e["event"] for e in task_events["sap"]]
-        expired_at = sap_events.index("session_expired_injected") if "session_expired_injected" in sap_events \
+        expired_at = (
+            sap_events.index("session_expired_injected")
+            if "session_expired_injected" in sap_events
             else None
+        )
         relogged = expired_at is not None and "login" in sap_events[expired_at:]
-        checks.append({"name": "W04: the injected session expiry happened and the Agent signed in again",
-                       "ok": relogged, "detail": {**sap, "signed_in_after_expiry": relogged}})
+        checks.append(
+            {
+                "name": "W04: the injected session expiry happened and the Agent signed in again",
+                "ok": relogged,
+                "detail": {**sap, "signed_in_after_expiry": relogged},
+            }
+        )
     if task == "W02":
         details = set(evidence.get("sap", {}).get("details", []))
         from expected import expected
 
         missing = sorted(set(expected("W02")["ids"]) - details)
-        checks.append({"name": "W02: every order's detail page was opened", "ok": not missing, "detail": missing})
+        checks.append(
+            {
+                "name": "W02: every order's detail page was opened",
+                "ok": not missing,
+                "detail": missing,
+            }
+        )
     if task == "X02":
-        checks.append({"name": "X02: asked for the missing rules before acting", "ok": bool(asked),
-                       "detail": answer_text(first)[:400]})
+        checks.append(
+            {
+                "name": "X02: asked for the missing rules before acting",
+                "ok": bool(asked),
+                "detail": answer_text(first)[:400],
+            }
+        )
     excel_ok = verdict(checks) if (book is not None or variant == "force_exit2") else False
     timed_out = any(x["timed_out"] for x in session.exchanges) or duration > limit
     code_generated = bool(runs) if runs or session.exchanges else None
@@ -403,41 +591,89 @@ def run_task(task: str, run_dir: Path, base: str, token: str, help_text: str,
     rerun_ok: bool | None = None
     if task in RERUN and variant_override is None:
         # None when no rerun was asked for: the first turn left nothing to rerun.
-        rerun_ok = bool(workflow_same) and verdict(rerun_checks) is True if rerun_checks is not None else None
-    status, layer, reason = classify(task, variant, timed_out, excel_ok, evidence, used, bypass, runs,
-                                     conversation_failures(session.exchanges), rerun_ok, book)
+        rerun_ok = (
+            bool(workflow_same) and verdict(rerun_checks) is True
+            if rerun_checks is not None
+            else None
+        )
+    status, layer, reason = classify(
+        task,
+        variant,
+        timed_out,
+        excel_ok,
+        evidence,
+        used,
+        bypass,
+        runs,
+        conversation_failures(session.exchanges),
+        rerun_ok,
+        book,
+    )
     record = {
-        "task_id": label, "status": status,
-        "code_generated": code_generated, "execution_succeeded": executed,
-        "excel_correct": excel_ok, "workflow_rerun_succeeded": rerun_ok,
-        "elapsed_seconds": round(duration, 1), "repair_loops": loops,
-        "human_interventions": len(interventions), "interfaces_used": used,
-        "failure_reason": reason, "blocked_layer": layer,
+        "task_id": label,
+        "status": status,
+        "code_generated": code_generated,
+        "execution_succeeded": executed,
+        "excel_correct": excel_ok,
+        "workflow_rerun_succeeded": rerun_ok,
+        "elapsed_seconds": round(duration, 1),
+        "repair_loops": loops,
+        "human_interventions": len(interventions),
+        "interfaces_used": used,
+        "failure_reason": reason,
+        "blocked_layer": layer,
         "artifact_paths": sorted(str(p) for p in output.rglob("*") if p.is_file()),
         "evidence_paths": [str(folder / "trace.json"), str(folder / "events.json")]
-                          + [str(p) for p in scripts],
-        "script_runs": [{"exit_code": r["exit_code"], "script": r["script"], "refused": r["refused"]} for r in runs],
+        + [str(p) for p in scripts],
+        "script_runs": [
+            {"exit_code": r["exit_code"], "script": r["script"], "refused": r["refused"]}
+            for r in runs
+        ],
         "conversation_failures": conversation_failures(session.exchanges),
-        "bypass_signals": bypass, "interventions": interventions,
-        "platform_runs": authored_runs(session.exchanges, decided), "approvals": decided,
+        "bypass_signals": bypass,
+        "interventions": interventions,
+        "platform_runs": authored_runs(session.exchanges, decided),
+        "approvals": decided,
         "workflow_unchanged_on_rerun": workflow_same,
         "workflow_revisions_after_rerun_request": revised,
-        "checks": checks, "rerun_checks": rerun_checks,
-        "session_id": session_id, "model_turns": [model_turns(x) for x in session.exchanges],
+        "checks": checks,
+        "rerun_checks": rerun_checks,
+        "session_id": session_id,
+        "model_turns": [model_turns(x) for x in session.exchanges],
         "tool_calls": len([t for x in session.exchanges for t in tools_of(x)]),
     }
-    (folder / "trace.json").write_text(json.dumps({"session_id": session_id, "exchanges": session.exchanges},
-                                                  ensure_ascii=False, indent=1, default=str), encoding="utf-8")
-    (folder / "events.json").write_text(json.dumps({"interfaces": evidence, "events": task_events},
-                                                   ensure_ascii=False, indent=1), encoding="utf-8")
-    (folder / "result.json").write_text(json.dumps(record, ensure_ascii=False, indent=1, default=str),
-                                        encoding="utf-8")
+    (folder / "trace.json").write_text(
+        json.dumps(
+            {"session_id": session_id, "exchanges": session.exchanges},
+            ensure_ascii=False,
+            indent=1,
+            default=str,
+        ),
+        encoding="utf-8",
+    )
+    (folder / "events.json").write_text(
+        json.dumps({"interfaces": evidence, "events": task_events}, ensure_ascii=False, indent=1),
+        encoding="utf-8",
+    )
+    (folder / "result.json").write_text(
+        json.dumps(record, ensure_ascii=False, indent=1, default=str), encoding="utf-8"
+    )
     return record
 
 
-def classify(task: str, variant: str, timed_out: bool, excel_ok: bool | None, evidence: dict[str, Any],
-             used: list[str], bypass: list[str], runs: list[dict[str, Any]], failures: list[str],
-             rerun_ok: bool | None, book: Path | None) -> tuple[str, str | None, str | None]:
+def classify(
+    task: str,
+    variant: str,
+    timed_out: bool,
+    excel_ok: bool | None,
+    evidence: dict[str, Any],
+    used: list[str],
+    bypass: list[str],
+    runs: list[dict[str, Any]],
+    failures: list[str],
+    rerun_ok: bool | None,
+    book: Path | None,
+) -> tuple[str, str | None, str | None]:
     """(status, blocked layer, reason). A missing tool is BLOCKED, never FAIL."""
     if timed_out:
         return "TIMEOUT", None, "the turn did not finish within the time limit"
@@ -445,35 +681,52 @@ def classify(task: str, variant: str, timed_out: bool, excel_ok: bool | None, ev
     if failures:
         notes.append("conversation stopped: " + ", ".join(sorted(set(failures))))
     if bypass:
-        notes.append("scripts read mock internals instead of using the interface: " + "; ".join(bypass[:3]))
+        notes.append(
+            "scripts read mock internals instead of using the interface: " + "; ".join(bypass[:3])
+        )
     systems = SYSTEMS[task]
     tools = agent_tools()
     # Reading the mocks' data behind their interfaces is never a pass (spec §5);
     # `operator/` holds only source data, answers and operator state.
     data_read = [b for b in bypass if re.search(r"source\.json|operator", b, re.I)]
     if data_read:
-        return "FAIL", None, "; ".join(["scripts read the mocks' data behind the interface", *notes])
+        return (
+            "FAIL",
+            None,
+            "; ".join(["scripts read the mocks' data behind the interface", *notes]),
+        )
     # A tool that exists but was not used is the Agent's failure, not a missing tool.
     if "expense" in systems and "expense" not in evidence:
         reason = "; ".join(["the Expense desktop app was never operated", *notes])
         if "desktop" in tools:
             return "FAIL", None, reason
-        return ("BLOCKED", "harness: no native desktop (GUI automation) tool in the AEP conversation or Bridge",
-                reason)
+        return (
+            "BLOCKED",
+            "harness: no native desktop (GUI automation) tool in the AEP conversation or Bridge",
+            reason,
+        )
     if "sap" in systems and not evidence.get("sap", {}).get("browser"):
-        how = ("scripts reached the site with an HTTP client" if "sap" in evidence
-               else "the site was never reached")
+        how = (
+            "scripts reached the site with an HTTP client"
+            if "sap" in evidence
+            else "the site was never reached"
+        )
         if "browser" in tools:
             return "FAIL", None, "; ".join([how + " (the browser tool was available)", *notes])
-        return ("BLOCKED", "harness: no browser tool in the AEP conversation (web/act exists only as a Workflow step)",
-                "; ".join([how, *notes]))
+        return (
+            "BLOCKED",
+            "harness: no browser tool in the AEP conversation (web/act exists only as a Workflow step)",
+            "; ".join([how, *notes]),
+        )
     if "quote" in systems and "quote" not in evidence:
         # Name only what was observed: a refused subprocess, or the turn ending first.
         if any(SUBPROCESS_BLOCKED.search(r["output_tail"]) for r in runs):
             layer = "runner: the restricted runner refused to start a subprocess (one-process job)"
         elif failures:
-            layer = ("harness: the conversation stopped before the CLI was tried "
-                     f"({', '.join(sorted(set(failures)))})")
+            layer = (
+                "harness: the conversation stopped before the CLI was tried "
+                f"({', '.join(sorted(set(failures)))})"
+            )
         else:
             layer = "harness: no tool ran the CLI as a process"
         return "BLOCKED", layer, "; ".join(["the quote CLI was never run as a process", *notes])
@@ -482,7 +735,11 @@ def classify(task: str, variant: str, timed_out: bool, excel_ok: bool | None, ev
     if excel_ok is not True:
         return "FAIL", None, "; ".join(["Excel checks failed", *notes])
     if rerun_ok is False:
-        return "FAIL", None, "; ".join(["the parameter rerun did not succeed with unchanged workflow code", *notes])
+        return (
+            "FAIL",
+            None,
+            "; ".join(["the parameter rerun did not succeed with unchanged workflow code", *notes]),
+        )
     return "PASS", None, None
 
 
@@ -493,15 +750,25 @@ def reclassify(record: dict[str, Any], folder: Path) -> dict[str, Any]:
     task, _, variant = record["task_id"].partition("-")
     runs = script_runs(trace["exchanges"])
     book = find_workbook(folder / "workspace" / "output", task)
-    status, layer, reason = classify(task, variant or "main", "TIMEOUT" == record["status"], record["excel_correct"],
-                                     stored["interfaces"], record["interfaces_used"], record["bypass_signals"], runs,
-                                     conversation_failures(trace["exchanges"]), record["workflow_rerun_succeeded"],
-                                     book)
+    status, layer, reason = classify(
+        task,
+        variant or "main",
+        "TIMEOUT" == record["status"],
+        record["excel_correct"],
+        stored["interfaces"],
+        record["interfaces_used"],
+        record["bypass_signals"],
+        runs,
+        conversation_failures(trace["exchanges"]),
+        record["workflow_rerun_succeeded"],
+        book,
+    )
     updated = dict(record, status=status, blocked_layer=layer, failure_reason=reason)
     if record.get("rerun_checks") is None:
         updated["workflow_rerun_succeeded"] = None
-    (folder / "result.json").write_text(json.dumps(updated, ensure_ascii=False, indent=1, default=str),
-                                        encoding="utf-8")
+    (folder / "result.json").write_text(
+        json.dumps(updated, ensure_ascii=False, indent=1, default=str), encoding="utf-8"
+    )
     return updated
 
 
@@ -509,22 +776,42 @@ def agent_tools() -> set[str]:
     """Which interface tools this host gives the Agent, read from its host.json."""
     found: set[str] = set()
     try:
-        host = json.loads((Path.home() / "AppData/Local/AgenticEngineeringPlatform/preview-0.1.0/host.json")
-                          .read_text(encoding="utf-8-sig"))
+        host = json.loads(
+            (
+                Path.home() / "AppData/Local/AgenticEngineeringPlatform/preview-0.1.0/host.json"
+            ).read_text(encoding="utf-8-sig")
+        )
     except (OSError, ValueError):
         return found
     if SAP_URL.rstrip("/") in ((host.get("web") or {}).get("allowed_origins") or []):
         found.add("browser")
-    if any(app.get("name") == "expense" for app in (host.get("desktop") or {}).get("applications") or []):
+    if any(
+        app.get("name") == "expense"
+        for app in (host.get("desktop") or {}).get("applications") or []
+    ):
         found.add("desktop")
     return found
 
 
-def not_run(task: str, reason: str | None = None, layer: str | None = None, status: str = "NOT_RUN") -> dict[str, Any]:
-    return {"task_id": task, "status": status, "code_generated": None, "execution_succeeded": None,
-            "excel_correct": None, "workflow_rerun_succeeded": None, "elapsed_seconds": None, "repair_loops": None,
-            "human_interventions": 0, "interfaces_used": [], "failure_reason": reason, "blocked_layer": layer,
-            "artifact_paths": [], "evidence_paths": []}
+def not_run(
+    task: str, reason: str | None = None, layer: str | None = None, status: str = "NOT_RUN"
+) -> dict[str, Any]:
+    return {
+        "task_id": task,
+        "status": status,
+        "code_generated": None,
+        "execution_succeeded": None,
+        "excel_correct": None,
+        "workflow_rerun_succeeded": None,
+        "elapsed_seconds": None,
+        "repair_loops": None,
+        "human_interventions": 0,
+        "interfaces_used": [],
+        "failure_reason": reason,
+        "blocked_layer": layer,
+        "artifact_paths": [],
+        "evidence_paths": [],
+    }
 
 
 def report(run_dir: Path, results: dict[str, dict[str, Any]], meta: dict[str, Any]) -> None:
@@ -537,8 +824,11 @@ def report(run_dir: Path, results: dict[str, dict[str, Any]], meta: dict[str, An
     def flag(value: Any) -> str:
         return {True: "yes", False: "no", None: "–"}.get(value, str(value))
 
-    smoke = json.loads((LAB / "operator" / "state" / "smoke.json").read_text(encoding="utf-8")) \
-        if (LAB / "operator" / "state" / "smoke.json").exists() else []
+    smoke = (
+        json.loads((LAB / "operator" / "state" / "smoke.json").read_text(encoding="utf-8"))
+        if (LAB / "operator" / "state" / "smoke.json").exists()
+        else []
+    )
     lines = [
         f"# business_workflow_lab — {run_dir.name}",
         "",
@@ -560,12 +850,16 @@ def report(run_dir: Path, results: dict[str, dict[str, Any]], meta: dict[str, An
         "|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for r in rows:
-        why = " — ".join(x for x in (r.get("blocked_layer"), r.get("failure_reason")) if x).replace("|", "/")
-        lines.append(f"| {r['task_id']} | {r['status']} | {flag(r['code_generated'])} | "
-                     f"{flag(r['execution_succeeded'])} | {flag(r['excel_correct'])} | "
-                     f"{flag(r['workflow_rerun_succeeded'])} | {r['elapsed_seconds'] or ''} | "
-                     f"{'' if r['repair_loops'] is None else r['repair_loops']} | {r['human_interventions']} | "
-                     f"{', '.join(r['interfaces_used'])} | {why} |")
+        why = " — ".join(x for x in (r.get("blocked_layer"), r.get("failure_reason")) if x).replace(
+            "|", "/"
+        )
+        lines.append(
+            f"| {r['task_id']} | {r['status']} | {flag(r['code_generated'])} | "
+            f"{flag(r['execution_succeeded'])} | {flag(r['excel_correct'])} | "
+            f"{flag(r['workflow_rerun_succeeded'])} | {r['elapsed_seconds'] or ''} | "
+            f"{'' if r['repair_loops'] is None else r['repair_loops']} | {r['human_interventions']} | "
+            f"{', '.join(r['interfaces_used'])} | {why} |"
+        )
     lines += [
         "",
         "Columns are independent: *Excel correct* judges only the workbook against the template and the "
@@ -577,10 +871,17 @@ def report(run_dir: Path, results: dict[str, dict[str, Any]], meta: dict[str, An
     ]
     for r in rows:
         failed = [c for c in r.get("checks") or [] if c["ok"] is False]
-        failed += [dict(c, name="rerun: " + c["name"]) for c in r.get("rerun_checks") or [] if c["ok"] is False]
+        failed += [
+            dict(c, name="rerun: " + c["name"])
+            for c in r.get("rerun_checks") or []
+            if c["ok"] is False
+        ]
         if failed:
             lines.append(f"**{r['task_id']}**")
-            lines += [f"- {c['name']}: `{json.dumps(c['detail'], ensure_ascii=False)[:220]}`" for c in failed]
+            lines += [
+                f"- {c['name']}: `{json.dumps(c['detail'], ensure_ascii=False)[:220]}`"
+                for c in failed
+            ]
             lines.append("")
     lines += [
         "## 4. Limits of this run",
@@ -595,8 +896,9 @@ def report(run_dir: Path, results: dict[str, dict[str, Any]], meta: dict[str, An
         "",
     ]
     (run_dir / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
-    (run_dir / "results.json").write_text(json.dumps(rows, ensure_ascii=False, indent=1, default=str),
-                                          encoding="utf-8")
+    (run_dir / "results.json").write_text(
+        json.dumps(rows, ensure_ascii=False, indent=1, default=str), encoding="utf-8"
+    )
 
 
 def main() -> int:
@@ -605,15 +907,21 @@ def main() -> int:
     parser.add_argument("--tasks", default="smoke", help="smoke | all | comma-separated task IDs")
     parser.add_argument("--force", action="store_true", help="rerun tasks already recorded")
     parser.add_argument("--report-only", action="store_true")
-    parser.add_argument("--reclassify", action="store_true",
-                        help="with --report-only: recompute status from the stored traces and events")
+    parser.add_argument(
+        "--reclassify",
+        action="store_true",
+        help="with --report-only: recompute status from the stored traces and events",
+    )
     args = parser.parse_args()
     run_dir = LAB / "runs" / args.run_id
     run_dir.mkdir(parents=True, exist_ok=True)
     meta_path = run_dir / "metadata.json"
     results_path = run_dir / "results.json"
-    results = {r["task_id"]: r for r in json.loads(results_path.read_text(encoding="utf-8"))} \
-        if results_path.exists() else {}
+    results = (
+        {r["task_id"]: r for r in json.loads(results_path.read_text(encoding="utf-8"))}
+        if results_path.exists()
+        else {}
+    )
     if args.report_only:
         if args.reclassify:
             for label, record in results.items():
@@ -622,22 +930,35 @@ def main() -> int:
                     results[label] = reclassify(record, folder)
         report(run_dir, results, json.loads(meta_path.read_text(encoding="utf-8")))
         return 0
-    tasks = SMOKE if args.tasks == "smoke" else TASKS if args.tasks == "all" else args.tasks.split(",")
+    tasks = (
+        SMOKE if args.tasks == "smoke" else TASKS if args.tasks == "all" else args.tasks.split(",")
+    )
     base, token = agent_web()
     if not meta_path.exists():
-        commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True,
-                                cwd=REPO).stdout.strip()
-        meta = {"run_id": args.run_id, "started": datetime.now().isoformat(timespec="seconds"),
-                "repo_commit": commit, "agent_web": base, "grader_version": GRADER_VERSION,
-                "source_sha256": sha256(LAB / "operator" / "data" / "source.json"),
-                "templates": {p.name: sha256(p) for p in sorted((LAB / "templates").glob("*.xlsx"))}}
+        commit = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, cwd=REPO
+        ).stdout.strip()
+        meta = {
+            "run_id": args.run_id,
+            "started": datetime.now().isoformat(timespec="seconds"),
+            "repo_commit": commit,
+            "agent_web": base,
+            "grader_version": GRADER_VERSION,
+            "source_sha256": sha256(LAB / "operator" / "data" / "source.json"),
+            "templates": {p.name: sha256(p) for p in sorted((LAB / "templates").glob("*.xlsx"))},
+        }
         try:
-            host = json.loads((Path.home() / "AppData/Local/AgenticEngineeringPlatform/preview-0.1.0/host.json")
-                              .read_text(encoding="utf-8-sig"))
+            host = json.loads(
+                (
+                    Path.home() / "AppData/Local/AgenticEngineeringPlatform/preview-0.1.0/host.json"
+                ).read_text(encoding="utf-8-sig")
+            )
             models = host.get("models") or {}
             alias = models.get("routing_alias")
             endpoints = (models.get("catalog") or {}).get("endpoints") or []
-            meta["model"] = next((e.get("model") for e in endpoints if e.get("alias") == alias), alias)
+            meta["model"] = next(
+                (e.get("model") for e in endpoints if e.get("alias") == alias), alias
+            )
         except (OSError, ValueError):
             meta["model"] = None
         meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -651,12 +972,20 @@ def main() -> int:
         for task in tasks:
             if task in results and results[task]["status"] != "NOT_RUN" and not args.force:
                 print(f"{task}: already recorded ({results[task]['status']}), skipped", flush=True)
-                bench.case_completed(task, results[task]["status"], reused=True,
-                                     **case_attributes(results[task], run_dir / task))
+                bench.case_completed(
+                    task,
+                    results[task]["status"],
+                    reused=True,
+                    **case_attributes(results[task], run_dir / task),
+                )
                 continue
             if task == "X03" and results.get("X01", {}).get("status") != "PASS":
-                results[task] = not_run(task, "X01 did not pass, so there is no workflow to reuse",
-                                        "dependency: X01", status="BLOCKED")
+                results[task] = not_run(
+                    task,
+                    "X01 did not pass, so there is no workflow to reuse",
+                    "dependency: X01",
+                    status="BLOCKED",
+                )
                 print("X03: BLOCKED (dependency X01)", flush=True)
                 bench.case_completed(task, "BLOCKED", blocked_layer="dependency: X01")
             else:
@@ -665,15 +994,20 @@ def main() -> int:
                 results[task] = run_task(task, run_dir, base, token, help_text, results)
                 r = results[task]
                 bench.case_completed(task, r["status"], **case_attributes(r, run_dir / task))
-                print(f"{task}: {r['status']} ({r['elapsed_seconds']} s) {r.get('blocked_layer') or ''} "
-                      f"{r['failure_reason'] or ''}", flush=True)
+                print(
+                    f"{task}: {r['status']} ({r['elapsed_seconds']} s) {r.get('blocked_layer') or ''} "
+                    f"{r['failure_reason'] or ''}",
+                    flush=True,
+                )
                 if task == "C04":
                     print("C04-force_exit2: submitting ...", flush=True)
-                    results["C04-force_exit2"] = run_task(task, run_dir, base, token, help_text, results,
-                                                          "force_exit2")
+                    results["C04-force_exit2"] = run_task(
+                        task, run_dir, base, token, help_text, results, "force_exit2"
+                    )
                     r = results["C04-force_exit2"]
-                    bench.case_completed("C04-force_exit2", r["status"],
-                                         **case_attributes(r, run_dir / task))
+                    bench.case_completed(
+                        "C04-force_exit2", r["status"], **case_attributes(r, run_dir / task)
+                    )
                     print(f"C04-force_exit2: {r['status']} {r['failure_reason'] or ''}", flush=True)
             for other in TASKS:
                 results.setdefault(other, not_run(other))

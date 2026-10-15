@@ -268,9 +268,7 @@ class ScheduleControl:
 
     def set_active(self, schedule_id: str, *, active: bool) -> ScheduleRecord:
         with self._store() as store:
-            return store.set_active(
-                schedule_id, owner=self.owner, active=active, now=self._clock()
-            )
+            return store.set_active(schedule_id, owner=self.owner, active=active, now=self._clock())
 
     def history(self, schedule_id: str, *, limit: int = 50) -> tuple[ScheduledRun, ...]:
         with self._store() as store:
@@ -372,9 +370,7 @@ class ScheduleControl:
                             definition.target,
                             self.task_templates,
                         ),
-                        "grant": None
-                        if grant is None
-                        else grant.grant.model_dump(mode="json"),
+                        "grant": None if grant is None else grant.grant.model_dump(mode="json"),
                         "runs": [run.model_dump(mode="json") for run in runs],
                         "blocked_by": next(
                             (

@@ -44,7 +44,8 @@ OLD_PLATFORM = {
 @pytest.fixture
 def app(tmp_path: Path) -> Iterator[SharedPlatformApplication]:
     platform = SharedPlatformApplication.empty(
-        administrators=("platform-admin",), registry_path=tmp_path / "registry.sqlite")
+        administrators=("platform-admin",), registry_path=tmp_path / "registry.sqlite"
+    )
     with platform:
         yield platform
 
@@ -61,19 +62,24 @@ def _environment(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def _agent_login(app: SharedPlatformApplication, session: str) -> str:
-    status, issued = request(app.member_base_url + "/v1/member/logins/issue-agent",
-                             authorization=session, body={})
+    status, issued = request(
+        app.member_base_url + "/v1/member/logins/issue-agent", authorization=session, body={}
+    )
     assert status == 200
     return str(issued["login"])
 
 
 def _host(tmp_path: Path) -> tuple[Path, Any]:
     """This PC as it was: a hand-written grants.json and an old platform."""
-    config, layout = ready(tmp_path, config_changes={
-        "platform": OLD_PLATFORM,
-        "credentials": [{"secret": "platform_token",
-                         "environment_variable": "AEP_LOCAL_PLATFORM_TOKEN"}],
-    })
+    config, layout = ready(
+        tmp_path,
+        config_changes={
+            "platform": OLD_PLATFORM,
+            "credentials": [
+                {"secret": "platform_token", "environment_variable": "AEP_LOCAL_PLATFORM_TOKEN"}
+            ],
+        },
+    )
     return host_json(tmp_path, config), layout
 
 
@@ -83,21 +89,26 @@ def _web(runtime: Any, path: Path, saved: dict[str, str]) -> AgentWeb:
     return web
 
 
-def _card(app: SharedPlatformApplication, code: str = "", enroll: bool = True
-          ) -> dict[str, Any]:
-    return {"member_portal_url": app.member_base_url + "/",
-            "base_url": app.control_base_url, "code": code, "enroll": enroll}
+def _card(app: SharedPlatformApplication, code: str = "", enroll: bool = True) -> dict[str, Any]:
+    return {
+        "member_portal_url": app.member_base_url + "/",
+        "base_url": app.control_base_url,
+        "code": code,
+        "enroll": enroll,
+    }
 
 
 def test_enrolling_writes_host_json_saves_the_token_and_switches_without_restart(
-    app: SharedPlatformApplication, tmp_path: Path,
+    app: SharedPlatformApplication,
+    tmp_path: Path,
 ) -> None:
     path, layout = _host(tmp_path)
     before = path.read_text(encoding="utf-8")
     login = _agent_login(app, _signed_in(app, "engineer", "member"))
     saved: dict[str, str] = {}
-    with build_runtime(CompanyHostConfiguration.model_validate_json(before),
-                       layout=layout) as runtime:
+    with build_runtime(
+        CompanyHostConfiguration.model_validate_json(before), layout=layout
+    ) as runtime:
         web = _web(runtime, path, saved)
         assert web.platform()["connection"] != "answered"  # the old platform
 
@@ -116,7 +127,8 @@ def test_enrolling_writes_host_json_saves_the_token_and_switches_without_restart
             assert secret not in written
             assert secret not in json.dumps(web.task_list())
             assert secret not in (layout.workspace_root / "shared-platform.json").read_text(
-                encoding="utf-8")
+                encoding="utf-8"
+            )
 
         # host.json: valid, backed up, one portal URL in both places, the
         # old platform's token mapping untouched.
@@ -155,13 +167,16 @@ def test_enrolling_writes_host_json_saves_the_token_and_switches_without_restart
 
 
 def test_a_new_process_finds_the_saved_token_without_the_environment(
-    app: SharedPlatformApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    app: SharedPlatformApplication,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     path, layout = _host(tmp_path)
     saved: dict[str, str] = {}
     login = _agent_login(app, _signed_in(app, "engineer", "member"))
-    with build_runtime(CompanyHostConfiguration.model_validate_json(
-            path.read_text("utf-8")), layout=layout) as runtime:
+    with build_runtime(
+        CompanyHostConfiguration.model_validate_json(path.read_text("utf-8")), layout=layout
+    ) as runtime:
         web = _web(runtime, path, saved)
         assert web.update_shared_platform(_card(app, login))["ok"]
     # As after a restart from a shell started before the token was saved.
@@ -175,22 +190,25 @@ def test_a_new_process_finds_the_saved_token_without_the_environment(
 
 
 def test_the_card_refuses_what_it_cannot_use_and_never_echoes_a_secret(
-    app: SharedPlatformApplication, tmp_path: Path,
+    app: SharedPlatformApplication,
+    tmp_path: Path,
 ) -> None:
     path, layout = _host(tmp_path)
     before = path.read_text(encoding="utf-8")
     saved: dict[str, str] = {}
-    with build_runtime(CompanyHostConfiguration.model_validate_json(before),
-                       layout=layout) as runtime:
+    with build_runtime(
+        CompanyHostConfiguration.model_validate_json(before), layout=layout
+    ) as runtime:
         web = _web(runtime, path, saved)
         bad = web.update_shared_platform(
-            {**_card(app), "member_portal_url": "http://172.25.228.141:8776"})
+            {**_card(app), "member_portal_url": "http://172.25.228.141:8776"}
+        )
         assert bad["ok"] is False and bad["code"] == "portal_url_invalid"
-        bad = web.update_shared_platform(
-            {**_card(app), "base_url": "http://172.25.228.141:8775"})
+        bad = web.update_shared_platform({**_card(app), "base_url": "http://172.25.228.141:8775"})
         assert bad["code"] == "bridge_url_invalid"
         assert web.update_shared_platform({**_card(app), "base_url": ""})["code"] == (
-            "bridge_url_missing")
+            "bridge_url_missing"
+        )
         # An address nothing answers at (an old local platform, a dropped
         # tunnel) is refused before anything is saved or enrolled.
         gone = web.update_shared_platform({**_card(app), "base_url": "http://127.0.0.1:9"})
@@ -205,7 +223,8 @@ def test_the_card_refuses_what_it_cannot_use_and_never_echoes_a_secret(
         # A Personal Agent code of another account: the settings are saved,
         # the PC is not enrolled, and the message names this PC's owner.
         other = web.update_shared_platform(
-            _card(app, _agent_login(app, _signed_in(app, "leo", "member"))))
+            _card(app, _agent_login(app, _signed_in(app, "leo", "member")))
+        )
         assert other["ok"] is False and other["code"] == "device_owner_mismatch"
         assert other["saved"] is True and "engineer" in other["message"]
         assert TOKEN_VARIABLE not in saved
@@ -223,11 +242,13 @@ def test_the_card_refuses_what_it_cannot_use_and_never_echoes_a_secret(
         assert saved_only["enrolled"] is None
 
         assert AgentWeb(runtime).update_shared_platform(_card(app))["code"] == (
-            "settings_read_only")
+            "settings_read_only"
+        )
 
 
 def test_publish_approve_enroll_select_and_synchronize_end_to_end(
-    app: SharedPlatformApplication, tmp_path: Path,
+    app: SharedPlatformApplication,
+    tmp_path: Path,
 ) -> None:
     """A member publishes, an administrator approves, another member's PC
     enrolls, sees it, selects it and synchronizes it: the exact bytes are
@@ -235,19 +256,28 @@ def test_publish_approve_enroll_select_and_synchronize_end_to_end(
     portal = app.member_base_url + "/v1/member/"
     leo = _signed_in(app, "leo", "member")
     admin = _signed_in(app, "leo-admin", "platform_admin")
-    status, submitted = request(portal + "assets/submit", authorization=leo, body={
-        "kind": "workflow", "change": "minor", "manifest": workflow_manifest()})
+    status, submitted = request(
+        portal + "assets/submit",
+        authorization=leo,
+        body={"kind": "workflow", "change": "minor", "manifest": workflow_manifest()},
+    )
     assert status == 200, submitted
-    assert request(portal + "admin/submissions/approve", authorization=admin, body={
-        "submission_id": submitted["submission"]["submission_id"],
-        "evidence": "read it"})[0] == 200
+    assert (
+        request(
+            portal + "admin/submissions/approve",
+            authorization=admin,
+            body={"submission_id": submitted["submission"]["submission_id"], "evidence": "read it"},
+        )[0]
+        == 200
+    )
 
     path, layout = _host(tmp_path)
     grants = layout.grants.read_bytes()
     engineer = _signed_in(app, "engineer", "member")
     saved: dict[str, str] = {}
-    with build_runtime(CompanyHostConfiguration.model_validate_json(
-            path.read_text("utf-8")), layout=layout) as runtime:
+    with build_runtime(
+        CompanyHostConfiguration.model_validate_json(path.read_text("utf-8")), layout=layout
+    ) as runtime:
         web = _web(runtime, path, saved)
         assert web.update_shared_platform(_card(app, _agent_login(app, engineer)))["ok"]
 
@@ -255,12 +285,18 @@ def test_publish_approve_enroll_select_and_synchronize_end_to_end(
         assert listed["assets_only"] is True and listed["bridge_id"] == "bridge-company"
         [entry] = [item for item in listed["catalog"] if item["name"] == "weekly-check"]
         assert (entry["version"], entry["authorized"], entry["installed"]) == (
-            "1.0.0", False, False)
+            "1.0.0",
+            False,
+            False,
+        )
         assert "grants.json" in listed["note"]
 
         identity = {"namespace": "lab", "name": "weekly-check", "version": "1.0.0"}
-        status, chosen = request(portal + "select", authorization=engineer,
-                                 body={"bridge_id": "bridge-company", "asset": identity})
+        status, chosen = request(
+            portal + "select",
+            authorization=engineer,
+            body={"bridge_id": "bridge-company", "asset": identity},
+        )
         assert status == 200, chosen
 
         result = web.synchronize()
@@ -269,8 +305,7 @@ def test_publish_approve_enroll_select_and_synchronize_end_to_end(
         installed = layout.workflows / "lab__weekly-check__1.0.0.json"
         package = app.state.packages.get(AssetIdentity(**identity))
         assert package is not None and package.metadata.package is not None
-        assert installed.read_bytes() == app.state.artifacts[
-            package.metadata.package.artifact_ref]
+        assert installed.read_bytes() == app.state.artifacts[package.metadata.package.artifact_ref]
         assert layout.grants.read_bytes() == grants
         assert not layout.authorization.exists()
         [after] = [item for item in result["after"]["catalog"] if item["name"] == "weekly-check"]
@@ -278,7 +313,8 @@ def test_publish_approve_enroll_select_and_synchronize_end_to_end(
 
 
 def test_an_asset_the_owner_shares_after_publication_reaches_another_members_pc(
-    app: SharedPlatformApplication, tmp_path: Path,
+    app: SharedPlatformApplication,
+    tmp_path: Path,
 ) -> None:
     """Owner decision 2026-10-15: `leo` publishes something only he may use;
     another member's Bridge catalog does not list it and the portal refuses
@@ -288,48 +324,74 @@ def test_an_asset_the_owner_shares_after_publication_reaches_another_members_pc(
     leo = _signed_in(app, "leo", "member")
     admin = _signed_in(app, "leo-admin", "platform_admin")
     manifest = workflow_manifest()  # declares another person as owner
-    status, submitted = request(portal + "assets/submit", authorization=leo, body={
-        "kind": "workflow", "change": "minor", "visibility": "private",
-        "manifest": manifest})
+    status, submitted = request(
+        portal + "assets/submit",
+        authorization=leo,
+        body={"kind": "workflow", "change": "minor", "visibility": "private", "manifest": manifest},
+    )
     assert status == 200, submitted
     assert submitted["submission"]["owner"] == {"type": "user", "id": "leo"}
-    assert request(portal + "admin/submissions/approve", authorization=admin, body={
-        "submission_id": submitted["submission"]["submission_id"],
-        "evidence": "read it"})[0] == 200
+    assert (
+        request(
+            portal + "admin/submissions/approve",
+            authorization=admin,
+            body={"submission_id": submitted["submission"]["submission_id"], "evidence": "read it"},
+        )[0]
+        == 200
+    )
 
     path, layout = _host(tmp_path)
     engineer = _signed_in(app, "engineer", "member")
     identity = {"namespace": "lab", "name": "weekly-check", "version": "1.0.0"}
-    with build_runtime(CompanyHostConfiguration.model_validate_json(
-            path.read_text("utf-8")), layout=layout) as runtime:
+    with build_runtime(
+        CompanyHostConfiguration.model_validate_json(path.read_text("utf-8")), layout=layout
+    ) as runtime:
         web = _web(runtime, path, {})
         assert web.update_shared_platform(_card(app, _agent_login(app, engineer)))["ok"]
         assert [i for i in web.platform()["catalog"] if i["name"] == "weekly-check"] == []
-        assert request(portal + "select", authorization=engineer, body={
-            "bridge_id": "bridge-company", "asset": identity}) == (
-            403, {"code": "asset_not_entitled"})
+        assert request(
+            portal + "select",
+            authorization=engineer,
+            body={"bridge_id": "bridge-company", "asset": identity},
+        ) == (403, {"code": "asset_not_entitled"})
 
-        status, shared = request(portal + "assets/access/update", authorization=leo, body={
-            "namespace": "lab", "name": "weekly-check", "members": ["engineer"]})
+        status, shared = request(
+            portal + "assets/access/update",
+            authorization=leo,
+            body={"namespace": "lab", "name": "weekly-check", "members": ["engineer"]},
+        )
         assert status == 200, shared
         [entry] = [i for i in web.platform()["catalog"] if i["name"] == "weekly-check"]
         assert entry["version"] == "1.0.0"
-        assert request(portal + "select", authorization=engineer, body={
-            "bridge_id": "bridge-company", "asset": identity})[0] == 200
+        assert (
+            request(
+                portal + "select",
+                authorization=engineer,
+                body={"bridge_id": "bridge-company", "asset": identity},
+            )[0]
+            == 200
+        )
         result = web.synchronize()
         assert result["status"] == "answered" and result["installed"] == [identity], result
         assert (layout.workflows / "lab__weekly-check__1.0.0.json").exists()
 
 
 def test_the_settings_page_has_the_card_and_capabilities_no_longer_holds_the_code() -> None:
-    for hook in ('id="shared-platform-card"', 'id="shared-portal-url"', 'id="shared-bridge-url"',
-                 'id="shared-code"', 'id="shared-enroll"', "/api/settings/shared-platform",
-                 "loadSharedPlatform()", "marketplaceUrl(", "permissions come from this PC's"
-                 " grants.json"):
+    for hook in (
+        'id="shared-platform-card"',
+        'id="shared-portal-url"',
+        'id="shared-bridge-url"',
+        'id="shared-code"',
+        'id="shared-enroll"',
+        "/api/settings/shared-platform",
+        "loadSharedPlatform()",
+        "marketplaceUrl(",
+        "permissions come from this PC's grants.json",
+    ):
         assert hook in PAGE
     assert 'id="publish-code"' not in PAGE and 'id="publish-connect"' not in PAGE
-    card = PAGE[PAGE.index('id="shared-platform-card"'):PAGE.index("Laya decision acceleration")]
-    assert '<section' not in card and 'type="password"' in card
+    card = PAGE[PAGE.index('id="shared-platform-card"') : PAGE.index("Laya decision acceleration")]
+    assert "<section" not in card and 'type="password"' in card
 
 
 @pytest.mark.skipif(browser_path() is None, reason="no Chromium browser is installed")
@@ -350,8 +412,9 @@ def test_the_card_renders_in_settings_in_a_real_browser(tmp_path: Path) -> None:
             browser.click(controls["nav-settings"].index, expected=controls["nav-settings"])
             size = browser._evaluate(
                 'JSON.stringify(["shared-platform-card","shared-enroll","shared-code"].map('
-                '(id) => { const r = document.getElementById(id).getBoundingClientRect();'
-                ' return [r.width, r.height]; }))')
+                "(id) => { const r = document.getElementById(id).getBoundingClientRect();"
+                " return [r.width, r.height]; }))"
+            )
             card, button, field = json.loads(str(size))
             assert card[0] > 300 and card[1] > 120, size
             assert button[0] > 40 and button[1] > 20, size
@@ -362,8 +425,7 @@ def test_the_card_renders_in_settings_in_a_real_browser(tmp_path: Path) -> None:
             status: object = ""
             while "bridge-company" not in str(status) and time.monotonic() < deadline:
                 time.sleep(0.2)  # the card fills in when its settings arrive
-                status = browser._evaluate(
-                    'document.getElementById("shared-this-pc").textContent')
+                status = browser._evaluate('document.getElementById("shared-this-pc").textContent')
             assert "bridge-company" in str(status) and "grants.json" in str(status)
         finally:
             browser.close()

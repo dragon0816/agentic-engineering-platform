@@ -35,7 +35,8 @@ def _stations(settings: Mapping[str, Any], arguments: Mapping[str, str]) -> list
     rows = [line.split(",") for line in catalogue.read_text(encoding="utf-8").splitlines()]
     return [
         ReferenceItem(value=name, label=f"{name} ({region})")
-        for name, region in rows if region == arguments["region"]
+        for name, region in rows
+        if region == arguments["region"]
     ]
 
 
@@ -54,11 +55,20 @@ def _sources(tmp_path: Path, settings: dict[str, Any]) -> ChoiceSources:
 
 
 def _with_station_field() -> WorkflowManifest:
-    return _manifest([
-        {"name": "region", "label": "Region", "kind": "text", "required": True, "order": 1},
-        {"name": "station", "label": "Station", "kind": "select", "required": True,
-         "order": 2, "choices_source": SOURCE, "needs": ["region"]},
-    ])
+    return _manifest(
+        [
+            {"name": "region", "label": "Region", "kind": "text", "required": True, "order": 1},
+            {
+                "name": "station",
+                "label": "Station",
+                "kind": "select",
+                "required": True,
+                "order": 2,
+                "choices_source": SOURCE,
+                "needs": ["region"],
+            },
+        ]
+    )
 
 
 def test_a_function_reads_the_settings_and_the_bound_arguments(tmp_path: Path) -> None:
@@ -66,7 +76,7 @@ def test_a_function_reads_the_settings_and_the_bound_arguments(tmp_path: Path) -
     sources = _sources(tmp_path, {"catalogue": str(_catalogue(tmp_path))})
     assert FunctionQuery(SOURCE).needed() == ("region",)
     assert ChoiceSources.needed(SOURCE) == ("region",)
-    assert sources.resolve(manifest, SOURCE, {}) is None              # waiting for region
+    assert sources.resolve(manifest, SOURCE, {}) is None  # waiting for region
     assert sources.values(manifest, SOURCE, {"region": "east"}) == ["公館站", "東清站"]
     assert sources.resolve(manifest, "fn:unknown.function", {}) is None
     # A function that cannot read its settings is "unavailable", not a crash.
@@ -76,22 +86,37 @@ def test_a_function_reads_the_settings_and_the_bound_arguments(tmp_path: Path) -
     assert unset.resolve(manifest, SOURCE, {"region": "east"}) is None
 
 
-def _engine(tmp_path: Path, handler: Handler, functions: dict[str, Any]) -> tuple[
-    WorkflowEngine, Any
-]:
+def _engine(
+    tmp_path: Path, handler: Handler, functions: dict[str, Any]
+) -> tuple[WorkflowEngine, Any]:
     installed = InstalledCapabilities()
     installed.register(
         capability_spec(), handler, Probe, Report, ExecutionDependencies(central_required=False)
     )
-    bridge = BridgeExecutor(installed, LocalPolicy((CapabilityGrant.model_validate({
-        "actor": "engineer", "asset": capability_spec().identity,
-        "permissions": ["engineering.validate"], "policy_refs": ["release-policy"],
-        "approval_ref": "release-approval",
-    }),)))
+    bridge = BridgeExecutor(
+        installed,
+        LocalPolicy(
+            (
+                CapabilityGrant.model_validate(
+                    {
+                        "actor": "engineer",
+                        "asset": capability_spec().identity,
+                        "permissions": ["engineering.validate"],
+                        "policy_refs": ["release-policy"],
+                        "approval_ref": "release-approval",
+                    }
+                ),
+            )
+        ),
+    )
     data = workflow_manifest().model_dump(mode="json")
     data["parameters"] = [
-        {"name": "args", "label": "Station", "kind": "select",
-         "choices_source": "fn:test.stations?region=east"},
+        {
+            "name": "args",
+            "label": "Station",
+            "kind": "select",
+            "choices_source": "fn:test.stations?region=east",
+        },
     ]
     manifest = WorkflowManifest.model_validate(data)
     workflows = InstalledWorkflows()
@@ -150,8 +175,13 @@ def test_agent_web_resolves_function_choices_for_the_form(
     data["parameters"] = [
         {"name": "catalogue", "label": "Catalogue", "kind": "file", "scope": "static"},
         {"name": "region", "label": "Region", "kind": "text", "order": 1},
-        {"name": "station", "label": "Station", "kind": "select", "order": 2,
-         "choices_source": SOURCE},
+        {
+            "name": "station",
+            "label": "Station",
+            "kind": "select",
+            "order": 2,
+            "choices_source": SOURCE,
+        },
     ]
     manifest = WorkflowManifest.model_validate(data)
     identity = manifest.metadata.identity.model_dump(mode="json")
@@ -170,14 +200,24 @@ def test_agent_web_resolves_function_choices_for_the_form(
             url = base(server) + "/api/workflow-options"
             body = {"workflow": identity, "field": "station", "answers": {}}
             assert fetch(url, token=server.token, body=body).json()["waiting_for"] == ["region"]
-            chosen = fetch(url, token=server.token, body={
-                **body, "answers": {"region": "north"},
-            }).json()
+            chosen = fetch(
+                url,
+                token=server.token,
+                body={
+                    **body,
+                    "answers": {"region": "north"},
+                },
+            ).json()
             assert chosen["choices"] == [{"value": "四條溝站", "label": "四條溝站 (north)"}]
             monkeypatch.delitem(host_module.CHOICE_FUNCTIONS, "test.stations")
-            gone = fetch(url, token=server.token, body={
-                **body, "answers": {"region": "north"},
-            }).json()
+            gone = fetch(
+                url,
+                token=server.token,
+                body={
+                    **body,
+                    "answers": {"region": "north"},
+                },
+            ).json()
             assert gone["unavailable"] is True and gone["set"] == "test.stations"
         finally:
             server.shutdown()

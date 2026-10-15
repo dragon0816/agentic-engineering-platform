@@ -32,8 +32,10 @@ AGENT_BACKENDS = ("claude_code", "codex", "copilot")
 RELAY_BACKENDS = ("claude_code", "copilot")
 #: Why a backend stays text-only, shown in Settings and the chat.
 TEXT_ONLY_REASON = {
-    "codex": ("Codex stays text-only: `codex exec` cannot hand its approval prompts to "
-              "Agent Web, and no relay for it has been verified on this computer."),
+    "codex": (
+        "Codex stays text-only: `codex exec` cannot hand its approval prompts to "
+        "Agent Web, and no relay for it has been verified on this computer."
+    ),
 }
 
 
@@ -70,15 +72,17 @@ class AgentModeStore:
     def load(self) -> AgentModeSettings:
         try:
             return AgentModeSettings.model_validate_json(
-                self.settings_path.read_text(encoding="utf-8-sig"))
+                self.settings_path.read_text(encoding="utf-8-sig")
+            )
         except (OSError, ValueError):
             return AgentModeSettings()
 
     def save(self, settings: AgentModeSettings) -> AgentModeSettings:
         checked = AgentModeSettings.model_validate(settings)
         with self._lock:
-            write_atomically(self.settings_path,
-                             checked.model_dump_json(indent=2).encode("utf-8") + b"\n")
+            write_atomically(
+                self.settings_path, checked.model_dump_json(indent=2).encode("utf-8") + b"\n"
+            )
         return checked
 
     def _sessions(self) -> dict[str, Any]:
@@ -101,13 +105,16 @@ class AgentModeStore:
         with self._lock:
             data = self._sessions()
             data[session_id] = checked.model_dump(mode="json")
-            write_atomically(self.sessions_path,
-                             json.dumps(data, ensure_ascii=False, indent=1).encode("utf-8"))
+            write_atomically(
+                self.sessions_path, json.dumps(data, ensure_ascii=False, indent=1).encode("utf-8")
+            )
         return checked
 
     def forget(self, session_id: str) -> None:
         with self._lock:
             data = self._sessions()
             if data.pop(session_id, None) is not None:
-                write_atomically(self.sessions_path,
-                                 json.dumps(data, ensure_ascii=False, indent=1).encode("utf-8"))
+                write_atomically(
+                    self.sessions_path,
+                    json.dumps(data, ensure_ascii=False, indent=1).encode("utf-8"),
+                )

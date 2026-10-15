@@ -31,8 +31,13 @@ from host_runtime.workflow_uploads import (
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import InstalledWorkflows, WorkflowEngine
 
-COMBO = {"name": "chipset", "label": "Chipset", "kind": "select", "allow_other": True,
-         "choices": [{"value": "kt326"}, {"value": "kt400"}]}
+COMBO = {
+    "name": "chipset",
+    "label": "Chipset",
+    "kind": "select",
+    "allow_other": True,
+    "choices": [{"value": "kt326"}, {"value": "kt400"}],
+}
 
 
 # -- A2 allow_other ------------------------------------------------------------
@@ -51,14 +56,18 @@ def test_allow_other_accepts_a_typed_value_and_keeps_old_manifests_unchanged() -
     schema = agent_tool_schema(manifest)["properties"]["chipset"]
     assert "enum" not in schema
     assert form_fields(manifest, "web")[0]["allow_other"] is True
-    assert form_fields(_manifest([{**COMBO, "allow_other": False}]), "web")[0][
-        "allow_other"] is False
+    assert (
+        form_fields(_manifest([{**COMBO, "allow_other": False}]), "web")[0]["allow_other"] is False
+    )
 
 
-@pytest.mark.parametrize("bad", [
-    {"name": "x", "label": "X", "kind": "text", "allow_other": True},
-    {**COMBO, "multiple": True},
-])
+@pytest.mark.parametrize(
+    "bad",
+    [
+        {"name": "x", "label": "X", "kind": "text", "allow_other": True},
+        {**COMBO, "multiple": True},
+    ],
+)
 def test_allow_other_is_for_single_selects_only(bad: dict[str, Any]) -> None:
     with pytest.raises(ValidationError, match="allow other"):
         _manifest([bad])
@@ -78,8 +87,13 @@ def _inbox(tmp_path: Path) -> Path:
 
 PICK = [
     {"name": "inbox_path", "label": "Inbox", "kind": "folder", "scope": "static"},
-    {"name": "plans", "label": "Plans", "kind": "select", "multiple": True,
-     "choices_source": "fn:folder_files?folder={inbox_path}&accept=.json"},
+    {
+        "name": "plans",
+        "label": "Plans",
+        "kind": "select",
+        "multiple": True,
+        "choices_source": "fn:folder_files?folder={inbox_path}&accept=.json",
+    },
 ]
 
 
@@ -98,8 +112,9 @@ def test_folder_files_lists_only_plain_files_directly_in_the_folder(tmp_path: Pa
     assert [item.value for item in listed] == ["A-plan.JSON", "b-plan.json"]
     every = [item.value for item in folder_files({}, {"folder": str(inbox)})]
     assert every == ["A-plan.JSON", "b-plan.json", "config.yaml"]
-    assert [item.value for item in folder_files({}, {"folder": str(inbox),
-                                                     "accept": "yaml,.yml"})] == ["config.yaml"]
+    assert [
+        item.value for item in folder_files({}, {"folder": str(inbox), "accept": "yaml,.yml"})
+    ] == ["config.yaml"]
     for folder in ("", "relative/inbox", str(tmp_path / "absent")):
         with pytest.raises(ValueError):
             folder_files({}, {"folder": folder})
@@ -114,13 +129,16 @@ def test_choice_sources_bind_settings_and_fail_soft(tmp_path: Path) -> None:
         raise RuntimeError("index down")
 
     sources = ChoiceSources(
-        ReferenceSetStore(tmp_path / REFERENCE_SETS_FILE), lambda _m: settings,
+        ReferenceSetStore(tmp_path / REFERENCE_SETS_FILE),
+        lambda _m: settings,
         {"folder_files": folder_files, "broken": broken},
     )
     source = PICK[1]["choices_source"]
     # A run or form cannot point the listing elsewhere: the setting wins.
     assert sources.values(manifest, source, {"inbox_path": str(tmp_path)}) == [
-        "A-plan.JSON", "b-plan.json"]
+        "A-plan.JSON",
+        "b-plan.json",
+    ]
     assert sources.resolve(manifest, "fn:broken", {}) is None
     settings.clear()
     assert sources.resolve(manifest, source, {}) is None
@@ -130,7 +148,9 @@ def test_choice_sources_bind_settings_and_fail_soft(tmp_path: Path) -> None:
 
 
 def _engine(
-    tmp_path: Path, parameter: dict[str, Any], provider: Any = None,
+    tmp_path: Path,
+    parameter: dict[str, Any],
+    provider: Any = None,
     upload_root: Path | None = None,
 ) -> tuple[WorkflowEngine, Any, Handler]:
     handler = Handler()
@@ -138,18 +158,28 @@ def _engine(
     installed.register(
         capability_spec(), handler, Probe, Report, ExecutionDependencies(central_required=False)
     )
-    bridge = BridgeExecutor(installed, LocalPolicy((CapabilityGrant.model_validate({
-        "actor": "engineer", "asset": capability_spec().identity,
-        "permissions": ["engineering.validate"], "policy_refs": ["release-policy"],
-        "approval_ref": "release-approval",
-    }),)))
+    bridge = BridgeExecutor(
+        installed,
+        LocalPolicy(
+            (
+                CapabilityGrant.model_validate(
+                    {
+                        "actor": "engineer",
+                        "asset": capability_spec().identity,
+                        "permissions": ["engineering.validate"],
+                        "policy_refs": ["release-policy"],
+                        "approval_ref": "release-approval",
+                    }
+                ),
+            )
+        ),
+    )
     data = workflow_manifest().model_dump(mode="json")
     data["parameters"] = [parameter]
     manifest = WorkflowManifest.model_validate(data)
     workflows = InstalledWorkflows()
     workflows.register(manifest)
-    engine = WorkflowEngine(workflows, bridge, choices_provider=provider,
-                            upload_root=upload_root)
+    engine = WorkflowEngine(workflows, bridge, choices_provider=provider, upload_root=upload_root)
     return engine, manifest.metadata.identity, handler
 
 
@@ -158,10 +188,15 @@ def test_the_engine_never_consults_a_pick_or_type_source(tmp_path: Path) -> None
 
     def provider(_manifest: Any, source: str, _answers: Any) -> list[str] | None:
         calls.append(source)
-        return None                                        # the index is down
+        return None  # the index is down
 
-    field = {"name": "args", "label": "Chipset", "kind": "select",
-             "choices_source": "fn:release_package.chipsets", "allow_other": True}
+    field = {
+        "name": "args",
+        "label": "Chipset",
+        "kind": "select",
+        "choices_source": "fn:release_package.chipsets",
+        "allow_other": True,
+    }
     engine, identity, handler = _engine(tmp_path, field, provider)
     ran = asyncio.run(engine.execute(request("run"), identity, {"args": "kt999"}))
     assert ran.run.status == "succeeded" and handler.calls == 1 and calls == []
@@ -184,8 +219,9 @@ def test_the_engine_accepts_only_uploads_from_the_store(tmp_path: Path) -> None:
     traversal = str(store.root / ".." / "secret.json")
     refused = asyncio.run(engine.execute(request("run"), identity, {"args": traversal}))
     assert refused.run.failure is not None and handler.calls == 0
-    manifest = WorkflowManifest.model_validate({
-        **workflow_manifest().model_dump(mode="json"), "parameters": [field]})
+    manifest = WorkflowManifest.model_validate(
+        {**workflow_manifest().model_dump(mode="json"), "parameters": [field]}
+    )
     stored = store.add(store.new_set(), manifest.parameters[0], "plan.json", b"{}")
     ran = asyncio.run(engine.execute(request("run"), identity, {"args": str(stored)}))
     assert ran.run.status == "succeeded" and handler.calls == 1
@@ -196,8 +232,17 @@ def test_the_engine_accepts_only_uploads_from_the_store(tmp_path: Path) -> None:
 
 def test_upload_store_checks_type_size_count_and_names(tmp_path: Path) -> None:
     store = WorkflowUploadStore(tmp_path)
-    many = _manifest([{"name": "plans", "label": "Plans", "kind": "upload", "multiple": True,
-                       "accept": [".json"]}]).parameters[0]
+    many = _manifest(
+        [
+            {
+                "name": "plans",
+                "label": "Plans",
+                "kind": "upload",
+                "multiple": True,
+                "accept": [".json"],
+            }
+        ]
+    ).parameters[0]
     one = _manifest([{"name": "plan", "label": "Plan", "kind": "upload"}]).parameters[0]
     upload_set = store.new_set()
     first = store.add(upload_set, many, r"..\..\evil\plan.json", b"{}")
@@ -237,8 +282,9 @@ def test_identity_presets_keep_only_identity_values_per_member(tmp_path: Path) -
     presets = IdentityPresets(tmp_path)
     manifest = _manifest(IDENTITY)
     assert presets.last("alice", manifest) == {}
-    presets.remember("alice", manifest, {"company": "Foxconn", "chipset": "kt326",
-                                         "notes": "not identity"})
+    presets.remember(
+        "alice", manifest, {"company": "Foxconn", "chipset": "kt326", "notes": "not identity"}
+    )
     presets.remember("bob", manifest, {"company": "Quanta"})
     assert presets.last("alice", manifest) == {"company": "Foxconn", "chipset": "kt326"}
     assert presets.last("bob", manifest) == {"company": "Quanta"}
@@ -272,8 +318,20 @@ def test_the_catalog_format_examples_validate_and_cover_every_kind() -> None:
     kinds = set(get_args(ParameterKind))
     assert set(WORKFLOW_FORMAT["parameter kinds"]) == kinds  # type: ignore[arg-type]
     described = WORKFLOW_FORMAT["parameter fields"]
-    for name in ("help", "default", "examples", "choices", "choices_source", "allow_other",
-                 "multiple", "accept", "pattern", "order", "group", "channels"):
+    for name in (
+        "help",
+        "default",
+        "examples",
+        "choices",
+        "choices_source",
+        "allow_other",
+        "multiple",
+        "accept",
+        "pattern",
+        "order",
+        "group",
+        "channels",
+    ):
         assert name in described  # type: ignore[operator]
     guide = creator_text("aep-workflow-creator")
     assert "## Parameters become the Agent Web and Telegram form" in guide

@@ -58,9 +58,7 @@ def _guided_procedure() -> KnowledgeProcedure:
 
 def _write(vault: Vault, name: str, value: str) -> None:
     raw_ref = f"raw/{name}.md"
-    source = source_for(value.encode(), f"drop/{name}.txt").model_copy(
-        update={"raw_ref": raw_ref}
-    )
+    source = source_for(value.encode(), f"drop/{name}.txt").model_copy(update={"raw_ref": raw_ref})
     vault.write_raw(
         raw_ref,
         render(
@@ -77,7 +75,8 @@ def _write(vault: Vault, name: str, value: str) -> None:
 def test_chinese_ntn_question_uses_market_focus_and_product_link(tmp_path: Path) -> None:
     vault = make_vault(tmp_path)
     _write(
-        vault, "ntn-cmx500",
+        vault,
+        "ntn-cmx500",
         "The Rohde & Schwarz CMX500 tester is tailored for NTN testing applications.",
     )
     question = "在NTN 的市場，rohde-schwarz有那些產品可以推給客戶"
@@ -86,7 +85,8 @@ def test_chinese_ntn_question_uses_market_focus_and_product_link(tmp_path: Path)
     assert procedure.focus(question) is not None
     assessment = assess_knowledge_evidence(vault, question, procedure)
     assert tuple(item.name for item in assessment.observations) == (
-        "market_segment", "product_option_spec",
+        "market_segment",
+        "product_option_spec",
     )
     assert assessment.status == "covered"
     assert assessment.relation_passages
@@ -100,7 +100,8 @@ def test_chinese_ntn_question_uses_market_focus_and_product_link(tmp_path: Path)
     assert grounded_record(
         AssetIdentity(namespace="engineering", name="widget-guide", version="1.0.0"),
         TraceIdentifiers(trace_id="ntn", request_id="ntn", span_id="answer"),
-        observed, assessment=assessment.summary(),
+        observed,
+        assessment=assessment.summary(),
     ).cited_passages
 
 
@@ -122,10 +123,11 @@ def test_ntn_recommendation_requires_product_use_case_not_reseller_market_list()
         ),
     )
     answer = Answer(
-        question=question, status="answered", passages=passages,
+        question=question,
+        status="answered",
+        passages=passages,
         text=(
-            "建議 CMX500 用於 NTN 裝置測試 [1]。\n"
-            "可推 OSP200 / OSP300，因為目標市場列有 NTN [2]。"
+            "建議 CMX500 用於 NTN 裝置測試 [1]。\n可推 OSP200 / OSP300，因為目標市場列有 NTN [2]。"
         ),
     )
     procedure = _guided_procedure()
@@ -140,18 +142,21 @@ def test_ntn_recommendation_requires_product_use_case_not_reseller_market_list()
 def test_ntn_recommendation_accepts_adjacent_source_context_for_pvt360() -> None:
     question = "在NTN 的市場，rohde-schwarz有那些產品可以推給客戶"
     answer = Answer(
-        question=question, status="answered",
-        passages=(Passage(
-            text=(
-                "With the introduction of NTN, test methodologies for satellites will change. "
-                "LEO satellites may be produced in large quantities, "
-                "requiring a production test concept. "
-                "The R&S PVT360 performance vector tester combines a vector signal generator "
-                "and vector spectrum analyzer for satellite production testing."
+        question=question,
+        status="answered",
+        passages=(
+            Passage(
+                text=(
+                    "With the introduction of NTN, test methodologies for satellites will change. "
+                    "LEO satellites may be produced in large quantities, "
+                    "requiring a production test concept. "
+                    "The R&S PVT360 performance vector tester combines a vector signal generator "
+                    "and vector spectrum analyzer for satellite production testing."
+                ),
+                citation=Citation(kind="raw", raw_ref="raw/Knowledge/ntn-whitepaper.md", section=1),
+                score=1,
             ),
-            citation=Citation(kind="raw", raw_ref="raw/Knowledge/ntn-whitepaper.md", section=1),
-            score=1,
-        ),),
+        ),
         text="可推 PVT360 用於 NTN 衛星量產測試。[1]",
     )
     assert unsupported_product_recommendations(answer, question, _guided_procedure()) == ()
@@ -160,21 +165,26 @@ def test_ntn_recommendation_accepts_adjacent_source_context_for_pvt360() -> None
 def test_ntn_recommendation_reads_pdf_hard_wrapped_context() -> None:
     question = "在NTN 的市場，rohde-schwarz有那些產品可以推給客戶"
     answer = Answer(
-        question=question, status="answered",
-        passages=(Passage(
-            text=(
-                "8.2.4 Production testing aspects for satellites\n"
-                "With the introduction of NTN, we also expect some changes in the overall test "
-                "methodologies for satellites. Especially\n"
-                "LEO and VLEO satellites might be produced in large quantities, making a novel "
-                "production test\n"
-                "concept imperative. With the R&S®PVT360 performance vector tester, Rohde & "
-                "Schwarz introduces a combined vec-\n"
-                "tor signal generator and vector spectrum analyzer in a single box."
+        question=question,
+        status="answered",
+        passages=(
+            Passage(
+                text=(
+                    "8.2.4 Production testing aspects for satellites\n"
+                    "With the introduction of NTN, we also expect some changes in the overall test "
+                    "methodologies for satellites. Especially\n"
+                    "LEO and VLEO satellites might be produced in large quantities, making a novel "
+                    "production test\n"
+                    "concept imperative. With the R&S®PVT360 performance vector tester, Rohde & "
+                    "Schwarz introduces a combined vec-\n"
+                    "tor signal generator and vector spectrum analyzer in a single box."
+                ),
+                citation=Citation(
+                    kind="raw", raw_ref="raw/Knowledge/satellite-paper.md", section=200
+                ),
+                score=1,
             ),
-            citation=Citation(kind="raw", raw_ref="raw/Knowledge/satellite-paper.md", section=200),
-            score=1,
-        ),),
+        ),
         text="可推 PVT360 用於衛星量產測試。[1]",
     )
     assert unsupported_product_recommendations(answer, question, _guided_procedure()) == ()
@@ -186,16 +196,21 @@ def test_ntn_recommendation_accepts_focused_document_but_not_unrelated_title() -
         "Figure 151: Vertical CATR for RX testing with the R&S ZNA and 3D positioner\n"
         "Indirect far field (IFF): R&S ATS1800C"
     )
+
     def answer_for(raw_ref: str) -> Answer:
         return Answer(
-            question=question, status="answered",
-            passages=(Passage(
-                text=caption,
-                citation=Citation(kind="raw", raw_ref=raw_ref, section=218),
-                score=1,
-            ),),
+            question=question,
+            status="answered",
+            passages=(
+                Passage(
+                    text=caption,
+                    citation=Citation(kind="raw", raw_ref=raw_ref, section=218),
+                    score=1,
+                ),
+            ),
             text="可推 ATS1800C 搭配 ZNA 做 RX 測試。[1]",
         )
+
     procedure = _guided_procedure()
     focused = answer_for("raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en.md")
     unrelated = answer_for("raw/Productions/ATS1800C_brochure_en.md")
@@ -207,34 +222,30 @@ def test_product_evidence_budget_keeps_distinct_instrument_roles() -> None:
     passages = tuple(
         Passage(
             text=f"CMX500 PR says NTN test solution number {index}.",
-            citation=Citation(
-                kind="raw", raw_ref=f"raw/Productions/PR/cmx-{index}.md", section=1
-            ),
+            citation=Citation(kind="raw", raw_ref=f"raw/Productions/PR/cmx-{index}.md", section=1),
             score=1,
         )
         for index in range(6)
     ) + (
         Passage(
             text="SMW200A and FSW form an NTN satellite component test setup.",
-            citation=Citation(
-                kind="raw", raw_ref="raw/Knowledge/ntn-whitepaper.md", section=1
-            ),
+            citation=Citation(kind="raw", raw_ref="raw/Knowledge/ntn-whitepaper.md", section=1),
             score=1,
         ),
         Passage(
             text="CMX500 supports NTN device testing in callbox mode.",
-            citation=Citation(
-                kind="raw", raw_ref="raw/Productions/cmx-features.md", section=1
-            ),
+            citation=Citation(kind="raw", raw_ref="raw/Productions/cmx-features.md", section=1),
             score=1,
         ),
     )
     selected = _diverse_passages(
-        passages, limit=2,
+        passages,
+        limit=2,
         entity_pattern=_guided_procedure().facets[2].entity_pattern,
     )
     assert {item.citation.raw_ref for item in selected} == {
-        "raw/Knowledge/ntn-whitepaper.md", "raw/Productions/cmx-features.md",
+        "raw/Knowledge/ntn-whitepaper.md",
+        "raw/Productions/cmx-features.md",
     }
 
 
@@ -252,10 +263,14 @@ def test_guided_product_search_follows_selected_source_to_direct_use_case(
     )
     vault.write_raw(
         raw_ref,
-        render(RawDocument(
-            source=source, extractor="txt.v1", created=date(2026, 10, 4),
-            sections=sections,
-        )),
+        render(
+            RawDocument(
+                source=source,
+                extractor="txt.v1",
+                created=date(2026, 10, 4),
+                sections=sections,
+            )
+        ),
     )
     snapshot = RetrievalSnapshot(vault)
     direct = snapshot.source_section(
@@ -269,12 +284,12 @@ def test_guided_product_search_follows_selected_source_to_direct_use_case(
     assert snapshot.source_neighbors(raw_ref, 1)[0].citation.section == 2
 
     assessment = assess_knowledge_evidence(
-        vault, "在NTN 的市場，rohde-schwarz有那些產品可以推給客戶",
-        _guided_procedure(), snapshot=snapshot,
+        vault,
+        "在NTN 的市場，rohde-schwarz有那些產品可以推給客戶",
+        _guided_procedure(),
+        snapshot=snapshot,
     )
-    product = next(
-        item for item in assessment.observations if item.name == "product_option_spec"
-    )
+    product = next(item for item in assessment.observations if item.name == "product_option_spec")
     assert any(
         passage.citation.raw_ref == raw_ref and passage.citation.section == 2
         for passage in product.passages
@@ -289,7 +304,9 @@ def test_citation_only_line_is_not_a_supported_claim() -> None:
         score=1,
     )
     answer = Answer(
-        question="NTN products", status="answered", passages=(passage,),
+        question="NTN products",
+        status="answered",
+        passages=(passage,),
         text="CMX500 supports NTN testing [1].\n[1]",
     )
     assert not answer_claims_overlap_raw(answer)
@@ -302,10 +319,11 @@ def test_partial_model_answer_keeps_only_independently_supported_lines() -> None
         score=1,
     )
     answer = Answer(
-        question="NTN products", status="answered", passages=(passage,),
+        question="NTN products",
+        status="answered",
+        passages=(passage,),
         text=(
-            "CMX500 supports NTN device testing [1].\n"
-            "CMX500 includes an unlisted K999 option [1]."
+            "CMX500 supports NTN device testing [1].\nCMX500 includes an unlisted K999 option [1]."
         ),
     )
     filtered = omit_unverified_answer_lines(answer)
@@ -318,24 +336,22 @@ def test_skill_evidence_redacts_credential_like_source_text_before_record(
 ) -> None:
     vault = make_vault(tmp_path)
     _write(
-        vault, "source-with-example-header",
+        vault,
+        "source-with-example-header",
         "CMP180 product option K123 supports wireless market demand. "
         "Example header: Bearer sample-token",
     )
-    assessment = assess_knowledge_evidence(
-        vault, "CMP180 market product", _procedure()
-    )
+    assessment = assess_knowledge_evidence(vault, "CMP180 market product", _procedure())
     assert assessment.status == "covered"
     assert any("[redacted]" in item.text for item in assessment.selected_passages())
     assert all("sample-token" not in item.text for item in assessment.selected_passages())
-    fallback = extractive_relation_answer(
-        "CMP180 market product", assessment, _procedure()
-    )
+    fallback = extractive_relation_answer("CMP180 market product", assessment, _procedure())
     assert fallback is not None
     assert grounded_record(
         AssetIdentity(namespace="engineering", name="widget-guide", version="1.0.0"),
         TraceIdentifiers(trace_id="secret-test", request_id="secret-test", span_id="answer"),
-        fallback, assessment=assessment.summary(),
+        fallback,
+        assessment=assessment.summary(),
     ).cited_passages
 
 
@@ -344,22 +360,22 @@ def test_open_ended_ntn_product_search_keeps_distinct_instruments(
 ) -> None:
     vault = make_vault(tmp_path)
     _write(
-        vault, "cmx500-ntn",
+        vault,
+        "cmx500-ntn",
         "CMX500 tester is a Rohde Schwarz NTN signaling solution.",
     )
     _write(
-        vault, "smbv100b-ntn",
+        vault,
+        "smbv100b-ntn",
         "SMBV100B signal generator is a Rohde Schwarz NTN channel emulation solution.",
     )
     assessment = assess_knowledge_evidence(
         vault, "在 NTN 市場有哪些產品可以推給客戶", _guided_procedure()
     )
-    product = next(
-        item for item in assessment.observations
-        if item.name == "product_option_spec"
-    )
+    product = next(item for item in assessment.observations if item.name == "product_option_spec")
     assert {passage.citation.raw_ref for passage in product.passages} == {
-        "raw/cmx500-ntn.md", "raw/smbv100b-ntn.md",
+        "raw/cmx500-ntn.md",
+        "raw/smbv100b-ntn.md",
     }
 
 
@@ -399,7 +415,8 @@ def test_wiki_index_navigates_to_linked_raw_before_global_search(tmp_path: Path)
     assert result[0].citation.kind == "raw"
     assert any(passage.citation.raw_ref == "raw/generic.md" for passage in result)
     filtered = snapshot.matching_wiki_sources(
-        "CMP180 option", accepts=lambda passage: "KM352" in passage.text,
+        "CMP180 option",
+        accepts=lambda passage: "KM352" in passage.text,
     )
     assert [passage.citation.raw_ref for passage in filtered] == ["raw/cmp-spec.md"]
     context = snapshot.wiki_index_context("CMP180 option")
@@ -411,11 +428,13 @@ def test_wiki_index_navigates_to_linked_raw_before_global_search(tmp_path: Path)
 def test_market_facet_ignores_navigation_url_words(tmp_path: Path) -> None:
     vault = make_vault(tmp_path)
     _write(
-        vault, "navigation",
+        vault,
+        "navigation",
         "CMP180 [5G NR](https://example.test/market-segment/wireless-communications/5g)",
     )
     _write(
-        vault, "Market/real-market",
+        vault,
+        "Market/real-market",
         "The wireless market demand for Wi-Fi 7 production testing is growing.",
     )
     assessment = assess_knowledge_evidence(
@@ -432,20 +451,19 @@ def test_market_facet_can_find_eligible_raw_below_unrelated_top_hits(
     vault = make_vault(tmp_path)
     for index in range(18):
         _write(
-            vault, f"Productions/distractor-{index}",
+            vault,
+            f"Productions/distractor-{index}",
             "Wireless communications market testing demand trend option summary.",
         )
     _write(
-        vault, "Market/real-trend",
+        vault,
+        "Market/real-trend",
         "Wireless market demand for production testing is growing in 2026.",
     )
-    assessment = assess_knowledge_evidence(
-        vault, "wireless market trend", _guided_procedure()
-    )
+    assessment = assess_knowledge_evidence(vault, "wireless market trend", _guided_procedure())
     market = next(item for item in assessment.observations if item.name == "market_trend")
     assert any(
-        passage.citation.raw_ref == "raw/Market/real-trend.md"
-        for passage in market.passages
+        passage.citation.raw_ref == "raw/Market/real-trend.md" for passage in market.passages
     )
 
 
@@ -463,7 +481,8 @@ def test_option_excerpt_prefers_option_statement_over_generic_product_line() -> 
     excerpt = evidence_excerpt(
         "CMP180 is a wireless tester for production testing.\n"
         "Option CMP-KM310 enables Bluetooth measurement on CMP180.",
-        subject="CMP180", terms=("tester", "option"),
+        subject="CMP180",
+        terms=("tester", "option"),
         priority_patterns=(r"\boption\b",),
     )
     assert excerpt == "Option CMP-KM310 enables Bluetooth measurement on CMP180."
@@ -480,8 +499,7 @@ def test_guided_market_and_option_require_the_requested_evidence(tmp_path: Path)
     )
     observations = {item.name: item for item in assessment.observations}
     assert all(
-        item.citation.raw_ref != "raw/leader.md"
-        for item in observations["market_trend"].passages
+        item.citation.raw_ref != "raw/leader.md" for item in observations["market_trend"].passages
     )
     assert all(
         item.citation.raw_ref != "raw/product.md"
@@ -496,11 +514,13 @@ def test_guided_market_and_option_require_the_requested_evidence(tmp_path: Path)
 def test_other_product_relationship_cannot_validate_named_product(tmp_path: Path) -> None:
     vault = make_vault(tmp_path)
     _write(
-        vault, "cmx-market",
+        vault,
+        "cmx-market",
         "Growing Wi-Fi 7 demand supports the CMX500 tester with WLAN option K352.",
     )
     _write(
-        vault, "cmp-option",
+        vault,
+        "cmp-option",
         "Option CMP-KM352 provides CMP180 WLAN IEEE 802.11be measurements.",
     )
     assessment = assess_knowledge_evidence(
@@ -520,9 +540,9 @@ def test_competitor_facet_needs_subject_comparison_not_battlecard_mention(
 ) -> None:
     vault = make_vault(tmp_path)
     _write(
-        vault, "cmx-battlecard",
-        "CMX500 versus Amarisoft supports NTN signaling.\n"
-        "Production Testing: CMP180/200/CMW100.",
+        vault,
+        "cmx-battlecard",
+        "CMX500 versus Amarisoft supports NTN signaling.\nProduction Testing: CMP180/200/CMW100.",
     )
     assessment = assess_knowledge_evidence(
         vault, "CMP180 product competitor comparison", _guided_procedure()
@@ -531,10 +551,7 @@ def test_competitor_facet_needs_subject_comparison_not_battlecard_mention(
 
 
 def _combinations() -> list[tuple[int, ...]]:
-    return [
-        subset for size in range(1, 5)
-        for subset in itertools.combinations(range(4), size)
-    ]
+    return [subset for size in range(1, 5) for subset in itertools.combinations(range(4), size)]
 
 
 @pytest.mark.parametrize("subset", _combinations())
@@ -593,46 +610,68 @@ def test_batch_retrieval_preserves_single_query_ranking(tmp_path: Path) -> None:
 def test_host_overlap_rejects_unrelated_claim_and_unseen_number() -> None:
     passage = Passage(
         text="CMP180 product option supports wireless market demand in production.",
-        citation=Citation(kind="raw", raw_ref="raw/link.md", section=1), score=1,
+        citation=Citation(kind="raw", raw_ref="raw/link.md", section=1),
+        score=1,
     )
-    assert answer_claims_overlap_raw(Answer(
-        question="CMP180 market product", status="answered", passages=(passage,),
-        text="CMP180 product option supports wireless market demand [1].",
-    ))
-    assert not answer_claims_overlap_raw(Answer(
-        question="CMP180 market product", status="answered", passages=(passage,),
-        text="Safe mode requires firmware 2.0 [1].",
-    ))
-    assert not answer_claims_overlap_raw(Answer(
-        question="CMP180 market product", status="answered", passages=(passage,),
-        text="CMP180 product option supports 9.9 Gbps wireless market demand [1].",
-    ))
+    assert answer_claims_overlap_raw(
+        Answer(
+            question="CMP180 market product",
+            status="answered",
+            passages=(passage,),
+            text="CMP180 product option supports wireless market demand [1].",
+        )
+    )
+    assert not answer_claims_overlap_raw(
+        Answer(
+            question="CMP180 market product",
+            status="answered",
+            passages=(passage,),
+            text="Safe mode requires firmware 2.0 [1].",
+        )
+    )
+    assert not answer_claims_overlap_raw(
+        Answer(
+            question="CMP180 market product",
+            status="answered",
+            passages=(passage,),
+            text="CMP180 product option supports 9.9 Gbps wireless market demand [1].",
+        )
+    )
 
 
 def test_host_overlap_reads_numbers_next_to_cjk_text() -> None:
     passage = Passage(
         text="台灣無線通訊代工製造產業在2026年呈現結構性成長，受惠於Wi-Fi 7規格紅利。",
-        citation=Citation(kind="raw", raw_ref="raw/Market/report.md", section=44), score=1,
+        citation=Citation(kind="raw", raw_ref="raw/Market/report.md", section=44),
+        score=1,
     )
+
     def answer(text: str) -> Answer:
         return Answer(
-            question="無線通訊市場趨勢", status="answered", passages=(passage,), text=text,
+            question="無線通訊市場趨勢",
+            status="answered",
+            passages=(passage,),
+            text=text,
         )
-    assert answer_claims_overlap_raw(answer(
-        "台灣無線通訊代工製造產業在 2026 年呈現結構性成長，受惠於 Wi-Fi 7 規格紅利 [1]。"
-    ))
-    assert not answer_claims_overlap_raw(answer(
-        "台灣無線通訊代工製造產業在2027年呈現結構性成長 [1]。"
-    ))
+
+    assert answer_claims_overlap_raw(
+        answer("台灣無線通訊代工製造產業在 2026 年呈現結構性成長，受惠於 Wi-Fi 7 規格紅利 [1]。")
+    )
+    assert not answer_claims_overlap_raw(
+        answer("台灣無線通訊代工製造產業在2027年呈現結構性成長 [1]。")
+    )
 
 
 def test_host_rejects_answer_about_other_product_even_with_raw_overlap() -> None:
     passage = Passage(
         text="CMP180 and CMX500 both have product options for wireless testing.",
-        citation=Citation(kind="raw", raw_ref="raw/products.md", section=1), score=1,
+        citation=Citation(kind="raw", raw_ref="raw/products.md", section=1),
+        score=1,
     )
     answer = Answer(
-        question="CMP180 product option", status="answered", passages=(passage,),
+        question="CMP180 product option",
+        status="answered",
+        passages=(passage,),
         text="CMX500 has product options for wireless testing [1].",
     )
     assert answer_claims_overlap_raw(answer)
@@ -642,8 +681,10 @@ def test_host_rejects_answer_about_other_product_even_with_raw_overlap() -> None
         answer,
     )
     actions = KnowledgeBridgeActions(
-        lambda: {}, required_evidence=("raw_citations",),
-        required_facets=("product_option_spec",), required_subject="CMP180",
+        lambda: {},
+        required_evidence=("raw_citations",),
+        required_facets=("product_option_spec",),
+        required_subject="CMP180",
     )
     actions.result = {"ok": True, "record": record.model_dump(mode="json")}
     claim = next(check for check in actions.validate() if check.check_id == "claim_support")
@@ -653,13 +694,13 @@ def test_host_rejects_answer_about_other_product_even_with_raw_overlap() -> None
 def test_host_accepts_option_claim_cited_from_the_subject_product_document() -> None:
     passage = Passage(
         text="Option R&S CMP-KM351 is required to measure 802.11ax signals.",
-        citation=Citation(
-            kind="raw", raw_ref="raw/Productions/CMP180_specs_en.md", section=165
-        ),
+        citation=Citation(kind="raw", raw_ref="raw/Productions/CMP180_specs_en.md", section=165),
         score=1,
     )
     answer = Answer(
-        question="CMP180 product option", status="answered", passages=(passage,),
+        question="CMP180 product option",
+        status="answered",
+        passages=(passage,),
         text="R&S CMP-KM351 option is required to measure 802.11ax signals [1].",
     )
     record = grounded_record(
@@ -668,8 +709,10 @@ def test_host_accepts_option_claim_cited_from_the_subject_product_document() -> 
         answer,
     )
     actions = KnowledgeBridgeActions(
-        lambda: {}, required_evidence=("raw_citations",),
-        required_facets=("product_option_spec",), required_subject="CMP180",
+        lambda: {},
+        required_evidence=("raw_citations",),
+        required_facets=("product_option_spec",),
+        required_subject="CMP180",
     )
     actions.result = {"ok": True, "record": record.model_dump(mode="json")}
     claim = next(check for check in actions.validate() if check.check_id == "claim_support")
@@ -714,20 +757,25 @@ def test_cited_direct_link_can_support_both_connected_facets(tmp_path: Path) -> 
     assert assessment.status == "covered"
     passages = assessment.selected_passages()
     number = next(
-        index for index, passage in enumerate(passages, 1)
+        index
+        for index, passage in enumerate(passages, 1)
         if passage.citation == assessment.relation_passages[0].citation
     )
     answer = Answer(
-        question="CMP180 product technical", status="answered", passages=passages,
+        question="CMP180 product technical",
+        status="answered",
+        passages=passages,
         text=f"CMP180 product option supports technical test requirements [{number}].",
     )
     record = grounded_record(
         AssetIdentity(namespace="engineering", name="widget-guide", version="1.0.0"),
         TraceIdentifiers(trace_id="trace-link", request_id="request-link", span_id="answer"),
-        answer, assessment=assessment.summary(),
+        answer,
+        assessment=assessment.summary(),
     )
     actions = KnowledgeBridgeActions(
-        lambda: {}, required_evidence=("raw_citations",),
+        lambda: {},
+        required_evidence=("raw_citations",),
         required_facets=("product_option_spec", "technical_knowledge"),
         relation_required=True,
     )
@@ -751,25 +799,26 @@ def test_host_accepts_cited_evidence_for_each_requested_combination(
     passages = assessment.selected_passages()
 
     def number_for(value: str) -> int:
-        return next(
-            number for number, passage in enumerate(passages, 1)
-            if value in passage.text
-        )
+        return next(number for number, passage in enumerate(passages, 1) if value in passage.text)
 
     sentences = [f"{TEXTS[index]} [{number_for(TEXTS[index])}]" for index in subset]
     if len(subset) > 1:
         sentences.append(f"{LINK} [{number_for(LINK)}]")
     answer = Answer(
-        question=question, status="answered", passages=passages,
+        question=question,
+        status="answered",
+        passages=passages,
         text=" ".join(sentences),
     )
     record = grounded_record(
         AssetIdentity(namespace="engineering", name="widget-guide", version="1.0.0"),
         TraceIdentifiers(trace_id="trace-subset", request_id="request-subset", span_id="answer"),
-        answer, assessment=assessment.summary(),
+        answer,
+        assessment=assessment.summary(),
     )
     actions = KnowledgeBridgeActions(
-        lambda: {}, required_evidence=("raw_citations",),
+        lambda: {},
+        required_evidence=("raw_citations",),
         required_facets=tuple(NAMES[index] for index in subset),
         relation_required=len(subset) > 1,
     )
@@ -781,12 +830,16 @@ def test_host_accepts_cited_evidence_for_each_requested_combination(
 def test_subject_is_carried_by_cited_product_document_not_other_products() -> None:
     def answer(raw_ref: str, text: str) -> Answer:
         return Answer(
-            question="CMP180 option", status="answered", text=text,
-            passages=(Passage(
-                text="Option R&S CMP-KM351 is required to measure 802.11ax signals.",
-                citation=Citation(kind="raw", raw_ref=raw_ref, section=3),
-                score=1,
-            ),),
+            question="CMP180 option",
+            status="answered",
+            text=text,
+            passages=(
+                Passage(
+                    text="Option R&S CMP-KM351 is required to measure 802.11ax signals.",
+                    citation=Citation(kind="raw", raw_ref=raw_ref, section=3),
+                    score=1,
+                ),
+            ),
         )
 
     own = answer("raw/Productions/CMP180_Features_V11-9_en_09.md", "CMP-KM351 量測 802.11ax [1]。")
@@ -800,7 +853,8 @@ def test_subject_is_carried_by_cited_product_document_not_other_products() -> No
 def test_host_checks_labeled_inference_without_upgrading_the_relationship() -> None:
     market = Passage(
         text="Wi-Fi 7 是網通代工最重要的規格升級驅動力，需支援完整 320MHz 頻寬。",
-        citation=Citation(kind="raw", raw_ref="raw/Market/report.md", section=2), score=1,
+        citation=Citation(kind="raw", raw_ref="raw/Market/report.md", section=2),
+        score=1,
     )
     option = Passage(
         text="R&S CMP-KM352 option, WLAN IEEE 802.11be analyzer.",
@@ -812,8 +866,10 @@ def test_host_checks_labeled_inference_without_upgrading_the_relationship() -> N
         "【推論】Wi-Fi 7 的 320MHz 需求與 CMP-KM352 802.11be analyzer 方向一致 [1][2]。"
     )
     answer = Answer(
-        question="無線通訊市場趨勢與 CMP180 選配", status="answered",
-        passages=(market, option), text=text,
+        question="無線通訊市場趨勢與 CMP180 選配",
+        status="answered",
+        passages=(market, option),
+        text=text,
     )
     procedure = _guided_procedure()
     assert procedure.inference_label == "【推論】"
@@ -824,8 +880,10 @@ def test_host_checks_labeled_inference_without_upgrading_the_relationship() -> N
         answer,
     )
     actions = KnowledgeBridgeActions(
-        lambda: {}, required_evidence=("raw_citations",),
-        required_facets=("product_option_spec",), required_subject="CMP180",
+        lambda: {},
+        required_evidence=("raw_citations",),
+        required_facets=("product_option_spec",),
+        required_subject="CMP180",
         procedure=procedure,
     )
     actions.result = {"ok": True, "record": record.model_dump(mode="json")}
@@ -841,12 +899,14 @@ def _uncredited_record(vault: Vault, question: str, cite: str) -> dict:
     assessment = assess_knowledge_evidence(vault, question, _procedure())
     passages = assessment.selected_passages()
     number = next(i for i, p in enumerate(passages, 1) if cite in p.text)
-    answer = Answer(question=question, status="answered", passages=passages,
-                    text=f"{cite} [{number}].")
+    answer = Answer(
+        question=question, status="answered", passages=passages, text=f"{cite} [{number}]."
+    )
     record = grounded_record(
         AssetIdentity(namespace="engineering", name="widget-guide", version="1.0.0"),
         TraceIdentifiers(trace_id="trace-cite", request_id="request-cite", span_id="answer"),
-        answer, assessment=assessment.summary(),
+        answer,
+        assessment=assessment.summary(),
     ).model_dump(mode="json")
     for facet in record["assessment"]["facets"]:
         facet["citations"] = []
@@ -861,13 +921,17 @@ def test_a_cited_passage_meeting_the_facet_rule_covers_it_outside_the_listed_one
     vault = make_vault(tmp_path)
     _write(vault, "technical", TEXTS[2])
     record = _uncredited_record(vault, "CMP180 technical", "CMP180 technical test method")
-    unguided = KnowledgeBridgeActions(lambda: {}, required_evidence=("raw_citations",),
-                                      required_facets=("technical_knowledge",))
+    unguided = KnowledgeBridgeActions(
+        lambda: {}, required_evidence=("raw_citations",), required_facets=("technical_knowledge",)
+    )
     unguided.result = {"ok": True, "record": record}
     assert unguided.facet_report()["facet_status"] == "missing"
-    guided = KnowledgeBridgeActions(lambda: {}, required_evidence=("raw_citations",),
-                                    required_facets=("technical_knowledge",),
-                                    procedure=_procedure())
+    guided = KnowledgeBridgeActions(
+        lambda: {},
+        required_evidence=("raw_citations",),
+        required_facets=("technical_knowledge",),
+        procedure=_procedure(),
+    )
     guided.result = {"ok": True, "record": record}
     assert guided.facet_report()["facet_status"] == "covered"
 
@@ -877,9 +941,12 @@ def test_a_cited_passage_failing_the_facet_rule_does_not_cover_it(tmp_path: Path
     _write(vault, "product", TEXTS[1])
     _write(vault, "technical", TEXTS[2])
     record = _uncredited_record(vault, "CMP180 technical product", "CMP180 product option K123")
-    actions = KnowledgeBridgeActions(lambda: {}, required_evidence=("raw_citations",),
-                                     required_facets=("technical_knowledge",),
-                                     procedure=_procedure())
+    actions = KnowledgeBridgeActions(
+        lambda: {},
+        required_evidence=("raw_citations",),
+        required_facets=("technical_knowledge",),
+        procedure=_procedure(),
+    )
     actions.result = {"ok": True, "record": record}
     report = actions.facet_report()
     assert report["facet_status"] == "missing"
@@ -892,27 +959,45 @@ def test_facet_credit_keeps_the_skills_citation_policy(tmp_path: Path) -> None:
     _write(vault, "technical", TEXTS[2])
     record = _uncredited_record(vault, "CMP180 technical", "CMP180 technical test method")
     record["citation_policy"] = "wiki_primary"
-    actions = KnowledgeBridgeActions(lambda: {}, required_evidence=("raw_citations",),
-                                     required_facets=("technical_knowledge",),
-                                     procedure=_procedure())
+    actions = KnowledgeBridgeActions(
+        lambda: {},
+        required_evidence=("raw_citations",),
+        required_facets=("technical_knowledge",),
+        procedure=_procedure(),
+    )
     actions.result = {"ok": True, "record": record}
     assert actions.facet_report()["facet_status"] == "missing"
 
 
-@pytest.mark.parametrize(("question", "focus"), [
-    ("For a Aerospace / Defense use case involving radar, where would Oscilloscope fit?",
-     "航太國防 aerospace defense"),
-    ("What are the most important S-parameters capabilities for applications in Automotive?",
-     "車用 automotive"),
-    ("How do changes in automotive radar technology affect Vector Network Analyzer needs?",
-     "車用 automotive"),
-    ("Which measurement parameters matter for Oscilloscope in AI?", "AI 資料中心 AI data center"),
-    ("What are the most important signaling test capabilities in Wireless Communication?",
-     "無線通訊 wireless communications"),
-    ("Which specifications of Signal Generator matter most for Semiconductor?", None),
-])
+@pytest.mark.parametrize(
+    ("question", "focus"),
+    [
+        (
+            "For a Aerospace / Defense use case involving radar, where would Oscilloscope fit?",
+            "航太國防 aerospace defense",
+        ),
+        (
+            "What are the most important S-parameters capabilities for applications in Automotive?",
+            "車用 automotive",
+        ),
+        (
+            "How do changes in automotive radar technology affect Vector Network Analyzer needs?",
+            "車用 automotive",
+        ),
+        (
+            "Which measurement parameters matter for Oscilloscope in AI?",
+            "AI 資料中心 AI data center",
+        ),
+        (
+            "What are the most important signaling test capabilities in Wireless Communication?",
+            "無線通訊 wireless communications",
+        ),
+        ("Which specifications of Signal Generator matter most for Semiconductor?", None),
+    ],
+)
 def test_knowledge_skill_1_5_0_reads_the_market_a_question_names(
-    question: str, focus: str | None,
+    question: str,
+    focus: str | None,
 ) -> None:
     """Owner 2026-10-07: market hints for Aerospace / Defense, Automotive and AI;
     none for Semiconductor, whose hint pulled competitor searches off target."""

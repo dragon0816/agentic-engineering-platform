@@ -50,36 +50,128 @@ class Category:
 
 
 MARKETS = (
-    Category("market-wireless", "無線通訊", "Wireless communication",
-             ("wireless", "5g", "5g-nr", "3gpp", "lte", "wlan", "wi-fi", "wifi", "802.11",
-              "cellular", "無線通訊", "基地台", "small cell", "fwa", "cpe")),
-    Category("market-aerospace-defense", "航太／國防", "Aerospace / defense",
-             ("aerospace", "defense", "defence", "satellite", "radar", "avionics", "ntn", "leo",
-              "航太", "國防", "衛星", "雷達")),
-    Category("market-automotive-uav", "車用／無人機", "Automotive / UAV",
-             ("automotive", "vehicle", "v2x", "ecall", "adas", "uav", "drone", "車用", "汽車",
-              "無人機")),
-    Category("market-ai", "AI", "AI",
-             ("ai", "data-center", "data center", "ai server", "ai-chip", "edge-ai", "gpu",
-              "人工智慧", "資料中心", "伺服器")),
-    Category("market-semiconductor", "半導體", "Semiconductor",
-             ("semiconductor", "wafer", "foundry", "ic ", "rfic", "package", "hbm", "substrate",
-              "osat", "半導體", "晶圓", "封裝")),
+    Category(
+        "market-wireless",
+        "無線通訊",
+        "Wireless communication",
+        (
+            "wireless",
+            "5g",
+            "5g-nr",
+            "3gpp",
+            "lte",
+            "wlan",
+            "wi-fi",
+            "wifi",
+            "802.11",
+            "cellular",
+            "無線通訊",
+            "基地台",
+            "small cell",
+            "fwa",
+            "cpe",
+        ),
+    ),
+    Category(
+        "market-aerospace-defense",
+        "航太／國防",
+        "Aerospace / defense",
+        (
+            "aerospace",
+            "defense",
+            "defence",
+            "satellite",
+            "radar",
+            "avionics",
+            "ntn",
+            "leo",
+            "航太",
+            "國防",
+            "衛星",
+            "雷達",
+        ),
+    ),
+    Category(
+        "market-automotive-uav",
+        "車用／無人機",
+        "Automotive / UAV",
+        ("automotive", "vehicle", "v2x", "ecall", "adas", "uav", "drone", "車用", "汽車", "無人機"),
+    ),
+    Category(
+        "market-ai",
+        "AI",
+        "AI",
+        (
+            "ai",
+            "data-center",
+            "data center",
+            "ai server",
+            "ai-chip",
+            "edge-ai",
+            "gpu",
+            "人工智慧",
+            "資料中心",
+            "伺服器",
+        ),
+    ),
+    Category(
+        "market-semiconductor",
+        "半導體",
+        "Semiconductor",
+        (
+            "semiconductor",
+            "wafer",
+            "foundry",
+            "ic ",
+            "rfic",
+            "package",
+            "hbm",
+            "substrate",
+            "osat",
+            "半導體",
+            "晶圓",
+            "封裝",
+        ),
+    ),
 )
 PRODUCTS = (
-    Category("product-wireless-tester", "無線通訊綜合測試儀（signaling / non-signaling）",
-             "Wireless communication testers (signaling / non-signaling)",
-             ("cmx500", "cmp180", "cmp200", "cmw", "signaling", "non-signaling",
-              "綜合測試儀", "信令")),
-    Category("product-signal-generator-analyzer", "訊號產生器／訊號分析儀",
-             "Signal generators / signal analyzers",
-             ("smw", "sma100", "smb100", "fsw", "fsv", "fpl", "signal generator", "signal analyzer",
-              "spectrum analyzer", "訊號產生器", "訊號分析儀", "頻譜分析儀")),
-    Category("product-oscilloscope", "示波器", "Oscilloscopes",
-             ("oscilloscope", "rto", "rtp", "mxo", "rtb", "rte", "示波器")),
-    Category("product-vna", "VNA 網路分析儀", "Vector network analyzers",
-             ("vna", "network analyzer", "zna", "znb", "znl", "znle", "s-parameter",
-              "網路分析儀")),
+    Category(
+        "product-wireless-tester",
+        "無線通訊綜合測試儀（signaling / non-signaling）",
+        "Wireless communication testers (signaling / non-signaling)",
+        ("cmx500", "cmp180", "cmp200", "cmw", "signaling", "non-signaling", "綜合測試儀", "信令"),
+    ),
+    Category(
+        "product-signal-generator-analyzer",
+        "訊號產生器／訊號分析儀",
+        "Signal generators / signal analyzers",
+        (
+            "smw",
+            "sma100",
+            "smb100",
+            "fsw",
+            "fsv",
+            "fpl",
+            "signal generator",
+            "signal analyzer",
+            "spectrum analyzer",
+            "訊號產生器",
+            "訊號分析儀",
+            "頻譜分析儀",
+        ),
+    ),
+    Category(
+        "product-oscilloscope",
+        "示波器",
+        "Oscilloscopes",
+        ("oscilloscope", "rto", "rtp", "mxo", "rtb", "rte", "示波器"),
+    ),
+    Category(
+        "product-vna",
+        "VNA 網路分析儀",
+        "Vector network analyzers",
+        ("vna", "network analyzer", "zna", "znb", "znl", "znle", "s-parameter", "網路分析儀"),
+    ),
 )
 TECHNICAL = Category("technical", "技術", "Technical concepts")
 COMPANIES = Category("companies", "公司與組織", "Companies and organisations")
@@ -94,6 +186,7 @@ def category_title(key: str) -> str:
         return f"{category.title_zh} / {category.title_en}"
     area = key.split("-", 1)[1] if key.startswith("sources-") else key
     return f"來源：{area} / Sources: {area}"
+
 
 ENRICH_PROMPT = (
     "You index a bilingual (Traditional Chinese / English) engineering wiki about test and "
@@ -138,7 +231,7 @@ def _front(text: str) -> tuple[str, str]:
     """(frontmatter body, rest); no frontmatter gives ('', text)."""
     text = text.replace("\r\n", "\n")
     found = _FRONT.match(text)
-    return (found.group(1), text[found.end():]) if found else ("", text)
+    return (found.group(1), text[found.end() :]) if found else ("", text)
 
 
 def _field(front: str, name: str) -> str:
@@ -167,17 +260,24 @@ def read_entry(vault: Vault, rel: str) -> PageEntry:
     parts = source_path.replace("\\", "/").split("/")
     area = parts[1] if len(parts) > 2 and parts[0] == "raw" else None
     entry = PageEntry(
-        path=rel, title=_field(front, "title") or rel.rsplit("/", 1)[-1][:-3], kind=kind,
-        summary_zh=_field(front, "summary_zh"), summary_en=_field(front, "summary_en"),
-        aliases=_list(front, "aliases"), area=area)
-    text = " ".join((entry.title, tags.group(1) if tags else "", " ".join(entry.aliases),
-                     body[:OPENING_CHARS])).lower()
+        path=rel,
+        title=_field(front, "title") or rel.rsplit("/", 1)[-1][:-3],
+        kind=kind,
+        summary_zh=_field(front, "summary_zh"),
+        summary_en=_field(front, "summary_en"),
+        aliases=_list(front, "aliases"),
+        area=area,
+    )
+    text = " ".join(
+        (entry.title, tags.group(1) if tags else "", " ".join(entry.aliases), body[:OPENING_CHARS])
+    ).lower()
     return entry.model_copy(update={"categories": tuple(sorted(rule_categories(text, kind)))})
 
 
 def rule_categories(text: str, kind: str) -> set[str]:
-    found = {c.key for c in (*MARKETS, *PRODUCTS)
-             if any(_matches(word, text) for word in c.keywords)}
+    found = {
+        c.key for c in (*MARKETS, *PRODUCTS) if any(_matches(word, text) for word in c.keywords)
+    }
     if kind == "entities" and re.search(r"\b(company|organization|organisation|公司)\b", text):
         found.add(COMPANIES.key)
     return found
@@ -201,14 +301,25 @@ def with_frontmatter(text: str, updates: dict[str, str]) -> str:
     """Set the given frontmatter keys; nothing outside the frontmatter changes."""
     normalized = text.replace("\r\n", "\n")
     front, body = _front(normalized)
-    lines = [line for line in front.split("\n") if line and not any(
-        line.startswith(f"{key}:") for key in updates)] if front else []
+    lines = (
+        [
+            line
+            for line in front.split("\n")
+            if line and not any(line.startswith(f"{key}:") for key in updates)
+        ]
+        if front
+        else []
+    )
     lines += [f"{key}: {value}" for key, value in updates.items()]
     return "---\n" + "\n".join(lines) + "\n---\n" + body
 
 
-KIND_TITLES = {"concepts": "概念 / Concepts", "entities": "實體 / Entities",
-               "syntheses": "綜合 / Syntheses", "sources": "來源 / Sources"}
+KIND_TITLES = {
+    "concepts": "概念 / Concepts",
+    "entities": "實體 / Entities",
+    "syntheses": "綜合 / Syntheses",
+    "sources": "來源 / Sources",
+}
 
 
 def part_title(part: str) -> str:
@@ -233,28 +344,41 @@ def _clean(value: Any, limit: int) -> str:
 
 
 class LayeredIndex:
-    def __init__(self, vault: Vault, model: ModelClient | None = None,
-                 alias: str | None = None) -> None:
+    def __init__(
+        self, vault: Vault, model: ModelClient | None = None, alias: str | None = None
+    ) -> None:
         self.vault = vault
         self.model = model
         self.alias = alias
 
     def entries(self) -> list[PageEntry]:
-        return [read_entry(self.vault, rel) for rel in self.vault.wiki_files()
-                if not rel.startswith(INDEX_DIR + "/")]
+        return [
+            read_entry(self.vault, rel)
+            for rel in self.vault.wiki_files()
+            if not rel.startswith(INDEX_DIR + "/")
+        ]
 
     def _ask(self, batch: list[PageEntry]) -> dict[str, dict[str, Any]]:
         assert self.model is not None and self.alias is not None
         shown = "\n\n".join(
             f"### {e.path}\ntitle: {e.title}\n{_front(self.vault.read(e.path))[1][:1200]}"
-            for e in batch)
-        response = self.model.generate(ModelRequest(
-            trace=TraceIdentifiers(trace_id="layered-index", request_id="enrich", span_id="enrich"),
-            model_alias=self.alias,
-            messages=(ModelMessage(role="system", text=ENRICH_PROMPT),
-                      ModelMessage(role="user", text=shown)),
-            requirements=ModelRequirements(structured_output=True),
-            output_contract="knowledge_layered_index", max_output_tokens=6000))
+            for e in batch
+        )
+        response = self.model.generate(
+            ModelRequest(
+                trace=TraceIdentifiers(
+                    trace_id="layered-index", request_id="enrich", span_id="enrich"
+                ),
+                model_alias=self.alias,
+                messages=(
+                    ModelMessage(role="system", text=ENRICH_PROMPT),
+                    ModelMessage(role="user", text=shown),
+                ),
+                requirements=ModelRequirements(structured_output=True),
+                output_contract="knowledge_layered_index",
+                max_output_tokens=6000,
+            )
+        )
         if response.failure is not None:
             return {}
         data = response.structured_output
@@ -278,7 +402,7 @@ class LayeredIndex:
         work, failed, refused = todo[:limit], 0, []
         done = 0
         for start in range(0, len(work), BATCH):
-            batch = work[start:start + BATCH]
+            batch = work[start : start + BATCH]
             answers = self._ask(batch)
             if not answers:
                 failed += 1
@@ -287,27 +411,38 @@ class LayeredIndex:
                 answer = answers.get(entry.path)
                 if not answer:
                     continue
-                categories = sorted({*entry.categories, *(
-                    c for c in answer.get("categories") or [] if c in KEYS)})
-                aliases = tuple(dict.fromkeys(
-                    _clean(a, MAX_ALIAS_CHARS) for a in answer.get("aliases") or []
-                    if str(a).strip()))[:MAX_ALIASES]
+                categories = sorted(
+                    {*entry.categories, *(c for c in answer.get("categories") or [] if c in KEYS)}
+                )
+                aliases = tuple(
+                    dict.fromkeys(
+                        _clean(a, MAX_ALIAS_CHARS)
+                        for a in answer.get("aliases") or []
+                        if str(a).strip()
+                    )
+                )[:MAX_ALIASES]
                 original = self.vault.read(entry.path)
-                updated = with_frontmatter(original, {
-                    "summary_zh": json.dumps(_clean(answer.get("summary_zh"), MAX_SUMMARY_CHARS),
-                                             ensure_ascii=False),
-                    "summary_en": json.dumps(_clean(answer.get("summary_en"), MAX_SUMMARY_CHARS),
-                                             ensure_ascii=False),
-                    "aliases": _yaml_list(aliases),
-                    "index_categories": _yaml_list(tuple(categories)),
-                })
+                updated = with_frontmatter(
+                    original,
+                    {
+                        "summary_zh": json.dumps(
+                            _clean(answer.get("summary_zh"), MAX_SUMMARY_CHARS), ensure_ascii=False
+                        ),
+                        "summary_en": json.dumps(
+                            _clean(answer.get("summary_en"), MAX_SUMMARY_CHARS), ensure_ascii=False
+                        ),
+                        "aliases": _yaml_list(aliases),
+                        "index_categories": _yaml_list(tuple(categories)),
+                    },
+                )
                 if _front(updated)[1] != _front(original)[1]:
                     refused.append(entry.path)  # only the frontmatter may change
                     continue
                 self.vault.write(entry.path, updated, stamp=label)
                 done += 1
-        return EnrichReport(done=done, remaining=len(todo) - done, failed_batches=failed,
-                            refused=tuple(refused))
+        return EnrichReport(
+            done=done, remaining=len(todo) - done, failed_batches=failed, refused=tuple(refused)
+        )
 
     def build(self, *, mode: str = "dry_run", stamp: str | None = None) -> IndexReport:
         """The top index and one sub-index per category; the old flat index.md
@@ -339,37 +474,48 @@ class LayeredIndex:
             # market splits by product line first (the domain matrix cells).
             parts: dict[str, list[PageEntry]] = {}
             for e in members:
-                cells = [p.key for p in PRODUCTS if p.key in e.categories] \
-                    if key.startswith("market-") else []
+                cells = (
+                    [p.key for p in PRODUCTS if p.key in e.categories]
+                    if key.startswith("market-")
+                    else []
+                )
                 for part in cells or [f"kind-{e.kind}"]:
                     parts.setdefault(part, []).append(e)
-            hub = [f"---\ntitle: Index — {titles[key]}\ntype: index\n---\n",
-                   f"# {titles[key]}\n"]
+            hub = [f"---\ntitle: Index — {titles[key]}\ntype: index\n---\n", f"# {titles[key]}\n"]
             for part, chunk_members in sorted(parts.items()):
                 ordered = sorted(chunk_members, key=lambda m: m.title.lower())
-                chunks = [ordered[i:i + MAX_ENTRIES] for i in range(0, len(ordered), MAX_ENTRIES)]
+                chunks = [ordered[i : i + MAX_ENTRIES] for i in range(0, len(ordered), MAX_ENTRIES)]
                 for number, chunk in enumerate(chunks, 1):
-                    label = part_title(part) + (f" ({number}/{len(chunks)})" if len(chunks) > 1
-                                                else "")
+                    label = part_title(part) + (
+                        f" ({number}/{len(chunks)})" if len(chunks) > 1 else ""
+                    )
                     title = f"{titles[key]} — {label}"
                     files[f"{INDEX_DIR}/{key}--{part}-{number}.md"] = _page(title, chunk)
                     hub.append(f"- [[Index — {title}]] — {len(chunk)} pages")
             files[f"{INDEX_DIR}/{key}.md"] = "\n".join(hub) + "\n"
-        top = ["# Index — 分類目錄 / Categories\n",
-               "每個分類一頁目錄，每行一句中英雙語說明。 Each category has its own index page.\n"]
+        top = [
+            "# Index — 分類目錄 / Categories\n",
+            "每個分類一頁目錄，每行一句中英雙語說明。 Each category has its own index page.\n",
+        ]
         top += [f"- [[Index — {titles[key]}]] — {len(groups[key])} pages" for key in titles]
         top.append(f"- [[{ALL_TITLE}]] — the previous flat index, unchanged")
         written = (*sorted(files), f"{INDEX_DIR}/all.md", "index.md")
-        report = IndexReport(pages=len(entries), unassigned=unassigned,
-                             categories={k: len(v) for k, v in groups.items() if v},
-                             written=written)
+        report = IndexReport(
+            pages=len(entries),
+            unassigned=unassigned,
+            categories={k: len(v) for k, v in groups.items() if v},
+            written=written,
+        )
         if mode != "apply":
             return report
         label = stamp or datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
         old = self.vault.read("index.md")
         if not self.vault.exists(f"{INDEX_DIR}/all.md"):
-            self.vault.write(f"{INDEX_DIR}/all.md",
-                             f"---\ntitle: {ALL_TITLE}\ntype: index\n---\n" + old, stamp=label)
+            self.vault.write(
+                f"{INDEX_DIR}/all.md",
+                f"---\ntitle: {ALL_TITLE}\ntype: index\n---\n" + old,
+                stamp=label,
+            )
         for rel, content in files.items():
             self.vault.write(rel, content, stamp=label)
         self.vault.write("index.md", "\n".join(top) + "\n", stamp=label)

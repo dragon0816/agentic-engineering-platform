@@ -36,12 +36,16 @@ def test_telegram_run_x_starts_the_question_flow(tmp_path: Path) -> None:
     assert delivery.disposition == "answered"
     assert "rs-wmt-package-release (1/" in (delivery.reply or "")
     assert "Which company is this release for?" in (delivery.reply or "")
-    assert item._flows                                  # waiting for the answer
+    assert item._flows  # waiting for the answer
 
 
 def test_telegram_names_missing_settings_instead_of_asking_them(tmp_path: Path) -> None:
-    transport = FakeTransport([[update(1, OWNER, "我要執行rs-wmt-package-release workflow")],
-                               [update(2, OWNER, "/run rs-wmt-package-release")]])
+    transport = FakeTransport(
+        [
+            [update(1, OWNER, "我要執行rs-wmt-package-release workflow")],
+            [update(2, OWNER, "/run rs-wmt-package-release")],
+        ]
+    )
     item, agent, _ = ingress(tmp_path, transport)
     agent.gateway.engine.workflows.register(release_workflow())
     for _ in range(2):
@@ -82,10 +86,16 @@ class _Scripted:
 
     def generate(self, item: ModelRequest) -> ModelResponse:
         reply = self.replies.pop(0)
-        calls = tuple(ModelToolCall(call_id=f"c{index}", name=name, arguments=arguments)
-                      for index, (name, arguments) in enumerate(reply.get("tools", [])))
-        return ModelResponse(trace=item.trace, model_alias=item.model_alias,
-                             text=reply.get("text", ""), tool_calls=calls)
+        calls = tuple(
+            ModelToolCall(call_id=f"c{index}", name=name, arguments=arguments)
+            for index, (name, arguments) in enumerate(reply.get("tools", []))
+        )
+        return ModelResponse(
+            trace=item.trace,
+            model_alias=item.model_alias,
+            text=reply.get("text", ""),
+            tool_calls=calls,
+        )
 
 
 def test_telegram_follows_the_models_form_hand_off_into_the_flow(tmp_path: Path) -> None:
@@ -93,23 +103,31 @@ def test_telegram_follows_the_models_form_hand_off_into_the_flow(tmp_path: Path)
 
     transport = FakeTransport([[update(1, OWNER, "please do the validation release")]])
     item, agent, _ = ingress(tmp_path, transport)
-    _install(agent, [{"name": "package", "label": "Mode", "kind": "text", "required": True},
-                     {"name": "note", "label": "Note", "kind": "text"}])
+    _install(
+        agent,
+        [
+            {"name": "package", "label": "Mode", "kind": "text", "required": True},
+            {"name": "note", "label": "Note", "kind": "text"},
+        ],
+    )
     agent.gateway.host_tools = lambda: workflow_form_tools(agent.gateway.engine)
     agent.gateway.router.model = _Scripted(
-        {"tools": [(FORM_TOOL, {"workflow": "release-validation-form",
-                                "values": {"package": "quick"}})]})
+        {
+            "tools": [
+                (FORM_TOOL, {"workflow": "release-validation-form", "values": {"package": "quick"}})
+            ]
+        }
+    )
     delivery = poll(item).deliveries[0]
     assert delivery.disposition == "answered"
-    assert "Note" in (delivery.reply or "") and item._flows   # Mode came with the request
+    assert "Note" in (delivery.reply or "") and item._flows  # Mode came with the request
     assert transport.statuses()[-1].startswith("✅ Done")
 
 
 def test_telegram_never_ends_a_turn_without_an_answer(tmp_path: Path) -> None:
     transport = FakeTransport([[update(1, OWNER, "what can you do")]])
     item, agent, _ = ingress(tmp_path, transport)
-    agent.gateway.router.model = _Scripted(
-        {"tools": [("shipment__run", {})]}, {"text": "   "})
+    agent.gateway.router.model = _Scripted({"tools": [("shipment__run", {})]}, {"text": "   "})
     delivery = poll(item).deliveries[0]
     assert delivery.replied and delivery.reply is not None
     assert "gave no answer" in delivery.reply and "/shipment run" in delivery.reply
@@ -130,8 +148,11 @@ def test_telegram_says_so_when_an_answer_cannot_be_delivered(tmp_path: Path) -> 
     agent.gateway.router.model = _Scripted({"text": "Hello"})
     delivery = poll(item).deliveries[0]
     assert delivery.replied is False
-    sent = [payload["text"] for url, payload in transport.calls
-            if url.endswith("/sendMessage") and not payload["text"].startswith(STATUS_MARK)]
+    sent = [
+        payload["text"]
+        for url, payload in transport.calls
+        if url.endswith("/sendMessage") and not payload["text"].startswith(STATUS_MARK)
+    ]
     assert sent[-1].startswith("The answer could not be delivered")
 
 
@@ -141,8 +162,7 @@ def test_a_rate_limited_answer_is_sent_again(tmp_path: Path) -> None:
 
         def send(self, url: str, body: bytes, headers: Any, timeout_s: float) -> FakeReply:
             payload = json.loads(body)
-            if url.endswith("/sendMessage") and payload.get("text") == "Hello" \
-                    and not self.limited:
+            if url.endswith("/sendMessage") and payload.get("text") == "Hello" and not self.limited:
                 self.limited = True
                 self.calls.append((url, payload))
                 return FakeReply(429, {"ok": False, "parameters": {"retry_after": 0}})

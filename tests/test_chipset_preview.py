@@ -143,9 +143,7 @@ def test_apply_only_copies_back_validated_temp_sheet(tmp_path: Path) -> None:
     assert plan.source_changes[0].critical_count == 0
     assert not state.exists()
     writer = RecordingChipsetWriter()
-    applied = apply_plan(
-        plan, settings, writer, staging_root=tmp_path / "staging", state_dir=state
-    )
+    applied = apply_plan(plan, settings, writer, staging_root=tmp_path / "staging", state_dir=state)
     assert applied.rows_written == plan.rows_generated
     assert writer.replaced == ["temp"]
     assert applied.backup_path is not None and Path(applied.backup_path).is_file()
@@ -172,7 +170,10 @@ def test_apply_refuses_stale_target_and_discards_corrupt_stage(tmp_path: Path) -
     book.close()
     with pytest.raises(CapabilityRefused, match="target_changed"):
         apply_plan(
-            plan, settings, RecordingChipsetWriter(), staging_root=tmp_path / "s1",
+            plan,
+            settings,
+            RecordingChipsetWriter(),
+            staging_root=tmp_path / "s1",
             state_dir=state,
         )
     assert not (tmp_path / "s1").exists()
@@ -206,6 +207,7 @@ def test_apply_refuses_when_temp_changed_after_preview(tmp_path: Path) -> None:
     with pytest.raises(CapabilityRefused, match="temp_sheet_changed"):
         apply_plan(plan, settings, RecordingChipsetWriter(), staging_root=tmp_path / "stage")
     assert target.read_bytes() == before
+
 
 def test_installed_workflow_10_apply_respects_exact_write_grant(tmp_path: Path) -> None:
     source, target = tmp_path / "FY2526.xlsx", tmp_path / "target.xlsx"
@@ -269,6 +271,7 @@ def test_installed_workflow_10_apply_respects_exact_write_grant(tmp_path: Path) 
         assert allowed.workflow.run.status == "succeeded", allowed.workflow.run.failure
     assert writer.replaced == ["temp"]
 
+
 def test_disabled_source_is_skipped_and_protected_sheet_is_refused(tmp_path: Path) -> None:
     source, target = tmp_path / "FY2526.xlsx", tmp_path / "target.xlsx"
     _book(source, "Project List", ("Chipset models",), [("QFW7114",)])
@@ -283,9 +286,7 @@ def test_missing_target_is_a_refusal_not_an_all_new_report(tmp_path: Path) -> No
     source = tmp_path / "FY2526.xlsx"
     _book(source, "Project List", ("Chipset models",), [("QFW7114",)])
     with pytest.raises(ChipsetPreviewError, match="workbook_missing"):
-        build_preview(
-            _settings(source, tmp_path / "missing.xlsx"), today=dt.date(2026, 10, 3)
-        )
+        build_preview(_settings(source, tmp_path / "missing.xlsx"), today=dt.date(2026, 10, 3))
 
 
 def test_manifest_is_read_only_and_command_args_are_bounded() -> None:

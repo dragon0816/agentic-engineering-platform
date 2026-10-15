@@ -26,22 +26,34 @@ def _tools(tmp_path: Path) -> AssistantTools:
     (root / "wiki/concepts/Error vector magnitude.md").write_text(
         "---\ntitle: Error vector magnitude\n---\nEVM measures modulation accuracy of a "
         "transmitter as the error vector between measured and ideal symbols.\n",
-        encoding="utf-8")
+        encoding="utf-8",
+    )
     vault = Vault(root)
     asset = AssetIdentity(namespace="engineering", name="rs", version="1.0.0")
     catalog = catalog_for(vault, asset, "leo.chi")
     handler = SimpleNamespace(catalog=catalog)
-    web = SimpleNamespace(runtime=SimpleNamespace(agent=SimpleNamespace(gateway=SimpleNamespace(
-        bridge=SimpleNamespace(installed=SimpleNamespace(get=lambda _identity: SimpleNamespace(
-            handler=handler)))))))
+    web = SimpleNamespace(
+        runtime=SimpleNamespace(
+            agent=SimpleNamespace(
+                gateway=SimpleNamespace(
+                    bridge=SimpleNamespace(
+                        installed=SimpleNamespace(
+                            get=lambda _identity: SimpleNamespace(handler=handler)
+                        )
+                    )
+                )
+            )
+        )
+    )
     return AssistantTools(web)
 
 
 def test_knowledge_search_and_read_use_the_published_vault(tmp_path: Path) -> None:
     tools = _tools(tmp_path)
     found = tools.call("aep_knowledge_search", {"query": "EVM modulation accuracy"})
-    assert found["ok"] and any(r["path"] == "wiki/concepts/Error vector magnitude.md"
-                               for r in found["results"])
+    assert found["ok"] and any(
+        r["path"] == "wiki/concepts/Error vector magnitude.md" for r in found["results"]
+    )
     page = tools.call("aep_knowledge_read", {"path": "wiki/concepts/EVM.md"})
     assert page["ok"] and page["text"].endswith("EVM\n")
     for bad in ("../host.json", "sandbox.json", "wiki/../../x.md", "index.md"):
@@ -51,16 +63,34 @@ def test_knowledge_search_and_read_use_the_published_vault(tmp_path: Path) -> No
 
 def test_the_protocol_lists_the_tools_and_answers_calls(tmp_path: Path) -> None:
     tools = _tools(tmp_path)
-    started = handle(tools, {"jsonrpc": "2.0", "id": 1, "method": "initialize",
-                             "params": {"protocolVersion": "2025-03-26"}})
+    started = handle(
+        tools,
+        {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "initialize",
+            "params": {"protocolVersion": "2025-03-26"},
+        },
+    )
     assert started is not None and started["result"]["protocolVersion"] == "2025-03-26"
     listed = handle(tools, {"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
     assert listed is not None
     assert {t["name"] for t in listed["result"]["tools"]} == {
-        "aep_knowledge_search", "aep_knowledge_read", "aep_knowledge_ask", "aep_workflows",
-        "aep_run_workflow"}
-    called = handle(tools, {"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {
-        "name": "aep_knowledge_read", "arguments": {"path": "wiki/concepts/EVM.md"}}})
+        "aep_knowledge_search",
+        "aep_knowledge_read",
+        "aep_knowledge_ask",
+        "aep_workflows",
+        "aep_run_workflow",
+    }
+    called = handle(
+        tools,
+        {
+            "jsonrpc": "2.0",
+            "id": 3,
+            "method": "tools/call",
+            "params": {"name": "aep_knowledge_read", "arguments": {"path": "wiki/concepts/EVM.md"}},
+        },
+    )
     assert called is not None and called["result"]["structuredContent"]["ok"]
     assert handle(tools, {"jsonrpc": "2.0", "method": "notifications/initialized"}) is None
 
@@ -74,8 +104,11 @@ def test_the_token_is_stable_across_restarts(tmp_path: Path) -> None:
 def served(tmp_path: Path) -> Iterator[AgentWebServer]:
     vault = _base(tmp_path)
     config, _ = workspace(
-        tmp_path, membership=membership_record(), grants=_grants(),
-        config_changes={"knowledge_pipeline": {"vaults": [{"name": "k-test", "root": str(vault)}]}})
+        tmp_path,
+        membership=membership_record(),
+        grants=_grants(),
+        config_changes={"knowledge_pipeline": {"vaults": [{"name": "k-test", "root": str(vault)}]}},
+    )
     with build_runtime(config) as runtime:
         server = AgentWebServer(AgentWeb(runtime))
         thread = threading.Thread(target=server.serve_forever, daemon=True)
@@ -102,17 +135,38 @@ def test_agent_web_serves_the_tools_with_their_own_token(served: AgentWebServer)
     assert _rpc(served, served.token, listing).status == 200  # the session token works too
     note = _rpc(served, token, {"jsonrpc": "2.0", "method": "notifications/initialized"})
     assert note.status == 202
-    workflows = json.loads(_rpc(served, token, {"jsonrpc": "2.0", "id": 2, "method": "tools/call",
-                                                "params": {"name": "aep_workflows"}}).body)
+    workflows = json.loads(
+        _rpc(
+            served,
+            token,
+            {
+                "jsonrpc": "2.0",
+                "id": 2,
+                "method": "tools/call",
+                "params": {"name": "aep_workflows"},
+            },
+        ).body
+    )
     listed = workflows["result"]["structuredContent"]["workflows"]
     assert listed and {"workflow", "read_only", "parameters"} <= set(listed[0])
-    missing = json.loads(_rpc(served, token, {
-        "jsonrpc": "2.0", "id": 3, "method": "tools/call",
-        "params": {"name": "aep_run_workflow",
-                   "arguments": {"workflow": "engineering/none@1.0.0"}}}).body)
+    missing = json.loads(
+        _rpc(
+            served,
+            token,
+            {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "method": "tools/call",
+                "params": {
+                    "name": "aep_run_workflow",
+                    "arguments": {"workflow": "engineering/none@1.0.0"},
+                },
+            },
+        ).body
+    )
     assert missing["result"]["structuredContent"]["code"] == "workflow_not_installed"
-    config = json.loads(fetch(base(served) + "/api/assistant/mcp-config",
-                              token=served.token).body)
+    config = json.loads(fetch(base(served) + "/api/assistant/mcp-config", token=served.token).body)
     assert config["vscode"]["servers"]["aep"]["url"].endswith("/mcp")
     assert config["copilot_cli"]["mcpServers"]["aep"]["headers"]["Authorization"] == (
-        f"Bearer {token}")
+        f"Bearer {token}"
+    )

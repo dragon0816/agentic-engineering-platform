@@ -16,7 +16,17 @@ from host_runtime.web_page import PAGE
 def test_the_catalog_has_ten_characters_each_with_an_idle_frame_and_motion() -> None:
     characters = catalog()
     assert [c["id"] for c in characters] == [
-        "luffy", "zoro", "nami", "chopper", "robin", "sanji", "usopp", "franky", "brook", "jinbe"]
+        "luffy",
+        "zoro",
+        "nami",
+        "chopper",
+        "robin",
+        "sanji",
+        "usopp",
+        "franky",
+        "brook",
+        "jinbe",
+    ]
     for character in characters:
         assert len(character["frames"]) >= 7, character["id"]
         for frame in character["frames"]:
@@ -57,7 +67,7 @@ def test_the_web_api_lists_avatars_and_saves_the_choice(
     assert fetch(url + "/api/preferences", token=token).json()["preferences"]["avatar"] == "chopper"
     refused = fetch(url + "/api/preferences", token=token, body={"avatar": "nobody"})
     assert refused.status == 400
-    assert fetch(url + "/api/avatars").status == 401   # the token is required
+    assert fetch(url + "/api/avatars").status == 401  # the token is required
 
 
 def test_the_page_shows_the_avatar_and_animates_it_while_a_turn_runs() -> None:

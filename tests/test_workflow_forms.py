@@ -15,29 +15,39 @@ from host_runtime.web_page import PAGE
 
 
 def test_fields_are_filtered_by_channel_identity_first_then_ordered() -> None:
-    manifest = _manifest([
-        {"name": "note", "label": "Note", "kind": "text", "order": 5},
-        *RICH,
-        {"name": "source", "label": "Source", "kind": "text", "scope": "static"},
-    ])
+    manifest = _manifest(
+        [
+            {"name": "note", "label": "Note", "kind": "text", "order": 5},
+            *RICH,
+            {"name": "source", "label": "Source", "kind": "text", "scope": "static"},
+        ]
+    )
     web = [field["name"] for field in form_fields(manifest, "web")]
-    assert web[0] == "project"                       # identity group leads
-    assert "source" not in web                       # static is never a run field
-    assert "trace_level" not in web                  # channels=[] is internal
+    assert web[0] == "project"  # identity group leads
+    assert "source" not in web  # static is never a run field
+    assert "trace_level" not in web  # channels=[] is internal
     assert web.index("note") < web.index("chipset")  # order 5 before order 20
     telegram = [field["name"] for field in form_fields(manifest, "telegram")]
     assert "output" not in telegram and "output" in web
 
 
 def test_fields_carry_normalized_choices_help_and_defaults() -> None:
-    manifest = _manifest([
-        {"name": "legacy", "label": "Legacy", "kind": "select", "options": ["a", "b"],
-         "description": "Old help"},
-        *RICH,
-    ])
+    manifest = _manifest(
+        [
+            {
+                "name": "legacy",
+                "label": "Legacy",
+                "kind": "select",
+                "options": ["a", "b"],
+                "description": "Old help",
+            },
+            *RICH,
+        ]
+    )
     fields = {field["name"]: field for field in form_fields(manifest, "web")}
     assert fields["legacy"]["choices"] == [
-        {"value": "a", "label": "a"}, {"value": "b", "label": "b"},
+        {"value": "a", "label": "a"},
+        {"value": "b", "label": "b"},
     ]
     assert fields["legacy"]["help"] == "Old help"
     assert fields["mode"]["choices"][1] == {"value": "full", "label": "Full"}
@@ -67,18 +77,41 @@ def test_parameter_renderer_keeps_hostile_text_as_text(tmp_path: Path) -> None:
     node = shutil.which("node")
     if node is None:
         pytest.skip("Node.js is not installed")
-    section = "// -- Parameter forms" + _script().split("// -- Parameter forms", 1)[1].split(
-        "// -- end Parameter forms", 1
-    )[0]
+    section = (
+        "// -- Parameter forms"
+        + _script().split("// -- Parameter forms", 1)[1].split("// -- end Parameter forms", 1)[0]
+    )
     hostile = "<img src=x onerror=alert(1)>"
-    fields = form_fields(_manifest([
-        {"name": "project", "label": hostile, "kind": "text", "group": "identity",
-         "help": hostile, "default": hostile},
-        {"name": "mode", "label": "Mode", "kind": "select",
-         "choices": [{"value": "a", "label": hostile}], "default": "a"},
-        {"name": "cc", "label": "CC", "kind": "emails", "default": ["a@example.com"]},
-        {"name": "send", "label": "Send", "kind": "boolean", "default": True, "confirm": True},
-    ]), "web")
+    fields = form_fields(
+        _manifest(
+            [
+                {
+                    "name": "project",
+                    "label": hostile,
+                    "kind": "text",
+                    "group": "identity",
+                    "help": hostile,
+                    "default": hostile,
+                },
+                {
+                    "name": "mode",
+                    "label": "Mode",
+                    "kind": "select",
+                    "choices": [{"value": "a", "label": hostile}],
+                    "default": "a",
+                },
+                {"name": "cc", "label": "CC", "kind": "emails", "default": ["a@example.com"]},
+                {
+                    "name": "send",
+                    "label": "Send",
+                    "kind": "boolean",
+                    "default": True,
+                    "confirm": True,
+                },
+            ]
+        ),
+        "web",
+    )
     harness = r"""
 const assert = require("node:assert/strict");
 class FakeNode {

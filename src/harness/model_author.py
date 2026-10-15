@@ -60,8 +60,8 @@ class ModelChangeAuthor:
     def plan(self, request: CodingHarnessRequest) -> HarnessPlan:
         answer = self._ask(
             request,
-            "First, plan. Return {\"summary\": one sentence on what you will change, "
-            "\"purpose\": what the change to the file achieves}.",
+            'First, plan. Return {"summary": one sentence on what you will change, '
+            '"purpose": what the change to the file achieves}.',
             max_output_tokens=600,
         )
         summary = _text(answer, "summary")
@@ -75,13 +75,16 @@ class ModelChangeAuthor:
     def initial_change(self, request: CodingHarnessRequest, plan: HarnessPlan) -> CandidateChange:
         answer = self._ask(
             request,
-            f"Plan: {plan.summary}\nNow write the change. Return {{\"content\": the complete "
+            f'Plan: {plan.summary}\nNow write the change. Return {{"content": the complete '
             f"new text of {request.artifact_path}}}.",
         )
         return self._candidate(request, answer)
 
     def repair(
-        self, request: CodingHarnessRequest, plan: HarnessPlan, failure: CommandOutcome,
+        self,
+        request: CodingHarnessRequest,
+        plan: HarnessPlan,
+        failure: CommandOutcome,
         attempt: int,
     ) -> CandidateChange:
         failures = "\n\n".join(
@@ -92,7 +95,7 @@ class ModelChangeAuthor:
             request,
             f"Plan: {plan.summary}\nYour last version of {request.artifact_path}:\n{last}\n\n"
             f"It failed `{failure.command}` (repair attempt {attempt}):\n{failures}\n\n"
-            f"Fix the file. Return {{\"content\": the complete corrected text of "
+            f'Fix the file. Return {{"content": the complete corrected text of '
             f"{request.artifact_path}}}.",
         )
         return self._candidate(request, answer)
@@ -116,15 +119,19 @@ class ModelChangeAuthor:
             f"File you may write: {request.artifact_path}\n\n"
             f"Read-only context (current files):\n{files or '(none)'}\n\n{instruction}"
         )
-        reply = self.model.generate(ModelRequest(
-            trace=self.trace,
-            model_alias=self.model_alias,
-            messages=(ModelMessage(role="system", text=SYSTEM),
-                      ModelMessage(role="user", text=prompt)),
-            requirements=ModelRequirements(structured_output=True, local_only=self.local_only),
-            output_contract=OUTPUT_CONTRACT,
-            max_output_tokens=max_output_tokens or self.max_output_tokens,
-        ))
+        reply = self.model.generate(
+            ModelRequest(
+                trace=self.trace,
+                model_alias=self.model_alias,
+                messages=(
+                    ModelMessage(role="system", text=SYSTEM),
+                    ModelMessage(role="user", text=prompt),
+                ),
+                requirements=ModelRequirements(structured_output=True, local_only=self.local_only),
+                output_contract=OUTPUT_CONTRACT,
+                max_output_tokens=max_output_tokens or self.max_output_tokens,
+            )
+        )
         if reply.failure is not None:
             raise AuthorUnavailable("author_model_failed")
         answer: object = reply.structured_output
@@ -148,6 +155,6 @@ def _salvage(text: str) -> object:
     if start < 0 or end <= start:
         return None
     try:
-        return json.loads(text[start:end + 1])
+        return json.loads(text[start : end + 1])
     except ValueError:
         return None

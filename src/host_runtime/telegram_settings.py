@@ -86,7 +86,12 @@ def windows_user_environment(name: str, value: str) -> None:
     hwnd_broadcast, wm_settingchange, smto_abortifhung = 0xFFFF, 0x001A, 0x0002
     result = ctypes.c_ulong()
     ctypes.windll.user32.SendMessageTimeoutW(
-        hwnd_broadcast, wm_settingchange, 0, "Environment", smto_abortifhung, 2000,
+        hwnd_broadcast,
+        wm_settingchange,
+        0,
+        "Environment",
+        smto_abortifhung,
+        2000,
         ctypes.byref(result),
     )
 
@@ -109,16 +114,17 @@ def telegram_status(config: CompanyHostConfiguration, layout: HostLayout) -> dic
     current = enabled or _read(_disabled(layout))
     variable = (
         config.credential_environment().get(current.credential.name, "")
-        if current is not None else config.credential_environment().get(TELEGRAM_SECRET, "")
+        if current is not None
+        else config.credential_environment().get(TELEGRAM_SECRET, "")
     )
     return {
         "configured": current is not None,
         "enabled": enabled is not None,
         "environment_variable": variable or TOKEN_VARIABLE,
         "token_present": bool(os.environ.get(variable or TOKEN_VARIABLE, "")),
-        "senders": [] if current is None else [
-            item.model_dump(mode="json") for item in current.senders
-        ],
+        "senders": []
+        if current is None
+        else [item.model_dump(mode="json") for item in current.senders],
     }
 
 
@@ -165,9 +171,9 @@ def apply_telegram_settings(
         candidate = current.model_dump(mode="json")
         candidate["credentials"] = [
             *candidate["credentials"],
-            CredentialBinding(
-                secret=TELEGRAM_SECRET, environment_variable=variable
-            ).model_dump(mode="json"),
+            CredentialBinding(secret=TELEGRAM_SECRET, environment_variable=variable).model_dump(
+                mode="json"
+            ),
         ]
         updated = CompanyHostConfiguration.model_validate(candidate)
         write_atomically(config_path, updated.model_dump_json(indent=2).encode("utf-8") + b"\n")

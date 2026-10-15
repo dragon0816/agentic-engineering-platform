@@ -30,23 +30,30 @@ from integrations.outlook_mail import (
 
 
 def _spec(name: str, description: str) -> CapabilitySpec:
-    return CapabilitySpec.model_validate({
-        "identity": {"namespace": "outlook", "name": name, "version": "1.0.0"},
-        "name": f"outlook.{name}",
-        "description": description,
-        "input_contract": f"outlook.{name}.input.v1",
-        "output_contract": f"outlook.{name}.output.v1",
-        "side_effect": "read",
-        "policy": {"risk": "low", "approval_required": False,
-                   "required_permissions": [f"outlook.{name}"],
-                   "policy_refs": ["outlook-read-policy"]},
-    })
+    return CapabilitySpec.model_validate(
+        {
+            "identity": {"namespace": "outlook", "name": name, "version": "1.0.0"},
+            "name": f"outlook.{name}",
+            "description": description,
+            "input_contract": f"outlook.{name}.input.v1",
+            "output_contract": f"outlook.{name}.output.v1",
+            "side_effect": "read",
+            "policy": {
+                "risk": "low",
+                "approval_required": False,
+                "required_permissions": [f"outlook.{name}"],
+                "policy_refs": ["outlook-read-policy"],
+            },
+        }
+    )
 
 
-SEARCH_SPEC = _spec("search", "Search the person's Outlook mail within the scope set in "
-                    "Settings (folders, days, excluded senders); read only")
-READ_SPEC = _spec("read", "Read one Outlook message within the scope set in Settings; "
-                  "read only")
+SEARCH_SPEC = _spec(
+    "search",
+    "Search the person's Outlook mail within the scope set in "
+    "Settings (folders, days, excluded senders); read only",
+)
+READ_SPEC = _spec("read", "Read one Outlook message within the scope set in Settings; read only")
 
 
 class MailSearchRequest(Contract):
@@ -87,36 +94,53 @@ def scrub(text: str) -> str:
 
 
 class MailSearchHandler:
-    def __init__(self, reader: Callable[[], MailReader],
-                 scope: Callable[[], MailScope]) -> None:
+    def __init__(self, reader: Callable[[], MailReader], scope: Callable[[], MailScope]) -> None:
         self._reader, self._scope = reader, scope
 
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = MailSearchRequest.model_validate(inputs)
         try:
-            found = await asyncio.to_thread(lambda: search(
-                self._reader(), self._scope(), query=request.query, sender=request.sender,
-                folder=request.folder, days=request.days, limit=request.limit))
+            found = await asyncio.to_thread(
+                lambda: search(
+                    self._reader(),
+                    self._scope(),
+                    query=request.query,
+                    sender=request.sender,
+                    folder=request.folder,
+                    days=request.days,
+                    limit=request.limit,
+                )
+            )
         except MailError as error:
             raise CapabilityRefused(error.code) from None
-        return MailSearchResult(messages=tuple(
-            MailSearchItem(**{**item.model_dump(), "snippet": scrub(item.snippet),
-                              "subject": scrub(item.subject)}) for item in found))
+        return MailSearchResult(
+            messages=tuple(
+                MailSearchItem(
+                    **{
+                        **item.model_dump(),
+                        "snippet": scrub(item.snippet),
+                        "subject": scrub(item.subject),
+                    }
+                )
+                for item in found
+            )
+        )
 
 
 class MailReadHandler:
-    def __init__(self, reader: Callable[[], MailReader],
-                 scope: Callable[[], MailScope]) -> None:
+    def __init__(self, reader: Callable[[], MailReader], scope: Callable[[], MailScope]) -> None:
         self._reader, self._scope = reader, scope
 
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = MailReadRequest.model_validate(inputs)
         try:
             message = await asyncio.to_thread(
-                lambda: read(self._reader(), self._scope(), request.message_id))
+                lambda: read(self._reader(), self._scope(), request.message_id)
+            )
         except MailError as error:
             raise CapabilityRefused(error.code) from None
         data = message.model_dump()
-        data.update(body=scrub(message.body), snippet=scrub(message.snippet),
-                    subject=scrub(message.subject))
+        data.update(
+            body=scrub(message.body), snippet=scrub(message.snippet), subject=scrub(message.subject)
+        )
         return MailReadResult(**data)

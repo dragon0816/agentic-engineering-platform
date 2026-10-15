@@ -23,7 +23,7 @@ from host_runtime.mcp_servers import McpHub, McpServerConfig, secret_variable
 from integrations.mcp_client import HttpMcpClient, StdioMcpClient
 from workflow.dispatch import BridgeExecutor
 
-FAKE_SERVER = r'''
+FAKE_SERVER = r"""
 import json, os, sys
 TOOLS = [
     {"name": "echo", "description": "Echo text back.", "annotations": {"readOnlyHint": True},
@@ -54,7 +54,7 @@ for line in sys.stdin:
                           "error": {"code": -32601, "message": "nope"}}), flush=True)
         continue
     print(json.dumps({"jsonrpc": "2.0", "id": ident, "result": result}), flush=True)
-'''
+"""
 
 
 @pytest.fixture
@@ -65,9 +65,13 @@ def fake(tmp_path: Path) -> Path:
 
 
 def context() -> RequestContext:
-    return RequestContext(trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"),
-                          actor="owner", namespace="engineering", channel="local",
-                          message="x")
+    return RequestContext(
+        trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"),
+        actor="owner",
+        namespace="engineering",
+        channel="local",
+        message="x",
+    )
 
 
 def test_a_local_server_is_listed_and_called_over_stdio(fake: Path) -> None:
@@ -97,8 +101,10 @@ class Remote(BaseHTTPRequestHandler):
         elif message["method"] == "tools/list":
             result = {"tools": [{"name": "time", "inputSchema": {"type": "object"}}]}
         else:
-            result = {"content": [{"type": "text", "text": "12:00"}],
-                      "structuredContent": {"hour": 12}}
+            result = {
+                "content": [{"type": "text", "text": "12:00"}],
+                "structuredContent": {"hour": 12},
+            }
         reply = {"jsonrpc": "2.0", "id": message["id"], "result": result}
         # Answer as an event stream, as Streamable HTTP servers may.
         body = f"event: message\ndata: {json.dumps(reply)}\n\n".encode()
@@ -117,8 +123,9 @@ def test_a_remote_server_is_called_over_streamable_http() -> None:
     server = ThreadingHTTPServer(("127.0.0.1", 0), Remote)
     threading.Thread(target=server.serve_forever, daemon=True).start()
     try:
-        client = HttpMcpClient(f"http://127.0.0.1:{server.server_address[1]}/mcp",
-                               timeout_seconds=10)
+        client = HttpMcpClient(
+            f"http://127.0.0.1:{server.server_address[1]}/mcp", timeout_seconds=10
+        )
         assert [t.name for t in asyncio.run(client.list_tools())] == ["time"]
         result = asyncio.run(client.call_tool("time", {}))
         assert result.data == {"text": "12:00", "structured": {"hour": 12}}
@@ -132,19 +139,32 @@ def hub_with(tmp_path: Path) -> tuple[McpHub, BridgeExecutor, dict[str, str]]:
     installed = InstalledCapabilities()
     bridge = BridgeExecutor(installed, LocalPolicy(()))
     stored: dict[str, str] = {}
-    hub = McpHub(tmp_path / "ws", installed, lambda: bridge.policy, "owner",
-                 store_secret=lambda name, value: stored.__setitem__(name, value))
+    hub = McpHub(
+        tmp_path / "ws",
+        installed,
+        lambda: bridge.policy,
+        "owner",
+        store_secret=lambda name, value: stored.__setitem__(name, value),
+    )
     (tmp_path / "ws").mkdir()
     return hub, bridge, stored
 
 
 def test_adding_a_server_grants_its_tools_to_conversations_and_workflows(
-    tmp_path: Path, fake: Path, monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    fake: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     hub, bridge, stored = hub_with(tmp_path)
     monkeypatch.delenv(secret_variable("fake", "FAKE_KEY"), raising=False)
-    config = McpServerConfig(name="fake", transport="stdio", command=sys.executable,
-                             args=(str(fake),), secret_env=("FAKE_KEY",), timeout_seconds=20)
+    config = McpServerConfig(
+        name="fake",
+        transport="stdio",
+        command=sys.executable,
+        args=(str(fake),),
+        secret_env=("FAKE_KEY",),
+        timeout_seconds=20,
+    )
     try:
         hub.save(config, {"FAKE_KEY": SecretStr("s3cret-value")})
         for _ in range(200):
@@ -154,7 +174,9 @@ def test_adding_a_server_grants_its_tools_to_conversations_and_workflows(
         (shown,) = hub.status()
         assert shown["status"] == "connected", shown["error"]
         assert [t["capability"] for t in shown["tools"]] == [
-            "mcp-fake/echo@1.0.0", "mcp-fake/secret-hint@1.0.0"]
+            "mcp-fake/echo@1.0.0",
+            "mcp-fake/secret-hint@1.0.0",
+        ]
         assert shown["secrets_present"] == {"FAKE_KEY": True}
         assert stored == {"AEP_MCP_FAKE_FAKE_KEY": "s3cret-value"}
         assert "s3cret-value" not in (tmp_path / "ws" / "mcp-servers.json").read_text()
@@ -167,19 +189,42 @@ def test_adding_a_server_grants_its_tools_to_conversations_and_workflows(
         assert secret.data["text"] == "secret ok"  # write tool, granted by adding the server
 
         # The same tool as a Workflow step: drafting finds it installed.
-        chat = ChatAuthoring(tmp_path / "chat", bridge=lambda: bridge, namespace="engineering",
-                             workflows_dir=tmp_path / "wf", grants_file=tmp_path / "g.json")
-        item, problems = chat.draft("owner", None, "Echo", {
-            "name": "echo-it", "description": "Echo.", "parameters": [],
-            "steps": [{"capability": "mcp-fake/echo@1.0.0",
-                       "inputs": {"text": {"source": "fixed", "value": "step"}}}]})
+        chat = ChatAuthoring(
+            tmp_path / "chat",
+            bridge=lambda: bridge,
+            namespace="engineering",
+            workflows_dir=tmp_path / "wf",
+            grants_file=tmp_path / "g.json",
+        )
+        item, problems = chat.draft(
+            "owner",
+            None,
+            "Echo",
+            {
+                "name": "echo-it",
+                "description": "Echo.",
+                "parameters": [],
+                "steps": [
+                    {
+                        "capability": "mcp-fake/echo@1.0.0",
+                        "inputs": {"text": {"source": "fixed", "value": "step"}},
+                    }
+                ],
+            },
+        )
         assert problems == [] and item is not None and chat.read_only(item.draft)
 
         hub.delete("fake")
         assert hub.tools(bridge) == [] and hub.status() == []
-        gone = asyncio.run(bridge.execute(CapabilityInvocation(
-            context=context(), target=McpHub.identity("fake", "echo"),
-            arguments={"text": "x"})))
+        gone = asyncio.run(
+            bridge.execute(
+                CapabilityInvocation(
+                    context=context(),
+                    target=McpHub.identity("fake", "echo"),
+                    arguments={"text": "x"},
+                )
+            )
+        )
         assert gone.status != "succeeded"
     finally:
         hub.close()
@@ -187,8 +232,10 @@ def test_adding_a_server_grants_its_tools_to_conversations_and_workflows(
 
 def test_a_server_that_cannot_start_is_a_status_not_a_crash(tmp_path: Path) -> None:
     hub, bridge, _ = hub_with(tmp_path)
-    hub.save(McpServerConfig(name="broken", transport="stdio",
-                             command="definitely-not-a-command-aep"), {})
+    hub.save(
+        McpServerConfig(name="broken", transport="stdio", command="definitely-not-a-command-aep"),
+        {},
+    )
     for _ in range(100):
         if hub.status()[0]["status"] != "connecting":
             break
@@ -200,8 +247,9 @@ def test_a_server_that_cannot_start_is_a_status_not_a_crash(tmp_path: Path) -> N
 
 def test_settings_refuse_secrets_in_plain_fields() -> None:
     with pytest.raises(ValueError):
-        McpServerConfig(name="x", transport="http", url="https://h/mcp",
-                        headers={"Authorization": "Bearer abc"})
+        McpServerConfig(
+            name="x", transport="http", url="https://h/mcp", headers={"Authorization": "Bearer abc"}
+        )
     with pytest.raises(ValueError):
         McpServerConfig(name="x", transport="http", url="ftp://h")
     with pytest.raises(ValueError):
@@ -216,7 +264,10 @@ def test_the_settings_page_lists_and_validates_mcp_servers(served: Any) -> None:
     url, token = base(served), served.token
     assert fetch(url + "/api/mcp", token=token).json() == {"servers": []}
     assert fetch(url + "/api/mcp").status == 401
-    refused = fetch(url + "/api/mcp/save", token=token, body={
-        "config": {"name": "x", "transport": "http", "url": "ftp://nowhere"}})
+    refused = fetch(
+        url + "/api/mcp/save",
+        token=token,
+        body={"config": {"name": "x", "transport": "http", "url": "ftp://nowhere"}},
+    )
     assert refused.status == 409 and refused.json()["code"] == "mcp_settings_invalid"
     assert 'id="mcp-form"' in PAGE and '"/api/mcp/" + action' in PAGE

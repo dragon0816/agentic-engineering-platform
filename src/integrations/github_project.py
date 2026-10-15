@@ -377,7 +377,8 @@ def _item(node: Mapping[str, Any]) -> ProjectItem:
             "the Issue assignee list was truncated; refuse incomplete member counts",
         )
     issue_assignees = tuple(
-        str(entry.get("login")) for entry in assignees.get("nodes") or []
+        str(entry.get("login"))
+        for entry in assignees.get("nodes") or []
         if isinstance(entry, Mapping) and entry.get("login")
     )
     return ProjectItem(

@@ -19,26 +19,38 @@ from host_runtime.web_page import PAGE
 
 
 def _report(workspace: Path, *findings: Finding) -> None:
-    report = ReviewReport(review_id="review-20261013T000000-abcd",
-                          started_at="2026-10-13T00:00:00+00:00",
-                          finished_at="2026-10-13T00:01:00+00:00", findings=findings)
+    report = ReviewReport(
+        review_id="review-20261013T000000-abcd",
+        started_at="2026-10-13T00:00:00+00:00",
+        finished_at="2026-10-13T00:01:00+00:00",
+        findings=findings,
+    )
     (workspace / REVIEWS_DIR).mkdir(parents=True, exist_ok=True)
     (workspace / REVIEWS_DIR / f"{report.review_id}.json").write_text(
-        report.model_dump_json(), encoding="utf-8")
+        report.model_dump_json(), encoding="utf-8"
+    )
 
 
 def _finding(kind: str, target: str, text: str = "Every claim carries a date.") -> Finding:
-    return Finding(group=f"knowledge|{kind}|-", case_ids=("case-1",), cases=1,
-                   cause="rule_missing", diagnosis="Answers lacked dates (case 1).",
-                   proposal=Proposal.model_validate({"kind": kind, "target": target,
-                                                     "text": text}),
-                   confidence="high", confirm="a dated answer")
+    return Finding(
+        group=f"knowledge|{kind}|-",
+        case_ids=("case-1",),
+        cases=1,
+        cause="rule_missing",
+        diagnosis="Answers lacked dates (case 1).",
+        proposal=Proposal.model_validate({"kind": kind, "target": target, "text": text}),
+        confidence="high",
+        confirm="a dated answer",
+    )
 
 
 def test_findings_become_proposals_a_person_decides(tmp_path: Path) -> None:
-    _report(tmp_path, _finding("rule_edit", "skills/ask-knowledge/SKILL.md"),
-            Finding(group="x", case_ids=(), cases=0, error="RuntimeError: 503"),
-            _finding("issue", "workflow handler"))
+    _report(
+        tmp_path,
+        _finding("rule_edit", "skills/ask-knowledge/SKILL.md"),
+        Finding(group="x", case_ids=(), cases=0, error="RuntimeError: 503"),
+        _finding("issue", "workflow handler"),
+    )
     store = ProposalStore(tmp_path)
     assert store.sync() == 2 and store.sync() == 0  # an errored group is not a proposal
     first, issue = sorted(store.all(), key=lambda p: p.proposal_id)
@@ -60,7 +72,10 @@ def test_targets_resolve_to_vault_rules_and_question_folders(tmp_path: Path) -> 
     pipeline, root = _project(tmp_path)
     found = resolve_rule("ingest-vna rules in skills/ingest-vna/SKILL.md", {"rs-k": root})
     assert found is not None and (found.base, found.path, found.scope) == (
-        "rs-k", "skills/ingest-vna/SKILL.md", "Productions/VNA")
+        "rs-k",
+        "skills/ingest-vna/SKILL.md",
+        "Productions/VNA",
+    )
     legacy = resolve_rule("the ask-knowledge answer rules", {"rs-k": root})
     assert legacy is not None and legacy.scope == "Knowledge"  # by the ask-<folder> name
     assert resolve_rule("platform Skill company-agent/knowledge-query", {"rs-k": root}) is None
@@ -92,20 +107,34 @@ def test_accepting_a_rule_edit_opens_a_review_sandbox(
     (vault / "skills/ingest-notes").mkdir(parents=True)
     (vault / "skills/ingest-notes/SKILL.md").write_text(
         "---\nname: ingest-notes\nmode: procedure\napplies_to: raw/notes\n---\n\n# rules\n",
-        encoding="utf-8")
+        encoding="utf-8",
+    )
     workspace = server.web.runtime.layout.workspace_root
-    _report(workspace, _finding("rule_edit", "skills/ingest-notes/SKILL.md"),
-            _finding("knowledge_gap", "notes", "No source covers the 2026 price list."))
+    _report(
+        workspace,
+        _finding("rule_edit", "skills/ingest-notes/SKILL.md"),
+        _finding("knowledge_gap", "notes", "No source covers the 2026 price list."),
+    )
     url = base(server) + "/api/reviews"
     assert fetch(url).status == 401
     listed = json.loads(fetch(url, token=server.token).body)
     rule = next(p for p in listed["proposals"] if p["kind"] == "rule_edit")
     gap = next(p for p in listed["proposals"] if p["kind"] == "knowledge_gap")
-    decided = json.loads(fetch(url + "/decide", token=server.token, body={
-        "proposal_id": gap["proposal_id"], "action": "accept"}).body)
+    decided = json.loads(
+        fetch(
+            url + "/decide",
+            token=server.token,
+            body={"proposal_id": gap["proposal_id"], "action": "accept"},
+        ).body
+    )
     assert next(p for p in decided["proposals"] if p["kind"] == "knowledge_gap")["route"] == "gap"
-    assert json.loads(fetch(url + "/decide", token=server.token, body={
-        "proposal_id": rule["proposal_id"], "action": "accept"}).body)["ok"]
+    assert json.loads(
+        fetch(
+            url + "/decide",
+            token=server.token,
+            body={"proposal_id": rule["proposal_id"], "action": "accept"},
+        ).body
+    )["ok"]
     deadline = time.monotonic() + 60
     while True:
         listed = json.loads(fetch(url, token=server.token).body)
@@ -113,10 +142,14 @@ def test_accepting_a_rule_edit_opens_a_review_sandbox(
         if (routed["route"] or "").startswith("sandbox:") or time.monotonic() > deadline:
             break
         time.sleep(0.3)
-    sandbox = routed["route"][len("sandbox:"):]
+    sandbox = routed["route"][len("sandbox:") :]
     assert routed["outcome"] == "in the sandbox, not pushed yet"
-    shown = json.loads(fetch(base(server) + "/api/knowledge/review-proposal?sandbox_id="
-                             + sandbox, token=server.token).body)
+    shown = json.loads(
+        fetch(
+            base(server) + "/api/knowledge/review-proposal?sandbox_id=" + sandbox,
+            token=server.token,
+        ).body
+    )
     assert shown["proposal"]["path"] == "skills/ingest-notes/SKILL.md"
     assert shown["proposal"]["text"] == "Every claim carries a date."
     assert listed["counts"]["accepted"] == 2
@@ -125,8 +158,14 @@ def test_accepting_a_rule_edit_opens_a_review_sandbox(
 
 
 def test_the_reviews_tab_and_the_knowledge_banner_are_on_the_page() -> None:
-    for hook in ('id="nav-reviews"', 'id="panel-reviews"', "/api/reviews/decide",
-                 'id="kp-review"', "/api/knowledge/review-proposal", 'id="rv-gaps"'):
+    for hook in (
+        'id="nav-reviews"',
+        'id="panel-reviews"',
+        "/api/reviews/decide",
+        'id="kp-review"',
+        "/api/knowledge/review-proposal",
+        'id="rv-gaps"',
+    ):
         assert hook in PAGE
     # The review settings moved off the Knowledge tab onto the Reviews tab.
     assert PAGE.index('id="xp-card"') > PAGE.index('id="panel-reviews"')

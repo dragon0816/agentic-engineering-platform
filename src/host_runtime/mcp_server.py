@@ -41,50 +41,90 @@ _OBJECT = {"type": "object"}
 _ID = {"candidate_id": {"type": "string"}}
 
 TOOLS: dict[str, tuple[str, dict[str, Any]]] = {
-    "aep_catalog": ("Compact catalog: installed capabilities (purpose, side effect, input "
-                    "field names), Workflows and Skills on this Host.",
-                    {"type": "object", "properties": {}}),
-    "aep_capability": ("One capability in full: description and input schema.",
-                       {"type": "object", "properties": {"target": {
-                           "type": "string",
-                           "description": "namespace/name@version from aep_catalog"}},
-                        "required": ["target"]}),
-    "aep_workflow_format": ("The full Workflow format: parameter kinds and form fields, steps, "
-                            "input sources, checks and rules, with examples.",
-                            {"type": "object", "properties": {}}),
-    "aep_skill_format": ("The full Skill format and what an authored Skill may not carry.",
-                         {"type": "object", "properties": {}}),
-    "aep_list": ("Your submitted Workflow and Skill candidates and their last approval.",
-                 {"type": "object", "properties": {}}),
-    "aep_get": ("One submitted candidate in full.",
-                {"type": "object", "properties": _ID, "required": ["candidate_id"]}),
-    "aep_status": ("An approval's outcome: statuses and codes.",
-                   {"type": "object", "properties": {"approval_id": {"type": "string"}},
-                    "required": ["approval_id"]}),
-    "aep_check_workflow": ("Check a Workflow against this Host without keeping it.",
-                           {"type": "object", "properties": {"workflow": _OBJECT},
-                            "required": ["workflow"]}),
-    "aep_submit_workflow": ("Keep a Workflow as a candidate; pass candidate_id to revise one.",
-                            {"type": "object", "properties": {
-                                "title": {"type": "string"}, "workflow": _OBJECT, **_ID},
-                             "required": ["title", "workflow"]}),
-    "aep_run_workflow": ("Run a candidate once with test values. Read-only Workflows run now; "
-                         "others wait for the owner's approval.",
-                         {"type": "object", "properties": {
-                             **_ID, "arguments": {"type": "object"}},
-                          "required": ["candidate_id"]}),
-    "aep_install_workflow": ("Ask the owner to install a Workflow candidate.",
-                             {"type": "object", "properties": _ID,
-                              "required": ["candidate_id"]}),
-    "aep_check_skill": ("Check a Skill against this Host without keeping it.",
-                        {"type": "object", "properties": {"skill": _OBJECT},
-                         "required": ["skill"]}),
-    "aep_submit_skill": ("Keep a Skill as a candidate; pass candidate_id to revise one.",
-                         {"type": "object", "properties": {
-                             "title": {"type": "string"}, "skill": _OBJECT, **_ID},
-                          "required": ["title", "skill"]}),
-    "aep_install_skill": ("Ask the owner to install a Skill candidate.",
-                          {"type": "object", "properties": _ID, "required": ["candidate_id"]}),
+    "aep_catalog": (
+        "Compact catalog: installed capabilities (purpose, side effect, input "
+        "field names), Workflows and Skills on this Host.",
+        {"type": "object", "properties": {}},
+    ),
+    "aep_capability": (
+        "One capability in full: description and input schema.",
+        {
+            "type": "object",
+            "properties": {
+                "target": {
+                    "type": "string",
+                    "description": "namespace/name@version from aep_catalog",
+                }
+            },
+            "required": ["target"],
+        },
+    ),
+    "aep_workflow_format": (
+        "The full Workflow format: parameter kinds and form fields, steps, "
+        "input sources, checks and rules, with examples.",
+        {"type": "object", "properties": {}},
+    ),
+    "aep_skill_format": (
+        "The full Skill format and what an authored Skill may not carry.",
+        {"type": "object", "properties": {}},
+    ),
+    "aep_list": (
+        "Your submitted Workflow and Skill candidates and their last approval.",
+        {"type": "object", "properties": {}},
+    ),
+    "aep_get": (
+        "One submitted candidate in full.",
+        {"type": "object", "properties": _ID, "required": ["candidate_id"]},
+    ),
+    "aep_status": (
+        "An approval's outcome: statuses and codes.",
+        {
+            "type": "object",
+            "properties": {"approval_id": {"type": "string"}},
+            "required": ["approval_id"],
+        },
+    ),
+    "aep_check_workflow": (
+        "Check a Workflow against this Host without keeping it.",
+        {"type": "object", "properties": {"workflow": _OBJECT}, "required": ["workflow"]},
+    ),
+    "aep_submit_workflow": (
+        "Keep a Workflow as a candidate; pass candidate_id to revise one.",
+        {
+            "type": "object",
+            "properties": {"title": {"type": "string"}, "workflow": _OBJECT, **_ID},
+            "required": ["title", "workflow"],
+        },
+    ),
+    "aep_run_workflow": (
+        "Run a candidate once with test values. Read-only Workflows run now; "
+        "others wait for the owner's approval.",
+        {
+            "type": "object",
+            "properties": {**_ID, "arguments": {"type": "object"}},
+            "required": ["candidate_id"],
+        },
+    ),
+    "aep_install_workflow": (
+        "Ask the owner to install a Workflow candidate.",
+        {"type": "object", "properties": _ID, "required": ["candidate_id"]},
+    ),
+    "aep_check_skill": (
+        "Check a Skill against this Host without keeping it.",
+        {"type": "object", "properties": {"skill": _OBJECT}, "required": ["skill"]},
+    ),
+    "aep_submit_skill": (
+        "Keep a Skill as a candidate; pass candidate_id to revise one.",
+        {
+            "type": "object",
+            "properties": {"title": {"type": "string"}, "skill": _OBJECT, **_ID},
+            "required": ["title", "skill"],
+        },
+    ),
+    "aep_install_skill": (
+        "Ask the owner to install a Skill candidate.",
+        {"type": "object", "properties": _ID, "required": ["candidate_id"]},
+    ),
 }
 
 
@@ -110,7 +150,8 @@ def dispatch(authoring: ExternalAuthoring, name: str, args: dict[str, Any]) -> d
         "aep_status": lambda: authoring.status(str(args.get("approval_id") or "")),
         "aep_check_workflow": lambda: authoring.check_workflow(_object(args, "workflow")),
         "aep_submit_workflow": lambda: authoring.submit_workflow(
-            _object(args, "workflow"), title, revise),
+            _object(args, "workflow"), title, revise
+        ),
         "aep_run_workflow": lambda: authoring.run_workflow(ident, _object(args, "arguments")),
         "aep_install_workflow": lambda: authoring.install_workflow(ident),
         "aep_check_skill": lambda: authoring.check_skill(_object(args, "skill")),
@@ -162,30 +203,45 @@ class Server:
         if method == "initialize":
             self.warm()
             asked = str(params.get("protocolVersion") or "")
-            return _result(ident, {
-                "protocolVersion": asked if asked in PROTOCOL_VERSIONS else PROTOCOL_VERSIONS[0],
-                "capabilities": {"tools": {"listChanged": False}},
-                "serverInfo": {"name": "aep", "version": self.version},
-                "instructions": INSTRUCTIONS,
-            })
+            return _result(
+                ident,
+                {
+                    "protocolVersion": asked
+                    if asked in PROTOCOL_VERSIONS
+                    else PROTOCOL_VERSIONS[0],
+                    "capabilities": {"tools": {"listChanged": False}},
+                    "serverInfo": {"name": "aep", "version": self.version},
+                    "instructions": INSTRUCTIONS,
+                },
+            )
         if method == "ping":
             return _result(ident, {})
         if method == "tools/list":
-            return _result(ident, {"tools": [
-                {"name": name, "description": text, "inputSchema": schema}
-                for name, (text, schema) in TOOLS.items()]})
+            return _result(
+                ident,
+                {
+                    "tools": [
+                        {"name": name, "description": text, "inputSchema": schema}
+                        for name, (text, schema) in TOOLS.items()
+                    ]
+                },
+            )
         if method == "tools/call":
             name = str(params.get("name") or "")
             if name not in TOOLS:
                 return _error(ident, -32602, f"unknown tool {name}")
             arguments = params.get("arguments")
             outcome = self._call(name, arguments if isinstance(arguments, dict) else {})
-            return _result(ident, {
-                "content": [{"type": "text",
-                             "text": json.dumps(outcome, ensure_ascii=False, indent=1)}],
-                "structuredContent": outcome,
-                "isError": outcome.get("ok") is False and "problems" not in outcome,
-            })
+            return _result(
+                ident,
+                {
+                    "content": [
+                        {"type": "text", "text": json.dumps(outcome, ensure_ascii=False, indent=1)}
+                    ],
+                    "structuredContent": outcome,
+                    "isError": outcome.get("ok") is False and "problems" not in outcome,
+                },
+            )
         return _error(ident, -32601, f"method not found: {method}")
 
     def serve(self, source: IO[bytes], sink: IO[bytes]) -> None:

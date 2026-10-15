@@ -83,7 +83,9 @@ class WorkflowSettingsStore:
             temporary.write_text(
                 json.dumps(
                     {"schema_version": SCHEMA_VERSION, "workflows": workflows},
-                    ensure_ascii=False, indent=2, sort_keys=True,
+                    ensure_ascii=False,
+                    indent=2,
+                    sort_keys=True,
                 ),
                 encoding="utf-8",
             )

@@ -34,9 +34,10 @@ def test_a_manifest_without_a_hint_keeps_its_published_bytes() -> None:
 
 
 def test_the_adapter_prefers_the_hint_and_strips_the_shared_suffix() -> None:
-    assert _distinct(
-        "Run the report. Executes installed workflow engineering/x@1.0.0."
-    ) == "Run the report."
+    assert (
+        _distinct("Run the report. Executes installed workflow engineering/x@1.0.0.")
+        == "Run the report."
+    )
     request = candidate()
     names = [tool.name for tool in request.tools]
     hinted = request.model_copy(update={"selector_hints": {names[0]: "週報 weekly report"}})
@@ -44,7 +45,7 @@ def test_the_adapter_prefers_the_hint_and_strips_the_shared_suffix() -> None:
     JEVSkillSelectionProvider(config(), lambda: "t", transport=transport).decide(hinted)
     criteria = json.loads(transport.calls[0][1])["questions"]["skill_candidate"]["criteria"]
     assert criteria["1"] == "週報 weekly report"
-    assert "閒聊" in criteria["0"]                       # concrete preserve option
+    assert "閒聊" in criteria["0"]  # concrete preserve option
 
 
 def test_the_gateway_passes_each_hinted_tool(tmp_path) -> None:  # type: ignore[no-untyped-def]
@@ -69,14 +70,24 @@ def test_the_v3_corpus_sends_hints_and_keeps_unhinted_tools_readable() -> None:
     class Recording(Transport):
         def send(self, url, body, headers, timeout_s):  # type: ignore[no-untyped-def]
             calls.append(json.loads(body))
-            return Reply(200, json.dumps({
-                "answers": {"skill_candidate": {"type": "choice", "choice": "0",
-                                                "confidence": 0.5}},
-                "usage": {"input_tokens": 1, "output_tokens": 0},
-            }).encode())
+            return Reply(
+                200,
+                json.dumps(
+                    {
+                        "answers": {
+                            "skill_candidate": {"type": "choice", "choice": "0", "confidence": 0.5}
+                        },
+                        "usage": {"input_tokens": 1, "output_tokens": 0},
+                    }
+                ).encode(),
+            )
 
-    run_public_benchmark(corpus=SKILLS_V3_CORPUS, model="laya-rl-agent",
-                         credential=lambda: "t", transport=Recording(answer("0")))
+    run_public_benchmark(
+        corpus=SKILLS_V3_CORPUS,
+        model="laya-rl-agent",
+        credential=lambda: "t",
+        transport=Recording(answer("0")),
+    )
     assert len(calls) == 46
     criteria = calls[0]["questions"]["skill_candidate"]["criteria"]
     assert any(text.startswith("SDE weekly report") for text in criteria.values())
@@ -102,7 +113,7 @@ def test_a_conversation_hands_the_selector_each_skills_hint() -> None:
     (skill,) = [item for item in registry.discover("engineering") if item.alias == "release"]
     hinted = skill.model_copy(update={"selector_hint": "release 發佈 check and package"})
     key = (skill.metadata.identity.namespace, skill.alias)
-    registry._skills[key] = hinted.model_dump_json()   # the installed manifest, now hinted
+    registry._skills[key] = hinted.model_dump_json()  # the installed manifest, now hinted
     seen: list[SkillCandidateRequest] = []
 
     def authorize(item: SkillCandidateRequest) -> bool:
@@ -112,8 +123,10 @@ def test_a_conversation_hands_the_selector_each_skills_hint() -> None:
     app.skill_decisions = DecisionService[SkillCandidateRequest, tuple[str, ...]](
         baseline=app.skill_decisions.baseline,
         config=DecisionAcceleratorConfig(
-            provider="JEV", endpoint="http://127.0.0.1:9797/v1",
-            credential={"name": "jev_token"}, enabled_decision_types=("skill_selection",),
+            provider="JEV",
+            endpoint="http://127.0.0.1:9797/v1",
+            credential={"name": "jev_token"},
+            enabled_decision_types=("skill_selection",),
         ),
         authorize_accelerator=authorize,
         accelerator_factory=lambda: None,  # type: ignore[arg-type,return-value]

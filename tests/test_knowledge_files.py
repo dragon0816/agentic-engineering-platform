@@ -16,14 +16,21 @@ def test_rules_are_listed_read_and_saved_only_in_the_sandbox(tmp_path: Path) -> 
     before = _snapshot(base)
     sandbox = pipeline.create_sandbox("k-test", "rules", "leo.chi").sandbox_id
     assert pipeline.rule_files(sandbox).files == ("CLAUDE.md",)
-    saved = pipeline.write_rule(sandbox, "skills/ingest-market/SKILL.md",
-                                "---\nname: ingest-market\napplies_to: raw/Market\n---\n日期必填\n")
+    saved = pipeline.write_rule(
+        sandbox,
+        "skills/ingest-market/SKILL.md",
+        "---\nname: ingest-market\napplies_to: raw/Market\n---\n日期必填\n",
+    )
     assert saved.path == "skills/ingest-market/SKILL.md"
     assert pipeline.rule_files(sandbox).files == ("CLAUDE.md", "skills/ingest-market/SKILL.md")
     assert "日期必填" in pipeline.read_file(sandbox, "skills/ingest-market/SKILL.md").text
     assert _snapshot(base) == before
-    for bad in ("wiki/concepts/EVM.md", "skills/../CLAUDE.md", "raw/notes/a.md",
-                "skills/x/other.md"):
+    for bad in (
+        "wiki/concepts/EVM.md",
+        "skills/../CLAUDE.md",
+        "raw/notes/a.md",
+        "skills/x/other.md",
+    ):
         with pytest.raises(PipelineError, match="not_a_rule_file"):
             pipeline.write_rule(sandbox, bad, "x")
 
@@ -53,8 +60,14 @@ def test_a_planned_page_shows_before_and_after(tmp_path: Path) -> None:
 
 
 def test_the_knowledge_tab_offers_preview_compare_and_the_rule_editor() -> None:
-    for hook in ('id="kp-rules"', 'id="kp-rule-text"', 'id="kp-viewer"', '"plan-page"',
-                 '"rule-write"', '"file-read"'):
+    for hook in (
+        'id="kp-rules"',
+        'id="kp-rule-text"',
+        'id="kp-viewer"',
+        '"plan-page"',
+        '"rule-write"',
+        '"file-read"',
+    ):
         assert hook in PAGE
 
 

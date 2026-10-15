@@ -85,7 +85,7 @@ def normalise_chipset(chipset_id: str) -> str:
     """
     bare = chipset_id.strip()
     if bare.lower().startswith(PACKAGE_PREFIX):
-        bare = bare[len(PACKAGE_PREFIX):]
+        bare = bare[len(PACKAGE_PREFIX) :]
     return bare
 
 
@@ -186,7 +186,7 @@ def _yaml_str(value: str | None) -> str:
     text = "" if value is None else str(value)
     if text == "":
         return '""'
-    if any(ch in text for ch in ':#{}[],&*?|<>=!%@`"\'\\') or text.strip() != text:
+    if any(ch in text for ch in ":#{}[],&*?|<>=!%@`\"'\\") or text.strip() != text:
         return '"' + text.replace("\\", "\\\\").replace('"', '\\"') + '"'
     return text
 
@@ -241,9 +241,12 @@ def render(
     )
 
 
-def requirements_lines(chipset_id: str, chipset_version: str,
-                       general_testcase_version: str,
-                       prefix: str = PACKAGE_PREFIX) -> list[str]:
+def requirements_lines(
+    chipset_id: str,
+    chipset_version: str,
+    general_testcase_version: str,
+    prefix: str = PACKAGE_PREFIX,
+) -> list[str]:
     """The two pinned requirements, in the order the example shows them.
 
     `rs-wmt-kt326==2.0.18` / `rs-wmt-general-testcase==2.1.2`. Exact pins, not

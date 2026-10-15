@@ -46,8 +46,13 @@ from host_runtime.external_authoring import ExternalAuthoring, build, connect  #
 
 LIVE = Path(os.environ.get("LOCALAPPDATA", "")) / "AgenticEngineeringPlatform" / "preview-0.1.0"
 SESSION_SECONDS = 1500
-WORKSPACE_COPY = ("membership.json", "grants.json", "authorization.json", "agent-persona.json",
-                  "workflow-settings.json")
+WORKSPACE_COPY = (
+    "membership.json",
+    "grants.json",
+    "authorization.json",
+    "agent-persona.json",
+    "workflow-settings.json",
+)
 
 
 # -- tasks -----------------------------------------------------------------------
@@ -67,12 +72,23 @@ def _write_csv(path: Path, rows: list[list[str]]) -> None:
         csv.writer(handle).writerows(rows)
 
 
-EXAMPLE_ITEMS = [["category", "item", "amount"], ["travel", "taxi", "120.50"],
-                 ["meals", "lunch", "85"], ["travel", "train", "300"],
-                 ["office", "paper", "42.25"], ["meals", "dinner", "210.10"]]
-HIDDEN_ITEMS = [["category", "item", "amount"], ["zeta", "a", "1.005"], ["alpha", "b", "10"],
-                ["alpha", "c", "2.5"], ["mid", "d", "0"], ["zeta", "e", "3.10"],
-                ["alpha", "f", "-1.25"]]
+EXAMPLE_ITEMS = [
+    ["category", "item", "amount"],
+    ["travel", "taxi", "120.50"],
+    ["meals", "lunch", "85"],
+    ["travel", "train", "300"],
+    ["office", "paper", "42.25"],
+    ["meals", "dinner", "210.10"],
+]
+HIDDEN_ITEMS = [
+    ["category", "item", "amount"],
+    ["zeta", "a", "1.005"],
+    ["alpha", "b", "10"],
+    ["alpha", "c", "2.5"],
+    ["mid", "d", "0"],
+    ["zeta", "e", "3.10"],
+    ["alpha", "f", "-1.25"],
+]
 
 
 def _totals(rows: list[list[str]]) -> list[list[str]]:
@@ -82,21 +98,35 @@ def _totals(rows: list[list[str]]) -> list[list[str]]:
         sums[category] = sums.get(category, Decimal(0)) + Decimal(amount)
     cent = Decimal("0.01")
     return [["category", "total"]] + [
-        [c, str(sums[c].quantize(cent, rounding=ROUND_HALF_UP))] for c in sorted(sums)]
+        [c, str(sums[c].quantize(cent, rounding=ROUND_HALF_UP))] for c in sorted(sums)
+    ]
 
 
 def _installed(authoring: ExternalAuthoring, name: str) -> WorkflowManifest | None:
-    found = [m for m in authoring.chat.installed_workflows()
-             if m.metadata.identity.name == name and m.metadata.lifecycle == "published"]
-    return max(found, key=lambda m: tuple(int(x) for x in m.metadata.identity.version.split(".")),
-               default=None)
+    found = [
+        m
+        for m in authoring.chat.installed_workflows()
+        if m.metadata.identity.name == name and m.metadata.lifecycle == "published"
+    ]
+    return max(
+        found,
+        key=lambda m: tuple(int(x) for x in m.metadata.identity.version.split(".")),
+        default=None,
+    )
 
 
-def _run_installed(authoring: ExternalAuthoring, manifest: WorkflowManifest,
-                   arguments: dict[str, Any]) -> dict[str, Any]:
+def _run_installed(
+    authoring: ExternalAuthoring, manifest: WorkflowManifest, arguments: dict[str, Any]
+) -> dict[str, Any]:
     now = datetime.now(UTC).isoformat()
-    candidate = ChatCandidate(candidate_id="grader", actor=authoring.actor, title="grader",
-                              created_at=now, updated_at=now, draft=manifest)
+    candidate = ChatCandidate(
+        candidate_id="grader",
+        actor=authoring.actor,
+        title="grader",
+        created_at=now,
+        updated_at=now,
+        draft=manifest,
+    )
     return authoring.chat.execute(authoring.actor, candidate, arguments, "authoring-v1-grader")
 
 
@@ -126,8 +156,9 @@ def grade_w1(authoring: ExternalAuthoring, folder: Path) -> dict[str, Any]:
         return checks
     hidden = workspace / "input" / "grader-hidden.csv"
     _write_csv(hidden, HIDDEN_ITEMS)
-    result = _run_installed(authoring, manifest,
-                            {"input_file": str(hidden), "output_name": "grader-check"})
+    result = _run_installed(
+        authoring, manifest, {"input_file": str(hidden), "output_name": "grader-check"}
+    )
     checks["run_succeeded"] = result.get("status") == "succeeded"
     output = workspace / "output" / "grader-check.csv"
     checks["output_written"] = output.is_file()
@@ -139,7 +170,9 @@ def grade_w1(authoring: ExternalAuthoring, folder: Path) -> dict[str, Any]:
     return checks
 
 
-W1 = Task("W1", """\
+W1 = Task(
+    "W1",
+    """\
 Build an AEP Workflow with the aep-workflow-creator skill.
 
 Name it exactly `csv-category-totals`. It takes two run parameters:
@@ -155,13 +188,22 @@ Check it, submit it, run it once with the example (input_file = that path, outpu
 "example"), fix it until the run succeeds, then ask to install it. Runs and installs wait for
 the owner's approval; poll aep_status until they are decided. Finish when the install is
 approved, and say the installed version.
-""", prepare_w1, grade_w1)
+""",
+    prepare_w1,
+    grade_w1,
+)
 
 
-SALES = [["date", "region", "amount"], ["2026-01-03", "north", "100"],
-         ["2026-01-15", "south", "40"], ["2026-02-01", "north", "250"],
-         ["2026-02-10", "east", "75"], ["2026-02-28", "south", "300"],
-         ["2026-03-05", "north", "20"], ["2026-03-31", "east", "500"]]
+SALES = [
+    ["date", "region", "amount"],
+    ["2026-01-03", "north", "100"],
+    ["2026-01-15", "south", "40"],
+    ["2026-02-01", "north", "250"],
+    ["2026-02-10", "east", "75"],
+    ["2026-02-28", "south", "300"],
+    ["2026-03-05", "north", "20"],
+    ["2026-03-31", "east", "500"],
+]
 
 
 def prepare_w2(folder: Path) -> None:
@@ -182,14 +224,18 @@ def grade_w2(authoring: ExternalAuthoring, folder: Path) -> dict[str, Any]:
     if manifest is None:
         return checks
     kinds = {p.name: p.kind for p in manifest.parameters}
-    checks["parameters"] = (kinds.get("from_date") == "date" and kinds.get("to_date") == "date"
-                            and kinds.get("min_amount") == "integer")
+    checks["parameters"] = (
+        kinds.get("from_date") == "date"
+        and kinds.get("to_date") == "date"
+        and kinds.get("min_amount") == "integer"
+    )
     workspace = _workspace_of(manifest)
     checks["workspace_fixed"] = workspace is not None
     if workspace is None:
         return checks
-    result = _run_installed(authoring, manifest, {
-        "from_date": "2026-02-01", "to_date": "2026-03-31", "min_amount": 50})
+    result = _run_installed(
+        authoring, manifest, {"from_date": "2026-02-01", "to_date": "2026-03-31", "min_amount": 50}
+    )
     checks["run_succeeded"] = result.get("status") == "succeeded"
     output = workspace / "output" / "summary-2026-02-01-2026-03-31.json"
     checks["output_written"] = output.is_file()
@@ -203,7 +249,9 @@ def grade_w2(authoring: ExternalAuthoring, folder: Path) -> dict[str, Any]:
     return checks
 
 
-W2 = Task("W2", """\
+W2 = Task(
+    "W2",
+    """\
 Build an AEP Workflow with the aep-workflow-creator skill.
 
 Name it exactly `sales-window-summary`. The sales file is fixed: {workspace}\\input\\sales.csv
@@ -218,7 +266,10 @@ Use coding/run-python with this fixed workspace folder: {workspace}
 Check it, submit it, run it once with from_date 2026-01-01, to_date 2026-01-31, min_amount 0,
 fix it until the run succeeds, then ask to install it. Runs and installs wait for the owner's
 approval; poll aep_status until they are decided. Finish when the install is approved.
-""", prepare_w2, grade_w2)
+""",
+    prepare_w2,
+    grade_w2,
+)
 
 
 def grade_s1(authoring: ExternalAuthoring, folder: Path) -> dict[str, Any]:
@@ -238,9 +289,15 @@ def grade_s1(authoring: ExternalAuthoring, folder: Path) -> dict[str, Any]:
         checks["loads_with_others"] = False
     workflow = _installed(authoring, "csv-category-totals")
     targets = {(c.target.namespace, c.target.name, c.target.version) for c in skill.commands}
-    checks["targets_installed_workflow"] = workflow is not None and (
-        workflow.metadata.identity.namespace, workflow.metadata.identity.name,
-        workflow.metadata.identity.version) in targets
+    checks["targets_installed_workflow"] = (
+        workflow is not None
+        and (
+            workflow.metadata.identity.namespace,
+            workflow.metadata.identity.name,
+            workflow.metadata.identity.version,
+        )
+        in targets
+    )
     checks["alias"] = skill.alias == "csv_totals"
     checks["default_command"] = skill.default_command is not None
     text = skill.instructions.lower()
@@ -255,7 +312,9 @@ def _skills(folder: Path) -> list[SkillManifest]:
     return installed_skills(folder)
 
 
-S1 = Task("S1", """\
+S1 = Task(
+    "S1",
+    """\
 Build an AEP Skill with the aep-skill-creator skill.
 
 Name it exactly `csv-totals`, alias `csv_totals`. It lets the AEP Agent total a CSV by
@@ -266,7 +325,10 @@ name (`output_name`) when the person did not give them, and to report the output
 Add a selector_hint with English and Chinese keywords.
 
 Check it, submit it, ask to install it, and poll aep_status until the owner decides.
-""", lambda folder: None, grade_s1)
+""",
+    lambda folder: None,
+    grade_s1,
+)
 
 TASKS = {task.task_id: task for task in (W1, W2, S1)}
 
@@ -297,26 +359,79 @@ def sandbox(run: Path, agent: str) -> Path:
 def agent_command(agent: str, project: Path, config: Path, prompt: str) -> list[str] | None:
     if agent == "claude-code":
         exe = shutil.which("claude")
-        return None if exe is None else [
-            exe, "-p", prompt, "--mcp-config", str(project / ".mcp.json"), "--strict-mcp-config",
-            "--allowedTools", "mcp__aep", "Read", "Write", "Edit", "Glob", "Grep", "Skill",
-            "--permission-mode", "acceptEdits", "--output-format", "json"]
+        return (
+            None
+            if exe is None
+            else [
+                exe,
+                "-p",
+                prompt,
+                "--mcp-config",
+                str(project / ".mcp.json"),
+                "--strict-mcp-config",
+                "--allowedTools",
+                "mcp__aep",
+                "Read",
+                "Write",
+                "Edit",
+                "Glob",
+                "Grep",
+                "Skill",
+                "--permission-mode",
+                "acceptEdits",
+                "--output-format",
+                "json",
+            ]
+        )
     if agent == "codex":
         exe = shutil.which("codex")
         if exe is None:
             return None
         args = ["-m", "host_runtime.cli", "mcp", "--config", str(config), "--agent", "codex"]
-        return [exe, "exec", "--skip-git-repo-check", "--sandbox", "workspace-write",
-                "-c", f"mcp_servers.aep.command={json.dumps(sys.executable)}",
-                "-c", f"mcp_servers.aep.args={json.dumps(args)}", prompt]
+        return [
+            exe,
+            "exec",
+            "--skip-git-repo-check",
+            "--sandbox",
+            "workspace-write",
+            "-c",
+            f"mcp_servers.aep.command={json.dumps(sys.executable)}",
+            "-c",
+            f"mcp_servers.aep.args={json.dumps(args)}",
+            prompt,
+        ]
     exe = shutil.which("copilot")
     if exe is None:
         return None
-    mcp = {"mcpServers": {"aep": {"type": "local", "command": sys.executable, "tools": ["*"],
-                                  "args": ["-m", "host_runtime.cli", "mcp", "--config",
-                                           str(config), "--agent", "copilot"]}}}
-    return [exe, "-p", prompt, "--additional-mcp-config", json.dumps(mcp),
-            "--allow-tool", "aep", "--allow-tool", "write"]
+    mcp = {
+        "mcpServers": {
+            "aep": {
+                "type": "local",
+                "command": sys.executable,
+                "tools": ["*"],
+                "args": [
+                    "-m",
+                    "host_runtime.cli",
+                    "mcp",
+                    "--config",
+                    str(config),
+                    "--agent",
+                    "copilot",
+                ],
+            }
+        }
+    }
+    return [
+        exe,
+        "-p",
+        prompt,
+        "--additional-mcp-config",
+        json.dumps(mcp),
+        "--allow-tool",
+        "aep",
+        "--allow-tool",
+        "write",
+    ]
 
 
 class Operator:
@@ -333,10 +448,19 @@ class Operator:
                 continue
             decided = chat.decide(item.approval_id, self.authoring.actor, True)
             with self.log.open("a", encoding="utf-8") as handle:
-                handle.write(json.dumps({"at": datetime.now(UTC).isoformat(),
-                                         "approval_id": item.approval_id, "kind": item.kind,
-                                         "workflow": item.workflow, "status": decided.status},
-                                        ensure_ascii=False) + "\n")
+                handle.write(
+                    json.dumps(
+                        {
+                            "at": datetime.now(UTC).isoformat(),
+                            "approval_id": item.approval_id,
+                            "kind": item.kind,
+                            "workflow": item.workflow,
+                            "status": decided.status,
+                        },
+                        ensure_ascii=False,
+                    )
+                    + "\n"
+                )
 
     def loop(self) -> None:
         while not self.stop.wait(4):
@@ -352,8 +476,11 @@ def main() -> int:
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--agents", default="claude-code")
     parser.add_argument("--tasks", default="W1,W2,S1")
-    parser.add_argument("--grade-only", action="store_true",
-                        help="grade what an earlier session of this run installed")
+    parser.add_argument(
+        "--grade-only",
+        action="store_true",
+        help="grade what an earlier session of this run installed",
+    )
     args = parser.parse_args()
     run = HERE / "runs" / args.run_id
     run.mkdir(parents=True, exist_ok=True)
@@ -365,8 +492,12 @@ def main() -> int:
         connect(agent, project, config, sys.executable)
         if agent_command(agent, project, config, "") is None and not args.grade_only:
             for task_id in args.tasks.split(","):
-                record = {"agent": agent, "task": task_id, "status": "NOT_RUN",
-                          "reason": f"{agent} is not installed"}
+                record = {
+                    "agent": agent,
+                    "task": task_id,
+                    "status": "NOT_RUN",
+                    "reason": f"{agent} is not installed",
+                }
                 print(f"[{agent}] {task_id}: NOT_RUN", flush=True)
                 with results.open("a", encoding="utf-8") as handle:
                     handle.write(json.dumps(record, ensure_ascii=False) + "\n")
@@ -386,8 +517,11 @@ def main() -> int:
             if args.grade_only:
                 checks = task.grade(authoring, folder)
                 passed = all(v is True for k, v in checks.items() if k != "output_seen")
-                record.update(checks=checks, status="PASS" if passed else "FAIL",
-                              note="graded again after a runner fault")
+                record.update(
+                    checks=checks,
+                    status="PASS" if passed else "FAIL",
+                    note="graded again after a runner fault",
+                )
             elif command is None:
                 record.update(status="NOT_RUN", reason=f"{agent} is not installed")
             else:
@@ -397,12 +531,19 @@ def main() -> int:
                 started = time.monotonic()
                 print(f"[{agent}] {task_id} started", flush=True)
                 try:
-                    done = subprocess.run(command, cwd=project, capture_output=True,
-                                          timeout=SESSION_SECONDS, encoding="utf-8",
-                                          errors="replace", stdin=subprocess.DEVNULL)
+                    done = subprocess.run(
+                        command,
+                        cwd=project,
+                        capture_output=True,
+                        timeout=SESSION_SECONDS,
+                        encoding="utf-8",
+                        errors="replace",
+                        stdin=subprocess.DEVNULL,
+                    )
                     timed_out = False
                     (folder / "transcript.txt").write_text(
-                        done.stdout + "\n--- stderr ---\n" + done.stderr, encoding="utf-8")
+                        done.stdout + "\n--- stderr ---\n" + done.stderr, encoding="utf-8"
+                    )
                 except subprocess.TimeoutExpired:
                     timed_out = True
                 operator.stop.set()
@@ -412,8 +553,7 @@ def main() -> int:
                 checks = task.grade(authoring, folder)
                 record["checks"] = checks
                 passed = all(v is True for k, v in checks.items() if k != "output_seen")
-                record["status"] = ("PASS" if passed else
-                                    "TIMEOUT" if timed_out else "FAIL")
+                record["status"] = "PASS" if passed else "TIMEOUT" if timed_out else "FAIL"
             print(f"[{agent}] {task_id}: {record['status']}", flush=True)
             with results.open("a", encoding="utf-8") as handle:
                 handle.write(json.dumps(record, ensure_ascii=False) + "\n")

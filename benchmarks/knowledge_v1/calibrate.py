@@ -54,10 +54,14 @@ def main() -> int:
         record = reference.answer(bank[qid])
         target.write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         verified = f"{record['verified_points']}/{len(record['key_points'])}"
-        print(f"{qid}: second answer {verified} points verified, {record['seconds']} s, "
-              f"~${record['cost_usd_estimate']}", flush=True)
+        print(
+            f"{qid}: second answer {verified} points verified, {record['seconds']} s, "
+            f"~${record['cost_usd_estimate']}",
+            flush=True,
+        )
     credential()
     from judge import Judge  # needs the credential in the environment
+
     judge = Judge(HOST_JSON)
     rows = []
     for qid in ids:
@@ -67,18 +71,29 @@ def main() -> int:
         for name, ref, ans in (("b_vs_a", first, second), ("a_vs_b", second, first)):
             asked = G.prompt(first["question"], ref, as_answer(ans))
             verdict = G._ask(judge.client, judge.alias, asked)
-            result[name] = ({"error": verdict["error"]} if "error" in verdict
-                            else G.score(ref, verdict))
+            result[name] = (
+                {"error": verdict["error"]} if "error" in verdict else G.score(ref, verdict)
+            )
         rows.append(result)
-        print(f"{qid}: b vs a {result['b_vs_a'].get('coverage')}, "
-              f"a vs b {result['a_vs_b'].get('coverage')}", flush=True)
-    (SECOND / "calibration.json").write_text(json.dumps(rows, ensure_ascii=False, indent=1),
-                                             encoding="utf-8")
-    both = [r[d]["coverage"] for r in rows for d in ("b_vs_a", "a_vs_b")
-            if r[d].get("coverage") is not None]
+        print(
+            f"{qid}: b vs a {result['b_vs_a'].get('coverage')}, "
+            f"a vs b {result['a_vs_b'].get('coverage')}",
+            flush=True,
+        )
+    (SECOND / "calibration.json").write_text(
+        json.dumps(rows, ensure_ascii=False, indent=1), encoding="utf-8"
+    )
+    both = [
+        r[d]["coverage"]
+        for r in rows
+        for d in ("b_vs_a", "a_vs_b")
+        if r[d].get("coverage") is not None
+    ]
     if both:
-        print(f"mean coverage between two independent Claude Code answers: "
-              f"{statistics.mean(both):.3f} (n={len(both)})")
+        print(
+            f"mean coverage between two independent Claude Code answers: "
+            f"{statistics.mean(both):.3f} (n={len(both)})"
+        )
     return 0
 
 

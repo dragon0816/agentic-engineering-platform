@@ -288,15 +288,38 @@ MAX_SOP_UPLOAD_BYTES = 28 * 1024 * 1024
 MAX_ATTACHMENT_REQUEST_BYTES = 36 * 1024 * 1024
 # The Knowledge tab's pipeline steps (docs/phases/KNOWLEDGE_K1.md), by the short
 # name the page sends; nothing else can be called through its route.
-PIPELINE_STEPS = {spec.identity.name: spec for spec in (
-    SANDBOX_CREATE_SPEC, SANDBOX_LIST_SPEC, SANDBOX_CONTENTS_SPEC, SANDBOX_DISCARD_SPEC,
-    DROP_ADD_SPEC, CONVERT_SPEC, INGEST_PLAN_SPEC, INGEST_APPLY_SPEC, LINT_SPEC,
-    ADOPT_SPEC, INDEX_ENRICH_SPEC, INDEX_BUILD_SPEC, MERGE_SPEC, DROP_FOLDERS_SPEC,
-    PULL_SPEC, QUESTION_SETS_SPEC, RULE_FILES_SPEC, FILE_READ_SPEC, RULE_WRITE_SPEC,
-    PLAN_PAGE_SPEC, SKILL_GUIDE_SPEC)}
+PIPELINE_STEPS = {
+    spec.identity.name: spec
+    for spec in (
+        SANDBOX_CREATE_SPEC,
+        SANDBOX_LIST_SPEC,
+        SANDBOX_CONTENTS_SPEC,
+        SANDBOX_DISCARD_SPEC,
+        DROP_ADD_SPEC,
+        CONVERT_SPEC,
+        INGEST_PLAN_SPEC,
+        INGEST_APPLY_SPEC,
+        LINT_SPEC,
+        ADOPT_SPEC,
+        INDEX_ENRICH_SPEC,
+        INDEX_BUILD_SPEC,
+        MERGE_SPEC,
+        DROP_FOLDERS_SPEC,
+        PULL_SPEC,
+        QUESTION_SETS_SPEC,
+        RULE_FILES_SPEC,
+        FILE_READ_SPEC,
+        RULE_WRITE_SPEC,
+        PLAN_PAGE_SPEC,
+        SKILL_GUIDE_SPEC,
+    )
+}
 AUTHORING_ROUTES = (
-    "/api/authoring/start", "/api/authoring/get", "/api/authoring/discuss",
-    "/api/authoring/preview", "/api/authoring/install",
+    "/api/authoring/start",
+    "/api/authoring/get",
+    "/api/authoring/discuss",
+    "/api/authoring/preview",
+    "/api/authoring/install",
 )
 BEARER = "Bearer "
 #: The only addresses this ever binds to or answers for.
@@ -319,8 +342,9 @@ def with_tools(message: ConversationMessage) -> str:
 def _listed_cards(answer: Mapping[str, Any]) -> tuple[dict[str, Any], ...]:
     """The agent-mode cards a turn showed, for its stored answer."""
     listed = answer.get("action_cards")
-    return tuple(item for item in listed if isinstance(item, dict)) if isinstance(
-        listed, list) else ()
+    return (
+        tuple(item for item in listed if isinstance(item, dict)) if isinstance(listed, list) else ()
+    )
 
 
 def _trace() -> TraceIdentifiers:
@@ -495,9 +519,7 @@ class AgentWeb:
             runtime.layout.workspace_root / SETTINGS_FILE
         )
         # Published choice lists behind `ref:` fields; the engine reads the same file.
-        self.reference_sets = ReferenceSetStore(
-            runtime.layout.workspace_root / REFERENCE_SETS_FILE
-        )
+        self.reference_sets = ReferenceSetStore(runtime.layout.workspace_root / REFERENCE_SETS_FILE)
         # SOP to Workflow authoring sessions (docs/phases/SOP_TO_WORKFLOW.md W5).
         router = runtime.agent.gateway.router
         self.authoring = AuthoringStudio(
@@ -517,7 +539,9 @@ class AgentWeb:
         gateway = runtime.agent.gateway
         earlier_tools = gateway.host_tools
         gateway.host_tools = lambda: (
-            *(earlier_tools() if earlier_tools is not None else ()), *self.proposals.tools())
+            *(earlier_tools() if earlier_tools is not None else ()),
+            *self.proposals.tools(),
+        )
         if runtime.telegram is not None:
             runtime.telegram.cards = self
         # Agent mode for the Claude Code / Copilot backends (owner 2026-10-15,
@@ -525,12 +549,16 @@ class AgentWeb:
         # email and the Knowledge pipeline as the agent's tools.
         coding = runtime.config.coding
         self.agent_mode = AgentMode(
-            runtime.layout.workspace_root, host_json=config_path, tasks=self.tasks,
+            runtime.layout.workspace_root,
+            host_json=config_path,
+            tasks=self.tasks,
             coding_roots=lambda: tuple(coding.workspace_roots) if coding is not None else (),
-            knowledge=self)
+            knowledge=self,
+        )
         self.agent_mode.skill_roots = self.backends.skill_roots()
-        self.agent_mail = AgentMail(self.agent_mode, reader=_outlook_mailbox,
-                                    writer=_outlook_drafts, sender=_outlook_sender)
+        self.agent_mail = AgentMail(
+            self.agent_mode, reader=_outlook_mailbox, writer=_outlook_drafts, sender=_outlook_sender
+        )
         self.agent_mode.mail = self.agent_mail
 
     @property
@@ -545,13 +573,21 @@ class AgentWeb:
         chat = self.runtime.chat_authoring
         if chat is None:
             return {"approvals": []}
-        return {"approvals": [
-            {"approval_id": item.approval_id, "kind": item.kind, "workflow": item.workflow,
-             "candidate_id": item.candidate_id, "summary": item.summary,
-             "arguments": item.arguments, "session_id": item.session_id,
-             "created_at": item.created_at}
-            for item in chat.approvals(self.runtime.actor, session_id=session_id)
-        ]}
+        return {
+            "approvals": [
+                {
+                    "approval_id": item.approval_id,
+                    "kind": item.kind,
+                    "workflow": item.workflow,
+                    "candidate_id": item.candidate_id,
+                    "summary": item.summary,
+                    "arguments": item.arguments,
+                    "session_id": item.session_id,
+                    "created_at": item.created_at,
+                }
+                for item in chat.approvals(self.runtime.actor, session_id=session_id)
+            ]
+        }
 
     def drafts(self) -> dict[str, Any]:
         """The owner's Workflow and Skill drafts that are not installed yet
@@ -564,36 +600,55 @@ class AgentWeb:
         for item in chat.approvals(actor, pending_only=False):
             if item.kind == "run":
                 result = item.result if isinstance(item.result, dict) else {}
-                runs[item.candidate_id] = {"status": item.status,
-                                           "result": result.get("status"),
-                                           "at": item.decided_at or item.created_at}
+                runs[item.candidate_id] = {
+                    "status": item.status,
+                    "result": result.get("status"),
+                    "at": item.decided_at or item.created_at,
+                }
         found: list[dict[str, Any]] = []
         for workflow in chat.candidates(actor):
             if workflow.status == "installed":
                 continue
             identity = workflow.draft.metadata.identity
-            found.append({
-                "candidate_id": workflow.candidate_id, "kind": "workflow",
-                "asset": f"{identity.namespace}/{identity.name}@{identity.version}",
-                "title": workflow.title, "description": workflow.draft.description,
-                "source": workflow.source, "updated_at": workflow.updated_at,
-                "steps": [f"{s.capability.namespace}/{s.capability.name}@{s.capability.version}"
-                          for s in workflow.draft.steps if hasattr(s, "capability")],
-                "parameters": [p.name for p in workflow.draft.parameters],
-                "last_run": runs.get(workflow.candidate_id),
-                "detail": workflow.draft.model_dump_json(indent=2)})
+            found.append(
+                {
+                    "candidate_id": workflow.candidate_id,
+                    "kind": "workflow",
+                    "asset": f"{identity.namespace}/{identity.name}@{identity.version}",
+                    "title": workflow.title,
+                    "description": workflow.draft.description,
+                    "source": workflow.source,
+                    "updated_at": workflow.updated_at,
+                    "steps": [
+                        f"{s.capability.namespace}/{s.capability.name}@{s.capability.version}"
+                        for s in workflow.draft.steps
+                        if hasattr(s, "capability")
+                    ],
+                    "parameters": [p.name for p in workflow.draft.parameters],
+                    "last_run": runs.get(workflow.candidate_id),
+                    "detail": workflow.draft.model_dump_json(indent=2),
+                }
+            )
         if chat.skills_dir is not None:
             for skill in chat.skill_candidates(actor):
                 if skill.status == "installed":
                     continue
                 identity = skill.draft.metadata.identity
-                found.append({
-                    "candidate_id": skill.candidate_id, "kind": "skill",
-                    "asset": f"{identity.namespace}/{identity.name}@{identity.version}",
-                    "title": skill.title, "description": skill.draft.selector_hint or "",
-                    "source": skill.source, "updated_at": skill.updated_at,
-                    "steps": [c.name for c in skill.draft.commands], "parameters": [],
-                    "last_run": None, "detail": skill.draft.model_dump_json(indent=2)})
+                found.append(
+                    {
+                        "candidate_id": skill.candidate_id,
+                        "kind": "skill",
+                        "asset": f"{identity.namespace}/{identity.name}@{identity.version}",
+                        "title": skill.title,
+                        "description": skill.draft.selector_hint or "",
+                        "source": skill.source,
+                        "updated_at": skill.updated_at,
+                        "steps": [c.name for c in skill.draft.commands],
+                        "parameters": [],
+                        "last_run": None,
+                        "detail": skill.draft.model_dump_json(indent=2),
+                    }
+                )
         found.sort(key=lambda item: str(item["updated_at"]), reverse=True)
         return {"drafts": found}
 
@@ -613,8 +668,12 @@ class AgentWeb:
         result = decided.result if isinstance(decided.result, dict) else {}
         if decided.status != "approved":
             return {"ok": False, "code": str(result.get("failure") or decided.status)}
-        return {"ok": True, "installed_as": result.get("installed_as"),
-                "note": result.get("note"), "text": approval_text(decided)}
+        return {
+            "ok": True,
+            "installed_as": result.get("installed_as"),
+            "note": result.get("note"),
+            "text": approval_text(decided),
+        }
 
     def external_approvals(self) -> dict[str, Any]:
         """What Claude Code, Codex or Copilot submitted and wait for the
@@ -628,17 +687,26 @@ class AgentWeb:
             if not item.source.startswith("external:"):
                 continue
             try:
-                draft = (chat.skill_candidate(item.candidate_id, self.runtime.actor).draft
-                         if item.kind == "install_skill"
-                         else chat.candidate(item.candidate_id, self.runtime.actor).draft)
+                draft = (
+                    chat.skill_candidate(item.candidate_id, self.runtime.actor).draft
+                    if item.kind == "install_skill"
+                    else chat.candidate(item.candidate_id, self.runtime.actor).draft
+                )
                 detail = draft.model_dump_json(indent=2)
             except ChatAuthoringError:
                 detail = ""
-            found.append({
-                "approval_id": item.approval_id, "kind": item.kind, "source": item.source,
-                "workflow": item.workflow, "summary": item.summary,
-                "arguments": item.arguments, "created_at": item.created_at,
-                "detail": detail})
+            found.append(
+                {
+                    "approval_id": item.approval_id,
+                    "kind": item.kind,
+                    "source": item.source,
+                    "workflow": item.workflow,
+                    "summary": item.summary,
+                    "arguments": item.arguments,
+                    "created_at": item.created_at,
+                    "detail": detail,
+                }
+            )
         return {"approvals": found}
 
     def decide_approval(self, approval_id: str, decision: str) -> dict[str, Any]:
@@ -661,23 +729,37 @@ class AgentWeb:
                     now = datetime.now(UTC)
                     # A pair, as every turn is: the owner's decision, then its result.
                     said = ConversationMessage(
-                        message_id=f"message-{uuid.uuid4().hex}", role="user",
+                        message_id=f"message-{uuid.uuid4().hex}",
+                        role="user",
                         text=("【核准】" if decision == "approve" else "【拒絕】")
                         + decided.summary,
-                        created_at=now, status="submitted",
+                        created_at=now,
+                        status="submitted",
                     )
                     added = ConversationMessage(
-                        message_id=f"message-{uuid.uuid4().hex}", role="assistant", text=text,
+                        message_id=f"message-{uuid.uuid4().hex}",
+                        role="assistant",
+                        text=text,
                         created_at=now,
                         status="answered" if decided.status != "failed" else "failed",
                     )
-                    self.runtime.state.save_conversation(record.model_copy(update={
-                        "updated_at": max(now, record.updated_at),
-                        "messages": (record.messages + (said, added))[-MAX_STORED_MESSAGES:],
-                    }))
+                    self.runtime.state.save_conversation(
+                        record.model_copy(
+                            update={
+                                "updated_at": max(now, record.updated_at),
+                                "messages": (record.messages + (said, added))[
+                                    -MAX_STORED_MESSAGES:
+                                ],
+                            }
+                        )
+                    )
                     message = json.loads(added.model_dump_json())
-        return {"ok": True, "approval": json.loads(decided.model_dump_json()),
-                "text": text, "message": message}
+        return {
+            "ok": True,
+            "approval": json.loads(decided.model_dump_json()),
+            "text": text,
+            "message": message,
+        }
 
     # -- SOP to Workflow authoring --------------------------------------------
 
@@ -686,27 +768,36 @@ class AgentWeb:
         installed = self.runtime.agent.gateway.bridge.installed
         return {
             "ok": True,
-            "session_id": session.session_id, "title": session.title,
-            "status": session.status, "sop_kind": session.sop_kind,
+            "session_id": session.session_id,
+            "title": session.title,
+            "status": session.status,
+            "sop_kind": session.sop_kind,
             "sop_chars": len(session.sop_text),
             "turns": [turn.model_dump(mode="json") for turn in session.turns],
-            "questions": list(session.questions), "problems": list(session.problems),
+            "questions": list(session.questions),
+            "problems": list(session.problems),
             "draft_text": None if draft is None else review_rendered(draft, installed),
             "run_fields": [] if draft is None else form_fields(draft, "web"),
             "settings_fields": [] if draft is None else settings_fields(draft),
             "settings": session.settings,
             "preview_arguments": session.preview_arguments,
-            "preview": None if session.preview is None
-            else session.preview.model_dump(mode="json"),
+            "preview": None if session.preview is None else session.preview.model_dump(mode="json"),
             "installed_as": session.installed_as,
         }
 
     def authoring_sessions(self) -> dict[str, Any]:
-        return {"ok": True, "sessions": [
-            {"session_id": item.session_id, "title": item.title, "status": item.status,
-             "updated_at": item.updated_at}
-            for item in self.authoring.sessions(self.runtime.actor)
-        ]}
+        return {
+            "ok": True,
+            "sessions": [
+                {
+                    "session_id": item.session_id,
+                    "title": item.title,
+                    "status": item.status,
+                    "updated_at": item.updated_at,
+                }
+                for item in self.authoring.sessions(self.runtime.actor)
+            ],
+        }
 
     def authoring_action(self, action: str, body: dict[str, Any]) -> dict[str, Any]:
         actor = self.runtime.actor
@@ -714,7 +805,8 @@ class AgentWeb:
             if action == "start":
                 pdf = body.get("pdf_base64")
                 session = self.authoring.start(
-                    actor, title=str(body.get("title") or "SOP"),
+                    actor,
+                    title=str(body.get("title") or "SOP"),
                     sop_text=None if pdf else str(body.get("sop_text") or ""),
                     pdf=base64.b64decode(str(pdf), validate=True) if pdf else None,
                 )
@@ -722,7 +814,8 @@ class AgentWeb:
                 session = self.authoring.load(str(body.get("session_id")), actor)
             elif action == "discuss":
                 session = self.authoring.discuss(
-                    str(body.get("session_id")), actor, str(body.get("message") or ""))
+                    str(body.get("session_id")), actor, str(body.get("message") or "")
+                )
             elif action == "preview":
                 arguments = body.get("arguments") or {}
                 settings = body.get("settings") or {}
@@ -730,8 +823,12 @@ class AgentWeb:
                     return {"ok": False, "code": "authoring_preview_invalid"}
                 with self.request_lock:
                     session = self.authoring.preview(
-                        str(body.get("session_id")), actor, arguments, settings,
-                        self.runtime.agent.gateway.bridge)
+                        str(body.get("session_id")),
+                        actor,
+                        arguments,
+                        settings,
+                        self.runtime.agent.gateway.bridge,
+                    )
             elif action == "install":
                 session, _path = self.authoring.install(str(body.get("session_id")), actor)
                 view = self._authoring_view(session)
@@ -887,7 +984,8 @@ class AgentWeb:
         identity = manifest.metadata.identity
         stored = self.workflow_settings_store.for_manifest(manifest)
         missing = [
-            field.name for field in static_fields(manifest)
+            field.name
+            for field in static_fields(manifest)
             if field.required and stored.get(field.name) is None and field.default is None
         ]
         return {
@@ -946,7 +1044,11 @@ class AgentWeb:
         )
 
     def upload_workflow_file(
-        self, workflow: AssetIdentity, field_name: str, upload_set: str, filename: str,
+        self,
+        workflow: AssetIdentity,
+        field_name: str,
+        upload_set: str,
+        filename: str,
         data: bytes,
     ) -> dict[str, Any]:
         """Store one file for an installed Workflow's `upload` field (forms v2).
@@ -955,8 +1057,11 @@ class AgentWeb:
         what the run then carries as the field's value.
         """
         manifest = self._installed_workflow(workflow)
-        field = None if manifest is None else next(
-            (item for item in manifest.parameters if item.name == field_name), None)
+        field = (
+            None
+            if manifest is None
+            else next((item for item in manifest.parameters if item.name == field_name), None)
+        )
         if field is None or field.kind != "upload" or field.scope != "runtime":
             return {"ok": False, "code": "workflow_field_unknown"}
         try:
@@ -966,8 +1071,13 @@ class AgentWeb:
             return {"ok": False, "code": error.code}
         except OSError:
             return {"ok": False, "code": "upload_not_saved"}
-        return {"ok": True, "upload_set": chosen, "path": str(path), "filename": path.name,
-                "size_bytes": len(data)}
+        return {
+            "ok": True,
+            "upload_set": chosen,
+            "path": str(path),
+            "filename": path.name,
+            "size_bytes": len(data),
+        }
 
     def workflow_identity(self, request: WorkflowIdentityRequest) -> dict[str, Any]:
         """The calling member's last identity values for this Workflow."""
@@ -988,15 +1098,20 @@ class AgentWeb:
             ),
             None,
         )
-        field = None if manifest is None else next(
-            (candidate for candidate in manifest.parameters if candidate.name == item.field),
-            None,
+        field = (
+            None
+            if manifest is None
+            else next(
+                (candidate for candidate in manifest.parameters if candidate.name == item.field),
+                None,
+            )
         )
         if manifest is None or field is None or not field.choices_source:
             return {"ok": False, "code": "workflow_field_unknown"}
         source = field.choices_source
         waiting = [
-            name for name in ChoiceSources.needed(source, manifest)
+            name
+            for name in ChoiceSources.needed(source, manifest)
             if item.answers.get(name) in (None, "")
         ]
         if waiting:
@@ -1006,14 +1121,15 @@ class AgentWeb:
         )
         if found is None:
             return {
-                "ok": True, "choices": [], "unavailable": True,
+                "ok": True,
+                "choices": [],
+                "unavailable": True,
                 "set": source.split(":", 1)[1].partition("?")[0],
             }
         return {
             "ok": True,
             "choices": [
-                {"value": choice.value, "label": choice.label or choice.value}
-                for choice in found
+                {"value": choice.value, "label": choice.label or choice.value} for choice in found
             ],
         }
 
@@ -1026,7 +1142,8 @@ class AgentWeb:
         """
         binding = self.runtime.config.models
         endpoint = (
-            None if binding is None or binding.routing_alias is None
+            None
+            if binding is None or binding.routing_alias is None
             else binding.catalog.endpoint(binding.routing_alias)
         )
         if endpoint is None or not endpoint.base_url:
@@ -1040,7 +1157,8 @@ class AgentWeb:
             headers["Authorization"] = f"Bearer {token}"
         base_url = endpoint.base_url.rstrip("/")
         url = (
-            base_url.removesuffix("/v1") + "/api/tags" if endpoint.provider == "ollama"
+            base_url.removesuffix("/v1") + "/api/tags"
+            if endpoint.provider == "ollama"
             else base_url + "/models"
         )
         try:
@@ -1054,11 +1172,14 @@ class AgentWeb:
         if reply.status != 200 or not isinstance(payload, dict):
             return {"ok": False, "code": f"gateway_http_{reply.status}", "models": []}
         rows = payload.get("models" if endpoint.provider == "ollama" else "data") or []
-        names = sorted({
-            str(row.get("name" if endpoint.provider == "ollama" else "id"))
-            for row in rows if isinstance(row, dict)
-            and row.get("name" if endpoint.provider == "ollama" else "id")
-        })
+        names = sorted(
+            {
+                str(row.get("name" if endpoint.provider == "ollama" else "id"))
+                for row in rows
+                if isinstance(row, dict)
+                and row.get("name" if endpoint.provider == "ollama" else "id")
+            }
+        )
         return {"ok": True, "models": names[:500], "current": endpoint.model}
 
     def _gateway_configured(self) -> bool:
@@ -1125,12 +1246,17 @@ class AgentWeb:
         status["failure"] = None if loop is None else loop.failure
         ingress = self.runtime.telegram
         allowed = {item["sender_id"] for item in status["senders"]}
-        status["unknown_senders"] = [] if ingress is None else [
-            {"sender_id": item.sender_id, "name": item.name, "seen": item.seen.isoformat()}
-            for item in sorted(ingress.unmapped.values(), key=lambda item: item.seen,
-                               reverse=True)
-            if item.sender_id not in allowed
-        ]
+        status["unknown_senders"] = (
+            []
+            if ingress is None
+            else [
+                {"sender_id": item.sender_id, "name": item.name, "seen": item.seen.isoformat()}
+                for item in sorted(
+                    ingress.unmapped.values(), key=lambda item: item.seen, reverse=True
+                )
+                if item.sender_id not in allowed
+            ]
+        )
         return status
 
     # -- MCP servers (owner 2026-10-08) ------------------------------------
@@ -1155,8 +1281,10 @@ class AgentWeb:
         try:
             if action == "save":
                 config = McpServerConfig.model_validate(body.get("config"))
-                secrets = {str(key): SecretStr(str(value))
-                           for key, value in (body.get("secrets") or {}).items()}
+                secrets = {
+                    str(key): SecretStr(str(value))
+                    for key, value in (body.get("secrets") or {}).items()
+                }
                 hub.save(config, secrets)
             elif action == "delete":
                 hub.delete(name)
@@ -1191,9 +1319,14 @@ class AgentWeb:
         from host_runtime.agent_setup import AGENT_NAMES, SERVERS, SKILLS, bundle_version, status
 
         environment = self._agent_environment()
-        return {"ok": True, "version": bundle_version(), "skills": list(SKILLS),
-                "servers": list(SERVERS), "writable": self.config_path is not None,
-                "agents": [status(agent, environment) for agent in AGENT_NAMES]}
+        return {
+            "ok": True,
+            "version": bundle_version(),
+            "skills": list(SKILLS),
+            "servers": list(SERVERS),
+            "writable": self.config_path is not None,
+            "agents": [status(agent, environment) for agent in AGENT_NAMES],
+        }
 
     def coding_agent_action(self, action: str, body: dict[str, Any]) -> dict[str, Any]:
         """Install/update or remove AEP's skills and servers for one agent, the
@@ -1207,8 +1340,13 @@ class AgentWeb:
         if action == "install" and self.config_path is None:
             return {"ok": False, "code": "host_config_unknown"}
         launch = None if self.config_path is None else Launch(console_python(), self.config_path)
-        lines = apply("install" if action == "install" else "remove", (agent,),
-                      self._agent_environment(), launch, only_detected=False)
+        lines = apply(
+            "install" if action == "install" else "remove",
+            (agent,),
+            self._agent_environment(),
+            launch,
+            only_detected=False,
+        )
         ok = not any(": not changed (" in line for line in lines)
         return {**self.coding_agents(), "ok": ok, "lines": lines}
 
@@ -1233,10 +1371,16 @@ class AgentWeb:
 
     def assistant_mcp_config(self, base_url: str) -> dict[str, Any]:
         """The MCP blocks for VS Code (`.vscode/mcp.json`) and the Copilot CLI."""
-        server = {"type": "http", "url": base_url.rstrip("/") + "/mcp",
-                  "headers": {"Authorization": f"Bearer {self.assistant_token}"}}
-        return {"ok": True, "vscode": {"servers": {"aep": server}},
-                "copilot_cli": {"mcpServers": {"aep": {**server, "tools": ["*"]}}}}
+        server = {
+            "type": "http",
+            "url": base_url.rstrip("/") + "/mcp",
+            "headers": {"Authorization": f"Bearer {self.assistant_token}"},
+        }
+        return {
+            "ok": True,
+            "vscode": {"servers": {"aep": server}},
+            "copilot_cli": {"mcpServers": {"aep": {**server, "tools": ["*"]}}},
+        }
 
     # -- experience review (docs/phases/EXPERIENCE_REVIEW.md, E1-E2) ---------
 
@@ -1249,8 +1393,7 @@ class AgentWeb:
         workspace = self.runtime.layout.workspace_root
         store = self._experience_store()
         # The state returns at most the 100 most recent conversations.
-        cases = from_conversations(self.runtime.state.conversations(self.runtime.actor,
-                                                                    limit=100))
+        cases = from_conversations(self.runtime.state.conversations(self.runtime.actor, limit=100))
         boxes = self._sandboxes()
         if boxes is not None and boxes.root.is_dir():
             cases += from_benchmarks(boxes.root)
@@ -1269,9 +1412,21 @@ class AgentWeb:
         catalog = getattr(handler, "catalog", None)
         parts = []
         skill = harness_skill(self.runtime.agent.gateway.router.commands.skills)
-        found = next((s for s in self.runtime.agent.gateway.router.commands.skills.discover(
-            skill.namespace) if s.metadata.identity == skill), None) if skill else None
-        guidance = ((found.procedure or {}).get("answer_guidance") if found else None)
+        found = (
+            next(
+                (
+                    s
+                    for s in self.runtime.agent.gateway.router.commands.skills.discover(
+                        skill.namespace
+                    )
+                    if s.metadata.identity == skill
+                ),
+                None,
+            )
+            if skill
+            else None
+        )
+        guidance = (found.procedure or {}).get("answer_guidance") if found else None
         if guidance:
             parts.append("Installed Knowledge Skill answer guidance:\n" + str(guidance))
         if catalog is not None and catalog.manifests():
@@ -1287,18 +1442,28 @@ class AgentWeb:
         if model is None or alias is None:
             return {"ok": False, "code": "experience_review_unavailable"}
         added = self.experience_harvest()
-        report = run_review(self._experience_store(), model, alias, self._experience_rules,
-                            workspace=self.runtime.layout.workspace_root, harvested=added)
+        report = run_review(
+            self._experience_store(),
+            model,
+            alias,
+            self._experience_rules,
+            workspace=self.runtime.layout.workspace_root,
+            harvested=added,
+        )
         self._experience_store().set_meta("last_review", report.started_at)
         return {"ok": True, "review_id": report.review_id, "findings": len(report.findings)}
 
     def experience(self) -> dict[str, Any]:
         workspace = self.runtime.layout.workspace_root
         store = self._experience_store()
-        return {"ok": True, "settings": load_settings(workspace).model_dump(mode="json"),
-                "open": len(store.cases("open")), "last_review": store.meta("last_review"),
-                "last_error": store.meta("last_error") or None,
-                "review": latest_review(workspace)}
+        return {
+            "ok": True,
+            "settings": load_settings(workspace).model_dump(mode="json"),
+            "open": len(store.cases("open")),
+            "last_review": store.meta("last_review"),
+            "last_error": store.meta("last_error") or None,
+            "review": latest_review(workspace),
+        }
 
     # -- Reviews: proposals a person decides on (E3-E5, owner 2026-10-13) ------
 
@@ -1313,7 +1478,7 @@ class AgentWeb:
         if boxes is None:
             return ""
         try:
-            _, sandbox = boxes.open(route[len("sandbox:"):])
+            _, sandbox = boxes.open(route[len("sandbox:") :])
         except SandboxError:
             return "sandbox discarded"
         push = latest_push(sandbox)
@@ -1321,9 +1486,12 @@ class AgentWeb:
             return "in the sandbox, not pushed yet"
         found = push.get("benchmark")
         bench: dict[str, Any] = found if isinstance(found, dict) else {}
-        return (f"push {push.get('status')}"
-                + (f": sandbox {bench.get('sandbox_score')} / project vault "
-                   f"{bench.get('project_score')} of {bench.get('total')}" if bench else ""))
+        return f"push {push.get('status')}" + (
+            f": sandbox {bench.get('sandbox_score')} / project vault "
+            f"{bench.get('project_score')} of {bench.get('total')}"
+            if bench
+            else ""
+        )
 
     def reviews(self) -> dict[str, Any]:
         store = self._proposals()
@@ -1345,8 +1513,12 @@ class AgentWeb:
             return {"ok": False, "code": "unknown_action"}
         store = self._proposals()
         try:
-            decided = store.decide(proposal_id, action, self.runtime.actor,  # type: ignore[arg-type]
-                                   reason)
+            decided = store.decide(
+                proposal_id,
+                action,
+                self.runtime.actor,  # type: ignore[arg-type]
+                reason,
+            )
         except ProposalError as error:
             return {"ok": False, "code": error.code}
         if action == "accept":
@@ -1366,14 +1538,19 @@ class AgentWeb:
             store.routed(proposal.proposal_id, "manual", "no Knowledge pipeline on this Agent")
             return
         # Project vaults first: they are where reviewed rules and questions live.
-        bases = {v.name: Path(v.root) for v in sorted(
-            binding.vaults, key=lambda v: v.knowledge_asset is None)}
+        bases = {
+            v.name: Path(v.root)
+            for v in sorted(binding.vaults, key=lambda v: v.knowledge_asset is None)
+        }
         if proposal.kind == "rule_edit":
             target = resolve_rule(proposal.target, bases)
             if target is None:
-                store.routed(proposal.proposal_id, "manual",
-                             "the target is not a vault rule file; platform Skill and "
-                             "Workflow proposals are followed up by hand for now")
+                store.routed(
+                    proposal.proposal_id,
+                    "manual",
+                    "the target is not a vault rule file; platform Skill and "
+                    "Workflow proposals are followed up by hand for now",
+                )
                 return
             base, path, scope = target.base, target.path, target.scope
         else:
@@ -1383,20 +1560,28 @@ class AgentWeb:
             path = f"checks/questions/{folder}/review-{proposal.proposal_id}.md"
 
         def work() -> tuple[TaskStatus, str]:
-            info = pipeline.create_sandbox(base, f"review {proposal.proposal_id[-10:]}",
-                                           self.runtime.actor, scope=scope)
+            info = pipeline.create_sandbox(
+                base, f"review {proposal.proposal_id[-10:]}", self.runtime.actor, scope=scope
+            )
             _, sandbox = pipeline.sandboxes.open(info.sandbox_id)
             if proposal.kind == "test_question":
                 pipeline.write_rule(info.sandbox_id, path, draft_question(proposal))
             write_proposal(sandbox.root, proposal, path)
-            store.routed(proposal.proposal_id, f"sandbox:{info.sandbox_id}",
-                         f"{path} in sandbox {info.label}")
+            store.routed(
+                proposal.proposal_id,
+                f"sandbox:{info.sandbox_id}",
+                f"{path} in sandbox {info.label}",
+            )
             return "succeeded", f"sandbox {info.sandbox_id} opened for {path}"
 
         store.routed(proposal.proposal_id, "opening", "opening a review sandbox")
-        threading.Thread(target=self.tasks().tracked(
-            "review", f"Open a review sandbox for {proposal.proposal_id}", base, work),
-            name="review-route", daemon=True).start()
+        threading.Thread(
+            target=self.tasks().tracked(
+                "review", f"Open a review sandbox for {proposal.proposal_id}", base, work
+            ),
+            name="review-route",
+            daemon=True,
+        ).start()
 
     def review_proposal(self, sandbox_id: str) -> dict[str, Any]:
         """The proposal a review sandbox was opened for, for the Knowledge page."""
@@ -1432,15 +1617,20 @@ class AgentWeb:
         return ("failed", error) if error else ("succeeded", "report written")
 
     def start_experience_review(self) -> dict[str, Any]:
-        thread = threading.Thread(target=self.tasks().tracked(
-            "experience_review", "Experience review", "", self._experience_review_task),
-            name="experience-review", daemon=True)
+        thread = threading.Thread(
+            target=self.tasks().tracked(
+                "experience_review", "Experience review", "", self._experience_review_task
+            ),
+            name="experience-review",
+            daemon=True,
+        )
         thread.start()
         return {"ok": True, "started": True}
 
     def start_experience_nightly(self, check_s: float = 1800.0) -> None:
         """Review once a night after 02:00 local time when there are new cases
         (owner, 2026-10-12)."""
+
         def loop() -> None:
             while True:
                 time.sleep(check_s)
@@ -1454,8 +1644,12 @@ class AgentWeb:
                         continue
                     self.experience_harvest()
                     if self._experience_store().cases("open"):
-                        self.tasks().tracked("experience_review", "Experience review (nightly)", "",
-                                             self._experience_review_task)()
+                        self.tasks().tracked(
+                            "experience_review",
+                            "Experience review (nightly)",
+                            "",
+                            self._experience_review_task,
+                        )()
                 except Exception:  # noqa: BLE001 - a failed night is retried the next
                     continue
 
@@ -1489,12 +1683,12 @@ class AgentWeb:
         with self._one_at_a_time:
             try:
                 config = apply_telegram_settings(
-                    self.config_path, self.runtime.layout, request,
+                    self.config_path,
+                    self.runtime.layout,
+                    request,
                     store=self.user_environment,
                 )
-                ingress = build_telegram(
-                    config, self.runtime.layout, self.runtime.agent, None
-                )
+                ingress = build_telegram(config, self.runtime.layout, self.runtime.agent, None)
             except TelegramSettingsError as error:
                 return {"ok": False, "code": str(error)}
             except (OSError, ValueError):
@@ -1660,8 +1854,11 @@ class AgentWeb:
                 }
                 for item in records
             ],
-            "selected": (None if selected is None
-                         else self._fresh_cards(json.loads(selected.model_dump_json()))),
+            "selected": (
+                None
+                if selected is None
+                else self._fresh_cards(json.loads(selected.model_dump_json()))
+            ),
         }
 
     # -- action cards (owner 2026-10-15): proposals now, agent mode next ------
@@ -1679,13 +1876,18 @@ class AgentWeb:
             if isinstance(listed, list):
                 message["action_cards"] = [
                     (self.card(str(item.get("card_id") or "")) or item)
-                    if isinstance(item, dict) and item.get("status") == "pending" else item
-                    for item in listed]
+                    if isinstance(item, dict) and item.get("status") == "pending"
+                    else item
+                    for item in listed
+                ]
         return record
 
     def card(self, card_id: str) -> dict[str, Any] | None:
-        handlers: dict[str, Any] = {"cp-": self.proposals, "pm-": self.agent_mode,
-                                    "ml-": self.agent_mail}
+        handlers: dict[str, Any] = {
+            "cp-": self.proposals,
+            "pm-": self.agent_mode,
+            "ml-": self.agent_mail,
+        }
         handler = handlers.get(card_id[:3])
         found = handler.card(card_id) if handler is not None else None
         return None if found is None else found.model_dump(mode="json")
@@ -1693,12 +1895,17 @@ class AgentWeb:
     def cards(self, session_id: str | None = None) -> dict[str, Any]:
         """Every card still waiting, from any channel (Tasks > Pending changes);
         with a session, that conversation's (agent mode polls it during a turn)."""
-        proposals = [item for item in self.proposals.open_cards()
-                     if session_id is None or getattr(
-                         self.proposals.store.get(item.card_id), "session_id", None)
-                     == session_id]
-        found = [*proposals, *self.agent_mode.open_cards(session_id),
-                 *self.agent_mail.open_cards(session_id)]
+        proposals = [
+            item
+            for item in self.proposals.open_cards()
+            if session_id is None
+            or getattr(self.proposals.store.get(item.card_id), "session_id", None) == session_id
+        ]
+        found = [
+            *proposals,
+            *self.agent_mode.open_cards(session_id),
+            *self.agent_mail.open_cards(session_id),
+        ]
         return {"ok": True, "cards": [item.model_dump(mode="json") for item in found]}
 
     def decide_card(self, card_id: str, action: str, channel: str = "local") -> dict[str, Any]:
@@ -1722,12 +1929,14 @@ class AgentWeb:
         return decided
 
     def _update_card_message(self, session_id: str, card: dict[str, Any]) -> None:
-        note = (f"[card {card['card_id']}] {card.get('status_label') or card['status']}"
-                + (f": {card['outcome']}" if card.get("outcome") else ""))
+        note = f"[card {card['card_id']}] {card.get('status_label') or card['status']}" + (
+            f": {card['outcome']}" if card.get("outcome") else ""
+        )
         with self._record_lock(session_id):
             try:
                 self.runtime.state.set_message_card(
-                    session_id, self.runtime.actor, card, note[:600])
+                    session_id, self.runtime.actor, card, note[:600]
+                )
             except (LocalStateError, ValueError):
                 return
 
@@ -1926,7 +2135,8 @@ class AgentWeb:
 
     @staticmethod
     def _replied_exchange(
-        record: ConversationRecord, reply_to: str | None,
+        record: ConversationRecord,
+        reply_to: str | None,
     ) -> tuple[ConversationMessage, ConversationMessage] | None:
         """The (question, answer) pair whose answer the user chose to reply to."""
         if reply_to is None:
@@ -1934,8 +2144,10 @@ class AgentWeb:
         messages = record.messages
         for index, message in enumerate(messages):
             if (
-                message.message_id == reply_to and message.role == "assistant"
-                and index > 0 and messages[index - 1].role == "user"
+                message.message_id == reply_to
+                and message.role == "assistant"
+                and index > 0
+                and messages[index - 1].role == "user"
             ):
                 return messages[index - 1], message
         return None
@@ -1947,10 +2159,10 @@ class AgentWeb:
         try:
             with self._record_lock(item.session_id):
                 saved = self.runtime.state.set_message_feedback(
-                    item.session_id, self.runtime.actor, item.message_id,
-                    MessageFeedback(
-                        rating=item.rating, note=note, updated_at=datetime.now(UTC)
-                    ),
+                    item.session_id,
+                    self.runtime.actor,
+                    item.message_id,
+                    MessageFeedback(rating=item.rating, note=note, updated_at=datetime.now(UTC)),
                     # Queued for the Shared Platform with the question and
                     # answer (owner 2026-10-08); sent now or once it answers.
                     queue=True,
@@ -1961,8 +2173,10 @@ class AgentWeb:
             self.feedback_sync.soon()
         message = next(m for m in saved.messages if m.message_id == item.message_id)
         return {
-            "ok": True, "message_id": item.message_id,
-            "feedback": None if message.feedback is None
+            "ok": True,
+            "message_id": item.message_id,
+            "feedback": None
+            if message.feedback is None
             else message.feedback.model_dump(mode="json"),
         }
 
@@ -1973,8 +2187,9 @@ class AgentWeb:
             if record is None:
                 return {"ok": False, "code": "conversation_unknown"}
             try:
-                attached = [self.attachments.get(item.session_id, file_id)
-                            for file_id in item.attachments]
+                attached = [
+                    self.attachments.get(item.session_id, file_id) for file_id in item.attachments
+                ]
             except AttachmentError as error:
                 return {"ok": False, "code": error.code}
             attachment_note, attachment_images = for_model(attached)
@@ -2015,10 +2230,10 @@ class AgentWeb:
                     "status": "needs_input",
                 }
             recent = tuple(
-                message for message in record.messages[-39:]
-                if quoted is None or message.message_id not in {
-                    quoted[0].message_id, quoted[1].message_id
-                }
+                message
+                for message in record.messages[-39:]
+                if quoted is None
+                or message.message_id not in {quoted[0].message_id, quoted[1].message_id}
             )
             # A reply keeps the chosen exchange directly before the new
             # question, even when it is older than the recent-history window.
@@ -2027,7 +2242,8 @@ class AgentWeb:
                 for message in (*recent, *(quoted or ()))
             ) + (ModelMessage(role="user", text=item.message),)
             routed_message = (
-                item.message if quoted is None
+                item.message
+                if quoted is None
                 else f"{item.message}\n\n（延續先前的問題：{quoted[0].text}）"
             )
             try:
@@ -2039,9 +2255,14 @@ class AgentWeb:
             if attached and history:
                 # The files ride on the newest message, outside the typed
                 # text's budget; the Gateway gives that message more room.
-                history = (*history[:-1], ModelMessage(
-                    role="user", text=f"{history[-1].text}\n\n{attachment_note}",
-                    images=attachment_images))
+                history = (
+                    *history[:-1],
+                    ModelMessage(
+                        role="user",
+                        text=f"{history[-1].text}\n\n{attachment_note}",
+                        images=attachment_images,
+                    ),
+                )
             context_too_large = {
                 "ok": False,
                 "answer": (
@@ -2094,16 +2315,24 @@ class AgentWeb:
                 )
                 if agent_run is not None:
                     answer_cards = self.agent_mode.finish(
-                        agent_run, completed.status, completed.code or "")
+                        agent_run, completed.status, completed.code or ""
+                    )
                 else:
                     answer_cards = []
                 answer = {
-                    **({"action_cards": answer_cards,
-                        # Later turns tell the agent what the person decided.
-                        "tool_summary": "\n".join(
-                            f"[card {card['card_id']}] {card['title']}: "
-                            f"{card.get('status_label') or card['status']}"
-                            for card in answer_cards)[:2_000]} if answer_cards else {}),
+                    **(
+                        {
+                            "action_cards": answer_cards,
+                            # Later turns tell the agent what the person decided.
+                            "tool_summary": "\n".join(
+                                f"[card {card['card_id']}] {card['title']}: "
+                                f"{card.get('status_label') or card['status']}"
+                                for card in answer_cards
+                            )[:2_000],
+                        }
+                        if answer_cards
+                        else {}
+                    ),
                     "ok": completed.status == "answered",
                     "answer": (
                         completed.text
@@ -2146,9 +2375,13 @@ class AgentWeb:
                 # The turn is one Harness run (telemetry v0.2); an exception
                 # leaves it incomplete, which the contract allows.
                 turn_run = ExitStack()
-                turn_run.enter_context(telemetry.run(
-                    "conversation_turn", trace_id=trace.trace_id,
-                    attributes={"ingress": "agent_web", "attachments": len(attached)}))
+                turn_run.enter_context(
+                    telemetry.run(
+                        "conversation_turn",
+                        trace_id=trace.trace_id,
+                        attributes={"ingress": "agent_web", "attachments": len(attached)},
+                    )
+                )
                 matrix_intent = self._market_matrix_intent(item.message)
                 named_knowledge = self._named_knowledge(routed_message)
                 if named_knowledge is None and matrix_intent:
@@ -2163,17 +2396,24 @@ class AgentWeb:
                 # "Run X" for an installed Workflow is its form, not the
                 # model's prose (owner 2026-10-15).
                 form_offer_now = (
-                    None if attached or explicit_command else self._run_form_offer(item.message))
+                    None if attached or explicit_command else self._run_form_offer(item.message)
+                )
                 route = (
-                    "command" if command_match is not None and explicit_command
+                    "command"
+                    if command_match is not None and explicit_command
                     else ("market_matrix" if matrix_intent else "knowledge_direct")
                     if named_knowledge is not None
-                    else "command_rule" if command_match is not None
-                    else "converse")
+                    else "command_rule"
+                    if command_match is not None
+                    else "converse"
+                )
                 if form_offer_now is not None:
                     route = "workflow_form"
-                telemetry.emit("routing.completed", state="routing", attributes={
-                    "router": "agent_web", "route": route})
+                telemetry.emit(
+                    "routing.completed",
+                    state="routing",
+                    attributes={"router": "agent_web", "route": route},
+                )
                 if form_offer_now is not None:
                     answer = self._form_answer(form_offer_now)
                 elif command_match is not None and explicit_command:
@@ -2208,9 +2448,11 @@ class AgentWeb:
                         ),
                         "outcome": json.loads(direct.model_dump_json()),
                     }
-                elif not attached and (
-                    inferred_knowledge := self._skill_intended_knowledge(routed_message)
-                ) is not None:
+                elif (
+                    not attached
+                    and (inferred_knowledge := self._skill_intended_knowledge(routed_message))
+                    is not None
+                ):
                     answer = self._knowledge_reply(inferred_knowledge, routed_message)
                 elif history_error:
                     answer = context_too_large
@@ -2241,7 +2483,8 @@ class AgentWeb:
                     }
                 telemetry.set_run(
                     outcome=answer.get("status"),
-                    status="failed" if answer.get("status") == "failed" else "succeeded")
+                    status="failed" if answer.get("status") == "failed" else "succeeded",
+                )
                 turn_run.close()
             finished = datetime.now(UTC)
             outcome = answer.get("outcome")
@@ -2284,8 +2527,11 @@ class AgentWeb:
                                 status="submitted",
                                 reply_to=None if quoted is None else quoted[1].message_id,
                                 attachments=tuple(
-                                    {"filename": file.filename, "kind": file.kind,
-                                     "path": file.path}
+                                    {
+                                        "filename": file.filename,
+                                        "kind": file.kind,
+                                        "path": file.path,
+                                    }
                                     for file in attached
                                 ),
                             ),
@@ -2350,12 +2596,16 @@ class AgentWeb:
         base = url.rstrip("/")
         launch = AgentLaunch(
             folder=run.folder,
-            servers={"aep-agent": (base + "/agent", run.token),
-                     "aep-assistant": (base, assistant),
-                     "aep": (base + "/authoring", assistant)},
+            servers={
+                "aep-agent": (base + "/agent", run.token),
+                "aep-assistant": (base, assistant),
+                "aep": (base + "/authoring", assistant),
+            },
             on_permission=lambda params: self.agent_mode.acp_permission(run, dict(params)),
             on_tool_update=lambda call, status: self.agent_mode.tool_outcome(run, call, status),
-            read_roots=run.read_roots, run_id=run.run_id)
+            read_roots=run.read_roots,
+            run_id=run.run_id,
+        )
         return run, launch
 
     def agent_mode_settings(self) -> dict[str, Any]:
@@ -2375,15 +2625,20 @@ class AgentWeb:
             return {"ok": False, "code": "conversation_unknown"}
         folders = body.get("read_folders")
         return self.agent_mode.set_session(
-            session_id, str(body.get("folder") or ""),
-            [str(item) for item in folders] if isinstance(folders, list) else [])
+            session_id,
+            str(body.get("folder") or ""),
+            [str(item) for item in folders] if isinstance(folders, list) else [],
+        )
 
     def agent_mcp(self, token: str, message: dict[str, Any]) -> dict[str, Any] | None:
         """`/mcp/agent`: only a running agent-mode turn's own token reaches it."""
         run = self.agent_mode.run_for_token(token)
         if run is None:
-            return {"jsonrpc": "2.0", "id": message.get("id"),
-                    "error": {"code": -32001, "message": "no agent run with this token"}}
+            return {
+                "jsonrpc": "2.0",
+                "id": message.get("id"),
+                "error": {"code": -32001, "message": "no agent run with this token"},
+            }
         return self.agent_mode.mcp(run, message)
 
     def _named_knowledge(self, message: str) -> dict[str, Any] | None:
@@ -2425,16 +2680,11 @@ class AgentWeb:
             procedure = KnowledgeProcedure.model_validate(skill.procedure)
         except ValueError:
             return None
-        return (
-            knowledge[0]
-            if procedure.matches_intent(message)
-            else None
-        )
+        return knowledge[0] if procedure.matches_intent(message) else None
 
     def _knowledge_reply(self, selected: dict[str, Any], question: str) -> dict[str, Any]:
         eligible_skills = [
-            item for item in self.assets()["skills"]
-            if item["knowledge_harness_selectable"]
+            item for item in self.assets()["skills"] if item["knowledge_harness_selectable"]
         ]
         selected_skill = (
             AssetIdentity(
@@ -2442,7 +2692,8 @@ class AgentWeb:
                 name=eligible_skills[0]["name"],
                 version=eligible_skills[0]["version"],
             )
-            if len(eligible_skills) == 1 else None
+            if len(eligible_skills) == 1
+            else None
         )
         result = self.ask_knowledge(
             KnowledgeAskRequest(
@@ -2506,8 +2757,12 @@ class AgentWeb:
         return any(
             term in lowered
             for term in (
-                "市場矩陣", "知識缺口矩陣", "產品市場對標", "產品與市場對標",
-                "market matrix", "market alignment matrix",
+                "市場矩陣",
+                "知識缺口矩陣",
+                "產品市場對標",
+                "產品與市場對標",
+                "market matrix",
+                "market alignment matrix",
             )
         )
 
@@ -2541,8 +2796,7 @@ class AgentWeb:
             }
         record = MarketMatrixRecord.model_validate(outcome.capability.data)
         assessments = tuple(
-            assess_market_cell(record, cell.product_family, cell.market)
-            for cell in record.cells
+            assess_market_cell(record, cell.product_family, cell.market) for cell in record.cells
         )
         unresolved = sum(item.status == "needs_evidence" for item in assessments)
         labels = {item[0]: item[1] for item in PRODUCT_FAMILIES}
@@ -2585,10 +2839,7 @@ class AgentWeb:
                 "每格仍需客戶情境與獨立驗證。",
                 "",
                 "按市場需補的知識：",
-                *(
-                    f"- {label}: {MARKET_QUESTIONS[key]}"
-                    for key, label, _aliases in TARGET_MARKETS
-                ),
+                *(f"- {label}: {MARKET_QUESTIONS[key]}" for key, label, _aliases in TARGET_MARKETS),
                 "按產品類別需補的規格與 option：",
                 *(
                     f"- {label}: {PRODUCT_QUESTIONS[key]}"
@@ -2649,12 +2900,15 @@ class AgentWeb:
                 elif "@" not in target_text and not raw_arguments.strip():
                     # `/run <name>`: the Workflow's form (owner 2026-10-15).
                     found = resolve_workflow(
-                        self.runtime.agent.gateway.engine.workflows.manifests(), target_text)
+                        self.runtime.agent.gateway.engine.workflows.manifests(), target_text
+                    )
                     if isinstance(found, str):
                         return self._command_needs_input(
-                            f"No single installed Workflow is called {target_text}.")
-                    return self._form_answer(form_offer(
-                        found, {}, self.runtime.agent.gateway.engine.settings_provider))
+                            f"No single installed Workflow is called {target_text}."
+                        )
+                    return self._form_answer(
+                        form_offer(found, {}, self.runtime.agent.gateway.engine.settings_provider)
+                    )
                 else:
                     path, separator, version = target_text.rpartition("@")
                     namespace, slash, name = path.partition("/")
@@ -2763,8 +3017,7 @@ class AgentWeb:
                 and item.harness_guidance is not None
                 and "knowledge" in item.harness_guidance.domains
                 and any(
-                    command.kind == "capability"
-                    and command.target == KNOWLEDGE_QUERY_SPEC.identity
+                    command.kind == "capability" and command.target == KNOWLEDGE_QUERY_SPEC.identity
                     for command in item.commands
                 )
             )
@@ -2794,7 +3047,8 @@ class AgentWeb:
                 ],
                 "default_command": item.default_command or "",
                 "harness_guidance": (
-                    None if item.harness_guidance is None
+                    None
+                    if item.harness_guidance is None
                     else item.harness_guidance.model_dump(mode="json")
                 ),
                 "knowledge_harness_selectable": harness_selectable(item),
@@ -2815,13 +3069,7 @@ class AgentWeb:
                 "parameters": {
                     "editor": "fields" if item.parameters else "json_object",
                     "input_contract": item.input_contract,
-                    **(
-                        {
-                            "fields": form_fields(item, "web")
-                        }
-                        if item.parameters
-                        else {}
-                    ),
+                    **({"fields": form_fields(item, "web")} if item.parameters else {}),
                 },
                 "shipped": asset_shelf.is_shipped("workflow", item.metadata.identity),
             }
@@ -2957,7 +3205,8 @@ class AgentWeb:
         assets_only = self.runtime.layout.grants.is_file()
         decided = (
             self.runtime.layout.platform_selections
-            if assets_only else self.runtime.layout.authorization
+            if assets_only
+            else self.runtime.layout.authorization
         )
         authorization = None
         if not decided.is_file():
@@ -3008,9 +3257,15 @@ class AgentWeb:
                             for item in metadata.dependencies
                         ),
                         provenance=tuple(
-                            item.source + "".join(
-                                f" ({label} {value})" for label, value in
-                                (("author", item.author), ("revision", item.revision)) if value)
+                            item.source
+                            + "".join(
+                                f" ({label} {value})"
+                                for label, value in (
+                                    ("author", item.author),
+                                    ("revision", item.revision),
+                                )
+                                if value
+                            )
                             for item in metadata.provenance
                         ),
                         runtime=metadata.compatibility.runtime or "",
@@ -3115,14 +3370,21 @@ class AgentWeb:
         environment = UserEnvironment()
         record = read_record(self.runtime.layout)
         enrolled = (
-            record is not None and platform is not None and record.token_id == platform.token_id
+            record is not None
+            and platform is not None
+            and record.token_id == platform.token_id
             and record.bridge_id == config.device.bridge_id
         )
         return {
             "ok": True,
             "writable": self.config_path is not None,
-            "member_portal_url": (publishing.member_portal_url if publishing is not None
-                                  else (platform.member_portal_url or "") if platform else ""),
+            "member_portal_url": (
+                publishing.member_portal_url
+                if publishing is not None
+                else (platform.member_portal_url or "")
+                if platform
+                else ""
+            ),
             "base_url": platform.base_url if platform is not None else "",
             "bridge_id": config.device.bridge_id,
             "registered_by": config.device.registered_by,
@@ -3163,8 +3425,7 @@ class AgentWeb:
                     raise SharedPlatformError("settings_invalid") from None
                 if code:
                     assert updated.publishing is not None
-                    variable = updated.credential_environment()[
-                        updated.publishing.credential.name]
+                    variable = updated.credential_environment()[updated.publishing.credential.name]
                     save_secret(self.user_environment, variable, code)
             except SharedPlatformError as error:
                 return self._shared_problem(error.code)
@@ -3176,8 +3437,12 @@ class AgentWeb:
                 except SharedPlatformError as error:
                     reply = {**self._shared_problem(error.code), "saved": True}
                 except PlatformPublishError as error:
-                    reply = {"ok": False, "code": error.code, "message": explain(error.code),
-                             "saved": True}
+                    reply = {
+                        "ok": False,
+                        "code": error.code,
+                        "message": explain(error.code),
+                        "saved": True,
+                    }
             try:
                 save_config(self.config_path, updated, now=utc_now())
             except OSError:
@@ -3190,8 +3455,9 @@ class AgentWeb:
                 reply["probe"] = probed.status
         return {**self.shared_platform_settings(), **reply}
 
-    def _enroll(self, config: CompanyHostConfiguration, base: str, portal: str
-                ) -> CompanyHostConfiguration:
+    def _enroll(
+        self, config: CompanyHostConfiguration, base: str, portal: str
+    ) -> CompanyHostConfiguration:
         """Ask the portal, as the member, for this computer's Bridge token;
         save the token for this Windows user; return host.json pointing at it."""
         from host_runtime.runtime import enrollment_request
@@ -3205,18 +3471,25 @@ class AgentWeb:
             if actor != config.device.registered_by:
                 # Said here with both names: the platform would refuse it too.
                 raise SharedPlatformError("device_owner_mismatch")
-            answer = publisher.enroll(
-                enrollment_request(config, _trace()).model_dump(mode="json"))
+            answer = publisher.enroll(enrollment_request(config, _trace()).model_dump(mode="json"))
             token_id, secret, expires = enrolled_token(answer, config.device.bridge_id)
             save_secret(self.user_environment, TOKEN_VARIABLE, secret)
         except (SharedPlatformError, PlatformPublishError) as error:
             self.tasks().finish(task, "failed", error.code)
             raise
-        updated = with_enrollment(config, base_url=base, member_portal_url=portal,
-                                  token_id=token_id)
-        write_record(self.runtime.layout, EnrollmentRecord(
-            bridge_id=config.device.bridge_id, token_id=token_id, actor=actor,
-            enrolled_at=utc_now(), expires_at=expires))
+        updated = with_enrollment(
+            config, base_url=base, member_portal_url=portal, token_id=token_id
+        )
+        write_record(
+            self.runtime.layout,
+            EnrollmentRecord(
+                bridge_id=config.device.bridge_id,
+                token_id=token_id,
+                actor=actor,
+                enrolled_at=utc_now(),
+                expires_at=expires,
+            ),
+        )
         self.tasks().finish(task, "succeeded", f"enrolled as {config.device.bridge_id}")
         return updated
 
@@ -3258,7 +3531,8 @@ class AgentWeb:
             return reply
         reply["portal"] = binding.member_portal_url
         reply["variable"] = self.runtime.config.credential_environment().get(
-            binding.credential.name)
+            binding.credential.name
+        )
         try:
             reply["submissions"] = publisher.submissions()
         except PlatformPublishError as error:
@@ -3270,22 +3544,33 @@ class AgentWeb:
     ) -> dict[str, Any]:
         publisher = self._publisher()
         if publisher is None or kind not in ("skill", "workflow"):
-            return {"ok": False, "code": "publishing_not_configured",
-                    "message": "Set the Member Portal URL in Settings > Shared platform."}
-        task = self.tasks().start("publish", f"Publish {asset} to the shared platform",
-                                  self.runtime.config.publishing.member_portal_url
-                                  if self.runtime.config.publishing else "")
+            return {
+                "ok": False,
+                "code": "publishing_not_configured",
+                "message": "Set the Member Portal URL in Settings > Shared platform.",
+            }
+        task = self.tasks().start(
+            "publish",
+            f"Publish {asset} to the shared platform",
+            self.runtime.config.publishing.member_portal_url
+            if self.runtime.config.publishing
+            else "",
+        )
         try:
             manifest = installed_manifest(self.runtime.layout, kind, asset)  # type: ignore[arg-type]
-            submission = publisher.submit(
-                kind, manifest, change, note, visibility or None)  # type: ignore[arg-type]
+            submission = publisher.submit(kind, manifest, change, note, visibility or None)  # type: ignore[arg-type]
         except PlatformPublishError as error:
             self.tasks().finish(task, "failed", error.code)
             return {"ok": False, "code": error.code, "message": explain(error.code)}
         identity = submission["identity"]
-        self.tasks().finish(task, "succeeded", (
-            f"{identity['namespace']}/{identity['name']}@{identity['version']} is waiting "
-            "for review"))
+        self.tasks().finish(
+            task,
+            "succeeded",
+            (
+                f"{identity['namespace']}/{identity['name']}@{identity['version']} is waiting "
+                "for review"
+            ),
+        )
         return {"ok": True, "submission": submission}
 
     def connect_publishing(self, code: str) -> dict[str, Any]:
@@ -3294,21 +3579,33 @@ class AgentWeb:
         logged or echoed (owner 2026-10-15: no command line for this)."""
         binding = self.runtime.config.publishing
         if binding is None:
-            return {"ok": False, "code": "publishing_not_configured",
-                    "message": "Set the Member Portal URL in Settings > Shared platform."}
+            return {
+                "ok": False,
+                "code": "publishing_not_configured",
+                "message": "Set the Member Portal URL in Settings > Shared platform.",
+            }
         variable = self.runtime.config.credential_environment().get(binding.credential.name)
         value = code.strip()
         if variable is None:
-            return {"ok": False, "code": "login_variable_missing",
-                    "message": "host.json names no environment variable for this login."}
+            return {
+                "ok": False,
+                "code": "login_variable_missing",
+                "message": "host.json names no environment variable for this login.",
+            }
         if not re.fullmatch(r"login-[0-9a-f]{16}:[A-Za-z0-9_-]{32,}", value):
-            return {"ok": False, "code": "login_malformed",
-                    "message": "That is not a Personal Agent code; copy it again from the portal."}
+            return {
+                "ok": False,
+                "code": "login_malformed",
+                "message": "That is not a Personal Agent code; copy it again from the portal.",
+            }
         try:
             self.user_environment(variable, value)
         except Exception:  # noqa: BLE001 - the reason must not carry the value
-            return {"ok": False, "code": "login_not_saved",
-                    "message": "Windows did not save the code."}
+            return {
+                "ok": False,
+                "code": "login_not_saved",
+                "message": "Windows did not save the code.",
+            }
         # The next call builds a fresh publisher, which reads the new login.
         self._member_publisher = (None, None)
         return {"ok": True}
@@ -3344,8 +3641,10 @@ class AgentWeb:
         label = f"{identity.namespace}/{identity.name}@{identity.version}"
         with self._one_at_a_time:
             task = self.tasks().start(
-                "select", (f"Add {label} to this Agent" if add
-                           else f"Remove the selection of {label}"), bridge_id)
+                "select",
+                (f"Add {label} to this Agent" if add else f"Remove the selection of {label}"),
+                bridge_id,
+            )
             already = False
             try:
                 if add:
@@ -3359,31 +3658,53 @@ class AgentWeb:
                 already = True
             synchronized = self.synchronize()
             after = synchronized.get("after") or {}
-            entry = next((item for item in after.get("catalog", ())
-                          if (item["namespace"], item["name"], item["version"])
-                          == identity.key), None)
+            entry = next(
+                (
+                    item
+                    for item in after.get("catalog", ())
+                    if (item["namespace"], item["name"], item["version"]) == identity.key
+                ),
+                None,
+            )
             installed = bool(entry and entry.get("installed"))
             assets_only = bool(synchronized.get("assets_only") or after.get("assets_only"))
             if synchronized["status"] != "answered":
                 failure = synchronized.get("failure") or {}
                 code = str(failure.get("code") or synchronized["status"])
-                message = ("Selected for this PC, but installing it did not finish: "
-                           if add else "Selection removed, but the sync did not finish: "
-                           ) + explain(code)
+                message = (
+                    "Selected for this PC, but installing it did not finish: "
+                    if add
+                    else "Selection removed, but the sync did not finish: "
+                ) + explain(code)
                 self.tasks().finish(task, "failed", code)
-                return {"ok": False, "code": code, "message": message, "selected": add,
-                        "installed": installed, "assets_only": assets_only,
-                        "restart_required": False, "sync": synchronized,
-                        "assets": self.assets()}
+                return {
+                    "ok": False,
+                    "code": code,
+                    "message": message,
+                    "selected": add,
+                    "installed": installed,
+                    "assets_only": assets_only,
+                    "restart_required": False,
+                    "sync": synchronized,
+                    "assets": self.assets(),
+                }
             restart_required = False
             if add:
-                message = (f"{label} was already selected for this PC" if already
-                           else f"{label} is now selected for this PC")
-                message += ("; it is installed on this Agent." if installed
-                            else "; it is not installed yet.")
+                message = (
+                    f"{label} was already selected for this PC"
+                    if already
+                    else f"{label} is now selected for this PC"
+                )
+                message += (
+                    "; it is installed on this Agent."
+                    if installed
+                    else "; it is not installed yet."
+                )
                 if assets_only:
-                    message += (" Files only: permissions come from this PC's grants.json, "
-                                "so it runs only where grants.json allows its capabilities.")
+                    message += (
+                        " Files only: permissions come from this PC's grants.json, "
+                        "so it runs only where grants.json allows its capabilities."
+                    )
                 if installed and kind == "workflow" and assets_only:
                     # grants.json still decides every step, as at start-up, so
                     # the engine may offer the new Workflow at once.
@@ -3393,14 +3714,23 @@ class AgentWeb:
                     restart_required = True
                     message += " Restart Agent Web before the Agent can use it."
             else:
-                message = (f"{label} is no longer selected for this PC. The installed file "
-                           "stays; use 'Remove from this Agent' in the list above to take it "
-                           "off this computer.")
+                message = (
+                    f"{label} is no longer selected for this PC. The installed file "
+                    "stays; use 'Remove from this Agent' in the list above to take it "
+                    "off this computer."
+                )
             self.tasks().finish(task, "succeeded", message)
         # The page redraws the card and the installed list from this answer.
-        return {"ok": True, "selected": add, "installed": installed,
-                "assets_only": assets_only, "restart_required": restart_required,
-                "message": message, "sync": synchronized, "assets": self.assets()}
+        return {
+            "ok": True,
+            "selected": add,
+            "installed": installed,
+            "assets_only": assets_only,
+            "restart_required": restart_required,
+            "message": message,
+            "sync": synchronized,
+            "assets": self.assets(),
+        }
 
     def add_to_agent(self, kind: str, asset: str) -> dict[str, Any]:
         """Select this exact version for this PC's Bridge, then synchronize."""
@@ -3429,8 +3759,11 @@ class AgentWeb:
         reply carries a ticket that signs a browser in for one minute."""
         portal = self._portal_address()
         if not portal:
-            return {"ok": False, "code": "portal_not_configured",
-                    "message": explain("portal_not_configured")}
+            return {
+                "ok": False,
+                "code": "portal_not_configured",
+                "message": explain("portal_not_configured"),
+            }
         if tab and not re.fullmatch(r"[a-z]{1,20}", tab):
             return {"ok": False, "code": "tab_invalid", "message": "No such portal tab."}
         if asset and ASSET_REFERENCE.match(asset) is None:
@@ -3455,10 +3788,14 @@ class AgentWeb:
                 return {"ok": True, "signed_in": True, "url": f"{portal}/#{fragment}"}
         # Without a saved Personal Agent code (or when the platform refused),
         # the plain portal opens on its sign-in page.
-        note = explain("login_unavailable") if problem in (
-            "login_unavailable", "login_missing") else (
-            f"{explain(problem)} Opened the sign-in page instead; "
-            "check Settings > Shared platform.")
+        note = (
+            explain("login_unavailable")
+            if problem in ("login_unavailable", "login_missing")
+            else (
+                f"{explain(problem)} Opened the sign-in page instead; "
+                "check Settings > Shared platform."
+            )
+        )
         url = f"{portal}/#{urlencode(place)}" if place else f"{portal}/"
         return {"ok": True, "signed_in": False, "url": url, "code": problem, "message": note}
 
@@ -3469,16 +3806,23 @@ class AgentWeb:
         if kind not in ("skill", "workflow", "bridge_extension", "application") or match is None:
             return {"ok": False, "code": "bad_reference", "message": explain("bad_reference")}
         if not self._portal_address():
-            return {"ok": False, "code": "platform_not_configured",
-                    "message": explain("platform_not_configured")}
+            return {
+                "ok": False,
+                "code": "platform_not_configured",
+                "message": explain("platform_not_configured"),
+            }
         publisher = self._publisher()
         if publisher is None:
-            return {"ok": False, "code": "publishing_not_configured",
-                    "message": explain("publishing_not_configured")}
+            return {
+                "ok": False,
+                "code": "publishing_not_configured",
+                "message": explain("publishing_not_configured"),
+            }
         namespace, name, version = match.groups()
         try:
             content = publisher.asset_content(
-                {"namespace": namespace, "name": name, "version": version})
+                {"namespace": namespace, "name": name, "version": version}
+            )
         except PlatformPublishError as error:
             code = "content_not_shared" if error.code == "asset_not_published" else error.code
             return {"ok": False, "code": code, "message": explain(code)}
@@ -3500,7 +3844,8 @@ class AgentWeb:
             gateway.engine.workflows.remove(identity)
             return
         path = self.runtime.layout.workflows / (
-            f"{identity.namespace}__{identity.name}__{identity.version}.json")
+            f"{identity.namespace}__{identity.name}__{identity.version}.json"
+        )
         try:
             manifest = WorkflowManifest.model_validate_json(path.read_text(encoding="utf-8-sig"))
         except (OSError, ValueError):
@@ -3522,15 +3867,22 @@ class AgentWeb:
         except asset_shelf.ShelfError as error:
             return {"ok": False, "code": error.code, "message": shelf_message(error.code)}
         except OSError:
-            return {"ok": False, "code": "workspace_unwritable",
-                    "message": shelf_message("workspace_unwritable")}
+            return {
+                "ok": False,
+                "code": "workspace_unwritable",
+                "message": shelf_message("workspace_unwritable"),
+            }
         if enabled:
             message = "Switched on." + (
                 " The Agent offers this Skill after Agent Web restarts."
-                if parsed_kind == "skill" else "")
+                if parsed_kind == "skill"
+                else ""
+            )
         else:
-            message = ("Switched off: the Agent no longer offers it. The file is kept in "
-                       f"assets\\{parsed_kind}s\\disabled; switch it on again at any time.")
+            message = (
+                "Switched off: the Agent no longer offers it. The file is kept in "
+                f"assets\\{parsed_kind}s\\disabled; switch it on again at any time."
+            )
         return {"ok": True, "enabled": enabled, "message": message, "assets": self.assets()}
 
     def remove_asset(self, kind: str, asset: str) -> dict[str, Any]:
@@ -3540,8 +3892,13 @@ class AgentWeb:
         try:
             parsed_kind, identity = asset_shelf.parse(kind, asset)
             with self._one_at_a_time:
-                moved = asset_shelf.remove(self.runtime.layout, parsed_kind, identity,
-                                           now=utc_now(), actor=self.runtime.actor)
+                moved = asset_shelf.remove(
+                    self.runtime.layout,
+                    parsed_kind,
+                    identity,
+                    now=utc_now(),
+                    actor=self.runtime.actor,
+                )
                 self._live(parsed_kind, identity, False)
                 try:
                     forgotten = self.runtime.state.forget(identity)
@@ -3550,19 +3907,31 @@ class AgentWeb:
         except asset_shelf.ShelfError as error:
             return {"ok": False, "code": error.code, "message": shelf_message(error.code)}
         except OSError:
-            return {"ok": False, "code": "workspace_unwritable",
-                    "message": shelf_message("workspace_unwritable")}
+            return {
+                "ok": False,
+                "code": "workspace_unwritable",
+                "message": shelf_message("workspace_unwritable"),
+            }
         kept = str(moved.target.relative_to(self.runtime.layout.workspace_root))
-        message = (f"Removed from this Agent. The file is kept in workspace\\{kept}; move it "
-                   "back to put it back.")
+        message = (
+            f"Removed from this Agent. The file is kept in workspace\\{kept}; move it "
+            "back to put it back."
+        )
         still_selected = self._selected_here(parsed_kind, identity)
         if still_selected:
-            message += (" It is still selected for this PC on the shared platform, so the next "
-                        "synchronization installs it again; press 'Remove selection' on its "
-                        "Library card to stop that.")
+            message += (
+                " It is still selected for this PC on the shared platform, so the next "
+                "synchronization installs it again; press 'Remove selection' on its "
+                "Library card to stop that."
+            )
         reply: dict[str, Any] = {
-            "ok": True, "kept_at": kept, "inventory_forgotten": forgotten,
-            "still_selected": still_selected, "message": message, "assets": self.assets()}
+            "ok": True,
+            "kept_at": kept,
+            "inventory_forgotten": forgotten,
+            "still_selected": still_selected,
+            "message": message,
+            "assets": self.assets(),
+        }
         if self.runtime.platform is not None:
             # The Library card's Installed badge follows without a second request.
             with self._one_at_a_time:
@@ -3579,11 +3948,13 @@ class AgentWeb:
                 continue
             try:
                 decided = DeviceAuthorization.model_validate_json(
-                    path.read_text(encoding="utf-8-sig"))
+                    path.read_text(encoding="utf-8-sig")
+                )
             except (OSError, ValueError):
                 continue
-            if any(item.kind == kind and item.asset.key == identity.key
-                   for item in decided.selections):
+            if any(
+                item.kind == kind and item.asset.key == identity.key for item in decided.selections
+            ):
                 return True
         return False
 
@@ -3631,22 +4002,33 @@ class AgentWeb:
 
     @staticmethod
     def _form_answer(offer: dict[str, Any]) -> dict[str, Any]:
-        return {"ok": True, "answer": str(offer.get("message") or "Fill in the run form."),
-                "status": "answered", "workflow_form": offer}
+        return {
+            "ok": True,
+            "answer": str(offer.get("message") or "Fill in the run form."),
+            "status": "answered",
+            "workflow_form": offer,
+        }
 
     def _record_form_run(
-        self, session_id: str, manifest: WorkflowManifest | None, identity: AssetIdentity,
-        arguments: dict[str, Any], answer: str, succeeded: bool,
+        self,
+        session_id: str,
+        manifest: WorkflowManifest | None,
+        identity: AssetIdentity,
+        arguments: dict[str, Any],
+        answer: str,
+        succeeded: bool,
     ) -> dict[str, Any] | None:
         """A run from a conversation's inline form, kept in that conversation
         as a pair (what was run, then its result) so the Agent sees it later."""
         hidden = (
             {item.name for item in manifest.parameters if item.kind == "upload"}
-            if manifest is not None else set()
+            if manifest is not None
+            else set()
         )
         shown = ", ".join(
             f"{name}={'(file)' if name in hidden else json.dumps(value, ensure_ascii=False)}"
-            for name, value in arguments.items())
+            for name, value in arguments.items()
+        )
         asked = f"▶ Run {identity.name} from the form" + (f": {shown}" if shown else "")
         with self._record_lock(session_id):
             record = self.runtime.state.conversation(session_id, self.runtime.actor)
@@ -3654,16 +4036,27 @@ class AgentWeb:
                 return None
             now = max(datetime.now(UTC), record.updated_at)
             said = ConversationMessage(
-                message_id=f"message-{uuid.uuid4().hex}", role="user", text=asked[:1500],
-                created_at=now, status="submitted")
+                message_id=f"message-{uuid.uuid4().hex}",
+                role="user",
+                text=asked[:1500],
+                created_at=now,
+                status="submitted",
+            )
             added = ConversationMessage(
-                message_id=f"message-{uuid.uuid4().hex}", role="assistant",
-                text=answer.strip() or "The run finished without a summary.", created_at=now,
-                status="answered" if succeeded else "failed")
-            self.runtime.state.save_conversation(record.model_copy(update={
-                "updated_at": now,
-                "messages": (record.messages + (said, added))[-MAX_STORED_MESSAGES:],
-            }))
+                message_id=f"message-{uuid.uuid4().hex}",
+                role="assistant",
+                text=answer.strip() or "The run finished without a summary.",
+                created_at=now,
+                status="answered" if succeeded else "failed",
+            )
+            self.runtime.state.save_conversation(
+                record.model_copy(
+                    update={
+                        "updated_at": now,
+                        "messages": (record.messages + (said, added))[-MAX_STORED_MESSAGES:],
+                    }
+                )
+            )
             recorded: dict[str, Any] = json.loads(added.model_dump_json())
             return recorded
 
@@ -3707,9 +4100,11 @@ class AgentWeb:
         )
         answer = readable(outcome)
         recorded = (
-            self._record_form_run(item.session_id, manifest, item.workflow, arguments, answer,
-                                  succeeded)
-            if item.session_id is not None else None
+            self._record_form_run(
+                item.session_id, manifest, item.workflow, arguments, answer, succeeded
+            )
+            if item.session_id is not None
+            else None
         )
         return {
             "ok": succeeded,
@@ -3725,9 +4120,18 @@ class AgentWeb:
         # A project vault (one the Agent's Knowledge is refreshed from) comes first, so
         # the start form does not default to a test vault (seen live, 2026-10-14).
         vaults.sort(key=lambda item: item.knowledge_asset is None)
-        return {"enabled": binding is not None, "bases": [item.name for item in vaults],
-                "vaults": [{"name": item.name, "project": item.knowledge_asset is not None,
-                            "asset": item.knowledge_asset} for item in vaults]}
+        return {
+            "enabled": binding is not None,
+            "bases": [item.name for item in vaults],
+            "vaults": [
+                {
+                    "name": item.name,
+                    "project": item.knowledge_asset is not None,
+                    "asset": item.knowledge_asset,
+                }
+                for item in vaults
+            ],
+        }
 
     def pipeline_call(self, step: str, arguments: dict[str, Any]) -> dict[str, Any]:
         """One pipeline step through the Agent, as the person who pressed it."""
@@ -3735,9 +4139,13 @@ class AgentWeb:
         if spec is None or self.runtime.config.knowledge_pipeline is None:
             return {"ok": False, "code": "unknown_pipeline_step"}
         local = LocalCapabilityRequest(
-            ingress="local", actor=self.runtime.actor,
-            bridge_id=self.runtime.config.device.bridge_id, target=spec.identity,
-            arguments=arguments, trace=_trace())
+            ingress="local",
+            actor=self.runtime.actor,
+            bridge_id=self.runtime.config.device.bridge_id,
+            target=spec.identity,
+            arguments=arguments,
+            trace=_trace(),
+        )
         import asyncio
 
         outcome = asyncio.run(self.runtime.agent.execute_capability(local))
@@ -3756,8 +4164,9 @@ class AgentWeb:
             return {"ok": False, "code": "publish_unavailable"}
         with self._one_at_a_time:
             try:
-                result = publish_candidate(self.config_path, self.runtime.layout, base,
-                                           candidate_root, self.runtime.actor)
+                result = publish_candidate(
+                    self.config_path, self.runtime.layout, base, candidate_root, self.runtime.actor
+                )
             except PublishError as error:
                 return {"ok": False, "code": error.code}
         return {"ok": True, "restart_required": True, "data": result.model_dump(mode="json")}
@@ -3766,8 +4175,10 @@ class AgentWeb:
         binding = self.runtime.config.knowledge_pipeline
         if binding is None:
             return None
-        return Sandboxes(self.runtime.layout.workspace_root,
-                         root=Path(binding.sandbox_root) if binding.sandbox_root else None)
+        return Sandboxes(
+            self.runtime.layout.workspace_root,
+            root=Path(binding.sandbox_root) if binding.sandbox_root else None,
+        )
 
     def start_benchmark(self, sandbox_id: str, sets: list[str]) -> dict[str, Any]:
         """Run the chosen question sets in the background (collaboration C3)."""
@@ -3782,22 +4193,38 @@ class AgentWeb:
         if not sets or not all(isinstance(name, str) for name in sets):
             return {"ok": False, "code": "no_question_sets"}
         entry = next((v for v in binding.vaults if v.name == info.base_name), None)
-        fallback = (Path(entry.questions_root) if entry and entry.questions_root
-                    else Path(info.base_root) / "checks" / "questions")
+        fallback = (
+            Path(entry.questions_root)
+            if entry and entry.questions_root
+            else Path(info.base_root) / "checks" / "questions"
+        )
         skill = harness_skill(self.runtime.agent.gateway.router.commands.skills)
         run_id = f"bench-{datetime.now(UTC).strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:4]}"
+
         def work() -> tuple[TaskStatus, str]:
             report = run_benchmark(
                 lambda request, catalog: self.knowledge_harness.ask(request, catalog=catalog),
-                sandbox_id=sandbox_id, sandbox=sandbox, project=Vault(Path(info.base_root)),
-                sets=tuple(sets), actor=self.runtime.actor, skill=skill,
-                questions_fallback=fallback, run_id=run_id)
-            return ("succeeded" if report.status == "finished" else "failed",
-                    f"sandbox {report.sandbox_score} / project vault {report.project_score} "
-                    f"of {report.total}")
+                sandbox_id=sandbox_id,
+                sandbox=sandbox,
+                project=Vault(Path(info.base_root)),
+                sets=tuple(sets),
+                actor=self.runtime.actor,
+                skill=skill,
+                questions_fallback=fallback,
+                run_id=run_id,
+            )
+            return (
+                "succeeded" if report.status == "finished" else "failed",
+                f"sandbox {report.sandbox_score} / project vault {report.project_score} "
+                f"of {report.total}",
+            )
 
-        threading.Thread(target=self.tasks().tracked(
-            "benchmark", "Benchmark " + ", ".join(sets), sandbox_id, work), daemon=True).start()
+        threading.Thread(
+            target=self.tasks().tracked(
+                "benchmark", "Benchmark " + ", ".join(sets), sandbox_id, work
+            ),
+            daemon=True,
+        ).start()
         return {"ok": True, "run_id": run_id}
 
     def _pipeline(self) -> KnowledgePipeline | None:
@@ -3807,13 +4234,19 @@ class AgentWeb:
         if binding is None or boxes is None:
             return None
         return KnowledgePipeline(
-            boxes, {item.name: Path(item.root) for item in binding.vaults},
-            questions_roots={item.name: Path(item.questions_root)
-                             for item in binding.vaults if item.questions_root},
-            maintainers={item.name: tuple(item.maintainers) for item in binding.vaults})
+            boxes,
+            {item.name: Path(item.root) for item in binding.vaults},
+            questions_roots={
+                item.name: Path(item.questions_root)
+                for item in binding.vaults
+                if item.questions_root
+            },
+            maintainers={item.name: tuple(item.maintainers) for item in binding.vaults},
+        )
 
-    def start_push(self, sandbox_id: str, sets: list[str],
-                   resolutions: dict[str, str]) -> dict[str, Any]:
+    def start_push(
+        self, sandbox_id: str, sets: list[str], resolutions: dict[str, str]
+    ) -> dict[str, Any]:
         """Merge, benchmark and, when the gate passes, write into the project
         vault, in the background (collaboration C4)."""
         pipeline = self._pipeline()
@@ -3827,22 +4260,37 @@ class AgentWeb:
             return {"ok": False, "code": "not_a_maintainer"}
         chosen: dict[str, Literal["sandbox", "published"]] = {
             key: "sandbox" if value == "sandbox" else "published"
-            for key, value in resolutions.items() if value in ("sandbox", "published")}
+            for key, value in resolutions.items()
+            if value in ("sandbox", "published")
+        }
         push_id = f"push-{datetime.now(UTC).strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:4]}"
         skill = harness_skill(self.runtime.agent.gateway.router.commands.skills)
+
         def work() -> tuple[TaskStatus, str]:
             report = run_push(
                 pipeline,
                 lambda request, catalog: self.knowledge_harness.ask(request, catalog=catalog),
-                sandbox_id=sandbox_id, actor=self.runtime.actor, sets=tuple(sets),
-                resolutions=chosen, skill=skill, push_id=push_id,
-                questions_fallback=pipeline.questions_roots.get(info.base_name))
-            status: TaskStatus = ("succeeded" if report.status == "pushed" else
-                                  "needs_input" if report.status == "conflicts" else "failed")
+                sandbox_id=sandbox_id,
+                actor=self.runtime.actor,
+                sets=tuple(sets),
+                resolutions=chosen,
+                skill=skill,
+                push_id=push_id,
+                questions_fallback=pipeline.questions_roots.get(info.base_name),
+            )
+            status: TaskStatus = (
+                "succeeded"
+                if report.status == "pushed"
+                else "needs_input"
+                if report.status == "conflicts"
+                else "failed"
+            )
             return status, report.status + (f": {report.reason}" if report.reason else "")
 
-        threading.Thread(target=self.tasks().tracked(
-            "push", f"Push to {info.base_name}", sandbox_id, work), daemon=True).start()
+        threading.Thread(
+            target=self.tasks().tracked("push", f"Push to {info.base_name}", sandbox_id, work),
+            daemon=True,
+        ).start()
         return {"ok": True, "push_id": push_id}
 
     def push_status(self, sandbox_id: str) -> dict[str, Any]:
@@ -3862,15 +4310,18 @@ class AgentWeb:
         settings = current_settings(self.runtime.config, Path.home() / ".ssh" / "config")
         tunnel = getattr(self, "laya_tunnel", None)
         return {
-            "ok": True, "writable": self.config_path is not None,
+            "ok": True,
+            "writable": self.config_path is not None,
             "settings": settings.model_dump(mode="json"),
             "endpoint": LAYA_ENDPOINT.format(port=settings.local_port),
-            "running_mode": "off" if self.runtime.config.decision_accelerator.provider == "NONE"
+            "running_mode": "off"
+            if self.runtime.config.decision_accelerator.provider == "NONE"
             else self.runtime.config.decision_accelerator.mode,
             "tunnel": tunnel.status() if tunnel is not None else {"state": "not_managed"},
             "probe": laya_probe(settings.local_port),
             "last_decision": laya_last_decision(
-                self.runtime.layout.workspace_root / SHADOW_LOG_FILE),
+                self.runtime.layout.workspace_root / SHADOW_LOG_FILE
+            ),
         }
 
     def update_laya(self, body: dict[str, Any]) -> dict[str, Any]:
@@ -3884,18 +4335,21 @@ class AgentWeb:
             return {"ok": False, "code": "laya_settings_invalid"}
         with self._one_at_a_time:
             current = CompanyHostConfiguration.model_validate_json(
-                self.config_path.read_text(encoding="utf-8-sig"))
+                self.config_path.read_text(encoding="utf-8-sig")
+            )
             try:
-                accelerator = laya_accelerator(settings, current.decision_accelerator,
-                                               current.credential_environment())
+                accelerator = laya_accelerator(
+                    settings, current.decision_accelerator, current.credential_environment()
+                )
             except LayaError as error:
                 return {"ok": False, "code": error.code}
             candidate = current.model_dump(mode="json")
             candidate["laya"] = settings.model_dump(mode="json")
             candidate["decision_accelerator"] = accelerator.model_dump(mode="json")
             updated = CompanyHostConfiguration.model_validate(candidate)
-            write_atomically(self.config_path,
-                             updated.model_dump_json(indent=2).encode("utf-8") + b"\n")
+            write_atomically(
+                self.config_path, updated.model_dump_json(indent=2).encode("utf-8") + b"\n"
+            )
         self.start_laya_tunnel(settings)
         restart = accelerator != self.runtime.config.decision_accelerator
         # The card shows what was saved at once; the running mode stays until
@@ -3944,10 +4398,13 @@ class AgentWeb:
         stop = threading.Event()
         self._convert_stops[sandbox_id] = stop
         run = ConvertRun(
-            run_id=f"convert-{uuid.uuid4().hex[:8]}", sandbox_id=sandbox_id,
-            mode="apply" if mode == "apply" else "dry_run", paths=paths,
+            run_id=f"convert-{uuid.uuid4().hex[:8]}",
+            sandbox_id=sandbox_id,
+            mode="apply" if mode == "apply" else "dry_run",
+            paths=paths,
             progress_key=f"cv{uuid.uuid4().hex[:16]}",
-            started=datetime.now(UTC).isoformat(timespec="seconds"))
+            started=datetime.now(UTC).isoformat(timespec="seconds"),
+        )
 
         def remember(current: ConvertRun) -> None:
             self._convert_runs[sandbox_id] = current
@@ -3956,27 +4413,39 @@ class AgentWeb:
             try:
                 done = run_convert(
                     lambda box, chosen, how, key: pipeline.convert(
-                        box, chosen, "apply" if how == "apply" else "dry_run", key),
-                    run, stop, remember)
+                        box, chosen, "apply" if how == "apply" else "dry_run", key
+                    ),
+                    run,
+                    stop,
+                    remember,
+                )
             except Exception as failure:  # noqa: BLE001 - the page must hear it ended
                 last = self._convert_runs.get(sandbox_id, run)
-                self._convert_runs[sandbox_id] = last.model_copy(update={
-                    "status": "failed", "error": type(failure).__name__, "current": None})
+                self._convert_runs[sandbox_id] = last.model_copy(
+                    update={"status": "failed", "error": type(failure).__name__, "current": None}
+                )
                 raise
             finally:
                 self._convert_stops.pop(sandbox_id, None)
             results: dict[str, int] = {}
             for item in done.items:
                 results[item.status] = results.get(item.status, 0) + 1
-            return ("succeeded" if done.status == "finished" else "stopped",
-                    f"{len(done.items)} of {len(done.paths)} originals: "
-                    + ", ".join(f"{n} {status}" for status, n in sorted(results.items())))
+            return (
+                "succeeded" if done.status == "finished" else "stopped",
+                f"{len(done.items)} of {len(done.paths)} originals: "
+                + ", ".join(f"{n} {status}" for status, n in sorted(results.items())),
+            )
 
-        title = ("Convert " if run.mode == "apply" else "Preview convert ") + \
-            f"{len(paths)} original(s)"
-        threading.Thread(target=self.tasks().tracked(
-            "convert" if run.mode == "apply" else "preview", title, sandbox_id, work),
-            name="knowledge-convert", daemon=True).start()
+        title = (
+            "Convert " if run.mode == "apply" else "Preview convert "
+        ) + f"{len(paths)} original(s)"
+        threading.Thread(
+            target=self.tasks().tracked(
+                "convert" if run.mode == "apply" else "preview", title, sandbox_id, work
+            ),
+            name="knowledge-convert",
+            daemon=True,
+        ).start()
         return {"ok": True, "run_id": run.run_id}
 
     def stop_convert(self, sandbox_id: str) -> dict[str, Any]:
@@ -4007,8 +4476,11 @@ class AgentWeb:
             _, sandbox = boxes.open(sandbox_id)
         except SandboxError as error:
             return {"ok": False, "code": error.code}
-        chosen = tuple(dict.fromkeys(ref for ref in raw_refs
-                                     if isinstance(ref, str) and ref.startswith("raw/")))
+        chosen = tuple(
+            dict.fromkeys(
+                ref for ref in raw_refs if isinstance(ref, str) and ref.startswith("raw/")
+            )
+        )
         if not chosen or len(chosen) > MAX_REINGEST:
             return {"ok": False, "code": "no_raw_documents"}
         self._reingest_stops: dict[str, threading.Event] = getattr(self, "_reingest_stops", {})
@@ -4019,29 +4491,39 @@ class AgentWeb:
         self._reingest_stops[sandbox_id] = stop
         run = ReingestRun(
             run_id=f"reingest-{datetime.now(UTC).strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:4]}",
-            sandbox_id=sandbox_id, actor=self.runtime.actor, raw_refs=chosen,
-            started=datetime.now(UTC).isoformat(timespec="seconds"))
+            sandbox_id=sandbox_id,
+            actor=self.runtime.actor,
+            raw_refs=chosen,
+            started=datetime.now(UTC).isoformat(timespec="seconds"),
+        )
 
         def live(current: ReingestRun) -> None:
             self._reingest_live[sandbox_id] = current
 
         def work() -> tuple[TaskStatus, str]:
             try:
-                done = run_reingest(self.pipeline_call, run, sandbox.root / REINGEST_RUNS, stop,
-                                    on_change=live)
+                done = run_reingest(
+                    self.pipeline_call, run, sandbox.root / REINGEST_RUNS, stop, on_change=live
+                )
             finally:
                 self._reingest_stops.pop(sandbox_id, None)
                 self._reingest_live.pop(sandbox_id, None)
             results: dict[str, int] = {}
             for item in done.items:
                 results[item.status] = results.get(item.status, 0) + 1
-            return ("succeeded" if done.status == "finished" else "stopped",
-                    f"{len(done.items)} of {len(done.raw_refs)} Raw: "
-                    + ", ".join(f"{n} {status}" for status, n in sorted(results.items())))
+            return (
+                "succeeded" if done.status == "finished" else "stopped",
+                f"{len(done.items)} of {len(done.raw_refs)} Raw: "
+                + ", ".join(f"{n} {status}" for status, n in sorted(results.items())),
+            )
 
-        threading.Thread(target=self.tasks().tracked(
-            "reingest", f"Re-ingest {len(chosen)} Raw document(s)", sandbox_id, work),
-            name="knowledge-reingest", daemon=True).start()
+        threading.Thread(
+            target=self.tasks().tracked(
+                "reingest", f"Re-ingest {len(chosen)} Raw document(s)", sandbox_id, work
+            ),
+            name="knowledge-reingest",
+            daemon=True,
+        ).start()
         return {"ok": True, "run_id": run.run_id}
 
     def stop_reingest(self, sandbox_id: str) -> dict[str, Any]:
@@ -4078,19 +4560,26 @@ class AgentWeb:
             return {"ok": False, "code": "refresh_unavailable"}
         with self._one_at_a_time:
             try:
-                result = refresh_from_project(self.config_path, self.runtime.layout, base,
-                                              self.runtime.actor)
+                result = refresh_from_project(
+                    self.config_path, self.runtime.layout, base, self.runtime.actor
+                )
             except PublishError as error:
                 return {"ok": False, "code": error.code}
         return {"ok": True, "restart_required": True, "data": result.model_dump(mode="json")}
 
-    def skill_assist_start(self, sandbox_id: str, path: str, current: str,
-                           turns: list[dict[str, Any]]) -> dict[str, Any]:
+    def skill_assist_start(
+        self, sandbox_id: str, path: str, current: str, turns: list[dict[str, Any]]
+    ) -> dict[str, Any]:
         """Start one reply in the background; the page follows its state:
         collecting -> asking -> checking -> done | failed."""
         job_id = uuid.uuid4().hex[:12]
-        job: dict[str, Any] = {"ok": True, "job_id": job_id, "state": "collecting",
-                               "started": time.monotonic(), "history": ["collecting"]}
+        job: dict[str, Any] = {
+            "ok": True,
+            "job_id": job_id,
+            "state": "collecting",
+            "started": time.monotonic(),
+            "history": ["collecting"],
+        }
         self._assist_jobs = getattr(self, "_assist_jobs", {})
         self._assist_jobs[job_id] = job
 
@@ -4110,19 +4599,30 @@ class AgentWeb:
         job = getattr(self, "_assist_jobs", {}).get(job_id)
         if job is None:
             return {"ok": False, "code": "unknown_job"}
-        return {"ok": True, "state": job["state"], "history": job["history"],
-                "elapsed_s": round(time.monotonic() - job["started"], 1),
-                "result": job.get("result")}
+        return {
+            "ok": True,
+            "state": job["state"],
+            "history": job["history"],
+            "elapsed_s": round(time.monotonic() - job["started"], 1),
+            "result": job.get("result"),
+        }
 
-    def skill_assist(self, sandbox_id: str, path: str, current: str,
-                     turns: list[dict[str, Any]],
-                     on_state: Any = None) -> dict[str, Any]:
+    def skill_assist(
+        self,
+        sandbox_id: str,
+        path: str,
+        current: str,
+        turns: list[dict[str, Any]],
+        on_state: Any = None,
+    ) -> dict[str, Any]:
         """One reply of the Skill assistant; it proposes, the person saves."""
         pipeline = self._pipeline()
         if pipeline is None:
             return {"ok": False, "code": "knowledge_pipeline_disabled"}
-        if not (path == "CLAUDE.md" or re.fullmatch(
-                r"skills/[A-Za-z0-9][A-Za-z0-9._-]*/SKILL\.md", path)):
+        if not (
+            path == "CLAUDE.md"
+            or re.fullmatch(r"skills/[A-Za-z0-9][A-Za-z0-9._-]*/SKILL\.md", path)
+        ):
             return {"ok": False, "code": "not_a_rule_file"}
         try:
             _, vault = pipeline.sandboxes.open(sandbox_id)
@@ -4144,10 +4644,18 @@ class AgentWeb:
             if first is not None:
                 sample = first.read_text(encoding="utf-8", errors="ignore")
         try:
-            reply = assist(model, alias, guide=guide.guide,
-                           template=guide.answer_template if answering else guide.ingest_template,
-                           path=path, current=current, sample=sample, turns=chat,
-                           trace=_trace(), on_state=on_state)
+            reply = assist(
+                model,
+                alias,
+                guide=guide.guide,
+                template=guide.answer_template if answering else guide.ingest_template,
+                path=path,
+                current=current,
+                sample=sample,
+                turns=chat,
+                trace=_trace(),
+                on_state=on_state,
+            )
         except (RuntimeError, ValueError) as error:
             return {"ok": False, "code": f"skill_assist_failed:{error}"[:80]}
         return {"ok": True, **reply.model_dump(mode="json")}
@@ -4166,8 +4674,9 @@ class AgentWeb:
         """Ask one exact installed Knowledge version through Bridge policy."""
         with telemetry.run("knowledge_query", attributes={"ingress": "agent_web"}):
             result = self._ask_knowledge(request)
-            telemetry.set_run(outcome=result.get("status"),
-                              status="succeeded" if result.get("ok") else "failed")
+            telemetry.set_run(
+                outcome=result.get("status"), status="succeeded" if result.get("ok") else "failed"
+            )
             return result
 
     def _ask_knowledge(self, request: KnowledgeAskRequest) -> dict[str, Any]:
@@ -4195,14 +4704,16 @@ class _Handler(BaseHTTPRequestHandler):
         session's (COPILOT_INTEGRATION CP1). `/mcp/agent` takes only a running
         agent-mode turn's own token (AGENT_MODE_BACKENDS)."""
         header = self.headers.get("Authorization") or ""
-        given = header[len(BEARER):].strip() if header.startswith(BEARER) else ""
+        given = header[len(BEARER) :].strip() if header.startswith(BEARER) else ""
         agent_route = urlparse(self.path).path == "/mcp/agent"
         if agent_route:
             if not given or self.server.web.agent_mode.run_for_token(given) is None:
                 self._refuse_unread(401, {"error": "this request carried no usable token"})
                 return
-        elif not given or not (hmac.compare_digest(given, self.server.web.assistant_token)
-                               or hmac.compare_digest(given, self.server.token)):
+        elif not given or not (
+            hmac.compare_digest(given, self.server.web.assistant_token)
+            or hmac.compare_digest(given, self.server.token)
+        ):
             self._refuse_unread(401, {"error": "this request carried no usable token"})
             return
         try:
@@ -4215,24 +4726,38 @@ class _Handler(BaseHTTPRequestHandler):
         try:
             message = json.loads(self.rfile.read(length))
         except (ValueError, TypeError):
-            self._json(400, {"jsonrpc": "2.0", "id": None,
-                             "error": {"code": -32700, "message": "parse error"}})
+            self._json(
+                400,
+                {"jsonrpc": "2.0", "id": None, "error": {"code": -32700, "message": "parse error"}},
+            )
             return
         batch = message if isinstance(message, list) else [message]
         web = self.server.web
-        serve = (web.authoring_mcp if urlparse(self.path).path == "/mcp/authoring"
-                 else (lambda item: web.agent_mcp(given, item)) if agent_route
-                 else web.assistant_mcp)
-        replies = [reply for item in batch if isinstance(item, dict)
-                   for reply in [serve(item)] if reply is not None]
+        serve = (
+            web.authoring_mcp
+            if urlparse(self.path).path == "/mcp/authoring"
+            else (lambda item: web.agent_mcp(given, item))
+            if agent_route
+            else web.assistant_mcp
+        )
+        replies = [
+            reply
+            for item in batch
+            if isinstance(item, dict)
+            for reply in [serve(item)]
+            if reply is not None
+        ]
         if not replies:
             self.send_response(202)
             self.send_header("Content-Length", "0")
             self.end_headers()
             return
         if isinstance(message, list):
-            self._send(200, json.dumps(replies, ensure_ascii=False).encode("utf-8"),
-                       "application/json; charset=utf-8")
+            self._send(
+                200,
+                json.dumps(replies, ensure_ascii=False).encode("utf-8"),
+                "application/json; charset=utf-8",
+            )
         else:
             self._json(200, replies[0])
 
@@ -4308,9 +4833,7 @@ class _Handler(BaseHTTPRequestHandler):
                 self._json(400, {"error": "the request was not valid JSON"})
                 return
         try:
-            status, payload = self.server.web.schedules_request(
-                method, path, parse_qs(query), body
-            )
+            status, payload = self.server.web.schedules_request(method, path, parse_qs(query), body)
         except Exception as failure:  # noqa: BLE001 - a page shows everything
             status, payload = 500, {"error": f"schedules: {type(failure).__name__}"}
         self._json(status, payload)
@@ -4372,8 +4895,9 @@ class _Handler(BaseHTTPRequestHandler):
             session = parse_qs(parsed.query).get("session_id", [""])[0]
             if wanted:
                 found = web.card(wanted)
-                self._json(200 if found is not None else 404,
-                           {"ok": found is not None, "card": found})
+                self._json(
+                    200 if found is not None else 404, {"ok": found is not None, "card": found}
+                )
             else:
                 self._json(200, web.cards(session or None))
         elif parsed.path == "/api/agent-mode":
@@ -4521,10 +5045,10 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(400, {"error": "the request did not say how long it was"})
             return
         limit = (
-            MAX_SOP_UPLOAD_BYTES if path == "/api/authoring/start"
+            MAX_SOP_UPLOAD_BYTES
+            if path == "/api/authoring/start"
             else MAX_ATTACHMENT_REQUEST_BYTES
-            if path in (
-                "/api/attachments", "/api/knowledge/pipeline/call", "/api/workflow-uploads")
+            if path in ("/api/attachments", "/api/knowledge/pipeline/call", "/api/workflow-uploads")
             else MAX_BODY_BYTES
         )
         if length > limit:
@@ -4541,54 +5065,79 @@ class _Handler(BaseHTTPRequestHandler):
                 return
             try:
                 result = self.server.web.pipeline_call(
-                    str(body.get("step") or ""), dict(body.get("arguments") or {}))
+                    str(body.get("step") or ""), dict(body.get("arguments") or {})
+                )
             except Exception as failure:  # noqa: BLE001 - a page shows everything
                 result = {"ok": False, "code": f"pipeline_error:{type(failure).__name__}"}
             self._json(200, result)
             return
         if path == "/api/knowledge/push/start":
-            if not isinstance(body, dict) or not isinstance(body.get("sets"), list) \
-                    or not isinstance(body.get("resolutions", {}), dict):
+            if (
+                not isinstance(body, dict)
+                or not isinstance(body.get("sets"), list)
+                or not isinstance(body.get("resolutions", {}), dict)
+            ):
                 self._json(400, {"ok": False, "code": "push_request_invalid"})
                 return
-            self._json(200, self.server.web.start_push(
-                str(body.get("sandbox_id") or ""), [str(x) for x in body["sets"]],
-                {str(k): str(v) for k, v in dict(body.get("resolutions") or {}).items()}))
+            self._json(
+                200,
+                self.server.web.start_push(
+                    str(body.get("sandbox_id") or ""),
+                    [str(x) for x in body["sets"]],
+                    {str(k): str(v) for k, v in dict(body.get("resolutions") or {}).items()},
+                ),
+            )
             return
         if path == "/api/settings/laya":
             self._json(200, self.server.web.update_laya(body if isinstance(body, dict) else {}))
             return
         if path == "/api/settings/shared-platform":
-            self._json(200, self.server.web.update_shared_platform(
-                body if isinstance(body, dict) else {}))
+            self._json(
+                200, self.server.web.update_shared_platform(body if isinstance(body, dict) else {})
+            )
             return
         if path in ("/api/knowledge/convert/start", "/api/knowledge/convert/stop"):
             chosen = body if isinstance(body, dict) else {}
             sandbox_id = str(chosen.get("sandbox_id") or "")
-            self._json(200, self.server.web.start_convert(sandbox_id, str(chosen.get("mode") or ""))
-                       if path.endswith("/start") else self.server.web.stop_convert(sandbox_id))
+            self._json(
+                200,
+                self.server.web.start_convert(sandbox_id, str(chosen.get("mode") or ""))
+                if path.endswith("/start")
+                else self.server.web.stop_convert(sandbox_id),
+            )
             return
         if path == "/api/knowledge/reingest/start":
             if not isinstance(body, dict) or not isinstance(body.get("raw_refs"), list):
                 self._json(400, {"ok": False, "code": "reingest_request_invalid"})
                 return
-            self._json(200, self.server.web.start_reingest(
-                str(body.get("sandbox_id") or ""), list(body["raw_refs"])))
+            self._json(
+                200,
+                self.server.web.start_reingest(
+                    str(body.get("sandbox_id") or ""), list(body["raw_refs"])
+                ),
+            )
             return
         if path == "/api/knowledge/reingest/stop":
             sandbox_id = str(body.get("sandbox_id") or "") if isinstance(body, dict) else ""
             self._json(200, self.server.web.stop_reingest(sandbox_id))
             return
         if path == "/api/experience/settings":
-            self._json(200, self.server.web.update_experience_settings(
-                body if isinstance(body, dict) else {}))
+            self._json(
+                200,
+                self.server.web.update_experience_settings(body if isinstance(body, dict) else {}),
+            )
             return
         if path == "/api/reviews/decide":
             chosen = body if isinstance(body, dict) else {}
             reason = chosen.get("reason")
-            self._json(200, self.server.web.review_decide(
-                str(chosen.get("proposal_id") or ""), str(chosen.get("action") or ""),
-                str(reason) if reason is not None else None))
+            self._json(
+                200,
+                self.server.web.review_decide(
+                    str(chosen.get("proposal_id") or ""),
+                    str(chosen.get("action") or ""),
+                    str(reason) if reason is not None else None,
+                ),
+            )
             return
         if path == "/api/experience/review":
             self._json(200, self.server.web.start_experience_review())
@@ -4597,9 +5146,15 @@ class _Handler(BaseHTTPRequestHandler):
             if not isinstance(body, dict) or not isinstance(body.get("turns"), list):
                 self._json(400, {"ok": False, "code": "skill_assist_request_invalid"})
                 return
-            self._json(200, self.server.web.skill_assist_start(
-                str(body.get("sandbox_id") or ""), str(body.get("path") or ""),
-                str(body.get("current") or ""), list(body["turns"])))
+            self._json(
+                200,
+                self.server.web.skill_assist_start(
+                    str(body.get("sandbox_id") or ""),
+                    str(body.get("path") or ""),
+                    str(body.get("current") or ""),
+                    list(body["turns"]),
+                ),
+            )
             return
         if path == "/api/knowledge/refresh":
             if not isinstance(body, dict):
@@ -4611,35 +5166,48 @@ class _Handler(BaseHTTPRequestHandler):
             if not isinstance(body, dict) or not isinstance(body.get("sets"), list):
                 self._json(400, {"ok": False, "code": "benchmark_request_invalid"})
                 return
-            self._json(200, self.server.web.start_benchmark(
-                str(body.get("sandbox_id") or ""), list(body["sets"])))
+            self._json(
+                200,
+                self.server.web.start_benchmark(
+                    str(body.get("sandbox_id") or ""), list(body["sets"])
+                ),
+            )
             return
         if path == "/api/knowledge/pipeline/publish":
             if not isinstance(body, dict):
                 self._json(400, {"ok": False, "code": "publish_request_invalid"})
                 return
-            self._json(200, self.server.web.publish_knowledge(
-                str(body.get("base") or ""), str(body.get("candidate_root") or "")))
+            self._json(
+                200,
+                self.server.web.publish_knowledge(
+                    str(body.get("base") or ""), str(body.get("candidate_root") or "")
+                ),
+            )
             return
         if path in ("/api/drafts/install", "/api/drafts/delete"):
             if not isinstance(body, dict):
                 self._json(400, {"ok": False, "code": "draft_request_invalid"})
                 return
             result = self.server.web.draft_action(
-                path.rsplit("/", 1)[1], str(body.get("candidate_id") or ""))
+                path.rsplit("/", 1)[1], str(body.get("candidate_id") or "")
+            )
             self._json(200 if result.get("ok") else 409, result)
             return
         if path in ("/api/agent-mode/settings", "/api/agent-mode/session"):
             given = body if isinstance(body, dict) else {}
             web = self.server.web
-            result = (web.update_agent_mode(given) if path.endswith("/settings")
-                      else web.update_agent_session(given))
+            result = (
+                web.update_agent_mode(given)
+                if path.endswith("/settings")
+                else web.update_agent_session(given)
+            )
             self._json(200, result)
             return
         if path == "/api/cards/decide":
             chosen = body if isinstance(body, dict) else {}
             result = self.server.web.decide_card(
-                str(chosen.get("card_id") or ""), str(chosen.get("action") or ""))
+                str(chosen.get("card_id") or ""), str(chosen.get("action") or "")
+            )
             self._json(200, result)
             return
         if path == "/api/approvals/decide":
@@ -4647,7 +5215,8 @@ class _Handler(BaseHTTPRequestHandler):
                 self._json(400, {"ok": False, "code": "approval_request_invalid"})
                 return
             result = self.server.web.decide_approval(
-                str(body.get("approval_id") or ""), str(body.get("decision") or ""))
+                str(body.get("approval_id") or ""), str(body.get("decision") or "")
+            )
             self._json(200 if result.get("ok") else 409, result)
             return
         if path in AUTHORING_ROUTES:
@@ -4710,14 +5279,19 @@ class _Handler(BaseHTTPRequestHandler):
         if path == "/api/workflow-uploads":
             try:
                 workflow = AssetIdentity.model_validate(
-                    body.get("workflow") if isinstance(body, dict) else None)
+                    body.get("workflow") if isinstance(body, dict) else None
+                )
                 data = base64.b64decode(str(body.get("data") or ""), validate=True)
             except (ValueError, TypeError, binascii.Error):
                 self._json(400, {"ok": False, "code": "upload_request_invalid"})
                 return
             result = self.server.web.upload_workflow_file(
-                workflow, str(body.get("field") or ""), str(body.get("upload_set") or ""),
-                str(body.get("filename") or ""), data)
+                workflow,
+                str(body.get("field") or ""),
+                str(body.get("upload_set") or ""),
+                str(body.get("filename") or ""),
+                data,
+            )
             self._json(200 if result["ok"] else 400, result)
             return
         if path == "/api/workflow-identity":
@@ -4739,7 +5313,8 @@ class _Handler(BaseHTTPRequestHandler):
                 self._json(400, {"ok": False, "code": "attachment_request_invalid"})
                 return
             result = self.server.web.add_attachment(
-                str(body.get("session_id") or ""), str(body.get("filename") or ""), data)
+                str(body.get("session_id") or ""), str(body.get("filename") or ""), data
+            )
             self._json(200 if result["ok"] else 400, result)
             return
         if path == "/api/preferences":
@@ -4836,8 +5411,11 @@ class _Handler(BaseHTTPRequestHandler):
             values = [fields.get(name) for name in ("kind", "asset", "change")]
             note = fields.get("note") or ""
             visibility = fields.get("visibility") or ""
-            if not all(isinstance(value, str) and value for value in values) or not isinstance(
-                    note, str) or not isinstance(visibility, str):
+            if (
+                not all(isinstance(value, str) and value for value in values)
+                or not isinstance(note, str)
+                or not isinstance(visibility, str)
+            ):
                 self._json(400, {"error": "name the kind, the asset and the change level"})
                 return
             kind, asset, change = (str(value) for value in values)
@@ -4861,8 +5439,14 @@ class _Handler(BaseHTTPRequestHandler):
             fields = body if isinstance(body, dict) else {}
             tab, asset = fields.get("tab") or "", fields.get("asset") or ""
             if not (isinstance(tab, str) and isinstance(asset, str)):
-                self._json(400, {"ok": False, "code": "portal_request_invalid",
-                                 "message": "name the tab and the asset as text"})
+                self._json(
+                    400,
+                    {
+                        "ok": False,
+                        "code": "portal_request_invalid",
+                        "message": "name the tab and the asset as text",
+                    },
+                )
                 return
             self._json(200, self.server.web.portal_link(tab, asset))
             return
@@ -4870,20 +5454,37 @@ class _Handler(BaseHTTPRequestHandler):
             fields = body if isinstance(body, dict) else {}
             asset_kind, asset_ref = fields.get("kind"), fields.get("asset")
             if not (isinstance(asset_kind, str) and isinstance(asset_ref, str) and asset_ref):
-                self._json(400, {"ok": False, "code": "asset_request_invalid",
-                                 "message": "name the kind and the asset"})
+                self._json(
+                    400,
+                    {
+                        "ok": False,
+                        "code": "asset_request_invalid",
+                        "message": "name the kind and the asset",
+                    },
+                )
                 return
             self._json(200, self.server.web.asset_content(asset_kind, asset_ref))
             return
-        if path in ("/api/platform/add", "/api/platform/unselect", "/api/assets/switch",
-                    "/api/assets/remove"):
+        if path in (
+            "/api/platform/add",
+            "/api/platform/unselect",
+            "/api/assets/switch",
+            "/api/assets/remove",
+        ):
             fields = body if isinstance(body, dict) else {}
             asset_kind, asset_ref = fields.get("kind"), fields.get("asset")
             enabled = fields.get("enabled")
             if not (isinstance(asset_kind, str) and isinstance(asset_ref, str) and asset_ref) or (
-                    path == "/api/assets/switch" and not isinstance(enabled, bool)):
-                self._json(400, {"ok": False, "code": "asset_request_invalid",
-                                 "message": "name the kind and the asset"})
+                path == "/api/assets/switch" and not isinstance(enabled, bool)
+            ):
+                self._json(
+                    400,
+                    {
+                        "ok": False,
+                        "code": "asset_request_invalid",
+                        "message": "name the kind and the asset",
+                    },
+                )
                 return
             web = self.server.web
             if path == "/api/platform/add":
@@ -5001,8 +5602,10 @@ class AgentWebServer(ThreadingHTTPServer):
         # The Copilot agent mode reaches the assistant tools on this server.
         backends = getattr(web, "backends", None)
         if backends is not None and hasattr(backends, "agent_mcp"):
-            backends.agent_mcp = (f"http://127.0.0.1:{self.server_address[1]}/mcp",
-                                  web.assistant_token)
+            backends.agent_mcp = (
+                f"http://127.0.0.1:{self.server_address[1]}/mcp",
+                web.assistant_token,
+            )
 
     def page(self) -> bytes:
         if self._page is not None:

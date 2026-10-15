@@ -314,8 +314,12 @@ def _write(
     # columns move with their entire ticket row.
     if tinted:
         writer.sort_highlighted_rows(
-            workbook, sheet, key_column=key_column, last_column=last_column,
-            last_row=last_row, colour=settings.key_highlight,
+            workbook,
+            sheet,
+            key_column=key_column,
+            last_column=last_column,
+            last_row=last_row,
+            colour=settings.key_highlight,
         )
 
     return WeeklyReportApplied(

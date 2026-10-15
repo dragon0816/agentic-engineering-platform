@@ -139,7 +139,11 @@ class AuthoringStudio:
     # -- the flow ----------------------------------------------------------
 
     def start(
-        self, actor: str, *, title: str, sop_text: str | None = None,
+        self,
+        actor: str,
+        *,
+        title: str,
+        sop_text: str | None = None,
         pdf: bytes | None = None,
     ) -> AuthoringSession:
         if (sop_text is None) == (pdf is None):
@@ -163,9 +167,14 @@ class AuthoringStudio:
                 raise AuthoringError("authoring_sop_missing")
             raw, kind = text.encode("utf-8"), "text"
         session = AuthoringSession(
-            session_id=session_id, actor=actor, created_at=_now(), updated_at=_now(),
-            title=title.strip() or "SOP", sop_kind=kind,
-            sop_sha256=hashlib.sha256(raw).hexdigest(), sop_text=text,
+            session_id=session_id,
+            actor=actor,
+            created_at=_now(),
+            updated_at=_now(),
+            title=title.strip() or "SOP",
+            sop_kind=kind,
+            sop_sha256=hashlib.sha256(raw).hexdigest(),
+            sop_text=text,
         )
         return self.discuss(self._save(session).session_id, actor, None)
 
@@ -177,35 +186,54 @@ class AuthoringStudio:
         if model is None:
             raise AuthoringError("authoring_model_unavailable")
         turns = session.turns + (
-            (AuthoringTurn(role="owner", text=message.strip()),) if message and message.strip()
+            (AuthoringTurn(role="owner", text=message.strip()),)
+            if message and message.strip()
             else ()
         )
         answer = author_turn(
-            session.sop_text, turns, session.draft, self.installed, model=model,
-            model_alias=self.model_alias, local_only=self.local_only,
-            trace=TraceIdentifiers(trace_id=f"authoring-{session_id}",
-                                   request_id=f"authoring-{len(turns)}", span_id="authoring"),
-            namespace=self.namespace, owner=actor,
+            session.sop_text,
+            turns,
+            session.draft,
+            self.installed,
+            model=model,
+            model_alias=self.model_alias,
+            local_only=self.local_only,
+            trace=TraceIdentifiers(
+                trace_id=f"authoring-{session_id}",
+                request_id=f"authoring-{len(turns)}",
+                span_id="authoring",
+            ),
+            namespace=self.namespace,
+            owner=actor,
         )
         reply = answer.reply + (
             "\n" + "\n".join(f"- {question}" for question in answer.questions)
-            if answer.questions else ""
+            if answer.questions
+            else ""
         )
         draft = answer.workflow or session.draft
-        status: AuthoringStatus = (
-            "needs_input" if answer.questions or draft is None else "ready"
+        status: AuthoringStatus = "needs_input" if answer.questions or draft is None else "ready"
+        return self._save(
+            session.model_copy(
+                update={
+                    "turns": (*turns, AuthoringTurn(role="agent", text=reply)),
+                    "questions": answer.questions,
+                    "problems": answer.problems,
+                    "draft": draft,
+                    "status": status,
+                    # A changed draft needs a new preview before it can be installed.
+                    "preview": session.preview if draft == session.draft else None,
+                }
+            )
         )
-        return self._save(session.model_copy(update={
-            "turns": (*turns, AuthoringTurn(role="agent", text=reply)),
-            "questions": answer.questions, "problems": answer.problems, "draft": draft,
-            "status": status,
-            # A changed draft needs a new preview before it can be installed.
-            "preview": session.preview if draft == session.draft else None,
-        }))
 
     def preview(
-        self, session_id: str, actor: str, arguments: dict[str, JsonValue],
-        settings: dict[str, JsonValue], bridge: BridgeExecutor,
+        self,
+        session_id: str,
+        actor: str,
+        arguments: dict[str, JsonValue],
+        settings: dict[str, JsonValue],
+        bridge: BridgeExecutor,
     ) -> AuthoringSession:
         session = self.load(session_id, actor)
         if session.draft is None:
@@ -226,25 +254,37 @@ class AuthoringStudio:
         from common.execution import RequestContext
 
         context = RequestContext(
-            trace=TraceIdentifiers(trace_id=f"authoring-{session_id}",
-                                   request_id="preview", span_id="preview"),
-            actor=actor, namespace=self.namespace, channel="agent-web",
+            trace=TraceIdentifiers(
+                trace_id=f"authoring-{session_id}", request_id="preview", span_id="preview"
+            ),
+            actor=actor,
+            namespace=self.namespace,
+            channel="agent-web",
             message="preview a drafted Workflow",
         )
         shown = asyncio.run(engine.preview(context, draft.metadata.identity, arguments))
-        return self._save(session.model_copy(update={
-            "preview": shown, "preview_arguments": arguments, "settings": settings,
-            "preview_of": _digest(draft),
-            "status": "previewed" if shown.status == "previewed" else session.status,
-        }))
+        return self._save(
+            session.model_copy(
+                update={
+                    "preview": shown,
+                    "preview_arguments": arguments,
+                    "settings": settings,
+                    "preview_of": _digest(draft),
+                    "status": "previewed" if shown.status == "previewed" else session.status,
+                }
+            )
+        )
 
     def install(self, session_id: str, actor: str) -> tuple[AuthoringSession, Path]:
         """The owner's approval. Never reachable by the model."""
         session = self.load(session_id, actor)
         draft = session.draft
         if (
-            draft is None or session.preview is None or session.status != "previewed"
-            or session.preview.status != "previewed" or session.preview_of != _digest(draft)
+            draft is None
+            or session.preview is None
+            or session.status != "previewed"
+            or session.preview.status != "previewed"
+            or session.preview_of != _digest(draft)
         ):
             raise AuthoringError("authoring_preview_required")
         identity = draft.metadata.identity
@@ -253,24 +293,38 @@ class AuthoringStudio:
         if target.exists():
             raise AuthoringError("authoring_workflow_exists")
         metadata = draft.metadata.model_dump(mode="json")
-        metadata.update({
-            "lifecycle": "published",
-            "business_approval": {"status": "approved", "reviewer": actor,
-                                  "evidence": f"authoring-session:{session_id}"},
-            "validation_refs": [f"authoring-preview:{session_id}:{session.preview_of}"],
-        })
+        metadata.update(
+            {
+                "lifecycle": "published",
+                "business_approval": {
+                    "status": "approved",
+                    "reviewer": actor,
+                    "evidence": f"authoring-session:{session_id}",
+                },
+                "validation_refs": [f"authoring-preview:{session_id}:{session.preview_of}"],
+            }
+        )
         published = WorkflowManifest.model_validate(
-            {**draft.model_dump(mode="json"), "metadata": metadata})
+            {**draft.model_dump(mode="json"), "metadata": metadata}
+        )
         self.workflows_dir.mkdir(parents=True, exist_ok=True)
-        write_atomically(target, (json.dumps(published.model_dump(mode="json"),
-                                             ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
+        write_atomically(
+            target,
+            (
+                json.dumps(published.model_dump(mode="json"), ensure_ascii=False, indent=2) + "\n"
+            ).encode("utf-8"),
+        )
         if session.settings:
             self.settings_store.save(identity, session.settings)
         self._add_grants(published, actor, f"authoring-session:{session_id}")
-        installed = self._save(session.model_copy(update={
-            "status": "installed",
-            "installed_as": f"{identity.namespace}/{identity.name}@{identity.version}",
-        }))
+        installed = self._save(
+            session.model_copy(
+                update={
+                    "status": "installed",
+                    "installed_as": f"{identity.namespace}/{identity.name}@{identity.version}",
+                }
+            )
+        )
         return installed, target
 
     # -- grants ------------------------------------------------------------
@@ -286,22 +340,30 @@ class AuthoringStudio:
             if binding is None:
                 raise AuthoringError("authoring_capability_missing")
             grants[step.capability.key] = CapabilityGrant(
-                actor=actor, asset=binding.spec.identity,
+                actor=actor,
+                asset=binding.spec.identity,
                 permissions=binding.spec.policy.required_permissions,
-                policy_refs=binding.spec.policy.policy_refs, approval_ref=ref,
+                policy_refs=binding.spec.policy.policy_refs,
+                approval_ref=ref,
             )
         return tuple(grants.values())
 
     def _add_grants(self, manifest: WorkflowManifest, actor: str, ref: str) -> None:
         existing = (
             [CapabilityGrant.model_validate(item) for item in documents(self.grants_file)]
-            if self.grants_file.is_file() else []
+            if self.grants_file.is_file()
+            else []
         )
         have = {(grant.actor, grant.asset.key) for grant in existing}
-        added = [grant for grant in self._grants(manifest, actor, ref)
-                 if (grant.actor, grant.asset.key) not in have]
+        added = [
+            grant
+            for grant in self._grants(manifest, actor, ref)
+            if (grant.actor, grant.asset.key) not in have
+        ]
         if not added:
             return
         payload = [grant.model_dump(mode="json") for grant in (*existing, *added)]
-        write_atomically(self.grants_file, (json.dumps(payload, ensure_ascii=False, indent=2)
-                                            + "\n").encode("utf-8"))
+        write_atomically(
+            self.grants_file,
+            (json.dumps(payload, ensure_ascii=False, indent=2) + "\n").encode("utf-8"),
+        )

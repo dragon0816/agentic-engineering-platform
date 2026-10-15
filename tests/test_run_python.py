@@ -27,11 +27,14 @@ SITE = {"PYTHONPATH": sysconfig.get_paths()["purelib"]}
 
 
 def handler(root: Path) -> RunPythonHandler:
-    binding = CodingHostBinding.model_validate({
-        "runner_python": BASE_PYTHON, "timeout_seconds": 60,
-        "repositories": [{"name": "x", "path": str(root), "writable": ["*.py"]}],
-        "workspace_roots": [str(root)],
-    })
+    binding = CodingHostBinding.model_validate(
+        {
+            "runner_python": BASE_PYTHON,
+            "timeout_seconds": 60,
+            "repositories": [{"name": "x", "path": str(root), "writable": ["*.py"]}],
+            "workspace_roots": [str(root)],
+        }
+    )
     return RunPythonHandler(binding, rule_present=lambda _python: True, extra_env=SITE)
 
 
@@ -45,11 +48,17 @@ def task(tmp_path: Path) -> Path:
 @requires_win32
 def test_a_script_reads_input_writes_output_and_its_result_comes_back(tmp_path: Path) -> None:
     workspace = task(tmp_path)
-    run = handler(tmp_path / "tasks").run(RunPythonRequest(workspace=str(workspace), script=(
-        "from openpyxl import Workbook\n"
-        "rows = open('input/data.csv', encoding='utf-8').read().split()\n"
-        "book = Workbook(); book.active.append(rows); book.save('output/out.xlsx')\n"
-        "print('rows', len(rows))\n")))
+    run = handler(tmp_path / "tasks").run(
+        RunPythonRequest(
+            workspace=str(workspace),
+            script=(
+                "from openpyxl import Workbook\n"
+                "rows = open('input/data.csv', encoding='utf-8').read().split()\n"
+                "book = Workbook(); book.active.append(rows); book.save('output/out.xlsx')\n"
+                "print('rows', len(rows))\n"
+            ),
+        )
+    )
     assert run.exit_code == 0 and "rows 2" in run.output
     assert [item.path for item in run.files] == ["output/out.xlsx"]
     assert (workspace / run.script_path).is_file()
@@ -59,15 +68,21 @@ def test_a_script_reads_input_writes_output_and_its_result_comes_back(tmp_path: 
 def test_input_and_other_folders_are_not_writable_and_a_failure_is_returned(tmp_path: Path) -> None:
     workspace = task(tmp_path)
     outside = tmp_path / "outside.txt"
-    run = handler(tmp_path / "tasks").run(RunPythonRequest(workspace=str(workspace), script=(
-        "import pathlib\n"
-        "for target in ('input/data.csv', r'" + str(outside) + "'):\n"
-        "    try:\n"
-        "        pathlib.Path(target).write_text('x')\n"
-        "        print('wrote', target)\n"
-        "    except PermissionError:\n"
-        "        print('refused', target)\n"
-        "raise SystemExit(3)\n")))
+    run = handler(tmp_path / "tasks").run(
+        RunPythonRequest(
+            workspace=str(workspace),
+            script=(
+                "import pathlib\n"
+                "for target in ('input/data.csv', r'" + str(outside) + "'):\n"
+                "    try:\n"
+                "        pathlib.Path(target).write_text('x')\n"
+                "        print('wrote', target)\n"
+                "    except PermissionError:\n"
+                "        print('refused', target)\n"
+                "raise SystemExit(3)\n"
+            ),
+        )
+    )
     assert run.exit_code == 3 and run.output.count("refused") == 2
     assert (workspace / "input" / "data.csv").read_text(encoding="utf-8") == "a,b\n1,2\n"
     assert not outside.exists()
@@ -75,9 +90,11 @@ def test_input_and_other_folders_are_not_writable_and_a_failure_is_returned(tmp_
 
 def test_only_workspaces_under_an_allowed_root(tmp_path: Path) -> None:
     (tmp_path / "elsewhere").mkdir()
-    for raw, code in ((str(tmp_path / "elsewhere"), "coding_workspace_not_allowed"),
-                      ("relative/path", "coding_workspace_not_absolute"),
-                      (str(tmp_path / "tasks" / "missing"), "coding_workspace_missing")):
+    for raw, code in (
+        (str(tmp_path / "elsewhere"), "coding_workspace_not_allowed"),
+        ("relative/path", "coding_workspace_not_absolute"),
+        (str(tmp_path / "tasks" / "missing"), "coding_workspace_missing"),
+    ):
         (tmp_path / "tasks").mkdir(exist_ok=True)
         with pytest.raises(CapabilityRefused) as refused:
             handler(tmp_path / "tasks").run(RunPythonRequest(workspace=raw, script="print(1)"))

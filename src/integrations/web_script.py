@@ -246,7 +246,11 @@ def _fill_in(text: str, values: Mapping[str, JsonValue]) -> str:
 
 class ScriptRunner:
     def __init__(
-        self, page: ScriptPage, allowed_origins: tuple[str, ...], *, settle_s: float = 0.3,
+        self,
+        page: ScriptPage,
+        allowed_origins: tuple[str, ...],
+        *,
+        settle_s: float = 0.3,
         timeout_s: float = 30.0,
         downloader: Callable[[Callable[[], None], str], str] | None = None,
     ) -> None:
@@ -275,8 +279,13 @@ class ScriptRunner:
                 done.append(item)
         return WebScriptResult(url=self._url(), data=data, done=tuple(done))
 
-    def _do(self, action: WebAction, values: Mapping[str, JsonValue], mode: ScriptMode,
-            data: dict[str, JsonValue]) -> None:
+    def _do(
+        self,
+        action: WebAction,
+        values: Mapping[str, JsonValue],
+        mode: ScriptMode,
+        data: dict[str, JsonValue],
+    ) -> None:
         if action.do == "open":
             assert action.url is not None
             url = _fill_in(action.url, values)
@@ -295,12 +304,14 @@ class ScriptRunner:
             return
         if action.do == "read_table":
             assert action.table is not None and action.save_as is not None
-            answer = self._evaluate(_READ_TABLE % {"css": json.dumps(action.table),
-                                                   "limit": MAX_TABLE_ROWS})
+            answer = self._evaluate(
+                _READ_TABLE % {"css": json.dumps(action.table), "limit": MAX_TABLE_ROWS}
+            )
             data[action.save_as] = answer["rows"]
             return
         spec: dict[str, Any] = {
-            "op": "click" if action.do == "download" else action.do, "mode": mode,
+            "op": "click" if action.do == "download" else action.do,
+            "mode": mode,
             **(action.target.model_dump() if action.target else {}),
         }
         if action.row is not None:

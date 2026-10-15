@@ -47,8 +47,12 @@ def record_path(workspace_root: Path) -> Path:
 
 
 def write_record(workspace_root: Path, address: str, port: int) -> None:
-    record = {"address": address, "port": port, "pid": os.getpid(),
-              "started_at": datetime.now(UTC).isoformat(timespec="seconds")}
+    record = {
+        "address": address,
+        "port": port,
+        "pid": os.getpid(),
+        "started_at": datetime.now(UTC).isoformat(timespec="seconds"),
+    }
     write_atomically(record_path(workspace_root), json.dumps(record).encode("utf-8"))
 
 
@@ -67,8 +71,7 @@ def read_record(workspace_root: Path) -> dict[str, object] | None:
         record = json.loads(record_path(workspace_root).read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return None
-    return record if isinstance(record, dict) and isinstance(record.get("address"), str) \
-        else None
+    return record if isinstance(record, dict) and isinstance(record.get("address"), str) else None
 
 
 def answers(address: str, timeout: float = 3.0) -> bool:
@@ -89,8 +92,10 @@ def refreshed_environment(base: Mapping[str, str] | None = None) -> dict[str, st
     import winreg
 
     places = (
-        (winreg.HKEY_LOCAL_MACHINE,
-         r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"),
+        (
+            winreg.HKEY_LOCAL_MACHINE,
+            r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment",
+        ),
         (winreg.HKEY_CURRENT_USER, "Environment"),
     )
     for hive, key_path in places:
@@ -123,18 +128,39 @@ def console_python(executable: str = sys.executable) -> str:
 def start_server(config_path: Path, port: int, logs: Path, schedules: bool = True) -> None:
     logs.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    args = [console_python(), "-u", "-m", "host_runtime.cli", "web",
-            "--config", str(config_path.resolve()), "--port", str(port)]
+    args = [
+        console_python(),
+        "-u",
+        "-m",
+        "host_runtime.cli",
+        "web",
+        "--config",
+        str(config_path.resolve()),
+        "--port",
+        str(port),
+    ]
     if schedules:
         args.append("--schedules")
     flags = 0
     if sys.platform == "win32":
-        flags = (subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.DETACHED_PROCESS
-                 | subprocess.CREATE_NO_WINDOW)
-    with (logs / f"agent-web-{stamp}.out.log").open("wb") as out, \
-            (logs / f"agent-web-{stamp}.err.log").open("wb") as err:
-        subprocess.Popen(args, stdout=out, stderr=err, stdin=subprocess.DEVNULL,
-                         env=refreshed_environment(), creationflags=flags, close_fds=True)
+        flags = (
+            subprocess.CREATE_NEW_PROCESS_GROUP
+            | subprocess.DETACHED_PROCESS
+            | subprocess.CREATE_NO_WINDOW
+        )
+    with (
+        (logs / f"agent-web-{stamp}.out.log").open("wb") as out,
+        (logs / f"agent-web-{stamp}.err.log").open("wb") as err,
+    ):
+        subprocess.Popen(
+            args,
+            stdout=out,
+            stderr=err,
+            stdin=subprocess.DEVNULL,
+            env=refreshed_environment(),
+            creationflags=flags,
+            close_fds=True,
+        )
 
 
 def open_agent(
@@ -155,8 +181,7 @@ def open_agent(
         return "opened"
     if record is not None:
         record_path(workspace_root).unlink(missing_ok=True)  # left by a server that died
-    launch = start or (lambda: start_server(config_path, port, workspace_root / "logs",
-                                            schedules))
+    launch = start or (lambda: start_server(config_path, port, workspace_root / "logs", schedules))
     launch()
     deadline = time.monotonic() + wait_seconds
     while time.monotonic() < deadline:
@@ -168,7 +193,8 @@ def open_agent(
     raise LauncherError(
         "agent_web_not_started",
         f"Agent Web did not answer within {wait_seconds:g} seconds; see the newest "
-        f"agent-web-*.err.log in {workspace_root / 'logs'}")
+        f"agent-web-*.err.log in {workspace_root / 'logs'}",
+    )
 
 
 #: The AEP Agent icon the shortcuts show; scripts/make_icon.py makes it from a PNG.
@@ -182,8 +208,7 @@ def create_shortcuts(config_path: Path, port: int = DEFAULT_PORT) -> list[Path]:
     python = Path(sys.executable)
     windowless = python.parent / "pythonw.exe"
     target = windowless if windowless.is_file() else python
-    arguments = (f'-m host_runtime.cli open --config "{config_path.resolve()}" '
-                 f"--port {port}")
+    arguments = f'-m host_runtime.cli open --config "{config_path.resolve()}" --port {port}'
     places = [
         Path(os.environ.get("USERPROFILE", "~")).expanduser() / "Desktop",
         Path(os.environ.get("APPDATA", "")) / "Microsoft" / "Windows" / "Start Menu" / "Programs",
@@ -201,11 +226,21 @@ def create_shortcuts(config_path: Path, port: int = DEFAULT_PORT) -> list[Path]:
             "$s.Save()"
         )
         # Values travel in the environment, so no path is ever parsed as script.
-        env = {**os.environ, "AEP_LINK": str(link), "AEP_TARGET": str(target),
-               "AEP_ARGS": arguments, "AEP_DIR": str(config_path.resolve().parent),
-               "AEP_ICON": str(SHORTCUT_ICON) if SHORTCUT_ICON.is_file() else ""}
-        done = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", script],
-                              env=env, capture_output=True, text=True, timeout=60)
+        env = {
+            **os.environ,
+            "AEP_LINK": str(link),
+            "AEP_TARGET": str(target),
+            "AEP_ARGS": arguments,
+            "AEP_DIR": str(config_path.resolve().parent),
+            "AEP_ICON": str(SHORTCUT_ICON) if SHORTCUT_ICON.is_file() else "",
+        }
+        done = subprocess.run(
+            ["powershell", "-NoProfile", "-NonInteractive", "-Command", script],
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
         if done.returncode != 0:
             raise LauncherError("shortcut_failed", f"could not create {link}")
         made.append(link)

@@ -145,8 +145,11 @@ def _weekly_steps() -> list[dict[str, object]]:
 
 _WEEKLY_PARAMETERS: list[dict[str, Any]] = [
     {
-        "name": "dry_run", "label": "Dry run: show the plan only", "kind": "boolean",
-        "default": False, "order": 5,
+        "name": "dry_run",
+        "label": "Dry run: show the plan only",
+        "kind": "boolean",
+        "default": False,
+        "order": 5,
         "help": "Plan the week and show it; the workbook and the mail are not touched.",
     },
     *[
@@ -155,21 +158,28 @@ _WEEKLY_PARAMETERS: list[dict[str, Any]] = [
         if item["name"] != "args"
     ],
     {
-        "name": "start_time", "label": "Window start (date or time)", "kind": "text",
+        "name": "start_time",
+        "label": "Window start (date or time)",
+        "kind": "text",
         "order": 45,
         "help": "Optional precise start, e.g. 2026-09-21 or 2026-09-21T09:00; "
-                "times without an offset are Taiwan time.",
+        "times without an offset are Taiwan time.",
     },
     {
-        "name": "end_time", "label": "Window end (date or time)", "kind": "text",
+        "name": "end_time",
+        "label": "Window end (date or time)",
+        "kind": "text",
         "order": 46,
         "help": "Optional precise end; a date alone means the end of that day.",
     },
     {
-        "name": "draft_mail", "label": "Save the weekly mail draft", "kind": "boolean",
-        "default": True, "order": 70,
+        "name": "draft_mail",
+        "label": "Save the weekly mail draft",
+        "kind": "boolean",
+        "default": True,
+        "order": 70,
         "help": "After writing the workbook, save the week's mail as an Outlook draft "
-                "(never sent).",
+        "(never sent).",
     },
     {**_RUN_PARAMETERS[-1], "order": 90, "channels": ["telegram", "agent"]},
 ]
@@ -202,7 +212,9 @@ def weekly_report_workflow() -> WorkflowManifest:
             "dependencies": {
                 "central_required": False,
                 "local_capabilities": [
-                    *_PLAN_CAPABILITIES, "weekly_report.apply", "weekly_report.mail",
+                    *_PLAN_CAPABILITIES,
+                    "weekly_report.apply",
+                    "weekly_report.mail",
                 ],
             },
             "progress_steps": [
@@ -218,7 +230,9 @@ def weekly_report_workflow() -> WorkflowManifest:
                 *_weekly_steps(),
                 {
                     "capability": {
-                        "namespace": "weekly-report", "name": "apply", "version": "1.0.0",
+                        "namespace": "weekly-report",
+                        "name": "apply",
+                        "version": "1.0.0",
                     },
                     "inputs": {
                         "plan": {"source": "step", "step_index": 3},
@@ -227,7 +241,9 @@ def weekly_report_workflow() -> WorkflowManifest:
                 },
                 {
                     "capability": {
-                        "namespace": "weekly-report", "name": "mail", "version": "1.0.0",
+                        "namespace": "weekly-report",
+                        "name": "mail",
+                        "version": "1.0.0",
                     },
                     "inputs": {
                         "window": {"source": "step", "step_index": 0},

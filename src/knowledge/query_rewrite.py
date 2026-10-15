@@ -33,7 +33,8 @@ REWRITE_PROMPT = (
 )
 # Only English function words: question templates add noise words such as
 # "what" and "which" that outweigh a short topic word like "EVM".
-STOPWORDS = frozenset("""
+STOPWORDS = frozenset(
+    """
 a about above after again against all am an and any are as at be because been before
 being below between both but by can could did do does doing down during each few for
 from further had has have having he her here hers him his how i if in into is it its
@@ -41,7 +42,8 @@ itself just me more most my no nor not now of off on once only or other our out 
 same she should so some such than that the their them then there these they this those
 through to too under until up very was we were what when where which while who whom why
 will with would you your
-""".split())
+""".split()
+)
 _WORD = re.compile(r"\w+", re.UNICODE)
 
 
@@ -52,15 +54,22 @@ def content_words(text: str) -> str:
 
 
 def rewrite_queries(
-    model: ModelClient, alias: str, question: str, trace: TraceIdentifiers,
+    model: ModelClient,
+    alias: str,
+    question: str,
+    trace: TraceIdentifiers,
 ) -> tuple[str, ...]:
     """Up to six keyword queries; none when the model fails, so retrieval goes on."""
     request = ModelRequest(
-        trace=trace, model_alias=alias,
-        messages=(ModelMessage(role="system", text=REWRITE_PROMPT),
-                  ModelMessage(role="user", text=question)),
+        trace=trace,
+        model_alias=alias,
+        messages=(
+            ModelMessage(role="system", text=REWRITE_PROMPT),
+            ModelMessage(role="user", text=question),
+        ),
         requirements=ModelRequirements(structured_output=True),
-        output_contract="knowledge_query_rewrite", max_output_tokens=800,
+        output_contract="knowledge_query_rewrite",
+        max_output_tokens=800,
     )
     try:
         response = model.generate(request)
@@ -79,6 +88,7 @@ def rewrite_queries(
         return ()
     queries = [
         " ".join(item.split())[:MAX_QUERY_CHARS]
-        for item in items if isinstance(item, str) and item.strip()
+        for item in items
+        if isinstance(item, str) and item.strip()
     ]
     return tuple(dict.fromkeys(queries))[:MAX_QUERIES]

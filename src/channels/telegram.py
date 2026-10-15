@@ -99,7 +99,8 @@ MAX_RETRY_WAIT_S = 5.0
 #: with only the "Done" status line (owner 2026-10-15).
 UNDELIVERED_REPLY = (
     "The answer could not be delivered here (Telegram refused the message). "
-    "Ask again, or open Agent Web.")
+    "Ask again, or open Agent Web."
+)
 SETTINGS_HINT = "Open Agent Web to set them, then send /run again."
 HELP = (
     "Talk to the Agent in words, or send a skill command as /<skill> <command> "
@@ -120,7 +121,8 @@ _ATTACHMENT_REPLIES = {
     "attachment_too_many": f"一則訊息最多 {MAX_FILES_PER_MESSAGE} 個檔案，沒有收下。",
     "attachment_telegram_limit": (
         f"Telegram 只讓 Bot 下載 {TELEGRAM_DOWNLOAD_BYTES // (1024 * 1024)} MB 以內的檔案，"
-        "這個檔案太大，請改用 Agent Web 上傳。"),
+        "這個檔案太大，請改用 Agent Web 上傳。"
+    ),
     "attachment_download_failed": "無法從 Telegram 下載附件，請再傳一次。",
     "attachment_zip_invalid": "這個 zip 檔無法解開。",
     "attachment_zip_too_many_files": "zip 裡的檔案太多（上限 2000 個），沒有收下。",
@@ -134,12 +136,15 @@ def attachment_reply(code: str) -> str:
     """What the person is told about an attachment refusal, by its code."""
     return _ATTACHMENT_REPLIES.get(code, f"附件無法處理（{code}）。")
 
+
 #: Turns of a Telegram chat kept as context for the next one (memory only).
 MAX_CHAT_HISTORY = 12
 #: How often a "working on it" message refreshes its elapsed time.
 PROGRESS_REFRESH_SECONDS = 5.0
 _STEP_MARKS: dict[ToolProgressState, str] = {
-    "running": "running…", "succeeded": "done", "failed": "failed",
+    "running": "running…",
+    "succeeded": "done",
+    "failed": "failed",
 }
 
 Disposition = Literal[
@@ -254,9 +259,15 @@ class _File:
 
 class _Update:
     def __init__(
-        self, update_id: int, chat_id: int, sender_id: int, text: str | None,
-        callback_id: str | None = None, sender_name: str = "",
-        files: list[_File] | None = None, media_group_id: str | None = None,
+        self,
+        update_id: int,
+        chat_id: int,
+        sender_id: int,
+        text: str | None,
+        callback_id: str | None = None,
+        sender_name: str = "",
+        files: list[_File] | None = None,
+        media_group_id: str | None = None,
         message_id: int | None = None,
     ) -> None:
         self.update_id = update_id
@@ -277,8 +288,10 @@ class _Update:
     def joins(self, other: "_Update") -> bool:
         """Whether `other` is another item of this update's album."""
         return (
-            self.media_group_id is not None and self.media_group_id == other.media_group_id
-            and self.chat_id == other.chat_id and self.sender_id == other.sender_id
+            self.media_group_id is not None
+            and self.media_group_id == other.media_group_id
+            and self.chat_id == other.chat_id
+            and self.sender_id == other.sender_id
         )
 
     def absorb(self, other: "_Update") -> None:
@@ -307,13 +320,20 @@ def _parse(raw: object) -> _Update | None:
         chat = message.get("chat") if isinstance(message, dict) else None
         data = callback.get("data")
         if (
-            isinstance(sender, dict) and type(sender.get("id")) is int
-            and isinstance(chat, dict) and type(chat.get("id")) is int
-            and isinstance(data, str) and isinstance(callback.get("id"), str)
+            isinstance(sender, dict)
+            and type(sender.get("id")) is int
+            and isinstance(chat, dict)
+            and type(chat.get("id")) is int
+            and isinstance(data, str)
+            and isinstance(callback.get("id"), str)
         ):
             identifier = message.get("message_id") if isinstance(message, dict) else None
             return _Update(
-                raw["update_id"], chat["id"], sender["id"], data, callback["id"],
+                raw["update_id"],
+                chat["id"],
+                sender["id"],
+                data,
+                callback["id"],
                 sender_name=_display_name(sender),
                 message_id=identifier if type(identifier) is int else None,
             )
@@ -333,8 +353,12 @@ def _parse(raw: object) -> _Update | None:
         text = message.get("caption")
     group = message.get("media_group_id")
     return _Update(
-        raw["update_id"], chat["id"], sender["id"], text if isinstance(text, str) else None,
-        sender_name=_display_name(sender), files=_files(message, raw["update_id"]),
+        raw["update_id"],
+        chat["id"],
+        sender["id"],
+        text if isinstance(text, str) else None,
+        sender_name=_display_name(sender),
+        files=_files(message, raw["update_id"]),
         media_group_id=group if isinstance(group, str) else None,
     )
 
@@ -350,23 +374,29 @@ def _files(message: dict[str, Any], update_id: int) -> list[_File]:
         name = document.get("file_name")
         if not isinstance(name, str) or not name.strip():
             mime = document.get("mime_type")
-            suffix = next(
-                (key for key, (_, media) in KINDS.items() if media == mime), "")
+            suffix = next((key for key, (_, media) in KINDS.items() if media == mime), "")
             name = f"file-{update_id}{suffix}"
         return [_File(document["file_id"], name, _size(document.get("file_size")))]
     photo = message.get("photo")
     if isinstance(photo, list):
-        sizes = [item for item in photo
-                 if isinstance(item, dict) and isinstance(item.get("file_id"), str)]
+        sizes = [
+            item
+            for item in photo
+            if isinstance(item, dict) and isinstance(item.get("file_id"), str)
+        ]
         if sizes:
-            largest = max(sizes, key=lambda item: (
-                _size(item.get("file_size")) or 0,
-                (_size(item.get("width")) or 0) * (_size(item.get("height")) or 0),
-            ))
+            largest = max(
+                sizes,
+                key=lambda item: (
+                    _size(item.get("file_size")) or 0,
+                    (_size(item.get("width")) or 0) * (_size(item.get("height")) or 0),
+                ),
+            )
             unique = largest.get("file_unique_id")
             label = unique if isinstance(unique, str) and unique else str(update_id)
-            return [_File(largest["file_id"], f"photo-{label}.jpg",
-                          _size(largest.get("file_size")))]
+            return [
+                _File(largest["file_id"], f"photo-{label}.jpg", _size(largest.get("file_size")))
+            ]
     return []
 
 
@@ -459,8 +489,7 @@ def _retry_after(body: bytes) -> float:
         seconds = json.loads(body).get("parameters", {}).get("retry_after", 1)
     except (ValueError, AttributeError):
         seconds = 1
-    return float(min(max(seconds if isinstance(seconds, int | float) else 1, 0),
-                     MAX_RETRY_WAIT_S))
+    return float(min(max(seconds if isinstance(seconds, int | float) else 1, 0), MAX_RETRY_WAIT_S))
 
 
 def _no_answer_reply(record: str | None) -> str:
@@ -468,11 +497,16 @@ def _no_answer_reply(record: str | None) -> str:
     never silent (owner 2026-10-15)."""
     used = ""
     if record:
-        names = [line.lstrip("-• ").split(":", 1)[0] for line in record.splitlines()
-                 if line.startswith("- ")]
+        names = [
+            line.lstrip("-• ").split(":", 1)[0]
+            for line in record.splitlines()
+            if line.startswith("- ")
+        ]
         used = " after using " + ", ".join(_tool_label(name) for name in names[:5] if name)
-    return (f"The Agent gave no answer{used}. Ask again or say it differently; to run a "
-            "Workflow, send /run <name>.")
+    return (
+        f"The Agent gave no answer{used}. Ask again or say it differently; to run a "
+        "Workflow, send /run <name>."
+    )
 
 
 def _tool_label(name: str) -> str:
@@ -712,8 +746,12 @@ class TelegramIngress:
                 replied = False
                 if delivery.edit_message_id is not None:
                     replied = await asyncio.to_thread(
-                        self._edit_reply, update.chat_id, delivery.edit_message_id,
-                        delivery.reply, delivery.buttons)
+                        self._edit_reply,
+                        update.chat_id,
+                        delivery.edit_message_id,
+                        delivery.reply,
+                        delivery.buttons,
+                    )
                 if not replied:
                     replied = await asyncio.to_thread(
                         self._reply, update.chat_id, delivery.reply, delivery.buttons
@@ -780,8 +818,10 @@ class TelegramIngress:
             return TelegramDelivery(**base, disposition="unmapped_sender")
         if update.files:
             waiting = self._flows.get((update.chat_id, update.sender_id))
-            if waiting is not None and not waiting.expired() and (
-                telegram_flow.current_upload(waiting) is not None
+            if (
+                waiting is not None
+                and not waiting.expired()
+                and (telegram_flow.current_upload(waiting) is not None)
             ):
                 return await self._flow_upload(base, waiting, actor, update)
             return await self._attached(base, actor, update)
@@ -796,7 +836,8 @@ class TelegramIngress:
         card_tap = CARD_TAP.match(text)
         if card_tap is not None:
             return await self._decide_card(
-                base, key, actor, card_tap.group(1), card_tap.group(2), update)
+                base, key, actor, card_tap.group(1), card_tap.group(2), update
+            )
         tapped = APPROVAL_TAP.match(text)
         if tapped is not None:
             return await self._decide(base, key, actor, tapped.group(1), tapped.group(2))
@@ -828,16 +869,19 @@ class TelegramIngress:
         request = self._request(update, actor, text)
         if request is None:
             return TelegramDelivery(
-                **base, disposition="unsupported_content", reply=CREDENTIAL_REPLY)
+                **base, disposition="unsupported_content", reply=CREDENTIAL_REPLY
+            )
         if parsed is None and not DOT_COMMAND.match(text):
             # "Run X" for an installed Workflow is its question flow, as
             # /run X is, never the model's prose (owner 2026-10-15).
             intent = run_intent(text, self.agent.gateway.engine.workflows.manifests())
             if intent is not None:
                 return await self._open_flow(
-                    base, key, intent.manifest, actor, update, intent.prefill)
+                    base, key, intent.manifest, actor, update, intent.prefill
+                )
         if (
-            parsed is None and not DOT_COMMAND.match(text)
+            parsed is None
+            and not DOT_COMMAND.match(text)
             and self.agent.gateway.router.model is not None
         ):
             # Free text is a conversation, as in Agent Web: the model answers
@@ -894,16 +938,22 @@ class TelegramIngress:
         the limits before anything is downloaded, saved with the shared store,
         and given to the conversation model as Agent Web does. The caller has
         already admitted the sender."""
+
         def refused(code: str) -> TelegramDelivery:
             return TelegramDelivery(
-                **base, disposition="unsupported_content", reply=attachment_reply(code))
+                **base, disposition="unsupported_content", reply=attachment_reply(code)
+            )
 
         if self.attachments is None:
-            return TelegramDelivery(**base, disposition="unsupported_content",
-                                    reply="這個 Bridge 不接受附件。")
+            return TelegramDelivery(
+                **base, disposition="unsupported_content", reply="這個 Bridge 不接受附件。"
+            )
         if self.agent.gateway.router.model is None:
-            return TelegramDelivery(**base, disposition="unsupported_content",
-                                    reply="附件需要對話模型，這個 Bridge 目前沒有設定。")
+            return TelegramDelivery(
+                **base,
+                disposition="unsupported_content",
+                reply="附件需要對話模型，這個 Bridge 目前沒有設定。",
+            )
         if len(update.files) > MAX_FILES_PER_MESSAGE:
             return refused("attachment_too_many")
         for file in update.files:
@@ -917,19 +967,23 @@ class TelegramIngress:
         request = self._request(update, actor, text)
         if request is None:
             return TelegramDelivery(
-                **base, disposition="unsupported_content", reply=CREDENTIAL_REPLY)
+                **base, disposition="unsupported_content", reply=CREDENTIAL_REPLY
+            )
         key = (update.chat_id, update.sender_id)
         try:
             saved = await asyncio.to_thread(self._save, _files_session(key), update.files)
             note, images = await asyncio.to_thread(for_model, saved)
         except AttachmentError as error:
-            return TelegramDelivery(**base, disposition="answered",
-                                    reply=attachment_reply(error.code))
+            return TelegramDelivery(
+                **base, disposition="answered", reply=attachment_reply(error.code)
+            )
         # Later turns keep the names and paths, never the content.
         listing = "[附件]\n" + "\n".join(
-            f"- {item.filename} ({item.kind}): {item.path}" for item in saved)
-        return await self._converse(base, key, request, text, (note, images, listing),
-                                    actor=actor, update=update)
+            f"- {item.filename} ({item.kind}): {item.path}" for item in saved
+        )
+        return await self._converse(
+            base, key, request, text, (note, images, listing), actor=actor, update=update
+        )
 
     def _save(self, session_id: str, files: list[_File]) -> list[Attachment]:
         assert self.attachments is not None
@@ -958,7 +1012,8 @@ class TelegramIngress:
             # A file is read with GET where the transport can name the method.
             method = getattr(self._transport, "request", None)
             reply = (
-                method("GET", url, None, {}, timeout_s) if callable(method)
+                method("GET", url, None, {}, timeout_s)
+                if callable(method)
                 else self._transport.send(url, b"", {}, timeout_s)
             )
             del url
@@ -987,69 +1042,110 @@ class TelegramIngress:
         rows = []
         for item in self.approvals.approvals(request.actor, session_id=request.session_id):
             label = "安裝" if item.kind == "install" else "執行"
-            rows.append(((f"核准{label} {item.workflow}"[:60], f"approve:{item.approval_id}"),
-                         ("拒絕", f"reject:{item.approval_id}")))
+            rows.append(
+                (
+                    (f"核准{label} {item.workflow}"[:60], f"approve:{item.approval_id}"),
+                    ("拒絕", f"reject:{item.approval_id}"),
+                )
+            )
         return tuple(rows)
 
     async def _decide(
-        self, base: dict[str, Any], key: tuple[int, int], actor: str, decision: str,
+        self,
+        base: dict[str, Any],
+        key: tuple[int, int],
+        actor: str,
+        decision: str,
         approval_id: str,
     ) -> TelegramDelivery:
         """An approval button. Only the owner decides: a sender acting on the
         owner's behalf is refused, and the model never reaches this."""
         acting, on_behalf_of = self._acting(actor)
         if self.approvals is None:
-            return TelegramDelivery(**base, disposition="answered",
-                                    reply="Approvals are not available on this Bridge.")
+            return TelegramDelivery(
+                **base, disposition="answered", reply="Approvals are not available on this Bridge."
+            )
         if on_behalf_of is not None:
-            return TelegramDelivery(**base, disposition="answered",
-                                    reply="Only the owner of this Bridge can approve or reject.")
+            return TelegramDelivery(
+                **base,
+                disposition="answered",
+                reply="Only the owner of this Bridge can approve or reject.",
+            )
         try:
             decided = await asyncio.to_thread(
-                self.approvals.decide, approval_id, acting, decision == "approve")
+                self.approvals.decide, approval_id, acting, decision == "approve"
+            )
         except ChatAuthoringError as error:
             return TelegramDelivery(
-                **base, disposition="answered",
-                reply=f"That request was already decided or is unknown ({error.code}).")
+                **base,
+                disposition="answered",
+                reply=f"That request was already decided or is unknown ({error.code}).",
+            )
         text = approval_text(decided)
         history = self._histories.get(key, [])
         said = ("【核准】" if decision == "approve" else "【拒絕】") + decided.summary
-        history = [*history, ModelMessage(role="user", text=said),
-                   ModelMessage(role="assistant", text=text)]
+        history = [
+            *history,
+            ModelMessage(role="user", text=said),
+            ModelMessage(role="assistant", text=text),
+        ]
         self._histories[key] = history[-MAX_CHAT_HISTORY:]
         return TelegramDelivery(**base, disposition="answered", reply=scrub(text))
 
     async def _decide_card(
-        self, base: dict[str, Any], key: tuple[int, int], actor: str, card_id: str,
-        action: str, update: _Update,
+        self,
+        base: dict[str, Any],
+        key: tuple[int, int],
+        actor: str,
+        card_id: str,
+        action: str,
+        update: _Update,
     ) -> TelegramDelivery:
         """A card's button. Only the owner decides, as for approvals; Agent
         Web refuses a kind Telegram may not apply. The card is redrawn in
         place with its outcome."""
         _acting, on_behalf_of = self._acting(actor)
         if self.cards is None:
-            return TelegramDelivery(**base, disposition="answered",
-                                    reply="Cards are not available on this Bridge.")
+            return TelegramDelivery(
+                **base, disposition="answered", reply="Cards are not available on this Bridge."
+            )
         if on_behalf_of is not None:
-            return TelegramDelivery(**base, disposition="answered",
-                                    reply="Only the owner of this Bridge can apply or cancel.")
+            return TelegramDelivery(
+                **base,
+                disposition="answered",
+                reply="Only the owner of this Bridge can apply or cancel.",
+            )
         decided = await asyncio.to_thread(self.cards.decide_card, card_id, action, "telegram")
         message = str(decided.get("message") or decided.get("code") or "Done.")
         card = decided.get("card")
         if isinstance(card, dict):
             drawn, buttons = telegram_card(ActionCard.model_validate(card), CARD_WHERE)
             history = self._histories.get(key, [])
-            history = [*history, ModelMessage(role="user", text=f"[{action}] {card['title']}"),
-                       ModelMessage(role="assistant", text=drawn)]
+            history = [
+                *history,
+                ModelMessage(role="user", text=f"[{action}] {card['title']}"),
+                ModelMessage(role="assistant", text=drawn),
+            ]
             self._histories[key] = history[-MAX_CHAT_HISTORY:]
-            return TelegramDelivery(**base, disposition="answered", reply=scrub(drawn),
-                                    buttons=buttons, edit_message_id=update.message_id)
+            return TelegramDelivery(
+                **base,
+                disposition="answered",
+                reply=scrub(drawn),
+                buttons=buttons,
+                edit_message_id=update.message_id,
+            )
         return TelegramDelivery(**base, disposition="answered", reply=scrub(message))
 
     async def _converse(
-        self, base: dict[str, Any], key: tuple[int, int], request: LocalAgentRequest,
-        text: str, attached: tuple[str, tuple[str, ...], str] | None = None,
-        *, actor: str | None = None, update: _Update | None = None,
+        self,
+        base: dict[str, Any],
+        key: tuple[int, int],
+        request: LocalAgentRequest,
+        text: str,
+        attached: tuple[str, tuple[str, ...], str] | None = None,
+        *,
+        actor: str | None = None,
+        update: _Update | None = None,
     ) -> TelegramDelivery:
         """`attached` is the files' note and pictures for the model, and the
         short listing the stored history keeps in their place."""
@@ -1061,16 +1157,13 @@ class TelegramIngress:
             note, images, listing = attached
             turn = [*history, ModelMessage(role="user", text=f"{text}\n\n{listing}")]
             # The files ride on the newest message only, as in Agent Web.
-            sent = [*history, ModelMessage(role="user", text=f"{text}\n\n{note}",
-                                           images=images)]
+            sent = [*history, ModelMessage(role="user", text=f"{text}\n\n{note}", images=images)]
         progress = await self._progress(base["chat_id"], "Working on it")
         listening = TOOL_PROGRESS.set(progress.tool)
         answered = False
         try:
             result = await self.agent.converse(request, tuple(sent))
-            answered = (
-                result.conversation is not None and result.conversation.status == "answered"
-            )
+            answered = result.conversation is not None and result.conversation.status == "answered"
         finally:
             TOOL_PROGRESS.reset(listening)
             await progress.finish(answered)
@@ -1092,11 +1185,12 @@ class TelegramIngress:
                 # Never a silent turn: say what happened (owner 2026-10-15).
                 reply = _no_answer_reply(record)
             if code == "tool_loop_limit" and conversation is not None:
-                reply = (f"這個回合已用完 {len(conversation.tools)} 次工具呼叫，工作還沒完成；"
-                         "回覆「繼續」我會接著做。")
+                reply = (
+                    f"這個回合已用完 {len(conversation.tools)} 次工具呼叫，工作還沒完成；"
+                    "回覆「繼續」我會接著做。"
+                )
                 # Keep what was done so 繼續 can pick it up.
-                turn.append(ModelMessage(role="assistant",
-                                         text=f"{reply}\n\n[工具紀錄]\n{record}"))
+                turn.append(ModelMessage(role="assistant", text=f"{reply}\n\n[工具紀錄]\n{record}"))
                 self._histories[key] = turn[-MAX_CHAT_HISTORY:]
             return TelegramDelivery(**base, disposition="answered", reply=reply, buttons=buttons)
         answer = conversation.text if conversation.text.strip() else _no_answer_reply(record)
@@ -1110,17 +1204,22 @@ class TelegramIngress:
             if manifest is not None:
                 prefill = offer.get("prefill")
                 return await self._open_flow(
-                    base, key, manifest, actor, update,
-                    prefill if isinstance(prefill, dict) else {})
+                    base, key, manifest, actor, update, prefill if isinstance(prefill, dict) else {}
+                )
         card = card_in(conversation.tools)
         if card is not None:
             # A proposal: the card, with Apply/Cancel only for the kinds
             # Telegram may apply (owner 2026-10-15).
             drawn, card_buttons = telegram_card(ActionCard.model_validate(card), CARD_WHERE)
-            return TelegramDelivery(**base, disposition="answered", reply=scrub(drawn),
-                                    buttons=(*card_buttons, *buttons))
-        return TelegramDelivery(**base, disposition="answered", reply=scrub(answer),
-                                buttons=buttons)
+            return TelegramDelivery(
+                **base,
+                disposition="answered",
+                reply=scrub(drawn),
+                buttons=(*card_buttons, *buttons),
+            )
+        return TelegramDelivery(
+            **base, disposition="answered", reply=scrub(answer), buttons=buttons
+        )
 
     def _acting(self, actor: str) -> tuple[str, str | None]:
         """Who runs and on whose behalf, as for every other request."""
@@ -1133,21 +1232,30 @@ class TelegramIngress:
         if not target:
             return "Name the Workflow: /run <number or name>."
         found = [
-            item for item in installed
+            item
+            for item in installed
             if (target.isdigit() and item.run_alias == int(target))
-            or target in (
+            or target
+            in (
                 item.metadata.identity.name,
                 f"{item.metadata.identity.namespace}/{item.metadata.identity.name}",
             )
         ]
         if len(found) != 1:
-            return (f"No single installed Workflow is called {target}."
-                    if not found else f"{target} names more than one Workflow; use namespace/name.")
+            return (
+                f"No single installed Workflow is called {target}."
+                if not found
+                else f"{target} names more than one Workflow; use namespace/name."
+            )
         return found[0]
 
     async def _start_flow(
-        self, base: dict[str, int], key: tuple[int, int],
-        parsed: tuple[str, str | None, str | None], actor: str, update: _Update,
+        self,
+        base: dict[str, int],
+        key: tuple[int, int],
+        parsed: tuple[str, str | None, str | None],
+        actor: str,
+        update: _Update,
     ) -> TelegramDelivery:
         target = " ".join(part for part in parsed[1:] if part).strip()
         manifest = self._resolve_workflow(target)
@@ -1163,40 +1271,61 @@ class TelegramIngress:
         return self.agent.gateway.engine.workflows.get(identity)
 
     async def _open_flow(
-        self, base: dict[str, Any], key: tuple[int, int], manifest: WorkflowManifest,
-        actor: str, update: _Update, prefill: Mapping[str, Any],
+        self,
+        base: dict[str, Any],
+        key: tuple[int, int],
+        manifest: WorkflowManifest,
+        actor: str,
+        update: _Update,
+        prefill: Mapping[str, Any],
     ) -> TelegramDelivery:
         """The Workflow's question flow, with values already given as answers
         (confirmed before the run), or why it cannot run yet."""
         engine = self.agent.gateway.engine
-        offer = form_offer(manifest, person_prefill(manifest, prefill, ("telegram",)),
-                           engine.settings_provider)
+        offer = form_offer(
+            manifest, person_prefill(manifest, prefill, ("telegram",)), engine.settings_provider
+        )
         if offer["missing_settings"]:
-            return TelegramDelivery(**base, disposition="answered",
-                                    reply=scrub(str(offer["message"])) + "\n" + SETTINGS_HINT)
+            return TelegramDelivery(
+                **base,
+                disposition="answered",
+                reply=scrub(str(offer["message"])) + "\n" + SETTINGS_HINT,
+            )
         effect = await asyncio.to_thread(
             target_side_effect, self.agent, "workflow", manifest.metadata.identity, {}
         )
         preset = (
             await asyncio.to_thread(self.presets.last, actor, manifest)
-            if self.presets is not None else {}
+            if self.presets is not None
+            else {}
         )
         state = telegram_flow.start(
-            manifest, effect, engine.choices_provider,
-            uploads=self.uploads is not None, preset=preset, prefill=offer["prefill"],
+            manifest,
+            effect,
+            engine.choices_provider,
+            uploads=self.uploads is not None,
+            preset=preset,
+            prefill=offer["prefill"],
         )
         if isinstance(state, str):
             return TelegramDelivery(**base, disposition="answered", reply=state)
         return await self._flow_step(base, key, state, telegram_flow.begin(state), actor, update)
 
     async def _flow_step(
-        self, base: dict[str, int], key: tuple[int, int], state: telegram_flow.FlowState,
-        step: telegram_flow.FlowStep, actor: str, update: _Update,
+        self,
+        base: dict[str, int],
+        key: tuple[int, int],
+        state: telegram_flow.FlowState,
+        step: telegram_flow.FlowStep,
+        actor: str,
+        update: _Update,
     ) -> TelegramDelivery:
         if step.kind == "ask" and step.prompt is not None:
             self._flows[key] = state
             return TelegramDelivery(
-                **base, disposition="answered", reply=scrub(step.prompt.text),
+                **base,
+                disposition="answered",
+                reply=scrub(step.prompt.text),
                 buttons=tuple(tuple(row) for row in step.prompt.buttons),
                 edit_message_id=update.message_id if step.prompt.edit else None,
             )
@@ -1210,27 +1339,32 @@ class TelegramIngress:
         succeeded = False
         try:
             outcome = await self._execute_flow(state, step, acting, on_behalf_of, update)
-            succeeded = (
-                outcome.workflow is not None and outcome.workflow.run.status == "succeeded"
-            )
+            succeeded = outcome.workflow is not None and outcome.workflow.run.status == "succeeded"
         finally:
             await progress.finish(succeeded)
         if outcome.refusal is not None:
             return TelegramDelivery(
-                **base, disposition="refused", reply=f"Refused: {outcome.refusal}.",
+                **base,
+                disposition="refused",
+                reply=f"Refused: {outcome.refusal}.",
                 outcome=outcome,
             )
         if outcome.workflow is None:
             reply = f"{state.workflow.name}: nothing ran."
         else:
             run = outcome.workflow.run
-            reply = (f"{state.workflow.name} run {run.run_id}: {run.status}, "
-                     f"{run.completed_steps} step(s)"
-                     + (f" ({run.failure.code})" if run.failure is not None else ""))
+            reply = (
+                f"{state.workflow.name} run {run.run_id}: {run.status}, "
+                f"{run.completed_steps} step(s)"
+                + (f" ({run.failure.code})" if run.failure is not None else "")
+            )
         return TelegramDelivery(**base, disposition="routed", reply=scrub(reply), outcome=outcome)
 
     async def _flow_upload(
-        self, base: dict[str, Any], state: telegram_flow.FlowState, actor: str,
+        self,
+        base: dict[str, Any],
+        state: telegram_flow.FlowState,
+        actor: str,
         update: _Update,
     ) -> TelegramDelivery:
         """Documents for the upload field a flow waits on (forms v2): checked
@@ -1244,15 +1378,17 @@ class TelegramIngress:
         def again(message: str) -> TelegramDelivery:
             reprompt = telegram_flow.prompt(state)
             return TelegramDelivery(
-                **base, disposition="answered", reply=scrub(f"{message}\n\n{reprompt.text}"),
-                buttons=tuple(tuple(row) for row in reprompt.buttons))
+                **base,
+                disposition="answered",
+                reply=scrub(f"{message}\n\n{reprompt.text}"),
+                buttons=tuple(tuple(row) for row in reprompt.buttons),
+            )
 
         if not item.multiple and len(update.files) > 1:
             return again("Send one file here.")
         for file in update.files:
             if not accepts(item, safe_name(file.filename)):
-                return again(f"{safe_name(file.filename)} is not a "
-                             f"{', '.join(item.accept)} file.")
+                return again(f"{safe_name(file.filename)} is not a {', '.join(item.accept)} file.")
             if file.size is not None and file.size > TELEGRAM_DOWNLOAD_BYTES:
                 return again(attachment_reply("attachment_telegram_limit"))
             if file.size is not None and file.size > MAX_UPLOAD_BYTES:
@@ -1264,7 +1400,8 @@ class TelegramIngress:
             try:
                 data = await asyncio.to_thread(self._download, file.file_id)
                 path = await asyncio.to_thread(
-                    self.uploads.add, state.upload_set, item, file.filename, data)
+                    self.uploads.add, state.upload_set, item, file.filename, data
+                )
             except AttachmentError as error:
                 return again(attachment_reply(error.code))
             except WorkflowUploadError as error:
@@ -1274,43 +1411,59 @@ class TelegramIngress:
         return await self._flow_step(base, key, state, step, actor, update)
 
     def _edit_reply(
-        self, chat_id: int, message_id: int, text: str,
+        self,
+        chat_id: int,
+        message_id: int,
+        text: str,
         buttons: tuple[tuple[tuple[str, str], ...], ...] = (),
     ) -> bool:
         """Replace one message's text and keyboard (a multi-select toggle)."""
         if len(text) > MAX_MESSAGE_CHARS:
             return False
         try:
-            status, _ = self._call("editMessageText", {
-                "chat_id": chat_id, "message_id": message_id, "text": text,
-                "reply_markup": {"inline_keyboard": [
-                    [{"text": label, "callback_data": data} for label, data in row]
-                    for row in buttons
-                ]},
-            })
+            status, _ = self._call(
+                "editMessageText",
+                {
+                    "chat_id": chat_id,
+                    "message_id": message_id,
+                    "text": text,
+                    "reply_markup": {
+                        "inline_keyboard": [
+                            [{"text": label, "callback_data": data} for label, data in row]
+                            for row in buttons
+                        ]
+                    },
+                },
+            )
         except Exception:  # noqa: BLE001 - the caller sends a new message instead
             return False
         return status == 200
 
     async def _execute_flow(
-        self, state: telegram_flow.FlowState, step: telegram_flow.FlowStep, acting: str,
-        on_behalf_of: str | None, update: _Update,
+        self,
+        state: telegram_flow.FlowState,
+        step: telegram_flow.FlowStep,
+        acting: str,
+        on_behalf_of: str | None,
+        update: _Update,
     ) -> LocalAgentOutcome:
         assert step.arguments is not None
-        return await self.agent.execute_workflow(LocalWorkflowRequest(
-            ingress="telegram",
-            actor=acting,
-            on_behalf_of=on_behalf_of,
-            bridge_id=self.config.bridge_id,
-            workflow=state.workflow,
-            arguments=step.arguments,
-            idempotency_key=f"telegram-{update.update_id}",
-            trace=TraceIdentifiers(
-                trace_id=f"telegram-{update.update_id}",
-                request_id=f"telegram-{update.update_id}",
-                span_id="telegram-flow",
-            ),
-        ))
+        return await self.agent.execute_workflow(
+            LocalWorkflowRequest(
+                ingress="telegram",
+                actor=acting,
+                on_behalf_of=on_behalf_of,
+                bridge_id=self.config.bridge_id,
+                workflow=state.workflow,
+                arguments=step.arguments,
+                idempotency_key=f"telegram-{update.update_id}",
+                trace=TraceIdentifiers(
+                    trace_id=f"telegram-{update.update_id}",
+                    request_id=f"telegram-{update.update_id}",
+                    span_id="telegram-flow",
+                ),
+            )
+        )
 
     async def _progress(self, chat_id: int, title: str) -> "_Progress":
         progress = _Progress(self, chat_id, title)
@@ -1350,7 +1503,9 @@ class TelegramIngress:
         return scrub("\n".join(lines))
 
     def _reply(
-        self, chat_id: int, text: str,
+        self,
+        chat_id: int,
+        text: str,
         buttons: tuple[tuple[tuple[str, str], ...], ...] = (),
     ) -> bool:
         """Plain text, in pieces Telegram accepts, with any inline keyboard on
@@ -1363,10 +1518,12 @@ class TelegramIngress:
             for position, piece in enumerate(pieces):
                 payload: dict[str, JsonValue] = {"chat_id": chat_id, "text": piece}
                 if buttons and position == len(pieces) - 1:
-                    payload["reply_markup"] = {"inline_keyboard": [
-                        [{"text": label, "callback_data": data} for label, data in row]
-                        for row in buttons
-                    ]}
+                    payload["reply_markup"] = {
+                        "inline_keyboard": [
+                            [{"text": label, "callback_data": data} for label, data in row]
+                            for row in buttons
+                        ]
+                    }
                 if not self._send_piece(payload):
                     return False
         except Exception:  # noqa: BLE001 - the delivery records that the reply failed
@@ -1382,8 +1539,10 @@ class TelegramIngress:
             time.sleep(_retry_after(body))
             status, body = self._call("sendMessage", payload)
         if status == 400 and "reply_markup" in payload:
-            status, _ = self._call("sendMessage", {
-                key: value for key, value in payload.items() if key != "reply_markup"})
+            status, _ = self._call(
+                "sendMessage",
+                {key: value for key, value in payload.items() if key != "reply_markup"},
+            )
         return status == 200
 
     def _acknowledge(self, callback_id: str) -> None:

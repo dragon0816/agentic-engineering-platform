@@ -47,7 +47,10 @@ def version_key(version: str) -> VersionKey:
     if match is None:
         raise ValueError("version must be a full semantic version")
     major, minor, patch, prerelease = (
-        int(match.group(1)), int(match.group(2)), int(match.group(3)), match.group(4)
+        int(match.group(1)),
+        int(match.group(2)),
+        int(match.group(3)),
+        match.group(4),
     )
     if prerelease is None:
         return major, minor, patch, 1, ()

@@ -29,14 +29,27 @@ WRITE = AssetIdentity(namespace="lab", name="write-it", version="1.0.0")
 def owner_studio(tmp_path: Path) -> tuple[ChatAuthoring, Recorder]:
     recorder = Recorder()
     installed = InstalledCapabilities()
-    installed.register(spec("write-it", "write"), recorder, Echo, Out,
-                       ExecutionDependencies(central_required=False))
-    grant = CapabilityGrant(actor="owner", asset=WRITE, permissions=("lab.write-it",),
-                            policy_refs=("lab-policy",), approval_ref="device-owner")
+    installed.register(
+        spec("write-it", "write"),
+        recorder,
+        Echo,
+        Out,
+        ExecutionDependencies(central_required=False),
+    )
+    grant = CapabilityGrant(
+        actor="owner",
+        asset=WRITE,
+        permissions=("lab.write-it",),
+        policy_refs=("lab-policy",),
+        approval_ref="device-owner",
+    )
     bridge = BridgeExecutor(installed, LocalPolicy((grant,), owner_mode=True))
     return ChatAuthoring(
-        tmp_path / "chat", bridge=lambda: bridge, namespace="engineering",
-        workflows_dir=tmp_path / "workflows", grants_file=tmp_path / "grants.json",
+        tmp_path / "chat",
+        bridge=lambda: bridge,
+        namespace="engineering",
+        workflows_dir=tmp_path / "workflows",
+        grants_file=tmp_path / "grants.json",
     ), recorder
 
 
@@ -81,20 +94,31 @@ def test_the_gateway_turns_a_model_chosen_write_into_an_approval_request() -> No
         def generate(self, item: ModelRequest) -> ModelResponse:
             self.calls.append(item)
             if len(self.calls) == 1:
-                return ModelResponse(trace=item.trace, model_alias=item.model_alias, tool_calls=(
-                    ModelToolCall(call_id="call-w", name="release__check", arguments={}),))
+                return ModelResponse(
+                    trace=item.trace,
+                    model_alias=item.model_alias,
+                    tool_calls=(
+                        ModelToolCall(call_id="call-w", name="release__check", arguments={}),
+                    ),
+                )
             assert "awaiting_approval" in item.messages[-1].text
-            return ModelResponse(trace=item.trace, model_alias=item.model_alias,
-                                 text="It waits for your approval.")
+            return ModelResponse(
+                trace=item.trace, model_alias=item.model_alias, text="It waits for your approval."
+            )
 
     handler = Handler()
     built = gateway(handler, WriteModel())
     installed = InstalledCapabilities()
-    installed.register(write_spec(), handler, Probe, Report,
-                       ExecutionDependencies(central_required=False))
-    grant = CapabilityGrant(actor="engineer", asset=write_spec().identity,
-                            permissions=("engineering.validate",), policy_refs=("release-policy",),
-                            approval_ref="device-owner")
+    installed.register(
+        write_spec(), handler, Probe, Report, ExecutionDependencies(central_required=False)
+    )
+    grant = CapabilityGrant(
+        actor="engineer",
+        asset=write_spec().identity,
+        permissions=("engineering.validate",),
+        policy_refs=("release-policy",),
+        approval_ref="device-owner",
+    )
     built.bridge = BridgeExecutor(installed, LocalPolicy((grant,), owner_mode=True))
     requested: list[Any] = []
 
@@ -103,10 +127,14 @@ def test_the_gateway_turns_a_model_chosen_write_into_an_approval_request() -> No
         return {"approval_id": "ap-1", "summary": "Run it", "next": "wait"}
 
     built.capability_approval = approval
-    result = asyncio.run(built.converse(
-        request("check the release"), (ModelMessage(role="user", text="check the release"),)))
+    result = asyncio.run(
+        built.converse(
+            request("check the release"), (ModelMessage(role="user", text="check the release"),)
+        )
+    )
     assert handler.calls == 0
     assert result.tools[0].host == HostToolOutcome(
-        status="awaiting_approval", data={"approval_id": "ap-1", "summary": "Run it",
-                                          "next": "wait"})
+        status="awaiting_approval",
+        data={"approval_id": "ap-1", "summary": "Run it", "next": "wait"},
+    )
     assert requested == [("engineer", write_spec().identity, {})]

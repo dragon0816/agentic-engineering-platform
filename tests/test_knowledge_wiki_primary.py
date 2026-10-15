@@ -62,7 +62,11 @@ def test_wiki_primary_record_carries_raw_provenance_for_each_cited_page() -> Non
         ),
     )
     record = grounded_record(
-        ASSET, TRACE, answer, citation_policy="wiki_primary", wiki_provenance=provenance,
+        ASSET,
+        TRACE,
+        answer,
+        citation_policy="wiki_primary",
+        wiki_provenance=provenance,
     )
     assert record.citation_policy == "wiki_primary"
     assert record.wiki_provenance[0].status == "sourced"
@@ -71,7 +75,9 @@ def test_wiki_primary_record_carries_raw_provenance_for_each_cited_page() -> Non
 
 def test_wiki_primary_marks_an_unlinked_page_without_rejecting_it() -> None:
     record = grounded_record(
-        ASSET, TRACE, _answer("ZNA covers 67 GHz [1].", WIKI),
+        ASSET,
+        TRACE,
+        _answer("ZNA covers 67 GHz [1].", WIKI),
         citation_policy="wiki_primary",
         wiki_provenance=(WikiProvenance(wiki_page="wiki/entities/R&S ZNA.md"),),
     )
@@ -81,18 +87,24 @@ def test_wiki_primary_marks_an_unlinked_page_without_rejecting_it() -> None:
 def test_wiki_primary_requires_exact_provenance_and_refuses_the_index() -> None:
     with pytest.raises(ValueError, match="provenance"):
         grounded_record(
-            ASSET, TRACE, _answer("ZNA covers 67 GHz [1].", WIKI),
+            ASSET,
+            TRACE,
+            _answer("ZNA covers 67 GHz [1].", WIKI),
             citation_policy="wiki_primary",
         )
     with pytest.raises(ValueError, match="provenance"):
         grounded_record(
-            ASSET, TRACE, _answer("ZNA-K20 adds an eye diagram [1].", RAW),
+            ASSET,
+            TRACE,
+            _answer("ZNA-K20 adds an eye diagram [1].", RAW),
             citation_policy="wiki_primary",
             wiki_provenance=(WikiProvenance(wiki_page="wiki/entities/R&S ZNA.md"),),
         )
     with pytest.raises(ValueError, match="index"):
         grounded_record(
-            ASSET, TRACE, _answer("ZNA is a network analyzer [1].", INDEX),
+            ASSET,
+            TRACE,
+            _answer("ZNA is a network analyzer [1].", INDEX),
             citation_policy="wiki_primary",
             wiki_provenance=(WikiProvenance(wiki_page="index.md"),),
         )
@@ -101,7 +113,9 @@ def test_wiki_primary_requires_exact_provenance_and_refuses_the_index() -> None:
 def test_raw_only_record_cannot_carry_wiki_provenance() -> None:
     with pytest.raises(ValueError, match="provenance"):
         KnowledgeAnswerRecord(
-            asset=ASSET, trace=TRACE, answer=_answer("ZNA-K20 adds an eye diagram [1].", RAW),
+            asset=ASSET,
+            trace=TRACE,
+            answer=_answer("ZNA-K20 adds an eye diagram [1].", RAW),
             cited_passages=(RAW,),
             wiki_provenance=(WikiProvenance(wiki_page="wiki/entities/R&S ZNA.md"),),
         )
@@ -138,10 +152,19 @@ def _wiki_vault(tmp_path: Path) -> Vault:
     source = source_for(b"zna specs", "drop/ZNA_specs.pdf").model_copy(
         update={"raw_ref": "raw/ZNA_specs.md"}
     )
-    vault.write_raw("raw/ZNA_specs.md", render(RawDocument(
-        source=source, extractor="pdf.v1", created=date(2026, 10, 5),
-        sections=(RawSection(text="ZNA-K20 extended time domain analysis with eye diagram."),),
-    )))
+    vault.write_raw(
+        "raw/ZNA_specs.md",
+        render(
+            RawDocument(
+                source=source,
+                extractor="pdf.v1",
+                created=date(2026, 10, 5),
+                sections=(
+                    RawSection(text="ZNA-K20 extended time domain analysis with eye diagram."),
+                ),
+            )
+        ),
+    )
     root = vault.root
     (root / "wiki" / "sources").mkdir(parents=True, exist_ok=True)
     (root / "wiki" / "entities").mkdir(parents=True, exist_ok=True)
@@ -173,12 +196,14 @@ def _wiki_vault(tmp_path: Path) -> Vault:
 def _procedure(**update: object) -> KnowledgeProcedure:
     payload: dict[str, object] = {
         "intent_patterns": ["option"],
-        "facets": [{
-            "name": "product_option_spec",
-            "request_patterns": ["option"],
-            "search_queries": ["ZNA option TDR eye diagram"],
-            "support_terms": ["option", "ZNA"],
-        }],
+        "facets": [
+            {
+                "name": "product_option_spec",
+                "request_patterns": ["option"],
+                "search_queries": ["ZNA option TDR eye diagram"],
+                "support_terms": ["option", "ZNA"],
+            }
+        ],
         "citation_policy": "wiki_primary",
         **update,
     }
@@ -193,7 +218,8 @@ class _Synth:
     def generate(self, request: ModelRequest) -> ModelResponse:
         self.requests.append(request)
         return ModelResponse(
-            trace=request.trace, model_alias=request.model_alias,
+            trace=request.trace,
+            model_alias=request.model_alias,
             text=self.write(request.messages[0].text),
         )
 
@@ -221,11 +247,15 @@ def _number(prompt: str, marker: str) -> int:
 def _ask(vault: Vault, procedure: KnowledgeProcedure, model: _Synth) -> dict[str, object]:
     handler = KnowledgeQueryHandler(_Catalog(vault), model, alias="a")  # type: ignore[arg-type]
     context = RequestContext(
-        trace=TRACE, actor="engineer", namespace="engineering",
-        message="ZNA option", channel="local",
+        trace=TRACE,
+        actor="engineer",
+        namespace="engineering",
+        message="ZNA option",
+        channel="local",
     )
     request = {
-        "asset": ASSET.model_dump(mode="json"), "question": "ZNA option",
+        "asset": ASSET.model_dump(mode="json"),
+        "question": "ZNA option",
         "procedure": procedure.model_dump(mode="json"),
     }
     record = asyncio.run(handler(context, request))  # type: ignore[arg-type]
@@ -249,12 +279,14 @@ def test_wiki_primary_answer_cites_wiki_with_provenance_and_passes_host(
     tmp_path: Path,
 ) -> None:
     procedure = _procedure()
-    model = _Synth(lambda prompt: (
-        "ZNA-K2 provides time domain TDR analysis "
-        f"[{_number(prompt, 'ZNA-K2 | time domain')}].\n"
-        "Orphan analyzer option supports TDR eye diagram measurement "
-        f"[{_number(prompt, 'Orphan analyzer')}]."
-    ))
+    model = _Synth(
+        lambda prompt: (
+            "ZNA-K2 provides time domain TDR analysis "
+            f"[{_number(prompt, 'ZNA-K2 | time domain')}].\n"
+            "Orphan analyzer option supports TDR eye diagram measurement "
+            f"[{_number(prompt, 'Orphan analyzer')}]."
+        )
+    )
     record = _ask(_wiki_vault(tmp_path), procedure, model)
     assert record["citation_policy"] == "wiki_primary"
     provenance = {
@@ -272,24 +304,30 @@ def test_wiki_primary_answer_cites_wiki_with_provenance_and_passes_host(
     assert any("Wiki：R&S ZNA（來源：`ZNA_specs.md`）" in line for line in lines)
     assert any("Wiki：Orphan（缺來源連結）" in line for line in lines)
     actions = KnowledgeBridgeActions(
-        lambda: {}, required_evidence=("raw_citations",),
-        required_facets=("product_option_spec",), procedure=procedure,
+        lambda: {},
+        required_evidence=("raw_citations",),
+        required_facets=("product_option_spec",),
+        procedure=procedure,
     )
     actions.result = {"ok": True, "record": record}
     checks = {check.check_id: check.status for check in actions.validate()}
     assert checks == {
-        "answer_nonempty": "passed", "facet_coverage": "passed", "claim_support": "passed",
+        "answer_nonempty": "passed",
+        "facet_coverage": "passed",
+        "claim_support": "passed",
     }
 
 
 def test_host_refuses_a_record_whose_policy_differs_from_the_skill(tmp_path: Path) -> None:
-    model = _Synth(lambda prompt: (
-        "ZNA-K2 provides time domain TDR analysis "
-        f"[{_number(prompt, 'ZNA-K2 | time domain')}]."
-    ))
+    model = _Synth(
+        lambda prompt: (
+            f"ZNA-K2 provides time domain TDR analysis [{_number(prompt, 'ZNA-K2 | time domain')}]."
+        )
+    )
     record = _ask(_wiki_vault(tmp_path), _procedure(), model)
     actions = KnowledgeBridgeActions(
-        lambda: {}, required_evidence=("raw_citations",),
+        lambda: {},
+        required_evidence=("raw_citations",),
         required_facets=("product_option_spec",),
         procedure=_procedure(citation_policy="raw_only"),
     )
@@ -300,11 +338,13 @@ def test_host_refuses_a_record_whose_policy_differs_from_the_skill(tmp_path: Pat
 
 
 def test_wiki_primary_drops_an_invented_wiki_claim(tmp_path: Path) -> None:
-    model = _Synth(lambda prompt: (
-        "ZNA-K2 provides time domain TDR analysis "
-        f"[{_number(prompt, 'ZNA-K2 | time domain')}].\n"
-        f"ZNA-K99 reaches 110 GHz [{_number(prompt, 'ZNA-K2 | time domain')}]."
-    ))
+    model = _Synth(
+        lambda prompt: (
+            "ZNA-K2 provides time domain TDR analysis "
+            f"[{_number(prompt, 'ZNA-K2 | time domain')}].\n"
+            f"ZNA-K99 reaches 110 GHz [{_number(prompt, 'ZNA-K2 | time domain')}]."
+        )
+    )
     record = _ask(_wiki_vault(tmp_path), _procedure(), model)
     text = record["answer"]["text"]  # type: ignore[index]
     assert "ZNA-K2 provides" in text
@@ -330,7 +370,10 @@ def test_table_rows_are_claims_and_structure_needs_no_citation() -> None:
         "| R&S ZNA | ZNA-K20 eye diagram | [2] |",
     )
     record = grounded_record(
-        ASSET, TRACE, _answer(TABLE, WIKI, RAW), citation_policy="wiki_primary",
+        ASSET,
+        TRACE,
+        _answer(TABLE, WIKI, RAW),
+        citation_policy="wiki_primary",
         wiki_provenance=(WikiProvenance(wiki_page="wiki/entities/R&S ZNA.md"),),
     )
     assert record.cited_passages == (WIKI, RAW)
@@ -364,7 +407,8 @@ def test_labeled_inferences_stay_under_their_heading_and_are_capped() -> None:
 
     inference = "【推論】ZNA 的 time domain analysis 適合 TDR 驗證 [1]。"
     text = (
-        "### 推薦先賣\n" + "\n".join([inference] * 4)
+        "### 推薦先賣\n"
+        + "\n".join([inference] * 4)
         + "\n### 事實\nZNA covers 10 MHz to 67 GHz [1]."
     )
     kept = omit_unverified_answer_lines(
@@ -384,8 +428,11 @@ def test_a_cached_snapshot_is_reused_until_a_vault_file_changes(tmp_path: Path) 
     first = RetrievalSnapshot.cached(vault)
     assert RetrievalSnapshot.cached(vault) is first
     page = tmp_path / "wiki" / "entities" / "R&S ZNB.md"
-    page.write_text("---\ntitle: R&S ZNB\n---\nZNB vector network analyzer with "
-                    "bandwidth up to 43.5 GHz for production test.\n", encoding="utf-8")
+    page.write_text(
+        "---\ntitle: R&S ZNB\n---\nZNB vector network analyzer with "
+        "bandwidth up to 43.5 GHz for production test.\n",
+        encoding="utf-8",
+    )
     second = RetrievalSnapshot.cached(vault)
     assert second is not first
     assert "wiki/entities/R&S ZNB.md" in second.wiki_titles()
@@ -402,16 +449,22 @@ def test_a_cached_snapshot_ranks_like_a_fresh_one(tmp_path: Path) -> None:
 
 def test_the_vaults_answer_rules_reach_the_synthesis_prompt(tmp_path: Path) -> None:
     vault = _wiki_vault(tmp_path)
-    for name, front in {"ask-knowledge": "mode: answer\n",
-                        "ask-market": "mode: answer\ntopics: [市場, market share]\n",
-                        "ingest-knowledge": "mode: procedure\napplies_to: raw/Knowledge\n"}.items():
+    for name, front in {
+        "ask-knowledge": "mode: answer\n",
+        "ask-market": "mode: answer\ntopics: [市場, market share]\n",
+        "ingest-knowledge": "mode: procedure\napplies_to: raw/Knowledge\n",
+    }.items():
         folder = tmp_path / "skills" / name
         folder.mkdir(parents=True)
         (folder / "SKILL.md").write_text(
             f"---\nname: {name}\n{front}---\nRule of {name}: keep {{braces}} literal.\n",
-            encoding="utf-8")
-    model = _Synth(lambda prompt: (
-        f"ZNA-K2 provides time domain TDR analysis [{_number(prompt, 'ZNA-K2 | time domain')}]."))
+            encoding="utf-8",
+        )
+    model = _Synth(
+        lambda prompt: (
+            f"ZNA-K2 provides time domain TDR analysis [{_number(prompt, 'ZNA-K2 | time domain')}]."
+        )
+    )
     _ask(vault, _procedure(), model)
     prompt = model.requests[0].messages[0].text
     assert "Knowledge base answer rules" in prompt

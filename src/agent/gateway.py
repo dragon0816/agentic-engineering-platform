@@ -101,14 +101,18 @@ TOOL_PROGRESS: ContextVar[Callable[[str, ToolProgressState], None] | None] = Con
 #: collapsed answers in knowledge_v1 core-005 (2026-10-12).
 VAULT_QUESTION_SCHEMA: dict[str, JsonValue] = {
     "type": "object",
-    "properties": {"question": {
-        "type": "string", "description": (
-            "The person's question to answer from this vault, in their own words. "
-            "Pass it unchanged when it stands alone; otherwise only make it "
-            "self-contained from the conversation. Add no instructions about "
-            "citations, evidence type, focus, products, ranking or format: the "
-            "vault cites its own evidence."),
-    }},
+    "properties": {
+        "question": {
+            "type": "string",
+            "description": (
+                "The person's question to answer from this vault, in their own words. "
+                "Pass it unchanged when it stands alone; otherwise only make it "
+                "self-contained from the conversation. Add no instructions about "
+                "citations, evidence type, focus, products, ranking or format: the "
+                "vault cites its own evidence."
+            ),
+        }
+    },
     "required": ["question"],
     "additionalProperties": False,
 }
@@ -325,9 +329,8 @@ class Gateway:
         engine: WorkflowEngine,
         *,
         decision_observer: Callable[[DecisionTrace], None] | None = None,
-        skill_accelerator: Callable[
-            [], DecisionProvider[SkillCandidateRequest, tuple[str, ...]]
-        ] | None = None,
+        skill_accelerator: Callable[[], DecisionProvider[SkillCandidateRequest, tuple[str, ...]]]
+        | None = None,
         skill_authorizer: Callable[[SkillCandidateRequest], bool] | None = None,
         skill_shadow_observer: Callable[[SkillCandidateRequest, DecisionShadow], None]
         | None = None,
@@ -355,11 +358,12 @@ class Gateway:
             # holding an excluded Skill's tools (coding, owner 2026-10-06):
             # such a narrowing falls back to the whole catalogue and the model
             # chooses, so the selector alone never turns a task into coding.
-            accept_accelerator=lambda request, candidate: _valid_skill_subset(
-                request, candidate
-            ) and not any(
-                name.split("__", 1)[0] in accelerator_excluded_aliases
-                for name in candidate.value
+            accept_accelerator=lambda request, candidate: (
+                _valid_skill_subset(request, candidate)
+                and not any(
+                    name.split("__", 1)[0] in accelerator_excluded_aliases
+                    for name in candidate.value
+                )
             ),
             observer=decision_observer,
             shadow_observer=skill_shadow_observer,
@@ -387,8 +391,9 @@ class Gateway:
         self.knowledge_harness: Callable[[str, AssetIdentity], dict[str, Any]] | None = None
         # Owner mode (2026-10-11): a side effect the model chose itself becomes
         # an approval request the person decides with a button.
-        self.capability_approval: Callable[
-            [RequestContext, AssetIdentity, dict[str, JsonValue]], dict[str, Any]] | None = None
+        self.capability_approval: (
+            Callable[[RequestContext, AssetIdentity, dict[str, JsonValue]], dict[str, Any]] | None
+        ) = None
 
     def _vault_tools(
         self,
@@ -418,15 +423,17 @@ class Gateway:
             if procedure and procedure.get("kind", "knowledge_query_v1") == "knowledge_query_v1":
                 bound[name]["procedure"] = procedure
             hints[name] = vault.purpose[:240]
-            tools.append(ModelTool(
-                name=name,
-                description=(
-                    f"Ask the Knowledge vault {asset.namespace}/{asset.name}@{asset.version}. "
-                    f"It covers: {vault.purpose}.{outside} {instructions}"
-                ),
-                input_contract="platform.command-arguments.v1",
-                input_schema=VAULT_QUESTION_SCHEMA,
-            ))
+            tools.append(
+                ModelTool(
+                    name=name,
+                    description=(
+                        f"Ask the Knowledge vault {asset.namespace}/{asset.name}@{asset.version}. "
+                        f"It covers: {vault.purpose}.{outside} {instructions}"
+                    ),
+                    input_contract="platform.command-arguments.v1",
+                    input_schema=VAULT_QUESTION_SCHEMA,
+                )
+            )
 
     async def converse(
         self,
@@ -440,26 +447,38 @@ class Gateway:
     ) -> GatewayConversationResult:
         # A conversation turn is a Harness run, unless an ingress (Agent Web)
         # already opened one around its routing (telemetry contract v0.2).
-        opened = telemetry.run("conversation_turn", trace_id=request.trace.trace_id) \
-            if telemetry.current_run() is None else nullcontext()
+        opened = (
+            telemetry.run("conversation_turn", trace_id=request.trace.trace_id)
+            if telemetry.current_run() is None
+            else nullcontext()
+        )
         with opened:
+
             async def turn(messages: tuple[ModelMessage, ...]) -> GatewayConversationResult:
                 return await self._converse(
-                    request, messages, persona_guidance=persona_guidance,
-                    allowed_tools=allowed_tools, max_turns=max_turns,
+                    request,
+                    messages,
+                    persona_guidance=persona_guidance,
+                    allowed_tools=allowed_tools,
+                    max_turns=max_turns,
                     max_history_messages=max_history_messages,
                 )
 
             # The tool loop executes; the Host checks the answer against the
             # turn's real tool results and files (harness unification U4).
             result: GatewayConversationResult = await checked_turn(
-                turn, history, self._workspace_roots,
+                turn,
+                history,
+                self._workspace_roots,
                 lambda role, text: ModelMessage(role=role, text=text),
-                request.trace.request_id)
+                request.trace.request_id,
+            )
             telemetry.set_run(
-                outcome=result.status, model_turns=result.model_turns,
+                outcome=result.status,
+                model_turns=result.model_turns,
                 status="failed" if result.status == "failed" else "succeeded",
-                failure_code=None if result.failure is None else result.failure.code)
+                failure_code=None if result.failure is None else result.failure.code,
+            )
         if self._conversation_observer is not None:
             try:
                 self._conversation_observer(result)
@@ -488,9 +507,7 @@ class Gateway:
         """
         context = RequestContext.model_validate(request)
         if isinstance(max_turns, bool) or not 1 <= max_turns <= MAX_CONVERSATION_TURNS:
-            raise ValueError(
-                f"Gateway conversation supports one to {MAX_CONVERSATION_TURNS} turns"
-            )
+            raise ValueError(f"Gateway conversation supports one to {MAX_CONVERSATION_TURNS} turns")
         if isinstance(max_history_messages, bool) or not 1 <= max_history_messages <= 40:
             raise ValueError("Gateway conversation supports one to forty history messages")
         # Images may come only with the person's newest message: the pictures
@@ -525,18 +542,25 @@ class Gateway:
                     and command.target == self._knowledge_capability
                 ):
                     procedure = skill.procedure or (
-                        self._knowledge_procedure() if self._knowledge_procedure else None)
-                    self._vault_tools(skill.alias, skill.instructions, command,
-                                      bindings, bound, tools, hints, procedure)
+                        self._knowledge_procedure() if self._knowledge_procedure else None
+                    )
+                    self._vault_tools(
+                        skill.alias,
+                        skill.instructions,
+                        command,
+                        bindings,
+                        bound,
+                        tools,
+                        hints,
+                        procedure,
+                    )
                     continue
                 name = f"{skill.alias}__{command.name}"
                 bindings[name] = command
                 if skill.selector_hint:
                     hints[name] = skill.selector_hint
                 target = command.target
-                manifest = (
-                    self.engine.workflows.get(target) if command.kind == "workflow" else None
-                )
+                manifest = self.engine.workflows.get(target) if command.kind == "workflow" else None
                 tools.append(
                     ModelTool(
                         name=name,
@@ -548,7 +572,8 @@ class Gateway:
                         # A declared Workflow tells the model its exact fields.
                         input_schema=(
                             agent_tool_schema(manifest)
-                            if manifest is not None and manifest.parameters else None
+                            if manifest is not None and manifest.parameters
+                            else None
                         ),
                     )
                 )
@@ -586,11 +611,13 @@ class Gateway:
         bounded_history = tuple(
             ModelMessage(
                 role=message.role,
-                text=message.text[:(
-                    MAX_CURRENT_MESSAGE_CHARS
-                    if index == len(recent) - 1 and message.role == "user"
-                    else MAX_CONVERSATION_MESSAGE_CHARS
-                )],
+                text=message.text[
+                    : (
+                        MAX_CURRENT_MESSAGE_CHARS
+                        if index == len(recent) - 1 and message.role == "user"
+                        else MAX_CONVERSATION_MESSAGE_CHARS
+                    )
+                ],
                 images=message.images,
             )
             for index, message in enumerate(recent)
@@ -618,13 +645,20 @@ class Gateway:
                 selector_hints=hints,
             )
             decision = self.skill_decisions.decide(
-                candidate_request, decision_type="skill_selection")
+                candidate_request, decision_type="skill_selection"
+            )
             selected_names = set(decision.result.value)
-            telemetry.emit("skill.selected", state="skill_selection", attributes={
-                "offered": len(tools), "selected": len(selected_names),
-                "skill_ids": sorted({name.split("__", 1)[0] for name in selected_names})[:20],
-                "provider": getattr(getattr(decision, "trace", None), "provider_id", None),
-                "fallback": getattr(getattr(decision, "trace", None), "fallback", None)})
+            telemetry.emit(
+                "skill.selected",
+                state="skill_selection",
+                attributes={
+                    "offered": len(tools),
+                    "selected": len(selected_names),
+                    "skill_ids": sorted({name.split("__", 1)[0] for name in selected_names})[:20],
+                    "provider": getattr(getattr(decision, "trace", None), "provider_id", None),
+                    "fallback": getattr(getattr(decision, "trace", None), "fallback", None),
+                },
+            )
             tools = [tool for tool in tools if tool.name in selected_names]
             bindings = {
                 name: binding for name, binding in bindings.items() if name in selected_names
@@ -638,8 +672,7 @@ class Gateway:
                 continue
             host[name] = host_tool
             tools.append(host_tool.tool)
-        for person_tool, guidance in ((FORM_TOOL, FORM_GUIDANCE),
-                                      (PROPOSE_TOOL, PROPOSE_GUIDANCE)):
+        for person_tool, guidance in ((FORM_TOOL, FORM_GUIDANCE), (PROPOSE_TOOL, PROPOSE_GUIDANCE)):
             if person_tool in host and context.session_id is not None:
                 messages[0] = ModelMessage(role="system", text=f"{messages[0].text} {guidance}")
             elif person_tool in host:
@@ -664,8 +697,7 @@ class Gateway:
             )
             try:
                 with telemetry.span("model", attributes={"loop_index": turn}) as step:
-                    response = await asyncio.to_thread(
-                        self.router.model.generate, model_request)
+                    response = await asyncio.to_thread(self.router.model.generate, model_request)
                     if response.failure is not None:
                         step.update(status="failed", failure_code=response.failure.code)
             except Exception:
@@ -681,8 +713,11 @@ class Gateway:
                 # The reply was cut at the output limit (lab fix-005 D04): say so
                 # and let the model answer again more briefly within this turn.
                 truncated_retries += 1
-                telemetry.emit("retry.scheduled", state="model", attributes={
-                    "retry_reason": "model_output_truncated", "loop_index": turn})
+                telemetry.emit(
+                    "retry.scheduled",
+                    state="model",
+                    attributes={"retry_reason": "model_output_truncated", "loop_index": turn},
+                )
                 messages.append(ModelMessage(role="user", text=TRUNCATED_NOTICE))
                 continue
             if response.failure is not None:
@@ -722,42 +757,64 @@ class Gateway:
             )
             for call in response.tool_calls:
                 if len(evidence) >= MAX_CONVERSATION_TOOL_CALLS:
-                    telemetry.emit("tool.completed", status="skipped", state="tool", attributes={
-                        "tool_id": call.name, "loop_index": turn,
-                        "failure_code": "tool_budget_exhausted"})
-                    messages.append(ModelMessage(
-                        role="tool", tool_call_id=call.call_id,
-                        text=json.dumps({"skipped": "the turn's tool budget is used up"}),
-                    ))
+                    telemetry.emit(
+                        "tool.completed",
+                        status="skipped",
+                        state="tool",
+                        attributes={
+                            "tool_id": call.name,
+                            "loop_index": turn,
+                            "failure_code": "tool_budget_exhausted",
+                        },
+                    )
+                    messages.append(
+                        ModelMessage(
+                            role="tool",
+                            tool_call_id=call.call_id,
+                            text=json.dumps({"skipped": "the turn's tool budget is used up"}),
+                        )
+                    )
                     continue
                 item = await self._telemetered_tool(context, call, turn, host, bindings, bound)
                 evidence.append(item)
-                harnessed = (item.host.data if item.host is not None
-                             and isinstance(item.host.data, dict) else {})
+                harnessed = (
+                    item.host.data
+                    if item.host is not None and isinstance(item.host.data, dict)
+                    else {}
+                )
                 offer = harnessed.get(OFFER_KEY)
                 if isinstance(offer, dict):
                     # A person's run is the Workflow's form, not the model's
                     # prose (owner 2026-10-15): the turn ends with the form,
                     # which the channel draws from the offer.
                     return GatewayConversationResult(
-                        trace=context.trace, status="answered",
+                        trace=context.trace,
+                        status="answered",
                         text=str(offer.get("message") or "Fill in the run form."),
-                        model_turns=turn, tools=tuple(evidence))
+                        model_turns=turn,
+                        tools=tuple(evidence),
+                    )
                 card = harnessed.get(CARD_KEY)
                 if isinstance(card, dict):
                     # A proposal waits for the person's press (owner
                     # 2026-10-15): the turn ends with the card.
                     return GatewayConversationResult(
-                        trace=context.trace, status="answered",
+                        trace=context.trace,
+                        status="answered",
                         text=str(card.get("message") or "Press a button on the card."),
-                        model_turns=turn, tools=tuple(evidence))
+                        model_turns=turn,
+                        tools=tuple(evidence),
+                    )
                 if harnessed.get("knowledge_harness") == "validated":
                     # The validated Knowledge answer is the turn's answer; the
                     # model does not rewrite it (owner 2026-10-09, option a).
                     return GatewayConversationResult(
-                        trace=context.trace, status="answered",
-                        text=str(harnessed.get("answer") or ""), model_turns=turn,
-                        tools=tuple(evidence))
+                        trace=context.trace,
+                        status="answered",
+                        text=str(harnessed.get("answer") or ""),
+                        model_turns=turn,
+                        tools=tuple(evidence),
+                    )
                 observation = json.dumps(item.model_dump(mode="json"), ensure_ascii=False)
                 if len(observation) > MAX_TOOL_OBSERVATION_CHARS:
                     observation = json.dumps(
@@ -781,22 +838,36 @@ class Gateway:
         )
 
     async def _telemetered_tool(
-        self, context: RequestContext, call: ModelToolCall, turn: int,
-        host: dict[str, HostTool], bindings: dict[str, Any], bound: dict[str, Any],
+        self,
+        context: RequestContext,
+        call: ModelToolCall,
+        turn: int,
+        host: dict[str, HostTool],
+        bindings: dict[str, Any],
+        bound: dict[str, Any],
     ) -> ConversationToolExecution:
         """One tool call, as a `tool.completed` span (telemetry contract v0.2)."""
         telemetry.note_tool()
-        with telemetry.span("tool", attributes={"tool_id": call.name, "loop_index": turn},
-                            completed="tool.completed") as step:
+        with telemetry.span(
+            "tool",
+            attributes={"tool_id": call.name, "loop_index": turn},
+            completed="tool.completed",
+        ) as step:
             item = await self._one_tool(context, call, host, bindings, bound)
             if not _tool_succeeded(item):
-                step.update(status="failed",
-                            failure_code=None if item.failure is None else item.failure.code)
+                step.update(
+                    status="failed",
+                    failure_code=None if item.failure is None else item.failure.code,
+                )
             return item
 
     async def _one_tool(
-        self, context: RequestContext, call: ModelToolCall, host: dict[str, HostTool],
-        bindings: dict[str, Any], bound: dict[str, Any],
+        self,
+        context: RequestContext,
+        call: ModelToolCall,
+        host: dict[str, HostTool],
+        bindings: dict[str, Any],
+        bound: dict[str, Any],
     ) -> ConversationToolExecution:
         binding = bindings.get(call.name)
         if call.name in host:
@@ -828,7 +899,8 @@ class Gateway:
             outcome = await item.handler(context, dict(call.arguments))
         except Exception as error:  # noqa: BLE001 - a host fault is an observation
             return ConversationToolExecution(
-                call_id=call.call_id, name=call.name,
+                call_id=call.call_id,
+                name=call.name,
                 failure=Failure(code="host_tool_failed", message=type(error).__name__),
             )
         return ConversationToolExecution(call_id=call.call_id, name=call.name, host=outcome)
@@ -845,8 +917,12 @@ class Gateway:
             target=binding.target,
             reason="Model selected an installed conversation tool",
         )
-        if binding.kind == "capability" and bound is not None and \
-                self.knowledge_harness is not None and isinstance(bound.get("asset"), dict):
+        if (
+            binding.kind == "capability"
+            and bound is not None
+            and self.knowledge_harness is not None
+            and isinstance(bound.get("asset"), dict)
+        ):
             # The tool route runs the same Knowledge Harness as the direct
             # route; its answer is validated by Host checks (owner 2026-10-09).
             question = str(call.arguments.get("question") or "")
@@ -863,24 +939,33 @@ class Gateway:
             # The answer's outcome is the Bridge call's: its code sits on the capability.
             failure_code = ((ran.get("capability") or {}).get("failure") or {}).get("code")
             return ConversationToolExecution(
-                call_id=call.call_id, name=call.name,
+                call_id=call.call_id,
+                name=call.name,
                 host=HostToolOutcome(
                     status="succeeded" if validated else "failed",
-                    data={"knowledge_harness": "validated" if validated else "not_validated",
-                          "answer": str(answer.get("answer") or "")[:12000],
-                          "evidence": answer.get("evidence"),
-                          "phase": state.get("phase"),
-                          "failure_code": failure_code,
-                          **kept,
-                          "instruction": (
-                              "This answer passed the Host's evidence checks and is shown to "
-                              "the person as it is." if validated else
-                              "The knowledge base did not validate an answer. Tell the "
-                              "person what is above; anything you add is not from the "
-                              "knowledge base and must say so.")},
-                    failure=None if validated else Failure(
+                    data={
+                        "knowledge_harness": "validated" if validated else "not_validated",
+                        "answer": str(answer.get("answer") or "")[:12000],
+                        "evidence": answer.get("evidence"),
+                        "phase": state.get("phase"),
+                        "failure_code": failure_code,
+                        **kept,
+                        "instruction": (
+                            "This answer passed the Host's evidence checks and is shown to "
+                            "the person as it is."
+                            if validated
+                            else "The knowledge base did not validate an answer. Tell the "
+                            "person what is above; anything you add is not from the "
+                            "knowledge base and must say so."
+                        ),
+                    },
+                    failure=None
+                    if validated
+                    else Failure(
                         code="knowledge_not_validated",
-                        message="The Knowledge Harness did not validate an answer")),
+                        message="The Knowledge Harness did not validate an answer",
+                    ),
+                ),
             )
         if binding.kind == "capability":
             invocation_arguments = dict(call.arguments)
@@ -888,8 +973,7 @@ class Gateway:
                 # Only the question comes from the model; the vault is the
                 # host's, so a model cannot point the tool at another vault.
                 invocation_arguments = {
-                    key: value for key, value in invocation_arguments.items()
-                    if key == "question"
+                    key: value for key, value in invocation_arguments.items() if key == "question"
                 } | bound
             result = await self.bridge.execute(
                 CapabilityInvocation(
@@ -899,13 +983,19 @@ class Gateway:
                     arguments=invocation_arguments,
                 )
             )
-            if (result.failure is not None and result.failure.code == "approval_required"
-                    and self.capability_approval is not None):
+            if (
+                result.failure is not None
+                and result.failure.code == "approval_required"
+                and self.capability_approval is not None
+            ):
                 pending = await asyncio.to_thread(
-                    self.capability_approval, context, binding.target, invocation_arguments)
+                    self.capability_approval, context, binding.target, invocation_arguments
+                )
                 return ConversationToolExecution(
-                    call_id=call.call_id, name=call.name,
-                    host=HostToolOutcome(status="awaiting_approval", data=pending))
+                    call_id=call.call_id,
+                    name=call.name,
+                    host=HostToolOutcome(status="awaiting_approval", data=pending),
+                )
             return ConversationToolExecution(
                 call_id=call.call_id,
                 name=call.name,
@@ -921,9 +1011,7 @@ class Gateway:
             refused = sorted(set(arguments) - offered)
             try:
                 if refused:
-                    raise WorkflowParameterError(
-                        f"{', '.join(refused)} cannot be set by the Agent"
-                    )
+                    raise WorkflowParameterError(f"{', '.join(refused)} cannot be set by the Agent")
                 arguments = validate_run_parameters(manifest, arguments)
             except WorkflowParameterError as error:
                 if context.session_id is not None:
@@ -931,10 +1019,14 @@ class Gateway:
                     # values become the Workflow's form with what the model
                     # may fill as prefill; the person completes and runs it.
                     offer = form_offer(
-                        manifest, agent_prefill(manifest, call.arguments),
-                        self.engine.settings_provider, origin="agent")
+                        manifest,
+                        agent_prefill(manifest, call.arguments),
+                        self.engine.settings_provider,
+                        origin="agent",
+                    )
                     return ConversationToolExecution(
-                        call_id=call.call_id, name=call.name,
+                        call_id=call.call_id,
+                        name=call.name,
                         host=HostToolOutcome(status="succeeded", data={OFFER_KEY: offer}),
                     )
                 return ConversationToolExecution(
@@ -1037,7 +1129,10 @@ class Gateway:
         with self.bridge.exclusive:
             # Through the shared Harness: steps, then the Workflow's output checks.
             return await run_workflow_checked(
-                self.engine, request, workflow, arguments,
+                self.engine,
+                request,
+                workflow,
+                arguments,
                 timeout_seconds=workflow_timeout_seconds,
                 idempotency_key=workflow_idempotency_key,
             )

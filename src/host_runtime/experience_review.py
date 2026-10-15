@@ -29,8 +29,14 @@ MAX_GROUPS = 10
 MAX_CASES_PER_GROUP = 8
 RULE_CHARS = 8000
 
-Cause = Literal["rule_missing", "rule_unclear", "retrieval_missed", "data_missing",
-                "model_error", "harness_defect"]
+Cause = Literal[
+    "rule_missing",
+    "rule_unclear",
+    "retrieval_missed",
+    "data_missing",
+    "model_error",
+    "harness_defect",
+]
 
 PROMPT = """You review failures of a company AI assistant to propose improvements.
 You get a group of similar failed cases (question, answer excerpt, failure code,
@@ -78,21 +84,30 @@ class ReviewReport(Contract):
     skipped_groups: int = 0
 
     def markdown(self) -> str:
-        lines = [f"# Experience review {self.review_id}", "",
-                 f"{self.started_at}: {self.harvested} new cases, {self.open_cases} open, "
-                 f"{len(self.findings)} groups reviewed"
-                 + (f", {self.skipped_groups} left for the next run" if self.skipped_groups else "")
-                 + ".", ""]
+        lines = [
+            f"# Experience review {self.review_id}",
+            "",
+            f"{self.started_at}: {self.harvested} new cases, {self.open_cases} open, "
+            f"{len(self.findings)} groups reviewed"
+            + (f", {self.skipped_groups} left for the next run" if self.skipped_groups else "")
+            + ".",
+            "",
+        ]
         for number, item in enumerate(self.findings, 1):
             lines.append(f"## {number}. {item.group} ({item.cases} cases)")
             if item.error:
                 lines += ["", f"Not reviewed: {item.error}", ""]
                 continue
-            lines += ["", f"- Cause: **{item.cause}** (confidence {item.confidence})",
-                      f"- Diagnosis: {item.diagnosis}"]
+            lines += [
+                "",
+                f"- Cause: **{item.cause}** (confidence {item.confidence})",
+                f"- Diagnosis: {item.diagnosis}",
+            ]
             if item.proposal is not None:
-                lines.append(f"- Proposal ({item.proposal.kind}, {item.proposal.target}): "
-                             f"{item.proposal.text}")
+                lines.append(
+                    f"- Proposal ({item.proposal.kind}, {item.proposal.target}): "
+                    f"{item.proposal.text}"
+                )
             lines += [f"- Would confirm it: {item.confirm}", ""]
         return "\n".join(lines) + "\n"
 
@@ -102,22 +117,35 @@ Rules = Callable[[str], str]  # domain -> the governing rule text
 
 def _case_text(number: int, case: ExperienceCase) -> str:
     head = f"{case.signal}, {case.failure_code or '-'}, {case.created_at[:10]}"
-    return (f"### case {number} ({head})\n"
-            f"Question: {case.subject}\nAnswer excerpt: {case.answer[:800]}\n"
-            + (f"Rating note: {case.rating_note}\n" if case.rating_note else ""))
+    return (
+        f"### case {number} ({head})\n"
+        f"Question: {case.subject}\nAnswer excerpt: {case.answer[:800]}\n"
+        + (f"Rating note: {case.rating_note}\n" if case.rating_note else "")
+    )
 
 
-def _ask(model: ModelClient, alias: str, cases: list[ExperienceCase], rules: str,
-         trace: TraceIdentifiers) -> dict[str, Any]:
+def _ask(
+    model: ModelClient, alias: str, cases: list[ExperienceCase], rules: str, trace: TraceIdentifiers
+) -> dict[str, Any]:
     shown = "\n".join(_case_text(n, c) for n, c in enumerate(cases, 1))
-    response = model.generate(ModelRequest(
-        trace=trace, model_alias=alias,
-        messages=(ModelMessage(role="system", text=PROMPT),
-                  ModelMessage(role="user", text=f"===== rules in force =====\n"
-                                                 f"{rules[:RULE_CHARS] or '(none)'}\n\n"
-                                                 f"===== cases =====\n{shown}")),
-        requirements=ModelRequirements(structured_output=True),
-        output_contract="experience_review_finding", max_output_tokens=3000))
+    response = model.generate(
+        ModelRequest(
+            trace=trace,
+            model_alias=alias,
+            messages=(
+                ModelMessage(role="system", text=PROMPT),
+                ModelMessage(
+                    role="user",
+                    text=f"===== rules in force =====\n"
+                    f"{rules[:RULE_CHARS] or '(none)'}\n\n"
+                    f"===== cases =====\n{shown}",
+                ),
+            ),
+            requirements=ModelRequirements(structured_output=True),
+            output_contract="experience_review_finding",
+            max_output_tokens=3000,
+        )
+    )
     if response.failure is not None:
         raise RuntimeError(response.failure.code)
     data = response.structured_output
@@ -126,8 +154,16 @@ def _ask(model: ModelClient, alias: str, cases: list[ExperienceCase], rules: str
     return dict(data)
 
 
-def run_review(store: ExperienceStore, model: ModelClient, alias: str, rules: Rules, *,
-               workspace: Path, harvested: int = 0, max_groups: int = MAX_GROUPS) -> ReviewReport:
+def run_review(
+    store: ExperienceStore,
+    model: ModelClient,
+    alias: str,
+    rules: Rules,
+    *,
+    workspace: Path,
+    harvested: int = 0,
+    max_groups: int = MAX_GROUPS,
+) -> ReviewReport:
     review_id = f"review-{datetime.now(UTC).strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:4]}"
     open_cases = store.cases("open")
     groups = list(group(open_cases).items())
@@ -136,26 +172,46 @@ def run_review(store: ExperienceStore, model: ModelClient, alias: str, rules: Ru
         shown = cases[-MAX_CASES_PER_GROUP:]
         finding = Finding(group=key, case_ids=tuple(c.case_id for c in cases), cases=len(cases))
         try:
-            data = _ask(model, alias, shown, rules(cases[0].domain),
-                        TraceIdentifiers(trace_id=review_id, request_id=f"group-{number}",
-                                         span_id="review"))
-            finding = finding.model_copy(update={
-                "cause": data.get("cause"), "diagnosis": str(data.get("diagnosis") or ""),
-                "proposal": Proposal.model_validate(data["proposal"])
-                if isinstance(data.get("proposal"), dict) else None,
-                "confidence": str(data.get("confidence") or ""),
-                "confirm": str(data.get("confirm") or "")})
+            data = _ask(
+                model,
+                alias,
+                shown,
+                rules(cases[0].domain),
+                TraceIdentifiers(
+                    trace_id=review_id, request_id=f"group-{number}", span_id="review"
+                ),
+            )
+            finding = finding.model_copy(
+                update={
+                    "cause": data.get("cause"),
+                    "diagnosis": str(data.get("diagnosis") or ""),
+                    "proposal": Proposal.model_validate(data["proposal"])
+                    if isinstance(data.get("proposal"), dict)
+                    else None,
+                    "confidence": str(data.get("confidence") or ""),
+                    "confirm": str(data.get("confirm") or ""),
+                }
+            )
             finding = Finding.model_validate(finding.model_dump())
             store.mark_reviewed(finding.case_ids, review_id)
         except (RuntimeError, ValueError, ValidationError, KeyError) as error:
-            finding = finding.model_copy(update={
-                "cause": None, "proposal": None, "error": type(error).__name__ + ": "
-                + str(error)[:120]})
+            finding = finding.model_copy(
+                update={
+                    "cause": None,
+                    "proposal": None,
+                    "error": type(error).__name__ + ": " + str(error)[:120],
+                }
+            )
         findings.append(finding)
-    report = ReviewReport(review_id=review_id, started_at=datetime.now(UTC).isoformat(
-        timespec="seconds"), harvested=harvested, open_cases=len(open_cases),
-        findings=tuple(findings), skipped_groups=max(0, len(groups) - max_groups),
-        finished_at=datetime.now(UTC).isoformat(timespec="seconds"))
+    report = ReviewReport(
+        review_id=review_id,
+        started_at=datetime.now(UTC).isoformat(timespec="seconds"),
+        harvested=harvested,
+        open_cases=len(open_cases),
+        findings=tuple(findings),
+        skipped_groups=max(0, len(groups) - max_groups),
+        finished_at=datetime.now(UTC).isoformat(timespec="seconds"),
+    )
     folder = workspace / REVIEWS_DIR
     folder.mkdir(exist_ok=True)
     (folder / f"{review_id}.json").write_text(report.model_dump_json(indent=1), encoding="utf-8")
@@ -170,8 +226,9 @@ def latest_review(workspace: Path) -> dict[str, Any] | None:
         return None
     loaded: dict[str, Any] = json.loads(runs[-1].read_text(encoding="utf-8"))
     markdown = runs[-1].with_suffix(".md")
-    loaded["markdown"] = (markdown.read_text(encoding="utf-8") if markdown.is_file()
-                          else ReviewReport.model_validate(loaded).markdown())
+    loaded["markdown"] = (
+        markdown.read_text(encoding="utf-8")
+        if markdown.is_file()
+        else ReviewReport.model_validate(loaded).markdown()
+    )
     return loaded
-
-

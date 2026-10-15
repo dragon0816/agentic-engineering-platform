@@ -38,9 +38,11 @@ _CLAIM = re.compile(
     r"(已經?|已)(成功)?(執行|跑完|產生|生成|建立|寫入|寫好|存檔|儲存|輸出|安裝|下載|送出|上傳|更新)"
     r"|\b(I|I've|I have|we)\s+(have\s+)?(ran|run|executed|created|generated|wrote|written|"
     r"saved|installed|downloaded|uploaded|submitted)\b",
-    re.IGNORECASE)
+    re.IGNORECASE,
+)
 _PATH = re.compile(
-    r"[A-Za-z]:[\\/][^\s\"'<>|*?`，。、）)]+?\.[A-Za-z0-9]{1,8}(?=[\s\"'`，。、）)]|$)")
+    r"[A-Za-z]:[\\/][^\s\"'<>|*?`，。、）)]+?\.[A-Za-z0-9]{1,8}(?=[\s\"'`，。、）)]|$)"
+)
 
 
 def named_files(text: str, roots: tuple[str, ...]) -> list[Path]:
@@ -52,15 +54,18 @@ def named_files(text: str, roots: tuple[str, ...]) -> list[Path]:
     return found
 
 
-def check_answer(text: str, tools: tuple[Any, ...], roots: tuple[str, ...]
-                 ) -> tuple[list[HarnessCheckResult], list[str]]:
+def check_answer(
+    text: str, tools: tuple[Any, ...], roots: tuple[str, ...]
+) -> tuple[list[HarnessCheckResult], list[str]]:
     """The two Host checks, with a plain reason for each one that failed."""
     reasons: list[str] = []
     succeeded = any(_succeeded(item) for item in tools)
     claim_ok = succeeded or not _CLAIM.search(text or "")
     if not claim_ok:
-        reasons.append("the answer says an action was completed, but no tool call succeeded "
-                       "in this turn; do it with a tool, or do not say it was done")
+        reasons.append(
+            "the answer says an action was completed, but no tool call succeeded "
+            "in this turn; do it with a tool, or do not say it was done"
+        )
     missing = []
     for path in named_files(text, roots):
         if not path.is_file():
@@ -70,10 +75,16 @@ def check_answer(text: str, tools: tuple[Any, ...], roots: tuple[str, ...]
     if missing:
         reasons.append("files the answer names are not there: " + "; ".join(missing[:5]))
     return [
-        HarnessCheckResult(check_id=CLAIM_CHECK, status="passed" if claim_ok else "failed",
-                           evidence_ref="tools-" + str(len(tools))),
-        HarnessCheckResult(check_id=OUTPUT_CHECK, status="failed" if missing else "passed",
-                           evidence_ref="files-checked"),
+        HarnessCheckResult(
+            check_id=CLAIM_CHECK,
+            status="passed" if claim_ok else "failed",
+            evidence_ref="tools-" + str(len(tools)),
+        ),
+        HarnessCheckResult(
+            check_id=OUTPUT_CHECK,
+            status="failed" if missing else "passed",
+            evidence_ref="files-checked",
+        ),
     ], reasons
 
 
@@ -91,9 +102,13 @@ def _succeeded(item: Any) -> bool:
 
 
 class ConversationActions:
-    def __init__(self, run_turn: Callable[[tuple[Any, ...]], Awaitable[Any]],
-                 history: tuple[Any, ...], roots: tuple[str, ...],
-                 message: Callable[[str, str], Any]) -> None:
+    def __init__(
+        self,
+        run_turn: Callable[[tuple[Any, ...]], Awaitable[Any]],
+        history: tuple[Any, ...],
+        roots: tuple[str, ...],
+        message: Callable[[str, str], Any],
+    ) -> None:
         self.run_turn, self.history, self.roots, self.message = run_turn, history, roots, message
         self.result: Any = None
         self.reasons: list[str] = []
@@ -102,9 +117,16 @@ class ConversationActions:
         history = self.history
         if self.result is not None and self.reasons:
             # The retry: the model sees its answer and what the Host found.
-            history = (*history, self.message("assistant", self.result.text or ""),
-                       self.message("user", "[Host check failed] " + " | ".join(self.reasons)
-                                    + ". Fix this and answer again."))
+            history = (
+                *history,
+                self.message("assistant", self.result.text or ""),
+                self.message(
+                    "user",
+                    "[Host check failed] "
+                    + " | ".join(self.reasons)
+                    + ". Fix this and answer again.",
+                ),
+            )
         self.result = await self.run_turn(history)
         return f"turn-{self.result.model_turns}"
 
@@ -112,26 +134,36 @@ class ConversationActions:
         if self.result.status != "answered":
             # A question to the person, or a stopped loop: nothing was claimed.
             self.reasons = []
-            return (HarnessCheckResult(check_id=CLAIM_CHECK, status="passed",
-                                       evidence_ref="not-answered"),
-                    HarnessCheckResult(check_id=OUTPUT_CHECK, status="passed",
-                                       evidence_ref="not-answered"))
+            return (
+                HarnessCheckResult(
+                    check_id=CLAIM_CHECK, status="passed", evidence_ref="not-answered"
+                ),
+                HarnessCheckResult(
+                    check_id=OUTPUT_CHECK, status="passed", evidence_ref="not-answered"
+                ),
+            )
         checks, self.reasons = check_answer(self.result.text, self.result.tools, self.roots)
         return tuple(checks)
 
 
-async def checked_turn(run_turn: Callable[[tuple[Any, ...]], Awaitable[Any]],
-                       history: tuple[Any, ...], roots: tuple[str, ...],
-                       message: Callable[[str, str], Any], request_id: str) -> Any:
+async def checked_turn(
+    run_turn: Callable[[tuple[Any, ...]], Awaitable[Any]],
+    history: tuple[Any, ...],
+    roots: tuple[str, ...],
+    message: Callable[[str, str], Any],
+    request_id: str,
+) -> Any:
     """Run the turn, check it, retry once on a failed check."""
     actions = ConversationActions(run_turn, history, roots, message)
     plan = build_plan(
         task_id="turn-" + hashlib.sha256(request_id.encode()).hexdigest()[:12],
         task_sha256=hashlib.sha256(request_id.encode()).hexdigest(),
-        domain="conversation", skill=TURN_SKILL,
-        guidance=SkillHarnessGuidance(domains=("conversation",), fallback="retry",
-                                      max_retries=1),
-        host_checks=(CLAIM_CHECK, OUTPUT_CHECK), max_retries=1)
+        domain="conversation",
+        skill=TURN_SKILL,
+        guidance=SkillHarnessGuidance(domains=("conversation",), fallback="retry", max_retries=1),
+        host_checks=(CLAIM_CHECK, OUTPUT_CHECK),
+        max_retries=1,
+    )
     run = await run_harness_async(plan, actions)
     result = actions.result
     if run.phase != "validated" and actions.reasons and result is not None:

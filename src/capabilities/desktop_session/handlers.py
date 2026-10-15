@@ -38,24 +38,37 @@ from common.base import Contract, Symbol, Text
 from common.execution import RequestContext
 from integrations.desktop import DesktopToolError, ensure_helper, run_actions
 
-SPEC = CapabilitySpec.model_validate({
-    "identity": {"namespace": "desktop", "name": "operate", "version": "1.0.0"},
-    "name": "desktop.operate",
-    "description": "Operate a registered Windows application: set, invoke, read, export",
-    "input_contract": "desktop.operate.input.v1",
-    "output_contract": "desktop.operate.output.v1",
-    "side_effect": "external_side_effect",
-    "policy": {
-        "risk": "medium",
-        "approval_required": True,
-        "required_permissions": ["desktop.operate"],
-        "policy_refs": ["desktop-application-policy"],
-    },
-})
+SPEC = CapabilitySpec.model_validate(
+    {
+        "identity": {"namespace": "desktop", "name": "operate", "version": "1.0.0"},
+        "name": "desktop.operate",
+        "description": "Operate a registered Windows application: set, invoke, read, export",
+        "input_contract": "desktop.operate.input.v1",
+        "output_contract": "desktop.operate.output.v1",
+        "side_effect": "external_side_effect",
+        "policy": {
+            "risk": "medium",
+            "approval_required": True,
+            "required_permissions": ["desktop.operate"],
+            "policy_refs": ["desktop-application-policy"],
+        },
+    }
+)
 MAX_LOOK_CHARS = 8_000
 
-ActionKind = Literal["set", "invoke", "select_row", "read", "read_table", "dialog", "dismiss",
-                     "save_as", "wait_dialog", "wait", "clear_dialogs"]
+ActionKind = Literal[
+    "set",
+    "invoke",
+    "select_row",
+    "read",
+    "read_table",
+    "dialog",
+    "dismiss",
+    "save_as",
+    "wait_dialog",
+    "wait",
+    "clear_dialogs",
+]
 _NEEDS: dict[str, tuple[str, ...]] = {
     "set": ("id", "value"),
     "invoke": ("id",),
@@ -230,8 +243,12 @@ class DesktopSessionHandler:
             actions.append(item)
         with self._lock:
             process = self._process(app)
-            helper_request = {"pid": process.pid, "window": app.window_title,
-                              "actions": actions, "look": request.look}
+            helper_request = {
+                "pid": process.pid,
+                "window": app.window_title,
+                "actions": actions,
+                "look": request.look,
+            }
             try:
                 answer = self._runner(helper_request, float(self.binding.timeout_seconds))
             except DesktopToolError as error:
@@ -240,11 +257,16 @@ class DesktopSessionHandler:
             code = str(answer.get("code") or "failed")
             step = answer.get("step")
             # Only the position and the action's kind travel, never the helper's message.
-            where = (f"action {step} ({request.actions[step].do})"
-                     if isinstance(step, int) and not isinstance(step, bool)
-                     and 0 <= step < len(request.actions) else None)
+            where = (
+                f"action {step} ({request.actions[step].do})"
+                if isinstance(step, int)
+                and not isinstance(step, bool)
+                and 0 <= step < len(request.actions)
+                else None
+            )
             raise CapabilityRefused(
-                code if code.startswith("desktop_") else f"desktop_{code}", where)
+                code if code.startswith("desktop_") else f"desktop_{code}", where
+            )
         data = answer.get("data")
         look = answer.get("look")
         return DesktopResult(

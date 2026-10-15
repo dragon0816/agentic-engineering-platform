@@ -15,13 +15,13 @@ from knowledge.vault import Vault
 def _skill(root: Path, name: str, front: str) -> None:
     (root / "skills" / name).mkdir(parents=True, exist_ok=True)
     (root / "skills" / name / "SKILL.md").write_text(
-        f"---\nname: {name}\n{front}---\n\n# {name}\nrules of {name}\n", encoding="utf-8")
+        f"---\nname: {name}\n{front}---\n\n# {name}\nrules of {name}\n", encoding="utf-8"
+    )
 
 
 def _project(tmp_path: Path) -> tuple[KnowledgePipeline, Path]:
     base = _base(tmp_path)
-    for folder in ("drop/Knowledge", "drop/Market", "drop/Productions/VNA",
-                   "drop/Productions/CMX"):
+    for folder in ("drop/Knowledge", "drop/Market", "drop/Productions/VNA", "drop/Productions/CMX"):
         (base / folder).mkdir(parents=True)
         (base / folder / "x.txt").write_text(folder + "\n", encoding="utf-8")
     _skill(base, "ingest-knowledge", "mode: procedure\napplies_to: raw/Knowledge\n")
@@ -41,13 +41,17 @@ def test_a_folder_sandbox_edits_its_rules_and_reads_the_shared_ones(tmp_path: Pa
     pipeline, _ = _project(tmp_path)
     knowledge = pipeline.create_sandbox("rs-k", "k", "leo", scope="Knowledge").sandbox_id
     assert _access(pipeline, knowledge) == {
-        "CLAUDE.md": "shared", "skills/ask-knowledge/SKILL.md": "edit",
-        "skills/ingest-knowledge/SKILL.md": "edit"}  # Market's rules are not listed
+        "CLAUDE.md": "shared",
+        "skills/ask-knowledge/SKILL.md": "edit",
+        "skills/ingest-knowledge/SKILL.md": "edit",
+    }  # Market's rules are not listed
     vna = pipeline.create_sandbox("rs-k", "v", "leo", scope="Productions/VNA").sandbox_id
     assert _access(pipeline, vna) == {
-        "CLAUDE.md": "shared", "skills/ask-productions/SKILL.md": "inherited",
+        "CLAUDE.md": "shared",
+        "skills/ask-productions/SKILL.md": "inherited",
         "skills/ingest-productions/SKILL.md": "inherited",
-        "skills/ingest-vna/SKILL.md": "edit"}
+        "skills/ingest-vna/SKILL.md": "edit",
+    }
     kinds = {r.path: r.kind for r in pipeline.rule_files(vna).rules}
     assert kinds["skills/ask-productions/SKILL.md"] == "answer"
 
@@ -58,17 +62,21 @@ def test_writes_outside_the_scope_are_refused(tmp_path: Path) -> None:
     text = "---\nname: ingest-vna\nmode: procedure\napplies_to: raw/Productions/VNA\n---\nnew\n"
     pipeline.write_rule(vna, "skills/ingest-vna/SKILL.md", text)
     for path, body in (
-            ("CLAUDE.md", "schema\n"),
-            ("skills/ingest-productions/SKILL.md", text.replace("Productions/VNA", "Productions")),
-            ("skills/ingest-market/SKILL.md", text.replace("Productions/VNA", "Market")),
-            # moving its own rule onto another folder's data
-            ("skills/ingest-vna/SKILL.md", text.replace("Productions/VNA", "Productions/CMX")),
-            # a new skill for another folder
-            ("skills/ingest-cmx/SKILL.md", text.replace("Productions/VNA", "Productions/CMX"))):
+        ("CLAUDE.md", "schema\n"),
+        ("skills/ingest-productions/SKILL.md", text.replace("Productions/VNA", "Productions")),
+        ("skills/ingest-market/SKILL.md", text.replace("Productions/VNA", "Market")),
+        # moving its own rule onto another folder's data
+        ("skills/ingest-vna/SKILL.md", text.replace("Productions/VNA", "Productions/CMX")),
+        # a new skill for another folder
+        ("skills/ingest-cmx/SKILL.md", text.replace("Productions/VNA", "Productions/CMX")),
+    ):
         with pytest.raises(PipelineError, match="rule_outside_scope"):
             pipeline.write_rule(vna, path, body)
-    pipeline.write_rule(vna, "skills/ask-vna/SKILL.md", "---\nname: ask-vna\nmode: answer\n"
-                        "applies_to: raw/Productions/VNA\n---\nx\n")
+    pipeline.write_rule(
+        vna,
+        "skills/ask-vna/SKILL.md",
+        "---\nname: ask-vna\nmode: answer\napplies_to: raw/Productions/VNA\n---\nx\n",
+    )
 
 
 def test_pull_and_creation_stay_inside_the_scope(tmp_path: Path) -> None:
@@ -93,7 +101,13 @@ def test_an_answer_skill_with_applies_to_is_not_an_ingest_rule(tmp_path: Path) -
 def test_the_page_chooses_the_folder_at_creation_and_lists_its_skills() -> None:
     # Since 2026-10-14 the folder is chosen when the sandbox is created (step 1) and its
     # skills are edited in step 2, "Skills for this folder".
-    for hook in ('id="kp-scope"', 'id="kp-scope-name"', "Folder you maintain", "kpLoadScopes",
-                 "Skills for this folder", "Push to the vault"):
+    for hook in (
+        'id="kp-scope"',
+        'id="kp-scope-name"',
+        "Folder you maintain",
+        "kpLoadScopes",
+        "Skills for this folder",
+        "Push to the vault",
+    ):
         assert hook in PAGE
     assert "2. Rules (schema and skills)" not in PAGE

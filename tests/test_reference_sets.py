@@ -43,9 +43,10 @@ def test_sets_are_published_replaced_and_filtered_by_earlier_answers(tmp_path: P
     assert [item.value for item in store.resolve("ref:chipsets", {}) or []] == ["kt326", "kt100"]
     query = "ref:packageVersions?chipset={chipset}"
     assert ReferenceQuery(query).needed() == ("chipset",)
-    assert store.resolve(query, {}) is None                     # waiting for the chipset
+    assert store.resolve(query, {}) is None  # waiting for the chipset
     assert [item.value for item in store.resolve(query, {"chipset": "kt326"}) or []] == [
-        "2.0.18", "2.0.19",
+        "2.0.18",
+        "2.0.19",
     ]
     assert store.resolve("ref:unpublished", {}) is None
     publish_values(store, "chipsets", ["kt999"], published_by="workflow-12")
@@ -59,11 +60,22 @@ def _engine(handler: Handler, store: ReferenceSetStore | None) -> tuple[Workflow
     installed.register(
         capability_spec(), handler, Probe, Report, ExecutionDependencies(central_required=False)
     )
-    bridge = BridgeExecutor(installed, LocalPolicy((CapabilityGrant.model_validate({
-        "actor": "engineer", "asset": capability_spec().identity,
-        "permissions": ["engineering.validate"], "policy_refs": ["release-policy"],
-        "approval_ref": "release-approval",
-    }),)))
+    bridge = BridgeExecutor(
+        installed,
+        LocalPolicy(
+            (
+                CapabilityGrant.model_validate(
+                    {
+                        "actor": "engineer",
+                        "asset": capability_spec().identity,
+                        "permissions": ["engineering.validate"],
+                        "policy_refs": ["release-policy"],
+                        "approval_ref": "release-approval",
+                    }
+                ),
+            )
+        ),
+    )
     data = workflow_manifest().model_dump(mode="json")
     data["parameters"] = [
         {"name": "args", "label": "Chipset", "kind": "select", "choices_source": "ref:chipsets"},
@@ -101,13 +113,31 @@ def test_telegram_offers_published_choices_as_buttons(tmp_path: Path) -> None:
         found = store.resolve(source, answers)
         return None if found is None else [item.value for item in found]
 
-    state = flow.start(_manifest([
-        {"name": "chipset", "label": "Chipset", "kind": "select", "required": True,
-         "order": 1, "choices_source": "ref:chipsets"},
-        {"name": "version", "label": "Version", "kind": "select", "required": True,
-         "order": 2, "choices_source": "ref:packageVersions?chipset={chipset}",
-         "needs": ["chipset"]},
-    ]), "read", choices)
+    state = flow.start(
+        _manifest(
+            [
+                {
+                    "name": "chipset",
+                    "label": "Chipset",
+                    "kind": "select",
+                    "required": True,
+                    "order": 1,
+                    "choices_source": "ref:chipsets",
+                },
+                {
+                    "name": "version",
+                    "label": "Version",
+                    "kind": "select",
+                    "required": True,
+                    "order": 2,
+                    "choices_source": "ref:packageVersions?chipset={chipset}",
+                    "needs": ["chipset"],
+                },
+            ]
+        ),
+        "read",
+        choices,
+    )
     assert isinstance(state, flow.FlowState)
     first = flow.begin(state)
     assert first.prompt is not None
@@ -116,7 +146,7 @@ def test_telegram_offers_published_choices_as_buttons(tmp_path: Path) -> None:
     second = flow.answer(state, "kt326")
     assert second.prompt is not None
     assert second.prompt.buttons == [[("2.0.18", "2.0.18"), ("2.0.19", "2.0.19")]]
-    done = flow.answer(state, "2")                     # by position
+    done = flow.answer(state, "2")  # by position
     assert done.kind == "ready" and done.arguments == {"chipset": "kt326", "version": "2.0.19"}
 
 
@@ -132,10 +162,20 @@ def test_agent_web_resolves_choices_for_the_form(tmp_path: Path) -> None:
 
     data = preview_workflow().model_dump(mode="json")
     data["parameters"] = [
-        {"name": "chipset", "label": "Chipset", "kind": "select", "order": 1,
-         "choices_source": "ref:chipsets"},
-        {"name": "version", "label": "Version", "kind": "select", "order": 2,
-         "choices_source": "ref:packageVersions?chipset={chipset}"},
+        {
+            "name": "chipset",
+            "label": "Chipset",
+            "kind": "select",
+            "order": 1,
+            "choices_source": "ref:chipsets",
+        },
+        {
+            "name": "version",
+            "label": "Version",
+            "kind": "select",
+            "order": 2,
+            "choices_source": "ref:packageVersions?chipset={chipset}",
+        },
     ]
     manifest = WorkflowManifest.model_validate(data)
     identity = manifest.metadata.identity.model_dump(mode="json")
@@ -154,12 +194,15 @@ def test_agent_web_resolves_choices_for_the_form(tmp_path: Path) -> None:
             assert unpublished.json()["unavailable"] is True
             assert unpublished.json()["set"] == "chipsets"
             _store(runtime.layout.workspace_root)
-            assert fetch(url, token=server.token, body=body).json()["waiting_for"] == [
-                "chipset"
-            ]
-            chosen = fetch(url, token=server.token, body={
-                **body, "answers": {"chipset": "kt100"},
-            }).json()
+            assert fetch(url, token=server.token, body=body).json()["waiting_for"] == ["chipset"]
+            chosen = fetch(
+                url,
+                token=server.token,
+                body={
+                    **body,
+                    "answers": {"chipset": "kt100"},
+                },
+            ).json()
             assert chosen["choices"] == [{"value": "1.4.0", "label": "1.4.0 (legacy)"}]
             assert fetch(url, body=body).status == 401
             assert fetch(url, token=server.token, body={**body, "field": "nope"}).status == 404

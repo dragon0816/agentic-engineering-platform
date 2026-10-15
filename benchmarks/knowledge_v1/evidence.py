@@ -37,42 +37,74 @@ def knowledge_use(exchange: dict[str, Any]) -> dict[str, Any]:
     if harness or capability:
         failure = capability.get("failure") or {}
         phase = (harness or {}).get("phase") if isinstance(harness, dict) else None
-        return {"route": "direct", "status": capability.get("status"), "failure": failure.get("code"),
-                "phase": phase, "record": capability.get("data") or {},
-                "text": str(answer.get("answer") or ""), "evidence": answer.get("evidence") or {},
-                "tools": []}
+        return {
+            "route": "direct",
+            "status": capability.get("status"),
+            "failure": failure.get("code"),
+            "phase": phase,
+            "record": capability.get("data") or {},
+            "text": str(answer.get("answer") or ""),
+            "evidence": answer.get("evidence") or {},
+            "tools": [],
+        }
     conversation = outcome.get("conversation") or {}
     tools = conversation.get("tools") or []
     used = [t for t in tools if str(t.get("name", "")).startswith("knowledge__")]
     names = [str(t.get("name")) for t in tools]
     text = str(conversation.get("text") or answer.get("answer") or "")
     if not used:
-        return {"route": "none", "status": conversation.get("status"),
-                "failure": (conversation.get("failure") or {}).get("code"), "phase": None,
-                "record": {}, "text": text, "evidence": {}, "tools": names}
-    harnessed = [t for t in used if isinstance((t.get("host") or {}).get("data"), dict)
-                 and "knowledge_harness" in t["host"]["data"]]
+        return {
+            "route": "none",
+            "status": conversation.get("status"),
+            "failure": (conversation.get("failure") or {}).get("code"),
+            "phase": None,
+            "record": {},
+            "text": text,
+            "evidence": {},
+            "tools": names,
+        }
+    harnessed = [
+        t
+        for t in used
+        if isinstance((t.get("host") or {}).get("data"), dict)
+        and "knowledge_harness" in t["host"]["data"]
+    ]
     if harnessed:
         # Since 2026-10-09 the tool route runs the Knowledge Harness on the
         # host; a validated answer is the turn's answer, cited like the direct
         # route's.
         host = harnessed[-1]["host"]
         data = host["data"]
-        return {"route": "tool", "status": host.get("status"),
-                "failure": data.get("failure_code") or (host.get("failure") or {}).get("code"),
-                "phase": data.get("phase") or conversation.get("status"),
-                "record": data.get("record") or {}, "text": text, "evidence": data.get("evidence") or {},
-                "tools": names, "harnessed": True, "conversation_status": conversation.get("status")}
+        return {
+            "route": "tool",
+            "status": host.get("status"),
+            "failure": data.get("failure_code") or (host.get("failure") or {}).get("code"),
+            "phase": data.get("phase") or conversation.get("status"),
+            "record": data.get("record") or {},
+            "text": text,
+            "evidence": data.get("evidence") or {},
+            "tools": names,
+            "harnessed": True,
+            "conversation_status": conversation.get("status"),
+        }
     # The last Knowledge call is what the answer rests on; earlier ones were searches.
-    good =[t for t in used if (t.get("capability") or {}).get("status") == "succeeded"]
+    good = [t for t in used if (t.get("capability") or {}).get("status") == "succeeded"]
     last = (good or used)[-1]
     capability = last.get("capability") or {}
     failure = capability.get("failure") or last.get("failure") or {}
     records = [(t.get("capability") or {}).get("data") or {} for t in good]
-    return {"route": "tool", "status": capability.get("status"), "failure": failure.get("code"),
-            "phase": conversation.get("status"), "record": capability.get("data") or {},
-            "records": records, "text": text, "evidence": {}, "tools": names,
-            "conversation_status": conversation.get("status")}
+    return {
+        "route": "tool",
+        "status": capability.get("status"),
+        "failure": failure.get("code"),
+        "phase": conversation.get("status"),
+        "record": capability.get("data") or {},
+        "records": records,
+        "text": text,
+        "evidence": {},
+        "tools": names,
+        "conversation_status": conversation.get("status"),
+    }
 
 
 def cited_numbers(text: str) -> list[int]:
@@ -102,12 +134,13 @@ def cited_passages(use: dict[str, Any]) -> list[dict[str, Any]]:
     text = use.get("text") or ""
     if use.get("route") == "direct" or use.get("harnessed"):
         passages = ((use.get("record") or {}).get("answer") or {}).get("passages") or []
-        return [{"number": n, **passages[n - 1]} for n in cited_numbers(text)
-                if 1 <= n <= len(passages)]
+        return [
+            {"number": n, **passages[n - 1]} for n in cited_numbers(text) if 1 <= n <= len(passages)
+        ]
     pool: list[dict[str, Any]] = []
     seen: set[str] = set()
     for record in use.get("records") or [use.get("record") or {}]:
-        for passage in ((record.get("answer") or {}).get("passages") or []):
+        for passage in (record.get("answer") or {}).get("passages") or []:
             key = _ref(passage) + "#" + str((passage.get("citation") or {}).get("section"))
             if key not in seen:
                 seen.add(key)
@@ -131,7 +164,11 @@ def verify(passage: dict[str, Any], vault: Path) -> dict[str, Any]:
     hold verbatim, so that line is left out of the comparison."""
     citation = passage.get("citation") or {}
     ref = citation.get("wiki_page") if citation.get("kind") == "wiki" else citation.get("raw_ref")
-    result: dict[str, Any] = {"number": passage.get("number"), "kind": citation.get("kind"), "ref": ref}
+    result: dict[str, Any] = {
+        "number": passage.get("number"),
+        "kind": citation.get("kind"),
+        "ref": ref,
+    }
     if not ref:
         return {**result, "ok": False, "why": "no file named"}
     path = (vault / ref).resolve()
@@ -144,8 +181,12 @@ def verify(passage: dict[str, Any], vault: Path) -> dict[str, Any]:
     file_text = _flat(path.read_text(encoding="utf-8", errors="replace"))
     # Compare in chunks: a passage may be trimmed or redacted at its ends.
     flat = _flat(body)
-    chunks = [flat[i:i + 40] for i in range(0, max(len(flat) - 39, 1), 40)] or [flat]
+    chunks = [flat[i : i + 40] for i in range(0, max(len(flat) - 39, 1), 40)] or [flat]
     found = sum(1 for chunk in chunks if chunk and chunk in file_text)
     share = found / len(chunks) if chunks else 0.0
-    return {**result, "ok": share >= 0.8, "text_found": round(share, 2),
-            "why": "" if share >= 0.8 else "passage text not found in the file"}
+    return {
+        **result,
+        "ok": share >= 0.8,
+        "text_found": round(share, 2),
+        "why": "" if share >= 0.8 else "passage text not found in the file",
+    }

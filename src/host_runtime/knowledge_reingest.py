@@ -71,28 +71,51 @@ def one(step: Step, sandbox_id: str, raw_ref: str) -> ReingestItem:
     plan = planned.get("data") or {}
     plan_id = plan.get("plan_id")
     if plan.get("status") != "planned" or not plan_id:
-        return ReingestItem(raw_ref=raw_ref, status="failed",
-                            detail=str(plan.get("failure_code") or plan.get("status")))
+        return ReingestItem(
+            raw_ref=raw_ref,
+            status="failed",
+            detail=str(plan.get("failure_code") or plan.get("status")),
+        )
     pages = tuple(str(page.get("path")) for page in plan.get("pages") or ())
     contradictions = tuple(str(line) for line in plan.get("contradictions") or ())
     flagged = [*(plan.get("problems") or ()), *("contradiction" for _ in contradictions)]
     if flagged:
-        return ReingestItem(raw_ref=raw_ref, status="needs_review", plan_id=plan_id,
-                            pages=pages, contradictions=contradictions,
-                            detail=", ".join(dict.fromkeys(flagged)))
+        return ReingestItem(
+            raw_ref=raw_ref,
+            status="needs_review",
+            plan_id=plan_id,
+            pages=pages,
+            contradictions=contradictions,
+            detail=", ".join(dict.fromkeys(flagged)),
+        )
     applied = step("ingest-apply", {"sandbox_id": sandbox_id, "plan_id": plan_id})
     data = applied.get("data") or {}
     if not applied.get("ok"):
-        return ReingestItem(raw_ref=raw_ref, status="failed", plan_id=plan_id, pages=pages,
-                            detail=str(applied.get("code")))
+        return ReingestItem(
+            raw_ref=raw_ref,
+            status="failed",
+            plan_id=plan_id,
+            pages=pages,
+            detail=str(applied.get("code")),
+        )
     if data.get("status") != "applied":
-        return ReingestItem(raw_ref=raw_ref, status="rejected", plan_id=plan_id, pages=pages,
-                            detail=", ".join(data.get("problems") or ()))
+        return ReingestItem(
+            raw_ref=raw_ref,
+            status="rejected",
+            plan_id=plan_id,
+            pages=pages,
+            detail=", ".join(data.get("problems") or ()),
+        )
     return ReingestItem(raw_ref=raw_ref, status="applied", plan_id=plan_id, pages=pages)
 
 
-def run_reingest(step: Step, run: ReingestRun, folder: Path, stop: threading.Event,
-                 on_change: Callable[[ReingestRun], None] | None = None) -> ReingestRun:
+def run_reingest(
+    step: Step,
+    run: ReingestRun,
+    folder: Path,
+    stop: threading.Event,
+    on_change: Callable[[ReingestRun], None] | None = None,
+) -> ReingestRun:
     """Go through the run's documents in order until done or stopped. A live
     run is reported through `on_change`, so nobody reads a file being written."""
 
@@ -110,12 +133,18 @@ def run_reingest(step: Step, run: ReingestRun, folder: Path, stop: threading.Eve
         try:
             item = one(step, run.sandbox_id, raw_ref)
         except Exception as failure:  # noqa: BLE001 - one document never ends the run
-            item = ReingestItem(raw_ref=raw_ref, status="failed",
-                                detail=f"error:{type(failure).__name__}")
+            item = ReingestItem(
+                raw_ref=raw_ref, status="failed", detail=f"error:{type(failure).__name__}"
+            )
         run = run.model_copy(update={"items": (*run.items, item)})
         _save(folder, run)
-    run = run.model_copy(update={
-        "status": "stopped" if run.remaining else "finished", "current": None, "ended": _now()})
+    run = run.model_copy(
+        update={
+            "status": "stopped" if run.remaining else "finished",
+            "current": None,
+            "ended": _now(),
+        }
+    )
     _save(folder, run)
     return run
 

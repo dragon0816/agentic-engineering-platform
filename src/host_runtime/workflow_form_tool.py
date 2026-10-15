@@ -28,10 +28,14 @@ def resolve(manifests: tuple[WorkflowManifest, ...], name: str) -> WorkflowManif
     if "@" in target:
         target = target.rsplit("@", 1)[0]
     found = [
-        item for item in manifests
+        item
+        for item in manifests
         if (target.isdigit() and item.run_alias == int(target))
-        or target in (item.metadata.identity.name,
-                      f"{item.metadata.identity.namespace}/{item.metadata.identity.name}")
+        or target
+        in (
+            item.metadata.identity.name,
+            f"{item.metadata.identity.namespace}/{item.metadata.identity.name}",
+        )
     ]
     if not found:
         return "workflow_not_installed"
@@ -49,8 +53,10 @@ def workflow_form_tools(engine: WorkflowEngine) -> tuple[HostTool, ...]:
     async def handler(context: RequestContext, args: dict[str, Any]) -> HostToolOutcome:
         found = resolve(engine.workflows.manifests(), str(args.get("workflow") or ""))
         if isinstance(found, str):
-            return HostToolOutcome(status="failed", failure=Failure(
-                code=found, message="Name one installed Workflow exactly."))
+            return HostToolOutcome(
+                status="failed",
+                failure=Failure(code=found, message="Name one installed Workflow exactly."),
+            )
         values = args.get("values")
         prefill = agent_prefill(found, values if isinstance(values, dict) else {})
         offer = form_offer(found, prefill, engine.settings_provider, origin="agent")
@@ -59,23 +65,30 @@ def workflow_form_tools(engine: WorkflowEngine) -> tuple[HostTool, ...]:
     workflow: dict[str, Any] = {"type": "string", "description": "The Workflow's name."}
     if len(names) <= MAX_LISTED:
         workflow["enum"] = names
-    return (HostTool(ModelTool(
-        name=FORM_TOOL,
-        description=(
-            "Show the person the run form of an installed Workflow when they ask to run it. "
-            "Give `workflow` and, in `values`, only run values the person already stated, by "
-            "parameter name; never guess one. The form asks for the rest and shows which "
-            "settings are missing; settings are never run values. Nothing runs until the "
-            "person presses Run; the turn ends with the form."
+    return (
+        HostTool(
+            ModelTool(
+                name=FORM_TOOL,
+                description=(
+                    "Show the person the run form of an installed Workflow when they ask to run it. "
+                    "Give `workflow` and, in `values`, only run values the person already stated, by "
+                    "parameter name; never guess one. The form asks for the rest and shows which "
+                    "settings are missing; settings are never run values. Nothing runs until the "
+                    "person presses Run; the turn ends with the form."
+                ),
+                input_contract="host.workflow-form.v1",
+                input_schema={
+                    "type": "object",
+                    "properties": {
+                        "workflow": workflow,
+                        "values": {
+                            "type": "object",
+                            "description": "Run values the person stated, by parameter name.",
+                        },
+                    },
+                    "required": ["workflow"],
+                },
+            ),
+            handler,
         ),
-        input_contract="host.workflow-form.v1",
-        input_schema={
-            "type": "object",
-            "properties": {
-                "workflow": workflow,
-                "values": {"type": "object",
-                           "description": "Run values the person stated, by parameter name."},
-            },
-            "required": ["workflow"],
-        },
-    ), handler),)
+    )

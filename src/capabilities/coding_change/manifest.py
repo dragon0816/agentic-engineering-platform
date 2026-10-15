@@ -41,19 +41,50 @@ _METADATA = {
 }
 
 _PARAMETERS = [
-    {"name": "repository", "label": "Which repository?", "kind": "select", "required": True,
-     "choices_source": f"fn:{REPOSITORIES_FUNCTION}", "order": 10},
-    {"name": "requirement", "label": "What should change?", "kind": "text", "required": True,
-     "order": 20, "help": "Describe the behaviour the tests expect, in a sentence or two."},
-    {"name": "file", "label": "Which file may be changed?", "kind": "text", "required": True,
-     "order": 30, "examples": ["src/practice/durations.py"],
-     "help": "Path inside the repository. Test files can never be changed."},
-    {"name": "tests", "label": "Which tests say it is done?", "kind": "text_list",
-     "required": True, "order": 40, "examples": ["tests/test_durations.py"],
-     "help": "Existing pytest files or node ids, one per line. The whole test folder "
-             "also runs as the regression check."},
-    {"name": "max_repairs", "label": "How many repair attempts?", "kind": "integer",
-     "default": 2, "minimum": 0, "maximum": 3, "order": 50},
+    {
+        "name": "repository",
+        "label": "Which repository?",
+        "kind": "select",
+        "required": True,
+        "choices_source": f"fn:{REPOSITORIES_FUNCTION}",
+        "order": 10,
+    },
+    {
+        "name": "requirement",
+        "label": "What should change?",
+        "kind": "text",
+        "required": True,
+        "order": 20,
+        "help": "Describe the behaviour the tests expect, in a sentence or two.",
+    },
+    {
+        "name": "file",
+        "label": "Which file may be changed?",
+        "kind": "text",
+        "required": True,
+        "order": 30,
+        "examples": ["src/practice/durations.py"],
+        "help": "Path inside the repository. Test files can never be changed.",
+    },
+    {
+        "name": "tests",
+        "label": "Which tests say it is done?",
+        "kind": "text_list",
+        "required": True,
+        "order": 40,
+        "examples": ["tests/test_durations.py"],
+        "help": "Existing pytest files or node ids, one per line. The whole test folder "
+        "also runs as the regression check.",
+    },
+    {
+        "name": "max_repairs",
+        "label": "How many repair attempts?",
+        "kind": "integer",
+        "default": 2,
+        "minimum": 0,
+        "maximum": 3,
+        "order": 50,
+    },
 ]
 
 
@@ -80,8 +111,10 @@ def coding_workflow() -> WorkflowManifest:
             "input_contract": "engineering.coding-change.input.v1",
             "output_contract": "coding.change.output.v1",
             "steps": [
-                {"capability": CHANGE_SPEC.identity.model_dump(),
-                 "inputs": {"request": {"source": "run"}}},
+                {
+                    "capability": CHANGE_SPEC.identity.model_dump(),
+                    "inputs": {"request": {"source": "run"}},
+                },
             ],
         }
     )
@@ -103,19 +136,31 @@ def run_python_workflow() -> WorkflowManifest:
             "execution": {"mode": "local"},
             "dependencies": {"central_required": False, "local_capabilities": [RUN_SPEC.name]},
             "parameters": [
-                {"name": "workspace", "label": "Which task workspace folder?", "kind": "text",
-                 "required": True, "order": 10,
-                 "help": "The absolute folder the person named; it holds input/ and output/."},
-                {"name": "script", "label": "The complete Python script", "kind": "text",
-                 "required": True, "order": 20,
-                 "help": "Python 3.12 with openpyxl. Relative paths resolve from the workspace. "
-                         "Print what you need to check. Never write credentials literally."},
+                {
+                    "name": "workspace",
+                    "label": "Which task workspace folder?",
+                    "kind": "text",
+                    "required": True,
+                    "order": 10,
+                    "help": "The absolute folder the person named; it holds input/ and output/.",
+                },
+                {
+                    "name": "script",
+                    "label": "The complete Python script",
+                    "kind": "text",
+                    "required": True,
+                    "order": 20,
+                    "help": "Python 3.12 with openpyxl. Relative paths resolve from the workspace. "
+                    "Print what you need to check. Never write credentials literally.",
+                },
             ],
             "input_contract": "engineering.run-python.input.v1",
             "output_contract": "coding.run-python.output.v1",
             "steps": [
-                {"capability": RUN_SPEC.identity.model_dump(),
-                 "inputs": {"request": {"source": "run"}}},
+                {
+                    "capability": RUN_SPEC.identity.model_dump(),
+                    "inputs": {"request": {"source": "run"}},
+                },
             ],
         }
     )

@@ -95,8 +95,11 @@ def _front_fields(front: str) -> dict[str, str]:
     return fields
 
 
-def _pick(base: str | None, sandbox: str | None, published: str | None,
-          ) -> tuple[str | None, bool]:
+def _pick(
+    base: str | None,
+    sandbox: str | None,
+    published: str | None,
+) -> tuple[str | None, bool]:
     """(result, conflict) for one part; None is an absent part."""
     if sandbox == base or sandbox == published:
         return published, False
@@ -106,8 +109,13 @@ def _pick(base: str | None, sandbox: str | None, published: str | None,
 
 
 def _merge_parts(
-    path: str, order: list[str], b: dict[str, str], s: dict[str, str], p: dict[str, str],
-    resolutions: dict[str, Resolution], label: str = "",
+    path: str,
+    order: list[str],
+    b: dict[str, str],
+    s: dict[str, str],
+    p: dict[str, str],
+    resolutions: dict[str, Resolution],
+    label: str = "",
 ) -> tuple[dict[str, str], list[str], list[MergeConflict]]:
     merged: dict[str, str] = {}
     taken: list[str] = []
@@ -121,8 +129,11 @@ def _merge_parts(
                 result = s.get(key)
                 taken.append(part)
             elif choice != "published":
-                conflicts.append(MergeConflict(path=path, part=part, sandbox=s.get(key) or "",
-                                               published=p.get(key) or ""))
+                conflicts.append(
+                    MergeConflict(
+                        path=path, part=part, sandbox=s.get(key) or "", published=p.get(key) or ""
+                    )
+                )
         elif result != p.get(key):
             taken.append(part)
         if result is not None:
@@ -133,6 +144,7 @@ def _merge_parts(
 def _later(a: str, b: str) -> str:
     def date(line: str) -> str:
         return line.split(":", 1)[1].strip().strip("\"'")
+
     return a if date(a) >= date(b) else b
 
 
@@ -143,8 +155,9 @@ def _parts(page: Page) -> dict[str, str]:
     return found
 
 
-def merge_page(path: str, base: str, sandbox: str, published: str,
-               resolutions: dict[str, Resolution]) -> tuple[str, list[str], list[MergeConflict]]:
+def merge_page(
+    path: str, base: str, sandbox: str, published: str, resolutions: dict[str, Resolution]
+) -> tuple[str, list[str], list[MergeConflict]]:
     """A page changed on both sides, merged by frontmatter field and section."""
     pb, ps, pp = parse(base), parse(sandbox), parse(published)
     fb, fs, fp = _front_fields(pb.front), _front_fields(ps.front), _front_fields(pp.front)
@@ -186,12 +199,14 @@ def _merge_index(base: str, sandbox: str, published: str) -> str:
 
 
 def _merge_log(base: str, sandbox: str, published: str) -> str:
-    added = sandbox[len(base):] if sandbox.startswith(base) else ""
+    added = sandbox[len(base) :] if sandbox.startswith(base) else ""
     return published.rstrip("\n") + "\n" + added.lstrip("\n") if added.strip() else published
 
 
 def three_way(
-    base: dict[str, bytes], sandbox: dict[str, bytes], published: dict[str, bytes],
+    base: dict[str, bytes],
+    sandbox: dict[str, bytes],
+    published: dict[str, bytes],
     resolutions: dict[str, Resolution] | None = None,
     in_scope: Iterable[str] | None = None,
 ) -> MergeResult:
@@ -218,8 +233,9 @@ def three_way(
             elif chosen.get(f"{rel}#page") == "sandbox" and not rel.startswith("raw/"):
                 result.files[rel] = s
             else:
-                result.conflicts.append(MergeConflict(path=rel, part="page", sandbox="(binary)",
-                                                      published="(binary)"))
+                result.conflicts.append(
+                    MergeConflict(path=rel, part="page", sandbox="(binary)", published="(binary)")
+                )
             continue
         bt, st, pt = _text(b), _text(s) or "", _text(p)
         if pt is None:  # new in the sandbox, or removed from published
@@ -231,8 +247,9 @@ def three_way(
                 if choice == "sandbox":
                     result.files[rel] = s
                 elif choice != "published":
-                    result.conflicts.append(MergeConflict(path=rel, part="page", sandbox=st,
-                                                          published=pt))
+                    result.conflicts.append(
+                        MergeConflict(path=rel, part="page", sandbox=st, published=pt)
+                    )
                 continue
             result.files[rel] = s
             result.changes.append(MergeChange(path=rel, change="taken", proposal=proposal))
@@ -247,16 +264,18 @@ def three_way(
             if choice == "sandbox":
                 result.files[rel] = s
             elif choice != "published":
-                result.conflicts.append(MergeConflict(path=rel, part="page", sandbox=st,
-                                                      published=pt))
+                result.conflicts.append(
+                    MergeConflict(path=rel, part="page", sandbox=st, published=pt)
+                )
         else:
             text, parts, conflicts = merge_page(rel, bt, st, pt, chosen)
             result.conflicts.extend(conflicts)
             if text != pt:
                 original = (p or b"").decode("utf-8")
                 result.files[rel] = like_endings(text, original).encode("utf-8")
-                result.changes.append(MergeChange(path=rel, change="merged", parts=tuple(parts),
-                                                  proposal=proposal))
+                result.changes.append(
+                    MergeChange(path=rel, change="merged", parts=tuple(parts), proposal=proposal)
+                )
     return result
 
 

@@ -217,10 +217,12 @@ class OpenAICompatible:
         # shorten the request.
         cut = choices[0].get("finish_reason") == "length"
         if cut and (isinstance(calls, Failure) or (not calls and not (content or "").strip())):
-            return refused(Failure(
-                code="model_output_truncated",
-                message="the model reached the output token limit before finishing",
-            ))
+            return refused(
+                Failure(
+                    code="model_output_truncated",
+                    message="the model reached the output token limit before finishing",
+                )
+            )
         if isinstance(calls, Failure):
             return refused(calls)
         if not isinstance(content, str) and not calls:

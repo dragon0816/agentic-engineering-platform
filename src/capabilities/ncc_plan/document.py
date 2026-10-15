@@ -49,20 +49,21 @@ def replace_numbered_block(
     from docx.text.paragraph import Paragraph
 
     paragraphs = doc.paragraphs
-    anchor_i = next((i for i, para in enumerate(paragraphs)
-                     if para.text.strip().startswith(after_prefix)), None)
+    anchor_i = next(
+        (i for i, para in enumerate(paragraphs) if para.text.strip().startswith(after_prefix)), None
+    )
     if anchor_i is None:
         warnings.append(f"template has no paragraph starting {after_prefix!r}; section left")
         return False
     victims = []
-    for para in paragraphs[anchor_i + 1:]:
+    for para in paragraphs[anchor_i + 1 :]:
         text = para.text.strip()
         if not text:
             continue
         if text.startswith("（") and "）" in text[:4]:
             victims.append(para)
             continue
-        break   # the next heading ends the section
+        break  # the next heading ends the section
     if not victims:
         warnings.append(f"nothing numbered after {after_prefix!r}; section left alone")
         return False
@@ -111,7 +112,7 @@ def set_fault_captions(doc: Any, captions: Sequence[str], warnings: list[str]) -
         clone = copy.deepcopy(model)
         blocks[-1]._tbl.addnext(clone)
         blocks = [t for t in doc.tables if len(t.columns) == 1]
-    for extra in blocks[len(captions):]:
+    for extra in blocks[len(captions) :]:
         extra._tbl.getparent().remove(extra._tbl)
     blocks = [t for t in doc.tables if len(t.columns) == 1]
     for table, caption in zip(blocks, captions, strict=False):

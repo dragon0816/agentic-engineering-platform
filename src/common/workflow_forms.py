@@ -24,14 +24,17 @@ def ordered_fields(
     contract already requires to put depended-on fields first.
     """
     indexed = [
-        (index, field) for index, field in enumerate(manifest.parameters)
+        (index, field)
+        for index, field in enumerate(manifest.parameters)
         if field.scope == "runtime" and channel in field.channels
     ]
-    indexed.sort(key=lambda item: (
-        item[1].group != IDENTITY_GROUP,
-        item[1].order if item[1].order is not None else item[0],
-        item[0],
-    ))
+    indexed.sort(
+        key=lambda item: (
+            item[1].group != IDENTITY_GROUP,
+            item[1].order if item[1].order is not None else item[0],
+            item[0],
+        )
+    )
     return tuple(field for _, field in indexed)
 
 
@@ -43,27 +46,29 @@ def form_field(field: WorkflowParameter) -> dict[str, Any]:
     `help` text (from `help` or `description`).
     """
     data = field.model_dump(mode="json")
-    data.update({
-        "choices": [
-            {"value": value, "label": label}
-            for value, label in (
-                [(item.value, item.label or item.value) for item in field.choices]
-                or [(value, value) for value in field.options]
-            )
-        ],
-        "help": field.help or field.description or "",
-        "default": field.default,
-        "choices_source": field.choices_source,
-        "allow_other": field.allow_other,
-        "needs": list(field.needs),
-        "multiple": field.multiple,
-        "accept": list(field.accept),
-        "group": field.group,
-        "examples": list(field.examples),
-        "pattern": field.pattern,
-        "min_length": field.min_length,
-        "confirm": field.confirm,
-    })
+    data.update(
+        {
+            "choices": [
+                {"value": value, "label": label}
+                for value, label in (
+                    [(item.value, item.label or item.value) for item in field.choices]
+                    or [(value, value) for value in field.options]
+                )
+            ],
+            "help": field.help or field.description or "",
+            "default": field.default,
+            "choices_source": field.choices_source,
+            "allow_other": field.allow_other,
+            "needs": list(field.needs),
+            "multiple": field.multiple,
+            "accept": list(field.accept),
+            "group": field.group,
+            "examples": list(field.examples),
+            "pattern": field.pattern,
+            "min_length": field.min_length,
+            "confirm": field.confirm,
+        }
+    )
     return data
 
 
@@ -103,10 +108,12 @@ def _property_schema(field: WorkflowParameter) -> dict[str, Any]:
             item["enum"] = list(field.choice_values)
     schema = (
         {"type": "array", "items": item}
-        if field.multiple or kind in ("text_list", "emails") else item
+        if field.multiple or kind in ("text_list", "emails")
+        else item
     )
-    description = field.label + (f": {field.help or field.description}"
-                                 if field.help or field.description else "")
+    description = field.label + (
+        f": {field.help or field.description}" if field.help or field.description else ""
+    )
     schema["description"] = description
     if field.default is not None:
         schema["default"] = field.default
@@ -131,10 +138,12 @@ def settings_fields(manifest: WorkflowManifest) -> list[dict[str, Any]]:
     so every generated run interface leaves them out.
     """
     indexed = [
-        (index, field) for index, field in enumerate(manifest.parameters)
-        if field.scope == "static"
+        (index, field) for index, field in enumerate(manifest.parameters) if field.scope == "static"
     ]
-    indexed.sort(key=lambda item: (
-        item[1].order if item[1].order is not None else item[0], item[0],
-    ))
+    indexed.sort(
+        key=lambda item: (
+            item[1].order if item[1].order is not None else item[0],
+            item[0],
+        )
+    )
     return [form_field(field) for _, field in indexed]

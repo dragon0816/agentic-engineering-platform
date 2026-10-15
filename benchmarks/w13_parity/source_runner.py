@@ -30,18 +30,25 @@ def main() -> int:
     class IsolatedBridge:
         base = "isolated"
 
-        def terminal_run(self, command: str, *, shell: str, cwd: str,
-                         timeoutSec: int) -> dict[str, object]:  # noqa: N803 - source API
+        def terminal_run(
+            self, command: str, *, shell: str, cwd: str, timeoutSec: int
+        ) -> dict[str, object]:  # noqa: N803 - source API
             if not Path(cwd).resolve().is_relative_to(root):
                 raise RuntimeError(f"refused outside the isolated root: {cwd}")
             if command.split()[:2] == ["git", "push"]:
                 raise RuntimeError("push is refused in the parity run")
             done = subprocess.run(
                 ["powershell", "-NoProfile", "-NonInteractive", "-Command", command],
-                cwd=cwd, capture_output=True, text=True, encoding="utf-8", errors="replace",
-                timeout=timeoutSec)
-            return {"data": {"exitCode": done.returncode, "stdout": done.stdout,
-                             "stderr": done.stderr}}
+                cwd=cwd,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=timeoutSec,
+            )
+            return {
+                "data": {"exitCode": done.returncode, "stdout": done.stdout, "stderr": done.stderr}
+            }
 
     release.Bridge = IsolatedBridge  # type: ignore[assignment,misc]
     release.load_file_defaults = lambda: {}

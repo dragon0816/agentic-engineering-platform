@@ -168,11 +168,13 @@ def plan_release(
     previous = ry.parse_version(previous_release_yaml or "")
     try:
         version = request.release_version.strip() or ry.next_version(previous)
-        requirements = tuple(ry.requirements_lines(
-            request.chipset_id,
-            request.chipset_version,
-            request.general_testcase_version,
-        ))
+        requirements = tuple(
+            ry.requirements_lines(
+                request.chipset_id,
+                request.chipset_version,
+                request.general_testcase_version,
+            )
+        )
         release_yaml = ry.render(
             chipset_id=request.chipset_id,
             branch_name=branch,
@@ -197,8 +199,7 @@ def plan_release(
     destinations = [item.destination for item in selected]
     for destination in destinations:
         if destinations.count(destination) > 1:
-            raise ReleaseValidationError(
-                f"two chosen files would both be written to {destination}")
+            raise ReleaseValidationError(f"two chosen files would both be written to {destination}")
     return ReleasePlan(
         branch=branch,
         previous_version=previous,

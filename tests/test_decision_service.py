@@ -236,4 +236,3 @@ def test_config_requires_non_secret_explicit_jev_binding() -> None:
         DecisionAcceleratorConfig.model_validate(
             {**configured().model_dump(mode="json"), "enabled_decision_types": ["route_selection"]}
         )
-

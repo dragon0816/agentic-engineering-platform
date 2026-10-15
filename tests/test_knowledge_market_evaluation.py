@@ -23,12 +23,14 @@ def _case(tmp_path: Path) -> tuple[MarketCase, Vault]:
     refs: list[dict[str, str]] = []
     for name, kind, content, anchor in (
         (
-            "market", "market_requirement",
+            "market",
+            "market_requirement",
             "高速通訊市場採用 800G 和 1.6T Ethernet。",
             "800G 和 1.6T Ethernet",
         ),
         (
-            "product", "product_capability",
+            "product",
+            "product_capability",
             "CMX-B200A option has two high-speed digital I/Q interfaces for R&S instruments.",
             "CMX-B200A option has two high-speed digital I/Q interfaces",
         ),
@@ -78,14 +80,8 @@ def test_pinned_raw_distinguishes_product_capability_from_market_fit(tmp_path: P
     assert report["semantic_entailment_proven"] is False
 
     passages = retrieve(vault, case.question, k=4, min_raw=2, evidence_coverage=True)
-    product_number = next(
-        n for n, passage in enumerate(passages, 1)
-        if "CMX-B200A" in passage.text
-    )
-    market_number = next(
-        n for n, passage in enumerate(passages, 1)
-        if "800G" in passage.text
-    )
+    product_number = next(n for n, passage in enumerate(passages, 1) if "CMX-B200A" in passage.text)
+    market_number = next(n for n, passage in enumerate(passages, 1) if "800G" in passage.text)
     asserted = _record(
         case, vault, f"CMX-B200A supports 800G Ethernet [{product_number}, {market_number}]."
     )
@@ -94,7 +90,8 @@ def test_pinned_raw_distinguishes_product_capability_from_market_fit(tmp_path: P
     assert len(failed["unsupported_market_fit_claims"]) == 1
 
     linked_across_sentences = _record(
-        case, vault,
+        case,
+        vault,
         f"CMX-B200A has digital I/Q interfaces [{product_number}]. "
         f"這些能力可對應 800G 高速通訊市場 [{market_number}].",
     )
@@ -103,7 +100,8 @@ def test_pinned_raw_distinguishes_product_capability_from_market_fit(tmp_path: P
     assert len(linked_report["unsupported_market_fit_claims"]) == 1
 
     qualified = _record(
-        case, vault,
+        case,
+        vault,
         f"CMX-B200A has digital I/Q interfaces [{product_number}]. "
         f"This does not establish 800G market fit [{product_number}, {market_number}].",
     )
@@ -128,7 +126,5 @@ def test_market_audit_fails_closed_on_raw_drift_and_path_escape(tmp_path: Path) 
 def test_reviewed_rs_case_is_structurally_valid() -> None:
     path = Path(__file__).resolve().parents[1] / "evaluation/knowledge/rs-market-v1.json"
     case = MarketCase.model_validate(json.loads(path.read_text(encoding="utf-8")))
-    assert {entry.kind for entry in case.evidence} == {
-        "market_requirement", "product_capability"
-    }
+    assert {entry.kind for entry in case.evidence} == {"market_requirement", "product_capability"}
     assert case.market_targets == ("800G", "1.6T")

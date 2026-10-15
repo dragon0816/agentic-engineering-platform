@@ -168,7 +168,8 @@ def _parser() -> argparse.ArgumentParser:
     asset_actions = assets.add_subparsers(dest="asset_action", required=True)
     asset_actions.add_parser("catalog", help="compact: capabilities, Workflows and Skills")
     asset_capability = asset_actions.add_parser(
-        "capability", help="one capability's description and input schema")
+        "capability", help="one capability's description and input schema"
+    )
     asset_capability.add_argument("--target", required=True, help="namespace/name@version")
     asset_actions.add_parser("workflow-format", help="the full Workflow format with examples")
     asset_actions.add_parser("skill-format", help="the full Skill format")
@@ -189,33 +190,44 @@ def _parser() -> argparse.ArgumentParser:
     # Member publish to the shared platform (owner 2026-10-15): the submission
     # waits for an administrator's review there; nothing is approved here.
     publish = asset_actions.add_parser(
-        "publish", help="submit an installed Skill or Workflow to the shared platform")
+        "publish", help="submit an installed Skill or Workflow to the shared platform"
+    )
     publish.add_argument("--kind", required=True, choices=("skill", "workflow"))
     source = publish.add_mutually_exclusive_group(required=True)
     source.add_argument("--asset", help="namespace/name@version as installed")
-    source.add_argument("--file", dest="manifest_file", type=Path,
-                        help="a manifest JSON file instead of an installed asset")
+    source.add_argument(
+        "--file",
+        dest="manifest_file",
+        type=Path,
+        help="a manifest JSON file instead of an installed asset",
+    )
     publish.add_argument("--change", default="minor", choices=("patch", "minor", "major"))
     publish.add_argument("--note", default="")
     publish.add_argument(
-        "--visibility", choices=("private", "team", "organization", "public"),
-        help="who may use it once approved (default: what the manifest says)")
+        "--visibility",
+        choices=("private", "team", "organization", "public"),
+        help="who may use it once approved (default: what the manifest says)",
+    )
     asset_actions.add_parser("submissions", help="your submissions to the shared platform")
     withdraw = asset_actions.add_parser("withdraw", help="withdraw a pending submission")
     withdraw.add_argument("--submission", required=True)
     connect = asset_actions.add_parser(
         "connect", help="install AEP's skills and MCP servers for a coding agent"
     )
-    connect.add_argument("--for", dest="target", required=True,
-                         choices=("claude-code", "codex", "copilot", "all"))
+    connect.add_argument(
+        "--for", dest="target", required=True, choices=("claude-code", "codex", "copilot", "all")
+    )
     where = connect.add_mutually_exclusive_group(required=True)
     where.add_argument("--project", type=Path, help="the folder the agent works in")
-    where.add_argument("--user", action="store_true",
-                       help="for every folder: the agent's own user configuration")
-    connect.add_argument("--remove", action="store_true",
-                         help="with --user: take out what AEP put in")
-    connect.add_argument("--status", action="store_true",
-                         help="with --user: show what is installed, change nothing")
+    where.add_argument(
+        "--user", action="store_true", help="for every folder: the agent's own user configuration"
+    )
+    connect.add_argument(
+        "--remove", action="store_true", help="with --user: take out what AEP put in"
+    )
+    connect.add_argument(
+        "--status", action="store_true", help="with --user: show what is installed, change nothing"
+    )
     # One-click Agent Web (owner 2026-10-08): the running server keeps its
     # address in the workspace; `open` starts it when needed and opens it.
     opened = commands.add_parser(
@@ -223,8 +235,11 @@ def _parser() -> argparse.ArgumentParser:
     )
     opened.add_argument("--config", required=True, type=Path)
     opened.add_argument("--port", type=int, default=53583)
-    opened.add_argument("--no-schedules", action="store_true",
-                        help="when starting it, do not run scheduled tasks in it")
+    opened.add_argument(
+        "--no-schedules",
+        action="store_true",
+        help="when starting it, do not run scheduled tasks in it",
+    )
     shortcut = commands.add_parser(
         "shortcut", help="put an 'AEP Agent' shortcut on the desktop and in the Start menu"
     )
@@ -241,9 +256,13 @@ def _parser() -> argparse.ArgumentParser:
     tele_export.add_argument("--since", help="RFC3339 time; only events from then on")
     tele_export.add_argument("--run", help="only this run")
     tele_compare = tele_actions.add_parser(
-        "compare", help="success, latency and loops per strategy (and run kind)")
-    tele_compare.add_argument("--by", default="strategy_id,run_kind",
-                              help="comma-separated: strategy_id, run_kind, skill_id")
+        "compare", help="success, latency and loops per strategy (and run kind)"
+    )
+    tele_compare.add_argument(
+        "--by",
+        default="strategy_id,run_kind",
+        help="comma-separated: strategy_id, run_kind, skill_id",
+    )
     tele_compare.add_argument("--since", help="RFC3339 start")
     tele_compare.add_argument("--until", help="RFC3339 end")
     tele_compare.add_argument("--json", action="store_true")
@@ -252,7 +271,8 @@ def _parser() -> argparse.ArgumentParser:
     mcp.add_argument("--agent", default="mcp", help="who is connecting, e.g. codex")
     assistant = commands.add_parser(
         "assistant-mcp",
-        help="serve AEP's Knowledge and Workflow tools over stdio, through the running Agent Web")
+        help="serve AEP's Knowledge and Workflow tools over stdio, through the running Agent Web",
+    )
     assistant.add_argument("--config", required=True, type=Path)
     return parser
 
@@ -288,7 +308,8 @@ def _assets(args: argparse.Namespace) -> int:
     if hasattr(args, "file"):
         try:
             call["workflow" if "workflow" in action else "skill"] = json.loads(
-                args.file.read_text(encoding="utf-8-sig"))
+                args.file.read_text(encoding="utf-8-sig")
+            )
         except (OSError, ValueError):
             print(json.dumps({"ok": False, "code": "draft_unreadable"}))
             return 2
@@ -323,8 +344,15 @@ def _publish(args: argparse.Namespace) -> int:
         return 2
     publisher = publisher_for(config.publishing, config.credential_environment())
     if publisher is None:
-        print(json.dumps({"ok": False, "code": "publishing_not_configured",
-                          "message": "Add `publishing` to host.json."}))
+        print(
+            json.dumps(
+                {
+                    "ok": False,
+                    "code": "publishing_not_configured",
+                    "message": "Add `publishing` to host.json.",
+                }
+            )
+        )
         return 2
     try:
         if args.asset_action == "publish":
@@ -332,17 +360,23 @@ def _publish(args: argparse.Namespace) -> int:
                 manifest_file(args.manifest_file)
                 if args.manifest_file is not None
                 else installed_manifest(
-                    HostLayout.under(config.workspace_root), args.kind, args.asset)
+                    HostLayout.under(config.workspace_root), args.kind, args.asset
+                )
             )
             outcome: object = publisher.submit(
-                args.kind, manifest, args.change, args.note, args.visibility)
+                args.kind, manifest, args.change, args.note, args.visibility
+            )
         elif args.asset_action == "withdraw":
             outcome = publisher.withdraw(args.submission)
         else:
             outcome = publisher.submissions()
     except PublishError as error:
-        print(json.dumps({"ok": False, "code": error.code, "message": explain(error.code)},
-                         ensure_ascii=False))
+        print(
+            json.dumps(
+                {"ok": False, "code": error.code, "message": explain(error.code)},
+                ensure_ascii=False,
+            )
+        )
         return 1
     print(json.dumps({"ok": True, "result": outcome}, ensure_ascii=False, indent=2))
     return 0
@@ -362,8 +396,13 @@ def _connect_user(args: argparse.Namespace) -> int:
         print(json.dumps([agent_setup.status(a, environment) for a in targets], indent=2))
         return 0
     launch = agent_setup.Launch(console_python(), args.config)
-    lines = agent_setup.apply("remove" if args.remove else "install", targets, environment,
-                              launch, only_detected=args.target == "all")
+    lines = agent_setup.apply(
+        "remove" if args.remove else "install",
+        targets,
+        environment,
+        launch,
+        only_detected=args.target == "all",
+    )
     print("\n".join(lines))
     return 1 if any(": not changed (" in line for line in lines) else 0
 
@@ -376,11 +415,14 @@ def _assistant_mcp(args: argparse.Namespace) -> int:
     try:
         workspace = HostLayout.under(_load(args.config).workspace_root).workspace_root
     except (OSError, ValueError):
-        problem = (f"The AEP configuration {args.config} cannot be read, so AEP's Knowledge "
-                   "and Workflows are not reachable. Reinstall or update AEP, or use Agent Web "
-                   "Settings > Coding agents to set this agent up again.")
+        problem = (
+            f"The AEP configuration {args.config} cannot be read, so AEP's Knowledge "
+            "and Workflows are not reachable. Reinstall or update AEP, or use Agent Web "
+            "Settings > Coding agents to set this agent up again."
+        )
     Bridge(workspace, _package_version(), problem=problem).serve(
-        sys.stdin.buffer, sys.stdout.buffer)
+        sys.stdin.buffer, sys.stdout.buffer
+    )
     return 0
 
 
@@ -389,7 +431,8 @@ def _mcp(args: argparse.Namespace) -> int:
     from host_runtime.mcp_server import Server
 
     Server(lambda: build(args.config, args.agent), _package_version()).serve(
-        sys.stdin.buffer, sys.stdout.buffer)
+        sys.stdin.buffer, sys.stdout.buffer
+    )
     return 0
 
 
@@ -581,9 +624,7 @@ def _prompt_task(runtime: HostRuntime, prompt: str, namespace: str | None) -> Ta
             actor=runtime.actor,
             namespace=chosen,
             objective=prompt,
-            expected_outputs=(
-                ExpectedOutput(output_id="answer", artifact_ref=f"answer-{value}"),
-            ),
+            expected_outputs=(ExpectedOutput(output_id="answer", artifact_ref=f"answer-{value}"),),
             checks=(
                 CompletionCheck(check_id="answer-present", output_id="answer", kind="nonempty"),
             ),
@@ -784,8 +825,9 @@ def _launch(args: argparse.Namespace, workspace_root: Path) -> int:
             for made in create_shortcuts(args.config, args.port):
                 print(f"made {made}")
             return 0
-        outcome = open_agent(workspace_root, args.config, port=args.port,
-                             schedules=not args.no_schedules)
+        outcome = open_agent(
+            workspace_root, args.config, port=args.port, schedules=not args.no_schedules
+        )
     except LauncherError as error:
         print(str(error), file=sys.stderr)
         return 1
@@ -1191,9 +1233,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.command == "chat":
             return _chat(runtime, args.actor, args.namespace)
         if args.command == "web":
-            return _web(
-                runtime, args.namespace, args.port, args.open, args.config, args.schedules
-            )
+            return _web(runtime, args.namespace, args.port, args.open, args.config, args.schedules)
         if args.command == "status":
             return _status(runtime, args.json)
         if args.command == "probe":

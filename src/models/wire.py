@@ -251,7 +251,8 @@ TOOL_INPUT_SCHEMAS: dict[str, dict[str, Any]] = {
 
 def tool_schema(tool: ModelTool) -> dict[str, Any] | Failure:
     schema = (
-        tool.input_schema if tool.input_schema is not None
+        tool.input_schema
+        if tool.input_schema is not None
         else TOOL_INPUT_SCHEMAS.get(tool.input_contract)
     )
     if schema is None:

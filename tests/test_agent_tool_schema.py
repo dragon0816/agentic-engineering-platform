@@ -26,33 +26,47 @@ def test_schema_offers_only_agent_fields_and_never_privileged_ones() -> None:
     schema = agent_tool_schema(_manifest(RICH))
     properties = schema["properties"]
     assert schema["additionalProperties"] is False
-    assert "send" not in properties            # privileged: a person's choice
-    assert "output" not in properties          # web-only field
-    assert "trace_level" not in properties     # internal field
+    assert "send" not in properties  # privileged: a person's choice
+    assert "output" not in properties  # web-only field
+    assert "trace_level" not in properties  # internal field
     assert properties["mode"]["enum"] == ["brief", "full"]
     assert properties["mode"]["default"] == "brief"
     assert properties["reporters"] == {
-        "type": "array", "items": {"type": "string", "minLength": 1},
-        "description": "Reporters", "default": [],
+        "type": "array",
+        "items": {"type": "string", "minLength": 1},
+        "description": "Reporters",
+        "default": [],
     }
     assert properties["cc"]["items"]["format"] == "email"
     assert properties["project"]["pattern"] == r"^[a-z0-9/_-]+$"
     assert "enum" not in properties["chipset"]  # resolved at run time (S6)
     assert properties["ratio"] == {
-        "type": "number", "minimum": 0, "maximum": 1, "description": "Ratio", "default": 0.5,
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "description": "Ratio",
+        "default": 0.5,
     }
 
 
 def test_wire_uses_a_generated_schema_and_keeps_the_generic_fallback() -> None:
     generated = {"type": "object", "properties": {}, "additionalProperties": False}
-    typed = tool_schema(ModelTool(
-        name="t", description="d", input_contract="platform.command-arguments.v1",
-        input_schema=generated,
-    ))
+    typed = tool_schema(
+        ModelTool(
+            name="t",
+            description="d",
+            input_contract="platform.command-arguments.v1",
+            input_schema=generated,
+        )
+    )
     assert isinstance(typed, dict) and typed["function"]["parameters"] == generated
-    legacy = tool_schema(ModelTool(
-        name="t", description="d", input_contract="platform.command-arguments.v1",
-    ))
+    legacy = tool_schema(
+        ModelTool(
+            name="t",
+            description="d",
+            input_contract="platform.command-arguments.v1",
+        )
+    )
     assert isinstance(legacy, dict)
     assert legacy["function"]["parameters"] == {"type": "object", "additionalProperties": True}
 
@@ -65,21 +79,38 @@ def _declared_gateway(handler: Handler, model: FakeModel) -> Gateway:
     installed.register(
         capability_spec(), handler, Probe, Report, ExecutionDependencies(central_required=False)
     )
-    bridge = BridgeExecutor(installed, LocalPolicy((CapabilityGrant.model_validate({
-        "actor": "engineer", "asset": capability_spec().identity,
-        "permissions": ["engineering.validate"], "policy_refs": ["release-policy"],
-        "approval_ref": "release-approval",
-    }),)))
+    bridge = BridgeExecutor(
+        installed,
+        LocalPolicy(
+            (
+                CapabilityGrant.model_validate(
+                    {
+                        "actor": "engineer",
+                        "asset": capability_spec().identity,
+                        "permissions": ["engineering.validate"],
+                        "policy_refs": ["release-policy"],
+                        "approval_ref": "release-approval",
+                    }
+                ),
+            )
+        ),
+    )
     data = workflow_manifest().model_dump(mode="json")
     data["parameters"] = [
-        {"name": "args", "label": "Arguments", "kind": "text", "pattern": "^[a-z]+$",
-         "help": "Validation mode"},
+        {
+            "name": "args",
+            "label": "Arguments",
+            "kind": "text",
+            "pattern": "^[a-z]+$",
+            "help": "Validation mode",
+        },
         {"name": "send", "label": "Send", "kind": "boolean", "confirm": True},
     ]
     workflows = InstalledWorkflows()
     workflows.register(WorkflowManifest.model_validate(data))
     return Gateway(
-        RequestRouter(CommandRouter(skills), model=model), bridge,
+        RequestRouter(CommandRouter(skills), model=model),
+        bridge,
         WorkflowEngine(workflows, bridge),
     )
 
@@ -92,18 +123,26 @@ class _ToolModel(FakeModel):
     def generate(self, item: ModelRequest) -> ModelResponse:
         self.calls.append(item)
         if len(self.calls) == 1:
-            return ModelResponse(trace=item.trace, model_alias=item.model_alias, tool_calls=(
-                ModelToolCall(call_id="call-1", name="release__package", arguments=self.arguments),
-            ))
+            return ModelResponse(
+                trace=item.trace,
+                model_alias=item.model_alias,
+                tool_calls=(
+                    ModelToolCall(
+                        call_id="call-1", name="release__package", arguments=self.arguments
+                    ),
+                ),
+            )
         return ModelResponse(trace=item.trace, model_alias=item.model_alias, text="done")
 
 
 def _converse(arguments: dict[str, Any]) -> tuple[Any, Handler, _ToolModel]:
     handler, model = Handler(), _ToolModel(arguments)
-    result = asyncio.run(_declared_gateway(handler, model).converse(
-        request("package the release"),
-        (ModelMessage(role="user", text="package the release"),),
-    ))
+    result = asyncio.run(
+        _declared_gateway(handler, model).converse(
+            request("package the release"),
+            (ModelMessage(role="user", text="package the release"),),
+        )
+    )
     return result, handler, model
 
 

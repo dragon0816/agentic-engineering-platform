@@ -35,8 +35,17 @@ PUSH_STATE = ".push"
 PUSHES = "pushes"
 MAX_ATTEMPTS = 3
 
-PushStatus = Literal["merging", "benchmarking", "writing", "pushed", "blocked", "conflicts",
-                     "moved", "refused", "failed"]
+PushStatus = Literal[
+    "merging",
+    "benchmarking",
+    "writing",
+    "pushed",
+    "blocked",
+    "conflicts",
+    "moved",
+    "refused",
+    "failed",
+]
 
 
 class PushReport(Contract):
@@ -76,15 +85,30 @@ def gate(report: BenchmarkReport) -> str | None:
     return None
 
 
-def run_push(pipeline: KnowledgePipeline, ask: Ask, *, sandbox_id: str, actor: str,
-             sets: tuple[str, ...], resolutions: dict[str, Resolution] | None = None,
-             skill: AssetIdentity | None = None, push_id: str | None = None,
-             questions_fallback: Path | None = None) -> PushReport:
+def run_push(
+    pipeline: KnowledgePipeline,
+    ask: Ask,
+    *,
+    sandbox_id: str,
+    actor: str,
+    sets: tuple[str, ...],
+    resolutions: dict[str, Resolution] | None = None,
+    skill: AssetIdentity | None = None,
+    push_id: str | None = None,
+    questions_fallback: Path | None = None,
+) -> PushReport:
     info, sandbox = pipeline.sandboxes.open(sandbox_id)
     project = Vault(pipeline.bases[info.base_name])
     pid = push_id or f"push-{datetime.now(UTC).strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:4]}"
-    report = PushReport(push_id=pid, sandbox_id=sandbox_id, base=info.base_name, actor=actor,
-                        started_at=_now(), sets=sets, resolutions=dict(resolutions or {}))
+    report = PushReport(
+        push_id=pid,
+        sandbox_id=sandbox_id,
+        base=info.base_name,
+        actor=actor,
+        started_at=_now(),
+        sets=sets,
+        resolutions=dict(resolutions or {}),
+    )
     folder = sandbox.root / PUSH_STATE
     folder.mkdir(exist_ok=True)
 
@@ -106,27 +130,46 @@ def run_push(pipeline: KnowledgePipeline, ask: Ask, *, sandbox_id: str, actor: s
                 if error.code != "unresolved_conflicts":
                     raise
                 preview = pipeline.merge(sandbox_id, "dry_run", dict(resolutions or {}))
-                return save(report, status="conflicts", finished_at=_now(),
-                            conflicts=tuple(c.key for c in preview.conflicts),
-                            reason="resolve the conflicts on the Knowledge page")
-            report = save(report, status="benchmarking", candidate_root=merged.candidate_root,
-                          written=merged.written,
-                          proposals=tuple(c.path for c in merged.changes if c.proposal),
-                          lost_sourced_lines=merged.lost_sourced_lines,
-                          lint_worse=merged.lint_worse)
+                return save(
+                    report,
+                    status="conflicts",
+                    finished_at=_now(),
+                    conflicts=tuple(c.key for c in preview.conflicts),
+                    reason="resolve the conflicts on the Knowledge page",
+                )
+            report = save(
+                report,
+                status="benchmarking",
+                candidate_root=merged.candidate_root,
+                written=merged.written,
+                proposals=tuple(c.path for c in merged.changes if c.proposal),
+                lost_sourced_lines=merged.lost_sourced_lines,
+                lint_worse=merged.lint_worse,
+            )
             assert merged.candidate_root is not None
             candidate = Vault(Path(merged.candidate_root))
-            bench = run_benchmark(ask, sandbox_id=sandbox_id, sandbox=candidate,
-                                  project=project, sets=sets, actor=actor, skill=skill,
-                                  questions_fallback=questions_fallback,
-                                  run_id=f"bench-{pid}-{attempt}")
+            bench = run_benchmark(
+                ask,
+                sandbox_id=sandbox_id,
+                sandbox=candidate,
+                project=project,
+                sets=sets,
+                actor=actor,
+                skill=skill,
+                questions_fallback=questions_fallback,
+                run_id=f"bench-{pid}-{attempt}",
+            )
             report = save(report, benchmark=bench.summary())
             blocked = gate(bench)
             if blocked:
                 return save(report, status="blocked", reason=blocked, finished_at=_now())
             if merged.lost_sourced_lines:
-                return save(report, status="blocked", finished_at=_now(),
-                            reason=f"{merged.lost_sourced_lines} sourced lines would be lost")
+                return save(
+                    report,
+                    status="blocked",
+                    finished_at=_now(),
+                    reason=f"{merged.lost_sourced_lines} sourced lines would be lost",
+                )
             if knowledge_digest(project) != before:
                 continue  # someone pushed first: merge and measure again
             report = save(report, status="writing")
@@ -135,8 +178,12 @@ def run_push(pipeline: KnowledgePipeline, ask: Ask, *, sandbox_id: str, actor: s
             _record(project, report, info.label)
             pipeline.sync_after_push(sandbox_id)
             return report
-        return save(report, status="moved", finished_at=_now(),
-                    reason="the project vault kept changing; try again")
+        return save(
+            report,
+            status="moved",
+            finished_at=_now(),
+            reason="the project vault kept changing; try again",
+        )
     except Exception as failure:  # noqa: BLE001 - the page shows why a push stopped
         code = getattr(failure, "code", None) or type(failure).__name__
         return save(report, status="failed", reason=str(code), finished_at=_now())
@@ -145,20 +192,27 @@ def run_push(pipeline: KnowledgePipeline, ask: Ask, *, sandbox_id: str, actor: s
 def _record(project: Vault, report: PushReport, label: str) -> None:
     folder = project.root / PUSHES
     folder.mkdir(exist_ok=True)
-    (folder / f"{report.push_id}.json").write_text(report.model_dump_json(indent=1),
-                                                    encoding="utf-8")
+    (folder / f"{report.push_id}.json").write_text(
+        report.model_dump_json(indent=1), encoding="utf-8"
+    )
     bench = report.benchmark or {}
-    entry = (f"\n## [{report.started_at[:10]}] push | {label}\n"
-             f"- By {report.actor} from sandbox {report.sandbox_id}; {len(report.written)} files; "
-             f"benchmark {bench.get('sandbox_score', 0)}/{bench.get('total', 0)} "
-             f"(project vault {bench.get('project_score', 0)}).\n"
-             f"- Record: {PUSHES}/{report.push_id}.json; backup: "
-             f".ingest-backup/{report.push_id}/\n")
+    entry = (
+        f"\n## [{report.started_at[:10]}] push | {label}\n"
+        f"- By {report.actor} from sandbox {report.sandbox_id}; {len(report.written)} files; "
+        f"benchmark {bench.get('sandbox_score', 0)}/{bench.get('total', 0)} "
+        f"(project vault {bench.get('project_score', 0)}).\n"
+        f"- Record: {PUSHES}/{report.push_id}.json; backup: "
+        f".ingest-backup/{report.push_id}/\n"
+    )
     log = project.root / "log.md"
     existing = log.read_bytes().decode("utf-8") if log.is_file() else "# Log\n"
     newline = "\r\n" if "\r\n" in existing else "\n"
-    log.write_bytes((existing.rstrip() + "\n" + entry).replace("\r\n", "\n")
-                    .replace("\n", newline).encode("utf-8"))
+    log.write_bytes(
+        (existing.rstrip() + "\n" + entry)
+        .replace("\r\n", "\n")
+        .replace("\n", newline)
+        .encode("utf-8")
+    )
 
 
 def latest_push(sandbox: Vault) -> dict[str, object] | None:

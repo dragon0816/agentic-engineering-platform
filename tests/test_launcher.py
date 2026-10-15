@@ -61,7 +61,8 @@ def test_the_record_belongs_to_the_server_that_wrote_it(tmp_path: Path) -> None:
 
 
 def test_a_running_server_is_opened_without_starting_another(
-    tmp_path: Path, server: ThreadingHTTPServer,
+    tmp_path: Path,
+    server: ThreadingHTTPServer,
 ) -> None:
     write_record(tmp_path, address(server), server.server_address[1])
     opened: list[str] = []
@@ -69,13 +70,15 @@ def test_a_running_server_is_opened_without_starting_another(
     def never() -> None:
         raise AssertionError("must not start a second server")
 
-    assert open_agent(tmp_path, tmp_path / "host.json", start=never,
-                      opener=opened.append) == "opened"
+    assert (
+        open_agent(tmp_path, tmp_path / "host.json", start=never, opener=opened.append) == "opened"
+    )
     assert opened == [address(server)]
 
 
 def test_a_stale_record_is_dropped_and_the_server_started_then_opened(
-    tmp_path: Path, server: ThreadingHTTPServer,
+    tmp_path: Path,
+    server: ThreadingHTTPServer,
 ) -> None:
     write_record(tmp_path, address(server, "old-token"), 1)  # from a server that died
     opened: list[str] = []
@@ -85,15 +88,23 @@ def test_a_stale_record_is_dropped_and_the_server_started_then_opened(
         started.append(True)
         write_record(tmp_path, address(server), server.server_address[1])
 
-    assert open_agent(tmp_path, tmp_path / "host.json", start=start, opener=opened.append,
-                      poll=0.01) == "started"
+    assert (
+        open_agent(tmp_path, tmp_path / "host.json", start=start, opener=opened.append, poll=0.01)
+        == "started"
+    )
     assert started == [True] and opened == [address(server)]
 
 
 def test_a_server_that_never_answers_is_reported_with_where_to_look(tmp_path: Path) -> None:
     with pytest.raises(LauncherError) as failed:
-        open_agent(tmp_path, tmp_path / "host.json", start=lambda: None, opener=print,
-                   wait_seconds=0.05, poll=0.01)
+        open_agent(
+            tmp_path,
+            tmp_path / "host.json",
+            start=lambda: None,
+            opener=print,
+            wait_seconds=0.05,
+            poll=0.01,
+        )
     assert failed.value.code == "agent_web_not_started" and "logs" in str(failed.value)
 
 

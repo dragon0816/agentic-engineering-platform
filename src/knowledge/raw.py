@@ -351,7 +351,11 @@ class Describer(Protocol):
     written; `knowledge.describe.ImageDescriber` does so through a model."""
 
     def describe_sections(
-        self, sections: tuple[RawSection, ...], assets: Mapping[str, bytes], *, trace_id: str,
+        self,
+        sections: tuple[RawSection, ...],
+        assets: Mapping[str, bytes],
+        *,
+        trace_id: str,
         on_image: Callable[[int, int], None] | None = None,
     ) -> tuple[tuple[RawSection, ...], tuple[ImageDescription, ...]]: ...
 
@@ -631,7 +635,9 @@ class DropIntake:
             # no tokens and counts instead.
             sections = self._reuse_descriptions(sections, previous)
             sections, descriptions = self.describer.describe_sections(
-                sections, staged.items, trace_id=f"intake-{source.sha256[:16]}",
+                sections,
+                staged.items,
+                trace_id=f"intake-{source.sha256[:16]}",
                 **({"on_image": on_image} if on_image is not None else {}),
             )
             if any(item.status == "model_failed" for item in descriptions):

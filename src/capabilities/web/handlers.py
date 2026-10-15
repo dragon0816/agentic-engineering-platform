@@ -26,40 +26,46 @@ from common.base import Contract, Text
 from common.execution import RequestContext
 from integrations.web_script import ScriptMode, ScriptPage, ScriptRunner, WebScript, WebScriptError
 
-READ_SPEC = CapabilitySpec.model_validate({
-    "identity": {"namespace": "web", "name": "read", "version": "1.0.0"},
-    "name": "web.read",
-    "description": "Replay a recorded web procedure that only reads; return what it read",
-    "input_contract": "web.script.v1",
-    "output_contract": "web.script-result.v1",
-    "side_effect": "read",
-    "policy": {"required_permissions": ["web.read"], "policy_refs": ["web-origin-policy"]},
-})
+READ_SPEC = CapabilitySpec.model_validate(
+    {
+        "identity": {"namespace": "web", "name": "read", "version": "1.0.0"},
+        "name": "web.read",
+        "description": "Replay a recorded web procedure that only reads; return what it read",
+        "input_contract": "web.script.v1",
+        "output_contract": "web.script-result.v1",
+        "side_effect": "read",
+        "policy": {"required_permissions": ["web.read"], "policy_refs": ["web-origin-policy"]},
+    }
+)
 
-ACT_SPEC = CapabilitySpec.model_validate({
-    "identity": {"namespace": "web", "name": "act", "version": "1.0.0"},
-    "name": "web.act",
-    "description": "Replay a recorded web procedure that changes the site, once per item",
-    "input_contract": "web.script.v1",
-    "output_contract": "web.script-result.v1",
-    "side_effect": "external_side_effect",
-    "policy": {
-        "risk": "medium",
-        "approval_required": True,
-        "required_permissions": ["web.act"],
-        "policy_refs": ["web-origin-policy"],
-    },
-})
+ACT_SPEC = CapabilitySpec.model_validate(
+    {
+        "identity": {"namespace": "web", "name": "act", "version": "1.0.0"},
+        "name": "web.act",
+        "description": "Replay a recorded web procedure that changes the site, once per item",
+        "input_contract": "web.script.v1",
+        "output_contract": "web.script-result.v1",
+        "side_effect": "external_side_effect",
+        "policy": {
+            "risk": "medium",
+            "approval_required": True,
+            "required_permissions": ["web.act"],
+            "policy_refs": ["web-origin-policy"],
+        },
+    }
+)
 
-SELECT_SPEC = CapabilitySpec.model_validate({
-    "identity": {"namespace": "data", "name": "select", "version": "1.0.0"},
-    "name": "data.select",
-    "description": "Keep the table rows whose cells match and return one column",
-    "input_contract": "data.select.input.v1",
-    "output_contract": "data.select.output.v1",
-    "side_effect": "read",
-    "policy": {"required_permissions": ["data.select"], "policy_refs": ["data-policy"]},
-})
+SELECT_SPEC = CapabilitySpec.model_validate(
+    {
+        "identity": {"namespace": "data", "name": "select", "version": "1.0.0"},
+        "name": "data.select",
+        "description": "Keep the table rows whose cells match and return one column",
+        "input_contract": "data.select.input.v1",
+        "output_contract": "data.select.output.v1",
+        "side_effect": "read",
+        "policy": {"required_permissions": ["data.select"], "policy_refs": ["data-policy"]},
+    }
+)
 
 
 class WebHostBinding(Contract):
@@ -89,7 +95,8 @@ class SelectHandler:
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = SelectRequest.model_validate(inputs)
         chosen = [
-            row for row in request.rows
+            row
+            for row in request.rows
             if all(str(row.get(column, "")) == wanted for column, wanted in request.where.items())
         ]
         if chosen and request.take not in chosen[0]:
@@ -116,8 +123,12 @@ class OpenPage(AbstractContextManager[ScriptPage]):
 
 class WebScriptHandler:
     def __init__(
-        self, binding: WebHostBinding, profile: Path, mode: ScriptMode,
-        *, page_factory: Callable[[], AbstractContextManager[ScriptPage]] | None = None,
+        self,
+        binding: WebHostBinding,
+        profile: Path,
+        mode: ScriptMode,
+        *,
+        page_factory: Callable[[], AbstractContextManager[ScriptPage]] | None = None,
     ) -> None:
         self.binding = binding
         self.mode: ScriptMode = mode
@@ -135,7 +146,8 @@ class WebScriptHandler:
         try:
             with self._open() as page:
                 return ScriptRunner(
-                    page, self.binding.allowed_origins,
+                    page,
+                    self.binding.allowed_origins,
                     timeout_s=float(self.binding.timeout_seconds),
                 ).run(script, self.mode)
         except WebScriptError as error:
@@ -143,4 +155,3 @@ class WebScriptHandler:
         except Exception as error:  # noqa: BLE001 - the browser's own typed codes
             code = getattr(error, "code", None)
             raise CapabilityRefused(str(code) if code else "web_browser_failed") from None
-

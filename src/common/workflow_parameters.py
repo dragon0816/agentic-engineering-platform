@@ -54,7 +54,10 @@ def static_fields(manifest: WorkflowManifest) -> tuple[WorkflowParameter, ...]:
 
 
 def validate_static_settings(
-    manifest: WorkflowManifest, values: Mapping[str, JsonValue], *, complete: bool,
+    manifest: WorkflowManifest,
+    values: Mapping[str, JsonValue],
+    *,
+    complete: bool,
 ) -> dict[str, JsonValue]:
     """Check one install's settings for a Workflow and apply declared defaults.
 

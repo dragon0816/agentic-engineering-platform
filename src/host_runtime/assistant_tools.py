@@ -33,29 +33,41 @@ INSTRUCTIONS = (
     "aep_knowledge_read and cite the page paths you used; aep_knowledge_ask returns "
     "AEP's validated, cited answer. aep_workflows lists installed Workflows; "
     "aep_run_workflow runs one that only reads. Never claim to have run a Workflow "
-    "that the tool said must be run by the person.")
+    "that the tool said must be run by the person."
+)
 
 _Q = {"type": "string"}
 TOOLS: dict[str, tuple[str, dict[str, Any]]] = {
     "aep_knowledge_search": (
         "Search the company knowledge base (curated wiki and raw sources). Returns page "
         "paths, titles and the best matching section. Try English and Chinese wording.",
-        {"type": "object", "properties": {"query": _Q, "limit": {"type": "integer"}},
-         "required": ["query"]}),
+        {
+            "type": "object",
+            "properties": {"query": _Q, "limit": {"type": "integer"}},
+            "required": ["query"],
+        },
+    ),
     "aep_knowledge_read": (
         "Read one knowledge page in full by its path (wiki/... or raw/...).",
-        {"type": "object", "properties": {"path": _Q}, "required": ["path"]}),
+        {"type": "object", "properties": {"path": _Q}, "required": ["path"]},
+    ),
     "aep_knowledge_ask": (
         "Ask AEP's Knowledge Harness: a validated answer with its cited sources.",
-        {"type": "object", "properties": {"question": _Q}, "required": ["question"]}),
+        {"type": "object", "properties": {"question": _Q}, "required": ["question"]},
+    ),
     "aep_workflows": (
         "List the installed Workflows: id, description, parameters, and whether it only reads.",
-        {"type": "object", "properties": {}}),
+        {"type": "object", "properties": {}},
+    ),
     "aep_run_workflow": (
         "Run an installed Workflow by id (namespace/name@version) with its parameters. "
         "Only Workflows that only read run here; others must be run by the person.",
-        {"type": "object", "properties": {"workflow": _Q, "arguments": {"type": "object"}},
-         "required": ["workflow"]}),
+        {
+            "type": "object",
+            "properties": {"workflow": _Q, "arguments": {"type": "object"}},
+            "required": ["workflow"],
+        },
+    ),
 }
 
 
@@ -89,7 +101,8 @@ class AssistantTools:
         from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
 
         installed = self.web.runtime.agent.gateway.bridge.installed.get(
-            KNOWLEDGE_QUERY_SPEC.identity)
+            KNOWLEDGE_QUERY_SPEC.identity
+        )
         catalog = getattr(getattr(installed, "handler", None), "catalog", None)
         if catalog is None or not catalog.manifests():
             raise LookupError("knowledge_unavailable")
@@ -100,25 +113,40 @@ class AssistantTools:
         snapshot = RetrievalSnapshot.cached(vault)
         limit = max(1, min(int(limit or 8), 20))
         titles = snapshot.wiki_titles()
-        results = [{"kind": "wiki", "path": p.citation.wiki_page,
-                    "title": titles.get(p.citation.wiki_page or "", ""), "text": p.text[:1500]}
-                   for p in snapshot.search_wiki_pages(query, exclude=set(), limit=limit)]
+        results = [
+            {
+                "kind": "wiki",
+                "path": p.citation.wiki_page,
+                "title": titles.get(p.citation.wiki_page or "", ""),
+                "text": p.text[:1500],
+            }
+            for p in snapshot.search_wiki_pages(query, exclude=set(), limit=limit)
+        ]
         raw = [p for p in snapshot.batch((query,), k=limit)[0] if p.citation.kind == "raw"]
-        results += [{"kind": "raw", "path": p.citation.raw_ref, "title": "",
-                     "text": p.text[:1500]} for p in raw[: max(2, limit // 2)]]
+        results += [
+            {"kind": "raw", "path": p.citation.raw_ref, "title": "", "text": p.text[:1500]}
+            for p in raw[: max(2, limit // 2)]
+        ]
         return {"ok": True, "results": results}
 
     def knowledge_read(self, path: str) -> dict[str, Any]:
         rel = normalize(path)
-        if ".." in rel.split("/") or not rel.endswith(".md") or not rel.startswith(
-                ("wiki/", "raw/")):
+        if (
+            ".." in rel.split("/")
+            or not rel.endswith(".md")
+            or not rel.startswith(("wiki/", "raw/"))
+        ):
             return {"ok": False, "code": "not_a_knowledge_page"}
         vault = self._vault()
         if not vault.exists(rel):
             return {"ok": False, "code": "unknown_page"}
         text = vault.read(rel)
-        return {"ok": True, "path": rel, "text": text[:MAX_PAGE_CHARS],
-                "truncated": len(text) > MAX_PAGE_CHARS}
+        return {
+            "ok": True,
+            "path": rel,
+            "text": text[:MAX_PAGE_CHARS],
+            "truncated": len(text) > MAX_PAGE_CHARS,
+        }
 
     def knowledge_ask(self, question: str) -> dict[str, Any]:
         from host_runtime.contracts import KnowledgeAskRequest
@@ -128,12 +156,16 @@ class AssistantTools:
         if not knowledge:
             return {"ok": False, "code": "knowledge_unavailable"}
         skill = harness_skill(self.web.runtime.agent.gateway.router.commands.skills)
-        reply = self.web.knowledge_harness.ask(KnowledgeAskRequest(
-            asset=knowledge[0].asset, question=question, skill=skill))
+        reply = self.web.knowledge_harness.ask(
+            KnowledgeAskRequest(asset=knowledge[0].asset, question=question, skill=skill)
+        )
         record = reply.get("record") or {}
-        return {"ok": bool(reply.get("ok")), "validated": bool(reply.get("ok")),
-                "answer": str(reply.get("answer") or ""),
-                "sources": knowledge_source_lines(record) if record else []}
+        return {
+            "ok": bool(reply.get("ok")),
+            "validated": bool(reply.get("ok")),
+            "answer": str(reply.get("answer") or ""),
+            "sources": knowledge_source_lines(record) if record else [],
+        }
 
     # -- workflows ---------------------------------------------------------
 
@@ -147,13 +179,22 @@ class AssistantTools:
         items = []
         for manifest in self._installed():
             identity = manifest.metadata.identity
-            items.append({
-                "workflow": f"{identity.namespace}/{identity.name}@{identity.version}",
-                "description": getattr(manifest, "description", "") or "",
-                "parameters": json.loads(json.dumps(
-                    [p.model_dump(mode="json") for p in getattr(manifest, "parameters", ())],
-                    default=str)),
-                "read_only": bool(chat.read_only(manifest)) if chat is not None else False})
+            items.append(
+                {
+                    "workflow": f"{identity.namespace}/{identity.name}@{identity.version}",
+                    "description": getattr(manifest, "description", "") or "",
+                    "parameters": json.loads(
+                        json.dumps(
+                            [
+                                p.model_dump(mode="json")
+                                for p in getattr(manifest, "parameters", ())
+                            ],
+                            default=str,
+                        )
+                    ),
+                    "read_only": bool(chat.read_only(manifest)) if chat is not None else False,
+                }
+            )
         return {"ok": True, "workflows": items}
 
     def run_workflow(self, workflow: str, arguments: dict[str, Any] | None) -> dict[str, Any]:
@@ -168,12 +209,19 @@ class AssistantTools:
             return {"ok": False, "code": "workflow_not_installed"}
         chat = self.web.runtime.chat_authoring
         if chat is None or not chat.read_only(manifest):
-            return {"ok": False, "code": "needs_person",
-                    "message": "This Workflow changes something; the person must run it from "
-                               "Agent Web. Do not say it ran."}
-        result = self.web.launch_workflow(WorkflowLaunchRequest(
-            workflow=identity, arguments=arguments or {},
-            idempotency_key=f"assistant-{uuid.uuid4().hex}"))
+            return {
+                "ok": False,
+                "code": "needs_person",
+                "message": "This Workflow changes something; the person must run it from "
+                "Agent Web. Do not say it ran.",
+            }
+        result = self.web.launch_workflow(
+            WorkflowLaunchRequest(
+                workflow=identity,
+                arguments=arguments or {},
+                idempotency_key=f"assistant-{uuid.uuid4().hex}",
+            )
+        )
         return {"ok": bool(result.get("ok")), "answer": result.get("answer")}
 
     # -- dispatch ----------------------------------------------------------
@@ -181,8 +229,9 @@ class AssistantTools:
     def call(self, name: str, args: dict[str, Any]) -> dict[str, Any]:
         try:
             if name == "aep_knowledge_search":
-                return self.knowledge_search(str(args.get("query") or ""),
-                                             int(args.get("limit") or 8))
+                return self.knowledge_search(
+                    str(args.get("query") or ""), int(args.get("limit") or 8)
+                )
             if name == "aep_knowledge_read":
                 return self.knowledge_read(str(args.get("path") or ""))
             if name == "aep_knowledge_ask":
@@ -191,8 +240,10 @@ class AssistantTools:
                 return self.workflows()
             if name == "aep_run_workflow":
                 arguments = args.get("arguments")
-                return self.run_workflow(str(args.get("workflow") or ""),
-                                         arguments if isinstance(arguments, dict) else {})
+                return self.run_workflow(
+                    str(args.get("workflow") or ""),
+                    arguments if isinstance(arguments, dict) else {},
+                )
         except LookupError as error:
             return {"ok": False, "code": str(error)}
         except Exception as error:  # noqa: BLE001 - a tool error, never a crash
@@ -208,29 +259,50 @@ def handle(tools: AssistantTools, message: dict[str, Any]) -> dict[str, Any] | N
         return None
     if method == "initialize":
         asked = str(params.get("protocolVersion") or "")
-        return _result(ident, {
-            "protocolVersion": asked if asked in PROTOCOL_VERSIONS else PROTOCOL_VERSIONS[0],
-            "capabilities": {"tools": {"listChanged": False}},
-            "serverInfo": {"name": "aep", "version": "assistant-1"},
-            "instructions": INSTRUCTIONS})
+        return _result(
+            ident,
+            {
+                "protocolVersion": asked if asked in PROTOCOL_VERSIONS else PROTOCOL_VERSIONS[0],
+                "capabilities": {"tools": {"listChanged": False}},
+                "serverInfo": {"name": "aep", "version": "assistant-1"},
+                "instructions": INSTRUCTIONS,
+            },
+        )
     if method == "ping":
         return _result(ident, {})
     if method == "tools/list":
-        return _result(ident, {"tools": [
-            {"name": name, "description": text, "inputSchema": schema}
-            for name, (text, schema) in TOOLS.items()]})
+        return _result(
+            ident,
+            {
+                "tools": [
+                    {"name": name, "description": text, "inputSchema": schema}
+                    for name, (text, schema) in TOOLS.items()
+                ]
+            },
+        )
     if method == "tools/call":
         name = str(params.get("name") or "")
         if name not in TOOLS:
-            return {"jsonrpc": "2.0", "id": ident,
-                    "error": {"code": -32602, "message": f"unknown tool {name}"}}
+            return {
+                "jsonrpc": "2.0",
+                "id": ident,
+                "error": {"code": -32602, "message": f"unknown tool {name}"},
+            }
         arguments = params.get("arguments")
         outcome = tools.call(name, arguments if isinstance(arguments, dict) else {})
-        return _result(ident, {
-            "content": [{"type": "text", "text": json.dumps(outcome, ensure_ascii=False)}],
-            "structuredContent": outcome, "isError": outcome.get("ok") is False})
-    return {"jsonrpc": "2.0", "id": ident,
-            "error": {"code": -32601, "message": f"method not found: {method}"}}
+        return _result(
+            ident,
+            {
+                "content": [{"type": "text", "text": json.dumps(outcome, ensure_ascii=False)}],
+                "structuredContent": outcome,
+                "isError": outcome.get("ok") is False,
+            },
+        )
+    return {
+        "jsonrpc": "2.0",
+        "id": ident,
+        "error": {"code": -32601, "message": f"method not found: {method}"},
+    }
 
 
 def _result(ident: Any, result: dict[str, Any]) -> dict[str, Any]:

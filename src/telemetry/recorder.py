@@ -52,9 +52,15 @@ class RunContext:
     started: float = field(default_factory=time.perf_counter)
     status: str = "succeeded"
     attributes: dict[str, Any] = field(default_factory=dict)
-    totals: dict[str, int] = field(default_factory=lambda: {
-        "llm_calls": 0, "tool_calls": 0, "input_tokens": 0, "output_tokens": 0,
-        "token_reports": 0})
+    totals: dict[str, int] = field(
+        default_factory=lambda: {
+            "llm_calls": 0,
+            "tool_calls": 0,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "token_reports": 0,
+        }
+    )
 
     def next_sequence(self) -> int:
         with self._lock:
@@ -75,8 +81,7 @@ class Recorder:
         self.dropped = 0
         self.rejected = 0
         self.written = 0
-        self._thread = threading.Thread(target=self._write, name="telemetry-writer",
-                                        daemon=True)
+        self._thread = threading.Thread(target=self._write, name="telemetry-writer", daemon=True)
         self._thread.start()
 
     def put(self, raw: dict[str, Any]) -> None:
@@ -138,10 +143,17 @@ class Recorder:
         self._thread.join(timeout)
 
     def health(self) -> dict[str, Any]:
-        return {"schema_version": SCHEMA_VERSION, "queue_depth": self.queue.qsize(),
-                "queue_limit": QUEUE_LIMIT, "dropped": self.dropped, "rejected": self.rejected,
-                "written": self.written, "strategy_id": self.strategy_id,
-                "strategy": self.strategy, "store": str(self.store.path)}
+        return {
+            "schema_version": SCHEMA_VERSION,
+            "queue_depth": self.queue.qsize(),
+            "queue_limit": QUEUE_LIMIT,
+            "dropped": self.dropped,
+            "rejected": self.rejected,
+            "written": self.written,
+            "strategy_id": self.strategy_id,
+            "strategy": self.strategy,
+            "store": str(self.store.path),
+        }
 
 
 _recorder: Recorder | None = None
@@ -181,49 +193,80 @@ def _new_id(prefix: str) -> str:
     return f"{prefix}-{uuid.uuid4().hex[:16]}"
 
 
-def emit(event_type: str, *, status: str = "succeeded", state: str | None = None,
-         attributes: dict[str, Any] | None = None, span_id: str | None = None,
-         parent_span_id: str | None = None, run: RunContext | None = None) -> None:
+def emit(
+    event_type: str,
+    *,
+    status: str = "succeeded",
+    state: str | None = None,
+    attributes: dict[str, Any] | None = None,
+    span_id: str | None = None,
+    parent_span_id: str | None = None,
+    run: RunContext | None = None,
+) -> None:
     """Record one event in the current run. Never raises; no run, no event."""
     target = run or _run.get()
     if _recorder is None or target is None:
         return
     try:
-        _recorder.put({
-            "schema_version": SCHEMA_VERSION, "event_id": uuid.uuid4().hex,
-            "run_id": target.run_id, "trace_id": target.trace_id,
-            # A point event is its own operation, under the current span.
-            "span_id": span_id or _new_id("span"),
-            "parent_span_id": parent_span_id if span_id else (_span.get() or target.span_id),
-            "sequence": target.next_sequence(),
-            "timestamp": datetime.now(UTC).isoformat(),
-            "event_type": event_type, "state": state if state is not None else _state.get(),
-            "status": status, "attributes": attributes or {}})
+        _recorder.put(
+            {
+                "schema_version": SCHEMA_VERSION,
+                "event_id": uuid.uuid4().hex,
+                "run_id": target.run_id,
+                "trace_id": target.trace_id,
+                # A point event is its own operation, under the current span.
+                "span_id": span_id or _new_id("span"),
+                "parent_span_id": parent_span_id if span_id else (_span.get() or target.span_id),
+                "sequence": target.next_sequence(),
+                "timestamp": datetime.now(UTC).isoformat(),
+                "event_type": event_type,
+                "state": state if state is not None else _state.get(),
+                "status": status,
+                "attributes": attributes or {},
+            }
+        )
     except Exception:  # noqa: BLE001 - telemetry never fails the harness
         _log.debug("telemetry emit failed", exc_info=True)
 
 
 @contextmanager
-def run(kind: str, *, trace_id: str | None = None, run_id: str | None = None,
-        attributes: dict[str, Any] | None = None) -> Iterator[RunContext | None]:
+def run(
+    kind: str,
+    *,
+    trace_id: str | None = None,
+    run_id: str | None = None,
+    attributes: dict[str, Any] | None = None,
+) -> Iterator[RunContext | None]:
     """A Harness run: `run.started`, then `run.completed` with its outcome."""
     if _recorder is None:
         yield None
         return
     parent = _run.get()
     context = RunContext(
-        run_id=run_id or _new_id("run"), kind=kind,
+        run_id=run_id or _new_id("run"),
+        kind=kind,
         trace_id=trace_id or (parent.trace_id if parent else _new_id("trace")),
-        span_id=_new_id("span"), parent_run_id=None if parent is None else parent.run_id,
+        span_id=_new_id("span"),
+        parent_run_id=None if parent is None else parent.run_id,
         parent_span_id=None if parent is None else (_span.get() or parent.span_id),
-        attributes=dict(attributes or {}))
+        attributes=dict(attributes or {}),
+    )
     run_token = _run.set(context)
     span_token = _span.set(context.span_id)
     state_token = _state.set(None)
-    emit("run.started", status="started", span_id=context.span_id,
-         parent_span_id=context.parent_span_id, attributes={
-        "run_kind": kind, "parent_run_id": context.parent_run_id,
-        "strategy_id": _recorder.strategy_id, **_recorder.strategy, **context.attributes})
+    emit(
+        "run.started",
+        status="started",
+        span_id=context.span_id,
+        parent_span_id=context.parent_span_id,
+        attributes={
+            "run_kind": kind,
+            "parent_run_id": context.parent_run_id,
+            "strategy_id": _recorder.strategy_id,
+            **_recorder.strategy,
+            **context.attributes,
+        },
+    )
     try:
         yield context
     except BaseException as error:
@@ -232,23 +275,32 @@ def run(kind: str, *, trace_id: str | None = None, run_id: str | None = None,
         raise
     finally:
         totals = context.totals
-        emit("run.completed", status=context.status, span_id=context.span_id,
-             parent_span_id=context.parent_span_id, attributes={
-            "run_kind": kind, "duration_ms": round((time.perf_counter() - context.started)
-                                                   * 1000, 1),
-            "llm_calls": totals["llm_calls"], "tool_calls": totals["tool_calls"],
-            # Missing usage is not zero: sums only cover calls that reported it.
-            "input_tokens": totals["input_tokens"] if totals["token_reports"] else None,
-            "output_tokens": totals["output_tokens"] if totals["token_reports"] else None,
-            "token_reports": totals["token_reports"], **context.attributes})
+        emit(
+            "run.completed",
+            status=context.status,
+            span_id=context.span_id,
+            parent_span_id=context.parent_span_id,
+            attributes={
+                "run_kind": kind,
+                "duration_ms": round((time.perf_counter() - context.started) * 1000, 1),
+                "llm_calls": totals["llm_calls"],
+                "tool_calls": totals["tool_calls"],
+                # Missing usage is not zero: sums only cover calls that reported it.
+                "input_tokens": totals["input_tokens"] if totals["token_reports"] else None,
+                "output_tokens": totals["output_tokens"] if totals["token_reports"] else None,
+                "token_reports": totals["token_reports"],
+                **context.attributes,
+            },
+        )
         _state.reset(state_token)
         _span.reset(span_token)
         _run.reset(run_token)
 
 
 @contextmanager
-def span(state: str, *, attributes: dict[str, Any] | None = None,
-         completed: str | None = None) -> Iterator[dict[str, Any]]:
+def span(
+    state: str, *, attributes: dict[str, Any] | None = None, completed: str | None = None
+) -> Iterator[dict[str, Any]]:
     """`state.entered` … `state.exited` (or `completed`, e.g. `tool.completed`),
     with duration and status. The yielded dict collects end attributes; set
     `status` in it to record a failure without raising."""
@@ -260,8 +312,14 @@ def span(state: str, *, attributes: dict[str, Any] | None = None,
     parent = _span.get() or run_context.span_id
     own = _new_id("span")
     started = time.perf_counter()
-    emit("state.entered", status="started", state=state, span_id=own, parent_span_id=parent,
-         attributes=attributes)
+    emit(
+        "state.entered",
+        status="started",
+        state=state,
+        span_id=own,
+        parent_span_id=parent,
+        attributes=attributes,
+    )
     span_token, state_token = _span.set(own), _state.set(state)
     status = "succeeded"
     try:
@@ -274,10 +332,18 @@ def span(state: str, *, attributes: dict[str, Any] | None = None,
     finally:
         _span.reset(span_token)
         _state.reset(state_token)
-        emit(completed or "state.exited", status=status, state=state, span_id=own,
-             parent_span_id=parent, attributes={
-                 **(attributes or {}), **end,
-                 "duration_ms": round((time.perf_counter() - started) * 1000, 1)})
+        emit(
+            completed or "state.exited",
+            status=status,
+            state=state,
+            span_id=own,
+            parent_span_id=parent,
+            attributes={
+                **(attributes or {}),
+                **end,
+                "duration_ms": round((time.perf_counter() - started) * 1000, 1),
+            },
+        )
 
 
 def note_llm(input_tokens: int | None, output_tokens: int | None) -> None:
@@ -305,4 +371,3 @@ def set_run(**attributes: Any) -> None:
         if status:
             run_context.status = str(status)
         run_context.attributes.update(attributes)
-

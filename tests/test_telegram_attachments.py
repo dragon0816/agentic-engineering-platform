@@ -29,7 +29,8 @@ from host_runtime.attachments import MAX_FILE_BYTES, AttachmentStore
 from models.contracts import ModelRequest, ModelResponse
 
 PNG = base64.b64decode(
-    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==")
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+)
 
 
 class BytesReply:
@@ -48,26 +49,46 @@ class FileTransport(FakeTransport):
     """Also answers `getFile` and serves downloads by GET from `files`,
     keyed by Telegram file id."""
 
-    def __init__(self, batches: list[list[dict[str, Any]]], files: dict[str, bytes],
-                 *, download_status: int = 200) -> None:
+    def __init__(
+        self,
+        batches: list[list[dict[str, Any]]],
+        files: dict[str, bytes],
+        *,
+        download_status: int = 200,
+    ) -> None:
         super().__init__(batches)
         self.files = files
         self.download_status = download_status
         self.downloads: list[str] = []
 
-    def send(self, url: str, body: bytes, headers: Mapping[str, str],
-             timeout_s: float) -> FakeReply:
+    def send(
+        self, url: str, body: bytes, headers: Mapping[str, str], timeout_s: float
+    ) -> FakeReply:
         if url.endswith("/getFile"):
             payload = json.loads(body)
             self.calls.append((url, payload))
             file_id = payload["file_id"]
-            return FakeReply(200, {"ok": True, "result": {
-                "file_id": file_id, "file_path": f"documents/{file_id}.bin",
-                "file_size": len(self.files[file_id])}})
+            return FakeReply(
+                200,
+                {
+                    "ok": True,
+                    "result": {
+                        "file_id": file_id,
+                        "file_path": f"documents/{file_id}.bin",
+                        "file_size": len(self.files[file_id]),
+                    },
+                },
+            )
         return super().send(url, body, headers, timeout_s)
 
-    def request(self, method: str, url: str, body: bytes | None,
-                headers: Mapping[str, str], timeout_s: float) -> BytesReply:
+    def request(
+        self,
+        method: str,
+        url: str,
+        body: bytes | None,
+        headers: Mapping[str, str],
+        timeout_s: float,
+    ) -> BytesReply:
         assert method == "GET" and body is None
         self.downloads.append(url)
         file_id = url.rsplit("/", 1)[-1].removesuffix(".bin")
@@ -85,13 +106,20 @@ class Seeing:
 
     def generate(self, request: ModelRequest) -> ModelResponse:
         self.requests.append(request)
-        return ModelResponse(trace=request.trace, model_alias=request.model_alias,
-                             text="I looked at it.")
+        return ModelResponse(
+            trace=request.trace, model_alias=request.model_alias, text="I looked at it."
+        )
 
 
-def message(update_id: int, sender: int, *, caption: str | None = None,
-            document: dict[str, Any] | None = None, photo: list[dict[str, Any]] | None = None,
-            group: str | None = None) -> dict[str, Any]:
+def message(
+    update_id: int,
+    sender: int,
+    *,
+    caption: str | None = None,
+    document: dict[str, Any] | None = None,
+    photo: list[dict[str, Any]] | None = None,
+    group: str | None = None,
+) -> dict[str, Any]:
     item: dict[str, Any] = {
         "message_id": update_id,
         "chat": {"id": sender, "type": "private"},
@@ -111,16 +139,28 @@ def message(update_id: int, sender: int, *, caption: str | None = None,
 def photo_sizes(file_id: str) -> list[dict[str, Any]]:
     # Telegram lists a photo's sizes small to large; the largest is taken.
     return [
-        {"file_id": f"{file_id}-small", "file_unique_id": "s", "width": 90, "height": 90,
-         "file_size": 10},
-        {"file_id": file_id, "file_unique_id": f"u{file_id}", "width": 800, "height": 800,
-         "file_size": len(PNG)},
+        {
+            "file_id": f"{file_id}-small",
+            "file_unique_id": "s",
+            "width": 90,
+            "height": 90,
+            "file_size": 10,
+        },
+        {
+            "file_id": file_id,
+            "file_unique_id": f"u{file_id}",
+            "width": 800,
+            "height": 800,
+            "file_size": len(PNG),
+        },
     ]
 
 
-def attached(tmp_path: Path, transport: FileTransport,
-             resolver: CountingCredentials | None = None,
-             ) -> tuple[TelegramIngress, Seeing, AttachmentStore]:
+def attached(
+    tmp_path: Path,
+    transport: FileTransport,
+    resolver: CountingCredentials | None = None,
+) -> tuple[TelegramIngress, Seeing, AttachmentStore]:
     item, agent, _ = ingress(tmp_path, transport, resolver=resolver)
     store = AttachmentStore(tmp_path / "workspace")
     item.attachments = store
@@ -131,10 +171,14 @@ def attached(tmp_path: Path, transport: FileTransport,
 
 def everything_said(item: TelegramIngress, transport: FakeTransport, tmp_path: Path) -> str:
     """Every reply, stored history message and file written under the workspace."""
-    stored = [message.model_dump_json() for history in item._histories.values()
-              for message in history]
-    written = [path.read_text("utf-8", "replace")
-               for path in (tmp_path / "workspace").rglob("*") if path.is_file()]
+    stored = [
+        message.model_dump_json() for history in item._histories.values() for message in history
+    ]
+    written = [
+        path.read_text("utf-8", "replace")
+        for path in (tmp_path / "workspace").rglob("*")
+        if path.is_file()
+    ]
     return "\n".join([*transport._messages(), *stored, *written])
 
 
@@ -142,9 +186,19 @@ def test_a_document_reaches_the_model_as_text_and_history_keeps_only_its_path(
     tmp_path: Path,
 ) -> None:
     files = {"doc1": b"name,price\nWidget,42\n"}
-    transport = FileTransport([[message(
-        1, OWNER, caption="summarise this",
-        document={"file_id": "doc1", "file_name": "prices.csv", "file_size": 21})]], files)
+    transport = FileTransport(
+        [
+            [
+                message(
+                    1,
+                    OWNER,
+                    caption="summarise this",
+                    document={"file_id": "doc1", "file_name": "prices.csv", "file_size": 21},
+                )
+            ]
+        ],
+        files,
+    )
     item, model, _ = attached(tmp_path, transport)
     delivery = poll(item).deliveries[0]
     assert delivery.disposition == "answered" and delivery.reply == "I looked at it."
@@ -163,8 +217,7 @@ def test_a_document_reaches_the_model_as_text_and_history_keeps_only_its_path(
 
 
 def test_a_photo_takes_the_largest_size_and_the_model_sees_it(tmp_path: Path) -> None:
-    transport = FileTransport(
-        [[message(1, OWNER, photo=photo_sizes("pic1"))]], {"pic1": PNG})
+    transport = FileTransport([[message(1, OWNER, photo=photo_sizes("pic1"))]], {"pic1": PNG})
     item, model, _ = attached(tmp_path, transport)
     delivery = poll(item).deliveries[0]
     assert delivery.disposition == "answered"
@@ -178,10 +231,15 @@ def test_a_photo_takes_the_largest_size_and_the_model_sees_it(tmp_path: Path) ->
 
 def test_an_album_in_one_batch_is_one_turn(tmp_path: Path) -> None:
     files = {"a": PNG, "b": PNG}
-    transport = FileTransport([[
-        message(1, OWNER, photo=photo_sizes("a"), group="album-1"),
-        message(2, OWNER, photo=photo_sizes("b"), group="album-1", caption="compare these"),
-    ]], files)
+    transport = FileTransport(
+        [
+            [
+                message(1, OWNER, photo=photo_sizes("a"), group="album-1"),
+                message(2, OWNER, photo=photo_sizes("b"), group="album-1", caption="compare these"),
+            ]
+        ],
+        files,
+    )
     item, model, _ = attached(tmp_path, transport)
     result = poll(item)
     assert len(result.deliveries) == 1 and result.next_offset == 3
@@ -194,14 +252,38 @@ def test_an_album_in_one_batch_is_one_turn(tmp_path: Path) -> None:
 def test_unsupported_and_oversized_files_are_refused_before_any_download(
     tmp_path: Path,
 ) -> None:
-    transport = FileTransport([[
-        message(1, OWNER, document={"file_id": "x", "file_name": "tool.exe", "file_size": 2}),
-        message(2, OWNER, document={"file_id": "y", "file_name": "big.pdf",
-                                    "file_size": 21 * 1024 * 1024}),
-        message(3, OWNER, document={"file_id": "z", "file_name": "huge.zip",
-                                    "file_size": MAX_FILE_BYTES + 1}),
-        *[message(10 + n, OWNER, photo=photo_sizes(f"p{n}"), group="many") for n in range(11)],
-    ]], {})
+    transport = FileTransport(
+        [
+            [
+                message(
+                    1, OWNER, document={"file_id": "x", "file_name": "tool.exe", "file_size": 2}
+                ),
+                message(
+                    2,
+                    OWNER,
+                    document={
+                        "file_id": "y",
+                        "file_name": "big.pdf",
+                        "file_size": 21 * 1024 * 1024,
+                    },
+                ),
+                message(
+                    3,
+                    OWNER,
+                    document={
+                        "file_id": "z",
+                        "file_name": "huge.zip",
+                        "file_size": MAX_FILE_BYTES + 1,
+                    },
+                ),
+                *[
+                    message(10 + n, OWNER, photo=photo_sizes(f"p{n}"), group="many")
+                    for n in range(11)
+                ],
+            ]
+        ],
+        {},
+    )
     item, model, _ = attached(tmp_path, transport)
     result = poll(item)
     replies = [delivery.reply or "" for delivery in result.deliveries]
@@ -216,9 +298,16 @@ def test_unsupported_and_oversized_files_are_refused_before_any_download(
 
 def test_a_stranger_s_file_is_never_downloaded(tmp_path: Path) -> None:
     resolver = CountingCredentials({"telegram_bot": TOKEN})
-    transport = FileTransport([[message(
-        1, STRANGER, document={"file_id": "doc1", "file_name": "a.txt", "file_size": 1})]],
-        {"doc1": b"x"})
+    transport = FileTransport(
+        [
+            [
+                message(
+                    1, STRANGER, document={"file_id": "doc1", "file_name": "a.txt", "file_size": 1}
+                )
+            ]
+        ],
+        {"doc1": b"x"},
+    )
     item, model, _ = attached(tmp_path, transport, resolver)
     delivery = poll(item).deliveries[0]
     assert delivery.disposition == "unmapped_sender" and delivery.reply is None
@@ -228,10 +317,19 @@ def test_a_stranger_s_file_is_never_downloaded(tmp_path: Path) -> None:
 
 
 def test_the_token_never_reaches_a_reply_the_history_or_a_saved_file(tmp_path: Path) -> None:
-    transport = FileTransport([
-        [message(1, OWNER, caption="read it",
-                 document={"file_id": "doc1", "file_name": "notes.md", "file_size": 5})],
-    ], {"doc1": b"hello"})
+    transport = FileTransport(
+        [
+            [
+                message(
+                    1,
+                    OWNER,
+                    caption="read it",
+                    document={"file_id": "doc1", "file_name": "notes.md", "file_size": 5},
+                )
+            ],
+        ],
+        {"doc1": b"hello"},
+    )
     item, model, _ = attached(tmp_path, transport)
     assert poll(item).deliveries[0].disposition == "answered"
     # The download itself used the token, through the bot's transport only.
@@ -242,9 +340,11 @@ def test_the_token_never_reaches_a_reply_the_history_or_a_saved_file(tmp_path: P
 
 
 def test_a_failed_download_is_a_readable_reply_without_the_token(tmp_path: Path) -> None:
-    transport = FileTransport([[message(
-        1, OWNER, document={"file_id": "doc1", "file_name": "a.txt", "file_size": 1})]],
-        {"doc1": b"x"}, download_status=404)
+    transport = FileTransport(
+        [[message(1, OWNER, document={"file_id": "doc1", "file_name": "a.txt", "file_size": 1})]],
+        {"doc1": b"x"},
+        download_status=404,
+    )
     item, model, _ = attached(tmp_path, transport)
     delivery = poll(item).deliveries[0]
     assert delivery.disposition == "answered"
@@ -254,12 +354,23 @@ def test_a_failed_download_is_a_readable_reply_without_the_token(tmp_path: Path)
 
 
 def test_new_forgets_the_chat_s_files(tmp_path: Path) -> None:
-    transport = FileTransport([
-        [message(1, OWNER, document={"file_id": "doc1", "file_name": "a.txt", "file_size": 1})],
-        [{"update_id": 2, "message": {
-            "message_id": 2, "chat": {"id": OWNER, "type": "private"},
-            "from": {"id": OWNER, "is_bot": False, "first_name": "someone"}, "text": "/new"}}],
-    ], {"doc1": b"x"})
+    transport = FileTransport(
+        [
+            [message(1, OWNER, document={"file_id": "doc1", "file_name": "a.txt", "file_size": 1})],
+            [
+                {
+                    "update_id": 2,
+                    "message": {
+                        "message_id": 2,
+                        "chat": {"id": OWNER, "type": "private"},
+                        "from": {"id": OWNER, "is_bot": False, "first_name": "someone"},
+                        "text": "/new",
+                    },
+                }
+            ],
+        ],
+        {"doc1": b"x"},
+    )
     item, _, _ = attached(tmp_path, transport)
     poll(item)
     root = tmp_path / "workspace" / "attachments"

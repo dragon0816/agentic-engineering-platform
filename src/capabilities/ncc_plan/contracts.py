@@ -14,8 +14,17 @@ from common.base import Contract
 #: The eleven 表一 ticks, named as the source parameters and the catalogue's
 #: `systems[].field` name them, so a catalogue written for the source works.
 SYSTEM_FIELDS = (
-    "transmitter", "amplifier", "mixer", "satDecoder", "satAntenna", "gpsAntenna",
-    "dvbtAntenna", "aircon", "voltageStabiliser", "ups", "isolationTransformer",
+    "transmitter",
+    "amplifier",
+    "mixer",
+    "satDecoder",
+    "satAntenna",
+    "gpsAntenna",
+    "dvbtAntenna",
+    "aircon",
+    "voltageStabiliser",
+    "ups",
+    "isolationTransformer",
 )
 
 

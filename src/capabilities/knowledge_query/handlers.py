@@ -136,7 +136,8 @@ class KnowledgeQueryHandler:
                             raise CapabilityRefused("knowledge_insufficient_evidence")
                         candidates.append(f"Raw candidate for {observation.name} [{number}].")
                     return grounded_record(
-                        request.asset, context.trace,
+                        request.asset,
+                        context.trace,
                         Answer(
                             question=request.question,
                             status="answered",
@@ -151,7 +152,8 @@ class KnowledgeQueryHandler:
             "Support each requested facet with a cited Raw passage. A comparison "
             "or recommendation needs a cited Raw passage directly connecting "
             "the relevant facets; separate co-mentions are insufficient."
-            if facets else ""
+            if facets
+            else ""
         )
         skill_guidance = (
             "\n\nInstalled Knowledge Skill guidance: " + request.procedure.answer_guidance
@@ -167,7 +169,8 @@ class KnowledgeQueryHandler:
             "passages of its premises, and use only product codes and numbers that "
             "appear in them. An inference is not a verified fact or a direct "
             "relationship; never state it as one. Do not write unlabeled inferences."
-            if inference_label else ""
+            if inference_label
+            else ""
         )
         partial_guidance = (
             "\n\nThe retrieved evidence does not establish every requested facet or "
@@ -195,7 +198,9 @@ class KnowledgeQueryHandler:
                     "in square brackets, like [2]. If no RAW passage supports an "
                     "answer, say so in one sentence and cite nothing.\n\n"
                     "Question: {question}\n\n{passages}"
-                    + facet_guidance + skill_guidance + partial_guidance
+                    + facet_guidance
+                    + skill_guidance
+                    + partial_guidance
                     + inference_guidance
                 ),
                 inference_label=inference_label,
@@ -232,12 +237,8 @@ class KnowledgeQueryHandler:
             )
         ):
             fallbacks = (
-                extractive_relation_answer(
-                    request.question, assessment, request.procedure
-                ),
-                extractive_observation_answer(
-                    request.question, assessment, request.procedure
-                ),
+                extractive_relation_answer(request.question, assessment, request.procedure),
+                extractive_observation_answer(request.question, assessment, request.procedure),
             )
             verified = None
             for fallback in fallbacks:
@@ -250,7 +251,9 @@ class KnowledgeQueryHandler:
                     continue
                 try:
                     grounded_record(
-                        request.asset, context.trace, fallback,
+                        request.asset,
+                        context.trace,
+                        fallback,
                         assessment=assessment.summary(),
                     )
                 except ValueError:
@@ -269,9 +272,11 @@ class KnowledgeQueryHandler:
                             candidates.append(f"Raw candidate for {observation.name} [{number}].")
                     if candidates:
                         return grounded_record(
-                            request.asset, context.trace,
+                            request.asset,
+                            context.trace,
                             Answer(
-                                question=request.question, status="answered",
+                                question=request.question,
+                                status="answered",
                                 passages=selected_passages,
                                 text=" ".join(candidates),
                             ),
@@ -285,15 +290,20 @@ class KnowledgeQueryHandler:
             raise CapabilityRefused("knowledge_model_failed")
         try:
             return grounded_record(
-                request.asset, context.trace, answer,
+                request.asset,
+                context.trace,
+                answer,
                 assessment=None if assessment is None else assessment.summary(),
             )
         except ValueError:
             raise CapabilityRefused("knowledge_not_grounded") from None
 
     def _wiki_primary(
-        self, context: RequestContext, request: KnowledgeQueryRequest,
-        procedure: KnowledgeProcedure, vault: Vault,
+        self,
+        context: RequestContext,
+        request: KnowledgeQueryRequest,
+        procedure: KnowledgeProcedure,
+        vault: Vault,
     ) -> Contract:
         """Answer from curated Wiki sections, with Raw as provenance and fallback."""
         snapshot = RetrievalSnapshot.cached(vault)
@@ -308,8 +318,7 @@ class KnowledgeQueryHandler:
         queries = [request.question, *(focus.expansions if focus else ())]
         rewrites: tuple[str, ...] = ()
         if bilingual:
-            rewrites = rewrite_queries(
-                self.model, self.alias, request.question, context.trace)
+            rewrites = rewrite_queries(self.model, self.alias, request.question, context.trace)
             queries[1:1] = rewrites
         for facet in procedure.requested_facets(request.question):
             for search in (*facet.search_queries, *facet.discovery_queries)[:2]:
@@ -317,14 +326,22 @@ class KnowledgeQueryHandler:
         sections = procedure.evidence_sections or (36 if bilingual else 24)
         chars = procedure.evidence_chars or 40000
         passages = snapshot.wiki_primary_passages(
-            tuple(dict.fromkeys(queries))[:12], k=sections, max_chars=chars,
-            content_only=bilingual)
+            tuple(dict.fromkeys(queries))[:12], k=sections, max_chars=chars, content_only=bilingual
+        )
         if procedure.retrieval_rounds and passages:
             passages = search_rounds(
-                snapshot, self.model, self.alias, context.trace, request.question,
-                passages, rounds=procedure.retrieval_rounds, k=sections, max_chars=chars,
+                snapshot,
+                self.model,
+                self.alias,
+                context.trace,
+                request.question,
+                passages,
+                rounds=procedure.retrieval_rounds,
+                k=sections,
+                max_chars=chars,
                 per_page=procedure.evidence_sections_per_page,
-                rank_text=" ".join((request.question, *rewrites)))
+                rank_text=" ".join((request.question, *rewrites)),
+            )
         if not passages:
             raise CapabilityRefused("knowledge_insufficient_evidence")
         assessment = assess_wiki_primary(passages, request.question, procedure)
@@ -342,11 +359,13 @@ class KnowledgeQueryHandler:
                 "\n\nRequested evidence facets: " + ", ".join(facets) + ". A "
                 "comparison or recommendation needs a cited passage directly "
                 "connecting the relevant facets; separate co-mentions are insufficient."
-                if facets else ""
+                if facets
+                else ""
             )
             + (
                 "\n\nInstalled Knowledge Skill guidance: " + procedure.answer_guidance
-                if procedure.answer_guidance else ""
+                if procedure.answer_guidance
+                else ""
             )
             + answer_rules_text(vault, request.question)
             + (
@@ -354,23 +373,31 @@ class KnowledgeQueryHandler:
                 "direct relationship. Still state every independently supported fact "
                 "with citations; do not claim the missing comparison or direct link. "
                 "The Host will report the exact gaps."
-                if assessment.status == "missing" else ""
+                if assessment.status == "missing"
+                else ""
             )
             + (
                 f"\n\nYou may add at most {MAX_LABELED_INFERENCES} inference lines after "
                 f"the facts. Start each inference line with {label}, cite the passages "
                 "of its premises, and use only product codes and numbers that appear "
                 "in them. An inference is not a verified fact or a direct relationship."
-                if label else ""
+                if label
+                else ""
             )
             + WIKI_CITATION_FORM
         )
         answer = QueryEngine(
-            vault, self.model, alias=self.alias,
+            vault,
+            self.model,
+            alias=self.alias,
             max_output_tokens=procedure.synthesis_max_output_tokens,
-            prompt=prompt, inference_label=label, allow_wiki=True,
+            prompt=prompt,
+            inference_label=label,
+            allow_wiki=True,
         ).ask(
-            request.question, trace=context.trace, raw_citations_only=True,
+            request.question,
+            trace=context.trace,
+            raw_citations_only=True,
             selected_passages=passages,
         )
         if answer.status == "model_failed":
@@ -379,20 +406,23 @@ class KnowledgeQueryHandler:
             answer = omit_unsupported_product_recommendations(
                 answer, request.question, procedure, allow_wiki=True
             )
-            answer = omit_unverified_answer_lines(
-                answer, inference_label=label, allow_wiki=True
-            )
+            answer = omit_unverified_answer_lines(answer, inference_label=label, allow_wiki=True)
         if answer.status != "answered":
             raise CapabilityRefused("knowledge_insufficient_evidence")
-        cited_pages = tuple(dict.fromkeys(
-            passage.citation.wiki_page
-            for number, passage in enumerate(answer.passages, 1)
-            if number in cited_numbers(answer.text)
-            and passage.citation.kind == "wiki" and passage.citation.wiki_page
-        ))
+        cited_pages = tuple(
+            dict.fromkeys(
+                passage.citation.wiki_page
+                for number, passage in enumerate(answer.passages, 1)
+                if number in cited_numbers(answer.text)
+                and passage.citation.kind == "wiki"
+                and passage.citation.wiki_page
+            )
+        )
         try:
             return grounded_record(
-                request.asset, context.trace, answer,
+                request.asset,
+                context.trace,
+                answer,
                 assessment=assessment.summary(),
                 citation_policy="wiki_primary",
                 wiki_provenance=tuple(

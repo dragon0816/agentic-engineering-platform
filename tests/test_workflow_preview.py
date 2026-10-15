@@ -49,11 +49,17 @@ def spec(name: str, effect: str) -> CapabilitySpec:
     policy: dict[str, Any] = {"required_permissions": [f"t.{name}"], "policy_refs": ["t"]}
     if effect != "read":
         policy["approval_required"] = True
-    return CapabilitySpec.model_validate({
-        "identity": {"namespace": "t", "name": name, "version": "1.0.0"},
-        "name": f"t.{name}", "description": name, "input_contract": "t.in",
-        "output_contract": "t.out", "side_effect": effect, "policy": policy,
-    })
+    return CapabilitySpec.model_validate(
+        {
+            "identity": {"namespace": "t", "name": name, "version": "1.0.0"},
+            "name": f"t.{name}",
+            "description": name,
+            "input_contract": "t.in",
+            "output_contract": "t.out",
+            "side_effect": effect,
+            "policy": policy,
+        }
+    )
 
 
 class Value(Contract):
@@ -80,13 +86,22 @@ class Plans(Echo):
 
 
 def manifest(steps: list[dict[str, Any]]) -> WorkflowManifest:
-    return WorkflowManifest.model_validate({
-        "metadata": {"identity": {"namespace": "engineering", "name": "p", "version": "1.0.0"},
-                     "owner": {"type": "team", "id": "engineering"}, "visibility": "private"},
-        "kind": "workflow", "description": "preview", "execution": {"mode": "local"},
-        "dependencies": {"central_required": False}, "input_contract": "t.in",
-        "output_contract": "t.out", "steps": steps,
-    })
+    return WorkflowManifest.model_validate(
+        {
+            "metadata": {
+                "identity": {"namespace": "engineering", "name": "p", "version": "1.0.0"},
+                "owner": {"type": "team", "id": "engineering"},
+                "visibility": "private",
+            },
+            "kind": "workflow",
+            "description": "preview",
+            "execution": {"mode": "local"},
+            "dependencies": {"central_required": False},
+            "input_contract": "t.in",
+            "output_contract": "t.out",
+            "steps": steps,
+        }
+    )
 
 
 def step(name: str, inputs: dict[str, Any]) -> dict[str, Any]:
@@ -97,16 +112,23 @@ def engine(workflow: WorkflowManifest, *, grant_write: bool = True) -> tuple[Wor
     calls = Calls()
     installed = InstalledCapabilities()
     grants = []
-    for name, effect, handler in (("read", "read", Echo("read", calls)),
-                                  ("write", "write", Plans("write", calls)),
-                                  ("send", "external_side_effect", Echo("send", calls))):
+    for name, effect, handler in (
+        ("read", "read", Echo("read", calls)),
+        ("write", "write", Plans("write", calls)),
+        ("send", "external_side_effect", Echo("send", calls)),
+    ):
         made = spec(name, effect)
         installed.register(made, handler, Value, Value, LOCAL)
         if effect == "read" or grant_write:
-            grants.append(CapabilityGrant(actor="engineer", asset=made.identity,
-                                          permissions=made.policy.required_permissions,
-                                          policy_refs=made.policy.policy_refs,
-                                          approval_ref="ok"))
+            grants.append(
+                CapabilityGrant(
+                    actor="engineer",
+                    asset=made.identity,
+                    permissions=made.policy.required_permissions,
+                    policy_refs=made.policy.policy_refs,
+                    approval_ref="ok",
+                )
+            )
     bridge = BridgeExecutor(installed, LocalPolicy(tuple(grants)))
     workflows = InstalledWorkflows()
     workflows.register(workflow)
@@ -115,24 +137,31 @@ def engine(workflow: WorkflowManifest, *, grant_write: bool = True) -> tuple[Wor
 
 def preview(workflow: WorkflowManifest, **kwargs: Any) -> tuple[Any, Calls]:
     running, calls = engine(workflow, **kwargs)
-    return asyncio.run(running.preview(request("x"), workflow.metadata.identity,
-                                       {"v": "go"})), calls
+    return asyncio.run(
+        running.preview(request("x"), workflow.metadata.identity, {"v": "go"})
+    ), calls
 
 
-CHAIN = manifest([
-    step("read", {"value": {"source": "run", "path": ["v"]}}),
-    step("write", {"value": {"source": "step", "step_index": 0, "path": ["value"]}}),
-    step("send", {"value": {"source": "fixed", "value": "hello"}}),
-    step("read", {"value": {"source": "step", "step_index": 1, "path": ["value"]}}),
-])
+CHAIN = manifest(
+    [
+        step("read", {"value": {"source": "run", "path": ["v"]}}),
+        step("write", {"value": {"source": "step", "step_index": 0, "path": ["value"]}}),
+        step("send", {"value": {"source": "fixed", "value": "hello"}}),
+        step("read", {"value": {"source": "step", "step_index": 1, "path": ["value"]}}),
+    ]
+)
 
 
 def test_reads_run_writes_are_planned_and_nothing_else_is_dispatched() -> None:
     result, calls = preview(CHAIN)
     assert result.status == "previewed" and calls.ran == ["read"]
     states = [(item.state, item.side_effect) for item in result.steps]
-    assert states == [("ran", "read"), ("planned", "write"),
-                      ("planned", "external_side_effect"), ("blocked", "read")]
+    assert states == [
+        ("ran", "read"),
+        ("planned", "write"),
+        ("planned", "external_side_effect"),
+        ("blocked", "read"),
+    ]
     assert result.steps[0].output == {"value": "read:go"}
     assert result.steps[1].inputs == {"value": "read:go"}
     assert result.steps[1].output == {"value": "would write read:go"}
@@ -162,8 +191,11 @@ SEARCH = [
 ]
 NOTIFY = [
     {"do": "open", "url": "{site}/orders?customer={customer}"},
-    {"do": "click", "target": {"label": "標記已通知", "kind": "button"},
-     "row": {"table": "#orders", "column": "訂單號", "equals": "{item}"}},
+    {
+        "do": "click",
+        "target": {"label": "標記已通知", "kind": "button"},
+        "row": {"table": "#orders", "column": "訂單號", "equals": "{item}"},
+    },
 ]
 COLUMNS = ["訂單號", "品項", "數量", "預計出貨日", "狀態"]
 
@@ -177,31 +209,60 @@ def fixed(value: Any) -> dict[str, Any]:
 
 
 def shipment_workflow() -> WorkflowManifest:
-    return WorkflowManifest.model_validate({
-        "metadata": {"identity": {"namespace": "engineering", "name": "shipment-tracking",
-                                  "version": "1.0.0"},
-                     "owner": {"type": "team", "id": "engineering"}, "visibility": "private"},
-        "kind": "workflow", "description": "每日出貨追蹤 SOP", "execution": {"mode": "local"},
-        "dependencies": {"central_required": False, "local_capabilities": [
-            "web.read", "data.select", "excel.upsert_rows", "web.act"]},
-        "input_contract": "t.in",
-        "output_contract": "t.out",
-        "steps": [
-            {"capability": READ_SPEC.identity.model_dump(),
-             "inputs": {"actions": fixed(SEARCH), "values": {"source": "run", "path": []}}},
-            {"capability": SELECT_SPEC.identity.model_dump(),
-             "inputs": {"rows": ref(0, "data", "orders"),
+    return WorkflowManifest.model_validate(
+        {
+            "metadata": {
+                "identity": {
+                    "namespace": "engineering",
+                    "name": "shipment-tracking",
+                    "version": "1.0.0",
+                },
+                "owner": {"type": "team", "id": "engineering"},
+                "visibility": "private",
+            },
+            "kind": "workflow",
+            "description": "每日出貨追蹤 SOP",
+            "execution": {"mode": "local"},
+            "dependencies": {
+                "central_required": False,
+                "local_capabilities": ["web.read", "data.select", "excel.upsert_rows", "web.act"],
+            },
+            "input_contract": "t.in",
+            "output_contract": "t.out",
+            "steps": [
+                {
+                    "capability": READ_SPEC.identity.model_dump(),
+                    "inputs": {"actions": fixed(SEARCH), "values": {"source": "run", "path": []}},
+                },
+                {
+                    "capability": SELECT_SPEC.identity.model_dump(),
+                    "inputs": {
+                        "rows": ref(0, "data", "orders"),
                         "where": fixed({"狀態": "延遲", "通知": "標記已通知"}),
-                        "take": fixed("訂單號")}},
-            {"capability": UPSERT_SPEC.identity.model_dump(),
-             "inputs": {"workbook": {"source": "run", "path": ["workbook"]},
-                        "sheet": fixed(SHEET_NAME), "key": fixed("訂單號"),
-                        "rows": ref(0, "data", "orders"), "columns": fixed(COLUMNS)}},
-            {"capability": ACT_SPEC.identity.model_dump(),
-             "inputs": {"actions": fixed(NOTIFY), "values": {"source": "run", "path": []},
-                        "for_each": ref(1, "values")}},
-        ],
-    })
+                        "take": fixed("訂單號"),
+                    },
+                },
+                {
+                    "capability": UPSERT_SPEC.identity.model_dump(),
+                    "inputs": {
+                        "workbook": {"source": "run", "path": ["workbook"]},
+                        "sheet": fixed(SHEET_NAME),
+                        "key": fixed("訂單號"),
+                        "rows": ref(0, "data", "orders"),
+                        "columns": fixed(COLUMNS),
+                    },
+                },
+                {
+                    "capability": ACT_SPEC.identity.model_dump(),
+                    "inputs": {
+                        "actions": fixed(NOTIFY),
+                        "values": {"source": "run", "path": []},
+                        "for_each": ref(1, "values"),
+                    },
+                },
+            ],
+        }
+    )
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="drives the installed Edge")
@@ -216,19 +277,34 @@ def test_the_practice_sop_previews_without_changes_then_runs(tmp_path: Path) -> 
         book = write_workbook(tmp_path / "出貨追蹤.xlsx")
         binding = WebHostBinding(allowed_origins=(site.url,))
         installed = InstalledCapabilities()
-        installed.register(READ_SPEC, WebScriptHandler(binding, tmp_path / "p", "read"),
-                           WebScript, WebScriptResult, LOCAL)
-        installed.register(ACT_SPEC, WebScriptHandler(binding, tmp_path / "p", "act"),
-                           WebScript, WebScriptResult, LOCAL)
+        installed.register(
+            READ_SPEC,
+            WebScriptHandler(binding, tmp_path / "p", "read"),
+            WebScript,
+            WebScriptResult,
+            LOCAL,
+        )
+        installed.register(
+            ACT_SPEC,
+            WebScriptHandler(binding, tmp_path / "p", "act"),
+            WebScript,
+            WebScriptResult,
+            LOCAL,
+        )
         installed.register(SELECT_SPEC, SelectHandler(), SelectRequest, SelectResult, LOCAL)
-        installed.register(UPSERT_SPEC, UpsertHandler(tmp_path / "backups"), UpsertRequest,
-                           UpsertResult, LOCAL)
+        installed.register(
+            UPSERT_SPEC, UpsertHandler(tmp_path / "backups"), UpsertRequest, UpsertResult, LOCAL
+        )
         grants = tuple(
-            CapabilityGrant(actor="engineer", asset=item.identity,
-                            permissions=item.policy.required_permissions,
-                            policy_refs=item.policy.policy_refs,
-                            approval_ref="owner")
-            for item in (READ_SPEC, ACT_SPEC, SELECT_SPEC, UPSERT_SPEC))
+            CapabilityGrant(
+                actor="engineer",
+                asset=item.identity,
+                permissions=item.policy.required_permissions,
+                policy_refs=item.policy.policy_refs,
+                approval_ref="owner",
+            )
+            for item in (READ_SPEC, ACT_SPEC, SELECT_SPEC, UPSERT_SPEC)
+        )
         bridge = BridgeExecutor(installed, LocalPolicy(grants))
         workflows = InstalledWorkflows()
         workflow = shipment_workflow()
@@ -244,8 +320,11 @@ def test_the_practice_sop_previews_without_changes_then_runs(tmp_path: Path) -> 
         assert shown.steps[3].inputs["for_each"] == ["SO-1002", "SO-1004"]
         assert book.read_bytes() == before and site.notified == set()
 
-        run = asyncio.run(running.execute(request("x"), workflow.metadata.identity, arguments,
-                                          timeout_seconds=120))
+        run = asyncio.run(
+            running.execute(
+                request("x"), workflow.metadata.identity, arguments, timeout_seconds=120
+            )
+        )
         assert run.run.status == "succeeded", run.run.failure
         with urllib.request.urlopen(site.url + "/state.json") as reply:
             assert json.loads(reply.read())["notified"] == ["SO-1002", "SO-1004"]

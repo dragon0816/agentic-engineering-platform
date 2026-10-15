@@ -29,8 +29,9 @@ from pydantic import Field
 from common.base import Contract
 from integrations.com import progid_is_registered
 
-MailErrorCode = Literal["library_missing", "outlook_missing", "folder_unknown",
-                        "message_unknown", "mail_failed"]
+MailErrorCode = Literal[
+    "library_missing", "outlook_missing", "folder_unknown", "message_unknown", "mail_failed"
+]
 OUTLOOK_PROGID = "Outlook.Application"
 #: olFolderInbox, olFolderSentMail, olFolderDrafts.
 _DEFAULT_FOLDERS = {"inbox": 6, "sent items": 5, "sent": 5, "drafts": 16}
@@ -57,11 +58,15 @@ class MailScope(Contract):
 
     def folder_allowed(self, folder: str) -> bool:
         name = _folder_key(folder)
-        if any(name == _folder_key(item) or name.startswith(_folder_key(item) + "/")
-               for item in self.excluded_folders):
+        if any(
+            name == _folder_key(item) or name.startswith(_folder_key(item) + "/")
+            for item in self.excluded_folders
+        ):
             return False
-        return any(name == _folder_key(item) or name.startswith(_folder_key(item) + "/")
-                   for item in self.folders)
+        return any(
+            name == _folder_key(item) or name.startswith(_folder_key(item) + "/")
+            for item in self.folders
+        )
 
     def sender_allowed(self, sender: str) -> bool:
         address = sender.strip().casefold()
@@ -81,8 +86,7 @@ class MailScope(Contract):
 
 
 def _folder_key(folder: str) -> str:
-    return "/".join(part.strip().casefold() for part in re.split(r"[\\/]", folder)
-                    if part.strip())
+    return "/".join(part.strip().casefold() for part in re.split(r"[\\/]", folder) if part.strip())
 
 
 class MailSummary(Contract):
@@ -111,9 +115,17 @@ class MailReader(Protocol):
     def save_attachment(self, message_id: str, name: str, target: Path) -> Path: ...
 
 
-def search(reader: MailReader, scope: MailScope, *, query: str = "", sender: str = "",
-           folder: str = "", days: int | None = None, limit: int = 20,
-           now: datetime | None = None) -> list[MailSummary]:
+def search(
+    reader: MailReader,
+    scope: MailScope,
+    *,
+    query: str = "",
+    sender: str = "",
+    folder: str = "",
+    days: int | None = None,
+    limit: int = 20,
+    now: datetime | None = None,
+) -> list[MailSummary]:
     """Messages in scope, newest first, whose subject, sender or snippet
     contain `query` and whose sender contains `sender`."""
     now = now or datetime.now(UTC)
@@ -143,13 +155,17 @@ def search(reader: MailReader, scope: MailScope, *, query: str = "", sender: str
     return found[:limit]
 
 
-def read(reader: MailReader, scope: MailScope, message_id: str,
-         now: datetime | None = None) -> MailMessage:
+def read(
+    reader: MailReader, scope: MailScope, message_id: str, now: datetime | None = None
+) -> MailMessage:
     """One message in scope, or `message_unknown` (also for one outside it)."""
     now = now or datetime.now(UTC)
     message = reader.get(message_id)
-    if (not scope.folder_allowed(message.folder) or not scope.sender_allowed(message.sender)
-            or not scope.recent(message.received, now)):
+    if (
+        not scope.folder_allowed(message.folder)
+        or not scope.sender_allowed(message.sender)
+        or not scope.recent(message.received, now)
+    ):
         raise MailError("message_unknown")
     return message.model_copy(update={"body": message.body[:MAX_BODY_CHARS]})
 
@@ -228,18 +244,25 @@ class OutlookComMailbox:
                 break
             names.append(name)
             folder = parent
-        return "/".join(reversed(names)) or _text(getattr(getattr(item, "Parent", None),
-                                                          "Name", ""))
+        return "/".join(reversed(names)) or _text(
+            getattr(getattr(item, "Parent", None), "Name", "")
+        )
 
     def _summary(self, item: Any, folder: str) -> MailSummary:
-        attachments = tuple(_text(item.Attachments.Item(index + 1).FileName)
-                            for index in range(int(getattr(item.Attachments, "Count", 0))))
+        attachments = tuple(
+            _text(item.Attachments.Item(index + 1).FileName)
+            for index in range(int(getattr(item.Attachments, "Count", 0)))
+        )
         return MailSummary(
-            message_id=_text(item.EntryID), folder=folder,
+            message_id=_text(item.EntryID),
+            folder=folder,
             sender=_text(getattr(item, "SenderEmailAddress", "")),
-            to=_text(getattr(item, "To", "")), subject=_text(getattr(item, "Subject", "")),
-            received=_when(getattr(item, "ReceivedTime", None)), attachments=attachments,
-            snippet=_plain(_text(getattr(item, "Body", "")))[:SNIPPET_CHARS])
+            to=_text(getattr(item, "To", "")),
+            subject=_text(getattr(item, "Subject", "")),
+            received=_when(getattr(item, "ReceivedTime", None)),
+            attachments=attachments,
+            snippet=_plain(_text(getattr(item, "Body", "")))[:SNIPPET_CHARS],
+        )
 
     def list(self, folder: str, since: datetime, limit: int) -> list[MailSummary]:
         namespace = self._namespace()
@@ -269,8 +292,11 @@ class OutlookComMailbox:
             raise MailError("message_unknown") from None
         try:
             summary = self._summary(item, self._folder_path(item))
-            return MailMessage(**summary.model_dump(), cc=_text(getattr(item, "CC", "")),
-                               body=_plain(_text(getattr(item, "Body", ""))))
+            return MailMessage(
+                **summary.model_dump(),
+                cc=_text(getattr(item, "CC", "")),
+                body=_plain(_text(getattr(item, "Body", ""))),
+            )
         except Exception:
             raise MailError("mail_failed") from None
 

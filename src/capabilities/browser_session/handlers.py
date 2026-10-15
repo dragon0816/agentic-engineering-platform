@@ -36,20 +36,22 @@ from common.base import Contract, Symbol, Text
 from common.execution import RequestContext
 from integrations.web_script import ScriptRunner, WebAction, WebScript, WebScriptError
 
-SPEC = CapabilitySpec.model_validate({
-    "identity": {"namespace": "browser", "name": "operate", "version": "1.0.0"},
-    "name": "browser.operate",
-    "description": "Operate the host's Edge on web sites: open, fill, click, read, download",
-    "input_contract": "browser.operate.input.v1",
-    "output_contract": "browser.operate.output.v1",
-    "side_effect": "external_side_effect",
-    "policy": {
-        "risk": "medium",
-        "approval_required": True,
-        "required_permissions": ["browser.operate"],
-        "policy_refs": ["web-origin-policy"],
-    },
-})
+SPEC = CapabilitySpec.model_validate(
+    {
+        "identity": {"namespace": "browser", "name": "operate", "version": "1.0.0"},
+        "name": "browser.operate",
+        "description": "Operate the host's Edge on web sites: open, fill, click, read, download",
+        "input_contract": "browser.operate.input.v1",
+        "output_contract": "browser.operate.output.v1",
+        "side_effect": "external_side_effect",
+        "policy": {
+            "risk": "medium",
+            "approval_required": True,
+            "required_permissions": ["browser.operate"],
+            "policy_refs": ["web-origin-policy"],
+        },
+    }
+)
 MAX_PAGE_CHARS = 6_000
 MAX_ELEMENTS = 80
 _SAFE_NAME = re.compile(r"[^A-Za-z0-9._-]+")
@@ -160,21 +162,24 @@ class BrowserSessionHandler:
                 saved.append(kept)
                 return kept
 
-            runner = ScriptRunner(browser, self.allowed_origins, timeout_s=self.timeout_s,
-                                  downloader=download)
+            runner = ScriptRunner(
+                browser, self.allowed_origins, timeout_s=self.timeout_s, downloader=download
+            )
             data: dict[str, JsonValue] = {}
             items: dict[str, JsonValue] = {}
             try:
                 if request.actions:
                     if request.for_each is None:
-                        result = runner.run(WebScript(actions=request.actions,
-                                                      values=request.values), "act")
+                        result = runner.run(
+                            WebScript(actions=request.actions, values=request.values), "act"
+                        )
                         data = dict(result.data)
                     else:
                         for item in request.for_each:
                             values = {**request.values, "item": item}
-                            result = runner.run(WebScript(actions=request.actions,
-                                                          values=values), "act")
+                            result = runner.run(
+                                WebScript(actions=request.actions, values=values), "act"
+                            )
                             items[item] = dict(result.data)
             except WebScriptError as error:
                 # A code only; the model looks again with an empty action list.
@@ -186,8 +191,13 @@ class BrowserSessionHandler:
                 url = str(browser.evaluate("document.location.href") or "")
             except Exception:  # noqa: BLE001
                 pass
-            return BrowserResult(url=url, data=data, items=items, downloads=tuple(saved),
-                                 page=_described(browser) if request.look else "")
+            return BrowserResult(
+                url=url,
+                data=data,
+                items=items,
+                downloads=tuple(saved),
+                page=_described(browser) if request.look else "",
+            )
 
 
 def _edge(profile: Path, headless: bool, timeout_s: float) -> Any:
@@ -206,8 +216,9 @@ def _described(browser: Any) -> str:
     return text
 
 
-def _download(browser: Any, folder: Path, click: Callable[[], None], name: str,
-              timeout_s: float) -> str:
+def _download(
+    browser: Any, folder: Path, click: Callable[[], None], name: str, timeout_s: float
+) -> str:
     """Let the page's own link or button send the file, then keep it as `name`."""
     page = browser.page()
     for method in ("Browser.setDownloadBehavior", "Page.setDownloadBehavior"):
@@ -220,8 +231,11 @@ def _download(browser: Any, folder: Path, click: Callable[[], None], name: str,
     click()
     end = time.monotonic() + timeout_s
     while time.monotonic() < end:
-        fresh = [item for item in folder.iterdir() if item.name not in before
-                 and not item.name.endswith((".crdownload", ".tmp"))]
+        fresh = [
+            item
+            for item in folder.iterdir()
+            if item.name not in before and not item.name.endswith((".crdownload", ".tmp"))
+        ]
         if fresh:
             got = fresh[0]
             size = -1

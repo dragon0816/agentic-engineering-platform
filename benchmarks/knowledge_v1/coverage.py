@@ -43,19 +43,26 @@ def past_outcomes() -> dict[str, tuple[str, str, str]]:
     for run in sorted((HERE / "runs").glob("sample-*")):
         for result in run.glob("Q*/result.json"):
             data = json.loads(result.read_text(encoding="utf-8"))
-            found[data["id"]] = (str(data.get("status")), str(data.get("gap") or "-"),
-                                 str(data.get("route") or "-"))
+            found[data["id"]] = (
+                str(data.get("status")),
+                str(data.get("gap") or "-"),
+                str(data.get("route") or "-"),
+            )
     return found
 
 
-def features(question: dict[str, Any], history: dict[str, tuple[str, str, str]],
-             tier: str) -> set[str]:
+def features(
+    question: dict[str, Any], history: dict[str, tuple[str, str, str]], tier: str
+) -> set[str]:
     out: set[str] = set()
     if "market" in question:
         market, product, kind = question["market"], question["product"], question["type"]
-        out |= {f"cell:{market}|{product}", f"type-market:{kind}|{market}",
-                f"type-product:{kind}|{product}",
-                f"type-difficulty:{kind}|{question['difficulty']}"}
+        out |= {
+            f"cell:{market}|{product}",
+            f"type-market:{kind}|{market}",
+            f"type-product:{kind}|{product}",
+            f"type-difficulty:{kind}|{question['difficulty']}",
+        }
         if tier == "intents":
             out.add("template:" + template(question))
     else:
@@ -75,14 +82,14 @@ def cover(questions: list[dict[str, Any]], tier: str) -> list[dict[str, Any]]:
     chosen: list[dict[str, Any]] = []
     by_id = {q["id"]: q for q in questions}
     while wanted:
-        best = max(pool, key=lambda ident: (len(pool[ident] & wanted), ident in history,
-                                            -int(ident[1:])))
+        best = max(
+            pool, key=lambda ident: (len(pool[ident] & wanted), ident in history, -int(ident[1:]))
+        )
         gained = pool.pop(best) & wanted
         if not gained:
             break
         wanted -= gained
-        chosen.append({**by_id[best], "covers": sorted(gained),
-                       "past": history.get(best)})
+        chosen.append({**by_id[best], "covers": sorted(gained), "past": history.get(best)})
     return sorted(chosen, key=lambda q: q["id"])
 
 
@@ -95,8 +102,10 @@ def main() -> int:
         kinds = Counter(q.get("type", "foundation") for q in picked)
         print(f"{tier}: {len(picked)} questions {dict(kinds)}")
     (HERE / "questions" / "coverage.json").write_text(
-        json.dumps({tier: [q["id"] for q in picked] for tier, picked in report.items()},
-                   indent=2) + "\n", encoding="utf-8")
+        json.dumps({tier: [q["id"] for q in picked] for tier, picked in report.items()}, indent=2)
+        + "\n",
+        encoding="utf-8",
+    )
     write_review(report, questions)
     return 0
 
@@ -134,13 +143,18 @@ def write_review(report: dict[str, list[dict[str, Any]]], questions: list[dict[s
         "|---|---|---|---|---|---|",
     ]
     for q in core:
-        where = (f"{q['market']} / {q['product']}" if "market" in q
-                 else f"基礎：{q.get('technical')}（{q.get('topic')}）")
+        where = (
+            f"{q['market']} / {q['product']}"
+            if "market" in q
+            else f"基礎：{q.get('technical')}（{q.get('topic')}）"
+        )
         kind = f"{q.get('type', '-')} / {q.get('difficulty', '-')}"
         past = "／".join(q["past"]) if q["past"] else "未跑過"
         reason = "；".join(item.split(":", 1)[0] for item in q["covers"])
-        lines.append(f"| {q['id']} | {where} | {kind} | {past} | {q['text']} | "
-                     f"{len(q['covers'])} 項（{reason}） |")
+        lines.append(
+            f"| {q['id']} | {where} | {kind} | {past} | {q['text']} | "
+            f"{len(q['covers'])} 項（{reason}） |"
+        )
     out = HERE / "questions" / "coverage-review.zh-TW.md"
     out.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"wrote {out}")

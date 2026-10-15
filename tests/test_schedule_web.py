@@ -97,9 +97,7 @@ def test_schedule_routes_refuse_without_token_foreign_host_or_foreign_origin(
     assert served.call("/api/schedules", headers={"Host": "attacker.example"})[0] == 403
     assert served.call("/api/schedules", headers={"Origin": "https://evil.example"})[0] == 403
     assert served.call("/api/schedules/create", create_body(), token=None)[0] == 401
-    status, _ = served.call(
-        "/api/schedules/create", create_body(), headers={"Origin": "null"}
-    )
+    status, _ = served.call("/api/schedules/create", create_body(), headers={"Origin": "null"})
     assert status == 403
     status, _ = served.call(
         "/api/schedules/grant",
@@ -138,12 +136,14 @@ def test_create_grant_pause_resume_and_history_over_the_socket(served: Served) -
     assert status == 200
     assert granted["grant"]["grant"]["approved_by"] == "engineer"
     assert granted["grant"]["grant"]["policy_ref"] == "owner-schedule-grant"
-    assert served.call("/api/schedules/pause", {"schedule_id": "daily-read"})[1]["schedule"][
-        "status"
-    ] == "paused"
-    assert served.call("/api/schedules/resume", {"schedule_id": "daily-read"})[1]["schedule"][
-        "status"
-    ] == "active"
+    assert (
+        served.call("/api/schedules/pause", {"schedule_id": "daily-read"})[1]["schedule"]["status"]
+        == "paused"
+    )
+    assert (
+        served.call("/api/schedules/resume", {"schedule_id": "daily-read"})[1]["schedule"]["status"]
+        == "active"
+    )
     status, overview = served.call("/api/schedules")
     (schedule,) = overview["schedules"]
     assert schedule["grant"]["max_side_effect"] == "read" and schedule["side_effect"] == "read"
@@ -172,9 +172,7 @@ def test_schedules_panel_loads_and_creates_in_a_real_browser(
         assert browser._evaluate('document.getElementById("boot-error").hidden') is True
         # The panel fills its target list asynchronously after the click.
         for _ in range(100):
-            options = browser._evaluate(
-                'document.getElementById("schedule-target").options.length'
-            )
+            options = browser._evaluate('document.getElementById("schedule-target").options.length')
             if options:
                 break
             threading.Event().wait(0.05)
@@ -221,9 +219,10 @@ def test_resolve_needs_confirmation_and_records_the_decision(served: Served) -> 
     status, overview = served.call("/api/schedules")
     stuck = next(item for item in overview["schedules"] if item["schedule_id"] == "stuck-0")
     assert stuck["blocked_by"] == key
-    assert served.call(
-        "/api/schedules/resolve", {"idempotency_key": key, "outcome": "failed"}
-    ) == (400, {"ok": False, "code": "confirmation_required"})
+    assert served.call("/api/schedules/resolve", {"idempotency_key": key, "outcome": "failed"}) == (
+        400,
+        {"ok": False, "code": "confirmation_required"},
+    )
     status, resolved = served.call(
         "/api/schedules/resolve",
         {"idempotency_key": key, "outcome": "failed", "note": "Saw the error", "confirm": True},

@@ -311,12 +311,17 @@ class SqliteLocalState:
     def create_task_run(self, record: TaskRunState) -> TaskRunState:
         """Persist only portable progress; the task objective stays with its caller."""
         item = TaskRunState.model_validate(record)
-        if item.status != "pending" or item.revision != 0 or item.observations or (
-            item.completed_steps
-            or item.unresolved_requirements
-            or item.errors
-            or item.artifact_refs
-            or item.validation is not None
+        if (
+            item.status != "pending"
+            or item.revision != 0
+            or item.observations
+            or (
+                item.completed_steps
+                or item.unresolved_requirements
+                or item.errors
+                or item.artifact_refs
+                or item.validation is not None
+            )
         ):
             raise LocalStateError("task_update_stale")
         with self._write() as conn:
@@ -434,8 +439,13 @@ class SqliteLocalState:
         return item
 
     def set_message_feedback(
-        self, session_id: Symbol, actor: Symbol, message_id: Symbol,
-        feedback: MessageFeedback, *, queue: bool = False,
+        self,
+        session_id: Symbol,
+        actor: Symbol,
+        message_id: Symbol,
+        feedback: MessageFeedback,
+        *,
+        queue: bool = False,
     ) -> ConversationRecord:
         """Annotate one answer with the user's feedback.
 
@@ -450,16 +460,19 @@ class SqliteLocalState:
             if row is None:
                 raise LocalStateError("conversation_unknown")
             stored = ConversationRecord.model_validate_json(row[0])
-            target = next(
-                (item for item in stored.messages if item.message_id == message_id), None
-            )
+            target = next((item for item in stored.messages if item.message_id == message_id), None)
             if target is None or target.role != "assistant":
                 raise LocalStateError("conversation_message_unknown")
-            updated = stored.model_copy(update={"messages": tuple(
-                item.model_copy(update={"feedback": feedback})
-                if item.message_id == message_id else item
-                for item in stored.messages
-            )})
+            updated = stored.model_copy(
+                update={
+                    "messages": tuple(
+                        item.model_copy(update={"feedback": feedback})
+                        if item.message_id == message_id
+                        else item
+                        for item in stored.messages
+                    )
+                }
+            )
             checked = ConversationRecord.model_validate(updated.model_dump())
             conn.execute(
                 "UPDATE conversations SET record = ? WHERE session_id = ?",
@@ -479,7 +492,11 @@ class SqliteLocalState:
         return checked
 
     def set_message_card(
-        self, session_id: Symbol, actor: Symbol, card: dict[str, Any], note: str,
+        self,
+        session_id: Symbol,
+        actor: Symbol,
+        card: dict[str, Any],
+        note: str,
     ) -> ConversationRecord | None:
         """Redraw an answer's action card after a decision (owner 2026-10-15).
 
@@ -497,17 +514,28 @@ class SqliteLocalState:
                 return None
             stored = ConversationRecord.model_validate_json(row[0])
             target = next(
-                (item for item in stored.messages if item.role == "assistant"
-                 and isinstance(item.action_card, dict)
-                 and item.action_card.get("card_id") == card_id), None)
+                (
+                    item
+                    for item in stored.messages
+                    if item.role == "assistant"
+                    and isinstance(item.action_card, dict)
+                    and item.action_card.get("card_id") == card_id
+                ),
+                None,
+            )
             if target is None:
                 return None
             summary = ((target.tool_summary + "\n") if target.tool_summary else "") + note
-            updated = stored.model_copy(update={"messages": tuple(
-                item.model_copy(update={"action_card": card, "tool_summary": summary})
-                if item.message_id == target.message_id else item
-                for item in stored.messages
-            )})
+            updated = stored.model_copy(
+                update={
+                    "messages": tuple(
+                        item.model_copy(update={"action_card": card, "tool_summary": summary})
+                        if item.message_id == target.message_id
+                        else item
+                        for item in stored.messages
+                    )
+                }
+            )
             checked = ConversationRecord.model_validate(updated.model_dump())
             conn.execute(
                 "UPDATE conversations SET record = ? WHERE session_id = ?",
@@ -527,11 +555,11 @@ class SqliteLocalState:
             for ident in feedback_ids:
                 conn.execute(
                     "UPDATE feedback_outbox SET attempts = attempts + 1, last_error = ?"
-                    " WHERE feedback_id = ?", (code[:200], ident))
+                    " WHERE feedback_id = ?",
+                    (code[:200], ident),
+                )
 
-    def feedback_delivered(
-        self, sent: list[FeedbackRecord], accepted: tuple[str, ...]
-    ) -> None:
+    def feedback_delivered(self, sent: list[FeedbackRecord], accepted: tuple[str, ...]) -> None:
         """Forget what the platform acknowledged, unless it was rated again
         while on its way."""
         done = set(accepted)
@@ -540,7 +568,8 @@ class SqliteLocalState:
                 if item.feedback_id in done:
                     conn.execute(
                         "DELETE FROM feedback_outbox WHERE feedback_id = ? AND rated_at = ?",
-                        (item.feedback_id, item.rated_at.isoformat()))
+                        (item.feedback_id, item.rated_at.isoformat()),
+                    )
 
     def feedback_backlog(self) -> int:
         with self._read() as conn:

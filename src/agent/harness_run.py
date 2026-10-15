@@ -15,8 +15,14 @@ HarnessPhase = Literal[
     "collecting", "executing", "validating", "needs_input", "failed", "validated"
 ]
 HarnessEventKind = Literal[
-    "started", "context_observed", "execution_observed", "validation_failed",
-    "retrying", "validated", "needs_input", "failed",
+    "started",
+    "context_observed",
+    "execution_observed",
+    "validation_failed",
+    "retrying",
+    "validated",
+    "needs_input",
+    "failed",
 ]
 
 
@@ -61,12 +67,13 @@ class AgentHarnessRun(Contract):
 
 
 def start_harness(plan: AgentHarnessPlan) -> AgentHarnessRun:
-    first: HarnessPhase = (
-        "collecting" if plan.stages[0] == "collect_context" else "executing"
-    )
+    first: HarnessPhase = "collecting" if plan.stages[0] == "collect_context" else "executing"
     return AgentHarnessRun(
-        plan=plan, phase=first, retry_count=0,
-        events=(HarnessRunEvent(sequence=0, kind="started"),), checks=(),
+        plan=plan,
+        phase=first,
+        retry_count=0,
+        events=(HarnessRunEvent(sequence=0, kind="started"),),
+        checks=(),
     )
 
 
@@ -105,9 +112,7 @@ def observe_execution(run: AgentHarnessRun, evidence_ref: Symbol) -> AgentHarnes
     return _advance(run, "validating", ("execution_observed", evidence_ref))
 
 
-def validate_run(
-    run: AgentHarnessRun, checks: tuple[HarnessCheckResult, ...]
-) -> AgentHarnessRun:
+def validate_run(run: AgentHarnessRun, checks: tuple[HarnessCheckResult, ...]) -> AgentHarnessRun:
     if run.phase != "validating":
         raise ValueError("validation is not expected in this phase")
     names = tuple(item.check_id for item in checks)
@@ -123,23 +128,26 @@ def validate_run(
             else "executing"
         )
         return _advance(
-            run, first,
-            ("validation_failed", failed.evidence_ref), ("retrying", None),
-            checks=(), retry_count=run.retry_count + 1,
+            run,
+            first,
+            ("validation_failed", failed.evidence_ref),
+            ("retrying", None),
+            checks=(),
+            retry_count=run.retry_count + 1,
         )
-    terminal: HarnessPhase = (
-        "needs_input" if run.plan.fallback == "needs_input" else "failed"
-    )
+    terminal: HarnessPhase = "needs_input" if run.plan.fallback == "needs_input" else "failed"
     event: HarnessEventKind = "needs_input" if terminal == "needs_input" else "failed"
     return _advance(
-        run, terminal, ("validation_failed", failed.evidence_ref),
-        (event, failed.evidence_ref), checks=checks, failure_code=run.plan.exhausted_code,
+        run,
+        terminal,
+        ("validation_failed", failed.evidence_ref),
+        (event, failed.evidence_ref),
+        checks=checks,
+        failure_code=run.plan.exhausted_code,
     )
 
 
-def stop_harness(
-    run: AgentHarnessRun, code: Symbol, *, needs_input: bool
-) -> AgentHarnessRun:
+def stop_harness(run: AgentHarnessRun, code: Symbol, *, needs_input: bool) -> AgentHarnessRun:
     if run.phase in ("validated", "failed", "needs_input"):
         raise ValueError("terminal harness run cannot be stopped again")
     phase: HarnessPhase = "needs_input" if needs_input else "failed"

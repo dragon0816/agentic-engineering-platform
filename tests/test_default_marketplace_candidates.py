@@ -30,9 +30,7 @@ def test_workflow11_preview_candidate_preserves_exact_read_only_route() -> None:
         "github.read",
         "excel.read",
     )
-    assert manifest.metadata.provenance[0].revision == (
-        "896046e8fe2170d21f9213e56e5ce2f93c05ba43"
-    )
+    assert manifest.metadata.provenance[0].revision == ("896046e8fe2170d21f9213e56e5ce2f93c05ba43")
     assert manifest.run_alias == 11
     assert manifest.dependencies.local_capabilities == (
         "weekly_report.resolve_window",
@@ -73,8 +71,7 @@ def test_candidate_export_is_deterministic_and_not_registry_publishable(tmp_path
 def test_shipped_candidate_snapshot_matches_source_backed_export() -> None:
     root = Path(__file__).resolve().parents[1]
     path = (
-        root
-        / "examples/default-marketplace/candidates/"
+        root / "examples/default-marketplace/candidates/"
         "engineering__jira-weekly-report-preview__1.0.0.json"
     )
     assert path.read_bytes() == default_candidates.workflow11_preview_candidate().content

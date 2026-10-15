@@ -51,52 +51,68 @@ POLICY = "knowledge-sandbox-policy"
 
 
 def _spec(name: str, description: str, side_effect: str, risk: str = "low") -> CapabilitySpec:
-    return CapabilitySpec.model_validate({
-        "identity": {"namespace": "knowledge-pipeline", "name": name, "version": "1.0.0"},
-        "name": f"knowledge_pipeline.{name.replace('-', '_')}",
-        "description": description,
-        "input_contract": f"knowledge-pipeline.{name}.input.v1",
-        "output_contract": f"knowledge-pipeline.{name}.output.v1",
-        "side_effect": side_effect,
-        "policy": {"risk": risk, "approval_required": side_effect != "read",
-                   "required_permissions": [PERMISSION], "policy_refs": [POLICY]},
-    })
+    return CapabilitySpec.model_validate(
+        {
+            "identity": {"namespace": "knowledge-pipeline", "name": name, "version": "1.0.0"},
+            "name": f"knowledge_pipeline.{name.replace('-', '_')}",
+            "description": description,
+            "input_contract": f"knowledge-pipeline.{name}.input.v1",
+            "output_contract": f"knowledge-pipeline.{name}.output.v1",
+            "side_effect": side_effect,
+            "policy": {
+                "risk": risk,
+                "approval_required": side_effect != "read",
+                "required_permissions": [PERMISSION],
+                "policy_refs": [POLICY],
+            },
+        }
+    )
 
 
-SANDBOX_CREATE_SPEC = _spec("sandbox-create", "Copy a base Knowledge vault into a personal sandbox",
-                            "write")
+SANDBOX_CREATE_SPEC = _spec(
+    "sandbox-create", "Copy a base Knowledge vault into a personal sandbox", "write"
+)
 SANDBOX_LIST_SPEC = _spec("sandbox-list", "List the personal Knowledge sandboxes", "read")
 CONVERT_SPEC = _spec("convert", "Preview or write drop originals into Raw in a sandbox", "write")
-INGEST_PLAN_SPEC = _spec("ingest-plan", "Plan the wiki writes for one Raw document in a sandbox",
-                         "read", "medium")
-INGEST_APPLY_SPEC = _spec("ingest-apply", "Apply a stored ingest plan to a sandbox wiki", "write",
-                          "medium")
+INGEST_PLAN_SPEC = _spec(
+    "ingest-plan", "Plan the wiki writes for one Raw document in a sandbox", "read", "medium"
+)
+INGEST_APPLY_SPEC = _spec(
+    "ingest-apply", "Apply a stored ingest plan to a sandbox wiki", "write", "medium"
+)
 LINT_SPEC = _spec("lint", "Static lint and open conflicts of a sandbox wiki", "read")
-ADOPT_SPEC = _spec("adopt", "Adopt Raw from earlier tooling in a sandbox so it can be ingested",
-                   "write")
-INDEX_ENRICH_SPEC = _spec("index-enrich",
-                          "Write bilingual aliases, summary and categories into sandbox pages",
-                          "write", "medium")
+ADOPT_SPEC = _spec(
+    "adopt", "Adopt Raw from earlier tooling in a sandbox so it can be ingested", "write"
+)
+INDEX_ENRICH_SPEC = _spec(
+    "index-enrich",
+    "Write bilingual aliases, summary and categories into sandbox pages",
+    "write",
+    "medium",
+)
 DROP_FOLDERS_SPEC = _spec("drop-folders", "List the project vault's drop folders", "read")
-PULL_SPEC = _spec("pull", "Copy chosen drop folders of the project vault into a sandbox",
-                  "write")
+PULL_SPEC = _spec("pull", "Copy chosen drop folders of the project vault into a sandbox", "write")
 RULE_FILES_SPEC = _spec("rule-files", "List a sandbox's schema and skill files", "read")
 FILE_READ_SPEC = _spec("file-read", "Read one Markdown file of a sandbox for preview", "read")
-RULE_WRITE_SPEC = _spec("rule-write", "Save the schema or a skill file in a sandbox",
-                        "write")
+RULE_WRITE_SPEC = _spec("rule-write", "Save the schema or a skill file in a sandbox", "write")
 PLAN_PAGE_SPEC = _spec("plan-page", "Show a planned page before and after", "read")
-QUESTION_SETS_SPEC = _spec("question-sets", "List a sandbox's benchmark question sets",
-                           "read")
+QUESTION_SETS_SPEC = _spec("question-sets", "List a sandbox's benchmark question sets", "read")
 SKILL_GUIDE_SPEC = _spec("skill-guide", "The skill writing guide and templates", "read")
-MERGE_SPEC = _spec("merge", "Preview or write a three-way merge of a sandbox into a new "
-                   "candidate vault; the published vault is never edited", "write", "medium")
-INDEX_BUILD_SPEC = _spec("index-build", "Preview or write the layered index of a sandbox",
-                         "write")
+MERGE_SPEC = _spec(
+    "merge",
+    "Preview or write a three-way merge of a sandbox into a new "
+    "candidate vault; the published vault is never edited",
+    "write",
+    "medium",
+)
+INDEX_BUILD_SPEC = _spec("index-build", "Preview or write the layered index of a sandbox", "write")
 DROP_ADD_SPEC = _spec("drop-add", "Put one original into a sandbox drop folder", "write")
-SANDBOX_CONTENTS_SPEC = _spec("sandbox-contents", "List originals, Raw and plans of a sandbox",
-                              "read")
-SANDBOX_DISCARD_SPEC = _spec("sandbox-discard", "Move a personal sandbox aside (never deleted)",
-                             "write")
+SANDBOX_CONTENTS_SPEC = _spec(
+    "sandbox-contents", "List originals, Raw and plans of a sandbox", "read"
+)
+SANDBOX_DISCARD_SPEC = _spec(
+    "sandbox-discard", "Move a personal sandbox aside (never deleted)", "write"
+)
 
 
 async def _run(call: Callable[[], Any]) -> Any:
@@ -112,12 +128,24 @@ class SandboxCreateHandler:
 
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = SandboxCreateRequest.model_validate(inputs)
-        info = await _run(lambda: self.pipeline.create_sandbox(
-            request.base, request.label, context.actor, request.domain, request.scope,
-            request.progress_key))
-        return SandboxRecord(sandbox_id=info.sandbox_id, base_name=info.base_name,
-                             label=info.label, created_by=info.created_by,
-                             created_at=info.created_at, scope=info.scope)
+        info = await _run(
+            lambda: self.pipeline.create_sandbox(
+                request.base,
+                request.label,
+                context.actor,
+                request.domain,
+                request.scope,
+                request.progress_key,
+            )
+        )
+        return SandboxRecord(
+            sandbox_id=info.sandbox_id,
+            base_name=info.base_name,
+            label=info.label,
+            created_by=info.created_by,
+            created_at=info.created_at,
+            scope=info.scope,
+        )
 
 
 class SandboxListHandler:
@@ -127,10 +155,19 @@ class SandboxListHandler:
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         SandboxListRequest.model_validate(inputs)
         found = await _run(self.pipeline.sandboxes.list)
-        return SandboxList(sandboxes=tuple(
-            SandboxRecord(sandbox_id=i.sandbox_id, base_name=i.base_name, label=i.label,
-                          created_by=i.created_by, created_at=i.created_at, scope=i.scope)
-            for i in found))
+        return SandboxList(
+            sandboxes=tuple(
+                SandboxRecord(
+                    sandbox_id=i.sandbox_id,
+                    base_name=i.base_name,
+                    label=i.label,
+                    created_by=i.created_by,
+                    created_at=i.created_at,
+                    scope=i.scope,
+                )
+                for i in found
+            )
+        )
 
 
 class ConvertHandler:
@@ -139,8 +176,11 @@ class ConvertHandler:
 
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = ConvertRequest.model_validate(inputs)
-        result: Contract = await _run(lambda: self.pipeline.convert(
-            request.sandbox_id, tuple(request.paths), request.mode, request.progress_key))
+        result: Contract = await _run(
+            lambda: self.pipeline.convert(
+                request.sandbox_id, tuple(request.paths), request.mode, request.progress_key
+            )
+        )
         return result
 
 
@@ -150,8 +190,9 @@ class IngestPlanHandler:
 
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = IngestPlanRequest.model_validate(inputs)
-        result: Contract = await _run(lambda: self.pipeline.plan_ingest(
-            request.sandbox_id, request.raw_ref))
+        result: Contract = await _run(
+            lambda: self.pipeline.plan_ingest(request.sandbox_id, request.raw_ref)
+        )
         return result
 
 
@@ -161,8 +202,9 @@ class IngestApplyHandler:
 
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = IngestApplyRequest.model_validate(inputs)
-        result: Contract = await _run(lambda: self.pipeline.apply_ingest(
-            request.sandbox_id, request.plan_id))
+        result: Contract = await _run(
+            lambda: self.pipeline.apply_ingest(request.sandbox_id, request.plan_id)
+        )
         return result
 
 
@@ -227,7 +269,8 @@ class IndexEnrichHandler:
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = IndexEnrichRequest.model_validate(inputs)
         result: Contract = await _run(
-            lambda: self.pipeline.index_enrich(request.sandbox_id, request.limit))
+            lambda: self.pipeline.index_enrich(request.sandbox_id, request.limit)
+        )
         return result
 
 
@@ -238,7 +281,8 @@ class IndexBuildHandler:
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = IndexBuildRequest.model_validate(inputs)
         result: Contract = await _run(
-            lambda: self.pipeline.index_build(request.sandbox_id, request.mode))
+            lambda: self.pipeline.index_build(request.sandbox_id, request.mode)
+        )
         return result
 
 
@@ -248,8 +292,9 @@ class MergeHandler:
 
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = MergeRequest.model_validate(inputs)
-        result: Contract = await _run(lambda: self.pipeline.merge(
-            request.sandbox_id, request.mode, dict(request.resolutions)))
+        result: Contract = await _run(
+            lambda: self.pipeline.merge(request.sandbox_id, request.mode, dict(request.resolutions))
+        )
         return result
 
 
@@ -269,8 +314,11 @@ class PullHandler:
 
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = PullRequest.model_validate(inputs)
-        result: Contract = await _run(lambda: self.pipeline.pull(
-            request.sandbox_id, tuple(request.folders), request.progress_key))
+        result: Contract = await _run(
+            lambda: self.pipeline.pull(
+                request.sandbox_id, tuple(request.folders), request.progress_key
+            )
+        )
         return result
 
 
@@ -291,7 +339,8 @@ class FileReadHandler:
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = FileRequest.model_validate(inputs)
         result: Contract = await _run(
-            lambda: self.pipeline.read_file(request.sandbox_id, request.path))
+            lambda: self.pipeline.read_file(request.sandbox_id, request.path)
+        )
         return result
 
 
@@ -302,7 +351,8 @@ class RuleWriteHandler:
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = RuleWriteRequest.model_validate(inputs)
         result: Contract = await _run(
-            lambda: self.pipeline.write_rule(request.sandbox_id, request.path, request.text))
+            lambda: self.pipeline.write_rule(request.sandbox_id, request.path, request.text)
+        )
         return result
 
 
@@ -312,8 +362,9 @@ class PlanPageHandler:
 
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = PlanPageRequest.model_validate(inputs)
-        result: Contract = await _run(lambda: self.pipeline.plan_page(
-            request.sandbox_id, request.plan_id, request.path))
+        result: Contract = await _run(
+            lambda: self.pipeline.plan_page(request.sandbox_id, request.plan_id, request.path)
+        )
         return result
 
 

@@ -96,8 +96,12 @@ class AuthoringAnswer(Contract):
 
 
 def _messages(
-    sop: str, turns: tuple[AuthoringTurn, ...], current: WorkflowManifest | None,
-    installed: InstalledCapabilities, namespace: str, problems: tuple[str, ...],
+    sop: str,
+    turns: tuple[AuthoringTurn, ...],
+    current: WorkflowManifest | None,
+    installed: InstalledCapabilities,
+    namespace: str,
+    problems: tuple[str, ...],
 ) -> tuple[ModelMessage, ...]:
     asked = [
         f"Namespace: {namespace}",
@@ -113,8 +117,12 @@ def _messages(
         asked += ["", "The discussion so far:"]
         asked += [f"{turn.role}: {turn.text}" for turn in turns[-MAX_TURNS_SHOWN:]]
     if problems:
-        asked += ["", "Your last Workflow would not run here. Fix exactly these and return "
-                  "the whole JSON answer again:", *(f"- {problem}" for problem in problems)]
+        asked += [
+            "",
+            "Your last Workflow would not run here. Fix exactly these and return "
+            "the whole JSON answer again:",
+            *(f"- {problem}" for problem in problems),
+        ]
     return (
         ModelMessage(role="system", text=INSTRUCTIONS + "\n" + GUIDE),
         ModelMessage(role="user", text="\n".join(asked)),
@@ -159,9 +167,11 @@ def assemble(
                     used.append(spec.name)
     return {
         "metadata": {
-            "identity": {"namespace": namespace, "name": name,
-                         "version": str(raw.get("version") or identity.get("version")
-                                        or "1.0.0")},
+            "identity": {
+                "namespace": namespace,
+                "name": name,
+                "version": str(raw.get("version") or identity.get("version") or "1.0.0"),
+            },
             "owner": {"type": "user", "id": owner},
             "visibility": "private",
             "lifecycle": "draft",
@@ -184,7 +194,7 @@ def _salvage(text: str) -> Any:
     if start < 0 or end <= start:
         return None
     try:
-        return json.loads(text[start:end + 1])
+        return json.loads(text[start : end + 1])
     except ValueError:
         return None
 
@@ -205,15 +215,22 @@ def author_turn(
 ) -> AuthoringAnswer:
     problems: tuple[str, ...] = ()
     for attempt in range(1, max_attempts + 1):
-        response = model.generate(ModelRequest(
-            trace=trace, model_alias=model_alias,
-            messages=_messages(sop, turns, current, installed, namespace, problems),
-            requirements=ModelRequirements(structured_output=True, local_only=local_only),
-            output_contract=OUTPUT_CONTRACT, max_output_tokens=8_000,
-        ))
+        response = model.generate(
+            ModelRequest(
+                trace=trace,
+                model_alias=model_alias,
+                messages=_messages(sop, turns, current, installed, namespace, problems),
+                requirements=ModelRequirements(structured_output=True, local_only=local_only),
+                output_contract=OUTPUT_CONTRACT,
+                max_output_tokens=8_000,
+            )
+        )
         if response.failure is not None:
-            return AuthoringAnswer(reply="The model could not answer this turn.",
-                                   problems=(response.failure.code,), attempts=attempt)
+            return AuthoringAnswer(
+                reply="The model could not answer this turn.",
+                problems=(response.failure.code,),
+                attempts=attempt,
+            )
         answer = response.structured_output
         if not isinstance(answer, dict):
             answer = _salvage(response.text)
@@ -232,16 +249,22 @@ def author_turn(
             continue
         try:
             workflow = WorkflowManifest.model_validate(
-                assemble(raw, namespace=namespace, owner=owner, installed=installed))
+                assemble(raw, namespace=namespace, owner=owner, installed=installed)
+            )
         except (ValidationError, ValueError) as invalid:
-            problems = review.contract_problems(invalid) if isinstance(
-                invalid, ValidationError) else (str(invalid),)
+            problems = (
+                review.contract_problems(invalid)
+                if isinstance(invalid, ValidationError)
+                else (str(invalid),)
+            )
             continue
         problems = review.unusable(workflow, installed, namespace=namespace)
         if not problems:
-            return AuthoringAnswer(reply=answer["reply"], questions=questions,
-                                   workflow=workflow, attempts=attempt)
+            return AuthoringAnswer(
+                reply=answer["reply"], questions=questions, workflow=workflow, attempts=attempt
+            )
     return AuthoringAnswer(
         reply="I could not write a Workflow that runs here yet; the problems are listed.",
-        problems=problems, attempts=max_attempts,
+        problems=problems,
+        attempts=max_attempts,
     )

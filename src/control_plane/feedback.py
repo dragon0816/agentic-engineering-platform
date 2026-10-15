@@ -30,8 +30,9 @@ class FeedbackStore:
         self._memory: dict[str, tuple[FeedbackRecord, str]] = {}
         self._conn: sqlite3.Connection | None = None
         if path is not None:
-            self._conn = sqlite3.connect(str(path), isolation_level=None,
-                                         check_same_thread=False, timeout=5)
+            self._conn = sqlite3.connect(
+                str(path), isolation_level=None, check_same_thread=False, timeout=5
+            )
             self._conn.execute(_SCHEMA)
 
     def record(self, records: Iterable[FeedbackRecord], received_at: datetime) -> tuple[str, ...]:
@@ -54,9 +55,15 @@ class FeedbackStore:
                     " rated_at = excluded.rated_at, received_at = excluded.received_at,"
                     " record = excluded.record WHERE excluded.rated_at >= feedback.rated_at",
                     # UTC text, so the comparison above orders by time.
-                    (item.feedback_id, item.bridge_id, item.actor, item.rating,
-                     item.rated_at.astimezone(UTC).isoformat(), stamp,
-                     item.model_dump_json()),
+                    (
+                        item.feedback_id,
+                        item.bridge_id,
+                        item.actor,
+                        item.rating,
+                        item.rated_at.astimezone(UTC).isoformat(),
+                        stamp,
+                        item.model_dump_json(),
+                    ),
                 )
         return tuple(accepted)
 
@@ -64,8 +71,11 @@ class FeedbackStore:
         """Newest rating first."""
         with self._lock:
             if self._conn is None:
-                items = sorted((held[0] for held in self._memory.values()),
-                               key=lambda item: item.rated_at, reverse=True)
+                items = sorted(
+                    (held[0] for held in self._memory.values()),
+                    key=lambda item: item.rated_at,
+                    reverse=True,
+                )
                 return tuple(items[:limit])
             rows = self._conn.execute(
                 "SELECT record FROM feedback ORDER BY rated_at DESC LIMIT ?", (limit,)

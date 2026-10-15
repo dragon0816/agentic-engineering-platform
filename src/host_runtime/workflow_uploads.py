@@ -72,9 +72,7 @@ class WorkflowUploadStore:
             except OSError:
                 continue
 
-    def add(
-        self, upload_set: str, field: WorkflowParameter, filename: str, data: bytes
-    ) -> Path:
+    def add(self, upload_set: str, field: WorkflowParameter, filename: str, data: bytes) -> Path:
         """Store one file for `field` and return its absolute path."""
         if not UPLOAD_SET.match(upload_set):
             raise WorkflowUploadError("upload_set_invalid")
@@ -107,7 +105,9 @@ class WorkflowUploadStore:
         candidate = Path(path)
         try:
             return (
-                candidate.is_absolute() and candidate.is_file() and not candidate.is_symlink()
+                candidate.is_absolute()
+                and candidate.is_file()
+                and not candidate.is_symlink()
                 and candidate.resolve().is_relative_to(self.root.resolve())
             )
         except OSError:

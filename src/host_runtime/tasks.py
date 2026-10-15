@@ -71,8 +71,7 @@ class TaskLog:
         self._tasks = {t.task_id: t for t in newest}
         self.path.parent.mkdir(parents=True, exist_ok=True)
         temporary = self.path.with_suffix(".tmp")
-        text = json.dumps([t.model_dump(mode="json") for t in newest], ensure_ascii=False,
-                          indent=1)
+        text = json.dumps([t.model_dump(mode="json") for t in newest], ensure_ascii=False, indent=1)
         # On Windows a scanner or indexer may hold the file for a moment; a few
         # retries cover that, and a record that still cannot be saved stays in
         # memory rather than failing the job it describes.
@@ -87,8 +86,9 @@ class TaskLog:
     def start(self, kind: str, title: str, where: str = "") -> str:
         task_id = f"task-{uuid.uuid4().hex[:10]}"
         with self._lock:
-            self._tasks[task_id] = TaskRecord(task_id=task_id, kind=kind, title=title,
-                                              started=_now(), where=where)
+            self._tasks[task_id] = TaskRecord(
+                task_id=task_id, kind=kind, title=title, started=_now(), where=where
+            )
             self._save()
         return task_id
 
@@ -97,12 +97,14 @@ class TaskLog:
             record = self._tasks.get(task_id)
             if record is None:
                 return
-            self._tasks[task_id] = record.model_copy(update={
-                "status": status, "summary": summary[:300], "ended": _now()})
+            self._tasks[task_id] = record.model_copy(
+                update={"status": status, "summary": summary[:300], "ended": _now()}
+            )
             self._save()
 
-    def tracked(self, kind: str, title: str, where: str,
-                work: Callable[[], tuple[TaskStatus, str]]) -> Callable[[], None]:
+    def tracked(
+        self, kind: str, title: str, where: str, work: Callable[[], tuple[TaskStatus, str]]
+    ) -> Callable[[], None]:
         """`work` wrapped so its task is recorded when it starts and ends; for a
         thread target. `work` returns the final status and a one-line summary."""
         task_id = self.start(kind, title, where)
@@ -135,13 +137,21 @@ def workflow_tasks(store: Any, limit: int = MAX_TASKS) -> list[TaskRecord]:
             status = "needs_input"
         else:
             status = "succeeded" if run.get("status") == "succeeded" else "failed"
-        found.append(TaskRecord(
-            task_id=run["run_id"], kind="workflow", title=workflow, status=status,
-            started=str(run.get("started_at") or ""), ended=run.get("ended_at"),
-            summary=(f"{run.get('tool_calls') or 0} steps"
-                     + (f", {outcome}" if outcome and outcome not in ("succeeded", "failed")
-                        else "")),
-            where=run["run_id"]))
+        found.append(
+            TaskRecord(
+                task_id=run["run_id"],
+                kind="workflow",
+                title=workflow,
+                status=status,
+                started=str(run.get("started_at") or ""),
+                ended=run.get("ended_at"),
+                summary=(
+                    f"{run.get('tool_calls') or 0} steps"
+                    + (f", {outcome}" if outcome and outcome not in ("succeeded", "failed") else "")
+                ),
+                where=run["run_id"],
+            )
+        )
     return found
 
 

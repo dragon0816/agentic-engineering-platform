@@ -19,13 +19,18 @@ def tool(status: str = "succeeded") -> HostTool:
     async def run(context: RequestContext, args: dict[str, Any]) -> HostToolOutcome:
         return HostToolOutcome(status=status, data={})  # type: ignore[arg-type]
 
-    return HostTool(ModelTool(name="make", description="d", input_contract="x.v1",
-                              input_schema={"type": "object"}), run)
+    return HostTool(
+        ModelTool(
+            name="make", description="d", input_contract="x.v1", input_schema={"type": "object"}
+        ),
+        run,
+    )
 
 
 def test_a_claimed_action_without_a_tool_gets_one_retry_with_the_reason() -> None:
     built, model = _host_gateway(
-        [], [_text("我已經產生報表檔案了。"), _text("我還沒有執行任何工具。")])
+        [], [_text("我已經產生報表檔案了。"), _text("我還沒有執行任何工具。")]
+    )
     result = asyncio.run(built.converse(request("做報表"), ()))
     assert result.text == "我還沒有執行任何工具。"
     assert len(model.calls) == 2
@@ -44,8 +49,9 @@ def test_a_named_output_that_is_missing_or_empty_is_caught(tmp_path: Path) -> No
     (root / "out").mkdir(parents=True)
     (root / "out" / "empty.csv").write_text("", encoding="utf-8")
     report = root / "out" / "report.xlsx"
-    built, model = _host_gateway([tool()], [
-        _call("make", {}), _text(f"已寫入 {report}。"), _text(f"再次確認：{report}。")])
+    built, model = _host_gateway(
+        [tool()], [_call("make", {}), _text(f"已寫入 {report}。"), _text(f"再次確認：{report}。")]
+    )
     built._workspace_roots = (str(root),)
     result = asyncio.run(built.converse(request("做報表"), ()))
     assert len(model.calls) == 3  # one retry, then the Host's note

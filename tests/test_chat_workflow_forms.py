@@ -39,14 +39,24 @@ from common.workflow_run_form import (
 from models.contracts import ModelMessage, ModelRequest, ModelResponse, ModelToolCall
 
 RELEASE_SETTINGS = {
-    "release_repo_url": "C:/isolated/origin.git", "work_root": "C:/isolated/work",
-    "inbox_path": "C:/isolated/inbox", "allowed_root": "C:/isolated",
+    "release_repo_url": "C:/isolated/origin.git",
+    "work_root": "C:/isolated/work",
+    "inbox_path": "C:/isolated/inbox",
+    "allowed_root": "C:/isolated",
 }
 
 
 def _catalog() -> list[WorkflowManifest]:
-    return [release_workflow(), preview_workflow(), prepare_workflow(), commit_workflow(),
-            push_workflow(), _plain("nightly-check"), _plain("push"), _plain("package-release")]
+    return [
+        release_workflow(),
+        preview_workflow(),
+        prepare_workflow(),
+        commit_workflow(),
+        push_workflow(),
+        _plain("nightly-check"),
+        _plain("push"),
+        _plain("package-release"),
+    ]
 
 
 def _plain(name: str, parameters: list[dict[str, Any]] | None = None) -> WorkflowManifest:
@@ -63,13 +73,16 @@ def _plain(name: str, parameters: list[dict[str, Any]] | None = None) -> Workflo
 # -- recognizing a run request ------------------------------------------------
 
 
-@pytest.mark.parametrize("text", [
-    "我要執行rs-wmt-package-release",
-    "我要執行rs-wmt-package-release workflow",
-    "run rs-wmt-package-release",
-    "幫我跑一下 engineering/rs-wmt-package-release",
-    "rs-wmt-package-release 執行",
-])
+@pytest.mark.parametrize(
+    "text",
+    [
+        "我要執行rs-wmt-package-release",
+        "我要執行rs-wmt-package-release workflow",
+        "run rs-wmt-package-release",
+        "幫我跑一下 engineering/rs-wmt-package-release",
+        "rs-wmt-package-release 執行",
+    ],
+)
 def test_an_explicit_run_of_the_release_workflow_is_recognized(text: str) -> None:
     intent = run_intent(text, _catalog())
     assert intent is not None
@@ -77,16 +90,19 @@ def test_an_explicit_run_of_the_release_workflow_is_recognized(text: str) -> Non
     assert intent.prefill == {}
 
 
-@pytest.mark.parametrize("text", [
-    "rs-wmt-package-release 怎麼執行?",
-    "為什麼 rs-wmt-package-release 執行失敗",
-    "rs-wmt-package-release 是什麼",
-    "不要執行 rs-wmt-package-release",
-    "tell me about rs-wmt-package-release",
-    "run the tests and then push the branch",       # `push` is a word, not a request
-    "執行 something-not-installed",
-    "",
-])
+@pytest.mark.parametrize(
+    "text",
+    [
+        "rs-wmt-package-release 怎麼執行?",
+        "為什麼 rs-wmt-package-release 執行失敗",
+        "rs-wmt-package-release 是什麼",
+        "不要執行 rs-wmt-package-release",
+        "tell me about rs-wmt-package-release",
+        "run the tests and then push the branch",  # `push` is a word, not a request
+        "執行 something-not-installed",
+        "",
+    ],
+)
 def test_questions_refusals_and_unknown_names_are_left_to_the_model(text: str) -> None:
     assert run_intent(text, _catalog()) is None
 
@@ -98,8 +114,7 @@ def test_plain_word_names_need_the_verb_right_before_them_and_no_params_works() 
     assert step is not None and step.manifest.metadata.identity.name == "release-package-push"
     # `package-release` inside `rs-wmt-package-release` is not a second Workflow.
     whole = run_intent("我要執行rs-wmt-package-release", _catalog())
-    assert whole is not None and whole.manifest.metadata.identity.name == (
-        "rs-wmt-package-release")
+    assert whole is not None and whole.manifest.metadata.identity.name == ("rs-wmt-package-release")
     nightly = run_intent("請執行 nightly-check", _catalog())
     assert nightly is not None and nightly.manifest.parameters == ()
 
@@ -107,19 +122,29 @@ def test_plain_word_names_need_the_verb_right_before_them_and_no_params_works() 
 def test_values_typed_with_the_request_are_prefill_but_settings_never_are() -> None:
     intent = run_intent(
         "執行 rs-wmt-package-release companyName=Foxconn cmpKtOption=kt161 dryRun=no "
-        "push=yes testPlans=a.json|b.json release_repo_url=C:/x notes=\"two words\"",
-        _catalog())
+        'push=yes testPlans=a.json|b.json release_repo_url=C:/x notes="two words"',
+        _catalog(),
+    )
     assert intent is not None
     assert intent.prefill == {
-        "companyName": "Foxconn", "cmpKtOption": "KT161", "dryRun": False, "push": True,
-        "testPlans": ["a.json", "b.json"], "notes": "two words",
+        "companyName": "Foxconn",
+        "cmpKtOption": "KT161",
+        "dryRun": False,
+        "push": True,
+        "testPlans": ["a.json", "b.json"],
+        "notes": "two words",
     }
 
 
 def test_a_model_may_prefill_only_its_own_fields() -> None:
     manifest = release_workflow()
-    given = {"companyName": "Foxconn", "push": True, "release_repo_url": "C:/x",
-             "testPlanUploads": ["C:/anything.json"], "cmpKtOption": "not-a-choice"}
+    given = {
+        "companyName": "Foxconn",
+        "push": True,
+        "release_repo_url": "C:/x",
+        "testPlanUploads": ["C:/anything.json"],
+        "cmpKtOption": "not-a-choice",
+    }
     assert agent_prefill(manifest, given) == {"companyName": "Foxconn"}
 
 
@@ -133,7 +158,7 @@ def test_missing_settings_are_named_and_the_message_points_to_the_settings_page(
     ready = form_offer(manifest, {"companyName": "Foxconn"}, lambda _m: RELEASE_SETTINGS)
     assert ready["missing_settings"] == [] and "fill in the form" in ready["message"]
     broken = form_offer(manifest, {}, lambda _m: (_ for _ in ()).throw(OSError("locked")))
-    assert broken["missing_settings"]                 # unreadable store: shown as not set
+    assert broken["missing_settings"]  # unreadable store: shown as not set
 
 
 # -- the Gateway hands over the form ------------------------------------------
@@ -142,8 +167,12 @@ def test_missing_settings_are_named_and_the_message_points_to_the_settings_page(
 def _session_request(message: str) -> RequestContext:
     return RequestContext(
         trace=TraceIdentifiers(trace_id="trace-1", request_id="request-1", span_id="span-1"),
-        actor="engineer", namespace="engineering", channel="local", message=message,
-        session_id="session-1")
+        actor="engineer",
+        namespace="engineering",
+        channel="local",
+        message=message,
+        session_id="session-1",
+    )
 
 
 class _Calls(FakeModel):
@@ -154,27 +183,40 @@ class _Calls(FakeModel):
     def generate(self, item: ModelRequest) -> ModelResponse:
         self.calls.append(item)
         if len(self.calls) == 1:
-            return ModelResponse(trace=item.trace, model_alias=item.model_alias, tool_calls=(
-                ModelToolCall(call_id="call-1", name=self.name, arguments=self.arguments),))
-        return ModelResponse(trace=item.trace, model_alias=item.model_alias,
-                             text="Please give companyName and chipsetId.")
+            return ModelResponse(
+                trace=item.trace,
+                model_alias=item.model_alias,
+                tool_calls=(
+                    ModelToolCall(call_id="call-1", name=self.name, arguments=self.arguments),
+                ),
+            )
+        return ModelResponse(
+            trace=item.trace,
+            model_alias=item.model_alias,
+            text="Please give companyName and chipsetId.",
+        )
 
 
 def test_the_form_tool_ends_the_turn_with_the_offer_and_the_prompt_says_so() -> None:
     from host_runtime.workflow_form_tool import workflow_form_tools
 
-    model = _Calls(FORM_TOOL, {"workflow": "rs-wmt-package-release",
-                               "values": {"companyName": "Foxconn", "push": True}})
+    model = _Calls(
+        FORM_TOOL,
+        {"workflow": "rs-wmt-package-release", "values": {"companyName": "Foxconn", "push": True}},
+    )
     gateway = _declared_gateway(Handler(), model)
     gateway.engine.workflows.register(release_workflow())
     gateway.host_tools = lambda: workflow_form_tools(gateway.engine)
-    result = asyncio.run(gateway.converse(
-        _session_request("release for Foxconn"),
-        (ModelMessage(role="user", text="release for Foxconn"),)))
+    result = asyncio.run(
+        gateway.converse(
+            _session_request("release for Foxconn"),
+            (ModelMessage(role="user", text="release for Foxconn"),),
+        )
+    )
     assert result.status == "answered" and len(model.calls) == 1
     offer = offer_in(result.tools)
     assert offer is not None and offer["workflow"]["name"] == "rs-wmt-package-release"
-    assert offer["prefill"] == {"companyName": "Foxconn"}   # push is the person's choice
+    assert offer["prefill"] == {"companyName": "Foxconn"}  # push is the person's choice
     assert offer["origin"] == "agent" and result.text == offer["message"]
     tool = next(t for t in model.calls[0].tools if t.name == FORM_TOOL)
     assert tool.input_schema is not None
@@ -195,15 +237,21 @@ def test_the_form_tool_is_not_offered_without_a_person_to_fill_it() -> None:
 def test_an_incomplete_workflow_tool_call_in_a_conversation_becomes_the_form() -> None:
     handler = Handler()
     model = _Calls("release__package", {"args": "NOT-VALID"})
-    result = asyncio.run(_declared_gateway(handler, model).converse(
-        _session_request("package the release"),
-        (ModelMessage(role="user", text="package the release"),)))
+    result = asyncio.run(
+        _declared_gateway(handler, model).converse(
+            _session_request("package the release"),
+            (ModelMessage(role="user", text="package the release"),),
+        )
+    )
     offer = offer_in(result.tools)
     assert offer is not None and offer["prefill"] == {} and handler.calls == 0
     assert result.status == "answered" and len(model.calls) == 1
     # A valid call still runs: the Agent-tool path for orchestration stays.
     valid = _Calls("release__package", {"args": "quick"})
-    ran = asyncio.run(_declared_gateway(handler, valid).converse(
-        _session_request("package the release"),
-        (ModelMessage(role="user", text="package the release"),)))
+    ran = asyncio.run(
+        _declared_gateway(handler, valid).converse(
+            _session_request("package the release"),
+            (ModelMessage(role="user", text="package the release"),),
+        )
+    )
     assert ran.tools[0].workflow is not None and handler.calls == 1

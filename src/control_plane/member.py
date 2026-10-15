@@ -883,8 +883,7 @@ class MemberService:
                     (
                         other.metadata.identity.version
                         for other in packages.discover(namespace=identity.namespace)
-                        if other.metadata.identity.name == identity.name
-                        and shared(other.metadata)
+                        if other.metadata.identity.name == identity.name and shared(other.metadata)
                     ),
                     key=version_key,
                 )

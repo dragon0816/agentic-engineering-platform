@@ -9,10 +9,23 @@ from test_workflow_parameter_declaration import _manifest
 from channels import telegram_flow as flow
 
 FIELDS: list[dict[str, Any]] = [
-    {"name": "project", "label": "Project", "kind": "text", "required": True,
-     "group": "identity", "order": 10, "pattern": "^[a-z]+$"},
-    {"name": "mode", "label": "Mode", "kind": "select", "order": 20, "default": "brief",
-     "choices": [{"value": "brief", "label": "Brief"}, {"value": "full", "label": "Full"}]},
+    {
+        "name": "project",
+        "label": "Project",
+        "kind": "text",
+        "required": True,
+        "group": "identity",
+        "order": 10,
+        "pattern": "^[a-z]+$",
+    },
+    {
+        "name": "mode",
+        "label": "Mode",
+        "kind": "select",
+        "order": 20,
+        "default": "brief",
+        "choices": [{"value": "brief", "label": "Brief"}, {"value": "full", "label": "Full"}],
+    },
     {"name": "cc", "label": "CC", "kind": "emails", "order": 30},
     {"name": "limit", "label": "Limit", "kind": "integer", "order": 40, "minimum": 1},
     {"name": "send", "label": "Send mail", "kind": "boolean", "order": 50, "confirm": True},
@@ -42,8 +55,8 @@ def test_buttons_answers_skip_and_validation() -> None:
     mode = flow.answer(state, "rsx")
     assert mode.prompt is not None
     assert mode.prompt.buttons == [[("Brief", "brief"), ("Full", "full")]]
-    flow.answer(state, "Full")                           # matched by label
-    flow.answer(state, "a@example.com, b@example.com")   # list kind
+    flow.answer(state, "Full")  # matched by label
+    flow.answer(state, "a@example.com, b@example.com")  # list kind
     assert "whole number" in flow.answer(state, "many").prompt.text
     assert "minimum" in flow.answer(state, "0").prompt.text
     flow.answer(state, "5")
@@ -52,8 +65,11 @@ def test_buttons_answers_skip_and_validation() -> None:
     done = flow.answer(state, "no")
     assert done.kind == "ready"
     assert done.arguments == {
-        "project": "rsx", "mode": "full", "cc": ["a@example.com", "b@example.com"],
-        "limit": 5, "send": False,
+        "project": "rsx",
+        "mode": "full",
+        "cc": ["a@example.com", "b@example.com"],
+        "limit": 5,
+        "send": False,
     }
 
 
@@ -72,7 +88,7 @@ def test_effectful_or_privileged_runs_need_a_confirmation_tap() -> None:
     flow.begin(privileged)
     for reply in ("rsx", "/skip", "/skip", "/skip"):
         flow.answer(privileged, reply)
-    confirm = flow.answer(privileged, "yes")             # send = true is privileged
+    confirm = flow.answer(privileged, "yes")  # send = true is privileged
     assert confirm.kind == "ask" and "(privileged)" in confirm.prompt.text
     assert flow.answer(privileged, "run:no").kind == "cancelled"
 
@@ -81,12 +97,22 @@ def test_cancel_and_required_upload_refusal() -> None:
     state = _state()
     flow.begin(state)
     assert flow.answer(state, "/cancel").kind == "cancelled"
-    refused = flow.start(_manifest([
-        {"name": "file", "label": "Requirements", "kind": "upload", "required": True},
-    ]), "read")
+    refused = flow.start(
+        _manifest(
+            [
+                {"name": "file", "label": "Requirements", "kind": "upload", "required": True},
+            ]
+        ),
+        "read",
+    )
     assert isinstance(refused, str) and "Agent Web" in refused
-    optional = flow.start(_manifest([
-        {"name": "file", "label": "Requirements", "kind": "upload"},
-    ]), "read")
+    optional = flow.start(
+        _manifest(
+            [
+                {"name": "file", "label": "Requirements", "kind": "upload"},
+            ]
+        ),
+        "read",
+    )
     assert isinstance(optional, flow.FlowState) and optional.fields == ()
     assert flow.begin(optional).kind == "ready"

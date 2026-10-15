@@ -30,27 +30,45 @@ def web(tmp_path: Path) -> Any:
         for manifest in (release_workflow(), _plain("nightly-check"), _form_workflow()):
             runtime.agent.gateway.engine.workflows.register(manifest)
             (runtime.layout.workflows / f"{manifest.metadata.identity.name}.json").write_text(
-                manifest.model_dump_json(), encoding="utf-8")
+                manifest.model_dump_json(), encoding="utf-8"
+            )
         yield AgentWeb(runtime), runtime, transport
 
 
 def _form_workflow() -> WorkflowManifest:
-    return _plain("forms-chat", [
-        {"name": "company", "label": "Company", "kind": "text", "group": "identity",
-         "required": True},
-        {"name": "chipset", "label": "Chipset", "kind": "select", "allow_other": True,
-         "choices": [{"value": "kt326"}, {"value": "kt400"}]},
-        {"name": "mode", "label": "Mode", "kind": "select", "required": True,
-         "choices": [{"value": "quick"}, {"value": "deep"}]},
-        {"name": "dryRun", "label": "Dry run", "kind": "boolean", "default": True},
-    ])
+    return _plain(
+        "forms-chat",
+        [
+            {
+                "name": "company",
+                "label": "Company",
+                "kind": "text",
+                "group": "identity",
+                "required": True,
+            },
+            {
+                "name": "chipset",
+                "label": "Chipset",
+                "kind": "select",
+                "allow_other": True,
+                "choices": [{"value": "kt326"}, {"value": "kt400"}],
+            },
+            {
+                "name": "mode",
+                "label": "Mode",
+                "kind": "select",
+                "required": True,
+                "choices": [{"value": "quick"}, {"value": "deep"}],
+            },
+            {"name": "dryRun", "label": "Dry run", "kind": "boolean", "default": True},
+        ],
+    )
 
 
 def _turn(web: Any, session: str, message: str) -> dict[str, Any]:
     from host_runtime.conversations import ConversationTurnRequest
 
-    return dict(web.conversation_turn(ConversationTurnRequest(session_id=session,
-                                                              message=message)))
+    return dict(web.conversation_turn(ConversationTurnRequest(session_id=session, message=message)))
 
 
 def test_web_answers_run_x_with_the_form_and_never_asks_the_model(web: Any) -> None:
@@ -61,11 +79,12 @@ def test_web_answers_run_x_with_the_form_and_never_asks_the_model(web: Any) -> N
     assert form["workflow"]["name"] == "rs-wmt-package-release"
     # No settings on this computer yet: named, and not asked in the chat.
     assert {"release_repo_url", "work_root", "inbox_path", "allowed_root"} <= {
-        item["name"] for item in form["missing_settings"]}
+        item["name"] for item in form["missing_settings"]
+    }
     stored = replied["conversation"]["messages"][-1]
     assert stored["workflow_form"]["workflow"]["name"] == "rs-wmt-package-release"
     assert "settings page" in stored["text"]
-    assert transport.calls == []                        # the model was never asked
+    assert transport.calls == []  # the model was never asked
 
 
 def test_web_prefill_settings_and_a_workflow_without_parameters(web: Any) -> None:
@@ -73,10 +92,12 @@ def test_web_prefill_settings_and_a_workflow_without_parameters(web: Any) -> Non
 
     agent_web, runtime, _ = web
     WorkflowSettingsStore(runtime.layout.workspace_root / SETTINGS_FILE).save(
-        release_workflow().metadata.identity, RELEASE_SETTINGS)
+        release_workflow().metadata.identity, RELEASE_SETTINGS
+    )
     session = agent_web.create_conversation()["conversation"]["session_id"]
-    form = _turn(agent_web, session, "執行 rs-wmt-package-release companyName=Foxconn "
-                 "chipsetId=kt326")["answer"]["workflow_form"]
+    form = _turn(
+        agent_web, session, "執行 rs-wmt-package-release companyName=Foxconn chipsetId=kt326"
+    )["answer"]["workflow_form"]
     assert form["missing_settings"] == []
     assert form["prefill"] == {"companyName": "Foxconn", "chipsetId": "kt326"}
     plain = _turn(agent_web, session, "run nightly-check")["answer"]["workflow_form"]
@@ -93,13 +114,17 @@ def test_a_run_from_the_chat_form_is_added_to_the_conversation(web: Any) -> None
     agent_web, runtime, _ = web
     session = agent_web.create_conversation()["conversation"]["session_id"]
     _turn(agent_web, session, "run forms-chat")
-    launched = agent_web.launch_workflow(WorkflowLaunchRequest(
-        workflow=_form_workflow().metadata.identity,
-        arguments={"company": "Foxconn", "mode": "quick"},
-        idempotency_key="chat-form-1", session_id=session))
+    launched = agent_web.launch_workflow(
+        WorkflowLaunchRequest(
+            workflow=_form_workflow().metadata.identity,
+            arguments={"company": "Foxconn", "mode": "quick"},
+            idempotency_key="chat-form-1",
+            session_id=session,
+        )
+    )
     assert launched["message"]["role"] == "assistant"
     messages = runtime.state.conversation(session, runtime.actor).messages
-    assert messages[-2].text.startswith("▶ Run forms-chat from the form: company=\"Foxconn\"")
+    assert messages[-2].text.startswith('▶ Run forms-chat from the form: company="Foxconn"')
     assert messages[-1].text == launched["answer"]
 
 
@@ -114,7 +139,7 @@ def _browser_missing() -> bool:
 
 @pytest.mark.skipif(_browser_missing(), reason="no Chromium browser is installed")
 def test_the_inline_chat_form_renders_and_runs_in_a_real_browser(tmp_path: Path) -> None:
-    """"Run X" in the chat draws the Workflow's own form under the answer
+    """ "Run X" in the chat draws the Workflow's own form under the answer
     (prefilled, measured), Run records the run in the conversation, and a
     Workflow with a missing setting points to its settings instead."""
     import threading
@@ -127,16 +152,25 @@ def test_the_inline_chat_form_renders_and_runs_in_a_real_browser(tmp_path: Path)
     from integrations.browser import Browser
 
     config, layout = _chat_config(tmp_path)
-    needs = _plain("needs-settings", [
-        {"name": "inbox_path", "label": "Input inbox", "kind": "folder", "scope": "static",
-         "required": True},
-        {"name": "company", "label": "Company", "kind": "text"},
-    ])
+    needs = _plain(
+        "needs-settings",
+        [
+            {
+                "name": "inbox_path",
+                "label": "Input inbox",
+                "kind": "folder",
+                "scope": "static",
+                "required": True,
+            },
+            {"name": "company", "label": "Company", "kind": "text"},
+        ],
+    )
     with build_runtime(config, layout=layout, model_transport=_ChatGateway()) as runtime:
         for manifest in (_form_workflow(), needs):
             runtime.agent.gateway.engine.workflows.register(manifest)
             (runtime.layout.workflows / f"{manifest.metadata.identity.name}.json").write_text(
-                manifest.model_dump_json(), encoding="utf-8")
+                manifest.model_dump_json(), encoding="utf-8"
+            )
         served = AgentWebServer(AgentWeb(runtime))
         thread = threading.Thread(target=served.serve_forever, daemon=True)
         thread.start()
@@ -153,15 +187,23 @@ def test_the_inline_chat_form_renders_and_runs_in_a_real_browser(tmp_path: Path)
             raise AssertionError(expression)
 
         def measure(selector: str) -> list[int]:
-            return json.loads(str(browser._evaluate(
-                "JSON.stringify((() => { const r = document.querySelector("
-                + json.dumps(selector) + ").getBoundingClientRect();"
-                " return [Math.round(r.width), Math.round(r.height)]; })())")))
+            return json.loads(
+                str(
+                    browser._evaluate(
+                        "JSON.stringify((() => { const r = document.querySelector("
+                        + json.dumps(selector)
+                        + ").getBoundingClientRect();"
+                        " return [Math.round(r.width), Math.round(r.height)]; })())"
+                    )
+                )
+            )
 
         def ask(message: str) -> None:
             browser._evaluate(
                 "(() => { const f = document.getElementById('message'); f.value = "
-                + json.dumps(message) + "; document.getElementById('ask').requestSubmit(); })()")
+                + json.dumps(message)
+                + "; document.getElementById('ask').requestSubmit(); })()"
+            )
 
         try:
             browser.navigate(served.address)
@@ -176,36 +218,55 @@ def test_the_inline_chat_form_renders_and_runs_in_a_real_browser(tmp_path: Path)
             shots = os.environ.get("AEP_UI_SHOTS")
             if shots:
                 browser.screenshot(Path(shots) / "chat-run-form.png")
+            assert (
+                browser._evaluate(
+                    'document.querySelector(".chat-run-form[open] input[id$=\\"-company\\"]").value'
+                )
+                == "Foxconn"
+            )
             assert browser._evaluate(
-                'document.querySelector(".chat-run-form[open] input[id$=\\"-company\\"]").value'
-            ) == "Foxconn"
-            assert browser._evaluate(
-                'document.querySelector(".chat-run-form[open] input[list]") !== null')
+                'document.querySelector(".chat-run-form[open] input[list]") !== null'
+            )
             assert not browser._evaluate(
-                "document.documentElement.scrollWidth > document.documentElement.clientWidth")
+                "document.documentElement.scrollWidth > document.documentElement.clientWidth"
+            )
             browser._evaluate(
-                '(() => { const s = document.querySelector('
+                "(() => { const s = document.querySelector("
                 '".chat-run-form[open] select[id$=\\"-mode\\"]"); s.value = "deep"; '
-                's.dispatchEvent(new Event("change")); })()')
+                's.dispatchEvent(new Event("change")); })()'
+            )
             browser._evaluate(
-                'document.querySelector(".chat-run-form[open] .chat-run-actions button").click()')
-            wait('document.getElementById("log").innerText.includes("Run forms-chat from the '
-                 'form")', 60)
+                'document.querySelector(".chat-run-form[open] .chat-run-actions button").click()'
+            )
+            wait(
+                'document.getElementById("log").innerText.includes("Run forms-chat from the form")',
+                60,
+            )
             # Only the newest answer's form is open; the run's own answer has none.
             assert browser._evaluate('document.querySelectorAll(".chat-run-form").length') == 1
 
             ask("run needs-settings")
             wait('!!document.querySelector(".chat-run-form[open] .chat-run-missing")')
-            assert "Input inbox" in str(browser._evaluate(
-                'document.querySelector(".chat-run-form[open] .chat-run-missing").innerText'))
-            assert browser._evaluate(
-                'document.querySelector(".chat-run-form[open] .chat-run-actions button")'
-                '.disabled') is True
+            assert "Input inbox" in str(
+                browser._evaluate(
+                    'document.querySelector(".chat-run-form[open] .chat-run-missing").innerText'
+                )
+            )
+            assert (
+                browser._evaluate(
+                    'document.querySelector(".chat-run-form[open] .chat-run-actions button")'
+                    ".disabled"
+                )
+                is True
+            )
             browser._evaluate(
-                'document.querySelector(".chat-run-form[open] .chat-run-missing button").click()')
+                'document.querySelector(".chat-run-form[open] .chat-run-missing button").click()'
+            )
             wait('document.getElementById("panel-installed").hasAttribute("data-open")')
-            wait('document.getElementById("capability-detail-content").innerText'
-                 '.includes("needs-settings")')
+            wait(
+                'document.getElementById("capability-detail-content").innerText'
+                '.includes("needs-settings")'
+            )
         finally:
             browser.close()
             browser.discard_profile()

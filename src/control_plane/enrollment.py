@@ -209,8 +209,9 @@ class InMemoryEnrollmentRegistry:
 
     def users(self) -> tuple[PlatformUser, ...]:
         """Every member who accepted an invitation, for an administrator."""
-        return tuple(_copy(item) for item in sorted(
-            self._users.values(), key=lambda entry: entry.actor))
+        return tuple(
+            _copy(item) for item in sorted(self._users.values(), key=lambda entry: entry.actor)
+        )
 
     def user_changes(self, actor: Symbol | None = None) -> tuple[PlatformUserChange, ...]:
         """The audit of role and group changes, oldest first."""
@@ -245,7 +246,8 @@ class InMemoryEnrollmentRegistry:
             raise EnrollmentError("user_missing")
         if user.role == "platform_admin" and checked_role != "platform_admin":
             others = [
-                item for item in self._users.values()
+                item
+                for item in self._users.values()
                 if item.actor != key and item.role == "platform_admin" and item.status == "active"
             ]
             if not others:
@@ -298,8 +300,10 @@ class InMemoryEnrollmentRegistry:
 
     def devices(self) -> tuple[BridgeDevice, ...]:
         """Every registered device, for an administrator's list."""
-        return tuple(_copy(item) for item in sorted(
-            self._devices.values(), key=lambda entry: entry.bridge_id))
+        return tuple(
+            _copy(item)
+            for item in sorted(self._devices.values(), key=lambda entry: entry.bridge_id)
+        )
 
     def advertisement(self, bridge_id: Symbol) -> BridgeRegistration:
         """What this device last said it can run. It is the device's own

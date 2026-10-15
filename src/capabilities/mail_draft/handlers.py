@@ -94,8 +94,9 @@ class MailDraftHandler:
             receipt = await asyncio.to_thread(lambda: self._writer().save(draft))
         except DraftError as error:
             if request.best_effort:
-                return MailDraftResult(drafted=False, to=draft.to, subject=draft.subject,
-                                       error=error.code)
+                return MailDraftResult(
+                    drafted=False, to=draft.to, subject=draft.subject, error=error.code
+                )
             raise CapabilityRefused(error.code) from None
         return MailDraftResult(
             drafted=receipt.saved,

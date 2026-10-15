@@ -136,8 +136,10 @@ def apply_isolated(
         changed_paths=receipt.changed,
         selected_files=tuple(
             ReleaseSelectedFile(
-                kind=item.kind, name=item.name,
-                destination=item.destination, sha256=item.sha256,
+                kind=item.kind,
+                name=item.name,
+                destination=item.destination,
+                sha256=item.sha256,
             )
             for item in plan.selected_files
         ),

@@ -104,7 +104,8 @@ class KnowledgeProcedure(Contract):
                 for facet in self.facets
                 for requirement in facet.evidence_requirements
                 for pattern in (
-                    requirement.question_pattern, *requirement.evidence_patterns,
+                    requirement.question_pattern,
+                    *requirement.evidence_patterns,
                 )
             ),
         ]
@@ -124,9 +125,11 @@ class KnowledgeProcedure(Contract):
 
     def requested_facets(self, question: str) -> tuple[KnowledgeFacetInstruction, ...]:
         return tuple(
-            facet for facet in self.facets
-            if any(re.search(pattern, question, re.IGNORECASE)
-                   for pattern in facet.request_patterns)
+            facet
+            for facet in self.facets
+            if any(
+                re.search(pattern, question, re.IGNORECASE) for pattern in facet.request_patterns
+            )
         )
 
     def subject(self, question: str) -> str | None:

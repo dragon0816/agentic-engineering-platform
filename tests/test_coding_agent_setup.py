@@ -36,8 +36,9 @@ PYTHON = "C:/aep/.venv/Scripts/python.exe"
 def env(tmp_path: Path, *found: str, **variables: str) -> Environment:
     home = tmp_path / "home"
     home.mkdir(exist_ok=True)
-    return Environment(home, variables, which=lambda name: f"C:/bin/{name}.exe"
-                       if name in found else None)
+    return Environment(
+        home, variables, which=lambda name: f"C:/bin/{name}.exe" if name in found else None
+    )
 
 
 def launch(tmp_path: Path, python: str = PYTHON) -> Launch:
@@ -61,8 +62,9 @@ def test_claude_code_gets_skills_and_both_servers_beside_its_own(tmp_path: Path)
         marker = json.loads((folder / MARKER_FILE).read_text(encoding="utf-8"))
         assert marker == {"managed_by": "aep", "skill": name, "version": bundle_version()}
     config = json.loads((home / ".claude.json").read_text(encoding="utf-8"))
-    assert config["numStartups"] == 7 and config["mcpServers"]["github"] == own["mcpServers"][
-        "github"]
+    assert (
+        config["numStartups"] == 7 and config["mcpServers"]["github"] == own["mcpServers"]["github"]
+    )
     authoring = config["mcpServers"][AUTHORING_SERVER]
     assert authoring["command"] == PYTHON and authoring["type"] == "stdio"
     assert authoring["args"][:3] == ["-m", "host_runtime.cli", "mcp"]
@@ -75,8 +77,11 @@ def test_claude_code_gets_skills_and_both_servers_beside_its_own(tmp_path: Path)
     again = install("claude-code", environment, launch(tmp_path))
     assert not again.changed and backups(home) == first.backups
     report = status("claude-code", environment)
-    assert report["detected"] and report["current"] and report["servers"] == {
-        AUTHORING_SERVER: True, ASSISTANT_SERVER: True}
+    assert (
+        report["detected"]
+        and report["current"]
+        and report["servers"] == {AUTHORING_SERVER: True, ASSISTANT_SERVER: True}
+    )
 
 
 def test_the_persons_own_skill_or_server_of_the_same_name_is_kept(tmp_path: Path) -> None:
@@ -85,8 +90,10 @@ def test_the_persons_own_skill_or_server_of_the_same_name_is_kept(tmp_path: Path
     mine = home / ".claude" / "skills" / "aep-knowledge"
     mine.mkdir(parents=True)
     (mine / "SKILL.md").write_text("my own", encoding="utf-8")
-    (home / ".claude.json").write_text(json.dumps({"mcpServers": {
-        "aep": {"type": "http", "url": "https://mine"}}}), encoding="utf-8")
+    (home / ".claude.json").write_text(
+        json.dumps({"mcpServers": {"aep": {"type": "http", "url": "https://mine"}}}),
+        encoding="utf-8",
+    )
     changes = install("claude-code", environment, launch(tmp_path))
     assert (mine / "SKILL.md").read_text(encoding="utf-8") == "my own"
     servers = json.loads((home / ".claude.json").read_text(encoding="utf-8"))["mcpServers"]
@@ -168,25 +175,27 @@ def test_all_skips_agents_that_are_not_here_and_says_so(tmp_path: Path) -> None:
     assert "GitHub Copilot CLI: not found on this computer; skipped" in lines
     assert not (environment.home / ".codex").exists()
     assert "Claude Code: already up to date" in apply(
-        "install", agent_setup.AGENT_NAMES, environment, launch(tmp_path))
+        "install", agent_setup.AGENT_NAMES, environment, launch(tmp_path)
+    )
     # A configuration folder counts as installed even when the command is not on PATH.
     (environment.home / ".copilot").mkdir()
     assert "GitHub Copilot CLI: installed/updated" in apply(
-        "install", ("copilot",), environment, launch(tmp_path))
+        "install", ("copilot",), environment, launch(tmp_path)
+    )
 
 
 def test_an_outdated_skill_is_reported_and_rewritten(tmp_path: Path) -> None:
     environment = env(tmp_path, "claude")
     install("claude-code", environment, launch(tmp_path))
     folder = environment.home / ".claude" / "skills" / "aep-workflow-creator"
-    (folder / MARKER_FILE).write_text(json.dumps({"managed_by": "aep", "version": "old"}),
-                                      encoding="utf-8")
+    (folder / MARKER_FILE).write_text(
+        json.dumps({"managed_by": "aep", "version": "old"}), encoding="utf-8"
+    )
     (folder / "SKILL.md").write_text("old text", encoding="utf-8")
     report = status("claude-code", environment)
     assert report["skills"]["aep-workflow-creator"] == "old" and not report["current"]
     install("claude-code", environment, launch(tmp_path))
-    assert (folder / "SKILL.md").read_text(encoding="utf-8") == skill_text(
-        "aep-workflow-creator")
+    assert (folder / "SKILL.md").read_text(encoding="utf-8") == skill_text("aep-workflow-creator")
     assert status("claude-code", environment)["current"]
 
 
@@ -199,7 +208,9 @@ def test_an_unreadable_config_is_not_changed(tmp_path: Path) -> None:
 
 
 def test_the_cli_installs_reports_and_removes_for_every_agent(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     environment = env(tmp_path, "claude", "copilot")
     monkeypatch.setattr(Environment, "current", classmethod(lambda cls: environment))
@@ -207,25 +218,42 @@ def test_the_cli_installs_reports_and_removes_for_every_agent(
     assert main(["assets", "--config", config, "connect", "--for", "all", "--user"]) == 0
     printed = capsys.readouterr().out
     assert "Claude Code: installed/updated" in printed and "Codex: not found" in printed
-    assert main(["assets", "--config", config, "connect", "--for", "all", "--user",
-                 "--status"]) == 0
+    assert (
+        main(["assets", "--config", config, "connect", "--for", "all", "--user", "--status"]) == 0
+    )
     report = {item["agent"]: item for item in json.loads(capsys.readouterr().out)}
     assert report["claude-code"]["current"] and report["copilot"]["current"]
     assert not report["codex"]["installed"]
-    assert main(["assets", "--config", config, "connect", "--for", "all", "--user",
-                 "--remove"]) == 0
+    assert (
+        main(["assets", "--config", config, "connect", "--for", "all", "--user", "--remove"]) == 0
+    )
     assert "Claude Code: removed" in capsys.readouterr().out
     assert not status("claude-code", environment)["installed"]
     # --remove belongs to --user.
-    assert main(["assets", "--config", config, "connect", "--for", "codex", "--project",
-                 str(tmp_path), "--remove"]) == 2
+    assert (
+        main(
+            [
+                "assets",
+                "--config",
+                config,
+                "connect",
+                "--for",
+                "codex",
+                "--project",
+                str(tmp_path),
+                "--remove",
+            ]
+        )
+        == 2
+    )
 
 
 def test_no_token_is_written_into_an_agents_configuration(tmp_path: Path) -> None:
     environment = env(tmp_path, "claude", "codex", "copilot")
     apply("install", agent_setup.AGENT_NAMES, environment, launch(tmp_path))
-    written = "".join(path.read_text(encoding="utf-8") for path in environment.home.rglob("*")
-                      if path.is_file())
+    written = "".join(
+        path.read_text(encoding="utf-8") for path in environment.home.rglob("*") if path.is_file()
+    )
     # The assistant bridge reads the token at call time; no configuration carries it.
     assert "Bearer" not in written and "Authorization" not in written
 
@@ -260,11 +288,17 @@ def test_the_scripts_parse_and_declare_the_switch() -> None:
         " $e = $null; $t = $null;"
         " $a = [System.Management.Automation.Language.Parser]::ParseFile("
         f"(Join-Path '{TEMPLATE}' $f), [ref]$t, [ref]$e);"
-        " if ($e.Count) { throw \"$f has $($e.Count) parse errors\" };"
+        ' if ($e.Count) { throw "$f has $($e.Count) parse errors" };'
         " $names += ($f + '=' + ($a.ParamBlock.Parameters.Name.VariablePath.UserPath -join ',')) };"
-        " $names -join ';'")
-    done = subprocess.run([str(_powershell()), "-NoProfile", "-Command", script],
-                          capture_output=True, text=True, timeout=120, check=False)
+        " $names -join ';'"
+    )
+    done = subprocess.run(
+        [str(_powershell()), "-NoProfile", "-Command", script],
+        capture_output=True,
+        text=True,
+        timeout=120,
+        check=False,
+    )
     assert done.returncode == 0, done.stderr
     params = dict(item.split("=", 1) for item in done.stdout.strip().split(";"))
     assert "NoAgentSkills" in params["install.ps1"].split(",")

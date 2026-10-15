@@ -22,16 +22,30 @@ SCHEMA_VERSION: Literal["aep.telemetry.v1"] = "aep.telemetry.v1"
 EventStatus = Literal["started", "succeeded", "failed", "skipped", "cancelled"]
 
 # What `run_kind` names (contract v0.2 addition).
-RUN_KINDS = ("conversation_turn", "workflow_run", "knowledge_query", "coding_change",
-             "capability_call", "benchmark_run", "benchmark_grading")
+RUN_KINDS = (
+    "conversation_turn",
+    "workflow_run",
+    "knowledge_query",
+    "coding_change",
+    "capability_call",
+    "benchmark_run",
+    "benchmark_grading",
+)
 
 # Recommended state names per harness (contract v0.2 addition), so state graphs
 # compare across runs; `state` stays an open string.
 STATES = {
     # Every domain on the shared Harness reports the same phases (unification
     # 2026-10-09), so state graphs compare across Coding, Workflow and Knowledge.
-    "harness": ("collecting", "executing", "validating", "validated", "needs_input",
-                "failed", "stopped"),
+    "harness": (
+        "collecting",
+        "executing",
+        "validating",
+        "validated",
+        "needs_input",
+        "failed",
+        "stopped",
+    ),
     "conversation_turn": ("routing", "skill_selection", "model", "tool", "answer"),
     "workflow_run": ("step",),
 }
@@ -42,11 +56,13 @@ MAX_LIST = 20
 # Keys that would carry content rather than metadata are never stored.
 _CONTENT_KEYS = re.compile(
     r"(prompt|message|text|content|answer|question|document|payload|body|script|"
-    r"password|secret|token$|api_key|authorization|credential)", re.IGNORECASE)
+    r"password|secret|token$|api_key|authorization|credential)",
+    re.IGNORECASE,
+)
 # Token counts are metadata even though the word appears in their names.
-_ALLOWED_KEYS = frozenset({
-    "input_tokens", "output_tokens", "context_tokens", "context_limit_tokens",
-    "max_output_tokens"})
+_ALLOWED_KEYS = frozenset(
+    {"input_tokens", "output_tokens", "context_tokens", "context_limit_tokens", "max_output_tokens"}
+)
 
 
 class TelemetryEvent(Contract):

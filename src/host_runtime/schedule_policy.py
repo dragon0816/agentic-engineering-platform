@@ -91,8 +91,7 @@ def target_capabilities(
         if manifest is None:
             return "workflow_not_installed"
         identities = tuple(
-            step.capability if isinstance(step, WorkflowStep) else step
-            for step in manifest.steps
+            step.capability if isinstance(step, WorkflowStep) else step for step in manifest.steps
         )
     else:
         template = task_templates.get(target.key)
@@ -129,8 +128,7 @@ def schedule_context(schedule: ScheduleRecord, trace: TraceIdentifiers) -> Reque
         actor=definition.owner,
         namespace=target.namespace,
         message=(
-            f"scheduled {definition.target_kind} "
-            f"{target.namespace}/{target.name}@{target.version}"
+            f"scheduled {definition.target_kind} {target.namespace}/{target.name}@{target.version}"
         ),
         channel="local",
     )
@@ -198,8 +196,6 @@ class ScheduleGrantAuthorizer:
             ),
         )
 
-    def __call__(
-        self, schedule: ScheduleRecord, trace: TraceIdentifiers
-    ) -> ExecutionAuthorization:
+    def __call__(self, schedule: ScheduleRecord, trace: TraceIdentifiers) -> ExecutionAuthorization:
         """The plain authorizer shape: never approves a run needing a human."""
         return self.decide(schedule, trace, run_approved=False, now=self._clock()).authorization

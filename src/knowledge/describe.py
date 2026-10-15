@@ -91,11 +91,14 @@ class ImageDescriber:
         )
         try:
             response = self.model.generate(request)
-            if (response.failure is not None
-                    and response.failure.code == "model_output_truncated"
-                    and self.retry_output_tokens > self.max_output_tokens):
-                response = self.model.generate(request.model_copy(
-                    update={"max_output_tokens": self.retry_output_tokens}))
+            if (
+                response.failure is not None
+                and response.failure.code == "model_output_truncated"
+                and self.retry_output_tokens > self.max_output_tokens
+            ):
+                response = self.model.generate(
+                    request.model_copy(update={"max_output_tokens": self.retry_output_tokens})
+                )
         except Exception as error:  # noqa: BLE001 - an adapter's failure is a status here
             return ImageDescription(
                 image_ref=image_ref, status="model_failed", failure=failure_from_exception(error)
@@ -123,8 +126,9 @@ class ImageDescriber:
         hold (an image that was never staged) are `missing_bytes`. `on_image`
         hears (done, total) after each image, for a progress bar."""
         results: dict[str, ImageDescription] = {}
-        total = len({s.image_ref for s in sections
-                     if s.image_ref is not None and needs_description(s)})
+        total = len(
+            {s.image_ref for s in sections if s.image_ref is not None and needs_description(s)}
+        )
         issued = 0
         updated: list[RawSection] = []
         for section in sections:

@@ -41,8 +41,14 @@ from scripts.build_windows_preview import BUNDLE_NAME, build  # noqa: E402
 #: The dependency wheels the bundle carries; `.github/workflows/verify.yml` downloads
 #: the same list, and a test holds the two together.
 DEPENDENCIES = (
-    "pydantic>=2.10,<3", "tzdata>=2025.2,<2028", "openpyxl>=3.1,<4", "pypdf>=6,<7",
-    "pywin32>=306", "matplotlib>=3.11,<4", "numpy>=1.26,<2", "contourpy>=1.3,<1.4",
+    "pydantic>=2.10,<3",
+    "tzdata>=2025.2,<2028",
+    "openpyxl>=3.1,<4",
+    "pypdf>=6,<7",
+    "pywin32>=306",
+    "matplotlib>=3.11,<4",
+    "numpy>=1.26,<2",
+    "contourpy>=1.3,<1.4",
 )
 MANUAL = "INSTALL.zh-TW.md"
 LATEST = "latest.json"
@@ -54,8 +60,9 @@ class ReleaseError(Exception):
 
 def run(command: list[str], cwd: Path = REPO) -> str:
     print("  $ " + " ".join(command), flush=True)
-    done = subprocess.run(command, cwd=cwd, text=True, encoding="utf-8", errors="replace",
-                          capture_output=True)
+    done = subprocess.run(
+        command, cwd=cwd, text=True, encoding="utf-8", errors="replace", capture_output=True
+    )
     if done.returncode != 0:
         tail = "\n".join((done.stdout + done.stderr).strip().splitlines()[-25:])
         raise ReleaseError(f"failed: {' '.join(command[:4])}\n{tail}")
@@ -74,18 +81,30 @@ def previous_revision(releases: Path) -> str | None:
     return revision if isinstance(revision, str) else None
 
 
-def release_notes(*, release: str, revision: str, previous: str | None,
-                  commits: list[str], created: str, tag: str | None = None) -> str:
+def release_notes(
+    *,
+    release: str,
+    revision: str,
+    previous: str | None,
+    commits: list[str],
+    created: str,
+    tag: str | None = None,
+) -> str:
     lines = [
-        f"# AEP Windows release {release}", "",
+        f"# AEP Windows release {release}",
+        "",
         f"- Source revision: `{revision}`" + (f" (git tag `{tag}`)" if tag else ""),
         f"- Built: {created}",
         f"- Previous release: `{previous}`" if previous else "- Previous release: (first release)",
-        "", "## How to install or update", "",
+        "",
+        "## How to install or update",
+        "",
         "- First installation: unzip to a short path such as `C:\\aep`, run `install.cmd`.",
         "- Update: close Agent Web, unzip the new release, run `update.cmd` (settings kept).",
         f"- Details: `{MANUAL}` in this folder and inside the zip.",
-        "", "## Changes since the previous release", "",
+        "",
+        "## Changes since the previous release",
+        "",
     ]
     lines += [f"- {commit}" for commit in commits] or ["- (no new commits)"]
     return "\n".join(lines) + "\n"
@@ -118,28 +137,61 @@ def wheels(work: Path, revision: str) -> tuple[Path, Path, Path]:
     with zipfile.ZipFile(archive) as bundle:
         bundle.extractall(source)
     print("Building the platform wheel ...", flush=True)
-    run([python, "-m", "pip", "wheel", "--no-deps", "--no-build-isolation",
-         "--disable-pip-version-check", "-w", str(work / "wheel"), str(source)])
+    run(
+        [
+            python,
+            "-m",
+            "pip",
+            "wheel",
+            "--no-deps",
+            "--no-build-isolation",
+            "--disable-pip-version-check",
+            "-w",
+            str(work / "wheel"),
+            str(source),
+        ]
+    )
     built = sorted((work / "wheel").glob("agentic_engineering_platform-*.whl"))
     if len(built) != 1:
         raise ReleaseError("the platform wheel was not built")
     print("Downloading dependency wheels for 64-bit Windows Python 3.12 ...", flush=True)
-    run([python, "-m", "pip", "download", "--disable-pip-version-check",
-         "--only-binary=:all:", "--platform", "win_amd64", "--python-version", "3.12",
-         "--implementation", "cp", "--dest", str(work / "dependencies"), *DEPENDENCIES])
+    run(
+        [
+            python,
+            "-m",
+            "pip",
+            "download",
+            "--disable-pip-version-check",
+            "--only-binary=:all:",
+            "--platform",
+            "win_amd64",
+            "--python-version",
+            "3.12",
+            "--implementation",
+            "cp",
+            "--dest",
+            str(work / "dependencies"),
+            *DEPENDENCIES,
+        ]
+    )
     return source, built[0], work / "dependencies"
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--output-dir", type=Path, default=REPO / "dist" / "releases")
-    parser.add_argument("--publish-dir", type=Path,
-                        help="also copy the release folder here, e.g. a shared OneDrive folder")
+    parser.add_argument(
+        "--publish-dir",
+        type=Path,
+        help="also copy the release folder here, e.g. a shared OneDrive folder",
+    )
     parser.add_argument("--quick", action="store_true", help="skip the test suite")
     parser.add_argument("--skip-checks", action="store_true", help="skip ruff, mypy and tests")
-    parser.add_argument("--allow-dirty", action="store_true",
-                        help="release although tracked files have uncommitted changes "
-                             "(they are NOT in the bundle)")
+    parser.add_argument(
+        "--allow-dirty",
+        action="store_true",
+        help="release although tracked files have uncommitted changes (they are NOT in the bundle)",
+    )
     parser.add_argument("--notes-since", help="list commits since this revision")
     parser.add_argument("--no-tag", action="store_true", help="do not tag the revision")
     args = parser.parse_args()
@@ -147,8 +199,10 @@ def main() -> int:
         revision = git("rev-parse", "HEAD")
         dirty = git("status", "--porcelain", "--untracked-files=no")
         if dirty and not args.allow_dirty:
-            raise ReleaseError("commit or stash these changes first; the bundle is built "
-                               "from the committed revision:\n" + dirty)
+            raise ReleaseError(
+                "commit or stash these changes first; the bundle is built "
+                "from the committed revision:\n" + dirty
+            )
         if not args.skip_checks:
             verify(args.quick)
         releases = args.output_dir.resolve()
@@ -163,27 +217,59 @@ def main() -> int:
             source, platform_wheel, dependencies = wheels(Path(temporary), revision)
             print("Building the offline bundle ...", flush=True)
             # The installer scripts and manuals come from the same export as the wheel.
-            archive = build(repo=source, platform_wheel=platform_wheel,
-                            dependency_dir=dependencies, output_dir=folder, revision=revision)
+            archive = build(
+                repo=source,
+                platform_wheel=platform_wheel,
+                dependency_dir=dependencies,
+                output_dir=folder,
+                revision=revision,
+            )
             shutil.copy2(source / "deploy" / "windows-preview" / MANUAL, folder / MANUAL)
         digest = sha256(archive)
         (folder / "SHA256SUMS.txt").write_text(f"{digest}  {archive.name}\n", encoding="utf-8")
         previous = args.notes_since or previous_revision(releases)
         log_range = f"{previous}..{revision}" if previous else revision
-        commits = git("log", "--no-merges", "--format=%h %s", *(
-            [log_range] if previous else ["-30", revision])).splitlines()
-        (folder / "RELEASE_NOTES.md").write_text(release_notes(
-            release=release, revision=revision, previous=previous, commits=commits,
-            created=created.isoformat(timespec="minutes"),
-            tag=None if args.no_tag else tag), encoding="utf-8")
+        commits = git(
+            "log",
+            "--no-merges",
+            "--format=%h %s",
+            *([log_range] if previous else ["-30", revision]),
+        ).splitlines()
+        (folder / "RELEASE_NOTES.md").write_text(
+            release_notes(
+                release=release,
+                revision=revision,
+                previous=previous,
+                commits=commits,
+                created=created.isoformat(timespec="minutes"),
+                tag=None if args.no_tag else tag,
+            ),
+            encoding="utf-8",
+        )
         if not args.no_tag:
-            git("tag", "-a", tag, revision, "-m",
-                f"AEP Windows release {release}\n\n{archive.name}\nsha256 {digest}")
-        (releases / LATEST).write_text(json.dumps({
-            "release": release, "revision": revision, "tag": None if args.no_tag else tag,
-            "zip": archive.name, "sha256": digest,
-            "created": created.isoformat(timespec="seconds")}, indent=2) + "\n",
-            encoding="utf-8")
+            git(
+                "tag",
+                "-a",
+                tag,
+                revision,
+                "-m",
+                f"AEP Windows release {release}\n\n{archive.name}\nsha256 {digest}",
+            )
+        (releases / LATEST).write_text(
+            json.dumps(
+                {
+                    "release": release,
+                    "revision": revision,
+                    "tag": None if args.no_tag else tag,
+                    "zip": archive.name,
+                    "sha256": digest,
+                    "created": created.isoformat(timespec="seconds"),
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
         published = None
         if args.publish_dir is not None:
             published = args.publish_dir / release

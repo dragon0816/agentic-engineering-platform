@@ -26,7 +26,8 @@ def _tap(update_id: int, sender: int, data: str) -> dict[str, Any]:
     return {
         "update_id": update_id,
         "callback_query": {
-            "id": f"cb-{update_id}", "from": {"id": sender, "is_bot": False},
+            "id": f"cb-{update_id}",
+            "from": {"id": sender, "is_bot": False},
             "message": {"message_id": 1, "chat": {"id": sender, "type": "private"}},
             "data": data,
         },
@@ -34,16 +35,27 @@ def _tap(update_id: int, sender: int, data: str) -> dict[str, Any]:
 
 
 def test_run_asks_each_field_then_executes_through_the_agent(tmp_path: Path) -> None:
-    transport = FakeTransport([
-        [update(1, OWNER, "/run 7")],
-        [update(2, OWNER, "BAD")],
-        [update(3, OWNER, "quick")],
-    ])
+    transport = FakeTransport(
+        [
+            [update(1, OWNER, "/run 7")],
+            [update(2, OWNER, "BAD")],
+            [update(3, OWNER, "quick")],
+        ]
+    )
     item, agent, runner = ingress(tmp_path, transport)
-    _install(agent, [
-        {"name": "package", "label": "Mode", "kind": "text", "required": True,
-         "pattern": "^[a-z]+$", "help": "lower-case word"},
-    ])
+    _install(
+        agent,
+        [
+            {
+                "name": "package",
+                "label": "Mode",
+                "kind": "text",
+                "required": True,
+                "pattern": "^[a-z]+$",
+                "help": "lower-case word",
+            },
+        ],
+    )
     first = poll(item).deliveries[0]
     assert first.disposition == "answered" and "Mode *" in (first.reply or "")
     assert "lower-case word" in (first.reply or "")
@@ -69,16 +81,31 @@ def test_choice_fields_send_an_inline_keyboard_and_taps_are_acknowledged(
 ) -> None:
     transport = FakeTransport([[update(1, OWNER, "/run release-validation-form")]])
     item, agent, _runner = ingress(tmp_path, transport)
-    _install(agent, [
-        {"name": "package", "label": "Mode", "kind": "select",
-         "choices": [{"value": "quick", "label": "Quick"}, {"value": "deep", "label": "Deep"}]},
-    ])
+    _install(
+        agent,
+        [
+            {
+                "name": "package",
+                "label": "Mode",
+                "kind": "select",
+                "choices": [
+                    {"value": "quick", "label": "Quick"},
+                    {"value": "deep", "label": "Deep"},
+                ],
+            },
+        ],
+    )
     first = poll(item).deliveries[0]
     assert first.buttons == ((("Quick", "quick"), ("Deep", "deep")),)
     sent = [payload for url, payload in transport.calls if url.endswith("/sendMessage")]
-    assert sent[-1]["reply_markup"] == {"inline_keyboard": [[
-        {"text": "Quick", "callback_data": "quick"}, {"text": "Deep", "callback_data": "deep"},
-    ]]}
+    assert sent[-1]["reply_markup"] == {
+        "inline_keyboard": [
+            [
+                {"text": "Quick", "callback_data": "quick"},
+                {"text": "Deep", "callback_data": "deep"},
+            ]
+        ]
+    }
     transport.batches.append([_tap(2, OWNER, "deep")])
     poll(item)
     acknowledged = [
@@ -88,12 +115,14 @@ def test_choice_fields_send_an_inline_keyboard_and_taps_are_acknowledged(
 
 
 def test_cancel_unknown_workflow_and_unmapped_sender(tmp_path: Path) -> None:
-    transport = FakeTransport([
-        [update(1, OWNER, "/run 7")],
-        [update(2, OWNER, "/cancel")],
-        [update(3, OWNER, "/run nothing-like-it")],
-        [update(4, STRANGER, "/run 7")],
-    ])
+    transport = FakeTransport(
+        [
+            [update(1, OWNER, "/run 7")],
+            [update(2, OWNER, "/cancel")],
+            [update(3, OWNER, "/run nothing-like-it")],
+            [update(4, STRANGER, "/run 7")],
+        ]
+    )
     item, agent, runner = ingress(tmp_path, transport)
     _install(agent, [{"name": "package", "label": "Mode", "kind": "text", "required": True}])
     poll(item)
@@ -119,7 +148,7 @@ def test_an_effectful_workflow_waits_for_the_run_tap(tmp_path: Path) -> None:
     assert waiting.disposition == "answered"
     assert "effects: external_side_effect" in (waiting.reply or "")
     assert waiting.buttons == ((("Run", "run:yes"), ("Cancel", "run:no")),)
-    assert runner.bridge.events == ()            # nothing ran before the tap
+    assert runner.bridge.events == ()  # nothing ran before the tap
     transport.batches.append([_tap(3, OWNER, "run:no")])
     assert poll(item).deliveries[0].reply == "Cancelled."
     assert runner.bridge.events == ()

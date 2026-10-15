@@ -42,8 +42,9 @@ class TelemetryStore:
     def __init__(self, path: Path | str) -> None:
         self.path = Path(path)
         self._lock = threading.Lock()
-        self._conn = sqlite3.connect(str(self.path), isolation_level=None,
-                                     check_same_thread=False, timeout=10)
+        self._conn = sqlite3.connect(
+            str(self.path), isolation_level=None, check_same_thread=False, timeout=10
+        )
         # Takes effect on a new file only; lets retention give space back.
         self._conn.execute("PRAGMA auto_vacuum=INCREMENTAL")
         self._conn.execute("PRAGMA journal_mode=WAL")
@@ -64,9 +65,17 @@ class TelemetryStore:
                     cursor = self._conn.execute(
                         "INSERT OR IGNORE INTO events (event_id, run_id, sequence, timestamp,"
                         " event_type, state, status, record) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                        (event.event_id, event.run_id, event.sequence,
-                         event.timestamp.astimezone(UTC).isoformat(), event.event_type,
-                         event.state, event.status, event.model_dump_json()))
+                        (
+                            event.event_id,
+                            event.run_id,
+                            event.sequence,
+                            event.timestamp.astimezone(UTC).isoformat(),
+                            event.event_type,
+                            event.state,
+                            event.status,
+                            event.model_dump_json(),
+                        ),
+                    )
                     added += cursor.rowcount
                     if event.event_type in ("run.started", "run.completed"):
                         self._summarize(event, now)
@@ -87,35 +96,78 @@ class TelemetryStore:
                 " ON CONFLICT(run_id) DO UPDATE SET run_kind = excluded.run_kind,"
                 " parent_run_id = excluded.parent_run_id, started_at = excluded.started_at,"
                 " strategy_id = excluded.strategy_id, updated_at = excluded.updated_at",
-                (event.run_id, a.get("run_kind"), a.get("parent_run_id"), event.trace_id,
-                 stamp, a.get("strategy_id"), a.get("skill_id"), a.get("model_alias"), now))
+                (
+                    event.run_id,
+                    a.get("run_kind"),
+                    a.get("parent_run_id"),
+                    event.trace_id,
+                    stamp,
+                    a.get("strategy_id"),
+                    a.get("skill_id"),
+                    a.get("model_alias"),
+                    now,
+                ),
+            )
             return
-        summary = {k: a.get(k) for k in ("duration_ms", "llm_calls", "tool_calls",
-                                          "input_tokens", "output_tokens", "failure_code",
-                                          "outcome", "cases", "status_counts") if k in a}
+        summary = {
+            k: a.get(k)
+            for k in (
+                "duration_ms",
+                "llm_calls",
+                "tool_calls",
+                "input_tokens",
+                "output_tokens",
+                "failure_code",
+                "outcome",
+                "cases",
+                "status_counts",
+            )
+            if k in a
+        }
         self._conn.execute(
             "INSERT INTO runs (run_id, trace_id, ended_at, status, skill_id, summary,"
             " updated_at) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT(run_id) DO UPDATE SET"
             " ended_at = excluded.ended_at, status = excluded.status,"
             " skill_id = COALESCE(excluded.skill_id, runs.skill_id),"
             " summary = excluded.summary, updated_at = excluded.updated_at",
-            (event.run_id, event.trace_id, stamp, event.status, a.get("skill_id"),
-             json.dumps(summary), now))
+            (
+                event.run_id,
+                event.trace_id,
+                stamp,
+                event.status,
+                a.get("skill_id"),
+                json.dumps(summary),
+                now,
+            ),
+        )
 
-    def prune(self, *, now: datetime | None = None, days: int = RETENTION_DAYS,
-              max_bytes: int = RETENTION_BYTES) -> int:
+    def prune(
+        self,
+        *,
+        now: datetime | None = None,
+        days: int = RETENTION_DAYS,
+        max_bytes: int = RETENTION_BYTES,
+    ) -> int:
         """Drop whole runs: older than `days`, then the oldest beyond `max_bytes`."""
         cutoff = ((now or datetime.now(UTC)) - timedelta(days=days)).isoformat()
         removed = 0
         with self._lock:
-            old = [row[0] for row in self._conn.execute(
-                "SELECT run_id FROM runs WHERE COALESCE(ended_at, started_at, updated_at) < ?",
-                (cutoff,))]
+            old = [
+                row[0]
+                for row in self._conn.execute(
+                    "SELECT run_id FROM runs WHERE COALESCE(ended_at, started_at, updated_at) < ?",
+                    (cutoff,),
+                )
+            ]
             removed += self._drop(old)
             while self._bytes() > max_bytes:
-                batch = [row[0] for row in self._conn.execute(
-                    "SELECT run_id FROM runs ORDER BY COALESCE(started_at, updated_at)"
-                    " LIMIT 200")]
+                batch = [
+                    row[0]
+                    for row in self._conn.execute(
+                        "SELECT run_id FROM runs ORDER BY COALESCE(started_at, updated_at)"
+                        " LIMIT 200"
+                    )
+                ]
                 if not batch:
                     break
                 removed += self._drop(batch)
@@ -136,19 +188,32 @@ class TelemetryStore:
 
     # -- reading ------------------------------------------------------------------
 
-    def runs(self, *, limit: int = 50, before: str | None = None, kind: str | None = None,
-             status: str | None = None, since: str | None = None,
-             until: str | None = None, trace_id: str | None = None,
-             parent_run_id: str | None = None) -> list[dict[str, Any]]:
+    def runs(
+        self,
+        *,
+        limit: int = 50,
+        before: str | None = None,
+        kind: str | None = None,
+        status: str | None = None,
+        since: str | None = None,
+        until: str | None = None,
+        trace_id: str | None = None,
+        parent_run_id: str | None = None,
+    ) -> list[dict[str, Any]]:
         """Newest first; `before` is the previous page's last `started_at|run_id`."""
         clauses, args = ["1 = 1"], []
         if before:
             started, _, run_id = before.partition("|")
-            clauses.append("(COALESCE(started_at, '') < ? OR (COALESCE(started_at, '') = ?"
-                           " AND run_id < ?))")
+            clauses.append(
+                "(COALESCE(started_at, '') < ? OR (COALESCE(started_at, '') = ? AND run_id < ?))"
+            )
             args += [started, started, run_id]
-        for column, value in (("run_kind", kind), ("status", status), ("trace_id", trace_id),
-                              ("parent_run_id", parent_run_id)):
+        for column, value in (
+            ("run_kind", kind),
+            ("status", status),
+            ("trace_id", trace_id),
+            ("parent_run_id", parent_run_id),
+        ):
             if value:
                 clauses.append(f"{column} = ?")
                 args.append(value)
@@ -164,9 +229,20 @@ class TelemetryStore:
                 " strategy_id, skill_id, model_alias, summary FROM runs WHERE "
                 + " AND ".join(clauses)
                 + " ORDER BY COALESCE(started_at, '') DESC, run_id DESC LIMIT ?",
-                (*args, limit)).fetchall()
-        keys = ("run_id", "run_kind", "parent_run_id", "trace_id", "started_at", "ended_at",
-                "status", "strategy_id", "skill_id", "model_alias")
+                (*args, limit),
+            ).fetchall()
+        keys = (
+            "run_id",
+            "run_kind",
+            "parent_run_id",
+            "trace_id",
+            "started_at",
+            "ended_at",
+            "status",
+            "strategy_id",
+            "skill_id",
+            "model_alias",
+        )
         found = []
         for row in rows:
             item = dict(zip(keys, row[:10], strict=True))
@@ -175,16 +251,25 @@ class TelemetryStore:
             found.append(item)
         return found
 
-    def run_events(self, run_id: str, *, after_sequence: int = -1,
-                   limit: int = 500) -> list[dict[str, Any]]:
+    def run_events(
+        self, run_id: str, *, after_sequence: int = -1, limit: int = 500
+    ) -> list[dict[str, Any]]:
         with self._lock:
             rows = self._conn.execute(
                 "SELECT ingest_seq, record FROM events WHERE run_id = ? AND sequence > ?"
-                " ORDER BY sequence LIMIT ?", (run_id, after_sequence, limit)).fetchall()
+                " ORDER BY sequence LIMIT ?",
+                (run_id, after_sequence, limit),
+            ).fetchall()
         return [{**json.loads(record), "ingest_seq": seq} for seq, record in rows]
 
-    def events_after(self, after_ingest_seq: int = 0, *, limit: int = 1000,
-                     since: str | None = None, until: str | None = None) -> list[dict[str, Any]]:
+    def events_after(
+        self,
+        after_ingest_seq: int = 0,
+        *,
+        limit: int = 1000,
+        since: str | None = None,
+        until: str | None = None,
+    ) -> list[dict[str, Any]]:
         """Every run's events in arrival order: the stream and its backfill."""
         clauses: list[str] = ["ingest_seq > ?"]
         args: list[Any] = [after_ingest_seq]
@@ -196,8 +281,11 @@ class TelemetryStore:
             args.append(until)
         with self._lock:
             rows = self._conn.execute(
-                "SELECT ingest_seq, record FROM events WHERE " + " AND ".join(clauses)
-                + " ORDER BY ingest_seq LIMIT ?", (*args, limit)).fetchall()
+                "SELECT ingest_seq, record FROM events WHERE "
+                + " AND ".join(clauses)
+                + " ORDER BY ingest_seq LIMIT ?",
+                (*args, limit),
+            ).fetchall()
         return [{**json.loads(record), "ingest_seq": seq} for seq, record in rows]
 
     def last_ingest_seq(self) -> int:
@@ -209,8 +297,11 @@ class TelemetryStore:
         """JSON Lines of the contract's event objects, in arrival order."""
         cursor = 0
         while True:
-            batch = (self.run_events(run_id, after_sequence=cursor - 1, limit=1000)
-                     if run_id else self.events_after(cursor, limit=1000, since=since))
+            batch = (
+                self.run_events(run_id, after_sequence=cursor - 1, limit=1000)
+                if run_id
+                else self.events_after(cursor, limit=1000, since=since)
+            )
             if not batch:
                 return
             for item in batch:

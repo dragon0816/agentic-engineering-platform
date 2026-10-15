@@ -15,16 +15,21 @@ def _observed(request: ModelRequest, response: ModelResponse, elapsed_ms: float)
     Usage the provider did not report stays null, never zero."""
     telemetry.note_llm(response.input_tokens, response.output_tokens)
     telemetry.emit(
-        "llm.completed", status="failed" if response.failure is not None else "succeeded",
+        "llm.completed",
+        status="failed" if response.failure is not None else "succeeded",
         attributes={
             "model_alias": request.model_alias,
-            "duration_ms": response.duration_ms if response.duration_ms is not None
+            "duration_ms": response.duration_ms
+            if response.duration_ms is not None
             else round(elapsed_ms, 1),
             "input_tokens": response.input_tokens or None,
             "output_tokens": response.output_tokens or None,
             "max_output_tokens": request.max_output_tokens,
-            "tools_offered": len(request.tools), "tool_calls": len(response.tool_calls),
-            "failure_code": None if response.failure is None else response.failure.code})
+            "tools_offered": len(request.tools),
+            "tool_calls": len(response.tool_calls),
+            "failure_code": None if response.failure is None else response.failure.code,
+        },
+    )
 
 
 class ApprovedModelClient:

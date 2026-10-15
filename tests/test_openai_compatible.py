@@ -152,7 +152,8 @@ def test_images_and_a_declared_output_contract_reach_the_wire() -> None:
     assert payload["response_format"] == {"type": "json_object"}
     # JSON mode needs the word "json" in a message (OpenAI, vLLM: 400 otherwise).
     assert payload["messages"][-1] == {
-        "role": "system", "content": "Respond with a single JSON object.",
+        "role": "system",
+        "content": "Respond with a single JSON object.",
     }
     assert "platform.route-proposal.v1" not in json.dumps(payload)
     assert response.structured_output == {"kind": "workflow"}
@@ -541,8 +542,10 @@ def test_json_mode_adds_no_instruction_when_a_message_already_says_json() -> Non
     transport = Transport(json_reply({**ANSWER, "choices": [{"message": {"content": "{}"}}]}))
     OpenAICompatible(endpoint(), transport=transport).generate(
         request(
-            messages=(ModelMessage(role="system", text="Return a JSON route."),
-                      ModelMessage(role="user", text="hi")),
+            messages=(
+                ModelMessage(role="system", text="Return a JSON route."),
+                ModelMessage(role="user", text="hi"),
+            ),
             requirements=ModelRequirements(structured_output=True),
             output_contract="platform.route-proposal.v1",
         )
@@ -553,15 +556,30 @@ def test_json_mode_adds_no_instruction_when_a_message_already_says_json() -> Non
 def test_a_reply_cut_at_the_output_limit_with_nothing_usable_is_its_own_failure() -> None:
     """coding_v1 D3: a tool call cut mid-argument used to look like an empty answer."""
     cut_call = {
-        "choices": [{"index": 0, "finish_reason": "length", "message": {
-            "role": "assistant", "content": None,
-            "tool_calls": [{"id": "c1", "type": "function",
-                            "function": {"name": "coding__run",
-                                         "arguments": "{\"script\": \"impo"}}]}}],
+        "choices": [
+            {
+                "index": 0,
+                "finish_reason": "length",
+                "message": {
+                    "role": "assistant",
+                    "content": None,
+                    "tool_calls": [
+                        {
+                            "id": "c1",
+                            "type": "function",
+                            "function": {"name": "coding__run", "arguments": '{"script": "impo'},
+                        }
+                    ],
+                },
+            }
+        ],
         "usage": {"prompt_tokens": 5, "completion_tokens": 256},
     }
-    empty = {"choices": [{"index": 0, "finish_reason": "length",
-                          "message": {"role": "assistant", "content": ""}}]}
+    empty = {
+        "choices": [
+            {"index": 0, "finish_reason": "length", "message": {"role": "assistant", "content": ""}}
+        ]
+    }
     for body in (cut_call, empty):
         client = OpenAICompatible(endpoint(), transport=Transport(json_reply(body)))
         response = client.generate(request())
@@ -570,8 +588,15 @@ def test_a_reply_cut_at_the_output_limit_with_nothing_usable_is_its_own_failure(
 
 
 def test_a_long_text_answer_at_the_output_limit_is_still_returned() -> None:
-    body = {"choices": [{"index": 0, "finish_reason": "length",
-                         "message": {"role": "assistant", "content": "a long partial answer"}}]}
+    body = {
+        "choices": [
+            {
+                "index": 0,
+                "finish_reason": "length",
+                "message": {"role": "assistant", "content": "a long partial answer"},
+            }
+        ]
+    }
     client = OpenAICompatible(endpoint(), transport=Transport(json_reply(body)))
     response = client.generate(request())
     assert response.failure is None

@@ -37,7 +37,11 @@ from software.marketplace import ApplicationCatalog, ApplicationProjection, proj
 # The kinds the overview shows, each in its own tab.
 OverviewKind = Literal["skill", "workflow", "knowledge", "agent", "bridge_extension"]
 OVERVIEW_KINDS: tuple[OverviewKind, ...] = (
-    "skill", "workflow", "knowledge", "agent", "bridge_extension"
+    "skill",
+    "workflow",
+    "knowledge",
+    "agent",
+    "bridge_extension",
 )
 
 

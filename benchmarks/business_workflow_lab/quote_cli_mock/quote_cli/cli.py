@@ -35,8 +35,18 @@ STATE = LAB / "operator" / "state"
 FAULT = STATE / "quote_fault.json"
 EVENTS = STATE / "quote_events.jsonl"
 STATUSES = ("Draft", "Sent", "Accepted", "Expired")
-HEADER_FIELDS = ["QuoteID", "CustomerID", "ProjectID", "QuoteDate", "ValidUntil", "Status",
-                 "Currency", "Subtotal", "DiscountPercent", "NetAmount"]
+HEADER_FIELDS = [
+    "QuoteID",
+    "CustomerID",
+    "ProjectID",
+    "QuoteDate",
+    "ValidUntil",
+    "Status",
+    "Currency",
+    "Subtotal",
+    "DiscountPercent",
+    "NetAmount",
+]
 LINE_FIELDS = ["ProductID", "ProductName", "Quantity", "UnitPrice", "LineAmount"]
 OK, BAD_ARGS, NOT_FOUND, TEMPORARY = 0, 2, 3, 4
 
@@ -69,8 +79,11 @@ def injected_failure(argv: list[str]) -> int | None:
     mode = state.get("mode", "normal")
     if mode == "force_exit2":
         event("fault_force_exit2", argv=argv)
-        print("quote_cli: error: the quote service rejected the request parameters "
-              "(operator scenario: wrapper fixed to exit 2)", file=sys.stderr)
+        print(
+            "quote_cli: error: the quote service rejected the request parameters "
+            "(operator scenario: wrapper fixed to exit 2)",
+            file=sys.stderr,
+        )
         return BAD_ARGS
     if mode == "transient_once" and not state.get("fired"):
         state["fired"] = True
@@ -79,7 +92,9 @@ def injected_failure(argv: list[str]) -> int | None:
         except OSError:
             return None  # a caller that cannot reach the service state gets no injected fault
         event("fault_transient_injected", argv=argv)
-        print("quote_cli: error: quote service temporarily unavailable, retry later", file=sys.stderr)
+        print(
+            "quote_cli: error: quote service temporarily unavailable, retry later", file=sys.stderr
+        )
         return TEMPORARY
     return None
 
@@ -94,14 +109,19 @@ def iso(text: str) -> str:
 def add_filters(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--customer", help="CustomerID, e.g. C001 (exact match)")
     parser.add_argument("--project", help="ProjectID, e.g. P001 (exact match)")
-    parser.add_argument("--from", dest="date_from", type=iso, help="QuoteDate on or after (YYYY-MM-DD)")
-    parser.add_argument("--to", dest="date_to", type=iso, help="QuoteDate on or before (YYYY-MM-DD)")
+    parser.add_argument(
+        "--from", dest="date_from", type=iso, help="QuoteDate on or after (YYYY-MM-DD)"
+    )
+    parser.add_argument(
+        "--to", dest="date_to", type=iso, help="QuoteDate on or before (YYYY-MM-DD)"
+    )
     parser.add_argument("--status", choices=STATUSES, help="quote status")
 
 
 def build_parser() -> Parser:
-    parser = Parser(prog="quote_cli", description=__doc__,
-                    formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = Parser(
+        prog="quote_cli", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     top = parser.add_subparsers(dest="group", required=True, parser_class=Parser)
     customers = top.add_parser("customers", help="customer master data")
     customers_sub = customers.add_subparsers(dest="action", required=True, parser_class=Parser)
@@ -115,7 +135,9 @@ def build_parser() -> Parser:
     quotes_get = quotes_sub.add_parser("get", help="one quote with its line items")
     quotes_get.add_argument("quote_id")
     quotes_get.add_argument("--format", choices=("json", "table"), default="table")
-    quotes_export = quotes_sub.add_parser("export", help="write matching quote headers to a CSV file")
+    quotes_export = quotes_sub.add_parser(
+        "export", help="write matching quote headers to a CSV file"
+    )
     add_filters(quotes_export)
     quotes_export.add_argument("--output", required=True, help="CSV path to write (UTF-8 with BOM)")
     return parser
@@ -172,7 +194,10 @@ def main(argv: list[str] | None = None) -> int:
     # that imported this module and called main() in its own process.
     event("command", argv=argv, argv0=sys.argv[0] if sys.argv else "", pid=os.getpid())
     if args.group == "customers":
-        rows = [{"CustomerID": c["CustomerID"], "CustomerName": c["CustomerName"]} for c in data["customers"]]
+        rows = [
+            {"CustomerID": c["CustomerID"], "CustomerName": c["CustomerName"]}
+            for c in data["customers"]
+        ]
         if args.format == "json":
             emit({"schema_version": 1, "items": rows, "count": len(rows)})
         else:

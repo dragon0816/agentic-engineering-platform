@@ -65,9 +65,10 @@ def test_corpus_is_public_balanced_and_source_controlled() -> None:
         "failure_classification",
     }
     assert all(case.classification == "PUBLIC" for case in cases)
-    assert all(sum(case.decision_type == kind for case in cases) == 4 for kind in {
-        case.decision_type for case in cases
-    })
+    assert all(
+        sum(case.decision_type == kind for case in cases) == 4
+        for kind in {case.decision_type for case in cases}
+    )
     assert "rohde" not in CORPUS.read_text(encoding="utf-8").lower()
 
 
@@ -93,12 +94,20 @@ def test_metrics_count_fallback_accuracy_calibration_unknown_cost_and_latency() 
     samples = (
         _observation("one", latency_ms=10, confidence=0.9),
         _observation(
-            "two", selected=("no",), latency_ms=20, confidence=0.8,
-            fallback_reason="accelerator_low_confidence", cost_usd=None,
+            "two",
+            selected=("no",),
+            latency_ms=20,
+            confidence=0.8,
+            fallback_reason="accelerator_low_confidence",
+            cost_usd=None,
         ),
         _observation(
-            "three", selected=(), status="abstained", confidence=None,
-            latency_ms=40, cost_usd=0.0,
+            "three",
+            selected=(),
+            status="abstained",
+            confidence=None,
+            latency_ms=40,
+            cost_usd=0.0,
         ),
         DecisionObservation(case_id="four", provider_id="synthetic-replay", status="unavailable"),
     )
@@ -135,12 +144,13 @@ def test_invalid_case_and_observation_contracts_fail_closed(tmp_path: Path) -> N
     with pytest.raises(ValidationError):
         DecisionObservation(case_id="one", provider_id="p", status="answered")
     with pytest.raises(ValidationError):
-        DecisionObservation(
-            case_id="one", provider_id="p", status="unavailable", cost_usd=0.0
-        )
+        DecisionObservation(case_id="one", provider_id="p", status="unavailable", cost_usd=0.0)
     with pytest.raises(ValidationError):
         DecisionObservation(
-            case_id="one", provider_id="p", status="answered", selected=("yes",),
+            case_id="one",
+            provider_id="p",
+            status="answered",
+            selected=("yes",),
             latency_ms=float("inf"),
         )
     source = tmp_path / "duplicate.json"

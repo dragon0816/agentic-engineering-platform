@@ -117,7 +117,8 @@ def run_public_benchmark(
         enabled_decision_types=("skill_selection",),
         confidence_threshold=(
             DecisionAcceleratorConfig.model_fields["confidence_threshold"].default
-            if threshold is None else threshold
+            if threshold is None
+            else threshold
         ),
     )
     if not credential().strip():
@@ -173,8 +174,11 @@ def run_public_benchmark(
                 and result.confidence >= config.confidence_threshold
             )
             reason = (
-                None if answered
-                else result.reason_code if not result.accepted else "low_confidence"
+                None
+                if answered
+                else result.reason_code
+                if not result.accepted
+                else "low_confidence"
             )
             observations.append(
                 DecisionObservation(
@@ -210,16 +214,21 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--trials", type=int, default=1)
     parser.add_argument("--timeout-ms", type=int, default=3_000)
     parser.add_argument(
-        "--corpus", choices=("v1", "skills", "skills-v3"), default="v1",
+        "--corpus",
+        choices=("v1", "skills", "skills-v3"),
+        default="v1",
         help="v1: four synthetic cases; skills: the live Skill catalogue (26); "
         "skills-v3: plus 20 held-out cases and selector hints (46)",
     )
     parser.add_argument(
-        "--threshold", type=float, default=None,
+        "--threshold",
+        type=float,
+        default=None,
         help="confidence a choice needs to be admitted (default: the Host's 0.9)",
     )
     parser.add_argument(
-        "--endpoint", default=TYPESAFE_SYSTEMONE,
+        "--endpoint",
+        default=TYPESAFE_SYSTEMONE,
         help="SystemOne URL: HTTPS, or http://127.0.0.1:<port>/v1/systemone through a tunnel",
     )
     args = parser.parse_args(argv)

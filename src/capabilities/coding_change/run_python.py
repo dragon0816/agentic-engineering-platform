@@ -36,23 +36,25 @@ from common.execution import RequestContext
 from harness.network_block import outbound_rule_present
 from harness.restricted_runner import RestrictedRunner, RunnerError, RunnerLimits, label_low
 
-RUN_SPEC = CapabilitySpec.model_validate({
-    "identity": {"namespace": "coding", "name": "run-python", "version": "1.0.0"},
-    "name": "coding.run_python",
-    "description": (
-        "Run one Python script in an allowed task workspace under restricted execution; "
-        "it may write only to the workspace's output folder"
-    ),
-    "input_contract": "coding.run-python.input.v1",
-    "output_contract": "coding.run-python.output.v1",
-    "side_effect": "execute",
-    "policy": {
-        "risk": "medium",
-        "approval_required": True,
-        "required_permissions": ["coding.run-python"],
-        "policy_refs": ["coding-restricted-execution-policy"],
-    },
-})
+RUN_SPEC = CapabilitySpec.model_validate(
+    {
+        "identity": {"namespace": "coding", "name": "run-python", "version": "1.0.0"},
+        "name": "coding.run_python",
+        "description": (
+            "Run one Python script in an allowed task workspace under restricted execution; "
+            "it may write only to the workspace's output folder"
+        ),
+        "input_contract": "coding.run-python.input.v1",
+        "output_contract": "coding.run-python.output.v1",
+        "side_effect": "execute",
+        "policy": {
+            "risk": "medium",
+            "approval_required": True,
+            "required_permissions": ["coding.run-python"],
+            "policy_refs": ["coding-restricted-execution-policy"],
+        },
+    }
+)
 MAX_OUTPUT_CHARS = 12_000
 MAX_FILES_LISTED = 200
 
@@ -85,7 +87,9 @@ class RunPythonResult(Contract):
 
 class RunPythonHandler:
     def __init__(
-        self, binding: CodingHostBinding, *,
+        self,
+        binding: CodingHostBinding,
+        *,
         rule_present: Callable[[Path], bool] = outbound_rule_present,
         extra_env: Mapping[str, str] | None = None,
     ) -> None:
@@ -114,9 +118,14 @@ class RunPythonHandler:
         workspace = self._workspace(request.workspace)
         python = Path(self.binding.runner_python)
         try:
-            runner = RestrictedRunner(python, RunnerLimits(
-                timeout_seconds=self.binding.timeout_seconds, memory_mb=self.binding.memory_mb,
-                max_processes=self.binding.run_python_max_processes))
+            runner = RestrictedRunner(
+                python,
+                RunnerLimits(
+                    timeout_seconds=self.binding.timeout_seconds,
+                    memory_mb=self.binding.memory_mb,
+                    max_processes=self.binding.run_python_max_processes,
+                ),
+            )
         except RunnerError as error:
             raise CapabilityRefused(error.code) from None
         if self.binding.require_network_block and not self.rule_present(python):
@@ -137,12 +146,17 @@ class RunPythonHandler:
         label_low(output)
         result = runner.run([str(script)], cwd=workspace, run_dir=step, extra_env=env)
         files = sorted(
-            (OutputFile(path=item.relative_to(workspace).as_posix(), bytes=item.stat().st_size)
-             for item in output.rglob("*") if item.is_file()),
+            (
+                OutputFile(path=item.relative_to(workspace).as_posix(), bytes=item.stat().st_size)
+                for item in output.rglob("*")
+                if item.is_file()
+            ),
             key=lambda item: item.path,
         )[:MAX_FILES_LISTED]
         return RunPythonResult(
-            exit_code=result.exit_code, timed_out=result.timed_out,
-            output=result.output[-MAX_OUTPUT_CHARS:], files=tuple(files),
+            exit_code=result.exit_code,
+            timed_out=result.timed_out,
+            output=result.output[-MAX_OUTPUT_CHARS:],
+            files=tuple(files),
             script_path=script.relative_to(workspace).as_posix(),
         )

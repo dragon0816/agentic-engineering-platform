@@ -36,13 +36,10 @@ class RecordedActions:
     def validate(self) -> tuple[HarnessCheckResult, ...]:
         self.calls.append("validate")
         status = (
-            "failed" if self.fail_first_check and self.calls.count("validate") == 1
-            else "passed"
+            "failed" if self.fail_first_check and self.calls.count("validate") == 1 else "passed"
         )
         return (
-            HarnessCheckResult(
-                check_id="host-check", status=status, evidence_ref="check-record"
-            ),
+            HarnessCheckResult(check_id="host-check", status=status, evidence_ref="check-record"),
         )
 
 

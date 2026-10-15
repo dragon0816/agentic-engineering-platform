@@ -26,7 +26,9 @@ SUITE_CASE = "suite"
 MAX_FAILURE_CHARS = 3_000
 MAX_FAILURES = 10
 _EXIT_CODES = {
-    2: "pytest_interrupted", 3: "pytest_internal_error", 4: "pytest_usage_error",
+    2: "pytest_interrupted",
+    3: "pytest_internal_error",
+    4: "pytest_usage_error",
     5: "no_tests_collected",
 }
 
@@ -50,7 +52,10 @@ class PytestCommand:
     """A `harness.runtime.ValidationCommand` running pytest restrictedly."""
 
     def __init__(
-        self, which: Literal["new", "suite"], runner: RestrictedRunner, run_dir: Path,
+        self,
+        which: Literal["new", "suite"],
+        runner: RestrictedRunner,
+        run_dir: Path,
         extra_env: Mapping[str, str] | None = None,
     ) -> None:
         self.which = which
@@ -69,21 +74,38 @@ class PytestCommand:
         results.mkdir(parents=True, exist_ok=True)
         report = results / f"{self.which}-{next(self._serial)}.xml"
         outcome = self.runner.run(
-            ["-m", "pytest", "-q", "-p", "no:cacheprovider", "-o", "addopts=",
-             f"--junitxml={report}", *targets],
-            cwd=workspace.root, run_dir=self.run_dir, extra_env=self.extra_env,
+            [
+                "-m",
+                "pytest",
+                "-q",
+                "-p",
+                "no:cacheprovider",
+                "-o",
+                "addopts=",
+                f"--junitxml={report}",
+                *targets,
+            ],
+            cwd=workspace.root,
+            run_dir=self.run_dir,
+            extra_env=self.extra_env,
         )
         first = cases[0].name
         if outcome.timed_out:
-            return (ValidationFailure(case=first, code="test_timeout",
-                                      message="pytest did not finish within the time limit"),)
+            return (
+                ValidationFailure(
+                    case=first,
+                    code="test_timeout",
+                    message="pytest did not finish within the time limit",
+                ),
+            )
         if outcome.exit_code in _EXIT_CODES or not report.is_file():
             code = _EXIT_CODES.get(outcome.exit_code or 0, "pytest_report_missing")
             return (ValidationFailure(case=first, code=code, message=_scrub(outcome.output)),)
         failures = self._failures(report, cases)
         if outcome.exit_code != 0 and not failures:
-            return (ValidationFailure(case=first, code="pytest_failed",
-                                      message=_scrub(outcome.output)),)
+            return (
+                ValidationFailure(case=first, code="pytest_failed", message=_scrub(outcome.output)),
+            )
         return failures
 
     @staticmethod
@@ -96,11 +118,13 @@ class PytestCommand:
             if problem is None:
                 continue
             name = f"{testcase.get('classname', '')}::{testcase.get('name', '')}"
-            found.append(ValidationFailure(
-                case=_case_for(name, cases),
-                code="test_failed" if problem.tag == "failure" else "test_error",
-                message=_scrub(f"{name}: {problem.get('message', '')}\n{problem.text or ''}"),
-            ))
+            found.append(
+                ValidationFailure(
+                    case=_case_for(name, cases),
+                    code="test_failed" if problem.tag == "failure" else "test_error",
+                    message=_scrub(f"{name}: {problem.get('message', '')}\n{problem.text or ''}"),
+                )
+            )
             if len(found) >= MAX_FAILURES:
                 break
         return tuple(found)

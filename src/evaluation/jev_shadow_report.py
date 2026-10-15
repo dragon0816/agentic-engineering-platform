@@ -87,22 +87,26 @@ def report(pairs: Iterable[tuple[dict[str, Any], dict[str, Any]]]) -> dict[str, 
                     agree += 1
                 else:
                     hidden += 1
-            rows.append({
-                "max_tools": length,
-                "threshold": threshold,
-                "narrowed": narrowed_turns,
-                "narrowed_share": round(narrowed_turns / len(pairs), 3) if pairs else None,
-                "agreed_with_model": agree,
-                "hid_the_models_tool": hidden,
-                "narrowed_without_tool_use": idle,
-                "precision": round(agree / (agree + hidden), 3) if agree + hidden else None,
-                "mean_tools_kept": round(sum(sizes) / len(sizes), 2) if sizes else None,
-            })
+            rows.append(
+                {
+                    "max_tools": length,
+                    "threshold": threshold,
+                    "narrowed": narrowed_turns,
+                    "narrowed_share": round(narrowed_turns / len(pairs), 3) if pairs else None,
+                    "agreed_with_model": agree,
+                    "hid_the_models_tool": hidden,
+                    "narrowed_without_tool_use": idle,
+                    "precision": round(agree / (agree + hidden), 3) if agree + hidden else None,
+                    "mean_tools_kept": round(sum(sizes) / len(sizes), 2) if sizes else None,
+                }
+            )
     return {
         "turns": len(pairs),
         "turns_with_tool_use": len(with_tool),
-        "shadow_latency_ms": {"p50": _percentile(latencies, 0.5),
-                              "p95": _percentile(latencies, 0.95)},
+        "shadow_latency_ms": {
+            "p50": _percentile(latencies, 0.5),
+            "p95": _percentile(latencies, 0.95),
+        },
         "outcomes": _count(s.get("outcome") for s, _ in pairs),
         "replay": rows,
     }

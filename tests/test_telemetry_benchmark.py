@@ -16,16 +16,26 @@ def test_a_benchmark_run_records_cases_and_a_summary(tmp_path: Path) -> None:
     bench = BenchmarkTelemetry("knowledge_v1", "core-006", store=store)
     bench.start(cases=2, strategy={"strategy_id": "st-1", "aep_build": "abc"})
     bench.case_started("Q0011", case_type="application")
-    bench.case_completed("Q0011", "PASS", duration_ms=1200, aep_trace_ids=["trace-a"],
-                         question="never stored", answer="never stored")
+    bench.case_completed(
+        "Q0011",
+        "PASS",
+        duration_ms=1200,
+        aep_trace_ids=["trace-a"],
+        question="never stored",
+        answer="never stored",
+    )
     bench.case_completed("Q0051", "FAIL", gap="REASONING_GAP")
     run_id = bench.run_id
     bench.finish()
     reopened = TelemetryStore(tmp_path / "telemetry.sqlite")
     events = _events(reopened, run_id)
     assert [e["event_type"] for e in events] == [
-        "run.started", "benchmark.case_started", "benchmark.case_completed",
-        "benchmark.case_completed", "run.completed"]
+        "run.started",
+        "benchmark.case_started",
+        "benchmark.case_completed",
+        "benchmark.case_completed",
+        "run.completed",
+    ]
     assert [e["sequence"] for e in events] == [0, 1, 2, 3, 4]
     passed = events[2]["attributes"]
     assert passed["verdict"] == "PASS" and passed["aep_trace_ids"] == ["trace-a"]
@@ -38,8 +48,9 @@ def test_a_benchmark_run_records_cases_and_a_summary(tmp_path: Path) -> None:
 
 def test_a_grading_run_hangs_under_its_benchmark_run(tmp_path: Path) -> None:
     store = TelemetryStore(tmp_path / "telemetry.sqlite")
-    grading = BenchmarkTelemetry("knowledge_v1", "core-006", kind="benchmark_grading",
-                                 parent_run_id="bench-x", store=store)
+    grading = BenchmarkTelemetry(
+        "knowledge_v1", "core-006", kind="benchmark_grading", parent_run_id="bench-x", store=store
+    )
     grading.start(cases=1)
     grading.case_completed("Q0011", "GRADED", coverage=0.5)
     run_id = grading.run_id

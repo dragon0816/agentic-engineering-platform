@@ -46,14 +46,21 @@ MAX_IMAGE_BYTES = 5 * 1024 * 1024
 
 Kind = Literal["text", "pdf", "image", "zip"]
 KINDS: dict[str, tuple[Kind, str]] = {
-    ".txt": ("text", "text/plain"), ".csv": ("text", "text/csv"),
-    ".json": ("text", "application/json"), ".yaml": ("text", "application/yaml"),
-    ".yml": ("text", "application/yaml"), ".md": ("text", "text/markdown"),
-    ".html": ("text", "text/html"), ".htm": ("text", "text/html"),
+    ".txt": ("text", "text/plain"),
+    ".csv": ("text", "text/csv"),
+    ".json": ("text", "application/json"),
+    ".yaml": ("text", "application/yaml"),
+    ".yml": ("text", "application/yaml"),
+    ".md": ("text", "text/markdown"),
+    ".html": ("text", "text/html"),
+    ".htm": ("text", "text/html"),
     ".pdf": ("pdf", "application/pdf"),
-    ".png": ("image", "image/png"), ".jpg": ("image", "image/jpeg"),
-    ".jpeg": ("image", "image/jpeg"), ".gif": ("image", "image/gif"),
-    ".webp": ("image", "image/webp"), ".bmp": ("image", "image/bmp"),
+    ".png": ("image", "image/png"),
+    ".jpg": ("image", "image/jpeg"),
+    ".jpeg": ("image", "image/jpeg"),
+    ".gif": ("image", "image/gif"),
+    ".webp": ("image", "image/webp"),
+    ".bmp": ("image", "image/bmp"),
     ".zip": ("zip", "application/zip"),
 }
 
@@ -114,10 +121,16 @@ class AttachmentStore:
                 shutil.rmtree(folder, ignore_errors=True)
                 raise
         item = Attachment(
-            file_id=file_id, session_id=session_id, filename=name, kind=kind,
-            media_type=media_type, size_bytes=len(data), path=str(path.resolve()),
+            file_id=file_id,
+            session_id=session_id,
+            filename=name,
+            kind=kind,
+            media_type=media_type,
+            size_bytes=len(data),
+            path=str(path.resolve()),
             unpacked=None if unpacked is None else str(unpacked.resolve()),
-            entries=entries, added_at=datetime.now(UTC),
+            entries=entries,
+            added_at=datetime.now(UTC),
         )
         write_atomically(folder / "attachment.json", item.model_dump_json().encode("utf-8"))
         return item
@@ -227,11 +240,16 @@ def for_model(items: list[Attachment]) -> tuple[str, tuple[str, ...]]:
             lines.append("  ```")
             if take < len(text):
                 lines.append(
-                    f"  (first {take} of {len(text)} characters; the full file is at the path)")
+                    f"  (first {take} of {len(text)} characters; the full file is at the path)"
+                )
     return "\n".join(lines), tuple(images)
 
 
 def summary(item: Attachment) -> dict[str, object]:
     """What the page shows about an attachment."""
-    return {"file_id": item.file_id, "filename": item.filename, "kind": item.kind,
-            "size_bytes": item.size_bytes}
+    return {
+        "file_id": item.file_id,
+        "filename": item.filename,
+        "kind": item.kind,
+        "size_bytes": item.size_bytes,
+    }

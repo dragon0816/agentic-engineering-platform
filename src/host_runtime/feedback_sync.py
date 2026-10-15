@@ -42,14 +42,20 @@ def feedback_record(bridge_id: str, record: ConversationRecord, message_id: str)
     question = next((item for item in reversed(messages[:index]) if item.role == "user"), None)
     return FeedbackRecord(
         feedback_id=feedback_id(bridge_id, record.session_id, message_id),
-        bridge_id=bridge_id, actor=record.actor, session_id=record.session_id,
-        message_id=message_id, rating=answer.feedback.rating, note=answer.feedback.note,
+        bridge_id=bridge_id,
+        actor=record.actor,
+        session_id=record.session_id,
+        message_id=message_id,
+        rating=answer.feedback.rating,
+        note=answer.feedback.note,
         question="" if question is None else question.text[:MAX_FEEDBACK_TEXT],
         answer=answer.text[:MAX_FEEDBACK_TEXT],
         tools=None if answer.tool_summary is None else answer.tool_summary[:4000],
-        backend=record.backend, data_classification=record.data_classification,
+        backend=record.backend,
+        data_classification=record.data_classification,
         trace_id=None if answer.trace is None else answer.trace.trace_id,
-        answered_at=answer.created_at, rated_at=answer.feedback.updated_at,
+        answered_at=answer.created_at,
+        rated_at=answer.feedback.updated_at,
     )
 
 

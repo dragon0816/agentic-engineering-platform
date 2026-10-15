@@ -32,8 +32,13 @@ def report(key: str, phase: str, done: int, total: int, current: str = "") -> No
     now = time.monotonic()
     with _lock:
         _expire(now)
-        _entries[key] = {"phase": phase, "done": done, "total": total,
-                         "current": current[-160:], "updated": now}
+        _entries[key] = {
+            "phase": phase,
+            "done": done,
+            "total": total,
+            "current": current[-160:],
+            "updated": now,
+        }
 
 
 def reporter(key: str | None) -> Reporter | None:

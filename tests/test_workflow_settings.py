@@ -24,10 +24,23 @@ from workflow.dispatch import BridgeExecutor
 from workflow.engine import InstalledWorkflows, WorkflowEngine
 
 SETTINGS = [
-    {"name": "reference_dir", "label": "Reference folder", "kind": "folder",
-     "scope": "static", "required": True, "order": 1},
-    {"name": "region", "label": "Region", "kind": "select", "scope": "static",
-     "options": ["tw", "cn"], "default": "tw", "order": 2},
+    {
+        "name": "reference_dir",
+        "label": "Reference folder",
+        "kind": "folder",
+        "scope": "static",
+        "required": True,
+        "order": 1,
+    },
+    {
+        "name": "region",
+        "label": "Region",
+        "kind": "select",
+        "scope": "static",
+        "options": ["tw", "cn"],
+        "default": "tw",
+        "order": 2,
+    },
     {"name": "project", "label": "Project", "kind": "text", "required": True},
 ]
 
@@ -43,9 +56,10 @@ def test_static_settings_validation_applies_defaults_and_completeness() -> None:
     assert validate_static_settings(manifest, {}, complete=False) == {"region": "tw"}
     with pytest.raises(WorkflowParameterError, match="reference_dir is required"):
         validate_static_settings(manifest, {}, complete=True)
-    assert validate_static_settings(
-        manifest, {"reference_dir": "D:/ref"}, complete=True
-    ) == {"reference_dir": "D:/ref", "region": "tw"}
+    assert validate_static_settings(manifest, {"reference_dir": "D:/ref"}, complete=True) == {
+        "reference_dir": "D:/ref",
+        "region": "tw",
+    }
     for bad in ({"project": "x"}, {"region": "eu"}, {"reference_dir": ""}):
         with pytest.raises(WorkflowParameterError):
             validate_static_settings(manifest, bad, complete=False)
@@ -56,7 +70,7 @@ def test_store_keys_by_workflow_name_and_refuses_credentials(tmp_path: Path) -> 
     v1 = AssetIdentity(namespace="engineering", name="release", version="1.0.0")
     v2 = v1.model_copy(update={"version": "2.0.0"})
     store.save(v1, {"reference_dir": "D:/ref"})
-    assert store.values(v2) == {"reference_dir": "D:/ref"}   # kept across upgrades
+    assert store.values(v2) == {"reference_dir": "D:/ref"}  # kept across upgrades
     with pytest.raises(WorkflowSettingsError, match="credentials"):
         store.save(v1, {"password": "hunter2"})
     (tmp_path / SETTINGS_FILE).write_text("{broken", encoding="utf-8")
@@ -69,16 +83,32 @@ def _engine(handler: Handler, provider: Any) -> tuple[WorkflowEngine, WorkflowMa
     installed.register(
         capability_spec(), handler, Probe, Report, ExecutionDependencies(central_required=False)
     )
-    bridge = BridgeExecutor(installed, LocalPolicy((CapabilityGrant.model_validate({
-        "actor": "engineer", "asset": capability_spec().identity,
-        "permissions": ["engineering.validate"], "policy_refs": ["release-policy"],
-        "approval_ref": "release-approval",
-    }),)))
+    bridge = BridgeExecutor(
+        installed,
+        LocalPolicy(
+            (
+                CapabilityGrant.model_validate(
+                    {
+                        "actor": "engineer",
+                        "asset": capability_spec().identity,
+                        "permissions": ["engineering.validate"],
+                        "policy_refs": ["release-policy"],
+                        "approval_ref": "release-approval",
+                    }
+                ),
+            )
+        ),
+    )
     data = workflow_manifest().model_dump(mode="json")
     # The test step's input is `args`; here it is a per-install setting.
     data["parameters"] = [
-        {"name": "args", "label": "Checkout folder", "kind": "text", "scope": "static",
-         "required": True},
+        {
+            "name": "args",
+            "label": "Checkout folder",
+            "kind": "text",
+            "scope": "static",
+            "required": True,
+        },
     ]
     manifest = WorkflowManifest.model_validate(data)
     workflows = InstalledWorkflows()
@@ -114,8 +144,10 @@ def test_engine_merges_settings_and_stops_a_run_without_them() -> None:
 
 def test_settings_are_shown_with_the_workflow_in_capabilities_and_are_safe() -> None:
     for expected in (
-        'id="workflow-settings-list"', 'call("/api/settings/workflows")',
-        '"/api/settings/workflows"', "renderParameterForm(form, fields, prefix)",
+        'id="workflow-settings-list"',
+        'call("/api/settings/workflows")',
+        '"/api/settings/workflows"',
+        "renderParameterForm(form, fields, prefix)",
         "loadWorkflowSettings(item);",
     ):
         assert expected in PAGE, expected
@@ -124,9 +156,9 @@ def test_settings_are_shown_with_the_workflow_in_capabilities_and_are_safe() -> 
     installed = PAGE.split('<section id="panel-installed">', 1)[1].split("</section>", 1)[0]
     assert "workflow-settings" not in settings and 'id="workflow-settings"' in installed
     script = PAGE.split("<script>", 1)[1].split("</script>", 1)[0]
-    section = script.split("// -- Workflow settings", 1)[1].split(
-        "// -- end Workflow settings", 1
-    )[0]
+    section = script.split("// -- Workflow settings", 1)[1].split("// -- end Workflow settings", 1)[
+        0
+    ]
     for unsafe in ("innerHTML", "insertAdjacentHTML", "outerHTML"):
         assert unsafe not in section
 
@@ -160,16 +192,34 @@ def test_agent_web_lists_saves_and_refuses_settings(tmp_path: Path) -> None:
             assert [field["name"] for field in entry["fields"]] == ["reference_dir", "region"]
             assert entry["missing"] == ["reference_dir"]
             assert fetch(url, body={"workflow": identity, "values": {}}).status == 401
-            refused = fetch(url, token=server.token, body={
-                "workflow": identity, "values": {"region": "eu"},
-            })
+            refused = fetch(
+                url,
+                token=server.token,
+                body={
+                    "workflow": identity,
+                    "values": {"region": "eu"},
+                },
+            )
             assert refused.status == 400 and refused.json()["code"] == "workflow_settings_invalid"
-            assert fetch(url, token=server.token, body={
-                "workflow": identity, "values": {"reference_dir": "password=hunter2"},
-            }).status == 400
-            saved = fetch(url, token=server.token, body={
-                "workflow": identity, "values": {"reference_dir": "D:/ref"},
-            }).json()
+            assert (
+                fetch(
+                    url,
+                    token=server.token,
+                    body={
+                        "workflow": identity,
+                        "values": {"reference_dir": "password=hunter2"},
+                    },
+                ).status
+                == 400
+            )
+            saved = fetch(
+                url,
+                token=server.token,
+                body={
+                    "workflow": identity,
+                    "values": {"reference_dir": "D:/ref"},
+                },
+            ).json()
             assert saved["ok"] is True and saved["workflow"]["missing"] == []
             # The engine reads the same file on the next run.
             engine = runtime.agent.gateway.engine

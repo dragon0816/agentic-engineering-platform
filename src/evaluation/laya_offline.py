@@ -95,7 +95,8 @@ def _answer(
     confidence = answer.get("answer_confidence")
     if (
         not isinstance(choice, str)
-        or choice not in candidates and not (allow_preserve and choice == PRESERVE_CATALOG)
+        or choice not in candidates
+        and not (allow_preserve and choice == PRESERVE_CATALOG)
         or isinstance(confidence, bool)
         or not isinstance(confidence, (float, int))
         or not math.isfinite(confidence)

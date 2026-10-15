@@ -90,8 +90,10 @@ def is_shipped(kind: str, identity: AssetIdentity) -> bool:
 def disabled_assets(layout: HostLayout) -> list[dict[str, object]]:
     """What is switched off, as the Capabilities list shows it."""
     found: list[dict[str, object]] = []
-    for kind, folder, model in (("skill", layout.skills, SkillManifest),
-                                ("workflow", layout.workflows, WorkflowManifest)):
+    for kind, folder, model in (
+        ("skill", layout.skills, SkillManifest),
+        ("workflow", layout.workflows, WorkflowManifest),
+    ):
         shelf = folder / DISABLED
         if not shelf.is_dir():
             continue
@@ -101,16 +103,21 @@ def disabled_assets(layout: HostLayout) -> list[dict[str, object]]:
             except (OSError, ValueError):
                 continue
             identity = manifest.metadata.identity
-            found.append({
-                "kind": kind,
-                "namespace": identity.namespace,
-                "name": identity.name,
-                "version": identity.version,
-                "alias": getattr(manifest, "alias", ""),
-                "description": (manifest.instructions if isinstance(manifest, SkillManifest)
-                                else manifest.description),
-                "shipped": is_shipped(kind, identity),
-            })
+            found.append(
+                {
+                    "kind": kind,
+                    "namespace": identity.namespace,
+                    "name": identity.name,
+                    "version": identity.version,
+                    "alias": getattr(manifest, "alias", ""),
+                    "description": (
+                        manifest.instructions
+                        if isinstance(manifest, SkillManifest)
+                        else manifest.description
+                    ),
+                    "shipped": is_shipped(kind, identity),
+                }
+            )
     return found
 
 
@@ -148,7 +155,9 @@ def switch_on(layout: HostLayout, kind: ShelfKind, identity: AssetIdentity) -> S
             except (OSError, ValueError):
                 continue
             if (other.metadata.identity.namespace, other.alias) == (
-                    identity.namespace, wanted.alias):
+                identity.namespace,
+                wanted.alias,
+            ):
                 raise ShelfError("alias_in_use")
     os.replace(source, target)
     return Shelved(identity, source, target)
@@ -180,7 +189,9 @@ def remove(
     day.mkdir(parents=True, exist_ok=True)
     os.replace(source, target)
     record = {
-        "at": now.isoformat(), "actor": actor, "kind": kind,
+        "at": now.isoformat(),
+        "actor": actor,
+        "kind": kind,
         "asset": f"{identity.namespace}/{identity.name}@{identity.version}",
         "from": str(source.relative_to(layout.workspace_root)),
         "to": str(target.relative_to(layout.workspace_root)),

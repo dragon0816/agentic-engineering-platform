@@ -38,13 +38,25 @@ def manifest_with(inputs: dict[str, object]) -> WorkflowManifest:
 def run(manifest: WorkflowManifest, arguments: dict[str, object]) -> tuple[object, Recording]:
     handler = Recording()
     installed = InstalledCapabilities()
-    installed.register(capability_spec(), handler, Probe, Report,
-                       ExecutionDependencies(central_required=False))
-    bridge = BridgeExecutor(installed, LocalPolicy((CapabilityGrant.model_validate({
-        "actor": "engineer", "asset": capability_spec().identity,
-        "permissions": ["engineering.validate"], "policy_refs": ["release-policy"],
-        "approval_ref": "release-approval",
-    }),)))
+    installed.register(
+        capability_spec(), handler, Probe, Report, ExecutionDependencies(central_required=False)
+    )
+    bridge = BridgeExecutor(
+        installed,
+        LocalPolicy(
+            (
+                CapabilityGrant.model_validate(
+                    {
+                        "actor": "engineer",
+                        "asset": capability_spec().identity,
+                        "permissions": ["engineering.validate"],
+                        "policy_refs": ["release-policy"],
+                        "approval_ref": "release-approval",
+                    }
+                ),
+            )
+        ),
+    )
     workflows = InstalledWorkflows()
     workflows.register(manifest)
     engine = WorkflowEngine(workflows, bridge)
@@ -65,8 +77,9 @@ def test_fixed_and_run_inputs_mix_and_the_preview_shows_the_fixed_value() -> Non
     assert handler.inputs[0].args == "deep"
     fixed = manifest_with({"args": {"source": "fixed", "value": "quick"}})
     installed = InstalledCapabilities()
-    installed.register(capability_spec(), Recording(), Probe, Report,
-                       ExecutionDependencies(central_required=False))
+    installed.register(
+        capability_spec(), Recording(), Probe, Report, ExecutionDependencies(central_required=False)
+    )
     assert 'args = fixed "quick"' in rendered(fixed, installed)
 
 
@@ -77,6 +90,8 @@ def test_a_credential_cannot_be_written_into_a_workflow() -> None:
 
 def test_manifests_without_fixed_inputs_keep_their_bytes() -> None:
     plain = workflow_manifest()
-    assert plain.model_dump_json() == WorkflowManifest.model_validate_json(
-        plain.model_dump_json()).model_dump_json()
+    assert (
+        plain.model_dump_json()
+        == WorkflowManifest.model_validate_json(plain.model_dump_json()).model_dump_json()
+    )
     assert '"fixed"' not in plain.model_dump_json()

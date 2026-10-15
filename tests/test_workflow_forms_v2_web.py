@@ -21,8 +21,13 @@ from host_runtime.workflow_settings import SETTINGS_FILE, WorkflowSettingsStore
 FIELDS: list[dict[str, Any]] = [
     {"name": "inbox_path", "label": "Inbox", "kind": "folder", "scope": "static"},
     {"name": "company", "label": "Company", "kind": "text", "group": "identity"},
-    {"name": "plans", "label": "Plans", "kind": "select", "multiple": True,
-     "choices_source": "fn:folder_files?folder={inbox_path}&accept=.json"},
+    {
+        "name": "plans",
+        "label": "Plans",
+        "kind": "select",
+        "multiple": True,
+        "choices_source": "fn:folder_files?folder={inbox_path}&accept=.json",
+    },
     {"name": "package", "label": "Plan file", "kind": "upload", "accept": [".json"]},
 ]
 
@@ -46,9 +51,11 @@ def served(tmp_path: Path) -> Iterator[tuple[Any, Any, WorkflowManifest, Path]]:
     config, layout = _chat_config(tmp_path)
     with build_runtime(config, layout=layout, model_transport=_ChatGateway()) as runtime:
         (runtime.layout.workflows / "forms-v2.json").write_text(
-            manifest.model_dump_json(), encoding="utf-8")
+            manifest.model_dump_json(), encoding="utf-8"
+        )
         WorkflowSettingsStore(runtime.layout.workspace_root / SETTINGS_FILE).save(
-            manifest.metadata.identity, {"inbox_path": str(inbox)})
+            manifest.metadata.identity, {"inbox_path": str(inbox)}
+        )
         server = AgentWebServer(AgentWeb(runtime))
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
@@ -60,13 +67,25 @@ def served(tmp_path: Path) -> Iterator[tuple[Any, Any, WorkflowManifest, Path]]:
             thread.join(timeout=5)
 
 
-def _upload(server: Any, manifest: WorkflowManifest, field: str, name: str,
-            data: bytes, upload_set: str = "") -> Any:
-    return fetch(base(server) + "/api/workflow-uploads", token=server.token, body={
-        "workflow": manifest.metadata.identity.model_dump(mode="json"), "field": field,
-        "upload_set": upload_set, "filename": name,
-        "data": base64.b64encode(data).decode("ascii"),
-    })
+def _upload(
+    server: Any,
+    manifest: WorkflowManifest,
+    field: str,
+    name: str,
+    data: bytes,
+    upload_set: str = "",
+) -> Any:
+    return fetch(
+        base(server) + "/api/workflow-uploads",
+        token=server.token,
+        body={
+            "workflow": manifest.metadata.identity.model_dump(mode="json"),
+            "field": field,
+            "upload_set": upload_set,
+            "filename": name,
+            "data": base64.b64encode(data).decode("ascii"),
+        },
+    )
 
 
 def test_uploads_are_stored_per_set_and_checked_against_the_field(served: Any) -> None:
@@ -79,19 +98,27 @@ def test_uploads_are_stored_per_set_and_checked_against_the_field(served: Any) -
     refused = _upload(server, manifest, "package", "tool.exe", b"MZ")
     assert refused.status == 400 and refused.json()["code"] == "upload_type_not_accepted"
     assert _upload(server, manifest, "company", "plan.json", b"{}").json()["code"] == (
-        "workflow_field_unknown")
-    assert _upload(server, manifest, "package", "plan.json", b"{}", "../../x").json()[
-        "code"] == "upload_set_invalid"
+        "workflow_field_unknown"
+    )
+    assert (
+        _upload(server, manifest, "package", "plan.json", b"{}", "../../x").json()["code"]
+        == "upload_set_invalid"
+    )
     unauthenticated = fetch(base(server) + "/api/workflow-uploads", body={})
     assert unauthenticated.status == 401
 
 
 def test_folder_choices_come_from_the_setting_and_never_wait_for_it(served: Any) -> None:
     server, _, manifest, _ = served
-    listed = fetch(base(server) + "/api/workflow-options", token=server.token, body={
-        "workflow": manifest.metadata.identity.model_dump(mode="json"), "field": "plans",
-        "answers": {"inbox_path": "C:/elsewhere"},
-    }).json()
+    listed = fetch(
+        base(server) + "/api/workflow-options",
+        token=server.token,
+        body={
+            "workflow": manifest.metadata.identity.model_dump(mode="json"),
+            "field": "plans",
+            "answers": {"inbox_path": "C:/elsewhere"},
+        },
+    ).json()
     assert listed["choices"] == [{"value": "plan.json", "label": "plan.json"}]
 
 
@@ -100,11 +127,15 @@ def test_a_launched_run_remembers_the_identity_for_next_time(served: Any) -> Non
     identity = manifest.metadata.identity.model_dump(mode="json")
     url = base(server) + "/api/workflow-identity"
     assert fetch(url, token=server.token, body={"workflow": identity}).json() == {
-        "ok": True, "values": {}}
+        "ok": True,
+        "values": {},
+    }
     IdentityPresets(runtime.layout.workspace_root).remember(
-        runtime.actor, manifest, {"company": "Foxconn"})
+        runtime.actor, manifest, {"company": "Foxconn"}
+    )
     assert fetch(url, token=server.token, body={"workflow": identity}).json()["values"] == {
-        "company": "Foxconn"}
+        "company": "Foxconn"
+    }
     unknown = {**identity, "name": "not-installed"}
     assert fetch(url, token=server.token, body={"workflow": unknown}).status == 404
 
@@ -114,11 +145,16 @@ def test_launch_records_presets_through_the_web_layer(served: Any) -> None:
     web = server.web
     from host_runtime.contracts import WorkflowLaunchRequest
 
-    web.launch_workflow(WorkflowLaunchRequest(
-        workflow=manifest.metadata.identity, arguments={"company": "Quanta"},
-        idempotency_key="forms-v2-launch-1"))
+    web.launch_workflow(
+        WorkflowLaunchRequest(
+            workflow=manifest.metadata.identity,
+            arguments={"company": "Quanta"},
+            idempotency_key="forms-v2-launch-1",
+        )
+    )
     assert IdentityPresets(runtime.layout.workspace_root).last(runtime.actor, manifest) == {
-        "company": "Quanta"}
+        "company": "Quanta"
+    }
 
 
 def _script() -> str:
@@ -131,8 +167,7 @@ def test_the_page_draws_fn_lists_combo_boxes_uploads_and_last_values() -> None:
     assert '"fn:"' in dynamic and '"ref:"' in dynamic
     combo = script.split("function comboControl(field, id)", 1)[1].split("\n}\n", 1)[0]
     assert 'createElement("datalist")' in combo and "Refresh list" in combo
-    upload = script.split("function wireUpload(input, field, context)", 1)[1].split(
-        "\n}\n", 1)[0]
+    upload = script.split("function wireUpload(input, field, context)", 1)[1].split("\n}\n", 1)[0]
     assert "/api/workflow-uploads" in upload
     assert "/api/workflow-identity" in script
     collect = script.split("function collectParameterValues(", 1)[1].split("\n}\n", 1)[0]

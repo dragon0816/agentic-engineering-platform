@@ -86,9 +86,7 @@ def test_decision_service_traces_rule_and_gateway_without_extra_model_calls() ->
     target = skills().discover("legacy")[0].commands[0].target
     model = FakeModel({"kind": "capability", "target": target.model_dump(), "arguments": {}})
     traces: list[DecisionTrace] = []
-    router = RequestRouter(
-        CommandRouter(skills()), model=model, decision_observer=traces.append
-    )
+    router = RequestRouter(CommandRouter(skills()), model=model, decision_observer=traces.append)
     assert router.route(request("run_testing.run")).origin == "deterministic"
     assert model.calls == []
     assert router.route(request("help me")).origin == "model"
@@ -103,8 +101,11 @@ def test_decision_provider_cannot_select_an_uninstalled_target() -> None:
         provider_id = "candidate"
 
         def decide(self, context: RequestContext) -> DecisionResult[RoutingOutcome]:
-            target = skills().discover("legacy")[0].commands[0].target.model_copy(
-                update={"name": "uninstalled"}
+            target = (
+                skills()
+                .discover("legacy")[0]
+                .commands[0]
+                .target.model_copy(update={"name": "uninstalled"})
             )
             return DecisionResult(
                 decision_type="route_selection",
@@ -119,9 +120,7 @@ def test_decision_provider_cannot_select_an_uninstalled_target() -> None:
             )
 
     router = RequestRouter(CommandRouter(skills()))
-    router.decisions = DecisionService[RequestContext, RoutingOutcome](
-        baseline=ForgedProvider()
-    )
+    router.decisions = DecisionService[RequestContext, RoutingOutcome](baseline=ForgedProvider())
     result = router.route(request("help me"))
     assert result.decision.kind == "needs_input"
     assert result.failure is not None and result.failure.code == "uninstalled_decision_target"
@@ -271,8 +270,6 @@ def test_malformed_dot_command_json_is_refused_without_execution() -> None:
 def test_a_model_finding_no_route_is_an_answer_not_a_malformed_one(output: Any) -> None:
     """JSON mode cannot return a bare null, so "no route" arrives as an object
     with no kind (seen on the owner's Gateway, 2026-10-05)."""
-    result = RequestRouter(CommandRouter(skills()), model=FakeModel(output)).route(
-        request("hi")
-    )
+    result = RequestRouter(CommandRouter(skills()), model=FakeModel(output)).route(request("hi"))
     assert result.decision.kind == "needs_input"
     assert result.failure is not None and result.failure.code == "no_matching_route"

@@ -20,12 +20,28 @@ from common.execution import RequestContext
 from integrations.jira import JiraClient, JiraError
 
 MANAGED_HEADERS = (
-    "Key", "Summary", "Type", "Status", "Priority", "Reporter", "Assignee",
-    "Created", "Updated", "Resolution", "Jira activity",
+    "Key",
+    "Summary",
+    "Type",
+    "Status",
+    "Priority",
+    "Reporter",
+    "Assignee",
+    "Created",
+    "Updated",
+    "Resolution",
+    "Jira activity",
 )
 SEARCH_FIELDS = (
-    "summary", "issuetype", "status", "priority", "reporter", "assignee",
-    "created", "updated", "resolution",
+    "summary",
+    "issuetype",
+    "status",
+    "priority",
+    "reporter",
+    "assignee",
+    "created",
+    "updated",
+    "resolution",
 )
 
 PREVIEW_SPEC = CapabilitySpec.model_validate(
@@ -76,8 +92,11 @@ class TeamTicketsPreviewHandler:
                     if failed:
                         comment_failures.append(key)
         return preview_items(
-            issues, request, self.client.connection.base_url,
-            activities=activities, comment_failures=comment_failures,
+            issues,
+            request,
+            self.client.connection.base_url,
+            activities=activities,
+            comment_failures=comment_failures,
         )
 
     def _comment_activity(self, key: str, count: int) -> tuple[str, str, bool]:
@@ -85,7 +104,8 @@ class TeamTicketsPreviewHandler:
             return "", "", False
         try:
             reply = self.client.request(
-                "GET", f"issue/{key}/comment",
+                "GET",
+                f"issue/{key}/comment",
                 params={"orderBy": "-created", "maxResults": count},
             )
             comments = (reply or {}).get("comments") or []
@@ -127,7 +147,10 @@ def preview_items(
         sheet = "Task" if issue_type.casefold() in ("task", "sub-task") else "Issues"
         records.append(
             TicketPreviewRecord(
-                key=key, url=f"{base_url.rstrip('/')}/browse/{key}", sheet=sheet, values=values,
+                key=key,
+                url=f"{base_url.rstrip('/')}/browse/{key}",
+                sheet=sheet,
+                values=values,
             )
         )
     return TeamTicketsPreview(
@@ -158,9 +181,7 @@ def format_activity(comments: Sequence[Mapping[str, Any]]) -> str:
         body = str(comment.get("body") or "").replace("\r\n", "\n").strip()
         if len(body) > 1000:
             body = body[:1000] + "…"
-        parts.append(
-            f"[{_date(comment.get('created'))} {_person(comment.get('author'))}]\n{body}"
-        )
+        parts.append(f"[{_date(comment.get('created'))} {_person(comment.get('author'))}]\n{body}")
     return "\n\n".join(parts)
 
 

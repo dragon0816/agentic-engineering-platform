@@ -34,8 +34,9 @@ from typing import Any
 from telemetry.events import TelemetryEvent, sanitize
 from telemetry.store import TelemetryStore
 
-DEFAULT_HOST_JSON = Path(os.path.expandvars(
-    r"%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0\host.json"))
+DEFAULT_HOST_JSON = Path(
+    os.path.expandvars(r"%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0\host.json")
+)
 STORE_FILE = "telemetry.sqlite"
 
 
@@ -62,14 +63,18 @@ def agent_strategy(base: str | None) -> dict[str, Any]:
         return {}
     try:
         with urllib.request.urlopen(  # noqa: S310 - loopback Agent Web address
-                base.rstrip("/") + "/api/v1/telemetry/health", timeout=5) as reply:
+            base.rstrip("/") + "/api/v1/telemetry/health", timeout=5
+        ) as reply:
             health = json.loads(reply.read().decode("utf-8"))
     except (OSError, ValueError):
         return {}
     strategy = health.get("strategy") if isinstance(health.get("strategy"), dict) else {}
-    return {"strategy_id": health.get("strategy_id"), "aep_build": strategy.get("build"),
-            "skills_digest": strategy.get("skills_digest"),
-            "strategy_label": strategy.get("strategy_label")}
+    return {
+        "strategy_id": health.get("strategy_id"),
+        "aep_build": strategy.get("build"),
+        "skills_digest": strategy.get("skills_digest"),
+        "strategy_label": strategy.get("strategy_label"),
+    }
 
 
 def trace_ids(exchanges: list[dict[str, Any]] | dict[str, Any]) -> list[str]:
@@ -90,9 +95,16 @@ class BenchmarkTelemetry:
     """Emits one benchmark (or grading) run; every method is safe to call when
     the store is unavailable."""
 
-    def __init__(self, suite: str, label: str, *, kind: str = "benchmark_run",
-                 parent_run_id: str | None = None, store: TelemetryStore | None = None,
-                 host_json: Path = DEFAULT_HOST_JSON) -> None:
+    def __init__(
+        self,
+        suite: str,
+        label: str,
+        *,
+        kind: str = "benchmark_run",
+        parent_run_id: str | None = None,
+        store: TelemetryStore | None = None,
+        host_json: Path = DEFAULT_HOST_JSON,
+    ) -> None:
         stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%S")
         prefix = "bench" if kind == "benchmark_run" else "grade"
         self.run_id = f"{prefix}-{suite}-{label}-{stamp}-{uuid.uuid4().hex[:6]}"
@@ -119,21 +131,39 @@ class BenchmarkTelemetry:
             return
         try:
             event = TelemetryEvent(
-                event_id=uuid.uuid4().hex, run_id=self.run_id, trace_id=self.trace_id,
-                span_id=f"span-{self.run_id}", sequence=self.sequence,
-                timestamp=datetime.now(UTC), event_type=event_type, status=status,
-                state=self.kind, attributes=sanitize(attributes))
+                event_id=uuid.uuid4().hex,
+                run_id=self.run_id,
+                trace_id=self.trace_id,
+                span_id=f"span-{self.run_id}",
+                sequence=self.sequence,
+                timestamp=datetime.now(UTC),
+                event_type=event_type,
+                status=status,
+                state=self.kind,
+                attributes=sanitize(attributes),
+            )
             self.store.append([event])
             self.sequence += 1
         except Exception:  # noqa: BLE001 - telemetry never stops a benchmark
             return
 
-    def start(self, *, cases: int, strategy: dict[str, Any] | None = None,
-              **attributes: Any) -> None:
+    def start(
+        self, *, cases: int, strategy: dict[str, Any] | None = None, **attributes: Any
+    ) -> None:
         self.started = datetime.now(UTC)
-        self._emit("run.started", "started", {
-            "run_kind": self.kind, "parent_run_id": self.parent_run_id, "suite": self.suite,
-            "label": self.label, "cases": cases, **(strategy or {}), **attributes})
+        self._emit(
+            "run.started",
+            "started",
+            {
+                "run_kind": self.kind,
+                "parent_run_id": self.parent_run_id,
+                "suite": self.suite,
+                "label": self.label,
+                "cases": cases,
+                **(strategy or {}),
+                **attributes,
+            },
+        )
 
     def case_started(self, case_id: str, **attributes: Any) -> None:
         self._emit("benchmark.case_started", "started", {"case_id": case_id, **attributes})
@@ -142,17 +172,32 @@ class BenchmarkTelemetry:
         """`status` is the benchmark's own verdict (PASS, FAIL, ...)."""
         with self._lock:
             self.statuses[status] += 1
-        event_type = "benchmark.case_graded" if self.kind == "benchmark_grading" \
+        event_type = (
+            "benchmark.case_graded"
+            if self.kind == "benchmark_grading"
             else "benchmark.case_completed"
-        self._emit(event_type, "succeeded" if status == "PASS" else "failed",
-                   {"case_id": case_id, "verdict": status, **attributes})
+        )
+        self._emit(
+            event_type,
+            "succeeded" if status == "PASS" else "failed",
+            {"case_id": case_id, "verdict": status, **attributes},
+        )
 
     def finish(self, **attributes: Any) -> None:
-        duration = (int((datetime.now(UTC) - self.started).total_seconds() * 1000)
-                    if self.started else None)
-        self._emit("run.completed", "succeeded", {
-            "cases": sum(self.statuses.values()), "status_counts": dict(self.statuses),
-            "duration_ms": duration, "outcome": "completed", **attributes})
+        duration = (
+            int((datetime.now(UTC) - self.started).total_seconds() * 1000) if self.started else None
+        )
+        self._emit(
+            "run.completed",
+            "succeeded",
+            {
+                "cases": sum(self.statuses.values()),
+                "status_counts": dict(self.statuses),
+                "duration_ms": duration,
+                "outcome": "completed",
+                **attributes,
+            },
+        )
         if self.store is not None:
             try:
                 self.store.close()

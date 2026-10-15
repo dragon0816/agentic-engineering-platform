@@ -120,7 +120,9 @@ def test_a_service_with_no_quantity_means_one() -> None:
 def test_a_name_containing_a_colon_keeps_it() -> None:
     """The quantity is after the *last* colon, and these names carry brackets
     and slashes already."""
-    assert parse_selection("GPS接收天線(供3頻道以上使用):2") == [("GPS接收天線(供3頻道以上使用)", 2)]  # noqa: E501 - oracle text kept as the source wrote it
+    assert parse_selection("GPS接收天線(供3頻道以上使用):2") == [
+        ("GPS接收天線(供3頻道以上使用)", 2)
+    ]  # noqa: E501 - oracle text kept as the source wrote it
 
 
 def test_zero_is_dropped_rather_than_written_as_a_zero_row() -> None:
@@ -148,9 +150,10 @@ def test_the_gongguan_total_matches_the_real_plan() -> None:
         "5瓦(含以上及以下)(各頻道)發射/補隙系統變調變錯誤比改善服:6,"
         "訊號放大器系統增益改善服務:1,"
         "混頻系統(6頻道)調變錯誤比改善服務:1,"
-        "DVB-T接收/發射天線(單一方向)性能改善服務:1")
+        "DVB-T接收/發射天線(單一方向)性能改善服務:1"
+    )
     rows, total = service_rows(selection, PRICES, {}, "115/09/30")
-    assert total == 2113450          # the figure printed in 公館站's plan
+    assert total == 2113450  # the figure printed in 公館站's plan
     assert rows[0][3] == "1,794,000"  # 299,000 x 6
     assert rows[-1][1] == "總計"
 
@@ -187,11 +190,22 @@ def test_the_schedule_shows_the_document_name_not_the_contract_name() -> None:
 
 
 SYSTEMS = [
-    {"n": 1, "system": "發射/補隙系統", "field": "transmitter", "perChannel": True,
-     "serviceByPower": {"5W": "5瓦(含以上及以下)(各頻道)發射/補隙系統變調變錯誤比改善服",
-                        "25W": "25瓦(含以上)(各頻道)發射/補隙系統調變錯誤比改善服務"}},
-    {"n": 2, "system": "訊號放大器系統", "field": "amplifier",
-     "service": "訊號放大器系統增益改善服務"},
+    {
+        "n": 1,
+        "system": "發射/補隙系統",
+        "field": "transmitter",
+        "perChannel": True,
+        "serviceByPower": {
+            "5W": "5瓦(含以上及以下)(各頻道)發射/補隙系統變調變錯誤比改善服",
+            "25W": "25瓦(含以上)(各頻道)發射/補隙系統調變錯誤比改善服務",
+        },
+    },
+    {
+        "n": 2,
+        "system": "訊號放大器系統",
+        "field": "amplifier",
+        "service": "訊號放大器系統增益改善服務",
+    },
     {"n": 3, "system": "空調系統", "field": "aircon", "service": "空調系統恆溫品質改善服務"},
 ]
 
@@ -252,8 +266,9 @@ def test_service_for_names_the_system_when_nothing_is_configured() -> None:
 
 def test_the_plan_section_is_numbered_in_full_width_and_continues_from_one() -> None:
     selection = parse_selection("甲:2,乙:1")
-    lines = plan_lines(selection, {"甲": "甲壞了({channels}頻道)。", "乙": "乙壞了。"},
-                       6, "保固說明。")
+    lines = plan_lines(
+        selection, {"甲": "甲壞了({channels}頻道)。", "乙": "乙壞了。"}, 6, "保固說明。"
+    )
     assert lines[0].startswith("（二）") and "6頻道" in lines[0]
     assert lines[1].startswith("（三）")
     assert lines[2] == "（四）保固說明。"
@@ -290,18 +305,27 @@ def test_display_name_falls_back_to_the_contract_wording() -> None:
 # --------------------------------------------------------------------------
 
 
-STATION = {"station": "東清站", "authority": "蘭嶼鄉公所",
-           "builtYear": "100", "population": 1654}
+STATION = {"station": "東清站", "authority": "蘭嶼鄉公所", "builtYear": "100", "population": 1654}
 
 
 def _preview(**over):
     from capabilities.ncc_plan.rules import preview
+
     selection = parse_selection("25瓦(含以上)(各頻道)發射/補隙系統調變錯誤比改善服務:2")
     rows, total = service_rows(selection, PRICES, {}, "115/09/30")
-    kw = dict(station=STATION, area="台東縣蘭嶼鄉東清村", out_name="x.docx",
-              selection=selection, rows=rows, total=total,
-              channels=["CH26"], service_channels=["CH24", "CH26"],
-              systems=[{"system": "發射系統"}], unmatched=[], missing_photos=[])
+    kw = dict(
+        station=STATION,
+        area="台東縣蘭嶼鄉東清村",
+        out_name="x.docx",
+        selection=selection,
+        rows=rows,
+        total=total,
+        channels=["CH26"],
+        service_channels=["CH24", "CH26"],
+        systems=[{"system": "發射系統"}],
+        unmatched=[],
+        missing_photos=[],
+    )
     kw.update(over)
     return "\n".join(preview(**kw))
 
@@ -356,8 +380,6 @@ def test_a_station_with_no_population_says_so_instead_of_zero() -> None:
 # --------------------------------------------------------------------------
 
 
-
-
 # --------------------------------------------------------------------------
 # dates: one format to type, two to print
 # --------------------------------------------------------------------------
@@ -368,33 +390,39 @@ def test_the_same_date_is_accepted_however_it_is_typed(typed: str) -> None:
     """The form asked for 115年6月7日 in one box and 115/09/30 in the other,
     which is the document's two formats leaking onto the person filling it in."""
     from capabilities.ncc_plan.rules import date_in_words
+
     assert date_in_words(typed) == "115年6月7日"
 
 
 def test_the_sentence_gets_words_and_the_table_gets_slashes() -> None:
     """三、（一） reads 「…115年9月30日確認…」; 表四's column reads 115/09/30."""
     from capabilities.ncc_plan.rules import date_in_slashes, date_in_words
+
     assert date_in_words("115/09/30") == "115年9月30日"
     assert date_in_slashes("115年9月30日") == "115/09/30"
 
 
 def test_the_table_column_is_zero_padded() -> None:
     from capabilities.ncc_plan.rules import date_in_slashes
+
     assert date_in_slashes("115/6/7") == "115/06/07"
 
 
 def test_text_that_is_not_a_date_is_left_alone() -> None:
     """Somebody writing 「115年6月上旬」 means it; rewriting it would be worse."""
     from capabilities.ncc_plan.rules import date_in_slashes, date_in_words
+
     assert date_in_words("115年6月上旬") == "115年6月上旬"
     assert date_in_slashes("待確認") == "待確認"
 
 
 def test_an_impossible_date_is_not_reformatted_into_looking_valid() -> None:
     from capabilities.ncc_plan.rules import date_in_words
+
     assert date_in_words("115/13/40") == "115/13/40"
 
 
 def test_an_empty_date_stays_empty() -> None:
     from capabilities.ncc_plan.rules import date_in_slashes, date_in_words
+
     assert date_in_words("") == "" and date_in_slashes("") == ""

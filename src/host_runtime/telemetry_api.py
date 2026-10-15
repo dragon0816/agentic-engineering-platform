@@ -77,34 +77,51 @@ def handle(handler: Any, path: str, query_text: str) -> bool:
         return True
     store = active.store
     query = parse_qs(query_text)
-    rest = path[len(PREFIX):]
+    rest = path[len(PREFIX) :]
     if rest == "health":
         _reply(handler, 200, {**active.health(), "last_ingest_seq": store.last_ingest_seq()})
     elif rest == "runs":
         limit = _int(query, "limit", 50, 1, 500)
-        runs = store.runs(limit=limit, before=query.get("cursor", [None])[0],
-                          kind=query.get("kind", [None])[0],
-                          status=query.get("status", [None])[0],
-                          since=query.get("since", [None])[0],
-                          until=query.get("until", [None])[0],
-                          trace_id=query.get("trace_id", [None])[0],
-                          parent_run_id=query.get("parent_run_id", [None])[0])
-        cursor = (f"{runs[-1]['started_at'] or ''}|{runs[-1]['run_id']}"
-                  if len(runs) == limit else None)
+        runs = store.runs(
+            limit=limit,
+            before=query.get("cursor", [None])[0],
+            kind=query.get("kind", [None])[0],
+            status=query.get("status", [None])[0],
+            since=query.get("since", [None])[0],
+            until=query.get("until", [None])[0],
+            trace_id=query.get("trace_id", [None])[0],
+            parent_run_id=query.get("parent_run_id", [None])[0],
+        )
+        cursor = (
+            f"{runs[-1]['started_at'] or ''}|{runs[-1]['run_id']}" if len(runs) == limit else None
+        )
         _reply(handler, 200, {"runs": runs, "next_cursor": cursor})
     elif (match := re.fullmatch(r"runs/([^/]+)/events", rest)) is not None:
         after = _int(query, "after_sequence", -1, -1, 2**62)
         limit = _int(query, "limit", 500, 1, 5000)
         events = store.run_events(unquote(match[1]), after_sequence=after, limit=limit)
-        _reply(handler, 200, {"events": events, "next_sequence":
-                              events[-1]["sequence"] if len(events) == limit else None})
+        _reply(
+            handler,
+            200,
+            {
+                "events": events,
+                "next_sequence": events[-1]["sequence"] if len(events) == limit else None,
+            },
+        )
     elif rest == "events":
         after = _int(query, "after_ingest_seq", 0, 0, 2**62)
         limit = _int(query, "limit", 1000, 1, 5000)
-        events = store.events_after(after, limit=limit, since=query.get("since", [None])[0],
-                                    until=query.get("until", [None])[0])
-        _reply(handler, 200, {"events": events, "next_ingest_seq":
-                              events[-1]["ingest_seq"] if events else after})
+        events = store.events_after(
+            after,
+            limit=limit,
+            since=query.get("since", [None])[0],
+            until=query.get("until", [None])[0],
+        )
+        _reply(
+            handler,
+            200,
+            {"events": events, "next_ingest_seq": events[-1]["ingest_seq"] if events else after},
+        )
     elif rest == "stream":
         _stream(handler, store, _int(query, "after_ingest_seq", -1, -1, 2**62))
     else:

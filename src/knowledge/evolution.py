@@ -322,8 +322,11 @@ class KnowledgeValidationEvidence(Contract):
 
 
 def grounded_record(
-    asset: AssetIdentity, trace: TraceIdentifiers, answer: Answer,
-    *, assessment: KnowledgeEvidenceSummary | None = None,
+    asset: AssetIdentity,
+    trace: TraceIdentifiers,
+    answer: Answer,
+    *,
+    assessment: KnowledgeEvidenceSummary | None = None,
     citation_policy: CitationPolicy = "raw_only",
     wiki_provenance: tuple[WikiProvenance, ...] = (),
 ) -> KnowledgeAnswerRecord:

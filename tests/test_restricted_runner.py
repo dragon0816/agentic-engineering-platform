@@ -35,13 +35,12 @@ def run_code(tmp_path: Path, code: str, timeout: int = 30) -> tuple[int | None, 
     return result.exit_code, result.timed_out, result.output
 
 
-def test_no_credential_reaches_the_process(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_no_credential_reaches_the_process(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("AEP_SECRET_PROBE", "should-not-leak")
     monkeypatch.setenv("LITELLM_MASTER_KEY", "should-not-leak")
     code, _, output = run_code(
-        tmp_path, "import os; print(sorted(k for k in os.environ if 'SECRET' in k or "
+        tmp_path,
+        "import os; print(sorted(k for k in os.environ if 'SECRET' in k or "
         "k.startswith(('AEP', 'LITELLM'))))",
     )
     assert code == 0 and output.strip() == "[]"
@@ -49,27 +48,33 @@ def test_no_credential_reaches_the_process(
 
 def test_it_writes_in_its_run_folder_and_nowhere_else(tmp_path: Path) -> None:
     outside = tmp_path / "outside.txt"
-    code, _, output = run_code(tmp_path, (
-        "import os, pathlib\n"
-        "pathlib.Path(os.getcwd(), 'inside.txt').write_text('ok')\n"
-        "try:\n"
-        f"    open(r'{outside}', 'w').write('x'); print('outside written')\n"
-        "except PermissionError:\n"
-        "    print('outside refused')\n"
-    ))
+    code, _, output = run_code(
+        tmp_path,
+        (
+            "import os, pathlib\n"
+            "pathlib.Path(os.getcwd(), 'inside.txt').write_text('ok')\n"
+            "try:\n"
+            f"    open(r'{outside}', 'w').write('x'); print('outside written')\n"
+            "except PermissionError:\n"
+            "    print('outside refused')\n"
+        ),
+    )
     assert code == 0 and "outside refused" in output
     assert (tmp_path / "run" / "inside.txt").read_text() == "ok"
     assert not outside.exists()
 
 
 def test_it_cannot_start_another_process(tmp_path: Path) -> None:
-    code, _, output = run_code(tmp_path, (
-        "import subprocess, sys\n"
-        "try:\n"
-        "    subprocess.run([sys.executable, '-c', 'pass'], check=True); print('child ran')\n"
-        "except OSError:\n"
-        "    print('child refused')\n"
-    ))
+    code, _, output = run_code(
+        tmp_path,
+        (
+            "import subprocess, sys\n"
+            "try:\n"
+            "    subprocess.run([sys.executable, '-c', 'pass'], check=True); print('child ran')\n"
+            "except OSError:\n"
+            "    print('child refused')\n"
+        ),
+    )
     assert code == 0 and "child refused" in output
 
 
@@ -138,6 +143,7 @@ def test_the_firewall_rule_check_reads_powershell_and_names_the_program() -> Non
             assert isinstance(env, dict)
             seen.append([*args, env["AEP_RUNNER_PROGRAM"]])
             return subprocess.CompletedProcess(args, 0, stdout=text + "\n", stderr="")
+
         return run
 
     python = Path(r"C:\runner\python.exe")
@@ -174,7 +180,8 @@ def test_the_rule_check_finds_a_real_rule_on_this_machine() -> None:
     from harness.network_block import outbound_rule_present
 
     runner_python = Path(os.environ.get("LOCALAPPDATA", "")) / (
-        "AgenticEngineeringPlatform/coding-runner/cpython-3.12.14-windows-x86_64-none/python.exe")
+        "AgenticEngineeringPlatform/coding-runner/cpython-3.12.14-windows-x86_64-none/python.exe"
+    )
     if not runner_python.is_file():
         pytest.skip("the live coding runner is not installed on this machine")
     assert outbound_rule_present(runner_python)

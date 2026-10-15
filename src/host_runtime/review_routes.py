@@ -36,8 +36,9 @@ def _folders(root: Path) -> list[str]:
     for area in ("drop", "raw"):
         folder = root / area
         if folder.is_dir():
-            found.update(p.name for p in folder.iterdir() if p.is_dir() and
-                         not p.name.startswith("."))
+            found.update(
+                p.name for p in folder.iterdir() if p.is_dir() and not p.name.startswith(".")
+            )
     return sorted(found)
 
 
@@ -45,13 +46,15 @@ def _scope_of(root: Path, rel: str) -> str | None:
     fields = front_fields((root / rel).read_text(encoding="utf-8", errors="ignore"))
     applies = fields.get("applies_to", "").strip().strip("/")
     if applies.startswith("raw/"):
-        folder = applies[len("raw/"):]
+        folder = applies[len("raw/") :]
         # The same folders a sandbox may be scoped to: collected (drop) or converted (raw).
         if (root / "drop" / folder).is_dir() or (root / "raw" / folder).is_dir():
             return folder
     name = (fields.get("name") or rel.split("/")[1]).casefold()
-    return next((f for f in _folders(root) if name in (f"ask-{f.casefold()}",
-                                                        f"ingest-{f.casefold()}")), None)
+    return next(
+        (f for f in _folders(root) if name in (f"ask-{f.casefold()}", f"ingest-{f.casefold()}")),
+        None,
+    )
 
 
 def resolve_rule(target: str, bases: dict[str, Path]) -> RuleTarget | None:
@@ -75,18 +78,32 @@ def question_folder(target: str, root: Path) -> str | None:
 def draft_question(proposal: ReviewProposal) -> str:
     """A question file whose terms an expert fills in; never invented here."""
     question = " ".join(proposal.text.split()) or "(question)"
-    return (f"---\nname: review-{proposal.proposal_id}\nasked_by: （待指定）\n---\n\n"
-            f"# {question}\n\n必須提到:\n  - （請專家填寫）\n\n不可以說:\n\n"
-            f"<!--\nFrom experience review {proposal.review_id}: {proposal.diagnosis}\n"
-            "The must-mention terms are left for an expert; a question without terms is\n"
-            "listed as not graded and does not count in the benchmark until filled in.\n-->\n")
+    return (
+        f"---\nname: review-{proposal.proposal_id}\nasked_by: （待指定）\n---\n\n"
+        f"# {question}\n\n必須提到:\n  - （請專家填寫）\n\n不可以說:\n\n"
+        f"<!--\nFrom experience review {proposal.review_id}: {proposal.diagnosis}\n"
+        "The must-mention terms are left for an expert; a question without terms is\n"
+        "listed as not graded and does not count in the benchmark until filled in.\n-->\n"
+    )
 
 
 def write_proposal(sandbox_root: Path, proposal: ReviewProposal, path: str) -> None:
-    (sandbox_root / PROPOSAL_FILE).write_text(json.dumps({
-        "proposal_id": proposal.proposal_id, "kind": proposal.kind, "path": path,
-        "text": proposal.text, "diagnosis": proposal.diagnosis, "confirm": proposal.confirm,
-        "cause": proposal.cause}, ensure_ascii=False, indent=1), encoding="utf-8")
+    (sandbox_root / PROPOSAL_FILE).write_text(
+        json.dumps(
+            {
+                "proposal_id": proposal.proposal_id,
+                "kind": proposal.kind,
+                "path": path,
+                "text": proposal.text,
+                "diagnosis": proposal.diagnosis,
+                "confirm": proposal.confirm,
+                "cause": proposal.cause,
+            },
+            ensure_ascii=False,
+            indent=1,
+        ),
+        encoding="utf-8",
+    )
 
 
 def read_proposal(sandbox_root: Path) -> dict[str, Any] | None:

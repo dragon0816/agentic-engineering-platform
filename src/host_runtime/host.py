@@ -419,16 +419,20 @@ def _release_chipsets(
     settings: Mapping[str, JsonValue], arguments: Mapping[str, str]
 ) -> list[ReferenceItem]:
     """The release form's chipset list (forms v2); fails soft, never blocks."""
-    return [ReferenceItem(value=value, label=label)
-            for value, label in release_choices.chipset_choices(settings, arguments)]
+    return [
+        ReferenceItem(value=value, label=label)
+        for value, label in release_choices.chipset_choices(settings, arguments)
+    ]
 
 
 def _release_versions(
     settings: Mapping[str, JsonValue], arguments: Mapping[str, str]
 ) -> list[ReferenceItem]:
     """Published versions of one package, for the release form (forms v2)."""
-    return [ReferenceItem(value=value, label=label)
-            for value, label in release_choices.version_choices(settings, arguments)]
+    return [
+        ReferenceItem(value=value, label=label)
+        for value, label in release_choices.version_choices(settings, arguments)
+    ]
 
 
 #: Read-only `fn:` choice functions by name (see `host_runtime.choice_sources`).
@@ -542,7 +546,9 @@ OWNER_GRANT_REF = "device-owner"
 
 
 def _owner_grants(
-    membership: BridgeMembership | None, installed: InstalledCapabilities, layout: HostLayout,
+    membership: BridgeMembership | None,
+    installed: InstalledCapabilities,
+    layout: HostLayout,
 ) -> tuple[CapabilityGrant, ...]:
     """Every installed capability for the device owner (owner 2026-10-11): on a
     local host what this computer may do, its owner may do. A grant written in
@@ -555,7 +561,8 @@ def _owner_grants(
     written = {(g.actor, g.asset.key) for g in _configured_grants(layout)}
     return tuple(
         CapabilityGrant(
-            actor=owner, asset=spec.identity,
+            actor=owner,
+            asset=spec.identity,
             permissions=spec.policy.required_permissions,
             policy_refs=spec.policy.policy_refs or (OWNER_GRANT_REF,),
             approval_ref=OWNER_GRANT_REF,
@@ -663,80 +670,115 @@ def build_integrations(
     # the owner's install, and the settings keep the real GitLab out until
     # `remote_release` is on.
     release_configured = _has_workflow_settings(
-        layout, (RELEASE_PREPARE_WORKFLOW, RELEASE_COMMIT_WORKFLOW, RELEASE_PUSH_WORKFLOW,
-                 RELEASE_RUN_WORKFLOW))
+        layout,
+        (
+            RELEASE_PREPARE_WORKFLOW,
+            RELEASE_COMMIT_WORKFLOW,
+            RELEASE_PUSH_WORKFLOW,
+            RELEASE_RUN_WORKFLOW,
+        ),
+    )
     # Uploaded release files are read only from this host's upload store.
     uploads = layout.workspace_root / UPLOADS_FOLDER
     for spec, handler, step_input, output in (
-        (RELEASE_PREPARE_SPEC, PrepareHandler(upload_root=uploads), PrepareStepInput,
-         PreparedRelease),
+        (
+            RELEASE_PREPARE_SPEC,
+            PrepareHandler(upload_root=uploads),
+            PrepareStepInput,
+            PreparedRelease,
+        ),
         (RELEASE_COMMIT_SPEC, CommitHandler(), CommitStepInput, CommitResult),
         (RELEASE_PUSH_SPEC, PushHandler(), PushStepInput, PushResult),
     ):
         if release_configured or spec.identity.key in uses:
-            installed.register(spec, handler, step_input, output,
-                               ExecutionDependencies(central_required=False))
+            installed.register(
+                spec, handler, step_input, output, ExecutionDependencies(central_required=False)
+            )
     # Workflow 14: its paths are per-install Workflow settings.
     if NCC_PREPARE_SPEC.identity.key in uses:
         installed.register(
-            NCC_PREPARE_SPEC, NccPrepareHandler(), NccPlanStepInput, NccPlan,
+            NCC_PREPARE_SPEC,
+            NccPrepareHandler(),
+            NccPlanStepInput,
+            NccPlan,
             ExecutionDependencies(central_required=False),
         )
     if NCC_RENDER_SPEC.identity.key in uses:
         installed.register(
-            NCC_RENDER_SPEC, NccRenderHandler(), NccRenderStepInput, NccRendered,
+            NCC_RENDER_SPEC,
+            NccRenderHandler(),
+            NccRenderStepInput,
+            NccRendered,
             ExecutionDependencies(central_required=False),
         )
     # Web and data building blocks for generated Workflows.
     if config.web is not None:
         profile = (
-            Path(config.web.profile_dir) if config.web.profile_dir
+            Path(config.web.profile_dir)
+            if config.web.profile_dir
             else layout.workspace_root / "web-profile"
         )
         for spec, mode in ((WEB_READ_SPEC, "read"), (WEB_ACT_SPEC, "act")):
             installed.register(
-                spec, WebScriptHandler(config.web, profile, mode),  # type: ignore[arg-type]
-                WebScript, WebScriptResult, ExecutionDependencies(central_required=False),
+                spec,
+                WebScriptHandler(config.web, profile, mode),  # type: ignore[arg-type]
+                WebScript,
+                WebScriptResult,
+                ExecutionDependencies(central_required=False),
             )
         # The Agent's own Edge for a task (lab gap L1): kept open between calls,
         # in a profile apart from the Workflow steps' so neither locks the other.
         installed.register(
             BROWSER_SPEC,
             BrowserSessionHandler(
-                config.web.allowed_origins, layout.workspace_root / "browser-profile",
-                headless=config.web.headless, timeout_s=float(config.web.timeout_seconds),
+                config.web.allowed_origins,
+                layout.workspace_root / "browser-profile",
+                headless=config.web.headless,
+                timeout_s=float(config.web.timeout_seconds),
                 workspace_roots=config.coding.workspace_roots if config.coding else (),
             ),
-            BrowserRequest, BrowserResult, ExecutionDependencies(central_required=False),
+            BrowserRequest,
+            BrowserResult,
+            ExecutionDependencies(central_required=False),
         )
     # Registered desktop applications the Agent may operate (lab gap L2).
     if config.desktop is not None:
         desktop = config.desktop
         if not desktop.workspace_roots and config.coding is not None:
-            desktop = desktop.model_copy(
-                update={"workspace_roots": config.coding.workspace_roots})
+            desktop = desktop.model_copy(update={"workspace_roots": config.coding.workspace_roots})
         installed.register(
             DESKTOP_SPEC,
             DesktopSessionHandler(desktop, layout.workspace_root / "desktop-tool"),
-            DesktopRequest, DesktopResult, ExecutionDependencies(central_required=False),
+            DesktopRequest,
+            DesktopResult,
+            ExecutionDependencies(central_required=False),
         )
     # Data and Excel blocks: installed when a Workflow uses them, or when this
     # host turned on web steps for generated Workflows (`web` in host.json).
     generated = config.web is not None
     if generated or DATA_SELECT_SPEC.identity.key in uses:
         installed.register(
-            DATA_SELECT_SPEC, SelectHandler(), SelectRequest, SelectResult,
+            DATA_SELECT_SPEC,
+            SelectHandler(),
+            SelectRequest,
+            SelectResult,
             ExecutionDependencies(central_required=False),
         )
     if generated or EXCEL_READ_SHEET_SPEC.identity.key in uses:
         installed.register(
-            EXCEL_READ_SHEET_SPEC, ReadSheetHandler(), ReadSheetRequest, SheetRows,
+            EXCEL_READ_SHEET_SPEC,
+            ReadSheetHandler(),
+            ReadSheetRequest,
+            SheetRows,
             ExecutionDependencies(central_required=False),
         )
     if generated or EXCEL_UPSERT_SPEC.identity.key in uses:
         installed.register(
-            EXCEL_UPSERT_SPEC, UpsertHandler(layout.workspace_root / "excel-backups"),
-            UpsertRequest, UpsertResult, ExecutionDependencies(central_required=False),
+            EXCEL_UPSERT_SPEC,
+            UpsertHandler(layout.workspace_root / "excel-backups"),
+            UpsertRequest,
+            UpsertResult,
+            ExecutionDependencies(central_required=False),
         )
     # The Outlook draft building block: installed when a Workflow uses it.
     if MAIL_DRAFT_SPEC.identity.key in uses:
@@ -755,11 +797,19 @@ def build_integrations(
 
         store = AgentModeStore(layout.workspace_root)
         installed.register(
-            MAIL_SEARCH_SPEC, MailSearchHandler(OutlookComMailbox, lambda: store.load().mail),
-            MailSearchRequest, MailSearchResult, ExecutionDependencies(central_required=False))
+            MAIL_SEARCH_SPEC,
+            MailSearchHandler(OutlookComMailbox, lambda: store.load().mail),
+            MailSearchRequest,
+            MailSearchResult,
+            ExecutionDependencies(central_required=False),
+        )
         installed.register(
-            MAIL_READ_SPEC, MailReadHandler(OutlookComMailbox, lambda: store.load().mail),
-            MailReadRequest, MailReadResult, ExecutionDependencies(central_required=False))
+            MAIL_READ_SPEC,
+            MailReadHandler(OutlookComMailbox, lambda: store.load().mail),
+            MailReadRequest,
+            MailReadResult,
+            ExecutionDependencies(central_required=False),
+        )
     integrations = config.integrations
     if integrations is None:
         return
@@ -1086,8 +1136,11 @@ def build_gateway(
     )
     if config.coding is not None and config.coding.workspace_roots:
         installed.register(
-            CODING_RUN_SPEC, RunPythonHandler(config.coding), RunPythonStepInput,
-            RunPythonResult, ExecutionDependencies(central_required=False),
+            CODING_RUN_SPEC,
+            RunPythonHandler(config.coding),
+            RunPythonStepInput,
+            RunPythonResult,
+            ExecutionDependencies(central_required=False),
         )
     if config.coding is not None:
         installed.register(
@@ -1153,15 +1206,14 @@ def build_gateway(
     grants = (
         _decided_grants(authorization, installed)
         if authorization is not None
-        else _configured_grants(layout) + (
-            _owner_grants(membership, installed, layout) if config.local_owner_grants else ())
+        else _configured_grants(layout)
+        + (_owner_grants(membership, installed, layout) if config.local_owner_grants else ())
     )
     if profile is not None:
         permitted = {item.key for item in profile.allowed_capabilities}
         grants = tuple(item for item in grants if item.asset.key in permitted)
     try:
-        policy = LocalPolicy(
-            grants, owner_mode=authorization is None and config.local_owner_grants)
+        policy = LocalPolicy(grants, owner_mode=authorization is None and config.local_owner_grants)
     except ValueError as error:
         raise HostError("grants_invalid", layout.grants) from error
     bridge = BridgeExecutor(installed, policy, timeout_seconds=config.capability_timeout_seconds)
@@ -1172,24 +1224,28 @@ def build_gateway(
     # owner's egress approval, and in shadow mode only records its choices.
     accelerator = config.decision_accelerator
     if (
-        resolver is None and accelerator.credential is not None
+        resolver is None
+        and accelerator.credential is not None
         and accelerator.credential.name not in config.credential_environment()
     ):
         raise HostError("credential_unmapped")
     factory, authorize = skill_accelerator(
         accelerator,
-        resolver if resolver is not None else EnvironmentCredentials(
-            config.credential_environment()
-        ),
+        resolver
+        if resolver is not None
+        else EnvironmentCredentials(config.credential_environment()),
     )
     shadow_log = (
         JevShadowLog(layout.workspace_root / SHADOW_LOG_FILE)
-        if factory is not None and accelerator.mode == "shadow" else None
+        if factory is not None and accelerator.mode == "shadow"
+        else None
     )
     return Gateway(
-        router, bridge,
+        router,
+        bridge,
         WorkflowEngine(
-            workflows, bridge,
+            workflows,
+            bridge,
             settings_provider=workflow_settings_provider(config, layout),
             choices_provider=choice_sources(config, layout).values,
             upload_root=layout.workspace_root / UPLOADS_FOLDER,
@@ -1198,14 +1254,13 @@ def build_gateway(
         skill_authorizer=authorize,
         skill_shadow_observer=None if shadow_log is None else shadow_log.decision,
         conversation_observer=None if shadow_log is None else shadow_log.conversation,
-        knowledge_vaults=(
-            None if knowledge_catalog is None else _vault_tools(knowledge_catalog)
-        ),
+        knowledge_vaults=(None if knowledge_catalog is None else _vault_tools(knowledge_catalog)),
         knowledge_capability=KNOWLEDGE_QUERY_SPEC.identity,
         knowledge_procedure=_harness_knowledge_procedure(router.commands.skills),
         accelerator_excluded_aliases=frozenset({coding_skill().alias}),
         workspace_note=workspace_note(
-            () if config.coding is None else tuple(config.coding.workspace_roots)),
+            () if config.coding is None else tuple(config.coding.workspace_roots)
+        ),
         workspace_roots=() if config.coding is None else tuple(config.coding.workspace_roots),
     )
 
@@ -1220,7 +1275,8 @@ def _harness_knowledge_procedure(
 
     def procedure() -> dict[str, JsonValue] | None:
         found = [
-            item for item in skills.manifests()
+            item
+            for item in skills.manifests()
             if item.procedure
             and item.metadata.lifecycle in {"validated", "published"}
             and item.harness_guidance is not None
@@ -1259,8 +1315,9 @@ def _chat_form_offer(
     manifest = gateway.engine.workflows.get(identity)
     if manifest is None:
         return None
-    return form_offer(manifest, agent_prefill(manifest, values),
-                      gateway.engine.settings_provider, origin="agent")
+    return form_offer(
+        manifest, agent_prefill(manifest, values), gateway.engine.settings_provider, origin="agent"
+    )
 
 
 def workflow_settings_provider(
@@ -1439,7 +1496,9 @@ def build_telegram(
         resolver = EnvironmentCredentials(mapped)
     try:
         return TelegramIngress(
-            ingress_config, agent, resolver,
+            ingress_config,
+            agent,
+            resolver,
             attachments=AttachmentStore(layout.workspace_root),
             uploads=WorkflowUploadStore(layout.workspace_root),
             presets=IdentityPresets(layout.workspace_root),
@@ -1653,15 +1712,19 @@ def _runner_probe(python: Path) -> str | None:
     try:
         runner = RestrictedRunner(python, RunnerLimits(timeout_seconds=60))
         with tempfile.TemporaryDirectory(prefix="aep-runner-probe-") as folder:
-            result = runner.run(["-c", "import pytest, openpyxl; print('ok')"],
-                                cwd=Path(folder), run_dir=Path(folder))
+            result = runner.run(
+                ["-c", "import pytest, openpyxl; print('ok')"],
+                cwd=Path(folder),
+                run_dir=Path(folder),
+            )
     except (RunnerError, OSError) as error:
         return f"the runner interpreter cannot start restricted ({type(error).__name__})"
     if result.exit_code == 0 and result.output.strip().endswith("ok"):
         return None
     code = result.exit_code if result.exit_code is None else hex(result.exit_code & 0xFFFFFFFF)
-    return ("the runner interpreter does not start restricted or lacks pytest/openpyxl "
-            f"(exit {code})")
+    return (
+        f"the runner interpreter does not start restricted or lacks pytest/openpyxl (exit {code})"
+    )
 
 
 def inspect_coding(
@@ -1688,16 +1751,20 @@ def inspect_coding(
         if problem is not None:
             problems.append(problem)
         if binding.require_network_block and not rule_present(python):
-            problems.append(f"no outbound firewall block names the runner; run elevated: "
-                            f"{create_rule_command(python)}")
+            problems.append(
+                f"no outbound firewall block names the runner; run elevated: "
+                f"{create_rule_command(python)}"
+            )
     problems.extend(
         f"repository {item.name} is not a git checkout"
-        for item in binding.repositories if not (Path(item.path) / ".git").exists()
+        for item in binding.repositories
+        if not (Path(item.path) / ".git").exists()
     )
     if problems:
         return DoctorCheck(name="coding", status="failed", detail="; ".join(problems))
     return DoctorCheck(
-        name="coding", status="passed",
+        name="coding",
+        status="passed",
         detail=f"restricted pytest ready for {', '.join(i.name for i in binding.repositories)}",
     )
 
@@ -1936,19 +2003,27 @@ def build_runtime(
         grants_file=place.grants,
         skills_dir=place.skills,
         coding_workspace_roots=(
-            () if checked.coding is None else tuple(checked.coding.workspace_roots)),
+            () if checked.coding is None else tuple(checked.coding.workspace_roots)
+        ),
         on_installed=lambda manifest, grants: _use_now(gateway, manifest, grants),
     )
-    mcp = McpHub(place.workspace_root, gateway.bridge.installed, lambda: gateway.bridge.policy,
-                 checked.device.registered_by, store_secret=windows_user_environment)
+    mcp = McpHub(
+        place.workspace_root,
+        gateway.bridge.installed,
+        lambda: gateway.bridge.policy,
+        checked.device.registered_by,
+        store_secret=windows_user_environment,
+    )
     gateway.capability_approval = chat_authoring.capability_approval_tool_data
-    gateway.host_tools = lambda: (*chat_authoring.tools(), *bridge_tools(gateway.bridge),
-                                  *mcp.tools(gateway.bridge),
-                                  *workflow_form_tools(gateway.engine))
+    gateway.host_tools = lambda: (
+        *chat_authoring.tools(),
+        *bridge_tools(gateway.bridge),
+        *mcp.tools(gateway.bridge),
+        *workflow_form_tools(gateway.engine),
+    )
     # An installed Workflow run from the chat with incomplete values becomes
     # its form (owner 2026-10-15), as on the Gateway's own Workflow tools.
-    chat_authoring.form_offer = lambda identity, values: _chat_form_offer(
-        gateway, identity, values)
+    chat_authoring.form_offer = lambda identity, values: _chat_form_offer(gateway, identity, values)
     try:
         state = SqliteLocalState(place.state, bridge_id=checked.device.bridge_id)
     except (LocalStateError, OSError, ValueError) as error:
@@ -1987,7 +2062,9 @@ def build_runtime(
 
 
 def _register_knowledge_pipeline(
-    installed: InstalledCapabilities, config: CompanyHostConfiguration, layout: HostLayout,
+    installed: InstalledCapabilities,
+    config: CompanyHostConfiguration,
+    layout: HostLayout,
     model: ModelClient | None,
 ) -> None:
     """Sandboxed convert/ingest/lint (docs/phases/KNOWLEDGE_K1.md). Ingest
@@ -1998,21 +2075,42 @@ def _register_knowledge_pipeline(
     alias = binding.routing_alias if binding is not None else None
     endpoints = binding.catalog.endpoints if binding is not None else ()
     endpoint = next((e for e in endpoints if e.alias == alias), None)
-    describer = (ImageDescriber(model, alias=alias)
-                 if model is not None and alias is not None and endpoint is not None
-                 and endpoint.capabilities.vision else None)
+    describer = (
+        ImageDescriber(model, alias=alias)
+        if model is not None
+        and alias is not None
+        and endpoint is not None
+        and endpoint.capabilities.vision
+        else None
+    )
     pipeline = KnowledgePipeline(
-        Sandboxes(layout.workspace_root, root=(
-            Path(config.knowledge_pipeline.sandbox_root)
-            if config.knowledge_pipeline.sandbox_root else None)),
+        Sandboxes(
+            layout.workspace_root,
+            root=(
+                Path(config.knowledge_pipeline.sandbox_root)
+                if config.knowledge_pipeline.sandbox_root
+                else None
+            ),
+        ),
         {item.name: Path(item.root) for item in config.knowledge_pipeline.vaults},
-        extractors=office_extractors(), model=model, alias=alias, describer=describer,
-        drop_roots={item.name: Path(item.drop_root)
-                    for item in config.knowledge_pipeline.vaults if item.drop_root},
-        questions_roots={item.name: Path(item.questions_root)
-                         for item in config.knowledge_pipeline.vaults if item.questions_root},
-        maintainers={item.name: tuple(item.maintainers)
-                     for item in config.knowledge_pipeline.vaults})
+        extractors=office_extractors(),
+        model=model,
+        alias=alias,
+        describer=describer,
+        drop_roots={
+            item.name: Path(item.drop_root)
+            for item in config.knowledge_pipeline.vaults
+            if item.drop_root
+        },
+        questions_roots={
+            item.name: Path(item.questions_root)
+            for item in config.knowledge_pipeline.vaults
+            if item.questions_root
+        },
+        maintainers={
+            item.name: tuple(item.maintainers) for item in config.knowledge_pipeline.vaults
+        },
+    )
     local = ExecutionDependencies(central_required=False)
     for spec, handler, request, response in (
         (SANDBOX_CREATE_SPEC, SandboxCreateHandler(pipeline), SandboxCreateRequest, SandboxRecord),
@@ -2022,8 +2120,7 @@ def _register_knowledge_pipeline(
         (INGEST_APPLY_SPEC, IngestApplyHandler(pipeline), IngestApplyRequest, IngestApplyResult),
         (LINT_SPEC, LintHandler(pipeline), LintRequest, LintSummary),
         (ADOPT_SPEC, AdoptHandler(pipeline), AdoptRequest, AdoptSummary),
-        (INDEX_ENRICH_SPEC, IndexEnrichHandler(pipeline), IndexEnrichRequest,
-         EnrichReport),
+        (INDEX_ENRICH_SPEC, IndexEnrichHandler(pipeline), IndexEnrichRequest, EnrichReport),
         (INDEX_BUILD_SPEC, IndexBuildHandler(pipeline), IndexBuildRequest, IndexReport),
         (MERGE_SPEC, MergeHandler(pipeline), MergeRequest, MergeReport),
         (DROP_FOLDERS_SPEC, DropFoldersHandler(pipeline), DropFoldersRequest, DropFolders),
@@ -2035,9 +2132,7 @@ def _register_knowledge_pipeline(
         (PLAN_PAGE_SPEC, PlanPageHandler(pipeline), PlanPageRequest, PlanPage),
         (SKILL_GUIDE_SPEC, SkillGuideHandler(pipeline), SkillGuideRequest, SkillGuide),
         (DROP_ADD_SPEC, DropAddHandler(pipeline), DropAddRequest, DropAdded),
-        (SANDBOX_CONTENTS_SPEC, SandboxContentsHandler(pipeline), SandboxRef,
-         SandboxContents),
-        (SANDBOX_DISCARD_SPEC, SandboxDiscardHandler(pipeline), SandboxRef,
-         SandboxDiscarded),
+        (SANDBOX_CONTENTS_SPEC, SandboxContentsHandler(pipeline), SandboxRef, SandboxContents),
+        (SANDBOX_DISCARD_SPEC, SandboxDiscardHandler(pipeline), SandboxRef, SandboxDiscarded),
     ):
         installed.register(spec, handler, request, response, local)

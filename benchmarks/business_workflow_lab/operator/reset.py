@@ -26,7 +26,9 @@ MODES = {
 }
 
 
-def reset(sap: str = "normal", expense: str = "normal", quote: str = "normal", label: str = "") -> dict[str, int]:
+def reset(
+    sap: str = "normal", expense: str = "normal", quote: str = "normal", label: str = ""
+) -> dict[str, int]:
     """Write the fault files and return each event log's size, the task's start offset."""
     STATE.mkdir(parents=True, exist_ok=True)
     offsets = {}
@@ -36,18 +38,31 @@ def reset(sap: str = "normal", expense: str = "normal", quote: str = "normal", l
         # A new epoch signs everybody out of the SAP-like site: each task starts fresh.
         (STATE / f"{system}_fault.json").write_text(
             json.dumps({"mode": mode, "epoch": datetime.now().isoformat(timespec="microseconds")}),
-            encoding="utf-8")
+            encoding="utf-8",
+        )
         log = STATE / f"{system}_events.jsonl"
         with log.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps({"at": datetime.now().isoformat(timespec="milliseconds"),
-                                     "event": "operator_reset", "mode": mode, "label": label}) + "\n")
+            handle.write(
+                json.dumps(
+                    {
+                        "at": datetime.now().isoformat(timespec="milliseconds"),
+                        "event": "operator_reset",
+                        "mode": mode,
+                        "label": label,
+                    }
+                )
+                + "\n"
+            )
         offsets[system] = log.stat().st_size
         if system == "quote" and sys.platform == "win32":
             # The Agent runs the CLI from its low-integrity runner; let that
             # process record its events and consume a one-time fault.
             for name in ("quote_fault.json", "quote_events.jsonl"):
-                subprocess.run(["icacls", str(STATE / name), "/setintegritylevel", "low", "/Q"],
-                               capture_output=True, check=False)
+                subprocess.run(
+                    ["icacls", str(STATE / name), "/setintegritylevel", "low", "/Q"],
+                    capture_output=True,
+                    check=False,
+                )
     return offsets
 
 
@@ -57,7 +72,9 @@ def events(system: str, offset: int) -> list[dict[str, object]]:
         return []
     with log.open("rb") as handle:
         handle.seek(offset)
-        return [json.loads(line) for line in handle.read().decode("utf-8").splitlines() if line.strip()]
+        return [
+            json.loads(line) for line in handle.read().decode("utf-8").splitlines() if line.strip()
+        ]
 
 
 def main() -> int:

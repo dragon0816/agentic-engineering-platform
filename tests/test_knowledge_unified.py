@@ -14,11 +14,19 @@ from host_runtime.knowledge_harness import broaden
 from host_runtime.knowledge_observation import KnowledgeBridgeActions
 from knowledge.procedure import KnowledgeProcedure
 
-PROCEDURE = KnowledgeProcedure.model_validate({
-    "intent_patterns": ["CMP180"],
-    "facets": [{"name": "technical", "request_patterns": ["standard"],
-                "search_queries": ["CMP180 standards"], "support_terms": ["standard"]}],
-})
+PROCEDURE = KnowledgeProcedure.model_validate(
+    {
+        "intent_patterns": ["CMP180"],
+        "facets": [
+            {
+                "name": "technical",
+                "request_patterns": ["standard"],
+                "search_queries": ["CMP180 standards"],
+                "support_terms": ["standard"],
+            }
+        ],
+    }
+)
 
 
 def test_a_validated_harness_answer_is_the_turn_answer_without_a_rewrite() -> None:
@@ -37,8 +45,11 @@ def test_a_validated_harness_answer_is_the_turn_answer_without_a_rewrite() -> No
 
     from models.contracts import ModelMessage
 
-    result = asyncio.run(built.converse(request("CMP180 支援哪些標準？"),
-                                        (ModelMessage(role="user", text="CMP180?"),)))
+    result = asyncio.run(
+        built.converse(
+            request("CMP180 支援哪些標準？"), (ModelMessage(role="user", text="CMP180?"),)
+        )
+    )
     assert result.text == "CMP180 supports 5G NR [1]." and len(model.calls) == 1
     assert asked == [("CMP180?", RS)] and handler.inputs == []  # no raw capability call
 
@@ -46,11 +57,24 @@ def test_a_validated_harness_answer_is_the_turn_answer_without_a_rewrite() -> No
 def test_a_validated_tool_answer_keeps_its_cited_passages_for_checking() -> None:
     model, handler = CallsVault("knowledge__rs-knowledge", {"question": "CMP180?"}), Recording()
     built = gateway(model, handler)
-    record = {"answer": {"passages": [{"text": "CMP180 supports 5G NR",
-                                       "citation": {"kind": "wiki", "wiki_page": "wiki/a.md"}}]}}
+    record = {
+        "answer": {
+            "passages": [
+                {
+                    "text": "CMP180 supports 5G NR",
+                    "citation": {"kind": "wiki", "wiki_page": "wiki/a.md"},
+                }
+            ]
+        }
+    }
     built.knowledge_harness = lambda question, asset: {
-        "ok": True, "answer": "CMP180 supports 5G NR [1].", "evidence": {}, "record": record,
-        "harness": {"phase": "validated"}, "outcome": {"failure": None}}
+        "ok": True,
+        "answer": "CMP180 supports 5G NR [1].",
+        "evidence": {},
+        "record": record,
+        "harness": {"phase": "validated"},
+        "outcome": {"failure": None},
+    }
     import asyncio
 
     from test_gateway import request
@@ -67,8 +91,11 @@ def test_an_unvalidated_answer_goes_back_to_the_model_marked_as_such() -> None:
     model, handler = CallsVault("knowledge__rs-knowledge", {"question": "CMP180?"}), Recording()
     built = gateway(model, handler)
     built.knowledge_harness = lambda question, asset: {
-        "ok": False, "answer": "No sufficient evidence.", "evidence": None,
-        "outcome": {"capability": {"failure": {"code": "knowledge_insufficient_evidence"}}}}
+        "ok": False,
+        "answer": "No sufficient evidence.",
+        "evidence": None,
+        "outcome": {"capability": {"failure": {"code": "knowledge_insufficient_evidence"}}},
+    }
     import asyncio
 
     from test_gateway import request
@@ -103,12 +130,19 @@ def test_a_retry_widens_retrieval_and_the_skill_budget_bounds_it() -> None:
         asked.append(attempt)
         return {"ok": True, "answer": "x", "record": None}
 
-    actions = KnowledgeBridgeActions(lambda: failing("knowledge_insufficient_evidence"),
-                                     required_evidence=("raw_citations",), broadened=again,
-                                     retry_budget=1)
+    actions = KnowledgeBridgeActions(
+        lambda: failing("knowledge_insufficient_evidence"),
+        required_evidence=("raw_citations",),
+        broadened=again,
+        retry_budget=1,
+    )
     assert actions.execute() == "bridge_knowledge_answer" and asked == [1]
-    none_left = KnowledgeBridgeActions(lambda: failing("knowledge_insufficient_evidence"),
-                                       required_evidence=(), broadened=again, retry_budget=0)
+    none_left = KnowledgeBridgeActions(
+        lambda: failing("knowledge_insufficient_evidence"),
+        required_evidence=(),
+        broadened=again,
+        retry_budget=0,
+    )
     try:
         none_left.execute()
         raise AssertionError("expected a stop")

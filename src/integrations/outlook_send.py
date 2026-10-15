@@ -21,8 +21,9 @@ from typing import Any, Literal, Protocol
 
 from integrations.outlook_mail import OUTLOOK_PROGID, MailError, require_com
 
-SendErrorCode = Literal["draft_unknown", "draft_changed", "send_failed",
-                        "library_missing", "outlook_missing"]
+SendErrorCode = Literal[
+    "draft_unknown", "draft_changed", "send_failed", "library_missing", "outlook_missing"
+]
 
 
 class SendError(Exception):
@@ -31,18 +32,27 @@ class SendError(Exception):
         super().__init__(code)
 
 
-def draft_fingerprint(to: Sequence[str], cc: Sequence[str], subject: str,
-                      attachments: Sequence[str]) -> str:
+def draft_fingerprint(
+    to: Sequence[str], cc: Sequence[str], subject: str, attachments: Sequence[str]
+) -> str:
     """What must not change between the card and the send. Outlook rewrites
     a draft's HTML when it saves it, so the body is shown on the card but not
     compared; recipients, subject and attachment names are."""
 
     def addresses(values: Sequence[str]) -> list[str]:
-        return sorted(part.strip().casefold() for value in values
-                      for part in value.replace(",", ";").split(";") if part.strip())
+        return sorted(
+            part.strip().casefold()
+            for value in values
+            for part in value.replace(",", ";").split(";")
+            if part.strip()
+        )
 
-    payload = {"to": addresses(to), "cc": addresses(cc), "subject": subject.strip(),
-               "attachments": sorted(name.casefold() for name in attachments)}
+    payload = {
+        "to": addresses(to),
+        "cc": addresses(cc),
+        "subject": subject.strip(),
+        "attachments": sorted(name.casefold() for name in attachments),
+    }
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode("utf-8")).hexdigest()
 
 
@@ -64,9 +74,11 @@ class OutlookComDraftSender:
             try:
                 require_com()
             except MailError as error:
-                raise SendError(error.code if error.code in ("library_missing",
-                                                             "outlook_missing")
-                                else "send_failed") from None
+                raise SendError(
+                    error.code
+                    if error.code in ("library_missing", "outlook_missing")
+                    else "send_failed"
+                ) from None
             import win32com.client
 
             self._dispatch = win32com.client.Dispatch(OUTLOOK_PROGID)
@@ -78,10 +90,13 @@ class OutlookComDraftSender:
     def send(self, entry_id: str, fingerprint: str) -> None:
         item = self._item(entry_id)
         try:
-            names = [str(item.Attachments.Item(index + 1).FileName)
-                     for index in range(int(item.Attachments.Count))]
-            now = draft_fingerprint([str(item.To or "")], [str(item.CC or "")],
-                                    str(item.Subject or ""), names)
+            names = [
+                str(item.Attachments.Item(index + 1).FileName)
+                for index in range(int(item.Attachments.Count))
+            ]
+            now = draft_fingerprint(
+                [str(item.To or "")], [str(item.CC or "")], str(item.Subject or ""), names
+            )
         except Exception:
             raise SendError("draft_unknown") from None
         if now != fingerprint:

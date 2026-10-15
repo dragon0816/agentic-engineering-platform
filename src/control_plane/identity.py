@@ -227,7 +227,8 @@ class InMemoryAccessTokens:
         return tuple(
             item.model_copy(deep=True)
             for item in sorted(
-                self._grants.values(), key=lambda entry: entry.issued_at, reverse=True)
+                self._grants.values(), key=lambda entry: entry.issued_at, reverse=True
+            )
             if item.bridge_id == key
         )
 

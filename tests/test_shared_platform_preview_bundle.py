@@ -134,6 +134,10 @@ def test_shared_platform_bundle_needs_every_core_dependency(tmp_path: Path) -> N
     wheel = tmp_path / "agentic_engineering_platform-0.1.0-py3-none-any.whl"
     wheel.write_bytes(b"platform-wheel")
     with pytest.raises(ValueError, match="incomplete"):
-        build(repo=repo, platform_wheel=wheel,
-              dependency_dir=dependency_dir(tmp_path, omit="tzdata-"),
-              output_dir=tmp_path / "out", revision="a" * 40)
+        build(
+            repo=repo,
+            platform_wheel=wheel,
+            dependency_dir=dependency_dir(tmp_path, omit="tzdata-"),
+            output_dir=tmp_path / "out",
+            revision="a" * 40,
+        )

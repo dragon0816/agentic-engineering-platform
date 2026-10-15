@@ -24,8 +24,11 @@ from host_runtime.web_page import PAGE
 def served_pipeline(tmp_path: Path) -> Iterator[tuple[AgentWebServer, Path]]:
     vault = _base(tmp_path)
     config, _ = workspace(
-        tmp_path, membership=membership_record(), grants=_grants(),
-        config_changes={"knowledge_pipeline": {"vaults": [{"name": "k-test", "root": str(vault)}]}})
+        tmp_path,
+        membership=membership_record(),
+        grants=_grants(),
+        config_changes={"knowledge_pipeline": {"vaults": [{"name": "k-test", "root": str(vault)}]}},
+    )
     with build_runtime(config) as runtime:
         server = AgentWebServer(AgentWeb(runtime))
         thread = threading.Thread(target=server.serve_forever, daemon=True)
@@ -39,8 +42,11 @@ def served_pipeline(tmp_path: Path) -> Iterator[tuple[AgentWebServer, Path]]:
 
 
 def _step(server: AgentWebServer, step: str, arguments: dict[str, Any]) -> dict[str, Any]:
-    reply = fetch(base(server) + "/api/knowledge/pipeline/call", token=server.token,
-                  body={"step": step, "arguments": arguments})
+    reply = fetch(
+        base(server) + "/api/knowledge/pipeline/call",
+        token=server.token,
+        body={"step": step, "arguments": arguments},
+    )
     assert reply.status == 200
     loaded: dict[str, Any] = json.loads(reply.body)
     return loaded
@@ -52,13 +58,17 @@ def test_the_tab_lists_bases_and_runs_steps_in_a_sandbox(
     server, vault = served_pipeline
     before = _snapshot(vault)
     info = json.loads(fetch(base(server) + "/api/knowledge/pipeline", token=server.token).body)
-    assert info == {"enabled": True, "bases": ["k-test"],
-                    "vaults": [{"name": "k-test", "project": False, "asset": None}]}
+    assert info == {
+        "enabled": True,
+        "bases": ["k-test"],
+        "vaults": [{"name": "k-test", "project": False, "asset": None}],
+    }
     made = _step(server, "sandbox-create", {"base": "k-test", "label": "web trial"})
     assert made["ok"], made
     sandbox = made["data"]["sandbox_id"]
-    assert _step(server, "drop-add", {"sandbox_id": sandbox, "name": "a.txt",
-                                      "data_base64": "aGVsbG8K"})["ok"]
+    assert _step(
+        server, "drop-add", {"sandbox_id": sandbox, "name": "a.txt", "data_base64": "aGVsbG8K"}
+    )["ok"]
     converted = _step(server, "convert", {"sandbox_id": sandbox, "mode": "apply"})
     assert converted["data"]["items"][0]["status"] == "written"
     linted = _step(server, "lint", {"sandbox_id": sandbox})
@@ -73,8 +83,13 @@ def test_only_pipeline_steps_can_be_called_and_the_token_is_required(
     assert _step(server, "read-file", {})["code"] == "unknown_pipeline_step"
     refused = _step(server, "lint", {"sandbox_id": "../escape"})
     assert refused == {"ok": False, "code": "invalid_sandbox_id"}
-    assert fetch(base(server) + "/api/knowledge/pipeline/call",
-                 body={"step": "sandbox-list", "arguments": {}}).status == 401
+    assert (
+        fetch(
+            base(server) + "/api/knowledge/pipeline/call",
+            body={"step": "sandbox-list", "arguments": {}},
+        ).status
+        == 401
+    )
     assert fetch(base(server) + "/api/knowledge/pipeline").status == 401
 
 
@@ -103,14 +118,21 @@ def test_push_and_refresh_routes_need_the_token_and_a_sandbox(
     server, _ = served_pipeline
     body = {"sandbox_id": "sb-missing-000000", "sets": [], "resolutions": {}}
     assert fetch(base(server) + "/api/knowledge/push/start", body=body).status == 401
-    reply = json.loads(fetch(base(server) + "/api/knowledge/push/start", token=server.token,
-                             body=body).body)
+    reply = json.loads(
+        fetch(base(server) + "/api/knowledge/push/start", token=server.token, body=body).body
+    )
     assert reply == {"ok": False, "code": "unknown_sandbox"}
-    status = json.loads(fetch(base(server) + "/api/knowledge/push?sandbox_id=sb-missing-000000",
-                              token=server.token).body)
+    status = json.loads(
+        fetch(
+            base(server) + "/api/knowledge/push?sandbox_id=sb-missing-000000", token=server.token
+        ).body
+    )
     assert status == {"ok": False, "code": "unknown_sandbox"}
-    refresh = json.loads(fetch(base(server) + "/api/knowledge/refresh", token=server.token,
-                               body={"base": "k-test"}).body)
+    refresh = json.loads(
+        fetch(
+            base(server) + "/api/knowledge/refresh", token=server.token, body={"base": "k-test"}
+        ).body
+    )
     assert refresh == {"ok": False, "code": "refresh_unavailable"}
     assert 'id="kp-push"' in PAGE and "/api/knowledge/push/start" in PAGE
 
@@ -123,17 +145,25 @@ def test_re_ingest_runs_in_the_background_and_reports_each_document(
     url = base(server) + "/api/knowledge/reingest"
     made = _step(server, "sandbox-create", {"base": "k-test", "label": "re"})
     sandbox = made["data"]["sandbox_id"]
-    assert _step(server, "drop-add", {"sandbox_id": sandbox, "name": "a.txt",
-                                      "data_base64": "aGVsbG8K"})["ok"]
-    raw_ref = _step(server, "convert", {"sandbox_id": sandbox, "mode": "apply"}
-                    )["data"]["items"][0]["raw_ref"]
+    assert _step(
+        server, "drop-add", {"sandbox_id": sandbox, "name": "a.txt", "data_base64": "aGVsbG8K"}
+    )["ok"]
+    raw_ref = _step(server, "convert", {"sandbox_id": sandbox, "mode": "apply"})["data"]["items"][
+        0
+    ]["raw_ref"]
     body = {"sandbox_id": sandbox, "raw_refs": [raw_ref]}
     assert fetch(url + "/start", body=body).status == 401
-    refused = json.loads(fetch(url + "/start", token=server.token,
-                               body={"sandbox_id": sandbox, "raw_refs": ["wiki/x.md"]}).body)
+    refused = json.loads(
+        fetch(
+            url + "/start",
+            token=server.token,
+            body={"sandbox_id": sandbox, "raw_refs": ["wiki/x.md"]},
+        ).body
+    )
     assert refused == {"ok": False, "code": "no_raw_documents"}
-    assert json.loads(fetch(url + "/stop", token=server.token, body={"sandbox_id": sandbox}).body
-                      ) == {"ok": False, "code": "reingest_not_running"}
+    assert json.loads(
+        fetch(url + "/stop", token=server.token, body={"sandbox_id": sandbox}).body
+    ) == {"ok": False, "code": "reingest_not_running"}
     assert json.loads(fetch(url + "/start", token=server.token, body=body).body)["ok"]
     deadline = time.monotonic() + 30
     while True:
@@ -153,8 +183,12 @@ def test_the_skill_assistant_route_only_edits_rule_files(
     server, _ = served_pipeline
     url = base(server) + "/api/knowledge/skill-assist"
     sandbox = _step(server, "sandbox-create", {"base": "k-test", "label": "assist"})
-    body: dict[str, Any] = {"sandbox_id": sandbox["data"]["sandbox_id"], "path": "wiki/x.md",
-                            "current": "", "turns": [{"role": "user", "text": "hi"}]}
+    body: dict[str, Any] = {
+        "sandbox_id": sandbox["data"]["sandbox_id"],
+        "path": "wiki/x.md",
+        "current": "",
+        "turns": [{"role": "user", "text": "hi"}],
+    }
     assert fetch(url, body=body).status == 401
 
     def finished(reply: dict[str, Any]) -> dict[str, Any]:
@@ -186,18 +220,27 @@ def test_the_experience_review_routes_keep_settings_and_report(
     info = json.loads(fetch(base(server) + "/api/experience", token=server.token).body)
     assert info["settings"] == {"retention_days": 30, "nightly": True}
     assert info["open"] == 0 and info["review"] is None
-    saved = json.loads(fetch(base(server) + "/api/experience/settings", token=server.token,
-                             body={"retention_days": 14, "nightly": False}).body)
+    saved = json.loads(
+        fetch(
+            base(server) + "/api/experience/settings",
+            token=server.token,
+            body={"retention_days": 14, "nightly": False},
+        ).body
+    )
     assert saved["settings"] == {"retention_days": 14, "nightly": False}
-    bad = json.loads(fetch(base(server) + "/api/experience/settings", token=server.token,
-                           body={"retention_days": 0}).body)
+    bad = json.loads(
+        fetch(
+            base(server) + "/api/experience/settings",
+            token=server.token,
+            body={"retention_days": 0},
+        ).body
+    )
     assert bad == {"ok": False, "code": "experience_settings_invalid"}
     # Harvesting reads this host's own records (the conversation limit is the
     # state's maximum of 100).
     assert server.web.experience_harvest() == 0
     # Without a Knowledge asking model the review cannot run and says so.
-    assert server.web.experience_review() == {"ok": False,
-                                              "code": "experience_review_unavailable"}
+    assert server.web.experience_review() == {"ok": False, "code": "experience_review_unavailable"}
 
 
 def test_a_project_vault_is_offered_first(tmp_path: Path) -> None:
@@ -206,10 +249,18 @@ def test_a_project_vault_is_offered_first(tmp_path: Path) -> None:
     test_vault = _base(tmp_path / "t")
     project = _base(tmp_path / "p")
     config, _ = workspace(
-        tmp_path, membership=membership_record(), grants=_grants(),
-        config_changes={"knowledge_pipeline": {"vaults": [
-            {"name": "k-test", "root": str(test_vault)},
-            {"name": "rs-project", "root": str(project), "knowledge_asset": "rs-knowledge"}]}})
+        tmp_path,
+        membership=membership_record(),
+        grants=_grants(),
+        config_changes={
+            "knowledge_pipeline": {
+                "vaults": [
+                    {"name": "k-test", "root": str(test_vault)},
+                    {"name": "rs-project", "root": str(project), "knowledge_asset": "rs-knowledge"},
+                ]
+            }
+        },
+    )
     with build_runtime(config) as runtime:
         info = AgentWeb(runtime).knowledge_pipeline()
     assert info["bases"] == ["rs-project", "k-test"]

@@ -39,7 +39,10 @@ Run = Callable[..., subprocess.CompletedProcess[str]]
 def outbound_rule_present(python: Path, run: Run = subprocess.run) -> bool:
     result = run(
         ["powershell", "-NoProfile", "-NonInteractive", "-Command", _RULE_SCRIPT],
-        capture_output=True, text=True, timeout=60, check=False,
+        capture_output=True,
+        text=True,
+        timeout=60,
+        check=False,
         env={**os.environ, _PROGRAM_VARIABLE: str(python)},
     )
     return result.returncode == 0 and result.stdout.strip().endswith("blocked")

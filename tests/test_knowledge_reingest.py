@@ -30,8 +30,13 @@ class _Steps:
             return {"ok": False, "code": "model_http_error"}
         if ref == "raw/Market/empty.md":
             return {"ok": True, "data": {"status": "invalid_plan", "failure_code": None}}
-        plan = {"status": "planned", "plan_id": "plan-1", "pages": [{"path": "wiki/a.md"}],
-                "problems": [], "contradictions": []}
+        plan = {
+            "status": "planned",
+            "plan_id": "plan-1",
+            "pages": [{"path": "wiki/a.md"}],
+            "problems": [],
+            "contradictions": [],
+        }
         if ref == "raw/Market/flagged.md":
             plan.update(problems=["drops_sourced_line"], contradictions=["5G date differs"])
         if ref == "raw/Market/stale.md":
@@ -55,8 +60,13 @@ def test_a_clean_plan_is_applied_and_a_flagged_one_waits_for_the_person() -> Non
 
 
 def _run(*refs: str) -> ReingestRun:
-    return ReingestRun(run_id="reingest-20261013T000000-abcd", sandbox_id="sb-1",
-                       actor="leo.chi", raw_refs=refs, started="2026-10-13T00:00:00+00:00")
+    return ReingestRun(
+        run_id="reingest-20261013T000000-abcd",
+        sandbox_id="sb-1",
+        actor="leo.chi",
+        raw_refs=refs,
+        started="2026-10-13T00:00:00+00:00",
+    )
 
 
 def test_a_run_records_every_document_and_can_continue_after_a_stop(tmp_path: Path) -> None:
@@ -66,8 +76,9 @@ def test_a_run_records_every_document_and_can_continue_after_a_stop(tmp_path: Pa
     assert stopped.status == "stopped" and len(stopped.items) == 1
     saved = latest(tmp_path)
     assert saved is not None and saved["remaining"] == list(refs[1:])
-    finished = run_reingest(_Steps(), stopped.model_copy(update={"status": "running"}),
-                            tmp_path, threading.Event())
+    finished = run_reingest(
+        _Steps(), stopped.model_copy(update={"status": "running"}), tmp_path, threading.Event()
+    )
     assert finished.status == "finished" and finished.remaining == ()
     assert [i.status for i in finished.items] == ["applied", "needs_review", "failed"]
     assert latest(tmp_path)["remaining"] == []  # type: ignore[index]
@@ -82,16 +93,30 @@ def test_an_error_in_one_document_does_not_end_the_run(tmp_path: Path) -> None:
 
 
 def test_the_page_offers_re_ingest_and_explains_pull() -> None:
-    for hook in ('id="kp-reingest"', 'id="kp-reingest-stop"', 'id="kp-raw-folder"',
-                 "/api/knowledge/reingest/start", "already_raw", "Tick them in step 3"):
+    for hook in (
+        'id="kp-reingest"',
+        'id="kp-reingest-stop"',
+        'id="kp-raw-folder"',
+        "/api/knowledge/reingest/start",
+        "already_raw",
+        "Tick them in step 3",
+    ):
         assert hook in PAGE
 
 
 def test_the_ingest_list_previews_on_click_and_ticks_with_keys() -> None:
     # Owner 2026-10-13: the document shows beside the list (no Preview button, no jump),
     # new Raw from a convert is ticked and green, keys move and tick, one box ticks all.
-    for hook in ('id="kp-doc"', 'id="kp-plan-one"', 'id="kp-raw-all"', 'class="kp-filelist"',
-                 '"ArrowDown"', "event.shiftKey", "kpNewRaw", ".kp-file.kp-new span",
-                 "Ingest ticked"):
+    for hook in (
+        'id="kp-doc"',
+        'id="kp-plan-one"',
+        'id="kp-raw-all"',
+        'class="kp-filelist"',
+        '"ArrowDown"',
+        "event.shiftKey",
+        "kpNewRaw",
+        ".kp-file.kp-new span",
+        "Ingest ticked",
+    ):
         assert hook in PAGE
     assert 'id="kp-raw-tick"' not in PAGE and 'id="kp-raw-clear"' not in PAGE

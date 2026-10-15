@@ -253,8 +253,7 @@ EXPLANATIONS = {
     # Bridge self-enrollment (owner 2026-10-15).
     "device_owner_mismatch": "This PC is registered to another platform account. Its "
     "host.json device.registered_by must be the account you signed in to the portal with.",
-    "administrator_required": "Only a platform administrator can enroll a shared test "
-    "workstation.",
+    "administrator_required": "Only a platform administrator can enroll a shared test workstation.",
     "device_disabled": "An administrator disabled this PC on the shared platform; ask them "
     "to enable it again.",
     "device_in_use": "Another member is bound to this PC on the shared platform.",
@@ -265,8 +264,7 @@ EXPLANATIONS = {
     "Shared platform and press 'Enroll this PC'.",
     "asset_not_entitled": "Its owner has not shared this with you; ask them to add you in the "
     "Member Portal ('Who can use it').",
-    "asset_not_published": "That version is no longer in the shared catalog; refresh the "
-    "Library.",
+    "asset_not_published": "That version is no longer in the shared catalog; refresh the Library.",
     "asset_deprecated": "That version is deprecated on the shared platform; choose a newer one.",
     "selection_missing": "That version is not selected for this PC.",
     "kind_mismatch": "That is not a Skill or Workflow the Agent can install.",
@@ -339,5 +337,6 @@ def publisher_for(
     from models.credentials import EnvironmentCredentials
 
     return MemberPortalPublisher(
-        binding, EnvironmentCredentials(names, environ if environ is not None
-                                        else UserEnvironment()))
+        binding,
+        EnvironmentCredentials(names, environ if environ is not None else UserEnvironment()),
+    )

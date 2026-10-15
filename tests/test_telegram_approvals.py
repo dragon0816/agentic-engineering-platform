@@ -22,8 +22,12 @@ def test_the_owner_approves_with_a_button_and_the_run_happens_once(tmp_path: Pat
     asked = chat.request(acting, session, "run", candidate.candidate_id, {"month": "2026-09"})
 
     buttons = item._approval_buttons(SimpleNamespace(actor=acting, session_id=session))
-    assert buttons == (((f"核准執行 {asked.workflow}"[:60], f"approve:{asked.approval_id}"),
-                        ("拒絕", f"reject:{asked.approval_id}")),)
+    assert buttons == (
+        (
+            (f"核准執行 {asked.workflow}"[:60], f"approve:{asked.approval_id}"),
+            ("拒絕", f"reject:{asked.approval_id}"),
+        ),
+    )
     assert recorder.calls == []
 
     transport.batches.append([_tap(2, OWNER, f"approve:{asked.approval_id}")])

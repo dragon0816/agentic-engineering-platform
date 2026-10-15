@@ -152,8 +152,7 @@ class JEVSkillSelectionProvider:
                 str(index): name for index, name in enumerate(names, start=1)
             }
             metadata["probabilities"] = {
-                labels[key]: _number(value)
-                for key, value in probabilities.items() if key in labels
+                labels[key]: _number(value) for key, value in probabilities.items() if key in labels
             }
         choice = answer.get("choice")
         confidence = answer.get("confidence")

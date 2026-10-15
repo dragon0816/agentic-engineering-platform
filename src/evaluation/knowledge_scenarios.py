@@ -11,12 +11,13 @@ from pydantic import Field, model_validator
 
 from common.base import Contract, Symbol, Text
 
-KnowledgeFacet = Literal[
-    "market_trend", "product_option_spec", "technical_knowledge", "competitor"
-]
+KnowledgeFacet = Literal["market_trend", "product_option_spec", "technical_knowledge", "competitor"]
 KnowledgeOutput = Literal["facts", "comparison", "strategy", "swot", "execution_actions"]
 ALL_FACETS: tuple[KnowledgeFacet, ...] = (
-    "market_trend", "product_option_spec", "technical_knowledge", "competitor"
+    "market_trend",
+    "product_option_spec",
+    "technical_knowledge",
+    "competitor",
 )
 
 
@@ -38,7 +39,10 @@ class KnowledgeScenario(Contract):
             raise ValueError("standalone cases have one facet; combined cases have several")
         strategy_outputs = {"strategy", "swot", "execution_actions"}
         if strategy_outputs.intersection(self.outputs) and not {
-            "market_trend", "product_option_spec", "technical_knowledge", "competitor"
+            "market_trend",
+            "product_option_spec",
+            "technical_knowledge",
+            "competitor",
         } <= set(self.facets):
             raise ValueError("strategy, SWOT and actions require all four evidence facets")
         return self
@@ -54,14 +58,13 @@ class KnowledgeScenarioSuite(Contract):
             raise ValueError("case IDs must be unique")
         observed = {frozenset(case.facets) for case in self.cases}
         expected = {
-            frozenset(items) for size in range(1, 5)
-            for items in combinations(ALL_FACETS, size)
+            frozenset(items) for size in range(1, 5) for items in combinations(ALL_FACETS, size)
         }
         if not expected <= observed:
             raise ValueError("suite needs all 15 nonempty Knowledge facet combinations")
         if not any(
-            case.tier == "combined" and {"strategy", "swot", "execution_actions"}
-            <= set(case.outputs)
+            case.tier == "combined"
+            and {"strategy", "swot", "execution_actions"} <= set(case.outputs)
             for case in self.cases
         ):
             raise ValueError("suite needs a complete combined strategy case")

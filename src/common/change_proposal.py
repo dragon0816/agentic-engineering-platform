@@ -26,8 +26,16 @@ PROPOSE_GUIDANCE = (
     "Settings to paste it."
 )
 #: Version 1 kinds, in the order the design's table lists them.
-KINDS = ("laya", "shared_platform", "model", "telegram", "workflow_settings", "capability",
-         "platform_add", "publish")
+KINDS = (
+    "laya",
+    "shared_platform",
+    "model",
+    "telegram",
+    "workflow_settings",
+    "capability",
+    "platform_add",
+    "publish",
+)
 #: Kinds Telegram may apply (owner decision 2026-10-15); capability only for
 #: switching on or off.
 TELEGRAM_KINDS = frozenset({"laya", "workflow_settings"})
@@ -44,15 +52,15 @@ _SECRET_NAME = re.compile(
 # Names a model may give: of a secret or of a variable, never its value.
 NAME_FIELDS = frozenset({"credential_secret", "credential_environment"})
 _SHAPES = (
-    re.compile(r"login-[0-9a-f]{16}:[A-Za-z0-9_-]{16,}"),          # Personal Agent code
-    re.compile(r"\d{5,}:[A-Za-z0-9_-]{30,}"),                       # Telegram bot token
-    re.compile(r"\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}"),       # JWT
-    re.compile(r"\b(?:sk|pk|rk)-[A-Za-z0-9_-]{16,}"),               # API keys
-    re.compile(r"\bgh[pousr]_[A-Za-z0-9]{20,}"),                    # GitHub tokens
-    re.compile(r"\bxox[abprs]-[A-Za-z0-9-]{10,}"),                  # Slack tokens
-    re.compile(r"\bAKIA[0-9A-Z]{16}\b"),                            # AWS access key
-    re.compile(r"\bglpat-[A-Za-z0-9_-]{16,}"),                      # GitLab token
-    re.compile(r"://[^/\s:@]+:[^/\s@]+@"),                          # password in a URL
+    re.compile(r"login-[0-9a-f]{16}:[A-Za-z0-9_-]{16,}"),  # Personal Agent code
+    re.compile(r"\d{5,}:[A-Za-z0-9_-]{30,}"),  # Telegram bot token
+    re.compile(r"\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}"),  # JWT
+    re.compile(r"\b(?:sk|pk|rk)-[A-Za-z0-9_-]{16,}"),  # API keys
+    re.compile(r"\bgh[pousr]_[A-Za-z0-9]{20,}"),  # GitHub tokens
+    re.compile(r"\bxox[abprs]-[A-Za-z0-9-]{10,}"),  # Slack tokens
+    re.compile(r"\bAKIA[0-9A-Z]{16}\b"),  # AWS access key
+    re.compile(r"\bglpat-[A-Za-z0-9_-]{16,}"),  # GitLab token
+    re.compile(r"://[^/\s:@]+:[^/\s@]+@"),  # password in a URL
     re.compile(r"[?&](?:token|key|secret|password|code|sig|signature)=", re.IGNORECASE),
 )
 _OPAQUE = re.compile(r"^[A-Za-z0-9_\-+=/]{32,}$")
@@ -67,8 +75,11 @@ def looks_like_credential(value: str) -> bool:
         return True
     # A long opaque string with mixed letters and digits and no path in it.
     return bool(
-        _OPAQUE.fullmatch(text) and "/" not in text.strip("/")
-        and re.search(r"\d", text) and re.search(r"[a-z]", text) and re.search(r"[A-Z]", text)
+        _OPAQUE.fullmatch(text)
+        and "/" not in text.strip("/")
+        and re.search(r"\d", text)
+        and re.search(r"[a-z]", text)
+        and re.search(r"[A-Z]", text)
     )
 
 
@@ -95,7 +106,8 @@ def secret_problem(values: Any) -> str | None:
                 name = str(key)
                 where = f"{prefix}.{name}" if prefix else name
                 if name not in NAME_FIELDS and (
-                        SECRET_FIELD.fullmatch(name) or _SECRET_NAME.search(name)):
+                    SECRET_FIELD.fullmatch(name) or _SECRET_NAME.search(name)
+                ):
                     return where
                 if isinstance(item, dict):
                     stack.append((where, item))

@@ -78,7 +78,10 @@ def test_source_runtime_form_contract_is_declared_and_does_not_let_a_model_push(
     workflow = release_workflow()
     fields = {item.name: item for item in workflow.parameters if item.scope == "runtime"}
     assert [name for name, item in fields.items() if item.required] == [
-        "companyName", "chipsetId", "cmpKtOption", "generalTestcaseVersion"
+        "companyName",
+        "chipsetId",
+        "cmpKtOption",
+        "generalTestcaseVersion",
     ]
     assert fields["chipsetVersion"].choices_source == (
         "fn:release_package.versions?package={chipsetId}"
@@ -114,17 +117,24 @@ def test_release_yaml_keeps_source_comments_and_manual_option() -> None:
 
 
 def test_status_projection_preserves_source_grouping() -> None:
-    assert parse_status(
-        ["?? testplans/a.xml", "?? testplans/b.xml", " M release.yaml"]
-    ) == [("test plans", 2), ("release.yaml", 1)]
-    assert parse_status(["R  overlay/old.bin -> testplans/new.xml"]) == [
-        ("test plans", 1)
+    assert parse_status(["?? testplans/a.xml", "?? testplans/b.xml", " M release.yaml"]) == [
+        ("test plans", 2),
+        ("release.yaml", 1),
     ]
+    assert parse_status(["R  overlay/old.bin -> testplans/new.xml"]) == [("test plans", 1)]
     lines = dry_run_plan(
-        company="WNC", chipset="sdx55", chipset_version="4.1.2",
-        branch="WNC_sdx55", branch_state="created", template="template",
-        release_version="0.0.1", previous_version="", testcase="2.8.1",
-        changed=["?? testplans/a.xml"], project_path="test/release", will_push=False,
+        company="WNC",
+        chipset="sdx55",
+        chipset_version="4.1.2",
+        branch="WNC_sdx55",
+        branch_state="created",
+        template="template",
+        release_version="0.0.1",
+        previous_version="",
+        testcase="2.8.1",
+        changed=["?? testplans/a.xml"],
+        project_path="test/release",
+        will_push=False,
     )
     assert "Nothing has been committed and nothing has been pushed." in "\n".join(lines)
     assert "pushing is switched off" in "\n".join(lines)
@@ -139,8 +149,11 @@ def test_plan_is_pure_and_projects_source_destinations(tmp_path: Path) -> None:
     before = set(repo.iterdir())
     plan = plan_release(
         ReleaseRequest(
-            company_name="Foxconn", chipset_id="kt326", cmp_kt_option="KT160",
-            chipset_version="v2.0.18", general_testcase_version="2.1.2",
+            company_name="Foxconn",
+            chipset_id="kt326",
+            cmp_kt_option="KT160",
+            chipset_version="v2.0.18",
+            general_testcase_version="2.1.2",
             test_plans=("a.json",),
         ),
         ReleaseSettings(inbox=inbox),
@@ -148,9 +161,7 @@ def test_plan_is_pure_and_projects_source_destinations(tmp_path: Path) -> None:
     )
     assert plan.branch == "Foxconn_kt326"
     assert plan.release_version == "0.1.0"
-    assert plan.requirements == (
-        "rs-wmt-kt326==2.0.18", "rs-wmt-general-testcase==2.1.2"
-    )
+    assert plan.requirements == ("rs-wmt-kt326==2.0.18", "rs-wmt-general-testcase==2.1.2")
     assert plan.selected_files[0].destination == "testplans/a.json"
     assert "VERSION: 0.1.0" in plan.release_yaml
     assert set(repo.iterdir()) == before
@@ -161,8 +172,11 @@ def test_plan_refuses_unsafe_or_missing_inbox_name(tmp_path: Path, filename: str
     with pytest.raises(ReleaseValidationError):
         plan_release(
             ReleaseRequest(
-                company_name="Foxconn", chipset_id="kt326", cmp_kt_option="KT160",
-                chipset_version="2.0.18", general_testcase_version="2.1.2",
+                company_name="Foxconn",
+                chipset_id="kt326",
+                cmp_kt_option="KT160",
+                chipset_version="2.0.18",
+                general_testcase_version="2.1.2",
                 test_plans=(filename,),
             ),
             ReleaseSettings(inbox=tmp_path),
@@ -173,9 +187,13 @@ def test_plan_refuses_upload_name_mixing_before_any_write(tmp_path: Path) -> Non
     with pytest.raises(ReleaseValidationError, match="both"):
         plan_release(
             ReleaseRequest(
-                company_name="Foxconn", chipset_id="kt326", cmp_kt_option="KT160",
-                chipset_version="2.0.18", general_testcase_version="2.1.2",
-                upload_set_id="set-1", test_plans=("a.json",),
+                company_name="Foxconn",
+                chipset_id="kt326",
+                cmp_kt_option="KT160",
+                chipset_version="2.0.18",
+                general_testcase_version="2.1.2",
+                upload_set_id="set-1",
+                test_plans=("a.json",),
             ),
             ReleaseSettings(inbox=tmp_path),
         )
@@ -187,8 +205,11 @@ def test_plan_requires_explicit_published_version_until_lookup_is_integrated(
     with pytest.raises(ReleaseValidationError, match="chipset_version"):
         plan_release(
             ReleaseRequest(
-                company_name="Foxconn", chipset_id="kt326", cmp_kt_option="KT160",
-                chipset_version="", general_testcase_version="2.1.2",
+                company_name="Foxconn",
+                chipset_id="kt326",
+                cmp_kt_option="KT160",
+                chipset_version="",
+                general_testcase_version="2.1.2",
             ),
             ReleaseSettings(inbox=tmp_path),
         )
@@ -206,8 +227,11 @@ def test_dry_run_writes_only_isolated_checkout_without_commit_or_push(tmp_path: 
     (inbox / "case.json").write_text("{}", encoding="utf-8")
     plan = plan_release(
         ReleaseRequest(
-            company_name="Foxconn", chipset_id="kt326", cmp_kt_option="KT160",
-            chipset_version="2.0.18", general_testcase_version="2.1.2",
+            company_name="Foxconn",
+            chipset_id="kt326",
+            cmp_kt_option="KT160",
+            chipset_version="2.0.18",
+            general_testcase_version="2.1.2",
             test_plans=("case.json",),
         ),
         ReleaseSettings(inbox=inbox),
@@ -222,9 +246,12 @@ def test_dry_run_writes_only_isolated_checkout_without_commit_or_push(tmp_path: 
         "rs-wmt-kt326==2.0.18\nrs-wmt-general-testcase==2.1.2\n"
     )
     assert (repo / "testplans" / "case.json").read_text(encoding="utf-8") == "{}"
-    assert subprocess.run(
-        [git, "rev-parse", "--verify", "HEAD"], cwd=repo, capture_output=True
-    ).returncode == head_before
+    assert (
+        subprocess.run(
+            [git, "rev-parse", "--verify", "HEAD"], cwd=repo, capture_output=True
+        ).returncode
+        == head_before
+    )
     status = subprocess.run(
         [git, "status", "--porcelain"], cwd=repo, capture_output=True, text=True, check=True
     ).stdout
@@ -238,8 +265,11 @@ def test_dry_run_refuses_checkout_outside_explicit_root(tmp_path: Path) -> None:
     (repo / ".git").mkdir()
     plan = plan_release(
         ReleaseRequest(
-            company_name="Foxconn", chipset_id="kt326", cmp_kt_option="KT160",
-            chipset_version="2.0.18", general_testcase_version="2.1.2",
+            company_name="Foxconn",
+            chipset_id="kt326",
+            cmp_kt_option="KT160",
+            chipset_version="2.0.18",
+            general_testcase_version="2.1.2",
         ),
         ReleaseSettings(inbox=tmp_path),
     )
@@ -255,15 +285,21 @@ def test_dry_run_refuses_forged_git_metadata_destination(tmp_path: Path) -> None
     (tmp_path / "input.json").write_text("{}", encoding="utf-8")
     good = plan_release(
         ReleaseRequest(
-            company_name="Foxconn", chipset_id="kt326", cmp_kt_option="KT160",
-            chipset_version="2.0.18", general_testcase_version="2.1.2",
+            company_name="Foxconn",
+            chipset_id="kt326",
+            cmp_kt_option="KT160",
+            chipset_version="2.0.18",
+            general_testcase_version="2.1.2",
             test_plans=("input.json",),
         ),
         ReleaseSettings(inbox=tmp_path),
     )
-    forged = replace(good, selected_files=(
-        SelectedFile("testPlans", "input.json", ".git/config", good.selected_files[0].sha256),
-    ))
+    forged = replace(
+        good,
+        selected_files=(
+            SelectedFile("testPlans", "input.json", ".git/config", good.selected_files[0].sha256),
+        ),
+    )
     with pytest.raises(ReleaseValidationError, match="destination"):
         prepare_dry_run(forged, inbox=tmp_path, checkout=repo, allowed_root=tmp_path)
     assert not (repo / "requirements.txt").exists()
@@ -281,8 +317,11 @@ def test_dry_run_refuses_destination_parent_symlink_into_git_metadata(tmp_path: 
         pytest.skip("directory symlinks are unavailable on this host")
     plan = plan_release(
         ReleaseRequest(
-            company_name="Foxconn", chipset_id="kt326", cmp_kt_option="KT160",
-            chipset_version="2.0.18", general_testcase_version="2.1.2",
+            company_name="Foxconn",
+            chipset_id="kt326",
+            cmp_kt_option="KT160",
+            chipset_version="2.0.18",
+            general_testcase_version="2.1.2",
             test_plans=("config",),
         ),
         ReleaseSettings(inbox=tmp_path),
@@ -293,13 +332,15 @@ def test_dry_run_refuses_destination_parent_symlink_into_git_metadata(tmp_path: 
 
 
 def _preview_request() -> ReleasePreviewRequest:
-    return ReleasePreviewRequest.model_validate({
-        "companyName": "Foxconn",
-        "chipsetId": "kt326",
-        "cmpKtOption": "KT160",
-        "chipsetVersion": "2.0.18",
-        "generalTestcaseVersion": "2.1.2",
-    })
+    return ReleasePreviewRequest.model_validate(
+        {
+            "companyName": "Foxconn",
+            "chipsetId": "kt326",
+            "cmpKtOption": "KT160",
+            "chipsetVersion": "2.0.18",
+            "generalTestcaseVersion": "2.1.2",
+        }
+    )
 
 
 def test_installed_w13_contract_is_exact_read_only_preview() -> None:
@@ -327,15 +368,14 @@ def test_read_only_preview_uses_checked_out_version_and_keeps_files_unchanged(
 ) -> None:
     checkout = tmp_path / "release"
     (checkout / ".git").mkdir(parents=True)
-    (checkout / ".git" / "HEAD").write_text(
-        "ref: refs/heads/Foxconn_kt326\n", encoding="utf-8"
-    )
+    (checkout / ".git" / "HEAD").write_text("ref: refs/heads/Foxconn_kt326\n", encoding="utf-8")
     (checkout / "release.yaml").write_text("VERSION: 0.0.15\n", encoding="utf-8")
     inbox = tmp_path / "inbox"
     inbox.mkdir()
     before = {
         str(path.relative_to(checkout)): path.read_bytes()
-        for path in checkout.rglob("*") if path.is_file()
+        for path in checkout.rglob("*")
+        if path.is_file()
     }
     settings = ReleasePreviewSettings(checkout_path=str(checkout), inbox_path=str(inbox))
     result = build_preview(settings, _preview_request())
@@ -347,7 +387,8 @@ def test_read_only_preview_uses_checked_out_version_and_keeps_files_unchanged(
     assert "CMP_KT_OPTION: KT160" in result.release_yaml
     assert {
         str(path.relative_to(checkout)): path.read_bytes()
-        for path in checkout.rglob("*") if path.is_file()
+        for path in checkout.rglob("*")
+        if path.is_file()
     } == before
 
 
@@ -360,24 +401,35 @@ def test_read_only_preview_refuses_wrong_branch_and_handler_maps_code(tmp_path: 
         build_preview(settings, _preview_request())
     context = RequestContext(
         trace=TraceIdentifiers(trace_id="w13", request_id="preview", span_id="test"),
-        actor="engineer", namespace="engineering", message="preview", channel="local",
+        actor="engineer",
+        namespace="engineering",
+        message="preview",
+        channel="local",
     )
     with pytest.raises(CapabilityRefused) as error:
         # The install's settings arrive with the run, not at construction.
-        asyncio.run(ReleasePreviewHandler()(
-            context, ReleasePreviewStepInput(
-                request=_preview_request(), checkout_path=str(checkout),
-                inbox_path=str(tmp_path),
+        asyncio.run(
+            ReleasePreviewHandler()(
+                context,
+                ReleasePreviewStepInput(
+                    request=_preview_request(),
+                    checkout_path=str(checkout),
+                    inbox_path=str(tmp_path),
+                ),
             )
-        ))
+        )
     assert error.value.code == "wrong_branch"
     with pytest.raises(CapabilityRefused) as invalid:
-        asyncio.run(ReleasePreviewHandler()(
-            context, ReleasePreviewStepInput(
-                request=_preview_request(), checkout_path="relative/path",
-                inbox_path=str(tmp_path),
+        asyncio.run(
+            ReleasePreviewHandler()(
+                context,
+                ReleasePreviewStepInput(
+                    request=_preview_request(),
+                    checkout_path="relative/path",
+                    inbox_path=str(tmp_path),
+                ),
             )
-        ))
+        )
     assert invalid.value.code == "release_settings_invalid"
 
 
@@ -386,16 +438,15 @@ def test_installed_workflow_13_preview_respects_bridge_grant_and_never_writes_re
 ) -> None:
     checkout = tmp_path / "release"
     (checkout / ".git").mkdir(parents=True)
-    (checkout / ".git" / "HEAD").write_text(
-        "ref: refs/heads/Foxconn_kt326\n", encoding="utf-8"
-    )
+    (checkout / ".git" / "HEAD").write_text("ref: refs/heads/Foxconn_kt326\n", encoding="utf-8")
     (checkout / "release.yaml").write_text("VERSION: 0.0.15\n", encoding="utf-8")
     inbox = tmp_path / "inbox"
     inbox.mkdir()
     (inbox / "testplan.json").write_text("{}", encoding="utf-8")
     before = {
         str(path.relative_to(checkout)): path.read_bytes()
-        for path in checkout.rglob("*") if path.is_file()
+        for path in checkout.rglob("*")
+        if path.is_file()
     }
     grant = {
         "actor": "engineer",
@@ -410,8 +461,11 @@ def test_installed_workflow_13_preview_respects_bridge_grant_and_never_writes_re
         }
     }
     arguments = {
-        "companyName": "Foxconn", "chipsetId": "kt326", "cmpKtOption": "KT160",
-        "chipsetVersion": "2.0.18", "generalTestcaseVersion": "2.1.2",
+        "companyName": "Foxconn",
+        "chipsetId": "kt326",
+        "cmpKtOption": "KT160",
+        "chipsetVersion": "2.0.18",
+        "generalTestcaseVersion": "2.1.2",
         "testPlans": ["testplan.json"],
     }
     for label, grants in (("authorized", [grant]), ("denied", [])):
@@ -429,9 +483,7 @@ def test_installed_workflow_13_preview_respects_bridge_grant_and_never_writes_re
             workflow=preview_workflow().metadata.identity,
             arguments=arguments,
             idempotency_key=f"release-preview-{label}",
-            trace=TraceIdentifiers(
-                trace_id=f"w13-{label}", request_id="preview", span_id="test"
-            ),
+            trace=TraceIdentifiers(trace_id=f"w13-{label}", request_id="preview", span_id="test"),
         )
         with build_runtime(config, layout=layout) as runtime:
             outcome = asyncio.run(runtime.agent.execute_workflow(request))
@@ -447,7 +499,8 @@ def test_installed_workflow_13_preview_respects_bridge_grant_and_never_writes_re
                 assert outcome.workflow.run.failure.code == "permission_denied"
         assert {
             str(path.relative_to(checkout)): path.read_bytes()
-            for path in checkout.rglob("*") if path.is_file()
+            for path in checkout.rglob("*")
+            if path.is_file()
         } == before
 
 
@@ -471,15 +524,22 @@ def test_workflow_13_runs_from_settings_page_values_without_host_integrations(
         "approval_ref": "release-preview-approval",
     }
     config, layout = workspace(
-        tmp_path / "host", membership=membership_record(), grants=[grant], assets=False,
+        tmp_path / "host",
+        membership=membership_record(),
+        grants=[grant],
+        assets=False,
     )
     export_assets(layout.workspace_root / "assets")
     request = LocalWorkflowRequest(
-        actor="engineer", bridge_id=config.device.bridge_id,
+        actor="engineer",
+        bridge_id=config.device.bridge_id,
         workflow=preview_workflow().metadata.identity,
         arguments={
-            "companyName": "Foxconn", "chipsetId": "kt326", "cmpKtOption": "KT160",
-            "chipsetVersion": "2.0.18", "generalTestcaseVersion": "2.1.2",
+            "companyName": "Foxconn",
+            "chipsetId": "kt326",
+            "cmpKtOption": "KT160",
+            "chipsetVersion": "2.0.18",
+            "generalTestcaseVersion": "2.1.2",
         },
         idempotency_key="release-preview-settings",
         trace=TraceIdentifiers(trace_id="w13-settings", request_id="preview", span_id="test"),
@@ -492,9 +552,11 @@ def test_workflow_13_runs_from_settings_page_values_without_host_integrations(
             preview_workflow().metadata.identity,
             {"checkout_path": str(checkout), "inbox_path": str(inbox)},
         )
-        ran = asyncio.run(runtime.agent.execute_workflow(
-            request.model_copy(update={"idempotency_key": "release-preview-settings-2"})
-        ))
+        ran = asyncio.run(
+            runtime.agent.execute_workflow(
+                request.model_copy(update={"idempotency_key": "release-preview-settings-2"})
+            )
+        )
         assert ran.workflow is not None
         assert ran.workflow.run.status == "succeeded", ran.workflow.run.failure
 
@@ -504,7 +566,9 @@ def test_settings_page_values_win_over_legacy_host_integrations(tmp_path: Path) 
 
     legacy = {"checkout_path": str(tmp_path / "old"), "inbox_path": str(tmp_path / "in")}
     config, layout = workspace(
-        tmp_path / "host", membership=membership_record(), assets=False,
+        tmp_path / "host",
+        membership=membership_record(),
+        assets=False,
         config_changes={"integrations": {"release_package": legacy}},
     )
     manifest = preview_workflow()
@@ -530,7 +594,8 @@ def _isolated_checkout(tmp_path: Path) -> tuple[IsolatedApplySettings, Path, Pat
     subprocess.run([git, "init", "-q", str(repo)], check=True)
     subprocess.run(
         [git, "symbolic-ref", "HEAD", "refs/heads/Foxconn_kt326"],
-        cwd=repo, check=True,
+        cwd=repo,
+        check=True,
     )
     (repo / "release.yaml").write_text("VERSION: 0.0.15\n", encoding="utf-8")
     inbox = tmp_path / "inbox"
@@ -548,8 +613,11 @@ def _isolated_checkout(tmp_path: Path) -> tuple[IsolatedApplySettings, Path, Pat
 def _isolated_plan(repo: Path, inbox: Path) -> ReleasePlan:
     return plan_release(
         ReleaseRequest(
-            company_name="Foxconn", chipset_id="kt326", cmp_kt_option="KT160",
-            chipset_version="2.0.18", general_testcase_version="2.1.2",
+            company_name="Foxconn",
+            chipset_id="kt326",
+            cmp_kt_option="KT160",
+            chipset_version="2.0.18",
+            general_testcase_version="2.1.2",
             test_plans=("case.json",),
         ),
         ReleaseSettings(inbox=inbox),
@@ -570,17 +638,18 @@ def test_isolated_apply_prepares_source_files_without_commit_push_or_network(
     receipt = apply_isolated(plan, settings=settings)
     assert receipt.prepared and not receipt.committed and not receipt.pushed
     assert receipt.release_version == "0.1.0"
-    assert receipt.changed_paths == (
-        "requirements.txt", "release.yaml", "testplans/case.json"
-    )
+    assert receipt.changed_paths == ("requirements.txt", "release.yaml", "testplans/case.json")
     assert (repo / "requirements.txt").read_text(encoding="utf-8") == (
         "rs-wmt-kt326==2.0.18\nrs-wmt-general-testcase==2.1.2\n"
     )
     assert "VERSION: 0.1.0" in (repo / "release.yaml").read_text(encoding="utf-8")
     assert (repo / "testplans" / "case.json").read_text(encoding="utf-8") == "{}"
-    assert subprocess.run(
-        [git, "rev-parse", "--verify", "HEAD"], cwd=repo, capture_output=True
-    ).returncode == head_before
+    assert (
+        subprocess.run(
+            [git, "rev-parse", "--verify", "HEAD"], cwd=repo, capture_output=True
+        ).returncode
+        == head_before
+    )
     assert not (repo / ".git" / "aep-w13-apply.lock").exists()
     with pytest.raises(IsolatedApplyError, match="stale_plan"):
         apply_isolated(plan, settings=settings)
@@ -601,14 +670,13 @@ def test_isolated_apply_refuses_unmarked_or_remote_checkout(tmp_path: Path) -> N
     Path(settings.allowed_root, ISOLATED_MARKER).unlink()
     with pytest.raises(IsolatedApplyError, match="isolated_root_unmarked"):
         apply_isolated(plan, settings=settings)
-    Path(settings.allowed_root, ISOLATED_MARKER).write_text(
-        ISOLATED_MARKER_VALUE, encoding="utf-8"
-    )
+    Path(settings.allowed_root, ISOLATED_MARKER).write_text(ISOLATED_MARKER_VALUE, encoding="utf-8")
     git = shutil.which("git")
     assert git is not None
     subprocess.run(
         [git, "remote", "add", "origin", "https://invalid.example/release.git"],
-        cwd=repo, check=True,
+        cwd=repo,
+        check=True,
     )
     with pytest.raises(IsolatedApplyError, match="remote_configured"):
         apply_isolated(plan, settings=settings)
@@ -627,10 +695,14 @@ def test_isolated_apply_serializes_checkout_and_requires_bridge_approval(tmp_pat
     assert ISOLATED_APPLY_SPEC.policy.approval_required
     context = RequestContext(
         trace=TraceIdentifiers(trace_id="w13", request_id="apply", span_id="test"),
-        actor="engineer", namespace="engineering", message="apply", channel="local",
+        actor="engineer",
+        namespace="engineering",
+        message="apply",
+        channel="local",
     )
     grant = CapabilityGrant(
-        actor="engineer", asset=ISOLATED_APPLY_SPEC.identity,
+        actor="engineer",
+        asset=ISOLATED_APPLY_SPEC.identity,
         permissions=ISOLATED_APPLY_SPEC.policy.required_permissions,
         policy_refs=ISOLATED_APPLY_SPEC.policy.policy_refs,
     )
@@ -647,8 +719,7 @@ def test_installed_isolated_apply_requires_grant_and_approval_then_prepares_only
     assert isinstance(step, WorkflowStep)
     assert step.capability == ISOLATED_APPLY_SPEC.identity
     before = {
-        str(path.relative_to(repo)): path.read_bytes()
-        for path in repo.rglob("*") if path.is_file()
+        str(path.relative_to(repo)): path.read_bytes() for path in repo.rglob("*") if path.is_file()
     }
     grant = {
         "actor": "engineer",
@@ -658,8 +729,11 @@ def test_installed_isolated_apply_requires_grant_and_approval_then_prepares_only
         "approval_ref": "isolated-release-write-approval",
     }
     arguments = {
-        "companyName": "Foxconn", "chipsetId": "kt326", "cmpKtOption": "KT160",
-        "chipsetVersion": "2.0.18", "generalTestcaseVersion": "2.1.2",
+        "companyName": "Foxconn",
+        "chipsetId": "kt326",
+        "cmpKtOption": "KT160",
+        "chipsetVersion": "2.0.18",
+        "generalTestcaseVersion": "2.1.2",
         "testPlans": ["case.json"],
     }
     for label, grants in (
@@ -673,9 +747,7 @@ def test_installed_isolated_apply_requires_grant_and_approval_then_prepares_only
             grants=grants,
             assets=False,
             config_changes={
-                "integrations": {
-                    "isolated_release_apply": settings.model_dump(mode="json")
-                }
+                "integrations": {"isolated_release_apply": settings.model_dump(mode="json")}
             },
         )
         export_assets(layout.workspace_root / "assets")
@@ -685,18 +757,14 @@ def test_installed_isolated_apply_requires_grant_and_approval_then_prepares_only
             workflow=workflow.metadata.identity,
             arguments=arguments,
             idempotency_key=f"isolated-release-{label}",
-            trace=TraceIdentifiers(
-                trace_id=f"w13-{label}", request_id="apply", span_id="test"
-            ),
+            trace=TraceIdentifiers(trace_id=f"w13-{label}", request_id="apply", span_id="test"),
         )
         with build_runtime(config, layout=layout) as runtime:
             outcome = asyncio.run(runtime.agent.execute_workflow(request))
             assert outcome.refusal is None and outcome.workflow is not None
             if label == "approved":
                 assert outcome.workflow.run.status == "succeeded", outcome.workflow.run.failure
-                applied = IsolatedApplyOutput.model_validate(
-                    outcome.workflow.step_results[-1].data
-                )
+                applied = IsolatedApplyOutput.model_validate(outcome.workflow.step_results[-1].data)
                 assert applied.prepared and not applied.committed and not applied.pushed
                 assert applied.release_version == "0.1.0"
             else:
@@ -705,7 +773,8 @@ def test_installed_isolated_apply_requires_grant_and_approval_then_prepares_only
                 assert outcome.workflow.run.failure.code == "permission_denied"
                 assert {
                     str(path.relative_to(repo)): path.read_bytes()
-                    for path in repo.rglob("*") if path.is_file()
+                    for path in repo.rglob("*")
+                    if path.is_file()
                 } == before
     assert (repo / "requirements.txt").read_text(encoding="utf-8") == (
         "rs-wmt-kt326==2.0.18\nrs-wmt-general-testcase==2.1.2\n"

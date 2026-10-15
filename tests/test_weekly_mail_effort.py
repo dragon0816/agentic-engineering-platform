@@ -30,8 +30,11 @@ def item(
 
 def test_sde_draft_uses_live_counts_and_the_reference_sections() -> None:
     window = ReportingWindow(
-        week="2026_40W", since=dt.date(2026, 9, 28), until=dt.date(2026, 10, 4),
-        comment_since=dt.date(2026, 9, 28), stamp_date=dt.date(2026, 10, 4),
+        week="2026_40W",
+        since=dt.date(2026, 9, 28),
+        until=dt.date(2026, 10, 4),
+        comment_since=dt.date(2026, 9, 28),
+        stamp_date=dt.date(2026, 10, 4),
     )
     items = (
         item("GH-1", assignee="JennyChen", company="FII", instrument="CMP180, WMT"),
@@ -56,8 +59,11 @@ def test_sde_draft_uses_live_counts_and_the_reference_sections() -> None:
 
 def test_source_draft_empty_week_explains_why_the_filter_dropped_everything() -> None:
     window = ReportingWindow(
-        week="2026_40W", since=dt.date(2026, 9, 28), until=dt.date(2026, 10, 4),
-        comment_since=dt.date(2026, 9, 28), stamp_date=dt.date(2026, 10, 4),
+        week="2026_40W",
+        since=dt.date(2026, 9, 28),
+        until=dt.date(2026, 10, 4),
+        comment_since=dt.date(2026, 9, 28),
+        stamp_date=dt.date(2026, 10, 4),
     )
     html = mail.build_html(window, (), matched=3)
     assert "本週有留言的 <b>0</b> / 3 張" in html
@@ -68,11 +74,15 @@ def test_source_draft_empty_week_explains_why_the_filter_dropped_everything() ->
 
 def test_source_draft_unfiltered_week_does_not_claim_comments_were_required() -> None:
     window = ReportingWindow(
-        week="2026_40W", since=dt.date(2026, 9, 28), until=dt.date(2026, 10, 4),
-        comment_since=dt.date(2026, 9, 28), stamp_date=dt.date(2026, 10, 4),
+        week="2026_40W",
+        since=dt.date(2026, 9, 28),
+        until=dt.date(2026, 10, 4),
+        comment_since=dt.date(2026, 9, 28),
+        stamp_date=dt.date(2026, 10, 4),
     )
-    html = mail.build_html(window, (item("GH-1", instrument="CMP180"),),
-                           activity_required=False, matched=1)
+    html = mail.build_html(
+        window, (item("GH-1", instrument="CMP180"),), activity_required=False, matched=1
+    )
     assert "本週符合條件的 <b>1</b> / 1 張" in html
     assert "未啟用本週留言篩選" in html
     assert "0 matching ticket(s) excluded by the activity rule" not in html
@@ -85,15 +95,26 @@ def test_reference_week_instrument_total_can_exceed_eight_tickets() -> None:
     three tickets each name a second instrument.
     """
     window = ReportingWindow(
-        week="2026_40W", since=dt.date(2026, 9, 28), until=dt.date(2026, 10, 4),
-        comment_since=dt.date(2026, 9, 28), stamp_date=dt.date(2026, 10, 4),
+        week="2026_40W",
+        since=dt.date(2026, 9, 28),
+        until=dt.date(2026, 10, 4),
+        comment_since=dt.date(2026, 9, 28),
+        stamp_date=dt.date(2026, 10, 4),
     )
     instruments = (
-        "CMP180, CMW100", "CMP180, CMX500", "CMP180, PVT360A", "CMP180",
-        "CMP180", "CMP180", "WMT", "WMT2.0",
+        "CMP180, CMW100",
+        "CMP180, CMX500",
+        "CMP180, PVT360A",
+        "CMP180",
+        "CMP180",
+        "CMP180",
+        "WMT",
+        "WMT2.0",
     )
-    items = tuple(item(f"GH-{index}", instrument=name, assignee="Member")
-                  for index, name in enumerate(instruments, 1))
+    items = tuple(
+        item(f"GH-{index}", instrument=name, assignee="Member")
+        for index, name in enumerate(instruments, 1)
+    )
     html = mail.build_html(window, items, chart_cid="effortpie", matched=8)
     assert "11 instrument-tickets from 8 tickets" in html
     assert "Share uses 11 instrument-tickets as its denominator" in html

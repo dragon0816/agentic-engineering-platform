@@ -23,9 +23,13 @@ from host_runtime.experience_review import REVIEWS_DIR
 ProposalStatus = Literal["proposed", "accepted", "rejected", "snoozed", "done"]
 Action = Literal["accept", "reject", "snooze", "done", "reopen"]
 SNOOZE_DAYS = 7
-OUTCOME: dict[Action, ProposalStatus] = {"accept": "accepted", "reject": "rejected",
-                                         "snooze": "snoozed", "done": "done",
-                                         "reopen": "proposed"}
+OUTCOME: dict[Action, ProposalStatus] = {
+    "accept": "accepted",
+    "reject": "rejected",
+    "snooze": "snoozed",
+    "done": "done",
+    "reopen": "proposed",
+}
 MAX_REASON = 500
 
 
@@ -68,8 +72,10 @@ class ProposalStore:
         self.path = workspace / STORE_FILE
         self._lock = threading.Lock()
         with self._connect() as conn:
-            conn.execute("CREATE TABLE IF NOT EXISTS proposals (proposal_id TEXT PRIMARY KEY,"
-                         " created_at TEXT NOT NULL, record TEXT NOT NULL)")
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS proposals (proposal_id TEXT PRIMARY KEY,"
+                " created_at TEXT NOT NULL, record TEXT NOT NULL)"
+            )
 
     def _connect(self) -> sqlite3.Connection:
         return sqlite3.connect(str(self.path), timeout=10)
@@ -96,24 +102,28 @@ class ProposalStore:
                         case_ids=tuple(finding.get("case_ids") or ()),
                         cause=finding.get("cause"),
                         diagnosis=str(finding.get("diagnosis") or ""),
-                        kind=proposal.get("kind"), target=str(proposal.get("target") or ""),
+                        kind=proposal.get("kind"),
+                        target=str(proposal.get("target") or ""),
                         text=str(proposal.get("text") or ""),
                         confidence=str(finding.get("confidence") or ""),
-                        confirm=str(finding.get("confirm") or ""))
+                        confirm=str(finding.get("confirm") or ""),
+                    )
                 except (KeyError, ValueError):
                     continue
                 with self._lock, self._connect() as conn:
                     done = conn.execute(
                         "INSERT OR IGNORE INTO proposals VALUES (?, ?, ?)",
-                        (record.proposal_id, record.created_at, record.model_dump_json()))
+                        (record.proposal_id, record.created_at, record.model_dump_json()),
+                    )
                     added += done.rowcount
         return added
 
     def all(self) -> list[ReviewProposal]:
         """Newest first; a snooze that has run out is shown as proposed again."""
         with self._connect() as conn:
-            rows = conn.execute("SELECT record FROM proposals ORDER BY created_at DESC,"
-                                " proposal_id").fetchall()
+            rows = conn.execute(
+                "SELECT record FROM proposals ORDER BY created_at DESC, proposal_id"
+            ).fetchall()
         now = _now().isoformat(timespec="seconds")
         found = []
         for (row,) in rows:
@@ -131,18 +141,24 @@ class ProposalStore:
 
     def save(self, record: ReviewProposal) -> ReviewProposal:
         with self._lock, self._connect() as conn:
-            conn.execute("UPDATE proposals SET record = ? WHERE proposal_id = ?",
-                         (record.model_dump_json(), record.proposal_id))
+            conn.execute(
+                "UPDATE proposals SET record = ? WHERE proposal_id = ?",
+                (record.model_dump_json(), record.proposal_id),
+            )
         return record
 
-    def decide(self, proposal_id: str, action: Action, actor: str,
-               reason: str | None = None) -> ReviewProposal:
+    def decide(
+        self, proposal_id: str, action: Action, actor: str, reason: str | None = None
+    ) -> ReviewProposal:
         """A person's decision. Reject needs a reason, so the same cases are not
         proposed again without one on record."""
         record = self.get(proposal_id)
         allowed = {
-            "accept": ("proposed", "snoozed"), "reject": ("proposed", "snoozed", "accepted"),
-            "snooze": ("proposed",), "done": ("accepted",), "reopen": ("rejected", "done"),
+            "accept": ("proposed", "snoozed"),
+            "reject": ("proposed", "snoozed", "accepted"),
+            "snooze": ("proposed",),
+            "done": ("accepted",),
+            "reopen": ("rejected", "done"),
         }
         if record.status not in allowed[action]:
             raise ProposalError("proposal_not_" + "_or_".join(allowed[action]))
@@ -151,13 +167,24 @@ class ProposalStore:
             raise ProposalError("reason_required")
         now = _now()
         status = OUTCOME[action]
-        return self.save(record.model_copy(update={
-            "status": status, "reason": clean if action != "reopen" else None,
-            "decided_by": actor, "decided_at": now.isoformat(timespec="seconds"),
-            "snooze_until": (now + timedelta(days=SNOOZE_DAYS)).isoformat(timespec="seconds")
-            if action == "snooze" else None,
-            "route": record.route if action in ("done", "reject") else None}))
+        return self.save(
+            record.model_copy(
+                update={
+                    "status": status,
+                    "reason": clean if action != "reopen" else None,
+                    "decided_by": actor,
+                    "decided_at": now.isoformat(timespec="seconds"),
+                    "snooze_until": (now + timedelta(days=SNOOZE_DAYS)).isoformat(
+                        timespec="seconds"
+                    )
+                    if action == "snooze"
+                    else None,
+                    "route": record.route if action in ("done", "reject") else None,
+                }
+            )
+        )
 
     def routed(self, proposal_id: str, route: str, note: str = "") -> ReviewProposal:
-        return self.save(self.get(proposal_id).model_copy(update={"route": route,
-                                                                   "route_note": note}))
+        return self.save(
+            self.get(proposal_id).model_copy(update={"route": route, "route_note": note})
+        )

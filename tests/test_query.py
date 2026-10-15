@@ -131,9 +131,10 @@ def test_tokens_split_scripts_and_index_cjk_at_every_length() -> None:
 
 
 def test_cited_claim_split_keeps_release_number_and_separate_citation_line() -> None:
-    assert cited_claim_sentences(
-        "CMW500 supports NB-NTN Rel. 17 Test Solution [1].\n[2]"
-    ) == ("CMW500 supports NB-NTN Rel. 17 Test Solution [1].", "[2]")
+    assert cited_claim_sentences("CMW500 supports NB-NTN Rel. 17 Test Solution [1].\n[2]") == (
+        "CMW500 supports NB-NTN Rel. 17 Test Solution [1].",
+        "[2]",
+    )
 
 
 def test_cited_claim_split_keeps_list_markers_and_grouped_citations_with_claim() -> None:
@@ -153,9 +154,7 @@ def test_named_raw_document_precedes_unrelated_chinese_matches(tmp_path: Path) -
     vault = make_vault(tmp_path)
     stem = "CMX500_Features_CSW9-20-0_en_32"
     raw_ref = f"raw/{stem}.md"
-    source = source_for(b"features", f"drop/{stem}.pdf").model_copy(
-        update={"raw_ref": raw_ref}
-    )
+    source = source_for(b"features", f"drop/{stem}.pdf").model_copy(update={"raw_ref": raw_ref})
     vault.write_raw(
         raw_ref,
         render(
@@ -425,10 +424,12 @@ def test_raw_synthesis_retries_an_ungrounded_sentence_with_the_same_raw_evidence
 ) -> None:
     vault = make_vault(tmp_path)
     corpus(vault)
-    model = SequenceSynth((
-        "The front end uses a GaN amplifier [1]. It is fast.",
-        "The front end uses a GaN amplifier [1].",
-    ))
+    model = SequenceSynth(
+        (
+            "The front end uses a GaN amplifier [1]. It is fast.",
+            "The front end uses a GaN amplifier [1].",
+        )
+    )
     answer = QueryEngine(vault, model, alias="a").ask(
         "GaN power amplifier", k=4, raw_citations_only=True
     )
@@ -473,10 +474,12 @@ def test_raw_synthesis_can_recover_from_a_wiki_citation_without_relabeling_it(
     raw_number = next(
         number for number, passage in enumerate(passages, 1) if passage.citation.kind == "raw"
     )
-    model = SequenceSynth((
-        f"A wiki-only claim [{wiki_number}].",
-        f"The front end uses a GaN power amplifier [{raw_number}].",
-    ))
+    model = SequenceSynth(
+        (
+            f"A wiki-only claim [{wiki_number}].",
+            f"The front end uses a GaN power amplifier [{raw_number}].",
+        )
+    )
     answer = QueryEngine(vault, model, alias="a").ask(
         "GaN power amplifier", k=4, raw_citations_only=True
     )
@@ -518,10 +521,12 @@ def test_raw_synthesis_retries_an_empty_gateway_response(tmp_path: Path) -> None
 def test_raw_synthesis_keeps_the_first_draft_when_the_retry_is_empty(tmp_path: Path) -> None:
     vault = make_vault(tmp_path)
     corpus(vault)
-    model = SequenceSynth((
-        "Overview without a citation.\nThe front end uses a GaN power amplifier [1].",
-        "",
-    ))
+    model = SequenceSynth(
+        (
+            "Overview without a citation.\nThe front end uses a GaN power amplifier [1].",
+            "",
+        )
+    )
     answer = QueryEngine(vault, model, alias="a").ask(
         "GaN power amplifier", k=4, raw_citations_only=True
     )
@@ -535,10 +540,7 @@ def test_raw_synthesis_keeps_only_supported_sentences_after_retry(
 ) -> None:
     vault = make_vault(tmp_path)
     corpus(vault)
-    response = (
-        "The front end uses a GaN power amplifier [1]. "
-        "The front end uses option K999 [1]."
-    )
+    response = "The front end uses a GaN power amplifier [1]. The front end uses option K999 [1]."
     model = Synth(response)
     answer = QueryEngine(vault, model, alias="a").ask(
         "GaN power amplifier", k=4, raw_citations_only=True
@@ -556,9 +558,7 @@ def test_raw_synthesis_keeps_the_richer_supported_draft_across_the_retry(
     corpus(vault)
     raw_number = next(
         number
-        for number, passage in enumerate(
-            retrieve(vault, "GaN power amplifier", k=4, min_raw=4), 1
-        )
+        for number, passage in enumerate(retrieve(vault, "GaN power amplifier", k=4, min_raw=4), 1)
         if passage.citation.kind == "raw"
     )
     first = (
@@ -586,8 +586,11 @@ def test_broad_query_keeps_distant_option_and_interface_claims_in_separate_raw_e
         f"Other specification row {number} has a numeric limit." for number in range(20)
     ]
     source = "\n".join(
-        ["Option B81 changes the RF output level.", *unrelated_rows,
-         "The high-speed USB digital input carries sample data."]
+        [
+            "Option B81 changes the RF output level.",
+            *unrelated_rows,
+            "The high-speed USB digital input carries sample data.",
+        ]
     )
     drop(vault, "drop/device-specs.txt", source.encode("utf-8"))
     intake.intake("drop/device-specs.txt", mode="apply", today=TODAY)
@@ -606,8 +609,11 @@ def test_broad_query_keeps_distant_option_and_interface_claims_in_separate_raw_e
     assert len(wrong.requests) == 2
 
     valid_source = "\n".join(
-        ["Option K17 provides a high-speed USB digital input.", *unrelated_rows,
-         "Another connection has a separate output."]
+        [
+            "Option K17 provides a high-speed USB digital input.",
+            *unrelated_rows,
+            "Another connection has a separate output.",
+        ]
     )
     drop(vault, "drop/valid-specs.txt", valid_source.encode("utf-8"))
     intake.intake("drop/valid-specs.txt", mode="apply", today=TODAY)
@@ -621,7 +627,8 @@ def test_broad_query_keeps_distant_option_and_interface_claims_in_separate_raw_e
 
 @pytest.mark.parametrize("code", ("B81", "B200A"))
 def test_option_code_and_interface_must_coexist_in_one_cited_raw_passage(
-    tmp_path: Path, code: str,
+    tmp_path: Path,
+    code: str,
 ) -> None:
     vault = make_vault(tmp_path)
     intake = DropIntake(vault, [PlainTextExtractor()])
@@ -710,7 +717,8 @@ def test_preselected_large_raw_is_bounded_before_model_synthesis(tmp_path: Path)
     model = Synth("SMW200A supports NTN channel emulation [1].")
     answer = QueryEngine(vault, model, alias="answerer").ask(
         "Which instrument supports NTN channel emulation?",
-        selected_passages=(passage,), raw_citations_only=True,
+        selected_passages=(passage,),
+        raw_citations_only=True,
     )
     assert answer.status == "answered"
     assert len(model.requests[0].messages[0].text) < 2500
@@ -759,7 +767,9 @@ def test_raw_grounding_admits_bounded_labeled_inferences_only_when_enabled() -> 
     flood = "\n".join([fact, *([inference] * 4)])
     assert not _has_raw_grounding(flood, passages, inference_label="【推論】")
     salvaged = _salvage_raw_sentences(
-        "Uncited overview.\n" + flood, passages, market_guidance=False,
+        "Uncited overview.\n" + flood,
+        passages,
+        market_guidance=False,
         inference_label="【推論】",
     )
     assert "Uncited" not in salvaged
@@ -773,8 +783,11 @@ class CutOff(Synth):
     def generate(self, request: ModelRequest) -> ModelResponse:
         self.requests.append(request)
         if len(self.requests) == 1:
-            return ModelResponse(trace=request.trace, model_alias=request.model_alias,
-                                 failure=Failure(code="model_output_truncated", message="cut"))
+            return ModelResponse(
+                trace=request.trace,
+                model_alias=request.model_alias,
+                failure=Failure(code="model_output_truncated", message="cut"),
+            )
         return ModelResponse(trace=request.trace, model_alias=request.model_alias, text=self.text)
 
 
@@ -784,7 +797,8 @@ def test_a_cut_off_synthesis_is_asked_once_more_for_a_shorter_answer(tmp_path: P
     corpus(vault)
     model = CutOff("The front end uses a GaN amplifier [1].")
     answer = QueryEngine(vault, model, alias="answerer").ask(
-        "What amplifier does the RF front end use?", k=2)
+        "What amplifier does the RF front end use?", k=2
+    )
     assert answer.status == "answered" and len(model.requests) == 2
     assert "more briefly" in model.requests[1].messages[0].text
     always = Synth("", fail=True)

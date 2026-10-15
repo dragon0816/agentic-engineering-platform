@@ -507,8 +507,12 @@ class WorkflowEngine:
         identity = _target(step)
         binding = self.bridge.installed.get(identity)
         if binding is None or not isinstance(step, WorkflowStep):
-            return PreviewStep(index=index, capability=identity, state="blocked",
-                               failure=_preview_failure("preview_step_not_previewable"))
+            return PreviewStep(
+                index=index,
+                capability=identity,
+                state="blocked",
+                failure=_preview_failure("preview_step_not_previewable"),
+            )
         effect = binding.spec.side_effect
         inputs: dict[str, JsonValue] = {}
         for name, ref in step.inputs.items():
@@ -516,48 +520,90 @@ class WorkflowEngine:
                 inputs[name] = deepcopy(ref.value)
                 continue
             if isinstance(ref, StepInput) and ref.step_index not in outputs:
-                return PreviewStep(index=index, capability=identity, side_effect=effect,
-                                   state="blocked",
-                                   failure=_preview_failure("preview_input_from_unrun_step"))
+                return PreviewStep(
+                    index=index,
+                    capability=identity,
+                    side_effect=effect,
+                    state="blocked",
+                    failure=_preview_failure("preview_input_from_unrun_step"),
+                )
             try:
                 inputs[name] = _select(
                     arguments if isinstance(ref, RunInput) else outputs[ref.step_index], ref.path
                 )
             except _MissingInput:
-                return PreviewStep(index=index, capability=identity, side_effect=effect,
-                                   state="failed",
-                                   failure=_preview_failure("workflow_input_missing"))
+                return PreviewStep(
+                    index=index,
+                    capability=identity,
+                    side_effect=effect,
+                    state="failed",
+                    failure=_preview_failure("workflow_input_missing"),
+                )
         if effect == "read":
             result = await self.bridge.execute(
                 CapabilityInvocation(context=context, target=identity, arguments=deepcopy(inputs))
             )
             if result.status != "succeeded":
-                return PreviewStep(index=index, capability=identity, side_effect=effect,
-                                   state="failed", inputs=inputs, failure=result.failure)
+                return PreviewStep(
+                    index=index,
+                    capability=identity,
+                    side_effect=effect,
+                    state="failed",
+                    inputs=inputs,
+                    failure=result.failure,
+                )
             outputs[index] = result.data
-            return PreviewStep(index=index, capability=identity, side_effect=effect,
-                               state="ran", inputs=inputs, output=result.data)
+            return PreviewStep(
+                index=index,
+                capability=identity,
+                side_effect=effect,
+                state="ran",
+                inputs=inputs,
+                output=result.data,
+            )
         if not self.bridge.policy.authorize(context, binding.spec).allowed:
-            return PreviewStep(index=index, capability=identity, side_effect=effect,
-                               state="not_permitted", inputs=inputs,
-                               failure=_preview_failure("permission_denied"))
+            return PreviewStep(
+                index=index,
+                capability=identity,
+                side_effect=effect,
+                state="not_permitted",
+                inputs=inputs,
+                failure=_preview_failure("permission_denied"),
+            )
         planner = getattr(binding.handler, "preview", None)
         if not callable(planner):
-            return PreviewStep(index=index, capability=identity, side_effect=effect,
-                               state="planned", inputs=inputs)
+            return PreviewStep(
+                index=index, capability=identity, side_effect=effect, state="planned", inputs=inputs
+            )
         try:
             model = binding.input_model.model_validate_json(json.dumps(inputs), strict=True)
             planned = await asyncio.to_thread(planner, model)
         except (ValidationError, TypeError, ValueError):
-            return PreviewStep(index=index, capability=identity, side_effect=effect,
-                               state="failed", inputs=inputs,
-                               failure=_preview_failure("invalid_input"))
+            return PreviewStep(
+                index=index,
+                capability=identity,
+                side_effect=effect,
+                state="failed",
+                inputs=inputs,
+                failure=_preview_failure("invalid_input"),
+            )
         except CapabilityRefused as refused:
-            return PreviewStep(index=index, capability=identity, side_effect=effect,
-                               state="failed", inputs=inputs,
-                               failure=_preview_failure(refused.code))
-        return PreviewStep(index=index, capability=identity, side_effect=effect, state="planned",
-                           inputs=inputs, output=planned.model_dump(mode="json"))
+            return PreviewStep(
+                index=index,
+                capability=identity,
+                side_effect=effect,
+                state="failed",
+                inputs=inputs,
+                failure=_preview_failure(refused.code),
+            )
+        return PreviewStep(
+            index=index,
+            capability=identity,
+            side_effect=effect,
+            state="planned",
+            inputs=inputs,
+            output=planned.model_dump(mode="json"),
+        )
 
     async def _launch(
         self,
@@ -633,11 +679,13 @@ class WorkflowEngine:
                 continue
             allowed = (
                 self.choices_provider(manifest, source, run_arguments)
-                if self.choices_provider else None
+                if self.choices_provider
+                else None
             )
             if allowed is None:
                 return (
-                    "reference_set_unavailable" if source.startswith("ref:")
+                    "reference_set_unavailable"
+                    if source.startswith("ref:")
                     else "choice_function_unavailable"
                 )
             chosen = value if isinstance(value, list) else [value]
@@ -653,7 +701,9 @@ class WorkflowEngine:
             path = Path(str(item))
             try:
                 inside = (
-                    path.is_absolute() and not path.is_symlink() and path.is_file()
+                    path.is_absolute()
+                    and not path.is_symlink()
+                    and path.is_file()
                     and path.resolve().is_relative_to(root)
                 )
             except OSError:
@@ -975,18 +1025,24 @@ class WorkflowEngine:
             finally:
                 telemetry.set_run(workflow_run_id=record.run_id)
             return
-        with telemetry.run("workflow_run", run_id=record.run_id,
-                           trace_id=context.trace.trace_id, attributes={
-                               "workflow_id": f"{identity.namespace}/{identity.name}@"
-                                              f"{identity.version}",
-                               "steps": len(manifest.steps), "resumed_from_step": start}):
+        with telemetry.run(
+            "workflow_run",
+            run_id=record.run_id,
+            trace_id=context.trace.trace_id,
+            attributes={
+                "workflow_id": f"{identity.namespace}/{identity.name}@{identity.version}",
+                "steps": len(manifest.steps),
+                "resumed_from_step": start,
+            },
+        ):
             try:
                 await self._drive_steps(record, manifest, context, arguments, start)
             finally:
                 telemetry.set_run(
                     outcome=record.status,
                     status="succeeded" if record.status == "succeeded" else "failed",
-                    failure_code=None if record.failure is None else record.failure.code)
+                    failure_code=None if record.failure is None else record.failure.code,
+                )
 
     async def _drive_steps(
         self,
@@ -1027,13 +1083,19 @@ class WorkflowEngine:
                     return
                 self._emit(record, "step_started", step_index=index)
                 target = _target(step)
-                with telemetry.span("step", attributes={
+                with telemetry.span(
+                    "step",
+                    attributes={
                         "step_index": index,
-                        "tool_id": f"{target.namespace}/{target.name}@{target.version}"}) as span:
+                        "tool_id": f"{target.namespace}/{target.name}@{target.version}",
+                    },
+                ) as span:
                     result = await self._execute_step(record, index, step, context, inputs)
                     if result.status != "succeeded":
-                        span.update(status="failed", failure_code=None if result.failure is None
-                                    else result.failure.code)
+                        span.update(
+                            status="failed",
+                            failure_code=None if result.failure is None else result.failure.code,
+                        )
                 record.step_results.append(result)
                 code = result.failure.code if result.failure is not None else None
                 record.append_log(
@@ -1305,7 +1367,14 @@ class WorkflowEngine:
             ):
                 return result
             record.append_log(f"step {index + 1} attempt {attempt} failed transient_failure; retry")
-            telemetry.emit("retry.scheduled", state="step", attributes={
-                "step_index": index, "attempt": attempt, "retry_reason": "transient_failure"})
+            telemetry.emit(
+                "retry.scheduled",
+                state="step",
+                attributes={
+                    "step_index": index,
+                    "attempt": attempt,
+                    "retry_reason": "transient_failure",
+                },
+            )
             await asyncio.sleep(retry.delay_ms / 1000)
         raise AssertionError("validated retry policy always permits an attempt")

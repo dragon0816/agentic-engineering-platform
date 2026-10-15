@@ -71,11 +71,13 @@ def dry_run_plan(
     """
     total = sum(n for _, n in parse_status(changed))
     branch_note = (
-        f"{branch}  (new; created from {template})" if branch_state == "created"
+        f"{branch}  (new; created from {template})"
+        if branch_state == "created"
         else f"{branch}  (already exists; would be updated)"
     )
     version_note = (
-        f"{previous_version} -> {release_version}" if previous_version
+        f"{previous_version} -> {release_version}"
+        if previous_version
         else f"{release_version}  (first release on this branch)"
     )
 

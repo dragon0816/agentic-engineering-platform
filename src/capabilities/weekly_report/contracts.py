@@ -175,7 +175,8 @@ class WeeklyReportRequest(Contract):
         if self.since is not None and self.until is not None and self.since > self.until:
             raise ValueError("a window ends no earlier than it starts")
         if (
-            self.start_time is not None and self.end_time is not None
+            self.start_time is not None
+            and self.end_time is not None
             and self.start_time > self.end_time
         ):
             raise ValueError("start_time must be earlier than or equal to end_time")

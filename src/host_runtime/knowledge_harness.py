@@ -61,9 +61,11 @@ def knowledge_source_lines(record: dict[str, Any]) -> list[str]:
             page = citation["wiki_page"]
             refs = provenance.get(page, ())
             backing = (
-                "來源：" + "、".join(f"`{Path(ref).name}`" for ref in refs[:3])
+                "來源："
+                + "、".join(f"`{Path(ref).name}`" for ref in refs[:3])
                 + ("…" if len(refs) > 3 else "")
-                if refs else "缺來源連結"
+                if refs
+                else "缺來源連結"
             )
             lines.append(f"[{number}] Wiki：{Path(page).stem}（{backing}）")
         elif citation.get("raw_ref"):
@@ -76,11 +78,15 @@ def harness_skill(skills: Any) -> Any:
     validated, Knowledge harness guidance, and the exact query command."""
     for manifest in skills.manifests():
         guidance = manifest.harness_guidance
-        if (manifest.metadata.lifecycle in {"validated", "published"}
-                and guidance is not None and "knowledge" in guidance.domains
-                and any(command.kind == "capability"
-                        and command.target == KNOWLEDGE_QUERY_SPEC.identity
-                        for command in manifest.commands)):
+        if (
+            manifest.metadata.lifecycle in {"validated", "published"}
+            and guidance is not None
+            and "knowledge" in guidance.domains
+            and any(
+                command.kind == "capability" and command.target == KNOWLEDGE_QUERY_SPEC.identity
+                for command in manifest.commands
+            )
+        ):
             return manifest.metadata.identity
     return None
 
@@ -88,13 +94,20 @@ def harness_skill(skills: Any) -> Any:
 def broaden(procedure: KnowledgeProcedure, attempt: int) -> KnowledgeProcedure:
     """Wider retrieval for a retry: every facet query, more passages per
     facet, more Wiki index hits. The Skill's rules and policy are unchanged."""
-    return procedure.model_copy(update={
-        "facets": tuple(facet.model_copy(update={
-            "collect_all_queries": True,
-            "max_passages": min(6, facet.max_passages + 2 * attempt)})
-            for facet in procedure.facets),
-        "wiki_index_hits": min(32, procedure.wiki_index_hits * 2 ** attempt),
-    })
+    return procedure.model_copy(
+        update={
+            "facets": tuple(
+                facet.model_copy(
+                    update={
+                        "collect_all_queries": True,
+                        "max_passages": min(6, facet.max_passages + 2 * attempt),
+                    }
+                )
+                for facet in procedure.facets
+            ),
+            "wiki_index_hits": min(32, procedure.wiki_index_hits * 2**attempt),
+        }
+    )
 
 
 class KnowledgeHarness:
@@ -114,9 +127,7 @@ class KnowledgeHarness:
         item = KnowledgeAskRequest.model_validate(request)
         if item.skill is None:
             return self._ask_knowledge_bridge(item, _trace(), catalog=catalog)
-        installed = self.runtime.agent.gateway.router.commands.skills.discover(
-            item.skill.namespace
-        )
+        installed = self.runtime.agent.gateway.router.commands.skills.discover(item.skill.namespace)
         skill = next(
             (candidate for candidate in installed if candidate.metadata.identity == item.skill),
             None,
@@ -142,8 +153,7 @@ class KnowledgeHarness:
             }
         try:
             procedure = (
-                KnowledgeProcedure.model_validate(skill.procedure)
-                if skill.procedure else None
+                KnowledgeProcedure.model_validate(skill.procedure) if skill.procedure else None
             )
         except ValueError:
             return {
@@ -155,7 +165,8 @@ class KnowledgeHarness:
             }
         required_facets = (
             tuple(facet.name for facet in procedure.requested_facets(item.question))
-            if procedure is not None else ()
+            if procedure is not None
+            else ()
         )
         relation_required = bool(
             procedure is not None
@@ -177,9 +188,7 @@ class KnowledgeHarness:
                 ExpectedOutput(output_id="answer", artifact_ref="bridge_raw_record"),
             ),
             checks=(
-                CompletionCheck(
-                    check_id="answer_nonempty", output_id="answer", kind="nonempty"
-                ),
+                CompletionCheck(check_id="answer_nonempty", output_id="answer", kind="nonempty"),
                 *(
                     (
                         CompletionCheck(
@@ -189,31 +198,38 @@ class KnowledgeHarness:
                             check_id="claim_support", output_id="answer", kind="nonempty"
                         ),
                     )
-                    if required_facets else ()
+                    if required_facets
+                    else ()
                 ),
             ),
             # The Knowledge Skill decides how many retries (U5), up to the cap.
             constraints=TaskExecutionConstraints(
-                max_retries=min(3, skill.harness_guidance.max_retries)),
+                max_retries=min(3, skill.harness_guidance.max_retries)
+            ),
         )
         plan = plan_task(task, skill, "knowledge")
         actions = KnowledgeBridgeActions(
-            lambda: self._ask_knowledge_bridge(item, trace, procedure=procedure,
-                                               catalog=catalog),
+            lambda: self._ask_knowledge_bridge(item, trace, procedure=procedure, catalog=catalog),
             required_evidence=plan.skill_evidence,
             required_facets=required_facets,
             relation_required=relation_required,
             required_subject=procedure.subject(item.question) if procedure else None,
             procedure=procedure,
-            broadened=None if procedure is None else (
+            broadened=None
+            if procedure is None
+            else (
                 lambda attempt: self._ask_knowledge_bridge(
-                    item, trace, procedure=broaden(procedure, attempt), catalog=catalog)),
+                    item, trace, procedure=broaden(procedure, attempt), catalog=catalog
+                )
+            ),
             retry_budget=plan.retry_budget,
         )
         run = run_harness(plan, actions)
         base = actions.result or {
-            "ok": False, "answer": "The Knowledge query did not run.",
-            "record": None, "outcome": None,
+            "ok": False,
+            "answer": "The Knowledge query did not run.",
+            "record": None,
+            "outcome": None,
         }
         facet_report = actions.facet_report()
         incomplete = run.phase != "validated" and base["ok"] and required_facets
@@ -237,9 +253,11 @@ class KnowledgeHarness:
                 # discarding a verified answer (owner 2026-10-07).
                 sources = knowledge_source_lines(record)
                 visible_answer = (
-                    "已查到可引用的部分資料：\n\n" + record_answer
+                    "已查到可引用的部分資料：\n\n"
+                    + record_answer
                     + ("\n\n來源：\n" + "\n".join(sources) if sources else "")
-                    + "\n\n未能以證據支持：" + ", ".join(gaps)
+                    + "\n\n未能以證據支持："
+                    + ", ".join(gaps)
                     + "。因此不能把上列資料當成完整的推薦或比較。"
                 )
             else:
@@ -284,22 +302,22 @@ class KnowledgeHarness:
         gaps = list(assessment.get("missing_facets") or [])
         if assessment.get("relation_required") and not connected_facets(
             tuple(item["name"] for item in assessment.get("facets") or []),
-            tuple(
-                (item["left"], item["right"])
-                for item in assessment.get("relations") or []
-            ),
+            tuple((item["left"], item["right"]) for item in assessment.get("relations") or []),
         ):
             gaps.append("direct_relationship")
         return (
-            "已查到可引用的部分資料：\n\n" + text +
-            ("\n\n來源：\n" + "\n".join(sources) if sources else "") +
-            "\n\n尚未證實：" + ", ".join(gaps) +
-            "。因此不能把上列資料當成完整的推薦或比較。"
+            "已查到可引用的部分資料：\n\n"
+            + text
+            + ("\n\n來源：\n" + "\n".join(sources) if sources else "")
+            + "\n\n尚未證實："
+            + ", ".join(gaps)
+            + "。因此不能把上列資料當成完整的推薦或比較。"
         )
 
     @staticmethod
     def _knowledge_gap_preview(
-        record: dict[str, Any], assessment: dict[str, Any],
+        record: dict[str, Any],
+        assessment: dict[str, Any],
         procedure: KnowledgeProcedure | None,
     ) -> str:
         """Expose cited Raw candidates without presenting them as a recommendation."""
@@ -307,17 +325,24 @@ class KnowledgeHarness:
         lines = ["已找到以下原始資料片段，但完整比較仍未通過證據檢查："]
         question = (record.get("answer") or {}).get("question") or ""
         subject = procedure.subject(question) if procedure else None
-        facet_terms = {facet.name: facet.support_terms + facet.link_terms
-                       for facet in procedure.facets} if procedure else {}
-        priority = {
-            facet.name: tuple(
-                pattern
-                for requirement in facet.evidence_requirements
-                if re.search(requirement.question_pattern, question, re.IGNORECASE)
-                for pattern in requirement.evidence_patterns
-            )
-            for facet in procedure.facets
-        } if procedure else {}
+        facet_terms = (
+            {facet.name: facet.support_terms + facet.link_terms for facet in procedure.facets}
+            if procedure
+            else {}
+        )
+        priority = (
+            {
+                facet.name: tuple(
+                    pattern
+                    for requirement in facet.evidence_requirements
+                    if re.search(requirement.question_pattern, question, re.IGNORECASE)
+                    for pattern in requirement.evidence_patterns
+                )
+                for facet in procedure.facets
+            }
+            if procedure
+            else {}
+        )
         for facet in assessment.get("facets") or []:
             citations = facet.get("citations") or []
             if not citations:
@@ -326,7 +351,8 @@ class KnowledgeHarness:
                 if passage.get("citation") != citations[0]:
                     continue
                 excerpt = evidence_excerpt(
-                    passage.get("text") or "", subject=subject,
+                    passage.get("text") or "",
+                    subject=subject,
                     terms=facet_terms.get(facet["name"], ()),
                     priority_patterns=priority.get(facet["name"], ()),
                 )
@@ -336,18 +362,19 @@ class KnowledgeHarness:
         missing = list(assessment.get("missing_facets") or [])
         if assessment.get("relation_required") and not connected_facets(
             tuple(item["name"] for item in assessment.get("facets") or []),
-            tuple(
-                (item["left"], item["right"])
-                for item in assessment.get("relations") or []
-            ),
+            tuple((item["left"], item["right"]) for item in assessment.get("relations") or []),
         ):
             missing.append("direct_relationship")
         lines.append("仍缺：" + ", ".join(missing) + "。目前不能把這些片段當成已證實的推薦或比較。")
         return "\n".join(lines)
 
     def _ask_knowledge_bridge(
-        self, item: KnowledgeAskRequest, trace: TraceIdentifiers,
-        *, procedure: KnowledgeProcedure | None = None, catalog: Any = None,
+        self,
+        item: KnowledgeAskRequest,
+        trace: TraceIdentifiers,
+        *,
+        procedure: KnowledgeProcedure | None = None,
+        catalog: Any = None,
     ) -> dict[str, Any]:
         if catalog is not None:
             return self._ask_catalog(item, trace, procedure, catalog)
@@ -359,9 +386,7 @@ class KnowledgeHarness:
             target=KNOWLEDGE_QUERY_SPEC.identity,
             arguments=KnowledgeQueryRequest(
                 asset=item.asset, question=item.question, procedure=procedure
-            ).model_dump(
-                mode="json", exclude_none=True
-            ),
+            ).model_dump(mode="json", exclude_none=True),
             trace=trace,
         )
         import asyncio
@@ -378,17 +403,18 @@ class KnowledgeHarness:
         return {
             "ok": record is not None,
             "answer": (
-                record.answer.text
-                if record is not None
-                else self._knowledge_failure_text(outcome)
+                record.answer.text if record is not None else self._knowledge_failure_text(outcome)
             ),
             "record": (None if record is None else json.loads(record.model_dump_json())),
             "outcome": json.loads(outcome.model_dump_json()),
         }
 
     def _ask_catalog(
-        self, item: KnowledgeAskRequest, trace: TraceIdentifiers,
-        procedure: KnowledgeProcedure | None, catalog: Any,
+        self,
+        item: KnowledgeAskRequest,
+        trace: TraceIdentifiers,
+        procedure: KnowledgeProcedure | None,
+        catalog: Any,
     ) -> dict[str, Any]:
         """The installed query handler's model and alias over another catalog;
         the result has the Bridge route's shape, refusals included."""
@@ -396,24 +422,42 @@ class KnowledgeHarness:
 
         installed = self.runtime.agent.gateway.bridge.installed.get(KNOWLEDGE_QUERY_SPEC.identity)
         if installed is None or not isinstance(installed.handler, KnowledgeQueryHandler):
-            return {"ok": False, "answer": "Knowledge asking is not installed on this host.",
-                    "record": None, "outcome": None}
-        handler = KnowledgeQueryHandler(catalog, installed.handler.model,
-                                        alias=installed.handler.alias)
-        context = RequestContext(trace=trace, actor=self.runtime.actor,
-                                 namespace=item.asset.namespace, message=item.question,
-                                 channel="knowledge-benchmark")
-        request = KnowledgeQueryRequest(asset=item.asset, question=item.question,
-                                        procedure=procedure)
+            return {
+                "ok": False,
+                "answer": "Knowledge asking is not installed on this host.",
+                "record": None,
+                "outcome": None,
+            }
+        handler = KnowledgeQueryHandler(
+            catalog, installed.handler.model, alias=installed.handler.alias
+        )
+        context = RequestContext(
+            trace=trace,
+            actor=self.runtime.actor,
+            namespace=item.asset.namespace,
+            message=item.question,
+            channel="knowledge-benchmark",
+        )
+        request = KnowledgeQueryRequest(
+            asset=item.asset, question=item.question, procedure=procedure
+        )
         try:
             data = asyncio.run(handler(context, request))
         except CapabilityRefused as refused:
             outcome = {"capability": {"status": "failed", "failure": {"code": refused.code}}}
-            return {"ok": False, "answer": f"The Knowledge query was refused ({refused.code}).",
-                    "record": None, "outcome": outcome}
+            return {
+                "ok": False,
+                "answer": f"The Knowledge query was refused ({refused.code}).",
+                "record": None,
+                "outcome": outcome,
+            }
         record = KnowledgeAnswerRecord.model_validate(data)
-        return {"ok": True, "answer": record.answer.text,
-                "record": json.loads(record.model_dump_json()), "outcome": None}
+        return {
+            "ok": True,
+            "answer": record.answer.text,
+            "record": json.loads(record.model_dump_json()),
+            "outcome": None,
+        }
 
     @staticmethod
     def _knowledge_failure_text(outcome: Any) -> str:
@@ -435,4 +479,3 @@ class KnowledgeHarness:
         }
         explanation = explanations.get(failure.code, "The Knowledge query did not complete.")
         return f"{explanation} ({failure.code})"
-

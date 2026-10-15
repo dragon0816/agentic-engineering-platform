@@ -70,7 +70,7 @@ def parse(text: str) -> Page:
     front = match.group(0) if match else ""
     page = Page(front=front)
     current: list[str] = page.preamble
-    for line in text[len(front):].split("\n"):
+    for line in text[len(front) :].split("\n"):
         if line.startswith("## "):
             body: list[str] = []
             page.sections.append((line.rstrip(), body))
@@ -148,7 +148,7 @@ def apply_op(text: str, op: dict[str, object]) -> str:
 def sourced_lines(text: str, source_titles: set[str]) -> list[str]:
     """Body lines that carry evidence: they link a source page or record a
     contradiction (⚠️). Compared stripped, so re-indenting is not a loss."""
-    body = text[len(parse(text).front):]
+    body = text[len(parse(text).front) :]
     found = []
     for line in body.split("\n"):
         clean = line.strip()

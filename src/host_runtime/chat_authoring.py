@@ -151,17 +151,26 @@ def summarize(snapshot: WorkflowRunSnapshot) -> dict[str, JsonValue]:
     run = snapshot.run
     steps: list[JsonValue] = []
     for index, step in enumerate(snapshot.step_results):
-        steps.append({
-            "index": index, "status": step.status,
-            "failure": None if step.failure is None else (
-                step.failure.code if step.failure.message == GENERIC_FAILURE
-                else f"{step.failure.code}: {step.failure.message}"),
-            "data": _excerpt(step.data),
-        })
+        steps.append(
+            {
+                "index": index,
+                "status": step.status,
+                "failure": None
+                if step.failure is None
+                else (
+                    step.failure.code
+                    if step.failure.message == GENERIC_FAILURE
+                    else f"{step.failure.code}: {step.failure.message}"
+                ),
+                "data": _excerpt(step.data),
+            }
+        )
     return {
-        "run_id": run.run_id, "status": run.status,
-        "failure": None if run.failure is None else {
-            "code": run.failure.code, "message": run.failure.message},
+        "run_id": run.run_id,
+        "status": run.status,
+        "failure": None
+        if run.failure is None
+        else {"code": run.failure.code, "message": run.failure.message},
         "steps": steps,
     }
 
@@ -171,24 +180,24 @@ DRAFT_GUIDE = (
     "Use it whenever the person asks for a Workflow for this platform, a reusable Workflow, or "
     "a run on the platform runtime; a workflow file written by a script is not one, and never "
     "say something ran on the platform unless authoring__run_workflow ran it. "
-    "`workflow` is {\"name\": kebab-case, \"description\": one sentence, \"parameters\": "
-    "[{\"name\": snake_case, \"label\": question, \"kind\": \"text\"|\"date\"|\"integer\"|"
-    "\"boolean\"|\"folder\"|\"file\", \"scope\": \"runtime\", \"required\": true|false}], "
-    "\"steps\": [{\"capability\": \"namespace/name@version\", \"inputs\": {...}}]}. "
-    "An input is {\"source\": \"fixed\", \"value\": JSON} for what the Workflow fixes, "
-    "{\"source\": \"run\", \"path\": [\"<parameter>\"]} for a run value ([] is all run values), "
-    "or {\"source\": \"step\", \"step_index\": N, \"path\": [...]} for an earlier step's output. "
+    '`workflow` is {"name": kebab-case, "description": one sentence, "parameters": '
+    '[{"name": snake_case, "label": question, "kind": "text"|"date"|"integer"|'
+    '"boolean"|"folder"|"file", "scope": "runtime", "required": true|false}], '
+    '"steps": [{"capability": "namespace/name@version", "inputs": {...}}]}. '
+    'An input is {"source": "fixed", "value": JSON} for what the Workflow fixes, '
+    '{"source": "run", "path": ["<parameter>"]} for a run value ([] is all run values), '
+    'or {"source": "step", "step_index": N, "path": [...]} for an earlier step\'s output. '
     "To run your own Python program as a step use coding/run-python@1.0.0 with inputs "
-    "{\"request\": {\"source\": \"fixed\", \"value\": {\"workspace\": \"<absolute task folder>\", "
-    "\"script\": \"<complete script>\"}}, \"arguments\": {\"source\": \"run\", \"path\": []}}; the "
-    "script reads the run values with json.load(open(os.environ[\"AEP_WORKFLOW_PARAMS\"])) and "
+    '{"request": {"source": "fixed", "value": {"workspace": "<absolute task folder>", '
+    '"script": "<complete script>"}}, "arguments": {"source": "run", "path": []}}; the '
+    'script reads the run values with json.load(open(os.environ["AEP_WORKFLOW_PARAMS"])) and '
     "writes only to the workspace's output folder, so the same script reruns with new values. "
-    "To operate a web system as a step use browser/operate@1.0.0 with inputs {\"actions\": "
-    "{\"source\": \"fixed\", \"value\": [the browser__operate actions]}, \"values\": "
-    "{\"source\": \"run\", \"path\": []}, \"workspace\": {\"source\": \"fixed\", \"value\": "
-    "\"<absolute task folder>\"}}; a download lands in <workspace>/output/downloads for a later "
+    'To operate a web system as a step use browser/operate@1.0.0 with inputs {"actions": '
+    '{"source": "fixed", "value": [the browser__operate actions]}, "values": '
+    '{"source": "run", "path": []}, "workspace": {"source": "fixed", "value": '
+    '"<absolute task folder>"}}; a download lands in <workspace>/output/downloads for a later '
     "coding/run-python step. To operate a desktop application as a step use "
-    "desktop/operate@1.0.0 with {\"app\": fixed, \"actions\": fixed, \"values\": run values}. "
+    'desktop/operate@1.0.0 with {"app": fixed, "actions": fixed, "values": run values}. '
     "{placeholders} in those actions take the run values; put run values in output file "
     "names so a rerun with new values neither collides with nor overwrites an earlier result. "
     "A system the person signs in to or "
@@ -198,9 +207,9 @@ DRAFT_GUIDE = (
     "installed) and check what it wrote; fix and rerun until it does the job. When asked to "
     "rerun it with new values, run that installed version unchanged. "
     "Declare what a successful run must produce in `checks`, so the Host can tell a run "
-    "that did the job from one that only ended: [{\"check_id\": snake_case, \"step_index\": "
-    "N, \"kind\": \"files_nonempty\"|\"file_exists\"|\"data_nonempty\", \"pattern\": "
-    "\"*.xlsx\"}] (a run-python step lists its output files). "
+    'that did the job from one that only ended: [{"check_id": snake_case, "step_index": '
+    'N, "kind": "files_nonempty"|"file_exists"|"data_nonempty", "pattern": '
+    '"*.xlsx"}] (a run-python step lists its output files). '
     "Never put a password, token or key in a fixed value. Pass `candidate_id` to revise a "
     "candidate you drafted before. The host fills in owner, version and lifecycle."
 )
@@ -218,8 +227,7 @@ class ChatAuthoring:
         run_timeout_seconds: float = RUN_TIMEOUT_SECONDS,
         skills_dir: Path | None = None,
         coding_workspace_roots: tuple[str, ...] = (),
-        on_installed: Callable[[WorkflowManifest, tuple[CapabilityGrant, ...]], None]
-        | None = None,
+        on_installed: Callable[[WorkflowManifest, tuple[CapabilityGrant, ...]], None] | None = None,
     ) -> None:
         self.root = root
         # Makes an installed Workflow usable at once, without a restart
@@ -228,8 +236,9 @@ class ChatAuthoring:
         self.on_installed = on_installed
         # (installed Workflow, the model's run values) -> its run form offer,
         # set by the host; None keeps the plain run (owner 2026-10-15).
-        self.form_offer: Callable[
-            [AssetIdentity, dict[str, JsonValue]], dict[str, Any] | None] | None = None
+        self.form_offer: (
+            Callable[[AssetIdentity, dict[str, JsonValue]], dict[str, Any] | None] | None
+        ) = None
         self.skills_dir = skills_dir
         # Where a run-python or browser step's fixed workspace may be; checked
         # at draft time so a Workflow never fails only at its approved run.
@@ -312,8 +321,14 @@ class ChatAuthoring:
     # -- drafting and preview ---------------------------------------------
 
     def draft(
-        self, actor: str, session_id: str | None, title: str, raw: dict[str, Any],
-        candidate_id: str | None = None, *, source: str = "conversation",
+        self,
+        actor: str,
+        session_id: str | None,
+        title: str,
+        raw: dict[str, Any],
+        candidate_id: str | None = None,
+        *,
+        source: str = "conversation",
     ) -> tuple[ChatCandidate | None, list[str]]:
         """Validate the model's Workflow and keep it as a candidate. Returns
         the candidate, or None with the problems the model must fix."""
@@ -324,16 +339,22 @@ class ChatAuthoring:
         self.prepare_workspaces(manifest)
         now = _now()
         item = ChatCandidate(
-            candidate_id=previous.candidate_id if previous is not None
+            candidate_id=previous.candidate_id
+            if previous is not None
             else f"wf-{datetime.now(UTC):%Y%m%d-%H%M%S}-{secrets.token_hex(3)}",
-            actor=actor, session_id=session_id, source=source,
+            actor=actor,
+            session_id=session_id,
+            source=source,
             title=title.strip() or manifest.description,
-            created_at=previous.created_at if previous is not None else now, updated_at=now,
-            revision=previous.revision + 1 if previous is not None else 1, draft=manifest,
+            created_at=previous.created_at if previous is not None else now,
+            updated_at=now,
+            revision=previous.revision + 1 if previous is not None else 1,
+            draft=manifest,
             installed_as=previous.installed_as if previous is not None else None,
             installed_digest=previous.installed_digest if previous is not None else None,
-            status="installed" if previous is not None and previous.installed_digest == digest(
-                manifest) else "draft",
+            status="installed"
+            if previous is not None and previous.installed_digest == digest(manifest)
+            else "draft",
         )
         return self._save_candidate(item), []
 
@@ -348,12 +369,19 @@ class ChatAuthoring:
         # so a new draft of an existing name never reuses an installed version
         # (owner decision 2026-10-07; lab fix-008 W01 hit workflow_version_exists).
         published = self._published(str(identity["namespace"]), str(identity["name"]))
-        others = sorted({m.metadata.owner.id for m in published
-                         if (m.metadata.owner.type, m.metadata.owner.id) != ("user", actor)})
+        others = sorted(
+            {
+                m.metadata.owner.id
+                for m in published
+                if (m.metadata.owner.type, m.metadata.owner.id) != ("user", actor)
+            }
+        )
         if others:
-            return None, [f"workflow.name: '{identity['name']}' already belongs to "
-                          f"{', '.join(others)}; choose another name, or ask its owner to let "
-                          "you co-edit it"]
+            return None, [
+                f"workflow.name: '{identity['name']}' already belongs to "
+                f"{', '.join(others)}; choose another name, or ask its owner to let "
+                "you co-edit it"
+            ]
         taken = [_core(m.metadata.identity.version) for m in published]
         if previous is not None and previous.draft.metadata.identity.name == identity["name"]:
             taken.append(_core(previous.draft.metadata.identity.version))
@@ -363,14 +391,16 @@ class ChatAuthoring:
         try:
             manifest = WorkflowManifest.model_validate(assembled)
         except ValidationError as error:
-            return None, [f"{'.'.join(str(p) for p in e['loc'])}: {e['msg']}"
-                          for e in error.errors()[:8]]
+            return None, [
+                f"{'.'.join(str(p) for p in e['loc'])}: {e['msg']}" for e in error.errors()[:8]
+            ]
         for index, step in enumerate(manifest.steps):
             if not isinstance(step, WorkflowStep):
                 problems.append(f"step {index}: nested Workflows are not supported here")
             elif self.installed.get(step.capability) is None:
                 problems.append(
-                    f"step {index}: capability {_key(step.capability)} is not installed")
+                    f"step {index}: capability {_key(step.capability)} is not installed"
+                )
             else:
                 problems.extend(self._workspace_problems(index, step))
         if not manifest.steps:
@@ -379,15 +409,23 @@ class ChatAuthoring:
             # A revision that drops what the Workflow did must say so (owner
             # 2026-10-09: a stock Workflow lost its script step after a failure
             # and then "succeeded" without producing anything).
-            kept = {_key(step.capability) for step in manifest.steps
-                    if isinstance(step, WorkflowStep)}
-            removed = sorted({_key(step.capability) for step in previous.draft.steps
-                              if isinstance(step, WorkflowStep)} - kept)
+            kept = {
+                _key(step.capability) for step in manifest.steps if isinstance(step, WorkflowStep)
+            }
+            removed = sorted(
+                {
+                    _key(step.capability)
+                    for step in previous.draft.steps
+                    if isinstance(step, WorkflowStep)
+                }
+                - kept
+            )
             if removed:
                 problems.append(
                     "this revision removes step(s) " + ", ".join(removed) + " that the "
-                    "previous version had; if that is intended, pass \"allow_removed_steps\": "
-                    "true and tell the person what the Workflow no longer does")
+                    'previous version had; if that is intended, pass "allow_removed_steps": '
+                    "true and tell the person what the Workflow no longer does"
+                )
         return (None, problems) if problems else (manifest, [])
 
     @staticmethod
@@ -414,8 +452,10 @@ class ChatAuthoring:
         roots = self.coding_workspace_roots
         if containing_root(source, roots) is None:
             allowed = "; ".join(roots) if roots else "none are configured on this host"
-            return [f"step {index}: workspace {source} is outside the allowed task folders "
-                    f"({allowed}); use a folder under one of them"]
+            return [
+                f"step {index}: workspace {source} is outside the allowed task folders "
+                f"({allowed}); use a folder under one of them"
+            ]
         return []
 
     def prepare_workspaces(self, manifest: WorkflowManifest) -> None:
@@ -425,8 +465,9 @@ class ChatAuthoring:
             if not isinstance(step, WorkflowStep):
                 continue
             source = self._fixed_workspace(step)
-            resolved = None if source is None else containing_root(
-                source, self.coding_workspace_roots)
+            resolved = (
+                None if source is None else containing_root(source, self.coding_workspace_roots)
+            )
             if resolved is not None and not resolved.is_dir():
                 for part in ("input", "output"):
                     (resolved / part).mkdir(parents=True, exist_ok=True)
@@ -440,7 +481,9 @@ class ChatAuthoring:
             except (OSError, ValueError):
                 continue
             if (manifest.metadata.identity.namespace, manifest.metadata.identity.name) == (
-                    namespace, name):
+                namespace,
+                name,
+            ):
                 found.append(manifest)
         return found
 
@@ -449,7 +492,8 @@ class ChatAuthoring:
         workflows.register(manifest)
         bridge = self._bridge()
         trial = BridgeExecutor(
-            bridge.installed, LocalPolicy(self.grants(manifest, actor, ref)),
+            bridge.installed,
+            LocalPolicy(self.grants(manifest, actor, ref)),
             timeout_seconds=bridge.timeout_seconds,
         )
         return WorkflowEngine(workflows, trial, settings_provider=lambda _manifest: {})
@@ -458,9 +502,13 @@ class ChatAuthoring:
     def _context(actor: str, namespace: str, session_id: str | None, label: str) -> RequestContext:
         token = secrets.token_hex(8)
         return RequestContext(
-            trace=TraceIdentifiers(trace_id=f"chat-authoring-{token}",
-                                   request_id=f"{label}-{token}", span_id=label),
-            actor=actor, namespace=namespace, channel="local", session_id=session_id,
+            trace=TraceIdentifiers(
+                trace_id=f"chat-authoring-{token}", request_id=f"{label}-{token}", span_id=label
+            ),
+            actor=actor,
+            namespace=namespace,
+            channel="local",
+            session_id=session_id,
             message=f"{label} a Workflow drafted in a conversation",
         )
 
@@ -469,17 +517,30 @@ class ChatAuthoring:
     ) -> dict[str, JsonValue]:
         item = self.candidate(candidate_id, actor)
         engine = self._engine(item.draft, actor, f"chat-preview:{candidate_id}")
-        shown = asyncio.run(engine.preview(
-            self._context(actor, self.namespace, item.session_id, "preview"),
-            item.draft.metadata.identity, arguments))
-        self._save_candidate(item.model_copy(update={
-            "preview_status": shown.status, "preview_of": digest(item.draft),
-            "status": item.status if item.status == "installed" else (
-                "previewed" if shown.status == "previewed" else "draft"),
-        }))
+        shown = asyncio.run(
+            engine.preview(
+                self._context(actor, self.namespace, item.session_id, "preview"),
+                item.draft.metadata.identity,
+                arguments,
+            )
+        )
+        self._save_candidate(
+            item.model_copy(
+                update={
+                    "preview_status": shown.status,
+                    "preview_of": digest(item.draft),
+                    "status": item.status
+                    if item.status == "installed"
+                    else ("previewed" if shown.status == "previewed" else "draft"),
+                }
+            )
+        )
         data = json.loads(shown.model_dump_json())
-        return {"candidate_id": candidate_id, "digest": digest(item.draft),
-                "preview": _excerpt(data)}
+        return {
+            "candidate_id": candidate_id,
+            "digest": digest(item.draft),
+            "preview": _excerpt(data),
+        }
 
     # -- running and installing -------------------------------------------
 
@@ -511,17 +572,31 @@ class ChatAuthoring:
     ) -> dict[str, JsonValue]:
         self.prepare_workspaces(candidate.draft)
         engine = self._engine(candidate.draft, actor, ref)
-        snapshot = asyncio.run(run_workflow_checked(
-            engine, self._context(actor, self.namespace, candidate.session_id, "run"),
-            candidate.draft.metadata.identity, arguments,
-            timeout_seconds=self.run_timeout_seconds,
-        ))
-        return {"candidate_id": candidate.candidate_id, "digest": digest(candidate.draft),
-                "workflow": _key(candidate.draft.metadata.identity), **summarize(snapshot)}
+        snapshot = asyncio.run(
+            run_workflow_checked(
+                engine,
+                self._context(actor, self.namespace, candidate.session_id, "run"),
+                candidate.draft.metadata.identity,
+                arguments,
+                timeout_seconds=self.run_timeout_seconds,
+            )
+        )
+        return {
+            "candidate_id": candidate.candidate_id,
+            "digest": digest(candidate.draft),
+            "workflow": _key(candidate.draft.metadata.identity),
+            **summarize(snapshot),
+        }
 
     def request(
-        self, actor: str, session_id: str | None, kind: ApprovalKind, candidate_id: str,
-        arguments: dict[str, JsonValue] | None = None, *, source: str = "conversation",
+        self,
+        actor: str,
+        session_id: str | None,
+        kind: ApprovalKind,
+        candidate_id: str,
+        arguments: dict[str, JsonValue] | None = None,
+        *,
+        source: str = "conversation",
     ) -> ApprovalRequest:
         if kind == "install_skill":
             return self.request_skill_install(actor, candidate_id, source=source)
@@ -530,62 +605,106 @@ class ChatAuthoring:
             raise ChatAuthoringError("candidate_already_installed")
         identity = item.draft.metadata.identity
         steps = ", ".join(
-            _key(step.capability) for step in item.draft.steps if isinstance(step, WorkflowStep))
+            _key(step.capability) for step in item.draft.steps if isinstance(step, WorkflowStep)
+        )
         summary = (
             f"Run {_key(identity)} once with {json.dumps(arguments or {}, ensure_ascii=False)}"
-            if kind == "run" else f"Install {_key(identity)} for reuse"
+            if kind == "run"
+            else f"Install {_key(identity)} for reuse"
         ) + f" — steps: {steps}"
-        return self._save_approval(ApprovalRequest(
-            approval_id=f"ap-{datetime.now(UTC):%Y%m%d-%H%M%S}-{secrets.token_hex(3)}",
-            actor=actor, session_id=session_id, kind=kind, source=source,
-            candidate_id=candidate_id,
-            digest=digest(item.draft), workflow=_key(identity), arguments=arguments or {},
-            summary=summary[:600], created_at=_now(),
-        ))
+        return self._save_approval(
+            ApprovalRequest(
+                approval_id=f"ap-{datetime.now(UTC):%Y%m%d-%H%M%S}-{secrets.token_hex(3)}",
+                actor=actor,
+                session_id=session_id,
+                kind=kind,
+                source=source,
+                candidate_id=candidate_id,
+                digest=digest(item.draft),
+                workflow=_key(identity),
+                arguments=arguments or {},
+                summary=summary[:600],
+                created_at=_now(),
+            )
+        )
 
     def request_capability(
-        self, actor: str, session_id: str | None, target: AssetIdentity,
+        self,
+        actor: str,
+        session_id: str | None,
+        target: AssetIdentity,
         arguments: dict[str, JsonValue],
     ) -> ApprovalRequest:
         """A side effect the conversation model chose itself (owner mode): it
         runs, as the person, only when they approve it."""
         key = _key(target)
         shown = json.dumps(arguments, ensure_ascii=False)
-        return self._save_approval(ApprovalRequest(
-            approval_id=f"ap-{datetime.now(UTC):%Y%m%d-%H%M%S}-{secrets.token_hex(3)}",
-            actor=actor, session_id=session_id, kind="capability", candidate_id="capability",
-            digest=_call_digest(key, arguments), workflow=key, arguments=arguments,
-            summary=f"Run {key} once with {shown}"[:600], created_at=_now(),
-        ))
+        return self._save_approval(
+            ApprovalRequest(
+                approval_id=f"ap-{datetime.now(UTC):%Y%m%d-%H%M%S}-{secrets.token_hex(3)}",
+                actor=actor,
+                session_id=session_id,
+                kind="capability",
+                candidate_id="capability",
+                digest=_call_digest(key, arguments),
+                workflow=key,
+                arguments=arguments,
+                summary=f"Run {key} once with {shown}"[:600],
+                created_at=_now(),
+            )
+        )
 
     def capability_approval_tool_data(
-        self, context: RequestContext, target: AssetIdentity,
+        self,
+        context: RequestContext,
+        target: AssetIdentity,
         arguments: dict[str, JsonValue],
     ) -> dict[str, JsonValue]:
         request = self.request_capability(context.actor, context.session_id, target, arguments)
         return {
-            "approval_id": request.approval_id, "summary": request.summary,
+            "approval_id": request.approval_id,
+            "summary": request.summary,
             "next": "Nothing ran yet. Tell the person it waits for their approval button; "
-                    "after they approve, the result appears in this conversation.",
+            "after they approve, the result appears in this conversation.",
         }
 
     def _run_capability(self, item: ApprovalRequest, actor: str) -> ApprovalRequest:
         if _call_digest(item.workflow, item.arguments) != item.digest:
-            return self._save_approval(item.model_copy(update={
-                "status": "failed", "decided_at": _now(),
-                "result": {"failure": "the request changed after it was made; ask again"}}))
+            return self._save_approval(
+                item.model_copy(
+                    update={
+                        "status": "failed",
+                        "decided_at": _now(),
+                        "result": {"failure": "the request changed after it was made; ask again"},
+                    }
+                )
+            )
         namespace, _, rest = item.workflow.partition("/")
         name, _, version = rest.partition("@")
         target = AssetIdentity(namespace=namespace, name=name, version=version)
-        result = asyncio.run(self._bridge().execute(CapabilityInvocation(
-            context=self._context(actor, self.namespace, item.session_id, "run"),
-            target=target, arguments=item.arguments)))
+        result = asyncio.run(
+            self._bridge().execute(
+                CapabilityInvocation(
+                    context=self._context(actor, self.namespace, item.session_id, "run"),
+                    target=target,
+                    arguments=item.arguments,
+                )
+            )
+        )
         status: ApprovalStatus = "approved" if result.status == "succeeded" else "failed"
-        return self._save_approval(item.model_copy(update={
-            "status": status, "decided_at": _now(),
-            "result": {"status": result.status,
-                       "data": json.loads(json.dumps(result.data, default=str)),
-                       "failure": None if result.failure is None else result.failure.code}}))
+        return self._save_approval(
+            item.model_copy(
+                update={
+                    "status": status,
+                    "decided_at": _now(),
+                    "result": {
+                        "status": result.status,
+                        "data": json.loads(json.dumps(result.data, default=str)),
+                        "failure": None if result.failure is None else result.failure.code,
+                    },
+                }
+            )
+        )
 
     def decide(self, approval_id: str, actor: str, approve: bool) -> ApprovalRequest:
         """The owner's decision, from a button the model cannot press."""
@@ -593,28 +712,44 @@ class ChatAuthoring:
         if item.status != "pending":
             raise ChatAuthoringError("approval_already_decided")
         if not approve:
-            return self._save_approval(item.model_copy(update={
-                "status": "rejected", "decided_at": _now()}))
+            return self._save_approval(
+                item.model_copy(update={"status": "rejected", "decided_at": _now()})
+            )
         if item.kind == "install_skill":
             return self._decide_skill(item, actor)
         if item.kind == "capability":
             return self._run_capability(item, actor)
         candidate = self.candidate(item.candidate_id, actor)
         if digest(candidate.draft) != item.digest:
-            return self._save_approval(item.model_copy(update={
-                "status": "failed", "decided_at": _now(),
-                "result": {"failure": "the candidate changed after the request; ask again"}}))
+            return self._save_approval(
+                item.model_copy(
+                    update={
+                        "status": "failed",
+                        "decided_at": _now(),
+                        "result": {"failure": "the candidate changed after the request; ask again"},
+                    }
+                )
+            )
         try:
             if item.kind == "run":
                 result: JsonValue = self.execute(
-                    actor, candidate, item.arguments, f"chat-approval:{approval_id}")
+                    actor, candidate, item.arguments, f"chat-approval:{approval_id}"
+                )
             else:
                 result = self.install(candidate, actor, approval_id)
         except ChatAuthoringError as error:
-            return self._save_approval(item.model_copy(update={
-                "status": "failed", "decided_at": _now(), "result": {"failure": error.code}}))
-        return self._save_approval(item.model_copy(update={
-            "status": "approved", "decided_at": _now(), "result": result}))
+            return self._save_approval(
+                item.model_copy(
+                    update={
+                        "status": "failed",
+                        "decided_at": _now(),
+                        "result": {"failure": error.code},
+                    }
+                )
+            )
+        return self._save_approval(
+            item.model_copy(update={"status": "approved", "decided_at": _now(), "result": result})
+        )
 
     def install(
         self, candidate: ChatCandidate, actor: str, approval_id: str
@@ -625,32 +760,52 @@ class ChatAuthoring:
         if target.exists():
             raise ChatAuthoringError("workflow_version_exists")
         metadata = candidate.draft.metadata.model_dump(mode="json")
-        metadata.update({
-            "lifecycle": "published",
-            "business_approval": {"status": "approved", "reviewer": actor,
-                                  "evidence": f"chat-approval:{approval_id}"},
-            "validation_refs": [
-                f"chat-candidate:{candidate.candidate_id}:{digest(candidate.draft)}"],
-        })
+        metadata.update(
+            {
+                "lifecycle": "published",
+                "business_approval": {
+                    "status": "approved",
+                    "reviewer": actor,
+                    "evidence": f"chat-approval:{approval_id}",
+                },
+                "validation_refs": [
+                    f"chat-candidate:{candidate.candidate_id}:{digest(candidate.draft)}"
+                ],
+            }
+        )
         published = WorkflowManifest.model_validate(
-            {**candidate.draft.model_dump(mode="json"), "metadata": metadata})
+            {**candidate.draft.model_dump(mode="json"), "metadata": metadata}
+        )
         self.prepare_workspaces(published)
         self.workflows_dir.mkdir(parents=True, exist_ok=True)
-        write_atomically(target, (json.dumps(published.model_dump(mode="json"),
-                                             ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
+        write_atomically(
+            target,
+            (
+                json.dumps(published.model_dump(mode="json"), ensure_ascii=False, indent=2) + "\n"
+            ).encode("utf-8"),
+        )
         ref = f"chat-approval:{approval_id}"
         self._add_grants(published, actor, ref)
-        self._save_candidate(candidate.model_copy(update={
-            "status": "installed", "installed_as": _key(identity),
-            "installed_digest": digest(candidate.draft)}))
+        self._save_candidate(
+            candidate.model_copy(
+                update={
+                    "status": "installed",
+                    "installed_as": _key(identity),
+                    "installed_digest": digest(candidate.draft),
+                }
+            )
+        )
         live = self.on_installed is not None
         if self.on_installed is not None:
             self.on_installed(published, self.grants(published, actor, ref))
-        return {"installed_as": _key(identity), "file": target.name,
-                "digest": digest(candidate.draft),
-                "note": "It runs now, in conversations and from the Capabilities page."
-                if live else "Reuse it from a conversation now; other channels see it after a "
-                             "restart."}
+        return {
+            "installed_as": _key(identity),
+            "file": target.name,
+            "digest": digest(candidate.draft),
+            "note": "It runs now, in conversations and from the Capabilities page."
+            if live
+            else "Reuse it from a conversation now; other channels see it after a restart.",
+        }
 
     # -- Skills (external authoring X1) -------------------------------------
 
@@ -702,23 +857,40 @@ class ChatAuthoring:
         assembled = assemble_skill(raw, namespace=self.namespace, owner=actor)
         skills = installed_skills(self._skills_dir())
         identity = assembled["metadata"]["identity"]
-        taken = [_core(m.metadata.identity.version) for m in skills
-                 if (m.metadata.identity.namespace, m.metadata.identity.name)
-                 == (identity["namespace"], identity["name"])]
+        taken = [
+            _core(m.metadata.identity.version)
+            for m in skills
+            if (m.metadata.identity.namespace, m.metadata.identity.name)
+            == (identity["namespace"], identity["name"])
+        ]
         disabled = self._skills_dir() / "disabled"
-        taken.extend(_core(m.metadata.identity.version) for m in installed_skills(disabled)
-                     if (m.metadata.identity.namespace, m.metadata.identity.name)
-                     == (identity["namespace"], identity["name"]))
+        taken.extend(
+            _core(m.metadata.identity.version)
+            for m in installed_skills(disabled)
+            if (m.metadata.identity.namespace, m.metadata.identity.name)
+            == (identity["namespace"], identity["name"])
+        )
         if previous is not None and previous.draft.metadata.identity.name == identity["name"]:
             taken.append(_core(previous.draft.metadata.identity.version))
         major, minor, patch = max(taken) if taken else (1, 0, -1)
         identity["version"] = f"{major}.{minor}.{patch + 1}"
-        return check_skill(raw, assembled, actor=actor, installed=self.installed,
-                           workflows=self.installed_workflows(), skills=skills)
+        return check_skill(
+            raw,
+            assembled,
+            actor=actor,
+            installed=self.installed,
+            workflows=self.installed_workflows(),
+            skills=skills,
+        )
 
     def draft_skill(
-        self, actor: str, title: str, raw: dict[str, Any], candidate_id: str | None = None,
-        *, source: str = "conversation",
+        self,
+        actor: str,
+        title: str,
+        raw: dict[str, Any],
+        candidate_id: str | None = None,
+        *,
+        source: str = "conversation",
     ) -> tuple[SkillCandidate | None, list[str]]:
         previous = self.skill_candidate(candidate_id, actor) if candidate_id else None
         manifest, problems = self.check_skill(actor, raw, previous)
@@ -726,11 +898,16 @@ class ChatAuthoring:
             return None, problems
         now = _now()
         item = SkillCandidate(
-            candidate_id=previous.candidate_id if previous is not None
+            candidate_id=previous.candidate_id
+            if previous is not None
             else f"sk-{datetime.now(UTC):%Y%m%d-%H%M%S}-{secrets.token_hex(3)}",
-            actor=actor, source=source, title=title.strip() or manifest.alias,
-            created_at=previous.created_at if previous is not None else now, updated_at=now,
-            revision=previous.revision + 1 if previous is not None else 1, draft=manifest,
+            actor=actor,
+            source=source,
+            title=title.strip() or manifest.alias,
+            created_at=previous.created_at if previous is not None else now,
+            updated_at=now,
+            revision=previous.revision + 1 if previous is not None else 1,
+            draft=manifest,
         )
         return self._save_skill_candidate(item), []
 
@@ -742,28 +919,52 @@ class ChatAuthoring:
             raise ChatAuthoringError("candidate_already_installed")
         identity = item.draft.metadata.identity
         commands = ", ".join(f"{c.name}→{_key(c.target)}" for c in item.draft.commands) or "none"
-        summary = (f"Install Skill {_key(identity)} (alias {item.draft.alias}) — commands: "
-                   f"{commands}; used after the host restarts")
-        return self._save_approval(ApprovalRequest(
-            approval_id=f"ap-{datetime.now(UTC):%Y%m%d-%H%M%S}-{secrets.token_hex(3)}",
-            actor=actor, session_id=None, kind="install_skill", source=source,
-            candidate_id=candidate_id, digest=skill_digest(item.draft), workflow=_key(identity),
-            summary=summary[:600], created_at=_now(),
-        ))
+        summary = (
+            f"Install Skill {_key(identity)} (alias {item.draft.alias}) — commands: "
+            f"{commands}; used after the host restarts"
+        )
+        return self._save_approval(
+            ApprovalRequest(
+                approval_id=f"ap-{datetime.now(UTC):%Y%m%d-%H%M%S}-{secrets.token_hex(3)}",
+                actor=actor,
+                session_id=None,
+                kind="install_skill",
+                source=source,
+                candidate_id=candidate_id,
+                digest=skill_digest(item.draft),
+                workflow=_key(identity),
+                summary=summary[:600],
+                created_at=_now(),
+            )
+        )
 
     def _decide_skill(self, item: ApprovalRequest, actor: str) -> ApprovalRequest:
         candidate = self.skill_candidate(item.candidate_id, actor)
         if skill_digest(candidate.draft) != item.digest:
-            return self._save_approval(item.model_copy(update={
-                "status": "failed", "decided_at": _now(),
-                "result": {"failure": "the candidate changed after the request; ask again"}}))
+            return self._save_approval(
+                item.model_copy(
+                    update={
+                        "status": "failed",
+                        "decided_at": _now(),
+                        "result": {"failure": "the candidate changed after the request; ask again"},
+                    }
+                )
+            )
         try:
             result = self.install_skill(candidate, actor, item.approval_id)
         except ChatAuthoringError as error:
-            return self._save_approval(item.model_copy(update={
-                "status": "failed", "decided_at": _now(), "result": {"failure": error.code}}))
-        return self._save_approval(item.model_copy(update={
-            "status": "approved", "decided_at": _now(), "result": result}))
+            return self._save_approval(
+                item.model_copy(
+                    update={
+                        "status": "failed",
+                        "decided_at": _now(),
+                        "result": {"failure": error.code},
+                    }
+                )
+            )
+        return self._save_approval(
+            item.model_copy(update={"status": "approved", "decided_at": _now(), "result": result})
+        )
 
     def install_skill(
         self, candidate: SkillCandidate, actor: str, approval_id: str
@@ -776,51 +977,82 @@ class ChatAuthoring:
         if target.exists():
             raise ChatAuthoringError("skill_version_exists")
         # Checked again at install: something may have been installed since.
-        others = [m for m in installed_skills(folder)
-                  if (m.metadata.identity.namespace, m.metadata.identity.name)
-                  != (identity.namespace, identity.name)
-                  or (m.metadata.owner.type, m.metadata.owner.id) != ("user", actor)]
+        others = [
+            m
+            for m in installed_skills(folder)
+            if (m.metadata.identity.namespace, m.metadata.identity.name)
+            != (identity.namespace, identity.name)
+            or (m.metadata.owner.type, m.metadata.owner.id) != ("user", actor)
+        ]
         _, problems = check_skill(
             {"instructions": candidate.draft.instructions},
-            candidate.draft.model_dump(mode="json"), actor=actor, installed=self.installed,
-            workflows=self.installed_workflows(), skills=others,
+            candidate.draft.model_dump(mode="json"),
+            actor=actor,
+            installed=self.installed,
+            workflows=self.installed_workflows(),
+            skills=others,
         )
         if problems:
             raise ChatAuthoringError("skill_no_longer_valid")
         metadata = candidate.draft.metadata.model_dump(mode="json")
-        metadata.update({
-            "lifecycle": "published",
-            "business_approval": {"status": "approved", "reviewer": actor,
-                                  "evidence": f"chat-approval:{approval_id}"},
-            "validation_refs": [
-                f"skill-candidate:{candidate.candidate_id}:{skill_digest(candidate.draft)}"],
-        })
+        metadata.update(
+            {
+                "lifecycle": "published",
+                "business_approval": {
+                    "status": "approved",
+                    "reviewer": actor,
+                    "evidence": f"chat-approval:{approval_id}",
+                },
+                "validation_refs": [
+                    f"skill-candidate:{candidate.candidate_id}:{skill_digest(candidate.draft)}"
+                ],
+            }
+        )
         published = SkillManifest.model_validate(
-            {**candidate.draft.model_dump(mode="json"), "metadata": metadata})
+            {**candidate.draft.model_dump(mode="json"), "metadata": metadata}
+        )
         set_aside: list[str] = []
         for path in sorted(folder.glob(f"{identity.namespace}__{identity.name}__*.json")):
             (folder / "disabled").mkdir(parents=True, exist_ok=True)
             path.replace(folder / "disabled" / path.name)
             set_aside.append(path.name)
         folder.mkdir(parents=True, exist_ok=True)
-        write_atomically(target, (json.dumps(published.model_dump(mode="json"),
-                                             ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
-        self._save_skill_candidate(candidate.model_copy(update={
-            "status": "installed", "installed_as": _key(identity),
-            "installed_digest": skill_digest(candidate.draft)}))
-        return {"installed_as": _key(identity), "file": target.name,
-                "digest": skill_digest(candidate.draft), "set_aside": list(set_aside),
-                "note": "The host uses it after a restart."}
+        write_atomically(
+            target,
+            (
+                json.dumps(published.model_dump(mode="json"), ensure_ascii=False, indent=2) + "\n"
+            ).encode("utf-8"),
+        )
+        self._save_skill_candidate(
+            candidate.model_copy(
+                update={
+                    "status": "installed",
+                    "installed_as": _key(identity),
+                    "installed_digest": skill_digest(candidate.draft),
+                }
+            )
+        )
+        return {
+            "installed_as": _key(identity),
+            "file": target.name,
+            "digest": skill_digest(candidate.draft),
+            "set_aside": list(set_aside),
+            "note": "The host uses it after a restart.",
+        }
 
     # -- the owner's draft list in Agent Web (owner 2026-10-08) -------------
 
     def install_now(self, actor: str, candidate_id: str) -> ApprovalRequest:
         """The owner pressed Install on a draft: that press is the approval."""
         skill = candidate_id.startswith("sk-")
-        source = (self.skill_candidate(candidate_id, actor) if skill
-                  else self.candidate(candidate_id, actor)).source
-        request = self.request(actor, None, "install_skill" if skill else "install",
-                               candidate_id, source=source)
+        source = (
+            self.skill_candidate(candidate_id, actor)
+            if skill
+            else self.candidate(candidate_id, actor)
+        ).source
+        request = self.request(
+            actor, None, "install_skill" if skill else "install", candidate_id, source=source
+        )
         return self.decide(request.approval_id, actor, True)
 
     def delete_candidate(self, actor: str, candidate_id: str) -> None:
@@ -834,8 +1066,9 @@ class ChatAuthoring:
             path = self._file("candidate", candidate_id)
         for item in self.approvals(actor):
             if item.candidate_id == candidate_id:
-                self._save_approval(item.model_copy(update={
-                    "status": "rejected", "decided_at": _now()}))
+                self._save_approval(
+                    item.model_copy(update={"status": "rejected", "decided_at": _now()})
+                )
         path.unlink(missing_ok=True)
 
     # -- what an external agent may see -------------------------------------
@@ -844,14 +1077,19 @@ class ChatAuthoring:
         """An approval's outcome without data: statuses and codes only, so
         nothing a run read reaches an external agent (PUBLIC rule)."""
         view: dict[str, JsonValue] = {
-            "approval_id": item.approval_id, "kind": item.kind, "status": item.status,
-            "workflow": item.workflow, "candidate_id": item.candidate_id,
-            "decided_at": item.decided_at}
+            "approval_id": item.approval_id,
+            "kind": item.kind,
+            "status": item.status,
+            "workflow": item.workflow,
+            "candidate_id": item.candidate_id,
+            "decided_at": item.decided_at,
+        }
         result = item.result if isinstance(item.result, dict) else {}
         if item.status == "failed":
             failure = result.get("failure")
-            view["failure"] = failure if isinstance(failure, str) and " " not in failure \
-                else "failed"
+            view["failure"] = (
+                failure if isinstance(failure, str) and " " not in failure else "failed"
+            )
         elif item.status == "approved" and item.kind != "run":
             view.update({k: result.get(k) for k in ("installed_as", "digest", "note")})
         elif item.status == "approved":
@@ -871,24 +1109,32 @@ class ChatAuthoring:
             if binding is None:
                 raise ChatAuthoringError("capability_missing")
             found[_key(step.capability)] = CapabilityGrant(
-                actor=actor, asset=binding.spec.identity,
+                actor=actor,
+                asset=binding.spec.identity,
                 permissions=binding.spec.policy.required_permissions,
-                policy_refs=binding.spec.policy.policy_refs, approval_ref=ref,
+                policy_refs=binding.spec.policy.policy_refs,
+                approval_ref=ref,
             )
         return tuple(found.values())
 
     def _add_grants(self, manifest: WorkflowManifest, actor: str, ref: str) -> None:
         existing = (
             [CapabilityGrant.model_validate(item) for item in documents(self.grants_file)]
-            if self.grants_file.is_file() else []
+            if self.grants_file.is_file()
+            else []
         )
         have = {(grant.actor, grant.asset.key) for grant in existing}
-        added = [grant for grant in self.grants(manifest, actor, ref)
-                 if (grant.actor, grant.asset.key) not in have]
+        added = [
+            grant
+            for grant in self.grants(manifest, actor, ref)
+            if (grant.actor, grant.asset.key) not in have
+        ]
         if added:
             payload = [grant.model_dump(mode="json") for grant in (*existing, *added)]
-            write_atomically(self.grants_file, (json.dumps(payload, ensure_ascii=False, indent=2)
-                                                + "\n").encode("utf-8"))
+            write_atomically(
+                self.grants_file,
+                (json.dumps(payload, ensure_ascii=False, indent=2) + "\n").encode("utf-8"),
+            )
 
     # -- conversation tools ------------------------------------------------
 
@@ -905,26 +1151,42 @@ class ChatAuthoring:
                     return _refused("workflow_missing", "give the Workflow as an object")
                 candidate_id = args.get("candidate_id")
                 item, problems = self.draft(
-                    context.actor, context.session_id, str(args.get("title") or ""), raw,
-                    str(candidate_id) if candidate_id else None)
+                    context.actor,
+                    context.session_id,
+                    str(args.get("title") or ""),
+                    raw,
+                    str(candidate_id) if candidate_id else None,
+                )
                 if item is None:
-                    return HostToolOutcome(status="failed", data={"problems": problems},
-                                           failure=Failure(code="workflow_invalid",
-                                                           message="; ".join(problems)[:500]))
-                return HostToolOutcome(status="succeeded", data={
-                    "candidate_id": item.candidate_id,
-                    "workflow": _key(item.draft.metadata.identity),
-                    "revision": item.revision, "digest": digest(item.draft),
-                    "read_only": self.read_only(item.draft),
-                    "next": "preview it, then run it; a run that writes waits for the owner's "
-                            "approval",
-                })
+                    return HostToolOutcome(
+                        status="failed",
+                        data={"problems": problems},
+                        failure=Failure(code="workflow_invalid", message="; ".join(problems)[:500]),
+                    )
+                return HostToolOutcome(
+                    status="succeeded",
+                    data={
+                        "candidate_id": item.candidate_id,
+                        "workflow": _key(item.draft.metadata.identity),
+                        "revision": item.revision,
+                        "digest": digest(item.draft),
+                        "read_only": self.read_only(item.draft),
+                        "next": "preview it, then run it; a run that writes waits for the owner's "
+                        "approval",
+                    },
+                )
+
             return await run_sync(work)
 
         async def preview_tool(context: RequestContext, args: Args) -> HostToolOutcome:
             def work() -> HostToolOutcome:
-                return HostToolOutcome(status="succeeded", data=self.preview(
-                    context.actor, str(args.get("candidate_id") or ""), _arguments(args)))
+                return HostToolOutcome(
+                    status="succeeded",
+                    data=self.preview(
+                        context.actor, str(args.get("candidate_id") or ""), _arguments(args)
+                    ),
+                )
+
             return await run_sync(work)
 
         async def run_tool(context: RequestContext, args: Args) -> HostToolOutcome:
@@ -936,51 +1198,86 @@ class ChatAuthoring:
                     if offer is not None:
                         return HostToolOutcome(status="succeeded", data={OFFER_KEY: offer})
                     # The installed version, unchanged: installing was the approval.
-                    return HostToolOutcome(status="succeeded", data=self.execute(
-                        context.actor, item, arguments, f"chat-installed:{item.candidate_id}"))
+                    return HostToolOutcome(
+                        status="succeeded",
+                        data=self.execute(
+                            context.actor, item, arguments, f"chat-installed:{item.candidate_id}"
+                        ),
+                    )
                 if self.read_only(item.draft):
-                    return HostToolOutcome(status="succeeded", data=self.execute(
-                        context.actor, item, arguments, f"chat-read-only:{item.candidate_id}"))
-                request = self.request(context.actor, context.session_id, "run",
-                                       item.candidate_id, arguments)
-                return HostToolOutcome(status="awaiting_approval", data={
-                    "approval_id": request.approval_id, "summary": request.summary,
-                    "next": "Nothing ran yet. Tell the person it waits for their approval "
-                            "button; after they approve, the result appears in this conversation.",
-                })
+                    return HostToolOutcome(
+                        status="succeeded",
+                        data=self.execute(
+                            context.actor, item, arguments, f"chat-read-only:{item.candidate_id}"
+                        ),
+                    )
+                request = self.request(
+                    context.actor, context.session_id, "run", item.candidate_id, arguments
+                )
+                return HostToolOutcome(
+                    status="awaiting_approval",
+                    data={
+                        "approval_id": request.approval_id,
+                        "summary": request.summary,
+                        "next": "Nothing ran yet. Tell the person it waits for their approval "
+                        "button; after they approve, the result appears in this conversation.",
+                    },
+                )
+
             return await run_sync(work)
 
         async def install_tool(context: RequestContext, args: Args) -> HostToolOutcome:
             def work() -> HostToolOutcome:
-                request = self.request(context.actor, context.session_id, "install",
-                                       str(args.get("candidate_id") or ""))
-                return HostToolOutcome(status="awaiting_approval", data={
-                    "approval_id": request.approval_id, "summary": request.summary,
-                    "next": "Nothing is installed yet; it waits for the person's approval button.",
-                })
+                request = self.request(
+                    context.actor,
+                    context.session_id,
+                    "install",
+                    str(args.get("candidate_id") or ""),
+                )
+                return HostToolOutcome(
+                    status="awaiting_approval",
+                    data={
+                        "approval_id": request.approval_id,
+                        "summary": request.summary,
+                        "next": "Nothing is installed yet; it waits for the person's approval button.",
+                    },
+                )
+
             return await run_sync(work)
 
         async def get_tool(context: RequestContext, args: Args) -> HostToolOutcome:
             def work() -> HostToolOutcome:
                 item = self.candidate(str(args.get("candidate_id") or ""), context.actor)
                 body: dict[str, JsonValue] = {
-                        "candidate_id": item.candidate_id,
-                        "workflow": _key(item.draft.metadata.identity),
-                        "status": item.status, "digest": digest(item.draft),
-                        "parameters": [p.model_dump(mode="json") for p in item.draft.parameters],
-                        "steps": [step.model_dump(mode="json") for step in item.draft.steps]}
+                    "candidate_id": item.candidate_id,
+                    "workflow": _key(item.draft.metadata.identity),
+                    "status": item.status,
+                    "digest": digest(item.draft),
+                    "parameters": [p.model_dump(mode="json") for p in item.draft.parameters],
+                    "steps": [step.model_dump(mode="json") for step in item.draft.steps],
+                }
                 return HostToolOutcome(status="succeeded", data=_excerpt(body, MAX_DRAFT_CHARS))
+
             return await run_sync(work)
 
         async def list_tool(context: RequestContext, args: Args) -> HostToolOutcome:
             def work() -> HostToolOutcome:
-                return HostToolOutcome(status="succeeded", data=[
-                    {"candidate_id": item.candidate_id, "title": item.title,
-                     "workflow": _key(item.draft.metadata.identity), "status": item.status,
-                     "digest": digest(item.draft), "description": item.draft.description,
-                     "parameters": [p.name for p in item.draft.parameters]}
-                    for item in self.candidates(context.actor)[:30]
-                ])
+                return HostToolOutcome(
+                    status="succeeded",
+                    data=[
+                        {
+                            "candidate_id": item.candidate_id,
+                            "title": item.title,
+                            "workflow": _key(item.draft.metadata.identity),
+                            "status": item.status,
+                            "digest": digest(item.draft),
+                            "description": item.draft.description,
+                            "parameters": [p.name for p in item.draft.parameters],
+                        }
+                        for item in self.candidates(context.actor)[:30]
+                    ],
+                )
+
             return await run_sync(work)
 
         def guarded(handler: Any) -> Any:
@@ -990,64 +1287,103 @@ class ChatAuthoring:
                     return outcome
                 except ChatAuthoringError as error:
                     return _refused(error.code, error.code)
+
             return call
 
         candidate = {"candidate_id": {"type": "string"}}
         values = {"arguments": {"type": "object", "description": "run values by parameter name"}}
         return (
-            HostTool(ModelTool(
-                name="authoring__draft_workflow",
-                description=" ".join(
-                    part for part in (DRAFT_GUIDE, workspace_note(self.coding_workspace_roots))
-                    if part),
-                input_contract="host.authoring.draft.v1",
-                input_schema={"type": "object", "properties": {
-                    "title": {"type": "string"}, "workflow": {"type": "object"},
-                    "candidate_id": {"type": "string"}}, "required": ["title", "workflow"]},
-            ), guarded(draft_tool)),
-            HostTool(ModelTool(
-                name="authoring__preview_workflow",
-                description="Preview a drafted Workflow: read steps run for real, other steps show "
-                            "what they would do; nothing changes.",
-                input_contract="host.authoring.preview.v1",
-                input_schema={"type": "object", "properties": {**candidate, **values},
-                              "required": ["candidate_id"]},
-            ), guarded(preview_tool)),
-            HostTool(ModelTool(
-                name="authoring__run_workflow",
-                description="Run a drafted or installed Workflow once with run values. A Workflow "
-                            "whose steps only read runs now and returns its result; otherwise it "
-                            "waits for the person's approval button and nothing runs yet. If a "
-                            "platform run failed, fix the cause (revise the candidate when its "
-                            "steps were wrong) and run it again here; do not redo the work "
-                            "outside the Workflow.",
-                input_contract="host.authoring.run.v1",
-                input_schema={"type": "object", "properties": {**candidate, **values},
-                              "required": ["candidate_id"]},
-            ), guarded(run_tool)),
-            HostTool(ModelTool(
-                name="authoring__install_workflow",
-                description="Ask the person to install a drafted Workflow for reuse; it waits for "
-                            "their approval button.",
-                input_contract="host.authoring.install.v1",
-                input_schema={"type": "object", "properties": candidate,
-                              "required": ["candidate_id"]},
-            ), guarded(install_tool)),
-            HostTool(ModelTool(
-                name="authoring__get_workflow",
-                description="Show a drafted or installed Workflow in full (parameters and steps "
-                            "with their inputs), to check or revise it.",
-                input_contract="host.authoring.get.v1",
-                input_schema={"type": "object", "properties": candidate,
-                              "required": ["candidate_id"]},
-            ), guarded(get_tool)),
-            HostTool(ModelTool(
-                name="authoring__list_workflows",
-                description="List the Workflows this person drafted or installed from "
-                            "conversations, to reuse one with new run values.",
-                input_contract="host.authoring.list.v1",
-                input_schema={"type": "object", "properties": {}},
-            ), guarded(list_tool)),
+            HostTool(
+                ModelTool(
+                    name="authoring__draft_workflow",
+                    description=" ".join(
+                        part
+                        for part in (DRAFT_GUIDE, workspace_note(self.coding_workspace_roots))
+                        if part
+                    ),
+                    input_contract="host.authoring.draft.v1",
+                    input_schema={
+                        "type": "object",
+                        "properties": {
+                            "title": {"type": "string"},
+                            "workflow": {"type": "object"},
+                            "candidate_id": {"type": "string"},
+                        },
+                        "required": ["title", "workflow"],
+                    },
+                ),
+                guarded(draft_tool),
+            ),
+            HostTool(
+                ModelTool(
+                    name="authoring__preview_workflow",
+                    description="Preview a drafted Workflow: read steps run for real, other steps show "
+                    "what they would do; nothing changes.",
+                    input_contract="host.authoring.preview.v1",
+                    input_schema={
+                        "type": "object",
+                        "properties": {**candidate, **values},
+                        "required": ["candidate_id"],
+                    },
+                ),
+                guarded(preview_tool),
+            ),
+            HostTool(
+                ModelTool(
+                    name="authoring__run_workflow",
+                    description="Run a drafted or installed Workflow once with run values. A Workflow "
+                    "whose steps only read runs now and returns its result; otherwise it "
+                    "waits for the person's approval button and nothing runs yet. If a "
+                    "platform run failed, fix the cause (revise the candidate when its "
+                    "steps were wrong) and run it again here; do not redo the work "
+                    "outside the Workflow.",
+                    input_contract="host.authoring.run.v1",
+                    input_schema={
+                        "type": "object",
+                        "properties": {**candidate, **values},
+                        "required": ["candidate_id"],
+                    },
+                ),
+                guarded(run_tool),
+            ),
+            HostTool(
+                ModelTool(
+                    name="authoring__install_workflow",
+                    description="Ask the person to install a drafted Workflow for reuse; it waits for "
+                    "their approval button.",
+                    input_contract="host.authoring.install.v1",
+                    input_schema={
+                        "type": "object",
+                        "properties": candidate,
+                        "required": ["candidate_id"],
+                    },
+                ),
+                guarded(install_tool),
+            ),
+            HostTool(
+                ModelTool(
+                    name="authoring__get_workflow",
+                    description="Show a drafted or installed Workflow in full (parameters and steps "
+                    "with their inputs), to check or revise it.",
+                    input_contract="host.authoring.get.v1",
+                    input_schema={
+                        "type": "object",
+                        "properties": candidate,
+                        "required": ["candidate_id"],
+                    },
+                ),
+                guarded(get_tool),
+            ),
+            HostTool(
+                ModelTool(
+                    name="authoring__list_workflows",
+                    description="List the Workflows this person drafted or installed from "
+                    "conversations, to reuse one with new run values.",
+                    input_contract="host.authoring.list.v1",
+                    input_schema={"type": "object", "properties": {}},
+                ),
+                guarded(list_tool),
+            ),
         )
 
 
@@ -1069,10 +1405,15 @@ def run_codes(result: JsonValue) -> dict[str, JsonValue]:
         "status": body.get("status"),
         "failure": failure.get("code") if isinstance(failure, dict) else None,
         "steps": [
-            {"index": step.get("index"), "status": step.get("status"),
-             "failure": str(step.get("failure")).split(":", 1)[0]
-             if step.get("failure") else None}
-            for step in (steps if isinstance(steps, list) else []) if isinstance(step, dict)
+            {
+                "index": step.get("index"),
+                "status": step.get("status"),
+                "failure": str(step.get("failure")).split(":", 1)[0]
+                if step.get("failure")
+                else None,
+            }
+            for step in (steps if isinstance(steps, list) else [])
+            if isinstance(step, dict)
         ],
     }
 
@@ -1088,13 +1429,19 @@ def approval_text(item: ApprovalRequest) -> str:
         detail = json.dumps(result.get("data"), ensure_ascii=False)
         return f"【已核准並執行】{item.workflow} 結果：{result.get('status')}\n{detail[:2000]}"
     if item.kind == "install_skill":
-        return (f"【已核准安裝 Skill】{result.get('installed_as')}"
-                f"（digest {result.get('digest')}）。主機重新啟動後生效。")
+        return (
+            f"【已核准安裝 Skill】{result.get('installed_as')}"
+            f"（digest {result.get('digest')}）。主機重新啟動後生效。"
+        )
     if item.kind == "install":
-        return (f"【已核准安裝】{result.get('installed_as')}（digest {result.get('digest')}）。"
-                "之後可以在對話中用新的參數重跑它。")
-    lines = [f"【已核准並執行】{item.workflow}（候選 {item.candidate_id}，digest "
-             f"{result.get('digest')}）結果：{result.get('status')}"]
+        return (
+            f"【已核准安裝】{result.get('installed_as')}（digest {result.get('digest')}）。"
+            "之後可以在對話中用新的參數重跑它。"
+        )
+    lines = [
+        f"【已核准並執行】{item.workflow}（候選 {item.candidate_id}，digest "
+        f"{result.get('digest')}）結果：{result.get('status')}"
+    ]
     failure = result.get("failure")
     if failure:
         lines.append(f"失敗：{json.dumps(failure, ensure_ascii=False)}")
@@ -1104,7 +1451,9 @@ def approval_text(item: ApprovalRequest) -> str:
             continue
         data = step.get("data")
         detail = json.dumps(data, ensure_ascii=False)
-        lines.append(f"步驟 {step.get('index')}：{step.get('status')}"
-                     + (f"（{step.get('failure')}）" if step.get("failure") else "")
-                     + f"\n{detail[:2500]}")
+        lines.append(
+            f"步驟 {step.get('index')}：{step.get('status')}"
+            + (f"（{step.get('failure')}）" if step.get("failure") else "")
+            + f"\n{detail[:2500]}"
+        )
     return "\n".join(lines)

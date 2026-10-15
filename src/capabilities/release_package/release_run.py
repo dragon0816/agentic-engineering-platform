@@ -90,13 +90,13 @@ class ReleaseRunError(Exception):
 _HTTPS_REMOTE = re.compile(r"^https://[A-Za-z0-9.-]+(:[0-9]+)?/[^\s@?#]+$")
 _SSH_REMOTE = re.compile(
     r"^(ssh://[A-Za-z0-9._-]+@[A-Za-z0-9.-]+(:[0-9]+)?/[^\s?#]+"
-    r"|[A-Za-z0-9._-]+@[A-Za-z0-9.-]+:[^\s?#/][^\s?#]*)$")
+    r"|[A-Za-z0-9._-]+@[A-Za-z0-9.-]+:[^\s?#/][^\s?#]*)$"
+)
 _LOOKS_REMOTE = re.compile(r"^[a-z][a-z0-9+.-]*://", re.IGNORECASE)
 
 
 def is_remote_url(url: str) -> bool:
-    return bool(_LOOKS_REMOTE.match(url)) or (
-        "@" in url and ":" in url.split("@", 1)[1])
+    return bool(_LOOKS_REMOTE.match(url)) or ("@" in url and ":" in url.split("@", 1)[1])
 
 
 def project_path(url: str) -> str:
@@ -159,12 +159,14 @@ class ReleaseRunSettings(Contract):
                 raise ReleaseRunError(
                     "remote_not_isolated",
                     "this install only uses a local repository inside the isolated root; "
-                    "switch on remote_release in this Workflow's settings to use GitLab")
+                    "switch on remote_release in this Workflow's settings to use GitLab",
+                )
             if not (_HTTPS_REMOTE.match(url) or _SSH_REMOTE.match(url)):
                 raise ReleaseRunError(
                     "remote_url_invalid",
                     "the release repository must be an https or ssh URL with no password "
-                    "or token in it")
+                    "or token in it",
+                )
         else:
             local += (Path(url),)
         for path in local:
@@ -184,24 +186,33 @@ class Git:
         self.root = root
         self.timeout = timeout
 
-    def __call__(self, *args: str, cwd: Path, check: bool = True,
-                 timeout: float | None = None) -> str:
+    def __call__(
+        self, *args: str, cwd: Path, check: bool = True, timeout: float | None = None
+    ) -> str:
         if not cwd.resolve().is_relative_to(self.root):
             raise ReleaseRunError("git_outside_work_root")
         env = {**os.environ, "GIT_TERMINAL_PROMPT": "0", "GCM_INTERACTIVE": "never"}
         try:
             done = subprocess.run(
-                ["git", *args], cwd=cwd, capture_output=True, text=True, encoding="utf-8",
-                errors="replace", timeout=timeout or self.timeout, env=env,
-                stdin=subprocess.DEVNULL)
+                ["git", *args],
+                cwd=cwd,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=timeout or self.timeout,
+                env=env,
+                stdin=subprocess.DEVNULL,
+            )
         except FileNotFoundError:
             raise ReleaseRunError("git_unavailable") from None
         except subprocess.TimeoutExpired:
             raise ReleaseRunError("git_timeout", f"git {args[0]} timed out") from None
         if check and done.returncode != 0:
             detail = (done.stderr or done.stdout or "").strip()[:300]
-            raise ReleaseRunError("git_failed",
-                                  f"git {args[0]} failed (exit {done.returncode}): {detail}")
+            raise ReleaseRunError(
+                "git_failed", f"git {args[0]} failed (exit {done.returncode}): {detail}"
+            )
         return done.stdout
 
 
@@ -233,7 +244,8 @@ def checkout_branch(git: Git, repo_dir: Path, branch: str, template: str, log: L
         raise ReleaseRunError(
             "template_missing",
             f"neither {branch} nor the template branch {template} exists on origin. "
-            "Check the template branch in this Workflow's settings.")
+            "Check the template branch in this Workflow's settings.",
+        )
     log(f"branch {branch} does not exist; creating it from {template}")
     git("checkout", "-B", branch, f"origin/{template}", cwd=repo_dir)
     return "created"
@@ -248,8 +260,9 @@ def checkout_lock(repo_dir: Path) -> Iterator[None]:
     try:
         fd = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
     except FileExistsError:
-        raise ReleaseRunError("checkout_busy",
-                              "another release run is using this working copy") from None
+        raise ReleaseRunError(
+            "checkout_busy", "another release run is using this working copy"
+        ) from None
     try:
         os.close(fd)
         yield
@@ -304,9 +317,11 @@ class ReleaseRunRequest(ReleasePreviewRequest):
     overlay_uploads: tuple[Text, ...] = Field(default=(), alias="overlayUploads")
 
     def uploads(self) -> dict[str, tuple[str, ...]]:
-        return {"testPlans": self.test_plan_uploads,
-                "configurations": self.configuration_uploads,
-                "overlays": self.overlay_uploads}
+        return {
+            "testPlans": self.test_plan_uploads,
+            "configurations": self.configuration_uploads,
+            "overlays": self.overlay_uploads,
+        }
 
 
 class PrepareStepInput(Contract):
@@ -321,8 +336,7 @@ class PrepareStepInput(Contract):
     remote_release: StrictBool = False
 
     def settings(self) -> ReleaseRunSettings:
-        return ReleaseRunSettings.model_validate(
-            self.model_dump(exclude={"request"}))
+        return ReleaseRunSettings.model_validate(self.model_dump(exclude={"request"}))
 
 
 class PreparedRelease(Contract):
@@ -362,8 +376,7 @@ class CommitStepInput(Contract):
     remote_release: StrictBool = False
 
     def settings(self) -> ReleaseRunSettings:
-        return ReleaseRunSettings.model_validate(
-            self.model_dump(exclude={"branch", "fingerprint"}))
+        return ReleaseRunSettings.model_validate(self.model_dump(exclude={"branch", "fingerprint"}))
 
 
 class CommitResult(Contract):
@@ -405,7 +418,8 @@ class PushStepInput(Contract):
 
     def settings(self) -> ReleaseRunSettings:
         return ReleaseRunSettings.model_validate(
-            self.model_dump(exclude={"branch", "commit", "push"}))
+            self.model_dump(exclude={"branch", "commit", "push"})
+        )
 
 
 class PushResult(Contract):
@@ -419,26 +433,43 @@ class PushResult(Contract):
 # -- the three steps -------------------------------------------------------------
 
 
-def _resolve(request: ReleaseRunRequest, settings: ReleaseRunSettings,
-             log: LogFn, fetch: Callable[..., tuple[int, str]] | None) -> tuple[str, str]:
+def _resolve(
+    request: ReleaseRunRequest,
+    settings: ReleaseRunSettings,
+    log: LogFn,
+    fetch: Callable[..., tuple[int, str]] | None,
+) -> tuple[str, str]:
     given = request.chipset_version.strip()
     if given:
         return given, "given"
     extra = {} if fetch is None else {"fetch": fetch}
-    found = lookup_published_version(request.chipset_id, settings.artifactory_base_url,
-                                     os.environ.get("ARTIFACTORY_TOKEN", ""), log, **extra)
+    found = lookup_published_version(
+        request.chipset_id,
+        settings.artifactory_base_url,
+        os.environ.get("ARTIFACTORY_TOKEN", ""),
+        log,
+        **extra,
+    )
     if found:
         return found, "published index"
     try:
-        return (lookup_readiness_version(request.chipset_id, settings.readiness_base_url,
-                                         os.environ.get("OPS_TOKEN", ""), log, **extra),
-                "readiness table")
+        return (
+            lookup_readiness_version(
+                request.chipset_id,
+                settings.readiness_base_url,
+                os.environ.get("OPS_TOKEN", ""),
+                log,
+                **extra,
+            ),
+            "readiness table",
+        )
     except VersionLookupError as error:
         raise ReleaseRunError("chipset_version_unknown", str(error)) from None
 
 
 def checked_uploads(
-    request: ReleaseRunRequest, upload_root: Path | None,
+    request: ReleaseRunRequest,
+    upload_root: Path | None,
 ) -> tuple[tuple[str, Path], ...]:
     """The run's uploaded files, each a regular file inside the host's upload
     store (forms v2), or a refusal. Their extensions are checked by the plan."""
@@ -447,32 +478,44 @@ def checked_uploads(
         assert kind in DEST_DIRS
         for raw in paths:
             if upload_root is None:
-                raise ReleaseRunError("uploads_not_available",
-                                      "this host has no upload store for release files")
+                raise ReleaseRunError(
+                    "uploads_not_available", "this host has no upload store for release files"
+                )
             path = Path(raw)
             try:
-                inside = (path.is_absolute() and not path.is_symlink() and path.is_file()
-                          and path.resolve().is_relative_to(upload_root.resolve()))
+                inside = (
+                    path.is_absolute()
+                    and not path.is_symlink()
+                    and path.is_file()
+                    and path.resolve().is_relative_to(upload_root.resolve())
+                )
             except OSError:
                 inside = False
             if not inside:
-                raise ReleaseRunError("upload_outside_store",
-                                      f"{path.name} is not a file uploaded for this run")
+                raise ReleaseRunError(
+                    "upload_outside_store", f"{path.name} is not a file uploaded for this run"
+                )
             found.append((kind, path.resolve()))
     return tuple(found)
 
 
 def prepare_release(
-    settings: ReleaseRunSettings, request: ReleaseRunRequest, *, log: LogFn = lambda _: None,
-    fetch: Callable[..., tuple[int, str]] | None = None, upload_root: Path | None = None,
+    settings: ReleaseRunSettings,
+    request: ReleaseRunRequest,
+    *,
+    log: LogFn = lambda _: None,
+    fetch: Callable[..., tuple[int, str]] | None = None,
+    upload_root: Path | None = None,
 ) -> PreparedRelease:
     root, work_root, inbox, origin = settings.checked()
     uploaded = checked_uploads(request, upload_root)
     if request.upload_set_id:
         # The source fetched upload sets from its own ops dashboard; on AEP the
         # files arrive as attachments. Until that is wired, name inbox files.
-        raise ReleaseRunError("upload_sets_not_supported",
-                              "name files in the inbox; upload sets are not wired on AEP yet")
+        raise ReleaseRunError(
+            "upload_sets_not_supported",
+            "name files in the inbox; upload sets are not wired on AEP yet",
+        )
     try:
         branch = branch_name(request.company_name, request.chipset_id, request.info)
     except ReleaseValidationError as error:
@@ -483,12 +526,18 @@ def prepare_release(
     with checkout_lock(repo_dir):
         branch_state = checkout_branch(git, repo_dir, branch, settings.template_branch, log)
         release_path = repo_dir / "release.yaml"
-        previous_text = (release_path.read_text(encoding="utf-8-sig")
-                         if release_path.exists() else None)
+        previous_text = (
+            release_path.read_text(encoding="utf-8-sig") if release_path.exists() else None
+        )
         try:
             plan = plan_release(
-                ReleaseRequest(**{**request.to_release_request().__dict__,
-                                  "chipset_version": chipset_version, "uploaded": uploaded}),
+                ReleaseRequest(
+                    **{
+                        **request.to_release_request().__dict__,
+                        "chipset_version": chipset_version,
+                        "uploaded": uploaded,
+                    }
+                ),
                 ReleaseSettings(inbox=inbox, include=DEFAULT_INCLUDE),
                 previous_release_yaml=previous_text,
             )
@@ -497,7 +546,8 @@ def prepare_release(
         # Written as the source writes them: text mode for the two generated
         # files (so line endings match on the same machine), copy2 for inputs.
         (repo_dir / "requirements.txt").write_text(
-            "\n".join(plan.requirements) + "\n", encoding="utf-8")
+            "\n".join(plan.requirements) + "\n", encoding="utf-8"
+        )
         placed = []
         for item in plan.selected_files:
             target = repo_dir / item.destination
@@ -505,39 +555,65 @@ def prepare_release(
                 raise ReleaseRunError("invalid_release_input")
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(Path(item.source) if item.source else inbox / item.name, target)
-            placed.append({"kind": item.kind, "file": item.name,
-                           "dest": item.destination.split("/", 1)[0],
-                           "from": "upload" if item.source else "inbox"})
+            placed.append(
+                {
+                    "kind": item.kind,
+                    "file": item.name,
+                    "dest": item.destination.split("/", 1)[0],
+                    "from": "upload" if item.source else "inbox",
+                }
+            )
             log(item.destination)
         release_path.write_text(plan.release_yaml, encoding="utf-8")
         changed = _changed(git, repo_dir)
         lines = dry_run_plan(
-            company=request.company_name, chipset=request.chipset_id,
-            chipset_version=chipset_version, branch=branch, branch_state=branch_state,
-            template=settings.template_branch, release_version=plan.release_version,
+            company=request.company_name,
+            chipset=request.chipset_id,
+            chipset_version=chipset_version,
+            branch=branch,
+            branch_state=branch_state,
+            template=settings.template_branch,
+            release_version=plan.release_version,
             previous_version=plan.previous_version or "",
-            testcase=request.general_testcase_version, changed=changed,
+            testcase=request.general_testcase_version,
+            changed=changed,
             project_path=project_path(origin) if settings.is_remote() else "",
-            will_push=settings.is_remote())
-        subject = (f"Release {request.company_name} {request.chipset_id} {chipset_version} "
-                   f"v{plan.release_version} (general-testcase "
-                   f"{request.general_testcase_version})")
+            will_push=settings.is_remote(),
+        )
+        subject = (
+            f"Release {request.company_name} {request.chipset_id} {chipset_version} "
+            f"v{plan.release_version} (general-testcase "
+            f"{request.general_testcase_version})"
+        )
         prepared = PreparedRelease(
-            branch=branch, branch_state=branch_state, repo_dir=str(repo_dir),
-            chipset_version=chipset_version, chipset_version_source=source,
-            previous_version=plan.previous_version, release_version=plan.release_version,
-            requirements=plan.requirements, placed=tuple(placed), changed_files=len(changed),
-            changes=tuple(parse_status(changed)), plan=tuple(lines), subject=subject,
-            notes=request.notes.strip(), fingerprint=fingerprint(git, repo_dir, branch),
+            branch=branch,
+            branch_state=branch_state,
+            repo_dir=str(repo_dir),
+            chipset_version=chipset_version,
+            chipset_version_source=source,
+            previous_version=plan.previous_version,
+            release_version=plan.release_version,
+            requirements=plan.requirements,
+            placed=tuple(placed),
+            changed_files=len(changed),
+            changes=tuple(parse_status(changed)),
+            plan=tuple(lines),
+            subject=subject,
+            notes=request.notes.strip(),
+            fingerprint=fingerprint(git, repo_dir, branch),
             dry_run=request.dry_run,
         )
         (repo_dir / ".git" / PREPARED_RECORD).write_text(
-            prepared.model_dump_json(indent=2), encoding="utf-8")
+            prepared.model_dump_json(indent=2), encoding="utf-8"
+        )
     return prepared
 
 
 def commit_release(
-    settings: ReleaseRunSettings, branch: str, fingerprint_shown: str, *,
+    settings: ReleaseRunSettings,
+    branch: str,
+    fingerprint_shown: str,
+    *,
     log: LogFn = lambda _: None,
 ) -> CommitResult:
     """Commit what `prepare` left, if it is still exactly what was reviewed."""
@@ -547,23 +623,30 @@ def commit_release(
     if prepared is None:
         raise ReleaseRunError("not_prepared", "prepare this release first")
     if prepared.branch != branch or not prepared.fingerprint.startswith(
-            fingerprint_shown.strip().lower()):
-        raise ReleaseRunError("stale_prepare",
-                              "this is not the release that was last prepared; prepare and "
-                              "review it again")
+        fingerprint_shown.strip().lower()
+    ):
+        raise ReleaseRunError(
+            "stale_prepare",
+            "this is not the release that was last prepared; prepare and review it again",
+        )
     if prepared.dry_run:
-        return CommitResult(branch=prepared.branch, committed=False,
-                            skipped=f"dry run; {prepared.changed_files} file(s) would be "
-                                    "committed")
+        return CommitResult(
+            branch=prepared.branch,
+            committed=False,
+            skipped=f"dry run; {prepared.changed_files} file(s) would be committed",
+        )
     if prepared.changed_files == 0:
         return CommitResult(branch=prepared.branch, committed=False, skipped="nothing changed")
     git = Git(root)
     with checkout_lock(repo_dir):
         record = repo_dir / ".git" / PREPARED_RECORD
-        if _current_branch(git, repo_dir) != prepared.branch or fingerprint(
-                git, repo_dir, prepared.branch) != prepared.fingerprint:
-            raise ReleaseRunError("checkout_changed",
-                                  "the working copy changed after it was prepared; prepare again")
+        if (
+            _current_branch(git, repo_dir) != prepared.branch
+            or fingerprint(git, repo_dir, prepared.branch) != prepared.fingerprint
+        ):
+            raise ReleaseRunError(
+                "checkout_changed", "the working copy changed after it was prepared; prepare again"
+            )
         files = len(_changed(git, repo_dir))
         git("add", "-A", cwd=repo_dir)
         args = ["commit", "-m", quote_for_git(prepared.subject)]
@@ -573,15 +656,20 @@ def commit_release(
         commit = git("rev-parse", "HEAD", cwd=repo_dir).strip()
         record.unlink(missing_ok=True)
         (repo_dir / ".git" / COMMITTED_RECORD).write_text(
-            CommittedRelease(branch=prepared.branch, commit=commit,
-                             subject=prepared.subject).model_dump_json(indent=2),
-            encoding="utf-8")
+            CommittedRelease(
+                branch=prepared.branch, commit=commit, subject=prepared.subject
+            ).model_dump_json(indent=2),
+            encoding="utf-8",
+        )
         log(f"committed: {prepared.subject}")
     return CommitResult(branch=prepared.branch, committed=True, commit=commit, files=files)
 
 
 def push_release(
-    settings: ReleaseRunSettings, branch: str, commit_shown: str, *,
+    settings: ReleaseRunSettings,
+    branch: str,
+    commit_shown: str,
+    *,
     log: LogFn = lambda _: None,
 ) -> PushResult:
     """Push the commit `commit` made, if it is still exactly what was reviewed.
@@ -596,36 +684,46 @@ def push_release(
         raise ReleaseRunError("not_committed", "commit this release first")
     shown = commit_shown.strip().lower()
     if committed.branch != branch or len(shown) < 7 or not committed.commit.startswith(shown):
-        raise ReleaseRunError("stale_commit",
-                              "this is not the commit the release step made; commit and "
-                              "review it again")
+        raise ReleaseRunError(
+            "stale_commit",
+            "this is not the commit the release step made; commit and review it again",
+        )
     git = Git(root)
     remote = settings.is_remote()
     path = project_path(origin) if remote else ""
     record = repo_dir / ".git" / COMMITTED_RECORD
     with checkout_lock(repo_dir):
-        if (_current_branch(git, repo_dir) != committed.branch
-                or git("rev-parse", "HEAD", cwd=repo_dir).strip() != committed.commit
-                or _changed(git, repo_dir)):
-            raise ReleaseRunError("checkout_changed",
-                                  "the working copy changed after the commit; prepare again")
+        if (
+            _current_branch(git, repo_dir) != committed.branch
+            or git("rev-parse", "HEAD", cwd=repo_dir).strip() != committed.commit
+            or _changed(git, repo_dir)
+        ):
+            raise ReleaseRunError(
+                "checkout_changed", "the working copy changed after the commit; prepare again"
+            )
         actual = git("remote", "get-url", "origin", cwd=repo_dir).strip()
         same = actual == origin if remote else Path(actual).resolve() == Path(origin)
         if not same:
-            raise ReleaseRunError("origin_changed",
-                                  "the working copy's origin is not the configured release "
-                                  "repository")
+            raise ReleaseRunError(
+                "origin_changed",
+                "the working copy's origin is not the configured release repository",
+            )
         heads = git("ls-remote", "--heads", "origin", committed.branch, cwd=repo_dir)
         if heads.split("\t", 1)[0].strip() == committed.commit:
             record.unlink(missing_ok=True)
-            return PushResult(branch=committed.branch, commit=committed.commit, pushed=False,
-                              project_path=path, skipped="already on origin")
-        git("push", "-u", "origin", committed.branch, cwd=repo_dir,
-            timeout=PUSH_TIMEOUT_SECONDS)
+            return PushResult(
+                branch=committed.branch,
+                commit=committed.commit,
+                pushed=False,
+                project_path=path,
+                skipped="already on origin",
+            )
+        git("push", "-u", "origin", committed.branch, cwd=repo_dir, timeout=PUSH_TIMEOUT_SECONDS)
         record.unlink(missing_ok=True)
         log(f"pushed {committed.branch}")
-    return PushResult(branch=committed.branch, commit=committed.commit, pushed=True,
-                      project_path=path)
+    return PushResult(
+        branch=committed.branch, commit=committed.commit, pushed=True, project_path=path
+    )
 
 
 # -- Bridge handlers --------------------------------------------------------------
@@ -636,8 +734,9 @@ def _refused(error: ReleaseRunError) -> CapabilityRefused:
 
 
 class PrepareHandler:
-    def __init__(self, fetch: Callable[..., tuple[int, str]] | None = None,
-                 upload_root: Path | None = None) -> None:
+    def __init__(
+        self, fetch: Callable[..., tuple[int, str]] | None = None, upload_root: Path | None = None
+    ) -> None:
         self.fetch = fetch
         # The host's Workflow upload store: the only place uploads come from.
         self.upload_root = upload_root
@@ -649,8 +748,13 @@ class PrepareHandler:
         except ValueError:
             raise CapabilityRefused("release_settings_invalid") from None
         try:
-            return await asyncio.to_thread(prepare_release, settings, step.request,
-                                           fetch=self.fetch, upload_root=self.upload_root)
+            return await asyncio.to_thread(
+                prepare_release,
+                settings,
+                step.request,
+                fetch=self.fetch,
+                upload_root=self.upload_root,
+            )
         except ReleaseRunError as error:
             raise _refused(error) from None
 
@@ -663,8 +767,7 @@ class CommitHandler:
         except ValueError:
             raise CapabilityRefused("release_settings_invalid") from None
         try:
-            return await asyncio.to_thread(commit_release, settings, step.branch,
-                                           step.fingerprint)
+            return await asyncio.to_thread(commit_release, settings, step.branch, step.fingerprint)
         except ReleaseRunError as error:
             raise _refused(error) from None
 
@@ -678,11 +781,19 @@ class PushHandler:
             raise CapabilityRefused("release_settings_invalid") from None
         try:
             if not step.push:
-                return PushResult(branch=step.branch, commit=step.commit, pushed=False,
-                                  skipped="push not requested")
+                return PushResult(
+                    branch=step.branch,
+                    commit=step.commit,
+                    pushed=False,
+                    skipped="push not requested",
+                )
             if not step.commit:
-                return PushResult(branch=step.branch, commit="", pushed=False,
-                                  skipped="nothing was committed in this run")
+                return PushResult(
+                    branch=step.branch,
+                    commit="",
+                    pushed=False,
+                    skipped="nothing was committed in this run",
+                )
             return await asyncio.to_thread(push_release, settings, step.branch, step.commit)
         except ReleaseRunError as error:
             raise _refused(error) from None
@@ -691,7 +802,8 @@ class PushHandler:
 def recorded_commit(repo_dir: Path) -> CommittedRelease | None:
     try:
         return CommittedRelease.model_validate_json(
-            (repo_dir / ".git" / COMMITTED_RECORD).read_text(encoding="utf-8"))
+            (repo_dir / ".git" / COMMITTED_RECORD).read_text(encoding="utf-8")
+        )
     except (OSError, ValueError):
         return None
 
@@ -699,7 +811,7 @@ def recorded_commit(repo_dir: Path) -> CommittedRelease | None:
 def recorded_prepare(repo_dir: Path) -> PreparedRelease | None:
     try:
         return PreparedRelease.model_validate_json(
-            (repo_dir / ".git" / PREPARED_RECORD).read_text(encoding="utf-8"))
+            (repo_dir / ".git" / PREPARED_RECORD).read_text(encoding="utf-8")
+        )
     except (OSError, ValueError):
         return None
-

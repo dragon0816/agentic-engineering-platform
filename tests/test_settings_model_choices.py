@@ -34,8 +34,12 @@ class _Lister:
         self.calls: list[tuple[str, str, dict[str, str]]] = []
 
     def request(
-        self, method: str, url: str, body: bytes | None,
-        headers: Mapping[str, str], timeout_s: float,
+        self,
+        method: str,
+        url: str,
+        body: bytes | None,
+        headers: Mapping[str, str],
+        timeout_s: float,
     ) -> _Reply:
         self.calls.append((method, url, dict(headers)))
         return self.reply
@@ -45,10 +49,12 @@ def _web(tmp_path: Path, **endpoint_changes: Any) -> Any:
     config, layout = ready(
         tmp_path,
         config_changes={
-            "models": binding(catalog={
-                "endpoints": [endpoint(**endpoint_changes)],
-                "routes": [{"name": "default", "alias": "company"}],
-            }),
+            "models": binding(
+                catalog={
+                    "endpoints": [endpoint(**endpoint_changes)],
+                    "routes": [{"name": "default", "alias": "company"}],
+                }
+            ),
             "credentials": [
                 {"secret": "llm_gateway_token", "environment_variable": "AEP_LLM_TOKEN"}
             ],
@@ -58,7 +64,8 @@ def _web(tmp_path: Path, **endpoint_changes: Any) -> Any:
 
 
 def test_lists_openai_compatible_models_with_the_environment_credential(
-    tmp_path: Path, monkeypatch: Any,
+    tmp_path: Path,
+    monkeypatch: Any,
 ) -> None:
     with _web(tmp_path) as runtime:
         web = AgentWeb(runtime)
@@ -75,7 +82,8 @@ def test_lists_openai_compatible_models_with_the_environment_credential(
 
 
 def test_missing_credential_or_gateway_error_is_a_code_not_a_crash(
-    tmp_path: Path, monkeypatch: Any,
+    tmp_path: Path,
+    monkeypatch: Any,
 ) -> None:
     with _web(tmp_path) as runtime:
         web = AgentWeb(runtime)
@@ -90,7 +98,10 @@ def test_missing_credential_or_gateway_error_is_a_code_not_a_crash(
 
 def test_ollama_lists_its_tags_without_a_credential(tmp_path: Path) -> None:
     with _web(
-        tmp_path, provider="ollama", credential=None, base_url="http://127.0.0.1:11434/v1",
+        tmp_path,
+        provider="ollama",
+        credential=None,
+        base_url="http://127.0.0.1:11434/v1",
     ) as runtime:
         web = AgentWeb(runtime)
         lister = _Lister(200, {"models": [{"name": "qwen3:8b"}, {"name": "llama3.1"}]})
@@ -102,7 +113,9 @@ def test_ollama_lists_its_tags_without_a_credential(tmp_path: Path) -> None:
 
 def test_settings_page_offers_the_gateway_model_picker() -> None:
     for expected in (
-        'id="model-choices"', 'id="model-choices-load"', 'call("/api/settings/models")',
+        'id="model-choices"',
+        'id="model-choices-load"',
+        'call("/api/settings/models")',
         'el("model-name").value = chosen',
     ):
         assert expected in PAGE, expected

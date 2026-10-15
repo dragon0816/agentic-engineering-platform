@@ -236,9 +236,7 @@ def test_conversation_does_not_advertise_unbound_knowledge_and_can_answer_withou
     context = request("What does RS_Knowledge say?").model_copy(
         update={"namespace": "company-agent"}
     )
-    result = asyncio.run(
-        app.converse(context, (ModelMessage(role="user", text=context.message),))
-    )
+    result = asyncio.run(app.converse(context, (ModelMessage(role="user", text=context.message),)))
     assert result.status == "answered"
     assert result.text == "RS_Knowledge is not available on this host."
     assert result.tools == ()
@@ -370,9 +368,7 @@ def test_accelerated_skill_subset_cannot_execute_a_hidden_tool() -> None:
                     trace=item.trace,
                     model_alias=item.model_alias,
                     tool_calls=(
-                        ModelToolCall(
-                            call_id="hidden-call", name="release__package", arguments={}
-                        ),
+                        ModelToolCall(call_id="hidden-call", name="release__package", arguments={}),
                     ),
                 )
             return ModelResponse(
@@ -424,7 +420,9 @@ def test_skill_candidate_authorization_sees_exact_history_persona_and_catalog() 
         seen.append(item)
         assert item.context.message == "Continue"
         assert [message.role for message in item.initial_request.messages] == [
-            "system", "user", "user"
+            "system",
+            "user",
+            "user",
         ]
         assert "private persona marker" in item.initial_request.messages[0].text
         assert "private history marker" in item.initial_request.messages[1].text
@@ -551,7 +549,8 @@ def test_the_chat_request_default_allows_the_whole_tool_budget() -> None:
     assert item.max_turns == MAX_CONVERSATION_TURNS == MAX_CONVERSATION_TOOL_CALLS + 1
     with pytest.raises(ValidationError):
         GatewayConversationRequest(
-            context=request("x"), history=(ModelMessage(role="user", text="x"),),
+            context=request("x"),
+            history=(ModelMessage(role="user", text="x"),),
             max_turns=MAX_CONVERSATION_TURNS + 1,
         )
 
@@ -576,14 +575,16 @@ def _host_gateway(
 
 def _call(name: str, arguments: dict[str, Any]) -> ModelResponse:
     return ModelResponse(
-        trace=TraceIdentifiers(trace_id="x", request_id="x", span_id="x"), model_alias="routing",
+        trace=TraceIdentifiers(trace_id="x", request_id="x", span_id="x"),
+        model_alias="routing",
         tool_calls=(ModelToolCall(call_id="c1", name=name, arguments=arguments),),
     )
 
 
 def _text(text: str) -> ModelResponse:
     return ModelResponse(
-        trace=TraceIdentifiers(trace_id="x", request_id="x", span_id="x"), model_alias="routing",
+        trace=TraceIdentifiers(trace_id="x", request_id="x", span_id="x"),
+        model_alias="routing",
         text=text,
     )
 
@@ -599,8 +600,9 @@ def test_a_host_tool_is_offered_and_its_outcome_is_recorded() -> None:
         seen.append(arguments)
         return HostToolOutcome(status="awaiting_approval", data={"approval_id": "a-1"})
 
-    tool = HostTool(ModelTool(name="authoring__run_workflow", description="run",
-                              input_contract="x.v1"), draft)
+    tool = HostTool(
+        ModelTool(name="authoring__run_workflow", description="run", input_contract="x.v1"), draft
+    )
     built, model = _host_gateway([tool], [_call("authoring__run_workflow", {"x": 1}), _text("ok")])
     history = (ModelMessage(role="user", text="run it"),)
     result = asyncio.run(built.converse(request("run it"), history))
@@ -618,15 +620,21 @@ def test_a_failing_host_tool_is_an_observation_and_a_task_scope_hides_it() -> No
     async def broken(context: RequestContext, arguments: dict[str, Any]) -> HostToolOutcome:
         raise RuntimeError("boom")
 
-    tool = HostTool(ModelTool(name="authoring__draft_workflow", description="d",
-                              input_contract="x.v1"), broken)
+    tool = HostTool(
+        ModelTool(name="authoring__draft_workflow", description="d", input_contract="x.v1"), broken
+    )
     built, _ = _host_gateway([tool], [_call("authoring__draft_workflow", {}), _text("sorry")])
     result = asyncio.run(built.converse(request("d"), (ModelMessage(role="user", text="d"),)))
     assert result.tools[0].failure is not None
     assert result.tools[0].failure.code == "host_tool_failed"
     scoped, model = _host_gateway([tool], [_text("no tools")])
-    asyncio.run(scoped.converse(request("d"), (ModelMessage(role="user", text="d"),),
-                                allowed_tools=frozenset({"other__tool"})))
+    asyncio.run(
+        scoped.converse(
+            request("d"),
+            (ModelMessage(role="user", text="d"),),
+            allowed_tools=frozenset({"other__tool"}),
+        )
+    )
     assert all(t.name != "authoring__draft_workflow" for t in model.calls[0].tools)
 
 
@@ -641,13 +649,16 @@ def test_several_calls_in_one_reply_run_in_order_and_each_gets_an_answer() -> No
         ran.append(str(arguments["n"]))
         return HostToolOutcome(status="succeeded", data={"n": arguments["n"]})
 
-    tool = HostTool(ModelTool(name="authoring__list_workflows", description="l",
-                              input_contract="x.v1"), note)
+    tool = HostTool(
+        ModelTool(name="authoring__list_workflows", description="l", input_contract="x.v1"), note
+    )
     both = ModelResponse(
-        trace=TraceIdentifiers(trace_id="x", request_id="x", span_id="x"), model_alias="routing",
+        trace=TraceIdentifiers(trace_id="x", request_id="x", span_id="x"),
+        model_alias="routing",
         tool_calls=tuple(
             ModelToolCall(call_id=call_id, name="authoring__list_workflows", arguments={"n": n})
-            for call_id, n in (("a", 1), ("b", 2))),
+            for call_id, n in (("a", 1), ("b", 2))
+        ),
     )
     built, model = _host_gateway([tool], [both, _text("done")])
     history = (ModelMessage(role="user", text="go"),)
@@ -659,7 +670,8 @@ def test_several_calls_in_one_reply_run_in_order_and_each_gets_an_answer() -> No
 
 def _cut() -> ModelResponse:
     return ModelResponse(
-        trace=TraceIdentifiers(trace_id="x", request_id="x", span_id="x"), model_alias="routing",
+        trace=TraceIdentifiers(trace_id="x", request_id="x", span_id="x"),
+        model_alias="routing",
         failure=Failure(code="model_output_truncated", message="cut"),
     )
 
@@ -712,8 +724,11 @@ def test_pictures_on_the_newest_message_reach_the_model_and_need_vision() -> Non
     assert result.status == "answered"
     sent = model.calls[0]
     assert sent.requirements.vision is True and sent.messages[-1].images == (picture,)
-    older = (ModelMessage(role="user", text="old", images=(picture,)),
-             ModelMessage(role="assistant", text="ok"), ModelMessage(role="user", text="new"))
+    older = (
+        ModelMessage(role="user", text="old", images=(picture,)),
+        ModelMessage(role="assistant", text="ok"),
+        ModelMessage(role="user", text="new"),
+    )
     refused = asyncio.run(built.converse(request("new"), older))
     assert refused.failure is not None and refused.failure.code == "conversation_history_invalid"
 

@@ -32,8 +32,14 @@ from common.base import Contract
 
 #: Variables copied from the host environment; everything else is dropped.
 ENVIRONMENT_ALLOWLIST = (
-    "SYSTEMROOT", "WINDIR", "SYSTEMDRIVE", "NUMBER_OF_PROCESSORS", "PROCESSOR_ARCHITECTURE",
-    "PATHEXT", "COMSPEC", "OS",
+    "SYSTEMROOT",
+    "WINDIR",
+    "SYSTEMDRIVE",
+    "NUMBER_OF_PROCESSORS",
+    "PROCESSOR_ARCHITECTURE",
+    "PATHEXT",
+    "COMSPEC",
+    "OS",
 )
 #: Output kept from a run; pytest's own summary fits easily.
 MAX_OUTPUT_CHARS = 20_000
@@ -78,7 +84,8 @@ def label_low(folder: Path) -> None:
     """Let a low-integrity process write in `folder` and what it will hold."""
     result = subprocess.run(
         ["icacls", str(folder), "/setintegritylevel", "(OI)(CI)low", "/T", "/C", "/Q"],
-        capture_output=True, check=False,
+        capture_output=True,
+        check=False,
     )
     if result.returncode != 0:
         raise RunnerError("run_folder_label_failed")
@@ -88,14 +95,21 @@ def restricted_environment(run_dir: Path, python: Path, extra: Mapping[str, str]
     env = {name: os.environ[name] for name in ENVIRONMENT_ALLOWLIST if name in os.environ}
     temp = str(run_dir / "tmp")
     system_root = env.get("SYSTEMROOT", r"C:\Windows")
-    env.update({
-        "PATH": os.pathsep.join((str(python.parent), str(Path(system_root) / "System32"))),
-        "TEMP": temp, "TMP": temp,
-        "USERPROFILE": str(run_dir / "home"), "HOME": str(run_dir / "home"),
-        "APPDATA": str(run_dir / "home"), "LOCALAPPDATA": str(run_dir / "home"),
-        "PYTHONDONTWRITEBYTECODE": "1", "PYTHONNOUSERSITE": "1", "PYTHONUTF8": "1",
-        "PYTHONIOENCODING": "utf-8",
-    })
+    env.update(
+        {
+            "PATH": os.pathsep.join((str(python.parent), str(Path(system_root) / "System32"))),
+            "TEMP": temp,
+            "TMP": temp,
+            "USERPROFILE": str(run_dir / "home"),
+            "HOME": str(run_dir / "home"),
+            "APPDATA": str(run_dir / "home"),
+            "LOCALAPPDATA": str(run_dir / "home"),
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "PYTHONNOUSERSITE": "1",
+            "PYTHONUTF8": "1",
+            "PYTHONIOENCODING": "utf-8",
+        }
+    )
     env.update(extra)
     return env
 
@@ -114,7 +128,11 @@ class RestrictedRunner:
         self.limits = limits if limits is not None else RunnerLimits()
 
     def run(
-        self, args: Sequence[str], *, cwd: Path, run_dir: Path,
+        self,
+        args: Sequence[str],
+        *,
+        cwd: Path,
+        run_dir: Path,
         extra_env: Mapping[str, str] | None = None,
     ) -> RunResult:
         import win32api
@@ -133,22 +151,28 @@ class RestrictedRunner:
 
         token = win32security.OpenProcessToken(
             win32api.GetCurrentProcess(),
-            win32con.TOKEN_DUPLICATE | win32con.TOKEN_QUERY | win32con.TOKEN_ADJUST_DEFAULT
+            win32con.TOKEN_DUPLICATE
+            | win32con.TOKEN_QUERY
+            | win32con.TOKEN_ADJUST_DEFAULT
             | win32con.TOKEN_ASSIGN_PRIMARY,
         )
         low = win32security.DuplicateTokenEx(
-            token, win32security.SecurityImpersonation, win32con.MAXIMUM_ALLOWED,
-            win32security.TokenPrimary, None,
+            token,
+            win32security.SecurityImpersonation,
+            win32con.MAXIMUM_ALLOWED,
+            win32security.TokenPrimary,
+            None,
         )
         win32security.SetTokenInformation(
-            low, win32security.TokenIntegrityLevel,
-            (win32security.ConvertStringSidToSid(LOW_INTEGRITY_SID),
-             win32security.SE_GROUP_INTEGRITY),
+            low,
+            win32security.TokenIntegrityLevel,
+            (
+                win32security.ConvertStringSidToSid(LOW_INTEGRITY_SID),
+                win32security.SE_GROUP_INTEGRITY,
+            ),
         )
         job = win32job.CreateJobObject(None, "")
-        limits = win32job.QueryInformationJobObject(
-            job, win32job.JobObjectExtendedLimitInformation
-        )
+        limits = win32job.QueryInformationJobObject(job, win32job.JobObjectExtendedLimitInformation)
         limits["BasicLimitInformation"]["LimitFlags"] = (
             win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
             | win32job.JOB_OBJECT_LIMIT_ACTIVE_PROCESS
@@ -171,10 +195,18 @@ class RestrictedRunner:
         startup.hStdInput = None
         try:
             process, thread, _, _ = win32process.CreateProcessAsUser(
-                low, None, command, None, None, True,
-                win32process.CREATE_SUSPENDED | win32process.CREATE_NO_WINDOW
+                low,
+                None,
+                command,
+                None,
+                None,
+                True,
+                win32process.CREATE_SUSPENDED
+                | win32process.CREATE_NO_WINDOW
                 | win32process.CREATE_UNICODE_ENVIRONMENT,
-                env, str(cwd), startup,
+                env,
+                str(cwd),
+                startup,
             )
         except Exception as error:  # noqa: BLE001 - a typed refusal, nothing ran
             handle.Close()
@@ -194,14 +226,18 @@ class RestrictedRunner:
             for item in (thread, process, handle, job):
                 item.Close()
         text = output_path.read_text(encoding="utf-8", errors="replace")
-        return RunResult(exit_code=exit_code, timed_out=timed_out,
-                         output=text[-MAX_OUTPUT_CHARS:])
+        return RunResult(exit_code=exit_code, timed_out=timed_out, output=text[-MAX_OUTPUT_CHARS:])
 
 
 def win32file_create(path: Path, attributes: Any) -> Any:
     import win32file
 
     return win32file.CreateFile(
-        str(path), win32file.GENERIC_WRITE, win32file.FILE_SHARE_READ, attributes,
-        win32file.CREATE_ALWAYS, win32file.FILE_ATTRIBUTE_NORMAL, None,
+        str(path),
+        win32file.GENERIC_WRITE,
+        win32file.FILE_SHARE_READ,
+        attributes,
+        win32file.CREATE_ALWAYS,
+        win32file.FILE_ATTRIBUTE_NORMAL,
+        None,
     )

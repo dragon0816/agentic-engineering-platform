@@ -102,4 +102,3 @@ def installed_agent_tasks(workspace_root: Path) -> dict[tuple[str, str, str], Ag
                 duplicates.add(key)
             found[key] = item
     return {key: value for key, value in found.items() if key not in duplicates}
-

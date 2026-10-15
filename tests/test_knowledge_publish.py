@@ -22,25 +22,34 @@ V1 = AssetIdentity(namespace="engineering", name="rs-knowledge", version="1.0.2"
 def _host(tmp_path: Path) -> tuple[Path, KnowledgePipeline, Path]:
     base = _base(tmp_path)
     sandbox_root = tmp_path / "sb"
-    config, layout = workspace(tmp_path, config_changes={
-        "knowledge_pipeline": {"vaults": [{"name": "rs-k", "root": str(base)}],
-                               "sandbox_root": str(sandbox_root)},
-        "knowledge": [{"asset": V1.model_dump(mode="json"), "vault_root": str(base)}]})
+    config, layout = workspace(
+        tmp_path,
+        config_changes={
+            "knowledge_pipeline": {
+                "vaults": [{"name": "rs-k", "root": str(base)}],
+                "sandbox_root": str(sandbox_root),
+            },
+            "knowledge": [{"asset": V1.model_dump(mode="json"), "vault_root": str(base)}],
+        },
+    )
     layout.knowledge.mkdir(parents=True, exist_ok=True)
     published = manifest(Vault(base)).model_copy(deep=True)
     data = json.loads(published.model_dump_json())
     data["metadata"]["identity"] = V1.model_dump(mode="json")
     (layout.knowledge / "engineering__rs-knowledge__1.0.2.json").write_text(
-        json.dumps(data), encoding="utf-8")
+        json.dumps(data), encoding="utf-8"
+    )
     path = tmp_path / "host.json"
     path.write_text(config.model_dump_json(indent=2), encoding="utf-8")
-    pipeline = KnowledgePipeline(Sandboxes(layout.workspace_root, root=sandbox_root),
-                                 {"rs-k": base})
+    pipeline = KnowledgePipeline(
+        Sandboxes(layout.workspace_root, root=sandbox_root), {"rs-k": base}
+    )
     return path, pipeline, base
 
 
 def test_publishing_a_candidate_switches_the_binding_and_keeps_the_old_version(
-        tmp_path: Path) -> None:
+    tmp_path: Path,
+) -> None:
     path, pipeline, base = _host(tmp_path)
     before = _snapshot(base)
     sandbox = pipeline.create_sandbox("rs-k", "vna", "leo.chi").sandbox_id
@@ -62,7 +71,8 @@ def test_publishing_a_candidate_switches_the_binding_and_keeps_the_old_version(
     assert Path(updated.knowledge_pipeline.vaults[0].root) == target
     # The new manifest loads into the query catalog exactly as a published version.
     new = KnowledgeManifest.model_validate_json(
-        (layout.knowledge / "engineering__rs-knowledge__1.1.0.json").read_text(encoding="utf-8"))
+        (layout.knowledge / "engineering__rs-knowledge__1.1.0.json").read_text(encoding="utf-8")
+    )
     KnowledgeCatalog().register(new, Vault(target))
     assert (layout.knowledge / "engineering__rs-knowledge__1.0.2.json").is_file()
 
@@ -98,6 +108,7 @@ def test_refresh_stages_the_project_vault_as_the_agents_next_version(tmp_path: P
     assert updated.knowledge_pipeline is not None
     assert Path(updated.knowledge_pipeline.vaults[0].root) == base  # still the project vault
     new = KnowledgeManifest.model_validate_json(
-        (layout.knowledge / "engineering__rs-knowledge__1.1.0.json").read_text(encoding="utf-8"))
+        (layout.knowledge / "engineering__rs-knowledge__1.1.0.json").read_text(encoding="utf-8")
+    )
     KnowledgeCatalog().register(new, Vault(target))
     assert refresh_from_project(path, layout, "rs-k", "leo.chi").version == "1.2.0"

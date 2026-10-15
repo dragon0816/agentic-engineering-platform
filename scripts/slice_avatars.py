@@ -21,10 +21,10 @@ from PIL import Image
 
 REPO = Path(__file__).resolve().parents[1]
 NAMES = ("Luffy", "Zoro", "Nami", "Chopper", "Robin", "Sanji", "Usopp", "Franky", "Brook", "Jinbe")
-LABEL_RIGHT = 165       # the name labels end left of this column
-ROW_GAP = 12            # blank lines that still belong to one row
-FRAME_GAP = 30          # blank columns that separate two frames
-FINE_FRAME_GAP = 6      # for a row whose frames nearly touch (Jinbe's waves)
+LABEL_RIGHT = 165  # the name labels end left of this column
+ROW_GAP = 12  # blank lines that still belong to one row
+FRAME_GAP = 30  # blank columns that separate two frames
+FINE_FRAME_GAP = 6  # for a row whose frames nearly touch (Jinbe's waves)
 PAD = 2
 
 
@@ -54,8 +54,9 @@ def slice_sheet(sheet: Path, out: Path) -> dict[str, object]:
     def ink(x: int, y: int) -> bool:
         return pixels[x, y] < 128
 
-    rows = spans([any(ink(x, y) for x in range(LABEL_RIGHT, width)) for y in range(height)],
-                 0, ROW_GAP)
+    rows = spans(
+        [any(ink(x, y) for x in range(LABEL_RIGHT, width)) for y in range(height)], 0, ROW_GAP
+    )
     if len(rows) != len(NAMES):
         raise SystemExit(f"expected {len(NAMES)} rows, found {len(rows)}")
     out.mkdir(parents=True, exist_ok=True)
@@ -67,8 +68,12 @@ def slice_sheet(sheet: Path, out: Path) -> dict[str, object]:
             frames = spans(columns, LABEL_RIGHT, FINE_FRAME_GAP)
         files = []
         for number, (left, right) in enumerate(frames, 1):
-            box = (max(left - PAD, 0), max(top - PAD, 0),
-                   min(right + PAD, width), min(bottom + PAD, height))
+            box = (
+                max(left - PAD, 0),
+                max(top - PAD, 0),
+                min(right + PAD, width),
+                min(bottom + PAD, height),
+            )
             # The art is black ink on white: keep it as black pixels whose
             # transparency is the ink, so each frame is a small two-tone PNG.
             ink_mask = gray.crop(box).point(lambda value: 255 if value < 160 else 0)
@@ -77,8 +82,9 @@ def slice_sheet(sheet: Path, out: Path) -> dict[str, object]:
             file = f"{name.lower()}-{number}.png"
             frame.save(out / file, optimize=True)
             files.append({"file": file, "width": frame.width, "height": frame.height})
-        characters.append({"id": name.lower(), "name": name, "row_height": bottom - top,
-                           "frames": files})
+        characters.append(
+            {"id": name.lower(), "name": name, "row_height": bottom - top, "frames": files}
+        )
         print(f"{name}: {len(files)} frames")
     manifest = {"source": sheet.name, "idle_frame": 1, "characters": characters}
     (out / "manifest.json").write_text(json.dumps(manifest, indent=1) + "\n", encoding="utf-8")

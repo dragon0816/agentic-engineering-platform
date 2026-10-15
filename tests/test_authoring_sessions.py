@@ -33,28 +33,49 @@ def blocks(calls: Calls) -> InstalledCapabilities:
 
 def draft(version: str = "1.0.0") -> dict[str, Any]:
     return {
-        "metadata": {"identity": {"namespace": "engineering", "name": "daily-sop",
-                                  "version": version},
-                     "owner": {"type": "team", "id": "engineering"}, "visibility": "private"},
-        "kind": "workflow", "description": "daily SOP", "execution": {"mode": "local"},
+        "metadata": {
+            "identity": {"namespace": "engineering", "name": "daily-sop", "version": version},
+            "owner": {"type": "team", "id": "engineering"},
+            "visibility": "private",
+        },
+        "kind": "workflow",
+        "description": "daily SOP",
+        "execution": {"mode": "local"},
         "dependencies": {"central_required": False, "local_capabilities": ["t.read", "t.write"]},
-        "input_contract": "t.in", "output_contract": "t.out",
-        "parameters": [{"name": "folder", "label": "Output folder", "kind": "text",
-                        "scope": "static", "required": True}],
+        "input_contract": "t.in",
+        "output_contract": "t.out",
+        "parameters": [
+            {
+                "name": "folder",
+                "label": "Output folder",
+                "kind": "text",
+                "scope": "static",
+                "required": True,
+            }
+        ],
         "steps": [
-            {"capability": {"namespace": "t", "name": "read", "version": "1.0.0"},
-             "inputs": {"value": {"source": "run", "path": ["customer"]}}},
-            {"capability": {"namespace": "t", "name": "write", "version": "1.0.0"},
-             "inputs": {"value": {"source": "step", "step_index": 0, "path": ["value"]}}},
+            {
+                "capability": {"namespace": "t", "name": "read", "version": "1.0.0"},
+                "inputs": {"value": {"source": "run", "path": ["customer"]}},
+            },
+            {
+                "capability": {"namespace": "t", "name": "write", "version": "1.0.0"},
+                "inputs": {"value": {"source": "step", "step_index": 0, "path": ["value"]}},
+            },
         ],
     }
 
 
 def studio(tmp_path: Path, model: Scripted, calls: Calls) -> AuthoringStudio:
     return AuthoringStudio(
-        tmp_path / "authoring", installed=blocks(calls), model=lambda: model,
-        model_alias="gateway", local_only=False, namespace="engineering",
-        workflows_dir=tmp_path / "assets" / "workflows", grants_file=tmp_path / "grants.json",
+        tmp_path / "authoring",
+        installed=blocks(calls),
+        model=lambda: model,
+        model_alias="gateway",
+        local_only=False,
+        namespace="engineering",
+        workflows_dir=tmp_path / "assets" / "workflows",
+        grants_file=tmp_path / "grants.json",
         settings_store=WorkflowSettingsStore(tmp_path / "workflow-settings.json"),
     )
 
@@ -80,8 +101,13 @@ def test_discussion_preview_and_install_end_to_end(tmp_path: Path) -> None:
         room.install(session.session_id, ACTOR)
     assert early.value.code == "authoring_preview_required"
 
-    shown = room.preview(session.session_id, ACTOR, {"customer": "C001"},
-                         {"folder": "C:/out"}, bridge(room.installed))
+    shown = room.preview(
+        session.session_id,
+        ACTOR,
+        {"customer": "C001"},
+        {"folder": "C:/out"},
+        bridge(room.installed),
+    )
     assert shown.status == "previewed" and calls.ran == ["read"]
     assert [step.state for step in shown.preview.steps] == ["ran", "planned"]  # type: ignore[union-attr]
 
@@ -102,12 +128,15 @@ def test_discussion_preview_and_install_end_to_end(tmp_path: Path) -> None:
 
 def test_a_draft_changed_after_its_preview_needs_a_new_preview(tmp_path: Path) -> None:
     calls = Calls()
-    model = Scripted({"reply": "草稿", "questions": [], "workflow": draft()},
-                     {"reply": "改了版本", "questions": [], "workflow": draft("1.0.1")})
+    model = Scripted(
+        {"reply": "草稿", "questions": [], "workflow": draft()},
+        {"reply": "改了版本", "questions": [], "workflow": draft("1.0.1")},
+    )
     room = studio(tmp_path, model, calls)
     session = room.start(ACTOR, title="t", sop_text="sop")
-    room.preview(session.session_id, ACTOR, {"customer": "C1"}, {"folder": "x"},
-                 bridge(room.installed))
+    room.preview(
+        session.session_id, ACTOR, {"customer": "C1"}, {"folder": "x"}, bridge(room.installed)
+    )
     changed = room.discuss(session.session_id, ACTOR, "版本改成 1.0.1")
     assert changed.preview is None and changed.status == "ready"
     with pytest.raises(AuthoringError) as refused:
@@ -116,8 +145,9 @@ def test_a_draft_changed_after_its_preview_needs_a_new_preview(tmp_path: Path) -
 
 
 def test_sessions_belong_to_their_actor_and_a_pdf_must_be_a_pdf(tmp_path: Path) -> None:
-    room = studio(tmp_path, Scripted({"reply": "ok", "questions": ["?"], "workflow": None}),
-                  Calls())
+    room = studio(
+        tmp_path, Scripted({"reply": "ok", "questions": ["?"], "workflow": None}), Calls()
+    )
     session = room.start(ACTOR, title="t", sop_text="sop")
     with pytest.raises(AuthoringError) as other:
         room.load(session.session_id, "someone-else")

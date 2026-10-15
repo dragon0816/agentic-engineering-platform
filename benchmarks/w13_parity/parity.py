@@ -44,44 +44,72 @@ from capabilities.release_package.release_run import (  # noqa: E402
     prepare_release,
 )
 
-SYSTEM_PYTHON = Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "Python" / "Python312" \
-    / "python.exe"
-FIXED = {"GIT_AUTHOR_NAME": "Parity", "GIT_AUTHOR_EMAIL": "parity@example.test",
-         "GIT_COMMITTER_NAME": "Parity", "GIT_COMMITTER_EMAIL": "parity@example.test",
-         "GIT_AUTHOR_DATE": "2026-10-08T10:00:00+08:00",
-         "GIT_COMMITTER_DATE": "2026-10-08T10:00:00+08:00"}
+SYSTEM_PYTHON = (
+    Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "Python" / "Python312" / "python.exe"
+)
+FIXED = {
+    "GIT_AUTHOR_NAME": "Parity",
+    "GIT_AUTHOR_EMAIL": "parity@example.test",
+    "GIT_COMMITTER_NAME": "Parity",
+    "GIT_COMMITTER_EMAIL": "parity@example.test",
+    "GIT_AUTHOR_DATE": "2026-10-08T10:00:00+08:00",
+    "GIT_COMMITTER_DATE": "2026-10-08T10:00:00+08:00",
+}
 REPO = "rs-wmt-sw-release.git"
 
 CASES: dict[str, dict[str, Any]] = {
     "new-branch": {
-        "companyName": "Acme Labs", "chipsetId": "kt326", "info": "demo",
-        "cmpKtOption": "KT160", "chipsetVersion": "2.0.17",
-        "generalTestcaseVersion": "v3.0.17", "suffix": "X1",
+        "companyName": "Acme Labs",
+        "chipsetId": "kt326",
+        "info": "demo",
+        "cmpKtOption": "KT160",
+        "chipsetVersion": "2.0.17",
+        "generalTestcaseVersion": "v3.0.17",
+        "suffix": "X1",
         "notes": 'fixed the "throughput" plan `again`',
-        "testPlans": ["throughput.json"], "configurations": ["lab.yaml"],
+        "testPlans": ["throughput.json"],
+        "configurations": ["lab.yaml"],
         "overlays": ["patch.txt"],
     },
     "existing-branch": {
-        "companyName": "Foxconn", "chipsetId": "kt326", "cmpKtOption": "KT161",
-        "chipsetVersion": "2.0.18", "generalTestcaseVersion": "3.0.18",
-        "notes": "second release", "testPlans": ["throughput.json"],
+        "companyName": "Foxconn",
+        "chipsetId": "kt326",
+        "cmpKtOption": "KT161",
+        "chipsetVersion": "2.0.18",
+        "generalTestcaseVersion": "3.0.18",
+        "notes": "second release",
+        "testPlans": ["throughput.json"],
     },
     "dry-run": {
-        "companyName": "Foxconn", "chipsetId": "kt326", "cmpKtOption": "KT161",
-        "chipsetVersion": "2.0.18", "generalTestcaseVersion": "3.0.18", "dryRun": True,
+        "companyName": "Foxconn",
+        "chipsetId": "kt326",
+        "cmpKtOption": "KT161",
+        "chipsetVersion": "2.0.18",
+        "generalTestcaseVersion": "3.0.18",
+        "dryRun": True,
         "configurations": ["lab.yaml"],
     },
     "explicit-version": {
-        "companyName": "Foxconn", "chipsetId": "kt326", "cmpKtOption": "KT161",
-        "chipsetVersion": "2.0.18", "generalTestcaseVersion": "3.0.18",
+        "companyName": "Foxconn",
+        "chipsetId": "kt326",
+        "cmpKtOption": "KT161",
+        "chipsetVersion": "2.0.18",
+        "generalTestcaseVersion": "3.0.18",
         "releaseVersion": "1.2.3",
     },
 }
 
 
 def git(*args: str, cwd: Path) -> str:
-    return subprocess.run(["git", *args], cwd=cwd, check=True, capture_output=True,
-                          text=True, encoding="utf-8", env={**os.environ, **FIXED}).stdout
+    return subprocess.run(
+        ["git", *args],
+        cwd=cwd,
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        env={**os.environ, **FIXED},
+    ).stdout
 
 
 def seed(base: Path) -> Path:
@@ -95,8 +123,7 @@ def seed(base: Path) -> Path:
     git("add", "-A", cwd=work)
     git("commit", "-q", "-m", "template", cwd=work)
     git("checkout", "-q", "-b", "Foxconn_kt326", cwd=work)
-    (work / "release.yaml").write_text("NAME: Foxconn_kt326\nVERSION: 0.0.15\n",
-                                       encoding="utf-8")
+    (work / "release.yaml").write_text("NAME: Foxconn_kt326\nVERSION: 0.0.15\n", encoding="utf-8")
     (work / "testplans").mkdir()
     (work / "testplans" / "old.json").write_text("{}", encoding="utf-8")
     git("add", "-A", cwd=work)
@@ -113,8 +140,7 @@ def isolated_root(where: Path, bare: Path) -> Path:
     shutil.copytree(bare, where / REPO)
     inbox = where / "inbox"
     inbox.mkdir()
-    (inbox / "throughput.json").write_text('{"plan": "throughput", "loops": 3}\n',
-                                           encoding="utf-8")
+    (inbox / "throughput.json").write_text('{"plan": "throughput", "loops": 3}\n', encoding="utf-8")
     (inbox / "lab.yaml").write_text("lab:\n  station: 7\n", encoding="utf-8")
     (inbox / "patch.txt").write_bytes(b"overlay\r\nbytes\n")
     return where
@@ -122,47 +148,74 @@ def isolated_root(where: Path, bare: Path) -> Path:
 
 def snapshot(repo: Path, committed: bool) -> dict[str, Any]:
     if committed:
-        return {"message": git("log", "-1", "--format=%B", cwd=repo),
-                "tree": git("ls-tree", "-r", "HEAD", cwd=repo).splitlines(),
-                "branch": git("rev-parse", "--abbrev-ref", "HEAD", cwd=repo).strip()}
+        return {
+            "message": git("log", "-1", "--format=%B", cwd=repo),
+            "tree": git("ls-tree", "-r", "HEAD", cwd=repo).splitlines(),
+            "branch": git("rev-parse", "--abbrev-ref", "HEAD", cwd=repo).strip(),
+        }
     status = sorted(git("status", "--porcelain", "-uall", cwd=repo).splitlines())
     files = {}
     for line in status:
         path = repo / line[3:]
         if path.is_file():
             files[line[3:]] = hashlib.sha256(path.read_bytes()).hexdigest()
-    return {"status": status, "files": files,
-            "branch": git("rev-parse", "--abbrev-ref", "HEAD", cwd=repo).strip(),
-            "head": git("log", "-1", "--format=%s", cwd=repo).strip()}
+    return {
+        "status": status,
+        "files": files,
+        "branch": git("rev-parse", "--abbrev-ref", "HEAD", cwd=repo).strip(),
+        "head": git("log", "-1", "--format=%s", cwd=repo).strip(),
+    }
 
 
 def run_source(source: Path, root: Path, params: dict[str, Any], folder: Path) -> dict[str, Any]:
-    job = {"root": str(root), "params": {
-        **params, "push": False,
-        # Forward slashes: the source takes the folder name after the last "/".
-        "_git": {"releaseRepoUrl": (root / REPO).as_posix(), "templateBranch": "template"},
-        "_paths": {"workRoot": str(root / "work"), "inbox": str(root / "inbox")},
-        "_release": {}, "_ops": {}, "_artifactory": {}}}
+    job = {
+        "root": str(root),
+        "params": {
+            **params,
+            "push": False,
+            # Forward slashes: the source takes the folder name after the last "/".
+            "_git": {"releaseRepoUrl": (root / REPO).as_posix(), "templateBranch": "template"},
+            "_paths": {"workRoot": str(root / "work"), "inbox": str(root / "inbox")},
+            "_release": {},
+            "_ops": {},
+            "_artifactory": {},
+        },
+    }
     (folder / "source-job.json").write_text(json.dumps(job, indent=2), encoding="utf-8")
-    subprocess.run([str(SYSTEM_PYTHON), str(HERE / "source_runner.py"), str(source),
-                    str(folder / "source-job.json"), str(folder / "source-result.json")],
-                   check=True, env={**os.environ, **FIXED}, timeout=900)
+    subprocess.run(
+        [
+            str(SYSTEM_PYTHON),
+            str(HERE / "source_runner.py"),
+            str(source),
+            str(folder / "source-job.json"),
+            str(folder / "source-result.json"),
+        ],
+        check=True,
+        env={**os.environ, **FIXED},
+        timeout=900,
+    )
     return json.loads((folder / "source-result.json").read_text(encoding="utf-8"))
 
 
 def run_aep(root: Path, params: dict[str, Any]) -> dict[str, Any]:
     os.environ.update(FIXED)
-    settings = ReleaseRunSettings(release_repo_url=(root / REPO).as_posix(),
-                                  work_root=str(root / "work"),
-                                  inbox_path=str(root / "inbox"), allowed_root=str(root))
+    settings = ReleaseRunSettings(
+        release_repo_url=(root / REPO).as_posix(),
+        work_root=str(root / "work"),
+        inbox_path=str(root / "inbox"),
+        allowed_root=str(root),
+    )
     prepared = prepare_release(settings, ReleaseRunRequest.model_validate(params))
     done = commit_release(settings, prepared.branch, prepared.fingerprint[:16])
-    return {"prepared": json.loads(prepared.model_dump_json()),
-            "commit": json.loads(done.model_dump_json())}
+    return {
+        "prepared": json.loads(prepared.model_dump_json()),
+        "commit": json.loads(done.model_dump_json()),
+    }
 
 
-def compare(case: str, source: dict[str, Any], aep: dict[str, Any], src_root: Path,
-            aep_root: Path) -> dict[str, Any]:
+def compare(
+    case: str, source: dict[str, Any], aep: dict[str, Any], src_root: Path, aep_root: Path
+) -> dict[str, Any]:
     if not source.get("ok"):
         return {"case": case, "match": False, "source_error": source.get("error")}
     s = source["result"]
@@ -182,8 +235,12 @@ def compare(case: str, source: dict[str, Any], aep: dict[str, Any], src_root: Pa
     trees = (snapshot(Path(s["repoDir"]), committed), snapshot(Path(p["repo_dir"]), committed))
     fields["repository"] = trees
     mismatched = sorted(k for k, (a, b) in fields.items() if a != b)
-    return {"case": case, "match": not mismatched, "mismatched": mismatched,
-            "fields": {k: {"source": a, "aep": b} for k, (a, b) in fields.items()}}
+    return {
+        "case": case,
+        "match": not mismatched,
+        "mismatched": mismatched,
+        "fields": {k: {"source": a, "aep": b} for k, (a, b) in fields.items()},
+    }
 
 
 def main() -> int:
@@ -211,8 +268,9 @@ def main() -> int:
         why = outcome.get("mismatched") or outcome.get("source_error")
         print(f"{case}: {'MATCH' if outcome['match'] else f'DIFF {why}'}", flush=True)
     report = {"source_revision": revision, "cases": results}
-    (run / "results.json").write_text(json.dumps(report, ensure_ascii=False, indent=2),
-                                      encoding="utf-8")
+    (run / "results.json").write_text(
+        json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     return 0 if all(item["match"] for item in results) else 1
 
 

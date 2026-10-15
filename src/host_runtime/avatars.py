@@ -38,8 +38,14 @@ def catalog() -> tuple[dict[str, Any], ...]:
             + base64.b64encode((FRAMES / frame["file"]).read_bytes()).decode("ascii")
             for frame in character["frames"]
         ]
-        characters.append({"id": character["id"], "name": character["name"],
-                           "height": character["row_height"], "frames": frames})
+        characters.append(
+            {
+                "id": character["id"],
+                "name": character["name"],
+                "height": character["row_height"],
+                "frames": frames,
+            }
+        )
     return tuple(characters)
 
 

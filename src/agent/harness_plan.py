@@ -80,18 +80,22 @@ def build_plan(
         fallback = "needs_input"
     collect = domain in ("knowledge", "coding") or guidance.context_required
     return AgentHarnessPlan(
-        task_id=task_id, task_sha256=task_sha256, domain=domain, skill=skill,
-        stages=("collect_context", "execute", "validate") if collect
-        else ("execute", "validate"),
-        requested_capabilities=requested_capabilities, host_checks=host_checks,
-        skill_evidence=guidance.required_evidence, fallback=fallback,
-        retry_budget=retry_budget, retry_from=retry_from, exhausted_code=exhausted_code,
+        task_id=task_id,
+        task_sha256=task_sha256,
+        domain=domain,
+        skill=skill,
+        stages=("collect_context", "execute", "validate") if collect else ("execute", "validate"),
+        requested_capabilities=requested_capabilities,
+        host_checks=host_checks,
+        skill_evidence=guidance.required_evidence,
+        fallback=fallback,
+        retry_budget=retry_budget,
+        retry_from=retry_from,
+        exhausted_code=exhausted_code,
     )
 
 
-def plan_task(
-    task: TaskContract, skill: SkillManifest, domain: HarnessDomain
-) -> AgentHarnessPlan:
+def plan_task(task: TaskContract, skill: SkillManifest, domain: HarnessDomain) -> AgentHarnessPlan:
     """Apply installed Skill guidance without widening the host task scope."""
     if skill.metadata.identity not in task.skills:
         raise ValueError("selected Skill is not declared by the task")
@@ -106,8 +110,7 @@ def plan_task(
         fallback = "needs_input"
     collect = domain in ("knowledge", "coding") or guidance.context_required
     stages: tuple[HarnessStage, ...] = (
-        ("collect_context", "execute", "validate")
-        if collect else ("execute", "validate")
+        ("collect_context", "execute", "validate") if collect else ("execute", "validate")
     )
     return AgentHarnessPlan(
         task_id=task.task_id,

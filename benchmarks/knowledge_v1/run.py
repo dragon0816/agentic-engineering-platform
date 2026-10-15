@@ -53,7 +53,9 @@ from telemetry.benchmark import BenchmarkTelemetry, agent_strategy, trace_ids  #
 # FAIL with VALIDATION_GAP, not a SYSTEM_ERROR.
 GRADER_VERSION = "1.4"  # 1.4: the reviewer sees up to 48 passages
 TIMEOUT_S = 600.0
-HOST_JSON = Path(os.path.expandvars(r"%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0\host.json"))
+HOST_JSON = Path(
+    os.path.expandvars(r"%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0\host.json")
+)
 STATUSES = ("PASS", "INSUFFICIENT_KNOWLEDGE", "FAIL", "NEEDS_HUMAN_REVIEW", "SYSTEM_ERROR")
 
 
@@ -62,78 +64,144 @@ def vault_root() -> Path:
     return Path(host["knowledge"][0]["vault_root"])
 
 
-def grade(question: dict[str, Any], exchange: dict[str, Any], vault: Path,
-          judge: Any) -> dict[str, Any]:
+def grade(
+    question: dict[str, Any], exchange: dict[str, Any], vault: Path, judge: Any
+) -> dict[str, Any]:
     """The question's status, the harness layer it stopped at, and the evidence."""
     use = knowledge_use(exchange)
-    base: dict[str, Any] = {"id": question["id"], "route": use["route"],
-                            "knowledge_status": use["status"], "failure": use["failure"],
-                            "phase": use["phase"], "tools": use["tools"],
-                            "seconds": exchange.get("seconds"), "grader": GRADER_VERSION}
+    base: dict[str, Any] = {
+        "id": question["id"],
+        "route": use["route"],
+        "knowledge_status": use["status"],
+        "failure": use["failure"],
+        "phase": use["phase"],
+        "tools": use["tools"],
+        "seconds": exchange.get("seconds"),
+        "grader": GRADER_VERSION,
+    }
     if exchange.get("timed_out") or exchange.get("http_status") not in (200, None):
-        return {**base, "status": "SYSTEM_ERROR", "gap": "SYSTEM_ERROR",
-                "why": f"turn timed out or HTTP {exchange.get('http_status')}"}
+        return {
+            **base,
+            "status": "SYSTEM_ERROR",
+            "gap": "SYSTEM_ERROR",
+            "why": f"turn timed out or HTTP {exchange.get('http_status')}",
+        }
     if use["route"] == "none":
         if use["status"] == "failed":
-            return {**base, "status": "SYSTEM_ERROR", "gap": "SYSTEM_ERROR",
-                    "why": f"the conversation failed ({use['failure']})"}
-        return {**base, "status": "FAIL", "gap": "EXECUTION_GAP",
-                "why": "answered without using Knowledge"}
+            return {
+                **base,
+                "status": "SYSTEM_ERROR",
+                "gap": "SYSTEM_ERROR",
+                "why": f"the conversation failed ({use['failure']})",
+            }
+        return {
+            **base,
+            "status": "FAIL",
+            "gap": "EXECUTION_GAP",
+            "why": "answered without using Knowledge",
+        }
     gap = use["failure"] in INSUFFICIENT or use["phase"] == "needs_input"
     if use.get("harnessed") and not gap and use["status"] != "succeeded":
         # The Harness ran and its checks refused the answer: a validation
         # miss, not a system error.
-        return {**base, "status": "FAIL", "gap": "VALIDATION_GAP",
-                "why": f"the Knowledge Harness did not validate an answer ({use['failure']})"}
+        return {
+            **base,
+            "status": "FAIL",
+            "gap": "VALIDATION_GAP",
+            "why": f"the Knowledge Harness did not validate an answer ({use['failure']})",
+        }
     if not gap and use["status"] != "succeeded":
-        return {**base, "status": "SYSTEM_ERROR", "gap": "EXECUTION_GAP",
-                "why": f"Knowledge did not complete ({use['failure'] or use['status']})"}
+        return {
+            **base,
+            "status": "SYSTEM_ERROR",
+            "gap": "EXECUTION_GAP",
+            "why": f"Knowledge did not complete ({use['failure'] or use['status']})",
+        }
     if use.get("harnessed") and use["status"] == "succeeded" and not use["record"]:
-        return {**base, "status": "NEEDS_HUMAN_REVIEW", "gap": "",
-                "why": "the trace predates the host record carrying the cited passages"}
+        return {
+            **base,
+            "status": "NEEDS_HUMAN_REVIEW",
+            "gap": "",
+            "why": "the trace predates the host record carrying the cited passages",
+        }
     passages = cited_passages(use) if use["status"] == "succeeded" else []
     base["partial"] = bool(gap and passages)
     if gap and not passages:
-        return {**base, "status": "INSUFFICIENT_KNOWLEDGE", "gap": "SOURCE_GAP or RETRIEVAL_GAP",
-                "why": f"the harness ran and reported a gap ({use['failure'] or use['phase']})"}
+        return {
+            **base,
+            "status": "INSUFFICIENT_KNOWLEDGE",
+            "gap": "SOURCE_GAP or RETRIEVAL_GAP",
+            "why": f"the harness ran and reported a gap ({use['failure'] or use['phase']})",
+        }
     if not passages:
-        return {**base, "status": "FAIL", "gap": "VALIDATION_GAP", "why": "the answer cites no evidence"}
+        return {
+            **base,
+            "status": "FAIL",
+            "gap": "VALIDATION_GAP",
+            "why": "the answer cites no evidence",
+        }
     checks = [verify(p, vault) for p in passages]
     base["citations"] = checks
     missing = [c for c in checks if not c["ok"]]
     if missing:
-        return {**base, "status": "FAIL", "gap": "VALIDATION_GAP",
-                "why": f"{len(missing)} of {len(checks)} citations not found in the Vault"}
+        return {
+            **base,
+            "status": "FAIL",
+            "gap": "VALIDATION_GAP",
+            "why": f"{len(missing)} of {len(checks)} citations not found in the Vault",
+        }
     review = judge.review(question["text"], use["text"], passages)
     base["review"] = review
     if not review.get("ok"):
-        return {**base, "status": "NEEDS_HUMAN_REVIEW", "gap": "",
-                "why": f"the reviewer gave no verdict ({review.get('error')})"}
+        return {
+            **base,
+            "status": "NEEDS_HUMAN_REVIEW",
+            "gap": "",
+            "why": f"the reviewer gave no verdict ({review.get('error')})",
+        }
     if review.get("supported") and review.get("reasonable"):
         if review.get("confidence") == "low":
-            return {**base, "status": "NEEDS_HUMAN_REVIEW", "gap": "", "why": "reviewer confidence low"}
+            return {
+                **base,
+                "status": "NEEDS_HUMAN_REVIEW",
+                "gap": "",
+                "why": "reviewer confidence low",
+            }
         return {**base, "status": "PASS", "gap": "", "why": ""}
-    return {**base, "status": "FAIL", "gap": "REASONING_GAP",
-            "why": "reviewer: " + str(review.get("reason") or "")[:300]}
+    return {
+        **base,
+        "status": "FAIL",
+        "gap": "REASONING_GAP",
+        "why": "reviewer: " + str(review.get("reason") or "")[:300],
+    }
 
 
 def tags(question: dict[str, Any]) -> dict[str, Any]:
     """The question's bank tags (never its text)."""
-    return {"case_type": question.get("type", "foundation"), "market": question.get("market"),
-            "product": question.get("product"), "difficulty": question.get("difficulty"),
-            "technical": question.get("technical")}
+    return {
+        "case_type": question.get("type", "foundation"),
+        "market": question.get("market"),
+        "product": question.get("product"),
+        "difficulty": question.get("difficulty"),
+        "technical": question.get("technical"),
+    }
 
 
-def case_attributes(question: dict[str, Any], result: dict[str, Any],
-                    exchange: dict[str, Any] | None) -> dict[str, Any]:
+def case_attributes(
+    question: dict[str, Any], result: dict[str, Any], exchange: dict[str, Any] | None
+) -> dict[str, Any]:
     """Telemetry attributes of one graded question: tags, verdict details, links."""
     review = result.get("review") if isinstance(result.get("review"), dict) else {}
     citations = result.get("citations") or []
     seconds = result.get("seconds")
     return {
-        **tags(question), "gap": result.get("gap") or None, "route": result.get("route"),
-        "knowledge_status": result.get("knowledge_status"), "failure_code": result.get("failure"),
-        "phase": result.get("phase"), "partial": result.get("partial"),
+        **tags(question),
+        "gap": result.get("gap") or None,
+        "route": result.get("route"),
+        "knowledge_status": result.get("knowledge_status"),
+        "failure_code": result.get("failure"),
+        "phase": result.get("phase"),
+        "partial": result.get("partial"),
         "duration_ms": int(seconds * 1000) if isinstance(seconds, int | float) else None,
         "citations_total": len(citations),
         "citations_verified": sum(1 for c in citations if c.get("ok")),
@@ -151,9 +219,14 @@ def ask(question: dict[str, Any], folder: Path, base: str, token: str) -> dict[s
     session.start()
     exchange = session.send(question["text"], TIMEOUT_S)
     folder.mkdir(parents=True, exist_ok=True)
-    (folder / "trace.json").write_text(json.dumps(
-        {"question": question, "session_id": session.session_id, "exchange": exchange},
-        ensure_ascii=False, indent=1), encoding="utf-8")
+    (folder / "trace.json").write_text(
+        json.dumps(
+            {"question": question, "session_id": session.session_id, "exchange": exchange},
+            ensure_ascii=False,
+            indent=1,
+        ),
+        encoding="utf-8",
+    )
     return exchange
 
 
@@ -161,30 +234,52 @@ def credential() -> None:
     """The reviewer's key comes from the user environment, as the Host's does."""
     if "LITELLM_MASTER_KEY" not in os.environ:
         value = subprocess.run(
-            ["powershell", "-NoProfile", "-Command",
-             "[Environment]::GetEnvironmentVariable('LITELLM_MASTER_KEY','User')"],
-            capture_output=True, text=True, check=False).stdout.strip()
+            [
+                "powershell",
+                "-NoProfile",
+                "-Command",
+                "[Environment]::GetEnvironmentVariable('LITELLM_MASTER_KEY','User')",
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        ).stdout.strip()
         if value:
             os.environ["LITELLM_MASTER_KEY"] = value
 
 
-def report(run_dir: Path, results: list[dict[str, Any]], questions: dict[str, dict[str, Any]],
-           meta: dict[str, Any]) -> None:
+def report(
+    run_dir: Path,
+    results: list[dict[str, Any]],
+    questions: dict[str, dict[str, Any]],
+    meta: dict[str, Any],
+) -> None:
     counts = collections.Counter(r["status"] for r in results)
     acceptable = counts["PASS"] + counts["INSUFFICIENT_KNOWLEDGE"]
-    lines = [f"# knowledge_v1 — {run_dir.name}", "",
-             f"Run at {meta['started']}, AEP commit `{meta['commit']}`, grader {GRADER_VERSION}, "
-             f"question bank sha256 `{SOURCE_SHA256[:12]}…`, set `{meta['set']}`.", "",
-             f"**{acceptable} of {len(results)} acceptable** "
-             f"(PASS {counts['PASS']}, INSUFFICIENT_KNOWLEDGE {counts['INSUFFICIENT_KNOWLEDGE']}); "
-             + ", ".join(f"{s} {counts[s]}" for s in STATUSES[2:]), ""]
+    lines = [
+        f"# knowledge_v1 — {run_dir.name}",
+        "",
+        f"Run at {meta['started']}, AEP commit `{meta['commit']}`, grader {GRADER_VERSION}, "
+        f"question bank sha256 `{SOURCE_SHA256[:12]}…`, set `{meta['set']}`.",
+        "",
+        f"**{acceptable} of {len(results)} acceptable** "
+        f"(PASS {counts['PASS']}, INSUFFICIENT_KNOWLEDGE {counts['INSUFFICIENT_KNOWLEDGE']}); "
+        + ", ".join(f"{s} {counts[s]}" for s in STATUSES[2:]),
+        "",
+    ]
 
     def table(title: str, key: Any) -> None:
         groups: dict[str, collections.Counter[str]] = collections.defaultdict(collections.Counter)
         for result in results:
             groups[key(questions[result["id"]])][result["status"]] += 1
-        lines.extend([f"## By {title}", "", "| " + title + " | " + " | ".join(STATUSES) + " |",
-                      "|---|" + "---|" * len(STATUSES)])
+        lines.extend(
+            [
+                f"## By {title}",
+                "",
+                "| " + title + " | " + " | ".join(STATUSES) + " |",
+                "|---|" + "---|" * len(STATUSES),
+            ]
+        )
         for name in sorted(groups):
             lines.append(f"| {name} | " + " | ".join(str(groups[name][s]) for s in STATUSES) + " |")
         lines.append("")
@@ -194,13 +289,24 @@ def report(run_dir: Path, results: list[dict[str, Any]], questions: dict[str, di
     table("type", lambda q: q.get("type", "foundation"))
     routes = collections.Counter(r["route"] for r in results)
     gaps = collections.Counter(r["gap"] for r in results if r.get("gap"))
-    lines += ["## Harness", "", "Routes: " + ", ".join(f"{k} {v}" for k, v in sorted(routes.items())),
-              "", "Gaps: " + (", ".join(f"{k} {v}" for k, v in gaps.most_common()) or "none"), "",
-              "## Not passed", "", "| Question | Status | Gap | Why |", "|---|---|---|---|"]
+    lines += [
+        "## Harness",
+        "",
+        "Routes: " + ", ".join(f"{k} {v}" for k, v in sorted(routes.items())),
+        "",
+        "Gaps: " + (", ".join(f"{k} {v}" for k, v in gaps.most_common()) or "none"),
+        "",
+        "## Not passed",
+        "",
+        "| Question | Status | Gap | Why |",
+        "|---|---|---|---|",
+    ]
     for result in sorted(results, key=lambda r: r["id"]):
         if result["status"] != "PASS":
-            lines.append(f"| {result['id']} | {result['status']} | {result.get('gap', '')} | "
-                         f"{str(result.get('why', '')).replace('|', '/')[:200]} |")
+            lines.append(
+                f"| {result['id']} | {result['status']} | {result.get('gap', '')} | "
+                f"{str(result.get('why', '')).replace('|', '/')[:200]} |"
+            )
     (run_dir / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -211,27 +317,45 @@ def main() -> int:
     parser.add_argument("--workers", type=int, default=2)
     parser.add_argument("--force", action="store_true", help="ask again questions already recorded")
     parser.add_argument("--regrade", action="store_true", help="grade stored traces without asking")
-    parser.add_argument("--into", default="",
-                        help="with --regrade: write verdicts and report under runs/<id>/<into>/")
+    parser.add_argument(
+        "--into",
+        default="",
+        help="with --regrade: write verdicts and report under runs/<id>/<into>/",
+    )
     args = parser.parse_args()
     plain = args.into.replace("-", "").replace(".", "").isalnum()
     if args.into and (not args.regrade or not plain):
         parser.error("--into needs --regrade and a plain folder name")
     bank = load()
     by_id = {q["id"]: q for q in bank}
-    chosen = (sample(bank) if args.set == "sample" else bank if args.set == "all"
-              else [by_id[i.strip()] for i in args.set.split(",")])
+    chosen = (
+        sample(bank)
+        if args.set == "sample"
+        else bank
+        if args.set == "all"
+        else [by_id[i.strip()] for i in args.set.split(",")]
+    )
     run_dir = HERE / "runs" / args.run_id
     run_dir.mkdir(parents=True, exist_ok=True)
-    commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO, capture_output=True,
-                            text=True, check=False).stdout.strip()
+    commit = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=REPO, capture_output=True, text=True, check=False
+    ).stdout.strip()
     meta_path = run_dir / "metadata.json"
-    meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {
-        "started": datetime.now(UTC).isoformat(timespec="seconds"), "commit": commit,
-        "set": args.set, "question_bank_sha256": SOURCE_SHA256, "timeout_s": TIMEOUT_S}
+    meta = (
+        json.loads(meta_path.read_text(encoding="utf-8"))
+        if meta_path.exists()
+        else {
+            "started": datetime.now(UTC).isoformat(timespec="seconds"),
+            "commit": commit,
+            "set": args.set,
+            "question_bank_sha256": SOURCE_SHA256,
+            "timeout_s": TIMEOUT_S,
+        }
+    )
     meta_path.write_text(json.dumps(meta, indent=1) + "\n", encoding="utf-8")
     credential()
     from judge import Judge  # needs the credential in the environment
+
     judge = Judge(HOST_JSON)
     vault = vault_root()
     base = token = ""
@@ -240,8 +364,13 @@ def main() -> int:
     lock = threading.Lock()
     # Progress and verdicts go to the Host telemetry for the Atlas dashboard.
     bench = BenchmarkTelemetry("knowledge_v1", args.run_id)
-    bench.start(cases=len(chosen), strategy=agent_strategy(base or None), grader=GRADER_VERSION,
-                question_set=args.set if len(args.set) <= 40 else "custom", regrade=args.regrade)
+    bench.start(
+        cases=len(chosen),
+        strategy=agent_strategy(base or None),
+        grader=GRADER_VERSION,
+        question_set=args.set if len(args.set) <= 40 else "custom",
+        regrade=args.regrade,
+    )
     meta.setdefault("telemetry_runs", []).append(bench.run_id)
     meta_path.write_text(json.dumps(meta, indent=1) + "\n", encoding="utf-8")
 
@@ -253,8 +382,9 @@ def main() -> int:
         result_path.parent.mkdir(parents=True, exist_ok=True)
         if result_path.exists() and not args.force and not args.regrade:
             kept = json.loads(result_path.read_text(encoding="utf-8"))
-            bench.case_completed(question["id"], kept["status"], reused=True,
-                                 **case_attributes(question, kept, None))
+            bench.case_completed(
+                question["id"], kept["status"], reused=True, **case_attributes(question, kept, None)
+            )
             return kept
         bench.case_started(question["id"], **tags(question))
         if args.regrade:
@@ -265,11 +395,15 @@ def main() -> int:
             exchange = ask(question, folder, base, token)
         result = grade(question, exchange, vault, judge)
         result_path.write_text(json.dumps(result, ensure_ascii=False, indent=1), encoding="utf-8")
-        bench.case_completed(question["id"], result["status"],
-                             **case_attributes(question, result, exchange))
+        bench.case_completed(
+            question["id"], result["status"], **case_attributes(question, result, exchange)
+        )
         with lock:
-            print(f"{question['id']}: {result['status']} ({result.get('seconds')} s, {result['route']}) "
-                  f"{result.get('why', '')[:120]}", flush=True)
+            print(
+                f"{question['id']}: {result['status']} ({result.get('seconds')} s, {result['route']}) "
+                f"{result.get('why', '')[:120]}",
+                flush=True,
+            )
         return result
 
     started = time.monotonic()
@@ -277,7 +411,9 @@ def main() -> int:
         results = [r for r in pool.map(one, chosen) if r is not None]
     report(out_dir, results, by_id, meta)
     bench.finish()
-    print(f"done: {len(results)} graded in {round(time.monotonic() - started)} s; see {out_dir / 'report.md'}")
+    print(
+        f"done: {len(results)} graded in {round(time.monotonic() - started)} s; see {out_dir / 'report.md'}"
+    )
     return 0
 
 

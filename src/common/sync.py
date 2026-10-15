@@ -43,8 +43,7 @@ from workflow.host_bridge import BridgeRegistration
 
 # The operations, as they appear in a path. A name not in this list is not an
 # operation, whatever the caller thinks.
-Operation = Literal[
-    "probe", "catalog", "advertise", "sync", "report", "poll", "settle", "feedback"]
+Operation = Literal["probe", "catalog", "advertise", "sync", "report", "poll", "settle", "feedback"]
 OPERATIONS: tuple[Operation, ...] = (
     "probe",
     "catalog",

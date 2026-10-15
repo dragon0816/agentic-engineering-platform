@@ -15,8 +15,9 @@ def _skill(root: Path, name: str, applies_to: str | None, body: str) -> None:
     folder = root / "skills" / name
     folder.mkdir(parents=True, exist_ok=True)
     scope = f"applies_to: {applies_to}\n" if applies_to else ""
-    (folder / "SKILL.md").write_text(f"---\nname: {name}\nmode: procedure\n{scope}---\n{body}\n",
-                                     encoding="utf-8")
+    (folder / "SKILL.md").write_text(
+        f"---\nname: {name}\nmode: procedure\n{scope}---\n{body}\n", encoding="utf-8"
+    )
 
 
 def test_the_category_skill_follows_the_raw_folder(tmp_path: Path) -> None:
@@ -26,7 +27,9 @@ def test_the_category_skill_follows_the_raw_folder(tmp_path: Path) -> None:
     _skill(root, "ask-market", None, "Answering rules.")
     vault = Vault(root)
     assert category_skill(vault, "raw/Market/deck.md") == (
-        "ingest-market", "Market rules: every claim has a date.")
+        "ingest-market",
+        "Market rules: every claim has a date.",
+    )
     assert category_skill(vault, "raw/Market/5G/nr.md") == ("ingest-market-5g", "5G market rules.")
     assert category_skill(vault, "raw/Marketing/x.md") is None  # a folder, not a prefix
     assert category_skill(vault, "raw/drop/x.md") is None
@@ -68,24 +71,32 @@ def test_a_product_line_skill_adds_to_the_shared_category_rules(tmp_path: Path) 
     assert shared < rules.text.index("List port count")  # general before specific
     assert "Bandwidth first." not in rules.text
     assert ingest_conventions(Vault(root), "raw/Productions/x.md", "b").skill == (
-        "ingest-productions")
+        "ingest-productions"
+    )
 
 
 def test_answering_skills_apply_by_topic_and_ignore_other_skills(tmp_path: Path) -> None:
     from knowledge.schema import answer_rules
 
     root = _base(tmp_path)
-    for name, front in {"ask-knowledge": "mode: answer\n",
-                        "ask-market": "mode: answer\ntopics: [市場, Market share]\n",
-                        "ask-legacy": "", "ingest-market": "mode: procedure\n"}.items():
+    for name, front in {
+        "ask-knowledge": "mode: answer\n",
+        "ask-market": "mode: answer\ntopics: [市場, Market share]\n",
+        "ask-legacy": "",
+        "ingest-market": "mode: procedure\n",
+    }.items():
         _skill(root, name, None, f"{name} rules.")
         if front:
             path = root / "skills" / name / "SKILL.md"
-            path.write_text(path.read_text(encoding="utf-8").replace("mode: procedure\n", front),
-                            encoding="utf-8")
+            path.write_text(
+                path.read_text(encoding="utf-8").replace("mode: procedure\n", front),
+                encoding="utf-8",
+            )
     vault = Vault(root)
     names = [name for name, _ in answer_rules(vault, "5G 市場的主要客戶是誰？")]
     assert names == ["ask-knowledge", "ask-market"]
     assert [n for n, _ in answer_rules(vault, "What is the MARKET SHARE?")] == [
-        "ask-knowledge", "ask-market"]
+        "ask-knowledge",
+        "ask-market",
+    ]
     assert [n for n, _ in answer_rules(vault, "EVM 怎麼量？")] == ["ask-knowledge"]

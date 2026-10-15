@@ -49,8 +49,12 @@ def _now() -> str:
     return datetime.now(UTC).isoformat(timespec="seconds")
 
 
-def run_convert(convert: Convert, run: ConvertRun, stop: threading.Event,
-                on_change: Callable[[ConvertRun], None]) -> ConvertRun:
+def run_convert(
+    convert: Convert,
+    run: ConvertRun,
+    stop: threading.Event,
+    on_change: Callable[[ConvertRun], None],
+) -> ConvertRun:
     on_change(run)
     for path in run.paths:
         if stop.is_set():
@@ -61,12 +65,16 @@ def run_convert(convert: Convert, run: ConvertRun, stop: threading.Event,
             result = convert(run.sandbox_id, (path,), run.mode, run.progress_key)
             found = [ConvertedItem.model_validate(item.model_dump()) for item in result.items]
         except Exception as failure:  # noqa: BLE001 - one original never ends the run
-            found = [ConvertedItem(path=path, status=str(getattr(failure, "code", "")
-                                                          or type(failure).__name__))]
+            found = [
+                ConvertedItem(
+                    path=path, status=str(getattr(failure, "code", "") or type(failure).__name__)
+                )
+            ]
         run = run.model_copy(update={"items": (*run.items, *found)})
         on_change(run)
     done = len(run.items) >= len(run.paths)
-    run = run.model_copy(update={"status": "finished" if done else "stopped",
-                                 "current": None, "ended": _now()})
+    run = run.model_copy(
+        update={"status": "finished" if done else "stopped", "current": None, "ended": _now()}
+    )
     on_change(run)
     return run

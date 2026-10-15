@@ -21,26 +21,46 @@ from capabilities.knowledge_pipeline.handlers import (
 from common.execution import TraceIdentifiers
 from host_runtime.host import build_runtime
 
-SPECS = (SANDBOX_CREATE_SPEC, SANDBOX_LIST_SPEC, CONVERT_SPEC, INGEST_PLAN_SPEC,
-         INGEST_APPLY_SPEC, LINT_SPEC, DROP_ADD_SPEC, SANDBOX_CONTENTS_SPEC,
-         SANDBOX_DISCARD_SPEC)
+SPECS = (
+    SANDBOX_CREATE_SPEC,
+    SANDBOX_LIST_SPEC,
+    CONVERT_SPEC,
+    INGEST_PLAN_SPEC,
+    INGEST_APPLY_SPEC,
+    LINT_SPEC,
+    DROP_ADD_SPEC,
+    SANDBOX_CONTENTS_SPEC,
+    SANDBOX_DISCARD_SPEC,
+)
 
 
 def _grants() -> list[dict[str, Any]]:
-    return [*grant_record(), *({
-        "actor": "engineer", "asset": spec.identity.model_dump(mode="json"),
-        "permissions": ["knowledge-pipeline.use"], "policy_refs": ["knowledge-sandbox-policy"],
-        "approval_ref": "knowledge-pipeline-approval",
-    } for spec in SPECS)]
+    return [
+        *grant_record(),
+        *(
+            {
+                "actor": "engineer",
+                "asset": spec.identity.model_dump(mode="json"),
+                "permissions": ["knowledge-pipeline.use"],
+                "policy_refs": ["knowledge-sandbox-policy"],
+                "approval_ref": "knowledge-pipeline-approval",
+            }
+            for spec in SPECS
+        ),
+    ]
 
 
 def _call(runtime: Any, spec: Any, arguments: dict[str, Any]) -> Any:
     from common.local_agent import LocalCapabilityRequest
 
     request = LocalCapabilityRequest(
-        ingress="local", actor=runtime.actor, bridge_id=runtime.config.device.bridge_id,
-        target=spec.identity, arguments=arguments,
-        trace=TraceIdentifiers(trace_id="k1", request_id="k1", span_id="k1"))
+        ingress="local",
+        actor=runtime.actor,
+        bridge_id=runtime.config.device.bridge_id,
+        target=spec.identity,
+        arguments=arguments,
+        trace=TraceIdentifiers(trace_id="k1", request_id="k1", span_id="k1"),
+    )
     return asyncio.run(runtime.agent.execute_capability(request))
 
 
@@ -48,16 +68,22 @@ def test_a_configured_host_installs_and_runs_the_pipeline(tmp_path: Path) -> Non
     base = _base(tmp_path)
     before = _snapshot(base)
     config, _ = workspace(
-        tmp_path, membership=membership_record(), grants=_grants(),
-        config_changes={"knowledge_pipeline": {"vaults": [{"name": "k-test", "root": str(base)}]}})
+        tmp_path,
+        membership=membership_record(),
+        grants=_grants(),
+        config_changes={"knowledge_pipeline": {"vaults": [{"name": "k-test", "root": str(base)}]}},
+    )
     with build_runtime(config) as runtime:
         installed = runtime.agent.gateway.bridge.installed
         assert all(installed.get(spec.identity) is not None for spec in SPECS)
         created = _call(runtime, SANDBOX_CREATE_SPEC, {"base": "k-test", "label": "host trial"})
         assert created.capability.status == "succeeded", created
         sandbox = created.capability.data["sandbox_id"]
-        added = _call(runtime, DROP_ADD_SPEC, {"sandbox_id": sandbox, "name": "a.txt",
-                                               "data_base64": "aGVsbG8K"})
+        added = _call(
+            runtime,
+            DROP_ADD_SPEC,
+            {"sandbox_id": sandbox, "name": "a.txt", "data_base64": "aGVsbG8K"},
+        )
         assert added.capability.data["path"] == "drop/a.txt"
         converted = _call(runtime, CONVERT_SPEC, {"sandbox_id": sandbox, "mode": "apply"})
         assert converted.capability.status == "succeeded"

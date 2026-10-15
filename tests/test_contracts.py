@@ -206,9 +206,7 @@ def test_workflow_run_fields_are_closed_typed_and_round_trip() -> None:
         with pytest.raises(ValueError):
             validate_run_parameters(manifest, invalid)
     with pytest.raises(ValidationError):
-        WorkflowManifest.model_validate(
-            {**data, "parameters": [*parameters, parameters[0]]}
-        )
+        WorkflowManifest.model_validate({**data, "parameters": [*parameters, parameters[0]]})
     with pytest.raises(ValidationError):
         WorkflowManifest.model_validate(
             {**data, "parameters": [{"name": "broken", "label": "Broken", "kind": "select"}]}

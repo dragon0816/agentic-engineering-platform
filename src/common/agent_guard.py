@@ -35,26 +35,69 @@ RequestKind = Literal["read", "write", "command", "network", "other"]
 Decision = Literal["free", "card", "refuse"]
 
 #: The refusal every guard answer starts with: one sentence a person can act on.
-REFUSAL = ("AEP never changes credentials or protected system settings through the agent "
-           "and never reads their secret values into a conversation, even when allowed")
+REFUSAL = (
+    "AEP never changes credentials or protected system settings through the agent "
+    "and never reads their secret values into a conversation, even when allowed"
+)
 
 #: File names that hold a credential wherever they are (lower case).
-SECRET_NAMES = frozenset({
-    ".env", ".netrc", "_netrc", ".git-credentials", ".pgpass", ".npmrc", ".pypirc",
-    ".credentials.json", ".claude.json", "login data", "login data for account",
-    "logins.json", "key4.db", "key3.db", "signons.sqlite", "web data",
-    "assistant-mcp-token", "agent-web.json", "id_rsa", "id_dsa", "id_ecdsa", "id_ed25519",
-    "known_hosts", "authorized_keys",
-})
+SECRET_NAMES = frozenset(
+    {
+        ".env",
+        ".netrc",
+        "_netrc",
+        ".git-credentials",
+        ".pgpass",
+        ".npmrc",
+        ".pypirc",
+        ".credentials.json",
+        ".claude.json",
+        "login data",
+        "login data for account",
+        "logins.json",
+        "key4.db",
+        "key3.db",
+        "signons.sqlite",
+        "web data",
+        "assistant-mcp-token",
+        "agent-web.json",
+        "id_rsa",
+        "id_dsa",
+        "id_ecdsa",
+        "id_ed25519",
+        "known_hosts",
+        "authorized_keys",
+    }
+)
 #: Name endings that mark a key or a password store.
-SECRET_SUFFIXES = (".pem", ".key", ".pfx", ".p12", ".kdbx", ".keychain", ".jks",
-                   ".keystore", ".ppk", ".gpg", ".asc")
+SECRET_SUFFIXES = (
+    ".pem",
+    ".key",
+    ".pfx",
+    ".p12",
+    ".kdbx",
+    ".keychain",
+    ".jks",
+    ".keystore",
+    ".ppk",
+    ".gpg",
+    ".asc",
+)
 #: `.env.local`, `id_rsa.pub`, `id_ed25519-work` …
 SECRET_PREFIXES = (".env.", "id_rsa", "id_dsa", "id_ecdsa", "id_ed25519")
 #: Tool configuration inside a working folder: writing one may change what an
 #: agent is allowed next time, so it is asked even inside the folder.
-TOOL_CONFIG_PARTS = (".claude", ".codex", ".copilot", ".vscode", ".github/hooks",
-                     ".github/copilot", ".git/hooks", ".mcp.json", ".agents")
+TOOL_CONFIG_PARTS = (
+    ".claude",
+    ".codex",
+    ".copilot",
+    ".vscode",
+    ".github/hooks",
+    ".github/copilot",
+    ".git/hooks",
+    ".mcp.json",
+    ".agents",
+)
 
 
 def _key(path: Path | str) -> str:
@@ -95,8 +138,13 @@ class GuardPlaces:
     sessions_root: Path | None = None
 
     @classmethod
-    def current(cls, *, host_json: Path | None, workspace_root: Path | None,
-                environ: Mapping[str, str] | None = None) -> GuardPlaces:
+    def current(
+        cls,
+        *,
+        host_json: Path | None,
+        workspace_root: Path | None,
+        environ: Mapping[str, str] | None = None,
+    ) -> GuardPlaces:
         env = os.environ if environ is None else environ
 
         def place(name: str) -> Path | None:
@@ -104,13 +152,23 @@ class GuardPlaces:
             return Path(value) if value else None
 
         home = place("USERPROFILE") or place("HOME") or Path.home()
-        programs = tuple(path for path in (place("ProgramFiles"), place("ProgramFiles(x86)"),
-                                           place("ProgramW6432")) if path is not None)
-        return cls(home=home, appdata=place("APPDATA"), localappdata=place("LOCALAPPDATA"),
-                   system_root=place("SystemRoot"), program_files=programs,
-                   host_json=host_json, workspace_root=workspace_root,
-                   sessions_root=(workspace_root / "agent-sessions"
-                                  if workspace_root is not None else None))
+        programs = tuple(
+            path
+            for path in (place("ProgramFiles"), place("ProgramFiles(x86)"), place("ProgramW6432"))
+            if path is not None
+        )
+        return cls(
+            home=home,
+            appdata=place("APPDATA"),
+            localappdata=place("LOCALAPPDATA"),
+            system_root=place("SystemRoot"),
+            program_files=programs,
+            host_json=host_json,
+            workspace_root=workspace_root,
+            sessions_root=(
+                workspace_root / "agent-sessions" if workspace_root is not None else None
+            ),
+        )
 
     def protected(self) -> tuple[tuple[Path, str], ...]:
         """Never read and never written: credentials and secret stores."""
@@ -144,10 +202,14 @@ class GuardPlaces:
             found += [
                 (self.localappdata / "Microsoft" / "Credentials", "Windows credential store"),
                 (self.localappdata / "Microsoft" / "Vault", "Windows credential store"),
-                (self.localappdata / "Google" / "Chrome" / "User Data",
-                 "browser profile and stored passwords"),
-                (self.localappdata / "Microsoft" / "Edge" / "User Data",
-                 "browser profile and stored passwords"),
+                (
+                    self.localappdata / "Google" / "Chrome" / "User Data",
+                    "browser profile and stored passwords",
+                ),
+                (
+                    self.localappdata / "Microsoft" / "Edge" / "User Data",
+                    "browser profile and stored passwords",
+                ),
                 (self.localappdata / "BraveSoftware", "browser profile and stored passwords"),
             ]
         if self.system_root is not None:
@@ -181,8 +243,9 @@ class GuardPlaces:
 def secret_name(path: Path | str) -> bool:
     """A file whose name says it holds a credential."""
     name = PureWindowsPath(str(path)).name.casefold()
-    return (name in SECRET_NAMES or name.endswith(SECRET_SUFFIXES)
-            or name.startswith(SECRET_PREFIXES))
+    return (
+        name in SECRET_NAMES or name.endswith(SECRET_SUFFIXES) or name.startswith(SECRET_PREFIXES)
+    )
 
 
 def path_refusal(path: Path | str, places: GuardPlaces, *, write: bool) -> str | None:
@@ -198,11 +261,16 @@ def path_refusal(path: Path | str, places: GuardPlaces, *, write: bool) -> str |
             if inside(target, root):
                 return f"{REFUSAL} ({label})."
         workspace, sessions = places.workspace_root, places.sessions_root
-        if workspace is not None and inside(target, workspace) and not (
-                sessions is not None and inside(target, sessions)):
-            return (f"{REFUSAL} (the AEP workspace: installing, approving and publishing "
-                    "stay with the Capabilities and portal buttons; submit a draft "
-                    "through the aep tools instead).")
+        if (
+            workspace is not None
+            and inside(target, workspace)
+            and not (sessions is not None and inside(target, sessions))
+        ):
+            return (
+                f"{REFUSAL} (the AEP workspace: installing, approving and publishing "
+                "stay with the Capabilities and portal buttons; submit a draft "
+                "through the aep tools instead)."
+            )
     return None
 
 
@@ -227,52 +295,71 @@ def tool_config(path: Path | str, folder: Path) -> bool:
     """A coding agent's configuration file inside the working folder."""
     if not inside(path, folder):
         return False
-    relative = _key(path)[len(_key(folder)):].lstrip("/")
-    return any(relative == part or relative.startswith(part + "/")
-               for part in TOOL_CONFIG_PARTS)
+    relative = _key(path)[len(_key(folder)) :].lstrip("/")
+    return any(relative == part or relative.startswith(part + "/") for part in TOOL_CONFIG_PARTS)
 
 
 # -- commands -----------------------------------------------------------------
 
 _COMMAND_RULES: tuple[tuple[re.Pattern[str], str], ...] = tuple(
-    (re.compile(pattern, re.IGNORECASE), label) for pattern, label in (
+    (re.compile(pattern, re.IGNORECASE), label)
+    for pattern, label in (
         (r"\bnetsh\b[^|;&]*\b(advfirewall|firewall)\b", "the Windows firewall"),
         (r"\b(new|set|remove|disable|enable|copy|rename)-netfirewall", "the Windows firewall"),
         (r"\bsetx\b", "the Windows user environment"),
-        (r"\[\s*(system\.)?environment\s*\]\s*::\s*(set|get)environmentvariable",
-         "the Windows user environment"),
+        (
+            r"\[\s*(system\.)?environment\s*\]\s*::\s*(set|get)environmentvariable",
+            "the Windows user environment",
+        ),
         (r"hk(cu|ey_current_user)[:\\/]+\\?environment", "the Windows user environment"),
-        (r"\breg(\.exe)?\s+(add|delete|import|export|query|save|restore|load|copy)\b",
-         "the Windows registry"),
+        (
+            r"\breg(\.exe)?\s+(add|delete|import|export|query|save|restore|load|copy)\b",
+            "the Windows registry",
+        ),
         (r"\b(get-childitem|gci|ls|dir)\s+env:", "the environment's secret values"),
-        (r"\$env:\w*(token|key|secret|passw|pwd|credential|auth)",
-         "the environment's secret values"),
-        (r"%\w*(token|key|secret|passw|pwd|credential|auth)\w*%",
-         "the environment's secret values"),
+        (
+            r"\$env:\w*(token|key|secret|passw|pwd|credential|auth)",
+            "the environment's secret values",
+        ),
+        (
+            r"%\w*(token|key|secret|passw|pwd|credential|auth)\w*%",
+            "the environment's secret values",
+        ),
         (r"^\s*(set|env|printenv)\s*$", "the environment's secret values"),
         (r"\bprintenv\b", "the environment's secret values"),
-        (r"\bcmdkey\b|\bvaultcmd\b|\bkeymgr\b|get-storedcredential|convertfrom-securestring",
-         "the Windows credential store"),
+        (
+            r"\bcmdkey\b|\bvaultcmd\b|\bkeymgr\b|get-storedcredential|convertfrom-securestring",
+            "the Windows credential store",
+        ),
         (r"\bssh-(keygen|add|copy-id)\b", "SSH keys"),
         (r"\bgh\s+auth\b", "GitHub CLI credentials"),
         (r"\bgit\b[^|;&]*\bcredential", "Git credentials"),
-        (r"\b(claude|copilot|codex)\b[^|;&]*\b(login|logout|setup-token|auth)\b",
-         "a coding agent's sign-in"),
+        (
+            r"\b(claude|copilot|codex)\b[^|;&]*\b(login|logout|setup-token|auth)\b",
+            "a coding agent's sign-in",
+        ),
         (r"\bnet\s+(user|localgroup)\b", "Windows accounts"),
         (r"\bsecurity\s+find-(generic|internet)-password\b", "stored passwords"),
-        (r"\baep-host\b[^|;&]*\b(install|approve|publish|enroll|connect|grant|secret)",
-         "installing, approving or publishing AEP assets"),
-        (r"host_runtime\.cli\b[^|;&]*\b(install|approve|publish|enroll|connect|grant)",
-         "installing, approving or publishing AEP assets"),
+        (
+            r"\baep-host\b[^|;&]*\b(install|approve|publish|enroll|connect|grant|secret)",
+            "installing, approving or publishing AEP assets",
+        ),
+        (
+            r"host_runtime\.cli\b[^|;&]*\b(install|approve|publish|enroll|connect|grant)",
+            "installing, approving or publishing AEP assets",
+        ),
         (r"[\\/]\.(ssh|aws|azure|gnupg|kube)\b", "credential files"),
-        (r"\.claude\.json|\.credentials\.json|\.git-credentials|\b_?\.?netrc\b",
-         "credential files"),
+        (
+            r"\.claude\.json|\.credentials\.json|\.git-credentials|\b_?\.?netrc\b",
+            "credential files",
+        ),
         (r"\bid_(rsa|dsa|ecdsa|ed25519)\b", "SSH keys"),
         (r"login data|logins\.json|key[34]\.db", "browser-stored passwords"),
         (r"(^|[\s\"'\\/])\.env(\.\w+)?\b(?!\w)", "credential files"),
         (r"\bhost\.json\b", "AEP host.json"),
         (r"assistant-mcp-token|agent-web\.json", "an AEP workspace secret"),
-    ))
+    )
+)
 
 
 def command_refusal(command: str, places: GuardPlaces) -> str | None:
@@ -316,15 +403,22 @@ class Grants:
     tools: set[str] = field(default_factory=set)
 
     def as_json(self) -> dict[str, list[str]]:
-        return {"read_folders": sorted(self.read_folders),
-                "write_folders": sorted(self.write_folders),
-                "programs": sorted(self.programs), "tools": sorted(self.tools)}
+        return {
+            "read_folders": sorted(self.read_folders),
+            "write_folders": sorted(self.write_folders),
+            "programs": sorted(self.programs),
+            "tools": sorted(self.tools),
+        }
 
     @classmethod
     def from_json(cls, data: Mapping[str, Iterable[str]] | None) -> Grants:
         data = data or {}
-        return cls(*(set(map(str, data.get(name) or ())) for name in
-                     ("read_folders", "write_folders", "programs", "tools")))
+        return cls(
+            *(
+                set(map(str, data.get(name) or ()))
+                for name in ("read_folders", "write_folders", "programs", "tools")
+            )
+        )
 
 
 @dataclass(frozen=True)
@@ -349,8 +443,14 @@ class Verdict:
     scope: str = ""
 
 
-def judge(request: AgentRequest, *, folder: Path, read_roots: Iterable[Path],
-          grants: Grants, places: GuardPlaces) -> Verdict:
+def judge(
+    request: AgentRequest,
+    *,
+    folder: Path,
+    read_roots: Iterable[Path],
+    grants: Grants,
+    places: GuardPlaces,
+) -> Verdict:
     """free (inside the folder, or allowed for this conversation), card (ask
     the person) or refuse (protected, even if allowed)."""
     paths = tuple(resolved(item, folder) for item in request.paths)
@@ -377,14 +477,22 @@ def judge(request: AgentRequest, *, folder: Path, read_roots: Iterable[Path],
         return Verdict("card", scope=request.tool)
     if not paths:
         paths = (folder,)
-    readable = [folder, *read_roots, *map(Path, grants.read_folders),
-                *map(Path, grants.write_folders)]
+    readable = [
+        folder,
+        *read_roots,
+        *map(Path, grants.read_folders),
+        *map(Path, grants.write_folders),
+    ]
     writable = [folder, *map(Path, grants.write_folders)]
     roots = writable if write else readable
     outside = [path for path in paths if not any(inside(path, root) for root in roots)]
     if write:
-        configured = [path for path in paths if tool_config(path, folder)
-                      and not any(inside(path, Path(root)) for root in grants.write_folders)]
+        configured = [
+            path
+            for path in paths
+            if tool_config(path, folder)
+            and not any(inside(path, Path(root)) for root in grants.write_folders)
+        ]
         if configured:
             return Verdict("card", scope="")
     if not outside:

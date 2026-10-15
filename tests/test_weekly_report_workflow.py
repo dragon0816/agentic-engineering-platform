@@ -526,31 +526,29 @@ def test_doctor_reports_the_integrations_without_contacting_anything(
         path for path in written if path.startswith(("skills/engineering", "workflows/engineering"))
     ]
     assert weekly == [
-            "skills/engineering__coding__1.7.0.json",
-            "skills/engineering__release-package-guide__1.0.0.json",
-            "skills/engineering__rs-ncc-improvement-plan-skill__1.0.0.json",
-            "skills/engineering__sales-to-chipset__1.0.0.json",
+        "skills/engineering__coding__1.7.0.json",
+        "skills/engineering__release-package-guide__1.0.0.json",
+        "skills/engineering__rs-ncc-improvement-plan-skill__1.0.0.json",
+        "skills/engineering__sales-to-chipset__1.0.0.json",
         "skills/engineering__team-tickets__2.1.0.json",
         "skills/engineering__weekly-report__2.0.0.json",
         "workflows/engineering__coding-change__1.0.0.json",
         "workflows/engineering__jira-team-tickets-preview__1.0.0.json",
-            "workflows/engineering__release-package-apply-isolated__1.0.0.json",
-            "workflows/engineering__release-package-commit__1.0.0.json",
-            "workflows/engineering__release-package-prepare__1.0.0.json",
-            "workflows/engineering__release-package-preview__1.0.0.json",
-            "workflows/engineering__release-package-push__1.0.0.json",
-            "workflows/engineering__rs-ncc-improvement-plan__1.0.0.json",
-            "workflows/engineering__rs-wmt-package-release__1.0.0.json",
-            "workflows/engineering__run-python__1.0.0.json",
-            "workflows/engineering__sales-to-chipset-preview__1.0.0.json",
-            "workflows/engineering__sales-to-chipset__1.0.0.json",
-            "workflows/engineering__sde-weekly-report__1.0.0.json",
+        "workflows/engineering__release-package-apply-isolated__1.0.0.json",
+        "workflows/engineering__release-package-commit__1.0.0.json",
+        "workflows/engineering__release-package-prepare__1.0.0.json",
+        "workflows/engineering__release-package-preview__1.0.0.json",
+        "workflows/engineering__release-package-push__1.0.0.json",
+        "workflows/engineering__rs-ncc-improvement-plan__1.0.0.json",
+        "workflows/engineering__rs-wmt-package-release__1.0.0.json",
+        "workflows/engineering__run-python__1.0.0.json",
+        "workflows/engineering__sales-to-chipset-preview__1.0.0.json",
+        "workflows/engineering__sales-to-chipset__1.0.0.json",
+        "workflows/engineering__sde-weekly-report__1.0.0.json",
     ]
     assert "wrote" in capsys.readouterr().out
     exported = json.loads(
-        (out / "workflows/engineering__sde-weekly-report__1.0.0.json").read_text(
-            encoding="utf-8"
-        )
+        (out / "workflows/engineering__sde-weekly-report__1.0.0.json").read_text(encoding="utf-8")
     )
     assert exported["metadata"]["identity"]["name"] == "sde-weekly-report"
     assert [step["capability"]["name"] for step in exported["steps"]][-2:] == ["apply", "mail"]

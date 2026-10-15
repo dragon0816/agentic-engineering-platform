@@ -77,8 +77,7 @@ def test_create_denies_different_owner_missing_workflow_and_untrusted_task(
     for change in ({"owner": "other"}, {"name": "missing"}, {"kind": "agent_task"}):
         source = _definition(tmp_path, **change)
         assert (
-            main(["schedules", "--config", str(host), "create", "--definition", str(source)])
-            == 1
+            main(["schedules", "--config", str(host), "create", "--definition", str(source)]) == 1
         )
     assert not (layout.workspace_root / "schedules.sqlite").exists()
 
@@ -151,9 +150,7 @@ def _due_an_hour_ago(layout_root: Path, schedule_id: str) -> None:
             "runtime_inputs": {"args": "notes.txt"},
         }
     )
-    with SqliteScheduleStore(
-        layout_root / "schedules.sqlite", bridge_id="bridge-company"
-    ) as store:
+    with SqliteScheduleStore(layout_root / "schedules.sqlite", bridge_id="bridge-company") as store:
         store.create(definition, now=now - timedelta(hours=2))
 
 
@@ -206,9 +203,7 @@ def test_pending_and_resolve_settle_an_uncertain_claim_without_running_it(
     assert command("approve", claim.idempotency_key) == 1
     assert "not_awaiting_approval" in capsys.readouterr().err
     assert (
-        command(
-            "resolve", claim.idempotency_key, "--outcome", "failed", "--note", "checked log"
-        )
+        command("resolve", claim.idempotency_key, "--outcome", "failed", "--note", "checked log")
         == 0
     )
     assert "failed (operator_resolved_failed)" in capsys.readouterr().out

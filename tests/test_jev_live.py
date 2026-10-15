@@ -42,9 +42,7 @@ class Transport:
         self.calls: list[tuple[str, dict[str, Any], Mapping[str, str], float]] = []
         self.replies: list[Reply] = []
 
-    def send(
-        self, url: str, body: bytes, headers: Mapping[str, str], timeout_s: float
-    ) -> Reply:
+    def send(self, url: str, body: bytes, headers: Mapping[str, str], timeout_s: float) -> Reply:
         payload = json.loads(body)
         self.calls.append((url, payload, headers, timeout_s))
         user = payload["state"]["message"]
@@ -60,12 +58,10 @@ def test_live_entry_sends_only_pinned_public_skill_cases_and_scores_abstention()
     )
     assert len(transport.calls) == 4
     assert all(
-        url == TYPESAFE_SYSTEMONE and timeout == 3.0
-        for url, _, _, timeout in transport.calls
+        url == TYPESAFE_SYSTEMONE and timeout == 3.0 for url, _, _, timeout in transport.calls
     )
     assert all(
-        headers["Authorization"] == "Bearer synthetic-token"
-        for _, _, headers, _ in transport.calls
+        headers["Authorization"] == "Bearer synthetic-token" for _, _, headers, _ in transport.calls
     )
     # Only the user's message is sent: no system text, persona or history.
     assert all(set(payload["state"]) == {"message"} for _, payload, _, _ in transport.calls)
@@ -124,8 +120,10 @@ def test_a_tunnelled_self_hosted_endpoint_is_used_and_plain_lan_http_is_refused(
     transport = Transport()
     tunnel = "http://127.0.0.1:18000/v1/systemone"
     run_public_benchmark(
-        model="laya-rl-agent", credential=lambda: "synthetic-token",
-        transport=transport, endpoint=tunnel,
+        model="laya-rl-agent",
+        credential=lambda: "synthetic-token",
+        transport=transport,
+        endpoint=tunnel,
     )
     assert transport.calls and all(url == tunnel for url, _, _, _ in transport.calls)
 
@@ -134,7 +132,9 @@ def test_a_tunnelled_self_hosted_endpoint_is_used_and_plain_lan_http_is_refused(
 
     with pytest.raises(ValueError):
         run_public_benchmark(
-            model="laya-rl-agent", credential=forbidden_credential, transport=Transport(),
+            model="laya-rl-agent",
+            credential=forbidden_credential,
+            transport=Transport(),
             endpoint="http://172.25.228.141:8000/v1/systemone",
         )
 
@@ -144,13 +144,15 @@ def test_the_skills_corpus_is_pinned_and_sends_real_descriptions() -> None:
 
     transport = Transport()
     run_public_benchmark(
-        corpus=SKILLS_CORPUS, model="laya-rl-agent", credential=lambda: "synthetic-token",
+        corpus=SKILLS_CORPUS,
+        model="laya-rl-agent",
+        credential=lambda: "synthetic-token",
         transport=transport,
     )
     assert len(transport.calls) == 26
     _, payload, _, _ = transport.calls[0]
     criteria = payload["questions"]["skill_candidate"]["criteria"]
-    assert len(criteria) == 9                       # preserve + eight installed commands
+    assert len(criteria) == 9  # preserve + eight installed commands
     assert any("SDE weekly report" in text for text in criteria.values())
     assert not any(text.startswith("Synthetic installed") for text in criteria.values())
 
@@ -159,8 +161,10 @@ def test_the_confidence_threshold_decides_and_the_fallback_column_keeps_the_cata
     """A choice below the Host's threshold is not admitted; the live route
     then keeps the whole catalogue, which the with-fallback column scores."""
     strict = run_public_benchmark(
-        model="jev-latest", credential=lambda: "synthetic-token", transport=Transport(),
-        threshold=0.99,                              # the fake answers at 0.96
+        model="jev-latest",
+        credential=lambda: "synthetic-token",
+        transport=Transport(),
+        threshold=0.99,  # the fake answers at 0.96
     )
     measured = strict["jev-systemone"]["skill_selection"]
     assert measured["answered"] == 0
@@ -169,7 +173,9 @@ def test_the_confidence_threshold_decides_and_the_fallback_column_keeps_the_cata
     baseline = strict["aep-none-baseline"]["skill_selection"]
     assert fallback["exact_accuracy"] == baseline["exact_accuracy"]
     admitted = run_public_benchmark(
-        model="jev-latest", credential=lambda: "synthetic-token", transport=Transport(),
+        model="jev-latest",
+        credential=lambda: "synthetic-token",
+        transport=Transport(),
     )
     assert admitted["jev-systemone"]["skill_selection"]["answered"] == 3
     assert admitted["jev-systemone.with-fallback"]["skill_selection"]["exact_accuracy"] == 0.5

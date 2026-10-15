@@ -224,9 +224,7 @@ class GatewayTaskExecutor:
             "validated" if report.status == "passed" else "failed",
             now=self.clock(),
             validation=report,
-            errors=(TaskIssue(code="task_validation_failed"),)
-            if report.status == "failed"
-            else (),
+            errors=(TaskIssue(code="task_validation_failed"),) if report.status == "failed" else (),
         )
         self.runs.save_task_run(final)
         return TaskExecutionOutcome(

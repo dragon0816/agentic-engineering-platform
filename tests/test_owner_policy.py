@@ -19,16 +19,20 @@ from workflow.dispatch import BridgeExecutor
 def write_spec() -> CapabilitySpec:
     payload = spec().model_dump(mode="json")
     payload["side_effect"] = "write"
-    payload["policy"] = {"approval_required": True, "required_permissions": ["sample.read"],
-                         "policy_refs": ["sample-policy"]}
+    payload["policy"] = {
+        "approval_required": True,
+        "required_permissions": ["sample.read"],
+        "policy_refs": ["sample-policy"],
+    }
     return CapabilitySpec.model_validate(payload)
 
 
 def bridge(capability: CapabilitySpec, policy: LocalPolicy) -> tuple[BridgeExecutor, Handler]:
     handler = Handler()
     registry = InstalledCapabilities()
-    registry.register(capability, handler, Input, Output,
-                      ExecutionDependencies(central_required=False))
+    registry.register(
+        capability, handler, Input, Output, ExecutionDependencies(central_required=False)
+    )
     return BridgeExecutor(registry, policy), handler
 
 
@@ -72,8 +76,9 @@ def test_on_a_local_host_the_owner_needs_no_grants_file(tmp_path, capsys) -> Non
     from host_runtime.cli import main
     from host_runtime.host import build_runtime
 
-    config, layout = workspace(tmp_path, membership=membership_record(),
-                               config_changes={"local_owner_grants": True})
+    config, layout = workspace(
+        tmp_path, membership=membership_record(), config_changes={"local_owner_grants": True}
+    )
     assert not layout.grants.exists()
     target = layout.workspace_root / "notes.txt"
     assert main(["ask", "--config", str(host_json(tmp_path, config)), f"files.read {target}"]) == 0

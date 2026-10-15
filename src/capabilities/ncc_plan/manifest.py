@@ -13,8 +13,9 @@ from capabilities.mail_draft.handlers import DRAFT_SPEC
 from common.assets import AssetIdentity, WorkflowManifest
 
 WORKFLOW = AssetIdentity(namespace="engineering", name="rs-ncc-improvement-plan", version="1.0.0")
-SKILL = AssetIdentity(namespace="engineering", name="rs-ncc-improvement-plan-skill",
-                      version="1.0.0")
+SKILL = AssetIdentity(
+    namespace="engineering", name="rs-ncc-improvement-plan-skill", version="1.0.0"
+)
 STATIONS_FUNCTION = "ncc_plan.stations"
 
 PREPARE_SPEC = CapabilitySpec.model_validate(
@@ -65,37 +66,101 @@ _SYSTEMS = (
 )
 
 _SETTINGS = [
-    {"name": "catalogue_file", "label": "目錄檔（workflow-14.json）", "kind": "file",
-     "scope": "static", "required": True, "accept": [".json"], "order": 1,
-     "help": "站台、價目、系統與文句的 JSON 檔，格式同 rs_workflow_system 的 "
-             "config/workflow-14.json；只讀內容區段，不讀 paths/ops。"},
-    {"name": "template_file", "label": "範本 .docx", "kind": "file", "scope": "static",
-     "required": True, "accept": [".docx"], "order": 2,
-     "help": "當作範本的範例改善服務規劃。"},
-    {"name": "output_dir", "label": "輸出資料夾", "kind": "folder", "scope": "static",
-     "required": True, "order": 3,
-     "help": "產出的 .docx 放這裡；資料夾必須已存在，不會自動建立。"},
-    {"name": "photo_dir", "label": "站台照片根目錄", "kind": "folder", "scope": "static",
-     "order": 4,
-     "help": "底下一站一個資料夾，檔名用頻道代號（外觀.jpg、CH24.jpg）。留空就不檢查。"},
+    {
+        "name": "catalogue_file",
+        "label": "目錄檔（workflow-14.json）",
+        "kind": "file",
+        "scope": "static",
+        "required": True,
+        "accept": [".json"],
+        "order": 1,
+        "help": "站台、價目、系統與文句的 JSON 檔，格式同 rs_workflow_system 的 "
+        "config/workflow-14.json；只讀內容區段，不讀 paths/ops。",
+    },
+    {
+        "name": "template_file",
+        "label": "範本 .docx",
+        "kind": "file",
+        "scope": "static",
+        "required": True,
+        "accept": [".docx"],
+        "order": 2,
+        "help": "當作範本的範例改善服務規劃。",
+    },
+    {
+        "name": "output_dir",
+        "label": "輸出資料夾",
+        "kind": "folder",
+        "scope": "static",
+        "required": True,
+        "order": 3,
+        "help": "產出的 .docx 放這裡；資料夾必須已存在，不會自動建立。",
+    },
+    {
+        "name": "photo_dir",
+        "label": "站台照片根目錄",
+        "kind": "folder",
+        "scope": "static",
+        "order": 4,
+        "help": "底下一站一個資料夾，檔名用頻道代號（外觀.jpg、CH24.jpg）。留空就不檢查。",
+    },
 ]
 
 _RUN = [
-    {"name": "dry_run", "label": "只試跑，先看內容？", "kind": "boolean", "default": False,
-     "order": 8, "help": "列出這份文件會寫什麼，不產生檔案、不建草稿。"},
-    {"name": "station", "label": "要做哪一個改善站？", "kind": "select", "required": True,
-     "choices_source": f"fn:{STATIONS_FUNCTION}", "group": "identity", "order": 10},
-    {"name": "channels", "label": "這次要改善哪些頻道？", "kind": "text", "order": 40,
-     "help": "用逗號分隔，例如 CH26,CH28。留空就用這一站的設定。"},
-    {"name": "confirm_date", "label": "權責機關哪一天確認有改善需求？", "kind": "text",
-     "order": 60, "help": "民國年，例如 115/06/07。"},
-    {"name": "completion_date", "label": "預計完成日期？", "kind": "text", "order": 70,
-     "help": "民國年，例如 115/09/30；留空用目錄檔的設定。"},
-    {"name": "draft_to", "label": "要把文件寄到哪個信箱？", "kind": "emails", "order": 75,
-     "help": "只建 Outlook 草稿，不會寄出；留空就不建。"},
+    {
+        "name": "dry_run",
+        "label": "只試跑，先看內容？",
+        "kind": "boolean",
+        "default": False,
+        "order": 8,
+        "help": "列出這份文件會寫什麼，不產生檔案、不建草稿。",
+    },
+    {
+        "name": "station",
+        "label": "要做哪一個改善站？",
+        "kind": "select",
+        "required": True,
+        "choices_source": f"fn:{STATIONS_FUNCTION}",
+        "group": "identity",
+        "order": 10,
+    },
+    {
+        "name": "channels",
+        "label": "這次要改善哪些頻道？",
+        "kind": "text",
+        "order": 40,
+        "help": "用逗號分隔，例如 CH26,CH28。留空就用這一站的設定。",
+    },
+    {
+        "name": "confirm_date",
+        "label": "權責機關哪一天確認有改善需求？",
+        "kind": "text",
+        "order": 60,
+        "help": "民國年，例如 115/06/07。",
+    },
+    {
+        "name": "completion_date",
+        "label": "預計完成日期？",
+        "kind": "text",
+        "order": 70,
+        "help": "民國年，例如 115/09/30；留空用目錄檔的設定。",
+    },
+    {
+        "name": "draft_to",
+        "label": "要把文件寄到哪個信箱？",
+        "kind": "emails",
+        "order": 75,
+        "help": "只建 Outlook 草稿，不會寄出；留空就不建。",
+    },
     *[
-        {"name": name, "label": label, "kind": "boolean", "default": False,
-         "group": "systems", "order": 200 + 10 * index}
+        {
+            "name": name,
+            "label": label,
+            "kind": "boolean",
+            "default": False,
+            "group": "systems",
+            "order": 200 + 10 * index,
+        }
         for index, (name, label) in enumerate(_SYSTEMS)
     ],
 ]
@@ -136,16 +201,29 @@ def plan_workflow() -> WorkflowManifest:
             "input_contract": "engineering.rs-ncc-improvement-plan.input.v1",
             "output_contract": "outlook.draft.output.v1",
             "steps": [
-                {"capability": PREPARE_SPEC.identity.model_dump(),
-                 "inputs": {"request": {"source": "run"}}},
-                {"capability": RENDER_SPEC.identity.model_dump(),
-                 "inputs": {"plan": {"source": "step", "step_index": 0}}},
-                {"capability": DRAFT_SPEC.identity.model_dump(),
-                 "inputs": {
-                     field: _mail_input(field)
-                     for field in ("skip", "subject", "html_body", "to", "cc",
-                                   "attachments", "best_effort")
-                 }},
+                {
+                    "capability": PREPARE_SPEC.identity.model_dump(),
+                    "inputs": {"request": {"source": "run"}},
+                },
+                {
+                    "capability": RENDER_SPEC.identity.model_dump(),
+                    "inputs": {"plan": {"source": "step", "step_index": 0}},
+                },
+                {
+                    "capability": DRAFT_SPEC.identity.model_dump(),
+                    "inputs": {
+                        field: _mail_input(field)
+                        for field in (
+                            "skip",
+                            "subject",
+                            "html_body",
+                            "to",
+                            "cc",
+                            "attachments",
+                            "best_effort",
+                        )
+                    },
+                },
             ],
         }
     )

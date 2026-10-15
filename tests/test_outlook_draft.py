@@ -209,9 +209,7 @@ def test_a_document_is_attached_as_a_file_not_inline(tmp_path: Path) -> None:
 def test_a_missing_document_leaves_no_half_built_draft(tmp_path: Path) -> None:
     outlook = FakeOutlook()
     with pytest.raises(DraftError) as raised:
-        OutlookComDraft(dispatch=outlook).save(
-            draft(attachments=(str(tmp_path / "absent.docx"),))
-        )
+        OutlookComDraft(dispatch=outlook).save(draft(attachments=(str(tmp_path / "absent.docx"),)))
     assert raised.value.code == "attachment_missing"
     assert outlook.created == []
     with pytest.raises(DraftError):

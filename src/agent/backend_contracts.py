@@ -66,9 +66,7 @@ class GatewayConversationRequest(Contract):
         ):
             raise ValueError("allowed tool names must be unique")
         if isinstance(self.max_turns, bool) or not 1 <= self.max_turns <= MAX_CONVERSATION_TURNS:
-            raise ValueError(
-                f"Gateway conversation supports one to {MAX_CONVERSATION_TURNS} turns"
-            )
+            raise ValueError(f"Gateway conversation supports one to {MAX_CONVERSATION_TURNS} turns")
         return self
 
 

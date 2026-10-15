@@ -22,7 +22,8 @@ from host_runtime.web import AgentWebServer
 from host_runtime.web_page import PAGE
 
 PNG = base64.b64decode(
-    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==")
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+)
 
 
 def zipped(entries: dict[str, bytes]) -> bytes:
@@ -80,7 +81,8 @@ def test_a_file_belongs_to_its_conversation_and_goes_with_it(tmp_path: Path) -> 
 
 
 def test_a_turn_carries_the_files_to_the_model_and_remembers_their_paths(
-    served: AgentWebServer, monkeypatch: pytest.MonkeyPatch,  # noqa: F811
+    served: AgentWebServer,
+    monkeypatch: pytest.MonkeyPatch,  # noqa: F811
 ) -> None:
     from agent.gateway import GatewayConversationResult
     from common.execution import TraceIdentifiers
@@ -92,40 +94,79 @@ def test_a_turn_carries_the_files_to_the_model_and_remembers_their_paths(
     async def converse(request: Any, history: Any, **_: Any) -> LocalConversationOutcome:
         seen.append(history)
         return LocalConversationOutcome(
-            trace=trace, ingress="local", actor=request.actor,
-            conversation=GatewayConversationResult.model_validate({
-                "trace": trace, "status": "answered", "text": "read it", "model_turns": 1,
-                "tools": ()}))
+            trace=trace,
+            ingress="local",
+            actor=request.actor,
+            conversation=GatewayConversationResult.model_validate(
+                {
+                    "trace": trace,
+                    "status": "answered",
+                    "text": "read it",
+                    "model_turns": 1,
+                    "tools": (),
+                }
+            ),
+        )
 
     monkeypatch.setattr(served.web.runtime.agent, "converse", converse)
     url, token = base(served), served.token
     session = fetch(url + "/api/conversations", token=token, body={}).json()
     session_id = session["conversation"]["session_id"]
-    uploaded = fetch(url + "/api/attachments", token=token, body={
-        "session_id": session_id, "filename": "prices.csv",
-        "data": base64.b64encode(b"stock,price\n2330,1000\n").decode()}).json()
+    uploaded = fetch(
+        url + "/api/attachments",
+        token=token,
+        body={
+            "session_id": session_id,
+            "filename": "prices.csv",
+            "data": base64.b64encode(b"stock,price\n2330,1000\n").decode(),
+        },
+    ).json()
     assert uploaded["ok"] and uploaded["attachment"]["kind"] == "text"
-    picture = fetch(url + "/api/attachments", token=token, body={
-        "session_id": session_id, "filename": "chart.png",
-        "data": base64.b64encode(PNG).decode()}).json()
-    turn = fetch(url + "/api/conversations/turn", token=token, body={
-        "session_id": session_id, "message": "整理這份資料",
-        "attachments": [uploaded["attachment"]["file_id"],
-                        picture["attachment"]["file_id"]]}).json()
+    picture = fetch(
+        url + "/api/attachments",
+        token=token,
+        body={
+            "session_id": session_id,
+            "filename": "chart.png",
+            "data": base64.b64encode(PNG).decode(),
+        },
+    ).json()
+    turn = fetch(
+        url + "/api/conversations/turn",
+        token=token,
+        body={
+            "session_id": session_id,
+            "message": "整理這份資料",
+            "attachments": [uploaded["attachment"]["file_id"], picture["attachment"]["file_id"]],
+        },
+    ).json()
     newest = seen[0][-1]
     assert "2330,1000" in newest.text and "prices.csv" in newest.text
     assert len(newest.images) == 1
     stored = turn["conversation"]["messages"][-2]
     assert [file["filename"] for file in stored["attachments"]] == ["prices.csv", "chart.png"]
-    fetch(url + "/api/conversations/turn", token=token,
-          body={"session_id": session_id, "message": "再算平均"})
+    fetch(
+        url + "/api/conversations/turn",
+        token=token,
+        body={"session_id": session_id, "message": "再算平均"},
+    )
     earlier = [m.text for m in seen[1] if m.role == "user"][0]
     assert "[附件]" in earlier and "prices.csv" in earlier and not seen[1][0].images
-    other = fetch(url + "/api/attachments", token=token, body={
-        "session_id": "conversation-unknown", "filename": "a.txt", "data": "eA=="})
+    other = fetch(
+        url + "/api/attachments",
+        token=token,
+        body={"session_id": "conversation-unknown", "filename": "a.txt", "data": "eA=="},
+    )
     assert other.status == 400
-    unknown = fetch(url + "/api/conversations/turn", token=token, body={
-        "session_id": session_id, "message": "x", "attachments": ["att-20260101000000-00000000"]})
+    unknown = fetch(
+        url + "/api/conversations/turn",
+        token=token,
+        body={
+            "session_id": session_id,
+            "message": "x",
+            "attachments": ["att-20260101000000-00000000"],
+        },
+    )
     assert unknown.json()["code"] == "attachment_unknown"
 
 

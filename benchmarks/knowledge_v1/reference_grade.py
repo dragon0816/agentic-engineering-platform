@@ -63,12 +63,15 @@ def _ask(client: Any, alias: str, prompt: str) -> dict[str, Any]:
     from models.contracts import ModelMessage, ModelRequest, ModelRequirements
 
     request = ModelRequest(
-        trace=TraceIdentifiers(trace_id="knowledge-v1-reference", request_id="reference",
-                               span_id="reference"),
+        trace=TraceIdentifiers(
+            trace_id="knowledge-v1-reference", request_id="reference", span_id="reference"
+        ),
         model_alias=alias,
         messages=(ModelMessage(role="system", text=RUBRIC), ModelMessage(role="user", text=prompt)),
         requirements=ModelRequirements(structured_output=True),
-        output_contract="knowledge_v1_reference_grade", max_output_tokens=4000)
+        output_contract="knowledge_v1_reference_grade",
+        max_output_tokens=4000,
+    )
     response = client.generate(request)
     if response.failure is not None:
         return {"error": response.failure.code}
@@ -89,23 +92,37 @@ def score(reference: dict[str, Any], verdict: dict[str, Any]) -> dict[str, Any]:
     for n, point in enumerate(points, 1):
         item = given.get(n) or {}
         label = item.get("label") if item.get("label") in LABELS else "missing"
-        labels.append({"n": n, "point": point.get("point"), "verified": point.get("verified"),
-                       "label": label, "why": item.get("why")})
+        labels.append(
+            {
+                "n": n,
+                "point": point.get("point"),
+                "verified": point.get("verified"),
+                "label": label,
+                "why": item.get("why"),
+            }
+        )
     weight = {"covered": 1.0, "partial": 0.5}
-    coverage = (sum(weight.get(item["label"], 0.0) for item in labels) / len(labels)
-                if labels else None)
-    return {"coverage": None if coverage is None else round(coverage, 3), "points": labels,
-            "contradicted": sum(1 for item in labels if item["label"] == "contradicted"),
-            "invented": [str(x) for x in verdict.get("invented") or []]}
+    coverage = (
+        sum(weight.get(item["label"], 0.0) for item in labels) / len(labels) if labels else None
+    )
+    return {
+        "coverage": None if coverage is None else round(coverage, 3),
+        "points": labels,
+        "contradicted": sum(1 for item in labels if item["label"] == "contradicted"),
+        "invented": [str(x) for x in verdict.get("invented") or []],
+    }
 
 
 def prompt(question: str, reference: dict[str, Any], answer: str) -> str:
-    points = "\n".join(f"{n}. {p.get('point')}" for n, p in
-                       enumerate(reference.get("key_points") or [], 1))
-    return (f"Question:\n{question}\n\nREFERENCE answer:\n{reference.get('answer') or ''}\n\n"
-            f"REFERENCE key points:\n{points}\n\n"
-            "Not in the knowledge base (per the reference):\n"
-            f"{reference.get('missing') or '(none)'}\n\nANSWER:\n{answer}")
+    points = "\n".join(
+        f"{n}. {p.get('point')}" for n, p in enumerate(reference.get("key_points") or [], 1)
+    )
+    return (
+        f"Question:\n{question}\n\nREFERENCE answer:\n{reference.get('answer') or ''}\n\n"
+        f"REFERENCE key points:\n{points}\n\n"
+        "Not in the knowledge base (per the reference):\n"
+        f"{reference.get('missing') or '(none)'}\n\nANSWER:\n{answer}"
+    )
 
 
 def main() -> int:
@@ -113,19 +130,26 @@ def main() -> int:
     parser.add_argument("--run-id", required=True)
     args = parser.parse_args()
     run_dir = HERE / "runs" / args.run_id
-    references = {p.stem: json.loads(p.read_text(encoding="utf-8"))
-                  for p in sorted((HERE / "references").glob("Q*.json"))}
+    references = {
+        p.stem: json.loads(p.read_text(encoding="utf-8"))
+        for p in sorted((HERE / "references").glob("Q*.json"))
+    }
     credential()
     from judge import Judge  # needs the credential in the environment
+
     judge = Judge(HOST_JSON)
     rows = []
     meta_path = run_dir / "metadata.json"
     meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
     graded_runs = meta.get("telemetry_runs") or [None]
-    grading = BenchmarkTelemetry("knowledge_v1", args.run_id, kind="benchmark_grading",
-                                 parent_run_id=graded_runs[-1])
-    grading.start(cases=sum(1 for q in references if (run_dir / q / "trace.json").exists()),
-                  grader=GRADER_VERSION, judge="company")
+    grading = BenchmarkTelemetry(
+        "knowledge_v1", args.run_id, kind="benchmark_grading", parent_run_id=graded_runs[-1]
+    )
+    grading.start(
+        cases=sum(1 for q in references if (run_dir / q / "trace.json").exists()),
+        grader=GRADER_VERSION,
+        judge="company",
+    )
     for qid, reference in references.items():
         trace_path = run_dir / qid / "trace.json"
         if not trace_path.exists():
@@ -133,34 +157,57 @@ def main() -> int:
         exchange = json.loads(trace_path.read_text(encoding="utf-8"))["exchange"]
         answer = knowledge_use(exchange)["text"]
         verdict = _ask(judge.client, judge.alias, prompt(reference["question"], reference, answer))
-        graded = ({"error": verdict["error"]} if "error" in verdict else score(reference, verdict))
+        graded = {"error": verdict["error"]} if "error" in verdict else score(reference, verdict)
         result = {"id": qid, "grader": GRADER_VERSION, **graded}
         (run_dir / qid / "reference-grade.json").write_text(
-            json.dumps(result, ensure_ascii=False, indent=1), encoding="utf-8")
-        status = json.loads((run_dir / qid / "result.json").read_text(encoding="utf-8"))["status"] \
-            if (run_dir / qid / "result.json").exists() else "-"
+            json.dumps(result, ensure_ascii=False, indent=1), encoding="utf-8"
+        )
+        status = (
+            json.loads((run_dir / qid / "result.json").read_text(encoding="utf-8"))["status"]
+            if (run_dir / qid / "result.json").exists()
+            else "-"
+        )
         rows.append((qid, status, result))
-        labels = {label: sum(1 for p in result.get("points") or [] if p["label"] == label)
-                  for label in LABELS}
+        labels = {
+            label: sum(1 for p in result.get("points") or [] if p["label"] == label)
+            for label in LABELS
+        }
         grading.case_completed(
-            qid, "ERROR" if "error" in result else "GRADED", run_verdict=status,
-            coverage=result.get("coverage"), key_points=len(result.get("points") or []),
+            qid,
+            "ERROR" if "error" in result else "GRADED",
+            run_verdict=status,
+            coverage=result.get("coverage"),
+            key_points=len(result.get("points") or []),
             **{f"points_{label}": count for label, count in labels.items()},
             invented_count=len(result.get("invented") or []),
-            reference_sufficient=reference.get("sufficient"), failure_code=result.get("error"))
-        print(f"{qid}: coverage {result.get('coverage')}, contradicted "
-              f"{result.get('contradicted')}, invented {len(result.get('invented') or [])} "
-              f"({status}) {result.get('error') or ''}", flush=True)
-    lines = [f"# knowledge_v1 {args.run_id}: answers against the Claude Code references", "",
-             f"Grader {GRADER_VERSION}. Coverage = (covered + partial / 2) / key points.", "",
-             "| Question | run.py status | Coverage | Covered | Partial | Missing | Contradicted |"
-             " Invented |", "|---|---|---|---|---|---|---|---|"]
+            reference_sufficient=reference.get("sufficient"),
+            failure_code=result.get("error"),
+        )
+        print(
+            f"{qid}: coverage {result.get('coverage')}, contradicted "
+            f"{result.get('contradicted')}, invented {len(result.get('invented') or [])} "
+            f"({status}) {result.get('error') or ''}",
+            flush=True,
+        )
+    lines = [
+        f"# knowledge_v1 {args.run_id}: answers against the Claude Code references",
+        "",
+        f"Grader {GRADER_VERSION}. Coverage = (covered + partial / 2) / key points.",
+        "",
+        "| Question | run.py status | Coverage | Covered | Partial | Missing | Contradicted |"
+        " Invented |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
     for qid, status, result in rows:
-        count = {label: sum(1 for p in result.get("points") or [] if p["label"] == label)
-                 for label in LABELS}
-        lines.append(f"| {qid} | {status} | {result.get('coverage', result.get('error'))} | "
-                     f"{count['covered']} | {count['partial']} | {count['missing']} | "
-                     f"{count['contradicted']} | {len(result.get('invented') or [])} |")
+        count = {
+            label: sum(1 for p in result.get("points") or [] if p["label"] == label)
+            for label in LABELS
+        }
+        lines.append(
+            f"| {qid} | {status} | {result.get('coverage', result.get('error'))} | "
+            f"{count['covered']} | {count['partial']} | {count['missing']} | "
+            f"{count['contradicted']} | {len(result.get('invented') or [])} |"
+        )
     (run_dir / "reference-report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     grading.finish()
     print(f"done: {len(rows)} graded; see {run_dir / 'reference-report.md'}")

@@ -563,8 +563,7 @@ class PlatformClient:
 
     async def feedback(self, records: tuple[FeedbackRecord, ...]) -> FeedbackOutcome:
         """Upload conversation feedback (owner 2026-10-08)."""
-        answer = await asyncio.to_thread(self._call, "feedback",
-                                         FeedbackRequest(records=records))
+        answer = await asyncio.to_thread(self._call, "feedback", FeedbackRequest(records=records))
         if answer.status != "answered":
             return FeedbackOutcome(status=answer.status, failure=answer.failure)
         try:

@@ -13,8 +13,9 @@ from knowledge.sandbox import Sandboxes
 
 def _pipeline(tmp_path: Path, model: PlanningModel | None = None) -> tuple[KnowledgePipeline, Path]:
     base = _base(tmp_path)
-    pipeline = KnowledgePipeline(Sandboxes(tmp_path / "workspace"), {"k-test": base},
-                                 model=model, alias="company")  # type: ignore[arg-type]
+    pipeline = KnowledgePipeline(
+        Sandboxes(tmp_path / "workspace"), {"k-test": base}, model=model, alias="company"
+    )  # type: ignore[arg-type]
     return pipeline, base
 
 
@@ -111,8 +112,11 @@ def test_drop_add_contents_and_discard(tmp_path: Path) -> None:
     before = _snapshot(base)
     sandbox = pipeline.create_sandbox("k-test", "files", "a").sandbox_id
     assert pipeline.add_drop(sandbox, "Market/x.txt", b"hello\n") == "drop/Market/x.txt"
-    for name, code in (("../escape.txt", "outside_drop"), ("Market/x.txt", "drop_exists"),
-                       (" ", "outside_drop")):
+    for name, code in (
+        ("../escape.txt", "outside_drop"),
+        ("Market/x.txt", "drop_exists"),
+        (" ", "outside_drop"),
+    ):
         with pytest.raises(PipelineError, match=code):
             pipeline.add_drop(sandbox, name, b"x")
     raw_ref = pipeline.convert(sandbox, mode="apply").items[0].raw_ref

@@ -282,9 +282,10 @@ def test_ask_renders_markdown_as_safe_readable_elements(
         pytest.skip("Node.js is not installed, so Markdown rendering cannot be checked")
     page = served.page().decode("utf-8")
     script = page.split("<script>", 1)[1].split("</script>", 1)[0]
-    renderer = "function safeMarkdownHref" + script.split("function safeMarkdownHref", 1)[
-        1
-    ].split("// -- Ask", 1)[0]
+    renderer = (
+        "function safeMarkdownHref"
+        + script.split("function safeMarkdownHref", 1)[1].split("// -- Ask", 1)[0]
+    )
     assert "renderAnswer(said, replied.text)" in script
     # A sent turn is rendered when its conversation reloads (renderConversation).
     assert "await loadConversations(session)" in script
@@ -859,11 +860,14 @@ def test_context_and_session_management_are_authenticated_and_owner_scoped(
     settings = fetch(base(served) + "/api/settings", token=served.token).json()
     assert settings["memory"]["cross_session"] is False
     assert fetch(base(served) + "/api/settings/context", body={}).status == 401
-    assert fetch(
-        base(served) + "/api/settings/context",
-        token=served.token,
-        body={"recent_messages": 0, "history_budget_bytes": 4_000},
-    ).status == 400
+    assert (
+        fetch(
+            base(served) + "/api/settings/context",
+            token=served.token,
+            body={"recent_messages": 0, "history_budget_bytes": 4_000},
+        ).status
+        == 400
+    )
     saved = fetch(
         base(served) + "/api/settings/context",
         token=served.token,
@@ -878,11 +882,14 @@ def test_context_and_session_management_are_authenticated_and_owner_scoped(
         fetch(base(served) + "/api/conversations/delete", body={"session_id": session}).status
         == 401
     )
-    assert fetch(
-        base(served) + "/api/conversations/delete",
-        token=served.token,
-        body={"session_id": session, "actor": "other"},
-    ).status == 400
+    assert (
+        fetch(
+            base(served) + "/api/conversations/delete",
+            token=served.token,
+            body={"session_id": session, "actor": "other"},
+        ).status
+        == 400
+    )
     deleted = fetch(
         base(served) + "/api/conversations/delete",
         token=served.token,
@@ -891,8 +898,9 @@ def test_context_and_session_management_are_authenticated_and_owner_scoped(
     assert deleted.status == 200
     assert deleted.json()["ok"] is True
     assert (
-        fetch(base(served) + "/api/conversations?session_id=" + session, token=served.token)
-        .json()["selected"]
+        fetch(base(served) + "/api/conversations?session_id=" + session, token=served.token).json()[
+            "selected"
+        ]
         is None
     )
 
@@ -905,9 +913,12 @@ def test_saved_session_rolls_at_one_hundred_messages_without_becoming_unreadable
         web = AgentWeb(runtime)
         session = web.create_conversation()["conversation"]["session_id"]
         for _ in range(51):
-            assert web.conversation_turn(
-                ConversationTurnRequest(session_id=session, message="/help")
-            )["ok"] is True
+            assert (
+                web.conversation_turn(ConversationTurnRequest(session_id=session, message="/help"))[
+                    "ok"
+                ]
+                is True
+            )
         saved = web.conversations(session)["selected"]
         assert len(saved["messages"]) == 100
     with build_runtime(config, layout=layout) as rebuilt:
@@ -1504,8 +1515,8 @@ def test_local_sync_refusal_is_typed_and_leaves_local_state_untouched(tmp_path: 
         # A hand-placed file under the planned identity with other bytes.
         layout.workflows.mkdir(parents=True, exist_ok=True)
         (layout.workflows / "mine.json").write_text(
-            json.dumps({**workflow_manifest(), "description": "placed by hand"}),
-            encoding="utf-8")
+            json.dumps({**workflow_manifest(), "description": "placed by hand"}), encoding="utf-8"
+        )
         with runtime:
             server = AgentWebServer(AgentWeb(runtime))
             thread = threading.Thread(target=server.serve_forever, daemon=True)
@@ -1654,7 +1665,9 @@ def test_installed_knowledge_skill_uses_shared_harness_and_bridge(tmp_path: Path
     ]
     assert result["record"]["cited_passages"]
     assert result["evidence"] == {
-        "raw_citations": 1, "facet_status": "not_assessed", "missing_facets": None
+        "raw_citations": 1,
+        "facet_status": "not_assessed",
+        "missing_facets": None,
     }
     assert result["outcome"]["decision"]["target"] == (
         KNOWLEDGE_QUERY_SPEC.identity.model_dump(mode="json")
@@ -1815,10 +1828,14 @@ def test_skill_guided_combination_reports_exact_missing_evidence(tmp_path: Path)
         )
         vault.write_raw(
             "raw/market.md",
-            render(RawDocument(
-                source=source, extractor="txt.v1", created=date(2026, 10, 4),
-                sections=(RawSection(text="CMP180 wireless market demand is increasing."),),
-            )),
+            render(
+                RawDocument(
+                    source=source,
+                    extractor="txt.v1",
+                    created=date(2026, 10, 4),
+                    sections=(RawSection(text="CMP180 wireless market demand is increasing."),),
+                )
+            ),
         )
         result = AgentWeb(runtime).ask_knowledge(
             KnowledgeAskRequest(asset=V1, question="CMP180 market product", skill=skill)
@@ -1851,24 +1868,28 @@ def test_guided_partial_evidence_stays_visible_when_relationship_is_missing(
             ("market", "Wi-Fi 7 wireless market testing demand is increasing."),
             ("option", "CMP180 product option K352 specifies WLAN 802.11be testing."),
         ):
-            raw_ref = (
-                "raw/Market/market.md" if name == "market" else "raw/option.md"
-            )
+            raw_ref = "raw/Market/market.md" if name == "market" else "raw/option.md"
             source = source_for(content.encode(), f"drop/{name}.txt").model_copy(
                 update={"raw_ref": raw_ref}
             )
             vault.write_raw(
                 raw_ref,
-                render(RawDocument(
-                    source=source, extractor="txt.v1", created=date(2026, 10, 4),
-                    sections=(RawSection(text=content),),
-                )),
+                render(
+                    RawDocument(
+                        source=source,
+                        extractor="txt.v1",
+                        created=date(2026, 10, 4),
+                        sections=(RawSection(text=content),),
+                    )
+                ),
             )
-        result = AgentWeb(runtime).ask_knowledge(KnowledgeAskRequest(
-            asset=V1,
-            question="CMP180 wireless market trend and product option",
-            skill=skill,
-        ))
+        result = AgentWeb(runtime).ask_knowledge(
+            KnowledgeAskRequest(
+                asset=V1,
+                question="CMP180 wireless market trend and product option",
+                skill=skill,
+            )
+        )
     assert result["ok"] is False
     assert result["harness"]["phase"] == "needs_input"
     assert result["evidence"]["missing_facets"] == []
@@ -1880,7 +1901,8 @@ def test_guided_partial_evidence_stays_visible_when_relationship_is_missing(
 def test_skill_guided_no_raw_reports_unverified_facets(tmp_path: Path) -> None:
     skill = AssetIdentity(namespace="company-agent", name="knowledge-query", version="1.2.0")
     with knowledge_runtime(
-        tmp_path, harness_skill=True,
+        tmp_path,
+        harness_skill=True,
         harness_skill_file="knowledge-evidence-v1.2.json",
     ) as runtime:
         result = AgentWeb(runtime).ask_knowledge(
@@ -1888,9 +1910,7 @@ def test_skill_guided_no_raw_reports_unverified_facets(tmp_path: Path) -> None:
         )
     assert result["ok"] is False
     assert result["harness"]["phase"] == "needs_input"
-    assert result["evidence"]["missing_facets"] == [
-        "market_trend", "product_option_spec"
-    ]
+    assert result["evidence"]["missing_facets"] == ["market_trend", "product_option_spec"]
     assert "Unverified requested facets" in result["answer"]
 
 
@@ -1902,7 +1922,8 @@ def test_skill_guided_host_rejects_unrelated_cited_model_answer(tmp_path: Path) 
 
     skill = AssetIdentity(namespace="company-agent", name="knowledge-query", version="1.2.0")
     with knowledge_runtime(
-        tmp_path, harness_skill=True,
+        tmp_path,
+        harness_skill=True,
         harness_skill_file="knowledge-evidence-v1.2.json",
     ) as runtime:
         vault = Vault(Path(runtime.config.knowledge[0].vault_root))
@@ -1915,10 +1936,14 @@ def test_skill_guided_host_rejects_unrelated_cited_model_answer(tmp_path: Path) 
         )
         vault.write_raw(
             "raw/link.md",
-            render(RawDocument(
-                source=source, extractor="txt.v1", created=date(2026, 10, 4),
-                sections=(RawSection(text=content),),
-            )),
+            render(
+                RawDocument(
+                    source=source,
+                    extractor="txt.v1",
+                    created=date(2026, 10, 4),
+                    sections=(RawSection(text=content),),
+                )
+            ),
         )
         result = AgentWeb(runtime).ask_knowledge(
             KnowledgeAskRequest(asset=V1, question="CMP180 market product", skill=skill)
@@ -1944,9 +1969,7 @@ def test_named_knowledge_chat_keeps_bridge_denial_visible(tmp_path: Path) -> Non
         )
     assert asked["answer"]["status"] == "failed"
     assert "permission_denied" in asked["answer"]["answer"]
-    assert asked["answer"]["outcome"]["capability"]["failure"]["code"] == (
-        "permission_denied"
-    )
+    assert asked["answer"]["outcome"]["capability"]["failure"]["code"] == ("permission_denied")
 
 
 def test_named_knowledge_market_matrix_uses_exact_read_capability(tmp_path: Path) -> None:
@@ -2177,7 +2200,8 @@ def test_a_host_with_no_namespace_says_what_to_set(tmp_path: Path) -> None:
 
 
 def test_a_supported_answer_with_an_uncited_facet_is_shown_with_its_gap(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """knowledge_v1 sample-001 Q0071: retrieval covered every facet but the answer
     cited none for one; the verified answer was replaced by a one-line refusal."""
@@ -2191,14 +2215,16 @@ def test_a_supported_answer_with_an_uncited_facet_is_shown_with_its_gap(
 
     def uncited_market(self: KnowledgeBridgeActions) -> dict[str, object]:
         report = dict(original(self))
-        report.update(facet_status="missing", missing_facets=["market_trend"],
-                      claim_status="supported")
+        report.update(
+            facet_status="missing", missing_facets=["market_trend"], claim_status="supported"
+        )
         return report
 
     monkeypatch.setattr(KnowledgeBridgeActions, "facet_report", uncited_market)
     skill = AssetIdentity(namespace="company-agent", name="knowledge-query", version="1.2.0")
-    with knowledge_runtime(tmp_path, harness_skill=True,
-                           harness_skill_file="knowledge-evidence-v1.2.json") as runtime:
+    with knowledge_runtime(
+        tmp_path, harness_skill=True, harness_skill_file="knowledge-evidence-v1.2.json"
+    ) as runtime:
         vault = Vault(Path(runtime.config.knowledge[0].vault_root))
         for name, content in (
             ("market", "CMP180 wireless market demand for production testing is increasing."),
@@ -2206,12 +2232,22 @@ def test_a_supported_answer_with_an_uncited_facet_is_shown_with_its_gap(
             ("link", "CMP180 product option K123 supports wireless market demand for testing."),
         ):
             source = source_for(content.encode(), f"drop/{name}.txt").model_copy(
-                update={"raw_ref": f"raw/{name}.md"})
-            vault.write_raw(f"raw/{name}.md", render(RawDocument(
-                source=source, extractor="txt.v1", created=date(2026, 10, 4),
-                sections=(RawSection(text=content),))))
-        result = AgentWeb(runtime).ask_knowledge(KnowledgeAskRequest(
-            asset=V1, question="CMP180 market product", skill=skill))
+                update={"raw_ref": f"raw/{name}.md"}
+            )
+            vault.write_raw(
+                f"raw/{name}.md",
+                render(
+                    RawDocument(
+                        source=source,
+                        extractor="txt.v1",
+                        created=date(2026, 10, 4),
+                        sections=(RawSection(text=content),),
+                    )
+                ),
+            )
+        result = AgentWeb(runtime).ask_knowledge(
+            KnowledgeAskRequest(asset=V1, question="CMP180 market product", skill=skill)
+        )
     assert result["ok"] is False
     assert "未能以證據支持：market_trend" in result["answer"]
     assert "已查到可引用的部分資料" in result["answer"]

@@ -60,25 +60,19 @@ def test_public_native_requires_every_material_to_be_explicitly_labeled() -> Non
         "native_requires_public"
     )
     with pytest.raises(ValidationError, match="PUBLIC requires an explicit classifier"):
-        ContextMaterial(
-            material_id="forged", origin="user", classification="PUBLIC", text="hello"
-        )
+        ContextMaterial(material_id="forged", origin="user", classification="PUBLIC", text="hello")
     with pytest.raises(ValidationError, match="unique material IDs"):
         OutboundContext(materials=(material("same"), material("same")))
 
 
 def test_internal_gateway_needs_explicit_approval_for_every_class() -> None:
     gateway = profile("model", "gateway")
-    context = OutboundContext(
-        materials=(material("one"), material("two", "CONFIDENTIAL"))
-    )
+    context = OutboundContext(materials=(material("one"), material("two", "CONFIDENTIAL")))
     assert DataPolicy(()).decide(gateway, context).code == "gateway_not_approved"
     assert DataPolicy((approval("UNCLASSIFIED"),)).decide(gateway, context).code == (
         "class_not_approved"
     )
-    approved = DataPolicy((approval("UNCLASSIFIED", "CONFIDENTIAL"),)).decide(
-        gateway, context
-    )
+    approved = DataPolicy((approval("UNCLASSIFIED", "CONFIDENTIAL"),)).decide(gateway, context)
     assert approved.allowed and approved.approval_ref == "policy/internal-gateway-1"
     assert approved.effective_classification == "UNCLASSIFIED"
     with pytest.raises(ValidationError, match="internal Gateway approval"):
@@ -99,8 +93,9 @@ def test_missing_context_is_denied_without_content_in_the_decision() -> None:
 def test_restricted_data_requires_a_separate_environment_and_never_reaches_native() -> None:
     restricted = OutboundContext(materials=(material("secret-design", "RESTRICTED"),))
     assert DataPolicy(()).decide(profile(), restricted).code == "native_requires_public"
-    assert DataPolicy((approval("UNCLASSIFIED"),)).decide(
-        profile("model", "gateway"), restricted
-    ).code == "class_not_approved"
+    assert (
+        DataPolicy((approval("UNCLASSIFIED"),)).decide(profile("model", "gateway"), restricted).code
+        == "class_not_approved"
+    )
     with pytest.raises(ValidationError, match="separate approved environment"):
         approval("RESTRICTED")

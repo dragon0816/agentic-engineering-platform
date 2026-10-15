@@ -46,9 +46,7 @@ def _vault(tmp_path: Path, sections: tuple[str, ...]) -> Vault:
 
 def _cell(record: MarketMatrixRecord, family: str, market: str) -> MatrixCell:
     return next(
-        cell
-        for cell in record.cells
-        if cell.product_family == family and cell.market == market
+        cell for cell in record.cells if cell.product_family == family and cell.market == market
     )
 
 
@@ -119,17 +117,17 @@ def test_selected_cell_reports_insufficient_evidence_without_promoting_a_lead(
         assert assessment.status == "needs_evidence"
         assert assessment.discovery_level == expected_level
         assert assessment.discovery_evidence == cell.evidence
-        assert tuple(need.question for need in assessment.missing_evidence) == (
-            cell.knowledge_gaps
-        )
+        assert tuple(need.question for need in assessment.missing_evidence) == (cell.knowledge_gaps)
         assert tuple(need.facet for need in assessment.missing_evidence) == (
-            "market_requirements", "product_options", "customer_use_case"
+            "market_requirements",
+            "product_options",
+            "customer_use_case",
         )
         assert assessment.asset == ASSET
         assert assessment.trace == TRACE
-        assert MarketCellSufficiency.model_validate(
-            assessment.model_dump(mode="json")
-        ) == assessment
+        assert (
+            MarketCellSufficiency.model_validate(assessment.model_dump(mode="json")) == assessment
+        )
         tampered = assessment.model_dump(mode="json")
         tampered["status"] = "validated"
         with pytest.raises(ValidationError):

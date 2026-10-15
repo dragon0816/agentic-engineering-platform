@@ -84,7 +84,10 @@ def enrollment() -> InMemoryEnrollmentRegistry:
     """alice and bob are in team `quality`; carol and dave are in no team."""
     registry = InMemoryEnrollmentRegistry(administrators=("platform-admin",))
     members: tuple[tuple[str, tuple[str, ...]], ...] = (
-        ("alice", ("quality",)), ("bob", ("quality",)), ("carol", ()), ("dave", ())
+        ("alice", ("quality",)),
+        ("bob", ("quality",)),
+        ("carol", ()),
+        ("dave", ()),
     )
     for actor, groups in members:
         registry.issue(
@@ -226,7 +229,10 @@ def test_only_the_owner_a_team_member_or_a_co_editor_publishes_a_new_version(
     with pytest.raises(OwnershipError, match="publisher_not_authorized"):
         publish(service, "carol", identity_of("report", "1.2.0"))
     assert [item.metadata.identity.version for item in registry.discover()] == [
-        "1.0.0", "1.1.0", "1.0.0", "1.1.0"
+        "1.0.0",
+        "1.1.0",
+        "1.0.0",
+        "1.1.0",
     ]
 
 
@@ -398,8 +404,13 @@ def test_deprecating_a_version_stops_new_choices_but_keeps_existing_ones() -> No
             who("lead"), REPORT.namespace, REPORT.name, "1.0.0", "x", replacement="9.0.0", now=NOW
         )
     record = owners.deprecate(
-        who("lead"), REPORT.namespace, REPORT.name, "1.1.0", "wrong totals",
-        replacement="1.0.0", now=NOW,
+        who("lead"),
+        REPORT.namespace,
+        REPORT.name,
+        "1.1.0",
+        "wrong totals",
+        replacement="1.0.0",
+        now=NOW,
     )
     deprecation = record.deprecation("1.1.0")
     assert deprecation is not None and deprecation.deprecated_by == "lead"
@@ -473,9 +484,7 @@ def test_one_active_version_is_per_member_and_per_device() -> None:
 def legacy_registry(path: Path, rows: list[PublishedAssetPackage]) -> None:
     """A Registry database as the previous code wrote it: no ownership table."""
     with sqlite3.connect(path) as connection:
-        connection.execute(
-            "CREATE TABLE registry_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)"
-        )
+        connection.execute("CREATE TABLE registry_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
         connection.execute("INSERT INTO registry_meta VALUES ('schema_version', '1')")
         connection.execute(
             "CREATE TABLE packages (namespace TEXT NOT NULL, name TEXT NOT NULL, "

@@ -34,8 +34,13 @@ class Picks:
         self.names = names
 
     def decide(self, item: SkillCandidateRequest) -> DecisionResult[tuple[str, ...]]:
-        return DecisionResult(decision_type="skill_selection", value=self.names, confidence=0.99,
-                              reason_code="picked", provider_id=self.provider_id)
+        return DecisionResult(
+            decision_type="skill_selection",
+            value=self.names,
+            confidence=0.99,
+            reason_code="picked",
+            provider_id=self.provider_id,
+        )
 
 
 class Seen(FakeModel):
@@ -45,15 +50,26 @@ class Seen(FakeModel):
 
 
 def skill(alias: str, name: str) -> SkillManifest:
-    return SkillManifest.model_validate({
-        "metadata": {"identity": {"namespace": "engineering", "name": name, "version": "1.0.0"},
-                     "owner": {"type": "team", "id": "engineering"},
-                     "visibility": "organization", "lifecycle": "published"},
-        "alias": alias, "instructions": f"{alias} tool",
-        "commands": [{"name": "ask", "kind": "capability",
-                      "target": KNOWLEDGE_QUERY_SPEC.identity.model_dump()}],
-        "default_command": "ask",
-    })
+    return SkillManifest.model_validate(
+        {
+            "metadata": {
+                "identity": {"namespace": "engineering", "name": name, "version": "1.0.0"},
+                "owner": {"type": "team", "id": "engineering"},
+                "visibility": "organization",
+                "lifecycle": "published",
+            },
+            "alias": alias,
+            "instructions": f"{alias} tool",
+            "commands": [
+                {
+                    "name": "ask",
+                    "kind": "capability",
+                    "target": KNOWLEDGE_QUERY_SPEC.identity.model_dump(),
+                }
+            ],
+            "default_command": "ask",
+        }
+    )
 
 
 def tools_offered(picked: tuple[str, ...], excluded: frozenset[str]) -> list[str]:
@@ -61,19 +77,28 @@ def tools_offered(picked: tuple[str, ...], excluded: frozenset[str]) -> list[str
     skills.register(skill("knowledge", "knowledge-query"))
     skills.register(skill("coding", "coding"))
     installed = InstalledCapabilities()
-    installed.register(KNOWLEDGE_QUERY_SPEC, Recording(), KnowledgeQueryRequest, Report,
-                       ExecutionDependencies(central_required=False))
+    installed.register(
+        KNOWLEDGE_QUERY_SPEC,
+        Recording(),
+        KnowledgeQueryRequest,
+        Report,
+        ExecutionDependencies(central_required=False),
+    )
     bridge = BridgeExecutor(installed, LocalPolicy(()))
     model = Seen()
     gateway = Gateway(
         RequestRouter(CommandRouter(skills), model=model, decision_accelerator=config()),
-        bridge, WorkflowEngine(InstalledWorkflows(), bridge),
+        bridge,
+        WorkflowEngine(InstalledWorkflows(), bridge),
         skill_accelerator=lambda: Picks(picked),  # type: ignore[arg-type,return-value]
         skill_authorizer=lambda _request: True,
         accelerator_excluded_aliases=excluded,
     )
-    asyncio.run(gateway.converse(request("CMP180 是什麼？"),
-                                 (ModelMessage(role="user", text="CMP180 是什麼？"),)))
+    asyncio.run(
+        gateway.converse(
+            request("CMP180 是什麼？"), (ModelMessage(role="user", text="CMP180 是什麼？"),)
+        )
+    )
     return sorted(tool.name for tool in model.calls[0].tools)
 
 
@@ -88,4 +113,3 @@ def test_a_narrowing_without_coding_still_applies() -> None:
 
 def test_without_an_exclusion_the_selector_behaves_as_before() -> None:
     assert tools_offered(("coding__ask",), frozenset()) == ["coding__ask"]
-

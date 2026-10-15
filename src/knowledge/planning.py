@@ -394,28 +394,40 @@ class IngestPlanner:
                 problems.append(PlanProblem(code="human_page", path=path))
                 continue
             if op is None or op == "create":
-                pages.append(PlannedPage.model_validate({
-                    "path": path, "content": item.get("content", ""),
-                    "action": "update" if exists else "create"}))
+                pages.append(
+                    PlannedPage.model_validate(
+                        {
+                            "path": path,
+                            "content": item.get("content", ""),
+                            "action": "update" if exists else "create",
+                        }
+                    )
+                )
                 continue
             if not isinstance(path, str) or not exists or op not in OPS:
-                problems.append(PlanProblem(
-                    code="section_operation", path=str(path),
-                    detail="unknown operation" if op not in OPS else "page does not exist"))
+                problems.append(
+                    PlanProblem(
+                        code="section_operation",
+                        path=str(path),
+                        detail="unknown operation" if op not in OPS else "page does not exist",
+                    )
+                )
                 continue
             key = normalize(path)
             current = pages[edited[key]].content if key in edited else self.vault.read(key)
             try:
                 updated = apply_op(current, dict(item))
             except SectionError as error:
-                problems.append(PlanProblem(code="section_operation", path=path,
-                                            detail=str(error)[:200]))
+                problems.append(
+                    PlanProblem(code="section_operation", path=path, detail=str(error)[:200])
+                )
                 continue
             if op == "replace_section" and correction_of(dict(item)) is not None:
                 parsed = parse(current)
                 body = parsed.sections[parsed.find(str(item.get("heading") or ""))][1]
                 allowed.setdefault(key, set()).update(
-                    sourced_lines("\n".join(body), self._source_titles()))
+                    sourced_lines("\n".join(body), self._source_titles())
+                )
             if key in edited:
                 pages[edited[key]] = pages[edited[key]].model_copy(update={"content": updated})
             else:
@@ -425,14 +437,27 @@ class IngestPlanner:
             if page.action != "update":
                 continue
             page = pages[number] = page.model_copy(
-                update={"content": like_endings(  # read() hides CRLF; the bytes do not
-                    page.content, self.vault.read_bytes(page.path).decode("utf-8"))})
-            lost = [line for line in lost_lines(self.vault.read(page.path), page.content,
-                                                self._source_titles())
-                    if line not in allowed.get(normalize(page.path), set())]
+                update={
+                    "content": like_endings(  # read() hides CRLF; the bytes do not
+                        page.content, self.vault.read_bytes(page.path).decode("utf-8")
+                    )
+                }
+            )
+            lost = [
+                line
+                for line in lost_lines(
+                    self.vault.read(page.path), page.content, self._source_titles()
+                )
+                if line not in allowed.get(normalize(page.path), set())
+            ]
             if lost:
-                problems.append(PlanProblem(code="drops_sourced_line", path=page.path,
-                                            detail=f"{len(lost)}: {lost[0][:160]}"))
+                problems.append(
+                    PlanProblem(
+                        code="drops_sourced_line",
+                        path=page.path,
+                        detail=f"{len(lost)}: {lost[0][:160]}",
+                    )
+                )
         return WritePlan(
             source=document.source,
             summary=proposal.summary,
@@ -450,8 +475,11 @@ class IngestPlanner:
 
     def _source_titles(self) -> set[str]:
         if self._sources is None:
-            self._sources = {title.casefold() for path, title in self.vault.wiki_pages()
-                             if path.startswith(SOURCES_AREA)}
+            self._sources = {
+                title.casefold()
+                for path, title in self.vault.wiki_pages()
+                if path.startswith(SOURCES_AREA)
+            }
         return self._sources
 
     def _exists(self, path: str) -> bool:
@@ -513,8 +541,13 @@ class IngestPlanner:
         touches and offers only their pages, each with its bilingual line."""
         every = self.vault.wiki_pages()
         pages = tuple((path, title) for path, title in every if not is_navigation(path))
-        entries = [entry for entry in index_entries(
-            self.vault, {title.casefold(): path for path, title in every}) if entry.category]
+        entries = [
+            entry
+            for entry in index_entries(
+                self.vault, {title.casefold(): path for path, title in every}
+            )
+            if entry.category
+        ]
         if not entries:
             listed = "\n".join(f"- {path} — {title}" for path, title in pages)
             return pages, listed or "(no pages yet)"
@@ -522,21 +555,31 @@ class IngestPlanner:
         answer = self._ask(
             CATEGORY_PROMPT.format(
                 categories="\n".join(f"- {name}" for name in categories),
-                source_ref=source_ref, source_text=text[: self.condense_over],
-                cap=MAX_CATEGORIES),
+                source_ref=source_ref,
+                source_text=text[: self.condense_over],
+                cap=MAX_CATEGORIES,
+            ),
             contract=CATEGORY_CONTRACT,
             trace=TraceIdentifiers(trace_id=trace_id, request_id="categories", span_id="pass-0"),
         )
         named = answer.get("categories") if isinstance(answer, dict) else None
-        chosen = set(list(dict.fromkeys(
-            item for item in (named if isinstance(named, list) else [])
-            if item in categories))[:MAX_CATEGORIES])
+        chosen = set(
+            list(
+                dict.fromkeys(
+                    item
+                    for item in (named if isinstance(named, list) else [])
+                    if item in categories
+                )
+            )[:MAX_CATEGORIES]
+        )
         titles = dict(pages)
         lines: dict[str, str] = {}
         for entry in entries:
             if entry.category in chosen:
-                lines.setdefault(entry.page, f"- {entry.page} — "
-                                 f"{entry.line.lstrip('-* ')[:INVENTORY_LINE_CHARS]}")
+                lines.setdefault(
+                    entry.page,
+                    f"- {entry.page} — {entry.line.lstrip('-* ')[:INVENTORY_LINE_CHARS]}",
+                )
         offered = tuple((path, titles.get(path, path)) for path in lines)
         return offered, "\n".join(lines.values()) or "(no pages in the chosen categories)"
 

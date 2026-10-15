@@ -63,8 +63,11 @@ def check_proposal(text: str) -> tuple[str, ...]:
     if not text.startswith("---\n") or "\n---\n" not in text[4:]:
         return ("the proposal has no frontmatter",)
     head = text[4:].split("\n---\n", 1)[0]
-    fields = {line.split(":", 1)[0].strip(): line.split(":", 1)[1].strip()
-              for line in head.splitlines() if ":" in line and not line.startswith(" ")}
+    fields = {
+        line.split(":", 1)[0].strip(): line.split(":", 1)[1].strip()
+        for line in head.splitlines()
+        if ":" in line and not line.startswith(" ")
+    }
     found = []
     if not fields.get("name"):
         found.append("frontmatter has no name")
@@ -81,32 +84,53 @@ def proposal_of(text: str) -> str | None:
     return found[-1].strip() + "\n" if found else None
 
 
-def assist(model: ModelClient, alias: str, *, guide: str, template: str, path: str,
-           current: str, sample: str | None, turns: list[Turn],
-           trace: TraceIdentifiers,
-           on_state: Callable[[str], None] | None = None) -> AssistReply:
+def assist(
+    model: ModelClient,
+    alias: str,
+    *,
+    guide: str,
+    template: str,
+    path: str,
+    current: str,
+    sample: str | None,
+    turns: list[Turn],
+    trace: TraceIdentifiers,
+    on_state: Callable[[str], None] | None = None,
+) -> AssistReply:
     """`on_state` hears `asking` and `checking`, so a page can show progress."""
     report = on_state or (lambda _state: None)
     if not turns or turns[-1].role != "user":
         raise ValueError("the last turn is the expert's")
-    context = (f"The file being edited: {path}\n\n===== current file =====\n"
-               f"{current[:MAX_TEXT] or '(new file)'}"
-               + (f"\n\n===== a sample source of this category (excerpt) =====\n"
-                  f"{sample[:SAMPLE_CHARS]}" if sample else ""))
+    context = (
+        f"The file being edited: {path}\n\n===== current file =====\n"
+        f"{current[:MAX_TEXT] or '(new file)'}"
+        + (
+            f"\n\n===== a sample source of this category (excerpt) =====\n{sample[:SAMPLE_CHARS]}"
+            if sample
+            else ""
+        )
+    )
     # replace(), not format(): a guide or template may contain braces.
     system = SYSTEM.replace("{guide}", guide).replace("{template}", template)
-    messages = [ModelMessage(role="system", text=system),
-                ModelMessage(role="user", text=context),
-                ModelMessage(role="assistant", text="I have the file. What should change?")]
-    messages += [ModelMessage(role=turn.role, text=turn.text[:MAX_TEXT])
-                 for turn in turns[-MAX_TURNS:]]
+    messages = [
+        ModelMessage(role="system", text=system),
+        ModelMessage(role="user", text=context),
+        ModelMessage(role="assistant", text="I have the file. What should change?"),
+    ]
+    messages += [
+        ModelMessage(role=turn.role, text=turn.text[:MAX_TEXT]) for turn in turns[-MAX_TURNS:]
+    ]
     report("asking")
-    response = model.generate(ModelRequest(trace=trace, model_alias=alias,
-                                           messages=tuple(messages), max_output_tokens=6000))
+    response = model.generate(
+        ModelRequest(
+            trace=trace, model_alias=alias, messages=tuple(messages), max_output_tokens=6000
+        )
+    )
     if response.failure is not None:
         raise RuntimeError(response.failure.code)
     report("checking")
     text = (response.text or "").strip()
     proposal = proposal_of(text)
-    return AssistReply(reply=text, proposal=proposal,
-                       warnings=check_proposal(proposal) if proposal else ())
+    return AssistReply(
+        reply=text, proposal=proposal, warnings=check_proposal(proposal) if proposal else ()
+    )

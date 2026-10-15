@@ -21,8 +21,7 @@ from host_runtime.acp_client import AcpError, AcpLauncher, prompt_turn
 from host_runtime.acp_client import launch as acp_launch
 from models.contracts import ModelMessage
 
-ConversationBackendName = Literal["gateway", "claude_code", "codex", "copilot",
-                                  "copilot_agent"]
+ConversationBackendName = Literal["gateway", "claude_code", "codex", "copilot", "copilot_agent"]
 ConversationBackendAuthentication = Literal[
     "ready", "required", "pending", "unavailable", "not_applicable"
 ]
@@ -63,11 +62,25 @@ CLAUDE_AGENT_SETTINGS = {
     "permissions": {
         "ask": ["Bash", "PowerShell", "WebFetch", "WebSearch"],
         "allow": ["mcp__aep-agent", "mcp__aep-assistant", "mcp__aep"],
-        "deny": [f"{tool}({pattern})" for tool in ("Read", "Edit", "Write")
-                 for pattern in ("**/.env", "**/.env.*", "**/*.pem", "**/*.key", "**/*.pfx",
-                                 "**/*.p12", "**/*.kdbx", "**/id_rsa*", "**/id_ed25519*",
-                                 "**/id_ecdsa*", "**/.git-credentials", "**/.netrc",
-                                 "**/host.json")],
+        "deny": [
+            f"{tool}({pattern})"
+            for tool in ("Read", "Edit", "Write")
+            for pattern in (
+                "**/.env",
+                "**/.env.*",
+                "**/*.pem",
+                "**/*.key",
+                "**/*.pfx",
+                "**/*.p12",
+                "**/*.kdbx",
+                "**/id_rsa*",
+                "**/id_ed25519*",
+                "**/id_ecdsa*",
+                "**/.git-credentials",
+                "**/.netrc",
+                "**/host.json",
+            )
+        ],
     },
     "disableAllHooks": True,
 }
@@ -539,9 +552,8 @@ class LocalConversationBackends:
             if persona_guidance:
                 expected.append(("persona", persona_guidance))
             actual = [(item.origin, item.text) for item in outbound.materials]
-            if (
-                actual != expected
-                or any(message.images or message.tool_calls for message in history)
+            if actual != expected or any(
+                message.images or message.tool_calls for message in history
             ):
                 return ConversationBackendResult(
                     backend=backend, status="unavailable", code="context_mismatch"
@@ -561,15 +573,17 @@ class LocalConversationBackends:
         if isinstance(max_history_messages, bool) or not 1 <= max_history_messages <= 40:
             raise ValueError("conversation supports one to forty history messages")
         if agent is not None:
-            return self._agent_turn(backend, executable, history, persona_guidance,
-                                    max_history_messages, agent)
+            return self._agent_turn(
+                backend, executable, history, persona_guidance, max_history_messages, agent
+            )
         prompt = self._prompt(history, persona_guidance, max_history_messages)
         extra: list[str] = []
         timeout = BACKEND_TIMEOUT_SECONDS
         if backend == "copilot_agent":
             if self.agent_mcp is None:
                 return ConversationBackendResult(
-                    backend=backend, status="unavailable", code="assistant_tools_unavailable")
+                    backend=backend, status="unavailable", code="assistant_tools_unavailable"
+                )
             url, token = self.agent_mcp
             config = self.root / AGENT_MCP_FILE
             headers = {"Authorization": f"Bearer {token}"}
@@ -577,16 +591,33 @@ class LocalConversationBackends:
             # (agent_setup.py), so these replace those for this session: the
             # Knowledge and Workflow tools, and the authoring tools, both
             # served by this Agent Web.
-            config.write_text(json.dumps({"mcpServers": {
-                "aep-assistant": {"type": "http", "url": url, "tools": ["*"],
-                                  "headers": headers},
-                "aep": {"type": "http", "url": url.rstrip("/") + "/authoring",
-                        "tools": ["*"], "headers": headers}}}), encoding="utf-8")
+            config.write_text(
+                json.dumps(
+                    {
+                        "mcpServers": {
+                            "aep-assistant": {
+                                "type": "http",
+                                "url": url,
+                                "tools": ["*"],
+                                "headers": headers,
+                            },
+                            "aep": {
+                                "type": "http",
+                                "url": url.rstrip("/") + "/authoring",
+                                "tools": ["*"],
+                                "headers": headers,
+                            },
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
             self._write_agent_skills()
             extra = ["--additional-mcp-config", f"@{config}", "--add-dir", str(self.root)]
             timeout = AGENT_TIMEOUT_SECONDS
-            prompt = self._prompt(history, persona_guidance, max_history_messages,
-                                  policy=AGENT_POLICY)
+            prompt = self._prompt(
+                history, persona_guidance, max_history_messages, policy=AGENT_POLICY
+            )
         try:
             completed = self._runner(
                 [executable, *spec.arguments, *extra],
@@ -620,20 +651,28 @@ class LocalConversationBackends:
 
     # -- agent mode (owner 2026-10-15) ----------------------------------------
 
-    def _agent_turn(self, backend: ConversationBackendName, executable: str,
-                    history: tuple[ModelMessage, ...], persona_guidance: str,
-                    max_history_messages: int,
-                    agent: AgentLaunch) -> ConversationBackendResult:
+    def _agent_turn(
+        self,
+        backend: ConversationBackendName,
+        executable: str,
+        history: tuple[ModelMessage, ...],
+        persona_guidance: str,
+        max_history_messages: int,
+        agent: AgentLaunch,
+    ) -> ConversationBackendResult:
         """One agent-mode turn: Claude Code with its permission prompts sent
         to AEP's `permission` tool, or Copilot over ACP. Codex has no relay."""
         if backend not in ("claude_code", "copilot"):
-            return ConversationBackendResult(backend=backend, status="unavailable",
-                                             code="agent_mode_unsupported")
+            return ConversationBackendResult(
+                backend=backend, status="unavailable", code="agent_mode_unsupported"
+            )
         label = {"claude_code": "Claude Code", "copilot": "GitHub Copilot"}[backend]
         roots = "; ".join(str(item) for item in agent.read_roots)
         policy = AGENT_MODE_POLICY.format(
-            label=label, folder=agent.folder,
-            read_roots=(f"You may also read these folders freely: {roots}. " if roots else ""))
+            label=label,
+            folder=agent.folder,
+            read_roots=(f"You may also read these folders freely: {roots}. " if roots else ""),
+        )
         prompt = self._prompt(history, persona_guidance, max_history_messages, policy=policy)
         run_dir = self.root / AGENT_RUNS_DIR / agent.run_id
         try:
@@ -643,36 +682,63 @@ class LocalConversationBackends:
         finally:
             shutil.rmtree(run_dir, ignore_errors=True)
 
-    def _claude_agent(self, executable: str, prompt: str, agent: AgentLaunch,
-                      run_dir: Path) -> ConversationBackendResult:
+    def _claude_agent(
+        self, executable: str, prompt: str, agent: AgentLaunch, run_dir: Path
+    ) -> ConversationBackendResult:
         run_dir.mkdir(parents=True, exist_ok=True)
-        servers = {name: {"type": "http", "url": url,
-                          "headers": {"Authorization": f"Bearer {token}"}}
-                   for name, (url, token) in agent.servers.items()}
+        servers = {
+            name: {"type": "http", "url": url, "headers": {"Authorization": f"Bearer {token}"}}
+            for name, (url, token) in agent.servers.items()
+        }
         mcp_file = run_dir / "mcp.json"
         mcp_file.write_text(json.dumps({"mcpServers": servers}), encoding="utf-8")
         settings_file = run_dir / "settings.json"
         settings_file.write_text(json.dumps(CLAUDE_AGENT_SETTINGS), encoding="utf-8")
         plugin = self._write_claude_plugin()
-        argv = [executable, "--print", "--output-format", "json", "--no-session-persistence",
-                "--setting-sources", "", "--strict-mcp-config", "--mcp-config", str(mcp_file),
-                "--settings", str(settings_file), "--permission-mode", "manual",
-                "--permission-prompts", "host",
-                "--permission-prompt-tool", CLAUDE_PERMISSION_TOOL,
-                "--plugin-dir", str(plugin)]
+        argv = [
+            executable,
+            "--print",
+            "--output-format",
+            "json",
+            "--no-session-persistence",
+            "--setting-sources",
+            "",
+            "--strict-mcp-config",
+            "--mcp-config",
+            str(mcp_file),
+            "--settings",
+            str(settings_file),
+            "--permission-mode",
+            "manual",
+            "--permission-prompts",
+            "host",
+            "--permission-prompt-tool",
+            CLAUDE_PERMISSION_TOOL,
+            "--plugin-dir",
+            str(plugin),
+        ]
         environment = _environment()
         # An approval card may wait ten minutes inside one tool call.
         environment["MCP_TOOL_TIMEOUT"] = str((agent.timeout_s + 60) * 1000)
         try:
-            completed = self._runner(argv, cwd=agent.folder, input=prompt,
-                                     capture_output=True, text=True, timeout=agent.timeout_s,
-                                     check=False, env=environment)
+            completed = self._runner(
+                argv,
+                cwd=agent.folder,
+                input=prompt,
+                capture_output=True,
+                text=True,
+                timeout=agent.timeout_s,
+                check=False,
+                env=environment,
+            )
         except subprocess.TimeoutExpired:
-            return ConversationBackendResult(backend="claude_code", status="timeout",
-                                             code="backend_timeout")
+            return ConversationBackendResult(
+                backend="claude_code", status="timeout", code="backend_timeout"
+            )
         except OSError:
-            return ConversationBackendResult(backend="claude_code", status="unavailable",
-                                             code="backend_start_failed")
+            return ConversationBackendResult(
+                backend="claude_code", status="unavailable", code="backend_start_failed"
+            )
         if completed.returncode != 0:
             code = _error_code(completed.stdout)
             if code == "backend_authentication_failed":
@@ -680,43 +746,69 @@ class LocalConversationBackends:
             return ConversationBackendResult(backend="claude_code", status="failed", code=code)
         answer = _answer(completed.stdout)
         if not answer:
-            return ConversationBackendResult(backend="claude_code", status="failed",
-                                             code="backend_empty_response")
+            return ConversationBackendResult(
+                backend="claude_code", status="failed", code="backend_empty_response"
+            )
         return ConversationBackendResult(backend="claude_code", status="answered", text=answer)
 
-    def _copilot_agent(self, executable: str, prompt: str,
-                       agent: AgentLaunch) -> ConversationBackendResult:
+    def _copilot_agent(
+        self, executable: str, prompt: str, agent: AgentLaunch
+    ) -> ConversationBackendResult:
         skills = self._write_agent_skills(self.root / AGENT_SKILLS_ROOT)
-        argv = [executable, "--acp", "--no-auto-update", "--disable-builtin-mcps",
-                "--disallow-temp-dir", "--no-ask-user",
-                "--secret-env-vars=COPILOT_GITHUB_TOKEN",
-                *(f"--allow-tool={name}" for name in agent.servers), "--add-dir", str(skills)]
-        servers = [{"type": "http", "name": name, "url": url,
-                    "headers": [{"name": "Authorization", "value": f"Bearer {token}"}]}
-                   for name, (url, token) in agent.servers.items()]
+        argv = [
+            executable,
+            "--acp",
+            "--no-auto-update",
+            "--disable-builtin-mcps",
+            "--disallow-temp-dir",
+            "--no-ask-user",
+            "--secret-env-vars=COPILOT_GITHUB_TOKEN",
+            *(f"--allow-tool={name}" for name in agent.servers),
+            "--add-dir",
+            str(skills),
+        ]
+        servers = [
+            {
+                "type": "http",
+                "name": name,
+                "url": url,
+                "headers": [{"name": "Authorization", "value": f"Bearer {token}"}],
+            }
+            for name, (url, token) in agent.servers.items()
+        ]
         try:
             process = self._acp_launcher(argv, agent.folder, _environment())
         except OSError:
-            return ConversationBackendResult(backend="copilot", status="unavailable",
-                                             code="backend_start_failed")
+            return ConversationBackendResult(
+                backend="copilot", status="unavailable", code="backend_start_failed"
+            )
         try:
-            answer = prompt_turn(process, cwd=agent.folder, mcp_servers=servers, prompt=prompt,
-                                 deadline_s=agent.timeout_s, on_permission=agent.on_permission,
-                                 on_tool_update=agent.on_tool_update)
+            answer = prompt_turn(
+                process,
+                cwd=agent.folder,
+                mcp_servers=servers,
+                prompt=prompt,
+                deadline_s=agent.timeout_s,
+                on_permission=agent.on_permission,
+                on_tool_update=agent.on_tool_update,
+            )
         except AcpError as error:
             if error.code == "backend_authentication_failed":
                 self._unavailable["copilot"] = error.code
             status: Literal["failed", "timeout"] = (
-                "timeout" if error.code == "backend_timeout" else "failed")
+                "timeout" if error.code == "backend_timeout" else "failed"
+            )
             return ConversationBackendResult(backend="copilot", status=status, code=error.code)
         finally:
             if process.poll() is None:
                 process.kill()
         if not answer:
-            return ConversationBackendResult(backend="copilot", status="failed",
-                                             code="backend_empty_response")
-        return ConversationBackendResult(backend="copilot", status="answered",
-                                         text=answer[:MAX_BACKEND_OUTPUT_CHARS])
+            return ConversationBackendResult(
+                backend="copilot", status="failed", code="backend_empty_response"
+            )
+        return ConversationBackendResult(
+            backend="copilot", status="answered", text=answer[:MAX_BACKEND_OUTPUT_CHARS]
+        )
 
     def _write_claude_plugin(self) -> Path:
         """AEP's skills as a Claude Code plugin loaded with --plugin-dir, so the
@@ -725,8 +817,13 @@ class LocalConversationBackends:
 
         root = self.root / AGENT_PLUGIN_DIR
         manifest = root / ".claude-plugin" / "plugin.json"
-        text = json.dumps({"name": "aep", "version": bundle_version(),
-                           "description": "AEP's creator and knowledge skills"})
+        text = json.dumps(
+            {
+                "name": "aep",
+                "version": bundle_version(),
+                "description": "AEP's creator and knowledge skills",
+            }
+        )
         if not manifest.is_file() or manifest.read_text(encoding="utf-8") != text:
             manifest.parent.mkdir(parents=True, exist_ok=True)
             manifest.write_text(text, encoding="utf-8")
@@ -759,7 +856,9 @@ class LocalConversationBackends:
 
     @staticmethod
     def _prompt(
-        history: tuple[ModelMessage, ...], persona_guidance: str, max_history_messages: int = 12,
+        history: tuple[ModelMessage, ...],
+        persona_guidance: str,
+        max_history_messages: int = 12,
         policy: str | None = None,
     ) -> str:
         policy = policy or (

@@ -70,28 +70,43 @@ def template_checks(path: Path, template: str) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     produced = load_workbook(path)
     pristine = load_workbook(TEMPLATES / template)
-    out.append(check("template: sheet names and order", produced.sheetnames == pristine.sheetnames,
-                     produced.sheetnames))
+    out.append(
+        check(
+            "template: sheet names and order",
+            produced.sheetnames == pristine.sheetnames,
+            produced.sheetnames,
+        )
+    )
     if "Report" in produced.sheetnames:
         report, original = produced["Report"], pristine["Report"]
         changed = [c for c in REPORT_LABELS if text(report[c].value) != text(original[c].value)]
         out.append(check("template: Report fixed labels and footer cell", not changed, changed))
         merged = {str(r) for r in report.merged_cells.ranges}
         out.append(check("template: Report A1:F1 merged", "A1:F1" in merged, sorted(merged)))
-    footers = [s.title for s in produced if s.title in pristine.sheetnames
-               and text(s.oddFooter.center.text) != text(pristine[s.title].oddFooter.center.text)]
+    footers = [
+        s.title
+        for s in produced
+        if s.title in pristine.sheetnames
+        and text(s.oddFooter.center.text) != text(pristine[s.title].oddFooter.center.text)
+    ]
     out.append(check("template: page footers kept", not footers, footers))
     if "Instructions" in produced.sheetnames:
         a, b = produced["Instructions"], pristine["Instructions"]
-        diffs = [c.coordinate for row in b.iter_rows() for c in row
-                 if text(a[c.coordinate].value) != text(c.value)]
+        diffs = [
+            c.coordinate
+            for row in b.iter_rows()
+            for c in row
+            if text(a[c.coordinate].value) != text(c.value)
+        ]
         out.append(check("template: Instructions unchanged", not diffs, diffs[:10]))
     header_issues, layout_issues, width_issues = [], [], []
     for sheet in pristine:
         if sheet.title not in produced.sheetnames or sheet.title in {"Report", "Instructions"}:
             continue
         mine = produced[sheet.title]
-        if [text(c.value) for c in mine[4]][: sheet.max_column] != [text(c.value) for c in sheet[4]]:
+        if [text(c.value) for c in mine[4]][: sheet.max_column] != [
+            text(c.value) for c in sheet[4]
+        ]:
             header_issues.append(sheet.title)
         if sheet.title in DETAIL_SHEETS:
             if mine.freeze_panes != "A5":
@@ -102,12 +117,16 @@ def template_checks(path: Path, template: str) -> list[dict[str, Any]]:
             if dim.width and abs((mine.column_dimensions[letter].width or 0) - dim.width) > 0.6:
                 width_issues.append(f"{sheet.title}!{letter}")
     out.append(check("template: row-4 column names kept", not header_issues, header_issues))
-    out.append(check("template: freeze panes and auto-filter kept", not layout_issues, layout_issues))
+    out.append(
+        check("template: freeze panes and auto-filter kept", not layout_issues, layout_issues)
+    )
     out.append(check("template: column widths kept", not width_issues, width_issues[:10]))
     return out
 
 
-def formula_checks(path: Path, total_cell: tuple[str, str, str, str] | None, template: str) -> list[dict[str, Any]]:
+def formula_checks(
+    path: Path, total_cell: tuple[str, str, str, str] | None, template: str
+) -> list[dict[str, Any]]:
     """Every template formula is still a formula over the same column, extended to the data."""
     out = []
     produced = load_workbook(path)
@@ -123,28 +142,51 @@ def formula_checks(path: Path, total_cell: tuple[str, str, str, str] | None, tem
                     out.append(check(f"formula kept: {where}", False, "sheet missing"))
                     continue
                 value = produced[sheet.title][cell.coordinate].value
-                found = re.match(r"=SUM\(((?:\w+!)?)([A-Z]+)5:([A-Z]+)(\d+)\)", str(value or "").replace("$", ""))
+                found = re.match(
+                    r"=SUM\(((?:\w+!)?)([A-Z]+)5:([A-Z]+)(\d+)\)", str(value or "").replace("$", "")
+                )
                 expected = re.match(r"=SUM\(((?:\w+!)?)([A-Z]+)5", cell.value)
-                same = bool(found and expected and found.group(1) == expected.group(1)
-                            and found.group(2) == expected.group(2))
+                same = bool(
+                    found
+                    and expected
+                    and found.group(1) == expected.group(1)
+                    and found.group(2) == expected.group(2)
+                )
                 out.append(check(f"formula kept: {where}", same, value))
                 if same and found:
                     target = found.group(1).rstrip("!") or sheet.title
                     if target in produced.sheetnames:
                         _, _, rows = table(produced[target])
                         last = rows[-1] if rows else 5
-                        out.append(check(f"formula range covers the data: {where}", int(found.group(4)) >= last,
-                                         f"{value}; last data row {last}"))
-                shown = cached[sheet.title][cell.coordinate].value if sheet.title in cached.sheetnames else None
-                out.append(check(f"formula cached value present: {where}", None if shown is None else True,
-                                 "no cached value (the writer did not calculate formulas); "
-                                 "totals are verified independently" if shown is None else shown))
+                        out.append(
+                            check(
+                                f"formula range covers the data: {where}",
+                                int(found.group(4)) >= last,
+                                f"{value}; last data row {last}",
+                            )
+                        )
+                shown = (
+                    cached[sheet.title][cell.coordinate].value
+                    if sheet.title in cached.sheetnames
+                    else None
+                )
+                out.append(
+                    check(
+                        f"formula cached value present: {where}",
+                        None if shown is None else True,
+                        "no cached value (the writer did not calculate formulas); "
+                        "totals are verified independently"
+                        if shown is None
+                        else shown,
+                    )
+                )
     del total_cell
     return out
 
 
-def detail_checks(path: Path, exp: dict[str, Any], sheet_name: str, id_column: str,
-                  fields: tuple[str, ...]) -> list[dict[str, Any]]:
+def detail_checks(
+    path: Path, exp: dict[str, Any], sheet_name: str, id_column: str, fields: tuple[str, ...]
+) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     book = load_workbook(path)
     if sheet_name not in book.sheetnames:
@@ -154,11 +196,23 @@ def detail_checks(path: Path, exp: dict[str, Any], sheet_name: str, id_column: s
     numeric_ids = [v for v in raw_ids if isinstance(v, (int, float))]
     ids = [text(v) for v in raw_ids]
     wanted = list(exp["ids"])
-    out.append(check(f"{sheet_name}: {id_column} set matches", sorted(set(ids)) == sorted(wanted),
-                     {"missing": sorted(set(wanted) - set(ids)), "extra": sorted(set(ids) - set(wanted))}))
-    out.append(check(f"{sheet_name}: no duplicate {id_column}", len(ids) == len(set(ids)),
-                     sorted({i for i in ids if ids.count(i) > 1})))
-    out.append(check(f"{sheet_name}: row count", len(ids) == len(wanted), f"{len(ids)} vs {len(wanted)}"))
+    out.append(
+        check(
+            f"{sheet_name}: {id_column} set matches",
+            sorted(set(ids)) == sorted(wanted),
+            {"missing": sorted(set(wanted) - set(ids)), "extra": sorted(set(ids) - set(wanted))},
+        )
+    )
+    out.append(
+        check(
+            f"{sheet_name}: no duplicate {id_column}",
+            len(ids) == len(set(ids)),
+            sorted({i for i in ids if ids.count(i) > 1}),
+        )
+    )
+    out.append(
+        check(f"{sheet_name}: row count", len(ids) == len(wanted), f"{len(ids)} vs {len(wanted)}")
+    )
     out.append(check(f"{sheet_name}: IDs stored as text", not numeric_ids, numeric_ids[:5]))
     wrong: list[str] = []
     for row in rows:
@@ -172,7 +226,11 @@ def detail_checks(path: Path, exp: dict[str, Any], sheet_name: str, id_column: s
             got, expected_value = row.get(field), want[field]
             if isinstance(expected_value, bool):
                 good = truthy(got) == expected_value
-            elif dec(expected_value) is not None and field not in {"ProjectID", "ReceiptID", "CustomerID"}:
+            elif dec(expected_value) is not None and field not in {
+                "ProjectID",
+                "ReceiptID",
+                "CustomerID",
+            }:
                 good = dec(got) == dec(expected_value)
             else:
                 good = " ".join(text(got).split()) == " ".join(text(expected_value).split())
@@ -205,23 +263,32 @@ def summary_rows(path: Path) -> list[tuple[set[str], set[Decimal]]]:
     return out
 
 
-def grouped_summary_check(path: Path, summary: dict[str, dict[str, Any]], need_amount: bool) -> dict[str, Any]:
+def grouped_summary_check(
+    path: Path, summary: dict[str, dict[str, Any]], need_amount: bool
+) -> dict[str, Any]:
     rows = summary_rows(path)
     missing = []
+
     def has(strings: set[str], part: str) -> bool:
         # A key may sit inside a label such as "E001 陳怡君" (grader 1.2).
         return any(part == cell or part in re.split(r"[\s|/(),:;]+", cell) for cell in strings)
 
     for key, value in summary.items():
         parts = {p for p in key.split("|") if p}
-        hit = any(all(has(strings, part) for part in parts) and dec(value["twd"]) in numbers
-                  and (not need_amount or dec(value["amount"]) in numbers) for strings, numbers in rows)
+        hit = any(
+            all(has(strings, part) for part in parts)
+            and dec(value["twd"]) in numbers
+            and (not need_amount or dec(value["amount"]) in numbers)
+            for strings, numbers in rows
+        )
         if not hit:
             missing.append(f"{key}: amount {value['amount']}, TWD {value['twd']}")
     return check("Summary: every expected group row (keys, amounts)", not missing, missing[:10])
 
 
-def project_summary_check(path: Path, wanted: dict[str, dict[str, str]], columns: list[str]) -> dict[str, Any]:
+def project_summary_check(
+    path: Path, wanted: dict[str, dict[str, str]], columns: list[str]
+) -> dict[str, Any]:
     book = load_workbook(path)
     if "Summary" not in book.sheetnames:
         return check("Summary: project rows", False, "no Summary sheet")
@@ -235,7 +302,8 @@ def project_summary_check(path: Path, wanted: dict[str, dict[str, str]], columns
             continue
         for column in columns:
             if dec(row.get(column)) != dec(values[column]) and not (
-                    dec(values[column]) == 0 and row.get(column) in (None, "")):
+                dec(values[column]) == 0 and row.get(column) in (None, "")
+            ):
                 wrong.append(f"{project}.{column}: {text(row.get(column))} != {values[column]}")
     return check("Summary: one row per project with the expected TWD totals", not wrong, wrong[:12])
 

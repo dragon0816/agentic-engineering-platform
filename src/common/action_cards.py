@@ -135,12 +135,20 @@ def telegram_card(
     buttons: tuple[tuple[tuple[str, str], ...], ...] = ()
     if not card.open:
         mark = "✅" if card.outcome_ok else "⛔" if card.outcome_ok is False else "•"
-        lines.extend(("", f"{mark} {card.status_label or card.status}"
-                      + (f": {card.outcome}" if card.outcome else "")))
+        lines.extend(
+            (
+                "",
+                f"{mark} {card.status_label or card.status}"
+                + (f": {card.outcome}" if card.outcome else ""),
+            )
+        )
     elif card.web_only:
         where = f": {web_address}" if web_address else "."
         lines.extend(("", "Open in Agent Web to apply" + where))
     else:
-        buttons = (tuple((button.label, f"card:{card.card_id}:{button.action}")
-                         for button in card.buttons),)
+        buttons = (
+            tuple(
+                (button.label, f"card:{card.card_id}:{button.action}") for button in card.buttons
+            ),
+        )
     return "\n".join(lines), buttons

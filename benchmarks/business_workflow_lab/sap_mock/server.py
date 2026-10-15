@@ -44,18 +44,54 @@ USERNAME = "lab.analyst"  # the simulated signed-in Windows user
 PAGE_SIZE = 10
 LOCK = threading.Lock()
 
-ORDER_COLUMNS = ["OrderID", "CustomerID", "CustomerName", "ProjectID", "OrderDate", "Status",
-                 "Currency", "NetAmount"]
-INVOICE_COLUMNS = ["InvoiceID", "OrderID", "CustomerID", "ProjectID", "InvoiceDate", "DueDate",
-                   "Currency", "Amount", "PaidAmount", "Balance"]
+ORDER_COLUMNS = [
+    "OrderID",
+    "CustomerID",
+    "CustomerName",
+    "ProjectID",
+    "OrderDate",
+    "Status",
+    "Currency",
+    "NetAmount",
+]
+INVOICE_COLUMNS = [
+    "InvoiceID",
+    "OrderID",
+    "CustomerID",
+    "ProjectID",
+    "InvoiceDate",
+    "DueDate",
+    "Currency",
+    "Amount",
+    "PaidAmount",
+    "Balance",
+]
 CUSTOMER_COLUMNS = ["CustomerID", "CustomerName", "Country"]
 LISTS = {
-    "orders": {"title": "Sales Orders", "key": "sales_orders", "columns": ORDER_COLUMNS,
-               "date": "OrderDate", "statuses": ["Open", "Closed", "Cancelled"], "id": "OrderID"},
-    "invoices": {"title": "Invoices", "key": "invoices", "columns": INVOICE_COLUMNS,
-                 "date": "InvoiceDate", "statuses": [], "id": "InvoiceID"},
-    "customers": {"title": "Customers", "key": "customers", "columns": CUSTOMER_COLUMNS,
-                  "date": None, "statuses": [], "id": "CustomerID"},
+    "orders": {
+        "title": "Sales Orders",
+        "key": "sales_orders",
+        "columns": ORDER_COLUMNS,
+        "date": "OrderDate",
+        "statuses": ["Open", "Closed", "Cancelled"],
+        "id": "OrderID",
+    },
+    "invoices": {
+        "title": "Invoices",
+        "key": "invoices",
+        "columns": INVOICE_COLUMNS,
+        "date": "InvoiceDate",
+        "statuses": [],
+        "id": "InvoiceID",
+    },
+    "customers": {
+        "title": "Customers",
+        "key": "customers",
+        "columns": CUSTOMER_COLUMNS,
+        "date": None,
+        "statuses": [],
+        "id": "CustomerID",
+    },
 }
 
 
@@ -102,18 +138,22 @@ form.filters label{display:flex;flex-direction:column;font-size:12px}
 def page(title: str, body: str, user: str | None = None) -> str:
     nav = ""
     if user:
-        nav = ("<a href='/customers'>Customers</a><a href='/orders'>Sales Orders</a>"
-               "<a href='/invoices'>Invoices</a><span class='grow'></span>"
-               f"<span id='current-user'>{html.escape(user)}</span>"
-               "<form method='post' action='/logout' style='margin:0'>"
-               "<button type='submit' id='logout'>Log out</button></form>")
-    return (f"<!doctype html><html lang='zh-Hant'><head><meta charset='utf-8'>"
-            f"<title>{html.escape(title)} - Lab ERP</title><style>{STYLE}</style></head>"
-            f"<body><header><strong>Lab ERP (synthetic)</strong>{nav}</header>"
-            f"<main><h1>{html.escape(title)}</h1>{body}</main>"
-            "<script>document.querySelectorAll('form.filters').forEach(f=>f.addEventListener("
-            "'submit',()=>{document.getElementById('loading').style.display='block'}))</script>"
-            "</body></html>")
+        nav = (
+            "<a href='/customers'>Customers</a><a href='/orders'>Sales Orders</a>"
+            "<a href='/invoices'>Invoices</a><span class='grow'></span>"
+            f"<span id='current-user'>{html.escape(user)}</span>"
+            "<form method='post' action='/logout' style='margin:0'>"
+            "<button type='submit' id='logout'>Log out</button></form>"
+        )
+    return (
+        f"<!doctype html><html lang='zh-Hant'><head><meta charset='utf-8'>"
+        f"<title>{html.escape(title)} - Lab ERP</title><style>{STYLE}</style></head>"
+        f"<body><header><strong>Lab ERP (synthetic)</strong>{nav}</header>"
+        f"<main><h1>{html.escape(title)}</h1>{body}</main>"
+        "<script>document.querySelectorAll('form.filters').forEach(f=>f.addEventListener("
+        "'submit',()=>{document.getElementById('loading').style.display='block'}))</script>"
+        "</body></html>"
+    )
 
 
 def matches(row: dict[str, Any], spec: dict[str, Any], query: dict[str, str]) -> bool:
@@ -143,8 +183,10 @@ def filtered(name: str, query: dict[str, str]) -> list[dict[str, Any]]:
     if sort not in spec["columns"]:
         sort = spec["id"]
     numeric = sort in {"NetAmount", "Amount", "PaidAmount", "Balance"}
-    rows.sort(key=lambda r: (Decimal(r[sort]) if numeric else str(r.get(sort, "")), r[spec["id"]]),
-              reverse=query.get("dir") == "desc")
+    rows.sort(
+        key=lambda r: (Decimal(r[sort]) if numeric else str(r.get(sort, "")), r[spec["id"]]),
+        reverse=query.get("dir") == "desc",
+    )
     return rows
 
 
@@ -158,8 +200,13 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
     # -- plumbing -----------------------------------------------------------
-    def _send(self, status: int, body: str, content_type: str = "text/html; charset=utf-8",
-              headers: dict[str, str] | None = None) -> None:
+    def _send(
+        self,
+        status: int,
+        body: str,
+        content_type: str = "text/html; charset=utf-8",
+        headers: dict[str, str] | None = None,
+    ) -> None:
         data = body.encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", content_type)
@@ -200,7 +247,11 @@ class Handler(BaseHTTPRequestHandler):
             self._redirect("/login?next=" + urllib.parse.quote(path))
             return None
         state = fault()
-        if state.get("mode") == "expire_session_once" and state.get("armed") and not state.get("fired"):
+        if (
+            state.get("mode") == "expire_session_once"
+            and state.get("armed")
+            and not state.get("fired")
+        ):
             SESSIONS.pop(token or "", None)
             state["fired"] = True
             save_fault(state)
@@ -218,7 +269,9 @@ class Handler(BaseHTTPRequestHandler):
     # -- routes -------------------------------------------------------------
     def do_GET(self) -> None:  # noqa: N802 - stdlib name
         url = urllib.parse.urlsplit(self.path)
-        query = {k: v[0] for k, v in urllib.parse.parse_qs(url.query, keep_blank_values=True).items()}
+        query = {
+            k: v[0] for k, v in urllib.parse.parse_qs(url.query, keep_blank_values=True).items()
+        }
         path = url.path.rstrip("/") or "/"
         if path == "/login":
             return self._login_page(query)
@@ -267,13 +320,17 @@ class Handler(BaseHTTPRequestHandler):
         if query.get("expired"):
             notes += "<p class='msg error' id='session-expired'>工作階段已逾時，請重新登入。 (Session expired)</p>"
         if query.get("failed"):
-            notes += "<p class='msg error' id='login-error'>登入失敗，請再試一次。 (Sign-in failed)</p>"
-        body = (f"{notes}<p>此系統使用公司帳號自動登入。 This site uses your company account.</p>"
-                "<form method='post' action='/login' id='login-form'>"
-                f"<input type='hidden' name='next' value='{html.escape(query.get('next', '/orders'))}'>"
-                "<input type='hidden' name='sso' value='company'>"
-                "<button type='submit' id='login-submit'>使用公司帳號登入 Continue with company account"
-                "</button></form>")
+            notes += (
+                "<p class='msg error' id='login-error'>登入失敗，請再試一次。 (Sign-in failed)</p>"
+            )
+        body = (
+            f"{notes}<p>此系統使用公司帳號自動登入。 This site uses your company account.</p>"
+            "<form method='post' action='/login' id='login-form'>"
+            f"<input type='hidden' name='next' value='{html.escape(query.get('next', '/orders'))}'>"
+            "<input type='hidden' name='sso' value='company'>"
+            "<button type='submit' id='login-submit'>使用公司帳號登入 Continue with company account"
+            "</button></form>"
+        )
         self._send(200, page("Sign in", body))
 
     def _list(self, name: str, query: dict[str, str], user: str) -> None:
@@ -291,9 +348,15 @@ class Handler(BaseHTTPRequestHandler):
             number = min(max(1, int(query.get("page", "1"))), pages)
         except ValueError:
             number = 1
-        shown = rows[(number - 1) * PAGE_SIZE: number * PAGE_SIZE]
-        event("query", list=name, filters={k: v for k, v in query.items() if k != "page"},
-              page=number, total=total, ua=self._client())
+        shown = rows[(number - 1) * PAGE_SIZE : number * PAGE_SIZE]
+        event(
+            "query",
+            list=name,
+            filters={k: v for k, v in query.items() if k != "page"},
+            page=number,
+            total=total,
+            ua=self._client(),
+        )
         self._query_done()
         keep = {k: v for k, v in query.items() if k != "page" and v}
 
@@ -302,23 +365,32 @@ class Handler(BaseHTTPRequestHandler):
 
         status_select = ""
         if spec["statuses"]:
-            options = "".join(f"<option value='{s}'{' selected' if query.get('status') == s else ''}>{s}</option>"
-                              for s in spec["statuses"])
-            status_select = (f"<label for='f-status'>Status<select id='f-status' name='status'>"
-                             f"<option value=''>(all)</option>{options}</select></label>")
+            options = "".join(
+                f"<option value='{s}'{' selected' if query.get('status') == s else ''}>{s}</option>"
+                for s in spec["statuses"]
+            )
+            status_select = (
+                f"<label for='f-status'>Status<select id='f-status' name='status'>"
+                f"<option value=''>(all)</option>{options}</select></label>"
+            )
         date_inputs = ""
         if spec["date"]:
             date_inputs = (
                 f"<label for='f-from'>Date from (YYYY-MM-DD)<input id='f-from' name='from' "
                 f"value='{html.escape(query.get('from', ''))}'></label>"
                 f"<label for='f-to'>Date to (YYYY-MM-DD)<input id='f-to' name='to' "
-                f"value='{html.escape(query.get('to', ''))}'></label>")
-        sort_options = "".join(f"<option value='{c}'{' selected' if query.get('sort') == c else ''}>{c}</option>"
-                               for c in spec["columns"])
+                f"value='{html.escape(query.get('to', ''))}'></label>"
+            )
+        sort_options = "".join(
+            f"<option value='{c}'{' selected' if query.get('sort') == c else ''}>{c}</option>"
+            for c in spec["columns"]
+        )
         project_input = ""
         if name != "customers":
-            project_input = (f"<label for='f-project'>Project<input id='f-project' name='project' "
-                             f"value='{html.escape(query.get('project', ''))}'></label>")
+            project_input = (
+                f"<label for='f-project'>Project<input id='f-project' name='project' "
+                f"value='{html.escape(query.get('project', ''))}'></label>"
+            )
         filters = (
             f"<form class='filters' method='get' action='/{name}' id='filter-form'>"
             f"<label for='f-customer'>Customer ID<input id='f-customer' name='customer' "
@@ -327,11 +399,14 @@ class Handler(BaseHTTPRequestHandler):
             f"<label for='f-dir'>Order<select id='f-dir' name='dir'><option value='asc'>asc</option>"
             f"<option value='desc'{' selected' if query.get('dir') == 'desc' else ''}>desc</option></select></label>"
             "<button type='submit' id='search'>Search</button></form>"
-            "<div id='loading'>Loading… 查詢中</div>")
+            "<div id='loading'>Loading… 查詢中</div>"
+        )
         export = ""
         if name != "customers":
-            export = (f"<p><a id='export-csv' href='/{name}/export.csv?{urllib.parse.urlencode(keep)}'>"
-                      "Export CSV (all filtered rows)</a></p>")
+            export = (
+                f"<p><a id='export-csv' href='/{name}/export.csv?{urllib.parse.urlencode(keep)}'>"
+                "Export CSV (all filtered rows)</a></p>"
+            )
         count = f"<p id='result-count'>Total: <strong>{total}</strong> rows · Page {number} of {pages}</p>"
         if not rows:
             table = "<p class='msg info' id='empty-result'>查無資料（0 筆）。 No rows match the filters.</p>"
@@ -344,11 +419,17 @@ class Handler(BaseHTTPRequestHandler):
                     value = html.escape(str(row.get(column, "")))
                     if column == spec["id"] and name != "customers":
                         value = f"<a href='/{name}/{value}' class='doc-link'>{value}</a>"
-                    css = " class='num'" if column in {"NetAmount", "Amount", "PaidAmount", "Balance"} else ""
+                    css = (
+                        " class='num'"
+                        if column in {"NetAmount", "Amount", "PaidAmount", "Balance"}
+                        else ""
+                    )
                     cells.append(f"<td data-field='{column}'{css}>{value}</td>")
                 body_rows.append("<tr>" + "".join(cells) + "</tr>")
-            table = (f"<table id='results'><thead><tr>{head}</tr></thead>"
-                     f"<tbody>{''.join(body_rows)}</tbody></table>")
+            table = (
+                f"<table id='results'><thead><tr>{head}</tr></thead>"
+                f"<tbody>{''.join(body_rows)}</tbody></table>"
+            )
         pager = "<div class='pager' id='pager'>"
         if number > 1:
             pager += f"<a id='prev-page' href='{link(number - 1)}'>‹ Previous</a>"
@@ -369,8 +450,12 @@ class Handler(BaseHTTPRequestHandler):
         event("export", list=name, filters=query, rows=len(rows), ua=self._client())
         self._query_done()
         stamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        self._send(200, "﻿" + buffer.getvalue(), "text/csv; charset=utf-8",
-                   {"Content-Disposition": f"attachment; filename={name}_{stamp}.csv"})
+        self._send(
+            200,
+            "﻿" + buffer.getvalue(),
+            "text/csv; charset=utf-8",
+            {"Content-Disposition": f"attachment; filename={name}_{stamp}.csv"},
+        )
 
     def _detail(self, name: str, ident: str, user: str) -> None:
         data = load()
@@ -378,8 +463,14 @@ class Handler(BaseHTTPRequestHandler):
         row = next((r for r in data[spec["key"]] if r[spec["id"]] == ident), None)
         if row is None:
             event("detail", list=name, id=ident, found=False)
-            return self._send(404, page("找不到文件", f"<p class='msg error' id='not-found'>"
-                                        f"找不到文件 {html.escape(ident)}。</p>", user))
+            return self._send(
+                404,
+                page(
+                    "找不到文件",
+                    f"<p class='msg error' id='not-found'>找不到文件 {html.escape(ident)}。</p>",
+                    user,
+                ),
+            )
         event("detail", list=name, id=ident, found=True, ua=self._client())
         self._query_done()
         fields = list(spec["columns"])
@@ -394,13 +485,22 @@ class Handler(BaseHTTPRequestHandler):
                 value = f"<a href='/projects/{value}' id='project-link'>{value}</a>"
             if field == "OrderID" and name == "invoices":
                 value = f"<a href='/orders/{value}' id='order-link'>{value}</a>"
-            items.append(f"<tr><th scope='row'>{field}</th><td data-field='{field}'>{value}</td></tr>")
+            items.append(
+                f"<tr><th scope='row'>{field}</th><td data-field='{field}'>{value}</td></tr>"
+            )
         body = f"<h2>Header</h2><table id='header'>{''.join(items)}</table>"
         if name == "orders":
             line_cols = ["LineNo", "ProductID", "Quantity", "UnitPrice", "LineAmount"]
             head = "".join(f"<th>{c}</th>" for c in line_cols)
-            lines = "".join("<tr>" + "".join(f"<td data-field='{c}'>{html.escape(str(line.get(c, '')))}</td>"
-                                             for c in line_cols) + "</tr>" for line in row["Lines"])
+            lines = "".join(
+                "<tr>"
+                + "".join(
+                    f"<td data-field='{c}'>{html.escape(str(line.get(c, '')))}</td>"
+                    for c in line_cols
+                )
+                + "</tr>"
+                for line in row["Lines"]
+            )
             body += f"<h2>Line items</h2><table id='line-items'><thead><tr>{head}</tr></thead><tbody>{lines}</tbody></table>"
         body += f"<p><a href='/{name}'>← Back to {spec['title']}</a></p>"
         self._send(200, page(f"{spec['title'][:-1]} {ident}", body, user))
@@ -408,9 +508,13 @@ class Handler(BaseHTTPRequestHandler):
     def _project(self, ident: str, user: str) -> None:
         project = next((p for p in load()["projects"] if p["ProjectID"] == ident), None)
         if project is None:
-            return self._send(404, page("找不到專案", "<p class='msg error'>找不到專案。</p>", user))
-        rows = "".join(f"<tr><th scope='row'>{k}</th><td data-field='{k}'>{html.escape(str(v))}</td></tr>"
-                       for k, v in project.items())
+            return self._send(
+                404, page("找不到專案", "<p class='msg error'>找不到專案。</p>", user)
+            )
+        rows = "".join(
+            f"<tr><th scope='row'>{k}</th><td data-field='{k}'>{html.escape(str(v))}</td></tr>"
+            for k, v in project.items()
+        )
         self._send(200, page(f"Project {ident}", f"<table id='header'>{rows}</table>", user))
 
 

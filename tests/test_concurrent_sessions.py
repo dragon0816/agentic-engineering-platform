@@ -46,9 +46,12 @@ class _SlowGateway(_ChatGateway):
 def _turn(
     web: AgentWeb, session: str, message: str, into: list[dict[str, Any]]
 ) -> threading.Thread:
-    thread = threading.Thread(target=lambda: into.append(web.conversation_turn(
-        ConversationTurnRequest(session_id=session, message=message)
-    )), daemon=True)
+    thread = threading.Thread(
+        target=lambda: into.append(
+            web.conversation_turn(ConversationTurnRequest(session_id=session, message=message))
+        ),
+        daemon=True,
+    )
     thread.start()
     return thread
 
@@ -96,7 +99,10 @@ def test_one_session_runs_its_turns_in_order(tmp_path: Path) -> None:
         second.join(15)
         messages = web.conversations(session)["selected"]["messages"]
         assert [item["text"] for item in messages] == [
-            "slow question", "ok", "second question", "ok",
+            "slow question",
+            "ok",
+            "second question",
+            "ok",
         ]
 
 
@@ -112,9 +118,14 @@ def test_rating_during_a_running_turn_survives_its_save(tmp_path: Path) -> None:
         thread = _turn(web, session, "slow question", results)
         try:
             assert transport.entered.wait(10)
-            rated = web.conversation_feedback(ConversationFeedbackRequest(
-                session_id=session, message_id=answer_id, rating="up", note="clear",
-            ))
+            rated = web.conversation_feedback(
+                ConversationFeedbackRequest(
+                    session_id=session,
+                    message_id=answer_id,
+                    rating="up",
+                    note="clear",
+                )
+            )
             assert rated["ok"] is True
         finally:
             transport.release.set()
@@ -149,7 +160,10 @@ def _peak(side_effect: str) -> int:
     handler = _Overlap()
     registry = InstalledCapabilities()
     registry.register(
-        spec().model_copy(update={"side_effect": side_effect}), handler, Input, Output,
+        spec().model_copy(update={"side_effect": side_effect}),
+        handler,
+        Input,
+        Output,
         ExecutionDependencies(central_required=False),
     )
     bridge = BridgeExecutor(registry, LocalPolicy((grant(),)))

@@ -48,11 +48,16 @@ def workflow_manifest(name: str = "weekly-check", version: str = "0.3.0") -> dic
                 "visibility": "organization",
                 "lifecycle": "published",
                 "business_approval": {
-                    "status": "approved", "reviewer": "alice", "evidence": "I checked it"
+                    "status": "approved",
+                    "reviewer": "alice",
+                    "evidence": "I checked it",
                 },
                 "technical_policy": {
-                    "status": "approved", "reviewer": "alice", "evidence": "fine",
-                    "risk": "medium", "required_permissions": ["read_file"],
+                    "status": "approved",
+                    "reviewer": "alice",
+                    "evidence": "fine",
+                    "risk": "medium",
+                    "required_permissions": ["read_file"],
                 },
             },
             "description": "Check the weekly numbers.",
@@ -127,7 +132,10 @@ def test_a_submission_waits_with_the_platforms_version_owner_and_pending_reviews
     assert metadata["business_approval"]["status"] == "pending"
     assert metadata["technical_policy"]["status"] == "pending"
     assert metadata["provenance"][-1] == {
-        "source": "member-submission", "revision": None, "author": "alice"}
+        "source": "member-submission",
+        "revision": None,
+        "author": "alice",
+    }
     assert queue.packages.discover() == ()  # nothing is published yet
 
 
@@ -136,7 +144,8 @@ def test_approval_publishes_as_the_submitter_with_the_reviewers_decision(
 ) -> None:
     item = submit(queue)
     approved = queue.approve(
-        who("bob"), AssetApproveRequest(submission_id=item.submission_id, evidence="read it"))
+        who("bob"), AssetApproveRequest(submission_id=item.submission_id, evidence="read it")
+    )
     assert approved.status == "approved" and approved.reviewer == "bob"
     (package,) = queue.packages.discover()
     assert package.metadata.identity == item.identity
@@ -159,8 +168,9 @@ def test_self_review_is_refused_when_the_platform_says_so(queue: SubmissionServi
     queue.allow_self_review = False
     item = submit(queue)
     with pytest.raises(SubmissionError, match="self_review_refused"):
-        queue.approve(who("alice"), AssetApproveRequest(
-            submission_id=item.submission_id, evidence="mine"))
+        queue.approve(
+            who("alice"), AssetApproveRequest(submission_id=item.submission_id, evidence="mine")
+        )
     assert queue.packages.discover() == ()
 
 
@@ -168,13 +178,15 @@ def test_a_rejection_needs_a_reason_and_publishes_nothing(queue: SubmissionServi
     item = submit(queue)
     with pytest.raises(ValueError):
         AssetRejectRequest.model_validate({"submission_id": item.submission_id, "reason": " "})
-    rejected = queue.reject(who("bob"), AssetRejectRequest(
-        submission_id=item.submission_id, reason="steps unclear"))
+    rejected = queue.reject(
+        who("bob"), AssetRejectRequest(submission_id=item.submission_id, reason="steps unclear")
+    )
     assert (rejected.status, rejected.reason) == ("rejected", "steps unclear")
     assert queue.packages.discover() == ()
     with pytest.raises(SubmissionError, match="submission_not_pending"):
-        queue.approve(who("bob"), AssetApproveRequest(
-            submission_id=item.submission_id, evidence="late"))
+        queue.approve(
+            who("bob"), AssetApproveRequest(submission_id=item.submission_id, evidence="late")
+        )
 
 
 def test_pending_submissions_of_one_name_get_distinct_versions(
@@ -190,11 +202,13 @@ def test_a_later_version_approved_first_supersedes_the_earlier_one(
 ) -> None:
     first = submit(queue)
     second = submit(queue, change="patch")
-    queue.approve(who("bob"), AssetApproveRequest(
-        submission_id=second.submission_id, evidence="ok"))
+    queue.approve(
+        who("bob"), AssetApproveRequest(submission_id=second.submission_id, evidence="ok")
+    )
     with pytest.raises(SubmissionError, match="version_superseded"):
-        queue.approve(who("bob"), AssetApproveRequest(
-            submission_id=first.submission_id, evidence="ok"))
+        queue.approve(
+            who("bob"), AssetApproveRequest(submission_id=first.submission_id, evidence="ok")
+        )
 
 
 def test_only_the_owner_or_a_co_editor_submits_a_new_version(queue: SubmissionService) -> None:
@@ -236,9 +250,14 @@ def test_invalid_oversized_and_withdrawn_submissions(queue: SubmissionService) -
 def test_the_queue_survives_a_restart(tmp_path: Path) -> None:
     path = tmp_path / "registry.sqlite"
     first = SubmissionStore(path)
-    item = submit(SubmissionService(
-        AssetOwnershipService(enrollment(), REGISTRIES["sqlite"](tmp_path)),
-        REGISTRIES["sqlite"](tmp_path), first, clock=lambda: NOW))
+    item = submit(
+        SubmissionService(
+            AssetOwnershipService(enrollment(), REGISTRIES["sqlite"](tmp_path)),
+            REGISTRIES["sqlite"](tmp_path),
+            first,
+            clock=lambda: NOW,
+        )
+    )
     first.close()
     again = SubmissionStore(path)
     held = again.get(item.submission_id)
@@ -252,20 +271,30 @@ def test_the_queue_survives_a_restart(tmp_path: Path) -> None:
 
 def _signed_in(app: SharedPlatformApplication, actor: str, role: str) -> str:
     proof = app.issue_invitation(
-        Invitation(invitation_id=f"invite-{actor}", actor=actor, issued_by="platform-admin",
-                   groups=("engineering",), role=role),  # type: ignore[arg-type]
+        Invitation(
+            invitation_id=f"invite-{actor}",
+            actor=actor,
+            issued_by="platform-admin",
+            groups=("engineering",),
+            role=role,
+        ),  # type: ignore[arg-type]
         expires_at=app.member_service.now() + timedelta(days=1),
     )
-    status, reply = request(app.member_base_url + "/v1/member/sign-in",
-                            authorization=f"Invitation {proof.bearer}", method="POST")
+    status, reply = request(
+        app.member_base_url + "/v1/member/sign-in",
+        authorization=f"Invitation {proof.bearer}",
+        method="POST",
+    )
     assert status == 200
     return f"Bearer {reply['session']}"
 
 
 def test_portal_routes_submit_review_and_issue_an_agent_login(tmp_path: Path) -> None:
     app = SharedPlatformApplication.empty(
-        administrators=("platform-admin",), registry_path=tmp_path / "registry.sqlite",
-        clock=lambda: NOW)
+        administrators=("platform-admin",),
+        registry_path=tmp_path / "registry.sqlite",
+        clock=lambda: NOW,
+    )
     with app:
         url = app.member_base_url + "/v1/member/"
         member = _signed_in(app, "leo", "member")
@@ -274,39 +303,63 @@ def test_portal_routes_submit_review_and_issue_an_agent_login(tmp_path: Path) ->
         # The member's Agent gets its own login and trades it for a session.
         status, issued = request(url + "logins/issue-agent", authorization=member, body={})
         assert status == 200 and issued["login_id"].startswith("login-")
-        status, agent = request(url + "session", authorization=f"Login {issued['login']}",
-                                method="POST")
+        status, agent = request(
+            url + "session", authorization=f"Login {issued['login']}", method="POST"
+        )
         assert status == 200
         agent_session = f"Bearer {agent['session']}"
 
-        status, submitted = request(url + "assets/submit", authorization=agent_session, body={
-            "kind": "workflow", "change": "minor", "note": "first", "manifest":
-            workflow_manifest()})
+        status, submitted = request(
+            url + "assets/submit",
+            authorization=agent_session,
+            body={
+                "kind": "workflow",
+                "change": "minor",
+                "note": "first",
+                "manifest": workflow_manifest(),
+            },
+        )
         assert status == 200, submitted
         submission_id = submitted["submission"]["submission_id"]
 
         # A member cannot see or decide the queue; nobody approves their own.
         assert request(url + "admin/submissions/list", authorization=member, body={})[0] == 403
-        assert request(url + "admin/submissions/approve", authorization=member, body={
-            "submission_id": submission_id, "evidence": "x"})[0] == 403
-        status, queue = request(url + "admin/submissions/list", authorization=reviewer,
-                                body={"status": "pending"})
+        assert (
+            request(
+                url + "admin/submissions/approve",
+                authorization=member,
+                body={"submission_id": submission_id, "evidence": "x"},
+            )[0]
+            == 403
+        )
+        status, queue = request(
+            url + "admin/submissions/list", authorization=reviewer, body={"status": "pending"}
+        )
         assert status == 200 and [s["submission_id"] for s in queue["submissions"]] == [
-            submission_id]
-        status, detail = request(url + "admin/submissions/get", authorization=reviewer,
-                                 body={"submission_id": submission_id})
+            submission_id
+        ]
+        status, detail = request(
+            url + "admin/submissions/get",
+            authorization=reviewer,
+            body={"submission_id": submission_id},
+        )
         assert status == 200 and detail["manifest"]["description"] == "Check the weekly numbers."
 
-        status, approved = request(url + "admin/submissions/approve", authorization=reviewer,
-                                   body={"submission_id": submission_id, "evidence": "read"})
+        status, approved = request(
+            url + "admin/submissions/approve",
+            authorization=reviewer,
+            body={"submission_id": submission_id, "evidence": "read"},
+        )
         assert status == 200 and approved["submission"]["status"] == "approved"
         status, mine = request(url + "assets/submissions", authorization=agent_session, body={})
         assert status == 200 and mine["submissions"][0]["status"] == "approved"
-        assert [p.metadata.identity.name for p in app.state.packages.discover()] == [
-            "weekly-check"]
+        assert [p.metadata.identity.name for p in app.state.packages.discover()] == ["weekly-check"]
 
-        status, refused = request(url + "assets/submit", authorization=agent_session, body={
-            "kind": "workflow", "change": "minor", "manifest": {"metadata": {}}})
+        status, refused = request(
+            url + "assets/submit",
+            authorization=agent_session,
+            body={"kind": "workflow", "change": "minor", "manifest": {"metadata": {}}},
+        )
         assert (status, refused) == (400, {"code": "manifest_invalid"})
         assert request(url + "assets/submit", body={})[0] == 401
 
@@ -314,19 +367,27 @@ def test_portal_routes_submit_review_and_issue_an_agent_login(tmp_path: Path) ->
 def test_the_portal_shows_the_review_queue_and_the_agent_connection() -> None:
     from control_plane.member_page import PAGE
 
-    for hook in ('id="review"', 'id="review-rows"', "/v1/member/admin/submissions/",
-                 'id="connect-agent"', "/v1/member/logins/issue-agent", 'id="mine-rows"',
-                 "/v1/member/assets/submissions"):
+    for hook in (
+        'id="review"',
+        'id="review-rows"',
+        "/v1/member/admin/submissions/",
+        'id="connect-agent"',
+        "/v1/member/logins/issue-agent",
+        'id="mine-rows"',
+        "/v1/member/assets/submissions",
+    ):
         assert hook in PAGE
     # Submitted text is shown as text, never as markup.
-    assert "review-manifest\").textContent" in PAGE and "innerHTML=JSON" not in PAGE
+    assert 'review-manifest").textContent' in PAGE and "innerHTML=JSON" not in PAGE
 
 
 def test_an_administrator_may_approve_their_own_submission_by_default(
     queue: SubmissionService,
 ) -> None:
     item = submit(queue)
-    approved = queue.approve(who("alice"), AssetApproveRequest(
-        submission_id=item.submission_id, evidence="my own, checked"))
+    approved = queue.approve(
+        who("alice"),
+        AssetApproveRequest(submission_id=item.submission_id, evidence="my own, checked"),
+    )
     assert (approved.status, approved.reviewer) == ("approved", "alice")
     assert len(queue.packages.discover()) == 1

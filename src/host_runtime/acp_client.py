@@ -49,9 +49,17 @@ AcpLauncher = Callable[[list[str], Path, Mapping[str, str]], AcpProcess]
 
 def launch(argv: list[str], cwd: Path, env: Mapping[str, str]) -> AcpProcess:
     return subprocess.Popen(  # noqa: S603 - argv is built from fixed flags
-        argv, cwd=cwd, env=dict(env), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL, text=True, encoding="utf-8", errors="replace",
-        bufsize=1)
+        argv,
+        cwd=cwd,
+        env=dict(env),
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        bufsize=1,
+    )
 
 
 def choose(options: list[dict[str, Any]], allowed: bool) -> dict[str, Any]:
@@ -65,9 +73,14 @@ def choose(options: list[dict[str, Any]], allowed: bool) -> dict[str, Any]:
 
 
 class AcpSession:
-    def __init__(self, process: AcpProcess, *, deadline_s: float,
-                 on_permission: Callable[[dict[str, Any]], bool],
-                 on_tool_update: Callable[[str, str], None] | None = None) -> None:
+    def __init__(
+        self,
+        process: AcpProcess,
+        *,
+        deadline_s: float,
+        on_permission: Callable[[dict[str, Any]], bool],
+        on_tool_update: Callable[[str, str], None] | None = None,
+    ) -> None:
         self.process = process
         self.deadline = time.monotonic() + deadline_s
         self.on_permission = on_permission
@@ -122,8 +135,11 @@ class AcpSession:
                 if "error" in message:
                     error = message.get("error") or {}
                     text = str(error.get("message") or "").casefold()
-                    raise AcpError("backend_authentication_failed"
-                                   if "auth" in text or "login" in text else "backend_failed")
+                    raise AcpError(
+                        "backend_authentication_failed"
+                        if "auth" in text or "login" in text
+                        else "backend_failed"
+                    )
                 result = message.get("result")
                 return result if isinstance(result, dict) else {}
             self._handle(message)
@@ -137,15 +153,21 @@ class AcpSession:
                 listed = params.get("options")
                 options: list[dict[str, Any]] = (
                     [item for item in listed if isinstance(item, dict)]
-                    if isinstance(listed, list) else [])
+                    if isinstance(listed, list)
+                    else []
+                )
                 try:
                     allowed = bool(self.on_permission(params))
                 except Exception:  # noqa: BLE001 - an error never allows
                     allowed = False
                 self._send({"id": message["id"], "result": choose(options, allowed)})
             else:
-                self._send({"id": message["id"], "error": {
-                    "code": -32601, "message": f"not offered: {method}"}})
+                self._send(
+                    {
+                        "id": message["id"],
+                        "error": {"code": -32601, "message": f"not offered: {method}"},
+                    }
+                )
             return
         if method == "session/update":
             raw = params.get("update")
@@ -172,24 +194,39 @@ class AcpSession:
             self.process.kill()
 
 
-def prompt_turn(process: AcpProcess, *, cwd: Path, mcp_servers: list[dict[str, Any]],
-                prompt: str, deadline_s: float,
-                on_permission: Callable[[dict[str, Any]], bool],
-                on_tool_update: Callable[[str, str], None] | None = None) -> str:
+def prompt_turn(
+    process: AcpProcess,
+    *,
+    cwd: Path,
+    mcp_servers: list[dict[str, Any]],
+    prompt: str,
+    deadline_s: float,
+    on_permission: Callable[[dict[str, Any]], bool],
+    on_tool_update: Callable[[str, str], None] | None = None,
+) -> str:
     """One ACP session, one prompt; the agent's answer text."""
-    session = AcpSession(process, deadline_s=deadline_s, on_permission=on_permission,
-                         on_tool_update=on_tool_update)
+    session = AcpSession(
+        process, deadline_s=deadline_s, on_permission=on_permission, on_tool_update=on_tool_update
+    )
     try:
-        session.request("initialize", {
-            "protocolVersion": PROTOCOL_VERSION,
-            "clientCapabilities": {"fs": {"readTextFile": False, "writeTextFile": False},
-                                   "terminal": False}})
+        session.request(
+            "initialize",
+            {
+                "protocolVersion": PROTOCOL_VERSION,
+                "clientCapabilities": {
+                    "fs": {"readTextFile": False, "writeTextFile": False},
+                    "terminal": False,
+                },
+            },
+        )
         created = session.request("session/new", {"cwd": str(cwd), "mcpServers": mcp_servers})
         session_id = str(created.get("sessionId") or "")
         if not session_id:
             raise AcpError("backend_failed")
-        session.request("session/prompt", {"sessionId": session_id,
-                                           "prompt": [{"type": "text", "text": prompt}]})
+        session.request(
+            "session/prompt",
+            {"sessionId": session_id, "prompt": [{"type": "text", "text": prompt}]},
+        )
         return "".join(session.text).strip()
     finally:
         session.close()

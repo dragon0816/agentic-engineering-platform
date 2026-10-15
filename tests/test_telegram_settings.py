@@ -40,7 +40,9 @@ class Store:
 
 def _update(**changes: Any) -> TelegramSettingsUpdate:
     values: dict[str, Any] = {
-        "enabled": True, "token": TOKEN, "senders": [{"sender_id": 42, "actor": "engineer"}],
+        "enabled": True,
+        "token": TOKEN,
+        "senders": [{"sender_id": 42, "actor": "engineer"}],
     }
     values.update(changes)
     return TelegramSettingsUpdate.model_validate(values)
@@ -61,7 +63,7 @@ def test_the_token_goes_to_the_environment_and_no_file(
     ingress = json.loads(layout.telegram.read_text(encoding="utf-8"))
     assert ingress["credential"] == {"name": "telegram_bot"}
     assert ingress["senders"] == [{"sender_id": 42, "actor": "engineer"}]
-    assert "123456789" not in repr(_update())               # SecretStr hides it
+    assert "123456789" not in repr(_update())  # SecretStr hides it
 
     # Saving again without a token keeps the stored one.
     monkeypatch.setenv(TOKEN_VARIABLE, TOKEN)
@@ -74,10 +76,13 @@ def test_the_token_goes_to_the_environment_and_no_file(
     assert (layout.workspace_root / "telegram.disabled.json").is_file()
 
 
-@pytest.mark.parametrize(("changes", "code"), [
-    ({"token": "not-a-token"}, "telegram_token_invalid"),
-    ({"token": None}, "telegram_token_missing"),
-])
+@pytest.mark.parametrize(
+    ("changes", "code"),
+    [
+        ({"token": "not-a-token"}, "telegram_token_invalid"),
+        ({"token": None}, "telegram_token_missing"),
+    ],
+)
 def test_incomplete_settings_are_refused_before_anything_is_written(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, changes: dict[str, Any], code: str
 ) -> None:
@@ -103,7 +108,7 @@ def test_agent_web_saves_and_starts_the_bot_without_echoing_the_token(
         store = Store()
         web.user_environment = store
         started = threading.Event()
-        monkeypatch.setattr(web, "start_telegram", started.set)   # no network in tests
+        monkeypatch.setattr(web, "start_telegram", started.set)  # no network in tests
         assert web.settings()["telegram"]["configured"] is False
         result = web.update_telegram_settings(_update())
         assert result["ok"] is True and result["restart_required"] is False
@@ -183,18 +188,25 @@ def test_the_form_accepts_an_id_alone_and_a_token_copied_with_bot(
         store = Store()
         web.user_environment = store
         monkeypatch.setattr(web, "start_telegram", lambda: None)
-        form = TelegramSettingsForm.model_validate({
-            "enabled": True, "token": f"  bot{TOKEN} ",
-            "senders": [{"sender_id": 42}, {"sender_id": 7, "actor": "@reviewer"}],
-        })
+        form = TelegramSettingsForm.model_validate(
+            {
+                "enabled": True,
+                "token": f"  bot{TOKEN} ",
+                "senders": [{"sender_id": 42}, {"sender_id": 7, "actor": "@reviewer"}],
+            }
+        )
         result = web.update_telegram_settings(form)
         assert result["ok"] is True, result
         assert store.saved == {TOKEN_VARIABLE: TOKEN}
         assert result["telegram"]["senders"] == [
-            {"sender_id": 42, "actor": runtime.actor}, {"sender_id": 7, "actor": "reviewer"},
+            {"sender_id": 42, "actor": runtime.actor},
+            {"sender_id": 7, "actor": "reviewer"},
         ]
-        refused = web.update_telegram_settings(TelegramSettingsForm.model_validate(
-            {"enabled": True, "senders": [{"sender_id": 7, "actor": "two words"}]}))
+        refused = web.update_telegram_settings(
+            TelegramSettingsForm.model_validate(
+                {"enabled": True, "senders": [{"sender_id": 7, "actor": "two words"}]}
+            )
+        )
         assert refused == {"ok": False, "code": "telegram_actor_invalid"}
 
 
@@ -205,7 +217,7 @@ def test_the_page_explains_each_refusal_and_keeps_the_typed_token() -> None:
     for code in ("telegram_token_invalid", "telegram_sender_invalid", "telegram_actor_invalid"):
         assert code in section
     assert "@userinfobot" in section
-    assert 'el("telegram-token").value = ""' not in section   # kept after a failure
+    assert 'el("telegram-token").value = ""' not in section  # kept after a failure
 
 
 def test_an_expired_page_says_so_instead_of_request_failed() -> None:
@@ -243,4 +255,4 @@ def test_a_bot_with_no_senders_runs_and_lists_who_messaged_it(
             _update(token=None, senders=[{"sender_id": 555, "actor": "engineer"}])
         )
         runtime.telegram.unmapped[555] = UnmappedSender(555, "@owner", now)
-        assert web.settings()["telegram"]["unknown_senders"] == []   # allowed now
+        assert web.settings()["telegram"]["unknown_senders"] == []  # allowed now

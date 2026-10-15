@@ -53,18 +53,22 @@ def folder_files(
         raise ValueError("folder is not an existing absolute folder")
     accept = {
         item.strip().lower() if item.strip().startswith(".") else f".{item.strip().lower()}"
-        for item in str(arguments.get("accept") or "").split(",") if item.strip()
+        for item in str(arguments.get("accept") or "").split(",")
+        if item.strip()
     }
     names: list[str] = []
     for entry in folder.iterdir():
         if (
-            entry.name.startswith(".") or entry.is_symlink() or not entry.is_file()
+            entry.name.startswith(".")
+            or entry.is_symlink()
+            or not entry.is_file()
             or (accept and entry.suffix.lower() not in accept)
         ):
             continue
         names.append(entry.name)
-    return [ReferenceItem(value=name) for name in sorted(names, key=str.casefold)[
-        :MAX_FOLDER_FILES]]
+    return [
+        ReferenceItem(value=name) for name in sorted(names, key=str.casefold)[:MAX_FOLDER_FILES]
+    ]
 
 
 class FunctionQuery:
@@ -114,7 +118,8 @@ class ChoiceSources:
     def needed(source: str, manifest: WorkflowManifest | None = None) -> tuple[str, ...]:
         """Answers the source waits for; settings of `manifest` are never waited for."""
         found = (
-            FunctionQuery(source).needed() if source.startswith("fn:")
+            FunctionQuery(source).needed()
+            if source.startswith("fn:")
             else ReferenceQuery(source).needed()
         )
         if manifest is None:

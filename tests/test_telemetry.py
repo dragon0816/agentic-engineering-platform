@@ -68,8 +68,12 @@ def test_a_conversation_turn_is_one_ordered_run_with_nested_spans(store: Telemet
     async def tool(context: RequestContext, args: dict[str, Any]) -> HostToolOutcome:
         return HostToolOutcome(status="succeeded", data={"ok": True})
 
-    host = HostTool(ModelTool(name="lookup", description="d", input_contract="x.v1",
-                              input_schema={"type": "object"}), tool)
+    host = HostTool(
+        ModelTool(
+            name="lookup", description="d", input_contract="x.v1", input_schema={"type": "object"}
+        ),
+        tool,
+    )
     built, model = _host_gateway([host], [_call("lookup", {}), _text("done")])
     built.router.model = Observed(built.router.model, usage=False)
     result = asyncio.run(built.converse(request("go"), ()))
@@ -110,20 +114,39 @@ def test_reported_usage_is_summed_and_a_failed_model_call_is_recorded(
 
 
 def test_attributes_are_metadata_only() -> None:
-    kept = sanitize({"prompt": "secret plan", "answer_text": "x", "tool_id": "web/read@1",
-                     "note": "password=hunter2", "input_tokens": 5, "nested": {"content": "x",
-                                                                                "n": 1},
-                     "long": "y" * 999})
+    kept = sanitize(
+        {
+            "prompt": "secret plan",
+            "answer_text": "x",
+            "tool_id": "web/read@1",
+            "note": "password=hunter2",
+            "input_tokens": 5,
+            "nested": {"content": "x", "n": 1},
+            "long": "y" * 999,
+        }
+    )
     assert "prompt" not in kept and "answer_text" not in kept
     assert kept["note"] == "[redacted]" and kept["input_tokens"] == 5
     assert kept["nested"] == {"n": 1} and len(kept["long"]) == 300
 
 
-def event(sequence: int, event_id: str = "e" * 32, run_id: str = "run-1",
-          when: datetime | None = None, event_type: str = "state.entered") -> TelemetryEvent:
-    return TelemetryEvent(event_id=event_id, run_id=run_id, trace_id="t", span_id="s",
-                          sequence=sequence, timestamp=when or datetime.now(UTC),
-                          event_type=event_type, status="started")
+def event(
+    sequence: int,
+    event_id: str = "e" * 32,
+    run_id: str = "run-1",
+    when: datetime | None = None,
+    event_type: str = "state.entered",
+) -> TelemetryEvent:
+    return TelemetryEvent(
+        event_id=event_id,
+        run_id=run_id,
+        trace_id="t",
+        span_id="s",
+        sequence=sequence,
+        timestamp=when or datetime.now(UTC),
+        event_type=event_type,
+        status="started",
+    )
 
 
 def test_storage_is_idempotent_and_ordered_by_sequence(tmp_path: Path) -> None:
@@ -138,8 +161,12 @@ def test_storage_is_idempotent_and_ordered_by_sequence(tmp_path: Path) -> None:
 def test_retention_drops_whole_old_runs(tmp_path: Path) -> None:
     item = TelemetryStore(tmp_path / "t.sqlite")
     old = datetime.now(UTC) - timedelta(days=40)
-    item.append([event(0, "o" * 32, "run-old", old, "run.started"),
-                 event(0, "n" * 32, "run-new", None, "run.started")])
+    item.append(
+        [
+            event(0, "o" * 32, "run-old", old, "run.started"),
+            event(0, "n" * 32, "run-new", None, "run.started"),
+        ]
+    )
     assert item.prune() == 1
     assert [r["run_id"] for r in item.runs()] == ["run-new"]
     assert item.run_events("run-old") == []
@@ -147,7 +174,8 @@ def test_retention_drops_whole_old_runs(tmp_path: Path) -> None:
 
 
 def test_emitting_never_blocks_or_raises_when_the_writer_falls_behind(
-    store: TelemetryStore, monkeypatch: pytest.MonkeyPatch,
+    store: TelemetryStore,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     recorder = telemetry.recorder()
     assert recorder is not None
@@ -204,9 +232,13 @@ def get(url: str, origin: str | None = None) -> Any:
 def _ws(port: int, path: str, origin: str) -> socket.socket:
     sock = socket.create_connection(("127.0.0.1", port), timeout=5)
     key = base64.b64encode(os.urandom(16)).decode()
-    sock.sendall((f"GET {path} HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\nUpgrade: websocket\r\n"
-                  f"Connection: Upgrade\r\nSec-WebSocket-Key: {key}\r\n"
-                  f"Sec-WebSocket-Version: 13\r\nOrigin: {origin}\r\n\r\n").encode())
+    sock.sendall(
+        (
+            f"GET {path} HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\nUpgrade: websocket\r\n"
+            f"Connection: Upgrade\r\nSec-WebSocket-Key: {key}\r\n"
+            f"Sec-WebSocket-Version: 13\r\nOrigin: {origin}\r\n\r\n"
+        ).encode()
+    )
     head = b""
     while b"\r\n\r\n" not in head:
         head += sock.recv(1)
@@ -230,7 +262,8 @@ def _message(sock: socket.socket) -> dict[str, Any]:
 
 
 def test_atlas_reads_runs_events_and_the_stream_without_the_token(
-    served: Any, store: TelemetryStore,  # noqa: F811
+    served: Any,
+    store: TelemetryStore,  # noqa: F811
 ) -> None:
     with telemetry.run("capability_call", trace_id="trace-x"):
         telemetry.emit("state.entered", status="started", state="model")
@@ -243,12 +276,17 @@ def test_atlas_reads_runs_events_and_the_stream_without_the_token(
     assert headers.get("Access-Control-Allow-Origin") == "http://127.0.0.1:8127"
     (run,) = listed["runs"]
     # A benchmark case links to the AEP runs that answered it by trace id.
-    assert get(url + "/api/v1/telemetry/runs?trace_id=trace-x")[2]["runs"][0]["run_id"] \
+    assert (
+        get(url + "/api/v1/telemetry/runs?trace_id=trace-x")[2]["runs"][0]["run_id"]
         == run["run_id"]
+    )
     assert get(url + "/api/v1/telemetry/runs?trace_id=trace-y")[2]["runs"] == []
     _, _, page = get(url + f"/api/v1/telemetry/runs/{run['run_id']}/events")
     assert [e["event_type"] for e in page["events"]] == [
-        "run.started", "state.entered", "run.completed"]
+        "run.started",
+        "state.entered",
+        "run.completed",
+    ]
     assert get(url + "/api/v1/telemetry/runs", "https://evil.example")[0] == 403
     # Other Agent Web routes still need the token.
     assert fetch(url + "/api/conversations").status == 401
@@ -274,26 +312,51 @@ def test_strategies_compare_on_success_latency_and_retries(tmp_path: Path) -> No
     now = datetime.now(UTC)
     rows = []
     for index, (strategy, status, duration) in enumerate(
-            [("st-a", "succeeded", 100), ("st-a", "failed", 300), ("st-b", "succeeded", 50)]):
+        [("st-a", "succeeded", 100), ("st-a", "failed", 300), ("st-b", "succeeded", 50)]
+    ):
         run = f"run-{index}"
         rows += [
-            TelemetryEvent(event_id=f"{index}s".ljust(32, "x"), run_id=run, trace_id="t",
-                           span_id="s", sequence=0, timestamp=now, event_type="run.started",
-                           status="started", attributes={"run_kind": "conversation_turn",
-                                                         "strategy_id": strategy}),
-            TelemetryEvent(event_id=f"{index}c".ljust(32, "x"), run_id=run, trace_id="t",
-                           span_id="s", sequence=1, timestamp=now, event_type="run.completed",
-                           status=status, attributes={"duration_ms": duration, "llm_calls": 2,
-                                                      "input_tokens": None}),
+            TelemetryEvent(
+                event_id=f"{index}s".ljust(32, "x"),
+                run_id=run,
+                trace_id="t",
+                span_id="s",
+                sequence=0,
+                timestamp=now,
+                event_type="run.started",
+                status="started",
+                attributes={"run_kind": "conversation_turn", "strategy_id": strategy},
+            ),
+            TelemetryEvent(
+                event_id=f"{index}c".ljust(32, "x"),
+                run_id=run,
+                trace_id="t",
+                span_id="s",
+                sequence=1,
+                timestamp=now,
+                event_type="run.completed",
+                status=status,
+                attributes={"duration_ms": duration, "llm_calls": 2, "input_tokens": None},
+            ),
         ]
-    rows.append(TelemetryEvent(event_id="r".ljust(32, "x"), run_id="run-1", trace_id="t",
-                               span_id="s", sequence=2, timestamp=now,
-                               event_type="retry.scheduled", status="succeeded"))
+    rows.append(
+        TelemetryEvent(
+            event_id="r".ljust(32, "x"),
+            run_id="run-1",
+            trace_id="t",
+            span_id="s",
+            sequence=2,
+            timestamp=now,
+            event_type="retry.scheduled",
+            status="succeeded",
+        )
+    )
     item.append(rows)
     item.close()
     report = {row["strategy_id"]: row for row in compare(tmp_path / "t.sqlite")}
     assert report["st-a"]["runs"] == 2 and report["st-a"]["success_rate"] == 0.5
     assert report["st-a"]["retried_runs"] == 1 and report["st-a"]["token_coverage"] == 0.0
     assert report["st-b"]["p50_ms"] == 50.0
-    assert "| st-a | conversation_turn | 2 |" in markdown(list(report.values()),
-                                                         ("strategy_id", "run_kind"))
+    assert "| st-a | conversation_turn | 2 |" in markdown(
+        list(report.values()), ("strategy_id", "run_kind")
+    )

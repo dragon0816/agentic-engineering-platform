@@ -50,15 +50,19 @@ from common.execution import RequestContext, TraceIdentifiers
 
 
 def git(*args: str, cwd: Path) -> str:
-    return subprocess.run(["git", *args], cwd=cwd, check=True, capture_output=True,
-                          text=True).stdout
+    return subprocess.run(
+        ["git", *args], cwd=cwd, check=True, capture_output=True, text=True
+    ).stdout
 
 
 @pytest.fixture(autouse=True)
 def identity(monkeypatch: pytest.MonkeyPatch) -> None:
-    for key, value in (("GIT_AUTHOR_NAME", "AEP Test"), ("GIT_AUTHOR_EMAIL", "aep@example.test"),
-                       ("GIT_COMMITTER_NAME", "AEP Test"),
-                       ("GIT_COMMITTER_EMAIL", "aep@example.test")):
+    for key, value in (
+        ("GIT_AUTHOR_NAME", "AEP Test"),
+        ("GIT_AUTHOR_EMAIL", "aep@example.test"),
+        ("GIT_COMMITTER_NAME", "AEP Test"),
+        ("GIT_COMMITTER_EMAIL", "aep@example.test"),
+    ):
         monkeypatch.setenv(key, value)
 
 
@@ -84,15 +88,26 @@ def isolated(tmp_path: Path, *, existing_version: str | None = None) -> ReleaseR
     inbox.mkdir()
     (inbox / "plan.json").write_text('{"tests": [1]}', encoding="utf-8")
     return ReleaseRunSettings(
-        release_repo_url=str(root / "rs-wmt-sw-release.git"), work_root=str(root / "work"),
-        inbox_path=str(inbox), allowed_root=str(root))
+        release_repo_url=str(root / "rs-wmt-sw-release.git"),
+        work_root=str(root / "work"),
+        inbox_path=str(inbox),
+        allowed_root=str(root),
+    )
 
 
 def request(**extra: Any) -> ReleaseRunRequest:
-    return ReleaseRunRequest.model_validate({
-        "companyName": "Foxconn", "chipsetId": "kt326", "cmpKtOption": "KT161",
-        "chipsetVersion": "2.0.17", "generalTestcaseVersion": "v3.0.17",
-        "notes": 'fixed the "throughput" plan', "testPlans": ["plan.json"], **extra})
+    return ReleaseRunRequest.model_validate(
+        {
+            "companyName": "Foxconn",
+            "chipsetId": "kt326",
+            "cmpKtOption": "KT161",
+            "chipsetVersion": "2.0.17",
+            "generalTestcaseVersion": "v3.0.17",
+            "notes": 'fixed the "throughput" plan',
+            "testPlans": ["plan.json"],
+            **extra,
+        }
+    )
 
 
 def test_a_new_branch_is_created_from_the_template_prepared_and_committed_locally(
@@ -114,7 +129,8 @@ def test_a_new_branch_is_created_from_the_template_prepared_and_committed_locall
     message = git("log", "-1", "--format=%B", cwd=repo)
     assert message.startswith(
         "Release Foxconn kt326 2.0.17 v0.0.1 (general-testcase v3.0.17)\n\n"
-        "fixed the 'throughput' plan")
+        "fixed the 'throughput' plan"
+    )
     assert git("ls-remote", "--heads", "origin", "Foxconn_kt326", cwd=repo) == ""  # not pushed
 
 
@@ -142,8 +158,10 @@ def test_a_dry_run_or_a_changed_checkout_is_never_committed(tmp_path: Path) -> N
 
 def test_only_a_local_origin_inside_a_marked_root_is_accepted(tmp_path: Path) -> None:
     settings = isolated(tmp_path)
-    for url in ("https://code.rsint.net/rs-wmt-projects/releases/rs-wmt-sw-release.git",
-                "git@code.rsint.net:rs-wmt-projects/releases/rs-wmt-sw-release.git"):
+    for url in (
+        "https://code.rsint.net/rs-wmt-projects/releases/rs-wmt-sw-release.git",
+        "git@code.rsint.net:rs-wmt-projects/releases/rs-wmt-sw-release.git",
+    ):
         with pytest.raises(ReleaseRunError) as remote:
             prepare_release(settings.model_copy(update={"release_repo_url": url}), request())
         assert remote.value.code == "remote_not_isolated"
@@ -199,11 +217,14 @@ def test_an_unreachable_index_falls_back_to_the_readiness_table(tmp_path: Path) 
             return 200, '{"data": {"chipsets": [{"name": "rs-wmt-kt326", "tag": "2.0.8"}]}}'
         raise OSError("down")
 
-    settings = isolated(tmp_path).model_copy(update={
-        "artifactory_base_url": "https://index", "readiness_base_url": "https://ops"})
+    settings = isolated(tmp_path).model_copy(
+        update={"artifactory_base_url": "https://index", "readiness_base_url": "https://ops"}
+    )
     prepared = prepare_release(settings, request(chipsetVersion=""), fetch=fetch)
     assert (prepared.chipset_version, prepared.chipset_version_source) == (
-        "2.0.8", "readiness table")
+        "2.0.8",
+        "readiness table",
+    )
 
 
 def test_the_commit_message_keeps_the_source_quoting() -> None:
@@ -220,18 +241,31 @@ def test_the_two_workflows_are_separate_approved_runs_that_never_push(tmp_path: 
 
     settings = isolated(tmp_path)
     context = RequestContext(
-        trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"), actor="owner",
-        namespace="engineering", channel="local", message="x")
+        trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"),
+        actor="owner",
+        namespace="engineering",
+        channel="local",
+        message="x",
+    )
     paths = settings.model_dump()
-    prepared = asyncio.run(PrepareHandler()(context, {
-        "request": request().model_dump(by_alias=True), **paths}))
-    committed = asyncio.run(CommitHandler()(context, {
-        "branch": "Foxconn_kt326", "fingerprint": prepared.fingerprint[:16],  # type: ignore[attr-defined]
-        **paths}))
+    prepared = asyncio.run(
+        PrepareHandler()(context, {"request": request().model_dump(by_alias=True), **paths})
+    )
+    committed = asyncio.run(
+        CommitHandler()(
+            context,
+            {
+                "branch": "Foxconn_kt326",
+                "fingerprint": prepared.fingerprint[:16],  # type: ignore[attr-defined]
+                **paths,
+            },
+        )
+    )
     assert committed.committed  # type: ignore[attr-defined]
     with pytest.raises(CapabilityRefused):
-        asyncio.run(CommitHandler()(context, {"branch": "Foxconn_kt326",
-                                              "fingerprint": "f" * 16, **paths}))
+        asyncio.run(
+            CommitHandler()(context, {"branch": "Foxconn_kt326", "fingerprint": "f" * 16, **paths})
+        )
 
 
 # -- push (owner 2026-10-14) ----------------------------------------------------
@@ -317,13 +351,17 @@ def test_the_real_repository_needs_remote_release_and_a_clean_url(tmp_path: Path
 
     on = settings.model_copy(update={"release_repo_url": GITLAB, "remote_release": True})
     assert on.checked()[3] == GITLAB
-    for url in ("git@code.example.test:rs-wmt-projects/releases/rs-wmt-sw-release.git",
-                "ssh://git@code.example.test:2222/rs-wmt-projects/rs-wmt-sw-release.git"):
+    for url in (
+        "git@code.example.test:rs-wmt-projects/releases/rs-wmt-sw-release.git",
+        "ssh://git@code.example.test:2222/rs-wmt-projects/rs-wmt-sw-release.git",
+    ):
         assert on.model_copy(update={"release_repo_url": url}).checked()[3] == url
-    for url in ("http://code.example.test/group/repo.git",
-                "https://someone@code.example.test/group/repo.git",
-                "https://oauth2:not-a-real-value@code.example.test/group/repo.git",
-                "file:///C:/repos/repo.git"):
+    for url in (
+        "http://code.example.test/group/repo.git",
+        "https://someone@code.example.test/group/repo.git",
+        "https://oauth2:not-a-real-value@code.example.test/group/repo.git",
+        "file:///C:/repos/repo.git",
+    ):
         with pytest.raises(ReleaseRunError) as bad:
             on.model_copy(update={"release_repo_url": url}).checked()
         assert bad.value.code == "remote_url_invalid"
@@ -341,8 +379,9 @@ def test_with_remote_release_the_plan_names_the_push_and_a_foreign_origin_is_ref
     prepare_release(settings, request(testPlans=[]))  # leaves a working copy
     remote = settings.model_copy(update={"release_repo_url": GITLAB, "remote_release": True})
     prepared = prepare_release(remote, request())  # fetches the existing copy: no network
-    assert any("push to rs-wmt-projects/releases/rs-wmt-sw-release" in line
-               for line in prepared.plan)
+    assert any(
+        "push to rs-wmt-projects/releases/rs-wmt-sw-release" in line for line in prepared.plan
+    )
     done = commit_release(remote, prepared.branch, prepared.fingerprint[:16])
     with pytest.raises(ReleaseRunError) as foreign:
         push_release(remote, prepared.branch, done.commit[:12])
@@ -365,14 +404,20 @@ def test_push_is_its_own_high_risk_approved_workflow(tmp_path: Path) -> None:
 
     settings, commit, _ = committed(tmp_path)
     context = RequestContext(
-        trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"), actor="owner",
-        namespace="engineering", channel="local", message="x")
+        trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"),
+        actor="owner",
+        namespace="engineering",
+        channel="local",
+        message="x",
+    )
     paths = settings.model_dump()
     with pytest.raises(CapabilityRefused):
-        asyncio.run(PushHandler()(context, {"branch": "Foxconn_kt326", "commit": "f" * 12,
-                                            **paths}))
-    pushed = asyncio.run(PushHandler()(context, {"branch": "Foxconn_kt326",
-                                                 "commit": commit[:12], **paths}))
+        asyncio.run(
+            PushHandler()(context, {"branch": "Foxconn_kt326", "commit": "f" * 12, **paths})
+        )
+    pushed = asyncio.run(
+        PushHandler()(context, {"branch": "Foxconn_kt326", "commit": commit[:12], **paths})
+    )
     assert pushed.pushed  # type: ignore[attr-defined]
 
 
@@ -390,11 +435,13 @@ def test_the_release_capabilities_exist_once_this_install_has_release_settings(
     config, layout = workspace(tmp_path, membership=membership_record(), assets=False)
     with build_runtime(config, layout=layout) as runtime:
         installed = runtime.agent.gateway.bridge.installed
-        assert all(installed.get(spec.identity) is None
-                   for spec in (PREPARE_SPEC, COMMIT_SPEC, PUSH_SPEC))
+        assert all(
+            installed.get(spec.identity) is None for spec in (PREPARE_SPEC, COMMIT_SPEC, PUSH_SPEC)
+        )
 
     WorkflowSettingsStore(layout.workspace_root / SETTINGS_FILE).save(
-        PREPARE, {"work_root": str(tmp_path / "work")})
+        PREPARE, {"work_root": str(tmp_path / "work")}
+    )
     with build_runtime(config, layout=layout) as runtime:
         installed = runtime.agent.gateway.bridge.installed
         for spec in (PREPARE_SPEC, COMMIT_SPEC, PUSH_SPEC):

@@ -36,15 +36,21 @@ def _approved(manifest: dict[str, Any]) -> dict[str, Any]:
     """What the owner's publication flow would produce; a test stand-in only."""
     policy = {
         **manifest["metadata"]["technical_policy"],
-        "status": "approved", "reviewer": "security-reviewer",
+        "status": "approved",
+        "reviewer": "security-reviewer",
         "evidence": "Reviewed the pinned job and adapter.",
     }
-    manifest["metadata"].update({
-        "lifecycle": "published",
-        "business_approval": {"status": "approved", "reviewer": "domain-owner",
-                              "evidence": "Workflow 90 behavior reviewed."},
-        "technical_policy": policy,
-    })
+    manifest["metadata"].update(
+        {
+            "lifecycle": "published",
+            "business_approval": {
+                "status": "approved",
+                "reviewer": "domain-owner",
+                "evidence": "Workflow 90 behavior reviewed.",
+            },
+            "technical_policy": policy,
+        }
+    )
     manifest["capability"]["policy"] = policy
     return manifest
 
@@ -76,9 +82,11 @@ def _run(runtime: Any, config: Any, arguments: dict[str, Any], key: str) -> Any:
     from common.assets import AssetIdentity
 
     request = LocalWorkflowRequest(
-        actor="engineer", bridge_id=config.device.bridge_id,
+        actor="engineer",
+        bridge_id=config.device.bridge_id,
         workflow=AssetIdentity.model_validate(workflow["metadata"]["identity"]),
-        arguments=arguments, idempotency_key=key,
+        arguments=arguments,
+        idempotency_key=key,
         trace=TraceIdentifiers(trace_id=f"w90-{key}", request_id="w90", span_id="test"),
     )
     return asyncio.run(runtime.agent.execute_workflow(request))
@@ -86,7 +94,9 @@ def _run(runtime: Any, config: Any, arguments: dict[str, Any], key: str) -> Any:
 
 def test_workflow_90_runs_the_pinned_job_through_bridge_policy(tmp_path: Path) -> None:
     config, layout = workspace(
-        tmp_path / "granted", membership=membership_record(), grants=[_grant()],
+        tmp_path / "granted",
+        membership=membership_record(),
+        grants=[_grant()],
     )
     _install(layout)
     with build_runtime(config) as runtime:
@@ -134,9 +144,7 @@ def test_vendored_job_is_byte_identical_to_the_pinned_source() -> None:
 
 
 def test_committed_manifests_match_the_generator() -> None:
-    spec = importlib.util.spec_from_file_location(
-        "w90_build", PACKAGE / "build_manifests.py"
-    )
+    spec = importlib.util.spec_from_file_location("w90_build", PACKAGE / "build_manifests.py")
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)

@@ -28,16 +28,30 @@ KEY = "訂單號"
 def web_rows(customer: str = "C001") -> list[dict[str, str]]:
     """The rows `web/read` returns for the practice site's table."""
     return [
-        {"訂單號": o.order, "品項": o.item, "數量": str(o.quantity), "預計出貨日": o.ship_date,
-         "狀態": o.status, "通知": "標記已通知" if o.status == "延遲" else ""}
-        for o in ORDERS if o.customer == customer
+        {
+            "訂單號": o.order,
+            "品項": o.item,
+            "數量": str(o.quantity),
+            "預計出貨日": o.ship_date,
+            "狀態": o.status,
+            "通知": "標記已通知" if o.status == "延遲" else "",
+        }
+        for o in ORDERS
+        if o.customer == customer
     ]
 
 
 def ask(book: Path, **changes: object) -> UpsertRequest:
-    return UpsertRequest.model_validate({
-        "workbook": str(book), "sheet": SHEET_NAME, "key": KEY, "rows": web_rows(),
-        "columns": ["訂單號", "品項", "數量", "預計出貨日", "狀態"], **changes})
+    return UpsertRequest.model_validate(
+        {
+            "workbook": str(book),
+            "sheet": SHEET_NAME,
+            "key": KEY,
+            "rows": web_rows(),
+            "columns": ["訂單號", "品項", "數量", "預計出貨日", "狀態"],
+            **changes,
+        }
+    )
 
 
 def sheet_rows(book: Path) -> list[tuple[object, ...]]:
@@ -62,18 +76,25 @@ def test_upsert_updates_appends_keeps_notes_and_other_rows_and_backs_up(tmp_path
     rows = sheet_rows(book)
     by_key = {row[0]: row for row in rows[1:]}
     assert by_key["SO-1001"] == (
-        "SO-1001", "CMW500 校正套件", 2, "2026-10-08", "準時", "客戶催過一次")
-    assert by_key["SO-0999"][4] == "已出貨"                       # another customer's row stays
+        "SO-1001",
+        "CMW500 校正套件",
+        2,
+        "2026-10-08",
+        "準時",
+        "客戶催過一次",
+    )
+    assert by_key["SO-0999"][4] == "已出貨"  # another customer's row stays
     assert by_key["SO-1004"] == ("SO-1004", "電源模組", 4, "2026-10-01", "延遲", None)
     assert len(rows) == 6
     again = asyncio.run(UpsertHandler(tmp_path / "backups")(request("run"), ask(book)))
-    assert again.unchanged == 4 and not again.written   # type: ignore[attr-defined]
+    assert again.unchanged == 4 and not again.written  # type: ignore[attr-defined]
 
 
 def test_read_sheet_returns_rows_by_header(tmp_path: Path) -> None:
     book = write_workbook(tmp_path / "book.xlsx")
-    rows = asyncio.run(ReadSheetHandler()(request("run"), ReadSheetRequest(
-        workbook=str(book), sheet=SHEET_NAME)))
+    rows = asyncio.run(
+        ReadSheetHandler()(request("run"), ReadSheetRequest(workbook=str(book), sheet=SHEET_NAME))
+    )
     assert rows.rows[0]["訂單號"] == "SO-1001" and rows.rows[0]["備註"] == "客戶催過一次"  # type: ignore[attr-defined]
 
 
@@ -88,10 +109,15 @@ def test_unsafe_workbooks_are_refused(tmp_path: Path) -> None:
     with zipfile.ZipFile(drawn, "a") as package:
         package.writestr("xl/drawings/drawing1.xml", "<xdr:wsDr/>")
     cases.append((ask(drawn), "excel_workbook_has_drawings"))
-    cases.append((ask(book, sheet="Nope", workbook=str(drawn).replace("drawn", "missing")),
-                  "excel_workbook_missing"))
-    cases.append((ask(write_workbook(tmp_path / "b2.xlsx"), key="客戶"),
-                  "excel_key_column_missing"))
+    cases.append(
+        (
+            ask(book, sheet="Nope", workbook=str(drawn).replace("drawn", "missing")),
+            "excel_workbook_missing",
+        )
+    )
+    cases.append(
+        (ask(write_workbook(tmp_path / "b2.xlsx"), key="客戶"), "excel_key_column_missing")
+    )
     for item, code in cases:
         with pytest.raises(CapabilityRefused) as refused:
             asyncio.run(handler(request("run"), item))

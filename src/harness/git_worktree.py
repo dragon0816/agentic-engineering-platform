@@ -20,8 +20,13 @@ class RunWorkspace:
 
 def _git(*args: str, cwd: Path) -> str:
     result = subprocess.run(
-        ["git", *args], cwd=cwd, capture_output=True, text=True, encoding="utf-8",
-        errors="replace", check=False,
+        ["git", *args],
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
     )
     if result.returncode != 0:
         raise WorkspaceRefused("git_failed")

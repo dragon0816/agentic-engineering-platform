@@ -274,8 +274,17 @@ class WorkflowStep(RegistryContract):
 
 
 ParameterKind = Literal[
-    "text", "integer", "number", "date", "boolean", "select",
-    "text_list", "emails", "file", "folder", "upload",
+    "text",
+    "integer",
+    "number",
+    "date",
+    "boolean",
+    "select",
+    "text_list",
+    "emails",
+    "file",
+    "folder",
+    "upload",
 ]
 ParameterChannel = Literal["web", "telegram", "schedule", "agent"]
 ALL_PARAMETER_CHANNELS: tuple[ParameterChannel, ...] = ("web", "telegram", "schedule", "agent")
@@ -283,10 +292,25 @@ _TEXT_KINDS = frozenset({"text", "select", "file", "folder", "upload"})
 _LIST_KINDS = frozenset({"text_list", "emails"})
 _PATH_KINDS = frozenset({"file", "folder", "upload"})
 _EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-_LATER_PARAMETER_FIELDS = frozenset({
-    "default", "help", "examples", "order", "group", "pattern", "min_length", "choices",
-    "choices_source", "needs", "multiple", "accept", "channels", "confirm", "allow_other",
-})
+_LATER_PARAMETER_FIELDS = frozenset(
+    {
+        "default",
+        "help",
+        "examples",
+        "order",
+        "group",
+        "pattern",
+        "min_length",
+        "choices",
+        "choices_source",
+        "needs",
+        "multiple",
+        "accept",
+        "channels",
+        "confirm",
+        "allow_other",
+    }
+)
 CHOICES_SOURCE = re.compile(r"^(ref|fn):[A-Za-z0-9_.-]+(\?[^\s]*)?$")
 _PLACEHOLDER = re.compile(r"\{([A-Za-z_][A-Za-z0-9_]*)\}")
 
@@ -396,7 +420,8 @@ class WorkflowParameter(RegistryContract):
         if self.minimum is not None and self.maximum is not None and self.minimum > self.maximum:
             raise ValueError("parameter minimum must not exceed maximum")
         if (self.pattern is not None or self.min_length is not None) and self.kind not in (
-            "text", "text_list"
+            "text",
+            "text_list",
         ):
             raise ValueError("only text parameters may declare a pattern or minimum length")
         if self.pattern is not None:
@@ -460,7 +485,9 @@ def parameter_value_problem(field: WorkflowParameter, value: Any) -> str | None:
         return "must be email addresses"
     values = field.choice_values
     if (
-        values and field.choices_source is None and not field.allow_other
+        values
+        and field.choices_source is None
+        and not field.allow_other
         and any(item not in values for item in items)
     ):
         return "must be a declared choice"
@@ -521,9 +548,7 @@ class WorkflowManifest(ExecutableManifest):
         }
         settings = {item.name for item in value if item.scope == "static"}
         for item in value:
-            placeholders = (
-                _PLACEHOLDER.findall(item.choices_source) if item.choices_source else []
-            )
+            placeholders = _PLACEHOLDER.findall(item.choices_source) if item.choices_source else []
             for name in placeholders:
                 if name not in position:
                     raise ValueError(f"{item.name}: placeholder {{{name}}} names no parameter")

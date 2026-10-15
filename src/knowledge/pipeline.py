@@ -168,41 +168,59 @@ class KnowledgePipeline:
         self.sandboxes = sandboxes
         self.bases = dict(bases)
         # Where each project vault collects originals; default <vault>/drop.
-        self.drop_roots = {name: (drop_roots or {}).get(name, root / "drop")
-                           for name, root in self.bases.items()}
+        self.drop_roots = {
+            name: (drop_roots or {}).get(name, root / "drop") for name, root in self.bases.items()
+        }
         self.maintainers = dict(maintainers or {})
         # Where each project vault keeps its question sets; default checks/questions.
         self.questions_roots = {
             name: (questions_roots or {}).get(name, root / "checks" / "questions")
-            for name, root in self.bases.items()}
+            for name, root in self.bases.items()
+        }
         self.extractors: tuple[Extractor, ...] = (
-            PlainTextExtractor(), MarkdownExtractor(), *extractors)
+            PlainTextExtractor(),
+            MarkdownExtractor(),
+            *extractors,
+        )
         self.model = model
         self.alias = alias
         self.describer = describer
 
     # -- sandboxes -----------------------------------------------------------
 
-    def create_sandbox(self, base: str, label: str, actor: str,
-                       domain: str | None = None, scope: str | None = None,
-                       progress_key: str | None = None) -> SandboxInfo:
+    def create_sandbox(
+        self,
+        base: str,
+        label: str,
+        actor: str,
+        domain: str | None = None,
+        scope: str | None = None,
+        progress_key: str | None = None,
+    ) -> SandboxInfo:
         if base not in self.bases:
             raise PipelineError("unknown_base_vault")
         if domain is not None and domain not in KEYS:
             raise PipelineError("unknown_domain")
         if scope is not None:
             scope = self._scope(base, scope)
-        return self.sandboxes.create(base, self.bases[base], label=label, actor=actor,
-                                     domain=domain, scope=scope,
-                                     progress=reporter(progress_key))
+        return self.sandboxes.create(
+            base,
+            self.bases[base],
+            label=label,
+            actor=actor,
+            domain=domain,
+            scope=scope,
+            progress=reporter(progress_key),
+        )
 
     def _scope(self, base: str, scope: str) -> str:
         """A folder the project vault collects (drop/) or holds (raw/)."""
         rel = normalize(scope).strip("/")
         if not rel or ".." in rel.split("/"):
             raise PipelineError("bad_scope")
-        if not ((self.drop_roots[base] / rel).is_dir()
-                or (self.bases[base] / "raw" / rel).is_dir()):
+        if not (
+            (self.drop_roots[base] / rel).is_dir() or (self.bases[base] / "raw" / rel).is_dir()
+        ):
             raise PipelineError("unknown_scope")
         return rel
 
@@ -228,8 +246,9 @@ class KnowledgePipeline:
                     found.append(DropFolder(path=rel.as_posix(), files=files))
         return DropFolders(base=base, folders=tuple(found))
 
-    def pull(self, sandbox_id: str, folders: tuple[str, ...],
-             progress_key: str | None = None) -> PullResult:
+    def pull(
+        self, sandbox_id: str, folders: tuple[str, ...], progress_key: str | None = None
+    ) -> PullResult:
         """Copy the chosen drop/ folders of the project vault into the sandbox's
         drop/, keeping their paths. An original already ingested (same content
         hash) or already in the sandbox is skipped; nothing is replaced. The Raw
@@ -269,8 +288,9 @@ class KnowledgePipeline:
             target = vault.root / "drop" / name
             if len(data) > MAX_DROP_BYTES:
                 large.append(name)
-            elif (raw_ref := _raw_holding(hashlib.sha256(data).hexdigest(), known,
-                                          legacy)) is not None:
+            elif (
+                raw_ref := _raw_holding(hashlib.sha256(data).hexdigest(), known, legacy)
+            ) is not None:
                 already.append(name)
                 already_raw.append(raw_ref)
             elif target.exists():
@@ -283,11 +303,15 @@ class KnowledgePipeline:
             progress("pulling", len(originals), len(originals), "")
         pulled = tuple(dict.fromkeys((*info.pulled, *clean_folders)))
         self.sandboxes.record(info.model_copy(update={"pulled": pulled}))
-        return PullResult(sandbox_id=sandbox_id, folders=pulled, copied=tuple(copied),
-                          already_ingested=tuple(already),
-                          already_raw=tuple(dict.fromkeys(already_raw)),
-                          already_in_sandbox=tuple(present),
-                          too_large=tuple(large))
+        return PullResult(
+            sandbox_id=sandbox_id,
+            folders=pulled,
+            copied=tuple(copied),
+            already_ingested=tuple(already),
+            already_raw=tuple(dict.fromkeys(already_raw)),
+            already_in_sandbox=tuple(present),
+            too_large=tuple(large),
+        )
 
     # -- files: preview and rule editing (collaboration C2) --------------------
 
@@ -299,19 +323,34 @@ class KnowledgePipeline:
         info, vault = self.sandboxes.open(sandbox_id)
         rules = []
         paths = [SCHEMA] if (vault.root / SCHEMA).is_file() else []
-        paths += sorted(p.relative_to(vault.root).as_posix()
-                        for p in (vault.root / "skills").glob("*/SKILL.md"))
+        paths += sorted(
+            p.relative_to(vault.root).as_posix() for p in (vault.root / "skills").glob("*/SKILL.md")
+        )
         for rel in paths:
             fields = front_fields((vault.root / rel).read_text(encoding="utf-8", errors="ignore"))
             access = _rule_access(info.scope, rel, fields)
             if access is not None:
-                rules.append(RuleFile(
-                    path=rel, access=access, applies_to=fields.get("applies_to") or None,
-                    kind="schema" if rel == SCHEMA else (
-                        "answer" if fields.get("mode", "").casefold() == "answer"
-                        or rel.startswith("skills/ask-") else "ingest")))
-        return RuleFiles(sandbox_id=sandbox_id, scope=info.scope,
-                         files=tuple(rule.path for rule in rules), rules=tuple(rules))
+                rules.append(
+                    RuleFile(
+                        path=rel,
+                        access=access,
+                        applies_to=fields.get("applies_to") or None,
+                        kind="schema"
+                        if rel == SCHEMA
+                        else (
+                            "answer"
+                            if fields.get("mode", "").casefold() == "answer"
+                            or rel.startswith("skills/ask-")
+                            else "ingest"
+                        ),
+                    )
+                )
+        return RuleFiles(
+            sandbox_id=sandbox_id,
+            scope=info.scope,
+            files=tuple(rule.path for rule in rules),
+            rules=tuple(rules),
+        )
 
     def skill_guide(self) -> SkillGuide:
         """The writing guide and the two templates shipped with the platform."""
@@ -319,7 +358,8 @@ class KnowledgePipeline:
         return SkillGuide(
             guide=(folder / "GUIDE.zh-TW.md").read_text(encoding="utf-8"),
             ingest_template=(folder / "ingest.SKILL.md").read_text(encoding="utf-8"),
-            answer_template=(folder / "answer.SKILL.md").read_text(encoding="utf-8"))
+            answer_template=(folder / "answer.SKILL.md").read_text(encoding="utf-8"),
+        )
 
     def read_file(self, sandbox_id: str, path: str) -> SandboxFile:
         """One Markdown file of the sandbox, for preview."""
@@ -332,8 +372,9 @@ class KnowledgePipeline:
         if len(data) > MAX_PREVIEW_BYTES:
             raise PipelineError("file_too_large")
         # Shown and edited with LF; a save restores the file's own line endings.
-        return SandboxFile(sandbox_id=sandbox_id, path=rel,
-                           text=data.decode("utf-8").replace("\r\n", "\n"))
+        return SandboxFile(
+            sandbox_id=sandbox_id, path=rel, text=data.decode("utf-8").replace("\r\n", "\n")
+        )
 
     def write_rule(self, sandbox_id: str, path: str, text: str) -> SandboxFile:
         """Save the schema or one skill file in the sandbox; nothing else is
@@ -358,10 +399,11 @@ class KnowledgePipeline:
             return SandboxFile(sandbox_id=sandbox_id, path=rel, text=text)
         # Both the file as it is and as it would be must belong to the scope,
         # so applies_to cannot be moved onto another folder's data either.
-        current = (target.read_text(encoding="utf-8", errors="ignore")
-                   if target.is_file() else text)
-        if (_rule_access(info.scope, rel, front_fields(current)) != "edit"
-                or _rule_access(info.scope, rel, front_fields(text)) != "edit"):
+        current = target.read_text(encoding="utf-8", errors="ignore") if target.is_file() else text
+        if (
+            _rule_access(info.scope, rel, front_fields(current)) != "edit"
+            or _rule_access(info.scope, rel, front_fields(text)) != "edit"
+        ):
             raise PipelineError("rule_outside_scope")
         target.parent.mkdir(parents=True, exist_ok=True)
         original = target.read_bytes().decode("utf-8") if target.is_file() else ""
@@ -382,8 +424,13 @@ class KnowledgePipeline:
         page = next((p for p in plan["pages"] if normalize(p["path"]) == rel), None)
         if page is None:
             raise PipelineError("unknown_file")
-        return PlanPage(sandbox_id=sandbox_id, plan_id=plan_id, path=rel,
-                        before=vault.read(rel), after=page["content"].replace("\r\n", "\n"))
+        return PlanPage(
+            sandbox_id=sandbox_id,
+            plan_id=plan_id,
+            path=rel,
+            before=vault.read(rel),
+            after=page["content"].replace("\r\n", "\n"),
+        )
 
     def question_sets(self, sandbox_id: str) -> QuestionSets:
         """The sandbox's question sets with counts, the ones its pulled scope
@@ -394,13 +441,22 @@ class KnowledgePipeline:
         counts = question_set_counts(found)
         scope = (info.scope,) if info.scope else info.pulled
         return QuestionSets(
-            sandbox_id=sandbox_id, sets=counts, defaults=default_sets(counts, scope),
+            sandbox_id=sandbox_id,
+            sets=counts,
+            defaults=default_sets(counts, scope),
             ungraded=tuple(q.path for q in found if not (q.must or q.must_not)),
-            questions=tuple(QuestionItem(
-                path=f"checks/questions/{q.path}", set=q.set, text=q.text, must=len(q.must),
-                must_not=len(q.must_not),
-                editable=_question_access(info.scope, f"checks/questions/{q.path}") == "edit")
-                for q in found))
+            questions=tuple(
+                QuestionItem(
+                    path=f"checks/questions/{q.path}",
+                    set=q.set,
+                    text=q.text,
+                    must=len(q.must),
+                    must_not=len(q.must_not),
+                    editable=_question_access(info.scope, f"checks/questions/{q.path}") == "edit",
+                )
+                for q in found
+            ),
+        )
 
     def add_drop(self, sandbox_id: str, name: str, data: bytes) -> str:
         """Put one original into the sandbox's drop/; never replaces a file."""
@@ -420,8 +476,11 @@ class KnowledgePipeline:
 
     def contents(self, sandbox_id: str) -> SandboxContents:
         vault = self._open(sandbox_id)
-        drop = tuple(p.relative_to(vault.root).as_posix()
-                     for p in sorted((vault.root / "drop").rglob("*")) if p.is_file())
+        drop = tuple(
+            p.relative_to(vault.root).as_posix()
+            for p in sorted((vault.root / "drop").rglob("*"))
+            if p.is_file()
+        )
         raw = tuple(sorted(e.raw_ref for e in RawIndex.scan(vault).entries))
         plans = []
         for path in sorted((vault.root / PLANS).glob("plan-*.json")):
@@ -431,13 +490,18 @@ class KnowledgePipeline:
 
     # -- convert -------------------------------------------------------------
 
-    def convert(self, sandbox_id: str, paths: tuple[str, ...] = (),
-                mode: Literal["dry_run", "apply"] = "dry_run",
-                progress_key: str | None = None) -> ConvertResult:
+    def convert(
+        self,
+        sandbox_id: str,
+        paths: tuple[str, ...] = (),
+        mode: Literal["dry_run", "apply"] = "dry_run",
+        progress_key: str | None = None,
+    ) -> ConvertResult:
         vault = self._open(sandbox_id)
         drop = vault.root / "drop"
         wanted = paths or tuple(
-            p.relative_to(vault.root).as_posix() for p in sorted(drop.rglob("*")) if p.is_file())
+            p.relative_to(vault.root).as_posix() for p in sorted(drop.rglob("*")) if p.is_file()
+        )
         intake = DropIntake(vault, self.extractors, self.describer)
         index = RawIndex.scan(vault)
         items = []
@@ -454,10 +518,15 @@ class KnowledgePipeline:
                     progress("describing", done, total, name)
 
             outcome = intake.intake(clean, mode=mode, index=index, on_image=image)
-            items.append(ConvertItem(
-                path=clean, status=outcome.status, raw_ref=outcome.raw_ref,
-                images=outcome.images_to_describe,
-                described=sum(1 for d in outcome.descriptions if d.status == "described")))
+            items.append(
+                ConvertItem(
+                    path=clean,
+                    status=outcome.status,
+                    raw_ref=outcome.raw_ref,
+                    images=outcome.images_to_describe,
+                    described=sum(1 for d in outcome.descriptions if d.status == "described"),
+                )
+            )
         return ConvertResult(sandbox_id=sandbox_id, mode=mode, items=tuple(items))
 
     # -- ingest --------------------------------------------------------------
@@ -466,38 +535,72 @@ class KnowledgePipeline:
         if self.model is None or self.alias is None:
             raise PipelineError("no_model")
         vault = self._open(sandbox_id)
-        entry = next((e for e in RawIndex.scan(vault).entries if e.raw_ref == normalize(raw_ref)),
-                     None)
+        entry = next(
+            (e for e in RawIndex.scan(vault).entries if e.raw_ref == normalize(raw_ref)), None
+        )
         if entry is None:
             raise PipelineError("unknown_raw")
         rules = ingest_conventions(vault, entry.raw_ref, DEFAULT_CONVENTIONS)
-        planner = IngestPlanner(self.model, vault, alias=self.alias, conventions=rules.text,
-                                max_output_tokens=PLAN_MAX_OUTPUT_TOKENS)
-        outcome = planner.plan(load_document(vault, entry), today=date.today().isoformat(),
-                               decisions=decisions_text(vault))
-        base = IngestPlanResult(sandbox_id=sandbox_id, raw_ref=entry.raw_ref,
-                                status=outcome.status, schema_source=rules.schema_source,
-                                skill=rules.skill,
-                                problems=tuple(p.code for p in outcome.problems),
-                                failure_code=outcome.failure.code if outcome.failure else None)
+        planner = IngestPlanner(
+            self.model,
+            vault,
+            alias=self.alias,
+            conventions=rules.text,
+            max_output_tokens=PLAN_MAX_OUTPUT_TOKENS,
+        )
+        outcome = planner.plan(
+            load_document(vault, entry),
+            today=date.today().isoformat(),
+            decisions=decisions_text(vault),
+        )
+        base = IngestPlanResult(
+            sandbox_id=sandbox_id,
+            raw_ref=entry.raw_ref,
+            status=outcome.status,
+            schema_source=rules.schema_source,
+            skill=rules.skill,
+            problems=tuple(p.code for p in outcome.problems),
+            failure_code=outcome.failure.code if outcome.failure else None,
+        )
         if outcome.plan is None or outcome.status != "planned":
             return base
         plan = outcome.plan
         plan_id = f"plan-{datetime.now(UTC).strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:6]}"
-        touched = {normalize(p.path): _sha(vault.read(p.path)) for p in plan.pages
-                   if vault.exists(p.path)}
+        touched = {
+            normalize(p.path): _sha(vault.read(p.path)) for p in plan.pages if vault.exists(p.path)
+        }
         folder = vault.root / PLANS
         folder.mkdir(exist_ok=True)
-        (folder / f"{plan_id}.json").write_text(json.dumps({
-            "plan_id": plan_id, "raw_ref": entry.raw_ref, "raw_sha256": entry.source.sha256,
-            "touched": touched, "plan": json.loads(plan.model_dump_json())},
-            ensure_ascii=False), encoding="utf-8")
-        pages = tuple(PagePreview(path=normalize(p.path),
-                                  change="changed" if normalize(p.path) in touched else "new",
-                                  chars=len(p.content)) for p in plan.pages)
-        return base.model_copy(update={
-            "plan_id": plan_id, "summary": plan.summary, "pages": pages,
-            "index_entries": len(plan.index_entries), "contradictions": plan.contradictions})
+        (folder / f"{plan_id}.json").write_text(
+            json.dumps(
+                {
+                    "plan_id": plan_id,
+                    "raw_ref": entry.raw_ref,
+                    "raw_sha256": entry.source.sha256,
+                    "touched": touched,
+                    "plan": json.loads(plan.model_dump_json()),
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+        pages = tuple(
+            PagePreview(
+                path=normalize(p.path),
+                change="changed" if normalize(p.path) in touched else "new",
+                chars=len(p.content),
+            )
+            for p in plan.pages
+        )
+        return base.model_copy(
+            update={
+                "plan_id": plan_id,
+                "summary": plan.summary,
+                "pages": pages,
+                "index_entries": len(plan.index_entries),
+                "contradictions": plan.contradictions,
+            }
+        )
 
     def apply_ingest(self, sandbox_id: str, plan_id: str) -> IngestApplyResult:
         vault = self._open(sandbox_id)
@@ -507,19 +610,33 @@ class KnowledgePipeline:
         if not stored_path.is_file():
             raise PipelineError("unknown_plan")
         stored = json.loads(stored_path.read_text(encoding="utf-8"))
-        entry = next((e for e in RawIndex.scan(vault).entries if e.raw_ref == stored["raw_ref"]),
-                     None)
-        stale = entry is None or entry.source.sha256 != stored["raw_sha256"] or any(
-            _sha(vault.read(path)) != digest for path, digest in stored["touched"].items())
+        entry = next(
+            (e for e in RawIndex.scan(vault).entries if e.raw_ref == stored["raw_ref"]), None
+        )
+        stale = (
+            entry is None
+            or entry.source.sha256 != stored["raw_sha256"]
+            or any(_sha(vault.read(path)) != digest for path, digest in stored["touched"].items())
+        )
         if stale:
-            return IngestApplyResult(sandbox_id=sandbox_id, plan_id=plan_id, status="rejected",
-                                     problems=("stale_plan",))
+            return IngestApplyResult(
+                sandbox_id=sandbox_id, plan_id=plan_id, status="rejected", problems=("stale_plan",)
+            )
         outcome = vault.apply(WritePlan.model_validate(stored["plan"]), mode="apply")
         if outcome.problems:
-            return IngestApplyResult(sandbox_id=sandbox_id, plan_id=plan_id, status="rejected",
-                                     problems=tuple(p.code for p in outcome.problems))
-        return IngestApplyResult(sandbox_id=sandbox_id, plan_id=plan_id, status="applied",
-                                 written=outcome.written, backed_up=outcome.backed_up)
+            return IngestApplyResult(
+                sandbox_id=sandbox_id,
+                plan_id=plan_id,
+                status="rejected",
+                problems=tuple(p.code for p in outcome.problems),
+            )
+        return IngestApplyResult(
+            sandbox_id=sandbox_id,
+            plan_id=plan_id,
+            status="applied",
+            written=outcome.written,
+            backed_up=outcome.backed_up,
+        )
 
     # -- layered index (K2) ----------------------------------------------------
 
@@ -530,14 +647,14 @@ class KnowledgePipeline:
             raise PipelineError("no_model")
         return LayeredIndex(self._open(sandbox_id), self.model, self.alias).enrich(limit=limit)
 
-    def index_build(self, sandbox_id: str,
-                    mode: Literal["dry_run", "apply"] = "dry_run") -> IndexReport:
+    def index_build(
+        self, sandbox_id: str, mode: Literal["dry_run", "apply"] = "dry_run"
+    ) -> IndexReport:
         return LayeredIndex(self._open(sandbox_id)).build(mode=mode)
 
     # -- adopt ---------------------------------------------------------------
 
-    def adopt(self, sandbox_id: str,
-              mode: Literal["dry_run", "apply"] = "dry_run") -> AdoptSummary:
+    def adopt(self, sandbox_id: str, mode: Literal["dry_run", "apply"] = "dry_run") -> AdoptSummary:
         """Adopt Raw written by earlier tooling (no platform provenance) so it can
         be ingested: a ledger records each file's content hash; Raw bytes stay
         untouched (knowledge.migrate)."""
@@ -545,17 +662,26 @@ class KnowledgePipeline:
         stamp = datetime.now(UTC).strftime("%Y%m%d-%H%M%S-%f")
         report = adopt(vault, mode=mode, today=date.today(), stamp=stamp)
         return AdoptSummary(
-            sandbox_id=sandbox_id, mode=mode, raw_adopted=len(report.raw_adopted),
-            raw_drifted=len(report.raw_drifted), raw_skipped=len(report.raw_skipped),
+            sandbox_id=sandbox_id,
+            mode=mode,
+            raw_adopted=len(report.raw_adopted),
+            raw_drifted=len(report.raw_drifted),
+            raw_skipped=len(report.raw_skipped),
             pages_migrated=len(report.pages_migrated),
-            pages_unresolved=len(report.pages_unresolved), written=len(report.written))
+            pages_unresolved=len(report.pages_unresolved),
+            written=len(report.written),
+        )
 
     # -- lint ----------------------------------------------------------------
 
     # -- merge (K3.3) ----------------------------------------------------------
 
-    def merge(self, sandbox_id: str, mode: Literal["dry_run", "apply"] = "dry_run",
-              resolutions: dict[str, Resolution] | None = None) -> MergeReport:
+    def merge(
+        self,
+        sandbox_id: str,
+        mode: Literal["dry_run", "apply"] = "dry_run",
+        resolutions: dict[str, Resolution] | None = None,
+    ) -> MergeReport:
         """Three-way merge of a sandbox into its base vault. A preview writes
         nothing; apply writes a new candidate vault beside the sandboxes, never
         the published vault, and refuses while a conflict is unresolved."""
@@ -571,22 +697,35 @@ class KnowledgePipeline:
         sandbox_files = read_tree(vault.root)
         scope = None
         if info.domain is not None:
-            scope = {rel for rel in sandbox_files if rel.startswith("wiki/") and rel.endswith(".md")
-                     and info.domain in read_entry(vault, rel).categories}
+            scope = {
+                rel
+                for rel in sandbox_files
+                if rel.startswith("wiki/")
+                and rel.endswith(".md")
+                and info.domain in read_entry(vault, rel).categories
+            }
         merged = three_way(base, sandbox_files, read_tree(published.root), resolutions, scope)
         report = MergeReport(
-            sandbox_id=sandbox_id, mode=mode, base_name=info.base_name,
-            changes=tuple(merged.changes), conflicts=tuple(merged.conflicts),
-            kept_removed=tuple(merged.kept_removed))
+            sandbox_id=sandbox_id,
+            mode=mode,
+            base_name=info.base_name,
+            changes=tuple(merged.changes),
+            conflicts=tuple(merged.conflicts),
+            kept_removed=tuple(merged.kept_removed),
+        )
         if mode == "dry_run":
             return report
         if merged.conflicts:
             raise PipelineError("unresolved_conflicts")
         stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%S")
-        target = (self.sandboxes.root / CANDIDATES
-                  / f"{info.base_name}-{stamp}-{uuid.uuid4().hex[:4]}")
-        shutil.copytree(published.root, target,
-                        ignore=lambda _dir, names: [n for n in names if n in _CANDIDATE_SKIP])
+        target = (
+            self.sandboxes.root / CANDIDATES / f"{info.base_name}-{stamp}-{uuid.uuid4().hex[:4]}"
+        )
+        shutil.copytree(
+            published.root,
+            target,
+            ignore=lambda _dir, names: [n for n in names if n in _CANDIDATE_SKIP],
+        )
         for rel, data in merged.files.items():
             path = target / rel
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -594,11 +733,17 @@ class KnowledgePipeline:
         candidate = Vault(target)
         lost = _lost_sourced(published, vault, candidate)
         before, after = _lint_counts(published), _lint_counts(candidate)
-        worse = {key: after[key] - before.get(key, 0) for key in after
-                 if after[key] > before.get(key, 0)}
-        return report.model_copy(update={
-            "candidate_root": str(target), "lost_sourced_lines": lost, "lint_worse": worse,
-            "written": tuple(sorted(merged.files))})
+        worse = {
+            key: after[key] - before.get(key, 0) for key in after if after[key] > before.get(key, 0)
+        }
+        return report.model_copy(
+            update={
+                "candidate_root": str(target),
+                "lost_sourced_lines": lost,
+                "lint_worse": worse,
+                "written": tuple(sorted(merged.files)),
+            }
+        )
 
     # -- push (collaboration C4) -----------------------------------------------
 
@@ -626,8 +771,9 @@ class KnowledgePipeline:
                     target.mkdir(exist_ok=True)
                     shutil.copy2(project / name, target / name)
 
-    def write_push(self, base: str, candidate_root: str, written: tuple[str, ...],
-                   push_id: str) -> str:
+    def write_push(
+        self, base: str, candidate_root: str, written: tuple[str, ...], push_id: str
+    ) -> str:
         """Copy the merged files from the candidate into the project vault in
         place; every file replaced is backed up first under
         `.ingest-backup/<push id>/`. Returns the backup folder."""
@@ -657,21 +803,30 @@ class KnowledgePipeline:
     def lint(self, sandbox_id: str) -> LintSummary:
         report = scan(self._open(sandbox_id))
         counts = {
-            "orphans": len(report.orphans), "dangling": len(report.dangling),
+            "orphans": len(report.orphans),
+            "dangling": len(report.dangling),
             "path_links": len(report.path_links),
             "missing_frontmatter": len(report.missing_frontmatter),
             "broken_source_path": len(report.broken_source_path),
             "unknown_source_id": len(report.unknown_source_id),
             "pending_sources": len(report.pending_sources),
-            "open_conflicts": len(report.open_conflicts), "unreadable": len(report.unreadable)}
+            "open_conflicts": len(report.open_conflicts),
+            "unreadable": len(report.unreadable),
+        }
         findings = [
             *(f"open conflict: {c.page}:{c.line}: {c.text}" for c in report.open_conflicts),
             *(f"dangling link: [[{d.target}]] ({d.count}x)" for d in report.dangling),
             *(f"missing frontmatter: {p}" for p in report.missing_frontmatter),
             *(f"pending source: {p}" for p in report.pending_sources),
-            *(f"orphan: {p}" for p in report.orphans)]
-        return LintSummary(sandbox_id=sandbox_id, pages=report.pages, clean=report.clean,
-                           counts=counts, findings=tuple(findings[:MAX_FINDINGS]))
+            *(f"orphan: {p}" for p in report.orphans),
+        ]
+        return LintSummary(
+            sandbox_id=sandbox_id,
+            pages=report.pages,
+            clean=report.clean,
+            counts=counts,
+            findings=tuple(findings[:MAX_FINDINGS]),
+        )
 
 
 CANDIDATES = "candidates"
@@ -693,24 +848,26 @@ class MergeReport(Contract):
 
 def _lint_counts(vault: Vault) -> dict[str, int]:
     report = scan(vault)
-    return {"path_links": len(report.path_links),
-            "missing_frontmatter": len(report.missing_frontmatter),
-            "broken_source_path": len(report.broken_source_path),
-            "unknown_source_id": len(report.unknown_source_id),
-            "unreadable": len(report.unreadable)}
+    return {
+        "path_links": len(report.path_links),
+        "missing_frontmatter": len(report.missing_frontmatter),
+        "broken_source_path": len(report.broken_source_path),
+        "unknown_source_id": len(report.unknown_source_id),
+        "unreadable": len(report.unreadable),
+    }
 
 
 def _lost_sourced(published: Vault, sandbox: Vault, candidate: Vault) -> int:
     """Sourced lines of either side that the candidate no longer carries."""
-    titles = {title.casefold() for rel, title in candidate.wiki_pages()
-              if rel.startswith("wiki/sources/")}
+    titles = {
+        title.casefold() for rel, title in candidate.wiki_pages() if rel.startswith("wiki/sources/")
+    }
     lost = 0
     for side in (published, sandbox):
         for rel in side.wiki_files():
             if rel.endswith(".md") and candidate.exists(rel):
                 lost += len(lost_lines(side.read(rel), candidate.read(rel), titles))
     return lost
-
 
 
 class DropFolder(Contract):
@@ -734,7 +891,6 @@ class PullResult(Contract):
     too_large: tuple[str, ...] = ()
 
 
-
 SCHEMA = "CLAUDE.md"
 MAX_PREVIEW_BYTES = 1024 * 1024
 _SKILL_FILE = re.compile(r"skills/[A-Za-z0-9][A-Za-z0-9._-]*/SKILL\.md")
@@ -745,8 +901,11 @@ _READABLE_FILES = (SCHEMA, "index.md", "log.md", "decisions.md")
 
 def _readable(path: str) -> str:
     rel = normalize(path)
-    if ".." in rel.split("/") or not rel.endswith(".md") or not (
-            rel in _READABLE_FILES or rel.startswith(_READABLE_AREAS)):
+    if (
+        ".." in rel.split("/")
+        or not rel.endswith(".md")
+        or not (rel in _READABLE_FILES or rel.startswith(_READABLE_AREAS))
+    ):
         raise PipelineError("not_previewable")
     return rel
 
@@ -784,8 +943,9 @@ def _within(folder: str, scope: str) -> bool:
     return folder == scope or folder.startswith(scope + "/")
 
 
-def _rule_access(scope: str | None, rel: str,
-                 fields: dict[str, str]) -> Literal["edit", "inherited", "shared"] | None:
+def _rule_access(
+    scope: str | None, rel: str, fields: dict[str, str]
+) -> Literal["edit", "inherited", "shared"] | None:
     """How a sandbox scoped to `scope` may treat one rule file; None hides it."""
     if scope is None:
         return "edit"
@@ -795,7 +955,7 @@ def _rule_access(scope: str | None, rel: str,
     if applies:
         if not applies.startswith("raw/"):
             return None
-        folder = applies[len("raw/"):]
+        folder = applies[len("raw/") :]
         if _within(folder, scope):
             return "edit"
         return "inherited" if _within(scope, folder) else None
@@ -819,7 +979,6 @@ class PlanPage(Contract):
     path: str
     before: str  # empty for a new page
     after: str
-
 
 
 class QuestionItem(Contract):
@@ -863,9 +1022,7 @@ def _raw_holding(digest: str, known: dict[str, str], legacy: dict[str, str]) -> 
     """The Raw that already holds an original with this content hash, if any."""
     if digest in known:
         return known[digest]
-    return next((raw_ref for prefix, raw_ref in legacy.items() if digest.startswith(prefix)),
-                None)
-
+    return next((raw_ref for prefix, raw_ref in legacy.items() if digest.startswith(prefix)), None)
 
 
 class SkillGuide(Contract):

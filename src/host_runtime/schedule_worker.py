@@ -79,8 +79,7 @@ class ScheduleWorker:
         self.agent = agent
         self.authorizer = authorizer
         self.task_templates = {
-            key: TaskContract.model_validate(value)
-            for key, value in (task_templates or {}).items()
+            key: TaskContract.model_validate(value) for key, value in (task_templates or {}).items()
         }
         self.workflow_wait_seconds = workflow_wait_seconds
         self.catch_up = catch_up
@@ -188,11 +187,7 @@ class ScheduleWorker:
                 # still uncertain to the schedule ledger. Never claim success
                 # from engine memory alone.
                 recorded = next(
-                    (
-                        run
-                        for run in self.agent.state.runs()
-                        if run.run_id == observed.run.run_id
-                    ),
+                    (run for run in self.agent.state.runs() if run.run_id == observed.run.run_id),
                     None,
                 )
                 if recorded is None or recorded.status != observed.run.status:
@@ -342,8 +337,10 @@ class ScheduleWorker:
         template = self.task_templates.get(definition.target.key)
         if template is None:
             return self._settle(claim, owner, "unavailable", "task_not_installed", effect)
-        if definition.runtime_inputs or template.actor != owner or (
-            template.namespace != definition.target.namespace
+        if (
+            definition.runtime_inputs
+            or template.actor != owner
+            or (template.namespace != definition.target.namespace)
         ):
             return self._settle(claim, owner, "needs_input", "task_input_unsupported", effect)
         task_id = _task_id(claim)
@@ -372,8 +369,10 @@ class ScheduleWorker:
         if task_outcome.execution is None:
             return claim
         execution = task_outcome.execution
-        status = "succeeded" if execution.status == "validated" else (
-            "needs_input" if execution.status == "refused" else execution.status
+        status = (
+            "succeeded"
+            if execution.status == "validated"
+            else ("needs_input" if execution.status == "refused" else execution.status)
         )
         if status == "succeeded" and execution.run is None:
             return claim

@@ -25,8 +25,13 @@ def agent_web() -> tuple[str, str]:
     it only in `.scratch` logs."""
     import os
 
-    record = (Path(os.environ.get("LOCALAPPDATA", "")) / "AgenticEngineeringPlatform"
-              / "preview-0.1.0" / "workspace" / "agent-web.json")
+    record = (
+        Path(os.environ.get("LOCALAPPDATA", ""))
+        / "AgenticEngineeringPlatform"
+        / "preview-0.1.0"
+        / "workspace"
+        / "agent-web.json"
+    )
     try:
         address = json.loads(record.read_text(encoding="utf-8"))["address"]
         found = re.search(r"(http://127\.0\.0\.1:\d+)/\?token=(\S+)", address)
@@ -36,7 +41,9 @@ def agent_web() -> tuple[str, str]:
         pass
     logs = sorted((REPO / ".scratch").glob("agent-web-*.out.log"), key=lambda p: p.stat().st_mtime)
     for log in reversed(logs):
-        found = re.search(r"(http://127\.0\.0\.1:\d+)/\?token=(\S+)", log.read_text(encoding="utf-8"))
+        found = re.search(
+            r"(http://127\.0\.0\.1:\d+)/\?token=(\S+)", log.read_text(encoding="utf-8")
+        )
         if found:
             return found.group(1), found.group(2)
     raise RuntimeError("no running Agent Web found under .scratch/")
@@ -48,12 +55,15 @@ class AgentWebSession:
         self.session_id: str | None = None
         self.exchanges: list[dict[str, Any]] = []
 
-    def _call(self, path: str, body: dict[str, Any] | None = None,
-              timeout: float | None = None) -> tuple[int, dict[str, Any]]:
+    def _call(
+        self, path: str, body: dict[str, Any] | None = None, timeout: float | None = None
+    ) -> tuple[int, dict[str, Any]]:
         request = urllib.request.Request(
-            self.base + path, data=None if body is None else json.dumps(body).encode("utf-8"),
+            self.base + path,
+            data=None if body is None else json.dumps(body).encode("utf-8"),
             headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
-            method="GET" if body is None else "POST")
+            method="GET" if body is None else "POST",
+        )
         try:
             with urllib.request.urlopen(request, timeout=timeout or 60) as reply:
                 return reply.status, json.loads(reply.read() or b"{}")
@@ -73,29 +83,49 @@ class AgentWebSession:
 
     def approvals(self) -> list[dict[str, Any]]:
         """Run and install requests the Agent made in this session (G4)."""
-        return list(self._call(f"/api/approvals?session_id={self.session_id}")[1].get("approvals") or [])
+        return list(
+            self._call(f"/api/approvals?session_id={self.session_id}")[1].get("approvals") or []
+        )
 
     def decide(self, approval_id: str, decision: str, timeout_s: float) -> dict[str, Any]:
         """The owner's button, pressed by the operator and recorded as an intervention."""
         started = time.monotonic()
-        status, reply = self._call("/api/approvals/decide",
-                                   {"approval_id": approval_id, "decision": decision}, timeout=timeout_s)
-        self.exchanges.append({"sent": f"[operator {decision}s {approval_id}]", "timed_out": False,
-                               "decided": approval_id, "decision": decision, "http_status": status,
-                               "seconds": round(time.monotonic() - started, 3), "reply": reply})
+        status, reply = self._call(
+            "/api/approvals/decide",
+            {"approval_id": approval_id, "decision": decision},
+            timeout=timeout_s,
+        )
+        self.exchanges.append(
+            {
+                "sent": f"[operator {decision}s {approval_id}]",
+                "timed_out": False,
+                "decided": approval_id,
+                "decision": decision,
+                "http_status": status,
+                "seconds": round(time.monotonic() - started, 3),
+                "reply": reply,
+            }
+        )
         return reply
 
     def send(self, message: str, timeout_s: float) -> dict[str, Any]:
         started = time.monotonic()
         try:
-            status, reply = self._call("/api/conversations/turn",
-                                       {"session_id": self.session_id, "message": message},
-                                       timeout=timeout_s)
+            status, reply = self._call(
+                "/api/conversations/turn",
+                {"session_id": self.session_id, "message": message},
+                timeout=timeout_s,
+            )
             timed_out = False
         except (TimeoutError, urllib.error.URLError) as error:
             status, reply, timed_out = 0, {"error": f"{type(error).__name__}: {error}"}, True
-        exchange = {"sent": message, "http_status": status, "seconds": round(time.monotonic() - started, 3),
-                    "timed_out": timed_out, "reply": reply}
+        exchange = {
+            "sent": message,
+            "http_status": status,
+            "seconds": round(time.monotonic() - started, 3),
+            "timed_out": timed_out,
+            "reply": reply,
+        }
         self.exchanges.append(exchange)
         return exchange
 
@@ -116,19 +146,30 @@ def tools_of(exchange: dict[str, Any]) -> list[dict[str, Any]]:
         run = workflow.get("run") or {}
         host = tool.get("host") or {}
         host_data = host.get("data") if isinstance(host.get("data"), dict) else {}
-        failure = (tool.get("failure") or capability.get("failure") or run.get("failure")
-                   or host.get("failure") or {})
-        out.append({
-            "name": tool.get("name"),
-            "target": (tool.get("decision") or {}).get("target"),
-            "status": (capability.get("status") or run.get("status") or host.get("status")
-                       or ("refused" if tool.get("failure") else None)),
-            "failure": failure.get("code"),
-            "workflow_run_id": run.get("run_id"),
-            # A Workflow drafted in the conversation and run by the host (G4).
-            "authored_run_id": host_data.get("run_id"),
-            "approval_id": host_data.get("approval_id"),
-        })
+        failure = (
+            tool.get("failure")
+            or capability.get("failure")
+            or run.get("failure")
+            or host.get("failure")
+            or {}
+        )
+        out.append(
+            {
+                "name": tool.get("name"),
+                "target": (tool.get("decision") or {}).get("target"),
+                "status": (
+                    capability.get("status")
+                    or run.get("status")
+                    or host.get("status")
+                    or ("refused" if tool.get("failure") else None)
+                ),
+                "failure": failure.get("code"),
+                "workflow_run_id": run.get("run_id"),
+                # A Workflow drafted in the conversation and run by the host (G4).
+                "authored_run_id": host_data.get("run_id"),
+                "approval_id": host_data.get("approval_id"),
+            }
+        )
     return out
 
 

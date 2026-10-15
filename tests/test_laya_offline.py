@@ -26,9 +26,7 @@ class FakeRouter:
         self.confidence = confidence
         self.calls: list[tuple[str, dict[str, Any], str]] = []
 
-    def predict(
-        self, state: str, questions: dict[str, Any], *, model: str
-    ) -> Mapping[str, Any]:
+    def predict(self, state: str, questions: dict[str, Any], *, model: str) -> Mapping[str, Any]:
         self.calls.append((state, questions, model))
         choices = questions["selection"]["criteria"]
         choice = self.answer if self.answer in choices else next(iter(choices))
@@ -51,9 +49,7 @@ def test_question_uses_declared_candidates_and_preserve_catalog_without_gold_lab
     criteria = question["selection"]["criteria"]
     assert set(criteria) == {*skill["candidates"], "preserve_catalog"}
     assert "read-file" not in question["selection"]["instructions"]
-    assert _selected("preserve_catalog", tuple(skill["candidates"])) == tuple(
-        skill["candidates"]
-    )
+    assert _selected("preserve_catalog", tuple(skill["candidates"])) == tuple(skill["candidates"])
 
 
 def test_pinned_benchmark_scores_all_four_types_and_records_revision() -> None:
@@ -106,18 +102,18 @@ def test_preserve_catalog_is_invalid_outside_skill_selection() -> None:
         }
     }
     assert _answer(reply, ("raw", "wiki"), None, allow_preserve=False) == (
-        (), None, "invalid_answer"
+        (),
+        None,
+        "invalid_answer",
     )
 
 
 def test_entropy_confidence_cannot_substitute_for_answer_probability() -> None:
-    reply = {
-        "answers": {
-            "selection": {"type": "choice", "choice": "raw", "confidence": 0.99}
-        }
-    }
+    reply = {"answers": {"selection": {"type": "choice", "choice": "raw", "confidence": 0.99}}}
     assert _answer(reply, ("raw", "wiki"), None, allow_preserve=False) == (
-        (), None, "invalid_answer"
+        (),
+        None,
+        "invalid_answer",
     )
 
 
@@ -133,5 +129,7 @@ def test_truncated_model_input_is_not_scored_as_a_valid_decision() -> None:
         },
     }
     assert _answer(reply, ("raw", "wiki"), None, allow_preserve=False) == (
-        (), None, "truncated_input"
+        (),
+        None,
+        "truncated_input",
     )

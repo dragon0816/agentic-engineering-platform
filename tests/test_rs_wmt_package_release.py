@@ -53,9 +53,14 @@ from host_runtime.workflow_uploads import WorkflowUploadStore
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import InstalledWorkflows, WorkflowEngine
 
-RUN = {"companyName": "Foxconn", "chipsetId": "kt326", "cmpKtOption": "KT161",
-       "chipsetVersion": "2.0.17", "generalTestcaseVersion": "v3.0.17",
-       "testPlans": ["plan.json"]}
+RUN = {
+    "companyName": "Foxconn",
+    "chipsetId": "kt326",
+    "cmpKtOption": "KT161",
+    "chipsetVersion": "2.0.17",
+    "generalTestcaseVersion": "v3.0.17",
+    "testPlans": ["plan.json"],
+}
 
 
 def test_the_workflow_is_named_not_numbered_and_asks_like_the_old_form() -> None:
@@ -64,24 +69,36 @@ def test_the_workflow_is_named_not_numbered_and_asks_like_the_old_form() -> None
     assert manifest.metadata.identity.name == "rs-wmt-package-release"
     assert manifest.run_alias is None and preview_workflow().run_alias is None
     assert [step.capability for step in manifest.steps] == [  # type: ignore[union-attr]
-        PREPARE_SPEC.identity, COMMIT_SPEC.identity, PUSH_SPEC.identity]
+        PREPARE_SPEC.identity,
+        COMMIT_SPEC.identity,
+        PUSH_SPEC.identity,
+    ]
     fields = {field["name"]: field for field in form_fields(manifest, "web")}
     assert [name for name in fields][:3] == ["companyName", "chipsetId", "info"]  # identity
     assert fields["chipsetId"]["allow_other"] and fields["chipsetId"]["group"] == "identity"
     assert fields["chipsetVersion"]["choices_source"] == (
-        "fn:release_package.versions?package={chipsetId}")
+        "fn:release_package.versions?package={chipsetId}"
+    )
     assert fields["generalTestcaseVersion"]["choices_source"].endswith(
-        "package=rs-wmt-general-testcase")
+        "package=rs-wmt-general-testcase"
+    )
     assert [choice["value"] for choice in fields["cmpKtOption"]["choices"]] == ["KT160", "KT161"]
     assert fields["testPlans"]["choices_source"] == (
-        "fn:folder_files?folder={inbox_path}&accept=.json")
+        "fn:folder_files?folder={inbox_path}&accept=.json"
+    )
     assert fields["configurationUploads"]["accept"] == [".yaml", ".yml"]
     assert fields["dryRun"]["default"] is True and fields["push"]["default"] is False
     # Pushing is a person's choice: confirmed, and never filled by a model.
     assert fields["push"]["confirm"] and "push" not in {f.name for f in agent_fields(manifest)}
-    checked = validate_run_parameters(manifest, {
-        "companyName": "Foxconn", "chipsetId": "kt999", "cmpKtOption": "KT160",
-        "generalTestcaseVersion": "3.0.99"})
+    checked = validate_run_parameters(
+        manifest,
+        {
+            "companyName": "Foxconn",
+            "chipsetId": "kt999",
+            "cmpKtOption": "KT160",
+            "generalTestcaseVersion": "3.0.99",
+        },
+    )
     assert checked["dryRun"] is True and checked["push"] is False
 
 
@@ -99,30 +116,44 @@ def _engine(settings: ReleaseRunSettings, upload_root: Path) -> WorkflowEngine:
     installed = InstalledCapabilities()
     grants = []
     for spec, handler, step_input, output in (
-        (PREPARE_SPEC, PrepareHandler(upload_root=upload_root), PrepareStepInput,
-         PreparedRelease),
+        (PREPARE_SPEC, PrepareHandler(upload_root=upload_root), PrepareStepInput, PreparedRelease),
         (COMMIT_SPEC, CommitHandler(), CommitStepInput, CommitResult),
         (PUSH_SPEC, PushHandler(), PushStepInput, PushResult),
     ):
-        installed.register(spec, handler, step_input, output,
-                           ExecutionDependencies(central_required=False))
-        grants.append(CapabilityGrant.model_validate({
-            "actor": "engineer", "asset": spec.identity,
-            "permissions": list(spec.policy.required_permissions),
-            "policy_refs": list(spec.policy.policy_refs), "approval_ref": "owner-approval",
-        }))
+        installed.register(
+            spec, handler, step_input, output, ExecutionDependencies(central_required=False)
+        )
+        grants.append(
+            CapabilityGrant.model_validate(
+                {
+                    "actor": "engineer",
+                    "asset": spec.identity,
+                    "permissions": list(spec.policy.required_permissions),
+                    "policy_refs": list(spec.policy.policy_refs),
+                    "approval_ref": "owner-approval",
+                }
+            )
+        )
     workflows = InstalledWorkflows()
     workflows.register(release_workflow())
     # Every setting the steps read is set, as on the owner's install; the
     # lookups never run because the tests name the chipset version.
-    values = {**settings.model_dump(), "artifactory_base_url": "https://index.invalid/simple",
-              "readiness_base_url": "https://ops.invalid"}
+    values = {
+        **settings.model_dump(),
+        "artifactory_base_url": "https://index.invalid/simple",
+        "readiness_base_url": "https://ops.invalid",
+    }
     # The inbox picks are checked against the folder listing, as on a host.
-    sources = ChoiceSources(ReferenceSetStore(upload_root / "unused.sqlite"),
-                            lambda _manifest: values, CHOICE_FUNCTIONS)
-    return WorkflowEngine(workflows, BridgeExecutor(installed, LocalPolicy(tuple(grants))),
-                          settings_provider=lambda _manifest: values,
-                          choices_provider=sources.values, upload_root=upload_root)
+    sources = ChoiceSources(
+        ReferenceSetStore(upload_root / "unused.sqlite"), lambda _manifest: values, CHOICE_FUNCTIONS
+    )
+    return WorkflowEngine(
+        workflows,
+        BridgeExecutor(installed, LocalPolicy(tuple(grants))),
+        settings_provider=lambda _manifest: values,
+        choices_provider=sources.values,
+        upload_root=upload_root,
+    )
 
 
 def _run(engine: WorkflowEngine, arguments: dict[str, Any]) -> Any:
@@ -142,8 +173,13 @@ def test_by_default_one_run_prepares_and_stops(tmp_path: Path) -> None:
     prepared, committed, pushed = _outputs(done)
     assert prepared["dry_run"] is True
     assert committed["committed"] is False and committed["skipped"].startswith("dry run")
-    assert pushed == {"branch": "Foxconn_kt326", "commit": "", "pushed": False,
-                      "project_path": "", "skipped": "push not requested"}
+    assert pushed == {
+        "branch": "Foxconn_kt326",
+        "commit": "",
+        "pushed": False,
+        "project_path": "",
+        "skipped": "push not requested",
+    }
     repo = Path(prepared["repo_dir"])
     assert git("log", "--oneline", cwd=repo).count("\n") == 1
 
@@ -185,8 +221,9 @@ def test_uploaded_files_join_the_picked_ones_and_must_come_from_the_store(
     plan = store.add(upload_set, field["testPlanUploads"], "uploaded.json", b'{"n": 2}')
     config = store.add(upload_set, field["configurationUploads"], "cmx.yaml", b"a: 1\n")
     engine = _engine(settings, store.root)
-    done = _run(engine, {**RUN, "testPlanUploads": [str(plan)],
-                         "configurationUploads": [str(config)]})
+    done = _run(
+        engine, {**RUN, "testPlanUploads": [str(plan)], "configurationUploads": [str(config)]}
+    )
     assert done.run.status == "succeeded", done.run.failure
     prepared = _outputs(done)[0]
     repo = Path(prepared["repo_dir"])
@@ -202,17 +239,24 @@ def test_uploaded_files_join_the_picked_ones_and_must_come_from_the_store(
     assert refused.run.failure.code == "workflow_upload_outside_store"
     # The step's own check holds even without the engine's.
     with pytest.raises(ReleaseRunError) as outside:
-        prepare_release(settings, ReleaseRunRequest.model_validate(
-            {**RUN, "testPlanUploads": [str(stray)]}), upload_root=store.root)
+        prepare_release(
+            settings,
+            ReleaseRunRequest.model_validate({**RUN, "testPlanUploads": [str(stray)]}),
+            upload_root=store.root,
+        )
     assert outside.value.code == "upload_outside_store"
     with pytest.raises(ReleaseRunError) as no_store:
-        prepare_release(settings, ReleaseRunRequest.model_validate(
-            {**RUN, "testPlanUploads": [str(plan)]}))
+        prepare_release(
+            settings, ReleaseRunRequest.model_validate({**RUN, "testPlanUploads": [str(plan)]})
+        )
     assert no_store.value.code == "uploads_not_available"
     duplicate = store.add(upload_set, field["testPlanUploads"], "plan.json", b"{}")
     with pytest.raises(ReleaseRunError) as twice:
-        prepare_release(settings, ReleaseRunRequest.model_validate(
-            {**RUN, "testPlanUploads": [str(duplicate)]}), upload_root=store.root)
+        prepare_release(
+            settings,
+            ReleaseRunRequest.model_validate({**RUN, "testPlanUploads": [str(duplicate)]}),
+            upload_root=store.root,
+        )
     assert twice.value.code == "invalid_release_input"
 
 
@@ -223,9 +267,11 @@ def test_a_wrong_type_upload_is_refused_by_the_plan(tmp_path: Path) -> None:
     script = root / "tool.exe"
     script.write_bytes(b"MZ")
     with pytest.raises(ReleaseRunError) as refused:
-        prepare_release(settings, ReleaseRunRequest.model_validate(
-            {**RUN, "testPlanUploads": [str(script)]}),
-            upload_root=tmp_path / "workspace" / "workflow-uploads")
+        prepare_release(
+            settings,
+            ReleaseRunRequest.model_validate({**RUN, "testPlanUploads": [str(script)]}),
+            upload_root=tmp_path / "workspace" / "workflow-uploads",
+        )
     assert refused.value.code == "invalid_release_input"
 
 
@@ -247,23 +293,31 @@ def test_choice_lists_read_the_index_and_readiness_table(
     def fetch(url: str, headers: dict[str, str]) -> tuple[int, str]:
         asked.append(url)
         if "/api/chipsets" in url:
-            return 200, ('{"data": {"chipsets": [{"name": "rs-wmt-kt326", "tag": "2.0.8"},'
-                         ' {"name": "kt500"}]}}')
+            return 200, (
+                '{"data": {"chipsets": [{"name": "rs-wmt-kt326", "tag": "2.0.8"},'
+                ' {"name": "kt500"}]}}'
+            )
         if url.endswith("/rs-wmt-kt326/"):
             return 200, KT326
         if url == "https://index/simple/":
             return 200, INDEX_ROOT
         return 404, ""
 
-    settings = {"artifactory_base_url": "https://index/simple",
-                "readiness_base_url": "https://ops"}
+    settings = {"artifactory_base_url": "https://index/simple", "readiness_base_url": "https://ops"}
     assert choices.chipset_choices(settings, {}, fetch) == [
-        ("kt326", "kt326 (2.0.8)"), ("kt500", "kt500")]
+        ("kt326", "kt326 (2.0.8)"),
+        ("kt500", "kt500"),
+    ]
     only_index = {"artifactory_base_url": "https://index/simple"}
     assert choices.chipset_choices(only_index, {}, fetch) == [
-        ("kt326", "kt326"), ("kt400", "kt400")]
+        ("kt326", "kt326"),
+        ("kt400", "kt400"),
+    ]
     assert choices.version_choices(settings, {"package": "kt326"}, fetch) == [
-        ("2.0.11", "2.0.11"), ("2.0.9", "2.0.9"), ("2.1.0rc1", "2.1.0rc1 (dev)")]
+        ("2.0.11", "2.0.11"),
+        ("2.0.9", "2.0.9"),
+        ("2.1.0rc1", "2.1.0rc1 (dev)"),
+    ]
     assert asked[-1] == "https://index/simple/rs-wmt-kt326/"
     with pytest.raises(ValueError):
         choices.version_choices(settings, {"package": "kt999"}, fetch)
@@ -273,6 +327,7 @@ def test_choice_lists_read_the_index_and_readiness_table(
 
 def test_choice_lists_fail_soft_through_the_host(monkeypatch: pytest.MonkeyPatch) -> None:
     """An index that is down yields no list, never an error in the form."""
+
     def down(url: str, headers: dict[str, str], timeout: float = 60) -> tuple[int, str]:
         raise TimeoutError("no answer within the timeout")
 
@@ -281,19 +336,24 @@ def test_choice_lists_fail_soft_through_the_host(monkeypatch: pytest.MonkeyPatch
     sources = ChoiceSources(
         ReferenceSetStore(Path("unused.sqlite")),
         lambda _manifest: {"artifactory_base_url": "https://index/simple"},
-        CHOICE_FUNCTIONS)
+        CHOICE_FUNCTIONS,
+    )
     manifest: WorkflowManifest = release_workflow()
     assert sources.resolve(manifest, "fn:release_package.chipsets", {}) is None
-    assert sources.resolve(
-        manifest, "fn:release_package.versions?package={chipsetId}", {"chipsetId": "kt326"},
-    ) is None
+    assert (
+        sources.resolve(
+            manifest,
+            "fn:release_package.versions?package={chipsetId}",
+            {"chipsetId": "kt326"},
+        )
+        is None
+    )
 
 
 def test_telegram_asks_the_release_by_name_with_uploads_and_a_confirmation() -> None:
     from channels import telegram_flow as flow
 
-    state = flow.start(release_workflow(), "external_side_effect", lambda *_: None,
-                       uploads=True)
+    state = flow.start(release_workflow(), "external_side_effect", lambda *_: None, uploads=True)
     assert isinstance(state, flow.FlowState)
     names = [item.name for item in state.fields]
     assert names[:3] == ["companyName", "chipsetId", "info"]
@@ -317,7 +377,8 @@ def test_the_release_capabilities_exist_once_the_new_workflow_has_settings(
 
     config, layout = workspace(tmp_path, membership=membership_record(), assets=False)
     WorkflowSettingsStore(layout.workspace_root / SETTINGS_FILE).save(
-        RELEASE, {"work_root": str(tmp_path / "work")})
+        RELEASE, {"work_root": str(tmp_path / "work")}
+    )
     with build_runtime(config, layout=layout) as runtime:
         installed = runtime.agent.gateway.bridge.installed
         for spec in (PREPARE_SPEC, COMMIT_SPEC, PUSH_SPEC):
@@ -326,4 +387,5 @@ def test_the_release_capabilities_exist_once_the_new_workflow_has_settings(
         assert prepare is not None
         assert prepare.handler.upload_root == layout.workspace_root / "workflow-uploads"
         assert runtime.agent.gateway.engine.upload_root == (
-            layout.workspace_root / "workflow-uploads")
+            layout.workspace_root / "workflow-uploads"
+        )

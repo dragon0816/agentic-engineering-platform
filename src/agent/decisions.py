@@ -70,8 +70,13 @@ class DecisionAcceleratorConfig(Contract):
             raise ValueError("enabled decision types must be unique")
         if self.provider == "NONE":
             if any(
-                (self.endpoint, self.credential, self.model_profile, self.enabled_decision_types,
-                 self.egress_approval)
+                (
+                    self.endpoint,
+                    self.credential,
+                    self.model_profile,
+                    self.enabled_decision_types,
+                    self.egress_approval,
+                )
             ):
                 raise ValueError("NONE has no accelerator endpoint, credential or enabled types")
             return self
@@ -135,8 +140,13 @@ class DecisionEnvelope(Contract, Generic[ValueT]):
 
 
 ShadowOutcome = Literal[
-    "would_select", "kept_catalog", "low_confidence", "unsupported", "error",
-    "not_authorized", "not_installed",
+    "would_select",
+    "kept_catalog",
+    "low_confidence",
+    "unsupported",
+    "error",
+    "not_authorized",
+    "not_installed",
 ]
 _SHADOW_OUTCOMES: dict[str | None, ShadowOutcome] = {
     None: "would_select",
@@ -198,8 +208,8 @@ class DecisionService(Generic[RequestT, ValueT]):
     ) -> tuple[DecisionResult[ValueT] | None, DecisionResult[ValueT] | None, Symbol | None]:
         """(admitted, candidate, fallback reason) from the configured accelerator."""
         try:
-            authorized = (
-                self._authorize_accelerator is not None and self._authorize_accelerator(request)
+            authorized = self._authorize_accelerator is not None and self._authorize_accelerator(
+                request
             )
         except Exception:
             authorized = False
@@ -268,7 +278,9 @@ class DecisionService(Generic[RequestT, ValueT]):
         if enabled and self.config.mode == "shadow":
             # Off the request's path: the person never waits for the shadow.
             thread = threading.Thread(
-                target=self._shadow, args=(request, decision_type), daemon=True,
+                target=self._shadow,
+                args=(request, decision_type),
+                daemon=True,
                 name="decision-shadow",
             )
             self._shadows = [item for item in self._shadows if item.is_alive()] + [thread]

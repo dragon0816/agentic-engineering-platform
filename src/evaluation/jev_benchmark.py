@@ -136,12 +136,12 @@ def baseline_observations(cases: Sequence[GoldenDecisionCase]) -> tuple[Decision
             message=case.request,
         )
         tools = tuple(
-                ModelTool(
-                    name=name,
-                    description=f"Synthetic installed command {name}",
-                    input_contract="synthetic.command.v1",
-                )
-                for name in case.candidates
+            ModelTool(
+                name=name,
+                description=f"Synthetic installed command {name}",
+                input_contract="synthetic.command.v1",
+            )
+            for name in case.candidates
         )
         request = SkillCandidateRequest(
             context=context,
@@ -188,9 +188,7 @@ def _metrics(
     available = [item for item in observations if item.status != "unavailable"]
     answered = [item for item in available if item.status == "answered"]
     correct = [
-        item
-        for item in answered
-        if set(item.selected) == set(by_case[item.case_id].expected)
+        item for item in answered if set(item.selected) == set(by_case[item.case_id].expected)
     ]
     latency = [item.latency_ms for item in available if item.latency_ms is not None]
     known_cost = [item.cost_usd for item in available if item.cost_usd is not None]
