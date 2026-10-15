@@ -375,6 +375,8 @@ def test_the_portal_page_has_the_published_assets_editor_and_name_rules() -> Non
     # An expired session is renewed from the stored login, then retried once.
     assert 'data.code==="session_expired"&&await renewSession()' in PAGE
     assert "Authorization:`Login ${login}`" in PAGE
+    # The reviewer sees who will own it and who may use it.
+    assert "Owner once published" in PAGE and "who can use it: ${s.visibility}" in PAGE
 
 
 @pytest.mark.skipif(_browser_missing(), reason="no Chromium browser is installed")
