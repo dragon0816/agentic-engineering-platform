@@ -2442,3 +2442,40 @@ Rejected alternatives:
 - Keeping the engine's choice check for `allow_other` fields: a slow index would
   block runs the owner wants to go through with a typed value.
 - Storing presets in browser storage: Telegram and Web would not share them.
+
+## 2026-10-15 — Bridge self-enrollment and assets-only sync beside grants.json
+
+Decision (owner): build Bridge enrollment to the Shared Platform
+(`docs/phases/BRIDGE_ENROLLMENT.md`). A member's own Agent enrolls its company
+workstation through the Member Portal (`bridges/enroll`, member session from the
+`Personal Agent` login). The platform registers or reuses the device, binds the member
+as `device_admin` and returns a 90-day Bridge token once; enrolling again rotates it.
+Administrators list Bridges and can disable one (its tokens are revoked). The Member
+Portal URL that "Open Marketplace" uses is set by the user in Agent Web Settings; the
+one field feeds `publishing.member_portal_url` and `platform.member_portal_url`. The
+token is kept for the Windows user as `AEP_SHARED_PLATFORM_TOKEN`, so an older
+platform's token variable is untouched, and the running Agent switches without a
+restart. For a PC with a hand-written workspace `grants.json`, the owner chose option
+(a): **assets-only sync**. Sync installs the selected Skill and Workflow files but
+writes the device bundle to `platform-selections.json` (display only) instead of
+`authorization.json`, so `grants.json` keeps deciding what the PC may run; the
+Library says so.
+
+Reason: the publish half (PC to platform) was live; the install half needed a Bridge
+token that only tests could issue. Asking the member to paste a second credential
+would add a step for no security gain, since the member's own session is the
+authority to enroll their own computer. Option (a) lets this PC receive published
+assets today without silently changing what it may run.
+
+Rejected alternatives:
+- (b) Rename `grants.json` away and let the platform's bundle decide: the intended end
+  state for colleagues, but it changes what this PC may run today.
+- (c) Keep refusing sync while `grants.json` exists: this PC could never install from
+  the platform.
+- An administrator-issued token pasted into Agent Web: an extra secret to move by
+  hand, and the platform cannot tell it was the member who asked.
+- Reusing `AEP_LOCAL_PLATFORM_TOKEN`: it would overwrite the old local platform's
+  token and mix two platforms' credentials in one variable.
+- Self-enrolling a shared test workstation: it has a virtual member of its own; it
+  stays an administrator's act.
+

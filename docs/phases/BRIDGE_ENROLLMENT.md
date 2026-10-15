@@ -1,6 +1,6 @@
 # Enroll a Personal Agent's Bridge on the Shared Platform
 
-Owner request: 2026-10-15. Status: **design, awaiting owner review. Nothing is implemented.**
+Owner request: 2026-10-15. Status: **approved 2026-10-15 with option (a); implemented 2026-10-15 (platform route, portal Bridges list, Agent Web card, assets-only sync). Live test on 172.25.228.141 pending.**
 
 ## Goal
 
@@ -17,6 +17,9 @@ install half (platform → PC).
 1. Build Bridge enrollment to the Shared Platform.
 2. The Member Portal address that "Open Marketplace" uses is set by the user in their
    own settings, not fixed by us.
+3. A PC with a hand-written `grants.json` uses option (a), **assets-only sync** (see
+   section 3): sync installs the selected files and leaves authorization to
+   `grants.json`, and the Library says so.
 
 ## What exists
 
@@ -135,10 +138,39 @@ A PC with a hand-written `grants.json` cannot sync, by design. Options for this 
 4. Select them in the portal, then "Synchronize selected" here.
 5. Both are installed. Under (a), permissions stay with `grants.json`.
 
-## Open question for the owner
+## Owner answer (2026-10-15)
 
-Which option for this PC's `grants.json`: (a) assets-only sync, (b) switch to
-platform-managed permissions, or (c) keep refusing?
+Option (a), assets-only sync. Recorded in `docs/DECISIONS.md`.
+
+## As built (2026-10-15)
+
+- **Platform.** `bridges/enroll` (member session; body `BridgeEnrollRequest`, the
+  `EnrollmentRequest` shape) in `control_plane/member_http.py`, logic in
+  `MemberService.enroll_bridge`. Codes: `device_owner_mismatch` 403,
+  `administrator_required` 403, `actor_disabled` 403, `device_disabled` 409,
+  `device_in_use` 409. The token lasts 90 days (`BRIDGE_TOKEN_LIFETIME`). The reply is
+  `bridge_id`, `token_id`, `secret`, `issued_at`, `expires_at`.
+- **Administrators.** `admin/bridges/list` and `admin/bridges/disable` and a "Bridges"
+  panel in the portal. Disable marks the device disabled and revokes its tokens; the
+  member then gets `device_disabled` when enrolling again.
+- **Portal link.** "Open Marketplace" opens `<portal>/#bridge=<bridge_id>`, so the
+  portal's Bridge ID field is already filled.
+- **Agent.** `host_runtime/shared_platform.py` and `AgentWeb.update_shared_platform`
+  (`GET`/`POST /api/settings/shared-platform`). The card:
+  - checks the login's account (`me`) against `device.registered_by` first;
+  - saves the token in `AEP_SHARED_PLATFORM_TOKEN` (Windows user environment and the
+    running process), maps `shared_platform_token` to it in `credentials`, and
+    leaves the old platform's mapping alone;
+  - backs host.json up as `host.json.bak-<stamp>-before-shared-platform`, then writes
+    it validated;
+  - replaces `runtime.platform` at once. A host built later also reads the saved token
+    from the user's environment (`UserEnvironment`).
+  - Non-secret enrollment facts are kept in `workspace\shared-platform.json`.
+- **Assets-only sync.** With `grants.json` present, `PlatformClient.synchronize`
+  installs the files and records the inventory, but writes the device bundle to
+  `platform-selections.json` (display only) instead of `authorization.json`.
+  `SyncOutcome.assets_only`, `PlatformSyncResult.assets_only` and
+  `PlatformProjection.assets_only` say so.
 
 ## Not in scope
 

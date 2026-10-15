@@ -1937,3 +1937,19 @@ s-k-20261011T102952` (not published).
   snapshot, then updated; that file rerun 16 passed). Draft
   wf-20261014-181908-f31f09 submitted; settings copied from prepare; waits for the
   owner's Install.
+- [x] Bridge self-enrollment on the Shared Platform (owner 2026-10-15; design
+  `docs/phases/BRIDGE_ENROLLMENT.md`, approved with option (a)): portal `bridges/enroll`
+  (member session, company workstation only, binds device_admin, 90-day token shown once,
+  re-enroll rotates), `admin/bridges/list|disable` and a portal "Bridges" panel; Agent Web
+  Settings "Shared platform" card (one Member Portal URL for `publishing` and `platform`,
+  Bridge API URL, Personal Agent code moved from Capabilities, "Enroll this PC"; token in
+  `AEP_SHARED_PLATFORM_TOKEN`, host.json backup, client switched without restart);
+  assets-only sync beside a hand-written `grants.json` (bundle kept in
+  `platform-selections.json`, never `authorization.json`). Tests:
+  `test_bridge_enrollment.py`, `test_shared_platform_settings.py` (incl. in-process
+  publish -> approve -> enroll -> select -> sync and a headless render check), updated
+  grants cases in `test_platform_transport.py` / `test_agent_web.py`. ruff and mypy src
+  clean; full suite 2679 passed, 6 skipped, 1 failed (page named `http://` in two
+  placeholders; fixed, that file and the card tests rerun 98 passed). Live test on
+  172.25.228.141 pending.
+

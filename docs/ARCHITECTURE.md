@@ -457,6 +457,19 @@ the name's owner and both reviews pending. An administrator other than the
 submitter approves or rejects it. Only an approval publishes, as the submitter,
 under the ownership rules above.
 
+**Bridge self-enrollment (owner decisions 2026-10-15, `docs/phases/BRIDGE_ENROLLMENT.md`).**
+The member enrolls their own company workstation from Agent Web (Settings > Shared
+platform > Enroll this PC). The Agent calls the Member Portal's `bridges/enroll` with
+its `Personal Agent` login. The platform registers or reuses the device, binds the
+member as its device administrator and returns a 90-day Bridge token once; enrolling
+again rotates it. The Agent keeps the token in the Windows user's environment
+(`AEP_SHARED_PLATFORM_TOKEN`), never in a file, and switches its platform client
+without a restart. A shared test workstation stays an administrator's act.
+Administrators list enrolled Bridges and can disable one, which revokes its tokens.
+Enrollment grants nothing: every run is still authorized by Bridge policy. On a PC
+whose workspace has a hand-written `grants.json`, sync is assets-only: files are
+installed, and `grants.json` keeps deciding what runs.
+
 Bridge Extensions and independent Applications are separate marketplace
 categories. A Bridge Extension declares exact Windows/Python/ABI compatibility,
 a versioned JSON-lines subprocess protocol, typed Bridge capabilities, health

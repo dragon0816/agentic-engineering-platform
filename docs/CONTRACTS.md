@@ -2030,6 +2030,34 @@ New codes: `manifest_invalid` 400, `artifact_too_large` 413,
 and returns its bearer once. The Agent trades it at `session` for one-hour
 sessions and never sends it to the Bridge API.
 
+### Bridge self-enrollment (2026-10-15)
+
+`docs/phases/BRIDGE_ENROLLMENT.md`. Member portal operations:
+- `bridges/enroll` (`common.member.BridgeEnrollRequest`: `device` and
+  `advertisement`, the same shape as the Agent's `EnrollmentRequest`). The device
+  and the advertisement must name the signed-in member (`device_owner_mismatch`
+  403), and the device must be a `company_workstation` (`administrator_required`
+  403). A disabled member gets `actor_disabled`, a disabled device
+  `device_disabled` 409, a device bound to another member `device_in_use` 409.
+  `MemberService.enroll_bridge` registers the device, or reuses one this member
+  registered (refreshing its advertisement), binds the member as `device_admin`
+  unless already bound, revokes the pair's tokens and issues one for
+  `BRIDGE_TOKEN_LIFETIME` (90 days). The reply is the only place the secret
+  appears: `bridge_id`, `token_id`, `secret`, `issued_at`, `expires_at`.
+- administrator only: `admin/bridges/list` (`AdminBridgeListReply` of
+  `AdminBridgeEntry`: device, members, last enrolled, token expiry) and
+  `admin/bridges/disable` (`AdminBridgeRequest`), which disables the device and
+  revokes its working tokens. `InMemoryEnrollmentRegistry.devices()` and
+  `InMemoryAccessTokens.history_for(bridge_id)` support the list.
+
+Agent side: `host_runtime.shared_platform` (URL checks with the
+`PlatformBinding` / `PlatformPublishBinding` rules, host.json rewrite with a
+backup, `AEP_SHARED_PLATFORM_TOKEN` for the `shared_platform_token` secret,
+`EnrollmentRecord` in `workspace/shared-platform.json`, no secret) and
+`AgentWeb.shared_platform_settings` / `update_shared_platform` behind
+`/api/settings/shared-platform`. `MemberPortalPublisher.me()` and `.enroll()`
+call the portal. `PlatformProjection` carries `bridge_id` and `assets_only`.
+
 ## Shared-platform transport (Phase 7, slice 2i)
 
 `common.sync` is the wire between a Bridge and the shared platform: seven
@@ -2106,15 +2134,21 @@ retryable; `withdrawn`; `rejected` (`authentication_failed`: this host's
 configuration is wrong); `refused` (anything else declined). Only `answered`
 changes anything on the Bridge. `probe`, `catalog`, `advertise` and `report` change
 nothing locally; the credential is resolved per call through
-`models.wire.authorized`, under the rule every HTTP adapter shares. `synchronize(layout, state)` refuses before calling when
-`grants.json` exists (`sync_grants_conflict`), then applies a reply in this
-order: `verify_installation` over the whole plan against the SQLite
+`models.wire.authorized`, under the rule every HTTP adapter shares. `synchronize(layout, state)`
+applies a reply in this order: `verify_installation` over the whole plan against the SQLite
 inventory; each artifact parsed as the manifest its kind names and carrying
 the identity its package claims (`sync_asset_invalid`); each file it would
 write compared with any hand-placed asset of the same identity, a conflict
 unless the bytes are identical (`sync_asset_conflict`); then the manifests
 written atomically as `<namespace>__<name>__<version>.json`, the inventory
-recorded in one transaction, and `authorization.json` replaced atomically. A
+recorded in one transaction, and `authorization.json` replaced atomically.
+When `grants.json` exists the sync is assets-only (owner decision (a),
+2026-10-15): everything above happens except that the bundle is written to
+`platform-selections.json` (`HostLayout.platform_selections`, display only,
+never loaded as an authorization) instead of `authorization.json`, and
+`SyncOutcome.assets_only` is true. The host therefore never holds two answers
+about what may run. (Before 2026-10-15 this case was refused as
+`sync_grants_conflict`.) A
 refusal before the first write leaves the workspace untouched; when the
 bundle, the one write after the inventory is recorded, fails, the outcome is
 `refused` with `installed` naming what was recorded (`SyncRefused.installed`).

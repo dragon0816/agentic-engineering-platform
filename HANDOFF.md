@@ -1,6 +1,35 @@
 # Handoff
 
-Updated: 2026-10-15 (Asia/Taipei), by Claude Code
+Updated: 2026-10-15 (Asia/Taipei), by Claude Code (Bridge enrollment)
+
+## Bridge self-enrollment on the Shared Platform (2026-10-15, Claude Code) — latest
+
+Goal: the install half of the Shared Platform (platform to PC). Design
+`docs/phases/BRIDGE_ENROLLMENT.md` (approved with option (a)), decision in
+`docs/DECISIONS.md` (2026-10-15 "Bridge self-enrollment and assets-only sync"), row in
+`docs/TASKS.md`. Committed on main, not pushed.
+- Platform: member portal `bridges/enroll` (member session; registers/reuses the
+  company workstation, binds the member as device_admin, 90-day token shown once,
+  re-enroll rotates), `admin/bridges/list|disable` and a "Bridges" portal panel.
+  Portal reads `#bridge=<id>` from "Open Marketplace".
+- Agent Web: Settings > "Shared platform" card (Member Portal URL feeding both
+  `publishing` and `platform`, Bridge API URL, Personal Agent code moved from
+  Capabilities, "Enroll this PC"). Token saved as `AEP_SHARED_PLATFORM_TOKEN` (user
+  environment + process), host.json backed up as
+  `host.json.bak-<stamp>-before-shared-platform`, client swapped without restart.
+- Assets-only sync when `workspace\grants.json` exists: files installed, bundle kept in
+  `platform-selections.json` (display only), `authorization.json` never written.
+- Verified: ruff, mypy src clean; full suite 2679 passed, 6 skipped, 1 failed
+  (`http://` in placeholders; fixed and rerun green, see TASKS).
+- NOT done: live test on 172.25.228.141 (owner's main session deploys). Steps: redeploy
+  the platform; in Agent Web Settings set Member Portal `http://127.0.0.1:28776` and
+  Bridge API `http://127.0.0.1:28775` (SSH tunnel), paste a fresh Personal Agent code if
+  needed, press Enroll this PC; Library should list the two assets published on
+  2026-10-15; select them in the portal; press Synchronize selected.
+- Risks: the PC's host.json `device.registered_by` must equal the portal account
+  (else `device_owner_mismatch`, shown by name). A synced Skill/Workflow whose name is
+  already installed locally at another version lands as a second file; a newly
+  installed Workflow may need an Agent Web restart to be offered (unchanged behaviour).
 
 ## Workflow forms v2 and the one-run release (2026-10-15, Claude Code)
 
@@ -47,7 +76,8 @@ decisions in `docs/DECISIONS.md`.
   snoozed, done or reopened; accept opens a review sandbox (rule edit, draft question),
   adds a gap or tracks an issue. Push now merges `checks/`. 16 proposals are waiting for
   the owner (mostly Workflow issues). Next: E4 (platform Skill and Workflow routes).
-- Releases: `scriptselease.cmd` (verify, build from `git archive HEAD`, bundle, release
+- Releases: `scripts
+elease.cmd` (verify, build from `git archive HEAD`, bundle, release
   folder, tag `release-<id>`); colleague manual `deploy/windows-preview/INSTALL.zh-TW.md`,
   publisher guide `docs/RELEASING.zh-TW.md`. Last release `20261013-1349-fd87def6` predates
   the icon, Tasks, Reviews and Ingest changes: make a new one before delivering.
