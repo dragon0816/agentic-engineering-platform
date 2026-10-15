@@ -1,6 +1,6 @@
 # Agent mode for Claude Code / Codex / Copilot in Agent Web
 
-Owner request: 2026-10-15. Status: **approved (option A); implementation next.**
+Owner request: 2026-10-15. Status: **approved (option A, rules revised 2026-10-15 below); implementation after the push.**
 
 ## Goal
 
@@ -78,3 +78,21 @@ Rejected:
 - **Telegram stays text-only.**
 - **Headless render** of the approval card.
 - **Smoke test:** a real `claude -p` run with the relay in a temp HOME, if feasible.
+
+## Revised rules (owner, 2026-10-15) — these replace items 1-3 of the design above
+
+| Action | Rule |
+|---|---|
+| Read or write files **inside** the conversation's working folder | free, no card |
+| Read or write files **outside** it (for example the OneDrive LLM wiki, other projects) | approval card; **Allow**, **Allow this folder for this conversation**, or **Deny** |
+| **Shell commands** | always a card that shows the full command and its folder (a command cannot be confined to a folder); **Allow for this conversation** is available |
+| **Read email** (new `outlook.search` / `outlook.read`, read-only, scope set in Settings: folders, days, excluded senders/folders) | one card per conversation the first time; attachments are saved into the working folder |
+| **Send email** | the agent builds a draft; the card shows the full message (to, cc, subject, body, attachments); **Send**, **Keep as draft** or **Cancel**; every message needs its own press, with no conversation-wide allow |
+| Installing, approving or publishing AEP assets | never from the agent; the Capabilities/portal buttons only (it may submit drafts) |
+| **Credentials and protected system settings**: tokens, SSH keys and passwords, the Windows firewall, `host.json`, the Windows user environment's secrets, browser-stored passwords, any other credential store | **never modified through the agent, even if allowed**; their secret values are also never read into a conversation |
+
+Also in scope:
+
+- the Knowledge pipeline as agent tools (create sandbox, pull, convert, ingest, run
+  test questions), with writes carded and Push to the vault left to the Knowledge page;
+- extra read-only folders a person adds to a conversation.
