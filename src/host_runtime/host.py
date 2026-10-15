@@ -153,6 +153,16 @@ from capabilities.knowledge_query.handlers import (
 )
 from capabilities.mail_draft.handlers import DRAFT_SPEC as MAIL_DRAFT_SPEC
 from capabilities.mail_draft.handlers import MailDraftHandler, MailDraftRequest, MailDraftResult
+from capabilities.mail_read.handlers import READ_SPEC as MAIL_READ_SPEC
+from capabilities.mail_read.handlers import SEARCH_SPEC as MAIL_SEARCH_SPEC
+from capabilities.mail_read.handlers import (
+    MailReadHandler,
+    MailReadRequest,
+    MailReadResult,
+    MailSearchHandler,
+    MailSearchRequest,
+    MailSearchResult,
+)
 from capabilities.ncc_plan.contracts import (
     NccPlan,
     NccPlanStepInput,
@@ -737,6 +747,19 @@ def build_integrations(
             MailDraftResult,
             ExecutionDependencies(central_required=False),
         )
+    # Outlook search and read (owner 2026-10-15): read only, in the scope the
+    # person set in Agent Web Settings > Agent mode; installed when used.
+    if MAIL_SEARCH_SPEC.identity.key in uses or MAIL_READ_SPEC.identity.key in uses:
+        from host_runtime.agent_mode_settings import AgentModeStore
+        from integrations.outlook_mail import OutlookComMailbox
+
+        store = AgentModeStore(layout.workspace_root)
+        installed.register(
+            MAIL_SEARCH_SPEC, MailSearchHandler(OutlookComMailbox, lambda: store.load().mail),
+            MailSearchRequest, MailSearchResult, ExecutionDependencies(central_required=False))
+        installed.register(
+            MAIL_READ_SPEC, MailReadHandler(OutlookComMailbox, lambda: store.load().mail),
+            MailReadRequest, MailReadResult, ExecutionDependencies(central_required=False))
     integrations = config.integrations
     if integrations is None:
         return
