@@ -545,6 +545,8 @@ tr:last-child td { border-bottom: none; }
 .cap-row .cap-item small { overflow-wrap: anywhere; }
 .cap-row[data-state="draft"] { box-shadow: inset 4px 0 0 var(--warn); }
 .cap-row[data-state="disabled"] .cap-item strong { color: var(--dim); }
+.cap-row[data-fresh] { box-shadow: inset 4px 0 0 var(--good); }
+.restart-note { color: var(--warn); }
 .cap-item[aria-current="true"] { background: var(--selected); }
 .cap-state { display: inline-block; margin-top: 4px; }
 .btn { min-height: 44px; padding: 8px 14px; color: var(--ink); background: var(--bg);
@@ -1095,10 +1097,13 @@ tr:last-child td { border-bottom: none; }
         <a id="member-portal" hidden target="_blank" rel="noopener noreferrer"
            aria-label="Open shared marketplace (Agent Add-ons and Applications)">
           Open Marketplace</a>
-        <button class="go" id="platform-sync" type="button" disabled>Synchronize selected</button>
+        <button class="btn" id="platform-sync" type="button" disabled
+                title="Install what you selected elsewhere, such as in the Member Portal">
+          Sync again</button>
       </div>
       <div id="platform-sync-result" class="section-status" role="status" aria-live="polite">
-        Synchronization runs only when you press the button.</div>
+        &ldquo;+ Add to this Agent&rdquo; installs at once. &ldquo;Sync again&rdquo; is only for
+        selections made in the Member Portal.</div>
       <p class="note">Press a card for its details. &ldquo;+ Add to this Agent&rdquo; selects
         that version for this PC as you on the shared platform and installs it here.</p>
       <div id="catalog" class="market-grid">
@@ -2583,6 +2588,12 @@ async function loadAssets() {
   loadExternalApprovals().catch(() => {});
   const [assets] = await Promise.all([call("/api/assets"),
     loadDrafts().catch(() => { capabilityDrafts = []; })]);
+  return renderAssets(assets);
+}
+
+// Draws the Capabilities list from an /api/assets answer, also when an
+// action's own response carries it: no second request and no reload.
+function renderAssets(assets) {
   el("profiles").replaceChildren(table(
     ["Asset", "State", "Action", "What it is"], assets.profiles,
     (p) => {
@@ -2653,6 +2664,7 @@ let installedAssets = {skills: [], workflows: [], knowledge: [], extensions: [],
 let activeCapabilityKind = "skills";
 let activeCapabilityKey = "";
 let activeCapabilityFilter = "all";
+let freshCapabilityKey = "";
 // The kinds a person can install from a draft, switch off and remove here.
 const SHELF_KINDS = {skills: "skill", workflows: "workflow"};
 
@@ -2725,7 +2737,9 @@ async function capabilityAction(button, busyText, request) {
   setCapabilityNotice(done.message || (done.ok ? "Done." : done.code || "It did not work."),
     !done.ok);
   button.removeAttribute("aria-busy");
-  try { await loadAssets(); } catch (_) { renderCapabilityBrowser(); }
+  if (done.platform) renderPlatform(done.platform);
+  if (done.assets) renderAssets(done.assets);
+  else { try { await loadAssets(); } catch (_) { renderCapabilityBrowser(); } }
   return done;
 }
 
@@ -2946,6 +2960,7 @@ function capabilityRow(row) {
   const button = document.createElement("button"); button.type = "button";
   button.className = "cap-item"; button.dataset.key = key;
   if (key === activeCapabilityKey) button.setAttribute("aria-current", "true");
+  if (key === freshCapabilityKey) { wrapper.dataset.fresh = ""; freshCapabilityKey = ""; }
   const title = document.createElement("strong");
   title.append(text(row.state === "draft" ? (item.title || item.name)
     : capabilityTitle(item, kind)));
@@ -4135,8 +4150,8 @@ async function marketSelect(item, add) {
   const key = marketKey(item);
   const asset = item.namespace + "/" + item.name + "@" + item.version;
   busyMarketKey = key;
-  marketOutcome[key] = {text: add ? "Selecting it for this PC and installing…"
-    : "Removing the selection…", bad: false};
+  marketOutcome[key] = {text: add ? "Installing\u2026 (selecting it for this PC and "
+    + "synchronizing)" : "Removing the selection\u2026", bad: false};
   renderMarketCards();
   let done;
   try {
@@ -4146,12 +4161,21 @@ async function marketSelect(item, add) {
     done = {ok: false, message: failure.message};
   }
   busyMarketKey = "";
-  marketOutcome[key] = {text: done.message || done.code || "", bad: !done.ok};
+  marketOutcome[key] = {text: done.message || done.code || "", bad: !done.ok,
+    restart: !!done.restart_required};
   const status = el("platform-sync-result");
   status.textContent = marketOutcome[key].text; status.classList.toggle("bad", !done.ok);
+  if (done.assets) {
+    if (add && done.installed) {
+      // Show the new Skill or Workflow in the list on the left, selected.
+      activeCapabilityKind = item.kind === "skill" ? "skills" : "workflows";
+      if (activeCapabilityFilter !== "installed") activeCapabilityFilter = "all";
+      activeCapabilityKey = "installed:" + asset; freshCapabilityKey = activeCapabilityKey;
+    }
+    renderAssets(done.assets);
+  }
   if (done.sync && done.sync.after) renderPlatform(done.sync.after); else renderMarketCards();
   focusMarketHead(key);
-  if (done.ok) loadAssets().catch(() => {});
 }
 
 function marketActions(item) {
@@ -4161,7 +4185,8 @@ function marketActions(item) {
     const made = document.createElement("button"); made.type = "button";
     made.className = className; made.textContent = label;
     made.disabled = busy || !!busyMarketKey || !sharedPlatform.configured;
-    if (busy) made.setAttribute("aria-busy", "true");
+    if (busy) { made.setAttribute("aria-busy", "true"); made.textContent = add
+    ? "Installing\u2026" : "Removing\u2026"; }
     made.addEventListener("click", () => marketSelect(item, add));
     actions.append(made);
     return made;
@@ -4247,6 +4272,11 @@ function marketCard(item, index) {
     outcome.setAttribute("role", "status");
     const said = marketOutcome[key];
     if (said) { outcome.append(text(said.text)); outcome.classList.toggle("bad", said.bad); }
+    if (said && said.restart) {
+      const restart = document.createElement("strong"); restart.className = "restart-note";
+      restart.append(text(" Restart needed before the Agent can use it."));
+      outcome.append(restart);
+    }
     detail.append(outcome);
     detail.addEventListener("keydown", (event) => {
       if (event.key === "Escape") { event.stopPropagation(); toggleMarket(key); }
@@ -4364,6 +4394,7 @@ async function synchronizePlatform() {
   try {
     const synchronized = await call("/api/platform/sync", {});
     renderPlatform(synchronized.after);
+    loadAssets().catch(() => {});  // what it installed appears on the left too
     if (synchronized.status === "answered") {
       result.textContent = "Synchronization complete: " + synchronized.installed.length
         + " installed, " + synchronized.selections + " active selections."

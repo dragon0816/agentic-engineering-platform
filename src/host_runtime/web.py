@@ -3128,7 +3128,9 @@ class AgentWeb:
                 self.tasks().finish(task, "failed", code)
                 return {"ok": False, "code": code, "message": message, "selected": add,
                         "installed": installed, "assets_only": assets_only,
-                        "sync": synchronized}
+                        "restart_required": False, "sync": synchronized,
+                        "assets": self.assets()}
+            restart_required = False
             if add:
                 message = (f"{label} was already selected for this PC" if already
                            else f"{label} is now selected for this PC")
@@ -3137,14 +3139,23 @@ class AgentWeb:
                 if assets_only:
                     message += (" Files only: permissions come from this PC's grants.json, "
                                 "so it runs only where grants.json allows its capabilities.")
-                message += " The Agent offers a newly installed one after Agent Web restarts."
+                if installed and kind == "workflow" and assets_only:
+                    # grants.json still decides every step, as at start-up, so
+                    # the engine may offer the new Workflow at once.
+                    self._live("workflow", identity, True)
+                    message += " The Agent can use it now."
+                elif installed:
+                    restart_required = True
+                    message += " Restart Agent Web before the Agent can use it."
             else:
                 message = (f"{label} is no longer selected for this PC. The installed file "
                            "stays; use 'Remove from this Agent' in the list above to take it "
                            "off this computer.")
             self.tasks().finish(task, "succeeded", message)
+        # The page redraws the card and the installed list from this answer.
         return {"ok": True, "selected": add, "installed": installed,
-                "assets_only": assets_only, "message": message, "sync": synchronized}
+                "assets_only": assets_only, "restart_required": restart_required,
+                "message": message, "sync": synchronized, "assets": self.assets()}
 
     def add_to_agent(self, kind: str, asset: str) -> dict[str, Any]:
         """Select this exact version for this PC's Bridge, then synchronize."""
@@ -3201,7 +3212,7 @@ class AgentWeb:
         else:
             message = ("Switched off: the Agent no longer offers it. The file is kept in "
                        f"assets\\{parsed_kind}s\\disabled; switch it on again at any time.")
-        return {"ok": True, "enabled": enabled, "message": message}
+        return {"ok": True, "enabled": enabled, "message": message, "assets": self.assets()}
 
     def remove_asset(self, kind: str, asset: str) -> dict[str, Any]:
         """Take an installed Skill or Workflow off this computer, recoverably:
@@ -3230,8 +3241,14 @@ class AgentWeb:
             message += (" It is still selected for this PC on the shared platform, so the next "
                         "synchronization installs it again; press 'Remove selection' on its "
                         "Library card to stop that.")
-        return {"ok": True, "kept_at": kept, "inventory_forgotten": forgotten,
-                "still_selected": still_selected, "message": message}
+        reply: dict[str, Any] = {
+            "ok": True, "kept_at": kept, "inventory_forgotten": forgotten,
+            "still_selected": still_selected, "message": message, "assets": self.assets()}
+        if self.runtime.platform is not None:
+            # The Library card's Installed badge follows without a second request.
+            with self._one_at_a_time:
+                reply["platform"] = self.platform()
+        return reply
 
     def _selected_here(self, kind: str, identity: AssetIdentity) -> bool:
         """The platform's last synchronized decisions still select it."""

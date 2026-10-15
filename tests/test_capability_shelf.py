@@ -217,6 +217,11 @@ def test_add_to_this_agent_selects_as_the_member_syncs_and_removal_is_consistent
         assert added["ok"] is True and added["installed"] is True, added
         assert added["assets_only"] is True and "grants.json" in added["message"]
         assert "now selected" in added["message"]
+        # One action: the answer carries what the page redraws, and in
+        # assets-only mode the engine offers the new Workflow at once.
+        assert added["restart_required"] is False and "can use it now" in added["message"]
+        assert "weekly-check" in [w["name"] for w in added["assets"]["workflows"]]
+        assert runtime.agent.gateway.engine.workflows.get(AssetIdentity(**IDENTITY)) is not None
         assert added["sync"]["installed"] == [IDENTITY]
         installed = layout.workflows / "lab__weekly-check__1.0.0.json"
         assert installed.is_file() and layout.grants.read_bytes() == grants
@@ -231,6 +236,9 @@ def test_add_to_this_agent_selects_as_the_member_syncs_and_removal_is_consistent
         removed = web.remove_asset("workflow", REFERENCE)
         assert removed["ok"] is True and removed["inventory_forgotten"] is True
         assert removed["still_selected"] is True and "Remove selection" in removed["message"]
+        assert "weekly-check" not in [w["name"] for w in removed["assets"]["workflows"]]
+        [card] = [i for i in removed["platform"]["catalog"] if i["name"] == "weekly-check"]
+        assert card["installed"] is False
         assert runtime.state.installed() == () and not installed.exists()
         [entry] = [i for i in web.platform()["catalog"] if i["name"] == "weekly-check"]
         assert entry["installed"] is False and entry["authorized"] is True
@@ -334,7 +342,9 @@ def test_the_page_lists_drafts_with_installed_assets_and_opens_library_cards() -
                  '"/api/assets/remove"', '"/api/drafts/install"', '"/api/drafts/delete"',
                  '"/api/platform/add"', '"/api/platform/unselect"', '"aria-expanded"',
                  "+ Add to this Agent", "Remove selection", "Discard draft",
-                 "Remove from this Agent", "Draft \u2014 not installed"):
+                 "Remove from this Agent", "Draft \u2014 not installed",
+                 "renderAssets(done.assets)", "done.restart_required", 'id="platform-sync"',
+                 "Sync again"):
         assert hook in PAGE, hook
     assert "我的草稿" not in PAGE and 'id="drafts-card"' not in PAGE
     script = PAGE.split("<script>", 1)[1].split("</script>", 1)[0]
@@ -421,6 +431,76 @@ def test_the_capability_list_works_in_a_real_browser(tmp_path: Path) -> None:
             wait('!document.getElementById("asset-confirm").open')
             assert (layout.workflows / "lab__local-check__1.0.0.json").is_file()
             assert not (layout.workspace_root / "removed").exists()
+        finally:
+            browser.close()
+            browser.discard_profile()
+            served.shutdown()
+            served.server_close()
+            thread.join(timeout=5)
+
+
+@pytest.mark.skipif(browser_path() is None, reason="no Chromium browser is installed")
+def test_add_to_this_agent_redraws_the_card_and_the_list_without_a_reload(
+    app: SharedPlatformApplication, tmp_path: Path,
+) -> None:
+    """Owner 2026-10-15: installing from the Library is one action; the
+    answer updates the card's badge, the list on the left (the new Workflow
+    selected), the tab counts and the status line, with no Synchronize
+    press and no reload."""
+    import threading
+    import time
+
+    from host_runtime.web import AgentWebServer
+    from integrations.browser import Browser
+
+    _published(app)
+    path, layout = _host(tmp_path)
+    engineer = _signed_in(app, "engineer", "member")
+    with build_runtime(CompanyHostConfiguration.model_validate_json(
+            path.read_text("utf-8")), layout=layout) as runtime:
+        web = _web(runtime, path, {})
+        assert web.update_shared_platform(_card(app, _agent_login(app, engineer)))["ok"]
+        served = AgentWebServer(web)
+        thread = threading.Thread(target=served.serve_forever, daemon=True)
+        thread.start()
+        browser = Browser(tmp_path / "browser", timeout_s=60)
+        browser.start()
+
+        def wait(expression: str, timeout: float = 40) -> object:
+            deadline = time.monotonic() + timeout
+            while time.monotonic() < deadline:
+                value = browser._evaluate(expression)
+                if value:
+                    return value
+                time.sleep(0.2)
+            raise AssertionError(expression)
+
+        try:
+            browser.navigate(served.address)
+            browser._evaluate('document.getElementById("nav-capabilities").click()')
+            browser._evaluate('document.getElementById("market-tab-workflow").click()')
+            wait('document.querySelectorAll("#catalog .market-head").length === 1')
+            before = int(str(browser._evaluate(
+                'document.getElementById("count-workflows").textContent')))
+            browser._evaluate('window.notReloaded = true')
+            browser._evaluate('document.querySelector("#catalog .market-head").click()')
+            browser._evaluate('document.querySelector(".market-detail button.go").click()')
+            wait('document.querySelector("#catalog .status-badge").textContent === "Installed"')
+            assert browser._evaluate("window.notReloaded") is True
+            row = browser._evaluate(
+                '(document.querySelector(".cap-item[aria-current=true] small") || {})'
+                '.textContent')
+            assert row == "lab/weekly-check@1.0.0", row
+            assert browser._evaluate('document.getElementById("cap-tab-workflows")'
+                                     '.getAttribute("aria-selected")') == "true"
+            assert int(str(browser._evaluate(
+                'document.getElementById("count-workflows").textContent'))) == before + 1
+            status = str(browser._evaluate(
+                'document.getElementById("platform-sync-result").textContent'))
+            assert "now selected" in status and "grants.json" in status, status
+            assert "now selected" in str(browser._evaluate(
+                'document.querySelector(".market-outcome").textContent'))
+            assert (layout.workflows / "lab__weekly-check__1.0.0.json").is_file()
         finally:
             browser.close()
             browser.discard_profile()
