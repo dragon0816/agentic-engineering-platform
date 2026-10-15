@@ -78,6 +78,10 @@ class FlowState:
     picked: list[str] = field(default_factory=list)
     # The upload set this flow stores documents in (set by the ingress).
     upload_set: str | None = None
+    # Run values given with the request ("run X company=Foxconn", or by the
+    # model for its own fields): answered already, never asked, always shown
+    # in a confirmation before the run (owner 2026-10-15).
+    prefilled: frozenset[str] = frozenset()
     _cache: dict[str, list[str] | None] = field(default_factory=dict)
 
     @property
@@ -98,6 +102,7 @@ class FlowStep:
 def start(
     manifest: WorkflowManifest, effect: str | None, choices: ChoicesProvider | None = None,
     *, uploads: bool = False, preset: Mapping[str, Any] | None = None,
+    prefill: Mapping[str, Any] | None = None,
 ) -> FlowState | str:
     """A new flow, or why this Workflow cannot be filled in from Telegram.
 
@@ -111,10 +116,14 @@ def start(
                 return (f"{item.label} needs a file upload, which Telegram does not accept "
                         "here; run this Workflow from Agent Web.")
         fields = tuple(item for item in fields if item.kind != "upload")
+    shown = {item.name for item in fields}
+    given = {name: value for name, value in (prefill or {}).items() if name in shown}
     identity = {item.name for item in fields if item.group == IDENTITY_GROUP}
-    remembered = {name: value for name, value in (preset or {}).items() if name in identity}
+    remembered = {name: value for name, value in (preset or {}).items()
+                  if name in identity and name not in given}
     return FlowState(
-        manifest, effect, fields, choices, preset=remembered, asking_preset=bool(remembered),
+        manifest, effect, fields, choices, answers=dict(given),
+        preset=remembered, asking_preset=bool(remembered), prefilled=frozenset(given),
     )
 
 
@@ -308,12 +317,16 @@ def _match_choice(item: WorkflowParameter, value: str, dynamic: list[str] | None
 def _next(state: FlowState) -> FlowStep:
     state.index += 1
     state.picked = []
-    while state.index < len(state.fields) and state.fields[state.index].name in state.preset \
-            and state.fields[state.index].name in state.answers:
+    while state.index < len(state.fields) and _given(state, state.fields[state.index].name):
         state.index += 1
     if state.index < len(state.fields):
         return FlowStep("ask", prompt(state))
     return _finish(state)
+
+
+def _given(state: FlowState, name: str) -> bool:
+    """Answered by last time's values or with the request: not asked."""
+    return name in state.answers and (name in state.preset or name in state.prefilled)
 
 
 def _finish(state: FlowState) -> FlowStep:
@@ -329,7 +342,7 @@ def _finish(state: FlowState) -> FlowStep:
         state.picked = []
         reprompt = prompt(state)
         return FlowStep("ask", FlowPrompt(f"{error}.\n\n{reprompt.text}", reprompt.buttons))
-    if needs_confirmation(state) and not state.confirming:
+    if (needs_confirmation(state) or state.prefilled) and not state.confirming:
         state.confirming = True
         return FlowStep("ask", prompt(state))
     return FlowStep("ready", arguments=arguments)
@@ -339,9 +352,8 @@ def begin(state: FlowState) -> FlowStep:
     """The first prompt, or straight to confirmation when nothing is asked."""
     if state.asking_preset:
         return FlowStep("ask", prompt(state))
-    if state.fields:
-        return FlowStep("ask", prompt(state))
-    return _finish(state)
+    state.index = -1
+    return _next(state)
 
 
 def current_upload(state: FlowState) -> WorkflowParameter | None:

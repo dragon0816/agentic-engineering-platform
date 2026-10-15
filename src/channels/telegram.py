@@ -35,6 +35,7 @@ from channels import telegram_flow
 from common.assets import (
     REDACTED,
     SECRET_PATTERN,
+    AssetIdentity,
     SecretRef,
     WorkflowManifest,
     reject_embedded_secrets,
@@ -43,6 +44,7 @@ from common.base import Contract, Slug, Symbol, Text
 from common.distribution import LocalStateError
 from common.execution import Failure, TraceIdentifiers
 from common.local_agent import LocalAgentRequest, LocalWorkflowRequest
+from common.workflow_run_form import form_offer, offer_in, person_prefill, run_intent
 from host_runtime.agent import LocalAgent, LocalAgentOutcome
 from host_runtime.attachments import (
     KINDS,
@@ -90,6 +92,14 @@ SLASH_COMMAND = re.compile(
     r"^/([a-zA-Z_][a-zA-Z0-9_]*)(?:@[A-Za-z0-9_]+)?(?:\s+([a-zA-Z_][a-zA-Z0-9_]*))?(?:\s+(.*))?$",
     re.DOTALL,
 )
+#: Longest wait honored after a rate-limited reply.
+MAX_RETRY_WAIT_S = 5.0
+#: Sent when an answer could not be delivered, so the person is not left
+#: with only the "Done" status line (owner 2026-10-15).
+UNDELIVERED_REPLY = (
+    "The answer could not be delivered here (Telegram refused the message). "
+    "Ask again, or open Agent Web.")
+SETTINGS_HINT = "Open Agent Web to set them, then send /run again."
 HELP = (
     "Talk to the Agent in words, or send a skill command as /<skill> <command> "
     "[arguments]. /run <number or name> asks a Workflow's fields one by one. /status "
@@ -439,6 +449,28 @@ def _describe(outcome: LocalAgentOutcome) -> str:
     return f"{target.name}: {decision.kind}"
 
 
+def _retry_after(body: bytes) -> float:
+    """Seconds Telegram asked to wait after a 429, at most `MAX_RETRY_WAIT_S`."""
+    try:
+        seconds = json.loads(body).get("parameters", {}).get("retry_after", 1)
+    except (ValueError, AttributeError):
+        seconds = 1
+    return float(min(max(seconds if isinstance(seconds, int | float) else 1, 0),
+                     MAX_RETRY_WAIT_S))
+
+
+def _no_answer_reply(record: str | None) -> str:
+    """What a person reads when the model produced no answer, so a turn is
+    never silent (owner 2026-10-15)."""
+    used = ""
+    if record:
+        names = [line.lstrip("-• ").split(":", 1)[0] for line in record.splitlines()
+                 if line.startswith("- ")]
+        used = " after using " + ", ".join(_tool_label(name) for name in names[:5] if name)
+    return (f"The Agent gave no answer{used}. Ask again or say it differently; to run a "
+            "Workflow, send /run <name>.")
+
+
 def _tool_label(name: str) -> str:
     """`weekly-report__run` -> `/weekly-report run`: how the person would type it."""
     alias, _, command = name.partition("__")
@@ -680,6 +712,9 @@ class TelegramIngress:
                     replied = await asyncio.to_thread(
                         self._reply, update.chat_id, delivery.reply, delivery.buttons
                     )
+                if not replied:
+                    # Never silent: say that the answer did not arrive.
+                    await asyncio.to_thread(self._reply, update.chat_id, UNDELIVERED_REPLY)
                 delivery = delivery.model_copy(update={"replied": replied})
             deliveries.append(delivery)
         if highest is None or highest == offset:
@@ -784,13 +819,20 @@ class TelegramIngress:
         if request is None:
             return TelegramDelivery(
                 **base, disposition="unsupported_content", reply=CREDENTIAL_REPLY)
+        if parsed is None and not DOT_COMMAND.match(text):
+            # "Run X" for an installed Workflow is its question flow, as
+            # /run X is, never the model's prose (owner 2026-10-15).
+            intent = run_intent(text, self.agent.gateway.engine.workflows.manifests())
+            if intent is not None:
+                return await self._open_flow(
+                    base, key, intent.manifest, actor, update, intent.prefill)
         if (
             parsed is None and not DOT_COMMAND.match(text)
             and self.agent.gateway.router.model is not None
         ):
             # Free text is a conversation, as in Agent Web: the model answers
             # and may call installed tools under the same policy.
-            return await self._converse(base, key, request, text)
+            return await self._converse(base, key, request, text, actor=actor, update=update)
         progress = await self._progress(update.chat_id, f"Running {_command_label(text)}")
         succeeded = False
         try:
@@ -876,7 +918,8 @@ class TelegramIngress:
         # Later turns keep the names and paths, never the content.
         listing = "[附件]\n" + "\n".join(
             f"- {item.filename} ({item.kind}): {item.path}" for item in saved)
-        return await self._converse(base, key, request, text, (note, images, listing))
+        return await self._converse(base, key, request, text, (note, images, listing),
+                                    actor=actor, update=update)
 
     def _save(self, session_id: str, files: list[_File]) -> list[Attachment]:
         assert self.attachments is not None
@@ -969,6 +1012,7 @@ class TelegramIngress:
     async def _converse(
         self, base: dict[str, Any], key: tuple[int, int], request: LocalAgentRequest,
         text: str, attached: tuple[str, tuple[str, ...], str] | None = None,
+        *, actor: str | None = None, update: _Update | None = None,
     ) -> TelegramDelivery:
         """`attached` is the files' note and pictures for the model, and the
         short listing the stored history keeps in their place."""
@@ -1007,6 +1051,9 @@ class TelegramIngress:
                 else "conversation_failed"
             )
             reply = f"That could not be answered ({code})."
+            if code == "empty_model_answer":
+                # Never a silent turn: say what happened (owner 2026-10-15).
+                reply = _no_answer_reply(record)
             if code == "tool_loop_limit" and conversation is not None:
                 reply = (f"這個回合已用完 {len(conversation.tools)} 次工具呼叫，工作還沒完成；"
                          "回覆「繼續」我會接著做。")
@@ -1015,11 +1062,20 @@ class TelegramIngress:
                                          text=f"{reply}\n\n[工具紀錄]\n{record}"))
                 self._histories[key] = turn[-MAX_CHAT_HISTORY:]
             return TelegramDelivery(**base, disposition="answered", reply=reply, buttons=buttons)
-        remembered = conversation.text if record is None else (
-            f"{conversation.text}\n\n[工具紀錄]\n{record}")
+        answer = conversation.text if conversation.text.strip() else _no_answer_reply(record)
+        remembered = answer if record is None else f"{answer}\n\n[工具紀錄]\n{record}"
         turn.append(ModelMessage(role="assistant", text=remembered))
         self._histories[key] = turn[-MAX_CHAT_HISTORY:]
-        return TelegramDelivery(**base, disposition="answered", reply=scrub(conversation.text),
+        offer = offer_in(conversation.tools)
+        if offer is not None and actor is not None and update is not None:
+            # The model handed over a Workflow's form: ask its questions here.
+            manifest = self._offered_workflow(offer)
+            if manifest is not None:
+                prefill = offer.get("prefill")
+                return await self._open_flow(
+                    base, key, manifest, actor, update,
+                    prefill if isinstance(prefill, dict) else {})
+        return TelegramDelivery(**base, disposition="answered", reply=scrub(answer),
                                 buttons=buttons)
 
     def _acting(self, actor: str) -> tuple[str, str | None]:
@@ -1053,6 +1109,27 @@ class TelegramIngress:
         manifest = self._resolve_workflow(target)
         if isinstance(manifest, str):
             return TelegramDelivery(**base, disposition="answered", reply=manifest)
+        return await self._open_flow(base, key, manifest, actor, update, {})
+
+    def _offered_workflow(self, offer: Mapping[str, Any]) -> WorkflowManifest | None:
+        try:
+            identity = AssetIdentity.model_validate(offer.get("workflow"))
+        except ValueError:
+            return None
+        return self.agent.gateway.engine.workflows.get(identity)
+
+    async def _open_flow(
+        self, base: dict[str, Any], key: tuple[int, int], manifest: WorkflowManifest,
+        actor: str, update: _Update, prefill: Mapping[str, Any],
+    ) -> TelegramDelivery:
+        """The Workflow's question flow, with values already given as answers
+        (confirmed before the run), or why it cannot run yet."""
+        engine = self.agent.gateway.engine
+        offer = form_offer(manifest, person_prefill(manifest, prefill, ("telegram",)),
+                           engine.settings_provider)
+        if offer["missing_settings"]:
+            return TelegramDelivery(**base, disposition="answered",
+                                    reply=scrub(str(offer["message"])) + "\n" + SETTINGS_HINT)
         effect = await asyncio.to_thread(
             target_side_effect, self.agent, "workflow", manifest.metadata.identity, {}
         )
@@ -1061,8 +1138,8 @@ class TelegramIngress:
             if self.presets is not None else {}
         )
         state = telegram_flow.start(
-            manifest, effect, self.agent.gateway.engine.choices_provider,
-            uploads=self.uploads is not None, preset=preset,
+            manifest, effect, engine.choices_provider,
+            uploads=self.uploads is not None, preset=preset, prefill=offer["prefill"],
         )
         if isinstance(state, str):
             return TelegramDelivery(**base, disposition="answered", reply=state)
@@ -1236,7 +1313,9 @@ class TelegramIngress:
         the last piece. A reply that cannot be sent is reported on the
         delivery, never raised over the outcome."""
         try:
-            pieces = list(chunks(text))
+            pieces = [piece for piece in chunks(text) if piece.strip()]
+            if not pieces:
+                return False
             for position, piece in enumerate(pieces):
                 payload: dict[str, JsonValue] = {"chat_id": chat_id, "text": piece}
                 if buttons and position == len(pieces) - 1:
@@ -1244,12 +1323,24 @@ class TelegramIngress:
                         [{"text": label, "callback_data": data} for label, data in row]
                         for row in buttons
                     ]}
-                status, _ = self._call("sendMessage", payload)
-                if status != 200:
+                if not self._send_piece(payload):
                     return False
         except Exception:  # noqa: BLE001 - the delivery records that the reply failed
             return False
         return True
+
+    def _send_piece(self, payload: dict[str, JsonValue]) -> bool:
+        """One `sendMessage`, retried once after a rate limit (the progress
+        edits just before it can trigger one) and once without its keyboard
+        when Telegram refuses the message, so an answer is not lost."""
+        status, body = self._call("sendMessage", payload)
+        if status == 429:
+            time.sleep(_retry_after(body))
+            status, body = self._call("sendMessage", payload)
+        if status == 400 and "reply_markup" in payload:
+            status, _ = self._call("sendMessage", {
+                key: value for key, value in payload.items() if key != "reply_markup"})
+        return status == 200
 
     def _acknowledge(self, callback_id: str) -> None:
         try:
