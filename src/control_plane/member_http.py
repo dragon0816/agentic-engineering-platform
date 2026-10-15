@@ -22,6 +22,7 @@ from common.member import (
     AdminInvitationListReply,
     AdminInvitationMetadata,
     AdminInvitationRevokeRequest,
+    AdminMemberUpdateRequest,
     AssetAccessListRequest,
     AssetAccessUpdateRequest,
     AssetApproveRequest,
@@ -98,6 +99,8 @@ STATUS_FOR = {
     "device_disabled": 409,
     "device_in_use": 409,
     "device_missing": 404,
+    # Platform overview (owner 2026-10-15).
+    "last_administrator": 409,
 }
 # The label of a login a member issues for their Personal Agent, so the
 # portal and an audit can tell it from the browser's own.
@@ -225,6 +228,8 @@ class _Handler(BaseHTTPRequestHandler):
             "bridges/enroll",
             "admin/bridges/list",
             "admin/bridges/disable",
+            "admin/overview",
+            "admin/members/update",
         ):
             self._json(404, {"code": "invalid_request"})
             return
@@ -381,6 +386,22 @@ class _Handler(BaseHTTPRequestHandler):
             elif operation == "admin/bridges/disable":
                 reply = self.server.service.disable_bridge(
                     *credential, AdminBridgeRequest.model_validate(raw)
+                )
+            elif operation == "admin/overview":
+                # Everything on the platform for an administrator, read-only
+                # and without any secret (owner 2026-10-15).
+                if raw != {}:
+                    raise ValueError("the overview takes no request fields")
+                sign_in = self.server.sign_in
+                expiry = (
+                    {grant.invitation_id: grant.expires_at for grant in sign_in.grants()}
+                    if sign_in is not None
+                    else {}
+                )
+                reply = self.server.service.overview(*credential, invitation_expiry=expiry)
+            elif operation == "admin/members/update":
+                reply = self.server.service.update_member(
+                    *credential, AdminMemberUpdateRequest.model_validate(raw)
                 )
             elif operation == "admin/invitations":
                 create = AdminInvitationCreateRequest.model_validate(raw)

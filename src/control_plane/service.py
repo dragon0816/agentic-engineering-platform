@@ -40,6 +40,7 @@ from common.sync import (
     SyncRequest,
     WireErrorCode,
 )
+from control_plane.activity import BridgeActivity
 from control_plane.authorization import InMemoryAuthorizationRegistry
 from control_plane.distribution import (
     ControlError,
@@ -113,7 +114,10 @@ class ControlPlaneService:
         artifacts: Mapping[str, bytes],
         clock: Callable[[], datetime] | None = None,
         feedback: FeedbackStore | None = None,
+        activity: BridgeActivity | None = None,
     ) -> None:
+        # When each Bridge last called, for the administrator's overview.
+        self.activity = activity if activity is not None else BridgeActivity()
         self.feedback_store = feedback if feedback is not None else FeedbackStore()
         self.enrollment = enrollment
         self.tokens = tokens
@@ -124,7 +128,9 @@ class ControlPlaneService:
         self._clock = clock if clock is not None else lambda: datetime.now(UTC)
         self._lock = threading.Lock()
 
-    def _who(self, token_id: str, secret: str, now: datetime) -> tuple[AuthenticatedActor, str]:
+    def _who(
+        self, token_id: str, secret: str, now: datetime, operation: str
+    ) -> tuple[AuthenticatedActor, str]:
         try:
             who = self.tokens.authenticate(token_id, secret, now=now)
         except AccessError as error:
@@ -134,6 +140,7 @@ class ControlPlaneService:
             raise ServiceError(_ACCESS_CODES.get(error.code, "authentication_failed")) from None
         if who.bridge_id is None:  # a token is always issued for a device
             raise ServiceError("authentication_failed")
+        self.activity.seen(who.bridge_id, operation, now)
         return who, who.bridge_id
 
     def probe(self, token_id: str, secret: str) -> ProbeReply:
@@ -141,7 +148,7 @@ class ControlPlaneService:
         clock. Changes nothing on either side."""
         now = self._clock()
         with self._lock:
-            who, _ = self._who(token_id, secret, now)
+            who, _ = self._who(token_id, secret, now, "probe")
         return ProbeReply(identity=who, platform_time=now)
 
     def catalog(self, token_id: str, secret: str, request: CatalogRequest) -> CatalogReply:
@@ -154,7 +161,7 @@ class ControlPlaneService:
         item = CatalogRequest.model_validate(request)
         now = self._clock()
         with self._lock:
-            who, _ = self._who(token_id, secret, now)
+            who, _ = self._who(token_id, secret, now, "catalog")
             member = self.enrollment.user(who.actor)
             packages = tuple(
                 package
@@ -167,7 +174,7 @@ class ControlPlaneService:
     def advertise(self, token_id: str, secret: str, request: AdvertiseRequest) -> AdvertiseReply:
         item = AdvertiseRequest.model_validate(request)
         with self._lock:
-            _, device = self._who(token_id, secret, self._clock())
+            _, device = self._who(token_id, secret, self._clock(), "advertise")
             if item.registration.bridge_id != device:
                 raise ServiceError("device_mismatch")
             try:
@@ -184,7 +191,7 @@ class ControlPlaneService:
         item = SyncRequest.model_validate(request)
         now = self._clock()
         with self._lock:
-            who, device = self._who(token_id, secret, now)
+            who, device = self._who(token_id, secret, now, "sync")
             bundle = self.authorization.authorization(device, issued_at=now)
             present = {asset.key for asset in item.installed}
             # One asset once, however many selections name it: a decision
@@ -215,7 +222,7 @@ class ControlPlaneService:
         item = ReportRequest.model_validate(request)
         now = self._clock()
         with self._lock:
-            _, device = self._who(token_id, secret, now)
+            _, device = self._who(token_id, secret, now, "report")
             if item.snapshot.device.bridge_id != device:
                 raise ServiceError("device_mismatch")
             observed = item.snapshot.observed_at
@@ -232,14 +239,14 @@ class ControlPlaneService:
     def poll(self, token_id: str, secret: str, request: PollRequest) -> PollReply:
         item = PollRequest.model_validate(request)
         with self._lock:
-            _, device = self._who(token_id, secret, self._clock())
+            _, device = self._who(token_id, secret, self._clock(), "poll")
             jobs = self.control.poll(device, limit=item.limit)
         return PollReply(jobs=jobs)
 
     def settle(self, token_id: str, secret: str, request: SettleRequest) -> SettleReply:
         item = SettleRequest.model_validate(request)
         with self._lock:
-            _, device = self._who(token_id, secret, self._clock())
+            _, device = self._who(token_id, secret, self._clock(), "settle")
             try:
                 record = self.control.settle(
                     device, item.job_id, disposition=item.disposition, run=item.run
@@ -254,7 +261,7 @@ class ControlPlaneService:
         item = FeedbackRequest.model_validate(request)
         now = self._clock()
         with self._lock:
-            _, device = self._who(token_id, secret, now)
+            _, device = self._who(token_id, secret, now, "feedback")
             if any(record.bridge_id != device for record in item.records):
                 raise ServiceError("device_mismatch")
         return FeedbackReply(accepted=self.feedback_store.record(item.records, now))

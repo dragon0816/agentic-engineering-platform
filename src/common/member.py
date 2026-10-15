@@ -319,6 +319,9 @@ class AssetAccessEntry(Contract):
     # What applies now: the access record's visibility, or the declared one.
     visibility: Visibility
     access: NameAccess | None = None
+    # Who else may publish new versions directly (owner decision 2026-10-07);
+    # shown so a refused publish can be explained (owner 2026-10-15).
+    co_editors: tuple[Symbol, ...] = ()
 
 
 class AssetAccessListReply(Contract):
@@ -376,7 +379,25 @@ class AdminBridgeEntry(Contract):
     # the token that still works is valid.
     enrolled_at: AwareDatetime | None = None
     token_expires_at: AwareDatetime | None = None
+    # The Bridge's last authenticated call on the Bridge API, and which one
+    # (Platform overview, owner 2026-10-15); none before its first call.
+    last_seen_at: AwareDatetime | None = None
+    last_seen_operation: Symbol | None = None
+    # How many add-on selections are in force on this computer.
+    selections: int = Field(default=0, ge=0)
 
 
 class AdminBridgeListReply(Contract):
     bridges: tuple[AdminBridgeEntry, ...] = ()
+
+
+# -- Platform overview (owner 2026-10-15, docs/phases/PLATFORM_OVERVIEW.md) --
+
+
+class AdminMemberUpdateRequest(Contract):
+    """An administrator sets a member's role and groups. The request replaces
+    both; groups decide team ownership and team visibility."""
+
+    actor: Symbol
+    role: PlatformRole
+    groups: tuple[Symbol, ...] = ()

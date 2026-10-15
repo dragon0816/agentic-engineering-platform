@@ -336,6 +336,15 @@ class InMemoryAuthorizationRegistry:
         self._selections[selected.key] = selected
         return revoked.model_copy(deep=True), selected.model_copy(deep=True)
 
+    def selections(self) -> tuple[DeviceAssetSelection, ...]:
+        """Every decision in force on every device, for the administrator's
+        overview (owner 2026-10-15)."""
+        return tuple(
+            item.model_copy(deep=True)
+            for item in sorted(self._selections.values(), key=lambda entry: entry.key)
+            if item.status == "active"
+        )
+
     def authorization(self, bridge_id: Symbol, *, issued_at: datetime) -> DeviceAuthorization:
         """What this device may run, as of now: the decisions in force."""
         key = TypeAdapter(Symbol).validate_python(bridge_id)

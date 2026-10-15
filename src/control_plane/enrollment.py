@@ -5,6 +5,8 @@ the caller and validate an out-of-band invitation proof before calling ``accept`
 The invitation identifier in these contracts is metadata, not a bearer secret.
 """
 
+import secrets
+from datetime import UTC, datetime
 from typing import Literal, TypeVar
 
 from pydantic import TypeAdapter
@@ -15,7 +17,9 @@ from common.enrollment import (
     BridgeDevice,
     BridgeExecutionSubject,
     Invitation,
+    PlatformRole,
     PlatformUser,
+    PlatformUserChange,
 )
 from control_plane.identity_store import SqliteIdentityStorage
 from workflow.host_bridge import BridgeRegistration
@@ -37,6 +41,9 @@ EnrollmentErrorCode = Literal[
     "binding_missing",
     "duplicate_binding",
     "device_single_user",
+    # Platform overview (owner 2026-10-15): the last platform administrator
+    # keeps that role.
+    "last_administrator",
 ]
 
 
@@ -93,6 +100,13 @@ class InMemoryEnrollmentRegistry:
             for item in (
                 BridgeRegistration.model_validate_json(raw)
                 for raw in (() if storage is None else storage.records("identity_advertisements"))
+            )
+        }
+        self._user_changes = {
+            item.change_id: item
+            for item in (
+                PlatformUserChange.model_validate_json(raw)
+                for raw in (() if storage is None else storage.records("identity_user_changes"))
             )
         }
         self._bindings = {
@@ -192,6 +206,68 @@ class InMemoryEnrollmentRegistry:
         if item is None:
             raise EnrollmentError("user_missing")
         return _copy(item)
+
+    def users(self) -> tuple[PlatformUser, ...]:
+        """Every member who accepted an invitation, for an administrator."""
+        return tuple(_copy(item) for item in sorted(
+            self._users.values(), key=lambda entry: entry.actor))
+
+    def user_changes(self, actor: Symbol | None = None) -> tuple[PlatformUserChange, ...]:
+        """The audit of role and group changes, oldest first."""
+        return tuple(
+            _copy(item)
+            for item in sorted(self._user_changes.values(), key=lambda entry: entry.changed_at)
+            if actor is None or item.actor == actor
+        )
+
+    def update_user(
+        self,
+        requested_by: Symbol,
+        actor: Symbol,
+        *,
+        role: PlatformRole,
+        groups: tuple[Symbol, ...],
+        now: datetime | None = None,
+    ) -> PlatformUser:
+        """An administrator changes a member's role and groups. Groups decide
+        which team-owned names a member manages and which team assets they
+        may use, from the next request on. The change is audited, and the
+        last active platform administrator cannot lose that role."""
+        requester = TypeAdapter(Symbol).validate_python(requested_by)
+        self._admin(requester)
+        key = TypeAdapter(Symbol).validate_python(actor)
+        checked_role: PlatformRole = TypeAdapter(PlatformRole).validate_python(role)
+        checked_groups = tuple(
+            dict.fromkeys(TypeAdapter(Symbol).validate_python(item) for item in groups)
+        )
+        user = self._users.get(key)
+        if user is None:
+            raise EnrollmentError("user_missing")
+        if user.role == "platform_admin" and checked_role != "platform_admin":
+            others = [
+                item for item in self._users.values()
+                if item.actor != key and item.role == "platform_admin" and item.status == "active"
+            ]
+            if not others:
+                raise EnrollmentError("last_administrator")
+        updated = PlatformUser.model_validate(
+            {**user.model_dump(), "role": checked_role, "groups": checked_groups}
+        )
+        change = PlatformUserChange(
+            change_id=f"user-change-{secrets.token_hex(8)}",
+            actor=key,
+            changed_by=requester,
+            changed_at=now if now is not None else datetime.now(UTC),
+            role_before=user.role,
+            role_after=updated.role,
+            groups_before=user.groups,
+            groups_after=updated.groups,
+        )
+        self._users = {**self._users, key: updated}
+        self._user_changes = {**self._user_changes, change.change_id: change}
+        self._save("identity_users", key, updated)
+        self._save("identity_user_changes", change.change_id, change)
+        return _copy(updated)
 
     def register_device(
         self, device: BridgeDevice, advertisement: BridgeRegistration

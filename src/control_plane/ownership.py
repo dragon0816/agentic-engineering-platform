@@ -154,7 +154,9 @@ class AssetOwnershipService:
         if record is None:
             raise OwnershipError("name_missing")
         versions = self._versions(ns, nm)
-        if record.may_publish(actor, groups):
+        # A platform administrator sees every name (Platform overview, owner
+        # 2026-10-15).
+        if record.may_publish(actor, groups) or self._administrator(actor):
             return record, versions
         for version in versions:
             package = self.packages.get(AssetIdentity(namespace=ns, name=nm, version=version))
@@ -166,7 +168,11 @@ class AssetOwnershipService:
         self, namespace: str, name: str, actor: str, groups: tuple[str, ...]
     ) -> tuple[AssetNameOwnership, tuple[str, ...]]:
         record, versions = self._visible(namespace, name, actor, groups)
-        if not record.manages(actor, groups):
+        # The owner, a member of an owning team, or a platform administrator
+        # (owner 2026-10-15: administrators adjust the sharing of any
+        # published asset, as they already may decide who can use it).
+        # Publishing itself stays with the owner, team and co-editors.
+        if not (record.manages(actor, groups) or self._administrator(actor)):
             raise OwnershipError("not_name_owner")
         return record, versions
 
@@ -464,6 +470,7 @@ class AssetOwnershipService:
                 else declared
             ),
             access=access,
+            co_editors=record.co_editors,
         )
 
     def access_list(

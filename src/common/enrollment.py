@@ -7,7 +7,7 @@ host; capability authorization remains at the Bridge execution boundary.
 
 from typing import Literal, Self
 
-from pydantic import Field, model_validator
+from pydantic import AwareDatetime, Field, model_validator
 
 from common.base import Contract, Symbol
 
@@ -43,6 +43,20 @@ class PlatformUser(Contract):
     groups: tuple[Symbol, ...] = ()
     role: PlatformRole = "member"
     status: Literal["active", "disabled"] = "active"
+
+
+class PlatformUserChange(Contract):
+    """An administrator's change of one member's role or groups, kept as an
+    audit record beside the member (Platform overview, owner 2026-10-15)."""
+
+    change_id: Symbol
+    actor: Symbol
+    changed_by: Symbol
+    changed_at: AwareDatetime
+    role_before: PlatformRole
+    role_after: PlatformRole
+    groups_before: tuple[Symbol, ...] = ()
+    groups_after: tuple[Symbol, ...] = ()
 
 
 class BridgeDevice(Contract):

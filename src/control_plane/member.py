@@ -33,6 +33,7 @@ from common.member import (
     AdminBridgeRequest,
     AdminExtensionCatalogEntry,
     AdminExtensionCatalogReply,
+    AdminMemberUpdateRequest,
     AssetAccessListReply,
     AssetAccessListRequest,
     AssetAccessReply,
@@ -64,11 +65,19 @@ from common.member import (
     MemberSelectRequest,
 )
 from common.ownership import AssetNameOwnership
+from control_plane.activity import BridgeActivity
 from control_plane.authorization import AuthorizationError, InMemoryAuthorizationRegistry
 from control_plane.distribution import entitled_in
 from control_plane.enrollment import EnrollmentError, InMemoryEnrollmentRegistry
 from control_plane.identity import AccessError, InMemoryAccessTokens, fingerprint
 from control_plane.identity_store import SqliteIdentityStorage
+from control_plane.overview import (
+    AdminMemberReply,
+    AdminOverviewReply,
+    bridge_entries,
+    member_rows,
+    overview,
+)
 from control_plane.ownership import AssetOwnershipService, OwnershipError
 from control_plane.submissions import SubmissionService
 from software.marketplace import (
@@ -118,6 +127,8 @@ MemberErrorCode = Literal[
     "device_disabled",
     "device_in_use",
     "device_missing",
+    # Platform overview (owner 2026-10-15).
+    "last_administrator",
 ]
 
 T = TypeVar("T")
@@ -252,6 +263,7 @@ _ENROLLMENT_CODES: dict[str, MemberErrorCode] = {
     "binding_forbidden": "device_owner_mismatch",
     "device_single_user": "device_in_use",
     "not_administrator": "not_administrator",
+    "last_administrator": "last_administrator",
 }
 
 _OWNERSHIP_CODES: dict[str, MemberErrorCode] = {
@@ -287,8 +299,11 @@ class MemberService:
         submissions: SubmissionService | None = None,
         tokens: InMemoryAccessTokens | None = None,
         clock: Callable[[], datetime] | None = None,
+        activity: BridgeActivity | None = None,
     ) -> None:
         self.enrollment = enrollment
+        # When each Bridge last called the Bridge API (Platform overview).
+        self.activity = activity
         self.authorization = authorization
         self.sessions = sessions
         self.applications = applications if applications is not None else ApplicationCatalog()
@@ -743,25 +758,10 @@ class MemberService:
         self.administrator(session_id, secret)
         now = self._clock()
         with self._lock:
-            entries = []
-            for device in self.enrollment.devices():
-                history = tokens.history_for(device.bridge_id)
-                working = tokens.grants_for(device.bridge_id, now=now)
-                expiries = [item.expires_at for item in working if item.expires_at is not None]
-                entries.append(
-                    AdminBridgeEntry(
-                        bridge_id=device.bridge_id,
-                        registered_by=device.registered_by,
-                        device_kind=device.device_kind,
-                        status=device.status,
-                        members=tuple(
-                            item.actor for item in self.enrollment.members(device.bridge_id)
-                        ),
-                        enrolled_at=history[0].issued_at if history else None,
-                        token_expires_at=max(expiries) if expiries else None,
-                    )
-                )
-        return AdminBridgeListReply(bridges=tuple(entries))
+            entries = bridge_entries(
+                self.enrollment, tokens, self.authorization, self.activity, now
+            )
+        return AdminBridgeListReply(bridges=entries)
 
     def disable_bridge(
         self, session_id: str, secret: str, request: AdminBridgeRequest
@@ -783,3 +783,49 @@ class MemberService:
             if entry.bridge_id == item.bridge_id:
                 return entry
         raise MemberError("device_missing")
+
+    # -- Platform overview (owner 2026-10-15) --------------------------------
+    # `docs/phases/PLATFORM_OVERVIEW.md`: one read-only view of everything on
+    # the platform for an administrator, and the member role and groups an
+    # administrator sets so team ownership works.
+
+    def overview(
+        self,
+        session_id: str,
+        secret: str,
+        *,
+        invitation_expiry: dict[str, datetime] | None = None,
+    ) -> AdminOverviewReply:
+        tokens = self._tokens()
+        self.administrator(session_id, secret)
+        submitted = self.submissions.store.list() if self.submissions is not None else ()
+        now = self._clock()
+        with self._lock:
+            return overview(
+                enrollment=self.enrollment,
+                tokens=tokens,
+                authorization=self.authorization,
+                packages=self.authorization.packages,
+                applications=self.applications,
+                submissions=submitted,
+                activity=self.activity,
+                invitation_expiry=invitation_expiry or {},
+                now=now,
+            )
+
+    def update_member(
+        self, session_id: str, secret: str, request: AdminMemberUpdateRequest
+    ) -> AdminMemberReply:
+        """Set a member's role and groups; audited in the enrollment record."""
+        item = AdminMemberUpdateRequest.model_validate(request)
+        who = self.administrator(session_id, secret)
+        now = self._clock()
+        with self._lock:
+            try:
+                self.enrollment.update_user(
+                    who.actor, item.actor, role=item.role, groups=item.groups, now=now
+                )
+            except EnrollmentError as error:
+                raise MemberError(_ENROLLMENT_CODES.get(error.code, "invalid_request")) from None
+            rows = member_rows(self.enrollment, {}, now)
+        return AdminMemberReply(member=next(row for row in rows if row.actor == item.actor))

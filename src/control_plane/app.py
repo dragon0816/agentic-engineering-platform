@@ -20,6 +20,7 @@ from pydantic import Field, model_validator
 from common.base import Contract, Symbol, Text
 from common.enrollment import Invitation
 from common.identity import IssuedInvitationProof
+from control_plane.activity import BridgeActivity
 from control_plane.authorization import InMemoryAuthorizationRegistry
 from control_plane.distribution import (
     InMemoryPackageRegistry,
@@ -122,6 +123,7 @@ class SharedPlatformState:
     logins: InMemoryMemberLogins = field(default_factory=InMemoryMemberLogins)
     feedback: FeedbackStore = field(default_factory=FeedbackStore)
     submissions: SubmissionStore = field(default_factory=SubmissionStore)
+    activity: BridgeActivity = field(default_factory=BridgeActivity)
 
     @classmethod
     def empty(cls, *, administrators: tuple[Symbol, ...]) -> Self:
@@ -165,6 +167,7 @@ class SharedPlatformState:
             logins=InMemoryMemberLogins(storage=storage),
             feedback=FeedbackStore(path),
             submissions=SubmissionStore(path),
+            activity=BridgeActivity(storage=storage),
         )
 
 
@@ -199,6 +202,7 @@ class SharedPlatformApplication:
             artifacts=state.artifacts,
             clock=moment,
             feedback=state.feedback,
+            activity=state.activity,
         )
         ownership = AssetOwnershipService(
             state.enrollment,
@@ -220,6 +224,7 @@ class SharedPlatformApplication:
             ),
             tokens=state.tokens,
             clock=moment,
+            activity=state.activity,
         )
         self.control_server = ControlPlaneServer(
             self.control_service,
