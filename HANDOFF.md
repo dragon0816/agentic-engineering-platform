@@ -1,8 +1,48 @@
 # Handoff
 
-Updated: 2026-10-15 (Asia/Taipei), by Claude Code (AEP skills and MCP for coding agents)
+Updated: 2026-10-15 (Asia/Taipei), by Claude Code (one-click portal sign-in, Library card content)
 
-## AEP skills and MCP for coding agents by default (2026-10-15, Claude Code) — latest
+## One-click Member Portal sign-in and Library card content (2026-10-15, Claude Code) — latest
+
+Goal: owner requests — Agent Web's "Open Marketplace" opens the Member Portal already
+signed in as this PC's member; a Library card shows the asset's real content. Design
+`docs/phases/PLATFORM_OVERVIEW.md` "One-click sign-in from Agent Web" and "Library card
+content in Agent Web"; decision `docs/DECISIONS.md` 2026-10-15 "Agent Web opens the
+Member Portal signed in with a single-use browser ticket"; contract `docs/CONTRACTS.md`
+"Browser sign-in ticket"; row in `docs/TASKS.md`. Committed on main, not pushed
+(e44f2652, 927de9e9, ff2a46c4 + this HANDOFF commit).
+- Platform: `control_plane/member_ticket.py`; `member_http.py` routes `browser-ticket`
+  (member session -> `ticket` id:secret, 60 s, single use, fingerprint in memory,
+  refused for disabled members) and `sign-in/ticket` (`Authorization: Ticket ...` ->
+  `session`, `login`, `expires_at`; earlier `Agent Web sign-in` login revoked). Portal
+  page (`member_page.py`) redeems `#ticket=`, drops the fragment, opens `#tab=` and
+  `#asset=` (Marketplace detail).
+- Agent Web: `platform_publish.py` `browser_ticket`, `asset_content`; `web.py`
+  `portal_link`, `asset_content`, routes `/api/platform/portal-link` and
+  `/api/platform/asset-content`; `web_page.py` `openPortal` on every portal link
+  (fallback: sign-in page + note to Settings > Shared platform), Library card content
+  (Skill/Workflow sections, metadata facts, actions in an aside; stacked under 640 px),
+  `contentMarkdown` keeps http(s) links only, per-version page cache.
+- Verified: ruff src tests clean; mypy src clean; new tests
+  `tests/test_browser_ticket.py` (7) and `tests/test_library_content_web.py` (6), both
+  with real-browser checks, pass; related suites (capability shelf, shared platform
+  settings, agent web, member password, portal tabs, platform overview, member publish)
+  pass. Full suite: 2807 passed, 6 skipped, 0 failed
+  (14 min 43 s, after the last code change).
+- NOT done: live check (owner). Steps: (1) deploy this code to the Shared Platform
+  (the portal page and the two routes are new; no schema change); (2) restart Agent Web
+  on this PC; (3) Capabilities > Share Platform Library > "Open Marketplace": a new tab
+  opens the portal already signed in, on Marketplace, the address bar without `#ticket`;
+  (4) open a Library card: content (instructions or steps/parameters) beside the facts,
+  "+ Add to this Agent" still there; (5) with the Personal Agent code removed from
+  Settings the button opens the sign-in page and Agent Web says to save the code.
+- Risks: a member who opens the portal from Agent Web in two browsers keeps only the
+  newest one signed in through it (by design, bounded logins); tickets live in the
+  portal process's memory, so a platform restart in the minute between click and
+  redemption shows "not valid" (click again); the shared `renderMarkdown` used for chat
+  answers still allows `mailto:` links (card content unwraps them).
+
+## AEP skills and MCP for coding agents by default (2026-10-15, Claude Code)
 
 Goal: owner requirements — Skills/Workflows made with Claude Code, Codex or Copilot must
 work on AEP without a per-folder connect, and AEP's MCP and Knowledge must be usable from
