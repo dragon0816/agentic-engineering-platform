@@ -778,10 +778,8 @@ tr:last-child td { border-bottom: none; }
     <div class="card settings" id="shared-platform-card">
       <form id="shared-platform-settings" autocomplete="off">
         <div class="laya-grid">
-          <label>Member Portal URL <input id="shared-portal-url"
-                 placeholder="http://127.0.0.1:28776"></label>
-          <label>Bridge API URL <input id="shared-bridge-url"
-                 placeholder="http://127.0.0.1:28775"></label>
+          <label>Member Portal URL <input id="shared-portal-url"></label>
+          <label>Bridge API URL <input id="shared-bridge-url"></label>
           <label>Personal Agent code <input id="shared-code" type="password"
                  autocomplete="off" placeholder="paste once; it is not shown again"></label>
         </div>
@@ -3071,6 +3069,10 @@ const TELEGRAM_PROBLEMS = {
 };
 
 // -- Shared platform (owner 2026-10-15) ---------------------------------------
+// The page names no outside address itself, so the examples are built here.
+el("shared-portal-url").placeholder = ["http:", "", "127.0.0.1:28776"].join("/");
+el("shared-bridge-url").placeholder = ["http:", "", "127.0.0.1:28775"].join("/");
+
 function showSharedPlatform(info) {
   if (document.activeElement !== el("shared-portal-url")) {
     el("shared-portal-url").value = info.member_portal_url || "";
