@@ -8,16 +8,18 @@ member session used here after it has produced an ``AuthenticatedActor``.
 
 from __future__ import annotations
 
+import hashlib
 import hmac
+import json
 import secrets
 import threading
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from datetime import UTC, datetime, timedelta
 from typing import Literal, Self, TypeVar
 
 from pydantic import AwareDatetime, model_validator
 
-from common.assets import RegistryContract
+from common.assets import AssetMetadata, RegistryContract
 from common.authorization import DeviceAssetSelection
 from common.base import Sha256, Symbol
 from common.enrollment import BridgeBinding, BridgeExecutionSubject
@@ -28,6 +30,7 @@ from common.identity import (
     entitled,
 )
 from common.member import (
+    MAX_MANIFEST_BYTES,
     AdminBridgeEntry,
     AdminBridgeListReply,
     AdminBridgeRequest,
@@ -41,6 +44,8 @@ from common.member import (
     AssetApproveRequest,
     AssetCoEditorRequest,
     AssetDeprecateRequest,
+    AssetManifestReply,
+    AssetManifestRequest,
     AssetNameRequest,
     AssetNextVersionReply,
     AssetNextVersionRequest,
@@ -64,7 +69,7 @@ from common.member import (
     MemberSelectionReply,
     MemberSelectRequest,
 )
-from common.ownership import AssetNameOwnership
+from common.ownership import AssetNameOwnership, version_key
 from control_plane.activity import BridgeActivity
 from control_plane.authorization import AuthorizationError, InMemoryAuthorizationRegistry
 from control_plane.distribution import entitled_in
@@ -129,6 +134,7 @@ MemberErrorCode = Literal[
     "device_missing",
     # Platform overview (owner 2026-10-15).
     "last_administrator",
+    "artifact_too_large",
 ]
 
 T = TypeVar("T")
@@ -300,7 +306,10 @@ class MemberService:
         tokens: InMemoryAccessTokens | None = None,
         clock: Callable[[], datetime] | None = None,
         activity: BridgeActivity | None = None,
+        artifacts: Mapping[str, bytes] | None = None,
     ) -> None:
+        # Published artifact bytes, for `assets/manifest`.
+        self.artifacts = artifacts
         self.enrollment = enrollment
         # When each Bridge last called the Bridge API (Platform overview).
         self.activity = activity
@@ -829,3 +838,83 @@ class MemberService:
                 raise MemberError(_ENROLLMENT_CODES.get(error.code, "invalid_request")) from None
             rows = member_rows(self.enrollment, {}, now)
         return AdminMemberReply(member=next(row for row in rows if row.actor == item.actor))
+
+    def asset_manifest(
+        self, session_id: str, secret: str, request: AssetManifestRequest
+    ) -> AssetManifestReply:
+        """One published version and its content, for a member it is shared
+        with; an administrator always. Anything else is `asset_not_published`,
+        so a name is not disclosed to somebody it is not shared with."""
+        item = AssetManifestRequest.model_validate(request)
+        now = self._clock()
+        with self._lock:
+            who = self._who(session_id, secret, now)
+            member = self.enrollment.user(who.actor)
+            if member.status != "active":
+                raise MemberError("actor_disabled")
+            admin = member.role == "platform_admin"
+            packages = self.authorization.packages
+
+            def shared(metadata: AssetMetadata) -> bool:
+                return admin or entitled_in(packages, metadata, member.actor, member.groups)
+
+            package = packages.get(item.asset)
+            if package is None or not shared(package.metadata):
+                raise MemberError("asset_not_published")
+            identity = package.metadata.identity
+            versions = tuple(
+                sorted(
+                    (
+                        other.metadata.identity.version
+                        for other in packages.discover(namespace=identity.namespace)
+                        if other.metadata.identity.name == identity.name
+                        and shared(other.metadata)
+                    ),
+                    key=version_key,
+                )
+            )
+            record = packages.ownership(identity.namespace, identity.name)
+            access = packages.access(identity.namespace, identity.name)
+        artifact = package.metadata.package
+        content = (
+            self.artifacts.get(artifact.artifact_ref)
+            if artifact is not None and self.artifacts is not None
+            else None
+        )
+        if content is not None and len(content) > MAX_MANIFEST_BYTES:
+            raise MemberError("artifact_too_large")
+        manifest: object = None
+        if content is not None:
+            try:
+                manifest = json.loads(content.decode("utf-8"))
+            except (UnicodeDecodeError, ValueError):
+                manifest = None
+        published_at = None
+        if self.submissions is not None:
+            for submitted in self.submissions.store.list(status="approved"):
+                if submitted.identity.key == identity.key:
+                    published_at = submitted.decided_at
+                    break
+        declared = package.metadata.visibility
+        return AssetManifestReply.model_validate(
+            {
+                "package": package,
+                "manifest": manifest if isinstance(manifest, dict) else None,
+                "artifact_sha256": (
+                    hashlib.sha256(content).hexdigest() if content is not None else None
+                ),
+                "artifact_size": len(content) if content is not None else 0,
+                "owner": record.owner if record is not None else package.metadata.owner,
+                "co_editors": record.co_editors if record is not None else (),
+                "versions": versions,
+                "visibility": (
+                    access.visibility
+                    if access is not None and access.visibility is not None
+                    else declared
+                ),
+                "deprecation": (
+                    record.deprecation(identity.version) if record is not None else None
+                ),
+                "published_at": published_at,
+            }
+        )

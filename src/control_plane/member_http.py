@@ -28,6 +28,7 @@ from common.member import (
     AssetApproveRequest,
     AssetCoEditorRequest,
     AssetDeprecateRequest,
+    AssetManifestRequest,
     AssetNameRequest,
     AssetNextVersionRequest,
     AssetRejectRequest,
@@ -230,6 +231,7 @@ class _Handler(BaseHTTPRequestHandler):
             "admin/bridges/disable",
             "admin/overview",
             "admin/members/update",
+            "assets/manifest",
         ):
             self._json(404, {"code": "invalid_request"})
             return
@@ -399,6 +401,10 @@ class _Handler(BaseHTTPRequestHandler):
                     else {}
                 )
                 reply = self.server.service.overview(*credential, invitation_expiry=expiry)
+            elif operation == "assets/manifest":
+                reply = self.server.service.asset_manifest(
+                    *credential, AssetManifestRequest.model_validate(raw)
+                )
             elif operation == "admin/members/update":
                 reply = self.server.service.update_member(
                     *credential, AdminMemberUpdateRequest.model_validate(raw)

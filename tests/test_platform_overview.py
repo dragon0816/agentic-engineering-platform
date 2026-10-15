@@ -23,6 +23,7 @@ from test_bridge_enrollment import bridge, enroll, enrollment
 from test_member_publish import workflow_manifest
 from test_shared_platform_app import request
 
+from common.assets import AssetIdentity
 from common.enrollment import Invitation
 from control_plane.activity import PERSIST_EVERY, BridgeActivity
 from control_plane.app import SharedPlatformApplication
@@ -308,3 +309,47 @@ def test_the_last_call_of_a_bridge_is_kept_and_written_at_most_once_a_minute(
     activity.seen("bridge-a", "sync", NOW + PERSIST_EVERY)
     restored = BridgeActivity(storage=storage).last("bridge-a")
     assert restored is not None and restored.operation == "sync"
+
+
+def test_a_member_reads_the_content_of_an_asset_shared_with_them(tmp_path: Path) -> None:
+    import hashlib
+
+    from common.distribution import PublishedAssetPackage
+
+    with _app(tmp_path, [NOW]) as app:
+        seeded = _seed(app)
+        url = seeded["url"] + "assets/manifest"
+        weekly = {**WEEKLY, "version": seeded["version"]}
+        status, reply = request(url, authorization=seeded["visitor"], body={"asset": weekly})
+        assert status == 200, reply
+        assert reply["schema_version"] == "1"
+        assert reply["manifest"]["kind"] == "workflow" and reply["manifest"]["steps"]
+        assert reply["manifest"]["metadata"]["identity"] == weekly
+        assert reply["package"]["metadata"]["identity"] == weekly
+        assert reply["artifact_sha256"] == reply["package"]["metadata"]["package"]["sha256"]
+        assert reply["owner"] == {"type": "team", "id": "engineering"}
+        assert reply["visibility"] == "organization" and reply["versions"] == [weekly["version"]]
+        assert reply["published_at"] is not None and reply["deprecation"] is None
+
+        # Private to a person who is not a member: refused as if it did not
+        # exist, except for an administrator.
+        handbook = {"namespace": "lab", "name": "handbook", "version": "1.1.0"}
+        assert request(url, authorization=seeded["visitor"], body={"asset": handbook}) == (
+            404, {"code": "asset_not_published"})
+        status, admin = request(url, authorization=seeded["root"], body={"asset": handbook})
+        assert status == 200 and admin["versions"] == ["1.0.0", "1.1.0"]
+        assert admin["manifest"] == {"identity": handbook}
+        assert request(url, authorization=seeded["root"], body={
+            "asset": {**handbook, "version": "9.9.9"}}) == (404, {"code": "asset_not_published"})
+        assert request(url, body={"asset": handbook})[0] == 401
+        assert request(url, authorization=seeded["root"], body={})[0] == 400
+
+        # Larger than the portal returns.
+        big = AssetIdentity(namespace="lab", name="huge", version="1.0.0")
+        content = json.dumps({"text": "a" * (600 * 1024)}).encode("utf-8")
+        data = package(big, kind="knowledge").model_dump(mode="json")
+        data["metadata"]["package"]["sha256"] = hashlib.sha256(content).hexdigest()
+        app.state.packages.publish(  # type: ignore[call-arg]
+            PublishedAssetPackage.model_validate(data), artifact=content)
+        assert request(url, authorization=seeded["root"], body={
+            "asset": big.model_dump()}) == (413, {"code": "artifact_too_large"})

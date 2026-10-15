@@ -16,7 +16,7 @@ from common.base import Contract, Sha256, Slug, Symbol, Text
 from common.distribution import PublishedAssetPackage
 from common.enrollment import BridgeDevice, Invitation, PlatformRole
 from common.identity import NameAccess, Visibility
-from common.ownership import AssetNameOwnership, VersionChange
+from common.ownership import AssetNameOwnership, VersionChange, VersionDeprecation
 from workflow.host_bridge import BridgeRegistration
 
 
@@ -401,3 +401,38 @@ class AdminMemberUpdateRequest(Contract):
     actor: Symbol
     role: PlatformRole
     groups: tuple[Symbol, ...] = ()
+
+
+# -- An asset's content (owner 2026-10-15, docs/CONTRACTS.md "Asset content") --
+
+# The largest published artifact the portal returns as a manifest.
+MAX_MANIFEST_BYTES = 512 * 1024
+
+
+class AssetManifestRequest(Contract):
+    asset: AssetIdentity
+
+
+class AssetManifestReply(Contract):
+    """One exact published version and what it contains, for a member it is
+    shared with (an administrator always). `manifest` is the published
+    artifact parsed as a JSON object (a Skill, Workflow, Knowledge or Agent
+    manifest), or None when the artifact is not one. Stable: Agent Web reads
+    it too."""
+
+    schema_version: Literal["1"] = "1"
+    package: PublishedAssetPackage
+    manifest: dict[str, JsonValue] | None = None
+    artifact_sha256: Sha256 | None = None
+    artifact_size: int = Field(default=0, ge=0)
+    # The name's current owner and co-editors (the package keeps the owner it
+    # declared when it was published).
+    owner: Owner
+    co_editors: tuple[Symbol, ...] = ()
+    # The versions of this name the caller may use, lowest first.
+    versions: tuple[Text, ...] = ()
+    # Who can use it now: the access record's visibility, or the declared one.
+    visibility: Visibility
+    deprecation: VersionDeprecation | None = None
+    # When an administrator approved this version, if it came through review.
+    published_at: AwareDatetime | None = None

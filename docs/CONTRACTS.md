@@ -2093,6 +2093,60 @@ backup, `AEP_SHARED_PLATFORM_TOKEN` for the `shared_platform_token` secret,
 `/api/settings/shared-platform`. `MemberPortalPublisher.me()` and `.enroll()`
 call the portal. `PlatformProjection` carries `bridge_id` and `assets_only`.
 
+### Platform overview and member administration (2026-10-15)
+
+`docs/phases/PLATFORM_OVERVIEW.md`. Administrator-only member portal operations
+(`not_administrator` 403 for anyone else, `authentication_failed` 401 without a
+session); no reply carries a token value or fingerprint, an invitation proof, a
+session or a login:
+- `admin/overview` (body `{}`; `control_plane.overview.AdminOverviewReply`):
+  `generated_at`; `counts` (`OverviewCounts`: Bridges active/disabled, members
+  active/disabled, pending invitations, per kind `names` and `versions` for
+  `skill`, `workflow`, `knowledge`, `agent`, `bridge_extension`, Application
+  names and versions, submissions per status); `bridges` (`AdminBridgeEntry`);
+  `assets` (`OverviewAsset`: every published name of those kinds, regardless of
+  entitlement, with owner, co-editors, latest version, all versions,
+  deprecations, declared and effective visibility, the `NameAccess` record,
+  distinct Bridges that selected any version, `published_at` of the latest
+  version when it was approved through review, pending submissions);
+  `submissions` (every `AssetSubmission`, newest first); `applications`
+  (`ApplicationProjection`); `members` (`OverviewMember`: role, groups, status,
+  invitation state `accepted`/`pending`/`expired`/`revoked`, invited by,
+  invitation expiry, bound Bridges, last role/group change).
+- `admin/members/update` (`AdminMemberUpdateRequest`: `actor`, `role`,
+  `groups`, replacing both) -> `AdminMemberReply`. Audited as a
+  `common.enrollment.PlatformUserChange` in the additive `identity_user_changes`
+  table. Demoting the last active `platform_admin` is `last_administrator` 409;
+  an unknown member is `actor_unknown`.
+
+`AdminBridgeEntry` gained `last_seen_at`, `last_seen_operation` (the last Bridge
+API call a token proved, recorded by `control_plane.activity.BridgeActivity` in
+`ControlPlaneService`, kept durable in the additive `bridge_activity` table at
+most once a minute per Bridge) and `selections` (add-on selections in force).
+`AssetAccessEntry` gained `co_editors`. A platform administrator may now also
+manage co-editors, transfer and deprecation of any name (`AssetOwnershipService.
+_managed`); publishing stays with the owner, owning team and co-editors.
+
+### Asset content (2026-10-15)
+
+Member portal operation `assets/manifest` (member session), stable for the
+portal and Agent Web:
+- request `common.member.AssetManifestRequest`: `asset` (exact
+  `namespace/name@version`);
+- reply `common.member.AssetManifestReply` (`schema_version` `"1"`): `package`
+  (the `PublishedAssetPackage`), `manifest` (the published artifact parsed as a
+  JSON object, or null when it is not one), `artifact_sha256`, `artifact_size`,
+  `owner` and `co_editors` (the name's current record), `versions` (the
+  versions of the name the caller may use, lowest first), `visibility`
+  (effective), `deprecation` (`VersionDeprecation` or null), `published_at`
+  (approval time when it came through review, else null).
+- A version that is not published, or is not shared with the caller
+  (`entitled_in`, which applies the name's access record), is
+  `asset_not_published` 404; a platform administrator reads every version. An
+  artifact above `MAX_MANIFEST_BYTES` (512 KiB) is `artifact_too_large` 413.
+  Manifests carry secret references by name only; submission already refuses
+  embedded secrets.
+
 ## Shared-platform transport (Phase 7, slice 2i)
 
 `common.sync` is the wire between a Bridge and the shared platform: seven
