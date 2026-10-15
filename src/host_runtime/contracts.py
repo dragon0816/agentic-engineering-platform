@@ -322,6 +322,9 @@ class WorkflowLaunchRequest(Contract):
     workflow: AssetIdentity
     arguments: dict[Symbol, JsonValue] = Field(default_factory=dict)
     idempotency_key: IdempotencyKey
+    # A run started from a conversation's inline form: the run and its
+    # result are added to that conversation (owner 2026-10-15).
+    session_id: Symbol | None = None
 
     @model_validator(mode="after")
     def no_credential_material(self) -> Self:

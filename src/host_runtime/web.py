@@ -95,6 +95,7 @@ from common.workflow_parameters import (
     validate_run_parameters,
     validate_static_settings,
 )
+from common.workflow_run_form import form_offer, offer_in, run_intent
 from extensions.package import PortableExtensionPackage
 from extensions.runtime import ExtensionLifecycleStore
 from host_runtime import asset_shelf, telemetry_api
@@ -246,6 +247,7 @@ from host_runtime.telegram_settings import (
     windows_user_environment,
 )
 from host_runtime.turn_summary import tool_summary
+from host_runtime.workflow_form_tool import resolve as resolve_workflow
 from host_runtime.workflow_settings import (
     SETTINGS_FILE,
     WorkflowSettingsError,
@@ -1986,15 +1988,23 @@ class AgentWeb:
                 if attached:
                     # Files are for the conversation and its tools to work on.
                     named_knowledge, command_match, explicit_command = None, None, False
+                # "Run X" for an installed Workflow is its form, not the
+                # model's prose (owner 2026-10-15).
+                form_offer_now = (
+                    None if attached or explicit_command else self._run_form_offer(item.message))
                 route = (
                     "command" if command_match is not None and explicit_command
                     else ("market_matrix" if matrix_intent else "knowledge_direct")
                     if named_knowledge is not None
                     else "command_rule" if command_match is not None
                     else "converse")
+                if form_offer_now is not None:
+                    route = "workflow_form"
                 telemetry.emit("routing.completed", state="routing", attributes={
                     "router": "agent_web", "route": route})
-                if command_match is not None and explicit_command:
+                if form_offer_now is not None:
+                    answer = self._form_answer(form_offer_now)
+                elif command_match is not None and explicit_command:
                     with self._one_at_a_time:
                         direct = asyncio.run(self.runtime.agent.handle(local))
                     answer = {
@@ -2042,7 +2052,9 @@ class AgentWeb:
                         )
                     )
                     result = conversational.conversation
+                    offered = offer_in(result.tools) if result is not None else None
                     answer = {
+                        **({"workflow_form": offered} if offered is not None else {}),
                         "tool_summary": tool_summary(result),
                         "ok": result is not None and result.status == "answered",
                         "answer": (
@@ -2110,6 +2122,7 @@ class AgentWeb:
                                 created_at=finished,
                                 status=status,
                                 tool_summary=answer.get("tool_summary"),
+                                workflow_form=answer.get("workflow_form"),
                                 trace=(
                                     None
                                     if trace_data is None
@@ -2410,6 +2423,15 @@ class AgentWeb:
                             "<namespace>/<name>@<version> identity."
                         )
                     target = matches[0]
+                elif "@" not in target_text and not raw_arguments.strip():
+                    # `/run <name>`: the Workflow's form (owner 2026-10-15).
+                    found = resolve_workflow(
+                        self.runtime.agent.gateway.engine.workflows.manifests(), target_text)
+                    if isinstance(found, str):
+                        return self._command_needs_input(
+                            f"No single installed Workflow is called {target_text}.")
+                    return self._form_answer(form_offer(
+                        found, {}, self.runtime.agent.gateway.engine.settings_provider))
                 else:
                     path, separator, version = target_text.rpartition("@")
                     namespace, slash, name = path.partition("/")
@@ -3302,6 +3324,52 @@ class AgentWeb:
             "outcome": json.loads(outcome.model_dump_json()),
         }
 
+    def _run_form_offer(self, message: str) -> dict[str, Any] | None:
+        """The form offer for an explicit "run X" of one installed Workflow."""
+        engine = self.runtime.agent.gateway.engine
+        intent = run_intent(message, engine.workflows.manifests())
+        if intent is None:
+            return None
+        return form_offer(intent.manifest, intent.prefill, engine.settings_provider)
+
+    @staticmethod
+    def _form_answer(offer: dict[str, Any]) -> dict[str, Any]:
+        return {"ok": True, "answer": str(offer.get("message") or "Fill in the run form."),
+                "status": "answered", "workflow_form": offer}
+
+    def _record_form_run(
+        self, session_id: str, manifest: WorkflowManifest | None, identity: AssetIdentity,
+        arguments: dict[str, Any], answer: str, succeeded: bool,
+    ) -> dict[str, Any] | None:
+        """A run from a conversation's inline form, kept in that conversation
+        as a pair (what was run, then its result) so the Agent sees it later."""
+        hidden = (
+            {item.name for item in manifest.parameters if item.kind == "upload"}
+            if manifest is not None else set()
+        )
+        shown = ", ".join(
+            f"{name}={'(file)' if name in hidden else json.dumps(value, ensure_ascii=False)}"
+            for name, value in arguments.items())
+        asked = f"▶ Run {identity.name} from the form" + (f": {shown}" if shown else "")
+        with self._record_lock(session_id):
+            record = self.runtime.state.conversation(session_id, self.runtime.actor)
+            if record is None:
+                return None
+            now = max(datetime.now(UTC), record.updated_at)
+            said = ConversationMessage(
+                message_id=f"message-{uuid.uuid4().hex}", role="user", text=asked[:1500],
+                created_at=now, status="submitted")
+            added = ConversationMessage(
+                message_id=f"message-{uuid.uuid4().hex}", role="assistant",
+                text=answer.strip() or "The run finished without a summary.", created_at=now,
+                status="answered" if succeeded else "failed")
+            self.runtime.state.save_conversation(record.model_copy(update={
+                "updated_at": now,
+                "messages": (record.messages + (said, added))[-MAX_STORED_MESSAGES:],
+            }))
+            recorded: dict[str, Any] = json.loads(added.model_dump_json())
+            return recorded
+
     def launch_workflow(self, request: WorkflowLaunchRequest) -> dict[str, Any]:
         """Run one exact installed Workflow through the resident Agent."""
         item = WorkflowLaunchRequest.model_validate(request)
@@ -3340,10 +3408,17 @@ class AgentWeb:
             and outcome.workflow is not None
             and outcome.workflow.run.status == "succeeded"
         )
+        answer = readable(outcome)
+        recorded = (
+            self._record_form_run(item.session_id, manifest, item.workflow, arguments, answer,
+                                  succeeded)
+            if item.session_id is not None else None
+        )
         return {
             "ok": succeeded,
-            "answer": readable(outcome),
+            "answer": answer,
             "outcome": json.loads(outcome.model_dump_json()),
+            **({"message": recorded} if recorded is not None else {}),
         }
 
     def knowledge_pipeline(self) -> dict[str, Any]:

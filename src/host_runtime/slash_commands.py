@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import Literal
 
 from common.assets import RegistryContract
@@ -38,7 +39,8 @@ COMMANDS = (
     SlashCommandSpec(
         name="run_workflow",
         invocation="/run ",
-        description="Run an installed Workflow by its unique number, such as /run 11.",
+        description=("Run an installed Workflow by its unique number, such as /run 11, or open "
+                     "its run form by name, such as /run weekly-report."),
     ),
     SlashCommandSpec(
         name="wiki_convert",
@@ -68,6 +70,9 @@ COMMANDS = (
 )
 
 
+_WORKFLOW_NAME = re.compile(r"[A-Za-z][A-Za-z0-9_.-]*(?:/[A-Za-z0-9][A-Za-z0-9_.-]*)?")
+
+
 class SlashCommandError(ValueError):
     def __init__(self, code: str) -> None:
         self.code = code
@@ -92,6 +97,9 @@ def parse_slash_command(message: str) -> SlashCommandInvocation | None:
         noun, _, remainder = argument.partition(" ")
         if noun == "workflow":
             argument = remainder.strip()
+        elif not remainder.strip() and _WORKFLOW_NAME.fullmatch(noun):
+            # `/run <name>` opens that Workflow's run form (owner 2026-10-15).
+            argument = noun
         elif not noun.isascii() or not noun.isdecimal():
             raise SlashCommandError("run_requires_workflow")
         return SlashCommandInvocation(name="run_workflow", argument=argument)

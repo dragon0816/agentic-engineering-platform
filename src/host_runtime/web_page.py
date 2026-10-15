@@ -509,6 +509,20 @@ tr:last-child td { border-bottom: none; }
 .upload-list { margin: 6px 0; padding-left: 20px; font-size: 13px; }
 .workflow-field .field-error { color: var(--bad); margin: 4px 0; font-size: 12px; }
 .workflow-field [aria-invalid="true"] { border-color: var(--bad); }
+/* A Workflow's run form inside the chat (owner 2026-10-15). */
+.chat-run-form { display: block; margin: 12px 0 0; padding: 12px 14px; max-width: 640px;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+.chat-run-form > summary { min-height: 44px; display: flex; align-items: center;
+  font-weight: 600; cursor: pointer; }
+.chat-run-form .chat-run-note { margin: 6px 0; font-size: 13px; color: var(--dim);
+  white-space: pre-wrap; }
+.chat-run-form .chat-run-missing { margin: 8px 0; padding: 8px 10px; border-radius: 8px;
+  border: 1px solid var(--bad); color: var(--ink); }
+.chat-run-form .chat-run-actions { display: flex; gap: 8px; align-items: center;
+  flex-wrap: wrap; margin-top: 12px; }
+.chat-run-form .chat-run-actions button { min-height: 44px; min-width: 88px; }
+.chat-run-form .chat-run-result { margin: 8px 0 0; white-space: pre-wrap;
+  overflow-wrap: anywhere; font-size: 13px; }
 .markdown-panel { max-height: 330px; margin: 8px 0 16px; padding: 16px;
   overflow: auto; white-space: pre-wrap; word-break: break-word; color: var(--ink);
   border: 1px solid var(--line); border-radius: 8px; background: var(--bg);
@@ -1791,10 +1805,137 @@ function renderConversation(record) {
       said.className = "said" + (replied.status === "failed" ? " bad" : "");
       renderAnswer(said, replied.text);
       attachTurnControls(said.parentNode, asked.text, replied);
+      if (replied.workflow_form) {
+        // Only the newest answer's form starts open; older ones fold away.
+        chatRunForm(said.parentNode, replied, record.session_id,
+          index + 2 >= record.messages.length);
+      }
     }
   }
   renderPendingTurns(record.session_id);
   renderApprovals(record.session_id).catch(() => {});
+}
+
+// -- A Workflow's run form in the chat (owner 2026-10-15) -------------------
+// "Run X" in the chat answers with the Workflow's own generated form: the
+// same renderer as Capabilities > Workflow > Run this Workflow, filled with
+// the values the person already gave. Settings are never asked here.
+
+let assetsReady = null;
+
+function installedWorkflow(identity) {
+  const all = installedAssets.workflows || [];
+  return all.find((item) => item.namespace === identity.namespace
+      && item.name === identity.name && item.version === identity.version)
+    || all.find((item) => item.namespace === identity.namespace
+      && item.name === identity.name);
+}
+
+function openWorkflowSettings(workflow) {
+  activeCapabilityKind = "workflows"; activeCapabilityFilter = "all";
+  activeCapabilityKey = "installed:" + capabilityKey(workflow);
+  selectPrimaryTab("installed");
+}
+
+function chatRunForm(block, message, session, open) {
+  const offer = message.workflow_form;
+  const holder = document.createElement("details");
+  holder.className = "chat-run-form"; holder.open = !!open;
+  holder.dataset.workflow = offer.workflow.namespace + "/" + offer.workflow.name;
+  const summary = document.createElement("summary");
+  summary.append(text("Run " + offer.title));
+  const body = document.createElement("div");
+  holder.append(summary, body);
+  block.append(holder);
+  let drawn = false;
+  const draw = () => {
+    if (drawn || !holder.open) return;
+    drawn = true;
+    drawChatRunForm(body, offer, message, session).catch((failure) => {
+      body.replaceChildren(text("The form could not be drawn: " + failure.message));
+    });
+  };
+  holder.addEventListener("toggle", draw);
+  draw();
+}
+
+async function drawChatRunForm(body, offer, message, session) {
+  let workflow = installedWorkflow(offer.workflow);
+  if (!workflow && assetsReady) {
+    await assetsReady.catch(() => {});
+    workflow = installedWorkflow(offer.workflow);
+  }
+  if (!workflow) {
+    body.replaceChildren(text(offer.title + " is not installed on this Agent any more."));
+    return;
+  }
+  const identity = {namespace: workflow.namespace, name: workflow.name,
+    version: workflow.version};
+  if (workflow.description) {
+    const about = document.createElement("p"); about.className = "chat-run-note";
+    about.append(text(workflow.description)); body.append(about);
+  }
+  const missing = offer.missing_settings || [];
+  const run = document.createElement("button"); run.type = "button";
+  run.className = "go"; run.append(text("Run"));
+  if (missing.length) {
+    const notice = document.createElement("div"); notice.className = "chat-run-missing";
+    notice.setAttribute("role", "status");
+    notice.append(text("Not set yet: " + missing.map((item) => item.label || item.name)
+      .join(", ") + ". These are settings of this Workflow on this computer, set once on "
+      + "its settings page, not run values."));
+    const open = document.createElement("button"); open.type = "button";
+    open.className = "btn small"; open.append(text("Open " + offer.title + " settings"));
+    open.addEventListener("click", () => openWorkflowSettings(workflow));
+    notice.append(document.createElement("br"), open);
+    body.append(notice);
+    run.disabled = true;
+  }
+  const fields = workflow.parameters.editor === "fields" ? workflow.parameters.fields : [];
+  const container = document.createElement("div");
+  const prefix = "chat-" + message.message_id + "-";
+  if (!fields.length) {
+    const none = document.createElement("p"); none.className = "chat-run-note";
+    none.append(text("This Workflow asks for nothing; press Run to start it."));
+    body.append(none);
+  }
+  body.append(container);
+  renderParameterForm(container, fields, prefix, {workflow: identity, uploads: true,
+    presets: true, values: offer.prefill || {}});
+  const actions = document.createElement("div"); actions.className = "chat-run-actions";
+  const result = document.createElement("p"); result.className = "chat-run-result";
+  result.setAttribute("aria-live", "polite");
+  actions.append(run);
+  body.append(actions, result);
+  run.addEventListener("click", async () => {
+    let values;
+    try { values = collectParameterValues(container, fields, prefix); }
+    catch (failure) { result.textContent = "Cannot run: " + failure.message; return; }
+    run.disabled = true; run.setAttribute("aria-busy", "true");
+    const started = Date.now();
+    const tick = () => {
+      result.textContent = "Running " + offer.title + "\u2026 "
+        + Math.round((Date.now() - started) / 1000) + " s";
+    };
+    tick();
+    const timer = setInterval(tick, 1000);
+    try {
+      const launched = await call("/api/workflows/run", {
+        workflow: identity, arguments: values, session_id: session,
+        idempotency_key: "chat-" + Date.now() + "-" + Math.random().toString(16).slice(2),
+      });
+      result.textContent = launched.answer;
+      if (session === activeConversation) {
+        await loadConversations(session);
+        log.scrollTop = log.scrollHeight;
+      }
+    } catch (failure) {
+      result.textContent = "The Workflow did not run: " + failure.message;
+    } finally {
+      clearInterval(timer); run.removeAttribute("aria-busy");
+      run.disabled = missing.length > 0;
+    }
+  });
 }
 
 // -- Approvals (G4): only the owner's button runs or installs ---------------
@@ -3792,6 +3933,11 @@ function renderParameterForm(container, fields, prefix, context) {
       wireUpload(input, field, dynamicContext);
     }
   }
+  // Values already given (a chat's "run X ..."), set before dynamic lists
+  // load so each list keeps them selected.
+  if (dynamicContext && dynamicContext.values) {
+    fillParameterValues(container, fields, prefix, dynamicContext.values, false);
+  }
   if (dynamicContext) wireDynamicChoices(container, fields, prefix, dynamicContext);
   if (dynamicContext && dynamicContext.presets) {
     offerLastValues(container, fields, prefix, dynamicContext);
@@ -3853,27 +3999,36 @@ async function offerLastValues(container, fields, prefix, context) {
     const value = values[field.name];
     return Array.isArray(value) ? value.join(", ") : String(value);
   }).join(" \u00b7 ")));
-  button.addEventListener("click", () => {
-    for (const field of names) {
-      const input = container.querySelector("#" + CSS.escape(prefix + field.name));
-      if (!input) continue;
-      const value = values[field.name];
-      if (input.type === "checkbox") input.checked = value === true;
-      else if (input.tagName === "TEXTAREA") {
-        input.value = Array.isArray(value) ? value.join("\n") : String(value);
-      } else if (input.tagName === "SELECT" && input.multiple) {
-        for (const option of input.options) {
-          option.selected = Array.isArray(value) && value.includes(option.value);
-        }
-      } else if (input.tagName === "SELECT"
-          && ![...input.options].some(option => option.value === String(value))) {
-        const option = document.createElement("option"); option.value = String(value);
-        option.append(text(String(value))); input.append(option); input.value = String(value);
-      } else input.value = String(value);
-      input.dispatchEvent(new Event("change"));
-    }
-  });
+  button.addEventListener("click",
+    () => fillParameterValues(container, names, prefix, values, true));
   container.prepend(button);
+}
+
+function fillParameterValues(container, fields, prefix, values, announce) {
+  for (const field of fields) {
+    if (!Object.prototype.hasOwnProperty.call(values, field.name)) continue;
+    const input = container.querySelector("#" + CSS.escape(prefix + field.name));
+    if (!input || input.type === "file") continue;
+    const value = values[field.name];
+    if (input.type === "checkbox") input.checked = value === true;
+    else if (input.tagName === "TEXTAREA") {
+      input.value = Array.isArray(value) ? value.join("\n") : String(value);
+    } else if (input.tagName === "SELECT" && input.multiple) {
+      const wanted = Array.isArray(value) ? value.map(String) : [String(value)];
+      for (const item of wanted) {
+        if (![...input.options].some(option => option.value === item)) {
+          const option = document.createElement("option"); option.value = item;
+          option.append(text(item)); input.append(option);
+        }
+      }
+      for (const option of input.options) option.selected = wanted.includes(option.value);
+    } else if (input.tagName === "SELECT"
+        && ![...input.options].some(option => option.value === String(value))) {
+      const option = document.createElement("option"); option.value = String(value);
+      option.append(text(String(value))); input.append(option); input.value = String(value);
+    } else input.value = String(value);
+    if (announce) input.dispatchEvent(new Event("change"));
+  }
 }
 
 function rawAnswers(container, fields, prefix) {
@@ -3890,6 +4045,8 @@ async function refreshChoices(container, fields, prefix, context, field) {
   const input = container.querySelector("#" + CSS.escape(prefix + field.name));
   if (!input) return;
   const previous = input.value || (field.default == null ? "" : String(field.default));
+  const ticked = input.multiple
+    ? [...input.selectedOptions].map(option => option.value).filter(Boolean) : null;
   const placeholder = (label) => {
     const option = document.createElement("option"); option.value = "";
     option.append(text(label)); return option;
@@ -3935,7 +4092,8 @@ async function refreshChoices(container, fields, prefix, context, field) {
   }
   const options = listed.choices.map(choice => {
     const option = document.createElement("option"); option.value = choice.value;
-    option.append(text(choice.label)); option.selected = choice.value === previous;
+    option.append(text(choice.label));
+    option.selected = ticked ? ticked.includes(choice.value) : choice.value === previous;
     return option;
   });
   input.replaceChildren(...(input.multiple ? [] : [placeholder("Select " + field.label)]),
@@ -6377,7 +6535,8 @@ el("nav-knowledge").addEventListener("click", () => selectPrimaryTab("knowledge"
 el("nav-tasks").addEventListener("click", () => selectPrimaryTab("tasks"));
 el("nav-reviews").addEventListener("click", () => selectPrimaryTab("reviews"));
 
-Promise.all([loadAbout(), loadAssets(), loadChat(), loadSlashCommands(), loadAvatars(), loadMcp()])
+assetsReady = loadAssets();
+Promise.all([loadAbout(), assetsReady, loadChat(), loadSlashCommands(), loadAvatars(), loadMcp()])
   .catch(showBootError);
 field.focus();
 </script>

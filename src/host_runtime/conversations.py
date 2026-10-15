@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Any, Literal, Self
 
-from pydantic import Field, StrictBool, model_validator
+from pydantic import Field, JsonValue, StrictBool, model_validator
 
 from common.assets import REDACTED, SECRET_PATTERN, reject_embedded_secrets
 from common.base import Contract, Symbol, Text
@@ -42,6 +42,10 @@ class ConversationMessage(Contract):
     # A question's attached files: name, kind and absolute path, so later
     # turns can still point tools at them; never their content.
     attachments: tuple[dict[str, str], ...] = ()
+    # An answer that hands the person a Workflow's run form (owner
+    # 2026-10-15): the Workflow, prefill and missing settings; the page draws
+    # the form from the installed declaration. Never run values it did not get.
+    workflow_form: dict[str, JsonValue] | None = None
 
     @model_validator(mode="before")
     @classmethod
@@ -65,6 +69,8 @@ class ConversationMessage(Contract):
             raise ValueError("feedback rates an answer, not a question")
         if self.role == "assistant" and self.reply_to is not None:
             raise ValueError("only a question replies to an earlier exchange")
+        if self.role == "user" and self.workflow_form is not None:
+            raise ValueError("only an answer offers a run form")
         if self.role == "user" and self.tool_summary is not None:
             raise ValueError("only an answer records the tools it used")
         reject_embedded_secrets(self.model_dump(mode="json"))
