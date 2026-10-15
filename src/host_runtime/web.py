@@ -100,6 +100,8 @@ from common.workflow_run_form import form_offer, offer_in, run_intent
 from extensions.package import PortableExtensionPackage
 from extensions.runtime import ExtensionLifecycleStore
 from host_runtime import asset_shelf, telemetry_api
+from host_runtime.agent_mail import AgentMail
+from host_runtime.agent_mode import AgentMode
 from host_runtime.answers import readable
 from host_runtime.assistant_tools import AssistantTools, assistant_token
 from host_runtime.assistant_tools import handle as assistant_handle
@@ -138,7 +140,7 @@ from host_runtime.contributions import (
     ContributionDraftCreateRequest,
     ConversationExcerpt,
 )
-from host_runtime.conversation_backends import LocalConversationBackends
+from host_runtime.conversation_backends import AgentLaunch, LocalConversationBackends
 from host_runtime.conversation_context import (
     ConversationContextSettings,
     ConversationContextStore,
@@ -312,6 +314,13 @@ def with_tools(message: ConversationMessage) -> str:
     if message.role != "assistant" or not message.tool_summary:
         return message.text
     return f"{message.text}\n\n[工具紀錄]\n{message.tool_summary}"
+
+
+def _listed_cards(answer: Mapping[str, Any]) -> tuple[dict[str, Any], ...]:
+    """The agent-mode cards a turn showed, for its stored answer."""
+    listed = answer.get("action_cards")
+    return tuple(item for item in listed if isinstance(item, dict)) if isinstance(
+        listed, list) else ()
 
 
 def _trace() -> TraceIdentifiers:
@@ -511,6 +520,18 @@ class AgentWeb:
             *(earlier_tools() if earlier_tools is not None else ()), *self.proposals.tools())
         if runtime.telegram is not None:
             runtime.telegram.cards = self
+        # Agent mode for the Claude Code / Copilot backends (owner 2026-10-15,
+        # docs/phases/AGENT_MODE_BACKENDS.md): working folders, approval cards,
+        # email and the Knowledge pipeline as the agent's tools.
+        coding = runtime.config.coding
+        self.agent_mode = AgentMode(
+            runtime.layout.workspace_root, host_json=config_path, tasks=self.tasks,
+            coding_roots=lambda: tuple(coding.workspace_roots) if coding is not None else (),
+            knowledge=self)
+        self.agent_mode.skill_roots = self.backends.skill_roots()
+        self.agent_mail = AgentMail(self.agent_mode, reader=_outlook_mailbox,
+                                    writer=_outlook_drafts, sender=_outlook_sender)
+        self.agent_mode.mail = self.agent_mail
 
     @property
     def request_lock(self) -> threading.RLock:
@@ -1654,21 +1675,43 @@ class AgentWeb:
                 live = self.card(str(card.get("card_id") or ""))
                 if live is not None:
                     message[CARD_KEY] = live
+            listed = message.get("action_cards")
+            if isinstance(listed, list):
+                message["action_cards"] = [
+                    (self.card(str(item.get("card_id") or "")) or item)
+                    if isinstance(item, dict) and item.get("status") == "pending" else item
+                    for item in listed]
         return record
 
     def card(self, card_id: str) -> dict[str, Any] | None:
-        found = self.proposals.card(card_id) if card_id.startswith("cp-") else None
+        handlers: dict[str, Any] = {"cp-": self.proposals, "pm-": self.agent_mode,
+                                    "ml-": self.agent_mail}
+        handler = handlers.get(card_id[:3])
+        found = handler.card(card_id) if handler is not None else None
         return None if found is None else found.model_dump(mode="json")
 
-    def cards(self) -> dict[str, Any]:
-        """Every card still waiting, from any channel (Tasks > Pending changes)."""
-        return {"ok": True, "cards": [item.model_dump(mode="json")
-                                      for item in self.proposals.open_cards()]}
+    def cards(self, session_id: str | None = None) -> dict[str, Any]:
+        """Every card still waiting, from any channel (Tasks > Pending changes);
+        with a session, that conversation's (agent mode polls it during a turn)."""
+        proposals = [item for item in self.proposals.open_cards()
+                     if session_id is None or getattr(
+                         self.proposals.store.get(item.card_id), "session_id", None)
+                     == session_id]
+        found = [*proposals, *self.agent_mode.open_cards(session_id),
+                 *self.agent_mail.open_cards(session_id)]
+        return {"ok": True, "cards": [item.model_dump(mode="json") for item in found]}
 
     def decide_card(self, card_id: str, action: str, channel: str = "local") -> dict[str, Any]:
         """A person pressed a card's button. The card's handler decides; the
         conversation that showed it keeps the card as it is now, and the
-        outcome joins that answer's tool record so the Agent sees it."""
+        outcome joins that answer's tool record so the Agent sees it.
+
+        `pm-` (agent-mode permissions) and `ml-` (mail to send) cards are
+        answered in Agent Web only; the waiting agent run learns the answer."""
+        if card_id.startswith("pm-"):
+            return self.agent_mode.decide(card_id, action, channel=channel)
+        if card_id.startswith("ml-"):
+            return self.agent_mail.decide(card_id, action, channel=channel)
         if not card_id.startswith("cp-"):
             return {"ok": False, "code": "card_unknown", "message": "That card is unknown here."}
         decided = self.proposals.decide(card_id, action, channel=channel)
@@ -1705,6 +1748,8 @@ class AgentWeb:
         deleted = self.runtime.state.delete_conversation(item.session_id, self.runtime.actor)
         if deleted:
             self.attachments.delete_session(item.session_id)
+            # "For this conversation" ends with it; its working folder stays.
+            self.agent_mode.forget(item.session_id)
         return {"ok": deleted, "code": None if deleted else "conversation_unknown"}
 
     def add_attachment(self, session_id: str, filename: str, data: bytes) -> dict[str, Any]:
@@ -2033,6 +2078,10 @@ class AgentWeb:
                     if record.data_classification == "PUBLIC"
                     else None
                 )
+                agent_run = None
+                launch = None
+                if self.agent_mode.enabled(record.backend):
+                    agent_run, launch = self._agent_launch(item.session_id, record.backend)
                 completed = self.backends.complete(
                     record.backend,
                     history,
@@ -2041,8 +2090,20 @@ class AgentWeb:
                     persona_guidance="",
                     outbound=outbound,
                     max_history_messages=context_settings.recent_messages,
+                    agent=launch,
                 )
+                if agent_run is not None:
+                    answer_cards = self.agent_mode.finish(
+                        agent_run, completed.status, completed.code or "")
+                else:
+                    answer_cards = []
                 answer = {
+                    **({"action_cards": answer_cards,
+                        # Later turns tell the agent what the person decided.
+                        "tool_summary": "\n".join(
+                            f"[card {card['card_id']}] {card['title']}: "
+                            f"{card.get('status_label') or card['status']}"
+                            for card in answer_cards)[:2_000]} if answer_cards else {}),
                     "ok": completed.status == "answered",
                     "answer": (
                         completed.text
@@ -2237,6 +2298,7 @@ class AgentWeb:
                                 tool_summary=answer.get("tool_summary"),
                                 workflow_form=answer.get("workflow_form"),
                                 action_card=answer.get(CARD_KEY),
+                                action_cards=_listed_cards(answer),
                                 trace=(
                                     None
                                     if trace_data is None
@@ -2276,6 +2338,53 @@ class AgentWeb:
             "draft": draft,
             "approvals": self.approvals(item.session_id)["approvals"],
         }
+
+    # -- agent mode (owner 2026-10-15, docs/phases/AGENT_MODE_BACKENDS.md) ---
+
+    def _agent_launch(self, session_id: str, backend: str) -> tuple[Any, AgentLaunch | None]:
+        """Start an agent-mode run: its folder, its MCP servers, its relay."""
+        if self.backends.agent_mcp is None:
+            return None, None
+        url, assistant = self.backends.agent_mcp
+        run = self.agent_mode.begin(session_id, backend)
+        base = url.rstrip("/")
+        launch = AgentLaunch(
+            folder=run.folder,
+            servers={"aep-agent": (base + "/agent", run.token),
+                     "aep-assistant": (base, assistant),
+                     "aep": (base + "/authoring", assistant)},
+            on_permission=lambda params: self.agent_mode.acp_permission(run, dict(params)),
+            on_tool_update=lambda call, status: self.agent_mode.tool_outcome(run, call, status),
+            read_roots=run.read_roots, run_id=run.run_id)
+        return run, launch
+
+    def agent_mode_settings(self) -> dict[str, Any]:
+        return self.agent_mode.settings()
+
+    def update_agent_mode(self, body: dict[str, Any]) -> dict[str, Any]:
+        return self.agent_mode.save_settings(body)
+
+    def agent_session(self, session_id: str) -> dict[str, Any]:
+        if self.runtime.state.conversation(session_id, self.runtime.actor) is None:
+            return {"ok": False, "code": "conversation_unknown"}
+        return self.agent_mode.session_view(session_id)
+
+    def update_agent_session(self, body: dict[str, Any]) -> dict[str, Any]:
+        session_id = str(body.get("session_id") or "")
+        if self.runtime.state.conversation(session_id, self.runtime.actor) is None:
+            return {"ok": False, "code": "conversation_unknown"}
+        folders = body.get("read_folders")
+        return self.agent_mode.set_session(
+            session_id, str(body.get("folder") or ""),
+            [str(item) for item in folders] if isinstance(folders, list) else [])
+
+    def agent_mcp(self, token: str, message: dict[str, Any]) -> dict[str, Any] | None:
+        """`/mcp/agent`: only a running agent-mode turn's own token reaches it."""
+        run = self.agent_mode.run_for_token(token)
+        if run is None:
+            return {"jsonrpc": "2.0", "id": message.get("id"),
+                    "error": {"code": -32001, "message": "no agent run with this token"}}
+        return self.agent_mode.mcp(run, message)
 
     def _named_knowledge(self, message: str) -> dict[str, Any] | None:
         """Resolve an explicitly named installed source without model tool selection."""
@@ -4083,11 +4192,17 @@ class _Handler(BaseHTTPRequestHandler):
 
     def _assistant_mcp(self) -> None:
         """MCP over HTTP for the assistant tools: its own stable token, or the
-        session's (COPILOT_INTEGRATION CP1)."""
+        session's (COPILOT_INTEGRATION CP1). `/mcp/agent` takes only a running
+        agent-mode turn's own token (AGENT_MODE_BACKENDS)."""
         header = self.headers.get("Authorization") or ""
         given = header[len(BEARER):].strip() if header.startswith(BEARER) else ""
-        if not given or not (hmac.compare_digest(given, self.server.web.assistant_token)
-                             or hmac.compare_digest(given, self.server.token)):
+        agent_route = urlparse(self.path).path == "/mcp/agent"
+        if agent_route:
+            if not given or self.server.web.agent_mode.run_for_token(given) is None:
+                self._refuse_unread(401, {"error": "this request carried no usable token"})
+                return
+        elif not given or not (hmac.compare_digest(given, self.server.web.assistant_token)
+                               or hmac.compare_digest(given, self.server.token)):
             self._refuse_unread(401, {"error": "this request carried no usable token"})
             return
         try:
@@ -4104,9 +4219,10 @@ class _Handler(BaseHTTPRequestHandler):
                              "error": {"code": -32700, "message": "parse error"}})
             return
         batch = message if isinstance(message, list) else [message]
-        serve = (self.server.web.authoring_mcp
-                 if urlparse(self.path).path == "/mcp/authoring"
-                 else self.server.web.assistant_mcp)
+        web = self.server.web
+        serve = (web.authoring_mcp if urlparse(self.path).path == "/mcp/authoring"
+                 else (lambda item: web.agent_mcp(given, item)) if agent_route
+                 else web.assistant_mcp)
         replies = [reply for item in batch if isinstance(item, dict)
                    for reply in [serve(item)] if reply is not None]
         if not replies:
@@ -4253,12 +4369,18 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.task_list())
         elif parsed.path == "/api/cards":
             wanted = parse_qs(parsed.query).get("card_id", [""])[0]
+            session = parse_qs(parsed.query).get("session_id", [""])[0]
             if wanted:
                 found = web.card(wanted)
                 self._json(200 if found is not None else 404,
                            {"ok": found is not None, "card": found})
             else:
-                self._json(200, web.cards())
+                self._json(200, web.cards(session or None))
+        elif parsed.path == "/api/agent-mode":
+            self._json(200, web.agent_mode_settings())
+        elif parsed.path == "/api/agent-mode/session":
+            session = parse_qs(parsed.query).get("session_id", [""])[0]
+            self._json(200, web.agent_session(session))
         elif parsed.path == "/api/knowledge/convert":
             query = parse_qs(parsed.query)
             self._json(200, web.convert_status((query.get("sandbox_id") or [""])[0]))
@@ -4321,7 +4443,7 @@ class _Handler(BaseHTTPRequestHandler):
             refusal = {"error": "this interface answers on the loopback address only"}
             self._refuse_unread(403, refusal)
             return
-        if urlparse(self.path).path in ("/mcp", "/mcp/authoring"):
+        if urlparse(self.path).path in ("/mcp", "/mcp/authoring", "/mcp/agent"):
             self._assistant_mcp()
             return
         if not self._authorized():
@@ -4385,6 +4507,8 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/contributions",
             "/api/approvals/decide",
             "/api/cards/decide",
+            "/api/agent-mode/settings",
+            "/api/agent-mode/session",
             "/api/drafts/install",
             "/api/drafts/delete",
             *AUTHORING_ROUTES,
@@ -4504,6 +4628,13 @@ class _Handler(BaseHTTPRequestHandler):
             result = self.server.web.draft_action(
                 path.rsplit("/", 1)[1], str(body.get("candidate_id") or ""))
             self._json(200 if result.get("ok") else 409, result)
+            return
+        if path in ("/api/agent-mode/settings", "/api/agent-mode/session"):
+            given = body if isinstance(body, dict) else {}
+            web = self.server.web
+            result = (web.update_agent_mode(given) if path.endswith("/settings")
+                      else web.update_agent_session(given))
+            self._json(200, result)
             return
         if path == "/api/cards/decide":
             chosen = body if isinstance(body, dict) else {}
@@ -4897,3 +5028,24 @@ class AgentWebServer(ThreadingHTTPServer):
     ) -> None:
         self.shutdown()
         self.server_close()
+
+
+# -- Outlook for agent mode: built per call, so a host without Outlook starts --
+
+
+def _outlook_mailbox() -> Any:
+    from integrations.outlook_mail import OutlookComMailbox
+
+    return OutlookComMailbox()
+
+
+def _outlook_drafts() -> Any:
+    from integrations.outlook_draft import OutlookComDraft
+
+    return OutlookComDraft()
+
+
+def _outlook_sender() -> Any:
+    from integrations.outlook_send import OutlookComDraftSender
+
+    return OutlookComDraftSender()

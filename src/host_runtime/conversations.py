@@ -50,6 +50,10 @@ class ConversationMessage(Contract):
     # proposal now, an agent-mode permission next. The server keeps the
     # pending record; this is the card as it was last drawn, never a secret.
     action_card: dict[str, JsonValue] | None = None
+    # The approval cards an agent-mode turn showed while it ran (owner
+    # 2026-10-15, AGENT_MODE_BACKENDS): permissions, a first mail read, mail
+    # to send, as they were decided. Kept for the history; never a secret.
+    action_cards: tuple[dict[str, JsonValue], ...] = Field(default=(), max_length=60)
 
     @model_validator(mode="before")
     @classmethod
@@ -75,7 +79,7 @@ class ConversationMessage(Contract):
             raise ValueError("only a question replies to an earlier exchange")
         if self.role == "user" and self.workflow_form is not None:
             raise ValueError("only an answer offers a run form")
-        if self.role == "user" and self.action_card is not None:
+        if self.role == "user" and (self.action_card is not None or self.action_cards):
             raise ValueError("only an answer shows an action card")
         if self.role == "user" and self.tool_summary is not None:
             raise ValueError("only an answer records the tools it used")

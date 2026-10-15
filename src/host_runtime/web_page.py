@@ -373,6 +373,18 @@ p.note { color: var(--dim); font-size: 13px; margin: 4px 0 12px; }
 .action-card .card-status { margin: 8px 0 0; font-size: 13px; white-space: pre-wrap;
   overflow-wrap: anywhere; }
 .action-card .card-status.good { color: var(--good); }
+/* Agent mode (owner 2026-10-15): the folder line under the composer and the
+   cards an agent-mode turn shows while it runs. */
+.agent-mode-line { display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  margin: 6px 0 0; font-size: 12.5px; color: var(--dim); overflow-wrap: anywhere; }
+.agent-mode-line[hidden] { display: none; }
+.agent-mode-line button { min-height: 32px; }
+.agent-live-cards:empty { display: none; }
+.agent-mode-backend { display: flex; gap: 8px; align-items: flex-start; margin: 6px 0; }
+.agent-mode-backend .note { margin: 0; }
+#agent-mode-form textarea, #agent-mode-form input:not([type=checkbox]),
+#agent-folders-dialog textarea, #agent-folders-dialog input { width: 100%;
+  box-sizing: border-box; }
 .action-card .card-status.bad { color: var(--bad); }
 .action-card .card-link { margin-top: 6px; }
 .said > :first-child { margin-top: 0; }
@@ -754,11 +766,32 @@ tr:last-child td { border-bottom: none; }
         </div>
         <button class="go send-button" id="send" type="submit" disabled>Send</button>
       </div>
+      <p id="agent-mode-line" class="agent-mode-line" role="status" hidden>
+        <span id="agent-mode-state"></span>
+        <button id="agent-folders" class="link-button" type="button" hidden>Folders…</button>
+      </p>
     </form>
     <p class="hint">This is the Agent on this computer &mdash; the same one the
       command line and Telegram reach, with the same permissions and the same
       refusals. Nothing is written unless the command says so. One request runs
       at a time.</p>
+    <dialog id="agent-folders-dialog" aria-labelledby="agent-folders-title">
+      <form class="dialog-body" id="agent-folders-form" method="dialog">
+        <h2 id="agent-folders-title">This conversation's folders</h2>
+        <p class="note">The agent reads and writes its working folder freely. It may also
+          read the folders below freely; anything else asks you first.</p>
+        <label for="agent-folder">Working folder (empty: the default for this
+          conversation)</label>
+        <input id="agent-folder" autocomplete="off">
+        <label for="agent-read-folders">Read-only folders (one full path per line)</label>
+        <textarea id="agent-read-folders" rows="4" autocomplete="off"></textarea>
+        <p id="agent-folders-result" class="note" role="status"></p>
+        <div class="dialog-actions">
+          <button id="agent-folders-cancel" type="button">Cancel</button>
+          <button class="go" id="agent-folders-save" type="submit">Save</button>
+        </div>
+      </form>
+    </dialog>
     <dialog id="backend-auth-dialog" aria-labelledby="backend-auth-title">
       <div class="dialog-body">
         <h2 id="backend-auth-title">Connect conversation backend</h2>
@@ -1021,6 +1054,35 @@ tr:last-child td { border-bottom: none; }
       <div id="coding-agents" class="empty">reading&hellip;</div>
       <p id="coding-agents-result" class="note" role="status"
         style="white-space: pre-wrap; overflow-wrap: anywhere"></p>
+    </div>
+    <div class="card settings" id="agent-mode-card" style="margin-top: 14px">
+      <h2>Agent mode</h2>
+      <p class="note">When a conversation uses Claude Code or GitHub Copilot, the agent can
+        work in that conversation's own folder with AEP's skills and tools. Inside the folder
+        it works freely; reading elsewhere, changing files outside it, every command and
+        sending each email ask you with a card in the chat (no answer in 10 minutes means
+        Deny). Credentials and protected system settings are never touched, and installing,
+        approving or publishing stays with you. Off until you turn a backend on. In Telegram
+        these backends stay text-only.</p>
+      <form id="agent-mode-form" autocomplete="off">
+        <div id="agent-mode-backends" class="empty">reading&hellip;</div>
+        <label for="agent-mode-root">Default folder for conversations</label>
+        <input id="agent-mode-root">
+        <p id="agent-mode-root-note" class="note"></p>
+        <h3>Email the agent may read</h3>
+        <label for="agent-mail-folders">Folders (one per line, for example Inbox or
+          Inbox/Projects)</label>
+        <textarea id="agent-mail-folders" rows="2"></textarea>
+        <label for="agent-mail-days">Days back, at most</label>
+        <input id="agent-mail-days" type="number" min="1" max="365">
+        <label for="agent-mail-senders">Never read mail from (an address or @domain per
+          line)</label>
+        <textarea id="agent-mail-senders" rows="2"></textarea>
+        <label for="agent-mail-excluded">Never read these folders (one per line)</label>
+        <textarea id="agent-mail-excluded" rows="2"></textarea>
+        <p><button class="go" id="agent-mode-save" type="submit">Save agent mode</button></p>
+        <p id="agent-mode-result" class="note" role="status"></p>
+      </form>
     </div>
     <div class="card settings" style="margin-top: 14px">
       <h2>Agent profile</h2>
@@ -1872,6 +1934,9 @@ function renderConversation(record) {
         chatRunForm(said.parentNode, replied, record.session_id,
           index + 2 >= record.messages.length);
       }
+      for (const shown of replied.action_cards || []) {
+        said.parentNode.append(renderActionCard(shown));
+      }
       if (replied.action_card) {
         said.parentNode.append(renderActionCard(replied.action_card, async () => {
           if (record.session_id === activeConversation) {
@@ -2409,6 +2474,7 @@ async function loadConversations(selectId) {
   activeBackend = requested ? selectedBackend : (backend.options[0] || {}).value || "gateway";
   backend.value = activeBackend; renderBackendState();
   send.disabled = false;
+  loadAgentSession().catch(() => {});
 }
 
 async function loadBackends() {
@@ -2470,7 +2536,7 @@ async function chooseBackend(name) {
   if (!selected.ok) throw new Error(selected.code);
   activeBackend = name;
   activeConversationPublic = selected.conversation.data_classification === "PUBLIC";
-  el("conversation-backend").value = name; renderBackendState();
+  el("conversation-backend").value = name; renderBackendState(); renderAgentModeLine();
 }
 
 async function loadChat(selectId) {
@@ -2579,6 +2645,157 @@ function renderPendingTurns(sessionId) {
     showPendingState(entry);
   }
 }
+
+// -- Agent mode (owner 2026-10-15) --------------------------------------------
+// While an agent-mode turn runs, its approval cards are fetched every 1.5 s
+// and drawn under the waiting turn; the run waits on the server until the
+// person presses. After the turn the answer keeps them (action_cards).
+
+const AGENT_BACKENDS = ["claude_code", "copilot", "codex"];
+let agentSession = null;
+
+function agentModeOn() {
+  return !!(agentSession && agentSession.backends && agentSession.backends[activeBackend]);
+}
+
+function watchAgentCards(session, entry) {
+  let stopped = false, timer = null;
+  const tick = async () => {
+    if (stopped) return;
+    try {
+      if (session === activeConversation && agentModeOn() && entry.said) {
+        const listed = await call("/api/cards?session_id=" + encodeURIComponent(session));
+        let holder = entry.said.parentNode.querySelector(".agent-live-cards");
+        if (!holder) {
+          holder = document.createElement("div"); holder.className = "agent-live-cards";
+          holder.setAttribute("aria-live", "polite");
+          entry.said.parentNode.append(holder);
+        }
+        const shown = new Set([...holder.querySelectorAll(".action-card")]
+          .map(node => node.dataset.cardId));
+        for (const card of listed.cards) {
+          if (!card.card_id.startsWith("pm-") && !card.card_id.startsWith("ml-")) continue;
+          if (shown.has(card.card_id)) continue;
+          holder.append(renderActionCard(card));
+          log.scrollTop = log.scrollHeight;
+        }
+      }
+    } catch (failure) { /* the next tick tries again */ }
+    if (!stopped) timer = setTimeout(tick, 1500);
+  };
+  timer = setTimeout(tick, 300);
+  return {stop() { stopped = true; if (timer) clearTimeout(timer); }};
+}
+
+function renderAgentModeLine() {
+  const line = el("agent-mode-line");
+  const relevant = AGENT_BACKENDS.includes(activeBackend) && agentSession;
+  line.hidden = !relevant;
+  if (!relevant) return;
+  const note = (agentSession.notes || {})[activeBackend];
+  if (note) {
+    el("agent-mode-state").textContent = note; el("agent-folders").hidden = true; return;
+  }
+  if (!agentModeOn()) {
+    el("agent-mode-state").textContent = "Text only: agent mode is off for this backend "
+      + "(Settings > Agent mode)."; el("agent-folders").hidden = true; return;
+  }
+  const extra = (agentSession.read_folders || []).length;
+  el("agent-mode-state").textContent = "Agent mode · works in " + agentSession.folder
+    + (extra ? " · reads " + extra + " more folder" + (extra > 1 ? "s" : "") : "");
+  el("agent-folders").hidden = false;
+}
+
+async function loadAgentSession() {
+  agentSession = null;
+  if (activeConversation) {
+    try {
+      const view = await call("/api/agent-mode/session?session_id="
+        + encodeURIComponent(activeConversation));
+      if (view.ok) agentSession = view;
+    } catch (failure) { agentSession = null; }
+  }
+  renderAgentModeLine();
+}
+
+el("agent-folders").addEventListener("click", () => {
+  if (!agentSession) return;
+  el("agent-folder").value = agentSession.folder || "";
+  el("agent-read-folders").value = (agentSession.read_folders || []).join("\n");
+  el("agent-folders-result").textContent = "";
+  el("agent-folders-dialog").showModal();
+});
+el("agent-folders-cancel").addEventListener("click", () => el("agent-folders-dialog").close());
+el("agent-folders-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const result = el("agent-folders-result"), button = el("agent-folders-save");
+  button.disabled = true; result.textContent = "Saving…";
+  try {
+    const saved = await call("/api/agent-mode/session", {
+      session_id: activeConversation, folder: el("agent-folder").value.trim(),
+      read_folders: el("agent-read-folders").value.split("\n").map(x => x.trim())
+        .filter(Boolean)});
+    if (!saved.ok) { result.textContent = saved.message || saved.code; return; }
+    agentSession = saved; renderAgentModeLine(); el("agent-folders-dialog").close();
+  } catch (failure) {
+    result.textContent = "Not saved: " + failure.message;
+  } finally { button.disabled = false; }
+});
+
+function agentLines(value) { return value.split("\n").map(x => x.trim()).filter(Boolean); }
+
+function renderAgentModeSettings(data) {
+  const box = el("agent-mode-backends");
+  box.className = ""; box.replaceChildren();
+  for (const backend of data.backends) {
+    const row = document.createElement("label"); row.className = "agent-mode-backend";
+    const check = document.createElement("input"); check.type = "checkbox";
+    check.dataset.backend = backend.name; check.checked = backend.enabled;
+    check.disabled = !backend.relay;
+    const words = document.createElement("span");
+    words.append(text(backend.label + (backend.relay ? ": agent mode" : "")));
+    if (backend.note) {
+      const why = document.createElement("p"); why.className = "note";
+      why.append(text(backend.note)); words.append(why);
+    }
+    row.append(check, words); box.append(row);
+  }
+  const settings = data.settings, mail = settings.mail;
+  el("agent-mode-root").value = settings.default_root;
+  el("agent-mode-root").placeholder = data.default_root;
+  el("agent-mode-root-note").textContent = "Each conversation gets its own folder inside it. "
+    + "It must be under " + [data.default_root, ...data.coding_roots].join(" or ") + ".";
+  el("agent-mail-folders").value = mail.folders.join("\n");
+  el("agent-mail-days").value = mail.max_days;
+  el("agent-mail-senders").value = mail.excluded_senders.join("\n");
+  el("agent-mail-excluded").value = mail.excluded_folders.join("\n");
+}
+
+async function loadAgentModeSettings() {
+  renderAgentModeSettings(await call("/api/agent-mode"));
+}
+
+el("agent-mode-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const result = el("agent-mode-result"), button = el("agent-mode-save");
+  const body = {default_root: el("agent-mode-root").value.trim(), mail: {
+    folders: agentLines(el("agent-mail-folders").value),
+    max_days: Number(el("agent-mail-days").value || 30),
+    excluded_senders: agentLines(el("agent-mail-senders").value),
+    excluded_folders: agentLines(el("agent-mail-excluded").value)}};
+  for (const check of el("agent-mode-backends").querySelectorAll("input[data-backend]")) {
+    body[check.dataset.backend] = check.checked;
+  }
+  button.disabled = true; result.textContent = "Saving…";
+  try {
+    const saved = await call("/api/agent-mode/settings", body);
+    if (!saved.ok) { result.textContent = saved.message || saved.code; return; }
+    renderAgentModeSettings(saved); result.textContent = "Saved. New turns use it.";
+    loadAgentSession().catch(() => {});
+  } catch (failure) {
+    result.textContent = "Not saved: " + failure.message;
+  } finally { button.disabled = false; }
+});
 
 // -- end Turn queues
 
@@ -2708,6 +2925,7 @@ form.addEventListener("submit", (event) => {
     entry.state = "working"; showPendingState(entry); renderSessionList();
     let answer = null;
     avatarWorking(1);
+    const watching = watchAgentCards(session, entry);
     try {
       const completed = await call("/api/conversations/turn", {
         session_id: session, message: asked,
@@ -2719,7 +2937,7 @@ form.addEventListener("submit", (event) => {
     } catch (failure) {
       entry.state = "failed"; entry.error = failure.message;
       showPendingState(entry);
-    } finally { avatarWorking(-1); }
+    } finally { watching.stop(); avatarWorking(-1); }
     try {
       if (session === activeConversation) await loadConversations(session);
       else { conversationRows = (await call("/api/conversations")).conversations;
@@ -3577,6 +3795,7 @@ async function loadSettings() {
   loadSharedPlatform().catch(() => {});
   loadLaya().catch(() => {});
   loadCodingAgents().catch(() => {});
+  loadAgentModeSettings().catch(() => {});
   el("persona-result").textContent =
     "Saved locally. Changes apply to the next natural-language turn.";
   el("model-provider").value = model.provider || "openai_compatible";
