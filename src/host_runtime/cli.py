@@ -371,13 +371,16 @@ def _connect_user(args: argparse.Namespace) -> int:
 def _assistant_mcp(args: argparse.Namespace) -> int:
     from host_runtime.assistant_bridge import Bridge
 
+    workspace = None
+    problem = ""
     try:
-        config = _load(args.config)
+        workspace = HostLayout.under(_load(args.config).workspace_root).workspace_root
     except (OSError, ValueError):
-        print(f"cannot read {args.config}", file=sys.stderr)
-        return 2
-    workspace = HostLayout.under(config.workspace_root).workspace_root
-    Bridge(workspace, _package_version()).serve(sys.stdin.buffer, sys.stdout.buffer)
+        problem = (f"The AEP configuration {args.config} cannot be read, so AEP's Knowledge "
+                   "and Workflows are not reachable. Reinstall or update AEP, or use Agent Web "
+                   "Settings > Coding agents to set this agent up again.")
+    Bridge(workspace, _package_version(), problem=problem).serve(
+        sys.stdin.buffer, sys.stdout.buffer)
     return 0
 
 

@@ -58,8 +58,12 @@ def endpoint(workspace: Path) -> tuple[str, str] | None:
 
 
 class Bridge:
-    def __init__(self, workspace: Path, version: str, post: Post = _post) -> None:
+    def __init__(self, workspace: Path | None, version: str, post: Post = _post,
+                 problem: str = "") -> None:
+        # None when host.json could not be read: the server still starts, so
+        # the agent shows it connected and each call says what is wrong.
         self.workspace = workspace
+        self.problem = problem
         self.version = version
         self._post = post
 
@@ -89,6 +93,8 @@ class Bridge:
                 {"name": name, "description": text, "inputSchema": schema}
                 for name, (text, schema) in TOOLS.items()]})
         if method == "tools/call":
+            if self.workspace is None:
+                return self._tool_error(ident, self.problem or NOT_RUNNING)
             found = endpoint(self.workspace)
             if found is None:
                 return self._tool_error(ident, NOT_RUNNING)

@@ -181,3 +181,20 @@ def test_the_coding_agents_card_renders_in_a_real_browser(
     finally:
         browser.close()
         browser.discard_profile()
+
+
+def test_the_bridge_starts_even_when_host_json_is_unreadable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from host_runtime.cli import main
+
+    source = io.BytesIO((json.dumps({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}) + "\n"
+                         + json.dumps(_call("aep_workflows")) + "\n").encode())
+    sink = io.BytesIO()
+    monkeypatch.setattr("sys.stdin", type("In", (), {"buffer": source})())
+    monkeypatch.setattr("sys.stdout", type("Out", (), {"buffer": sink})())
+    assert main(["assistant-mcp", "--config", str(tmp_path / "missing.json")]) == 0
+    listed, called = [json.loads(line) for line in sink.getvalue().splitlines()]
+    assert listed["result"]["tools"]
+    assert called["result"]["isError"] and "cannot be read" in called["result"]["content"][0][
+        "text"]
