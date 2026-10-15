@@ -1422,10 +1422,14 @@ def build_platform(
     if config.platform is None:
         return None
     if resolver is None:
+        from host_runtime.platform_publish import UserEnvironment
+
         mapped = config.credential_environment()
         if config.platform.credential.name not in mapped:
             raise HostError("credential_unmapped")
-        resolver = EnvironmentCredentials(mapped)
+        # The token is saved for this Windows user when the PC enrolls, which
+        # a process started earlier does not see in its own environment.
+        resolver = EnvironmentCredentials(mapped, UserEnvironment())
     return PlatformClient(config.platform, resolver)
 
 

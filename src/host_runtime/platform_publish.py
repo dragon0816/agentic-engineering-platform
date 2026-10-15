@@ -170,12 +170,25 @@ class MemberPortalPublisher:
             "assets/submissions/withdraw", {"submission_id": submission_id}
         )["submission"]
 
+    def me(self) -> str:
+        """The platform account this PC's Personal Agent login belongs to."""
+        actor = self._call("me", {}).get("actor")
+        if not isinstance(actor, str) or not actor:
+            raise PublishError("bad_reply")
+        return actor
+
+    def enroll(self, request: dict[str, Any]) -> dict[str, Any]:
+        """Enroll this computer as the member (`bridges/enroll`, owner
+        2026-10-15). The reply carries this computer's Bridge token once; the
+        caller stores it and drops it, and never logs or returns it."""
+        return self._call("bridges/enroll", request)
+
 
 # What a person sees for each code, in the page and the CLI.
 EXPLANATIONS = {
     "login_missing": "This PC has no Personal Agent code for the shared platform yet. In the "
     "Member Portal press 'Connect a Personal Agent', copy the code and paste it into "
-    "'Personal Agent code' below, then Save.",
+    "Settings > Shared platform > 'Personal Agent code', then Save.",
     "authentication_failed": "The shared platform did not accept this PC's login. Connect the "
     "Personal Agent again in the Member Portal.",
     "platform_unreachable": "The shared platform did not answer. Check the address in Settings "
@@ -190,6 +203,16 @@ EXPLANATIONS = {
     "co-editor.",
     "submission_missing": "That submission does not exist or is not yours.",
     "submission_not_pending": "That submission has already been decided.",
+    # Bridge self-enrollment (owner 2026-10-15).
+    "device_owner_mismatch": "This PC is registered to another platform account. Its "
+    "host.json device.registered_by must be the account you signed in to the portal with.",
+    "administrator_required": "Only a platform administrator can enroll a shared test "
+    "workstation.",
+    "device_disabled": "An administrator disabled this PC on the shared platform; ask them "
+    "to enable it again.",
+    "device_in_use": "Another member is bound to this PC on the shared platform.",
+    "actor_disabled": "Your platform account is disabled.",
+    "session_expired": "The shared platform ended this PC's session; try again.",
 }
 
 
@@ -198,7 +221,7 @@ def explain(code: str) -> str:
 
 
 class UserEnvironment(Mapping[str, str]):
-    """This process's environment, then this Windows user's saved variables.
+    r"""This process's environment, then this Windows user's saved variables.
 
     A member sets their Personal Agent login once with `setx`; a running Agent
     Web or a shell opened before that does not see it in its own environment,

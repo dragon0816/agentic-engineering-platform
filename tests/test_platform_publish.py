@@ -223,5 +223,6 @@ def test_agent_web_saves_a_pasted_code_for_this_user_and_never_echoes_it() -> No
     assert reply == {"ok": True} and saved == {"AEP_PLATFORM_MEMBER_LOGIN": code}
     refused = AgentWeb.connect_publishing(web, "not a code")  # type: ignore[arg-type]
     assert refused["code"] == "login_malformed" and "not a code" not in str(refused)
-    assert 'id="publish-code"' in PAGE and 'type="password"' in PAGE
-    assert "/api/publishing/connect" in PAGE
+    # The paste box lives in Settings > Shared platform (owner 2026-10-15).
+    assert 'id="shared-code"' in PAGE and 'type="password"' in PAGE
+    assert "/api/settings/shared-platform" in PAGE

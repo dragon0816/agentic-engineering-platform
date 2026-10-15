@@ -16,7 +16,8 @@ from workflow.host_bridge import BridgeRegistration
 
 LIMITATIONS = (
     "Enrollment (invitation, device registration, binding, token issue) happens on the "
-    "shared platform; this host presents a token it was given and cannot obtain one.",
+    "shared platform; this host's member enrolls it from Agent Web (Settings > Shared "
+    "platform > Enroll this PC), and the Bridge API never issues a token itself.",
     "The GTM weekly report (source workflow 11) needs a project board and a workbook "
     "configured under `integrations`, and Excel installed to write; `doctor` reports "
     "whether this host has them.",

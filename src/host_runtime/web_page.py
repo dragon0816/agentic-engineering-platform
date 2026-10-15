@@ -768,6 +768,29 @@ tr:last-child td { border-bottom: none; }
         <div id="telegram-unknown"></div>
       </form>
     </div>
+    <h2>Shared platform</h2>
+    <p class="note">The company's shared platform: Skills and Workflows your team published,
+      and where you publish yours. The Member Portal is the Marketplace in your browser;
+      "Open Marketplace" uses this address. The Bridge API is what this PC synchronizes
+      from. Paste the Personal Agent code from the Member Portal ("Connect a Personal
+      Agent") once, then press "Enroll this PC". Codes and tokens are kept only in this
+      Windows user's environment and never shown again.</p>
+    <div class="card settings" id="shared-platform-card">
+      <form id="shared-platform-settings" autocomplete="off">
+        <div class="laya-grid">
+          <label>Member Portal URL <input id="shared-portal-url"
+                 placeholder="http://127.0.0.1:28776"></label>
+          <label>Bridge API URL <input id="shared-bridge-url"
+                 placeholder="http://127.0.0.1:28775"></label>
+          <label>Personal Agent code <input id="shared-code" type="password"
+                 autocomplete="off" placeholder="paste once; it is not shown again"></label>
+        </div>
+        <p class="note" id="shared-this-pc"></p>
+        <p><button class="go" id="shared-save" type="submit">Save</button>
+          <button id="shared-enroll" type="button">Enroll this PC</button></p>
+        <p id="shared-status" class="note" role="status" aria-live="polite"></p>
+      </form>
+    </div>
     <h2>Laya decision acceleration</h2>
     <p class="note">Laya answers small routing decisions fast. The Agent reaches it only
       through an SSH tunnel to a port on this computer, so nothing travels unencrypted to
@@ -995,15 +1018,9 @@ tr:last-child td { border-bottom: none; }
       <p class="note">Send an installed Skill or Workflow to the shared platform as you. It
         waits there until an administrator (not you) approves it; only then can others
         choose it. The platform gives it the next version number.</p>
-      <div id="publish-off" class="empty" hidden>Publishing is not set up on this PC: add
-        <code>publishing</code> (the Member Portal address and the name of your Personal
-        Agent login) to host.json.</div>
-      <div id="publish-connect" class="laya-grid" hidden>
-        <label>Personal Agent code from the Member Portal ("Connect a Personal Agent")
-          <input id="publish-code" type="password" autocomplete="off"
-                 placeholder="paste the code, then Save"></label>
-        <div><button id="publish-code-save" type="button">Save code</button></div>
-      </div>
+      <div id="publish-off" class="empty" hidden>Publishing is not set up on this PC: set
+        the Member Portal URL and your Personal Agent code in Settings &gt; Shared
+        platform.</div>
       <div id="publish-form" class="laya-grid" hidden>
         <label>Skill or Workflow<select id="publish-asset"></select></label>
         <label>Change<select id="publish-change">
@@ -2849,6 +2866,7 @@ async function loadSettings() {
   el("persona-introduction").value = persona.introduction;
   el("persona-soul").value = persona.soul;
   showTelegram(settings.telegram);
+  loadSharedPlatform().catch(() => {});
   loadLaya().catch(() => {});
   el("persona-result").textContent =
     "Saved locally. Changes apply to the next natural-language turn.";
@@ -3051,6 +3069,74 @@ const TELEGRAM_PROBLEMS = {
   page_expired: "This page is from an earlier start of Agent Web. Open the newest Agent Web "
     + "tab and save again.",
 };
+
+// -- Shared platform (owner 2026-10-15) ---------------------------------------
+function showSharedPlatform(info) {
+  if (document.activeElement !== el("shared-portal-url")) {
+    el("shared-portal-url").value = info.member_portal_url || "";
+  }
+  if (document.activeElement !== el("shared-bridge-url")) {
+    el("shared-bridge-url").value = info.base_url || "";
+  }
+  el("shared-this-pc").textContent = "This PC: Bridge " + info.bridge_id + ", registered by "
+    + info.registered_by + (info.login_saved ? " · Personal Agent code saved"
+      : " · no Personal Agent code yet")
+    + (info.assets_only ? " · grants.json decides what this PC may run; synchronizing "
+      + "installs files only" : "");
+  const parts = [];
+  if (info.enrolled) {
+    parts.push("Enrolled as " + info.enrolled.bridge_id + " (" + info.enrolled.actor + ")");
+    if (info.enrolled.expires_at) {
+      parts.push("token valid until " + new Date(info.enrolled.expires_at).toLocaleString());
+    }
+  } else {
+    parts.push("Not enrolled on this shared platform yet");
+  }
+  if (info.last_catalog) {
+    parts.push("last catalog read " + new Date(info.last_catalog.at).toLocaleString()
+      + " (" + info.last_catalog.status + ")");
+  }
+  el("shared-status").textContent = parts.join(" · ");
+}
+
+async function loadSharedPlatform() {
+  const info = await call("/api/settings/shared-platform");
+  if (info.ok !== false) showSharedPlatform(info);
+}
+
+async function saveSharedPlatform(enroll) {
+  const save = el("shared-save"), go = el("shared-enroll"), status = el("shared-status");
+  const field = el("shared-code");
+  save.disabled = true; go.disabled = true; status.classList.remove("bad");
+  status.textContent = enroll ? "Enrolling this PC…" : "Saving…";
+  try {
+    const reply = await call("/api/settings/shared-platform", {
+      member_portal_url: el("shared-portal-url").value.trim(),
+      base_url: el("shared-bridge-url").value.trim(),
+      code: field.value, enroll});
+    field.value = "";  // the code never stays on the page
+    if (reply.member_portal_url !== undefined) showSharedPlatform(reply);
+    if (reply.ok === false) {
+      status.classList.add("bad");
+      status.textContent = (reply.saved ? "Settings saved, but not enrolled: " : "Not saved: ")
+        + (reply.message || reply.code);
+    } else if (enroll) {
+      status.textContent = "Enrolled. " + status.textContent
+        + (reply.probe ? " · the platform answered: " + reply.probe : "")
+        + " · no restart needed.";
+      loadCapabilities().catch(() => {});
+    } else {
+      status.textContent = "Saved. " + status.textContent;
+    }
+  } catch (failure) {
+    status.classList.add("bad"); status.textContent = "Not saved: " + failure.message;
+  } finally { save.disabled = false; go.disabled = false; }
+}
+
+el("shared-platform-settings").addEventListener("submit", (event) => {
+  event.preventDefault(); saveSharedPlatform(false);
+});
+el("shared-enroll").addEventListener("click", () => saveSharedPlatform(true));
 
 // -- Laya decision acceleration (owner 2026-10-13) ---------------------------
 const LAYA_PROBLEMS = {
@@ -3722,7 +3808,7 @@ function marketplaceAction(item) {
     actions.append(install); return actions;
   }
   if (sharedPlatform.member_portal_url) {
-    const select = document.createElement("a"); select.href = sharedPlatform.member_portal_url;
+    const select = document.createElement("a"); select.href = marketplaceUrl(sharedPlatform);
     select.target = "_blank"; select.rel = "noopener noreferrer";
     select.textContent = item.kind === "bridge_extension"
       ? "Review Extension" : "Select in Marketplace";
@@ -3755,8 +3841,13 @@ function renderMarketCards() {
     identity.append(text(item.kind + " · version " + item.version));
     const badges = document.createElement("div"); badges.className = "badges";
     badges.append(tag(true, "available", ""));
-    if (item.authorized) badges.append(tag(true, "authorized", ""));
+    if (item.authorized) {
+      badges.append(tag(true, sharedPlatform.assets_only ? "selected" : "authorized", ""));
+    }
     if (item.installed) badges.append(tag(true, "installed", ""));
+    if (item.installed && sharedPlatform.assets_only) {
+      badges.append(tag(false, "", "permissions come from this PC's grants.json"));
+    }
     if (!item.authorized) {
       const pending = tag(false, "", "select in Marketplace"); pending.classList.add("warn");
       badges.append(pending);
@@ -3791,13 +3882,19 @@ function renderMarketCards() {
   }
 }
 
+// The Marketplace opened from here already names this PC's Bridge.
+function marketplaceUrl(platform) {
+  return platform.member_portal_url
+    + (platform.bridge_id ? "/#bridge=" + encodeURIComponent(platform.bridge_id) : "");
+}
+
 function renderPlatform(platform) {
   sharedPlatform = platform;
   el("platform-note").textContent = platform.note;
   el("platform-sync").disabled = !platform.configured;
   const portal = el("member-portal");
   if (platform.member_portal_url) {
-    portal.href = platform.member_portal_url;
+    portal.href = marketplaceUrl(platform);
     portal.hidden = false;
   } else {
     portal.removeAttribute("href");
@@ -3855,7 +3952,9 @@ async function synchronizePlatform() {
     renderPlatform(synchronized.after);
     if (synchronized.status === "answered") {
       result.textContent = "Synchronization complete: " + synchronized.installed.length
-        + " installed, " + synchronized.selections + " active selections.";
+        + " installed, " + synchronized.selections + " active selections."
+        + (synchronized.assets_only ? " Installed files only; permissions come from this "
+          + "PC's grants.json." : "");
     } else {
       const failure = synchronized.failure || {code: synchronized.status};
       result.textContent = "Synchronization " + synchronized.status + ": " + failure.code;
@@ -3875,7 +3974,6 @@ el("platform-sync").addEventListener("click", synchronizePlatform);
 async function loadPublishing() {
   const data = await call("/api/publishing");
   el("publish-off").hidden = data.configured; el("publish-form").hidden = !data.configured;
-  el("publish-connect").hidden = !data.configured;
   const select = el("publish-asset"), chosen = select.value;
   select.replaceChildren();
   for (const item of data.assets) {
@@ -3902,15 +4000,6 @@ async function withdrawSubmission(id) {
   el("publish-status").textContent = reply.ok ? "Withdrawn." : reply.message || reply.code;
   await loadPublishing();
 }
-
-el("publish-code-save").addEventListener("click", async () => {
-  const field = el("publish-code"), status = el("publish-status");
-  const reply = await call("/api/publishing/connect", {code: field.value});
-  field.value = "";  // the code never stays on the page
-  status.classList.toggle("bad", !reply.ok);
-  status.textContent = reply.ok ? "Saved. This PC now publishes as you." : reply.message;
-  if (reply.ok) await loadPublishing();
-});
 
 el("publish-go").addEventListener("click", async () => {
   const button = el("publish-go"), status = el("publish-status");

@@ -190,6 +190,7 @@ from host_runtime.laya import probe as laya_probe
 from host_runtime.persona import AgentPersonaStore, AgentPersonaUpdateRequest
 from host_runtime.platform_publish import (
     MemberPortalPublisher,
+    UserEnvironment,
     explain,
     installed_assets,
     installed_manifest,
@@ -208,6 +209,24 @@ from host_runtime.review_routes import (
     resolve_rule,
     write_proposal,
 )
+from host_runtime.shared_platform import (
+    LOGIN_SHAPE,
+    TOKEN_VARIABLE,
+    EnrollmentRecord,
+    SharedPlatformError,
+    bridge_url,
+    enrolled_token,
+    portal_url,
+    read_config,
+    read_record,
+    save_config,
+    save_secret,
+    with_enrollment,
+    with_settings,
+    write_record,
+)
+from host_runtime.shared_platform import PROBLEMS as SHARED_PLATFORM_PROBLEMS
+from host_runtime.shared_platform import now as utc_now
 from host_runtime.skill_assist import Turn, assist
 from host_runtime.slash_commands import (
     COMMANDS,
@@ -2651,6 +2670,7 @@ class AgentWeb:
         import asyncio
 
         discovered = asyncio.run(self.runtime.platform.catalog())
+        self.last_catalog = {"at": utc_now().isoformat(), "status": discovered.status}
 
         try:
             installed_assets = self.runtime.state.installed()
@@ -2802,6 +2822,147 @@ class AgentWeb:
         publisher: MemberPortalPublisher | None = self._member_publisher[1]
         return publisher
 
+    # -- the Settings "Shared platform" card (owner 2026-10-15) --------------
+    # `docs/phases/BRIDGE_ENROLLMENT.md`: one Member Portal URL, the Bridge
+    # API URL, the Personal Agent code, and "Enroll this PC".
+
+    def shared_platform_settings(self) -> dict[str, Any]:
+        """The card's values and this PC's enrollment; never a secret."""
+        config = self.runtime.config
+        names = config.credential_environment()
+        publishing, platform = config.publishing, config.platform
+        login_variable = names.get(publishing.credential.name) if publishing else None
+        environment = UserEnvironment()
+        record = read_record(self.runtime.layout)
+        enrolled = (
+            record is not None and platform is not None and record.token_id == platform.token_id
+            and record.bridge_id == config.device.bridge_id
+        )
+        return {
+            "ok": True,
+            "writable": self.config_path is not None,
+            "member_portal_url": (publishing.member_portal_url if publishing is not None
+                                  else (platform.member_portal_url or "") if platform else ""),
+            "base_url": platform.base_url if platform is not None else "",
+            "bridge_id": config.device.bridge_id,
+            "registered_by": config.device.registered_by,
+            "login_variable": login_variable,
+            "login_saved": bool(login_variable and environment.get(login_variable)),
+            "token_variable": TOKEN_VARIABLE,
+            "enrolled": record.model_dump(mode="json") if enrolled and record else None,
+            "assets_only": self.runtime.layout.grants.is_file(),
+            "last_catalog": getattr(self, "last_catalog", None),
+        }
+
+    def update_shared_platform(self, body: dict[str, Any]) -> dict[str, Any]:
+        """Save the card (and the pasted code) and, when asked, enroll this
+        PC: the Bridge token is saved for this Windows user, host.json points
+        `platform` at it, and the running Agent switches to the new client
+        without a restart."""
+        if self.config_path is None:
+            return self._shared_problem("settings_read_only")
+        enroll = body.get("enroll") is True
+        code = body.get("code")
+        code = code.strip() if isinstance(code, str) else ""
+        with self._one_at_a_time:
+            try:
+                portal = portal_url(str(body.get("member_portal_url") or ""))
+                raw_bridge = str(body.get("base_url") or "").strip()
+                base = bridge_url(raw_bridge) if raw_bridge else None
+                if enroll and base is None:
+                    raise SharedPlatformError("bridge_url_missing")
+                if code and not LOGIN_SHAPE.fullmatch(code):
+                    raise SharedPlatformError("login_malformed")
+                try:
+                    current = read_config(self.config_path)
+                    updated = with_settings(current, member_portal_url=portal, base_url=base)
+                except (OSError, ValueError):
+                    raise SharedPlatformError("settings_invalid") from None
+                if code:
+                    assert updated.publishing is not None
+                    variable = updated.credential_environment()[
+                        updated.publishing.credential.name]
+                    save_secret(self.user_environment, variable, code)
+            except SharedPlatformError as error:
+                return self._shared_problem(error.code)
+            reply: dict[str, Any] = {"ok": True, "restart_required": False}
+            if enroll and base is not None:
+                try:
+                    updated = self._enroll(updated, base, portal)
+                    reply["just_enrolled"] = True
+                except SharedPlatformError as error:
+                    reply = {**self._shared_problem(error.code), "saved": True}
+                except PlatformPublishError as error:
+                    reply = {"ok": False, "code": error.code, "message": explain(error.code),
+                             "saved": True}
+            try:
+                save_config(self.config_path, updated, now=utc_now())
+            except OSError:
+                return self._shared_problem("settings_not_saved")
+            self._switch_platform(updated)
+            if reply.get("just_enrolled") and self.runtime.platform is not None:
+                import asyncio
+
+                probed = asyncio.run(self.runtime.platform.probe())
+                reply["probe"] = probed.status
+        return {**self.shared_platform_settings(), **reply}
+
+    def _enroll(self, config: CompanyHostConfiguration, base: str, portal: str
+                ) -> CompanyHostConfiguration:
+        """Ask the portal, as the member, for this computer's Bridge token;
+        save the token for this Windows user; return host.json pointing at it."""
+        from host_runtime.runtime import enrollment_request
+
+        assert config.publishing is not None
+        publisher = publisher_for(config.publishing, config.credential_environment())
+        assert publisher is not None
+        task = self.tasks().start("enroll", "Enroll this PC on the shared platform", portal)
+        try:
+            actor = publisher.me()
+            if actor != config.device.registered_by:
+                # Said here with both names: the platform would refuse it too.
+                raise SharedPlatformError("device_owner_mismatch")
+            answer = publisher.enroll(
+                enrollment_request(config, _trace()).model_dump(mode="json"))
+            token_id, secret, expires = enrolled_token(answer, config.device.bridge_id)
+            save_secret(self.user_environment, TOKEN_VARIABLE, secret)
+        except (SharedPlatformError, PlatformPublishError) as error:
+            self.tasks().finish(task, "failed", error.code)
+            raise
+        updated = with_enrollment(config, base_url=base, member_portal_url=portal,
+                                  token_id=token_id)
+        write_record(self.runtime.layout, EnrollmentRecord(
+            bridge_id=config.device.bridge_id, token_id=token_id, actor=actor,
+            enrolled_at=utc_now(), expires_at=expires))
+        self.tasks().finish(task, "succeeded", f"enrolled as {config.device.bridge_id}")
+        return updated
+
+    def _switch_platform(self, config: CompanyHostConfiguration) -> None:
+        """Use the new configuration at once: the publisher is rebuilt on its
+        next call and the Bridge client is replaced (the feedback sync reads
+        `runtime.platform` each time)."""
+        from host_runtime.sync import PlatformClient
+        from models.credentials import EnvironmentCredentials
+
+        self.runtime.config = config
+        self._member_publisher = (None, None)
+        if config.platform is not None:
+            self.runtime.platform = PlatformClient(
+                config.platform,
+                EnvironmentCredentials(config.credential_environment(), UserEnvironment()),
+            )
+
+    def _shared_problem(self, code: str) -> dict[str, Any]:
+        if code == "device_owner_mismatch":
+            message = (
+                f"This PC is registered to {self.runtime.config.device.registered_by} "
+                "(host.json device.registered_by), which is not the platform account of "
+                "this Personal Agent code."
+            )
+        else:
+            message = SHARED_PLATFORM_PROBLEMS.get(code) or explain(code)
+        return {"ok": False, "code": code, "message": message}
+
     def publishing(self) -> dict[str, Any]:
         binding = self.runtime.config.publishing
         reply: dict[str, Any] = {
@@ -2825,7 +2986,7 @@ class AgentWeb:
         publisher = self._publisher()
         if publisher is None or kind not in ("skill", "workflow"):
             return {"ok": False, "code": "publishing_not_configured",
-                    "message": "Add the shared platform's publishing settings to host.json."}
+                    "message": "Set the Member Portal URL in Settings > Shared platform."}
         task = self.tasks().start("publish", f"Publish {asset} to the shared platform",
                                   self.runtime.config.publishing.member_portal_url
                                   if self.runtime.config.publishing else "")
@@ -2848,7 +3009,7 @@ class AgentWeb:
         binding = self.runtime.config.publishing
         if binding is None:
             return {"ok": False, "code": "publishing_not_configured",
-                    "message": "Add the shared platform's publishing settings to host.json."}
+                    "message": "Set the Member Portal URL in Settings > Shared platform."}
         variable = self.runtime.config.credential_environment().get(binding.credential.name)
         value = code.strip()
         if variable is None:
@@ -3597,6 +3758,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, {"ok": True, "progress": knowledge_progress(key)})
         elif parsed.path == "/api/settings/laya":
             self._json(200, web.laya_settings())
+        elif parsed.path == "/api/settings/shared-platform":
+            self._json(200, web.shared_platform_settings())
         elif parsed.path == "/api/knowledge/reingest":
             query = parse_qs(parsed.query)
             self._json(200, web.reingest_status((query.get("sandbox_id") or [""])[0]))
@@ -3681,6 +3844,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/reviews/decide",
             "/api/settings/model",
             "/api/settings/laya",
+            "/api/settings/shared-platform",
             "/api/settings/telegram",
             "/api/mcp/save",
             "/api/mcp/delete",
@@ -3749,6 +3913,10 @@ class _Handler(BaseHTTPRequestHandler):
             return
         if path == "/api/settings/laya":
             self._json(200, self.server.web.update_laya(body if isinstance(body, dict) else {}))
+            return
+        if path == "/api/settings/shared-platform":
+            self._json(200, self.server.web.update_shared_platform(
+                body if isinstance(body, dict) else {}))
             return
         if path in ("/api/knowledge/convert/start", "/api/knowledge/convert/stop"):
             chosen = body if isinstance(body, dict) else {}
