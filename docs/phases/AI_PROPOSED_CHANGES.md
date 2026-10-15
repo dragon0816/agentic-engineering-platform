@@ -1,6 +1,6 @@
 # AI proposes, the person applies
 
-Owner request: 2026-10-15. Status: **design, awaiting owner review. Nothing is implemented.**
+Owner request: 2026-10-15. Status: **approved 2026-10-15; implementation starts after `CHAT_WORKFLOW_FORMS.md` lands.**
 
 ## Goal
 
@@ -110,8 +110,8 @@ refuses with `stale` and the Agent can propose again.
 - End to end: "turn Laya to shadow" → card → Apply → host.json changed → the Laya card
   shows it.
 
-## Open questions for the owner
+## Owner decisions (2026-10-15)
 
-1. Telegram: Apply only the low-risk kinds there (recommended), or every kind?
-2. Kinds in version 1: all of the table above, or start with `laya`,
-   `shared_platform`, `capability` and `platform_add`?
+1. Telegram applies only the low-risk kinds (`laya`, `workflow_settings`, capability
+   switch on/off); every other kind links to Agent Web.
+2. Version 1 covers every kind in the table above.
