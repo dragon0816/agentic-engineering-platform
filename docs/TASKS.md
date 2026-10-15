@@ -2032,3 +2032,34 @@ s-k-20261011T102952` (not published).
   suite 2754 passed, 6 skipped, 1 failed under load (`test_script_tools` PowerShell
   fixture, script timeout; the file passed alone, 6 passed). Live check pending (owner
   deploys to 172.25.228.141).
+
+- [x] AEP skills and MCP for coding agents by default (owner requirements 2026-10-15:
+  platform-ready Skills/Workflows from Claude Code, Codex and Copilot without a
+  per-folder connect; "MCP and Knowledge too"; live-test findings 3-6). Design
+  `docs/phases/EXTERNAL_AUTHORING.md` "Default user-level setup", decision in
+  `docs/DECISIONS.md` 2026-10-15 "AEP skills and MCP servers in the coding agents' user
+  configuration by default". `host_runtime/agent_setup.py`: `assets connect --user
+  --for claude-code|codex|copilot|all [--status|--remove]` writes
+  `aep-workflow-creator`, `aep-skill-creator`, new `aep-knowledge` skills and the `aep`
+  (authoring) + `aep-assistant` (Knowledge/Workflows) MCP servers into
+  `~/.claude/skills` + `~/.claude.json`, `~/.agents/skills` + `~/.codex/config.toml`
+  (marked block), `~/.copilot/skills` + `~/.copilot/mcp-config.json`; only AEP-marked
+  entries change, backups first, versioned skills. `host_runtime/assistant_bridge.py`
+  (`aep-host assistant-mcp`): stdio bridge to the running Agent Web reading address and
+  token at call time. install.ps1/update.ps1 run it unless `-NoAgentSkills`;
+  uninstall.ps1 `-Apply` removes it. Agent Web: `/mcp/authoring`; Copilot agent mode
+  gets `aep` + `aep-assistant` and the skills explicitly (text-only backends unchanged);
+  Settings "Coding agents" card. Fixes: compact `aep_catalog` (60 rich capabilities:
+  106,292 -> 11,809 characters, budget 15K) with `aep_capability`,
+  `aep_workflow_format`, `aep_skill_format` (+ CLI); checks create no folders; creator
+  skills ask before writing and prefer typed parameters. Tests:
+  `tests/test_coding_agent_setup.py` (temp homes), `tests/test_coding_agents_web.py`
+  (bridge, `/mcp/authoring`, Settings API, real browser card 717x895, Install 77x41),
+  additions in `tests/test_external_authoring.py`, `tests/test_conversation_backends.py`.
+  Smoke: `claude mcp list` in a temp home shows `aep` and `aep-assistant` Connected.
+  ruff clean; mypy src clean for these files (remaining errors: matplotlib stubs in the
+  local environment, and another in-progress `control_plane/app.py` change); full suite
+  2734 passed, 6 skipped, 24 failed + 23 errors: all in control_plane/portal tests from
+  another agent's uncommitted `src/control_plane` edits (pass on committed HEAD) or
+  pre-existing environment failures (numpy 2 vs matplotlib 3.7 weekly chart tests,
+  coding doctor firewall check; same on 0354ab42). Live check pending (owner).

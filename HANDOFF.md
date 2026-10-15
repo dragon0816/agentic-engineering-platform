@@ -1,8 +1,56 @@
 # Handoff
 
-Updated: 2026-10-15 (Asia/Taipei), by Claude Code (Workflow run forms in the chat)
+Updated: 2026-10-15 (Asia/Taipei), by Claude Code (AEP skills and MCP for coding agents)
 
-## Workflow run forms in the chat (2026-10-15, Claude Code) — latest
+## AEP skills and MCP for coding agents by default (2026-10-15, Claude Code) — latest
+
+Goal: owner requirements — Skills/Workflows made with Claude Code, Codex or Copilot must
+work on AEP without a per-folder connect, and AEP's MCP and Knowledge must be usable from
+them; plus live-test findings (catalog over the MCP output limit, check creating folders,
+agent not asking). Design `docs/phases/EXTERNAL_AUTHORING.md` "Default user-level setup";
+decision `docs/DECISIONS.md` 2026-10-15 "AEP skills and MCP servers in the coding agents'
+user configuration by default"; row in `docs/TASKS.md`. Committed on main, not pushed
+(87a098ab, 5a6e886a, 861ff17c, f1137dd8, b4fc2918 + the TASKS/HANDOFF commit).
+- `host_runtime/agent_setup.py` + `aep-host assets --config host.json connect --for
+  claude-code|codex|copilot|all --user [--status|--remove]`: skills `aep-workflow-creator`,
+  `aep-skill-creator`, `aep-knowledge` and MCP servers `aep` (authoring stdio) and
+  `aep-assistant` (`aep-host assistant-mcp`, `host_runtime/assistant_bridge.py`, forwards to
+  the running Agent Web, reads `agent-web.json` + `assistant-mcp-token` per call) into
+  `~/.claude/skills` + `~/.claude.json`; `~/.agents/skills` + `~/.codex/config.toml`
+  (marked block); `~/.copilot/skills` + `~/.copilot/mcp-config.json`. AEP-marked entries
+  only, backups `<file>.aep-backup-<time>`, versioned skills (`.aep-managed.json`).
+- Installer/updater run it for detected agents unless `-NoAgentSkills`; uninstall `-Apply`
+  removes it. Settings > Coding agents card (`/api/coding-agents`, install/remove).
+- Agent Web serves authoring MCP at `/mcp/authoring`; the Copilot agent mode gets `aep` +
+  `aep-assistant` and the skills (`.conversation-backends/.github/skills`, `--add-dir`).
+  The text-only Claude Code/Codex/Copilot chat backends stay tool-less by design.
+- Catalog compact (60 rich capabilities: 106,292 -> 11,809 chars; budget 15K) +
+  `aep_capability`, `aep_workflow_format`, `aep_skill_format` (+ CLI). Checks have no side
+  effects; folders made on submit/run/install. Creator skills ask first, typed params.
+- Verified: ruff clean; mypy clean for these files; new/changed tests pass
+  (`test_coding_agent_setup.py`, `test_coding_agents_web.py` incl. real browser,
+  `test_external_authoring.py`, `test_conversation_backends.py`). Full suite: 2734 passed,
+  6 skipped, 24 failed + 23 errors — control_plane/portal tests broken by another agent's
+  uncommitted `src/control_plane` password-sign-in edits (they pass on committed HEAD) and
+  pre-existing environment failures (numpy 2 vs matplotlib 3.7: weekly chart/report;
+  coding doctor firewall check; same on 0354ab42). Smoke: `claude mcp list` in a temp home
+  shows `aep` and `aep-assistant` Connected.
+- NOT done: live check (owner). Not done by design, needs an owner decision: tool-using
+  Claude Code/Codex agent modes inside Agent Web chat. Codex CLI is not installed here, so
+  its file locations follow current docs and are unverified on a real Codex.
+- Next for the owner: (1) `aep-host.exe assets --config host.json connect --for all --user`
+  from the install folder (or Settings > Coding agents > Install; needs Agent Web restarted
+  on this code); (2) restart Claude Code / VS Code; `claude mcp list` should show `aep` and
+  `aep-assistant` Connected; (3) in any folder ask Claude Code "幫我做一個 AEP Workflow…"
+  and expect clarifying questions first, then check/submit; (4) with Agent Web running ask
+  "用 AEP 知識庫查 …" and expect cited page paths; (5) remove with `--remove` or the
+  Settings button and confirm only AEP entries go.
+- Risks: `~/.claude.json` is rewritten whole (formatting normalized, backup kept) while a
+  Claude Code may be writing it; a person's own `aep`/`aep-assistant` entries are kept and
+  then AEP's are missing (reported); Copilot also reads `~/.agents/skills`, so with Codex
+  installed it may see the skills twice.
+
+## Workflow run forms in the chat (2026-10-15, Claude Code)
 
 Goal: owner finding — "我要執行rs-wmt-package-release" got prose in Agent Web (settings
 and values asked in chat) and only "✅ Done" in Telegram. Now a person's run request is
