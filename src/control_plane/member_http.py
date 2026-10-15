@@ -60,6 +60,11 @@ from control_plane.member_signin import (
     InMemoryInvitationSignIn,
     InvitationSignInError,
 )
+from control_plane.member_ticket import (
+    TICKET_LOGIN_LABEL,
+    TICKET_METHOD,
+    BrowserTickets,
+)
 from control_plane.submissions import SubmissionError
 from software.marketplace import ApplicationCatalogRequest
 
@@ -69,6 +74,7 @@ BEARER = "Bearer "
 INVITATION = "Invitation "
 LOGIN = "Login "
 RESET = "Reset "
+TICKET = "Ticket "
 
 STATUS_FOR = {
     "authentication_failed": 401,
@@ -124,6 +130,9 @@ STATUS_FOR = {
     "reset_link_used": 409,
     "reset_link_expired": 401,
     "reset_link_revoked": 401,
+    # One-click sign-in from Agent Web (owner 2026-10-15).
+    "ticket_used": 409,
+    "ticket_expired": 401,
 }
 # The label of a login a member issues for their Personal Agent, so the
 # portal and an audit can tell it from the browser's own.
@@ -165,6 +174,15 @@ def _reset_credential(header: str | None) -> tuple[str, str] | None:
     if not separator or not reset_id or not secret:
         return None
     return reset_id, secret
+
+
+def _ticket_credential(header: str | None) -> tuple[str, str] | None:
+    if header is None or not header.startswith(TICKET):
+        return None
+    ticket_id, separator, secret = header[len(TICKET) :].strip().partition(":")
+    if not separator or not ticket_id or not secret:
+        return None
+    return ticket_id, secret
 
 
 def _strings(raw: object, *names: str) -> tuple[str, ...]:
@@ -295,6 +313,8 @@ class _Handler(BaseHTTPRequestHandler):
             "admin/members/password-reset",
             "admin/members/sign-out",
             "admin/members/credentials",
+            "browser-ticket",
+            "sign-in/ticket",
         ):
             self._json(404, {"code": "invalid_request"})
             return
@@ -304,7 +324,7 @@ class _Handler(BaseHTTPRequestHandler):
         if operation == "session":
             self._refresh_session()
             return
-        if operation in ("sign-in/check", "sign-in/password", "password/reset"):
+        if operation in ("sign-in/check", "sign-in/password", "password/reset", "sign-in/ticket"):
             self._password_entry(operation)
             return
         credential = _credential(self.headers.get("Authorization"))
@@ -475,6 +495,24 @@ class _Handler(BaseHTTPRequestHandler):
                 reply = self.server.service.update_member(
                     *credential, AdminMemberUpdateRequest.model_validate(raw)
                 )
+            elif operation == "browser-ticket":
+                # One-click sign-in from Agent Web (owner 2026-10-15): the
+                # member's Agent, with its session, gets a single-use ticket
+                # good for 60 seconds that the browser trades for a sign-in.
+                if raw != {}:
+                    raise ValueError("a browser ticket takes no request fields")
+                member = self.server.service.identity(*credential)
+                if not self._active(member.actor):
+                    raise MemberError("actor_disabled")
+                ticket = self.server.tickets.issue(member.actor, now=self.server.service.now())
+                self._json(
+                    200,
+                    {
+                        "ticket": ticket.bearer,
+                        "expires_at": ticket.grant.expires_at.isoformat(),
+                    },
+                )
+                return
             elif operation == "password/status":
                 if raw != {}:
                     raise ValueError("the password status takes no request fields")
@@ -749,17 +787,19 @@ class _Handler(BaseHTTPRequestHandler):
         sessions = self.server.service.sessions.revoke_actor(actor)
         return logins, sessions
 
-    def _signed_in(self, actor: str) -> None:
+    def _signed_in(
+        self, actor: str, *, method: str = PASSWORD_METHOD, label: str = BROWSER_LOGIN_LABEL
+    ) -> None:
         """The same browser login and one-hour session an invitation gives."""
         now = self.server.service.now()
         identity = AuthenticatedActor(
             actor=actor,
-            method=PASSWORD_METHOD,
+            method=method,
             authenticated_at=now,
             expires_at=now + DEFAULT_MEMBER_SESSION,
         )
         session = self.server.service.sessions.issue(identity, now=now)
-        login = self.server.logins.issue(actor, label=BROWSER_LOGIN_LABEL, now=now)
+        login = self.server.logins.issue(actor, label=label, now=now)
         self._json(
             200,
             {
@@ -798,6 +838,20 @@ class _Handler(BaseHTTPRequestHandler):
                     active=self._active,
                 )
                 self._signed_in(actor)
+            elif operation == "sign-in/ticket":
+                ticket = _ticket_credential(header)
+                if ticket is None:
+                    raise MemberError("authentication_failed")
+                if raw != {}:
+                    raise ValueError("a ticket sign-in takes no request fields")
+                actor = self.server.tickets.redeem(*ticket, now=now)
+                if not self._active(actor):
+                    raise MemberError("actor_disabled")
+                # One Agent Web browser login per member: the earlier one ends.
+                for earlier in self.server.logins.active(actor, now=now):
+                    if earlier.label == TICKET_LOGIN_LABEL:
+                        self.server.logins.revoke(earlier.login_id)
+                self._signed_in(actor, method=TICKET_METHOD, label=TICKET_LOGIN_LABEL)
             elif operation == "password/reset":
                 reset = _reset_credential(header)
                 if reset is None:
@@ -856,6 +910,7 @@ class MemberPortalServer(ThreadingHTTPServer):
         sign_in: InMemoryInvitationSignIn | None = None,
         logins: InMemoryMemberLogins | None = None,
         passwords: MemberPasswords | None = None,
+        tickets: BrowserTickets | None = None,
     ) -> None:
         if ssl_context is None and host not in ("127.0.0.1", "localhost", "::1"):
             raise ValueError("a member portal exposed beyond loopback requires TLS")
@@ -863,6 +918,8 @@ class MemberPortalServer(ThreadingHTTPServer):
         self.sign_in = sign_in
         self.logins = logins if logins is not None else InMemoryMemberLogins()
         self.passwords = passwords if passwords is not None else MemberPasswords()
+        # Browser sign-in tickets live a minute, in memory only.
+        self.tickets = tickets if tickets is not None else BrowserTickets()
         super().__init__((host, port), _Handler)
         if ssl_context is not None:
             self.socket = ssl_context.wrap_socket(self.socket, server_side=True)

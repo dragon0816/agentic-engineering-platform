@@ -135,6 +135,9 @@ MemberErrorCode = Literal[
     # Platform overview (owner 2026-10-15).
     "last_administrator",
     "artifact_too_large",
+    # One-click sign-in from Agent Web (owner 2026-10-15).
+    "ticket_used",
+    "ticket_expired",
 ]
 
 T = TypeVar("T")
