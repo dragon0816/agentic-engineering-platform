@@ -290,6 +290,11 @@ def test_sending_needs_a_press_on_each_message(tmp_path: Path) -> None:
     mail_rows = [row for row in tasks.rows.values() if row["kind"] == "agent_mail"]
     assert [row["status"] for row in mail_rows] == [
         "succeeded", "stopped", "stopped", "failed", "stopped"]
+    # The answer keeps every mail card as decided.
+    shown = mode.finish(run, "answered")
+    assert [card["status"] for card in shown] == ["sent", "kept", "cancelled", "failed",
+                                                   "expired"]
+    assert all(card["card_id"].startswith("ml-") for card in shown)
 
 
 def test_a_draft_is_refused_before_outlook_when_it_is_unsafe(tmp_path: Path) -> None:

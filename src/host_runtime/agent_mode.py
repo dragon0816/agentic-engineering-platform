@@ -303,7 +303,8 @@ class AgentMode:
         summary = redact("; ".join(parts) + (f" ({note})" if note else ""))
         self.tasks().finish(run.task_id, "succeeded" if status == "answered" else "failed",
                             summary)
-        drawn = [self.card(card_id) for card_id in run.cards]
+        drawn = [self.mail.card(card_id) if card_id.startswith("ml-") and self.mail
+                 else self.card(card_id) for card_id in run.cards]
         return [item.model_dump(mode="json") for item in drawn if item is not None]
 
     def run_for_token(self, token: str) -> AgentRun | None:
