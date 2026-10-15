@@ -97,7 +97,7 @@ from common.workflow_parameters import (
 )
 from extensions.package import PortableExtensionPackage
 from extensions.runtime import ExtensionLifecycleStore
-from host_runtime import telemetry_api
+from host_runtime import asset_shelf, telemetry_api
 from host_runtime.answers import readable
 from host_runtime.assistant_tools import AssistantTools, assistant_token
 from host_runtime.assistant_tools import handle as assistant_handle
@@ -402,6 +402,28 @@ ASSETS_ONLY_NOTE = (
     " Synchronizing installs the selected files only; permissions come from this PC's "
     "grants.json, so nothing this PC may run changes."
 )
+
+
+# What a person sees when switching off or removing an installed asset.
+SHELF_MESSAGES = {
+    "shipped_asset": "This ships with AEP: 'aep-host export-assets', run at install and "
+    "upgrade, writes it back, so removing it would not last. Switch it off instead.",
+    "not_installed": "That Skill or Workflow is not installed on this PC any more; refresh.",
+    "not_disabled": "That is not switched off; refresh.",
+    "already_installed": "The same version is already switched on.",
+    "disabled_copy_exists": "A switched-off copy of this version already exists in the "
+    "disabled folder; remove one of them first.",
+    "alias_in_use": "Another version of this Skill is switched on; the Agent uses one "
+    "version per alias. Switch that one off first.",
+    "asset_unreadable": "That file cannot be read as a manifest.",
+    "kind_not_removable": "Only Skills and Workflows can be switched off or removed here.",
+    "bad_reference": "Name the asset as namespace/name@version.",
+    "workspace_unwritable": "Windows did not let the Agent move the file; nothing changed.",
+}
+
+
+def shelf_message(code: str) -> str:
+    return SHELF_MESSAGES.get(code, code)
 
 
 class AgentWeb:
@@ -2531,6 +2553,7 @@ class AgentWeb:
                     else item.harness_guidance.model_dump(mode="json")
                 ),
                 "knowledge_harness_selectable": harness_selectable(item),
+                "shipped": asset_shelf.is_shipped("skill", item.metadata.identity),
             }
             for item in manifests(layout.skills, SkillManifest)
         ]
@@ -2555,6 +2578,7 @@ class AgentWeb:
                         else {}
                     ),
                 },
+                "shipped": asset_shelf.is_shipped("workflow", item.metadata.identity),
             }
             for item in manifests(layout.workflows, WorkflowManifest)
         ]
@@ -2635,6 +2659,8 @@ class AgentWeb:
                 for item in extension_lifecycle(self.runtime)
             ],
             "runs": runs,
+            # Switched off: in the kind's `disabled/` folder, not offered.
+            "disabled": asset_shelf.disabled_assets(layout),
         }
 
     def activate_profile(self, request: AgentProfileActivationRequest) -> dict[str, Any]:
@@ -2735,6 +2761,12 @@ class AgentWeb:
                         dependencies=tuple(
                             f"{item.namespace}/{item.name}@{item.version}"
                             for item in metadata.dependencies
+                        ),
+                        provenance=tuple(
+                            item.source + "".join(
+                                f" ({label} {value})" for label, value in
+                                (("author", item.author), ("revision", item.revision)) if value)
+                            for item in metadata.provenance
                         ),
                         runtime=metadata.compatibility.runtime or "",
                         platforms=metadata.compatibility.platforms,
@@ -3044,6 +3076,180 @@ class AgentWeb:
             return {"ok": True, "submission": publisher.withdraw(submission_id)}
         except PlatformPublishError as error:
             return {"ok": False, "code": error.code, "message": explain(error.code)}
+
+    # -- the Library's "+ Add to this Agent" (owner 2026-10-15) ------------
+    # Selecting is the member's own decision, made in the Member Portal with
+    # their Personal Agent login; installing is the existing verified sync.
+
+    def _selection_problem(self, code: str) -> dict[str, Any]:
+        return {"ok": False, "code": code, "message": explain(code)}
+
+    def _member_selection(self, kind: str, asset: str, add: bool) -> dict[str, Any]:
+        try:
+            _, identity = asset_shelf.parse(kind, asset)
+        except asset_shelf.ShelfError as error:
+            return self._selection_problem(error.code)
+        if self.runtime.platform is None:
+            return self._selection_problem("platform_not_configured")
+        publisher = self._publisher()
+        if publisher is None:
+            return self._selection_problem("publishing_not_configured")
+        bridge_id = self.runtime.config.device.bridge_id
+        reference = identity.model_dump(mode="json")
+        label = f"{identity.namespace}/{identity.name}@{identity.version}"
+        with self._one_at_a_time:
+            task = self.tasks().start(
+                "select", (f"Add {label} to this Agent" if add
+                           else f"Remove the selection of {label}"), bridge_id)
+            already = False
+            try:
+                if add:
+                    publisher.select(bridge_id, reference)
+                else:
+                    publisher.revoke(bridge_id, reference)
+            except PlatformPublishError as error:
+                if not (add and error.code == "duplicate_selection"):
+                    self.tasks().finish(task, "failed", error.code)
+                    return self._selection_problem(error.code)
+                already = True
+            synchronized = self.synchronize()
+            after = synchronized.get("after") or {}
+            entry = next((item for item in after.get("catalog", ())
+                          if (item["namespace"], item["name"], item["version"])
+                          == identity.key), None)
+            installed = bool(entry and entry.get("installed"))
+            assets_only = bool(synchronized.get("assets_only") or after.get("assets_only"))
+            if synchronized["status"] != "answered":
+                failure = synchronized.get("failure") or {}
+                code = str(failure.get("code") or synchronized["status"])
+                message = ("Selected for this PC, but installing it did not finish: "
+                           if add else "Selection removed, but the sync did not finish: "
+                           ) + explain(code)
+                self.tasks().finish(task, "failed", code)
+                return {"ok": False, "code": code, "message": message, "selected": add,
+                        "installed": installed, "assets_only": assets_only,
+                        "sync": synchronized}
+            if add:
+                message = (f"{label} was already selected for this PC" if already
+                           else f"{label} is now selected for this PC")
+                message += ("; it is installed on this Agent." if installed
+                            else "; it is not installed yet.")
+                if assets_only:
+                    message += (" Files only: permissions come from this PC's grants.json, "
+                                "so it runs only where grants.json allows its capabilities.")
+                message += " The Agent offers a newly installed one after Agent Web restarts."
+            else:
+                message = (f"{label} is no longer selected for this PC. The installed file "
+                           "stays; use 'Remove from this Agent' in the list above to take it "
+                           "off this computer.")
+            self.tasks().finish(task, "succeeded", message)
+        return {"ok": True, "selected": add, "installed": installed,
+                "assets_only": assets_only, "message": message, "sync": synchronized}
+
+    def add_to_agent(self, kind: str, asset: str) -> dict[str, Any]:
+        """Select this exact version for this PC's Bridge, then synchronize."""
+        return self._member_selection(kind, asset, True)
+
+    def remove_selection(self, kind: str, asset: str) -> dict[str, Any]:
+        """Take back this PC's selection, then synchronize the decisions."""
+        return self._member_selection(kind, asset, False)
+
+    # -- switching off and removing installed assets (owner 2026-10-15) -----
+    # `host_runtime/asset_shelf.py`: off = the kind's `disabled/` folder,
+    # removed = `workspace/removed/<date>/`, never a hard delete.
+
+    def _live(self, kind: str, identity: AssetIdentity, offer: bool) -> None:
+        """Make the running Agent stop (or start) offering it at once. A
+        Skill switched on is offered after a restart, like an installed one."""
+        gateway = self.runtime.agent.gateway
+        if kind == "skill":
+            if not offer:
+                gateway.router.commands.skills.remove(identity)
+            return
+        if not offer:
+            gateway.engine.workflows.remove(identity)
+            return
+        path = self.runtime.layout.workflows / (
+            f"{identity.namespace}__{identity.name}__{identity.version}.json")
+        try:
+            manifest = WorkflowManifest.model_validate_json(path.read_text(encoding="utf-8-sig"))
+        except (OSError, ValueError):
+            return
+        if gateway.engine.workflows.get(identity) is None:
+            gateway.engine.workflows.register(manifest)
+
+    def switch_asset(self, kind: str, asset: str, enabled: bool) -> dict[str, Any]:
+        """Switch an installed Skill or Workflow off (its `disabled/` folder)
+        or back on, so a person can keep it from crowding the Agent's choices."""
+        try:
+            parsed_kind, identity = asset_shelf.parse(kind, asset)
+            with self._one_at_a_time:
+                if enabled:
+                    asset_shelf.switch_on(self.runtime.layout, parsed_kind, identity)
+                else:
+                    asset_shelf.switch_off(self.runtime.layout, parsed_kind, identity)
+                self._live(parsed_kind, identity, enabled)
+        except asset_shelf.ShelfError as error:
+            return {"ok": False, "code": error.code, "message": shelf_message(error.code)}
+        except OSError:
+            return {"ok": False, "code": "workspace_unwritable",
+                    "message": shelf_message("workspace_unwritable")}
+        if enabled:
+            message = "Switched on." + (
+                " The Agent offers this Skill after Agent Web restarts."
+                if parsed_kind == "skill" else "")
+        else:
+            message = ("Switched off: the Agent no longer offers it. The file is kept in "
+                       f"assets\\{parsed_kind}s\\disabled; switch it on again at any time.")
+        return {"ok": True, "enabled": enabled, "message": message}
+
+    def remove_asset(self, kind: str, asset: str) -> dict[str, Any]:
+        """Take an installed Skill or Workflow off this computer, recoverably:
+        the file moves to `workspace/removed/<date>/` and the inventory row
+        goes, so it is no longer offered or reported."""
+        try:
+            parsed_kind, identity = asset_shelf.parse(kind, asset)
+            with self._one_at_a_time:
+                moved = asset_shelf.remove(self.runtime.layout, parsed_kind, identity,
+                                           now=utc_now(), actor=self.runtime.actor)
+                self._live(parsed_kind, identity, False)
+                try:
+                    forgotten = self.runtime.state.forget(identity)
+                except LocalStateError:
+                    forgotten = False
+        except asset_shelf.ShelfError as error:
+            return {"ok": False, "code": error.code, "message": shelf_message(error.code)}
+        except OSError:
+            return {"ok": False, "code": "workspace_unwritable",
+                    "message": shelf_message("workspace_unwritable")}
+        kept = str(moved.target.relative_to(self.runtime.layout.workspace_root))
+        message = (f"Removed from this Agent. The file is kept in workspace\\{kept}; move it "
+                   "back to put it back.")
+        still_selected = self._selected_here(parsed_kind, identity)
+        if still_selected:
+            message += (" It is still selected for this PC on the shared platform, so the next "
+                        "synchronization installs it again; press 'Remove selection' on its "
+                        "Library card to stop that.")
+        return {"ok": True, "kept_at": kept, "inventory_forgotten": forgotten,
+                "still_selected": still_selected, "message": message}
+
+    def _selected_here(self, kind: str, identity: AssetIdentity) -> bool:
+        """The platform's last synchronized decisions still select it."""
+        from common.authorization import DeviceAuthorization
+
+        layout = self.runtime.layout
+        for path in (layout.platform_selections, layout.authorization):
+            if not path.is_file():
+                continue
+            try:
+                decided = DeviceAuthorization.model_validate_json(
+                    path.read_text(encoding="utf-8-sig"))
+            except (OSError, ValueError):
+                continue
+            if any(item.kind == kind and item.asset.key == identity.key
+                   for item in decided.selections):
+                return True
+        return False
 
     def ask(
         self,
@@ -3832,6 +4038,10 @@ class _Handler(BaseHTTPRequestHandler):
         if path not in (
             "/api/ask",
             "/api/platform/sync",
+            "/api/platform/add",
+            "/api/platform/unselect",
+            "/api/assets/switch",
+            "/api/assets/remove",
             "/api/publishing/submit",
             "/api/publishing/connect",
             "/api/publishing/withdraw",
@@ -4201,6 +4411,27 @@ class _Handler(BaseHTTPRequestHandler):
                 self._json(400, {"error": "name the submission"})
                 return
             self._json(200, self.server.web.withdraw_submission(submission_id))
+            return
+        if path in ("/api/platform/add", "/api/platform/unselect", "/api/assets/switch",
+                    "/api/assets/remove"):
+            fields = body if isinstance(body, dict) else {}
+            asset_kind, asset_ref = fields.get("kind"), fields.get("asset")
+            enabled = fields.get("enabled")
+            if not (isinstance(asset_kind, str) and isinstance(asset_ref, str) and asset_ref) or (
+                    path == "/api/assets/switch" and not isinstance(enabled, bool)):
+                self._json(400, {"ok": False, "code": "asset_request_invalid",
+                                 "message": "name the kind and the asset"})
+                return
+            web = self.server.web
+            if path == "/api/platform/add":
+                result = web.add_to_agent(asset_kind, asset_ref)
+            elif path == "/api/platform/unselect":
+                result = web.remove_selection(asset_kind, asset_ref)
+            elif path == "/api/assets/switch":
+                result = web.switch_asset(asset_kind, asset_ref, bool(enabled))
+            else:
+                result = web.remove_asset(asset_kind, asset_ref)
+            self._json(200, result)
             return
         if path == "/api/platform/sync":
             try:

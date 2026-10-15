@@ -155,6 +155,10 @@ class InstalledWorkflows:
             raise ValueError("workflow version already installed")
         self._workflows[key] = checked
 
+    def remove(self, identity: AssetIdentity) -> bool:
+        """Stop offering one version (switched off or removed by its owner)."""
+        return self._workflows.pop(identity.key, None) is not None
+
     def get(self, identity: AssetIdentity) -> WorkflowManifest | None:
         manifest = self._workflows.get(identity.key)
         return manifest.model_copy(deep=True) if manifest is not None else None

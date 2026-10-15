@@ -198,6 +198,16 @@ class MemberPortalPublisher:
             raise PublishError("bad_reply")
         return actor
 
+    def select(self, bridge_id: str, asset: dict[str, str]) -> dict[str, Any]:
+        """Choose one exact version for this computer's Bridge as the member
+        (Agent Web "+ Add to this Agent", owner 2026-10-15). Another version
+        of the same name selected before is replaced by the platform."""
+        return self._call("select", {"bridge_id": bridge_id, "asset": asset})
+
+    def revoke(self, bridge_id: str, asset: dict[str, str]) -> dict[str, Any]:
+        """Take back the member's selection of one exact version."""
+        return self._call("revoke", {"bridge_id": bridge_id, "asset": asset})
+
     def enroll(self, request: dict[str, Any]) -> dict[str, Any]:
         """Enroll this computer as the member (`bridges/enroll`, owner
         2026-10-15). The reply carries this computer's Bridge token once; the
@@ -236,6 +246,22 @@ EXPLANATIONS = {
     "device_in_use": "Another member is bound to this PC on the shared platform.",
     "actor_disabled": "Your platform account is disabled.",
     "session_expired": "The shared platform ended this PC's session; try again.",
+    # Selecting from Agent Web (owner 2026-10-15).
+    "actor_not_admitted": "This PC is not enrolled for your platform account. Open Settings > "
+    "Shared platform and press 'Enroll this PC'.",
+    "asset_not_entitled": "Its owner has not shared this with you; ask them to add you in the "
+    "Member Portal ('Who can use it').",
+    "asset_not_published": "That version is no longer in the shared catalog; refresh the "
+    "Library.",
+    "asset_deprecated": "That version is deprecated on the shared platform; choose a newer one.",
+    "selection_missing": "That version is not selected for this PC.",
+    "kind_mismatch": "That is not a Skill or Workflow the Agent can install.",
+    "publishing_not_configured": "Set the Member Portal URL and your Personal Agent code in "
+    "Settings > Shared platform.",
+    "platform_not_configured": "This PC is not connected to the shared platform yet. Open "
+    "Settings > Shared platform, set both addresses and press 'Enroll this PC'.",
+    "sync_asset_conflict": "A different file with the same name and version is already on "
+    "this PC, so nothing was installed. Remove the local copy first.",
 }
 
 

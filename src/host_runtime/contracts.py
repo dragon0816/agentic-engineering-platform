@@ -167,6 +167,8 @@ class PlatformCatalogProjection(Contract):
     lifecycle: Symbol
     categories: tuple[Symbol, ...] = ()
     dependencies: tuple[Text, ...] = ()
+    # Where it came from and who wrote it, e.g. "member-portal (author leo)".
+    provenance: tuple[Text, ...] = ()
     runtime: str = ""
     platforms: tuple[Symbol, ...] = ()
     published: StrictBool

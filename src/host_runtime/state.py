@@ -23,6 +23,7 @@ from urllib.request import pathname2url
 from pydantic import TypeAdapter, ValidationError
 
 from agent.run_state import TaskRunState, task_run_follows
+from common.assets import AssetIdentity
 from common.base import Symbol
 from common.distribution import (
     BridgeStateSnapshot,
@@ -258,6 +259,18 @@ class SqliteLocalState:
                     (*item.identity.key, item.model_dump_json()),
                 )
         return added
+
+    def forget(self, identity: AssetIdentity) -> bool:
+        """Drop one installed-asset row after its file was taken off this
+        computer (Agent Web "Remove from this Agent", owner 2026-10-15), so
+        the inventory no longer reports it and a later sync may install it
+        again. False when no row named it."""
+        with self._write() as conn:
+            removed = conn.execute(
+                "DELETE FROM installed WHERE namespace = ? AND name = ? AND version = ?",
+                identity.key,
+            ).rowcount
+        return bool(removed)
 
     def record_run(self, summary: LocalRunSummary) -> LocalRunSummary:
         """A run belongs to the actor who started it for as long as the record

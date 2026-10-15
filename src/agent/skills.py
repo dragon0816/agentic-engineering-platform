@@ -117,6 +117,14 @@ class SkillRegistry:
             raise ValueError("Skill alias already installed in this namespace")
         self._skills[key] = checked.model_dump_json()
 
+    def remove(self, identity: AssetIdentity) -> bool:
+        """Stop offering one exact Skill version (switched off or removed)."""
+        for key, payload in list(self._skills.items()):
+            if SkillManifest.model_validate_json(payload).metadata.identity == identity:
+                del self._skills[key]
+                return True
+        return False
+
     def get(self, namespace: str, alias: str) -> SkillManifest | None:
         payload = self._skills.get((namespace, alias))
         return SkillManifest.model_validate_json(payload) if payload is not None else None
