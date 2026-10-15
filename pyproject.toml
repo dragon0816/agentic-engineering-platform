@@ -65,7 +65,9 @@ markers = ["gui: drives desktop windows; runs only with AEP_GUI_TESTS=1"]
 target-version = "py311"
 line-length = 100
 # Migrated source jobs are vendored byte-identical and hash-verified; never reformat them.
-extend-exclude = ["packages/*/*/vendor"]
+# Benchmark runs are recorded agent output kept as evidence (prompts, traces and
+# the scripts an agent wrote, some deliberately broken); never lint or reformat them.
+extend-exclude = ["packages/*/*/vendor", "benchmarks/*/runs"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
