@@ -278,6 +278,7 @@ knows about them.
 | Phase 7, slice 4 | The team's real `chipset-map.json`, the ruleset workflow 10 transforms with, is not in the pinned source: it carries only `chipset-map.example.json`, so every run in that tree falls back to the example. The real file exists on the company machine and is needed for the parity run. It is host configuration, not content for this repository |
 | Phase 7, slice 3f | Source workflow 7, `jira_team_tickets` / `workflows/07_jira_team_tickets_to_excel.json`, has never been inspected, characterized or migrated. It was named in the Phase 7 candidate table by mistake, in place of the weekly report that was actually built. Whether it is migrated at all, and where it belongs in the order, is an owner decision that has not been asked for |
 | Phase 7, slice 2j | An approval on a tool selection may still name the acting member (`approved_by == actor`), as it could on a company workstation before the slice. Whether an approval must come from a second person is an owner policy decision that has not been asked for |
+| Backlog, 2026-10-16 | **Suggested Skills from experience** (owner request): detect repeated or long reusable work and propose a Skill or Workflow draft as a card that a person creates, ignores or turns into an update. Never self-installed. Planned after the Hermes skill pack release; design first (`docs/phases/SKILL_SUGGESTIONS.md`) |
 
 **Leaked credentials in the pinned `telegram-local-agent` source, checked
 2026-09-23.** Its `config.yaml` is tracked and carries two values. The
