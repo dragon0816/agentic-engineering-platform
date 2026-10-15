@@ -754,7 +754,9 @@ def test_page_exposes_setup_commands_and_capability_management(served: AgentWebS
     assert "Bridge Extensions" in page
     assert 'id="tab-feedback"' not in page
     assert 'id="contribution-form"' not in page and 'id="sop-authoring"' not in page
-    assert "Create a Skill or Workflow draft" not in page and 'id="drafts"' in page
+    # Drafts are listed with what is installed (owner 2026-10-15), not in a card of their own.
+    assert "Create a Skill or Workflow draft" not in page and 'id="cap-filter-drafts"' in page
+    assert 'id="drafts-card"' not in page
     assert 'id="persona-settings"' in page
     assert 'id="persona-soul"' in page
 

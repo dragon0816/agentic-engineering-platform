@@ -34,6 +34,7 @@ from host_runtime.contracts import CompanyHostConfiguration, HostLayout
 from host_runtime.host import build_runtime
 from host_runtime.shared_platform import LOGIN_VARIABLE, TOKEN_VARIABLE
 from host_runtime.web import AgentWeb
+from integrations.browser import browser_path
 
 IDENTITY = {"namespace": "lab", "name": "weekly-check", "version": "1.0.0"}
 REFERENCE = "lab/weekly-check@1.0.0"
@@ -322,4 +323,107 @@ def test_the_routes_need_the_token_and_a_named_asset(tmp_path: Path) -> None:
         finally:
             server.shutdown()
             server.server_close()
+            thread.join(timeout=5)
+
+
+def test_the_page_lists_drafts_with_installed_assets_and_opens_library_cards() -> None:
+    from host_runtime.web_page import PAGE
+
+    for hook in ('id="cap-filters"', 'id="cap-filter-drafts"', 'id="cap-filter-disabled"',
+                 '"role", "switch"', 'id="asset-confirm"', '"/api/assets/switch"',
+                 '"/api/assets/remove"', '"/api/drafts/install"', '"/api/drafts/delete"',
+                 '"/api/platform/add"', '"/api/platform/unselect"', '"aria-expanded"',
+                 "+ Add to this Agent", "Remove selection", "Discard draft",
+                 "Remove from this Agent", "Draft \u2014 not installed"):
+        assert hook in PAGE, hook
+    assert "我的草稿" not in PAGE and 'id="drafts-card"' not in PAGE
+    script = PAGE.split("<script>", 1)[1].split("</script>", 1)[0]
+    for name in ("function capabilityRow(", "function marketCard(", "function confirmAsset("):
+        body = script.split(name, 1)[1].split("\nfunction ", 1)[0]
+        for unsafe in ("innerHTML", "insertAdjacentHTML", "outerHTML"):
+            assert unsafe not in body, (name, unsafe)
+
+
+@pytest.mark.skipif(browser_path() is None, reason="no Chromium browser is installed")
+def test_the_capability_list_works_in_a_real_browser(tmp_path: Path) -> None:
+    """Drafts first, then installed, then switched off; chips filter; the
+    switch and buttons are at least 44 px; Remove asks first, naming the asset."""
+    import threading
+    import time
+
+    from host_runtime.web import AgentWebServer
+    from integrations.browser import Browser
+
+    config, layout = ready(tmp_path)
+    _local_workflow(layout, "local-check")
+    _local_workflow(layout, "quiet-check")
+    draft = {"candidate_id": "wf-test", "kind": "workflow", "asset": "lab/draft-check@1.0.0",
+             "title": "Draft check", "description": "From an external agent.",
+             "source": "external:claude-code", "updated_at": "2026-10-15T10:00:00+08:00",
+             "steps": ["files/read-file@1.0.0"], "parameters": [], "last_run": None,
+             "detail": "{}"}
+    with build_runtime(config) as runtime:
+        web = AgentWeb(runtime)
+        assert web.switch_asset("workflow", "lab/quiet-check@1.0.0", False)["ok"]
+        web.drafts = lambda: {"drafts": [draft]}  # type: ignore[method-assign]
+        served = AgentWebServer(web)
+        thread = threading.Thread(target=served.serve_forever, daemon=True)
+        thread.start()
+        browser = Browser(tmp_path / "browser", timeout_s=60)
+        browser.start()
+
+        def wait(expression: str) -> object:
+            deadline = time.monotonic() + 20
+            while time.monotonic() < deadline:
+                value = browser._evaluate(expression)
+                if value:
+                    return value
+                time.sleep(0.2)
+            raise AssertionError(expression)
+
+        def size(selector: str) -> list[int]:
+            return json.loads(str(browser._evaluate(
+                "JSON.stringify((() => { const r = document.querySelector("
+                + json.dumps(selector) + ").getBoundingClientRect();"
+                " return [Math.round(r.width), Math.round(r.height)]; })())")))
+
+        try:
+            browser.navigate(served.address)
+            browser._evaluate('document.getElementById("nav-capabilities").click()')
+            browser._evaluate('document.getElementById("cap-tab-workflows").click()')
+            wait('document.querySelectorAll("#capability-list .cap-row").length >= 4')
+            states = json.loads(str(browser._evaluate(
+                'JSON.stringify([...document.querySelectorAll("#capability-list .cap-row")]'
+                '.map((r) => r.dataset.state))')))
+            assert states[0] == "draft" and states[-1] == "disabled", states
+            assert set(states[1:-1]) == {"installed"}
+            for selector in ("#cap-filter-drafts", ".cap-row .switch",
+                             '.cap-row[data-state="draft"] .btn', ".detail-actions .danger"):
+                width, height = size(selector)
+                assert width >= 44 and height >= 44, (selector, width, height)
+            detail = str(browser._evaluate(
+                'document.getElementById("capability-detail-content").innerText'))
+            assert "Discard draft" in detail and "Install" in detail
+
+            browser._evaluate('document.getElementById("cap-filter-disabled").click()')
+            assert json.loads(str(browser._evaluate(
+                'JSON.stringify([...document.querySelectorAll("#capability-list .cap-row")]'
+                '.map((r) => r.dataset.state))'))) == ["disabled"]
+            browser._evaluate('document.getElementById("cap-filter-installed").click()')
+            browser._evaluate('[...document.querySelectorAll(".cap-item")].find((b) => '
+                              'b.textContent.includes("local-check")).click()')
+            browser._evaluate('[...document.querySelectorAll(".detail-actions button")]'
+                              '.find((b) => b.textContent.includes("Remove")).click()')
+            wait('document.getElementById("asset-confirm").open')
+            assert "local-check" in str(browser._evaluate(
+                'document.getElementById("asset-confirm-title").textContent'))
+            browser._evaluate('document.getElementById("asset-confirm-cancel").click()')
+            wait('!document.getElementById("asset-confirm").open')
+            assert (layout.workflows / "lab__local-check__1.0.0.json").is_file()
+            assert not (layout.workspace_root / "removed").exists()
+        finally:
+            browser.close()
+            browser.discard_profile()
+            served.shutdown()
+            served.server_close()
             thread.join(timeout=5)

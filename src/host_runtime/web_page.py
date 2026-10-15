@@ -528,14 +528,88 @@ tr:last-child td { border-bottom: none; }
   color: var(--accent); text-decoration: none; font-weight: 600; white-space: nowrap; }
 .market-grid { display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px; }
-.market-card { min-height: 180px; padding: 14px; border: 1px solid var(--line);
-  border-left: 4px solid var(--accent); border-radius: 9px; background: var(--panel); }
-.market-card h3 { margin: 0; font-size: 15px; overflow-wrap: anywhere; }
-.market-card p { margin: 8px 0; color: var(--dim); font-size: 13px; }
-.market-card .inline-actions { margin-top: 12px; }
+.market-card { border: 1px solid var(--line); border-radius: 9px; background: var(--panel); }
 .badges { display: flex; flex-wrap: wrap; gap: 5px; margin: 9px 0; }
 .tag.warn { color: var(--warn); border-color: var(--warn); }
 .section-status { min-height: 22px; color: var(--dim); font-size: 13px; }
+/* Capabilities: one list for installed, drafts and switched-off assets. */
+.cap-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.chip { min-height: 44px; padding: 6px 12px; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 999px; font: inherit; font-size: 13px;
+  cursor: pointer; }
+.chip[aria-pressed="true"] { color: var(--accent); border-color: var(--accent);
+  background: var(--accent-soft); font-weight: 600; }
+.cap-row { display: flex; align-items: center; gap: 6px; padding-right: 8px;
+  border-bottom: 1px solid var(--line); }
+.cap-row .cap-item { flex: 1; min-width: 0; border-bottom: 0; }
+.cap-row .cap-item small { overflow-wrap: anywhere; }
+.cap-row[data-state="draft"] { box-shadow: inset 4px 0 0 var(--warn); }
+.cap-row[data-state="disabled"] .cap-item strong { color: var(--dim); }
+.cap-item[aria-current="true"] { background: var(--selected); }
+.cap-state { display: inline-block; margin-top: 4px; }
+.btn { min-height: 44px; padding: 8px 14px; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 8px; font: inherit; font-weight: 600;
+  cursor: pointer; }
+.btn[disabled] { opacity: .5; cursor: default; }
+.btn.danger { color: var(--bad); border-color: var(--bad); }
+.btn.small { min-height: 44px; padding: 6px 12px; font-size: 13px; }
+.switch { position: relative; flex: none; width: 52px; min-height: 44px; padding: 0;
+  background: transparent; border: 0; cursor: pointer; }
+.switch::before { content: ""; position: absolute; left: 4px; top: 50%; width: 44px;
+  height: 24px; margin-top: -12px; border-radius: 999px; background: var(--line);
+  transition: background .15s; }
+.switch::after { content: ""; position: absolute; left: 7px; top: 50%; width: 18px;
+  height: 18px; margin-top: -9px; border-radius: 50%; background: var(--bg);
+  box-shadow: 0 1px 2px #0004; transition: transform .15s; }
+.switch[aria-checked="true"]::before { background: var(--good); }
+.switch[aria-checked="true"]::after { transform: translateX(20px); }
+.switch[disabled] { opacity: .5; cursor: default; }
+.detail-head { display: flex; gap: 14px; align-items: flex-start;
+  justify-content: space-between; flex-wrap: wrap; }
+.detail-head > div:first-child { min-width: 0; flex: 1 1 220px; }
+.detail-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.detail-actions .note { flex-basis: 100%; text-align: right; margin: 0; }
+.detail-actions .go, .market-detail .go, .cap-row .btn { min-height: 44px; }
+.tag.draft { color: var(--warn); border-color: var(--warn); }
+/* Share Platform Library: expandable cards, one open at a time. */
+.market-card { position: relative; display: flex; flex-direction: column; min-height: 0;
+  padding: 0; border-left-width: 1px; cursor: pointer; }
+.market-card:hover { border-color: var(--accent); }
+.market-card[data-expanded] { grid-column: 1 / -1; cursor: default;
+  border-color: var(--accent); }
+.market-card h3 { margin: 0; font-size: inherit; }
+.market-head { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 10px;
+  align-items: center; width: 100%; min-height: 64px; padding: 14px 14px 6px;
+  color: var(--ink); background: transparent; border: 0; border-radius: 9px 9px 0 0;
+  text-align: left; font: inherit; cursor: pointer; }
+.kind-icon { display: inline-flex; width: 40px; height: 40px; align-items: center;
+  justify-content: center; border-radius: 10px; font-weight: 700; color: var(--accent);
+  background: var(--accent-soft); }
+.kind-icon[data-kind="workflow"] { color: var(--good); }
+.market-name { display: block; font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
+.market-head .identity { display: block; }
+.status-badge { padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 600;
+  white-space: nowrap; border: 1px solid var(--line); color: var(--dim); background: var(--bg); }
+.status-badge[data-status="installed"] { color: var(--good); border-color: var(--good); }
+.status-badge[data-status="selected"] { color: var(--accent); border-color: var(--accent); }
+.market-summary { padding: 0 14px 14px 64px; }
+.market-summary p { margin: 2px 0 8px; color: var(--dim); font-size: 13px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.market-card[data-expanded] .market-summary p { white-space: normal; }
+.market-summary .badges { margin: 0; }
+.market-detail { padding: 0 14px 16px 64px; border-top: 1px solid var(--line); }
+.market-detail h4 { margin: 14px 0 4px; font-size: 13px; color: var(--dim);
+  text-transform: uppercase; letter-spacing: .04em; }
+.market-detail .inline-actions { margin-top: 12px; }
+.market-outcome { margin-top: 10px; }
+@media (max-width: 760px) {
+  .market-summary, .market-detail { padding-left: 14px; }
+  .detail-actions { justify-content: flex-start; }
+  .detail-actions .note { text-align: left; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .switch::before, .switch::after { transition: none; }
+}
 .section-status.bad { color: var(--bad); }
 @media (max-width: 1000px) {
   .market-tools { grid-template-columns: minmax(220px, 1fr) minmax(150px, .55fr); }
@@ -917,13 +991,30 @@ tr:last-child td { border-bottom: none; }
               data-kind="applications">
         Apps<span class="cap-count" id="count-applications">0</span></button>
     </div>
+    <div id="capability-notice" class="section-status cap-notice" role="status"
+         aria-live="polite"></div>
     <div class="cap-layout">
       <div class="cap-browser">
-        <div class="cap-search"><label for="capability-search">Search installed capabilities</label>
+        <div class="cap-search"><label for="capability-search">Search this Agent's
+          capabilities</label>
           <input id="capability-search" type="search"
-                 placeholder="Name, namespace or description"></div>
-        <div id="capability-list" class="cap-list" role="listbox"
-             aria-label="Installed capabilities"></div>
+                 placeholder="Name, namespace or description">
+          <div id="cap-filters" class="cap-filters" role="group" aria-label="Show">
+            <button type="button" class="chip" id="cap-filter-all" data-filter="all"
+                    aria-pressed="true">All<span class="cap-count"
+                    id="cap-filter-count-all">0</span></button>
+            <button type="button" class="chip" id="cap-filter-installed" data-filter="installed"
+                    aria-pressed="false">Installed<span class="cap-count"
+                    id="cap-filter-count-installed">0</span></button>
+            <button type="button" class="chip" id="cap-filter-drafts" data-filter="drafts"
+                    aria-pressed="false">Drafts<span class="cap-count"
+                    id="cap-filter-count-drafts">0</span></button>
+            <button type="button" class="chip" id="cap-filter-disabled" data-filter="disabled"
+                    aria-pressed="false">Switched off<span class="cap-count"
+                    id="cap-filter-count-disabled">0</span></button>
+          </div></div>
+        <div id="capability-list" class="cap-list" role="list"
+             aria-label="Capabilities on this Agent"></div>
       </div>
       <article id="capability-detail" class="cap-detail" aria-live="polite">
         <div id="capability-detail-content" class="empty">
@@ -960,13 +1051,17 @@ tr:last-child td { border-bottom: none; }
         </div>
       </article>
     </div>
-    <div class="card" id="drafts-card" style="margin-top: 14px">
-      <h3>我的草稿（尚未安裝）</h3>
-      <p class="note">在對話中或由外部 Agent 做出、還沒安裝的 Workflow 與 Skill。
-        按「安裝」就是你的核准；Workflow 立即可在對話中重用，Skill 在主機重新啟動後生效。
-        「執行一次」不等於安裝。</p>
-      <div id="drafts" class="empty">reading&hellip;</div>
-    </div>
+    <dialog id="asset-confirm" aria-labelledby="asset-confirm-title"
+            aria-describedby="asset-confirm-detail">
+      <form method="dialog" class="dialog-body">
+        <h2 id="asset-confirm-title">Remove?</h2>
+        <p id="asset-confirm-detail"></p>
+        <div class="dialog-actions">
+          <button class="btn" id="asset-confirm-cancel" value="cancel" autofocus>Cancel</button>
+          <button class="btn danger" id="asset-confirm-go" value="confirm">Remove</button>
+        </div>
+      </form>
+    </dialog>
     <div hidden aria-hidden="true">
       <select id="workflow-target" disabled></select>
       <select id="knowledge-target" disabled></select>
@@ -995,7 +1090,7 @@ tr:last-child td { border-bottom: none; }
           <option value="all">All categories</option></select>
         <select id="market-status" aria-label="Filter by status">
           <option value="all">All statuses</option><option value="installed">Installed</option>
-          <option value="authorized">Authorized</option><option value="available">Available</option>
+          <option value="authorized">Selected</option><option value="available">Available</option>
         </select>
         <a id="member-portal" hidden target="_blank" rel="noopener noreferrer"
            aria-label="Open shared marketplace (Agent Add-ons and Applications)">
@@ -1004,7 +1099,9 @@ tr:last-child td { border-bottom: none; }
       </div>
       <div id="platform-sync-result" class="section-status" role="status" aria-live="polite">
         Synchronization runs only when you press the button.</div>
-      <div id="catalog" class="market-grid" aria-live="polite">
+      <p class="note">Press a card for its details. &ldquo;+ Add to this Agent&rdquo; selects
+        that version for this PC as you on the shared platform and installs it here.</p>
+      <div id="catalog" class="market-grid">
         <div class="empty">reading&hellip;</div></div>
       <details style="margin-top: 14px"><summary>Selections authorized on this Bridge</summary>
         <p class="note">A synchronized selection does not bypass capability policy.</p>
@@ -2425,52 +2522,19 @@ field.addEventListener("keydown", event => {
   }
 });
 
+// Drafts (owner 2026-10-08) live in the Capabilities list beside what is
+// installed (owner 2026-10-15): "Draft - not installed" with Install, where the
+// owner's press is the approval. Built with text nodes only.
+let capabilityDrafts = [];
+
 async function loadDrafts() {
-  const box = el("drafts");
   const listed = await call("/api/drafts");
-  if (!listed.drafts.length) {
-    box.className = "empty"; box.textContent = "沒有尚未安裝的草稿。"; return;
-  }
-  box.className = ""; box.replaceChildren();
-  for (const item of listed.drafts) {
-    const card = document.createElement("div"); card.className = "approval-card";
-    card.dataset.candidateId = item.candidate_id;
-    const title = document.createElement("strong");
-    title.textContent = (item.kind === "skill" ? "Skill " : "Workflow ") + item.asset
-      + "（" + (item.source === "conversation" ? "對話" : item.source) + "）";
-    const summary = document.createElement("p");
-    const run = item.last_run;
-    summary.textContent = (item.description || item.title)
-      + "\n" + (item.kind === "skill" ? "指令：" : "步驟：") + item.steps.join(" → ")
-      + (item.parameters.length ? "\n參數：" + item.parameters.join(", ") : "")
-      + "\n上次執行：" + (run ? (run.result || run.status) + "（" + run.at + "）" : "尚未執行");
-    const details = document.createElement("details");
-    const label = document.createElement("summary"); label.textContent = "完整內容";
-    const body = document.createElement("pre"); body.textContent = item.detail;
-    details.append(label, body);
-    const install = document.createElement("button"); install.type = "button";
-    install.className = "approve"; install.textContent = "安裝";
-    const remove = document.createElement("button"); remove.type = "button";
-    remove.className = "reject"; remove.textContent = "刪除草稿";
-    const note = document.createElement("span"); note.className = "approval-note";
-    const act = async (action) => {
-      if (action === "delete" && !confirm("刪除這個草稿？已安裝的版本不受影響。")) return;
-      install.disabled = remove.disabled = true;
-      note.textContent = action === "install" ? "安裝中…" : "";
-      try {
-        const done = await call("/api/drafts/" + action, {candidate_id: item.candidate_id});
-        if (!done.ok) throw new Error(done.code || action + " failed");
-        if (action === "install") alert("已安裝 " + done.installed_as + "。" + (done.note || ""));
-        await loadAssets();
-      } catch (failure) {
-        note.textContent = failure.message; install.disabled = remove.disabled = false;
-      }
-    };
-    install.addEventListener("click", () => act("install"));
-    remove.addEventListener("click", () => act("delete"));
-    card.append(title, summary, details, install, remove, note);
-    box.append(card);
-  }
+  capabilityDrafts = listed.drafts.map((item) => {
+    const slash = item.asset.indexOf("/"), at = item.asset.lastIndexOf("@");
+    return Object.assign({}, item, {namespace: item.asset.slice(0, slash),
+      name: item.asset.slice(slash + 1, at), version: item.asset.slice(at + 1)});
+  });
+  return capabilityDrafts;
 }
 
 async function loadExternalApprovals() {
@@ -2517,8 +2581,8 @@ async function loadExternalApprovals() {
 
 async function loadAssets() {
   loadExternalApprovals().catch(() => {});
-  loadDrafts().catch(() => {});
-  const assets = await call("/api/assets");
+  const [assets] = await Promise.all([call("/api/assets"),
+    loadDrafts().catch(() => { capabilityDrafts = []; })]);
   el("profiles").replaceChildren(table(
     ["Asset", "State", "Action", "What it is"], assets.profiles,
     (p) => {
@@ -2555,7 +2619,7 @@ async function loadAssets() {
   }
   target.disabled = assets.workflows.length === 0;
   el("workflow-run").disabled = assets.workflows.length === 0;
-  installedAssets = Object.assign({applications: []}, assets);
+  installedAssets = Object.assign({applications: [], disabled: []}, assets);
   showWorkflowContract();
   const knowledgeTarget = el("knowledge-target");
   knowledgeTarget.replaceChildren();
@@ -2585,16 +2649,35 @@ async function loadAssets() {
 }
 
 let installedAssets = {skills: [], workflows: [], knowledge: [], extensions: [],
-  applications: []};
+  applications: [], disabled: []};
 let activeCapabilityKind = "skills";
 let activeCapabilityKey = "";
+let activeCapabilityFilter = "all";
+// The kinds a person can install from a draft, switch off and remove here.
+const SHELF_KINDS = {skills: "skill", workflows: "workflow"};
 
 function capabilityKey(item) {
   return item.namespace + "/" + item.name + "@" + item.version;
 }
 
+function capabilityRowKey(row) {
+  return row.state + ":" + capabilityKey(row.item);
+}
+
 function capabilityTitle(item, kind) {
   return kind === "skills" && item.alias ? item.alias : item.name;
+}
+
+// Drafts first, then what is installed, then what is switched off.
+function capabilityRows(kind) {
+  const installed = installedAssets[kind].map((item) => ({state: "installed", item: item}));
+  const shelf = SHELF_KINDS[kind];
+  if (!shelf) return installed;
+  const drafts = capabilityDrafts.filter((item) => item.kind === shelf)
+    .map((item) => ({state: "draft", item: item}));
+  const off = (installedAssets.disabled || []).filter((item) => item.kind === shelf)
+    .map((item) => ({state: "disabled", item: item}));
+  return drafts.concat(installed, off);
 }
 
 function appendMeta(container, rows) {
@@ -2602,33 +2685,200 @@ function appendMeta(container, rows) {
   for (const [label, value] of rows) {
     const term = document.createElement("dt"); term.append(text(label));
     const detail = document.createElement("dd");
-    if (value instanceof Node) detail.append(value); else detail.append(text(value || "\u2014"));
+    if (value instanceof Node) detail.append(value); else detail.append(text(value || "—"));
     list.append(term, detail);
   }
   container.append(list);
 }
 
-function showCapabilityDetail(item, kind) {
+function setCapabilityNotice(message, bad) {
+  const box = el("capability-notice");
+  box.textContent = message || ""; box.classList.toggle("bad", !!bad);
+}
+
+// A named confirmation before anything is discarded or removed.
+function confirmAsset(title, detail, confirmLabel) {
+  const dialog = el("asset-confirm");
+  el("asset-confirm-title").textContent = title;
+  el("asset-confirm-detail").textContent = detail;
+  el("asset-confirm-go").textContent = confirmLabel;
+  dialog.returnValue = "";
+  return new Promise((resolve) => {
+    dialog.addEventListener("close", () => resolve(dialog.returnValue === "confirm"),
+      {once: true});
+    dialog.showModal();
+    el("asset-confirm-cancel").focus();
+  });
+}
+
+async function capabilityAction(button, busyText, request) {
+  for (const other of document.querySelectorAll(
+    "#capability-list button, #capability-detail-content button")) other.disabled = true;
+  button.setAttribute("aria-busy", "true");
+  setCapabilityNotice(busyText, false);
+  let done;
+  try {
+    done = await request();
+  } catch (failure) {
+    done = {ok: false, message: failure.message};
+  }
+  setCapabilityNotice(done.message || (done.ok ? "Done." : done.code || "It did not work."),
+    !done.ok);
+  button.removeAttribute("aria-busy");
+  try { await loadAssets(); } catch (_) { renderCapabilityBrowser(); }
+  return done;
+}
+
+function installDraft(draft, button) {
+  return capabilityAction(button, "Installing " + draft.asset + "…", async () => {
+    const done = await call("/api/drafts/install", {candidate_id: draft.candidate_id});
+    if (!done.ok) return {ok: false, message: "Not installed: " + (done.code || "install failed")};
+    const installedAs = done.installed_as || draft.asset;
+    activeCapabilityKey = "installed:" + installedAs;
+    return {ok: true, message: "Installed " + installedAs + ". " + (done.note || "")};
+  });
+}
+
+async function discardDraft(draft, button) {
+  const confirmed = await confirmAsset("Discard the draft " + draft.asset + "?",
+    "The draft “" + (draft.title || draft.asset) + "” is deleted. Installed "
+      + "versions are not affected.", "Discard draft");
+  if (!confirmed) { button.focus(); return null; }
+  return capabilityAction(button, "Discarding " + draft.asset + "…", async () => {
+    const done = await call("/api/drafts/delete", {candidate_id: draft.candidate_id});
+    return done.ok ? {ok: true, message: "Draft " + draft.asset + " discarded."}
+      : {ok: false, message: "Not discarded: " + (done.code || "delete failed")};
+  });
+}
+
+function switchAsset(kind, item, enabled, button) {
+  const key = capabilityKey(item);
+  return capabilityAction(button, (enabled ? "Switching on " : "Switching off ") + key + "…",
+    async () => {
+      const done = await call("/api/assets/switch",
+        {kind: kind, asset: key, enabled: enabled});
+      if (done.ok) activeCapabilityKey = (enabled ? "installed:" : "disabled:") + key;
+      return done;
+    });
+}
+
+async function removeAsset(kind, item, button) {
+  const key = capabilityKey(item);
+  const name = capabilityTitle(item, kind === "skill" ? "skills" : "workflows");
+  const confirmed = await confirmAsset("Remove " + name + " from this Agent?",
+    key + " moves to a dated folder under workspace\\removed (it is not deleted) and the "
+      + "Agent stops offering it. To put it back, move the file back.",
+    "Remove from this Agent");
+  if (!confirmed) { button.focus(); return null; }
+  return capabilityAction(button, "Removing " + key + "…",
+    () => call("/api/assets/remove", {kind: kind, asset: key}));
+}
+
+function actionButton(label, className, handler) {
+  const button = document.createElement("button"); button.type = "button";
+  button.className = className; button.textContent = label;
+  button.addEventListener("click", () => handler(button));
+  return button;
+}
+
+function detailHead(content, title, key, badgeNodes) {
+  const head = document.createElement("div"); head.className = "detail-head";
+  const left = document.createElement("div");
+  const heading = document.createElement("h3"); heading.append(text(title));
+  const identity = document.createElement("div"); identity.className = "identity";
+  identity.append(text(key));
+  const badges = document.createElement("div"); badges.className = "badges";
+  badges.append(...badgeNodes);
+  left.append(heading, identity, badges);
+  const actions = document.createElement("div"); actions.className = "detail-actions";
+  head.append(left, actions);
+  content.append(head);
+  return {actions: actions, badges: badges};
+}
+
+function showDraftDetail(content, draft) {
+  const state = tag(false, "", "Draft — not installed"); state.classList.add("draft");
+  const head = detailHead(content, draft.title || draft.name, draft.asset, [state]);
+  head.actions.append(
+    actionButton("Install", "go", (button) => installDraft(draft, button)),
+    actionButton("Discard draft", "btn danger", (button) => discardDraft(draft, button)));
+  const description = document.createElement("p"); description.className = "detail-description";
+  description.append(text(draft.description || "No description supplied."));
+  const run = draft.last_run;
+  content.append(description);
+  appendMeta(content, [
+    ["Made in", draft.source === "conversation" ? "a conversation" : draft.source],
+    [draft.kind === "skill" ? "Commands" : "Steps", draft.steps.join(" → ")],
+    ["Parameters", draft.parameters.join(", ") || "None"],
+    ["Last run", run ? (run.result || run.status) + " (" + run.at + ")" : "Not run yet"],
+    ["Updated", draft.updated_at]]);
+  const note = document.createElement("p"); note.className = "note";
+  note.append(text("Install is your approval; the Agent never installs a draft on its own. "
+    + "A Workflow is usable at once, a Skill after the host restarts. Running it once is "
+    + "not installing it."));
+  const details = document.createElement("details");
+  const label = document.createElement("summary"); label.textContent = "Full content";
+  const body = document.createElement("pre"); body.className = "markdown-panel";
+  body.textContent = draft.detail;
+  details.append(label, body);
+  content.append(note, details);
+}
+
+function showDisabledDetail(content, item, kind) {
+  const state = tag(false, "", "Switched off");
+  const head = detailHead(content, capabilityTitle(item, kind), capabilityKey(item), [state]);
+  const shelf = SHELF_KINDS[kind];
+  head.actions.append(
+    actionButton("Switch on", "go", (button) => switchAsset(shelf, item, true, button)));
+  appendRemove(head.actions, shelf, item);
+  const description = document.createElement("p"); description.className = "detail-description";
+  description.append(text(item.description || "No description supplied."));
+  content.append(description);
+  appendMeta(content, [["State", "Switched off: the Agent does not offer it"],
+    ["Kept in", "assets\\" + shelf + "s\\disabled"]]);
+}
+
+function appendRemove(actions, shelf, item) {
+  const remove = actionButton("Remove from this Agent", "btn danger",
+    (button) => removeAsset(shelf, item, button));
+  actions.append(remove);
+  if (item.shipped) {
+    remove.disabled = true;
+    const why = document.createElement("p"); why.className = "note";
+    why.append(text("Ships with AEP, so export-assets would bring it back; switch it off "
+      + "instead."));
+    actions.append(why);
+  }
+}
+
+function showCapabilityDetail(row, kind) {
   const content = el("capability-detail-content"); content.className = "";
   content.replaceChildren();
   el("workflow-action").hidden = true;
   el("workflow-settings").hidden = true;
   el("knowledge-action").hidden = true;
-  if (!item) {
+  if (!row) {
     content.className = "empty";
     content.append(text(kind === "applications"
       ? "Applications run independently and are discovered in the authenticated Shared Marketplace."
-      : "No installed " + kind + " match this search."));
+      : "Nothing here matches this search and filter."));
     return;
   }
-  const title = document.createElement("h3"); title.append(text(capabilityTitle(item, kind)));
-  const identity = document.createElement("div"); identity.className = "identity";
-  identity.append(text(capabilityKey(item)));
-  const badges = document.createElement("div"); badges.className = "badges";
-  badges.append(tag(true, "installed", ""));
+  if (row.state === "draft") { showDraftDetail(content, row.item); return; }
+  if (row.state === "disabled") { showDisabledDetail(content, row.item, kind); return; }
+  const item = row.item;
+  const head = detailHead(content, capabilityTitle(item, kind), capabilityKey(item),
+    [tag(true, "installed", "")]);
+  const badges = head.badges;
+  const shelf = SHELF_KINDS[kind];
+  if (shelf) {
+    head.actions.append(actionButton("Switch off", "btn",
+      (button) => switchAsset(shelf, item, false, button)));
+    appendRemove(head.actions, shelf, item);
+  }
   const description = document.createElement("p"); description.className = "detail-description";
   description.append(text(item.description || "No description supplied."));
-  content.append(title, identity, badges, description);
+  content.append(description);
 
   if (kind === "skills") {
     appendMeta(content, [["Alias", item.alias], ["Default command", item.default_command],
@@ -2688,46 +2938,97 @@ function showCapabilityDetail(item, kind) {
   }
 }
 
+function capabilityRow(row) {
+  const item = row.item, kind = activeCapabilityKind, shelf = SHELF_KINDS[kind];
+  const key = capabilityRowKey(row);
+  const wrapper = document.createElement("div"); wrapper.className = "cap-row";
+  wrapper.setAttribute("role", "listitem"); wrapper.dataset.state = row.state;
+  const button = document.createElement("button"); button.type = "button";
+  button.className = "cap-item"; button.dataset.key = key;
+  if (key === activeCapabilityKey) button.setAttribute("aria-current", "true");
+  const title = document.createElement("strong");
+  title.append(text(row.state === "draft" ? (item.title || item.name)
+    : capabilityTitle(item, kind)));
+  const secondary = document.createElement("small"); secondary.append(text(capabilityKey(item)));
+  button.append(title, secondary);
+  if (row.state === "draft") {
+    const state = tag(false, "", "Draft — not installed");
+    state.classList.add("draft", "cap-state"); button.append(state);
+  } else if (row.state === "disabled") {
+    const state = tag(false, "", "Switched off"); state.classList.add("cap-state");
+    button.append(state);
+  }
+  button.addEventListener("click", () => {
+    activeCapabilityKey = key; renderCapabilityBrowser();
+    const again = document.querySelector('.cap-item[data-key="' + CSS.escape(key) + '"]');
+    if (again) again.focus();
+  });
+  wrapper.append(button);
+  if (row.state === "draft") {
+    const install = actionButton("Install", "btn small", (pressed) => installDraft(item, pressed));
+    install.setAttribute("aria-label", "Install " + item.asset);
+    wrapper.append(install);
+  } else if (shelf) {
+    const on = row.state === "installed";
+    const toggle = document.createElement("button"); toggle.type = "button";
+    toggle.className = "switch"; toggle.setAttribute("role", "switch");
+    toggle.setAttribute("aria-checked", String(on));
+    toggle.setAttribute("aria-label", "Offer " + capabilityKey(item) + " to the Agent");
+    toggle.title = on ? "On: the Agent may use it. Press to switch it off."
+      : "Off: the Agent does not offer it. Press to switch it on.";
+    toggle.addEventListener("click", () => switchAsset(shelf, item, !on, toggle));
+    wrapper.append(toggle);
+  }
+  return wrapper;
+}
+
 function renderCapabilityBrowser() {
   for (const kind of ["skills", "workflows", "knowledge", "extensions", "applications"]) {
-    el("count-" + kind).textContent = String(installedAssets[kind].length);
+    el("count-" + kind).textContent = String(capabilityRows(kind).length);
     el("cap-tab-" + kind).setAttribute("aria-selected", String(kind === activeCapabilityKind));
   }
+  const shelf = SHELF_KINDS[activeCapabilityKind];
+  el("cap-filters").hidden = !shelf;
+  const filter = shelf ? activeCapabilityFilter : "all";
   const query = el("capability-search").value.trim().toLowerCase();
-  const rows = installedAssets[activeCapabilityKind].filter((item) =>
-    [item.name, item.namespace, item.alias, item.description, item.domain, item.state]
-      .filter(Boolean).join(" ").toLowerCase().includes(query));
-  if (!rows.some((item) => capabilityKey(item) === activeCapabilityKey)) {
-    activeCapabilityKey = rows.length ? capabilityKey(rows[0]) : "";
+  const matching = capabilityRows(activeCapabilityKind).filter((row) =>
+    [row.item.name, row.item.namespace, row.item.alias, row.item.title, row.item.description,
+     row.item.domain, row.item.state].filter(Boolean).join(" ").toLowerCase().includes(query));
+  const counts = {all: matching.length, installed: 0, drafts: 0, disabled: 0};
+  for (const row of matching) counts[row.state === "draft" ? "drafts" : row.state] += 1;
+  for (const name of Object.keys(counts)) {
+    el("cap-filter-count-" + name).textContent = String(counts[name]);
+    el("cap-filter-" + name).setAttribute("aria-pressed", String(name === filter));
   }
-  const buttons = rows.map((item) => {
-    const button = document.createElement("button"); button.type = "button";
-    button.className = "cap-item"; button.setAttribute("role", "option");
-    const selected = capabilityKey(item) === activeCapabilityKey;
-    button.setAttribute("aria-selected", String(selected));
-    const title = document.createElement("strong");
-    title.append(text(capabilityTitle(item, activeCapabilityKind)));
-    const secondary = document.createElement("small"); secondary.append(text(capabilityKey(item)));
-    button.append(title, secondary);
-    button.addEventListener("click", () => {
-      activeCapabilityKey = capabilityKey(item); renderCapabilityBrowser();
-    });
-    return button;
-  });
-  if (buttons.length) el("capability-list").replaceChildren(...buttons);
+  const rows = matching.filter((row) => filter === "all"
+    || (filter === "drafts" ? row.state === "draft" : row.state === filter));
+  if (!rows.some((row) => capabilityRowKey(row) === activeCapabilityKey)) {
+    activeCapabilityKey = rows.length ? capabilityRowKey(rows[0]) : "";
+  }
+  if (rows.length) el("capability-list").replaceChildren(...rows.map(capabilityRow));
   else {
     const empty = document.createElement("div"); empty.className = "empty";
     empty.append(text(activeCapabilityKind === "applications"
-      ? "Applications are managed in Shared Marketplace." : "No matching installed capabilities."));
+      ? "Applications are managed in Shared Marketplace."
+      : filter === "drafts" ? "No drafts waiting. Drafts made in a conversation or sent by "
+        + "an external agent appear here."
+      : filter === "disabled" ? "Nothing is switched off."
+      : "No matching capabilities."));
     el("capability-list").replaceChildren(empty);
   }
-  showCapabilityDetail(rows.find((item) => capabilityKey(item) === activeCapabilityKey),
+  showCapabilityDetail(rows.find((row) => capabilityRowKey(row) === activeCapabilityKey),
     activeCapabilityKind);
 }
 
 for (const button of document.querySelectorAll(".cap-tabs button")) {
   button.addEventListener("click", () => {
     activeCapabilityKind = button.dataset.kind; activeCapabilityKey = "";
+    renderCapabilityBrowser();
+  });
+}
+for (const chip of document.querySelectorAll("#cap-filters .chip")) {
+  chip.addEventListener("click", () => {
+    activeCapabilityFilter = chip.dataset.filter; activeCapabilityKey = "";
     renderCapabilityBrowser();
   });
 }
@@ -3800,28 +4101,164 @@ el("knowledge-ask").addEventListener("click", async () => {
 
 let sharedPlatform = {configured: false, catalog: [], decisions: [], note: ""};
 let activeMarketKind = "skill";
+// One card open at a time; outcomes stay on their card across re-renders.
+let expandedMarketKey = "";
+let busyMarketKey = "";
+const marketOutcome = {};
+const KIND_LETTER = {skill: "S", workflow: "W", bridge_extension: "E", application: "A"};
+const KIND_TEXT = {skill: "Skill", workflow: "Workflow", bridge_extension: "Extension",
+  application: "App"};
+const VISIBILITY_TEXT = {private: "Only its owner", team: "Its owner's team",
+  organization: "Everyone in the organization", public: "Everyone"};
 
-function marketplaceAction(item) {
+function marketKey(item) {
+  return item.kind + ":" + item.namespace + "/" + item.name + "@" + item.version;
+}
+
+function marketStatus(item) {
+  return item.installed ? "installed" : item.authorized ? "selected" : "available";
+}
+
+function focusMarketHead(key) {
+  const head = document.querySelector('.market-head[data-key="' + CSS.escape(key) + '"]');
+  if (head) head.focus();
+}
+
+function toggleMarket(key) {
+  expandedMarketKey = expandedMarketKey === key ? "" : key;
+  renderMarketCards(); focusMarketHead(key);
+}
+
+// "+ Add to this Agent": select this exact version for this PC as the
+// member on the shared platform, then run the verified sync (owner 2026-10-15).
+async function marketSelect(item, add) {
+  const key = marketKey(item);
+  const asset = item.namespace + "/" + item.name + "@" + item.version;
+  busyMarketKey = key;
+  marketOutcome[key] = {text: add ? "Selecting it for this PC and installing…"
+    : "Removing the selection…", bad: false};
+  renderMarketCards();
+  let done;
+  try {
+    done = await call(add ? "/api/platform/add" : "/api/platform/unselect",
+      {kind: item.kind, asset: asset});
+  } catch (failure) {
+    done = {ok: false, message: failure.message};
+  }
+  busyMarketKey = "";
+  marketOutcome[key] = {text: done.message || done.code || "", bad: !done.ok};
+  const status = el("platform-sync-result");
+  status.textContent = marketOutcome[key].text; status.classList.toggle("bad", !done.ok);
+  if (done.sync && done.sync.after) renderPlatform(done.sync.after); else renderMarketCards();
+  focusMarketHead(key);
+  if (done.ok) loadAssets().catch(() => {});
+}
+
+function marketActions(item) {
   const actions = document.createElement("div"); actions.className = "inline-actions";
-  if (item.installed) {
-    const installed = document.createElement("button"); installed.type = "button";
-    installed.className = "go"; installed.disabled = true; installed.textContent = "Installed";
-    actions.append(installed); return actions;
-  }
-  if (item.authorized) {
-    const install = document.createElement("button"); install.type = "button";
-    install.className = "go"; install.textContent = "Install selected";
-    install.addEventListener("click", synchronizePlatform);
-    actions.append(install); return actions;
-  }
-  if (sharedPlatform.member_portal_url) {
+  const busy = busyMarketKey === marketKey(item);
+  const button = (label, className, add) => {
+    const made = document.createElement("button"); made.type = "button";
+    made.className = className; made.textContent = label;
+    made.disabled = busy || !!busyMarketKey || !sharedPlatform.configured;
+    if (busy) made.setAttribute("aria-busy", "true");
+    made.addEventListener("click", () => marketSelect(item, add));
+    actions.append(made);
+    return made;
+  };
+  if (item.kind === "skill" || item.kind === "workflow") {
+    if (!item.authorized) button("+ Add to this Agent", "go", true);
+    else {
+      if (!item.installed) button("Install now", "go", true);
+      button("Remove selection", "btn", false);
+    }
+  } else if (sharedPlatform.member_portal_url) {
     const select = document.createElement("a"); select.href = marketplaceUrl(sharedPlatform);
     select.target = "_blank"; select.rel = "noopener noreferrer";
     select.textContent = item.kind === "bridge_extension"
-      ? "Review Extension" : "Select in Marketplace";
+      ? "Review Extension" : "Open in Marketplace";
     actions.append(select);
   }
   return actions;
+}
+
+function marketCard(item, index) {
+  const key = marketKey(item), status = marketStatus(item);
+  const expanded = key === expandedMarketKey;
+  const card = document.createElement("article"); card.className = "market-card";
+  card.dataset.status = status;
+  if (expanded) card.dataset.expanded = "";
+  const headId = "market-head-" + index, detailId = "market-detail-" + index;
+  const heading = document.createElement("h3");
+  const head = document.createElement("button"); head.type = "button";
+  head.className = "market-head"; head.id = headId; head.dataset.key = key;
+  head.setAttribute("aria-expanded", String(expanded));
+  head.setAttribute("aria-controls", detailId);
+  const icon = document.createElement("span"); icon.className = "kind-icon";
+  icon.dataset.kind = item.kind; icon.setAttribute("aria-hidden", "true");
+  icon.append(text(KIND_LETTER[item.kind] || "?"));
+  const names = document.createElement("span");
+  const name = document.createElement("span"); name.className = "market-name";
+  name.append(text(item.name));
+  const identity = document.createElement("span"); identity.className = "identity";
+  identity.append(text(item.namespace + " · v" + item.version));
+  names.append(name, identity);
+  const badge = document.createElement("span"); badge.className = "status-badge";
+  badge.dataset.status = status;
+  badge.append(text(status === "installed" ? "Installed"
+    : status === "selected" ? "Selected" : "Available"));
+  head.append(icon, names, badge);
+  head.addEventListener("click", () => toggleMarket(key));
+  heading.append(head);
+
+  const summary = document.createElement("div"); summary.className = "market-summary";
+  const description = document.createElement("p");
+  description.append(text(item.description || "No description supplied."));
+  const chips = document.createElement("div"); chips.className = "badges";
+  chips.append(tag(false, "", KIND_TEXT[item.kind] || item.kind));
+  for (const category of item.categories || []) chips.append(tag(false, "", category));
+  chips.append(tag(false, "", "v" + item.version));
+  summary.append(description, chips);
+  card.append(heading, summary);
+
+  const detail = document.createElement("div"); detail.className = "market-detail";
+  detail.id = detailId; detail.setAttribute("role", "region");
+  detail.setAttribute("aria-labelledby", headId); detail.hidden = !expanded;
+  if (expanded) {
+    const overview = document.createElement("h4"); overview.append(text("Overview"));
+    detail.append(overview);
+    const compatibility = [item.runtime].concat(item.platforms || []).filter(Boolean).join(", ");
+    appendMeta(detail, [["Version", item.version], ["Owner", item.owner],
+      ["Who can use it", VISIBILITY_TEXT[item.visibility] || item.visibility],
+      ["Categories", (item.categories || []).join(", ") || "None"],
+      ["Provenance", (item.provenance || []).join("; ") || "Not recorded"],
+      ["Depends on", (item.dependencies || []).join(", ") || "Nothing declared"],
+      ["Compatibility", compatibility || "Not declared"],
+      ["Lifecycle", item.lifecycle]]);
+    if (sharedPlatform.assets_only && (item.kind === "skill" || item.kind === "workflow")) {
+      const only = document.createElement("p"); only.className = "note";
+      only.append(text("On this PC adding installs the file only: "
+        + "permissions come from this PC's grants.json."));
+      detail.append(only);
+    }
+    detail.append(marketActions(item));
+    const outcome = document.createElement("p");
+    outcome.className = "section-status market-outcome";
+    outcome.setAttribute("role", "status");
+    const said = marketOutcome[key];
+    if (said) { outcome.append(text(said.text)); outcome.classList.toggle("bad", said.bad); }
+    detail.append(outcome);
+    detail.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") { event.stopPropagation(); toggleMarket(key); }
+    });
+  }
+  card.append(detail);
+  // The whole card opens it; controls and links inside keep their own action.
+  card.addEventListener("click", (event) => {
+    if (expanded || event.target.closest("button, a, select, input")) return;
+    toggleMarket(key);
+  });
+  return card;
 }
 
 function renderMarketCards() {
@@ -3840,37 +4277,7 @@ function renderMarketCards() {
       || (status === "available" && !item.authorized && !item.installed);
     return matchesQuery && matchesKind && matchesCategory && matchesStatus;
   });
-  const cards = rows.map((item) => {
-    const card = document.createElement("article"); card.className = "market-card";
-    const title = document.createElement("h3");
-    title.append(text(item.namespace + "/" + item.name));
-    const identity = document.createElement("div"); identity.className = "identity";
-    identity.append(text(item.kind + " · version " + item.version));
-    const badges = document.createElement("div"); badges.className = "badges";
-    badges.append(tag(true, "available", ""));
-    if (item.authorized) {
-      badges.append(tag(true, sharedPlatform.assets_only ? "selected" : "authorized", ""));
-    }
-    if (item.installed) badges.append(tag(true, "installed", ""));
-    if (item.installed && sharedPlatform.assets_only) {
-      badges.append(tag(false, "", "permissions come from this PC's grants.json"));
-    }
-    if (!item.authorized) {
-      const pending = tag(false, "", "select in Marketplace"); pending.classList.add("warn");
-      badges.append(pending);
-    }
-    for (const category of item.categories || []) badges.append(tag(false, "", category));
-    const description = document.createElement("p");
-    description.append(text(item.description || "No description supplied."));
-    const owner = document.createElement("p");
-    owner.append(text("Owner: " + item.owner + " · " + item.visibility));
-    const compatible = document.createElement("p");
-    const compatibility = [item.runtime].concat(item.platforms).filter(Boolean).join(", ");
-    compatible.append(text("Compatibility: " + (compatibility || "not declared")));
-    card.append(title, identity, badges, description, owner, compatible,
-      marketplaceAction(item));
-    return card;
-  });
+  const cards = rows.map(marketCard);
   if (cards.length) el("catalog").replaceChildren(...cards);
   else {
     const empty = document.createElement("div"); empty.className = "empty";
