@@ -67,7 +67,13 @@ line-length = 100
 # Migrated source jobs are vendored byte-identical and hash-verified; never reformat them.
 # Benchmark runs are recorded agent output kept as evidence (prompts, traces and
 # the scripts an agent wrote, some deliberately broken); never lint or reformat them.
-extend-exclude = ["packages/*/*/vendor", "benchmarks/*/runs"]
+# The NCC rules are the source module verbatim apart from its imports, and
+# tests/test_rs_w14_ncc_plan.py compares the two text for text; keep its layout.
+extend-exclude = [
+    "packages/*/*/vendor",
+    "benchmarks/*/runs",
+    "src/capabilities/ncc_plan/rules.py",
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
