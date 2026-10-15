@@ -147,6 +147,9 @@ class SyncOutcome(Contract):
     failure: Failure | None = None
     installed: tuple[AssetIdentity, ...] = ()
     selections: int | None = Field(default=None, ge=0, strict=True)
+    # Files only: `grants.json` decides what runs, so the bundle was kept
+    # for display and not installed as an authorization.
+    assets_only: StrictBool = False
 
 
 class FeedbackOutcome(Contract):
@@ -338,11 +341,17 @@ class PlatformClient:
 
     async def synchronize(self, layout: HostLayout, state: SqliteLocalState) -> SyncOutcome:
         """Bring this host's assets and authorization up to what its member
-        decided. Refused before the call when `grants.json` is present: the
-        bundle and a hand-written grants file are two answers to one
-        question, and the host refuses to start with both."""
-        if layout.grants.is_file():
-            return SyncOutcome(status="refused", failure=_refusal("grants_conflict"))
+        decided.
+
+        With a hand-written `grants.json` the sync is assets-only (owner
+        decision (a), 2026-10-15, `docs/phases/BRIDGE_ENROLLMENT.md`): the
+        selected Skill and Workflow files are verified and installed as
+        always, but the bundle is not written as `authorization.json`. The
+        bundle and the grants file would be two answers to one question, and
+        the host refuses to start with both; so `grants.json` keeps deciding
+        what this computer may run, and the selections are kept beside it for
+        display only."""
+        assets_only = layout.grants.is_file()
         try:
             installed = await asyncio.to_thread(state.installed)
         except LocalStateError as error:
@@ -358,13 +367,21 @@ class PlatformClient:
         if reply.authorization.bridge_id != state.bridge_id:
             return SyncOutcome(status="refused", failure=_refusal("installation_bridge_mismatch"))
         try:
-            added = await asyncio.to_thread(self._apply, reply, layout, state, installed)
+            added = await asyncio.to_thread(
+                self._apply, reply, layout, state, installed, assets_only
+            )
         except SyncRefused as error:
             return SyncOutcome(
-                status="refused", failure=_refusal(error.code), installed=error.installed
+                status="refused",
+                failure=_refusal(error.code),
+                installed=error.installed,
+                assets_only=assets_only,
             )
         return SyncOutcome(
-            status="answered", installed=added, selections=len(reply.authorization.selections)
+            status="answered",
+            installed=added,
+            selections=len(reply.authorization.selections),
+            assets_only=assets_only,
         )
 
     def _apply(
@@ -373,6 +390,7 @@ class PlatformClient:
         layout: HostLayout,
         state: SqliteLocalState,
         installed: tuple[InstalledAsset, ...],
+        assets_only: bool = False,
     ) -> tuple[AssetIdentity, ...]:
         """Verify everything, then write everything. The order is: the plan
         against the inventory, every manifest against its package, every file
@@ -418,7 +436,7 @@ class PlatformClient:
             added = tuple(item.identity for item in rows)
         try:
             write_atomically(
-                layout.authorization,
+                layout.platform_selections if assets_only else layout.authorization,
                 reply.authorization.model_dump_json(indent=2).encode("utf-8") + b"\n",
             )
         except OSError:

@@ -24,6 +24,7 @@ from pydantic import ValidationError
 from test_host_wiring import (
     BRIDGE,
     device,
+    grant_record,
     host_json,
     membership_record,
     skill_manifest,
@@ -722,20 +723,6 @@ def test_sync_refuses_and_leaves_the_workspace_untouched(
     tmp_path: Path, platform: Platform
 ) -> None:
     with ControlPlaneServer(platform.service) as server:
-        # grants.json is the operator's own answer; refused before any call.
-        config, layout, runtime = host(tmp_path / "grants", platform, server.base_url)
-        layout.grants.write_text("[]", encoding="utf-8")
-        counting = CountingTransport()
-        watched = PlatformClient(
-            config.platform,  # type: ignore[arg-type]
-            StaticCredentials({"platform_token": SECRET}),
-            transport=counting,
-        )
-        with runtime:
-            refused = run(watched.synchronize(layout, runtime.state))
-            assert refused.status == "refused" and refused.failure is not None
-            assert refused.failure.code == "sync_grants_conflict" and counting.calls == []
-            _untouched(layout)
         # A tampered artifact: the platform's store no longer matches what
         # it published.
         config, layout, runtime = host(tmp_path / "tampered", platform, server.base_url)
@@ -1200,3 +1187,47 @@ def test_the_server_names_its_address_as_a_url(platform: Platform) -> None:
     with six:
         assert six.base_url.startswith("http://[::1]:")
         assert PlatformBinding.model_validate(binding(six.base_url)).base_url == six.base_url
+
+
+def test_with_a_hand_written_grants_file_sync_installs_files_only(
+    tmp_path: Path, platform: Platform
+) -> None:
+    """Owner decision (a), 2026-10-15 (`docs/phases/BRIDGE_ENROLLMENT.md`):
+    grants.json keeps deciding what this computer may run. The selected files
+    are verified and installed; the bundle is kept for display beside it and
+    never becomes authorization.json, and grants.json is not touched."""
+    with ControlPlaneServer(platform.service) as server:
+        config, layout, runtime = host(tmp_path, platform, server.base_url)
+        written = json.dumps(grant_record()).encode("utf-8")
+        layout.grants.write_bytes(written)
+        counting = CountingTransport()
+        watched = PlatformClient(
+            config.platform,  # type: ignore[arg-type]
+            StaticCredentials({"platform_token": SECRET}),
+            transport=counting,
+        )
+        with runtime:
+            synced = run(watched.synchronize(layout, runtime.state))
+            assert synced.status == "answered" and synced.assets_only is True
+            assert len(synced.installed) == 2 and synced.selections == 3  # and a tool
+            ref = next(iter(platform.artifacts))
+            planned = layout.workflows / "engineering__read-local-file__1.0.0.json"
+            assert planned.read_bytes() == platform.artifacts[ref]
+            assert {item.identity.name for item in runtime.state.installed()} == {
+                "read-local-file", "file-skill"}
+            assert layout.grants.read_bytes() == written
+            assert not layout.authorization.exists()
+            kept = DeviceAuthorization.model_validate_json(
+                layout.platform_selections.read_text(encoding="utf-8"))
+            assert kept.bridge_id == BRIDGE and len(kept.selections) == 3
+            assert [url.rsplit("/", 1)[-1] for url in counting.calls] == ["sync"]
+            # Again: nothing new to install, still files only.
+            again = run(watched.synchronize(layout, runtime.state))
+            assert again.status == "answered" and again.installed == ()
+            assert again.assets_only is True and not layout.authorization.exists()
+        # The host still starts: one answer (grants.json) about what may run.
+        with build_runtime(
+            config, layout=layout, resolver=StaticCredentials({"platform_token": SECRET})
+        ) as restarted:
+            assert {item.identity.name for item in restarted.state.installed()} == {
+                "read-local-file", "file-skill"}

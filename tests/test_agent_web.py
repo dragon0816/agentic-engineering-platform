@@ -22,7 +22,14 @@ from typing import Any
 import pytest
 from test_extension_package import DeterministicVerifier, package, trust
 from test_host_models import GatewayReply, binding, endpoint
-from test_host_wiring import grant_record, host_json, membership_record, ready, workspace
+from test_host_wiring import (
+    grant_record,
+    host_json,
+    membership_record,
+    ready,
+    workflow_manifest,
+    workspace,
+)
 from test_platform_transport import Platform, host
 from test_product_e2e_05 import V1, copy_vault, manifest
 
@@ -1492,7 +1499,11 @@ def test_local_sync_refusal_is_typed_and_leaves_local_state_untouched(tmp_path: 
     platform = Platform()
     with ControlPlaneServer(platform.service) as control:
         _config, layout, runtime = host(tmp_path, platform, control.base_url)
-        layout.grants.write_text("[]", encoding="utf-8")
+        # A hand-placed file under the planned identity with other bytes.
+        layout.workflows.mkdir(parents=True, exist_ok=True)
+        (layout.workflows / "mine.json").write_text(
+            json.dumps({**workflow_manifest(), "description": "placed by hand"}),
+            encoding="utf-8")
         with runtime:
             server = AgentWebServer(AgentWeb(runtime))
             thread = threading.Thread(target=server.serve_forever, daemon=True)
@@ -1502,7 +1513,7 @@ def test_local_sync_refusal_is_typed_and_leaves_local_state_untouched(tmp_path: 
                     base(server) + "/api/platform/sync", token=server.token, body={}
                 ).json()
                 assert result["status"] == "refused"
-                assert result["failure"]["code"] == "sync_grants_conflict"
+                assert result["failure"]["code"] == "sync_asset_conflict"
                 assert result["installed"] == []
                 assert runtime.state.installed() == ()
                 assert not layout.authorization.exists()

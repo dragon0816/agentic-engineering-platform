@@ -377,6 +377,13 @@ def names_local_work(message: str) -> bool:
     return _LOCAL_WORK.search(message) is not None
 
 
+# Shown in the Library while grants.json decides what this PC may run.
+ASSETS_ONLY_NOTE = (
+    " Synchronizing installs the selected files only; permissions come from this PC's "
+    "grants.json, so nothing this PC may run changes."
+)
+
+
 class AgentWeb:
     """What the pages ask for, with no HTTP in it.
 
@@ -2651,7 +2658,13 @@ class AgentWeb:
             installed_assets = ()
         installed = {item.identity.key for item in installed_assets}
 
-        decided = self.runtime.layout.authorization
+        # With a hand-written grants.json a sync installs files only and keeps
+        # the platform's selections beside it for display (owner 2026-10-15).
+        assets_only = self.runtime.layout.grants.is_file()
+        decided = (
+            self.runtime.layout.platform_selections
+            if assets_only else self.runtime.layout.authorization
+        )
         authorization = None
         if not decided.is_file():
             decisions_note = (
@@ -2669,6 +2682,8 @@ class AgentWeb:
                     "Published, authorized and installed are separate states. "
                     "Execution still requires Bridge policy permission."
                 )
+                if authorization.bridge_id != self.runtime.config.device.bridge_id:
+                    authorization = None
             except Exception:  # noqa: BLE001 - doctor owns the detailed diagnosis
                 decisions_note = (
                     "The decisions this machine was given cannot be read; run `doctor`."
@@ -2706,6 +2721,8 @@ class AgentWeb:
                     )
                 )
             note = decisions_note
+            if assets_only:
+                note += ASSETS_ONLY_NOTE
         else:
             code = discovered.failure.code if discovered.failure is not None else discovered.status
             note = (
@@ -2733,6 +2750,8 @@ class AgentWeb:
         return PlatformProjection(
             configured=True,
             member_portal_url=(binding.member_portal_url or "") if binding is not None else "",
+            bridge_id=self.runtime.config.device.bridge_id,
+            assets_only=assets_only,
             connection=discovered.status,
             note=note,
             catalog=tuple(catalog),
@@ -2764,6 +2783,7 @@ class AgentWeb:
                     failure=synchronized.failure,
                     installed=synchronized.installed,
                     selections=synchronized.selections,
+                    assets_only=synchronized.assets_only,
                     before=before,
                     after=self._platform_projection(),
                 )

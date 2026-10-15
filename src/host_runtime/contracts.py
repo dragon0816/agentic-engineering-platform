@@ -190,6 +190,11 @@ class PlatformProjection(Contract):
 
     configured: StrictBool
     member_portal_url: str = ""
+    # The Bridge this host is enrolled as, so "Open Marketplace" can name it.
+    bridge_id: str = ""
+    # `grants.json` exists: a sync installs files only and permissions stay
+    # with that file (owner decision (a), 2026-10-15).
+    assets_only: StrictBool = False
     connection: PlatformReachability | None = None
     note: Text
     catalog: tuple[PlatformCatalogProjection, ...] = ()
@@ -291,6 +296,8 @@ class PlatformSyncResult(Contract):
     failure: Failure | None = None
     installed: tuple[AssetIdentity, ...] = ()
     selections: int | None = Field(default=None, ge=0, strict=True)
+    # Files only; permissions stay with this PC's grants.json (owner 2026-10-15).
+    assets_only: StrictBool = False
     before: PlatformProjection
     after: PlatformProjection
 
@@ -639,6 +646,10 @@ class HostLayout(Contract):
     membership: Path
     grants: Path
     authorization: Path
+    # What the platform says this device's member selected, kept for display
+    # only while `grants.json` decides what runs (assets-only sync, owner
+    # 2026-10-15). The host never reads it as an authorization.
+    platform_selections: Path
     skills: Path
     workflows: Path
     knowledge: Path
@@ -659,6 +670,7 @@ class HostLayout(Contract):
             membership=root / "membership.json",
             grants=root / "grants.json",
             authorization=root / "authorization.json",
+            platform_selections=root / "platform-selections.json",
             skills=root / "assets" / "skills",
             workflows=root / "assets" / "workflows",
             knowledge=root / "assets" / "knowledge",
