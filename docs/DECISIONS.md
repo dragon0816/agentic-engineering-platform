@@ -2945,3 +2945,24 @@ apply, ingest apply, running test questions) show a card (Allow / Allow for this
 conversation / Deny). Merge, discard, adopt, index, rule write, push and publish are not
 offered. Steps run through `AgentWeb.pipeline_call` as the Host's owner, the same path
 as the Knowledge page.
+
+## 2026-10-15 — CI type-checks without the optional plotting extra; recorded artefacts stay out of ruff
+
+Decision: `[tool.mypy]` gets an `ignore_missing_imports` override for `matplotlib`
+(like the pywin32 and lxml ones). The `weekly-mail` extra is optional and
+`capabilities/weekly_report/chart.py` imports it lazily, so CI and hosts without it must
+still pass strict mypy; with the extra installed matplotlib's own inline types are used.
+Ruff excludes `benchmarks/*/runs` (recorded agent output, including scripts that do not
+parse, kept as evidence) and `src/capabilities/ncc_plan/rules.py` (kept text-identical
+to the source module, which `tests/test_rs_w14_ncc_plan.py` compares), and exempts
+from E501 only `benchmarks/business_workflow_lab/operator/smoke.py` (embedded
+PowerShell) and `benchmarks/coding_v1/fixtures/build_fixtures.py` (prompts whose bytes
+the fixture manifest hashes).
+
+Reason: make `verify.yml` pass on a runner that installs only `.[dev,office]` without
+weakening strict mypy or rewriting evidence and verbatim ports.
+
+Rejected alternatives: installing the `weekly-mail` extra in CI (the job deliberately
+mirrors a host without it); `ignore_errors` for tests or dropping `tests` from mypy
+`files`; reformatting the benchmark runs or the NCC rules (changes recorded evidence
+and breaks the verbatim-port test).

@@ -2146,3 +2146,25 @@ s-k-20261011T102952` (not published).
   (59, incl. real browser: permission card 640x359, Allow 88x44; mail card 640x314,
   Send 88x44; real `claude`/`copilot` flag smokes in a temp home). Verification in
   `HANDOFF.md`. Live check pending (owner).
+
+- [x] Make GitHub CI pass as `.github/workflows/verify.yml` runs it (2026-10-15).
+  Before: pytest failed (fixed earlier by edd968f1's skip guards), `ruff check` found
+  14,553 findings (almost all in recorded benchmark runs), `ruff format --check` wanted
+  360 files reformatted, strict `mypy` over src+tests reported 258 errors, and the
+  Windows bundle smoke asserted a Workflow 11 manifest name retired on 2026-10-05 and
+  exit 0 from an `ask` that has exited 1 for needs_input since 2026-10-02.
+  Done: benchmark runs and the verbatim NCC rules module excluded from ruff; one
+  pure `ruff format .` commit; remaining lint fixed (AST-identical string splits,
+  noqa moved onto the fixture parameters it covers, E501 exempted only for the
+  embedded PowerShell smoke script and the hashed fixture prompts); all mypy errors
+  fixed with real types (fakes implement `ModelClient.stream`, JsonValue/Optional
+  narrowed before indexing, stranded `type: ignore` comments moved or removed) plus a
+  `matplotlib` missing-imports override; the bundle smoke checks
+  `engineering__sde-weekly-report__1.0.0.json` and asserts the fresh install's
+  needs_input/unknown_skill answer from `ask --json`. Verified locally in a fresh
+  Python 3.12 venv with only `.[dev,office]` (no pywin32/matplotlib) and in the
+  project `.venv`; the two bundle steps were replayed locally with the CI flags
+  (plus `-NoShortcut -NoAgentSkills` and a throwaway home so the owner's desktop and
+  coding-agent settings were not touched). Decision: `docs/DECISIONS.md` 2026-10-15
+  "CI type-checks without the optional plotting extra; recorded artefacts stay out
+  of ruff".
