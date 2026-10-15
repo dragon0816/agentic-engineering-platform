@@ -1,8 +1,72 @@
 # Handoff
 
-Updated: 2026-10-15 (Asia/Taipei), by Claude Code (AI proposes, the person applies)
+Updated: 2026-10-15 (Asia/Taipei), by Claude Code (agent mode for coding-agent backends)
 
-## AI proposes, the person applies (2026-10-15, Claude Code) — latest
+## Agent mode for Claude Code / Copilot in Agent Web (2026-10-15, Claude Code) — latest
+
+Goal: owner-approved design `docs/phases/AGENT_MODE_BACKENDS.md` ("Revised rules (owner,
+2026-10-15)" replace items 1-3). Decisions `docs/DECISIONS.md` 2026-10-15 "Agent mode for
+Claude Code and Copilot in Agent Web; Codex stays text-only", "Agent mode email: read in
+scope, send only from one card per message", "Agent mode audit: ...", "Knowledge pipeline
+as agent tools; push stays on the Knowledge page"; contract `docs/CONTRACTS.md` "Agent
+mode (approval cards for coding-agent backends)"; row in `docs/TASKS.md`; design doc
+status and "Implementation" section updated. Committed on main, not pushed (146431dd,
+f9528f3a, 1b2710e5, 86635d36 + the docs commit).
+- Backends: **Claude Code** relays through `--permission-prompt-tool
+  mcp__aep-agent__permission` (`--setting-sources ""`, run `--settings` that ask for every
+  Bash/PowerShell/WebFetch/WebSearch, `--plugin-dir` with AEP's skills, strict MCP config
+  with `aep-agent`, `aep-assistant`, `aep`); **Copilot** over ACP (`copilot --acp`,
+  `host_runtime/acp_client.py`, allow once / reject once, never "always"); **Codex stays
+  text-only** (`codex exec` has no relay; Codex is not installed here, nothing verifiable;
+  Settings and the chat line say so, enabling it is refused). With agent mode off (the
+  default) every backend runs exactly as before.
+- Code: `common/agent_guard.py` (protected places, command guard, `judge`),
+  `host_runtime/agent_mode_settings.py`, `host_runtime/agent_mode.py` (runs, `pm-` cards,
+  10-minute Deny, audit, `/mcp/agent` tools incl. Knowledge), `host_runtime/agent_mail.py`
+  (`outlook_search`/`outlook_read`/`outlook_draft`, `ml-` cards),
+  `integrations/outlook_mail.py` (read only), `integrations/outlook_send.py` (send/discard,
+  only from `AgentMail.decide`), `capabilities/mail_read` (`outlook.search`,
+  `outlook.read`, registered when a Workflow uses them), `conversation_backends.py`
+  (`AgentLaunch`, `_claude_agent`, `_copilot_agent`), `web.py` (routes `/api/agent-mode`,
+  `/api/agent-mode/settings`, `/api/agent-mode/session`, `/api/cards?session_id=`,
+  `/mcp/agent`), `web_page.py` (Settings > Agent mode; chat line "Agent mode · works in
+  ..." + "Folders..."; cards polled under the waiting turn; `action_cards` in history),
+  `conversations.py` (`ConversationMessage.action_cards`).
+- Verified: ruff src tests clean; mypy src clean; `tests/test_agent_mode.py` +
+  `tests/test_agent_mail.py` 59 passed (incl. real browser: permission card 640x359,
+  Allow 88x44, Allow pressed in the page lets the fake run finish; mail card 640x314,
+  Send 88x44; real `claude` 2.1.296 and `copilot` 1.0.95 accept every agent-mode flag in
+  a temp home and stop at sign-in / answer ACP `initialize`); related suites
+  (conversation backends, Outlook draft, mail draft capability, AI proposed changes)
+  passed. Full suite after the last code change: 2914 passed, 6 skipped, 0 failed (17 min 27 s); an earlier full run found one page-source assertion (`test_avatars.py`), fixed in 86635d36.
+- NOT verified: a real model turn through the relay (no sign-in in a temp home, and the
+  person's own `~/.claude` / `~/.copilot` were not touched), Outlook COM against the real
+  mailbox (search/read/send adapters are written to the object model and tested with
+  fakes only), Copilot's real `session/request_permission` payloads (ACP spec shape).
+- Live steps (owner; Agent Web restart is not done by the agent): (1) restart Agent Web
+  on this code; (2) Settings > Agent mode: tick Claude Code (and/or GitHub Copilot), set
+  the email scope (folders, days, excluded senders/folders), Save; (3) new conversation,
+  choose Claude Code (PUBLIC session dialog as before): under the composer "Agent mode ·
+  works in ...\workspace\agent-sessions\conversation-..."; "Folders..." to add a
+  read-only folder (e.g. the OneDrive LLM wiki); (4) ask it to write a file in its folder
+  (no card), to read a file elsewhere (card: Allow / Allow this folder for this
+  conversation / Deny), to run `git status` (card with the command and folder); leave one
+  card 10 minutes: Deny; (5) ask it to read `~/.ssh` or run `netsh advfirewall ...`:
+  refused without a card; (6) ask it to find a mail: one card the first time, then
+  results; ask it to email someone: draft in Outlook Drafts + card with Send / Keep as
+  draft / Cancel (test with your own address first); (7) Tasks lists `agent_permission`,
+  `agent_mail`, `agent_turn` rows; `workspace/agent-mode/audit.jsonl` has every request;
+  (8) Telegram: unchanged (Gateway only).
+- Risks: Copilot loads the person's user-level MCP servers and settings next to AEP's
+  (a user-level "allow all" in Copilot's own settings could bypass the relay; not
+  inspected); the command guard is pattern-based (a backstop: every command already needs
+  a press); Outlook's object-model guard may prompt when reading sender addresses on a
+  PC without up-to-date antivirus status; a turn can take up to 30 minutes when cards
+  wait; cards of a turn whose Agent Web restarted are denied (no waiter).
+- Next: owner live check; then optionally a Codex relay (verify `codex app-server`
+  approval requests on a PC with Codex), and a Stop button for a running agent turn.
+
+## AI proposes, the person applies (2026-10-15, Claude Code)
 
 Goal: owner-approved design `docs/phases/AI_PROPOSED_CHANGES.md` (version 1, every kind;
 Telegram applies only `laya`, `workflow_settings`, capability switch on/off). Decision

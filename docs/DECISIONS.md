@@ -2822,3 +2822,126 @@ Rejected alternatives:
   this machine's Agent.
 - Making the card status a closed enum: the agent-mode slice needs allowed/denied/sent
   statuses; the handler owns its statuses, the card only knows `pending` is open.
+
+## 2026-10-15 — Agent mode for Claude Code and Copilot in Agent Web; Codex stays text-only
+
+Context: owner-approved design `docs/phases/AGENT_MODE_BACKENDS.md` (option A with the
+"Revised rules (owner, 2026-10-15)"). It replaces, for Agent Web, the 2026-10-02 rule
+that the Claude Code, Codex and Copilot conversation backends are text-only
+(`--restricted --strict-mcp-config`, `--ignore-user-config`, `--available-tools=`).
+
+Decision:
+1. Agent mode is a per-backend switch in Settings > Agent mode, **off by default**;
+   with it off the backend runs exactly as before (text-only flags unchanged). The
+   conversation must still be a PUBLIC session (the 2026-10-02 data boundary); what the
+   agent reads beyond the chat is governed by the cards below and the owner's switch.
+2. Each conversation has one working folder (default `workspace\agent-sessions\<session>`,
+   or a folder under `workspace\agent-sessions` or a configured `coding.workspace_roots`
+   entry) and optional read-only folders a person adds. A folder that is, or contains,
+   a protected location is refused.
+3. Relay, verified against the CLIs on this PC (Claude Code 2.1.296, Copilot CLI
+   1.0.95):
+   - Claude Code: `--print --setting-sources "" --strict-mcp-config --mcp-config <run>
+     --settings <run> --permission-mode manual --permission-prompts host
+     --permission-prompt-tool mcp__aep-agent__permission --plugin-dir <AEP skills>`.
+     The run's settings make every Bash/PowerShell/WebFetch/WebSearch ask, allow only
+     AEP's MCP servers, deny credential file patterns and disable hooks; the person's
+     own user/project settings (which could allow commands) are not loaded.
+     `MCP_TOOL_TIMEOUT` is raised so one tool call can wait ten minutes.
+   - Copilot: `copilot --acp` (Agent Client Protocol). Agent Web is the ACP client
+     (`host_runtime/acp_client.py`), answers `session/request_permission` through the
+     card, never picks "allow always" (nothing persists in Copilot's configuration), and
+     passes the MCP servers in `session/new`; `--disallow-temp-dir`,
+     `--secret-env-vars=COPILOT_GITHUB_TOKEN`, `--allow-tool` only for AEP's servers.
+   - Codex: **text-only**. `codex exec` has no relay; Codex is not installed on this PC,
+     so no flag of a relay (app-server or MCP elicitation) could be verified. Settings
+     and the chat say so; enabling it is refused.
+4. One pure decision function (`common/agent_guard.py` `judge`): inside the working or
+   a read-only folder free; outside a card (Allow / Allow this folder for this
+   conversation / Deny); every command a card (Allow for this conversation remembers
+   the program, e.g. `git`); network and unknown tools a card; a coding agent's tool
+   configuration inside the folder (`.claude`, `.github/hooks`, `.mcp.json` ...) a card
+   without a conversation-wide button. Refused even when allowed: SSH keys, cloud and
+   CLI credentials, Windows credential stores, browser profiles, `host.json`, AEP
+   workspace secrets (including each run's MCP configuration), credential file names
+   anywhere, writes to the coding agents' own configuration, `%SystemRoot%`, Program
+   Files and the whole AEP workspace outside `agent-sessions` (so installing, approving
+   or publishing can never happen by writing a file); commands touching the firewall,
+   the user environment's secrets, the registry, credential stores, sign-ins, AEP
+   install/approve/publish, a protected path, or carrying a credential.
+5. Cards are `pm-` records (`host_runtime/agent_mode.py`) in the shared card component;
+   the MCP/ACP call blocks on the record; ten minutes without an answer is Deny. They
+   are decided in Agent Web only (Telegram is refused `web_only`; Telegram never runs
+   these backends). During a turn the page polls `GET /api/cards?session_id=` and draws
+   them under the waiting turn; the answer keeps them
+   (`ConversationMessage.action_cards`) and a tool-record line per card, so a later
+   turn knows the outcome.
+6. `/mcp/agent` (the `aep-agent` server: permission, mail and Knowledge tools) accepts
+   only a running turn's own random token; the run's files are deleted after the turn.
+
+Rejected alternatives:
+- `--restricted` for Claude Code agent mode: it refuses files outside the working
+  directories instead of asking, which contradicts "outside: a card".
+- `--permission-mode acceptEdits`: in-folder edits would bypass the guard (a credential
+  file or a tool configuration inside the folder).
+- Copilot `preToolUse` hooks: they live in configuration the agent can reach and their
+  allow semantics are not documented for this version; ACP is a public protocol with an
+  explicit permission request.
+- Answering ACP with "allow always": it would persist in the person's Copilot settings
+  beyond the conversation.
+- A Codex wrapper over `codex app-server`: unverifiable here (not installed); left as a
+  follow-up instead of shipping guessed flags.
+
+## 2026-10-15 — Agent mode email: read in scope, send only from one card per message
+
+Context: `docs/phases/AGENT_MODE_BACKENDS.md` revised rules (read email, send email).
+
+Decision:
+1. `outlook.search` / `outlook.read` are read-only capabilities
+   (`capabilities/mail_read`, `integrations/outlook_mail.py`, Outlook COM like the draft
+   adapter; injectable readers for tests). The scope (folders, max days, excluded
+   senders/domains and folders) comes from Settings > Agent mode and is applied inside
+   the integration on every call; a message outside it is `message_unknown`.
+   Credential-shaped text in subjects and bodies is redacted. A source test keeps the
+   module free of any verb that changes a mailbox. The capabilities are registered for
+   a Workflow only when it uses them, like `outlook.draft`.
+2. The agent gets them as `aep-agent` MCP tools; the first read in a conversation shows
+   one card (Allow for this conversation / Deny); attachments are saved into the
+   working folder (`mail-attachments/`).
+3. Sending: `outlook_draft` saves a draft with the existing `outlook.draft` writer and
+   shows an `ml-` card (to, cc, subject, body, attachments; Send / Keep as draft /
+   Cancel). Every message is its own card; there is no conversation-wide allow; no
+   answer in ten minutes keeps the draft. `integrations/outlook_send.py` (the only
+   delivering module) is called from `AgentMail.decide` only, after comparing the
+   draft's recipients, subject and attachment names with what the card showed
+   (Outlook rewrites HTML, so the body is shown but not compared); a changed draft is
+   not sent. A source test checks that nothing else imports it.
+
+Rejected alternatives:
+- Sending through SMTP: needs a mailbox credential on the workstation.
+- A "send all" or per-conversation allow: the owner's rule is one press per message.
+- Putting the send verb into `integrations/outlook_draft.py`: that module's promise
+  (and test) is that it never sends.
+
+## 2026-10-15 — Agent mode audit: Task rows for decisions, every request in a log
+
+Decision: every carded request, every refusal and every agent turn is a Task row
+(`agent_permission`, `agent_mail`, `agent_turn`; the turn row counts asked, refused and
+free requests and names the first free ones), with secret-shaped text redacted; every
+request, free ones included, and every decision is a line in
+`workspace/agent-mode/audit.jsonl` (redacted). For Copilot the card's Task row also
+records whether the tool then completed or failed (ACP `tool_call_update`).
+
+Rejected alternative: a Task row for every free in-folder read or write: the task list
+keeps the newest 50 and one busy turn would push Workflow runs out of it.
+
+## 2026-10-15 — Knowledge pipeline as agent tools; push stays on the Knowledge page
+
+Decision: the `aep-agent` server offers `knowledge_sandboxes`, `knowledge_step` and
+`knowledge_run_questions` / `knowledge_questions_status`. Read steps (sandbox list and
+contents, drop folders, question sets, lint, ingest plan, file read, plan page, skill
+guide, convert dry run) run freely; writes (sandbox create, pull, drop add, convert
+apply, ingest apply, running test questions) show a card (Allow / Allow for this
+conversation / Deny). Merge, discard, adopt, index, rule write, push and publish are not
+offered. Steps run through `AgentWeb.pipeline_call` as the Host's owner, the same path
+as the Knowledge page.

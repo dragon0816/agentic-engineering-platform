@@ -109,8 +109,11 @@ them. The Copilot agent mode (`copilot_agent`, CP2) gets AEP's tools explicitly:
 the authoring tools served by the same Agent Web with the assistant token, actor =
 the Host's owner, source `external:copilot`), both allowed with `--allow-tool`, and
 the three skills are written to `.conversation-backends/.github/skills/`, trusted with
-`--add-dir`. Giving Claude Code or Codex an agent mode in Agent Web is not done; it
-needs an owner decision (data boundary as for Copilot on 2026-10-12).
+`--add-dir`. Since 2026-10-15 Claude Code and Copilot also have an agent mode with
+in-chat approval cards (`docs/phases/AGENT_MODE_BACKENDS.md`, Settings > Agent mode,
+off by default); it loads AEP's skills (`--plugin-dir` for Claude Code, `--add-dir`
+for Copilot) and the `aep`, `aep-assistant` and `aep-agent` servers. Codex stays
+text-only.
 
 Live-test fixes (2026-10-15):
 

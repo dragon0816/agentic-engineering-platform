@@ -2121,3 +2121,28 @@ s-k-20261011T102952` (not published).
   Web otherwise. Fixed: the Laya card now shows saved values before a restart. Tests:
   `tests/test_ai_proposed_changes.py` (48, incl. Telegram end to end and a real browser,
   card 640x288, Apply 88x44). Verification in `HANDOFF.md`. Live check pending (owner).
+
+- [x] Agent mode for the Claude Code / Copilot conversation backends (owner-approved
+  design `docs/phases/AGENT_MODE_BACKENDS.md` with the revised rules; decisions in
+  `docs/DECISIONS.md` 2026-10-15 "Agent mode for Claude Code and Copilot in Agent Web;
+  Codex stays text-only", "Agent mode email ...", "Agent mode audit ...", "Knowledge
+  pipeline as agent tools ..."; contract `docs/CONTRACTS.md` "Agent mode (approval cards
+  for coding-agent backends)"). Settings > Agent mode (per backend, off by default;
+  default folder; email scope). Each conversation works in its own folder (default
+  `workspace\agent-sessions\<session>`, or under a coding root) with read-only folders
+  a person adds ("Folders..." in the chat). Claude Code relays through
+  `--permission-prompt-tool mcp__aep-agent__permission` (`--setting-sources ""`, run
+  settings that ask for every command), Copilot over ACP (`copilot --acp`); Codex stays
+  text-only (no relay verifiable; said in Settings and chat). Inside the folder free;
+  outside a card (Allow / Allow this folder for this conversation / Deny); every command
+  a card; ten minutes = Deny; credentials and protected settings refused even when
+  allowed (`common/agent_guard.py`). Mail: `outlook.search` / `outlook.read` read only in
+  scope, first read one card, attachments into the folder; sending = draft + `ml-` card
+  per message (Send / Keep as draft / Cancel), `integrations/outlook_send.py` reachable
+  only from that decision. Knowledge pipeline steps as tools, writes carded, push stays
+  on the Knowledge page. Audit: Task rows per card, refusal and turn, every request in
+  `workspace/agent-mode/audit.jsonl`. Telegram unchanged (text-only; `pm-`/`ml-` cards
+  refused there). Tests: `tests/test_agent_mode.py` and `tests/test_agent_mail.py`
+  (59, incl. real browser: permission card 640x359, Allow 88x44; mail card 640x314,
+  Send 88x44; real `claude`/`copilot` flag smokes in a temp home). Verification in
+  `HANDOFF.md`. Live check pending (owner).

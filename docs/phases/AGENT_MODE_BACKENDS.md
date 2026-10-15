@@ -1,6 +1,6 @@
 # Agent mode for Claude Code / Codex / Copilot in Agent Web
 
-Owner request: 2026-10-15. Status: **approved (option A, rules revised 2026-10-15 below); implementation after the push.**
+Owner request: 2026-10-15. Status: **implemented 2026-10-15** (option A with the revised rules below) for Claude Code and GitHub Copilot; **Codex stays text-only** (no verifiable relay). Live check pending (owner). See "Implementation" at the end.
 
 ## Goal
 
@@ -96,3 +96,39 @@ Also in scope:
 - the Knowledge pipeline as agent tools (create sandbox, pull, convert, ingest, run
   test questions), with writes carded and Push to the vault left to the Knowledge page;
 - extra read-only folders a person adds to a conversation.
+
+
+## Implementation (2026-10-15)
+
+Decisions: `docs/DECISIONS.md` 2026-10-15 "Agent mode for Claude Code and Copilot in
+Agent Web; Codex stays text-only", "Agent mode email: read in scope, send only from one
+card per message", "Agent mode audit: ..." and "Knowledge pipeline as agent tools; push
+stays on the Knowledge page". Contract: `docs/CONTRACTS.md` "Agent mode (approval cards
+for coding-agent backends)".
+
+| Part | Where |
+|---|---|
+| Rules (pure): protected places, command guard, free / card / refuse | `src/common/agent_guard.py` (`GuardPlaces`, `judge`, `path_refusal`, `command_refusal`, `folder_refusal`) |
+| Settings > Agent mode, each conversation's folders and grants | `src/host_runtime/agent_mode_settings.py` (`agent-mode.json`, `agent-mode-sessions.json`) |
+| Runs, `pm-` cards, waiting, timeout, audit, the `aep-agent` MCP server (permission, mail, Knowledge tools) | `src/host_runtime/agent_mode.py` |
+| Mail tools and `ml-` send cards | `src/host_runtime/agent_mail.py`; `src/integrations/outlook_mail.py` (read only), `src/integrations/outlook_send.py` (send/discard, card decision only); capabilities `outlook.search` / `outlook.read` in `src/capabilities/mail_read/` |
+| Claude Code relay | `--permission-prompt-tool mcp__aep-agent__permission`, `--setting-sources ""`, run settings (ask for every command and network use), `--plugin-dir` with AEP's skills (`src/host_runtime/conversation_backends.py`) |
+| Copilot relay | `copilot --acp`; `src/host_runtime/acp_client.py` answers `session/request_permission` (allow once / reject once, never "always") |
+| Codex | text-only: `codex exec` has no relay and none could be verified here (not installed); Settings and the chat say so |
+| Agent Web | `/mcp/agent` (only a running turn's token), `GET /api/agent-mode`, `POST /api/agent-mode/settings`, `GET/POST /api/agent-mode/session`, `GET /api/cards?session_id=`; Settings card "Agent mode"; the chat line "Agent mode · works in ..." with "Folders..." (working folder, read-only folders); cards under the waiting turn, kept on the answer (`action_cards`) |
+| Telegram | unchanged: it never runs these backends; a `pm-`/`ml-` card decision from Telegram is refused (`web_only`) |
+
+Tests: `tests/test_agent_mode.py` (guard for every protected location with temp
+directories, command refusals, folder rules, relay round trip allow / deny /
+allow-for-conversation / timeout, a fake Claude Code over the real HTTP relay, a fake
+Copilot ACP agent in a real process, Codex text-only, Telegram text-only, real-browser
+render and press of a permission card and render of a mail card measured, and smokes of
+the real `claude` and `copilot` CLIs in a temp home: every agent-mode flag accepted, the
+run stops at sign-in); `tests/test_agent_mail.py` (scope, first-read card, attachments,
+send only from a card, one card per message, changed draft not sent, timeout keeps the
+draft, no send verb reachable otherwise, Knowledge reads free / writes carded / push not
+offered).
+
+Not verified here: a model actually calling the relay (the temp home has no sign-in, so
+no real `claude -p` turn could run without touching the person's own configuration),
+Outlook COM against a real mailbox, Copilot's real permission requests over ACP.

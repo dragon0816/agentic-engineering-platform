@@ -2195,6 +2195,49 @@ One card for every "the Agent asks, the person decides" moment
   publish), `values` (only what changes), `reason`. A refusal is a failed host outcome
   `proposal_refused` with a message naming fields, never values.
 
+### Agent mode (approval cards for coding-agent backends) (2026-10-15)
+
+`docs/phases/AGENT_MODE_BACKENDS.md`. Reuses "Action card and change proposal":
+- Card ids `pm-` (permission, first mail read, Knowledge write; `ActionCard.kind`
+  `agent_permission`) and `ml-` (an email to send; `agent_mail`). Buttons: `allow`,
+  `allow_session` ("Allow this folder for this conversation", "Allow <program> for this
+  conversation", "Allow for this conversation"), `deny`; mail `send`, `keep_draft`,
+  `cancel`. Statuses `pending`, `allowed`, `allowed_session`, `denied`, `expired`
+  (= Deny after 10 minutes); mail `sent`, `kept`, `cancelled`, `failed`, `expired`
+  (= kept as a draft). `web_only` is always true; Telegram gets `web_only`.
+  Decision codes: the new status, `permission_<status>` / `mail_<status>` for a card
+  already decided, `card_action_unknown`, `card_unknown`, `web_only`.
+- Server records: `host_runtime.agent_mode.AgentCard(PendingRecord)` (`kind`,
+  `session_id`, `run_id`, `backend`, `tool`, `request_kind` read/write/command/network/
+  other, `title`, `paths`, `command`, `folder`, `preview`, `reason`, `scope` (what
+  "for this conversation" remembers), `task_id`, `outcome`, `outcome_ok`, `channel`) in
+  `workspace/agent-mode/cards.json`; `host_runtime.agent_mail.MailCard` (`entry_id`,
+  `fingerprint` of to/cc/subject/attachment names, `to`, `cc`, `subject`, `body`,
+  `attachments`, ...) in `workspace/agent-mode/mail-cards.json`. Commands, paths and
+  previews are stored with credential-shaped text redacted.
+- `ConversationMessage.action_cards`: the cards an agent-mode turn showed, as decided
+  (at most 60), plus one `[card <id>] <title>: <status>` line per card in the answer's
+  `tool_summary`.
+- Settings `host_runtime.agent_mode_settings.AgentModeSettings`: `claude_code`,
+  `codex` (always refused), `copilot` (bool, default false), `default_root`, `mail`
+  (`integrations.outlook_mail.MailScope`: `folders`, `max_days` 1-365, `excluded_senders`
+  (address or `@domain`), `excluded_folders`). Per conversation `SessionAgentState`:
+  `folder`, `read_folders` (at most 20), `grants` (`read_folders`, `write_folders`,
+  `programs`, `tools`), `mail_read`.
+- Routes: `GET /api/agent-mode`, `POST /api/agent-mode/settings`,
+  `GET /api/agent-mode/session?session_id=`, `POST /api/agent-mode/session`
+  (`session_id`, `folder`, `read_folders`), `GET /api/cards?session_id=`.
+- MCP `POST /mcp/agent` (server `aep-agent`), bearer = the running turn's own random
+  token only. Tools: `permission` (Claude Code only; `{tool_name, input, tool_use_id}`
+  -> text `{"behavior": "allow", "updatedInput": ...}` or `{"behavior": "deny",
+  "message": ...}`), `outlook_search`, `outlook_read`, `outlook_draft`,
+  `knowledge_sandboxes`, `knowledge_step`, `knowledge_run_questions`,
+  `knowledge_questions_status`. No tool sends mail.
+- Capabilities `outlook.search` / `outlook.read` (`outlook.search.input.v1`: `query`,
+  `sender`, `folder`, `days`, `limit` <= 50; `outlook.read.input.v1`: `message_id`),
+  side effect `read`, refusal codes `folder_unknown`, `message_unknown`, `mail_failed`,
+  `library_missing`, `outlook_missing`.
+
 ## Shared-platform transport (Phase 7, slice 2i)
 
 `common.sync` is the wire between a Bridge and the shared platform: seven
