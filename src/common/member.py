@@ -14,8 +14,9 @@ from common.assets import AssetIdentity, Owner
 from common.authorization import DeviceAssetSelection
 from common.base import Contract, Sha256, Slug, Symbol, Text
 from common.distribution import PublishedAssetPackage
-from common.enrollment import Invitation, PlatformRole
+from common.enrollment import BridgeDevice, Invitation, PlatformRole
 from common.ownership import AssetNameOwnership, VersionChange
+from workflow.host_bridge import BridgeRegistration
 
 
 class MemberCatalogRequest(Contract):
@@ -284,3 +285,47 @@ class AssetApproveRequest(AssetSubmissionRequest):
 
 class AssetRejectRequest(AssetSubmissionRequest):
     reason: Text
+
+
+# -- Bridge self-enrollment (owner 2026-10-15, docs/phases/BRIDGE_ENROLLMENT.md) --
+
+
+class BridgeEnrollRequest(Contract):
+    """A member's own Agent asking to enroll the computer it runs on.
+
+    The same shape as the Agent's `EnrollmentRequest`: the device facts and
+    what it advertises, with no secret. Who is asking comes from the member
+    session, never from this body; the body must name that member.
+    """
+
+    schema_version: Literal["1"] = "1"
+    device: BridgeDevice
+    advertisement: BridgeRegistration
+
+    @model_validator(mode="after")
+    def one_device(self) -> Self:
+        if self.advertisement.bridge_id != self.device.bridge_id:
+            raise ValueError("advertisement bridge identity must match the device")
+        return self
+
+
+class AdminBridgeRequest(Contract):
+    bridge_id: Symbol
+
+
+class AdminBridgeEntry(Contract):
+    """One enrolled computer as an administrator sees it; no secret."""
+
+    bridge_id: Symbol
+    registered_by: Symbol
+    device_kind: Symbol
+    status: Literal["active", "disabled"]
+    members: tuple[Symbol, ...] = ()
+    # When its newest token was issued (the last enrollment) and until when
+    # the token that still works is valid.
+    enrolled_at: AwareDatetime | None = None
+    token_expires_at: AwareDatetime | None = None
+
+
+class AdminBridgeListReply(Contract):
+    bridges: tuple[AdminBridgeEntry, ...] = ()

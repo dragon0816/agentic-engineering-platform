@@ -12,7 +12,7 @@ import hmac
 import secrets
 import threading
 from collections.abc import Callable
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Literal, Self, TypeVar
 
 from pydantic import AwareDatetime, model_validator
@@ -20,9 +20,17 @@ from pydantic import AwareDatetime, model_validator
 from common.assets import RegistryContract
 from common.authorization import DeviceAssetSelection
 from common.base import Sha256, Symbol
-from common.enrollment import BridgeExecutionSubject
-from common.identity import ACCESS_TOKEN_METHOD, AuthenticatedActor, entitled
+from common.enrollment import BridgeBinding, BridgeExecutionSubject
+from common.identity import (
+    ACCESS_TOKEN_METHOD,
+    AuthenticatedActor,
+    IssuedAccessToken,
+    entitled,
+)
 from common.member import (
+    AdminBridgeEntry,
+    AdminBridgeListReply,
+    AdminBridgeRequest,
     AdminExtensionCatalogEntry,
     AdminExtensionCatalogReply,
     AssetApproveRequest,
@@ -40,6 +48,7 @@ from common.member import (
     AssetSubmissionRequest,
     AssetSubmitRequest,
     AssetTransferRequest,
+    BridgeEnrollRequest,
     MemberCatalogEntry,
     MemberCatalogReply,
     MemberCatalogRequest,
@@ -52,8 +61,8 @@ from common.member import (
 )
 from common.ownership import AssetNameOwnership
 from control_plane.authorization import AuthorizationError, InMemoryAuthorizationRegistry
-from control_plane.enrollment import InMemoryEnrollmentRegistry
-from control_plane.identity import fingerprint
+from control_plane.enrollment import EnrollmentError, InMemoryEnrollmentRegistry
+from control_plane.identity import AccessError, InMemoryAccessTokens, fingerprint
 from control_plane.identity_store import SqliteIdentityStorage
 from control_plane.ownership import AssetOwnershipService, OwnershipError
 from control_plane.submissions import SubmissionService
@@ -65,6 +74,9 @@ from software.marketplace import (
 )
 
 MIN_SESSION_SECRET_CHARS = 32
+# How long a Bridge token issued by self-enrollment works. Enrolling again
+# rotates it earlier; an administrator can withdraw the computer at any time.
+BRIDGE_TOKEN_LIFETIME = timedelta(days=90)
 
 MemberErrorCode = Literal[
     "authentication_failed",
@@ -94,6 +106,12 @@ MemberErrorCode = Literal[
     "new_owner_unknown",
     "version_missing",
     "version_deprecated",
+    # Bridge self-enrollment (owner 2026-10-15, docs/phases/BRIDGE_ENROLLMENT.md).
+    "device_owner_mismatch",
+    "administrator_required",
+    "device_disabled",
+    "device_in_use",
+    "device_missing",
 ]
 
 T = TypeVar("T")
@@ -218,6 +236,18 @@ _AUTHORIZATION_CODES: dict[str, MemberErrorCode] = {
     "asset_deprecated": "asset_deprecated",
 }
 
+_ENROLLMENT_CODES: dict[str, MemberErrorCode] = {
+    "user_missing": "actor_unknown",
+    "user_disabled": "actor_disabled",
+    "device_missing": "device_missing",
+    "device_disabled": "device_disabled",
+    "duplicate_device": "device_owner_mismatch",
+    "advertisement_identity_mismatch": "device_owner_mismatch",
+    "binding_forbidden": "device_owner_mismatch",
+    "device_single_user": "device_in_use",
+    "not_administrator": "not_administrator",
+}
+
 _OWNERSHIP_CODES: dict[str, MemberErrorCode] = {
     "session_expired": "session_expired",
     "actor_unknown": "actor_unknown",
@@ -248,6 +278,7 @@ class MemberService:
         applications: ApplicationCatalog | None = None,
         ownership: AssetOwnershipService | None = None,
         submissions: SubmissionService | None = None,
+        tokens: InMemoryAccessTokens | None = None,
         clock: Callable[[], datetime] | None = None,
     ) -> None:
         self.enrollment = enrollment
@@ -260,6 +291,9 @@ class MemberService:
         # Member publish with a review queue (owner 2026-10-15); without it the
         # submission operations answer invalid_request.
         self.submissions = submissions
+        # Bridge self-enrollment issues tokens; without it `bridges/enroll`
+        # answers invalid_request.
+        self.tokens = tokens
         self._clock = clock if clock is not None else lambda: datetime.now(UTC)
         self._lock = threading.Lock()
 
@@ -592,3 +626,117 @@ class MemberService:
         who = self.administrator(session_id, secret)
         return AssetSubmissionReply(submission=service.reject(who, request))
 
+    # -- Bridge self-enrollment (owner 2026-10-15) --------------------------
+    # `docs/phases/BRIDGE_ENROLLMENT.md`: a member's own Agent enrolls the
+    # company workstation it runs on and gets that computer's Bridge token,
+    # shown once. A shared test workstation stays an administrator's act.
+
+    def _tokens(self) -> InMemoryAccessTokens:
+        if self.tokens is None:
+            raise MemberError("invalid_request")
+        return self.tokens
+
+    def enroll_bridge(
+        self, session_id: str, secret: str, request: BridgeEnrollRequest
+    ) -> IssuedAccessToken:
+        """Register (or reuse) the member's own computer, bind them as its
+        device administrator, and issue a fresh token. A token that still
+        works for the same pair is revoked first, so enrolling again rotates
+        it. The secret leaves only in the returned value."""
+        tokens = self._tokens()
+        item = BridgeEnrollRequest.model_validate(request)
+        now = self._clock()
+        with self._lock:
+            who = self._who(session_id, secret, now)
+            member = self.enrollment.user(who.actor)
+            if member.status != "active":
+                raise MemberError("actor_disabled")
+            device = item.device
+            if device.registered_by != who.actor or item.advertisement.owner_id != who.actor:
+                raise MemberError("device_owner_mismatch")
+            if device.device_kind != "company_workstation":
+                raise MemberError("administrator_required")
+            try:
+                existing = self.enrollment.device(device.bridge_id)
+            except EnrollmentError:
+                existing = None
+            try:
+                if existing is None:
+                    self.enrollment.register_device(device, item.advertisement)
+                elif existing.registered_by != who.actor:
+                    raise MemberError("device_owner_mismatch")
+                elif existing.status != "active":
+                    raise MemberError("device_disabled")
+                else:
+                    self.enrollment.advertise(device.bridge_id, item.advertisement)
+                bound = any(
+                    binding.actor == who.actor
+                    for binding in self.enrollment.members(device.bridge_id)
+                )
+                if not bound:
+                    self.enrollment.bind(
+                        who.actor,
+                        BridgeBinding(
+                            bridge_id=device.bridge_id, actor=who.actor, role="device_admin"
+                        ),
+                    )
+            except EnrollmentError as error:
+                raise MemberError(_ENROLLMENT_CODES.get(error.code, "invalid_request")) from None
+            try:
+                tokens.revoke_for(who.actor, who.actor, device.bridge_id)
+                return tokens.issue(
+                    who.actor,
+                    who.actor,
+                    device.bridge_id,
+                    issued_at=now,
+                    expires_at=now + BRIDGE_TOKEN_LIFETIME,
+                )
+            except AccessError:
+                raise MemberError("actor_not_admitted") from None
+
+    def bridges(self, session_id: str, secret: str) -> AdminBridgeListReply:
+        """Every enrolled computer, for an administrator."""
+        tokens = self._tokens()
+        self.administrator(session_id, secret)
+        now = self._clock()
+        with self._lock:
+            entries = []
+            for device in self.enrollment.devices():
+                history = tokens.history_for(device.bridge_id)
+                working = tokens.grants_for(device.bridge_id, now=now)
+                expiries = [item.expires_at for item in working if item.expires_at is not None]
+                entries.append(
+                    AdminBridgeEntry(
+                        bridge_id=device.bridge_id,
+                        registered_by=device.registered_by,
+                        device_kind=device.device_kind,
+                        status=device.status,
+                        members=tuple(
+                            item.actor for item in self.enrollment.members(device.bridge_id)
+                        ),
+                        enrolled_at=history[0].issued_at if history else None,
+                        token_expires_at=max(expiries) if expiries else None,
+                    )
+                )
+        return AdminBridgeListReply(bridges=tuple(entries))
+
+    def disable_bridge(
+        self, session_id: str, secret: str, request: AdminBridgeRequest
+    ) -> AdminBridgeEntry:
+        """Withdraw a computer: the device is disabled and every token it
+        holds is revoked, so its Bridge is told it was withdrawn at its next
+        call and its member cannot enroll it again on their own."""
+        tokens = self._tokens()
+        item = AdminBridgeRequest.model_validate(request)
+        who = self.administrator(session_id, secret)
+        with self._lock:
+            try:
+                self.enrollment.disable_device(who.actor, item.bridge_id)
+            except EnrollmentError as error:
+                raise MemberError(_ENROLLMENT_CODES.get(error.code, "invalid_request")) from None
+            for grant in tokens.grants_for(item.bridge_id, now=self._clock()):
+                tokens.revoke(who.actor, grant.token_id)
+        for entry in self.bridges(session_id, secret).bridges:
+            if entry.bridge_id == item.bridge_id:
+                return entry
+        raise MemberError("device_missing")

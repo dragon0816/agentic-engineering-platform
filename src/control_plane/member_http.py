@@ -17,6 +17,7 @@ from common.base import Contract
 from common.enrollment import Invitation
 from common.identity import IssuedInvitationProof
 from common.member import (
+    AdminBridgeRequest,
     AdminInvitationCreateRequest,
     AdminInvitationListReply,
     AdminInvitationMetadata,
@@ -31,6 +32,7 @@ from common.member import (
     AssetSubmissionRequest,
     AssetSubmitRequest,
     AssetTransferRequest,
+    BridgeEnrollRequest,
     MemberCatalogRequest,
     MemberReplaceRequest,
     MemberRevokeRequest,
@@ -87,6 +89,12 @@ STATUS_FOR = {
     "submission_not_pending": 409,
     "self_review_refused": 403,
     "version_superseded": 409,
+    # Bridge self-enrollment (owner 2026-10-15).
+    "device_owner_mismatch": 403,
+    "administrator_required": 403,
+    "device_disabled": 409,
+    "device_in_use": 409,
+    "device_missing": 404,
 }
 # The label of a login a member issues for their Personal Agent, so the
 # portal and an audit can tell it from the browser's own.
@@ -180,6 +188,9 @@ class _Handler(BaseHTTPRequestHandler):
             "admin/submissions/approve",
             "admin/submissions/reject",
             "logins/issue-agent",
+            "bridges/enroll",
+            "admin/bridges/list",
+            "admin/bridges/disable",
         ):
             self._json(404, {"code": "invalid_request"})
             return
@@ -303,6 +314,32 @@ class _Handler(BaseHTTPRequestHandler):
                     },
                 )
                 return
+            elif operation == "bridges/enroll":
+                # The member's own Agent enrolls this computer. The Bridge
+                # token is in this reply once and nowhere else.
+                issued = self.server.service.enroll_bridge(
+                    *credential, BridgeEnrollRequest.model_validate(raw)
+                )
+                expires = issued.grant.expires_at
+                self._json(
+                    200,
+                    {
+                        "bridge_id": issued.grant.bridge_id,
+                        "token_id": issued.grant.token_id,
+                        "secret": issued.secret,
+                        "issued_at": issued.grant.issued_at.isoformat(),
+                        "expires_at": expires.isoformat() if expires is not None else None,
+                    },
+                )
+                return
+            elif operation == "admin/bridges/list":
+                if raw != {}:
+                    raise ValueError("the Bridge list takes no request fields")
+                reply = self.server.service.bridges(*credential)
+            elif operation == "admin/bridges/disable":
+                reply = self.server.service.disable_bridge(
+                    *credential, AdminBridgeRequest.model_validate(raw)
+                )
             elif operation == "admin/invitations":
                 create = AdminInvitationCreateRequest.model_validate(raw)
                 who = self.server.service.administrator(*credential)

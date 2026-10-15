@@ -218,6 +218,7 @@ class SharedPlatformApplication:
                 artifacts=state.artifacts,
                 clock=moment,
             ),
+            tokens=state.tokens,
             clock=moment,
         )
         self.control_server = ControlPlaneServer(

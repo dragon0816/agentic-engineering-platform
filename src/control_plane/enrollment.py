@@ -220,6 +220,11 @@ class InMemoryEnrollmentRegistry:
             raise EnrollmentError("device_missing")
         return _copy(item)
 
+    def devices(self) -> tuple[BridgeDevice, ...]:
+        """Every registered device, for an administrator's list."""
+        return tuple(_copy(item) for item in sorted(
+            self._devices.values(), key=lambda entry: entry.bridge_id))
+
     def advertisement(self, bridge_id: Symbol) -> BridgeRegistration:
         """What this device last said it can run. It is the device's own
         claim, not an authorization: what a member may run is decided

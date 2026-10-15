@@ -220,6 +220,17 @@ class InMemoryAccessTokens:
             if item.bridge_id == key and self._usable(item, moment)
         )
 
+    def history_for(self, bridge_id: Symbol) -> tuple[BridgeAccessGrant, ...]:
+        """Every token a device was ever given, newest first, revoked and
+        expired ones included: when it was last enrolled is read from here."""
+        key = TypeAdapter(Symbol).validate_python(bridge_id)
+        return tuple(
+            item.model_copy(deep=True)
+            for item in sorted(
+                self._grants.values(), key=lambda entry: entry.issued_at, reverse=True)
+            if item.bridge_id == key
+        )
+
     def revoke(self, requested_by: Symbol, token_id: Symbol) -> BridgeAccessGrant:
         """Take back one token. Its own member may, and so may somebody who
         administers the device it belongs to; nobody else."""
