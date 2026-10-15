@@ -2681,3 +2681,47 @@ Rejected alternatives:
   the documented user configuration.
 - Giving Agent Web's Claude Code and Codex chat backends tools: changes the 2026-10-02
   text-only backend rule and the data boundary; left for an owner decision.
+
+## 2026-10-15 — Members sign in to the Member Portal with an account and a password
+
+Context: the owner found invitation-only sign-in too cumbersome ("signing in only by
+invitation link"). Design and routes: `docs/phases/PASSWORD_SIGN_IN.md`.
+
+Decision:
+1. The Member Portal signs members in with account + password. An invitation stays the
+   only way to become a member; the page asks for the password in the same step
+   (`sign-in` with `{"password"}`), and the policy is checked before the invitation is
+   used up. The API still accepts an empty invitation body (automation, older pages);
+   such a member sets a password later from the portal (`password/set`).
+2. Only an scrypt hash is kept (`n=2**15, r=8, p=1`, 16-byte random salt, cost stored
+   per record, `hmac.compare_digest`) in the additive identity table
+   `identity_passwords`; `schema_version` unchanged. Password bodies are parsed by hand,
+   never as a `Contract`, so no validation error, dump or log can carry one.
+3. Policy: 12 to 256 characters; refused when it contains the account name, is in a small
+   built-in common list or is one repeated character (`password_rejected` with a reason).
+4. Every sign-in failure is `authentication_failed` (unknown account, no password, wrong
+   password, disabled member, locked). Counters in memory: 5 failures per account or 20
+   per client address within 15 minutes lock that key for 15 minutes.
+5. Forgot password: an administrator issues a single-use reset link (`#reset=`, SHA-256
+   fingerprint stored as for invitations, 60 minutes by default, at most 24 hours, a new
+   link revokes the earlier one). Redeeming it and changing the password revoke the
+   member's browser logins and sessions and keep the Personal Agent login; "Force
+   sign-out" revokes every login including the Agent's, and all sessions.
+6. A disabled member's stored login no longer renews a session (`actor_disabled`).
+
+Reason: an account + password is what members expect and what a browser password
+manager supports, while invitations still decide who is a member. scrypt is in the
+standard library (no new dependency) and memory-hard. The address limit is higher than
+the account limit because the live platform is reached through an SSH tunnel or relay,
+where every member arrives from 127.0.0.1; at 5, one person could lock everybody out.
+
+Rejected alternatives:
+- PBKDF2-HMAC-SHA256: also standard library, but not memory-hard.
+- `p=3` (the full OWASP-equivalent scrypt setting): over a second per check on the busy
+  office PC that hosts the platform; the cost is per record, so it can be raised later.
+- Persisting lockout counters: a restart clearing them is acceptable for a preview and
+  avoids a write on every failed attempt.
+- Revoking the Personal Agent login on reset: a forgotten password says nothing about the
+  separately issued Agent login; an administrator uses Force sign-out when it might.
+- An external identity provider or e-mailed reset links: no mail service or IdP in the
+  preview; the administrator delivers the link like an invitation.

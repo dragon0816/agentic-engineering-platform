@@ -2033,6 +2033,25 @@ s-k-20261011T102952` (not published).
   fixture, script timeout; the file passed alone, 6 passed). Live check pending (owner
   deploys to 172.25.228.141).
 
+- [x] Account and password sign-in for the Member Portal (owner request 2026-10-15;
+  design and as-built `docs/phases/PASSWORD_SIGN_IN.md`, decision in `docs/DECISIONS.md`
+  2026-10-15 "Members sign in to the Member Portal with an account and a password").
+  Platform: `control_plane/member_password.py` (scrypt hash per member in the additive
+  `identity_passwords` table, policy, per-account 5 / per-address 20 failure lockout for
+  15 minutes, single-use reset links in `identity_password_resets`); routes
+  `sign-in` (invitation + `{"password"}`), `sign-in/check`, `sign-in/password`,
+  `password/reset`, `password/status`, `password/set`, `password/change`,
+  `admin/members/password-reset`, `admin/members/sign-out`, `admin/members/credentials`;
+  uniform `authentication_failed`; reset and change revoke browser logins and sessions
+  (Agent login kept), force sign-out revokes all; a disabled member's login no longer
+  renews a session. Portal: account + password sign-in first, invitation/reset links open
+  "Set your password", header "Password" (set or change), no-password notice, Members
+  table Password column with "Password reset link" and "Force sign-out". Docs:
+  `deploy/shared-platform-preview/START-HERE.md` 1.1, `deploy/windows-preview/INSTALL.zh-TW.md`
+  5.2. Tests: `tests/test_member_password.py` (13, incl. real browser: sign-in form and
+  set-password step measured, sign in, change password); the two existing browser tests
+  set a password on their invitation step. Live check pending (owner deploys).
+
 - [x] AEP skills and MCP for coding agents by default (owner requirements 2026-10-15:
   platform-ready Skills/Workflows from Claude Code, Codex and Copilot without a
   per-folder connect; "MCP and Knowledge too"; live-test findings 3-6). Design

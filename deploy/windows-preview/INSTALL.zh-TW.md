@@ -91,7 +91,8 @@ Laya 等）都在 Settings 頁設定；細節見同一資料夾的 `README.md`�
 
 | 名稱 | 從哪裡來 | 用途 | 效期 |
 |---|---|---|---|
-| 邀請連結（Invitation） | 管理員寄給你 | 第一次登入 Member Portal（網頁），建立你的帳號 | 只能用一次 |
+| 邀請連結（Invitation） | 管理員寄給你 | 第一次登入 Member Portal（網頁），建立你的帳號並設定密碼 | 只能用一次 |
+| 密碼 | 你自己在第一次登入時設定 | 之後用「帳號 + 密碼」登入 Member Portal | 直到你更改 |
 | Personal Agent code | Member Portal 的「Connect a Personal Agent」 | 讓你的 Agent 以你的身分發布、註冊這台電腦 | 30 天 |
 | Bridge token | Agent Web 按「Enroll this PC」時自動取得 | 讓這台電腦從平台讀取清單、安裝 | 90 天 |
 
@@ -105,11 +106,28 @@ Laya 等）都在 Settings 頁設定；細節見同一資料夾的 `README.md`�
 
 管理員會用你的帳號名稱發一張邀請，寄給你一個邀請連結。
 
-### 5.2 登入 Member Portal（瀏覽器，只做一次）
+### 5.2 登入 Member Portal（瀏覽器）
 
-1. 打開管理員給你的**邀請連結**，會自動登入；或打開 Member Portal URL，把連結貼到
-   「Invitation link or code」再按 **Accept invitation and sign in**。
-2. 右上角顯示你的帳號名稱，就是登入成功。這個瀏覽器之後會記得你。
+**第一次（用邀請連結，同時設定密碼）**
+
+1. 打開管理員給你的**邀請連結**，畫面會顯示 **Set your password** 和你的帳號名稱；
+   或打開 Member Portal URL，展開 **Have an invitation or a password reset link?**，
+   把連結貼上後按 **Continue**。
+2. 輸入兩次新密碼，按 **Set password and sign in**。密碼至少 12 個字元（可以用幾個英文字
+   組成的句子），不能包含帳號名稱，也不能是常見密碼。
+3. 右上角顯示你的帳號名稱，就是登入成功。這個瀏覽器之後會記得你。
+
+**之後（帳號 + 密碼）**
+
+- 打開 Member Portal URL，在 **Sign in** 輸入 **Account**（例如 `leo.chi`）與
+  **Password**，按 **Sign in**。瀏覽器的密碼管理員可以記住它。
+- 輸入錯誤 5 次，這個帳號會被鎖 15 分鐘；畫面只會說「帳號或密碼錯誤」，不會說是哪一個。
+- **改密碼**：登入後按右上角 **Password**，輸入目前密碼與新密碼。其他瀏覽器會被登出，
+  這個瀏覽器保持登入；Agent 的 Personal Agent code 不受影響。
+- 以前只用邀請連結登入、還沒有密碼的人：登入後頁面上方會提示 **Set password**，
+  按下去設定即可（不需要目前密碼）。
+- **忘記密碼**：請管理員從 **Members & invitations** 發一個 **Password reset link**
+  給你（只能用一次、預設 60 分鐘內有效）。打開後設定新密碼就會登入，其他瀏覽器會被登出。
 
 ### 5.3 讓你的 Agent 代表你（Personal Agent code）
 
@@ -161,6 +179,8 @@ Laya 等）都在 Settings 頁設定；細節見同一資料夾的 `README.md`�
 | `device_owner_mismatch` | Portal 帳號和這台電腦的 `registered_by` 不同 | 請管理員用 `registered_by` 的名稱發邀請，重做 5.2～5.4 |
 | `Could not create invitation: invalid_request`（管理員） | 帳號名稱有 `@` 或其他符號 | 只用英文字母、數字和 `. - _` |
 | `session_expired` | Portal 網頁閒置太久 | 重新整理頁面（新版會自動續期） |
+| 「Account or password is wrong, or there were too many attempts」 | 帳號或密碼錯誤，或錯太多次被鎖 15 分鐘 | 等 15 分鐘再試；忘記密碼請管理員發 Password reset link |
+| 「This reset link was already used / has expired」 | 重設連結只能用一次且有期限 | 請管理員再發一個 |
 | `publisher_not_authorized` | 這個名稱屬於別人 | 請擁有者把你加為 co-editor，或改用新的名稱 |
 | Library 是空的 | 還沒註冊、或沒有你能用的項目 | 先做 5.4；或請擁有者把 **Who can use it** 改成全公司 |
 | `platform_unreachable` | 平台位址錯誤或網路不通 | 檢查兩個網址；確認平台有在執行 |

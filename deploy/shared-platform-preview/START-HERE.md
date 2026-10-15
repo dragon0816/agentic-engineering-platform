@@ -86,8 +86,32 @@ Applications，以及送審項目（等待／核准／退回／撤回）。點�
    的成員表按 **Role and groups**；變更會被記錄，最後一位管理員不能被改成 Member
    （`last_administrator`）。
 4. 按 **Create invitation** → **Copy link**，用私訊交給同事。連結只能用一次；過期或用掉後
-   可以再發一張，不用的可以按 **Revoke**。
+   可以再發一張，不用的可以按 **Revoke**。同事第一次打開邀請連結時會設定自己的密碼，之後用
+   「帳號 + 密碼」登入，不需要再發邀請。
 5. 一併告訴同事兩個網址：Member Portal URL 與 Bridge API URL。
+
+### 1.1 密碼：重設連結與強制登出
+
+Member Portal 的登入方式是**帳號 + 密碼**；邀請連結只用在第一次（同時設定密碼）。
+**Members & invitations** 分頁的成員表有 **Password** 欄（Set / Not set，以及尚未使用的
+重設連結期限），每一列有：
+
+- **Password reset link**：同事忘記密碼時按這個，複製出現的連結用私訊交給他。連結只能用
+  一次、預設 60 分鐘內有效（API 可設 1～1440 分鐘），再發一次會讓上一個連結失效。
+  同事打開後設定新密碼即登入；他其他瀏覽器的登入會被撤銷（Personal Agent code 保留）。
+  停用的帳號不能用重設連結。
+- **Force sign-out**：電腦遺失、帳號外洩時按這個。該成員所有瀏覽器登入、所有 session，
+  **連同 Personal Agent code** 立即失效；他的密碼不變，可以再用密碼登入（若密碼也可能外洩，
+  接著發一個 Password reset link）。
+
+規則：密碼至少 12 字元、不可包含帳號名稱或常見密碼；同一帳號錯 5 次鎖 15 分鐘，同一來源
+位址錯 20 次鎖 15 分鐘（經由 SSH tunnel 時大家的來源都是 127.0.0.1，所以位址的上限較高）；
+重啟平台會清除鎖定計數。所有登入失敗都只回 `authentication_failed`，不透露帳號是否存在。
+平台只保存密碼的 scrypt 雜湊（`workspace\registry.sqlite` 的 `identity_passwords`），
+任何回覆與紀錄都不含密碼。
+
+唯一的管理員忘記密碼、又沒有其他還登入著的瀏覽器時：在 `platform.json` 的 `invitations`
+加一張給**另一個**管理員帳號的啟動邀請，重啟後用它登入，再替原帳號發 Password reset link。
 
 ### 2. 審核同事發布的 Skill / Workflow
 
