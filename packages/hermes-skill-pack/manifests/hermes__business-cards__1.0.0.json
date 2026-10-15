@@ -1,0 +1,69 @@
+{
+  "metadata": {
+    "identity": {
+      "namespace": "hermes",
+      "name": "business-cards",
+      "version": "1.0.0"
+    },
+    "owner": {
+      "type": "organization",
+      "id": "aep"
+    },
+    "visibility": "organization",
+    "lifecycle": "published",
+    "contributors": [],
+    "categories": [
+      "hermes",
+      "productivity",
+      "contacts",
+      "ocr",
+      "vision",
+      "charts"
+    ],
+    "provenance": [
+      {
+        "source": "Hermes agent skill productivity/business-cards (Internal use; author AEP (from an internal Hermes skill))",
+        "revision": "sha256:7aa83deb81e0b820ad2fa1a52d28da916eae03bbf036878c9049f4f09ea5b2bd",
+        "author": null
+      }
+    ],
+    "dependencies": [],
+    "compatibility": {
+      "contract_version": "1",
+      "runtime": null,
+      "bridge": null,
+      "platforms": [
+        "windows"
+      ]
+    },
+    "business_approval": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null
+    },
+    "technical_policy": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null,
+      "risk": "low",
+      "approval_required": true,
+      "required_permissions": [],
+      "policy_refs": [],
+      "assessment": "manual"
+    },
+    "validation_refs": [],
+    "evaluation_refs": [],
+    "package": null,
+    "deprecation_reason": null,
+    "replacement": null
+  },
+  "alias": "business_cards",
+  "instructions": "Read a business card photo the user sends, extract company, name, department, title and phone into a local store, and render a company grouping chart on request.\n\n(AEP note: ported from the Hermes agent skill `productivity/business-cards`, Internal use, author AEP (from an internal Hermes skill). Hermes tool names are given in neutral words; a call written like terminal(command=...) means: run it in a shell, if this runtime lets you. Use the equivalent this runtime offers, and if it has none, say so instead of pretending. `~/.hermes` and HERMES_HOME are the Hermes agent's own folders. Scripts, references and templates named below are in the coding-agent copy of this Skill, folder `hermes-business-cards`.)\n\n# Business cards\n\nThe user photographs cards and sends them in the chat. Read the card, store what it\nsays, and be able to draw the company later.\n\n## Reading a card\n\nLook at the image and produce exactly this JSON — no prose, no code fence:\n\n```json\n{\"name\": \"\", \"company\": \"\", \"department\": \"\", \"title\": \"\", \"phone\": \"\",\n \"mobile\": \"\", \"email\": \"\", \"address\": \"\", \"website\": \"\", \"notes\": \"\",\n \"uncertain\": []}\n```\n\n- **Local-language form in `name` / `company`**, romanised form in `notes`. A card\n  showing both 王小明 and Hsiao-Ming Wang stores 王小明 and notes the other; do not\n  concatenate them into one field.\n- **`phone` is the desk number, `mobile` is the cellphone.** Keep extensions\n  (`#312`). A card with one number only: judge from the label, and if there is no\n  label, put it in `phone` and list `phone` in `uncertain`.\n- **`uncertain` is the point of this format.** A blurred digit, glare across the\n  title, a department you inferred rather than read — name the field. A wrong phone\n  number presented as fact costs the user a call to nobody; a flagged one costs them a\n  glance. Never guess silently to make the JSON look complete.\n- **Omit a field rather than invent it.**\n\n## Storing it\n\nWrite the JSON to a UTF-8 file and pass the path. Do **not** put Chinese in the\n`--json` argument: on Windows it goes through the console code page and arrives\nmangled.\n\n```bash\npython <skill>/scripts/cards.py add --json-file card.json\n```\n\nThe reply tells you whether this person was already on file and what changed:\n\n```json\n{\"stored\": true, \"name\": \"...\", \"previous\": {\"title\": \"經理\", ...}, \"changed\": [\"title\"]}\n```\n\n**Every scan is kept.** A re-scan does not overwrite; it adds a row. That is\ndeliberate — a person moving from one company to another is exactly the kind of\nthing the user wants to be able to look up later. When `changed` is non-empty, say so\nin your reply: \"上次是研發部經理, 現在是協理\" is the useful sentence.\n\n## Reporting back after a scan\n\nShort. What you read, and anything you were unsure of:\n\n- Confirm company / name / department / title / the numbers in one block.\n- If `uncertain` is non-empty, ask about exactly those fields and nothing else.\n- If the person was already on file with different details, lead with the change.\n\n## Drawing the company\n\n```bash\npython <skill>/scripts/cards.py chart --company \"範例公司\" --out C:/path/org.png\n```\n\nThen give it to the user: attach the PNG to your reply, or tell them its path.\n\n**Say what the chart is, every time.** It groups by department and sorts by title\nseniority. Business cards carry no reporting lines, so it is *not* a reporting\nchart — 王 sitting above 李 means \"more senior title\", not \"李's manager\". A tree\nthat looks like an org chart will be read as one unless you say otherwise.\n\nPeople with an `uncertain` field are drawn with an orange border and a ⚠ mark, so\nthe chart shows its own weak spots.\n\n## Looking things up\n\n```bash\npython <skill>/scripts/cards.py list --company \"範例公司\"      # newest row per person\npython <skill>/scripts/cards.py list --all-history         # every scan ever\npython <skill>/scripts/cards.py history --name \"王小明\"     # one person over time\n```\n\nThe store is SQLite at `cards.db` in the folder named by `BUSINESS_CARDS_HOME`\n(default `~/.business-cards`). It is\ncontact data the user collected in person — do not send it anywhere, and do not include\nwhole dumps of it in a reply. Answer the question that was asked.",
+  "commands": [],
+  "rules": [],
+  "default_command": null,
+  "script_tools": [],
+  "harness_guidance": null,
+  "procedure": {},
+  "selector_hint": "Read a business card photo the user sends, extract company, name, department, title and phone into a local store, and render a company grouping chart on request."
+}

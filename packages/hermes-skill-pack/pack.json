@@ -1,0 +1,790 @@
+{
+  "pack": "hermes",
+  "pack_version": "1.0.0",
+  "namespace": "hermes",
+  "agent_folder_prefix": "hermes-",
+  "default_enabled": false,
+  "source": "Hermes agent skills folder (<category>/<name>/SKILL.md), read only",
+  "skipped": [
+    "apple/apple-notes",
+    "apple/apple-reminders",
+    "apple/findmy",
+    "apple/imessage",
+    "autonomous-ai-agents/hermes-agent",
+    "social-media/xurl",
+    "software-development/hermes-agent-skill-authoring",
+    "software-development/inspecting-hermes-desktop-dom",
+    "software-development/python-debugpy"
+  ],
+  "skills": [
+    {
+      "source": "autonomous-ai-agents/claude-code",
+      "name": "claude-code",
+      "version": "2.2.1",
+      "license": "MIT",
+      "author": "Hermes Agent + Teknium",
+      "source_sha256": "ec92e627db1f449ea038e2b756ebbaa067880dd673a35497ea64b7e6391cf519",
+      "manifest": "manifests/hermes__claude-code__2.2.1.json",
+      "agent_folder": "skills/vendor/hermes-claude-code",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-claude-code",
+        "instructions shortened (16 section(s) left out)"
+      ]
+    },
+    {
+      "source": "autonomous-ai-agents/codex",
+      "name": "codex",
+      "version": "1.0.1",
+      "license": "MIT",
+      "author": "Hermes Agent",
+      "source_sha256": "1b15b57bcaba128b83ebe9f050b6873958198a1570bc801d4ca0406fb7e3271d",
+      "manifest": "manifests/hermes__codex__1.0.1.json",
+      "agent_folder": "skills/vendor/hermes-codex",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-codex"
+      ]
+    },
+    {
+      "source": "autonomous-ai-agents/computer-use",
+      "name": "computer-use",
+      "version": "2.1.0",
+      "license": "MIT",
+      "author": "Francesco Bonacci (f-trycua), Hermes Agent",
+      "source_sha256": "778833ecfea4385cab79ec4dda0ffe956e3f4bf9231eb80e52c5d113ee4e6cdf",
+      "manifest": "manifests/hermes__computer-use__2.1.0.json",
+      "agent_folder": "skills/vendor/hermes-computer-use",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-computer-use",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "autonomous-ai-agents/opencode",
+      "name": "opencode",
+      "version": "1.2.0",
+      "license": "MIT",
+      "author": "Hermes Agent",
+      "source_sha256": "885582e6f2d5b88f431c5a0bc3b69b88f5aab701774f91572487a6f4e4679a0b",
+      "manifest": "manifests/hermes__opencode__1.2.0.json",
+      "agent_folder": "skills/vendor/hermes-opencode",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-opencode"
+      ]
+    },
+    {
+      "source": "creative/architecture-diagram",
+      "name": "architecture-diagram",
+      "version": "1.0.0",
+      "license": "MIT",
+      "author": "Cocoon AI (hello@cocoon-ai.com), ported by Hermes Agent",
+      "source_sha256": "0e7e2736aafe052e409c2ad27863d51ef3007c116711e584033787ccb5d99d3f",
+      "manifest": "manifests/hermes__architecture-diagram__1.0.0.json",
+      "agent_folder": "skills/vendor/hermes-architecture-diagram",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-architecture-diagram",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "creative/ascii-video",
+      "name": "ascii-video",
+      "version": "1.0.0",
+      "license": "MIT",
+      "author": "SHL0MS, Hermes Agent",
+      "source_sha256": "3bd3f39985a52954e2693866608bd8105f4dc0efbca5b6baa3045c2b641bda26",
+      "manifest": "manifests/hermes__ascii-video__1.0.0.json",
+      "agent_folder": "skills/vendor/hermes-ascii-video",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-ascii-video"
+      ]
+    },
+    {
+      "source": "creative/baoyu-infographic",
+      "name": "baoyu-infographic",
+      "version": "1.56.1",
+      "license": "MIT",
+      "author": "宝玉 (JimLiu)",
+      "source_sha256": "89e25da6d8ea1cac79b18d9e6c4c3b8d7a522df2eef559f151f19c6ce5b2a002",
+      "manifest": "manifests/hermes__baoyu-infographic__1.56.1.json",
+      "agent_folder": "skills/vendor/hermes-baoyu-infographic",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-baoyu-infographic",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "creative/claude-design",
+      "name": "claude-design",
+      "version": "1.1.0",
+      "license": "MIT",
+      "author": "BadTechBandit",
+      "source_sha256": "1582b0d49e48bdf937b2f555098484e0979cdfa285c6cc9fa329ba8e416d347a",
+      "manifest": "manifests/hermes__claude-design__1.1.0.json",
+      "agent_folder": "skills/vendor/hermes-claude-design",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-claude-design",
+        "instructions shortened (13 section(s) left out)"
+      ]
+    },
+    {
+      "source": "creative/design-md",
+      "name": "design-md",
+      "version": "1.1.0",
+      "license": "MIT",
+      "author": "Hermes Agent",
+      "source_sha256": "7ed56bba40ffc9573fa51b33b2424f37fb5f774e9ecb7e76e737797afd0b62ae",
+      "manifest": "manifests/hermes__design-md__1.1.0.json",
+      "agent_folder": "skills/vendor/hermes-design-md",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-design-md",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "creative/humanizer",
+      "name": "humanizer",
+      "version": "2.5.1",
+      "license": "MIT",
+      "author": "Siqi Chen (@blader, https://github.com/blader/humanizer), ported by Hermes Agent",
+      "source_sha256": "887d5e3467a682da9b166e5293007f8bbbc299f8a6718ae00f26161b7d062b04",
+      "manifest": "manifests/hermes__humanizer__2.5.1.json",
+      "agent_folder": "skills/vendor/hermes-humanizer",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-humanizer",
+        "Hermes tool names in neutral words",
+        "instructions shortened (7 section(s) left out)"
+      ]
+    },
+    {
+      "source": "creative/manim-video",
+      "name": "manim-video",
+      "version": "1.0.0",
+      "license": "MIT",
+      "author": "SHL0MS, Hermes Agent",
+      "source_sha256": "467376469fc2043e2674a843509f8eea52660791e76fb2e142074ecd4abc7e69",
+      "manifest": "manifests/hermes__manim-video__1.0.0.json",
+      "agent_folder": "skills/vendor/hermes-manim-video",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-manim-video"
+      ]
+    },
+    {
+      "source": "creative/p5js",
+      "name": "p5js",
+      "version": "1.0.0",
+      "license": "MIT",
+      "author": "SHL0MS, Hermes Agent",
+      "source_sha256": "3b39b75303e082af69b3f4e2deab7a55b27d60293eff6a561fb627188194a33e",
+      "manifest": "manifests/hermes__p5js__1.0.0.json",
+      "agent_folder": "skills/vendor/hermes-p5js",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-p5js",
+        "instructions shortened (4 section(s) left out)"
+      ]
+    },
+    {
+      "source": "creative/popular-web-designs",
+      "name": "popular-web-designs",
+      "version": "1.0.0",
+      "license": "MIT",
+      "author": "Hermes Agent + Teknium (design systems sourced from VoltAgent/awesome-design-md)",
+      "source_sha256": "cd89bdb86008bb30b35d9bdd30e06587f75ee54055c54e1a79afb20418264b3d",
+      "manifest": "manifests/hermes__popular-web-designs__1.0.0.json",
+      "agent_folder": "skills/vendor/hermes-popular-web-designs",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-popular-web-designs",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "creative/songwriting-and-ai-music",
+      "name": "songwriting-and-ai-music",
+      "version": "1.0.0",
+      "license": "MIT",
+      "author": "Teknium (teknium1), Hermes Agent",
+      "source_sha256": "5dbf92dc336e9b17be45c35c92a5bb307e4655e39a86617f07b7654678f92583",
+      "manifest": "manifests/hermes__songwriting-and-ai-music__1.0.0.json",
+      "agent_folder": "skills/vendor/hermes-songwriting-and-ai-music",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-songwriting-and-ai-music"
+      ]
+    },
+    {
+      "source": "devops/sdlc-review",
+      "name": "sdlc-review",
+      "version": "1.1.0",
+      "license": "MIT",
+      "author": "Jakub Wolniewicz (@frizikk) + Hermes Agent",
+      "source_sha256": "ce90e8a3e145cce69c62880dc85921700110879f9290952d6cec28218503155f",
+      "manifest": "manifests/hermes__sdlc-review__1.1.0.json",
+      "agent_folder": "skills/vendor/hermes-sdlc-review",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-sdlc-review",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "email/email-inbox-triage",
+      "name": "email-inbox-triage",
+      "version": "0.2.0",
+      "license": "MIT",
+      "author": "Ben Barclay (benbarclay), Hermes Agent",
+      "source_sha256": "deeade1bb70f8835b2f3158980030b8aa41bb1ea6f798631451c89cfd632bcc8",
+      "manifest": "manifests/hermes__email-inbox-triage__0.2.0.json",
+      "agent_folder": "skills/vendor/hermes-email-inbox-triage",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-email-inbox-triage"
+      ]
+    },
+    {
+      "source": "email/himalaya",
+      "name": "himalaya",
+      "version": "1.1.0",
+      "license": "MIT",
+      "author": "community",
+      "source_sha256": "0f6c9bb4c0a5c4f4627e139b6beb2b1ba0addd7145895196528b8125929e3837",
+      "manifest": "manifests/hermes__himalaya__1.1.0.json",
+      "agent_folder": "skills/vendor/hermes-himalaya",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-himalaya"
+      ]
+    },
+    {
+      "source": "media/gif-search",
+      "name": "gif-search",
+      "version": "1.1.0",
+      "license": "MIT",
+      "author": "Hermes Agent",
+      "source_sha256": "a8349043740a8805d4ebfeb3a21f67ec0e9a9733a84f96403ca142c88a312b5d",
+      "manifest": "manifests/hermes__gif-search__1.1.0.json",
+      "agent_folder": "skills/vendor/hermes-gif-search",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-gif-search",
+        "1 credential placeholder(s) shown as [redacted]"
+      ]
+    },
+    {
+      "source": "media/songsee",
+      "name": "songsee",
+      "version": "1.0.0",
+      "license": "MIT",
+      "author": "community",
+      "source_sha256": "d9d8d1394c630bd83329cd54cd8f18e0e3cd140debe31c3ccf5d9667f054de07",
+      "manifest": "manifests/hermes__songsee__1.0.0.json",
+      "agent_folder": "skills/vendor/hermes-songsee",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-songsee",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "media/youtube-content",
+      "name": "youtube-content",
+      "version": "1.0.0",
+      "license": "MIT",
+      "author": "Teknium (teknium1), Hermes Agent",
+      "source_sha256": "52349e30ac74a3c2693c43588e9392a53236526b4b7d92769a64045a9782308e",
+      "manifest": "manifests/hermes__youtube-content__1.0.0.json",
+      "agent_folder": "skills/vendor/hermes-youtube-content",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-youtube-content"
+      ]
+    },
+    {
+      "source": "note-taking/obsidian",
+      "name": "obsidian",
+      "version": "1.0.0",
+      "license": "MIT",
+      "author": "Teknium (teknium1), Hermes Agent",
+      "source_sha256": "7aea4e8f89f94ab2876d79898d10a5d4cdab31390c53f72ad6934b071179f826",
+      "manifest": "manifests/hermes__obsidian__1.0.0.json",
+      "agent_folder": "skills/vendor/hermes-obsidian",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-obsidian",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "productivity/airtable",
+      "name": "airtable",
+      "version": "1.1.0",
+      "license": "MIT",
+      "author": "community",
+      "source_sha256": "28253f1e20c4d250725eb7f475c886952a4c6a1ef43ef6900c2dc0e75ebb40e6",
+      "manifest": "manifests/hermes__airtable__1.1.0.json",
+      "agent_folder": "skills/vendor/hermes-airtable",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-airtable",
+        "Hermes tool names in neutral words",
+        "18 credential placeholder(s) shown as [redacted]"
+      ]
+    },
+    {
+      "source": "productivity/box",
+      "name": "box",
+      "version": "1.0.0",
+      "license": "MIT",
+      "author": "Chris Kim (iskysun96), Hermes Agent",
+      "source_sha256": "e9672412333de4feff348e6dc387d9022d32005247360347a10a7131fb87eb13",
+      "manifest": "manifests/hermes__box__1.0.0.json",
+      "agent_folder": "skills/vendor/hermes-box",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-box",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "productivity/business-cards",
+      "name": "business-cards",
+      "version": "1.0.0",
+      "license": "Internal use",
+      "author": "AEP (from an internal Hermes skill)",
+      "source_sha256": "7aa83deb81e0b820ad2fa1a52d28da916eae03bbf036878c9049f4f09ea5b2bd",
+      "manifest": "manifests/hermes__business-cards__1.0.0.json",
+      "agent_folder": "skills/vendor/hermes-business-cards",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-business-cards",
+        "SKILL.md: owner name and channel in the description",
+        "SKILL.md: owner name as author",
+        "SKILL.md: internal licence stated",
+        "SKILL.md: reference to a personal skill",
+        "SKILL.md: owner name and channel",
+        "SKILL.md: owner name",
+        "SKILL.md: owner name",
+        "SKILL.md: owner name",
+        "SKILL.md: example person name replaced by a placeholder name",
+        "SKILL.md: example person name replaced by a placeholder name",
+        "SKILL.md: example company name replaced by a placeholder",
+        "SKILL.md: Hermes Telegram delivery command",
+        "SKILL.md: owner's Hermes data path",
+        "scripts/cards.py: own data folder instead of the Hermes one",
+        "scripts/cards.py: chart default in the same folder"
+      ]
+    },
+    {
+      "source": "productivity/document-to-action-items",
+      "name": "document-to-action-items",
+      "version": "0.1.0",
+      "license": "MIT",
+      "author": "Ben Barclay (benbarclay), Hermes Agent",
+      "source_sha256": "8a7556754aca2a7d04d38847131fb4db8d6705fa2106fcb154279e26117b41ee",
+      "manifest": "manifests/hermes__document-to-action-items__0.1.0.json",
+      "agent_folder": "skills/vendor/hermes-document-to-action-items",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-document-to-action-items",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "productivity/docx",
+      "name": "docx",
+      "version": "1.1.0",
+      "license": "MIT",
+      "author": "Nous Research",
+      "source_sha256": "9678b14d5e7841d588b969f6a4696cd46bcc46c3e4ac1479edc7656a051aa5ff",
+      "manifest": "manifests/hermes__docx__1.1.0.json",
+      "agent_folder": "skills/vendor/hermes-docx",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-docx",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "productivity/google-workspace",
+      "name": "google-workspace",
+      "version": "1.2.0",
+      "license": "MIT",
+      "author": "Nous Research",
+      "source_sha256": "c22194d932d9d96f3b6d7001b5d7680348163279af64d4c2c12aa09e32ea2267",
+      "manifest": "manifests/hermes__google-workspace__1.2.0.json",
+      "agent_folder": "skills/vendor/hermes-google-workspace",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-google-workspace"
+      ]
+    },
+    {
+      "source": "productivity/maps",
+      "name": "maps",
+      "version": "1.2.0",
+      "license": "MIT",
+      "author": "Mibayy",
+      "source_sha256": "775ef9f79be9cd147bc81e0c4a4ef952230a04736a6082f44dbac78554ef89ab",
+      "manifest": "manifests/hermes__maps__1.2.0.json",
+      "agent_folder": "skills/vendor/hermes-maps",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-maps",
+        "Hermes skill-folder paths written as <this skill's folder>",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "productivity/meeting-action-items",
+      "name": "meeting-action-items",
+      "version": "0.1.0",
+      "license": "MIT",
+      "author": "Ben Barclay (benbarclay), Hermes Agent",
+      "source_sha256": "1902f782551da96ee1f9b34d6f13af627f06150a498d874b0cc2a75d06d35aa8",
+      "manifest": "manifests/hermes__meeting-action-items__0.1.0.json",
+      "agent_folder": "skills/vendor/hermes-meeting-action-items",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-meeting-action-items",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "productivity/notion",
+      "name": "notion",
+      "version": "2.0.0",
+      "license": "MIT",
+      "author": "community",
+      "source_sha256": "e5aaf194f2688223890cb2eb6cf5ce866e6390082f1dff845c9e37a25fe0bfee",
+      "manifest": "manifests/hermes__notion__2.0.0.json",
+      "agent_folder": "skills/vendor/hermes-notion",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-notion",
+        "14 credential placeholder(s) shown as [redacted]"
+      ]
+    },
+    {
+      "source": "productivity/pdf",
+      "name": "pdf",
+      "version": "1.1.0",
+      "license": "MIT",
+      "author": "Nous Research",
+      "source_sha256": "c16b9c159a3a0b49353bfcd10c498b02aef3d319207b1019aa7dc8db129d06ab",
+      "manifest": "manifests/hermes__pdf__1.1.0.json",
+      "agent_folder": "skills/vendor/hermes-pdf",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-pdf",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "productivity/powerpoint",
+      "name": "powerpoint",
+      "version": "1.1.0",
+      "license": "MIT",
+      "author": "Nous Research",
+      "source_sha256": "b71d29d9809c4464d7f8d10afabf4f22f6a26c647cf7aacb6f9faf196ebe82f2",
+      "manifest": "manifests/hermes__powerpoint__1.1.0.json",
+      "agent_folder": "skills/vendor/hermes-powerpoint",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-powerpoint",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "productivity/product-price-monitor",
+      "name": "product-price-monitor",
+      "version": "0.1.0",
+      "license": "MIT",
+      "author": "Ben Barclay (benbarclay), Hermes Agent",
+      "source_sha256": "b87bf2102fed13d2c7c64759fa153f24f5e43a0afcf6f8ec5e13def92a6642ef",
+      "manifest": "manifests/hermes__product-price-monitor__0.1.0.json",
+      "agent_folder": "skills/vendor/hermes-product-price-monitor",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-product-price-monitor",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "productivity/teams-meeting-pipeline",
+      "name": "teams-meeting-pipeline",
+      "version": "1.1.0",
+      "license": "MIT",
+      "author": "Hermes Agent + Teknium",
+      "source_sha256": "ae1b08f044d7dfd9abb01c643cac3b69e4a3a1cbe7fd5782dd17785964cdc441",
+      "manifest": "manifests/hermes__teams-meeting-pipeline__1.1.0.json",
+      "agent_folder": "skills/vendor/hermes-teams-meeting-pipeline",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-teams-meeting-pipeline"
+      ]
+    },
+    {
+      "source": "productivity/weekly-review-planning",
+      "name": "weekly-review-planning",
+      "version": "0.1.0",
+      "license": "MIT",
+      "author": "Ben Barclay (benbarclay), Hermes Agent",
+      "source_sha256": "a689257facb937cfca9bc5507dd9e729f287f0cd3f6abbf73448eb25f73fbaab",
+      "manifest": "manifests/hermes__weekly-review-planning__0.1.0.json",
+      "agent_folder": "skills/vendor/hermes-weekly-review-planning",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-weekly-review-planning"
+      ]
+    },
+    {
+      "source": "productivity/xlsx",
+      "name": "xlsx",
+      "version": "1.1.0",
+      "license": "MIT",
+      "author": "Nous Research",
+      "source_sha256": "b302d7ac997843a757ab3c11513ea012889ebdae32f842edb44faa9a4485f19b",
+      "manifest": "manifests/hermes__xlsx__1.1.0.json",
+      "agent_folder": "skills/vendor/hermes-xlsx",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-xlsx",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "research/arxiv",
+      "name": "arxiv",
+      "version": "1.0.0",
+      "license": "MIT",
+      "author": "Hermes Agent",
+      "source_sha256": "9b41877bcb64166dc2355a43aedd3198c3e5214af67f09e1d1b717a989d92f72",
+      "manifest": "manifests/hermes__arxiv__1.0.0.json",
+      "agent_folder": "skills/vendor/hermes-arxiv",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-arxiv"
+      ]
+    },
+    {
+      "source": "research/competitor-news-monitor",
+      "name": "competitor-news-monitor",
+      "version": "0.1.0",
+      "license": "MIT",
+      "author": "Ben Barclay (benbarclay), Hermes Agent",
+      "source_sha256": "d8fd2a3a26ff45455709595132a092825a48f6c9dd3bcc98b06c1a43eaa7fcca",
+      "manifest": "manifests/hermes__competitor-news-monitor__0.1.0.json",
+      "agent_folder": "skills/vendor/hermes-competitor-news-monitor",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-competitor-news-monitor",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "research/grounded-citations",
+      "name": "grounded-citations",
+      "version": "1.2.0",
+      "license": "MIT",
+      "author": "Hermes Agent + Teknium",
+      "source_sha256": "19fba3a4ceedf768af6851e094b268a66b62af750d4d0689c5d62d5d50c032b6",
+      "manifest": "manifests/hermes__grounded-citations__1.2.0.json",
+      "agent_folder": "skills/vendor/hermes-grounded-citations",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-grounded-citations",
+        "Hermes skill-folder paths written as <this skill's folder>",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "research/llm-wiki",
+      "name": "llm-wiki",
+      "version": "2.1.0",
+      "license": "MIT",
+      "author": "Hermes Agent",
+      "source_sha256": "0229e37c1783fcac5b77cfb3242703666cf4aa472d2ae85b6bd5279756b515b6",
+      "manifest": "manifests/hermes__llm-wiki__2.1.0.json",
+      "agent_folder": "skills/vendor/hermes-llm-wiki",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-llm-wiki",
+        "Hermes tool names in neutral words",
+        "instructions shortened (2 section(s) left out)"
+      ]
+    },
+    {
+      "source": "software-development/codebase-inspection",
+      "name": "codebase-inspection",
+      "version": "1.0.0",
+      "license": "MIT",
+      "author": "Hermes Agent",
+      "source_sha256": "d62554263461919dff7d77c3c0c284c2190c894f312a84d7a770a030dab642dc",
+      "manifest": "manifests/hermes__codebase-inspection__1.0.0.json",
+      "agent_folder": "skills/vendor/hermes-codebase-inspection",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-codebase-inspection"
+      ]
+    },
+    {
+      "source": "software-development/dogfood",
+      "name": "dogfood",
+      "version": "1.0.0",
+      "license": "MIT",
+      "author": "Teknium (teknium1), Hermes Agent",
+      "source_sha256": "1b2793734493dbc624a1d1f1c0667cb510e191fa79b1c740d866706550190560",
+      "manifest": "manifests/hermes__dogfood__1.0.0.json",
+      "agent_folder": "skills/vendor/hermes-dogfood",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-dogfood",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "software-development/github",
+      "name": "github",
+      "version": "2.0.0",
+      "license": "MIT",
+      "author": "Ben Barclay (benbarclay), Hermes Agent",
+      "source_sha256": "9d70e7c842fe7db75b5a50526552a69862f5bcfc1e59aa93785241649a09d5a3",
+      "manifest": "manifests/hermes__github__2.0.0.json",
+      "agent_folder": "skills/vendor/hermes-github",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-github"
+      ]
+    },
+    {
+      "source": "software-development/node-inspect-debugger",
+      "name": "node-inspect-debugger",
+      "version": "1.0.0",
+      "license": "MIT",
+      "author": "Hermes Agent",
+      "source_sha256": "422eed9a0997182c5b197a8879ab194647799d69e573000e53b65b8708cf3a77",
+      "manifest": "manifests/hermes__node-inspect-debugger__1.0.0.json",
+      "agent_folder": "skills/vendor/hermes-node-inspect-debugger",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-node-inspect-debugger"
+      ]
+    },
+    {
+      "source": "software-development/requesting-code-review",
+      "name": "requesting-code-review",
+      "version": "2.1.0",
+      "license": "MIT",
+      "author": "Hermes Agent (adapted from obra/superpowers + MorAlekss)",
+      "source_sha256": "1e26ced9f05e357950e035b93ad1a937dd8a9e578a44d3c8d4fa734a09b7f814",
+      "manifest": "manifests/hermes__requesting-code-review__2.1.0.json",
+      "agent_folder": "skills/vendor/hermes-requesting-code-review",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-requesting-code-review",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "software-development/simplify-code",
+      "name": "simplify-code",
+      "version": "1.1.0",
+      "license": "MIT",
+      "author": "Hermes Agent (inspired by Claude Code /simplify)",
+      "source_sha256": "9ee977c3362a1c07f2e327198e066ddb3c0ed67709706fc410165ee820b2ca01",
+      "manifest": "manifests/hermes__simplify-code__1.1.0.json",
+      "agent_folder": "skills/vendor/hermes-simplify-code",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-simplify-code",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "software-development/spike",
+      "name": "spike",
+      "version": "1.0.0",
+      "license": "MIT",
+      "author": "Hermes Agent (adapted from gsd-build/get-shit-done)",
+      "source_sha256": "573d8fc0d6699eaf5308e742402bc02c883152ffeebe14607f164c6c538495c2",
+      "manifest": "manifests/hermes__spike__1.0.0.json",
+      "agent_folder": "skills/vendor/hermes-spike",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-spike",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "software-development/systematic-debugging",
+      "name": "systematic-debugging",
+      "version": "1.1.0",
+      "license": "MIT",
+      "author": "Hermes Agent (adapted from obra/superpowers)",
+      "source_sha256": "bd480f51a2e9969c88544003c30b7539b7df0b7358703f99b0495514c2dd878a",
+      "manifest": "manifests/hermes__systematic-debugging__1.1.0.json",
+      "agent_folder": "skills/vendor/hermes-systematic-debugging",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-systematic-debugging",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "software-development/test-driven-development",
+      "name": "test-driven-development",
+      "version": "1.1.0",
+      "license": "MIT",
+      "author": "Hermes Agent (adapted from obra/superpowers)",
+      "source_sha256": "649e6ab89bd8aaad2f9b162c60321f227cff8a8cda56393f07a81d1c6825a692",
+      "manifest": "manifests/hermes__test-driven-development__1.1.0.json",
+      "agent_folder": "skills/vendor/hermes-test-driven-development",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-test-driven-development",
+        "Hermes tool names in neutral words"
+      ]
+    },
+    {
+      "source": "ui-ux-pro-max",
+      "name": "ui-ux-pro-max",
+      "version": "1.0.0",
+      "license": "MIT",
+      "author": "nextlevelbuilder (https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)",
+      "source_sha256": "88aadd21220542083a455e373bd162ffe7843266a71f06f4d837bb3b34f9c9c7",
+      "manifest": "manifests/hermes__ui-ux-pro-max__1.0.0.json",
+      "agent_folder": "skills/vendor/hermes-ui-ux-pro-max",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-ui-ux-pro-max",
+        "license taken from the upstream repository (not in frontmatter)"
+      ]
+    },
+    {
+      "source": "web/blocked-page-recovery",
+      "name": "blocked-page-recovery",
+      "version": "1.0.0",
+      "license": "MIT",
+      "author": "Hermes Agent",
+      "source_sha256": "b71179e82ff27c002e6593e792d9a64dad9a444901b8938f30204fa115592061",
+      "manifest": "manifests/hermes__blocked-page-recovery__1.0.0.json",
+      "agent_folder": "skills/vendor/hermes-blocked-page-recovery",
+      "default_enabled": false,
+      "adaptations": [
+        "frontmatter name set to hermes-blocked-page-recovery",
+        "1 credential placeholder(s) shown as [redacted]"
+      ]
+    }
+  ]
+}

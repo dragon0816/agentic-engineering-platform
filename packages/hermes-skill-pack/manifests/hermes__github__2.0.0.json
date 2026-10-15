@@ -1,0 +1,76 @@
+{
+  "metadata": {
+    "identity": {
+      "namespace": "hermes",
+      "name": "github",
+      "version": "2.0.0"
+    },
+    "owner": {
+      "type": "organization",
+      "id": "aep"
+    },
+    "visibility": "organization",
+    "lifecycle": "published",
+    "contributors": [],
+    "categories": [
+      "hermes",
+      "software-development",
+      "github",
+      "gh",
+      "git",
+      "pull-requests",
+      "issues",
+      "code-review",
+      "repos",
+      "auth",
+      "ci"
+    ],
+    "provenance": [
+      {
+        "source": "Hermes agent skill software-development/github (MIT; author Ben Barclay (benbarclay), Hermes Agent)",
+        "revision": "sha256:9d70e7c842fe7db75b5a50526552a69862f5bcfc1e59aa93785241649a09d5a3",
+        "author": null
+      }
+    ],
+    "dependencies": [],
+    "compatibility": {
+      "contract_version": "1",
+      "runtime": null,
+      "bridge": null,
+      "platforms": [
+        "linux",
+        "macos",
+        "windows"
+      ]
+    },
+    "business_approval": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null
+    },
+    "technical_policy": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null,
+      "risk": "low",
+      "approval_required": true,
+      "required_permissions": [],
+      "policy_refs": [],
+      "assessment": "manual"
+    },
+    "validation_refs": [],
+    "evaluation_refs": [],
+    "package": null,
+    "deprecation_reason": null,
+    "replacement": null
+  },
+  "alias": "github",
+  "instructions": "GitHub via gh CLI: PRs, issues, reviews, repos, auth.\n\n(AEP note: ported from the Hermes agent skill `software-development/github`, MIT, author Ben Barclay (benbarclay), Hermes Agent. Hermes tool names are given in neutral words; a call written like terminal(command=...) means: run it in a shell, if this runtime lets you. Use the equivalent this runtime offers, and if it has none, say so instead of pretending. `~/.hermes` and HERMES_HOME are the Hermes agent's own folders. Scripts, references and templates named below are in the coding-agent copy of this Skill, folder `hermes-github`.)\n\n# GitHub\n\nWork GitHub end to end with the `gh` CLI (REST fallback where noted): auth,\nissues, the PR lifecycle, issue-to-PR delivery, code review, and repo\nmanagement. This skill consolidates six former skills; each workflow lives\ncomplete in its reference file — ALWAYS read the matching reference before\nstarting that workflow, the body below only routes.\n\n## Routing\n\n| Task | Read first |\n|---|---|\n| Auth broken / new machine / token or SSH setup / gh login | `references/auth.md` |\n| Create, triage, label, assign, close issues | `references/issues.md` |\n| Branch, commit, open PR, watch CI, merge | `references/pr-workflow.md` |\n| Carry an ISSUE to a verified PR (full delivery loop) | `references/issue-to-pr.md` |\n| Review someone's PR: diffs, inline comments, verdict | `references/code-review.md` |\n| Clone/create/fork repos, remotes, releases | `references/repo-management.md` |\n\nSupporting assets: `scripts/gh-env.sh` + `scripts/git-credential-token.py`\n(auth helpers), `templates/` (PR bodies, bug report, feature request),\n`references/ci-troubleshooting.md`, `references/conventional-commits.md`,\n`references/github-api-cheatsheet.md`, `references/review-output-template.md`.\n\n## Core discipline (applies to every workflow)\n\n- Preflight once per session: `gh auth status` — if it fails, go to\n  `references/auth.md` before anything else.\n- Prefer `gh` over raw REST; drop to `gh api` only for endpoints the\n  porcelain lacks (the cheatsheet lists them).\n- Never report CI green without checking `gh pr checks` yourself; never\n  claim merged without verifying `state,mergedAt`.\n- Read full context before writing: `gh issue view --comments` /\n  `gh pr view --comments` — decisions live in threads, not titles.\n- Sweep for duplicates before creating anything:\n  `gh pr list --search` / `gh issue list --search`.\n\n## Verification\n\n- The workflow's own reference file defines done for that task.\n- Cross-cutting: every claim about remote state (CI, merge, release,\n  issue state) is backed by a fresh `gh` read, never memory.",
+  "commands": [],
+  "rules": [],
+  "default_command": null,
+  "script_tools": [],
+  "harness_guidance": null,
+  "procedure": {},
+  "selector_hint": "GitHub via gh CLI: PRs, issues, reviews, repos, auth."
+}

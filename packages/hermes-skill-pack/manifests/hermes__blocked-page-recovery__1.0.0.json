@@ -1,0 +1,73 @@
+{
+  "metadata": {
+    "identity": {
+      "namespace": "hermes",
+      "name": "blocked-page-recovery",
+      "version": "1.0.0"
+    },
+    "owner": {
+      "type": "organization",
+      "id": "aep"
+    },
+    "visibility": "organization",
+    "lifecycle": "published",
+    "contributors": [],
+    "categories": [
+      "hermes",
+      "web",
+      "research",
+      "archives",
+      "wayback",
+      "paywall",
+      "waf",
+      "fallback"
+    ],
+    "provenance": [
+      {
+        "source": "Hermes agent skill web/blocked-page-recovery (MIT; author Hermes Agent)",
+        "revision": "sha256:b71179e82ff27c002e6593e792d9a64dad9a444901b8938f30204fa115592061",
+        "author": null
+      }
+    ],
+    "dependencies": [],
+    "compatibility": {
+      "contract_version": "1",
+      "runtime": null,
+      "bridge": null,
+      "platforms": [
+        "linux",
+        "macos",
+        "windows"
+      ]
+    },
+    "business_approval": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null
+    },
+    "technical_policy": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null,
+      "risk": "low",
+      "approval_required": true,
+      "required_permissions": [],
+      "policy_refs": [],
+      "assessment": "manual"
+    },
+    "validation_refs": [],
+    "evaluation_refs": [],
+    "package": null,
+    "deprecation_reason": null,
+    "replacement": null
+  },
+  "alias": "blocked_page_recovery",
+  "instructions": "Use when a fetch fails: 403/429, paywall, WAF, bot wall.\n\n(AEP note: ported from the Hermes agent skill `web/blocked-page-recovery`, MIT, author Hermes Agent. Hermes tool names are given in neutral words; a call written like terminal(command=...) means: run it in a shell, if this runtime lets you. Use the equivalent this runtime offers, and if it has none, say so instead of pretending. `~/.hermes` and HERMES_HOME are the Hermes agent's own folders. Scripts, references and templates named below are in the coding-agent copy of this Skill, folder `hermes-blocked-page-recovery`. Values shown as [redacted] come from the environment, never from text (JINA_API_KEY).)\n\n# Blocked-Page Recovery\n\nWhen a page won't fetch — 403/429, Cloudflare \"Just a moment...\", a paywall,\nor a bot-detection interstitial — don't give up and don't loop on the same\nURL. Third-party services often hold a **copy** of the page. Work down this\nladder, cheapest first.\n\n## The ladder\n\n```\n1. Wayback Machine  — archive.org \"available\" API  (snapshot + timestamp)\n2. archive.today    — domain rotation: archive.ph → .md → .li → .is\n3. Jina Reader      — only if JINA_API_KEY is set  (live server-side render)\n4. API-first pivot  — look for /api/, /graphql, .json, or RSS on the same host\n5. Real browser     — browser tool as the last, most expensive resort\n```\n\nRun it in one shot with the bundled script:\n\n```bash\npython3 scripts/recover_page.py \"https://example.com/blocked-article\" --json\n```\n\nThe script tries each route in order, validates every body (see \"Fake\nsuccesses\" below), and prints the first genuine hit with its provenance.\n\n## Provenance discipline (non-negotiable)\n\nEvery recovered copy carries a provenance you MUST preserve when citing:\n\n| Route | Provenance | How to cite |\n|-------|-----------|-------------|\n| Wayback / archive.today | `snapshot` | Cite WITH the snapshot date: \"as archived 2026-08-06\". Never present a snapshot as the live page — it may be stale. |\n| Jina Reader | `live` | Server-side re-render of the live page; cite normally. |\n| Live fetch / browser | `live` | Cite normally. |\n\nIf the user needs *current* data (prices, availability, breaking news), a\nsnapshot is context, not an answer — say so explicitly and note its age.\n\n## Manual routes\n\n### 1. Wayback Machine (best provenance, try first)\n\n```bash\n# Discovery: returns closest snapshot URL + timestamp as JSON\ncurl -sL \"https://archive.org/wayback/available?url={URL}\"\n# Then fetch archived_snapshots.closest.url\n```\n\nFor enumerating many snapshots (or recovering deleted pages), the CDX index:\n\n```bash\ncurl -sL \"https://web.archive.org/cdx/search/cdx?url={URL}&output=json&limit=10\"\n```\n\nCDX intermittently returns 503 under load — if it does, fall back to the\n`available` API; don't retry-hammer it.\n\nWorks for: any publicly crawled URL. Fails for: robots-blocked sites,\nnever-crawled URLs, JS-only SPAs (snapshots don't render).\n\n### 2. archive.today (paywalls, deleted content)\n\nUser-submitted archives — often has paywalled news articles Wayback lacks.\nRate-limits aggressively (429) and rotates domains, so iterate:\n\n```bash\nfor d in archive.ph archive.md archive.li archive.is; do\n  curl -sL --max-time 20 \"https://$d/newest/{URL}\" -o ~/.hermes/cache/scratch/page.html \\\n    -w \"%{http_code}\" && break\ndone\n```\n\n**Validate the body, not the status code** — a 429 still ships several KB of\nrate-limit HTML that looks like a success to a size check alone.\n\n### 3. Jina Reader (requires JINA_API_KEY)\n\n`r.jina.ai` re-renders the live page in a real browser server-side and\nreturns markdown. Anonymous access is dead (401 → Turnstile); a key is\nrequired:\n\n```bash\ncurl -s -H \"Authorization: Bearer [redacted]\" \"https://r.jina.ai/{URL}\"\n```\n\nHandles JS SPAs that archives can't. Skip this route entirely when the env\nvar is unset.\n\n### 4. API-first pivot\n\nWAFs protect the HTML surface far more aggressively than the data endpoints\nbehind it. After 2-3 blocked attempts on a site, stop fighting the HTML and\nlook for:\n\n- `/api/...`, `/graphql`, or `.json` variants of the page URL\n- An RSS/Atom feed (`/feed`, `/rss`, `<link rel=\"alternate\">` in any copy\n  you did recover)\n- A sitemap (`/sitemap.xml`) revealing canonical URLs that may not be gated\n\n## Fake successes — routes that LIE\n\nThese return HTTP 200 with a plausible body that is NOT the page. The script\nrejects them automatically; reject them manually too:\n\n- **Google Cache is dead** (since mid-2024). `webcache.googleusercontent.com`\n  returns 200 + tens of KB, but it's a Google Search interstitial with a JS\n  redirect, not a cache. Never use it.\n- **AMP caches** (`*.cdn.ampproject.org`) mostly return a ~300-byte\n  `<title>Redirecting</title>` meta-refresh stub pointing back at the\n  original (blocked) URL. Treating that as success creates a fetch loop.\n- **Rate-limit bodies**: archive.today 429 pages are multi-KB HTML. Check for\n  the target's actual content (title words, expected strings), not just size.\n\nDetection heuristics the script applies: body under a per-route byte floor;\nmeta-refresh/JS-redirect stubs whose target is the original host; interstitial\ntitles (\"Just a moment\", \"Redirecting\", \"Google Search\", \"Attention Required\").\n\n## Proxy relays: don't\n\nGeneric \"web proxy\" relays are man-in-the-middle by construction. Never send\ncookies or Authorization headers through one, and don't use them for anything\nthe user will rely on — provenance is unverifiable. Prefer archives, which at\nleast timestamp their copies.",
+  "commands": [],
+  "rules": [],
+  "default_command": null,
+  "script_tools": [],
+  "harness_guidance": null,
+  "procedure": {},
+  "selector_hint": "Use when a fetch fails: 403/429, paywall, WAF, bot wall."
+}

@@ -1,0 +1,71 @@
+{
+  "metadata": {
+    "identity": {
+      "namespace": "hermes",
+      "name": "gif-search",
+      "version": "1.1.0"
+    },
+    "owner": {
+      "type": "organization",
+      "id": "aep"
+    },
+    "visibility": "organization",
+    "lifecycle": "published",
+    "contributors": [],
+    "categories": [
+      "hermes",
+      "media",
+      "gif",
+      "search",
+      "tenor",
+      "api"
+    ],
+    "provenance": [
+      {
+        "source": "Hermes agent skill media/gif-search (MIT; author Hermes Agent)",
+        "revision": "sha256:a8349043740a8805d4ebfeb3a21f67ec0e9a9733a84f96403ca142c88a312b5d",
+        "author": null
+      }
+    ],
+    "dependencies": [],
+    "compatibility": {
+      "contract_version": "1",
+      "runtime": null,
+      "bridge": null,
+      "platforms": [
+        "linux",
+        "macos",
+        "windows"
+      ]
+    },
+    "business_approval": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null
+    },
+    "technical_policy": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null,
+      "risk": "low",
+      "approval_required": true,
+      "required_permissions": [],
+      "policy_refs": [],
+      "assessment": "manual"
+    },
+    "validation_refs": [],
+    "evaluation_refs": [],
+    "package": null,
+    "deprecation_reason": null,
+    "replacement": null
+  },
+  "alias": "gif_search",
+  "instructions": "Search/download GIFs from Tenor via curl + jq.\n\n(AEP note: ported from the Hermes agent skill `media/gif-search`, MIT, author Hermes Agent. Hermes tool names are given in neutral words; a call written like terminal(command=...) means: run it in a shell, if this runtime lets you. Use the equivalent this runtime offers, and if it has none, say so instead of pretending. `~/.hermes` and HERMES_HOME are the Hermes agent's own folders. Scripts, references and templates named below are in the coding-agent copy of this Skill, folder `hermes-gif-search`. Needs: commands curl, jq; environment variables TENOR_API_KEY. Values shown as [redacted] come from the environment, never from text.)\n\n# GIF Search (Tenor API)\n\nSearch and download GIFs directly via the Tenor API using curl. No extra tools needed.\n\n## When to use\n\nUseful for finding reaction GIFs, creating visual content, and sending GIFs in chat.\n\n## Setup\n\nSet your Tenor API key in your environment (add to `${HERMES_HOME:-~/.hermes}/.env`):\n\n```bash\nTENOR_API_KEY=[redacted]\n```\n\nGet a free API key at https://developers.google.com/tenor/guides/quickstart — the Google Cloud Console Tenor API key is free and has generous rate limits.\n\n## Prerequisites\n\n- `curl` and `jq` (both standard on macOS/Linux)\n- `TENOR_API_KEY` environment variable\n\n## Search for GIFs\n\n```bash\n# Search and get GIF URLs\ncurl -s \"https://tenor.googleapis.com/v2/search?q=thumbs+up&limit=5&key=${TENOR_API_KEY}\" | jq -r '.results[].media_formats.gif.url'\n\n# Get smaller/preview versions\ncurl -s \"https://tenor.googleapis.com/v2/search?q=nice+work&limit=3&key=${TENOR_API_KEY}\" | jq -r '.results[].media_formats.tinygif.url'\n```\n\n## Download a GIF\n\n```bash\n# Search and download the top result\nURL=$(curl -s \"https://tenor.googleapis.com/v2/search?q=celebration&limit=1&key=${TENOR_API_KEY}\" | jq -r '.results[0].media_formats.gif.url')\ncurl -sL \"$URL\" -o celebration.gif\n```\n\n## Get Full Metadata\n\n```bash\ncurl -s \"https://tenor.googleapis.com/v2/search?q=cat&limit=3&key=${TENOR_API_KEY}\" | jq '.results[] | {title: .title, url: .media_formats.gif.url, preview: .media_formats.tinygif.url, dimensions: .media_formats.gif.dims}'\n```\n\n## API Parameters\n\n| Parameter | Description |\n|-----------|-------------|\n| `q` | Search query (URL-encode spaces as `+`) |\n| `limit` | Max results (1-50, default 20) |\n| `key` | API key (from `$TENOR_API_KEY` env var) |\n| `media_filter` | Filter formats: `gif`, `tinygif`, `mp4`, `tinymp4`, `webm` |\n| `contentfilter` | Safety: `off`, `low`, `medium`, `high` |\n| `locale` | Language: `en_US`, `es`, `fr`, etc. |\n\n## Available Media Formats\n\nEach result has multiple formats under `.media_formats`:\n\n| Format | Use case |\n|--------|----------|\n| `gif` | Full quality GIF |\n| `tinygif` | Small preview GIF |\n| `mp4` | Video version (smaller file size) |\n| `tinymp4` | Small preview video |\n| `webm` | WebM video |\n| `nanogif` | Tiny thumbnail |\n\n## Notes\n\n- URL-encode the query: spaces as `+`, special chars as `%XX`\n- For sending in chat, `tinygif` URLs are lighter weight\n- GIF URLs can be used directly in markdown: `![alt](url)`",
+  "commands": [],
+  "rules": [],
+  "default_command": null,
+  "script_tools": [],
+  "harness_guidance": null,
+  "procedure": {},
+  "selector_hint": "Search/download GIFs from Tenor via curl + jq."
+}

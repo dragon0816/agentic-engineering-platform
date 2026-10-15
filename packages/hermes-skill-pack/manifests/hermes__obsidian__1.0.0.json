@@ -1,0 +1,71 @@
+{
+  "metadata": {
+    "identity": {
+      "namespace": "hermes",
+      "name": "obsidian",
+      "version": "1.0.0"
+    },
+    "owner": {
+      "type": "organization",
+      "id": "aep"
+    },
+    "visibility": "organization",
+    "lifecycle": "published",
+    "contributors": [],
+    "categories": [
+      "hermes",
+      "note-taking",
+      "obsidian",
+      "notes",
+      "markdown",
+      "vault"
+    ],
+    "provenance": [
+      {
+        "source": "Hermes agent skill note-taking/obsidian (MIT; author Teknium (teknium1), Hermes Agent)",
+        "revision": "sha256:7aea4e8f89f94ab2876d79898d10a5d4cdab31390c53f72ad6934b071179f826",
+        "author": null
+      }
+    ],
+    "dependencies": [],
+    "compatibility": {
+      "contract_version": "1",
+      "runtime": null,
+      "bridge": null,
+      "platforms": [
+        "linux",
+        "macos",
+        "windows"
+      ]
+    },
+    "business_approval": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null
+    },
+    "technical_policy": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null,
+      "risk": "low",
+      "approval_required": true,
+      "required_permissions": [],
+      "policy_refs": [],
+      "assessment": "manual"
+    },
+    "validation_refs": [],
+    "evaluation_refs": [],
+    "package": null,
+    "deprecation_reason": null,
+    "replacement": null
+  },
+  "alias": "obsidian",
+  "instructions": "Read, search, create, and edit notes in the Obsidian vault.\n\n(AEP note: ported from the Hermes agent skill `note-taking/obsidian`, MIT, author Teknium (teknium1), Hermes Agent. Hermes tool names are given in neutral words; a call written like terminal(command=...) means: run it in a shell, if this runtime lets you. Use the equivalent this runtime offers, and if it has none, say so instead of pretending. `~/.hermes` and HERMES_HOME are the Hermes agent's own folders. Scripts, references and templates named below are in the coding-agent copy of this Skill, folder `hermes-obsidian`.)\n\n# Obsidian Vault\n\nUse this skill for filesystem-first Obsidian vault work: reading notes, listing notes, searching note files, creating notes, appending content, and adding wikilinks.\n\n## Vault path\n\nUse a known or resolved vault path before calling file tools.\n\nThe documented vault-path convention is the `OBSIDIAN_VAULT_PATH` environment variable, for example from `${HERMES_HOME:-~/.hermes}/.env`. If it is unset, use `~/Documents/Obsidian Vault`.\n\nFile tools do not expand shell variables. Do not pass paths containing `$OBSIDIAN_VAULT_PATH` to read file, write file, edit file, or file search; resolve the vault path first and pass a concrete absolute path. Vault paths may contain spaces, which is another reason to prefer file tools over shell commands.\n\nIf the vault path is unknown, shell is acceptable for resolving `OBSIDIAN_VAULT_PATH` or checking whether the fallback path exists. Once the path is known, switch back to file tools.\n\n## Read a note\n\nUse read file with the resolved absolute path to the note. Prefer this over `cat` because it provides line numbers and pagination.\n\n## List notes\n\nUse file search with `target: \"files\"` and the resolved vault path. Prefer this over `find` or `ls`.\n\n- To list all markdown notes, use `pattern: \"*.md\"` under the vault path.\n- To list a subfolder, search under that subfolder's absolute path.\n\n## Search\n\nUse file search for both filename and content searches. Prefer this over `grep`, `find`, or `ls`.\n\n- For filenames, use file search with `target: \"files\"` and a filename `pattern`.\n- For note contents, use file search with `target: \"content\"`, the content regex as `pattern`, and `file_glob: \"*.md\"` when you want to restrict matches to markdown notes.\n\n## Create a note\n\nUse write file with the resolved absolute path and the full markdown content. Prefer this over shell heredocs or `echo` because it avoids shell quoting issues and returns structured results.\n\n## Append to a note\n\nPrefer a native file-tool workflow when it is not awkward:\n\n- Read the target note with read file.\n- Use edit file for an anchored append when there is stable context, such as adding a section after an existing heading or appending before a known trailing block.\n- Use write file when rewriting the whole note is clearer than constructing a fragile patch.\n\nFor an anchored append with edit file, replace the anchor with the anchor plus the new content.\n\nFor a simple append with no stable context, shell is acceptable if it is the clearest safe option.\n\n## Targeted edits\n\nUse edit file for focused note changes when the current content gives you stable context. Prefer this over shell text rewriting.\n\n## Wikilinks\n\nObsidian links notes with `[[Note Name]]` syntax. When creating notes, use these to link related content.",
+  "commands": [],
+  "rules": [],
+  "default_command": null,
+  "script_tools": [],
+  "harness_guidance": null,
+  "procedure": {},
+  "selector_hint": "Read, search, create, and edit notes in the Obsidian vault."
+}

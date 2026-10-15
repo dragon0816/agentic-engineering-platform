@@ -1,0 +1,72 @@
+{
+  "metadata": {
+    "identity": {
+      "namespace": "hermes",
+      "name": "product-price-monitor",
+      "version": "0.1.0"
+    },
+    "owner": {
+      "type": "organization",
+      "id": "aep"
+    },
+    "visibility": "organization",
+    "lifecycle": "published",
+    "contributors": [],
+    "categories": [
+      "hermes",
+      "productivity",
+      "prices",
+      "availability",
+      "shopping",
+      "travel",
+      "alerts"
+    ],
+    "provenance": [
+      {
+        "source": "Hermes agent skill productivity/product-price-monitor (MIT; author Ben Barclay (benbarclay), Hermes Agent)",
+        "revision": "sha256:b87bf2102fed13d2c7c64759fa153f24f5e43a0afcf6f8ec5e13def92a6642ef",
+        "author": null
+      }
+    ],
+    "dependencies": [],
+    "compatibility": {
+      "contract_version": "1",
+      "runtime": null,
+      "bridge": null,
+      "platforms": [
+        "linux",
+        "macos",
+        "windows"
+      ]
+    },
+    "business_approval": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null
+    },
+    "technical_policy": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null,
+      "risk": "low",
+      "approval_required": true,
+      "required_permissions": [],
+      "policy_refs": [],
+      "assessment": "manual"
+    },
+    "validation_refs": [],
+    "evaluation_refs": [],
+    "package": null,
+    "deprecation_reason": null,
+    "replacement": null
+  },
+  "alias": "product_price_monitor",
+  "instructions": "Watch product, flight, or listing prices; alert on target.\n\n(AEP note: ported from the Hermes agent skill `productivity/product-price-monitor`, MIT, author Ben Barclay (benbarclay), Hermes Agent. Hermes tool names are given in neutral words; a call written like terminal(command=...) means: run it in a shell, if this runtime lets you. Use the equivalent this runtime offers, and if it has none, say so instead of pretending. `~/.hermes` and HERMES_HOME are the Hermes agent's own folders. Scripts, references and templates named below are in the coding-agent copy of this Skill, folder `hermes-product-price-monitor`.)\n\n# Product Price Monitor\n\nMonitor a concrete purchasable item and alert on a normalized all-in price or availability condition. Handle variants, taxes, fees, currencies, stock, cancellation terms, and duplicate alerts explicitly. Setup runs once in the foreground; the recurring check runs as a scheduler tick (the `price-watch` automation blueprint scaffolds this).\n\n## When to Use\n\n- \"Alert me when this laptop drops below $1,000.\"\n- \"Watch these flights for a fare under $500.\"\n- \"Tell me when this hotel has a refundable room.\"\n- \"Track ticket/listing availability.\"\n- A cron tick fires for an existing price watch (steps 4-6).\n\nDon't use for: one-off \"what does this cost right now\" lookups (use web search/web page reader directly).\n\n## Procedure — Setup (foreground, once)\n\n### 1. Define the exact item\n\nRecord source URL/provider, product/listing ID where available, variant, quantity, location, dates, travelers/guests, membership/login assumptions, condition, seller, and acceptable substitutes. Done when two variants cannot be confused.\n\n### 2. Define the alert condition\n\nSpecify currency, all-in vs pre-tax price, maximum price, availability/stock rule, shipping, refundability, cabin/room/ticket class, cooldown, and notification destination. Done when synthetic examples have deterministic alert decisions.\n\n### 3. Establish a live baseline, then schedule\n\nFetch a bounded live result with web page reader or browser (navigate) and record retrieval time, source price, fees/taxes, availability, and terms. Do not schedule until one foreground fetch works. Write the watch contract (item, condition, baseline observation) to a state file under `~/.hermes/price-watches/<watch-slug>.json`, then create the job:\n\n```\ncronjob(action=\"create\",\n        schedule=\"every 6h\",\n        prompt=\"Load the product-price-monitor skill and run the tick for the watch contract at ~/.hermes/price-watches/<watch-slug>.json.\",\n        deliver=<user's destination>)\n```\n\nPick a cadence that respects rate limits and site terms. Done when the baseline matches the exact item contract and the job exists.\n\n## Procedure — Tick (each scheduled run)\n\n### 4. Fetch and normalize\n\nRe-fetch the source. Convert currency only with a timestamped rate and retain the source currency. Separate base price, mandatory fees, shipping/taxes, total, and availability. Exclude volatile page metadata. A failed fetch means unknown state: report or skip, but never overwrite the last good observation with an error page. Done when the observation is comparable to the baseline or explicitly marked failed.\n\n### 5. Compare and suppress duplicates\n\nAlert on threshold entry, qualifying availability, material lower price, or recovery as requested. Store the last good observation and last alert fingerprint in the state file. Replaying the same offer must send no second alert; respect the cooldown. Done when the alert decision is deterministic against stored state.\n\n### 6. Deliver or stay silent\n\nWhen a condition is met, the alert includes: exact item/variant, observed all-in price and source currency, availability/terms, threshold, retrieval timestamp, source link, and important uncertainty. Never claim inventory is reserved. When nothing qualifies, stay silent — no \"still watching\" noise unless a periodic all-clear was requested. Done when the state file reflects this run.\n\n## Pitfalls\n\n- Comparing a base fare with an all-in threshold.\n- Alerting on the wrong size, seller, cabin, dates, or room terms.\n- Overwriting a last-known-good value with an error page.\n- Polling aggressively enough to trigger blocking or violate site terms.\n- Scheduling before a single foreground fetch has succeeded.\n\n## Verification\n\n- [ ] The watch contract pins the item so two variants cannot be confused.\n- [ ] One foreground fetch succeeded before any job was created.\n- [ ] Alert decisions replay deterministically from the state file; duplicates suppressed.\n- [ ] Failed fetches never replaced last-known-good state.\n- [ ] Alerts carry all-in price, source currency, timestamp, and source link.",
+  "commands": [],
+  "rules": [],
+  "default_command": null,
+  "script_tools": [],
+  "harness_guidance": null,
+  "procedure": {},
+  "selector_hint": "Watch product, flight, or listing prices; alert on target."
+}

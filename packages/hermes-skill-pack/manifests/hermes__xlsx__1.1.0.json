@@ -1,0 +1,72 @@
+{
+  "metadata": {
+    "identity": {
+      "namespace": "hermes",
+      "name": "xlsx",
+      "version": "1.1.0"
+    },
+    "owner": {
+      "type": "organization",
+      "id": "aep"
+    },
+    "visibility": "organization",
+    "lifecycle": "published",
+    "contributors": [],
+    "categories": [
+      "hermes",
+      "productivity",
+      "excel",
+      "spreadsheet",
+      "xlsx",
+      "csv",
+      "openpyxl"
+    ],
+    "provenance": [
+      {
+        "source": "Hermes agent skill productivity/xlsx (MIT; author Nous Research)",
+        "revision": "sha256:b302d7ac997843a757ab3c11513ea012889ebdae32f842edb44faa9a4485f19b",
+        "author": null
+      }
+    ],
+    "dependencies": [],
+    "compatibility": {
+      "contract_version": "1",
+      "runtime": null,
+      "bridge": null,
+      "platforms": [
+        "linux",
+        "macos",
+        "windows"
+      ]
+    },
+    "business_approval": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null
+    },
+    "technical_policy": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null,
+      "risk": "low",
+      "approval_required": true,
+      "required_permissions": [],
+      "policy_refs": [],
+      "assessment": "manual"
+    },
+    "validation_refs": [],
+    "evaluation_refs": [],
+    "package": null,
+    "deprecation_reason": null,
+    "replacement": null
+  },
+  "alias": "xlsx",
+  "instructions": "Create, read, edit Excel .xlsx workbooks and CSVs.\n\n(AEP note: ported from the Hermes agent skill `productivity/xlsx`, MIT, author Nous Research. Hermes tool names are given in neutral words; a call written like terminal(command=...) means: run it in a shell, if this runtime lets you. Use the equivalent this runtime offers, and if it has none, say so instead of pretending. `~/.hermes` and HERMES_HOME are the Hermes agent's own folders. Scripts, references and templates named below are in the coding-agent copy of this Skill, folder `hermes-xlsx`.)\n\n# Xlsx Skill\n\nWork with Excel .xlsx workbooks using Python and openpyxl: build styled\nmulti-sheet workbooks with formulas and charts, inspect or dump existing\nfiles, edit cells and structure, and convert to/from CSV. All helper\nscripts are argparse CLIs that print JSON and use explicit UTF-8 I/O.\n\n## When to Use\n\n- Creating .xlsx reports: multiple sheets, number formats, styling,\n  merged cells, freeze panes, autofilter, conditional formatting,\n  charts, data-validation dropdowns, native Excel tables, defined\n  names, hyperlinks, cell notes, sheet protection.\n- Reading a workbook: sheet inventory, dumping data as JSON or CSV,\n  listing formulas vs cached values, notes, defined names, tables.\n- Editing existing files: set cells, append rows, insert/delete\n  rows/columns (reference-aware via `xlsx_restructure.py`),\n  copy/rename sheets, tables, names, notes, protection.\n- Recalculating formulas headlessly via LibreOffice\n  (`xlsx_recalc.py`).\n- CSV interop with type inference and non-UTF-8 encodings.\n- Not for the legacy .xls binary format (use LibreOffice to convert\n  first: `soffice --headless --convert-to xlsx old.xls`).\n\n## Prerequisites\n\n- Python 3.10+ with `openpyxl` (`pip install openpyxl`). No other\n  third-party packages are needed; everything else is stdlib.\n- Optional: LibreOffice (`soffice`) for headless recalculation or\n  format conversion.\n\n## How to Run\n\nRun the helper scripts with the shell tool from this skill's\n`scripts/` directory (every script supports `--help`):\n\n```bash\npython scripts/xlsx_create.py spec.json report.xlsx   # build from JSON spec\npython scripts/xlsx_read.py report.xlsx --sheets      # inventory\npython scripts/xlsx_read.py report.xlsx --json --sheet Data\npython scripts/xlsx_read.py report.xlsx --formulas\npython scripts/xlsx_edit.py report.xlsx --sheet Data --set B2=42 --recalc\npython scripts/xlsx_restructure.py report.xlsx --sheet Data --insert-rows 3:2\npython scripts/xlsx_recalc.py report.xlsx\npython scripts/csv_to_xlsx.py data.csv out.xlsx --encoding utf-8\npython scripts/xlsx_to_csv.py report.xlsx out.csv --sheet Data\n```\n\nAuthor the JSON spec with write file, inspect script JSON output with\nread file or directly from stdout.\n\n## Quick Reference\n\n| Task | Command |\n|---|---|\n| Create workbook from spec | `xlsx_create.py spec.json out.xlsx` |\n| Sheet names + dimensions | `xlsx_read.py f.xlsx --sheets` |\n| Dump sheet as JSON | `xlsx_read.py f.xlsx --json --sheet S` |\n| Dump sheet as CSV | `xlsx_read.py f.xlsx --csv --out d.csv` |\n| List formulas + cached values | `xlsx_read.py f.xlsx --formulas` |\n| Set a cell / formula | `xlsx_edit.py f.xlsx --set \"A1==SUM(B:B)\"` |\n| Append a row | `xlsx_edit.py f.xlsx --append '[1,\"x\",true]'` |\n| Insert 2 rows, refs NOT shifted | `xlsx_edit.py f.xlsx --insert-rows 3:2` |\n| Insert 2 rows, refs shifted | `xlsx_restructure.py f.xlsx --insert-rows 3:2` |\n| Delete a column, refs shifted | `xlsx_restructure.py f.xlsx --delete-cols B` |\n| Create a native table | `xlsx_edit.py f.xlsx --add-table Sales:A1:C9` |\n| Append inside a table | `--table-append 'Sales=[\"West\",5]'` |\n| List tables | `xlsx_edit.py f.xlsx --list-tables` |\n| Defined names | `--define-name \"Rates='Data'!$B$2:$B$9\"` / `--delete-name Rates` / `xlsx_read.py f.xlsx --names` |\n| Hyperlink | `--hyperlink \"A1=https://example.com|Docs\"` |\n| Cell note | `--note \"B2=Check this|Reviewer\"`; read via `xlsx_read.py f.xlsx --notes` |\n| Protect sheet (see Pitfalls) | `--protect your-password --unlock B2:B9` |\n| Recalculate via LibreOffice | `xlsx_recalc.py f.xlsx` |\n| Copy / rename sheet | `--copy-sheet Src:New --rename-sheet Old:New` |\n| Force recalc on open | `xlsx_edit.py f.xlsx --recalc` |\n| CSV -> styled xlsx | `csv_to_xlsx.py in.csv out.xlsx` |\n| xlsx -> CSV | `xlsx_to_csv.py f.xlsx out.csv --encoding utf-8` |\n\n## Procedure\n\n1. **Create**: write a JSON spec (schema documented in\n   `xlsx_create.py --help` and its docstring). Each sheet supports\n   `rows` (scalars or styled cell objects), sparse `cells` overrides,\n   `column_widths`, `row_heights`, `merges`, `freeze_panes`,\n   `autofilter`, `conditional_formats` (cell_is rules and color\n   scales), `charts` (bar/line/pie from cell ranges),\n   `validations` (list dropdowns), `tables` (native Excel tables with\n   a style name), and `protection`. Workbook-level `defined_names`\n   maps names to refs. Cell objects also take `hyperlink` and `note`.\n   Typed values: JSON numbers/bools\n   pass through; dates use `{\"value\": \"2026-01-31\", \"type\": \"date\"}`.\n   Number formats are Excel format strings: currency `\"$#,##0.00\"`,\n   percent `\"0.0%\"`, date `\"yyyy-mm-dd\"`.\n2. **Formulas**: set with `\"formula\": \"SUM(B2:B9)\"` in the spec or\n   `--set \"C1==SUM(A:A)\"` in the editor. When writing formulas, add\n   `\"full_calc_on_load\": true` (spec) or `--recalc` (editor); this sets\n   the workbook's `fullCalcOnLoad` flag so Excel/LibreOffice recompute\n   everything on open. openpyxl itself NEVER evaluates formulas.\n3. **Read**: `--sheets` for inventory (names, dimensions, merged\n   ranges, chart count, tables, protection, defined names),\n   `--json`/`--csv` for data, `--formulas` to\n   pair each formula string with its cached result, `--notes` for\n   cell comments, `--names` for defined names. Cached results\n   exist only if the file was last saved by a real spreadsheet app;\n   files fresh from openpyxl return `null` there. To materialize\n   results headlessly run `xlsx_recalc.py file.xlsx` (uses\n   LibreOffice; prints `{\"recalculated\": false, ...}` and exits 0\n   when `soffice` is absent), then reload with `--data-only`.\n4. **Edit**: `xlsx_edit.py` applies renames/copies first, then\n   structural row/column changes, then `--set`/`--append`. It edits in\n   place unless `--out` is given — copy the file first if you need the\n   original.\n5. **Restructure**: for insert/delete on sheets that have formulas,\n   merges, tables, or filters, use `xlsx_restructure.py` instead of\n   `xlsx_edit.py`. It rewrites formula references on ALL sheets\n   (absolute `$` refs, ranges, cross-sheet refs), shifts merges,\n   autofilter, freeze panes, validation and conditional-format\n   ranges, table refs, defined names, and row/column dimensions, then\n   prints a JSON report including a `not_shifted` list. Rules and\n   limits: `references/restructuring.md`.\n6. **CSV interop**: `csv_to_xlsx.py` infers int/float/bool/ISO-date\n   per cell and styles the header row; `xlsx_to_csv.py` writes ISO\n   dates and blank strings for empty cells. Both default to UTF-8 and\n   accept `--encoding` (e.g. `utf-8-sig` for Excel-friendly BOM,\n   `cp1252` for legacy Windows exports).\n\n## Converting to PDF\n\nLibreOffice converts headlessly (also works for CSV export of a single\nsheet):\n\n```bash\nsoffice --headless --convert-to pdf report.xlsx --outdir out/\nsoffice --headless --convert-to csv report.xlsx --outdir out/  # 1st sheet only\n```\n\nOnly the first sheet lands in a CSV; for other sheets use\n`xlsx_to_csv.py --sheet NAME`. If `soffice` is missing, install\nLibreOffice or hand the file to the user unconverted.\n\n## Pitfalls\n\n- **openpyxl does not calculate.** Formula results are available only\n  via `load_workbook(path, data_only=True)` and only when the file was\n  previously saved by Excel/LibreOffice. Otherwise you get `None`.\n- **`xlsx_edit.py` insert/delete does not shift references** (raw\n  openpyxl behavior). Use `xlsx_restructure.py`, which does — but even\n  it cannot move chart anchors, images, or conditional-format RULE\n  formulas; read its JSON report's `not_shifted` list and\n  `references/restructuring.md`.\n- **Sheet protection is NOT security.** `--protect` sets the standard\n  xlsx sheet-protection hash: it signals \"don't edit this\" to\n  well-behaved apps and nothing more. Anyone can strip it by editing\n  the zip's XML or unchecking it in LibreOffice. Never rely on it for\n  confidentiality or integrity; it does not encrypt anything.\n- **`data_only=True` then save** silently discards all formulas\n  (cached values replace them). Never save a workbook loaded that way\n  unless that is the goal.\n- **Loading strips charts/images**: openpyxl does not round-trip\n  charts, so editing a charted workbook and saving drops the charts.\n  Re-add charts after editing, or avoid re-saving charted files.\n- **CSV locale traps**: always pass explicit encodings (the scripts\n  already do) and remember European CSVs often use `;` delimiters and\n  decimal commas — use `--delimiter ';'` and expect strings like\n  `\"12,5\"` to stay strings.\n- **Dates are datetimes**: Excel stores dates as serial numbers;\n  openpyxl returns `datetime`/`date` objects. Dumps here emit ISO\n  strings.\n- Sheet names are capped at 31 chars and reject `[ ] : * ? / \\`.\n\n## Verification\n\n- After creating: `xlsx_read.py out.xlsx --sheets` and confirm sheet\n  names, dimensions, merged ranges, and chart counts match intent.\n- Dump data with `--json` and compare against the source values.\n- After edits: re-dump the touched range; if formulas were written,\n  confirm `--formulas` lists them and that `--recalc` was applied.\n- After `xlsx_restructure.py`: read its JSON report, then re-run\n  `--formulas` and `--sheets` to confirm references and ranges landed\n  where expected.\n- For a full visual check, open in LibreOffice:\n  `soffice --headless --convert-to pdf out.xlsx` and inspect the PDF.",
+  "commands": [],
+  "rules": [],
+  "default_command": null,
+  "script_tools": [],
+  "harness_guidance": null,
+  "procedure": {},
+  "selector_hint": "Create, read, edit Excel .xlsx workbooks and CSVs."
+}
