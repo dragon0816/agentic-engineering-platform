@@ -18,7 +18,10 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: python -m pip install -e ".[dev,office]"
-      - run: python -m pytest
+      - run: python -m pytest --junitxml=pytest-results.xml
+      - name: Annotate failed tests
+        if: failure()
+        run: python scripts/ci_annotate.py pytest-results.xml
       - run: python -m ruff check .
       - run: python -m ruff format --check .
       - run: python -m mypy
@@ -60,7 +63,14 @@ jobs:
           if (-not (Test-Path "$installRoot\workspace\assets\workflows\engineering__sde-weekly-report__1.0.0.json")) {
             throw 'The shipped weekly-report manifests were not written.'
           }
-          # A fresh install has no Skill installed, so the Agent answers that it
+          # The bundled Skills (docs/phases/HERMES_SKILL_PACK.md): in-use ones
+          # switched on, the Hermes skill pack switched off, its coding-agent
+          # folders in AEP's own store.
+          if (-not (Test-Path "$installRoot\workspace\assets\skills\engineering__knowledge-query__1.0.1.json")) { throw 'The bundled in-use Skills were not installed switched on.' }
+          if (-not (Test-Path "$installRoot\workspace\assets\skills\disabled\hermes__docx__1.1.0.json")) { throw 'The Hermes skill pack was not installed switched off.' }
+          if (Test-Path "$installRoot\workspace\assets\skills\hermes__docx__1.1.0.json") { throw 'A Hermes skill was installed switched on.' }
+          if (-not (Test-Path "$installRoot\workspace\agent-skills\hermes-docx\SKILL.md")) { throw 'The Hermes coding-agent skill folders were not stored.' }
+          # No Skill has the alias "files", so the Agent answers that it
           # needs input (unknown_skill); since 2026-10-02 that answer exits 1.
           # Check the answer itself: routed, neither refused nor unrecorded.
           & "$installRoot\.venv\Scripts\aep-host.exe" ask --config "$installRoot\host.json" --namespace engineering --json --output "$installRoot\ask.json" "files.read nothing.txt"
@@ -89,8 +99,11 @@ jobs:
           $foreignMembership.device.bridge_id = 'bridge-stale-install'
           $foreignMembership.bindings[0].bridge_id = 'bridge-stale-install'
           $foreignMembership | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath "$installRoot\workspace\membership.json" -Encoding UTF8
+          # A Skill the person switched off stays off when AEP is installed again.
+          Move-Item -LiteralPath "$installRoot\workspace\assets\skills\engineering__knowledge-query__1.0.1.json" -Destination "$installRoot\workspace\assets\skills\disabled\"
           & "$($bundle.FullName)\install.ps1" -Actor ci-user -PythonExe (Get-Command python).Source -InstallRoot $installRoot
           if ($LASTEXITCODE -ne 0) { throw 'Installing over an existing host failed.' }
+          if (Test-Path "$installRoot\workspace\assets\skills\engineering__knowledge-query__1.0.1.json") { throw 'Reinstalling switched on a Skill the person had switched off.' }
           $kept = Get-Content "$installRoot\host.json" -Raw | ConvertFrom-Json
           if ($kept.integrations.weekly_report.workbook_path -ne "C:/nowhere/Report.xlsx") {
             throw 'Reinstalling discarded the integrations an operator had configured.'
