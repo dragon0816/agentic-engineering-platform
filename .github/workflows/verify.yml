@@ -60,8 +60,15 @@ jobs:
           if (-not (Test-Path "$installRoot\workspace\assets\workflows\engineering__sde-weekly-report__1.0.0.json")) {
             throw 'The shipped weekly-report manifests were not written.'
           }
-          & "$installRoot\.venv\Scripts\aep-host.exe" ask --config "$installRoot\host.json" --namespace engineering "files.read nothing.txt"
-          if ($LASTEXITCODE -ne 0) { throw 'The resident agent did not answer a local request.' }
+          # A fresh install has no Skill installed, so the Agent answers that it
+          # needs input (unknown_skill); since 2026-10-02 that answer exits 1.
+          # Check the answer itself: routed, neither refused nor unrecorded.
+          & "$installRoot\.venv\Scripts\aep-host.exe" ask --config "$installRoot\host.json" --namespace engineering --json --output "$installRoot\ask.json" "files.read nothing.txt"
+          if ($LASTEXITCODE -ne 1) { throw 'The resident agent did not answer a local request.' }
+          $answer = Get-Content "$installRoot\ask.json" -Raw | ConvertFrom-Json
+          if ($answer.decision.kind -ne 'needs_input' -or $answer.decision.reason -ne 'unknown_skill' -or $null -ne $answer.refusal -or $null -ne $answer.unrecorded) {
+            throw 'The resident agent did not answer a local request.'
+          }
           & "$installRoot\.venv\Scripts\aep-host.exe" status --config "$installRoot\host.json"
           if ($LASTEXITCODE -ne 0) { throw 'The resident agent could not report its status.' }
           # Installing over a configured host must keep what was typed by
