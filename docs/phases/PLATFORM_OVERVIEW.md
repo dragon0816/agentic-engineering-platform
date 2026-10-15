@@ -95,3 +95,117 @@ of the same day:
   installed).
 - A publish date for versions seeded by the platform itself (only approvals
   through the review queue carry one).
+
+## One-click sign-in from Agent Web (owner request 2026-10-15)
+
+Status: **implemented 2026-10-15 on main (not pushed); live check pending
+(owner deploys the platform and restarts Agent Web).** Decision in
+`docs/DECISIONS.md` (2026-10-15 "Agent Web opens the Member Portal signed in
+with a single-use browser ticket"); contract in `docs/CONTRACTS.md` "Browser
+sign-in ticket".
+
+Goal: "Open Marketplace" in Agent Web (Capabilities > Share Platform Library,
+the Library card links for Extensions and Applications, and the Applications
+empty state) opens the portal already signed in as this PC's member, with
+nothing to type.
+
+Hand-off:
+
+1. Agent Web's page calls `POST /api/platform/portal-link` (its own token)
+   with an optional `tab` (`[a-z]{1,20}`) and `asset`
+   (`namespace/name@version`). It opens `about:blank` inside the click (so no
+   popup blocker stops it) and drops `opener`.
+2. Agent Web, server side, uses `MemberPortalPublisher` (the member's
+   `Personal Agent` login from `UserEnvironment`, traded for a one-hour session
+   held in memory) to call the platform's `POST /v1/member/browser-ticket`
+   (member session, body `{}`). The platform answers `ticket`
+   (`ticket-<16 hex>:<32-byte urlsafe secret>`) and `expires_at`.
+3. Agent Web returns `<portal>/#ticket=<id:secret>&bridge=<bridge id>&tab=...&asset=...`.
+   The ticket is only ever in the URL **fragment**, which the browser does not
+   send in a request, never in a query string; the Personal Agent login never
+   leaves the Agent. Nothing is logged or written to the task list.
+4. The portal page removes the fragment from the address bar and history
+   before anything else runs (as for `#session`/`#invitation`), then calls
+   `POST /v1/member/sign-in/ticket` with `Authorization: Ticket <id:secret>`,
+   empty body. The reply is the same as a password sign-in: `session`,
+   `login`, `expires_at`; the page stores the login like any browser login and
+   opens the asked tab, then the asked asset's detail in Marketplace.
+
+Ticket rules (`control_plane/member_ticket.py`, `BrowserTickets`):
+
+- Issued only for a valid member session of an active member
+  (`actor_disabled` 403 otherwise); bound to that actor.
+- At most 60 seconds (`TICKET_TTL`; a longer one cannot be configured).
+- Single use: the first redemption with the right secret uses it up, whatever
+  happens next. Unknown or wrong secret `authentication_failed` (401), used
+  `ticket_used` (409), too old `ticket_expired` (401), member disabled since
+  `actor_disabled` (403).
+- Stored as a SHA-256 fingerprint of the secret, in memory only (a restart
+  drops open tickets, harmless for something that lives a minute); at most
+  five open tickets per member.
+- The session's method is `agent-ticket`; the browser login's label is
+  `Agent Web sign-in`. A new ticket sign-in revokes the member's earlier
+  `Agent Web sign-in` login, so repeated clicks do not pile up 30-day logins
+  (the Personal Agent's login and password-sign-in browsers are untouched). A
+  member who opens the portal from Agent Web in two different browsers keeps
+  only the latest one signed in through it.
+- No new rate limit: guessing a 256-bit secret within a minute is not
+  practical, and every guess is one HTTP request.
+
+Fallback: with no Personal Agent code saved (or when the platform refuses or
+does not answer), `portal-link` answers `signed_in: false` and the plain
+portal address with the same `tab`/`asset`/`bridge` fragment; Agent Web shows
+"save your Personal Agent code in Settings > Shared platform" (or the
+platform's reason). After a normal sign-in the portal still opens the asked
+asset.
+
+## Library card content in Agent Web (owner request 2026-10-15)
+
+Status: implemented with the hand-off above; same decision entry.
+
+Opening a card in Agent Web's Share Platform Library shows the version's
+published content, like the portal's detail view (and
+atcyrus.com/skills/baseline-ui):
+
+- Agent Web `POST /api/platform/asset-content` (`kind`, `asset`) reads
+  `assets/manifest` (CONTRACTS "Asset content") with the member's session,
+  server side. Errors: `content_not_shared` (the platform's
+  `asset_not_published`: not shared with this member or not published),
+  `login_missing`, `platform_unreachable`, `platform_not_configured`,
+  `publishing_not_configured`, `bad_reference`, each with a sentence.
+- The card keeps its layout: uniform closed cards; the open card spans the
+  row and expands in place. Inside, the content is on the left and an aside on
+  the right with the facts and the existing "+ Add to this Agent" / "Remove
+  selection" actions; where the open card is narrower than 640 px (container
+  query) the aside comes first and the content below.
+- Skill: instructions as Markdown, command (alias), default command, selector
+  hint, commands with what they run, keyword rules, script tools, harness
+  guidance. Workflow: description, ordered steps (with step inputs), run
+  parameters (label, name, kind, required, default, choices or choices
+  source), checks after the run, risk, required permissions, approval, side
+  effect (occupies the machine), local capabilities, secret names. Other
+  kinds: description.
+- Facts: version and other versions, owner, co-editors, who can use it,
+  categories, provenance, business and technical reviewers, published date,
+  dependencies, deprecation.
+- Safety: every value is set as a text node. Markdown goes through the page's
+  `renderMarkdown` (no `innerHTML`; links only via `safeMarkdownHref`, which
+  allows http(s) and mailto), and card content additionally unwraps every link
+  that is not http(s), so `mailto:` and `javascript:` become text. A
+  `<script>` in instructions shows as text.
+- Cache: content is kept per exact version for the page's lifetime (a
+  refusal is asked again the next time the card opens). Nothing is cached on
+  the Agent, so a withdrawn share takes effect on the next page load.
+
+Tests: `tests/test_browser_ticket.py` (issue needs a member session, single
+use, expiry at 60 s, disabled member at issue and redemption, fingerprint-only
+in-memory storage, never accepted from a query string and never in output,
+one Agent Web login per member, page hooks, real browser: signed in on the
+asked tab and asset, fragment gone, a reused ticket explained);
+`tests/test_library_content_web.py` (ticket URL in the fragment and redeemable
+once, no Personal Agent login in it, fallback without a code / disabled /
+unreachable, content entitled and not shared, routes need the page token,
+page hooks, real browser at 1400 px: content and facts measured side by side,
+narrow card stacks, uniform closed cards, malicious `<script>`, `<img>`,
+`javascript:` and `mailto:` shown as text or dropped, Workflow content, Open
+Marketplace opens a ticket URL).

@@ -2725,3 +2725,46 @@ Rejected alternatives:
   separately issued Agent login; an administrator uses Force sign-out when it might.
 - An external identity provider or e-mailed reset links: no mail service or IdP in the
   preview; the administrator delivers the link like an invitation.
+
+## 2026-10-15 — Agent Web opens the Member Portal signed in with a single-use browser ticket
+
+Context: owner request 2026-10-15: "Open Marketplace" in Agent Web must open the Member
+Portal already signed in as this PC's member, with nothing to type, and a Library card
+must show the asset's real content. Agent Web holds the member's Personal Agent login.
+Design: `docs/phases/PLATFORM_OVERVIEW.md` "One-click sign-in from Agent Web" and
+"Library card content in Agent Web".
+
+Decision:
+1. New platform routes `browser-ticket` (member session; answers a single-use ticket
+   bound to that member, valid 60 seconds at most) and `sign-in/ticket`
+   (`Authorization: Ticket id:secret`; answers the same browser login and one-hour
+   session as a password sign-in, method `agent-ticket`, login label
+   `Agent Web sign-in`).
+2. Tickets are kept only as SHA-256 fingerprints, in memory, at most five open per
+   member; refused for a disabled member at issue and at redemption; used up by the
+   first redemption with the right secret; `ticket_used` / `ticket_expired` /
+   `authentication_failed` otherwise.
+3. Agent Web obtains the ticket server side with the Personal Agent session and opens
+   `<portal>/#ticket=...` (fragment, never a query string, never logged); the portal
+   drops the fragment from history at once. The Personal Agent login never reaches
+   the browser or a URL. Without a saved code the portal opens on its sign-in page and
+   Agent Web points to Settings > Shared platform.
+4. A new ticket sign-in revokes the member's earlier `Agent Web sign-in` login.
+5. Library card content comes from `assets/manifest` through the member's session,
+   server side, uncached on the Agent and cached per version in the page.
+
+Reason: the fragment never travels in a request, so neither the portal's access log, a
+proxy nor a Referer sees it; a minute-long single-use ticket bounds the damage if a URL
+is copied. Handing the browser the Agent's own 30-day login would give every browser
+tab the Agent's credential, which could not be told apart or revoked separately.
+
+Rejected alternatives:
+- Putting the Personal Agent login (or its session) in the URL: long-lived, the same
+  credential the Agent publishes with, and indistinguishable from the Agent in audits.
+- A query-string ticket or a server-side redirect carrying it: lands in server logs,
+  history and Referer headers.
+- Persisting tickets in the identity database: a minute-long credential gains nothing
+  from surviving a restart, and every click would be a durable write.
+- A one-off session per click without a browser login: the page could not renew it,
+  so the member would be signed out after an hour on that tab.
+- Caching content on the Agent: a withdrawn share would keep showing until a restart.

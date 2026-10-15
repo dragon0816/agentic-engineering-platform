@@ -2082,3 +2082,23 @@ s-k-20261011T102952` (not published).
   another agent's uncommitted `src/control_plane` edits (pass on committed HEAD) or
   pre-existing environment failures (numpy 2 vs matplotlib 3.7 weekly chart tests,
   coding doctor firewall check; same on 0354ab42). Live check pending (owner).
+
+- [x] One-click Member Portal sign-in from Agent Web and Library card content (owner
+  requests 2026-10-15; design `docs/phases/PLATFORM_OVERVIEW.md` "One-click sign-in from
+  Agent Web" and "Library card content in Agent Web", decision in `docs/DECISIONS.md`
+  2026-10-15 "Agent Web opens the Member Portal signed in with a single-use browser
+  ticket", contract `docs/CONTRACTS.md` "Browser sign-in ticket"). Platform:
+  `control_plane/member_ticket.py` (`BrowserTickets`: 60 s, single use, SHA-256
+  fingerprint in memory, at most 5 open per member), routes `browser-ticket` (member
+  session) and `sign-in/ticket` (`Ticket id:secret` -> browser login + session, method
+  `agent-ticket`, one `Agent Web sign-in` login per member); the portal page redeems
+  `#ticket=`, drops the fragment and opens `#tab=`/`#asset=`. Agent Web:
+  `MemberPortalPublisher.browser_ticket` / `asset_content`, `AgentWeb.portal_link` /
+  `asset_content`, routes `/api/platform/portal-link`, `/api/platform/asset-content`;
+  every portal link opens through `openPortal` (fallback: the sign-in page with a note
+  pointing to Settings > Shared platform); Library cards show Skill/Workflow content and
+  full metadata beside the facts and actions (stacked below 640 px), safe Markdown with
+  http(s) links only, cached per version for the page. Tests:
+  `tests/test_browser_ticket.py` (7, incl. real browser) and
+  `tests/test_library_content_web.py` (6, incl. real browser measured at 1400 px and
+  narrow). Verification in `HANDOFF.md`. Live check pending (owner).

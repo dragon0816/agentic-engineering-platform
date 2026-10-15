@@ -2147,6 +2147,23 @@ portal and Agent Web:
   Manifests carry secret references by name only; submission already refuses
   embedded secrets.
 
+### Browser sign-in ticket (2026-10-15)
+
+Member portal operations for one-click sign-in from Agent Web
+(`docs/phases/PLATFORM_OVERVIEW.md`):
+- `browser-ticket`: member session, body `{}`; reply `ticket` (`id:secret`,
+  single use) and `expires_at` (at most 60 seconds). `actor_disabled` for a
+  disabled member.
+- `sign-in/ticket`: `Authorization: Ticket id:secret`, empty body; reply
+  `session`, `login`, `expires_at` as `sign-in/password`. Refusals
+  `authentication_failed` 401, `ticket_used` 409, `ticket_expired` 401,
+  `actor_disabled` 403. Only accepted at that exact path, never from a query.
+- Agent Web: `POST /api/platform/portal-link` (`tab`?, `asset`?) answers `ok`,
+  `signed_in`, `url` (`<portal>/#ticket=...&bridge=...&tab=...&asset=...`, or
+  the plain portal with `code` and `message`); `POST
+  /api/platform/asset-content` (`kind`, `asset`) answers `ok` and `content`
+  (the `AssetManifestReply`), or `code` and `message`.
+
 ## Shared-platform transport (Phase 7, slice 2i)
 
 `common.sync` is the wire between a Bridge and the shared platform: seven
