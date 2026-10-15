@@ -434,7 +434,9 @@ def test_the_portal_renews_its_session_and_edits_access_in_a_real_browser(
 
             # The session the page signed in with is over; the stored login is not.
             moment[0] = NOW + timedelta(hours=3)
-            browser._evaluate('document.getElementById("published-scope").value="all";'
+            # The portal is in tabs (owner 2026-10-15): open "My published assets".
+            browser._evaluate('showTab("published");'
+                              ' document.getElementById("published-scope").value="all";'
                               ' loadPublished(); 0')
             until(lambda: "weekly-check" in text("published-rows"))
             assert "unavailable" not in text("published-status")
