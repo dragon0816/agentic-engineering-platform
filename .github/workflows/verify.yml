@@ -57,7 +57,7 @@ jobs:
           & "$installRoot\.venv\Scripts\python.exe" -c "import openpyxl, win32com.client, matplotlib"
           if ($LASTEXITCODE -ne 0) { throw 'The bundle did not install the excel, windows and weekly-mail extras.' }
           & "$installRoot\.venv\Scripts\aep-host.exe" export-assets --out "$installRoot\workspace\assets"
-          if (-not (Test-Path "$installRoot\workspace\assets\workflows\engineering__jira-weekly-report__1.0.0.json")) {
+          if (-not (Test-Path "$installRoot\workspace\assets\workflows\engineering__sde-weekly-report__1.0.0.json")) {
             throw 'The shipped weekly-report manifests were not written.'
           }
           & "$installRoot\.venv\Scripts\aep-host.exe" ask --config "$installRoot\host.json" --namespace engineering "files.read nothing.txt"
