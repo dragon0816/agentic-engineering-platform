@@ -6,7 +6,7 @@ from typing import Literal, Protocol, TypeVar
 
 from pydantic import TypeAdapter, ValidationError
 
-from common.assets import AssetIdentity
+from common.assets import AssetIdentity, AssetMetadata
 from common.base import Symbol
 from common.distribution import (
     BridgeStateSnapshot,
@@ -22,6 +22,7 @@ from common.distribution import (
     verify_installation,
 )
 from common.enrollment import BridgeDevice, BridgeExecutionSubject, admit_device
+from common.identity import NameAccess, entitled
 from common.ownership import AssetNameOwnership, VersionChange, above_all, next_version
 
 ControlErrorCode = Literal[
@@ -134,6 +135,16 @@ def admit_member_version(
     return record
 
 
+def entitled_in(
+    packages: "PackageRegistry", metadata: AssetMetadata, actor: str, groups: tuple[str, ...]
+) -> bool:
+    """`common.identity.entitled` with the name's access record, as the
+    owner decided it after publication. Every place that lists, offers or
+    accepts an asset for a member asks this, so they cannot disagree."""
+    identity = metadata.identity
+    return entitled(metadata, actor, groups, packages.access(identity.namespace, identity.name))
+
+
 class PackageRegistry(Protocol):
     """The catalog boundary consumed by authorization and transport."""
 
@@ -154,6 +165,10 @@ class PackageRegistry(Protocol):
         self, updated: AssetNameOwnership, *, previous: AssetNameOwnership
     ) -> AssetNameOwnership: ...
 
+    def access(self, namespace: str, name: str) -> NameAccess | None: ...
+
+    def save_access(self, access: NameAccess) -> NameAccess: ...
+
     def discover(self, *, namespace: str | None = None) -> tuple[PublishedAssetPackage, ...]: ...
 
     def get(self, identity: AssetIdentity) -> PublishedAssetPackage | None: ...
@@ -173,6 +188,7 @@ class InMemoryPackageRegistry:
     def __init__(self) -> None:
         self._packages: dict[tuple[str, str, str], str] = {}
         self._owners: dict[tuple[str, str], str] = {}
+        self._access: dict[tuple[str, str], str] = {}
 
     def _record(self, namespace: str, name: str) -> AssetNameOwnership | None:
         payload = self._owners.get((namespace, name))
@@ -236,6 +252,18 @@ class InMemoryPackageRegistry:
         if current != before:
             raise ControlError("ownership_changed")
         self._owners[item.key] = item.model_dump_json()
+        return item.model_copy(deep=True)
+
+    def access(self, namespace: str, name: str) -> NameAccess | None:
+        payload = self._access.get((namespace, name))
+        return None if payload is None else NameAccess.model_validate_json(payload)
+
+    def save_access(self, access: NameAccess) -> NameAccess:
+        """Record who may use a published name. The name must exist."""
+        item = NameAccess.model_validate(access)
+        if self._record(*item.key) is None:
+            raise ControlError("name_missing")
+        self._access[item.key] = item.model_dump_json()
         return item.model_copy(deep=True)
 
     def discover(self, *, namespace: str | None = None) -> tuple[PublishedAssetPackage, ...]:

@@ -18,6 +18,7 @@ from pydantic import TypeAdapter, ValidationError
 from common.assets import AssetIdentity, Owner
 from common.base import Symbol
 from common.distribution import InstallationPlan, PublishedAssetPackage
+from common.identity import NameAccess
 from common.ownership import AssetNameOwnership, VersionChange, version_key
 from control_plane.distribution import (
     ControlError,
@@ -114,6 +115,14 @@ class SqliteRegistry:
                 )
                 connection.execute(
                     "CREATE TABLE IF NOT EXISTS name_owners ("
+                    "namespace TEXT NOT NULL, name TEXT NOT NULL, payload TEXT NOT NULL, "
+                    "PRIMARY KEY(namespace, name))"
+                )
+                # Who may use a name, as its owner decided after publication
+                # (owner decision 2026-10-15). Additive like `name_owners`:
+                # code that predates it never reads this table.
+                connection.execute(
+                    "CREATE TABLE IF NOT EXISTS name_access ("
                     "namespace TEXT NOT NULL, name TEXT NOT NULL, payload TEXT NOT NULL, "
                     "PRIMARY KEY(namespace, name))"
                 )
@@ -306,6 +315,41 @@ class SqliteRegistry:
                 connection.execute(
                     "UPDATE name_owners SET payload = ? WHERE namespace = ? AND name = ?",
                     (item.model_dump_json(), *item.key),
+                )
+        except ControlError:
+            raise
+        except sqlite3.DatabaseError as error:
+            raise RegistryStoreError("storage_unavailable") from error
+        return item.model_copy(deep=True)
+
+    def access(self, namespace: str, name: str) -> NameAccess | None:
+        try:
+            with self._connect() as connection:
+                row = connection.execute(
+                    "SELECT payload FROM name_access WHERE namespace = ? AND name = ?",
+                    (namespace, name),
+                ).fetchone()
+        except sqlite3.DatabaseError as error:
+            raise RegistryStoreError("storage_unavailable") from error
+        if row is None:
+            return None
+        try:
+            return NameAccess.model_validate_json(row[0])
+        except (ValidationError, ValueError, TypeError) as error:
+            raise RegistryStoreError("corrupt_record") from error
+
+    def save_access(self, access: NameAccess) -> NameAccess:
+        """Record who may use a published name. The name must exist."""
+        item = NameAccess.model_validate(access)
+        try:
+            with self._connect() as connection:
+                connection.execute("BEGIN IMMEDIATE")
+                if self._ensure_record(connection, *item.key) is None:
+                    raise ControlError("name_missing")
+                connection.execute(
+                    "INSERT INTO name_access(namespace, name, payload) VALUES (?, ?, ?) "
+                    "ON CONFLICT(namespace, name) DO UPDATE SET payload = excluded.payload",
+                    (*item.key, item.model_dump_json()),
                 )
         except ControlError:
             raise

@@ -33,6 +33,10 @@ from common.member import (
     AdminBridgeRequest,
     AdminExtensionCatalogEntry,
     AdminExtensionCatalogReply,
+    AssetAccessListReply,
+    AssetAccessListRequest,
+    AssetAccessReply,
+    AssetAccessUpdateRequest,
     AssetApproveRequest,
     AssetCoEditorRequest,
     AssetDeprecateRequest,
@@ -61,6 +65,7 @@ from common.member import (
 )
 from common.ownership import AssetNameOwnership
 from control_plane.authorization import AuthorizationError, InMemoryAuthorizationRegistry
+from control_plane.distribution import entitled_in
 from control_plane.enrollment import EnrollmentError, InMemoryEnrollmentRegistry
 from control_plane.identity import AccessError, InMemoryAccessTokens, fingerprint
 from control_plane.identity_store import SqliteIdentityStorage
@@ -106,6 +111,7 @@ MemberErrorCode = Literal[
     "new_owner_unknown",
     "version_missing",
     "version_deprecated",
+    "access_member_unknown",
     # Bridge self-enrollment (owner 2026-10-15, docs/phases/BRIDGE_ENROLLMENT.md).
     "device_owner_mismatch",
     "administrator_required",
@@ -263,6 +269,7 @@ _OWNERSHIP_CODES: dict[str, MemberErrorCode] = {
     "new_owner_unknown": "new_owner_unknown",
     "version_missing": "version_missing",
     "version_deprecated": "version_deprecated",
+    "access_member_unknown": "access_member_unknown",
 }
 
 
@@ -341,7 +348,9 @@ class MemberService:
                 AdminExtensionCatalogEntry(package=package)
                 for package in self.authorization.packages.discover()
                 if package.kind == "bridge_extension"
-                and entitled(package.metadata, member.actor, member.groups)
+                and entitled_in(
+                    self.authorization.packages, package.metadata, member.actor, member.groups
+                )
             )
         return AdminExtensionCatalogReply(entries=entries)
 
@@ -564,6 +573,40 @@ class MemberService:
                 now=now,
             ),
         )
+
+    # -- who can use a published name (owner decision 2026-10-15) ---------
+
+    def asset_access(
+        self, session_id: str, secret: str, request: AssetAccessListRequest
+    ) -> AssetAccessListReply:
+        item = AssetAccessListRequest.model_validate(request)
+        entries = self._owned(
+            session_id,
+            secret,
+            lambda service, who, now: service.access_list(
+                who, everything=item.scope == "all", now=now
+            ),
+        )
+        return AssetAccessListReply(entries=entries)
+
+    def asset_access_update(
+        self, session_id: str, secret: str, request: AssetAccessUpdateRequest
+    ) -> AssetAccessReply:
+        item = AssetAccessUpdateRequest.model_validate(request)
+        entry = self._owned(
+            session_id,
+            secret,
+            lambda service, who, now: service.set_access(
+                who,
+                item.namespace,
+                item.name,
+                visibility=item.visibility,
+                members=item.members,
+                groups=item.groups,
+                now=now,
+            ),
+        )
+        return AssetAccessReply(entry=entry)
 
     # -- member publish with a review queue (owner 2026-10-15) -------------
 

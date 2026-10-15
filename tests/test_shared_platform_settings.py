@@ -273,6 +273,50 @@ def test_publish_approve_enroll_select_and_synchronize_end_to_end(
         assert after["authorized"] is True and after["installed"] is True
 
 
+def test_an_asset_the_owner_shares_after_publication_reaches_another_members_pc(
+    app: SharedPlatformApplication, tmp_path: Path,
+) -> None:
+    """Owner decision 2026-10-15: `leo` publishes something only he may use;
+    another member's Bridge catalog does not list it and the portal refuses
+    to select it. Once leo says who else may use it, that member's catalog
+    lists it, the selection is accepted and a sync installs it."""
+    portal = app.member_base_url + "/v1/member/"
+    leo = _signed_in(app, "leo", "member")
+    admin = _signed_in(app, "leo-admin", "platform_admin")
+    manifest = workflow_manifest()  # declares another person as owner
+    status, submitted = request(portal + "assets/submit", authorization=leo, body={
+        "kind": "workflow", "change": "minor", "visibility": "private",
+        "manifest": manifest})
+    assert status == 200, submitted
+    assert submitted["submission"]["owner"] == {"type": "user", "id": "leo"}
+    assert request(portal + "admin/submissions/approve", authorization=admin, body={
+        "submission_id": submitted["submission"]["submission_id"],
+        "evidence": "read it"})[0] == 200
+
+    path, layout = _host(tmp_path)
+    engineer = _signed_in(app, "engineer", "member")
+    identity = {"namespace": "lab", "name": "weekly-check", "version": "1.0.0"}
+    with build_runtime(CompanyHostConfiguration.model_validate_json(
+            path.read_text("utf-8")), layout=layout) as runtime:
+        web = _web(runtime, path, {})
+        assert web.update_shared_platform(_card(app, _agent_login(app, engineer)))["ok"]
+        assert [i for i in web.platform()["catalog"] if i["name"] == "weekly-check"] == []
+        assert request(portal + "select", authorization=engineer, body={
+            "bridge_id": "bridge-company", "asset": identity}) == (
+            403, {"code": "asset_not_entitled"})
+
+        status, shared = request(portal + "assets/access/update", authorization=leo, body={
+            "namespace": "lab", "name": "weekly-check", "members": ["engineer"]})
+        assert status == 200, shared
+        [entry] = [i for i in web.platform()["catalog"] if i["name"] == "weekly-check"]
+        assert entry["version"] == "1.0.0"
+        assert request(portal + "select", authorization=engineer, body={
+            "bridge_id": "bridge-company", "asset": identity})[0] == 200
+        result = web.synchronize()
+        assert result["status"] == "answered" and result["installed"] == [identity], result
+        assert (layout.workflows / "lab__weekly-check__1.0.0.json").exists()
+
+
 def test_the_settings_page_has_the_card_and_capabilities_no_longer_holds_the_code() -> None:
     for hook in ('id="shared-platform-card"', 'id="shared-portal-url"', 'id="shared-bridge-url"',
                  'id="shared-code"', 'id="shared-enroll"', "/api/settings/shared-platform",

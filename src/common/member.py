@@ -15,6 +15,7 @@ from common.authorization import DeviceAssetSelection
 from common.base import Contract, Sha256, Slug, Symbol, Text
 from common.distribution import PublishedAssetPackage
 from common.enrollment import BridgeDevice, Invitation, PlatformRole
+from common.identity import NameAccess, Visibility
 from common.ownership import AssetNameOwnership, VersionChange
 from workflow.host_bridge import BridgeRegistration
 
@@ -216,11 +217,15 @@ SubmissionRisk = Literal["low", "medium", "high", "critical"]
 
 class AssetSubmitRequest(Contract):
     """A manifest as the member's Agent has it. The platform assigns the
-    version, owner and reviews; nothing the author wrote there is trusted."""
+    version, owner and reviews; nothing the author wrote there is trusted.
+
+    `visibility` is who the publisher wants to use it (owner decision
+    2026-10-15); absent, the manifest's own applies."""
 
     kind: SubmissionKind
     change: VersionChange
     note: Text | None = None
+    visibility: Visibility | None = None
     manifest: dict[str, JsonValue]
 
 
@@ -236,6 +241,10 @@ class AssetSubmission(Contract):
     sha256: Sha256
     risk: SubmissionRisk = "low"
     required_permissions: tuple[Symbol, ...] = ()
+    # Who will own it and who may use it once approved (owner decision
+    # 2026-10-15). Absent on submissions recorded before then.
+    owner: Owner | None = None
+    visibility: Visibility | None = None
     status: SubmissionStatus = "pending"
     reviewer: Symbol | None = None
     reason: Text | None = None
@@ -285,6 +294,48 @@ class AssetApproveRequest(AssetSubmissionRequest):
 
 class AssetRejectRequest(AssetSubmissionRequest):
     reason: Text
+
+
+# -- Who can use a published name (owner decision 2026-10-15) ---------------
+# `docs/phases/MEMBER_PUBLISH.md` "Who can use it". The name's owner, a member
+# of an owning team, or a platform administrator changes it after publication.
+
+
+class AssetAccessListRequest(Contract):
+    """`mine`: the names the member manages. `all`: every published name, for
+    a platform administrator only."""
+
+    scope: Literal["mine", "all"] = "mine"
+
+
+class AssetAccessEntry(Contract):
+    namespace: Slug
+    name: Slug
+    kind: Symbol
+    owner: Owner
+    versions: tuple[Text, ...] = ()
+    # What the highest version declared when it was published.
+    declared_visibility: Visibility
+    # What applies now: the access record's visibility, or the declared one.
+    visibility: Visibility
+    access: NameAccess | None = None
+
+
+class AssetAccessListReply(Contract):
+    entries: tuple[AssetAccessEntry, ...] = ()
+
+
+class AssetAccessUpdateRequest(AssetNameRequest):
+    """`visibility` None keeps each version's own; `members` and `groups` may
+    use the name in addition. The request replaces the previous decision."""
+
+    visibility: Visibility | None = None
+    members: tuple[Symbol, ...] = ()
+    groups: tuple[Symbol, ...] = ()
+
+
+class AssetAccessReply(Contract):
+    entry: AssetAccessEntry
 
 
 # -- Bridge self-enrollment (owner 2026-10-15, docs/phases/BRIDGE_ENROLLMENT.md) --

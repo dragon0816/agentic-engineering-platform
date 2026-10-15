@@ -18,7 +18,7 @@ from datetime import UTC, datetime, timedelta
 from pydantic import ValidationError
 
 from common.base import Contract
-from common.identity import AuthenticatedActor, entitled
+from common.identity import AuthenticatedActor
 from common.sync import (
     OPERATIONS,
     AdvertiseReply,
@@ -41,7 +41,12 @@ from common.sync import (
     WireErrorCode,
 )
 from control_plane.authorization import InMemoryAuthorizationRegistry
-from control_plane.distribution import ControlError, InMemoryRemoteControl, PackageRegistry
+from control_plane.distribution import (
+    ControlError,
+    InMemoryRemoteControl,
+    PackageRegistry,
+    entitled_in,
+)
 from control_plane.enrollment import EnrollmentError, InMemoryEnrollmentRegistry
 from control_plane.feedback import FeedbackStore
 from control_plane.identity import AccessError, InMemoryAccessTokens
@@ -155,7 +160,7 @@ class ControlPlaneService:
                 package
                 for package in self.packages.discover(namespace=item.namespace)
                 if (not item.kinds or package.kind in item.kinds)
-                and entitled(package.metadata, member.actor, member.groups)
+                and entitled_in(self.packages, package.metadata, member.actor, member.groups)
             )
         return CatalogReply(packages=packages)
 

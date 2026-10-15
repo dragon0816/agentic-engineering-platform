@@ -26,7 +26,8 @@ from pydantic import TypeAdapter
 from common.assets import AssetIdentity, Owner
 from common.base import Slug, Symbol
 from common.distribution import PublishedAssetPackage
-from common.identity import AuthenticatedActor, entitled
+from common.identity import AuthenticatedActor, NameAccess, Visibility
+from common.member import AssetAccessEntry
 from common.ownership import (
     AssetNameOwnership,
     VersionChange,
@@ -34,7 +35,7 @@ from common.ownership import (
     next_version,
     version_key,
 )
-from control_plane.distribution import ControlError, PackageRegistry
+from control_plane.distribution import ControlError, PackageRegistry, entitled_in
 from control_plane.enrollment import EnrollmentError, InMemoryEnrollmentRegistry
 from control_plane.registry_sqlite import SqliteRegistry
 
@@ -61,6 +62,8 @@ OwnershipErrorCode = Literal[
     "new_owner_unknown",
     "version_missing",
     "version_deprecated",
+    # Who can use a name (owner decision 2026-10-15).
+    "access_member_unknown",
 ]
 
 _REGISTRY_CODES: dict[str, OwnershipErrorCode] = {
@@ -155,7 +158,7 @@ class AssetOwnershipService:
             return record, versions
         for version in versions:
             package = self.packages.get(AssetIdentity(namespace=ns, name=nm, version=version))
-            if package is not None and entitled(package.metadata, actor, groups):
+            if package is not None and entitled_in(self.packages, package.metadata, actor, groups):
                 return record, versions
         raise OwnershipError("name_missing")
 
@@ -425,3 +428,115 @@ class AssetOwnershipService:
             }
         )
         return self._save(updated, record)
+
+    # -- who can use a name (owner decision 2026-10-15) --------------------
+    # Published packages are immutable, so the decision is a `NameAccess`
+    # record beside the name. The name's owner, a member of an owning team,
+    # or a platform administrator makes it.
+
+    def _administrator(self, actor: str) -> bool:
+        try:
+            return self.enrollment.user(actor).role == "platform_admin"
+        except EnrollmentError:
+            return False
+
+    def _access_entry(self, record: AssetNameOwnership) -> AssetAccessEntry | None:
+        versions = self._versions(*record.key)
+        if not versions:
+            return None
+        latest = self.packages.get(
+            AssetIdentity(namespace=record.namespace, name=record.name, version=versions[-1])
+        )
+        if latest is None:
+            return None
+        access = self.packages.access(*record.key)
+        declared = latest.metadata.visibility
+        return AssetAccessEntry(
+            namespace=record.namespace,
+            name=record.name,
+            kind=latest.kind,
+            owner=record.owner,
+            versions=versions,
+            declared_visibility=declared,
+            visibility=(
+                access.visibility
+                if access is not None and access.visibility is not None
+                else declared
+            ),
+            access=access,
+        )
+
+    def access_list(
+        self,
+        identity: AuthenticatedActor,
+        *,
+        everything: bool = False,
+        now: datetime | None = None,
+    ) -> tuple[AssetAccessEntry, ...]:
+        """The names this member manages, or every published name for a
+        platform administrator who asks for all of them."""
+        actor, groups = self._member(identity, now)
+        if everything and not self._administrator(actor):
+            raise OwnershipError("not_name_owner")
+        names = sorted(
+            {
+                (item.metadata.identity.namespace, item.metadata.identity.name)
+                for item in self.packages.discover()
+            }
+        )
+        entries: list[AssetAccessEntry] = []
+        for namespace, name in names:
+            record = self.packages.ownership(namespace, name)
+            if record is None or not (everything or record.manages(actor, groups)):
+                continue
+            entry = self._access_entry(record)
+            if entry is not None:
+                entries.append(entry)
+        return tuple(entries)
+
+    def set_access(
+        self,
+        identity: AuthenticatedActor,
+        namespace: str,
+        name: str,
+        *,
+        visibility: Visibility | None,
+        members: tuple[str, ...] = (),
+        groups: tuple[str, ...] = (),
+        now: datetime | None = None,
+    ) -> AssetAccessEntry:
+        """Decide who may use every version of a name, replacing the previous
+        decision. Selections already made and installs already done are not
+        withdrawn, as with a deprecation; what is offered and chosen anew
+        follows the decision."""
+        moment = now if now is not None else datetime.now(UTC)
+        actor, member_groups = self._member(identity, moment)
+        ns = TypeAdapter(Slug).validate_python(namespace)
+        nm = TypeAdapter(Slug).validate_python(name)
+        record = self.packages.ownership(ns, nm)
+        if record is None or not self._versions(ns, nm):
+            raise OwnershipError("name_missing")
+        if not (record.manages(actor, member_groups) or self._administrator(actor)):
+            raise OwnershipError("not_name_owner")
+        for member in members:
+            try:
+                self.enrollment.user(TypeAdapter(Symbol).validate_python(member))
+            except EnrollmentError:
+                raise OwnershipError("access_member_unknown") from None
+        decided = NameAccess(
+            namespace=ns,
+            name=nm,
+            visibility=visibility,
+            members=tuple(dict.fromkeys(members)),
+            groups=tuple(dict.fromkeys(groups)),
+            updated_by=actor,
+            updated_at=moment,
+        )
+        try:
+            self.packages.save_access(decided)
+        except ControlError as error:
+            raise _registry_error(error) from None
+        entry = self._access_entry(record)
+        if entry is None:
+            raise OwnershipError("name_missing")
+        return entry

@@ -19,7 +19,7 @@ from typing import Literal, Self
 from pydantic import AwareDatetime, model_validator
 
 from common.assets import AssetMetadata, Owner, RegistryContract
-from common.base import Sha256, Symbol, Text
+from common.base import Sha256, Slug, Symbol, Text
 
 # How a Bridge says who it is acting for. Named here because the record of an
 # authentication has to say what produced it.
@@ -179,7 +179,47 @@ def owns(owner: Owner, actor: str, groups: tuple[str, ...]) -> bool:
     return owner.id == actor if owner.type == "user" else owner.id in groups
 
 
-def entitled(metadata: AssetMetadata, actor: str, groups: tuple[str, ...]) -> bool:
+Visibility = Literal["private", "team", "organization", "public"]
+
+
+class NameAccess(RegistryContract):
+    """Who may use the versions of one Skill or Workflow name, as its owner
+    (or a platform administrator) decided after publication (owner decision
+    2026-10-15, `docs/phases/MEMBER_PUBLISH.md` "Who can use it").
+
+    Published packages are immutable, so the decision is kept beside the name,
+    as deprecations are. `visibility` replaces what each version declared;
+    absent, each version's own applies. `members` and `groups` may use it in
+    addition, whatever the visibility.
+    """
+
+    namespace: Slug
+    name: Slug
+    visibility: Visibility | None = None
+    members: tuple[Symbol, ...] = ()
+    groups: tuple[Symbol, ...] = ()
+    updated_by: Symbol
+    updated_at: AwareDatetime
+
+    @model_validator(mode="after")
+    def unique(self) -> Self:
+        if len(set(self.members)) != len(self.members):
+            raise ValueError("members must be unique")
+        if len(set(self.groups)) != len(self.groups):
+            raise ValueError("groups must be unique")
+        return self
+
+    @property
+    def key(self) -> tuple[str, str]:
+        return self.namespace, self.name
+
+
+def entitled(
+    metadata: AssetMetadata,
+    actor: str,
+    groups: tuple[str, ...],
+    access: NameAccess | None = None,
+) -> bool:
     """Whether one member may use one published asset.
 
     The owner may always use what it owns, whether the owner is this actor or
@@ -193,6 +233,10 @@ def entitled(metadata: AssetMetadata, actor: str, groups: tuple[str, ...]) -> bo
     user-owned asset marked `team` names no team to check, so it stays with
     its owner rather than widening to everyone.
 
+    The name's access record, when its owner decided one after publication,
+    replaces the version's visibility and lets its named members and groups
+    use it as well. It never takes the asset away from its owner.
+
     Being entitled to an asset is not permission to run it anywhere: a member
     still chooses which of their devices may, and the Bridge policy still
     authorizes every dispatch.
@@ -201,4 +245,15 @@ def entitled(metadata: AssetMetadata, actor: str, groups: tuple[str, ...]) -> bo
         return False
     if owns(metadata.owner, actor, groups) or actor in metadata.contributors:
         return True
-    return metadata.visibility in ("public", "organization")
+    visibility = metadata.visibility
+    if access is not None:
+        if (access.namespace, access.name) != (
+            metadata.identity.namespace,
+            metadata.identity.name,
+        ):
+            raise ValueError("an access record decides its own name only")
+        if actor in access.members or any(group in access.groups for group in groups):
+            return True
+        if access.visibility is not None:
+            visibility = access.visibility
+    return visibility in ("public", "organization")

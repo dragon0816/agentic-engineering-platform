@@ -5,9 +5,12 @@ from their Personal Agent; an administrator who is not the submitter approves
 or rejects it; only an approval publishes it, as the submitter, under the
 ownership and version rules of `docs/phases/ASSET_OWNERSHIP.md`.
 
-What the author wrote about version, owner, lifecycle and reviews is never
-trusted: the platform assigns the version, keeps the name's owner, resets both
-reviews to pending on submit and writes the reviewer's decision on approval.
+What the author wrote about version, lifecycle and reviews is never trusted:
+the platform assigns the version, resets both reviews to pending on submit and
+writes the reviewer's decision on approval. The owner is the name's recorded
+owner, or for a new name the declared team the submitter belongs to, or else
+the submitter; the visibility is the one the publisher chose when submitting,
+or the manifest's.
 A submitted manifest is data. The platform never runs it.
 """
 
@@ -37,7 +40,7 @@ from common.assets import (
     WorkflowManifest,
 )
 from common.distribution import PublishedAssetPackage
-from common.identity import AuthenticatedActor
+from common.identity import AuthenticatedActor, owns
 from common.member import (
     AssetApproveRequest,
     AssetRejectRequest,
@@ -47,7 +50,7 @@ from common.member import (
     AssetSubmitRequest,
     SubmissionStatus,
 )
-from common.ownership import next_version, version_key
+from common.ownership import AssetNameOwnership, next_version, version_key
 from control_plane.distribution import PackageRegistry
 from control_plane.ownership import AssetOwnershipService, OwnershipError
 
@@ -196,6 +199,23 @@ def _with_metadata(
         raise SubmissionError("manifest_invalid") from None
 
 
+def _owner(
+    record: AssetNameOwnership | None, declared: Owner, actor: str, groups: tuple[str, ...]
+) -> Owner:
+    """Who owns what is submitted (owner decision 2026-10-15).
+
+    An existing name keeps its recorded owner. A new name keeps the team or
+    organization the manifest declares when the submitter belongs to it, so
+    the members of that team can use it; otherwise the submitter owns it.
+    A declared person or service is never trusted: that would let anybody
+    publish in somebody else's name."""
+    if record is not None:
+        return record.owner
+    if declared.type in ("team", "organization") and owns(declared, actor, groups):
+        return declared
+    return Owner(type="user", id=actor)
+
+
 def _content(manifest: WorkflowManifest | SkillManifest) -> bytes:
     # The same bytes the preview catalog publishes and a Bridge installs.
     return manifest.model_dump_json(indent=2).encode("utf-8")
@@ -281,13 +301,14 @@ class SubmissionService:
             version = next_version(taken, item.change)
             identity = AssetIdentity(namespace=namespace, name=name, version=version)
             policy = original.technical_policy
+            owner = _owner(record, original.owner, actor, groups)
+            visibility = item.visibility if item.visibility is not None else original.visibility
             metadata = AssetMetadata.model_validate(
                 {
                     **original.model_dump(mode="json"),
                     "identity": identity.model_dump(mode="json"),
-                    "owner": (
-                        record.owner if record is not None else Owner(type="user", id=actor)
-                    ).model_dump(mode="json"),
+                    "owner": owner.model_dump(mode="json"),
+                    "visibility": visibility,
                     "lifecycle": "published",
                     "business_approval": BusinessApproval().model_dump(mode="json"),
                     "technical_policy": TechnicalPolicy(
@@ -319,6 +340,8 @@ class SubmissionService:
                 sha256=hashlib.sha256(content).hexdigest(),
                 risk=policy.risk,
                 required_permissions=policy.required_permissions,
+                owner=owner,
+                visibility=visibility,
                 submitted_at=self._clock(),
             )
             self.store.add(submission, content)

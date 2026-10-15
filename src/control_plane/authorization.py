@@ -25,8 +25,8 @@ from common.authorization import DeviceAssetSelection, DeviceAuthorization
 from common.base import Symbol
 from common.distribution import PublishedAssetPackage
 from common.enrollment import BridgeExecutionSubject
-from common.identity import AuthenticatedActor, entitled
-from control_plane.distribution import PackageRegistry
+from common.identity import AuthenticatedActor
+from control_plane.distribution import PackageRegistry, entitled_in
 from control_plane.enrollment import EnrollmentError, InMemoryEnrollmentRegistry
 from control_plane.identity_store import SqliteIdentityStorage
 
@@ -185,7 +185,7 @@ class InMemoryAuthorizationRegistry:
             # from the device rather than the Registry, so offering any other
             # published kind here would offer what cannot be chosen.
             if package.kind in ("workflow", "skill", "knowledge", "agent")
-            and entitled(package.metadata, who.actor, groups)
+            and entitled_in(self.packages, package.metadata, who.actor, groups)
             and not self._deprecated(package.metadata.identity)
         )
 
@@ -237,7 +237,9 @@ class InMemoryAuthorizationRegistry:
                 raise AuthorizationError("asset_not_published")
             if package.kind != item.kind:
                 raise AuthorizationError("kind_mismatch")
-            if not entitled(package.metadata, item.actor, self._member_groups(item.actor)):
+            if not entitled_in(
+                self.packages, package.metadata, item.actor, self._member_groups(item.actor)
+            ):
                 raise AuthorizationError("asset_not_entitled")
             if self._deprecated(item.asset):
                 raise AuthorizationError("asset_deprecated")
@@ -311,7 +313,9 @@ class InMemoryAuthorizationRegistry:
             raise AuthorizationError("asset_not_published")
         if package.kind != existing.kind:
             raise AuthorizationError("kind_mismatch")
-        if not entitled(package.metadata, who.actor, self._member_groups(who.actor)):
+        if not entitled_in(
+            self.packages, package.metadata, who.actor, self._member_groups(who.actor)
+        ):
             raise AuthorizationError("asset_not_entitled")
         if self._deprecated(new):
             raise AuthorizationError("asset_deprecated")

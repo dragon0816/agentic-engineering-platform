@@ -22,6 +22,8 @@ from common.member import (
     AdminInvitationListReply,
     AdminInvitationMetadata,
     AdminInvitationRevokeRequest,
+    AssetAccessListRequest,
+    AssetAccessUpdateRequest,
     AssetApproveRequest,
     AssetCoEditorRequest,
     AssetDeprecateRequest,
@@ -81,6 +83,7 @@ STATUS_FOR = {
     "new_owner_unknown": 400,
     "version_missing": 404,
     "version_deprecated": 409,
+    "access_member_unknown": 400,
     # Member publish with a review queue (owner 2026-10-15).
     "manifest_invalid": 400,
     "artifact_too_large": 413,
@@ -126,6 +129,35 @@ def _login_credential(header: str | None) -> tuple[str, str] | None:
     if not separator or not login_id or not secret:
         return None
     return login_id, secret
+
+
+# Why a name was refused, in words the portal shows as they are (owner,
+# 2026-10-15: an invitation for "name@example" failed with only
+# `invalid_request`). Account and group names are `common.base.Symbol`.
+NAME_RULE = (
+    "letters, digits, '.', '-' and '_' only, starting with a letter or '_'; no '@' or spaces"
+)
+_NAME_REASONS = {
+    "actor": ("account_invalid", f"Account names use {NAME_RULE}, for example leo.chi."),
+    "groups": ("group_invalid", f"Group names use {NAME_RULE}, for example engineering."),
+    "members": ("account_invalid", f"Account names use {NAME_RULE}, for example leo.chi."),
+    "co_editor": ("account_invalid", f"Account names use {NAME_RULE}, for example leo.chi."),
+}
+
+
+def _invalid(error: ValidationError) -> dict[str, str]:
+    """`invalid_request`, with the reason when a name was what was wrong. The
+    submitted value is never echoed."""
+    for detail in error.errors():
+        location = detail.get("loc", ())
+        field = location[0] if location else None
+        # A field the request may not carry at all is not a badly written name.
+        if detail.get("type") == "extra_forbidden":
+            continue
+        if isinstance(field, str) and field in _NAME_REASONS:
+            reason, message = _NAME_REASONS[field]
+            return {"code": "invalid_request", "reason": reason, "message": message}
+    return {"code": "invalid_request"}
 
 
 class _Handler(BaseHTTPRequestHandler):
@@ -180,6 +212,8 @@ class _Handler(BaseHTTPRequestHandler):
             "assets/co-editors/remove",
             "assets/transfer",
             "assets/deprecate",
+            "assets/access",
+            "assets/access/update",
             "assets/submit",
             "assets/submissions",
             "assets/submissions/withdraw",
@@ -267,6 +301,14 @@ class _Handler(BaseHTTPRequestHandler):
             elif operation == "assets/deprecate":
                 reply = self.server.service.asset_deprecate(
                     *credential, AssetDeprecateRequest.model_validate(raw)
+                )
+            elif operation == "assets/access":
+                reply = self.server.service.asset_access(
+                    *credential, AssetAccessListRequest.model_validate(raw)
+                )
+            elif operation == "assets/access/update":
+                reply = self.server.service.asset_access_update(
+                    *credential, AssetAccessUpdateRequest.model_validate(raw)
                 )
             elif operation == "assets/submit":
                 reply = self.server.service.asset_submit(
@@ -397,7 +439,10 @@ class _Handler(BaseHTTPRequestHandler):
                 sign_in.revoke(revoke_request.invitation_id)
                 self._json(200, {"invitation": invitation.model_dump(mode="json")})
                 return
-        except (ValidationError, ValueError):
+        except ValidationError as error:
+            self._json(400, _invalid(error))
+            return
+        except ValueError:
             self._json(400, {"code": "invalid_request"})
             return
         except (MemberError, SubmissionError) as error:
