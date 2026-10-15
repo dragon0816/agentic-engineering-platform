@@ -2566,3 +2566,41 @@ Rejected alternatives:
 - Removing shipped manifests with a warning: the removal silently undoes on upgrade.
 - Revoking the platform selection on removal: removal is a local act; the member's
   platform decision stays theirs to change (one button away on the card).
+
+## 2026-10-15 — A person's "run X" in a chat is the Workflow's form
+
+Decision: when a person asks in Agent Web or Telegram to run an installed Workflow,
+the answer is that Workflow's generated run form (Web, inline under the answer) or
+question flow (Telegram), never the model collecting values in prose. Details in
+`docs/phases/CHAT_WORKFLOW_FORMS.md`.
+1. An explicit request (run verb + exactly one installed Workflow named) is routed
+   deterministically before the model, Skill rules and Knowledge routing; `name=value`
+   pairs typed with it are prefill. `/run <name>` in Agent Web opens the form too.
+2. When the model decides, it calls the host tool `workflows__run_form`; a Skill-bound
+   Workflow tool or `authoring__run_workflow` (installed) with incomplete or refused
+   values in a person's conversation returns the same offer. The offer ends the turn.
+   A complete, valid model call still runs, so a Workflow can remain a step the Agent
+   orchestrates. Only in a conversation with a `session_id`; tasks keep failures.
+3. A model may prefill only agent-channel, non-`confirm` fields; uploads and settings
+   are never prefilled. Settings are never asked in the chat: missing required
+   settings are named with a link to the Workflow's settings (Web) or a pointer to
+   Agent Web (Telegram), and the Run button stays disabled.
+4. A run from the inline form is recorded in that conversation as a question/answer
+   pair; Telegram prefill is shown in the Run/Cancel confirmation.
+5. A Telegram turn is never silent: blank model text, rate limits and refused messages
+   get a retry or a short notice.
+
+Reason: authors declare parameters once and never write GUI; the same declaration
+already draws the Capabilities form and the `/run` flow, so a chat request must reuse
+it. A model filling run values breaks the `channels`/`confirm` contract and asks for
+settings that are not run values.
+
+Rejected alternatives:
+- Better prompting only: the model still decides the shape, cannot show pick lists,
+  uploads or "same as last time", and was observed listing settings.
+- Exposing every installed Workflow as a model tool with its schema: the model would
+  fill values itself, the opposite of the owner's requirement.
+- A separate chat-only form renderer: two renderers would drift; the inline form uses
+  `renderParameterForm` as Capabilities does.
+- Running immediately when no field is required: a chat sentence is not a Run click;
+  the form (or Telegram confirmation for non-read runs) stays the confirmation.
