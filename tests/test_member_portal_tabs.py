@@ -132,6 +132,14 @@ def test_the_tabbed_portal_in_a_real_browser(tmp_path: Path) -> None:
 
         try:
             browser.navigate(app.member_base_url + f"/#invitation={proof}")
+            # First sign-in sets a password (owner 2026-10-15).
+            until(lambda: bool(browser._evaluate(
+                'document.getElementById("set-password-form").getClientRects().length')))
+            browser._evaluate('document.getElementById("new-password").value='
+                              '"lantern orchard pebble 42";'
+                              'document.getElementById("new-password-again").value='
+                              '"lantern orchard pebble 42";'
+                              'document.getElementById("set-password").click(); 0')
             until(lambda: "Registered computers" in text("overview-tiles"))
             assert js('document.getElementById("ptab-overview").getAttribute("aria-selected")'
                       ) == "true"

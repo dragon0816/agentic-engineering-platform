@@ -423,6 +423,14 @@ def test_the_portal_renews_its_session_and_edits_access_in_a_real_browser(
 
         try:
             browser.navigate(app.member_base_url + f"/#invitation={proof.bearer}")
+            # First sign-in sets a password (owner 2026-10-15).
+            until(lambda: bool(browser._evaluate(
+                'document.getElementById("set-password-form").getClientRects().length')))
+            browser._evaluate('document.getElementById("new-password").value='
+                              '"lantern orchard pebble 42";'
+                              'document.getElementById("new-password-again").value='
+                              '"lantern orchard pebble 42";'
+                              'document.getElementById("set-password").click(); 0')
             until(lambda: "root" in text("actor"))
             approve = request(url + "admin/submissions/approve", authorization=leo, body={
                 "submission_id": submitted["submission"]["submission_id"], "evidence": "x"})
