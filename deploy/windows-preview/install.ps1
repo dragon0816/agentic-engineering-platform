@@ -4,7 +4,9 @@ param(
     [ValidatePattern('^[a-z0-9]+(-[a-z0-9]+)*$')][string]$Namespace,
     [string]$PythonExe = "python",
     [string]$InstallRoot = "$env:LOCALAPPDATA\AgenticEngineeringPlatform\preview-0.1.0",
-    [switch]$NoShortcut
+    [switch]$NoShortcut,
+    # Leave Claude Code, Codex and Copilot as they are (no AEP skills or MCP servers).
+    [switch]$NoAgentSkills
 )
 $ErrorActionPreference = "Stop"
 $BundleRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -163,6 +165,19 @@ if (-not $NoShortcut) {
     # The 'AEP Agent' desktop and Start menu shortcut opens Agent Web, starting it if needed.
     & $HostExecutable shortcut --config $ConfigPath
     if ($LASTEXITCODE -ne 0) { Write-Warning "Could not create the AEP Agent shortcut; use start-web.cmd." }
+}
+if ($NoAgentSkills) {
+    Write-Host "Skipped the coding agent setup (-NoAgentSkills). Set it up later in Agent Web Settings > Coding agents."
+}
+else {
+    # AEP's skills (Workflow and Skill creators, AEP Knowledge) and its two MCP
+    # servers for every coding agent found here, in that agent's own user
+    # settings; only AEP's entries are touched and edited files are backed up.
+    Write-Host "Setting up AEP for the coding agents on this computer (Claude Code, Codex, GitHub Copilot):"
+    & $HostExecutable assets --config $ConfigPath connect --for all --user
+    if ($LASTEXITCODE -ne 0) {
+        Write-Warning "Some coding agents were not set up; see above, or use Agent Web Settings > Coding agents."
+    }
 }
 Write-Host "Installed the local-only preview at $InstallRoot"
 Write-Host "Bundle source revision: $($Manifest.source_revision)"
