@@ -92,6 +92,20 @@ def bridge_url(value: str) -> str:
         raise SharedPlatformError("bridge_url_invalid") from None
 
 
+def bridge_answers(base_url: str, timeout: float = 8.0) -> bool:
+    """Whether a Shared Platform Bridge API answers at this origin. Checked
+    before enrolling, so a wrong address is refused instead of saved (owner
+    2026-10-15: an old address was saved and only shown as unreachable)."""
+    import json
+    import urllib.request
+
+    try:
+        with urllib.request.urlopen(f"{base_url}/v1/health", timeout=timeout) as answer:
+            return answer.status == 200 and json.loads(answer.read()).get("ok") is True
+    except (OSError, ValueError):
+        return False
+
+
 def _mapped(candidate: dict[str, Any], secret: str, variable: str) -> None:
     """Map `secret` to `variable` in the candidate's credentials, replacing
     whatever variable that secret had before and nothing else."""
@@ -207,6 +221,8 @@ PROBLEMS = {
     "bridge_url_invalid": "The Bridge API URL must be an address like "
     "https://platform.example or, on this computer, http://127.0.0.1:28775.",
     "bridge_url_missing": "Enter the Bridge API URL before enrolling.",
+    "bridge_unreachable": "The Bridge API URL did not answer, so this PC was not enrolled and "
+    "nothing was saved. Check the address (and the SSH tunnel, if you use one).",
     "login_malformed": "That is not a Personal Agent code; copy it again from the Member "
     "Portal ('Connect a Personal Agent').",
     "secret_not_saved": "Windows did not save the value for this user.",

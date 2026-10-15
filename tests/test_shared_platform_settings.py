@@ -191,6 +191,10 @@ def test_the_card_refuses_what_it_cannot_use_and_never_echoes_a_secret(
         assert bad["code"] == "bridge_url_invalid"
         assert web.update_shared_platform({**_card(app), "base_url": ""})["code"] == (
             "bridge_url_missing")
+        # An address nothing answers at (an old local platform, a dropped
+        # tunnel) is refused before anything is saved or enrolled.
+        gone = web.update_shared_platform({**_card(app), "base_url": "http://127.0.0.1:9"})
+        assert gone["code"] == "bridge_unreachable" and "nothing was saved" in gone["message"]
         typed = "not-a-code-but-maybe-a-password"
         refused = web.update_shared_platform(_card(app, typed))
         assert refused["code"] == "login_malformed" and typed not in json.dumps(refused)

@@ -214,6 +214,7 @@ from host_runtime.shared_platform import (
     TOKEN_VARIABLE,
     EnrollmentRecord,
     SharedPlatformError,
+    bridge_answers,
     bridge_url,
     enrolled_token,
     portal_url,
@@ -449,6 +450,8 @@ class AgentWeb:
         self.feedback_sync: Any = None
         self.knowledge_harness = KnowledgeHarness(runtime, namespace)
         self.user_environment = windows_user_environment
+        # Injected for tests; checks the Bridge API answers before enrolling.
+        self.bridge_answers = bridge_answers
         # Reads the configured Gateway's model list for the Settings picker.
         self.model_listing_transport: MethodTransport = UrllibTransport()
         # Per-install Workflow settings; the engine reads the same file per run.
@@ -2871,6 +2874,9 @@ class AgentWeb:
                 base = bridge_url(raw_bridge) if raw_bridge else None
                 if enroll and base is None:
                     raise SharedPlatformError("bridge_url_missing")
+                if enroll and base is not None and not self.bridge_answers(base):
+                    # Refused before anything is saved (owner 2026-10-15).
+                    raise SharedPlatformError("bridge_unreachable")
                 if code and not LOGIN_SHAPE.fullmatch(code):
                     raise SharedPlatformError("login_malformed")
                 try:
