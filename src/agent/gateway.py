@@ -48,6 +48,13 @@ from common.execution import (
 )
 from common.workflow_forms import agent_fields, agent_tool_schema
 from common.workflow_parameters import WorkflowParameterError, validate_run_parameters
+from common.workflow_run_form import (
+    FORM_GUIDANCE,
+    FORM_TOOL,
+    OFFER_KEY,
+    agent_prefill,
+    form_offer,
+)
 from models.contracts import (
     ModelMessage,
     ModelRequest,
@@ -629,6 +636,12 @@ class Gateway:
                 continue
             host[name] = host_tool
             tools.append(host_tool.tool)
+        if FORM_TOOL in host and context.session_id is not None:
+            messages[0] = ModelMessage(role="system", text=f"{messages[0].text} {FORM_GUIDANCE}")
+        elif FORM_TOOL in host:
+            # No person to fill a form (a task or a schedule): not offered.
+            del host[FORM_TOOL]
+            tools = [tool for tool in tools if tool.name != FORM_TOOL]
         evidence: list[ConversationToolExecution] = []
         truncated_retries = 0
         for turn in range(1, max_turns + 1):
@@ -716,6 +729,15 @@ class Gateway:
                 evidence.append(item)
                 harnessed = (item.host.data if item.host is not None
                              and isinstance(item.host.data, dict) else {})
+                offer = harnessed.get(OFFER_KEY)
+                if isinstance(offer, dict):
+                    # A person's run is the Workflow's form, not the model's
+                    # prose (owner 2026-10-15): the turn ends with the form,
+                    # which the channel draws from the offer.
+                    return GatewayConversationResult(
+                        trace=context.trace, status="answered",
+                        text=str(offer.get("message") or "Fill in the run form."),
+                        model_turns=turn, tools=tuple(evidence))
                 if harnessed.get("knowledge_harness") == "validated":
                     # The validated Knowledge answer is the turn's answer; the
                     # model does not rewrite it (owner 2026-10-09, option a).
@@ -891,6 +913,17 @@ class Gateway:
                     )
                 arguments = validate_run_parameters(manifest, arguments)
             except WorkflowParameterError as error:
+                if context.session_id is not None:
+                    # In a person's conversation, incomplete or refused run
+                    # values become the Workflow's form with what the model
+                    # may fill as prefill; the person completes and runs it.
+                    offer = form_offer(
+                        manifest, agent_prefill(manifest, call.arguments),
+                        self.engine.settings_provider, origin="agent")
+                    return ConversationToolExecution(
+                        call_id=call.call_id, name=call.name,
+                        host=HostToolOutcome(status="succeeded", data={OFFER_KEY: offer}),
+                    )
                 return ConversationToolExecution(
                     call_id=call.call_id,
                     name=call.name,

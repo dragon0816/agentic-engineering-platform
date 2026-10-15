@@ -16,7 +16,7 @@ import os
 from collections.abc import Callable, Mapping
 from pathlib import Path
 from types import TracebackType
-from typing import Literal, Self, TypeVar
+from typing import Any, Literal, Self, TypeVar
 
 from pydantic import JsonValue, ValidationError
 
@@ -248,6 +248,7 @@ from common.base import Contract
 from common.distribution import LocalStateError
 from common.execution import Failure, TraceIdentifiers
 from common.local_agent import BridgeMembership
+from common.workflow_run_form import agent_prefill, form_offer
 from dut.adapters import DutAdapter, SubprocessDutAdapter
 from dut.contracts import DutPhysicalValidationRequest, DutValidationEvidence
 from dut.runtime import PhysicalDutValidationService
@@ -283,6 +284,7 @@ from host_runtime.state import SqliteLocalState
 from host_runtime.sync import PlatformClient
 from host_runtime.task_artifacts import LocalTaskArtifacts
 from host_runtime.telegram_settings import windows_user_environment
+from host_runtime.workflow_form_tool import workflow_form_tools
 from host_runtime.workflow_settings import SETTINGS_FILE, WorkflowSettingsStore, settings_key
 from host_runtime.workflow_uploads import UPLOADS_FOLDER, WorkflowUploadStore
 from host_runtime.workspace import documents
@@ -1228,6 +1230,16 @@ def _vault_tools(catalog: KnowledgeCatalog) -> Callable[[], list[KnowledgeVaultT
     return tools
 
 
+def _chat_form_offer(
+    gateway: Gateway, identity: AssetIdentity, values: dict[str, JsonValue]
+) -> dict[str, Any] | None:
+    manifest = gateway.engine.workflows.get(identity)
+    if manifest is None:
+        return None
+    return form_offer(manifest, agent_prefill(manifest, values),
+                      gateway.engine.settings_provider, origin="agent")
+
+
 def workflow_settings_provider(
     config: CompanyHostConfiguration, layout: HostLayout
 ) -> Callable[[WorkflowManifest], dict[str, JsonValue]]:
@@ -1908,7 +1920,12 @@ def build_runtime(
                  checked.device.registered_by, store_secret=windows_user_environment)
     gateway.capability_approval = chat_authoring.capability_approval_tool_data
     gateway.host_tools = lambda: (*chat_authoring.tools(), *bridge_tools(gateway.bridge),
-                                  *mcp.tools(gateway.bridge))
+                                  *mcp.tools(gateway.bridge),
+                                  *workflow_form_tools(gateway.engine))
+    # An installed Workflow run from the chat with incomplete values becomes
+    # its form (owner 2026-10-15), as on the Gateway's own Workflow tools.
+    chat_authoring.form_offer = lambda identity, values: _chat_form_offer(
+        gateway, identity, values)
     try:
         state = SqliteLocalState(place.state, bridge_id=checked.device.bridge_id)
     except (LocalStateError, OSError, ValueError) as error:

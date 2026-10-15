@@ -49,6 +49,8 @@ from capabilities.workflow_author.conversation import assemble
 from common.assets import AssetIdentity, FixedInput, WorkflowManifest, WorkflowStep
 from common.base import Contract, Symbol, Text
 from common.execution import Failure, RequestContext, TraceIdentifiers
+from common.workflow_parameters import WorkflowParameterError, validate_run_parameters
+from common.workflow_run_form import OFFER_KEY
 from host_runtime.skill_authoring import (
     SkillCandidate,
     assemble_skill,
@@ -224,6 +226,10 @@ class ChatAuthoring:
         # (owner 2026-10-08: a Workflow installed from the draft list said
         # workflow_not_installed when run from the Capabilities page).
         self.on_installed = on_installed
+        # (installed Workflow, the model's run values) -> its run form offer,
+        # set by the host; None keeps the plain run (owner 2026-10-15).
+        self.form_offer: Callable[
+            [AssetIdentity, dict[str, JsonValue]], dict[str, Any] | None] | None = None
         self.skills_dir = skills_dir
         # Where a run-python or browser step's fixed workspace may be; checked
         # at draft time so a Workflow never fails only at its approved run.
@@ -468,6 +474,20 @@ class ChatAuthoring:
             if binding is None or binding.spec.side_effect != "read":
                 return False
         return True
+
+    def _form_instead(
+        self, context: RequestContext, draft: WorkflowManifest, arguments: dict[str, JsonValue]
+    ) -> dict[str, Any] | None:
+        """In a person's conversation, an installed Workflow whose run values
+        are incomplete or invalid is handed over as its form, not run and not
+        asked for in prose."""
+        if self.form_offer is None or context.session_id is None or not draft.parameters:
+            return None
+        try:
+            validate_run_parameters(draft, arguments)
+        except WorkflowParameterError:
+            return self.form_offer(draft.metadata.identity, arguments)
+        return None
 
     def execute(
         self, actor: str, candidate: ChatCandidate, arguments: dict[str, JsonValue], ref: str
@@ -893,6 +913,9 @@ class ChatAuthoring:
                 item = self.candidate(str(args.get("candidate_id") or ""), context.actor)
                 arguments = _arguments(args)
                 if item.status == "installed" and item.installed_digest == digest(item.draft):
+                    offer = self._form_instead(context, item.draft, arguments)
+                    if offer is not None:
+                        return HostToolOutcome(status="succeeded", data={OFFER_KEY: offer})
                     # The installed version, unchanged: installing was the approval.
                     return HostToolOutcome(status="succeeded", data=self.execute(
                         context.actor, item, arguments, f"chat-installed:{item.candidate_id}"))
