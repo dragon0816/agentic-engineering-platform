@@ -43,7 +43,9 @@ AEP Agent 安裝在你自己的電腦上，只有這台電腦能開啟它的網�
    - 建立獨立的 Python 環境；
    - 從安裝包內的檔案離線安裝，不會連外下載；
    - 執行健康檢查（doctor）；
-   - 在桌面和開始功能表建立 **AEP Agent** 捷徑。
+   - 在桌面和開始功能表建立 **AEP Agent** 捷徑；
+   - 替這台電腦上找得到的 Claude Code、Codex、GitHub Copilot 裝好 AEP 的 skills 和
+     MCP 設定（見第 11 節；不想要時加 `-NoAgentSkills`）。
 
    最後出現 `Installed the local-only preview at ...` 就是安裝完成。
 
@@ -172,7 +174,9 @@ Laya 等）都在 Settings 頁設定；細節見同一資料夾的 `README.md`�
    - 讀取你原本的帳號和 Bridge ID，不必再輸入；
    - 先關閉正在執行的 Agent Web；
    - 用新版檔案重新安裝程式；
-   - **保留**你的 `host.json` 設定、workspace、對話紀錄和已安裝的能力。
+   - **保留**你的 `host.json` 設定、workspace、對話紀錄和已安裝的能力；
+   - 把 Claude Code / Codex / Copilot 裡 AEP 的 skills 和 MCP 設定更新到新版
+     （加 `-NoAgentSkills` 則不動）。
 3. 看到 `Updated.` 後，執行 `verify.cmd`，確認版本碼和發佈說明（`RELEASE_NOTES.md`）上的
    一致。
 4. 用 **AEP Agent** 捷徑重新開啟。
@@ -212,6 +216,9 @@ Laya 等）都在 Settings 頁設定；細節見同一資料夾的 `README.md`�
 .\uninstall.cmd -Apply   # 真的刪除整個安裝資料夾（含設定與紀錄）
 ```
 
+`-Apply` 會先把 AEP 放進 Claude Code / Codex / Copilot 的 skills 和 MCP 設定拿掉
+（只拿 AEP 自己的，其他設定不動），再刪除安裝資料夾。
+
 解除安裝會刪除 `host.json`、workspace 和對話紀錄。需要保留時，請先另外備份
 安裝資料夾。桌面和開始功能表的 **AEP Agent** 捷徑請手動刪除。
 
@@ -224,3 +231,65 @@ Laya 等）都在 Settings 頁設定；細節見同一資料夾的 `README.md`�
 | 工作資料、對話、能力 | 安裝資料夾裡的 `workspace\` |
 | 錯誤紀錄 | `workspace\logs\` |
 | 已安裝的版本 | 安裝資料夾裡的 `bundle-manifest.json`（`source_revision`） |
+| Claude Code 的 AEP skills / MCP | `%USERPROFILE%\.claude\skills\aep-*`、`%USERPROFILE%\.claude.json` |
+| Codex 的 AEP skills / MCP | `%USERPROFILE%\.agents\skills\aep-*`、`%USERPROFILE%\.codex\config.toml` |
+| Copilot 的 AEP skills / MCP | `%USERPROFILE%\.copilot\skills\aep-*`、`%USERPROFILE%\.copilot\mcp-config.json` |
+
+## 11. 用 Claude Code / Codex / Copilot 產生 AEP 可用的 Skill 與 Workflow
+
+AEP 和一般 Claude Code 最大的差別：在 AEP 做出來的 Skill 和 Workflow **在 AEP 上就能用**
+（Agent Web 會自動產生執行表單，Telegram 會一題一題問），而且你的 coding agent 可以直接
+查 AEP 的公司知識庫（Knowledge）。
+
+### 11.1 預設裝了什麼
+
+安裝和更新時，AEP 會替這台電腦上**找得到的** Claude Code、Codex、GitHub Copilot CLI
+（指令在 PATH 上，或已有它們的設定資料夾）放入：
+
+| 項目 | 用途 |
+|---|---|
+| skill `aep-workflow-creator` | 教 agent 寫出 AEP 可用的 Workflow：先釐清需求、用有型別的參數（日期、下拉選單、上傳檔案…）、檢查、送出、測試、請你核准 |
+| skill `aep-skill-creator` | 教 agent 寫 AEP Agent 用的 Skill |
+| skill `aep-knowledge` | 教 agent 查 AEP 知識庫：搜尋 → 讀頁面 → 註明出處，不亂編產品資訊 |
+| MCP server `aep` | 撰寫工具：目錄、格式、檢查、送出、測試、申請安裝（只回狀態碼，看不到公司資料） |
+| MCP server `aep-assistant` | 知識庫搜尋／閱讀／問答，以及已安裝的 Workflow；透過**正在執行的 Agent Web** 回答 |
+
+- 只會改 AEP 自己的項目；你原有的 MCP server、skills 都不會被刪改。設定檔修改前會先備份成
+  `<檔名>.aep-backup-<時間>`。
+- 你自己已有同名的 skill 或 MCP server 時，AEP 會保留你的，並在畫面上註明。
+- 權杖（token）不會寫進 agent 的設定檔；`aep-assistant` 每次呼叫時才從 AEP 讀取。
+- 沒有安裝的 agent 會顯示 `not found on this computer; skipped`，之後裝了再到 Settings 按
+  Install 即可。
+
+### 11.2 在 Settings 查看、更新或移除
+
+打開 AEP Agent → **Settings** → **Coding agents**。每個 agent 一張卡片，顯示：
+是否找到、三個 skills 是否已安裝（installed / out of date / your own）、兩個 MCP server
+是否已註冊。按 **Install / Update** 安裝或更新，按 **Remove** 移除 AEP 的項目。
+改完請**重新開啟**該 agent（Claude Code 重開視窗、VS Code 重新載入）。
+
+也可以用指令（在安裝資料夾）：
+
+```powershell
+.\.venv\Scripts\aep-host.exe assets --config host.json connect --for all --user           # 安裝／更新
+.\.venv\Scripts\aep-host.exe assets --config host.json connect --for all --user --status  # 查看
+.\.venv\Scripts\aep-host.exe assets --config host.json connect --for all --user --remove  # 移除
+```
+
+### 11.3 怎麼問
+
+在任何資料夾開 Claude Code / Codex / Copilot，直接說：
+
+- 「幫我做一個 AEP Workflow：每月把上傳的費用 CSV 合併成一份 Excel」
+- 「幫我做一個 AEP Skill，讓 AEP Agent 會用 monthly-expense 這個 Workflow」
+- 「用 AEP 知識庫查 CMX500 支援哪些 5G NR 頻段，附上出處」
+
+agent 會先重述需求，**不清楚的地方會先問你**（例如 CSV 編碼、日期格式、結果要放哪、
+會不會寄信）。回答後它會檢查、送出、測試；任何會改變東西的執行和**所有安裝**都要你在
+Agent Web 按核准才會生效（Installed 頁面上方會列出等待核准的項目）。
+
+注意：
+- 查知識庫和執行 Workflow 需要 **Agent Web 正在執行**；沒開時 agent 會請你先開
+  AEP Agent 捷徑。
+- 新的 Skill 在 AEP Agent 重新啟動後才會被使用。
+

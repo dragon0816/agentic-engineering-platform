@@ -61,6 +61,17 @@ install time, and runs `aep-host doctor`. That local membership grants no
 capability by itself. The installer does not contact the shared platform or any
 company system.
 
+It also sets up the coding agents found on this computer (Claude Code, Codex,
+GitHub Copilot CLI): the `aep-workflow-creator`, `aep-skill-creator` and
+`aep-knowledge` skills in each agent's personal skills folder, and the `aep`
+(authoring) and `aep-assistant` (Knowledge and Workflows through the running
+Agent Web) MCP servers in its user configuration. Only AEP's own entries are
+written, each edited file is backed up first, and no token is stored there. Add
+`-NoAgentSkills` to skip it (also on `update.cmd`); manage it later in Agent Web
+Settings > Coding agents or with `aep-host assets --config host.json connect
+--for all --user [--status|--remove]`. The manual `INSTALL.zh-TW.md` section 11
+explains how to ask an agent for an AEP Workflow or Skill.
+
 Run the checks again and export the JSON that will later be submitted through an
 authenticated enrollment flow:
 
@@ -638,6 +649,7 @@ it.
 
 ## Remove
 
-`uninstall.cmd` shows what it would remove. `uninstall.cmd -Apply` removes only the
-versioned preview installation. The extracted bundle and exported enrollment JSON
+`uninstall.cmd` shows what it would remove. `uninstall.cmd -Apply` first removes
+AEP's skills and MCP servers from the coding agents, then only the versioned
+preview installation. The extracted bundle and exported enrollment JSON
 remain until you remove them yourself.

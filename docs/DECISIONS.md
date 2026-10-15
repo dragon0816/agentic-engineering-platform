@@ -2633,3 +2633,51 @@ Rejected alternatives:
 - Owner-only management (as of 2026-10-07): leaves names stuck when the owner is away.
 - Letting administrators publish any name: mixes reviewing and authoring.
 - Group changes only through new invitations: an accepted member could never join a team.
+
+## 2026-10-15 — AEP skills and MCP servers in the coding agents' user configuration by default
+
+Context: the owner requires that Skills and Workflows produced with this platform work
+on it, and that AEP's Knowledge and MCP tools are usable from Claude Code, Codex and
+Copilot, without a per-folder `aep-host assets connect`. A live test also found the
+authoring catalog (~82K characters) above Claude Code's MCP output limit, `check-workflow`
+creating folders, and agents assuming unclear inputs instead of asking.
+`docs/phases/EXTERNAL_AUTHORING.md` "Default user-level setup".
+
+Decision:
+1. The installer and updater (unless `-NoAgentSkills`), Agent Web Settings > Coding
+   agents and `assets connect --user` put, for each detected agent, the
+   `aep-workflow-creator`, `aep-skill-creator` and `aep-knowledge` skills in its personal
+   skills folder and the `aep` (authoring) and `aep-assistant` (Knowledge and Workflows)
+   MCP servers in its user configuration. Files touched: `~/.claude/skills/aep-*`,
+   `~/.claude.json` (`mcpServers`); `~/.agents/skills/aep-*`, `~/.codex/config.toml`
+   (marked block); `~/.copilot/skills/aep-*`, `~/.copilot/mcp-config.json`
+   (`CLAUDE_CONFIG_DIR`, `CODEX_HOME`, `COPILOT_HOME` respected). `uninstall -Apply`
+   removes them.
+2. Only AEP-marked entries are replaced or removed (skill marker file, server args
+   running `host_runtime.cli`, the TOML block); the person's own same-named entries are
+   kept; each edited file is backed up first.
+3. `aep-assistant` is a stdio bridge to the running Agent Web that reads its address
+   and token at call time; no token is written into an agent's configuration.
+4. This extends the 2026-10-12 Copilot data decision (assistant tools return company
+   content) to the person's own Claude Code, Codex and Copilot sessions, at the owner's
+   request ("MCP and Knowledge too — they must be usable"). Authoring tools keep
+   returning statuses and codes only.
+5. Agent Web's text-only chat backends stay tool-less; the Copilot agent mode gets the
+   authoring tools (`/mcp/authoring`) and the skills explicitly.
+6. `aep_catalog` is compact (≤15K characters); schemas and formats come from
+   `aep_capability`, `aep_workflow_format`, `aep_skill_format`. Checks have no side
+   effects; task folders are created on submit, run or install.
+
+Reason: AEP's value over a plain coding agent is that what it builds runs here, and a
+per-folder step was forgotten (live test: a fresh session knew nothing about AEP).
+User-level configuration is where each agent looks in every folder.
+
+Rejected alternatives:
+- Per-folder `connect` only: forgotten in practice, and new folders start without AEP.
+- A fixed `http://127.0.0.1:<port>/mcp` URL with the token in the agent's config: the
+  port can change and the token would sit in plain configuration files.
+- Running `claude mcp add` / `codex mcp add` / `copilot mcp add`: needs each CLI on PATH
+  in the installer's session and is not testable against a temporary home; the files are
+  the documented user configuration.
+- Giving Agent Web's Claude Code and Codex chat backends tools: changes the 2026-10-02
+  text-only backend rule and the data boundary; left for an owner decision.
