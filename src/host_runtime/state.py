@@ -17,7 +17,7 @@ from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 from types import TracebackType
-from typing import Self
+from typing import Any, Self
 from urllib.request import pathname2url
 
 from pydantic import TypeAdapter, ValidationError
@@ -476,6 +476,43 @@ class SqliteLocalState:
                     " record = excluded.record",
                     (item.feedback_id, item.rated_at.isoformat(), item.model_dump_json()),
                 )
+        return checked
+
+    def set_message_card(
+        self, session_id: Symbol, actor: Symbol, card: dict[str, Any], note: str,
+    ) -> ConversationRecord | None:
+        """Redraw an answer's action card after a decision (owner 2026-10-15).
+
+        The transcript stays append-only: only the answer that shows this
+        card changes, its `action_card` and a line added to its tool record
+        so later turns tell the model the outcome. None when no answer here
+        shows the card."""
+        card_id = card.get("card_id")
+        with self._write() as conn:
+            row = conn.execute(
+                "SELECT record FROM conversations WHERE session_id = ? AND actor = ?",
+                (session_id, actor),
+            ).fetchone()
+            if row is None:
+                return None
+            stored = ConversationRecord.model_validate_json(row[0])
+            target = next(
+                (item for item in stored.messages if item.role == "assistant"
+                 and isinstance(item.action_card, dict)
+                 and item.action_card.get("card_id") == card_id), None)
+            if target is None:
+                return None
+            summary = ((target.tool_summary + "\n") if target.tool_summary else "") + note
+            updated = stored.model_copy(update={"messages": tuple(
+                item.model_copy(update={"action_card": card, "tool_summary": summary})
+                if item.message_id == target.message_id else item
+                for item in stored.messages
+            )})
+            checked = ConversationRecord.model_validate(updated.model_dump())
+            conn.execute(
+                "UPDATE conversations SET record = ? WHERE session_id = ?",
+                (checked.model_dump_json(), session_id),
+            )
         return checked
 
     def queued_feedback(self, limit: int) -> list[FeedbackRecord]:

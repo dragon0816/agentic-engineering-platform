@@ -347,6 +347,34 @@ p.note { color: var(--dim); font-size: 13px; margin: 4px 0 12px; }
 .approval-card p { margin: 6px 0 8px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .approval-card button { margin-right: 8px; }
 .approval-note { font-size: 13px; }
+/* An action card (owner 2026-10-15): a change proposal now, agent-mode
+   permissions next. One renderer, renderActionCard. */
+.action-card { margin: 12px 0 0; padding: 12px 14px; max-width: 640px;
+  border: 1px solid var(--accent); border-radius: 8px; background: var(--bg); }
+.action-card.closed { border-color: var(--line); }
+.action-card h3 { margin: 0 0 8px; font-size: 15px; line-height: 1.4; }
+.action-card .card-diff { width: 100%; border-collapse: collapse; margin: 6px 0;
+  font-size: 13px; table-layout: fixed; }
+.action-card .card-diff th, .action-card .card-diff td { padding: 6px 8px;
+  border-top: 1px solid var(--line); text-align: left; vertical-align: top;
+  overflow-wrap: anywhere; }
+.action-card .card-diff th { color: var(--dim); font-weight: 600; }
+.action-card .card-diff .before { color: var(--dim); text-decoration: line-through; }
+.action-card .card-preview { margin: 6px 0; padding: 8px 10px; max-height: 320px;
+  overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; border-radius: 6px;
+  background: var(--panel); font: 12.5px/1.55 var(--mono); }
+.action-card .card-reason { margin: 6px 0; font-size: 13px; white-space: pre-wrap; }
+.action-card .card-effects { margin: 6px 0; padding-left: 20px; font-size: 13px;
+  color: var(--warn); }
+.action-card .card-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+  margin-top: 10px; }
+.action-card .card-actions button { min-height: 44px; min-width: 88px; }
+.action-card .card-actions button.danger { color: var(--bad); }
+.action-card .card-status { margin: 8px 0 0; font-size: 13px; white-space: pre-wrap;
+  overflow-wrap: anywhere; }
+.action-card .card-status.good { color: var(--good); }
+.action-card .card-status.bad { color: var(--bad); }
+.action-card .card-link { margin-top: 6px; }
 .said > :first-child { margin-top: 0; }
 .said > :last-child { margin-bottom: 0; }
 .said p { margin: 0 0 12px; white-space: pre-wrap; }
@@ -1517,6 +1545,8 @@ tr:last-child td { border-bottom: none; }
         <p class="note" id="task-counts" role="status">reading&hellip;</p></div>
       <button id="task-refresh" type="button">Refresh</button>
     </div>
+    <h3 id="pending-cards-heading" hidden>Pending changes</h3>
+    <div id="pending-cards"></div>
     <div class="card" id="task-list"></div>
   </section>
   <section id="panel-schedules">
@@ -1842,6 +1872,13 @@ function renderConversation(record) {
         chatRunForm(said.parentNode, replied, record.session_id,
           index + 2 >= record.messages.length);
       }
+      if (replied.action_card) {
+        said.parentNode.append(renderActionCard(replied.action_card, async () => {
+          if (record.session_id === activeConversation) {
+            await loadConversations(record.session_id);
+          }
+        }));
+      }
     }
   }
   renderPendingTurns(record.session_id);
@@ -1968,6 +2005,131 @@ async function drawChatRunForm(body, offer, message, session) {
       run.disabled = missing.length > 0;
     }
   });
+}
+
+// -- Action cards (owner 2026-10-15) ----------------------------------------
+// One component for "the Agent asks, the person decides": a title, a
+// before -> after table or a preview body, the reason, effects and buttons
+// whose labels and actions come from the server (Apply/Cancel now; Allow,
+// Allow for this conversation, Deny or Send, Keep as draft, Cancel next).
+// The server keeps the pending record and decides; the card is redrawn
+// from its answer, with the outcome in place.
+
+function openCardLink(link) {
+  if (link.view === "installed" && link.asset) {
+    activeCapabilityKind = link.capability_kind || "workflows";
+    activeCapabilityFilter = "all";
+    activeCapabilityKey = "installed:" + link.asset;
+  }
+  selectPrimaryTab(link.view).then(() => {
+    const target = link.anchor ? el(link.anchor) : null;
+    if (target) target.scrollIntoView({block: "start"});
+  });
+}
+
+function renderActionCard(card, onDecided) {
+  const box = document.createElement("div");
+  box.className = "action-card" + (card.status === "pending" ? "" : " closed");
+  box.dataset.cardId = card.card_id; box.dataset.status = card.status;
+  box.setAttribute("role", "group"); box.setAttribute("aria-label", card.title);
+  const heading = document.createElement("h3"); heading.append(text(card.title));
+  box.append(heading);
+  if (card.rows && card.rows.length) {
+    const diff = document.createElement("table"); diff.className = "card-diff";
+    const head = diff.createTHead().insertRow();
+    for (const label of ["Setting", "Now", "After"]) {
+      const cell = document.createElement("th"); cell.scope = "col";
+      cell.append(text(label)); head.append(cell);
+    }
+    const body = diff.createTBody();
+    for (const row of card.rows) {
+      const line = body.insertRow();
+      const name = document.createElement("th"); name.scope = "row";
+      name.append(text(row.label)); line.append(name);
+      const before = line.insertCell(); before.className = "before";
+      before.append(text(row.before || "(empty)"));
+      const after = line.insertCell(); after.append(text(row.after || "(empty)"));
+    }
+    box.append(diff);
+  }
+  if (card.preview) {
+    const preview = document.createElement("pre"); preview.className = "card-preview";
+    preview.append(text(card.preview)); box.append(preview);
+  }
+  if (card.reason) {
+    const reason = document.createElement("p"); reason.className = "card-reason";
+    reason.append(text("Why: " + card.reason)); box.append(reason);
+  }
+  if (card.effects && card.effects.length) {
+    const effects = document.createElement("ul"); effects.className = "card-effects";
+    for (const effect of card.effects) {
+      const item = document.createElement("li"); item.append(text(effect));
+      effects.append(item);
+    }
+    box.append(effects);
+  }
+  const status = document.createElement("p"); status.className = "card-status";
+  status.setAttribute("role", "status"); status.setAttribute("aria-live", "polite");
+  const expired = card.status === "pending" && card.expires_at
+    && Date.parse(card.expires_at) <= Date.now();
+  if (card.status === "pending") {
+    const actions = document.createElement("div"); actions.className = "card-actions";
+    for (const button of card.buttons || []) {
+      const press = document.createElement("button"); press.type = "button";
+      press.dataset.action = button.action;
+      press.className = button.style === "primary" ? "go"
+        : button.style === "danger" ? "danger" : "";
+      press.append(text(button.label));
+      press.disabled = !!expired;
+      press.addEventListener("click", async () => {
+        for (const other of actions.querySelectorAll("button")) other.disabled = true;
+        press.setAttribute("aria-busy", "true");
+        status.className = "card-status"; status.textContent = button.label + "\u2026";
+        try {
+          const decided = await call("/api/cards/decide",
+            {card_id: card.card_id, action: button.action});
+          if (decided.card) {
+            box.replaceWith(renderActionCard(decided.card, onDecided));
+          } else {
+            status.className = "card-status bad";
+            status.textContent = decided.message || decided.code;
+          }
+          if (onDecided) await onDecided(decided);
+        } catch (failure) {
+          status.className = "card-status bad"; status.textContent = failure.message;
+          for (const other of actions.querySelectorAll("button")) other.disabled = false;
+        } finally { press.removeAttribute("aria-busy"); }
+      });
+      actions.append(press);
+    }
+    box.append(actions);
+    status.textContent = expired ? "Expired: ask the Agent again."
+      : (card.status_label || "") + (card.expires_at
+        ? " until " + new Date(card.expires_at).toLocaleTimeString() : "");
+  } else {
+    status.className = "card-status" + (card.outcome_ok === true ? " good"
+      : card.outcome_ok === false ? " bad" : "");
+    status.textContent = (card.status_label || card.status)
+      + (card.outcome ? ": " + card.outcome : "");
+  }
+  box.append(status);
+  if (card.link) {
+    const open = document.createElement("button"); open.type = "button";
+    open.className = "link-button card-link"; open.append(text(card.link.label));
+    open.addEventListener("click", () => openCardLink(card.link));
+    box.append(open);
+  }
+  return box;
+}
+
+async function loadPendingCards() {
+  const holder = el("pending-cards");
+  const listed = await call("/api/cards");
+  holder.replaceChildren();
+  el("pending-cards-heading").hidden = !listed.cards.length;
+  for (const card of listed.cards) {
+    holder.append(renderActionCard(card, () => loadPendingCards().catch(() => {})));
+  }
 }
 
 // -- Approvals (G4): only the owner's button runs or installs ---------------
@@ -6773,7 +6935,8 @@ el("kp-discard").addEventListener("click", () => {
 });
 
 // -- Tasks (owner 2026-10-13): Workflows and background jobs, newest 50 --------
-const TASK_KINDS = {workflow: "Workflow", convert: "Convert", preview: "Preview convert",
+const TASK_KINDS = {workflow: "Workflow", proposal: "Proposed change",
+  convert: "Convert", preview: "Preview convert",
   reingest: "Re-ingest", benchmark: "Benchmark", push: "Push",
   experience_review: "Experience review"};
 const TASK_LABELS = {running: "running", succeeded: "done", failed: "failed",
@@ -6795,6 +6958,7 @@ function taskDuration(task) {
 
 async function loadTasks() {
   clearTimeout(taskTimer);
+  loadPendingCards().catch(() => {});
   const reply = await call("/api/tasks");
   const counts = reply.counts || {};
   el("task-counts").textContent = reply.tasks.length + " tasks: "

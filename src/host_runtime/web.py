@@ -84,6 +84,7 @@ from capabilities.knowledge_pipeline.handlers import (
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC, MARKET_MATRIX_SPEC
 from capabilities.script_tools import load_script_tools
 from capabilities.workflow_author.review import rendered as review_rendered
+from common.action_cards import CARD_KEY, card_in
 from common.assets import AssetIdentity, Owner, WorkflowManifest
 from common.distribution import LocalStateError
 from common.execution import Failure, RequestContext, TraceIdentifiers
@@ -110,6 +111,7 @@ from host_runtime.attachments import (
 from host_runtime.attachments import summary as attachment_summary
 from host_runtime.authoring import AuthoringError, AuthoringSession, AuthoringStudio
 from host_runtime.avatars import UserPreferences, UserPreferencesStore, catalog
+from host_runtime.change_proposals import ChangeProposals
 from host_runtime.chat_authoring import ChatAuthoringError, approval_text
 from host_runtime.choice_sources import ChoiceSources
 from host_runtime.contracts import (
@@ -500,6 +502,15 @@ class AgentWeb:
             grants_file=runtime.layout.grants,
             settings_store=self.workflow_settings_store,
         )
+        # AI proposes, the person applies (owner 2026-10-15): the model gets
+        # only `propose_change`; Apply runs this object's own writers.
+        self.proposals = ChangeProposals(self)
+        gateway = runtime.agent.gateway
+        earlier_tools = gateway.host_tools
+        gateway.host_tools = lambda: (
+            *(earlier_tools() if earlier_tools is not None else ()), *self.proposals.tools())
+        if runtime.telegram is not None:
+            runtime.telegram.cards = self
 
     @property
     def request_lock(self) -> threading.RLock:
@@ -1439,6 +1450,7 @@ class AgentWeb:
     def start_telegram(self) -> None:
         """Poll with the host's current Telegram ingress, if it has one."""
         if self.runtime.telegram is not None:
+            self.runtime.telegram.cards = self
             self.telegram_loop = ResidentTelegram(self.runtime.telegram)
             self.telegram_loop.start()
 
@@ -1627,8 +1639,54 @@ class AgentWeb:
                 }
                 for item in records
             ],
-            "selected": (None if selected is None else json.loads(selected.model_dump_json())),
+            "selected": (None if selected is None
+                         else self._fresh_cards(json.loads(selected.model_dump_json()))),
         }
+
+    # -- action cards (owner 2026-10-15): proposals now, agent mode next ------
+
+    def _fresh_cards(self, record: dict[str, Any]) -> dict[str, Any]:
+        """A stored card as it is now: a pending one may have expired or been
+        decided from another channel since the message was saved."""
+        for message in record.get("messages", ()):
+            card = message.get(CARD_KEY)
+            if isinstance(card, dict) and card.get("status") == "pending":
+                live = self.card(str(card.get("card_id") or ""))
+                if live is not None:
+                    message[CARD_KEY] = live
+        return record
+
+    def card(self, card_id: str) -> dict[str, Any] | None:
+        found = self.proposals.card(card_id) if card_id.startswith("cp-") else None
+        return None if found is None else found.model_dump(mode="json")
+
+    def cards(self) -> dict[str, Any]:
+        """Every card still waiting, from any channel (Tasks > Pending changes)."""
+        return {"ok": True, "cards": [item.model_dump(mode="json")
+                                      for item in self.proposals.open_cards()]}
+
+    def decide_card(self, card_id: str, action: str, channel: str = "local") -> dict[str, Any]:
+        """A person pressed a card's button. The card's handler decides; the
+        conversation that showed it keeps the card as it is now, and the
+        outcome joins that answer's tool record so the Agent sees it."""
+        if not card_id.startswith("cp-"):
+            return {"ok": False, "code": "card_unknown", "message": "That card is unknown here."}
+        decided = self.proposals.decide(card_id, action, channel=channel)
+        card = decided.get("card")
+        proposal = self.proposals.store.get(card_id)
+        if isinstance(card, dict) and proposal is not None and proposal.session_id:
+            self._update_card_message(proposal.session_id, card)
+        return decided
+
+    def _update_card_message(self, session_id: str, card: dict[str, Any]) -> None:
+        note = (f"[card {card['card_id']}] {card.get('status_label') or card['status']}"
+                + (f": {card['outcome']}" if card.get("outcome") else ""))
+        with self._record_lock(session_id):
+            try:
+                self.runtime.state.set_message_card(
+                    session_id, self.runtime.actor, card, note[:600])
+            except (LocalStateError, ValueError):
+                return
 
     def create_conversation(self) -> dict[str, Any]:
         now = datetime.now(UTC)
@@ -2106,8 +2164,10 @@ class AgentWeb:
                     )
                     result = conversational.conversation
                     offered = offer_in(result.tools) if result is not None else None
+                    carded = card_in(result.tools) if result is not None else None
                     answer = {
                         **({"workflow_form": offered} if offered is not None else {}),
+                        **({CARD_KEY: carded} if carded is not None else {}),
                         "tool_summary": tool_summary(result),
                         "ok": result is not None and result.status == "answered",
                         "answer": (
@@ -2176,6 +2236,7 @@ class AgentWeb:
                                 status=status,
                                 tool_summary=answer.get("tool_summary"),
                                 workflow_form=answer.get("workflow_form"),
+                                action_card=answer.get(CARD_KEY),
                                 trace=(
                                     None
                                     if trace_data is None
@@ -3728,6 +3789,9 @@ class AgentWeb:
                              updated.model_dump_json(indent=2).encode("utf-8") + b"\n")
         self.start_laya_tunnel(settings)
         restart = accelerator != self.runtime.config.decision_accelerator
+        # The card shows what was saved at once; the running mode stays until
+        # a restart, as the Gateway read it at start-up.
+        self.runtime.config = self.runtime.config.model_copy(update={"laya": settings})
         return {**self.laya_settings(), "ok": True, "restart_required": restart}
 
     def start_laya_tunnel(self, settings: LayaSettings | None = None) -> None:
@@ -4187,6 +4251,14 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.review_proposal((query.get("sandbox_id") or [""])[0]))
         elif parsed.path == "/api/tasks":
             self._json(200, web.task_list())
+        elif parsed.path == "/api/cards":
+            wanted = parse_qs(parsed.query).get("card_id", [""])[0]
+            if wanted:
+                found = web.card(wanted)
+                self._json(200 if found is not None else 404,
+                           {"ok": found is not None, "card": found})
+            else:
+                self._json(200, web.cards())
         elif parsed.path == "/api/knowledge/convert":
             query = parse_qs(parsed.query)
             self._json(200, web.convert_status((query.get("sandbox_id") or [""])[0]))
@@ -4312,6 +4384,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/backends/authenticate",
             "/api/contributions",
             "/api/approvals/decide",
+            "/api/cards/decide",
             "/api/drafts/install",
             "/api/drafts/delete",
             *AUTHORING_ROUTES,
@@ -4431,6 +4504,12 @@ class _Handler(BaseHTTPRequestHandler):
             result = self.server.web.draft_action(
                 path.rsplit("/", 1)[1], str(body.get("candidate_id") or ""))
             self._json(200 if result.get("ok") else 409, result)
+            return
+        if path == "/api/cards/decide":
+            chosen = body if isinstance(body, dict) else {}
+            result = self.server.web.decide_card(
+                str(chosen.get("card_id") or ""), str(chosen.get("action") or ""))
+            self._json(200, result)
             return
         if path == "/api/approvals/decide":
             if not isinstance(body, dict):

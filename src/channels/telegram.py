@@ -32,6 +32,7 @@ from pydantic import Field, JsonValue, StrictBool, field_validator, model_valida
 from agent.gateway import TOOL_PROGRESS, ToolProgressState
 from agent.routing import DOT_COMMAND
 from channels import telegram_flow
+from common.action_cards import CARD_TAP, ActionCard, card_in, telegram_card
 from common.assets import (
     REDACTED,
     SECRET_PATTERN,
@@ -287,6 +288,9 @@ class _Update:
 
 
 CREDENTIAL_REPLY = "That message was not forwarded: it looks like it contains a credential."
+#: Where a card Telegram may not decide is applied (owner 2026-10-15). No
+#: address: Agent Web's page key must never travel in a chat.
+CARD_WHERE = "Agent Web on this PC, Tasks > Pending changes"
 #: The data of an approval button (G4): `approve:<id>` or `reject:<id>`.
 APPROVAL_TAP = re.compile(r"^(approve|reject):(ap-[A-Za-z0-9-]{1,64})$")
 
@@ -599,6 +603,8 @@ class TelegramIngress:
         self.uploads = uploads
         # The member's identity answers from last time ("same as last time?").
         self.presets = presets
+        # Action cards (change proposals): Agent Web decides them; set by it.
+        self.cards: Any = None
 
     def offset(self) -> int | None:
         """How far this bot has been consumed, from the Bridge's own durable
@@ -787,6 +793,10 @@ class TelegramIngress:
             )
         text = update.text.strip()
         key = (update.chat_id, update.sender_id)
+        card_tap = CARD_TAP.match(text)
+        if card_tap is not None:
+            return await self._decide_card(
+                base, key, actor, card_tap.group(1), card_tap.group(2), update)
         tapped = APPROVAL_TAP.match(text)
         if tapped is not None:
             return await self._decide(base, key, actor, tapped.group(1), tapped.group(2))
@@ -1009,6 +1019,33 @@ class TelegramIngress:
         self._histories[key] = history[-MAX_CHAT_HISTORY:]
         return TelegramDelivery(**base, disposition="answered", reply=scrub(text))
 
+    async def _decide_card(
+        self, base: dict[str, Any], key: tuple[int, int], actor: str, card_id: str,
+        action: str, update: _Update,
+    ) -> TelegramDelivery:
+        """A card's button. Only the owner decides, as for approvals; Agent
+        Web refuses a kind Telegram may not apply. The card is redrawn in
+        place with its outcome."""
+        _acting, on_behalf_of = self._acting(actor)
+        if self.cards is None:
+            return TelegramDelivery(**base, disposition="answered",
+                                    reply="Cards are not available on this Bridge.")
+        if on_behalf_of is not None:
+            return TelegramDelivery(**base, disposition="answered",
+                                    reply="Only the owner of this Bridge can apply or cancel.")
+        decided = await asyncio.to_thread(self.cards.decide_card, card_id, action, "telegram")
+        message = str(decided.get("message") or decided.get("code") or "Done.")
+        card = decided.get("card")
+        if isinstance(card, dict):
+            drawn, buttons = telegram_card(ActionCard.model_validate(card), CARD_WHERE)
+            history = self._histories.get(key, [])
+            history = [*history, ModelMessage(role="user", text=f"[{action}] {card['title']}"),
+                       ModelMessage(role="assistant", text=drawn)]
+            self._histories[key] = history[-MAX_CHAT_HISTORY:]
+            return TelegramDelivery(**base, disposition="answered", reply=scrub(drawn),
+                                    buttons=buttons, edit_message_id=update.message_id)
+        return TelegramDelivery(**base, disposition="answered", reply=scrub(message))
+
     async def _converse(
         self, base: dict[str, Any], key: tuple[int, int], request: LocalAgentRequest,
         text: str, attached: tuple[str, tuple[str, ...], str] | None = None,
@@ -1075,6 +1112,13 @@ class TelegramIngress:
                 return await self._open_flow(
                     base, key, manifest, actor, update,
                     prefill if isinstance(prefill, dict) else {})
+        card = card_in(conversation.tools)
+        if card is not None:
+            # A proposal: the card, with Apply/Cancel only for the kinds
+            # Telegram may apply (owner 2026-10-15).
+            drawn, card_buttons = telegram_card(ActionCard.model_validate(card), CARD_WHERE)
+            return TelegramDelivery(**base, disposition="answered", reply=scrub(drawn),
+                                    buttons=(*card_buttons, *buttons))
         return TelegramDelivery(**base, disposition="answered", reply=scrub(answer),
                                 buttons=buttons)
 

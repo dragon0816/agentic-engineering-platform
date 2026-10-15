@@ -46,6 +46,10 @@ class ConversationMessage(Contract):
     # 2026-10-15): the Workflow, prefill and missing settings; the page draws
     # the form from the installed declaration. Never run values it did not get.
     workflow_form: dict[str, JsonValue] | None = None
+    # An answer that shows an action card (owner 2026-10-15): a change
+    # proposal now, an agent-mode permission next. The server keeps the
+    # pending record; this is the card as it was last drawn, never a secret.
+    action_card: dict[str, JsonValue] | None = None
 
     @model_validator(mode="before")
     @classmethod
@@ -71,6 +75,8 @@ class ConversationMessage(Contract):
             raise ValueError("only a question replies to an earlier exchange")
         if self.role == "user" and self.workflow_form is not None:
             raise ValueError("only an answer offers a run form")
+        if self.role == "user" and self.action_card is not None:
+            raise ValueError("only an answer shows an action card")
         if self.role == "user" and self.tool_summary is not None:
             raise ValueError("only an answer records the tools it used")
         reject_embedded_secrets(self.model_dump(mode="json"))

@@ -33,8 +33,10 @@ from agent.decisions import (
 from agent.routing import RequestRouter, RoutingOutcome
 from agent.skills import CommandBinding
 from capabilities.runtime import CapabilityInvocation
+from common.action_cards import CARD_KEY
 from common.assets import AssetIdentity
 from common.base import Contract, Symbol, Text
+from common.change_proposal import PROPOSE_GUIDANCE, PROPOSE_TOOL
 from common.execution import (
     CapabilityResult,
     Failure,
@@ -636,12 +638,15 @@ class Gateway:
                 continue
             host[name] = host_tool
             tools.append(host_tool.tool)
-        if FORM_TOOL in host and context.session_id is not None:
-            messages[0] = ModelMessage(role="system", text=f"{messages[0].text} {FORM_GUIDANCE}")
-        elif FORM_TOOL in host:
-            # No person to fill a form (a task or a schedule): not offered.
-            del host[FORM_TOOL]
-            tools = [tool for tool in tools if tool.name != FORM_TOOL]
+        for person_tool, guidance in ((FORM_TOOL, FORM_GUIDANCE),
+                                      (PROPOSE_TOOL, PROPOSE_GUIDANCE)):
+            if person_tool in host and context.session_id is not None:
+                messages[0] = ModelMessage(role="system", text=f"{messages[0].text} {guidance}")
+            elif person_tool in host:
+                # No person to fill a form or press Apply (a task or a
+                # schedule): not offered.
+                del host[person_tool]
+                tools = [tool for tool in tools if tool.name != person_tool]
         evidence: list[ConversationToolExecution] = []
         truncated_retries = 0
         for turn in range(1, max_turns + 1):
@@ -737,6 +742,14 @@ class Gateway:
                     return GatewayConversationResult(
                         trace=context.trace, status="answered",
                         text=str(offer.get("message") or "Fill in the run form."),
+                        model_turns=turn, tools=tuple(evidence))
+                card = harnessed.get(CARD_KEY)
+                if isinstance(card, dict):
+                    # A proposal waits for the person's press (owner
+                    # 2026-10-15): the turn ends with the card.
+                    return GatewayConversationResult(
+                        trace=context.trace, status="answered",
+                        text=str(card.get("message") or "Press a button on the card."),
                         model_turns=turn, tools=tuple(evidence))
                 if harnessed.get("knowledge_harness") == "validated":
                     # The validated Knowledge answer is the turn's answer; the
