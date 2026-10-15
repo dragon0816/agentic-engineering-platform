@@ -60,21 +60,38 @@ Member Portal 畫面，以及 sanitized 的錯誤碼。不得附上 invitation p
 
 同事端的操作寫在 Agent 安裝包的 `INSTALL.zh-TW.md` 第 5 節。管理員要做的是：
 
+Member Portal 分成分頁（網址會記住目前分頁，例如 `#tab=review`，重新整理或上一頁都會留在原
+分頁）。管理員登入後預設在 **Overview**，另外有 **Review queue**（分頁上的數字是等待審核的
+數量）、**Registrations (Bridges)**、**All published assets**、**Members & invitations**；
+一般同事只看到 **Marketplace**、**My published assets**、**My submissions**、
+**Applications**。
+
+### 0. 平台總覽（Overview）
+
+**Overview** 一頁列出：已註冊電腦（啟用／停用）、成員（啟用／待接受邀請）、各類資產
+（Skills、Workflows、Knowledge、Agent profiles、Extensions）的名稱數與版本數、
+Applications，以及送審項目（等待／核准／退回／撤回）。點任一個方塊會開啟對應分頁；
+**All published assets** 可依種類篩選，切換卡片或表格（表格可排序），卡片按名稱可看
+該版本的完整內容（Workflow 的步驟、參數、權限；Skill 的說明、指令、關鍵字規則）。
+這裡列出**所有**已發布的資產，不論你自己能不能使用。回覆中不會有任何 token、邀請碼或登入碼。
+
 ### 1. 發邀請（每位同事一次）
 
-1. 以管理員帳號登入 Member Portal → **Invitation administration**。
+1. 以管理員帳號登入 Member Portal → **Members & invitations** 分頁 → **Invitations**。
 2. **Account** 填同事電腦 `host.json` 裡 `device.registered_by` 的值（例如 `leo.chi`）。
    只能用英文字母、數字和 `. - _`，**不能用 email**；名稱不一致時，同事註冊電腦會被拒絕
    （`device_owner_mismatch`）。
 3. **Role**：一般同事選 Member；要能審核的人選 Administrator。**Groups** 填團隊名稱（例如
-   `engineering`），同團隊的人才看得到「只有我的團隊」的能力。
+   `engineering`），同團隊的人才看得到「只有我的團隊」的能力。之後要改角色或群組，在同一分頁
+   的成員表按 **Role and groups**；變更會被記錄，最後一位管理員不能被改成 Member
+   （`last_administrator`）。
 4. 按 **Create invitation** → **Copy link**，用私訊交給同事。連結只能用一次；過期或用掉後
    可以再發一張，不用的可以按 **Revoke**。
 5. 一併告訴同事兩個網址：Member Portal URL 與 Bridge API URL。
 
 ### 2. 審核同事發布的 Skill / Workflow
 
-1. Member Portal → **Review queue**，預設只列出等待審核的項目。
+1. Member Portal → **Review queue** 分頁，預設只列出等待審核的項目（也可切到全部、已核准、已退回、已撤回）。
 2. 按 **View** 看完整內容、要求的權限與風險，以及上一個已發布版本。
 3. 按 **Approve and publish**（寫下你檢查了什麼）或 **Reject**（一定要寫原因，送出的人看得到）。
 4. 核准後才會出現在其他人的 Library。目前設定允許管理員審核自己送出的項目
@@ -82,13 +99,19 @@ Member Portal 畫面，以及 sanitized 的錯誤碼。不得附上 invitation p
 
 ### 3. 調整誰能使用
 
-Member Portal → **My published assets**（管理員可切到 **All published assets**）→
+Member Portal → **My published assets**，或管理員在 **All published assets** 分頁的任何資產 →
 **Who can use it**：可改成「只有團隊」或「全公司」，也可以額外加指定的帳號或群組。
 已發布的版本內容不會改變；收回權限不會移除別人已經安裝的版本。
 
+要讓另一個帳號發布新版本：同一列按 **Owner and co-editors** → 加入 **co-editor**（帳號名稱）；
+或用 **Transfer owner** 把擁有者轉給某人或某團隊（會先確認新擁有者）。每一列都會顯示
+「May publish new versions」：擁有者、擁有團隊的成員與 co-editors，其他人發布會被拒絕
+（`publisher_not_authorized`）。擁有者、擁有團隊成員與管理員都能調整這些設定。
+
 ### 4. 管理已註冊的電腦（Bridges）
 
-Member Portal → **Bridges** 列出所有已註冊的電腦、所屬帳號與 token 到期日。電腦遺失或
+Member Portal → **Registrations (Bridges)** 分頁列出所有已註冊的電腦、所屬帳號、token 到期日、
+**Last seen**（該電腦最後一次呼叫 Bridge API 的時間與動作）與選取的能力數。電腦遺失或
 同事離開時按 **Disable**，該電腦的 token 立即失效，也不能再自行註冊。
 
 ### 5. 啟動、更新與資料

@@ -2009,3 +2009,26 @@ s-k-20261011T102952` (not published).
   `..._telegram.py`. ruff, mypy src clean; full suite 2746 passed, 6 skipped, 1 failed
   under load (`test_workflow_preview` capability timeout), rerun alone and passed.
   Live check pending (owner).
+
+- [x] Platform overview and tabbed Member Portal (owner requests 2026-10-15; design and
+  as-built `docs/phases/PLATFORM_OVERVIEW.md`, decision in `docs/DECISIONS.md` 2026-10-15
+  "Administrators manage the sharing of any published name", contracts in
+  `docs/CONTRACTS.md` "Platform overview and member administration" and "Asset content").
+  Platform: `admin/overview` (counts, Bridges with last seen and selections, every
+  published Skill/Workflow/Knowledge/Agent/Extension name with all versions, owner,
+  co-editors, access override, deprecations, Bridges selected, published date, pending
+  submissions; submissions, Applications, members and invitation states; no secrets),
+  `admin/members/update` (role and groups, audited, last administrator kept),
+  `assets/manifest` (a version's content for whoever it is shared with), Bridge API
+  last-seen recording (`control_plane/activity.py`), administrators manage any name's
+  co-editors/owner/deprecation. Portal: tabs in the URL hash (members: Marketplace, My
+  published assets, My submissions, Applications; administrators also Overview, Review
+  queue with count, Registrations, All published assets, Members & invitations), one
+  card size, in-tab detail with the asset's content (safe Markdown), owner and
+  co-editor tools, member role/groups editor. Admin SOP in
+  `deploy/shared-platform-preview/START-HERE.md`. Tests:
+  `tests/test_platform_overview.py`, `tests/test_member_portal_tabs.py` (real browser),
+  `tests/test_asset_access.py` browser test opens its tab. ruff, mypy src clean; full
+  suite 2754 passed, 6 skipped, 1 failed under load (`test_script_tools` PowerShell
+  fixture, script timeout; the file passed alone, 6 passed). Live check pending (owner
+  deploys to 172.25.228.141).

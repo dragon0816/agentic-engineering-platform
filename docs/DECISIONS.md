@@ -2604,3 +2604,32 @@ Rejected alternatives:
   `renderParameterForm` as Capabilities does.
 - Running immediately when no field is required: a chat sentence is not a Run click;
   the form (or Telegram confirmation for non-read runs) stays the confirmation.
+
+## 2026-10-15 — Administrators manage the sharing of any published name
+
+Context: the owner asked for a platform overview on the Member Portal from which an
+administrator adjusts the sharing of any published asset (who can use it, co-editors,
+owner), and for co-editor and transfer UI because an owner could not let another account
+publish new versions. `docs/phases/PLATFORM_OVERVIEW.md`.
+
+Decision:
+1. A platform administrator may add and remove co-editors, transfer and deprecate any
+   name, besides the owner and members of an owning team (`AssetOwnershipService._managed`
+   and `_visible`). They already could decide who may use any name
+   (`assets/access/update`).
+2. Publishing a new version is unchanged: only the owner, an owning-team member or a
+   co-editor (`AssetNameOwnership.may_publish`); an administrator is not a publisher.
+3. Administrators set members' role and groups (`admin/members/update`), audited in
+   `identity_user_changes`; the last active platform administrator keeps the role.
+4. The portal is in tabs kept in the URL hash, and an asset's published content is
+   readable by everyone it is shared with (`assets/manifest`).
+
+Reason: an orphaned or wrongly owned name (for example the two assets `leo` published on
+2026-10-15) must be fixable without the owner, and the administrator is the platform's
+accountable operator. Keeping publishing out of the administrator role keeps the review
+separation (an administrator reviews, owners and co-editors publish).
+
+Rejected alternatives:
+- Owner-only management (as of 2026-10-07): leaves names stuck when the owner is away.
+- Letting administrators publish any name: mixes reviewing and authoring.
+- Group changes only through new invitations: an accepted member could never join a team.
