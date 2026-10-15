@@ -50,7 +50,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from types import TracebackType
 from typing import Any, Literal, Self
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, urlencode, urlparse
 
 import telemetry.recorder as telemetry
 from agent.contracts import ActiveAgentProfile, AgentProfile
@@ -190,6 +190,7 @@ from host_runtime.laya import last_decision as laya_last_decision
 from host_runtime.laya import probe as laya_probe
 from host_runtime.persona import AgentPersonaStore, AgentPersonaUpdateRequest
 from host_runtime.platform_publish import (
+    ASSET_REFERENCE,
     MemberPortalPublisher,
     UserEnvironment,
     explain,
@@ -3239,6 +3240,80 @@ class AgentWeb:
         """Take back this PC's selection, then synchronize the decisions."""
         return self._member_selection(kind, asset, False)
 
+    # -- one-click Member Portal and Library card content (owner 2026-10-15) --
+    # `docs/phases/PLATFORM_OVERVIEW.md` "One-click sign-in from Agent Web":
+    # the Agent's Personal Agent session asks for a single-use 60-second
+    # ticket; only the ticket reaches the browser, in the URL fragment.
+
+    def _portal_address(self) -> str:
+        config = self.runtime.config
+        if config.publishing is not None:
+            return config.publishing.member_portal_url.rstrip("/")
+        if config.platform is not None and config.platform.member_portal_url:
+            return config.platform.member_portal_url.rstrip("/")
+        return ""
+
+    def portal_link(self, tab: str = "", asset: str = "") -> dict[str, Any]:
+        """The Member Portal address to open, signed in as this PC's member
+        when the Personal Agent code is saved. Never logged or recorded: the
+        reply carries a ticket that signs a browser in for one minute."""
+        portal = self._portal_address()
+        if not portal:
+            return {"ok": False, "code": "portal_not_configured",
+                    "message": explain("portal_not_configured")}
+        if tab and not re.fullmatch(r"[a-z]{1,20}", tab):
+            return {"ok": False, "code": "tab_invalid", "message": "No such portal tab."}
+        if asset and ASSET_REFERENCE.match(asset) is None:
+            return {"ok": False, "code": "bad_reference", "message": explain("bad_reference")}
+        place: list[tuple[str, str]] = []
+        bridge_id = self.runtime.config.device.bridge_id
+        if bridge_id:
+            place.append(("bridge", bridge_id))
+        if tab:
+            place.append(("tab", tab))
+        if asset:
+            place.append(("asset", asset))
+        publisher = self._publisher()
+        problem = "login_unavailable"
+        if publisher is not None:
+            try:
+                ticket = publisher.browser_ticket()
+            except PlatformPublishError as error:
+                problem = error.code
+            else:
+                fragment = urlencode([("ticket", ticket), *place])
+                return {"ok": True, "signed_in": True, "url": f"{portal}/#{fragment}"}
+        # Without a saved Personal Agent code (or when the platform refused),
+        # the plain portal opens on its sign-in page.
+        note = explain("login_unavailable") if problem in (
+            "login_unavailable", "login_missing") else (
+            f"{explain(problem)} Opened the sign-in page instead; "
+            "check Settings > Shared platform.")
+        url = f"{portal}/#{urlencode(place)}" if place else f"{portal}/"
+        return {"ok": True, "signed_in": False, "url": url, "code": problem, "message": note}
+
+    def asset_content(self, kind: str, asset: str) -> dict[str, Any]:
+        """One Library card's published content (`assets/manifest`, CONTRACTS
+        "Asset content"), fetched as this PC's member."""
+        match = ASSET_REFERENCE.match(asset.strip())
+        if kind not in ("skill", "workflow", "bridge_extension", "application") or match is None:
+            return {"ok": False, "code": "bad_reference", "message": explain("bad_reference")}
+        if not self._portal_address():
+            return {"ok": False, "code": "platform_not_configured",
+                    "message": explain("platform_not_configured")}
+        publisher = self._publisher()
+        if publisher is None:
+            return {"ok": False, "code": "publishing_not_configured",
+                    "message": explain("publishing_not_configured")}
+        namespace, name, version = match.groups()
+        try:
+            content = publisher.asset_content(
+                {"namespace": namespace, "name": name, "version": version})
+        except PlatformPublishError as error:
+            code = "content_not_shared" if error.code == "asset_not_published" else error.code
+            return {"ok": False, "code": code, "message": explain(code)}
+        return {"ok": True, "content": content}
+
     # -- switching off and removing installed assets (owner 2026-10-15) -----
     # `host_runtime/asset_shelf.py`: off = the kind's `disabled/` folder,
     # removed = `workspace/removed/<date>/`, never a hard delete.
@@ -4189,6 +4264,8 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/platform/sync",
             "/api/platform/add",
             "/api/platform/unselect",
+            "/api/platform/portal-link",
+            "/api/platform/asset-content",
             "/api/assets/switch",
             "/api/assets/remove",
             "/api/publishing/submit",
@@ -4569,6 +4646,24 @@ class _Handler(BaseHTTPRequestHandler):
                 self._json(400, {"error": "name the submission"})
                 return
             self._json(200, self.server.web.withdraw_submission(submission_id))
+            return
+        if path == "/api/platform/portal-link":
+            fields = body if isinstance(body, dict) else {}
+            tab, asset = fields.get("tab") or "", fields.get("asset") or ""
+            if not (isinstance(tab, str) and isinstance(asset, str)):
+                self._json(400, {"ok": False, "code": "portal_request_invalid",
+                                 "message": "name the tab and the asset as text"})
+                return
+            self._json(200, self.server.web.portal_link(tab, asset))
+            return
+        if path == "/api/platform/asset-content":
+            fields = body if isinstance(body, dict) else {}
+            asset_kind, asset_ref = fields.get("kind"), fields.get("asset")
+            if not (isinstance(asset_kind, str) and isinstance(asset_ref, str) and asset_ref):
+                self._json(400, {"ok": False, "code": "asset_request_invalid",
+                                 "message": "name the kind and the asset"})
+                return
+            self._json(200, self.server.web.asset_content(asset_kind, asset_ref))
             return
         if path in ("/api/platform/add", "/api/platform/unselect", "/api/assets/switch",
                     "/api/assets/remove"):

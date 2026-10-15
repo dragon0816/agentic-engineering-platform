@@ -208,6 +208,20 @@ class MemberPortalPublisher:
         """Take back the member's selection of one exact version."""
         return self._call("revoke", {"bridge_id": bridge_id, "asset": asset})
 
+    def browser_ticket(self) -> str:
+        """A single-use ticket (60 s) that signs a browser in to the Member
+        Portal as this member (Agent Web "Open Marketplace", owner
+        2026-10-15). The Personal Agent login itself never leaves the Agent."""
+        ticket = self._call("browser-ticket", {}).get("ticket")
+        if not isinstance(ticket, str) or ":" not in ticket:
+            raise PublishError("bad_reply")
+        return ticket
+
+    def asset_content(self, asset: dict[str, str]) -> dict[str, Any]:
+        """One exact version's published content (`assets/manifest`), for a
+        member it is shared with; `asset_not_published` otherwise."""
+        return self._call("assets/manifest", {"asset": asset})
+
     def enroll(self, request: dict[str, Any]) -> dict[str, Any]:
         """Enroll this computer as the member (`bridges/enroll`, owner
         2026-10-15). The reply carries this computer's Bridge token once; the
@@ -260,6 +274,11 @@ EXPLANATIONS = {
     "Settings > Shared platform.",
     "platform_not_configured": "This PC is not connected to the shared platform yet. Open "
     "Settings > Shared platform, set both addresses and press 'Enroll this PC'.",
+    "login_unavailable": "Signed-in opening needs your Personal Agent code: save it in "
+    "Settings > Shared platform. Until then sign in on the portal page.",
+    "portal_not_configured": "Set the Member Portal URL in Settings > Shared platform.",
+    "content_not_shared": "This version is not shared with your platform account (or is no "
+    "longer published). Ask its owner to add you in the Member Portal ('Who can use it').",
     "sync_asset_conflict": "A different file with the same name and version is already on "
     "this PC, so nothing was installed. Remove the local copy first.",
 }

@@ -618,6 +618,27 @@ tr:last-child td { border-bottom: none; }
   text-transform: uppercase; letter-spacing: .04em; }
 .market-detail .inline-actions { margin-top: 12px; }
 .market-outcome { margin-top: 10px; }
+/* A card's published content beside its facts and actions (owner 2026-10-15). */
+.market-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+  gap: 8px 24px; align-items: start; }
+.market-content, .market-aside { min-width: 0; }
+.market-content .note { margin: 4px 0; }
+.market-content pre { max-width: 100%; overflow-x: auto; white-space: pre-wrap;
+  overflow-wrap: anywhere; padding: 8px 10px; border-radius: 8px; background: var(--bg);
+  border: 1px solid var(--line); font-size: 12px; }
+.market-content table { display: block; max-width: 100%; overflow-x: auto; }
+.market-md { overflow-wrap: anywhere; line-height: 1.5; }
+.market-md :is(h1, h2, h3, h4, h5, h6) { margin: 12px 0 4px; font-size: 15px; color: var(--ink);
+  text-transform: none; letter-spacing: 0; }
+.market-steps { margin: 4px 0; padding-left: 22px; }
+.market-steps li { margin: 3px 0; overflow-wrap: anywhere; }
+.market-content .mono { font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+/* Side by side only where the open card is wide enough; else facts and actions first. */
+.market-detail { container-type: inline-size; }
+@container (max-width: 640px) {
+  .market-body { grid-template-columns: 1fr; }
+  .market-aside { order: -1; }
+}
 @media (max-width: 760px) {
   .market-summary, .market-detail { padding-left: 14px; }
   .detail-actions { justify-content: flex-start; }
@@ -4426,9 +4447,233 @@ function marketActions(item) {
     select.target = "_blank"; select.rel = "noopener noreferrer";
     select.textContent = item.kind === "bridge_extension"
       ? "Review Extension" : "Open in Marketplace";
+    select.addEventListener("click", (event) => openPortal(event, item.kind === "application"
+      ? {tab: "applications"} : {tab: "marketplace", asset: item.namespace + "/" + item.name
+        + "@" + item.version}));
     actions.append(select);
   }
   return actions;
+}
+
+// One-click Member Portal (owner 2026-10-15): Agent Web asks the platform,
+// with this PC's Personal Agent login, for a single-use one-minute ticket;
+// only that ticket reaches the browser, in the URL fragment. Without a saved
+// Personal Agent code the portal opens on its sign-in page.
+async function openPortal(event, place = {}) {
+  if (event && (event.ctrlKey || event.metaKey || event.shiftKey || event.button === 1)) return;
+  if (event) event.preventDefault();
+  const status = place.status || el("platform-sync-result");
+  // Opened now, inside the click, so a popup blocker lets it through.
+  const opened = window.open("about:blank", "_blank");
+  if (opened) opened.opener = null;
+  let reply;
+  try {
+    reply = await call("/api/platform/portal-link",
+      {tab: place.tab || "", asset: place.asset || ""});
+  } catch (failure) { reply = {ok: false, message: failure.message}; }
+  if (!reply.ok || !reply.url) {
+    if (opened) opened.close();
+    status.textContent = "Could not open the Member Portal: " + (reply.message || reply.code
+      || "no answer"); status.classList.add("bad");
+    return;
+  }
+  if (opened) opened.location.replace(reply.url);
+  else window.open(reply.url, "_blank", "noopener,noreferrer");
+  status.classList.toggle("bad", !reply.signed_in);
+  status.textContent = reply.signed_in ? "Opened the Member Portal, signed in as you."
+    : "Opened the Member Portal sign-in page. " + (reply.message || "");
+}
+
+// Library card content (owner 2026-10-15): the published version itself
+// (`assets/manifest`), read with this PC's member session and kept per
+// version for this page. Every value is set as text; instructions go through
+// renderMarkdown, and only http(s) links survive.
+const marketContent = new Map();
+
+function contentMarkdown(source) {
+  const box = document.createElement("div"); box.className = "market-md";
+  box.append(renderMarkdown(source));
+  for (const link of box.querySelectorAll("a")) {
+    let protocol = "";
+    try { protocol = new URL(link.href).protocol; } catch (_) { protocol = ""; }
+    if (protocol !== "http:" && protocol !== "https:") link.replaceWith(text(link.textContent));
+  }
+  return box;
+}
+
+function contentRef(value) {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  const target = value.capability || value.identity || value;
+  return target.namespace + "/" + target.name
+    + (target.version ? "@" + target.version : target.version_range
+      ? " " + target.version_range : "");
+}
+
+function contentNote(words) {
+  const note = document.createElement("p"); note.className = "note"; note.append(text(words));
+  return note;
+}
+
+function contentSection(title, ...kids) {
+  const section = document.createElement("section");
+  const heading = document.createElement("h4"); heading.append(text(title));
+  section.append(heading, ...kids.filter(Boolean));
+  return section;
+}
+
+function contentTable(columns, rows) {
+  if (!rows.length) return contentNote("None.");
+  return table(columns, rows, (row) => row.map((value) =>
+    value === null || value === undefined || value === "" ? "—" : String(value)));
+}
+
+function shownValue(value) {
+  if (value === null || value === undefined) return "";
+  return typeof value === "object" ? JSON.stringify(value) : String(value);
+}
+
+function workflowContent(m) {
+  const policy = (m.metadata && m.metadata.technical_policy) || {};
+  const steps = (m.steps || []).map((step) => step.capability ? step : {capability: step});
+  const list = document.createElement("ol"); list.className = "market-steps";
+  for (const step of steps) {
+    const li = document.createElement("li");
+    const name = document.createElement("span"); name.className = "mono";
+    name.append(text(contentRef(step.capability))); li.append(name);
+    const inputs = step.inputs ? Object.keys(step.inputs) : [];
+    if (inputs.length) li.append(text(" — inputs: " + inputs.join(", ")));
+    list.append(li);
+  }
+  const parameters = (m.parameters || []).map((p) => [p.label, p.name,
+    p.kind + (p.multiple ? " (several)" : ""), p.required ? "Yes" : "No", shownValue(p.default),
+    p.choices_source || (p.choices || []).map((c) => c.label || c.value).join(", ")
+      || (p.options || []).join(", ")]);
+  const checks = (m.checks || []).map((c) => [c.check_id, String(c.kind || "").replace(/_/g, " "),
+    Number.isInteger(c.step_index) ? "after step " + (c.step_index + 1) : "", c.pattern || ""]);
+  const dependencies = m.dependencies || {};
+  const effects = [["Risk", policy.risk || "low"],
+    ["Required permissions", (policy.required_permissions || []).join(", ") || "none"],
+    ["Approval required", policy.approval_required === false ? "No" : "Yes"],
+    ["Side effect", m.occupies_machine
+      ? "Occupies the machine: no other such run at the same time" : "None declared"],
+    ["Runs", m.execution ? m.execution.mode : "Not declared"],
+    ["Local capabilities", (dependencies.local_capabilities || []).join(", ") || "none"],
+    ["Secrets it needs (names)", (m.secrets || []).map((x) => x.name).join(", ") || "none"]];
+  const effectBox = document.createElement("div"); appendMeta(effectBox, effects);
+  return [contentSection("What it does", contentMarkdown(m.description || "No description.")),
+    contentSection("Steps", steps.length ? list : contentNote("No steps.")),
+    contentSection("Run parameters", contentTable(
+      ["Label", "Name", "Kind", "Required", "Default", "Choices / source"], parameters)),
+    contentSection("Checks after the run", contentTable(
+      ["Check", "Kind", "When", "Pattern"], checks)),
+    contentSection("Risk, permissions and side effects", effectBox)];
+}
+
+function skillContent(m) {
+  const summary = document.createElement("div");
+  appendMeta(summary, [["Command", m.alias ? "/" + m.alias : "None"],
+    ["Default command", m.default_command || "None"],
+    ["Selector hint", m.selector_hint || "None"]]);
+  const tools = (m.script_tools || []).map((tool) => [contentRef(tool)]);
+  const guidance = m.harness_guidance;
+  return [contentSection("Instructions", contentMarkdown(m.instructions || "No instructions.")),
+    summary,
+    contentSection("Commands", contentTable(["Command", "Runs", "Target"],
+      (m.commands || []).map((c) => [c.name, c.kind === "workflow" ? "Workflow" : "Capability",
+        contentRef(c.target)]))),
+    contentSection("Keyword rules", contentTable(["Pattern", "Command"],
+      (m.rules || []).map((r) => [r.pattern, r.command]))),
+    contentSection("Script tools", contentTable(["Tool"], tools)),
+    guidance ? contentSection("Harness guidance", contentNote("Domains: "
+      + (guidance.domains || []).join(", ") + ". On failure: " + (guidance.fallback || "")
+      + (guidance.max_retries ? " (up to " + guidance.max_retries + " retries)" : "") + "."))
+      : null];
+}
+
+function contentFacts(item, reply) {
+  if (!reply) {
+    const compatibility = [item.runtime].concat(item.platforms || []).filter(Boolean).join(", ");
+    return [["Version", item.version], ["Owner", item.owner],
+      ["Who can use it", VISIBILITY_TEXT[item.visibility] || item.visibility],
+      ["Categories", (item.categories || []).join(", ") || "None"],
+      ["Provenance", (item.provenance || []).join("; ") || "Not recorded"],
+      ["Depends on", (item.dependencies || []).join(", ") || "Nothing declared"],
+      ["Compatibility", compatibility || "Not declared"],
+      ["Lifecycle", item.lifecycle]];
+  }
+  const meta = (reply.package && reply.package.metadata) || {};
+  const owner = reply.owner || meta.owner;
+  const ownerText = !owner ? item.owner : typeof owner === "string" ? owner
+    : owner.type === "user" ? owner.id : owner.id + " (" + owner.type + ")";
+  const review = (label, decision) => decision && decision.status
+    ? label + " " + decision.status + (decision.reviewer ? " by " + decision.reviewer : "") : "";
+  const reviews = [review("Business", meta.business_approval),
+    review("technical", meta.technical_policy)].filter(Boolean).join("; ");
+  const others = (reply.versions || []).filter((v) => v !== item.version);
+  const provenance = (meta.provenance || []).map((p) => typeof p === "string" ? p
+    : [p.source, p.author && "by " + p.author, p.revision && "at " + p.revision]
+      .filter(Boolean).join(" ")).join("; ");
+  const rows = [["Version", item.version],
+    ["Other versions", others.length ? others.join(", ") : "None"],
+    ["Owner", ownerText || "Not recorded"],
+    ["Co-editors", (reply.co_editors || []).join(", ") || "None"],
+    ["Who can use it", VISIBILITY_TEXT[reply.visibility] || reply.visibility || "Not recorded"],
+    ["Categories", (meta.categories || item.categories || []).join(", ") || "None"],
+    ["Provenance", provenance || "Not recorded"],
+    ["Reviewed", reviews || "Not recorded"],
+    ["Published", reply.published_at ? new Date(reply.published_at).toLocaleString()
+      : "Not recorded"],
+    ["Depends on", (meta.dependencies || []).map(contentRef).join(", ") || "Nothing declared"]];
+  if (reply.deprecation) rows.push(["Deprecated", reply.deprecation.reason
+    + (reply.deprecation.replacement ? " (use " + reply.deprecation.replacement + ")" : "")]);
+  return rows;
+}
+
+function drawMarketContent(content, facts, item, held) {
+  facts.replaceChildren();
+  appendMeta(facts, contentFacts(item, held && held.state === "ok" ? held.reply : null));
+  if (!held || held.state === "loading") {
+    content.replaceChildren(contentNote("Reading its content from the shared platform…"));
+    content.setAttribute("aria-busy", "true");
+    return;
+  }
+  content.removeAttribute("aria-busy");
+  if (held.state === "bad") {
+    const problem = contentNote(held.message); problem.classList.add("bad");
+    problem.classList.add("section-status"); problem.dataset.problem = "";
+    content.replaceChildren(problem);
+    return;
+  }
+  const m = held.reply.manifest, kind = held.reply.package && held.reply.package.kind;
+  const parts = m && kind === "workflow" && m.steps ? workflowContent(m)
+    : m && kind === "skill" && "instructions" in m ? skillContent(m)
+    : [contentSection("About", contentMarkdown((m && m.description) || item.description
+      || "No description."))];
+  content.replaceChildren(...parts.filter(Boolean));
+}
+
+function fillMarketContent(content, facts, item) {
+  const key = marketKey(item), held = marketContent.get(key);
+  drawMarketContent(content, facts, item, held);
+  if (held) return;
+  marketContent.set(key, {state: "loading"});
+  call("/api/platform/asset-content", {kind: item.kind,
+    asset: item.namespace + "/" + item.name + "@" + item.version})
+    .then((reply) => reply.ok ? {state: "ok", reply: reply.content}
+      : {state: "bad", message: reply.message || reply.code || "The content is unavailable."})
+    .catch((failure) => ({state: "bad", message: "The content is unavailable: "
+      + failure.message}))
+    .then((answer) => {
+      // Content is kept per version for this page; a refusal is asked again
+      // the next time the card opens.
+      if (answer.state === "ok") marketContent.set(key, answer); else marketContent.delete(key);
+      const shownContent = document.querySelector(
+        '.market-content[data-key="' + CSS.escape(key) + '"]');
+      const shownFacts = document.querySelector(
+        '.market-facts[data-key="' + CSS.escape(key) + '"]');
+      if (shownContent && shownFacts) drawMarketContent(shownContent, shownFacts, item, answer);
+    });
 }
 
 function marketCard(item, index) {
@@ -4474,23 +4719,23 @@ function marketCard(item, index) {
   detail.id = detailId; detail.setAttribute("role", "region");
   detail.setAttribute("aria-labelledby", headId); detail.hidden = !expanded;
   if (expanded) {
+    const body = document.createElement("div"); body.className = "market-body";
+    const content = document.createElement("div"); content.className = "market-content";
+    content.dataset.key = key; content.setAttribute("aria-live", "polite");
+    const aside = document.createElement("div"); aside.className = "market-aside";
     const overview = document.createElement("h4"); overview.append(text("Overview"));
-    detail.append(overview);
-    const compatibility = [item.runtime].concat(item.platforms || []).filter(Boolean).join(", ");
-    appendMeta(detail, [["Version", item.version], ["Owner", item.owner],
-      ["Who can use it", VISIBILITY_TEXT[item.visibility] || item.visibility],
-      ["Categories", (item.categories || []).join(", ") || "None"],
-      ["Provenance", (item.provenance || []).join("; ") || "Not recorded"],
-      ["Depends on", (item.dependencies || []).join(", ") || "Nothing declared"],
-      ["Compatibility", compatibility || "Not declared"],
-      ["Lifecycle", item.lifecycle]]);
+    const facts = document.createElement("div"); facts.className = "market-facts";
+    facts.dataset.key = key;
+    aside.append(overview, facts);
+    fillMarketContent(content, facts, item);
     if (sharedPlatform.assets_only && (item.kind === "skill" || item.kind === "workflow")) {
       const only = document.createElement("p"); only.className = "note";
       only.append(text("On this PC adding installs the file only: "
         + "permissions come from this PC's grants.json."));
-      detail.append(only);
+      aside.append(only);
     }
-    detail.append(marketActions(item));
+    body.append(content, aside); detail.append(body);
+    aside.append(marketActions(item));
     const outcome = document.createElement("p");
     outcome.className = "section-status market-outcome";
     outcome.setAttribute("role", "status");
@@ -4501,7 +4746,7 @@ function marketCard(item, index) {
       restart.append(text(" Restart needed before the Agent can use it."));
       outcome.append(restart);
     }
-    detail.append(outcome);
+    aside.append(outcome);
     detail.addEventListener("keydown", (event) => {
       if (event.key === "Escape") { event.stopPropagation(); toggleMarket(key); }
     });
@@ -4544,6 +4789,7 @@ function renderMarketCards() {
     if (activeMarketKind === "application" && sharedPlatform.member_portal_url) {
       const link = document.createElement("a"); link.href = sharedPlatform.member_portal_url;
       link.target = "_blank"; link.rel = "noopener noreferrer";
+      link.addEventListener("click", (event) => openPortal(event, {tab: "applications"}));
       link.textContent = " Open Marketplace"; empty.append(link);
     }
     el("catalog").replaceChildren(empty);
@@ -4597,6 +4843,8 @@ async function loadPlatform() {
   renderPlatform(await call("/api/platform"));
 }
 
+el("member-portal").addEventListener("click",
+  (event) => openPortal(event, {tab: "marketplace"}));
 el("market-search").addEventListener("input", renderMarketCards);
 el("market-category").addEventListener("change", renderMarketCards);
 el("market-status").addEventListener("change", renderMarketCards);
