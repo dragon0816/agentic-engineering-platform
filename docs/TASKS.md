@@ -2274,6 +2274,26 @@ s-k-20261011T102952` (not published).
 - [x] Suggested Skills from experience: design written for owner review (2026-10-16),
   `docs/phases/SKILL_SUGGESTIONS.md`. Status: design, awaiting owner review (4 open questions
   with recommended answers). Implementation slices S1-S6 not started.
+- [x] Install card after a conversation drafts a Workflow or Skill (2026-10-16, owner request
+  "bring the small install card back"). Every turn that creates or revises a draft (Gateway
+  authoring tools and the coding Skill, Claude Code / Copilot agent mode and the Copilot agent
+  backend through `/mcp/authoring`, Telegram) ends with one `dr-` card: title, what it does,
+  steps, parameters -> form fields, check result; Install (press = approval; existing install
+  path), Run once to try (read-only, defaults only), Not now (stays in Capabilities); after
+  Install the run form opens under the card. Missing before: the card existed only when the
+  model called `authoring__install_workflow`; agent-mode drafts had no conversation and
+  showed only in Capabilities. External agents outside Agent Web unchanged. Code:
+  `host_runtime/draft_cards.py`, `web.py` (turn hook, `dr-` decide, `/mcp/authoring` turn
+  tokens), `external_authoring.py` (`session_id`), `chat_authoring.py` / `skill_authoring.py`
+  (Skill draft session), `conversation_backends.py` (`authoring_token`), `state.py`
+  (`set_message_card` finds `action_cards`, sets `workflow_form`), `channels/telegram.py`,
+  `web_page.py` (`draftCardDecided`). Decision in `docs/DECISIONS.md`, contract in
+  `docs/CONTRACTS.md` "Draft install card". Tests: `tests/test_draft_install_cards.py` (14,
+  incl. Telegram and a real browser: card 394x346, Install 88x44, run form Run >= 44 px). Verified on
+  a clean worktree of a96e329e plus this change: ruff check, ruff format --check, mypy (src+tests);
+  full pytest in the project `.venv` 3031 passed, 7 skipped; in a fresh venv with only
+  `.[dev,office]` 3008 passed, 30 skipped. Not verified: live Agent Web (needs a restart),
+  a real Claude Code / Copilot turn, the live Telegram bot.
 
 - [x] Weekly report is personal, not bundled (2026-10-16, owner request; decision
   `docs/DECISIONS.md` 2026-10-16 "The weekly report is personal, not bundled").

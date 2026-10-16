@@ -1,6 +1,6 @@
 # Handoff
 
-Updated: 2026-10-16 (Asia/Taipei), by Claude Code (colleague user guide)
+Updated: 2026-10-16 (Asia/Taipei), by Claude Code (draft install card)
 
 ## Weekly report not bundled + starting page for the shortcut (2026-10-16, Claude Code)
 
@@ -29,7 +29,31 @@ and "`aep-host open` shows a starting page ..."; rows in `docs/TASKS.md`.
   his PC if he wants weekly upgrades from bundles; try the shortcut once with Agent Web
   stopped (after checking /api/tasks) and see the starting page switch to Agent Web.
 
-## Colleague user guide (2026-10-16, Claude Code) — latest
+## Install card after a conversation drafts a Workflow or Skill (2026-10-16, Claude Code) — latest
+
+Goal: owner request 2026-10-16 "bring back the small card that lets the person install a
+Workflow right in the conversation". Done and committed on main (not pushed); decision
+`docs/DECISIONS.md` 2026-10-16 "A conversation that drafts a Workflow or Skill shows its
+install card", contract `docs/CONTRACTS.md` "Draft install card", row in `docs/TASKS.md`.
+- Findings: the old card was only the `/api/approvals` request the resident model made when it
+  chose `authoring__install_workflow` (often it did not); agent-mode Claude Code / Copilot drafts
+  came through `/mcp/authoring` with the shared assistant token, so they had no conversation
+  (and were all labelled `external:copilot`) and waited only in Capabilities.
+- Now every turn that creates or revises a draft ends with one `dr-` card (Install / Run once to
+  try / Not now) in Agent Web and Telegram (Install / Not now); `host_runtime/draft_cards.py`.
+- Verified: ruff check, ruff format --check, mypy (src+tests); full pytest on a clean worktree
+  of this change: project `.venv` 3031 passed, 7 skipped; fresh venv with only `.[dev,office]`
+  3008 passed, 30 skipped. `tests/test_draft_install_cards.py` (14) includes Telegram (fake Bot
+  API) and a real browser (card 394x346, Install 88x44).
+- NOT verified live (owner): restart Agent Web on this code (not done by the agent); in a
+  Gateway chat ask for a small Workflow: the card appears under the answer; press Install: the
+  card says Installed and "Run <name>" opens below it. With Settings > Agent mode on for Claude
+  Code, ask it to make a Workflow with the AEP creator skill: the same card after its turn.
+  In Telegram ask for a Workflow: Install / Not now buttons under the answer.
+- Risks: a Skill installed from the card is used after an Agent Web restart (as before); Try
+  only appears for read-only Workflows whose required fields have defaults.
+
+## Colleague user guide (2026-10-16, Claude Code)
 
 Goal: owner request 2026-10-16, the manual shipped to colleagues explains every setting
 and feature. Done and committed on main (not pushed): `deploy/windows-preview/INSTALL.zh-TW.md`

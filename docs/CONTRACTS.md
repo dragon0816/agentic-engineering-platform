@@ -2238,6 +2238,33 @@ One card for every "the Agent asks, the person decides" moment
   side effect `read`, refusal codes `folder_unknown`, `message_unknown`, `mail_failed`,
   `library_missing`, `outlook_missing`.
 
+### Draft install card (2026-10-16)
+
+Reuses "Action card and change proposal" (`docs/DECISIONS.md` 2026-10-16 "A conversation that
+drafts a Workflow or Skill shows its install card"):
+- Card ids `dr-`, `ActionCard.kind` `draft_install`. Buttons `install` (primary), `try`
+  ("Run once to try"; Agent Web only, read-only Workflows whose required run fields have
+  defaults), `not_now`. Statuses `pending`, `installed`, `not_now`, `superseded` (a newer
+  card for the same draft), `stale` (the draft changed or is gone), `failed`, `expired`
+  (30 days). Decision codes: `installed`, `tried`, `not_now`, `draft_<status>` for a closed
+  card, `draft_stale`, `try_unavailable`, `try_needs_values`, `install_failed`,
+  `card_action_unknown`, `card_unknown`. A decision reply adds `session_id` and, after a
+  Workflow install, `workflow_form` (a run form offer with `origin` `install`).
+- Server record `host_runtime.draft_cards.DraftCard(PendingRecord)`: `session_id`,
+  `candidate_id`, `asset` workflow/skill, `revision`, `digest`, `name`, `title`, `channel`,
+  `source`, `read_only`, `tryable`, `tried`, `tried_ok`, `approval_id`, `asked_by` (the
+  agent's install request it answers), `outcome`, `outcome_ok`; in
+  `workspace/authoring/draft-cards.json`.
+- Turn end: `AgentWeb.draft_turn_cards(session_id, since, channel, message)` adds the cards
+  to the answer's `action_cards` and one `[card <id>] <title>: <status>` line to its
+  `tool_summary`; replaced cards are redrawn in place. `LocalState.set_message_card(...,
+  workflow_form=)` finds a card in `action_card` or `action_cards`.
+- `/mcp/authoring` accepts a running turn's own token (agent-mode run token, or the
+  `copilot_agent` turn token passed as `LocalConversationBackends.complete(...,
+  authoring_token=)`); `ExternalAuthoring(..., session_id=)` then puts that conversation on
+  drafts (`ChatCandidate.session_id`, new `SkillCandidate.session_id`) and install requests,
+  never on run requests.
+
 ## Shared-platform transport (Phase 7, slice 2i)
 
 `common.sync` is the wire between a Bridge and the shared platform: seven

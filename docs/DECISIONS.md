@@ -3093,3 +3093,52 @@ authenticated Agent Web and weakens the token guard); writing the address into t
 page itself (left on disk in another file indefinitely); opening Agent Web in a
 second tab from the launcher (two tabs; the starting tab cannot close itself); a
 small loopback server for the page (another listener to secure).
+
+## 2026-10-16 — A conversation that drafts a Workflow or Skill shows its install card
+
+Decision (owner request 2026-10-16, "bring back the small card so nobody has to go to
+Capabilities to install"): whenever a Workflow or Skill draft is created or revised as part
+of an Agent Web or Telegram conversation, whatever backend answered, the conversation shows
+one install card right after that turn. The card (`dr-` ids, `ActionCard.kind`
+`draft_install`, `host_runtime/draft_cards.py`, records in
+`workspace/authoring/draft-cards.json`) shows the title, what it does, the steps with their
+side effect, the parameters and "Will become a form with fields ...", the check result and
+any test run; buttons **Install** (the owner's press is the approval: it decides the agent's
+own pending install request when there is one, so `aep_status` reads approved, else runs
+`ChatAuthoring.install_now`), **Run once to try** (read-only Workflows whose required run
+fields all have defaults; the existing `ChatAuthoring.execute` test-run path; the card stays
+open and shows statuses and codes only) and **Not now** (the draft stays in Capabilities).
+After Install the answer gets the Workflow's run form (`workflow_form`, origin `install`)
+under the card and the Workflow runs at once (the existing `on_installed`). Nothing
+installs without the press.
+
+Why the card had gone: it was never tied to drafting. The old in-chat card was the
+`/api/approvals` request the resident model made only if it chose to call
+`authoring__install_workflow` (often it stopped after drafting or running), and agent-mode
+Claude Code / Copilot drafts went through `/mcp/authoring` with the shared assistant token,
+so they had no conversation (`session_id` None, and always labelled `external:copilot`) and
+their install requests were listed only in Capabilities.
+
+Rules:
+- Attribution: `/mcp/authoring` now also takes a running turn's own token (an agent-mode
+  run's token, or a per-turn token for the `copilot_agent` conversation backend); with it
+  `ExternalAuthoring` carries that `session_id` and the right agent name. Drafts and install
+  requests get the conversation; run requests do not (a run's data must never enter a
+  conversation an external agent reads, PUBLIC rule). `SkillCandidate.session_id` added.
+- One open card per draft and conversation: a later revision, or the agent asking to install
+  again, closes the earlier card as "Replaced" (redrawn in place) and shows the new one under
+  the newer answer; several revisions in one turn give one card; an unchanged draft is not
+  carded again. An install request answered on a card is no longer shown as a second,
+  old-style approval card (`/api/approvals?session_id=` and Telegram's approval buttons skip
+  it); run approvals keep the old card.
+- Telegram: installs were already approvable there by the owner (approval buttons), so the
+  card shows Install / Not now (no Try); decided through Agent Web's `decide_card`, owner
+  only, as every card.
+- Drafts from an external agent outside Agent Web (stdio `aep-host mcp`, CLI) keep appearing
+  only in Capabilities. No notification in the latest conversation (decided: keep simple; a
+  conversation the person did not use for it would be the wrong place).
+
+Rejected: auto-installing a draft that passed its checks (installing stays the owner's
+press); a card per revision (duplicates); attributing `/mcp/authoring` calls to whichever
+conversation turn is running (wrong when two conversations run at once); adding Try to
+Telegram (runs belong to the run form there).
