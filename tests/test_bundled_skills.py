@@ -299,9 +299,9 @@ def test_the_installer_and_manual_describe_the_bundled_skills() -> None:
     installer = (preview / "install.ps1").read_text(encoding="utf-8")
     assert '"install-bundled", "--bundle", $BundleRoot' in installer
     assert '$BundledArguments += "--no-agent-skills"' in installer
-    manual = (preview / "INSTALL.zh-TW.md").read_text(encoding="utf-8")
-    assert "## 12. 安裝包附帶的 Skills" in manual
-    assert "Switch on" in manual and "hermes\\NOTICE.md" in manual
+    guide = (preview / "USER_GUIDE.zh-TW.md").read_text(encoding="utf-8")
+    assert "### 13.4 安裝包附帶的 Skills" in guide
+    assert "Switch on" in guide and "hermes\\NOTICE.md" in guide
 
 
 def test_a_folder_from_another_pack_is_not_replaced(tmp_path: Path) -> None:

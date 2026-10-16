@@ -69,7 +69,7 @@ Agent Web) MCP servers in its user configuration. Only AEP's own entries are
 written, each edited file is backed up first, and no token is stored there. Add
 `-NoAgentSkills` to skip it (also on `update.cmd`); manage it later in Agent Web
 Settings > Coding agents or with `aep-host assets --config host.json connect
---for all --user [--status|--remove]`. The manual `INSTALL.zh-TW.md` section 11
+--for all --user [--status|--remove]`. The guide `USER_GUIDE.zh-TW.md` chapter 13
 explains how to ask an agent for an AEP Workflow or Skill.
 
 Run the checks again and export the JSON that will later be submitted through an

@@ -58,7 +58,9 @@ Member Portal 畫面，以及 sanitized 的錯誤碼。不得附上 invitation p
 
 ## 管理員 SOP：讓同事開始使用
 
-同事端的操作寫在 Agent 安裝包的 `INSTALL.zh-TW.md` 第 5 節。管理員要做的是：
+同事端的操作寫在 Agent 安裝包的 `USER_GUIDE.zh-TW.md` 第 10 章；管理員的完整說明（分頁、邀請、
+角色與群組、密碼重設、審核、Bridges、共同編輯與轉移、TLS）整理在同一份指南的第 15 章。
+以下是管理員 SOP 摘要：
 
 Member Portal 分成分頁（網址會記住目前分頁，例如 `#tab=review`，重新整理或上一頁都會留在原
 分頁）。管理員登入後預設在 **Overview**，另外有 **Review queue**（分頁上的數字是等待審核的

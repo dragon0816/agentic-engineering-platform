@@ -1,7 +1,8 @@
 # 發佈 Windows 安裝包給同事
 
 給負責發佈的人看。同事端怎麼安裝、更新，寫在安裝包裡的
-`deploy/windows-preview/INSTALL.zh-TW.md`。
+`deploy/windows-preview/INSTALL.zh-TW.md`；每個設定與功能的用法寫在
+`deploy/windows-preview/USER_GUIDE.zh-TW.md`（使用指南）。
 
 ## 一個指令產生交付版本
 
@@ -29,7 +30,8 @@ scripts\release.cmd --publish-dir "C:\Users\<你>\OneDrive - Rohde & Schwarz\AEP
    - `aep-windows-preview-0.1.0-<版本碼>.zip`：安裝包；
    - `SHA256SUMS.txt`：同事可以用來比對 zip 是否完整；
    - `RELEASE_NOTES.md`：上次發佈以來的 commit 清單；
-   - `INSTALL.zh-TW.md`：安裝手冊，不必解壓縮就能看。
+   - `INSTALL.zh-TW.md`：安裝手冊，不必解壓縮就能看；
+   - `USER_GUIDE.zh-TW.md`：使用指南（每個設定與功能）。
 
    `dist/releases/latest.json` 記錄這次的版本碼，下次的發佈說明就從這裡接著列。
 6. **打 git tag**：在該 commit 建立 annotated tag `release-<日期時間>-<版本碼>`，

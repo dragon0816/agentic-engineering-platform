@@ -56,6 +56,8 @@ DEPENDENCIES = (
     "contourpy>=1.3,<1.4",
 )
 MANUAL = "INSTALL.zh-TW.md"
+#: The complete guide to every setting and feature, shipped beside the manual.
+GUIDE = "USER_GUIDE.zh-TW.md"
 LATEST = "latest.json"
 
 
@@ -106,9 +108,10 @@ def release_notes(
         "",
         "- First installation: unzip to a short path such as `C:\\aep`, run `install.cmd`.",
         "- Update: close Agent Web, unzip the new release, run `update.cmd` (settings kept).",
-        f"- Details: `{MANUAL}` in this folder and inside the zip.",
+        f"- Details: `{MANUAL}` (install, update, uninstall) and `{GUIDE}` (every setting "
+        "and feature) in this folder and inside the zip.",
         "- LLM gateway: installed and started at sign-in unless `-NoGateway`; read "
-        '"設定 LLM gateway（最重要）" in the manual first (token renewal needs the '
+        '"設定 LLM gateway（最重要）" (chapter 1 of the guide) first (token renewal needs the '
         "company domain sign-in).",
         "- Bundled Skills: AEP's in-use Skills are installed switched on, the Hermes skill "
         "pack switched off (switch one on in Agent Web > Capabilities); an update keeps "
@@ -259,7 +262,8 @@ def main() -> int:
                 output_dir=folder,
                 revision=revision,
             )
-            shutil.copy2(source / "deploy" / "windows-preview" / MANUAL, folder / MANUAL)
+            for document in (MANUAL, GUIDE):
+                shutil.copy2(source / "deploy" / "windows-preview" / document, folder / document)
         digest = sha256(archive)
         (folder / "SHA256SUMS.txt").write_text(f"{digest}  {archive.name}\n", encoding="utf-8")
         previous = args.notes_since or previous_revision(releases)

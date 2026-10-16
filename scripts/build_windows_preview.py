@@ -92,7 +92,12 @@ REQUIRED_DEPENDENCIES = (
 BUNDLED_EXTRAS = ("excel", "windows", "weekly-mail")
 #: These operator guides are part of the installable product.  A release that
 #: cannot tell its tester how to install and validate it is not a usable bundle.
-REQUIRED_OPERATOR_GUIDES = ("START-HERE.md", "README.md", "INSTALL.zh-TW.md")
+REQUIRED_OPERATOR_GUIDES = (
+    "START-HERE.md",
+    "README.md",
+    "INSTALL.zh-TW.md",
+    "USER_GUIDE.zh-TW.md",
+)
 
 
 def worst_case_path(relative: str) -> int:
