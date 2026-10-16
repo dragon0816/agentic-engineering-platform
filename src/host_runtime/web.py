@@ -40,6 +40,7 @@ import json
 import os
 import re
 import secrets
+import sys
 import threading
 import time
 import uuid
@@ -99,7 +100,7 @@ from common.workflow_parameters import (
 from common.workflow_run_form import form_offer, offer_in, run_intent
 from extensions.package import PortableExtensionPackage
 from extensions.runtime import ExtensionLifecycleStore
-from host_runtime import asset_shelf, telemetry_api
+from host_runtime import asset_shelf, gateway_link, telemetry_api
 from host_runtime.agent_mail import AgentMail
 from host_runtime.agent_mode import AgentMode
 from host_runtime.answers import readable
@@ -169,6 +170,7 @@ from host_runtime.experience import (
 )
 from host_runtime.experience_proposals import ProposalError, ProposalStore, ReviewProposal
 from host_runtime.experience_review import latest_review, run_review
+from host_runtime.gateway_link import explain_model_failure
 from host_runtime.host import HostRuntime, build_telegram, choice_sources, load_authorization
 from host_runtime.identity_presets import IdentityPresets
 from host_runtime.jev_shadow import SHADOW_LOG_FILE
@@ -277,6 +279,10 @@ from knowledge.query import cited_numbers
 from knowledge.sandbox import SandboxError, Sandboxes
 from knowledge.schema import answer_rules_text
 from knowledge.vault import Vault
+from llm_gateway import control as gateway_control
+from llm_gateway import token_refresh as gateway_token
+from llm_gateway.config import GatewayConfigError
+from llm_gateway.config import load_settings as load_gateway_settings
 from models.contracts import ModelMessage
 from models.wire import MethodTransport, UrllibTransport
 
@@ -497,6 +503,20 @@ class AgentWeb:
         # workflow run and every non-read capability (`BridgeExecutor.exclusive`),
         # so two runs never act on the same workbook at once.
         self._one_at_a_time = threading.RLock()
+        # The built-in LLM gateway (docs/phases/LLM_GATEWAY.md): its home, and
+        # what starts, stops, probes and schedules it; tests replace these.
+        self.gateway_paths = gateway_link.default_paths()
+        self.gateway_probe: Callable[[int], bool] = gateway_control.health
+        self.gateway_alive: Callable[[int], bool] = gateway_control.process_alive
+        self.gateway_spawner: gateway_control.Spawner = gateway_control.spawn_detached
+        self.gateway_killer: Callable[[int], None] = gateway_control.kill_tree
+        self.gateway_refresh_runner: gateway_token.Runner = gateway_token.run_powershell
+        self.gateway_command_runner: gateway_control.CommandRunner = gateway_control.run_command
+        self.gateway_run_key: gateway_control.RunKey | None = None
+        self.gateway_autostart_query: Callable[[], dict[str, object]] | None = (
+            gateway_control.autostart_query if sys.platform == "win32" else None
+        )
+        self._gateway_lock = threading.Lock()
         # Per session: a turn lock queues that session's turns in order, and a
         # short record lock guards read-modify-write of its stored record.
         self._session_guard = threading.Lock()
@@ -933,6 +953,15 @@ class AgentWeb:
         return bool(environment and os.environ.get(environment))
 
     def _gateway_conversation_text(self, result: GatewayConversationResult) -> str:
+        explained = explain_model_failure(
+            self.runtime.config,
+            result.failure,
+            paths=self.gateway_paths,
+            probe=self.gateway_probe,
+            alive=self.gateway_alive,
+        )
+        if explained is not None:
+            return explained
         if result.failure is not None and result.failure.code == "tool_loop_limit":
             return (
                 f"這個回合已用完 {len(result.tools)} 次工具呼叫，工作還沒完成。"
@@ -4380,6 +4409,87 @@ class AgentWeb:
             self.laya_tunnel = SshTunnel(chosen)
             self.laya_tunnel.start()
 
+    def gateway_settings(self) -> dict[str, Any]:
+        """The LLM gateway card: running, starting or stopped, its port,
+        token expiry (never the value), last test, autostart."""
+        return gateway_link.gateway_card(
+            self.runtime.config,
+            paths=self.gateway_paths,
+            probe=self.gateway_probe,
+            alive=self.gateway_alive,
+            autostart_query=self.gateway_autostart_query,
+        )
+
+    def gateway_action(self, body: dict[str, Any]) -> dict[str, Any]:
+        """Start, Restart, Stop, Refresh token, Test, autostart on/off. A
+        gateway run outside AEP is only shown and tested (`not_managed`)."""
+        action = str(body.get("action") or "")
+        if action not in ("start", "restart", "stop", "refresh", "test", "autostart"):
+            return {"ok": False, "code": "gateway_action_unknown"}
+        if not self._gateway_lock.acquire(blocking=False):
+            return {"ok": False, "code": "gateway_busy"}
+        paths = self.gateway_paths
+        detail: dict[str, Any] = {}
+        try:
+            probe, alive = self.gateway_probe, self.gateway_alive
+            if action in ("stop", "restart"):
+                gateway_control.stop(paths, probe=probe, alive=alive, killer=self.gateway_killer)
+            if action in ("start", "restart"):
+                gateway_control.start(paths, probe=probe, alive=alive, spawner=self.gateway_spawner)
+            if action == "refresh":
+                refreshed = gateway_token.refresh(
+                    paths,
+                    load_gateway_settings(paths),
+                    force=True,
+                    runner=self.gateway_refresh_runner,
+                )
+                detail["refresh"] = refreshed.to_json()
+                current = gateway_control.status(paths, probe=probe, alive=alive)
+                if refreshed.code == "renewed" and current.ours:
+                    # It read the old token when it started.
+                    gateway_control.stop(
+                        paths, probe=probe, alive=alive, killer=self.gateway_killer
+                    )
+                    gateway_control.start(
+                        paths, probe=probe, alive=alive, spawner=self.gateway_spawner
+                    )
+                    detail["restarted"] = True
+            if action == "test":
+                models = body.get("models")
+                chosen = (
+                    [str(item) for item in models][:12]
+                    if isinstance(models, list) and models
+                    else None
+                )
+                detail["test"] = [
+                    item.to_json()
+                    for item in gateway_control.test(paths, models=chosen, timeout=60)
+                ]
+            if action == "autostart":
+                detail["autostart_result"] = gateway_control.set_autostart(
+                    paths,
+                    bool(body.get("on")),
+                    runner=self.gateway_command_runner,
+                    run_key=self.gateway_run_key,
+                )
+        except gateway_control.GatewayControlError as error:
+            return {
+                **self.gateway_settings(),
+                "ok": False,
+                "code": error.code,
+                "message": str(error),
+            }
+        except GatewayConfigError as error:
+            return {
+                **self.gateway_settings(),
+                "ok": False,
+                "code": "gateway_config",
+                "message": str(error),
+            }
+        finally:
+            self._gateway_lock.release()
+        return {**self.gateway_settings(), **detail, "ok": True}
+
     def tasks(self) -> TaskLog:
         """The background jobs this Agent Web started (owner 2026-10-13)."""
         if getattr(self, "_task_log", None) is None:
@@ -4927,6 +5037,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.laya_settings())
         elif parsed.path == "/api/settings/shared-platform":
             self._json(200, web.shared_platform_settings())
+        elif parsed.path == "/api/settings/gateway":
+            self._json(200, web.gateway_settings())
         elif parsed.path == "/api/knowledge/reingest":
             query = parse_qs(parsed.query)
             self._json(200, web.reingest_status((query.get("sandbox_id") or [""])[0]))
@@ -5020,6 +5132,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/settings/model",
             "/api/settings/laya",
             "/api/settings/shared-platform",
+            "/api/settings/gateway",
             "/api/settings/telegram",
             "/api/mcp/save",
             "/api/mcp/delete",
@@ -5107,6 +5220,9 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(
                 200, self.server.web.update_shared_platform(body if isinstance(body, dict) else {})
             )
+            return
+        if path == "/api/settings/gateway":
+            self._json(200, self.server.web.gateway_action(body if isinstance(body, dict) else {}))
             return
         if path in ("/api/knowledge/convert/start", "/api/knowledge/convert/stop"):
             chosen = body if isinstance(body, dict) else {}

@@ -40,6 +40,7 @@ from host_runtime.host import HostError, HostRuntime, build_runtime, host_report
 from host_runtime.runtime import enrollment_request
 from host_runtime.sync import PlatformClient, advertisement
 from host_runtime.workspace import documents
+from llm_gateway import cli as gateway_cli
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -158,6 +159,10 @@ def _parser() -> argparse.ArgumentParser:
         "--out", required=True, type=Path, help="a directory; assets/ of a workspace"
     )
     commands.add_parser("version", help="show the installed package version")
+    # The built-in LLM gateway (docs/phases/LLM_GATEWAY.md).
+    gateway_cli.add_arguments(
+        commands.add_parser("gateway", help="the built-in LLM gateway on 127.0.0.1")
+    )
     # External authoring (docs/phases/EXTERNAL_AUTHORING.md): Claude Code, Codex
     # or Copilot build Skills and Workflows; the owner approves in Agent Web.
     assets = commands.add_parser(
@@ -1240,6 +1245,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "version":
         print(_package_version())
         return 0
+    if args.command == "gateway":
+        return gateway_cli.run(args)
     if args.command == "export-assets":
         for written in export_assets(args.out):
             print(f"wrote {written}")

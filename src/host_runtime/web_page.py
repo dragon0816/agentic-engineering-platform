@@ -233,6 +233,16 @@ body {
 .laya-grid label { display: flex; flex-direction: column; gap: 2px; }
 .settings .laya-check { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
 .settings .laya-check input { width: auto; margin: 0; flex: none; }
+.gateway-state { font-weight: 600; margin: 0 0 8px; }
+.gateway-state[data-state="serving"] { color: #137333; }
+.gateway-state[data-state="starting"] { color: #8a5a00; }
+.gateway-state[data-state="stopped"] { color: #b3261e; }
+.gateway-facts { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px;
+  margin: 0 0 10px; font-size: 13px; }
+.gateway-facts dt { color: var(--dim); }
+.gateway-facts dd { margin: 0; overflow-wrap: anywhere; }
+.gateway-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.gateway-actions button { min-height: 44px; min-width: 88px; }
 .kp-ingest { display: flex; gap: 12px; align-items: stretch; height: 70vh; min-height: 380px; }
 .kp-ingest-main { flex: 2 1 0; min-width: 0; display: flex; flex-direction: column;
   border: 1px solid var(--line, #ddd); border-radius: 6px; background: var(--panel, #fff); }
@@ -849,11 +859,30 @@ tr:last-child td { border-bottom: none; }
            aria-label="Avatar"></div>
       <pre id="avatar-result" class="note"></pre>
     </div>
+    <h2 id="gateway-heading">LLM gateway</h2>
+    <p class="note">The gateway on this computer connects the Agent (and coding agents) to
+      the company models. It listens on 127.0.0.1 only. The company token stays in your
+      Windows profile and is never shown here; renewing it needs the company domain
+      sign-in (in the office, or over VPN with a Kerberos ticket).</p>
+    <div class="card settings" id="gateway-card">
+      <p id="gateway-state" class="gateway-state" role="status" aria-live="polite">
+        Reading the gateway&hellip;</p>
+      <dl id="gateway-facts" class="gateway-facts"></dl>
+      <p class="gateway-actions">
+        <button class="go" id="gateway-start" type="button">Start</button>
+        <button id="gateway-restart" type="button">Restart</button>
+        <button id="gateway-refresh" type="button">Refresh token</button>
+        <button id="gateway-test" type="button">Test</button></p>
+      <label class="laya-check"><input type="checkbox" id="gateway-autostart"> Start the
+        gateway when I sign in to Windows</label>
+      <pre id="gateway-result" class="note"></pre>
+    </div>
     <h2>Natural-language model</h2>
     <p class="note">Connect the Agent to the existing OpenAI-compatible Gateway.
       This page stores only connection metadata and optional secret/environment names.
       It never accepts or stores an access-token value.</p>
     <div class="card settings">
+      <p id="model-gateway-link" class="note" hidden></p>
       <form id="model-settings">
         <div class="two">
           <div><label for="model-provider">Provider</label>
@@ -3797,6 +3826,7 @@ async function loadSettings() {
   loadLaya().catch(() => {});
   loadCodingAgents().catch(() => {});
   loadAgentModeSettings().catch(() => {});
+  loadGateway().catch((failure) => { el("gateway-state").textContent = failure.message; });
   el("persona-result").textContent =
     "Saved locally. Changes apply to the next natural-language turn.";
   el("model-provider").value = model.provider || "openai_compatible";
@@ -4070,6 +4100,120 @@ el("shared-platform-settings").addEventListener("submit", (event) => {
   event.preventDefault(); saveSharedPlatform(false);
 });
 el("shared-enroll").addEventListener("click", () => saveSharedPlatform(true));
+
+// -- LLM gateway (docs/phases/LLM_GATEWAY.md) --------------------------------
+// Running / Starting… / Stopped, token expiry (never the value), last test,
+// Start / Restart / Refresh token / Test, autostart. A gateway run outside
+// AEP (managed=false) is shown and tested only.
+const GATEWAY_STATES = {serving: "Running", starting: "Starting…", stopped: "Stopped"};
+const GATEWAY_PROBLEMS = {
+  not_managed: "this gateway is run outside AEP; use the tools it was set up with",
+  not_ours: "another program serves this port; AEP does not stop it",
+  gateway_busy: "the gateway is busy with another action; try again in a moment",
+  config: "the gateway configuration has a problem (see below)",
+};
+let gatewayTimer = null;
+
+function gatewayToken(token) {
+  if (!token || !token.present) return "missing — press Refresh token";
+  if (!token.expires_at) return "present (expiry unreadable)";
+  const day = token.expires_at.slice(0, 16).replace("T", " ");
+  return token.expired ? "EXPIRED on " + day + " UTC — press Refresh token"
+    : "valid until " + day + " UTC (" + token.days_left + " days left)";
+}
+
+function showGateway(info) {
+  const state = el("gateway-state");
+  state.dataset.state = info.state;
+  let line = (GATEWAY_STATES[info.state] || info.state) + " · 127.0.0.1:" + info.port;
+  if (!info.managed) line += " · run outside AEP (status and test only)";
+  else if (info.state === "serving" && !info.ours) line += " · not started by AEP";
+  if (info.state === "starting" && info.started_at) {
+    const since = Math.max(0, Math.round((Date.now() - Date.parse(info.started_at)) / 1000));
+    line += " · started " + since + " s ago; a first start can take a few minutes";
+  }
+  state.textContent = line;
+  const test = info.last_test && info.last_test.results ? info.last_test : null;
+  const rows = [
+    ["Token", gatewayToken(info.token)],
+    ["Last refresh", info.last_refresh_at ? info.last_refresh_at.replace("T", " ")
+      + (info.last_refresh_error ? " (last attempt failed: " + info.last_refresh_error + ")" : "")
+      : (info.last_refresh_error ? "failed: " + info.last_refresh_error : "not yet")],
+    ["Models answering", test ? test.results.filter((r) => r.model !== "(models)")
+      .map((r) => r.model + (r.ok ? " ✓" : " ✗ " + r.code)).join(", ")
+      + " (" + test.at.replace("T", " ") + ")" : "not tested yet — press Test"],
+    ["Local key", info.key_present ? "present" : "missing"],
+    ["Configuration", info.config_ok ? "ok" : info.config_problems.join("; ")],
+    ["LiteLLM", (info.litellm_version || "not found") + " (verified " + info.litellm_pinned + ")"],
+    ["Folder", info.home],
+  ];
+  const facts = el("gateway-facts");
+  facts.replaceChildren(...rows.flatMap(([term, value]) => {
+    const dt = document.createElement("dt"), dd = document.createElement("dd");
+    dt.append(text(term)); dd.append(text(value)); return [dt, dd];
+  }));
+  const managed = info.managed !== false;
+  el("gateway-start").disabled = !managed || info.state !== "stopped";
+  el("gateway-restart").disabled = !managed || !info.ours;
+  el("gateway-refresh").disabled = !managed;
+  el("gateway-test").disabled = info.state !== "serving";
+  const autostart = el("gateway-autostart");
+  autostart.disabled = !managed;
+  autostart.checked = !!(info.autostart && info.autostart.on);
+  const link = el("model-gateway-link");
+  link.hidden = !info.model_uses_gateway;
+  if (info.model_uses_gateway) {
+    const anchor = document.createElement("a");
+    anchor.href = "#gateway-heading"; anchor.append(text("127.0.0.1:" + info.port));
+    link.replaceChildren(text("Uses the built-in gateway at "), anchor,
+      text(" (" + (GATEWAY_STATES[info.state] || info.state).toLowerCase() + ")."));
+  }
+  clearTimeout(gatewayTimer);
+  if (info.state === "starting") {
+    gatewayTimer = setTimeout(() => loadGateway().catch(() => {}), 2000);
+  }
+}
+
+async function loadGateway() {
+  showGateway(await call("/api/settings/gateway"));
+}
+
+async function gatewayAct(action, extra, busyText) {
+  const result = el("gateway-result");
+  const buttons = ["gateway-start", "gateway-restart", "gateway-refresh", "gateway-test"];
+  buttons.forEach((id) => { el(id).disabled = true; });
+  result.textContent = busyText;
+  try {
+    const done = await call("/api/settings/gateway", {action, ...extra});
+    if (done.state) showGateway(done);
+    const lines = [];
+    if (done.ok === false) lines.push("Not done: " + (GATEWAY_PROBLEMS[done.code] || done.message
+      || done.code));
+    if (done.refresh) lines.push((done.refresh.ok ? "Token: " : "Token not renewed: ")
+      + done.refresh.message + (done.restarted ? " The gateway was restarted." : ""));
+    if (done.test) lines.push(...done.test.map((r) => (r.ok ? "✓ " : "✗ ") + r.model
+      + ": " + (r.ok ? (r.detail || "ok") : r.code + " " + r.detail)));
+    if (done.autostart_result) lines.push("Autostart " + (done.autostart_result.on ? "on" : "off")
+      + (done.autostart_result.note ? " — " + done.autostart_result.note : ""));
+    if (done.ok !== false && (action === "start" || action === "restart")) {
+      lines.push("Starting; this card updates when it answers.");
+    }
+    result.textContent = lines.join("\n");
+  } catch (failure) {
+    result.textContent = "Not done: " + failure.message;
+    loadGateway().catch(() => {});
+  }
+}
+
+el("gateway-start").addEventListener("click", () => gatewayAct("start", {}, "Starting…"));
+el("gateway-restart").addEventListener("click", () =>
+  gatewayAct("restart", {}, "Restarting…"));
+el("gateway-refresh").addEventListener("click", () =>
+  gatewayAct("refresh", {}, "Renewing the token with your Windows sign-in…"));
+el("gateway-test").addEventListener("click", () =>
+  gatewayAct("test", {}, "Asking the gateway's default model…"));
+el("gateway-autostart").addEventListener("change", () =>
+  gatewayAct("autostart", {on: el("gateway-autostart").checked}, "Saving…"));
 
 // -- Laya decision acceleration (owner 2026-10-13) ---------------------------
 const LAYA_PROBLEMS = {

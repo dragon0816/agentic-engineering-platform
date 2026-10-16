@@ -22,7 +22,7 @@ import asyncio
 import json
 import re
 import time
-from collections.abc import Iterator, Mapping
+from collections.abc import Callable, Iterator, Mapping
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal, Self
@@ -639,6 +639,9 @@ class TelegramIngress:
         self.presets = presets
         # Action cards (change proposals): Agent Web decides them; set by it.
         self.cards: Any = None
+        # A plain reason for a failed model turn (e.g. the LLM gateway is not
+        # running or still starting); set by the host, None says nothing more.
+        self.explain_failure: Callable[[Failure], str | None] | None = None
 
     def offset(self) -> int | None:
         """How far this bot has been consumed, from the Bridge's own durable
@@ -1181,6 +1184,15 @@ class TelegramIngress:
                 else "conversation_failed"
             )
             reply = f"That could not be answered ({code})."
+            explained = (
+                self.explain_failure(conversation.failure)
+                if self.explain_failure is not None
+                and conversation is not None
+                and conversation.failure is not None
+                else None
+            )
+            if explained:
+                reply = explained
             if code == "empty_model_answer":
                 # Never a silent turn: say what happened (owner 2026-10-15).
                 reply = _no_answer_reply(record)

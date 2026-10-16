@@ -284,6 +284,7 @@ from host_runtime.contracts import (
 # Re-exported: the layout moved to the contracts module so the platform client
 # can take one without importing this module, and callers still find it here.
 from host_runtime.contracts import HostLayout as HostLayout
+from host_runtime.gateway_link import explain_model_failure
 from host_runtime.identity_presets import IdentityPresets
 from host_runtime.jev_shadow import SHADOW_LOG_FILE, JevShadowLog, skill_accelerator
 from host_runtime.mcp_servers import McpHub
@@ -1495,7 +1496,7 @@ def build_telegram(
             raise HostError("credential_unmapped", layout.telegram)
         resolver = EnvironmentCredentials(mapped)
     try:
-        return TelegramIngress(
+        ingress = TelegramIngress(
             ingress_config,
             agent,
             resolver,
@@ -1505,6 +1506,10 @@ def build_telegram(
         )
     except ValueError as error:
         raise HostError("telegram_invalid", layout.telegram) from error
+    # A failed turn says when the LLM gateway is down, starting or rejecting
+    # the token (docs/phases/LLM_GATEWAY.md), as Agent Web does.
+    ingress.explain_failure = lambda failure: explain_model_failure(config, failure)
+    return ingress
 
 
 def build_platform(
