@@ -278,7 +278,7 @@ knows about them.
 | Phase 7, slice 4 | The team's real `chipset-map.json`, the ruleset workflow 10 transforms with, is not in the pinned source: it carries only `chipset-map.example.json`, so every run in that tree falls back to the example. The real file exists on the company machine and is needed for the parity run. It is host configuration, not content for this repository |
 | Phase 7, slice 3f | Source workflow 7, `jira_team_tickets` / `workflows/07_jira_team_tickets_to_excel.json`, has never been inspected, characterized or migrated. It was named in the Phase 7 candidate table by mistake, in place of the weekly report that was actually built. Whether it is migrated at all, and where it belongs in the order, is an owner decision that has not been asked for |
 | Phase 7, slice 2j | An approval on a tool selection may still name the acting member (`approved_by == actor`), as it could on a company workstation before the slice. Whether an approval must come from a second person is an owner policy decision that has not been asked for |
-| Backlog, 2026-10-16 | **Suggested Skills from experience** (owner request): detect repeated or long reusable work and propose a Skill or Workflow draft as a card that a person creates, ignores or turns into an update. Never self-installed. Planned after the Hermes skill pack release; design first (`docs/phases/SKILL_SUGGESTIONS.md`) |
+| Backlog, 2026-10-16 | **Suggested Skills from experience** (owner request): detect repeated or long reusable work and propose a Skill or Workflow draft as a card that a person creates, ignores or turns into an update. Never self-installed. Planned after the Hermes skill pack release; design first (`docs/phases/SKILL_SUGGESTIONS.md`; design written 2026-10-16, awaiting owner review) |
 
 **Leaked credentials in the pinned `telegram-local-agent` source, checked
 2026-09-23.** Its `config.yaml` is tracked and carries two values. The
@@ -2258,3 +2258,20 @@ s-k-20261011T102952` (not published).
   point to the guide (the platform START-HERE SOP kept, with a pointer to chapter 15).
   Tests: `tests/test_release_windows.py` (chapter order, code labels present, no
   credential-like assignment), `tests/test_bundled_skills.py` (section moved to 13.4).
+
+- [x] Stale design docs brought in line with the code (2026-10-16). "As built" notes, checked
+  against the code, appended without rewriting history in `MEMBER_PUBLISH.md`
+  (`allow_self_review` true by default, `assets/submissions`, card "Publish to the shared
+  platform"), `PASSWORD_SIGN_IN.md` (one-click sign-in built), `deploy/windows-preview/README.md`
+  (chat default view, `/problem`, Telegram commands, schedules pause-and-recreate),
+  `LAYA_ACCELERATION.md` and `JEV_ADAPTER_READINESS.md` (SSH-tunnel loopback only, 1500 ms
+  timeout, `jev_api_key` mapping, "Check connection"), `RS_WORKFLOW_MIGRATION.md`
+  (`workspace\workflow-settings.json`), `PHASE_7_MIGRATION.md` and `CONTRACTS.md` (weekly
+  report reads a GitHub board), `KNOWLEDGE_COLLAB.md` and `KNOWLEDGE_PIPELINE_RELEASE.zh-TW.md`
+  (three steps, "Run test", lost sourced line blocks before writing, no lock or approval step,
+  sandbox id), `EXPERIENCE_REVIEW.md` (action labels), `AGENT_MODE_BACKENDS.md` (audit.jsonl,
+  send card keeps the draft, network card, `copilot_agent` is not agent mode). Docs only.
+- [x] Suggested Skills from experience: design written for owner review (2026-10-16),
+  `docs/phases/SKILL_SUGGESTIONS.md`. Status: design, awaiting owner review (4 open questions
+  with recommended answers). Implementation slices S1-S6 not started.
+
