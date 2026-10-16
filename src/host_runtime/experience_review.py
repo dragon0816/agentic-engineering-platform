@@ -22,6 +22,7 @@ from pydantic import ValidationError
 from common.base import Contract
 from common.execution import TraceIdentifiers
 from host_runtime.experience import ExperienceCase, ExperienceStore, group
+from host_runtime.skill_suggestions import SuggestionCounts, SuggestionItem, SuggestionPass
 from models.contracts import ModelClient, ModelMessage, ModelRequest, ModelRequirements
 
 REVIEWS_DIR = "experience-reviews"
@@ -82,6 +83,10 @@ class ReviewReport(Contract):
     open_cases: int = 0
     findings: tuple[Finding, ...] = ()
     skipped_groups: int = 0
+    # Suggested Skills (SKILL_SUGGESTIONS S1): what was considered,
+    # qualified and dropped with the reason; counts beside it.
+    suggestions: tuple[SuggestionItem, ...] = ()
+    suggestion_counts: SuggestionCounts | None = None
 
     def markdown(self) -> str:
         lines = [
@@ -109,6 +114,12 @@ class ReviewReport(Contract):
                     f"{item.proposal.text}"
                 )
             lines += [f"- Would confirm it: {item.confirm}", ""]
+        if self.suggestion_counts is not None:
+            lines.append(
+                SuggestionPass(counts=self.suggestion_counts, suggestions=self.suggestions)
+                .markdown()
+                .rstrip("\n")
+            )
         return "\n".join(lines) + "\n"
 
 
@@ -124,26 +135,30 @@ def _case_text(number: int, case: ExperienceCase) -> str:
     )
 
 
-def _ask(
-    model: ModelClient, alias: str, cases: list[ExperienceCase], rules: str, trace: TraceIdentifiers
-) -> dict[str, Any]:
-    shown = "\n".join(_case_text(n, c) for n, c in enumerate(cases, 1))
+def structured_call(
+    model: ModelClient,
+    alias: str,
+    *,
+    system: str,
+    user: str,
+    trace: TraceIdentifiers,
+    output_contract: str,
+    max_output_tokens: int = 3000,
+) -> Any:
+    """One structured call to the company model; the reply's JSON value. A
+    model failure is raised as `RuntimeError(code)`, unreadable text as
+    `ValueError`. Shared by the failure review and the Skill suggestions."""
     response = model.generate(
         ModelRequest(
             trace=trace,
             model_alias=alias,
             messages=(
-                ModelMessage(role="system", text=PROMPT),
-                ModelMessage(
-                    role="user",
-                    text=f"===== rules in force =====\n"
-                    f"{rules[:RULE_CHARS] or '(none)'}\n\n"
-                    f"===== cases =====\n{shown}",
-                ),
+                ModelMessage(role="system", text=system),
+                ModelMessage(role="user", text=user),
             ),
             requirements=ModelRequirements(structured_output=True),
-            output_contract="experience_review_finding",
-            max_output_tokens=3000,
+            output_contract=output_contract,
+            max_output_tokens=max_output_tokens,
         )
     )
     if response.failure is not None:
@@ -151,6 +166,25 @@ def _ask(
     data = response.structured_output
     if not isinstance(data, dict):
         data = json.loads(response.text or "")
+    return data
+
+
+def _ask(
+    model: ModelClient, alias: str, cases: list[ExperienceCase], rules: str, trace: TraceIdentifiers
+) -> dict[str, Any]:
+    shown = "\n".join(_case_text(n, c) for n, c in enumerate(cases, 1))
+    data = structured_call(
+        model,
+        alias,
+        system=PROMPT,
+        user=f"===== rules in force =====\n"
+        f"{rules[:RULE_CHARS] or '(none)'}\n\n"
+        f"===== cases =====\n{shown}",
+        trace=trace,
+        output_contract="experience_review_finding",
+    )
+    if not isinstance(data, dict):
+        raise ValueError("the reply is not a JSON object")
     return dict(data)
 
 
@@ -163,6 +197,7 @@ def run_review(
     workspace: Path,
     harvested: int = 0,
     max_groups: int = MAX_GROUPS,
+    suggestions: SuggestionPass | None = None,
 ) -> ReviewReport:
     review_id = f"review-{datetime.now(UTC).strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:4]}"
     open_cases = store.cases("open")
@@ -210,6 +245,8 @@ def run_review(
         open_cases=len(open_cases),
         findings=tuple(findings),
         skipped_groups=max(0, len(groups) - max_groups),
+        suggestions=suggestions.suggestions if suggestions is not None else (),
+        suggestion_counts=suggestions.counts if suggestions is not None else None,
         finished_at=datetime.now(UTC).isoformat(timespec="seconds"),
     )
     folder = workspace / REVIEWS_DIR
@@ -217,6 +254,19 @@ def run_review(
     (folder / f"{review_id}.json").write_text(report.model_dump_json(indent=1), encoding="utf-8")
     (folder / f"{review_id}.md").write_text(report.markdown(), encoding="utf-8")
     return report
+
+
+def review_model(runtime: Any) -> tuple[ModelClient, str] | None:
+    """The company model and alias the review asks: the installed Knowledge
+    capability's, as the review always used. None when there is none."""
+    from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
+
+    installed = runtime.agent.gateway.bridge.installed.get(KNOWLEDGE_QUERY_SPEC.identity)
+    handler = getattr(installed, "handler", None)
+    model, alias = getattr(handler, "model", None), getattr(handler, "alias", None)
+    if model is None or alias is None:
+        return None
+    return model, str(alias)
 
 
 def latest_review(workspace: Path) -> dict[str, Any] | None:

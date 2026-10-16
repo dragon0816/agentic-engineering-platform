@@ -13,7 +13,7 @@ import argparse
 import asyncio
 import sys
 import uuid
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from datetime import UTC, datetime, timedelta
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
@@ -41,6 +41,7 @@ from host_runtime.runtime import enrollment_request
 from host_runtime.sync import PlatformClient, advertisement
 from host_runtime.workspace import documents
 from llm_gateway import cli as gateway_cli
+from models.contracts import ModelClient
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -316,6 +317,22 @@ def _parser() -> argparse.ArgumentParser:
     tele_compare.add_argument("--since", help="RFC3339 start")
     tele_compare.add_argument("--until", help="RFC3339 end")
     tele_compare.add_argument("--json", action="store_true")
+    experience = commands.add_parser(
+        "experience", help="the experience review's Skill suggestions (report only)"
+    )
+    experience_actions = experience.add_subparsers(dest="experience_action", required=True)
+    suggest = experience_actions.add_parser(
+        "suggest",
+        help="look for repeated work, as the nightly job does, and print the report section",
+    )
+    suggest.add_argument("--config", required=True, type=Path)
+    suggest.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="write nothing: no suggestion store, no report file (required for now)",
+    )
+    suggest.add_argument("--actor", help="whose conversations to mine; the device owner by default")
+    suggest.add_argument("--json", action="store_true")
     mcp = commands.add_parser("mcp", help="serve authoring tools to a coding agent over stdio")
     mcp.add_argument("--config", required=True, type=Path)
     mcp.add_argument("--agent", default="mcp", help="who is connecting, e.g. codex")
@@ -1251,6 +1268,37 @@ def _schedules(runtime: HostRuntime, args: argparse.Namespace) -> int:
     return 0
 
 
+def _experience_suggest(
+    runtime: object,
+    actor: str | None,
+    dry_run: bool,
+    as_json: bool,
+    resolve: Callable[[object], tuple[ModelClient, str] | None] | None = None,
+) -> int:
+    """`aep-host experience suggest --dry-run`: the nightly suggestion pass
+    (the same code), printed, with nothing written."""
+    from host_runtime.experience_review import review_model
+    from host_runtime.skill_suggestions import suggest_for_runtime
+
+    if not dry_run:
+        print(
+            "only --dry-run is available here; the nightly experience review keeps the suggestions",
+            file=sys.stderr,
+        )
+        return 2
+    found = (resolve or review_model)(runtime)
+    if found is None:
+        print("no review model: the Knowledge capability is not installed", file=sys.stderr)
+        return 1
+    model, alias = found
+    result = suggest_for_runtime(runtime, model, alias, actor=actor, dry_run=True)
+    if as_json:
+        print(result.model_dump_json(indent=2))
+    else:
+        print(result.markdown(), end="")
+    return 1 if result.counts.error else 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     _write_in_utf8()
     args = _parser().parse_args(argv)
@@ -1330,6 +1378,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _schedules(runtime, args)
         if args.command == "dut-validate":
             return _dut_validate(runtime, args.request, args.output)
+        if args.command == "experience":
+            return _experience_suggest(runtime, args.actor, args.dry_run, args.json)
         return _telegram(runtime, args.once)
 
 

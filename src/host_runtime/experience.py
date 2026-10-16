@@ -45,6 +45,11 @@ Signal = Literal[
 class ExperienceSettings(Contract):
     retention_days: int = Field(default=30, ge=1, le=3650)
     nightly: bool = True
+    # Suggested Skills from repeated work (docs/phases/SKILL_SUGGESTIONS.md, S1):
+    # off means no harvest and no model call; the cap bounds the request
+    # excerpts one nightly grouping pass sends to the model.
+    suggestions: bool = True
+    suggestion_max_requests: int = Field(default=120, ge=10, le=1000)
 
 
 class ExperienceCase(Contract):

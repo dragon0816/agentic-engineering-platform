@@ -170,7 +170,7 @@ from host_runtime.experience import (
     save_settings,
 )
 from host_runtime.experience_proposals import ProposalError, ProposalStore, ReviewProposal
-from host_runtime.experience_review import latest_review, run_review
+from host_runtime.experience_review import latest_review, review_model, run_review
 from host_runtime.gateway_link import explain_model_failure
 from host_runtime.host import HostRuntime, build_telegram, choice_sources, load_authorization
 from host_runtime.identity_presets import IdentityPresets
@@ -241,6 +241,13 @@ from host_runtime.shared_platform import (
 from host_runtime.shared_platform import PROBLEMS as SHARED_PLATFORM_PROBLEMS
 from host_runtime.shared_platform import now as utc_now
 from host_runtime.skill_assist import Turn, assist
+from host_runtime.skill_suggestions import (
+    SuggestionCounts,
+    SuggestionPass,
+    SuggestionStore,
+    suggest_for_runtime,
+)
+from host_runtime.skill_suggestions import due as suggestions_due
 from host_runtime.slash_commands import (
     COMMANDS,
     SlashCommandError,
@@ -1511,13 +1518,14 @@ class AgentWeb:
         return "\n\n".join(part for part in parts if part)
 
     def experience_review(self) -> dict[str, Any]:
-        """Harvest, then review the open groups; report only (E2)."""
-        installed = self.runtime.agent.gateway.bridge.installed.get(KNOWLEDGE_QUERY_SPEC.identity)
-        handler = getattr(installed, "handler", None)
-        model, alias = getattr(handler, "model", None), getattr(handler, "alias", None)
-        if model is None or alias is None:
+        """Harvest, then review the open groups and look for repeated work;
+        report only (E2, SKILL_SUGGESTIONS S1)."""
+        found = review_model(self.runtime)
+        if found is None:
             return {"ok": False, "code": "experience_review_unavailable"}
+        model, alias = found
         added = self.experience_harvest()
+        suggestions = self._suggestion_pass(model, alias)
         report = run_review(
             self._experience_store(),
             model,
@@ -1525,9 +1533,39 @@ class AgentWeb:
             self._experience_rules,
             workspace=self.runtime.layout.workspace_root,
             harvested=added,
+            suggestions=suggestions,
         )
         self._experience_store().set_meta("last_review", report.started_at)
-        return {"ok": True, "review_id": report.review_id, "findings": len(report.findings)}
+        return {
+            "ok": True,
+            "review_id": report.review_id,
+            "findings": len(report.findings),
+            "suggestions": suggestions.counts.qualified,
+        }
+
+    def _suggestion_pass(self, model: Any, alias: str) -> SuggestionPass:
+        """The device owner's Skill suggestion pass; a fault is reported, never
+        allowed to stop the failure review."""
+        try:
+            return suggest_for_runtime(self.runtime, model, alias)
+        except Exception as error:  # noqa: BLE001 - the report shows why it stopped
+            return SuggestionPass(
+                counts=SuggestionCounts(
+                    pass_id="suggest-failed",
+                    actor=self.runtime.actor,
+                    started_at=datetime.now(UTC).isoformat(timespec="seconds"),
+                    error=type(error).__name__,
+                )
+            )
+
+    def _suggestions_due(self) -> bool:
+        workspace = self.runtime.layout.workspace_root
+        return suggestions_due(
+            self.runtime.state.conversations(self.runtime.actor, limit=100),
+            actor=self.runtime.actor,
+            store=SuggestionStore(workspace),
+            settings=load_settings(workspace),
+        )
 
     def experience(self) -> dict[str, Any]:
         workspace = self.runtime.layout.workspace_root
@@ -1672,7 +1710,10 @@ class AgentWeb:
 
     def update_experience_settings(self, body: dict[str, Any]) -> dict[str, Any]:
         try:
-            settings = ExperienceSettings.model_validate(body)
+            # Fields the page does not send (the suggestion settings) keep
+            # their saved values.
+            current = load_settings(self.runtime.layout.workspace_root).model_dump()
+            settings = ExperienceSettings.model_validate({**current, **body})
         except ValueError:
             return {"ok": False, "code": "experience_settings_invalid"}
         save_settings(self.runtime.layout.workspace_root, settings)
@@ -1719,7 +1760,7 @@ class AgentWeb:
                     if now.hour < 2 or last[:10] == now.date().isoformat():
                         continue
                     self.experience_harvest()
-                    if self._experience_store().cases("open"):
+                    if self._experience_store().cases("open") or self._suggestions_due():
                         self.tasks().tracked(
                             "experience_review",
                             "Experience review (nightly)",

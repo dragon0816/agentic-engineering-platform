@@ -218,7 +218,12 @@ def test_the_experience_review_routes_keep_settings_and_report(
     server, _ = served_pipeline
     assert fetch(base(server) + "/api/experience").status == 401
     info = json.loads(fetch(base(server) + "/api/experience", token=server.token).body)
-    assert info["settings"] == {"retention_days": 30, "nightly": True}
+    assert info["settings"] == {
+        "retention_days": 30,
+        "nightly": True,
+        "suggestions": True,
+        "suggestion_max_requests": 120,
+    }
     assert info["open"] == 0 and info["review"] is None
     saved = json.loads(
         fetch(
@@ -227,7 +232,13 @@ def test_the_experience_review_routes_keep_settings_and_report(
             body={"retention_days": 14, "nightly": False},
         ).body
     )
-    assert saved["settings"] == {"retention_days": 14, "nightly": False}
+    # The page sends only its two fields; the suggestion settings keep theirs.
+    assert saved["settings"] == {
+        "retention_days": 14,
+        "nightly": False,
+        "suggestions": True,
+        "suggestion_max_requests": 120,
+    }
     bad = json.loads(
         fetch(
             base(server) + "/api/experience/settings",
