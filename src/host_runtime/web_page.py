@@ -4135,7 +4135,7 @@ async function saveSharedPlatform(enroll) {
       base_url: el("shared-bridge-url").value.trim(),
       code: field.value, enroll});
     field.value = "";  // the code never stays on the page
-    if (reply.member_portal_url !== undefined) showSharedPlatform(reply);
+    if (reply.member_portal_url !== undefined) showSharedPlatform(reply, reply.ok !== false);
     if (reply.ok === false) {
       status.classList.add("bad");
       status.textContent = (reply.saved ? "Settings saved, but not enrolled: " : "Not saved: ")
