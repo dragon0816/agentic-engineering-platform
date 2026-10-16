@@ -2204,3 +2204,30 @@ s-k-20261011T102952` (not published).
   internal; this PC keeps its own internal `business-cards`) installed switched off
   in the live workspace, coding-agent folders in `workspace/agent-skills`; backup in
   `%LOCALAPPDATA%\AgenticEngineeringPlatform\backups\20261016-before-hermes-pack`.
+
+- [x] LLM gateway in the Windows installer (2026-10-16, owner decision;
+  `docs/phases/LLM_GATEWAY.md`, decision `docs/DECISIONS.md` 2026-10-16 "The installer
+  ships an LLM gateway ..."). Phase A (52aabea9, 5617be76): `src/llm_gateway/` ports the
+  owner's working gateway (LiteLLM 1.94.1, `hosted_vllm/` chatrs models, the
+  empty-`choices` streaming patch that refuses to run when LiteLLM's internals move,
+  Kerberos/SPNEGO token renewal, offline LiteLLM flags set before LiteLLM is imported),
+  with status/start/stop/test/autostart and an exact dependency lock
+  (`deploy/windows-preview/gateway/requirements.txt`, 106 wheels, no proprietary
+  `litellm-enterprise`). Phase B: `aep-host gateway ...`; `gateway.json` `managed`
+  (false = show and test only); Agent Web Settings > LLM gateway (Running / Starting… /
+  Stopped, token expiry, last test, Start / Restart / Refresh token / Test, autostart)
+  linked from the Natural-language model card; failed turns on a loopback model say
+  not running / still starting / 401 in Agent Web and Telegram
+  (`host_runtime/gateway_link.py`); installer `gateway-venv` + init + local key in the
+  user environment when none + model only when `host.json` has none + best-effort
+  token refresh + autostart + start, `-NoGateway`, `-GatewayInstallOnly`, long-path
+  pre-check; update stops AEP's gateway and keeps its settings; uninstall switches
+  autostart off and stops it; builder `--gateway-wheel-dir` (one wheel per locked
+  package), release script downloads the lock; CI smoke installs the gateway offline
+  and checks status, the patch, the launcher's refusal without a token and that a
+  reinstall keeps `gateway.json`; manual section "設定 LLM gateway（最重要）" right
+  after installation; README. Tests: `tests/test_llm_gateway.py`,
+  `tests/test_gateway_link.py` (incl. real browser: card 717x348, Start 88x44),
+  `tests/test_windows_preview_bundle.py`. This PC keeps the owner's gateway (port
+  4000, task `LiteLLM_Gateway`); AEP's gateway home here is unmanaged and reads the
+  owner's `.env` for the expiry only.

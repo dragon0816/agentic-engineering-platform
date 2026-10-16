@@ -1,8 +1,11 @@
 # LLM gateway in the AEP installer
 
-Status: phase A done (2026-10-16, Claude Code): design, `src/llm_gateway/`, tests,
-dependency lock. Phase B open: installer, `aep-host gateway` wiring, Settings card,
-model-failure message, manual, `verify.yml`, DECISIONS/TASKS/HANDOFF entries.
+Status: done (phase A and B 2026-10-16, Claude Code). Phase A: design,
+`src/llm_gateway/`, tests, dependency lock. Phase B: `aep-host gateway`, Agent Web
+Settings > LLM gateway, model-failure answers in Agent Web and Telegram, installer /
+update / uninstall, builder and release, `verify.yml`, manual and README, decision
+`docs/DECISIONS.md` 2026-10-16 "The installer ships an LLM gateway ...". Owner
+decisions 2026-10-16 below ("Owner decisions on the open questions").
 
 ## Owner decision (2026-10-16)
 
@@ -214,32 +217,54 @@ gateway autostart --on`. Default: (a).
 - `stop` stopped only the gateway it started; the owner's gateway on port 4000 kept
   answering throughout.
 
-## Decision record (to append to docs/DECISIONS.md in phase B)
+## Owner decisions on the open questions (2026-10-16)
 
-Phase A does not edit `docs/DECISIONS.md`, `docs/TASKS.md` or `HANDOFF.md`: another
-agent has uncommitted changes in them. Text to append:
+1. All 11 models ship, including the `claude-*` aliases; AEP's default stays `gpt-5.5`.
+2. A separate `gateway-venv` under the install root (AEP wheel `--no-deps`), not the
+   AEP venv.
+3. `litellm-enterprise` is left out; the ~135 MB bundle growth is accepted.
+4. This PC keeps the owner's own gateway on port 4000 and its `LiteLLM_Gateway`
+   task. AEP's gateway home here is `managed: false` with `secrets_file` pointing at
+   the owner's `.env` (read for the expiry only), AEP autostart off; AEP never stops
+   or kills a foreign gateway.
 
-> ## 2026-10-16 — The installer ships an LLM gateway (LiteLLM without its enterprise package)
->
-> Decision: AEP ships `llm_gateway` (LiteLLM 1.94.1 proxy on 127.0.0.1:4000, chatrs
-> via `hosted_vllm/`, the empty-`choices` streaming patch, Kerberos token refresh,
-> offline LiteLLM flags) installed offline from a lock of the owner's verified versions,
-> in its own venv, started at logon by a current-user task. `litellm[proxy]` is not
-> installed: its `litellm-enterprise` dependency is proprietary and may not be
-> redistributed; its other requirements are listed explicitly. Secrets stay in a token
-> file in the user's profile; configuration references them as `os.environ/...`.
->
-> Reason: without a gateway AEP's Agent reaches no model; the owner's hand-built one is
-> verified and its knowledge (prefix, patch, settings, token renewal) is ported, not
-> rediscovered.
->
-> Rejected alternatives: bundling `litellm[proxy]` (redistributes proprietary code);
-> shipping `chatrs-gateway.exe` (153 MB binary built from that same set, opaque);
-> writing an own proxy (loses the Anthropic `/v1/messages` translation Claude Code
-> needs); the AEP venv (numpy and pydantic pin conflicts, pending owner confirmation);
-> downloading at install time (company PCs install offline).
+The decision text is in `docs/DECISIONS.md` (2026-10-16).
 
-## Needed from the owner
+## Phase B as built
+
+- `managed` in `gateway.json` (default true). False: `start`, `stop`, `restart`,
+  `refresh-token` and `autostart --on` are refused with `not_managed`; status and
+  test work; `init` writes no key. `aep-host gateway init` takes `--python`,
+  `--port`, `--secrets-file`, `--unmanaged`, `--user-env` (exports the local key to
+  the user variable `LITELLM_MASTER_KEY` only when none exists).
+- `autostart --off` queries first and removes only what exists (the task, the Run
+  value), so a computer without AEP's task sees a query and nothing else.
+- `host_runtime/gateway_link.py`: `explain_model_failure` (codes `model_unreachable`,
+  `model_timeout`, `model_error`, `model_http_error`, `model_unavailable` on a
+  loopback endpoint: not running / still starting (started N s ago) / 401 / 405) and
+  `gateway_card`. Agent Web: `GET/POST /api/settings/gateway`, the card before the
+  Natural-language model card ("Uses the built-in gateway at 127.0.0.1:4000"),
+  polling every 2 s while starting. Telegram: `TelegramIngress.explain_failure`, set
+  by `build_telegram`.
+- Installer: `-NoGateway`, `-GatewayInstallOnly`; model merge only without
+  `models`; long-path pre-check (deepest LiteLLM file 129 characters below
+  `site-packages`); `gateway stop` before reinstalling `gateway-venv`; best-effort
+  token refresh, autostart, start. `update.ps1` stops AEP's gateway first and passes
+  `-NoGateway`; `uninstall.ps1 -Apply` switches autostart off and stops AEP's gateway,
+  keeping the gateway home.
+- Builder: `--gateway-wheel-dir`, exactly one wheel per locked package (refused
+  otherwise), copied to `wheels-gateway/`; the credential scan covers the lock.
+  `release_windows.py` downloads the lock with `--no-deps`. CI: downloads the lock,
+  installs with `-GatewayInstallOnly`, checks model routing, `gateway status --json`
+  (stopped, config ok, managed, LiteLLM = pinned), the patch against the bundled
+  LiteLLM, the launcher's exit 2 without a token, and that a reinstall keeps
+  `gateway.json`.
+- No `gateway` extra in `pyproject.toml`: an extra cannot express "LiteLLM without
+  its `proxy` extra plus the proxy's other requirements at exact versions"; the lock
+  file is the single source, and `litellm` is never imported statically (no mypy
+  override needed).
+
+## Needed from the owner (answered 2026-10-16, see above)
 
 1. Confirm the model list (11 names, `DEFAULT_MODELS` in `config.py`, AEP default
    `gpt-5.5`) and whether colleagues should get the `claude-*` aliases.

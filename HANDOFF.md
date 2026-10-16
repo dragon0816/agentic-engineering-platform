@@ -1,8 +1,51 @@
 # Handoff
 
-Updated: 2026-10-16 (Asia/Taipei), by Claude Code (Hermes skill pack and bundled Skills)
+Updated: 2026-10-16 (Asia/Taipei), by Claude Code (LLM gateway in the installer)
 
-## Hermes skill pack and bundled Skills (2026-10-16, Claude Code) — latest
+## LLM gateway in the Windows installer (2026-10-16, Claude Code) — latest
+
+Goal: owner decision 2026-10-16 "the installer must include the LLM gateway"; design and
+as-built in `docs/phases/LLM_GATEWAY.md`, decision `docs/DECISIONS.md` 2026-10-16 "The
+installer ships an LLM gateway ...", row in `docs/TASKS.md`. Committed on main, not
+pushed (phase A 52aabea9, 5617be76; phase B commits after them).
+- Code: `src/llm_gateway/` (launcher + streaming patch + offline LiteLLM flags,
+  config/secrets/state, Kerberos token refresh, control, CLI), `aep-host gateway ...`
+  (`host_runtime/cli.py`), `host_runtime/gateway_link.py` (failure explanation, card),
+  Agent Web `GET/POST /api/settings/gateway` + card in `web_page.py`, Telegram
+  `TelegramIngress.explain_failure` (set in `host.build_telegram`).
+- Bundle: lock `deploy/windows-preview/gateway/requirements.txt` (106 wheels, no
+  `litellm-enterprise`), builder `--gateway-wheel-dir` -> `wheels-gateway/`,
+  `release_windows.py` downloads it; `install.ps1` (`-NoGateway`, `-GatewayInstallOnly`,
+  long-path pre-check, `gateway-venv`, init + `--user-env`, model only when `host.json`
+  has none, refresh/autostart/start), `update.ps1`, `uninstall.ps1`; `verify.yml`
+  bundle smoke extended. Manual section "設定 LLM gateway（最重要）" right after section 2.
+- This PC: the owner keeps his gateway (port 4000, task `LiteLLM_Gateway`, `.env` in
+  `C:\Users\Chi_L\Documents\claude\customized_LLM_vscode_plugin`). AEP's gateway home
+  `%LOCALAPPDATA%\AgenticEngineeringPlatform\gateway\gateway.json` was written with
+  `managed: false`, `secrets_file` = that `.env` (read for the expiry only), `python` =
+  his venv (for the LiteLLM version); AEP autostart off. `aep-host gateway status` here:
+  serving (run outside AEP), token 9.8 days left, LiteLLM 1.94.1. No task, registry
+  value, token, live host.json or live Agent Web was touched; Agent Web not restarted.
+- Verified: ruff check / format --check and strict mypy (src+tests) in the project
+  `.venv` and in a fresh venv with only `.[dev,office]`; full pytest in that CI-like
+  venv (2993 passed, 30 skipped) and in the project `.venv` (see `docs/TASKS.md` /
+  the final report); both `verify.yml` bundle steps replayed locally with a temporary
+  USERPROFILE/LOCALAPPDATA (`-NoShortcut -NoAgentSkills` added). The Windows step ran in
+  two parts: the first stopped on two CI-script issues, then fixed (the status check
+  assumed nothing serves port 4000, which is false on this PC; `Add-Member credentials`
+  needs `-Force` now that the installer maps the gateway key); the second part resumed
+  there and ran to the uninstall. The Shared Platform step ran in one go. Real browser:
+  card 717x348, Start 88x44.
+- NOT verified: a real `refresh-token` against Keycloak, a real start of AEP's gateway
+  from the bundle with a model answer on a domain PC, the Task Scheduler registration
+  (tests use fakes; CI uses `-GatewayInstallOnly`), the card against the live Agent Web
+  (needs a restart on this code).
+- Next (owner): restart Agent Web on this code; Settings > LLM gateway shows "Running ·
+  127.0.0.1:4000 · run outside AEP", the token expiry, and Test answers. On a colleague's
+  domain PC: install a released bundle; the card shows Running and Test answers. Push
+  and watch CI (the bundle step now downloads ~135 MB more and installs the gateway).
+
+## Hermes skill pack and bundled Skills (2026-10-16, Claude Code)
 
 Goal: owner request 2026-10-15 + decisions 2026-10-16, `docs/phases/HERMES_SKILL_PACK.md`
 (design, scan findings, bundle list, phase B, this PC). Decision `docs/DECISIONS.md`

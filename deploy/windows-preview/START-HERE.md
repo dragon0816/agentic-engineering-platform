@@ -75,7 +75,7 @@ token 貼到 Issue、聊天或測試證據中。
 本機預設可編輯的 Gateway 設定片段在 `gateway-default.json`。它包含
 `company`、`http://127.0.0.1:4000/v1`、`gpt-5.5`、環境變數名稱及本機
 `UNCLASSIFIED` 資料核准；沒有 token 值。將其中 `models`、`credentials`
-合併到安裝目錄的 `host.json`，或直接修改已安裝的 `host.json`。
+合併到安裝目錄的 `host.json`（安裝程式在 `host.json` 還沒有模型時會自動合併，並安裝、啟動內建的 LLM gateway；見 `INSTALL.zh-TW.md` 的「設定 LLM gateway（最重要）」），或直接修改已安裝的 `host.json`。
 只更換同一路由的 model 不會清除核准；更換 URL、provider 或憑證時，
 需要在 `host.json` 重新設定對應核准。核准不會自動套用到其他主機。
 

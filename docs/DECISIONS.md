@@ -2994,3 +2994,44 @@ Rejected alternatives: running `export-assets` from the installer (it rewrites s
 files and would switch on what a person switched off); writing every pack folder into
 the agents and relying on `disable-model-invocation` (Claude Code only, still listed);
 a global `[redacted]` exemption in the builder's scan (weakens it for every file).
+
+## 2026-10-16 — The installer ships an LLM gateway (LiteLLM without its enterprise package, own venv)
+
+Decision: the Windows bundle installs `llm_gateway` (docs/phases/LLM_GATEWAY.md): the
+owner's verified LiteLLM 1.94.1 proxy on `127.0.0.1:4000`, chatrs models via
+`hosted_vllm/` (11 names incl. the `claude-*` aliases, AEP default `gpt-5.5`), the
+empty-`choices` streaming patch (refuses to start when LiteLLM's internals moved),
+offline LiteLLM flags set before LiteLLM is imported (`LITELLM_LOCAL_MODEL_COST_MAP`
+and three more; a reboot otherwise waited 9-12 minutes on a GitHub fetch behind the
+company proxy), Kerberos/SPNEGO token renewal, status/start/stop/test/autostart
+(`aep-host gateway ...`, Agent Web Settings > LLM gateway). It is installed offline
+from an exact lock of the owner's versions (`deploy/windows-preview/gateway/
+requirements.txt`, 106 wheels, ~135 MB) into `<install root>\gateway-venv` with the AEP
+wheel `--no-deps`. `litellm[proxy]` is not installed: its `litellm-enterprise`
+dependency is proprietary and may not be redistributed; LiteLLM imports it only inside
+`try/except`, and the extra's other requirements are listed explicitly. Settings,
+configuration (secrets only as `os.environ/...`) and the token file live in
+`%LOCALAPPDATA%\AgenticEngineeringPlatform\gateway\` and survive updates and
+uninstall; the local key is generated once and exported to the user variable
+`LITELLM_MASTER_KEY` only when none exists. `host.json` gets `gateway-default.json`'s
+model only when it has none. Autostart is a current-user logon task without
+elevation and without a restart loop (fallback: the user's Run key). A gateway run
+outside AEP (`gateway.json` `managed: false`) is shown and tested only, never
+started, stopped, refreshed or autostarted. Failed model turns on a loopback endpoint
+say "not running", "still starting (started N s ago)" or "401: token probably expired"
+with a pointer to Settings > LLM gateway, in Agent Web and Telegram.
+
+Reason: without a gateway AEP's Agent reaches no model (owner, 2026-10-16); the owner's
+hand-built gateway is verified, so its knowledge (prefix, patch, settings, token
+renewal) is ported, not rediscovered. Owner decisions 2026-10-16: all 11 models, a
+separate venv, no enterprise package and the bundle growth accepted, this PC keeps
+its own gateway.
+
+Rejected alternatives: bundling `litellm[proxy]` (redistributes proprietary code); a
+trimmed dependency set (LiteLLM's `run_server` refuses to start without boto3);
+shipping the 153 MB `chatrs-gateway.exe` (opaque PyInstaller build of the same set);
+writing an own proxy (loses the Anthropic `/v1/messages` translation Claude Code
+needs); the AEP venv (numpy `<2` vs 2.5.1 and other pin conflicts); downloading at
+install time (company PCs install offline); a restart-on-failure task (masks a bad
+token as a crash loop); a probe inside `agent/gateway.py` (the agent layer stays
+provider-neutral; the explanation lives in `host_runtime/gateway_link.py`).

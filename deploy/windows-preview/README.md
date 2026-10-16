@@ -468,6 +468,50 @@ instead of adding this week's. That defect is fixed and pinned by a test, and
 the run takes a backup before touching anything — but try it on a copy first
 and compare the result with the old Host Bridge's.
 
+## LLM gateway (installed by default)
+
+The Agent reaches a model through a LiteLLM proxy on `127.0.0.1:4000`
+(docs/phases/LLM_GATEWAY.md in the source repository). `install.ps1` installs
+it unless `-NoGateway` is given:
+
+- `gateway-venv\` under the install root: LiteLLM 1.94.1 and its dependencies from
+  the bundle's `wheels-gateway\` (exact lock `gateway\requirements.txt`; not
+  `litellm[proxy]`, whose `litellm-enterprise` dependency is proprietary), plus
+  AEP's `llm_gateway` launcher. It is a separate venv because LiteLLM's pins differ
+  from AEP's (numpy, pydantic).
+- `aep-host gateway init`: `%LOCALAPPDATA%\AgenticEngineeringPlatform\gateway\`
+  gets `gateway.json` (port, upstream, models, default `gpt-5.5`),
+  `litellm-config.yaml` (secrets only as `os.environ/...` references) and the
+  token file `gateway.env`. A local key is generated once when neither the token
+  file nor the user environment has one, and put in the user variable
+  `LITELLM_MASTER_KEY` (what `gateway-default.json`'s credential mapping names).
+  An update keeps all of these.
+- When `host.json` has no `models` yet, the installer merges
+  `gateway-default.json` (model `company` at `http://127.0.0.1:4000/v1`, its data
+  approval and credential mapping). A configured model is never replaced.
+- `aep-host gateway refresh-token` renews the company token with Windows
+  integrated sign-in (Kerberos/SPNEGO against the company Keycloak; no password is
+  stored). Off the domain it fails, the installer warns, and the gateway waits.
+- `aep-host gateway autostart --on` registers the Task Scheduler task
+  `AEP LLM Gateway` for the current user at logon (no elevation, no restart loop;
+  falls back to the user's Run key), then `aep-host gateway start`.
+- `-GatewayInstallOnly` installs and configures it without the token renewal,
+  autostart and start (CI and offline checks).
+- `uninstall.cmd -Apply` switches the autostart off and stops the gateway AEP
+  started; the gateway folder in `%LOCALAPPDATA%` is kept.
+
+Commands: `aep-host gateway status [--json] | start | stop | restart |
+test [--model M] | refresh-token [--force] [--restart] | autostart --on/--off |
+init [--force] [--port N] [--python P] [--secrets-file F] [--unmanaged]`.
+None of them prints a token or key. A gateway someone runs outside AEP on the
+same port is reported (`not started by AEP`) and never stopped; with
+`init --unmanaged --secrets-file <its .env>` AEP only shows its status and
+tests it. Agent Web **Settings → LLM gateway** shows the same status
+(Running / Starting… / Stopped, token expiry, last test) with Start, Restart,
+Refresh token, Test and the autostart switch. When a turn fails because the
+gateway is down, still starting or answering 401, Agent Web and Telegram say so
+instead of a generic model error.
+
 ## A model (optional)
 
 Without one, this Agent matches commands and runs Workflows. It does not
@@ -498,7 +542,8 @@ For this workstation the owner approved the exact `company` route at
 `http://127.0.0.1:4000/v1` for `UNCLASSIFIED` requests. The editable
 `gateway-default.json` fragment supplies `models.data_approval` and the
 `LITELLM_MASTER_KEY` environment-variable mapping without a token value.
-Merge its `models` and `credentials` keys into the installed `host.json`.
+The installer merges its `models` and `credentials` keys into `host.json` when
+that has no model yet (see "LLM gateway" above); otherwise merge them by hand.
 Changing only the model ID preserves that route's approval; changing the
 URL, provider or credential clears it. Other hosts need their own approval.
 

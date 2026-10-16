@@ -20,8 +20,8 @@ AEP Agent 安裝在你自己的電腦上，只有這台電腦能開啟它的網�
      不能安裝軟體時，請洽 IT。
    - 已經有 3.12，但 `python` 指到別的版本：安裝時改用 `-PythonExe`，指定 3.12 的
      `python.exe` 完整路徑（見第 2 節）。
-3. **公司語言模型（LLM Gateway）的存取資訊**：網址、模型名稱，以及存放權杖的環境變數
-   名稱。這些由發佈者或團隊提供。權杖值只放在 Windows 環境變數，不寫進任何檔案。
+3. **公司網域登入**：安裝包內建 LLM gateway，用你的 Windows 網域登入取得公司模型的
+   權杖（見「設定 LLM gateway（最重要）」）。安裝時最好在公司網路上，或連著 VPN。
 
 ## 2. 第一次安裝
 
@@ -42,6 +42,8 @@ AEP Agent 安裝在你自己的電腦上，只有這台電腦能開啟它的網�
    - 檢查每個檔案的 SHA-256；
    - 建立獨立的 Python 環境；
    - 從安裝包內的檔案離線安裝，不會連外下載；
+   - 安裝 **LLM gateway**，用你的網域登入取得權杖、設成登入時自動啟動並啟動它
+     （見下一節；不想要時加 `-NoGateway`）；
    - 執行健康檢查（doctor）；
    - 在桌面和開始功能表建立 **AEP Agent** 捷徑；
    - 替這台電腦上找得到的 Claude Code、Codex、GitHub Copilot 裝好 AEP 的 skills 和
@@ -57,6 +59,85 @@ AEP Agent 安裝在你自己的電腦上，只有這台電腦能開啟它的網�
 %LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0
 ```
 
+## 設定 LLM gateway（最重要）
+
+AEP Agent 要透過 **LLM gateway** 才能使用公司的語言模型（chatrs 上的 GPT 等）。
+沒有它，Agent 無法回答任何一般對話。安裝程式已經替你裝好、設定好，並設成登入
+Windows 時自動啟動；這一節說明它是什麼、怎麼確認它正常、出問題時怎麼處理。
+
+### 它是什麼
+
+- 一個只在這台電腦上聽 `127.0.0.1:4000` 的小程式（LiteLLM），把 Agent 的請求轉給
+  公司的模型服務。別台電腦連不到它。Claude Code 也可以透過它使用公司模型。
+- 程式裝在安裝資料夾的 `gateway-venv\`；設定、權杖檔和紀錄放在
+  `%LOCALAPPDATA%\AgenticEngineeringPlatform\gateway\`，**更新和解除安裝都會保留**。
+- Agent Web 的 **Settings → Natural-language model** 會顯示
+  「Uses the built-in gateway at 127.0.0.1:4000」，不需要再填任何網址或權杖。
+
+### 自動啟動
+
+- 登入 Windows 時自動啟動（工作排程器的「AEP LLM Gateway」，只對你自己的帳號，
+  不需要系統管理員權限；工作排程器拒絕時改用你帳號的登入啟動項目）。
+- 重開機後第一次啟動可能要 1～3 分鐘。這段時間 Agent 會回答
+  「The LLM gateway is still starting」，稍等再問即可；Settings 的卡片會顯示
+  `Starting…`，準備好後變成 `Running`。
+- gateway 停掉後**不會**自己一直重啟（權杖錯誤時一直重啟只會掩蓋原因）；請看下面的
+  疑難排解。
+
+### 權杖（token）
+
+- 公司模型服務要一個約 28 天有效的權杖。gateway 用你的 **Windows 網域登入
+  （Kerberos）** 自動換新：不需要也不會儲存密碼，不開瀏覽器。
+- 權杖只存在 `%LOCALAPPDATA%\AgenticEngineeringPlatform\gateway\gateway.env`；
+  Agent Web 只顯示到期日，不顯示權杖本身。**不要把這個檔案或權杖寄給任何人。**
+- 換新需要：電腦在公司網域且已登入——在公司網路上，或連上 VPN 並有 Kerberos 票證
+  （PowerShell 執行 `klist`，看得到 `krbtgt/` 開頭的票證）。
+- 剩 7 天以內時，登入自動啟動會先換新。也可以手動：Settings → **LLM gateway** →
+  **Refresh token**。在家沒有 VPN 時換不了，但舊權杖到期前照常可用。
+- 安裝時若顯示「The LLM gateway's token could not be renewed now」，表示當下沒有網域
+  登入：連上公司網路或 VPN 後，到 Settings → LLM gateway 按 **Refresh token**。
+
+### 確認 gateway 正常
+
+1. 打開 Agent Web → **Settings → LLM gateway**：
+   - 狀態是 `Running · 127.0.0.1:4000`；
+   - Token 顯示 `valid until …（N days left）`；
+   - 按 **Test**，看到 `✓ gpt-5.5: OK`。
+2. 或在 PowerShell 執行：
+
+   ```powershell
+   $aep = "$env:LOCALAPPDATA\AgenticEngineeringPlatform\preview-0.1.0\.venv\Scripts\aep-host.exe"
+   & $aep gateway status    # 狀態、權杖到期日、設定是否正確
+   & $aep gateway test      # 問預設模型一句話
+   ```
+
+常用指令（都用上面的 `$aep`）：
+
+| 指令 | 作用 |
+|---|---|
+| `& $aep gateway status` | 是否在執行、權杖到期日、LiteLLM 版本、自動啟動 |
+| `& $aep gateway start` / `stop` / `restart` | 啟動 / 停止 / 重新啟動（只停 AEP 自己啟動的那一個） |
+| `& $aep gateway test --model gpt-5.4` | 測試某個模型 |
+| `& $aep gateway refresh-token --force` | 立即用網域登入換新權杖（換新後按 Restart） |
+| `& $aep gateway autostart --on` / `--off` | 開啟 / 關閉登入時自動啟動 |
+
+不想安裝 gateway（例如團隊有別的模型服務）時，安裝和更新加 `-NoGateway`，再到
+Settings → Natural-language model 填團隊提供的網址。
+
+### 疑難排解
+
+| 你看到的 | 原因 | 處理方式 |
+|---|---|---|
+| Agent 回答「The LLM gateway is not running」 | gateway 沒在執行 | Settings → LLM gateway → **Start**；仍停住時看 `gateway\logs\gateway.log` 最後幾行 |
+| 「The LLM gateway is still starting」 | 剛開機，LiteLLM 還在載入 | 等 1～3 分鐘再問 |
+| `401`、「the company token has probably expired」 | 權杖過期，或本機金鑰不一致 | **Refresh token** 後 **Restart**；仍是 401 時回報（不要貼出 `gateway.env` 或 `LITELLM_MASTER_KEY` 的值） |
+| `405 Method Not Allowed` | 某個模型在 `litellm-config.yaml` 設成 `openai/`，LiteLLM 改走公司服務沒有的 Responses API | 模型一律用 `hosted_vllm/`；或執行 `& $aep gateway init --force` 依 `gateway.json` 重新產生設定 |
+| 回答串流到一半中斷，`gateway.log` 出現 `IndexError` | 公司服務送出 `choices` 為空的片段 | gateway 內建修正；若在換過 LiteLLM 版本後出現，回報 `gateway status` 顯示的版本（LiteLLM 內部改變時 gateway 會拒絕啟動並說明原因） |
+| `127.0.0.1:4000 is already served` / 卡片顯示 `not started by AEP` | 另一個程式（例如你自己架的 gateway）已在用 4000 | 正常的保護：AEP 不會啟動第二個，也不會停掉別人的。要換埠號：`& $aep gateway init --port 4001 --force`，再把 Natural-language model 的網址改成同一個埠號 |
+| `No Kerberos ticket` | 沒有網域登入 | 連公司網路或 VPN；必要時登出再登入，用 `klist` 檢查 |
+| `rejected the Windows ticket (401)` | 公司登入網站不在「近端內部網路」區域 | 請 IT 確認；`klist purge` 後登出再登入 |
+| 安裝時 `would need …-character paths` | 安裝路徑太深 | 用較短的 `-InstallRoot`（例如 `C:\aep\preview`），或加 `-NoGateway` |
+
 ## 3. 確認安裝成功
 
 在安裝包資料夾雙擊或執行 `verify.cmd`：
@@ -70,9 +151,12 @@ AEP Agent 安裝在你自己的電腦上，只有這台電腦能開啟它的網�
 - 第一次開啟需要等約 10～30 秒，之後瀏覽器會自動打開 Agent Web。
 - 關掉瀏覽器分頁，Agent 仍在背景執行；下次點捷徑會直接打開。
 
-### 第一次使用：設定語言模型
+### 第一次使用：語言模型
 
-打開 **Settings → Natural-language model**，填入第 1 節取得的資訊：
+安裝程式已經把語言模型設成內建的 LLM gateway（見「設定 LLM gateway（最重要）」），
+Settings → Natural-language model 會顯示「Uses the built-in gateway at 127.0.0.1:4000」，
+不需要再設定。只有不用內建 gateway（安裝時加了 `-NoGateway`）時，才打開
+**Settings → Natural-language model** 填入團隊提供的資訊：
 
 - Provider：`OpenAI-compatible Gateway`
 - Alias：`company`
@@ -197,6 +281,8 @@ Laya 等）都在 Settings 頁設定；細節見同一資料夾的 `README.md`�
    - 先關閉正在執行的 Agent Web；
    - 用新版檔案重新安裝程式；
    - **保留**你的 `host.json` 設定、workspace、對話紀錄和已安裝的能力；
+   - 先停下 AEP 啟動的 LLM gateway，更新後再啟動它；gateway 的設定和權杖保留
+     （加 `-NoGateway` 則不動 gateway）；
    - 把 Claude Code / Codex / Copilot 裡 AEP 的 skills 和 MCP 設定更新到新版
      （加 `-NoAgentSkills` 則不動）；
    - 加入新版附帶的 Skills；已經在這台電腦上的**維持你設定的狀態**：你關掉的不會被
@@ -230,6 +316,7 @@ Laya 等）都在 Settings 頁設定；細節見同一資料夾的 `README.md`�
 | `AEP is not installed ... yet`（update.cmd） | 這台電腦還沒安裝過 | 改用 `install.cmd` |
 | 捷徑點了沒反應 | Agent Web 啟動失敗 | 看 `workspace\logs` 最新的 `agent-web-*.err.log` 並回報 |
 | 網頁顯示要設定模型 | 還沒設定語言模型 | 依第 4 節設定 |
+| Agent 說 LLM gateway 沒在執行、還在啟動或 401 | gateway 的狀態 | 見「設定 LLM gateway（最重要）」的疑難排解 |
 
 ## 9. 解除安裝
 
@@ -241,7 +328,9 @@ Laya 等）都在 Settings 頁設定；細節見同一資料夾的 `README.md`�
 ```
 
 `-Apply` 會先把 AEP 放進 Claude Code / Codex / Copilot 的 skills 和 MCP 設定拿掉
-（只拿 AEP 自己的，其他設定不動），再刪除安裝資料夾。
+（只拿 AEP 自己的，其他設定不動），關閉 LLM gateway 的登入自動啟動並停下 AEP 啟動的
+gateway，再刪除安裝資料夾。gateway 的設定和權杖檔
+（`%LOCALAPPDATA%\AgenticEngineeringPlatform\gateway\`）會保留，不需要時請自行刪除。
 
 解除安裝會刪除 `host.json`、workspace 和對話紀錄。需要保留時，請先另外備份
 安裝資料夾。桌面和開始功能表的 **AEP Agent** 捷徑請手動刪除。
@@ -255,6 +344,8 @@ Laya 等）都在 Settings 頁設定；細節見同一資料夾的 `README.md`�
 | 工作資料、對話、能力 | 安裝資料夾裡的 `workspace\` |
 | 錯誤紀錄 | `workspace\logs\` |
 | 已安裝的版本 | 安裝資料夾裡的 `bundle-manifest.json`（`source_revision`） |
+| LLM gateway 程式 | 安裝資料夾裡的 `gateway-venv\` |
+| LLM gateway 設定、權杖、紀錄 | `%LOCALAPPDATA%\AgenticEngineeringPlatform\gateway\`（`gateway.json`、`litellm-config.yaml`、`gateway.env`、`logs\gateway.log`；更新與解除安裝都保留） |
 | Claude Code 的 AEP skills / MCP | `%USERPROFILE%\.claude\skills\aep-*`、`%USERPROFILE%\.claude.json` |
 | Codex 的 AEP skills / MCP | `%USERPROFILE%\.agents\skills\aep-*`、`%USERPROFILE%\.codex\config.toml` |
 | Copilot 的 AEP skills / MCP | `%USERPROFILE%\.copilot\skills\aep-*`、`%USERPROFILE%\.copilot\mcp-config.json` |
