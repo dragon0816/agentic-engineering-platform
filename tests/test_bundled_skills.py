@@ -18,7 +18,7 @@ from agent.skills import SkillManifest, SkillRegistry
 from common.assets import AssetIdentity
 from host_runtime import agent_setup, asset_shelf, skill_packs
 from host_runtime.agent_setup import MARKER_FILE, SKILLS, Environment
-from host_runtime.assets import shipped
+from host_runtime.assets import personal, shipped
 from host_runtime.cli import main
 from host_runtime.contracts import HostLayout
 from host_runtime.host import build_runtime
@@ -318,3 +318,87 @@ def test_a_folder_from_another_pack_is_not_replaced(tmp_path: Path) -> None:
     stored = skill_packs.store_dir(layout) / "hermes-business-cards" / "SKILL.md"
     assert stored.read_text(encoding="utf-8") == "internal"
     assert any("from the hermes-personal pack" in line for line in report.lines)
+
+
+# --- the weekly report is personal, not bundled (owner 2026-10-16) ---------------
+
+WEEKLY_FILES = {
+    "skills": "engineering__weekly-report__2.0.0.json",
+    "workflows": "engineering__sde-weekly-report__1.0.0.json",
+}
+
+
+def test_the_weekly_report_is_personal_and_not_shipped() -> None:
+    shipped_names = {item.metadata.identity.name for item in shipped()}
+    personal_names = {item.metadata.identity.name for item in personal()}
+    assert personal_names == {"weekly-report", "sde-weekly-report"}
+    assert not shipped_names & personal_names
+    assert not any("weekly" in name for name in shipped_names)
+    # Not shipped, so a colleague may remove one an earlier bundle installed.
+    for item in personal():
+        kind = "skill" if isinstance(item, SkillManifest) else "workflow"
+        assert not asset_shelf.is_shipped(kind, item.metadata.identity)
+
+
+def _install_cli(path: Path, bundle: Path, *extra: str) -> int:
+    return main(
+        [
+            "assets",
+            "--config",
+            str(path),
+            "install-bundled",
+            "--bundle",
+            str(bundle),
+            "--no-agent-skills",
+            *extra,
+        ]
+    )
+
+
+def test_a_colleague_install_gets_no_weekly_report_and_the_owner_can_ask_for_it(
+    tmp_path: Path, bundle: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("AEP_INCLUDE_PERSONAL_ASSETS", raising=False)
+    config, layout = ready(tmp_path)
+    path = host_json(tmp_path, config)
+    assert _install_cli(path, bundle) == 0
+    assert not (layout.skills / WEEKLY_FILES["skills"]).exists()
+    assert not (layout.workflows / WEEKLY_FILES["workflows"]).exists()
+    assert not any("weekly-report" in p.name for p in layout.workspace_root.rglob("*.json"))
+    # The owner's computer: the flag or the environment variable.
+    assert _install_cli(path, bundle, "--include-personal") == 0
+    assert (layout.skills / WEEKLY_FILES["skills"]).exists()
+    assert (layout.workflows / WEEKLY_FILES["workflows"]).exists()
+    other_config, other = ready(tmp_path / "owner")
+    other_path = host_json(tmp_path / "owner", other_config)
+    monkeypatch.setenv("AEP_INCLUDE_PERSONAL_ASSETS", "1")
+    assert _install_cli(other_path, bundle) == 0
+    assert (other.workflows / WEEKLY_FILES["workflows"]).exists()
+
+
+def test_an_update_leaves_earlier_weekly_assets_alone_and_never_brings_them_back(
+    tmp_path: Path, bundle: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A colleague who got the weekly report from an earlier bundle keeps it
+    as it is (an update removes nothing); once they remove it, no update
+    adds it again."""
+    monkeypatch.delenv("AEP_INCLUDE_PERSONAL_ASSETS", raising=False)
+    config, layout = ready(tmp_path)
+    path = host_json(tmp_path, config)
+    # What an earlier bundle installed, edited since by the person.
+    skill_packs.install(layout, switched_on=personal())
+    workflow = layout.workflows / WEEKLY_FILES["workflows"]
+    workflow.write_text(workflow.read_text(encoding="utf-8") + " ", encoding="utf-8")
+    before = workflow.read_bytes()
+    assert _install_cli(path, bundle) == 0
+    assert workflow.read_bytes() == before
+    assert (layout.skills / WEEKLY_FILES["skills"]).exists()
+    # Removed by the person (allowed: it is not shipped), then updated twice.
+    for kind, name in (("skill", "weekly-report"), ("workflow", "sde-weekly-report")):
+        identity = next(i.metadata.identity for i in personal() if i.metadata.identity.name == name)
+        asset_shelf.remove(layout, kind, identity, now=datetime.now(UTC), actor="me")  # type: ignore[arg-type]
+    assert _install_cli(path, bundle) == 0
+    assert _install_cli(path, bundle) == 0
+    assert not (layout.skills / WEEKLY_FILES["skills"]).exists()
+    assert not workflow.exists()
+    assert not list((layout.skills / "disabled").glob("*weekly-report*"))

@@ -87,8 +87,8 @@ $PlatformWheels = @(Get-ChildItem -LiteralPath (Join-Path $BundleRoot "wheels") 
 if ($PlatformWheels.Count -ne 1) { throw "Bundle must contain exactly one platform wheel." }
 $PlatformWheel = $PlatformWheels[0]
 # By name with its extras, resolved entirely from the bundle's own wheels:
-# the extras the bundle carries are reading the weekly workbook (openpyxl),
-# writing it through Excel (pywin32), and drawing the weekly mail chart.
+# the extras the bundle carries are reading workbooks (openpyxl), writing
+# them through Excel (pywin32), and drawing charts (matplotlib).
 # Extras appended to a wheel *path*
 # read to pip as part of the filename, so the requirement form is used and
 # the check above is what guarantees the directory holds exactly one build.

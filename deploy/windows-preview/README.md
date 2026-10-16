@@ -8,11 +8,8 @@ This preview proves a credential-free, per-user installation and company-device
 configuration before the shared-platform enrollment transport exists. It installs
 a resident Agent that runs the Skills and Workflows you place in its workspace.
 
-It ships the capabilities the GTM weekly report needs — a bounded read of a file
-inside the workspace, a project board reader, a workbook reader and the workbook writer —
-and the Skill and Workflow that run them. None of that does anything until you
-configure a project board and a workbook under `integrations`; `aep-host doctor`
-says whether you have. It also contains a provider-neutral physical DUT boundary,
+It ships the Skills and Workflows meant for everyone (see "Shipped Skills and
+Workflows" below) and the capabilities they run. It also contains a provider-neutral physical DUT boundary,
 but no vendor driver or vendor procedure. It contains no Git, browser or email
 execution adapter, so it cannot run workflow 13.
 
@@ -298,188 +295,20 @@ this host that its token is revoked or its binding withdrawn is a revocation,
 and even then nothing local is deleted; being bound again is an action on the
 platform.
 
-## Weekly report preview (optional)
+## Shipped Skills and Workflows
 
-The GTM weekly report's first half runs here: the week's tracked items planned
-against the workbook's scratch sheet, with nothing written. The workbook is
-read without Excel, by a library the bundle already carries, so there is
-nothing to install. Add the project board and the report's settings to
-`host.json` and map the board's token like every other secret. The token
-needs **both** project access and access to the repository the board's issues
-live in: with only the first it reads the board and none of the notes on it,
-which looks exactly like a week in which nobody wrote anything, and the run
-refuses rather than report that.
-
-```json
-"integrations": {
-  "github_project": { "owner": "your-account", "project_number": 1,
-                      "credential": { "name": "board_token" } },
-  "weekly_report": { "workbook_path": "C:/Users/you/OneDrive/Report/SDE_Weekly_Report.xlsx" }
-},
-"credentials": [{ "secret": "board_token", "environment_variable": "AEP_GITHUB_TOKEN" }]
-```
-
-`weekly_report` takes the source job's other settings with the same defaults
-(`temp_sheet`, `week_style`, `jql`, `max_issues`, `markers`, the colours);
-`aep-host doctor` reports whether the site, the secret, the library and the
-workbook are all in place without contacting anything.
-
-When `AEP_GITHUB_TOKEN` is absent from the current terminal, `doctor` reports
-this optional integration as pending. The resident Agent remains ready; only
-operations that need the board token are unavailable in that session.
-
-Then write the shipped manifests into the workspace:
+The installer installs the Skills and Workflows AEP ships, switched on, without
+overwriting or switching on again anything already here. To write the shipped
+manifests into a workspace by hand:
 
 ```powershell
 aep-host export-assets --out workspace\assets
 ```
 
-and grant the capabilities in `workspace\grants.json` (or choose them on the
-shared platform and `sync`). **Every one of them declares that it needs an
-approval, the reads included, so every grant carries an `approval_ref`.** A
-grant without one is not a weaker grant; it is no grant, and the run stops
-with `permission_denied` at the first step. Use whatever reference your team
-records the approval under.
-
-```json
-[
-  { "actor": "employee.id",
-    "asset": { "namespace": "weekly-report", "name": "resolve-window", "version": "1.0.0" },
-    "permissions": ["weekly-report.plan"], "policy_refs": ["weekly-report-policy"],
-    "approval_ref": "CHANGE-1234" },
-  { "actor": "employee.id",
-    "asset": { "namespace": "github", "name": "search-project", "version": "1.0.0" },
-    "permissions": ["github.read"], "policy_refs": ["github-read-policy"],
-    "approval_ref": "CHANGE-1234" },
-  { "actor": "employee.id",
-    "asset": { "namespace": "excel", "name": "read-scratch-sheet", "version": "1.0.0" },
-    "permissions": ["excel.read"], "policy_refs": ["excel-read-policy"],
-    "approval_ref": "CHANGE-1234" },
-  { "actor": "employee.id",
-    "asset": { "namespace": "weekly-report", "name": "plan", "version": "1.0.0" },
-    "permissions": ["weekly-report.plan"], "policy_refs": ["weekly-report-policy"],
-    "approval_ref": "CHANGE-1234" }
-]
-```
-
-The four above are the preview. Writing needs a fifth, in the next section.
-`membership.json` has to name you as well, or this Bridge admits nobody and
-`doctor` says the resident Agent is pending. Then:
-
-```powershell
-aep-host ask --config host.json "weekly.preview 2026_31W"
-```
-
-A run that fails says how many steps finished, which is where it stopped:
-none means the grants, one means the board, two means the workbook.
-
-The answer is the plan: which rows would be upserted, which comment blocks
-would be prepended in red, what was skipped and why, and a digest of the
-scratch sheet as it stands. It is the same plan the source's `--dry-run`
-printed.
-
-### Writing it into the workbook
-
-`weekly apply` runs the same four steps and then writes the plan through
-Excel itself, so the machine needs Excel installed. The bundle already carries
-the reader (`openpyxl`) and the Excel bridge (`pywin32`), so there is nothing
-to install:
-
-```powershell
-aep-host ask --config host.json "weekly.apply 2026_31W"
-```
-
-Writing is the one side effect here, so `weekly-report/apply` is granted
-separately from the four reads. It needs `excel.write` and its own policy
-reference, and an `approval_ref` like every other grant:
-
-```json
-{ "actor": "employee.id",
-  "asset": { "namespace": "weekly-report", "name": "apply", "version": "1.0.0" },
-  "permissions": ["excel.write"], "policy_refs": ["weekly-report-write-policy"],
-  "approval_ref": "CHANGE-1234" }
-```
-
-Without it the plan is still made and only the write is refused, so
-`weekly preview` keeps working on a host that may not write.
-
-Before it writes, it backs the workbook up, copies it somewhere your sync
-client is not watching, and **checks the scratch sheet is still the one the
-plan was made against** — if somebody edited it in between, the run is
-refused rather than written. A run that does not finish leaves the real
-workbook exactly as it was and tells you where the staged copy is. Close the
-workbook first: a file Excel has open is refused before anything is copied.
-
-Two things to expect the first time. Every run retires last week's marks
-across the whole scratch sheet before making this week's, so a red `Comments`
-cell or a tinted `Key` cell you applied *by hand* loses its colour — never its
-text. Planned rows with `Done`, `In Progress` and `New` receive green, amber
-and pink Status fills; other status values keep their existing fills. The
-Comments column is top-left aligned, and rows with this week's Key highlight
-are sorted to the top as complete rows.
-
-### The weekly mail
-
-`weekly mail` reads the board, counts the week's effort and saves a draft in
-Outlook. **It never sends.** Nothing in this platform can send a mail: the
-adapter has no call that delivers one, and a test reads its source to keep it
-that way. A person opens the draft, reads it, and presses send, or does not.
-
-```powershell
-aep-host ask --config host.json "weekly.mail 2026_31W"
-```
-
-It does not read or write the workbook, so it is its own workflow and its own
-grant: somebody who may draft the mail need not be somebody who may write the
-team's file.
-
-```json
-{ "actor": "employee.id",
-  "asset": { "namespace": "weekly-report", "name": "mail", "version": "1.0.0" },
-  "permissions": ["outlook.draft"], "policy_refs": ["weekly-report-mail-policy"],
-  "approval_ref": "CHANGE-1234" }
-```
-
-What the mail says, and what it counts:
-
-- **Effort is tickets, not hours.** This project records no worklog and has no
-  points field, so there are no hours to weigh. The mail says that on its face.
-- **Only what somebody worked on.** An item whose timestamp moved because a
-  field was edited is not work, so it is left out — and the ones left out are
-  *named*, not just subtracted. A week that matched sixty-three items and
-  counted four is either right or badly wrong, and only a reader told both
-  numbers can tell which. Set `"mail_requires_activity": false` under
-  `weekly_report` to count everything the week matched instead; the mail then
-  says which question it answered.
-- **A ticket naming several instruments counts once under each**, so the
-  instrument totals add up to more than the number of tickets. That is
-  deliberate and the mail says so rather than hiding it.
-- The draft embeds one source-style pie and per-member stacked-bar image,
-  drawn headlessly with the bundled `weekly-mail` plotting dependency.
-  Instrument/Account totals remain selectable HTML text, so the figures
-  survive when the reader's mail client blocks images.
-
-Who it is addressed to is configuration, and empty is the safer default — the
-draft then has no recipients and the person who opens it fills them in:
-
-```text
-"weekly_report": {
-  "mail_to": ["sde-team@example.com"],
-  "mail_cc": [],
-  "mail_subject_prefix": "SDE Weekly Report",
-  "project": "rs-sde-projects"
-}
-```
-
-The configured recipients remain on this Host. The previously authorized
-`weekly.mail` run saved an unsent draft in Outlook; inspect a new draft before
-manually sending it.
-
-This writer has now been run against a real team workbook once, on
-2026-09-24, and an earlier build of it renamed the previous week's sheet
-instead of adding this week's. That defect is fixed and pinned by a test, and
-the run takes a backup before touching anything — but try it on a copy first
-and compare the result with the old Host Bridge's.
+A person's own (personal) Workflows are not part of this bundle; nothing in it
+installs, schedules or documents them. An update never removes an asset that is
+already installed, including one an earlier bundle brought: switch it off or
+remove it in Agent Web if you do not use it.
 
 ## LLM gateway (installed by default)
 
@@ -644,26 +473,19 @@ would read as the model declining to answer.
 
 ## Without typing commands
 
-Everything above is one `aep-host` command, and nobody runs a weekly job that
-way for long. Four things in this folder do it for you. They find the
-installation themselves; if you installed somewhere else, edit the `ROOT` line
-at the top of each.
+Everything above is one `aep-host` command. These files in this folder do it
+for you. They find the installation themselves; if you installed somewhere
+else, edit the `ROOT` line at the top of each.
 
 | Double-click | What it does |
 | --- | --- |
 | `chat.cmd` | Opens a window and lets you talk to the Agent on this computer. |
-| `weekly-preview.cmd` | Runs the dry run and prints the plan. Writes nothing. |
-| `weekly-apply.cmd` | Asks, then writes the plan into the workbook. |
-| `weekly-mail.cmd` | Saves this week's mail as a draft in Outlook. Sends nothing. |
 | `dut-validate.cmd` | Runs one explicitly approved DUT request and saves typed evidence. |
-
-`weekly-preview.cmd 2026_39W` names a week; with no argument it is this week.
 
 `chat.cmd` is the same Agent the command line and Telegram reach, with the
 same grants and the same refusals — a window is an ingress, not a shortcut
-past anything. Type a command such as `weekly.preview 2026_39W` and the plan
-comes back in the window. It takes one request at a time, because two runs at
-once would be two runs against the one workbook. A console window stays open
+past anything. Type a request or a Skill command and the answer comes back in
+the window. It takes one request at a time. A console window stays open
 behind it; that is where a configuration problem is reported.
 
 ### On a schedule
@@ -704,11 +526,6 @@ values (a paused schedule never runs; **Resume** turns it back on).
 The task runs as you, not as SYSTEM: the workbook, the tokens and Office all
 belong to your account, and a task running as SYSTEM would see none of them —
 so it runs when you are signed in.
-
-`schedule-weekly.ps1` is the earlier stopgap: it registers a fixed Windows task
-that runs the weekly report **preview** only, outside these schedules and their
-grants. Prefer a native schedule; the script remains for hosts that already use
-it.
 
 ## Remove
 

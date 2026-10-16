@@ -5,9 +5,11 @@ board, plan, write the workbook and save the mail draft. The read-only
 preview manifest stays defined for the marketplace's read-only default
 candidate (`host_runtime.default_candidates`); it is not shipped.
 
-Shipped as contracts so a host, a test and the Registry all take the same
-manifests; `host_runtime.assets.export_assets` writes them as the JSON files
-a workspace or a publisher takes. Pure data: nothing here touches a file.
+Kept as contracts so a host, a test and the Registry all take the same
+manifests. They are the owner's personal set (`host_runtime.assets.personal`,
+owner 2026-10-16): not bundled, written by `export-assets` or installed by
+`assets install-bundled` only with `--include-personal` or
+`AEP_INCLUDE_PERSONAL_ASSETS=1`. Pure data: nothing here touches a file.
 """
 
 from typing import Any

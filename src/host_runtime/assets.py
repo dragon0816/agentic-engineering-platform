@@ -2,9 +2,23 @@
 
 A host concern, beside the CLI: the manifests themselves are pure data in
 the capability packages that ship them.
+
+Two sets (owner 2026-10-16, docs/DECISIONS.md "The weekly report is
+personal, not bundled"):
+
+- `shipped()`: what every installation gets. The Windows bundle installs
+  these (`aep-host assets install-bundled`) and `export-assets` writes them;
+- `personal()`: the owner's own Workflows (the SDE weekly report). They stay
+  in the package so the owner's install and upgrade keep working, but they
+  are written or installed only when asked for, with `--include-personal`
+  or `AEP_INCLUDE_PERSONAL_ASSETS=1`. A machine that received them from an
+  earlier bundle keeps what it has: nothing here removes them, and nothing
+  adds them again.
 """
 
 import json
+import os
+from collections.abc import Mapping
 from pathlib import Path
 
 from agent.skills import SkillManifest
@@ -42,7 +56,9 @@ from host_runtime.workspace import write_atomically
 
 
 def shipped() -> tuple[SkillManifest | WorkflowManifest, ...]:
-    """Every manifest this package ships, Skills and Workflows alike."""
+    """Every manifest every installation gets, Skills and Workflows alike.
+
+    The owner's personal Workflows are not among them (`personal()`)."""
     return (
         chipset_preview_skill(),
         chipset_preview_workflow(),
@@ -56,13 +72,11 @@ def shipped() -> tuple[SkillManifest | WorkflowManifest, ...]:
         release_run_workflow(),
         ncc_plan_skill(),
         ncc_plan_workflow(),
-        weekly_skill(),
         team_tickets_preview_skill(),
         workflow_author_skill(),
         knowledge_skill(),
         market_alignment_skill(),
         personal_proof_skill(),
-        weekly_report_workflow(),
         team_tickets_preview_workflow(),
         personal_proof_workflow(),
         coding_skill(),
@@ -71,11 +85,33 @@ def shipped() -> tuple[SkillManifest | WorkflowManifest, ...]:
     )
 
 
-def export_assets(directory: Path) -> tuple[Path, ...]:
-    """Write the shipped manifests as `skills/` and `workflows/` under
-    `directory`, named as a sync would name them."""
+#: Set to 1 on the owner's own computer so install and upgrade bring his
+#: personal Workflows too.
+INCLUDE_PERSONAL_VARIABLE = "AEP_INCLUDE_PERSONAL_ASSETS"
+
+
+def personal() -> tuple[SkillManifest | WorkflowManifest, ...]:
+    """The owner's personal Skill and Workflow: never bundled or shared."""
+    return (weekly_skill(), weekly_report_workflow())
+
+
+def include_personal_requested(environment: Mapping[str, str] | None = None) -> bool:
+    """Whether this computer asks for the personal set (`INCLUDE_PERSONAL_VARIABLE`)."""
+    value = (os.environ if environment is None else environment).get(INCLUDE_PERSONAL_VARIABLE, "")
+    return value.strip().lower() in ("1", "true", "yes", "on")
+
+
+def manifests(*, include_personal: bool = False) -> tuple[SkillManifest | WorkflowManifest, ...]:
+    """`shipped()`, plus `personal()` when asked for."""
+    return shipped() + (personal() if include_personal else ())
+
+
+def export_assets(directory: Path, *, include_personal: bool = False) -> tuple[Path, ...]:
+    """Write the shipped manifests (and, when asked, the personal ones) as
+    `skills/` and `workflows/` under `directory`, named as a sync would
+    name them."""
     written: list[Path] = []
-    for manifest in shipped():
+    for manifest in manifests(include_personal=include_personal):
         folder = "skills" if isinstance(manifest, SkillManifest) else "workflows"
         identity = manifest.metadata.identity
         path = (

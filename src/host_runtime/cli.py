@@ -34,7 +34,7 @@ from common.local_agent import LocalAgentRequest, LocalCapabilityRequest
 from common.scheduling import ScheduleDefinition, ScheduledRun, ScheduleRecord
 from dut.contracts import DutPhysicalValidationRequest, DutValidationEvidence
 from host_runtime.agent import LocalAgentOutcome
-from host_runtime.assets import export_assets
+from host_runtime.assets import export_assets, include_personal_requested
 from host_runtime.contracts import CompanyHostConfiguration, HostDoctorReport, HostLayout
 from host_runtime.host import HostError, HostRuntime, build_runtime, host_report
 from host_runtime.runtime import enrollment_request
@@ -158,6 +158,11 @@ def _parser() -> argparse.ArgumentParser:
     export.add_argument(
         "--out", required=True, type=Path, help="a directory; assets/ of a workspace"
     )
+    export.add_argument(
+        "--include-personal",
+        action="store_true",
+        help="also write the owner's personal Workflows (or set AEP_INCLUDE_PERSONAL_ASSETS=1)",
+    )
     commands.add_parser("version", help="show the installed package version")
     # The built-in LLM gateway (docs/phases/LLM_GATEWAY.md).
     gateway_cli.add_arguments(
@@ -262,6 +267,11 @@ def _parser() -> argparse.ArgumentParser:
     )
     bundled.add_argument(
         "--no-shipped", action="store_true", help="leave out the manifests AEP ships"
+    )
+    bundled.add_argument(
+        "--include-personal",
+        action="store_true",
+        help="also install the owner's personal Workflows (or set AEP_INCLUDE_PERSONAL_ASSETS=1)",
     )
     bundled.add_argument(
         "--no-agent-skills",
@@ -452,7 +462,7 @@ def _connect_user(args: argparse.Namespace) -> int:
 def _install_bundled(args: argparse.Namespace) -> int:
     """`assets install-bundled`: what install.ps1 and update.ps1 run."""
     from host_runtime import agent_setup, skill_packs
-    from host_runtime.assets import shipped
+    from host_runtime.assets import manifests
 
     try:
         layout = HostLayout.under(_load(args.config).workspace_root)
@@ -463,7 +473,9 @@ def _install_bundled(args: argparse.Namespace) -> int:
         report = skill_packs.install_bundle(
             layout,
             args.bundle,
-            shipped=() if args.no_shipped else shipped(),
+            shipped=()
+            if args.no_shipped
+            else manifests(include_personal=args.include_personal or include_personal_requested()),
             extra_off=args.off,
             extra_agent_skills=args.agent_skills,
             extra_pack=args.agent_pack,
@@ -1248,7 +1260,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "gateway":
         return gateway_cli.run(args)
     if args.command == "export-assets":
-        for written in export_assets(args.out):
+        personal = args.include_personal or include_personal_requested()
+        for written in export_assets(args.out, include_personal=personal):
             print(f"wrote {written}")
         return 0
     if args.command == "assets":

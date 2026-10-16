@@ -3035,3 +3035,37 @@ needs); the AEP venv (numpy `<2` vs 2.5.1 and other pin conflicts); downloading 
 install time (company PCs install offline); a restart-on-failure task (masks a bad
 token as a crash loop); a probe inside `agent/gateway.py` (the agent layer stays
 provider-neutral; the explanation lives in `host_runtime/gateway_link.py`).
+
+## 2026-10-16 — The weekly report is personal, not bundled
+
+Decision (owner, 2026-10-16): the SDE weekly report (`engineering/weekly-report` Skill
+2.0.0 and `engineering/sde-weekly-report` Workflow 1.0.0) is the owner's personal
+Workflow and is never shipped or shared. `host_runtime.assets` keeps two sets:
+`shipped()` (what every installation gets: the bundle's `assets install-bundled`, the
+Capabilities "ships with AEP" refusal, `export-assets`) and `personal()` (the weekly
+report). The personal set is installed or written only with `--include-personal` on
+`aep-host assets install-bundled` / `aep-host export-assets`, or with the user
+environment variable `AEP_INCLUDE_PERSONAL_ASSETS=1` (set once on the owner's PC, so
+his normal `update.cmd` keeps bringing new weekly versions). The capability code and
+the manifests stay in the package. Updates remove nothing: a colleague PC that got the
+weekly assets from an earlier bundle keeps them as they are, may now remove them
+(they are no longer "shipped"), and no update adds them again. The broken
+`weekly-preview.cmd` / `weekly-apply.cmd` / `weekly-mail.cmd` (they sent
+`weekly.preview/apply/mail`, which the Skill no longer declares) and the superseded
+`schedule-weekly.ps1` are deleted from `deploy/windows-preview/` (git history keeps
+them); the manuals no longer describe the weekly report and say instead that personal
+Workflows are not bundled. CI asserts the install has no weekly Workflow and that
+`export-assets` writes `engineering/rs-wmt-package-release` but not the weekly Skill.
+
+Reason: the weekly report reads one team's board and workbook and mails one team; on a
+colleague's PC it is noise at best and a wrong Workflow at worst, and its double-click
+scripts were broken.
+
+Rejected alternatives: removing the code from the repository (breaks the owner's own
+install and upgrade); a separate personal pack folder outside the bundle (a second
+install path to maintain for two manifests); an installer switch `-IncludePersonal`
+(names a personal feature in the colleague installer); uninstalling the weekly assets
+from colleague PCs on update (updates never remove what a person has); dropping the
+`weekly-mail` extra (matplotlib) from the bundle (the owner's upgrade reinstalls from
+the same bundle and his weekly mail chart needs it; it is a dependency, not a
+Workflow).

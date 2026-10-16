@@ -4,8 +4,7 @@ rem
 rem Double-click this, or make a shortcut to it. It is the same Agent the
 rem command line and Telegram reach, so Telegram is not needed to use it.
 rem
-rem Type a command such as  weekly.preview 2026_39W
-rem Nothing is written to the workbook unless the command says so.
+rem Type a request, or a Skill command such as  /help
 setlocal
 set "ROOT=%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0"
 if not exist "%ROOT%\host.json" (

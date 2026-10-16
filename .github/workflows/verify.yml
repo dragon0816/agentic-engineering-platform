@@ -73,10 +73,14 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'The bundled LiteLLM does not take the streaming patch.' }
           & "$installRoot\gateway-venv\Scripts\python.exe" -m llm_gateway.launcher
           if ($LASTEXITCODE -ne 2) { throw 'The gateway launcher did not refuse to start without a token.' }
+          # The weekly report is the owner's personal Workflow: neither installed
+          # nor exported from the bundle (docs/DECISIONS.md 2026-10-16).
+          if (Test-Path "$installRoot\workspace\assets\workflows\engineering__sde-weekly-report__1.0.0.json") { throw 'The bundle installed the personal weekly report.' }
           & "$installRoot\.venv\Scripts\aep-host.exe" export-assets --out "$installRoot\workspace\assets"
-          if (-not (Test-Path "$installRoot\workspace\assets\workflows\engineering__sde-weekly-report__1.0.0.json")) {
-            throw 'The shipped weekly-report manifests were not written.'
+          if (-not (Test-Path "$installRoot\workspace\assets\workflows\engineering__rs-wmt-package-release__1.0.0.json")) {
+            throw 'The shipped manifests were not written.'
           }
+          if (Test-Path "$installRoot\workspace\assets\skills\engineering__weekly-report__2.0.0.json") { throw 'export-assets wrote the personal weekly report.' }
           # The bundled Skills (docs/phases/HERMES_SKILL_PACK.md): in-use ones
           # switched on, the Hermes skill pack switched off, its coding-agent
           # folders in AEP's own store.

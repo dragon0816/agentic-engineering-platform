@@ -106,18 +106,21 @@ def test_builder_emits_reproducible_closed_manifest(tmp_path: Path) -> None:
             assert prefix + guide in names
         assert prefix + "wheels/" + platform_wheel.name in names
         # The things somebody double-clicks. An operator who has to type a
-        # command with four flags to see a week's plan does not run it, so
-        # these shipping is part of the bundle working, not a convenience.
+        # command with four flags does not run it, so these shipping is part
+        # of the bundle working, not a convenience.
         for launcher in (
             "chat.cmd",
-            "weekly-preview.cmd",
-            "weekly-apply.cmd",
-            "weekly-mail.cmd",
             "dut-validate.cmd",
             "start-web.cmd",
             "update.cmd",
         ):
             assert prefix + launcher in names
+        # The weekly report is the owner's personal Workflow (owner
+        # 2026-10-16): no script, schedule, Skill or Workflow of it ships.
+        # (The Hermes pack's generic `weekly-review-planning` is not it.)
+        personal_marks = ("weekly-report", "weekly-preview", "weekly-apply", "weekly-mail")
+        assert not [n for n in names if any(mark in n.lower() for mark in personal_marks)]
+        assert prefix + "schedule-weekly.ps1" not in names
         for dut_file in (
             "DUT_DRIVER_CONTRACT.md",
             "dut-request.example.json",

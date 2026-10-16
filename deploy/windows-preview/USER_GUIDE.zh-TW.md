@@ -337,7 +337,7 @@ MCP server 可以給 Agent 加新工具（例如 GitHub、檔案系統）。**�
 | 指令 | 作用 |
 |---|---|
 | `/help` | 列出可用的指令 |
-| `/run <名稱>` | 打開某個 Workflow 的執行表單，例如 `/run weekly-report`；`/run 11` 用編號直接執行 |
+| `/run <名稱>` | 打開某個 Workflow 的執行表單，例如 `/run rs-wmt-package-release`；`/run 11` 用編號直接執行 |
 | `/run workflow <ns/name@版本> {JSON}` | 用 JSON 參數執行一個指定版本的 Workflow（進階） |
 | `/wiki-query <問題>` | 問某個已安裝的 Knowledge，回答附出處 |
 | `/wiki-convert`、`/wiki-ingest`、`/wiki-lint` | 執行對應的 Knowledge Workflow（進階；一般請用 Knowledge 頁） |
@@ -347,7 +347,7 @@ MCP server 可以給 Agent 加新工具（例如 GitHub、檔案系統）。**�
 
 ### 4.4 在對話中執行 Workflow（執行表單）
 
-說「執行 rs-wmt-package-release」、「run weekly-report」，或打 `/run <名稱>`，Agent 會在
+說「執行 rs-wmt-package-release」、「run rs-wmt-package-release」，或打 `/run <名稱>`，Agent 會在
 回答下方畫出 **Run <Workflow 名稱>** 表單，不需要你一題一題打字。
 
 1. 表單會先帶入你在句子裡已經說的值（例如 `chipsetId=kt326`）。
@@ -402,7 +402,7 @@ Agent **不會自己**安裝、核准或發布任何東西。需要你決定時�
 ### 5.1 名詞
 
 - **Skill**：教 Agent 某件事怎麼做的說明書（何時用、用哪些指令）。
-- **Workflow**：一串固定步驟的自動化程序（例如產生週報），有參數表單。
+- **Workflow**：一串固定步驟的自動化程序（例如準備 release 套件），有參數表單。
 - **Knowledge**：Agent 可以查詢並附出處的知識庫版本。
 - **Extensions** / **Apps**：Bridge 擴充功能與獨立應用程式（由平台管理，一般人不用動）。
 
@@ -807,20 +807,11 @@ Agent Web 要在執行中，Telegram 才會有回應。
 - **Push to the release repository**（預設**關**，會再確認）：只推這次 run 做出的 commit，
   永遠不會 force push。dry run 時忽略。
 
-### 9.3 範例：週報（weekly report）
+### 9.3 個人 Workflow 不在安裝包裡
 
-週報 Workflow `engineering/sde-weekly-report`（Skill 指令 `/weekly`）依序：讀 GitHub 專案看板 →
-讀週報 Excel 的暫存工作表 → 產生計畫 → 寫入 → 在 Outlook 存草稿。執行時可以選
-**Dry run: show the plan only**（只顯示計畫）、**Report week**、日期範圍、
-**Save the weekly mail draft** 等。它需要：
-
-- GitHub Project 看板的設定（`host.json` 的 `integrations.github_project`），以及放在環境變數裡的
-  權杖（權杖要能讀 project，**也**要能讀看板 issue 所在的 repository）；
-- 週報 Excel 檔的路徑；寫入（apply）時這台電腦要有 Excel，且**檔案不能開著**；
-- 寄信步驟只會在 Outlook **存成草稿，永遠不會自動寄出**。
-
-看板和 Excel 路徑目前寫在 `host.json` 的 `integrations`（`github_project`、`weekly_report`），格式見同資料夾的 `README.md`
-「Weekly report preview」，建議請團隊的負責人協助。
+安裝包只帶給大家共用的 Skill 和 Workflow。個人自己的 Workflow 不會放進安裝包，也不會被
+安裝或排程；需要的話請從共享平台安裝別人分享的能力（第 10 章）。更新時不會刪掉你電腦上已經
+安裝的 Skill / Workflow；用不到的可以在 **Capabilities** 關掉或移除。
 
 ---
 
@@ -1099,7 +1090,7 @@ Agent Web 按核准才會生效（**Capabilities** 頁上方的 **外部 Agent �
 | `company-agent/knowledge-query`、`engineering/knowledge-query` | 查公司知識庫，回答附出處 |
 | `company-agent/market-alignment`、`company-agent/personal-proof` | 市場對照表、個人證明 |
 | `engineering/coding` | 程式修改與執行 Python（`coding-change`、`run-python`） |
-| `engineering/weekly-report`、`engineering/team-tickets` | 週報、Jira team tickets 預覽 |
+| `engineering/team-tickets` | Jira team tickets 預覽 |
 | `engineering/rs-ncc-improvement-plan-skill` | NCC 改善計畫 |
 | `engineering/sales-to-chipset`、`engineering/release-package-guide` | Sales-to-chipset 報表、release package |
 
@@ -1149,7 +1140,7 @@ Agent 的選擇。例如：
 | 欄位 | 填什麼 |
 |---|---|
 | **Installed Workflow or Agent Task** | 要排程的 Workflow 或 Agent 工作 |
-| **Schedule name** | 英文名稱，例如 `weekly-report` |
+| **Schedule name** | 英文名稱，例如 `team-tickets-friday` |
 | **Repeats** | `Weekly`（勾選星期幾）或 `Daily` |
 | **Local time** | 幾點，預設 09:00 |
 | **Time zone (IANA)** | 例如 `Asia/Taipei`（預設取瀏覽器的時區） |
@@ -1345,7 +1336,7 @@ Agent Web 重新啟動過，舊分頁的頁面金鑰失效了。關掉舊分頁�
 | `permission_denied` | 這台電腦沒有被授權執行這個能力 | 請管理員確認授權（`grants.json` 或平台上的選擇） |
 | `workflow_upload_outside_store` | 上傳欄位的值不是透過上傳得到的檔案 | 用表單的上傳按鈕重新上傳 |
 | `isolated_root_unmarked` | release 隔離資料夾沒有正確的標記檔 | 見 9.2 |
-| `workbook_open` | 週報 Excel 正開著 | 關掉 Excel 檔再執行 |
+| `workbook_open` | 要寫入的 Excel 檔正開著 | 關掉 Excel 檔再執行 |
 | `stale`（AI 提案） | 提案後設定被改過 | 請 Agent 重新提案 |
 | `not_a_maintainer` | 你不在這個 vault 的 `maintainers` 裡 | 請 vault 負責人把你加進去 |
 | `path_too_long` | Knowledge 沙盒路徑超過 Windows 限制 | 把 `sandbox_root` 改成較短的資料夾 |

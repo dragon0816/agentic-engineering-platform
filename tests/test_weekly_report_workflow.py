@@ -219,7 +219,8 @@ def host(tmp_path: Path, *, scratch: bool = True, **changes: Any) -> tuple[Any, 
             "credentials": [{"secret": "board_token", "environment_variable": "AEP_GITHUB_TOKEN"}],
         },
     )
-    export_assets(layout.workspace_root / "assets")
+    # The weekly report is the owner's personal Workflow: written only on request.
+    export_assets(layout.workspace_root / "assets", include_personal=True)
     return config, layout, workbook
 
 
@@ -518,9 +519,16 @@ def test_doctor_reports_the_integrations_without_contacting_anything(
     build_workbook(workbook, scratch=True)
     checks = {c.name: c for c in host_report(config, layout).checks}
     assert "openpyxl is not installed" in checks["integrations"].detail
-    # The shipped manifests are written where a workspace reads them.
+    # The shipped manifests are written where a workspace reads them; the
+    # weekly report is personal and comes only with --include-personal.
+    monkeypatch.delenv("AEP_INCLUDE_PERSONAL_ASSETS", raising=False)
+    shared = tmp_path / "shared"
+    assert main(["export-assets", "--out", str(shared)]) == 0
+    shared_names = {path.name for path in shared.rglob("*.json")}
+    assert "engineering__sde-weekly-report__1.0.0.json" not in shared_names
+    assert "engineering__weekly-report__2.0.0.json" not in shared_names
     out = tmp_path / "exported"
-    assert main(["export-assets", "--out", str(out)]) == 0
+    assert main(["export-assets", "--out", str(out), "--include-personal"]) == 0
     written = sorted(path.relative_to(out).as_posix() for path in out.rglob("*.json"))
     weekly = [
         path for path in written if path.startswith(("skills/engineering", "workflows/engineering"))
