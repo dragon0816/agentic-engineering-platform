@@ -228,6 +228,41 @@ def _parser() -> argparse.ArgumentParser:
     connect.add_argument(
         "--status", action="store_true", help="with --user: show what is installed, change nothing"
     )
+    # Bundled Skills (owner 2026-10-15/16, docs/phases/HERMES_SKILL_PACK.md):
+    # install.ps1 installs AEP's in-use Skills switched on and the skill packs
+    # switched off, never overwriting or switching on what is already here.
+    bundled = asset_actions.add_parser(
+        "install-bundled",
+        help="install the bundle's Skills: in-use ones on, skill packs off; keeps your choices",
+    )
+    bundled.add_argument("--bundle", type=Path, help="the unpacked Windows bundle")
+    bundled.add_argument(
+        "--off",
+        type=Path,
+        action="append",
+        default=[],
+        help="a folder of Skill manifests to install switched off (repeatable)",
+    )
+    bundled.add_argument(
+        "--agent-skills",
+        type=Path,
+        action="append",
+        default=[],
+        help="a folder of coding-agent skill folders for AEP's store (repeatable)",
+    )
+    bundled.add_argument(
+        "--agent-pack",
+        default="hermes",
+        help="the pack name recorded for --agent-skills folders (default: hermes)",
+    )
+    bundled.add_argument(
+        "--no-shipped", action="store_true", help="leave out the manifests AEP ships"
+    )
+    bundled.add_argument(
+        "--no-agent-skills",
+        action="store_true",
+        help="leave Claude Code and Copilot skills folders as they are",
+    )
     # One-click Agent Web (owner 2026-10-08): the running server keeps its
     # address in the workspace; `open` starts it when needed and opens it.
     opened = commands.add_parser(
@@ -287,6 +322,8 @@ def _assets(args: argparse.Namespace) -> int:
         return _publish(args)
     if args.asset_action == "connect" and args.user:
         return _connect_user(args)
+    if args.asset_action == "install-bundled":
+        return _install_bundled(args)
     if args.asset_action == "connect":
         if args.target == "all" or args.remove or args.status:
             print("--for all, --remove and --status go with --user", file=sys.stderr)
@@ -405,6 +442,33 @@ def _connect_user(args: argparse.Namespace) -> int:
     )
     print("\n".join(lines))
     return 1 if any(": not changed (" in line for line in lines) else 0
+
+
+def _install_bundled(args: argparse.Namespace) -> int:
+    """`assets install-bundled`: what install.ps1 and update.ps1 run."""
+    from host_runtime import agent_setup, skill_packs
+    from host_runtime.assets import shipped
+
+    try:
+        layout = HostLayout.under(_load(args.config).workspace_root)
+    except (OSError, ValueError) as error:
+        print(f"cannot read {args.config}: {type(error).__name__}", file=sys.stderr)
+        return 2
+    try:
+        report = skill_packs.install_bundle(
+            layout,
+            args.bundle,
+            shipped=() if args.no_shipped else shipped(),
+            extra_off=args.off,
+            extra_agent_skills=args.agent_skills,
+            extra_pack=args.agent_pack,
+            environment=None if args.no_agent_skills else agent_setup.Environment.current(),
+        )
+    except (OSError, ValueError) as error:
+        print(f"bundled Skills not installed: {error}", file=sys.stderr)
+        return 1
+    print("\n".join(report.summary()))
+    return 0
 
 
 def _assistant_mcp(args: argparse.Namespace) -> int:

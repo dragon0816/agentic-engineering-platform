@@ -20,16 +20,19 @@ from __future__ import annotations
 
 import json
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from agent.skills import SkillManifest
 from common.assets import AssetIdentity, WorkflowManifest
 from host_runtime.contracts import HostLayout
 from host_runtime.platform_publish import ASSET_REFERENCE
+
+if TYPE_CHECKING:
+    from host_runtime.agent_setup import Environment
 
 ShelfKind = Literal["skill", "workflow"]
 DISABLED = "disabled"
@@ -52,6 +55,10 @@ class Shelved:
     identity: AssetIdentity
     source: Path
     target: Path
+    # What changed in the coding agents' skills folders: a pack Skill's copy
+    # goes in when it is switched on and out when it is switched off or
+    # removed (`host_runtime.skill_packs`, owner 2026-10-16).
+    agent_lines: tuple[str, ...] = field(default=())
 
 
 def parse(kind: str, reference: str) -> tuple[ShelfKind, AssetIdentity]:
@@ -121,7 +128,22 @@ def disabled_assets(layout: HostLayout) -> list[dict[str, object]]:
     return found
 
 
-def switch_off(layout: HostLayout, kind: ShelfKind, identity: AssetIdentity) -> Shelved:
+def _agent_copy(
+    layout: HostLayout, kind: ShelfKind, identity: AssetIdentity, environment: Environment | None
+) -> tuple[str, ...]:
+    if kind != "skill" or environment is None:
+        return ()
+    from host_runtime.skill_packs import sync_agent_copy
+
+    return tuple(sync_agent_copy(layout, identity, environment))
+
+
+def switch_off(
+    layout: HostLayout,
+    kind: ShelfKind,
+    identity: AssetIdentity,
+    environment: Environment | None = None,
+) -> Shelved:
     folder = _folder(layout, kind)
     source = folder / _file(identity)
     if not source.is_file():
@@ -131,10 +153,15 @@ def switch_off(layout: HostLayout, kind: ShelfKind, identity: AssetIdentity) -> 
         raise ShelfError("disabled_copy_exists")
     target.parent.mkdir(parents=True, exist_ok=True)
     os.replace(source, target)
-    return Shelved(identity, source, target)
+    return Shelved(identity, source, target, _agent_copy(layout, kind, identity, environment))
 
 
-def switch_on(layout: HostLayout, kind: ShelfKind, identity: AssetIdentity) -> Shelved:
+def switch_on(
+    layout: HostLayout,
+    kind: ShelfKind,
+    identity: AssetIdentity,
+    environment: Environment | None = None,
+) -> Shelved:
     folder = _folder(layout, kind)
     source = folder / DISABLED / _file(identity)
     if not source.is_file():
@@ -160,7 +187,7 @@ def switch_on(layout: HostLayout, kind: ShelfKind, identity: AssetIdentity) -> S
             ):
                 raise ShelfError("alias_in_use")
     os.replace(source, target)
-    return Shelved(identity, source, target)
+    return Shelved(identity, source, target, _agent_copy(layout, kind, identity, environment))
 
 
 def remove(
@@ -170,6 +197,7 @@ def remove(
     *,
     now: datetime,
     actor: str,
+    environment: Environment | None = None,
 ) -> Shelved:
     """Move the installed (or switched-off) file into today's removed folder."""
     if is_shipped(kind, identity):
@@ -198,4 +226,4 @@ def remove(
     }
     with (bin_root / JOURNAL).open("a", encoding="utf-8") as journal:
         journal.write(json.dumps(record, ensure_ascii=False) + "\n")
-    return Shelved(identity, source, target)
+    return Shelved(identity, source, target, _agent_copy(layout, kind, identity, environment))

@@ -3859,10 +3859,15 @@ class AgentWeb:
         try:
             parsed_kind, identity = asset_shelf.parse(kind, asset)
             with self._one_at_a_time:
+                environment = self._agent_environment()
                 if enabled:
-                    asset_shelf.switch_on(self.runtime.layout, parsed_kind, identity)
+                    moved = asset_shelf.switch_on(
+                        self.runtime.layout, parsed_kind, identity, environment
+                    )
                 else:
-                    asset_shelf.switch_off(self.runtime.layout, parsed_kind, identity)
+                    moved = asset_shelf.switch_off(
+                        self.runtime.layout, parsed_kind, identity, environment
+                    )
                 self._live(parsed_kind, identity, enabled)
         except asset_shelf.ShelfError as error:
             return {"ok": False, "code": error.code, "message": shelf_message(error.code)}
@@ -3883,6 +3888,12 @@ class AgentWeb:
                 "Switched off: the Agent no longer offers it. The file is kept in "
                 f"assets\\{parsed_kind}s\\disabled; switch it on again at any time."
             )
+        if moved.agent_lines:
+            message += (
+                " Claude Code / Copilot skills folder: "
+                + "; ".join(line.strip() for line in moved.agent_lines)
+                + "."
+            )
         return {"ok": True, "enabled": enabled, "message": message, "assets": self.assets()}
 
     def remove_asset(self, kind: str, asset: str) -> dict[str, Any]:
@@ -3898,6 +3909,7 @@ class AgentWeb:
                     identity,
                     now=utc_now(),
                     actor=self.runtime.actor,
+                    environment=self._agent_environment(),
                 )
                 self._live(parsed_kind, identity, False)
                 try:

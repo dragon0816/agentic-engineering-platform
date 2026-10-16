@@ -304,6 +304,12 @@ def remove(agent: AgentName, environment: Environment) -> Changes:
             shutil.rmtree(folder)
             changes.changed = True
             changes.lines.append(f"  removed skill {folder}")
+    if where.skills_dir.is_dir():
+        for folder in sorted(where.skills_dir.iterdir()):
+            if folder.is_dir() and _pack_marker(folder) is not None:
+                shutil.rmtree(folder)
+                changes.changed = True
+                changes.lines.append(f"  removed skill {folder}")
     if where.mcp_format == "codex":
         if where.mcp_file.is_file():
             text = where.mcp_file.read_text(encoding="utf-8-sig")
@@ -406,3 +412,71 @@ def apply(
         lines.append(f"{LABELS[agent]}: {verb}")
         lines.extend(changes.lines)
     return lines
+
+
+# -- Skill-pack copies (owner 2026-10-16, docs/phases/HERMES_SKILL_PACK.md) --
+#
+# A pack skill (the Hermes skill pack) lives in AEP's own store
+# (`workspace/agent-skills/<folder>`, `host_runtime.skill_packs`) and is copied
+# into Claude Code's and Copilot's skills folders only while its AEP Skill is
+# switched on; switching it off takes the copy out again. Only for an agent
+# that already has AEP's own setup (the installer's `connect --user`, or
+# Settings > Coding agents), so `-NoAgentSkills` and a removed setup are
+# respected. A same-named folder of the person's own is never touched.
+
+PACK_AGENTS: tuple[AgentName, ...] = ("claude-code", "copilot")
+
+
+def _pack_marker(folder: Path) -> dict[str, Any] | None:
+    """The marker of an AEP pack skill folder, or None (not AEP's, or not a
+    pack skill)."""
+    marker = folder / MARKER_FILE
+    if not marker.is_file():
+        return None
+    try:
+        data = json.loads(marker.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if not isinstance(data, dict) or data.get("managed_by") != "aep" or not data.get("pack"):
+        return None
+    return data
+
+
+def aep_setup_present(agent: AgentName, environment: Environment) -> bool:
+    """AEP's own skills are in this agent's skills folder."""
+    skills_dir = places(agent, environment).skills_dir
+    return any((skills_dir / name / MARKER_FILE).is_file() for name in SKILLS)
+
+
+def link_pack_skill(agent: AgentName, environment: Environment, source: Path) -> Changes:
+    """Copy one pack skill folder (with its marker) into `agent`'s skills
+    folder, replacing only an older AEP copy."""
+    changes = Changes()
+    wanted = _pack_marker(source)
+    if wanted is None:
+        raise ValueError(f"{source} is not an AEP pack skill")
+    target = places(agent, environment).skills_dir / source.name
+    if target.exists():
+        present = _pack_marker(target)
+        if present is None:
+            changes.lines.append(f"  kept your own skill {target} (not AEP's; not replaced)")
+            return changes
+        if present.get("version") == wanted.get("version"):
+            return changes
+        shutil.rmtree(target)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(source, target)
+    changes.changed = True
+    changes.lines.append(f"  {LABELS[agent]}: skill {source.name} in {target.parent}")
+    return changes
+
+
+def unlink_pack_skill(agent: AgentName, environment: Environment, name: str) -> Changes:
+    """Take AEP's copy of one pack skill out of `agent`'s skills folder."""
+    changes = Changes()
+    target = places(agent, environment).skills_dir / name
+    if target.is_dir() and _pack_marker(target) is not None:
+        shutil.rmtree(target)
+        changes.changed = True
+        changes.lines.append(f"  {LABELS[agent]}: removed skill {name} from {target.parent}")
+    return changes
