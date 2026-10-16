@@ -99,7 +99,7 @@ def test_the_page_offers_re_ingest_and_explains_pull() -> None:
         'id="kp-raw-folder"',
         "/api/knowledge/reingest/start",
         "already_raw",
-        "Tick them in step 3",
+        "Tick them in step 2",
     ):
         assert hook in PAGE
 

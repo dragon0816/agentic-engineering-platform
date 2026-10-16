@@ -6252,7 +6252,7 @@ async function kpOpen(item) {
     name.append(text(ref.startsWith(prefix) ? ref.slice(prefix.length) : ref));
     row.append(tick, name); raw.append(row);
   }
-  if (!rawRefs.length) raw.append(text("No Raw documents yet: convert originals in step 2."));
+  if (!rawRefs.length) raw.append(text("No Raw documents yet: convert originals in step 1."));
   kpMarkNew();
   if (kpFocus && !rawRefs.includes(kpFocus)) kpFocus = null;
   kpShowFocus();
@@ -6517,7 +6517,7 @@ async function kpConvertShow() {
     kpConvertWatching = run.run_id;
     kpConvertTimer = setTimeout(() => kpConvertShow().catch(() => {}), 1500);
   } else if (run.mode === "apply" && kpConvertWatching === run.run_id) {
-    kpConvertWatching = null;  // it just ended: the new Raw appears in step 3
+    kpConvertWatching = null;  // it just ended: the new Raw appears in step 2
     kpNewRaw = new Set(run.items.filter((i) => ["written", "drifted"].includes(i.status)
       && i.raw_ref).map((i) => i.raw_ref));
     await kpOpen(kpSandbox);
@@ -6850,7 +6850,7 @@ el("kp-pull").addEventListener("click", () => kpRun("Pulling", async () => {
   const key = kpKey();
   const pulled = await kpWithProgress("Pulling originals", key, () =>
     pipeline("pull", {sandbox_id: kpSandbox.sandbox_id, folders, progress_key: key}));
-  const parts = [pulled.copied.length + " new original(s) copied to drop (convert them in step 2)"];
+  const parts = [pulled.copied.length + " new original(s) copied to drop (convert them below)"];
   if (pulled.already_in_sandbox.length) {
     parts.push(pulled.already_in_sandbox.length + " already in this sandbox's drop");
   }
@@ -6858,12 +6858,12 @@ el("kp-pull").addEventListener("click", () => kpRun("Pulling", async () => {
   if (pulled.already_ingested.length) {
     parts.push(pulled.already_ingested.length + " already ingested: their Raw ("
       + pulled.already_raw.length + " document(s)) is already in this sandbox, so they are "
-      + "not pulled again. To try changed rules on them, re-ingest them in step 3");
+      + "not pulled again. To try changed rules on them, re-ingest them in step 2");
   }
   await kpOpen(kpSandbox);
   const box = el("kp-pull-result"); box.replaceChildren(text(parts.join("; ") + ". "));
   if (pulled.already_raw.length) {
-    box.append(kpButton("Tick them in step 3", () => {
+    box.append(kpButton("Tick them in step 2", () => {
       kpRawTick(pulled.already_raw);
       el("kp-raw").scrollIntoView({block: "start"});
     }));

@@ -551,8 +551,6 @@ Agent **不會自己**安裝、核准或發布任何東西。需要你決定時�
 沙盒上方：**Switch sandbox** 換沙盒；**Discard sandbox** 丟掉整個沙盒（移到
 `knowledge-sandboxes\.discarded\`，不會真的刪除；正式 vault 不受影響）。
 
-> 注意：目前畫面上有幾句提示的步驟編號是舊的（例如「convert them in step 2」、
-> 「re-ingest them in step 3」），請以這裡的三個步驟為準：Convert 在第 1 步，Ingest 在第 2 步。
 
 ### 6.4 Step 2 of 3 · Ingest data
 
