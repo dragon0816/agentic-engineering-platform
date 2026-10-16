@@ -1757,6 +1757,25 @@ credential-free origin. It applies the same origin shape and non-loopback HTTPS
 rules as `base_url`; it is not used by `PlatformClient`. `AgentWeb.platform`
 projects it solely as navigation metadata for the browser.
 
+Certificate trust (2026-10-16, `docs/phases/BRIDGE_ENROLLMENT.md` "TLS and
+certificate pinning"): `PlatformBinding` and `PlatformPublishBinding` take an
+optional `certificate_sha256` (normalized to upper-case colon-separated hex; any
+SHA-256 hex form is accepted) or an optional `ca_file` (PEM path), never both.
+`PlatformClient`, `MemberPortalPublisher` and `shared_platform.check_bridge`
+build their HTTPS handler with `common.certificates.https_handler`: pinned
+(handshake, compare, close before sending on a mismatch), CA file, or the default
+verified context. A certificate failure is `Failure(code="certificate_untrusted",
+retryable=False)` with reachability `unreachable` from `PlatformClient`, and
+`PublishError("certificate_untrusted")` from the publisher. Agent Web
+`POST /api/settings/shared-platform/certificate` (page token; body
+`member_portal_url`, `base_url`) replies `certificates[]` (`url`, `fingerprint`,
+`pem` — public certificate only, `trusted_by_system`), `fingerprint`, `pem`,
+`trusted_by_system`, `pinned`, `matches_pin`, or `ok: false` with
+`certificate_needs_https`, `certificate_unreachable`, `certificate_mismatch`;
+`POST /api/settings/shared-platform` accepts `certificate_sha256` (a fingerprint,
+or empty to forget; absent keeps the pin; `certificate_pin_invalid`), and its
+settings reply carries `certificate_sha256` and `ca_file`.
+
 ## Personal Agent Web synchronization (Productization 1, slice 3)
 
 `PlatformProjection` is the typed local Web view of a shared catalog: platform

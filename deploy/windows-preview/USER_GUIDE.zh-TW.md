@@ -830,15 +830,48 @@ Agent Web 要在執行中，Telegram 才會有回應。
 | Personal Agent code | Member Portal 的 **Connect a Personal Agent** | 讓你的 Agent 以你的身分發布、註冊這台電腦、一鍵開 Marketplace | 30 天 |
 | Bridge token | Agent Web 按 **Enroll this PC** 時自動取得 | 讓這台電腦從平台讀取清單、安裝 | 90 天 |
 
-### 10.1 跟管理員要三樣東西
+### 10.1 跟管理員要四樣東西
 
 1. **你的帳號名稱**：必須和安裝時輸入的帳號**完全一樣**（例如 `alex.wang`）。只能用英文
    字母、數字和 `. - _`，**不要用 email**。不確定時看 **Settings → Shared platform** 卡片
    上「registered by」的值。
-2. **Member Portal URL**（例如 `https://platform.example:8776`）。
-3. **Bridge API URL**（例如 `https://platform.example:8775`）。
+2. **Member Portal URL**（例如 `https://172.25.228.141:8776`）。
+3. **Bridge API URL**（例如 `https://172.25.228.141:8775`）。
+4. **憑證指紋（SHA-256）**：一串 64 個英數字，例如 `83:95:B0:90:…:BA:8B`。平台用的是
+   管理員自己簽的憑證（自簽憑證），Windows 不認得它，你要用這串指紋確認連到的是真的平台。
 
 管理員會用你的帳號名稱發一張邀請，私訊給你一個邀請連結。
+
+### 10.1.1 信任平台的憑證（第一次，在 Agent Web）
+
+1. 打開 Agent Web → **Settings → Shared platform**，在 **Member Portal URL** 和
+   **Bridge API URL** 填上兩個 `https://` 網址。
+2. 在 **Platform certificate** 區塊按 **Fetch & show fingerprint**。畫面顯示
+   `SHA-256 83:95:B0:…`（兩個網址是同一張憑證）和 `not trusted yet`。
+3. **逐段比對**這串指紋和管理員給你的是否**完全相同**：
+   - 相同：按 **Trust this certificate**。卡片顯示 `Trusted certificate (SHA-256): …`，
+     之後這台電腦只接受這一張憑證，其他一律拒絕；
+   - 不同：**不要按 Trust**，告訴管理員。可能是網址打錯，或有人冒充平台。
+4. 管理員換了憑證時（會通知你新的指紋），重做這三步；按 **Forget** 可以取消信任。
+
+這只影響 Agent（同步、發布、註冊、一鍵開 Marketplace 取得登入票），不會關掉其他網站的
+憑證檢查。
+
+**瀏覽器的警告**：用瀏覽器打開 Member Portal（或按 **Open Marketplace**）時，Edge／Chrome
+會顯示「你的連線不是私人連線」。兩種處理方式擇一：
+
+- **每個瀏覽器第一次接受一次**：按網址列的「不安全」→ 憑證 → 詳細資料，看
+  **SHA-256 指紋**和管理員給的相同，再回到警告頁按 **進階 → 繼續前往**。之後每次重開瀏覽器
+  可能還會再問。
+- **匯入憑證，不再警告**：在 **Platform certificate** 按 **Download .cer**（只有公開憑證，
+  沒有私鑰），雙擊下載的 `shared-platform.cer` → **安裝憑證** → **目前使用者** →
+  **將所有憑證放入以下的存放區** → **受信任的根憑證授權單位**；或在 PowerShell 執行
+  `certutil -user -addstore Root "$env:USERPROFILE\Downloads\shared-platform.cer"`。
+  重開瀏覽器後就不再警告。
+  **風險**：受信任的根憑證可以替**任何**網站背書。持有這張憑證私鑰的人，理論上可以對你這個
+  Windows 帳號假冒任何 https 網站。私鑰只存在平台電腦上、只有平台的服務帳號能讀，但仍請只
+  在比對過指紋後匯入；平台改用公司正式憑證後，從 `certmgr.msc` →「受信任的根憑證授權單位」
+  刪除它。不確定時，用第一種方式即可。
 
 ### 10.2 登入 Member Portal（瀏覽器）
 
@@ -869,7 +902,7 @@ Agent Web 要在執行中，Telegram 才會有回應。
 
 1. 在 Member Portal 的 **Publish from your Personal Agent** 區塊按
    **Connect a Personal Agent**，複製出現的代碼（只會顯示這一次）。
-2. 打開 Agent Web → **Settings → Shared platform**：
+2. 打開 Agent Web → **Settings → Shared platform**（`https://` 平台先做完 10.1.1）：
    - **Member Portal URL**、**Bridge API URL**：填 10.1 拿到的兩個網址；
    - **Personal Agent code**：貼上剛剛的代碼；
    - 按 **Save**。代碼只存在你的 Windows 使用者環境裡，不會寫進任何檔案，也不會再顯示。
@@ -883,6 +916,8 @@ Agent Web 要在執行中，Telegram 才會有回應。
   什麼。
 - 再按一次只會換一個新 token（舊的失效），不會重複註冊。token 快到期時再按一次即可。
 - 顯示 **The Bridge API URL did not answer** 時，什麼都沒有存，請檢查 Bridge API URL。
+- 顯示 **The Bridge API's certificate is not trusted by this PC** 時，什麼都沒有存，先做
+  10.1.1 信任憑證再按一次。
 
 ### 10.5 安裝、發布、誰能用
 
@@ -909,6 +944,9 @@ Agent Web 要在執行中，Telegram 才會有回應。
 | `publisher_not_authorized` | 這個名稱屬於別人 | 請擁有者把你加為 co-editor，或改用新的名稱 |
 | Library 是空的 | 還沒註冊、或沒有你能用的項目 | 先做 10.4；或請擁有者把 **Who can use it** 改成全公司 |
 | `platform_unreachable` | 平台位址錯誤或網路不通 | 檢查兩個網址；確認平台有在執行 |
+| `certificate_untrusted` | 還沒信任平台的憑證，或管理員換了憑證（訊息會列出兩個指紋） | 做 10.1.1；指紋和管理員給的不同時不要信任，通知管理員 |
+| `certificate_mismatch` | Member Portal 和 Bridge API 出示不同的憑證 | 不要信任，問管理員哪一個才對 |
+| 瀏覽器顯示「你的連線不是私人連線」 | 平台用自簽憑證 | 見 10.1.1「瀏覽器的警告」 |
 | `Publishing is not set up on this PC` | 沒有 Member Portal URL 或 Personal Agent code | 做 10.3 |
 | **Open Marketplace** 開的是登入頁 | 沒有存 Personal Agent code，或代碼過期（30 天） | 重新做 10.3 |
 | 「This sign-in from Agent Web expired (it lasts one minute)」 | 一鍵登入票只有 1 分鐘 | 回 Agent Web 再按一次 **Open Marketplace** |
@@ -1280,26 +1318,40 @@ Member，`last_administrator`）。
 
 ### 15.7 啟動、更新與資料
 
-- 啟動：`start-platform.cmd`（開機後不會自動啟動）。帳號、已發布的能力、審核紀錄與已註冊的
-  電腦都存在 `workspace\registry.sqlite`，重啟不會遺失。
+- 啟動：`start-platform.cmd`；要開機自動啟動，建立排程工作「AEP Shared Platform」（15.8）。
+  帳號、已發布的能力、審核紀錄與已註冊的電腦都存在 `workspace\registry.sqlite`，重啟不會遺失。
 - 每次重啟會產生 `invitation-links-*.json`（`platform.json` 裡尚未使用的啟動邀請）；**內容是
   登入憑證，不要轉寄或提交到 Git**。
 - 更新：用新版安裝包重新執行 `install.cmd`，`platform.json` 會保留。
 
-### 15.8 開放給公司網路（TLS）
+### 15.8 開放給公司網路（TLS、自簽憑證、防火牆、自動啟動）
 
-預設只監聽本機（127.0.0.1），其他電腦連不到。開放時編輯安裝目錄的 `platform.json`：
+預設只監聽本機（127.0.0.1），其他電腦連不到。完整指令在 Shared Platform 安裝包的
+`START-HERE.md` 第 6 節，步驟如下（都在平台電腦上、以執行平台的帳號操作）：
 
-1. `listen_host` 改成這台電腦的固定 IP 或 DNS 名稱；
-2. 設定 `tls_certificate_path` 與 `tls_private_key_path`（**非本機一律要求 HTTPS**，沒有 TLS
-   會被拒絕）；
-3. Windows 防火牆只對預期的網路開放 `control_port`（Bridge API，預設 8765）與 `member_port`
-   （Member Portal，預設 8766；兩個不能相同）；
-4. 重啟後把兩個 `https://` 網址給同事。
+1. **產生自簽憑證**：用 Git for Windows 的 `openssl` 在平台電腦上產生憑證與私鑰，SAN 寫這台
+   電腦的 IP 和名稱（例如 `IP:172.25.228.141,DNS:OPENLAB01`），放在安裝目錄外的
+   `%LOCALAPPDATA%\AgenticEngineeringPlatform\shared-platform-tls\`，私鑰只給這個帳號讀取。
+   **私鑰不可複製到別台電腦、寄出或提交到 Git**。
+2. **`platform.json`**：`listen_host` 改成這台電腦的 IP；`tls_certificate_path`、
+   `tls_private_key_path` 指向兩個檔案（**非本機一律要求 HTTPS**）。`control_port`
+   （Bridge API）和 `member_port`（Member Portal）不能相同，被其他程式占用時（Windows socket
+   `10048`）換一個未使用的埠；不要直接停掉不明程序。
+3. **取得指紋**：`aep-platform certificate-fingerprint --config <platform.json>` 印出
+   `SHA-256 fingerprint: …`；平台啟動時也會印 `Certificate SHA-256: …`。
+4. **防火牆**：新增輸入規則「AEP Shared Platform」，TCP，兩個埠，只開 **Domain／Private**
+   設定檔；公司網路在這台電腦上被判定為「無法辨識的網路」（Public）時，改成只對那張網卡開放
+   （所有設定檔 + `-InterfaceAlias`），不要對所有 Public 網路開放。
+5. **開機自動啟動**：排程工作「AEP Shared Platform」，開機時以平台帳號執行
+   `start-platform.cmd`（S4U，沒人登入也會跑），每 5 分鐘檢查一次、平台結束了就重新啟動；
+   紀錄在安裝包資料夾的 `platform.log`。**更新前**先 `Disable-ScheduledTask`，裝完再
+   `Enable-ScheduledTask` 與 `Start-ScheduledTask`。
+6. **交給同事**：兩個 `https://` 網址和憑證指紋，用私訊或團隊公告這種可信的管道。同事照第 10 章
+   10.1.1 在 Agent Web 比對指紋並按 **Trust this certificate**；瀏覽器的警告也在那裡說明。
 
-出現 Windows socket `10048` 或 port occupied：那個埠已被使用。先確認是不是正在運作的舊平台，
-不要直接停掉不明程序；否則替兩個入口各選一個未使用的埠，更新 `platform.json` 後重啟。
-使用自簽憑證時，同事的 Agent 需要信任該憑證（Agent 端的信任設定尚在開發中）。
+更換憑證（到期、私鑰外洩、改用公司正式憑證）：重新產生、重啟平台、公告新指紋；每位同事在
+Agent Web 重做 10.1.1（舊的指紋會被拒絕，訊息會列出新舊兩個指紋）。改用公司 CA 簽發的憑證後，
+Windows 已信任它，同事按 **Forget** 即可。
 
 ---
 

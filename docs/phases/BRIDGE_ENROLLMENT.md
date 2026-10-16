@@ -1,6 +1,6 @@
 # Enroll a Personal Agent's Bridge on the Shared Platform
 
-Owner request: 2026-10-15. Status: **approved 2026-10-15 with option (a); implemented 2026-10-15 (platform route, portal Bridges list, Agent Web card, assets-only sync). Live test on 172.25.228.141 pending.**
+Owner request: 2026-10-15. Status: **approved 2026-10-15 with option (a); implemented 2026-10-15 (platform route, portal Bridges list, Agent Web card, assets-only sync). Live test on 172.25.228.141 pending.** TLS with a pinned self-signed certificate: 2026-10-16, see "TLS and certificate pinning".
 
 ## Goal
 
@@ -87,7 +87,8 @@ validated):
 - **Status:** enrolled as `<bridge_id>`, token expiry, last catalog read.
 
 Over the SSH tunnel, both URLs are loopback HTTP (`127.0.0.1:28775/28776`). Beyond
-loopback HTTPS stays required.
+loopback HTTPS stays required; a self-signed platform is trusted by its pinned
+fingerprint (2026-10-16, "TLS and certificate pinning").
 
 ### 3. Local grants and platform sync
 
@@ -172,8 +173,70 @@ Option (a), assets-only sync. Recorded in `docs/DECISIONS.md`.
   `SyncOutcome.assets_only`, `PlatformSyncResult.assets_only` and
   `PlatformProjection.assets_only` say so.
 
+## TLS and certificate pinning (owner request 2026-10-16)
+
+Status: **implemented 2026-10-16 on main (not pushed); deployed on 172.25.228.141.**
+Decision in `docs/DECISIONS.md` (2026-10-16 "A self-signed Shared Platform is trusted by a
+pinned SHA-256 fingerprint").
+
+The Shared Platform on 172.25.228.141 is reached directly over the company network with a
+self-signed certificate (no SSH tunnel). The platform already served TLS
+(`tls_certificate_path` / `tls_private_key_path`, both ports one context); what was missing
+was the Agent's trust.
+
+- **Trust per binding, never global.** host.json `platform` and `publishing` gained
+  `certificate_sha256` (the exact certificate's SHA-256, stored as `AB:CD:...`; hex with or
+  without colons is accepted) and `ca_file` (a PEM file to verify chain and host name
+  against). Not both. Without either, Windows' trust store decides, as before.
+- **Where it applies.** `PlatformClient` (probe, catalog, sync, poll, report, feedback),
+  `MemberPortalPublisher` (publish, enroll, `me`, select/revoke, browser ticket for "Open
+  Marketplace", Library content) and the enrollment check of the Bridge API. The
+  assistant and authoring paths reach the platform only through these two clients, so they
+  follow the same binding. Code: `common/certificates.py`.
+- **How a pin is checked.** `PinnedHTTPSConnection` completes the TLS handshake, compares
+  the presented certificate's SHA-256 with the pin and closes the connection on a
+  mismatch, **before any request byte (the `Authorization` header included) is sent**.
+  Only this connection skips chain and name checks, because it compares the whole
+  certificate instead. `ssl`'s process default and every other HTTPS call are untouched.
+- **Failure.** A missing pin with an untrusted certificate, a wrong pin, or a CA file of
+  another certificate is `certificate_untrusted` (not retryable; the Bridge client reports
+  it as `unreachable` with that code, the publisher raises it, enrollment refuses it before
+  anything is saved). A wrong pin's message names both fingerprints (public).
+- **Agent Web.** Settings > Shared platform > "Platform certificate":
+  - **Fetch & show fingerprint** (`POST /api/settings/shared-platform/certificate`) reads
+    the certificate each https address presents (a handshake, nothing sent) and shows its
+    SHA-256, whether Windows already trusts it and whether it matches the pin; a portal and
+    Bridge API that present different certificates are refused (`certificate_mismatch`);
+  - **Trust this certificate** saves exactly the fingerprint the member compared
+    (`certificate_sha256` in the card's save) into both bindings, backup first; the running
+    Agent switches at once;
+  - **Forget** removes the pin; **Download .cer** saves the public certificate for the
+    browser (below).
+- **Browsers.** Agent Web's links open the portal in the member's browser, which warns about
+  a self-signed certificate. Either accept the warning once per browser after comparing the
+  fingerprint in the certificate viewer, or import the downloaded `.cer` into the Windows
+  user's "Trusted Root Certification Authorities" (`certutil -user -addstore Root
+  shared-platform.cer`). Risk of importing: whoever holds the platform's private key could
+  then impersonate any https site to that Windows user. The key is generated on the
+  platform machine, readable only by its service account and never copied off; remove the
+  certificate (`certmgr.msc`) when the platform gets a company-issued certificate.
+- **Platform side.** `aep-platform certificate-fingerprint --config platform.json` prints
+  the fingerprint to hand out; `serve` prints it at start. The TLS handshake now runs on
+  each request's thread with a 10-second limit (`control_plane.http.tls_listener` /
+  `finish_tls`): before, `accept()` did it on the one accepting thread, so a client that
+  connected and sent nothing (a port scan, a browser that rejected the certificate) stopped
+  the platform for everybody.
+
+Tests: `tests/test_platform_certificate_pinning.py` (pin forms, bindings, the CLI
+fingerprint, a wrong pin sends no byte and a right one connects against a recording TLS
+server, verification stays on for everything else, Bridge client and publisher with pin /
+CA file / none / wrong pin, a silent client does not stop the TLS platform, the card
+fetches, trusts, enrolls over https, keeps, replaces and forgets the pin, page hooks, and a
+real browser pressing Fetch and Trust). Each test run makes its own self-signed certificate
+with `openssl`.
+
 ## Not in scope
 
 - Shared test workstations (administrator enrollment).
-- TLS and a non-loopback deployment.
+- A company-issued (CA-signed) certificate; `ca_file` and the system store already cover it.
 - Deprecation notices to Hosts.

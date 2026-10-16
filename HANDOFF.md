@@ -1,6 +1,39 @@
 # Handoff
 
-Updated: 2026-10-16 (Asia/Taipei), by Claude Code (draft install card)
+Updated: 2026-10-16 (Asia/Taipei), by Claude Code (Shared Platform on the company network)
+
+## Shared Platform on 172.25.228.141 over https with a pinned certificate (2026-10-16, Claude Code) — latest
+
+Goal: owner request 2026-10-16, colleagues reach the Shared Platform on 141 directly (no SSH
+tunnel) with a self-signed certificate. Design and as-built: `docs/phases/BRIDGE_ENROLLMENT.md`
+"TLS and certificate pinning"; decision `docs/DECISIONS.md` 2026-10-16 "A self-signed Shared
+Platform is trusted by a pinned SHA-256 fingerprint"; row in `docs/TASKS.md`. Code commit
+70ef34a6 + 33bf7d8c (not pushed), docs commit after them.
+- **Hand out:** Member Portal `https://172.25.228.141:8776`, Bridge API
+  `https://172.25.228.141:8775`, certificate SHA-256
+  `83:95:B0:90:90:1A:28:1E:6B:0D:E9:92:F5:33:A6:2B:49:9D:5A:3A:19:08:8D:30:F6:C1:91:42:BA:C5:BA:8B`
+  (valid until 2029-01-18). Members follow USER_GUIDE 10.1.1.
+- **141 state:** bundle 70ef34a6 installed; `platform.json` `listen_host` 172.25.228.141, ports
+  8775/8776, cert/key in `%LOCALAPPDATA%\AgenticEngineeringPlatform\shared-platform-tls\` (key
+  ACL: OpenLab only; generated on 141 with Git's openssl, never copied); backup
+  `platform.json.bak-20261016-*-before-tls`. Firewall rule "AEP Shared Platform" TCP 8775/8776
+  inbound, all profiles but only on the Ethernet adapter (the LAN is an unidentified = Public
+  network there). Scheduled task "AEP Shared Platform": `cmd /c start-platform.cmd >>
+  C:\aep-platform\platform.log`, S4U as OpenLab, triggers at startup + every 5 minutes,
+  IgnoreNew (a killed platform came back within 60 s). To redeploy: `Disable-ScheduledTask`,
+  stop processes under the install root, unpack + install, `Enable-` and `Start-ScheduledTask`.
+  The SSH tunnel 28775/28776 no longer works for the platform (it is TLS on the LAN address).
+- **This PC:** host.json `platform`/`publishing` now https + the pin (backup
+  `host.json.bak-20261016-183648-before-141-https`); Agent Web restarted on the working tree at
+  18:37 with no task running. Live checks: Settings card shows the pin and `matches_pin`,
+  catalog answered (18), signed-in portal link, Bridge probe as bridge-tp401555 (leo.chi).
+- **Verified:** see the TASKS row (ruff, format, mypy, both full suites, bundle step replay).
+- **Not verified:** a reboot of 141 (autostart at boot; only the 5-minute trigger was proven),
+  a colleague's PC end to end, a real browser importing the `.cer`. `platform.log` stays empty
+  until Python flushes its output (buffered).
+- **Next (owner):** hand out the two URLs and the fingerprint; when 141 next reboots, check
+  `https://172.25.228.141:8776` answers; consider removing the used bootstrap invitations from
+  141's `platform.json` (each restart writes a new `invitation-links-*.json` for unused ones).
 
 ## Weekly report not bundled + starting page for the shortcut (2026-10-16, Claude Code)
 

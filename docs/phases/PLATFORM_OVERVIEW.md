@@ -209,3 +209,26 @@ page hooks, real browser at 1400 px: content and facts measured side by side,
 narrow card stacks, uniform closed cards, malicious `<script>`, `<img>`,
 `javascript:` and `mailto:` shown as text or dropped, Workflow content, Open
 Marketplace opens a ticket URL).
+
+## TLS on the company network (owner request 2026-10-16)
+
+Status: **implemented 2026-10-16 on main (not pushed); 172.25.228.141 serves both ports
+over https.** Decision in `docs/DECISIONS.md` (2026-10-16 "A self-signed Shared Platform is
+trusted by a pinned SHA-256 fingerprint"); Agent side in
+`docs/phases/BRIDGE_ENROLLMENT.md` "TLS and certificate pinning".
+
+- The portal and the Bridge API listen on the machine's address with one self-signed
+  certificate (`platform.json` `listen_host`, `tls_certificate_path`,
+  `tls_private_key_path`); a non-loopback listener without TLS is still refused.
+- Members' Agents pin the certificate's SHA-256 (Settings > Shared platform > "Platform
+  certificate"); every call of the Bridge client and of the member publisher (browser
+  ticket, Library content, enrollment, publishing) checks it before sending anything.
+- Browsers show a warning for the self-signed portal; the guide (chapter 10) explains
+  comparing the fingerprint or importing the public `.cer` that Agent Web downloads, and
+  the risk of the latter.
+- `aep-platform certificate-fingerprint --config platform.json` prints the value an
+  administrator hands out; `serve` prints it at start.
+- The TLS handshake runs on each request's thread with a 10-second limit, so a silent
+  client cannot stop the platform.
+- Administrator procedure (issuing the certificate on the platform machine, firewall rules,
+  autostart): `deploy/shared-platform-preview/START-HERE.md` and the guide's chapter 15.

@@ -2338,3 +2338,31 @@ s-k-20261011T102952` (not published).
   real headless browser: card 480x280, spinner 48x48, slow notice 424x142 after a
   simulated 125 s, dark scheme changes the background, `ready` lands on the fake
   server's token URL, failure shows reason and log folder).
+
+- [x] Shared Platform on the company network with a self-signed certificate (2026-10-16,
+  owner request). Agent: `common/certificates.py` (pin forms, `PinnedHTTPSConnection` checks
+  the SHA-256 before sending, `https_handler`, `presented_certificate`); host.json `platform`
+  / `publishing` gain `certificate_sha256` or `ca_file`; used by `PlatformClient`,
+  `MemberPortalPublisher` (publish, enroll, browser ticket, Library content) and the
+  enrollment check (`shared_platform.check_bridge`); `certificate_untrusted` everywhere.
+  Agent Web Settings > Shared platform > "Platform certificate": Fetch & show fingerprint
+  (`POST /api/settings/shared-platform/certificate`), Trust this certificate, Forget,
+  Download .cer. Platform: `aep-platform certificate-fingerprint`, fingerprint printed at
+  start, TLS handshake on the request thread with a 10 s limit. 141: self-signed cert made
+  on 141 (key readable by openlab only), `listen_host` 172.25.228.141, ports 8775/8776,
+  firewall rule "AEP Shared Platform" (Ethernet adapter only), scheduled task "AEP Shared
+  Platform" (startup + 5-minute check, S4U); this PC's host.json switched to the https URLs
+  and the pin (backup `host.json.bak-20261016-183648-before-141-https`), Agent Web restarted
+  with no task running. Verified live from this PC without the tunnel: both ports present
+  the pinned certificate, health, portal sign-in page, Bridge probe as bridge-tp401555
+  (leo.chi), Agent Web catalog answered (18 entries), signed-in portal link, and the watch
+  trigger restarted a killed platform within 60 s. Docs: `BRIDGE_ENROLLMENT.md` "TLS and certificate pinning",
+  `PLATFORM_OVERVIEW.md`, `docs/shared-platform-preview.md`, platform `START-HERE.md`
+  section 6, `USER_GUIDE.zh-TW.md` 10.1/10.1.1/10.4/10.6 and 15.7/15.8, decision in
+  `docs/DECISIONS.md`. Tests: `tests/test_platform_certificate_pinning.py` (10, real TLS
+  platform with a generated self-signed cert, recording TLS server, real browser). Checks on
+  70ef34a6: ruff check / format --check, strict mypy (src+tests) in a fresh venv with only
+  `.[dev,office]`; full pytest in the project `.venv` 3031 passed, 7 skipped; in the CI-like
+  venv 3003 passed, 30 skipped, 1 failed (the real-browser card test: settings arriving
+  late replaced the typed URLs; fixed in the page before the commit, the file and the card
+  suites re-run green in that venv); the verify.yml Shared Platform bundle step replayed.

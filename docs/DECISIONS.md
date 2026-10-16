@@ -3142,3 +3142,45 @@ Rejected: auto-installing a draft that passed its checks (installing stays the o
 press); a card per revision (duplicates); attributing `/mcp/authoring` calls to whichever
 conversation turn is running (wrong when two conversations run at once); adding Try to
 Telegram (runs belong to the run form there).
+
+## 2026-10-16 — A self-signed Shared Platform is trusted by a pinned SHA-256 fingerprint
+
+Context: owner request 2026-10-16, open the Shared Platform on 172.25.228.141 to colleagues on
+the company network with a self-signed certificate (141 is a public test machine; no company
+CA certificate is available for it). Agents had no way to trust it except importing it into
+Windows, and every call would otherwise fail verification.
+
+Decision:
+- host.json `platform` and `publishing` take an optional `certificate_sha256` (the exact
+  certificate, stored `AB:CD:...`) or `ca_file` (PEM), not both. The Bridge client, the
+  member publisher (publish, enroll, browser ticket, Library content) and the enrollment
+  check use it. Without either, the Windows trust store decides, as before.
+- A pinned connection completes the handshake, compares the certificate's SHA-256 and closes
+  on a mismatch before any request byte is sent; only that connection skips chain and name
+  checks. Nothing changes the process-wide `ssl` default. Failure code
+  `certificate_untrusted`, not retryable.
+- Members trust the platform in Agent Web (Settings > Shared platform > "Platform
+  certificate": Fetch & show fingerprint, compare with the administrator's value, Trust this
+  certificate). The administrator gets the value from `aep-platform certificate-fingerprint`
+  and hands it out through a trusted channel.
+- Browsers: accept the warning after comparing the fingerprint, or import the public `.cer`
+  (downloadable from the card) into the user's Trusted Root, with the risk explained in the
+  guide (chapter 10.1.1). The private key is generated on the platform machine, readable only
+  by its service account, never copied off.
+- Platform: the TLS handshake moved from the accepting thread to each request's thread
+  (10-second limit), because a silent client otherwise stopped the platform for everybody.
+- 141: certificate in `%LOCALAPPDATA%\AgenticEngineeringPlatform\shared-platform-tls\`,
+  `listen_host` 172.25.228.141, ports 8775/8776, firewall rule "AEP Shared Platform" (TCP
+  8775/8776 inbound; all profiles but only on the Ethernet adapter that holds
+  172.25.228.141, because Windows classifies the company LAN there as an unidentified,
+  Public network, so a Domain/Private-only rule would never apply), scheduled task "AEP
+  Shared Platform" (at startup and a 5-minute check, S4U as openlab, IgnoreNew, so it
+  restarts the platform when it stopped).
+
+Rejected: disabling verification (globally or per call); trusting on first use without a
+human comparison (a man in the middle on the first call would be pinned); requiring every
+member to import a root certificate (wide trust for one internal host); shipping a pure-Python
+certificate generator (openssl from Git for Windows is on the machine; no new crypto code);
+a scheduled task that stores the account password (S4U needs none); opening the ports for
+every Public network or changing the LAN's network category (an unidentified network's
+category is policy, not a setting that reliably stays).

@@ -44,7 +44,7 @@
 
 1. 將 `listen_host` 設為這台共享電腦的固定 DNS 名稱或 IP。
 2. 設定 `tls_certificate_path` 與 `tls_private_key_path`；非 loopback listener 沒有 TLS
-   會被程式拒絕。
+   會被程式拒絕。自簽憑證即可，作法見下方「管理員 SOP」第 6 節。
 3. 確認 `control_port` 與 `member_port` 的防火牆規則只允許預期網路。
 4. 在 `invitations` 加入具期限的邀請，再啟動並安全交付產生的 invitation link。
 
@@ -142,19 +142,120 @@ Member Portal → **Registrations (Bridges)** 分頁列出所有已註冊的電�
 
 ### 5. 啟動、更新與資料
 
-- 啟動：`start-platform.cmd`（開機後不會自動啟動）。重啟不會遺失帳號、已發布的能力、
-  審核紀錄與已註冊的電腦，這些都存在 `workspace\registry.sqlite`。
+- 啟動：`start-platform.cmd`。要開機自動啟動，見第 6 節的排程工作。重啟不會遺失帳號、
+  已發布的能力、審核紀錄與已註冊的電腦，這些都存在 `workspace\registry.sqlite`。
 - 每次重啟會產生新的 `invitation-links-*.json`，裡面是 `platform.json` 裡尚未使用的
   啟動邀請；**檔案內容是登入憑證，不要轉寄或提交到 Git**。
 - 更新：用新版安裝包重新執行 `install.cmd`，`platform.json` 會保留。
 
-### 6. 開放給公司網路
+### 6. 開放給公司網路（自簽憑證、防火牆、開機自動啟動）
 
-預設只監聽本機（127.0.0.1），其他電腦連不到。開放時：
+預設只監聽本機（127.0.0.1），其他電腦連不到。以下以 `172.25.228.141`（電腦名稱
+`OPENLAB01`）為例，換成你的 IP 與名稱。全部在**這台平台電腦**上、以執行平台的 Windows
+帳號、在系統管理員 PowerShell 中操作。
 
-1. `platform.json` 的 `listen_host` 改成這台電腦的固定 IP 或 DNS 名稱；
-2. 設定 `tls_certificate_path` 與 `tls_private_key_path`（非本機一律要求 HTTPS）；
-3. Windows 防火牆開放 `control_port` 與 `member_port`；
-4. 重啟後把新的兩個 `https://` 網址給同事。
+**6.1 在這台電腦上產生自簽憑證**（私鑰不離開這台電腦）
 
-使用自簽憑證時，同事的 Agent 需要信任該憑證（Agent 端的信任設定尚在開發中）。
+用 Git for Windows 附帶的 `openssl`（`C:\Program Files\Git\usr\bin\openssl.exe`）：
+
+```powershell
+$Dir = "$env:LOCALAPPDATA\AgenticEngineeringPlatform\shared-platform-tls"
+New-Item -ItemType Directory -Force $Dir | Out-Null
+$Me = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+icacls $Dir /inheritance:r /grant:r "${Me}:(OI)(CI)F"      # 只有這個帳號能讀
+@"
+[req]
+distinguished_name = dn
+prompt = no
+[dn]
+CN = 172.25.228.141
+O = AEP Shared Platform
+[ext]
+subjectAltName = IP:172.25.228.141,DNS:OPENLAB01,DNS:openlab01
+basicConstraints = critical,CA:FALSE
+keyUsage = critical,digitalSignature
+extendedKeyUsage = serverAuth
+subjectKeyIdentifier = hash
+"@ | Set-Content -Encoding ascii "$Dir\ext.cnf"
+& "C:\Program Files\Git\usr\bin\openssl.exe" req -x509 -newkey ec `
+  -pkeyopt ec_paramgen_curve:prime256v1 -nodes -days 825 `
+  -keyout "$Dir\platform-key.pem" -out "$Dir\platform-cert.pem" -config "$Dir\ext.cnf" -extensions ext
+Remove-Item "$Dir\ext.cnf"
+icacls "$Dir\platform-key.pem" /inheritance:r /grant:r "${Me}:F"
+```
+
+憑證放在安裝目錄**外面**，重新安裝或解除安裝都不會刪掉它。私鑰（`platform-key.pem`）
+不要複製、寄送或提交到 Git；遺失或外洩時重新產生，並把新的指紋給所有同事。
+
+**6.2 設定 `platform.json` 並取得指紋**
+
+```json
+"listen_host": "172.25.228.141",
+"tls_certificate_path": "C:\\Users\\<帳號>\\AppData\\Local\\AgenticEngineeringPlatform\\shared-platform-tls\\platform-cert.pem",
+"tls_private_key_path": "C:\\Users\\<帳號>\\AppData\\Local\\AgenticEngineeringPlatform\\shared-platform-tls\\platform-key.pem"
+```
+
+```powershell
+& "$env:LOCALAPPDATA\AgenticEngineeringPlatform\shared-platform-preview-0.1.0\.venv\Scripts\aep-platform.exe" `
+  certificate-fingerprint --config "$env:LOCALAPPDATA\AgenticEngineeringPlatform\shared-platform-preview-0.1.0\platform.json"
+```
+
+印出的 `SHA-256 fingerprint: 83:95:...` 就是要交給同事的指紋（`start-platform.cmd` 啟動時
+也會印 `Certificate SHA-256: ...`）。指紋是公開資訊，但要用**可信的管道**給（私訊、團隊公告），
+同事會拿它和 Agent Web 顯示的值比對。
+
+**6.3 Windows 防火牆**
+
+```powershell
+New-NetFirewallRule -DisplayName "AEP Shared Platform" -Direction Inbound -Protocol TCP `
+  -LocalPort 8775,8776 -Action Allow -Profile Domain,Private
+```
+
+把 `8775,8776` 換成 `platform.json` 的 `control_port`、`member_port`。只開放 Domain／Private
+設定檔。若公司網路在這台電腦上是「無法辨識的網路」（設定檔為 Public，`Get-NetConnectionProfile`
+可查），改成只對那張網卡開放，不要對所有 Public 網路開放：
+
+```powershell
+$Nic = (Get-NetIPAddress -AddressFamily IPv4 -IPAddress 172.25.228.141).InterfaceAlias
+Set-NetFirewallRule -DisplayName "AEP Shared Platform" -Profile Domain,Private,Public -InterfaceAlias $Nic
+```
+
+平台只監聽 `listen_host` 這個位址，所以 Wi-Fi、VPN 等其他網卡本來就連不到。
+
+**6.4 開機自動啟動（排程工作，失敗自動重啟）**
+
+```powershell
+$Bundle = "C:\aep-platform"   # 解壓縮安裝包的資料夾（有 start-platform.cmd）
+$Action = New-ScheduledTaskAction -Execute "cmd.exe" `
+  -Argument "/c `"`"$Bundle\start-platform.cmd`" >> `"$Bundle\platform.log`" 2>&1`""
+$Trigger = New-ScheduledTaskTrigger -AtStartup
+# 每 5 分鐘檢查一次：平台還在執行就不動（IgnoreNew），結束了就重新啟動。
+$Trigger.Repetition = (New-ScheduledTaskTrigger -Once -At (Get-Date) `
+  -RepetitionInterval (New-TimeSpan -Minutes 5)).Repetition
+# 開機觸發的重複檢查要等下次開機才開始；這個觸發讓檢查從現在就開始。
+$Watch = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) `
+  -RepetitionInterval (New-TimeSpan -Minutes 5)
+$Settings = New-ScheduledTaskSettingsSet -MultipleInstances IgnoreNew -StartWhenAvailable `
+  -ExecutionTimeLimit ([TimeSpan]::Zero) -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1) `
+  -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+$Principal = New-ScheduledTaskPrincipal -UserId $Me -LogonType S4U -RunLevel Limited
+Register-ScheduledTask -TaskName "AEP Shared Platform" -Action $Action -Trigger @($Trigger, $Watch) `
+  -Settings $Settings -Principal $Principal
+Start-ScheduledTask -TaskName "AEP Shared Platform"
+```
+
+`S4U` 讓工作在沒有人登入時也以這個帳號執行，不需要存密碼。紀錄寫在
+`C:\aep-platform\platform.log`。**更新平台前**先 `Disable-ScheduledTask -TaskName "AEP Shared
+Platform"`，停掉平台、重新安裝後再 `Enable-ScheduledTask` 和 `Start-ScheduledTask`，否則
+5 分鐘檢查會在安裝途中把舊版啟動。
+
+**6.5 交給同事**
+
+- Member Portal：`https://172.25.228.141:8776`
+- Bridge API：`https://172.25.228.141:8775`
+- 憑證指紋（SHA-256）：6.2 印出的值
+
+同事在 Agent Web **Settings → Shared platform** 填兩個網址，按 **Fetch & show fingerprint**，
+比對指紋相同後按 **Trust this certificate**，再按 **Enroll this PC**（使用指南第 10 章）。
+瀏覽器打開 Member Portal 時會警告「不安全／憑證無效」：比對憑證檢視器裡的 SHA-256 與你給的
+指紋相同後再繼續，或匯入 Agent Web 下載的 `.cer`（指南 10.1.1 說明風險）。
