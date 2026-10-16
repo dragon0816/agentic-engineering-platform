@@ -30,6 +30,15 @@ in [archive/](archive/); they are kept for history, not for current work.
 | [phases/KNOWLEDGE_MULTI_ROUND_RETRIEVAL.md](phases/KNOWLEDGE_MULTI_ROUND_RETRIEVAL.md) | Model-directed search rounds for queries |
 | [phases/E2E_05_KNOWLEDGE_EVOLUTION.md](phases/E2E_05_KNOWLEDGE_EVOLUTION.md) | Product gate E2E-05 |
 
+## Proposals (awaiting owner review)
+
+| Document | What it is for |
+|---|---|
+| [proposals/KNOWLEDGE_STRATEGY_v1.1.md](proposals/KNOWLEDGE_STRATEGY_v1.1.md) | Knowledge Strategy v1.1: Wiki + Graph strategies on the existing Workflow/Harness, ADR drafts, benchmark plan, Atlas Knowledge API draft |
+| [proposals/K01_AS_IS_GAP_ANALYSIS.md](proposals/K01_AS_IS_GAP_ANALYSIS.md) | K01 audit behind v1.1, including the Knowledge tool-path investigation |
+| [proposals/KNOWLEDGE_STRATEGY_v1.1_DIFF.md](proposals/KNOWLEDGE_STRATEGY_v1.1_DIFF.md) | What changed from v1.0 to v1.1 and why |
+| [proposals/KNOWLEDGE_STRATEGY_v1.0_original.md](proposals/KNOWLEDGE_STRATEGY_v1.0_original.md) | The original v1.0 proposal, verbatim |
+
 ## Harness and authoring
 
 | Document | What it is for |

@@ -1,8 +1,37 @@
 # Handoff
 
-Updated: 2026-10-16 (Asia/Taipei), by Claude Code (Suggested Skills S2)
+Updated: 2026-10-17 (Asia/Taipei), by Claude Code (K01 knowledge strategy gap analysis)
 
-## Suggested Skills from experience, slice S2 (2026-10-16, Claude Code) — latest
+## K01 knowledge strategy gap analysis (2026-10-17, Claude Code) — awaiting owner review
+
+**Status:** docs only, committed on main, not pushed. **Next: the owner reviews
+`docs/proposals/KNOWLEDGE_STRATEGY_v1.1.md` and answers its §8 open questions. K02 and
+everything after it are blocked until the owner approves v1.1.** Do not start AEP-K02.
+
+- **Goal:** audit the AS-IS against the owner's ten revision principles (2026-10-17) and
+  revise the v1.0 Knowledge Strategy proposal. No feature code.
+- **Files:** `docs/proposals/KNOWLEDGE_STRATEGY_v1.0_original.md` (verbatim copy),
+  `docs/proposals/K01_AS_IS_GAP_ANALYSIS.md` (facts with file:line, marked verified /
+  inferred / unverified), `docs/proposals/KNOWLEDGE_STRATEGY_v1.1.md` (ADR drafts K1-K9;
+  K2 storage/PostgreSQL and K9 PR-vs-main are pending; K5 BI policy and K8 BI data class
+  partly pending), `docs/proposals/KNOWLEDGE_STRATEGY_v1.1_DIFF.md`; `docs/README.md`
+  index; a `docs/TASKS.md` entry.
+- **Key finding:** the "Knowledge tool path 10/74" figure is from sample-003 (2026-10-07),
+  before U5 (`0b39228a`, 2026-10-09) made the tool route return the validated Harness
+  answer. Residual causes (unvalidated results go back to the chat model without the
+  record, model-chosen question, one Skill bound, first validated result ends the turn,
+  12,000-character cut) are in K01 §2.4. U7 (post-U5 sample benchmark) is still open.
+- **Verified:** `.venv` `ruff check .` passed; `ruff format --check .` 863 files formatted;
+  `pytest -q -p no:cacheprovider tests -k "docs or readme or tasks"` 15 passed, 3084 deselected;
+  the tests that read docs (`test_codex_remote_test_workflow`, `test_deployment_validation_loop`,
+  `test_llm_gateway`, `test_weekly_report_documented_grants`, `test_bundled_skills`) 90 passed,
+  1 skipped (litellm not installed). No test parses TASKS/HANDOFF/README/DECISIONS.
+  No live benchmark, model call, live install or vault content was used.
+- **Not done:** no GitHub issues created (drafts only in v1.1 §7); no DECISIONS or
+  ARCHITECTURE change; stale docs listed in K01 §12 are not fixed.
+
+
+## Suggested Skills from experience, slice S2 (2026-10-16, Claude Code)
 
 **Status after hand-back:** S2 pushed (897c28cb, CI green); full pytest in the project
 `.venv` re-run after the fix: 3092 passed, 7 skipped. Agent Web restarted on it. **Next:

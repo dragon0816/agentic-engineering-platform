@@ -2408,3 +2408,23 @@ s-k-20261011T102952` (not published).
   `C:epci-wkenv` (`.[dev,office]`); full pytest project `.venv` 3091 passed, 7 skipped,
   1 failed (a settings exact-dict test, updated for the new field and re-run green); CI-like
   venv 3069 passed, 30 skipped. Not verified live (Agent Web not restarted).
+
+## Knowledge Strategy proposal (2026-10-17)
+
+- [x] K01 knowledge strategy gap analysis — docs only (2026-10-17, Claude Code; owner
+  revision principles 1-10 of 2026-10-17). Copied the v1.0 proposal verbatim to
+  `docs/proposals/KNOWLEDGE_STRATEGY_v1.0_original.md`; wrote
+  `docs/proposals/K01_AS_IS_GAP_ANALYSIS.md` (verified AS-IS audit with file:line
+  references, the Knowledge tool-path investigation and the Agent Web Knowledge page
+  coverage), `docs/proposals/KNOWLEDGE_STRATEGY_v1.1.md` (TO-BE architecture, reuse
+  matrix, ADR drafts K1-K9, MVP scope, benchmark plan with thresholds for owner
+  confirmation, Knowledge API v0.1 draft, issue drafts AEP-K02..K12, open questions) and
+  `docs/proposals/KNOWLEDGE_STRATEGY_v1.1_DIFF.md`. No code, decisions or architecture
+  changed; no benchmark or model call was run. Finding: the "tool path 10/74" figure
+  predates the 2026-10-09 U5 fix; residual tool-path causes are listed in K01 §2.4.
+  **K02 and later are blocked on the owner's review of v1.1.**
+  Verification: `.venv` `ruff check .` passed; `ruff format --check .` 863 files formatted;
+  `pytest -q -p no:cacheprovider tests -k "docs or readme or tasks"` 15 passed, 3084 deselected;
+  the tests that read docs (`test_codex_remote_test_workflow`, `test_deployment_validation_loop`,
+  `test_llm_gateway`, `test_weekly_report_documented_grants`, `test_bundled_skills`) 90 passed,
+  1 skipped (litellm not installed). No test parses TASKS/HANDOFF/README/DECISIONS.
