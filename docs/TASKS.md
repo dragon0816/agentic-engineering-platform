@@ -2428,3 +2428,12 @@ s-k-20261011T102952` (not published).
   the tests that read docs (`test_codex_remote_test_workflow`, `test_deployment_validation_loop`,
   `test_llm_gateway`, `test_weekly_report_documented_grants`, `test_bundled_skills`) 90 passed,
   1 skipped (litellm not installed). No test parses TASKS/HANDOFF/README/DECISIONS.
+
+## n8n integration removed (2026-10-17)
+
+- [x] Remove the n8n integration (2026-10-17, Claude Code; owner: "n8n的東西請取消整合",
+  "我們不在Agent上面串接N8N的工作流"). Deleted `src/integrations/n8n.py`, `tests/test_n8n.py`,
+  `integrations/n8n/`; AGENTS.md rule 3, ARCHITECTURE, architecture-guard, README and
+  CONTRACTS now say AEP does not integrate n8n. Source characterization of old n8n workflows
+  is kept as a migration specification. Decision: DECISIONS 2026-10-17 "AEP does not
+  integrate n8n".

@@ -140,10 +140,7 @@ through `Gateway.inspect`/`Gateway.resume` or the engine directly, and owners ca
 follow a run's progress through bounded `watch` streams;
 durable state and production jobs remain deferred.
 
-The optional [n8n adapter](integrations/n8n/README.md) accepts operation IDs and
-arguments for a host-bound workflow through `Gateway.execute_workflow`; normal
-routed workflows share this entry point. Offline tests cover delivery deduplication,
-policy and progress. No n8n runtime, HTTP endpoint or production connection is installed.
+AEP does not integrate n8n: there is no n8n adapter, trigger or schedule (removed 2026-10-17).
 [Workflow checkpoints](docs/WORKFLOW_CHECKPOINTS.md) define the owner-scoped restart
 evidence and store contract that manual recovery would rely on, with a bounded
 in-memory reference store, a single-writer SQLite backend and a content-addressed

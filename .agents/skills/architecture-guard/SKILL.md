@@ -15,7 +15,7 @@ Verify:
 - publish does not imply execution permission;
 - normal contributions do not require core-runtime modification;
 - model/provider details do not leak into platform contracts;
-- n8n is not introduced as a mandatory runtime dependency;
+- n8n is not introduced in any form (no adapter, trigger or scheduling; owner 2026-10-17);
 - new side effects have policy/approval classification;
 - new capabilities have tests/evaluation coverage.
 

@@ -3264,3 +3264,22 @@ another member's entry while Agent Web serves one person; revisit with per-membe
 filtering only in the page (an id would still be decidable); reopening the rejected card
 on re-proposal (it would erase the recorded Ignore); counting only the number of new
 requests after an Ignore (two in one session would bring a card back).
+
+## 2026-10-17 — AEP does not integrate n8n
+
+Owner: "n8n的東西請取消整合" / "我們不在Agent上面串接N8N的工作流". The Agent never calls or
+is called by n8n workflows.
+
+- Removed the offline n8n adapter: `src/integrations/n8n.py` (`N8nAdapter`,
+  `N8nSubmission`, `N8nWorkflowBinding`), `tests/test_n8n.py` and `integrations/n8n/`.
+  Nothing else imported it.
+- `AGENTS.md` rule 3, `docs/ARCHITECTURE.md` (core rule, section 2, the n8n section,
+  layout and rule 20), the architecture-guard skill, README and CONTRACTS now say AEP does not
+  integrate n8n; schedules, triggers and notifications are the host's own (schedule store,
+  Agent Web, Telegram). This replaces the earlier "n8n is optional integration" rule.
+- Kept: old n8n workflows as a specification source for migration (`tests/fixtures/source_n8n_release.json`,
+  `tests/test_source_n8n.py` characterize the source; `benchmarks/w13_parity`), and
+  historical records in DECISIONS, TASKS and phase documents.
+
+Rejected: keeping the adapter as an unused optional seam (it suggests n8n is a supported
+integration and keeps a contract nobody may use).

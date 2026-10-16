@@ -8,7 +8,7 @@ This repository unifies the proven capabilities currently spread across five sou
 
 Core rule:
 
-> Agent decides **WHAT / WHY / WHICH**. Workflow defines **HOW EXACTLY**. n8n coordinates **WHEN**. Skills teach **HOW TO REASON/PROCEED**. Tools perform atomic actions. MCP exposes capabilities. Knowledge provides grounded context. Models are replaceable infrastructure. Evaluation proves behaviour remains acceptable.
+> Agent decides **WHAT / WHY / WHICH**. Workflow defines **HOW EXACTLY**. The host's own schedules and triggers decide **WHEN** (no n8n). Skills teach **HOW TO REASON/PROCEED**. Tools perform atomic actions. MCP exposes capabilities. Knowledge provides grounded context. Models are replaceable infrastructure. Evaluation proves behaviour remains acceptable.
 
 ## 2. Core requirements
 
@@ -49,7 +49,7 @@ The **Platform Registry** is the shared control plane for published assets and t
 
 Publishing an asset does not automatically grant execution permission. Registry/distribution and capability authorization are separate concerns. Shared assets must support explicit owner, version, lifecycle state, dependencies, compatibility requirements and permission/approval metadata.
 
-**n8n is optional integration infrastructure**, not a mandatory core execution layer. n8n, Agent and CLI integrations should invoke the same Workflow/Capability contracts rather than implementing parallel business logic.
+**AEP does not integrate n8n** (owner, 2026-10-17; the offline n8n adapter was removed). Agent and CLI integrations invoke the same Workflow/Capability contracts rather than implementing parallel business logic; schedules and triggers are the host's own.
 
 ### Personal engineering workspace and capability growth
 
@@ -1002,8 +1002,8 @@ Owns deterministic multi-step execution, retry/idempotency, progress, state and 
 
 Workflow parameters: a Workflow declares typed `WorkflowParameter` fields (kind, scope, choices or a `ref:`/`fn:` choice source, `allow_other`, `multiple`, `accept`, `group`, `order`, `channels`, `confirm`) and nothing else about its interface. `common/workflow_forms.py` derives the Agent Web form, the schedule form, the Telegram question flow (`channels/telegram_flow.py`) and the Agent tool schema from that one declaration; `common/workflow_parameters.py` validates every run against it and the engine re-checks dynamic choices and upload confinement. Choice lists resolve through one `host_runtime/choice_sources.py`; uploads land in one workspace store (`host_runtime/workflow_uploads.py`); identity presets in `host_runtime/identity_presets.py`. See `docs/phases/WORKFLOW_FORMS_V2.md`.
 
-### n8n
-Event/business orchestration: schedules, triggers, coarse branching, notifications and integration glue. Do not move detailed engineering logic into n8n nodes when it can live in testable workflow/jobs code.
+### Schedules and triggers (no n8n)
+Schedules, triggers and notifications are the host's own: the host schedule store (`aep-host schedule`), Agent Web, Telegram. AEP does not integrate n8n (owner, 2026-10-17); old n8n workflows are migrated into Workflows and are only a specification source.
 
 ### Knowledge platform
 Owns Drop -> Raw -> Wiki and retrieval. Raw sources are immutable. Document ingestion must preserve provenance. Phase 1+ should extend ingestion to extract text, tables and images from PDF/PPT/DOCX and preserve page/slide/image relationships in Raw Markdown before curation into Wiki.
@@ -1112,8 +1112,6 @@ agentic-engineering-platform/
 │   ├── graders/
 │   ├── model_comparison/
 │   └── regression/
-├── integrations/
-│   └── n8n/
 ├── docs/
 └── tests/
 ```
@@ -1158,7 +1156,7 @@ At the inspected `main` revision its repository tree SHA matches `knowledge_mana
 17. Shared assets must carry owner, version, lifecycle, dependency and permission metadata.
 18. Registry/distribution is separate from execution authorization; publishing never implies unrestricted execution.
 19. Bridges/workers execute locally and advertise installed capabilities/resources; the central registry is a control plane, not the mandatory execution host.
-20. n8n is optional event/business automation integration; Agent, n8n and CLI must reuse the same underlying Workflow/Capability contracts.
+20. AEP does not integrate n8n; Agent and CLI reuse the same underlying Workflow/Capability contracts, and schedules/triggers are the host's own.
 21. Agents may propose new reusable assets from work experience, but shared publication requires explicit validation/evaluation and applicable human review.
 22. Published assets preserve author/contributor provenance, version/lifecycle and validation metadata so capability evolution is auditable and reversible.
 23. Personal Bridges may mix private, installed shared and in-development capabilities; publication to the Platform Registry is an explicit lifecycle transition.

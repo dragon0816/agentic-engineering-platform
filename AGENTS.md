@@ -10,7 +10,7 @@ Build a multi-user, contribution-driven agentic engineering platform without sac
 
 1. **Agent decides WHAT / WHY / WHICH.** Do not embed deterministic execution details in prompts when code/workflows can own them.
 2. **Workflow defines HOW EXACTLY.** Repeatable engineering operations belong in deterministic workflows/jobs.
-3. **n8n is optional event/business automation integration.** Use it for schedules, triggers, coarse orchestration and notifications when useful; Agent, n8n and CLI must call the same underlying Workflow/Capability contracts. Keep detailed engineering logic outside n8n.
+3. **AEP does not integrate n8n** (owner, 2026-10-17). The Agent never calls or is called by n8n workflows; schedules, triggers and notifications are AEP's own (host schedule store, Telegram, Agent Web). Old n8n workflows are only a specification source for migration. Agent and CLI call the same underlying Workflow/Capability contracts.
 4. **Skills are procedures and domain guidance.** They are not synonymous with Python functions.
 5. **Tools are atomic executable capabilities.** Give them explicit input/output contracts and side-effect classification.
 6. **MCP exposes capabilities.** It is an integration boundary, not a replacement for agent or workflow runtime.

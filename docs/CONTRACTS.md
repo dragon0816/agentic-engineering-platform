@@ -402,25 +402,8 @@ host entry point; routed workflows use it too. It forwards to the existing engin
 without message parsing, model calls or authority changes. Timeout and idempotency
 options match routed workflow execution. It returns WorkflowRunSnapshot directly.
 
-Optional `integrations.n8n` is imported only by hosts that need it:
-
-- `N8nWorkflowBinding`: trusted stable binding id and exact scoped workflow version.
-- `N8nSubmission`: closed operation id plus JSON argument map. Context, target,
-  timeout, credentials, permissions and resume policy are not payload fields.
-- `N8nAdapter.submit`: validates the submission and derives an idempotency key from
-  binding id and operation id, then calls Gateway.execute_workflow with unchanged
-  arguments and separately authenticated host context. Hashing keeps the key within
-  the engine's bounds; it is not authorization. No adapter cache/retry is added.
-- `inspect`/`watch`: reuse Gateway run-control contracts and additionally filter
-  by bound workflow. Owner/namespace checks remain in the engine; other owners and
-  other workflows receive no plan/stream. No adapter resume method is exposed.
-
-Operation id stability is the caller's responsibility. A fresh trace on redelivery
-is allowed; other context, target or argument changes conflict. Engine-lifetime
-deduplication, retained-key capacity, caller-timeout overlays and progress lag/close
-semantics all remain unchanged. No n8n SDK, HTTP server, credentials, production
-instance or notification transport is introduced. See
-`integrations/n8n/README.md` for offline host wiring and source status differences.
+The offline `integrations.n8n` adapter (`N8nAdapter`, `N8nSubmission`,
+`N8nWorkflowBinding`) was removed on 2026-10-17: AEP does not integrate n8n.
 ## Checkpoint persistence boundary (Phase 3 slice 9)
 
 `common.checkpoints` defines owner-scoped RunCheckpoint/StepCheckpoint v1 and
