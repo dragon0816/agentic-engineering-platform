@@ -50,6 +50,9 @@ class ExperienceSettings(Contract):
     # excerpts one nightly grouping pass sends to the model.
     suggestions: bool = True
     suggestion_max_requests: int = Field(default=120, ge=10, le=1000)
+    # S2: which row of the design's section 5 table (repeated requests) the
+    # nightly pass uses; read on every pass, so a change needs no restart.
+    suggestion_sensitivity: Literal["low", "normal", "high"] = "normal"
 
 
 class ExperienceCase(Contract):

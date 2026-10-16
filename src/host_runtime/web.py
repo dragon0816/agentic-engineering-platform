@@ -169,7 +169,13 @@ from host_runtime.experience import (
     load_settings,
     save_settings,
 )
-from host_runtime.experience_proposals import ProposalError, ProposalStore, ReviewProposal
+from host_runtime.experience_proposals import (
+    SUGGESTION,
+    ProposalError,
+    ProposalStore,
+    ReviewProposal,
+    make_cards,
+)
 from host_runtime.experience_review import latest_review, review_model, run_review
 from host_runtime.gateway_link import explain_model_failure
 from host_runtime.host import HostRuntime, build_telegram, choice_sources, load_authorization
@@ -245,6 +251,8 @@ from host_runtime.skill_suggestions import (
     SuggestionCounts,
     SuggestionPass,
     SuggestionStore,
+    evidence_excerpt,
+    sensitivity_rows,
     suggest_for_runtime,
 )
 from host_runtime.skill_suggestions import due as suggestions_due
@@ -1526,6 +1534,9 @@ class AgentWeb:
         model, alias = found
         added = self.experience_harvest()
         suggestions = self._suggestion_pass(model, alias)
+        # S2: qualified groups become the person's Reviews cards; the report
+        # then says which item became (or updated) which card.
+        suggestions = make_cards(self._proposals(), suggestions)
         report = run_review(
             self._experience_store(),
             model,
@@ -1577,12 +1588,15 @@ class AgentWeb:
             "last_review": store.meta("last_review"),
             "last_error": store.meta("last_error") or None,
             "review": latest_review(workspace),
+            "sensitivities": sensitivity_rows(),
         }
 
     # -- Reviews: proposals a person decides on (E3-E5, owner 2026-10-13) ------
 
     def _proposals(self) -> ProposalStore:
-        return ProposalStore(self.runtime.layout.workspace_root)
+        # Rows without an actor (before S2, failure reviews) are the device
+        # owner's; Agent Web acts as `runtime.actor` and sees only its own.
+        return ProposalStore(self.runtime.layout.workspace_root, owner=self.runtime.actor)
 
     def _outcome(self, route: str | None) -> str:
         """How far an accepted proposal got: its review sandbox's last push."""
@@ -1612,8 +1626,11 @@ class AgentWeb:
         store.sync()
         proposals = []
         counts: dict[str, int] = {}
-        for item in store.all():
+        sessions: dict[str, Any] = {}
+        for item in store.all(self.runtime.actor):
             shown = item.model_dump(mode="json")
+            if item.suggestion is not None:
+                shown["suggestion"]["evidence"] = self._suggestion_evidence(item, sessions)
             shown["outcome"] = self._outcome(item.route)
             if shown["outcome"].startswith("push pushed"):
                 counts["pushed"] = counts.get("pushed", 0) + 1
@@ -1621,8 +1638,46 @@ class AgentWeb:
             proposals.append(shown)
         return {**self.experience(), "proposals": proposals, "counts": counts}
 
-    def review_decide(self, proposal_id: str, action: str, reason: str | None) -> dict[str, Any]:
-        """A person's decision; an accept is routed to the asset's normal path."""
+    def _suggestion_evidence(
+        self, item: ReviewProposal, sessions: dict[str, Any]
+    ) -> list[dict[str, Any]]:
+        """A card's evidence with excerpts cut from the person's own
+        conversations now; a deleted conversation or message is marked gone."""
+        found = []
+        for entry in item.suggestion.evidence if item.suggestion is not None else ():
+            if entry.session_id not in sessions:
+                sessions[entry.session_id] = self.runtime.state.conversation(
+                    entry.session_id, self.runtime.actor
+                )
+            record = sessions[entry.session_id]
+            message = next(
+                (
+                    m
+                    for m in (record.messages if record is not None else ())
+                    if m.message_id == entry.message_id and m.role == "user"
+                ),
+                None,
+            )
+            found.append(
+                {
+                    **entry.model_dump(mode="json"),
+                    "excerpt": evidence_excerpt(message.text) if message is not None else "",
+                    "gone": message is None,
+                }
+            )
+        return found
+
+    def review_decide(
+        self,
+        proposal_id: str,
+        action: str,
+        reason: str | None,
+        reason_code: str | None = None,
+    ) -> dict[str, Any]:
+        """A person's decision; an accept is routed to the asset's normal path.
+        Only the person's own proposal can be decided (another's answers
+        `unknown_proposal`). Ignoring a Skill suggestion marks its group so it
+        is proposed again only after enough new requests (S2)."""
         if action not in ("accept", "reject", "snooze", "done", "reopen"):
             return {"ok": False, "code": "unknown_action"}
         store = self._proposals()
@@ -1632,11 +1687,20 @@ class AgentWeb:
                 action,  # type: ignore[arg-type]
                 self.runtime.actor,
                 reason,
+                reason_code,
             )
         except ProposalError as error:
             return {"ok": False, "code": error.code}
         if action == "accept":
             self._route(store, decided)
+        if decided.kind == SUGGESTION and decided.suggestion is not None and decided.actor:
+            if action in ("reject", "reopen"):
+                SuggestionStore(self.runtime.layout.workspace_root).set_ignored(
+                    decided.actor,
+                    decided.suggestion.group_id,
+                    action == "reject",
+                    at=decided.decided_at or datetime.now(UTC).isoformat(timespec="seconds"),
+                )
         return {**self.reviews(), "ok": True}
 
     def _route(self, store: ProposalStore, proposal: ReviewProposal) -> None:
@@ -5484,12 +5548,14 @@ class _Handler(BaseHTTPRequestHandler):
         if path == "/api/reviews/decide":
             chosen = body if isinstance(body, dict) else {}
             reason = chosen.get("reason")
+            code = chosen.get("reason_code")
             self._json(
                 200,
                 self.server.web.review_decide(
                     str(chosen.get("proposal_id") or ""),
                     str(chosen.get("action") or ""),
                     str(reason) if reason is not None else None,
+                    str(code) if code else None,
                 ),
             )
             return

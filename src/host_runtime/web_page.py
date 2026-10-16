@@ -104,7 +104,38 @@ body {
 .rv-card h3 { margin: 0 0 4px; font-size: 15px; }
 .rv-text { white-space: pre-wrap; background: var(--soft, #f4f6fa); border-radius: 6px;
   padding: 8px 10px; margin: 6px 0; }
-.rv-tabs { display: flex; gap: 4px; margin: 8px 0; }
+.rv-tabs { display: flex; gap: 4px; margin: 8px 0; flex-wrap: wrap; }
+.rv-tabs button { min-height: 44px; padding: 0 14px; }
+/* Suggested Skill cards (SKILL_SUGGESTIONS S2) */
+.sg-card { overflow-wrap: anywhere; }
+.sg-card .sg-kind { color: var(--accent); font-size: 12px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .04em; }
+.sg-why { margin: 6px 0; padding: 8px 10px; border-radius: 6px; background: var(--accent-soft);
+  color: var(--ink); }
+.sg-evidence { list-style: none; margin: 6px 0; padding: 0; }
+.sg-evidence li { margin: 4px 0; }
+.sg-evidence button { display: block; width: 100%; min-height: 44px; text-align: left;
+  padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg);
+  color: var(--ink); cursor: pointer; overflow-wrap: anywhere; }
+.sg-evidence button:hover, .sg-evidence button:focus-visible { border-color: var(--accent); }
+.sg-evidence time { color: var(--dim); margin-right: 8px; font-variant-numeric: tabular-nums; }
+.sg-card .kp-actions button, .sg-ignore button { min-height: 44px; min-width: 88px; }
+.sg-ignore { margin: 8px 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; }
+.sg-ignore .sg-picks { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.sg-ignore .sg-picks button[aria-pressed="true"] { background: var(--accent); color: #fff;
+  border-color: var(--accent); }
+.sg-ignore input[type=text] { width: 100%; min-height: 44px; margin: 4px 0 8px;
+  background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px;
+  padding: 6px 10px; }
+.sg-gone { color: var(--bad); }
+.turn.sg-target { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 8px; }
+#xp-suggest { margin: 10px 0; padding: 8px 12px; border: 1px solid var(--line);
+  border-radius: 8px; min-width: 0; }
+#xp-suggest legend { font-weight: 600; padding: 0 4px; }
+#xp-card .kp-actions button { min-height: 44px; }
+#xp-suggest label { display: flex; align-items: center; gap: 8px; min-height: 44px; }
+#xp-sensitivity label { align-items: flex-start; padding: 6px 0; }
+#xp-sensitivity input { margin-top: 4px; min-width: 20px; min-height: 20px; }
 .rv-tabs [aria-selected="true"] { background: var(--accent, #2b6cb0); color: #fff; }
 .kp-banner { border: 1px solid #c9d8f5; background: #eef3fb; border-radius: 8px;
   padding: 8px 12px; margin: 8px 0; }
@@ -1615,7 +1646,9 @@ tr:last-child td { border-bottom: none; }
           compare, benchmark and push on the Knowledge page; missing knowledge goes to the
           gap list; a platform problem becomes an issue to follow up),
           <strong>Reject</strong> records why so it is not proposed again for these cases,
-          <strong>Snooze</strong> hides it for 7 days.</p>
+          <strong>Snooze</strong> hides it for 7 days. A <strong>Suggested Skill</strong>
+          card shows work you keep asking for; open a request to see that conversation,
+          or <strong>Ignore</strong> or <strong>Snooze</strong> it.</p>
         <p class="note" id="rv-counts" role="status">reading&hellip;</p></div>
       <button id="rv-refresh" type="button">Refresh</button>
     </div>
@@ -1641,6 +1674,21 @@ tr:last-child td { border-bottom: none; }
           <label>Keep cases <input id="xp-days" type="number" min="1" max="3650"
             style="width:5em"> days</label>
           <label><input id="xp-nightly" type="checkbox"> Review nightly</label>
+        </div>
+        <fieldset id="xp-suggest">
+          <legend>Suggested Skills</legend>
+          <label><input id="xp-suggestions" type="checkbox"> Suggest Skills from my repeated
+            work</label>
+          <p class="note">Each night your own requests are compared; work you repeat becomes
+            a card under <strong>To decide</strong>. Only you see your suggestions. A change
+            here applies from the next nightly pass, without a restart.</p>
+          <p class="note"><strong>Sensitivity</strong>: how often you must repeat a task
+            before it is suggested.</p>
+          <div id="xp-sensitivity" role="radiogroup" aria-label="Sensitivity"></div>
+          <label>Compare at most <input id="xp-max-requests" type="number" min="10" max="1000"
+            style="width:6em"> requests a night</label>
+        </fieldset>
+        <div class="kp-actions">
           <button id="xp-save" type="button">Save settings</button>
         </div>
         <div id="xp-report" class="kp-markdown"></div></details>
@@ -1972,6 +2020,7 @@ function renderConversation(record) {
     const replied = record.messages[index + 1];
     const said = turn(asked.text, asked.reply_to ? questions.get(asked.reply_to) || "" : null,
       asked.attachments || []);
+    said.parentNode.dataset.askedId = asked.message_id;
     if (replied) {
       said.className = "said" + (replied.status === "failed" ? " bad" : "");
       renderAnswer(said, replied.text);
@@ -6024,8 +6073,12 @@ function kpButton(label, action) {
 
 async function xpLoad() { await loadReviews(); }
 el("xp-save").addEventListener("click", () => rvRun("Saving", async () => {
+  const chosen = document.querySelector('#xp-sensitivity input[name="xp-sens"]:checked');
   const reply = await call("/api/experience/settings", {
-    retention_days: Number(el("xp-days").value), nightly: el("xp-nightly").checked});
+    retention_days: Number(el("xp-days").value), nightly: el("xp-nightly").checked,
+    suggestions: el("xp-suggestions").checked,
+    suggestion_sensitivity: chosen ? chosen.value : "normal",
+    suggestion_max_requests: Number(el("xp-max-requests").value)});
   if (!reply.ok) {
     const problem = new Error(reply.code); problem.code = reply.code; throw problem;
   }
@@ -6040,7 +6093,10 @@ el("xp-run").addEventListener("click", () => rvRun("Starting the review", async 
 
 // -- Reviews (E3-E5, owner 2026-10-13) --------------------------------------
 const RV_KINDS = {rule_edit: "Rule change", knowledge_gap: "Missing knowledge",
-  test_question: "Test question", issue: "Platform issue"};
+  test_question: "Test question", issue: "Platform issue",
+  skill_suggestion: "Suggested Skill"};
+const SG_REASONS = [["not_useful", "Not useful"], ["one_off", "One-off"],
+  ["wrong_grouping", "Wrong grouping"]];
 const RV_ACCEPT = {rule_edit: "Accept: open a review sandbox",
   test_question: "Accept: draft it in a review sandbox",
   knowledge_gap: "Accept: add to the gap list",
@@ -6054,16 +6110,17 @@ async function rvRun(label, action) {
     + (failure.code || failure.message); }
 }
 
-async function rvDecide(proposal, action) {
-  let reason = null;
-  if (action === "reject") {
+async function rvDecide(proposal, action, given) {
+  let reason = null, reasonCode = null;
+  if (given) { reason = given.reason || null; reasonCode = given.reason_code || null; }
+  else if (action === "reject") {
     reason = prompt("Why is this proposal wrong or not worth doing? (recorded, so the same "
       + "cases are not proposed again)");
     if (!reason || !reason.trim()) return;
   }
   await rvRun("Saving your decision", async () => {
     const reply = await call("/api/reviews/decide",
-                             {proposal_id: proposal.proposal_id, action, reason});
+      {proposal_id: proposal.proposal_id, action, reason, reason_code: reasonCode});
     if (!reply.ok) {
       const problem = new Error(reply.code); problem.code = reply.code; throw problem;
     }
@@ -6081,7 +6138,124 @@ async function rvOpenSandbox(sandboxId) {
   if (item) await kpRun("Opening", () => kpOpen(item));
 }
 
+// -- Suggested Skill card (SKILL_SUGGESTIONS S2): no draft yet --------------
+async function rvOpenConversation(sessionId, messageId, where) {
+  // The person's own conversation, opened at the request (each turn block
+  // carries the id of the message it asked).
+  const listed = await call("/api/conversations?session_id=" + encodeURIComponent(sessionId));
+  if (!listed.selected || listed.selected.session_id !== sessionId) {
+    where.textContent = "This conversation was deleted."; where.className = "note sg-gone";
+    return;
+  }
+  selectPrimaryTab("ask");
+  activeConversation = sessionId; log.replaceChildren();
+  await loadChat(sessionId);
+  const target = [...log.querySelectorAll(".turn")]
+    .find((block) => block.dataset.askedId === messageId);
+  if (target) {
+    for (const old of log.querySelectorAll(".turn.sg-target")) old.classList.remove("sg-target");
+    target.classList.add("sg-target");
+    target.scrollIntoView({block: "center"}); target.focus({preventScroll: true});
+  }
+}
+
+function sgIgnoreBox(item, actions) {
+  const box = document.createElement("div"); box.className = "sg-ignore";
+  const ask = document.createElement("p"); ask.className = "note";
+  ask.append(text("Why ignore it? Optional. It is recorded, and this work is suggested "
+    + "again only if you repeat it often enough afterwards."));
+  const picks = document.createElement("div"); picks.className = "sg-picks";
+  picks.setAttribute("role", "group"); picks.setAttribute("aria-label", "Reason");
+  let code = null;
+  for (const [key, label] of SG_REASONS) {
+    const pick = kpButton(label, () => {
+      code = code === key ? null : key;
+      for (const other of picks.children) {
+        other.setAttribute("aria-pressed", String(other.dataset.code === code));
+      }
+    });
+    pick.dataset.code = key; pick.setAttribute("aria-pressed", "false");
+    picks.append(pick);
+  }
+  const note = document.createElement("input"); note.type = "text"; note.maxLength = 500;
+  note.placeholder = "Anything else (optional)"; note.setAttribute("aria-label", "Comment");
+  const confirm = kpButton("Ignore it", () => rvDecide(item, "reject",
+    {reason: note.value.trim() || null, reason_code: code}));
+  confirm.className = "go"; confirm.dataset.action = "confirm-ignore";
+  const cancel = kpButton("Cancel", () => { box.remove(); actions.hidden = false; });
+  const row = document.createElement("div"); row.className = "kp-actions";
+  row.append(confirm, cancel);
+  box.append(ask, picks, note, row);
+  return box;
+}
+
+function sgCard(item) {
+  const card = document.createElement("div"); card.className = "rv-card sg-card";
+  card.dataset.proposalId = item.proposal_id; card.dataset.status = item.status;
+  const s = item.suggestion || {evidence: [], matched_words: [], tool_shape: []};
+  const kind = document.createElement("div"); kind.className = "sg-kind";
+  kind.append(text(RV_KINDS.skill_suggestion));
+  const head = document.createElement("h3");
+  head.append(text(s.task || item.text || "(unnamed)"));
+  const meta = document.createElement("p"); meta.className = "note sg-counts";
+  meta.append(text(s.requests + " requests \u00b7 " + s.sessions + " conversations \u00b7 "
+    + s.days + " days \u00b7 found " + (item.created_at || "").slice(0, 10)
+    + (s.seen_more ? " \u00b7 seen " + s.seen_more + " more times since" : "")));
+  const why = document.createElement("p"); why.className = "sg-why";
+  const parts = [];
+  if (s.matched_words.length) parts.push("matched words: " + s.matched_words.join(", "));
+  if (s.tool_shape.length) parts.push("same tools: " + s.tool_shape.join(" \u2192 "));
+  why.append(text("Why: " + (parts.join("; ") || "the nightly review grouped these requests")
+    + (s.note ? " (" + s.note + ")" : "")));
+  const listHead = document.createElement("p"); listHead.className = "note";
+  listHead.append(text("Your requests (open one to see that conversation):"));
+  const list = document.createElement("ul"); list.className = "sg-evidence";
+  for (const entry of s.evidence) {
+    const row = document.createElement("li");
+    if (entry.gone) {
+      const when = document.createElement("time"); when.append(text(entry.date));
+      const gone = document.createElement("span"); gone.className = "note sg-gone";
+      gone.append(text("This conversation was deleted."));
+      row.append(when, text(" "), gone); list.append(row); continue;
+    }
+    const open = document.createElement("button"); open.type = "button";
+    const when = document.createElement("time"); when.append(text(entry.date));
+    open.append(when, text(entry.excerpt));
+    const where = document.createElement("span"); where.className = "note";
+    open.addEventListener("click", () => rvOpenConversation(entry.session_id,
+      entry.message_id, where).catch(showBootError));
+    row.append(open, where); list.append(row);
+  }
+  const later = document.createElement("p"); later.className = "note";
+  later.append(text("No draft yet: making a Skill from a suggestion comes in a later version."));
+  card.append(kind, head, meta, why, listHead, list, later);
+  const actions = document.createElement("div"); actions.className = "kp-actions";
+  if (item.status === "proposed" || item.status === "snoozed") {
+    const ignore = kpButton("Ignore", () => {
+      actions.hidden = true; card.append(sgIgnoreBox(item, actions));
+    });
+    ignore.dataset.action = "ignore"; actions.append(ignore);
+    if (item.status === "proposed") {
+      const snooze = kpButton("Snooze 7 days", () => rvDecide(item, "snooze"));
+      snooze.dataset.action = "snooze"; actions.append(snooze);
+    }
+    if (item.snooze_until) actions.append(text(" snoozed until " + item.snooze_until.slice(0, 10)));
+  } else {
+    const picked = (SG_REASONS.find(([key]) => key === item.reason_code) || [])[1];
+    const said = [picked, item.reason].filter(Boolean);
+    const why2 = document.createElement("p"); why2.className = "note";
+    why2.append(text("Ignored by " + item.decided_by
+      + (said.length ? ": " + said.join(" \u2014 ") : "")));
+    card.append(why2);
+    const reopen = kpButton("Reopen", () => rvDecide(item, "reopen"));
+    reopen.dataset.action = "reopen"; actions.append(reopen);
+  }
+  card.append(actions);
+  return card;
+}
+
 function rvCard(item) {
+  if (item.kind === "skill_suggestion") return sgCard(item);
   const card = document.createElement("div"); card.className = "rv-card";
   const head = document.createElement("h3");
   head.append(text((RV_KINDS[item.kind] || item.kind)
@@ -6147,6 +6321,18 @@ function rvShow(data) {
     gap.text, gap.target, kpButton("Mark done", () => rvDecide(gap, "done"))]));
   el("xp-days").value = data.settings.retention_days;
   el("xp-nightly").checked = data.settings.nightly;
+  el("xp-suggestions").checked = data.settings.suggestions;
+  el("xp-max-requests").value = data.settings.suggestion_max_requests;
+  el("xp-sensitivity").replaceChildren(...(data.sensitivities || []).map((row) => {
+    const label = document.createElement("label");
+    const radio = document.createElement("input"); radio.type = "radio"; radio.name = "xp-sens";
+    radio.value = row.key; radio.checked = row.key === data.settings.suggestion_sensitivity;
+    const words = document.createElement("span");
+    const name = document.createElement("strong"); name.append(text(row.label + ": "));
+    words.append(name, text(row.describe + (row.key === "normal" ? " (default)" : "")));
+    label.append(radio, words);
+    return label;
+  }));
   el("xp-summary").textContent = " \u2014 " + data.open + " open cases"
     + (data.last_review ? "; last review " + data.last_review.slice(0, 16) : "")
     + (data.last_error ? "; last attempt failed: " + data.last_error : "");

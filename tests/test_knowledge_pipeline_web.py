@@ -223,6 +223,7 @@ def test_the_experience_review_routes_keep_settings_and_report(
         "nightly": True,
         "suggestions": True,
         "suggestion_max_requests": 120,
+        "suggestion_sensitivity": "normal",
     }
     assert info["open"] == 0 and info["review"] is None
     saved = json.loads(
@@ -232,12 +233,13 @@ def test_the_experience_review_routes_keep_settings_and_report(
             body={"retention_days": 14, "nightly": False},
         ).body
     )
-    # The page sends only its two fields; the suggestion settings keep theirs.
+    # Two fields alone (an older page); the suggestion settings keep theirs.
     assert saved["settings"] == {
         "retention_days": 14,
         "nightly": False,
         "suggestions": True,
         "suggestion_max_requests": 120,
+        "suggestion_sensitivity": "normal",
     }
     bad = json.loads(
         fetch(

@@ -723,7 +723,11 @@ def test_the_report_has_suggestions_beside_findings(tmp_path: Path) -> None:
         "matched_words",
         "tool_shape",
         "evidence",
+        # S2: the card the item became; none here, the pass ran without cards.
+        "card",
+        "card_note",
     }
+    assert item["card"] is None and item["card_note"] == ""
     assert set(item["evidence"][0]) == {"session_id", "message_id", "date", "excerpt"}
     assert data["suggestion_counts"]["actor"] == ME and data["suggestion_counts"]["qualified"] == 1
     # The counts carry no request text.

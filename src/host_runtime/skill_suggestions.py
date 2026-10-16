@@ -18,7 +18,11 @@
   3 new suggestions a night; installed Skills and Workflows, pending
   candidates and earlier suggestions are deduplicated with a reason.
 
-S1 only writes the nightly report. The model creates, installs and approves
+S1 writes the nightly report; S2 turns a qualified group into a Reviews card
+(`experience_proposals.ProposalStore.suggest`). The thresholds follow the
+person's sensitivity setting (section 5, repeated requests). An ignored group
+is proposed again only when at least a threshold's worth of NEW requests
+arrives after the rejection (6.4.3). The model creates, installs and approves
 nothing, and no candidate is made here.
 """
 
@@ -32,7 +36,7 @@ import threading
 import uuid
 from collections import Counter
 from collections.abc import Iterable, Sequence
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any, Literal
@@ -46,10 +50,50 @@ from host_runtime.experience import STORE_FILE, ExperienceSettings, load_setting
 from knowledge.query import tokens
 from models.contracts import ModelClient
 
-MIN_REQUESTS = 3
-MIN_SESSIONS = 3
-MIN_DAYS = 2
-MAX_NEW_PER_NIGHT = 3
+
+@dataclass(frozen=True)
+class Thresholds:
+    """One row of the design's section 5 table, repeated requests (4.1)."""
+
+    requests: int
+    sessions: int
+    days: int
+    per_night: int
+
+    def describe(self) -> str:
+        return (
+            f"{self.requests} times in {self.sessions} conversations"
+            + (f" over at least {self.days} days" if self.days > 1 else "")
+            + f", up to {self.per_night} a night"
+        )
+
+
+Sensitivity = Literal["low", "normal", "high"]
+SENSITIVITY: dict[str, Thresholds] = {
+    "low": Thresholds(requests=4, sessions=3, days=3, per_night=1),
+    "normal": Thresholds(requests=3, sessions=3, days=2, per_night=3),
+    # The table gives no day count for High: one day is enough.
+    "high": Thresholds(requests=2, sessions=2, days=1, per_night=5),
+}
+NORMAL = SENSITIVITY["normal"]
+MIN_REQUESTS = NORMAL.requests
+MIN_SESSIONS = NORMAL.sessions
+MIN_DAYS = NORMAL.days
+MAX_NEW_PER_NIGHT = NORMAL.per_night
+
+
+def thresholds_for(sensitivity: str) -> Thresholds:
+    return SENSITIVITY.get(sensitivity, NORMAL)
+
+
+def sensitivity_rows() -> list[dict[str, Any]]:
+    """The rows the Reviews settings show, in plain words."""
+    return [
+        {"key": key, "label": key.capitalize(), "describe": row.describe(), **asdict(row)}
+        for key, row in SENSITIVITY.items()
+    ]
+
+
 # Pre-filter: a request with no other request this close in another session
 # is a one-off and is not sent (it stays pending for a later night).
 PREFILTER_FLOOR = 0.2
@@ -296,6 +340,12 @@ def _form_workflow(form: Any) -> tuple[str, ...]:
     return ()
 
 
+def evidence_excerpt(text: str) -> str:
+    """What a card shows of one request, cut from the conversation when the
+    card is listed (cards keep ids, never request text)."""
+    return SECRET_PATTERN.sub(REDACTED, _SPACE.sub(" ", text.strip()))[:EVIDENCE_CHARS]
+
+
 def from_reuse(
     records: Iterable[Any], actor: str, *, retention_days: int, now: datetime | None = None
 ) -> Harvest:
@@ -410,7 +460,8 @@ def explain(members: Sequence[Request], scorer: Scorer) -> tuple[tuple[str, ...]
 # -- persistence ------------------------------------------------------------------
 
 
-GroupStatus = Literal["open", "reported", "dropped"]
+# "ignored": the person ignored its card (S2); new requests may bring it back.
+GroupStatus = Literal["open", "reported", "dropped", "ignored"]
 
 
 class SuggestionGroup(Contract):
@@ -425,6 +476,10 @@ class SuggestionGroup(Contract):
     created_at: str
     updated_at: str
     reported_at: str | None = None
+    ignored_at: str | None = None
+    # The requests the group held when its card was ignored: only requests
+    # beyond these, made after `ignored_at`, can bring it back.
+    ignored_request_ids: tuple[str, ...] = ()
 
 
 @dataclass
@@ -509,6 +564,41 @@ class SuggestionStore:
                     " ON CONFLICT(group_id) DO UPDATE SET record = excluded.record",
                     (group.group_id, actor, group.model_dump_json()),
                 )
+
+    def set_ignored(self, actor: str, group_id: str, ignored: bool, *, at: str) -> bool:
+        """The person ignored (or reopened) the group's card. Only the
+        actor's own group is changed; returns whether one was."""
+        if self.read_only:
+            raise RuntimeError("a dry run writes nothing")
+        group = self.load(actor).groups.get(group_id)
+        if group is None:
+            return False
+        if ignored:
+            changed = group.model_copy(
+                update={
+                    "status": "ignored",
+                    "ignored_at": at,
+                    "ignored_request_ids": group.request_ids,
+                    "updated_at": at,
+                }
+            )
+        elif group.status == "ignored":
+            changed = group.model_copy(
+                update={
+                    "status": "reported",
+                    "ignored_at": None,
+                    "ignored_request_ids": (),
+                    "updated_at": at,
+                }
+            )
+        else:
+            return True
+        with self._lock, self._connect() as conn:
+            conn.execute(
+                "UPDATE suggestion_groups SET record = ? WHERE group_id = ? AND actor = ?",
+                (changed.model_dump_json(), group_id, actor),
+            )
+        return True
 
 
 # -- what is installed or pending (dedupe) ----------------------------------------
@@ -637,10 +727,14 @@ class SuggestionEvidence(Contract):
     excerpt: str
 
 
+ItemStatus = Literal["qualified", "updated", "considered", "deferred", "dropped"]
+
+
 class SuggestionItem(Contract):
     group_id: str
     task: str = ""
-    status: Literal["qualified", "considered", "deferred", "dropped"]
+    # "updated": a group already shown as a card that gained requests.
+    status: ItemStatus
     reason: str = ""
     requests: int
     sessions: int
@@ -648,6 +742,9 @@ class SuggestionItem(Contract):
     matched_words: tuple[str, ...] = ()
     tool_shape: tuple[str, ...] = ()
     evidence: tuple[SuggestionEvidence, ...] = ()
+    # S2: the Reviews card this item became or updated, and what happened.
+    card: str | None = None
+    card_note: str = ""
 
 
 class SuggestionCounts(Contract):
@@ -669,6 +766,10 @@ class SuggestionCounts(Contract):
     qualified: int = 0
     dropped: int = 0
     deferred: int = 0
+    updated: int = 0
+    sensitivity: str = "normal"
+    cards_created: int = 0
+    cards_updated: int = 0
     error: str | None = None
 
 
@@ -687,6 +788,12 @@ class SuggestionPass(Contract):
             f"kept back, {c.sent_requests} requests and {c.sent_groups} groups sent to the model"
             + (f", {c.left_for_next} left for the next night" if c.left_for_next else "")
             + (f", {c.secret_dropped} dropped for secret-shaped text" if c.secret_dropped else "")
+            + f". Sensitivity {c.sensitivity}"
+            + (
+                f"; Reviews cards: {c.cards_created} new, {c.cards_updated} updated"
+                if not c.dry_run
+                else "; dry run, no cards"
+            )
             + ".",
         ]
         if c.error:
@@ -703,6 +810,8 @@ class SuggestionPass(Contract):
                 lines.append(f"- Matched words: {', '.join(item.matched_words)}")
             if item.tool_shape:
                 lines.append(f"- Tools: {' → '.join(item.tool_shape)}")
+            if item.card or item.card_note:
+                lines.append(f"- Card: {item.card or '-'} ({item.card_note or 'no card'})")
             lines += [
                 f"- {e.date} {e.session_id}/{e.message_id}: {e.excerpt}" for e in item.evidence
             ]
@@ -797,18 +906,23 @@ def _stats(members: Sequence[Request]) -> tuple[int, int, int]:
     return len(members), len({m.session_id for m in members}), len({m.day for m in members})
 
 
-def qualifies(members: Sequence[Request]) -> bool:
-    """3 requests in 3 sessions over 2 calendar days (Normal). Requests inside
-    one session never qualify on their own."""
+def qualifies(members: Sequence[Request], thresholds: Thresholds = NORMAL) -> bool:
+    """3 requests in 3 sessions over 2 calendar days (Normal; the other rows
+    by sensitivity). Requests inside one session never qualify on their own."""
     count, sessions, days = _stats(members)
-    return count >= MIN_REQUESTS and sessions >= MIN_SESSIONS and days >= MIN_DAYS
+    return (
+        count >= thresholds.requests
+        and sessions >= thresholds.sessions
+        and days >= thresholds.days
+        and sessions >= 2
+    )
 
 
 def _item(
     group: SuggestionGroup,
     members: Sequence[Request],
     scorer: Scorer,
-    status: Literal["qualified", "considered", "deferred", "dropped"],
+    status: ItemStatus,
     reason: str = "",
 ) -> SuggestionItem:
     count, sessions, days = _stats(members)
@@ -908,11 +1022,13 @@ def run_suggestions(
     thresholds, dedupe. Writes the store unless this is a dry run."""
     moment = (now or datetime.now(UTC)).astimezone(UTC)
     pass_id = f"suggest-{moment.strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:4]}"
+    rules = thresholds_for(settings.suggestion_sensitivity)
     counts: dict[str, Any] = {
         "pass_id": pass_id,
         "actor": actor,
         "started_at": moment.isoformat(timespec="seconds"),
         "dry_run": dry_run,
+        "sensitivity": settings.suggestion_sensitivity,
     }
     if not settings.suggestions:
         return SuggestionPass(counts=SuggestionCounts(**counts, enabled=False))
@@ -959,6 +1075,8 @@ def run_suggestions(
     sent = [item for _, item in candidates[: max(0, cap - used)]]
     counts["left_for_next"] = len(candidates) - len(sent)
     removed: list[str] = []
+    # Groups already shown (reported or ignored) that gained requests now.
+    grown: set[str] = set()
     stamp = moment.isoformat(timespec="seconds")
     if sent:
         shown_groups = [
@@ -1001,6 +1119,10 @@ def run_suggestions(
                         state.groups.pop(other.group_id, None)
                         removed.append(other.group_id)
                     merged += [r for r in new_ids if r not in merged]
+                    if keep.status in ("reported", "ignored") and len(merged) > len(
+                        keep.request_ids
+                    ):
+                        grown.add(keep.group_id)
                     state.groups[keep.group_id] = keep.model_copy(
                         update={
                             "request_ids": tuple(merged),
@@ -1034,15 +1156,49 @@ def run_suggestions(
 
     # Thresholds and dedupe over the open groups.
     items: list[SuggestionItem] = []
-    reported = [g for g in state.groups.values() if g.status == "reported"]
-    ready: list[tuple[SuggestionGroup, list[Request]]] = []
+    reported = [g for g in state.groups.values() if g.status in ("reported", "ignored")]
+    ready: list[tuple[SuggestionGroup, list[Request], str]] = []
+    needs = f"needs {rules.requests} in {rules.sessions} sessions" + (
+        f" over {rules.days} days" if rules.days > 1 else ""
+    )
     for group in sorted(state.groups.values(), key=lambda g: (g.created_at, g.group_id)):
+        members = members_of(group)
+        if group.status == "reported" and group.group_id in grown:
+            items.append(
+                _item(group, members, scorer, "updated", "new requests joined this suggestion")
+            )
+            continue
+        if group.status == "ignored":
+            # 6.4.3: back only when enough NEW requests came after the rejection.
+            fresh = [
+                m
+                for m in members
+                if m.request_id not in group.ignored_request_ids
+                and m.created_at.astimezone(UTC).isoformat(timespec="seconds")
+                >= (group.ignored_at or "")
+            ]
+            if not fresh:
+                continue
+            if not qualifies(fresh, rules):
+                count, sessions, days = _stats(fresh)
+                items.append(
+                    _item(
+                        group,
+                        members,
+                        scorer,
+                        "considered",
+                        f"ignored on {(group.ignored_at or '')[:10]}; {count} new requests "
+                        f"in {sessions} sessions over {days} days since ({needs})",
+                    )
+                )
+                continue
+            ready.append((group, members, f"proposed again: {len(fresh)} new requests"))
+            continue
         if group.status != "open":
             continue
-        members = members_of(group)
         if len(members) < 2:
             continue
-        if not qualifies(members):
+        if not qualifies(members, rules):
             count, sessions, days = _stats(members)
             items.append(
                 _item(
@@ -1051,7 +1207,7 @@ def run_suggestions(
                     scorer,
                     "considered",
                     f"below the threshold: {count} requests in {sessions} sessions over "
-                    f"{days} days (needs {MIN_REQUESTS} in {MIN_SESSIONS} over {MIN_DAYS})",
+                    f"{days} days ({needs})",
                 )
             )
             continue
@@ -1062,29 +1218,30 @@ def run_suggestions(
             )
             items.append(_item(group, members, scorer, "dropped", reason))
             continue
-        ready.append((group, members))
+        ready.append((group, members, ""))
     ready.sort(
-        key=lambda pair: (
-            -_stats(pair[1])[0],
-            -_stats(pair[1])[1],
-            -pair[1][-1].created_at.timestamp(),
-            pair[0].group_id,
+        key=lambda entry: (
+            -_stats(entry[1])[0],
+            -_stats(entry[1])[1],
+            -entry[1][-1].created_at.timestamp(),
+            entry[0].group_id,
         )
     )
-    for number, (group, members) in enumerate(ready):
-        if number >= MAX_NEW_PER_NIGHT:
+    for number, (group, members, note) in enumerate(ready):
+        if number >= rules.per_night:
             items.append(
                 _item(
                     group,
                     members,
                     scorer,
                     "deferred",
-                    f"at most {MAX_NEW_PER_NIGHT} new suggestions a night; next night",
+                    f"at most {rules.per_night} new suggestions a night; next night",
                 )
             )
             continue
-        # A group qualified earlier in this pass is compared with it too.
-        reason = _duplicate_reason(group, members, Catalog(), reported)
+        # A group qualified earlier in this pass is compared with it too, and
+        # an ignored group coming back with what is installed since.
+        reason = _duplicate_reason(group, members, catalog if note else Catalog(), reported)
         if reason is not None:
             state.groups[group.group_id] = group.model_copy(
                 update={"status": "dropped", "reason": reason, "updated_at": stamp}
@@ -1092,17 +1249,24 @@ def run_suggestions(
             items.append(_item(group, members, scorer, "dropped", reason))
             continue
         done = group.model_copy(
-            update={"status": "reported", "reported_at": stamp, "updated_at": stamp}
+            update={
+                "status": "reported",
+                "reported_at": stamp,
+                "updated_at": stamp,
+                "ignored_at": None,
+                "ignored_request_ids": (),
+            }
         )
         state.groups[group.group_id] = done
-        reported.append(done)
-        items.append(_item(done, members, scorer, "qualified"))
-    order = {"qualified": 0, "deferred": 1, "dropped": 2, "considered": 3}
+        reported = [g for g in reported if g.group_id != done.group_id] + [done]
+        items.append(_item(done, members, scorer, "qualified", note))
+    order = {"qualified": 0, "updated": 1, "deferred": 2, "dropped": 3, "considered": 4}
     items.sort(key=lambda i: (order[i.status], -i.requests, i.group_id))
     counts.update(
         qualified=sum(i.status == "qualified" for i in items),
         dropped=sum(i.status == "dropped" for i in items),
         deferred=sum(i.status == "deferred" for i in items),
+        updated=sum(i.status == "updated" for i in items),
     )
     if not dry_run:
         cutoff = (moment - timedelta(days=settings.retention_days)).astimezone(UTC)
