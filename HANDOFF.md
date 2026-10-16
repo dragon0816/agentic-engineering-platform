@@ -2,6 +2,33 @@
 
 Updated: 2026-10-16 (Asia/Taipei), by Claude Code (colleague user guide)
 
+## Weekly report not bundled + starting page for the shortcut (2026-10-16, Claude Code)
+
+Goal: two owner requests 2026-10-16. Done and committed on main (not pushed): 8598d172
+(weekly report personal), 7826781d (starting page), c7aa1df9 (README grant test);
+decisions `docs/DECISIONS.md` 2026-10-16 "The weekly report is personal, not bundled"
+and "`aep-host open` shows a starting page ..."; rows in `docs/TASKS.md`.
+- Weekly: `host_runtime.assets.shipped()` no longer has the weekly Skill/Workflow; they
+  are `personal()`, installed/exported only with `--include-personal` or the user
+  variable `AEP_INCLUDE_PERSONAL_ASSETS=1`. Owner's PC: his live workspace already has
+  them (untouched); to get future weekly versions through `update.cmd`, set
+  `AEP_INCLUDE_PERSONAL_ASSETS=1` in his user environment once (not done by this
+  session). `weekly-*.cmd` and `schedule-weekly.ps1` deleted from the bundle dir.
+- Startup page: `aep-host open` opens `workspace/agent-web-starting.html` at once and
+  hands the token URL over through `agent-web-starting.js` (only while `ready`, 15 s).
+- Verified: ruff check / format --check / mypy (src+tests) in the project `.venv` and a
+  fresh `.[dev,office]` venv; full pytest in the fresh venv on 7826781d (3002 passed,
+  30 skipped; the 2 README-grant failures fixed by c7aa1df9, re-run green); full pytest
+  in the project `.venv` on the shared working tree (3033 passed; failures: the same 2
+  README-grant tests, fixed, plus 2 browser tests that pass alone under less load —
+  one is another agent's untracked `test_platform_certificate_pinning.py`); the
+  `verify.yml` Windows bundle step replayed with temp USERPROFILE/LOCALAPPDATA
+  (`-NoShortcut -NoAgentSkills`) to the end, including the new weekly assertions.
+- NOT verified: the real desktop shortcut on this PC (needs Agent Web stopped; the owner's
+  live Agent Web was not touched). Next (owner): set `AEP_INCLUDE_PERSONAL_ASSETS=1` on
+  his PC if he wants weekly upgrades from bundles; try the shortcut once with Agent Web
+  stopped (after checking /api/tasks) and see the starting page switch to Agent Web.
+
 ## Colleague user guide (2026-10-16, Claude Code) — latest
 
 Goal: owner request 2026-10-16, the manual shipped to colleagues explains every setting

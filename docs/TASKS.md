@@ -2275,3 +2275,46 @@ s-k-20261011T102952` (not published).
   `docs/phases/SKILL_SUGGESTIONS.md`. Status: design, awaiting owner review (4 open questions
   with recommended answers). Implementation slices S1-S6 not started.
 
+- [x] Weekly report is personal, not bundled (2026-10-16, owner request; decision
+  `docs/DECISIONS.md` 2026-10-16 "The weekly report is personal, not bundled").
+  `host_runtime.assets`: `shipped()` (every installation) no longer holds
+  `engineering/weekly-report@2.0.0` / `engineering/sde-weekly-report@1.0.0`; they are
+  `personal()`, installed by `aep-host assets install-bundled` or written by
+  `aep-host export-assets` only with `--include-personal` or the user variable
+  `AEP_INCLUDE_PERSONAL_ASSETS=1` (the owner's PC). Updates remove nothing: a colleague
+  PC keeps weekly assets an earlier bundle brought, may now remove them, and no update
+  adds them back. Deleted from `deploy/windows-preview/`: `weekly-preview.cmd`,
+  `weekly-apply.cmd`, `weekly-mail.cmd` (they sent `weekly.preview/apply/mail`, which
+  the Skill no longer declares) and `schedule-weekly.ps1`; `chat.cmd` and
+  `install.ps1` comments neutral. Bundle `README.md` (weekly section replaced by
+  "Shipped Skills and Workflows" with a neutral personal-Workflow note, double-click
+  table, schedule note) and `USER_GUIDE.zh-TW.md` (§9.3 now "個人 Workflow 不在安裝包裡",
+  examples, §13 table, schedule example, `workbook_open`) no longer describe it.
+  `verify.yml`: the install has no weekly Workflow; `export-assets` writes
+  `engineering__rs-wmt-package-release__1.0.0.json` and not the weekly Skill. Tests:
+  `tests/test_bundled_skills.py` (personal set not shipped and removable; colleague
+  install has none; flag and variable install it; an update keeps earlier weekly files
+  byte for byte and never brings removed ones back), `tests/test_windows_preview_bundle.py`
+  (no weekly script/Skill/Workflow in the zip), `tests/test_weekly_report_workflow.py`
+  (exports with `include_personal`). Not changed: the `weekly-mail` extra (matplotlib)
+  stays in the bundle (the owner's upgrade needs it); `aep-host doctor` still names the
+  weekly report among optional integrations; the Shared Platform default marketplace
+  candidate `engineering/jira-weekly-report-preview` (platform code, other owner).
+
+- [x] Starting page for the AEP Agent shortcut (2026-10-16, owner request; decision
+  `docs/DECISIONS.md` 2026-10-16 "`aep-host open` shows a starting page ...").
+  `host_runtime/launcher.py`: when Agent Web is not running, `open` writes
+  `workspace/agent-web-starting.html` (static, light/dark, spinner, elapsed time) and
+  opens it at once, then starts the server; the page polls `agent-web-starting.js`
+  (written by the launcher: `starting` / `ready` / `failed` / `opened`) with a
+  `<script>` tag every second, says after 120 s that it is slow and where the logs are,
+  shows the reason and the logs when the server exits (exit code, reported at once) or
+  does not answer in 180 s, and on `ready` goes to Agent Web's token URL (loopback only);
+  the launcher removes the address from the status 15 s later, the page never holds it.
+  No browser for the page: Agent Web opens directly as before. Manuals: `INSTALL.zh-TW.md`
+  §4 and §9, `USER_GUIDE.zh-TW.md` §0. Tests: `tests/test_launcher.py` (page static
+  without address, only `ready` carries it, page first then hand-over then removed and
+  only `agent-web.json` holds the token, direct fallback, early exit, timeout status;
+  real headless browser: card 480x280, spinner 48x48, slow notice 424x142 after a
+  simulated 125 s, dark scheme changes the background, `ready` lands on the fake
+  server's token URL, failure shows reason and log folder).
