@@ -2366,3 +2366,24 @@ s-k-20261011T102952` (not published).
   venv 3003 passed, 30 skipped, 1 failed (the real-browser card test: settings arriving
   late replaced the typed URLs; fixed in the page before the commit, the file and the card
   suites re-run green in that venv); the verify.yml Shared Platform bundle step replayed.
+- [x] Suggested Skills from experience, slice S1: detection and the nightly report only
+  (2026-10-16, Claude Code; spec `docs/phases/SKILL_SUGGESTIONS.md` "S1 as built",
+  decision `docs/DECISIONS.md` 2026-10-16 "Skill suggestions S1: the model groups, the score
+  only filters"). `host_runtime/skill_suggestions.py`: `from_reuse` (one actor's opening
+  requests in the retention window, short follow-ups skipped, secret-shaped text
+  dropped), the deterministic pre-filter (IDF-weighted Jaccard on `tokens` + tool shape,
+  floor 0.2, one-offs kept back, never joins), one structured grouping call per pass
+  through the review's model (`experience_review.structured_call`, contract
+  `skill_suggestion_groups`, cap `suggestion_max_requests` default 120, only new requests
+  plus the stored groups they resemble), strict output validation, groups persisted in
+  `experience.sqlite`, thresholds 3 requests / 3 sessions / 2 days, at most 3 a night,
+  dedupe against installed Workflows and Skills, pending candidates and earlier
+  suggestions with the reason. `review-*.json` gains `suggestions` and
+  `suggestion_counts`; settings gain `suggestions` and `suggestion_max_requests` (the
+  settings route keeps fields the page does not send); the nightly loop also runs when a
+  pass is due; CLI `aep-host experience suggest --config <host.json> --dry-run [--actor X]
+  [--json]` (read-only, same code). No cards, drafts or candidates. Tests:
+  `tests/test_skill_suggestions.py` (30, fake model only). Checks: ruff check / format
+  --check and strict mypy (src+tests) in the project `.venv` and in `C:\aepci-wk\venv`
+  (reinstalled with `.[dev,office]`); full pytest project `.venv` 3075 passed, 7 skipped;
+  CI-like venv 3052 passed, 30 skipped. Not done: the owner's dry run on his own data, S2-S6.

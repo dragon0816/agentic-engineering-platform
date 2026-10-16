@@ -1,8 +1,8 @@
 # Suggested Skills from experience (design)
 
-Owner request: 2026-10-16. Status: **design approved 2026-10-16 (decisions at the end); implementation queued.** Nothing in this
-document is implemented. The owner wants it built next; the open questions at the end
-need an answer first.
+Owner request: 2026-10-16. Status: **design approved 2026-10-16 (decisions at the end); S1
+implemented 2026-10-16 (section "S1 as built" at the end), S2-S6 queued.** S1 detects and
+reports only; no card, draft or candidate exists yet.
 
 ## 1. Why
 
@@ -277,7 +277,7 @@ Turning suggestions off stops new detection; existing cards stay until decided.
 
 | Slice | What | Done when |
 |---|---|---|
-| S1 | Deterministic detection: `from_reuse` harvest, similarity and clustering, thresholds, dedupe against installed and pending; findings written to the nightly report only (no cards) | A nightly run on this PC's last 30 days lists clusters the owner agrees with; tests |
+| S1 (**implemented 2026-10-16**, see "S1 as built") | Detection: `from_reuse` harvest, deterministic pre-filter, the model's grouping pass (owner decision 1), thresholds, dedupe against installed, pending and reported; findings written to the nightly report only (no cards) | A nightly run on this PC's last 30 days lists clusters the owner agrees with (owner's dry run pending); tests |
 | S2 | Reviews card without draft: `skill_suggestion` kind, evidence links, Ignore / Snooze, settings (on/off, sensitivity) | Cards appear and decisions are recorded |
 | S3 | Draft generation: model call, Skill/Workflow choice, typed parameters, check-skill / check-workflow with one retry, form preview; **Create draft** to a candidate | A suggestion becomes a candidate that the owner installs with the Install button |
 | S4 | **Update existing** proposals and corrections signal | One correction turned into an update candidate |
@@ -313,3 +313,76 @@ Turning suggestions off stops new detection; existing cards stay until decided.
    at most 3 new cards a night (Normal).
 3. End-of-conversation card: **off** until after the trial (S6); Reviews tab only.
 4. Shared workstation: **each member sees only their own suggestions.**
+
+## S1 as built (2026-10-16)
+
+Code: `src/host_runtime/skill_suggestions.py`; report fields in
+`src/host_runtime/experience_review.py`; nightly wiring in `AgentWeb.experience_review` /
+`start_experience_nightly` (`src/host_runtime/web.py`); CLI `aep-host experience suggest
+--config <host.json> --dry-run [--actor X] [--json]`; tests `tests/test_skill_suggestions.py`.
+Decision record: `docs/DECISIONS.md` 2026-10-16 "Skill suggestions S1: the model groups,
+the score only filters".
+
+- **Requests.** `from_reuse(records, actor, retention_days)` reads only records whose
+  `actor` is the person (the host also asks the state for that actor only). A request is
+  the first user message of a session or one without `reply_to`, skipping short
+  follow-ups ("ok", "謝謝", "繼續", under 4 characters, or no comparable word). It
+  carries the answer's status, the ordered unique tool names from `tool_summary` and a
+  Workflow named in `workflow_form`. A request whose text matches `SECRET_PATTERN` or
+  still holds `[redacted]` is dropped (counted, never sent or reported). Excerpts are
+  300 characters to the model, 160 in the report.
+- **Pre-filter (never joins).** `terms` = `knowledge.query.tokens` minus stop words, pure
+  numbers/dates, mostly-digit values (`2026_w30`, `w31`) and CJK bigrams with a function
+  character. Score = 0.6 x IDF-weighted Jaccard + 0.4 x tool shape (1.0 for the same
+  ordered shape or a shared Workflow, else the set Jaccard). A new request whose best
+  score against any request of *another session* is below **0.2** is a one-off: not
+  sent, and reconsidered on later nights (it is not marked as sent). The score also
+  orders what the cap keeps and gives the report's matched words and tool shape.
+- **Grouping pass (owner decision 1).** At most one structured call per pass through
+  `experience_review.structured_call` (the review's endpoint, alias, `structured_output`,
+  output contract `skill_suggestion_groups`). Input: new requests as `R1..Rn` and the
+  stored groups that resemble them as `G1..Gm` (task name + 2 example excerpts), each with
+  its date and tool shape. Cap: `suggestion_max_requests` (default **120**) request
+  excerpts per pass, groups using at most half; requests over the cap wait for the next
+  night. Output `{"groups": [{"ids": [...], "task": "..."}]}` is validated: unknown or
+  repeated ids are ignored, a group needs two known items, any count in the reply is
+  ignored, the task line is redacted and cut to 120 characters. A failed or malformed
+  reply changes nothing (the requests stay new and are retried next night).
+- **Persistence.** `experience.sqlite` tables `suggestion_sent (actor, request_id,
+  created_at)` and `suggestion_groups (group_id, actor, record)`; a group record holds
+  request ids, task, status `open | reported | dropped`, reason and times, never request
+  text (excerpts are rebuilt from the conversations, so a deleted conversation drops out
+  of the evidence). A sent request the model matched with nothing is kept as a group of
+  one so a later request of the same task can join it. Merged groups keep the oldest id.
+  Rows older than the retention window are pruned.
+- **Thresholds.** 3 requests in 3 distinct sessions over 2 local calendar days; at most 3
+  new suggestions a night, the rest `deferred` and reported on a later night.
+- **Dedupe** (a qualifying group is `dropped` with the reason, permanently): an installed
+  Workflow run in the evidence (`workflow_form`, a Skill command tool `<alias>__<command>`
+  that targets it, or its name inside a tool name); task-name words (no single CJK
+  characters) at least half covered by an installed Skill's name/alias/selector_hint/
+  instructions or an installed Workflow's name/description; the same against the actor's
+  pending Workflow and Skill candidates in `authoring/chat/`; a task similar to an
+  already reported group.
+- **Report.** `review-*.json` gains `suggestions` (items: `group_id, task, status
+  qualified|deferred|dropped|considered, reason, requests, sessions, days, matched_words,
+  tool_shape, evidence[session_id, message_id, date, excerpt]`) and `suggestion_counts`
+  (counts and ids only). The `.md` report gets a "Suggested Skills" section. Groups of one
+  are not listed; groups of two or more below the threshold are `considered`.
+- **Nightly.** `experience_review()` runs the pass for the device owner (`runtime.actor`)
+  before the failure review and passes it into the report; a fault in the pass is
+  reported as an error and never stops the review. The nightly loop now also runs on a
+  night without failure cases when the pass is due (suggestions on and a new request
+  past the pre-filter; no model call to decide).
+- **Settings.** `experience-settings.json` gains `suggestions` (default on) and
+  `suggestion_max_requests` (10-1000, default 120). Off: no harvest, no model call. The
+  Reviews settings form still sends only its two fields; the route now keeps the others.
+- **Dry run.** `aep-host experience suggest --dry-run` calls the same
+  `suggest_for_runtime` with a read-only store (it never creates or changes
+  `experience.sqlite`) and writes no report file; it does call the review model.
+
+Deviations from the design text: the model groups (owner decision 1) instead of
+single-link clustering; the end-of-conversation signal, long runs (4.2), corrections
+(4.3) and sensitivity rows other than Normal are not built; the nightly pass mines only
+the device owner (`runtime.actor`), other members on a shared workstation are not yet
+iterated (the CLI `--actor` covers one at a time); no telemetry events yet (S5).

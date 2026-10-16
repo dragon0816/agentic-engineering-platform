@@ -1,8 +1,40 @@
 # Handoff
 
-Updated: 2026-10-16 (Asia/Taipei), by Claude Code (Shared Platform on the company network)
+Updated: 2026-10-16 (Asia/Taipei), by Claude Code (Suggested Skills S1)
 
-## Shared Platform on 172.25.228.141 over https with a pinned certificate (2026-10-16, Claude Code) — latest
+## Suggested Skills from experience, slice S1 (2026-10-16, Claude Code) — latest
+
+Goal: S1 of `docs/phases/SKILL_SUGGESTIONS.md` under the owner decisions of 2026-10-16
+(the model groups requests; the deterministic score only pre-filters): detect repeated
+work in ONE actor's conversations and write it to the nightly experience report only.
+As built: that document's section "S1 as built"; decision `docs/DECISIONS.md` 2026-10-16
+"Skill suggestions S1: the model groups, the score only filters"; row in `docs/TASKS.md`.
+Committed on main, not pushed.
+- **Code:** `src/host_runtime/skill_suggestions.py` (harvest, pre-filter, grouping call,
+  store, thresholds, dedupe, report models, `suggest_for_runtime`);
+  `experience_review.py` (`structured_call` shared with the failure review,
+  `review_model`, `ReviewReport.suggestions` / `suggestion_counts`, markdown section);
+  `experience.py` (settings `suggestions`, `suggestion_max_requests`); `web.py`
+  (`experience_review` runs the pass, `_suggestions_due` lets the nightly loop run without
+  failure cases, the settings route keeps unsent fields); `cli.py`
+  (`aep-host experience suggest --config <host.json> --dry-run [--actor X] [--json]`).
+- **Verified:** ruff check, format --check, mypy (src+tests) in the project `.venv` and in
+  `C:\aepci-wk\venv` (reinstalled `.[dev,office]`); full pytest: project `.venv` 3075 passed,
+  7 skipped; CI-like venv 3052 passed, 30 skipped. All tests use a fake model. Note: the
+  Reviews page's "Run review now" also runs a suggestion pass (one model call when there
+  are new requests).
+- **Not verified / not done:** no live pass on the owner's data (by instruction); Agent Web
+  was not restarted, so the running instance still has the old nightly code until the
+  owner restarts it (check `/api/tasks` first). No cards, drafts, Reviews kind, telemetry
+  events or end-of-conversation card (S2-S5). The nightly pass mines only `runtime.actor`.
+- **Next (owner):** run the dry run on his data and judge the groups:
+  `.venv\Scripts\aep-host.exe experience suggest --config "%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0\host.json" --dry-run`
+  from the repository (the working tree Agent Web runs on)
+  (add `--json` for the full report, `--actor <id>` for another member). It calls the
+  review model once and writes nothing. Then S2 (Reviews card, Ignore/Snooze, settings in
+  the page, per-member passes).
+
+## Shared Platform on 172.25.228.141 over https with a pinned certificate (2026-10-16, Claude Code)
 
 Goal: owner request 2026-10-16, colleagues reach the Shared Platform on 141 directly (no SSH
 tunnel) with a self-signed certificate. Design and as-built: `docs/phases/BRIDGE_ENROLLMENT.md`

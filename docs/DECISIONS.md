@@ -3184,3 +3184,42 @@ certificate generator (openssl from Git for Windows is on the machine; no new cr
 a scheduled task that stores the account password (S4U needs none); opening the ports for
 every Public network or changing the LAN's network category (an unidentified network's
 category is policy, not a setting that reliably stays).
+
+## 2026-10-16 — Skill suggestions S1: the model groups, the score only filters
+
+Decision (owner decisions 2026-10-16 in `docs/phases/SKILL_SUGGESTIONS.md`, implemented as
+slice S1, report only): repeated work is found by one structured model call a night that
+groups the person's own requests; the deterministic score never joins requests.
+
+- **Pre-filter floor 0.2** (0.6 x IDF-weighted Jaccard over `knowledge.query.tokens` +
+  0.4 x tool shape) against any request in *another session*. Below it a new request is a
+  one-off: not sent, and not marked as sent, so it is reconsidered when a similar request
+  arrives. Low on purpose: it only removes obvious one-offs; the model decides.
+- **Cap default 120 request excerpts per pass** (`suggestion_max_requests`, 10-1000),
+  stored groups shown with at most 2 examples each and at most half the cap; the rest
+  waits for the next night. 120 excerpts of 300 characters stay well inside one model
+  call and cover a busy month of one person's opening requests.
+- **Persistence:** two tables in `experience.sqlite` (`suggestion_sent`,
+  `suggestion_groups`) holding request ids, group ids, task names, status `open | reported
+  | dropped` and reason; never request text. Excerpts are rebuilt from the conversations
+  each night, so deleting a conversation removes it from the evidence. A sent request the
+  model matched with nothing becomes a group of one so it can still be joined later; only
+  stored groups that resemble the night's new requests are sent again.
+- **Model output is untrusted:** only ids from the prompt (`R1..`, `G1..`), each once, two
+  or more per group; counts and any other field ignored; task line redacted and cut. A
+  failure or malformed reply changes nothing.
+- **Dedupe drops permanently with the reason** (installed Workflow run in the evidence,
+  installed Skill or Workflow covering the task words, a pending candidate, an earlier
+  suggestion); requests that later join a dropped or reported group only add evidence.
+- **Secrets:** requests matching `SECRET_PATTERN` or still holding `[redacted]` are
+  dropped before anything else. The report's counts carry no text.
+- **Shared code:** the nightly job and `aep-host experience suggest --dry-run` call the
+  same `suggest_for_runtime`; the dry run opens the store read-only and writes no report.
+  The model call shares `experience_review.structured_call` with the failure review.
+
+Rejected: deterministic single-link clustering as the joiner (section 4.1's
+recommendation, overridden by the owner); sending every request each night (cost grows
+with history); persisting request excerpts (a second copy of conversation text outside
+the conversation store); marking one-offs as sent (a one-off could then never meet the
+request that repeats it); mining every actor on the Host in the nightly job for now (S1
+mines the device owner; per-member passes come with the Reviews card in S2).
