@@ -1,6 +1,6 @@
 # Suggested Skills from experience (design)
 
-Owner request: 2026-10-16. Status: **design, awaiting owner review.** Nothing in this
+Owner request: 2026-10-16. Status: **design approved 2026-10-16 (decisions at the end); implementation queued.** Nothing in this
 document is implemented. The owner wants it built next; the open questions at the end
 need an answer first.
 
@@ -298,3 +298,18 @@ Turning suggestions off stops new detection; existing cards stay until decided.
 4. **Where suggestions are reviewed on a shared workstation.** Each member sees only
    their own (mined from their own conversations) — or the machine owner sees all?
    *Recommended:* each member only their own; nobody sees another person's requests.
+
+## Owner decisions (2026-10-16)
+
+1. **Similarity: the model judges** (overrides the recommendation in 4.1). The nightly job
+   sends the person's own request excerpts (already redacted on save) with their tool
+   shapes to the configured model through the internal gateway, in batches, and asks it to
+   group requests that are the same task and to name each group. The deterministic
+   score in 4.1 is kept only as a cheap pre-filter that drops obvious one-offs and caps
+   the batch size, and as the explanation shown on the card; it never joins requests by
+   itself. Budget: at most one grouping pass per night over requests new since the last
+   pass plus the open groups, with a hard cap on requests per pass (setting).
+2. Threshold for a first suggestion: **3 requests in 3 sessions over at least 2 days**,
+   at most 3 new cards a night (Normal).
+3. End-of-conversation card: **off** until after the trial (S6); Reviews tab only.
+4. Shared workstation: **each member sees only their own suggestions.**
