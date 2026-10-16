@@ -2231,3 +2231,30 @@ s-k-20261011T102952` (not published).
   `tests/test_windows_preview_bundle.py`. This PC keeps the owner's gateway (port
   4000, task `LiteLLM_Gateway`); AEP's gateway home here is unmanaged and reads the
   owner's `.env` for the expiry only.
+
+- [x] Colleague manual split into an install manual and a complete user guide (2026-10-16,
+  owner request). `deploy/windows-preview/INSTALL.zh-TW.md` now covers only prerequisites,
+  install (with the options table), verify, open, update, uninstall, file locations,
+  reporting a problem and install errors, and points to the new
+  `deploy/windows-preview/USER_GUIDE.zh-TW.md`. The guide covers every setting and feature
+  in the owner's order: 0 quick start, 1 LLM gateway (moved from the manual), 2
+  Natural-language model, 3 Agent Web tour (every nav item and Settings card incl. identity,
+  avatar, context, MCP servers, profiles, Tasks), 4 chat and inline Workflow forms
+  (uploads, last values, slash commands, cards, Telegram /run), 5 Capabilities (filters,
+  Install/Switch/Remove and recovery, Library, Open Marketplace, Publish), 6 Knowledge
+  (knowledge_pipeline config, sandbox, Pull/Convert, Ingest with folder skills and the AI
+  session, Testing/Push, Reviews, what is written where), 7 Laya card, 8 Telegram, 9
+  Workflow settings (rs-wmt-package-release marker file, inbox, remote_release, dry run;
+  weekly report), 10 Shared Platform for members (merged from the old section 5), 11
+  Agent mode, 12 AI proposals, 13 coding agents and bundled Skills, 14 Schedules, 15
+  Shared Platform administration (consolidated from the platform START-HERE), 16 FAQ and
+  error codes, 17 glossary. Labels were checked against `web_page.py`, `web.py`,
+  `member_page.py` and the CLI; code won where docs disagreed (listed in the hand-off
+  report: e.g. `allow_self_review` defaults to true, Telegram has /run /start /help /new
+  /status only, weekly report reads a GitHub board, no schedule edit/delete, Knowledge
+  page hints still say "step 2/3" for convert/ingest). Bundle: `REQUIRED_OPERATOR_GUIDES`
+  adds the guide; `release_windows.py` copies both documents into the release folder and
+  names both in the notes; `docs/RELEASING.zh-TW.md`, `README.md`, both `START-HERE.md`
+  point to the guide (the platform START-HERE SOP kept, with a pointer to chapter 15).
+  Tests: `tests/test_release_windows.py` (chapter order, code labels present, no
+  credential-like assignment), `tests/test_bundled_skills.py` (section moved to 13.4).

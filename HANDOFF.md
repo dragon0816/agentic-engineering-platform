@@ -1,6 +1,20 @@
 # Handoff
 
-Updated: 2026-10-16 (Asia/Taipei), by Claude Code (LLM gateway in the installer)
+Updated: 2026-10-16 (Asia/Taipei), by Claude Code (colleague user guide)
+
+## Colleague user guide (2026-10-16, Claude Code) — latest
+
+Goal: owner request 2026-10-16, the manual shipped to colleagues explains every setting
+and feature. Done and committed on main (not pushed): `deploy/windows-preview/INSTALL.zh-TW.md`
+(install only) + `deploy/windows-preview/USER_GUIDE.zh-TW.md` (chapters 0-17), shipped in
+the bundle and the release folder; row in `docs/TASKS.md`. Verified: ruff check, ruff
+format --check, mypy, the bundle tests and the full suite in the project `.venv`.
+Not verified: the guide against a live Agent Web screen (labels come from the code).
+Next (owner): read the guide once on a colleague PC; fix the Knowledge page hints that
+still say "step 2/3" for convert/ingest (code, not the guide); decide whether
+`weekly-*.cmd` (they send `weekly.preview/apply/mail`) still match the current
+`/weekly` Skill, which declares only `run`. Earlier work continues below.
+
 
 ## LLM gateway in the Windows installer (2026-10-16, Claude Code) — latest
 
