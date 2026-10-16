@@ -3069,3 +3069,27 @@ from colleague PCs on update (updates never remove what a person has); dropping 
 `weekly-mail` extra (matplotlib) from the bundle (the owner's upgrade reinstalls from
 the same bundle and his weekly mail chart needs it; it is a dependency, not a
 Workflow).
+
+## 2026-10-16 — `aep-host open` shows a starting page while Agent Web starts
+
+Decision (owner request 2026-10-16: a shortcut click showed nothing for 10-30 s): when
+Agent Web is not running, `aep-host open` first writes and opens a static page,
+`workspace/agent-web-starting.html` (no server; light/dark; spinner; elapsed time),
+then starts the server. The page reads `workspace/agent-web-starting.js` every second
+through a `<script>` tag (a `file://` page may not `fetch` another file); the launcher
+writes it as `starting`, `ready`, `failed` (server exited, with its exit code, or no
+answer within 180 s) or `opened`. After 120 s the page says it is slow and where the
+logs are. Only `ready` carries Agent Web's address (the token URL already kept in
+`agent-web.json` and opened before); the page goes there with `location.replace`
+(loopback addresses only), and after 15 s the launcher rewrites the status without it.
+The page never holds the address. When the browser could not be asked to open the
+page, Agent Web is opened directly as before; a running Agent Web is opened directly.
+
+Reason: an immediate page tells the person the click worked and, if it fails, where
+the log is, without a second server or a new credential.
+
+Rejected alternatives: a token-free redirect route on Agent Web (lets any page open an
+authenticated Agent Web and weakens the token guard); writing the address into the
+page itself (left on disk in another file indefinitely); opening Agent Web in a
+second tab from the launcher (two tabs; the starting tab cannot close itself); a
+small loopback server for the page (another listener to secure).

@@ -91,7 +91,10 @@
 ## 4. 開啟 AEP Agent
 
 - 雙擊桌面上的 **AEP Agent** 捷徑；或在安裝包資料夾雙擊 `start-web.cmd`。
-- 第一次開啟需要等約 10～30 秒，之後瀏覽器會自動打開 Agent Web。
+- Agent Web 還沒在執行時，瀏覽器會立刻打開 **AEP Agent is starting…**（AEP Agent 啟動中）
+  頁面，顯示轉圈和已經過的時間；約 10～30 秒後這個頁面會自己切換到 Agent Web，不必再點一次。
+- 超過 2 分鐘還沒好時，頁面會說明「比平常久」並顯示錯誤紀錄的位置（`workspace\logs`）；
+  啟動失敗時會顯示失敗原因和同一個位置。請把最新的 `agent-web-*.err.log` 回報（第 8 節）。
 - 關掉瀏覽器分頁，Agent 仍在背景執行；下次點捷徑會直接打開。
 - 接下來請照使用指南第 0 章「快速開始」逐項完成設定。
 
@@ -185,7 +188,8 @@
 | `Offline wheel installation failed` | 檔案被占用或防毒軟體攔截 | 關閉 Agent Web 後重試；仍失敗時附上畫面截圖回報 |
 | `The LLM gateway's token could not be renewed now` | 安裝時沒有網域登入 | 不影響安裝。連上公司網路或 VPN 後，到 Settings → LLM gateway 按 **Refresh token** |
 | `AEP is not installed ... yet`（update.cmd） | 這台電腦還沒安裝過 | 改用 `install.cmd` |
-| 捷徑點了沒反應 | Agent Web 啟動失敗 | 看 `workspace\logs` 最新的 `agent-web-*.err.log` 並回報 |
+| 捷徑點了沒反應，或啟動頁顯示 `AEP Agent did not start` | Agent Web 啟動失敗 | 看 `workspace\logs` 最新的 `agent-web-*.err.log` 並回報 |
+| 啟動頁停在 `AEP Agent is running` | Agent Web 已啟動，但這個頁面沒有及時切過去 | 再點一次 **AEP Agent** 捷徑 |
 | Agent 說 LLM gateway 沒在執行、還在啟動或 401 | gateway 的狀態 | 見使用指南第 1 章的疑難排解 |
 
 其他使用上的問題，請看使用指南第 16 章「常見問題與錯誤代碼」。
