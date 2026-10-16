@@ -17,6 +17,16 @@ gives today, so everything after sign-in is unchanged.
 Out of scope here: one-click sign-in from Agent Web (a later task), a
 production identity provider, self-service "forgot password" by e-mail.
 
+*As built (2026-10-15):* one-click sign-in from Agent Web was built later the same
+day as its own slice: Agent Web's "Open Marketplace" obtains a single-use browser
+ticket (valid 60 seconds) server side with the Personal Agent session and opens
+`<portal>/#ticket=<id:secret>`; the portal redeems it with `sign-in/ticket` and gets
+the same browser login and one-hour session as a password sign-in (method
+`agent-ticket`, login label `Agent Web sign-in`). Code: `control_plane/member_ticket.py`,
+`host_runtime/platform_publish.py` `browser_ticket`. Decision: `docs/DECISIONS.md`
+2026-10-15 "Agent Web opens the Member Portal signed in with a single-use browser
+ticket".
+
 ## Owner decisions (2026-10-15)
 
 1. **First sign-in.** Opening an invitation link shows "Set your password" for

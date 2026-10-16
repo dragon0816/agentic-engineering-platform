@@ -243,6 +243,19 @@ Never put the token in a file. Set the environment variable for your Windows use
 and run `aep-host telegram --config host.json`, which polls outbound only and needs
 no inbound firewall rule. A sender that is not in the map is ignored.
 
+Commands the bot understands (`channels/telegram.py`, `channels/telegram_flow.py`):
+
+- plain words: talk to the Agent;
+- `/start` or `/help`: a short usage text;
+- `/run <number or name>`: start a Workflow and answer its fields one by one;
+- `/status`: this Bridge's state;
+- `/new`: start a fresh conversation (forgets its files);
+- `/<skill> <command> [arguments]`: a Skill's deterministic command;
+- inside a `/run` form: `/skip` (optional field only), `/done` (finish a
+  multi-value field), `/cancel` (stop the form).
+
+There are no other bot commands; schedules and settings are changed in Agent Web.
+
 On a company workstation, a mapped sender still has to be this Bridge's one bound
 owner: a request on anybody else's behalf is refused. On a shared test workstation
 the machine runs as a virtual member of its own, so a mapped sender's request runs
@@ -547,15 +560,16 @@ that has no model yet (see "LLM gateway" above); otherwise merge them by hand.
 Changing only the model ID preserves that route's approval; changing the
 URL, provider or credential clears it. Other hosts need their own approval.
 
-The **Ask** tab shows whether natural-language routing is ready and lists every
-deterministic command declared by installed Skills. Clicking a command only
-fills the request box; execution begins only after pressing **Send**.
+Chat is the default view of Agent Web (there is no separate "Ask" tab). Typing
+`/` in the message box opens a list of the deterministic slash commands (`/help`,
+`/run`, `/wiki-query`, `/problem`, ...) with their descriptions. Clicking a command
+only fills the message box; execution begins only after pressing **Send**.
 
-After a conversation, the **Improve** tab can save its recent messages as a
-local review draft. Choose one exact installed Skill, Workflow or Knowledge
-version to report a problem, or propose a new Skill or Workflow. The Host
-supplies identity and ownership. Saving the draft does not create an Issue,
-run code, install anything or publish it; business and technical review remain
+To report a problem from a conversation, send `/problem <what went wrong>` in that
+conversation (there is no separate "Improve" tab). It saves a governed local problem
+draft built from the conversation's recent messages for human review. The Host
+supplies identity and ownership. Saving the draft does not create an Issue, run
+code, install anything or publish it; business and technical review remain
 separately pending.
 
 A company's LiteLLM gateway serves an OpenAI-shaped API, which is what this
@@ -682,6 +696,10 @@ interrupted is never retried by itself: the schedule shows as blocked until you
 record what happened under **History → Resolve** (or
 `aep-host schedules resolve`). The same controls exist on the command line:
 `aep-host schedules list|grant|revoke|pending|approve|deny|resolve|tick`.
+
+A schedule cannot be edited or deleted from Agent Web: there is no Edit or Delete
+button. To change one, **Pause** it and create a new schedule with the new time or
+values (a paused schedule never runs; **Resume** turns it back on).
 
 The task runs as you, not as SYSTEM: the workbook, the tokens and Office all
 belong to your account, and a task running as SYSTEM would see none of them —

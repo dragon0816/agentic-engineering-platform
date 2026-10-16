@@ -11,6 +11,11 @@ maintainers develop one knowledge vault together. It builds on K1 (sandboxes), K
 Pull → edit skills → Convert → Ingest → Benchmark → Push
 ```
 
+*As built (2026-10-16):* the Knowledge page groups this into **three steps**:
+"1. Pull data" (pull, add files, convert), "2. Ingest data" (edit skills, ingest) and
+"3. Testing data" (questions, test, push). The benchmark is the **"Run test"** button
+inside step 3, not a separate "Benchmark" step. See section 12.
+
 A sandbox works like a git branch with a pull request:
 
 | Git idea | Here |
@@ -193,6 +198,11 @@ supersedes the "one or more folders" pull of section 3 for new sandboxes.
   4. **Check after writing.** Run lint and the sourced-line check: no line linking a
      source, and no ⚠️ line, from either side may be lost. Any finding is reported in the
      push record.
+
+     *As built:* the sourced-line check runs on the merged candidate **before
+     writing**: a candidate that would lose any sourced line is `blocked`
+     ("N sourced lines would be lost") and nothing is written
+     (`host_runtime/knowledge_push.py`).
 - **The push record.** One file per push in `pushes/<push id>.json`, plus a `log.md`
   entry `## [date] push | <sandbox label>`. It holds:
   - who pushed, the sandbox id and label, when the sandbox was opened and pushed;
@@ -255,3 +265,22 @@ after a side was chosen; push records, log entries and backups were written. One
 came out of it: after a push the sandbox and its `.base` take the pushed state.
 Observation: the only gradable question fails on both sides, so the gate compared 0
 with 0. The gate only protects what the question sets ask.
+
+## 12. As built (checked against the code 2026-10-16)
+
+- **Page steps.** Three steps (`web_page.py` `kp-stepper`): **1. Pull data** (pull, add
+  files, convert), **2. Ingest data** (edit skills, ingest), **3. Testing data**
+  (questions, test, push). The benchmark button is **"Run test"**; there is no
+  separate "Benchmark" step. (Section 8's "Pull → Skills → Convert → Ingest →
+  Benchmark → Push" page order and the 2026-10-13 "1. Scope and rules" step name are
+  superseded by these three steps.)
+- **Push order** (`host_runtime/knowledge_push.py`): merge against the current vault →
+  benchmark gate on the merged candidate → sourced-line check (a lost sourced line
+  **blocks the push before anything is written**) → compare the vault digest (re-merge
+  if someone pushed first) → write with backups → push record and `log.md` entry.
+- **No lock and no approval step.** There is no vault lock and no domain-owner
+  approval: any listed maintainer pushes, the first push wins, a later push re-merges
+  and passes the gate again.
+- **Sandbox id.** `sb-<label slug, at most 16 characters>-<6 hex characters>`, for
+  example `sb-vna-options-3f9a1c` (`knowledge/sandbox.py`); kept short because it is in
+  every copied path.

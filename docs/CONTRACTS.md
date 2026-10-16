@@ -2364,6 +2364,11 @@ answer is printed as exactly that, never as a revocation.
 
 ## Workflow 11: the weekly report up to its plan (Phase 7, slice 3a)
 
+*As built today (note 2026-10-16):* the weekly report no longer reads Jira. Its live
+source is a GitHub Projects board (`github/search-project`); see "Workflow 11's second
+source: the GitHub Projects client (Phase 7, slice 5)" below. This section records the
+slice 3a contracts as they were first built.
+
 `capabilities.weekly_report.rules` is the pinned Host Bridge's
 `_weekly_rules` ported pure: `parse_week_name`, `week_number`/`week_name` in
 the `iso`, `us` and `iso-1` styles, `week_range`, `week_range_for_name`,

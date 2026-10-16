@@ -61,6 +61,8 @@ Rejected:
      Capabilities/portal buttons, and the agent may only *submit drafts* through the
      authoring MCP.
 4. **Audit.** Every request and decision is a Task row in the session's task list.
+   *(As built: free requests go only to `agent-mode\audit.jsonl`; see "As built" at
+   the end.)*
    - Recorded: tool, path or command (secrets redacted), decision and outcome.
    - The approval cards stay in the conversation history.
 5. **Telegram.** These backends stay text-only in Telegram. Approval cards need Agent
@@ -128,6 +130,23 @@ run stops at sign-in); `tests/test_agent_mail.py` (scope, first-read card, attac
 send only from a card, one card per message, changed draft not sent, timeout keeps the
 draft, no send verb reachable otherwise, Knowledge reads free / writes carded / push not
 offered).
+
+### As built (checked against the code 2026-10-16)
+
+- **Audit.** Every request (secrets redacted) is written to
+  `workspace\agent-mode\audit.jsonl`. Only cards, refusals and each agent turn
+  become Task rows; a request that was free (inside the working folder, or already
+  allowed for the conversation) is recorded **only** in `audit.jsonl`, not as its own
+  Task row. This replaces design item 4 ("every request and decision is a Task row").
+- **Send email card.** An unanswered send card expires after the timeout and the
+  message is **kept as a draft** in Outlook (not sent, not discarded).
+- **Network tools.** A network request beyond the model API is not refused outright:
+  it gets an approval card, and **Allow for this conversation** frees that tool for
+  the rest of the conversation (`common/agent_guard.py` `judge`).
+- **"GitHub Copilot (agent, AEP tools)"** (backend `copilot_agent`) is **not** agent
+  mode: it is the signed-in Copilot CLI with AEP's assistant MCP tools as its only
+  tools, shell and file writes denied, and no approval cards. Agent mode for Copilot
+  is the `copilot --acp` relay described above.
 
 Not verified here: a model actually calling the relay (the temp home has no sign-in, so
 no real `claude -p` turn could run without touching the person's own configuration),

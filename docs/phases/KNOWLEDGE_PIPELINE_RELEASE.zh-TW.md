@@ -23,6 +23,9 @@ query 在對話中進行。瀏覽 wiki 沿用 Obsidian（Karpathy 建議），�
 
 一致性（非權限）：不直接 ingest 到正式 vault；每人在自己的沙盒 ingest，再經合併發布（見 4.8）。合併時同一 vault 同一時間只允許一個寫入者（vault 鎖），查詢不受影響。
 
+*實作現況（2026-10-16 對照程式）*：沒有 vault 鎖。依 2026-10-11 owner 決定改為「先 push 者先合併」：
+後到的 push 對當時的 vault 重新合併並重跑檢驗；唯一的互斥是寫入前的摘要比對（數秒）。見 `docs/phases/KNOWLEDGE_COLLAB.md` 第 6、12 節。
+
 ## 3. 現況對照
 
 | 功能 | 已有（`src/knowledge/`） | 缺口 |
@@ -113,13 +116,18 @@ K3 以這些為起點轉成平台 Skill，不從零撰寫；雙語別名（4.2�
 - 段落層級寫入（4.4）是自動合併的前提，所以合併放在 K3 之後。
 - 不在 OneDrive 共享資料夾上用 git：同步會損壞 `.git`；改用候選版本加摘要比對。
 - 「領域負責人核准」是工作流程，不是權限控制。
+- *實作現況（2026-10-16 對照程式）*：沒有「領域負責人核准」步驟，也沒有 vault 鎖。名單內的 maintainer 皆可 push、
+  不需第二人核准；push 前在合併結果上跑題目檢驗（Knowledge 頁「Run test」），任一題退步、或會遺失任何有來源的行，
+  都會在寫入前擋下。Knowledge 頁是三個步驟：1. Pull data（pull、加檔、convert）、2. Ingest data（改 skill、ingest）、
+  3. Testing data（題目、Run test、push），沒有獨立的「Benchmark」步驟。沙盒 id 格式為
+  `sb-<標籤 slug，最多 16 字元>-<6 位十六進位>`。詳見 `docs/phases/KNOWLEDGE_COLLAB.md` 第 12 節。
 - **多人協作流程（owner 2026-10-11）**：Pull → 改 skill → Convert → Ingest → Benchmark → Push，類似 git 的分支與 PR；共用 vault 依專案設定（本專案為 OneDrive `RS_Knowledge`）。設計見 `docs/phases/KNOWLEDGE_COLLAB.md`。
 
 ## 5. 分階段
 
 | 階段 | 內容 | 驗收 |
 |---|---|---|
-| K1 | 接上 Agent：convert、ingest、lint 成為 Bridge 能力；Agent Web「Knowledge」頁（選 vault、drop 預覽、ingest 差異核准）；ingest 一律進個人沙盒（候選 vault）；vault 鎖 | 在獨立測試 vault 跑完 convert → ingest → lint（TASKS 既有待辦） |
+| K1 | 接上 Agent：convert、ingest、lint 成為 Bridge 能力；Agent Web「Knowledge」頁（選 vault、drop 預覽、ingest 差異核准）；ingest 一律進個人沙盒（候選 vault）；vault 鎖（實作現況：未做，改為先 push 先贏，見 4.8） | 在獨立測試 vault 跑完 convert → ingest → lint（TASKS 既有待辦） |
 | K2 | 分層 index + 雙語別名／摘要；ingest 挑頁與 query 改為循 index | 36 題 benchmark 涵蓋率不低於 0.40、目標 0.50；耗時不惡化 |
 | K3 | Karpathy 基礎 Skill + domain matrix Skill（含領域範圍）；段落層級寫入與刪除防護；沙盒合併（三方比較、合併衝突、合併後驗證、核准發布） | 測試 vault ingest 後無刪失；兩個沙盒改不同段可自動合併、改同段被列為衝突 |
 | K4 | Convert 補齊：Excel（表格、圖表 → 數字表 + 總結）、HTML、`.ppt`、圖片連結與 OCR | 各格式樣本轉換結果經 owner 檢視 |

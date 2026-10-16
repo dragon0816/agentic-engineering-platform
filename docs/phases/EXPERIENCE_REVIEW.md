@@ -107,6 +107,18 @@ A "Reviews" section in Agent Web, also linked from the Knowledge tab. Each propo
   - **Reject** — the reason is recorded so it is not proposed again;
   - **Snooze.**
 
+  *As built (labels in `web_page.py`):* the accept button names its route: "Accept:
+  open a review sandbox" (rule change), "Accept: draft it in a review sandbox" (test
+  question), "Accept: add to the gap list" (missing knowledge), "Accept: track as an
+  issue" (platform issue). Then **Reject** (asks for a reason, required) and
+  **Snooze 7 days**. An accepted proposal offers "Open in Knowledge" (when it went to
+  a sandbox), "Mark done" and "Reject"; a rejected or done one offers "Reopen". The
+  page tabs are "To decide", "Accepted", "Snoozed" and "Rejected or done". Platform
+  Skill candidates and Workflow revision drafts (E4 routes) are not built: proposal
+  kinds are only `rule_edit`, `knowledge_gap`, `test_question` and `issue`, and a rule
+  edit that does not name a vault rule is tracked as an issue note
+  (`host_runtime/review_routes.py`).
+
 Each proposal is tracked as proposed, accepted, pushed or installed, measured, rejected,
 or regressed. These counts show whether the review is worth its cost.
 

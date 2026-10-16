@@ -55,8 +55,13 @@ only 11 % of cases.
 
 ## 4. Data collection week (shadow only)
 
-1. Keep the Laya connection up (the owner chooses: the loopback relay, plaintext on
-   the LAN, or a fixed SSH tunnel) and `mode: shadow`. Nothing reaches the person.
+1. Keep the Laya connection up and `mode: shadow`. Nothing reaches the person.
+   *As built:* the product only reaches Laya through a loopback port
+   (`http://127.0.0.1:<local port>`) carried by an SSH tunnel (opened by hand, or by
+   Agent Web when "Agent Web opens the SSH tunnel" is ticked). A plaintext LAN address
+   is never accepted (`LayaSettings`, `host_runtime/contracts.py`). The scratch
+   loopback relay used on 2026-10-13 was outside the repository and is not a product
+   option.
 2. Record for each shadow decision: top probability, margin, kept list, latency and
    what the model actually did (already logged for A).
 3. Proposed additions for review (not built): shadow records for B and C, with the
@@ -71,3 +76,21 @@ Report per decision point: decisions answered, accept rate and error bound per
 threshold, seconds saved per accepted decision, added latency. The owner then decides
 which points (if any) move to `active`, starting with the one that saves most at the
 lowest risk.
+
+## As built: the Settings card (checked against the code 2026-10-16)
+
+The Settings card "Laya decision acceleration" (`host_runtime/laya.py`,
+`LayaSettings` in `host_runtime/contracts.py`) is what exists today:
+
+- **Connection.** Only a loopback local port reached through an SSH tunnel; the
+  decision endpoint is always `http://127.0.0.1:<local port>` (local port 1024-65535).
+  No plaintext LAN relay in the product.
+- **Timeout.** Default 1500 ms, allowed 100-5000 ms. (The lower-level
+  `decision_accelerator.timeout_ms` contract in `agent/decisions.py` still defaults to
+  300 ms when host.json is written by hand; the card writes its own value.)
+- **Saving shadow or active** needs an owner approval reference
+  (`egress_approval_missing` otherwise) and the credential `jev_api_key` mapped in
+  host.json `credentials` to an environment variable (`credential_unmapped`
+  otherwise). Mode off clears `decision_accelerator`.
+- **"Check connection"** shows whether Laya answers through the local port, its
+  response time and the last shadow decision.

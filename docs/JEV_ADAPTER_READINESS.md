@@ -16,7 +16,7 @@ performed. An offline, injected-transport Skill-selection adapter now exists.
 | Boundary | Current contract |
 |---|---|
 | Decision provider | `DecisionProvider[RequestT, ValueT].decide(request) -> DecisionResult[ValueT]` is synchronous and in-process. The result carries decision type, value, accepted flag, confidence, reason code, provider ID, and optional metadata. It is **not** a JEV wire schema. |
-| Configuration | `CompanyHostConfiguration.decision_accelerator` defaults to `provider: NONE`. `JEV` configuration requires an endpoint, a symbolic `SecretRef`, and at least one enabled decision type. Endpoint validation permits HTTPS or loopback HTTP, and rejects URL credentials/query/fragment. Timeout defaults to 300 ms (range 1–5000 ms); confidence threshold defaults to 0.9. |
+| Configuration | `CompanyHostConfiguration.decision_accelerator` defaults to `provider: NONE`. `JEV` configuration requires an endpoint, a symbolic `SecretRef`, and at least one enabled decision type. Endpoint validation permits HTTPS or loopback HTTP, and rejects URL credentials/query/fragment. Timeout defaults to 300 ms (range 1–5000 ms) in this raw contract; the Settings card writes its own value (default 1500 ms, range 100–5000 ms, see "Settings page card" below); confidence threshold defaults to 0.9. |
 | Actual wiring | `RequestRouter` and `Gateway.converse` use `DecisionService`. The ordinary conversation's `skill_selection` baseline returns every installed command in order. `RequestRouter` observes final `route_selection`, which is not an allowed accelerator type. No JEV factory or whole-request authorizer is wired into the Host; enabling the config alone cannot call JEV and falls back to baseline. |
 | Admission | Before constructing an accelerator, `DecisionService` requires its caller's `authorize_accelerator(request)` to return true. Candidate type, provider ID, acceptance, request-specific validator, and confidence are checked; failures fall back to baseline. Traces contain no request text. `skill_selection` additionally accepts only a nonempty subset of installed tool names and applies it to both display and dispatch bindings. |
 | Data policy | `DataPolicy` already distinguishes `PUBLIC`, `INTERNAL`, `CONFIDENTIAL`, `RESTRICTED`, and `UNCLASSIFIED`; unknown outranks known classes. Its current approval model is for Gateway backends, not a JEV service. `SkillCandidateRequest` contains the full user context and tool descriptions but carries no per-material classification. Existing approval of the local LiteLLM Gateway does **not** approve JEV data egress. |
@@ -227,5 +227,16 @@ ticked, Agent Web runs `ssh -N -o BatchMode=yes -L 127.0.0.1:<local>:127.0.0.1:<
 Windows job kills it even on a forced stop) and shows the last ssh error. The card shows
 whether Laya answers through the local port, its response time and the last shadow
 decision. Encryption is unchanged: only an SSH tunnel or HTTPS reaches another machine.
+
+*As built (checked against the code 2026-10-16):*
+- The card accepts only a loopback local port reached through an SSH tunnel; the
+  endpoint is always `http://127.0.0.1:<local port>`. A plaintext LAN address is
+  refused, and the scratch relay of 2026-10-13 is not a product path.
+- The card's timeout defaults to **1500 ms** (allowed 100-5000 ms), not the 300 ms of
+  the raw `decision_accelerator` contract quoted under "Current state" above.
+- Saving mode shadow or active requires the owner's approval reference and the
+  credential `jev_api_key` mapped in host.json `credentials` (errors
+  `egress_approval_missing` / `credential_unmapped`).
+- The connection check button is labelled **"Check connection"**.
 Prerequisite for the automatic tunnel: the remote host must accept this PC's SSH key
 (it rejects it as of 2026-10-13).

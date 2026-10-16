@@ -89,6 +89,12 @@ grade; credentials and sensitive payloads remain on the Bridge.
 
 ### Workflow 11 — the GTM weekly report
 
+*As built (note 2026-10-16):* Jira was switched off in 2026-09; the weekly report now
+reads a GitHub Projects board (see "Slice 5 — workflow 11 reads GitHub instead of
+Jira" below). Read "Jira issue keys" in this gate as the board's item keys (the
+original Jira key kept in the title, or `GH-` for board-only work). The gate text is
+kept as first written.
+
 - The same reporting week, base JQL and updated window select the same Jira issue
   keys, subject to an explicit safety cap.
 - Only `weekly report temp` is created or changed. Existing `YYYY_NW` sheets are

@@ -20,6 +20,10 @@ enters the catalog, where other members can select it for their Bridges.
 3. **Entry points.** An Agent Web "Publish to shared platform" action, plus
    `aep-host assets publish` for automation.
 
+   *As built:* the Agent Web entry point is a card headed "Publish to the shared
+   platform" (Skill or Workflow picker, change, who can use it, note, "Publish for
+   review"), not a per-row action in the installed lists.
+
 ## What exists (code survey 2026-10-15)
 
 - Registry, ownership and version rules: `AssetOwnershipService.publish_as` /
@@ -62,7 +66,7 @@ enters the catalog, where other members can select it for their Bridges.
 | Operation | Body | Result |
 |---|---|---|
 | `assets/submit` | `kind` (skill/workflow), `change` (patch/minor/major), `note`, `manifest` (the manifest JSON object) | `submission_id`, assigned `version`, `status: pending` |
-| `assets/submissions/mine` | — | the member's submissions with status and reviewer reason |
+| `assets/submissions` | — | the member's own submissions with status and reviewer reason (designed as `assets/submissions/mine`; built as `assets/submissions`) |
 | `assets/submissions/withdraw` | `submission_id` | a pending submission is withdrawn |
 
 **Checks on submit, before anything is stored:**
@@ -107,9 +111,15 @@ above both published and pending versions.
   `artifact_ref registry://ns/name/version` and the artifact sha256, then calls
   `publish_as(package, publisher=submitter)` in one transaction. Ownership and
   version rules are checked again there.
-- **No self-review.** The reviewer must not be the submitter (`self_review_refused`).
-  This is the gap ASSET_OWNERSHIP names ("a member could otherwise assert their own
-  reviews").
+- **No self-review (as designed).** The reviewer must not be the submitter
+  (`self_review_refused`). This is the gap ASSET_OWNERSHIP names ("a member could
+  otherwise assert their own reviews").
+
+  *As built (owner decision 2026-10-15, temporary):* the platform config field
+  `allow_self_review` defaults to **true** (`control_plane/app.py`), so an
+  administrator may approve their own submission while publishing is being verified.
+  Setting it to false restores the `self_review_refused` check
+  (`control_plane/submissions.py`). To be revisited.
 - **Risk.** A Workflow's risk is the highest `required_permissions` risk of its steps;
   it is shown to the reviewer. High or critical risk keeps `approval_required`.
 - **Portal UI.** The admin sees a "Review queue" section (list, view manifest, approve
@@ -183,6 +193,9 @@ above both published and pending versions.
 
 1. **Reviewer.** Self-review stays refused; the test uses a second administrator
    account (`leo-review`). No `allow_self_review` switch.
+
+   *Superseded later on 2026-10-15:* the owner allowed self-review for now; the
+   `allow_self_review` switch exists and defaults to true (see "Review" above).
 2. **Login storage.** The existing environment-variable credential.
 3. **Namespace.** The asset keeps its current namespace.
 

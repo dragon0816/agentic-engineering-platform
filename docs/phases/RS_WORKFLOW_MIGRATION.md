@@ -66,6 +66,13 @@ Add `WorkflowManifest.progress_steps`. Static per-install values move to a
 generic `host.json` `workflow_settings` map validated against `scope: static`
 fields, edited in Agent Web. Secrets remain SecretRef names only.
 
+*As built:* there is no host.json `workflow_settings` map. Per-install values are
+stored in `workspace\workflow-settings.json` (`host_runtime/workflow_settings.py`,
+keyed by `namespace/name` so an upgrade keeps them, read on every run without a
+restart) and set in Agent Web under Capabilities → select the Workflow → "Settings on
+this computer". Credentials never live there; a Workflow declares a `SecretRef` that
+host.json maps to an environment variable.
+
 Generators in a new pure module `src/common/workflow_forms.py`:
 `form_spec(manifest, channel)` (one shared web renderer for launch and
 schedule forms), `telegram_flow(spec)` (question sequence, inline keyboards,
@@ -82,7 +89,7 @@ secret fields).
 | S2 | `form_spec` + shared web renderer (launch and schedule) | generated spec snapshots for W11/W13; DOM safety tests |
 | S3 | `agent_tool_schema` | static/secret fields never exposed |
 | S4 | Telegram question flow, then inline keyboard/callbacks | fake transport drives each question; required field refuses `/skip` |
-| S5 | `workflow_settings` store and editor | credential-shaped values refused; W13 `checkout_path` migrated off `HostIntegrations` |
+| S5 | `workflow_settings` store and editor (as built: `workspace\workflow-settings.json`, Capabilities → "Settings on this computer") | credential-shaped values refused; W13 `checkout_path` migrated off `HostIntegrations` |
 | S6 | Dynamic choices `ref:` then `fn:` (read-only, policy-checked) | |
 | S7+ | One workflow per slice: 90, 12, 14, 07, finish 10/11/13, 03, 06/06b | source pytest suite as oracle; dry-run plan and normalized output parity recorded in CONTRACTS format |
 
