@@ -10,7 +10,9 @@ Steps, each of which stops the release when it fails:
 2. Verification: ruff, mypy and the test suite (`--quick` skips the tests,
    `--skip-checks` skips all three; use either only for a re-build).
 3. The platform wheel is built from that export; the dependency wheels are
-   downloaded for 64-bit Windows Python 3.12 (the same list the CI build uses).
+   downloaded for 64-bit Windows Python 3.12 (the same list the CI build uses),
+   and the LLM gateway's wheels from its lock
+   (`deploy/windows-preview/gateway/requirements.txt`, docs/phases/LLM_GATEWAY.md).
 4. `scripts/build_windows_preview.py` makes the hash-verified offline bundle.
 5. A release folder `dist/releases/<date>-<revision>/` gets the zip, its SHA-256,
    release notes (commits since the previous release) and the installation manual.
@@ -37,6 +39,9 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
 from scripts.build_windows_preview import BUNDLE_NAME, build  # noqa: E402
+
+#: The gateway's lock, relative to the exported source.
+GATEWAY_LOCK = Path("deploy") / "windows-preview" / "gateway" / "requirements.txt"
 
 #: The dependency wheels the bundle carries; `.github/workflows/verify.yml` downloads
 #: the same list, and a test holds the two together.
@@ -102,6 +107,9 @@ def release_notes(
         "- First installation: unzip to a short path such as `C:\\aep`, run `install.cmd`.",
         "- Update: close Agent Web, unzip the new release, run `update.cmd` (settings kept).",
         f"- Details: `{MANUAL}` in this folder and inside the zip.",
+        "- LLM gateway: installed and started at sign-in unless `-NoGateway`; read "
+        '"設定 LLM gateway（最重要）" in the manual first (token renewal needs the '
+        "company domain sign-in).",
         "- Bundled Skills: AEP's in-use Skills are installed switched on, the Hermes skill "
         "pack switched off (switch one on in Agent Web > Capabilities); an update keeps "
         "what you switched on, off or removed.",
@@ -130,8 +138,9 @@ def verify(quick: bool) -> None:
         run([python, "-m", "pytest", "-q", "-p", "no:cacheprovider", "-x"])
 
 
-def wheels(work: Path, revision: str) -> tuple[Path, Path, Path]:
-    """The committed revision's source, its platform wheel and the dependencies."""
+def wheels(work: Path, revision: str) -> tuple[Path, Path, Path, Path]:
+    """The committed revision's source, its platform wheel, the dependencies
+    and the LLM gateway's locked wheels."""
     python = sys.executable
     source = work / "source"
     archive = work / "source.zip"
@@ -177,7 +186,29 @@ def wheels(work: Path, revision: str) -> tuple[Path, Path, Path]:
             *DEPENDENCIES,
         ]
     )
-    return source, built[0], work / "dependencies"
+    print("Downloading the LLM gateway's locked wheels ...", flush=True)
+    run(
+        [
+            python,
+            "-m",
+            "pip",
+            "download",
+            "--disable-pip-version-check",
+            "--no-deps",
+            "--only-binary=:all:",
+            "--platform",
+            "win_amd64",
+            "--python-version",
+            "3.12",
+            "--implementation",
+            "cp",
+            "--dest",
+            str(work / "gateway"),
+            "-r",
+            str(source / GATEWAY_LOCK),
+        ]
+    )
+    return source, built[0], work / "dependencies", work / "gateway"
 
 
 def main() -> int:
@@ -217,13 +248,14 @@ def main() -> int:
         folder = releases / release
         folder.mkdir(parents=True, exist_ok=False)
         with tempfile.TemporaryDirectory() as temporary:
-            source, platform_wheel, dependencies = wheels(Path(temporary), revision)
+            source, platform_wheel, dependencies, gateway = wheels(Path(temporary), revision)
             print("Building the offline bundle ...", flush=True)
             # The installer scripts and manuals come from the same export as the wheel.
             archive = build(
                 repo=source,
                 platform_wheel=platform_wheel,
                 dependency_dir=dependencies,
+                gateway_dependency_dir=gateway,
                 output_dir=folder,
                 revision=revision,
             )

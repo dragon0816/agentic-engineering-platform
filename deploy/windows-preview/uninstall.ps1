@@ -16,6 +16,7 @@ $HostExecutable = Join-Path $Target ".venv\Scripts\aep-host.exe"
 $ConfigPath = Join-Path $Target "host.json"
 if (-not $Apply) {
     Write-Host "Dry run: would remove AEP's skills and MCP servers from Claude Code, Codex and Copilot"
+    Write-Host "Dry run: would switch off the LLM gateway's logon start and stop the gateway AEP started"
     Write-Host "Dry run: would remove the versioned preview directory $Target"
     Write-Host "Run uninstall.cmd -Apply to perform this removal."
     exit 0
@@ -25,6 +26,13 @@ if (-not $Apply) {
 if (Test-Path -LiteralPath $HostExecutable) {
     & $HostExecutable assets --config $ConfigPath connect --for all --user --remove
     if ($LASTEXITCODE -ne 0) { Write-Warning "Could not remove AEP from every coding agent; see above." }
+    # The LLM gateway (docs/phases/LLM_GATEWAY.md): its logon start goes, and
+    # the gateway AEP started stops (one run outside AEP is left alone). Its
+    # settings and token file in the user's profile stay for a reinstall.
+    & $HostExecutable gateway autostart --off | Out-Null
+    & $HostExecutable gateway stop | Out-Null
+    Write-Host ("Kept the LLM gateway's settings and token file in " +
+        "$env:LOCALAPPDATA\AgenticEngineeringPlatform\gateway (delete that folder to remove them).")
 }
 Remove-Item -LiteralPath $Target -Recurse -Force
 Write-Host "Removed $Target"

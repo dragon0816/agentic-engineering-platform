@@ -38,6 +38,11 @@ SECRET_ASSIGNMENT = re.compile(
 #: folders under `hermes/agent/`. `install.ps1` installs it switched off.
 HERMES_PACK = Path("packages") / "hermes-skill-pack"
 BUNDLE_HERMES = "hermes"
+#: The LLM gateway (docs/phases/LLM_GATEWAY.md): its exact dependency lock,
+#: copied with the template as `gateway/requirements.txt`, and every wheel it
+#: names in `wheels-gateway/`, installed by `install.ps1` into its own venv.
+GATEWAY_LOCK = Path("gateway") / "requirements.txt"
+BUNDLE_GATEWAY_WHEELS = "wheels-gateway"
 #: Documented placeholders in the Hermes pack that look like an assignment
 #: to the credential scan, accepted one by one (file, exact text). Anything
 #: else that looks like a credential still stops the build.
@@ -124,6 +129,43 @@ def copy_hermes_pack(pack: Path, target: Path) -> None:
     )
 
 
+def locked_requirements(lock: Path) -> list[tuple[str, str]]:
+    """(name, version) for every `name==version` line of the gateway lock."""
+    pinned = []
+    for raw in lock.read_text(encoding="utf-8").splitlines():
+        line = raw.split("#", 1)[0].strip()
+        if not line:
+            continue
+        name, separator, version = line.partition("==")
+        if not separator or not name.strip() or not version.strip() or "[" in name:
+            raise ValueError(f"the gateway lock pins every package exactly: {line}")
+        pinned.append((name.strip(), version.strip()))
+    return pinned
+
+
+def wheel_prefix(name: str, version: str) -> str:
+    """How a wheel file for `name==version` starts (PEP 427 / 503 spelling)."""
+    return re.sub(r"[-_.]+", "_", name).lower() + "-" + version.lower() + "-"
+
+
+def gateway_wheels(lock: Path, wheel_dir: Path) -> list[Path]:
+    """Exactly one wheel per locked package; a missing one stops the build
+    (the bundle installs offline, so it would stop the install instead)."""
+    available = sorted(wheel_dir.glob("*.whl"))
+    chosen: list[Path] = []
+    missing: list[str] = []
+    for name, version in locked_requirements(lock):
+        prefix = wheel_prefix(name, version)
+        found = [item for item in available if item.name.lower().startswith(prefix)]
+        if not found:
+            missing.append(f"{name}=={version}")
+        else:
+            chosen.append(found[0])
+    if missing:
+        raise ValueError("gateway wheel directory is incomplete: " + ", ".join(missing))
+    return chosen
+
+
 def digest(path: Path) -> str:
     hasher = hashlib.sha256()
     with path.open("rb") as stream:
@@ -143,6 +185,7 @@ def build(
     repo: Path,
     platform_wheel: Path,
     dependency_dir: Path,
+    gateway_dependency_dir: Path,
     output_dir: Path,
     revision: str,
 ) -> Path:
@@ -159,6 +202,7 @@ def build(
     missing_guides = [name for name in REQUIRED_OPERATOR_GUIDES if not (template / name).is_file()]
     if missing_guides:
         raise ValueError("Windows preview operator guide is missing: " + ", ".join(missing_guides))
+    locked_gateway = gateway_wheels(template / GATEWAY_LOCK, gateway_dependency_dir)
     with tempfile.TemporaryDirectory() as temporary:
         root = Path(temporary) / BUNDLE_NAME
         shutil.copytree(template, root)
@@ -168,6 +212,10 @@ def build(
         shutil.copy2(platform_wheel, wheels / platform_wheel.name)
         for item in dependencies:
             shutil.copy2(item, wheels / item.name)
+        gateway = root / BUNDLE_GATEWAY_WHEELS
+        gateway.mkdir()
+        for item in locked_gateway:
+            shutil.copy2(item, gateway / item.name)
         payload = sorted(path for path in root.rglob("*") if path.is_file())
         for path in payload:
             if path.suffix.lower() in TEXT_SUFFIXES:
@@ -227,6 +275,12 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--wheel", required=True, type=Path)
     parser.add_argument("--dependency-dir", required=True, type=Path)
+    parser.add_argument(
+        "--gateway-wheel-dir",
+        required=True,
+        type=Path,
+        help="the wheels of deploy/windows-preview/gateway/requirements.txt",
+    )
     parser.add_argument("--output-dir", default=Path("dist"), type=Path)
     parser.add_argument("--source-revision")
     args = parser.parse_args()
@@ -235,6 +289,7 @@ def main() -> int:
         repo=repo,
         platform_wheel=args.wheel.resolve(),
         dependency_dir=args.dependency_dir.resolve(),
+        gateway_dependency_dir=args.gateway_wheel_dir.resolve(),
         output_dir=args.output_dir.resolve(),
         revision=args.source_revision or source_revision(repo),
     )

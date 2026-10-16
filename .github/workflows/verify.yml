@@ -31,12 +31,15 @@ jobs:
         shell: pwsh
         run: |
           python -m pip download --only-binary=:all: --dest dist/windows-preview-wheels "pydantic>=2.10,<3" "tzdata>=2025.2,<2028" "openpyxl>=3.1,<4" "pypdf>=6,<7" "pywin32>=306" "matplotlib>=3.11,<4" "numpy>=1.26,<2" "contourpy>=1.3,<1.4"
-          python scripts/build_windows_preview.py --wheel dist/agentic_engineering_platform-0.1.0-py3-none-any.whl --dependency-dir dist/windows-preview-wheels
+          # The LLM gateway's exact lock (docs/phases/LLM_GATEWAY.md), without litellm[proxy].
+          python -m pip download --no-deps --only-binary=:all: --platform win_amd64 --python-version 3.12 --implementation cp --dest dist/gateway-wheels -r deploy/windows-preview/gateway/requirements.txt
+          python scripts/build_windows_preview.py --wheel dist/agentic_engineering_platform-0.1.0-py3-none-any.whl --dependency-dir dist/windows-preview-wheels --gateway-wheel-dir dist/gateway-wheels
           $archive = Get-ChildItem dist/aep-windows-preview-*.zip | Select-Object -First 1
           Expand-Archive -LiteralPath $archive.FullName -DestinationPath dist/preview-expanded
           $bundle = Get-ChildItem dist/preview-expanded -Directory | Select-Object -First 1
           $installRoot = "$env:LOCALAPPDATA\AgenticEngineeringPlatform\ci-preview"
-          & "$($bundle.FullName)\install.ps1" -Actor ci-user -PythonExe (Get-Command python).Source -InstallRoot $installRoot
+          # No company sign-in here: the gateway is installed and configured, not started.
+          & "$($bundle.FullName)\install.ps1" -Actor ci-user -PythonExe (Get-Command python).Source -InstallRoot $installRoot -GatewayInstallOnly
           $installedConfig = Get-Content "$installRoot\host.json" -Raw | ConvertFrom-Json
           $device = $installedConfig.device
           if ($installedConfig.device.bridge_id -notlike 'bridge-*') { throw 'Computer-name Bridge ID was not generated.' }
@@ -59,6 +62,17 @@ jobs:
           # importable from it alone -- no index was available to fill a gap.
           & "$installRoot\.venv\Scripts\python.exe" -c "import openpyxl, win32com.client, matplotlib"
           if ($LASTEXITCODE -ne 0) { throw 'The bundle did not install the excel, windows and weekly-mail extras.' }
+          # The LLM gateway: offline in its own venv, configured, the model set to it,
+          # and a launcher that refuses to start without the company token.
+          if ($installedConfig.models.routing_alias -ne 'company') { throw 'The installer did not set the model to the gateway.' }
+          if ($installedConfig.models.catalog.endpoints[0].base_url -ne 'http://127.0.0.1:4000/v1') { throw 'The model does not go through the gateway.' }
+          $gateway = (& "$installRoot\.venv\Scripts\aep-host.exe" gateway status --json) -join "`n" | ConvertFrom-Json
+          if ($gateway.ours -or $gateway.state -eq 'starting' -or -not $gateway.config_ok -or -not $gateway.managed) { throw "The gateway is not installed as expected: $($gateway | ConvertTo-Json -Compress)" }
+          if ($gateway.litellm_version -ne $gateway.litellm_pinned) { throw "The gateway venv has LiteLLM $($gateway.litellm_version), not $($gateway.litellm_pinned)." }
+          & "$installRoot\gateway-venv\Scripts\python.exe" -c "import os; os.environ['LITELLM_LOCAL_MODEL_COST_MAP'] = 'True'; import litellm.proxy.proxy_cli, llm_gateway.patch; llm_gateway.patch.apply()"
+          if ($LASTEXITCODE -ne 0) { throw 'The bundled LiteLLM does not take the streaming patch.' }
+          & "$installRoot\gateway-venv\Scripts\python.exe" -m llm_gateway.launcher
+          if ($LASTEXITCODE -ne 2) { throw 'The gateway launcher did not refuse to start without a token.' }
           & "$installRoot\.venv\Scripts\aep-host.exe" export-assets --out "$installRoot\workspace\assets"
           if (-not (Test-Path "$installRoot\workspace\assets\workflows\engineering__sde-weekly-report__1.0.0.json")) {
             throw 'The shipped weekly-report manifests were not written.'
@@ -91,8 +105,10 @@ jobs:
           $configured | Add-Member -NotePropertyName integrations -NotePropertyValue ([ordered]@{
               weekly_report = [ordered]@{ workbook_path = "C:/nowhere/Report.xlsx" }
           })
-          $configured | Add-Member -NotePropertyName credentials -NotePropertyValue @(
+          # The installer already mapped the gateway's key; the operator's mapping goes first.
+          $configured | Add-Member -Force -NotePropertyName credentials -NotePropertyValue @(
               [ordered]@{ secret = "jira_token"; environment_variable = "AEP_JIRA_TOKEN" }
+              $configured.credentials
           )
           $configured | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath "$installRoot\host.json" -Encoding UTF8
           $foreignMembership = Get-Content "$installRoot\workspace\membership.json" -Raw | ConvertFrom-Json
@@ -101,7 +117,12 @@ jobs:
           $foreignMembership | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath "$installRoot\workspace\membership.json" -Encoding UTF8
           # A Skill the person switched off stays off when AEP is installed again.
           Move-Item -LiteralPath "$installRoot\workspace\assets\skills\engineering__knowledge-query__1.0.1.json" -Destination "$installRoot\workspace\assets\skills\disabled\"
-          & "$($bundle.FullName)\install.ps1" -Actor ci-user -PythonExe (Get-Command python).Source -InstallRoot $installRoot
+          # The person's gateway settings survive a reinstall.
+          $gatewaySettings = "$env:LOCALAPPDATA\AgenticEngineeringPlatform\gateway\gateway.json"
+          $edited = Get-Content $gatewaySettings -Raw | ConvertFrom-Json
+          $edited.default_model = 'gpt-5.4'
+          $edited | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $gatewaySettings -Encoding UTF8
+          & "$($bundle.FullName)\install.ps1" -Actor ci-user -PythonExe (Get-Command python).Source -InstallRoot $installRoot -GatewayInstallOnly
           if ($LASTEXITCODE -ne 0) { throw 'Installing over an existing host failed.' }
           if (Test-Path "$installRoot\workspace\assets\skills\engineering__knowledge-query__1.0.1.json") { throw 'Reinstalling switched on a Skill the person had switched off.' }
           $kept = Get-Content "$installRoot\host.json" -Raw | ConvertFrom-Json
@@ -110,6 +131,9 @@ jobs:
           }
           if ($kept.credentials[0].environment_variable -ne "AEP_JIRA_TOKEN") {
             throw 'Reinstalling discarded the credential mapping an operator had configured.'
+          }
+          if ((Get-Content $gatewaySettings -Raw | ConvertFrom-Json).default_model -ne 'gpt-5.4') {
+            throw 'Reinstalling discarded the gateway settings.'
           }
           if ($kept.device.bridge_id -ne $device.bridge_id) {
             throw 'Reinstalling changed the device identity it should have rewritten unchanged.'

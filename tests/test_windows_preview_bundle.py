@@ -56,6 +56,19 @@ def dependency_dir(root: Path, *, omit: str = "") -> Path:
     return directory
 
 
+def gateway_dir(root: Path, *, omit: str = "") -> Path:
+    """One fake wheel per package the gateway lock pins, named as pip names it."""
+    directory = root / "gateway-wheels"
+    directory.mkdir(parents=True, exist_ok=True)
+    lock = Path(__file__).resolve().parents[1] / "deploy" / "windows-preview" / "gateway"
+    for name, version in build_windows_preview.locked_requirements(lock / "requirements.txt"):
+        if omit and name == omit:
+            continue
+        wheel = build_windows_preview.wheel_prefix(name, version) + "py3-none-any.whl"
+        (directory / wheel).write_bytes(wheel.encode())
+    return directory
+
+
 def test_builder_emits_reproducible_closed_manifest(tmp_path: Path) -> None:
     repo = Path(__file__).resolve().parents[1]
     platform_wheel = tmp_path / "agentic_engineering_platform-0.1.0-py3-none-any.whl"
@@ -67,6 +80,7 @@ def test_builder_emits_reproducible_closed_manifest(tmp_path: Path) -> None:
         repo=repo,
         platform_wheel=platform_wheel,
         dependency_dir=dependencies,
+        gateway_dependency_dir=gateway_dir(tmp_path),
         output_dir=output,
         revision=revision,
     )
@@ -75,6 +89,7 @@ def test_builder_emits_reproducible_closed_manifest(tmp_path: Path) -> None:
         repo=repo,
         platform_wheel=platform_wheel,
         dependency_dir=dependencies,
+        gateway_dependency_dir=gateway_dir(tmp_path),
         output_dir=output,
         revision=revision,
     )
@@ -112,8 +127,11 @@ def test_builder_emits_reproducible_closed_manifest(tmp_path: Path) -> None:
         # The Hermes skill pack's documentation and scripts may carry such
         # words in their names (`configuration.md`, `git-credential-token.py`);
         # they are the reviewed pack files, compared byte for byte below.
+        # So may third-party wheel names (tiktoken, tokenizers) the gateway carries.
         pack_prefix = prefix + "hermes/agent/"
-        outside_pack = [name for name in names if not name.startswith(pack_prefix)]
+        outside_pack = [
+            name for name in names if not name.startswith((pack_prefix, prefix + "wheels-gateway/"))
+        ]
         assert all("config" not in name.lower() for name in outside_pack)
         assert all("token" not in name.lower() for name in outside_pack)
         pack_root = repo / "packages" / "hermes-skill-pack"
@@ -153,6 +171,16 @@ def test_builder_emits_reproducible_closed_manifest(tmp_path: Path) -> None:
         # at a company index, or at nothing.
         for wheel in BUNDLED_WHEELS:
             assert prefix + "wheels/" + wheel in names
+        # The LLM gateway (docs/phases/LLM_GATEWAY.md): its lock and every
+        # wheel it pins, installed offline into its own venv.
+        assert prefix + "gateway/requirements.txt" in names
+        gateway_wheels = [n for n in names if n.startswith(prefix + "wheels-gateway/")]
+        assert len(gateway_wheels) == len(
+            build_windows_preview.locked_requirements(
+                repo / "deploy" / "windows-preview" / "gateway" / "requirements.txt"
+            )
+        )
+        assert not [n for n in gateway_wheels if "enterprise" in n]
         installer = bundle.read(prefix + "install.ps1").decode("utf-8")
         install_line = next(line for line in installer.splitlines() if "-m pip install" in line)
         assert "--no-index" in install_line
@@ -205,6 +233,7 @@ def test_a_bundle_missing_a_wheel_its_extras_need_is_refused(tmp_path: Path) -> 
                 repo=repo,
                 platform_wheel=platform_wheel,
                 dependency_dir=dependency_dir(tmp_path / omitted, omit=omitted),
+                gateway_dependency_dir=gateway_dir(tmp_path),
                 output_dir=tmp_path / "output",
                 revision="b" * 40,
             )
@@ -224,6 +253,7 @@ def test_a_bundle_missing_the_start_guide_is_refused(
             repo=tmp_path / "repo",
             platform_wheel=platform_wheel,
             dependency_dir=dependency_dir(tmp_path),
+            gateway_dependency_dir=gateway_dir(tmp_path),
             output_dir=tmp_path / "output",
             revision="b" * 40,
         )
@@ -241,6 +271,7 @@ def test_every_bundled_name_survives_the_way_people_get_the_bundle(tmp_path: Pat
         repo=repo,
         platform_wheel=platform_wheel,
         dependency_dir=dependency_dir(tmp_path),
+        gateway_dependency_dir=gateway_dir(tmp_path),
         output_dir=tmp_path / "output",
         revision="c" * 40,
     )
@@ -268,6 +299,7 @@ def test_a_name_too_long_to_extract_is_refused_where_it_is_built(
             repo=repo,
             platform_wheel=platform_wheel,
             dependency_dir=dependency_dir(tmp_path),
+            gateway_dependency_dir=gateway_dir(tmp_path),
             output_dir=tmp_path / "output",
             revision="c" * 40,
         )
@@ -323,9 +355,57 @@ def test_only_the_reviewed_pack_placeholders_pass_the_credential_scan(
             repo=tmp_path / "repo",
             platform_wheel=platform_wheel,
             dependency_dir=dependency_dir(tmp_path),
+            gateway_dependency_dir=gateway_dir(tmp_path),
             output_dir=tmp_path / "output",
             revision="d" * 40,
         )
     assert ("hermes/agent/hermes-airtable/SKILL.md", "API_KEY=pat_your_token_here") in (
         build_windows_preview.ALLOWED_PLACEHOLDERS
     )
+
+
+def test_a_bundle_missing_a_gateway_wheel_is_refused(tmp_path: Path) -> None:
+    repo = Path(__file__).resolve().parents[1]
+    platform_wheel = tmp_path / "agentic_engineering_platform-0.1.0-py3-none-any.whl"
+    platform_wheel.write_bytes(b"platform-wheel")
+    with pytest.raises(ValueError, match="gateway wheel directory is incomplete: boto3=="):
+        build(
+            repo=repo,
+            platform_wheel=platform_wheel,
+            dependency_dir=dependency_dir(tmp_path),
+            gateway_dependency_dir=gateway_dir(tmp_path / "partial", omit="boto3"),
+            output_dir=tmp_path / "output",
+            revision="e" * 40,
+        )
+
+
+def test_the_installer_sets_up_the_gateway_unless_told_not_to() -> None:
+    """Gateway venv from the bundle's own wheels, init with the local key in
+    the user environment, the model only when host.json has none, a token
+    refresh that may fail, autostart, start; -NoGateway skips all of it and
+    -GatewayInstallOnly (CI, offline smoke) stops after init."""
+    template = Path(__file__).resolve().parents[1] / "deploy" / "windows-preview"
+    installer = (template / "install.ps1").read_text(encoding="utf-8")
+    for expected in (
+        "[switch]$NoGateway",
+        "[switch]$GatewayInstallOnly",
+        "gateway-venv",
+        "wheels-gateway",
+        r"gateway\requirements.txt",
+        "--no-index --no-deps",
+        "gateway init --python",
+        "--user-env",
+        "gateway-default.json",
+        "gateway refresh-token",
+        "gateway autostart --on",
+        "gateway start",
+        "gateway stop",
+    ):
+        assert expected in installer, expected
+    assert installer.index("gateway init") < installer.index("gateway refresh-token")
+    assert installer.index("gateway autostart --on") < installer.index("gateway start")
+    update = (template / "update.ps1").read_text(encoding="utf-8")
+    assert "[switch]$NoGateway" in update and "-NoGateway:$NoGateway" in update
+    assert "gateway stop" in update
+    uninstall = (template / "uninstall.ps1").read_text(encoding="utf-8")
+    assert "gateway autostart --off" in uninstall and "gateway stop" in uninstall

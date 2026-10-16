@@ -6,7 +6,13 @@ param(
     [string]$InstallRoot = "$env:LOCALAPPDATA\AgenticEngineeringPlatform\preview-0.1.0",
     [switch]$NoShortcut,
     # Leave Claude Code, Codex and Copilot as they are (no AEP skills or MCP servers).
-    [switch]$NoAgentSkills
+    [switch]$NoAgentSkills,
+    # Do not install the built-in LLM gateway (docs/phases/LLM_GATEWAY.md);
+    # without a gateway, or another model endpoint, the Agent reaches no model.
+    [switch]$NoGateway,
+    # Install and configure the gateway but do not renew the token, register
+    # the logon start or start it (CI and offline checks, no company sign-in).
+    [switch]$GatewayInstallOnly
 )
 $ErrorActionPreference = "Stop"
 $BundleRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -128,6 +134,7 @@ if (-not [string]::IsNullOrWhiteSpace($Namespace)) {
 # it on an update loses all of that silently, and the run afterwards fails
 # for a reason that looks nothing like the cause.
 $ConfigPath = Join-Path $InstallRoot "host.json"
+$GatewayDefault = Join-Path $BundleRoot "gateway-default.json"
 if (Test-Path -LiteralPath $ConfigPath -PathType Leaf) {
     try {
         $Existing = Get-Content -LiteralPath $ConfigPath -Raw | ConvertFrom-Json
@@ -148,6 +155,25 @@ if (Test-Path -LiteralPath $ConfigPath -PathType Leaf) {
         Write-Host ("Kept from the existing host.json: " + ($Kept -join ", "))
     }
 }
+# The Natural-language model goes through the built-in gateway, but only when
+# this host has no model yet: a model someone configured is theirs, and an
+# update never replaces it. The credential mapping is added beside it when
+# its name is not mapped already.
+if (-not $NoGateway -and -not $Config.Contains("models")) {
+    $Fragment = Get-Content -LiteralPath $GatewayDefault -Raw | ConvertFrom-Json
+    $Config.models = $Fragment.models
+    $Credentials = @()
+    if ($Config.Contains("credentials") -and $null -ne $Config.credentials) {
+        $Credentials = @($Config.credentials)
+    }
+    foreach ($Mapping in $Fragment.credentials) {
+        if (-not ($Credentials | Where-Object { $_.secret -eq $Mapping.secret })) {
+            $Credentials += $Mapping
+        }
+    }
+    $Config.credentials = $Credentials
+    Write-Host "Set the Natural-language model to the built-in LLM gateway at 127.0.0.1:4000."
+}
 $Config | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $ConfigPath -Encoding UTF8
 $Membership = [ordered]@{
     device = $Config.device
@@ -159,6 +185,65 @@ $Membership = [ordered]@{
 }
 $MembershipPath = Join-Path $Workspace "membership.json"
 $Membership | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $MembershipPath -Encoding UTF8
+if ($NoGateway) {
+    Write-Host ("Skipped the LLM gateway (-NoGateway). The Agent reaches a model only " +
+        "through another endpoint set in Agent Web Settings > Natural-language model.")
+}
+else {
+    # The built-in LLM gateway (docs/phases/LLM_GATEWAY.md): LiteLLM in its own
+    # venv (its pins differ from AEP's), from the bundle's own wheels only.
+    $GatewayVenv = Join-Path $InstallRoot "gateway-venv"
+    # LiteLLM's deepest file is 129 characters below site-packages; Windows
+    # refuses 260 or more unless long paths are enabled, and pip would stop
+    # half-way with "The filename or extension is too long".
+    $Deepest = (Join-Path $GatewayVenv "Lib\site-packages").Length + 1 + 129
+    if ($Deepest -ge 260) {
+        throw ("The LLM gateway would need $Deepest-character paths under $GatewayVenv and " +
+            "Windows allows 259. Install with a shorter -InstallRoot (for example " +
+            "C:\aep\preview), or use -NoGateway.")
+    }
+    $GatewayPython = Join-Path $GatewayVenv "Scripts\python.exe"
+    if (Test-Path -LiteralPath $GatewayPython) {
+        # A running gateway holds the files this replaces. Only the one AEP
+        # started is stopped; one run outside AEP is left alone.
+        & $HostExecutable gateway stop | Out-Null
+    }
+    else {
+        & $PythonExe -m venv $GatewayVenv
+        if ($LASTEXITCODE -ne 0) { throw "Could not create the LLM gateway's virtual environment." }
+    }
+    Write-Host "Installing the LLM gateway (LiteLLM, offline; this takes a few minutes)..."
+    & $GatewayPython -m pip install --disable-pip-version-check --no-index --no-deps --find-links (Join-Path $BundleRoot "wheels-gateway") -r (Join-Path $BundleRoot "gateway\requirements.txt")
+    if ($LASTEXITCODE -ne 0) { throw "The LLM gateway could not be installed from the bundle." }
+    # The launcher is AEP's own llm_gateway package (standard library only).
+    & $GatewayPython -m pip install --disable-pip-version-check --no-index --no-deps --force-reinstall $PlatformWheel.FullName
+    if ($LASTEXITCODE -ne 0) { throw "The LLM gateway launcher could not be installed." }
+    Get-ChildItem -LiteralPath (Join-Path $GatewayVenv "Scripts") -Filter "aep-*" -ErrorAction SilentlyContinue | Remove-Item -Force
+    # Settings and configuration in the user's profile, kept on an update; the
+    # local key is generated once and put in the user's environment, where
+    # host.json's credential mapping (LITELLM_MASTER_KEY) finds it.
+    & $HostExecutable gateway init --python $GatewayPython --user-env
+    if ($LASTEXITCODE -ne 0) { throw "The LLM gateway could not be configured." }
+    if ([string]::IsNullOrWhiteSpace($env:LITELLM_MASTER_KEY)) {
+        $env:LITELLM_MASTER_KEY = [Environment]::GetEnvironmentVariable("LITELLM_MASTER_KEY", "User")
+    }
+    if ($GatewayInstallOnly) {
+        Write-Host "Installed the LLM gateway without starting it (-GatewayInstallOnly)."
+    }
+    else {
+        # The company token, with this Windows sign-in (Kerberos); off the
+        # domain this fails and says so, and the gateway waits for a token.
+        & $HostExecutable gateway refresh-token
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warning ("The LLM gateway's token could not be renewed now (company domain " +
+                "sign-in needed). Agent Web Settings > LLM gateway > Refresh token, later.")
+        }
+        & $HostExecutable gateway autostart --on
+        if ($LASTEXITCODE -ne 0) { Write-Warning "The LLM gateway will not start at sign-in; see above." }
+        & $HostExecutable gateway start
+        if ($LASTEXITCODE -ne 0) { Write-Warning "The LLM gateway did not start; see Agent Web Settings > LLM gateway." }
+    }
+}
 & $HostExecutable doctor --config (Join-Path $InstallRoot "host.json")
 if ($LASTEXITCODE -ne 0) { throw "Host doctor failed." }
 if (-not $NoShortcut) {

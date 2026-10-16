@@ -5,7 +5,9 @@ param(
     [switch]$NoShortcut,
     # Leave Claude Code, Codex and Copilot as they are; by default their AEP
     # skills and MCP servers are brought up to this version.
-    [switch]$NoAgentSkills
+    [switch]$NoAgentSkills,
+    # Leave the built-in LLM gateway out (docs/phases/LLM_GATEWAY.md).
+    [switch]$NoGateway
 )
 # Update an existing installation from this bundle. The person, the Bridge ID,
 # host.json and the workspace are kept: install.ps1 rewrites only the device
@@ -25,6 +27,13 @@ if ([string]::IsNullOrWhiteSpace($Actor) -or [string]::IsNullOrWhiteSpace($Bridg
     throw "host.json does not name its user and Bridge ID; run install.cmd -Actor <your id>."
 }
 
+# The LLM gateway AEP started runs from gateway-venv and holds its files;
+# stop it (a gateway run outside AEP is left alone). The gateway's settings,
+# configuration and token file live in the user's profile and are kept.
+$OldHost = Join-Path $InstallRoot ".venv\Scripts\aep-host.exe"
+if ((Test-Path -LiteralPath $OldHost) -and (Test-Path -LiteralPath (Join-Path $InstallRoot "gateway-venv"))) {
+    & $OldHost gateway stop | Out-Null
+}
 # A running Agent Web holds the files the update replaces; stop it first.
 $Venv = [IO.Path]::GetFullPath((Join-Path $InstallRoot ".venv"))
 $Running = @(Get-CimInstance Win32_Process | Where-Object {
@@ -44,5 +53,5 @@ if (Test-Path -LiteralPath $Previous) {
 }
 & (Join-Path $PSScriptRoot "install.ps1") -Actor $Actor -BridgeId $BridgeId `
     -PythonExe $PythonExe -InstallRoot $InstallRoot -NoShortcut:$NoShortcut `
-    -NoAgentSkills:$NoAgentSkills
+    -NoAgentSkills:$NoAgentSkills -NoGateway:$NoGateway
 Write-Host "Updated. Open Agent Web again with the 'AEP Agent' shortcut or start-web.cmd."
