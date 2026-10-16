@@ -2,7 +2,7 @@
 
 Owner request: 2026-10-16. Status: **design approved 2026-10-16 (decisions at the end); S1
 implemented 2026-10-16 (section "S1 as built"), owner confirmed its dry-run grouping on his
-data the same day; S2 implemented 2026-10-16 (section "S2 as built"); S3-S6 queued.** A
+data the same day; S2 implemented 2026-10-16 (section "S2 as built"); S3-S6 on hold: the owner wants to watch card quality before S3 (2026-10-16).** A
 suggestion is a Reviews card with evidence; no draft or candidate exists yet (S3).
 
 ## 1. Why
@@ -458,3 +458,9 @@ Windows login has their own workspace and settings); the similarity column of se
 is not used (the model groups, owner decision 1); High's day count is 1 because the table
 gives none; the nightly pass still mines only the device owner (`runtime.actor`); the
 end-of-conversation card and telemetry events remain S5.
+
+## Owner decision after S2 (2026-10-16)
+
+S2 is live on the owner's PC (pushed at 897c28cb, CI green, Agent Web restarted). The
+owner chose to **watch the quality of the Suggested Skill cards before starting S3**
+(drafts). Do not start S3 until the owner reviews real cards and asks for it.

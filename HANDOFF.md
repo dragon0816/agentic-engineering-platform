@@ -4,6 +4,11 @@ Updated: 2026-10-16 (Asia/Taipei), by Claude Code (Suggested Skills S2)
 
 ## Suggested Skills from experience, slice S2 (2026-10-16, Claude Code) — latest
 
+**Status after hand-back:** S2 pushed (897c28cb, CI green); full pytest in the project
+`.venv` re-run after the fix: 3092 passed, 7 skipped. Agent Web restarted on it. **Next:
+wait.** The owner wants to watch real Suggested Skill cards before S3; do not start S3
+until asked.
+
 Goal: S2 of `docs/phases/SKILL_SUGGESTIONS.md`: a group the nightly pass qualifies becomes a
 "Suggested Skill" card in Agent Web → Reviews for the person whose requests formed it, with
 evidence, Ignore / Snooze, and settings (on/off, Sensitivity Low / Normal / High, request
