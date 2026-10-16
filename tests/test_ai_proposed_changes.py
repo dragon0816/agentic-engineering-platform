@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 from collections.abc import Iterator, Mapping
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -320,8 +321,12 @@ def test_a_task_or_schedule_without_a_person_is_refused(web: Any) -> None:
     ],
 )
 def test_validation_errors_come_back_as_a_refusal_not_a_card(
-    web: Any, kind: str, values: dict[str, Any], says: str
+    web: Any, kind: str, values: dict[str, Any], says: str, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    # The bot token is read from the environment; a developer PC that has one
+    # saved must not change the refusal under test (2026-10-16).
+    for name in [key for key in os.environ if "TELEGRAM" in key.upper()]:
+        monkeypatch.delenv(name, raising=False)
     agent_web, path, _ = web
     before = path.read_bytes()
     outcome = _propose(agent_web, kind, values)
