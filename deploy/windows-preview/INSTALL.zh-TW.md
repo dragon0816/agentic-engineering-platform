@@ -45,7 +45,9 @@ AEP Agent 安裝在你自己的電腦上，只有這台電腦能開啟它的網�
    - 執行健康檢查（doctor）；
    - 在桌面和開始功能表建立 **AEP Agent** 捷徑；
    - 替這台電腦上找得到的 Claude Code、Codex、GitHub Copilot 裝好 AEP 的 skills 和
-     MCP 設定（見第 11 節；不想要時加 `-NoAgentSkills`）。
+     MCP 設定（見第 11 節；不想要時加 `-NoAgentSkills`）；
+   - 裝好安裝包附帶的 Skills：AEP 正在使用的 Skills **開啟**，Hermes skill pack
+     **關閉**當備用（見第 12 節）。
 
    最後出現 `Installed the local-only preview at ...` 就是安裝完成。
 
@@ -196,7 +198,9 @@ Laya 等）都在 Settings 頁設定；細節見同一資料夾的 `README.md`�
    - 用新版檔案重新安裝程式；
    - **保留**你的 `host.json` 設定、workspace、對話紀錄和已安裝的能力；
    - 把 Claude Code / Codex / Copilot 裡 AEP 的 skills 和 MCP 設定更新到新版
-     （加 `-NoAgentSkills` 則不動）。
+     （加 `-NoAgentSkills` 則不動）；
+   - 加入新版附帶的 Skills；已經在這台電腦上的**維持你設定的狀態**：你關掉的不會被
+     重新打開，你移除的不會被裝回來，你改過的不會被覆寫（見第 12 節）。
 3. 看到 `Updated.` 後，執行 `verify.cmd`，確認版本碼和發佈說明（`RELEASE_NOTES.md`）上的
    一致。
 4. 用 **AEP Agent** 捷徑重新開啟。
@@ -254,6 +258,8 @@ Laya 等）都在 Settings 頁設定；細節見同一資料夾的 `README.md`�
 | Claude Code 的 AEP skills / MCP | `%USERPROFILE%\.claude\skills\aep-*`、`%USERPROFILE%\.claude.json` |
 | Codex 的 AEP skills / MCP | `%USERPROFILE%\.agents\skills\aep-*`、`%USERPROFILE%\.codex\config.toml` |
 | Copilot 的 AEP skills / MCP | `%USERPROFILE%\.copilot\skills\aep-*`、`%USERPROFILE%\.copilot\mcp-config.json` |
+| 關閉中的 Skills（含 Hermes skill pack） | `workspace\assets\skills\disabled\` |
+| Hermes skills 給 coding agent 用的原始資料夾 | `workspace\agent-skills\hermes-*`（開啟時才複製到 Claude Code / Copilot 的 `skills\`） |
 
 ## 11. 用 Claude Code / Codex / Copilot 產生 AEP 可用的 Skill 與 Workflow
 
@@ -312,4 +318,54 @@ Agent Web 按核准才會生效（Installed 頁面上方會列出等待核准的
 - 查知識庫和執行 Workflow 需要 **Agent Web 正在執行**；沒開時 agent 會請你先開
   AEP Agent 捷徑。
 - 新的 Skill 在 AEP Agent 重新啟動後才會被使用。
+
+## 12. 安裝包附帶的 Skills
+
+安裝和更新時，AEP 會一併裝好兩組 Skills。
+
+### 12.1 開啟的：AEP 正在使用的 Skills
+
+| Skill | 用途 |
+|---|---|
+| `company-agent/workflow-author` | 在對話中幫你寫 Workflow |
+| `company-agent/knowledge-query`（1.12.0）、`engineering/knowledge-query`（1.0.1） | 查公司知識庫（RS_Knowledge），回答附出處 |
+| `company-agent/market-alignment`、`company-agent/personal-proof` | 市場對照表、個人證明 |
+| `engineering/coding` | 程式修改與執行 Python（`coding-change`、`run-python`） |
+| `engineering/weekly-report`、`engineering/team-tickets` | 週報、Jira team tickets 預覽 |
+| `engineering/rs-ncc-improvement-plan-skill` | NCC 改善計畫 |
+| `engineering/sales-to-chipset`、`engineering/release-package-guide` | Sales-to-chipset 報表、release package |
+
+它們會用到的 Workflows 也會一起裝好。需要外部設定（Jira、Excel、Outlook…）的，要等你在
+`host.json` 設定好才會執行成功。
+
+### 12.2 關閉的：Hermes skill pack（備用）
+
+51 個從 Hermes agent 移植來的 skills（50 個 MIT 授權，加上僅供公司內部使用的
+`business-cards`；作者與來源列在安裝包的 `hermes\NOTICE.md`），預設**全部關閉**，不會干擾 Agent 的選擇。例如：
+
+- 文件：`docx`、`xlsx`、`powerpoint`、`pdf`、`document-to-action-items`、`meeting-action-items`
+- 開發：`github`、`systematic-debugging`、`test-driven-development`、`requesting-code-review`、
+  `simplify-code`、`spike`、`codebase-inspection`、`node-inspect-debugger`、`dogfood`
+- 研究：`arxiv`、`grounded-citations`、`llm-wiki`、`competitor-news-monitor`、`blocked-page-recovery`
+- 設計與創作：`ui-ux-pro-max`、`claude-design`、`design-md`、`popular-web-designs`、
+  `architecture-diagram`、`humanizer`、`p5js`、`manim-video`…
+- 其他：`business-cards`（名片辨識與公司分組圖）、`google-workspace`、`notion`、`airtable`、
+  `box`、`obsidian`、`maps`、`email-inbox-triage`、`himalaya`、`claude-code`、`codex`…
+
+完整清單在 Agent Web → **Capabilities** → **Skills**，篩選 **Switched off**，名稱以
+`hermes/` 開頭。部分 skill 需要額外的指令或環境變數（例如 `NOTION_API_KEY`），說明寫在
+skill 內容開頭的「AEP note」裡；`teams-meeting-pipeline` 和 `sdlc-review` 需要 Hermes 本身才能用。
+
+### 12.3 打開或關閉
+
+1. Agent Web → **Capabilities** → **Skills**，篩選 **Switched off**，點選要用的 skill。
+2. 按 **Switch on**。Agent 在 Agent Web **重新啟動後**才會用它。
+3. 這台電腦的 Claude Code / Copilot 已裝好 AEP 設定（第 11 節）時，同一個 skill 的原始資料夾
+   會同時複製到 `%USERPROFILE%\.claude\skills\hermes-<名稱>` 和
+   `%USERPROFILE%\.copilot\skills\hermes-<名稱>`，在 agent mode 裡也能用；重新開啟該 agent
+   後生效。你自己已有同名資料夾時，AEP 不會動它。
+4. 不用時按 **Switch off**：Agent 不再使用，coding agent 裡的複本也會被拿掉。
+
+更新時，你打開、關掉或移除的 Skills 都會維持原狀；新版本多出來的 Hermes skills 一樣以
+關閉狀態加入。
 

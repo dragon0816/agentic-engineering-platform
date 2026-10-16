@@ -66,8 +66,8 @@ if ($LASTEXITCODE -ne 0 -or $Architecture -notin @("amd64", "x86_64")) {
 New-Item -ItemType Directory -Force -Path $InstallRoot | Out-Null
 $Workspace = Join-Path $InstallRoot "workspace"
 New-Item -ItemType Directory -Force -Path $Workspace | Out-Null
-# The layout the resident Agent reads. The directories are created empty:
-# this package installs no Skill, Workflow or grant, and says so.
+# The layout the resident Agent reads. The bundled Skills are installed at
+# the end (install-bundled); this package installs no grant.
 New-Item -ItemType Directory -Force -Path (Join-Path $Workspace "assets\skills") | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $Workspace "assets\workflows") | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $Workspace "assets\knowledge") | Out-Null
@@ -179,6 +179,15 @@ else {
         Write-Warning "Some coding agents were not set up; see above, or use Agent Web Settings > Coding agents."
     }
 }
+# The bundled Skills: AEP's in-use Skills (and the Workflows they call)
+# switched on, the Hermes skill pack switched off. What is already here is
+# kept as it is, switched on or off; nothing removed is brought back. The
+# coding-agent copy of a pack skill reaches Claude Code / Copilot only while
+# it is switched on, and not at all with -NoAgentSkills.
+$BundledArguments = @("assets", "--config", $ConfigPath, "install-bundled", "--bundle", $BundleRoot)
+if ($NoAgentSkills) { $BundledArguments += "--no-agent-skills" }
+& $HostExecutable @BundledArguments
+if ($LASTEXITCODE -ne 0) { throw "The bundled Skills could not be installed; see above." }
 Write-Host "Installed the local-only preview at $InstallRoot"
 Write-Host "Bundle source revision: $($Manifest.source_revision)"
 Write-Host "The resident Agent is bound to $Actor on $BridgeId. Capability grants remain separate."

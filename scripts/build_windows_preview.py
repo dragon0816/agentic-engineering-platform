@@ -33,6 +33,26 @@ SECRET_ASSIGNMENT = re.compile(
     r"(?:password|api[_-]?key|access[_-]?token|secret[_-]?value)\s*[=:]\s*(?:\"[^\"]+\"|'[^']+'|\S+)",
     re.IGNORECASE,
 )
+#: The Hermes skill pack (docs/phases/HERMES_SKILL_PACK.md): the bundle's
+#: `hermes/` holds its manifests, index and NOTICE, and its coding-agent skill
+#: folders under `hermes/agent/`. `install.ps1` installs it switched off.
+HERMES_PACK = Path("packages") / "hermes-skill-pack"
+BUNDLE_HERMES = "hermes"
+#: Documented placeholders in the Hermes pack that look like an assignment
+#: to the credential scan, accepted one by one (file, exact text). Anything
+#: else that looks like a credential still stops the build.
+ALLOWED_PLACEHOLDERS = frozenset(
+    {
+        ("hermes/agent/hermes-airtable/SKILL.md", "API_KEY=pat_your_token_here"),
+        ("hermes/agent/hermes-gif-search/SKILL.md", "API_KEY=your_key_here"),
+        ("hermes/agent/hermes-notion/SKILL.md", "API_KEY=ntn_your_key_here"),
+        ("hermes/agent/hermes-github/references/auth.md", "Password: <paste"),
+        # JSON text: `\n` here is the two characters of an escaped line end.
+        ("hermes/manifests/hermes__airtable__1.1.0.json", r"API_KEY=[redacted]\n"),
+        ("hermes/manifests/hermes__gif-search__1.1.0.json", r"API_KEY=[redacted]\n```\n\nGet"),
+        ("hermes/manifests/hermes__notion__2.0.0.json", r"API_KEY=[redacted]\n"),
+    }
+)
 #: Every wheel the installed extras need. The bundle is offline, so a
 #: missing one is a failed install on a company computer rather than a
 #: download, and the builder refuses to produce a bundle that would do that.
@@ -88,6 +108,22 @@ def worst_case_path(relative: str) -> int:
     return downloads + artefact + zip_folder + bundle_root + len(relative)
 
 
+def copy_hermes_pack(pack: Path, target: Path) -> None:
+    """The pack's manifests, `pack.json` and `NOTICE.md`, and its skill
+    folders flattened to `agent/<folder>` (shorter paths in the bundle)."""
+    if not (pack / "pack.json").is_file():
+        raise ValueError("the Hermes skill pack is missing")
+    target.mkdir(parents=True)
+    shutil.copy2(pack / "pack.json", target / "pack.json")
+    shutil.copy2(pack / "NOTICE.md", target / "NOTICE.md")
+    shutil.copytree(pack / "manifests", target / "manifests")
+    shutil.copytree(
+        pack / "skills" / "vendor",
+        target / "agent",
+        ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+    )
+
+
 def digest(path: Path) -> str:
     hasher = hashlib.sha256()
     with path.open("rb") as stream:
@@ -126,6 +162,7 @@ def build(
     with tempfile.TemporaryDirectory() as temporary:
         root = Path(temporary) / BUNDLE_NAME
         shutil.copytree(template, root)
+        copy_hermes_pack(repo / HERMES_PACK, root / BUNDLE_HERMES)
         wheels = root / "wheels"
         wheels.mkdir()
         shutil.copy2(platform_wheel, wheels / platform_wheel.name)
@@ -135,8 +172,10 @@ def build(
         for path in payload:
             if path.suffix.lower() in TEXT_SUFFIXES:
                 text = path.read_text(encoding="utf-8")
-                if SECRET_ASSIGNMENT.search(text):
-                    raise ValueError(f"credential-like assignment found in {path.name}")
+                in_bundle = path.relative_to(root).as_posix()
+                for found in SECRET_ASSIGNMENT.finditer(text):
+                    if (in_bundle, found.group(0)) not in ALLOWED_PLACEHOLDERS:
+                        raise ValueError(f"credential-like assignment found in {path.name}")
         relatives = [path.relative_to(root).as_posix() for path in payload]
         # A name nobody can extract is a bundle nobody can install, and the
         # failure surfaces on the company computer rather than here. Name the

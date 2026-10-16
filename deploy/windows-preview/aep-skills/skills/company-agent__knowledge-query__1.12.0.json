@@ -1,0 +1,375 @@
+{
+  "metadata": {
+    "identity": {
+      "namespace": "company-agent",
+      "name": "knowledge-query",
+      "version": "1.12.0"
+    },
+    "owner": {
+      "type": "team",
+      "id": "engineering"
+    },
+    "visibility": "private",
+    "lifecycle": "validated",
+    "contributors": [],
+    "categories": [],
+    "provenance": [],
+    "dependencies": [],
+    "compatibility": {
+      "contract_version": "1",
+      "runtime": null,
+      "bridge": null,
+      "platforms": []
+    },
+    "business_approval": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null
+    },
+    "technical_policy": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null,
+      "risk": "low",
+      "approval_required": true,
+      "required_permissions": [],
+      "policy_refs": [],
+      "assessment": "manual"
+    },
+    "validation_refs": [],
+    "evaluation_refs": [],
+    "package": null,
+    "deprecation_reason": null,
+    "replacement": null
+  },
+  "alias": "knowledge_evidence_candidate",
+  "instructions": "Answer from the vault's curated Wiki pages (entities, concepts, syntheses, sources) found through index.md and their links; cite Wiki pages as primary evidence and Raw only where the Wiki does not cover a claim. Match exact model and option codes literally; search bilingual concepts with alternate wording. Distinguish fact from labeled inference and name missing links rather than inventing a recommendation.",
+  "commands": [
+    {
+      "name": "ask",
+      "kind": "capability",
+      "target": {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+      }
+    }
+  ],
+  "rules": [],
+  "default_command": null,
+  "script_tools": [],
+  "harness_guidance": {
+    "domains": [
+      "knowledge"
+    ],
+    "required_evidence": [
+      "raw_citations"
+    ],
+    "context_required": true,
+    "fallback": "retry",
+    "max_retries": 1
+  },
+  "procedure": {
+    "kind": "knowledge_query_v1",
+    "intent_patterns": [
+      "\\bfirmware\\b",
+      "市場|規格|選配|產品|技術|競品|競爭對手|知識庫|推薦|\\b(?:market|specification|option|technical|competitor|knowledge|NTN)\\b"
+    ],
+    "subject_pattern": "\\b[A-Z]{2,}[A-Z0-9]*[0-9][A-Z0-9]*\\b",
+    "focus_hints": [
+      {
+        "pattern": "高速通訊|高速傳輸|high.?speed (?:communication|digital|interconnect)",
+        "query": "高速通訊 high-speed communications",
+        "evidence_terms": [
+          "高速",
+          "high-speed",
+          "SerDes",
+          "PCIe",
+          "signal integrity",
+          "Wi-Fi 7",
+          "jitter",
+          "eye diagram"
+        ],
+        "expansions": [
+          "R&S solution mapping AI server high speed PCB connector cable",
+          "signal integrity SerDes PCIe TDR eye diagram de-embedding vector network analyzer",
+          "clock jitter phase noise PLL analyzer",
+          "Wi-Fi 7 802.11be production test option",
+          "wideband signal and spectrum analyzer analysis bandwidth option",
+          "wideband vector signal generator receiver test MIMO fading option"
+        ]
+      },
+      {
+        "pattern": "(?<![A-Za-z0-9])NTN(?![A-Za-z0-9])|non.?terrestrial",
+        "query": "NTN",
+        "evidence_terms": [
+          "NTN",
+          "non-terrestrial"
+        ]
+      },
+      {
+        "pattern": "無線通訊|\\bwireless\\b",
+        "query": "無線通訊 wireless communications",
+        "evidence_terms": [
+          "無線通訊",
+          "wireless",
+          "WLAN",
+          "Wi-Fi 7",
+          "802.11"
+        ]
+      },
+      {
+        "pattern": "航太|國防|aerospace|defen[cs]e|(?<![A-Za-z])A&D(?![A-Za-z])",
+        "query": "航太國防 aerospace defense",
+        "evidence_terms": [
+          "aerospace",
+          "defense",
+          "航太",
+          "國防",
+          "radar",
+          "雷達",
+          "avionics",
+          "jamming"
+        ],
+        "expansions": [
+          "Aerospace & Defense test 5G private network resilience smart jamming electronic warfare",
+          "radar target simulation pulse analysis 雷達 測試",
+          "avionics DO-160 airborne equipment military EMC testing",
+          "satellite payload ground station test 航太 衛星"
+        ]
+      },
+      {
+        "pattern": "車用|汽車|automotive|vehicle|(?<![A-Za-z])V2X(?![A-Za-z])",
+        "query": "車用 automotive",
+        "evidence_terms": [
+          "automotive",
+          "車用",
+          "汽車",
+          "vehicle",
+          "v2x",
+          "ecall",
+          "adas",
+          "車載"
+        ],
+        "expansions": [
+          "automotive connectivity C-V2X eCall NG eCall EN 17240 testing",
+          "automotive radar ADAS sensor test",
+          "車用 電子 連網 測試 vehicle telematics"
+        ]
+      },
+      {
+        "pattern": "(?<![A-Za-z])AI(?![A-Za-z])|人工智慧|artificial intelligence",
+        "query": "AI 資料中心 AI data center",
+        "evidence_terms": [
+          "ai 資料中心",
+          "ai data center",
+          "ai server",
+          "ai 伺服器",
+          "gpu",
+          "ai accelerator",
+          "ai 加速器",
+          "人工智慧"
+        ],
+        "expansions": [
+          "AISeverEcosystem R&S solution mapping AI server",
+          "AI 伺服器 PCB PCIe 高速傳輸 signal integrity 測試",
+          "AI data center power delivery GPU interconnect test"
+        ]
+      }
+    ],
+    "facets": [
+      {
+        "name": "market_trend",
+        "request_patterns": [
+          "趨勢|需求|\\btrend\\b|\\bdemand\\b|市場趨勢|測試需求"
+        ],
+        "search_queries": [
+          "market testing demand trend",
+          "industry testing application growth",
+          "市場趨勢 成長 規格升級 驅動力"
+        ],
+        "support_terms": [
+          "demand",
+          "growth",
+          "trend",
+          "趨勢",
+          "需求",
+          "rising",
+          "increasing",
+          "expanding",
+          "成長",
+          "驅動",
+          "滲透率",
+          "升級"
+        ],
+        "search_subject": false,
+        "collect_all_queries": true,
+        "max_passages": 4,
+        "require_focus": true,
+        "source_areas": [
+          "raw/Market/"
+        ],
+        "link_terms": [
+          "market",
+          "市場",
+          "demand",
+          "industry"
+        ]
+      },
+      {
+        "name": "market_segment",
+        "request_patterns": [
+          "^(?!.*(?:趨勢|需求|trend|demand)).*市場",
+          "\\bmarket\\b(?!\\s*(?:trend|demand))"
+        ],
+        "search_queries": [
+          "market segment product testing"
+        ],
+        "support_terms": [
+          "market",
+          "segment"
+        ],
+        "focus_is_support": true,
+        "focus_is_link": true
+      },
+      {
+        "name": "product_option_spec",
+        "request_patterns": [
+          "產品|規格|選配|推薦|推給客戶|\\bproduct\\b|\\boption\\b|\\bspec(?:ification)?s?\\b"
+        ],
+        "search_queries": [
+          "product option specification feature",
+          "tester option application performance"
+        ],
+        "discovery_queries": [
+          "Rohde Schwarz product tester solution",
+          "product portfolio test solution",
+          "signal generator channel emulation conformance"
+        ],
+        "support_terms": [
+          "option",
+          "spec",
+          "feature",
+          "tester",
+          "solution",
+          "instrument",
+          "test",
+          "規格",
+          "產品"
+        ],
+        "include_subject": true,
+        "link_subject": true,
+        "link_terms": [
+          "tester",
+          "solution",
+          "instrument",
+          "option",
+          "feature"
+        ],
+        "require_focus": true,
+        "require_focus_when_unbound": true,
+        "entity_pattern": "\\b(?:CMX|CMP|CMW|SMBV|SMW|FSW|ZNA|ZNB|MXO|RTO|PVT)[A-Z0-9-]*\\d[A-Z0-9-]*\\b",
+        "collect_all_queries": true,
+        "max_passages": 6,
+        "evidence_requirements": [
+          {
+            "question_pattern": "選配|\\boption\\b",
+            "evidence_patterns": [
+              "\\b(?:CMP[- ]?)?[KB][A-Z]?\\d{2,4}\\b"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "technical_knowledge",
+        "request_patterns": [
+          "技術|測試差異|\\btechnical\\b|\\bsignaling\\b|\\btechnology\\b"
+        ],
+        "search_queries": [
+          "wireless test technology signaling measurement",
+          "non signaling RF test method"
+        ],
+        "support_terms": [
+          "measurement",
+          "signaling",
+          "technical",
+          "RF testing",
+          "技術方法"
+        ],
+        "include_subject": true,
+        "link_terms": [
+          "RF testing",
+          "measurement",
+          "signaling",
+          "test method",
+          "technical test",
+          "技術測試"
+        ]
+      },
+      {
+        "name": "competitor",
+        "request_patterns": [
+          "競品|競爭對手|\\bcompetitor\\b|\\bKeysight\\b|\\bAnritsu\\b|\\bAmarisoft\\b"
+        ],
+        "search_queries": [
+          "competitor comparison Keysight Anritsu Amarisoft",
+          "competitive battle card alternative"
+        ],
+        "support_terms": [
+          "competitor",
+          "Keysight",
+          "Anritsu",
+          "Amarisoft",
+          "競品"
+        ],
+        "include_subject": true,
+        "link_terms": [
+          "competitor",
+          "Keysight",
+          "Anritsu",
+          "Amarisoft",
+          "競品"
+        ],
+        "comparison_terms": [
+          "vs",
+          "versus",
+          "compared",
+          "comparison",
+          "對照",
+          "比較"
+        ]
+      }
+    ],
+    "relation_terms": [
+      "supports",
+      "support",
+      "tailored",
+      "cover",
+      "addresses",
+      "designed",
+      "compared",
+      "versus",
+      "vs",
+      "適用",
+      "對應",
+      "compete"
+    ],
+    "relation_search_queries": [
+      "Rohde Schwarz product tester solution",
+      "product application testing demand"
+    ],
+    "require_relation_for_combination": true,
+    "extractive_fallback": true,
+    "wiki_index_first": true,
+    "wiki_index_hits": 24,
+    "synthesis_max_output_tokens": 8192,
+    "inference_label": "【推論】",
+    "answer_guidance": "Use the user's language. Cite curated Wiki pages first; cite Raw only where the Wiki lacks the claim. Separate market demand, technical measurement need and R&S product/options; for an open-ended product question cover distinct instrument roles. For a product/market mapping or recommendation question, write a report: a one-line 建議主軸; then '### 推薦先賣' with a few cited lines, or 知識庫未證實 when no passage ties a product to that market; then '### 產品與 Option 對接表' as a Markdown table with columns 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險, one row per product line, citing its passages in the 證據 cell; then '### 場景切入建議' as a table 場景 | 推薦組合 | 切入重點 | 未驗證事項, each row cited; then '### 限制'. For other questions lead with a short answer, then cited details. List only option codes and specifications that appear in the passages; write 知識庫未標示 instead of guessing a code, order number, price, market share or competitor advantage. A press release's positioning is not measured demand, and a target-market list is not customer fit. Put any conclusion that connects separate sources on a labeled inference line. Claim that a product fits a market, application or customer only where a cited passage states that link; otherwise give the product facts and write 知識庫未證實 for the link. Do not rank (strongest, most important) unless a passage ranks. A table cell or heading must not state a link the passages do not state. These instructions are not knowledge: never repeat their evidence rules or facet names (such as direct_relationship) as findings, and never cite a passage for them. Answer every part of the question: for each part, state each cited fact the passages give for it rather than only the first few; a longer answer is fine when every line is cited.",
+    "citation_policy": "wiki_primary",
+    "bilingual_retrieval": true,
+    "retrieval_rounds": 2,
+    "evidence_sections": 96,
+    "evidence_chars": 80000,
+    "evidence_sections_per_page": 8
+  }
+}

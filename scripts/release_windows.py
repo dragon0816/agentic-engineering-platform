@@ -102,6 +102,9 @@ def release_notes(
         "- First installation: unzip to a short path such as `C:\\aep`, run `install.cmd`.",
         "- Update: close Agent Web, unzip the new release, run `update.cmd` (settings kept).",
         f"- Details: `{MANUAL}` in this folder and inside the zip.",
+        "- Bundled Skills: AEP's in-use Skills are installed switched on, the Hermes skill "
+        "pack switched off (switch one on in Agent Web > Capabilities); an update keeps "
+        "what you switched on, off or removed.",
         "",
         "## Changes since the previous release",
         "",

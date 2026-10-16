@@ -1,0 +1,63 @@
+{
+  "metadata": {
+    "identity": {
+      "namespace": "engineering",
+      "name": "knowledge-query",
+      "version": "1.0.1"
+    },
+    "owner": {
+      "type": "team",
+      "id": "engineering"
+    },
+    "visibility": "organization",
+    "lifecycle": "published",
+    "contributors": [],
+    "categories": [],
+    "provenance": [],
+    "dependencies": [],
+    "compatibility": {
+      "contract_version": "1",
+      "runtime": null,
+      "bridge": null,
+      "platforms": []
+    },
+    "business_approval": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null
+    },
+    "technical_policy": {
+      "status": "pending",
+      "reviewer": null,
+      "evidence": null,
+      "risk": "low",
+      "approval_required": true,
+      "required_permissions": [],
+      "policy_refs": [],
+      "assessment": "manual"
+    },
+    "validation_refs": [],
+    "evaluation_refs": [],
+    "package": null,
+    "deprecation_reason": null,
+    "replacement": null
+  },
+  "alias": "knowledge",
+  "instructions": "Ask the exact installed RS_Knowledge vault (curated Wiki pages with their Raw sources) when the user asks about its products, markets, technologies or competitors. Pass the person's question as they asked it; make a follow-up self-contained, but add no instructions about citations, evidence type, focus, products, ranking or format. The vault's Knowledge Skill decides retrieval and citation and the Host checks every cited claim. Show a validated answer as it is. If the vault does not validate an answer, say the evidence is insufficient; never claim to have read the Vault.",
+  "commands": [
+    {
+      "name": "ask",
+      "kind": "capability",
+      "target": {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+      }
+    }
+  ],
+  "rules": [],
+  "default_command": "ask",
+  "script_tools": [],
+  "harness_guidance": null,
+  "procedure": {}
+}

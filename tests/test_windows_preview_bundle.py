@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import shutil
 import zipfile
 from pathlib import Path
 
@@ -108,8 +109,45 @@ def test_builder_emits_reproducible_closed_manifest(tmp_path: Path) -> None:
             "dut-skill.example.json",
         ):
             assert prefix + dut_file in names
-        assert all("config" not in name.lower() for name in names)
-        assert all("token" not in name.lower() for name in names)
+        # The Hermes skill pack's documentation and scripts may carry such
+        # words in their names (`configuration.md`, `git-credential-token.py`);
+        # they are the reviewed pack files, compared byte for byte below.
+        pack_prefix = prefix + "hermes/agent/"
+        outside_pack = [name for name in names if not name.startswith(pack_prefix)]
+        assert all("config" not in name.lower() for name in outside_pack)
+        assert all("token" not in name.lower() for name in outside_pack)
+        pack_root = repo / "packages" / "hermes-skill-pack"
+        pack_files = {
+            pack_prefix + path.relative_to(pack_root / "skills" / "vendor").as_posix(): path
+            for path in (pack_root / "skills" / "vendor").rglob("*")
+            if path.is_file()
+        }
+        assert {name for name in names if name.startswith(pack_prefix)} == set(pack_files)
+        for name, path in pack_files.items():
+            assert bundle.read(name) == path.read_bytes(), name
+        for kept in (
+            "hermes/pack.json",
+            "hermes/NOTICE.md",
+            "hermes/manifests/hermes__docx__1.1.0.json",
+        ):
+            assert prefix + kept in names
+        assert len([n for n in names if n.startswith(prefix + "hermes/manifests/")]) == 51
+        for in_use in (
+            "aep-skills/skills/company-agent__knowledge-query__1.12.0.json",
+            "aep-skills/skills/engineering__knowledge-query__1.0.1.json",
+        ):
+            assert prefix + in_use in names
+        # Skipped and internal Hermes skills are not in it (business-cards is,
+        # scrubbed).
+        for absent in (
+            "hermes-findmy",
+            "hermes-hermes-agent",
+            "hermes-rs-workflow-jobs",
+            "hermes-leo-work-automation",
+            "hermes-aep-platform-testing",
+        ):
+            assert not any(name.startswith(pack_prefix + absent + "/") for name in names)
+        assert prefix + "hermes/agent/hermes-business-cards/SKILL.md" in names
         # The extras the installer asks for are carried, not fetched: the
         # bundle installs with --no-index on a machine whose pip may point
         # at a company index, or at nothing.
@@ -263,3 +301,31 @@ def test_source_distribution_includes_the_validation_profile_files() -> None:
     assert "recursive-include deploy/windows-preview" in manifest
     for suffix in ("*.json", "*.pdf", "*.txt"):
         assert suffix in manifest
+
+
+def test_only_the_reviewed_pack_placeholders_pass_the_credential_scan(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The builder accepts the Hermes pack's documented placeholders one by
+    one (file and exact text); a new assignment anywhere still stops it."""
+    repo = Path(__file__).resolve().parents[1]
+    pack = tmp_path / "repo" / build_windows_preview.HERMES_PACK
+    shutil.copytree(repo / build_windows_preview.HERMES_PACK, pack)
+    skill = pack / "skills" / "vendor" / "hermes-airtable" / "SKILL.md"
+    skill.write_text(skill.read_text(encoding="utf-8") + "\nAPI_KEY=a-new-one\n", encoding="utf-8")
+    shutil.copytree(
+        repo / "deploy" / "windows-preview", tmp_path / "repo" / "deploy" / "windows-preview"
+    )
+    platform_wheel = tmp_path / "agentic_engineering_platform-0.1.0-py3-none-any.whl"
+    platform_wheel.write_bytes(b"platform-wheel")
+    with pytest.raises(ValueError, match="credential-like assignment found in SKILL.md"):
+        build(
+            repo=tmp_path / "repo",
+            platform_wheel=platform_wheel,
+            dependency_dir=dependency_dir(tmp_path),
+            output_dir=tmp_path / "output",
+            revision="d" * 40,
+        )
+    assert ("hermes/agent/hermes-airtable/SKILL.md", "API_KEY=pat_your_token_here") in (
+        build_windows_preview.ALLOWED_PLACEHOLDERS
+    )
