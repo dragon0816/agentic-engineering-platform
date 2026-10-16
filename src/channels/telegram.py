@@ -1039,11 +1039,18 @@ class TelegramIngress:
     def _approval_buttons(
         self, request: LocalAgentRequest
     ) -> tuple[tuple[tuple[str, str], ...], ...]:
-        """One row per pending request the Agent made in this chat (G4, A5)."""
+        """One row per pending request the Agent made in this chat (G4, A5).
+        With Agent Web's draft cards, an install is answered on its card."""
         if self.approvals is None:
             return ()
+        carded: set[str] = set()
+        draft_cards = getattr(self.cards, "draft_cards", None)
+        if draft_cards is not None and request.session_id:
+            carded = draft_cards.carded(request.session_id)
         rows = []
         for item in self.approvals.approvals(request.actor, session_id=request.session_id):
+            if item.kind in ("install", "install_skill") and item.candidate_id in carded:
+                continue
             label = "安裝" if item.kind == "install" else "執行"
             rows.append(
                 (
@@ -1164,6 +1171,7 @@ class TelegramIngress:
         progress = await self._progress(base["chat_id"], "Working on it")
         listening = TOOL_PROGRESS.set(progress.tool)
         answered = False
+        started = datetime.now(UTC)
         try:
             result = await self.agent.converse(request, tuple(sent))
             answered = result.conversation is not None and result.conversation.status == "answered"
@@ -1175,6 +1183,7 @@ class TelegramIngress:
                 **base, disposition="answered", reply=f"Refused: {result.refusal}."
             )
         conversation = result.conversation
+        drafted = await self._draft_cards(request, started)
         buttons = self._approval_buttons(request)
         record = tool_summary(conversation)
         if conversation is None or conversation.status != "answered":
@@ -1204,6 +1213,8 @@ class TelegramIngress:
                 # Keep what was done so 繼續 can pick it up.
                 turn.append(ModelMessage(role="assistant", text=f"{reply}\n\n[工具紀錄]\n{record}"))
                 self._histories[key] = turn[-MAX_CHAT_HISTORY:]
+            if drafted:
+                return self._carded(base, reply, buttons, drafted)
             return TelegramDelivery(**base, disposition="answered", reply=reply, buttons=buttons)
         answer = conversation.text if conversation.text.strip() else _no_answer_reply(record)
         remembered = answer if record is None else f"{answer}\n\n[工具紀錄]\n{record}"
@@ -1229,9 +1240,48 @@ class TelegramIngress:
                 reply=scrub(drawn),
                 buttons=(*card_buttons, *buttons),
             )
+        if drafted:
+            return self._carded(base, answer, buttons, drafted)
         return TelegramDelivery(
             **base, disposition="answered", reply=scrub(answer), buttons=buttons
         )
+
+    def _carded(
+        self,
+        base: dict[str, Any],
+        answer: str,
+        buttons: tuple[tuple[tuple[str, str], ...], ...],
+        drafted: list[dict[str, Any]],
+    ) -> TelegramDelivery:
+        """A Workflow or Skill drafted in this turn: the answer, then its
+        install card with Install / Not now; a press is the owner's approval,
+        as for the approval buttons (owner 2026-10-16)."""
+        texts = [answer]
+        card_rows: list[tuple[tuple[str, str], ...]] = []
+        for shown in drafted:
+            drawn, card_buttons = telegram_card(ActionCard.model_validate(shown), CARD_WHERE)
+            texts.append(drawn)
+            card_rows.extend(card_buttons)
+        return TelegramDelivery(
+            **base,
+            disposition="answered",
+            reply=scrub("\n\n".join(texts)),
+            buttons=(*card_rows, *buttons),
+        )
+
+    async def _draft_cards(
+        self, request: LocalAgentRequest, started: datetime
+    ) -> list[dict[str, Any]]:
+        """The install cards for drafts this turn made, when Agent Web runs
+        with this bot (it keeps and decides the cards)."""
+        maker = getattr(self.cards, "draft_turn_cards", None)
+        if maker is None or not request.session_id:
+            return []
+        try:
+            found = await asyncio.to_thread(maker, request.session_id, started, "telegram")
+        except Exception:  # noqa: BLE001 - a card is extra; the answer still goes out
+            return []
+        return [item for item in found if isinstance(item, dict)]
 
     def _acting(self, actor: str) -> tuple[str, str | None]:
         """Who runs and on whose behalf, as for every other request."""

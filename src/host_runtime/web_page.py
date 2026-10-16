@@ -1976,13 +1976,23 @@ function renderConversation(record) {
       said.className = "said" + (replied.status === "failed" ? " bad" : "");
       renderAnswer(said, replied.text);
       attachTurnControls(said.parentNode, asked.text, replied);
-      if (replied.workflow_form) {
+      const installForm = replied.workflow_form
+        && replied.workflow_form.origin === "install";
+      if (replied.workflow_form && !installForm) {
         // Only the newest answer's form starts open; older ones fold away.
         chatRunForm(said.parentNode, replied, record.session_id,
           index + 2 >= record.messages.length);
       }
       for (const shown of replied.action_cards || []) {
-        said.parentNode.append(renderActionCard(shown));
+        said.parentNode.append(shown.card_id.startsWith("dr-")
+          ? renderActionCard(shown, (decided) => draftCardDecided(record.session_id,
+            replied.message_id, decided))
+          : renderActionCard(shown));
+      }
+      if (installForm) {
+        // A Workflow installed from its draft card: its run form under the card.
+        chatRunForm(said.parentNode, replied, record.session_id,
+          index + 2 >= record.messages.length || openInstallForm === replied.message_id);
       }
       if (replied.action_card) {
         said.parentNode.append(renderActionCard(replied.action_card, async () => {
@@ -2241,6 +2251,26 @@ async function loadPendingCards() {
   el("pending-cards-heading").hidden = !listed.cards.length;
   for (const card of listed.cards) {
     holder.append(renderActionCard(card, () => loadPendingCards().catch(() => {})));
+  }
+}
+
+// -- Draft install cards (owner 2026-10-16) ----------------------------------
+// After a turn that drafted or revised a Workflow or Skill, the answer shows
+// its install card: Install (the press is the approval), Run once to try
+// (read-only Workflows) and Not now (the draft stays in Capabilities). After
+// Install the Workflow's run form opens under the card.
+
+let openInstallForm = null;
+
+async function draftCardDecided(session, messageId, decided) {
+  if (!decided || !decided.card) return;
+  if (decided.card.status === "installed") {
+    openInstallForm = messageId;
+    assetsReady = loadAssets();
+    await assetsReady.catch(() => {});
+  }
+  if (decided.card.status !== "pending" && session === activeConversation) {
+    await loadConversations(session);
   }
 }
 

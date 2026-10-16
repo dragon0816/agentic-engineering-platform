@@ -497,13 +497,17 @@ class SqliteLocalState:
         actor: Symbol,
         card: dict[str, Any],
         note: str,
+        *,
+        workflow_form: dict[str, Any] | None = None,
     ) -> ConversationRecord | None:
         """Redraw an answer's action card after a decision (owner 2026-10-15).
 
         The transcript stays append-only: only the answer that shows this
-        card changes, its `action_card` and a line added to its tool record
-        so later turns tell the model the outcome. None when no answer here
-        shows the card."""
+        card changes, its `action_card` (or that entry of its `action_cards`)
+        and a line added to its tool record so later turns tell the model the
+        outcome. `workflow_form` (a Workflow installed from its draft card,
+        owner 2026-10-16) is set on that answer when it has none. None when
+        no answer here shows the card."""
         card_id = card.get("card_id")
         with self._write() as conn:
             row = conn.execute(
@@ -518,18 +522,36 @@ class SqliteLocalState:
                     item
                     for item in stored.messages
                     if item.role == "assistant"
-                    and isinstance(item.action_card, dict)
-                    and item.action_card.get("card_id") == card_id
+                    and (
+                        (
+                            isinstance(item.action_card, dict)
+                            and item.action_card.get("card_id") == card_id
+                        )
+                        or any(shown.get("card_id") == card_id for shown in item.action_cards)
+                    )
                 ),
                 None,
             )
             if target is None:
                 return None
             summary = ((target.tool_summary + "\n") if target.tool_summary else "") + note
+            change: dict[str, Any] = {"tool_summary": summary}
+            if (
+                isinstance(target.action_card, dict)
+                and target.action_card.get("card_id") == card_id
+            ):
+                change["action_card"] = card
+            else:
+                change["action_cards"] = tuple(
+                    card if shown.get("card_id") == card_id else shown
+                    for shown in target.action_cards
+                )
+            if workflow_form is not None and target.workflow_form is None:
+                change["workflow_form"] = workflow_form
             updated = stored.model_copy(
                 update={
                     "messages": tuple(
-                        item.model_copy(update={"action_card": card, "tool_summary": summary})
+                        item.model_copy(update=change)
                         if item.message_id == target.message_id
                         else item
                         for item in stored.messages

@@ -159,6 +159,7 @@ from host_runtime.conversations import (
     ConversationTurnRequest,
     MessageFeedback,
 )
+from host_runtime.draft_cards import DraftCards
 from host_runtime.experience import (
     ExperienceSettings,
     ExperienceStore,
@@ -561,6 +562,15 @@ class AgentWeb:
         # AI proposes, the person applies (owner 2026-10-15): the model gets
         # only `propose_change`; Apply runs this object's own writers.
         self.proposals = ChangeProposals(self)
+        # The install card a conversation shows after it drafted a Workflow
+        # or Skill (owner 2026-10-16); the press is the approval.
+        self.draft_cards = DraftCards(
+            runtime.layout.workspace_root,
+            chat=lambda: self.runtime.chat_authoring,
+            actor=lambda: self.runtime.actor,
+            form_offer=self._installed_form,
+        )
+        self._authoring_turns: dict[str, tuple[str, str]] = {}
         gateway = runtime.agent.gateway
         earlier_tools = gateway.host_tools
         gateway.host_tools = lambda: (
@@ -598,6 +608,8 @@ class AgentWeb:
         chat = self.runtime.chat_authoring
         if chat is None:
             return {"approvals": []}
+        # An install the conversation shows a draft card for is answered there.
+        carded = self.draft_cards.carded(session_id) if session_id else set()
         return {
             "approvals": [
                 {
@@ -611,6 +623,7 @@ class AgentWeb:
                     "created_at": item.created_at,
                 }
                 for item in chat.approvals(self.runtime.actor, session_id=session_id)
+                if not (item.kind in ("install", "install_skill") and item.candidate_id in carded)
             ]
         }
 
@@ -1384,11 +1397,40 @@ class AgentWeb:
         ok = not any(": not changed (" in line for line in lines)
         return {**self.coding_agents(), "ok": ok, "lines": lines}
 
-    def authoring_mcp(self, message: dict[str, Any]) -> dict[str, Any] | None:
+    def authoring_turn(self, token: str) -> tuple[str, str] | None:
+        """(conversation, agent name) of a running turn whose own token this
+        is: an agent-mode run, or a Copilot agent conversation turn."""
+        run = self.agent_mode.run_for_token(token) if token else None
+        if run is not None:
+            return run.session_id, "claude-code" if run.backend == "claude_code" else "copilot"
+        for given, turn in list(self._authoring_turns.items()):
+            if token and hmac.compare_digest(given, token):
+                return turn
+        return None
+
+    def authoring_mcp(
+        self, message: dict[str, Any], turn: tuple[str, str] | None = None
+    ) -> dict[str, Any] | None:
         """AEP's authoring tools over the same loopback MCP endpoint
         (`/mcp/authoring`), for the Copilot agent mode: the creator skills
         need them, and this Agent Web already holds the authoring state, so no
-        second Host is assembled per turn (owner 2026-10-15)."""
+        second Host is assembled per turn (owner 2026-10-15). Called with a
+        turn's own token (`turn`), drafts belong to that conversation, which
+        shows their install card after the turn (owner 2026-10-16)."""
+        if turn is not None:
+            from host_runtime.external_authoring import ExternalAuthoring
+            from host_runtime.mcp_server import Server
+
+            session_id, agent = turn
+
+            def attributed() -> ExternalAuthoring:
+                chat = self.runtime.chat_authoring
+                if chat is None:
+                    raise ChatAuthoringError("authoring_unavailable")
+                return ExternalAuthoring(chat, self.runtime.actor, agent, session_id=session_id)
+
+            answered: dict[str, Any] | None = Server(attributed, "agent-web").handle(message)
+            return answered
         if getattr(self, "_authoring_server", None) is None:
             from host_runtime.external_authoring import ExternalAuthoring
             from host_runtime.mcp_server import Server
@@ -1922,6 +1964,8 @@ class AgentWeb:
             "pm-": self.agent_mode,
             "ml-": self.agent_mail,
         }
+        if card_id.startswith("dr-"):
+            return self.draft_cards.card(card_id)
         handler = handlers.get(card_id[:3])
         found = handler.card(card_id) if handler is not None else None
         return None if found is None else found.model_dump(mode="json")
@@ -1953,6 +1997,15 @@ class AgentWeb:
             return self.agent_mode.decide(card_id, action, channel=channel)
         if card_id.startswith("ml-"):
             return self.agent_mail.decide(card_id, action, channel=channel)
+        if card_id.startswith("dr-"):
+            with self._one_at_a_time:
+                drafted = self.draft_cards.decide(card_id, action, channel=channel)
+            shown = drafted.get("card")
+            if isinstance(shown, dict) and drafted.get("session_id"):
+                self._update_card_message(
+                    str(drafted["session_id"]), shown, drafted.get("workflow_form")
+                )
+            return drafted
         if not card_id.startswith("cp-"):
             return {"ok": False, "code": "card_unknown", "message": "That card is unknown here."}
         decided = self.proposals.decide(card_id, action, channel=channel)
@@ -1962,17 +2015,41 @@ class AgentWeb:
             self._update_card_message(proposal.session_id, card)
         return decided
 
-    def _update_card_message(self, session_id: str, card: dict[str, Any]) -> None:
+    def _update_card_message(
+        self, session_id: str, card: dict[str, Any], form: dict[str, Any] | None = None
+    ) -> None:
         note = f"[card {card['card_id']}] {card.get('status_label') or card['status']}" + (
             f": {card['outcome']}" if card.get("outcome") else ""
         )
         with self._record_lock(session_id):
             try:
                 self.runtime.state.set_message_card(
-                    session_id, self.runtime.actor, card, note[:600]
+                    session_id, self.runtime.actor, card, note[:600], workflow_form=form
                 )
             except (LocalStateError, ValueError):
                 return
+
+    # -- install cards for drafts a conversation made (owner 2026-10-16) -----
+
+    def _installed_form(self, manifest: WorkflowManifest) -> dict[str, Any] | None:
+        """The run form of a Workflow just installed from its card."""
+        engine = self.runtime.agent.gateway.engine
+        identity = manifest.metadata.identity
+        live = next(
+            (item for item in engine.workflows.manifests() if item.metadata.identity == identity),
+            manifest,
+        )
+        return form_offer(live, {}, engine.settings_provider, origin="install")
+
+    def draft_turn_cards(
+        self, session_id: str, since: datetime, channel: str = "local", message: str = ""
+    ) -> list[dict[str, Any]]:
+        """The install cards for drafts this turn made or revised; earlier
+        cards of the same drafts are redrawn as replaced where they are."""
+        shown, replaced = self.draft_cards.for_turn(session_id, since, channel, message)
+        for card in replaced:
+            self._update_card_message(session_id, card)
+        return shown
 
     def create_conversation(self) -> dict[str, Any]:
         now = datetime.now(UTC)
@@ -2337,16 +2414,22 @@ class AgentWeb:
                 launch = None
                 if self.agent_mode.enabled(record.backend):
                     agent_run, launch = self._agent_launch(item.session_id, record.backend)
-                completed = self.backends.complete(
-                    record.backend,
-                    history,
-                    # Local persona may contain private text; a PUBLIC session
-                    # sends only explicitly declared conversation messages.
-                    persona_guidance="",
-                    outbound=outbound,
-                    max_history_messages=context_settings.recent_messages,
-                    agent=launch,
-                )
+                authoring_token = secrets.token_urlsafe(32)
+                self._authoring_turns[authoring_token] = (item.session_id, "copilot")
+                try:
+                    completed = self.backends.complete(
+                        record.backend,
+                        history,
+                        # Local persona may contain private text; a PUBLIC session
+                        # sends only explicitly declared conversation messages.
+                        persona_guidance="",
+                        outbound=outbound,
+                        max_history_messages=context_settings.recent_messages,
+                        agent=launch,
+                        authoring_token=authoring_token,
+                    )
+                finally:
+                    self._authoring_turns.pop(authoring_token, None)
                 if agent_run is not None:
                     answer_cards = self.agent_mode.finish(
                         agent_run, completed.status, completed.code or ""
@@ -2520,6 +2603,24 @@ class AgentWeb:
                     status="failed" if answer.get("status") == "failed" else "succeeded",
                 )
                 turn_run.close()
+            # Every turn ends with the install cards of the drafts it made or
+            # revised, whichever backend answered (owner 2026-10-16).
+            install_cards = self.draft_turn_cards(
+                item.session_id, started, "local", str(answer.get("answer") or "")
+            )
+            if install_cards:
+                earlier = answer.get("tool_summary")
+                lines = [earlier] if isinstance(earlier, str) and earlier else []
+                lines.extend(
+                    f"[card {card['card_id']}] {card['title']}: "
+                    f"{card.get('status_label') or card['status']}"
+                    for card in install_cards
+                )
+                answer = {
+                    **answer,
+                    "action_cards": [*_listed_cards(answer), *install_cards],
+                    "tool_summary": "\n".join(lines)[:4_000],
+                }
             finished = datetime.now(UTC)
             outcome = answer.get("outcome")
             status = (
@@ -2633,7 +2734,8 @@ class AgentWeb:
             servers={
                 "aep-agent": (base + "/agent", run.token),
                 "aep-assistant": (base, assistant),
-                "aep": (base + "/authoring", assistant),
+                # The run's own token: its drafts belong to this conversation.
+                "aep": (base + "/authoring", run.token),
             },
             on_permission=lambda params: self.agent_mode.acp_permission(run, dict(params)),
             on_tool_update=lambda call, status: self.agent_mode.tool_outcome(run, call, status),
@@ -4895,10 +4997,19 @@ class _Handler(BaseHTTPRequestHandler):
         header = self.headers.get("Authorization") or ""
         given = header[len(BEARER) :].strip() if header.startswith(BEARER) else ""
         agent_route = urlparse(self.path).path == "/mcp/agent"
+        # A turn's own token on the authoring tools: drafts belong to that
+        # conversation (owner 2026-10-16).
+        turn = (
+            self.server.web.authoring_turn(given)
+            if given and urlparse(self.path).path == "/mcp/authoring"
+            else None
+        )
         if agent_route:
             if not given or self.server.web.agent_mode.run_for_token(given) is None:
                 self._refuse_unread(401, {"error": "this request carried no usable token"})
                 return
+        elif turn is not None:
+            pass
         elif not given or not (
             hmac.compare_digest(given, self.server.web.assistant_token)
             or hmac.compare_digest(given, self.server.token)
@@ -4923,7 +5034,7 @@ class _Handler(BaseHTTPRequestHandler):
         batch = message if isinstance(message, list) else [message]
         web = self.server.web
         serve = (
-            web.authoring_mcp
+            (lambda item: web.authoring_mcp(item, turn))
             if urlparse(self.path).path == "/mcp/authoring"
             else (lambda item: web.agent_mcp(given, item))
             if agent_route

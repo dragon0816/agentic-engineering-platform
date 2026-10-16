@@ -541,7 +541,11 @@ class LocalConversationBackends:
         outbound: OutboundContext | None = None,
         max_history_messages: int = 12,
         agent: AgentLaunch | None = None,
+        authoring_token: str | None = None,
     ) -> ConversationBackendResult:
+        """`authoring_token` is this turn's own token for the authoring tools
+        of the Copilot agent conversation (`copilot_agent`): its drafts then
+        belong to this conversation and show an install card after the turn."""
         spec = self._specs.get(backend)
         if spec is None:
             return ConversationBackendResult(
@@ -605,7 +609,9 @@ class LocalConversationBackends:
                                 "type": "http",
                                 "url": url.rstrip("/") + "/authoring",
                                 "tools": ["*"],
-                                "headers": headers,
+                                "headers": {"Authorization": f"Bearer {authoring_token}"}
+                                if authoring_token
+                                else headers,
                             },
                         }
                     }

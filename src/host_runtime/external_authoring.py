@@ -262,12 +262,19 @@ def _within_budget(catalog: dict[str, JsonValue]) -> dict[str, JsonValue]:
 
 
 class ExternalAuthoring:
-    def __init__(self, chat: ChatAuthoring, actor: str, agent: str) -> None:
+    def __init__(
+        self, chat: ChatAuthoring, actor: str, agent: str, *, session_id: str | None = None
+    ) -> None:
         if not AGENT_NAME.match(agent):
             raise ChatAuthoringError("agent_name_invalid")
         self.chat = chat
         self.actor = actor
         self.source = f"external:{agent}"
+        # The Agent Web conversation this agent answers in (agent mode), so
+        # its drafts and install requests show there as an install card
+        # (owner 2026-10-16). Run requests stay without it: a run's data is
+        # never added to a conversation an external agent reads.
+        self.session_id = session_id
 
     # -- reading -----------------------------------------------------------
 
@@ -437,7 +444,7 @@ class ExternalAuthoring:
         self, raw: dict[str, Any], title: str, candidate_id: str | None = None
     ) -> dict[str, JsonValue]:
         item, problems = self.chat.draft(
-            self.actor, None, title, raw, candidate_id, source=self.source
+            self.actor, self.session_id, title, raw, candidate_id, source=self.source
         )
         if item is None:
             return {"ok": False, "problems": list(problems)}
@@ -483,7 +490,9 @@ class ExternalAuthoring:
         }
 
     def install_workflow(self, candidate_id: str) -> dict[str, JsonValue]:
-        request = self.chat.request(self.actor, None, "install", candidate_id, source=self.source)
+        request = self.chat.request(
+            self.actor, self.session_id, "install", candidate_id, source=self.source
+        )
         return {
             "ok": True,
             "approval_id": request.approval_id,
@@ -503,7 +512,7 @@ class ExternalAuthoring:
         self, raw: dict[str, Any], title: str, candidate_id: str | None = None
     ) -> dict[str, JsonValue]:
         item, problems = self.chat.draft_skill(
-            self.actor, title, raw, candidate_id, source=self.source
+            self.actor, title, raw, candidate_id, source=self.source, session_id=self.session_id
         )
         if item is None:
             return {"ok": False, "problems": list(problems)}
@@ -519,7 +528,7 @@ class ExternalAuthoring:
 
     def install_skill(self, candidate_id: str) -> dict[str, JsonValue]:
         request = self.chat.request(
-            self.actor, None, "install_skill", candidate_id, source=self.source
+            self.actor, self.session_id, "install_skill", candidate_id, source=self.source
         )
         return {
             "ok": True,

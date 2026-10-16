@@ -599,7 +599,9 @@ class ChatAuthoring:
         source: str = "conversation",
     ) -> ApprovalRequest:
         if kind == "install_skill":
-            return self.request_skill_install(actor, candidate_id, source=source)
+            return self.request_skill_install(
+                actor, candidate_id, source=source, session_id=session_id
+            )
         item = self.candidate(candidate_id, actor)
         if kind == "install" and item.status == "installed":
             raise ChatAuthoringError("candidate_already_installed")
@@ -891,6 +893,7 @@ class ChatAuthoring:
         candidate_id: str | None = None,
         *,
         source: str = "conversation",
+        session_id: str | None = None,
     ) -> tuple[SkillCandidate | None, list[str]]:
         previous = self.skill_candidate(candidate_id, actor) if candidate_id else None
         manifest, problems = self.check_skill(actor, raw, previous)
@@ -902,6 +905,9 @@ class ChatAuthoring:
             if previous is not None
             else f"sk-{datetime.now(UTC):%Y%m%d-%H%M%S}-{secrets.token_hex(3)}",
             actor=actor,
+            session_id=session_id
+            if session_id is not None
+            else (previous.session_id if previous is not None else None),
             source=source,
             title=title.strip() or manifest.alias,
             created_at=previous.created_at if previous is not None else now,
@@ -912,7 +918,12 @@ class ChatAuthoring:
         return self._save_skill_candidate(item), []
 
     def request_skill_install(
-        self, actor: str, candidate_id: str, *, source: str = "conversation"
+        self,
+        actor: str,
+        candidate_id: str,
+        *,
+        source: str = "conversation",
+        session_id: str | None = None,
     ) -> ApprovalRequest:
         item = self.skill_candidate(candidate_id, actor)
         if item.status == "installed":
@@ -927,7 +938,7 @@ class ChatAuthoring:
             ApprovalRequest(
                 approval_id=f"ap-{datetime.now(UTC):%Y%m%d-%H%M%S}-{secrets.token_hex(3)}",
                 actor=actor,
-                session_id=None,
+                session_id=session_id,
                 kind="install_skill",
                 source=source,
                 candidate_id=candidate_id,

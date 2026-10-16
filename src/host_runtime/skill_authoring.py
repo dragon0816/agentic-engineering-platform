@@ -37,6 +37,9 @@ _TARGET = re.compile(r"^([a-z0-9][a-z0-9-]*)/([a-z0-9][a-z0-9-]*)@(\d+\.\d+\.\d+
 class SkillCandidate(Contract):
     candidate_id: Symbol
     actor: Symbol
+    # The conversation that drafted it (agent mode in Agent Web), for its
+    # install card; None for an external agent outside Agent Web.
+    session_id: Text | None = None
     source: Text = "conversation"
     title: Text
     created_at: Text
