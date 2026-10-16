@@ -57,6 +57,20 @@ def _loopback(base_url: str) -> bool:
     return host in ("127.0.0.1", "::1", "localhost")
 
 
+def _pinned(value: str | None) -> str | None:
+    """A certificate pin as `AB:CD:...`; None when not set."""
+    if value is None or not value.strip():
+        return None
+    from common.certificates import normalize_fingerprint
+
+    return normalize_fingerprint(value)
+
+
+def _one_trust(certificate_sha256: str | None, ca_file: str | None) -> None:
+    if certificate_sha256 and ca_file:
+        raise ValueError("trust the platform by a pinned fingerprint or by a CA file, not both")
+
+
 class PlatformBinding(Contract):
     """How this host reaches the shared platform and as which token.
 
@@ -75,11 +89,22 @@ class PlatformBinding(Contract):
     token_id: Symbol
     credential: SecretRef
     timeout_seconds: int = Field(default=30, ge=1, le=300, strict=True)
+    # A platform with a self-signed certificate (owner 2026-10-16): the
+    # exact certificate's SHA-256 fingerprint, which the administrator hands
+    # out, or a PEM CA file to verify the chain and name against. Neither
+    # turns verification off; without both the system's trust store decides.
+    certificate_sha256: str | None = None
+    ca_file: Text | None = None
 
     @field_validator("base_url", "member_portal_url")
     @classmethod
     def without_trailing_slash(cls, value: str | None) -> str | None:
         return value.rstrip("/") if value is not None else None
+
+    @field_validator("certificate_sha256")
+    @classmethod
+    def a_sha256_pin(cls, value: str | None) -> str | None:
+        return _pinned(value)
 
     @model_validator(mode="after")
     def https_beyond_loopback(self) -> Self:
@@ -105,6 +130,7 @@ class PlatformBinding(Contract):
                 if field == "member_portal_url":
                     raise ValueError("a member portal beyond loopback is reached over https")
                 raise ValueError("a platform beyond loopback is reached over https")
+        _one_trust(self.certificate_sha256, self.ca_file)
         reject_embedded_secrets(self.model_dump(mode="json"))
         return self
 
@@ -122,11 +148,20 @@ class PlatformPublishBinding(Contract):
     member_portal_url: Text
     credential: SecretRef
     timeout_seconds: int = Field(default=30, ge=1, le=300, strict=True)
+    # The same trust as `PlatformBinding` (owner 2026-10-16); both ports of a
+    # platform present one certificate.
+    certificate_sha256: str | None = None
+    ca_file: Text | None = None
 
     @field_validator("member_portal_url")
     @classmethod
     def without_trailing_slash(cls, value: str) -> str:
         return value.rstrip("/")
+
+    @field_validator("certificate_sha256")
+    @classmethod
+    def a_sha256_pin(cls, value: str | None) -> str | None:
+        return _pinned(value)
 
     @model_validator(mode="after")
     def https_beyond_loopback(self) -> Self:
@@ -143,6 +178,7 @@ class PlatformPublishBinding(Contract):
             raise ValueError("member_portal_url carries no credential")
         if parts.scheme == "http" and not _loopback(self.member_portal_url):
             raise ValueError("a member portal beyond loopback is reached over https")
+        _one_trust(self.certificate_sha256, self.ca_file)
         reject_embedded_secrets(self.model_dump(mode="json"))
         return self
 

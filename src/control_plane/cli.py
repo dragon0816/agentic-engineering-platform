@@ -36,7 +36,36 @@ def _parser() -> argparse.ArgumentParser:
     feedback = subcommands.add_parser("feedback", help="print uploaded conversation feedback")
     feedback.add_argument("--config", type=Path, required=True)
     feedback.add_argument("--limit", type=int, default=1000)
+    # The SHA-256 an administrator hands to members, who pin it in Agent Web
+    # (owner 2026-10-16). Reads the public certificate only.
+    pin = subcommands.add_parser(
+        "certificate-fingerprint", help="print the SHA-256 of the configured TLS certificate"
+    )
+    pin.add_argument("--config", type=Path, required=True)
     return parser
+
+
+def _certificate_fingerprint(path: Path | str) -> str:
+    from common.certificates import pem_fingerprint
+
+    return pem_fingerprint(Path(path).read_text(encoding="ascii"))
+
+
+def _fingerprint_command(config: Path) -> int:
+    try:
+        configuration = _load(config)
+        if configuration.tls_certificate_path is None:
+            print(
+                "this platform is configured without TLS (no tls_certificate_path)", file=sys.stderr
+            )
+            return 2
+        print(
+            f"SHA-256 fingerprint: {_certificate_fingerprint(configuration.tls_certificate_path)}"
+        )
+    except (OSError, ValidationError, ValueError) as error:
+        print(f"certificate unreadable: {error}", file=sys.stderr)
+        return 2
+    return 0
 
 
 def _load(path: Path) -> SharedPlatformConfiguration:
@@ -87,6 +116,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == "feedback":
         return _feedback(args.config, args.limit)
+    if args.command == "certificate-fingerprint":
+        return _fingerprint_command(args.config)
     try:
         configuration = _load(args.config)
         if configuration.invitations and args.invitation_output is None:
@@ -107,6 +138,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         with application:
             print(f"Bridge API: {application.control_base_url}")
             print(f"Member portal: {application.member_base_url}")
+            if configuration.tls_certificate_path is not None:
+                try:
+                    shown = _certificate_fingerprint(configuration.tls_certificate_path)
+                    print(f"Certificate SHA-256: {shown}")
+                except (OSError, ValueError):
+                    pass  # served already; the fingerprint is a convenience
             print("Ctrl+C stops both entry points.")
             try:
                 threading.Event().wait()

@@ -45,6 +45,7 @@ from common.member import (
     MemberSelectRequest,
 )
 from control_plane.enrollment import EnrollmentError
+from control_plane.http import finish_tls, tls_listener
 from control_plane.member import IssuedMemberSession, MemberError, MemberService
 from control_plane.member_login import InMemoryMemberLogins
 from control_plane.member_page import PAGE
@@ -922,8 +923,13 @@ class MemberPortalServer(ThreadingHTTPServer):
         self.tickets = tickets if tickets is not None else BrowserTickets()
         super().__init__((host, port), _Handler)
         if ssl_context is not None:
-            self.socket = ssl_context.wrap_socket(self.socket, server_side=True)
+            # The handshake runs on each request's thread (control_plane.http).
+            self.socket = tls_listener(ssl_context, self.socket)
         self._thread: threading.Thread | None = None
+
+    def finish_request(self, request: Any, client_address: Any) -> None:
+        if finish_tls(request):
+            super().finish_request(request, client_address)
 
     @property
     def base_url(self) -> str:

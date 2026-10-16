@@ -13,6 +13,7 @@ carry.
 """
 
 import json
+import socket
 import ssl
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -148,6 +149,35 @@ class _Handler(BaseHTTPRequestHandler):
         self._send(200, reply.model_dump_json().encode("utf-8"))
 
 
+# How long a client gets to finish the TLS handshake on its own thread.
+HANDSHAKE_TIMEOUT_SECONDS = 10.0
+
+
+def tls_listener(context: ssl.SSLContext, sock: socket.socket) -> ssl.SSLSocket:
+    """The listening socket wrapped for TLS without a handshake on accept.
+
+    With the default, `accept()` runs the handshake on the one thread that
+    accepts, so a client that connects and sends nothing (a port scan, a
+    browser that rejected the certificate and went quiet) would stop every
+    other client until it left. The handshake runs in `finish_tls` instead,
+    on the request's own thread and bounded in time."""
+    return context.wrap_socket(sock, server_side=True, do_handshake_on_connect=False)
+
+
+def finish_tls(request: object) -> bool:
+    """Complete a deferred handshake on the request's thread; False (and
+    the connection closed by the caller) when the client did not."""
+    if not isinstance(request, ssl.SSLSocket):
+        return True
+    try:
+        request.settimeout(HANDSHAKE_TIMEOUT_SECONDS)
+        request.do_handshake()
+        request.settimeout(None)
+    except (OSError, ValueError):
+        return False
+    return True
+
+
 class ControlPlaneServer(ThreadingHTTPServer):
     """The service on a socket. Port 0 takes a free one, which is what a
     test wants; an operator names the port. Given an `ssl.SSLContext` the
@@ -168,8 +198,12 @@ class ControlPlaneServer(ThreadingHTTPServer):
         self.service = service
         super().__init__((host, port), _Handler)
         if ssl_context is not None:
-            self.socket = ssl_context.wrap_socket(self.socket, server_side=True)
+            self.socket = tls_listener(ssl_context, self.socket)
         self._thread: threading.Thread | None = None
+
+    def finish_request(self, request: Any, client_address: Any) -> None:
+        if finish_tls(request):
+            super().finish_request(request, client_address)
 
     @property
     def base_url(self) -> str:

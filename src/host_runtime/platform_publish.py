@@ -25,6 +25,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Literal
 
+from common.certificates import certificate_problem, https_handler
 from host_runtime.contracts import HostLayout, PlatformPublishBinding
 from models.credentials import CredentialResolver
 
@@ -107,6 +108,11 @@ class MemberPortalPublisher:
         self._clock = clock if clock is not None else lambda: datetime.now(UTC)
         self._lock = threading.Lock()
         self._session: tuple[str, datetime] | None = None
+        # The platform's certificate is trusted as the binding says: pinned,
+        # a CA file or the system store (owner 2026-10-16). Never unverified.
+        self._opener = urllib.request.build_opener(
+            https_handler(self.binding.certificate_sha256, self.binding.ca_file)
+        )
 
     def _post(self, operation: str, authorization: str, body: object | None) -> dict[str, Any]:
         raw = b"" if body is None else json.dumps(body).encode("utf-8")
@@ -119,7 +125,7 @@ class MemberPortalPublisher:
         if body is not None:
             request.add_header("Content-Type", "application/json")
         try:
-            with urllib.request.urlopen(request, timeout=self.binding.timeout_seconds) as answer:
+            with self._opener.open(request, timeout=self.binding.timeout_seconds) as answer:
                 reply = json.loads(answer.read())
         except urllib.error.HTTPError as refused:
             try:
@@ -127,7 +133,9 @@ class MemberPortalPublisher:
             except ValueError:
                 code = "request_failed"
             raise PublishError(str(code), refused.code) from None
-        except (urllib.error.URLError, TimeoutError, OSError):
+        except (urllib.error.URLError, TimeoutError, OSError) as failed:
+            if certificate_problem(failed) is not None:
+                raise PublishError("certificate_untrusted") from None
             raise PublishError("platform_unreachable") from None
         except ValueError:
             raise PublishError("bad_reply") from None
@@ -238,6 +246,10 @@ EXPLANATIONS = {
     "Personal Agent again in the Member Portal.",
     "platform_unreachable": "The shared platform did not answer. Check the address in Settings "
     "(and the SSH tunnel, if you use one).",
+    "certificate_untrusted": "The shared platform's certificate is not trusted by this PC "
+    "(self-signed, or not the one this PC pinned). In Settings > Shared platform press 'Fetch "
+    "& show fingerprint', compare it with the fingerprint your administrator gave you and press "
+    "'Trust this certificate'. If it differs, do not trust it and tell your administrator.",
     "not_installed": "That Skill or Workflow is not installed on this PC.",
     "bad_reference": "Name the asset as namespace/name@version.",
     "bad_change": "Choose patch, minor or major.",

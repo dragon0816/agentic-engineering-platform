@@ -11,7 +11,7 @@ reply shape and its own idea of a streaming chunk.
 import json
 import urllib.error
 import urllib.request
-from collections.abc import Callable, Iterator, Mapping
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from time import monotonic
 from typing import Any, Protocol
 
@@ -98,8 +98,10 @@ class _UrllibReply:
 class UrllibTransport:
     """The standard library, so the platform's install stays `pydantic` alone."""
 
-    def __init__(self) -> None:
-        self.opener = urllib.request.build_opener(NoRedirect())
+    def __init__(self, handlers: Sequence[urllib.request.BaseHandler] = ()) -> None:
+        # Extra handlers replace urllib's defaults of the same kind, e.g. an
+        # HTTPS handler that pins a platform's certificate.
+        self.opener = urllib.request.build_opener(NoRedirect(), *handlers)
 
     def send(self, url: str, body: bytes, headers: Mapping[str, str], timeout_s: float) -> Reply:
         return self.request("POST", url, body, headers, timeout_s)

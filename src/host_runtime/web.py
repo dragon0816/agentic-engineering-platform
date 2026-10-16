@@ -218,12 +218,15 @@ from host_runtime.review_routes import (
     write_proposal,
 )
 from host_runtime.shared_platform import (
+    KEEP,
     LOGIN_SHAPE,
     TOKEN_VARIABLE,
     EnrollmentRecord,
     SharedPlatformError,
-    bridge_answers,
     bridge_url,
+    certificate_of,
+    certificate_pin,
+    check_bridge,
     enrolled_token,
     portal_url,
     read_config,
@@ -530,8 +533,10 @@ class AgentWeb:
         self.feedback_sync: Any = None
         self.knowledge_harness = KnowledgeHarness(runtime, namespace)
         self.user_environment = windows_user_environment
-        # Injected for tests; checks the Bridge API answers before enrolling.
-        self.bridge_answers = bridge_answers
+        # Injected for tests; checks the Bridge API answers (with a trusted
+        # certificate) before enrolling, and reads a presented certificate.
+        self.check_bridge = check_bridge
+        self.certificate_of = certificate_of
         # Reads the configured Gateway's model list for the Settings picker.
         self.model_listing_transport: MethodTransport = UrllibTransport()
         # Per-install Workflow settings; the engine reads the same file per run.
@@ -3415,6 +3420,21 @@ class AgentWeb:
                 else ""
             ),
             "base_url": platform.base_url if platform is not None else "",
+            # The pinned certificate (owner 2026-10-16); public, not a secret.
+            "certificate_sha256": (
+                publishing.certificate_sha256
+                if publishing is not None
+                else platform.certificate_sha256
+                if platform is not None
+                else None
+            ),
+            "ca_file": (
+                publishing.ca_file
+                if publishing is not None
+                else platform.ca_file
+                if platform is not None
+                else None
+            ),
             "bridge_id": config.device.bridge_id,
             "registered_by": config.device.registered_by,
             "login_variable": login_variable,
@@ -3440,18 +3460,28 @@ class AgentWeb:
                 portal = portal_url(str(body.get("member_portal_url") or ""))
                 raw_bridge = str(body.get("base_url") or "").strip()
                 base = bridge_url(raw_bridge) if raw_bridge else None
-                if enroll and base is None:
-                    raise SharedPlatformError("bridge_url_missing")
-                if enroll and base is not None and not self.bridge_answers(base):
-                    # Refused before anything is saved (owner 2026-10-15).
-                    raise SharedPlatformError("bridge_unreachable")
+                # "Trust this certificate" / "Forget" (owner 2026-10-16);
+                # absent keeps the pin host.json has.
+                pin = (
+                    certificate_pin(body["certificate_sha256"])
+                    if "certificate_sha256" in body
+                    else KEEP
+                )
                 if code and not LOGIN_SHAPE.fullmatch(code):
                     raise SharedPlatformError("login_malformed")
                 try:
                     current = read_config(self.config_path)
-                    updated = with_settings(current, member_portal_url=portal, base_url=base)
+                    updated = with_settings(
+                        current, member_portal_url=portal, base_url=base, certificate_sha256=pin
+                    )
                 except (OSError, ValueError):
                     raise SharedPlatformError("settings_invalid") from None
+                if enroll and base is None:
+                    raise SharedPlatformError("bridge_url_missing")
+                if enroll and base is not None:
+                    # Refused before anything is saved (owner 2026-10-15).
+                    assert updated.publishing is not None
+                    self.check_bridge(base, updated.publishing.certificate_sha256)
                 if code:
                     assert updated.publishing is not None
                     variable = updated.credential_environment()[updated.publishing.credential.name]
@@ -3536,6 +3566,43 @@ class AgentWeb:
                 config.platform,
                 EnvironmentCredentials(config.credential_environment(), UserEnvironment()),
             )
+
+    def shared_platform_certificate(self, body: dict[str, Any]) -> dict[str, Any]:
+        """The card's "Fetch & show fingerprint" (owner 2026-10-16): the
+        certificate each https address presents, so the member compares its
+        SHA-256 with the one the administrator gave them before trusting it.
+        Reads only; trusting is a separate save."""
+        try:
+            urls = []
+            portal = str(body.get("member_portal_url") or "").strip()
+            bridge = str(body.get("base_url") or "").strip()
+            if portal:
+                urls.append(portal_url(portal))
+            if bridge:
+                urls.append(bridge_url(bridge))
+            if not urls:
+                raise SharedPlatformError("portal_url_invalid")
+            if any(not url.startswith("https://") for url in urls):
+                raise SharedPlatformError("certificate_needs_https")
+            presented = [self.certificate_of(url) for url in urls]
+        except SharedPlatformError as error:
+            return self._shared_problem(error.code)
+        fingerprints = {item["fingerprint"] for item in presented}
+        config = self.runtime.config
+        binding = config.publishing or config.platform
+        pinned = binding.certificate_sha256 if binding is not None else None
+        reply: dict[str, Any] = {
+            "ok": True,
+            "certificates": presented,
+            "fingerprint": presented[0]["fingerprint"],
+            "pem": presented[0]["pem"],
+            "trusted_by_system": all(item["trusted_by_system"] for item in presented),
+            "pinned": pinned,
+            "matches_pin": pinned is not None and fingerprints == {pinned},
+        }
+        if len(fingerprints) > 1:
+            reply.update(self._shared_problem("certificate_mismatch"))
+        return reply
 
     def _shared_problem(self, code: str) -> dict[str, Any]:
         if code == "device_owner_mismatch":
@@ -5132,6 +5199,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/settings/model",
             "/api/settings/laya",
             "/api/settings/shared-platform",
+            "/api/settings/shared-platform/certificate",
             "/api/settings/gateway",
             "/api/settings/telegram",
             "/api/mcp/save",
@@ -5219,6 +5287,12 @@ class _Handler(BaseHTTPRequestHandler):
         if path == "/api/settings/shared-platform":
             self._json(
                 200, self.server.web.update_shared_platform(body if isinstance(body, dict) else {})
+            )
+            return
+        if path == "/api/settings/shared-platform/certificate":
+            self._json(
+                200,
+                self.server.web.shared_platform_certificate(body if isinstance(body, dict) else {}),
             )
             return
         if path == "/api/settings/gateway":

@@ -92,18 +92,65 @@ def bridge_url(value: str) -> str:
         raise SharedPlatformError("bridge_url_invalid") from None
 
 
-def bridge_answers(base_url: str, timeout: float = 8.0) -> bool:
-    """Whether a Shared Platform Bridge API answers at this origin. Checked
-    before enrolling, so a wrong address is refused instead of saved (owner
-    2026-10-15: an old address was saved and only shown as unreachable)."""
-    import json
+def check_bridge(
+    base_url: str, certificate_sha256: str | None = None, timeout: float = 8.0
+) -> None:
+    """Refuse unless a Shared Platform Bridge API answers at this origin,
+    with the certificate this PC trusts. Checked before enrolling, so a wrong
+    address is refused instead of saved (owner 2026-10-15: an old address was
+    saved and only shown as unreachable); a certificate this PC does not
+    trust is said as such (owner 2026-10-16)."""
     import urllib.request
 
+    from common.certificates import certificate_problem, https_handler
+
+    opener = urllib.request.build_opener(https_handler(certificate_sha256))
     try:
-        with urllib.request.urlopen(f"{base_url}/v1/health", timeout=timeout) as answer:
-            return answer.status == 200 and json.loads(answer.read()).get("ok") is True
-    except (OSError, ValueError):
-        return False
+        with opener.open(f"{base_url}/v1/health", timeout=timeout) as answer:
+            if answer.status == 200 and json.loads(answer.read()).get("ok") is True:
+                return
+    except (OSError, ValueError) as error:
+        if certificate_problem(error) is not None:
+            raise SharedPlatformError("certificate_untrusted") from None
+    raise SharedPlatformError("bridge_unreachable")
+
+
+# `KEEP` leaves the pinned certificate as it is; None removes it.
+KEEP = "keep"
+
+
+def certificate_pin(value: object) -> str | None:
+    """The card's "Trust this certificate" value: a SHA-256 fingerprint, or
+    empty to forget the pin."""
+    if value is None or (isinstance(value, str) and not value.strip()):
+        return None
+    if not isinstance(value, str):
+        raise SharedPlatformError("certificate_pin_invalid")
+    from common.certificates import normalize_fingerprint
+
+    try:
+        return normalize_fingerprint(value)
+    except ValueError:
+        raise SharedPlatformError("certificate_pin_invalid") from None
+
+
+def certificate_of(url: str, timeout: float = 8.0) -> dict[str, Any]:
+    """What an https origin presents, for the card's "Fetch & show
+    fingerprint". Public facts only; nothing is trusted by reading it."""
+    from common.certificates import presented_certificate
+
+    try:
+        presented = presented_certificate(url, timeout=timeout)
+    except ValueError:
+        raise SharedPlatformError("certificate_needs_https") from None
+    except OSError:
+        raise SharedPlatformError("certificate_unreachable") from None
+    return {
+        "url": url,
+        "fingerprint": presented.fingerprint,
+        "pem": presented.pem,
+        "trusted_by_system": presented.trusted_by_system,
+    }
 
 
 def _mapped(candidate: dict[str, Any], secret: str, variable: str) -> None:
@@ -114,23 +161,42 @@ def _mapped(candidate: dict[str, Any], secret: str, variable: str) -> None:
 
 
 def with_settings(
-    current: CompanyHostConfiguration, *, member_portal_url: str, base_url: str | None
+    current: CompanyHostConfiguration,
+    *,
+    member_portal_url: str,
+    base_url: str | None,
+    certificate_sha256: str | None = KEEP,
 ) -> CompanyHostConfiguration:
     """host.json with the card's URLs: the one Member Portal URL in both
     `publishing` and `platform`, and the Bridge API URL in `platform` when
-    this PC already has one (a new `platform` needs a token: Enroll)."""
+    this PC already has one (a new `platform` needs a token: Enroll). A
+    pinned certificate (owner 2026-10-16) goes into both as well; `KEEP`
+    leaves the trust as it is, None forgets the pin."""
     candidate = current.model_dump(mode="json")
     publishing = current.publishing
     login = publishing.credential.name if publishing is not None else LOGIN_SECRET
+    pin: str | None
+    if certificate_sha256 == KEEP:
+        source = publishing if publishing is not None else current.platform
+        pin = source.certificate_sha256 if source is not None else None
+        ca_file = source.ca_file if source is not None else None
+    else:
+        # A pin the member chose replaces a CA file; forgetting it leaves
+        # the system's trust store.
+        pin, ca_file = certificate_sha256, None
     candidate["publishing"] = {
         "member_portal_url": member_portal_url,
         "credential": {"name": login},
         "timeout_seconds": publishing.timeout_seconds if publishing is not None else 30,
+        "certificate_sha256": pin,
+        "ca_file": ca_file,
     }
     if login not in current.credential_environment():
         _mapped(candidate, login, LOGIN_VARIABLE)
     if current.platform is not None:
         candidate["platform"]["member_portal_url"] = member_portal_url
+        candidate["platform"]["certificate_sha256"] = pin
+        candidate["platform"]["ca_file"] = ca_file
         if base_url:
             candidate["platform"]["base_url"] = base_url
     return CompanyHostConfiguration.model_validate(candidate)
@@ -140,15 +206,19 @@ def with_enrollment(
     current: CompanyHostConfiguration, *, base_url: str, member_portal_url: str, token_id: str
 ) -> CompanyHostConfiguration:
     """host.json pointing `platform` at the new Bridge token. Only this
-    token's own mapping is added; an older platform's mapping stays."""
+    token's own mapping is added; an older platform's mapping stays. The
+    certificate trust is the one `publishing` has (the card sets both)."""
     candidate = current.model_dump(mode="json")
     timeout = current.platform.timeout_seconds if current.platform is not None else 30
+    publishing = current.publishing
     candidate["platform"] = {
         "base_url": base_url,
         "member_portal_url": member_portal_url,
         "token_id": token_id,
         "credential": {"name": PLATFORM_SECRET},
         "timeout_seconds": timeout,
+        "certificate_sha256": publishing.certificate_sha256 if publishing else None,
+        "ca_file": publishing.ca_file if publishing else None,
     }
     _mapped(candidate, PLATFORM_SECRET, TOKEN_VARIABLE)
     return CompanyHostConfiguration.model_validate(candidate)
@@ -230,4 +300,15 @@ PROBLEMS = {
     "settings_invalid": "host.json would not be valid with these values; nothing was saved.",
     "settings_not_saved": "host.json could not be written; nothing changed in this Agent.",
     "bad_reply": "The shared platform's answer was not an enrollment for this PC.",
+    # A platform with a self-signed certificate (owner 2026-10-16).
+    "certificate_untrusted": "The Bridge API's certificate is not trusted by this PC, so this "
+    "PC was not enrolled. Press 'Fetch & show fingerprint', compare it with the fingerprint "
+    "your administrator gave you, then 'Trust this certificate' and enroll again.",
+    "certificate_pin_invalid": "A certificate fingerprint is a SHA-256: 64 hexadecimal digits "
+    "(colons allowed).",
+    "certificate_needs_https": "Only an https:// address has a certificate to show.",
+    "certificate_unreachable": "That address did not answer a TLS handshake. Check the address "
+    "and that this PC can reach it.",
+    "certificate_mismatch": "The Member Portal and the Bridge API presented different "
+    "certificates; ask your administrator which one is right before trusting either.",
 }

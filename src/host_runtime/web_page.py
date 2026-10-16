@@ -488,6 +488,11 @@ table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
 th, td { border-bottom: 1px solid var(--line); padding: 8px 10px; text-align: left; }
 th { color: var(--dim); font-weight: 600; white-space: nowrap; }
 td.mono, th.mono { font-family: var(--mono); font-size: 12.5px; }
+.shared-cert { border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px;
+  margin: 10px 0; }
+.shared-cert legend { color: var(--dim); font-weight: 600; padding: 0 4px; }
+#shared-cert-fingerprint { display: block; font-family: var(--mono); font-size: 12.5px;
+  overflow-wrap: anywhere; }
 tr:last-child td { border-bottom: none; }
 .card {
   border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
@@ -985,6 +990,19 @@ tr:last-child td { border-bottom: none; }
                  autocomplete="off" placeholder="paste once; it is not shown again"></label>
         </div>
         <p class="note" id="shared-this-pc"></p>
+        <fieldset class="shared-cert" id="shared-cert">
+          <legend>Platform certificate</legend>
+          <p class="note">A platform on the company network with its own (self-signed)
+            certificate: press "Fetch &amp; show fingerprint", compare the SHA-256 with the
+            one your administrator gave you, and only if they are the same press "Trust this
+            certificate". This PC then accepts that certificate and no other.</p>
+          <p class="note" id="shared-cert-pinned"></p>
+          <output id="shared-cert-fingerprint" class="mono"></output>
+          <p><button id="shared-cert-fetch" type="button">Fetch &amp; show fingerprint</button>
+            <button id="shared-cert-trust" type="button" disabled>Trust this certificate</button>
+            <button id="shared-cert-download" type="button" disabled>Download .cer</button>
+            <button id="shared-cert-forget" type="button">Forget</button></p>
+        </fieldset>
         <p><button class="go" id="shared-save" type="submit">Save</button>
           <button id="shared-enroll" type="button">Enroll this PC</button></p>
         <p id="shared-status" class="note" role="status" aria-live="polite"></p>
@@ -4034,13 +4052,22 @@ const TELEGRAM_PROBLEMS = {
 el("shared-portal-url").placeholder = ["http:", "", "127.0.0.1:28776"].join("/");
 el("shared-bridge-url").placeholder = ["http:", "", "127.0.0.1:28775"].join("/");
 
-function showSharedPlatform(info) {
-  if (document.activeElement !== el("shared-portal-url")) {
-    el("shared-portal-url").value = info.member_portal_url || "";
-  }
-  if (document.activeElement !== el("shared-bridge-url")) {
-    el("shared-bridge-url").value = info.base_url || "";
-  }
+// A URL the person typed is not replaced by settings that arrive later.
+const sharedEdited = new Set();
+for (const id of ["shared-portal-url", "shared-bridge-url"]) {
+  el(id).addEventListener("input", () => sharedEdited.add(id));
+}
+
+function showSharedPlatform(info, saved) {
+  if (saved) sharedEdited.clear();
+  const keep = (id) => document.activeElement === el(id) || sharedEdited.has(id);
+  if (!keep("shared-portal-url")) el("shared-portal-url").value = info.member_portal_url || "";
+  if (!keep("shared-bridge-url")) el("shared-bridge-url").value = info.base_url || "";
+  el("shared-cert-pinned").textContent = info.certificate_sha256
+    ? "Trusted certificate (SHA-256): " + info.certificate_sha256
+    : info.ca_file ? "Certificates are checked against " + info.ca_file
+      : "No certificate pinned: only certificates Windows already trusts are accepted.";
+  el("shared-cert-forget").disabled = !info.certificate_sha256;
   el("shared-this-pc").textContent = "This PC: Bridge " + info.bridge_id + ", registered by "
     + info.registered_by + (info.login_saved ? " · Personal Agent code saved"
       : " · no Personal Agent code yet")
@@ -4100,6 +4127,73 @@ el("shared-platform-settings").addEventListener("submit", (event) => {
   event.preventDefault(); saveSharedPlatform(false);
 });
 el("shared-enroll").addEventListener("click", () => saveSharedPlatform(true));
+
+// "Platform certificate" (owner 2026-10-16): fetch shows what the platform
+// presents; trusting stores exactly the fingerprint the member compared.
+let presentedCertificate = null;
+
+async function fetchSharedCertificate() {
+  const out = el("shared-cert-fingerprint"), status = el("shared-status");
+  presentedCertificate = null;
+  el("shared-cert-trust").disabled = true; el("shared-cert-download").disabled = true;
+  status.classList.remove("bad"); out.textContent = "Reading the certificate…";
+  try {
+    const reply = await call("/api/settings/shared-platform/certificate", {
+      member_portal_url: el("shared-portal-url").value.trim(),
+      base_url: el("shared-bridge-url").value.trim()});
+    if (reply.ok === false) {
+      out.textContent = ""; status.classList.add("bad");
+      status.textContent = reply.message || reply.code;
+      return;
+    }
+    presentedCertificate = reply;
+    out.textContent = "SHA-256 " + reply.fingerprint
+      + (reply.matches_pin ? " · already trusted on this PC"
+        : reply.trusted_by_system ? " · Windows already trusts it" : " · not trusted yet");
+    el("shared-cert-trust").disabled = !!reply.matches_pin;
+    el("shared-cert-download").disabled = false;
+  } catch (failure) {
+    out.textContent = ""; status.classList.add("bad"); status.textContent = failure.message;
+  }
+}
+
+async function trustSharedCertificate(fingerprint) {
+  const status = el("shared-status");
+  status.classList.remove("bad");
+  try {
+    const reply = await call("/api/settings/shared-platform", {
+      member_portal_url: el("shared-portal-url").value.trim(),
+      base_url: el("shared-bridge-url").value.trim(),
+      certificate_sha256: fingerprint, code: "", enroll: false});
+    if (reply.member_portal_url !== undefined) showSharedPlatform(reply, reply.ok !== false);
+    if (reply.ok === false) {
+      status.classList.add("bad");
+      status.textContent = "Not saved: " + (reply.message || reply.code);
+      return;
+    }
+    el("shared-cert-trust").disabled = true;
+    status.textContent = (fingerprint ? "Certificate trusted. " : "Certificate forgotten. ")
+      + status.textContent;
+  } catch (failure) {
+    status.classList.add("bad"); status.textContent = "Not saved: " + failure.message;
+  }
+}
+
+el("shared-cert-fetch").addEventListener("click", () => fetchSharedCertificate());
+el("shared-cert-trust").addEventListener("click", () => {
+  if (presentedCertificate) trustSharedCertificate(presentedCertificate.fingerprint);
+});
+el("shared-cert-forget").addEventListener("click", () => trustSharedCertificate(""));
+el("shared-cert-download").addEventListener("click", () => {
+  if (!presentedCertificate) return;
+  // The public certificate only, for importing into Windows (see the guide).
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(new Blob([presentedCertificate.pem],
+    {type: "application/x-x509-ca-cert"}));
+  link.download = "shared-platform.cer";
+  document.body.append(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+});
 
 // -- LLM gateway (docs/phases/LLM_GATEWAY.md) --------------------------------
 // Running / Starting… / Stopped, token expiry (never the value), last test,

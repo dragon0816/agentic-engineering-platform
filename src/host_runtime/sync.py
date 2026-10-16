@@ -37,6 +37,7 @@ from agent.contracts import AgentProfile
 from agent.skills import SkillManifest
 from common.assets import AssetIdentity, WorkflowManifest
 from common.base import Contract, Symbol
+from common.certificates import certificate_problem, describe_problem, https_handler
 from common.distribution import (
     AssetKind,
     BridgeStateSnapshot,
@@ -242,7 +243,13 @@ class PlatformClient:
     ) -> None:
         self.binding = PlatformBinding.model_validate(binding)
         self._resolver = resolver
-        self._transport = transport if transport is not None else UrllibTransport()
+        self._transport = (
+            transport
+            if transport is not None
+            else UrllibTransport(
+                (https_handler(self.binding.certificate_sha256, self.binding.ca_file),)
+            )
+        )
         # How long a polled job's workflow is waited on before the Agent
         # reports it still running; the engine's default when None. A run
         # that outlives it is still waited for before it is settled.
@@ -269,6 +276,12 @@ class PlatformClient:
                 float(self.binding.timeout_seconds),
             )
         except Exception as error:  # noqa: BLE001 - every transport fault is one answer
+            problem = certificate_problem(error)
+            if problem is not None:
+                # Not a moment to wait out: the certificate is not the one
+                # this PC trusts, and nothing was sent (owner 2026-10-16).
+                untrusted = Failure(code="certificate_untrusted", message=describe_problem(problem))
+                return _Answer("unreachable", untrusted, None)
             return _Answer("unreachable", transport_failure(error, prefix="platform"), None)
         try:
             raw = b"".join(reply.chunks())
