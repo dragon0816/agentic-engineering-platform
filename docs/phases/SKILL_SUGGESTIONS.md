@@ -1,8 +1,9 @@
 # Suggested Skills from experience (design)
 
 Owner request: 2026-10-16. Status: **design approved 2026-10-16 (decisions at the end); S1
-implemented 2026-10-16 (section "S1 as built" at the end), S2-S6 queued.** S1 detects and
-reports only; no card, draft or candidate exists yet.
+implemented 2026-10-16 (section "S1 as built"), owner confirmed its dry-run grouping on his
+data the same day; S2 implemented 2026-10-16 (section "S2 as built"); S3-S6 queued.** A
+suggestion is a Reviews card with evidence; no draft or candidate exists yet (S3).
 
 ## 1. Why
 
@@ -277,8 +278,8 @@ Turning suggestions off stops new detection; existing cards stay until decided.
 
 | Slice | What | Done when |
 |---|---|---|
-| S1 (**implemented 2026-10-16**, see "S1 as built") | Detection: `from_reuse` harvest, deterministic pre-filter, the model's grouping pass (owner decision 1), thresholds, dedupe against installed, pending and reported; findings written to the nightly report only (no cards) | A nightly run on this PC's last 30 days lists clusters the owner agrees with (owner's dry run pending); tests |
-| S2 | Reviews card without draft: `skill_suggestion` kind, evidence links, Ignore / Snooze, settings (on/off, sensitivity) | Cards appear and decisions are recorded |
+| S1 (**implemented 2026-10-16**, see "S1 as built") | Detection: `from_reuse` harvest, deterministic pre-filter, the model's grouping pass (owner decision 1), thresholds, dedupe against installed, pending and reported; findings written to the nightly report only (no cards) | A nightly run on this PC's last 30 days lists clusters the owner agrees with (**done**: owner's dry run 2026-10-16, "looks reasonable"); tests |
+| S2 (**implemented 2026-10-16**, see "S2 as built") | Reviews card without draft: `skill_suggestion` kind, evidence links, Ignore / Snooze, settings (on/off, sensitivity) | Cards appear and decisions are recorded (live check after the owner restarts Agent Web) |
 | S3 | Draft generation: model call, Skill/Workflow choice, typed parameters, check-skill / check-workflow with one retry, form preview; **Create draft** to a candidate | A suggestion becomes a candidate that the owner installs with the Install button |
 | S4 | **Update existing** proposals and corrections signal | One correction turned into an update candidate |
 | S5 | End-of-conversation card and Telegram link line; telemetry events | Card shown on the 3rd matching request; Atlas counts |
@@ -386,3 +387,74 @@ single-link clustering; the end-of-conversation signal, long runs (4.2), correct
 (4.3) and sensitivity rows other than Normal are not built; the nightly pass mines only
 the device owner (`runtime.actor`), other members on a shared workstation are not yet
 iterated (the CLI `--actor` covers one at a time); no telemetry events yet (S5).
+
+Owner check (2026-10-16): the owner ran the S1 dry run on his own data and said the
+grouping "looks reasonable". S1's done-when condition is met.
+
+## S2 as built (2026-10-16)
+
+Code: `src/host_runtime/experience_proposals.py` (`ReviewProposal.actor`, `SuggestionCard`,
+`ProposalStore.suggest`, `make_cards`, actor filtering, the column migration);
+`src/host_runtime/skill_suggestions.py` (sensitivity rows, the `ignored` group status and
+its way back, `updated` items, card fields in the report); `src/host_runtime/web.py`
+(`experience_review` makes the cards, `reviews` / `review_decide` filter by the person,
+excerpts cut at view time, settings rows); the Reviews tab in `src/host_runtime/web_page.py`;
+tests `tests/test_skill_suggestion_cards.py`. Decision record: `docs/DECISIONS.md`
+2026-10-16 "Skill suggestions S2: cards per person, ids not text, sensitivity per Host".
+
+- **Cards.** After the nightly pass, every `qualified` item becomes one proposal of kind
+  `skill_suggestion` with id `suggest-<group id>` (a card made again after an Ignore gets
+  `-2`, `-3`, ...). Its `actor` is the person the pass ran for; `suggestion` holds the
+  group id, task, counts (requests, sessions, days), matched words, tool shape, the
+  sensitivity in force, `seen_more` and the evidence as session id, message id and date.
+  A reported group that gains requests on a later night is an `updated` item and updates
+  the open (proposed or snoozed) card: counts, evidence and "seen N more times". A group
+  never has two open cards. A dry run or suggestions off make no card. The per-night cap
+  (sensitivity row) counts first proposals and re-proposals together.
+- **No text in the card.** The card keeps ids and dates only. `/api/reviews` cuts each
+  excerpt (160 characters, `SECRET_PATTERN` redacted) from the person's conversation when
+  it lists the card; a deleted conversation or message is shown as "This conversation was
+  deleted." This keeps the S1 decision of no second copy of conversation text. (The
+  nightly `review-*.json` keeps its S1 excerpts as before.)
+- **Opening evidence.** Each entry is a 44 px button that opens Agent Web's own
+  conversation view (`loadChat(session)`), scrolls to the turn whose asked message id
+  matches (`data-asked-id` on each turn block, added in S2) and outlines it.
+- **Actions** (Agent Web routes only, `/api/reviews/decide` with the existing actions; the
+  model has no tool): **Ignore** = `reject` with an optional quick pick (`reason_code`:
+  `not_useful`, `one_off`, `wrong_grouping`) and an optional free text; **Snooze 7 days**
+  = `snooze`; an ignored card can be **Reopen**ed. `accept` and `done` are refused for a
+  suggestion (`suggestion_has_no_draft_yet`) until S3. The failure review's Reject still
+  needs a reason.
+- **Ignored groups (6.4.3).** Ignoring marks the S1 group `ignored` with the time and the
+  request ids it held. It comes back only when the requests that joined it after that time
+  meet the sensitivity's threshold on their own (requests, sessions and days, not just the
+  count); fewer are reported as `considered` with the count. Reopening a card puts the
+  group back to `reported`.
+- **Visibility.** Agent Web acts as one person, `runtime.actor`: there is no per-request
+  member sign-in, and the Personal Agent login is per Windows user. `reviews` lists, and
+  `review_decide` decides, only proposals whose actor is that person; another person's
+  card answers `unknown_proposal`, by id too. Rows saved before S2 (no actor) and the
+  failure review's proposals belong to the device owner.
+- **Settings** (Reviews → "Review settings and the latest report" → Suggested Skills, in
+  `experience-settings.json`, additive): on/off, **Sensitivity** Low / Normal / High with
+  each row in plain words (from `skill_suggestions.SENSITIVITY`), and the per-pass request
+  cap. Read on every pass, so a change applies to the next nightly pass without a restart.
+  The route keeps fields a form does not send.
+
+| Sensitivity | Requests | Sessions | Days | New cards per night |
+|---|---|---|---|---|
+| Low | 4 | 3 | 3 | 1 |
+| Normal (default) | 3 | 3 | 2 | 3 |
+| High | 2 | 2 | 1 (the table gives none) | 5 |
+
+- **Report.** Each item carries `card` and `card_note` ("card created", "card created
+  again after it was ignored", "card updated: seen N more times", "card unchanged");
+  `suggestion_counts` gains `sensitivity`, `updated`, `cards_created`, `cards_updated`;
+  the `.md` lists "- Card: <id> (<note>)" and the card counts.
+
+Deviations: the settings are per Host workspace, not per member (Agent Web has a single
+person, so a per-member map would have no way to be edited; a member with their own
+Windows login has their own workspace and settings); the similarity column of section 5
+is not used (the model groups, owner decision 1); High's day count is 1 because the table
+gives none; the nightly pass still mines only the device owner (`runtime.actor`); the
+end-of-conversation card and telemetry events remain S5.

@@ -2387,3 +2387,24 @@ s-k-20261011T102952` (not published).
   --check and strict mypy (src+tests) in the project `.venv` and in `C:\aepci-wk\venv`
   (reinstalled with `.[dev,office]`); full pytest project `.venv` 3075 passed, 7 skipped;
   CI-like venv 3052 passed, 30 skipped. Not done: the owner's dry run on his own data, S2-S6.
+- [x] Suggested Skills from experience, slice S2: Reviews cards, Ignore / Snooze and
+  settings (2026-10-16, Claude Code; spec `docs/phases/SKILL_SUGGESTIONS.md` "S2 as built",
+  decision `docs/DECISIONS.md` 2026-10-16 "Skill suggestions S2: cards per person, ids not
+  text, sensitivity per Host"; owner confirmed the S1 dry-run grouping the same day). A
+  qualified group becomes one `skill_suggestion` card for its person (`ReviewProposal.actor`,
+  additive `actor` column migration, NULL = device owner); new requests update the open card
+  ("seen N more times"); at most the sensitivity's cards a night. Card: task, why (matched
+  words, tool shape), counts, evidence buttons that open the conversation at the request
+  (excerpts cut from the conversation at view time, never stored). Ignore (optional
+  quick-pick reason and text) marks the group `ignored`; it returns only when new requests
+  after the Ignore meet the threshold; Snooze 7 days; Reopen; no accept or draft yet.
+  `/api/reviews` and `/api/reviews/decide` filter by `runtime.actor` (another person's id
+  answers `unknown_proposal`). Settings in the Reviews panel: on/off, Sensitivity Low /
+  Normal / High in plain words, request cap; applied on the next pass without a restart.
+  Report items carry `card` / `card_note`. USER_GUIDE 6.6 note. Tests:
+  `tests/test_skill_suggestion_cards.py` (17, incl. a real browser render with 44 px
+  checks, dark mode, no horizontal scroll; screenshots in `.scratch/skill-suggestion-ui/`).
+  Verification: ruff check, format --check, mypy (src+tests) in the project `.venv` and
+  `C:epci-wkenv` (`.[dev,office]`); full pytest project `.venv` 3091 passed, 7 skipped,
+  1 failed (a settings exact-dict test, updated for the new field and re-run green); CI-like
+  venv 3069 passed, 30 skipped. Not verified live (Agent Web not restarted).

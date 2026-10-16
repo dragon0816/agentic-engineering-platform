@@ -1,38 +1,45 @@
 # Handoff
 
-Updated: 2026-10-16 (Asia/Taipei), by Claude Code (Suggested Skills S1)
+Updated: 2026-10-16 (Asia/Taipei), by Claude Code (Suggested Skills S2)
 
-## Suggested Skills from experience, slice S1 (2026-10-16, Claude Code) — latest
+## Suggested Skills from experience, slice S2 (2026-10-16, Claude Code) — latest
 
-Goal: S1 of `docs/phases/SKILL_SUGGESTIONS.md` under the owner decisions of 2026-10-16
-(the model groups requests; the deterministic score only pre-filters): detect repeated
-work in ONE actor's conversations and write it to the nightly experience report only.
-As built: that document's section "S1 as built"; decision `docs/DECISIONS.md` 2026-10-16
-"Skill suggestions S1: the model groups, the score only filters"; row in `docs/TASKS.md`.
-Committed on main, not pushed.
-- **Code:** `src/host_runtime/skill_suggestions.py` (harvest, pre-filter, grouping call,
-  store, thresholds, dedupe, report models, `suggest_for_runtime`);
-  `experience_review.py` (`structured_call` shared with the failure review,
-  `review_model`, `ReviewReport.suggestions` / `suggestion_counts`, markdown section);
-  `experience.py` (settings `suggestions`, `suggestion_max_requests`); `web.py`
-  (`experience_review` runs the pass, `_suggestions_due` lets the nightly loop run without
-  failure cases, the settings route keeps unsent fields); `cli.py`
-  (`aep-host experience suggest --config <host.json> --dry-run [--actor X] [--json]`).
-- **Verified:** ruff check, format --check, mypy (src+tests) in the project `.venv` and in
-  `C:\aepci-wk\venv` (reinstalled `.[dev,office]`); full pytest: project `.venv` 3075 passed,
-  7 skipped; CI-like venv 3052 passed, 30 skipped. All tests use a fake model. Note: the
-  Reviews page's "Run review now" also runs a suggestion pass (one model call when there
-  are new requests).
-- **Not verified / not done:** no live pass on the owner's data (by instruction); Agent Web
-  was not restarted, so the running instance still has the old nightly code until the
-  owner restarts it (check `/api/tasks` first). No cards, drafts, Reviews kind, telemetry
-  events or end-of-conversation card (S2-S5). The nightly pass mines only `runtime.actor`.
-- **Next (owner):** run the dry run on his data and judge the groups:
-  `.venv\Scripts\aep-host.exe experience suggest --config "%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0\host.json" --dry-run`
-  from the repository (the working tree Agent Web runs on)
-  (add `--json` for the full report, `--actor <id>` for another member). It calls the
-  review model once and writes nothing. Then S2 (Reviews card, Ignore/Snooze, settings in
-  the page, per-member passes).
+Goal: S2 of `docs/phases/SKILL_SUGGESTIONS.md`: a group the nightly pass qualifies becomes a
+"Suggested Skill" card in Agent Web → Reviews for the person whose requests formed it, with
+evidence, Ignore / Snooze, and settings (on/off, Sensitivity Low / Normal / High, request
+cap). No draft, candidate or install (S3). The owner confirmed S1's dry-run grouping
+("looks reasonable") and asked that each person can set the sensitivity in Agent Web.
+As built: that document's section "S2 as built"; decision `docs/DECISIONS.md` 2026-10-16
+"Skill suggestions S2: cards per person, ids not text, sensitivity per Host"; row in
+`docs/TASKS.md`; USER_GUIDE 6.6 "建議的 Skill". Code commit 46eb861f, docs commit after it,
+on main, not pushed.
+- **Code:** `experience_proposals.py` (`ReviewProposal.actor` / `reason_code` /
+  `suggestion`, additive `actor` column migration, `all(actor)` / `get(id, actor)`,
+  `suggest`, `make_cards`); `skill_suggestions.py` (`SENSITIVITY` rows, `ignored` group
+  status and `set_ignored`, `updated` items, `card` / `card_note`, `evidence_excerpt`);
+  `web.py` (`experience_review` makes cards, `reviews` / `review_decide` filter by
+  `runtime.actor` and cut excerpts at view time, `/api/reviews/decide` takes
+  `reason_code`); `web_page.py` (card, Ignore box, evidence opens the conversation at the
+  request via `data-asked-id`, settings fieldset). Tests `tests/test_skill_suggestion_cards.py`
+  (17); two exact-field assertions extended for the new fields
+  (`test_skill_suggestions.py` report item, `test_knowledge_pipeline_web.py` settings).
+- **Verified:** ruff check, ruff format --check, mypy (src+tests) in the project `.venv`
+  and in `C:epci-wkenv` (reinstalled `.[dev,office]`). Full pytest: project `.venv`
+  3091 passed, 7 skipped, 1 failed (the settings exact-dict test above, updated for the new
+  field and re-run green); CI-like venv after the fix 3069 passed, 30 skipped. Real browser
+  render of the card (light, dark, Ignore box, settings, opened conversation, 390 px wide):
+  screenshots in `.scratch/skill-suggestion-ui/`. All models are fakes.
+- **Not verified / not done:** no live pass, Agent Web not restarted (check `/api/tasks`
+  first). Settings are per Host workspace, not per member: Agent Web serves one person
+  (`runtime.actor`) with no per-request member sign-in, so a per-member map could not be
+  edited; a member with their own Windows login has their own workspace. The nightly pass
+  still mines only `runtime.actor`. No telemetry events or end-of-conversation card (S5).
+- **Next (owner):** restart Agent Web on this working tree; Reviews → "Review settings and
+  the latest report": the Suggested Skills box shows the switch, the three sensitivity
+  rows in words and the cap; press **Review now** (one grouping call when there are new
+  requests) or wait for the night; a qualified group appears under **To decide** as a
+  Suggested Skill card counted in the header; press a request to open that conversation;
+  try Ignore with and without a reason and Snooze. Then S3 (drafts and Create draft).
 
 ## Shared Platform on 172.25.228.141 over https with a pinned certificate (2026-10-16, Claude Code)
 

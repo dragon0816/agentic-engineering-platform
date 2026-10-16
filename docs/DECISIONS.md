@@ -3223,3 +3223,44 @@ with history); persisting request excerpts (a second copy of conversation text o
 the conversation store); marking one-offs as sent (a one-off could then never meet the
 request that repeats it); mining every actor on the Host in the nightly job for now (S1
 mines the device owner; per-member passes come with the Reviews card in S2).
+
+## 2026-10-16 — Skill suggestions S2: cards per person, ids not text, sensitivity per Host
+
+Decision (slice S2 of `docs/phases/SKILL_SUGGESTIONS.md`, section "S2 as built"): a group
+the nightly pass qualifies becomes one `skill_suggestion` proposal in the existing
+`ProposalStore`, owned by the person whose requests formed it.
+
+- **Actor field, additive migration.** `ReviewProposal` gains `actor` (default None), and
+  the `proposals` table gains a nullable `actor` column through `ALTER TABLE ... ADD
+  COLUMN` when it is missing (checked with `PRAGMA table_info` on every open, so it runs
+  once). Old rows keep NULL and their JSON records are untouched; a NULL actor means the
+  device owner (`ProposalStore(owner=runtime.actor)`), which keeps every failure-review
+  proposal visible exactly where it was. Inserts now name their columns.
+- **Visibility is enforced in the store, not the page.** `all(actor)` and `get(id, actor)`
+  return only that person's proposals; another person's id answers `unknown_proposal`, the
+  same as a missing one, so its existence is not disclosed. Agent Web passes
+  `runtime.actor`: it has no per-request member identity (the Personal Agent login is per
+  Windows user), so that is the person signed in to this Agent Web.
+- **Cards keep ids, not request text.** The card stores session id, message id and date;
+  `/api/reviews` cuts the excerpt from the person's conversation when listing (redacted
+  again). This follows the S1 decision of no second copy of conversation text, and a
+  deleted conversation leaves the evidence ("This conversation was deleted.").
+- **One open card per group.** Card id `suggest-<group id>`; a later `updated` item (a
+  reported group that gained requests) updates the open card's counts, evidence and
+  `seen_more`. An Ignore is a `reject` with an optional quick-pick `reason_code` and an
+  optional text; it marks the S1 group `ignored` with the time and the request ids held.
+  The group comes back (as card `-2`, ...) only when the requests that joined after the
+  Ignore meet the whole threshold on their own (requests, sessions, days), the strict
+  reading of 6.4.3 so one busy session cannot bring it back.
+- **Sensitivity is one setting per Host workspace** (`suggestion_sensitivity`, Low /
+  Normal / High from section 5's repeated-requests column; High's missing day count is 1),
+  read on every pass, so no restart is needed.
+- **No accept in S2.** `accept` and `done` are refused for a suggestion until S3 adds
+  Create draft; the model gets no tool for any decision.
+
+Rejected: storing excerpts in the card (second copy of text, outlives a deleted
+conversation); a per-member settings map in `experience-settings.json` (nothing can edit
+another member's entry while Agent Web serves one person; revisit with per-member sign-in);
+filtering only in the page (an id would still be decidable); reopening the rejected card
+on re-proposal (it would erase the recorded Ignore); counting only the number of new
+requests after an Ignore (two in one session would bring a card back).

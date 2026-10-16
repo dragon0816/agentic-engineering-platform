@@ -630,6 +630,29 @@ vault）、**Write bilingual summaries** / **Build layered index**（大型 wiki
 - **Review settings and the latest report**：**Review now**（立即回顧）、
   **Keep cases [n] days**（案例保留天數）、**Review nightly**（每晚自動）、**Save settings**。
 
+#### 建議的 Skill（Suggested Skill）
+
+Agent 每晚也會比對**你自己的**提問；同一件工作你重複做了好幾次，就會在 **To decide**
+出現一張 **Suggested Skill** 卡片。只有你看得到自己的建議，同一台電腦的其他成員看不到。
+
+- 卡片內容：這件工作的一句話說明；**Why**（相同的關鍵字、用了相同的工具順序）；
+  次數（幾次提問、幾個對話、幾天）；以及你的提問清單（日期與摘要）。點一筆就會打開那個
+  對話並捲到那則提問；對話已刪除的會標示 "This conversation was deleted."。
+- 之後又重複同樣的工作，會更新同一張卡（"seen N more times since"），不會多出新卡。
+- 按鈕：**Ignore**（忽略；可選 "Not useful"、"One-off"、"Wrong grouping"，也可再補一句，
+  **都不是必填**）、**Snooze 7 days**（先藏 7 天）。被忽略的建議，要等你**之後**又重複到
+  門檻的次數，才會再出現。已忽略的卡可以 **Reopen**。
+- 目前**還不會產生草稿**，也沒有 **Create draft** 按鈕；不會自動安裝任何東西。
+- 設定在 **Review settings and the latest report → Suggested Skills**，按 **Save settings**
+  儲存，下一次每晚回顧就生效，不用重開 Agent：
+  - **Suggest Skills from my repeated work**：開／關（預設開）；
+  - **Sensitivity**（敏感度，要重複幾次才建議）：
+    - **Low**：3 個對話中共 4 次、至少 3 天，每晚最多 1 張；
+    - **Normal**（預設）：3 個對話中共 3 次、至少 2 天，每晚最多 3 張；
+    - **High**：2 個對話中共 2 次，每晚最多 5 張；
+  - **Compare at most [n] requests a night**：每晚最多送幾則提問給模型比對（10～1000，預設 120）。
+- 這些設定存在這台 Host 的工作區，對在這台 Agent Web 上的你生效。
+
 ### 6.7 寫到哪裡
 
 | 動作 | 寫入 |
