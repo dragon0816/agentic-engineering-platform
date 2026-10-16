@@ -1,8 +1,56 @@
 # Handoff
 
-Updated: 2026-10-15 (Asia/Taipei), by Claude Code (agent mode for coding-agent backends)
+Updated: 2026-10-16 (Asia/Taipei), by Claude Code (Hermes skill pack and bundled Skills)
 
-## Agent mode for Claude Code / Copilot in Agent Web (2026-10-15, Claude Code) — latest
+## Hermes skill pack and bundled Skills (2026-10-16, Claude Code) — latest
+
+Goal: owner request 2026-10-15 + decisions 2026-10-16, `docs/phases/HERMES_SKILL_PACK.md`
+(design, scan findings, bundle list, phase B, this PC). Decision `docs/DECISIONS.md`
+2026-10-16 "Bundled Skills: in-use on, skill packs off, ..."; row in `docs/TASKS.md`.
+Committed on main, not pushed (phase A ad9811c9, 16e100f8; phase B commits after
+them). The CI smoke assertions for it went into `verify.yml` with 96f551b5.
+- Pack: `packages/hermes-skill-pack` (51 skills: manifests `hermes/<name>`, folders
+  `skills/vendor/hermes-<name>`, `pack.json`, `NOTICE.md`), made by
+  `scripts/port_hermes_skills.py --source %LOCALAPPDATA%\hermes\skills --out
+  packages\hermes-skill-pack [--personal-out <outside repo>]` (deterministic; refuses
+  credentials, owner data, non-MIT licences).
+- Bundle/installer: builder copies `hermes/` + template `aep-skills/` (two
+  knowledge-query manifests); `install.ps1`/`update.ps1` run `aep-host assets
+  install-bundled --bundle <root>` (`host_runtime/skill_packs.py`): in-use on, pack
+  off, never overwrite / re-enable / bring back removed. Pack folders in
+  `workspace/agent-skills/`; copied to `~/.claude/skills` / `~/.copilot/skills` only
+  while switched on and only where AEP's setup is (`asset_shelf` switch/remove with
+  `environment`, `agent_setup.link_pack_skill` / `unlink_pack_skill`; `remove()` takes
+  all pack copies out). Builder scan allow-list `ALLOWED_PLACEHOLDERS`.
+- This PC: 58 Hermes skills (51 + 7 internal; internal `business-cards` kept) switched
+  off in the live workspace, 58 folders in `workspace/agent-skills`; internal sources in
+  `%LOCALAPPDATA%\AgenticEngineeringPlatform\hermes-personal-pack`; backup in
+  `%LOCALAPPDATA%\AgenticEngineeringPlatform\backups\20261016-before-hermes-pack`. No
+  coding-agent folder touched, Agent Web not restarted.
+- Verified (2026-10-16): ruff check ., ruff format --check . (838 files), strict mypy
+  src+tests (602 files) in the project `.venv` and a fresh CI-like venv
+  (`%LOCALAPPDATA%\Temp\aepci3`, only `.[dev,office]`). Full pytest: project `.venv`
+  2944 passed, 6 skipped, 1 failed; CI-like venv 2920 passed, 29 skipped, 2 failed. The
+  common failure, `test_ai_proposed_changes.py::...[telegram-...-bot token is not saved]`,
+  also fails on a clean worktree of e03a025a: it reads whether a Telegram bot token is
+  saved on this PC (machine state, not this change). The other, `test_browser.py::
+  test_a_throwaway_profile_is_removed_although_the_browser_holds_it`, passed on rerun
+  (timing). The verify.yml "Build and install Windows offline preview" step was replayed
+  locally with a throwaway USERPROFILE and `-NoShortcut`: bundle built from this tree,
+  installed, every assertion passed (25 on, 52 off; the shipped Knowledge 1.0.0 set
+  aside; knowledge-query moved to disabled stayed off on reinstall; ask
+  needs_input/unknown_skill); `uninstall.ps1` refused the temporary root (it only removes
+  under `%LOCALAPPDATA%\AgenticEngineeringPlatform`), as designed.
+- NOT verified: a real Claude Code / Copilot session using a switched-on `hermes-*`
+  skill (tests use a temporary home); Agent Web switch on/off against the live
+  workspace (needs a restart on this code).
+- Next (owner): restart Agent Web on this code; Capabilities > Skills > filter
+  "Switched off" lists 58 `hermes/...`; switch one on (e.g. `hermes/docx`) and check
+  `%USERPROFILE%\.claude\skills\hermes-docx` appears (only if AEP's coding-agent setup
+  is installed there), switch off and check it is gone. Then release a bundle
+  (`scripts/release_windows.py`).
+
+## Agent mode for Claude Code / Copilot in Agent Web (2026-10-15, Claude Code)
 
 Goal: owner-approved design `docs/phases/AGENT_MODE_BACKENDS.md` ("Revised rules (owner,
 2026-10-15)" replace items 1-3). Decisions `docs/DECISIONS.md` 2026-10-15 "Agent mode for

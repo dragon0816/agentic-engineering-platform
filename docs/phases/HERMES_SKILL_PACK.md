@@ -1,8 +1,6 @@
 # Hermes skill pack
 
-Status: phase A done (pack data, converter, tests; 2026-10-15, Claude Code).
-Phase B (bundle, installer, manual, installs on this PC) waits for the CI
-formatting work to land, because it edits existing files.
+Status: done (phase A 2026-10-15, phase B and this PC 2026-10-16, Claude Code).
 
 ## Owner request (2026-10-15)
 
@@ -141,54 +139,101 @@ and public-attribution domains. Findings of the 2026-10-15 run:
 - `ui-ux-pro-max/data/stacks/avalonia.csv` holds `C:\Users\data\config.json` as an
   anti-pattern example: generic, kept.
 
-## AEP in-use Skills for the bundle (proposal, owner to confirm)
+## AEP in-use Skills in the bundle (owner-approved 2026-10-16)
 
-Read from this PC's live workspace (`assets/skills`, `assets/workflows`, read
-only) on 2026-10-15. Ship switched **on**:
+Read from this PC's live workspace (`assets/skills`, `assets/workflows`, read only)
+on 2026-10-15. Installed switched **on**:
 
-- Already shipped by `aep-host export-assets` at install and update (no change):
-  `company-agent/workflow-author@1.1.0`, `company-agent/market-alignment@1.1.0`,
+- Every manifest `aep-host export-assets` ships (`host_runtime.assets.shipped()`):
+  `company-agent/workflow-author@1.1.0`, `company-agent/knowledge-query@1.0.0`
+  (set aside by 1.12.0 below), `company-agent/market-alignment@1.1.0`,
   `company-agent/personal-proof@1.1.0`, `engineering/coding@1.7.0`,
-  `engineering/rs-ncc-improvement-plan-skill@1.0.0`,
-  `engineering/team-tickets@2.1.0`, `engineering/weekly-report@2.0.0`, with the
-  Workflows they call (`personal-proof`, `coding-change`, `run-python`,
-  `rs-ncc-improvement-plan`, `jira-team-tickets-preview`, `sde-weekly-report`).
-- Added by the bundle (the owner's evolved Knowledge pair, live since 425c5f6;
-  no personal data found): `company-agent/knowledge-query@1.12.0` (team
-  `engineering`; the Knowledge procedure for the shared RS_Knowledge vault) and
-  `engineering/knowledge-query@1.0.1` (tool route to `knowledge-query/ask`). The
-  latter is owned by `user/leo.chi`, visibility private: ship as is, or re-own it
-  as `team/engineering` (changes its digest) - owner's choice.
+  `engineering/rs-ncc-improvement-plan-skill@1.0.0`, `engineering/team-tickets@2.1.0`,
+  `engineering/weekly-report@2.0.0`, `engineering/sales-to-chipset@1.0.0`,
+  `engineering/release-package-guide@1.0.0` and the Workflows they call.
+- The bundle's `aep-skills/` (`deploy/windows-preview/aep-skills/skills/`), the
+  owner's evolved Knowledge pair, live since 425c5f6, no personal data:
+  `company-agent/knowledge-query@1.12.0` (team `engineering`; the Knowledge
+  procedure for the shared RS_Knowledge vault, unchanged) and
+  `engineering/knowledge-query@1.0.1` (tool route to `knowledge-query/ask`), re-owned
+  from `user/leo.chi` to `team/engineering`, visibility `organization` (owner decision
+  2026-10-16).
 
-Not shipped: `preview/checklist-review-skill` + `preview/checklist-review`
-(built-in preview catalog demo), and every `user/leo.chi` private Workflow (the
-monthly / expense / quote / SAP / SOP reports, `release-package-push`,
-`rs-wmt-package-release`, `yahoo-stock-last-price`, `sync-test`): personal.
+Not shipped: `preview/checklist-review-skill` + `preview/checklist-review` (built-in
+preview catalog demo) and every `user/leo.chi` private Workflow (monthly / expense /
+quote / SAP / SOP reports, `release-package-push`, `rs-wmt-package-release`,
+`yahoo-stock-last-price`, `sync-test`): personal.
 
-## Phase B (after the CI work lands)
+## Phase B: bundle, installer, switch semantics
 
-1. Bundle: `scripts/build_windows_preview.py` / `release_windows.py` copy
-   `packages/hermes-skill-pack` (manifests, `pack.json`, `NOTICE.md`, agent
-   folders) and the two Knowledge manifests into the bundle; the builder's
-   credential scan treats the pack's documented placeholders as placeholders
-   (`airtable`, `gif-search`, `notion` `API_KEY=...`, `github` `Password: <paste`).
-   Path budget: the deepest pack file is 96 characters below the pack root.
-2. Install / update (`install.ps1`, `update.ps1`, through `aep-host`): a pack
-   manifest goes to `workspace/assets/skills/disabled/` only when neither the
-   active nor the switched-off copy of that identity exists; nothing is
-   overwritten and nothing switched off is switched on. The in-use Skills go to
-   `assets/skills/` on the same rule.
-3. Agent-mode copies through `host_runtime/agent_setup.py` (respect
-   `-NoAgentSkills`), with the `.aep-managed.json` marker. Coding agents load
-   every folder in their skills directory, so "switched off" there needs a
-   decision: proposal - keep the `hermes-*` folders in AEP's own folder and
-   copy one into the agent's skills directory when it is switched on in
-   Capabilities.
-4. Manual `INSTALL.zh-TW.md`: the bundled Skills, which are on, which are Hermes
-   backups, how to switch one on in Capabilities.
-5. This PC: the 51 plus the 7 other internal skills switched off in the live
-   workspace (`--personal-out` outside the repository; this PC keeps its original
-   `business-cards`, which takes the same identity, so the bundle's scrubbed copy
-   is never installed over it), backed up first; or prepared up to the owner's
-   one press.
-6. Tests: bundle contents, default states, update does not re-enable.
+Decision: `docs/DECISIONS.md` 2026-10-16 "Bundled Skills: in-use on, skill packs off,
+a person's choices kept; pack copies in coding agents follow the switch".
+
+- **Bundle** (`scripts/build_windows_preview.py`): `hermes/pack.json`,
+  `hermes/NOTICE.md`, `hermes/manifests/*.json` and `hermes/agent/hermes-<name>/`
+  (the vendor folders, flattened; deepest path 93 characters below the bundle root,
+  within the 259-character budget); `aep-skills/` comes with the template. The
+  credential scan accepts exactly the pack's seven documented placeholders
+  (`ALLOWED_PLACEHOLDERS`, file + exact text); any other assignment still stops the
+  build. `scripts/release_windows.py` notes say what is on and off.
+- **Install / update** (`install.ps1`, run by `update.ps1`): after the coding-agent
+  setup, `aep-host assets --config host.json install-bundled --bundle <bundle>`
+  (`--no-agent-skills` with `-NoAgentSkills`), `host_runtime/skill_packs.py`:
+  - shipped manifests and `aep-skills/` go on; `hermes/manifests` go to
+    `assets/skills/disabled/`; `hermes/agent/*` go to AEP's store
+    `workspace/agent-skills/<folder>` with `.aep-managed.json`
+    (`{"managed_by": "aep", "pack": "hermes", "version": <tree digest>}`);
+  - an identity already here, on or off, is left as it is (never overwritten,
+    never switched on again); one in `workspace/removed/removed.jsonl` is not
+    brought back;
+  - a Skill meant to be on stays off when an earlier version was switched off or a
+    newer one is here; one that goes on sets older active versions aside; an alias
+    another switched-on Skill of its namespace uses keeps it off;
+  - a store folder of another pack (this PC's `hermes-personal`) is not replaced.
+  Also usable for extra sources: `--off <manifests>`, `--agent-skills <folders>`,
+  `--agent-pack <name>`, `--no-shipped`.
+- **Switch semantics in coding agents** (owner decision 2026-10-16): a pack skill's
+  folder is copied into Claude Code's (`~/.claude/skills`) and Copilot's
+  (`~/.copilot/skills`) skills folder only while its Skill is switched on
+  (Capabilities > Switch on; `asset_shelf.switch_on(..., environment)` ->
+  `skill_packs.sync_agent_copy` -> `agent_setup.link_pack_skill`), and taken out on
+  Switch off or Remove. Only for an agent where AEP's own setup is present (so
+  `-NoAgentSkills` or a removed setup is respected); a same-named folder of the
+  person's own is never replaced or removed; an update refreshes the copies of
+  switched-on pack skills; `connect --user --remove` and `uninstall.ps1 -Apply` take
+  every pack copy out. The Agent Web switch message says what changed there.
+- **Manual** `INSTALL.zh-TW.md`: install and update steps, file locations, section 12
+  "安裝包附帶的 Skills" (what is on, the Hermes backups, how to switch on / off).
+- **CI** (`verify.yml`, committed in 96f551b5): after the bundle install, the
+  Knowledge Skill is on, `hermes__docx` is off and stored; a Skill moved to
+  `disabled/` stays off after installing again.
+- **Tests**: `tests/test_hermes_skill_pack.py`, `tests/test_bundled_skills.py`
+  (default states, host start, update keeps choices, version and alias rules,
+  agent copies follow the switch, `-NoAgentSkills`, CLI, other-pack store folders),
+  `tests/test_windows_preview_bundle.py` (pack contents byte for byte, no skipped or
+  internal skill except `business-cards`, allow-list refusal).
+- **Local bundle smoke** (2026-10-16): built from the working tree with the previous
+  release's dependency wheels, installed twice into a temporary root with
+  `-NoShortcut -NoAgentSkills`: 26 on (24 shipped + 2; the shipped Knowledge 1.0.0
+  then set aside), 51 off, 51 store folders; doctor `assets: 11 skill(s) and 14
+  workflow(s)`; `ask "files.read nothing.txt"` still needs_input / unknown_skill; a
+  Skill moved to `disabled/` stayed off on the second install. Temporary root removed.
+
+## This PC (step 3, 2026-10-16)
+
+- Backup first: `%LOCALAPPDATA%\AgenticEngineeringPlatform\backups\20261016-before-hermes-pack\`
+  (`skills/`, `workflows/` of the live workspace).
+- Internal skills generated outside the repository:
+  `%LOCALAPPDATA%\AgenticEngineeringPlatform\hermes-personal-pack` (`--personal-out`;
+  the repository pack regenerated identical).
+- Installed with the same code the installer runs, without the shipped manifests and
+  without touching any coding agent (`--no-shipped --no-agent-skills`): first the 8
+  internal skills (`--agent-pack hermes-personal`), then the 51 of the pack. Result:
+  58 `hermes__*` manifests in `workspace/assets/skills/disabled/` (this PC keeps its
+  own internal `business-cards`; the scrubbed one was "already here"), 58 folders in
+  `workspace/agent-skills/` (`hermes-business-cards` is the internal one), nothing
+  switched on, every other file in `assets/skills` unchanged, nothing written to
+  `~/.claude` or `~/.copilot`. No press was needed; Agent Web was not restarted (the
+  Capabilities list reads `disabled/` from disk).
+- Copying into Claude Code / Copilot on Switch on needs Agent Web running this code
+  (restart by the owner).

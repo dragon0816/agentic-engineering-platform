@@ -2169,3 +2169,38 @@ s-k-20261011T102952` (not published).
   coding-agent settings were not touched). Decision: `docs/DECISIONS.md` 2026-10-15
   "CI type-checks without the optional plotting extra; recorded artefacts stay out
   of ruff".
+
+- [x] Hermes skill pack and bundled Skills (2026-10-15/16, owner request;
+  `docs/phases/HERMES_SKILL_PACK.md`). Phase A (ad9811c9, 16e100f8):
+  `scripts/port_hermes_skills.py` ports the Hermes agent's skills into
+  `packages/hermes-skill-pack`: 51 skills (50 MIT incl. `ui-ux-pro-max` from the
+  upstream MIT repository, plus `business-cards` after a reviewed personal-data
+  scrub), each an AEP Skill manifest (`hermes/<name>`, neutral tool wording,
+  credential placeholders `[redacted]`, bodies over 20,000 characters cut at a
+  heading) and the original folder as `hermes-<name>` for Claude Code / Copilot;
+  9 skipped, 7 internal ones only on this PC (`--personal-out`, outside the repo);
+  NOTICE and `pack.json` keep licences, authors, adaptations. Phase B: the Windows
+  bundle carries `hermes/` (manifests, NOTICE, `agent/` folders) and `aep-skills/`
+  (`company-agent/knowledge-query@1.12.0`, `engineering/knowledge-query@1.0.1`
+  re-owned to team `engineering`, visibility organization); `install.ps1` /
+  `update.ps1` run `aep-host assets install-bundled` (`host_runtime/skill_packs.py`):
+  shipped manifests and `aep-skills/` switched on, the pack switched off in
+  `assets/skills/disabled`, agent folders in `workspace/agent-skills/`; never
+  overwrite, never switch on again, never bring back a removed one; a newer Skill
+  stays off when an earlier version was switched off and sets an active older one
+  aside; an alias clash keeps it off. Switching a pack Skill on in Capabilities
+  copies its folder into Claude Code's / Copilot's skills folder (only where AEP's
+  own setup is present, so `-NoAgentSkills` is respected), switching off or
+  removing takes it out (`asset_shelf` + `agent_setup.link_pack_skill`); `connect
+  --user --remove` / uninstall take all pack copies out. Builder: the pack's seven
+  documented placeholders are accepted by file + exact text
+  (`ALLOWED_PLACEHOLDERS`), any other assignment still stops the build. Manual
+  section 12, release note line, CI smoke assertions (in 96f551b5). Tests:
+  `tests/test_hermes_skill_pack.py` (19), `tests/test_bundled_skills.py` (12),
+  `tests/test_windows_preview_bundle.py` (pack contents, allow-list). A local
+  bundle was built and installed twice into a temporary root (`-NoShortcut
+  -NoAgentSkills`): 26 on / 51 off, `ask` still needs_input/unknown_skill, a
+  switched-off Skill stayed off on reinstall. This PC: 58 Hermes skills (51 + 7
+  internal; this PC keeps its own internal `business-cards`) installed switched off
+  in the live workspace, coding-agent folders in `workspace/agent-skills`; backup in
+  `%LOCALAPPDATA%\AgenticEngineeringPlatform\backups\20261016-before-hermes-pack`.

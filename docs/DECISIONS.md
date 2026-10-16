@@ -2966,3 +2966,31 @@ Rejected alternatives: installing the `weekly-mail` extra in CI (the job deliber
 mirrors a host without it); `ignore_errors` for tests or dropping `tests` from mypy
 `files`; reformatting the benchmark runs or the NCC rules (changes recorded evidence
 and breaks the verbatim-port test).
+
+## 2026-10-16 — Bundled Skills: in-use on, skill packs off, a person's choices kept; pack copies in coding agents follow the switch
+
+Decision (owner 2026-10-15/16, `docs/phases/HERMES_SKILL_PACK.md`): the Windows bundle
+installs, through `aep-host assets install-bundled` (`host_runtime/skill_packs.py`),
+the shipped manifests and its `aep-skills/` switched on and the Hermes skill pack
+switched off (`assets/skills/disabled/`). An identity already here (on or off) is never
+overwritten or switched on; one in `workspace/removed/removed.jsonl` is not brought
+back; a newer Skill stays off when the person switched an earlier version off, and a
+newer one going on sets the older aside (as installing a Skill always did); an alias
+clash keeps it off. Pack coding-agent folders live in AEP's store
+`workspace/agent-skills/<namespace>-<name>` (marker `.aep-managed.json` with `pack`)
+and are copied into Claude Code's and Copilot's skills folders only while the Skill is
+switched on, only for agents with AEP's own setup, never over a person's same-named
+folder; switching off, removing, or removing AEP's setup takes them out. A store
+folder of another pack (this PC's internal `hermes-personal`) is not replaced. The
+builder's credential scan accepts the pack's documented placeholders one by one (file
+and exact text).
+
+Reason: colleagues get the Skills AEP uses and a large backup set that does not crowd
+the Agent's choices; updates must not undo what a person switched, edited or removed;
+coding agents load every folder in their skills directory, so "off" can only mean
+"not there".
+
+Rejected alternatives: running `export-assets` from the installer (it rewrites shipped
+files and would switch on what a person switched off); writing every pack folder into
+the agents and relying on `disable-model-invocation` (Claude Code only, still listed);
+a global `[redacted]` exemption in the builder's scan (weakens it for every file).
