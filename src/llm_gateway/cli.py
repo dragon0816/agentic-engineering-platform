@@ -1,8 +1,10 @@
 """`aep-host gateway ...` (phase B wires it into host_runtime.cli; until then
 `python -m llm_gateway.cli ...`).
 
-    init [--force]              write gateway.json + litellm-config.yaml, make
-                                the local key when there is none
+    init [--force] [--python P] [--port N] [--secrets-file F] [--unmanaged]
+         [--user-env]           write gateway.json + litellm-config.yaml, make
+                                the local key when there is none (and put it
+                                in the user's environment with --user-env)
     status [--json]             running / starting / stopped, token expiry,
                                 config, LiteLLM version, autostart
     start [--wait N] | stop | restart
@@ -20,6 +22,7 @@ import json
 import os
 import sys
 from collections.abc import Sequence
+from dataclasses import replace
 from pathlib import Path
 
 from llm_gateway import control, secrets_file, token_refresh
@@ -29,6 +32,7 @@ from llm_gateway.config import (
     default_home,
     init_home,
     load_settings,
+    save_settings,
 )
 
 
@@ -37,6 +41,19 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
     actions = parser.add_subparsers(dest="gateway_action", required=True)
     init = actions.add_parser("init", help="write the gateway's settings and configuration")
     init.add_argument("--force", action="store_true", help="render the configuration again")
+    init.add_argument("--python", help="the gateway venv's python.exe")
+    init.add_argument("--port", type=int, help="the loopback port (default 4000)")
+    init.add_argument("--secrets-file", help="use an existing token file instead of gateway.env")
+    init.add_argument(
+        "--unmanaged",
+        action="store_true",
+        help="the gateway is run outside AEP: only show its status and test it",
+    )
+    init.add_argument(
+        "--user-env",
+        action="store_true",
+        help="put the local key in the user's environment when none is there",
+    )
     status = actions.add_parser("status", help="whether the gateway runs, token expiry")
     status.add_argument("--json", action="store_true")
     for name in ("start", "restart"):
@@ -64,7 +81,11 @@ def describe(status: control.GatewayStatus) -> list[str]:
     token = status.token
     lines = [
         f"gateway: {status.state} on {data['address']}"
-        + ("" if status.ours or status.state == "stopped" else " (not started by AEP)")
+        + (
+            " (run outside AEP)"
+            if not status.managed
+            else ("" if status.ours or status.state == "stopped" else " (not started by AEP)")
+        )
     ]
     if token.get("present"):
         if token.get("expires_at"):
@@ -98,12 +119,35 @@ def run(args: argparse.Namespace) -> int:
     action = args.gateway_action
     try:
         if action == "init":
-            written = init_home(paths, force=args.force)
+            written = init_home(paths)
             settings = load_settings(paths)
-            _key, made = secrets_file.ensure_master_key(settings.secrets_path(paths), os.environ)
-            for path in written:
+            changes: dict[str, object] = {}
+            if args.python:
+                changes["python"] = str(Path(args.python))
+            if args.port:
+                changes["port"] = args.port
+            if args.secrets_file:
+                changes["secrets_file"] = str(Path(args.secrets_file))
+            if args.unmanaged:
+                changes["managed"] = False
+            if changes:
+                settings = replace(settings, **changes)  # type: ignore[arg-type]
+                save_settings(paths, settings)
+            if args.force or (changes and paths.config not in written):
+                init_home(paths, force=True)
+                written.append(paths.config)
+            for path in dict.fromkeys(written):
                 print(f"wrote {path}")
+            if not settings.managed:
+                print("managed: no (AEP shows and tests this gateway, never runs it)")
+                return 0
+            key, made = secrets_file.ensure_master_key(settings.secrets_path(paths), os.environ)
             print("local key: " + ("generated into the token file" if made else "kept"))
+            if args.user_env and sys.platform == "win32":
+                if control.export_master_key(key, os.environ):
+                    print("local key: put in the user environment (LITELLM_MASTER_KEY)")
+                else:
+                    print("local key: the user environment already has LITELLM_MASTER_KEY")
             return 0
         if action == "status":
             query = control.autostart_query if sys.platform == "win32" else None

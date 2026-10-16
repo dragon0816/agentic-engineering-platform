@@ -161,6 +161,14 @@ def refresh(
     platform: str = sys.platform,
     now: datetime | None = None,
 ) -> RefreshResult:
+    if not settings.managed:
+        # Someone else's gateway and token file (gateway.json managed=false):
+        # renewing would rewrite a file AEP does not own.
+        return RefreshResult(
+            False,
+            "not_managed",
+            "This gateway's token file is managed outside AEP; renew it there.",
+        )
     current_time = now or datetime.now(UTC)
     target = settings.secrets_path(paths)
     current = secrets_file.read(target).get(TOKEN_VARIABLE, "")

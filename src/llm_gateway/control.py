@@ -27,6 +27,7 @@ from pathlib import Path
 
 from llm_gateway import LOOPBACK, PINNED_LITELLM_VERSION, secrets_file, state
 from llm_gateway.config import (
+    MASTER_KEY_VARIABLE,
     TOKEN_VARIABLE,
     GatewayConfigError,
     GatewayPaths,
@@ -130,6 +131,8 @@ class GatewayStatus:
     last_refresh_error: str | None
     last_test: object
     litellm_version: str | None
+    managed: bool = True
+    started_at: str | None = None
     autostart: dict[str, object] = field(default_factory=dict)
 
     def to_json(self) -> dict[str, object]:
@@ -149,6 +152,8 @@ class GatewayStatus:
             "last_test": self.last_test,
             "litellm_version": self.litellm_version,
             "litellm_pinned": PINNED_LITELLM_VERSION,
+            "managed": self.managed,
+            "started_at": self.started_at,
             "autostart": self.autostart,
         }
 
@@ -187,6 +192,7 @@ def status(
         current = "stopped"
     refreshed = facts.get("last_refresh_at")
     refresh_error = facts.get("last_refresh_error")
+    started_at = facts.get("started_at")
     return GatewayStatus(
         state=current,
         port=settings.port,
@@ -200,11 +206,22 @@ def status(
         last_refresh_error=refresh_error if isinstance(refresh_error, str) else None,
         last_test=facts.get("last_test"),
         litellm_version=installed_litellm(gateway_python(settings, env)),
+        managed=settings.managed,
+        started_at=started_at if running and isinstance(started_at, str) else None,
         autostart=autostart_query() if autostart_query else {},
     )
 
 
 # --- start / stop --------------------------------------------------------------
+
+
+def refuse_unmanaged(settings: GatewaySettings, action: str) -> None:
+    if not settings.managed:
+        raise GatewayControlError(
+            "not_managed",
+            f"This gateway is run outside AEP (gateway.json managed=false); AEP does not "
+            f"{action} it. Use the tools it was set up with.",
+        )
 
 
 def launch_command(python: Path, paths: GatewayPaths, *, refresh_if_due: bool = False) -> list[str]:
@@ -264,6 +281,7 @@ def start(
     current = status(paths, env, probe=probe, alive=alive)
     if current.state in ("serving", "starting"):
         return current
+    refuse_unmanaged(load_settings(paths), "start")
     if current.config_problems:
         raise GatewayControlError("config", "; ".join(current.config_problems))
     settings = load_settings(paths)
@@ -287,6 +305,8 @@ def stop(
 ) -> GatewayStatus:
     """Stop the gateway AEP started. One it did not start is left alone."""
     current = status(paths, {}, probe=probe, alive=alive)
+    if not current.managed:
+        refuse_unmanaged(load_settings(paths), "stop")
     if current.pid is None:
         if current.state == "serving":
             raise GatewayControlError(
@@ -548,10 +568,15 @@ def set_autostart(
     env = os.environ if environ is None else environ
     keys = run_key or RunKey()
     if not on:
-        runner(["schtasks", "/Delete", "/TN", TASK_NAME, "/F"])
-        keys.delete()
+        # Only what is there is removed: a computer without AEP's task sees
+        # a query and nothing else.
+        if runner(["schtasks", "/Query", "/TN", TASK_NAME]).returncode == 0:
+            runner(["schtasks", "/Delete", "/TN", TASK_NAME, "/F"])
+        if keys.get() is not None:
+            keys.delete()
         return {"on": False, "task": False, "run_key": False}
     settings = load_settings(paths)
+    refuse_unmanaged(settings, "autostart")
     command = launch_command(windowless(gateway_python(settings, env)), paths, refresh_if_due=True)
     registered = runner(
         ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", task_script(command)]
@@ -566,3 +591,49 @@ def set_autostart(
         "run_key": True,
         "note": "Task Scheduler refused the logon task; using the user's Run key instead.",
     }
+
+
+# --- the local key in the user's environment -----------------------------------
+
+
+class UserEnvironment:
+    """HKCU\Environment: where AEP's credential mapping finds the local key
+    (`LITELLM_MASTER_KEY`) in processes started after this. Injectable so
+    tests never touch the registry."""
+
+    def get(self, name: str) -> str | None:
+        import winreg
+
+        try:
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment") as key:
+                value, _kind = winreg.QueryValueEx(key, name)
+        except OSError:
+            return None
+        return value if isinstance(value, str) and value else None
+
+    def set(self, name: str, value: str) -> None:
+        import ctypes
+        import winreg
+
+        with winreg.CreateKey(winreg.HKEY_CURRENT_USER, "Environment") as key:
+            winreg.SetValueEx(key, name, 0, winreg.REG_SZ, value)
+        # Tell running programs (Explorer) so new windows see it.
+        result = ctypes.c_ulong()
+        ctypes.windll.user32.SendMessageTimeoutW(
+            0xFFFF, 0x001A, 0, "Environment", 0x0002, 5000, ctypes.byref(result)
+        )
+
+
+def export_master_key(
+    key: str, environ: Mapping[str, str], user_environment: UserEnvironment | None = None
+) -> bool:
+    """Put the local key in the user's environment when no key is there yet.
+    An existing one is never replaced: AEP and other clients hold a copy.
+    Returns whether it was written."""
+    if not key or environ.get(MASTER_KEY_VARIABLE):
+        return False
+    target = user_environment or UserEnvironment()
+    if target.get(MASTER_KEY_VARIABLE):
+        return False
+    target.set(MASTER_KEY_VARIABLE, key)
+    return True

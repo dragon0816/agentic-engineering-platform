@@ -123,6 +123,10 @@ class GatewaySettings:
     #: The Python of the gateway's own virtual environment (where LiteLLM is).
     #: Empty: `AEP_GATEWAY_PYTHON`, else the Python running AEP.
     python: str = ""
+    #: False: a gateway run outside AEP (e.g. the owner's own on this port).
+    #: AEP then only shows its status and tests it; it never starts, stops,
+    #: refreshes the token of, or autostarts it.
+    managed: bool = True
 
     def __post_init__(self) -> None:
         if not 1024 <= self.port <= 65535:
@@ -151,6 +155,7 @@ class GatewaySettings:
             "default_model": self.default_model,
             "secrets_file": self.secrets_file,
             "python": self.python,
+            "managed": self.managed,
             "models": [
                 {"name": m.name, "upstream": m.upstream, "note": m.note} for m in self.models
             ],
@@ -178,6 +183,9 @@ class GatewaySettings:
         default_model = data.get("default_model", DEFAULT_MODEL)
         secrets_file = data.get("secrets_file", "")
         python = data.get("python", "")
+        managed = data.get("managed", True)
+        if not isinstance(managed, bool):
+            raise GatewayConfigError("managed must be true or false")
         if not isinstance(port, int) or isinstance(port, bool):
             raise GatewayConfigError("port must be a number")
         if not isinstance(upstream, str) or not isinstance(default_model, str):
@@ -191,6 +199,7 @@ class GatewaySettings:
             models=models,
             secrets_file=secrets_file,
             python=python,
+            managed=managed,
         )
 
     def secrets_path(self, paths: GatewayPaths) -> Path:
@@ -200,7 +209,7 @@ class GatewaySettings:
 def load_settings(paths: GatewayPaths) -> GatewaySettings:
     """The settings in the gateway home, or the defaults when there are none."""
     try:
-        text = paths.settings.read_text(encoding="utf-8")
+        text = paths.settings.read_text(encoding="utf-8-sig")
     except FileNotFoundError:
         return GatewaySettings()
     try:
@@ -210,6 +219,10 @@ def load_settings(paths: GatewayPaths) -> GatewaySettings:
     if not isinstance(data, dict):
         raise GatewayConfigError(f"{paths.settings} must hold an object")
     return GatewaySettings.from_json(data)
+
+
+def save_settings(paths: GatewayPaths, settings: GatewaySettings) -> None:
+    write_atomically(paths.settings, json.dumps(settings.to_json(), indent=2) + "\n")
 
 
 def write_atomically(path: Path, text: str) -> None:
@@ -320,7 +333,7 @@ def init_home(paths: GatewayPaths, *, force: bool = False) -> list[Path]:
     """
     written: list[Path] = []
     if not paths.settings.exists():
-        write_atomically(paths.settings, json.dumps(GatewaySettings().to_json(), indent=2) + "\n")
+        save_settings(paths, GatewaySettings())
         written.append(paths.settings)
     settings = load_settings(paths)
     if force or not paths.config.exists():
@@ -344,5 +357,6 @@ __all__ = [
     "init_home",
     "load_settings",
     "render_config",
+    "save_settings",
     "validate_config_text",
 ]
