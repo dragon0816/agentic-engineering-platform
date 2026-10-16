@@ -31,25 +31,27 @@ from common.execution import RequestContext, TraceIdentifiers
 
 README = Path(__file__).resolve().parents[1] / "deploy" / "windows-preview" / "README.md"
 #: Every capability for which the preview documents a grant: the bounded file
-#: read, the weekly report's four reads and two writes, and the optional DUT
-#: validation boundary. The page has to cover
+#: read and the optional DUT validation boundary. The page has to cover
 #: all of them, because a reader who follows it and is refused cannot tell
 #: which grant is missing.
 SPECS = (
     READ_FILE_SPEC,
+    DUT_PHYSICAL_VALIDATE_SPEC,
+)
+#: The weekly report is the owner's personal Workflow (owner 2026-10-16): the
+#: colleague bundle's README documents none of its grants.
+PERSONAL_SPECS = (
     RESOLVE_WINDOW_SPEC,
     PROJECT_SEARCH_SPEC,
     READ_SCRATCH_SHEET_SPEC,
     PLAN_SPEC,
     APPLY_SPEC,
     MAIL_SPEC,
-    DUT_PHYSICAL_VALIDATE_SPEC,
 )
 
 
 def documented_grants() -> tuple[CapabilityGrant, ...]:
-    """Every grant the README shows, wherever it shows it: the preview's four
-    in one block and the write in its own."""
+    """Every grant the README shows, wherever it shows it."""
     blocks = re.findall(r"```json\n(.*?)```", README.read_text(encoding="utf-8"), re.DOTALL)
     grants: list[CapabilityGrant] = []
     for block in blocks:
@@ -73,7 +75,7 @@ def context(actor: str) -> RequestContext:
         trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"),
         actor=actor,
         namespace="engineering",
-        message="weekly.preview",
+        message="files.read notes.txt",
         channel="local",
     )
 
@@ -84,6 +86,7 @@ def test_the_readme_documents_a_grant_for_every_capability() -> None:
     which grant is absent."""
     documented = {grant.asset.key for grant in documented_grants()}
     assert documented == {spec.identity.key for spec in SPECS}
+    assert not documented & {spec.identity.key for spec in PERSONAL_SPECS}
 
 
 def test_every_documented_grant_is_one_the_policy_accepts() -> None:
