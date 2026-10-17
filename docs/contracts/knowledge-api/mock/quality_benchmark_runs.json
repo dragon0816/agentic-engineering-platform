@@ -1,0 +1,243 @@
+{
+  "schema_version": "aep.knowledge.v1",
+  "contract_version": "0.1",
+  "request_id": "req-f4fa7181b4fe",
+  "generated_at": "2026-10-17T08:00:00Z",
+  "source": {
+    "producer": "mock",
+    "backend": "mock",
+    "vault": "bi-fixture",
+    "vault_version": "sha256:9203f65d4aad10f6d785e60a980ed734f25c954a7039b7869e76a238c1eb896e",
+    "schema_id": "bi.schema/v0",
+    "synthetic": true
+  },
+  "data": [
+    {
+      "benchmark_run_id": "bi-v0-mock-wiki-direct-1",
+      "suite": "knowledge_bi_v0",
+      "question_set_version": "0.1.0-draft",
+      "retrieval_mode": "wiki",
+      "path": "direct",
+      "started_at": "2026-10-17T01:00:00Z",
+      "status": "completed",
+      "synthetic": true,
+      "ground_truth_status": "draft-unreviewed",
+      "indicative": true,
+      "questions": 25,
+      "reviewed_questions": 0,
+      "metrics": {
+        "answer_accuracy": 0.48,
+        "evidence_resolvable": 1.0,
+        "evidence_support": 0.9,
+        "modality_labeling": 0.55,
+        "relationship_precision": 0.66,
+        "relationship_recall": 0.52,
+        "relationship_f1": 0.582,
+        "invented_relations": 14,
+        "gap_detection": 0.4,
+        "latency_p50_s": 70.0,
+        "latency_p90_s": 118.0,
+        "tokens_mean": 21000.0,
+        "loop_rounds_max": 3,
+        "graph_hops_max": null,
+        "tool_loop_limit_hits": 0
+      },
+      "by_category": {
+        "market_trend": {
+          "answer_accuracy": 0.52,
+          "relationship_f1": 0.622
+        },
+        "technology_ecosystem": {
+          "answer_accuracy": 0.5,
+          "relationship_f1": 0.602
+        },
+        "customer_product": {
+          "answer_accuracy": 0.45,
+          "relationship_f1": 0.552
+        },
+        "application_test_solution": {
+          "answer_accuracy": 0.51,
+          "relationship_f1": 0.612
+        },
+        "cross_domain_opportunity": {
+          "answer_accuracy": 0.42,
+          "relationship_f1": 0.522
+        }
+      },
+      "telemetry_run_id": null
+    },
+    {
+      "benchmark_run_id": "bi-v0-mock-graph-direct-2",
+      "suite": "knowledge_bi_v0",
+      "question_set_version": "0.1.0-draft",
+      "retrieval_mode": "graph",
+      "path": "direct",
+      "started_at": "2026-10-17T02:00:00Z",
+      "status": "completed",
+      "synthetic": true,
+      "ground_truth_status": "draft-unreviewed",
+      "indicative": true,
+      "questions": 25,
+      "reviewed_questions": 0,
+      "metrics": {
+        "answer_accuracy": 0.44,
+        "evidence_resolvable": 1.0,
+        "evidence_support": 0.9,
+        "modality_labeling": 0.8,
+        "relationship_precision": 0.88,
+        "relationship_recall": 0.55,
+        "relationship_f1": 0.677,
+        "invented_relations": 3,
+        "gap_detection": 0.8,
+        "latency_p50_s": 41.0,
+        "latency_p90_s": 77.0,
+        "tokens_mean": 9000.0,
+        "loop_rounds_max": 3,
+        "graph_hops_max": 3,
+        "tool_loop_limit_hits": 0
+      },
+      "by_category": {
+        "market_trend": {
+          "answer_accuracy": 0.48,
+          "relationship_f1": 0.717
+        },
+        "technology_ecosystem": {
+          "answer_accuracy": 0.46,
+          "relationship_f1": 0.697
+        },
+        "customer_product": {
+          "answer_accuracy": 0.41,
+          "relationship_f1": 0.647
+        },
+        "application_test_solution": {
+          "answer_accuracy": 0.47,
+          "relationship_f1": 0.707
+        },
+        "cross_domain_opportunity": {
+          "answer_accuracy": 0.38,
+          "relationship_f1": 0.617
+        }
+      },
+      "telemetry_run_id": null
+    },
+    {
+      "benchmark_run_id": "bi-v0-mock-hybrid-direct-3",
+      "suite": "knowledge_bi_v0",
+      "question_set_version": "0.1.0-draft",
+      "retrieval_mode": "hybrid",
+      "path": "direct",
+      "started_at": "2026-10-17T03:00:00Z",
+      "status": "completed",
+      "synthetic": true,
+      "ground_truth_status": "draft-unreviewed",
+      "indicative": true,
+      "questions": 25,
+      "reviewed_questions": 0,
+      "metrics": {
+        "answer_accuracy": 0.58,
+        "evidence_resolvable": 1.0,
+        "evidence_support": 0.9,
+        "modality_labeling": 0.8,
+        "relationship_precision": 0.84,
+        "relationship_recall": 0.68,
+        "relationship_f1": 0.752,
+        "invented_relations": 5,
+        "gap_detection": 0.8,
+        "latency_p50_s": 96.0,
+        "latency_p90_s": 170.0,
+        "tokens_mean": 29000.0,
+        "loop_rounds_max": 3,
+        "graph_hops_max": 3,
+        "tool_loop_limit_hits": 0
+      },
+      "by_category": {
+        "market_trend": {
+          "answer_accuracy": 0.62,
+          "relationship_f1": 0.792
+        },
+        "technology_ecosystem": {
+          "answer_accuracy": 0.6,
+          "relationship_f1": 0.772
+        },
+        "customer_product": {
+          "answer_accuracy": 0.55,
+          "relationship_f1": 0.722
+        },
+        "application_test_solution": {
+          "answer_accuracy": 0.61,
+          "relationship_f1": 0.782
+        },
+        "cross_domain_opportunity": {
+          "answer_accuracy": 0.52,
+          "relationship_f1": 0.692
+        }
+      },
+      "telemetry_run_id": null
+    },
+    {
+      "benchmark_run_id": "bi-v0-mock-hybrid-tool-4",
+      "suite": "knowledge_bi_v0",
+      "question_set_version": "0.1.0-draft",
+      "retrieval_mode": "hybrid",
+      "path": "tool",
+      "started_at": "2026-10-17T04:00:00Z",
+      "status": "completed",
+      "synthetic": true,
+      "ground_truth_status": "draft-unreviewed",
+      "indicative": true,
+      "questions": 25,
+      "reviewed_questions": 0,
+      "metrics": {
+        "answer_accuracy": 0.55,
+        "evidence_resolvable": 1.0,
+        "evidence_support": 0.9,
+        "modality_labeling": 0.8,
+        "relationship_precision": 0.83,
+        "relationship_recall": 0.65,
+        "relationship_f1": 0.729,
+        "invented_relations": 6,
+        "gap_detection": 0.8,
+        "latency_p50_s": 101.0,
+        "latency_p90_s": 182.0,
+        "tokens_mean": 31000.0,
+        "loop_rounds_max": 3,
+        "graph_hops_max": 3,
+        "tool_loop_limit_hits": 0
+      },
+      "by_category": {
+        "market_trend": {
+          "answer_accuracy": 0.59,
+          "relationship_f1": 0.769
+        },
+        "technology_ecosystem": {
+          "answer_accuracy": 0.57,
+          "relationship_f1": 0.749
+        },
+        "customer_product": {
+          "answer_accuracy": 0.52,
+          "relationship_f1": 0.699
+        },
+        "application_test_solution": {
+          "answer_accuracy": 0.58,
+          "relationship_f1": 0.759
+        },
+        "cross_domain_opportunity": {
+          "answer_accuracy": 0.49,
+          "relationship_f1": 0.669
+        }
+      },
+      "telemetry_run_id": null
+    }
+  ],
+  "pagination": {
+    "next_cursor": null,
+    "limit": 500
+  },
+  "warnings": [
+    {
+      "code": "synthetic_data",
+      "message": "Synthetic mock data; no real customer or product claim."
+    }
+  ],
+  "error": null
+}

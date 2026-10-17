@@ -34,7 +34,12 @@ in [archive/](archive/); they are kept for history, not for current work.
 
 | Document | What it is for |
 |---|---|
-| [proposals/KNOWLEDGE_STRATEGY_v1.1.md](proposals/KNOWLEDGE_STRATEGY_v1.1.md) | Knowledge Strategy v1.1: Wiki + Graph strategies on the existing Workflow/Harness, ADR drafts, benchmark plan, Atlas Knowledge API draft |
+| [proposals/KNOWLEDGE_STRATEGY_v1.2.md](proposals/KNOWLEDGE_STRATEGY_v1.2.md) | **Current.** Knowledge Strategy v1.2: owner decisions of 2026-10-17, ADR status (K1/K3/K7 decided; K2 central DB, K6 G1-G4, K9 pending; new K10 schema decoupling), BD benchmark plan and thresholds, integrated schedule around E2E-01 / Phase 7 / S3 |
+| [proposals/KNOWLEDGE_STRATEGY_v1.2_DIFF.md](proposals/KNOWLEDGE_STRATEGY_v1.2_DIFF.md) | What changed from v1.1 to v1.2 and why, with the issue renumbering |
+| [proposals/bi_schema_v0/README.md](proposals/bi_schema_v0/README.md) | BI Schema v0 (`bi.schema/v0`, PoC contract) from the owner's BI Knowledge Base document, with page citations |
+| [proposals/knowledge_benchmark_v0/README.md](proposals/knowledge_benchmark_v0/README.md) | 25-question BD / Marketing benchmark draft (unreviewed; `questions.json` is machine-readable) |
+| [contracts/knowledge-api/README.md](contracts/knowledge-api/README.md) | Knowledge API contract v0.1 for Atlas: OpenAPI 3.1, JSON Schemas, synthetic mock data |
+| [proposals/KNOWLEDGE_STRATEGY_v1.1.md](proposals/KNOWLEDGE_STRATEGY_v1.1.md) | Superseded by v1.2; kept for history |
 | [proposals/K01_AS_IS_GAP_ANALYSIS.md](proposals/K01_AS_IS_GAP_ANALYSIS.md) | K01 audit behind v1.1, including the Knowledge tool-path investigation |
 | [proposals/KNOWLEDGE_STRATEGY_v1.1_DIFF.md](proposals/KNOWLEDGE_STRATEGY_v1.1_DIFF.md) | What changed from v1.0 to v1.1 and why |
 | [proposals/KNOWLEDGE_STRATEGY_v1.0_original.md](proposals/KNOWLEDGE_STRATEGY_v1.0_original.md) | The original v1.0 proposal, verbatim |

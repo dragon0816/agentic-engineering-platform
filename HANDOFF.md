@@ -1,34 +1,78 @@
 # Handoff
 
-Updated: 2026-10-17 (Asia/Taipei), by Claude Code (K01 knowledge strategy gap analysis)
+Updated: 2026-10-17 (Asia/Taipei), by Claude Code (Knowledge Strategy v1.2)
 
-## K01 knowledge strategy gap analysis (2026-10-17, Claude Code) — awaiting owner review
+## Knowledge Strategy v1.2 (2026-10-17, Claude Code) — awaiting owner confirmation
 
-**Status:** docs only, committed on main, not pushed. **Next: the owner reviews
-`docs/proposals/KNOWLEDGE_STRATEGY_v1.1.md` and answers its §8 open questions. K02 and
-everything after it are blocked until the owner approves v1.1.** Do not start AEP-K02.
+**Status:** docs and contract design only, committed on main, not pushed. **v1.2 awaits the owner's
+confirmation of three things:**
+1. the success thresholds (`docs/proposals/KNOWLEDGE_STRATEGY_v1.2.md` §5.5 and the reviewed-question
+   precondition in §5.6);
+2. BI Schema v0 (`docs/proposals/bi_schema_v0/`);
+3. the integrated schedule (§7.3).
 
-- **Goal:** audit the AS-IS against the owner's ten revision principles (2026-10-17) and
-  revise the v1.0 Knowledge Strategy proposal. No feature code.
-- **Files:** `docs/proposals/KNOWLEDGE_STRATEGY_v1.0_original.md` (verbatim copy),
-  `docs/proposals/K01_AS_IS_GAP_ANALYSIS.md` (facts with file:line, marked verified /
-  inferred / unverified), `docs/proposals/KNOWLEDGE_STRATEGY_v1.1.md` (ADR drafts K1-K9;
-  K2 storage/PostgreSQL and K9 PR-vs-main are pending; K5 BI policy and K8 BI data class
-  partly pending), `docs/proposals/KNOWLEDGE_STRATEGY_v1.1_DIFF.md`; `docs/README.md`
-  index; a `docs/TASKS.md` entry.
-- **Key finding:** the "Knowledge tool path 10/74" figure is from sample-003 (2026-10-07),
-  before U5 (`0b39228a`, 2026-10-09) made the tool route return the validated Harness
-  answer. Residual causes (unvalidated results go back to the chat model without the
-  record, model-chosen question, one Skill bound, first validated result ends the turn,
-  12,000-character cut) are in K01 §2.4. U7 (post-U5 sample benchmark) is still open.
-- **Verified:** `.venv` `ruff check .` passed; `ruff format --check .` 863 files formatted;
-  `pytest -q -p no:cacheprovider tests -k "docs or readme or tasks"` 15 passed, 3084 deselected;
-  the tests that read docs (`test_codex_remote_test_workflow`, `test_deployment_validation_loop`,
-  `test_llm_gateway`, `test_weekly_report_documented_grants`, `test_bundled_skills`) 90 passed,
-  1 skipped (litellm not installed). No test parses TASKS/HANDOFF/README/DECISIONS.
-  No live benchmark, model call, live install or vault content was used.
-- **Not done:** no GitHub issues created (drafts only in v1.1 §7); no DECISIONS or
-  ARCHITECTURE change; stale docs listed in K01 §12 are not fixed.
+**AEP-K02 and everything after it are still blocked until the owner approves v1.2.** Do not start
+AEP-K02. Do not create issues or PRs.
+
+- **Goal:**
+  - Apply the owner's decisions of 2026-10-17 (v1.2 §0.2, D1-D6). The owner's item 3, Harness rules
+    G1-G4 versus measuring U7 first, is **not decided**; it stays pending as ADR-K6 / AEP-K13.
+  - D2a: the owner supplied the BI Knowledge Base document (17-slide PDF, internal, kept out of the
+    repo). Schema v0 keeps its entity types and relationships exactly and cites pages.
+- **Files:**
+  - `docs/proposals/KNOWLEDGE_STRATEGY_v1.2.md` and `KNOWLEDGE_STRATEGY_v1.2_DIFF.md`; v1.1 is kept
+    unchanged.
+  - `docs/proposals/bi_schema_v0/{bi_schema_v0.json,README.md}`.
+  - `docs/proposals/knowledge_benchmark_v0/{questions.json,README.md}`.
+  - `docs/contracts/knowledge-api/`: `openapi.yaml`, 11 files in `schemas/*.schema.json`, and 19 mock
+    responses in `mock/*.json` plus `mock/index.json`, with a README for the Atlas Coding Agent.
+  - `tests/test_knowledge_strategy_docs.py`.
+  - The `docs/README.md` index and a `docs/TASKS.md` row.
+- **How the JSON was made:**
+  - The schema, benchmark and mock JSON were generated from one synthetic catalog by a throwaway
+    script, so ids and triples agree.
+  - The script is not in the repo. The committed JSON is the source now; edit it directly.
+  - The test keeps it consistent.
+- **Key facts:**
+  - BI Schema v0:
+    - 12 types, all `source-bi-doc`.
+    - 14 relationship names over 22 (name, domain) sources: 18 `source-bi-doc` (8 with field names
+      printed in the document, 10 `provisional` until `bi_schema.py` is available) and 4 `proposed-v0`
+      (Opportunity `account` / `customer_product` / `test_solutions`, Signal `mentions`).
+  - In the document, Ecosystem cards are supplier/partner companies, Account cards are customers, and
+    Node is a fixed list of value-chain positions.
+  - `tests/test_product_e2e_01.py:11, 331` builds `agent.gateway.Gateway`. The G1-G4 regression plan is
+    in v1.2 §7.5.
+  - v1.1's evidence-id backfill into Raw would break Phase 7 Knowledge parity; it is now a derived
+    index (ADR-K4).
+- **Verified:**
+  - `.venv` `ruff check .` passed; `ruff format --check .`: 866 files formatted.
+  - `mypy`: no issues in 620 source files.
+  - The OpenAPI YAML parsed with PyYAML from the system Python 3.12; the repo `.venv` has no yaml
+    library, so the repo test checks the YAML's `$ref` targets by text.
+  - All 33 new JSON files parse.
+  - `pytest tests/test_knowledge_strategy_docs.py`: 27 passed.
+  - `pytest -q -p no:cacheprovider tests -k "docs or readme or tasks"`: 42 passed, 3057 deselected.
+  - No model call, benchmark, live install or vault write.
+- **Pending owner decisions:**
+  - the thresholds, Schema v0 and the schedule;
+  - D3 (G1-G4 or U7 first);
+  - N1: `bi_schema.py` / `bi_ingest.py` for the provisional names, the 8th Node, the Opportunity and
+    Signal links, the Node extension and real-card import;
+  - N2: named Domain Reviewers;
+  - Q10: Knowledge API scopes;
+  - ADR-K2 central DB;
+  - ADR-K5 domain review;
+  - ADR-K8 BI data class;
+  - ADR-K9 PR vs main;
+  - the AEP- prefix;
+  - freezing v0.1 with Atlas.
+  The full list is in v1.2 §8.2.
+- **Next:**
+  1. The owner reviews v1.2 and answers §8.2.
+  2. After approval, start with AEP-K02 (benchmark review, synthetic fixture, Wiki-only baseline) and
+     AEP-K03 (Schema Registry). Both stay outside the E2E-01, Phase 7 and S3 hot spots.
+  3. Meanwhile, the Atlas Coding Agent can build against `docs/contracts/knowledge-api/mock/`.
 
 
 ## Suggested Skills from experience, slice S2 (2026-10-16, Claude Code)

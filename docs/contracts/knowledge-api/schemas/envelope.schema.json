@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aep:knowledge-api:v0.1:envelope",
+  "title": "Response envelope (exactly one of data and error is non-null)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract_version",
+    "request_id",
+    "generated_at",
+    "source",
+    "data",
+    "pagination",
+    "warnings",
+    "error"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "aep.knowledge.v1"
+    },
+    "contract_version": {
+      "type": "string",
+      "pattern": "^0\\.[0-9]+$"
+    },
+    "request_id": {
+      "type": "string",
+      "pattern": "^req-[0-9a-f]{12}$"
+    },
+    "generated_at": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "producer",
+        "backend",
+        "vault",
+        "vault_version",
+        "schema_id",
+        "synthetic"
+      ],
+      "properties": {
+        "producer": {
+          "enum": [
+            "aep-agent-web",
+            "aep-knowledge-service",
+            "mock"
+          ]
+        },
+        "backend": {
+          "enum": [
+            "vault-files+host-index",
+            "shared-knowledge-service",
+            "mock"
+          ]
+        },
+        "vault": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "vault_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "schema_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "synthetic": {
+          "type": "boolean"
+        }
+      }
+    },
+    "data": {},
+    "pagination": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "next_cursor",
+        "limit"
+      ],
+      "properties": {
+        "next_cursor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "enum": [
+              "content_withheld",
+              "classification_filtered",
+              "truncated",
+              "synthetic_data",
+              "partial_backend"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "error": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "error.schema.json"
+        }
+      ]
+    }
+  }
+}

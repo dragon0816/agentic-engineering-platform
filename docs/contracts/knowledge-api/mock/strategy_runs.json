@@ -1,0 +1,141 @@
+{
+  "schema_version": "aep.knowledge.v1",
+  "contract_version": "0.1",
+  "request_id": "req-35fc1b984e63",
+  "generated_at": "2026-10-17T08:00:00Z",
+  "source": {
+    "producer": "mock",
+    "backend": "mock",
+    "vault": "bi-fixture",
+    "vault_version": "sha256:9203f65d4aad10f6d785e60a980ed734f25c954a7039b7869e76a238c1eb896e",
+    "schema_id": "bi.schema/v0",
+    "synthetic": true
+  },
+  "data": [
+    {
+      "strategy_run_id": "srun-e01cd827bb71",
+      "strategy_id": "general_wiki",
+      "strategy_version": "0.1.0",
+      "vault": "bi-fixture",
+      "status": "published",
+      "workflow_run_id": "wfr-b3dcb3863c91",
+      "trace_id": "tr-17fe6f303311c0b1",
+      "started_at": "2026-10-16T08:00:00Z",
+      "ended_at": "2026-10-16T08:21:00Z",
+      "document_ids": [
+        "src-94d7f386a187d6c5",
+        "src-4655934c7dc131d0",
+        "src-949f65d8479ae218",
+        "src-3238265128202ade",
+        "src-e7662d469d6417eb",
+        "src-c139b845db42da86",
+        "src-ca02d576f60b0a66",
+        "src-385b20f6d5d503cc",
+        "src-00f367845fa35048",
+        "src-b4550f519ea89142"
+      ],
+      "candidate_counts": {
+        "entities": 0,
+        "relationships": 0,
+        "claims": 0,
+        "wiki_pages": 24
+      },
+      "published_version": "sha256:9203f65d4aad10f6d785e60a980ed734f25c954a7039b7869e76a238c1eb896e",
+      "error": null
+    },
+    {
+      "strategy_run_id": "srun-5a65c5b3e464",
+      "strategy_id": "bi_knowledge_graph",
+      "strategy_version": "0.1.0",
+      "vault": "bi-fixture",
+      "status": "published",
+      "workflow_run_id": "wfr-109303069d28",
+      "trace_id": "tr-da62c78ef0808095",
+      "started_at": "2026-10-16T09:00:00Z",
+      "ended_at": "2026-10-16T10:00:00Z",
+      "document_ids": [
+        "src-94d7f386a187d6c5",
+        "src-4655934c7dc131d0",
+        "src-949f65d8479ae218",
+        "src-3238265128202ade",
+        "src-e7662d469d6417eb",
+        "src-c139b845db42da86",
+        "src-ca02d576f60b0a66",
+        "src-385b20f6d5d503cc",
+        "src-00f367845fa35048",
+        "src-b4550f519ea89142"
+      ],
+      "candidate_counts": {
+        "entities": 91,
+        "relationships": 163,
+        "claims": 163,
+        "wiki_pages": 0
+      },
+      "published_version": "sha256:9203f65d4aad10f6d785e60a980ed734f25c954a7039b7869e76a238c1eb896e",
+      "error": null
+    },
+    {
+      "strategy_run_id": "srun-c2a67eb909e0",
+      "strategy_id": "bi_knowledge_graph",
+      "strategy_version": "0.1.0",
+      "vault": "bi-fixture",
+      "status": "candidates_ready",
+      "workflow_run_id": "wfr-dba00086cfe4",
+      "trace_id": "tr-946e1ce9f2e316fb",
+      "started_at": "2026-10-17T07:30:00Z",
+      "ended_at": "2026-10-17T07:52:00Z",
+      "document_ids": [
+        "src-4655934c7dc131d0"
+      ],
+      "candidate_counts": {
+        "entities": 3,
+        "relationships": 4,
+        "claims": 4,
+        "wiki_pages": 0
+      },
+      "published_version": null,
+      "error": null
+    },
+    {
+      "strategy_run_id": "srun-9af25aa27479",
+      "strategy_id": "bi_knowledge_graph",
+      "strategy_version": "0.1.0",
+      "vault": "bi-fixture",
+      "status": "failed",
+      "workflow_run_id": "wfr-71e01b32172e",
+      "trace_id": "tr-b3d16674e4deb67c",
+      "started_at": "2026-10-17T07:55:00Z",
+      "ended_at": "2026-10-17T07:56:10Z",
+      "document_ids": [
+        "src-3238265128202ade"
+      ],
+      "candidate_counts": {
+        "entities": 0,
+        "relationships": 0,
+        "claims": 0,
+        "wiki_pages": 0
+      },
+      "published_version": null,
+      "error": {
+        "code": "invalid_request",
+        "message": "Candidate relationship 'competes_in' had a TestSolution subject; outside the bi.schema/v0 domain.",
+        "retryable": false,
+        "http_status": 400,
+        "details": {
+          "rule": "domain_range"
+        }
+      }
+    }
+  ],
+  "pagination": {
+    "next_cursor": null,
+    "limit": 500
+  },
+  "warnings": [
+    {
+      "code": "synthetic_data",
+      "message": "Synthetic mock data; no real customer or product claim."
+    }
+  ],
+  "error": null
+}

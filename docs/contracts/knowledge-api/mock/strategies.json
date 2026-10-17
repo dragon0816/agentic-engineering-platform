@@ -1,0 +1,98 @@
+{
+  "schema_version": "aep.knowledge.v1",
+  "contract_version": "0.1",
+  "request_id": "req-7e3b3bf8e6e0",
+  "generated_at": "2026-10-17T08:00:00Z",
+  "source": {
+    "producer": "mock",
+    "backend": "mock",
+    "vault": "bi-fixture",
+    "vault_version": "sha256:9203f65d4aad10f6d785e60a980ed734f25c954a7039b7869e76a238c1eb896e",
+    "schema_id": "bi.schema/v0",
+    "synthetic": true
+  },
+  "data": [
+    {
+      "strategy_id": "general_wiki",
+      "version": "0.1.0",
+      "kind": "ingestion",
+      "output": "wiki",
+      "mode": null,
+      "workflow": {
+        "namespace": "knowledge",
+        "name": "wiki-ingest",
+        "version": "0.1.0"
+      },
+      "skills": [
+        {
+          "namespace": "knowledge",
+          "name": "vault-ingest",
+          "version": "0.1.0"
+        }
+      ],
+      "schema": null,
+      "review_policy": "general_collab",
+      "drafts_searchable": false,
+      "installed": true
+    },
+    {
+      "strategy_id": "bi_knowledge_graph",
+      "version": "0.1.0",
+      "kind": "ingestion",
+      "output": "graph",
+      "mode": null,
+      "workflow": {
+        "namespace": "knowledge",
+        "name": "graph-ingest",
+        "version": "0.1.0"
+      },
+      "skills": [
+        {
+          "namespace": "knowledge",
+          "name": "bi-graph-extract",
+          "version": "0.1.0"
+        }
+      ],
+      "schema": {
+        "schema_id": "bi.schema/v0",
+        "digest": "sha256:391553d65f394ede4c5336710f6f38014865f40ffc9970b887ddfe30900acaf0"
+      },
+      "review_policy": "general_collab",
+      "drafts_searchable": false,
+      "installed": true
+    },
+    {
+      "strategy_id": "hybrid_default",
+      "version": "0.1.0",
+      "kind": "retrieval",
+      "output": null,
+      "mode": "hybrid",
+      "workflow": null,
+      "skills": [
+        {
+          "namespace": "knowledge",
+          "name": "knowledge-answer",
+          "version": "0.1.0"
+        }
+      ],
+      "schema": {
+        "schema_id": "bi.schema/v0",
+        "digest": "sha256:391553d65f394ede4c5336710f6f38014865f40ffc9970b887ddfe30900acaf0"
+      },
+      "review_policy": "general_collab",
+      "drafts_searchable": false,
+      "installed": true
+    }
+  ],
+  "pagination": {
+    "next_cursor": null,
+    "limit": 500
+  },
+  "warnings": [
+    {
+      "code": "synthetic_data",
+      "message": "Synthetic mock data; no real customer or product claim."
+    }
+  ],
+  "error": null
+}

@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aep:knowledge-api:v0.1:relationship",
+  "title": "Relationship Query",
+  "$defs": {
+    "Relationship": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "relationship_id",
+        "relationship_type",
+        "subject_entity_id",
+        "subject_type",
+        "object_entity_id",
+        "object_type",
+        "origin",
+        "status",
+        "claims",
+        "evidence_ids",
+        "graph_state",
+        "classification",
+        "provenance"
+      ],
+      "properties": {
+        "relationship_id": {
+          "$ref": "common.schema.json#/$defs/relationship_id"
+        },
+        "relationship_type": {
+          "$ref": "common.schema.json#/$defs/relationship_type"
+        },
+        "subject_entity_id": {
+          "$ref": "common.schema.json#/$defs/entity_id"
+        },
+        "subject_type": {
+          "$ref": "common.schema.json#/$defs/entity_type"
+        },
+        "object_entity_id": {
+          "$ref": "common.schema.json#/$defs/entity_id"
+        },
+        "object_type": {
+          "$ref": "common.schema.json#/$defs/entity_type"
+        },
+        "origin": {
+          "enum": [
+            "source-bi-doc",
+            "source-v1.0",
+            "proposed-v0"
+          ]
+        },
+        "status": {
+          "$ref": "common.schema.json#/$defs/status"
+        },
+        "claims": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "claim.schema.json#/$defs/ClaimSummary"
+          }
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/evidence_id"
+          }
+        },
+        "graph_state": {
+          "$ref": "common.schema.json#/$defs/graph_state"
+        },
+        "classification": {
+          "$ref": "common.schema.json#/$defs/classification"
+        },
+        "provenance": {
+          "$ref": "common.schema.json#/$defs/provenance"
+        }
+      }
+    },
+    "RelationshipList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Relationship"
+      }
+    }
+  }
+}

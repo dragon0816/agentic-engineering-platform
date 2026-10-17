@@ -1,0 +1,258 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aep:knowledge-api:v0.1:strategy",
+  "title": "Strategy Run Status",
+  "$defs": {
+    "AssetRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "namespace",
+        "name",
+        "version"
+      ],
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        }
+      }
+    },
+    "Strategy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "strategy_id",
+        "version",
+        "kind",
+        "output",
+        "mode",
+        "workflow",
+        "skills",
+        "schema",
+        "review_policy",
+        "drafts_searchable",
+        "installed"
+      ],
+      "properties": {
+        "strategy_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "kind": {
+          "enum": [
+            "ingestion",
+            "retrieval"
+          ]
+        },
+        "output": {
+          "enum": [
+            "wiki",
+            "graph",
+            null
+          ]
+        },
+        "mode": {
+          "enum": [
+            "wiki",
+            "graph",
+            "hybrid",
+            null
+          ]
+        },
+        "workflow": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/AssetRef"
+            }
+          ]
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AssetRef"
+          }
+        },
+        "schema": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "schema_id",
+            "digest"
+          ],
+          "properties": {
+            "schema_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            }
+          }
+        },
+        "review_policy": {
+          "enum": [
+            "general_collab",
+            "domain_owner_review"
+          ]
+        },
+        "drafts_searchable": {
+          "type": "boolean"
+        },
+        "installed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "StrategyList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Strategy"
+      }
+    },
+    "StrategyRun": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "strategy_run_id",
+        "strategy_id",
+        "strategy_version",
+        "vault",
+        "status",
+        "workflow_run_id",
+        "trace_id",
+        "started_at",
+        "ended_at",
+        "document_ids",
+        "candidate_counts",
+        "published_version",
+        "error"
+      ],
+      "properties": {
+        "strategy_run_id": {
+          "$ref": "common.schema.json#/$defs/strategy_run_id"
+        },
+        "strategy_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "strategy_version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "vault": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "running",
+            "candidates_ready",
+            "publishing",
+            "published",
+            "failed",
+            "discarded"
+          ]
+        },
+        "workflow_run_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The Workflow engine run id; also the telemetry run_id of the workflow_run."
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "GET /api/v1/telemetry/runs?trace_id=<trace_id> returns the runs."
+        },
+        "started_at": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        "ended_at": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "common.schema.json#/$defs/timestamp"
+            }
+          ]
+        },
+        "document_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/document_id"
+          }
+        },
+        "candidate_counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "entities",
+            "relationships",
+            "claims",
+            "wiki_pages"
+          ],
+          "properties": {
+            "entities": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "relationships": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "claims": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "wiki_pages": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "published_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "error.schema.json"
+            }
+          ]
+        }
+      }
+    },
+    "StrategyRunList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/StrategyRun"
+      }
+    }
+  }
+}

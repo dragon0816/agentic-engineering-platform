@@ -1,0 +1,1377 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aep:bi.schema:v0",
+  "schema_id": "bi.schema/v0",
+  "version": "0.1.0",
+  "status": "poc-contract",
+  "title": "BI Knowledge Schema v0 (PoC contract, not a production schema)",
+  "source": {
+    "primary": "BI Knowledge Base slides (BDM Business Intelligence Knowledge Base, 17 pages, internal; provided by the owner 2026-10-17; not stored in this repository). Pages cited as x-pages / pages.",
+    "secondary": "docs/proposals/KNOWLEDGE_STRATEGY_v1.0_original.md, section 'PostgreSQL Knowledge Graph' (same 12 type names; claim/evidence roles).",
+    "origins": {
+      "source-bi-doc": "defined in the BI document; name_status 'doc' = the field name appears in the document, 'provisional' = the document describes the field but its name is fixed by bi_schema.py, which is not available",
+      "source-v1.0": "defined in the v1.0 proposal only",
+      "proposed-v0": "added by this proposal; kept to a minimum, each with a reason"
+    },
+    "analysis_chain": [
+      "Trend",
+      "Technology",
+      "Node",
+      "Ecosystem",
+      "CustomerProduct",
+      "Application",
+      "TestSolution",
+      "Opportunity"
+    ],
+    "analysis_chain_pages": [
+      3
+    ],
+    "doc_node_positions": [
+      "chipset",
+      "module",
+      "handset",
+      "cpe",
+      "base-station",
+      "telecom-network",
+      "certification-lab"
+    ],
+    "doc_node_positions_note": "Slide 4 says 8 fixed nodes but lists 7 (chipset, module, handset, CPE, base station, telecom network, certification lab).",
+    "still_unavailable": [
+      "bi_schema.py (the document calls it the only authority for field names)",
+      "bi_ingest.py",
+      "bi_slides_extract.py",
+      "the mapping JSON files"
+    ]
+  },
+  "id_rules": {
+    "entity_id": "ent-<lowercase entity_type>-<canonical_key>",
+    "canonical_key": "^[a-z0-9]+(-[a-z0-9]+)*$, unique per entity_type",
+    "relationship_id": "rel-<sha256(subject_entity_id|relationship_type|object_entity_id)[:16]>",
+    "claim_id": "clm-<sha256(relationship_id or subject_entity_id|statement)[:16]>",
+    "document_id": "src-<sha256(original bytes)[:16]> (existing source_id, src/knowledge/raw.py source_for)",
+    "evidence_id": "ev-<sha256(document_id|locator|normalized_text)[:20]> (ADR-K4)"
+  },
+  "entity_record": {
+    "description": "Storage-neutral entity record. The backend stores entity_type plus a properties document; it validates properties against entity_types[entity_type].properties_schema of the schema_id the record names.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "entity_id",
+      "entity_type",
+      "canonical_key",
+      "display_name",
+      "properties",
+      "schema_id",
+      "classification",
+      "status",
+      "review_status"
+    ],
+    "properties": {
+      "entity_id": {
+        "type": "string",
+        "pattern": "^ent-[a-z]+-[a-z0-9]+(-[a-z0-9]+)*$"
+      },
+      "entity_type": {
+        "enum": [
+          "Trend",
+          "Technology",
+          "Node",
+          "Ecosystem",
+          "Account",
+          "CustomerProduct",
+          "Application",
+          "TestSolution",
+          "Competitor",
+          "Concept",
+          "Signal",
+          "Opportunity"
+        ]
+      },
+      "canonical_key": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+      },
+      "display_name": {
+        "type": "string",
+        "minLength": 1
+      },
+      "aliases": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "properties": {
+        "type": "object"
+      },
+      "schema_id": {
+        "const": "bi.schema/v0"
+      },
+      "classification": {
+        "enum": [
+          "PUBLIC",
+          "INTERNAL",
+          "CONFIDENTIAL",
+          "RESTRICTED",
+          "UNCLASSIFIED"
+        ]
+      },
+      "status": {
+        "enum": [
+          "candidate",
+          "reviewed",
+          "published",
+          "rejected"
+        ]
+      },
+      "review_status": {
+        "enum": [
+          "draft",
+          "reviewed",
+          "rejected"
+        ]
+      },
+      "edited_by_human": {
+        "type": "boolean"
+      },
+      "updated": {
+        "type": "string",
+        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+        "x-origin": "source-bi-doc",
+        "x-pages": [
+          12,
+          15
+        ],
+        "x-name-status": "doc",
+        "description": "Card update date; older than 90 days raises a stale reminder."
+      },
+      "sources": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "x-origin": "source-bi-doc",
+        "x-pages": [
+          12
+        ],
+        "x-name-status": "provisional",
+        "description": "Each card keeps its sources."
+      }
+    }
+  },
+  "claim_record": {
+    "description": "Every relationship and every entity fact is carried by claims. Source rule: distinguish assertion from inference, assumed from verified, draft from reviewed.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "claim_id",
+      "subject_entity_id",
+      "claim_kind",
+      "verification_status",
+      "review_status",
+      "evidence"
+    ],
+    "properties": {
+      "claim_id": {
+        "type": "string",
+        "pattern": "^clm-[0-9a-f]{16}$"
+      },
+      "subject_entity_id": {
+        "type": "string"
+      },
+      "relationship_id": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "statement": {
+        "type": "string",
+        "minLength": 1
+      },
+      "claim_kind": {
+        "enum": [
+          "source_assertion",
+          "inference"
+        ]
+      },
+      "verification_status": {
+        "enum": [
+          "assumed",
+          "verified",
+          "disputed"
+        ]
+      },
+      "review_status": {
+        "enum": [
+          "draft",
+          "reviewed",
+          "rejected"
+        ]
+      },
+      "evidence": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "evidence_id",
+            "role"
+          ],
+          "properties": {
+            "evidence_id": {
+              "type": "string",
+              "pattern": "^ev-[0-9a-f]{20}$"
+            },
+            "role": {
+              "enum": [
+                "supports",
+                "contradicts",
+                "context"
+              ]
+            }
+          }
+        }
+      },
+      "derived_from_claim_ids": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "classification": {
+        "enum": [
+          "PUBLIC",
+          "INTERNAL",
+          "CONFIDENTIAL",
+          "RESTRICTED",
+          "UNCLASSIFIED"
+        ]
+      },
+      "valid_from": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "valid_to": {
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    }
+  },
+  "entity_types": {
+    "Trend": {
+      "origin": "source-bi-doc",
+      "pages": [
+        3,
+        4
+      ],
+      "doc_label": "市場趨勢",
+      "also_in_v1_0": true,
+      "description": "A market trend; chain step 1. Doc key fields: measurement impact, our fit, stage.",
+      "default_classification": "UNCLASSIFIED",
+      "label_is_content": false,
+      "suggested_review_domain": "BD",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "stage"
+        ],
+        "properties": {
+          "measurement_impact": {
+            "type": "string",
+            "minLength": 1,
+            "x-origin": "source-bi-doc",
+            "x-pages": [
+              4
+            ],
+            "x-name-status": "provisional"
+          },
+          "our_fit": {
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ],
+            "x-origin": "source-bi-doc",
+            "x-pages": [
+              4
+            ],
+            "x-name-status": "provisional",
+            "x-note": "Enum values proposed; the document names the field only."
+          },
+          "stage": {
+            "enum": [
+              "emerging",
+              "growth",
+              "mature",
+              "declining"
+            ],
+            "x-origin": "source-bi-doc",
+            "x-pages": [
+              4
+            ],
+            "x-name-status": "provisional",
+            "x-note": "Enum values proposed."
+          },
+          "market_segments": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "wireless_communications",
+                "aerospace_defense",
+                "automotive",
+                "ai_server",
+                "semiconductor"
+              ]
+            },
+            "x-origin": "proposed-v0",
+            "x-name-status": "proposed",
+            "x-note": "Atlas market filter; values of src/knowledge/market_matrix.py TargetMarket. The BI document defines no market field."
+          }
+        }
+      }
+    },
+    "Technology": {
+      "origin": "source-bi-doc",
+      "pages": [
+        3,
+        4
+      ],
+      "doc_label": "關鍵技術",
+      "also_in_v1_0": true,
+      "description": "A technology that drives trends; chain step 2. Doc key fields: maturity, standards body, affected nodes (link affects_nodes).",
+      "default_classification": "UNCLASSIFIED",
+      "label_is_content": false,
+      "suggested_review_domain": "AE",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "maturity"
+        ],
+        "properties": {
+          "maturity": {
+            "enum": [
+              "research",
+              "pre_standard",
+              "standardized",
+              "deployed"
+            ],
+            "x-origin": "source-bi-doc",
+            "x-pages": [
+              4
+            ],
+            "x-name-status": "provisional",
+            "x-note": "Enum values proposed."
+          },
+          "standards_body": {
+            "type": "string",
+            "minLength": 1,
+            "x-origin": "source-bi-doc",
+            "x-pages": [
+              4
+            ],
+            "x-name-status": "provisional"
+          }
+        }
+      }
+    },
+    "Node": {
+      "origin": "source-bi-doc",
+      "pages": [
+        3,
+        4
+      ],
+      "doc_label": "價值鏈節點",
+      "also_in_v1_0": true,
+      "description": "A fixed position in the value chain; chain step 3. The document says 8 fixed nodes and lists chipset, module, handset, CPE, base station, telecom network and certification lab (7 legible).",
+      "default_classification": "UNCLASSIFIED",
+      "label_is_content": false,
+      "suggested_review_domain": "BD",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "position_set"
+        ],
+        "properties": {
+          "position_set": {
+            "enum": [
+              "bi-doc",
+              "proposed-v0-extension"
+            ],
+            "x-origin": "proposed-v0",
+            "x-name-status": "proposed",
+            "x-note": "bi-doc = one of the document's fixed wireless nodes; proposed-v0-extension = a node added for the owner's non-wireless BD scenarios (AI data center, automotive radar)."
+          }
+        }
+      }
+    },
+    "Ecosystem": {
+      "origin": "source-bi-doc",
+      "pages": [
+        3,
+        4,
+        5
+      ],
+      "doc_label": "供應商與夥伴",
+      "also_in_v1_0": true,
+      "description": "A supplier or partner company on a node (chip, module, certification partner); chain step 4. Doc key fields: role, node (link node), supplied technologies (link supplied_technologies). Never a customer.",
+      "default_classification": "UNCLASSIFIED",
+      "label_is_content": false,
+      "suggested_review_domain": "BD",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "role"
+        ],
+        "properties": {
+          "role": {
+            "enum": [
+              "chipset_supplier",
+              "module_supplier",
+              "certification_partner",
+              "component_supplier",
+              "other"
+            ],
+            "x-origin": "source-bi-doc",
+            "x-pages": [
+              4
+            ],
+            "x-name-status": "provisional",
+            "x-note": "Enum values proposed."
+          }
+        }
+      }
+    },
+    "Account": {
+      "origin": "source-bi-doc",
+      "pages": [
+        5
+      ],
+      "doc_label": "客戶",
+      "also_in_v1_0": true,
+      "description": "A customer that buys our instruments. Doc key fields: node (link node), main suppliers (link suppliers) and customers, region. Not on the slide-3 chain diagram; the chain reaches it through CustomerProduct.",
+      "default_classification": "CONFIDENTIAL",
+      "label_is_content": true,
+      "suggested_review_domain": "Account Owner",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [],
+        "properties": {
+          "region": {
+            "enum": [
+              "apac",
+              "emea",
+              "americas",
+              "global"
+            ],
+            "x-origin": "source-bi-doc",
+            "x-pages": [
+              5
+            ],
+            "x-name-status": "provisional",
+            "x-note": "Enum values proposed."
+          },
+          "customers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "x-origin": "source-bi-doc",
+            "x-pages": [
+              5
+            ],
+            "x-name-status": "provisional",
+            "x-note": "The account's own customers; no card type exists for them, so v0 keeps them as text."
+          },
+          "synthetic": {
+            "type": "boolean",
+            "x-origin": "proposed-v0",
+            "x-name-status": "proposed",
+            "x-note": "Marks mock data."
+          }
+        }
+      }
+    },
+    "CustomerProduct": {
+      "origin": "source-bi-doc",
+      "pages": [
+        3,
+        5
+      ],
+      "doc_label": "客戶產品（slide 3: Product）",
+      "also_in_v1_0": true,
+      "description": "A product a customer launches; chain step 5 (named Product on slide 3). Doc key fields: account (link account), launch schedule, technologies (link technologies), chips/modules (link chip_modules).",
+      "default_classification": "CONFIDENTIAL",
+      "label_is_content": true,
+      "suggested_review_domain": "Account Owner",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [],
+        "properties": {
+          "launch_schedule": {
+            "type": "string",
+            "pattern": "^[0-9]{4}(-Q[1-4]|-[0-9]{2})?$",
+            "x-origin": "source-bi-doc",
+            "x-pages": [
+              5,
+              13
+            ],
+            "x-name-status": "provisional"
+          }
+        }
+      }
+    },
+    "Application": {
+      "origin": "source-bi-doc",
+      "pages": [
+        3,
+        5
+      ],
+      "doc_label": "量測應用",
+      "also_in_v1_0": true,
+      "description": "A measurement application a product needs; chain step 6. Doc key fields: value-chain tier (link node), measurement topic, related technologies (link technologies).",
+      "default_classification": "UNCLASSIFIED",
+      "label_is_content": false,
+      "suggested_review_domain": "AE",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "measurement_topic"
+        ],
+        "properties": {
+          "measurement_topic": {
+            "type": "string",
+            "minLength": 1,
+            "x-origin": "source-bi-doc",
+            "x-pages": [
+              5
+            ],
+            "x-name-status": "provisional"
+          },
+          "market_segments": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "wireless_communications",
+                "aerospace_defense",
+                "automotive",
+                "ai_server",
+                "semiconductor"
+              ]
+            },
+            "x-origin": "proposed-v0",
+            "x-name-status": "proposed",
+            "x-note": "Atlas market filter; values of src/knowledge/market_matrix.py TargetMarket. The BI document defines no market field."
+          }
+        }
+      }
+    },
+    "TestSolution": {
+      "origin": "source-bi-doc",
+      "pages": [
+        3,
+        6,
+        8
+      ],
+      "doc_label": "測試方案",
+      "also_in_v1_0": true,
+      "description": "A test solution, ours or a competitor's; chain step 7. Doc key fields: vendor (empty = R&S; else link to a Competitor card), applications, competing_solutions.",
+      "default_classification": "UNCLASSIFIED",
+      "label_is_content": false,
+      "suggested_review_domain": "PM",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "is_own_solution"
+        ],
+        "properties": {
+          "is_own_solution": {
+            "type": "boolean",
+            "x-origin": "source-v1.0",
+            "x-name-status": "proposed",
+            "x-note": "Explicit form of the document's rule that an empty vendor means our own solution (slide 8); required by v1.0 and the owner."
+          },
+          "product_family": {
+            "enum": [
+              "nonsignaling_wireless",
+              "signaling_wireless",
+              "signal_generation_analysis",
+              "vector_network_analysis",
+              "oscilloscope",
+              "radar_test",
+              "power_analysis",
+              "other"
+            ],
+            "x-origin": "proposed-v0",
+            "x-name-status": "proposed",
+            "x-note": "Aligns with market_matrix.py ProductFamily for the Atlas product filter."
+          }
+        }
+      }
+    },
+    "Competitor": {
+      "origin": "source-bi-doc",
+      "pages": [
+        6,
+        8
+      ],
+      "doc_label": "競爭對手",
+      "also_in_v1_0": true,
+      "description": "A competitor. Doc key fields: strengths, weaknesses, product lines. No Competitor card for our own company.",
+      "default_classification": "INTERNAL",
+      "label_is_content": false,
+      "suggested_review_domain": "PM",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [],
+        "properties": {
+          "strengths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "x-origin": "source-bi-doc",
+            "x-pages": [
+              6
+            ],
+            "x-name-status": "provisional"
+          },
+          "weaknesses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "x-origin": "source-bi-doc",
+            "x-pages": [
+              6
+            ],
+            "x-name-status": "provisional"
+          },
+          "product_lines": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "x-origin": "source-bi-doc",
+            "x-pages": [
+              6
+            ],
+            "x-name-status": "provisional"
+          },
+          "confirmed": {
+            "type": "boolean",
+            "x-origin": "source-bi-doc",
+            "x-pages": [
+              6,
+              16
+            ],
+            "x-name-status": "provisional",
+            "x-note": "The document separates confirmed competitors from ones still to be confirmed."
+          }
+        }
+      }
+    },
+    "Concept": {
+      "origin": "source-bi-doc",
+      "pages": [
+        6,
+        9
+      ],
+      "doc_label": "白話技術解釋",
+      "also_in_v1_0": true,
+      "description": "A plain-language explanation for sales. Doc fields: one-line explanation, analogy, related technologies / applications / solutions, audience, review state (draft until sales have read it).",
+      "default_classification": "UNCLASSIFIED",
+      "label_is_content": false,
+      "suggested_review_domain": "BD",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "one_liner",
+          "review_state"
+        ],
+        "properties": {
+          "one_liner": {
+            "type": "string",
+            "minLength": 1,
+            "x-origin": "source-bi-doc",
+            "x-pages": [
+              6,
+              9
+            ],
+            "x-name-status": "provisional"
+          },
+          "analogy": {
+            "type": "string",
+            "minLength": 1,
+            "x-origin": "source-bi-doc",
+            "x-pages": [
+              6,
+              9
+            ],
+            "x-name-status": "provisional"
+          },
+          "audience": {
+            "type": "string",
+            "minLength": 1,
+            "x-origin": "source-bi-doc",
+            "x-pages": [
+              9
+            ],
+            "x-name-status": "provisional"
+          },
+          "review_state": {
+            "enum": [
+              "draft",
+              "reviewed"
+            ],
+            "x-origin": "source-bi-doc",
+            "x-pages": [
+              9,
+              12
+            ],
+            "x-name-status": "provisional",
+            "x-note": "draft until a sales trial read; distinct from the record's publication review_status."
+          }
+        }
+      }
+    },
+    "Signal": {
+      "origin": "source-bi-doc",
+      "pages": [
+        6,
+        11,
+        15
+      ],
+      "doc_label": "外部情報",
+      "also_in_v1_0": true,
+      "description": "One piece of external intelligence (e.g. a conference deck, a customer visit). Doc fields: date, source, reliability, so_what.",
+      "default_classification": "UNCLASSIFIED",
+      "label_is_content": false,
+      "suggested_review_domain": "BD",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "date",
+          "source",
+          "reliability"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}(-[0-9]{2})?$",
+            "x-origin": "source-bi-doc",
+            "x-pages": [
+              6
+            ],
+            "x-name-status": "provisional"
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1,
+            "x-origin": "source-bi-doc",
+            "x-pages": [
+              6
+            ],
+            "x-name-status": "provisional"
+          },
+          "reliability": {
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ],
+            "x-origin": "source-bi-doc",
+            "x-pages": [
+              6
+            ],
+            "x-name-status": "provisional",
+            "x-note": "Enum values proposed."
+          },
+          "so_what": {
+            "type": "string",
+            "minLength": 1,
+            "x-origin": "source-bi-doc",
+            "x-pages": [
+              15
+            ],
+            "x-name-status": "doc"
+          }
+        }
+      }
+    },
+    "Opportunity": {
+      "origin": "source-bi-doc",
+      "pages": [
+        3,
+        13
+      ],
+      "doc_label": "商機",
+      "also_in_v1_0": true,
+      "description": "Chain step 8. The document names it (and 'customer opportunity leads' as an output) but defines no fields or links; v0 adds the minimum.",
+      "default_classification": "CONFIDENTIAL",
+      "label_is_content": true,
+      "suggested_review_domain": "BD",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "hypothesis_status"
+        ],
+        "properties": {
+          "hypothesis_status": {
+            "enum": [
+              "hypothesis",
+              "qualified",
+              "rejected"
+            ],
+            "x-origin": "proposed-v0",
+            "x-name-status": "proposed",
+            "x-note": "An opportunity is an inference until a reviewer qualifies it."
+          },
+          "market_segments": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "wireless_communications",
+                "aerospace_defense",
+                "automotive",
+                "ai_server",
+                "semiconductor"
+              ]
+            },
+            "x-origin": "proposed-v0",
+            "x-name-status": "proposed",
+            "x-note": "Atlas market filter; values of src/knowledge/market_matrix.py TargetMarket. The BI document defines no market field."
+          }
+        }
+      }
+    }
+  },
+  "relationship_types": [
+    {
+      "name": "related_tech",
+      "range": "Technology",
+      "description": "Trend card field pointing at the technologies behind the trend.",
+      "sources": [
+        {
+          "domain": "Trend",
+          "origin": "source-bi-doc",
+          "pages": [
+            7
+          ],
+          "name_status": "doc"
+        }
+      ]
+    },
+    {
+      "name": "affects_nodes",
+      "range": "Node",
+      "description": "Technology card field: the value-chain nodes a technology affects.",
+      "sources": [
+        {
+          "domain": "Technology",
+          "origin": "source-bi-doc",
+          "pages": [
+            4,
+            7
+          ],
+          "name_status": "doc"
+        }
+      ]
+    },
+    {
+      "name": "node",
+      "range": "Node",
+      "description": "The node a card sits on.",
+      "sources": [
+        {
+          "domain": "Ecosystem",
+          "origin": "source-bi-doc",
+          "pages": [
+            4,
+            7
+          ],
+          "name_status": "doc"
+        },
+        {
+          "domain": "Account",
+          "origin": "source-bi-doc",
+          "pages": [
+            5
+          ],
+          "name_status": "provisional",
+          "note": "Account key field 所在節點; field name not on the link table."
+        },
+        {
+          "domain": "Application",
+          "origin": "source-bi-doc",
+          "pages": [
+            5
+          ],
+          "name_status": "provisional",
+          "note": "Application key field 價值鏈層級, read as a link to Node (interpretation)."
+        }
+      ]
+    },
+    {
+      "name": "technologies",
+      "range": "Technology",
+      "description": "Technologies a card refers to.",
+      "sources": [
+        {
+          "domain": "Application",
+          "origin": "source-bi-doc",
+          "pages": [
+            5,
+            7
+          ],
+          "name_status": "doc"
+        },
+        {
+          "domain": "Concept",
+          "origin": "source-bi-doc",
+          "pages": [
+            7,
+            9
+          ],
+          "name_status": "doc"
+        },
+        {
+          "domain": "CustomerProduct",
+          "origin": "source-bi-doc",
+          "pages": [
+            5
+          ],
+          "name_status": "provisional",
+          "note": "CustomerProduct key field 使用技術."
+        }
+      ]
+    },
+    {
+      "name": "applications",
+      "range": "Application",
+      "description": "Measurement applications a card refers to.",
+      "sources": [
+        {
+          "domain": "TestSolution",
+          "origin": "source-bi-doc",
+          "pages": [
+            6,
+            7
+          ],
+          "name_status": "doc"
+        },
+        {
+          "domain": "CustomerProduct",
+          "origin": "source-bi-doc",
+          "pages": [
+            3,
+            5
+          ],
+          "name_status": "provisional",
+          "note": "Chain step 5 -> 6 ('產品需要量測'); Application is defined as the measurement a product needs."
+        },
+        {
+          "domain": "Concept",
+          "origin": "source-bi-doc",
+          "pages": [
+            9
+          ],
+          "name_status": "provisional",
+          "note": "Concept cards list related applications."
+        }
+      ]
+    },
+    {
+      "name": "competing_solutions",
+      "range": "TestSolution",
+      "description": "Our TestSolution card points at the competitor's TestSolution.",
+      "sources": [
+        {
+          "domain": "TestSolution",
+          "origin": "source-bi-doc",
+          "pages": [
+            7,
+            8
+          ],
+          "name_status": "doc"
+        }
+      ]
+    },
+    {
+      "name": "vendor",
+      "range": "Competitor",
+      "description": "A competitor's TestSolution names its Competitor card in vendor; our own solutions leave vendor empty and have no vendor link.",
+      "sources": [
+        {
+          "domain": "TestSolution",
+          "origin": "source-bi-doc",
+          "pages": [
+            6,
+            8
+          ],
+          "name_status": "doc"
+        }
+      ]
+    },
+    {
+      "name": "supplied_technologies",
+      "range": "Technology",
+      "description": "Technologies an Ecosystem supplier provides.",
+      "sources": [
+        {
+          "domain": "Ecosystem",
+          "origin": "source-bi-doc",
+          "pages": [
+            4
+          ],
+          "name_status": "provisional",
+          "note": "Ecosystem key field 供應的技術."
+        }
+      ]
+    },
+    {
+      "name": "suppliers",
+      "range": "Ecosystem",
+      "description": "An account's main suppliers.",
+      "sources": [
+        {
+          "domain": "Account",
+          "origin": "source-bi-doc",
+          "pages": [
+            5
+          ],
+          "name_status": "provisional",
+          "note": "Account key field 主要供應商."
+        }
+      ]
+    },
+    {
+      "name": "account",
+      "range": "Account",
+      "description": "The customer a card belongs to.",
+      "sources": [
+        {
+          "domain": "CustomerProduct",
+          "origin": "source-bi-doc",
+          "pages": [
+            5
+          ],
+          "name_status": "provisional",
+          "note": "CustomerProduct key field 所屬客戶."
+        },
+        {
+          "domain": "Opportunity",
+          "origin": "proposed-v0",
+          "pages": [
+            3,
+            13
+          ],
+          "name_status": "proposed",
+          "note": "The document defines no Opportunity links; an opportunity needs its customer."
+        }
+      ]
+    },
+    {
+      "name": "chip_modules",
+      "range": "Ecosystem",
+      "description": "The chip or module suppliers inside a customer product.",
+      "sources": [
+        {
+          "domain": "CustomerProduct",
+          "origin": "source-bi-doc",
+          "pages": [
+            5
+          ],
+          "name_status": "provisional",
+          "note": "CustomerProduct key field 晶片模組; chip and module makers are Ecosystem cards (slide 5)."
+        }
+      ]
+    },
+    {
+      "name": "test_solutions",
+      "range": "TestSolution",
+      "description": "Test solutions a card refers to.",
+      "sources": [
+        {
+          "domain": "Concept",
+          "origin": "source-bi-doc",
+          "pages": [
+            9
+          ],
+          "name_status": "provisional",
+          "note": "Concept cards list related solutions."
+        },
+        {
+          "domain": "Opportunity",
+          "origin": "proposed-v0",
+          "pages": [
+            3
+          ],
+          "name_status": "proposed",
+          "note": "Chain step 7 -> 8: an opportunity proposes our solution."
+        }
+      ]
+    },
+    {
+      "name": "customer_product",
+      "range": "CustomerProduct",
+      "description": "The customer product an opportunity is about.",
+      "sources": [
+        {
+          "domain": "Opportunity",
+          "origin": "proposed-v0",
+          "pages": [
+            3
+          ],
+          "name_status": "proposed",
+          "note": "Chain step 5 -> 8."
+        }
+      ]
+    },
+    {
+      "name": "mentions",
+      "range": [
+        "Trend",
+        "Technology",
+        "Account",
+        "CustomerProduct",
+        "Ecosystem",
+        "Competitor",
+        "Application"
+      ],
+      "description": "The cards a Signal informs.",
+      "sources": [
+        {
+          "domain": "Signal",
+          "origin": "proposed-v0",
+          "pages": [
+            11,
+            15
+          ],
+          "name_status": "proposed",
+          "note": "The document gives Signal date, source, reliability and so_what and says imports leave a Signal record, but defines no link field; without one a Signal cannot be traced to the cards it supports."
+        }
+      ]
+    }
+  ],
+  "source_links": [
+    {
+      "name": "claim_about",
+      "from": "Claim",
+      "to": "Entity",
+      "origin": "source-v1.0",
+      "description": "kg.claim.subject_entity_id."
+    },
+    {
+      "name": "supports",
+      "from": "Claim",
+      "to": "Evidence",
+      "origin": "source-v1.0",
+      "description": "kg.claim_evidence role=supports."
+    },
+    {
+      "name": "contradicts",
+      "from": "Claim",
+      "to": "Evidence",
+      "origin": "source-v1.0",
+      "description": "kg.claim_evidence role=contradicts."
+    },
+    {
+      "name": "context",
+      "from": "Claim",
+      "to": "Evidence",
+      "origin": "source-v1.0",
+      "description": "kg.claim_evidence role=context."
+    }
+  ],
+  "rules": [
+    {
+      "id": "account_not_ecosystem",
+      "origin": "source-bi-doc",
+      "pages": [
+        5
+      ],
+      "statement": "Account is a customer that buys our instruments; Ecosystem is a supply-chain chip, module or certification partner. They are never mixed: one canonical_key never names both, and an Account reaches an Ecosystem only through suppliers (or a CustomerProduct through chip_modules)."
+    },
+    {
+      "id": "own_solution_vendor",
+      "origin": "source-bi-doc",
+      "pages": [
+        8
+      ],
+      "statement": "Our TestSolution leaves vendor empty (no vendor link) and there is no Competitor card for our own company. A competitor's TestSolution has exactly one vendor link to its Competitor card. competing_solutions goes from our solution to a competitor's solution."
+    },
+    {
+      "id": "own_solution_explicit",
+      "origin": "source-v1.0",
+      "statement": "is_own_solution is required and equals 'has no vendor link'."
+    },
+    {
+      "id": "coverage_counts_own_only",
+      "origin": "source-bi-doc",
+      "pages": [
+        8,
+        13
+      ],
+      "statement": "Solution coverage of an Application counts our solutions only; competitor solutions appear only in the comparison."
+    },
+    {
+      "id": "claim_modality",
+      "origin": "source-bi-doc",
+      "pages": [
+        11,
+        12
+      ],
+      "statement": "Every claim separates what the source says (source_assertion) from what we infer (inference), and states assumed / verified (verified only after checking) and draft / reviewed. Uncertain facts go to a to-verify list (verification_status=assumed), never stated as fact. Each claim from a deck cites its page."
+    },
+    {
+      "id": "claim_record_fields",
+      "origin": "source-v1.0",
+      "statement": "claim_kind, verification_status, review_status and the evidence roles supports / contradicts / context follow kg.claim and kg.claim_evidence of v1.0."
+    },
+    {
+      "id": "concept_review",
+      "origin": "source-bi-doc",
+      "pages": [
+        9,
+        12
+      ],
+      "statement": "A Concept starts as review_state=draft and becomes reviewed after sales have read it."
+    },
+    {
+      "id": "stale_after_90_days",
+      "origin": "source-bi-doc",
+      "pages": [
+        12
+      ],
+      "statement": "Every card records its sources and updated date; a card not updated for more than 90 days is flagged stale (Atlas graph_state stale, gap STALE_DATA)."
+    },
+    {
+      "id": "node_fixed_set",
+      "origin": "source-bi-doc",
+      "pages": [
+        4
+      ],
+      "statement": "Node is a fixed set of value-chain positions (the document's wireless set). proposed-v0 extension: further positions for the owner's non-wireless BD scenarios, marked position_set=proposed-v0-extension."
+    },
+    {
+      "id": "import_idempotent_merge",
+      "origin": "source-bi-doc",
+      "pages": [
+        10,
+        11
+      ],
+      "statement": "Imports run dry-run first, are repeatable without duplicate cards, merge into existing cards without overwriting human-written text, keep extraction output out of the published set until reviewed, and keep only summaries and sources, not full source text."
+    },
+    {
+      "id": "assertion_needs_support",
+      "origin": "proposed-v0",
+      "statement": "A source_assertion claim has at least one supports evidence item."
+    },
+    {
+      "id": "inference_needs_basis",
+      "origin": "proposed-v0",
+      "statement": "An inference claim lists derived_from_claim_ids and is never verified; a reviewer qualifies the derived Opportunity instead."
+    },
+    {
+      "id": "disputed_needs_both_sides",
+      "origin": "proposed-v0",
+      "statement": "A disputed claim has both supports and contradicts evidence."
+    },
+    {
+      "id": "domain_range",
+      "origin": "proposed-v0",
+      "statement": "A relationship's subject type is one of its sources' domains and its object type is in its range."
+    },
+    {
+      "id": "classification_inherits_max",
+      "origin": "proposed-v0",
+      "statement": "A record takes the highest classification of its evidence documents and its type default (ADR-K8 pending)."
+    },
+    {
+      "id": "label_is_content",
+      "origin": "proposed-v0",
+      "statement": "Labels of Account, CustomerProduct and Opportunity, or of any CONFIDENTIAL/RESTRICTED record, are content (Knowledge API scope knowledge.read.content)."
+    }
+  ],
+  "gap_checks": [
+    {
+      "id": "application_without_own_solution",
+      "origin": "source-bi-doc",
+      "pages": [
+        13
+      ],
+      "atlas_gap_type": "RELATION_GAP"
+    },
+    {
+      "id": "technology_without_concept",
+      "origin": "source-bi-doc",
+      "pages": [
+        9,
+        13
+      ],
+      "atlas_gap_type": "METADATA_GAP"
+    },
+    {
+      "id": "inferred_share",
+      "origin": "source-bi-doc",
+      "pages": [
+        13
+      ],
+      "atlas_gap_type": "REASONING_GAP"
+    },
+    {
+      "id": "stale_cards",
+      "origin": "source-bi-doc",
+      "pages": [
+        12,
+        13
+      ],
+      "atlas_gap_type": "STALE_DATA"
+    },
+    {
+      "id": "disputed_claims",
+      "origin": "proposed-v0",
+      "atlas_gap_type": "CONFLICT"
+    }
+  ],
+  "review_roles": {
+    "origin": "source-bi-doc",
+    "pages": [
+      9,
+      15
+    ],
+    "doc": "Sales trial-read Concept drafts; card owner and review frequency are 'to be assigned' in the document.",
+    "benchmark": "Owner is Benchmark Owner; BD / PM / AE are suggested Domain Reviewers (owner decision 2026-10-17)."
+  },
+  "upcast": {
+    "from": "bi.schema/v0",
+    "to": "bi.schema/v1 (future, from the real BI source)",
+    "steps": [
+      "type_map: v0 entity_type -> v1 entity_type (identity unless the source renames it); a rename keeps the old entity_id as an alias and sets superseded_by on the old id.",
+      "property_map: per type, v0 property -> v1 property; v1-required properties without a value set review_status=draft and status=candidate; unmapped v0 properties move to properties.legacy_v0.",
+      "relationship_map: v0 relationship_type -> v1 type; a proposed-v0 type with no v1 counterpart becomes related_to when both ends are Concept, otherwise the relationship is kept unpublished with properties.legacy_relationship_type and sent to review.",
+      "claims, evidence ids, document ids and review_status are never rewritten; edited_by_human records keep their values and conflicts are reported.",
+      "dry_run first: write a migration report (counts, unmapped names, conflicts); apply is idempotent by (entity_type, canonical_key) and relationship_id."
+    ],
+    "registered_in": "Strategy Config schema.upcasters (data), applied by the storage backend on read or by a one-off migration run, never by the Harness."
+  }
+}

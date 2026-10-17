@@ -1,0 +1,123 @@
+{
+  "schema_version": "aep.knowledge.v1",
+  "contract_version": "0.1",
+  "request_id": "req-cc11776ff20b",
+  "generated_at": "2026-10-17T08:00:00Z",
+  "source": {
+    "producer": "mock",
+    "backend": "mock",
+    "vault": "bi-fixture",
+    "vault_version": "sha256:9203f65d4aad10f6d785e60a980ed734f25c954a7039b7869e76a238c1eb896e",
+    "schema_id": "bi.schema/v0",
+    "synthetic": true
+  },
+  "data": {
+    "vault": "bi-fixture",
+    "computed_at": "2026-10-17T08:00:00Z",
+    "schema_id": "bi.schema/v0",
+    "entity_counts": {
+      "Account": 7,
+      "Application": 11,
+      "Competitor": 2,
+      "Concept": 4,
+      "CustomerProduct": 8,
+      "Ecosystem": 7,
+      "Node": 12,
+      "Opportunity": 5,
+      "Signal": 7,
+      "Technology": 11,
+      "TestSolution": 10,
+      "Trend": 7
+    },
+    "relationship_counts": {
+      "account": 13,
+      "affects_nodes": 18,
+      "applications": 27,
+      "chip_modules": 6,
+      "competing_solutions": 4,
+      "customer_product": 4,
+      "mentions": 8,
+      "node": 25,
+      "related_tech": 10,
+      "supplied_technologies": 9,
+      "suppliers": 6,
+      "technologies": 25,
+      "test_solutions": 5,
+      "vendor": 3
+    },
+    "evidence_coverage": {
+      "relationships_total": 163,
+      "relationships_with_supporting_evidence": 149,
+      "ratio": 0.9141
+    },
+    "claim_modality": {
+      "source_assertion": 149,
+      "inference": 14,
+      "verified": 137,
+      "assumed": 25,
+      "disputed": 1,
+      "reviewed": 163,
+      "draft": 0
+    },
+    "review_coverage": 1.0,
+    "gaps": [
+      {
+        "gap_type": "RELATION_GAP",
+        "count": 1,
+        "example_ids": [
+          "ent-application-cpo-optoelectronic-test"
+        ],
+        "description": "Applications with no own TestSolution (coverage counts our solutions only)."
+      },
+      {
+        "gap_type": "METADATA_GAP",
+        "count": 8,
+        "example_ids": [
+          "ent-technology-5g-redcap",
+          "ent-technology-5g-ntn",
+          "ent-technology-6g-sub-thz",
+          "ent-technology-cpo",
+          "ent-technology-1-6t-ethernet"
+        ],
+        "description": "Technologies without a Concept card."
+      },
+      {
+        "gap_type": "STALE_DATA",
+        "count": 2,
+        "example_ids": [
+          "ent-competitor-competitor-b",
+          "ent-signal-6g-study-item"
+        ],
+        "description": "Cards not updated for more than 90 days."
+      },
+      {
+        "gap_type": "CONFLICT",
+        "count": 1,
+        "example_ids": [
+          "rel-fcdee28eb476b4d5"
+        ],
+        "description": "Relationships whose claim is disputed (supports and contradicts evidence)."
+      },
+      {
+        "gap_type": "REASONING_GAP",
+        "count": 14,
+        "example_ids": [
+          "rel-b1ec7b5904afd19b",
+          "rel-59161894f56ce332",
+          "rel-370ed3bfcb48ac43",
+          "rel-a9224d86a495ee00",
+          "rel-13cb0a338e7f8511"
+        ],
+        "description": "Relationships carried only by inference claims (inferred share); they need review before a BD decision relies on them."
+      }
+    ]
+  },
+  "pagination": null,
+  "warnings": [
+    {
+      "code": "synthetic_data",
+      "message": "Synthetic mock data; no real customer or product claim."
+    }
+  ],
+  "error": null
+}

@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aep:knowledge-api:v0.1:health",
+  "title": "Health",
+  "$defs": {
+    "Health": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "contract_version",
+        "schema_ids",
+        "vaults",
+        "scopes_available"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "degraded",
+            "unavailable"
+          ]
+        },
+        "contract_version": {
+          "type": "string"
+        },
+        "schema_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "vaults": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "vault",
+              "vault_version",
+              "privacy"
+            ],
+            "properties": {
+              "vault": {
+                "type": "string"
+              },
+              "vault_version": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "privacy": {
+                "enum": [
+                  "private",
+                  "public"
+                ]
+              }
+            }
+          }
+        },
+        "scopes_available": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "knowledge.read.metadata",
+              "knowledge.read.content"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

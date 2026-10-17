@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aep:knowledge-api:v0.1:graph",
+  "title": "Graph Query: a subgraph in the shape Atlas's graph normalizer reads (nodes and edges arrays)",
+  "$defs": {
+    "Subgraph": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "seed_entity_id",
+        "depth",
+        "nodes",
+        "edges",
+        "truncated"
+      ],
+      "properties": {
+        "seed_entity_id": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "common.schema.json#/$defs/entity_id"
+            }
+          ]
+        },
+        "depth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "label",
+              "label_redacted",
+              "type",
+              "group",
+              "state",
+              "classification",
+              "review_status",
+              "evidence_count"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "common.schema.json#/$defs/entity_id"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "label_redacted": {
+                "type": "boolean"
+              },
+              "type": {
+                "$ref": "common.schema.json#/$defs/entity_type"
+              },
+              "group": {
+                "type": "string",
+                "minLength": 1
+              },
+              "state": {
+                "$ref": "common.schema.json#/$defs/graph_state"
+              },
+              "classification": {
+                "$ref": "common.schema.json#/$defs/classification"
+              },
+              "review_status": {
+                "$ref": "common.schema.json#/$defs/review_status"
+              },
+              "evidence_count": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "source",
+              "target",
+              "type",
+              "state",
+              "weight",
+              "claim_count"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "common.schema.json#/$defs/relationship_id"
+              },
+              "source": {
+                "$ref": "common.schema.json#/$defs/entity_id"
+              },
+              "target": {
+                "$ref": "common.schema.json#/$defs/entity_id"
+              },
+              "type": {
+                "$ref": "common.schema.json#/$defs/relationship_type"
+              },
+              "state": {
+                "$ref": "common.schema.json#/$defs/graph_state"
+              },
+              "weight": {
+                "type": "number",
+                "minimum": 0
+              },
+              "claim_count": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

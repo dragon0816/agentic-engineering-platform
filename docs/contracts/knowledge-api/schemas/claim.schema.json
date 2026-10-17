@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aep:knowledge-api:v0.1:claim",
+  "title": "Claim",
+  "$defs": {
+    "ClaimSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claim_id",
+        "claim_kind",
+        "verification_status",
+        "review_status"
+      ],
+      "properties": {
+        "claim_id": {
+          "$ref": "common.schema.json#/$defs/claim_id"
+        },
+        "claim_kind": {
+          "$ref": "common.schema.json#/$defs/claim_kind"
+        },
+        "verification_status": {
+          "$ref": "common.schema.json#/$defs/verification_status"
+        },
+        "review_status": {
+          "$ref": "common.schema.json#/$defs/review_status"
+        }
+      }
+    },
+    "Claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claim_id",
+        "subject_entity_id",
+        "relationship_id",
+        "statement",
+        "statement_redacted",
+        "claim_kind",
+        "verification_status",
+        "review_status",
+        "evidence",
+        "derived_from_claim_ids",
+        "classification"
+      ],
+      "properties": {
+        "claim_id": {
+          "$ref": "common.schema.json#/$defs/claim_id"
+        },
+        "subject_entity_id": {
+          "$ref": "common.schema.json#/$defs/entity_id"
+        },
+        "relationship_id": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "common.schema.json#/$defs/relationship_id"
+            }
+          ]
+        },
+        "statement": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "statement_redacted": {
+          "type": "boolean"
+        },
+        "claim_kind": {
+          "$ref": "common.schema.json#/$defs/claim_kind"
+        },
+        "verification_status": {
+          "$ref": "common.schema.json#/$defs/verification_status"
+        },
+        "review_status": {
+          "$ref": "common.schema.json#/$defs/review_status"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "evidence_id",
+              "role"
+            ],
+            "properties": {
+              "evidence_id": {
+                "$ref": "common.schema.json#/$defs/evidence_id"
+              },
+              "role": {
+                "enum": [
+                  "supports",
+                  "contradicts",
+                  "context"
+                ]
+              }
+            }
+          }
+        },
+        "derived_from_claim_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/claim_id"
+          }
+        },
+        "classification": {
+          "$ref": "common.schema.json#/$defs/classification"
+        }
+      }
+    }
+  }
+}

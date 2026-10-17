@@ -2428,6 +2428,24 @@ s-k-20261011T102952` (not published).
   the tests that read docs (`test_codex_remote_test_workflow`, `test_deployment_validation_loop`,
   `test_llm_gateway`, `test_weekly_report_documented_grants`, `test_bundled_skills`) 90 passed,
   1 skipped (litellm not installed). No test parses TASKS/HANDOFF/README/DECISIONS.
+- [x] Knowledge Strategy v1.2 — docs and contract design only (2026-10-17, Claude Code; owner
+  decisions of 2026-10-17: BD / Marketing first users and a 25-question benchmark, BI Schema v0,
+  E2E-01 unaffected with a parallel schedule, minimal Atlas Knowledge API now; the owner then
+  supplied the BI Knowledge Base document). Wrote `docs/proposals/KNOWLEDGE_STRATEGY_v1.2.md`
+  (v1.1 kept unchanged) and `docs/proposals/KNOWLEDGE_STRATEGY_v1.2_DIFF.md`;
+  `docs/proposals/bi_schema_v0/` (12 entity types and 18 relationship sources from the BI
+  document with page citations, 4 minimal `proposed-v0` links, rules, 90-day stale rule, upcast);
+  `docs/proposals/knowledge_benchmark_v0/` (25 questions, all `draft-unreviewed`, indicative
+  only until reviewed); `docs/contracts/knowledge-api/` (OpenAPI 3.1 with 14 GET operations,
+  11 JSON Schemas, 19 synthetic mock responses, README for the Atlas Coding Agent); test
+  `tests/test_knowledge_strategy_docs.py` (stdlib JSON Schema subset validator). ADR-K1, K3 and
+  the K7 mechanism decided; K2 central DB, K6 G1-G4 vs U7 and K9 pending; new ADR-K10 (schema as
+  data, storage and Harness type-agnostic). Found: `tests/test_product_e2e_01.py` builds
+  `agent.gateway.Gateway`, so G1-G4 need the regression plan in v1.2 section 7.5; v1.1's Raw
+  backfill of evidence ids would break Phase 7 Knowledge parity, now a derived index. No `src/`,
+  DECISIONS or ARCHITECTURE change; no issue, PR or push. **AEP-K02 and later stay blocked until
+  the owner confirms the thresholds, Schema v0 and the schedule and approves v1.2.**
+  Verification: see HANDOFF.md.
 
 ## n8n integration removed (2026-10-17)
 

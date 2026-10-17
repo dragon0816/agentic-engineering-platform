@@ -1,0 +1,429 @@
+openapi: 3.1.0
+info:
+  title: AEP Knowledge API (minimal contract for Atlas)
+  version: "0.1"
+  summary: Read-only Entity, Relationship/Graph, Evidence, Quality and Strategy Run queries.
+  description: |
+    Draft contract v0.1 of 2026-10-17 (Knowledge Strategy v1.2, ADR-K7). Status: proposal,
+    awaiting owner confirmation; no AEP route serves it yet. Atlas develops against the
+    synthetic files in ./mock/ (see README.md and mock/index.json).
+
+    Conventions (from docs/telemetry/AEP_ATLAS_TELEMETRY_CONTRACT.md):
+    - Every response is an envelope with schema_version "aep.knowledge.v1" and
+      contract_version "0.1"; exactly one of data and error is non-null.
+    - Adding an optional field raises only contract_version; a removal or a change of
+      meaning needs "aep.knowledge.v2". Consumers ignore unknown fields.
+    - snake_case fields, UTC RFC3339 timestamps, string ids, cursor pagination
+      (limit default 50, maximum 500; next_cursor null ends the list).
+    - Only published content is returned (drafts_searchable is false). Records above the
+      caller's classification ceiling are left out and counted in a
+      classification_filtered warning.
+
+    Scopes (Q10, recommendation awaiting owner confirmation):
+    - knowledge.read.metadata: ids, types, canonical keys, statuses, counts, metrics,
+      run status, and labels of non-sensitive types. Served like telemetry: GET only,
+      loopback only, no token, cross-origin only for pages on this machine.
+    - knowledge.read.content: passage text, claim statements, document titles and paths,
+      and labels of Account, CustomerProduct, Opportunity or any CONFIDENTIAL/RESTRICTED
+      record. Needs a bearer token carrying the scope. Without it those fields are null,
+      the record says *_redacted: true and a content_withheld warning counts them.
+  license:
+    name: Internal draft
+servers:
+  - url: http://127.0.0.1:{port}
+    description: Agent Web on loopback (Phase 1)
+    variables:
+      port:
+        default: "53583"
+tags:
+  - name: entity
+    description: Entity Query
+  - name: graph
+    description: Relationship / Graph Query
+  - name: evidence
+    description: Evidence Query (passages and document metadata)
+  - name: quality
+    description: Knowledge Quality Metrics
+  - name: strategy
+    description: Strategy Run Status
+  - name: service
+    description: Health
+components:
+  securitySchemes:
+    knowledgeBearer:
+      type: http
+      scheme: bearer
+      description: >
+        Agent Web read token that carries scopes. OpenAPI 3.1 allows role names in the
+        security requirement of a non-OAuth scheme; they name the scope. A loopback
+        request without a token gets knowledge.read.metadata only.
+  parameters:
+    vault:
+      name: vault
+      in: query
+      required: false
+      schema: {type: string, minLength: 1}
+      description: Vault name; defaults to the Host's only Knowledge vault.
+    cursor:
+      name: cursor
+      in: query
+      required: false
+      schema: {type: string}
+    limit:
+      name: limit
+      in: query
+      required: false
+      schema: {type: integer, minimum: 1, maximum: 500, default: 50}
+    entity_type:
+      name: entity_type
+      in: query
+      required: false
+      schema: {$ref: "./schemas/common.schema.json#/$defs/entity_type"}
+    relationship_type:
+      name: relationship_type
+      in: query
+      required: false
+      schema: {$ref: "./schemas/common.schema.json#/$defs/relationship_type"}
+    entity_id_path:
+      name: entity_id
+      in: path
+      required: true
+      schema: {$ref: "./schemas/common.schema.json#/$defs/entity_id"}
+  responses:
+    Error:
+      description: Envelope with data null and an error object.
+      content:
+        application/json:
+          schema: {$ref: "./schemas/envelope.schema.json"}
+          examples:
+            not_found: {externalValue: "./mock/error_not_found.json"}
+            scope_required: {externalValue: "./mock/error_scope_required.json"}
+security:
+  - {}
+  - knowledgeBearer: [knowledge.read.metadata]
+paths:
+  /api/v1/knowledge/health:
+    get:
+      tags: [service]
+      operationId: getHealth
+      summary: Service, backend, vaults, schema ids and the scopes the caller can get.
+      x-aep-scope: knowledge.read.metadata
+      responses:
+        "200":
+          description: "Envelope; data: health.schema.json#/$defs/Health"
+          content:
+            application/json:
+              schema: {$ref: "./schemas/envelope.schema.json"}
+              examples:
+                mock: {externalValue: "./mock/health.json"}
+  /api/v1/knowledge/entities:
+    get:
+      tags: [entity]
+      operationId: listEntities
+      summary: List or search published entities.
+      x-aep-scope: knowledge.read.metadata (labels of sensitive types need knowledge.read.content)
+      parameters:
+        - $ref: "#/components/parameters/vault"
+        - $ref: "#/components/parameters/entity_type"
+        - name: q
+          in: query
+          required: false
+          schema: {type: string, maxLength: 200}
+          description: Matches canonical_key always; display_name and aliases only under knowledge.read.content.
+        - name: market_segment
+          in: query
+          required: false
+          schema: {enum: [wireless_communications, aerospace_defense, automotive, ai_server, semiconductor]}
+        - name: review_status
+          in: query
+          required: false
+          schema: {$ref: "./schemas/common.schema.json#/$defs/review_status"}
+        - $ref: "#/components/parameters/cursor"
+        - $ref: "#/components/parameters/limit"
+      responses:
+        "200":
+          description: "Envelope; data: entity.schema.json#/$defs/EntityList"
+          content:
+            application/json:
+              schema: {$ref: "./schemas/envelope.schema.json"}
+              examples:
+                content_scope: {externalValue: "./mock/entities.json"}
+                metadata_scope: {externalValue: "./mock/entities.metadata.json"}
+        "400": {$ref: "#/components/responses/Error"}
+  /api/v1/knowledge/entities/{entity_id}:
+    get:
+      tags: [entity]
+      operationId: getEntity
+      summary: One entity with its claims and relationship counts.
+      x-aep-scope: knowledge.read.metadata (claim statements need knowledge.read.content)
+      parameters:
+        - $ref: "#/components/parameters/entity_id_path"
+      responses:
+        "200":
+          description: "Envelope; data: entity.schema.json#/$defs/EntityDetail"
+          content:
+            application/json:
+              schema: {$ref: "./schemas/envelope.schema.json"}
+              examples:
+                mock: {externalValue: "./mock/entity_detail.json"}
+        "404": {$ref: "#/components/responses/Error"}
+  /api/v1/knowledge/relationships:
+    get:
+      tags: [graph]
+      operationId: listRelationships
+      summary: List typed relationships with claim summaries, evidence ids and Atlas graph state.
+      x-aep-scope: knowledge.read.metadata
+      parameters:
+        - $ref: "#/components/parameters/vault"
+        - $ref: "#/components/parameters/relationship_type"
+        - name: subject_entity_id
+          in: query
+          required: false
+          schema: {$ref: "./schemas/common.schema.json#/$defs/entity_id"}
+        - name: object_entity_id
+          in: query
+          required: false
+          schema: {$ref: "./schemas/common.schema.json#/$defs/entity_id"}
+        - name: graph_state
+          in: query
+          required: false
+          schema: {$ref: "./schemas/common.schema.json#/$defs/graph_state"}
+        - $ref: "#/components/parameters/cursor"
+        - $ref: "#/components/parameters/limit"
+      responses:
+        "200":
+          description: "Envelope; data: relationship.schema.json#/$defs/RelationshipList"
+          content:
+            application/json:
+              schema: {$ref: "./schemas/envelope.schema.json"}
+              examples:
+                mock: {externalValue: "./mock/relationships.json"}
+        "400": {$ref: "#/components/responses/Error"}
+  /api/v1/knowledge/graph:
+    get:
+      tags: [graph]
+      operationId: getGraph
+      summary: A subgraph as nodes and edges arrays (the shape Atlas's graph normalizer reads).
+      description: Without seed, the whole published graph up to limit nodes; with seed, the neighbourhood up to depth hops (1-3).
+      x-aep-scope: knowledge.read.metadata (labels of sensitive nodes need knowledge.read.content)
+      parameters:
+        - $ref: "#/components/parameters/vault"
+        - name: seed
+          in: query
+          required: false
+          schema: {$ref: "./schemas/common.schema.json#/$defs/entity_id"}
+        - name: depth
+          in: query
+          required: false
+          schema: {type: integer, minimum: 1, maximum: 3, default: 1}
+        - $ref: "#/components/parameters/relationship_type"
+        - $ref: "#/components/parameters/entity_type"
+        - $ref: "#/components/parameters/limit"
+      responses:
+        "200":
+          description: "Envelope; data: graph.schema.json#/$defs/Subgraph"
+          content:
+            application/json:
+              schema: {$ref: "./schemas/envelope.schema.json"}
+              examples:
+                whole_graph_metadata_scope: {externalValue: "./mock/graph.json"}
+                seeded_content_scope: {externalValue: "./mock/graph_seed.json"}
+        "400": {$ref: "#/components/responses/Error"}
+  /api/v1/knowledge/evidence:
+    get:
+      tags: [evidence]
+      operationId: listEvidence
+      summary: Evidence for a document, entity, relationship or claim (exactly one filter).
+      x-aep-scope: knowledge.read.metadata (text needs knowledge.read.content)
+      parameters:
+        - $ref: "#/components/parameters/vault"
+        - name: document_id
+          in: query
+          required: false
+          schema: {$ref: "./schemas/common.schema.json#/$defs/document_id"}
+        - name: entity_id
+          in: query
+          required: false
+          schema: {$ref: "./schemas/common.schema.json#/$defs/entity_id"}
+        - name: relationship_id
+          in: query
+          required: false
+          schema: {$ref: "./schemas/common.schema.json#/$defs/relationship_id"}
+        - name: claim_id
+          in: query
+          required: false
+          schema: {$ref: "./schemas/common.schema.json#/$defs/claim_id"}
+        - $ref: "#/components/parameters/cursor"
+        - $ref: "#/components/parameters/limit"
+      responses:
+        "200":
+          description: "Envelope; data: evidence.schema.json#/$defs/EvidenceList"
+          content:
+            application/json:
+              schema: {$ref: "./schemas/envelope.schema.json"}
+              examples:
+                mock: {externalValue: "./mock/evidence.json"}
+        "400": {$ref: "#/components/responses/Error"}
+  /api/v1/knowledge/evidence/{evidence_id}:
+    get:
+      tags: [evidence]
+      operationId: getEvidence
+      summary: One evidence passage and its locator.
+      x-aep-scope: knowledge.read.metadata (text needs knowledge.read.content)
+      parameters:
+        - name: evidence_id
+          in: path
+          required: true
+          schema: {$ref: "./schemas/common.schema.json#/$defs/evidence_id"}
+      security:
+        - {}
+        - knowledgeBearer: [knowledge.read.content]
+      responses:
+        "200":
+          description: "Envelope; data: evidence.schema.json#/$defs/Evidence"
+          content:
+            application/json:
+              schema: {$ref: "./schemas/envelope.schema.json"}
+              examples:
+                content_scope: {externalValue: "./mock/evidence_detail.json"}
+                metadata_scope: {externalValue: "./mock/evidence_detail.metadata.json"}
+        "403": {$ref: "#/components/responses/Error"}
+        "404": {$ref: "#/components/responses/Error"}
+  /api/v1/knowledge/documents:
+    get:
+      tags: [evidence]
+      operationId: listDocuments
+      summary: Document metadata and extraction versions.
+      x-aep-scope: knowledge.read.metadata (title, original_ref and raw_ref need knowledge.read.content)
+      parameters:
+        - $ref: "#/components/parameters/vault"
+        - $ref: "#/components/parameters/cursor"
+        - $ref: "#/components/parameters/limit"
+      responses:
+        "200":
+          description: "Envelope; data: evidence.schema.json#/$defs/DocumentList"
+          content:
+            application/json:
+              schema: {$ref: "./schemas/envelope.schema.json"}
+              examples:
+                metadata_scope: {externalValue: "./mock/documents.json"}
+                content_scope: {externalValue: "./mock/documents.content.json"}
+  /api/v1/knowledge/documents/{document_id}:
+    get:
+      tags: [evidence]
+      operationId: getDocument
+      summary: One document's metadata.
+      x-aep-scope: knowledge.read.metadata (title and paths need knowledge.read.content)
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema: {$ref: "./schemas/common.schema.json#/$defs/document_id"}
+      responses:
+        "200":
+          description: "Envelope; data: evidence.schema.json#/$defs/Document"
+          content:
+            application/json:
+              schema: {$ref: "./schemas/envelope.schema.json"}
+        "404": {$ref: "#/components/responses/Error"}
+  /api/v1/knowledge/quality/summary:
+    get:
+      tags: [quality]
+      operationId: getQualitySummary
+      summary: Counts, evidence coverage, claim modality, review coverage and gaps (Atlas gap taxonomy).
+      x-aep-scope: knowledge.read.metadata
+      parameters:
+        - $ref: "#/components/parameters/vault"
+      responses:
+        "200":
+          description: "Envelope; data: quality.schema.json#/$defs/QualitySummary"
+          content:
+            application/json:
+              schema: {$ref: "./schemas/envelope.schema.json"}
+              examples:
+                mock: {externalValue: "./mock/quality_summary.json"}
+  /api/v1/knowledge/quality/benchmark-runs:
+    get:
+      tags: [quality]
+      operationId: listBenchmarkRuns
+      summary: Wiki-only / Graph-only / Hybrid benchmark results with the six metrics and the ground-truth review state.
+      x-aep-scope: knowledge.read.metadata
+      parameters:
+        - name: suite
+          in: query
+          required: false
+          schema: {type: string, default: knowledge_bi_v0}
+        - name: retrieval_mode
+          in: query
+          required: false
+          schema: {enum: [wiki, graph, hybrid]}
+        - $ref: "#/components/parameters/cursor"
+        - $ref: "#/components/parameters/limit"
+      responses:
+        "200":
+          description: "Envelope; data: quality.schema.json#/$defs/BenchmarkRunList"
+          content:
+            application/json:
+              schema: {$ref: "./schemas/envelope.schema.json"}
+              examples:
+                mock: {externalValue: "./mock/quality_benchmark_runs.json"}
+  /api/v1/knowledge/strategies:
+    get:
+      tags: [strategy]
+      operationId: listStrategies
+      summary: Installed Strategy Configs (Workflow + Skills + Configuration; ADR-K1).
+      x-aep-scope: knowledge.read.metadata
+      responses:
+        "200":
+          description: "Envelope; data: strategy.schema.json#/$defs/StrategyList"
+          content:
+            application/json:
+              schema: {$ref: "./schemas/envelope.schema.json"}
+              examples:
+                mock: {externalValue: "./mock/strategies.json"}
+  /api/v1/knowledge/strategy-runs:
+    get:
+      tags: [strategy]
+      operationId: listStrategyRuns
+      summary: Strategy runs, newest first, with the Workflow run id and trace id for the telemetry API.
+      x-aep-scope: knowledge.read.metadata
+      parameters:
+        - $ref: "#/components/parameters/vault"
+        - name: strategy_id
+          in: query
+          required: false
+          schema: {type: string}
+        - name: status
+          in: query
+          required: false
+          schema: {enum: [running, candidates_ready, publishing, published, failed, discarded]}
+        - $ref: "#/components/parameters/cursor"
+        - $ref: "#/components/parameters/limit"
+      responses:
+        "200":
+          description: "Envelope; data: strategy.schema.json#/$defs/StrategyRunList"
+          content:
+            application/json:
+              schema: {$ref: "./schemas/envelope.schema.json"}
+              examples:
+                mock: {externalValue: "./mock/strategy_runs.json"}
+  /api/v1/knowledge/strategy-runs/{strategy_run_id}:
+    get:
+      tags: [strategy]
+      operationId: getStrategyRun
+      summary: One strategy run.
+      x-aep-scope: knowledge.read.metadata
+      parameters:
+        - name: strategy_run_id
+          in: path
+          required: true
+          schema: {$ref: "./schemas/common.schema.json#/$defs/strategy_run_id"}
+      responses:
+        "200":
+          description: "Envelope; data: strategy.schema.json#/$defs/StrategyRun"
+          content:
+            application/json:
+              schema: {$ref: "./schemas/envelope.schema.json"}
+              examples:
+                mock: {externalValue: "./mock/strategy_run_detail.json"}
+        "404": {$ref: "#/components/responses/Error"}

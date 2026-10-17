@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aep:knowledge-api:v0.1:entity",
+  "title": "Entity Query",
+  "$defs": {
+    "Entity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entity_id",
+        "entity_type",
+        "canonical_key",
+        "display_name",
+        "display_name_redacted",
+        "aliases",
+        "properties",
+        "schema_id",
+        "classification",
+        "status",
+        "review_status",
+        "updated",
+        "stale",
+        "provenance",
+        "updated_at"
+      ],
+      "properties": {
+        "entity_id": {
+          "$ref": "common.schema.json#/$defs/entity_id"
+        },
+        "entity_type": {
+          "$ref": "common.schema.json#/$defs/entity_type"
+        },
+        "canonical_key": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "display_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "display_name_redacted": {
+          "type": "boolean"
+        },
+        "aliases": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "properties": {
+          "type": "object",
+          "description": "Validated against bi.schema/v0 entity_types[entity_type].properties_schema."
+        },
+        "schema_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "classification": {
+          "$ref": "common.schema.json#/$defs/classification"
+        },
+        "status": {
+          "$ref": "common.schema.json#/$defs/status"
+        },
+        "review_status": {
+          "$ref": "common.schema.json#/$defs/review_status"
+        },
+        "updated": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "description": "Card update date (BI document: updated)."
+        },
+        "stale": {
+          "type": "boolean",
+          "description": "updated is more than 90 days old (BI document rule)."
+        },
+        "provenance": {
+          "$ref": "common.schema.json#/$defs/provenance"
+        },
+        "updated_at": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        }
+      }
+    },
+    "EntityList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Entity"
+      }
+    },
+    "EntityDetail": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entity",
+        "claims",
+        "relationship_counts"
+      ],
+      "properties": {
+        "entity": {
+          "$ref": "#/$defs/Entity"
+        },
+        "claims": {
+          "type": "array",
+          "items": {
+            "$ref": "claim.schema.json#/$defs/Claim"
+          }
+        },
+        "relationship_counts": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    }
+  }
+}

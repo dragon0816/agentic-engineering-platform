@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aep:knowledge-api:v0.1:error",
+  "title": "Error (same core fields as AEP common.execution.Failure)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "code",
+    "message",
+    "retryable",
+    "http_status"
+  ],
+  "properties": {
+    "code": {
+      "enum": [
+        "invalid_request",
+        "not_found",
+        "scope_required",
+        "origin_refused",
+        "conflict",
+        "backend_unavailable",
+        "unsupported_version",
+        "internal_error"
+      ]
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1
+    },
+    "retryable": {
+      "type": "boolean"
+    },
+    "http_status": {
+      "enum": [
+        400,
+        403,
+        404,
+        409,
+        503,
+        500
+      ]
+    },
+    "details": {
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  }
+}

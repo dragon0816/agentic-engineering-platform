@@ -1,0 +1,334 @@
+{
+  "schema_version": "aep.knowledge.v1",
+  "contract_version": "0.1",
+  "request_id": "req-9af880821791",
+  "generated_at": "2026-10-17T08:00:00Z",
+  "source": {
+    "producer": "mock",
+    "backend": "mock",
+    "vault": "bi-fixture",
+    "vault_version": "sha256:9203f65d4aad10f6d785e60a980ed734f25c954a7039b7869e76a238c1eb896e",
+    "schema_id": "bi.schema/v0",
+    "synthetic": true
+  },
+  "data": {
+    "seed_entity_id": "ent-opportunity-gamma-wifi8-rd",
+    "depth": 2,
+    "nodes": [
+      {
+        "id": "ent-account-network-oem-gamma",
+        "label": "Network OEM Gamma（合成）",
+        "label_redacted": false,
+        "type": "Account",
+        "group": "Account",
+        "state": "covered",
+        "classification": "CONFIDENTIAL",
+        "review_status": "reviewed",
+        "evidence_count": 5
+      },
+      {
+        "id": "ent-application-ntn-device-test",
+        "label": "NTN 終端測試",
+        "label_redacted": false,
+        "type": "Application",
+        "group": "Application",
+        "state": "covered",
+        "classification": "UNCLASSIFIED",
+        "review_status": "reviewed",
+        "evidence_count": 4
+      },
+      {
+        "id": "ent-application-redcap-device-test",
+        "label": "5G-RedCap 終端測試",
+        "label_redacted": false,
+        "type": "Application",
+        "group": "Application",
+        "state": "covered",
+        "classification": "UNCLASSIFIED",
+        "review_status": "reviewed",
+        "evidence_count": 5
+      },
+      {
+        "id": "ent-application-wifi-rf-signaling-test",
+        "label": "Wi-Fi RF signaling 測試",
+        "label_redacted": false,
+        "type": "Application",
+        "group": "Application",
+        "state": "covered",
+        "classification": "UNCLASSIFIED",
+        "review_status": "reviewed",
+        "evidence_count": 6
+      },
+      {
+        "id": "ent-customerproduct-gamma-wifi7-router",
+        "label": "Gamma Wi-Fi 7 Mesh Router（合成）",
+        "label_redacted": false,
+        "type": "CustomerProduct",
+        "group": "CustomerProduct",
+        "state": "covered",
+        "classification": "CONFIDENTIAL",
+        "review_status": "reviewed",
+        "evidence_count": 4
+      },
+      {
+        "id": "ent-customerproduct-gamma-wifi8-ap-proto",
+        "label": "Gamma Wi-Fi 8 AP 原型（合成）",
+        "label_redacted": false,
+        "type": "CustomerProduct",
+        "group": "CustomerProduct",
+        "state": "covered",
+        "classification": "CONFIDENTIAL",
+        "review_status": "reviewed",
+        "evidence_count": 5
+      },
+      {
+        "id": "ent-ecosystem-chip-vendor-kappa",
+        "label": "Chip Vendor Kappa（合成）",
+        "label_redacted": false,
+        "type": "Ecosystem",
+        "group": "Ecosystem",
+        "state": "covered",
+        "classification": "UNCLASSIFIED",
+        "review_status": "reviewed",
+        "evidence_count": 6
+      },
+      {
+        "id": "ent-node-cpe",
+        "label": "CPE",
+        "label_redacted": false,
+        "type": "Node",
+        "group": "Node",
+        "state": "covered",
+        "classification": "UNCLASSIFIED",
+        "review_status": "reviewed",
+        "evidence_count": 6
+      },
+      {
+        "id": "ent-opportunity-gamma-wifi8-rd",
+        "label": "Gamma Wi-Fi 8 R&D 測試機會（假設，合成）",
+        "label_redacted": false,
+        "type": "Opportunity",
+        "group": "Opportunity",
+        "state": "missing/inferred",
+        "classification": "CONFIDENTIAL",
+        "review_status": "reviewed",
+        "evidence_count": 3
+      },
+      {
+        "id": "ent-opportunity-sigma-redcap-cpe",
+        "label": "Sigma RedCap CPE 測試機會（假設，合成）",
+        "label_redacted": false,
+        "type": "Opportunity",
+        "group": "Opportunity",
+        "state": "missing/inferred",
+        "classification": "CONFIDENTIAL",
+        "review_status": "reviewed",
+        "evidence_count": 3
+      },
+      {
+        "id": "ent-technology-wifi-8",
+        "label": "Wi-Fi 8",
+        "label_redacted": false,
+        "type": "Technology",
+        "group": "Technology",
+        "state": "covered",
+        "classification": "UNCLASSIFIED",
+        "review_status": "reviewed",
+        "evidence_count": 6
+      },
+      {
+        "id": "ent-testsolution-own-wireless-signaling-tester",
+        "label": "Wireless signaling tester（我方）",
+        "label_redacted": false,
+        "type": "TestSolution",
+        "group": "TestSolution",
+        "state": "covered",
+        "classification": "UNCLASSIFIED",
+        "review_status": "reviewed",
+        "evidence_count": 6
+      }
+    ],
+    "edges": [
+      {
+        "id": "rel-8ff76235879359a6",
+        "source": "ent-technology-wifi-8",
+        "target": "ent-node-cpe",
+        "type": "affects_nodes",
+        "state": "covered",
+        "weight": 1.0,
+        "claim_count": 1
+      },
+      {
+        "id": "rel-b0350bb122b455f3",
+        "source": "ent-ecosystem-chip-vendor-kappa",
+        "target": "ent-technology-wifi-8",
+        "type": "supplied_technologies",
+        "state": "covered",
+        "weight": 1.0,
+        "claim_count": 1
+      },
+      {
+        "id": "rel-b4a2e66874e43535",
+        "source": "ent-account-network-oem-gamma",
+        "target": "ent-node-cpe",
+        "type": "node",
+        "state": "covered",
+        "weight": 1.0,
+        "claim_count": 1
+      },
+      {
+        "id": "rel-ba1c608b6c235fb2",
+        "source": "ent-account-network-oem-gamma",
+        "target": "ent-ecosystem-chip-vendor-kappa",
+        "type": "suppliers",
+        "state": "covered",
+        "weight": 1.0,
+        "claim_count": 1
+      },
+      {
+        "id": "rel-b754361363c17536",
+        "source": "ent-customerproduct-gamma-wifi7-router",
+        "target": "ent-account-network-oem-gamma",
+        "type": "account",
+        "state": "covered",
+        "weight": 1.0,
+        "claim_count": 1
+      },
+      {
+        "id": "rel-7bc9acc3e36a36be",
+        "source": "ent-customerproduct-gamma-wifi8-ap-proto",
+        "target": "ent-account-network-oem-gamma",
+        "type": "account",
+        "state": "covered",
+        "weight": 1.0,
+        "claim_count": 1
+      },
+      {
+        "id": "rel-c426d088c3f6cc41",
+        "source": "ent-customerproduct-gamma-wifi8-ap-proto",
+        "target": "ent-technology-wifi-8",
+        "type": "technologies",
+        "state": "covered",
+        "weight": 1.0,
+        "claim_count": 1
+      },
+      {
+        "id": "rel-215e8330b4389993",
+        "source": "ent-customerproduct-gamma-wifi7-router",
+        "target": "ent-ecosystem-chip-vendor-kappa",
+        "type": "chip_modules",
+        "state": "covered",
+        "weight": 1.0,
+        "claim_count": 1
+      },
+      {
+        "id": "rel-5b5469bbf9ac0c43",
+        "source": "ent-customerproduct-gamma-wifi8-ap-proto",
+        "target": "ent-ecosystem-chip-vendor-kappa",
+        "type": "chip_modules",
+        "state": "weak",
+        "weight": 1.0,
+        "claim_count": 1
+      },
+      {
+        "id": "rel-618a88243683f0f1",
+        "source": "ent-customerproduct-gamma-wifi8-ap-proto",
+        "target": "ent-application-wifi-rf-signaling-test",
+        "type": "applications",
+        "state": "covered",
+        "weight": 1.0,
+        "claim_count": 1
+      },
+      {
+        "id": "rel-abb4c22c58c39933",
+        "source": "ent-application-wifi-rf-signaling-test",
+        "target": "ent-technology-wifi-8",
+        "type": "technologies",
+        "state": "covered",
+        "weight": 1.0,
+        "claim_count": 1
+      },
+      {
+        "id": "rel-80d1a95eb7eec1ec",
+        "source": "ent-application-wifi-rf-signaling-test",
+        "target": "ent-node-cpe",
+        "type": "node",
+        "state": "covered",
+        "weight": 1.0,
+        "claim_count": 1
+      },
+      {
+        "id": "rel-9c165885dab7c7f7",
+        "source": "ent-testsolution-own-wireless-signaling-tester",
+        "target": "ent-application-wifi-rf-signaling-test",
+        "type": "applications",
+        "state": "covered",
+        "weight": 2.0,
+        "claim_count": 1
+      },
+      {
+        "id": "rel-5eaeba00d79118fc",
+        "source": "ent-testsolution-own-wireless-signaling-tester",
+        "target": "ent-application-ntn-device-test",
+        "type": "applications",
+        "state": "covered",
+        "weight": 1.0,
+        "claim_count": 1
+      },
+      {
+        "id": "rel-097a52185d8e227a",
+        "source": "ent-testsolution-own-wireless-signaling-tester",
+        "target": "ent-application-redcap-device-test",
+        "type": "applications",
+        "state": "covered",
+        "weight": 2.0,
+        "claim_count": 1
+      },
+      {
+        "id": "rel-59161894f56ce332",
+        "source": "ent-opportunity-gamma-wifi8-rd",
+        "target": "ent-account-network-oem-gamma",
+        "type": "account",
+        "state": "missing/inferred",
+        "weight": 0.5,
+        "claim_count": 1
+      },
+      {
+        "id": "rel-370ed3bfcb48ac43",
+        "source": "ent-opportunity-gamma-wifi8-rd",
+        "target": "ent-customerproduct-gamma-wifi8-ap-proto",
+        "type": "customer_product",
+        "state": "missing/inferred",
+        "weight": 0.5,
+        "claim_count": 1
+      },
+      {
+        "id": "rel-a9224d86a495ee00",
+        "source": "ent-opportunity-gamma-wifi8-rd",
+        "target": "ent-testsolution-own-wireless-signaling-tester",
+        "type": "test_solutions",
+        "state": "missing/inferred",
+        "weight": 0.5,
+        "claim_count": 1
+      },
+      {
+        "id": "rel-e8427cbffa3c67fd",
+        "source": "ent-opportunity-sigma-redcap-cpe",
+        "target": "ent-testsolution-own-wireless-signaling-tester",
+        "type": "test_solutions",
+        "state": "missing/inferred",
+        "weight": 0.5,
+        "claim_count": 1
+      }
+    ],
+    "truncated": false
+  },
+  "pagination": null,
+  "warnings": [
+    {
+      "code": "synthetic_data",
+      "message": "Synthetic mock data; no real customer or product claim."
+    }
+  ],
+  "error": null
+}

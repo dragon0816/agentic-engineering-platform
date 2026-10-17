@@ -1,0 +1,177 @@
+{
+  "contract_version": "0.1",
+  "description": "Which endpoint and scope each mock file answers, and the JSON Schema of its data field.",
+  "files": [
+    {
+      "file": "health.json",
+      "method": "GET",
+      "path": "/api/v1/knowledge/health",
+      "query": "",
+      "scope": "knowledge.read.metadata",
+      "http_status": 200,
+      "data_schema": "health.schema.json#/$defs/Health"
+    },
+    {
+      "file": "strategies.json",
+      "method": "GET",
+      "path": "/api/v1/knowledge/strategies",
+      "query": "",
+      "scope": "knowledge.read.metadata",
+      "http_status": 200,
+      "data_schema": "strategy.schema.json#/$defs/StrategyList"
+    },
+    {
+      "file": "strategy_runs.json",
+      "method": "GET",
+      "path": "/api/v1/knowledge/strategy-runs",
+      "query": "vault=bi-fixture&limit=500",
+      "scope": "knowledge.read.metadata",
+      "http_status": 200,
+      "data_schema": "strategy.schema.json#/$defs/StrategyRunList"
+    },
+    {
+      "file": "strategy_run_detail.json",
+      "method": "GET",
+      "path": "/api/v1/knowledge/strategy-runs/srun-5a65c5b3e464",
+      "query": "",
+      "scope": "knowledge.read.metadata",
+      "http_status": 200,
+      "data_schema": "strategy.schema.json#/$defs/StrategyRun"
+    },
+    {
+      "file": "entities.json",
+      "method": "GET",
+      "path": "/api/v1/knowledge/entities",
+      "query": "vault=bi-fixture&limit=500",
+      "scope": "knowledge.read.content",
+      "http_status": 200,
+      "data_schema": "entity.schema.json#/$defs/EntityList"
+    },
+    {
+      "file": "entities.metadata.json",
+      "method": "GET",
+      "path": "/api/v1/knowledge/entities",
+      "query": "vault=bi-fixture&limit=500",
+      "scope": "knowledge.read.metadata",
+      "http_status": 200,
+      "data_schema": "entity.schema.json#/$defs/EntityList"
+    },
+    {
+      "file": "entity_detail.json",
+      "method": "GET",
+      "path": "/api/v1/knowledge/entities/ent-technology-wifi-8",
+      "query": "",
+      "scope": "knowledge.read.content",
+      "http_status": 200,
+      "data_schema": "entity.schema.json#/$defs/EntityDetail"
+    },
+    {
+      "file": "relationships.json",
+      "method": "GET",
+      "path": "/api/v1/knowledge/relationships",
+      "query": "vault=bi-fixture&limit=500",
+      "scope": "knowledge.read.metadata",
+      "http_status": 200,
+      "data_schema": "relationship.schema.json#/$defs/RelationshipList"
+    },
+    {
+      "file": "graph.json",
+      "method": "GET",
+      "path": "/api/v1/knowledge/graph",
+      "query": "vault=bi-fixture&limit=500",
+      "scope": "knowledge.read.metadata",
+      "http_status": 200,
+      "data_schema": "graph.schema.json#/$defs/Subgraph"
+    },
+    {
+      "file": "graph_seed.json",
+      "method": "GET",
+      "path": "/api/v1/knowledge/graph",
+      "query": "vault=bi-fixture&seed=ent-opportunity-gamma-wifi8-rd&depth=2",
+      "scope": "knowledge.read.content",
+      "http_status": 200,
+      "data_schema": "graph.schema.json#/$defs/Subgraph"
+    },
+    {
+      "file": "evidence.json",
+      "method": "GET",
+      "path": "/api/v1/knowledge/evidence",
+      "query": "vault=bi-fixture&entity_id=ent-technology-wifi-8",
+      "scope": "knowledge.read.content",
+      "http_status": 200,
+      "data_schema": "evidence.schema.json#/$defs/EvidenceList"
+    },
+    {
+      "file": "evidence_detail.json",
+      "method": "GET",
+      "path": "/api/v1/knowledge/evidence/ev-8d85af1f53b43e3a256d",
+      "query": "",
+      "scope": "knowledge.read.content",
+      "http_status": 200,
+      "data_schema": "evidence.schema.json#/$defs/Evidence"
+    },
+    {
+      "file": "evidence_detail.metadata.json",
+      "method": "GET",
+      "path": "/api/v1/knowledge/evidence/ev-8d85af1f53b43e3a256d",
+      "query": "",
+      "scope": "knowledge.read.metadata",
+      "http_status": 200,
+      "data_schema": "evidence.schema.json#/$defs/Evidence"
+    },
+    {
+      "file": "documents.json",
+      "method": "GET",
+      "path": "/api/v1/knowledge/documents",
+      "query": "vault=bi-fixture&limit=500",
+      "scope": "knowledge.read.metadata",
+      "http_status": 200,
+      "data_schema": "evidence.schema.json#/$defs/DocumentList"
+    },
+    {
+      "file": "documents.content.json",
+      "method": "GET",
+      "path": "/api/v1/knowledge/documents",
+      "query": "vault=bi-fixture&limit=500",
+      "scope": "knowledge.read.content",
+      "http_status": 200,
+      "data_schema": "evidence.schema.json#/$defs/DocumentList"
+    },
+    {
+      "file": "quality_summary.json",
+      "method": "GET",
+      "path": "/api/v1/knowledge/quality/summary",
+      "query": "vault=bi-fixture",
+      "scope": "knowledge.read.metadata",
+      "http_status": 200,
+      "data_schema": "quality.schema.json#/$defs/QualitySummary"
+    },
+    {
+      "file": "quality_benchmark_runs.json",
+      "method": "GET",
+      "path": "/api/v1/knowledge/quality/benchmark-runs",
+      "query": "suite=knowledge_bi_v0",
+      "scope": "knowledge.read.metadata",
+      "http_status": 200,
+      "data_schema": "quality.schema.json#/$defs/BenchmarkRunList"
+    },
+    {
+      "file": "error_scope_required.json",
+      "method": "GET",
+      "path": "/api/v1/knowledge/evidence/ev-8d85af1f53b43e3a256d",
+      "query": "fields=text",
+      "scope": "none",
+      "http_status": 403,
+      "data_schema": null
+    },
+    {
+      "file": "error_not_found.json",
+      "method": "GET",
+      "path": "/api/v1/knowledge/entities/ent-technology-wifi-9",
+      "query": "",
+      "scope": "knowledge.read.metadata",
+      "http_status": 404,
+      "data_schema": null
+    }
+  ]
+}

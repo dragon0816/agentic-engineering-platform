@@ -1,0 +1,1614 @@
+{
+  "benchmark_id": "knowledge_bi_v0",
+  "version": "0.1.0-draft",
+  "created": "2026-10-17",
+  "schema_id": "bi.schema/v0",
+  "target_users": "BD / Marketing",
+  "benchmark_owner": "owner",
+  "suggested_domain_reviewers": [
+    "BD",
+    "PM",
+    "AE"
+  ],
+  "formal_reviewers": [],
+  "ground_truth_status": "draft-unreviewed",
+  "grading_note": "Expected answers and triples are drafts written by Claude Code from synthetic data. They are not formal ground truth until a Domain Reviewer sets review_status=reviewed. Any grade against a draft-unreviewed question is indicative only.",
+  "entity_ref_format": "<EntityType>:<canonical_key>, resolved in docs/contracts/knowledge-api/mock/entities.json",
+  "triple_format": "{subject, relationship, object}; relationship is a bi.schema/v0 relationship_type; object TestSolution:* means any TestSolution",
+  "corpus_note": "corpus=synthetic_fixture: the questions are answerable from the synthetic documents behind the mock data. real_vault_candidate=true marks questions a reviewer may re-anchor to a copy of the real vault; Account / CustomerProduct / Opportunity questions stay synthetic.",
+  "categories": [
+    {
+      "id": "market_trend",
+      "label": "Market Trend",
+      "prefix": "MT"
+    },
+    {
+      "id": "technology_ecosystem",
+      "label": "Technology & Ecosystem",
+      "prefix": "TE"
+    },
+    {
+      "id": "customer_product",
+      "label": "Customer & Product",
+      "prefix": "CP"
+    },
+    {
+      "id": "application_test_solution",
+      "label": "Application & Test Solution",
+      "prefix": "AT"
+    },
+    {
+      "id": "cross_domain_opportunity",
+      "label": "Cross-domain Opportunity Discovery",
+      "prefix": "OD"
+    }
+  ],
+  "questions": [
+    {
+      "id": "MT-01",
+      "category": "market_trend",
+      "title": "AI 資料中心功率密度的相關技術與節點",
+      "question": "「AI 資料中心機櫃功率密度上升」這個 Trend 的 related_tech 有哪些？這些技術影響哪些價值鏈 Node？",
+      "expected_entities": [
+        "Trend:ai-dc-power-density",
+        "Technology:800v-dc-distribution",
+        "Technology:gan-power",
+        "Node:ai-server-psu"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "Trend:ai-dc-power-density",
+          "relationship": "related_tech",
+          "object": "Technology:800v-dc-distribution"
+        },
+        {
+          "subject": "Trend:ai-dc-power-density",
+          "relationship": "related_tech",
+          "object": "Technology:gan-power"
+        },
+        {
+          "subject": "Technology:800v-dc-distribution",
+          "relationship": "affects_nodes",
+          "object": "Node:ai-server-psu"
+        },
+        {
+          "subject": "Technology:gan-power",
+          "relationship": "affects_nodes",
+          "object": "Node:ai-server-psu"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 1,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": false,
+        "must_report_verification_status": true,
+        "must_report_gap": false,
+        "classification_ceiling": "UNCLASSIFIED",
+        "notes": "800V DC affects_nodes AI 伺服器 PSU 為 assumed，必須標示；AI 伺服器 PSU 是 proposed-v0 擴充節點。"
+      },
+      "expected_answer": "related_tech 是 800V DC 機櫃配電與 GaN 功率元件；兩者都影響「AI 伺服器 PSU」節點。GaN 的影響已驗證；800V DC 的影響是 assumed，應標示待查證。",
+      "review_domain": "BD",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 2,
+      "expected_shape": "chain",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": true
+    },
+    {
+      "id": "MT-02",
+      "category": "market_trend",
+      "title": "Wi-Fi 世代轉換的訊號與推論",
+      "question": "「Wi-Fi 7 → Wi-Fi 8 世代轉換」有哪些 Signal 支持？這些 Signal 的可靠度如何？哪些說法是文件宣稱、哪些是推論？",
+      "expected_entities": [
+        "Trend:wifi-generation-transition",
+        "Technology:wifi-8",
+        "Technology:wifi-7",
+        "Signal:wifi8-first-rf-demo"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "Signal:wifi8-first-rf-demo",
+          "relationship": "mentions",
+          "object": "Trend:wifi-generation-transition"
+        },
+        {
+          "subject": "Signal:wifi8-first-rf-demo",
+          "relationship": "mentions",
+          "object": "Technology:wifi-8"
+        },
+        {
+          "subject": "Trend:wifi-generation-transition",
+          "relationship": "related_tech",
+          "object": "Technology:wifi-8"
+        },
+        {
+          "subject": "Trend:wifi-generation-transition",
+          "relationship": "related_tech",
+          "object": "Technology:wifi-7"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 1,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": true,
+        "must_report_verification_status": false,
+        "must_report_gap": false,
+        "classification_ceiling": "UNCLASSIFIED",
+        "notes": "不得把展示活動推論成量產時程；推論須標示。"
+      },
+      "expected_answer": "支持的 Signal 是「Wi-Fi 8 首批 RF signaling 測試公開展示」（2026-03，可靠度 high），它涉及該 Trend 與 Wi-Fi 8。Trend 的 related_tech 是 Wi-Fi 7 與 Wi-Fi 8。知識庫沒有量產時程的宣稱，任何時程都是推論。",
+      "review_domain": "BD",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 2,
+      "expected_shape": "list",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": true
+    },
+    {
+      "id": "MT-03",
+      "category": "market_trend",
+      "title": "CPO 趨勢影響的節點與供應商",
+      "question": "「交換器互連走向 CPO」這個 Trend 影響哪些 Node？哪些 Ecosystem 供應商位於這些節點並供應 CPO？",
+      "expected_entities": [
+        "Trend:optical-interconnect-shift",
+        "Technology:cpo",
+        "Node:switch-asic",
+        "Node:optical-module",
+        "Ecosystem:optics-chip-xi"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "Trend:optical-interconnect-shift",
+          "relationship": "related_tech",
+          "object": "Technology:cpo"
+        },
+        {
+          "subject": "Technology:cpo",
+          "relationship": "affects_nodes",
+          "object": "Node:switch-asic"
+        },
+        {
+          "subject": "Technology:cpo",
+          "relationship": "affects_nodes",
+          "object": "Node:optical-module"
+        },
+        {
+          "subject": "Ecosystem:optics-chip-xi",
+          "relationship": "node",
+          "object": "Node:optical-module"
+        },
+        {
+          "subject": "Ecosystem:optics-chip-xi",
+          "relationship": "supplied_technologies",
+          "object": "Technology:cpo"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 2,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": false,
+        "must_report_verification_status": true,
+        "must_report_gap": false,
+        "classification_ceiling": "INTERNAL",
+        "notes": "Optics Chip Xi 供應 CPO 為 assumed。"
+      },
+      "expected_answer": "CPO 影響「交換器 ASIC」與「光模組」兩個節點。位於光模組節點的供應商 Optics Chip Xi 供應 CPO（assumed）；交換器 ASIC 節點在知識庫中沒有供應商卡。",
+      "review_domain": "BD",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 3,
+      "expected_shape": "chain",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": true
+    },
+    {
+      "id": "MT-04",
+      "category": "market_trend",
+      "title": "車用雷達趨勢的節點、供應商與訊號",
+      "question": "「車用雷達數量與解析度提升」的相關技術影響哪個 Node？該節點有哪些 Ecosystem 供應商？有哪些 Signal？",
+      "expected_entities": [
+        "Trend:vehicle-radar-proliferation",
+        "Technology:automotive-radar-77ghz",
+        "Node:radar-module",
+        "Ecosystem:radar-mmic-omicron",
+        "Signal:radar-band-regulation-update"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "Trend:vehicle-radar-proliferation",
+          "relationship": "related_tech",
+          "object": "Technology:automotive-radar-77ghz"
+        },
+        {
+          "subject": "Technology:automotive-radar-77ghz",
+          "relationship": "affects_nodes",
+          "object": "Node:radar-module"
+        },
+        {
+          "subject": "Ecosystem:radar-mmic-omicron",
+          "relationship": "node",
+          "object": "Node:radar-module"
+        },
+        {
+          "subject": "Ecosystem:radar-mmic-omicron",
+          "relationship": "supplied_technologies",
+          "object": "Technology:automotive-radar-77ghz"
+        },
+        {
+          "subject": "Signal:radar-band-regulation-update",
+          "relationship": "mentions",
+          "object": "Trend:vehicle-radar-proliferation"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 2,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": false,
+        "must_report_verification_status": false,
+        "must_report_gap": false,
+        "classification_ceiling": "INTERNAL",
+        "notes": ""
+      },
+      "expected_answer": "相關技術 77 GHz 車用雷達影響「車用雷達模組」節點；該節點的供應商是 Radar MMIC Omicron，供應 77 GHz 雷達技術。Signal 為「車用雷達頻段法規更新」（2026-01，可靠度 high）。",
+      "review_domain": "BD",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 3,
+      "expected_shape": "chain",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": true
+    },
+    {
+      "id": "MT-05",
+      "category": "market_trend",
+      "title": "6G 與 NTN 趨勢的信心度與過期資料",
+      "question": "「6G 前標準化」與「NTN 衛星通訊商業化」兩個 Trend 的相關技術各影響哪些 Node？哪些內容是 assumed？哪些卡片已超過 90 天未更新？",
+      "expected_entities": [
+        "Trend:6g-pre-standard",
+        "Trend:ntn-commercialization",
+        "Technology:6g-sub-thz",
+        "Technology:5g-ntn",
+        "Node:base-station",
+        "Node:handset",
+        "Signal:6g-study-item"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "Trend:6g-pre-standard",
+          "relationship": "related_tech",
+          "object": "Technology:6g-sub-thz"
+        },
+        {
+          "subject": "Technology:6g-sub-thz",
+          "relationship": "affects_nodes",
+          "object": "Node:base-station"
+        },
+        {
+          "subject": "Trend:ntn-commercialization",
+          "relationship": "related_tech",
+          "object": "Technology:5g-ntn"
+        },
+        {
+          "subject": "Technology:5g-ntn",
+          "relationship": "affects_nodes",
+          "object": "Node:handset"
+        },
+        {
+          "subject": "Signal:6g-study-item",
+          "relationship": "mentions",
+          "object": "Trend:6g-pre-standard"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 1,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": false,
+        "must_report_verification_status": true,
+        "must_report_gap": false,
+        "classification_ceiling": "UNCLASSIFIED",
+        "notes": "「3GPP 6G study item 啟動」這張 Signal 卡超過 90 天未更新，須提醒（過期資料）。"
+      },
+      "expected_answer": "6G sub-THz 與 6G 前標準化的關係、以及它影響基地台節點，兩者都是 assumed。5G NTN 影響手機節點（另影響晶片與電信網路），為已驗證。Signal「3GPP 6G study item 啟動」的卡片 updated 已超過 90 天，應列為過期資料。",
+      "review_domain": "BD",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 2,
+      "expected_shape": "list",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": true
+    },
+    {
+      "id": "TE-01",
+      "category": "technology_ecosystem",
+      "title": "Wi-Fi 8 的 Concept 與我方方案",
+      "question": "哪些 Concept 解釋 Wi-Fi 7 與 Wi-Fi 8？它們的審閱狀態是什麼？哪個量測應用使用 Wi-Fi 8，我方哪個 TestSolution 對應？",
+      "expected_entities": [
+        "Technology:wifi-8",
+        "Technology:wifi-7",
+        "Concept:dru",
+        "Concept:mlo",
+        "Application:wifi-rf-signaling-test",
+        "TestSolution:own-wireless-signaling-tester"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "Concept:dru",
+          "relationship": "technologies",
+          "object": "Technology:wifi-8"
+        },
+        {
+          "subject": "Concept:mlo",
+          "relationship": "technologies",
+          "object": "Technology:wifi-7"
+        },
+        {
+          "subject": "Application:wifi-rf-signaling-test",
+          "relationship": "technologies",
+          "object": "Technology:wifi-8"
+        },
+        {
+          "subject": "TestSolution:own-wireless-signaling-tester",
+          "relationship": "applications",
+          "object": "Application:wifi-rf-signaling-test"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 2,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": false,
+        "must_report_verification_status": false,
+        "must_report_gap": false,
+        "classification_ceiling": "UNCLASSIFIED",
+        "notes": "dRU 的 Concept 是 draft（業務尚未試讀），須說明。"
+      },
+      "expected_answer": "dRU 解釋 Wi-Fi 8（draft，尚未經業務試讀）；MLO 解釋 Wi-Fi 7（reviewed）。Wi-Fi RF signaling 測試使用 Wi-Fi 8，由我方 Wireless signaling tester 對應（方案簡報與白皮書兩份文件）。",
+      "review_domain": "AE",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 2,
+      "expected_shape": "list",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": true
+    },
+    {
+      "id": "TE-02",
+      "category": "technology_ecosystem",
+      "title": "800G / 1.6T 的節點與供應商",
+      "question": "800G 與 1.6T Ethernet 各影響哪些 Node？哪個 Concept 解釋 800G？哪個 Ecosystem 供應 800G？",
+      "expected_entities": [
+        "Technology:800g-ethernet",
+        "Technology:1-6t-ethernet",
+        "Concept:pam4",
+        "Node:switch-asic",
+        "Node:optical-module",
+        "Ecosystem:optics-chip-xi"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "Technology:800g-ethernet",
+          "relationship": "affects_nodes",
+          "object": "Node:switch-asic"
+        },
+        {
+          "subject": "Technology:800g-ethernet",
+          "relationship": "affects_nodes",
+          "object": "Node:optical-module"
+        },
+        {
+          "subject": "Technology:1-6t-ethernet",
+          "relationship": "affects_nodes",
+          "object": "Node:switch-asic"
+        },
+        {
+          "subject": "Concept:pam4",
+          "relationship": "technologies",
+          "object": "Technology:800g-ethernet"
+        },
+        {
+          "subject": "Ecosystem:optics-chip-xi",
+          "relationship": "supplied_technologies",
+          "object": "Technology:800g-ethernet"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 2,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": false,
+        "must_report_verification_status": false,
+        "must_report_gap": false,
+        "classification_ceiling": "INTERNAL",
+        "notes": ""
+      },
+      "expected_answer": "800G 影響交換器 ASIC 與光模組；1.6T 影響交換器 ASIC。PAM4 解釋 800G。Optics Chip Xi 供應 800G。",
+      "review_domain": "AE",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 1,
+      "expected_shape": "matrix",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": true
+    },
+    {
+      "id": "TE-03",
+      "category": "technology_ecosystem",
+      "title": "5G FWA 價值鏈與缺少 Concept 的技術",
+      "question": "「5G FWA 成長」的相關技術影響哪些 Node？哪些 Ecosystem 供應這項技術、哪些 Account 位於受影響的節點？這項技術有沒有 Concept 解釋？",
+      "expected_entities": [
+        "Trend:5g-fwa-growth",
+        "Technology:5g-redcap",
+        "Node:module",
+        "Node:cpe",
+        "Ecosystem:module-maker-lambda",
+        "Account:fwa-odm-sigma"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "Trend:5g-fwa-growth",
+          "relationship": "related_tech",
+          "object": "Technology:5g-redcap"
+        },
+        {
+          "subject": "Technology:5g-redcap",
+          "relationship": "affects_nodes",
+          "object": "Node:module"
+        },
+        {
+          "subject": "Technology:5g-redcap",
+          "relationship": "affects_nodes",
+          "object": "Node:cpe"
+        },
+        {
+          "subject": "Ecosystem:module-maker-lambda",
+          "relationship": "node",
+          "object": "Node:module"
+        },
+        {
+          "subject": "Ecosystem:module-maker-lambda",
+          "relationship": "supplied_technologies",
+          "object": "Technology:5g-redcap"
+        },
+        {
+          "subject": "Account:fwa-odm-sigma",
+          "relationship": "node",
+          "object": "Node:cpe"
+        }
+      ],
+      "expected_absent_relationships": [
+        {
+          "subject": "Concept:*",
+          "relationship": "technologies",
+          "object": "Technology:5g-redcap"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 2,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": false,
+        "must_report_verification_status": false,
+        "must_report_gap": true,
+        "classification_ceiling": "CONFIDENTIAL",
+        "notes": "缺口：5G-RedCap 沒有 Concept 卡（Dashboard 的『缺 Concept 的 Technology』）。"
+      },
+      "expected_answer": "5G-RedCap 影響模組與 CPE 節點；供應商 Module Maker Lambda 位於模組節點並供應 RedCap；客戶 FWA ODM Sigma 位於 CPE 節點（另有 Network OEM Gamma，但它的產品不是 RedCap）。5G-RedCap 目前沒有任何 Concept 解釋，是缺口。",
+      "review_domain": "BD",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 3,
+      "expected_shape": "chain_with_gap",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": true
+    },
+    {
+      "id": "TE-04",
+      "category": "technology_ecosystem",
+      "title": "Wi-Fi 鏈上的供應商與認證夥伴",
+      "question": "Wi-Fi 相關的 Ecosystem 有哪些？各自位於哪個 Node、供應哪些技術？認證實驗室節點受哪項技術影響？",
+      "expected_entities": [
+        "Ecosystem:chip-vendor-kappa",
+        "Ecosystem:cert-lab-mu",
+        "Node:chipset",
+        "Node:certification-lab",
+        "Technology:wifi-7",
+        "Technology:wifi-8"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "Ecosystem:chip-vendor-kappa",
+          "relationship": "node",
+          "object": "Node:chipset"
+        },
+        {
+          "subject": "Ecosystem:chip-vendor-kappa",
+          "relationship": "supplied_technologies",
+          "object": "Technology:wifi-7"
+        },
+        {
+          "subject": "Ecosystem:chip-vendor-kappa",
+          "relationship": "supplied_technologies",
+          "object": "Technology:wifi-8"
+        },
+        {
+          "subject": "Ecosystem:cert-lab-mu",
+          "relationship": "node",
+          "object": "Node:certification-lab"
+        },
+        {
+          "subject": "Ecosystem:cert-lab-mu",
+          "relationship": "supplied_technologies",
+          "object": "Technology:wifi-7"
+        },
+        {
+          "subject": "Technology:wifi-7",
+          "relationship": "affects_nodes",
+          "object": "Node:certification-lab"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 2,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": false,
+        "must_report_verification_status": false,
+        "must_report_gap": false,
+        "classification_ceiling": "INTERNAL",
+        "notes": ""
+      },
+      "expected_answer": "Chip Vendor Kappa 位於晶片節點，供應 Wi-Fi 7 與 Wi-Fi 8；Cert Lab Mu 位於認證實驗室節點（認證夥伴），與 Wi-Fi 7 相關。認證實驗室節點受 Wi-Fi 7 影響。",
+      "review_domain": "AE",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 2,
+      "expected_shape": "matrix",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": true
+    },
+    {
+      "id": "TE-05",
+      "category": "technology_ecosystem",
+      "title": "Account 與 Ecosystem 不可混用",
+      "question": "Chip Vendor Kappa 是我們的客戶嗎？它與 Network OEM Gamma 是什麼關係？兩者各位於哪個 Node？",
+      "expected_entities": [
+        "Ecosystem:chip-vendor-kappa",
+        "Account:network-oem-gamma",
+        "Node:chipset",
+        "Node:cpe",
+        "CustomerProduct:gamma-wifi8-ap-proto"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "Account:network-oem-gamma",
+          "relationship": "suppliers",
+          "object": "Ecosystem:chip-vendor-kappa"
+        },
+        {
+          "subject": "Account:network-oem-gamma",
+          "relationship": "node",
+          "object": "Node:cpe"
+        },
+        {
+          "subject": "Ecosystem:chip-vendor-kappa",
+          "relationship": "node",
+          "object": "Node:chipset"
+        },
+        {
+          "subject": "CustomerProduct:gamma-wifi8-ap-proto",
+          "relationship": "chip_modules",
+          "object": "Ecosystem:chip-vendor-kappa"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 2,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": false,
+        "must_report_verification_status": true,
+        "must_report_gap": false,
+        "classification_ceiling": "CONFIDENTIAL",
+        "notes": "規則 account_not_ecosystem（BI 文件 slide 5）：把 Kappa 說成客戶即判 FAIL。"
+      },
+      "expected_answer": "不是。Kappa 是 Ecosystem（晶片供應商，位於晶片節點）；Gamma 是 Account（買我方儀器的客戶，位於 CPE 節點），Kappa 是 Gamma 的主要供應商。Gamma 的 Wi-Fi 8 AP 原型使用 Kappa 晶片是 assumed。",
+      "review_domain": "BD",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 2,
+      "expected_shape": "yes_no_with_detail",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": true
+    },
+    {
+      "id": "CP-01",
+      "category": "customer_product",
+      "title": "Gamma 產品的技術、上市時程與量測需求",
+      "question": "Network OEM Gamma 有哪些 CustomerProduct？各自的上市時程、使用技術與需要的量測應用是什麼？",
+      "expected_entities": [
+        "Account:network-oem-gamma",
+        "CustomerProduct:gamma-wifi7-router",
+        "CustomerProduct:gamma-wifi8-ap-proto",
+        "Technology:wifi-7",
+        "Technology:wifi-8",
+        "Application:wifi-production-test",
+        "Application:wifi-rf-signaling-test"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "CustomerProduct:gamma-wifi7-router",
+          "relationship": "account",
+          "object": "Account:network-oem-gamma"
+        },
+        {
+          "subject": "CustomerProduct:gamma-wifi8-ap-proto",
+          "relationship": "account",
+          "object": "Account:network-oem-gamma"
+        },
+        {
+          "subject": "CustomerProduct:gamma-wifi7-router",
+          "relationship": "technologies",
+          "object": "Technology:wifi-7"
+        },
+        {
+          "subject": "CustomerProduct:gamma-wifi8-ap-proto",
+          "relationship": "technologies",
+          "object": "Technology:wifi-8"
+        },
+        {
+          "subject": "CustomerProduct:gamma-wifi7-router",
+          "relationship": "applications",
+          "object": "Application:wifi-production-test"
+        },
+        {
+          "subject": "CustomerProduct:gamma-wifi8-ap-proto",
+          "relationship": "applications",
+          "object": "Application:wifi-rf-signaling-test"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 1,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": false,
+        "must_report_verification_status": false,
+        "must_report_gap": false,
+        "classification_ceiling": "CONFIDENTIAL",
+        "notes": ""
+      },
+      "expected_answer": "Wi-Fi 7 Mesh Router（2026-Q1）使用 Wi-Fi 7，需要 Wi-Fi 產線測試；Wi-Fi 8 AP 原型（2027-Q4）使用 Wi-Fi 8，需要 Wi-Fi RF signaling 測試。",
+      "review_domain": "BD",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 2,
+      "expected_shape": "matrix",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": false
+    },
+    {
+      "id": "CP-02",
+      "category": "customer_product",
+      "title": "Beta AI PSU 的技術與量測",
+      "question": "PSU Maker Beta 的 AI PSU 使用哪些技術、需要哪些量測應用？哪個 Concept 能向業務解釋其中一項量測？",
+      "expected_entities": [
+        "Account:psu-maker-beta",
+        "CustomerProduct:beta-ai-psu",
+        "Technology:gan-power",
+        "Technology:800v-dc-distribution",
+        "Application:psu-efficiency-transient",
+        "Application:power-integrity",
+        "Concept:hold-up-time"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "CustomerProduct:beta-ai-psu",
+          "relationship": "account",
+          "object": "Account:psu-maker-beta"
+        },
+        {
+          "subject": "CustomerProduct:beta-ai-psu",
+          "relationship": "technologies",
+          "object": "Technology:gan-power"
+        },
+        {
+          "subject": "CustomerProduct:beta-ai-psu",
+          "relationship": "technologies",
+          "object": "Technology:800v-dc-distribution"
+        },
+        {
+          "subject": "CustomerProduct:beta-ai-psu",
+          "relationship": "applications",
+          "object": "Application:psu-efficiency-transient"
+        },
+        {
+          "subject": "CustomerProduct:beta-ai-psu",
+          "relationship": "applications",
+          "object": "Application:power-integrity"
+        },
+        {
+          "subject": "Concept:hold-up-time",
+          "relationship": "applications",
+          "object": "Application:psu-efficiency-transient"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 2,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": false,
+        "must_report_verification_status": true,
+        "must_report_gap": false,
+        "classification_ceiling": "CONFIDENTIAL",
+        "notes": ""
+      },
+      "expected_answer": "使用 GaN（verified）與 800V DC（assumed）；需要效率與動態響應量測（verified）與電源完整性量測（assumed）。Concept「PSU hold-up time」解釋效率與動態響應量測，但它仍是 draft。",
+      "review_domain": "BD",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 2,
+      "expected_shape": "list",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": false
+    },
+    {
+      "id": "CP-03",
+      "category": "customer_product",
+      "title": "Alpha AI 機櫃：宣稱與推論",
+      "question": "ODM Alpha 的 AI 伺服器機櫃使用哪些技術？哪些是文件宣稱、哪些是推論？還有哪些 Signal 涉及 Alpha？",
+      "expected_entities": [
+        "Account:odm-alpha",
+        "CustomerProduct:alpha-ai-rack",
+        "Technology:800g-ethernet",
+        "Technology:800v-dc-distribution",
+        "Signal:alpha-capacity-expansion"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "CustomerProduct:alpha-ai-rack",
+          "relationship": "account",
+          "object": "Account:odm-alpha"
+        },
+        {
+          "subject": "CustomerProduct:alpha-ai-rack",
+          "relationship": "technologies",
+          "object": "Technology:800g-ethernet"
+        },
+        {
+          "subject": "CustomerProduct:alpha-ai-rack",
+          "relationship": "technologies",
+          "object": "Technology:800v-dc-distribution"
+        },
+        {
+          "subject": "Signal:alpha-capacity-expansion",
+          "relationship": "mentions",
+          "object": "Account:odm-alpha"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 2,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": true,
+        "must_report_verification_status": true,
+        "must_report_gap": false,
+        "classification_ceiling": "CONFIDENTIAL",
+        "notes": "800V DC 是 inference（BI 文件 slide 11、12：宣稱與推論分開寫）。"
+      },
+      "expected_answer": "文件宣稱 Alpha 機櫃使用 800G Ethernet；「使用 800V DC」是由功率密度趨勢與該產品推得的推論（assumed）。另有 Signal「ODM Alpha 擴產訊號」（可靠度 low、assumed）。",
+      "review_domain": "BD",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 2,
+      "expected_shape": "list",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": false
+    },
+    {
+      "id": "CP-04",
+      "category": "customer_product",
+      "title": "Delta 雷達模組的晶片來源與量測",
+      "question": "Tier-1 Delta 的 77 GHz 雷達模組使用哪項技術、晶片來自哪個 Ecosystem、需要哪些量測應用？",
+      "expected_entities": [
+        "Account:tier1-delta",
+        "CustomerProduct:delta-77ghz-radar",
+        "Technology:automotive-radar-77ghz",
+        "Ecosystem:radar-mmic-omicron",
+        "Application:radar-target-simulation",
+        "Application:radar-production-calibration"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "CustomerProduct:delta-77ghz-radar",
+          "relationship": "account",
+          "object": "Account:tier1-delta"
+        },
+        {
+          "subject": "CustomerProduct:delta-77ghz-radar",
+          "relationship": "technologies",
+          "object": "Technology:automotive-radar-77ghz"
+        },
+        {
+          "subject": "CustomerProduct:delta-77ghz-radar",
+          "relationship": "chip_modules",
+          "object": "Ecosystem:radar-mmic-omicron"
+        },
+        {
+          "subject": "CustomerProduct:delta-77ghz-radar",
+          "relationship": "applications",
+          "object": "Application:radar-target-simulation"
+        },
+        {
+          "subject": "CustomerProduct:delta-77ghz-radar",
+          "relationship": "applications",
+          "object": "Application:radar-production-calibration"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 2,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": false,
+        "must_report_verification_status": false,
+        "must_report_gap": false,
+        "classification_ceiling": "CONFIDENTIAL",
+        "notes": ""
+      },
+      "expected_answer": "使用 77 GHz 車用雷達；晶片來自 Radar MMIC Omicron；需要雷達目標模擬與 RF 量測，以及雷達產線校正與 EOL 測試。",
+      "review_domain": "BD",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 1,
+      "expected_shape": "list",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": false
+    },
+    {
+      "id": "CP-05",
+      "category": "customer_product",
+      "title": "Sigma RedCap CPE 的價值鏈",
+      "question": "FWA ODM Sigma 的 5G-RedCap CPE 使用哪項技術、模組來自誰、需要什麼量測？我方哪個方案對應，是否已有商機線索？",
+      "expected_entities": [
+        "Account:fwa-odm-sigma",
+        "CustomerProduct:sigma-redcap-cpe",
+        "Technology:5g-redcap",
+        "Ecosystem:module-maker-lambda",
+        "Application:redcap-device-test",
+        "TestSolution:own-wireless-signaling-tester",
+        "Opportunity:sigma-redcap-cpe"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "CustomerProduct:sigma-redcap-cpe",
+          "relationship": "account",
+          "object": "Account:fwa-odm-sigma"
+        },
+        {
+          "subject": "CustomerProduct:sigma-redcap-cpe",
+          "relationship": "technologies",
+          "object": "Technology:5g-redcap"
+        },
+        {
+          "subject": "CustomerProduct:sigma-redcap-cpe",
+          "relationship": "chip_modules",
+          "object": "Ecosystem:module-maker-lambda"
+        },
+        {
+          "subject": "CustomerProduct:sigma-redcap-cpe",
+          "relationship": "applications",
+          "object": "Application:redcap-device-test"
+        },
+        {
+          "subject": "TestSolution:own-wireless-signaling-tester",
+          "relationship": "applications",
+          "object": "Application:redcap-device-test"
+        },
+        {
+          "subject": "Opportunity:sigma-redcap-cpe",
+          "relationship": "customer_product",
+          "object": "CustomerProduct:sigma-redcap-cpe"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 3,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": true,
+        "must_report_verification_status": false,
+        "must_report_gap": false,
+        "classification_ceiling": "CONFIDENTIAL",
+        "notes": ""
+      },
+      "expected_answer": "Sigma 的 RedCap CPE 使用 5G-RedCap，模組來自 Module Maker Lambda，需要 5G-RedCap 終端測試，由我方 Wireless signaling tester 對應。已有推論性的商機「Sigma RedCap CPE 測試機會」（assumed）。",
+      "review_domain": "BD",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 3,
+      "expected_shape": "chain",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": false
+    },
+    {
+      "id": "AT-01",
+      "category": "application_test_solution",
+      "title": "Wi-Fi 量測應用的我方與對手方案",
+      "question": "Wi-Fi RF signaling 測試與 Wi-Fi 產線測試由哪些 TestSolution 對應？哪些是我方（vendor 空白）、哪些是對手？我方卡片如何指向對手方案？",
+      "expected_entities": [
+        "Application:wifi-rf-signaling-test",
+        "Application:wifi-production-test",
+        "TestSolution:own-wireless-signaling-tester",
+        "TestSolution:own-signal-gen-analyzer",
+        "TestSolution:own-nonsignaling-tester",
+        "TestSolution:competitor-b-wifi-tester",
+        "Competitor:competitor-b"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "TestSolution:own-wireless-signaling-tester",
+          "relationship": "applications",
+          "object": "Application:wifi-rf-signaling-test"
+        },
+        {
+          "subject": "TestSolution:own-signal-gen-analyzer",
+          "relationship": "applications",
+          "object": "Application:wifi-rf-signaling-test"
+        },
+        {
+          "subject": "TestSolution:own-nonsignaling-tester",
+          "relationship": "applications",
+          "object": "Application:wifi-production-test"
+        },
+        {
+          "subject": "TestSolution:competitor-b-wifi-tester",
+          "relationship": "applications",
+          "object": "Application:wifi-production-test"
+        },
+        {
+          "subject": "TestSolution:competitor-b-wifi-tester",
+          "relationship": "vendor",
+          "object": "Competitor:competitor-b"
+        },
+        {
+          "subject": "TestSolution:own-nonsignaling-tester",
+          "relationship": "competing_solutions",
+          "object": "TestSolution:competitor-b-wifi-tester"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 2,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": false,
+        "must_report_verification_status": false,
+        "must_report_gap": false,
+        "classification_ceiling": "INTERNAL",
+        "notes": "BI 文件 slide 8：vendor 空白 = 我方；對手方案 vendor 指向 Competitor 卡；方案覆蓋只計我方。Competitor B 卡已超過 90 天未更新。"
+      },
+      "expected_answer": "RF signaling 測試：我方 Wireless signaling tester 與 Signal generator / analyzer。產線測試：我方 Non-signaling tester，以及對手 Competitor B 的 Wi-Fi tester（vendor = Competitor B）；我方 Non-signaling tester 以 competing_solutions 指向它。Competitor B 卡片已過期，應提醒更新。",
+      "review_domain": "PM",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 1,
+      "expected_shape": "matrix",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": true
+    },
+    {
+      "id": "AT-02",
+      "category": "application_test_solution",
+      "title": "SerDes 一致性測試的方案對照",
+      "question": "高速 SerDes / 800G 一致性測試，我方與 Competitor A 各有哪些方案？我方方案如何標示對手方案？",
+      "expected_entities": [
+        "Application:serdes-compliance",
+        "TestSolution:own-oscilloscope",
+        "TestSolution:own-vna",
+        "TestSolution:competitor-a-serdes-suite",
+        "Competitor:competitor-a"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "TestSolution:own-oscilloscope",
+          "relationship": "applications",
+          "object": "Application:serdes-compliance"
+        },
+        {
+          "subject": "TestSolution:own-vna",
+          "relationship": "applications",
+          "object": "Application:serdes-compliance"
+        },
+        {
+          "subject": "TestSolution:competitor-a-serdes-suite",
+          "relationship": "applications",
+          "object": "Application:serdes-compliance"
+        },
+        {
+          "subject": "TestSolution:competitor-a-serdes-suite",
+          "relationship": "vendor",
+          "object": "Competitor:competitor-a"
+        },
+        {
+          "subject": "TestSolution:own-oscilloscope",
+          "relationship": "competing_solutions",
+          "object": "TestSolution:competitor-a-serdes-suite"
+        },
+        {
+          "subject": "TestSolution:own-vna",
+          "relationship": "competing_solutions",
+          "object": "TestSolution:competitor-a-serdes-suite"
+        }
+      ],
+      "expected_absent_relationships": [
+        {
+          "subject": "TestSolution:own-oscilloscope",
+          "relationship": "vendor",
+          "object": "Competitor:*"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 2,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": false,
+        "must_report_verification_status": false,
+        "must_report_gap": false,
+        "classification_ceiling": "INTERNAL",
+        "notes": "我方方案沒有 vendor 連結（vendor 空白 ⇔ is_own_solution=true）。"
+      },
+      "expected_answer": "我方：Oscilloscope 與 VNA（vendor 空白）；對手：Competitor A 的 SerDes suite（vendor = Competitor A）。兩個我方方案都以 competing_solutions 指向 Competitor A 的方案。",
+      "review_domain": "PM",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 1,
+      "expected_shape": "matrix",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": true
+    },
+    {
+      "id": "AT-03",
+      "category": "application_test_solution",
+      "title": "PSU 與電源完整性量測的方案",
+      "question": "PSU 效率與動態響應量測、電源完整性量測，各使用哪些技術、由我方哪個方案對應？哪個 Concept 連到我方 Power analyzer？",
+      "expected_entities": [
+        "Application:psu-efficiency-transient",
+        "Application:power-integrity",
+        "TestSolution:own-power-analyzer",
+        "TestSolution:own-oscilloscope",
+        "Technology:gan-power",
+        "Technology:800v-dc-distribution",
+        "Concept:hold-up-time"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "TestSolution:own-power-analyzer",
+          "relationship": "applications",
+          "object": "Application:psu-efficiency-transient"
+        },
+        {
+          "subject": "TestSolution:own-oscilloscope",
+          "relationship": "applications",
+          "object": "Application:power-integrity"
+        },
+        {
+          "subject": "Application:psu-efficiency-transient",
+          "relationship": "technologies",
+          "object": "Technology:gan-power"
+        },
+        {
+          "subject": "Application:power-integrity",
+          "relationship": "technologies",
+          "object": "Technology:800v-dc-distribution"
+        },
+        {
+          "subject": "Concept:hold-up-time",
+          "relationship": "test_solutions",
+          "object": "TestSolution:own-power-analyzer"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 2,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": false,
+        "must_report_verification_status": true,
+        "must_report_gap": false,
+        "classification_ceiling": "UNCLASSIFIED",
+        "notes": ""
+      },
+      "expected_answer": "效率與動態響應量測（GaN）由我方 Power analyzer 對應；電源完整性量測（800V DC，assumed）由我方 Oscilloscope 對應。Concept「PSU hold-up time」（draft）連到 Power analyzer。",
+      "review_domain": "PM",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 1,
+      "expected_shape": "matrix",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": true
+    },
+    {
+      "id": "AT-04",
+      "category": "application_test_solution",
+      "title": "雷達量測的方案與有爭議的對手",
+      "question": "雷達目標模擬與雷達產線校正由哪些方案對應？對手在產線校正上的方案是否確定？",
+      "expected_entities": [
+        "Application:radar-target-simulation",
+        "Application:radar-production-calibration",
+        "TestSolution:own-radar-target-simulator",
+        "TestSolution:own-signal-gen-analyzer",
+        "TestSolution:competitor-b-radar-eol-tester",
+        "Competitor:competitor-b"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "TestSolution:own-radar-target-simulator",
+          "relationship": "applications",
+          "object": "Application:radar-target-simulation"
+        },
+        {
+          "subject": "TestSolution:own-signal-gen-analyzer",
+          "relationship": "applications",
+          "object": "Application:radar-target-simulation"
+        },
+        {
+          "subject": "TestSolution:own-radar-target-simulator",
+          "relationship": "applications",
+          "object": "Application:radar-production-calibration"
+        },
+        {
+          "subject": "TestSolution:competitor-b-radar-eol-tester",
+          "relationship": "applications",
+          "object": "Application:radar-production-calibration"
+        },
+        {
+          "subject": "TestSolution:competitor-b-radar-eol-tester",
+          "relationship": "vendor",
+          "object": "Competitor:competitor-b"
+        },
+        {
+          "subject": "TestSolution:own-radar-target-simulator",
+          "relationship": "competing_solutions",
+          "object": "TestSolution:competitor-b-radar-eol-tester"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 2,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": false,
+        "must_report_verification_status": true,
+        "must_report_gap": false,
+        "classification_ceiling": "INTERNAL",
+        "notes": "Competitor B 方案對應產線校正是 disputed（兩份文件矛盾），須並陳。"
+      },
+      "expected_answer": "目標模擬：我方 Radar target simulator 與 Signal generator / analyzer；產線校正：我方 Radar target simulator。Competitor B 的 radar EOL tester 是否對應產線校正有矛盾（disputed），須並陳兩份來源，不能當事實。",
+      "review_domain": "AE",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 1,
+      "expected_shape": "matrix_with_conflict",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": true
+    },
+    {
+      "id": "AT-05",
+      "category": "application_test_solution",
+      "title": "沒有方案的 Application（缺口）",
+      "question": "哪些 Application 目前沒有任何 TestSolution 對應？它們使用哪些技術、位於哪個節點？",
+      "expected_entities": [
+        "Application:cpo-optoelectronic-test",
+        "Technology:cpo",
+        "Node:optical-module"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "Application:cpo-optoelectronic-test",
+          "relationship": "technologies",
+          "object": "Technology:cpo"
+        },
+        {
+          "subject": "Application:cpo-optoelectronic-test",
+          "relationship": "node",
+          "object": "Node:optical-module"
+        }
+      ],
+      "expected_absent_relationships": [
+        {
+          "subject": "TestSolution:*",
+          "relationship": "applications",
+          "object": "Application:cpo-optoelectronic-test"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 1,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": false,
+        "must_report_verification_status": false,
+        "must_report_gap": true,
+        "classification_ceiling": "UNCLASSIFIED",
+        "notes": "BI 文件 slide 13 的缺口檢查『沒有方案的 Application』；不得編造方案。"
+      },
+      "expected_answer": "只有「CPO 光電共封裝測試」沒有任何 TestSolution（我方與對手皆無）；它使用 CPO，位於光模組節點。",
+      "review_domain": "PM",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 1,
+      "expected_shape": "gap_list",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": true
+    },
+    {
+      "id": "OD-01",
+      "category": "cross_domain_opportunity",
+      "title": "誰可能需要 Wi-Fi 8 測試",
+      "question": "哪些 Account 可能需要 Wi-Fi 8 測試？依據為何（產品、技術、訊號）？我方可提出哪個方案？請區分宣稱與推論。",
+      "expected_entities": [
+        "Technology:wifi-8",
+        "CustomerProduct:gamma-wifi8-ap-proto",
+        "Account:network-oem-gamma",
+        "Application:wifi-rf-signaling-test",
+        "TestSolution:own-wireless-signaling-tester",
+        "Signal:wifi8-first-rf-demo",
+        "Opportunity:gamma-wifi8-rd"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "CustomerProduct:gamma-wifi8-ap-proto",
+          "relationship": "technologies",
+          "object": "Technology:wifi-8"
+        },
+        {
+          "subject": "CustomerProduct:gamma-wifi8-ap-proto",
+          "relationship": "account",
+          "object": "Account:network-oem-gamma"
+        },
+        {
+          "subject": "CustomerProduct:gamma-wifi8-ap-proto",
+          "relationship": "applications",
+          "object": "Application:wifi-rf-signaling-test"
+        },
+        {
+          "subject": "TestSolution:own-wireless-signaling-tester",
+          "relationship": "applications",
+          "object": "Application:wifi-rf-signaling-test"
+        },
+        {
+          "subject": "Signal:wifi8-first-rf-demo",
+          "relationship": "mentions",
+          "object": "Technology:wifi-8"
+        },
+        {
+          "subject": "Opportunity:gamma-wifi8-rd",
+          "relationship": "account",
+          "object": "Account:network-oem-gamma"
+        },
+        {
+          "subject": "Opportunity:gamma-wifi8-rd",
+          "relationship": "test_solutions",
+          "object": "TestSolution:own-wireless-signaling-tester"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 3,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": true,
+        "must_report_verification_status": true,
+        "must_report_gap": false,
+        "classification_ceiling": "CONFIDENTIAL",
+        "notes": ""
+      },
+      "expected_answer": "Network OEM Gamma：文件宣稱其 Wi-Fi 8 AP 原型使用 Wi-Fi 8 並需要 RF signaling 測試，我方 Wireless signaling tester 可對應；Signal「Wi-Fi 8 首批 RF 測試展示」支持需求出現。「Gamma Wi-Fi 8 R&D 測試機會」是推論（assumed）。沒有其他 Account 有 Wi-Fi 8 產品的證據。",
+      "review_domain": "BD",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 4,
+      "expected_shape": "chain",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": false
+    },
+    {
+      "id": "OD-02",
+      "category": "cross_domain_opportunity",
+      "title": "800V DC 趨勢的測試商機",
+      "question": "800V DC 機櫃配電的趨勢，對哪些 Account 的哪些產品形成測試商機？我方可提出哪個方案？",
+      "expected_entities": [
+        "Signal:800v-dc-rack-proposal",
+        "Trend:ai-dc-power-density",
+        "Technology:800v-dc-distribution",
+        "Account:psu-maker-beta",
+        "CustomerProduct:beta-ai-psu",
+        "Application:psu-efficiency-transient",
+        "TestSolution:own-power-analyzer",
+        "Opportunity:beta-800v-psu-test"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "Signal:800v-dc-rack-proposal",
+          "relationship": "mentions",
+          "object": "Trend:ai-dc-power-density"
+        },
+        {
+          "subject": "Trend:ai-dc-power-density",
+          "relationship": "related_tech",
+          "object": "Technology:800v-dc-distribution"
+        },
+        {
+          "subject": "CustomerProduct:beta-ai-psu",
+          "relationship": "technologies",
+          "object": "Technology:800v-dc-distribution"
+        },
+        {
+          "subject": "CustomerProduct:beta-ai-psu",
+          "relationship": "account",
+          "object": "Account:psu-maker-beta"
+        },
+        {
+          "subject": "CustomerProduct:beta-ai-psu",
+          "relationship": "applications",
+          "object": "Application:psu-efficiency-transient"
+        },
+        {
+          "subject": "TestSolution:own-power-analyzer",
+          "relationship": "applications",
+          "object": "Application:psu-efficiency-transient"
+        },
+        {
+          "subject": "Opportunity:beta-800v-psu-test",
+          "relationship": "account",
+          "object": "Account:psu-maker-beta"
+        },
+        {
+          "subject": "Opportunity:beta-800v-psu-test",
+          "relationship": "test_solutions",
+          "object": "TestSolution:own-power-analyzer"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 3,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": true,
+        "must_report_verification_status": true,
+        "must_report_gap": false,
+        "classification_ceiling": "CONFIDENTIAL",
+        "notes": "Alpha 機櫃使用 800V DC 只是推論，不應列為已確認商機。"
+      },
+      "expected_answer": "PSU Maker Beta 的 AI PSU：800V DC 用於該產品（assumed），產品需要效率與動態響應量測，我方 Power analyzer 可對應；「Beta 800V PSU 驗證機會」是推論。ODM Alpha 機櫃與 800V DC 的關係本身是推論，只能列為待查證線索。",
+      "review_domain": "BD",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 4,
+      "expected_shape": "chain",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": false
+    },
+    {
+      "id": "OD-03",
+      "category": "cross_domain_opportunity",
+      "title": "CPO × 光模組廠：商機與方案缺口",
+      "question": "CPO 趨勢與光模組廠之間有什麼測試商機？我方目前有沒有對應的 TestSolution？",
+      "expected_entities": [
+        "Trend:optical-interconnect-shift",
+        "Technology:cpo",
+        "Node:optical-module",
+        "Account:optics-epsilon",
+        "Application:cpo-optoelectronic-test",
+        "Opportunity:epsilon-cpo-test",
+        "Signal:cpo-switch-sampling"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "Trend:optical-interconnect-shift",
+          "relationship": "related_tech",
+          "object": "Technology:cpo"
+        },
+        {
+          "subject": "Technology:cpo",
+          "relationship": "affects_nodes",
+          "object": "Node:optical-module"
+        },
+        {
+          "subject": "Account:optics-epsilon",
+          "relationship": "node",
+          "object": "Node:optical-module"
+        },
+        {
+          "subject": "Application:cpo-optoelectronic-test",
+          "relationship": "technologies",
+          "object": "Technology:cpo"
+        },
+        {
+          "subject": "Signal:cpo-switch-sampling",
+          "relationship": "mentions",
+          "object": "Trend:optical-interconnect-shift"
+        },
+        {
+          "subject": "Opportunity:epsilon-cpo-test",
+          "relationship": "account",
+          "object": "Account:optics-epsilon"
+        }
+      ],
+      "expected_absent_relationships": [
+        {
+          "subject": "TestSolution:*",
+          "relationship": "applications",
+          "object": "Application:cpo-optoelectronic-test"
+        },
+        {
+          "subject": "Opportunity:epsilon-cpo-test",
+          "relationship": "test_solutions",
+          "object": "TestSolution:*"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 2,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": true,
+        "must_report_verification_status": false,
+        "must_report_gap": true,
+        "classification_ceiling": "CONFIDENTIAL",
+        "notes": ""
+      },
+      "expected_answer": "CPO 影響光模組節點，客戶 Optics Epsilon 位於該節點；CPO 光電共封裝測試使用 CPO；Signal「CPO 交換器送樣消息」支持趨勢。「Epsilon CPO 測試機會」是推論。知識庫中沒有任何 TestSolution 對應 CPO 光電測試，該商機也沒有可提出的方案，這是方案缺口，不得編造。",
+      "review_domain": "BD",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 3,
+      "expected_shape": "chain_with_gap",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": false
+    },
+    {
+      "id": "OD-04",
+      "category": "cross_domain_opportunity",
+      "title": "雷達法規與 Delta 的產線商機",
+      "question": "車用雷達法規更新，對 Tier-1 Delta 的產線測試有什麼商機？對手是否已切入同一應用？",
+      "expected_entities": [
+        "Signal:radar-band-regulation-update",
+        "Trend:vehicle-radar-proliferation",
+        "Account:tier1-delta",
+        "CustomerProduct:delta-77ghz-radar",
+        "Application:radar-production-calibration",
+        "TestSolution:own-radar-target-simulator",
+        "TestSolution:competitor-b-radar-eol-tester",
+        "Opportunity:delta-radar-production"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "Signal:radar-band-regulation-update",
+          "relationship": "mentions",
+          "object": "Trend:vehicle-radar-proliferation"
+        },
+        {
+          "subject": "CustomerProduct:delta-77ghz-radar",
+          "relationship": "account",
+          "object": "Account:tier1-delta"
+        },
+        {
+          "subject": "CustomerProduct:delta-77ghz-radar",
+          "relationship": "applications",
+          "object": "Application:radar-production-calibration"
+        },
+        {
+          "subject": "TestSolution:own-radar-target-simulator",
+          "relationship": "applications",
+          "object": "Application:radar-production-calibration"
+        },
+        {
+          "subject": "TestSolution:competitor-b-radar-eol-tester",
+          "relationship": "applications",
+          "object": "Application:radar-production-calibration"
+        },
+        {
+          "subject": "Opportunity:delta-radar-production",
+          "relationship": "account",
+          "object": "Account:tier1-delta"
+        },
+        {
+          "subject": "Opportunity:delta-radar-production",
+          "relationship": "test_solutions",
+          "object": "TestSolution:own-radar-target-simulator"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 3,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": true,
+        "must_report_verification_status": true,
+        "must_report_gap": false,
+        "classification_ceiling": "CONFIDENTIAL",
+        "notes": "對手方案對應產線校正是 disputed，須並陳。"
+      },
+      "expected_answer": "Delta 的雷達模組需要產線校正與 EOL 測試，我方 Radar target simulator 可對應；「Delta 雷達產線測試機會」是推論，Signal 為法規更新。Competitor B 是否已切入產線校正有矛盾（disputed），須並陳。",
+      "review_domain": "BD",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 3,
+      "expected_shape": "chain_with_conflict",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": false
+    },
+    {
+      "id": "OD-05",
+      "category": "cross_domain_opportunity",
+      "title": "跨節點的我方方案",
+      "question": "有哪些我方 TestSolution 同時服務位於不同 Node 的客戶產品（例如 CPE 與車用雷達模組）？可提出哪些跨域商機假設？",
+      "expected_entities": [
+        "TestSolution:own-signal-gen-analyzer",
+        "Application:wifi-rf-signaling-test",
+        "Application:radar-target-simulation",
+        "CustomerProduct:gamma-wifi8-ap-proto",
+        "CustomerProduct:delta-77ghz-radar",
+        "Account:network-oem-gamma",
+        "Account:tier1-delta",
+        "Node:cpe",
+        "Node:radar-module"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "TestSolution:own-signal-gen-analyzer",
+          "relationship": "applications",
+          "object": "Application:wifi-rf-signaling-test"
+        },
+        {
+          "subject": "TestSolution:own-signal-gen-analyzer",
+          "relationship": "applications",
+          "object": "Application:radar-target-simulation"
+        },
+        {
+          "subject": "CustomerProduct:gamma-wifi8-ap-proto",
+          "relationship": "applications",
+          "object": "Application:wifi-rf-signaling-test"
+        },
+        {
+          "subject": "CustomerProduct:delta-77ghz-radar",
+          "relationship": "applications",
+          "object": "Application:radar-target-simulation"
+        },
+        {
+          "subject": "CustomerProduct:gamma-wifi8-ap-proto",
+          "relationship": "account",
+          "object": "Account:network-oem-gamma"
+        },
+        {
+          "subject": "CustomerProduct:delta-77ghz-radar",
+          "relationship": "account",
+          "object": "Account:tier1-delta"
+        },
+        {
+          "subject": "Account:network-oem-gamma",
+          "relationship": "node",
+          "object": "Node:cpe"
+        },
+        {
+          "subject": "Account:tier1-delta",
+          "relationship": "node",
+          "object": "Node:radar-module"
+        }
+      ],
+      "evidence_requirements": {
+        "min_independent_documents": 2,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": true,
+        "must_report_verification_status": false,
+        "must_report_gap": false,
+        "classification_ceiling": "CONFIDENTIAL",
+        "notes": "跨域商機假設一律是推論。"
+      },
+      "expected_answer": "Signal generator / analyzer 同時對應 Wi-Fi RF signaling 測試（Gamma 的 Wi-Fi 8 AP 原型，CPE 節點）與雷達目標模擬（Delta 的雷達模組，車用雷達模組節點）。據此可提出「同一方案跨 CPE 與車用雷達客戶」的商機假設，但這是推論，知識庫沒有對應的 Opportunity 卡。",
+      "review_domain": "BD",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 4,
+      "expected_shape": "chain",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": false
+    }
+  ]
+}
