@@ -61,3 +61,11 @@
 | 需要修改的 repo 規則 / 文件清單 | v1.1 §7.3 | P9 |
 | 編號衝突提醒：`docs/TASKS.md` 已有 Knowledge pipeline release「K1–K6」 | v1.1 §7、§8 | 避免 AEP-K02 與既有 K2 混淆 |
 | 過時文件清單（10/74 數字、`docs/TASKS.md:1454` 未勾選、HARNESS_6_LAYER_STATUS 等） | K01 §12 | 事實修正 |
+
+## 2026-10-17 修訂：ADR-K6 改為通用規則
+
+owner 問「為什麼有專為 Knowledge 客製的 Harness」後決定：ADR-K6 的四項修正改寫為**所有領域適用的
+通用接合規則 G1–G4**（未通過驗收的結果不交模型改寫、使用者原句優先、Skill 依綁定資產選擇、輸出長度
+一致），寫進對話 Harness 而非 Knowledge 特例；並說明 `knowledge_harness.py` 是領域 adapter（只提供
+execute 與 validate），不是另一套迴圈。AEP-K02 改名為 "Apply the generic Harness hand-off rules G1–G4
+and measure U7"，驗收要求以 Knowledge 與至少一個非 Knowledge 領域各驗一次。

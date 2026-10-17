@@ -111,8 +111,8 @@ R = Reuse（照用）、E = Extend（加欄位 / 加 adapter / 加 Skill）、N 
 | Workflow engine（preview / preflight / journal / recover） | `src/workflow/engine.py`、`src/workflow/checkpoints_sqlite.py`、`src/common/assets.py:268-273, 514-527` | R | Strategy 的執行者。步驟為線性 tuple，無 DAG、無中途人工步驟；v1.1 不需要它們（ADR-K1） |
 | Bridge（授權、核准、I/O 驗證） | `src/workflow/dispatch.py` | R | 所有新能力都經 Bridge |
 | Harness 狀態機 | `src/agent/harness_plan.py`、`harness_run.py`、`harness_runner.py` | R | Graph / Hybrid 檢索沿用 collect → execute → validate → retry |
-| Knowledge Harness（兩條路徑共用） | `src/host_runtime/knowledge_harness.py` | E | 加 retrieval_mode；未驗證結果在工具路徑的處理（ADR-K6） |
-| Gateway 工具迴圈與 vault 工具 | `src/agent/gateway.py:98-118, 400-433, 808-817, 908-966` | E | 不新增 Graph 工具；修正未驗證結果交回模型的路徑 |
+| Knowledge Harness（領域 adapter，兩條路徑共用；不是另一套迴圈） | `src/host_runtime/knowledge_harness.py` | E | 加 retrieval_mode；Skill 選擇改用通用綁定規則（ADR-K6 規則 G3） |
+| Gateway 工具迴圈與 vault 工具 | `src/agent/gateway.py:98-118, 400-433, 808-817, 908-966` | E | 不新增 Graph 工具；套用 ADR-K6 的通用接合規則 G1、G2、G4（所有領域適用） |
 | Knowledge pipeline（sandbox、drop、convert、plan/apply、merge、lint、push） | `src/knowledge/pipeline.py`、`sandbox.py`、`merge.py`、`lint.py`、`src/host_runtime/knowledge_push.py` | R/E | Graph candidate 以檔案進 sandbox，沿用 merge / gate / push |
 | Pipeline Bridge 能力 | `src/capabilities/knowledge_pipeline/handlers.py` | E | 新增 `graph-extract`、`graph-plan` 類能力 |
 | 文件擷取（PDF / PPTX / DOCX） | `src/knowledge/office.py` | R | 不加 OCR（P8）。PDF 無表格模型、PPTX 不含 speaker notes（K01 §4.1） |
@@ -231,7 +231,7 @@ R = Reuse（照用）、E = Extend（加欄位 / 加 adapter / 加 Skill）、N 
   | 文件互相矛盾：ARCHITECTURE:757、PRODUCT_ACCEPTANCE_TESTS:197, 218 vs KNOWLEDGE_COLLAB | 既有矛盾，與本提案無關，但 owner 需要決定哪一份為準 |
 - **Consequences.** 若 owner 採用 BI policy，需要新增一條 DECISIONS 條目說明「BI 例外」，並更新 KNOWLEDGE_COLLAB 的適用範圍說明；General Wiki 不變。
 
-### ADR-K6：Knowledge tool path 的修正方式（Graph 不重蹈覆轍）
+### ADR-K6：Harness 接合處的通用規則（Knowledge tool path 不再失分，Graph 不重蹈覆轍）
 
 - **Context（K01 §2）.** `docs/HARNESS_DESIGN.zh-TW.md` §7.1 / §11.2 的「工具路徑 10/74」是 2026-10-07 sample-003 的數字，**當時聊天模型會改寫結果**。2026-10-09 起（`0b39228a`，U5）工具路徑執行同一個 Knowledge Harness，validated 答案直接成為回合答案（`src/agent/gateway.py:808-817`）。U5 之後的 core 集（core-009 至 core-015），工具路徑可接受率 147/182（80.8%），直接路徑 56/70（80.0%）；但 110 題 sample 集在 U5 後只有 sample-004，而其中 41 題因 trace 早於 record 欄位而無法判定、21 題是 `knowledge_not_validated`。殘留根因：
   1. 未驗證結果（`ok=false`）交回聊天模型，且移除 record（`gateway.py:938`），模型自行組答案；對話回合的 Host checks 只有 `no_unbacked_action_claim` 與 `named_outputs_exist`（`src/agent/conversation_harness.py:6-10`），沒有引用或 grounding 檢查。
@@ -243,13 +243,30 @@ R = Reuse（照用）、E = Extend（加欄位 / 加 adapter / 加 Skill）、N 
   - A. Graph 作為另一個 `graph__<vault>` 工具，由聊天模型組合。
   - B. Retrieval mode 放在同一個 knowledge-query 能力內；融合與驗證在 Harness 內；工具路徑只回傳 Harness 結果。
   - C. 把所有 Knowledge 問題都導到直接路徑（`docs/DECISIONS.md` 2026-10-07 已否決：無法處理混合工作）。
-- **Recommendation: B，加上四個小修正**（每項先寫失敗測試，再改；屬 Harness 變更，需 owner 同意）：
-  1. 未驗證但有部分支持的答案，與直接路徑一樣以 Harness 的文字（含「未能以證據支持：…」）直接回傳，並保留 record；只有完全沒有結果時才交回模型。
-  2. 傳給 Harness 的 question 以使用者原句為主，模型改寫版只作為檢索補充（或記錄差異供評分）。
-  3. Knowledge Skill 綁定改為依 vault（或 Strategy Config）選擇。
-  4. 截斷上限與 synthesis 輸出上限一致，或截斷時附上完整答案的取得方式。
+- **定位（owner 2026-10-17 指示改為通用規則）.** 共用狀態機（`harness_runner.py`）只有一套；
+  `knowledge_harness.py` 是**領域 adapter**，只提供 execute（Bridge 的 knowledge-query 能力）與
+  validate（Host checks），本身沒有迴圈。驗收放在 Host 而不放在 Skill，是因為 Skill 不能新增／刪除
+  Host checks、不能驗證自己的輸出（HARNESS_DESIGN 原則 2、§6.1）。上述根因都**不是迴圈本身的限制**，
+  而是發生在 Skill 碰不到的「對話工具迴圈 ↔ 領域 adapter」接合處。因此修正一律寫成**所有領域適用的
+  通用接合規則**，不在 Knowledge 加特例。
+- **Recommendation: B，加上四條通用接合規則**（每條先寫失敗測試，再改；屬 Harness 變更，需 owner 同意）：
+  - **G1 未通過驗收的結果不交給模型改寫。** 任何領域的 Harness 結果若未通過 Host checks，對話迴圈一律
+    把 Harness 產生的文字與 Host 註記（例如「以下未能以證據支持：…」）原樣回給使用者，並保留紀錄
+    （record / evidence）；只有 Harness 完全沒有產出時，才交回模型，且模型的回答必須標示「未經驗證」。
+    對 Knowledge 而言，這修正根因 1；對 Coding、Workflow 與未來的 Graph 同樣適用。
+  - **G2 使用者原句優先。** 對話模型呼叫任何 Harness 工具時，Host 一併傳入使用者原句；領域 adapter
+    以原句為主要輸入，模型改寫版只作補充並記錄差異供評分。修正根因 2。
+  - **G3 Skill 依綁定的資產選擇。** 領域 adapter 選 Skill 時，依 Skill 宣告綁定的資產（vault、
+    Workflow、Strategy Config）選擇；同一資產有多個 Skill 時依明確優先序，沒有綁定才退回目前的
+    「第一個符合者」。不再由安裝順序決定。修正根因 3，也是 Graph / Hybrid 依 mode 選 Skill 的前提。
+  - **G4 輸出長度一致。** 對話迴圈回傳 Harness 結果的長度上限，與該領域宣告的輸出上限一致；仍需截斷時，
+    附上取得完整結果的方式並在 Host 註記說明。修正根因 5。
+  - 根因 4（第一個 validated 結果即結束回合）不另立規則：Retrieval mode 在同一能力內（選項 B），
+    Hybrid 的融合在 Harness 內完成，不需要跨工具結果融合。
   並完成 HARNESS_UNIFICATION U7 的量測（U5 後 110 題 sample 集，grader 1.4）。
-- **Consequences.** Graph / Hybrid 不新增聊天工具；Agent 看到的仍是一個 vault 一個工具。`docs/HARNESS_DESIGN.zh-TW.md` §7.1、§11.2 與 `docs/TASKS.md:1454` 需更新（過時）。
+- **Consequences.** Graph / Hybrid 不新增聊天工具；Agent 看到的仍是一個 vault 一個工具。四條規則
+  寫進 `docs/HARNESS_DESIGN.zh-TW.md`（對話 Harness 一節）而非 Knowledge 一節；Coding 與 Workflow 的
+  回歸測試也要涵蓋 G1、G3。`docs/HARNESS_DESIGN.zh-TW.md` §7.1、§11.2 與 `docs/TASKS.md:1454` 需更新（過時）。
 
 ### ADR-K7：Atlas Knowledge API 契約與版本
 
@@ -571,7 +588,7 @@ paths:
 
 | # | 標題 | 目標 | 驗收 | 依賴 | 大小 |
 |---|---|---|---|---|---|
-| AEP-K02 | Close the remaining Knowledge tool-path gaps and measure U7 | ADR-K6 的四個修正（各先寫失敗測試）；U5 後 110 題 sample 集量測（grader 1.4） | 新測試覆蓋：partial 答案在工具路徑原樣回傳且保留 record；question 原句保留；Skill 依 vault 綁定；長答案不截斷。sample 集工具路徑與直接路徑可接受率差距 ≤ 5 pp；HARNESS_DESIGN §7.1 / §11.2、TASKS:1454 更新 | owner 核准 v1.1 與 Harness 變更 | M |
+| AEP-K02 | Apply the generic Harness hand-off rules G1–G4 and measure U7 | ADR-K6 的四條通用接合規則（各先寫失敗測試）；U5 後 110 題 sample 集量測（grader 1.4） | 新測試覆蓋（以 Knowledge 與至少一個非 Knowledge 領域各驗一次）：G1 未通過驗收的結果原樣回傳且保留紀錄、不經模型改寫；G2 使用者原句傳入 adapter；G3 Skill 依綁定資產選擇、無綁定才退回；G4 長結果不被無聲截斷。sample 集工具路徑與直接路徑可接受率差距 ≤ 5 pp；Coding / Workflow 既有測試不退化；HARNESS_DESIGN（對話 Harness 一節）、§7.1 / §11.2、TASKS:1454 更新 | owner 核准 v1.1 與 Harness 變更 | M |
 | AEP-K03 | Add the relationship question set, relationship grading and a Wiki-only baseline | §5.2 問題集定稿與 pin；reference + gold triples；評分加 Relationship Accuracy、mode 維度；baseline 2 次 | `selftest.py` 擴充並通過；gold triples commit；baseline 報告含六項指標 | K02（避免在已知 tool-path 缺陷上量 baseline） | M |
 | AEP-K04 | Define Document ID, Evidence ID and the KnowledgeStorageBackend interface | ADR-K4 ID 規則；ADR-K2 介面；選項 A 的實作（vault 檔案 + Host 衍生索引）；舊 Raw 回填 | 契約測試：同檔同 ID、重擷取 evidence_map、舊 ID 不重用；Raw 不變性測試仍通過 | owner 核准 ADR-K2（介面部分）、K4 | M |
 | AEP-K05 | Add Strategy Config and wrap General Wiki ingest as a Workflow | ADR-K1；`general_wiki` = 既有 convert / ingest-plan / ingest-apply 能力組成的 Workflow + Config | 安裝 Config 不需改 Harness；第三個 mock strategy 只靠安裝即可執行；既有 Knowledge 頁行為不變 | K04 | M |
@@ -622,7 +639,7 @@ owner 核准 v1.1
 8. **資料分類**：BI 的客戶 / 商機內容標 CONFIDENTIAL 還是 RESTRICTED？（現行 `DataPolicy` 不允許 RESTRICTED 送任何模型）Gateway 核准是否涵蓋 CONFIDENTIAL？Phase 1 是否完全排除這些類型？
 9. **協作流程（ADR-K9）**：K02+ 用 PR 還是在 main 直接 commit？誰 merge？是否需要 branch protection？
 10. **Knowledge API 授權**：唯讀 GET 是否比照遙測（loopback、免 token）？Evidence 會回傳段落原文，與遙測只回中繼資料不同。`POST /query` 呢？
-11. **Tool-path 修正（ADR-K6）**：是否同意修改 Harness 的四個小修正？是否先只做 U7 量測、不改程式？
+11. **通用接合規則（ADR-K6 G1–G4）**：是否同意以四條所有領域適用的規則修改 Harness 接合處？是否先只做 U7 量測、不改程式？
 12. **編號**：本計畫的 AEP-K02… 是否改用其他前綴，以免與既有 Knowledge pipeline K1–K6 混淆？
 13. **Atlas**：Atlas 端由誰負責、從 mock 開始的時間？是否需要與 Atlas 共同凍結 v0.1 後才開始 K09 的實作？
 14. **優先順序**：本計畫與目前 active 的 E2E-01 gate、Phase 7、Skill suggestions S3 的先後如何排？（CLAUDE.md 規定不得以其他 backlog 取代 active product gate）
