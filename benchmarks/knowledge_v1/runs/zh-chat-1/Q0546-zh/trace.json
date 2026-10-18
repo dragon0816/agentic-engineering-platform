@@ -1,0 +1,1971 @@
+{
+ "question": {
+  "id": "Q0546-zh",
+  "source_id": "Q0546",
+  "text": "根據知識庫目前的證據，訊號產生器/訊號分析儀在汽車領域最有潛力的機會有哪些？每個機會各有哪些證據支持？",
+  "market": "Automotive",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-2526fa64cf494e88a8aad7d77f72e235",
+ "exchange": {
+  "sent": "根據知識庫目前的證據，訊號產生器/訊號分析儀在汽車領域最有潛力的機會有哪些？每個機會各有哪些證據支持？",
+  "http_status": 200,
+  "seconds": 78.656,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-2526fa64cf494e88a8aad7d77f72e235",
+    "actor": "leo.chi",
+    "title": "根據知識庫目前的證據，訊號產生器/訊號分析儀在汽車領域最有潛力的機會有哪些？每個機會各有哪些證據支持？",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-18T16:05:44.168659Z",
+    "updated_at": "2026-10-18T16:07:02.582770Z",
+    "messages": [
+     {
+      "message_id": "message-ebd3c20072f942a387c5b36a204166fc",
+      "role": "user",
+      "text": "根據知識庫目前的證據，訊號產生器/訊號分析儀在汽車領域最有潛力的機會有哪些？每個機會各有哪些證據支持？",
+      "created_at": "2026-10-18T16:05:44.181689Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": [],
+      "workflow_form": null,
+      "action_card": null,
+      "action_cards": []
+     },
+     {
+      "message_id": "message-96cdd3916b244287ae25862e12ce4114",
+      "role": "assistant",
+      "text": "### 建議主軸\n先切入「汽車雷達回波產生 / ADAS radar 測試」與「4G/5G NG eCall、hybrid eCall 測試」；「汽車高速 PCB / SI/PI」可列為待補證機會，因為知識庫目前有 PCB 測試流程但未給正式 R&S 產品型號、option、頻率或標準條件。[65][62][10][45][79][15]\n### 推薦先賣\n1. **汽車雷達回波產生 / ADAS radar 測試**：R&S AREG800A 被明確定義為 Automotive Radar Echo Generator，用於 dynamic artificial object generation，且支援 FMCW radar 的 digital echo generation、最高 3000 m generated distance、individual Doppler frequency shift、最多 32 個 artificial objects 與 HiL interface option。[65][62][2][3][6]\n2. **NG eCall / IMS eCall / 4G-5G 車用緊急通話測試**：R&S 與 Qualcomm Technologies 使用 R&S CMX500 驗證 Snapdragon Auto 5G Modem-RF 的 NG eCall functionality 符合 EN 17240:2024，測試包含 voice and data transmission、simulating a PSAP，且 CMX500 搭配 CMX-KA098 可在 realistic network conditions 下用於 NG eCall testing。[10][40][42]\n3. **Hybrid eCall fallback 測試**：Hybrid eCall testing 的目標是驗證車輛 emergency call system 能在 NG eCall 與 classic CS eCall transport paths 之間可靠運作與 fallback，來源連到 EN 18052:2025、EN 17240:2024+A1:2026、R&S CMX500 與 R&S CMX-KA09x。[44][45][47]\n4. **汽車高速 PCB / SI/PI 測試流程**：R&S PCB test solutions 來源列出 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring，量測 / 分析項目包含 TDR impedance、DK/DF extraction、insertion loss、roughness、crosstalk、TL modeling 與 eye diagram；但來源未提供正式 R&S 產品型號、option code、測試頻率、標準、fixture 或 calibration method。[79][13][15]\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S AREG800A | Automotive radar echo generation、FMCW radar 目標模擬、ADAS radar 測試 | Echo generator type 是 dynamic artificial object generation；hybrid concept 在短物距 < 17 m 使用 analog stepped delay line、較長距離至 3000 m 使用 fully digital implementation；digital concept 用於 FMCW radar，maximum generated distance 為 3000 m。[62] | 產品頁明確稱 AREG800A 是 Automotive Radar Echo Generator，且用途就是 dynamic artificial object generation。[65] | [65][62] | Datasheet 未列價格，且部分 IF frequency range 與 option code 萃取有 unresolved 問題，需回查原始 datasheet。[70] |\n| R&S AREG800A + Doppler / object options | 多目標、速度、距離情境產生 | 每個 artificial object 支援 individual Doppler frequency shift；with R&S AREG8-B9 and R&S AREG8-B63 的 velocity setting range 為 ±500 km/h，velocity step size 為 0.001 km/h，velocity accuracy < 0.05 km/h。[2] | 可支援雷達測試中每個 artificial object 的 individual Doppler frequency shift，並提供速度範圍、步進與 accuracy 規格。[2] | [2] | Object distance accuracy with R&S AREG8-B9 option 為 ±5 cm，標示為 meas.，且 measured values 不由 R&S 保證。[3][1] |\n| R&S AREG800A + frontends / QAT100 / FE44S | 多前端、近遠距、多 artificial object 雷達場景 | 搭配 conventional mmWave frontends 或 FE44S 時，在多個 distance condition 下最多 32 個 artificial objects、每 frontend 最多 8 個；每台 AREG800A base unit 支援 conventional mmWave frontends 最多 4 個、QAT100 最多 8 個、FE44S 最多 8 個 external frontends。[3][63] | 多 artificial objects 與多 frontends 可支援較複雜的雷達場景配置。[3][63] | [3][63] | AREG8-24D 在 supported remote frontends 中出現，但 maximum number bullet 未列 AREG8-24D，頁面明示不自行補入。[63] |\n| R&S AREG800A + HiL / OSI | Hardware-in-the-loop radar scenario integration | HiL interface option 為 R&S AREG8-K109；open-standard protocol support 為 OSI；time synchronization protocol 為 gPTP、NTP。[6] | HiL、OSI 與時間同步能力可對接模擬環境與自動化測試流程。[6] | [6] | 知識庫未提供具體 HIL test case、simulator vendor compatibility 或 automotive OEM acceptance criteria。[6] |\n| R&S CMX500 + R&S CMX-KA098 | NG eCall over IMS / LTE / 5G NR 測試 | CMX500 with CMX-KA098 software option 可用於 NG eCall testing under realistic network conditions；驗證流程使用 CMX500 作為 NG eCall voice and data transmission 的 comprehensive testing solution。[40] | 已有 Qualcomm Technologies / Snapdragon Auto 5G Modem-RF 的 NG eCall verification 語境，且測試模擬 PSAP 並驗證 EN 17240:2024 implementation at both ends。[10][40] | [10][40][42] | 該頁目前只由新聞稿支撐，不是 EN 17240:2024 標準摘要、conformance test plan 或 certification report，且未列 test case IDs、test conditions、network parameters、IMS setup、GNSS setup、software versions 或 pass/fail details。[11] |\n| R&S CMX500 + R&S CMX-KA098 / CMX-KF671B | NGeCall over NR/LTE capability-list 導向測試 | Capability listing 對象是 R&S CMX500 with R&S CMX-KA098；文件用於引導使用者執行 CEN EN 17240、ETSI TS 103 683、3GPP TS 34.229-5、3GPP TS 34.229-1、3GPP TS 38.523-1、3GPP TS 36.523-1、3GPP TS 26.269 中指定的 NGeCall tests。[49] | 相較單純 PR，capability list 提供 CMX500 / CMX-KA098 的實際測試支援範圍與版本基準。[51] | [49][50][51] | 來源明示 CMX500 有時只支援部分測試，或某些測試需要 further equipment；多個測試需要 HMI interaction、engine / ignition OFF 控制、AT command、Prepared TestUSIM、handset、crash simulation、in-band modem over IP support 或 IVS SUT IP address check。[49][56] |\n| R&S CMX500 + R&S CMX-KA09x / CMX-KA099 | Hybrid eCall、NG eCall 與 classic CS eCall fallback 測試 | CMX-KA09x 是 R&S updated eCall evaluation solution 的泛稱，來源說它支援 EN 18052:2025 與 EN 17240:2024+A1:2026 compliance；CMX-KA099 在 hybrid EN18052:2025 區段與 CMX-KA098、CMX-KF672B 同列 mandatory。[47][53] | Hybrid eCall test specification EN 18052 要求 hybrid system combine different transmission paths and protocols，確保 eCall reliably reaches its destination；實務語境包含 4G/5G IP/IMS NG eCall 與 coverage 或 service quality degraded 時 fallback 到 2G/3G classic CS eCall。[45] | [47][53][45] | 新聞稿只說 completed PSAP test scenarios，不是完整 conformance statement、test report 或 technical specifications；CMX-KA099 頁也未提供正式 datasheet、feature description、capability list 或 maintenance PU mapping。[48][52] |\n| R&S PCB test solutions | Automotive electronics 的高速 PCB / SI/PI 流程候選 | 流程包含 Material Measurement、Material/Stackup selection、Signal Integrity modeling/testing、Sampling testing、PL/Process Monitoring；項目包含 TDR impedance、DK/DF extraction、IL、roughness、impedance、Xtalk、TL modeling、Eye diagram。[79][13] | 可對接 PCB Fabricator and System House 的材料、stackup、SI modeling/testing、抽樣與 process monitoring 流程。[80][13] | [79][80][13] | 來源沒有提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method，因此目前不應解讀為完整採購配置。[15] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| 多目標、多前端 radar object simulation | R&S AREG800A + conventional mmWave frontends / FE44S / QAT100 | 搭配 conventional mmWave frontends 或 FE44S 時可達最多 32 個 artificial objects、每 frontend 最多 8 個；QAT100 組合也列出最多 8 個 artificial objects。[3] | Object distance accuracy ±5 cm 是 measured value，且 measured values 不由 R&S 保證。[3][1] |\n| Radar HiL / simulator integration | R&S AREG800A + R&S AREG8-K109 | 以 HiL interface option、OSI open-standard protocol support、gPTP / NTP time synchronization 做系統整合切入。[6] | 知識庫未列 simulator 品牌、OSI profile、latency budget 或 HIL certification criteria。[6] |\n| 車用 NG eCall 4G/5G / IMS 測試 | R&S CMX500 + R&S CMX-KA098 | 以 EN 17240:2024、PSAP simulation、voice and data transmission、realistic network conditions 切入。[10][40] | 來源未列 test case IDs、test conditions、network parameters、IMS setup、GNSS setup、software versions 或 pass/fail details。[11] |\n| Hybrid eCall fallback 驗證 | R&S CMX500 + R&S CMX-KA09x / CMX-KA098 / CMX-KA099；CMX-KA099 在 hybrid EN18052:2025 區段與 CMX-KA098、CMX-KF672B 同列 mandatory。[47][53] | 以 NG eCall over 4G/5G IP/IMS 與 2G/3G classic CS eCall fallback 的可靠性驗證切入。[45] | 不可由新聞稿推論 CMX500 / CMX-KA09x 已涵蓋所有 possible hybrid eCall test cases。[43] |\n| 汽車高速板材、SerDes / SI 流程前段評估 | R&S PCB test solutions；具體儀器型號知識庫未標示。[15] | 以 TDR impedance、DK/DF extraction、insertion loss、roughness、crosstalk、eye diagram 與 process monitoring 流程討論需求。[79][13] | Slide 21 未提供正式 R&S 產品型號、option code、測試頻率、測試標準、fixture 或 calibration method。[15] |\n### 限制\n知識庫目前沒有提供汽車領域各機會的市場規模、客戶預算、採購優先順序或競品勝率，因此不能把上述機會排成「最強 / 最大 / 第一名」的排名。[11][15][43]\nNG eCall 與 hybrid eCall 的多個證據來自新聞稿或 capability list，相關頁面明示不是完整標準摘要、conformance test plan、certification report 或完整 test matrix。[11][43][49]\nPCB / SI/PI 機會目前只有流程與量測項目摘要，來源明示沒有正式產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。[15]\n【推論】若以「知識庫直接連到 automotive」作為優先條件，AREG800A automotive radar echo generation 與 CMX500 eCall / hybrid eCall 的證據比一般 signal generator / spectrum analyzer 規格更直接，因為 AREG800A 被明確標為 Automotive Radar Echo Generator，而 CMX500 被直接用於 Snapdragon Auto 5G Modem-RF 的 NG eCall verification。[65][10][40]\n\n來源：\n[1] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[2] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[3] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[6] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[10] Wiki：NG eCall EN 17240 2024 verification（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[11] Wiki：NG eCall EN 17240 2024 verification（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[13] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[15] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[40] Wiki：Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[42] Wiki：Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[43] Wiki：Hybrid eCall testing（來源：`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[44] Wiki：Hybrid eCall testing（來源：`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[45] Wiki：Hybrid eCall testing（來源：`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[47] Wiki：R&S CMX-KA09x（來源：`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`、`CMX500_Software_Maintenance_PU-Option_Mapping.md`、`CMX_Configuration_Guide.md`…）\n[48] Wiki：R&S CMX-KA09x（來源：`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`、`CMX500_Software_Maintenance_PU-Option_Mapping.md`、`CMX_Configuration_Guide.md`…）\n[49] Wiki：CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`…）\n[50] Wiki：CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`…）\n[51] Wiki：CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`…）\n[52] Wiki：R&S CMX-KA099（來源：`CMX_Configuration_Guide.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[53] Wiki：R&S CMX-KA099（來源：`CMX_Configuration_Guide.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[56] Wiki：NGeCall over LTE（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`）\n[62] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[63] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[65] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[70] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[79] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[80] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n\nEvidence check: Wiki/Raw citations verified; facet coverage not assessed.",
+      "created_at": "2026-10-18T16:07:02.582770Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-98e136a972534c54938a746cae691298",
+       "request_id": "request-98e136a972534c54938a746cae691298",
+       "span_id": "span-98e136a972534c54938a746cae691298",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": [],
+      "workflow_form": null,
+      "action_card": null,
+      "action_cards": []
+     }
+    ]
+   },
+   "answer": {
+    "ok": true,
+    "answer": "### 建議主軸\n先切入「汽車雷達回波產生 / ADAS radar 測試」與「4G/5G NG eCall、hybrid eCall 測試」；「汽車高速 PCB / SI/PI」可列為待補證機會，因為知識庫目前有 PCB 測試流程但未給正式 R&S 產品型號、option、頻率或標準條件。[65][62][10][45][79][15]\n### 推薦先賣\n1. **汽車雷達回波產生 / ADAS radar 測試**：R&S AREG800A 被明確定義為 Automotive Radar Echo Generator，用於 dynamic artificial object generation，且支援 FMCW radar 的 digital echo generation、最高 3000 m generated distance、individual Doppler frequency shift、最多 32 個 artificial objects 與 HiL interface option。[65][62][2][3][6]\n2. **NG eCall / IMS eCall / 4G-5G 車用緊急通話測試**：R&S 與 Qualcomm Technologies 使用 R&S CMX500 驗證 Snapdragon Auto 5G Modem-RF 的 NG eCall functionality 符合 EN 17240:2024，測試包含 voice and data transmission、simulating a PSAP，且 CMX500 搭配 CMX-KA098 可在 realistic network conditions 下用於 NG eCall testing。[10][40][42]\n3. **Hybrid eCall fallback 測試**：Hybrid eCall testing 的目標是驗證車輛 emergency call system 能在 NG eCall 與 classic CS eCall transport paths 之間可靠運作與 fallback，來源連到 EN 18052:2025、EN 17240:2024+A1:2026、R&S CMX500 與 R&S CMX-KA09x。[44][45][47]\n4. **汽車高速 PCB / SI/PI 測試流程**：R&S PCB test solutions 來源列出 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring，量測 / 分析項目包含 TDR impedance、DK/DF extraction、insertion loss、roughness、crosstalk、TL modeling 與 eye diagram；但來源未提供正式 R&S 產品型號、option code、測試頻率、標準、fixture 或 calibration method。[79][13][15]\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S AREG800A | Automotive radar echo generation、FMCW radar 目標模擬、ADAS radar 測試 | Echo generator type 是 dynamic artificial object generation；hybrid concept 在短物距 < 17 m 使用 analog stepped delay line、較長距離至 3000 m 使用 fully digital implementation；digital concept 用於 FMCW radar，maximum generated distance 為 3000 m。[62] | 產品頁明確稱 AREG800A 是 Automotive Radar Echo Generator，且用途就是 dynamic artificial object generation。[65] | [65][62] | Datasheet 未列價格，且部分 IF frequency range 與 option code 萃取有 unresolved 問題，需回查原始 datasheet。[70] |\n| R&S AREG800A + Doppler / object options | 多目標、速度、距離情境產生 | 每個 artificial object 支援 individual Doppler frequency shift；with R&S AREG8-B9 and R&S AREG8-B63 的 velocity setting range 為 ±500 km/h，velocity step size 為 0.001 km/h，velocity accuracy < 0.05 km/h。[2] | 可支援雷達測試中每個 artificial object 的 individual Doppler frequency shift，並提供速度範圍、步進與 accuracy 規格。[2] | [2] | Object distance accuracy with R&S AREG8-B9 option 為 ±5 cm，標示為 meas.，且 measured values 不由 R&S 保證。[3][1] |\n| R&S AREG800A + frontends / QAT100 / FE44S | 多前端、近遠距、多 artificial object 雷達場景 | 搭配 conventional mmWave frontends 或 FE44S 時，在多個 distance condition 下最多 32 個 artificial objects、每 frontend 最多 8 個；每台 AREG800A base unit 支援 conventional mmWave frontends 最多 4 個、QAT100 最多 8 個、FE44S 最多 8 個 external frontends。[3][63] | 多 artificial objects 與多 frontends 可支援較複雜的雷達場景配置。[3][63] | [3][63] | AREG8-24D 在 supported remote frontends 中出現，但 maximum number bullet 未列 AREG8-24D，頁面明示不自行補入。[63] |\n| R&S AREG800A + HiL / OSI | Hardware-in-the-loop radar scenario integration | HiL interface option 為 R&S AREG8-K109；open-standard protocol support 為 OSI；time synchronization protocol 為 gPTP、NTP。[6] | HiL、OSI 與時間同步能力可對接模擬環境與自動化測試流程。[6] | [6] | 知識庫未提供具體 HIL test case、simulator vendor compatibility 或 automotive OEM acceptance criteria。[6] |\n| R&S CMX500 + R&S CMX-KA098 | NG eCall over IMS / LTE / 5G NR 測試 | CMX500 with CMX-KA098 software option 可用於 NG eCall testing under realistic network conditions；驗證流程使用 CMX500 作為 NG eCall voice and data transmission 的 comprehensive testing solution。[40] | 已有 Qualcomm Technologies / Snapdragon Auto 5G Modem-RF 的 NG eCall verification 語境，且測試模擬 PSAP 並驗證 EN 17240:2024 implementation at both ends。[10][40] | [10][40][42] | 該頁目前只由新聞稿支撐，不是 EN 17240:2024 標準摘要、conformance test plan 或 certification report，且未列 test case IDs、test conditions、network parameters、IMS setup、GNSS setup、software versions 或 pass/fail details。[11] |\n| R&S CMX500 + R&S CMX-KA098 / CMX-KF671B | NGeCall over NR/LTE capability-list 導向測試 | Capability listing 對象是 R&S CMX500 with R&S CMX-KA098；文件用於引導使用者執行 CEN EN 17240、ETSI TS 103 683、3GPP TS 34.229-5、3GPP TS 34.229-1、3GPP TS 38.523-1、3GPP TS 36.523-1、3GPP TS 26.269 中指定的 NGeCall tests。[49] | 相較單純 PR，capability list 提供 CMX500 / CMX-KA098 的實際測試支援範圍與版本基準。[51] | [49][50][51] | 來源明示 CMX500 有時只支援部分測試，或某些測試需要 further equipment；多個測試需要 HMI interaction、engine / ignition OFF 控制、AT command、Prepared TestUSIM、handset、crash simulation、in-band modem over IP support 或 IVS SUT IP address check。[49][56] |\n| R&S CMX500 + R&S CMX-KA09x / CMX-KA099 | Hybrid eCall、NG eCall 與 classic CS eCall fallback 測試 | CMX-KA09x 是 R&S updated eCall evaluation solution 的泛稱，來源說它支援 EN 18052:2025 與 EN 17240:2024+A1:2026 compliance；CMX-KA099 在 hybrid EN18052:2025 區段與 CMX-KA098、CMX-KF672B 同列 mandatory。[47][53] | Hybrid eCall test specification EN 18052 要求 hybrid system combine different transmission paths and protocols，確保 eCall reliably reaches its destination；實務語境包含 4G/5G IP/IMS NG eCall 與 coverage 或 service quality degraded 時 fallback 到 2G/3G classic CS eCall。[45] | [47][53][45] | 新聞稿只說 completed PSAP test scenarios，不是完整 conformance statement、test report 或 technical specifications；CMX-KA099 頁也未提供正式 datasheet、feature description、capability list 或 maintenance PU mapping。[48][52] |\n| R&S PCB test solutions | Automotive electronics 的高速 PCB / SI/PI 流程候選 | 流程包含 Material Measurement、Material/Stackup selection、Signal Integrity modeling/testing、Sampling testing、PL/Process Monitoring；項目包含 TDR impedance、DK/DF extraction、IL、roughness、impedance、Xtalk、TL modeling、Eye diagram。[79][13] | 可對接 PCB Fabricator and System House 的材料、stackup、SI modeling/testing、抽樣與 process monitoring 流程。[80][13] | [79][80][13] | 來源沒有提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method，因此目前不應解讀為完整採購配置。[15] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| 多目標、多前端 radar object simulation | R&S AREG800A + conventional mmWave frontends / FE44S / QAT100 | 搭配 conventional mmWave frontends 或 FE44S 時可達最多 32 個 artificial objects、每 frontend 最多 8 個；QAT100 組合也列出最多 8 個 artificial objects。[3] | Object distance accuracy ±5 cm 是 measured value，且 measured values 不由 R&S 保證。[3][1] |\n| Radar HiL / simulator integration | R&S AREG800A + R&S AREG8-K109 | 以 HiL interface option、OSI open-standard protocol support、gPTP / NTP time synchronization 做系統整合切入。[6] | 知識庫未列 simulator 品牌、OSI profile、latency budget 或 HIL certification criteria。[6] |\n| 車用 NG eCall 4G/5G / IMS 測試 | R&S CMX500 + R&S CMX-KA098 | 以 EN 17240:2024、PSAP simulation、voice and data transmission、realistic network conditions 切入。[10][40] | 來源未列 test case IDs、test conditions、network parameters、IMS setup、GNSS setup、software versions 或 pass/fail details。[11] |\n| Hybrid eCall fallback 驗證 | R&S CMX500 + R&S CMX-KA09x / CMX-KA098 / CMX-KA099；CMX-KA099 在 hybrid EN18052:2025 區段與 CMX-KA098、CMX-KF672B 同列 mandatory。[47][53] | 以 NG eCall over 4G/5G IP/IMS 與 2G/3G classic CS eCall fallback 的可靠性驗證切入。[45] | 不可由新聞稿推論 CMX500 / CMX-KA09x 已涵蓋所有 possible hybrid eCall test cases。[43] |\n| 汽車高速板材、SerDes / SI 流程前段評估 | R&S PCB test solutions；具體儀器型號知識庫未標示。[15] | 以 TDR impedance、DK/DF extraction、insertion loss、roughness、crosstalk、eye diagram 與 process monitoring 流程討論需求。[79][13] | Slide 21 未提供正式 R&S 產品型號、option code、測試頻率、測試標準、fixture 或 calibration method。[15] |\n### 限制\n知識庫目前沒有提供汽車領域各機會的市場規模、客戶預算、採購優先順序或競品勝率，因此不能把上述機會排成「最強 / 最大 / 第一名」的排名。[11][15][43]\nNG eCall 與 hybrid eCall 的多個證據來自新聞稿或 capability list，相關頁面明示不是完整標準摘要、conformance test plan、certification report 或完整 test matrix。[11][43][49]\nPCB / SI/PI 機會目前只有流程與量測項目摘要，來源明示沒有正式產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。[15]\n【推論】若以「知識庫直接連到 automotive」作為優先條件，AREG800A automotive radar echo generation 與 CMX500 eCall / hybrid eCall 的證據比一般 signal generator / spectrum analyzer 規格更直接，因為 AREG800A 被明確標為 Automotive Radar Echo Generator，而 CMX500 被直接用於 Snapdragon Auto 5G Modem-RF 的 NG eCall verification。[65][10][40]\n\n來源：\n[1] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[2] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[3] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[6] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[10] Wiki：NG eCall EN 17240 2024 verification（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[11] Wiki：NG eCall EN 17240 2024 verification（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[13] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[15] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[40] Wiki：Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[42] Wiki：Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[43] Wiki：Hybrid eCall testing（來源：`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[44] Wiki：Hybrid eCall testing（來源：`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[45] Wiki：Hybrid eCall testing（來源：`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[47] Wiki：R&S CMX-KA09x（來源：`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`、`CMX500_Software_Maintenance_PU-Option_Mapping.md`、`CMX_Configuration_Guide.md`…）\n[48] Wiki：R&S CMX-KA09x（來源：`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`、`CMX500_Software_Maintenance_PU-Option_Mapping.md`、`CMX_Configuration_Guide.md`…）\n[49] Wiki：CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`…）\n[50] Wiki：CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`…）\n[51] Wiki：CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`…）\n[52] Wiki：R&S CMX-KA099（來源：`CMX_Configuration_Guide.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[53] Wiki：R&S CMX-KA099（來源：`CMX_Configuration_Guide.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[56] Wiki：NGeCall over LTE（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`）\n[62] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[63] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[65] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[70] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[79] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[80] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n\nEvidence check: Wiki/Raw citations verified; facet coverage not assessed.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-98e136a972534c54938a746cae691298",
+      "request_id": "request-98e136a972534c54938a746cae691298",
+      "span_id": "span-98e136a972534c54938a746cae691298",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-98e136a972534c54938a746cae691298",
+       "request_id": "request-98e136a972534c54938a746cae691298",
+       "span_id": "span-98e136a972534c54938a746cae691298",
+       "parent_span_id": null
+      },
+      "status": "succeeded",
+      "data": {
+       "asset": {
+        "namespace": "engineering",
+        "name": "rs-knowledge",
+        "version": "1.0.3"
+       },
+       "trace": {
+        "trace_id": "trace-98e136a972534c54938a746cae691298",
+        "request_id": "request-98e136a972534c54938a746cae691298",
+        "span_id": "span-98e136a972534c54938a746cae691298",
+        "parent_span_id": null
+       },
+       "answer": {
+        "question": "根據知識庫目前的證據，訊號產生器/訊號分析儀在汽車領域最有潛力的機會有哪些？每個機會各有哪些證據支持？",
+        "status": "answered",
+        "passages": [
+         {
+          "text": "R&S AREG800A › 文件與適用條件\n- 來源文件：[[AREG800A_specs_en_3609-8015-22_v0900]]。\n- 文件編號：`PD 3609.8015.22`。\n- 文件版本：`Version 09.00`。\n- 文件日期：`September 2025（LA）`。\n- 文件名稱：`AREG800A Automotive Radar Echo Generator`。\n- Copyright：`© 2021–2025 Rohde & Schwarz`。\n- 資料註記：無 tolerance limits 的資料不具 binding 效力；資料 `subject to change`。\n\n產品資料適用條件（Version 09.00, September 2025）：\n\n- 於環境溫度儲存 3 小時後，進行 30 分鐘 warm-up operation。\n- 符合指定 environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有適用的 internal automatic adjustments。\n\n規格定義（Version 09.00, September 2025）：\n\n- `Specifications with limits`：以 `<`、`≤`、`>`、`≥`、`±`、maximum、minimum 等限制符號表示保證產品性能。\n- `Non-traceable specifications with limits (n. trc.)`：依 specifications with limits 測試，但因缺乏可追溯至 national metrology standards 的量測設備，Rohde & Schwarz 不保證。\n- `Specifications without limits`：表示保證產品性能，通常為 dimensions 或 setting parameter resolution 等值。\n- `Typical data (typ.)`、`Nominal values (nom.)`、`Measured values (meas.)` 不由 Rohde & Schwarz 保證。\n- `Uncertainties`：coverage factor 為 2，依 GUM 計算。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S AREG800A.md"
+          },
+          "score": 29.51172
+         },
+         {
+          "text": "R&S AREG800A › Radial velocity 與 Doppler\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- 每個 artificial object 支援 individual Doppler frequency shift：`yes`。\n- Velocity setting range with [[R&S AREG8-B9]] and [[R&S AREG8-B63]]：`±500 km/h`。\n- Velocity step size：\n  - [[R&S AREG8-B9]] and [[R&S AREG8-B63]]：`0.001 km/h`。\n  - [[R&S AREG-DBP1]] / [[R&S AREG-DBP2]] / [[R&S AREG-DBP3]] with [[R&S AREG-MFP]] / [[R&S AREG-BFP]]：`0.05 km/h`。\n- Doppler frequency offset accuracy：在 IF domain 以 spectrum analyzer 量測 base unit IF input 與 IF output signal 的 frequency offset，不含 frontend，`< 1 Hz`。\n- Velocity accuracy：Doppler shift velocity error 由公式 `v_error = 3.6 × (f_error/f_center) × ½ × 299 700 000 m/s` 決定；`f_center` 為 `78 GHz` 或 `79 GHz`，適用於 [[R&S AREG8-81S]] / [[R&S AREG8-81WS]] 與 [[R&S AREG8-81D]] / [[R&S AREG8-81WD]]；velocity accuracy `< 0.05 km/h`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 13,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S AREG800A.md"
+          },
+          "score": 21.648877
+         },
+         {
+          "text": "R&S AREG800A › Artificial objects\n| Frontend 組合 | Distance condition | Maximum artificial objects |\n|---|---|---:|\n| with [[R&S QAT100]] | `< 4 m to 3000 m + air gap` | 最多 8 個；4 m 至 17 m 最多 4 個，17 m 至 3000 m 最多 4 個 |\n| with [[R&S QAT100]] | `> 17 m to 3000 m + air gap` | 最多 8 個 |\n| with [[R&S QAT100]] | `≥ air gap to 3000 m` | 最多 8 個 |\n| with [[R&S AREG8-24S]] / [[R&S AREG8-24D]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] / [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]] or [[R&S FE44S]] | `< 4 m to 3000 m + air gap` | 最多 32 個，每 frontend 最多 8 個；4 m 至 17 m 最多 4 個，17 m 至 3000 m 最多 28 個 |\n| with [[R&S AREG8-24S]] / [[R&S AREG8-24D]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] / [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]] or [[R&S FE44S]] | `> 17 m to 3000 m + air gap` | 最多 32 個，每 frontend 最多 8 個 |\n| with [[R&S AREG8-24S]] / [[R&S AREG8-24D]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] / [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]] or [[R&S FE44S]] | `≥ air gap to 3000 m` | 最多 32 個，每 frontend 最多 8 個 |\n\n其他 artificial object 規格：\n\n- Object distance accuracy with [[R&S AREG8-B9]] option：`±5 cm (meas.)`。\n- Object distance step size with [[R&S AREG8-B9]] option：`1 cm`。\n- Air gap：object distances 與 resulting object radar cross-sections 會依 frontend reference plane 與 DUT 之間距離改變；來源建議 air gap 足夠大以符合 radar under test 的 far-field condition。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 12,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S AREG800A.md"
+          },
+          "score": 19.400219
+         },
+         {
+          "text": "AREG800A_specs_en_3609-8015-22_v0900 › 重點摘要\n這份來源是 [[R&S AREG800A]] Automotive Radar Echo Generator 的 specifications，文件編號 `PD 3609.8015.22`，文件版本 `Version 09.00`，文件日期 `September 2025（LA）`，文件標題為 `AREG800A Automotive Radar Echo Generator`，Copyright `© 2021–2025 Rohde & Schwarz`。\n\n[[R&S AREG800A]] 的 echo generator type 為 `dynamic artificial object generation`。Echo generation concept 分為：\n\n- `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n- `digital`：針對 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 `air gap value`；maximum generated distance 為 `3000 m`。\n\n產品資料適用條件（Version 09.00, September 2025）：\n\n- 在環境溫度下儲存 3 小時後，進行 30 分鐘 warm-up operation。\n- 符合指定 environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有適用的 internal automatic adjustments。\n\n規格資料定義：\n\n- `Specifications with limits`：代表保證的產品效能，以 `<`、`≤`、`>`、`≥`、`±`、maximum、minimum 等限制符號表示。\n- `Non-traceable specifications with limits (n. trc.)`：依 specifications with limits 的方式指定與測試，但因缺乏可追溯至 national metrology standards 的量測設備，Rohde & Schwarz 不保證。\n- `Specifications without limits`：代表保證的產品效能，通常為 dimensions 或 setting parameter resolution 等無偏差或偏差可忽略的值。\n- `Typical data (typ.)`、`Nominal values (nom.)`、`Measured values (meas.)` 不由 Rohde & Schwarz 保證。\n- `Uncertainties`：coverage factor 為 2，依據 GUM 計算，納入 environmental conditions、aging、wear and tear。\n- `Data without tolerance limits is not binding`；文件 `subject to change`。\n\n主要能力與限制：",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+          },
+          "score": 21.555796
+         },
+         {
+          "text": "AREG800A_specs_en_3609-8015-22_v0900 › 與既有知識的關係\n本來源已對應既有來源頁 [[AREG800A_specs_en_3609-8015-22_v0900]] 與實體頁 [[R&S AREG800A]]。本次 ingest 依同一 raw source 重新校對既有頁面，補入或修正：\n\n- [[R&S AREG8-81S]] / [[R&S AREG8-81D]] 的 AUX IF output、RX power output、AUX IF input 與 connector 資訊。\n- [[R&S QAT100]] 搭配 [[R&S AREG800A]] 的 IF level 與 amplitude flatness 摘要。\n- 讀圖補充 p001、p021、p022、p023 的低可信度註記。\n- `0.7 GHz to 5.7 GHz` 條件、RF transfer characteristics 中未完整保留 option code 的 unresolved 記錄。\n\n本來源與其他 Rohde & Schwarz Productions 頁面（如 [[R&S SGU100A]]、[[R&S SGT100A]]、[[R&S SMW200A]]）同屬 test & measurement 產品資料，但用途為 automotive radar echo generation，不屬 RF signal generator 或 spectrum analyzer。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+          },
+          "score": 20.646762
+         },
+         {
+          "text": "AREG800A_specs_en_3609-8015-22_v0900 › 重點摘要\n- Base unit instantaneous IF bandwidth 依 option 為 `1 GHz`、`2 GHz` 或 `5 GHz`；overrange 分別為 `1.2 GHz (meas.)`、`2.2 GHz (meas.)`、`5.2 GHz (meas.)`。\n- AREG800A base unit IF frequency range：[[R&S AREG8-B9]] 為 `1.1 GHz to 2.1 GHz`；[[R&S AREG8-B9]] with [[R&S AREG8-K527]] 為 `0.7 GHz to 2.7 GHz`；來源另列 [[R&S AREG8-B9]] with [[R&S AREG8-K527]] 為 `0.7 GHz to 5.7 GHz`，但 5 GHz bandwidth ordering information 顯示還涉及 [[R&S AREG8-K528]]，此處未自行推論修正。\n- RF frequency bands：[[R&S AREG8-24S]] / [[R&S AREG8-24D]] 為 `24 GHz to 24.25 GHz`；[[R&S AREG8-81S]] / [[R&S AREG8-81D]] 與 [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]]、[[R&S QAT100]] 為 `76 GHz to 81 GHz`；[[R&S FE44S]] 為 `24 GHz to 44 GHz`。\n- 每台 [[R&S AREG800A]] base unit 支援 conventional mmWave frontends 最多 4 個，[[R&S QAT100]] 最多 8 個，[[R&S FE44S]] 最多 8 個 external frontends（4 個 TX、4 個 RX，共 4 pairs）。\n- Artificial object distance 可依 option 涵蓋 `< 17 m to 3000 m (meas.)`、`< 4 m to 3000 m (meas.)`、`≥ air gap to 3000 m (meas.)`；production frontend 組合列為 FMCW `≥ air gap to 350 m (meas.)`，non FMCW `< 17 m to 350 m (meas.)`。\n- Radial velocity：每個 artificial object 支援 individual Doppler frequency shift；with [[R&S AREG8-B9]] and [[R&S AREG8-B63]] velocity setting range 為 `±500 km/h`，velocity step size 為 `0.001 km/h`。\n- Remote control interfaces 包含 Ethernet 與 [[R&S AREG8-K986]] GPIB；remote control command set 為 `SCPI`。\n- HiL interface option 為 [[R&S AREG8-K109]]；open-standard protocol support 為 open simulation interface（OSI）；time synchronization protocol 為 `gPTP`、`NTP`。\n- Base unit `AREG800A` Order No. `1437.4400.02`，包含 power cable 與 quick start guide。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+          },
+          "score": 12.829042
+         },
+         {
+          "text": "R&S CMX500 › Application tests 與 audio\n依 [[CMX500_Features_CSW9-20-0_en_32]]：\n\n- 未啟用 R&S CMX-KA100 等 application test license 時，IP application test functionality 降到最低；只能使用 standalone mode，不能連接 external servers，也不支援 IP based measurements 或 tools。\n- R&S CMX-KA100 提供 internal IP services 與 IP connection to DUT 測試 applications，包含 DNS、IMS、Message Center、FTP、HTTP、DNS monitor、IP logging、iPerf、Ping、throughput、Max Throughput Wizard、web server。\n- R&S CMX-KA110 增強 KA100，加入 QoS、ePDG、N3IWF、delay measurement、IP tune tool、SMPP / MT SMS advanced settings。\n- R&S CMX-KA150 提供 IP analysis tool，用於監控與分析 DUT uplink / downlink IP traffic。\n- R&S CMX-KA180 提供 audio codecs for 4G and 5G IMS voice call，支援 AMR-NB、AMR-WB、EVS，並包含 [[R&S CMX-ZG180A]] external sound card drivers and configuration settings。\n- R&S CMX-KA181 加入 [[POLQA]]，用於 measuring perceived speech quality；measurement version 為 3，mode 為 full-band 或 narrowband。\n- R&S CMX-KA401 支援 WAV player / recorder、upload/download WAV files、file-based POLQA measurements 與 end-to-end audio delay。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 35,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX500.md"
+          },
+          "score": 23.271627
+         },
+         {
+          "text": "R&S CMX500 › mmWave extension 與 remote radio heads\n[[CMX500_specs_en_5216-4127-22_v1100]] 指出 3GPP FR2 frequency range 測試可由 [[R&S CMX500]] 搭配 [[R&S CMXHEAD30]]、[[R&S CMXHEAD50]] 或 [[R&S CMXHEAD50-Evo]] 執行。Remote radio head 是獨立 compact unit，在 IF 與 5G NR FR2 frequency ranges 間執行 upconversion / downconversion。CMX500 與 remote radio head 的 split concept 可在 5G NR FR2 frequency range 使用短 RF cable lengths，以最佳化 radiated chamber test environments 的 link budget。\n\n適用 radiated chamber test environments：[[R&S CMQ500]] shielding cube 與 [[R&S ATS800R]] CATR rack based antenna test system。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 21,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX500.md"
+          },
+          "score": 21.93399
+         },
+         {
+          "text": "R&S CMX500 › RF ports 與 routing\n- RF Com 1、RF Com 2：simultaneous receiver and transmitter testing；2 × SnapN；RF input/output to DUT。\n- RF In 1、RF In 2：transmitter testing；2 × SnapN；RF input from DUT。\n- RF Out 1 to RF Out 4：receiver testing；4 × SnapN；RF output to DUT。\n- Receiver test functions：四個 RF generators（其中兩個在 GPRF mode）可 routing 到 RF Com 1、RF Com 2、RF Out 1 to RF Out 4。\n- Transmitter test functions：RF Com 1、RF Com 2、RF In 1、RF In 2 ports 的四個 input signals 各可 split 到 one or two RF analyzers。\n- FDA tables 支援 user-specific frequency-dependent attenuation corrections。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 15,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX500.md"
+          },
+          "score": 21.11937
+         },
+         {
+          "text": "NG eCall EN 17240 2024 verification › 驗證範圍\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 驗證對象：[[Snapdragon Auto 5G Modem-RF]] 的 [[Next Generation eCall]] functionality。\n- 合作方：[[Rohde & Schwarz]] 與 [[Qualcomm Technologies]]。\n- 測試設備：[[R&S CMX500]] mobile radio tester。\n- Software context：來源稱 [[R&S CMX500]] with [[R&S CMX-KA098]] software option can be effectively used for NG eCall testing under realistic network conditions。\n- 標準：[[EN 17240]]:2024。\n- 測試情境：simulating a [[PSAP]]。\n- 驗證內容：NG eCall including voice and data transmission，並 validated the compliance of the implementation at both ends with EN 17240:2024。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+          },
+          "score": 10.788882
+         },
+         {
+          "text": "NG eCall EN 17240 2024 verification › 使用限制\n- 本頁目前只由新聞稿支撐，不是 EN 17240:2024 標準摘要、conformance test plan 或 certification report。\n- 來源未列 test case IDs、test conditions、network parameters、IMS setup、GNSS setup、software versions 或 pass/fail details。\n- 來源未說 whether verification equals formal certification；因此本頁使用 verification，不改寫為 certification。\n- 來源未提供 European Commission regulation 的正式文件編號；2026-01-01 obligation date 只能追溯到本新聞稿說法。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+          },
+          "score": 8.926752
+         },
+         {
+          "text": "NG eCall EN 17240 2024 verification\n[[NG eCall EN 17240 2024 verification]] 是 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]] 中描述的 PR 層級驗證活動：[[Rohde & Schwarz]] 與 [[Qualcomm Technologies]] 使用 [[R&S CMX500]] 驗證 [[Snapdragon Auto 5G Modem-RF]] 的 NG eCall functionality 符合 [[EN 17240]]:2024。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+          },
+          "score": 4.985826
+         },
+         {
+          "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 12.789733
+         },
+         {
+          "text": "R&S PCB test solutions › 與既有知識的關係\n- [[高頻高速 PCB 測試解決方案]] 既有內容來自 Keysight 圖像，流程是原材料表徵、材料選擇、電路板抽樣測試、大批量監控；本頁保存 R&S 簡報中的類似但不完全相同的流程詞。\n- [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 均已有既有頁面；本來源增加 2026.3.4 R&S 簡報的追溯來源，但沒有新增可量化規格。\n- [[SerDes 與 SI PI 測試概覽]] 連接 Slide 11 和 Slide 20 的 validation challenges / SI flow；本頁聚焦 Slide 21 的 PCB test solutions。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 9.392945
+         },
+         {
+          "text": "R&S PCB test solutions › 可追溯限制\n- 本來源沒有提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。\n- 本頁不把 Slide 21 的圖上列名解讀為正式解決方案型錄或完整採購配置。\n- [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]] 的角色未明，僅保留圖上列名。\n- [[ISD-ADK]] 與 PL 未展開縮寫，需後續來源補證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 6.69569
+         },
+         {
+          "text": "R&S FSV3004 › 重要條件與限制\n- 規格適用條件：環境溫度下存放 3 小時後，30 分鐘 warm-up operation，符合 environmental conditions，遵守 recommended calibration interval，並執行所有適用的 internal automatic adjustments。\n- Rohde & Schwarz 不保證 typical data、nominal values、measured values、non-traceable specifications with limits。\n- Maximum input level 適用於 instrument in operation：AC coupled DC voltage 50 V；DC coupled DC voltage 0 V；CW RF power 在 RF attenuation = 0 dB 且 RF preamplifier off 時 20 dBm (= 0.1 W)。\n- R&S®FSV3004 不適用 R&S®FSV3-B21 LO/IF connections for external mixers。\n- R&S®FSV3-B11 YIG preselector bypass 的來源適用型號為 R&S®FSV3013、R&S®FSV3030、R&S®FSV3044、R&S®FSV3050；未列 R&S®FSV3004。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S FSV3004.md"
+          },
+          "score": 10.427466
+         },
+         {
+          "text": "R&S FSV3004 › Unresolved\n- 來源為 lossy derivative；報價前應回查原始 PDF 的完整 footnotes 與 option applicability。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S FSV3004.md"
+          },
+          "score": 4.009392
+         },
+         {
+          "text": "R&S FSV3004 › 基礎規格\n| 項目 | 規格 |\n|---|---|\n| Frequency range，DC coupled | 10 Hz to 4 GHz |\n| Frequency range，AC coupled | 10 MHz to 4 GHz |\n| Frequency resolution | 0.01 Hz |\n| RF input connector | type N, female |\n| RF input impedance | 50 Ω |\n| RF attenuator setting range | 0 dB to 75 dB，5 dB steps |\n| With R&S®FSV3-B25 electronic RF attenuator | 0 dB to 25 dB，1 dB steps，f ≤ 7.5 GHz |\n| Maximum signal analysis bandwidth，standard，f ≤ 7.5 GHz | 28 MHz nominal |\n| With R&S®FSV3-B40 | 40 MHz nominal |\n| With R&S®FSV3-B200 | 200 MHz nominal |\n| Operating temperature range | +0 °C to +50 °C |\n| Recommended calibration interval | 2 years |\n| Power consumption，operating | 120 W nominal；all options max. 250 W |\n| Net weight without options | 12.2 kg (26.9 lb) nominal |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S FSV3004.md"
+          },
+          "score": 3.866243
+         },
+         {
+          "text": "FSV3000_specs_en_5216-1334-22_v1601 › 與既有知識的關係\n- 本來源維護 [[R&S FSV3000]] 系列，與既有 [[R&S FPL1003]]、[[R&S FPL1007]]、[[R&S FPL1014]]、[[R&S FPL1026]]、[[R&S FPL1044]] 同屬 spectrum/signal analyzer 產品資料，但本次未建立產品線比較；如需比較應另建 synthesis。\n- 本來源的 options 與 firmware licences 應依附在 [[R&S FSV3000]] 與各 FSV3000 型號頁，不另為 option 建 entity 頁。\n- 本次較先前摘要補齊 R&S®FSV3-B271 Order No. 1330.4190.03 的 requires / excludes：requires R&S®FSV3-B114，且不可與 R&S®FSV3-B200 option 合用。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 21,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/FSV3000_specs_en_5216-1334-22_v1601.md"
+          },
+          "score": 24.350029
+         },
+         {
+          "text": "FSV3000_specs_en_5216-1334-22_v1601 › 重點摘要\n- 文件：Rohde & Schwarz R&S®FSV3000 Signal and Spectrum Analyzer，Specifications，PD 5216.1334.22，Version 16.01，August 2025。\n- 適用型號：[[R&S FSV3004]]、[[R&S FSV3007]]、[[R&S FSV3013]]、[[R&S FSV3030]]、[[R&S FSV3044]]、[[R&S FSV3050]]。\n- 產品資料適用條件：環境溫度下存放 3 小時後，30 分鐘 warm-up operation；符合 environmental conditions；遵守 recommended calibration interval；已執行所有適用 internal automatic adjustments。\n- Rohde & Schwarz 明確不保證 non-traceable specifications with limits、typical data、nominal values、measured values；data without tolerance limits is not binding。\n- Recommended calibration interval：2 years。\n- Frequency resolution：0.01 Hz。\n- Display：LCD TFT color display，10.1 inch，1280 × 800 pixel。\n- Operating temperature range：+0 °C to +50 °C；storage：–40 °C to +70 °C。\n- AC supply：100 V to 240 V，max. 3.5 A，50 Hz to 60 Hz、400 Hz，protection class I。\n- EMC：符合 EMC Directive 2014/30/EU；IEC/EN 61326-1 immunity test requirement 為 industrial environment；CISPR 11/EN 55011 class A equipment emission limits。\n- EU legislation：來源標示符合 Data Act - Regulation (EU) 2023/2854；細節見 user documentation。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/FSV3000_specs_en_5216-1334-22_v1601.md"
+          },
+          "score": 16.905703
+         },
+         {
+          "text": "FSV3000_specs_en_5216-1334-22_v1601 › Sensitivity 摘要\nDisplayed average noise level 條件：RF attenuation = 0 dB、termination = 50 Ω、logarithmic scaling、normalized to 1 Hz RBW、RBW = 1 kHz、VBW = 1 Hz、+20 °C to +30 °C。\n\n| 條件 / 型號群 | Frequency range | DANL |\n|---|---|---:|\n| 低頻 | 20 Hz | –100 dBm，typ. –110 dBm |\n| 低頻 | 100 Hz | –110 dBm，typ. –120 dBm |\n| 低頻 | 1 kHz | –120 dBm，typ. –130 dBm |\n| 全系列低頻段 | 9 kHz ≤ f < 100 kHz | –135 dBm，typ. –140 dBm |\n| 全系列低頻段 | 100 kHz ≤ f < 1 MHz | –145 dBm，typ. –150 dBm |\n| 全系列至 7.5 GHz | 1 MHz ≤ f ≤ 7.5 GHz | –148 dBm，typ. –151 dBm |\n| R&S®FSV3030/3044/3050 | 7.5 GHz < f ≤ 15 GHz | –148 dBm，typ. –151 dBm |\n| R&S®FSV3030/3044/3050 | 15 GHz < f ≤ 26.5 GHz | –145 dBm，typ. –148 dBm |\n| R&S®FSV3030/3044/3050 | 26.5 GHz < f ≤ 34 GHz | –143 dBm，typ. –146 dBm |\n| R&S®FSV3030/3044/3050 | 34 GHz < f ≤ 44 GHz | –136 dBm，typ. –139 dBm |\n| R&S®FSV3050 | 44 GHz < f ≤ 50 GHz | –133 dBm，typ. –137 dBm |\n\nR&S®FSV3-B24 preamplifier option、RF preamplifier = 30 dB 時另有分型號 DANL；例如 R&S®FSV3050 搭配 option model .50 在 44 GHz < f ≤ 50 GHz 為 –152 dBm。報價或規格確認前需回查原始 PDF 表格。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/FSV3000_specs_en_5216-1334-22_v1601.md"
+          },
+          "score": 13.619856
+         },
+         {
+          "text": "R&S SMW200A › 產品定位與架構\n依 [[SMW200A_specs_en_3606-8037-22_v3100]]（Version 31.00，May 2026）與 [[SMW200A_config-guide_en_3606-8037-92_v0600]]（Version 06.00，May 2024）：\n\n- [[R&S SMW200A]] 可從 single-path vector signal generator 擴充到 multichannel [[MIMO]] receiver tester。\n- 支援最多 `8` 個 signal sources 與最多 `64` 個 fading channels。\n- 可連接 [[R&S SGT100A]] signal generator modules，提供最多 `8` 條 RF paths。\n- 最多可在 `2` 個 internal baseband modules 上配置 `8` 個 baseband generators，具 real-time coder 與 ARB。\n- 單機可配置最多兩個 internal RF paths：RF path A 為 mandatory，RF path B 為 optional second RF path。\n- Baseband section 分成 standard baseband section 與 wideband baseband section；standard baseband 最高 `160 MHz` RF modulation bandwidth，wideband baseband 最高 `2 GHz` RF modulation bandwidth。\n- 可選 integrated fading section，channel emulation bandwidth 最高 `800 MHz`；最多可安裝 `4` 個 fading modules，提供最多 `64` 個 logical faders。\n- 單一儀器可實作 MIMO fading scenarios：`2x2`、`3x3`、`4x4`、`8x4`、`4x8`、`2x4x4`。\n- Path-specific、baseband-specific 與 fading/MIMO software options 採 floating license concept；若同一 feature 需同時在兩個 paths 或兩個 baseband generators 使用，通常需安裝兩份對應 option。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 23.404647
+         },
+         {
+          "text": "R&S SMW200A › RF、baseband enhancement 與 noise options\n| Code | Name / description | Order No. | 原文 requires / 重點 |\n|---|---|---:|---|\n| `R&S®SMW-K544` | User-defined frequency response correction | `1414.3707.02` | Requires `R&S®SMW-B13/-B13T/-B13XT`。 |\n| `R&S®SMW-K546` | Digital Doherty | `1414.6487.02` | Requires two `K541`、two baseband generators、two RF paths、`R&S®SMW-B90`。 |\n| `R&S®SMW-K548` | Crest factor reduction | `1414.6641.02` | Requires `R&S®SMW-B9/-B10`。 |\n| `R&S®SMW-K551` | Slow I/Q | `1413.9724.02` | Requires `B10` + `K18` 或 `B9` + `K19`。 |\n| `R&S®SMW-K555` | Bandwidth extension | `1414.6229.02` | Requires two `B9`、two `K527`；clock rate up to `4.8 GHz`；bandwidth up to `4 GHz`。 |\n| `R&S®SMW-K575` | RF linearization | `1434.8379.02` | Requires at least one `B10` or `B9`。 |\n| `R&S®SMW-K556` | Customized digital input | `1434.8310.02` | 每個 option 需一個 `B9`；HS DIG I/Q；data rate `50 Gbit/s`。 |\n| `R&S®SMW-K810` | Enhanced noise generation | `1414.6341.02` | Requires `R&S®SMW-K62`。 |\n| `R&S®SMW-K811` | Notched signals | `1414.6364.02` | Requires `B10` or `B9`；最多 `25` 個 band-stop filters。 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 20,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 12.978601
+         },
+         {
+          "text": "R&S SMW200A › 主要 RF performance（Version 31.00，May 2026）\n依 [[SMW200A_specs_en_3606-8037-22_v3100]]：\n\n- Frequency range：依 RF path frequency option，RF path A 最高 `100 kHz to 67 GHz`；RF path B 最高 `100 kHz to 44 GHz`。\n- Overrange：`67 GHz to 72 GHz`。\n- Resolution of setting：`0.001 Hz`。\n- Resolution of synthesis：`0.053 nHz nominal`，條件 `f = 1 GHz`。\n- Frequency setting time：依 frequency option 為 `< 1.2 ms` 至 `< 1.8 ms`；with `R&S®SMW-B711/-B721` 為 `< 4.0 ms`。條件包含 GUI update stopped、I/Q optimization mode fast、after IEC/IEEE bus delimiter、HUMS off。\n- Frequency setting time in list mode：依 frequency option為 `< 0.8 ms` 至 `< 1.4 ms`；with `R&S®SMW-B711/-B721`、run mode live 為 `< 4.0 ms`。\n- Level setting range：`100 kHz ≤ f < 1 MHz` 為 `–145 dBm to +8 dBm`；`1 MHz ≤ f < 3 MHz` 為 `–145 dBm to +13 dBm`；`3 MHz ≤ f ≤ 67 GHz` 為 `–145 dBm to +30 dBm`。\n- Standard performance SSB phase noise 條件：CW，carrier offset `20 kHz`，measurement bandwidth `1 Hz`，level `10 dBm` 或 maximum specified output power 兩者較低者；`f = 1 GHz` 為 `< –134 dBc`，typ. `–140 dBc`。\n- `R&S®SMW-B711/-B721` ultra low phase noise 在 `1 GHz`、`10 kHz offset` 下為 `–144 dBc`，typ. `–150 dBc`；在 `67 GHz`、`10 kHz offset` 下為 `–105 dBc`，typ. `–111 dBc`。\n- Pulse modulation 需 `R&S®SMW-K22`；一般 on/off ratio `> 80 dB`，部分高頻條件例外為 `> 65 dB`。\n- Pulse rise/fall time（10 % / 90 % of RF amplitude）：低頻 frequency options fast transition `< 10 ns`；多數 20 GHz 以上 options fast transition `< 15 ns`；smoothed transition 多數條件 `< 200 ns`。\n- Internal baseband I/Q、wideband baseband (`R&S®SMW-B13XT`)、I/Q wideband on：`f > 2.5 GHz` 時 `±1 GHz`；RF modulation bandwidth 可達 `2 GHz`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 13,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 12.790217
+         },
+         {
+          "text": "SMW200A_config-guide_en_3606-8037-92_v0600 › 與既有知識的關係\n- [[R&S SMCV100B]] 既有頁提到 `R&S®SMCVB-K19` digital I/Q input/output 可與 [[R&S SMW200A]] 等 Rohde & Schwarz instruments 做 lossless connection；本來源補上 [[R&S SMW200A]] 本身的 configuration guide 與 wideband/digital baseband options。\n- [[R&S SMM100A]]、[[R&S SMBV100B]]、[[R&S SMCV100B]] 皆是 vector signal generator 產品頁；本來源使 [[R&S SMW200A]] 成為可比較的高階雙 RF path / wideband / fading / MIMO 配置產品入口。\n- 本來源屬於 configuration guide，適合支援報價與組態檢查；完整 RF performance spec 另見 [[SMW200A_specs_en_3606-8037-22_v3100]]。\n- 本次重新匯入的 raw 摘錄已明列 `R&S®SMW-B1031` Order No. `1428.5307.02`，可修正既有來源摘要中「未顯示 `.02` 後綴」的未決事項。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 16,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/SMW200A_config-guide_en_3606-8037-92_v0600.md"
+          },
+          "score": 17.251376
+         },
+         {
+          "text": "SMW200A_config-guide_en_3606-8037-92_v0600 › 重點摘要\n- Standard baseband hardware 使用 `R&S®SMW-B10`（64 Msample、120 MHz RF bandwidth）與相關 keycode options；wideband baseband hardware 使用 `R&S®SMW-B9` / `R&S®SMW-B9F`（256 Msample，`R&S®SMW-B9F` 明列 500 MHz RF bandwidth）與相關 keycode options。\n- Path-specific、baseband-specific、fading/MIMO 相關 software options 採 floating license concept；若要同時在兩個 paths 或兩個 baseband generators 使用同一 feature，通常必須安裝兩次對應 option。\n- 文件列出大量 option code 與 order number；本次匯入只照錄來源列出的代碼、訂購號、requires、not compatible、retrofitting notes，不推導未列資訊。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/SMW200A_config-guide_en_3606-8037-92_v0600.md"
+          },
+          "score": 13.75872
+         },
+         {
+          "text": "SMW200A_config-guide_en_3606-8037-92_v0600 › 主要配置規則\n- Step 1 RF path A frequency range 是 mandatory，且 Step 1 options 不能 retrofitted。\n- Step 2 signal routing and baseband main module 是 mandatory；`R&S®SMW-B13`、`R&S®SMW-B13T`、`R&S®SMW-B13XT` 可在 factory retrofitted，但 `R&S®SMW-B13XT` retrofitting 只適用於 serial number `102700` 或更高的儀器。\n- RF path B frequency option 需要 `R&S®SMW-B13T` 或 `R&S®SMW-B13XT`。\n- `R&S®SMW-B1044` 只能與 `R&S®SMW-B2044` 組合；`R&S®SMW-B1044N` 只能與 `R&S®SMW-B2044N` 組合；`R&S®SMW-B1044O` 只能與 `R&S®SMW-B2044O` 組合。\n- Standard and wideband baseband hardware cannot be mixed。\n- `R&S®SMW-B9F` 與 `R&S®SMW-B9` 不可混用；可行組態只有 `1 × R&S®SMW-B9`、`2 × R&S®SMW-B9`、`1 × R&S®SMW-B9F`、`2 × R&S®SMW-B9F`。\n- `R&S®SMW-B9` option 的 enhancements，以及在 `R&S®SMW-B9` 上執行的 software options，也可搭配 `R&S®SMW-B9F` 使用。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/SMW200A_config-guide_en_3606-8037-92_v0600.md"
+          },
+          "score": 13.26985
+         },
+         {
+          "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 重點摘要\n此來源是由 `3GPP NTN Signal Generator Solutions Overview-EN-UR.pptx` 轉出的 lossy markdown；封面標示 `1GP` 與 `12-2025`，末頁標示 `Last updated: 08/25`，其中 slide 27 另標示 `2025-09-29 Nokia Workshop at R&S - SigGen Product Update`。本頁以來源原文呈現的 2025 年簡報語境處理，不自行推論正式發布日。\n\n簡報主題是 [[Rohde & Schwarz]] 針對 [[3GPP]] [[NTN]] 的 signal generator / channel emulation 測試方案，涵蓋：\n\n- [[5G NTN-NR]] 的 Release 17 / 18 / 19 演進與頻段。\n- [[Satellite Access Node]]（[[SAN]]）conformance testing。\n- [[NTN signal generator solutions]] 的 component testing、SAN testing、end-to-end system testing 與 UE testing 分層。\n- [[R&S SMW200A]] 作為 channel emulator / signal generator 的 NTN 測試能力。\n- [[R&S FSW]] 與 [[R&S FSVA3000]] 在 component testing / SAN transmitter measurement 中的角色。\n- [[R&S Space Nexus]] 依 satellite trajectory 產生 [[R&S SMW200A]] fading files 的待請求 PC software 線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+          },
+          "score": 22.949878
+         },
+         {
+          "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 與既有知識的關係\n- 與 [[R&S SMW200A]]：補充 NTN channel emulation、SAN conformance testing 與 E2E testing 的 application / configuration 視角；不取代 [[SMW200A_specs_en_3606-8037-22_v3100]] 或 [[SMW200A_config-guide_en_3606-8037-92_v0600]]。\n- 與 [[R&S FSW]]：補充在 NTN component testing 中的分析角色與簡報級摘要規格；正式 frequency / bandwidth / option 仍以 [[FSW_specs_en_5215-6749-22_v1701]] 為準。\n- 與 [[R&S FSVA3000]]：補充 FSW / FSVA 5G NR options support Chapter 6 & 9 measurements 的簡報說法；未列出 FSVA3000 具體型號或 option stack。\n- 與 [[5G NTN validation and testing]]：新增 signal-generator-centric / channel-emulation-centric 的 NTN validation path，與既有 CMX500 / partner PR 語境互補。\n- 與 [[NR-NTN conformance testing]]：既有頁偏向 UE / GCF / PTCRB / TS8980 / CMX500 conformance validation；本來源聚焦 [[Satellite Access Node]] conformance testing 與 [[3GPP TS 38.181]] / [[3GPP TS 38.108]]。\n- 與 [[NTN propagation emulation and fading]]：既有頁整理 CMX500 PR 中 propagation emulation 與 fading 區分；本來源提供 SMW200A dynamic fading / Doppler / path delay 的 signal generator 實作線索，但未使用相同術語區分。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 14,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+          },
+          "score": 19.5358
+         },
+         {
+          "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 關鍵實體與概念\n- [[R&S SMW200A]]：核心 signal generator / channel emulator。\n- [[R&S FSW]]：component testing 與 SAN transmitter measurement 的 spectrum / signal analysis instrument。\n- [[R&S FSVA3000]]：來源 slide 33 說 5G NR options on FSW / FSVA support Chapter 6 & 9 measurements。\n- [[R&S Space Nexus]]：來源 slide 27 的 PC software，available on request，用於依 satellite trajectory 產生 SMW200A fading files。\n- [[NTN signal generator solutions]]：本來源的 solution-level 概念節點。\n- [[5G NR SAN conformance testing]]：本來源最明確的 3GPP conformance testing 應用。\n- [[SMW200A NTN end-to-end channel emulation]]：本來源對 SMW200A + K820 / Space Nexus 的 E2E satellite RF link emulation 說法。\n- [[3GPP TS 38.108]]、[[3GPP TS 38.181]]、[[3GPP TS 36.108]]、[[3GPP TS 36.181]]、[[3GPP TR 38.821]]、[[3GPP TR 38.863]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 13,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+          },
+          "score": 13.360643
+         },
+         {
+          "text": "R&S SMBV100B › Waveform package and recommended extras\n| Code | Name | Order No. | 原文說明 / 關係 |\n|---|---|---:|---|\n| R&S®SMBVB-K200 | 1 waveform | 1423.8714.71 | Waveform package for signals from R&S®WinIQSIM2、R&S®Pulse Sequencer Software、R&S®Pulse Sequencer DFS。 |\n| R&S®SMBVB-K200 | 5 waveforms | 1423.8714.72 | 每台儀器最多可註冊 250 waveforms。 |\n| R&S®SMBVB-K200 | 50 waveforms | 1423.8714.75 | 每台儀器最多可註冊 250 waveforms。 |\n| R&S®SMBVB-Z10 | Spare CFAST card | 3639.9910.02 | Recommended extra。 |\n| R&S®ZZA-KNA33 | 19-inch rack adapter | 1177.8090.00 | Recommended extra。 |\n| R&S®TS-USB1 | USB serial adapter for RS-232 remote control | 6124.2531.00 | Recommended extra；RS-232 remote control recommended extra。 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 36,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMBV100B.md"
+          },
+          "score": 18.624494
+         },
+         {
+          "text": "R&S SMBV100B › Remote control、HUMS 與 emulation\n- Standard interfaces / systems：Ethernet/LAN 10/100/1000BASE-T、IEC 60625（GPIB IEEE-488.2）、USB 2.0（USB-TMC）、serial（RS-232；需 recommended extra R&S®TS-USB1 USB serial adapter）。\n- Command set：SCPI 1999.5 或 compatible command sets。\n- Ethernet/LAN protocols and services：VISA VXI-11、Telnet/RawEthernet、VNC、FTP、SMB。\n- Ethernet/LAN addressing：DHCP、static；支援 ZeroConf 與 M-DNS。\n- R&S®SMBVB-K980 HUMS：Data readout and display 支援 SNMP v1/v2c/v3、REST（JSON）、SCPI、device web；提供 device information、options、licenses、status、service、mass storage、utilization、device history event log 等資訊。\n- Compatible command sets 可用於 emulating another instrument；每個 emulated instrument 的 *IDN? 與 *OPT? strings 可設定。\n- Legacy command emulation 涵蓋 Hewlett Packard、Agilent/Keysight Technologies、Aeroflex（IFR/Marconi）、Anritsu、Panasonic、Racal Dana、Rohde & Schwarz 等系列；來源明列 R&S®SMBV100A、Keysight MXG/EXG、Aeroflex、Anritsu 等。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 27,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMBV100B.md"
+          },
+          "score": 18.413172
+         },
+         {
+          "text": "R&S SMBV100B\n[[R&S SMBV100B]] 是 Rohde & Schwarz 的 vector signal generator，依 PD 3607.8201.22 Specifications Version 13.01（August 2025）支援 8 kHz to 3 GHz 或 8 kHz to 6 GHz RF frequency range、最高 1 GHz RF modulation bandwidth、internal baseband / I/Q generation、digital standards、GNSS/avionics options、HUMS 與 legacy command emulation。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMBV100B.md"
+          },
+          "score": 15.382721
+         },
+         {
+          "text": "cetecom advanced\n[[cetecom advanced]] 是 [[Rohde & Schwarz]] 新聞稿中列名的 independent test laboratory，來源稱其為多領域產品測試與 worldwide certification 機構。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/cetecom advanced.md"
+          },
+          "score": 8.522367
+         },
+         {
+          "text": "cetecom advanced › 來源中的定位\n依 [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]]：\n\n- [[cetecom advanced]] conducted certification testing of the Rohde & Schwarz hybrid eCall and Next Generation eCall test solution。\n- 來源稱 cetecom advanced is a leading independent test laboratory for product testing and worldwide certification。\n- 來源列出的服務領域包含 communication technologies、automotive、medical technology、payment & identification。\n- [[Thomas Reschka]] 以 Senior Technical Consultant at cetecom advanced 身分在新聞稿中被引用。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/cetecom advanced.md"
+          },
+          "score": 8.152509
+         },
+         {
+          "text": "cetecom advanced › 使用限制\n- 本頁只依新聞稿記錄 cetecom advanced 在本次 R&S eCall solution certification testing 中的角色。\n- 不可由此推論 cetecom advanced 對所有 [[Rohde & Schwarz]] automotive test solutions 皆有 certification 關係。\n- 來源未提供 cetecom advanced 的完整法律名稱、總部地址、認證範圍、accreditation number 或測試報告。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/cetecom advanced.md"
+          },
+          "score": 6.528737
+         },
+         {
+          "text": "R&S SMA100B › 讀圖補充\n- [[SMA100B_specs_en_5215-1018-22_v1000]]（讀圖）指出封面可見 R&S®SMA100B、RF AND MICROWAVE SIGNAL GENERATOR、Specifications、Version 10.00；封面產品圖片顯示兩台儀器疊放，前面板可見按鍵、螢幕、數字鍵區、旋鈕與連接埠。\n- [[SMA100B_specs_en_5215-1018-22_v1000]]（讀圖）指出下方儀器螢幕可辨識 67.000 000 000 000 Hz、22.00 dBm；上方儀器螢幕可辨識但不完整。\n- [[SMA100B_specs_en_5215-1018-22_v1000]]（讀圖）指出 p059 可見 Version 10.00, February 2026、Rohde & Schwarz R&S®SMA100B RF and Microwave Signal Generator、頁碼 59，且本頁沒有表格、圖表、方塊圖、曲線圖或螢幕截圖。\n- 來源提供的讀圖補充未附可嵌入圖片 wikilink；若需核對讀圖內容，需回查原 PDF 或轉檔資產。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 29,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMA100B.md"
+          },
+          "score": 25.649595
+         },
+         {
+          "text": "R&S SMA100B › 文件依據\n- 來源：[[SMA100B_specs_en_5215-1018-22_v1000]]。\n- 文件名稱：R&S®SMA100B RF and Microwave Signal Generator。\n- 文件代碼：PD 5215.1018.22。\n- 文件版次：Specifications Version 10.00。\n- 文件日期：February 2026。\n- Product data 適用條件：在 ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘，符合指定 environmental conditions，遵守 recommended calibration interval，且已執行所有適用的 internal automatic adjustments。\n- 注意：Data without tolerance limits is not binding；Subject to change；typical data、nominal values、measured values、non-traceable specifications with limits 不由 Rohde & Schwarz warranted。\n- Recommended calibration interval：operation 40 h/week、full range of specified environmental conditions 下為 3 years。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMA100B.md"
+          },
+          "score": 14.705098
+         },
+         {
+          "text": "R&S SMA100B › unresolved\n- 來源未列出價格。\n- 來源為分段萃取後的重點；報價前需回查 [[SMA100B_specs_en_5215-1018-22_v1000]] 與 configure 工具確認完整 requires/excludes、serial number 限制、FW version 限制、export license、retrofittable 狀態與 option compatibility。\n- R&S®NRP-Z81/-Z85/-Z86 power sensors 標示為 phased-out products，但原文未指明後繼型號。\n- 多個規格為 typ.、nom.、meas. 或 n. trc.，引用時必須保留原文標示，不能當作 warranted limit。\n- R&S®SMAB-B150/-B150N/-B167/-B167N 的 specified level range 依 serial number < 120000 或 ≥ 120000 分段；客戶組態若涉及 output power 或 level range，必須確認序號條件。\n- 讀圖補充未附圖片 wikilink，暫不能在 wiki 頁中嵌入原圖供核對。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 30,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMA100B.md"
+          },
+          "score": 14.146048
+         },
+         {
+          "text": "Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard › 重點摘要\n- [[Rohde & Schwarz]] 宣稱其與 [[Qualcomm Technologies]] 合作，驗證 [[Snapdragon Auto 5G Modem-RF]] 上 [[Next Generation eCall]]（NG eCall）的 implementation，並稱其符合 [[EN 17240]]:2024。\n- 來源說 [[eCall]] 於 2015 年導入，且自 2018 年起成為歐盟境內所有新車銷售的 mandatory requirement。\n- 來源指出，隨著 2G / 3G circuit-switched cellular networks 逐漸 obsolete，emergency call systems 需要適配到 4G / 5G packet-switched cellular networks。\n- 來源稱 [[European Commission]] 在其 most recent regulation 中定義 NG eCall 將自 **2026-01-01** 起成為 obligatory。\n- 來源稱 EN 17240:2024 建立在 IP Multimedia Subsystem（[[IMS]]）networks 上測試 eCall systems 的 guidelines，涵蓋 advanced 4G LTE 與 5G NR technologies。\n- [[Snapdragon Auto 5G Modem-RF]] 被描述為 5G automotive-grade platform，支援 high-speed connectivity、advanced positioning、Vehicle-to-Everything（[[V2X]]）、multi-band [[GNSS]] navigation 與 enhanced safety。\n- 來源稱驗證流程使用 [[R&S CMX500]] mobile radio tester，作為 NG eCall voice and data transmission 的 comprehensive testing solution。\n- 來源稱測試模擬 [[PSAP]]，並驗證 implementation at both ends with the [[EN 17240]]:2024 standard。\n- 來源說 [[R&S CMX500]] 支援 4G 與 5G technologies，目標是讓方案 future-proof。\n- [[Juergen Meyer]] 以 [[Rohde & Schwarz]] Vice President Market Segment Automotive 身分在新聞稿中引述，稱此次 collaboration 為 future emergency call services 建立 new benchmark。\n- 來源稱 [[R&S CMX500]] 搭配 [[R&S CMX-KA098]] software option 可在 realistic network conditions 下用於 NG eCall testing。\n- 來源將合作定位為 mutually validating solutions、reducing effort、accelerating time to market for mutual customers。\n- Press and media contact 為 [[Patrizia Muehlbauer]]，職稱 PR Manager Products & Standard Systems。\n- 公司資訊段落稱 [[Rohde & Schwarz]] 2024/2025 fiscal year net revenue 為 EUR 3.16 billion，2025-06-30 worldwide employees more than 15,000。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+          },
+          "score": 14.268953
+         },
+         {
+          "text": "Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard › 與既有知識的關係\n- 既有 [[R&S CMX-KA098]] 頁已記錄 CMX-KA098 是 [[R&S CMX500]] 的 NGeCall / IMS eCall application test software option，並由 capability list 與 software maintenance mapping 支撐。本來源補充其在 PR 中與 [[Snapdragon Auto 5G Modem-RF]]、[[Qualcomm Technologies]] 和 EN 17240:2024 verification 的語境。\n- 既有 [[NGeCall over LTE]] 頁已記錄 CMW500 與 CMX500 capability list。本來源不是 test case matrix，但補充 vendor-to-vendor verification 與 2026-01-01 regulatory transition 的 PR 層級說法。\n- 既有 [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 說 [[R&S CMX-KA098]] completed PSAP test scenarios according to EN 17240:2024+A1:2026。本來源較早或不同語境地說 Qualcomm Technologies 的 Snapdragon Auto 5G Modem-RF NG eCall implementation 已依 EN 17240:2024 驗證；兩者標準版本不同，但來源未標示發布日期，不能判斷時間序列。\n- 既有 [[Hybrid eCall testing]] 關注 EN 18052:2025 與 fallback / hybrid paths。本來源聚焦 EN 17240:2024 NG eCall，未描述 EN 18052 hybrid fallback 測試。\n- 既有 [[Qualcomm Technologies]] 頁記錄其與 [[Rohde & Schwarz]] 在 AI-enhanced CSI feedback、FR3、FR1-FR3 carrier aggregation 與 SSSG early verification 等 PR 語境中的合作。本來源新增 automotive NG eCall / Snapdragon Auto 5G Modem-RF cooperation context。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+          },
+          "score": 11.974015
+         },
+         {
+          "text": "Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard › 關鍵實體與概念\n- [[Rohde & Schwarz]] — 新聞稿發布公司，提供 test and measurement solutions 與 automotive testing solution。\n- [[Rohde & Schwarz GmbH & Co KG]] — raw frontmatter author 與 R&S registered trademark owner 名稱。\n- [[Qualcomm Technologies]] — 與 [[Rohde & Schwarz]] 共同進行 NG eCall implementation verification 的公司實體。\n- [[Snapdragon Auto 5G Modem-RF]] — 本來源中的 Qualcomm Technologies automotive-grade platform / modem-RF platform。\n- [[R&S CMX500]] — 用於 verification process 的 mobile radio tester / comprehensive testing solution。\n- [[R&S CMX-KA098]] — 本來源稱 CMX500 with CMX-KA098 software option 可用於 NG eCall testing under realistic network conditions。\n- [[Juergen Meyer]] — [[Rohde & Schwarz]] Vice President Market Segment Automotive，引述人物。\n- [[Patrizia Muehlbauer]] — press and media contact。\n- [[NG eCall EN 17240 2024 verification]] — 本來源的主要 verification 主題。\n- [[NGeCall over LTE]]、[[NGeCall over NR-LTE]]、[[IMS eCall]]、[[EN 17240]]、[[PSAP]]、[[GNSS]]、[[V2X]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+          },
+          "score": 6.920428
+         },
+         {
+          "text": "Hybrid eCall testing › 使用限制\n- 本頁目前只由新聞稿支撐，不是 [[EN 18052]] 或 [[EN 17240]] 標準文本摘要。\n- 來源未提供正式 certification report、certificate number、測試日期或完整 test matrix。\n- 來源未列 national requirements 的國家名稱或版本。\n- 不可從新聞稿推論 [[R&S CMX500]] / [[R&S CMX-KA09x]] 已涵蓋所有 possible hybrid eCall test cases。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+          },
+          "score": 7.460975
+         },
+         {
+          "text": "Hybrid eCall testing\n[[Hybrid eCall testing]] 是驗證車輛 emergency call system 能在 NG eCall 與 classic CS eCall transport paths 之間可靠運作與 fallback 的測試主題；[[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 將其連到 [[EN 18052]]:2025、[[EN 17240]]:2024+A1:2026、[[R&S CMX500]] 與 [[R&S CMX-KA09x]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+          },
+          "score": 5.539254
+         },
+         {
+          "text": "Hybrid eCall testing › 測試目的\n依 [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]]，hybrid eCall test specification [[EN 18052]] 要求 hybrid system combine different transmission paths and protocols，確保 eCall reliably reaches its destination。\n\n來源描述的實務語境：\n\n- 車輛使用 NG eCall functions，即 IP/IMS-based voice and data over 4G/5G。\n- 當 coverage 或 service quality degrades 時，車輛可 automatically fall back to available classic CS eCall 2G/3G transport paths。\n- Manufacturers 需要 validate hybrid implementations，以確保能 trigger calls、transmit [[MSD]]、maintain [[GNSS]] positioning，並提供 intelligible voice quality。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+          },
+          "score": 5.18468
+         },
+         {
+          "text": "R&S CMX-KA09x › 與已知 KA098 / KA099 的關係\n[[R&S CMX-KA09x]] 在本來源中是 family / umbrella-like wording；它至少涵蓋或指向下列 option：\n\n| Option | 來源中的說法 | 既有頁面 |\n|---|---|---|\n| [[R&S CMX-KA098]] | completed PSAP test scenarios according to [[EN 17240]]:2024+A1:2026 | [[R&S CMX-KA098]] |\n| [[R&S CMX-KA099]] | completed PSAP test scenarios according to [[EN 18052]]:2025 | [[R&S CMX-KA099]] |\n\n既有 [[CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status]] 已以 capability list 形式記錄 [[R&S CMX-KA098]] 的 NGeCall over NR/LTE 測試範圍；既有 [[CMX_Configuration_Guide]] 則將 [[R&S CMX-KA099]] 列為 [[CMX500 NGeCall configuration]] 中 EN18052:2025 hybrid configuration 的 mandatory software item。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX-KA09x.md"
+          },
+          "score": 7.604497
+         },
+         {
+          "text": "R&S CMX-KA09x\n[[R&S CMX-KA09x]] 是 [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 中對 Rohde & Schwarz updated eCall evaluation solution 的泛稱，來源說它支援 [[EN 18052]]:2025 與 [[EN 17240]]:2024+A1:2026 compliance。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX-KA09x.md"
+          },
+          "score": 4.392007
+         },
+         {
+          "text": "R&S CMX-KA09x › 使用限制\n- 本頁只記錄新聞稿中的 CMX-KA09x 泛稱；來源未提供正式 product page、order number、license family structure 或 version table。\n- 不可由 CMX-KA09x 推論所有 CMX-KA09* options 的清單或功能範圍。\n- 對 [[R&S CMX-KA098]] 與 [[R&S CMX-KA099]] 的正式 material number、dependencies 與 configuration context，仍應分別引用 [[R&S CMX-KA098]]、[[R&S CMX-KA099]]、[[CMX_Configuration_Guide]]、[[CMX500_Software_Maintenance_PU-Option_Mapping]] 與 capability list。\n- 新聞稿只說 completed PSAP test scenarios；它不是完整 conformance statement、test report 或 technical specifications。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX-KA09x.md"
+          },
+          "score": 4.017379
+         },
+         {
+          "text": "CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status › 重點摘要\n- 文件頁首標示：Rohde & Schwarz、COMPANY RESTRICTED、NGeCall over NR/LTE Reference List。\n- 原始表格 / 工作簿名稱：`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.xlsx`。\n- Capability listing 對象：[[R&S CMX500]] with [[R&S CMX-KA098]]。\n- 文件狀態 / 日期：CEN TS 17240:2018 區段標示 `CMX-KA098_PanEUNGeCall_TC_Status Dec. 2024`；CEN EN 17240:2024 區段標示 `May. 2024`；ETSI TS 103 683 區段標示 `May. 2025`；3GPP TS 26.269 區段標示 `Apr. 2024`。\n- 文件版次：來源未標示。\n- 來源說明本文件用於引導使用者在使用 [[R&S CMX500]] 與 CMW-KA09x test software 時，執行 CEN EN 17240、ETSI TS 103 683、3GPP TS 34.229-5、3GPP TS 34.229-1、3GPP TS 38.523-1、3GPP TS 36.523-1、3GPP TS 26.269 中指定的 NGeCall tests。\n- 來源明示限制：[[R&S CMX500]] 有時只支援部分測試，或某些測試需要 further equipment；限制會在文件中註明。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md"
+          },
+          "score": 12.568268
+         },
+         {
+          "text": "CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status › CEN EN 17240:2024\n來源列出 CEN EN 17240:2024（區段日期 May. 2024）測試項目，並以 [[R&S CMX500]] >= CSW 2025.0.0.1850 / [[R&S CMX-KA098]] >= V4.3.0-RC8 與 CMWrun [[R&S CMX-KF671B]] / CMWrun >= 1.9.15.37 作為版本基準。\n\n新增或較明確的內容包含：\n\n- CTP 1.1.0.1 改寫為對 ETSI TS 136 523-1、ETSI TS 138 523-1、ETSI TS 134 229-1 與 ETSI TS 134 229-5 的 conformance test，comment 仍指 covered with protocol test suite [[PCT5-KC625]]。\n- CTP 1.1.10.1 與 CTP 1.1.10.5 的 limited service condition 測試說明有兩種方式：使用 Prepared TestUSIM with Forbidden PLMN 001 02，或 rejecting normal attach reject but accepting emergency attach；後者目前 not supported。\n- CTP 1.1.10.6 標示 verification ongoing。\n- CTP 1.1.10.13 / CTP 1.1.18.4 附近有 June 2025 / Jun 2025 時點與 in-band modem over IP support 相關標註。\n- Voice link established 註明可使用 handset 模擬。\n- IPv4 / IPv6 MSD transfer 項目註明 IP address currently to be checked on IVS SUT。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md"
+          },
+          "score": 11.571963
+         },
+         {
+          "text": "CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status › 與既有知識的關係\n- 既有 [[CMW-KA096_PanEUNGeCall_TC_Status]] 記錄 [[R&S CMW500]] 搭配 [[R&S CMW-KA096]] / [[R&S CMWrun KT111]] 的 NGeCall over LTE capability list，狀態為 Oct. 2024；本來源則補充 [[R&S CMX500]] 搭配 [[R&S CMX-KA098]] / [[R&S CMX-KF671B]] 的 NGeCall over NR/LTE capability list，狀態含 Dec. 2024、May. 2025 與 June 2025 標註。\n- 既有 [[R&S CMX-KA098]] 頁只從 [[CMW500 to CMX500OBT_License_Swap_Process]] 得知 CMX-KA098 是 Application test IMS NGeCALL；本來源提供 CMX-KA098 的實際 capability list、最低版本與支援標準範圍。\n- 既有 [[R&S CMX500]] 頁依 [[CMX500_specs_en_5216-4127-22_v1100]] 與 [[CMX500_Features_CSW9-20-0_en_32]] 整理 CMX500 的一般硬體、FR1/FR2 與 application options；本來源是 NGeCall application / test plan 層的補充，不取代正式 specifications。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md"
+          },
+          "score": 10.615102
+         },
+         {
+          "text": "R&S CMX-KA099 › 使用限制\n- [[CMX_Configuration_Guide]] 只提供 configuration table；未提供 CMX-KA099 的正式 datasheet、feature description、capability list 或 maintenance PU mapping。\n- [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 是 press release；它提供 certification claim 與 PSAP scenario context，但不是完整測試報告或規格書。\n- 不可由 `APPL NGECALL MULTI CELL` 推論完整 test coverage、standards coverage 或支援 cell 數。\n- Material number 只可作為本來源中的 material number 使用；正式 ordering / pricing 需回 configurator 或 official ordering data。\n- completed PSAP test scenarios 不等於已證明覆蓋所有 EN 18052:2025 clauses；需以 cetecom advanced report 或 official R&S test documentation 確認。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX-KA099.md"
+          },
+          "score": 8.921658
+         },
+         {
+          "text": "R&S CMX-KA099 › 與 CMX500 NGeCall 的關係\n在 [[CMX_Configuration_Guide]] 的 hybrid EN18052:2025 區段，[[R&S CMX-KA099]] 與 [[R&S CMX-KA098]]、[[R&S CMX-KF672B]] 同列為 mandatory。來源未說明 CMX-KA099 與 [[R&S CMX-KA098]] 的 dependency、license scope 或是否只適用 hybrid / multi-cell test cases。\n\n[[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 則把 CMX-KA099 放在 [[Hybrid eCall testing]] 與 [[EN 18052]]:2025 的 PSAP scenario context 中，並與 [[R&S CMX-KA098]] 對應的 [[EN 17240]]:2024+A1:2026 PSAP scenarios 區分。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX-KA099.md"
+          },
+          "score": 5.545674
+         },
+         {
+          "text": "R&S CMX-KA099 › unresolved\n- [[CMX_Configuration_Guide]] 未提供 CMX-KA099 的正式 feature list、dependency、service maintenance mapping 或 price。\n- [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 未提供 CMX-KA099 的 software version、test report number、certificate number 或 test date。\n- [[EN 18052]]:2025 的完整標準標題、發布組織與 test case mapping 尚未由本頁來源提供。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX-KA099.md"
+          },
+          "score": 1.076341
+         },
+         {
+          "text": "NGeCall over LTE › 與既有知識的關係\n- [[CMW-KA096_PanEUNGeCall_TC_Status]] 是 [[R&S CMW500]] / [[R&S CMW-KA096]] / [[R&S CMWrun KT111]] 的 Oct. 2024 NGeCall over LTE capability list。\n- [[CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status]] 是 [[R&S CMX500]] / [[R&S CMX-KA098]] / [[R&S CMX-KF671B]] 的 NGeCall over NR/LTE capability list，並補入 CEN EN 17240:2024、3GPP TS 34.229-5 與 3GPP TS 38.523-1。\n- [[R&S CMX-KA098]] 先前只由 license swap 文件確認為 Application test IMS NGeCALL；新來源提供 capability list 與版本基準，因此應作為 CMX500 NGeCall 測試能力的主要可追溯來源之一。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NGeCall over LTE.md"
+          },
+          "score": 13.84132
+         },
+         {
+          "text": "NGeCall over LTE › 支援限制\n- 來源明示 [[R&S CMW500]] 或 [[R&S CMX500]] 有時只支援部分測試，或某些測試需要 further equipment。\n- 多個測試不是單靠 [[R&S CMW-KA096]]、[[R&S CMWrun KT111]]、[[R&S CMX-KA098]] 或 [[R&S CMX-KF671B]] 即可完整自動化，因為需要 HMI interaction、engine / ignition OFF 控制、AT command、IVS debugging tool、Prepared TestUSIM、handset、crash simulation、in-band modem over IP support 或 IVS SUT IP address check。\n- CMW500 / CMW-KA096 來源中，CTP 1.1.10.1-IMS limited service condition 標示 Partly Available，需 Prepared TestUSIM with Forbidden PLMN 001 02，且 attach reject by network not supported yet。\n- CMX500 / CMX-KA098 來源中，CEN EN 17240:2024 limited service tests 說明有兩種方式：使用 Prepared TestUSIM with Forbidden PLMN 001 02，或 rejecting normal attach reject but accepting emergency attach；後者 currently not supported。\n- CMW500 / CMW-KA096 來源中，CTP 1.1.17.2-IMS callback abnormal termination 標示 Not available。\n- 3GPP TS 34.229-1 21.3 在既有 CMW500 來源中標示 Not available；CMX500 來源中 34.229-1 區段也可辨識 Not Available 標註。\n- 兩份來源都保留 legacy CS domain eCall with inband-modem 到 NGeCall over IMS 的 transition 尚未由 EU commission 最終決定，因此部分 handover test cases 尚未實作的限制。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NGeCall over LTE.md"
+          },
+          "score": 12.281635
+         },
+         {
+          "text": "NGeCall over LTE\nNGeCall over LTE 是以 LTE / IMS 承載 next generation eCall 的測試主題；在 [[CMW-KA096_PanEUNGeCall_TC_Status]] 中，它由 [[R&S CMW500]] 搭配 [[R&S CMW-KA096]] 或 [[R&S CMWrun KT111]] 對照多個 eCall / IVS 標準的測試支援狀態。[[CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status]] 進一步把同一測試主題擴展到 [[R&S CMX500]] 搭配 [[R&S CMX-KA098]] / [[R&S CMX-KF671B]] 的 NGeCall over NR/LTE capability list。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NGeCall over LTE.md"
+          },
+          "score": 8.713682
+         },
+         {
+          "text": "CMX500 NGeCall configuration\nCMX500 NGeCall configuration 是 [[CMX_Configuration_Guide]] 中針對 [[R&S CMX500]] 執行 4G/5G [[NGeCall over LTE]] / [[NGeCall over NR-LTE]]、PCT NGeCall 與 EN18052:2025 hybrid eCall 測試所列的 application-specific configuration。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/CMX500 NGeCall configuration.md"
+          },
+          "score": 7.664534
+         },
+         {
+          "text": "CMX500 NGeCall configuration › eCall ITU-P1140 audio testing\n[[CMX_Configuration_Guide]] 的 `eCall ITU-P1140 - CMX500 + HEAD acoustics labCORE Audio Testing` 區段 contact 欄寫 `Chrsitian Hof`，列出：\n\n| Item | Type | Material Number | Description | Comment |\n|---|---|---:|---|---|\n| [[R&S CMX-B600B]] | HW | 1222.0953.03 | RF Unit | mandatory, 1 |\n| [[R&S CMX-KS600B]] | SW | 1222.1672.02 | NR Signaling Enabler, Basic Level | mandatory |\n\n來源明示 requires HEAD acoustics labCore system，更多資訊需聯絡 HEAD acoustics。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/CMX500 NGeCall configuration.md"
+          },
+          "score": 5.868487
+         },
+         {
+          "text": "CMX500 NGeCall configuration › CMW500 到 CMX500 的 NGeCall 轉換脈絡\n[[CMX_Configuration_Guide]] 在 CMWPC / CMW500 區段列出：\n\n- [[R&S CMW-KA096]]（1211.2450.02）：Enabling test software for NGeCall，optional for 4G NG eCall 17240:2018。\n- [[R&S CMWrun KT111]] / CMW-KT111（1211.3733.02）：CMW500 – NgeCall Test Scripts for CMWrun (17240:2018)，optional for 4G NG eCall 17240:2018。\n\n同一來源明示：CMW supports the 2018 specification；new specifications are published and not compatible with the CMW500；therefore recommend switching to the CMX500。它也明示 license transfer for LTE、DAU and KA096 from [[R&S CMW500]] to [[R&S CMX500]] is allowed。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/CMX500 NGeCall configuration.md"
+          },
+          "score": 2.923407
+         },
+         {
+          "text": "R&S AREG800A › 讀圖補充\n以下內容來自 [[AREG800A_specs_en_3609-8015-22_v0900]] 的讀圖補充，可信度低於正文，不用於推翻正文。本次提供的 raw 摘要未附圖片 wikilink，因此未嵌入圖片。\n\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p001：封面可辨識 `AREG800A`、`AUTOMOTIVE RADAR ECHO GENERATOR`、`Specifications`、`Specifications | Version 09.00`、`R&S`；產品本體可辨識 `R&S® AREG800A Automotive Radar Echo Generator`、`AREG`；螢幕欄位可勉強辨識 `User Ligths`、`Instrument Setup`、`System Config`、`Update Setup`；左側按鍵可辨識 `Home`、`Loc`、`Preset`、`Help`；另可辨識 `Esc`、`Enter`、`On/Off`。主機螢幕內大部分內容、多數按鍵小字、外接模組細小標示無法辨識。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p021：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `21`；無表格、圖表、方塊圖、曲線圖或螢幕截圖等實質內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p022：可見 `Version 09.00, September 2025`、頁碼 `22`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`；除文件資訊外無其他可辨識內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p023：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `23`；無圖表、方塊圖、曲線圖、表格、螢幕截圖或內文。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 48,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S AREG800A.md"
+          },
+          "score": 18.972036
+         },
+         {
+          "text": "R&S AREG800A › Echo generation\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Echo generator type：`dynamic artificial object generation`。\n- Echo generation concept：\n  - `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n  - `digital`：用於 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 air gap value；maximum generated distance 為 `3000 m`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S AREG800A.md"
+          },
+          "score": 16.389344
+         },
+         {
+          "text": "R&S AREG800A › 支援的 remote frontends\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Conventional mmWave remote frontends：[[R&S AREG8-24S]]、[[R&S AREG8-24D]]、[[R&S AREG8-81S]]、[[R&S AREG8-81D]]、[[R&S AREG8-81WS]]、[[R&S AREG8-81WD]]。\n- Production frontend options：[[R&S AREG-MFP]]、[[R&S AREG-BFP]]，支援 monostatic 或 bistatic；需 [[R&S AREG-DBP1]]、[[R&S AREG-DBP2]] 或 [[R&S AREG-DBP3]] production base unit option。\n- Electronically controllable antenna array：[[R&S QAT100]]。\n- External frontends：[[R&S FE44S]]。\n\n每台 [[R&S AREG800A]] base unit 支援數量（Version 09.00, September 2025）：\n\n| Frontend 類型 | Maximum number per AREG800A base unit |\n|---|---:|\n| [[R&S AREG8-24S]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] / [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]] | 最多 4 個 conventional mmWave frontends |\n| [[R&S QAT100]] | 最多 8 個 |\n| [[R&S FE44S]] | 最多 8 個 external frontends；4 個 TX、4 個 RX，共 4 pairs |\n\n註：maximum number 清單依來源萃取文字保留；雖然 supported remote frontends 包含 [[R&S AREG8-24D]]，maximum number bullet 未列 [[R&S AREG8-24D]]，本頁不自行補入。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S AREG800A.md"
+          },
+          "score": 14.109665
+         },
+         {
+          "text": "R&S AREG800A › 基本訂購資訊\n| 類別 | 型號 / 代碼 | 名稱 | Order No. | 原文說明 |\n|---|---|---|---|---|\n| Base unit | `AREG800A` | Automotive radar echo generator | `1437.4400.02` | Includes power cable and quick start guide |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S AREG800A.md"
+          },
+          "score": 13.141523
+         },
+         {
+          "text": "R&S AREG800A\n[[R&S AREG800A]] 是 [[Rohde & Schwarz]] 的 Automotive Radar Echo Generator，用於 dynamic artificial object generation；本頁規格依 [[AREG800A_specs_en_3609-8015-22_v0900]]，文件版本 `Version 09.00`，文件日期 `September 2025（LA）`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S AREG800A.md"
+          },
+          "score": 12.866467
+         },
+         {
+          "text": "AREG800A_specs_en_3609-8015-22_v0900 › 讀圖補充\n以下內容來自讀圖補充，可信度低於正文，不用於推翻正文。\n\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p001：封面可辨識 `AREG800A`、`AUTOMOTIVE RADAR ECHO GENERATOR`、`Specifications`、`Specifications | Version 09.00`、`R&S`；產品本體可辨識 `R&S® AREG800A Automotive Radar Echo Generator`、`AREG`；螢幕欄位可勉強辨識 `User Ligths`、`Instrument Setup`、`System Config`、`Update Setup`；左側按鍵可辨識 `Home`、`Loc`、`Preset`、`Help`；另可辨識 `Esc`、`Enter`、`On/Off`。主機螢幕內大部分內容、多數按鍵小字、外接模組細小標示無法辨識。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p021：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `21`；無表格、圖表、方塊圖、曲線圖或螢幕截圖等實質內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p022：可見 `Version 09.00, September 2025`、頁碼 `22`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`；除文件資訊外無其他可辨識內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p023：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `23`；無圖表、方塊圖、曲線圖、表格、螢幕截圖或內文。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+          },
+          "score": 8.639869
+         },
+         {
+          "text": "AREG800A_specs_en_3609-8015-22_v0900 › 關鍵實體與概念\n- [[R&S AREG-MFP]]、[[R&S AREG-BFP]] — production frontend options，支援 monostatic 或 bistatic。\n- [[Automotive radar echo generation]]、[[FMCW radar]]、[[Radar cross-section]]、[[Doppler frequency shift]]、[[Hardware-in-the-loop]]、[[Open Simulation Interface]]、[[SCPI]]、[[Air gap]] — 本來源涉及的技術概念。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+          },
+          "score": 4.718376
+         },
+         {
+          "text": "AREG800A_specs_en_3609-8015-22_v0900 › 關鍵實體與概念\n- [[R&S AREG800A]] — Automotive Radar Echo Generator；本來源主要產品實體。\n- [[Rohde & Schwarz]] — 製造商與文件發布者。\n- [[R&S AREG8-B9]] — Digital baseband，1 GHz IF bandwidth、1 IF path、1 individual artificial object；Order No. `1437.8011.02`。\n- [[R&S AREG8-B63]] — Analog stepped delay line，用於 short object generation；Order No. `1437.8205.02`。\n- [[R&S AREG8-K527]] — Baseband extension from 1 GHz to 2 GHz IF bandwidth；Order No. `1437.9882.02`。\n- [[R&S AREG8-K528]] — Baseband extension from 2 GHz to 5 GHz IF bandwidth；Order No. `1437.9799.02`。\n- [[R&S AREG8-K570]] — Activation of second IF path；Order No. `1437.9899.02`。\n- [[R&S AREG8-K812]] — One additional artificial object；Order No. `1437.9853.02`。\n- [[R&S AREG8-K813]] — Extended Doppler frequency shift up to 10 MHz；Order No. `1437.9901.02`。\n- [[R&S AREG8-K814]] — Near object range for FMCW；Order No. `1437.9776.02`。\n- [[R&S AREG8-K740]] — Analog IF output interfaces；Order No. `1437.9830.02`。\n- [[R&S AREG8-K741]] — Analog IF input interface；Order No. `1437.9847.02`。\n- [[R&S AREG8-K109]] — Hardware-in-the-loop control interface；Order No. `1437.9860.02`。\n- [[R&S AREG8-K549]] — Synchronization interface；Order No. `1437.9876.02`。\n- [[R&S AREG8-K986]] — Remote control GPIB；Order No. `1437.9818.02`。\n- [[R&S AREG8-B97]] — System alignment backend；Order No. `1437.9001.02`。\n- [[R&S AREG-P1]] / [[R&S AREG-DBP1]]、[[R&S AREG-P2]] / [[R&S AREG-DBP2]]、[[R&S AREG-P3]] / [[R&S AREG-DBP3]] — automotive radar production configurations / production base unit options。\n- [[R&S AREG8-24S]]、[[R&S AREG8-24D]]、[[R&S AREG8-81S]]、[[R&S AREG8-81D]]、[[R&S AREG8-81WS]]、[[R&S AREG8-81WD]]、[[R&S FE44S]] — 支援的 mmWave 或 external frontends。\n- [[R&S QAT100]]、[[R&S QAT-B2]]、[[R&S QAT-Z50]] — advanced antenna array 及其相關 option/accessory。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+          },
+          "score": 4.198779
+         },
+         {
+          "text": "AREG800A_specs_en_3609-8015-22_v0900 › 讀圖頁面\n> 以下段落引用的內容來自這幾頁的圖片。模型讀圖沒有信心分數，請以圖片為準。\n\n**p001**\n\n![[AREG800A_specs_en_3609-8015-22_v0900-p001.png]]\n\n**p021**\n\n![[AREG800A_specs_en_3609-8015-22_v0900-p021.png]]\n\n**p022**\n\n![[AREG800A_specs_en_3609-8015-22_v0900-p022.png]]\n\n**p023**\n\n![[AREG800A_specs_en_3609-8015-22_v0900-p023.png]]",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+          },
+          "score": 3.638869
+         },
+         {
+          "text": "AREG800A_specs_en_3609-8015-22_v0900 › 原文未解的問題\n- `AREG800A base unit IF frequency range` 中來源列出 [[R&S AREG8-B9]] with [[R&S AREG8-K527]]：`0.7 GHz to 5.7 GHz`；同份來源 ordering information 顯示 5 GHz IF bandwidth extension 為 [[R&S AREG8-K528]]。本頁未自行推論修正，需回查原始 datasheet 表格。\n- `AUX IF output frequency range` 也出現 [[R&S AREG8-B9]] with [[R&S AREG8-K527]]：`0.7 GHz to 5.7 GHz`；同樣需回查是否漏列 [[R&S AREG8-K528]]。\n- 多處 RF transfer characteristics 條件萃取為 `R&S®AREG8-B9 with 未完整標示 option`，未保留完整 option code；不得自行補碼。\n- Datasheet 未列出價格。\n- Datasheet 未列出 service plan 具體 order code。\n- Extended warranty periods 需聯絡 Rohde & Schwarz sales office；datasheet 未列出具體 code 或期限組合。\n- 本次提供的 raw 摘要包含圖片補充文字，但未提供可嵌入的圖片 wikilink；因此 wiki 僅保留讀圖文字註記，未新增圖片嵌入。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+          },
+          "score": 1.396891
+         },
+         {
+          "text": "R&S CMX500 › R&S CMX-B200A accelerator unit\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX-B200A]] 提供 accelerated digital signal processing capabilities，並包含 two high-speed digital I/Q interfaces：\n\n| 項目 | 規格 |\n|---|---|\n| Ports | DIG. IQ HS 1、DIG. IQ HS 2 |\n| Direction | full duplex |\n| Connector | QSFP+ |\n| Level | CML |\n| Data rate | 40 Gbps |\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，每個 accelerator unit 可 fading 的最大 cells 數包含：1 NR cell 8x8 MIMO；1 NR cell 16x4 MIMO, 50 MHz bandwidth；2 NR cells 4x4 MIMO；4 NR cells 2x2 MIMO；2 LTE cells 8x4 MIMO；4 LTE cells 2x2 或 4x4 MIMO。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX500.md"
+          },
+          "score": 18.247862
+         },
+         {
+          "text": "R&S CMX500 › RF generator\nOutput level uncertainties 適用於 continuous wave，不適用於 overrange；wideband applications 可能產生 additional uncertainties。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 19,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX500.md"
+          },
+          "score": 18.187152
+         },
+         {
+          "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX500.md"
+          },
+          "score": 16.51372
+         },
+         {
+          "text": "R&S CMX500 › NR FR1\n依 [[CMX500_Features_CSW9-20-0_en_32]]，R&S CMX-KM600 是 frequency range 1 對 NR uplink signals 執行任何 TX tests 的必要 option。NR FR1 uplink measurements 包含 multi-evaluation、PRACH、SRS、TPC measurement。Multi-evaluation 支援 NR channel bandwidth **3 MHz 到 100 MHz**，可分析 FDD 與 TDD signals、NR standalone signals 與 intraband contiguous EN-DC signals。\n\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，R&S CMX-KM600 option 的 5G NR analyzer 條件為 FR1、SCS 30 kHz、16QAM、temperature range +15 °C to +35 °C；input level –25 dBm to –10 dBm RMS、bandwidth 100 MHz 時 EVM **< 0.5 %**。Frequency measurement uncertainty：**< 20 Hz + drift of timebase**；相對於同一台 CMX500 device 的 downlink signal 進行 frequency error measurements 時，uncertainty 符合 [[3GPP TS 38.521-1]] V18.5.0。\n\nR&S CMX-KW601 option 的 5G NR generator 條件：5G NR PDSCH、full allocation、SCS 30 kHz / 60 kHz、modulation 64QAM、PAR 11.8 dB、temperature +15 °C to +35 °C；ports RF Com 1、RF Com 2、RF Out 1 to RF Out 4；output level –5 dBm、bandwidth 100 MHz 時 EVM **< 0.5 %**。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 30,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX500.md"
+          },
+          "score": 15.648667
+         },
+         {
+          "text": "R&S CMX500 › 使用介面與 automation\n依 [[CMX500_Features_CSW9-20-0_en_32]]：\n\n| 介面 | 原文定位 |\n|---|---|\n| [[CMsquares]] | 單一 graphical user interface，web-based、responsive，支援 RF tests、functional tests、advanced signaling tests、protocol tests |\n| [[R&S CMXmars]] | Message log analysis，可離線分析或在線監控 instrument messaging |\n| [[R&S CMsequencer]] | Graphical scripting interface，可在 CMX500 或 Windows PC 上建立、設定與執行 test scripts |\n| [[XLAPI]] | Python-based scripting interface，適合 complex scripting use cases |\n| [[SCPI]] | Remote control interface，適合 simple、standardized scripting use cases |\n\nXLAPI scripting environment：Python 3.10；script development computer 可為 Windows PC 或 CMX500；XLAPI installation package 為 **CMX-KF600X**。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 36,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX500.md"
+          },
+          "score": 15.596087
+         },
+         {
+          "text": "NG eCall EN 17240 2024 verification › 與既有 NGeCall / hybrid eCall 頁面的關係\n- [[NGeCall over LTE]] 整理 CMW500 與 CMX500 capability lists，本頁只整理 PR 中的 Qualcomm / Snapdragon verification event。\n- [[CMX500 NGeCall configuration]] 整理 configuration guide 的 mandatory / optional items，本頁不取代正式 configuration 或 quote。\n- [[Hybrid eCall testing]] 以 EN 18052:2025 與 hybrid fallback 為核心；本頁聚焦 EN 17240:2024 NG eCall verification，不描述 classic CS fallback 或 EN 18052 test scope。\n- [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 提到 EN 17240:2024+A1:2026 與 cetecom advanced certification testing；本頁來源只提 EN 17240:2024，且未說第三方 certification report。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+          },
+          "score": 4.109409
+         },
+         {
+          "text": "NG eCall EN 17240 2024 verification › unresolved\n- [[EN 17240]]:2024 的完整標準題名、發布組織、publication date 與 clause mapping 未由本來源提供。\n- [[European Commission]] most recent regulation 的正式名稱、編號、發布日期與條文未標示。\n- [[R&S CMX-KA098]] 的 software version、license dependencies 與 test package versions 未標示。\n- [[Snapdragon Auto 5G Modem-RF]] 的 exact product / chipset / firmware configuration 未標示。\n- PSAP simulation 的 scenario IDs、acceptance criteria 與完整 test matrix 未標示。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+          },
+          "score": 2.511257
+         },
+         {
+          "text": "NG eCall EN 17240 2024 verification › Regulatory transition context\n同一來源提供下列背景，但未列 regulation 文件編號：\n\n- [[eCall]] automated vehicle emergency call system introduced in 2015。\n- eCall 自 2018 年起是 all new cars sold within the European Union 的 mandatory requirement。\n- 來源稱 2G / 3G circuit-switched cellular networks become obsolete，因此 emergency call systems 需要 adapted to 4G / 5G packet-switched cellular networks。\n- 來源稱 [[European Commission]] most recent regulation 定義 NG eCall will be obligatory starting **2026-01-01**。\n- 來源稱 EN 17240:2024 establishes guidelines for testing eCall systems over [[IMS]] networks, including advanced 4G LTE and 5G NR technologies。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+          },
+          "score": 1.424263
+         },
+         {
+          "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 6.599255
+         },
+         {
+          "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 5.270237
+         },
+         {
+          "text": "R&S PCB test solutions › 未決事項\n- Slide 21 未標示 R&S PCB test solutions 的正式文件版次與產品 portfolio 對應。\n- Slide 21 未標示 [[TDR]]、[[Delta-L]]、ISD/ADK、DK/DF extraction 的標準版本、演算法、測試條件或工具型號。\n- Slide 21 未展開 PL、ISD、ADK、RSTW、SWISSTO12、QWED、KEYCOM。\n- 需回看原始 PPTX 圖像確認各圖示、商標、箭頭與工具對應關係。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 4.834086
+         },
+         {
+          "text": "R&S PCB test solutions › 圖上工具 / 合作方文字\n| 圖上文字 | 可能角色 | 來源 | 限制 |\n|---|---|---|---|\n| [[SPEAG]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未說明是合作夥伴、工具、方法或範例 |\n| [[SWISSTO12]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[QWED]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[KEYCOM]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[RSTW]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未展開完整單位名稱 |\n| TDR | 測 impedance | [[0 Digital Test - What are SIPI and Serdes]] | 未提供 TDR option 或探頭型號 |\n| Delta-L | 損耗量測相關 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供方法定義、標準或軟體名稱 |\n| ISD/ADK | 圖上方法 / 工具文字 | [[0 Digital Test - What are SIPI and Serdes]] | 未展開縮寫，未說明與 Delta-L 的關係 |\n| w/ cable / connector testing | cable / connector testing | [[0 Digital Test - What are SIPI and Serdes]] | 未提供連接器類型、線纜規格或測試項目 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 4.801874
+         },
+         {
+          "text": "R&S PCB test solutions › 相關來源\n- [[0 Digital Test - What are SIPI and Serdes]] — 2026.3.4 的 R&S / RSTW high-speed digital 測試簡報來源摘要。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 1.231714
+         },
+         {
+          "text": "R&S FSV3004\nR&S FSV3004 是 [[R&S FSV3000]] 系列 4 GHz Signal and Spectrum Analyzer 型號，依 [[FSV3000_specs_en_5216-1334-22_v1601]]（Version 16.01，August 2025）整理。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S FSV3004.md"
+          },
+          "score": 3.70648
+         },
+         {
+          "text": "R&S FSV3004 › 型號與文件版次\n- 型號：R&S®FSV3004。\n- 文件：PD 5216.1334.22，Version 16.01，August 2025。\n- Order No.：1330.5000.04。\n- 訂購名稱：Signal and spectrum analyzer 10 Hz to 4 GHz。\n- Supplied accessories：power cable、quick start guide。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S FSV3004.md"
+          },
+          "score": 3.498607
+         },
+         {
+          "text": "R&S FSV3004 › Firmware licences\n本型號可用 firmware licences 需依訂購與相依關係核對 [[FSV3000_specs_en_5216-1334-22_v1601]]。常見明確列出的 licences 包含 R&S®FSV3-K6 pulse measurements、R&S®FSV3-K7 AM/FM/PM modulation analysis、R&S®FSV3-K30 noise figure measurements、R&S®FSV3-K40 phase noise measurements、R&S®FSV3-K54 EMI measurements、R&S®FSV3-K70 vector signal analysis、R&S®FSV3-K91 WLAN、R&S®FSV3-K144 5G NR Rel. 15 downlink、R&S®FSV3-K145 5G NR Rel. 15 uplink、R&S®FSV3-K184 Beyond 5G measurements、R&S®FSV3-K980 HUMS。完整 code 與 Order No. 見 [[FSV3000_specs_en_5216-1334-22_v1601]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S FSV3004.md"
+          },
+          "score": 2.920792
+         },
+         {
+          "text": "R&S FSV3004 › Hardware options\n| Code | Order No. | 名稱 | 原文說明 / 相依關係 |\n|---|---:|---|---|\n| R&S®FSV3-B1 | 1330.5700.02 | Side carry handles | user-retrofittable |\n| R&S®FSV3-B3 | 1330.3765.02 | Audio demodulator | AF demodulation types AM、FM；audio output loudspeaker、phone jack |\n| R&S®FSV3-B4 | 1330.3794.02 | OCXO frequency reference | 改善 internal reference frequency aging、temperature drift、initial calibration accuracy |\n| R&S®FSV3-B5 | 1330.3820.02 | Additional interfaces | GPIB、IF out、video out、trigger out、AUX port、AUX control |\n| R&S®FSV3-B5E | 1330.3820.03 | Additional interfaces | IF out、video out、trigger out、AUX port、AUX control；GPIB 不適用 |\n| R&S®FSV3-B6 | 1330.3913.02 | 10 Gbit/s LAN interface | requires R&S®FSV3-B114 |\n| R&S®FSV3-B8E | 1346.4337.02 | Resolution bandwidth up to 40 MHz | signal analysis bandwidth 由 R&S®FSV3-B40/-B200 定義 |\n| R&S®FSV3-B10 | 1330.3859.02 | External generator control | LAN based；high sweep speed 建議 R&S®FSV3-B5 |\n| R&S®FSV3-B40 | 1330.4103.02 | 40 MHz analysis bandwidth | user-retrofittable license key |\n| R&S®FSV3-B200 | 1330.4132.02 | 200 MHz analysis bandwidth | requires R&S®FSV3-B114 |\n| R&S®FSV3-B18 | 1330.4003.21 | Spare solid-state drive | includes Windows IoT Enterprise LTSC 2021 license；requires R&S®FSV3-B20 |\n| R&S®FSV3-B20 | 1330.3971.02 | Removable hard drive | front panel |\n| R&S®FSV3-B24 | 1330.4049.07 | RF preamplifier for R&S®FSV3004 and R&S®FSV3007 | frequency range for R&S®FSV3004：10 MHz to 4 GHz；gain 15 dB/30 dB nominal |\n| R&S®FSV3-B25 | 1330.4078.02 | Electronic attenuator, 1 dB steps | frequency range 10 Hz to 7.5 GHz；setting range 0 dB to 25 dB |\n| R&S®FSV3-B28V | 1330.6664.02 | Noise source control via BNC | adds BNC female for noise source control |\n| R&S®FSV3-B114 | 1330.4910.03 | Enhanced computing power | not retrofittable |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S FSV3004.md"
+          },
+          "score": 1.375032
+         },
+         {
+          "text": "FSV3000_specs_en_5216-1334-22_v1601 › 原文未解的問題\n- 來源是 lossy derivative；若需逐項報價或確認所有 footnotes，必須回查原始 PDF。\n- R&S®FSV3-B21 ordering information 段落在萃取中寫「適用 R&S®FSV3030、R&S®FSV3044，後續型號文字在此段截斷」；但 external harmonic mixers 段落列 [[R&S FSV3030]]、[[R&S FSV3044]]、[[R&S FSV3050]] 搭配 R&S®FSV3-B21 option。未自行推論訂購適用性。\n- Dimensions and weight 中另列 15.6 kg（34.4 lb），萃取未明確標示對應型號；未寫入各型號重量欄位。\n- RF input connector 表未明確列出 [[R&S FSV3013]] 的 connector；accessory/probe 條目提到 R&S®FSV3004/3007/3013 適用 type N torque/probe adapter，但本摘要不以此推導 connector 規格。\n- 部分 sensitivity 原文段落很長；本頁只保留摘要與可讀數值，報價或規格承諾前需回查原始 PDF 表格。\n- 讀圖補充內容不是從文件文字層抽取，可信度低於正文；本次未用讀圖內容推翻正文。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 22,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/FSV3000_specs_en_5216-1334-22_v1601.md"
+          },
+          "score": 12.159882
+         },
+         {
+          "text": "FSV3000_specs_en_5216-1334-22_v1601 › Upgrades、extras 與外接附件\n- Upgrades：R&S®FSV3-U21 LO/IF connections for external mixers upgrade；R&S®FSV3-U24C / R&S®FSV3-U24N RF preamplifier upgrades；R&S®FSV3-U10 Upgrade to Windows IoT Enterprise LTSC 2021。各 upgrade 的 Order No. 以來源列出的型號與 suffix 為準；50 GHz upgrade 中 .50 需 export license。\n- R&S®FSV3-K9 支援多種 [[R&S NRP power sensors]]；來源列出 universal、thermal、average、three path diode、wideband power sensors，並標示部分 R&S®NRP-Z 系列為 Product discontinued。\n- External harmonic mixers：適用 [[R&S FSV3030]]、[[R&S FSV3044]]、[[R&S FSV3050]] 且需 R&S®FSV3-B21 option；來源列出 RPG FS-Z60、FS-Z75、FS-Z90、FS-Z110、FS-Z140、FS-Z170、FS-Z220、FS-Z325。\n- R&S®FSV3-K553 支援 external frontends：R&S®FE44S（24 GHz to 44 GHz，Order No. 1338.7001.02）與 R&S®FE50DTR（36 GHz to 50 GHz，Order No. 1347.4099.02）。\n- R&S®VSE PC software 另列 basic edition、enterprise edition、license dongle、floating license dongle 與 software maintenance；進一步資料需查 R&S®VSE 規格書 PD 3607.1371.22 與 brochure PD 3607.1371.12。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 19,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/FSV3000_specs_en_5216-1334-22_v1601.md"
+          },
+          "score": 9.41743
+         },
+         {
+          "text": "FSV3000_specs_en_5216-1334-22_v1601 › Resolution、channel、EMI 與 video bandwidth\n- Sweep filters and FFT filters，resolution bandwidths（–3 dB）standard：1 Hz to 10 MHz，1/2/3/5 sequence，另有 51 kHz、150 kHz、250 kHz、400 kHz、450 kHz、6 MHz、8 MHz。\n- 搭配 R&S®FSV3-B8E option 額外支援 resolution bandwidth：20 MHz、28 MHz、30 MHz、40 MHz。\n- Resolution bandwidths > 3 MHz 僅可用於 sweep mode；R&S®FSV3-B8E option 的 RBW ≤ 28 MHz 為 Gaussian shape。\n- Channel filters bandwidths（–3 dB）standard 包含 100 Hz、200 Hz、300 Hz、500 Hz 與多個 RRC / listed channel filter bandwidths；搭配 R&S®FSV3-B8E 額外支援 20 MHz、28 MHz、40 MHz。\n- EMI filters 僅適用 R&S®FSV3-K54；bandwidths（–6 dB）：10 Hz、100 Hz、200 Hz、1 kHz、9 kHz、10 kHz、100 kHz、120 kHz、1 MHz。\n- Video bandwidths：1 Hz to 10 MHz，1/2/3/5 sequence。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/FSV3000_specs_en_5216-1334-22_v1601.md"
+          },
+          "score": 9.055868
+         },
+         {
+          "text": "FSV3000_specs_en_5216-1334-22_v1601 › 主要 firmware licences\nFirmware 註記：retrofitting 需聯絡當地 Rohde & Schwarz sales office；analysis bandwidth > 28 MHz 的量測需要適當 bandwidth option；標註 23 的項目也可用 floating license，Order No. 使用 xxxx.xxxx.51 取代 xxxx.xxxx.02，且需 R&S®FSV3-FL hardware option。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 18,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/FSV3000_specs_en_5216-1334-22_v1601.md"
+          },
+          "score": 8.657013
+         },
+         {
+          "text": "FSV3000_specs_en_5216-1334-22_v1601 › RF input 與 attenuator\n- RF input impedance：50 Ω。\n- RF input connector：R&S®FSV3004/3007 為 type N female；R&S®FSV3030 為 APC 3.5 mm male compatible with SMA；R&S®FSV3044 為 2.92 mm male compatible with SMA；R&S®FSV3050 為 1.85 mm male。萃取中的 connector 表未明確列出 R&S®FSV3013 connector。\n- RF attenuator setting range：0 dB to 75 dB，5 dB steps。\n- With R&S®FSV3-B25 option 的 RF attenuator setting range：0 dB to 75 dB，1 dB steps。\n- Electronic RF attenuator with R&S®FSV3-B25 option：f ≤ 7.5 GHz，0 dB to 25 dB，1 dB steps。\n- R&S®FSV3-B25 option 說明：mechanical RF attenuator 為 5 dB steps，electronic attenuator 為 1 dB steps；electronic attenuator 位於 mechanical attenuator 與 RF preamplifier 之後，f ≤ 7.5 GHz 時在 RF，f > 7.5 GHz 時在 IF。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 11,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/FSV3000_specs_en_5216-1334-22_v1601.md"
+          },
+          "score": 6.357652
+         },
+         {
+          "text": "R&S SMW200A › Unresolved\n- 來源未標示價格。\n- 本頁整合 [[SMW200A_config-guide_en_3606-8037-92_v0600]]（configuration guide，May 2024）與 [[SMW200A_specs_en_3606-8037-22_v3100]]（specifications，May 2026）；兩者文件性質不同。報價前應回查正式 PDF、最新 ordering information 與 configure 工具。\n- Multichannel、MIMO、fading、digital standards、GNSS/avionics、external pulse sequencer options 的完整規格需另查引用文件：`PD 3673.1276.22`、`PD 5213.9434.22`、`PD 3607.6896.22`、`PD 3607.1388.22`。\n- RF path combination table 的全部 allowed / not allowed combinations 與灰底 deeper chassis 條件需回查原表；本頁只照錄來源明列摘要與 `R&S®SMW-B94L` 明列條件。\n- Recommended rack adapter 與 2 m digital baseband cable 在 May 2024 configuration guide 與 May 2026 specifications 不一致；不可自行判定是否替代或等效。\n- 來源為分段萃取重點，不是完整逐頁文字；圖表曲線僅記錄來源明列的文字與數字。\n- 來源提供讀圖補充為 p001 封面資訊，但本次提示未提供可原封不動複製的圖片嵌入行；依 productions 讀圖規則，未把讀圖內容作為規格主張寫入本頁。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 28,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 9.678781
+         },
+         {
+          "text": "R&S SMW200A › Floating license rules\n- 某些 software options 可在 two-path instruments 中安裝一次或兩次。\n- 多數 path-specific software options 採 floating license concept。\n- 若 option features 要同時在兩個 paths 使用，該 option 必須安裝兩次。\n- 若 option 只安裝一次，只能在 path A 或 path B 其中之一使用。\n- Software option 不綁定特定 path。\n- 對 baseband generator 也是類似規則：若兩個 baseband generators 要同時輸出相同 standard 或 waveform，對應 software option 必須安裝兩次。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 27,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 9.544947
+         },
+         {
+          "text": "R&S SMW200A › 與既有資料的矛盾與更新\n⚠️ [[SMW200A_config-guide_en_3606-8037-92_v0600]]（May 2024）說 `R&S®SMW-B1031` Order No. 是 `1428.5307.02`，但既有頁面 [[R&S SMW200A]] 說 May 2024 configuration guide 摘錄未顯示 `.02` 後綴。判斷：本次重新匯入的來源摘錄已明列完整 order number，因此本頁以 `1428.5307.02` 記錄，並移除「未顯示 `.02`」作為未決事項。\n\n⚠️ [[SMW200A_specs_en_3606-8037-22_v3100]]（May 2026）說 recommended 19 inch rack adapter 是 `R&S®ZZA-KN4B`，Order No. `1703.1346.00`，但 [[SMW200A_config-guide_en_3606-8037-92_v0600]]（May 2024）說 recommended 19 inch rack adapter 是 `R&S®ZZA-KN4`，Order No. `1175.3033.00`。判斷：兩份來源並列；報價採用前需回查最新 ordering document 或 configure 工具，不自行判定舊料號是否停用。\n\n⚠️ [[SMW200A_specs_en_3606-8037-22_v3100]]（May 2026）說 `Cable for Rohde & Schwarz digital baseband interfaces (2 m)` Order No. 是 `3716.5425.00` 且未標示 type code，但 [[SMW200A_config-guide_en_3606-8037-92_v0600]]（May 2024）說 2 m digital baseband cable 是 `R&S®SMU-Z6`，Order No. `1415.0201.02`。判斷：兩份來源並列；不可自行推論兩者是否等效或取代。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 9.477079
+         },
+         {
+          "text": "R&S SMW200A › 規格適用條件與語彙\n依 [[SMW200A_specs_en_3606-8037-22_v3100]]（Version 31.00，May 2026）：\n\n- Product data 適用條件：ambient temperature 下 storage `3 hours` 後 warm-up operation `30 minutes`、符合 specified environmental conditions、遵守 recommended calibration interval、完成所有 applicable internal automatic adjustments。\n- Specifications with limits 與 specifications without limits 代表 warranted product performance。\n- `n. trc.`、`typ.`、`nom.`、`meas.` 不由 Rohde & Schwarz 保證。\n- Uncertainties 的 coverage factor 為 `2`，依 GUM 計算。\n- 依 3GPP standard，本文件中的 `Gbps`、`Mcps`、`Mbps`、`Msps`、`kbps`、`ksps`、`Msample/s` 不是 SI units。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 9.008498
+         },
+         {
+          "text": "右欄還有各應用領域的圖示，例如：\n- 汽車\n- 家電\n- 智慧手機\n- 穿戴裝置\n- GPU\n- 伺服器\n- AI\n- 記憶體\n等。",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-6877983df8f4d708",
+            "original_ref": "raw/Market/IC Carrier 載板 image 2.md",
+            "sha256": "6877983df8f4d70858ae88a29da994782551c7e37c71826ded78a3fc5da11ea5",
+            "raw_ref": "raw/Market/IC Carrier 載板 image 2.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/IC Carrier 載板 image 2.md",
+           "section": 29,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 39.891923
+         },
+         {
+          "text": "* 選定終端機型號 (Intellian OW11F 或 Hughes HL1120W)\n* RF 特性量測：接收增益 (G/T)、雜訊指數 (NF)、發送功率\n* 鏈路方程式驗證 (Qorvo PA + Analog Devices LNA)\n* 調變/編碼分析 (OneWeb 專有或 MediaTek 5G NTN M80)\n* 設備：Rohde & Schwarz SMW6 信號產生器、FSW 譜儀",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-62c234dd566e887e",
+            "original_ref": "raw/Market/OneNote/oneweb_ut_final_presentation.md",
+            "sha256": "62c234dd566e887eb17b68860ff3c42d541b5000c7f1c0c5be9f824b285a9c74",
+            "raw_ref": "raw/Market/OneNote/oneweb_ut_final_presentation.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/oneweb_ut_final_presentation.md",
+           "section": 14,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 37.863608
+         },
+         {
+          "text": "[800G](https://school.gugu.fund/blog/concept-stocks/8144635825) 交換器是什麼？800G概念股有哪些：供應廠商、應用、發展 -股市分析",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-9d749221d9d2a383",
+            "original_ref": "raw/Market/OneNote/Optical Switch (2026-7-27)/Switch server- optical switch.md",
+            "sha256": "9d749221d9d2a38390439f98e54c3fab3d0c7ee05f56fc4de470fb9686eba1a5",
+            "raw_ref": "raw/Market/OneNote/Optical Switch (2026-7-27)/Switch server- optical switch.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/Optical Switch (2026-7-27)/Switch server- optical switch.md",
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 37.741455
+         },
+         {
+          "text": "目前的說明：CDMA2000®",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-c969a73ce53b2512",
+            "original_ref": "raw/Market/review-options.md",
+            "sha256": "c969a73ce53b25124272e6e4882961305b754f06cef4c63b7ad16b041804194e",
+            "raw_ref": "raw/Market/review-options.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/review-options.md",
+           "section": 94,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 34.279368
+         }
+        ],
+        "text": "### 建議主軸\n先切入「汽車雷達回波產生 / ADAS radar 測試」與「4G/5G NG eCall、hybrid eCall 測試」；「汽車高速 PCB / SI/PI」可列為待補證機會，因為知識庫目前有 PCB 測試流程但未給正式 R&S 產品型號、option、頻率或標準條件。[65][62][10][45][79][15]\n### 推薦先賣\n1. **汽車雷達回波產生 / ADAS radar 測試**：R&S AREG800A 被明確定義為 Automotive Radar Echo Generator，用於 dynamic artificial object generation，且支援 FMCW radar 的 digital echo generation、最高 3000 m generated distance、individual Doppler frequency shift、最多 32 個 artificial objects 與 HiL interface option。[65][62][2][3][6]\n2. **NG eCall / IMS eCall / 4G-5G 車用緊急通話測試**：R&S 與 Qualcomm Technologies 使用 R&S CMX500 驗證 Snapdragon Auto 5G Modem-RF 的 NG eCall functionality 符合 EN 17240:2024，測試包含 voice and data transmission、simulating a PSAP，且 CMX500 搭配 CMX-KA098 可在 realistic network conditions 下用於 NG eCall testing。[10][40][42]\n3. **Hybrid eCall fallback 測試**：Hybrid eCall testing 的目標是驗證車輛 emergency call system 能在 NG eCall 與 classic CS eCall transport paths 之間可靠運作與 fallback，來源連到 EN 18052:2025、EN 17240:2024+A1:2026、R&S CMX500 與 R&S CMX-KA09x。[44][45][47]\n4. **汽車高速 PCB / SI/PI 測試流程**：R&S PCB test solutions 來源列出 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring，量測 / 分析項目包含 TDR impedance、DK/DF extraction、insertion loss、roughness、crosstalk、TL modeling 與 eye diagram；但來源未提供正式 R&S 產品型號、option code、測試頻率、標準、fixture 或 calibration method。[79][13][15]\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S AREG800A | Automotive radar echo generation、FMCW radar 目標模擬、ADAS radar 測試 | Echo generator type 是 dynamic artificial object generation；hybrid concept 在短物距 < 17 m 使用 analog stepped delay line、較長距離至 3000 m 使用 fully digital implementation；digital concept 用於 FMCW radar，maximum generated distance 為 3000 m。[62] | 產品頁明確稱 AREG800A 是 Automotive Radar Echo Generator，且用途就是 dynamic artificial object generation。[65] | [65][62] | Datasheet 未列價格，且部分 IF frequency range 與 option code 萃取有 unresolved 問題，需回查原始 datasheet。[70] |\n| R&S AREG800A + Doppler / object options | 多目標、速度、距離情境產生 | 每個 artificial object 支援 individual Doppler frequency shift；with R&S AREG8-B9 and R&S AREG8-B63 的 velocity setting range 為 ±500 km/h，velocity step size 為 0.001 km/h，velocity accuracy < 0.05 km/h。[2] | 可支援雷達測試中每個 artificial object 的 individual Doppler frequency shift，並提供速度範圍、步進與 accuracy 規格。[2] | [2] | Object distance accuracy with R&S AREG8-B9 option 為 ±5 cm，標示為 meas.，且 measured values 不由 R&S 保證。[3][1] |\n| R&S AREG800A + frontends / QAT100 / FE44S | 多前端、近遠距、多 artificial object 雷達場景 | 搭配 conventional mmWave frontends 或 FE44S 時，在多個 distance condition 下最多 32 個 artificial objects、每 frontend 最多 8 個；每台 AREG800A base unit 支援 conventional mmWave frontends 最多 4 個、QAT100 最多 8 個、FE44S 最多 8 個 external frontends。[3][63] | 多 artificial objects 與多 frontends 可支援較複雜的雷達場景配置。[3][63] | [3][63] | AREG8-24D 在 supported remote frontends 中出現，但 maximum number bullet 未列 AREG8-24D，頁面明示不自行補入。[63] |\n| R&S AREG800A + HiL / OSI | Hardware-in-the-loop radar scenario integration | HiL interface option 為 R&S AREG8-K109；open-standard protocol support 為 OSI；time synchronization protocol 為 gPTP、NTP。[6] | HiL、OSI 與時間同步能力可對接模擬環境與自動化測試流程。[6] | [6] | 知識庫未提供具體 HIL test case、simulator vendor compatibility 或 automotive OEM acceptance criteria。[6] |\n| R&S CMX500 + R&S CMX-KA098 | NG eCall over IMS / LTE / 5G NR 測試 | CMX500 with CMX-KA098 software option 可用於 NG eCall testing under realistic network conditions；驗證流程使用 CMX500 作為 NG eCall voice and data transmission 的 comprehensive testing solution。[40] | 已有 Qualcomm Technologies / Snapdragon Auto 5G Modem-RF 的 NG eCall verification 語境，且測試模擬 PSAP 並驗證 EN 17240:2024 implementation at both ends。[10][40] | [10][40][42] | 該頁目前只由新聞稿支撐，不是 EN 17240:2024 標準摘要、conformance test plan 或 certification report，且未列 test case IDs、test conditions、network parameters、IMS setup、GNSS setup、software versions 或 pass/fail details。[11] |\n| R&S CMX500 + R&S CMX-KA098 / CMX-KF671B | NGeCall over NR/LTE capability-list 導向測試 | Capability listing 對象是 R&S CMX500 with R&S CMX-KA098；文件用於引導使用者執行 CEN EN 17240、ETSI TS 103 683、3GPP TS 34.229-5、3GPP TS 34.229-1、3GPP TS 38.523-1、3GPP TS 36.523-1、3GPP TS 26.269 中指定的 NGeCall tests。[49] | 相較單純 PR，capability list 提供 CMX500 / CMX-KA098 的實際測試支援範圍與版本基準。[51] | [49][50][51] | 來源明示 CMX500 有時只支援部分測試，或某些測試需要 further equipment；多個測試需要 HMI interaction、engine / ignition OFF 控制、AT command、Prepared TestUSIM、handset、crash simulation、in-band modem over IP support 或 IVS SUT IP address check。[49][56] |\n| R&S CMX500 + R&S CMX-KA09x / CMX-KA099 | Hybrid eCall、NG eCall 與 classic CS eCall fallback 測試 | CMX-KA09x 是 R&S updated eCall evaluation solution 的泛稱，來源說它支援 EN 18052:2025 與 EN 17240:2024+A1:2026 compliance；CMX-KA099 在 hybrid EN18052:2025 區段與 CMX-KA098、CMX-KF672B 同列 mandatory。[47][53] | Hybrid eCall test specification EN 18052 要求 hybrid system combine different transmission paths and protocols，確保 eCall reliably reaches its destination；實務語境包含 4G/5G IP/IMS NG eCall 與 coverage 或 service quality degraded 時 fallback 到 2G/3G classic CS eCall。[45] | [47][53][45] | 新聞稿只說 completed PSAP test scenarios，不是完整 conformance statement、test report 或 technical specifications；CMX-KA099 頁也未提供正式 datasheet、feature description、capability list 或 maintenance PU mapping。[48][52] |\n| R&S PCB test solutions | Automotive electronics 的高速 PCB / SI/PI 流程候選 | 流程包含 Material Measurement、Material/Stackup selection、Signal Integrity modeling/testing、Sampling testing、PL/Process Monitoring；項目包含 TDR impedance、DK/DF extraction、IL、roughness、impedance、Xtalk、TL modeling、Eye diagram。[79][13] | 可對接 PCB Fabricator and System House 的材料、stackup、SI modeling/testing、抽樣與 process monitoring 流程。[80][13] | [79][80][13] | 來源沒有提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method，因此目前不應解讀為完整採購配置。[15] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| 多目標、多前端 radar object simulation | R&S AREG800A + conventional mmWave frontends / FE44S / QAT100 | 搭配 conventional mmWave frontends 或 FE44S 時可達最多 32 個 artificial objects、每 frontend 最多 8 個；QAT100 組合也列出最多 8 個 artificial objects。[3] | Object distance accuracy ±5 cm 是 measured value，且 measured values 不由 R&S 保證。[3][1] |\n| Radar HiL / simulator integration | R&S AREG800A + R&S AREG8-K109 | 以 HiL interface option、OSI open-standard protocol support、gPTP / NTP time synchronization 做系統整合切入。[6] | 知識庫未列 simulator 品牌、OSI profile、latency budget 或 HIL certification criteria。[6] |\n| 車用 NG eCall 4G/5G / IMS 測試 | R&S CMX500 + R&S CMX-KA098 | 以 EN 17240:2024、PSAP simulation、voice and data transmission、realistic network conditions 切入。[10][40] | 來源未列 test case IDs、test conditions、network parameters、IMS setup、GNSS setup、software versions 或 pass/fail details。[11] |\n| Hybrid eCall fallback 驗證 | R&S CMX500 + R&S CMX-KA09x / CMX-KA098 / CMX-KA099；CMX-KA099 在 hybrid EN18052:2025 區段與 CMX-KA098、CMX-KF672B 同列 mandatory。[47][53] | 以 NG eCall over 4G/5G IP/IMS 與 2G/3G classic CS eCall fallback 的可靠性驗證切入。[45] | 不可由新聞稿推論 CMX500 / CMX-KA09x 已涵蓋所有 possible hybrid eCall test cases。[43] |\n| 汽車高速板材、SerDes / SI 流程前段評估 | R&S PCB test solutions；具體儀器型號知識庫未標示。[15] | 以 TDR impedance、DK/DF extraction、insertion loss、roughness、crosstalk、eye diagram 與 process monitoring 流程討論需求。[79][13] | Slide 21 未提供正式 R&S 產品型號、option code、測試頻率、測試標準、fixture 或 calibration method。[15] |\n### 限制\n知識庫目前沒有提供汽車領域各機會的市場規模、客戶預算、採購優先順序或競品勝率，因此不能把上述機會排成「最強 / 最大 / 第一名」的排名。[11][15][43]\nNG eCall 與 hybrid eCall 的多個證據來自新聞稿或 capability list，相關頁面明示不是完整標準摘要、conformance test plan、certification report 或完整 test matrix。[11][43][49]\nPCB / SI/PI 機會目前只有流程與量測項目摘要，來源明示沒有正式產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。[15]\n【推論】若以「知識庫直接連到 automotive」作為優先條件，AREG800A automotive radar echo generation 與 CMX500 eCall / hybrid eCall 的證據比一般 signal generator / spectrum analyzer 規格更直接，因為 AREG800A 被明確標為 Automotive Radar Echo Generator，而 CMX500 被直接用於 Snapdragon Auto 5G Modem-RF 的 NG eCall verification。[65][10][40]",
+        "synthesized_by": "company",
+        "failure": null
+       },
+       "cited_passages": [
+        {
+         "text": "R&S AREG800A › 文件與適用條件\n- 來源文件：[[AREG800A_specs_en_3609-8015-22_v0900]]。\n- 文件編號：`PD 3609.8015.22`。\n- 文件版本：`Version 09.00`。\n- 文件日期：`September 2025（LA）`。\n- 文件名稱：`AREG800A Automotive Radar Echo Generator`。\n- Copyright：`© 2021–2025 Rohde & Schwarz`。\n- 資料註記：無 tolerance limits 的資料不具 binding 效力；資料 `subject to change`。\n\n產品資料適用條件（Version 09.00, September 2025）：\n\n- 於環境溫度儲存 3 小時後，進行 30 分鐘 warm-up operation。\n- 符合指定 environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有適用的 internal automatic adjustments。\n\n規格定義（Version 09.00, September 2025）：\n\n- `Specifications with limits`：以 `<`、`≤`、`>`、`≥`、`±`、maximum、minimum 等限制符號表示保證產品性能。\n- `Non-traceable specifications with limits (n. trc.)`：依 specifications with limits 測試，但因缺乏可追溯至 national metrology standards 的量測設備，Rohde & Schwarz 不保證。\n- `Specifications without limits`：表示保證產品性能，通常為 dimensions 或 setting parameter resolution 等值。\n- `Typical data (typ.)`、`Nominal values (nom.)`、`Measured values (meas.)` 不由 Rohde & Schwarz 保證。\n- `Uncertainties`：coverage factor 為 2，依 GUM 計算。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S AREG800A.md"
+         },
+         "score": 29.51172
+        },
+        {
+         "text": "R&S AREG800A › Radial velocity 與 Doppler\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- 每個 artificial object 支援 individual Doppler frequency shift：`yes`。\n- Velocity setting range with [[R&S AREG8-B9]] and [[R&S AREG8-B63]]：`±500 km/h`。\n- Velocity step size：\n  - [[R&S AREG8-B9]] and [[R&S AREG8-B63]]：`0.001 km/h`。\n  - [[R&S AREG-DBP1]] / [[R&S AREG-DBP2]] / [[R&S AREG-DBP3]] with [[R&S AREG-MFP]] / [[R&S AREG-BFP]]：`0.05 km/h`。\n- Doppler frequency offset accuracy：在 IF domain 以 spectrum analyzer 量測 base unit IF input 與 IF output signal 的 frequency offset，不含 frontend，`< 1 Hz`。\n- Velocity accuracy：Doppler shift velocity error 由公式 `v_error = 3.6 × (f_error/f_center) × ½ × 299 700 000 m/s` 決定；`f_center` 為 `78 GHz` 或 `79 GHz`，適用於 [[R&S AREG8-81S]] / [[R&S AREG8-81WS]] 與 [[R&S AREG8-81D]] / [[R&S AREG8-81WD]]；velocity accuracy `< 0.05 km/h`。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 13,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S AREG800A.md"
+         },
+         "score": 21.648877
+        },
+        {
+         "text": "R&S AREG800A › Artificial objects\n| Frontend 組合 | Distance condition | Maximum artificial objects |\n|---|---|---:|\n| with [[R&S QAT100]] | `< 4 m to 3000 m + air gap` | 最多 8 個；4 m 至 17 m 最多 4 個，17 m 至 3000 m 最多 4 個 |\n| with [[R&S QAT100]] | `> 17 m to 3000 m + air gap` | 最多 8 個 |\n| with [[R&S QAT100]] | `≥ air gap to 3000 m` | 最多 8 個 |\n| with [[R&S AREG8-24S]] / [[R&S AREG8-24D]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] / [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]] or [[R&S FE44S]] | `< 4 m to 3000 m + air gap` | 最多 32 個，每 frontend 最多 8 個；4 m 至 17 m 最多 4 個，17 m 至 3000 m 最多 28 個 |\n| with [[R&S AREG8-24S]] / [[R&S AREG8-24D]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] / [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]] or [[R&S FE44S]] | `> 17 m to 3000 m + air gap` | 最多 32 個，每 frontend 最多 8 個 |\n| with [[R&S AREG8-24S]] / [[R&S AREG8-24D]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] / [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]] or [[R&S FE44S]] | `≥ air gap to 3000 m` | 最多 32 個，每 frontend 最多 8 個 |\n\n其他 artificial object 規格：\n\n- Object distance accuracy with [[R&S AREG8-B9]] option：`±5 cm (meas.)`。\n- Object distance step size with [[R&S AREG8-B9]] option：`1 cm`。\n- Air gap：object distances 與 resulting object radar cross-sections 會依 frontend reference plane 與 DUT 之間距離改變；來源建議 air gap 足夠大以符合 radar under test 的 far-field condition。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 12,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S AREG800A.md"
+         },
+         "score": 19.400219
+        },
+        {
+         "text": "AREG800A_specs_en_3609-8015-22_v0900 › 重點摘要\n- Base unit instantaneous IF bandwidth 依 option 為 `1 GHz`、`2 GHz` 或 `5 GHz`；overrange 分別為 `1.2 GHz (meas.)`、`2.2 GHz (meas.)`、`5.2 GHz (meas.)`。\n- AREG800A base unit IF frequency range：[[R&S AREG8-B9]] 為 `1.1 GHz to 2.1 GHz`；[[R&S AREG8-B9]] with [[R&S AREG8-K527]] 為 `0.7 GHz to 2.7 GHz`；來源另列 [[R&S AREG8-B9]] with [[R&S AREG8-K527]] 為 `0.7 GHz to 5.7 GHz`，但 5 GHz bandwidth ordering information 顯示還涉及 [[R&S AREG8-K528]]，此處未自行推論修正。\n- RF frequency bands：[[R&S AREG8-24S]] / [[R&S AREG8-24D]] 為 `24 GHz to 24.25 GHz`；[[R&S AREG8-81S]] / [[R&S AREG8-81D]] 與 [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]]、[[R&S QAT100]] 為 `76 GHz to 81 GHz`；[[R&S FE44S]] 為 `24 GHz to 44 GHz`。\n- 每台 [[R&S AREG800A]] base unit 支援 conventional mmWave frontends 最多 4 個，[[R&S QAT100]] 最多 8 個，[[R&S FE44S]] 最多 8 個 external frontends（4 個 TX、4 個 RX，共 4 pairs）。\n- Artificial object distance 可依 option 涵蓋 `< 17 m to 3000 m (meas.)`、`< 4 m to 3000 m (meas.)`、`≥ air gap to 3000 m (meas.)`；production frontend 組合列為 FMCW `≥ air gap to 350 m (meas.)`，non FMCW `< 17 m to 350 m (meas.)`。\n- Radial velocity：每個 artificial object 支援 individual Doppler frequency shift；with [[R&S AREG8-B9]] and [[R&S AREG8-B63]] velocity setting range 為 `±500 km/h`，velocity step size 為 `0.001 km/h`。\n- Remote control interfaces 包含 Ethernet 與 [[R&S AREG8-K986]] GPIB；remote control command set 為 `SCPI`。\n- HiL interface option 為 [[R&S AREG8-K109]]；open-standard protocol support 為 open simulation interface（OSI）；time synchronization protocol 為 `gPTP`、`NTP`。\n- Base unit `AREG800A` Order No. `1437.4400.02`，包含 power cable 與 quick start guide。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+         },
+         "score": 12.829042
+        },
+        {
+         "text": "NG eCall EN 17240 2024 verification › 驗證範圍\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 驗證對象：[[Snapdragon Auto 5G Modem-RF]] 的 [[Next Generation eCall]] functionality。\n- 合作方：[[Rohde & Schwarz]] 與 [[Qualcomm Technologies]]。\n- 測試設備：[[R&S CMX500]] mobile radio tester。\n- Software context：來源稱 [[R&S CMX500]] with [[R&S CMX-KA098]] software option can be effectively used for NG eCall testing under realistic network conditions。\n- 標準：[[EN 17240]]:2024。\n- 測試情境：simulating a [[PSAP]]。\n- 驗證內容：NG eCall including voice and data transmission，並 validated the compliance of the implementation at both ends with EN 17240:2024。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+         },
+         "score": 10.788882
+        },
+        {
+         "text": "NG eCall EN 17240 2024 verification › 使用限制\n- 本頁目前只由新聞稿支撐，不是 EN 17240:2024 標準摘要、conformance test plan 或 certification report。\n- 來源未列 test case IDs、test conditions、network parameters、IMS setup、GNSS setup、software versions 或 pass/fail details。\n- 來源未說 whether verification equals formal certification；因此本頁使用 verification，不改寫為 certification。\n- 來源未提供 European Commission regulation 的正式文件編號；2026-01-01 obligation date 只能追溯到本新聞稿說法。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 5,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+         },
+         "score": 8.926752
+        },
+        {
+         "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+         },
+         "score": 12.789733
+        },
+        {
+         "text": "R&S PCB test solutions › 可追溯限制\n- 本來源沒有提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。\n- 本頁不把 Slide 21 的圖上列名解讀為正式解決方案型錄或完整採購配置。\n- [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]] 的角色未明，僅保留圖上列名。\n- [[ISD-ADK]] 與 PL 未展開縮寫，需後續來源補證。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 6,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+         },
+         "score": 6.69569
+        },
+        {
+         "text": "Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard › 重點摘要\n- [[Rohde & Schwarz]] 宣稱其與 [[Qualcomm Technologies]] 合作，驗證 [[Snapdragon Auto 5G Modem-RF]] 上 [[Next Generation eCall]]（NG eCall）的 implementation，並稱其符合 [[EN 17240]]:2024。\n- 來源說 [[eCall]] 於 2015 年導入，且自 2018 年起成為歐盟境內所有新車銷售的 mandatory requirement。\n- 來源指出，隨著 2G / 3G circuit-switched cellular networks 逐漸 obsolete，emergency call systems 需要適配到 4G / 5G packet-switched cellular networks。\n- 來源稱 [[European Commission]] 在其 most recent regulation 中定義 NG eCall 將自 **2026-01-01** 起成為 obligatory。\n- 來源稱 EN 17240:2024 建立在 IP Multimedia Subsystem（[[IMS]]）networks 上測試 eCall systems 的 guidelines，涵蓋 advanced 4G LTE 與 5G NR technologies。\n- [[Snapdragon Auto 5G Modem-RF]] 被描述為 5G automotive-grade platform，支援 high-speed connectivity、advanced positioning、Vehicle-to-Everything（[[V2X]]）、multi-band [[GNSS]] navigation 與 enhanced safety。\n- 來源稱驗證流程使用 [[R&S CMX500]] mobile radio tester，作為 NG eCall voice and data transmission 的 comprehensive testing solution。\n- 來源稱測試模擬 [[PSAP]]，並驗證 implementation at both ends with the [[EN 17240]]:2024 standard。\n- 來源說 [[R&S CMX500]] 支援 4G 與 5G technologies，目標是讓方案 future-proof。\n- [[Juergen Meyer]] 以 [[Rohde & Schwarz]] Vice President Market Segment Automotive 身分在新聞稿中引述，稱此次 collaboration 為 future emergency call services 建立 new benchmark。\n- 來源稱 [[R&S CMX500]] 搭配 [[R&S CMX-KA098]] software option 可在 realistic network conditions 下用於 NG eCall testing。\n- 來源將合作定位為 mutually validating solutions、reducing effort、accelerating time to market for mutual customers。\n- Press and media contact 為 [[Patrizia Muehlbauer]]，職稱 PR Manager Products & Standard Systems。\n- 公司資訊段落稱 [[Rohde & Schwarz]] 2024/2025 fiscal year net revenue 為 EUR 3.16 billion，2025-06-30 worldwide employees more than 15,000。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+         },
+         "score": 14.268953
+        },
+        {
+         "text": "Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard › 關鍵實體與概念\n- [[Rohde & Schwarz]] — 新聞稿發布公司，提供 test and measurement solutions 與 automotive testing solution。\n- [[Rohde & Schwarz GmbH & Co KG]] — raw frontmatter author 與 R&S registered trademark owner 名稱。\n- [[Qualcomm Technologies]] — 與 [[Rohde & Schwarz]] 共同進行 NG eCall implementation verification 的公司實體。\n- [[Snapdragon Auto 5G Modem-RF]] — 本來源中的 Qualcomm Technologies automotive-grade platform / modem-RF platform。\n- [[R&S CMX500]] — 用於 verification process 的 mobile radio tester / comprehensive testing solution。\n- [[R&S CMX-KA098]] — 本來源稱 CMX500 with CMX-KA098 software option 可用於 NG eCall testing under realistic network conditions。\n- [[Juergen Meyer]] — [[Rohde & Schwarz]] Vice President Market Segment Automotive，引述人物。\n- [[Patrizia Muehlbauer]] — press and media contact。\n- [[NG eCall EN 17240 2024 verification]] — 本來源的主要 verification 主題。\n- [[NGeCall over LTE]]、[[NGeCall over NR-LTE]]、[[IMS eCall]]、[[EN 17240]]、[[PSAP]]、[[GNSS]]、[[V2X]]。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+         },
+         "score": 6.920428
+        },
+        {
+         "text": "Hybrid eCall testing › 使用限制\n- 本頁目前只由新聞稿支撐，不是 [[EN 18052]] 或 [[EN 17240]] 標準文本摘要。\n- 來源未提供正式 certification report、certificate number、測試日期或完整 test matrix。\n- 來源未列 national requirements 的國家名稱或版本。\n- 不可從新聞稿推論 [[R&S CMX500]] / [[R&S CMX-KA09x]] 已涵蓋所有 possible hybrid eCall test cases。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 6,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+         },
+         "score": 7.460975
+        },
+        {
+         "text": "Hybrid eCall testing\n[[Hybrid eCall testing]] 是驗證車輛 emergency call system 能在 NG eCall 與 classic CS eCall transport paths 之間可靠運作與 fallback 的測試主題；[[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 將其連到 [[EN 18052]]:2025、[[EN 17240]]:2024+A1:2026、[[R&S CMX500]] 與 [[R&S CMX-KA09x]]。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+         },
+         "score": 5.539254
+        },
+        {
+         "text": "Hybrid eCall testing › 測試目的\n依 [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]]，hybrid eCall test specification [[EN 18052]] 要求 hybrid system combine different transmission paths and protocols，確保 eCall reliably reaches its destination。\n\n來源描述的實務語境：\n\n- 車輛使用 NG eCall functions，即 IP/IMS-based voice and data over 4G/5G。\n- 當 coverage 或 service quality degrades 時，車輛可 automatically fall back to available classic CS eCall 2G/3G transport paths。\n- Manufacturers 需要 validate hybrid implementations，以確保能 trigger calls、transmit [[MSD]]、maintain [[GNSS]] positioning，並提供 intelligible voice quality。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+         },
+         "score": 5.18468
+        },
+        {
+         "text": "R&S CMX-KA09x\n[[R&S CMX-KA09x]] 是 [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 中對 Rohde & Schwarz updated eCall evaluation solution 的泛稱，來源說它支援 [[EN 18052]]:2025 與 [[EN 17240]]:2024+A1:2026 compliance。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S CMX-KA09x.md"
+         },
+         "score": 4.392007
+        },
+        {
+         "text": "R&S CMX-KA09x › 使用限制\n- 本頁只記錄新聞稿中的 CMX-KA09x 泛稱；來源未提供正式 product page、order number、license family structure 或 version table。\n- 不可由 CMX-KA09x 推論所有 CMX-KA09* options 的清單或功能範圍。\n- 對 [[R&S CMX-KA098]] 與 [[R&S CMX-KA099]] 的正式 material number、dependencies 與 configuration context，仍應分別引用 [[R&S CMX-KA098]]、[[R&S CMX-KA099]]、[[CMX_Configuration_Guide]]、[[CMX500_Software_Maintenance_PU-Option_Mapping]] 與 capability list。\n- 新聞稿只說 completed PSAP test scenarios；它不是完整 conformance statement、test report 或 technical specifications。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 4,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S CMX-KA09x.md"
+         },
+         "score": 4.017379
+        },
+        {
+         "text": "CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status › 重點摘要\n- 文件頁首標示：Rohde & Schwarz、COMPANY RESTRICTED、NGeCall over NR/LTE Reference List。\n- 原始表格 / 工作簿名稱：`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.xlsx`。\n- Capability listing 對象：[[R&S CMX500]] with [[R&S CMX-KA098]]。\n- 文件狀態 / 日期：CEN TS 17240:2018 區段標示 `CMX-KA098_PanEUNGeCall_TC_Status Dec. 2024`；CEN EN 17240:2024 區段標示 `May. 2024`；ETSI TS 103 683 區段標示 `May. 2025`；3GPP TS 26.269 區段標示 `Apr. 2024`。\n- 文件版次：來源未標示。\n- 來源說明本文件用於引導使用者在使用 [[R&S CMX500]] 與 CMW-KA09x test software 時，執行 CEN EN 17240、ETSI TS 103 683、3GPP TS 34.229-5、3GPP TS 34.229-1、3GPP TS 38.523-1、3GPP TS 36.523-1、3GPP TS 26.269 中指定的 NGeCall tests。\n- 來源明示限制：[[R&S CMX500]] 有時只支援部分測試，或某些測試需要 further equipment；限制會在文件中註明。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md"
+         },
+         "score": 12.568268
+        },
+        {
+         "text": "CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status › CEN EN 17240:2024\n來源列出 CEN EN 17240:2024（區段日期 May. 2024）測試項目，並以 [[R&S CMX500]] >= CSW 2025.0.0.1850 / [[R&S CMX-KA098]] >= V4.3.0-RC8 與 CMWrun [[R&S CMX-KF671B]] / CMWrun >= 1.9.15.37 作為版本基準。\n\n新增或較明確的內容包含：\n\n- CTP 1.1.0.1 改寫為對 ETSI TS 136 523-1、ETSI TS 138 523-1、ETSI TS 134 229-1 與 ETSI TS 134 229-5 的 conformance test，comment 仍指 covered with protocol test suite [[PCT5-KC625]]。\n- CTP 1.1.10.1 與 CTP 1.1.10.5 的 limited service condition 測試說明有兩種方式：使用 Prepared TestUSIM with Forbidden PLMN 001 02，或 rejecting normal attach reject but accepting emergency attach；後者目前 not supported。\n- CTP 1.1.10.6 標示 verification ongoing。\n- CTP 1.1.10.13 / CTP 1.1.18.4 附近有 June 2025 / Jun 2025 時點與 in-band modem over IP support 相關標註。\n- Voice link established 註明可使用 handset 模擬。\n- IPv4 / IPv6 MSD transfer 項目註明 IP address currently to be checked on IVS SUT。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 6,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md"
+         },
+         "score": 11.571963
+        },
+        {
+         "text": "CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status › 與既有知識的關係\n- 既有 [[CMW-KA096_PanEUNGeCall_TC_Status]] 記錄 [[R&S CMW500]] 搭配 [[R&S CMW-KA096]] / [[R&S CMWrun KT111]] 的 NGeCall over LTE capability list，狀態為 Oct. 2024；本來源則補充 [[R&S CMX500]] 搭配 [[R&S CMX-KA098]] / [[R&S CMX-KF671B]] 的 NGeCall over NR/LTE capability list，狀態含 Dec. 2024、May. 2025 與 June 2025 標註。\n- 既有 [[R&S CMX-KA098]] 頁只從 [[CMW500 to CMX500OBT_License_Swap_Process]] 得知 CMX-KA098 是 Application test IMS NGeCALL；本來源提供 CMX-KA098 的實際 capability list、最低版本與支援標準範圍。\n- 既有 [[R&S CMX500]] 頁依 [[CMX500_specs_en_5216-4127-22_v1100]] 與 [[CMX500_Features_CSW9-20-0_en_32]] 整理 CMX500 的一般硬體、FR1/FR2 與 application options；本來源是 NGeCall application / test plan 層的補充，不取代正式 specifications。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 9,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md"
+         },
+         "score": 10.615102
+        },
+        {
+         "text": "R&S CMX-KA099 › 使用限制\n- [[CMX_Configuration_Guide]] 只提供 configuration table；未提供 CMX-KA099 的正式 datasheet、feature description、capability list 或 maintenance PU mapping。\n- [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 是 press release；它提供 certification claim 與 PSAP scenario context，但不是完整測試報告或規格書。\n- 不可由 `APPL NGECALL MULTI CELL` 推論完整 test coverage、standards coverage 或支援 cell 數。\n- Material number 只可作為本來源中的 material number 使用；正式 ordering / pricing 需回 configurator 或 official ordering data。\n- completed PSAP test scenarios 不等於已證明覆蓋所有 EN 18052:2025 clauses；需以 cetecom advanced report 或 official R&S test documentation 確認。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 5,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S CMX-KA099.md"
+         },
+         "score": 8.921658
+        },
+        {
+         "text": "R&S CMX-KA099 › 與 CMX500 NGeCall 的關係\n在 [[CMX_Configuration_Guide]] 的 hybrid EN18052:2025 區段，[[R&S CMX-KA099]] 與 [[R&S CMX-KA098]]、[[R&S CMX-KF672B]] 同列為 mandatory。來源未說明 CMX-KA099 與 [[R&S CMX-KA098]] 的 dependency、license scope 或是否只適用 hybrid / multi-cell test cases。\n\n[[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 則把 CMX-KA099 放在 [[Hybrid eCall testing]] 與 [[EN 18052]]:2025 的 PSAP scenario context 中，並與 [[R&S CMX-KA098]] 對應的 [[EN 17240]]:2024+A1:2026 PSAP scenarios 區分。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 4,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S CMX-KA099.md"
+         },
+         "score": 5.545674
+        },
+        {
+         "text": "NGeCall over LTE › 支援限制\n- 來源明示 [[R&S CMW500]] 或 [[R&S CMX500]] 有時只支援部分測試，或某些測試需要 further equipment。\n- 多個測試不是單靠 [[R&S CMW-KA096]]、[[R&S CMWrun KT111]]、[[R&S CMX-KA098]] 或 [[R&S CMX-KF671B]] 即可完整自動化，因為需要 HMI interaction、engine / ignition OFF 控制、AT command、IVS debugging tool、Prepared TestUSIM、handset、crash simulation、in-band modem over IP support 或 IVS SUT IP address check。\n- CMW500 / CMW-KA096 來源中，CTP 1.1.10.1-IMS limited service condition 標示 Partly Available，需 Prepared TestUSIM with Forbidden PLMN 001 02，且 attach reject by network not supported yet。\n- CMX500 / CMX-KA098 來源中，CEN EN 17240:2024 limited service tests 說明有兩種方式：使用 Prepared TestUSIM with Forbidden PLMN 001 02，或 rejecting normal attach reject but accepting emergency attach；後者 currently not supported。\n- CMW500 / CMW-KA096 來源中，CTP 1.1.17.2-IMS callback abnormal termination 標示 Not available。\n- 3GPP TS 34.229-1 21.3 在既有 CMW500 來源中標示 Not available；CMX500 來源中 34.229-1 區段也可辨識 Not Available 標註。\n- 兩份來源都保留 legacy CS domain eCall with inband-modem 到 NGeCall over IMS 的 transition 尚未由 EU commission 最終決定，因此部分 handover test cases 尚未實作的限制。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 6,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/NGeCall over LTE.md"
+         },
+         "score": 12.281635
+        },
+        {
+         "text": "R&S AREG800A › Echo generation\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Echo generator type：`dynamic artificial object generation`。\n- Echo generation concept：\n  - `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n  - `digital`：用於 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 air gap value；maximum generated distance 為 `3000 m`。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 4,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S AREG800A.md"
+         },
+         "score": 16.389344
+        },
+        {
+         "text": "R&S AREG800A › 支援的 remote frontends\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Conventional mmWave remote frontends：[[R&S AREG8-24S]]、[[R&S AREG8-24D]]、[[R&S AREG8-81S]]、[[R&S AREG8-81D]]、[[R&S AREG8-81WS]]、[[R&S AREG8-81WD]]。\n- Production frontend options：[[R&S AREG-MFP]]、[[R&S AREG-BFP]]，支援 monostatic 或 bistatic；需 [[R&S AREG-DBP1]]、[[R&S AREG-DBP2]] 或 [[R&S AREG-DBP3]] production base unit option。\n- Electronically controllable antenna array：[[R&S QAT100]]。\n- External frontends：[[R&S FE44S]]。\n\n每台 [[R&S AREG800A]] base unit 支援數量（Version 09.00, September 2025）：\n\n| Frontend 類型 | Maximum number per AREG800A base unit |\n|---|---:|\n| [[R&S AREG8-24S]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] / [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]] | 最多 4 個 conventional mmWave frontends |\n| [[R&S QAT100]] | 最多 8 個 |\n| [[R&S FE44S]] | 最多 8 個 external frontends；4 個 TX、4 個 RX，共 4 pairs |\n\n註：maximum number 清單依來源萃取文字保留；雖然 supported remote frontends 包含 [[R&S AREG8-24D]]，maximum number bullet 未列 [[R&S AREG8-24D]]，本頁不自行補入。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 5,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S AREG800A.md"
+         },
+         "score": 14.109665
+        },
+        {
+         "text": "R&S AREG800A\n[[R&S AREG800A]] 是 [[Rohde & Schwarz]] 的 Automotive Radar Echo Generator，用於 dynamic artificial object generation；本頁規格依 [[AREG800A_specs_en_3609-8015-22_v0900]]，文件版本 `Version 09.00`，文件日期 `September 2025（LA）`。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S AREG800A.md"
+         },
+         "score": 12.866467
+        },
+        {
+         "text": "AREG800A_specs_en_3609-8015-22_v0900 › 原文未解的問題\n- `AREG800A base unit IF frequency range` 中來源列出 [[R&S AREG8-B9]] with [[R&S AREG8-K527]]：`0.7 GHz to 5.7 GHz`；同份來源 ordering information 顯示 5 GHz IF bandwidth extension 為 [[R&S AREG8-K528]]。本頁未自行推論修正，需回查原始 datasheet 表格。\n- `AUX IF output frequency range` 也出現 [[R&S AREG8-B9]] with [[R&S AREG8-K527]]：`0.7 GHz to 5.7 GHz`；同樣需回查是否漏列 [[R&S AREG8-K528]]。\n- 多處 RF transfer characteristics 條件萃取為 `R&S®AREG8-B9 with 未完整標示 option`，未保留完整 option code；不得自行補碼。\n- Datasheet 未列出價格。\n- Datasheet 未列出 service plan 具體 order code。\n- Extended warranty periods 需聯絡 Rohde & Schwarz sales office；datasheet 未列出具體 code 或期限組合。\n- 本次提供的 raw 摘要包含圖片補充文字，但未提供可嵌入的圖片 wikilink；因此 wiki 僅保留讀圖文字註記，未新增圖片嵌入。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 6,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+         },
+         "score": 1.396891
+        },
+        {
+         "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+         },
+         "score": 6.599255
+        },
+        {
+         "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+         },
+         "score": 5.270237
+        }
+       ],
+       "assessment": {
+        "status": "covered",
+        "facets": [],
+        "missing_facets": [],
+        "relation_required": false,
+        "relation_citations": [],
+        "relations": []
+       },
+       "citation_policy": "wiki_primary",
+       "wiki_provenance": [
+        {
+         "wiki_page": "wiki/entities/R&S AREG800A.md",
+         "raw_refs": [
+          "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md",
+         "raw_refs": [
+          "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md",
+         "raw_refs": [
+          "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+          "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/R&S PCB test solutions.md",
+         "raw_refs": [
+          "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/sources/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+         "raw_refs": [
+          "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+          "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/Hybrid eCall testing.md",
+         "raw_refs": [
+          "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/R&S CMX-KA09x.md",
+         "raw_refs": [
+          "raw/Productions/CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md",
+          "raw/Productions/CMX500_Software_Maintenance_PU-Option_Mapping.md",
+          "raw/Productions/CMX_Configuration_Guide.md",
+          "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/sources/CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md",
+         "raw_refs": [
+          "raw/Productions/CMW-KA096_PanEUNGeCall_TC_Status.md",
+          "raw/Productions/CMW500 to CMX500OBT_License_Swap_Process.md",
+          "raw/Productions/CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md",
+          "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+          "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/R&S CMX-KA099.md",
+         "raw_refs": [
+          "raw/Productions/CMX_Configuration_Guide.md",
+          "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/NGeCall over LTE.md",
+         "raw_refs": [
+          "raw/Productions/CMW-KA096_PanEUNGeCall_TC_Status.md",
+          "raw/Productions/CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md"
+         ]
+        }
+       ]
+      },
+      "failure": null,
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-7a43b969a2f0430db7c4695b93b44ed1",
+      "task_sha256": "df1fcef7807c7897664f60362546ea53d94a32688d898e8f74c1e5f3074d0f10",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.12.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "validated",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 3,
+       "kind": "validated",
+       "evidence_ref": "bridge_raw_record"
+      }
+     ],
+     "checks": [
+      {
+       "check_id": "answer_nonempty",
+       "status": "passed",
+       "evidence_ref": "bridge_raw_record"
+      }
+     ],
+     "failure_code": null
+    },
+    "evidence": {
+     "raw_citations": 27,
+     "facet_status": "not_assessed",
+     "missing_facets": null
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

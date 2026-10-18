@@ -1,0 +1,68 @@
+{
+ "id": "Q1041-zh",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "failed",
+ "tools": [],
+ "seconds": 86.578,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 44,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 47,
+   "kind": "wiki",
+   "ref": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 48,
+   "kind": "wiki",
+   "ref": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 63,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 17,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "哪些與產品相關的量測決策需要先理解眼圖",
+   "討論 R&S PCB test solutions 時，是否能指定正式產品型號、option code、fixture 或 calibration"
+  ],
+  "reason": "答案主要內容有引用支持：資料確實只把 Eye diagram 放在 SI flow、material/stackup selection、redriver eye opening requirements、以及 fiber-weave skew 對 receiver differential eye diagram 的影響中，且沒有提供正式定義。唯一較勉強的是把「是否能指定 R&S 正式產品型號/option/fixture/calibration」列為需要先理解眼圖的量測決策；[17] 只支持資料缺乏這些規格，未顯示它與理解眼圖有直接關係，但這比較像限制說明，未破壞整體答案。",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

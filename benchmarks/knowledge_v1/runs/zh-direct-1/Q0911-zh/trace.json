@@ -1,0 +1,2976 @@
+{
+ "question": {
+  "id": "Q0911-zh",
+  "source_id": "Q0911",
+  "text": "在半導體領域涉及 RFIC 驗證的應用情境中，訊號產生器/訊號分析儀會落在測試流程的哪個環節？",
+  "market": "Semiconductor",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": null,
+ "exchange": {
+  "sent": "在半導體領域涉及 RFIC 驗證的應用情境中，訊號產生器/訊號分析儀會落在測試流程的哪個環節？",
+  "route_forced": "direct",
+  "http_status": 200,
+  "seconds": 28.703,
+  "timed_out": false,
+  "reply": {
+   "answer": {
+    "ok": true,
+    "answer": "### 答案\n訊號產生器／訊號分析儀在這類 RFIC／RF 驗證情境中，會落在**實驗室 RF 測試／RF 驗證**環節；OneWeb UT 測試流程把第 1–3 個月定義為 laboratory RF test，並在此階段量測 G/T、noise figure、transmit power、驗證 link equation、分析 modulation / coding，測試設備列為 `Rohde & Schwarz SMW6` signal generator 與 R&S FSW spectrum analyzer。[2]\n若用半導體產業鏈語境對應，這類儀器屬於「生產製程及檢測設備」的一部分；該類設備在中游支援 IC／晶圓製造，也在下游支援 IC 封裝測試。[19][20]\n\n來源：\n[2] Wiki：OneWeb UT 測試流程（來源：`oneweb_ut_final_presentation.md`）\n[19] Wiki：半導體產業鏈（來源：`Serdes IC-IP companies image 1.md`、`Serdes IC-IP companies image 2.md`、`Serdes IC-IP companies image 3.md`…）\n[20] Wiki：半導體產業鏈（來源：`Serdes IC-IP companies image 1.md`、`Serdes IC-IP companies image 2.md`、`Serdes IC-IP companies image 3.md`…）",
+    "record": {
+     "asset": {
+      "namespace": "engineering",
+      "name": "rs-knowledge",
+      "version": "1.0.3"
+     },
+     "trace": {
+      "trace_id": "trace-a94f97283bf144cba1a049bfa53840e6",
+      "request_id": "request-a94f97283bf144cba1a049bfa53840e6",
+      "span_id": "span-a94f97283bf144cba1a049bfa53840e6",
+      "parent_span_id": null
+     },
+     "answer": {
+      "question": "在半導體領域涉及 RFIC 驗證的應用情境中，訊號產生器/訊號分析儀會落在測試流程的哪個環節？",
+      "status": "answered",
+      "passages": [
+       {
+        "text": "OneWeb UT 測試流程 › 與既有頁面的關係\n- [[Satellite User Terminal 外部資料清單]]：本來源是該頁 unresolved 中 `oneweb_ut_final_presentation.html` 的已轉 markdown 擷取來源之一。\n- [[衛星地面設備]]：本頁補充 user terminal testing / commercialization flow，屬於 ground equipment 與 user terminal commercialization 的應用層資料。\n- [[5G NTN validation and testing]]：本頁補充 [[Sharp]] + [[MediaTek M80]]、[[3GPP Release 19]] 與 ITRI gNB 的 OneWeb UT roadmap 語境。\n- [[相控陣列天線]]：本頁涉及 flat-panel antenna、G/T、scan angle、beamforming ASIC 與 phased-array front-end，但未提供 antenna design detail。\n- [[R&S FSW]]：來源點名 FSW spectrum analyzer 作為測試設備線索；未列 model、option 或 measurement setup。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 7,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/OneWeb UT 測試流程.md"
+        },
+        "score": 21.922652
+       },
+       {
+        "text": "OneWeb UT 測試流程 › 第一階段：實驗室 RF 測試（第 1–3 個月）\n[[oneweb_ut_final_presentation]] 將第 1–3 個月定義為 laboratory RF test，主要活動包含：\n\n- 選定終端機型號，例如 [[Intellian OW11F]] 或 [[Hughes HL1120W]]。\n- 量測 RF characteristics：接收增益 / G/T、noise figure（NF）、transmit power。\n- 驗證 link equation，來源以 [[Qorvo]] PA + [[Analog Devices]] LNA 作為例子。\n- 分析 modulation / coding，來源寫 OneWeb proprietary 或 [[MediaTek M80]] 5G NTN modem。\n- 測試設備列為 `Rohde & Schwarz SMW6` signal generator 與 [[R&S FSW]] spectrum analyzer。\n\n交付物包含 G/T and noise figure measurement validation、Ku / Ka rain fade margin calculation 與 multipath fading assessment。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/OneWeb UT 測試流程.md"
+        },
+        "score": 21.80261
+       },
+       {
+        "text": "OneWeb UT 測試流程 › 第二階段：現場鏈路驗證（第 3–5 個月）\n[[oneweb_ut_final_presentation]] 將第 3–5 個月定義為 field link validation，主要活動包含：\n\n- 透過 [[Eutelsat OneWeb]] gateway 進行 real-time link testing。\n- 測試 mobility scenarios：aircraft、maritime、IoT。\n- 量測 handover latency 與 connection downtime（CDT）。\n- 與多個 OEM 廠商平行試驗，例如 [[Kymeta]]、[[ThinKom]]。\n- 啟動 [[Sharp]] + [[MediaTek M80]] 的 5G NTN trial。\n\n交付物包含 real-world throughput / latency metrics、multi-orbit handover validation 與 5G NTN compatibility assessment。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/OneWeb UT 測試流程.md"
+        },
+        "score": 10.618211
+       },
+       {
+        "text": "Qorvo › 來源中的說法\n[[oneweb_ut_final_presentation]]（來源正式日期未標示；raw converted 2026-09-17）對 [[Qorvo]] 的描述包含：\n\n- 在 laboratory RF test 階段，link equation validation 例子寫為 [[Qorvo]] PA + [[Analog Devices]] LNA。\n- RF metrics 的 Tx 指標寫 `EIRP: 35–45 dBW (Qorvo PA)`。\n- RF components & semiconductor supplier tier 中寫：[[Qorvo]] 是 industry leader；GaN-based Ku / Ka band `2W–100W+`；[[Qorvo QPA1722]] K-band latest，bandwidth increased 3x。\n- LNA generic supply 中列出 LNA `<1 dB NF @ 12 GHz` from [[Qorvo]]、[[ADI]]、[[Skyworks]]。\n- 採購與測試協調區將 [[Qorvo]] PA 列為 RF component supplier supply agreement 對象。\n- 後續行動建議 lock in [[Qorvo]] 與 [[Analog Devices]] component supply agreements。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Qorvo.md"
+        },
+        "score": 6.812863
+       },
+       {
+        "text": "Qorvo\n[[Qorvo]] 是 [[oneweb_ut_final_presentation]] 中列為 OneWeb user terminal RF component / semiconductor supply chain 的 PA / LNA 供應商，來源特別提到 GaN-based Ku / Ka band PA 與 [[Qorvo QPA1722]]。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Qorvo.md"
+        },
+        "score": 3.75732
+       },
+       {
+        "text": "Qorvo › 可追溯範圍\n- 本頁只支持 [[oneweb_ut_final_presentation]] 中 [[Qorvo]] 在 PA / LNA / GaN / K-band component supply chain 的列名與 roadmap 建議。\n- 來源未提供 Qorvo datasheet、part number list、application circuit、frequency range、output power condition、efficiency condition、customer adoption、supply agreement 或 price。\n- [[Qorvo QPA1722]] 的 K-band / bandwidth claim 需要 Qorvo 官方產品頁或 datasheet 補證。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Qorvo.md"
+        },
+        "score": 2.598078
+       },
+       {
+        "text": "Kuiper UT 測試流程 › OTA 電波暗室配置\nSlide 7 列出 OTA 電波暗室資訊：\n\n- 核心設備：3 × 3 × 3 m 暗室、多探頭陣列 48–192 個、VNA 與信號分析儀。\n- 校準步驟：背景扣除、元素 A/P 校準、波束表生成。\n- 輸出品質：增益誤差 < 0.5 dB、指向誤差 < 0.5°、模式完整性。\n\n此段可連到 [[Phased Array OTA testing]]、[[相控陣列天線]]與 [[低軌衛星終端設備檢測]]，但來源未提供儀器型號、校準標準或 measurement uncertainty。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 4,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+        },
+        "score": 21.759666
+       },
+       {
+        "text": "Kuiper UT 測試流程 › unresolved\n- 需要取得原始 PPTX 或正式 test plan 以確認表格、圖像與備註是否在 markdown 轉檔中遺失。\n- 需要確認 FCC 授權案號、ITU filing、測試地點、終端數量與 prototype / production 的區分。\n- 需要補充 OTA chamber、VNA、signal analyzer、network emulator、satellite channel emulator 的具體設備與校準方法。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 10,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+        },
+        "score": 16.552165
+       },
+       {
+        "text": "Kuiper UT 測試流程\n[[Kuiper UT 測試流程]]是 [[Kuiper UT Test & Supply Chain]] 中針對 [[Project Kuiper 用戶終端]]的製造測試、OTA 電波暗室測試、RF 驗證、波束追蹤、環境可靠性、系統整合與現場試驗流程。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+        },
+        "score": 13.265316
+       },
+       {
+        "text": "Project Kuiper › 測試與產品化流程\n來源把 [[Kuiper UT 測試流程]]分成：\n\n- 製造階段：工廠驗收測試 FAT、射頻模式驗證、熱電性能。\n- 系統整合：實驗室端對端測試、協議棧驗證、模擬器模擬。\n- 現場驗證：Protoflight 試驗、真實衛星測試、1000+ 終端試驗。\n\n來源列出的時間點包括 2023 Protoflight、2024 1000+ 單位測試、2025 實衛星速率、2026 Q1 商用化準備；但未提供外部公告或測試報告。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 4,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Project Kuiper.md"
+        },
+        "score": 24.567171
+       },
+       {
+        "text": "Project Kuiper\n[[Project Kuiper]] 是 [[Amazon]] 的低軌衛星通訊 / user terminal 相關計畫名稱，本 vault 目前由 [[Kuiper UT Test & Supply Chain]] 提供其用戶終端測試流程、產品化準備與供應鏈策略的 company restricted 簡報說法。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Project Kuiper.md"
+        },
+        "score": 13.13496
+       },
+       {
+        "text": "Project Kuiper › 使用限制\n- [[Kuiper UT Test & Supply Chain]] 未標示正式發布日期、作者、版本號或引用來源；不可視為 Amazon 官方規格、公開服務承諾或合約證據。\n- 本頁只記錄來源文字，不得推論實際上線、國家授權、衛星數、量產良率、終端出貨量、供應商合約或 R&S 往來關係。\n- 2026 Q1 / 2026 年底 / 2023 / 2024 / 2025 等時間點都需要官方公告、FCC / ITU filing 或測試報告補證。\n- 三款終端規格、Ka-band 頻段、功耗與成本目標應由正式 datasheet 或 regulatory filing 驗證。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 7,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Project Kuiper.md"
+        },
+        "score": 11.743186
+       },
+       {
+        "text": "Amazon Prometheus SoC › 在 Project Kuiper 架構中的角色\n依 [[Kuiper UT Test & Supply Chain]]，Prometheus SoC 連接下列脈絡：\n\n- [[Project Kuiper 用戶終端]]的 Ka-band 相控陣與基帶處理。\n- [[Kuiper UT 測試流程]]中的 FAT、熱電性能、協議棧驗證、資料處理與端對端模擬。\n- [[AWS]] 整合、加密與安全、企業私網延伸等服務定位。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Amazon Prometheus SoC.md"
+        },
+        "score": 12.685962
+       },
+       {
+        "text": "Amazon Prometheus SoC › 使用限制\n- 來源未提供 Prometheus SoC 的正式產品頁、die photo、製程節點、封裝、記憶體介面、RF 介面、功耗 breakdown 或吞吐量測試條件。\n- 來源中的 60–225 W 可能是 user terminal 整機功耗，不可直接寫成 SoC TDP。\n- 來源中的 1Tbps 等級資料處理未標示是衛星、網關、終端、aggregate throughput、switching fabric 或 protocol stack capability。\n- 不可由本來源推論 [[Amazon Prometheus SoC]] 已量產、由特定晶圓代工廠製造、使用特定製程、出貨給特定供應商或與 [[AWS Trainium 2 Max]] 等 AI ASIC 有技術關係。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 4,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Amazon Prometheus SoC.md"
+        },
+        "score": 10.192053
+       },
+       {
+        "text": "Amazon Prometheus SoC › 來源中的說法\n[[Kuiper UT Test & Supply Chain]]（來源正文未標示正式發布日期；raw converted 2026-09-17）在多個位置提到 [[Amazon Prometheus SoC]]：\n\n- Slide 4：基帶晶片為 Amazon Prometheus SoC，衛星 / 網關 / 終端共用。\n- Slide 6：製造測試中的電源與熱項目包含 Prometheus SoC 功耗，來源同頁括號列出 60–225 W，但該範圍也與三款 user terminal 功耗相同，因此不能確定是否為 SoC 本身功耗。\n- Slide 11：系統整合測試包含基帶 / Prometheus 晶片、協議棧驗證與資料處理，括號寫 1Tbps 等級。\n- Slide 14：2026 年底部署時間表寫 Prometheus SoC 全球整合。\n- Slide 15：核心設計為 Amazon 內部，Prometheus SoC 自主研發。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Amazon Prometheus SoC.md"
+        },
+        "score": 10.070188
+       },
+       {
+        "text": "oneweb_ut_final_presentation › 與既有知識的關係\n- [[Satellite User Terminal 外部資料清單]] 先前把 `oneweb_ut_final_presentation.html` 列為待擷取附件；本頁將該附件轉出的 markdown 作為已 ingest 的來源摘要，但仍需回查原始 HTML / presentation。\n- [[衛星地面設備]] 先前只把 [[User Terminal]] 視為 link hub；本來源新增 OneWeb user terminal 測試流程、OEM ecosystem、RF metrics 與 commercialization stages 的可追溯摘要。\n- [[5G NTN validation and testing]] 先前由 R&S / MediaTek、Gatehouse、Viasat 等 PR 支撐；本來源新增 OneWeb / Sharp / MediaTek M80 / ITRI 視角，但來源不是標準文件、產品 datasheet 或官方測試報告。\n- [[MediaTek]] 既有頁面整理 MWC 2024 NTN-NR demo 與 Genio / Dimensity 圖卡；本來源新增 [[MediaTek M80]] 作為 5G NTN modem roadmap 線索，但不可視為官方量產或規格確認。\n- [[Analog Devices]] 既有頁面只把 ADI 視為 phased array / receiver IC link hub 線索；本來源新增 ADI LNA / receiver front-end / phased-array receive front-end 供應鏈語境。\n- [[工研院]] 既有頁面記錄 Ka-band LEO satellite RF chipset 研發說法；本來源新增 ITRI 5G NTN terrestrial / satellite gNB development 線索。\n- [[R&S SMW200A]] 與 [[R&S FSW]] 是既有產品頁；本來源只寫 `Rohde & Schwarz SMW6 信號產生器、FSW 譜儀`，其中 `SMW6` 的正式型號未能對應，不能自動改寫為 [[R&S SMW200A]]。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/oneweb_ut_final_presentation.md"
+        },
+        "score": 18.344529
+       },
+       {
+        "text": "oneweb_ut_final_presentation › 原文未解的問題\n- 來源正式發布日期、簡報版次、作者、部門正式名稱與適用客戶 / 專案未標示。\n- 原始檔為 HTML 轉 markdown 的 lossy derivative；需回查 `oneweb_ut_final_presentation.html` 原始內容、圖片與任何 speaker notes。\n- OneWeb constellation 數字、軌道高度、覆蓋範圍、頻段、throughput、latency 與 beam count 未附官方文件或測試條件。\n- [[Intellian OW11F]]、[[Hughes HL1120W]]、[[Kymeta Goshawk u8]]、[[Sharp]] 5G NTN terminal、[[Gilat ESR-2030Ku]]、[[ThinKom Ka2517]]、[[SatixFy ESMA]] 等產品規格需個別 datasheet 或 OEM 文件確認。\n- RF metrics（G/T、NF、EIRP、P1dB、path loss、rain margin、SNR）未標示量測 setup、環境條件、終端型號、頻點、校正狀態或測試不確定度。\n- [[Qorvo]] PA、[[Analog Devices]] LNA / receiver front-end、[[MediaTek M80]]、[[SatixFy Sx3099]] 與 [[Prime ASIC]] 供應鏈角色未附合約、採用或量產證據。\n- [[MediaTek M80]] 的 [[3GPP Release 19]] support、Sharp trial、2025 H2 commercial modem mass production 皆需官方 roadmap / datasheet / announcement 補證。\n- [[工研院]] ITRI satellite-board gNB / terrestrial gNB support 未提供專案名稱、標準版本、頻段、平台或合作單位證據。\n- `Rohde & Schwarz SMW6` 可能是型號簡寫或轉檔 / 原文錯誤；不可自行對應為 [[R&S SMW200A]] 或其他 signal generator。\n- 市場規模、CAGR 與 2035 forecast 未標示研究機構、報告日期、定義口徑或貨幣基準。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 6,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/oneweb_ut_final_presentation.md"
+        },
+        "score": 17.033007
+       },
+       {
+        "text": "oneweb_ut_final_presentation › 重點摘要\n- 來源題名為「OneWeb UT 測試流程」，副題為「衛星通訊使用者終端機驗證與商業化」，署名脈絡為「衛星通訊測試中心 | RF 工程部門」。\n- 來源將 [[Eutelsat OneWeb]] 描述為 OneWeb constellation operator，並列出 [[OneWeb]] 系統參數：LEO 軌道高度 `750 km`、`600+` 在軌衛星、`100+` 預訂衛星、全球 `±81.4°` 覆蓋、user bands 為 [[Ku-band]] `12–18 GHz` 與 [[Ka-band]] `27–31 GHz`。\n- 來源描述 typical terminal peak downlink `150 Mbps`、latency `50–150 ms`、`200+` simultaneous beams；這些數字未提供 datasheet、測試條件或 OneWeb 官方文件引用。\n- 來源把 [[OneWeb UT 測試流程]] 分成三階段：第 1–3 個月 laboratory RF test、第 3–5 個月 field link validation、第 5–7 個月 commercialization readiness。\n- 第一階段 laboratory RF test 建議選定 [[Intellian]] [[Intellian OW11F]] 或 [[Hughes]] [[Hughes HL1120W]]，量測 G/T、NF、Tx power、link equation，並提到 [[Qorvo]] PA、[[Analog Devices]] LNA、[[MediaTek M80]] 與 `Rohde & Schwarz SMW6` / [[R&S FSW]]。\n- 第二階段 field link validation 透過 [[Eutelsat OneWeb]] gateway 做 real-time link testing，含 mobility scenarios、handover latency / CDT、multi-OEM parallel trials 與 [[Sharp]] + [[MediaTek M80]] 5G NTN trial。\n- 第三階段 commercialization readiness 包含供應鏈最終化、[[MediaTek]] 5G NTN roadmap、[[工研院]] ITRI gNB development、SLA negotiation 與 2026+ commercial launch roadmap。\n- RF 指標區列出 Rx：G/T `18.2 dB/K`（[[Intellian OW11F]]）、NF `<1 dB @ 12 GHz`、gain tolerance `±2 dB`、3 dB bandwidth `500 MHz`；Tx：EIRP `35–45 dBW`、power efficiency `50%+`、PA NF `6–8 dB`、P1dB `35 dBm (2W)`。\n- Link budget 區列出 Ku downlink path loss `196 dB`、rain fade margin `4–6 dB` for `99.5%` availability、margin `>3 dB`、QPSK/BPSK SNR `6–8 dB`。\n- OEM ecosystem 區列出 [[Intellian]]、[[Hughes]]、[[Kymeta]]、[[Sharp]]，並延伸列出 [[Gilat]] / [[Gilat ESR-2030Ku]]、[[ThinKom]] / [[ThinKom Ka2517]]、[[Satcom Direct]] / [[Plane Simple]]、[[PALS]] / [[PPA-SOTM]]、[[SatixFy]] / [[SatixFy ESMA]]、[[Intelsat]] / [[Intelsat ESA]]、[[Requtech]] / [[RESA]]、[[Asmote]]。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/oneweb_ut_final_presentation.md"
+        },
+        "score": 16.973184
+       },
+       {
+        "text": "半導體產業鏈 › 來源中的分段\n| 產業鏈階段 | 圖上項目 | 日期 / 期間 | 來源 | 限制 |\n|---|---|---|---|---|\n| 上游 | IP設計/IC設計代工服務；IC設計 | 來源未標示日期；取得於 2026-09-04 | [[Serdes IC-IP companies image 2]]；[[Serdes IC-IP companies image]] | 未列公司、產品、IP 類別、設計服務範圍或商業關係；兩份來源高度重複，不可視為獨立驗證 |\n| 中游 | IC/晶圓製造；生產製程及檢測設備；光罩；化學品 | 來源未標示日期；取得於 2026-09-04 | [[Serdes IC-IP companies image 2]]；[[Serdes IC-IP companies image]] | 未列 foundry、設備商、材料商、製程節點、產能或市場數字；兩份來源高度重複，不可視為獨立驗證 |\n| 下游 | IC封裝測試；生產製程及檢測設備；基板；導線架；IC模組；IC通路 | 來源未標示日期；取得於 2026-09-04 | [[Serdes IC-IP companies image 2]]；[[Serdes IC-IP companies image]] | 未列 OSAT、基板供應商、導線架供應商、模組商、通路商或出貨資料；兩份來源高度重複，不可視為獨立驗證 |",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/半導體產業鏈.md"
+        },
+        "score": 18.649285
+       },
+       {
+        "text": "半導體產業鏈 › 圖上流程關係\n- [[Serdes IC-IP companies image 2]]（來源未標示日期；取得於 2026-09-04）在上游區塊內以箭頭表示 **IP設計/IC設計代工服務 → IC設計**。\n- [[Serdes IC-IP companies image]]（來源未標示日期；取得於 2026-09-04）在上游區塊內以箭頭表示 **IP設計 /IC設計 代工服務 → IC設計**。\n- [[Serdes IC-IP companies image 2]]（來源未標示日期；取得於 2026-09-04）在中游區塊把 **IC/晶圓製造** 放在上方主方塊，下方列出 **生產製程及檢測設備**、**光罩**、**化學品**，並以向上箭頭表示支援主方塊。\n- [[Serdes IC-IP companies image]]（來源未標示日期；取得於 2026-09-04）描述中游主方塊 **IC/晶圓製造** 與下方 **生產製程及檢測設備**、**光罩**、**化學品** 之間有上下雙向箭頭樣式的連結符號，表示彼此相關或互相支援。\n- [[Serdes IC-IP companies image 2]]（來源未標示日期；取得於 2026-09-04）在下游區塊把 **IC封裝測試** 放在上方主方塊，下方列出 **生產製程及檢測設備**、**基板**、**導線架**，並以向上箭頭表示支援主方塊。\n- [[Serdes IC-IP companies image]]（來源未標示日期；取得於 2026-09-04）描述下游主方塊 **IC封裝測試** 與下方 **生產製程及檢測設備**、**基板**、**導線架** 之間有上下雙向箭頭樣式的連結符號。\n- [[Serdes IC-IP companies image 2]]（來源未標示日期；取得於 2026-09-04）在下游右側另列 **IC模組** 與 **IC通路**。\n- [[Serdes IC-IP companies image]]（來源未標示日期；取得於 2026-09-04）明確描述 **IC封裝測試** 右側有向右箭頭指向 **IC模組**；來源列出的結構化關聯表未列出 [[IC通路]] 與其他方塊的明確箭頭。\n- [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 都沒有以完整箭頭串接所有大區塊；本頁只記錄圖上呈現的上游、中游、下游排列與區塊內箭頭，不補寫供應鏈流程細節。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/半導體產業鏈.md"
+        },
+        "score": 15.486918
+       },
+       {
+        "text": "半導體產業鏈\n[[半導體產業鏈]] 是 [[Serdes IC-IP companies image 2]]（來源未標示日期；取得於 2026-09-04）與 [[Serdes IC-IP companies image]]（來源未標示日期；取得於 2026-09-04）用三個區塊表示的產業分工結構，圖上分為上游、中游與下游，並列出 IP / IC 設計、晶圓製造、封裝測試、基板、導線架、IC 模組與 IC 通路等環節。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/半導體產業鏈.md"
+        },
+        "score": 14.120803
+       },
+       {
+        "text": "OneWeb UT 測試流程 › RF 驗證指標\n[[oneweb_ut_final_presentation]] 列出的 Rx 指標包含：\n\n| 指標 | 來源數值 | 來源限制 |\n|---|---:|---|\n| G/T | `18.2 dB/K`（[[Intellian OW11F]]） | 未附 datasheet、測試頻點或 scan angle 條件。 |\n| NF | `<1 dB @ 12 GHz` | 未標示 LNA 型號、溫度或 calibration 條件。 |\n| Gain risk / tolerance | `±2 dB` | 來源稱來自 temperature / frequency，但未提供測試條件。 |\n| 3 dB bandwidth | `500 MHz`（Ku-band） | 未標示中心頻率與 terminal / antenna 型號。 |\n\nTx 指標包含：\n\n| 指標 | 來源數值 | 來源限制 |\n|---|---:|---|\n| EIRP | `35–45 dBW`（[[Qorvo]] PA） | 未標示 PA 型號、antenna gain 或 duty cycle。 |\n| Power efficiency | `50%+`（GaN chipset） | 未標示 operating point。 |\n| PA noise figure | `6–8 dB` | 未標示頻段與量測條件。 |\n| Output P1dB | `35 dBm (2W)` | 未標示 PA 型號與 frequency。 |\n\nLink budget 指標包含：Ku downlink path loss `196 dB`、rain fade margin `4–6 dB` for `99.5%` availability、margin `>3 dB`、QPSK / BPSK SNR `6–8 dB`。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/OneWeb UT 測試流程.md"
+        },
+        "score": 9.725278
+       },
+       {
+        "text": "OneWeb UT 測試流程\n[[OneWeb UT 測試流程]] 是 [[oneweb_ut_final_presentation]] 對 [[OneWeb]] / [[Eutelsat OneWeb]] user terminal 從實驗室 RF 驗證、現場鏈路驗證到商業化準備的三階段測試與導入流程描述；來源正式日期未標示，僅 raw converted date 為 2026-09-17。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/OneWeb UT 測試流程.md"
+        },
+        "score": 8.543329
+       },
+       {
+        "text": "OneWeb UT 測試流程 › 使用限制\n- 本頁是 Market 來源摘要，不是 OneWeb / Eutelsat OneWeb 官方 test plan、terminal datasheet、R&S application note 或 conformance test procedure。\n- 時程「第 1–3 個月 / 第 3–5 個月 / 第 5–7 個月」是 presentation roadmap，未標示專案開始日期。\n- 來源未標示是否為內部 planning、客戶簡報、教育訓練或 market analysis。\n- `Rohde & Schwarz SMW6` 未能對應到既有正式型號；不可自行改為 [[R&S SMW200A]]。\n- 所有供應協議、採購協議與 SLA negotiation 皆為來源建議 / roadmap；不可視為已簽約或已量產。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 8,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/OneWeb UT 測試流程.md"
+        },
+        "score": 8.456282
+       },
+       {
+        "text": "OneWeb UT 測試流程 › OEM 與供應鏈流程\n來源將測試流程與採購協調連在一起：\n\n- 選定 terminal model，例如 [[Intellian OW11F]] 或 [[Hughes HL1120W]]。\n- 請 OEM 提供 RF characteristics data，並與 laboratory results compare / validate。\n- 安排 field installation and acceptance，與 OEM technical support coordination。\n- 與 [[Eutelsat OneWeb]] 開 test account、取得 gateway access。\n- 與 terminal OEM 取得 samples、technical documents、after-sales support commitment。\n- 與 RF component suppliers [[Qorvo]] 與 [[Analog Devices]] 討論 PA / LNA / receiver front-end supply agreement。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 6,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/OneWeb UT 測試流程.md"
+        },
+        "score": 5.855363
+       },
+       {
+        "text": "OneWeb UT 測試流程 › unresolved\n- 需要回查原始 `oneweb_ut_final_presentation.html`，確認 HTML 是否含圖表、註腳、資料來源或作者資訊。\n- 需要確認 OneWeb constellation parameters 與 UT RF metrics 的官方來源。\n- 需要擷取 [[Intellian OW11F]]、[[Hughes HL1120W]]、[[Kymeta Goshawk u8]]、[[MediaTek M80]]、[[Qorvo QPA1722]] 與 [[ADAR1000]] datasheet / product page。\n- 需要確認 `SMW6` 是正式型號、簡寫、或轉檔錯誤。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 9,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/OneWeb UT 測試流程.md"
+        },
+        "score": 4.845838
+       },
+       {
+        "text": "Qorvo › unresolved\n- 需要擷取 [[Qorvo QPA1722]] official datasheet，確認 frequency range、gain、P1dB、PAE、noise figure、package、application 與 revision。\n- 需要確認 [[Qorvo]] 是否在 OneWeb / Eutelsat OneWeb terminal supply chain 中有正式採用或僅是來源建議。\n- 需要確認 `2W–100W+` GaN Ku / Ka PA coverage 的產品系列與條件。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 4,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Qorvo.md"
+        },
+        "score": 2.510523
+       },
+       {
+        "text": "Kuiper UT 測試流程 › 測試策略框架\n[[Kuiper UT Test & Supply Chain]]（來源正文未標示正式發布日期；raw converted 2026-09-17）Slide 5 將測試策略分為三層：\n\n1. 製造階段：工廠驗收測試 FAT、射頻模式驗證、熱電性能。\n2. 系統整合：實驗室端對端測試、協議棧驗證、模擬器模擬。\n3. 現場驗證：Protoflight 試驗、真實衛星測試、1000+ 終端試驗。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+        },
+        "score": 10.004182
+       },
+       {
+        "text": "Kuiper UT 測試流程 › 使用限制\n- 本頁是市場 / 內部簡報層級測試流程整理，不是正式 test plan、測試標準或 certification requirement。\n- FCC 25.209、PFD、ITU、MIL-STD、APSK、BER vs Eb/N0 等項目需補正式標準版本、章節與測試條件。\n- 100% 成功率、1000+ 單位測試、1+ Gbps 下行與 450 Mbps 上行等說法未附報告、地點、terminal model、satellite count 或 measurement method。\n- 不可用本頁判斷任何 Kuiper terminal 已取得認證、完成量產或達成商用 SLA。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 9,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+        },
+        "score": 10.003932
+       },
+       {
+        "text": "Kuiper UT 測試流程 › 系統整合與現場試驗\nSlide 11 的系統整合測試：\n\n- 基帶 / [[Amazon Prometheus SoC]]：協議棧驗證、資料處理 1Tbps 等級。\n- 加密與安全：[[AWS]] 整合，私有網路延伸。\n- 端對端模擬：使用網路仿真器，模擬衛星延遲與衰落。\n- 合規檢驗：FCC / ITU 規範，PFD、雜散限制。\n\nSlide 12 的現場試驗目標：\n\n- Protoflight（2023）：100% 成功率，雙向視訊通話驗證。\n- 1000+ 單位測試（2024）：FCC 授權，多地點涵蓋驗證。\n- 實衛星速率（2025）：達成 1+ Gbps 下行、450 Mbps 上行。\n- 商用化準備（2026 Q1）：5 國上線服務驗證。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 8,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+        },
+        "score": 9.273469
+       },
+       {
+        "text": "Kuiper UT 測試流程 › 環境與可靠性測試\nSlide 10 列出：\n\n- 溫度範圍：-40°C 至 +60°C，RF 性能漂移監測。\n- 振動與衝擊：MIL-STD 運輸與安裝耐久性。\n- 濕度與鹽霧：防護等級驗證，腐蝕測試。\n- 長期耐久：1000+ 頻率掃描週期，增益衰減 < 0.5 dB。\n\n來源未標示 MIL-STD 具體版本、鹽霧標準、IP rating 或測試 duration。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 7,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+        },
+        "score": 8.810222
+       },
+       {
+        "text": "Kuiper UT 測試流程 › 第一階段：製造測試 FAT\nSlide 6 列出的 FAT 項目：\n\n- 近場掃描：射頻模式驗證，3D 掃描，SLL < -20 dB。\n- 增益與增益溫度比：波束掃描損失 < 3 dB 檢證。\n- 元素校準：振幅 / 相位均勻性 < 1 dB / < 5°。\n- 電源與熱：Prometheus SoC 功耗，來源括號列 60–225 W；此數字是否為 [[Amazon Prometheus SoC]] 本身功耗或終端整機功耗未決。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+        },
+        "score": 8.203012
+       },
+       {
+        "text": "Project Kuiper › 用戶終端與技術線索\n[[Kuiper UT Test & Supply Chain]] 將 [[Project Kuiper 用戶終端]]分為三款：\n\n- 標準型：18 × 18 cm、400 Mbps、90 W，用於住宅與小企業。\n- 便攜型：7 inch、100 Mbps、60 W，用於流動與 IoT 應用。\n- 企業型：76 × 51 cm、1 Gbps、225 W，用於回傳與企業應用。\n\n核心技術被描述為 Ka 頻段[[相控陣列天線]]：Rx 18–20 GHz、Tx 28–30 GHz、電子掃描、無機械部件、±60°覆蓋，並使用 [[Amazon Prometheus SoC]] 作為衛星 / 網關 / 終端共用的基帶晶片。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Project Kuiper.md"
+        },
+        "score": 10.43293
+       },
+       {
+        "text": "Project Kuiper › 與 Amazon Leo 的關係\n既有 [[Satellite User Terminal 外部資料清單]] 記錄 [[User Terminal]] link hub 中有 Amazon：Project Kuiper becomes [[Amazon Leo]] 的待讀線索。[[Kuiper UT Test & Supply Chain]] 使用 Amazon Project Kuiper 名稱，未提到 [[Amazon Leo]]。目前不可判定兩個名稱在來源時間點、品牌策略或法律實體上的正式關係。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 6,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Project Kuiper.md"
+        },
+        "score": 7.30125
+       },
+       {
+        "text": "Project Kuiper › 供應鏈與製造策略\n[[Kuiper UT Test & Supply Chain]] 稱：\n\n- 核心設計由 [[Amazon]] 內部完成，地點為 Kirkland / Redmond, WA。\n- [[Amazon Prometheus SoC]] 為自主研發。\n- 製造基地為 Washington 州自動化工廠，年產百萬級 user terminals 與衛星。\n- 元件夥伴列有 [[Tezmaksan]]（天線部件）與 [[L3Harris]]（政府應用）。\n- 供應鏈策略包含全球分散、規避單一國家風險、消費電子物流優勢。\n- 成本控制使用 Echo / Fire TV 經驗、自動化組裝、垂直整合 80% 技術、Amazon FBA 網路與自安裝降低裝機費。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Project Kuiper.md"
+        },
+        "score": 4.847499
+       },
+       {
+        "text": "Project Kuiper › 來源中的商業目標\n[[Kuiper UT Test & Supply Chain]]（來源正文未標示正式發布日期；raw converted 2026-09-17）稱：\n\n- 2026年Q1：在美、加、英、德、法 5 個國家上線服務。\n- 2026 年底：覆蓋範圍擴展至 26 個國家。\n- 市場客群：住宅、企業、政府、電信回傳。\n- 產品定位：競爭光纖價格，超越現有衛星服務。\n- 2026年Q1 部署時間表另稱 5 國上線時衛星數為 200+ 顆。\n- 成功關鍵因素列有預計 3200+ LEO 衛星、全球涵蓋競爭力、AWS 整合與低成本製造。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Project Kuiper.md"
+        },
+        "score": 4.558401
+       },
+       {
+        "text": "Amazon Prometheus SoC\n[[Amazon Prometheus SoC]] 是 [[Kuiper UT Test & Supply Chain]] 中列為 [[Project Kuiper]] 衛星、網關與用戶終端共用的基帶晶片名稱；來源未提供正式 datasheet、製程、供應商或量產狀態。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Amazon Prometheus SoC.md"
+        },
+        "score": 8.53137
+       },
+       {
+        "text": "Amazon Prometheus SoC › unresolved\n- 需要 Amazon 官方技術頁、FCC filing、採訪或拆解資料確認 Prometheus SoC 的正式名稱、規格與適用設備。\n- 需要確認 1Tbps 等級的口徑與測試條件。\n- 需要確認 60–225 W 是否為三款 user terminal 整機功耗，而非 SoC 功耗。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Amazon Prometheus SoC.md"
+        },
+        "score": 1.24428
+       },
+       {
+        "text": "oneweb_ut_final_presentation › 關鍵實體與概念\n- [[OneWeb UT 測試流程]]：本來源的核心概念，涵蓋 laboratory RF test、field link validation 與 commercialization readiness。\n- [[Eutelsat OneWeb]]：來源列為 constellation operator 與 gateway / SLA / test account 相關方。\n- [[OneWeb]]：衛星系統與 UT 商業化對象。\n- [[Intellian]]、[[Hughes]]、[[Kymeta]]、[[Sharp]]：主要 OEM terminal / 5G NTN trial 相關廠商。\n- [[Qorvo]]、[[Analog Devices]]、[[Skyworks]]：PA / LNA / receiver front-end 等 RF components 供應商線索。\n- [[MediaTek M80]]：來源稱為 5G NTN modem，支援 [[3GPP Release 19]]，用於 Sharp trial；需官方資料補證。\n- [[工研院]]：來源稱 ITRI 開發 satellite-board 5G gNB / terrestrial gNB integration 相關方案。\n- [[Satellite User Terminal 外部資料清單]]、[[衛星地面設備]]、[[5G NTN validation and testing]]：既有頁面可承接本來源的 user terminal、ground equipment 與 NTN validation 脈絡。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 4,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/oneweb_ut_final_presentation.md"
+        },
+        "score": 10.574719
+       },
+       {
+        "text": "oneweb_ut_final_presentation\n[[oneweb_ut_final_presentation]] 是由 `oneweb_ut_final_presentation.html` 轉出的 OneNote / presentation 型 Market 來源，主題為 [[OneWeb UT 測試流程]]、衛星通訊使用者終端機驗證與商業化；來源正式發布日期、作者正式姓名、部門版次與原始簡報版本皆未標示，raw frontmatter 僅標示 converted: 2026-09-17。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/oneweb_ut_final_presentation.md"
+        },
+        "score": 10.223009
+       },
+       {
+        "text": "oneweb_ut_final_presentation › 重點摘要\n- RF component / semiconductor 區列出 [[Qorvo]]、[[Analog Devices]]、[[Skyworks]]、[[MediaTek M80]]、[[SatixFy Sx3099]]、[[Prime ASIC]]，並建議與 [[Qorvo]] 與 [[Analog Devices]] 簽供應協議、與 [[MediaTek]] 溝通 5G NTN modem roadmap。\n- 台灣策略定位區把 2025–2026 稱為 Taiwan positioning opportunity window，列出 [[MediaTek]]、[[工研院]] / ITRI、GaN PA design、phased-array subarray manufacturing 與 5G NTN ground integration solution。\n- 5G NTN strategic roadmap 區列出 [[3GPP Release 19]]、[[MediaTek M80]]、ITRI satellite-board gNB、Ericsson / Nokia 3GPP certification，並列出 2025 H1 Sharp 5G NTN trial validation、2025 H2 MediaTek commercial modem mass production、2026 global 5G NTN service coverage。\n- Market sizing 區列出 flat-panel antenna 2023 `$7.28B`、2035 `$11.9B–$32.95B`、CAGR `15%–32.1%`；LEO UT market 2024 `~$2B`、2035 `~$5–8B`、CAGR `30%+`；5G NTN modem 2024 `<$500M`、2035 `$2–3B`、CAGR `50%+`。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/oneweb_ut_final_presentation.md"
+        },
+        "score": 3.102257
+       },
+       {
+        "text": "半導體產業鏈 › 與既有頁面的關係\n- [[Serdes IC-IP companies image 1]]（來源未標示日期；取得於 2026-09-04）與 [[Serdes IC-IP companies image 3]]（來源未標示日期；取得於 2026-09-04）呈現的是 SoC / 晶片平台可整合 IP 類別，包括 [[SerDes]]、High Speed Serial I/F、Memory Interface、DSP、Processor、GPU、Mixed-Signal 等；[[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 則提供更高層級的產業鏈分類，將 **IP設計/IC設計代工服務** 放在上游。\n- [[SoC IP 組成方塊圖]] 可視為上游 **IP設計 / IC設計** 相關資料的一種圖像來源，但 [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 沒有列出 SoC、SerDes、Memory Interface 或具體 IP 清單。\n- [[IC載板]] 與 [[Package Substrate]] 是既有頁面中與下游 **基板** 可能相關的概念；但 [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 只寫「基板」，沒有定義材料、結構、用途或範圍，因此不能把該字樣直接等同於 [[IC載板]] 或 [[Package Substrate]]。\n- [[半導體封裝技術]] 頁整理具體封裝技術分類；[[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 只把 **IC封裝測試** 放在下游，不提供 [[Wire Bond]]、[[Flip Chip]]、[[Chiplet]]、[[2.5D 3D 封裝]] 或 [[Hybrid Bonding]] 的分類資訊。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/半導體產業鏈.md"
+        },
+        "score": 12.269863
+       },
+       {
+        "text": "半導體產業鏈 › 相關來源\n- [[Serdes IC-IP companies image 2]] — 未標示日期、取得於 2026-09-04 的半導體產業鏈方塊流程圖。\n- [[Serdes IC-IP companies image]] — 未標示日期、取得於 2026-09-04 的半導體產業鏈方塊流程圖，內容與 [[Serdes IC-IP companies image 2]] 高度重疊。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 7,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/半導體產業鏈.md"
+        },
+        "score": 7.22828
+       },
+       {
+        "text": "半導體產業鏈 › 未決事項\n- [[Serdes IC-IP companies image 2]] 未標示日期、年份、季度或資料期間。\n- [[Serdes IC-IP companies image]] 未標示日期、年份、季度或資料期間。\n- [[Serdes IC-IP companies image 2]] 未標示原始發布者、公司、作者、報告名稱、文件版次、頁碼或資料來源。\n- [[Serdes IC-IP companies image]] 未標示原始發布者、公司、作者、報告名稱、文件版次、頁碼或資料來源。\n- [[Serdes IC-IP companies image 2]] 未標示上游、中游、下游分類的依據。\n- [[Serdes IC-IP companies image]] 未標示上游、中游、下游分類的依據。\n- [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 都未列出任何公司、產品型號、產能、產值、市占率或出貨量。\n- [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 都未說明 **IP設計/IC設計代工服務** 的範圍。\n- [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 都未說明 **基板** 的種類、材料、用途或是否等同於 [[IC載板]] / [[Package Substrate]]。\n- [[Serdes IC-IP companies image 2]] 未說明 **IC模組** 與 **IC通路** 和 **IC封裝測試** 之間的箭頭或交易關係。\n- [[Serdes IC-IP companies image]] 明確描述 **IC封裝測試** 右側箭頭指向 **IC模組**，但未在結構化關聯表中說明 [[IC通路]] 與 [[IC封裝測試]] 或 [[IC模組]] 的關係。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 8,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/半導體產業鏈.md"
+        },
+        "score": 6.904732
+       },
+       {
+        "text": "半導體產業鏈 › 重複來源判斷\n- [[Serdes IC-IP companies image]] 與 [[Serdes IC-IP companies image 2]] 的主題、三段式區塊、上游 / 中游 / 下游圖中文字與缺漏欄位高度一致。\n- 兩份來源都未標示日期、年份、季度、公司名稱、產品型號、產能、產值、市占率或出貨量。\n- 引用時應把 [[Serdes IC-IP companies image]] 視為 [[Serdes IC-IP companies image 2]] 的重複或同源補充，詳見 [[Serdes IC-IP companies image 與 2 重複來源]]；不可因兩份圖像內容相同而把同一主張加權為兩份獨立市場證據。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 4,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/半導體產業鏈.md"
+        },
+        "score": 6.400455
+       },
+       {
+        "text": "半導體產業鏈 › 使用限制\n- 本頁只整理 [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 的圖上產業鏈分類，不把它們改寫為完整產業研究報告。\n- [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 都未標示公司名單，因此不能用來推論任何市場參與者、供應關係、客戶關係或競爭格局。\n- [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 都沒有數字，因此不能用來推論產值、市占率、產能、出貨量、成長率或占比。\n- [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 都沒有日期，因此不能用來代表任何特定時間點的市場狀態。\n- [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 都沒有標準版本或發布組織，因此本頁不把其分類視為正式標準。\n- [[Serdes IC-IP companies image]] 與 [[Serdes IC-IP companies image 2]] 高度重複；重複來源只能用於確認圖像同源 / 重複，不可用於提高結論可信度。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 6,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/半導體產業鏈.md"
+        },
+        "score": 3.797637
+       },
+       {
+        "text": "Serdes IC-IP companies image 2 › 重點摘要\n- [[Serdes IC-IP companies image 2]]（來源未標示日期；取得於 2026-09-04）是一張**產業鏈方塊流程圖 / 結構圖**，不是折線圖、長條圖、表格或市場份額圖。\n- 圖上主題文字為 **半導體產業鏈**。\n- 圖中以三個灰色大區塊表示 [[半導體產業鏈]] 的三個階段：**上游**、**中游**、**下游**。\n- **上游**區塊列出 **IP設計/IC設計代工服務** 與 **IC設計**，兩者之間以右向箭頭表示：IP設計/IC設計代工服務 → IC設計。\n- **中游**區塊列出 **IC/晶圓製造** 作為上方主方塊，並在下方列出 **生產製程及檢測設備**、**光罩**、**化學品** 等支援項目。\n- **下游**區塊列出 **IC封裝測試** 作為上方主方塊，並在下方列出 **生產製程及檢測設備**、**基板**、**導線架** 等支援項目。\n- 下游區塊右側另列 **IC模組** 與 **IC通路**。\n- 圖上沒有公司名稱、產品名稱、型號、數值、座標軸、單位、年份、季度或日期。\n- raw frontmatter 的 converted: 2026-09-04 只能作為取得 / 轉檔日期，不是內容日期。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/Serdes IC-IP companies image 2.md"
+        },
+        "score": 11.615243
+       },
+       {
+        "text": "Starlink User Terminal › Product lifecycle\n依 [[Starlink UT Test Flow]]：\n\n| 階段 | 來源數量 / 說法 | 測試重點 |\n|---|---|---|\n| EVT | 20–50 prototypes | Design feasibility、power、thermal limits |\n| DVT | 50–200 units | Stress tests、drop / thermal、FCC / UL compliance |\n| PVT | 來源未標示數量 | Manufacturing yields、MP volume production、field validation |",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Starlink User Terminal.md"
+        },
+        "score": 1.94728
+       },
+       {
+        "text": "Gatehouse Satcom › 與 Rohde & Schwarz 的合作\n依 [[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]]：\n\n- [[Gatehouse Satcom]] 與 [[Rohde & Schwarz]] formalized collaboration，以 strengthening validation and testing of [[5G IoT-NTN]] and [[NR-NTN]] technologies。\n- 合作目標是將 [[Gatehouse Satcom]] 的 5G [[NTN]] software expertise 與 [[Rohde & Schwarz]] test and measurement capabilities 結合。\n- [[Gatehouse Satcom]] gains access to the [[R&S CMX500]] platform，作為共同 further develop advanced orbit and channel emulation capabilities for NTN use cases 的一部分。\n- [[Gatehouse Satcom]] contributes end-to-end NTN test results、technical insight and engineering feedback，協助 [[Rohde & Schwarz]] 強化 NTN-focused test capabilities。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Gatehouse Satcom.md"
+        },
+        "score": 1.105657
+       },
+       {
+        "text": "Demosthenes Vouyioukas › Biography 摘錄\n依 [[Software-Defined_Radio_Deployments_in_UAV-Driven_Applications_A_Comprehensive_Review]]：\n\n- 1996 年取得 [[National Technical University of Athens]] electrical and computer engineering five-year Diploma。\n- 2003 年取得 NTUA electrical and computer engineering Ph.D. degree。\n- 2004 年取得 NTUA Joint Engineering-Economics M.Sc. degree。\n- 2011 至 2024 年任職於 [[University of the Aegean]]，Department of Information and Communication Systems Engineering，職位為 Professor。\n- 目前為 [[University of Piraeus]] Department of Digital Systems 的 Associate Professor。\n- 來源稱其在研究領域有超過 140 篇發表，包含 scientific journals、books、book chapters、international conference proceedings。\n- 研究領域包括 mobile and wireless communications systems、channel characterization and propagation models、machine learning techniques for path loss prediction、performance modeling of wireless networks、cooperative systems with relays、UWB indoor localization techniques、UAV and aerial communications、next generation satellite networks、mMIMO、IoT、5G and beyond / 6G technologies、network security、privacy policies。\n- 來源列其為 IEEE Communication Society、IFIP、ACM、Technical Chamber of Greece 成員。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Demosthenes Vouyioukas.md"
+        },
+        "score": 0.647459
+       },
+       {
+        "text": "R&S CMW100 K06 › General functions 與 RF connectors\n依 [[CMW100-K06_specs_en_5214-8348-22_v0500]] Version 05.00：\n\n| 項目 | 規格 / 說明 |\n|---|---|\n| Simultaneous operation | 支援 simultaneous receiver and transmitter。 |\n| RF generator/analyzer ports | RF 1 to RF 8，共 8 × SnapN，RF input/output to DUT。 |\n| RF generator auxiliary port | TX AUX，共 1 × SnapN，RF output。 |\n| RF connectors | Front panel；SnapN female，50 Ω，compatible with N female connectors。 |\n| RF 1 to RF 8 | combined RF input and RF output。 |\n| TX AUX | RF output。 |\n| Control interface | Rear panel USB 3.0 type B connector，maximum length 3 m。 |\n| Trigger interface | Rear panel trigger input/output，2 × BNC connector；output trigger sources 為 standard-specific internal trigger sources。 |\n\nReceiver test functions：RF generator signal 可 split 並 forwarded to 8 output ports；每個 output 可 separately switched off；RF 1 to RF 8 connectors 支援 collective output level setting；支援 frequency-dependent attenuation table，且 RF 1 to RF 8 connectors 可分別設定。\n\nTransmitter test functions：8 input signals 可 multiplexed to RF analyzer；支援 frequency-dependent attenuation tables，且 RF 1 to RF 8 connectors 可分別設定。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 4,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/R&S CMW100 K06.md"
+        },
+        "score": 7.634295
+       },
+       {
+        "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+        },
+        "score": 9.323678
+       },
+       {
+        "text": "第三代半導體概念股 › 限制與不可推論事項\n- [[Power IC - Power Management IC image 3]] 與 [[Power IC - Power Management IC image]] 未標示日期；[[Power IC - Power Management IC image 4]] 只在漲價潮段落標示 2026 年，仍缺少完整發布日期。\n- 圖上分類是概念股 / 供應鏈資訊圖，不等於供應鏈驗證、交易關係、完整市場名單或投資建議。\n- [[Power IC - Power Management IC image]] 的「上游基板與晶晶」照 raw OCR 保留；[[Power IC - Power Management IC image 3]] 的「上游基板與磊晶」也保留，兩者需待原圖或更清晰來源裁決。\n- 圖中文字「GaAs/Ga 通訊射頻供應鏈」照原文記錄；此頁不推論「Ga」是 GaN、GaAs 或其他技術縮寫。\n- [[Power IC - Power Management IC image 4]] 的「晶圓」「磊晶」「代工」是圖上括號註記，不等於產能、市占率或 AI 伺服器供應量。\n- 圖上沒有任何數字口徑可支持市占率、排名、產能或成長率。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 6,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/第三代半導體概念股.md"
+        },
+        "score": 4.124512
+       },
+       {
+        "text": "亞光 › 來源中的說法\n- [[0. UAV產業分析報告架構]]（2025 年版；raw 轉檔 2026-09-17）將 [[亞光]]（3019）列在台灣無人機產業供應鏈中游，分類為模組製造與系統整合，描述為高解析度鏡頭與感測器。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/亞光.md"
+        },
+        "score": 2.044232
+       },
+       {
+        "text": "聯發科 › UAV / Genio 脈絡\n- [[0. UAV產業分析報告架構]]（2025 年版；raw 轉檔 2026-09-17）將 [[聯發科]]（2454）列於 [[台灣無人機供應鏈]] 上游的晶片、感測器、通訊模組分類，描述為 AI晶片與通訊模組。\n- [[4. UAV Eco-chain in Taiwan]]（來源未標示正式日期；raw 轉檔 2026-09-17）將 [[聯發科]]（2454）列於 Key component/technology 區段，稱其晶片可作為無人機核心處理器，負責運算與通訊。\n- [[TW government support projects(無人機關鍵晶片及模組自主開發研發補助計畫)]]（來源未標示正式發布日期；raw 轉檔 2026-09-17）稱 [[海華科技]] 主導、[[臺灣希望]] 合作的先進無人機 AI 影像模組計畫將採用 [[聯發科]] [[Genio 720]] 晶片。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/聯發科.md"
+        },
+        "score": 3.835457
+       },
+       {
+        "text": "Serdes IC-IP companies image 2 › 與既有知識的關係\n- [[Serdes IC-IP companies image 1]]（來源未標示日期；取得於 2026-09-04）整理的是 SoC / 晶片平台 IP 組成示意圖，包含 [[SerDes]]、Memory Interface、DSP、Processor、GPU、Mixed-Signal 等 IP 類別；[[Serdes IC-IP companies image 2]]（來源未標示日期；取得於 2026-09-04）則是更上位的 [[半導體產業鏈]] 分工圖，列出上游、中游、下游環節。\n- 既有 [[SerDes]] 頁與 [[Serdes IC-IP companies image 1]] 關聯較直接；本來源只在上游列出 **IP設計/IC設計代工服務**，沒有列出 SerDes、SATA、PCIe、USB、MIPI、HDMI 或 Ethernet，因此不更新 [[SerDes]] 的技術規格內容。\n- 既有 [[IC載板]] 頁依 [[IC Carrier 載板 image 3]] 記錄 IC載板連接 [[IC晶片]] 與 [[PCB]]，並列出 [[BT材料基板]]、[[ABF材料基板]]、[[MIS材料基板]]；本來源只在下游支援項目列出 **基板**，沒有說明材料、封裝位置、應用或規格，因此不能直接合併為 [[IC載板]] 的定義證據。\n- 既有 [[Package Substrate]] 頁整理封裝載板在 die-to-die 互連與 2.5D / 3D 封裝示意圖中的圖上位置；本來源只列出泛稱 **基板**，不提供 package substrate 的材料、結構或供應鏈資料。\n- 既有 [[半導體封裝技術]] 頁整理 [[Wire Bond]]、[[Flip Chip]]、[[WLCSP]]、[[Fan-Out WLP]]、[[Chiplet]]、[[2.5D 3D 封裝]]、[[3D IC]]、[[Hybrid Bonding]] 等封裝技術；本來源只將 **IC封裝測試** 放在下游，不提供封裝技術分類。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/Serdes IC-IP companies image 2.md"
+        },
+        "score": 11.255907
+       },
+       {
+        "text": "Starlink User Terminal › Field performance metrics\n來源列出：\n\n- Throughput：Rev4 100–307 Mbps down、10–40 Mbps up；iPerf3 validation。\n- Latency / Jitter：88 ms avg、9 ms jitter Rev4；flent rrul bufferbloat test。\n- Power：55–100 W normal、200 W snowmelt；wattmeter baseline。\n- Obstructions：App API monitoring、FOV alignment、beam steering accuracy。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 7,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Starlink User Terminal.md"
+        },
+        "score": 1.884213
+       },
+       {
+        "text": "MediaTek\n[[MediaTek]] 是 [[Edge AI Chips image 1]]（2024/05/15）在 [[Mobile AI]] / [[SoC]] 區塊列出的公司 / 品牌名稱，圖中同區塊也寫有 [[聯發科]] 與 [[天璣 9300 系列]]；[[Edge AI Chips image 11]]（來源未標示日期；取得於 2026-09-04）另把 [[MediaTek]] / [[聯發科]] 列於「AI 晶片開發工具－SDK & Studio」區塊；[[Edge AI Chips image 14]]（來源未標示日期；取得於 2026-09-04）以「聯發科 (MediaTek) – Genio IoT」列出 [[MediaTek Genio 系列]]；[[Edge AI Chips image 17]]（來源未標示日期；取得於 2026-09-04）提供另一張聚焦 [[Genio IoT]] 的產品介紹 / 比較表；[[Edge AI Chips image 21]]（來源未標示日期；取得於 2026-09-04）則以「聯發科 (MediaTek) – 5G 手機 SoC」列出天璣系列 APU / NPU 與生成式 AI / 代理型 AI 推論相關圖上文字。[[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]] 另把 [[MediaTek]] 放在 [[5G NTN-NR Rel.17 connection demonstration]] 語境，提供 NTN-NR device as DUT 與 NTN test platform。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/MediaTek.md"
+        },
+        "score": 0.737642
+       },
+       {
+        "text": "Analog Devices › 來源中的出現\n[[Beamforming OneNote]]（來源正式日期未標示；raw converted 2026-09-17）列出以下 Analog Devices 連結標題：\n\n- An Interview with Analog Devices Discussing RF Electronics for Phased Array Applications。\n- Overcoming Common Planar Phased Array Circuit Design Challenges。\n- Internet from Space: RFIC in High Capacity, Low Latency LEO Satellite Terminals。\n\n[[User Terminal]]（來源正文標示 links current as of January 7, 2026, 1:33 PM CST；raw converted 2026-09-17）在 RF Components & Semiconductors 表格列出：\n\n- Component：Receiver IC。\n- Supplier：[[Analog Devices]]。\n- Link：`analog.com/adar1000`，連到 [[ADAR1000]] 產品頁。\n- 另一個 link：Analog Devices IMS landing page。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Analog Devices.md"
+        },
+        "score": 0.728159
+       },
+       {
+        "text": "R&S CMW100 K06 › RF analyzer general specifications\n| 項目 | 條件 | 數值 |\n|---|---|---:|\n| Inherent spurious response | without input signal，150 MHz to 6000 MHz，expected nominal power setting ≤ –10 dBm；排除 n · 500 MHz with n = 5 to 12、100 MHz + n · 50 MHz with n = 1 to 62、562.5 MHz、750 MHz、3150 MHz、4050 MHz、4800 MHz、5812.5 MHz | < –100 dBm |\n| Inherent spurious response | same exclusions，expected nominal power setting > –10 dBm | < –90 dB below expected nominal power setting |\n| Spurious response | full-scale single-tone input signal，150 MHz to 3800 MHz | < –55 dB |\n| Spurious response | full-scale single-tone input signal，3800 MHz to 4200 MHz | < –40 dB |\n| Spurious response | full-scale single-tone input signal，4200 MHz to 6000 MHz | < –40 dB |\n| RF analyzer phase noise | 150 MHz to 3800 MHz，carrier offset ≥ 1 MHz | < –120 dBc, 1 Hz |\n| RF analyzer phase noise | 3800 MHz to 6000 MHz，carrier offset ≥ 1 MHz | < –117 dBc, 1 Hz |\n\nTrigger sources：GPRF free run、GPRF IF power、GPRF Gen。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 11,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/R&S CMW100 K06.md"
+        },
+        "score": 6.473878
+       },
+       {
+        "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+        },
+        "score": 8.743512
+       },
+       {
+        "text": "Analog Devices › unresolved\n- 需要擷取 Analog Devices 文章正文，確認文章日期、作者、產品 / 技術範圍與可引用主張。\n- 需要確認是否建立個別來源頁：RF Electronics for Phased Array Applications、Planar Phased Array Circuit Design Challenges、Internet from Space RFIC。\n- 需要擷取 [[ADAR1000]] 官方產品頁，確認其功能、頻段、資料表版次與 satellite / phased array 使用限制。\n- 需要確認 [[User Terminal]] 中 Analog Devices IMS landing page 是否與 [[ADAR1000]]、satellite terminal testing 或 phased array demo 直接相關。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 4,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Analog Devices.md"
+        },
+        "score": 1.844808
+       },
+       {
+        "text": "第三代半導體概念股 › 與功率半導體概念股的關係\n- [[Power IC - Power Management IC image 3]] 與 [[Power IC - Power Management IC image]] 都把 [[第三代半導體概念股]] 和 [[功率半導體概念股]] 放在同一張「功率半導體+第三代半導體概念股」圖中，但用不同區塊呈現。\n- [[Power IC - Power Management IC image]] 與 [[Power IC - Power Management IC image 3]] 高度重疊，不可視為彼此獨立的市場驗證。\n- [[Power IC - Power Management IC image 1]] 也列出 [[嘉晶]] 與 [[漢磊]]，但其分類是「磊晶/基板」，核心能力分別寫作 SiC/GaN 磊晶片與 SiC/GaN 晶圓代工龍頭。\n- [[Power IC - Power Management IC image 4]] 把 [[環球晶]]、[[嘉晶]]、[[漢磊]] 放入 [[AI 伺服器 PMIC 與功率半導體轉型]] 的台股 AI 電力供應鏈地圖，但未提供 AI 伺服器供應證據。\n- 這些來源都沒有提供 [[環球晶]]、[[嘉晶]]、[[合晶]]、[[全新]]、[[漢磊]]、[[穩懋]] 的出貨、營收、市占率、客戶或產能證據。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/第三代半導體概念股.md"
+        },
+        "score": 3.482898
+       },
+       {
+        "text": "亞光\n[[亞光]] 是 [[0. UAV產業分析報告架構]] 中列於 [[台灣無人機供應鏈]] 中游的公司，來源描述其與高解析度鏡頭與感測器相關。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/亞光.md"
+        },
+        "score": 2.021314
+       },
+       {
+        "text": "新唐科技 › 來源中的說法\n- [[0. UAV產業分析報告架構]]（2025 年版；raw 轉檔 2026-09-17）將 [[新唐科技]] / 新唐（4919）列於 [[台灣無人機供應鏈]] 上游的晶片、感測器、通訊模組分類，描述為微控制器 MCU。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/新唐科技.md"
+        },
+        "score": 5.791177
+       },
+       {
+        "text": "Serdes IC-IP companies image 2 › 原文未解的問題\n- unresolved: 來源未標示日期、年份、季度或資料期間。\n- unresolved: 來源未標示原始發布者、公司、作者、報告名稱、文件版次或頁碼。\n- unresolved: raw frontmatter 的 converted: 2026-09-04 只能作為取得 / 轉檔日期，不是內容日期。\n- unresolved: 圖上沒有浮水印、頁尾來源、公司標誌或資料來源註記；頁尾文字只有「半導體產業鏈」。\n- unresolved: 圖上沒有公司名稱、產品名稱、型號或市場數字。\n- unresolved: 圖上未說明 **IP設計/IC設計代工服務** 是否指一般設計服務、IP 授權、ASIC design service、foundry design enablement 或其他範圍。\n- unresolved: 圖上未說明中游與下游的 **生產製程及檢測設備** 是否為同一類設備、不同設備，或只是共用產業環節名稱。\n- unresolved: 圖上 **基板** 未說明是否指 [[IC載板]]、[[Package Substrate]]、[[ABF載板]]、[[BT材料基板]]、[[MIS材料基板]] 或其他基板。\n- unresolved: 圖上未標示箭頭是否代表物流、設計流程、價值鏈關係、供應關係或產業分類。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 6,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/Serdes IC-IP companies image 2.md"
+        },
+        "score": 9.292807
+       },
+       {
+        "text": "Starlink User Terminal › DVT / PVT test flow\n[[Starlink UT Test Flow]] 列出 key steps：\n\n- Functional test：power on、stow、normal / obstructed state check。\n- RF emissions：anechoic chamber、FCC Part 15 / 25 limits、spurious <-43 dBc。\n- EIRP / G/T：spectrum analyzer + power meter measurement、validate against target。\n- Modulation BER：connect to gateway simulator、QPSK / 64QAM threshold test。\n- Environmental：thermal cycle、drop / vibration、IP67 salt spray、snowmelt power。\n\n更完整測試流程另見 [[Starlink User Terminal 測試流程]]。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 6,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Starlink User Terminal.md"
+        },
+        "score": 0.346265
+       },
+       {
+        "text": "Viasat › 來源中的角色\n依 [[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]]：\n\n- [[Viasat]] 與 [[Rohde & Schwarz]] joined forces to boost testing for [[Narrowband Non-terrestrial Networks]]（[[NB-NTN]]）[[IoT]] devices connecting via satellite。\n- [[Viasat]] 被描述為 global leader in satellite communications。\n- 合作目標是確保 chipsets、modules and devices interoperate seamlessly with [[Viasat]] satellite network，並 comply with [[3GPP Release 17]] standards。\n- 來源描述的 target service 是 satellite-based [[IoT]] applications，特別是在 areas without terrestrial network coverage 的 ubiquitous IoT applications。\n- [[Viasat NB-NTN IoT test plan]] 是 certification test plan，包含 protocol、performance 與 RF test scenarios，並 based on [[R&S CMX500]] one-box signaling tester。\n- 來源指出 visitors to [[MWC Barcelona 2026]] can experience the test plan in action；[[Viasat]] booth 位於 hall 6，booth 6A20。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Viasat.md"
+        },
+        "score": 0.189804
+       },
+       {
+        "text": "R&S CMW100 K06\n[[R&S CMW100 K06]] 是 [[Rohde & Schwarz]] 的 Communications Manufacturing Test Set，依 [[CMW100-K06_specs_en_5214-8348-22_v0500]]（PD 5214.8348.22，Version 05.00，September 2025）提供 8 個 RF DUT input/output、TX AUX、RF generator/analyzer、power meter、spectrum analyzer 與多種行動 / 無線標準 production test 規格。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/R&S CMW100 K06.md"
+        },
+        "score": 5.877974
+       },
+       {
+        "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+        },
+        "score": 5.528915
+       },
+       {
+        "text": "MediaTek M80\n[[MediaTek M80]] 是 [[oneweb_ut_final_presentation]] 中被描述為 5G NTN modem / modem roadmap 的產品或平台名稱，來源稱其支援 [[3GPP Release 19]]、用於 [[Sharp]] 5G NTN trial，並被視為 satellite + 5G convergence 的關鍵元件；此說法需以 [[MediaTek]] 官方資料補證。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/MediaTek M80.md"
+        },
+        "score": 1.606826
+       },
+       {
+        "text": "第三代半導體概念股 › [[Power IC - Power Management IC image]] 圖上分類\n[[Power IC - Power Management IC image]] 未標示圖片發布日期，raw 轉換於 2026-09-04，內容與 [[Power IC - Power Management IC image 3]] 高度重疊；但本次 raw OCR 將上游分類照錄為「上游基板與晶晶」。\n\n| 圖上大分類 | 圖上子分類 | 公司 / 代號 | 日期 / 期間 |\n|---|---|---|---|\n| 第三代半導體與特殊製程 | 上游基板與晶晶 | [[環球晶]]（6488） | 來源未標示日期；raw 轉換於 2026-09-04 |\n| 第三代半導體與特殊製程 | 上游基板與晶晶 | [[嘉晶]]（3016） | 來源未標示日期；raw 轉換於 2026-09-04 |\n| 第三代半導體與特殊製程 | 上游基板與晶晶 | [[合晶]]（6182） | 來源未標示日期；raw 轉換於 2026-09-04 |\n| 第三代半導體與特殊製程 | 上游基板與晶晶 | [[全新]]（2455） | 來源未標示日期；raw 轉換於 2026-09-04 |\n| 第三代半導體與特殊製程 | 第三代半導體晶圓代工 | [[漢磊]]（3707） | 來源未標示日期；raw 轉換於 2026-09-04 |\n| 第三代半導體與特殊製程 | GaAs/Ga 通訊射頻供應鏈 | [[穩懋]]（3105） | 來源未標示日期；raw 轉換於 2026-09-04 |\n\n⚠️ [[Power IC - Power Management IC image]]（來源未標示日期；raw 轉換於 2026-09-04）說第三代半導體與特殊製程的上游分類為「上游基板與晶晶」，但既有頁面 [[第三代半導體概念股]] 說 [[Power IC - Power Management IC image 3]] 的對應分類為「上游基板與磊晶」。判斷為同一或高度相似圖卡的 OCR / 讀圖差異；未裁決前兩種字串並列，不自行改成其中一者。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/第三代半導體概念股.md"
+        },
+        "score": 3.212609
+       },
+       {
+        "text": "亞光 › 可追溯限制\n- 來源未提供亞光的無人機鏡頭 / 感測器型號、客戶、出貨、認證、營收或得標資料。\n- 本頁不把來源列名改寫為已確認供應、量產或採購關係。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/亞光.md"
+        },
+        "score": 1.221864
+       },
+       {
+        "text": "圓剛 › 來源中的說法\n- [[0. UAV產業分析報告架構]]（2025 年版；raw 轉檔 2026-09-17）將 [[圓剛]]（2417）列在台灣無人機產業供應鏈上游，分類為晶片、感測器、通訊模組，描述為影像與視訊模組。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/圓剛.md"
+        },
+        "score": 3.281438
+       },
+       {
+        "text": "5G NTN validation and testing › 來源中的測試目標\n依 [[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]]，[[Gatehouse Satcom]] 與 [[Rohde & Schwarz]] 的合作目標包含：\n\n- strengthen validation and testing of [[5G IoT-NTN]] and [[NR-NTN]] technologies。\n- 在市場從 specification work 走向 real-world implementation 時，改善 validation 方法。\n- 在 realistic and controlled laboratory conditions 下測試 5G NTN technologies。\n- further develop advanced orbit and channel emulation capabilities for NTN use cases。\n- 支援更準確的 satellite radio channel modelling。\n- 更 realistic testing of 5G NTN behavior across different scenarios。\n- 支援 faster validation cycles、earlier identification of system-level issues 與 stronger test conditions。\n- reduce technical uncertainty and accelerate time to market for the broader NTN ecosystem。\n\n依 [[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]]，MWC 2024 展示目標包含：\n\n- demonstrate a [[5G Non-Terrestrial Network]] [[New Radio]] connection based on latest [[3GPP Release 17]] specifications。\n- emulate a [[Low Earth Orbit]] satellite access node。\n- showcase 5G technology providing connectivity in areas without terrestrial coverage。\n- 展示 basic mobile services，例如 voice、messaging 與 low data rate services，面向 maritime、aeronautical 與 rural applications。\n- 在 interactive callbox mode 中讓 users trigger voice calls alongside RF-related measurements。\n- 評估 future NTN-NR devices powered by [[MediaTek]] NTN test platform 在不同 conditions 下的 performance and reliability。\n\n依 [[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]]，[[Viasat]] 與 [[Rohde & Schwarz]] 的 NB-NTN IoT test plan 目標包含：",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/5G NTN validation and testing.md"
+        },
+        "score": 0.228925
+       },
+       {
+        "text": "IC Carrier 載板 image 2 與 5 重複來源 › 相關來源\n- [[IC Carrier 載板 image 2]] — 來源未標示日期、取得於 2026-09-04 的 Semiconductor Packaging Technologies 比較表。\n- [[IC Carrier 載板 image 5]] — 來源未標示日期、raw 轉換於 2026-09-04 的 Semiconductor Packaging Technologies 比較表。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 6,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/syntheses/IC Carrier 載板 image 2 與 5 重複來源.md"
+        },
+        "score": 0.757648
+       },
+       {
+        "text": "R&S CMPHEAD30 › mmWave RF analyzer\n| 項目 | 規格 |\n|---|---|\n| 搭配 | [[R&S CMP200]] 與 [[R&S CM-Z30A]] |\n| Duplex mode | half duplex（TDD） |\n| Frequency range | 28 GHz band：24.25 GHz to 31.80 GHz；39 GHz band：37.00 GHz to 43.50 GHz |\n| Frequency extension narrowband spectrum emission mask | 28 GHz band：23.45 GHz to 24.25 GHz；39 GHz band：43.50 GHz to 44.30 GHz |\n| Frequency resolution | < 0.1 Hz |\n| Absolute maximum level | highest attenuation +20 dBm CW；lowest attenuation +8 dBm CW；0 V DC |\n| Level uncertainty | 28 GHz band：< 2.5 dB；39 GHz band：< 3.0 dB |\n| Displayed average noise level | 23.5 GHz ≤ f ≤ 29.6 GHz：< –155 dBm/Hz；29.6 GHz < f ≤ 31.8 GHz：< –154 dBm/Hz；37.0 GHz ≤ f ≤ 43.5 GHz：< –152 dBm/Hz；43.5 GHz < f ≤ 44.3 GHz：< –150 dBm/Hz |\n| Frequency error | < ±0.01 ppm，符合 [[3GPP TS 38.521-2]] V17.0.0 |\n| Isolation of RF ports | RF 1 to RF 2 > 27 dB，35 dB typ. |",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 6,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/R&S CMPHEAD30.md"
+        },
+        "score": 2.528179
+       },
+       {
+        "text": "工研院 › 使用限制\n- [[0.Satcom Industry]] 未提供晶片組名稱、製程、頻段範圍、Tx/Rx 架構、output power、noise figure、beamforming 支援、測試結果、合作廠商、量產狀態或公開技術報告。\n- [[Taiwan Small Cell BTS 業務簡報]] 未提供工研院 Micro Outdoor gNB 的型號、頻段、O-RAN spec version、RU class、測試報告、OTIC 認證證書或補助案號。\n- `台灣已成為 O-RAN 認證樞紐` 與 `年均投入 NT$ 數億` 都是業務簡報層說法，需以工研院、OTIC、政府或 O-RAN Alliance 文件驗證。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/工研院.md"
+        },
+        "score": 4.46842
+       },
+       {
+        "text": "S-SSS › 使用限制\n- 來源未保留 first ID / second ID 的正式符號與範圍。\n- 來源未提供 full S-SSS interleaving formula。\n- 來源未標示 [[3GPP TS 38.211]] 的 version；只提供 Section 8.4.2 / 8.4.3 的引用線索。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 4,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/S-SSS.md"
+        },
+        "score": 0.796351
+       },
+       {
+        "text": "聰泰 › 來源中的說法\n- [[0. UAV產業分析報告架構]]（2025 年版；raw 轉檔 2026-09-17）將 [[聰泰]]（5474）列在台灣無人機產業供應鏈上游，分類為晶片、感測器、通訊模組，描述為影像與視訊模組。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/聰泰.md"
+        },
+        "score": 3.281438
+       },
+       {
+        "text": "5G NTN validation and testing › 使用限制\n- 本頁只整理 PR 層級合作、測試方法、certification test plan 與展示語境，不是產品規格、標準規格或 conformance test plan。\n- Gatehouse Satcom 來源未標示 published date、PR 編號或 formal version。\n- Rohde & Schwarz / MediaTek MWC 2024 來源未標示 published date、PR 編號或 formal version。\n- Rohde & Schwarz / Viasat 來源未標示 published date、test plan version、document number、test case list 或 certification body。\n- 來源未列 supported test cases、frequency bands、channel models、orbit emulation limits、payload types、UE categories、satellite operators 或 measurement accuracy。\n- [[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]] 未提供 MediaTek NTN-NR device 型號、R&S CMX500 OBT configuration、SMBV100B GNSS option code 或 physical test setup。\n- [[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]] 未提供 [[Viasat]] satellite network technical profile、NB-NTN device list、CMX500 option stack 或 first test results data。\n- future [[6G NTN testing and validation]] 只可視為 PR ambition；不可推論已有產品或測試能力。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 7,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/5G NTN validation and testing.md"
+        },
+        "score": 0.221609
+       },
+       {
+        "text": "IC Carrier 載板 image 2 與 5 重複來源 › 主要相同內容\n| 比對項目 | [[IC Carrier 載板 image 2]] | [[IC Carrier 載板 image 5]] | 判斷 |\n|---|---|---|---|\n| 主題 | Semiconductor Packaging Technologies | Semiconductor Packaging Technologies | 高度一致 |\n| 技術列數 | 10 類封裝技術 | 10 類封裝技術 | 一致 |\n| 第 1 類 | [[Wire Bond]] / WB | [[Wire Bond]] / WB | 一致 |\n| 第 2 類 | [[Flip Chip]] / FC | [[Flip Chip]] / FC | 一致 |\n| 第 3 類 | [[WLCSP]] | [[WLCSP]] | 一致 |\n| 第 4 類 | [[Fan-In WLP]] | [[Fan-In WLP]] | 一致，image 5 明確 OCR 出 RDL = redistribution layer |\n| 第 5 類 | [[Fan-Out WLP]] / FO-WLP | [[Fan-Out WLP]] / FO-WLP | 一致 |\n| 第 6 類 | [[SiP]] / System in Package | [[SiP]] / System in Package | 一致 |\n| 第 7 類 | [[Chiplet]] | [[Chiplet]] | 一致 |\n| 第 8 類 | [[2.5D 3D 封裝|2.5D]] / Interposer / Bridge | [[2.5D 3D 封裝|2.5D]] / Interposer / Bridge | 一致 |\n| 第 9 類 | [[3D IC]] / Die Stacking | [[3D IC]] / Die Stacking | 一致 |\n| 第 10 類 | [[Hybrid Bonding]] | [[Hybrid Bonding]] | 一致 |\n| 底部 benefits | Higher I/O Density、Better Performance、Lower Power、More Integration、Cost Effective Long Term | Higher I/O Density、Better Performance、Lower Power、More Integration、Cost Effective Long Term | 高度一致 |",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/syntheses/IC Carrier 載板 image 2 與 5 重複來源.md"
+        },
+        "score": 0.576176
+       },
+       {
+        "text": "R&S CMPHEAD30 › mmWave RF generator\n| 項目 | 規格 |\n|---|---|\n| 搭配 | [[R&S CMP200]] 與 [[R&S CM-Z30A]] |\n| Duplex mode | half duplex（TDD） |\n| Frequency range | 28 GHz band：24.25 GHz to 31.80 GHz；39 GHz band：37.00 GHz to 43.50 GHz |\n| Frequency resolution | < 0.1 Hz |\n| Maximum reverse power | 0 V DC，+25 dBm |\n| Output level range | 28 GHz band PEP –84 dBm to +20 dBm；37 GHz ≤ f ≤ 40 GHz PEP –78 dBm to +19 dBm；40 GHz < f ≤ 43.5 GHz PEP –78 dBm to +17 dBm |\n| Output level uncertainty | 28 GHz band，–50 dBm to +15 dBm CW：< 2.5 dB；39 GHz band，–45 dBm to +10 dBm CW：< 3.0 dB |\n| Output level repeatability | 1 h warm-up 後 typ. < 0.2 dB |\n| Isolation of RF ports | RF 1 to RF 2 > 27 dB，35 dB typ. |\n\nEVM 條件：SCS 60 kHz / 120 kHz、64QAM、+15 °C to +35 °C、within ±5 °C from last I/Q alignment。來源標示 EVM 為 measured values。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/R&S CMPHEAD30.md"
+        },
+        "score": 2.522024
+       },
+       {
+        "text": "工研院 › Satcom / RF 脈絡\n- [[0.Satcom Industry]]（來源正文未標示正式發布日期；內容含 2025 年與 2024 年資料點；raw converted 2026-09-17）稱[[工研院]]研發 Ka 頻段低軌衛星射頻晶片組。\n- 同一來源將此列在台灣廠商積極投入衛星本體、光學酬載、陣列天線、[[NTN]] 等技術開發的段落中。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/工研院.md"
+        },
+        "score": 4.212446
+       },
+       {
+        "text": "S-SSS › 基本性質\n依 [[S-SSB]]：\n\n- [[S-SSS]] 是 [[Sidelink SSB]] / [[S-SS-PSBCH block]] 的四個組成之一。\n- Like standard [[SSS]]，[[S-SSS]] consists of 127 [[BPSK]] modulation symbols。\n- Sequence is based on two Fibonacci [[LFSR]]s of length 7：\n  - `x0` with taps [7,3]。\n  - `x1` with taps [7,6]。\n- Final sequence `d` is obtained by interleaving the two LFSR outputs depending on the [[Sidelink identity]]，in same way as standard [[SSS]]；但來源中的完整公式 / identity 符號因轉檔遺失。\n- Overall 672 different S-SSS sequences are defined because sequence generation depends on the first and second ID。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/S-SSS.md"
+        },
+        "score": 0.637156
+       },
+       {
+        "text": "5G NTN validation and testing\n[[5G NTN validation and testing]] 是針對 [[5G Non-Terrestrial Networks]]、[[5G IoT-NTN]]、[[NR-NTN]]、[[NB-NTN]] 與 satellite connectivity devices，在 realistic and controlled laboratory conditions 下驗證 satellite connectivity behavior、radio channel modelling、orbit / channel emulation、protocol / performance / RF scenarios 與 system-level behavior 的測試活動。[[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]] 補充一個 [[MWC Barcelona 2024]] 展示例子：以 [[R&S CMX500 OBT]]、[[R&S SMBV100B]] 與 [[MediaTek]] NTN-NR device as DUT 展示基於 [[3GPP Release 17]] specifications 的 live [[5G NTN-NR]] connection。[[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]] 則補入 [[Viasat]] / [[Rohde & Schwarz]] 的 [[NB-NTN]] [[IoT]] certification test plan 語境，焦點是 device validation、interoperability with [[Viasat]] satellite network 與 [[3GPP Release 17]] compliance。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/5G NTN validation and testing.md"
+        },
+        "score": 0.216893
+       },
+       {
+        "text": "IC Carrier 載板 image 2 與 5 重複來源\n[[IC Carrier 載板 image 2 與 5 重複來源]] 比對兩份未標示日期、raw 取得 / 轉檔於 2026-09-04 的 Semiconductor Packaging Technologies 比較圖，標示兩者高度重疊，避免同一圖表或同一類圖卡被視為獨立市場驗證。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/syntheses/IC Carrier 載板 image 2 與 5 重複來源.md"
+        },
+        "score": 0.537883
+       },
+       {
+        "text": "R&S CMPHEAD30\n[[R&S CMPHEAD30]] 是 [[Rohde & Schwarz]] 用於 [[R&S CMP200]] 5G NR FR2 nonsignaling one-box test solution 的 remote radio head，覆蓋 28 GHz band 與 39 GHz band。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/R&S CMPHEAD30.md"
+        },
+        "score": 2.353724
+       },
+       {
+        "text": "工研院\n[[工研院]] 是 [[0.Satcom Industry]] 中列為 Ka 頻段低軌衛星射頻晶片組研發單位的台灣研究機構名稱；[[Taiwan Small Cell BTS 業務簡報]]（2025 業務簡報）另將工研院列入台灣 small cell / O-RAN 供應鏈與政策支持脈絡。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/工研院.md"
+        },
+        "score": 2.803435
+       },
+       {
+        "text": "0. UAV產業分析報告架構 › 原文未解的問題\n- 來源是 Microsoft 365 chat / OneNote 複製內容，未標示作者、生成模型、製作日期或人工校訂者。\n- references 中的三個外部連結未被 raw 擷取正文；本頁不能把連結內容當成已讀證據。\n- 2025 年上半年外銷金額 1,189 萬美元、年增超過 7 倍的統計口徑、資料來源、商品分類與是否包含零組件未標示。\n- 政府投入 500 億元、2026–2027 年採購 5 萬架無人機的預算科目、採購單位、標案編號與是否已核定未標示。\n- 全球市場 2024–2030 預估的研究機構、報告日期、無人機分類範圍與 CAGR 計算口徑未標示。\n- 供應鏈公司列名未標示是否為實際供應、已得標、量產、研發、概念股或市場觀察名單。\n- 來源未提供 [[聯發科]]、[[新唐科技]]、[[圓剛]]、[[聰泰]]、[[亞光]]、[[中光電]]、[[漢翔]]、[[雷虎科技]]、[[經緯航太]]、[[長榮航太]]在無人機供應鏈中的產品型號或客戶。\n- 來源提到 AI、自主飛行、5G、低軌衛星通訊，但未提供標準版本、頻段、測試項目、產品型號或實作案例。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/0. UAV產業分析報告架構.md"
+        },
+        "score": 2.894262
+       },
+       {
+        "text": "中光電\n[[中光電]] 是 [[0. UAV產業分析報告架構]] 中列於 [[台灣無人機供應鏈]] 中游的公司，來源描述其與軍用與商用無人機整合相關；[[4. UAV Eco-chain in Taiwan]] 另在 System Integrator 區段列出中強光電 / 中光電 / Coretronic Corporation 與 [[中光電智能機器人]]。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/中光電.md"
+        },
+        "score": 1.981669
+       },
+       {
+        "text": "IC Carrier 載板 image 2\n[[IC Carrier 載板 image 2]] 是一張來源未標示日期、取得於 2026-09-04 的半導體封裝技術資訊圖表，主題為 Semiconductor Packaging Technologies，副標題為 From Traditional to Advanced Integration。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/IC Carrier 載板 image 2.md"
+        },
+        "score": 1.574062
+       },
+       {
+        "text": "R&S FSWX3026\nR&S FSWX3026 是 [[R&S FSWX]] 系列 26.5 GHz Signal and Spectrum Analyzer 型號，依 Version 12.00（May 2026）提供 1 RF 與 2 RF base unit。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/R&S FSWX3026.md"
+        },
+        "score": 6.320113
+       },
+       {
+        "text": "Starlink User Terminal 測試流程 › 來源口徑\n- 來源：[[Starlink UT Test Flow]]。\n- 正式日期：來源未標示。\n- raw converted：2026-09-18。\n- 資料類型：Market / OneNote / PowerPoint lossy derivative。\n- 限制：本頁不是 Starlink 官方 test plan、NCC / FCC 認證流程文件、量產 SOP 或實驗室 scope。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Starlink User Terminal 測試流程.md"
+        },
+        "score": 3.98726
+       },
+       {
+        "text": "0. UAV產業分析報告架構 › 實體\n- [[聯發科]] — 來源列於上游晶片、感測器、通訊模組層，描述為 AI晶片與通訊模組。\n- [[新唐科技]] — 來源列於上游層，描述為微控制器 MCU。\n- [[圓剛]] — 來源列於上游層，描述為影像與視訊模組。\n- [[聰泰]] — 來源列於上游層，描述為影像與視訊模組。\n- [[亞光]] — 來源列於中游層，描述為高解析度鏡頭與感測器。\n- [[中光電]] — 來源列於中游層，描述為軍用與商用無人機整合。\n- [[漢翔]] — 來源列於中游層，描述為整機組裝與飛控系統。\n- [[雷虎科技]] — 來源列於下游層，描述為軍用與大型無人機。\n- [[經緯航太]] — 來源列於下游層，描述為智慧農業與多用途無人機。\n- [[長榮航太]] — 來源列於下游層，描述為艦載型監偵無人機。\n- [[台灣卓越無人機海外商機聯盟]] — 來源稱政府成立的無人機海外商機聯盟。\n- [[DJI]] — 來源在挑戰段落列為國際品牌競爭例子。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/0. UAV產業分析報告架構.md"
+        },
+        "score": 2.341069
+       },
+       {
+        "text": "漢翔\n[[漢翔]] 是 [[0. UAV產業分析報告架構]] 中列於 [[台灣無人機供應鏈]] 中游的公司，來源描述其與整機組裝與飛控系統相關；[[4. UAV Eco-chain in Taiwan]] 另把漢翔航空工業列在 System Integrator 區段。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/漢翔.md"
+        },
+        "score": 1.761756
+       },
+       {
+        "text": "# OneWeb UT 測試流程",
+        "citation": {
+         "kind": "raw",
+         "source": {
+          "source_id": "src-62c234dd566e887e",
+          "original_ref": "raw/Market/OneNote/oneweb_ut_final_presentation.md",
+          "sha256": "62c234dd566e887eb17b68860ff3c42d541b5000c7f1c0c5be9f824b285a9c74",
+          "raw_ref": "raw/Market/OneNote/oneweb_ut_final_presentation.md",
+          "page": null,
+          "slide": null,
+          "parent_source_id": null
+         },
+         "raw_ref": "raw/Market/OneNote/oneweb_ut_final_presentation.md",
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": null
+        },
+        "score": 57.889317
+       },
+       {
+        "text": "| 類別 | 規格 | 台光電 | 台燿 | 聯茂 | 斗山(韓) | 生益科技(中) |\n|---|---|---|---|---|---|---|\n| 一般 PCB板 | M6 | ○ | ○ | ○ | ○ | ○ |\n| 一般 PCB板 | M7 | ○ | ○ | 測試/驗證中 | ○ | ○ |\n| 一般 PCB板 | M8 | ○ | ○ |  | ○ |  |\n| HDI板 | M6 | ○ | ○ | ○ | ○ | ○ |\n| HDI板 | M7 | ○ | 測試/驗證中 | 測試/驗證中 | ○ | 測試/驗證中 |\n| HDI板 | M8 | ○ | 測試/驗證中 |  | 測試/驗證中 |  |",
+        "citation": {
+         "kind": "raw",
+         "source": {
+          "source_id": "src-65f05f7ae088eb63",
+          "original_ref": "raw/Market/AI Server PCB test image 47.md",
+          "sha256": "65f05f7ae088eb634ad8153249b12163689fb39b40f32751ac3e7df1d1c050c0",
+          "raw_ref": "raw/Market/AI Server PCB test image 47.md",
+          "page": null,
+          "slide": null,
+          "parent_source_id": null
+         },
+         "raw_ref": "raw/Market/AI Server PCB test image 47.md",
+         "section": 30,
+         "page": null,
+         "slide": null,
+         "wiki_page": null
+        },
+        "score": 55.471578
+       },
+       {
+        "text": "| 高階 CCL 規格 |  | 台光電 | 台燿 | 聯茂 | 斗山(韓) | 生益科技(中) |\n|---|---|---|---|---|---|---|\n| 一般 PCB板 | M6 | ○ | ○ | ○ | ○ | ○ |\n| 一般 PCB板 | M7 | ○ | ○ | 測試/驗證中 | ○ | ○ |\n| 一般 PCB板 | M8 | ○ | ○ |  | ○ |  |\n| HDI板 | M6 | ○ | ○ | ○ | ○ | ○ |\n| HDI板 | M7 | ○ | 測試/驗證中 | 測試/驗證中 | ○ | 測試/驗證中 |\n| HDI板 | M8 | ○ | 測試/驗證中 |  | 測試/驗證中 |  |",
+        "citation": {
+         "kind": "raw",
+         "source": {
+          "source_id": "src-65f05f7ae088eb63",
+          "original_ref": "raw/Market/AI Server PCB test image 47.md",
+          "sha256": "65f05f7ae088eb634ad8153249b12163689fb39b40f32751ac3e7df1d1c050c0",
+          "raw_ref": "raw/Market/AI Server PCB test image 47.md",
+          "page": null,
+          "slide": null,
+          "parent_source_id": null
+         },
+         "raw_ref": "raw/Market/AI Server PCB test image 47.md",
+         "section": 8,
+         "page": null,
+         "slide": null,
+         "wiki_page": null
+        },
+        "score": 55.259123
+       },
+       {
+        "text": "#### 與 OEM 協力的測試流程",
+        "citation": {
+         "kind": "raw",
+         "source": {
+          "source_id": "src-62c234dd566e887e",
+          "original_ref": "raw/Market/OneNote/oneweb_ut_final_presentation.md",
+          "sha256": "62c234dd566e887eb17b68860ff3c42d541b5000c7f1c0c5be9f824b285a9c74",
+          "raw_ref": "raw/Market/OneNote/oneweb_ut_final_presentation.md",
+          "page": null,
+          "slide": null,
+          "parent_source_id": null
+         },
+         "raw_ref": "raw/Market/OneNote/oneweb_ut_final_presentation.md",
+         "section": 67,
+         "page": null,
+         "slide": null,
+         "wiki_page": null
+        },
+        "score": 54.353226
+       }
+      ],
+      "text": "### 答案\n訊號產生器／訊號分析儀在這類 RFIC／RF 驗證情境中，會落在**實驗室 RF 測試／RF 驗證**環節；OneWeb UT 測試流程把第 1–3 個月定義為 laboratory RF test，並在此階段量測 G/T、noise figure、transmit power、驗證 link equation、分析 modulation / coding，測試設備列為 `Rohde & Schwarz SMW6` signal generator 與 R&S FSW spectrum analyzer。[2]\n若用半導體產業鏈語境對應，這類儀器屬於「生產製程及檢測設備」的一部分；該類設備在中游支援 IC／晶圓製造，也在下游支援 IC 封裝測試。[19][20]",
+      "synthesized_by": "company",
+      "failure": null
+     },
+     "cited_passages": [
+      {
+       "text": "OneWeb UT 測試流程 › 第一階段：實驗室 RF 測試（第 1–3 個月）\n[[oneweb_ut_final_presentation]] 將第 1–3 個月定義為 laboratory RF test，主要活動包含：\n\n- 選定終端機型號，例如 [[Intellian OW11F]] 或 [[Hughes HL1120W]]。\n- 量測 RF characteristics：接收增益 / G/T、noise figure（NF）、transmit power。\n- 驗證 link equation，來源以 [[Qorvo]] PA + [[Analog Devices]] LNA 作為例子。\n- 分析 modulation / coding，來源寫 OneWeb proprietary 或 [[MediaTek M80]] 5G NTN modem。\n- 測試設備列為 `Rohde & Schwarz SMW6` signal generator 與 [[R&S FSW]] spectrum analyzer。\n\n交付物包含 G/T and noise figure measurement validation、Ku / Ka rain fade margin calculation 與 multipath fading assessment。",
+       "citation": {
+        "kind": "wiki",
+        "source": null,
+        "raw_ref": null,
+        "section": 2,
+        "page": null,
+        "slide": null,
+        "wiki_page": "wiki/concepts/OneWeb UT 測試流程.md"
+       },
+       "score": 21.80261
+      },
+      {
+       "text": "半導體產業鏈 › 來源中的分段\n| 產業鏈階段 | 圖上項目 | 日期 / 期間 | 來源 | 限制 |\n|---|---|---|---|---|\n| 上游 | IP設計/IC設計代工服務；IC設計 | 來源未標示日期；取得於 2026-09-04 | [[Serdes IC-IP companies image 2]]；[[Serdes IC-IP companies image]] | 未列公司、產品、IP 類別、設計服務範圍或商業關係；兩份來源高度重複，不可視為獨立驗證 |\n| 中游 | IC/晶圓製造；生產製程及檢測設備；光罩；化學品 | 來源未標示日期；取得於 2026-09-04 | [[Serdes IC-IP companies image 2]]；[[Serdes IC-IP companies image]] | 未列 foundry、設備商、材料商、製程節點、產能或市場數字；兩份來源高度重複，不可視為獨立驗證 |\n| 下游 | IC封裝測試；生產製程及檢測設備；基板；導線架；IC模組；IC通路 | 來源未標示日期；取得於 2026-09-04 | [[Serdes IC-IP companies image 2]]；[[Serdes IC-IP companies image]] | 未列 OSAT、基板供應商、導線架供應商、模組商、通路商或出貨資料；兩份來源高度重複，不可視為獨立驗證 |",
+       "citation": {
+        "kind": "wiki",
+        "source": null,
+        "raw_ref": null,
+        "section": 2,
+        "page": null,
+        "slide": null,
+        "wiki_page": "wiki/concepts/半導體產業鏈.md"
+       },
+       "score": 18.649285
+      },
+      {
+       "text": "半導體產業鏈 › 圖上流程關係\n- [[Serdes IC-IP companies image 2]]（來源未標示日期；取得於 2026-09-04）在上游區塊內以箭頭表示 **IP設計/IC設計代工服務 → IC設計**。\n- [[Serdes IC-IP companies image]]（來源未標示日期；取得於 2026-09-04）在上游區塊內以箭頭表示 **IP設計 /IC設計 代工服務 → IC設計**。\n- [[Serdes IC-IP companies image 2]]（來源未標示日期；取得於 2026-09-04）在中游區塊把 **IC/晶圓製造** 放在上方主方塊，下方列出 **生產製程及檢測設備**、**光罩**、**化學品**，並以向上箭頭表示支援主方塊。\n- [[Serdes IC-IP companies image]]（來源未標示日期；取得於 2026-09-04）描述中游主方塊 **IC/晶圓製造** 與下方 **生產製程及檢測設備**、**光罩**、**化學品** 之間有上下雙向箭頭樣式的連結符號，表示彼此相關或互相支援。\n- [[Serdes IC-IP companies image 2]]（來源未標示日期；取得於 2026-09-04）在下游區塊把 **IC封裝測試** 放在上方主方塊，下方列出 **生產製程及檢測設備**、**基板**、**導線架**，並以向上箭頭表示支援主方塊。\n- [[Serdes IC-IP companies image]]（來源未標示日期；取得於 2026-09-04）描述下游主方塊 **IC封裝測試** 與下方 **生產製程及檢測設備**、**基板**、**導線架** 之間有上下雙向箭頭樣式的連結符號。\n- [[Serdes IC-IP companies image 2]]（來源未標示日期；取得於 2026-09-04）在下游右側另列 **IC模組** 與 **IC通路**。\n- [[Serdes IC-IP companies image]]（來源未標示日期；取得於 2026-09-04）明確描述 **IC封裝測試** 右側有向右箭頭指向 **IC模組**；來源列出的結構化關聯表未列出 [[IC通路]] 與其他方塊的明確箭頭。\n- [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 都沒有以完整箭頭串接所有大區塊；本頁只記錄圖上呈現的上游、中游、下游排列與區塊內箭頭，不補寫供應鏈流程細節。",
+       "citation": {
+        "kind": "wiki",
+        "source": null,
+        "raw_ref": null,
+        "section": 3,
+        "page": null,
+        "slide": null,
+        "wiki_page": "wiki/concepts/半導體產業鏈.md"
+       },
+       "score": 15.486918
+      }
+     ],
+     "assessment": {
+      "status": "covered",
+      "facets": [],
+      "missing_facets": [],
+      "relation_required": false,
+      "relation_citations": [],
+      "relations": []
+     },
+     "citation_policy": "wiki_primary",
+     "wiki_provenance": [
+      {
+       "wiki_page": "wiki/concepts/OneWeb UT 測試流程.md",
+       "raw_refs": [
+        "raw/Market/OneNote/oneweb_ut_final_presentation.md"
+       ]
+      },
+      {
+       "wiki_page": "wiki/concepts/半導體產業鏈.md",
+       "raw_refs": [
+        "raw/Market/Serdes IC-IP companies image 1.md",
+        "raw/Market/Serdes IC-IP companies image 2.md",
+        "raw/Market/Serdes IC-IP companies image 3.md",
+        "raw/Market/Serdes IC-IP companies image.md"
+       ]
+      }
+     ]
+    },
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-a94f97283bf144cba1a049bfa53840e6",
+      "request_id": "request-a94f97283bf144cba1a049bfa53840e6",
+      "span_id": "span-a94f97283bf144cba1a049bfa53840e6",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-a94f97283bf144cba1a049bfa53840e6",
+       "request_id": "request-a94f97283bf144cba1a049bfa53840e6",
+       "span_id": "span-a94f97283bf144cba1a049bfa53840e6",
+       "parent_span_id": null
+      },
+      "status": "succeeded",
+      "data": {
+       "asset": {
+        "namespace": "engineering",
+        "name": "rs-knowledge",
+        "version": "1.0.3"
+       },
+       "trace": {
+        "trace_id": "trace-a94f97283bf144cba1a049bfa53840e6",
+        "request_id": "request-a94f97283bf144cba1a049bfa53840e6",
+        "span_id": "span-a94f97283bf144cba1a049bfa53840e6",
+        "parent_span_id": null
+       },
+       "answer": {
+        "question": "在半導體領域涉及 RFIC 驗證的應用情境中，訊號產生器/訊號分析儀會落在測試流程的哪個環節？",
+        "status": "answered",
+        "passages": [
+         {
+          "text": "OneWeb UT 測試流程 › 與既有頁面的關係\n- [[Satellite User Terminal 外部資料清單]]：本來源是該頁 unresolved 中 `oneweb_ut_final_presentation.html` 的已轉 markdown 擷取來源之一。\n- [[衛星地面設備]]：本頁補充 user terminal testing / commercialization flow，屬於 ground equipment 與 user terminal commercialization 的應用層資料。\n- [[5G NTN validation and testing]]：本頁補充 [[Sharp]] + [[MediaTek M80]]、[[3GPP Release 19]] 與 ITRI gNB 的 OneWeb UT roadmap 語境。\n- [[相控陣列天線]]：本頁涉及 flat-panel antenna、G/T、scan angle、beamforming ASIC 與 phased-array front-end，但未提供 antenna design detail。\n- [[R&S FSW]]：來源點名 FSW spectrum analyzer 作為測試設備線索；未列 model、option 或 measurement setup。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/OneWeb UT 測試流程.md"
+          },
+          "score": 21.922652
+         },
+         {
+          "text": "OneWeb UT 測試流程 › 第一階段：實驗室 RF 測試（第 1–3 個月）\n[[oneweb_ut_final_presentation]] 將第 1–3 個月定義為 laboratory RF test，主要活動包含：\n\n- 選定終端機型號，例如 [[Intellian OW11F]] 或 [[Hughes HL1120W]]。\n- 量測 RF characteristics：接收增益 / G/T、noise figure（NF）、transmit power。\n- 驗證 link equation，來源以 [[Qorvo]] PA + [[Analog Devices]] LNA 作為例子。\n- 分析 modulation / coding，來源寫 OneWeb proprietary 或 [[MediaTek M80]] 5G NTN modem。\n- 測試設備列為 `Rohde & Schwarz SMW6` signal generator 與 [[R&S FSW]] spectrum analyzer。\n\n交付物包含 G/T and noise figure measurement validation、Ku / Ka rain fade margin calculation 與 multipath fading assessment。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/OneWeb UT 測試流程.md"
+          },
+          "score": 21.80261
+         },
+         {
+          "text": "OneWeb UT 測試流程 › 第二階段：現場鏈路驗證（第 3–5 個月）\n[[oneweb_ut_final_presentation]] 將第 3–5 個月定義為 field link validation，主要活動包含：\n\n- 透過 [[Eutelsat OneWeb]] gateway 進行 real-time link testing。\n- 測試 mobility scenarios：aircraft、maritime、IoT。\n- 量測 handover latency 與 connection downtime（CDT）。\n- 與多個 OEM 廠商平行試驗，例如 [[Kymeta]]、[[ThinKom]]。\n- 啟動 [[Sharp]] + [[MediaTek M80]] 的 5G NTN trial。\n\n交付物包含 real-world throughput / latency metrics、multi-orbit handover validation 與 5G NTN compatibility assessment。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/OneWeb UT 測試流程.md"
+          },
+          "score": 10.618211
+         },
+         {
+          "text": "Qorvo › 來源中的說法\n[[oneweb_ut_final_presentation]]（來源正式日期未標示；raw converted 2026-09-17）對 [[Qorvo]] 的描述包含：\n\n- 在 laboratory RF test 階段，link equation validation 例子寫為 [[Qorvo]] PA + [[Analog Devices]] LNA。\n- RF metrics 的 Tx 指標寫 `EIRP: 35–45 dBW (Qorvo PA)`。\n- RF components & semiconductor supplier tier 中寫：[[Qorvo]] 是 industry leader；GaN-based Ku / Ka band `2W–100W+`；[[Qorvo QPA1722]] K-band latest，bandwidth increased 3x。\n- LNA generic supply 中列出 LNA `<1 dB NF @ 12 GHz` from [[Qorvo]]、[[ADI]]、[[Skyworks]]。\n- 採購與測試協調區將 [[Qorvo]] PA 列為 RF component supplier supply agreement 對象。\n- 後續行動建議 lock in [[Qorvo]] 與 [[Analog Devices]] component supply agreements。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Qorvo.md"
+          },
+          "score": 6.812863
+         },
+         {
+          "text": "Qorvo\n[[Qorvo]] 是 [[oneweb_ut_final_presentation]] 中列為 OneWeb user terminal RF component / semiconductor supply chain 的 PA / LNA 供應商，來源特別提到 GaN-based Ku / Ka band PA 與 [[Qorvo QPA1722]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Qorvo.md"
+          },
+          "score": 3.75732
+         },
+         {
+          "text": "Qorvo › 可追溯範圍\n- 本頁只支持 [[oneweb_ut_final_presentation]] 中 [[Qorvo]] 在 PA / LNA / GaN / K-band component supply chain 的列名與 roadmap 建議。\n- 來源未提供 Qorvo datasheet、part number list、application circuit、frequency range、output power condition、efficiency condition、customer adoption、supply agreement 或 price。\n- [[Qorvo QPA1722]] 的 K-band / bandwidth claim 需要 Qorvo 官方產品頁或 datasheet 補證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Qorvo.md"
+          },
+          "score": 2.598078
+         },
+         {
+          "text": "Kuiper UT 測試流程 › OTA 電波暗室配置\nSlide 7 列出 OTA 電波暗室資訊：\n\n- 核心設備：3 × 3 × 3 m 暗室、多探頭陣列 48–192 個、VNA 與信號分析儀。\n- 校準步驟：背景扣除、元素 A/P 校準、波束表生成。\n- 輸出品質：增益誤差 < 0.5 dB、指向誤差 < 0.5°、模式完整性。\n\n此段可連到 [[Phased Array OTA testing]]、[[相控陣列天線]]與 [[低軌衛星終端設備檢測]]，但來源未提供儀器型號、校準標準或 measurement uncertainty。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+          },
+          "score": 21.759666
+         },
+         {
+          "text": "Kuiper UT 測試流程 › unresolved\n- 需要取得原始 PPTX 或正式 test plan 以確認表格、圖像與備註是否在 markdown 轉檔中遺失。\n- 需要確認 FCC 授權案號、ITU filing、測試地點、終端數量與 prototype / production 的區分。\n- 需要補充 OTA chamber、VNA、signal analyzer、network emulator、satellite channel emulator 的具體設備與校準方法。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+          },
+          "score": 16.552165
+         },
+         {
+          "text": "Kuiper UT 測試流程\n[[Kuiper UT 測試流程]]是 [[Kuiper UT Test & Supply Chain]] 中針對 [[Project Kuiper 用戶終端]]的製造測試、OTA 電波暗室測試、RF 驗證、波束追蹤、環境可靠性、系統整合與現場試驗流程。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+          },
+          "score": 13.265316
+         },
+         {
+          "text": "Project Kuiper › 測試與產品化流程\n來源把 [[Kuiper UT 測試流程]]分成：\n\n- 製造階段：工廠驗收測試 FAT、射頻模式驗證、熱電性能。\n- 系統整合：實驗室端對端測試、協議棧驗證、模擬器模擬。\n- 現場驗證：Protoflight 試驗、真實衛星測試、1000+ 終端試驗。\n\n來源列出的時間點包括 2023 Protoflight、2024 1000+ 單位測試、2025 實衛星速率、2026 Q1 商用化準備；但未提供外部公告或測試報告。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Project Kuiper.md"
+          },
+          "score": 24.567171
+         },
+         {
+          "text": "Project Kuiper\n[[Project Kuiper]] 是 [[Amazon]] 的低軌衛星通訊 / user terminal 相關計畫名稱，本 vault 目前由 [[Kuiper UT Test & Supply Chain]] 提供其用戶終端測試流程、產品化準備與供應鏈策略的 company restricted 簡報說法。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Project Kuiper.md"
+          },
+          "score": 13.13496
+         },
+         {
+          "text": "Project Kuiper › 使用限制\n- [[Kuiper UT Test & Supply Chain]] 未標示正式發布日期、作者、版本號或引用來源；不可視為 Amazon 官方規格、公開服務承諾或合約證據。\n- 本頁只記錄來源文字，不得推論實際上線、國家授權、衛星數、量產良率、終端出貨量、供應商合約或 R&S 往來關係。\n- 2026 Q1 / 2026 年底 / 2023 / 2024 / 2025 等時間點都需要官方公告、FCC / ITU filing 或測試報告補證。\n- 三款終端規格、Ka-band 頻段、功耗與成本目標應由正式 datasheet 或 regulatory filing 驗證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Project Kuiper.md"
+          },
+          "score": 11.743186
+         },
+         {
+          "text": "Amazon Prometheus SoC › 在 Project Kuiper 架構中的角色\n依 [[Kuiper UT Test & Supply Chain]]，Prometheus SoC 連接下列脈絡：\n\n- [[Project Kuiper 用戶終端]]的 Ka-band 相控陣與基帶處理。\n- [[Kuiper UT 測試流程]]中的 FAT、熱電性能、協議棧驗證、資料處理與端對端模擬。\n- [[AWS]] 整合、加密與安全、企業私網延伸等服務定位。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Amazon Prometheus SoC.md"
+          },
+          "score": 12.685962
+         },
+         {
+          "text": "Amazon Prometheus SoC › 使用限制\n- 來源未提供 Prometheus SoC 的正式產品頁、die photo、製程節點、封裝、記憶體介面、RF 介面、功耗 breakdown 或吞吐量測試條件。\n- 來源中的 60–225 W 可能是 user terminal 整機功耗，不可直接寫成 SoC TDP。\n- 來源中的 1Tbps 等級資料處理未標示是衛星、網關、終端、aggregate throughput、switching fabric 或 protocol stack capability。\n- 不可由本來源推論 [[Amazon Prometheus SoC]] 已量產、由特定晶圓代工廠製造、使用特定製程、出貨給特定供應商或與 [[AWS Trainium 2 Max]] 等 AI ASIC 有技術關係。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Amazon Prometheus SoC.md"
+          },
+          "score": 10.192053
+         },
+         {
+          "text": "Amazon Prometheus SoC › 來源中的說法\n[[Kuiper UT Test & Supply Chain]]（來源正文未標示正式發布日期；raw converted 2026-09-17）在多個位置提到 [[Amazon Prometheus SoC]]：\n\n- Slide 4：基帶晶片為 Amazon Prometheus SoC，衛星 / 網關 / 終端共用。\n- Slide 6：製造測試中的電源與熱項目包含 Prometheus SoC 功耗，來源同頁括號列出 60–225 W，但該範圍也與三款 user terminal 功耗相同，因此不能確定是否為 SoC 本身功耗。\n- Slide 11：系統整合測試包含基帶 / Prometheus 晶片、協議棧驗證與資料處理，括號寫 1Tbps 等級。\n- Slide 14：2026 年底部署時間表寫 Prometheus SoC 全球整合。\n- Slide 15：核心設計為 Amazon 內部，Prometheus SoC 自主研發。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Amazon Prometheus SoC.md"
+          },
+          "score": 10.070188
+         },
+         {
+          "text": "oneweb_ut_final_presentation › 與既有知識的關係\n- [[Satellite User Terminal 外部資料清單]] 先前把 `oneweb_ut_final_presentation.html` 列為待擷取附件；本頁將該附件轉出的 markdown 作為已 ingest 的來源摘要，但仍需回查原始 HTML / presentation。\n- [[衛星地面設備]] 先前只把 [[User Terminal]] 視為 link hub；本來源新增 OneWeb user terminal 測試流程、OEM ecosystem、RF metrics 與 commercialization stages 的可追溯摘要。\n- [[5G NTN validation and testing]] 先前由 R&S / MediaTek、Gatehouse、Viasat 等 PR 支撐；本來源新增 OneWeb / Sharp / MediaTek M80 / ITRI 視角，但來源不是標準文件、產品 datasheet 或官方測試報告。\n- [[MediaTek]] 既有頁面整理 MWC 2024 NTN-NR demo 與 Genio / Dimensity 圖卡；本來源新增 [[MediaTek M80]] 作為 5G NTN modem roadmap 線索，但不可視為官方量產或規格確認。\n- [[Analog Devices]] 既有頁面只把 ADI 視為 phased array / receiver IC link hub 線索；本來源新增 ADI LNA / receiver front-end / phased-array receive front-end 供應鏈語境。\n- [[工研院]] 既有頁面記錄 Ka-band LEO satellite RF chipset 研發說法；本來源新增 ITRI 5G NTN terrestrial / satellite gNB development 線索。\n- [[R&S SMW200A]] 與 [[R&S FSW]] 是既有產品頁；本來源只寫 `Rohde & Schwarz SMW6 信號產生器、FSW 譜儀`，其中 `SMW6` 的正式型號未能對應，不能自動改寫為 [[R&S SMW200A]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/oneweb_ut_final_presentation.md"
+          },
+          "score": 18.344529
+         },
+         {
+          "text": "oneweb_ut_final_presentation › 原文未解的問題\n- 來源正式發布日期、簡報版次、作者、部門正式名稱與適用客戶 / 專案未標示。\n- 原始檔為 HTML 轉 markdown 的 lossy derivative；需回查 `oneweb_ut_final_presentation.html` 原始內容、圖片與任何 speaker notes。\n- OneWeb constellation 數字、軌道高度、覆蓋範圍、頻段、throughput、latency 與 beam count 未附官方文件或測試條件。\n- [[Intellian OW11F]]、[[Hughes HL1120W]]、[[Kymeta Goshawk u8]]、[[Sharp]] 5G NTN terminal、[[Gilat ESR-2030Ku]]、[[ThinKom Ka2517]]、[[SatixFy ESMA]] 等產品規格需個別 datasheet 或 OEM 文件確認。\n- RF metrics（G/T、NF、EIRP、P1dB、path loss、rain margin、SNR）未標示量測 setup、環境條件、終端型號、頻點、校正狀態或測試不確定度。\n- [[Qorvo]] PA、[[Analog Devices]] LNA / receiver front-end、[[MediaTek M80]]、[[SatixFy Sx3099]] 與 [[Prime ASIC]] 供應鏈角色未附合約、採用或量產證據。\n- [[MediaTek M80]] 的 [[3GPP Release 19]] support、Sharp trial、2025 H2 commercial modem mass production 皆需官方 roadmap / datasheet / announcement 補證。\n- [[工研院]] ITRI satellite-board gNB / terrestrial gNB support 未提供專案名稱、標準版本、頻段、平台或合作單位證據。\n- `Rohde & Schwarz SMW6` 可能是型號簡寫或轉檔 / 原文錯誤；不可自行對應為 [[R&S SMW200A]] 或其他 signal generator。\n- 市場規模、CAGR 與 2035 forecast 未標示研究機構、報告日期、定義口徑或貨幣基準。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/oneweb_ut_final_presentation.md"
+          },
+          "score": 17.033007
+         },
+         {
+          "text": "oneweb_ut_final_presentation › 重點摘要\n- 來源題名為「OneWeb UT 測試流程」，副題為「衛星通訊使用者終端機驗證與商業化」，署名脈絡為「衛星通訊測試中心 | RF 工程部門」。\n- 來源將 [[Eutelsat OneWeb]] 描述為 OneWeb constellation operator，並列出 [[OneWeb]] 系統參數：LEO 軌道高度 `750 km`、`600+` 在軌衛星、`100+` 預訂衛星、全球 `±81.4°` 覆蓋、user bands 為 [[Ku-band]] `12–18 GHz` 與 [[Ka-band]] `27–31 GHz`。\n- 來源描述 typical terminal peak downlink `150 Mbps`、latency `50–150 ms`、`200+` simultaneous beams；這些數字未提供 datasheet、測試條件或 OneWeb 官方文件引用。\n- 來源把 [[OneWeb UT 測試流程]] 分成三階段：第 1–3 個月 laboratory RF test、第 3–5 個月 field link validation、第 5–7 個月 commercialization readiness。\n- 第一階段 laboratory RF test 建議選定 [[Intellian]] [[Intellian OW11F]] 或 [[Hughes]] [[Hughes HL1120W]]，量測 G/T、NF、Tx power、link equation，並提到 [[Qorvo]] PA、[[Analog Devices]] LNA、[[MediaTek M80]] 與 `Rohde & Schwarz SMW6` / [[R&S FSW]]。\n- 第二階段 field link validation 透過 [[Eutelsat OneWeb]] gateway 做 real-time link testing，含 mobility scenarios、handover latency / CDT、multi-OEM parallel trials 與 [[Sharp]] + [[MediaTek M80]] 5G NTN trial。\n- 第三階段 commercialization readiness 包含供應鏈最終化、[[MediaTek]] 5G NTN roadmap、[[工研院]] ITRI gNB development、SLA negotiation 與 2026+ commercial launch roadmap。\n- RF 指標區列出 Rx：G/T `18.2 dB/K`（[[Intellian OW11F]]）、NF `<1 dB @ 12 GHz`、gain tolerance `±2 dB`、3 dB bandwidth `500 MHz`；Tx：EIRP `35–45 dBW`、power efficiency `50%+`、PA NF `6–8 dB`、P1dB `35 dBm (2W)`。\n- Link budget 區列出 Ku downlink path loss `196 dB`、rain fade margin `4–6 dB` for `99.5%` availability、margin `>3 dB`、QPSK/BPSK SNR `6–8 dB`。\n- OEM ecosystem 區列出 [[Intellian]]、[[Hughes]]、[[Kymeta]]、[[Sharp]]，並延伸列出 [[Gilat]] / [[Gilat ESR-2030Ku]]、[[ThinKom]] / [[ThinKom Ka2517]]、[[Satcom Direct]] / [[Plane Simple]]、[[PALS]] / [[PPA-SOTM]]、[[SatixFy]] / [[SatixFy ESMA]]、[[Intelsat]] / [[Intelsat ESA]]、[[Requtech]] / [[RESA]]、[[Asmote]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/oneweb_ut_final_presentation.md"
+          },
+          "score": 16.973184
+         },
+         {
+          "text": "半導體產業鏈 › 來源中的分段\n| 產業鏈階段 | 圖上項目 | 日期 / 期間 | 來源 | 限制 |\n|---|---|---|---|---|\n| 上游 | IP設計/IC設計代工服務；IC設計 | 來源未標示日期；取得於 2026-09-04 | [[Serdes IC-IP companies image 2]]；[[Serdes IC-IP companies image]] | 未列公司、產品、IP 類別、設計服務範圍或商業關係；兩份來源高度重複，不可視為獨立驗證 |\n| 中游 | IC/晶圓製造；生產製程及檢測設備；光罩；化學品 | 來源未標示日期；取得於 2026-09-04 | [[Serdes IC-IP companies image 2]]；[[Serdes IC-IP companies image]] | 未列 foundry、設備商、材料商、製程節點、產能或市場數字；兩份來源高度重複，不可視為獨立驗證 |\n| 下游 | IC封裝測試；生產製程及檢測設備；基板；導線架；IC模組；IC通路 | 來源未標示日期；取得於 2026-09-04 | [[Serdes IC-IP companies image 2]]；[[Serdes IC-IP companies image]] | 未列 OSAT、基板供應商、導線架供應商、模組商、通路商或出貨資料；兩份來源高度重複，不可視為獨立驗證 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/半導體產業鏈.md"
+          },
+          "score": 18.649285
+         },
+         {
+          "text": "半導體產業鏈 › 圖上流程關係\n- [[Serdes IC-IP companies image 2]]（來源未標示日期；取得於 2026-09-04）在上游區塊內以箭頭表示 **IP設計/IC設計代工服務 → IC設計**。\n- [[Serdes IC-IP companies image]]（來源未標示日期；取得於 2026-09-04）在上游區塊內以箭頭表示 **IP設計 /IC設計 代工服務 → IC設計**。\n- [[Serdes IC-IP companies image 2]]（來源未標示日期；取得於 2026-09-04）在中游區塊把 **IC/晶圓製造** 放在上方主方塊，下方列出 **生產製程及檢測設備**、**光罩**、**化學品**，並以向上箭頭表示支援主方塊。\n- [[Serdes IC-IP companies image]]（來源未標示日期；取得於 2026-09-04）描述中游主方塊 **IC/晶圓製造** 與下方 **生產製程及檢測設備**、**光罩**、**化學品** 之間有上下雙向箭頭樣式的連結符號，表示彼此相關或互相支援。\n- [[Serdes IC-IP companies image 2]]（來源未標示日期；取得於 2026-09-04）在下游區塊把 **IC封裝測試** 放在上方主方塊，下方列出 **生產製程及檢測設備**、**基板**、**導線架**，並以向上箭頭表示支援主方塊。\n- [[Serdes IC-IP companies image]]（來源未標示日期；取得於 2026-09-04）描述下游主方塊 **IC封裝測試** 與下方 **生產製程及檢測設備**、**基板**、**導線架** 之間有上下雙向箭頭樣式的連結符號。\n- [[Serdes IC-IP companies image 2]]（來源未標示日期；取得於 2026-09-04）在下游右側另列 **IC模組** 與 **IC通路**。\n- [[Serdes IC-IP companies image]]（來源未標示日期；取得於 2026-09-04）明確描述 **IC封裝測試** 右側有向右箭頭指向 **IC模組**；來源列出的結構化關聯表未列出 [[IC通路]] 與其他方塊的明確箭頭。\n- [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 都沒有以完整箭頭串接所有大區塊；本頁只記錄圖上呈現的上游、中游、下游排列與區塊內箭頭，不補寫供應鏈流程細節。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/半導體產業鏈.md"
+          },
+          "score": 15.486918
+         },
+         {
+          "text": "半導體產業鏈\n[[半導體產業鏈]] 是 [[Serdes IC-IP companies image 2]]（來源未標示日期；取得於 2026-09-04）與 [[Serdes IC-IP companies image]]（來源未標示日期；取得於 2026-09-04）用三個區塊表示的產業分工結構，圖上分為上游、中游與下游，並列出 IP / IC 設計、晶圓製造、封裝測試、基板、導線架、IC 模組與 IC 通路等環節。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/半導體產業鏈.md"
+          },
+          "score": 14.120803
+         },
+         {
+          "text": "OneWeb UT 測試流程 › RF 驗證指標\n[[oneweb_ut_final_presentation]] 列出的 Rx 指標包含：\n\n| 指標 | 來源數值 | 來源限制 |\n|---|---:|---|\n| G/T | `18.2 dB/K`（[[Intellian OW11F]]） | 未附 datasheet、測試頻點或 scan angle 條件。 |\n| NF | `<1 dB @ 12 GHz` | 未標示 LNA 型號、溫度或 calibration 條件。 |\n| Gain risk / tolerance | `±2 dB` | 來源稱來自 temperature / frequency，但未提供測試條件。 |\n| 3 dB bandwidth | `500 MHz`（Ku-band） | 未標示中心頻率與 terminal / antenna 型號。 |\n\nTx 指標包含：\n\n| 指標 | 來源數值 | 來源限制 |\n|---|---:|---|\n| EIRP | `35–45 dBW`（[[Qorvo]] PA） | 未標示 PA 型號、antenna gain 或 duty cycle。 |\n| Power efficiency | `50%+`（GaN chipset） | 未標示 operating point。 |\n| PA noise figure | `6–8 dB` | 未標示頻段與量測條件。 |\n| Output P1dB | `35 dBm (2W)` | 未標示 PA 型號與 frequency。 |\n\nLink budget 指標包含：Ku downlink path loss `196 dB`、rain fade margin `4–6 dB` for `99.5%` availability、margin `>3 dB`、QPSK / BPSK SNR `6–8 dB`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/OneWeb UT 測試流程.md"
+          },
+          "score": 9.725278
+         },
+         {
+          "text": "OneWeb UT 測試流程\n[[OneWeb UT 測試流程]] 是 [[oneweb_ut_final_presentation]] 對 [[OneWeb]] / [[Eutelsat OneWeb]] user terminal 從實驗室 RF 驗證、現場鏈路驗證到商業化準備的三階段測試與導入流程描述；來源正式日期未標示，僅 raw converted date 為 2026-09-17。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/OneWeb UT 測試流程.md"
+          },
+          "score": 8.543329
+         },
+         {
+          "text": "OneWeb UT 測試流程 › 使用限制\n- 本頁是 Market 來源摘要，不是 OneWeb / Eutelsat OneWeb 官方 test plan、terminal datasheet、R&S application note 或 conformance test procedure。\n- 時程「第 1–3 個月 / 第 3–5 個月 / 第 5–7 個月」是 presentation roadmap，未標示專案開始日期。\n- 來源未標示是否為內部 planning、客戶簡報、教育訓練或 market analysis。\n- `Rohde & Schwarz SMW6` 未能對應到既有正式型號；不可自行改為 [[R&S SMW200A]]。\n- 所有供應協議、採購協議與 SLA negotiation 皆為來源建議 / roadmap；不可視為已簽約或已量產。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/OneWeb UT 測試流程.md"
+          },
+          "score": 8.456282
+         },
+         {
+          "text": "OneWeb UT 測試流程 › OEM 與供應鏈流程\n來源將測試流程與採購協調連在一起：\n\n- 選定 terminal model，例如 [[Intellian OW11F]] 或 [[Hughes HL1120W]]。\n- 請 OEM 提供 RF characteristics data，並與 laboratory results compare / validate。\n- 安排 field installation and acceptance，與 OEM technical support coordination。\n- 與 [[Eutelsat OneWeb]] 開 test account、取得 gateway access。\n- 與 terminal OEM 取得 samples、technical documents、after-sales support commitment。\n- 與 RF component suppliers [[Qorvo]] 與 [[Analog Devices]] 討論 PA / LNA / receiver front-end supply agreement。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/OneWeb UT 測試流程.md"
+          },
+          "score": 5.855363
+         },
+         {
+          "text": "OneWeb UT 測試流程 › unresolved\n- 需要回查原始 `oneweb_ut_final_presentation.html`，確認 HTML 是否含圖表、註腳、資料來源或作者資訊。\n- 需要確認 OneWeb constellation parameters 與 UT RF metrics 的官方來源。\n- 需要擷取 [[Intellian OW11F]]、[[Hughes HL1120W]]、[[Kymeta Goshawk u8]]、[[MediaTek M80]]、[[Qorvo QPA1722]] 與 [[ADAR1000]] datasheet / product page。\n- 需要確認 `SMW6` 是正式型號、簡寫、或轉檔錯誤。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/OneWeb UT 測試流程.md"
+          },
+          "score": 4.845838
+         },
+         {
+          "text": "Qorvo › unresolved\n- 需要擷取 [[Qorvo QPA1722]] official datasheet，確認 frequency range、gain、P1dB、PAE、noise figure、package、application 與 revision。\n- 需要確認 [[Qorvo]] 是否在 OneWeb / Eutelsat OneWeb terminal supply chain 中有正式採用或僅是來源建議。\n- 需要確認 `2W–100W+` GaN Ku / Ka PA coverage 的產品系列與條件。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Qorvo.md"
+          },
+          "score": 2.510523
+         },
+         {
+          "text": "Kuiper UT 測試流程 › 測試策略框架\n[[Kuiper UT Test & Supply Chain]]（來源正文未標示正式發布日期；raw converted 2026-09-17）Slide 5 將測試策略分為三層：\n\n1. 製造階段：工廠驗收測試 FAT、射頻模式驗證、熱電性能。\n2. 系統整合：實驗室端對端測試、協議棧驗證、模擬器模擬。\n3. 現場驗證：Protoflight 試驗、真實衛星測試、1000+ 終端試驗。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+          },
+          "score": 10.004182
+         },
+         {
+          "text": "Kuiper UT 測試流程 › 使用限制\n- 本頁是市場 / 內部簡報層級測試流程整理，不是正式 test plan、測試標準或 certification requirement。\n- FCC 25.209、PFD、ITU、MIL-STD、APSK、BER vs Eb/N0 等項目需補正式標準版本、章節與測試條件。\n- 100% 成功率、1000+ 單位測試、1+ Gbps 下行與 450 Mbps 上行等說法未附報告、地點、terminal model、satellite count 或 measurement method。\n- 不可用本頁判斷任何 Kuiper terminal 已取得認證、完成量產或達成商用 SLA。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+          },
+          "score": 10.003932
+         },
+         {
+          "text": "Kuiper UT 測試流程 › 系統整合與現場試驗\nSlide 11 的系統整合測試：\n\n- 基帶 / [[Amazon Prometheus SoC]]：協議棧驗證、資料處理 1Tbps 等級。\n- 加密與安全：[[AWS]] 整合，私有網路延伸。\n- 端對端模擬：使用網路仿真器，模擬衛星延遲與衰落。\n- 合規檢驗：FCC / ITU 規範，PFD、雜散限制。\n\nSlide 12 的現場試驗目標：\n\n- Protoflight（2023）：100% 成功率，雙向視訊通話驗證。\n- 1000+ 單位測試（2024）：FCC 授權，多地點涵蓋驗證。\n- 實衛星速率（2025）：達成 1+ Gbps 下行、450 Mbps 上行。\n- 商用化準備（2026 Q1）：5 國上線服務驗證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+          },
+          "score": 9.273469
+         },
+         {
+          "text": "Kuiper UT 測試流程 › 環境與可靠性測試\nSlide 10 列出：\n\n- 溫度範圍：-40°C 至 +60°C，RF 性能漂移監測。\n- 振動與衝擊：MIL-STD 運輸與安裝耐久性。\n- 濕度與鹽霧：防護等級驗證，腐蝕測試。\n- 長期耐久：1000+ 頻率掃描週期，增益衰減 < 0.5 dB。\n\n來源未標示 MIL-STD 具體版本、鹽霧標準、IP rating 或測試 duration。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+          },
+          "score": 8.810222
+         },
+         {
+          "text": "Kuiper UT 測試流程 › 第一階段：製造測試 FAT\nSlide 6 列出的 FAT 項目：\n\n- 近場掃描：射頻模式驗證，3D 掃描，SLL < -20 dB。\n- 增益與增益溫度比：波束掃描損失 < 3 dB 檢證。\n- 元素校準：振幅 / 相位均勻性 < 1 dB / < 5°。\n- 電源與熱：Prometheus SoC 功耗，來源括號列 60–225 W；此數字是否為 [[Amazon Prometheus SoC]] 本身功耗或終端整機功耗未決。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+          },
+          "score": 8.203012
+         },
+         {
+          "text": "Project Kuiper › 用戶終端與技術線索\n[[Kuiper UT Test & Supply Chain]] 將 [[Project Kuiper 用戶終端]]分為三款：\n\n- 標準型：18 × 18 cm、400 Mbps、90 W，用於住宅與小企業。\n- 便攜型：7 inch、100 Mbps、60 W，用於流動與 IoT 應用。\n- 企業型：76 × 51 cm、1 Gbps、225 W，用於回傳與企業應用。\n\n核心技術被描述為 Ka 頻段[[相控陣列天線]]：Rx 18–20 GHz、Tx 28–30 GHz、電子掃描、無機械部件、±60°覆蓋，並使用 [[Amazon Prometheus SoC]] 作為衛星 / 網關 / 終端共用的基帶晶片。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Project Kuiper.md"
+          },
+          "score": 10.43293
+         },
+         {
+          "text": "Project Kuiper › 與 Amazon Leo 的關係\n既有 [[Satellite User Terminal 外部資料清單]] 記錄 [[User Terminal]] link hub 中有 Amazon：Project Kuiper becomes [[Amazon Leo]] 的待讀線索。[[Kuiper UT Test & Supply Chain]] 使用 Amazon Project Kuiper 名稱，未提到 [[Amazon Leo]]。目前不可判定兩個名稱在來源時間點、品牌策略或法律實體上的正式關係。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Project Kuiper.md"
+          },
+          "score": 7.30125
+         },
+         {
+          "text": "Project Kuiper › 供應鏈與製造策略\n[[Kuiper UT Test & Supply Chain]] 稱：\n\n- 核心設計由 [[Amazon]] 內部完成，地點為 Kirkland / Redmond, WA。\n- [[Amazon Prometheus SoC]] 為自主研發。\n- 製造基地為 Washington 州自動化工廠，年產百萬級 user terminals 與衛星。\n- 元件夥伴列有 [[Tezmaksan]]（天線部件）與 [[L3Harris]]（政府應用）。\n- 供應鏈策略包含全球分散、規避單一國家風險、消費電子物流優勢。\n- 成本控制使用 Echo / Fire TV 經驗、自動化組裝、垂直整合 80% 技術、Amazon FBA 網路與自安裝降低裝機費。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Project Kuiper.md"
+          },
+          "score": 4.847499
+         },
+         {
+          "text": "Project Kuiper › 來源中的商業目標\n[[Kuiper UT Test & Supply Chain]]（來源正文未標示正式發布日期；raw converted 2026-09-17）稱：\n\n- 2026年Q1：在美、加、英、德、法 5 個國家上線服務。\n- 2026 年底：覆蓋範圍擴展至 26 個國家。\n- 市場客群：住宅、企業、政府、電信回傳。\n- 產品定位：競爭光纖價格，超越現有衛星服務。\n- 2026年Q1 部署時間表另稱 5 國上線時衛星數為 200+ 顆。\n- 成功關鍵因素列有預計 3200+ LEO 衛星、全球涵蓋競爭力、AWS 整合與低成本製造。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Project Kuiper.md"
+          },
+          "score": 4.558401
+         },
+         {
+          "text": "Amazon Prometheus SoC\n[[Amazon Prometheus SoC]] 是 [[Kuiper UT Test & Supply Chain]] 中列為 [[Project Kuiper]] 衛星、網關與用戶終端共用的基帶晶片名稱；來源未提供正式 datasheet、製程、供應商或量產狀態。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Amazon Prometheus SoC.md"
+          },
+          "score": 8.53137
+         },
+         {
+          "text": "Amazon Prometheus SoC › unresolved\n- 需要 Amazon 官方技術頁、FCC filing、採訪或拆解資料確認 Prometheus SoC 的正式名稱、規格與適用設備。\n- 需要確認 1Tbps 等級的口徑與測試條件。\n- 需要確認 60–225 W 是否為三款 user terminal 整機功耗，而非 SoC 功耗。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Amazon Prometheus SoC.md"
+          },
+          "score": 1.24428
+         },
+         {
+          "text": "oneweb_ut_final_presentation › 關鍵實體與概念\n- [[OneWeb UT 測試流程]]：本來源的核心概念，涵蓋 laboratory RF test、field link validation 與 commercialization readiness。\n- [[Eutelsat OneWeb]]：來源列為 constellation operator 與 gateway / SLA / test account 相關方。\n- [[OneWeb]]：衛星系統與 UT 商業化對象。\n- [[Intellian]]、[[Hughes]]、[[Kymeta]]、[[Sharp]]：主要 OEM terminal / 5G NTN trial 相關廠商。\n- [[Qorvo]]、[[Analog Devices]]、[[Skyworks]]：PA / LNA / receiver front-end 等 RF components 供應商線索。\n- [[MediaTek M80]]：來源稱為 5G NTN modem，支援 [[3GPP Release 19]]，用於 Sharp trial；需官方資料補證。\n- [[工研院]]：來源稱 ITRI 開發 satellite-board 5G gNB / terrestrial gNB integration 相關方案。\n- [[Satellite User Terminal 外部資料清單]]、[[衛星地面設備]]、[[5G NTN validation and testing]]：既有頁面可承接本來源的 user terminal、ground equipment 與 NTN validation 脈絡。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/oneweb_ut_final_presentation.md"
+          },
+          "score": 10.574719
+         },
+         {
+          "text": "oneweb_ut_final_presentation\n[[oneweb_ut_final_presentation]] 是由 `oneweb_ut_final_presentation.html` 轉出的 OneNote / presentation 型 Market 來源，主題為 [[OneWeb UT 測試流程]]、衛星通訊使用者終端機驗證與商業化；來源正式發布日期、作者正式姓名、部門版次與原始簡報版本皆未標示，raw frontmatter 僅標示 converted: 2026-09-17。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/oneweb_ut_final_presentation.md"
+          },
+          "score": 10.223009
+         },
+         {
+          "text": "oneweb_ut_final_presentation › 重點摘要\n- RF component / semiconductor 區列出 [[Qorvo]]、[[Analog Devices]]、[[Skyworks]]、[[MediaTek M80]]、[[SatixFy Sx3099]]、[[Prime ASIC]]，並建議與 [[Qorvo]] 與 [[Analog Devices]] 簽供應協議、與 [[MediaTek]] 溝通 5G NTN modem roadmap。\n- 台灣策略定位區把 2025–2026 稱為 Taiwan positioning opportunity window，列出 [[MediaTek]]、[[工研院]] / ITRI、GaN PA design、phased-array subarray manufacturing 與 5G NTN ground integration solution。\n- 5G NTN strategic roadmap 區列出 [[3GPP Release 19]]、[[MediaTek M80]]、ITRI satellite-board gNB、Ericsson / Nokia 3GPP certification，並列出 2025 H1 Sharp 5G NTN trial validation、2025 H2 MediaTek commercial modem mass production、2026 global 5G NTN service coverage。\n- Market sizing 區列出 flat-panel antenna 2023 `$7.28B`、2035 `$11.9B–$32.95B`、CAGR `15%–32.1%`；LEO UT market 2024 `~$2B`、2035 `~$5–8B`、CAGR `30%+`；5G NTN modem 2024 `<$500M`、2035 `$2–3B`、CAGR `50%+`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/oneweb_ut_final_presentation.md"
+          },
+          "score": 3.102257
+         },
+         {
+          "text": "半導體產業鏈 › 與既有頁面的關係\n- [[Serdes IC-IP companies image 1]]（來源未標示日期；取得於 2026-09-04）與 [[Serdes IC-IP companies image 3]]（來源未標示日期；取得於 2026-09-04）呈現的是 SoC / 晶片平台可整合 IP 類別，包括 [[SerDes]]、High Speed Serial I/F、Memory Interface、DSP、Processor、GPU、Mixed-Signal 等；[[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 則提供更高層級的產業鏈分類，將 **IP設計/IC設計代工服務** 放在上游。\n- [[SoC IP 組成方塊圖]] 可視為上游 **IP設計 / IC設計** 相關資料的一種圖像來源，但 [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 沒有列出 SoC、SerDes、Memory Interface 或具體 IP 清單。\n- [[IC載板]] 與 [[Package Substrate]] 是既有頁面中與下游 **基板** 可能相關的概念；但 [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 只寫「基板」，沒有定義材料、結構、用途或範圍，因此不能把該字樣直接等同於 [[IC載板]] 或 [[Package Substrate]]。\n- [[半導體封裝技術]] 頁整理具體封裝技術分類；[[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 只把 **IC封裝測試** 放在下游，不提供 [[Wire Bond]]、[[Flip Chip]]、[[Chiplet]]、[[2.5D 3D 封裝]] 或 [[Hybrid Bonding]] 的分類資訊。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/半導體產業鏈.md"
+          },
+          "score": 12.269863
+         },
+         {
+          "text": "半導體產業鏈 › 相關來源\n- [[Serdes IC-IP companies image 2]] — 未標示日期、取得於 2026-09-04 的半導體產業鏈方塊流程圖。\n- [[Serdes IC-IP companies image]] — 未標示日期、取得於 2026-09-04 的半導體產業鏈方塊流程圖，內容與 [[Serdes IC-IP companies image 2]] 高度重疊。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/半導體產業鏈.md"
+          },
+          "score": 7.22828
+         },
+         {
+          "text": "半導體產業鏈 › 未決事項\n- [[Serdes IC-IP companies image 2]] 未標示日期、年份、季度或資料期間。\n- [[Serdes IC-IP companies image]] 未標示日期、年份、季度或資料期間。\n- [[Serdes IC-IP companies image 2]] 未標示原始發布者、公司、作者、報告名稱、文件版次、頁碼或資料來源。\n- [[Serdes IC-IP companies image]] 未標示原始發布者、公司、作者、報告名稱、文件版次、頁碼或資料來源。\n- [[Serdes IC-IP companies image 2]] 未標示上游、中游、下游分類的依據。\n- [[Serdes IC-IP companies image]] 未標示上游、中游、下游分類的依據。\n- [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 都未列出任何公司、產品型號、產能、產值、市占率或出貨量。\n- [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 都未說明 **IP設計/IC設計代工服務** 的範圍。\n- [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 都未說明 **基板** 的種類、材料、用途或是否等同於 [[IC載板]] / [[Package Substrate]]。\n- [[Serdes IC-IP companies image 2]] 未說明 **IC模組** 與 **IC通路** 和 **IC封裝測試** 之間的箭頭或交易關係。\n- [[Serdes IC-IP companies image]] 明確描述 **IC封裝測試** 右側箭頭指向 **IC模組**，但未在結構化關聯表中說明 [[IC通路]] 與 [[IC封裝測試]] 或 [[IC模組]] 的關係。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/半導體產業鏈.md"
+          },
+          "score": 6.904732
+         },
+         {
+          "text": "半導體產業鏈 › 重複來源判斷\n- [[Serdes IC-IP companies image]] 與 [[Serdes IC-IP companies image 2]] 的主題、三段式區塊、上游 / 中游 / 下游圖中文字與缺漏欄位高度一致。\n- 兩份來源都未標示日期、年份、季度、公司名稱、產品型號、產能、產值、市占率或出貨量。\n- 引用時應把 [[Serdes IC-IP companies image]] 視為 [[Serdes IC-IP companies image 2]] 的重複或同源補充，詳見 [[Serdes IC-IP companies image 與 2 重複來源]]；不可因兩份圖像內容相同而把同一主張加權為兩份獨立市場證據。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/半導體產業鏈.md"
+          },
+          "score": 6.400455
+         },
+         {
+          "text": "半導體產業鏈 › 使用限制\n- 本頁只整理 [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 的圖上產業鏈分類，不把它們改寫為完整產業研究報告。\n- [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 都未標示公司名單，因此不能用來推論任何市場參與者、供應關係、客戶關係或競爭格局。\n- [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 都沒有數字，因此不能用來推論產值、市占率、產能、出貨量、成長率或占比。\n- [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 都沒有日期，因此不能用來代表任何特定時間點的市場狀態。\n- [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 都沒有標準版本或發布組織，因此本頁不把其分類視為正式標準。\n- [[Serdes IC-IP companies image]] 與 [[Serdes IC-IP companies image 2]] 高度重複；重複來源只能用於確認圖像同源 / 重複，不可用於提高結論可信度。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/半導體產業鏈.md"
+          },
+          "score": 3.797637
+         },
+         {
+          "text": "Serdes IC-IP companies image 2 › 重點摘要\n- [[Serdes IC-IP companies image 2]]（來源未標示日期；取得於 2026-09-04）是一張**產業鏈方塊流程圖 / 結構圖**，不是折線圖、長條圖、表格或市場份額圖。\n- 圖上主題文字為 **半導體產業鏈**。\n- 圖中以三個灰色大區塊表示 [[半導體產業鏈]] 的三個階段：**上游**、**中游**、**下游**。\n- **上游**區塊列出 **IP設計/IC設計代工服務** 與 **IC設計**，兩者之間以右向箭頭表示：IP設計/IC設計代工服務 → IC設計。\n- **中游**區塊列出 **IC/晶圓製造** 作為上方主方塊，並在下方列出 **生產製程及檢測設備**、**光罩**、**化學品** 等支援項目。\n- **下游**區塊列出 **IC封裝測試** 作為上方主方塊，並在下方列出 **生產製程及檢測設備**、**基板**、**導線架** 等支援項目。\n- 下游區塊右側另列 **IC模組** 與 **IC通路**。\n- 圖上沒有公司名稱、產品名稱、型號、數值、座標軸、單位、年份、季度或日期。\n- raw frontmatter 的 converted: 2026-09-04 只能作為取得 / 轉檔日期，不是內容日期。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Serdes IC-IP companies image 2.md"
+          },
+          "score": 11.615243
+         },
+         {
+          "text": "Starlink User Terminal › Product lifecycle\n依 [[Starlink UT Test Flow]]：\n\n| 階段 | 來源數量 / 說法 | 測試重點 |\n|---|---|---|\n| EVT | 20–50 prototypes | Design feasibility、power、thermal limits |\n| DVT | 50–200 units | Stress tests、drop / thermal、FCC / UL compliance |\n| PVT | 來源未標示數量 | Manufacturing yields、MP volume production、field validation |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Starlink User Terminal.md"
+          },
+          "score": 1.94728
+         },
+         {
+          "text": "Gatehouse Satcom › 與 Rohde & Schwarz 的合作\n依 [[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]]：\n\n- [[Gatehouse Satcom]] 與 [[Rohde & Schwarz]] formalized collaboration，以 strengthening validation and testing of [[5G IoT-NTN]] and [[NR-NTN]] technologies。\n- 合作目標是將 [[Gatehouse Satcom]] 的 5G [[NTN]] software expertise 與 [[Rohde & Schwarz]] test and measurement capabilities 結合。\n- [[Gatehouse Satcom]] gains access to the [[R&S CMX500]] platform，作為共同 further develop advanced orbit and channel emulation capabilities for NTN use cases 的一部分。\n- [[Gatehouse Satcom]] contributes end-to-end NTN test results、technical insight and engineering feedback，協助 [[Rohde & Schwarz]] 強化 NTN-focused test capabilities。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Gatehouse Satcom.md"
+          },
+          "score": 1.105657
+         },
+         {
+          "text": "Demosthenes Vouyioukas › Biography 摘錄\n依 [[Software-Defined_Radio_Deployments_in_UAV-Driven_Applications_A_Comprehensive_Review]]：\n\n- 1996 年取得 [[National Technical University of Athens]] electrical and computer engineering five-year Diploma。\n- 2003 年取得 NTUA electrical and computer engineering Ph.D. degree。\n- 2004 年取得 NTUA Joint Engineering-Economics M.Sc. degree。\n- 2011 至 2024 年任職於 [[University of the Aegean]]，Department of Information and Communication Systems Engineering，職位為 Professor。\n- 目前為 [[University of Piraeus]] Department of Digital Systems 的 Associate Professor。\n- 來源稱其在研究領域有超過 140 篇發表，包含 scientific journals、books、book chapters、international conference proceedings。\n- 研究領域包括 mobile and wireless communications systems、channel characterization and propagation models、machine learning techniques for path loss prediction、performance modeling of wireless networks、cooperative systems with relays、UWB indoor localization techniques、UAV and aerial communications、next generation satellite networks、mMIMO、IoT、5G and beyond / 6G technologies、network security、privacy policies。\n- 來源列其為 IEEE Communication Society、IFIP、ACM、Technical Chamber of Greece 成員。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Demosthenes Vouyioukas.md"
+          },
+          "score": 0.647459
+         },
+         {
+          "text": "R&S CMW100 K06 › General functions 與 RF connectors\n依 [[CMW100-K06_specs_en_5214-8348-22_v0500]] Version 05.00：\n\n| 項目 | 規格 / 說明 |\n|---|---|\n| Simultaneous operation | 支援 simultaneous receiver and transmitter。 |\n| RF generator/analyzer ports | RF 1 to RF 8，共 8 × SnapN，RF input/output to DUT。 |\n| RF generator auxiliary port | TX AUX，共 1 × SnapN，RF output。 |\n| RF connectors | Front panel；SnapN female，50 Ω，compatible with N female connectors。 |\n| RF 1 to RF 8 | combined RF input and RF output。 |\n| TX AUX | RF output。 |\n| Control interface | Rear panel USB 3.0 type B connector，maximum length 3 m。 |\n| Trigger interface | Rear panel trigger input/output，2 × BNC connector；output trigger sources 為 standard-specific internal trigger sources。 |\n\nReceiver test functions：RF generator signal 可 split 並 forwarded to 8 output ports；每個 output 可 separately switched off；RF 1 to RF 8 connectors 支援 collective output level setting；支援 frequency-dependent attenuation table，且 RF 1 to RF 8 connectors 可分別設定。\n\nTransmitter test functions：8 input signals 可 multiplexed to RF analyzer；支援 frequency-dependent attenuation tables，且 RF 1 to RF 8 connectors 可分別設定。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMW100 K06.md"
+          },
+          "score": 7.634295
+         },
+         {
+          "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 9.323678
+         },
+         {
+          "text": "第三代半導體概念股 › 限制與不可推論事項\n- [[Power IC - Power Management IC image 3]] 與 [[Power IC - Power Management IC image]] 未標示日期；[[Power IC - Power Management IC image 4]] 只在漲價潮段落標示 2026 年，仍缺少完整發布日期。\n- 圖上分類是概念股 / 供應鏈資訊圖，不等於供應鏈驗證、交易關係、完整市場名單或投資建議。\n- [[Power IC - Power Management IC image]] 的「上游基板與晶晶」照 raw OCR 保留；[[Power IC - Power Management IC image 3]] 的「上游基板與磊晶」也保留，兩者需待原圖或更清晰來源裁決。\n- 圖中文字「GaAs/Ga 通訊射頻供應鏈」照原文記錄；此頁不推論「Ga」是 GaN、GaAs 或其他技術縮寫。\n- [[Power IC - Power Management IC image 4]] 的「晶圓」「磊晶」「代工」是圖上括號註記，不等於產能、市占率或 AI 伺服器供應量。\n- 圖上沒有任何數字口徑可支持市占率、排名、產能或成長率。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/第三代半導體概念股.md"
+          },
+          "score": 4.124512
+         },
+         {
+          "text": "亞光 › 來源中的說法\n- [[0. UAV產業分析報告架構]]（2025 年版；raw 轉檔 2026-09-17）將 [[亞光]]（3019）列在台灣無人機產業供應鏈中游，分類為模組製造與系統整合，描述為高解析度鏡頭與感測器。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/亞光.md"
+          },
+          "score": 2.044232
+         },
+         {
+          "text": "聯發科 › UAV / Genio 脈絡\n- [[0. UAV產業分析報告架構]]（2025 年版；raw 轉檔 2026-09-17）將 [[聯發科]]（2454）列於 [[台灣無人機供應鏈]] 上游的晶片、感測器、通訊模組分類，描述為 AI晶片與通訊模組。\n- [[4. UAV Eco-chain in Taiwan]]（來源未標示正式日期；raw 轉檔 2026-09-17）將 [[聯發科]]（2454）列於 Key component/technology 區段，稱其晶片可作為無人機核心處理器，負責運算與通訊。\n- [[TW government support projects(無人機關鍵晶片及模組自主開發研發補助計畫)]]（來源未標示正式發布日期；raw 轉檔 2026-09-17）稱 [[海華科技]] 主導、[[臺灣希望]] 合作的先進無人機 AI 影像模組計畫將採用 [[聯發科]] [[Genio 720]] 晶片。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/聯發科.md"
+          },
+          "score": 3.835457
+         },
+         {
+          "text": "Serdes IC-IP companies image 2 › 與既有知識的關係\n- [[Serdes IC-IP companies image 1]]（來源未標示日期；取得於 2026-09-04）整理的是 SoC / 晶片平台 IP 組成示意圖，包含 [[SerDes]]、Memory Interface、DSP、Processor、GPU、Mixed-Signal 等 IP 類別；[[Serdes IC-IP companies image 2]]（來源未標示日期；取得於 2026-09-04）則是更上位的 [[半導體產業鏈]] 分工圖，列出上游、中游、下游環節。\n- 既有 [[SerDes]] 頁與 [[Serdes IC-IP companies image 1]] 關聯較直接；本來源只在上游列出 **IP設計/IC設計代工服務**，沒有列出 SerDes、SATA、PCIe、USB、MIPI、HDMI 或 Ethernet，因此不更新 [[SerDes]] 的技術規格內容。\n- 既有 [[IC載板]] 頁依 [[IC Carrier 載板 image 3]] 記錄 IC載板連接 [[IC晶片]] 與 [[PCB]]，並列出 [[BT材料基板]]、[[ABF材料基板]]、[[MIS材料基板]]；本來源只在下游支援項目列出 **基板**，沒有說明材料、封裝位置、應用或規格，因此不能直接合併為 [[IC載板]] 的定義證據。\n- 既有 [[Package Substrate]] 頁整理封裝載板在 die-to-die 互連與 2.5D / 3D 封裝示意圖中的圖上位置；本來源只列出泛稱 **基板**，不提供 package substrate 的材料、結構或供應鏈資料。\n- 既有 [[半導體封裝技術]] 頁整理 [[Wire Bond]]、[[Flip Chip]]、[[WLCSP]]、[[Fan-Out WLP]]、[[Chiplet]]、[[2.5D 3D 封裝]]、[[3D IC]]、[[Hybrid Bonding]] 等封裝技術；本來源只將 **IC封裝測試** 放在下游，不提供封裝技術分類。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Serdes IC-IP companies image 2.md"
+          },
+          "score": 11.255907
+         },
+         {
+          "text": "Starlink User Terminal › Field performance metrics\n來源列出：\n\n- Throughput：Rev4 100–307 Mbps down、10–40 Mbps up；iPerf3 validation。\n- Latency / Jitter：88 ms avg、9 ms jitter Rev4；flent rrul bufferbloat test。\n- Power：55–100 W normal、200 W snowmelt；wattmeter baseline。\n- Obstructions：App API monitoring、FOV alignment、beam steering accuracy。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Starlink User Terminal.md"
+          },
+          "score": 1.884213
+         },
+         {
+          "text": "MediaTek\n[[MediaTek]] 是 [[Edge AI Chips image 1]]（2024/05/15）在 [[Mobile AI]] / [[SoC]] 區塊列出的公司 / 品牌名稱，圖中同區塊也寫有 [[聯發科]] 與 [[天璣 9300 系列]]；[[Edge AI Chips image 11]]（來源未標示日期；取得於 2026-09-04）另把 [[MediaTek]] / [[聯發科]] 列於「AI 晶片開發工具－SDK & Studio」區塊；[[Edge AI Chips image 14]]（來源未標示日期；取得於 2026-09-04）以「聯發科 (MediaTek) – Genio IoT」列出 [[MediaTek Genio 系列]]；[[Edge AI Chips image 17]]（來源未標示日期；取得於 2026-09-04）提供另一張聚焦 [[Genio IoT]] 的產品介紹 / 比較表；[[Edge AI Chips image 21]]（來源未標示日期；取得於 2026-09-04）則以「聯發科 (MediaTek) – 5G 手機 SoC」列出天璣系列 APU / NPU 與生成式 AI / 代理型 AI 推論相關圖上文字。[[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]] 另把 [[MediaTek]] 放在 [[5G NTN-NR Rel.17 connection demonstration]] 語境，提供 NTN-NR device as DUT 與 NTN test platform。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/MediaTek.md"
+          },
+          "score": 0.737642
+         },
+         {
+          "text": "Analog Devices › 來源中的出現\n[[Beamforming OneNote]]（來源正式日期未標示；raw converted 2026-09-17）列出以下 Analog Devices 連結標題：\n\n- An Interview with Analog Devices Discussing RF Electronics for Phased Array Applications。\n- Overcoming Common Planar Phased Array Circuit Design Challenges。\n- Internet from Space: RFIC in High Capacity, Low Latency LEO Satellite Terminals。\n\n[[User Terminal]]（來源正文標示 links current as of January 7, 2026, 1:33 PM CST；raw converted 2026-09-17）在 RF Components & Semiconductors 表格列出：\n\n- Component：Receiver IC。\n- Supplier：[[Analog Devices]]。\n- Link：`analog.com/adar1000`，連到 [[ADAR1000]] 產品頁。\n- 另一個 link：Analog Devices IMS landing page。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Analog Devices.md"
+          },
+          "score": 0.728159
+         },
+         {
+          "text": "R&S CMW100 K06 › RF analyzer general specifications\n| 項目 | 條件 | 數值 |\n|---|---|---:|\n| Inherent spurious response | without input signal，150 MHz to 6000 MHz，expected nominal power setting ≤ –10 dBm；排除 n · 500 MHz with n = 5 to 12、100 MHz + n · 50 MHz with n = 1 to 62、562.5 MHz、750 MHz、3150 MHz、4050 MHz、4800 MHz、5812.5 MHz | < –100 dBm |\n| Inherent spurious response | same exclusions，expected nominal power setting > –10 dBm | < –90 dB below expected nominal power setting |\n| Spurious response | full-scale single-tone input signal，150 MHz to 3800 MHz | < –55 dB |\n| Spurious response | full-scale single-tone input signal，3800 MHz to 4200 MHz | < –40 dB |\n| Spurious response | full-scale single-tone input signal，4200 MHz to 6000 MHz | < –40 dB |\n| RF analyzer phase noise | 150 MHz to 3800 MHz，carrier offset ≥ 1 MHz | < –120 dBc, 1 Hz |\n| RF analyzer phase noise | 3800 MHz to 6000 MHz，carrier offset ≥ 1 MHz | < –117 dBc, 1 Hz |\n\nTrigger sources：GPRF free run、GPRF IF power、GPRF Gen。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 11,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMW100 K06.md"
+          },
+          "score": 6.473878
+         },
+         {
+          "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 8.743512
+         },
+         {
+          "text": "Analog Devices › unresolved\n- 需要擷取 Analog Devices 文章正文，確認文章日期、作者、產品 / 技術範圍與可引用主張。\n- 需要確認是否建立個別來源頁：RF Electronics for Phased Array Applications、Planar Phased Array Circuit Design Challenges、Internet from Space RFIC。\n- 需要擷取 [[ADAR1000]] 官方產品頁，確認其功能、頻段、資料表版次與 satellite / phased array 使用限制。\n- 需要確認 [[User Terminal]] 中 Analog Devices IMS landing page 是否與 [[ADAR1000]]、satellite terminal testing 或 phased array demo 直接相關。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Analog Devices.md"
+          },
+          "score": 1.844808
+         },
+         {
+          "text": "第三代半導體概念股 › 與功率半導體概念股的關係\n- [[Power IC - Power Management IC image 3]] 與 [[Power IC - Power Management IC image]] 都把 [[第三代半導體概念股]] 和 [[功率半導體概念股]] 放在同一張「功率半導體+第三代半導體概念股」圖中，但用不同區塊呈現。\n- [[Power IC - Power Management IC image]] 與 [[Power IC - Power Management IC image 3]] 高度重疊，不可視為彼此獨立的市場驗證。\n- [[Power IC - Power Management IC image 1]] 也列出 [[嘉晶]] 與 [[漢磊]]，但其分類是「磊晶/基板」，核心能力分別寫作 SiC/GaN 磊晶片與 SiC/GaN 晶圓代工龍頭。\n- [[Power IC - Power Management IC image 4]] 把 [[環球晶]]、[[嘉晶]]、[[漢磊]] 放入 [[AI 伺服器 PMIC 與功率半導體轉型]] 的台股 AI 電力供應鏈地圖，但未提供 AI 伺服器供應證據。\n- 這些來源都沒有提供 [[環球晶]]、[[嘉晶]]、[[合晶]]、[[全新]]、[[漢磊]]、[[穩懋]] 的出貨、營收、市占率、客戶或產能證據。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/第三代半導體概念股.md"
+          },
+          "score": 3.482898
+         },
+         {
+          "text": "亞光\n[[亞光]] 是 [[0. UAV產業分析報告架構]] 中列於 [[台灣無人機供應鏈]] 中游的公司，來源描述其與高解析度鏡頭與感測器相關。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/亞光.md"
+          },
+          "score": 2.021314
+         },
+         {
+          "text": "新唐科技 › 來源中的說法\n- [[0. UAV產業分析報告架構]]（2025 年版；raw 轉檔 2026-09-17）將 [[新唐科技]] / 新唐（4919）列於 [[台灣無人機供應鏈]] 上游的晶片、感測器、通訊模組分類，描述為微控制器 MCU。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/新唐科技.md"
+          },
+          "score": 5.791177
+         },
+         {
+          "text": "Serdes IC-IP companies image 2 › 原文未解的問題\n- unresolved: 來源未標示日期、年份、季度或資料期間。\n- unresolved: 來源未標示原始發布者、公司、作者、報告名稱、文件版次或頁碼。\n- unresolved: raw frontmatter 的 converted: 2026-09-04 只能作為取得 / 轉檔日期，不是內容日期。\n- unresolved: 圖上沒有浮水印、頁尾來源、公司標誌或資料來源註記；頁尾文字只有「半導體產業鏈」。\n- unresolved: 圖上沒有公司名稱、產品名稱、型號或市場數字。\n- unresolved: 圖上未說明 **IP設計/IC設計代工服務** 是否指一般設計服務、IP 授權、ASIC design service、foundry design enablement 或其他範圍。\n- unresolved: 圖上未說明中游與下游的 **生產製程及檢測設備** 是否為同一類設備、不同設備，或只是共用產業環節名稱。\n- unresolved: 圖上 **基板** 未說明是否指 [[IC載板]]、[[Package Substrate]]、[[ABF載板]]、[[BT材料基板]]、[[MIS材料基板]] 或其他基板。\n- unresolved: 圖上未標示箭頭是否代表物流、設計流程、價值鏈關係、供應關係或產業分類。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Serdes IC-IP companies image 2.md"
+          },
+          "score": 9.292807
+         },
+         {
+          "text": "Starlink User Terminal › DVT / PVT test flow\n[[Starlink UT Test Flow]] 列出 key steps：\n\n- Functional test：power on、stow、normal / obstructed state check。\n- RF emissions：anechoic chamber、FCC Part 15 / 25 limits、spurious <-43 dBc。\n- EIRP / G/T：spectrum analyzer + power meter measurement、validate against target。\n- Modulation BER：connect to gateway simulator、QPSK / 64QAM threshold test。\n- Environmental：thermal cycle、drop / vibration、IP67 salt spray、snowmelt power。\n\n更完整測試流程另見 [[Starlink User Terminal 測試流程]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Starlink User Terminal.md"
+          },
+          "score": 0.346265
+         },
+         {
+          "text": "Viasat › 來源中的角色\n依 [[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]]：\n\n- [[Viasat]] 與 [[Rohde & Schwarz]] joined forces to boost testing for [[Narrowband Non-terrestrial Networks]]（[[NB-NTN]]）[[IoT]] devices connecting via satellite。\n- [[Viasat]] 被描述為 global leader in satellite communications。\n- 合作目標是確保 chipsets、modules and devices interoperate seamlessly with [[Viasat]] satellite network，並 comply with [[3GPP Release 17]] standards。\n- 來源描述的 target service 是 satellite-based [[IoT]] applications，特別是在 areas without terrestrial network coverage 的 ubiquitous IoT applications。\n- [[Viasat NB-NTN IoT test plan]] 是 certification test plan，包含 protocol、performance 與 RF test scenarios，並 based on [[R&S CMX500]] one-box signaling tester。\n- 來源指出 visitors to [[MWC Barcelona 2026]] can experience the test plan in action；[[Viasat]] booth 位於 hall 6，booth 6A20。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Viasat.md"
+          },
+          "score": 0.189804
+         },
+         {
+          "text": "R&S CMW100 K06\n[[R&S CMW100 K06]] 是 [[Rohde & Schwarz]] 的 Communications Manufacturing Test Set，依 [[CMW100-K06_specs_en_5214-8348-22_v0500]]（PD 5214.8348.22，Version 05.00，September 2025）提供 8 個 RF DUT input/output、TX AUX、RF generator/analyzer、power meter、spectrum analyzer 與多種行動 / 無線標準 production test 規格。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMW100 K06.md"
+          },
+          "score": 5.877974
+         },
+         {
+          "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 5.528915
+         },
+         {
+          "text": "MediaTek M80\n[[MediaTek M80]] 是 [[oneweb_ut_final_presentation]] 中被描述為 5G NTN modem / modem roadmap 的產品或平台名稱，來源稱其支援 [[3GPP Release 19]]、用於 [[Sharp]] 5G NTN trial，並被視為 satellite + 5G convergence 的關鍵元件；此說法需以 [[MediaTek]] 官方資料補證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/MediaTek M80.md"
+          },
+          "score": 1.606826
+         },
+         {
+          "text": "第三代半導體概念股 › [[Power IC - Power Management IC image]] 圖上分類\n[[Power IC - Power Management IC image]] 未標示圖片發布日期，raw 轉換於 2026-09-04，內容與 [[Power IC - Power Management IC image 3]] 高度重疊；但本次 raw OCR 將上游分類照錄為「上游基板與晶晶」。\n\n| 圖上大分類 | 圖上子分類 | 公司 / 代號 | 日期 / 期間 |\n|---|---|---|---|\n| 第三代半導體與特殊製程 | 上游基板與晶晶 | [[環球晶]]（6488） | 來源未標示日期；raw 轉換於 2026-09-04 |\n| 第三代半導體與特殊製程 | 上游基板與晶晶 | [[嘉晶]]（3016） | 來源未標示日期；raw 轉換於 2026-09-04 |\n| 第三代半導體與特殊製程 | 上游基板與晶晶 | [[合晶]]（6182） | 來源未標示日期；raw 轉換於 2026-09-04 |\n| 第三代半導體與特殊製程 | 上游基板與晶晶 | [[全新]]（2455） | 來源未標示日期；raw 轉換於 2026-09-04 |\n| 第三代半導體與特殊製程 | 第三代半導體晶圓代工 | [[漢磊]]（3707） | 來源未標示日期；raw 轉換於 2026-09-04 |\n| 第三代半導體與特殊製程 | GaAs/Ga 通訊射頻供應鏈 | [[穩懋]]（3105） | 來源未標示日期；raw 轉換於 2026-09-04 |\n\n⚠️ [[Power IC - Power Management IC image]]（來源未標示日期；raw 轉換於 2026-09-04）說第三代半導體與特殊製程的上游分類為「上游基板與晶晶」，但既有頁面 [[第三代半導體概念股]] 說 [[Power IC - Power Management IC image 3]] 的對應分類為「上游基板與磊晶」。判斷為同一或高度相似圖卡的 OCR / 讀圖差異；未裁決前兩種字串並列，不自行改成其中一者。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/第三代半導體概念股.md"
+          },
+          "score": 3.212609
+         },
+         {
+          "text": "亞光 › 可追溯限制\n- 來源未提供亞光的無人機鏡頭 / 感測器型號、客戶、出貨、認證、營收或得標資料。\n- 本頁不把來源列名改寫為已確認供應、量產或採購關係。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/亞光.md"
+          },
+          "score": 1.221864
+         },
+         {
+          "text": "圓剛 › 來源中的說法\n- [[0. UAV產業分析報告架構]]（2025 年版；raw 轉檔 2026-09-17）將 [[圓剛]]（2417）列在台灣無人機產業供應鏈上游，分類為晶片、感測器、通訊模組，描述為影像與視訊模組。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/圓剛.md"
+          },
+          "score": 3.281438
+         },
+         {
+          "text": "5G NTN validation and testing › 來源中的測試目標\n依 [[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]]，[[Gatehouse Satcom]] 與 [[Rohde & Schwarz]] 的合作目標包含：\n\n- strengthen validation and testing of [[5G IoT-NTN]] and [[NR-NTN]] technologies。\n- 在市場從 specification work 走向 real-world implementation 時，改善 validation 方法。\n- 在 realistic and controlled laboratory conditions 下測試 5G NTN technologies。\n- further develop advanced orbit and channel emulation capabilities for NTN use cases。\n- 支援更準確的 satellite radio channel modelling。\n- 更 realistic testing of 5G NTN behavior across different scenarios。\n- 支援 faster validation cycles、earlier identification of system-level issues 與 stronger test conditions。\n- reduce technical uncertainty and accelerate time to market for the broader NTN ecosystem。\n\n依 [[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]]，MWC 2024 展示目標包含：\n\n- demonstrate a [[5G Non-Terrestrial Network]] [[New Radio]] connection based on latest [[3GPP Release 17]] specifications。\n- emulate a [[Low Earth Orbit]] satellite access node。\n- showcase 5G technology providing connectivity in areas without terrestrial coverage。\n- 展示 basic mobile services，例如 voice、messaging 與 low data rate services，面向 maritime、aeronautical 與 rural applications。\n- 在 interactive callbox mode 中讓 users trigger voice calls alongside RF-related measurements。\n- 評估 future NTN-NR devices powered by [[MediaTek]] NTN test platform 在不同 conditions 下的 performance and reliability。\n\n依 [[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]]，[[Viasat]] 與 [[Rohde & Schwarz]] 的 NB-NTN IoT test plan 目標包含：",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/5G NTN validation and testing.md"
+          },
+          "score": 0.228925
+         },
+         {
+          "text": "IC Carrier 載板 image 2 與 5 重複來源 › 相關來源\n- [[IC Carrier 載板 image 2]] — 來源未標示日期、取得於 2026-09-04 的 Semiconductor Packaging Technologies 比較表。\n- [[IC Carrier 載板 image 5]] — 來源未標示日期、raw 轉換於 2026-09-04 的 Semiconductor Packaging Technologies 比較表。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/syntheses/IC Carrier 載板 image 2 與 5 重複來源.md"
+          },
+          "score": 0.757648
+         },
+         {
+          "text": "R&S CMPHEAD30 › mmWave RF analyzer\n| 項目 | 規格 |\n|---|---|\n| 搭配 | [[R&S CMP200]] 與 [[R&S CM-Z30A]] |\n| Duplex mode | half duplex（TDD） |\n| Frequency range | 28 GHz band：24.25 GHz to 31.80 GHz；39 GHz band：37.00 GHz to 43.50 GHz |\n| Frequency extension narrowband spectrum emission mask | 28 GHz band：23.45 GHz to 24.25 GHz；39 GHz band：43.50 GHz to 44.30 GHz |\n| Frequency resolution | < 0.1 Hz |\n| Absolute maximum level | highest attenuation +20 dBm CW；lowest attenuation +8 dBm CW；0 V DC |\n| Level uncertainty | 28 GHz band：< 2.5 dB；39 GHz band：< 3.0 dB |\n| Displayed average noise level | 23.5 GHz ≤ f ≤ 29.6 GHz：< –155 dBm/Hz；29.6 GHz < f ≤ 31.8 GHz：< –154 dBm/Hz；37.0 GHz ≤ f ≤ 43.5 GHz：< –152 dBm/Hz；43.5 GHz < f ≤ 44.3 GHz：< –150 dBm/Hz |\n| Frequency error | < ±0.01 ppm，符合 [[3GPP TS 38.521-2]] V17.0.0 |\n| Isolation of RF ports | RF 1 to RF 2 > 27 dB，35 dB typ. |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMPHEAD30.md"
+          },
+          "score": 2.528179
+         },
+         {
+          "text": "工研院 › 使用限制\n- [[0.Satcom Industry]] 未提供晶片組名稱、製程、頻段範圍、Tx/Rx 架構、output power、noise figure、beamforming 支援、測試結果、合作廠商、量產狀態或公開技術報告。\n- [[Taiwan Small Cell BTS 業務簡報]] 未提供工研院 Micro Outdoor gNB 的型號、頻段、O-RAN spec version、RU class、測試報告、OTIC 認證證書或補助案號。\n- `台灣已成為 O-RAN 認證樞紐` 與 `年均投入 NT$ 數億` 都是業務簡報層說法，需以工研院、OTIC、政府或 O-RAN Alliance 文件驗證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/工研院.md"
+          },
+          "score": 4.46842
+         },
+         {
+          "text": "S-SSS › 使用限制\n- 來源未保留 first ID / second ID 的正式符號與範圍。\n- 來源未提供 full S-SSS interleaving formula。\n- 來源未標示 [[3GPP TS 38.211]] 的 version；只提供 Section 8.4.2 / 8.4.3 的引用線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/S-SSS.md"
+          },
+          "score": 0.796351
+         },
+         {
+          "text": "聰泰 › 來源中的說法\n- [[0. UAV產業分析報告架構]]（2025 年版；raw 轉檔 2026-09-17）將 [[聰泰]]（5474）列在台灣無人機產業供應鏈上游，分類為晶片、感測器、通訊模組，描述為影像與視訊模組。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/聰泰.md"
+          },
+          "score": 3.281438
+         },
+         {
+          "text": "5G NTN validation and testing › 使用限制\n- 本頁只整理 PR 層級合作、測試方法、certification test plan 與展示語境，不是產品規格、標準規格或 conformance test plan。\n- Gatehouse Satcom 來源未標示 published date、PR 編號或 formal version。\n- Rohde & Schwarz / MediaTek MWC 2024 來源未標示 published date、PR 編號或 formal version。\n- Rohde & Schwarz / Viasat 來源未標示 published date、test plan version、document number、test case list 或 certification body。\n- 來源未列 supported test cases、frequency bands、channel models、orbit emulation limits、payload types、UE categories、satellite operators 或 measurement accuracy。\n- [[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]] 未提供 MediaTek NTN-NR device 型號、R&S CMX500 OBT configuration、SMBV100B GNSS option code 或 physical test setup。\n- [[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]] 未提供 [[Viasat]] satellite network technical profile、NB-NTN device list、CMX500 option stack 或 first test results data。\n- future [[6G NTN testing and validation]] 只可視為 PR ambition；不可推論已有產品或測試能力。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/5G NTN validation and testing.md"
+          },
+          "score": 0.221609
+         },
+         {
+          "text": "IC Carrier 載板 image 2 與 5 重複來源 › 主要相同內容\n| 比對項目 | [[IC Carrier 載板 image 2]] | [[IC Carrier 載板 image 5]] | 判斷 |\n|---|---|---|---|\n| 主題 | Semiconductor Packaging Technologies | Semiconductor Packaging Technologies | 高度一致 |\n| 技術列數 | 10 類封裝技術 | 10 類封裝技術 | 一致 |\n| 第 1 類 | [[Wire Bond]] / WB | [[Wire Bond]] / WB | 一致 |\n| 第 2 類 | [[Flip Chip]] / FC | [[Flip Chip]] / FC | 一致 |\n| 第 3 類 | [[WLCSP]] | [[WLCSP]] | 一致 |\n| 第 4 類 | [[Fan-In WLP]] | [[Fan-In WLP]] | 一致，image 5 明確 OCR 出 RDL = redistribution layer |\n| 第 5 類 | [[Fan-Out WLP]] / FO-WLP | [[Fan-Out WLP]] / FO-WLP | 一致 |\n| 第 6 類 | [[SiP]] / System in Package | [[SiP]] / System in Package | 一致 |\n| 第 7 類 | [[Chiplet]] | [[Chiplet]] | 一致 |\n| 第 8 類 | [[2.5D 3D 封裝|2.5D]] / Interposer / Bridge | [[2.5D 3D 封裝|2.5D]] / Interposer / Bridge | 一致 |\n| 第 9 類 | [[3D IC]] / Die Stacking | [[3D IC]] / Die Stacking | 一致 |\n| 第 10 類 | [[Hybrid Bonding]] | [[Hybrid Bonding]] | 一致 |\n| 底部 benefits | Higher I/O Density、Better Performance、Lower Power、More Integration、Cost Effective Long Term | Higher I/O Density、Better Performance、Lower Power、More Integration、Cost Effective Long Term | 高度一致 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/syntheses/IC Carrier 載板 image 2 與 5 重複來源.md"
+          },
+          "score": 0.576176
+         },
+         {
+          "text": "R&S CMPHEAD30 › mmWave RF generator\n| 項目 | 規格 |\n|---|---|\n| 搭配 | [[R&S CMP200]] 與 [[R&S CM-Z30A]] |\n| Duplex mode | half duplex（TDD） |\n| Frequency range | 28 GHz band：24.25 GHz to 31.80 GHz；39 GHz band：37.00 GHz to 43.50 GHz |\n| Frequency resolution | < 0.1 Hz |\n| Maximum reverse power | 0 V DC，+25 dBm |\n| Output level range | 28 GHz band PEP –84 dBm to +20 dBm；37 GHz ≤ f ≤ 40 GHz PEP –78 dBm to +19 dBm；40 GHz < f ≤ 43.5 GHz PEP –78 dBm to +17 dBm |\n| Output level uncertainty | 28 GHz band，–50 dBm to +15 dBm CW：< 2.5 dB；39 GHz band，–45 dBm to +10 dBm CW：< 3.0 dB |\n| Output level repeatability | 1 h warm-up 後 typ. < 0.2 dB |\n| Isolation of RF ports | RF 1 to RF 2 > 27 dB，35 dB typ. |\n\nEVM 條件：SCS 60 kHz / 120 kHz、64QAM、+15 °C to +35 °C、within ±5 °C from last I/Q alignment。來源標示 EVM 為 measured values。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMPHEAD30.md"
+          },
+          "score": 2.522024
+         },
+         {
+          "text": "工研院 › Satcom / RF 脈絡\n- [[0.Satcom Industry]]（來源正文未標示正式發布日期；內容含 2025 年與 2024 年資料點；raw converted 2026-09-17）稱[[工研院]]研發 Ka 頻段低軌衛星射頻晶片組。\n- 同一來源將此列在台灣廠商積極投入衛星本體、光學酬載、陣列天線、[[NTN]] 等技術開發的段落中。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/工研院.md"
+          },
+          "score": 4.212446
+         },
+         {
+          "text": "S-SSS › 基本性質\n依 [[S-SSB]]：\n\n- [[S-SSS]] 是 [[Sidelink SSB]] / [[S-SS-PSBCH block]] 的四個組成之一。\n- Like standard [[SSS]]，[[S-SSS]] consists of 127 [[BPSK]] modulation symbols。\n- Sequence is based on two Fibonacci [[LFSR]]s of length 7：\n  - `x0` with taps [7,3]。\n  - `x1` with taps [7,6]。\n- Final sequence `d` is obtained by interleaving the two LFSR outputs depending on the [[Sidelink identity]]，in same way as standard [[SSS]]；但來源中的完整公式 / identity 符號因轉檔遺失。\n- Overall 672 different S-SSS sequences are defined because sequence generation depends on the first and second ID。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/S-SSS.md"
+          },
+          "score": 0.637156
+         },
+         {
+          "text": "5G NTN validation and testing\n[[5G NTN validation and testing]] 是針對 [[5G Non-Terrestrial Networks]]、[[5G IoT-NTN]]、[[NR-NTN]]、[[NB-NTN]] 與 satellite connectivity devices，在 realistic and controlled laboratory conditions 下驗證 satellite connectivity behavior、radio channel modelling、orbit / channel emulation、protocol / performance / RF scenarios 與 system-level behavior 的測試活動。[[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]] 補充一個 [[MWC Barcelona 2024]] 展示例子：以 [[R&S CMX500 OBT]]、[[R&S SMBV100B]] 與 [[MediaTek]] NTN-NR device as DUT 展示基於 [[3GPP Release 17]] specifications 的 live [[5G NTN-NR]] connection。[[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]] 則補入 [[Viasat]] / [[Rohde & Schwarz]] 的 [[NB-NTN]] [[IoT]] certification test plan 語境，焦點是 device validation、interoperability with [[Viasat]] satellite network 與 [[3GPP Release 17]] compliance。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/5G NTN validation and testing.md"
+          },
+          "score": 0.216893
+         },
+         {
+          "text": "IC Carrier 載板 image 2 與 5 重複來源\n[[IC Carrier 載板 image 2 與 5 重複來源]] 比對兩份未標示日期、raw 取得 / 轉檔於 2026-09-04 的 Semiconductor Packaging Technologies 比較圖，標示兩者高度重疊，避免同一圖表或同一類圖卡被視為獨立市場驗證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/syntheses/IC Carrier 載板 image 2 與 5 重複來源.md"
+          },
+          "score": 0.537883
+         },
+         {
+          "text": "R&S CMPHEAD30\n[[R&S CMPHEAD30]] 是 [[Rohde & Schwarz]] 用於 [[R&S CMP200]] 5G NR FR2 nonsignaling one-box test solution 的 remote radio head，覆蓋 28 GHz band 與 39 GHz band。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMPHEAD30.md"
+          },
+          "score": 2.353724
+         },
+         {
+          "text": "工研院\n[[工研院]] 是 [[0.Satcom Industry]] 中列為 Ka 頻段低軌衛星射頻晶片組研發單位的台灣研究機構名稱；[[Taiwan Small Cell BTS 業務簡報]]（2025 業務簡報）另將工研院列入台灣 small cell / O-RAN 供應鏈與政策支持脈絡。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/工研院.md"
+          },
+          "score": 2.803435
+         },
+         {
+          "text": "0. UAV產業分析報告架構 › 原文未解的問題\n- 來源是 Microsoft 365 chat / OneNote 複製內容，未標示作者、生成模型、製作日期或人工校訂者。\n- references 中的三個外部連結未被 raw 擷取正文；本頁不能把連結內容當成已讀證據。\n- 2025 年上半年外銷金額 1,189 萬美元、年增超過 7 倍的統計口徑、資料來源、商品分類與是否包含零組件未標示。\n- 政府投入 500 億元、2026–2027 年採購 5 萬架無人機的預算科目、採購單位、標案編號與是否已核定未標示。\n- 全球市場 2024–2030 預估的研究機構、報告日期、無人機分類範圍與 CAGR 計算口徑未標示。\n- 供應鏈公司列名未標示是否為實際供應、已得標、量產、研發、概念股或市場觀察名單。\n- 來源未提供 [[聯發科]]、[[新唐科技]]、[[圓剛]]、[[聰泰]]、[[亞光]]、[[中光電]]、[[漢翔]]、[[雷虎科技]]、[[經緯航太]]、[[長榮航太]]在無人機供應鏈中的產品型號或客戶。\n- 來源提到 AI、自主飛行、5G、低軌衛星通訊，但未提供標準版本、頻段、測試項目、產品型號或實作案例。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/0. UAV產業分析報告架構.md"
+          },
+          "score": 2.894262
+         },
+         {
+          "text": "中光電\n[[中光電]] 是 [[0. UAV產業分析報告架構]] 中列於 [[台灣無人機供應鏈]] 中游的公司，來源描述其與軍用與商用無人機整合相關；[[4. UAV Eco-chain in Taiwan]] 另在 System Integrator 區段列出中強光電 / 中光電 / Coretronic Corporation 與 [[中光電智能機器人]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/中光電.md"
+          },
+          "score": 1.981669
+         },
+         {
+          "text": "IC Carrier 載板 image 2\n[[IC Carrier 載板 image 2]] 是一張來源未標示日期、取得於 2026-09-04 的半導體封裝技術資訊圖表，主題為 Semiconductor Packaging Technologies，副標題為 From Traditional to Advanced Integration。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/IC Carrier 載板 image 2.md"
+          },
+          "score": 1.574062
+         },
+         {
+          "text": "R&S FSWX3026\nR&S FSWX3026 是 [[R&S FSWX]] 系列 26.5 GHz Signal and Spectrum Analyzer 型號，依 Version 12.00（May 2026）提供 1 RF 與 2 RF base unit。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S FSWX3026.md"
+          },
+          "score": 6.320113
+         },
+         {
+          "text": "Starlink User Terminal 測試流程 › 來源口徑\n- 來源：[[Starlink UT Test Flow]]。\n- 正式日期：來源未標示。\n- raw converted：2026-09-18。\n- 資料類型：Market / OneNote / PowerPoint lossy derivative。\n- 限制：本頁不是 Starlink 官方 test plan、NCC / FCC 認證流程文件、量產 SOP 或實驗室 scope。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Starlink User Terminal 測試流程.md"
+          },
+          "score": 3.98726
+         },
+         {
+          "text": "0. UAV產業分析報告架構 › 實體\n- [[聯發科]] — 來源列於上游晶片、感測器、通訊模組層，描述為 AI晶片與通訊模組。\n- [[新唐科技]] — 來源列於上游層，描述為微控制器 MCU。\n- [[圓剛]] — 來源列於上游層，描述為影像與視訊模組。\n- [[聰泰]] — 來源列於上游層，描述為影像與視訊模組。\n- [[亞光]] — 來源列於中游層，描述為高解析度鏡頭與感測器。\n- [[中光電]] — 來源列於中游層，描述為軍用與商用無人機整合。\n- [[漢翔]] — 來源列於中游層，描述為整機組裝與飛控系統。\n- [[雷虎科技]] — 來源列於下游層，描述為軍用與大型無人機。\n- [[經緯航太]] — 來源列於下游層，描述為智慧農業與多用途無人機。\n- [[長榮航太]] — 來源列於下游層，描述為艦載型監偵無人機。\n- [[台灣卓越無人機海外商機聯盟]] — 來源稱政府成立的無人機海外商機聯盟。\n- [[DJI]] — 來源在挑戰段落列為國際品牌競爭例子。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/0. UAV產業分析報告架構.md"
+          },
+          "score": 2.341069
+         },
+         {
+          "text": "漢翔\n[[漢翔]] 是 [[0. UAV產業分析報告架構]] 中列於 [[台灣無人機供應鏈]] 中游的公司，來源描述其與整機組裝與飛控系統相關；[[4. UAV Eco-chain in Taiwan]] 另把漢翔航空工業列在 System Integrator 區段。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/漢翔.md"
+          },
+          "score": 1.761756
+         },
+         {
+          "text": "# OneWeb UT 測試流程",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-62c234dd566e887e",
+            "original_ref": "raw/Market/OneNote/oneweb_ut_final_presentation.md",
+            "sha256": "62c234dd566e887eb17b68860ff3c42d541b5000c7f1c0c5be9f824b285a9c74",
+            "raw_ref": "raw/Market/OneNote/oneweb_ut_final_presentation.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/oneweb_ut_final_presentation.md",
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 57.889317
+         },
+         {
+          "text": "| 類別 | 規格 | 台光電 | 台燿 | 聯茂 | 斗山(韓) | 生益科技(中) |\n|---|---|---|---|---|---|---|\n| 一般 PCB板 | M6 | ○ | ○ | ○ | ○ | ○ |\n| 一般 PCB板 | M7 | ○ | ○ | 測試/驗證中 | ○ | ○ |\n| 一般 PCB板 | M8 | ○ | ○ |  | ○ |  |\n| HDI板 | M6 | ○ | ○ | ○ | ○ | ○ |\n| HDI板 | M7 | ○ | 測試/驗證中 | 測試/驗證中 | ○ | 測試/驗證中 |\n| HDI板 | M8 | ○ | 測試/驗證中 |  | 測試/驗證中 |  |",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-65f05f7ae088eb63",
+            "original_ref": "raw/Market/AI Server PCB test image 47.md",
+            "sha256": "65f05f7ae088eb634ad8153249b12163689fb39b40f32751ac3e7df1d1c050c0",
+            "raw_ref": "raw/Market/AI Server PCB test image 47.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/AI Server PCB test image 47.md",
+           "section": 30,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 55.471578
+         },
+         {
+          "text": "| 高階 CCL 規格 |  | 台光電 | 台燿 | 聯茂 | 斗山(韓) | 生益科技(中) |\n|---|---|---|---|---|---|---|\n| 一般 PCB板 | M6 | ○ | ○ | ○ | ○ | ○ |\n| 一般 PCB板 | M7 | ○ | ○ | 測試/驗證中 | ○ | ○ |\n| 一般 PCB板 | M8 | ○ | ○ |  | ○ |  |\n| HDI板 | M6 | ○ | ○ | ○ | ○ | ○ |\n| HDI板 | M7 | ○ | 測試/驗證中 | 測試/驗證中 | ○ | 測試/驗證中 |\n| HDI板 | M8 | ○ | 測試/驗證中 |  | 測試/驗證中 |  |",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-65f05f7ae088eb63",
+            "original_ref": "raw/Market/AI Server PCB test image 47.md",
+            "sha256": "65f05f7ae088eb634ad8153249b12163689fb39b40f32751ac3e7df1d1c050c0",
+            "raw_ref": "raw/Market/AI Server PCB test image 47.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/AI Server PCB test image 47.md",
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 55.259123
+         },
+         {
+          "text": "#### 與 OEM 協力的測試流程",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-62c234dd566e887e",
+            "original_ref": "raw/Market/OneNote/oneweb_ut_final_presentation.md",
+            "sha256": "62c234dd566e887eb17b68860ff3c42d541b5000c7f1c0c5be9f824b285a9c74",
+            "raw_ref": "raw/Market/OneNote/oneweb_ut_final_presentation.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/oneweb_ut_final_presentation.md",
+           "section": 67,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 54.353226
+         }
+        ],
+        "text": "### 答案\n訊號產生器／訊號分析儀在這類 RFIC／RF 驗證情境中，會落在**實驗室 RF 測試／RF 驗證**環節；OneWeb UT 測試流程把第 1–3 個月定義為 laboratory RF test，並在此階段量測 G/T、noise figure、transmit power、驗證 link equation、分析 modulation / coding，測試設備列為 `Rohde & Schwarz SMW6` signal generator 與 R&S FSW spectrum analyzer。[2]\n若用半導體產業鏈語境對應，這類儀器屬於「生產製程及檢測設備」的一部分；該類設備在中游支援 IC／晶圓製造，也在下游支援 IC 封裝測試。[19][20]",
+        "synthesized_by": "company",
+        "failure": null
+       },
+       "cited_passages": [
+        {
+         "text": "OneWeb UT 測試流程 › 第一階段：實驗室 RF 測試（第 1–3 個月）\n[[oneweb_ut_final_presentation]] 將第 1–3 個月定義為 laboratory RF test，主要活動包含：\n\n- 選定終端機型號，例如 [[Intellian OW11F]] 或 [[Hughes HL1120W]]。\n- 量測 RF characteristics：接收增益 / G/T、noise figure（NF）、transmit power。\n- 驗證 link equation，來源以 [[Qorvo]] PA + [[Analog Devices]] LNA 作為例子。\n- 分析 modulation / coding，來源寫 OneWeb proprietary 或 [[MediaTek M80]] 5G NTN modem。\n- 測試設備列為 `Rohde & Schwarz SMW6` signal generator 與 [[R&S FSW]] spectrum analyzer。\n\n交付物包含 G/T and noise figure measurement validation、Ku / Ka rain fade margin calculation 與 multipath fading assessment。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/OneWeb UT 測試流程.md"
+         },
+         "score": 21.80261
+        },
+        {
+         "text": "半導體產業鏈 › 來源中的分段\n| 產業鏈階段 | 圖上項目 | 日期 / 期間 | 來源 | 限制 |\n|---|---|---|---|---|\n| 上游 | IP設計/IC設計代工服務；IC設計 | 來源未標示日期；取得於 2026-09-04 | [[Serdes IC-IP companies image 2]]；[[Serdes IC-IP companies image]] | 未列公司、產品、IP 類別、設計服務範圍或商業關係；兩份來源高度重複，不可視為獨立驗證 |\n| 中游 | IC/晶圓製造；生產製程及檢測設備；光罩；化學品 | 來源未標示日期；取得於 2026-09-04 | [[Serdes IC-IP companies image 2]]；[[Serdes IC-IP companies image]] | 未列 foundry、設備商、材料商、製程節點、產能或市場數字；兩份來源高度重複，不可視為獨立驗證 |\n| 下游 | IC封裝測試；生產製程及檢測設備；基板；導線架；IC模組；IC通路 | 來源未標示日期；取得於 2026-09-04 | [[Serdes IC-IP companies image 2]]；[[Serdes IC-IP companies image]] | 未列 OSAT、基板供應商、導線架供應商、模組商、通路商或出貨資料；兩份來源高度重複，不可視為獨立驗證 |",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/半導體產業鏈.md"
+         },
+         "score": 18.649285
+        },
+        {
+         "text": "半導體產業鏈 › 圖上流程關係\n- [[Serdes IC-IP companies image 2]]（來源未標示日期；取得於 2026-09-04）在上游區塊內以箭頭表示 **IP設計/IC設計代工服務 → IC設計**。\n- [[Serdes IC-IP companies image]]（來源未標示日期；取得於 2026-09-04）在上游區塊內以箭頭表示 **IP設計 /IC設計 代工服務 → IC設計**。\n- [[Serdes IC-IP companies image 2]]（來源未標示日期；取得於 2026-09-04）在中游區塊把 **IC/晶圓製造** 放在上方主方塊，下方列出 **生產製程及檢測設備**、**光罩**、**化學品**，並以向上箭頭表示支援主方塊。\n- [[Serdes IC-IP companies image]]（來源未標示日期；取得於 2026-09-04）描述中游主方塊 **IC/晶圓製造** 與下方 **生產製程及檢測設備**、**光罩**、**化學品** 之間有上下雙向箭頭樣式的連結符號，表示彼此相關或互相支援。\n- [[Serdes IC-IP companies image 2]]（來源未標示日期；取得於 2026-09-04）在下游區塊把 **IC封裝測試** 放在上方主方塊，下方列出 **生產製程及檢測設備**、**基板**、**導線架**，並以向上箭頭表示支援主方塊。\n- [[Serdes IC-IP companies image]]（來源未標示日期；取得於 2026-09-04）描述下游主方塊 **IC封裝測試** 與下方 **生產製程及檢測設備**、**基板**、**導線架** 之間有上下雙向箭頭樣式的連結符號。\n- [[Serdes IC-IP companies image 2]]（來源未標示日期；取得於 2026-09-04）在下游右側另列 **IC模組** 與 **IC通路**。\n- [[Serdes IC-IP companies image]]（來源未標示日期；取得於 2026-09-04）明確描述 **IC封裝測試** 右側有向右箭頭指向 **IC模組**；來源列出的結構化關聯表未列出 [[IC通路]] 與其他方塊的明確箭頭。\n- [[Serdes IC-IP companies image 2]] 與 [[Serdes IC-IP companies image]] 都沒有以完整箭頭串接所有大區塊；本頁只記錄圖上呈現的上游、中游、下游排列與區塊內箭頭，不補寫供應鏈流程細節。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/半導體產業鏈.md"
+         },
+         "score": 15.486918
+        }
+       ],
+       "assessment": {
+        "status": "covered",
+        "facets": [],
+        "missing_facets": [],
+        "relation_required": false,
+        "relation_citations": [],
+        "relations": []
+       },
+       "citation_policy": "wiki_primary",
+       "wiki_provenance": [
+        {
+         "wiki_page": "wiki/concepts/OneWeb UT 測試流程.md",
+         "raw_refs": [
+          "raw/Market/OneNote/oneweb_ut_final_presentation.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/半導體產業鏈.md",
+         "raw_refs": [
+          "raw/Market/Serdes IC-IP companies image 1.md",
+          "raw/Market/Serdes IC-IP companies image 2.md",
+          "raw/Market/Serdes IC-IP companies image 3.md",
+          "raw/Market/Serdes IC-IP companies image.md"
+         ]
+        }
+       ]
+      },
+      "failure": null,
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "output_limit_chars": 33095,
+    "full_result_hint": "完整答案保留在這次工具紀錄的 record 中；也可以在 Agent Web 的 Knowledge 頁直接問同一個問題，看到完整結果。",
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-65ff012758054f5d90ac2a88e6ad8c7b",
+      "task_sha256": "a38951d79eae8ece9f095de2bbba5b4822a54b1cad383b97e624ba086181c525",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.12.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "validated",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 3,
+       "kind": "validated",
+       "evidence_ref": "bridge_raw_record"
+      }
+     ],
+     "checks": [
+      {
+       "check_id": "answer_nonempty",
+       "status": "passed",
+       "evidence_ref": "bridge_raw_record"
+      }
+     ],
+     "failure_code": null
+    },
+    "evidence": {
+     "raw_citations": 3,
+     "facet_status": "not_assessed",
+     "missing_facets": null
+    }
+   }
+  }
+ }
+}

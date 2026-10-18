@@ -1,0 +1,189 @@
+{
+ "id": "Q0671-zh",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [],
+ "seconds": 66.672,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 3,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AI Server 供應鏈總覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 11,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 12,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 85,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 60,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AI Server 供應鏈總覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 64,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 73,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 10,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 91,
+   "kind": "wiki",
+   "ref": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 92,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 95,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 93,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 25,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 86,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 14,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AI 資料中心基礎設施.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 79,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AI 資料中心基礎設施.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 77,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AI 資料中心基礎設施.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 26,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 27,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AI Server 供應鏈總覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "對示波器產品線而言，知識庫只確認 MXO 在表內被映射到 power rail、multiphase DC、PI",
+   "示波器可對應 Eye diagram 與高速介面驗證脈絡",
+   "TDR / impedance 相關觀察"
+  ],
+  "reason": "答案的主鏈條——AI server 需求/供應鏈段落、Networking/PCB/Power 技術壓力、Interface Test/PDN 對應 scopes、PCB SI flow 與 MXO mapping——大多由引文直接支持，且對未提供頻寬、取樣率、option、fixture、標準等限制有清楚說明。少數表述把 MXO 視為示波器產品線、或把 Eye/TDR 等 SI 項目連到示波器能力，屬於合理但未被段落逐字明示的推論，未影響整體結論。",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

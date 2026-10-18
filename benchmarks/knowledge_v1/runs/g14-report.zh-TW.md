@@ -33,3 +33,17 @@
 
 G1（部分有依據的答案不再交模型改寫）消除了 U7 的工具路徑差距；剩下的失分是兩條路徑共有的
 隨機推理雜訊與一次暫時性模型錯誤，不是路徑問題。
+
+## 補充：中文題（語言無關的 G2 修正之後，2026-10-19）
+
+AEP commit `369c139d`（Agent Web 已重啟），`--set zh`（8 題繁體中文，見 `questions/zh-core.json`）。
+
+| Run | 結果 | 路由 |
+|---|---|---|
+| `zh-chat-1` | **8/8 PASS** | 直接 5、工具 3 |
+| `zh-direct-1` | **8/8 PASS** | 直接 8 |
+
+- 3 次工具呼叫的 `anchor.outcome` 都是 `same`：模型把中文原句照傳，並填了逐字複製的
+  `original_terms`（全部核對通過，`discarded_terms` 為空）。**意圖偏移率 0%。**
+- 模型這次沒有填 `term_translations`（`translations_used` 為空），所以雙語擴充檢索仍只來自
+  Harness 內的 `query_rewrite`；中文題照樣全數通過。
