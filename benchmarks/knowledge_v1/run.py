@@ -9,12 +9,20 @@ Vault lacks the evidence) is acceptable too, as the question file says.
     python benchmarks/knowledge_v1/run.py --run-id <id> [--set sample|all|Q0001,Q0002] [--workers 2]
     python benchmarks/knowledge_v1/run.py --run-id <id> --regrade   # grade stored traces again
     python benchmarks/knowledge_v1/run.py --run-id <id> --regrade --into grader-1.4
+    python benchmarks/knowledge_v1/run.py --run-id <id> --set core --route direct
+        # U7 (owner 2026-10-18): the same questions through the direct route,
+        # to compare with a `--route chat` run question by question
         # grade stored traces again into runs/<id>/grader-1.4/, leaving the
         # original verdicts and report as they were
 
 Each question gets a new conversation; the questions are sent as written,
-without naming a knowledge base. Traces, verdicts and reasons are kept per
-question under runs/<id>/<question>/.
+without naming a knowledge base. `--route chat` (default) is what a person gets:
+Agent Web routes the turn (direct when the Skill's intent matches, otherwise
+the conversation's tool route). `--route direct` asks the same Knowledge Harness
+through `/api/knowledge/ask` with the one installed Vault and Knowledge Skill,
+exactly as the chat's direct route does (`web.py` `_knowledge_reply`). `--set
+core` is the 36-question coverage core (`questions/coverage.json`). Traces,
+verdicts and reasons are kept per question under runs/<id>/<question>/.
 """
 
 from __future__ import annotations
@@ -214,10 +222,57 @@ def case_attributes(
     }
 
 
-def ask(question: dict[str, Any], folder: Path, base: str, token: str) -> dict[str, Any]:
+def direct_target(session: AgentWebSession) -> dict[str, Any]:
+    """The one installed Vault and Knowledge Skill the chat's direct route
+    would use; anything else is refused rather than guessed."""
+    _status, assets = session._call("/api/assets")
+    knowledge = assets.get("knowledge") or []
+    skills = [s for s in assets.get("skills") or [] if s.get("knowledge_harness_selectable")]
+    if len(knowledge) != 1 or len(skills) != 1:
+        raise RuntimeError(
+            f"--route direct needs one Vault and one Knowledge Skill "
+            f"(found {len(knowledge)} and {len(skills)})"
+        )
+    pick = ("namespace", "name", "version")
+    return {
+        "asset": {k: knowledge[0][k] for k in pick},
+        "skill": {k: skills[0][k] for k in pick},
+    }
+
+
+def ask_direct(session: AgentWebSession, target: dict[str, Any], text: str) -> dict[str, Any]:
+    """One direct-route question, recorded in the chat exchange's shape."""
+    started = time.monotonic()
+    try:
+        status, reply = session._call(
+            "/api/knowledge/ask", {**target, "question": text}, timeout=TIMEOUT_S
+        )
+        timed_out = False
+    except (TimeoutError, OSError) as error:
+        status, reply, timed_out = 0, {"error": f"{type(error).__name__}: {error}"}, True
+    return {
+        "sent": text,
+        "route_forced": "direct",
+        "http_status": status,
+        "seconds": round(time.monotonic() - started, 3),
+        "timed_out": timed_out,
+        "reply": {"answer": reply},
+    }
+
+
+def ask(
+    question: dict[str, Any],
+    folder: Path,
+    base: str,
+    token: str,
+    target: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     session = AgentWebSession(base, token, TIMEOUT_S)
-    session.start()
-    exchange = session.send(question["text"], TIMEOUT_S)
+    if target is None:
+        session.start()
+        exchange = session.send(question["text"], TIMEOUT_S)
+    else:
+        exchange = ask_direct(session, target, question["text"])
     folder.mkdir(parents=True, exist_ok=True)
     (folder / "trace.json").write_text(
         json.dumps(
@@ -313,7 +368,13 @@ def report(
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run-id", required=True)
-    parser.add_argument("--set", default="sample", help="sample | all | comma-separated IDs")
+    parser.add_argument("--set", default="sample", help="sample | core | all | comma-separated IDs")
+    parser.add_argument(
+        "--route",
+        choices=("chat", "direct"),
+        default="chat",
+        help="chat: Agent Web routes the turn; direct: the Harness via /api/knowledge/ask",
+    )
     parser.add_argument("--workers", type=int, default=2)
     parser.add_argument("--force", action="store_true", help="ask again questions already recorded")
     parser.add_argument("--regrade", action="store_true", help="grade stored traces without asking")
@@ -328,9 +389,12 @@ def main() -> int:
         parser.error("--into needs --regrade and a plain folder name")
     bank = load()
     by_id = {q["id"]: q for q in bank}
+    core = json.loads((HERE / "questions" / "coverage.json").read_text(encoding="utf-8"))["core"]
     chosen = (
         sample(bank)
         if args.set == "sample"
+        else [by_id[str(i["id"] if isinstance(i, dict) else i)] for i in core]
+        if args.set == "core"
         else bank
         if args.set == "all"
         else [by_id[i.strip()] for i in args.set.split(",")]
@@ -350,6 +414,7 @@ def main() -> int:
             "set": args.set,
             "question_bank_sha256": SOURCE_SHA256,
             "timeout_s": TIMEOUT_S,
+            "route": args.route,
         }
     )
     meta_path.write_text(json.dumps(meta, indent=1) + "\n", encoding="utf-8")
@@ -359,8 +424,11 @@ def main() -> int:
     judge = Judge(HOST_JSON)
     vault = vault_root()
     base = token = ""
+    target = None
     if not args.regrade:
         base, token = agent_web()
+        if args.route == "direct":
+            target = direct_target(AgentWebSession(base, token, TIMEOUT_S))
     lock = threading.Lock()
     # Progress and verdicts go to the Host telemetry for the Atlas dashboard.
     bench = BenchmarkTelemetry("knowledge_v1", args.run_id)
@@ -392,7 +460,7 @@ def main() -> int:
                 return None
             exchange = json.loads((folder / "trace.json").read_text(encoding="utf-8"))["exchange"]
         else:
-            exchange = ask(question, folder, base, token)
+            exchange = ask(question, folder, base, token, target)
         result = grade(question, exchange, vault, judge)
         result_path.write_text(json.dumps(result, ensure_ascii=False, indent=1), encoding="utf-8")
         bench.case_completed(
