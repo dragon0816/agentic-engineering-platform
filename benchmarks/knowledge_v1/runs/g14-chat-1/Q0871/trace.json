@@ -1,0 +1,1768 @@
+{
+ "question": {
+  "id": "Q0871",
+  "text": "Map the chain from a Semiconductor market requirement to a measurable parameter and then to a required capability of Oscilloscope.",
+  "market": "Semiconductor",
+  "product": "Oscilloscope",
+  "type": "solution_mapping",
+  "difficulty": "L3"
+ },
+ "session_id": "conversation-ac38e274ff9f4a1fa7caca18fb791926",
+ "exchange": {
+  "sent": "Map the chain from a Semiconductor market requirement to a measurable parameter and then to a required capability of Oscilloscope.",
+  "http_status": 200,
+  "seconds": 103.469,
+  "timed_out": false,
+  "reply": {
+   "ok": false,
+   "conversation": {
+    "session_id": "conversation-ac38e274ff9f4a1fa7caca18fb791926",
+    "actor": "leo.chi",
+    "title": "Map the chain from a Semiconductor market requirement to a measurable pa…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-18T13:50:29.128187Z",
+    "updated_at": "2026-10-18T13:52:12.376967Z",
+    "messages": [
+     {
+      "message_id": "message-aa84ce3b72ea46c79046928020e631ad",
+      "role": "user",
+      "text": "Map the chain from a Semiconductor market requirement to a measurable parameter and then to a required capability of Oscilloscope.",
+      "created_at": "2026-10-18T13:50:29.139711Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": [],
+      "workflow_form": null,
+      "action_card": null,
+      "action_cards": []
+     },
+     {
+      "message_id": "message-6459a40df868439cbe1c521193e0a266",
+      "role": "assistant",
+      "text": "已查到可引用的部分資料：\n\nThe supported chain is partial: the passages connect AI-server semiconductor power demand to PDN/interface test contexts where scopes are used, but they do not specify an oscilloscope model, bandwidth, sample rate, data-rate coverage, option code, or pass/fail limit [4][5][13][60].\n| Semiconductor market requirement | Measurable parameter / test item | Required Oscilloscope capability supported by the passages | Evidence gap |\n|---|---|---|---|\n| AI servers pull PMIC demand as chip count scales, and the PMIC driver is increasing GPU count and memory modules [5]. | PMICs handle last-mile chip power distribution, voltage regulation, and over-current protection, so the supported measurement context is power-delivery / PDN validation [6][13]. | The passages state that Power Distribution Network testing is associated with scopes and network analyzers [13][60]. | The passages do not provide a PDN impedance target value, oscilloscope model, bandwidth, data rate, or test method [13]. |\n| AI servers pull power-semiconductor demand through power-architecture upgrades, and the stated driver is 800V high-voltage architecture specification improvement [5]. | Power semiconductors perform high-current conversion and switching to step external power down into racks [6]. | The supported oscilloscope role is again PDN-related observation because the PDN test block is mapped to scopes and network analyzers [13][60]. | The passages do not provide a scope specification for 800V / HVDC validation, nor do they give a formal test standard or configuration [13][50]. |\n| High-speed electrical-interface validation is a semiconductor test context covering Tx, Rx, channel, packages, PCBs, connectors, EQ, ADC + DSP, and DSP + DAC [60]. | The measurable SI items explicitly listed are IL, Xtalk, Eye diagram, TDR Impedance, Stackup Planner, and TL Calculator [60]. | The passages map Interface Test to scopes, BERTs, AWGs, and switch matrices [13][60]. | The passages do not provide oscilloscope model, bandwidth, data rate, standard version, software option, or pass/fail condition [13][14]. |\n【推論】For AI-server PMIC / power-semiconductor demand, the defensible oscilloscope capability requirement is “support PDN / power-integrity measurement workflows,” because the passages tie AI-server demand to PMIC and power semiconductors, and separately tie PDN testing to scopes [5][6][13][60].\n【推論】For high-speed semiconductor interface demand, the defensible oscilloscope capability requirement is “support interface-test workflows including waveform / eye-diagram-oriented validation,” because the passages tie Interface Test to scopes and list Eye diagram among SI-flow items [13][60].\n\n來源：\n[4] Wiki：AI 伺服器 PMIC 與功率半導體轉型（來源：`Power IC - Power Management IC image 1.md`、`Power IC - Power Management IC image 2.md`、`Power IC - Power Management IC image 3.md`…）\n[5] Wiki：AI 伺服器 PMIC 與功率半導體轉型（來源：`Power IC - Power Management IC image 1.md`、`Power IC - Power Management IC image 2.md`、`Power IC - Power Management IC image 3.md`…）\n[6] Wiki：AI 伺服器 PMIC 與功率半導體轉型（來源：`Power IC - Power Management IC image 1.md`、`Power IC - Power Management IC image 2.md`、`Power IC - Power Management IC image 3.md`…）\n[13] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[14] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[50] Wiki：AI 伺服器 PMIC 與功率半導體轉型（來源：`Power IC - Power Management IC image 1.md`、`Power IC - Power Management IC image 2.md`、`Power IC - Power Management IC image 3.md`…）\n[60] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n\n未能以證據支持：market_segment。因此不能把上列資料當成完整的推薦或比較。",
+      "created_at": "2026-10-18T13:52:12.376967Z",
+      "status": "failed",
+      "trace": {
+       "trace_id": "trace-9f4077d69be3449c8410aa104b283e29",
+       "request_id": "request-9f4077d69be3449c8410aa104b283e29",
+       "span_id": "span-9f4077d69be3449c8410aa104b283e29",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": [],
+      "workflow_form": null,
+      "action_card": null,
+      "action_cards": []
+     }
+    ]
+   },
+   "answer": {
+    "ok": false,
+    "answer": "已查到可引用的部分資料：\n\nThe supported chain is partial: the passages connect AI-server semiconductor power demand to PDN/interface test contexts where scopes are used, but they do not specify an oscilloscope model, bandwidth, sample rate, data-rate coverage, option code, or pass/fail limit [4][5][13][60].\n| Semiconductor market requirement | Measurable parameter / test item | Required Oscilloscope capability supported by the passages | Evidence gap |\n|---|---|---|---|\n| AI servers pull PMIC demand as chip count scales, and the PMIC driver is increasing GPU count and memory modules [5]. | PMICs handle last-mile chip power distribution, voltage regulation, and over-current protection, so the supported measurement context is power-delivery / PDN validation [6][13]. | The passages state that Power Distribution Network testing is associated with scopes and network analyzers [13][60]. | The passages do not provide a PDN impedance target value, oscilloscope model, bandwidth, data rate, or test method [13]. |\n| AI servers pull power-semiconductor demand through power-architecture upgrades, and the stated driver is 800V high-voltage architecture specification improvement [5]. | Power semiconductors perform high-current conversion and switching to step external power down into racks [6]. | The supported oscilloscope role is again PDN-related observation because the PDN test block is mapped to scopes and network analyzers [13][60]. | The passages do not provide a scope specification for 800V / HVDC validation, nor do they give a formal test standard or configuration [13][50]. |\n| High-speed electrical-interface validation is a semiconductor test context covering Tx, Rx, channel, packages, PCBs, connectors, EQ, ADC + DSP, and DSP + DAC [60]. | The measurable SI items explicitly listed are IL, Xtalk, Eye diagram, TDR Impedance, Stackup Planner, and TL Calculator [60]. | The passages map Interface Test to scopes, BERTs, AWGs, and switch matrices [13][60]. | The passages do not provide oscilloscope model, bandwidth, data rate, standard version, software option, or pass/fail condition [13][14]. |\n【推論】For AI-server PMIC / power-semiconductor demand, the defensible oscilloscope capability requirement is “support PDN / power-integrity measurement workflows,” because the passages tie AI-server demand to PMIC and power semiconductors, and separately tie PDN testing to scopes [5][6][13][60].\n【推論】For high-speed semiconductor interface demand, the defensible oscilloscope capability requirement is “support interface-test workflows including waveform / eye-diagram-oriented validation,” because the passages tie Interface Test to scopes and list Eye diagram among SI-flow items [13][60].\n\n來源：\n[4] Wiki：AI 伺服器 PMIC 與功率半導體轉型（來源：`Power IC - Power Management IC image 1.md`、`Power IC - Power Management IC image 2.md`、`Power IC - Power Management IC image 3.md`…）\n[5] Wiki：AI 伺服器 PMIC 與功率半導體轉型（來源：`Power IC - Power Management IC image 1.md`、`Power IC - Power Management IC image 2.md`、`Power IC - Power Management IC image 3.md`…）\n[6] Wiki：AI 伺服器 PMIC 與功率半導體轉型（來源：`Power IC - Power Management IC image 1.md`、`Power IC - Power Management IC image 2.md`、`Power IC - Power Management IC image 3.md`…）\n[13] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[14] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[50] Wiki：AI 伺服器 PMIC 與功率半導體轉型（來源：`Power IC - Power Management IC image 1.md`、`Power IC - Power Management IC image 2.md`、`Power IC - Power Management IC image 3.md`…）\n[60] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n\n未能以證據支持：market_segment。因此不能把上列資料當成完整的推薦或比較。",
+    "status": "failed",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-9f4077d69be3449c8410aa104b283e29",
+      "request_id": "request-9f4077d69be3449c8410aa104b283e29",
+      "span_id": "span-9f4077d69be3449c8410aa104b283e29",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-9f4077d69be3449c8410aa104b283e29",
+       "request_id": "request-9f4077d69be3449c8410aa104b283e29",
+       "span_id": "span-9f4077d69be3449c8410aa104b283e29",
+       "parent_span_id": null
+      },
+      "status": "succeeded",
+      "data": {
+       "asset": {
+        "namespace": "engineering",
+        "name": "rs-knowledge",
+        "version": "1.0.3"
+       },
+       "trace": {
+        "trace_id": "trace-9f4077d69be3449c8410aa104b283e29",
+        "request_id": "request-9f4077d69be3449c8410aa104b283e29",
+        "span_id": "span-9f4077d69be3449c8410aa104b283e29",
+        "parent_span_id": null
+       },
+       "answer": {
+        "question": "Map the chain from a Semiconductor market requirement to a measurable parameter and then to a required capability of Oscilloscope.",
+        "status": "answered",
+        "passages": [
+         {
+          "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 11.222554
+         },
+         {
+          "text": "R&S PCB test solutions › 圖上工具 / 合作方文字\n| 圖上文字 | 可能角色 | 來源 | 限制 |\n|---|---|---|---|\n| [[SPEAG]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未說明是合作夥伴、工具、方法或範例 |\n| [[SWISSTO12]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[QWED]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[KEYCOM]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[RSTW]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未展開完整單位名稱 |\n| TDR | 測 impedance | [[0 Digital Test - What are SIPI and Serdes]] | 未提供 TDR option 或探頭型號 |\n| Delta-L | 損耗量測相關 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供方法定義、標準或軟體名稱 |\n| ISD/ADK | 圖上方法 / 工具文字 | [[0 Digital Test - What are SIPI and Serdes]] | 未展開縮寫，未說明與 Delta-L 的關係 |\n| w/ cable / connector testing | cable / connector testing | [[0 Digital Test - What are SIPI and Serdes]] | 未提供連接器類型、線纜規格或測試項目 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 8.760562
+         },
+         {
+          "text": "R&S PCB test solutions › 與既有知識的關係\n- [[高頻高速 PCB 測試解決方案]] 既有內容來自 Keysight 圖像，流程是原材料表徵、材料選擇、電路板抽樣測試、大批量監控；本頁保存 R&S 簡報中的類似但不完全相同的流程詞。\n- [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 均已有既有頁面；本來源增加 2026.3.4 R&S 簡報的追溯來源，但沒有新增可量化規格。\n- [[SerDes 與 SI PI 測試概覽]] 連接 Slide 11 和 Slide 20 的 validation challenges / SI flow；本頁聚焦 Slide 21 的 PCB test solutions。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 5.776564
+         },
+         {
+          "text": "AI 伺服器 PMIC 與功率半導體轉型\n[[AI 伺服器 PMIC 與功率半導體轉型]] 是 [[Power IC - Power Management IC image 4]] 用來描述 [[AI 伺服器]] 同時拉動晶片端 [[PMIC]] 需求與機櫃 / 系統端 [[功率半導體]] 需求的資訊圖主題；此頁只記錄來源圖上的市場敘事，不把它解讀為完整供應鏈、投資建議或 NVIDIA 官方架構文件。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 伺服器 PMIC 與功率半導體轉型.md"
+          },
+          "score": 11.027995
+         },
+         {
+          "text": "AI 伺服器 PMIC 與功率半導體轉型 › AI 伺服器需求連動\n- [[Power IC - Power Management IC image 4]] 說 [[PMIC]] 需求隨晶片顆數放大。\n- [[Power IC - Power Management IC image 4]] 說 [[功率半導體]] 則隨供電架構升級。\n- [[Power IC - Power Management IC image 4]] 把功率半導體的驅動因素寫為 800V 高壓架構規格提升。\n- [[Power IC - Power Management IC image 4]] 把 PMIC 的驅動因素寫為 GPU 顆數與記憶體模組增加。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 伺服器 PMIC 與功率半導體轉型.md"
+          },
+          "score": 7.507037
+         },
+         {
+          "text": "AI 伺服器 PMIC 與功率半導體轉型 › 兩類電力元件角色\n| 類別 | 圖上比喻 | 圖上功能 | 關聯元件 |\n|---|---|---|---|\n| [[功率半導體]] | 系統的電力心臟 / 大樓電力幹線基礎工程 | 大電流轉換與開關，將外部電力降壓送入機櫃 | [[MOSFET]]、[[IGBT]]、[[SiC]]、[[GaN]] |\n| [[PMIC]] / [[電源管理 IC]] | 精準控制的閥門 / 每個房間的流量控制閥門 | 晶片內部最後一哩路的配電、穩壓與過流保護 | 類比電源管理晶片、[[DDR5 PMIC]] |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 伺服器 PMIC 與功率半導體轉型.md"
+          },
+          "score": 5.747608
+         },
+         {
+          "text": "AI 加速器資料流架構 › 使用限制\n- 本頁所有數字都來自 [[IO Serdes in AI ASIC-TPU-Chiplet image 5]]（來源未標示日期；取得於 2026-09-04），不可寫成特定產品現況、標準規格或市場導入資料。\n- 來源未標示公司、產品、型號或發布日期，因此本頁不能用來支持供應鏈、競品、客戶導入、出貨量或量產狀態主張。\n- 圖上數字缺少測試條件；不可用 **14 GiB/s**、**30 GiB/s**、**167 GiB/s** 或 **64K per cycle** 與其他來源做效能 benchmark，除非另有同口徑資料。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 加速器資料流架構.md"
+          },
+          "score": 18.044089
+         },
+         {
+          "text": "AI 加速器資料流架構 › 圖上路徑整理\n| 路徑 | 圖上模組 | 圖上數字 | 日期 / 期間 | 來源 | 限制 |\n|---|---|---:|---|---|---|\n| Host / off-chip I/O | PCIe Gen3 ×16 Interface → Host Interface | 14 GiB/s | 來源未標示日期；取得於 2026-09-04 | [[IO Serdes in AI ASIC-TPU-Chiplet image 5]] | 未標示方向、有效頻寬或測試條件 |\n| Host 到 activation buffer | Host Interface → Unified Buffer (Local Activation Storage) | 10 GiB/s | 來源未標示日期；取得於 2026-09-04 | [[IO Serdes in AI ASIC-TPU-Chiplet image 5]] | 未標示資料格式、批次大小或傳輸口徑 |\n| 權重輸入 | DDR3 DRAM Chips → DDR3-2133 Interfaces → Weight FIFO (Weight Fetcher) | 30 GiB/s | 來源未標示日期；取得於 2026-09-04 | [[IO Serdes in AI ASIC-TPU-Chiplet image 5]] | 未標示 DRAM 顆數、bus width 或通道數 |\n| 啟動值 / 運算資料供應 | Unified Buffer → Systolic Data Setup → Matrix Multiply Unit | 167 GiB/s | 來源未標示日期；取得於 2026-09-04 | [[IO Serdes in AI ASIC-TPU-Chiplet image 5]] | 未標示峰值 / 平均值、單向 / 雙向或內部 bus 條件 |\n| 計算後處理 | Matrix Multiply Unit → Accumulators → Activation → Normalize/Pool | 64K per cycle 標在 Matrix Multiply Unit | 來源未標示日期；取得於 2026-09-04 | [[IO Serdes in AI ASIC-TPU-Chiplet image 5]] | 未標示 K、cycle、資料型態或時脈條件 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 加速器資料流架構.md"
+          },
+          "score": 8.936479
+         },
+         {
+          "text": "AI 加速器資料流架構 › 未決事項\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 5]] 未標示日期、年份、季度或資料期間。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 5]] 未標示發布者、公司、產品名稱、型號或圖表來源。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 5]] 未說明所有 GiB/s 數字的測試條件、方向與理論 / 實測口徑。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 5]] 未說明 **64K per cycle** 的資料型態、時脈、運算類型或是否為峰值。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 5]] 未說明該架構是否對應特定 AI ASIC、TPU、NPU、GPU、DNN accelerator 或研究原型。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 加速器資料流架構.md"
+          },
+          "score": 6.731602
+         },
+         {
+          "text": "IO Serdes in AI ASIC-TPU-Chiplet image 5 › 與既有知識的關係\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 1]]、[[IO Serdes in AI ASIC-TPU-Chiplet image 2]]、[[IO Serdes in AI ASIC-TPU-Chiplet image 3]] 與 [[IO Serdes in AI ASIC-TPU-Chiplet image 4]] 主要整理 [[Die-to-Die 互連]]、[[SerDes]]、[[D2D PHY]]、[[UCIe]]、[[HBM]] 或 Eliyan D2D / D2M / C2C 架構；本來源則是加速器內部資料流與計算方塊圖，圖上沒有 SerDes、D2D PHY、UCIe、HBM 或 Eliyan。\n- 本來源可補充 [[AI 加速器資料流架構]]、[[Matrix Multiply Unit]]、[[Unified Buffer]]、[[Systolic Data Setup]] 等概念；但不能補充 [[D2D interfaces 比較]] 的 data rate、reach、latency、energy 或 package 欄位。\n- 本來源圖上有 **PCIe Gen3 ×16 Interface** 與 **DDR3-2133 Interfaces**，但沒有標示標準發布組織、版本文件、合規測試或板級拓撲，因此不應改寫成 PCIe 或 DDR3 的標準規格頁。\n- 本來源檔名含 AI ASIC / TPU / Chiplet，但圖上沒有 **TPU**、**ASIC**、**Chiplet**、**XPU**、公司名稱、客戶、出貨量、量產或導入日期；不可推論為特定產品架構或市場採用案例。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/IO Serdes in AI ASIC-TPU-Chiplet image 5.md"
+          },
+          "score": 12.13282
+         },
+         {
+          "text": "IO Serdes in AI ASIC-TPU-Chiplet image 5 › 重點摘要\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 5]]（來源未標示日期；取得於 2026-09-04）是一張硬體架構方塊圖 / 資料流方塊圖，描述一個運算加速器的外部 I/O、資料緩衝、控制邏輯與計算單元。\n- 圖上沒有座標軸，也不是市場趨勢圖、時間序列圖或統計比較圖；主要數字單位為 **GiB/s** 與 **per cycle**。\n- 圖上外部連接包含 **PCIe Gen3 ×16 Interface** 與 **Host Interface**；外部 I/O 與 Host Interface 相關路徑標示 **14 GiB/s**。\n- 圖上記憶體 / 權重輸入路徑包含 **DDR3 DRAM Chips**、**DDR3-2133 Interfaces** 與 **Weight FIFO (Weight Fetcher)**，相關頻寬標示 **30 GiB/s**。\n- 圖上中央資料緩衝為 **Unified Buffer (Local Activation Storage)**，Host Interface 到 Unified Buffer 的資料通道標示 **10 GiB/s**。\n- 圖上 **Systolic Data Setup** 到右側計算單元的資料通道標示 **167 GiB/s**；下方回到 Unified Buffer 的藍色資料路徑也標示 **167 GiB/s**。\n- 圖上核心計算模組是 **Matrix Multiply Unit (64K per cycle)**，其後接 **Accumulators**、**Activation** 與 **Normalize/Pool**。\n- 圖上多個紅色方塊標示 **Control**，左下有 **Instr**，來源文字解讀為控制訊號與指令模組協調整個系統。\n- 圖例將綠色標為 **Off-Chip I/O**、藍色標為 **Data Buffer**、淡黃色標為 **Computation**、紅色標為 **Control**。\n- 圖上沒有明確公司名稱、產品名稱、型號、日期、年份或季度；本頁不把檔名中的 AI ASIC / TPU / Chiplet 改寫成具體產品或市場導入事實。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/IO Serdes in AI ASIC-TPU-Chiplet image 5.md"
+          },
+          "score": 11.697913
+         },
+         {
+          "text": "IO Serdes in AI ASIC-TPU-Chiplet image 5 › 圖上資料流與頻寬\n| 路徑 / 模組 | 圖上文字 | 圖上數字 | 日期 / 期間 | 限制 |\n|---|---|---:|---|---|\n| 外部 / 主機介面 | PCIe Gen3 ×16 Interface；Host Interface | 14 GiB/s | 來源未標示日期；取得於 2026-09-04 | 來源未說明方向、有效頻寬、編碼開銷或測試條件 |\n| Host 到本地緩衝 | Host Interface → Unified Buffer (Local Activation Storage) | 10 GiB/s | 來源未標示日期；取得於 2026-09-04 | 來源未說明資料型態、批次大小或方向 |\n| 權重讀取 | DDR3 DRAM Chips；DDR3-2133 Interfaces；Weight FIFO (Weight Fetcher) | 30 GiB/s | 來源未標示日期；取得於 2026-09-04 | 來源未說明 DRAM 顆數、bus width、通道數或理論 / 實測口徑 |\n| 運算資料供應 | Unified Buffer；Systolic Data Setup；Matrix Multiply Unit | 167 GiB/s | 來源未標示日期；取得於 2026-09-04 | 來源未說明是單向、雙向、峰值、平均或內部匯流排寬度換算 |\n| 運算回寫 / 下方資料路徑 | Accumulators / Activation / Normalize/Pool 與 Unified Buffer 相關藍色路徑 | 167 GiB/s | 來源未標示日期；取得於 2026-09-04 | 來源未說明該路徑的起點、終點與資料格式 |\n| 核心運算 | Matrix Multiply Unit (64K per cycle) | 64K per cycle | 來源未標示日期；取得於 2026-09-04 | 來源未說明 K 的口徑、資料型態、時脈、矩陣大小或是否為峰值 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/IO Serdes in AI ASIC-TPU-Chiplet image 5.md"
+          },
+          "score": 8.933917
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 測試脈絡整理\n| 區塊 | 來源明示文字 | 相關儀器 / 方法 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Interface Test | Scopes、BERTs、AWGs、Switch Matrices | [[Oscilloscope]]、[[BERT]]、[[AWG]]、[[Switch Matrix]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4；Slide 11 頁腳 6/13/2025 未決 | 未提供型號、頻寬、資料率或測試標準 |\n| Transmission Channel | Tx Package、PCBs、Connectors、Rx Package | Channel / test board / switch matrices | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 channel loss、fixture、connector 型號或 PCB stackup |\n| RefClk and PLL Jitter Performance | Phase Noise Analyzers、Signal Generators | [[Phase Noise Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 jitter mask、phase noise offset 或 PLL 規格 |\n| Power Distribution Network | Scopes、Network Analyzers | [[Oscilloscope]]、[[Network Analyzer]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 PDN impedance 目標值或測試方法 |\n| ADC / DAC Frontend Performance | Spectrum Analyzers、Signal Generators | [[Spectrum Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 ADC / DAC 指標或頻率 |\n| Signal integrity flow | IL / Xtalk / Eye diagram；TDR Impedance；Stackup Planner；TL Calculator | [[Insertion Loss]]、[[Crosstalk]]、[[Eye diagram]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供工具名稱、標準版本或 pass/fail 條件 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 8.935456
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 未決事項\n- Slide 11 未標示各測試區塊對應的標準版本、測試流程、儀器型號、軟體 option 或測試條件。\n- Slide 20 未標示 IL、Xtalk、Eye diagram、TDR impedance、Stackup Planner 與 TL Calculator 的工具、供應商或規格。\n- 需回看原始 PPTX 才能確認圖片中的 waveform、diagram 與 instrument details。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 6.532963
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 與既有知識的關係\n- [[SerDes]] 已記錄 die-to-die、SoC IP 與封裝示意圖中的 SerDes 語彙；本頁補充 R&S 簡報中 SerDes 與 SI / PI / validation challenges 的測試場景。\n- [[高頻高速 PCB 測試解決方案]]、[[Dk-Df]]、[[Delta-L]] 與 [[TDR 阻抗測量]] 可承接 Slide 20–21 中對 high speed PCB / PCBA signal integrity flow 與 PCB test solutions 的列名。\n- [[Power Integrity 外部資料清單]] 保存既有 OneNote link hub 中的 PDN impedance 待讀資料；本頁只加入 Slide 11 明示的 [[Power Distribution Network]] 測試區塊。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 6.241055
+         },
+         {
+          "text": "SerDes › 使用限制\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 1]]（來源未標示日期；取得於 2026-09-04）只把 [[SerDes]] 列為 D2D 互連方式之一，沒有提供任何數值規格。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 3]]（來源未標示日期；取得於 2026-09-04）只把 **SerDes** 標在封裝示意圖的模組上，沒有說明它是 chip-to-chip、die-to-die、package-to-package、board-level 或 optical interface 前端介面。\n- [[Serdes IC-IP companies image 1]] 與 [[Serdes IC-IP companies image 3]]（來源未標示日期；取得於 2026-09-04）只在 SoC IP 組成圖中列出 Serdes 可對應的介面名稱；不能由此推論任何 IP 已授權、已驗證、已量產或已出貨。\n- [[Serdes IC-IP companies image 1]] 與 [[Serdes IC-IP companies image 3]] 沒有提供 Serdes 區塊的資料率、通道模型、clocking、equalization、FEC、測試條件、製程節點或供應商。\n- 本頁不把 [[SerDes]] 的圖上出現解讀為特定公司、IP 供應商、產品、標準版本或市場導入。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 1]]（來源未標示日期；取得於 2026-09-04）沒有說明 [[SerDes]] 與 [[Parallel Wires]] 的取捨條件。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 3]]（來源未標示日期；取得於 2026-09-04）沒有說明 SerDes 與 [[Optical I-O]] 的關係；不可推論 SerDes 已連接到光 I/O，也不可推論其支援 [[CPO]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes.md"
+          },
+          "score": 12.919447
+         },
+         {
+          "text": "SerDes › SoC IP 組成方塊圖中的 Serdes\n| 圖上分類 | 圖上列出的項目 | 日期 / 期間 | 來源 | 限制 |\n|---|---|---|---|---|\n| Serdes | SATA；LVDS, sub-LVDS；MIPI D-PHY, DSI-2/CSI2 controller；HDMI2.1 with HDCP2.0；Ethernet | 來源未標示日期；取得於 2026-09-04 | [[Serdes IC-IP companies image 1]]；[[Serdes IC-IP companies image 3]] | 來源未標示資料率、lane 數、通道條件、controller / PHY 拆分、IP vendor、製程節點、驗證狀態或量產狀態。 |\n| High Speed Serial I/F | USB3.2/3.1/3.0/2.0；PCI-Express Gen5/Gen4/Gen3 | 來源未標示日期；取得於 2026-09-04 | [[Serdes IC-IP companies image 1]]；[[Serdes IC-IP companies image 3]] | 來源沒有說明此區塊與 Serdes 區塊的分類邊界；不可自動合併為同一產品能力清單。 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes.md"
+          },
+          "score": 9.325586
+         },
+         {
+          "text": "SerDes › 重複來源限制\n- [[Serdes IC-IP companies image 3]] 與 [[Serdes IC-IP companies image 1]] 在 Serdes 區塊與 High Speed Serial I/F 區塊的內容高度一致。\n- 依 [[Serdes IC-IP companies image 1 與 3 重複來源]]，兩者不可被視為兩份獨立市場驗證，也不可用來加倍計算 SerDes IP 類別覆蓋。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes.md"
+          },
+          "score": 7.495199
+         },
+         {
+          "text": "IO SerDes ASIC TPU Chiplet 外部資料清單 › 使用限制\n- 本頁不把 URL title、PDF 檔名或 OneNote 頁標題當成已驗證技術主張。\n- 本頁不補推外部資料的發布日期、標準版本、產品版本、供應商能力、量產狀態或測試條件。\n- 若後續需要引用 Google Cloud、Cadence、Synopsys、Eliyan、SemiWiki 或 EET China 的內容，應先將對應網頁 / PDF 轉入 raw 並另行 ingest。\n- 本頁可作為待讀清單、研究入口與圖像來源關聯索引，但不可作為 [[Market]] 主張的唯一證據。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/IO SerDes ASIC TPU Chiplet 外部資料清單.md"
+          },
+          "score": 14.875416
+         },
+         {
+          "text": "IO SerDes ASIC TPU Chiplet 外部資料清單 › 待讀網頁\n| 連結標題 / URL 線索 | 可能相關頁面 | 來源 | 使用限制 |\n|---|---|---|---|\n| TPU Deep Dive / Google TPU 架构深度分析 - 知乎 | [[Google TPU 晶片藍圖]]、[[TPU 8t]]、[[TPU v8e]]、[[TPU v8p]]、[[TPU v9]] | [[IO Serdes in AI ASIC-TPU-Chiplet]] | 未擷取正文；不可引用其中技術分析或時間線。 |\n| 后摩尔时代的 Chiplet D2D解决方案-电子工程专辑 | [[Chiplet]]、[[Die-to-Die 互連]]、[[D2D PHY]] | [[IO Serdes in AI ASIC-TPU-Chiplet]] | 未擷取正文；不可建立 D2D solution 比較。 |\n| Ultra Ethernet/Ethernet Controller  Cadence | [[Cadence]]、[[Ethernet]]、[[SerDes]]、[[Ultra Ethernet]] | [[IO Serdes in AI ASIC-TPU-Chiplet]] | 未擷取正文；不可推論 Cadence IP 規格或授權狀態。 |\n| Ultra-Short Reach PHY IP Optimized for Advanced Packaging Technology - SemiWiki | [[USR PHY]]、[[XSR PHY]]、[[SerDes]]、[[Advanced Packaging]] | [[IO Serdes in AI ASIC-TPU-Chiplet]] | 未擷取正文；不可推論 PHY IP 規格。 |\n| Die-to-Die IP  Synopsys | [[Synopsys]]、[[Die-to-Die 互連]]、[[UCIe]]、[[D2D PHY]] | [[IO Serdes in AI ASIC-TPU-Chiplet]] | 未擷取正文；不可推論 Synopsys DesignWare IP 版本或支援標準。 |\n| Products - Eliyan | [[Eliyan]]、[[D2D PHY]]、[[D2M PHY]]、[[C2C PHY]]、[[Eliyan HBM Base Die Chiplet]] | [[IO Serdes in AI ASIC-TPU-Chiplet]] | 未擷取正文；不可推論 Eliyan 產品規格、供貨或量產狀態。 |\n| GoogleTPU 架构演进及十大经验-电子工程专辑 | [[Google TPU 晶片藍圖]] | [[IO Serdes in AI ASIC-TPU-Chiplet]] | 未擷取正文；不可更新 TPU 世代關係。 |\n| AI Chips Technology Trends & Landscape (GPU + TPU + FPGA + Startups) | [[AI GPU 性能比較]]、[[TPU]]、[[FPGA]]、[[AI accelerator]] | [[IO Serdes in AI ASIC-TPU-Chiplet]] | 未擷取正文；不可作為市場版圖證據。 |\n| ytyuted Substack ep48 Google TPU v8 AI | [[Google TPU 晶片藍圖]]、[[TPU v8e]]、[[TPU v8p]] | [[IO Serdes in AI ASIC-TPU-Chiplet]] | 未擷取正文；不可建立 TPU v8 主張。 |\n| Google Cloud blog `tpu-8t-and-tpu-8i-technical-deep-dive` | [[TPU 8t]]、[[TPU 8i]]、[[Google]] | [[IO Serdes in AI ASIC-TPU-Chiplet]] | 未擷取正文；[[TPU 8i]] 目前只是 URL / 標題線索。 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/IO SerDes ASIC TPU Chiplet 外部資料清單.md"
+          },
+          "score": 10.006937
+         },
+         {
+          "text": "IO SerDes ASIC TPU Chiplet 外部資料清單\n[[IO SerDes ASIC TPU Chiplet 外部資料清單]] 保存 [[IO Serdes in AI ASIC-TPU-Chiplet]] 這類 OneNote link hub 中的外部網頁、本機 PDF 與嵌入圖像索引；它只表示待讀材料被收集在同一主題下，不表示連結標題中的技術數字、產品名稱或供應商能力已被驗證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/IO SerDes ASIC TPU Chiplet 外部資料清單.md"
+          },
+          "score": 7.132195
+         },
+         {
+          "text": "Serdes IC-IP companies › 與既有知識的關係\n- 既有 [[SerDes]] 頁主要依圖像來源整理 SerDes 在 D2D、封裝示意圖與 SoC IP 組成圖中的角色；本來源提供更偏市場 / 公司名單的補充，尤其是台灣 high-speed interface、I/O interface IC、networking IC 與 silicon IP 公司。\n- 既有 [[Serdes IC-IP companies image]] 與 [[Serdes IC-IP companies image 2]] 是半導體產業鏈圖；本來源則是 OneNote 公司名單與公司簡介，內容層級不同，不應視為重複圖像來源。\n- 既有 [[MediaTek]]、[[Realtek]]、[[Himax]]、[[Egis]] 等頁已各自從 Edge AI 圖卡或 PR 中整理產品 / 技術語境；本來源新增這些公司在 IC design / silicon IP / networking / I/O interface 分類中的市場名單語境。\n- 既有 [[ASPEED AST2600]] 頁只記錄 G894-SD3-AAX7 block diagram 中的 BMC 型號；本來源補充公司層級的 [[ASPEED Technology Inc.]]，包含 BMCs、PFR ICs 與 AV-over-IP solutions。\n- 既有 [[SerDes Chiplet]] 頁來自 Google Ironwood 架構圖；本來源新增 [[Egis]] 的 UCIe / chiplet design services 與 [[Whalechip Co., Ltd.]] 的 3D heterogeneous integration / WoW turnkey service 線索，但沒有直接支撐 Google Ironwood 的 SerDes chiplet 架構。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Serdes IC-IP companies.md"
+          },
+          "score": 13.804848
+         },
+         {
+          "text": "Serdes IC-IP companies › 原文未解的問題\n- unresolved: 來源正文未標示正式發布日期；raw 路徑中的 2026-8-7 只可記作資料夾 / 筆記日期線索，不可推論為所有內容的發布日。\n- unresolved: 來源由 OneNote 彙整而來，內容可能混合公司官網、第三方公司資料庫、產業分類表與人工整理；原始引用來源未逐條標示。\n- unresolved: 多家公司簡介中的成立日期、總部、股票代號、員工數、財務數字、market share、全球排名、合作品牌、專利數與出貨量未附原始證據或文件版次。\n- unresolved: [[Egis]] 的 UCIe IP 為全球唯一 mass-produced UCIe IP、已由 Tier 1 U.S. cloud service providers 驗證等說法未附官方文件、客戶名稱、驗證日期或量產口徑。\n- unresolved: [[Airoha Technology Corp.]] 的 Bluetooth 與 GNSS chips market share 全球前三說法未標示年份、統計機構或範圍。\n- unresolved: IP Vendors、Networking IC、I/O Interface IC 分類未標示分類機構、日期、納入標準或是否為完整名單。\n- unresolved: I/O Interface IC 分類中的「邁威爾」重複列出兩次，來源未說明是否為重複、不同法人或 OCR / 整理錯誤。\n- unresolved: Common Standards Using SerDes 未標示標準版本、發布組織、資料率範圍或與各公司產品的對應關係。\n- unresolved: 多個中文公司名與英文公司名是否為正式對應需逐一以官方資料確認，例如 [[円星科技]] / [[M31 Technology Corporation]]、[[乾瞻]] / [[InPsytech, Inc.]]、[[宏芯]] / [[Terawins, Inc.]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Serdes IC-IP companies.md"
+          },
+          "score": 11.895527
+         },
+         {
+          "text": "Serdes IC-IP companies › 重點摘要\n- 來源把 [[ASMedia Technology Inc.]] 描述為 high-speed interface technologies 相關 fabless IC design company，產品 / 技術包含 USB host and device controllers、PCIe bridge controllers、SATA bridges and controllers、high-speed signal switches、ASIC solutions，並寫明具備 high-speed SERDES development 專業。\n- 來源把 [[Egis Technology Inc.]] 描述為 Semiconductors、Biometric Security、Chiplet Design 相關 fabless semiconductor company，專注 fingerprint biometric solutions、connectivity IPs（UCIe、DDR、LPDDR、ONFI）、chiplet design turnkey services 與 AI server compute die development。\n- 來源列出 IP Vendors 分類：本國上市公司、本國上櫃公司、本國興櫃公司、外國上市公司與知名外國企業；其中包含 [[智原]]、[[創意]]、[[晶心科]]、[[力旺]]、[[M31]]、[[安謀]]、[[益華]]、[[Imagination]]、[[新思科技]] 等。\n- 來源列出 Networking IC 分類，包含本國上市公司 [[瑞昱]]、[[聯發科]]、[[聯傑]]、[[立積]]、[[達發]]，以及本國上櫃公司 [[亞信]]、[[信驊]]、[[茂達]]、[[宏觀]]、[[天擎]]、[[九暘]] 等。\n- 來源列出 I/O Interface IC 分類，包含本國上市公司 [[凌陽]]、[[聯陽]]、[[祥碩]]、[[迅杰]]、[[威鋒電子]]，以及本國上櫃公司 [[精拓科]]、[[創惟]]、[[旺玖]]、[[晶焱]]、[[宏觀]]、[[鈺太]]、[[安格]]、[[安國]] 等。\n- 來源列出 Common Standards Using SerDes，包括 [[PCI Express]]、[[Ethernet]]、[[USB]]、[[SATA]]、[[SAS]]、[[MIPI]]、[[DisplayPort]]、[[HDMI]]、[[InfiniBand]]、[[NVLink]]、[[UALink]]、[[Ultra-Ethernet]]、[[Thunderbolt]]、[[JESD204]]、[[USR]]、[[XSR]]、[[Fiber Channel]] 與 [[Automotive SerDes Alliance]] standards。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Serdes IC-IP companies.md"
+          },
+          "score": 7.828907
+         },
+         {
+          "text": "UI 與 Data Rate 換算 › 使用限制\n- [[Equations]] 只是一個由 Excel 轉出的簡短表格；不能由此推論任何 [[SerDes]] 標準、產品、測試設備或 compliance 測試項目。\n- [[Equations]] 沒有標示 [[NRZ]]、[[PAM4]]、[[PAM-n]]、encoding overhead、FEC、clocking、jitter 或 lane count，因此不可把 `DR(Gbps)=16.0` 解讀為完整 link capability。\n- 本頁保留來源明示的公式與數字，不補推原始 Excel 可能存在的 cell formula、格式、隱藏欄列或未轉出的內容。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/UI 與 Data Rate 換算.md"
+          },
+          "score": 9.328856
+         },
+         {
+          "text": "UI 與 Data Rate 換算 › 來源中的說法\n| 欄位 / 文字 | 值 | 日期 / 期間 | 來源 | 限制 |\n|---|---:|---|---|---|\n| `UI(ps):` | 62.5 | 來源正文未標示正式日期；raw converted 2026-09-17 | [[Equations]] | 未展開 UI 縮寫；未說明是否為 bit period、symbol period 或其他時間單位 |\n| `Data Rate=1/UI` | 原文公式文字 | 來源正文未標示正式日期；raw converted 2026-09-17 | [[Equations]] | 未標示單位換算、有效位數或適用條件 |\n| `DR(Gbps):` | 16.0 | 來源正文未標示正式日期；raw converted 2026-09-17 | [[Equations]] | 未說明是 per-lane、aggregate、raw bit rate、line rate 或 payload rate |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/UI 與 Data Rate 換算.md"
+          },
+          "score": 5.404501
+         },
+         {
+          "text": "UI 與 Data Rate 換算 › 未決事項\n- [[Equations]] 未展開 `UI` 的縮寫。\n- [[Equations]] 未說明 `DR` 的完整名稱、口徑或測量 / 計算條件。\n- [[Equations]] 未標示公式是否適用於特定 [[SerDes]]、[[High speed SerDes standards]]、[[PCIe]]、[[Ethernet]]、[[NVLink]] 或其他介面。\n- [[Equations]] 未標示 `16.0 Gbps` 是否為 raw data rate、payload data rate、symbol rate 或 aggregate throughput。\n- Sheet2 與 Sheet3 為空表格，需回查原始 `Equations.xlsx` 才能確認是否有未轉出的公式或內容。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/UI 與 Data Rate 換算.md"
+          },
+          "score": 4.527423
+         },
+         {
+          "text": "Digital design test success stories › 可追溯限制\n- [[DDT SuccessStories_202607]] 是 PowerPoint 轉出的 lossy markdown；除標題與少量文字外，大部分成功案例細節在圖片中，尚未 OCR。\n- 本頁不把 success-story mapping 解讀為正式 solution bundle、報價配置、必選 option、客戶背書或量產導入證據。\n- 本頁不推論 [[R&S FSWP]]、[[R&S SMA100B]]、[[R&S ZNA67]] 在各應用中的角色分工；例如 stimulus、analysis、phase noise、VNA 或 automation 角色都需後續來源補證。\n- Market 類資料會隨時間變動；本頁的時間點只限於來源標示的 2026.7。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Digital design test success stories.md"
+          },
+          "score": 12.11068
+         },
+         {
+          "text": "Digital design test success stories › 來源中的 mapping\n| 投影片 | 來源標題 | 明示對應儀器 | 可連到的主題 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Slide 2–3 | DAC/ADC testing => FSWP, SMA100B | [[R&S FSWP]]、[[R&S SMA100B]] | [[DAC ADC testing]] | 2026.7 | 只 OCR 出標題與儀器名稱；圖片內容未解讀 |\n| Slide 4–5 | SOC testing => FSWP, SMA100B, ZNA67 | [[R&S FSWP]]、[[R&S SMA100B]]、[[R&S ZNA67]] | [[SoC testing]] | 2026.7 | 未提供 DUT、介面、頻率、量測結果或 option |\n| Slide 6 | SOC testing=> ZNA67 | [[R&S ZNA67]] | [[SoC testing]] | 2026.7 | 圖片內容未 OCR；不可推論 ZNA67 的完整配置 |\n| Slide 7 | ATE PCB testing=> ZNA67 | [[R&S ZNA67]] | [[ATE PCB testing]]、[[R&S PCB test solutions]] | 2026.7 | 未標示 ATE 平台、fixture、頻率、PCB 板材或 pass/fail 條件 |\n| Slide 8 | O/E, E/O, TIA testing | 來源未標示 | [[O-E E-O TIA testing]]、[[TIA testing]] | 2026.7 | 未標示儀器、光電轉換器、資料率或標準 |\n| Slide 9–10 | High speed Cable testing | 來源未標示 | [[High speed Cable testing]]、[[HSD Cable test 外部資料清單]] | 2026.7 | 未標示 cable 類型、資料率、連接器或量測方法 |\n| Slide 11–12 | Digital Power Test | 來源未標示 | [[Digital Power Test]]、[[Power Integrity]] | 2026.7 | 未標示測試項目、電壓 / 電流、負載或儀器 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Digital design test success stories.md"
+          },
+          "score": 10.869184
+         },
+         {
+          "text": "Digital design test success stories › 未決事項\n- unresolved: Slide 2–7 圖片未 OCR，無法確認每個 success story 的客戶、DUT、測試配置、結果或導入狀態。\n- unresolved: Slide 8–12 未標示儀器 mapping，需回看原始 PPTX 或後續 OCR。\n- unresolved: 來源未標示是否所有案例都屬於同一期間、同一地區或同一業務單位。\n- unresolved: 來源未標示 [[DAC ADC testing]]、[[SoC testing]]、[[ATE PCB testing]]、[[O-E E-O TIA testing]]、[[High speed Cable testing]]、[[Digital Power Test]] 的正式定義或測試標準。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Digital design test success stories.md"
+          },
+          "score": 8.823517
+         },
+         {
+          "text": "高速互連 probing 與 de-embedding 測試案例 › 來源中的案例\n| 案例 | 日期 / 期間 | Customer / 對象 | DUT / application | 來源明示方案 | 限制 |\n|---|---|---|---|---|---|\n| TRI case | 來源未標示正式日期；raw converted 2026-09-18 | [[TRI]] | dual-side ATE inline measurement，test sides A/B each measure two DUTs | 4-port VNA [[R&S ZNB3044]]、[[R&S OSP320]]、flying probe module、interposer board | TRI 未展開；DUT、頻率、fixture、calibration 未標示 |\n| AMD case | 來源未標示正式日期；raw converted 2026-09-18 | [[AMD]] / [[AMD EPYC 9965]] case | validation optimization、socket–socket interconnection test | default setup 與 optimized setup 比較；SDD12 100 cycles stability proof | 67 GHz claim 未標示完整儀器組合，不能改寫單機儀器規格 |\n| LSmtron success story | Slide 8 頁尾 28/04/2020 | [[LSmtron]] | Board to Board Connector | ZNB40、probe、mount-kit、de-embedding tool、local partner [[TeraBit Solutions]] / [[AtaiTec]] | ZNB40 正式型號、probe 型號、de-embedding tool 名稱未標示 |\n| Bare Board for SoCs | 來源未標示正式日期；raw converted 2026-09-18 | [[Advantest]]、[[Meritech]] | PCB test with probing；impedance、insertion loss、return loss | ZNB40、probe、mount-kit、de-embedding tool | ATS / ZVA67 / ZNA43 欄位分層不明 |\n| Samsung Foundry RF/Analog Enablement | 來源未標示正式日期；raw converted 2026-09-18 | [[Samsung Electronics]] | 5G SoC including VCO | [[R&S FSWP50]]、[[R&S SMW200A]] 44GHz、SGS100A、automated VCO Tuning S/W | SGS100A 需補證；software 版本、scope 與交付方式未標示 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+          },
+          "score": 7.166693
+         },
+         {
+          "text": "高速互連 probing 與 de-embedding 測試案例 › 可學到的 sales / solution pattern\n- 來源明示的 win factor 不是單一儀器規格，而是 total solution：probe、mount-kit、de-embedding tool 與 local partner。這與 [[R&S PCB test solutions]] 中 material measurement / sampling testing / process monitoring 的流程視角互補。\n- Bare board for SoCs、socket / transmission line evaluation 與 board-to-board connector DUT 都落在 [[Signal Integrity]]、[[Insertion Loss]]、[[Return Loss]]、[[Impedance]] 與 de-embedding 的交界。\n- Samsung 5G SoC including VCO case 顯示 [[R&S FSWP50]]、[[R&S SMW200A]] 與 automated VCO tuning software 可以被包裝成 RF / analog enablement 測試方案，但來源未提供正式 software product name 或 version。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+          },
+          "score": 7.146211
+         },
+         {
+          "text": "高速互連 probing 與 de-embedding 測試案例\n[[高速互連 probing 與 de-embedding 測試案例]] 是從 [[TRI_AMD_RSKR Sharing1]] 抽出的 Market 層級案例集合，描述以 VNA、probe、mount-kit、de-embedding tool 與 local partner 解決 PCB、socket、connector 與 SoC validation 量測問題。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+          },
+          "score": 5.600778
+         },
+         {
+          "text": "112G PAM4 PCB Engineering › 關鍵實體與概念\n- [[112G PAM4 PCB 工程測試資料清單]] — 本來源可作為 112G PAM4 PCB engineering / transmission line 測試資料的待讀索引。\n- [[112G PAM4]] — 只出現在來源標題；來源未提供 PAM4 定義、symbol rate、baud rate、lane 數或標準版本。\n- [[PCB Engineering]] — 只出現在來源標題；來源未展開工程範圍。\n- [[Transmission Lines on PCB]] — 來源正文標題；未提供 transmission line geometry、stackup、impedance、loss 或 test coupon。\n- [[Probe]] — 表格欄位標題；未列出 probe 型號、頻寬或供應商。\n- [[Station-Handler]] — 表格欄位標題；未列出 station、handler 或 probing platform 型號。\n- [[Software]] — 表格欄位標題；未列出軟體名稱、版本或 license。\n- [[VNA]] — 表格欄位標題；未列出 [[Vector Network Analyzer]] 型號、port 數、頻率範圍、calibration kit 或 measurement setup。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/112G PAM4 PCB Engineering.md"
+          },
+          "score": 6.68486
+         },
+         {
+          "text": "112G PAM4 PCB Engineering › 重點摘要\n- 本來源是由 `112G PAM4 PCB Engineering.pdf` 轉出的 lossy markdown derivative，raw frontmatter 顯示 converted 日期為 2026-09-17；正式發布日期、內容日期或資料期間：**來源未標示**。\n- 來源正文只保留少量文字：`COMPANY RESTRICTED`、`Transmission Lines on PCB`，以及一個空表格的欄位標題：`Probe`、`Station/Handler`、`Software`、`VNA`。\n- 來源標題含 [[112G PAM4]]、[[PCB Engineering]]，正文含 [[Transmission Lines on PCB]] 與 [[VNA]] 測試配置線索；但沒有提供測試流程、儀器型號、頻率範圍、fixture、校準方法、量測數值或 pass/fail 條件。\n- 因來源是 PDF 轉 markdown 的 lossy derivative，且表格沒有資料列，本頁只保存可追溯的表頭與缺漏，不推論原 PDF 中未轉出的內容。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/112G PAM4 PCB Engineering.md"
+          },
+          "score": 5.603785
+         },
+         {
+          "text": "112G PAM4 PCB Engineering › 原文未解的問題\n- 正式發布日期、內容日期或資料期間：來源未標示。\n- 原 PDF 文件版次、作者、部門、頁數與頁碼：來源未標示。\n- `COMPANY RESTRICTED` 的適用範圍、分享限制與版本控管：來源未標示。\n- `Transmission Lines on PCB` 章節是否有正文、圖片或表格資料列：markdown 轉出未保留。\n- 表格欄位 `Probe`、`Station/Handler`、`Software`、`VNA` 下方沒有資料列；實際設備、軟體或配置：來源未標示。\n- [[112G PAM4]] 的應用標準、資料率口徑、channel loss budget、test coupon、fixture、校準方法與量測指標：來源未標示。\n- 是否與 [[R&S PCB test solutions]]、[[高頻高速 PCB 測試解決方案]]、[[SerDes 與 SI PI 測試概覽]] 或任何 R&S product configuration 直接相關：來源未標示。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/112G PAM4 PCB Engineering.md"
+          },
+          "score": 5.260543
+         },
+         {
+          "text": "112G PAM4 PCB 工程測試資料清單 › 可追溯線索\n| 線索 | 來源明示文字 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|\n| 題名 | 112G PAM4 PCB Engineering | [[112G PAM4 PCB Engineering]] | 正式日期來源未標示；raw converted 2026-09-17 | 不足以推論標準版本、測試範圍或應用場景 |\n| 存取標記 | COMPANY RESTRICTED | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未說明限制範圍或文件控管規則 |\n| 章節 / 主題 | Transmission Lines on PCB | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供 transmission line geometry、stackup、impedance 或 loss 數值 |\n| 測試配置欄位 | Probe | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供 probe 型號、頻寬、pitch、供應商或 calibration method |\n| 測試配置欄位 | Station/Handler | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供 station / handler 型號、夾治具或 automation context |\n| 測試配置欄位 | Software | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供軟體名稱、版本、script 或 license |\n| 測試配置欄位 | VNA | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供 [[Vector Network Analyzer]] 型號、port 數、頻率範圍、校準件或 S-parameter 設定 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+          },
+          "score": 10.994001
+         },
+         {
+          "text": "112G PAM4 PCB 工程測試資料清單 › 未決事項\n- 原 PDF 的正式日期、版次、作者、部門、頁數與頁碼未標示。\n- 來源未說明 `112G PAM4` 的資料率口徑、標準版本、channel model、fixture、test coupon 或量測頻率範圍。\n- 來源未提供 transmission lines on PCB 的幾何、stackup、阻抗、loss、via、connector、launch 或 S-parameter 目標。\n- 來源未提供 probe、station / handler、software、VNA 的型號、供應商、設定或校準方式。\n- 來源未說明是否與 [[R&S PCB test solutions]]、[[高頻高速 PCB 測試解決方案]] 或任何正式產品方案直接相關。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+          },
+          "score": 7.940442
+         },
+         {
+          "text": "112G PAM4 PCB 工程測試資料清單 › 與既有知識的關係\n- [[SerDes 與 SI PI 測試概覽]] 已記錄 high-speed digital validation challenges，包括 transmission channel、PCBs、connectors、scopes、BERTs、AWGs、network analyzers 等測試脈絡；本頁只補一個 112G PAM4 PCB 題名與 VNA / probe 類表頭，不新增測試方法。\n- [[R&S PCB test solutions]] 已保存 [[Dk-Df]]、[[TDR 阻抗測量]]、[[Delta-L]]、IL、Xtalk、Eye diagram、material / stackup selection 等流程詞；[[112G PAM4 PCB Engineering]] 沒有提供足夠內容把這些流程套到 112G PAM4 PCB。\n- [[高頻高速 PCB 測試解決方案]] 已保存 Keysight high-frequency / high-speed PCB 測試流程；本來源不足以比較 Keysight 與 R&S，也不足以建立採購配置。\n- [[SerDes]] 與 [[High speed SerDes standards]] 可作為 112G PAM4 的上位 high-speed interface / SerDes 脈絡，但本來源沒有明示任何 standard organization、standard version 或 compliance test。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+          },
+          "score": 5.853399
+         },
+         {
+          "text": "D2D interfaces 比較 › 重複來源標註\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 9]] 與 [[IO Serdes in AI ASIC-TPU-Chiplet image 2]] 都是標題為 **3) Survey of D2D interfaces** 的比較表，欄位與數值高度一致。\n- 兩份來源不可視為兩個獨立市場驗證；若引用本頁數值，應標示它們是重複圖像來源。\n- 詳見 [[D2D interfaces 比較表重複來源]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/D2D interfaces 比較.md"
+          },
+          "score": 9.361098
+         },
+         {
+          "text": "D2D interfaces 比較 › 使用限制\n- 本頁所有數字都來自 [[IO Serdes in AI ASIC-TPU-Chiplet image 2]] 與 [[IO Serdes in AI ASIC-TPU-Chiplet image 9]]；兩份來源均未標示日期，取得於 2026-09-04，不應寫成現況或標準官方規格。\n- 來源未標示標準版本，因此本頁不推論 [[OIF]]、[[BoW]]、[[AIB]]、[[UCIe]] 或 [[Proprietary]] 介面的版本、合規狀態或互通性測試結果。\n- 來源未標示測試條件，因此本頁不把 latency、energy、shoreline、reach 或 data rate 數值用於跨產品 benchmark。\n- [[Proprietary]] 欄中 [[NVLink]]、[[Infinity]]、[[NuLink]]、[[UltraLink]]、[[Glink]] 的排列方式有歧義；本頁只照表列出，不推論它們分別對應 shoreline、reach、latency、energy、package 的有效數值。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 9]] 與 [[IO Serdes in AI ASIC-TPU-Chiplet image 2]] 高度重複，不可將兩者計為兩個獨立來源。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/D2D interfaces 比較.md"
+          },
+          "score": 7.638524
+         },
+         {
+          "text": "D2D interfaces 比較 › 未決事項\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 2]] 與 [[IO Serdes in AI ASIC-TPU-Chiplet image 9]] 均未標示日期、年份、季度或資料期間。\n- 兩份來源均未標示發布者、簡報名稱、頁碼、作者或組織。\n- 兩份來源均未標示各 interface 數值的標準版本、測試條件、統計口徑或資料來源。\n- 兩份來源均未說明 data rate 欄中的 G 是 per-lane、per-direction、aggregate 或其他口徑。\n- 兩份來源均未說明 [[Proprietary]] 欄中的 [[NVLink]]、[[Infinity]]、[[NuLink]]、[[UltraLink]]、[[Glink]] 與各列欄位的精確對應關係。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/D2D interfaces 比較.md"
+          },
+          "score": 6.391622
+         },
+         {
+          "text": "R&S PCB test solutions › 可追溯限制\n- 本來源沒有提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。\n- 本頁不把 Slide 21 的圖上列名解讀為正式解決方案型錄或完整採購配置。\n- [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]] 的角色未明，僅保留圖上列名。\n- [[ISD-ADK]] 與 PL 未展開縮寫，需後續來源補證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 5.717759
+         },
+         {
+          "text": "R&S PCB test solutions › 未決事項\n- Slide 21 未標示 R&S PCB test solutions 的正式文件版次與產品 portfolio 對應。\n- Slide 21 未標示 [[TDR]]、[[Delta-L]]、ISD/ADK、DK/DF extraction 的標準版本、演算法、測試條件或工具型號。\n- Slide 21 未展開 PL、ISD、ADK、RSTW、SWISSTO12、QWED、KEYCOM。\n- 需回看原始 PPTX 圖像確認各圖示、商標、箭頭與工具對應關係。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 4.412783
+         },
+         {
+          "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 3.796122
+         },
+         {
+          "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 3.606005
+         },
+         {
+          "text": "R&S PCB test solutions › 相關來源\n- [[0 Digital Test - What are SIPI and Serdes]] — 2026.3.4 的 R&S / RSTW high-speed digital 測試簡報來源摘要。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 0.951016
+         },
+         {
+          "text": "AI 伺服器 PMIC 與功率半導體轉型 › 圖上三大變革\n1. [[DDR5]] 記憶體架構轉移：來源說 PMIC 直接站在模組上，並帶動單機用量與單價 ASP 倍增；但未提供 ASP 基準或倍數。\n2. [[NVIDIA]] 800V 高壓供電革命：來源說導入 [[HVDC]] 架構以減少轉換損耗，對高效率 [[DC-DC]] 方案需求極大；但未提供 NVIDIA 官方文件或平台型號。\n3. 2026 年低票失衡引發漲價潮：來源說交期拉長至 30 週以上，報價最高漲約 1.5%；低票失衡語意可疑，需回查原圖。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 伺服器 PMIC 與功率半導體轉型.md"
+          },
+          "score": 5.556781
+         },
+         {
+          "text": "AI 伺服器 PMIC 與功率半導體轉型 › 台股 AI 電力供應鏈地圖\n| 分類 | 圖上列名 | 限制 |\n|---|---|---|\n| PMIC 設計與 BMC 監控 | [[矽力-KY]]、[[致新]]、[[力智]]、[[茂達]]、[[BMC]]、[[信驊]]、[[新唐]] | [[BMC]] 可能是分類詞；[[新唐]] 是否等同 [[新唐科技]] 需確認 |\n| 功率半導體 (IDM/MOSFET) | [[強茂]]、[[台半]]、[[微碁]] (IDM)、設計商、[[富鼎]]、[[大中]] | [[微碁]] 讀圖清晰度有限；設計商是分類，不是公司名 |\n| 第三代半導體 (SiC/GaN) | [[環球晶]]（晶圓）、[[嘉晶]]（磊晶）、[[漢磊]]（代工） | 未提供產能、客戶、量產或出貨證據 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 伺服器 PMIC 與功率半導體轉型.md"
+          },
+          "score": 5.456655
+         },
+         {
+          "text": "AI 伺服器 PMIC 與功率半導體轉型 › 限制與不可推論事項\n- [[Power IC - Power Management IC image 4]] 未提供原始發布者、報告、方法論或資料來源。\n- 圖上的公司列名不能推論為供應商名單、客戶關係、市占率或投資建議。\n- 圖上的 2026 年、30 週以上與約 1.5% 都缺少產品、廠商、地區與樣本口徑。\n- [[NVIDIA]] 800V / [[HVDC]] 說法不得擴大為 NVIDIA 官方規格或已導入事實。\n- [[微碁]]、[[低票失衡]] 等讀圖風險需保留未決。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 伺服器 PMIC 與功率半導體轉型.md"
+          },
+          "score": 4.003692
+         },
+         {
+          "text": "AI 伺服器 PMIC 與功率半導體轉型 › 與既有頁面的關係\n- [[台股電源管理 IC AI 受惠程度對照表]] 依 [[Power IC - Power Management IC image 2]] 與 [[Power IC - Power Management IC image 5]] 整理 2024/05 的 PMIC 受惠排序；本頁依 [[Power IC - Power Management IC image 4]] 整理角色與供應鏈分類，兩者口徑不同。\n- [[功率半導體概念股]] 依 [[Power IC - Power Management IC image 1]] 與 [[Power IC - Power Management IC image 3]] 整理概念股分類；本頁補充 AI 伺服器電力架構升級敘事。\n- [[第三代半導體概念股]] 依 [[Power IC - Power Management IC image 3]] 記錄上游基板 / 磊晶與晶圓代工列名；本頁新增 [[Power IC - Power Management IC image 4]] 中晶圓、磊晶、代工三個括號註記。\n- [[AI 資料中心高壓直流供電]] 與 [[800V DC 配電架構]] 提供 800V / HVDC 架構背景；本頁只補充 [[Power IC - Power Management IC image 4]] 對 NVIDIA 800V 高壓供電革命的資訊圖說法。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 伺服器 PMIC 與功率半導體轉型.md"
+          },
+          "score": 2.335246
+         },
+         {
+          "text": "AI 加速器資料流架構 › 來源中的架構分層\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 5]]（來源未標示日期；取得於 2026-09-04）的圖例把綠色標為 **Off-Chip I/O**、藍色標為 **Data Buffer**、淡黃色標為 **Computation**、紅色標為 **Control**。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 5]]（來源未標示日期；取得於 2026-09-04）左側標示 **PCIe Gen3 ×16 Interface** 與 **Host Interface**，相關頻寬標示 **14 GiB/s**。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 5]]（來源未標示日期；取得於 2026-09-04）上方標示 **DDR3 DRAM Chips**、**DDR3-2133 Interfaces** 與 **Weight FIFO (Weight Fetcher)**，相關頻寬標示 **30 GiB/s**。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 5]]（來源未標示日期；取得於 2026-09-04）中央標示 **Unified Buffer (Local Activation Storage)**，Host Interface 到 Unified Buffer 的路徑標示 **10 GiB/s**。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 5]]（來源未標示日期；取得於 2026-09-04）將 **Systolic Data Setup** 連到 **Matrix Multiply Unit (64K per cycle)**，圖上資料供應路徑標示 **167 GiB/s**。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 5]]（來源未標示日期；取得於 2026-09-04）在 Matrix Multiply Unit 下游列出 **Accumulators**、**Activation** 與 **Normalize/Pool**。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 5]]（來源未標示日期；取得於 2026-09-04）有多個紅色 **Control** 方塊與 **Instr** 文字，來源文字解讀為控制訊號與指令輸入協調整個系統。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 加速器資料流架構.md"
+          },
+          "score": 4.973844
+         },
+         {
+          "text": "AI 加速器資料流架構 › 與既有知識的關係\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 5]] 的重點是單一加速器內部資料流；不同於 [[Die-to-Die 互連]]、[[D2D PHY]]、[[UCIe]] 或 [[D2D interfaces 比較]] 那類 die-to-die interface / chiplet 互連來源。\n- 雖然來源檔名含 AI ASIC / TPU / Chiplet，本頁不把圖上的加速器架構改寫成特定 [[TPU]]、[[AI ASIC]]、[[XPU]]、[[GPU]] 或 [[Chiplet]] 產品；圖上沒有這些產品名稱或公司資訊。\n- [[Matrix Multiply Unit]] 與 [[Systolic Data Setup]] 可作為此架構中 computation 與資料排列的關鍵概念，但來源沒有說明是否為 systolic array、矩陣尺寸、資料型態或精度。\n- [[Unified Buffer]] 在此圖中是 local activation storage，但來源沒有提供容量或 bank 結構；不可直接與其他 AI 加速器產品的 on-chip SRAM / unified buffer 規格比較。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 加速器資料流架構.md"
+          },
+          "score": 3.237701
+         },
+         {
+          "text": "AI 加速器資料流架構 › 相關來源\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 5]] — 未標示日期、取得於 2026-09-04 的運算加速器硬體架構 / 資料流方塊圖。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 加速器資料流架構.md"
+          },
+          "score": 2.900392
+         },
+         {
+          "text": "AI 加速器資料流架構\n[[AI 加速器資料流架構]] 是 [[IO Serdes in AI ASIC-TPU-Chiplet image 5]]（來源未標示日期；取得於 2026-09-04）圖上呈現的運算加速器資料流概念，將 off-chip I/O、data buffer、control 與 computation 方塊串成 PCIe / DDR3 輸入、Unified Buffer、systolic data setup、matrix multiply 與後處理流水線。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 加速器資料流架構.md"
+          },
+          "score": 0.890124
+         },
+         {
+          "text": "IO Serdes in AI ASIC-TPU-Chiplet image 5 › 原文未解的問題\n- unresolved: 來源未標示日期、年份、季度或資料期間。\n- unresolved: 來源未標示發布者、公司、報告名稱、頁碼、圖號、網址或來源註記。\n- unresolved: 來源未標示這張加速器架構圖對應的產品名稱、型號、公司或應用場景。\n- unresolved: 來源未說明 **14 GiB/s**、**10 GiB/s**、**30 GiB/s**、**167 GiB/s** 是峰值、實測、單向、雙向、理論或有效頻寬。\n- unresolved: 來源未說明 **Matrix Multiply Unit (64K per cycle)** 中 **64K** 的運算類型、資料型態、矩陣尺寸、時脈或是否為峰值。\n- unresolved: 來源未說明 [[DDR3 DRAM Chips]] 的顆數、容量、bus width、通道數或與 **30 GiB/s** 的換算關係。\n- unresolved: 來源未說明 [[Unified Buffer]] 容量、bank 數、讀寫埠、資料格式或與 **Local Activation Storage** 的精確定義。\n- unresolved: 來源未說明 [[Systolic Data Setup]] 的內部功能、資料排列方式或是否對應 systolic array。\n- unresolved: 來源未說明 [[Activation]] 與 [[Normalize-Pool]] 支援的函數、資料型態或執行順序。\n- unresolved: 來源未說明 [[Instr]] 的指令集、控制格式或與 host / control 方塊的協定。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/IO Serdes in AI ASIC-TPU-Chiplet image 5.md"
+          },
+          "score": 8.287041
+         },
+         {
+          "text": "IO Serdes in AI ASIC-TPU-Chiplet image 5 › 公司 / 產品 / 型號\n- 圖中沒有明確公司名稱。\n- 圖中沒有明確產品名稱。\n- 圖中沒有明確型號。\n- 本來源不能用來建立或更新特定公司、TPU、AI ASIC、NPU、GPU 或 chiplet 產品的市場狀態。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/IO Serdes in AI ASIC-TPU-Chiplet image 5.md"
+          },
+          "score": 3.736681
+         },
+         {
+          "text": "IO Serdes in AI ASIC-TPU-Chiplet image 5 › 概念 / 技術\n- [[AI 加速器資料流架構]] — 本來源呈現的運算加速器資料路徑、控制路徑與計算流水線概念。\n- [[PCIe Gen3 ×16 Interface]] — 圖上外部主機介面；來源只標示名稱與 **14 GiB/s**，未提供 PCIe 實作、主機平台或協定細節。\n- [[Host Interface]] — 圖上位於 PCIe Gen3 ×16 Interface 之後、連到 Unified Buffer 與控制路徑的主機介面方塊。\n- [[DDR3 DRAM Chips]] — 圖上權重資料來源；與 [[DDR3-2133 Interfaces]] 及 [[Weight FIFO]] 相連。\n- [[DDR3-2133 Interfaces]] — 圖上 DDR3 DRAM Chips 到 Weight FIFO 之間的介面文字。\n- [[Weight FIFO]] / [[Weight Fetcher]] — 圖上位於 DDR3-2133 Interfaces 與 Matrix Multiply Unit 之間的權重擷取 / 緩衝方塊。\n- [[Unified Buffer]] — 圖上標為 **Unified Buffer (Local Activation Storage)** 的本地 activation 儲存 / 資料緩衝方塊。\n- [[Systolic Data Setup]] — 圖上位於 Unified Buffer 與 Matrix Multiply Unit 之間的資料準備方塊。\n- [[Matrix Multiply Unit]] — 圖上核心計算方塊，標示 **64K per cycle**。\n- [[Accumulators]]、[[Activation]]、[[Normalize-Pool]] — 圖上位於 Matrix Multiply Unit 下游的計算 / 後處理方塊。\n- [[Control]]、[[Instr]] — 圖上紅色控制路徑與指令輸入 / 指令緩衝相關文字。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/IO Serdes in AI ASIC-TPU-Chiplet image 5.md"
+          },
+          "score": 2.656149
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 可追溯限制\n- 本來源是 lossy markdown derivative，多數圖像未 OCR；不可把未擷取的圖片內容當成已驗證主張。\n- Slide 11 的頁腳日期 **6/13/2025** 與封面日期 **2026.3.4** 並存，未能判定何者是內容日期。\n- 本頁不推論 R&S 具備所有列名儀器或方案，也不把儀器類型轉換成正式 product configuration。\n- 本頁不提供 [[Signal Integrity]]、[[Power Integrity]] 或 [[SerDes]] 的標準定義；只保存來源明示的測試區塊與儀器類型。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 5.331535
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 2.986732
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽\n[[SerDes 與 SI PI 測試概覽]] 是依 [[0 Digital Test - What are SIPI and Serdes]] 建立的 high-speed digital 測試主題頁，用來連接 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]]、[[PCB]] / [[PCBA]] 與相關驗證儀器類型。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 1.392735
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 相關來源\n- [[0 Digital Test - What are SIPI and Serdes]] — 2026.3.4 的 R&S / RSTW high-speed digital 測試簡報來源摘要。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 0.92488
+         },
+         {
+          "text": "SerDes › 與 Parallel Wires 的圖上對照\n| 路徑 | 圖上 framing block | 圖上 PHY | 日期 / 期間 | 來源 | 限制 |\n|---|---|---|---|---|---|\n| [[SerDes]] | D2D controller Framing Layer (serdes) | [[XSR PHY]] | 來源未標示日期；取得於 2026-09-04 | [[IO Serdes in AI ASIC-TPU-Chiplet image 1]] | 來源未提供資料率、lane 數、FEC 類型或 XSR 展開 |\n| [[Parallel Wires]] | D2D cntrlr Framing Layer (parallel wires) | BoW/AIB/OHBI PHY | 來源未標示日期；取得於 2026-09-04 | [[IO Serdes in AI ASIC-TPU-Chiplet image 1]] | 來源未提供 BoW、AIB、OHBI 版本或 parallel wire 數量 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes.md"
+          },
+          "score": 3.867391
+         },
+         {
+          "text": "SerDes › 封裝示意圖中的 SerDes\n| 圖上角色 | 圖上相鄰概念 | 日期 / 期間 | 來源 | 限制 |\n|---|---|---|---|---|\n| 多個藍色 **SerDes** 模組 | [[XPU]]、[[HBM]]、[[Optical I-O]]、[[異質整合封裝]] | 來源未標示日期；取得於 2026-09-04 | [[IO Serdes in AI ASIC-TPU-Chiplet image 3]] | 圖上沒有明確連線、數值、協定、lane 數、通道條件、產品型號或供應商 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes.md"
+          },
+          "score": 2.609671
+         },
+         {
+          "text": "SerDes › 來源中的說法\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 1]]（來源未標示日期；取得於 2026-09-04）上方小示意圖在 [[Die A]] 與 [[Die B]] 之間標示 **SerDes OR Parallel Wires**。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 1]]（來源未標示日期；取得於 2026-09-04）右側標示 **D2D controller Framing Layer (serdes)**，其右邊接 [[XSR PHY]]。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 1]]（來源未標示日期；取得於 2026-09-04）下方 Framing Layer 說明框寫 **Function depends on Parallel wires or SerDes**。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 1]]（來源未標示日期；取得於 2026-09-04）在 Framing Layer 功能中列出 **Lane alignment/De-skew** 與 **Optional FEC Engine**。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 3]]（來源未標示日期；取得於 2026-09-04）圖上多個藍色模組標示為 **SerDes**，並與 2 顆 **XPU**、多個 **HBM** 與多個 **Optical I/O** 同置於一張封裝 / 晶片模組示意圖中。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 3]]（來源未標示日期；取得於 2026-09-04）沒有畫出 SerDes 與 XPU、HBM 或 Optical I/O 之間的明確連線，也沒有提供資料率、lane 數、功耗、距離、協定或規格版本。\n- [[Serdes IC-IP companies image 1]]（來源未標示日期；取得於 2026-09-04）與 [[Serdes IC-IP companies image 3]]（來源未標示日期；取得於 2026-09-04）在 SoC / 晶片平台 IP 組成方塊圖下方列出 **Serdes** 區塊。\n- [[Serdes IC-IP companies image 1]] 與 [[Serdes IC-IP companies image 3]] 的 Serdes 區塊列出 **SATA**、**LVDS, sub-LVDS**、**MIPI D-PHY, DSI-2/CSI2 controller**、**HDMI2.1 with HDCP2.0**、**Ethernet**。\n- [[Serdes IC-IP companies image 1]] 與 [[Serdes IC-IP companies image 3]] 同一圖中另有 **High Speed Serial I/F** 區塊，列出 **USB3.2/3.1/3.0/2.0** 與 **PCI-Express Gen5/Gen4/Gen3**；來源沒有說明 High Speed Serial I/F 與 Serdes 區塊之間的分類邊界。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes.md"
+          },
+          "score": 2.580955
+         },
+         {
+          "text": "SerDes › 未決事項\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 1]] 未標示日期、年份、季度或資料期間。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 1]] 未標示 [[SerDes]] 的資料率、lane 數、編碼方式、FEC 類型、功耗、延遲或通道條件。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 1]] 未展開 [[XSR PHY]] 的縮寫，也未標示其規格版本或發布組織。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 3]] 未標示日期、年份、季度或資料期間。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 3]] 未標示 [[SerDes]] 的資料率、lane 數、協定、功耗、距離、供應商、產品名稱或規格版本。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 3]] 未標示 [[SerDes]] 與 [[XPU]]、[[HBM]] 或 [[Optical I-O]] 之間的實際連接關係。\n- [[Serdes IC-IP companies image 1]] 未標示日期、年份、季度或資料期間。\n- [[Serdes IC-IP companies image 3]] 未標示日期、年份、季度或資料期間。\n- [[Serdes IC-IP companies image 1]] 與 [[Serdes IC-IP companies image 3]] 未標示 Serdes 清單中的 SATA、LVDS、MIPI D-PHY、HDMI2.1、Ethernet 是否為 PHY、controller、protocol stack 或整合方案。\n- [[Serdes IC-IP companies image 1]] 與 [[Serdes IC-IP companies image 3]] 未標示 High Speed Serial I/F 與 Serdes 區塊的分類邊界。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes.md"
+          },
+          "score": 1.957294
+         },
+         {
+          "text": "SerDes\n[[SerDes]] 是 [[IO Serdes in AI ASIC-TPU-Chiplet image 1]]（來源未標示日期；取得於 2026-09-04）圖上列為 [[Die-to-Die 互連]] 方式之一，並與 **D2D controller Framing Layer (serdes)** 和 [[XSR PHY]] 相連的互連語彙；[[IO Serdes in AI ASIC-TPU-Chiplet image 3]]（來源未標示日期；取得於 2026-09-04）則把 **SerDes** 標示為 [[XPU]] / [[HBM]] / [[Optical I-O]] 封裝示意圖中的多個模組；[[Serdes IC-IP companies image 1]] 與 [[Serdes IC-IP companies image 3]]（皆為來源未標示日期；取得於 2026-09-04）另在 SoC IP 組成方塊圖中把 **Serdes** 列為模組，並列出 SATA、LVDS、sub-LVDS、MIPI D-PHY、DSI-2/CSI2 controller、HDMI2.1 with HDCP2.0 與 Ethernet。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes.md"
+          },
+          "score": 0.808251
+         },
+         {
+          "text": "IO SerDes ASIC TPU Chiplet 外部資料清單 › 待讀 PDF / 本機附件\n| 檔名 / 連結文字 | 可能相關頁面 | 來源 | 使用限制 |\n|---|---|---|---|\n| 2022-IPIG-Heterogenous-Integration-Chiplets-White-Paper-Final-v4 | [[異質整合封裝]]、[[Chiplet]] | [[IO Serdes in AI ASIC-TPU-Chiplet]] | 未擷取 PDF；不可引用 white paper 內容、版本或組織。 |\n| Create Cutting_edge Chiplets with foundry / 20250121_PreConF_Yee | [[Chiplet]]、[[Foundry]] | [[IO Serdes in AI ASIC-TPU-Chiplet]] | 未擷取 PDF；不可推論 foundry 方案。 |\n| 5nm Inverter-Based Short-Reach Simultaneous Bi-Directional Transceiver for Die-to-Die | [[D2D PHY]]、[[Die-to-Die 互連]]、[[SerDes]] | [[IO Serdes in AI ASIC-TPU-Chiplet]] | 數字只在檔名；不可引用 0.297 pJ/bit 或 50.4 Gb/s 為已驗證規格。 |\n| 4nm HBM3 Interface | [[HBM]]、[[HBM3]] | [[IO Serdes in AI ASIC-TPU-Chiplet]] | 數字只在檔名；不可引用 1.15 TB/s 或 4 nm 為已驗證規格。 |\n| achp_alphachip_io_product_brief_0_3_6 | [[AlphaChip]]、[[I-O IP]] | [[IO Serdes in AI ASIC-TPU-Chiplet]] | 未擷取 PDF；產品名稱、版本與內容未確認。 |\n| Die-to-Die Interface for Multi-ChipletAI Systems | [[Die-to-Die 互連]]、[[Multi-Chiplet AI Systems]] | [[IO Serdes in AI ASIC-TPU-Chiplet]] | 未擷取 PDF；不可引用系統架構或規格。 |\n| ECTC2025 SpecialSession 9 EPS Seminar User-Perspective-of-Chiplet-Technology | [[ECTC 2025]]、[[Chiplet]] | [[IO Serdes in AI ASIC-TPU-Chiplet]] | 未擷取 PDF；不可引用會議內容、講者或結論。 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/IO SerDes ASIC TPU Chiplet 外部資料清單.md"
+          },
+          "score": 3.976242
+         },
+         {
+          "text": "IO SerDes ASIC TPU Chiplet 外部資料清單 › 嵌入圖像索引\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 3]]、[[IO Serdes in AI ASIC-TPU-Chiplet image 10]] 與 [[XPU HBM SerDes Optical I-O 封裝示意圖重複來源]]：用於 [[異質整合封裝]]、[[XPU]]、[[HBM]]、[[SerDes]]、[[Optical I-O]] 的圖像脈絡。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 8]]、[[IO Serdes in AI ASIC-TPU-Chiplet image 1]] 與 [[D2D Controller Features 圖重複來源]]：用於 [[D2D Controller]]、[[Die-to-Die 互連]]、[[SerDes]]、[[Parallel Wires]] 的圖像脈絡。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 4]]：用於 [[Eliyan]]、[[D2D PHY]]、[[D2M PHY]]、[[C2C PHY]] 與 [[Eliyan HBM Base Die Chiplet]]。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 9]]、[[IO Serdes in AI ASIC-TPU-Chiplet image 2]] 與 [[D2D interfaces 比較表重複來源]]：用於 [[D2D interfaces 比較]] 與 [[UCIe]]。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 11]]：用於 [[UCIe]]、[[Die-to-Die Adapter]]、[[Main Band]]、[[Sideband]]。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 12]]：用於 [[D2D PHY]]、[[In-Package Interconnect Tiles]]、[[Forwarded Clock]]。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 5]]：用於 [[AI 加速器資料流架構]]、[[Matrix Multiply Unit]]、[[Unified Buffer]]。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 7]]：用於 [[Google Ironwood]]、[[SerDes Chiplet]]、[[HBM3E]]、[[ICI]]。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 13]] 與 [[Google TPU 晶片藍圖重複來源]]：用於 [[Google TPU 晶片藍圖]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/IO SerDes ASIC TPU Chiplet 外部資料清單.md"
+          },
+          "score": 2.447768
+         },
+         {
+          "text": "IO SerDes ASIC TPU Chiplet 外部資料清單 › 未決事項\n- 所有外部網頁的發布日期、作者、版本與正文內容尚未擷取。\n- 所有本機 PDF 的正文、頁碼、作者、發布組織與版本尚未擷取。\n- Google Cloud blog 標題中的 [[TPU 8i]] 尚未建立產品頁，且本來源未提供正文支撐。\n- [[Cadence]]、[[Synopsys]]、[[SemiWiki]]、[[AlphaChip]]、[[ECTC 2025]] 等頁面若需建立，仍需對應來源正文支撐。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/IO SerDes ASIC TPU Chiplet 外部資料清單.md"
+          },
+          "score": 2.017219
+         },
+         {
+          "text": "IO SerDes ASIC TPU Chiplet 外部資料清單 › 來源範圍\n- 主要來源：[[IO Serdes in AI ASIC-TPU-Chiplet]]。\n- 來源正文未標示正式發布日期；raw converted 為 2026-09-17，raw 路徑資料夾含 `2026-8-7`。\n- 主題範圍涵蓋 [[SerDes]]、[[Die-to-Die 互連]]、[[D2D PHY]]、[[UCIe]]、[[Chiplet]]、[[HBM]]、[[Google TPU 晶片藍圖]]、[[異質整合封裝]]、[[Eliyan]] 與 [[Optical I-O]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/IO SerDes ASIC TPU Chiplet 外部資料清單.md"
+          },
+          "score": 1.229705
+         },
+         {
+          "text": "Serdes IC-IP companies › 重點摘要\n- 來源列出 [[M31 Technology Corporation]] 作為 professional silicon intellectual property provider，成立於 2011 年 10 月，總部在台灣新竹，專注 high-speed interface IP、memory compilers、standard cell library solutions，股票代號 6643。\n- 來源列出多家台灣 IC design 公司及產品方向，包括 [[MediaTek]]、[[Novatek]]、[[Realtek]]、[[Himax]]、[[Richtek]]、[[Silicon Motion Technology Corporation]]、[[FocalTech]]、[[Elite]]、[[Sitronix]]、[[Sunplus]]、[[ASMedia Technology Inc.]]、[[Parade Technologies]]、[[VIA Labs]]、[[Genesys Logic]]、[[Global Unichip]]、[[Etron]]、[[Raydium Semiconductor Corporation]]、[[Elan]]、[[Faraday Technology Corporation]]、[[VIA]]、[[PixArt Imaging]]、[[ALi Corporation]] 與 [[GMT Global]]。\n- 來源對若干公司提供較完整簡介，包含 [[Terawins, Inc.]]、[[Augentix Inc.]]、[[Raydium Semiconductor Corporation]]、[[Silicon Motion Technology Corporation]]、[[InPsytech, Inc.]]、[[ANPEC Electronics Corporation]]、[[Genesys Logic]]、[[Faraday Technology Corporation]]、[[Astro Circuit Design Co., Ltd.]]、[[RDC Semiconductor Co., Ltd.]]、[[ALi Corporation]]、[[eEver Technology, Inc.]]、[[Phison Electronics Corporation]]、[[Fitipower Integrated Technology Inc.]]、[[ASMedia Technology Inc.]]、[[Whalechip Co., Ltd.]]、[[KaiKuTeK Inc.]]、[[Centera Photonics Inc.]]、[[MicroIP Inc.]]、[[Airoha Technology Corp.]]、[[SiliconAuto B.V.]]、[[iCatch Technology, Inc.]]、[[ASolid Technology Co., Ltd.]]、[[ASPEED Technology Inc.]]、[[ITE Tech. Inc.]]、[[Egis Technology Inc.]] 與 [[ILITEK]]。\n- 來源把 [[InPsytech, Inc.]] 描述為 professional silicon IP provider，成立於 2019 年 9 月，總部台灣竹北，high-speed interface IPs 包含 DDR、LPDDR、D2D、ONFI，且 2024 年 1 月被 [[Egis]] Technology 收購。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Serdes IC-IP companies.md"
+          },
+          "score": 1.987241
+         },
+         {
+          "text": "Serdes IC-IP companies › 主要新增 / 補強實體\n- [[M31 Technology Corporation]] — professional silicon IP provider，與 high-speed interface IP、memory compilers、standard cell library solutions 相關。\n- [[InPsytech, Inc.]] — professional silicon IP provider，high-speed interface IPs 包含 DDR、LPDDR、D2D、ONFI；來源稱 2024 年 1 月被 [[Egis]] Technology 收購。\n- [[ASMedia Technology Inc.]] — high-speed interface fabless IC design company，產品 / 技術涵蓋 USB、PCIe、SATA、high-speed signal switches 與 high-speed SERDES。\n- [[Egis]] / [[Egis Technology Inc.]] — 來源除既有 fingerprint biometric solutions 外，新增 connectivity IPs、UCIe、chiplet turnkey services 與 AI server compute die development 說法。\n- [[ASPEED Technology Inc.]] — fabless IC design company，核心業務包括 [[BMC]]、AV-over-IP、Bridge IC、PFR IC 與 Cupola360。\n- [[Airoha Technology Corp.]] — 來源稱其為 [[MediaTek]] subsidiary，產品方向包含 Ethernet switch and PHY、xDSL、10G-PON、Bluetooth Audio SoCs 與 GNSS chips。\n- [[Centera Photonics Inc.]] — Taiwan-based optoelectronic SoC design company，聚焦 silicon photonics、optical interconnects、high-speed optical engines 與 transceivers。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Serdes IC-IP companies.md"
+          },
+          "score": 1.380975
+         },
+         {
+          "text": "Serdes IC-IP companies\n這份來源是 OneNote 匯出的 [[SerDes]] / IC design / silicon IP 公司彙整頁，內容混合台灣 IC design 公司名單、silicon IP vendors 分類、networking IC / I/O interface IC 分類，以及若干公司簡介；來源正文未標示正式發布日期，raw 路徑含 2026-8-7，轉換日期為 2026-09-17。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Serdes IC-IP companies.md"
+          },
+          "score": 1.144408
+         },
+         {
+          "text": "UI 與 Data Rate 換算 › 與既有知識的關係\n- [[SerDes]]、[[SerDes 與 SI PI 測試概覽]] 與 [[High speed SerDes standards]] 提供 high-speed interface 與測試脈絡；本頁只補充一個資料率與 UI 的表格線索。\n- 若後續補入正式標準或教材來源，應另建或更新 [[Unit Interval]]、[[Data Rate]]、[[Line Rate]]、[[Symbol Rate]] 等概念頁，並標示標準版本與發布組織。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/UI 與 Data Rate 換算.md"
+          },
+          "score": 3.925246
+         },
+         {
+          "text": "UI 與 Data Rate 換算\n[[UI 與 Data Rate 換算]] 是 [[Equations]] 中以 `Data Rate=1/UI` 表示、並以 `UI(ps)=62.5` 對應 `DR(Gbps)=16.0` 的簡易換算線索；來源未展開 UI 的縮寫，也未標示應用情境。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/UI 與 Data Rate 換算.md"
+          },
+          "score": 0.124036
+         },
+         {
+          "text": "UI 與 Data Rate 換算 › 相關來源\n- [[Equations]] — raw converted 2026-09-17、來源正文未標示正式日期的 Excel 轉檔來源，Sheet1 含 `UI(ps)=62.5`、`Data Rate=1/UI` 與 `DR(Gbps)=16.0`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/UI 與 Data Rate 換算.md"
+          },
+          "score": 0.099572
+         },
+         {
+          "text": "Digital design test success stories › 與既有測試概念的關係\n- [[SerDes 與 SI PI 測試概覽]] 與 [[R&S PCB test solutions]] 提供 high-speed digital、SI/PI 與 PCB 測試流程脈絡；本頁只保存 success-story 簡報中的應用 / 儀器對應關係。\n- [[高頻高速 PCB 測試解決方案]] 主要來自 Keysight 圖像來源，描述原材料表徵、材料選擇、抽樣測試與量產監控；本頁的 ATE PCB testing 只指出 [[R&S ZNA67]] 被列名，不能推論完整流程。\n- [[HSD Cable test 外部資料清單]] 保存 cable / connector / signal integrity 外部待讀材料；本頁的 High speed Cable testing slide 未提供可採用的 cable test 主張。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Digital design test success stories.md"
+          },
+          "score": 8.433745
+         },
+         {
+          "text": "Digital design test success stories\n[[Digital design test success stories]] 是 [[DDT SuccessStories_202607]] 中對 2026.7 digital design test 應用案例的簡報層級 mapping，將部分測試應用連到 [[R&S FSWP]]、[[R&S SMA100B]] 與 [[R&S ZNA67]]，但未提供細部配置或測試結果。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Digital design test success stories.md"
+          },
+          "score": 3.134891
+         },
+         {
+          "text": "Digital design test success stories › 與 R&S 儀器頁的關係\n- [[R&S FSWP]] 在既有 Productions 頁中被定義為 Phase Noise Analyzer and VCO Tester；[[DDT SuccessStories_202607]] 只說它出現在 DAC/ADC testing 與 SOC testing 的 success-story mapping 中，未新增規格。\n- [[R&S SMA100B]] 在既有 Productions 頁中被定義為 RF and Microwave Signal Generator；[[DDT SuccessStories_202607]] 只說它出現在 DAC/ADC testing 與 SOC testing 的 success-story mapping 中，未新增規格。\n- [[R&S ZNA67]] 在既有 Productions 頁中被定義為 67 GHz Vector Network Analyzer；[[DDT SuccessStories_202607]] 只說它出現在 SOC testing 與 ATE PCB testing 的 success-story mapping 中，未新增規格。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Digital design test success stories.md"
+          },
+          "score": 1.807382
+         },
+         {
+          "text": "Digital design test success stories › 相關來源\n- [[DDT SuccessStories_202607]] — 2026.7 的 Digital design test success stories 來源摘要。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Digital design test success stories.md"
+          },
+          "score": 0.127173
+         },
+         {
+          "text": "高速互連 probing 與 de-embedding 測試案例 › 與既有知識的關係\n- [[R&S PCB test solutions]] — 保存 R&S high-speed digital 簡報中的 PCB test flow；本頁補入 case-sharing 中的 customer / partner / competitor context。\n- [[SerDes 與 SI PI 測試概覽]] — 本頁提供 PCB / interconnect probing 的實務案例語境。\n- [[Keysight ENA]] — 在 LSmtron case 中作為 competitor。\n- [[R&S ZNB3044]]、[[R&S ZNA43]]、[[R&S FSWP50]]、[[R&S SMW200A]] — 本來源提供 Market 應用案例，不改寫 Productions 規格。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+          },
+          "score": 2.416633
+         },
+         {
+          "text": "高速互連 probing 與 de-embedding 測試案例 › 未決事項\n- TRI、RSKR、ICR、WIC、ADT、AUT、ATS、ZVA67、SGS100A 等縮寫 / 型號需補證。\n- ZNB40 是否對應既有 R&S ZNB 系列正式型號與 40 GHz configuration 未確認。\n- AMD optimized setup up to 67 GHz 的完整 topology、extender、probe、calibration 與 de-embedding method 未標示。\n- Samsung case 中 automated VCO Tuning S/W 的名稱、版本、license、交付形式與支援範圍未標示。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+          },
+          "score": 1.979424
+         },
+         {
+          "text": "高速互連 probing 與 de-embedding 測試案例 › 相關來源\n- [[TRI_AMD_RSKR Sharing1]] — company confidential case sharing，來源正式日期未標示，raw converted 2026-09-18。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+          },
+          "score": 0.962139
+         },
+         {
+          "text": "112G PAM4 PCB Engineering › 與既有知識的關係\n- 既有 [[SerDes 與 SI PI 測試概覽]] 與 [[R&S PCB test solutions]] 已保存 high-speed digital / PCB SI 測試流程、[[TDR 阻抗測量]]、[[Dk-Df]]、[[Delta-L]]、[[Insertion Loss]] 等測試語彙；本來源只新增一個更稀疏的 112G PAM4 PCB engineering 題名與表頭線索。\n- 既有 [[高頻高速 PCB 測試解決方案]] 來自 Keysight 圖像，包含原材料表徵、材料選擇、抽樣測試與量產監控流程；本來源沒有提供等同流程，不可用來補強該頁的工具清單或測試方法。\n- 既有 [[High speed SerDes standards]] 中已保存多種 high-speed SerDes standards 名稱；本來源只在標題出現 112G PAM4，不足以建立標準版本或 compliance 測試主張。\n- 本來源可連到 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]] 與 [[PCB]] 脈絡，但目前只支撐「有一份題為 112G PAM4 PCB Engineering 的公司限制資料，內容轉出後只保留 transmission line table header」這一層主張。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/112G PAM4 PCB Engineering.md"
+          },
+          "score": 2.028317
+         },
+         {
+          "text": "112G PAM4 PCB 工程測試資料清單 › 使用限制\n- 本頁不得把 `112G PAM4` 推論為特定標準、特定 lane rate、特定 connector、特定 PCB material 或特定 compliance requirement。\n- 本頁不得把 `VNA` 推論為 R&S、Keysight 或其他廠牌的特定 [[Vector Network Analyzer]]。\n- 本頁不得把 `Probe`、`Station/Handler`、`Software`、`VNA` 四個欄位解讀為完整測試設備清單，因來源沒有資料列。\n- 本頁不得把 lossy markdown 未轉出的內容補寫成原 PDF 內容；若需要工程細節，必須回讀原始 PDF 或取得更完整 OCR。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+          },
+          "score": 3.480531
+         },
+         {
+          "text": "112G PAM4 PCB 工程測試資料清單\n[[112G PAM4 PCB 工程測試資料清單]] 是依 [[112G PAM4 PCB Engineering]] 建立的稀疏資料節點，用來保存一份 company restricted、轉檔後只剩少量表頭的 112G PAM4 PCB engineering / transmission line 測試線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+          },
+          "score": 1.44731
+         },
+         {
+          "text": "112G PAM4 PCB 工程測試資料清單 › 相關來源\n- [[112G PAM4 PCB Engineering]] — raw converted 2026-09-17、正式發布日期未標示的 company restricted 112G PAM4 PCB Engineering 來源摘要。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+          },
+          "score": 0.826875
+         },
+         {
+          "text": "112G PAM4 PCB 工程測試資料清單 › 來源中的說法\n- [[112G PAM4 PCB Engineering]] 的 raw frontmatter 顯示原始檔名為 `112G PAM4 PCB Engineering.pdf`，轉檔日期為 2026-09-17。\n- [[112G PAM4 PCB Engineering]] 正文含 `COMPANY RESTRICTED`。\n- [[112G PAM4 PCB Engineering]] 正文含標題 `Transmission Lines on PCB`。\n- [[112G PAM4 PCB Engineering]] 保留一個空表格，欄位為 `Probe`、`Station/Handler`、`Software`、`VNA`。\n- [[112G PAM4 PCB Engineering]] 沒有保留任何表格資料列。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+          },
+          "score": 0.665455
+         },
+         {
+          "text": "D2D interfaces 比較 › 與既有知識的關係\n- [[Die-to-Die 互連]] 處理 die 之間以 [[SerDes]]、[[Parallel Wires]]、[[UCIe]] main band / sideband、[[D2D Controller]] 或 [[Die-to-Die Adapter]] 連接的架構圖；本頁處理的是 D2D interface 類別比較表。\n- [[D2D PHY]] 處理 [[IO Serdes in AI ASIC-TPU-Chiplet image 1]]、[[IO Serdes in AI ASIC-TPU-Chiplet image 12]] 與 [[IO Serdes in AI ASIC-TPU-Chiplet image 4]] 的 PHY 方塊；本頁的 data rate 欄不能直接視為單一 PHY 的 lane rate 或 aggregate rate。\n- [[UCIe]] 在 [[IO Serdes in AI ASIC-TPU-Chiplet image 11]] 中是 multi-die package module 的 main band / sideband 介面；在本頁比較表中則是一列可與 [[OIF]]、[[BoW]]、[[AIB]]、[[Proprietary]] 比較的 interface 類別。\n- [[NVLink]] 在 [[AI Server PCB test image 34]] 中與 [[NVSwitch]] 和 GPU 間通信相關；在 [[IO Serdes in AI ASIC-TPU-Chiplet image 2]] 與 [[IO Serdes in AI ASIC-TPU-Chiplet image 9]] 中只出現在 [[Proprietary]] 欄，來源未說明對應公司或規格。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/D2D interfaces 比較.md"
+          },
+          "score": 5.35308
+         },
+         {
+          "text": "D2D interfaces 比較 › 圖上可直接讀出的比較\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 2]] 與 [[IO Serdes in AI ASIC-TPU-Chiplet image 9]]（皆來源未標示日期；取得於 2026-09-04）列出 [[OIF]] 的 data rate 為 **112G / 224G**，[[Proprietary]] 的 data rate 為 **64G+**，[[UCIe]] 為 **4 – 40G**，[[BoW]] 為 **2 – 32G**，[[AIB]] 為 **2 – 6.4G**。\n- 兩份來源列出 [[UCIe]] 的 shoreline 為 **Up to 12.9 Tbps/mm**，[[BoW]] 為 **2-12+ Tbps/mm**，[[OIF]] 為 **3 Tbps/mm**，[[AIB]] 為 **1.6 Tbps/mm**。\n- 兩份來源列出 [[OIF]] reach 為 **50mm**，[[BoW]] 為 **25mm+**，[[AIB]] 為 **25mm**，[[UCIe]] 為 **Up to 25mm**。\n- 兩份來源列出 [[UCIe]] latency 為 **~2ns**，[[BoW]] 為 **<2-4ns w/o FEC**，[[AIB]] 為 **1.5 CLK cycle**，[[OIF]] 為 **~10ns**。\n- 兩份來源列出 [[UCIe]] energy 為 **~0.5pJ/bit**，[[AIB]] 為 **0.85pJ/bit**，[[BoW]] 為 **0.5-1pJ/bit terminated** 與 **0.25-0.5pJ/bit unterminated**，[[OIF]] 為 **1-4 pJ/bit**。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/D2D interfaces 比較.md"
+          },
+          "score": 2.917944
+         },
+         {
+          "text": "D2D interfaces 比較 › 比較表\n| 類別 | Standard | Data Rate | Protocol | Bump Pitch | Shoreline | Reach | Latency | Energy | Package | 日期 / 期間 | 來源 |\n|---|---|---|---|---|---|---|---|---|---|---|---|\n| [[OIF]] | XSR/USR | 112G / 224G | Not defined | 130-170 um | 3 Tbps/mm | 50mm | ~10ns | 1-4 pJ/bit | 2D | 來源未標示日期；取得於 2026-09-04 | [[IO Serdes in AI ASIC-TPU-Chiplet image 2]]；[[IO Serdes in AI ASIC-TPU-Chiplet image 9]] |\n| [[Open Compute Project]] | BoW | 2 – 32G | Not defined；BoW – ACI, CHI | 40-170 um | 2-12+ Tbps/mm | 25mm+ | <2-4ns w/o FEC | 0.5-1pJ/bit terminated；0.25-0.5pJ/bit unterminated | 2D, 2.5D | 來源未標示日期；取得於 2026-09-04 | [[IO Serdes in AI ASIC-TPU-Chiplet image 2]]；[[IO Serdes in AI ASIC-TPU-Chiplet image 9]] |\n| [[CHIPS ALLIANCE]] | AIB | 2 – 6.4G | Not defined；AXI | 10-55 um | 1.6 Tbps/mm | 25mm | 1.5 CLK cycle | 0.85pJ/bit | Bridge | 來源未標示日期；取得於 2026-09-04 | [[IO Serdes in AI ASIC-TPU-Chiplet image 2]]；[[IO Serdes in AI ASIC-TPU-Chiplet image 9]] |\n| [[UCIe]] | UCIe | 4 – 40G | PCIe/CXL；Raw, Streaming – Not defined | 25-170 um | Up to 12.9 Tbps/mm | Up to 25mm | ~2ns | ~0.5pJ/bit | 2D, 2.5D, Bridge | 來源未標示日期；取得於 2026-09-04 | [[IO Serdes in AI ASIC-TPU-Chiplet image 2]]；[[IO Serdes in AI ASIC-TPU-Chiplet image 9]] |\n| [[Proprietary]] | Custom | 64G+ | 來源未標示 | Custom: | NVLink | Infinity | NuLink | UltraLink | Glink | 來源未標示日期；取得於 2026-09-04 | [[IO Serdes in AI ASIC-TPU-Chiplet image 2]]；[[IO Serdes in AI ASIC-TPU-Chiplet image 9]] |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/D2D interfaces 比較.md"
+          },
+          "score": 1.343776
+         },
+         {
+          "text": "D2D interfaces 比較 › 相關來源\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 2]] — 未標示日期、取得於 2026-09-04 的 **Survey of D2D interfaces** 比較表。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 9]] — 未標示日期、取得於 2026-09-04 的 **Survey of D2D interfaces** 比較表，內容與 [[IO Serdes in AI ASIC-TPU-Chiplet image 2]] 高度一致。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/D2D interfaces 比較.md"
+          },
+          "score": 0.489534
+         },
+         {
+          "text": "D2D interfaces 比較\n[[D2D interfaces 比較]] 是依 [[IO Serdes in AI ASIC-TPU-Chiplet image 2]] 與 [[IO Serdes in AI ASIC-TPU-Chiplet image 9]] 整理的 die-to-die interface 比較概念；兩份來源皆未標示日期，取得於 2026-09-04，內容高度一致，涵蓋 [[OIF]] / [[XSR]] / [[USR]]、[[Open Compute Project]] / [[BoW]]、[[CHIPS ALLIANCE]] / [[AIB]]、[[UCIe]] 與 [[Proprietary]] / [[Custom]] 五類。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/D2D interfaces 比較.md"
+          },
+          "score": 0.373905
+         },
+         {
+          "text": "AI data center ecosystem map 12-10-2025 重複來源 › 相關來源\n- [[4 AI Data Center Eco-Chain image 1]] — 頁尾標示 12/10/2025（日期格式未標示）的 AI data center ecosystem map。\n- [[4 AI Data Center Eco-Chain image 9]] — 頁尾標示 12/10/2025、RS、Rohde & Schwarz、頁碼 25 的 AI data center ecosystem map OCR 來源，與 [[4 AI Data Center Eco-Chain image 1]] 高度重疊。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/syntheses/AI data center ecosystem map 12-10-2025 重複來源.md"
+          },
+          "score": 0.598181
+         },
+         {
+          "text": "漢翔\n[[漢翔]] 是 [[0. UAV產業分析報告架構]] 中列於 [[台灣無人機供應鏈]] 中游的公司，來源描述其與整機組裝與飛控系統相關；[[4. UAV Eco-chain in Taiwan]] 另把漢翔航空工業列在 System Integrator 區段。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/漢翔.md"
+          },
+          "score": 0.152409
+         },
+         {
+          "text": "<!-- Slide number: 1 -->\nTaiwan 5G FWA CPE\nIndustry Analysis 2024\nMarket Overview | Supply Chain | Growth Opportunities\nCOMPANY RESTRICTED",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-75d3180ed93f6430",
+            "original_ref": "raw/Market/OneNote/Taiwan CPE Industry 2024 (1).md",
+            "sha256": "75d3180ed93f6430daaae5b26ffeae196785c3c9773c826ad56622fd0323af37",
+            "raw_ref": "raw/Market/OneNote/Taiwan CPE Industry 2024 (1).md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/Taiwan CPE Industry 2024 (1).md",
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 14.373205
+         },
+         {
+          "text": "<!-- Slide number: 1 -->\nTaiwan 5G FWA CPE\nIndustry Analysis 2024\nMarket Overview | Supply Chain | Growth Opportunities\nCOMPANY RESTRICTED",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-0438f20c93d9c027",
+            "original_ref": "raw/Market/OneNote/Taiwan CPE Industry 2024.md",
+            "sha256": "0438f20c93d9c027333c35f07086ac16c7368e1a1912a7755c4f863723604a0c",
+            "raw_ref": "raw/Market/OneNote/Taiwan CPE Industry 2024.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/Taiwan CPE Industry 2024.md",
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 14.373205
+         },
+         {
+          "text": "map",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-bc47a8ad4da77a6a",
+            "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+            "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+           "section": 3482,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 13.3816
+         },
+         {
+          "text": "# Validation Tests secure successful market access of product\nDiverse compliance or certification are required\nRegulatory Compliance Test\nTo grant market access under legal aspect in each region",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-4a179a13677acd8f",
+            "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+            "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 13.352384
+         }
+        ],
+        "text": "The supported chain is partial: the passages connect AI-server semiconductor power demand to PDN/interface test contexts where scopes are used, but they do not specify an oscilloscope model, bandwidth, sample rate, data-rate coverage, option code, or pass/fail limit [4][5][13][60].\n| Semiconductor market requirement | Measurable parameter / test item | Required Oscilloscope capability supported by the passages | Evidence gap |\n|---|---|---|---|\n| AI servers pull PMIC demand as chip count scales, and the PMIC driver is increasing GPU count and memory modules [5]. | PMICs handle last-mile chip power distribution, voltage regulation, and over-current protection, so the supported measurement context is power-delivery / PDN validation [6][13]. | The passages state that Power Distribution Network testing is associated with scopes and network analyzers [13][60]. | The passages do not provide a PDN impedance target value, oscilloscope model, bandwidth, data rate, or test method [13]. |\n| AI servers pull power-semiconductor demand through power-architecture upgrades, and the stated driver is 800V high-voltage architecture specification improvement [5]. | Power semiconductors perform high-current conversion and switching to step external power down into racks [6]. | The supported oscilloscope role is again PDN-related observation because the PDN test block is mapped to scopes and network analyzers [13][60]. | The passages do not provide a scope specification for 800V / HVDC validation, nor do they give a formal test standard or configuration [13][50]. |\n| High-speed electrical-interface validation is a semiconductor test context covering Tx, Rx, channel, packages, PCBs, connectors, EQ, ADC + DSP, and DSP + DAC [60]. | The measurable SI items explicitly listed are IL, Xtalk, Eye diagram, TDR Impedance, Stackup Planner, and TL Calculator [60]. | The passages map Interface Test to scopes, BERTs, AWGs, and switch matrices [13][60]. | The passages do not provide oscilloscope model, bandwidth, data rate, standard version, software option, or pass/fail condition [13][14]. |\n【推論】For AI-server PMIC / power-semiconductor demand, the defensible oscilloscope capability requirement is “support PDN / power-integrity measurement workflows,” because the passages tie AI-server demand to PMIC and power semiconductors, and separately tie PDN testing to scopes [5][6][13][60].\n【推論】For high-speed semiconductor interface demand, the defensible oscilloscope capability requirement is “support interface-test workflows including waveform / eye-diagram-oriented validation,” because the passages tie Interface Test to scopes and list Eye diagram among SI-flow items [13][60].",
+        "synthesized_by": "company",
+        "failure": null
+       },
+       "cited_passages": [
+        {
+         "text": "AI 伺服器 PMIC 與功率半導體轉型\n[[AI 伺服器 PMIC 與功率半導體轉型]] 是 [[Power IC - Power Management IC image 4]] 用來描述 [[AI 伺服器]] 同時拉動晶片端 [[PMIC]] 需求與機櫃 / 系統端 [[功率半導體]] 需求的資訊圖主題；此頁只記錄來源圖上的市場敘事，不把它解讀為完整供應鏈、投資建議或 NVIDIA 官方架構文件。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/AI 伺服器 PMIC 與功率半導體轉型.md"
+         },
+         "score": 11.027995
+        },
+        {
+         "text": "AI 伺服器 PMIC 與功率半導體轉型 › AI 伺服器需求連動\n- [[Power IC - Power Management IC image 4]] 說 [[PMIC]] 需求隨晶片顆數放大。\n- [[Power IC - Power Management IC image 4]] 說 [[功率半導體]] 則隨供電架構升級。\n- [[Power IC - Power Management IC image 4]] 把功率半導體的驅動因素寫為 800V 高壓架構規格提升。\n- [[Power IC - Power Management IC image 4]] 把 PMIC 的驅動因素寫為 GPU 顆數與記憶體模組增加。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/AI 伺服器 PMIC 與功率半導體轉型.md"
+         },
+         "score": 7.507037
+        },
+        {
+         "text": "AI 伺服器 PMIC 與功率半導體轉型 › 兩類電力元件角色\n| 類別 | 圖上比喻 | 圖上功能 | 關聯元件 |\n|---|---|---|---|\n| [[功率半導體]] | 系統的電力心臟 / 大樓電力幹線基礎工程 | 大電流轉換與開關，將外部電力降壓送入機櫃 | [[MOSFET]]、[[IGBT]]、[[SiC]]、[[GaN]] |\n| [[PMIC]] / [[電源管理 IC]] | 精準控制的閥門 / 每個房間的流量控制閥門 | 晶片內部最後一哩路的配電、穩壓與過流保護 | 類比電源管理晶片、[[DDR5 PMIC]] |",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/AI 伺服器 PMIC 與功率半導體轉型.md"
+         },
+         "score": 5.747608
+        },
+        {
+         "text": "SerDes 與 SI PI 測試概覽 › 測試脈絡整理\n| 區塊 | 來源明示文字 | 相關儀器 / 方法 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Interface Test | Scopes、BERTs、AWGs、Switch Matrices | [[Oscilloscope]]、[[BERT]]、[[AWG]]、[[Switch Matrix]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4；Slide 11 頁腳 6/13/2025 未決 | 未提供型號、頻寬、資料率或測試標準 |\n| Transmission Channel | Tx Package、PCBs、Connectors、Rx Package | Channel / test board / switch matrices | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 channel loss、fixture、connector 型號或 PCB stackup |\n| RefClk and PLL Jitter Performance | Phase Noise Analyzers、Signal Generators | [[Phase Noise Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 jitter mask、phase noise offset 或 PLL 規格 |\n| Power Distribution Network | Scopes、Network Analyzers | [[Oscilloscope]]、[[Network Analyzer]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 PDN impedance 目標值或測試方法 |\n| ADC / DAC Frontend Performance | Spectrum Analyzers、Signal Generators | [[Spectrum Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 ADC / DAC 指標或頻率 |\n| Signal integrity flow | IL / Xtalk / Eye diagram；TDR Impedance；Stackup Planner；TL Calculator | [[Insertion Loss]]、[[Crosstalk]]、[[Eye diagram]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供工具名稱、標準版本或 pass/fail 條件 |",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+         },
+         "score": 8.935456
+        },
+        {
+         "text": "SerDes 與 SI PI 測試概覽 › 未決事項\n- Slide 11 未標示各測試區塊對應的標準版本、測試流程、儀器型號、軟體 option 或測試條件。\n- Slide 20 未標示 IL、Xtalk、Eye diagram、TDR impedance、Stackup Planner 與 TL Calculator 的工具、供應商或規格。\n- 需回看原始 PPTX 才能確認圖片中的 waveform、diagram 與 instrument details。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 7,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+         },
+         "score": 6.532963
+        },
+        {
+         "text": "AI 伺服器 PMIC 與功率半導體轉型 › 限制與不可推論事項\n- [[Power IC - Power Management IC image 4]] 未提供原始發布者、報告、方法論或資料來源。\n- 圖上的公司列名不能推論為供應商名單、客戶關係、市占率或投資建議。\n- 圖上的 2026 年、30 週以上與約 1.5% 都缺少產品、廠商、地區與樣本口徑。\n- [[NVIDIA]] 800V / [[HVDC]] 說法不得擴大為 NVIDIA 官方規格或已導入事實。\n- [[微碁]]、[[低票失衡]] 等讀圖風險需保留未決。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 7,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/AI 伺服器 PMIC 與功率半導體轉型.md"
+         },
+         "score": 4.003692
+        },
+        {
+         "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+         },
+         "score": 2.986732
+        }
+       ],
+       "assessment": {
+        "status": "covered",
+        "facets": [
+         {
+          "name": "market_segment",
+          "citations": [
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 6,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/IO SerDes ASIC TPU Chiplet 外部資料清單.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 7,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/Serdes IC-IP companies.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 5,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/Digital design test success stories.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 4,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+           },
+           {
+            "kind": "raw",
+            "source": {
+             "source_id": "src-75d3180ed93f6430",
+             "original_ref": "raw/Market/OneNote/Taiwan CPE Industry 2024 (1).md",
+             "sha256": "75d3180ed93f6430daaae5b26ffeae196785c3c9773c826ad56622fd0323af37",
+             "raw_ref": "raw/Market/OneNote/Taiwan CPE Industry 2024 (1).md",
+             "page": null,
+             "slide": null,
+             "parent_source_id": null
+            },
+            "raw_ref": "raw/Market/OneNote/Taiwan CPE Industry 2024 (1).md",
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": null
+           }
+          ],
+          "attempts": 1
+         }
+        ],
+        "missing_facets": [],
+        "relation_required": false,
+        "relation_citations": [],
+        "relations": []
+       },
+       "citation_policy": "wiki_primary",
+       "wiki_provenance": [
+        {
+         "wiki_page": "wiki/concepts/AI 伺服器 PMIC 與功率半導體轉型.md",
+         "raw_refs": [
+          "raw/Market/Power IC - Power Management IC image 1.md",
+          "raw/Market/Power IC - Power Management IC image 2.md",
+          "raw/Market/Power IC - Power Management IC image 3.md",
+          "raw/Market/Power IC - Power Management IC image 4.md",
+          "raw/Market/Power IC - Power Management IC image 5.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+         "raw_refs": [
+          "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+         ]
+        }
+       ]
+      },
+      "failure": null,
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-df46c07e559140cc8752ceb1bddbc6cd",
+      "task_sha256": "38bb5baf658125563405c9676225f9f42fb3de2a7a645dc8fdc879905d452bb9",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.12.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "failed",
+     "retry_count": 1,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 3,
+       "kind": "validation_failed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "sequence": 4,
+       "kind": "retrying",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 5,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 6,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 7,
+       "kind": "validation_failed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "sequence": 8,
+       "kind": "failed",
+       "evidence_ref": "bridge_facet_assessment"
+      }
+     ],
+     "checks": [
+      {
+       "check_id": "answer_nonempty",
+       "status": "passed",
+       "evidence_ref": "bridge_raw_record"
+      },
+      {
+       "check_id": "facet_coverage",
+       "status": "failed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "check_id": "claim_support",
+       "status": "passed",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "failure_code": "host_check_failed"
+    },
+    "evidence": {
+     "raw_citations": 7,
+     "facet_status": "missing",
+     "missing_facets": [
+      "market_segment"
+     ],
+     "relation_status": "not_requested",
+     "retrieval_attempts": {
+      "market_segment": 1
+     },
+     "claim_status": "supported"
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

@@ -1,0 +1,1926 @@
+{
+ "question": {
+  "id": "Q0489",
+  "text": "What evidence is required to compare our Oscilloscope solution with a competitor for Automotive without making unsupported claims?",
+  "market": "Automotive",
+  "product": "Oscilloscope",
+  "type": "competitive",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-9849592ec93c4c4087aee2381ec0d95c",
+ "exchange": {
+  "sent": "What evidence is required to compare our Oscilloscope solution with a competitor for Automotive without making unsupported claims?",
+  "http_status": 200,
+  "seconds": 54.5,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-9849592ec93c4c4087aee2381ec0d95c",
+    "actor": "leo.chi",
+    "title": "What evidence is required to compare our Oscilloscope solution with a co…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-18T14:34:42.401169Z",
+    "updated_at": "2026-10-18T14:35:36.684646Z",
+    "messages": [
+     {
+      "message_id": "message-d422c45fadf4455e9ef6fd38da2c9db1",
+      "role": "user",
+      "text": "What evidence is required to compare our Oscilloscope solution with a competitor for Automotive without making unsupported claims?",
+      "created_at": "2026-10-18T14:34:42.412302Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": [],
+      "workflow_form": null,
+      "action_card": null,
+      "action_cards": []
+     },
+     {
+      "message_id": "message-0ad12d67726e465482e3aab2c9755613",
+      "role": "assistant",
+      "text": "### 短答\n知識庫沒有提供可直接支持「R&S Oscilloscope solution vs competitor for Automotive」的比較證據；要避免 unsupported claims，需補正式 R&S oscilloscope 規格 / automotive application 證據、競品官方或第三方資料，以及能直接把兩邊放在同一 automotive use case 下比較的測試條件、版本、配置與結果。[49][71][95]\n### 需要的證據\n- 需要 R&S Oscilloscope 的正式 specifications / features document，而不是 sales positioning 或 battle card；現有 CMX500 競品頁明確說 battle card 不能取代正式 specifications / features documents。[49][71][95]\n- 需要競品的官方 datasheet、features document、order/configuration data、或第三方測試證據；現有競品頁都說，對 amarisoft、Keysight、Anritsu 的主張若用於客戶文件，應另查競品官方資料與第三方證據。[49][71][95]\n- 需要直接連到 Automotive use case 的證據，例如 automotive radar、eCall、IVS、hybrid / NG eCall、車用測試場景等；目前 passages 中 automotive 證據主要支撐 CMX500 eCall / NG eCall、AREG800A automotive radar echo generation，而不是 Oscilloscope 競品比較。[7][10][54][92]\n- 需要明確列出 comparison scope：測試項目、標準版本、量測條件、配置、software / option version、pass/fail 或 acceptance criteria；現有 eCall 新聞稿被標註缺少 configuration、software version、test setup、acceptance criteria、test case IDs、pass/fail details 等資訊。[27][12][38][39]\n- 需要避免使用 “only platform”、“first validated”、“leadership”、“lower TCO”、“fewer boxes” 等 sales language 當作可驗證技術規格；現有競品頁明確說這類語句不應當作可驗證技術規格。[71][95]\n- 若要比較規格數字，需使用正式 specs 中有條件與 tolerance 的資料；CMX500 規格頁說 data without tolerance limits is not binding，且規格適用條件包含 warm-up、environmental conditions、calibration interval 與 internal automatic adjustments。[48]\n- 若要比較總成本、box count、整合度、支援、保固或校準，也需要正式服務條款、配置 BOM、價格或可驗證算式；現有 battle card 對 lower TCO、fewer boxes、support / warranty 等說法被標註為 sales language 或缺少正式證據。[4][6][71]\n- 若要把 Oscilloscope 說成適合 Automotive，需有來源直接把該 Oscilloscope solution 與 automotive application 連起來；目前 passages 中出現 Oscilloscope 的明確 mapping 是 SatelliteEcoChain 的 OBC / satellite context，不可外推為 automotive fit。[14][15][35]\n### 最低可接受證據包\n| 證據類型 | 必須包含什麼 | 為什麼需要 | 目前 passages 顯示的風險 |\n|---|---|---|---|\n| R&S Oscilloscope 正式資料 | 型號、規格、option、版本、tolerance、校準與測試條件 | 正式 specs 才能支撐規格比較 | Battle card / sales positioning 不能取代正式規格文件。[49][71][95] |\n| Automotive application 證據 | 直接連到 automotive radar、eCall、IVS、車用 ECU / OBC / power / SI 等具體場景 | 不能只因產品是量測儀器就推論適用 automotive | 目前 automotive passages 支撐 CMX500 eCall 與 AREG800A radar，不支撐 Oscilloscope 競品比較。[7][10][54][92] |\n| Competitor 官方或第三方資料 | 競品型號、版本、規格、配置、限制、測試條件 | 客戶文件中的競品主張不能只靠 R&S internal battle card | 現有競品頁明確要求另查競品官方資料與第三方證據。[49][71][95] |\n| 同一測試條件下的 comparison matrix | 相同 DUT、fixture、bandwidth、sample rate、probe、software version、standard、pass/fail criteria | 避免把不同條件下的數字放在一起比較 | eCall / certification 類來源多次標註缺少 test case IDs、acceptance criteria、pass/fail detail 或完整 test matrix。[12][27][38][39] |\n| 第三方 validation / certification | 報告號、certificate number、測試日期、測試環境版本、scope | 若要宣稱 validated / certified，需要可追溯報告 | cetecom advanced 新聞稿被標註缺少 certification report number、certificate number、測試日期與完整 acceptance criteria。[12] |\n| Claim-control wording | 將 “sales claim” 與 “binding spec” 分開標示 | 避免把定位語言寫成規格或市場事實 | 現有頁面明確說 only、first、leadership、lower TCO、fewer boxes 等不能當作可驗證技術規格。[4][6][71] |\n### 可說與不可說\n- 可說：目前知識庫未提供 Oscilloscope solution 與 competitor 在 Automotive 場景下的直接比較證據。[14][15][35][49][71][95]\n- 可說：若要做客戶文件比較，需補 R&S 正式 oscilloscope 文件、競品官方 / 第三方資料、共同 automotive use case、共同測試條件與可追溯結果。[49][71][95]\n- 不可說：R&S Oscilloscope 在 Automotive 優於某競品，因 passages 沒有提供直接比較、同條件測試或第三方驗證證據。[49][71][95]\n- 不可說：SatelliteEcoChain 裡的 Oscilloscope mapping 證明 automotive fit，因該來源限制說 R&S Solution 欄只是 sales / solution mapping 線索，不等於客戶已採購、使用、評估或適用該儀器。[15]\n\n來源：\n[4] Wiki：2026_02_CMX500_Keysight_Sales_Battle_Card（來源：`2026_02_CMX500_Keysight_Sales_Battle_Card.md`、`CMW_dat-sw_en_5213-9211-22_v1700.md`、`CMX500_Features_CSW9-20-0_en_32.md`…）\n[6] Wiki：2026_02_CMX500_Keysight_Sales_Battle_Card（來源：`2026_02_CMX500_Keysight_Sales_Battle_Card.md`、`CMW_dat-sw_en_5213-9211-22_v1700.md`、`CMX500_Features_CSW9-20-0_en_32.md`…）\n[7] Wiki：Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[10] Wiki：cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing（來源：`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`、`CMX_Configuration_Guide.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[12] Wiki：cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing（來源：`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`、`CMX_Configuration_Guide.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[14] Wiki：SatelliteEcoChain（來源：`0.Satcom Industry.md`、`4. Satellite Eco-chain in Taiwan.md`、`SatelliteEcoChain.md`）\n[15] Wiki：SatelliteEcoChain（來源：`0.Satcom Industry.md`、`4. Satellite Eco-chain in Taiwan.md`、`SatelliteEcoChain.md`）\n[27] Wiki：Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[35] Wiki：SatelliteEcoChain（來源：`0.Satcom Industry.md`、`4. Satellite Eco-chain in Taiwan.md`、`SatelliteEcoChain.md`）\n[38] Wiki：Hybrid eCall testing（來源：`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[39] Wiki：Hybrid eCall testing（來源：`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[48] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[49] Wiki：R&S CMX500 vs amarisoft（來源：`2026_02_CMX500_Amarisoft_Sales_Battle_Card.md`、`CMW_dat-sw_en_5213-9211-22_v1700.md`、`CMX500_Features_CSW9-20-0_en_32.md`…）\n[54] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[71] Wiki：R&S CMX500 vs Keysight（來源：`2026_02_CMX500_Keysight_Sales_Battle_Card.md`、`CMW_dat-sw_en_5213-9211-22_v1700.md`、`CMX500_Features_CSW9-20-0_en_32.md`…）\n[92] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[95] Wiki：R&S CMX500 vs Anritsu（來源：`2026_02_CMX500_Anritsu_Sales_Battle_Card.md`、`CMW_dat-sw_en_5213-9211-22_v1700.md`、`CMX500_Features_CSW9-20-0_en_32.md`…）\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+      "created_at": "2026-10-18T14:35:36.684646Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-75cff71fab1e4c7fa2bdcf199580a2af",
+       "request_id": "request-75cff71fab1e4c7fa2bdcf199580a2af",
+       "span_id": "span-75cff71fab1e4c7fa2bdcf199580a2af",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": [],
+      "workflow_form": null,
+      "action_card": null,
+      "action_cards": []
+     }
+    ]
+   },
+   "answer": {
+    "ok": true,
+    "answer": "### 短答\n知識庫沒有提供可直接支持「R&S Oscilloscope solution vs competitor for Automotive」的比較證據；要避免 unsupported claims，需補正式 R&S oscilloscope 規格 / automotive application 證據、競品官方或第三方資料，以及能直接把兩邊放在同一 automotive use case 下比較的測試條件、版本、配置與結果。[49][71][95]\n### 需要的證據\n- 需要 R&S Oscilloscope 的正式 specifications / features document，而不是 sales positioning 或 battle card；現有 CMX500 競品頁明確說 battle card 不能取代正式 specifications / features documents。[49][71][95]\n- 需要競品的官方 datasheet、features document、order/configuration data、或第三方測試證據；現有競品頁都說，對 amarisoft、Keysight、Anritsu 的主張若用於客戶文件，應另查競品官方資料與第三方證據。[49][71][95]\n- 需要直接連到 Automotive use case 的證據，例如 automotive radar、eCall、IVS、hybrid / NG eCall、車用測試場景等；目前 passages 中 automotive 證據主要支撐 CMX500 eCall / NG eCall、AREG800A automotive radar echo generation，而不是 Oscilloscope 競品比較。[7][10][54][92]\n- 需要明確列出 comparison scope：測試項目、標準版本、量測條件、配置、software / option version、pass/fail 或 acceptance criteria；現有 eCall 新聞稿被標註缺少 configuration、software version、test setup、acceptance criteria、test case IDs、pass/fail details 等資訊。[27][12][38][39]\n- 需要避免使用 “only platform”、“first validated”、“leadership”、“lower TCO”、“fewer boxes” 等 sales language 當作可驗證技術規格；現有競品頁明確說這類語句不應當作可驗證技術規格。[71][95]\n- 若要比較規格數字，需使用正式 specs 中有條件與 tolerance 的資料；CMX500 規格頁說 data without tolerance limits is not binding，且規格適用條件包含 warm-up、environmental conditions、calibration interval 與 internal automatic adjustments。[48]\n- 若要比較總成本、box count、整合度、支援、保固或校準，也需要正式服務條款、配置 BOM、價格或可驗證算式；現有 battle card 對 lower TCO、fewer boxes、support / warranty 等說法被標註為 sales language 或缺少正式證據。[4][6][71]\n- 若要把 Oscilloscope 說成適合 Automotive，需有來源直接把該 Oscilloscope solution 與 automotive application 連起來；目前 passages 中出現 Oscilloscope 的明確 mapping 是 SatelliteEcoChain 的 OBC / satellite context，不可外推為 automotive fit。[14][15][35]\n### 最低可接受證據包\n| 證據類型 | 必須包含什麼 | 為什麼需要 | 目前 passages 顯示的風險 |\n|---|---|---|---|\n| R&S Oscilloscope 正式資料 | 型號、規格、option、版本、tolerance、校準與測試條件 | 正式 specs 才能支撐規格比較 | Battle card / sales positioning 不能取代正式規格文件。[49][71][95] |\n| Automotive application 證據 | 直接連到 automotive radar、eCall、IVS、車用 ECU / OBC / power / SI 等具體場景 | 不能只因產品是量測儀器就推論適用 automotive | 目前 automotive passages 支撐 CMX500 eCall 與 AREG800A radar，不支撐 Oscilloscope 競品比較。[7][10][54][92] |\n| Competitor 官方或第三方資料 | 競品型號、版本、規格、配置、限制、測試條件 | 客戶文件中的競品主張不能只靠 R&S internal battle card | 現有競品頁明確要求另查競品官方資料與第三方證據。[49][71][95] |\n| 同一測試條件下的 comparison matrix | 相同 DUT、fixture、bandwidth、sample rate、probe、software version、standard、pass/fail criteria | 避免把不同條件下的數字放在一起比較 | eCall / certification 類來源多次標註缺少 test case IDs、acceptance criteria、pass/fail detail 或完整 test matrix。[12][27][38][39] |\n| 第三方 validation / certification | 報告號、certificate number、測試日期、測試環境版本、scope | 若要宣稱 validated / certified，需要可追溯報告 | cetecom advanced 新聞稿被標註缺少 certification report number、certificate number、測試日期與完整 acceptance criteria。[12] |\n| Claim-control wording | 將 “sales claim” 與 “binding spec” 分開標示 | 避免把定位語言寫成規格或市場事實 | 現有頁面明確說 only、first、leadership、lower TCO、fewer boxes 等不能當作可驗證技術規格。[4][6][71] |\n### 可說與不可說\n- 可說：目前知識庫未提供 Oscilloscope solution 與 competitor 在 Automotive 場景下的直接比較證據。[14][15][35][49][71][95]\n- 可說：若要做客戶文件比較，需補 R&S 正式 oscilloscope 文件、競品官方 / 第三方資料、共同 automotive use case、共同測試條件與可追溯結果。[49][71][95]\n- 不可說：R&S Oscilloscope 在 Automotive 優於某競品，因 passages 沒有提供直接比較、同條件測試或第三方驗證證據。[49][71][95]\n- 不可說：SatelliteEcoChain 裡的 Oscilloscope mapping 證明 automotive fit，因該來源限制說 R&S Solution 欄只是 sales / solution mapping 線索，不等於客戶已採購、使用、評估或適用該儀器。[15]\n\n來源：\n[4] Wiki：2026_02_CMX500_Keysight_Sales_Battle_Card（來源：`2026_02_CMX500_Keysight_Sales_Battle_Card.md`、`CMW_dat-sw_en_5213-9211-22_v1700.md`、`CMX500_Features_CSW9-20-0_en_32.md`…）\n[6] Wiki：2026_02_CMX500_Keysight_Sales_Battle_Card（來源：`2026_02_CMX500_Keysight_Sales_Battle_Card.md`、`CMW_dat-sw_en_5213-9211-22_v1700.md`、`CMX500_Features_CSW9-20-0_en_32.md`…）\n[7] Wiki：Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[10] Wiki：cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing（來源：`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`、`CMX_Configuration_Guide.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[12] Wiki：cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing（來源：`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`、`CMX_Configuration_Guide.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[14] Wiki：SatelliteEcoChain（來源：`0.Satcom Industry.md`、`4. Satellite Eco-chain in Taiwan.md`、`SatelliteEcoChain.md`）\n[15] Wiki：SatelliteEcoChain（來源：`0.Satcom Industry.md`、`4. Satellite Eco-chain in Taiwan.md`、`SatelliteEcoChain.md`）\n[27] Wiki：Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[35] Wiki：SatelliteEcoChain（來源：`0.Satcom Industry.md`、`4. Satellite Eco-chain in Taiwan.md`、`SatelliteEcoChain.md`）\n[38] Wiki：Hybrid eCall testing（來源：`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[39] Wiki：Hybrid eCall testing（來源：`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[48] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[49] Wiki：R&S CMX500 vs amarisoft（來源：`2026_02_CMX500_Amarisoft_Sales_Battle_Card.md`、`CMW_dat-sw_en_5213-9211-22_v1700.md`、`CMX500_Features_CSW9-20-0_en_32.md`…）\n[54] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[71] Wiki：R&S CMX500 vs Keysight（來源：`2026_02_CMX500_Keysight_Sales_Battle_Card.md`、`CMW_dat-sw_en_5213-9211-22_v1700.md`、`CMX500_Features_CSW9-20-0_en_32.md`…）\n[92] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[95] Wiki：R&S CMX500 vs Anritsu（來源：`2026_02_CMX500_Anritsu_Sales_Battle_Card.md`、`CMW_dat-sw_en_5213-9211-22_v1700.md`、`CMX500_Features_CSW9-20-0_en_32.md`…）\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-75cff71fab1e4c7fa2bdcf199580a2af",
+      "request_id": "request-75cff71fab1e4c7fa2bdcf199580a2af",
+      "span_id": "span-75cff71fab1e4c7fa2bdcf199580a2af",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-75cff71fab1e4c7fa2bdcf199580a2af",
+       "request_id": "request-75cff71fab1e4c7fa2bdcf199580a2af",
+       "span_id": "span-75cff71fab1e4c7fa2bdcf199580a2af",
+       "parent_span_id": null
+      },
+      "status": "succeeded",
+      "data": {
+       "asset": {
+        "namespace": "engineering",
+        "name": "rs-knowledge",
+        "version": "1.0.3"
+       },
+       "trace": {
+        "trace_id": "trace-75cff71fab1e4c7fa2bdcf199580a2af",
+        "request_id": "request-75cff71fab1e4c7fa2bdcf199580a2af",
+        "span_id": "span-75cff71fab1e4c7fa2bdcf199580a2af",
+        "parent_span_id": null
+       },
+       "answer": {
+        "question": "What evidence is required to compare our Oscilloscope solution with a competitor for Automotive without making unsupported claims?",
+        "status": "answered",
+        "passages": [
+         {
+          "text": "2026_02_CMX500_Amarisoft_Sales_Battle_Card › 概念\n- [[Sales Battle Card]] — 本來源的文件類型；用於競品比較與銷售定位，不是正式 specifications。\n- [[Validated Testing]] — 來源用來區分 R&S validated / PTCRB-GCF aligned test cases 與 [[amarisoft]] functional simulation。\n- [[Conformance Testing]]、[[Operator Acceptance]]、[[PTCRB]]、[[GCF]] — 來源稱 R&S 支援 aligned RF、RRM、protocol、IMS、VoNR、throughput、CA、mobility tests，而 [[amarisoft]] 不被接受作 operator certification。\n- [[NR-NTN]]、[[NTN]]、[[RedCap]] — 來源將其列為 R&S offensive play 與 [[amarisoft]] functional testing 能力對比項目。\n- [[Wi-Fi signaling]] — 來源稱 [[R&S CMX500]] 整合 Wi-Fi signaling，含 Wi-Fi 6/6E/7；並稱 [[amarisoft]] 需 external AP/N3IWF 或無 Wi-Fi signaling。\n- [[FR2]]、[[mmWave]]、[[Calibrated RF]] — 來源稱 R&S 提供 calibrated FR2 / mmWave，而 [[amarisoft]] 使用 external RRH 且 calibration 以問號標示。\n- [[ATE production scalability]]、[[Non-signaling test]] — 來源稱 R&S 可由 CMX validation scale 到 CMP180 / CMP200 / CMW100 production lines。\n- [[O-RAN]]、[[ORU conformance]]、[[NES]] — 來源提出 R&S + VIAVI upgrade path，但未展開文件依據。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md"
+          },
+          "score": 9.845953
+         },
+         {
+          "text": "2026_02_CMX500_Amarisoft_Sales_Battle_Card › 原文未解的問題\n- unresolved：來源沒有正式 document ID、revision number 或版次；只標示 Date: 26.02.2026 與 Creator: Christian Hof。\n- unresolved：來源是 Company Confidential battle card，不是 binding specifications；不能用來取代 [[CMX500_specs_en_5216-4127-22_v1100]] 或 [[CMX500_Features_CSW9-20-0_en_32]] 的規格引用。\n- unresolved：來源對 [[amarisoft]] company size 在正文寫 **15–50 employees**，比較表寫 **15–25**；未說明哪一個為準。\n- unresolved：來源稱 [[amarisoft]] no regional offices / no global support footprint / remote-only support，但未提供查證日期、官方來源或 SLA 文件。\n- unresolved：來源稱 [[amarisoft]] up to 1000 UEs、supports NB-IoT / LTE-M / RedCap / basic NTN，但未列對應 AMARI 型號、軟體版本、SDR hardware、測試條件或授權項目。\n- unresolved：來源稱 R&S validated NR-NTN RF / RRM / protocol testcases “w/ Samsung”，但未提供 validation report、test case list、Samsung 專案代碼或日期。\n- unresolved：來源稱 R&S supports PTCRB/GCF aligned RF、RRM、protocol、IMS、VoNR、throughput、CA、mobility tests，但未列各 test package 的 option code、版本或正式 accreditation / certification 文件。\n- unresolved：來源稱 R&S + VIAVI → ORU conformance/NES，但未提供 VIAVI 產品、R&S 產品、O-RAN spec version、NES 展開或合作文件。\n- unresolved：來源未列價格、商務條款、trade-in program 條件或 migration kit 的具體交付內容。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md"
+          },
+          "score": 9.207812
+         },
+         {
+          "text": "2026_02_CMX500_Amarisoft_Sales_Battle_Card › 實體\n- [[R&S CMX500]] — 來源主角；被定位為 integrated platform for signaling、validated testing、FR1、FR2 up to 50 GHz 與 Wi-Fi signaling。\n- [[amarisoft]] — 競品；來源稱其為 small French private company，提供 software-based 4G/5G network stacks and test systems。\n- [[AMARI Callbox Series]] — [[amarisoft]] product line，包含 Mini、Classic、Advanced、Ultimate、Extreme。\n- [[UE Simbox Series]] — [[amarisoft]] product line。\n- [[R&S CMW500]] — 來源稱其提供 2G/3G legacy continuity，並屬於 R&S full test lifecycle 中的 legacy platform。\n- [[R&S CMP180]]、[[R&S CMP200]]、[[R&S CMW100 K06]] — 來源稱其構成 R&S production / ATE scaling path。\n- [[Samsung]] — 來源稱 R&S validated NR-NTN RF / RRM / protocol testcases “w/ Samsung”；未提供專案、文件或測試案例編號。\n- [[VIAVI]] — 來源稱 R&S + VIAVI 可提供 O-RAN upgrade path，對比 [[amarisoft]] functional DU/RU testing；未提供產品、文件或合作細節。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md"
+          },
+          "score": 7.721836
+         },
+         {
+          "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › 原文未解的問題\n- unresolved：來源是 lossy derivative；原始 PDF 才是 source of truth。\n- unresolved：來源標示 COMPANY CONFIDENTIAL；未說明可對外使用範圍。\n- unresolved：來源未提供 [[Keysight E7515P]]、[[Keysight E7515W]]、[[Keysight E7515B]]、[[Keysight E7515E]]、[[Keysight E7515R]] 的正式文件編號、版本、order number 或日期。\n- unresolved：來源未提供 [[RFU18]] 的正式 order number、datasheet、release date、supported CMX500 configurations、校準條件或 availability。\n- unresolved：來源說 [[RFU18]] up to 18 GHz、max aggregated NR bandwidth 2000 MHz，但未提供測試條件、band combination、carrier count、SCS、modulation、MIMO layers 或 binding tolerance。\n- unresolved：來源說 R&S first validated 3GPP NR-NTN conformance with [[Samsung]]，但未提供 validation report、test case list、PTCRB RFT 555 版本或日期。\n- unresolved：來源多處使用 only、first、leadership、lower TCO、fewer boxes 等 sales language；需要正式證據才能在技術比較或客戶文件中使用。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+          },
+          "score": 15.487931
+         },
+         {
+          "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › Keysight 相關\n- [[Keysight]] — 本 battle card 的競品公司。\n- [[Keysight UXM]] — 來源中的 UXM 5G Wireless Test Platforms 總稱。\n- [[Keysight E7515P]] — 來源稱 high-end wideband / 5G platform with Wi-Fi as additional capability；quick table 稱 E7515P up to 15 GHz。\n- [[Keysight E7515W]] — 來源稱 Wi-Fi 7 / connectivity platform。\n- [[Keysight E7515B]] — 來源稱 standard / mid-tier 5G UXM。\n- [[Keysight E7515E]] — 來源稱 value / mid-tier 5G UXM。\n- [[Keysight E7515R]] — 來源稱 RedCap / IoT-only SKU。\n- [[ProbSim]] — channel emulator；來源在 integrated vs external fading landmine 中列名。\n- [[RaySim]] — digital twin / ray tracing engine；來源說 advanced fading、digital twin、FR3 / 6G scenarios 可能需要 RaySim。\n- [[Channel Studio]] — channel modeling / fading 相關 external tool。\n- [[Nemo]] — field test tools；來源列於 Keysight fragmented toolchain。\n- [[Atlas]] — AI-powered device test / test management；來源列於 Keysight fragmented toolchain。\n- [[KeysightCare]] — 來源說 Keysight support model 使用 tiered KeysightCare：Assured、Enhanced、Application Software Support，以及 optional warranty / calibration assurance plan。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+          },
+          "score": 10.349747
+         },
+         {
+          "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › Battle card 中的 R&S positioning\n來源的 positioning statement 主張：\n\n- [[Rohde & Schwarz]] delivers the industry’s only fully integrated platform for FR1、FR2、Wi-Fi、fading、IP throughput、RF analysis、NTN、RedCap and end-to-end signalling in one instrument。\n- 來源說 [[Keysight]] spreads equivalent capabilities across multiple UXM models、add-on software and external tools。\n- 來源說 R&S ensures long-term scalability、measurement accuracy and path from R&D to certification without hardware fragmentation。\n\n使用限制：以上是 sales language；其中 only、industry’s only、fully integrated、long-term scalability、lower TCO 等敘述不能當作可驗證規格，需回查正式 datasheet、features document、conformance report 或配置工具。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+          },
+          "score": 9.448651
+         },
+         {
+          "text": "Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard › 重點摘要\n- [[Rohde & Schwarz]] 宣稱其與 [[Qualcomm Technologies]] 合作，驗證 [[Snapdragon Auto 5G Modem-RF]] 上 [[Next Generation eCall]]（NG eCall）的 implementation，並稱其符合 [[EN 17240]]:2024。\n- 來源說 [[eCall]] 於 2015 年導入，且自 2018 年起成為歐盟境內所有新車銷售的 mandatory requirement。\n- 來源指出，隨著 2G / 3G circuit-switched cellular networks 逐漸 obsolete，emergency call systems 需要適配到 4G / 5G packet-switched cellular networks。\n- 來源稱 [[European Commission]] 在其 most recent regulation 中定義 NG eCall 將自 **2026-01-01** 起成為 obligatory。\n- 來源稱 EN 17240:2024 建立在 IP Multimedia Subsystem（[[IMS]]）networks 上測試 eCall systems 的 guidelines，涵蓋 advanced 4G LTE 與 5G NR technologies。\n- [[Snapdragon Auto 5G Modem-RF]] 被描述為 5G automotive-grade platform，支援 high-speed connectivity、advanced positioning、Vehicle-to-Everything（[[V2X]]）、multi-band [[GNSS]] navigation 與 enhanced safety。\n- 來源稱驗證流程使用 [[R&S CMX500]] mobile radio tester，作為 NG eCall voice and data transmission 的 comprehensive testing solution。\n- 來源稱測試模擬 [[PSAP]]，並驗證 implementation at both ends with the [[EN 17240]]:2024 standard。\n- 來源說 [[R&S CMX500]] 支援 4G 與 5G technologies，目標是讓方案 future-proof。\n- [[Juergen Meyer]] 以 [[Rohde & Schwarz]] Vice President Market Segment Automotive 身分在新聞稿中引述，稱此次 collaboration 為 future emergency call services 建立 new benchmark。\n- 來源稱 [[R&S CMX500]] 搭配 [[R&S CMX-KA098]] software option 可在 realistic network conditions 下用於 NG eCall testing。\n- 來源將合作定位為 mutually validating solutions、reducing effort、accelerating time to market for mutual customers。\n- Press and media contact 為 [[Patrizia Muehlbauer]]，職稱 PR Manager Products & Standard Systems。\n- 公司資訊段落稱 [[Rohde & Schwarz]] 2024/2025 fiscal year net revenue 為 EUR 3.16 billion，2025-06-30 worldwide employees more than 15,000。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+          },
+          "score": 12.397777
+         },
+         {
+          "text": "Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard › 與既有知識的關係\n- 既有 [[R&S CMX-KA098]] 頁已記錄 CMX-KA098 是 [[R&S CMX500]] 的 NGeCall / IMS eCall application test software option，並由 capability list 與 software maintenance mapping 支撐。本來源補充其在 PR 中與 [[Snapdragon Auto 5G Modem-RF]]、[[Qualcomm Technologies]] 和 EN 17240:2024 verification 的語境。\n- 既有 [[NGeCall over LTE]] 頁已記錄 CMW500 與 CMX500 capability list。本來源不是 test case matrix，但補充 vendor-to-vendor verification 與 2026-01-01 regulatory transition 的 PR 層級說法。\n- 既有 [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 說 [[R&S CMX-KA098]] completed PSAP test scenarios according to EN 17240:2024+A1:2026。本來源較早或不同語境地說 Qualcomm Technologies 的 Snapdragon Auto 5G Modem-RF NG eCall implementation 已依 EN 17240:2024 驗證；兩者標準版本不同，但來源未標示發布日期，不能判斷時間序列。\n- 既有 [[Hybrid eCall testing]] 關注 EN 18052:2025 與 fallback / hybrid paths。本來源聚焦 EN 17240:2024 NG eCall，未描述 EN 18052 hybrid fallback 測試。\n- 既有 [[Qualcomm Technologies]] 頁記錄其與 [[Rohde & Schwarz]] 在 AI-enhanced CSI feedback、FR3、FR1-FR3 carrier aggregation 與 SSSG early verification 等 PR 語境中的合作。本來源新增 automotive NG eCall / Snapdragon Auto 5G Modem-RF cooperation context。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+          },
+          "score": 9.12982
+         },
+         {
+          "text": "Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard › 關鍵實體與概念\n- [[Rohde & Schwarz]] — 新聞稿發布公司，提供 test and measurement solutions 與 automotive testing solution。\n- [[Rohde & Schwarz GmbH & Co KG]] — raw frontmatter author 與 R&S registered trademark owner 名稱。\n- [[Qualcomm Technologies]] — 與 [[Rohde & Schwarz]] 共同進行 NG eCall implementation verification 的公司實體。\n- [[Snapdragon Auto 5G Modem-RF]] — 本來源中的 Qualcomm Technologies automotive-grade platform / modem-RF platform。\n- [[R&S CMX500]] — 用於 verification process 的 mobile radio tester / comprehensive testing solution。\n- [[R&S CMX-KA098]] — 本來源稱 CMX500 with CMX-KA098 software option 可用於 NG eCall testing under realistic network conditions。\n- [[Juergen Meyer]] — [[Rohde & Schwarz]] Vice President Market Segment Automotive，引述人物。\n- [[Patrizia Muehlbauer]] — press and media contact。\n- [[NG eCall EN 17240 2024 verification]] — 本來源的主要 verification 主題。\n- [[NGeCall over LTE]]、[[NGeCall over NR-LTE]]、[[IMS eCall]]、[[EN 17240]]、[[PSAP]]、[[GNSS]]、[[V2X]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+          },
+          "score": 7.206969
+         },
+         {
+          "text": "cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing › 重點摘要\n- [[Rohde & Schwarz]] 宣稱其 hybrid eCall 與 Next Generation eCall test solution 已成功通過 [[cetecom advanced]] 的 certification testing。\n- 來源描述 [[cetecom advanced]] 是 independent test laboratory，服務範圍包含 communication technologies、automotive、medical technology、payment & identification 等產品測試與 worldwide certification。\n- 測試方案以 [[R&S CMX500]] radio communication tester 為基礎，搭配更新後的 eCall option，以支援最新 eCall regulations and standards。\n- 來源說 [[Hybrid eCall testing]] 所依據的 [[EN 18052]] 要求 hybrid system 結合不同 transmission paths and protocols，使 eCall 能可靠到達目的地。\n- 來源說實務上車輛會使用 NG eCall functions，即 IP/IMS-based voice and data over 4G/5G；但在 coverage 或 service quality 降低時，可自動 fallback 到 classic CS eCall 2G/3G transport paths。\n- 製造商需要驗證 hybrid implementations 能 trigger calls、transmit [[MSD]]、maintain [[GNSS]] positioning，並在 [[VoNR]]、[[VoLTE]] 與 circuit-switched fallback 等多種 network scenarios 下提供 intelligible voice quality。\n- [[Rohde & Schwarz]] 宣稱其 eCall evaluation solution [[R&S CMX-KA09x]] 已更新，以支援 compliance with [[EN 18052]]:2025 與 [[EN 17240]]:2024+A1:2026。\n- [[R&S CMX-KA099]] option completed Public Safety Answering Point scenario tests according to [[EN 18052]]:2025。\n- [[R&S CMX-KA098]] option completed Public Safety Answering Point scenario tests according to [[EN 17240]]:2024+A1:2026。\n- [[Thomas Reschka]] 以 [[cetecom advanced]] Senior Technical Consultant 身分表示，該 solution 用於 functional tests、protocol conformity tests，以及 type-approval of [[IVS]] implementing hybrid eCall and NG eCall。\n- 來源稱 test environment 可 simulation real-world mobile network conditions 並 emulation various network scenarios，用於 certifications 或 new vehicle model market launch 前準備。\n- Press contact 為 [[Patrizia Muehlbauer]]，職稱 PR Manager Products & Standard Systems。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+          },
+          "score": 17.988369
+         },
+         {
+          "text": "cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing › 關鍵實體與概念\n- [[Rohde & Schwarz]] — 新聞稿發布公司，提供 automotive test solutions。\n- [[R&S CMX500]] — 測試方案基礎設備，radio communication tester。\n- [[R&S CMX-KA09x]] — 來源中的 updated eCall evaluation solution 泛稱，支援 EN 18052:2025 與 EN 17240:2024+A1:2026 compliance。\n- [[R&S CMX-KA099]] — 來源稱已完成 EN 18052:2025 的 PSAP test scenarios。\n- [[R&S CMX-KA098]] — 來源稱已完成 EN 17240:2024+A1:2026 的 PSAP test scenarios。\n- [[cetecom advanced]] — 執行 certification testing 的 independent test laboratory。\n- [[Thomas Reschka]] — cetecom advanced Senior Technical Consultant，新聞稿引述人物。\n- [[Patrizia Muehlbauer]] — Rohde & Schwarz press and media contact。\n- [[Hybrid eCall testing]] — hybrid eCall / NG eCall 測試主題，涵蓋 NG eCall、classic CS eCall fallback、GNSS、MSD、voice quality、handover 與 degraded radio conditions。\n- [[EN 18052]]、[[EN 17240]]、[[CEN]]、[[ETSI]]、[[3GPP]]、[[NGeCall over LTE]]、[[NGeCall over NR-LTE]]、[[IMS eCall]]、[[IVS]]、[[PSAP]]、[[MSD]]、[[GNSS]]、[[VoNR]]、[[VoLTE]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+          },
+          "score": 5.176377
+         },
+         {
+          "text": "cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing › 原文未解的問題\n- unresolved：新聞稿 frontmatter 的 published 欄位為空；來源正文也未標示發布日期。raw created 為 2026-09-11，但不可等同正式發布日。\n- unresolved：新聞稿未標示 document version、press release ID 或 revision。\n- unresolved：來源未提供 cetecom advanced certification report number、certificate number、測試日期、測試環境版本或完整 acceptance criteria。\n- unresolved：來源未提供 [[R&S CMX-KA09x]]、[[R&S CMX-KA098]]、[[R&S CMX-KA099]] 的完整 order number、license dependencies、software version 或 maintenance mapping。\n- unresolved：來源只稱 CMX-KA099 / CMX-KA098 completed PSAP test scenarios，未列出各 PSAP scenario 的 test case IDs、pass/fail detail 或是否涵蓋所有 EN 18052:2025 / EN 17240:2024+A1:2026 requirements。\n- unresolved：來源提到 national requirements，但未列國家、法規名稱或版本。\n- unresolved：來源未展開 [[EN 18052]]、[[EN 17240]] 的發布組織、正式標題或 amendment 細節。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+          },
+          "score": 4.198318
+         },
+         {
+          "text": "SatelliteEcoChain › 關鍵實體與概念\n- [[台灣衛星產業鏈 R&S solution mapping]] — 本來源最直接支撐的概念頁，整理 satellite eco-chain 表格分類、企業列名、R&S solution mapping 與使用限制。\n- [[台灣衛星產業鏈外部資料清單]] — 既有頁面曾把 `SatelliteEcoChain.xlsx` 標為未擷取；本來源提供該 Excel 的 markdown 擷取版本，但仍需回查原始 Excel。\n- [[衛星地面設備]]、[[Satellite User Terminal 外部資料清單]]、[[低軌衛星零組件與地面終端供應鏈]] — 本來源列出的 UT、地面站、通訊模組與 PCB 分類可與這些頁面互相追溯，但不可直接合併為已驗證供應關係。\n- [[衛星酬載與元件測試]]、[[衛星酬載群延遲量測]]、[[TVAC 衛星酬載測試]] — 表格中的 G/T、NPR、Group delay、DVB-S2/S2X 與 R&S 儀器 mapping 可連到既有衛星測試主題。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 15,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/SatelliteEcoChain.md"
+          },
+          "score": 12.875383
+         },
+         {
+          "text": "SatelliteEcoChain › 重點摘要\n- 來源 frontmatter 顯示原始檔為 `SatelliteEcoChain.xlsx`，轉檔時間為 2026-09-17；正文未標示正式內容日期或資料期間。\n- 主表標題為 `Satellite`，欄位包含 `UAV零組件`、`關鍵元件`、`企業`、`代號`、`角色亮點`、`R&S Solution`、`Sales kits` 以及三個未命名欄位。`UAV零組件` 欄名疑似沿用其他表格，但本來源頁面與 sheet 標題皆指向 satellite；本頁不自行改名。\n- 表格按類別列出 satellite / satcom 相關供應鏈或追蹤對象，包含 GPS定位、天線、系統整合商、UT、地面站、通訊模組、電源動力、衛星控制板 / OBC、航太材料、認證實驗室、其他與 PCB。\n- 多個列名有 R&S solution mapping，例如 [[R&S SMW200A]]、[[R&S SMBV100B]]、[[R&S FSW]]、[[R&S ZNA]]、[[R&S ZNB3000]]、[[R&S CMX500]]、[[R&S CMP180]] 與 Oscilloscope。\n- 角色亮點欄出現 [[GNSS]]、G/T、NPR、Group delay、[[DVB-S2-S2X]]、OneWeb、[[NB-NTN]]、[[NR-NTN]]、ISL module 等測試 / 技術語彙。\n- Sales kits 欄含多個 Rohde & Schwarz SharePoint / OneDrive 連結，例如 `2025_09_satellite test solutions.pptx`、`Satellite T&M solution V2_MikeW.pdf`、`Oneweb Test Solutions Overview.pptx` 與 `DVB-S2_S2X_Overview.pptx`；本次 ingest 未擷取這些附件正文。\n- `ICs(Notyet)` 表格只保留晶片分類列，例如 GPU、CPU、DRAM、IC、晶圓代工、封裝測試、測試介面、網通、BMC、高速傳輸IC；企業、股票代號、角色亮點與 R&S Solution 欄皆未填寫。\n- `Sheet3` 只出現空表格標記，未提供可抽取內容。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/SatelliteEcoChain.md"
+          },
+          "score": 11.514841
+         },
+         {
+          "text": "SatelliteEcoChain › 使用限制\n- 來源未標示正式日期或資料期間；Market 類資料必須將日期標示為「來源未標示」，raw converted 2026-09-17 只能代表轉檔時間。\n- `SatelliteEcoChain.xlsx` 經 markitdown 轉出，為 lossy derivative；原 Excel 才是 source of truth，需回查原始 workbook 才能確認 merged cells、格式、註解、公式、hidden sheets、超連結與股票代號格式。\n- 表格列名不得解讀為已驗證供應商、客戶、合約、出貨、營收、認證、投資建議或 R&S 實際往來關係。\n- R&S Solution 欄只表示來源表格中的 sales / solution mapping 線索，不等於該客戶已採購、使用、評估或適用該儀器。\n- Sales kits 連結多為內部 SharePoint / OneDrive；本次未擷取附件正文，因此不能用附件檔名推論完整方案、規格、版本或發表日期。\n- 股票代號欄從 Excel 轉出為 `3138.0`、`6282.0` 等浮點格式；本頁照錄來源，不自行修正為整數代號。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 17,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/SatelliteEcoChain.md"
+          },
+          "score": 9.735062
+         },
+         {
+          "text": "Hybrid eCall testing\n[[Hybrid eCall testing]] 是驗證車輛 emergency call system 能在 NG eCall 與 classic CS eCall transport paths 之間可靠運作與 fallback 的測試主題；[[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 將其連到 [[EN 18052]]:2025、[[EN 17240]]:2024+A1:2026、[[R&S CMX500]] 與 [[R&S CMX-KA09x]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+          },
+          "score": 6.591936
+         },
+         {
+          "text": "Hybrid eCall testing › 與 NGeCall over LTE / NR-LTE 的關係\n[[NGeCall over LTE]] 與 [[NGeCall over NR-LTE]] 關注 NG eCall 在 IMS / packet-switched 4G/5G 路徑上的測試支援與標準對照。[[Hybrid eCall testing]] 進一步把 NG eCall 與 classic CS eCall fallback、handover、degraded radio conditions 與 multi-path robustness 放在同一驗證範圍內。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+          },
+          "score": 4.842714
+         },
+         {
+          "text": "Hybrid eCall testing › R&S solution context\n依 [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]]：\n\n- 測試方案基於 [[R&S CMX500]] radio communication tester。\n- [[R&S CMX-KA09x]] updated eCall evaluation solution 支援 [[EN 18052]]:2025 與 [[EN 17240]]:2024+A1:2026 compliance。\n- [[R&S CMX-KA099]] completed [[PSAP]] test scenarios according to [[EN 18052]]:2025。\n- [[R&S CMX-KA098]] completed [[PSAP]] test scenarios according to [[EN 17240]]:2024+A1:2026。\n- [[cetecom advanced]] conducted certification testing。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+          },
+          "score": 3.974921
+         },
+         {
+          "text": "2026_02_CMX500_Amarisoft_Sales_Battle_Card › 與既有知識的關係\n- 既有 [[R&S CMX500]] 頁已依 [[CMX500_specs_en_5216-4127-22_v1100]] 與 [[CMX500_Features_CSW9-20-0_en_32]] 整理正式規格與 Features and Functions。本來源不是 specifications；它補充的是 sales positioning 與競品比較語境。\n- 來源稱 [[R&S CMX500]] covers FR2 up to 50 GHz；既有 [[CMX500_specs_en_5216-4127-22_v1100]] 對 [[R&S CMXHEAD50]] / [[R&S CMXHEAD50-Evo]] 列出的 frequency range 是 **21.84 GHz to 50.20 GHz**。判斷本來源的 50 GHz 是 sales battle card 的四捨五入說法，不列為矛盾。\n- 來源稱 [[R&S CMX500]] 整合 Wi-Fi signaling（Wi-Fi 6/6E/7）；既有 [[CMX500_Features_CSW9-20-0_en_32]] 已列 WLAN signaling / measurements：802.11ax、802.11be、2.4/4/5/6 GHz bands 等，方向一致。\n- 來源把 [[R&S CMW500]] 用於 2G/3G continuity；既有 [[CMW_dat-sw_en_5213-9211-22_v1700]] 已列 GSM、WCDMA、LTE、NR Sub-6GHz、Bluetooth、WLAN 等 CMW wireless standards，方向一致。\n- 來源把 [[R&S CMP180]]、[[R&S CMP200]]、[[R&S CMW100 K06]] 作為 production / non-signaling / ATE path；既有各產品頁也把 CMP180、CMP200、CMW100 K06 描述為 production / manufacturing / nonsignaling 測試相關平台，方向一致。\n- 來源對 [[amarisoft]] 的資訊是 sales battle card 觀點，且未引用 amarisoft 官方文件；應避免把 “Only R&S” 等銷售語句當作獨立技術規格或市場事實。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md"
+          },
+          "score": 6.152607
+         },
+         {
+          "text": "2026_02_CMX500_Amarisoft_Sales_Battle_Card › 重點摘要\n- 來源將 [[amarisoft]] 描述為一家小型法國私人公司，專注於 software-based [[4G]] / [[5G]] network stacks and test systems。\n- 來源列出 [[amarisoft]] 公司規模約 **15–50 employees**；但比較表中又寫 **15–25**，兩者不一致，需保留未決。\n- [[amarisoft]] headquarters 位於 **Levallois-Perret, France**；來源稱其沒有 regional offices 或 global support footprint。\n- [[amarisoft]] 產品線包含 [[AMARI Callbox Series]]（Mini、Classic、Advanced、Ultimate、Extreme）與 [[UE Simbox Series]]。\n- [[amarisoft]] architecture 為 software-defined RAN & Core（eNB、gNB、EPC、5GC）running on x86 Linux + SDR。\n- 來源認為 [[amarisoft]] 優勢是 functional load testing、flexibility、最多 **1000 UEs**，並適用於 [[NB-IoT]]、[[LTE-M]]、[[RedCap]] 與 basic [[NTN]] functional testing。\n- 來源對 [[amarisoft]] 的限制描述包括：remote-only application support、documentation-driven learn-by-yourself、warranty 依賴 COTS PC & SDR vendors、缺少 instrument-class warranty、缺少 calibrated RF、conformance、operator acceptance、validated NTN、global support、Wi-Fi signaling 與 ATE production scalability。\n- [[Rohde & Schwarz]] positioning statement：R&S 提供 instrument-grade、validated 5G testing，包含 global support、multi-year warranties、calibrated FR2、Wi-Fi signaling 與 R&D-to-production path；相對地，[[amarisoft]] 被描述為在 COTS hardware 上提供 functional software testing。\n- 來源的 R&S differentiators 包含：[[R&S CMX500]] one-box [[NR FR1]] + [[NR FR2]] + [[Wi-Fi signaling]]、R&D → pre-conformance → conformance → production lifecycle、PTCRB/GCF aligned tests、operator acceptance、validated NR-NTN test cases、2G/3G continuity via [[R&S CMW500]]、global support / calibration / warranty。\n- 來源將 production path 連到 [[R&S CMP180]]、[[R&S CMP200]] 與 [[R&S CMW100 K06]]；並把 [[R&S CMW500]] 定位為 legacy / 2G/3G continuity。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md"
+          },
+          "score": 3.907062
+         },
+         {
+          "text": "2026_02_CMX500_Amarisoft_Sales_Battle_Card › 重點摘要\n- Landmines / sales questions 聚焦在 calibrated FR2/mmWave、global support / warranty / calibration、operator acceptance / conformance、validated vs. simulated testing、production scale、Wi-Fi signaling、non-signaling capability 與 3GPP RF pre-conformance。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md"
+          },
+          "score": 0.924325
+         },
+         {
+          "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › 與既有知識的關係\n- 與 [[R&S CMX500 vs amarisoft]]、[[R&S CMX500 vs Anritsu]] 同屬 2026-02-26 R&S battle card 類型來源；三者都應視為競品銷售定位，而不是正式規格來源。\n- [[R&S CMX500]] 的正式規格仍需以 [[CMX500_specs_en_5216-4127-22_v1100]]（Version 11.00，August 2025）與 [[CMX500_Features_CSW9-20-0_en_32]]（Version 32，CSW 9.20.0 and higher）追溯。\n- 本來源提到 [[R&S CMW500]] covers all legacy + EN-DC；[[R&S CMW500]] 的正式資料需追溯 [[CMW_dat-sw_en_5213-9211-22_v1700]]。\n- 本來源新增 [[Keysight]] 在 wireless device testing battle card 語境中的公司與 UXM portfolio 描述；既有 [[Keysight]] 頁主要來自高頻高速 PCB 測試圖像來源，兩者資料層次不同。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+          },
+          "score": 7.19702
+         },
+         {
+          "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › 測試與市場語彙\n- [[NR FR1]]、[[NR FR2]]、[[FR3]]、[[6G]]、[[Wi-Fi 6]]、[[Wi-Fi 6E]]、[[Wi-Fi 7]]、[[NTN]]、[[RedCap]]、[[IMS]]、[[VoNR]]、[[VoWiFi]]、[[Fading]]、[[Doppler]]、[[Satellite mobility]]、[[IP throughput testing]]、[[Application testing]]、[[Operator Certification]]、[[PTCRB]]、[[RRM]]、[[PCT]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+          },
+          "score": 6.320823
+         },
+         {
+          "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › 與既有頁面的矛盾 / 需並列標註\n⚠️ [[2026_02_CMX500_Keysight_Sales_Battle_Card]]（2026-02-26）說 quick comparison table 中 [[R&S CMX500]] cellular FR1 up to **18 GHz**、FR2 up to **50 GHz (RRH evo)**，但既有頁面 [[R&S CMX500]] 依 [[CMX500_specs_en_5216-4127-22_v1100]] 說 [[R&S CMX-B600B]] RF unit frequency range **400 MHz to 8000 MHz**，[[R&S CMX-B500A]] IF generator **6 GHz to 20 GHz**、IF analyzer **4 GHz to 20 GHz**，FR2 remote radio heads 為 [[R&S CMXHEAD30]] / [[R&S CMXHEAD50]] / [[R&S CMXHEAD50-Evo]]。判斷：battle card 可能將 FR1 / FR3 / RFU18 roadmap 口徑混寫；正式規格比較不得直接引用 quick table 的 FR1 up to 18 GHz，需等待 RFU18 或 FR3 正式規格文件。\n\n⚠️ [[2026_02_CMX500_Keysight_Sales_Battle_Card]]（2026-02-26）說 [[RFU18]] 提供 max aggregated NR bandwidth **2000 MHz**，但既有頁面 [[R&S CMX500]] 依 [[CMX500_specs_en_5216-4127-22_v1100]] 說 [[R&S CMX-B600B]] RF bandwidth **250 MHz**、[[R&S CMX-B500A]] IF analyzer bandwidth up to **1 GHz**，且 [[CMX500_Features_CSW9-20-0_en_32]] 說 IF unit 最高 **800 MHz total carrier bandwidth**、NR FR2 channel bandwidth **50 / 100 / 200 / 400 MHz**。判斷：2000 MHz 屬 RFU18 / roadmap sales claim，不可回填為既有 CMX500 binding specification。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+          },
+          "score": 5.973016
+         },
+         {
+          "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › 重點摘要\n- 來源將 [[Keysight]] 描述為大型美國 test & measurement vendor，總部在 Santa Rosa, California, USA，員工數約 **16,800+**，在 semiconductor、aerospace / defense、cloud 與 wireless testing 具有強市場存在。\n- 來源主張 [[Keysight]] mobile communications strategy 越來越 software-led 與 AI-driven，但 [[Keysight UXM]] portfolio 分散於多個 hardware SKUs：[[Keysight E7515P]]、[[Keysight E7515W]]、[[Keysight E7515B]]、[[Keysight E7515E]]、[[Keysight E7515R]]。\n- 來源列出 [[Keysight]] portfolio 包含 UXM 5G Wireless Test Platforms、[[ProbSim]] channel emulators、[[Nemo]] field test tools、[[RaySim]] digital twin engine、[[Atlas]] AI-powered device test、C-V2X 與 cybersecurity tools。\n- 來源把 R&S positioning 表述為：[[R&S CMX500]] 在 one instrument 中整合 [[NR FR1]]、[[NR FR2]]、[[Wi-Fi]]、[[Fading]]、IP throughput、RF analysis、[[NTN]]、[[RedCap]] 與 end-to-end signaling；而 Keysight 需分散於多個 UXM models、add-on software 與 external tools。\n- 來源主張 [[R&S CMX500]] 的差異化包含 one-platform architecture、integrated fading + IP + application testing、unified software ecosystem（[[CMsquares]]、[[R&S CMsequencer]]、AI Script Assistant）、measurement leadership、FR3 / 6G path、cellular + Wi-Fi in one platform，以及 NTN / RedCap / operator certification leadership。\n- 來源對 [[Keysight]] 的弱點敘述包含 hardware fragmentation、multi-tool workflow、advanced testing external dependencies、limited legacy、Wi-Fi only on selected models、FR3 / 6G roadmap relies on add-ons。\n- 來源的 quick comparison table 將 R&S / CMX500 描述為 one platform：FR1 + FR2 + FR3 + WLAN + fading + IP + NTN + LTE + RedCap；將 Keysight 描述為 multiple UXM SKUs + external tools。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+          },
+          "score": 5.921709
+         },
+         {
+          "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › 對 Keysight 的主要主張\n| 主題 | 來源對 Keysight 的說法 | 限制 |\n|---|---|---|\n| Portfolio | UXM 5G Wireless Test Platforms E7515B/W/P/E/R、ProbSim、Nemo、RaySim、Atlas、C-V2X、cybersecurity tools | 未提供 Keysight 官方 datasheet 或版本 |\n| Architecture | Multi-Box UXM approach；不同 UXM 有不同 NR bandwidth、RF ports、Rel-17 support、WLAN capability、IP throughput、FR2 readiness | 未列各 SKU 的完整規格條件 |\n| Software model | Atlas + Channel Studio + RaySim + Nemo + WLAN tools + UXM-specific features；no unified automation environment | 這是 R&S battle card 觀點，需 Keysight 官方資料驗證 |\n| Support model | tiered KeysightCare model：Assured、Enhanced、Application Software Support；optional warranty / calibration assurance plan | 未提供 KeysightCare 文件版次或服務條款 |\n| Wi-Fi | Wi-Fi signaling only on selected models：E7515W、E7515P | 未提供 Keysight WLAN option / configuration 文件 |\n| RedCap | E7515R is dedicated RedCap / IoT model | 未提供 E7515R 官方規格或 order data |\n| FR3 / 6G | UXM-P bandwidth options + RaySim + future hardware / software；multi-component approach | future hardware / software 未標示日期、型號或 release status |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+          },
+          "score": 5.519434
+         },
+         {
+          "text": "Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard › 原文未解的問題\n- unresolved：新聞稿 frontmatter 的 published 欄位為空，正文也未標示正式發布日期；raw created 為 2026-09-11，但不可等同正式發布日。\n- unresolved：來源未標示 document version、press release ID 或 revision。\n- unresolved：來源未提供 European Commission regulation 的正式文件編號、標題或 publication date，只說 NG eCall will be obligatory starting January 1, 2026。\n- unresolved：來源未提供 EN 17240:2024 的完整標準標題、發布組織、章節或 test case IDs。\n- unresolved：來源未提供 [[Snapdragon Auto 5G Modem-RF]] 的完整型號、chipset generation、firmware、software build、module supplier 或 commercial availability。\n- unresolved：來源未提供 [[R&S CMX500]] configuration、[[R&S CMX-KA098]] version、license dependencies、test setup、radio conditions、IMS configuration、voice codec、GNSS simulation setup 或 pass/fail details。\n- unresolved：來源只說 simulating a [[PSAP]]，未列 PSAP scenario IDs、acceptance criteria 或是否涵蓋所有 EN 17240:2024 requirements。\n- unresolved：來源未說 mutual customers 的產業範圍、客戶名稱或 adoption status。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+          },
+          "score": 3.290919
+         },
+         {
+          "text": "Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard\n這份來源是 [[Rohde & Schwarz]] 新聞稿，說明 [[Rohde & Schwarz]] 與 [[Qualcomm Technologies]] 合作，以 [[R&S CMX500]] 搭配 [[R&S CMX-KA098]] 驗證 [[Snapdragon Auto 5G Modem-RF]] 的 [[NG eCall EN 17240 2024 verification]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+          },
+          "score": 2.510181
+         },
+         {
+          "text": "cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing\n這份來源是 [[Rohde & Schwarz]] 的新聞稿，說明其以 [[R&S CMX500]] radio communication tester 為基礎的 hybrid eCall 與 [[NGeCall over LTE]] / [[NGeCall over NR-LTE]] 測試方案，通過 [[cetecom advanced]] 執行的 certification testing。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+          },
+          "score": 3.205174
+         },
+         {
+          "text": "cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing › 與既有知識的關係\n- 既有 [[CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status]] 是 [[R&S CMX500]] 搭配 [[R&S CMX-KA098]] / [[R&S CMX-KF671B]] 的 NGeCall over NR/LTE capability list，狀態含 Dec. 2024、May. 2025 與 June 2025 標註。本來源是新聞稿層級的 certification claim，補充 CMX-KA098 已完成 EN 17240:2024+A1:2026 PSAP test scenarios，但不提供完整 test case list。\n- 既有 [[CMX_Configuration_Guide]] 與 [[CMX500 NGeCall configuration]] 已列 [[R&S CMX-KA099]] 作為 EN18052:2025 hybrid configuration 的 mandatory software item。本來源補充 CMX-KA099 completed PSAP test scenarios according to EN 18052:2025。\n- 既有 [[R&S CMX-KA099]] 只由 configuration guide 確認 material number 與 APPL NGECALL MULTI CELL description；本來源提供其 certification / PSAP scenario context，但仍不是 formal datasheet。\n- 既有 [[NGeCall over LTE]] 頁整理 CMW500 與 CMX500 capability list。本來源將 scope 推進到 EN 17240:2024+A1:2026 與 hybrid eCall / EN 18052:2025 compliance statement。\n- 既有 [[eCall GNSS Testing configuration]] 記錄 SMBV100B-based GNSS configuration；本來源只說 hybrid implementations 需 maintain GNSS positioning，未提供 SMBV100B 或 GNSS test suite 配置。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+          },
+          "score": 1.684825
+         },
+         {
+          "text": "cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing › 重點摘要\n- Rohde & Schwarz 公司資訊：2024/2025 fiscal year net revenue EUR 3.16 billion；2025-06-30 employees more than 15,000 worldwide。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+          },
+          "score": 0.346735
+         },
+         {
+          "text": "SatelliteEcoChain › 認證實驗室\n- [[Dekra]] — 關鍵元件欄為 ADT EMC；來源未填角色亮點或 R&S Solution。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 12,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/SatelliteEcoChain.md"
+          },
+          "score": 4.70377
+         },
+         {
+          "text": "SatelliteEcoChain › 天線\n- [[芳興科技]] — 角色亮點欄為 G/T；R&S Solution 欄列 [[R&S ZNA]] / [[R&S ZNB3000]]。\n- [[詠業]] — 來源只列企業名稱，未填角色亮點、R&S Solution 或 sales kits。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/SatelliteEcoChain.md"
+          },
+          "score": 3.786057
+         },
+         {
+          "text": "SatelliteEcoChain › 與既有知識的關係\n- [[4. Satellite Eco-chain in Taiwan]] 是 OneNote link hub，先前只列出 `SatelliteEcoChain.xlsx` 與外部網頁 / 圖片待讀；本來源是同名 Excel 經 markitdown 轉出的表格內容，因此補足部分待讀材料。\n- [[台灣太空產業]] 已依 [[0.Satcom Industry]] 整理 TASA、台灣太空產業地圖、2024 衛星地面設備產值與若干公司列名；本來源新增的是 Excel 表格中的分類與 R&S solution mapping，不提供市場規模或產值。\n- [[低軌衛星零組件與地面終端供應鏈]] 由 2026-09-15 市場分析報告支撐公司技術定位與市場敘事；本來源只可補充「某公司被列入某分類」與「R&S solution mapping」，不能覆蓋該報告中的市場主張。\n- [[Satellite User Terminal 外部資料清單]] 已保存 OneWeb / Kuiper / Starlink user terminal 待讀資料；本來源新增 UT 區段列名與 R&S CMX500 / CMP180 / SMW200A / SMBV100B 等測試設備線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 16,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/SatelliteEcoChain.md"
+          },
+          "score": 3.402486
+         },
+         {
+          "text": "SatelliteEcoChain › 衛星控制板 / OBC\n- [[精英電腦]] — 關鍵元件欄為 OBC；R&S Solution 欄為 Oscilloscope。\n- [[利安科技]]、[[張量科技]]、[[艾訊科技]] — 來源在衛星控制板 / OBC 區段列名，但未填角色亮點或 R&S Solution。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/SatelliteEcoChain.md"
+          },
+          "score": 2.791951
+         },
+         {
+          "text": "SatelliteEcoChain › References（來源原文列出但未擷取正文）\n- `GNSS Simulation with the SMBV100B - EN - CR_Internal`\n- `2025_09_satellite test solutions.pptx`\n- `Satellite T&M solution V2_MikeW.pdf`\n- `Satellite T&M solution.pptx`\n- `Oneweb Test Solutions Overview.pptx`\n- `DVB-S2_S2X_Overview.pptx`",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 19,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/SatelliteEcoChain.md"
+          },
+          "score": 2.62779
+         },
+         {
+          "text": "Hybrid eCall testing › 測試目的\n依 [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]]，hybrid eCall test specification [[EN 18052]] 要求 hybrid system combine different transmission paths and protocols，確保 eCall reliably reaches its destination。\n\n來源描述的實務語境：\n\n- 車輛使用 NG eCall functions，即 IP/IMS-based voice and data over 4G/5G。\n- 當 coverage 或 service quality degrades 時，車輛可 automatically fall back to available classic CS eCall 2G/3G transport paths。\n- Manufacturers 需要 validate hybrid implementations，以確保能 trigger calls、transmit [[MSD]]、maintain [[GNSS]] positioning，並提供 intelligible voice quality。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+          },
+          "score": 3.863508
+         },
+         {
+          "text": "Hybrid eCall testing › 使用限制\n- 本頁目前只由新聞稿支撐，不是 [[EN 18052]] 或 [[EN 17240]] 標準文本摘要。\n- 來源未提供正式 certification report、certificate number、測試日期或完整 test matrix。\n- 來源未列 national requirements 的國家名稱或版本。\n- 不可從新聞稿推論 [[R&S CMX500]] / [[R&S CMX-KA09x]] 已涵蓋所有 possible hybrid eCall test cases。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+          },
+          "score": 3.739688
+         },
+         {
+          "text": "Hybrid eCall testing › unresolved\n- [[EN 18052]] 的完整標準標題、發布組織與正式版本細節尚未由本來源提供。\n- [[EN 17240]]:2024+A1:2026 的 amendment A1 細節與發布狀態尚未由本來源提供。\n- completed PSAP test scenarios 的 coverage、test IDs、結果細節與 certification scope 未標示。\n- 來源未提供 degraded radio conditions、handover 與 voice quality 測試的具體設定。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+          },
+          "score": 3.714896
+         },
+         {
+          "text": "Hybrid eCall testing › 測試情境\n來源明示或列出的 network scenarios 包含：\n\n- [[VoNR]]。\n- [[VoLTE]]。\n- circuit-switched fallback。\n- handovers。\n- degraded radio conditions。\n- real-world mobile network conditions simulation。\n- various network scenarios emulation。\n\n來源沒有提供各 scenario 的 test case IDs、channel model、radio profile 或 pass/fail criteria。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+          },
+          "score": 1.916405
+         },
+         {
+          "text": "CMX500 NTN one-box tester › 來源定位\n依 [[Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026]]：\n\n- [[R&S CMX500]] radio communication tester has evolved into a versatile, all-in-one platform for NTN testing。\n- 來源明示 supported technologies：[[NR-NTN]]、[[NB-NTN]]、[[Direct-to-Cell]]（D2C / DTC）。\n- 來源宣稱 users can test all NTN technologies on both network and device level without multiple instruments。\n- [[Rohde & Schwarz]] 將於 [[MWC Barcelona 2026]] booth 5A80 / hall 5 展示 upgraded one-box tester，活動期間為 2026-03-02 至 2026-03-05。\n\n依 [[CMX500_Callbox]]：\n\n- Comprehensive support for NR-NTN。\n- Multi-orbit：[[LEO]]、[[MEO]]、[[GEO]]、[[GSO]]。\n- Complete channel emulation in one box。\n- Live graphics for NTN orbits and parameters。\n- NB-NTN coming end of `25。\n- Option 線索：[[R&S CMX-KS627B]] NR Signaling Extension Rel-17。\n\n此處的 one-box tester 是 PR / solution positioning 與簡報 use-case 語彙；正式 hardware configuration、software option stack、measurement specification 與 order number 仍需回 [[R&S CMX500]]、[[CMX500_specs_en_5216-4127-22_v1100]]、[[CMX500_Features_CSW9-20-0_en_32]]、[[CMX500 NR-NTN configuration]] 與正式 configurator。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/CMX500 NTN one-box tester.md"
+          },
+          "score": 2.129333
+         },
+         {
+          "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX500.md"
+          },
+          "score": 4.03711
+         },
+         {
+          "text": "AREG800A_specs_en_3609-8015-22_v0900 › 讀圖補充\n以下內容來自讀圖補充，可信度低於正文，不用於推翻正文。\n\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p001：封面可辨識 `AREG800A`、`AUTOMOTIVE RADAR ECHO GENERATOR`、`Specifications`、`Specifications | Version 09.00`、`R&S`；產品本體可辨識 `R&S® AREG800A Automotive Radar Echo Generator`、`AREG`；螢幕欄位可勉強辨識 `User Ligths`、`Instrument Setup`、`System Config`、`Update Setup`；左側按鍵可辨識 `Home`、`Loc`、`Preset`、`Help`；另可辨識 `Esc`、`Enter`、`On/Off`。主機螢幕內大部分內容、多數按鍵小字、外接模組細小標示無法辨識。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p021：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `21`；無表格、圖表、方塊圖、曲線圖或螢幕截圖等實質內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p022：可見 `Version 09.00, September 2025`、頁碼 `22`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`；除文件資訊外無其他可辨識內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p023：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `23`；無圖表、方塊圖、曲線圖、表格、螢幕截圖或內文。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+          },
+          "score": 0.896535
+         },
+         {
+          "text": "CMX500 NTN one-box tester › 兩種 testing configurations\n來源說 CMX500 supports two primary testing configurations：\n\n1. [[Full Satellite Access Network emulation]]：面向 device manufacturers，simulating the complete NTN architecture for comprehensive device testing。\n2. [[gNB and 5G core network emulation]]：面向 satellite network operators，validating satellite network components against standards-compliant cellular technologies。\n\n來源沒有提供這兩種 configurations 的 hardware BOM、cell 數、band、orbit、payload type、gateway interface 或 software license list。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/CMX500 NTN one-box tester.md"
+          },
+          "score": 0.89189
+         },
+         {
+          "text": "R&S PWC200 › 與 3GPP radiated conformance 的關係\n依 [[R&S portfolio for O-RU testing]] Slide 51：\n\n- 來源說 PWC200 / PWS is recognized like CATR as one of the methods for 3GPP BS radiated conformance testing（[[3GPP TR 37.941]]）。\n- 這把 PWC200 連到 [[3GPP TS 38.141-2]] radiated conformance testing 與 [[3GPP TR 37.941]] OTA test methodology context。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S PWC200.md"
+          },
+          "score": 0.640016
+         },
+         {
+          "text": "R&S CMX-KC665B › unresolved\n- Summary verified 12，但本次萃取列出的 KC665B測項為 11 個；需回原始 Excel 確認是否有漏列。\n- Package-level license 欄未列 [[R&S CMX-KM606]]，與 [[CMX500 NR-NTN configuration]] 中 RF measurement configuration 的 scope 關係待產品管理或 configurator 確認。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX-KC665B.md"
+          },
+          "score": 1.109323
+         },
+         {
+          "text": "R&S CMX500 vs Keysight\n本頁整理 [[2026_02_CMX500_Keysight_Sales_Battle_Card]] 中 [[R&S CMX500]] 對 [[Keysight]] 的競品比較論點；其性質是 sales positioning，不是 binding technical specifications。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/syntheses/R&S CMX500 vs Keysight.md"
+          },
+          "score": 14.636966
+         },
+         {
+          "text": "R&S CMX500 › 文件依據與版次\n本頁並列使用兩份來源：\n\n| 來源 | 文件類型 | 文件編號 | 版次 / 軟體 | 日期 | 用途 |\n|---|---|---|---|---|---|\n| [[CMX500_specs_en_5216-4127-22_v1100]] | Specifications | PD 5216.4127.22 | Version 11.00 | August 2025 | binding specifications、hardware unit 型號、order number、環境、尺寸、電源、service |\n| [[CMX500_Features_CSW9-20-0_en_32]] | Features and Functions | 1179.1164.02 | Version 32；CSW 9.20.0 and higher | 來源未標示；© 2026 | GUI、software features、signaling / application / measurement options 與使用介面 |\n\n[[CMX500_specs_en_5216-4127-22_v1100]] 的 product data 適用條件：ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘；符合指定 environmental conditions；遵守 recommended calibration interval；已執行所有適用的 internal automatic adjustments。文件區分 specifications with limits、non-traceable specifications、typical data、nominal values、measured values 與 uncertainties；non-traceable specifications、typical data、nominal values、measured values 不由 [[Rohde & Schwarz]] 擔保。\n\n[[CMX500_Features_CSW9-20-0_en_32]] 明示：**Subject to change – data without tolerance limits is not binding**。它是 features/functions overview，不是 technical specifications datasheet。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX500.md"
+          },
+          "score": 4.900487
+         },
+         {
+          "text": "R&S CMX500 vs amarisoft › 使用限制\n- 本頁不可取代 [[R&S CMX500]]、[[R&S CMW500]]、[[R&S CMP180]]、[[R&S CMP200]]、[[R&S CMW100 K06]] 的正式 specifications / features documents。\n- “Only R&S” 與 “safe and future-proof choice” 是 battle card 的 sales language，不應當作可驗證技術規格。\n- 對 [[amarisoft]] 的主張目前只有 R&S internal battle card 單一來源；若用於客戶文件，應另查 [[amarisoft]] 官方資料與第三方證據。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/syntheses/R&S CMX500 vs amarisoft.md"
+          },
+          "score": 8.439015
+         },
+         {
+          "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX500.md"
+          },
+          "score": 3.553657
+         },
+         {
+          "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 4.40176
+         },
+         {
+          "text": "NG eCall EN 17240 2024 verification › 與既有 NGeCall / hybrid eCall 頁面的關係\n- [[NGeCall over LTE]] 整理 CMW500 與 CMX500 capability lists，本頁只整理 PR 中的 Qualcomm / Snapdragon verification event。\n- [[CMX500 NGeCall configuration]] 整理 configuration guide 的 mandatory / optional items，本頁不取代正式 configuration 或 quote。\n- [[Hybrid eCall testing]] 以 EN 18052:2025 與 hybrid fallback 為核心；本頁聚焦 EN 17240:2024 NG eCall verification，不描述 classic CS fallback 或 EN 18052 test scope。\n- [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 提到 EN 17240:2024+A1:2026 與 cetecom advanced certification testing；本頁來源只提 EN 17240:2024，且未說第三方 certification report。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+          },
+          "score": 1.588172
+         },
+         {
+          "text": "AREG800A_specs_en_3609-8015-22_v0900 › 與既有知識的關係\n本來源已對應既有來源頁 [[AREG800A_specs_en_3609-8015-22_v0900]] 與實體頁 [[R&S AREG800A]]。本次 ingest 依同一 raw source 重新校對既有頁面，補入或修正：\n\n- [[R&S AREG8-81S]] / [[R&S AREG8-81D]] 的 AUX IF output、RX power output、AUX IF input 與 connector 資訊。\n- [[R&S QAT100]] 搭配 [[R&S AREG800A]] 的 IF level 與 amplitude flatness 摘要。\n- 讀圖補充 p001、p021、p022、p023 的低可信度註記。\n- `0.7 GHz to 5.7 GHz` 條件、RF transfer characteristics 中未完整保留 option code 的 unresolved 記錄。\n\n本來源與其他 Rohde & Schwarz Productions 頁面（如 [[R&S SGU100A]]、[[R&S SGT100A]]、[[R&S SMW200A]]）同屬 test & measurement 產品資料，但用途為 automotive radar echo generation，不屬 RF signal generator 或 spectrum analyzer。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+          },
+          "score": 2.449444
+         },
+         {
+          "text": "R&S AREG800A › Echo generation\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Echo generator type：`dynamic artificial object generation`。\n- Echo generation concept：\n  - `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n  - `digital`：用於 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 air gap value；maximum generated distance 為 `3000 m`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S AREG800A.md"
+          },
+          "score": 6.421744
+         },
+         {
+          "text": "欣銓 › 來源中的說法\n- [[Power IC - Power Management IC]] 在功率半導體封測區塊將 [[欣銓]] 寫為「車用與功率IC測試核心廠」。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/欣銓.md"
+          },
+          "score": 2.8079
+         },
+         {
+          "text": "朋程 › 來源中的說法\n- [[Power IC - Power Management IC image 1]]（來源未標示日期；取得於 2026-09-04）將 [[朋程]] 列於產業分類「整流/車用二極體」。\n- [[Power IC - Power Management IC image 1]]（來源未標示日期；取得於 2026-09-04）在核心能力欄寫「車用整流二極體全球第一」。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/朋程.md"
+          },
+          "score": 3.44403
+         },
+         {
+          "text": "CMX500 NTN one-box tester › Propagation emulation vs fading\n來源宣稱 CMX500 是 only available [[NTN]] test solution that differentiates between propagation emulation and fading，並將：\n\n- space-to-ground effects：Doppler、delay、scattering；\n- terrestrial impairments：reflections、receiver-induced Doppler；\n\n分別建模與控制。此主張另整理於 [[NTN propagation emulation and fading]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/CMX500 NTN one-box tester.md"
+          },
+          "score": 1.180257
+         },
+         {
+          "text": "AREG800A_specs_en_3609-8015-22_v0900 › 關鍵實體與概念\n- [[R&S AREG-MFP]]、[[R&S AREG-BFP]] — production frontend options，支援 monostatic 或 bistatic。\n- [[Automotive radar echo generation]]、[[FMCW radar]]、[[Radar cross-section]]、[[Doppler frequency shift]]、[[Hardware-in-the-loop]]、[[Open Simulation Interface]]、[[SCPI]]、[[Air gap]] — 本來源涉及的技術概念。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+          },
+          "score": 0.743672
+         },
+         {
+          "text": "R&S ATS1800C › 來源中的定位\n依 [[TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02]]（2020-11-02）：\n\n- Slide 16 的 OTA testing portfolio 將 [[R&S ATS1800C]] 標示為 `FR2 UE conformance & CTIA`、`30 cm QZ`、`RF, RRM, PCT`。\n- Slide 19 標題為 `CATR with ATS1800C`。\n- Slide 20 標題為 `ATS1800C – compact 5G NR mmWave test chamber`。\n- Slide 20 描述其為 very compact and mobile far-field over-the-air test system，based on compact antenna test range technology。\n- Slide 20 說明其具備 state-of-the-art CATR reflector、optimized edges、high-precision surface finishing、high shielding effectiveness >90 dB、large 30 cm and 3GPP compliant quiet zone、spherical 3D positioner 與 built-in hardware triggering functionality。\n- Slide 20 稱其 suitable for conformance testing as specified by 3GPP, CTIA antenna performance testing and device beam characterization。\n- Slide 22 的 FR2 system configuration elements 將 [[R&S ATS1800C]] 與 [[R&S CMW500]] + [[R&S CMX500]]、IF boards & RRHs、RF connection box、[[R&S CMX-RF42]] 同列。\n\n依 [[5G NR Base station conformance testing - EN - UR_Public]]（2023-06）：\n\n- Slide 標題為 `ATS1800C conformance grade catr chamber`。\n- 來源位於 [[5G NR Base Station Conformance Testing]] 的 OTA measurement system set-ups / chamber section。\n- 來源語境連到 [[3GPP TS 38.141-2]] radiated conformance testing、[[CATR]]、OTA chamber types 與 FR2 OTA 測試。\n\n依 [[GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests]]（06.2020）：\n\n- [[R&S ATS1800C]] 是 compact antenna test range（CATR）test system。\n- 設計用於 5G NR antennas、modules、devices（user equipment, UE）的 characterization，涵蓋 R&D 到 conformance tests。\n- 支援 active 與 passive measurements，包括 3D antenna gain patterns、ACLR、EVM、EiRP、TRP、EiS。\n- 適合 FR2 base station conformance transmitter tests。\n- Ordering information：Compact antenna test range OTA test system，Order No. `1534.1800K02`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ATS1800C.md"
+          },
+          "score": 1.617725
+         },
+         {
+          "text": "R&S CMX-KC665B › Required licenses\n依 [[Sequencer-CMX-Test_Packages_Database]]，[[R&S CMX-KC665B]] 的 required licenses 為：\n\n- [[R&S CMX-KS600]]\n- [[R&S CMX-KS627]]\n- [[R&S CMX-KM600]]\n\n⚠️ 來源 [[Sequencer-CMX-Test_Packages_Database]]（2026-06-30）說 [[R&S CMX-KC665B]] 的 required licenses 為 [[R&S CMX-KS600]]、[[R&S CMX-KS627]]、[[R&S CMX-KM600]]，但既有頁面 [[CMX500 NR-NTN configuration]] 說 [[R&S CMX-KC665B]] 若 RF measurements needed 另需 [[R&S CMX-KM600]] / [[R&S CMX-KM606]]。判斷：暫視為 sequencer package database 與 NR-NTN configuration guide 的 scope 差異；本頁不得把 package-level license 欄當成完整 NR-NTN application configuration。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX-KC665B.md"
+          },
+          "score": 0.94395
+         },
+         {
+          "text": "R&S CMX-KF651X › 使用限制\n- 本頁只由 configuration guide 與 XLAPI scenario database 支撐；來源未提供 material number、script package order number、release note、XLAPI package delivery format 或 commercial availability。\n- [[R&S CMX-KF651X]] 的 protocol automation scope 不可外推成正式 conformance coverage；若涉及 RF conformance / preconformance，來源另列 [[R&S CMX-KC665B]]。\n- [[XLAPI-CMX_Scenario_Database]] 的 verified / implemented / defined 狀態不可替代正式 release notes、supported bands matrix、orbit / payload matrix 或 customer acceptance criteria。\n- 多數 scripts minimum hardware 為 [[R&S CMX500 OBT]]，但完整 hardware / software configuration 仍需依 [[CMX_Configuration_Guide_NR-NTN]] 與正式 configurator 確認。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 14,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX-KF651X.md"
+          },
+          "score": 1.714815
+         },
+         {
+          "text": "R&S CMX500 vs Keysight › 對比表\n| 主題 | R&S / CMX500 positioning | Keysight positioning | 來源限制 |\n|---|---|---|---|\n| NTN | first validated 3GPP NR-NTN RF + RRM + PCT with [[Samsung]]；integrated | NTN solutions；different conformance validation story | 未提供 validation report、PTCRB RFT 555 版本或 test case list |\n| RedCap | integrated (OBT-Lite) in CMX500 platform | separate [[Keysight E7515R]] RedCap / IoT-only SKU | RedCap adoption 與 E7515R 需正式資料 |\n| Legacy | [[R&S CMW500]] covers all legacy + EN-DC | no integrated 2G/3G/IMS；requires separate platforms | CMW500 正式能力需引用 [[CMW_dat-sw_en_5213-9211-22_v1700]] |\n| Message | fewer boxes, fewer SKUs, more capability, lower TCO | more models and tools, higher integration effort | TCO 未有算式或實證資料 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/syntheses/R&S CMX500 vs Keysight.md"
+          },
+          "score": 1.797409
+         },
+         {
+          "text": "Keysight\n[[Keysight]]（圖中亦寫作 [[是德科技]]）是在既有 PCB 測試圖像來源中被列為高頻高速 [[PCB]] 測試解決方案相關公司的測試量測廠商名稱；在 [[2026_02_CMX500_Keysight_Sales_Battle_Card]] 中，Keysight 也被描述為大型美國 test & measurement vendor 與 [[R&S CMX500]] 的 wireless device testing 競品供應商。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Keysight.md"
+          },
+          "score": 4.397517
+         },
+         {
+          "text": "R&S CMX500 vs amarisoft\n本頁整理 [[2026_02_CMX500_Amarisoft_Sales_Battle_Card]] 中的競品比較論點；其性質是 sales positioning，不是 binding technical specifications。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/syntheses/R&S CMX500 vs amarisoft.md"
+          },
+          "score": 6.054019
+         },
+         {
+          "text": "R&S CMW500 › 規格條件\n- 未標示 tolerance limits 的資料不具 binding 效力。\n- 規格以 24-month calibration interval 為基準，除非另有說明。\n- 需至少 15 minutes warm-up time，環境溫度與指定 environmental conditions 符合要求，calibration cycle 已遵守，且所有 internal automatic adjustments 已執行。\n- `typ.` 為 typical values，在 final test 中驗證，但 Rohde & Schwarz 不保證。\n- Nominal values 為 design parameters，Rohde & Schwarz 不保證。\n- Calibration interval：12 months recommended for highest accuracy；24 months 時需在 specified RF generator 與 RF analyzer level uncertainty 加上 0.2 dB。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMW500.md"
+          },
+          "score": 8.846251
+         },
+         {
+          "text": "R&S PCB test solutions › 未決事項\n- Slide 21 未標示 R&S PCB test solutions 的正式文件版次與產品 portfolio 對應。\n- Slide 21 未標示 [[TDR]]、[[Delta-L]]、ISD/ADK、DK/DF extraction 的標準版本、演算法、測試條件或工具型號。\n- Slide 21 未展開 PL、ISD、ADK、RSTW、SWISSTO12、QWED、KEYCOM。\n- 需回看原始 PPTX 圖像確認各圖示、商標、箭頭與工具對應關係。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 3.753047
+         },
+         {
+          "text": "NG eCall EN 17240 2024 verification › 驗證範圍\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 驗證對象：[[Snapdragon Auto 5G Modem-RF]] 的 [[Next Generation eCall]] functionality。\n- 合作方：[[Rohde & Schwarz]] 與 [[Qualcomm Technologies]]。\n- 測試設備：[[R&S CMX500]] mobile radio tester。\n- Software context：來源稱 [[R&S CMX500]] with [[R&S CMX-KA098]] software option can be effectively used for NG eCall testing under realistic network conditions。\n- 標準：[[EN 17240]]:2024。\n- 測試情境：simulating a [[PSAP]]。\n- 驗證內容：NG eCall including voice and data transmission，並 validated the compliance of the implementation at both ends with EN 17240:2024。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+          },
+          "score": 1.219887
+         },
+         {
+          "text": "欣銓 › 限制與不可推論事項\n- 來源未標示 Threads 原文發布日期。\n- 來源未提供 [[欣銓]] 的測試項目、車用 / 功率 IC 占比、客戶、營收、產能或市占率。\n- 「核心廠」是來源用語，缺少排名或供應關係證據。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/欣銓.md"
+          },
+          "score": 2.213529
+         },
+         {
+          "text": "朋程 › 限制與不可推論事項\n- 「全球第一」是圖上用語；來源未提供排名口徑、市占率、年度、產品範圍或資料來源拆分。\n- 來源未標示日期，因此不能把上述列名寫成特定時間點的市場現況。\n- 來源是概念股整理表，不構成投資建議或供應鏈驗證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/朋程.md"
+          },
+          "score": 0.401528
+         },
+         {
+          "text": "CMX configuration guide › NR-NTN\n[[CMX_Configuration_Guide_NR-NTN]] 專門整理 [[R&S CMX500]] 的 [[NR-NTN]] 配置，包含 Golden S/L-band NR-NTN callbox、fading、user-defined CDL / TDL、mobility、Rel. 18 add-on、RF 3GPP preconformance、Ku-band n247、Ka-band n248、E2E application over NR-NTN、xLAPI protocol regression，以及 optional [[R&S SMBV100B]] NTN companion。\n\n依該來源，Golden S/L-band NR-NTN callbox 的 scope 為 2 cells、Rel. 17、no fading、no mobility；硬體為 [[R&S CMX-PB70H]] + 1× [[R&S CMX-B200A]] + [[R&S CMX-B300C]] + [[R&S CMX-B600B]]；軟體為 [[R&S CMX-KS600B]] + [[R&S CMX-KS627B]] + [[R&S CMX-KA100]] + [[R&S CMX-KM600]] + [[R&S CMX-KM606]]。\n\nNR-NTN source rules include：\n\n- [[R&S CMX-B600B]] 是 S/L-band NTN standard RF path，sufficient for n250–n256。\n- Standard S/L-band callbox 不需要 [[R&S CMX-B500A]]。\n- Ku-band n247 需要 1× IF unit（[[R&S CMX-B500A]] 或 [[R&S CMX-B650]]），不需要 RRH。\n- Ka-band n248 需要 2× IF unit（DL + UL）加 [[R&S CMXHEAD30]] 或 [[R&S CMXHEAD50]] on UL path。\n- [[R&S CMX-KS627B]] 是 NR-NTN Rel. 17 mandatory option，也是 [[R&S CMX-KM606]] 與 [[R&S CMX-KC665B]] 的 prerequisite。\n- [[R&S CMX-KE611]] 用於 predefined NR NTN fading profiles，來源明示不需要 [[R&S CMX-KE601]] 或 [[R&S CMX-KS627M]]；custom CDL / TDL 另加 [[R&S CMX-KE620]]。\n- Mobility / handover in scope 時需要 [[R&S CMX-KS600M]] + [[R&S CMX-KS627M]] tier match。\n- NR NTN-specific ASN.1 editing in scope 時需要 [[R&S CMX-KS600X]] + relevant X tier + [[R&S CMX-KT600]]。\n- [[R&S CMX-KF651X]] 是 Release 17 NR NTN xLAPI scenario package，用於 protocol regression automation，不是 standard callbox default KF。\n\n⚠️ 來源 CMX_Configuration_Guide_NR-NTN（converted 2026-09-10；正式文件日期來源未標示）說 [[R&S CMX-B200A]] Max 3× per CMX500，但既有頁面 [[R&S CMX500]] 說 CMX500 hardware unit 組合限制為 1 到 4 accelerator units。判斷：暫視為 NR-NTN guide 的 application-specific rule 與 CMX500 general hardware capacity 的 scope 差異，不得把 NR-NTN 的 Max 3× 當成 CMX500 全產品規格上限。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/CMX configuration guide.md"
+          },
+          "score": 1.811525
+         },
+         {
+          "text": "R&S CMX500 vs Keysight › 使用限制\n- 本頁不可取代 [[R&S CMX500]]、[[R&S CMW500]] 或 Keysight UXM 各型號的正式 specifications / features documents。\n- 對 [[Keysight]] 的主張目前只有 R&S internal battle card 單一來源；若用於客戶文件，應另查 Keysight 官方資料與第三方證據。\n- only platform、first validated、leadership、lower TCO、fewer boxes 等語句是 sales language，不應當作可驗證技術規格。\n- RFU18、FR3、2000 MHz aggregated bandwidth、AI Script Assistant、Keysight RaySim / Atlas / Channel Studio 的正式功能邊界與版本仍需補來源。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/syntheses/R&S CMX500 vs Keysight.md"
+          },
+          "score": 1.352667
+         },
+         {
+          "text": "R&S CMX500 vs amarisoft › R&S offensive plays\n依 [[2026_02_CMX500_Amarisoft_Sales_Battle_Card]]：\n\n- **One-Box FR1 + FR2 + Wi-Fi Signaling + Validated Testing**：將 [[R&S CMX500]] 定位為 integrated platform。\n- **Migration Kit**：script conversion、Python / [[XLAPI]] mapping、on-site bring-up、trade-in program；來源未列交付細節或商務條件。\n- **NTN & RedCap Acceleration**：強化 validated vs. simulated message。\n- **O-RAN Upgrade Path**：R&S + [[VIAVI]] → ORU conformance / NES；來源未展開產品與規格。\n- **Production Path (ATE)**：將 CMX validation scale 到 [[R&S CMP180]]、[[R&S CMP200]]、[[R&S CMW100 K06]] production lines。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/syntheses/R&S CMX500 vs amarisoft.md"
+          },
+          "score": 1.119038
+         },
+         {
+          "text": "R&S CMP180 › 產品定位\n[[R&S CMP180]] 是 Radio Communication Tester。依 [[CMP180 Features and Functions Version 09]]，文件涵蓋 global options、Bluetooth、CDMA2000、GSM、LP-IoT、LTE、NB-IoT、NR、spectrum analysis、UWB、WCDMA、WLAN、[[R&S VSE]] options 與 ordering information。\n\n依 [[CMP180 Specifications Version 08.00]]，CMP180 支援 simultaneous receiver and transmitter testing，並提供 RF generator/analyzer no. 1 與可選 RF generator/analyzer no. 2 的多埠 RF 測試架構。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMP180.md"
+          },
+          "score": 3.11664
+         },
+         {
+          "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 3.606005
+         },
+         {
+          "text": "NG eCall EN 17240 2024 verification › Regulatory transition context\n同一來源提供下列背景，但未列 regulation 文件編號：\n\n- [[eCall]] automated vehicle emergency call system introduced in 2015。\n- eCall 自 2018 年起是 all new cars sold within the European Union 的 mandatory requirement。\n- 來源稱 2G / 3G circuit-switched cellular networks become obsolete，因此 emergency call systems 需要 adapted to 4G / 5G packet-switched cellular networks。\n- 來源稱 [[European Commission]] most recent regulation 定義 NG eCall will be obligatory starting **2026-01-01**。\n- 來源稱 EN 17240:2024 establishes guidelines for testing eCall systems over [[IMS]] networks, including advanced 4G LTE and 5G NR technologies。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+          },
+          "score": 1.129084
+         },
+         {
+          "text": "R&S SGT100A › General data\nPower supply：\n\n| 項目 | 規格 |\n|---|---|\n| AC input voltage range | `100 V to 240 V`, `±10 %` |\n| AC supply frequency | `50 Hz to 60 Hz`, `±5 %` |\n| Maximum input current | `1.7 A` |\n| Power consumption | `65 W (meas.)` |\n| Power factor correction | complies with `EN 61000-3-2` |\n\nCompliance / environmental：\n\n- Electrical safety compliance：`IEC 61010-1`, `EN 61010-1`, `CAN/CSA-C22.2 No. 61010-1-04`, `UL 61010-1`。\n- Test marks：`VDE-GS`, `CSA C US`。\n- EMC：`EN 55011 class A`, `EN 61326-1 (industrial environment)`, `EN 61326-2-1`。\n- Vibration sinusoidal：`5 Hz to 150 Hz`，55 Hz 時 max. `2 g`，55 Hz to 150 Hz 時 const. `0.5 g`，符合 `EN 60068-2-6`。\n- Vibration random：`10 Hz to 300 Hz`，acceleration `1.2 g (RMS)`，符合 `EN 60068-2-64`。\n- Shock：`40 g shock spectrum`，符合 `MIL-STD-810E`, method no. 516.4, procedure I。\n- Operating temperature range：`0 °C to +50 °C`，符合 `EN 60068-2-1`, `EN 60068-2-2`。\n- Storage temperature range：`–40 °C to +71 °C`。\n- Climatic resistance：`+40 °C / 95 % relative humidity`，符合 `EN 60068-2-30`。\n- Altitude：operating up to `4600 m`；storage up to `4600 m`。\n\nDimensions / weight：\n\n| 條件 | Dimensions | Weight |\n|---|---|---|\n| without `R&S®SGT-B88` option | `246 mm × 52.5 mm × 401 mm (9.69 in × 2.07 in × 15.79 in)`, `1 HU`, `½ 19 inch rack width` | fully equipped `4.0 kg (8.82 lb)` |\n| with `R&S®SGT-B88` option | `246 mm × 98 mm × 401 mm (9.69 in × 3.86 in × 15.79 in)`, `2 HU`, `½ 19 inch rack width` | `4.6 kg (10.14 lb)` |\n\nCalibration interval：recommended calibration interval `3 years`，條件 `40 h/week operation in the full range of the specified environmental conditions`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 23,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SGT100A.md"
+          },
+          "score": 2.490012
+         },
+         {
+          "text": "欣銓\n[[欣銓]] 是 [[Power IC - Power Management IC]]（原文未標示日期；raw converted 2026-09-16）列於 [[功率半導體封測]] 分類的公司名稱。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/欣銓.md"
+          },
+          "score": 0.154007
+         },
+         {
+          "text": "艾姆勒\n[[艾姆勒]] 是 [[Power IC - Power Management IC image 3]]（來源未標示日期；取得於 2026-09-04）列於「下游：模組、散熱與終端系統應用」中「車用/功率散熱模組機構件」分類的公司名稱，圖上代號為 2241。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/艾姆勒.md"
+          },
+          "score": 0.493055
+         },
+         {
+          "text": "FR3 測試與 RFU18 battle card 主張 › 與既有 CMX500 正式規格的差異\n⚠️ [[2026_02_CMX500_Anritsu_Sales_Battle_Card]]（2026-02-26）說 [[R&S CMX500]] 在 FR2 有 **>16 GHz instantaneous bandwidth** 與 **>10 Gbps data rate**，但既有頁面 [[R&S CMX500]] 依 [[CMX500_specs_en_5216-4127-22_v1100]] 說 [[R&S CMX-B500A]] IF unit bandwidth up to **1 GHz**、[[R&S CMX-B600B]] RF bandwidth **250 MHz**，且 [[CMX500_Features_CSW9-20-0_en_32]] 對 NR FR2 measurements 列 channel bandwidth **50 / 100 / 200 / 400 MHz**。判斷：battle card 數字不可當作 CMX500 binding specifications；引用時只能標示為 2026-02-26 sales claim，需等待正式 RFU18 / FR2 high-bandwidth 規格文件。\n\n⚠️ [[2026_02_CMX500_Anritsu_Sales_Battle_Card]]（2026-02-26）說 quick comparison table 中 [[R&S CMX500]] FR1 bandwidth 為 **500 MHz (& future scalable)**，但既有頁面 [[R&S CMX500]] 依 [[CMX500_specs_en_5216-4127-22_v1100]] 說 [[R&S CMX-B600B]] RF generator RF bandwidth **250 MHz**、RF analyzer demodulation bandwidth **250 MHz**，而 [[CMX500_Features_CSW9-20-0_en_32]] 說 RF unit 每個 RX 最高 **500 MHz bandwidth**、每個 TX 最高 **200 MHz total carrier bandwidth**。判斷：battle card 的 FR1 500 MHz 說法與正式規格口徑不同；報價、規格比較或承諾前需回查正式 CMX500 / RFU option 文件。\n\n⚠️ [[2026_02_CMX500_Keysight_Sales_Battle_Card]]（2026-02-26）說 quick comparison table 中 [[R&S CMX500]] cellular FR1 up to **18 GHz**、FR2 up to **50 GHz (RRH evo)**，但既有頁面 [[R&S CMX500]] 依 [[CMX500_specs_en_5216-4127-22_v1100]] 說 [[R&S CMX-B600B]] RF unit frequency range **400 MHz to 8000 MHz**，[[R&S CMX-B500A]] IF generator **6 GHz to 20 GHz**、IF analyzer **4 GHz to 20 GHz**，FR2 remote radio heads 為 [[R&S CMXHEAD30]] / [[R&S CMXHEAD50]] / [[R&S CMXHEAD50-Evo]]。判斷：Keysight battle card 的 quick table 可能把 FR1 / FR3 / RFU18 roadmap 口徑混寫；正式規格比較不得直接引用 FR1 up to 18 GHz。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/FR3 測試與 RFU18 battle card 主張.md"
+          },
+          "score": 1.298021
+         },
+         {
+          "text": "RAR UL Grant › Frequency hopping flag\n依 [[PUSCH Frequency Hopping]]：\n\n- If the value of the frequency hopping flag is 0, the UE transmits the [[PUSCH]] without frequency hopping。\n- Otherwise, UE transmits [[PUSCH]] with [[PUSCH frequency hopping]]。\n- 來源引用 [[3GPP TS 38.213]] Table 8.2-1 Random Access Response Grant Content，列出 Frequency hopping flag 為 1 bit。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/RAR UL Grant.md"
+          },
+          "score": 1.225598
+         },
+         {
+          "text": "KL730 › 來源中的說法\n- [[Edge AI Chips image 16]]（來源未標示日期；取得於 2026-09-04）右下晶片渲染圖上可辨識文字為 `KL730`。\n- [[Edge AI Chips image 16]] 標題為「耐能 (Kneron) – KLM730A」，並列出 [[KDP730 NPU]]、[[Arm Cortex-A55]] 4 核、DSP、MJPEG / H.264 / H2.65 Decoder、CSI / DSI、GPIO 等規格文字。\n- [[Edge AI Chips image 16]] 右下方塊圖可辨識 CPU、NPU、DDR、USB2.0 OTG、USB3.0、MIPI-CSI Camera Input、MIPI DSI I/F、GigE ETH、UART、I2C、GPIO / PWM 等方塊。\n- [[Edge AI Chips image 23]]（來源未標示發布日期；取得於 2026-09-04；圖上 roadmap 年份含 2019、2026、2028）在 [[Kneron Product Roadmap]] 中列出 `KL 730`。\n- [[Edge AI Chips image 23]] 中 `KL 730` 方塊既有讀圖記錄為 `Up to 12Mp`、`Fisheye/Single cam`、`3.6e TOPS`、`Security`、`AIoT`、`Automotive`。\n- [[Edge AI Chips image 49]]（來源未標示日期；raw 轉檔於 2026-09-04；圖上 roadmap 年份含 2019、2026、2028）在 [[Kneron Product Roadmap]] 中列出 `KL 730`。\n- [[Edge AI Chips image 49]] 中 `KL 730` 方塊讀圖為 `Up to 12MP`、`Fisheye/Single cam`、`36 TOPS`、`Security`、`AIoT`、`Automotive`。\n- [[Edge AI Chips image 42]]（來源未標示日期；raw 轉檔於 2026-09-04）在 [[Kneron]] / [[KLM730A]] 圖卡的晶片渲染圖上可辨識 `KL730`。\n- [[Edge AI Chips image 42]] 右下方塊圖包含 Cortex Quad Core、[[KDP730 NPU]]、DSP、H265 H264/MJPEG、Gige ETH、USB2.0 OTG、USB3.0、MIPI CSI、Bayer-ISP、3D DPE IP、Security、eFuse、GPIO / PWM、SPI、UART、I2C、I2S 等可辨識文字，但來源未明示該方塊圖完整正式名稱。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/KL730.md"
+          },
+          "score": 1.691194
+         },
+         {
+          "text": "O-RU testing › 與既有知識的關係\n- [[Small Cell BTS 測試資料清單]] 將 `R&S portfolio for O-RU testing` 與 `5G NR Base station conformance testing` 同列於 Conformance test 區段。\n- [[5G NR Base Station Conformance Testing]] 處理 [[3GPP TS 38.141-1]] / [[3GPP TS 38.141-2]] 的 base station conformance；[[R&S portfolio for O-RU testing]] 則把 O-DU / O-RU pair-wise / isolated 測試放入同一脈絡。\n- [[Network energy saving]] 與 O-RU testing 的交集由 [[MWC2025---WIC-INFRA]] Slide 24 支撐：O-RU energy efficiency testing 連到 [[ETSI ES 202 706-1]]、[[R&S RTO6]] 與 power supply。\n- [[R&S portfolio for O-RU testing]] 補出 [[O-RAN Beamforming Measurements]]，和 [[Beamforming]] / [[相控陣列天線]] 形成技術連結。\n- [[R&S PWC200]]、[[R&S ATS1800C]] 連到 [[OTA testing]] 與 [[3GPP TS 38.141-2]] radiated conformance testing。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/O-RU testing.md"
+          },
+          "score": 0.100899
+         },
+         {
+          "text": "CMX configuration guide › LTE-DTC\n[[CMX_Configuration_Guide_LTE-DTC]] 專門整理 [[R&S CMX500]] 的 [[LTE-DTC]] / [[Direct-to-Cell]] 配置，包含 Golden Starlink LTE Direct-to-Cell xLAPI regression、LTE-DTC signaling lab、LTE-DTC + RF measurements 與 LTE-DTC + deeper protocol scope。\n\n依該來源，Golden Starlink LTE-DTC xLAPI regression 的硬體為 [[R&S CMX-PB70H]]、2× [[R&S CMX-B200A]]、[[R&S CMX-B300C]]、[[R&S CMX-B600B]]；軟體為 [[R&S CMX-KS600B]]、[[R&S CMX-KS550B]]、[[R&S CMX-KA100]]、[[R&S CMX-KF655X]]。\n\n⚠️ 來源 CMX_Configuration_Guide_LTE-DTC（2026-09-10 converted；文件日期來源未標示）說 [[R&S CMX-B200A]] 在 LTE-DTC guide 中 Max 3× per CMX500，但既有頁面 [[R&S CMX500]] 說 CMX500 hardware unit 組合限制為 1 到 4 accelerator units。判斷：暫視為 LTE-DTC guide 的 application-specific rule 與 CMX500 general hardware capacity 的 scope 差異，不得把 LTE-DTC 的 Max 3× 當成 CMX500 全產品規格上限。\n\n詳細見 [[CMX500 LTE-DTC configuration]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/CMX configuration guide.md"
+          },
+          "score": 1.720151
+         },
+         {
+          "text": "R&S CMX500 vs Anritsu\n本頁整理 [[2026_02_CMX500_Anritsu_Sales_Battle_Card]] 中 [[R&S CMX500]] 對 [[Anritsu]] 的競品比較論點；其性質是 sales positioning，不是 binding technical specifications。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/syntheses/R&S CMX500 vs Anritsu.md"
+          },
+          "score": 8.085607
+         },
+         {
+          "text": "R&S CMP200 › Specifications data sheet\n本頁硬體、IF、RRH、UWB head、ordering、mechanical、environmental 與 conformance 相關主張主要來自 [[CMP200_specs_en_5216-4391-22_v0800]]：\n\n- 文件名稱：**CMP200 Radio Communication Tester Specifications Data Sheet**。\n- 文件代碼：**PD 5216.4391.22**。\n- 文件版本：**Version 08.00**。\n- 文件日期：**August 2024**。\n- 版權：**© 2019–2024 Rohde & Schwarz**。\n- 產品：**Rohde & Schwarz CMP200 Radio Communication Tester**。\n- 注意：**Data without tolerance limits is not binding**；**Subject to change**。\n- Recommended calibration interval：CMP200 與 RRH 為 **12 months**；[[R&S CM-Z310A]] UWB head 為 **24 months**。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMP200.md"
+          },
+          "score": 4.812462
+         },
+         {
+          "text": "R&S CMX-KA098 › 版本基準\n[[CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status]] 中可辨識的 CMX-KA098 版本基準如下：\n\n| 區段 | CMX500 / CMX-KA098 條件 |\n|---|---|\n| CEN TS 17240:2018 | [[R&S CMX500]] >= CSW 7.40 / CMX-KA098 >= V4.1.0 |\n| CEN TS 17240:2018 | [[R&S CMX500]] >= CSW 7.80 / CMX-KA098 >= V4.2.0 |\n| CEN EN 17240:2024 | [[R&S CMX500]] >= CSW 2025.0.0.1850 / CMX-KA098 >= V4.3.0-RC8 |\n\n來源同時列出 CMWrun [[R&S CMX-KF671B]] / CMWrun >= 1.9.15.37，用於 CEN EN 17240:2024 與 ETSI TS 103 683 V2.1.1 alternative coverage。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX-KA098.md"
+          },
+          "score": 8.206778
+         },
+         {
+          "text": "Juergen Meyer › 來源中的列名\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 人名：Juergen Meyer。\n- 組織：[[Rohde & Schwarz]]。\n- 職稱：Vice President Market Segment Automotive at Rohde & Schwarz。\n- 引言主旨：他表示 [[Rohde & Schwarz]] 很高興與 [[Qualcomm Technologies]] 合作驗證其 chipsets 的 NG eCall implementation，並稱此 collaboration 為 future emergency call services 設定 new benchmark，為 automotive industry 提供 robust and dependable solution 以 meet latest eCall standards。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Juergen Meyer.md"
+          },
+          "score": 1.64862
+         },
+         {
+          "text": "R&S SMW200A › Remote control、connectors 與一般資料\n- Remote control interfaces：IEC 60625 GPIB IEEE-488.2、Ethernet/LAN 10/100/1000BASE-T、USB 3.0 super speed、serial RS-232 via `R&S®TS-USB1`。\n- Remote command set：`SCPI 1999.5 or compatible command sets`。\n- Ethernet/LAN protocols and services：VISA VXI-11、Telnet/RawEthernet、VNC、FTP、SMB。\n- Front panel RF 50 Ω path A connector：3/6/7.5 GHz options 為 N female；12.75/20/31.8/40 GHz options 為 test port adapter PC 2.92 mm female；44 GHz options 為 PC 1.85 mm male with adapter；56/67 GHz options 為 1.85 mm female with wear and tear adapter。\n- Front panel RF 50 Ω path B connector：3/6/7.5 GHz options 為 N female；12.75/20/31.8 GHz options 為 test port adapter PC 2.92 mm female；44 GHz options 為 PC 1.85 mm male with adapter。\n- Rear panel 包含 REF IN/OUT、INST TRG A/B、USER 4/5/6、EFC、LO IN/OUT、IEEE 488、LAN、USB DEVICE、EXT 1/2、DIG I/Q OUT、HS DIG I/Q OUT 等。\n- Rated power when fully equipped：`550 W measured`；with `R&S®SMW-B94L` fully equipped：`750 W measured`。\n- Operating temperature range：`0 °C to +45 °C`；with `R&S®SMW-B1056`、`R&S®SMW-B1067`、`R&S®SMW-B1067N`、`R&S®SMW-B1067O` 為 `+5 °C to +45 °C`。\n- Dimensions：standard `435 mm × 192 mm × 460 mm`；with `R&S®SMW-B94L` 為 `435 mm × 192 mm × 560 mm`。\n- Weight：fully equipped `21 kg`；with `R&S®SMW-B94L` fully equipped `30 kg`。\n- Non-volatile memory：SSD，`512 Gbyte`。\n- Recommended calibration interval：`3 years`，條件 `40 h/week operation in the full range of the specified environmental conditions`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 22,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 3.153957
+         },
+         {
+          "text": "艾姆勒 › 來源中的說法\n- [[Power IC - Power Management IC image 3]]（來源未標示日期；取得於 2026-09-04）將 [[艾姆勒]]（2241）列於「下游：模組、散熱與終端系統應用」大分類。\n- 同一來源將 [[艾姆勒]] 放在「車用/功率散熱模組機構件」子分類。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/艾姆勒.md"
+          },
+          "score": 0.467793
+         },
+         {
+          "text": "FR3 測試與 RFU18 battle card 主張 › 來源主張\n- 來源說 [[Rohde & Schwarz]] 與 [[Qualcomm Technologies]] successfully validated high-throughput performance of a [[5G NR]] connection at **13 GHz**。\n- 來源明示 proposed [[FR3]] frequency range 為 **7.125 GHz to 24.25 GHz**。\n- 來源說 [[Qualcomm Technologies]] 的 5G mobile test platform（MTP）使用 [[R&S CMX500 OBT]] in a maximum throughput use case at 13 GHz。\n- 來源稱該 achievement confirms the potential of [[FR3]] to deliver high data rates using high [[MCS]]，並透過 [[4x4 MIMO]] enhanced capacity。\n- 來源未提到 [[RFU18]]，也未提供 [[R&S CMX500 OBT]] 的 13 GHz hardware / software configuration。\n\n依 [[Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness]]（來源未標示 published date；raw created 2026-09-11；demo 日期 March 2 to 5, 2026）：\n\n- 來源說 [[Rohde & Schwarz]] 與 [[Qualcomm Technologies]] successfully demonstrated carrier aggregation across [[FR1]] and [[FR3]] frequency ranges。\n- Demo 聚合約 **2.5 GHz** [[FR1]] channel 與約 **7 GHz** [[FR3]] channel，兩 band 均使用 [[4x4 MIMO]] 與 higher-order modulation。\n- Test setup 核心是 [[R&S CMX500]] one-box signaling tester，extended with new [[RFU18]] board to provide coverage up to **18 GHz**。\n- 來源稱 [[RFU18]] is a modular hardware upgrade for the [[R&S CMX500]] platform，讓 existing testers extend towards [[6G]]。\n- 來源稱 all existing [[R&S CMX500]] platforms can be enhanced with new [[RFU18]] board to extend frequency coverage and capabilities without replacing the entire system。\n- 來源稱 [[R&S CMX500]] engineered for data rates up to **20 Gbps**，supporting wide dynamic range、[[4096QAM]] 與 up to **16 device antenna ports**。\n- 來源仍未提供 [[RFU18]] order number、formal specs 文件編號、bandwidth、throughput、MCS index、software release 或 measurement conditions。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/FR3 測試與 RFU18 battle card 主張.md"
+          },
+          "score": 1.268401
+         },
+         {
+          "text": "RAR UL Grant › SUL / NUL target carrier routing\n依 [[SUL RACH procedure]]：\n\n- [[Msg2]] 的 [[Random Access Response]] [[PDSCH]] payload and [[Msg3]] grant need to be routed to target carrier（[[Normal Uplink carrier]] or [[SUL carrier]]）。\n- The target carrier is same to carrier that [[PRACH]] is transmitted on。\n- [[Msg3]] [[PUSCH]] transmission is on target carrier。\n- A UE transmits [[PRACH]] and the [[PUSCH]] on a same uplink carrier of a same serving cell。\n- 來源引用 [[3GPP TS 38.213]] Section 8.3：UE always transmits the PUSCH scheduled by a RAR UL grant without repetitions。\n\n這些 SUL / NUL carrier routing 線索只由 [[SUL RACH procedure]] 支撐；來源未標示 [[3GPP TS 38.213]] 的版本或發布日期。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/RAR UL Grant.md"
+          },
+          "score": 0.898296
+         },
+         {
+          "text": "R&S AREG800A › 相關來源\n- [[AREG800A_specs_en_3609-8015-22_v0900]] — R&S AREG800A Automotive Radar Echo Generator Specifications，Version 09.00，September 2025。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 50,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S AREG800A.md"
+          },
+          "score": 3.284384
+         },
+         {
+          "text": "O-RU testing › R&S portfolio for O-RU testing\n依 [[R&S portfolio for O-RU testing]]（August 2023；raw converted 2026-09-17）：",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/O-RU testing.md"
+          },
+          "score": 0.099486
+         },
+         {
+          "text": "CMX configuration guide › 使用限制\n- [[CMX_Configuration_Guide]]、[[CMX_Configuration_Guide_LTE-DTC]] 與 [[CMX_Configuration_Guide_NR-NTN]] 都是 configuration guide，不是 technical specifications data sheet；material number、option code 與 mandatory / optional / recommended / conditional 註記可用於配置脈絡，但規格數字仍應回各產品正式 specs。\n- 來源為 lossy derivative；欄位中的 NaN、空白、箭頭與換行可能源自 Excel 轉換。\n- `mandatory`、`optional`、`recommended`、`conditional` 與 `not mandatory` 的含義依 application / test case 而定；不可轉用到所有 CMX500 或 CMW500 configurations。\n- [[CMX_Configuration_Guide_LTE-DTC]] 中的 Starlink LTE-DTC scope 不可推論為 Starlink 官方認證、商業合作、產品供應關係或完整 test coverage。\n- [[CMX_Configuration_Guide_NR-NTN]] 中的 NR-NTN scope 不可推論為所有 orbit、payload、bands、satellite operator、gateway interface 或 3GPP conformance coverage 皆已正式支援；需回正式 features / specifications / release notes 查證。\n- 配置表未提供價格、正式 quote、configurator rules 或 commercial availability。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 14,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/CMX configuration guide.md"
+          },
+          "score": 1.571848
+         },
+         {
+          "text": "R&S CMX500 vs Anritsu › 使用限制\n- 本頁不可取代 [[R&S CMX500]]、[[R&S CMW500]]、[[R&S CMP180]]、[[R&S CMP200]]、[[R&S CMW100 K06]] 的正式 specifications / features documents。\n- 對 [[Anritsu]] 的 battle card 主張目前主要來自 R&S internal battle card；若用於客戶文件，應另查 Anritsu 官方資料與第三方證據。\n- [[mx844030pc-j1200]] 是 Anritsu product brochure，可用於描述 [[Anritsu MX844030PC]]、[[Anritsu MD8190A]] 與 [[Virtual Signalling Tester]]，但不可用來驗證 R&S 對 CMX500 的優勢主張。\n- Source 中的 only platform、industry-leading、widest frequency range、lower TCO 等語句是 sales language，不應當作可驗證技術規格。\n- FR1 / FR2 / FR3 bandwidth 與 data rate 相關矛盾與限制已集中標註於 [[FR3 測試與 RFU18 battle card 主張]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/syntheses/R&S CMX500 vs Anritsu.md"
+          },
+          "score": 7.8919
+         },
+         {
+          "text": "R&S CMW100 K06 › 文件依據與版次\n本頁所有主張除非另註，均來自 [[CMW100-K06_specs_en_5214-8348-22_v0500]]：\n\n- 文件名稱：CMW100 Communications Manufacturing Test Set Specifications，Model K06。\n- 文件識別碼：PD 5214.8348.22。\n- 文件版本：Version 05.00。\n- 文件日期：September 2025。\n- 適用資料：除非另有說明，規格資料適用於 CMW100, model K06。\n- 頁尾標示：PD 5214.8348.22，Version 05.00，September 2025 (ch)。\n- 產品資料適用條件：ambient temperature 下儲存 3 小時後，30 分鐘 warm-up operation；符合指定 environmental conditions；遵守 recommended calibration interval；已執行 internal path correction adjustment。\n- 4000 MHz 以上頻率的規格值僅適用於配備 R&S®CMW-K046 option 的 [[R&S CMW100 K06]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMW100 K06.md"
+          },
+          "score": 7.030493
+         },
+         {
+          "text": "AKM suite: PSK\nencryption type: CCMP-128, GCMP-256\nprotection management frame (PMF): unsupported,\nsupported, or required",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-bc47a8ad4da77a6a",
+            "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+            "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+           "section": 2171,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 17.412534
+         },
+         {
+          "text": "AKM suite: SAE authentication, SAE with hash algo-\nrithm\ngroup transform: 256-bit ECP, 384-bit ECP\nPMF: unsupported, supported, or required",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-bc47a8ad4da77a6a",
+            "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+            "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+           "section": 2172,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 15.84186
+         },
+         {
+          "text": "AKM suite: OWE\nencryption type: CCMP-128 or GCMP-256\ngroup transform: 256-bit ECP, 384-bit ECP\nPMF: unsupported, supported, or required",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-bc47a8ad4da77a6a",
+            "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+            "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+           "section": 2220,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 15.561126
+         },
+         {
+          "text": "# In case signaling solution is required for RX test or others…",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-4a179a13677acd8f",
+            "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+            "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+           "section": 152,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 14.166031
+         }
+        ],
+        "text": "### 短答\n知識庫沒有提供可直接支持「R&S Oscilloscope solution vs competitor for Automotive」的比較證據；要避免 unsupported claims，需補正式 R&S oscilloscope 規格 / automotive application 證據、競品官方或第三方資料，以及能直接把兩邊放在同一 automotive use case 下比較的測試條件、版本、配置與結果。[49][71][95]\n### 需要的證據\n- 需要 R&S Oscilloscope 的正式 specifications / features document，而不是 sales positioning 或 battle card；現有 CMX500 競品頁明確說 battle card 不能取代正式 specifications / features documents。[49][71][95]\n- 需要競品的官方 datasheet、features document、order/configuration data、或第三方測試證據；現有競品頁都說，對 amarisoft、Keysight、Anritsu 的主張若用於客戶文件，應另查競品官方資料與第三方證據。[49][71][95]\n- 需要直接連到 Automotive use case 的證據，例如 automotive radar、eCall、IVS、hybrid / NG eCall、車用測試場景等；目前 passages 中 automotive 證據主要支撐 CMX500 eCall / NG eCall、AREG800A automotive radar echo generation，而不是 Oscilloscope 競品比較。[7][10][54][92]\n- 需要明確列出 comparison scope：測試項目、標準版本、量測條件、配置、software / option version、pass/fail 或 acceptance criteria；現有 eCall 新聞稿被標註缺少 configuration、software version、test setup、acceptance criteria、test case IDs、pass/fail details 等資訊。[27][12][38][39]\n- 需要避免使用 “only platform”、“first validated”、“leadership”、“lower TCO”、“fewer boxes” 等 sales language 當作可驗證技術規格；現有競品頁明確說這類語句不應當作可驗證技術規格。[71][95]\n- 若要比較規格數字，需使用正式 specs 中有條件與 tolerance 的資料；CMX500 規格頁說 data without tolerance limits is not binding，且規格適用條件包含 warm-up、environmental conditions、calibration interval 與 internal automatic adjustments。[48]\n- 若要比較總成本、box count、整合度、支援、保固或校準，也需要正式服務條款、配置 BOM、價格或可驗證算式；現有 battle card 對 lower TCO、fewer boxes、support / warranty 等說法被標註為 sales language 或缺少正式證據。[4][6][71]\n- 若要把 Oscilloscope 說成適合 Automotive，需有來源直接把該 Oscilloscope solution 與 automotive application 連起來；目前 passages 中出現 Oscilloscope 的明確 mapping 是 SatelliteEcoChain 的 OBC / satellite context，不可外推為 automotive fit。[14][15][35]\n### 最低可接受證據包\n| 證據類型 | 必須包含什麼 | 為什麼需要 | 目前 passages 顯示的風險 |\n|---|---|---|---|\n| R&S Oscilloscope 正式資料 | 型號、規格、option、版本、tolerance、校準與測試條件 | 正式 specs 才能支撐規格比較 | Battle card / sales positioning 不能取代正式規格文件。[49][71][95] |\n| Automotive application 證據 | 直接連到 automotive radar、eCall、IVS、車用 ECU / OBC / power / SI 等具體場景 | 不能只因產品是量測儀器就推論適用 automotive | 目前 automotive passages 支撐 CMX500 eCall 與 AREG800A radar，不支撐 Oscilloscope 競品比較。[7][10][54][92] |\n| Competitor 官方或第三方資料 | 競品型號、版本、規格、配置、限制、測試條件 | 客戶文件中的競品主張不能只靠 R&S internal battle card | 現有競品頁明確要求另查競品官方資料與第三方證據。[49][71][95] |\n| 同一測試條件下的 comparison matrix | 相同 DUT、fixture、bandwidth、sample rate、probe、software version、standard、pass/fail criteria | 避免把不同條件下的數字放在一起比較 | eCall / certification 類來源多次標註缺少 test case IDs、acceptance criteria、pass/fail detail 或完整 test matrix。[12][27][38][39] |\n| 第三方 validation / certification | 報告號、certificate number、測試日期、測試環境版本、scope | 若要宣稱 validated / certified，需要可追溯報告 | cetecom advanced 新聞稿被標註缺少 certification report number、certificate number、測試日期與完整 acceptance criteria。[12] |\n| Claim-control wording | 將 “sales claim” 與 “binding spec” 分開標示 | 避免把定位語言寫成規格或市場事實 | 現有頁面明確說 only、first、leadership、lower TCO、fewer boxes 等不能當作可驗證技術規格。[4][6][71] |\n### 可說與不可說\n- 可說：目前知識庫未提供 Oscilloscope solution 與 competitor 在 Automotive 場景下的直接比較證據。[14][15][35][49][71][95]\n- 可說：若要做客戶文件比較，需補 R&S 正式 oscilloscope 文件、競品官方 / 第三方資料、共同 automotive use case、共同測試條件與可追溯結果。[49][71][95]\n- 不可說：R&S Oscilloscope 在 Automotive 優於某競品，因 passages 沒有提供直接比較、同條件測試或第三方驗證證據。[49][71][95]\n- 不可說：SatelliteEcoChain 裡的 Oscilloscope mapping 證明 automotive fit，因該來源限制說 R&S Solution 欄只是 sales / solution mapping 線索，不等於客戶已採購、使用、評估或適用該儀器。[15]",
+        "synthesized_by": "company",
+        "failure": null
+       },
+       "cited_passages": [
+        {
+         "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › 原文未解的問題\n- unresolved：來源是 lossy derivative；原始 PDF 才是 source of truth。\n- unresolved：來源標示 COMPANY CONFIDENTIAL；未說明可對外使用範圍。\n- unresolved：來源未提供 [[Keysight E7515P]]、[[Keysight E7515W]]、[[Keysight E7515B]]、[[Keysight E7515E]]、[[Keysight E7515R]] 的正式文件編號、版本、order number 或日期。\n- unresolved：來源未提供 [[RFU18]] 的正式 order number、datasheet、release date、supported CMX500 configurations、校準條件或 availability。\n- unresolved：來源說 [[RFU18]] up to 18 GHz、max aggregated NR bandwidth 2000 MHz，但未提供測試條件、band combination、carrier count、SCS、modulation、MIMO layers 或 binding tolerance。\n- unresolved：來源說 R&S first validated 3GPP NR-NTN conformance with [[Samsung]]，但未提供 validation report、test case list、PTCRB RFT 555 版本或日期。\n- unresolved：來源多處使用 only、first、leadership、lower TCO、fewer boxes 等 sales language；需要正式證據才能在技術比較或客戶文件中使用。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 10,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+         },
+         "score": 15.487931
+        },
+        {
+         "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › Battle card 中的 R&S positioning\n來源的 positioning statement 主張：\n\n- [[Rohde & Schwarz]] delivers the industry’s only fully integrated platform for FR1、FR2、Wi-Fi、fading、IP throughput、RF analysis、NTN、RedCap and end-to-end signalling in one instrument。\n- 來源說 [[Keysight]] spreads equivalent capabilities across multiple UXM models、add-on software and external tools。\n- 來源說 R&S ensures long-term scalability、measurement accuracy and path from R&D to certification without hardware fragmentation。\n\n使用限制：以上是 sales language；其中 only、industry’s only、fully integrated、long-term scalability、lower TCO 等敘述不能當作可驗證規格，需回查正式 datasheet、features document、conformance report 或配置工具。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 6,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+         },
+         "score": 9.448651
+        },
+        {
+         "text": "Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard › 重點摘要\n- [[Rohde & Schwarz]] 宣稱其與 [[Qualcomm Technologies]] 合作，驗證 [[Snapdragon Auto 5G Modem-RF]] 上 [[Next Generation eCall]]（NG eCall）的 implementation，並稱其符合 [[EN 17240]]:2024。\n- 來源說 [[eCall]] 於 2015 年導入，且自 2018 年起成為歐盟境內所有新車銷售的 mandatory requirement。\n- 來源指出，隨著 2G / 3G circuit-switched cellular networks 逐漸 obsolete，emergency call systems 需要適配到 4G / 5G packet-switched cellular networks。\n- 來源稱 [[European Commission]] 在其 most recent regulation 中定義 NG eCall 將自 **2026-01-01** 起成為 obligatory。\n- 來源稱 EN 17240:2024 建立在 IP Multimedia Subsystem（[[IMS]]）networks 上測試 eCall systems 的 guidelines，涵蓋 advanced 4G LTE 與 5G NR technologies。\n- [[Snapdragon Auto 5G Modem-RF]] 被描述為 5G automotive-grade platform，支援 high-speed connectivity、advanced positioning、Vehicle-to-Everything（[[V2X]]）、multi-band [[GNSS]] navigation 與 enhanced safety。\n- 來源稱驗證流程使用 [[R&S CMX500]] mobile radio tester，作為 NG eCall voice and data transmission 的 comprehensive testing solution。\n- 來源稱測試模擬 [[PSAP]]，並驗證 implementation at both ends with the [[EN 17240]]:2024 standard。\n- 來源說 [[R&S CMX500]] 支援 4G 與 5G technologies，目標是讓方案 future-proof。\n- [[Juergen Meyer]] 以 [[Rohde & Schwarz]] Vice President Market Segment Automotive 身分在新聞稿中引述，稱此次 collaboration 為 future emergency call services 建立 new benchmark。\n- 來源稱 [[R&S CMX500]] 搭配 [[R&S CMX-KA098]] software option 可在 realistic network conditions 下用於 NG eCall testing。\n- 來源將合作定位為 mutually validating solutions、reducing effort、accelerating time to market for mutual customers。\n- Press and media contact 為 [[Patrizia Muehlbauer]]，職稱 PR Manager Products & Standard Systems。\n- 公司資訊段落稱 [[Rohde & Schwarz]] 2024/2025 fiscal year net revenue 為 EUR 3.16 billion，2025-06-30 worldwide employees more than 15,000。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+         },
+         "score": 12.397777
+        },
+        {
+         "text": "cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing › 重點摘要\n- [[Rohde & Schwarz]] 宣稱其 hybrid eCall 與 Next Generation eCall test solution 已成功通過 [[cetecom advanced]] 的 certification testing。\n- 來源描述 [[cetecom advanced]] 是 independent test laboratory，服務範圍包含 communication technologies、automotive、medical technology、payment & identification 等產品測試與 worldwide certification。\n- 測試方案以 [[R&S CMX500]] radio communication tester 為基礎，搭配更新後的 eCall option，以支援最新 eCall regulations and standards。\n- 來源說 [[Hybrid eCall testing]] 所依據的 [[EN 18052]] 要求 hybrid system 結合不同 transmission paths and protocols，使 eCall 能可靠到達目的地。\n- 來源說實務上車輛會使用 NG eCall functions，即 IP/IMS-based voice and data over 4G/5G；但在 coverage 或 service quality 降低時，可自動 fallback 到 classic CS eCall 2G/3G transport paths。\n- 製造商需要驗證 hybrid implementations 能 trigger calls、transmit [[MSD]]、maintain [[GNSS]] positioning，並在 [[VoNR]]、[[VoLTE]] 與 circuit-switched fallback 等多種 network scenarios 下提供 intelligible voice quality。\n- [[Rohde & Schwarz]] 宣稱其 eCall evaluation solution [[R&S CMX-KA09x]] 已更新，以支援 compliance with [[EN 18052]]:2025 與 [[EN 17240]]:2024+A1:2026。\n- [[R&S CMX-KA099]] option completed Public Safety Answering Point scenario tests according to [[EN 18052]]:2025。\n- [[R&S CMX-KA098]] option completed Public Safety Answering Point scenario tests according to [[EN 17240]]:2024+A1:2026。\n- [[Thomas Reschka]] 以 [[cetecom advanced]] Senior Technical Consultant 身分表示，該 solution 用於 functional tests、protocol conformity tests，以及 type-approval of [[IVS]] implementing hybrid eCall and NG eCall。\n- 來源稱 test environment 可 simulation real-world mobile network conditions 並 emulation various network scenarios，用於 certifications 或 new vehicle model market launch 前準備。\n- Press contact 為 [[Patrizia Muehlbauer]]，職稱 PR Manager Products & Standard Systems。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+         },
+         "score": 17.988369
+        },
+        {
+         "text": "cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing › 原文未解的問題\n- unresolved：新聞稿 frontmatter 的 published 欄位為空；來源正文也未標示發布日期。raw created 為 2026-09-11，但不可等同正式發布日。\n- unresolved：新聞稿未標示 document version、press release ID 或 revision。\n- unresolved：來源未提供 cetecom advanced certification report number、certificate number、測試日期、測試環境版本或完整 acceptance criteria。\n- unresolved：來源未提供 [[R&S CMX-KA09x]]、[[R&S CMX-KA098]]、[[R&S CMX-KA099]] 的完整 order number、license dependencies、software version 或 maintenance mapping。\n- unresolved：來源只稱 CMX-KA099 / CMX-KA098 completed PSAP test scenarios，未列出各 PSAP scenario 的 test case IDs、pass/fail detail 或是否涵蓋所有 EN 18052:2025 / EN 17240:2024+A1:2026 requirements。\n- unresolved：來源提到 national requirements，但未列國家、法規名稱或版本。\n- unresolved：來源未展開 [[EN 18052]]、[[EN 17240]] 的發布組織、正式標題或 amendment 細節。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 6,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+         },
+         "score": 4.198318
+        },
+        {
+         "text": "SatelliteEcoChain › 重點摘要\n- 來源 frontmatter 顯示原始檔為 `SatelliteEcoChain.xlsx`，轉檔時間為 2026-09-17；正文未標示正式內容日期或資料期間。\n- 主表標題為 `Satellite`，欄位包含 `UAV零組件`、`關鍵元件`、`企業`、`代號`、`角色亮點`、`R&S Solution`、`Sales kits` 以及三個未命名欄位。`UAV零組件` 欄名疑似沿用其他表格，但本來源頁面與 sheet 標題皆指向 satellite；本頁不自行改名。\n- 表格按類別列出 satellite / satcom 相關供應鏈或追蹤對象，包含 GPS定位、天線、系統整合商、UT、地面站、通訊模組、電源動力、衛星控制板 / OBC、航太材料、認證實驗室、其他與 PCB。\n- 多個列名有 R&S solution mapping，例如 [[R&S SMW200A]]、[[R&S SMBV100B]]、[[R&S FSW]]、[[R&S ZNA]]、[[R&S ZNB3000]]、[[R&S CMX500]]、[[R&S CMP180]] 與 Oscilloscope。\n- 角色亮點欄出現 [[GNSS]]、G/T、NPR、Group delay、[[DVB-S2-S2X]]、OneWeb、[[NB-NTN]]、[[NR-NTN]]、ISL module 等測試 / 技術語彙。\n- Sales kits 欄含多個 Rohde & Schwarz SharePoint / OneDrive 連結，例如 `2025_09_satellite test solutions.pptx`、`Satellite T&M solution V2_MikeW.pdf`、`Oneweb Test Solutions Overview.pptx` 與 `DVB-S2_S2X_Overview.pptx`；本次 ingest 未擷取這些附件正文。\n- `ICs(Notyet)` 表格只保留晶片分類列，例如 GPU、CPU、DRAM、IC、晶圓代工、封裝測試、測試介面、網通、BMC、高速傳輸IC；企業、股票代號、角色亮點與 R&S Solution 欄皆未填寫。\n- `Sheet3` 只出現空表格標記，未提供可抽取內容。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/SatelliteEcoChain.md"
+         },
+         "score": 11.514841
+        },
+        {
+         "text": "SatelliteEcoChain › 使用限制\n- 來源未標示正式日期或資料期間；Market 類資料必須將日期標示為「來源未標示」，raw converted 2026-09-17 只能代表轉檔時間。\n- `SatelliteEcoChain.xlsx` 經 markitdown 轉出，為 lossy derivative；原 Excel 才是 source of truth，需回查原始 workbook 才能確認 merged cells、格式、註解、公式、hidden sheets、超連結與股票代號格式。\n- 表格列名不得解讀為已驗證供應商、客戶、合約、出貨、營收、認證、投資建議或 R&S 實際往來關係。\n- R&S Solution 欄只表示來源表格中的 sales / solution mapping 線索，不等於該客戶已採購、使用、評估或適用該儀器。\n- Sales kits 連結多為內部 SharePoint / OneDrive；本次未擷取附件正文，因此不能用附件檔名推論完整方案、規格、版本或發表日期。\n- 股票代號欄從 Excel 轉出為 `3138.0`、`6282.0` 等浮點格式；本頁照錄來源，不自行修正為整數代號。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 17,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/SatelliteEcoChain.md"
+         },
+         "score": 9.735062
+        },
+        {
+         "text": "Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard › 原文未解的問題\n- unresolved：新聞稿 frontmatter 的 published 欄位為空，正文也未標示正式發布日期；raw created 為 2026-09-11，但不可等同正式發布日。\n- unresolved：來源未標示 document version、press release ID 或 revision。\n- unresolved：來源未提供 European Commission regulation 的正式文件編號、標題或 publication date，只說 NG eCall will be obligatory starting January 1, 2026。\n- unresolved：來源未提供 EN 17240:2024 的完整標準標題、發布組織、章節或 test case IDs。\n- unresolved：來源未提供 [[Snapdragon Auto 5G Modem-RF]] 的完整型號、chipset generation、firmware、software build、module supplier 或 commercial availability。\n- unresolved：來源未提供 [[R&S CMX500]] configuration、[[R&S CMX-KA098]] version、license dependencies、test setup、radio conditions、IMS configuration、voice codec、GNSS simulation setup 或 pass/fail details。\n- unresolved：來源只說 simulating a [[PSAP]]，未列 PSAP scenario IDs、acceptance criteria 或是否涵蓋所有 EN 17240:2024 requirements。\n- unresolved：來源未說 mutual customers 的產業範圍、客戶名稱或 adoption status。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 5,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+         },
+         "score": 3.290919
+        },
+        {
+         "text": "SatelliteEcoChain › 衛星控制板 / OBC\n- [[精英電腦]] — 關鍵元件欄為 OBC；R&S Solution 欄為 Oscilloscope。\n- [[利安科技]]、[[張量科技]]、[[艾訊科技]] — 來源在衛星控制板 / OBC 區段列名，但未填角色亮點或 R&S Solution。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 10,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/SatelliteEcoChain.md"
+         },
+         "score": 2.791951
+        },
+        {
+         "text": "Hybrid eCall testing › 使用限制\n- 本頁目前只由新聞稿支撐，不是 [[EN 18052]] 或 [[EN 17240]] 標準文本摘要。\n- 來源未提供正式 certification report、certificate number、測試日期或完整 test matrix。\n- 來源未列 national requirements 的國家名稱或版本。\n- 不可從新聞稿推論 [[R&S CMX500]] / [[R&S CMX-KA09x]] 已涵蓋所有 possible hybrid eCall test cases。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 6,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+         },
+         "score": 3.739688
+        },
+        {
+         "text": "Hybrid eCall testing › unresolved\n- [[EN 18052]] 的完整標準標題、發布組織與正式版本細節尚未由本來源提供。\n- [[EN 17240]]:2024+A1:2026 的 amendment A1 細節與發布狀態尚未由本來源提供。\n- completed PSAP test scenarios 的 coverage、test IDs、結果細節與 certification scope 未標示。\n- 來源未提供 degraded radio conditions、handover 與 voice quality 測試的具體設定。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 7,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+         },
+         "score": 3.714896
+        },
+        {
+         "text": "R&S CMX500 › 文件依據與版次\n本頁並列使用兩份來源：\n\n| 來源 | 文件類型 | 文件編號 | 版次 / 軟體 | 日期 | 用途 |\n|---|---|---|---|---|---|\n| [[CMX500_specs_en_5216-4127-22_v1100]] | Specifications | PD 5216.4127.22 | Version 11.00 | August 2025 | binding specifications、hardware unit 型號、order number、環境、尺寸、電源、service |\n| [[CMX500_Features_CSW9-20-0_en_32]] | Features and Functions | 1179.1164.02 | Version 32；CSW 9.20.0 and higher | 來源未標示；© 2026 | GUI、software features、signaling / application / measurement options 與使用介面 |\n\n[[CMX500_specs_en_5216-4127-22_v1100]] 的 product data 適用條件：ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘；符合指定 environmental conditions；遵守 recommended calibration interval；已執行所有適用的 internal automatic adjustments。文件區分 specifications with limits、non-traceable specifications、typical data、nominal values、measured values 與 uncertainties；non-traceable specifications、typical data、nominal values、measured values 不由 [[Rohde & Schwarz]] 擔保。\n\n[[CMX500_Features_CSW9-20-0_en_32]] 明示：**Subject to change – data without tolerance limits is not binding**。它是 features/functions overview，不是 technical specifications datasheet。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S CMX500.md"
+         },
+         "score": 4.900487
+        },
+        {
+         "text": "R&S CMX500 vs amarisoft › 使用限制\n- 本頁不可取代 [[R&S CMX500]]、[[R&S CMW500]]、[[R&S CMP180]]、[[R&S CMP200]]、[[R&S CMW100 K06]] 的正式 specifications / features documents。\n- “Only R&S” 與 “safe and future-proof choice” 是 battle card 的 sales language，不應當作可驗證技術規格。\n- 對 [[amarisoft]] 的主張目前只有 R&S internal battle card 單一來源；若用於客戶文件，應另查 [[amarisoft]] 官方資料與第三方證據。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 6,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/syntheses/R&S CMX500 vs amarisoft.md"
+         },
+         "score": 8.439015
+        },
+        {
+         "text": "R&S AREG800A › Echo generation\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Echo generator type：`dynamic artificial object generation`。\n- Echo generation concept：\n  - `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n  - `digital`：用於 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 air gap value；maximum generated distance 為 `3000 m`。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 4,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S AREG800A.md"
+         },
+         "score": 6.421744
+        },
+        {
+         "text": "R&S CMX500 vs Keysight › 使用限制\n- 本頁不可取代 [[R&S CMX500]]、[[R&S CMW500]] 或 Keysight UXM 各型號的正式 specifications / features documents。\n- 對 [[Keysight]] 的主張目前只有 R&S internal battle card 單一來源；若用於客戶文件，應另查 Keysight 官方資料與第三方證據。\n- only platform、first validated、leadership、lower TCO、fewer boxes 等語句是 sales language，不應當作可驗證技術規格。\n- RFU18、FR3、2000 MHz aggregated bandwidth、AI Script Assistant、Keysight RaySim / Atlas / Channel Studio 的正式功能邊界與版本仍需補來源。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 8,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/syntheses/R&S CMX500 vs Keysight.md"
+         },
+         "score": 1.352667
+        },
+        {
+         "text": "R&S AREG800A › 相關來源\n- [[AREG800A_specs_en_3609-8015-22_v0900]] — R&S AREG800A Automotive Radar Echo Generator Specifications，Version 09.00，September 2025。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 50,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S AREG800A.md"
+         },
+         "score": 3.284384
+        },
+        {
+         "text": "R&S CMX500 vs Anritsu › 使用限制\n- 本頁不可取代 [[R&S CMX500]]、[[R&S CMW500]]、[[R&S CMP180]]、[[R&S CMP200]]、[[R&S CMW100 K06]] 的正式 specifications / features documents。\n- 對 [[Anritsu]] 的 battle card 主張目前主要來自 R&S internal battle card；若用於客戶文件，應另查 Anritsu 官方資料與第三方證據。\n- [[mx844030pc-j1200]] 是 Anritsu product brochure，可用於描述 [[Anritsu MX844030PC]]、[[Anritsu MD8190A]] 與 [[Virtual Signalling Tester]]，但不可用來驗證 R&S 對 CMX500 的優勢主張。\n- Source 中的 only platform、industry-leading、widest frequency range、lower TCO 等語句是 sales language，不應當作可驗證技術規格。\n- FR1 / FR2 / FR3 bandwidth 與 data rate 相關矛盾與限制已集中標註於 [[FR3 測試與 RFU18 battle card 主張]]。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 8,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/syntheses/R&S CMX500 vs Anritsu.md"
+         },
+         "score": 7.8919
+        }
+       ],
+       "assessment": {
+        "status": "covered",
+        "facets": [
+         {
+          "name": "competitor",
+          "citations": [
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 5,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 7,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 4,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 10,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 4,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 6,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+           }
+          ],
+          "attempts": 1
+         }
+        ],
+        "missing_facets": [],
+        "relation_required": false,
+        "relation_citations": [],
+        "relations": []
+       },
+       "citation_policy": "wiki_primary",
+       "wiki_provenance": [
+        {
+         "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+         "raw_refs": [
+          "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+          "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+          "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+          "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/sources/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+         "raw_refs": [
+          "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+          "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+         "raw_refs": [
+          "raw/Productions/CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md",
+          "raw/Productions/CMX_Configuration_Guide.md",
+          "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/sources/SatelliteEcoChain.md",
+         "raw_refs": [
+          "raw/Market/OneNote/Satellite/0.Satcom Industry.md",
+          "raw/Market/OneNote/Satellite/4. Satellite Eco-chain in Taiwan.md",
+          "raw/Market/OneNote/SatelliteEcoChain.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/Hybrid eCall testing.md",
+         "raw_refs": [
+          "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/R&S CMX500.md",
+         "raw_refs": [
+          "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+          "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/syntheses/R&S CMX500 vs amarisoft.md",
+         "raw_refs": [
+          "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+          "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+          "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+          "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/R&S AREG800A.md",
+         "raw_refs": [
+          "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/syntheses/R&S CMX500 vs Keysight.md",
+         "raw_refs": [
+          "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+          "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+          "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+          "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/syntheses/R&S CMX500 vs Anritsu.md",
+         "raw_refs": [
+          "raw/Productions/2026_02_CMX500_Anritsu_Sales_Battle_Card.md",
+          "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+          "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+          "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+          "raw/Productions/mx844030pc-j1200.md"
+         ]
+        }
+       ]
+      },
+      "failure": null,
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-ae729c66705c48eea348345674bdafe5",
+      "task_sha256": "bc279b31ae6fa5fa1a3a5300f0e70e2c4038545c3dde4404d69810c3312beda3",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.12.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "validated",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 3,
+       "kind": "validated",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "checks": [
+      {
+       "check_id": "answer_nonempty",
+       "status": "passed",
+       "evidence_ref": "bridge_raw_record"
+      },
+      {
+       "check_id": "facet_coverage",
+       "status": "passed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "check_id": "claim_support",
+       "status": "passed",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "failure_code": null
+    },
+    "evidence": {
+     "raw_citations": 17,
+     "facet_status": "covered",
+     "missing_facets": [],
+     "relation_status": "not_requested",
+     "retrieval_attempts": {
+      "competitor": 1
+     },
+     "claim_status": "supported"
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

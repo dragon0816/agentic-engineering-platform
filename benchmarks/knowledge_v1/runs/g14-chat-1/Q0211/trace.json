@@ -1,0 +1,1890 @@
+{
+ "question": {
+  "id": "Q0211",
+  "text": "For a Aerospace / Defense use case involving radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "market": "Aerospace / Defense",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-fdc5ed991db7451aa2f55188a181ddbe",
+ "exchange": {
+  "sent": "For a Aerospace / Defense use case involving radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 48.563,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-fdc5ed991db7451aa2f55188a181ddbe",
+    "actor": "leo.chi",
+    "title": "For a Aerospace / Defense use case involving radar, where would Signalin…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-18T13:33:34.724069Z",
+    "updated_at": "2026-10-18T13:34:23.081657Z",
+    "messages": [
+     {
+      "message_id": "message-88868eafa3f84d34b68e30bdecf7ed2f",
+      "role": "user",
+      "text": "For a Aerospace / Defense use case involving radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+      "created_at": "2026-10-18T13:33:34.752734Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": [],
+      "workflow_form": null,
+      "action_card": null,
+      "action_cards": []
+     },
+     {
+      "message_id": "message-2bdc67eb63194307bec3638a3727c59d",
+      "role": "assistant",
+      "text": "### Short answer\nFor an Aerospace / Defense radar workflow, the passages do **not** directly place a Signaling / Non-signaling Tester as the main radar test instrument; the supported fit is around **communications/RF-link validation, OTA signaling, desense/interference checks, generic RF waveform replay or TX/RX measurement**, while radar-specific work is only separately supported as radar signature evaluation or radar echo generation in other contexts. [13][16][25][30][37][46]\n### Where it fits in the workflow\n| Workflow area | Fit of Signaling / Non-signaling Tester | Evidence |\n|---|---|---|\n| Radar-specific measurement | The passages do not state that CMX500-style Signaling / Non-signaling Tester performs radar echo generation or radar signature evaluation for Aerospace / Defense radar; radar-related passages separately mention MVG test solutions for radar signature evaluation and AREG800A as an **Automotive Radar Echo Generator**. | [25][28][30] |\n| Communications subsystem test on a radar platform | A signaling tester fits where the radar platform also has LTE, 5G, Wi‑Fi, WLAN or similar communication links, because CMX500 is described as a network emulation and measurement test solution for LTE, NR FR1, NR FR2 and WLAN signaling / TX measurements. | [13][15][76] |\n| OTA signaling / antenna system workflow | A signaling tester can fit in the OTA/antenna measurement stage when the workflow involves 5G NR, RedCap, LTE or WLAN OTA signaling testing, because CMX500 OBT is integrated with MVG antenna / multiprobe measurement systems through WaveStudio for those OTA signaling tests. | [19][21][27][83] |\n| Desense / coexistence around radar payload electronics | A signaling tester can fit in interference or desense validation when cellular and WLAN radios operate simultaneously, because CMX500 Desense Testing is described as WLAN + cellular one-box interference / desense testing under real connections. | [46][47] |\n| Non-signaling RF stimulus / waveform replay | A non-signaling tester role fits generic RF stimulus, waveform replay or standalone TX measurement, because CMX500 GPRF Generator is described as a CMX500 non-signaling use case that generates ARB, CW, dual tone or replay `.wv` waveforms for R&D waveform replay / creation and standalone TX measurement. | [37][39] |\n| EMC / EME environment testing around radar exposure | A signaling/non-signaling tester is not identified as the core EMC/EME system, but it may sit beside EMC/EME testing because Aerospace / Defense drone sources emphasize MIL / aviation EMC and system-level EME, while DO-160 Section 20 notes RF susceptibility from external radiators such as radar stations. | [2][7][60][61] |\n### Practical placement\n| Stage | Placement | Supported reason |\n|---|---|---|\n| Before radar chamber / signature testing | Use signaling testing for the platform’s 5G/LTE/WLAN communication module rather than for radar echo/signature measurement. | [13][16][25] |\n| During OTA antenna validation | Use CMX500 OBT with MVG WaveStudio / antenna or multiprobe systems when the OTA task is 5G NR, RedCap, LTE or WLAN signaling. | [19][21][27][83] |\n| During coexistence / desense checks | Use CMX500-style signaling connections to observe cellular/WLAN interference or desense effects under real connections. | [46] |\n| During non-signaling RF lab work | Use GPRF Generator-style non-signaling mode for ARB/CW/dual-tone generation, waveform replay, R&D waveform creation and standalone TX measurement. | [37][39] |\n| During formal radar-target simulation | The passages support AREG800A for automotive radar echo generation, not Aerospace / Defense radar workflow placement. | [28][30] |\n### 【推論】\n【推論】In an Aerospace / Defense radar program, place Signaling / Non-signaling Tester **around the radar system**, not as the primary radar simulator: use signaling for the platform’s cellular/WLAN links and OTA antenna validation, and use non-signaling GPRF for RF stimulus or waveform replay, while keeping radar echo/signature work on radar-specific systems not established here as CMX500 functions. [13][19][25][30][37][39][46]\n\n來源：\n[2] Wiki：2025RS Drone Solution（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`）\n[7] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）\n[13] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[15] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[16] Wiki：MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`、`MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md`）\n[19] Wiki：MVG CMX500 OBT OTA signaling testing（來源：`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`、`MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md`…）\n[21] Wiki：MVG CMX500 OBT OTA signaling testing（來源：`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`、`MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md`…）\n[25] Wiki：MVG（來源：`MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md`、`MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md`）\n[27] Wiki：MVG（來源：`MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md`、`MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md`）\n[28] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[30] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[37] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[39] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[46] Wiki：CMX500 Desense Testing（來源：`CMX500_Callbox.md`）\n[47] Wiki：CMX500 Desense Testing（來源：`CMX500_Callbox.md`）\n[60] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[61] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[76] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[83] Wiki：MVG CMX500 OBT OTA signaling testing（來源：`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`、`MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md`…）",
+      "created_at": "2026-10-18T13:34:23.081657Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-24a60209e93e4c988503a79a66faa9bc",
+       "request_id": "request-24a60209e93e4c988503a79a66faa9bc",
+       "span_id": "span-24a60209e93e4c988503a79a66faa9bc",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": [],
+      "workflow_form": null,
+      "action_card": null,
+      "action_cards": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "### Short answer\nFor an Aerospace / Defense radar workflow, the passages do **not** directly place a Signaling / Non-signaling Tester as the main radar test instrument; the supported fit is around **communications/RF-link validation, OTA signaling, desense/interference checks, generic RF waveform replay or TX/RX measurement**, while radar-specific work is only separately supported as radar signature evaluation or radar echo generation in other contexts. [13][16][25][30][37][46]\n### Where it fits in the workflow\n| Workflow area | Fit of Signaling / Non-signaling Tester | Evidence |\n|---|---|---|\n| Radar-specific measurement | The passages do not state that CMX500-style Signaling / Non-signaling Tester performs radar echo generation or radar signature evaluation for Aerospace / Defense radar; radar-related passages separately mention MVG test solutions for radar signature evaluation and AREG800A as an **Automotive Radar Echo Generator**. | [25][28][30] |\n| Communications subsystem test on a radar platform | A signaling tester fits where the radar platform also has LTE, 5G, Wi‑Fi, WLAN or similar communication links, because CMX500 is described as a network emulation and measurement test solution for LTE, NR FR1, NR FR2 and WLAN signaling / TX measurements. | [13][15][76] |\n| OTA signaling / antenna system workflow | A signaling tester can fit in the OTA/antenna measurement stage when the workflow involves 5G NR, RedCap, LTE or WLAN OTA signaling testing, because CMX500 OBT is integrated with MVG antenna / multiprobe measurement systems through WaveStudio for those OTA signaling tests. | [19][21][27][83] |\n| Desense / coexistence around radar payload electronics | A signaling tester can fit in interference or desense validation when cellular and WLAN radios operate simultaneously, because CMX500 Desense Testing is described as WLAN + cellular one-box interference / desense testing under real connections. | [46][47] |\n| Non-signaling RF stimulus / waveform replay | A non-signaling tester role fits generic RF stimulus, waveform replay or standalone TX measurement, because CMX500 GPRF Generator is described as a CMX500 non-signaling use case that generates ARB, CW, dual tone or replay `.wv` waveforms for R&D waveform replay / creation and standalone TX measurement. | [37][39] |\n| EMC / EME environment testing around radar exposure | A signaling/non-signaling tester is not identified as the core EMC/EME system, but it may sit beside EMC/EME testing because Aerospace / Defense drone sources emphasize MIL / aviation EMC and system-level EME, while DO-160 Section 20 notes RF susceptibility from external radiators such as radar stations. | [2][7][60][61] |\n### Practical placement\n| Stage | Placement | Supported reason |\n|---|---|---|\n| Before radar chamber / signature testing | Use signaling testing for the platform’s 5G/LTE/WLAN communication module rather than for radar echo/signature measurement. | [13][16][25] |\n| During OTA antenna validation | Use CMX500 OBT with MVG WaveStudio / antenna or multiprobe systems when the OTA task is 5G NR, RedCap, LTE or WLAN signaling. | [19][21][27][83] |\n| During coexistence / desense checks | Use CMX500-style signaling connections to observe cellular/WLAN interference or desense effects under real connections. | [46] |\n| During non-signaling RF lab work | Use GPRF Generator-style non-signaling mode for ARB/CW/dual-tone generation, waveform replay, R&D waveform creation and standalone TX measurement. | [37][39] |\n| During formal radar-target simulation | The passages support AREG800A for automotive radar echo generation, not Aerospace / Defense radar workflow placement. | [28][30] |\n### 【推論】\n【推論】In an Aerospace / Defense radar program, place Signaling / Non-signaling Tester **around the radar system**, not as the primary radar simulator: use signaling for the platform’s cellular/WLAN links and OTA antenna validation, and use non-signaling GPRF for RF stimulus or waveform replay, while keeping radar echo/signature work on radar-specific systems not established here as CMX500 functions. [13][19][25][30][37][39][46]\n\n來源：\n[2] Wiki：2025RS Drone Solution（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`）\n[7] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）\n[13] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[15] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[16] Wiki：MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`、`MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md`）\n[19] Wiki：MVG CMX500 OBT OTA signaling testing（來源：`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`、`MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md`…）\n[21] Wiki：MVG CMX500 OBT OTA signaling testing（來源：`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`、`MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md`…）\n[25] Wiki：MVG（來源：`MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md`、`MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md`）\n[27] Wiki：MVG（來源：`MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md`、`MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md`）\n[28] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[30] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[37] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[39] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[46] Wiki：CMX500 Desense Testing（來源：`CMX500_Callbox.md`）\n[47] Wiki：CMX500 Desense Testing（來源：`CMX500_Callbox.md`）\n[60] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[61] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[76] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[83] Wiki：MVG CMX500 OBT OTA signaling testing（來源：`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`、`MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md`…）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-24a60209e93e4c988503a79a66faa9bc",
+      "request_id": "request-24a60209e93e4c988503a79a66faa9bc",
+      "span_id": "span-24a60209e93e4c988503a79a66faa9bc",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-24a60209e93e4c988503a79a66faa9bc",
+       "request_id": "request-24a60209e93e4c988503a79a66faa9bc",
+       "span_id": "span-24a60209e93e4c988503a79a66faa9bc",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "### Short answer\nFor an Aerospace / Defense radar workflow, the passages do **not** directly place a Signaling / Non-signaling Tester as the main radar test instrument; the supported fit is around **communications/RF-link validation, OTA signaling, desense/interference checks, generic RF waveform replay or TX/RX measurement**, while radar-specific work is only separately supported as radar signature evaluation or radar echo generation in other contexts. [13][16][25][30][37][46]\n### Where it fits in the workflow\n| Workflow area | Fit of Signaling / Non-signaling Tester | Evidence |\n|---|---|---|\n| Radar-specific measurement | The passages do not state that CMX500-style Signaling / Non-signaling Tester performs radar echo generation or radar signature evaluation for Aerospace / Defense radar; radar-related passages separately mention MVG test solutions for radar signature evaluation and AREG800A as an **Automotive Radar Echo Generator**. | [25][28][30] |\n| Communications subsystem test on a radar platform | A signaling tester fits where the radar platform also has LTE, 5G, Wi‑Fi, WLAN or similar communication links, because CMX500 is described as a network emulation and measurement test solution for LTE, NR FR1, NR FR2 and WLAN signaling / TX measurements. | [13][15][76] |\n| OTA signaling / antenna system workflow | A signaling tester can fit in the OTA/antenna measurement stage when the workflow involves 5G NR, RedCap, LTE or WLAN OTA signaling testing, because CMX500 OBT is integrated with MVG antenna / multiprobe measurement systems through WaveStudio for those OTA signaling tests. | [19][21][27][83] |\n| Desense / coexistence around radar payload electronics | A signaling tester can fit in interference or desense validation when cellular and WLAN radios operate simultaneously, because CMX500 Desense Testing is described as WLAN + cellular one-box interference / desense testing under real connections. | [46][47] |\n| Non-signaling RF stimulus / waveform replay | A non-signaling tester role fits generic RF stimulus, waveform replay or standalone TX measurement, because CMX500 GPRF Generator is described as a CMX500 non-signaling use case that generates ARB, CW, dual tone or replay `.wv` waveforms for R&D waveform replay / creation and standalone TX measurement. | [37][39] |\n| EMC / EME environment testing around radar exposure | A signaling/non-signaling tester is not identified as the core EMC/EME system, but it may sit beside EMC/EME testing because Aerospace / Defense drone sources emphasize MIL / aviation EMC and system-level EME, while DO-160 Section 20 notes RF susceptibility from external radiators such as radar stations. | [2][7][60][61] |\n### Practical placement\n| Stage | Placement | Supported reason |\n|---|---|---|\n| Before radar chamber / signature testing | Use signaling testing for the platform’s 5G/LTE/WLAN communication module rather than for radar echo/signature measurement. | [13][16][25] |\n| During OTA antenna validation | Use CMX500 OBT with MVG WaveStudio / antenna or multiprobe systems when the OTA task is 5G NR, RedCap, LTE or WLAN signaling. | [19][21][27][83] |\n| During coexistence / desense checks | Use CMX500-style signaling connections to observe cellular/WLAN interference or desense effects under real connections. | [46] |\n| During non-signaling RF lab work | Use GPRF Generator-style non-signaling mode for ARB/CW/dual-tone generation, waveform replay, R&D waveform creation and standalone TX measurement. | [37][39] |\n| During formal radar-target simulation | The passages support AREG800A for automotive radar echo generation, not Aerospace / Defense radar workflow placement. | [28][30] |\n### 【推論】\n【推論】In an Aerospace / Defense radar program, place Signaling / Non-signaling Tester **around the radar system**, not as the primary radar simulator: use signaling for the platform’s cellular/WLAN links and OTA antenna validation, and use non-signaling GPRF for RF stimulus or waveform replay, while keeping radar echo/signature work on radar-specific systems not established here as CMX500 functions. [13][19][25][30][37][39][46]\n\n來源：\n[2] Wiki：2025RS Drone Solution（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`）\n[7] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）\n[13] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[15] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[16] Wiki：MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`、`MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md`）\n[19] Wiki：MVG CMX500 OBT OTA signaling testing（來源：`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`、`MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md`…）\n[21] Wiki：MVG CMX500 OBT OTA signaling testing（來源：`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`、`MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md`…）\n[25] Wiki：MVG（來源：`MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md`、`MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md`）\n[27] Wiki：MVG（來源：`MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md`、`MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md`）\n[28] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[30] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[37] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[39] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[46] Wiki：CMX500 Desense Testing（來源：`CMX500_Callbox.md`）\n[47] Wiki：CMX500 Desense Testing（來源：`CMX500_Callbox.md`）\n[60] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[61] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[76] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[83] Wiki：MVG CMX500 OBT OTA signaling testing（來源：`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`、`MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md`…）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_BF6nx339ERJqsQY8kILKZ987",
+        "name": "knowledge__rs-knowledge",
+        "arguments": {
+         "question": "For a Aerospace / Defense use case involving radar, where would Signaling / Non-signaling Tester fit in the test workflow?"
+        },
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "harness_verdict": "validated",
+          "harness_output": true,
+          "answer": "### Short answer\nFor an Aerospace / Defense radar workflow, the passages do **not** directly place a Signaling / Non-signaling Tester as the main radar test instrument; the supported fit is around **communications/RF-link validation, OTA signaling, desense/interference checks, generic RF waveform replay or TX/RX measurement**, while radar-specific work is only separately supported as radar signature evaluation or radar echo generation in other contexts. [13][16][25][30][37][46]\n### Where it fits in the workflow\n| Workflow area | Fit of Signaling / Non-signaling Tester | Evidence |\n|---|---|---|\n| Radar-specific measurement | The passages do not state that CMX500-style Signaling / Non-signaling Tester performs radar echo generation or radar signature evaluation for Aerospace / Defense radar; radar-related passages separately mention MVG test solutions for radar signature evaluation and AREG800A as an **Automotive Radar Echo Generator**. | [25][28][30] |\n| Communications subsystem test on a radar platform | A signaling tester fits where the radar platform also has LTE, 5G, Wi‑Fi, WLAN or similar communication links, because CMX500 is described as a network emulation and measurement test solution for LTE, NR FR1, NR FR2 and WLAN signaling / TX measurements. | [13][15][76] |\n| OTA signaling / antenna system workflow | A signaling tester can fit in the OTA/antenna measurement stage when the workflow involves 5G NR, RedCap, LTE or WLAN OTA signaling testing, because CMX500 OBT is integrated with MVG antenna / multiprobe measurement systems through WaveStudio for those OTA signaling tests. | [19][21][27][83] |\n| Desense / coexistence around radar payload electronics | A signaling tester can fit in interference or desense validation when cellular and WLAN radios operate simultaneously, because CMX500 Desense Testing is described as WLAN + cellular one-box interference / desense testing under real connections. | [46][47] |\n| Non-signaling RF stimulus / waveform replay | A non-signaling tester role fits generic RF stimulus, waveform replay or standalone TX measurement, because CMX500 GPRF Generator is described as a CMX500 non-signaling use case that generates ARB, CW, dual tone or replay `.wv` waveforms for R&D waveform replay / creation and standalone TX measurement. | [37][39] |\n| EMC / EME environment testing around radar exposure | A signaling/non-signaling tester is not identified as the core EMC/EME system, but it may sit beside EMC/EME testing because Aerospace / Defense drone sources emphasize MIL / aviation EMC and system-level EME, while DO-160 Section 20 notes RF susceptibility from external radiators such as radar stations. | [2][7][60][61] |\n### Practical placement\n| Stage | Placement | Supported reason |\n|---|---|---|\n| Before radar chamber / signature testing | Use signaling testing for the platform’s 5G/LTE/WLAN communication module rather than for radar echo/signature measurement. | [13][16][25] |\n| During OTA antenna validation | Use CMX500 OBT with MVG WaveStudio / antenna or multiprobe systems when the OTA task is 5G NR, RedCap, LTE or WLAN signaling. | [19][21][27][83] |\n| During coexistence / desense checks | Use CMX500-style signaling connections to observe cellular/WLAN interference or desense effects under real connections. | [46] |\n| During non-signaling RF lab work | Use GPRF Generator-style non-signaling mode for ARB/CW/dual-tone generation, waveform replay, R&D waveform creation and standalone TX measurement. | [37][39] |\n| During formal radar-target simulation | The passages support AREG800A for automotive radar echo generation, not Aerospace / Defense radar workflow placement. | [28][30] |\n### 【推論】\n【推論】In an Aerospace / Defense radar program, place Signaling / Non-signaling Tester **around the radar system**, not as the primary radar simulator: use signaling for the platform’s cellular/WLAN links and OTA antenna validation, and use non-signaling GPRF for RF stimulus or waveform replay, while keeping radar echo/signature work on radar-specific systems not established here as CMX500 functions. [13][19][25][30][37][39][46]\n\n來源：\n[2] Wiki：2025RS Drone Solution（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`）\n[7] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）\n[13] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[15] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[16] Wiki：MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`、`MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md`）\n[19] Wiki：MVG CMX500 OBT OTA signaling testing（來源：`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`、`MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md`…）\n[21] Wiki：MVG CMX500 OBT OTA signaling testing（來源：`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`、`MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md`…）\n[25] Wiki：MVG（來源：`MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md`、`MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md`）\n[27] Wiki：MVG（來源：`MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md`、`MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md`）\n[28] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[30] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[37] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[39] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[46] Wiki：CMX500 Desense Testing（來源：`CMX500_Callbox.md`）\n[47] Wiki：CMX500 Desense Testing（來源：`CMX500_Callbox.md`）\n[60] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[61] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[76] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[83] Wiki：MVG CMX500 OBT OTA signaling testing（來源：`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`、`MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md`…）",
+          "evidence": {
+           "raw_citations": 19,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "technical_knowledge": 1
+           },
+           "claim_status": "supported"
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.3"
+           },
+           "trace": {
+            "trace_id": "trace-12afb377b61640d68cdad42a8e407dd4",
+            "request_id": "request-12afb377b61640d68cdad42a8e407dd4",
+            "span_id": "span-12afb377b61640d68cdad42a8e407dd4",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "For a Aerospace / Defense use case involving radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "2025RS Drone Solution › 與既有知識的關係\n- [[UAV Technologies 外部資料清單]] 已保存 [[6. UAV Technologies]] 中 UAV regulation、standards、PDF 與 link hub 線索；本來源比 [[6. UAV Technologies]] 提供更完整的 drone EMC / EME test proposal 脈絡，但仍屬 Market 類簡報，缺 formal date / version。\n- [[UAV signaling test solution]] 聚焦 [[R&S CMX500]] 對 [[LTE]]、[[5G]]、[[Wi-Fi]] 的 signaling test 與 De-sense validation；本來源則聚焦 EMC / EME / immunity / emissions / system-level RF environment，兩者互補但不可互相替代。\n- [[UAV 通訊]] 記錄 C2、telemetry、payload data、SATCOM、4G/5G、Wi‑Fi、mesh 與 MAVLink / RTPS 等通訊議題；本來源補充通訊設備、GPS、mobile radio、broadcast emissions、data communications 與 power supply 可能形成 electromagnetic environment 的測試背景。\n- [[Counter-UAV 技術]] 討論 detection / neutralization；本來源只在 customised solution 中列 [[CUAS System Performance Verification]]，沒有提供 counter-UAS system 的技術分類、產品或效能數字。\n- [[UAV 系統方塊圖]] 整理 UAV 子系統；本來源補充 drone components 如 battery、BMS、ESC、FCM、CM、antennas 與 sensors，但未提供 specific architecture 或 BOM。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2025RS Drone Solution.md"
+              },
+              "score": 8.878771
+             },
+             {
+              "text": "2025RS Drone Solution › 重點摘要\n- 本來源是由 `2025RS Drone Solution.pdf` 轉出的 lossy markdown，標題為 `DRONE TEST SOLUTION PROPOSAL`；來源檔名含 `2025RS`，但正文未標示正式發布日期、作者、版本或簡報完整封面。\n- 來源以 [[EMC]] / [[EME]] 為主軸，說明 drone / [[UAV]] / [[UAS]] 在 residential、outdoor AUT、MIL battle environment 與 multi-domain operations 下會遭遇不同電磁干擾與測試需求。\n- 來源定義 [[UAV]] 為 platform vehicle，[[UAS]] 為支援 drone operation 的整體系統，包含 UAV、controller、datalink、sensors 等；並列出 battery、[[BMS]]、[[ESC]]、[[Flight Control Module]]、[[Communication Module]]、antennas 與 sensors 等 drone components。\n- 來源提出 [[UAV UAS Drones T&M Solutions]]：standard system 包含 [[R&S TS9975 EMI Test System]]、[[R&S TS9982 EMS Test System]] 與 [[R&S TS8997]]；customised solution 包含 [[B-RID Environment Performance]]、[[CUAS System Performance Verification]]、[[Electromagnetic Environment Emulation]] 與 [[High-Intensity RF]]。\n- 商用無人機部分，來源列出 [[European EMC Directive]] 2014/30/EU、[[Radio Equipment Directive]] 2014/53/EU、[[ETSI EN 301 489]] 系列、[[CISPR 32]] / [[EN 55032]]、[[CISPR 35]]、[[EN 61000-4-3]]、[[EN 61000-4-6]]、[[EN 61000-4-2]]、[[EN 61000-4-4]]、[[EN 61000-4-5]]、[[EN 61000-4-11]]、[[EN 61000-3-2]]、[[EN 61000-3-3]] 與 [[ISO 7637-2]] 等線索。\n- 軍用 / 航太部分，來源列出 [[MIL-STD-461]]、[[MIL-STD-464]]、[[RTCA DO-160]]、[[DEF STAN 59-411]]、[[GJB 151B]]、[[GJB 1389A]] 等標準線索，並補充 [[MIL-STD-464]] 涵蓋 external RF EME、[[HPM]]、[[EMP]]、lightning、RADHAZ、HERP / HERF / HERO、electrical bonding、TEMPEST 與 platform radiated emission 等系統層議題。\n- 來源指出 commercial drone radiated RF immunity default test level 為 3 V/m、frequency range 80 MHz to 6 GHz，但也問「Is this test level adequate for all environment?」，並指出 test level 需由 drone manufacturer 依 applications 定義，例如 higher test level 10 V/m 或 specialized test level。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2025RS Drone Solution.md"
+              },
+              "score": 6.419233
+             },
+             {
+              "text": "2025RS Drone Solution › 原文未解的問題\n- 來源未標示正式發布日期、版本、作者、客戶、適用國家 / 地區或簡報完整頁數；只能以 raw 轉檔日期 2026-09-17 與檔名 `2025RS` 追溯。\n- 轉檔為 lossy derivative；多個表格與標準列名存在 OCR / 排版斷裂，例如 standards based on EUT、R&S test system list、ETSI 4709-x 描述與 MIL / satellite standards 表。\n- [[R&S TS8997]] 只出現代碼；來源未說明完整產品名稱或用途。\n- [[MIL-STD-464]] 在來源中同時出現 464C 與 464D，未說明版本差異或適用情境。\n- `Lighting` / `Lightning` 在來源中皆出現，需回 PDF 判斷是 illumination 還是 lightning / EMP 語境。\n- `DAV-B` 可能為 `DVB` 或其他 broadcast emission 文字；未決。\n- [[ETSI 4709-x]] 的正式標準名稱、版本與 drone network testing 關係未由來源清楚標示。\n- 來源列出的 standard applicability 不等於任一 drone product 必須全部測試；測試項目需依 EUT、intended environment、regulatory domain、application 與 manufacturer requirement 定義。\n- 來源列 [[B-RID Environment Performance]]、[[CUAS System Performance Verification]]、[[Electromagnetic Environment Emulation]] 與 [[High-Intensity RF]]，但未提供 test method、frequency plan、chamber / antenna setup、pass / fail criteria、threat waveform 或 safety condition。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2025RS Drone Solution.md"
+              },
+              "score": 5.338393
+             },
+             {
+              "text": "軍用無人機 EMC 與 EME testing › 與 standard EMC test 的差異\n[[2025RS Drone Solution]] 對 system level EME effects test 與 standard EMC test 的差異描述包含：\n\n- system level 依 requirements operate in fixed / operational environment。\n- operational environmental conditions may have no definition。\n- 分析 EM interference，涵蓋 time and frequency domain。\n- standard EMC test 則 according to test methods、frequency domain、research and design work 等。\n\n來源排版破碎，以上只保留可見語句，不延伸成正式測試方法。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+              },
+              "score": 6.279706
+             },
+             {
+              "text": "軍用無人機 EMC 與 EME testing › 使用限制\n- 本頁是 Market 類簡報摘要，不是 [[MIL-STD-461]]、[[MIL-STD-464]] 或 [[RTCA DO-160]] 標準文件。\n- 不可由此頁直接判定任一 drone / UAV / eVTOL 產品必須測哪些項目。\n- [[MIL-STD-464C]] / [[MIL-STD-464D]] 版本差異需後續查正式標準或 procurement documentation。\n- 系統層 EME / HPM / EMP / lightning / RADHAZ 測試涉及安全與法規限制，來源未提供可部署或可執行參數。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+              },
+              "score": 2.804666
+             },
+             {
+              "text": "軍用無人機 EMC 與 EME testing\n[[軍用無人機 EMC 與 EME testing]] 是 [[2025RS Drone Solution]] 中針對 military / aviation drones 在 unforgiving electromagnetic environment、multi-domain operations 與 system-level effects 下的測試標準與 solution 線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+              },
+              "score": 2.373098
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing › Section 20 — Radio Frequency Susceptibility\n來源說此測試確保 EUT exposed to a level of RF modulated power 時不受影響，並分為：\n\n- Conducted Susceptibility（low freq）。\n- Radiated Susceptibility（high freq）。\n\n來源說 emissions can come from equipment installed inside aircraft as well as external radiators such as radar stations；Conducted Susceptibility similar to [[CS114]] test，Radiated Susceptibility similar to [[RS103]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 4.763508
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing\n[[DO-160 airborne equipment EMC testing]] 是 [[2025RS Drone Solution]] 中引用 [[RTCA DO-160]] 作為 airborne equipment environmental conditions and test procedures 的測試線索，用於 military / aviation drone EMC proposal context。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 3.586652
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing › Section 22 — Lightning Induced Transients\n來源說此測試確保 equipment can withstand a selection of fast transients intended to represent induced effects of lightning，並在頁面標題中列 [[CS117]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 2.206261
+             },
+             {
+              "text": "CMX500 use-case based 5G testing › toolchain\n來源列出的 CMX500 toolchain 包含：\n\n- [[R&S CMsquares]]。\n- [[R&S CONTEST]]。\n- Conformance：LTE、NR、2G、3G、C-IoT。\n- 測試範圍：RF Conformance、RRM、LBS、NetOp、PCT、signaling tests、application、callbox、NPT、PQA、3GPP RF preconformance、ATE。\n- 相關設備：[[R&S CMX500]]、[[R&S ATS CATR]]、[[R&S NGM200]]、[[R&S TS8980 Conformance Test Platform]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 8.549352
+             },
+             {
+              "text": "CMX500 use-case based 5G testing › Shuffler\n來源描述 [[Shuffler]]：\n\n- RF / T-put test on all supported UE band combos in one go。\n- All Shuffler tests part of [[R&S CMX-KF612M]] test package。\n- Loop blocks provide flexibility to loop through bands、bandwidth、channels。\n- one test script with one test report can test RF TX / RX measurement、RX sensitivity measurement、throughput、VoLTE / VoNR。\n- Band combinations input via UE capabilities or user-defined Excel sheet。\n- Shuffler implemented in [[R&S CMsequencer]]。\n\n此處仍需正式 [[R&S CMX-KF612M]] 文件補證。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 7.673286
+             },
+             {
+              "text": "CMX500 use-case based 5G testing\n[[CMX500 use-case based 5G testing]] 是 [[Rethink 5G Testing solution overview 5G RedCap NTN FWA]] 中對 [[R&S CMX500]] 的 market / solution positioning：以 use-case based approach 支援 5G eMBB、FWA、RedCap、NTN、XR 等裝置測試，而不只是一組單點工具。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 6.27119
+             },
+             {
+              "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 13.88277
+             },
+             {
+              "text": "R&S CMX500 › mmWave extension 與 remote radio heads\n[[CMX500_specs_en_5216-4127-22_v1100]] 指出 3GPP FR2 frequency range 測試可由 [[R&S CMX500]] 搭配 [[R&S CMXHEAD30]]、[[R&S CMXHEAD50]] 或 [[R&S CMXHEAD50-Evo]] 執行。Remote radio head 是獨立 compact unit，在 IF 與 5G NR FR2 frequency ranges 間執行 upconversion / downconversion。CMX500 與 remote radio head 的 split concept 可在 5G NR FR2 frequency range 使用短 RF cable lengths，以最佳化 radiated chamber test environments 的 link budget。\n\n適用 radiated chamber test environments：[[R&S CMQ500]] shielding cube 與 [[R&S ATS800R]] CATR rack based antenna test system。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 21,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 12.763353
+             },
+             {
+              "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 12.08367
+             },
+             {
+              "text": "MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes › 重點摘要\n- [[MVG]]（Microwave Vision Group）已將 [[R&S CMX500 OBT]] 整合進 [[WaveStudio Software Suite]]。\n- 來源稱此整合讓使用者可直接使用 [[MVG]] antenna measurement systems 執行 [[5G NR]] 與 [[LTE]] [[OTA testing]] signaling tests。\n- [[R&S CMX500 OBT]] 被描述為支援 full stack generation and analysis of 4G、[[5G NR]]、[[WLAN]] 與 [[LTE]] signals。\n- 與 [[MVG]] multi-probe measurement systems 搭配時，來源稱可在 real-world conditions 下進行 precise OTA testing。\n- [[WaveStudio Software Suite]] 整合後，來源稱 [[MVG]] systems 可處理 [[5G NR Standalone]]（SA）mode、[[RedCap]] 與 [[LTE]]（FDD & TDD）signaling testing。\n- 來源稱整合支援 multiple hardware configurations of the [[R&S CMX500 OBT]]，包括 `CMX Lite` 與 `CMX Pro`；但未提供正式料號、BOM 或與既有 [[R&S CMX500]] standard hardware configurations 的對照。\n- 來源列出可支援的標準 / 場景包括 [[5G NR FR1]] SA、[[RedCap]] 與 [[LTE]]。\n- 來源稱此整合可移除 earlier setups 的複雜度，減少 preparation and measurements 所需時間，並加速 development cycles。\n- [[Pierre Jurek]] 以 [[MVG]] Chief Commercial Officer 身分表示，MVG 決定支援 different OBT configurations，並正快速擴充測試能力到 WiFi technologies，尤其是 [[Wi-Fi 7]] / [[IEEE 802.11be]]。\n- [[Christoph Pointner]] 以 [[Rohde & Schwarz]] Senior Vice President of Mobile Radio Testers 身分表示，[[R&S CMX500]] one-box signaling tester 的 multi-band capabilities 可顯著簡化 OTA test setup。\n- Press & media contact 為 [[Christian Mokry]]，PR Manager Test & measurement。\n- [[Rohde & Schwarz]] 公司資訊：2024/2025 fiscal year（July to June）net revenue EUR 3.16 billion；2025-06-30 員工超過 15,000 人。\n- [[MVG]] 公司資訊：Microwave Vision Group 提供 electromagnetic waves visualization 技術、antenna characterization、radar signature evaluation 與 electromagnetic measurements 測試方案；營運於 10 個國家，90% sales from exports，revenues exceeding €100 million。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md"
+              },
+              "score": 8.685293
+             },
+             {
+              "text": "MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes › 實體\n- [[MVG]] — Microwave Vision Group，提供 antenna characterization、radar signature evaluation 與 electromagnetic measurements 相關測試方案；本來源說其 antenna measurement systems / multi-probe measurement systems 可搭配 [[R&S CMX500 OBT]] 執行 OTA signaling testing。\n- [[WaveStudio Software Suite]] — [[MVG]] 的 software suite；本來源說它已整合 [[R&S CMX500 OBT]]，用於簡化 5G OTA signaling test processes。\n- [[R&S CMX500 OBT]] — [[Rohde & Schwarz]] CMX500 One-Box Tester；本來源將其定位為可整合進 [[WaveStudio Software Suite]] 的 OTA signaling test component。\n- [[R&S CMX500]] — 來源引用 CMX500 product page，並在引言中稱其為 one-box signaling tester。\n- [[Pierre Jurek]] — [[MVG]] Chief Commercial Officer，於本來源提供引言。\n- [[Christoph Pointner]] — [[Rohde & Schwarz]] Senior Vice President of Mobile Radio Testers，於本來源提供引言。\n- [[Christian Mokry]] — [[Rohde & Schwarz]] press & media contact，PR Manager Test & measurement。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md"
+              },
+              "score": 5.604573
+             },
+             {
+              "text": "MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes › 概念\n- [[MVG CMX500 OBT OTA signaling testing]] — 本來源描述的測試整合情境：[[R&S CMX500 OBT]] 透過 [[WaveStudio Software Suite]] 連到 [[MVG]] antenna / multi-probe measurement systems，用於 [[5G NR]]、[[RedCap]] 與 [[LTE]] OTA signaling testing。\n- [[OTA testing]]、[[5G NR Standalone]]、[[5G NR FR1]]、[[RedCap]]、[[LTE]]、[[WLAN]]、[[Wi-Fi 7]]、[[IEEE 802.11be]]、[[FDD]]、[[TDD]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md"
+              },
+              "score": 3.856482
+             },
+             {
+              "text": "MVG CMX500 OBT OTA signaling testing › 測試架構\n依 [[MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes]]：\n\n- [[R&S CMX500 OBT]] 被整合到 [[WaveStudio Software Suite]]。\n- [[WaveStudio Software Suite]] 控制 / 串接 [[MVG]] antenna measurement systems。\n- 與 [[MVG]] multi-probe measurement systems 搭配時，來源稱可進行 precise OTA testing under real-world conditions。\n- 目標是 streamlining test environment，簡化 next-generation wireless devices 的 OTA signaling testing processes。\n\n依 [[MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz]]：\n\n- [[MVG]] 已將 full [[WLAN]] signaling test functionality including [[Wi-Fi 7]] of the [[R&S CMX500 OBT]] 整合進 [[WaveStudio Software Suite]]。\n- Manufacturers 可在 single antenna measurement system 內執行 comprehensive 4G、5G 與 [[WLAN]] [[OTA testing]]。\n- [[WaveStudio Software Suite]] 整合 full Wi‑Fi（[[IEEE 802.11]] a/b/g/n/ac/ax/be）access point and station testing functionality。\n- Software now supports [[5G NR Non-Standalone]]（[[EN-DC]]）testing with the [[R&S CMX500]]。\n- [[MVG]] multiprobe measurement systems 被描述為 fully support Wi‑Fi and cellular standards within a single tester。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/MVG CMX500 OBT OTA signaling testing.md"
+              },
+              "score": 4.835912
+             },
+             {
+              "text": "MVG CMX500 OBT OTA signaling testing › 與其他 OTA partner integrations 的關係\n- [[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]] 描述 [[R&S CMX500 OBT]] 與 [[Bluetest Flow]] v1.18 / [[Bluetest]] RTS 的 4G、[[5G NR]] 與 [[WLAN]] OTA workflow。\n- [[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 描述 [[R&S CMX500]] 與 [[EMITE]] OTA chambers 的 [[Wi-Fi 7]] 與 [[5G RedCap]] OTA measurements。\n- [[MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes]] 描述 [[R&S CMX500 OBT]] 與 [[MVG]] [[WaveStudio Software Suite]] / multi-probe measurement systems 的 5G NR / RedCap / LTE OTA signaling workflow。\n- [[MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz]] 則補充同一 [[MVG]] workflow 現在包含 full WLAN / Wi‑Fi 7 OTA signaling testing 與 5G NR NSA EN-DC support。\n\n這些來源都是 PR / solution-level statements；不可替代正式 datasheet、configuration guide、test case database、conformance document 或 certification documentation。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/MVG CMX500 OBT OTA signaling testing.md"
+              },
+              "score": 4.772144
+             },
+             {
+              "text": "MVG CMX500 OBT OTA signaling testing › 來源列出的測試能力\n目前兩份 MVG / R&S PR 明確列出的能力包含：\n\n- [[5G NR]] OTA signaling testing。\n- [[5G NR Standalone]]（SA）mode。\n- [[5G NR FR1]] SA。\n- [[5G NR Non-Standalone]]（[[EN-DC]]）。\n- [[RedCap]]。\n- [[LTE]] OTA signaling testing。\n- [[LTE]] FDD & TDD signaling testing。\n- Full Wi‑Fi / [[WLAN]] access point and station testing functionality。\n- [[IEEE 802.11]] a/b/g/n/ac/ax/be。\n- [[Wi-Fi 7]] / [[IEEE 802.11be]]。\n- multiple hardware configurations of [[R&S CMX500 OBT]]，包括 `CMX Lite` 與 `CMX Pro`（僅前一份來源列名，未定義正式 BOM）。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/MVG CMX500 OBT OTA signaling testing.md"
+              },
+              "score": 3.565899
+             },
+             {
+              "text": "WaveStudio Software Suite › 來源中的功能定位\n依 [[MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes]]：\n\n- [[WaveStudio Software Suite]] 已整合 [[R&S CMX500 OBT]]。\n- 此整合可讓使用者透過 [[MVG]] antenna measurement systems 執行 [[5G NR]] 與 [[LTE]] OTA signaling testing。\n- 整合後，[[MVG]] systems 被稱為 fully equipped to handle [[5G NR Standalone]]（SA）mode、[[RedCap]] 與 [[LTE]]（FDD & TDD）signaling testing。\n- 來源稱此 workflow 可簡化 complex testing processes，減少 preparation and measurements 所需時間。\n\n依 [[MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz]]：\n\n- [[WaveStudio Software Suite]] 已整合 [[R&S CMX500 OBT]] 的 full [[WLAN]] signaling test functionality including [[Wi-Fi 7]]。\n- 整合內容包括 full Wi‑Fi（[[IEEE 802.11]] a/b/g/n/ac/ax/be）access point and station testing functionality。\n- Software now supports [[5G NR Non-Standalone]]（[[EN-DC]]）testing with the [[R&S CMX500]]。\n- 來源稱 [[MVG]] multiprobe measurement systems 可 fully support Wi‑Fi and cellular standards，包括 [[5G NR Standalone]]（SA）、[[5G NR Non-Standalone]]（EN-DC）、[[RedCap]] 與 [[LTE]]（FDD & TDD），all within a single tester。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/WaveStudio Software Suite.md"
+              },
+              "score": 4.876837
+             },
+             {
+              "text": "WaveStudio Software Suite › 使用限制\n- 來源未標示 [[WaveStudio Software Suite]] 的版本號、release date、module 名稱、license requirement 或 release notes。\n- 來源未標示 [[R&S CMX500 OBT]] integration 的 API、driver、connection topology、automation interface 或 supported command set。\n- 來源未列出完整 test case list、band combinations、measurement uncertainty、pass/fail criteria 或 conformance / certification applicability。\n- 來源提到 `CMX Lite` 與 `CMX Pro`，但未提供正式料號、BOM 或與 [[R&S CMX500]] 既有 OBT configurations 的對照。\n- [[MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz]] 的 full Wi‑Fi / WLAN support 是 PR statement；仍不可推論所有 [[IEEE 802.11be]] features、[[MLO]] combinations、spatial streams 或 channel bandwidths 均已在所有 [[MVG]] systems / [[R&S CMX500 OBT]] configurations 中可用。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/WaveStudio Software Suite.md"
+              },
+              "score": 4.639577
+             },
+             {
+              "text": "WaveStudio Software Suite › 支援範圍的來源說法\n兩份來源合併後，目前可追溯的 PR 層級支援範圍包含：\n\n- multiple hardware configurations of [[R&S CMX500 OBT]]。\n- `CMX Lite` 與 `CMX Pro`（僅前一份來源列名，未定義正式料號或 BOM）。\n- [[5G NR FR1]] SA。\n- [[5G NR Standalone]]（SA）。\n- [[5G NR Non-Standalone]]（[[EN-DC]]）。\n- [[RedCap]]。\n- [[LTE]]（FDD & TDD）。\n- [[WLAN]] / Wi‑Fi access point and station testing，涵蓋 [[IEEE 802.11]] a/b/g/n/ac/ax/be。\n- [[Wi-Fi 7]] / [[IEEE 802.11be]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/WaveStudio Software Suite.md"
+              },
+              "score": 2.644724
+             },
+             {
+              "text": "MVG\n[[MVG]]（Microwave Vision Group）是提供 electromagnetic waves visualization、antenna characterization、radar signature evaluation 與 electromagnetic measurements 測試方案的公司；在 [[MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes]] 中，它將 [[R&S CMX500 OBT]] 整合進 [[WaveStudio Software Suite]]，使其 antenna measurement systems / multi-probe measurement systems 可執行 [[5G NR]] 與 [[LTE]] OTA signaling testing。[[MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz]] 進一步說明，[[MVG]] OTA test systems / multiprobe measurement systems 現在透過同一整合支援 full [[WLAN]] OTA signaling testing，包括 [[Wi-Fi 7]] / [[IEEE 802.11be]]，並與 4G / 5G cellular coverage 並列。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/MVG.md"
+              },
+              "score": 7.002722
+             },
+             {
+              "text": "MVG › 使用限制\n- 兩份來源都是 PR / solution-level statements，不是 [[MVG]] antenna measurement systems、multiprobe measurement systems 或 [[WaveStudio Software Suite]] 的 datasheet。\n- 來源未標示 [[MVG]] multi-probe measurement systems 的具體型號、frequency range、DUT 尺寸、probe count、校準條件或 measurement uncertainty。\n- 來源未標示 [[WaveStudio Software Suite]] 版本號、integration module、license requirement、release notes 或 API / driver 條件。\n- [[MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz]] 說 full Wi‑Fi（IEEE 802.11 a/b/g/n/ac/ax/be）AP / station testing functionality 已整合，但未列完整 test cases、MLO combinations、spatial streams、bands、channel bandwidths、pass/fail criteria 或 conformance applicability。\n- 來源未說明 [[MVG]] 與 [[Rohde & Schwarz]] 的商務合作範圍、支援合約、銷售組合或認證責任分工。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/MVG.md"
+              },
+              "score": 4.515003
+             },
+             {
+              "text": "MVG › CMX500 OBT / WaveStudio 整合\n依 [[MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes]]：\n\n- [[MVG]] 已將 [[R&S CMX500 OBT]] 整合進 [[WaveStudio Software Suite]]。\n- 使用者可透過 [[MVG]] antenna measurement systems 直接執行 [[5G NR]] 與 [[LTE]] OTA signaling testing。\n- 與 [[MVG]] multi-probe measurement systems 搭配時，可在 real-world conditions 下進行 OTA testing。\n- 整合後支援 [[5G NR Standalone]]（SA）mode、[[RedCap]] 與 [[LTE]]（FDD & TDD）signaling testing。\n- [[Pierre Jurek]] 表示，[[MVG]] 決定支援 different OBT configurations，並正快速擴充到 WiFi technologies，尤其是 [[Wi-Fi 7]] / [[IEEE 802.11be]]。\n\n依 [[MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz]]：\n\n- [[MVG]] 已將 full [[WLAN]] signaling test functionality including [[Wi-Fi 7]] of the [[R&S CMX500 OBT]] 整合進 [[WaveStudio Software Suite]]。\n- 來源稱此整合讓 manufacturers 可在 single antenna measurement system 中執行 comprehensive 4G、5G 與 [[WLAN]] [[OTA testing]]。\n- [[WaveStudio Software Suite]] 整合 full Wi‑Fi（[[IEEE 802.11]] a/b/g/n/ac/ax/be）access point and station testing functionality。\n- Software now supports [[5G NR Non-Standalone]]（[[EN-DC]]）testing with the [[R&S CMX500]]。\n- [[MVG]] multiprobe measurement systems 被描述為 fully support Wi‑Fi and cellular standards，包括 [[5G NR Standalone]]（SA）、[[5G NR Non-Standalone]]（EN-DC）、[[RedCap]] 與 [[LTE]]（FDD & TDD），all within a single tester。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/MVG.md"
+              },
+              "score": 4.181467
+             },
+             {
+              "text": "R&S AREG800A › 文件與適用條件\n- 來源文件：[[AREG800A_specs_en_3609-8015-22_v0900]]。\n- 文件編號：`PD 3609.8015.22`。\n- 文件版本：`Version 09.00`。\n- 文件日期：`September 2025（LA）`。\n- 文件名稱：`AREG800A Automotive Radar Echo Generator`。\n- Copyright：`© 2021–2025 Rohde & Schwarz`。\n- 資料註記：無 tolerance limits 的資料不具 binding 效力；資料 `subject to change`。\n\n產品資料適用條件（Version 09.00, September 2025）：\n\n- 於環境溫度儲存 3 小時後，進行 30 分鐘 warm-up operation。\n- 符合指定 environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有適用的 internal automatic adjustments。\n\n規格定義（Version 09.00, September 2025）：\n\n- `Specifications with limits`：以 `<`、`≤`、`>`、`≥`、`±`、maximum、minimum 等限制符號表示保證產品性能。\n- `Non-traceable specifications with limits (n. trc.)`：依 specifications with limits 測試，但因缺乏可追溯至 national metrology standards 的量測設備，Rohde & Schwarz 不保證。\n- `Specifications without limits`：表示保證產品性能，通常為 dimensions 或 setting parameter resolution 等值。\n- `Typical data (typ.)`、`Nominal values (nom.)`、`Measured values (meas.)` 不由 Rohde & Schwarz 保證。\n- `Uncertainties`：coverage factor 為 2，依 GUM 計算。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 17.322826
+             },
+             {
+              "text": "R&S AREG800A › 基本訂購資訊\n| 類別 | 型號 / 代碼 | 名稱 | Order No. | 原文說明 |\n|---|---|---|---|---|\n| Base unit | `AREG800A` | Automotive radar echo generator | `1437.4400.02` | Includes power cable and quick start guide |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 10.238328
+             },
+             {
+              "text": "R&S AREG800A › Echo generation\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Echo generator type：`dynamic artificial object generation`。\n- Echo generation concept：\n  - `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n  - `digital`：用於 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 air gap value；maximum generated distance 為 `3000 m`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 6.421744
+             },
+             {
+              "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › 重點摘要\n- 來源將 [[Keysight]] 描述為大型美國 test & measurement vendor，總部在 Santa Rosa, California, USA，員工數約 **16,800+**，在 semiconductor、aerospace / defense、cloud 與 wireless testing 具有強市場存在。\n- 來源主張 [[Keysight]] mobile communications strategy 越來越 software-led 與 AI-driven，但 [[Keysight UXM]] portfolio 分散於多個 hardware SKUs：[[Keysight E7515P]]、[[Keysight E7515W]]、[[Keysight E7515B]]、[[Keysight E7515E]]、[[Keysight E7515R]]。\n- 來源列出 [[Keysight]] portfolio 包含 UXM 5G Wireless Test Platforms、[[ProbSim]] channel emulators、[[Nemo]] field test tools、[[RaySim]] digital twin engine、[[Atlas]] AI-powered device test、C-V2X 與 cybersecurity tools。\n- 來源把 R&S positioning 表述為：[[R&S CMX500]] 在 one instrument 中整合 [[NR FR1]]、[[NR FR2]]、[[Wi-Fi]]、[[Fading]]、IP throughput、RF analysis、[[NTN]]、[[RedCap]] 與 end-to-end signaling；而 Keysight 需分散於多個 UXM models、add-on software 與 external tools。\n- 來源主張 [[R&S CMX500]] 的差異化包含 one-platform architecture、integrated fading + IP + application testing、unified software ecosystem（[[CMsquares]]、[[R&S CMsequencer]]、AI Script Assistant）、measurement leadership、FR3 / 6G path、cellular + Wi-Fi in one platform，以及 NTN / RedCap / operator certification leadership。\n- 來源對 [[Keysight]] 的弱點敘述包含 hardware fragmentation、multi-tool workflow、advanced testing external dependencies、limited legacy、Wi-Fi only on selected models、FR3 / 6G roadmap relies on add-ons。\n- 來源的 quick comparison table 將 R&S / CMX500 描述為 one platform：FR1 + FR2 + FR3 + WLAN + fading + IP + NTN + LTE + RedCap；將 Keysight 描述為 multiple UXM SKUs + external tools。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+              },
+              "score": 12.013094
+             },
+             {
+              "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › 原文未解的問題\n- unresolved：來源是 lossy derivative；原始 PDF 才是 source of truth。\n- unresolved：來源標示 COMPANY CONFIDENTIAL；未說明可對外使用範圍。\n- unresolved：來源未提供 [[Keysight E7515P]]、[[Keysight E7515W]]、[[Keysight E7515B]]、[[Keysight E7515E]]、[[Keysight E7515R]] 的正式文件編號、版本、order number 或日期。\n- unresolved：來源未提供 [[RFU18]] 的正式 order number、datasheet、release date、supported CMX500 configurations、校準條件或 availability。\n- unresolved：來源說 [[RFU18]] up to 18 GHz、max aggregated NR bandwidth 2000 MHz，但未提供測試條件、band combination、carrier count、SCS、modulation、MIMO layers 或 binding tolerance。\n- unresolved：來源說 R&S first validated 3GPP NR-NTN conformance with [[Samsung]]，但未提供 validation report、test case list、PTCRB RFT 555 版本或日期。\n- unresolved：來源多處使用 only、first、leadership、lower TCO、fewer boxes 等 sales language；需要正式證據才能在技術比較或客戶文件中使用。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+              },
+              "score": 9.892634
+             },
+             {
+              "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › 對 Keysight 的主要主張\n| 主題 | 來源對 Keysight 的說法 | 限制 |\n|---|---|---|\n| Portfolio | UXM 5G Wireless Test Platforms E7515B/W/P/E/R、ProbSim、Nemo、RaySim、Atlas、C-V2X、cybersecurity tools | 未提供 Keysight 官方 datasheet 或版本 |\n| Architecture | Multi-Box UXM approach；不同 UXM 有不同 NR bandwidth、RF ports、Rel-17 support、WLAN capability、IP throughput、FR2 readiness | 未列各 SKU 的完整規格條件 |\n| Software model | Atlas + Channel Studio + RaySim + Nemo + WLAN tools + UXM-specific features；no unified automation environment | 這是 R&S battle card 觀點，需 Keysight 官方資料驗證 |\n| Support model | tiered KeysightCare model：Assured、Enhanced、Application Software Support；optional warranty / calibration assurance plan | 未提供 KeysightCare 文件版次或服務條款 |\n| Wi-Fi | Wi-Fi signaling only on selected models：E7515W、E7515P | 未提供 Keysight WLAN option / configuration 文件 |\n| RedCap | E7515R is dedicated RedCap / IoT model | 未提供 E7515R 官方規格或 order data |\n| FR3 / 6G | UXM-P bandwidth options + RaySim + future hardware / software；multi-component approach | future hardware / software 未標示日期、型號或 release status |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+              },
+              "score": 7.151821
+             },
+             {
+              "text": "Virtual Signalling Tester › 來源定義\n[[mx844030pc-j1200]] 將 [[Virtual Signalling Tester]] 描述為 software protocol simulator / Virtual Signalling Test Solution，透過虛擬化 protocol stack，在 PC 上重現多個 protocol layers：\n\n- [[RRC-NAS]]\n- [[PDCP]]\n- [[RLC]]\n- [[MAC]]\n\n來源主張它可不使用一般硬體測試儀而在 PC 上快速建立 protocol test environment；但 RF-IF configuration 仍使用 [[Anritsu MD8190A]] Universal RF Unit 與 [[MX819020A]] RF Platform。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+              },
+              "score": 8.317376
+             },
+             {
+              "text": "Virtual Signalling Tester › 與 Virtual tester 的區分\n[[Virtual tester]] 在 [[AIW_Products_Customer_Questionnaire]] 中是 R&S AI Workplace questionnaire 的 agentic workflow concept，跨 implementation、test、debug、validation。\n\n[[Virtual Signalling Tester]] 則是 [[mx844030pc-j1200]] 中 Anritsu NR / RedCap protocol simulation and test product / solution 語彙。兩者名稱相近，但目前沒有來源支持它們是同一產品、同一架構或同一市場分類。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+              },
+              "score": 3.753184
+             },
+             {
+              "text": "Virtual Signalling Tester › Post-silicon testing\n- 適用 [[IoT]] device 與 communication module 的 basic protocol test。\n- 支援快速 functional test、regression test、sample scenario parameterization、test procedure 與 report / log display。\n- 來源列出 [[5G RedCap]]、Automotive、Healthcare、Industrial IoT、Smart Cities 等應用語境。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+              },
+              "score": 2.195801
+             },
+             {
+              "text": "CMX500 GPRF Generator\n[[CMX500 GPRF Generator]] 是 [[CMX500_Callbox]] 中的 [[R&S CMX500]] non-signaling use case：在 CMX500 上產生 ARB、CW、dual tone 或 replay `.wv` waveform，支援 R&D waveform replay / creation 與 standalone TX measurement 工作流。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md"
+              },
+              "score": 10.375975
+             },
+             {
+              "text": "CMX500 GPRF Generator › 使用限制\n- [[CMX500_Callbox]] 是簡報來源，不是 formal feature list 或 specifications。\n- `No License required` 只可先記為 GPRF Generator slide claim；technology-specific ARB replay / WinIQSim2 waveform 明確需要 KWxxx licenses。\n- Planned for CSW 9.00 / coming with CSW 9.10 需以 release note 驗證。\n- 本頁未補推 KW option 的 order number；需回正式 CMX500 features、pricing 或 configurator。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md"
+              },
+              "score": 5.996777
+             },
+             {
+              "text": "CMX500 GPRF Generator › Waveform replay\n來源描述可 replay any waveform from：\n\n- IQ capture。\n- MATLAB。\n- Other sources。\n\n流程線索包含：\n\n1. Convert with R&S MATLAB tools from App Note [[1GP60]]。\n2. Read in complex IQ vector。\n3. Add parameters（sample rate provided in `.info` file in CMX500 captures）。\n4. Run conversion script from [[1GP60]]。\n5. `.wv` stored in active directory。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md"
+              },
+              "score": 4.747293
+             },
+             {
+              "text": "CMX500_Callbox › 與既有知識的關係\n- 本來源補充 [[R&S CMX500]] 正式 specifications / features 以外的 callbox sales / training 視角；其內容多為 use-case、workflow、roadmap 或 demo claim，不可替代 [[CMX500_specs_en_5216-4127-22_v1100]] 或 [[CMX500_Features_CSW9-20-0_en_32]] 的 binding specifications。\n- 本來源對 [[5G NR FR1 SA pre-conformance testing]] 補充 GUI one-click / wizard / 25 TCs / 1C111 app note 的簡報敘事；既有 [[1C111_1e_3GPPPreConfGuide]] 仍是具體 workflow 與限制的主要來源。\n- 本來源對 [[CMX500 Sequencer Test Packages]] 補充 manual-to-automated pre-conformance、TC count chart 與 WiFi RF pre-conformance update 的簡報圖表；正式 verified status 仍以 [[Sequencer-CMX-Test_Packages_Database]] 為主。\n- 本來源對 [[CMX500 NTN one-box tester]] 補充 multi-orbit、complete channel emulation in one box 與 NTN orbit live graphics 的簡報說法；PR 與 configuration guide 仍需分別追溯。\n- 本來源對 [[WLAN offloading with Voice over WLAN]] 補充 application testing 清單中的 WLAN offloading / ATSSS 與 desense / WiFi7 parallel testing 情境。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Callbox.md"
+              },
+              "score": 8.129888
+             },
+             {
+              "text": "CMX500_Callbox › 原文未解的問題\n- 來源投影片中日期 **05.01.2026** 未標示格式；不可判定為 2026-01-05 或 2026-05-01。\n- 來源 frontmatter 只標示 converted 2026-09-17；原始簡報發布日期、作者、版本與 software release 未標示。\n- Slide 21 的「25 TCs」未列出 test case IDs，也未說明是否僅限 manual NR SA FR1 GUI pre-conformance。\n- Slide 31 RF Pre-Conformance TC Count 圖表的 category 7.1、7.4、7.6、8.3000000000000007 未展開為標準章節或 package 名稱。\n- Slide 23 / 52 說 NR-NTN、NSA、LTE coming；來源未標示該 roadmap 對應 software release 或實際可用日期。\n- Slide 69 說 LTE+LTE DSDA coming soon；Slide 42 的 supported combinations 圖上也列 LTE+LTE DSDA，兩者 scope / 時點未明。\n- Slide 70 說 NB-NTN coming end of `25；來源日期格式未定，且未提供 option code / release note / availability 證據。\n- Slide 71 的 10.6 Gbps with 5CC SA verified、1CC FR1 + 8CC FR2、10 Gbps E2E testing 未提供 test setup、DUT、band combination、software release 或 report。\n- GPRF Generator 標示 no license required，但 ARB libraries / WinIQSim2 waveforms 又列出 KWxxx licenses；需區分 base GPRF signal generation 與 technology-specific protected ARB files。\n- QDART WLAN support 標示 internally verified / currently in process to get listed in Qualcomm help files，尚非正式 listed claim。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Callbox.md"
+              },
+              "score": 6.313814
+             },
+             {
+              "text": "CMX500_Callbox › 重點摘要\n- 來源 frontmatter 顯示原始檔為 `CMX500_Callbox.pptx`，由 markitdown 轉出，converted date 為 2026-09-17；投影片中另出現日期 **05.01.2026**，但日期格式未標示。\n- 簡報將測試階段分為 [[Go-NoGo Testing]]、[[Non-Sig Testing]]、[[Conformance Testing]] 與 [[R&D Testing]]，並以 [[R&S CMX500]] callbox 作為可快速建立 call、進行 RF testing、mobility testing 與 application testing 的平台。\n- Callbox focus 包含 [[RF Testing]]、[[3GPP pre-conformance]]、[[Mobility Testing]]、[[Application Testing]]、[[Network Slicing]]、[[IP Throughput]]、[[Security Analysis]]、[[Backend Service]]、[[IMS Services]]、[[WLAN offloading with Voice over WLAN]]、[[ATSSS]]、[[Power Consumption]]、[[XR Responsiveness & L4S]]、[[eCall]] / [[NGeCall]] 與 [[Speech Quality]]。\n- 來源描述 [[CMsquares]] 為 web based、all-in-one configuration、all tools in one place、modern UI 的介面，並列出 live views、app testing、NTN live views、sequencer、log analysis 與 one-click RF testing。\n- [[RF SA Preconformance]] 部分宣稱可在 GUI 中快速開始 manual 3GPP RF pre-conformance，並提到 automatic configuration of parameters per TC、25 TCs、dynamic workspace per TC、NR-NTN / NSA / LTE coming、release 時有 comprehensive App Note，連結為 `https://www.rohde-schwarz.com/appnote/1C111`。\n- [[CMSequencer]] 部分描述可由 manual 快速切換到 automated pre-conformance，使用 same technology specific license，並引用 `Sequencer-CMX-Test_Packages_Database.xlsx`；來源圖表列出 RF pre-conformance TC count：category 7.1 為 3GPP 43、7.4 為 68、7.6 為 134、8.3 為 3GPP 159 / RED 33 / WiFi 92。\n- R&D automation / RF pathloss calibration 部分描述 predefined blocks、mix & match、PL from signaling measurements + reports、GPRF measurements 與 NRP Power Meter；來源 notes 稱 NRP slightly more precise、GPRF 會包含 connector + additional RF path、golden device 最容易但 least precise。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Callbox.md"
+              },
+              "score": 5.298209
+             },
+             {
+              "text": "UAV 通訊 › Signaling test 與驗證線索\n[[Signaling test solution]] 指出 [[R&S CMX500]] 可針對 [[LTE]]、[[5G]] 與 [[Wi-Fi]] UE 提供 single-technology signaling test；其 RF frequency range 在來源中寫為 **400 MHz 至 8 GHz**。來源列出的測試類別包含：\n\n- 基本 RF 量測：Power、Frequency、Spectrum、[[EVM]]、[[PER]] / [[BLER]]、[[MIMO]]。\n- Application layer tests：IP throughput、Video、Audio。\n- Protocol test。\n\n詳細配置線索見 [[UAV signaling test solution]]。使用限制：[[Signaling test solution]] 是 Market 類 OneNote solution note，未標示正式 configuration guide、軟體版本、license bundle、test case、pass / fail criteria 或 measurement uncertainty；正式規格仍需查 [[R&S CMX500]]、[[CMX500_specs_en_5216-4127-22_v1100]] 與 [[CMX500_Features_CSW9-20-0_en_32]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/UAV 通訊.md"
+              },
+              "score": 16.380353
+             },
+             {
+              "text": "UAV 通訊 › 多技術整合與 De-sense 驗證\n[[Signaling test solution]] 指出 UAV 可能使用兩種以上通訊技術，其間可能造成相互干擾；[[R&S CMX500]] 因支援多種通訊技術，可進行 De-sense validation。\n\n來源給出的配置原則是：software options 合併 5G 與 Wi‑Fi 測試表格，hardware 以滿足兩者中最大的 carrier aggregation 或 [[MIMO]] 作為配置。來源同時提醒「配置如有疑問請與 1C PM 確認」。\n\n限制：來源未提供 De-sense 的干擾模型、jamming waveform、shielding / OTA chamber setup、測試流程、automation、limits 或結果。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/UAV 通訊.md"
+              },
+              "score": 16.104064
+             },
+             {
+              "text": "UAV 通訊 › 通訊鏈路類型\n[[Communication of UAVs]] 將 UAV 通訊鏈路分成：\n\n- UAV-to-GCS：UAV 與 [[Ground Control Station]] 之間交換 command、telemetry 與 data。\n- UAV-to-UAV：UAV 之間為 swarm 或 collaborative operations 進行 coordination，可使用 [[Mesh Networks]] 或 custom protocols。\n- UAV-to-Cloud：real-time data upload 到 cloud platforms，用於 analysis、storage 與 AI-based decision-making。\n- UAV-to-Human：透過 mobile apps 或 displays 與 operators / field personnel 溝通。\n\n這些是高階鏈路分類；來源沒有提供網路拓樸、routing、handover、security、interoperability 或測試流程。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/UAV 通訊.md"
+              },
+              "score": 9.693192
+             },
+             {
+              "text": "CMX500 Desense Testing\n[[CMX500 Desense Testing]] 是 [[CMX500_Callbox]] 中描述的 WLAN + cellular one-box interference / desense use case：以 [[R&S CMX500]] 在真實連線下同時處理 WLAN、LTE 與 NR 測試，觀察互相干擾或 desense 影響。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Desense Testing.md"
+              },
+              "score": 6.184649
+             },
+             {
+              "text": "CMX500 Desense Testing › 與既有頁面的關係\n- [[WLAN offloading with Voice over WLAN]] 記錄 [[R&S CMX500]] 在 cellular 5G 與 WLAN interworking / offloading 的 PR use case。\n- 本頁聚焦 interference / desense 與 parallel measurements，不等同 offloading / voice continuity。\n- [[Wi-Fi 7 R&D and production testing]] 提供 Wi-Fi 7 R&D signaling / production non-signaling 的更大脈絡。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Desense Testing.md"
+              },
+              "score": 4.824538
+             },
+             {
+              "text": "CMX500 Desense Testing › Wi-Fi 7 線索\n來源在 desense 相關 slide 中列出：\n\n- Modulations：4096QAM。\n- 320 MHz BW in 6GHz Band。\n\n此處只可視為簡報中的 Wi-Fi 7 / WLAN test capability 線索；實際 channel、band plan、MCS、EVM limit、DUT 條件與 test setup 需回正式文件。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Desense Testing.md"
+              },
+              "score": 2.522533
+             },
+             {
+              "text": "R&S SMW200A › Remote control、connectors 與一般資料\n- Remote control interfaces：IEC 60625 GPIB IEEE-488.2、Ethernet/LAN 10/100/1000BASE-T、USB 3.0 super speed、serial RS-232 via `R&S®TS-USB1`。\n- Remote command set：`SCPI 1999.5 or compatible command sets`。\n- Ethernet/LAN protocols and services：VISA VXI-11、Telnet/RawEthernet、VNC、FTP、SMB。\n- Front panel RF 50 Ω path A connector：3/6/7.5 GHz options 為 N female；12.75/20/31.8/40 GHz options 為 test port adapter PC 2.92 mm female；44 GHz options 為 PC 1.85 mm male with adapter；56/67 GHz options 為 1.85 mm female with wear and tear adapter。\n- Front panel RF 50 Ω path B connector：3/6/7.5 GHz options 為 N female；12.75/20/31.8 GHz options 為 test port adapter PC 2.92 mm female；44 GHz options 為 PC 1.85 mm male with adapter。\n- Rear panel 包含 REF IN/OUT、INST TRG A/B、USER 4/5/6、EFC、LO IN/OUT、IEEE 488、LAN、USB DEVICE、EXT 1/2、DIG I/Q OUT、HS DIG I/Q OUT 等。\n- Rated power when fully equipped：`550 W measured`；with `R&S®SMW-B94L` fully equipped：`750 W measured`。\n- Operating temperature range：`0 °C to +45 °C`；with `R&S®SMW-B1056`、`R&S®SMW-B1067`、`R&S®SMW-B1067N`、`R&S®SMW-B1067O` 為 `+5 °C to +45 °C`。\n- Dimensions：standard `435 mm × 192 mm × 460 mm`；with `R&S®SMW-B94L` 為 `435 mm × 192 mm × 560 mm`。\n- Weight：fully equipped `21 kg`；with `R&S®SMW-B94L` fully equipped `30 kg`。\n- Non-volatile memory：SSD，`512 Gbyte`。\n- Recommended calibration interval：`3 years`，條件 `40 h/week operation in the full range of the specified environmental conditions`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 22,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 5.701915
+             },
+             {
+              "text": "R&S SMW200A › Digital I/Q\n- Standard digital baseband outputs 至少需 `R&S®SMW-K18`；wideband digital baseband outputs 至少需 `R&S®SMW-K19`。\n- Digital I/Q input/output 可用於 [[R&S SMW200A]] 與其他 Rohde & Schwarz 儀器之間的 lossless connection，例如 [[R&S SGT100A]]、[[R&S SMM100A]]、[[R&S SMCV100B]] 或 CMW500 wideband radio communication tester 的 fading applications。\n- DIG I/Q interface 符合 `R&S®Digital I/Q Interface PAD-R`，level `LVDS`，connector `26-pin MDR`。\n- HS DIG I/Q interface 符合 `R&S®Digital I/Q Interface 40G PAD-R`，connector `QSFP+/QSFP 28`。\n- Wideband HS DIG I/Q standard system configuration mode：40G up to `1.05 GHz`，50G up to `1.25 GHz`；advanced mode with `R&S®SMW-K822` input up to `500 MHz`，with `R&S®SMW-K823` input up to `1000 MHz`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 18,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 4.910464
+             },
+             {
+              "text": "R&S SMW200A › Digital standards、R&S WinIQSIM2、Pulse Sequencer、MIMO 與 fading\n- Internal digital modulation systems 至少需安裝一個 `R&S®SMW-B10` 或 `R&S®SMW-B9`。\n- 來源列出 cellular、wireless connectivity、navigation、broadcast 與 other standards options；包含 `GSM/EDGE`、`3GPP FDD`、`LTE Release 8` 到 `Release 15`、`Cellular IoT`、`5G New Radio`、`5G NR Release 16/17`、`IEEE 802.11a/b/g/n/j/p/ac/ax/be/ad/ay`、`Bluetooth EDR/5.x/5.4`、`GNSS`、`DVB-S2/S2X`、`DVB-RCS2`、`LoRa`、`HRP UWB` 等。\n- 來源描述 digital standards 不需要 separate PC software；但 waveform packages for signals from [[R&S WinIQSIM2]] 另明列 [[R&S WinIQSIM2]] requires an external PC。判斷：前者指 instrument internal digital standards，後者指 WinIQSIM2 workflow，不合併為單一規則。\n- `R&S®SMW-K144`：5G New Radio，Order No. `1414.4990.02`。\n- `R&S®SMW-K145`：5G New Radio closed-loop BS test，Order No. `1414.6506.02`。\n- `R&S®SMW-K148`：5G NR Release 16，Order No. `1414.6664.02`。\n- `R&S®SMW-K170`：5G NR sidelink，Order No. `1413.8640.02`。\n- `R&S®SMW-K171`：5G NR Release 17，Order No. `1413.7280.02`。\n- [[R&S WinIQSIM2]] requires an external PC；`R&S®SMW-K200` waveform packages 可登錄 1、5 或 50 waveforms，每台 instrument 最多 `250 waveforms`。\n- [[R&S Pulse Sequencer]] 相關 options 包含 `R&S®SMW-K300`、`K301`、`K302`、`K304`、`K306`、`K307`、`K308`、`K315`、`K350`。\n- Multichannel、MIMO and fading 完整規格另見 `PD 3673.1276.22`；digital standards 完整規格另見 `PD 5213.9434.22`；GNSS/avionics 另見 `PD 3607.6896.22`；Pulse Sequencer 另見 `PD 3607.1388.22`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 21,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 4.321513
+             },
+             {
+              "text": "R&S ELEKTRA\n[[R&S ELEKTRA]] 是 [[Rohde & Schwarz]] 的 EMC / RSE test automation software；[[Regulatory test for wireless devices with cellular technology]] 只把它列為 [[R&S TS8996]] RSE & customization 的 solution mapping，[[RSE Test System TS8996 (1)]]（07/2025）則描述它在 [[Radiated Spurious Emissions]]、[[5G FR2 RSE 測試]]、wireless EMC / EMS 與報告管理中的具體功能。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ELEKTRA.md"
+              },
+              "score": 6.882578
+             },
+             {
+              "text": "R&S ELEKTRA › unresolved\n- 正式 datasheet、software version、licensing 與 supported standard list 未取得。\n- [[ELEMI-EAS]]、[[ELEMI-RSE]]、[[ELEMI-3D]]、[[ELEMI-5GFC]]、[[ELEMI-OOB]] 等 options 的 order numbers、dependencies 與 release availability 未標示。\n- 與 [[R&S ESW]]、[[R&S FSW]]、[[R&S TS8996]]、[[R&S TS9982 EMS Test System]] 的配置角色仍需正式 system documentation 補證。\n- Satellite / NTN RSE customization 的交付方式與限制未標示。\n- [[ELEMS-ABT]] audio breakthrough application note 未擷取正文。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 14,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ELEKTRA.md"
+              },
+              "score": 5.532203
+             },
+             {
+              "text": "R&S ELEKTRA › 5G FR2 test procedure support\n依 [[RSE Test System TS8996 (1)]]：\n\n- ELEKTRA is next generation EMC test SW。\n- For 5G support of RSE measurement procedures with extension for 5G FR2。\n- 支援 3D and TRP evaluation。\n- 支援 5G signaling with [[R&S CMX500]]。\n- Mixers and calibration procedure also supported by EMC32。\n- EMI test sequence adopted to support RSE requirements。\n- Sweeps 可 free run（for FDD）或 gated sweep（triggered by CMX, for TDD）。\n- 支援 elevation positioner。\n- 支援 3D view possibility for overview measurement, maximization and final TRP measurement。\n- Typical test distance: **1 m for >40 GHz** and **3 m for <40 GHz**。\n- Workflow steps 包含 overview measurement、data reduction、maximization、adjustment、final measurement。\n- Virtual RMS detectors with **100 MHz and 200 MHz bandwidth** 可把 lower bandwidth measurement integration over 100 MHz / 200 MHz sliding window，用於平行量測 -13 dBm/MHz 與 -10 dBm/100 MHz limits。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ELEKTRA.md"
+              },
+              "score": 5.381885
+             },
+             {
+              "text": "2025RS Drone Solution › Drone / UAV / UAS 概念\n- [[UAV]] — 來源定義為 platform vehicle。\n- [[UAS]] — 來源定義為 entire system that supports drone operation，包含 UAV、controller、datalink、sensors 等。\n- [[Drone EMC 測試]] — 來源核心議題，涵蓋 emissions、immunity、conducted layout、radiated layout、mounting mode、idle / active mode 與 EUT / AUT 環境。\n- [[商用無人機 EMC standards]] — 來源整理 commercial drones 的 regulatory compliance、emission / immunity standards、Class A / Class B 與 application-dependent immunity level。\n- [[軍用無人機 EMC 與 EME testing]] — 來源整理 [[MIL-STD-461]]、[[MIL-STD-464]]、[[RTCA DO-160]] 與系統層 EME effects testing。\n- [[DO-160 airborne equipment EMC testing]] — 來源摘要 [[RTCA DO-160]] Section 15、16、17、18、19、20、21、22、25，並將 Section 20 對應 RF susceptibility、Section 21 對應 RF emissions、Section 22 對應 lightning induced transients、Section 25 對應 ESD。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2025RS Drone Solution.md"
+              },
+              "score": 3.396644
+             },
+             {
+              "text": "2025RS Drone Solution › Commercial drone standards / tests\n- [[ETSI EN 301 489]] — 來源列出 EN 301 489-1 common、EN 301 489-3 SRD、EN 301 489-17 WLAN / BT、EN 301 489-19 GNSS receivers、EN 301 489-52 Cellular UE，以及 EN 301 489-…。\n- [[ETSI EN 300 328]] — 來源列為 2.4 GHz wideband transmission systems。\n- [[ETSI EN 301 893]] — 來源列為 5 GHz WAS / RLAN。\n- [[ETSI 4709-x]] — 來源列為 network testing、indoor and outdoor testing、ID / built 等，但文字不完整，需後續核對正式標準名稱。\n- [[CISPR 32]] / [[EN 55032]] — 來源用於 multimedia equipment emission，並說 Class B emission limits more stringent than Class A。\n- [[CISPR 35]] — 來源在 international standards for drone testing 與 commercial drone standards 中列名。\n- [[EN 61000-4-3]] — radiated RF immunity。\n- [[EN 61000-4-6]] — conducted RF immunity。\n- [[EN 61000-4-2]] — electrostatic discharge。\n- [[EN 61000-4-4]] — electrical fast transient。\n- [[EN 61000-4-5]] — surges。\n- [[EN 61000-4-11]] — voltage dips and interruption。\n- [[EN 61000-3-2]] — harmonic current emission。\n- [[EN 61000-3-3]] — voltage fluctuations and flicker。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2025RS Drone Solution.md"
+              },
+              "score": 2.426772
+             },
+             {
+              "text": "2025RS Drone Solution › R&S / 測試系統線索\n- [[Rohde & Schwarz]] — 來源多頁頁尾標示 Rohde & Schwarz，且整份簡報為 drone test solution proposal；來源未標示部門、作者或客戶。\n- [[R&S TS9975 EMI Test System]] — 來源在 `UAV/UAS Drones T&M Solutions` 的 standard system 中列名，描述為 EMI Test System；未提供規格、配置、order number 或軟體版本。\n- [[R&S TS9982 EMS Test System]] — 來源在 standard system 中列名，描述為 EMS Test System；未提供規格、配置、order number 或軟體版本。\n- [[R&S TS8997]] — 來源在 standard system 區段列出 `TS8997`，但 markdown 排版無法確認其完整產品名稱、功能或與 EMI / EMS 的關係。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2025RS Drone Solution.md"
+              },
+              "score": 2.251637
+             },
+             {
+              "text": "2025RS Drone Solution › 日期與期間\n| 項目 | 日期 / 期間 | 來源中的標示 |\n|---|---:|---|\n| 來源檔名 | `2025RS Drone Solution.pdf` | 只出現在 raw frontmatter `source_file`；不可直接推論正式發布日期。 |\n| raw 轉檔日期 | 2026-09-17 | frontmatter `converted: 2026-09-17`，不可當成簡報發布日期。 |\n| source SHA | `a8e4eb6491b3f0a1` | frontmatter `source_sha`。 |\n| formal document version | 來源未標示 | 未見 version、revision、author、issue date 或 confidentiality marking。 |\n| radiated layout frequency range | 80 MHz – 6 GHz | slide `Radiated Layout` 與 commercial drone immunity 章節皆出現 80 MHz to 6 GHz。 |\n| commercial drone immunity default test level | 3 V/m | [[EN 301 489-1]] Immunity Requirements；來源同時指出不同應用可能需 10 V/m 或 specialized test level。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2025RS Drone Solution.md"
+              },
+              "score": 1.302412
+             },
+             {
+              "text": "2025RS Drone Solution › Military / aviation / system-level standards\n- [[MIL-STD-461]] — 來源說其為 control of electromagnetic interference emissions and susceptibility 的 requirements，並特別提到 [[MIL-STD-461G]]。\n- [[MIL-STD-464]] — 來源說其為 electromagnetic environmental effects requirements for systems；簡報同時出現 464C 與 464D 版本字樣，需後續核對。\n- [[RTCA DO-160]] — 來源說其提供 airborne equipment environmental conditions and test procedures。\n- [[CS114]] — 來源在 DO-160 Section 20 中說 conducted susceptibility similar to CS114 test。\n- [[RS103]] — 來源在 DO-160 Section 20 中說 radiated susceptibility similar to RS103。\n- [[CS117]] — 來源在 DO-160 Section 22 lightning induced transients 中列名。\n- [[RE102]] — 來源在 Section 21 emission of RF energy 標題中列 `RE102 / CE`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2025RS Drone Solution.md"
+              },
+              "score": 0.525895
+             },
+             {
+              "text": "軍用無人機 EMC 與 EME testing › Complex EME emulation\n來源的 RF electromagnetic environment 章節列出：\n\n- emulate complex EME signals。\n- enable the military electromagnetic spectrum operation。\n- emulating different electromagnetic environment。\n- evaluating military system level effects under EM interferences。\n- simulating different operational scenarios。\n\n這支持 [[Electromagnetic Environment Emulation]] 與 [[UAV UAS Drones T&M Solutions]] 的客製化測試方向，但來源未提供 signal library、scenario definition、threat emitter model、功率、頻段、同步或安全條件。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+              },
+              "score": 1.887466
+             },
+             {
+              "text": "軍用無人機 EMC 與 EME testing › MIL-STD-464 system-level testing\n[[2025RS Drone Solution]] 說 [[MIL-STD-464]] provides the basis of environment testing for vehicles that have to work in the most unforgiving condition，並將其描述為 system level testing standard。\n\n來源列出的 main chapter / sub-items 包含：\n\n- margins，6 dB margins。\n- intra-system EMC。\n- hull generated intermodulation interference / IMI。\n- shipboard internal EME。\n- multipaction。\n- induced levels at antenna ports of antenna-connected receivers。\n- external RF EME。\n- [[High Power Microwave]] / HPM sources。\n- lightning。\n- [[Electromagnetic Pulse]] / EMP。\n- subsystems and equipment electromagnetic interference / EMI。\n- portable electronics devices and carry-on equipment requirements。\n- non-developmental items / NDI and commercial items。\n- electrostatic environments。\n- radiation hazards / RADHAZ：HERP、HERF、HERO。\n- life cycle / E3 hardness。\n- electrical bonding、power current return path、antenna installations、mechanical interfaces、shock / fault / ignitable vapour protection。\n- external grounds。\n- TEMPEST。\n- system radiated emission、EMCON、platform radiated emission。\n- EM spectrum supportability。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+              },
+              "score": 1.659339
+             },
+             {
+              "text": "軍用無人機 EMC 與 EME testing › Common MIL EMC standards\n[[2025RS Drone Solution]] 列出：\n\n- [[MIL-STD-461]] — requirements for the control of electromagnetic interference emission and susceptibility。\n- [[MIL-STD-464]] — electromagnetic environmental effects requirements for systems。\n- [[RTCA DO-160]] — environmental conditions and test procedures for airborne equipment。\n\n來源另在 example 頁將 military / aviation drone EMC test standards 分為 component level 與 full system level：\n\n| 層級 | 來源列名 |\n|---|---|\n| Component level | [[RTCA DO-160G]]、[[MIL-STD-461G]]、[[DEF STAN 59-411 Part 3]]、[[GJB 151B]] |\n| Full system level | [[MIL-STD-464D]]、[[DEF STAN 59-411 Part 4]]、[[GJB 1389A]] |\n\n使用限制：來源同時在另一頁將 applicable standards 列為 [[MIL-STD-464C]]，而 example 頁列 [[MIL-STD-464D]]；目前只保留為版本線索，未裁決適用版本。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+              },
+              "score": 1.114217
+             },
+             {
+              "text": "軍用無人機 EMC 與 EME testing › MIL-STD-461G applicability\n來源說 [[MIL-STD-461G]] provides the basis of EMC testing for vehicles that have to work in the most unforgiving condition，並列出 Army、Navy、Air-force、Space categories。\n\n來源另說 MIL-STD461G applicability 使用：\n\n- A：Applicable。\n- L：Limited as specified in the individual sections of this standard。\n- S：Procuring activity must specify in procurement documentation。\n\n來源沒有提供完整 requirement matrix、test methods、frequency ranges 或 limit tables。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+              },
+              "score": 1.014494
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing › 來源列出的 sections\n| Section | 來源描述 |\n|---:|---|\n| 15 | Magnetic field / magnetic effect。 |\n| 16 | Power input（electrical testing, non-EMC）。 |\n| 17 | Voltage spike（AC / DC）。 |\n| 18 | Audio frequency conducted susceptibility - power inputs。 |\n| 19 | Induced signal susceptibility。 |\n| 20 | Radio frequency susceptibility（radiated and conducted）。 |\n| 21 | Emission of radio frequency energy。 |\n| 22 | Lightning induced transient susceptibility。 |\n| 25 | Electrostatic discharge。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 2.154226
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing › Section 25 — Electrostatic Discharge\n來源說此測試確保 equipment able to withstand an air discharged electromagnetic pulse，並指出 static electricity charges can result from human contact；contributing factors include low humidity、low temperature、low conductivity、carpets、vinyl seats and plastic structures。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 2.144076
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing › 使用限制\n- 本頁不是 [[RTCA DO-160]] 正式標準摘要；只保存 [[2025RS Drone Solution]] 的簡報文字。\n- 不得由本頁推論 DO-160G / DO-160 任何 section 的完整 category、limit、waveform、test setup 或 pass / fail criteria。\n- 來源把 DO-160 放在 military / aviation drone example 中，但未說明特定 drone、eVTOL 或 avionics equipment 的 qualification plan。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 2.115705
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing › Section 21 — Emission of RF Energy\n來源說此測試確保 equipment does not emit excessive RF noise，以 protect aircraft sensors and receivers。來源分為：\n\n- Conducted Emissions（low freq）。\n- Radiated Emissions（high freq）。\n\n標題中同列 [[RE102]] / CE，但未提供 limit table 或 exact mapping。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 1.946562
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing › 來源中的 DO-160 定位\n[[2025RS Drone Solution]] 說 [[RTCA DO-160]] is important because it provides the minimum operational performance standards for electronic systems and equipment that support aviation to pursue increased safety, system capacity and efficiency。\n\n來源另說其 purpose 是提供 means of determining performance characteristics of airborne equipment in environmental conditions which may be encountered in airborne operation of the equipment，並可與 applicable standards 一起作為 minimum specification。\n\n使用限制：來源未提供 DO-160 的正式版次文件、section limit table、category matrix 或適用 drone 類型。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 1.096143
+             },
+             {
+              "text": "CMX500 use-case based 5G testing › 使用限制\n- 本頁是 Market / solution overview，不是 [[R&S CMX500]] formal specifications。\n- 任何 hardware configuration、throughput、component carrier、FR2、iBW、RedCap package、Shuffler package 或 XR roadmap 說法都需要正式 R&S documentation / configuration guide / release note 補證。\n- 若與 [[CMX500_specs_en_5216-4127-22_v1100]] 或 [[CMX500_Features_CSW9-20-0_en_32]] 不同，正式規格頁優先作為產品規格；本頁保留 presentation claim 供市場 / solution positioning 追溯。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 14,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 3.261407
+             },
+             {
+              "text": "CMX500 use-case based 5G testing › XR / application testing 線索\n來源的 XR / Metaverse 章節以 [[R&S CMX500]] 連接 lab-based XR testbed：\n\n- Compact 3GPP-compliant OTA chamber for 5G NR mmWave signals。\n- 5G One Box Signaling Tester。\n- Cloud XR Server。\n- IP connection。\n- XR Client App。\n- Artificial Head on 3D positioner to emulate 6DoF。\n- HMD or AR glasses。\n- USB-C tethering。\n- future: WiFi7。\n\n來源另列 R&S CMX500 XR-related roadmap focuses on power savings and low latency，包含 BWP switching、SCell dormancy、cross-slot scheduling、uplink configured grant、enhanced cDRX、PDCCH skipping、low latency mobility 等 Release 15–18 / 19 features。此部分本次只作為待拆頁線索。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 3.076681
+             },
+             {
+              "text": "CMX500 use-case based 5G testing › unresolved\n- 來源未標示正式日期與投影片版次。\n- OBT Lite 5 GHz RF DL iBW 與 RedCap 章節 4 GHz RF DL iBW 的適用 configuration 未標示。\n- [[R&S CMX-KF612M]] 與 [[R&S CMX-KF678X]] 的正式 order number、release、option dependencies 與 test package contents 未確認。\n- XR-related roadmap 的 FW 7.20 / tbd / not agreed in 3GPP yet 條目需要對應正式 release note 與 3GPP status。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 2.775439
+             },
+             {
+              "text": "CMX500 use-case based 5G testing › CMX500 platform overview\n來源對 [[R&S CMX500]] 的 platform overview 說法包含：\n\n- Future proof 5G signaling test platform。\n- Running on Linux：faster and more robust。\n- Single web-based GUI for RF、protocol、application testing。\n- Modular and scalable HW architecture。\n- LTE & FR1：up to 8 GHz。\n- FR2：24–50 GHz。\n- Ready for up to 20 Gbps and more E2E IP performance。\n- Extensive IP and Application Test feature set onboard。\n\n此處屬 presentation claim；不能取代 formal frequency range、hardware configuration、software option 或 guaranteed performance 規格。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 2.615192
+             },
+             {
+              "text": "CMX500 use-case based 5G testing › 來源日期與範圍\n- 主要來源：[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]。\n- 來源正式日期：來源未標示。\n- 本頁只保存 Market / solution overview 說法；[[R&S CMX500]] 正式規格仍以 [[CMX500_specs_en_5216-4127-22_v1100]] 與 [[CMX500_Features_CSW9-20-0_en_32]] 為準。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 1.884605
+             },
+             {
+              "text": "R&S CMX500 › Application tests 與 audio\n依 [[CMX500_Features_CSW9-20-0_en_32]]：\n\n- 未啟用 R&S CMX-KA100 等 application test license 時，IP application test functionality 降到最低；只能使用 standalone mode，不能連接 external servers，也不支援 IP based measurements 或 tools。\n- R&S CMX-KA100 提供 internal IP services 與 IP connection to DUT 測試 applications，包含 DNS、IMS、Message Center、FTP、HTTP、DNS monitor、IP logging、iPerf、Ping、throughput、Max Throughput Wizard、web server。\n- R&S CMX-KA110 增強 KA100，加入 QoS、ePDG、N3IWF、delay measurement、IP tune tool、SMPP / MT SMS advanced settings。\n- R&S CMX-KA150 提供 IP analysis tool，用於監控與分析 DUT uplink / downlink IP traffic。\n- R&S CMX-KA180 提供 audio codecs for 4G and 5G IMS voice call，支援 AMR-NB、AMR-WB、EVS，並包含 [[R&S CMX-ZG180A]] external sound card drivers and configuration settings。\n- R&S CMX-KA181 加入 [[POLQA]]，用於 measuring perceived speech quality；measurement version 為 3，mode 為 full-band 或 narrowband。\n- R&S CMX-KA401 支援 WAV player / recorder、upload/download WAV files、file-based POLQA measurements 與 end-to-end audio delay。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 35,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 11.474198
+             },
+             {
+              "text": "R&S CMX500 › 文件依據與版次\n本頁並列使用兩份來源：\n\n| 來源 | 文件類型 | 文件編號 | 版次 / 軟體 | 日期 | 用途 |\n|---|---|---|---|---|---|\n| [[CMX500_specs_en_5216-4127-22_v1100]] | Specifications | PD 5216.4127.22 | Version 11.00 | August 2025 | binding specifications、hardware unit 型號、order number、環境、尺寸、電源、service |\n| [[CMX500_Features_CSW9-20-0_en_32]] | Features and Functions | 1179.1164.02 | Version 32；CSW 9.20.0 and higher | 來源未標示；© 2026 | GUI、software features、signaling / application / measurement options 與使用介面 |\n\n[[CMX500_specs_en_5216-4127-22_v1100]] 的 product data 適用條件：ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘；符合指定 environmental conditions；遵守 recommended calibration interval；已執行所有適用的 internal automatic adjustments。文件區分 specifications with limits、non-traceable specifications、typical data、nominal values、measured values 與 uncertainties；non-traceable specifications、typical data、nominal values、measured values 不由 [[Rohde & Schwarz]] 擔保。\n\n[[CMX500_Features_CSW9-20-0_en_32]] 明示：**Subject to change – data without tolerance limits is not binding**。它是 features/functions overview，不是 technical specifications datasheet。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 8.805337
+             },
+             {
+              "text": "R&S CMX500 › Signaling options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---|---|\n| R&S CMX-KS350B | WLAN signaling, 802.11a/b/g/n/ac, basic | 1222.7064.xx | WLAN SISO signaling |\n| R&S CMX-KS351B | WLAN signaling, 802.11ax, STA testing, basic | 1222.7070.xx | 802.11ax station testing |\n| R&S CMX-KS352B | WLAN signaling, 802.11be, STA testing, basic | 1222.7087.xx | 802.11be station testing |\n| R&S CMX-KS353B | WLAN signaling, 802.11bn, STA testing, basic | 1222.9873.xx | 802.11bn station testing |\n| R&S CMX-KS355B | WLAN signaling, 802.11ax, AP testing, basic | 1222.7093.xx | 802.11ax AP testing |\n| R&S CMX-KS356B | WLAN signaling, 802.11be, AP testing, basic | 1222.7106.xx | 802.11be AP testing |\n| R&S CMX-KS357B | WLAN signaling, 802.11bn, AP testing, basic | 1222.9880.xx | 802.11bn AP testing |\n| R&S CMX-KS360B | WLAN signaling, 2x2 MIMO single user | 1222.7112.xx | 2x2 MIMO support |\n| R&S CMX-KS365B | WLAN advanced encryption and authentication | 1222.7129.xx | Enterprise security support |\n| R&S CMX-KS500B / M / X | LTE signaling basic / medium / expert | 1222.6380.xx / 1222.6397.xx / 1222.6400.xx | 僅 LTE standalone 需要；NR NSA LTE anchor cells 包含於 NR signaling options |\n| R&S CMX-KS550B | LTE-DTC extension for direct-to-cell communication | 1222.9573.xx | D2C fixed / variable delay |\n| R&S CMX-KS600B / M / X | NR signaling enabler, Rel. 15 | 1222.1672.xx / 1222.1650.xx / 1222.1695.xx | 包含 5G NR SA option 2、NSA option 3、DL 2x2/4x4 MIMO、one CC、UL 256QAM |\n| R&S CMX-KS610B / M / X | NR signaling extension, Rel. 15, feature set 3 | 1222.3700.xx / 1222.3717.xx / 1222.3723.xx | UL 2x2 MIMO、CA up to 9 CC |\n| R&S CMX-KS611B / M / X | NR signaling extension, SUL and Rel. 16 features | 1222.3730.xx / 1222.3746.xx / 1222.3752.xx | SUL / Rel. 16 features |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 25,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 8.539321
+             },
+             {
+              "text": "R&S CMX500 › 使用介面與 automation\n依 [[CMX500_Features_CSW9-20-0_en_32]]：\n\n| 介面 | 原文定位 |\n|---|---|\n| [[CMsquares]] | 單一 graphical user interface，web-based、responsive，支援 RF tests、functional tests、advanced signaling tests、protocol tests |\n| [[R&S CMXmars]] | Message log analysis，可離線分析或在線監控 instrument messaging |\n| [[R&S CMsequencer]] | Graphical scripting interface，可在 CMX500 或 Windows PC 上建立、設定與執行 test scripts |\n| [[XLAPI]] | Python-based scripting interface，適合 complex scripting use cases |\n| [[SCPI]] | Remote control interface，適合 simple、standardized scripting use cases |\n\nXLAPI scripting environment：Python 3.10；script development computer 可為 Windows PC 或 CMX500；XLAPI installation package 為 **CMX-KF600X**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 36,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 7.525293
+             },
+             {
+              "text": "R&S CMX500 › RF ports 與 routing\n- RF Com 1、RF Com 2：simultaneous receiver and transmitter testing；2 × SnapN；RF input/output to DUT。\n- RF In 1、RF In 2：transmitter testing；2 × SnapN；RF input from DUT。\n- RF Out 1 to RF Out 4：receiver testing；4 × SnapN；RF output to DUT。\n- Receiver test functions：四個 RF generators（其中兩個在 GPRF mode）可 routing 到 RF Com 1、RF Com 2、RF Out 1 to RF Out 4。\n- Transmitter test functions：RF Com 1、RF Com 2、RF In 1、RF In 2 ports 的四個 input signals 各可 split 到 one or two RF analyzers。\n- FDA tables 支援 user-specific frequency-dependent attenuation corrections。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 6.819702
+             },
+             {
+              "text": "MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes › 原文未解的問題\n- unresolved：來源未標示新聞稿發布日期；raw frontmatter 的 created 為 2026-09-11，但不可視為新聞稿發布日。\n- unresolved：來源未標示文件版次、press release revision 或 WaveStudio integration release version。\n- unresolved：來源未標示 [[WaveStudio Software Suite]] 版本號、module 名稱、license requirement、API / driver 條件或 release notes。\n- unresolved：來源未標示 [[R&S CMX500 OBT]] 搭配 [[MVG]] systems 時所需 hardware configuration、RF chains 數量、IF / RF / AU 組合、software option code、CSW version、license 或 order number。\n- unresolved：來源提到 `CMX Lite` 與 `CMX Pro`，但未提供正式產品名稱、料號、BOM，亦未說明它們與既有 [[R&S CMX500]] standard hardware configurations 中 OBT lite / OBT plus / OBT FR1 specialist / OBT FR2 specialist 的關係。\n- unresolved：來源未列出 [[MVG]] antenna measurement systems / multi-probe measurement systems 的型號、chamber 規格、frequency range、DUT 尺寸、校準條件、measurement uncertainty 或相容性矩陣。\n- unresolved：來源未列出 [[5G NR]]、[[RedCap]]、[[LTE]]（FDD & TDD）或未來 [[Wi-Fi 7]] 的完整 test case list、band combinations、pass/fail metric、throughput / latency 指標或 conformance applicability。\n- unresolved：來源文字中 `single teser` 應為原文拼寫錯誤；本頁不據此建立新實體或技術名稱。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md"
+              },
+              "score": 3.68056
+             },
+             {
+              "text": "MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes › 與既有知識的關係\n- 與 [[R&S CMX500 OBT]] 的關係：既有頁面已收錄 [[R&S CMX500 OBT]] 在 [[Bluetest]] RTS / [[Bluetest Flow]] v1.18 的 4G、[[5G NR]] 與 [[WLAN]] OTA test 語境；本來源新增另一個 OTA chamber / antenna measurement partner [[MVG]] 與 [[WaveStudio Software Suite]]。\n- 與 [[R&S CMX500]] 的關係：既有 [[R&S CMX500]] 頁依 [[CMX500_specs_en_5216-4127-22_v1100]] 與 [[CMX500_Features_CSW9-20-0_en_32]] 整理正式規格、hardware units、WLAN / NR / LTE options 與使用限制；本來源是 PR / solution-level statement，不提供新的 CMX500 formal specifications、option code 或完整硬體 BOM。\n- 與 [[Wi-Fi 7 and 5G RedCap OTA measurements]] 的關係：既有 [[EMITE]] 來源描述 [[R&S CMX500]] 整合進 [[EMITE]] OTA chambers 支援 [[Wi-Fi 7]] 與 [[5G RedCap]]；本來源則描述 [[R&S CMX500 OBT]] 整合進 [[MVG]] [[WaveStudio Software Suite]]，目前明確列出 [[5G NR]]、[[RedCap]]、[[LTE]]，並以 roadmap / expansion 語氣提到 [[Wi-Fi 7]]。\n- 與 [[4G 5G NR WLAN OTA MIMO stress testing]] 的關係：既有 [[Bluetest]] 來源聚焦 reverberation chamber / [[MIMO]] stress testing；本來源聚焦 [[MVG]] multi-probe measurement systems 與 WaveStudio workflow，不提供 reverberation chamber 或 MIMO stress testing 的同等描述。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md"
+              },
+              "score": 2.678268
+             },
+             {
+              "text": "MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes\n這份來源是 [[Rohde & Schwarz]] 官網新聞稿，說明 [[MVG]] 將 [[R&S CMX500 OBT]] 整合進 [[WaveStudio Software Suite]]，使使用者可透過 [[MVG]] antenna measurement systems 直接執行 [[5G NR]] 與 [[LTE]] OTA signaling testing。來源未標示發布日期與文件版次；raw frontmatter 的 created 為 2026-09-11。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md"
+              },
+              "score": 0.663646
+             },
+             {
+              "text": "MVG CMX500 OBT OTA signaling testing › 使用限制\n- 兩份 MVG / R&S 來源都未標示新聞稿發布日期與文件版次。\n- 來源未標示 [[WaveStudio Software Suite]] 版本、integration module 名稱、license、release notes 或 API 條件。\n- 來源未標示 [[R&S CMX500 OBT]] 的正式 hardware BOM、RF chains、IF / RF / AU 組合、CSW version、software option code 或 order number。\n- `CMX Lite` 與 `CMX Pro` 的正式產品定位未在來源中定義；不可自行對應到 [[R&S CMX500]] 頁中既有的 OBT lite / OBT plus / OBT FR1 specialist / OBT FR2 specialist。\n- 來源未標示 [[MVG]] antenna measurement systems / multi-probe systems 的型號、chamber 規格、frequency range、DUT 尺寸、calibration procedure 或 measurement uncertainty。\n- 來源未列完整 5G NR / RedCap / LTE / WLAN / Wi‑Fi 7 test case list、band combinations、AP / STA role matrix、MIMO / antenna configuration、MLO combinations、throughput target、latency target、pass/fail metric 或 conformance applicability。\n- 新來源說 full WLAN signaling test functionality including Wi‑Fi 7 已整合；這是 PR statement，不等於確認所有 [[IEEE 802.11be]] feature combinations 在所有 [[MVG]] systems / [[R&S CMX500 OBT]] configurations 中皆可測。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/MVG CMX500 OBT OTA signaling testing.md"
+              },
+              "score": 3.559654
+             },
+             {
+              "text": "MVG CMX500 OBT OTA signaling testing\n[[MVG CMX500 OBT OTA signaling testing]] 是 [[MVG]] 與 [[Rohde & Schwarz]] 新聞稿中描述的整合測試情境：將 [[R&S CMX500 OBT]] 整合進 [[MVG]] 的 [[WaveStudio Software Suite]]，讓 [[MVG]] antenna / multiprobe measurement systems 可直接執行 [[5G NR]]、[[RedCap]]、[[LTE]] 與 [[WLAN]] OTA signaling tests。[[MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz]] 將此情境擴充到 full [[WLAN]] signaling test functionality including [[Wi-Fi 7]] / [[IEEE 802.11be]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/MVG CMX500 OBT OTA signaling testing.md"
+              },
+              "score": 2.840478
+             },
+             {
+              "text": "WaveStudio Software Suite\n[[WaveStudio Software Suite]] 是 [[MVG]] 的 software suite；依 [[MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes]]，它已整合 [[R&S CMX500 OBT]]，使 [[MVG]] antenna measurement systems 可直接執行 [[5G NR]] 與 [[LTE]] OTA signaling testing。依 [[MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz]]，此整合已擴充到 full [[WLAN]] OTA signaling testing，包括 [[Wi-Fi 7]] / [[IEEE 802.11be]] access point and station testing functionality，並新增 [[5G NR Non-Standalone]]（[[EN-DC]]）testing support。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/WaveStudio Software Suite.md"
+              },
+              "score": 2.48915
+             },
+             {
+              "text": "WaveStudio Software Suite › 與前一份來源的差異\n- [[MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes]] 中，WiFi technologies / [[Wi-Fi 7]] 是 [[Pierre Jurek]] 引言中的快速擴充方向。\n- [[MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz]] 中，full [[WLAN]] signaling test functionality including [[Wi-Fi 7]] 被描述為已整合進 [[WaveStudio Software Suite]]。\n- 這更像是同一合作的後續擴充；但兩份來源皆未標示發布日期，因此本頁不以時間順序推定產品 release 狀態，只記錄 raw created 同為 2026-09-11 的來源文字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/WaveStudio Software Suite.md"
+              },
+              "score": 1.017498
+             },
+             {
+              "text": "MVG › 來源中的公司描述\n依 [[MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes]] 與 [[MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz]]：\n\n- [[MVG]] 的全名為 Microwave Vision Group。\n- 提供 cutting-edge technologies for visualizing electromagnetic waves。\n- 其 advanced test solutions 用於 antenna characterization、radar signature evaluation 與 electromagnetic measurements。\n- 支援 company R&D teams innovate and boost product development。\n- 營運於 10 個國家。\n- 90% sales from exports。\n- Group revenues exceeding €100 million。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/MVG.md"
+              },
+              "score": 3.22915
+             },
+             {
+              "text": "MVG › 人員與引言\n- [[Pierre Jurek]] 在 [[MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes]] 中被列為 [[MVG]] Chief Commercial Officer。\n- [[Pierre Jurek]] 在 [[MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz]] 中被列為 [[MVG]] Deputy Chief Executive Officer。\n\n⚠️ [[MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz]]（來源未標示發布日期；raw created 2026-09-11）說 [[Pierre Jurek]] 是 [[MVG]] Deputy Chief Executive Officer，但既有頁面 [[MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes]] 說 [[Pierre Jurek]] 是 [[MVG]] Chief Commercial Officer。兩份來源皆未標示發布日期，因此目前只標註職稱差異，不判斷哪一個較新或較正確。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/MVG.md"
+              },
+              "score": 0.435905
+             },
+             {
+              "text": "R&S AREG800A › Radial velocity 與 Doppler\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- 每個 artificial object 支援 individual Doppler frequency shift：`yes`。\n- Velocity setting range with [[R&S AREG8-B9]] and [[R&S AREG8-B63]]：`±500 km/h`。\n- Velocity step size：\n  - [[R&S AREG8-B9]] and [[R&S AREG8-B63]]：`0.001 km/h`。\n  - [[R&S AREG-DBP1]] / [[R&S AREG-DBP2]] / [[R&S AREG-DBP3]] with [[R&S AREG-MFP]] / [[R&S AREG-BFP]]：`0.05 km/h`。\n- Doppler frequency offset accuracy：在 IF domain 以 spectrum analyzer 量測 base unit IF input 與 IF output signal 的 frequency offset，不含 frontend，`< 1 Hz`。\n- Velocity accuracy：Doppler shift velocity error 由公式 `v_error = 3.6 × (f_error/f_center) × ½ × 299 700 000 m/s` 決定；`f_center` 為 `78 GHz` 或 `79 GHz`，適用於 [[R&S AREG8-81S]] / [[R&S AREG8-81WS]] 與 [[R&S AREG8-81D]] / [[R&S AREG8-81WD]]；velocity accuracy `< 0.05 km/h`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 5.275097
+             },
+             {
+              "text": "R&S AREG800A › Remote frontends 與 accessories 訂購資訊\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 42,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 4.325229
+             },
+             {
+              "text": "R&S AREG800A › R&S AREG8-81S / R&S AREG8-81D\nRF transfer characteristics 量測條件：with diplexer between RX and TX，frequency step size `2.5 MHz`，measurement bandwidth `1 kHz`，window function normal gate（Hann），type bandpass filter，measured from RX waveguide input to waveguide TX output connector。\n\n- Amplitude flatness：[[R&S AREG8-B9]] `< ±1 dB in 1 GHz bandwidth (meas.)`；[[R&S AREG8-B9]] with 未完整標示 option `< ±2 dB in 2 GHz bandwidth (meas.)`；[[R&S AREG8-B9]] with 未完整標示 option `< ±5 dB in 4 GHz bandwidth (meas.)`。\n- Group delay flatness：[[R&S AREG8-B9]] `< ±0.5 ns in 1 GHz bandwidth (meas.)`；[[R&S AREG8-B9]] with 未完整標示 option `< ±1 ns in 2 GHz bandwidth (meas.)`；[[R&S AREG8-B9]] with 未完整標示 option `< ±1 ns in 4 GHz bandwidth (meas.)`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 25,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 3.716214
+             },
+             {
+              "text": "R&S AREG800A › 讀圖補充\n以下內容來自 [[AREG800A_specs_en_3609-8015-22_v0900]] 的讀圖補充，可信度低於正文，不用於推翻正文。本次提供的 raw 摘要未附圖片 wikilink，因此未嵌入圖片。\n\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p001：封面可辨識 `AREG800A`、`AUTOMOTIVE RADAR ECHO GENERATOR`、`Specifications`、`Specifications | Version 09.00`、`R&S`；產品本體可辨識 `R&S® AREG800A Automotive Radar Echo Generator`、`AREG`；螢幕欄位可勉強辨識 `User Ligths`、`Instrument Setup`、`System Config`、`Update Setup`；左側按鍵可辨識 `Home`、`Loc`、`Preset`、`Help`；另可辨識 `Esc`、`Enter`、`On/Off`。主機螢幕內大部分內容、多數按鍵小字、外接模組細小標示無法辨識。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p021：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `21`；無表格、圖表、方塊圖、曲線圖或螢幕截圖等實質內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p022：可見 `Version 09.00, September 2025`、頁碼 `22`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`；除文件資訊外無其他可辨識內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p023：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `23`；無圖表、方塊圖、曲線圖、表格、螢幕截圖或內文。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 48,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 3.669396
+             },
+             {
+              "text": "R&S AREG800A › Artificial objects\n| Frontend 組合 | Distance condition | Maximum artificial objects |\n|---|---|---:|\n| with [[R&S QAT100]] | `< 4 m to 3000 m + air gap` | 最多 8 個；4 m 至 17 m 最多 4 個，17 m 至 3000 m 最多 4 個 |\n| with [[R&S QAT100]] | `> 17 m to 3000 m + air gap` | 最多 8 個 |\n| with [[R&S QAT100]] | `≥ air gap to 3000 m` | 最多 8 個 |\n| with [[R&S AREG8-24S]] / [[R&S AREG8-24D]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] / [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]] or [[R&S FE44S]] | `< 4 m to 3000 m + air gap` | 最多 32 個，每 frontend 最多 8 個；4 m 至 17 m 最多 4 個，17 m 至 3000 m 最多 28 個 |\n| with [[R&S AREG8-24S]] / [[R&S AREG8-24D]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] / [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]] or [[R&S FE44S]] | `> 17 m to 3000 m + air gap` | 最多 32 個，每 frontend 最多 8 個 |\n| with [[R&S AREG8-24S]] / [[R&S AREG8-24D]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] / [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]] or [[R&S FE44S]] | `≥ air gap to 3000 m` | 最多 32 個，每 frontend 最多 8 個 |\n\n其他 artificial object 規格：\n\n- Object distance accuracy with [[R&S AREG8-B9]] option：`±5 cm (meas.)`。\n- Object distance step size with [[R&S AREG8-B9]] option：`1 cm`。\n- Air gap：object distances 與 resulting object radar cross-sections 會依 frontend reference plane 與 DUT 之間距離改變；來源建議 air gap 足夠大以符合 radar under test 的 far-field condition。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 3.546526
+             },
+             {
+              "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › Battle card 中的 R&S positioning\n來源的 positioning statement 主張：\n\n- [[Rohde & Schwarz]] delivers the industry’s only fully integrated platform for FR1、FR2、Wi-Fi、fading、IP throughput、RF analysis、NTN、RedCap and end-to-end signalling in one instrument。\n- 來源說 [[Keysight]] spreads equivalent capabilities across multiple UXM models、add-on software and external tools。\n- 來源說 R&S ensures long-term scalability、measurement accuracy and path from R&D to certification without hardware fragmentation。\n\n使用限制：以上是 sales language；其中 only、industry’s only、fully integrated、long-term scalability、lower TCO 等敘述不能當作可驗證規格，需回查正式 datasheet、features document、conformance report 或配置工具。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+              },
+              "score": 7.00394
+             },
+             {
+              "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › 測試與市場語彙\n- [[NR FR1]]、[[NR FR2]]、[[FR3]]、[[6G]]、[[Wi-Fi 6]]、[[Wi-Fi 6E]]、[[Wi-Fi 7]]、[[NTN]]、[[RedCap]]、[[IMS]]、[[VoNR]]、[[VoWiFi]]、[[Fading]]、[[Doppler]]、[[Satellite mobility]]、[[IP throughput testing]]、[[Application testing]]、[[Operator Certification]]、[[PTCRB]]、[[RRM]]、[[PCT]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+              },
+              "score": 6.320823
+             },
+             {
+              "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › 與既有知識的關係\n- 與 [[R&S CMX500 vs amarisoft]]、[[R&S CMX500 vs Anritsu]] 同屬 2026-02-26 R&S battle card 類型來源；三者都應視為競品銷售定位，而不是正式規格來源。\n- [[R&S CMX500]] 的正式規格仍需以 [[CMX500_specs_en_5216-4127-22_v1100]]（Version 11.00，August 2025）與 [[CMX500_Features_CSW9-20-0_en_32]]（Version 32，CSW 9.20.0 and higher）追溯。\n- 本來源提到 [[R&S CMW500]] covers all legacy + EN-DC；[[R&S CMW500]] 的正式資料需追溯 [[CMW_dat-sw_en_5213-9211-22_v1700]]。\n- 本來源新增 [[Keysight]] 在 wireless device testing battle card 語境中的公司與 UXM portfolio 描述；既有 [[Keysight]] 頁主要來自高頻高速 PCB 測試圖像來源，兩者資料層次不同。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+              },
+              "score": 4.697677
+             },
+             {
+              "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › R&S / Rohde & Schwarz 相關\n- [[R&S CMX500]] — battle card 的核心產品；來源定位為 one-platform cellular + Wi-Fi + fading + IP + NTN + RedCap 測試平台。\n- [[R&S CMW500]] — 來源在 Keysight weaknesses 中說 R&S CMW500 covers all legacy + EN-DC；正式能力需追溯 [[CMW_dat-sw_en_5213-9211-22_v1700]]。\n- [[RFU18]] — 來源描述為 wide frequency range up to 18 GHz，並說 max aggregated NR bandwidth 2000 MHz with RFU18；來源未提供正式 order number、specification document、release date 或 configuration 條件。\n- [[CMsquares]]、[[R&S CMsequencer]]、[[CONTEST]]、[[AI Script Assistant]] — battle card 中 R&S unified automation / software ecosystem 的列名。\n- [[TS8980]]、[[TS-RRM]] — 來源在 NR-NTN conformance 敘述中與 CMX500、CONTEST 同列。\n- [[Samsung]] — 來源說 R&S was first to validate 3GPP NR-NTN conformance across RF、RRM、PCT with Samsung。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+              },
+              "score": 3.736021
+             },
+             {
+              "text": "https://www.parpro.com.tw/solutions/aerospace-defense/",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-6ae422456b68416f",
+                "original_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+                "sha256": "6ae422456b68416f9b973f5aa4e40338bdd570f8ca1ff01afc1f9718774b14d1",
+                "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 23.758653
+             },
+             {
+              "text": "<!-- Slide number: 1 -->\n# Making Deployed 5G Private Networks more Resilient\nRandy Schnell\nBusiness Development Manager\nAerospace & Defense Test",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-ee03d2faf62e9553",
+                "original_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+                "sha256": "ee03d2faf62e95530401e678c264a927c21cc58e47bb7aadc133b34233fc6940",
+                "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 23.33605
+             },
+             {
+              "text": "•  Virtual tester: an agentic workflow that spans implementation → test → debug → validation, not a",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-c733beba88ba4b3a",
+                "original_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+                "sha256": "c733beba88ba4b3a7a73b46c78b0191eb5a79f87d47069cf2345244bc474e112",
+                "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 23.288141
+             },
+             {
+              "text": "Mission Context & Industry Drivers\nProblem statement\nTechnical Mapping\nTest setup\nOutcome\nCurrent FHSS Use in Defense\nCall to Action",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-ee03d2faf62e9553",
+                "original_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+                "sha256": "ee03d2faf62e95530401e678c264a927c21cc58e47bb7aadc133b34233fc6940",
+                "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 18.843878
+             }
+            ],
+            "text": "### Short answer\nFor an Aerospace / Defense radar workflow, the passages do **not** directly place a Signaling / Non-signaling Tester as the main radar test instrument; the supported fit is around **communications/RF-link validation, OTA signaling, desense/interference checks, generic RF waveform replay or TX/RX measurement**, while radar-specific work is only separately supported as radar signature evaluation or radar echo generation in other contexts. [13][16][25][30][37][46]\n### Where it fits in the workflow\n| Workflow area | Fit of Signaling / Non-signaling Tester | Evidence |\n|---|---|---|\n| Radar-specific measurement | The passages do not state that CMX500-style Signaling / Non-signaling Tester performs radar echo generation or radar signature evaluation for Aerospace / Defense radar; radar-related passages separately mention MVG test solutions for radar signature evaluation and AREG800A as an **Automotive Radar Echo Generator**. | [25][28][30] |\n| Communications subsystem test on a radar platform | A signaling tester fits where the radar platform also has LTE, 5G, Wi‑Fi, WLAN or similar communication links, because CMX500 is described as a network emulation and measurement test solution for LTE, NR FR1, NR FR2 and WLAN signaling / TX measurements. | [13][15][76] |\n| OTA signaling / antenna system workflow | A signaling tester can fit in the OTA/antenna measurement stage when the workflow involves 5G NR, RedCap, LTE or WLAN OTA signaling testing, because CMX500 OBT is integrated with MVG antenna / multiprobe measurement systems through WaveStudio for those OTA signaling tests. | [19][21][27][83] |\n| Desense / coexistence around radar payload electronics | A signaling tester can fit in interference or desense validation when cellular and WLAN radios operate simultaneously, because CMX500 Desense Testing is described as WLAN + cellular one-box interference / desense testing under real connections. | [46][47] |\n| Non-signaling RF stimulus / waveform replay | A non-signaling tester role fits generic RF stimulus, waveform replay or standalone TX measurement, because CMX500 GPRF Generator is described as a CMX500 non-signaling use case that generates ARB, CW, dual tone or replay `.wv` waveforms for R&D waveform replay / creation and standalone TX measurement. | [37][39] |\n| EMC / EME environment testing around radar exposure | A signaling/non-signaling tester is not identified as the core EMC/EME system, but it may sit beside EMC/EME testing because Aerospace / Defense drone sources emphasize MIL / aviation EMC and system-level EME, while DO-160 Section 20 notes RF susceptibility from external radiators such as radar stations. | [2][7][60][61] |\n### Practical placement\n| Stage | Placement | Supported reason |\n|---|---|---|\n| Before radar chamber / signature testing | Use signaling testing for the platform’s 5G/LTE/WLAN communication module rather than for radar echo/signature measurement. | [13][16][25] |\n| During OTA antenna validation | Use CMX500 OBT with MVG WaveStudio / antenna or multiprobe systems when the OTA task is 5G NR, RedCap, LTE or WLAN signaling. | [19][21][27][83] |\n| During coexistence / desense checks | Use CMX500-style signaling connections to observe cellular/WLAN interference or desense effects under real connections. | [46] |\n| During non-signaling RF lab work | Use GPRF Generator-style non-signaling mode for ARB/CW/dual-tone generation, waveform replay, R&D waveform creation and standalone TX measurement. | [37][39] |\n| During formal radar-target simulation | The passages support AREG800A for automotive radar echo generation, not Aerospace / Defense radar workflow placement. | [28][30] |\n### 【推論】\n【推論】In an Aerospace / Defense radar program, place Signaling / Non-signaling Tester **around the radar system**, not as the primary radar simulator: use signaling for the platform’s cellular/WLAN links and OTA antenna validation, and use non-signaling GPRF for RF stimulus or waveform replay, while keeping radar echo/signature work on radar-specific systems not established here as CMX500 functions. [13][19][25][30][37][39][46]",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "2025RS Drone Solution › 重點摘要\n- 本來源是由 `2025RS Drone Solution.pdf` 轉出的 lossy markdown，標題為 `DRONE TEST SOLUTION PROPOSAL`；來源檔名含 `2025RS`，但正文未標示正式發布日期、作者、版本或簡報完整封面。\n- 來源以 [[EMC]] / [[EME]] 為主軸，說明 drone / [[UAV]] / [[UAS]] 在 residential、outdoor AUT、MIL battle environment 與 multi-domain operations 下會遭遇不同電磁干擾與測試需求。\n- 來源定義 [[UAV]] 為 platform vehicle，[[UAS]] 為支援 drone operation 的整體系統，包含 UAV、controller、datalink、sensors 等；並列出 battery、[[BMS]]、[[ESC]]、[[Flight Control Module]]、[[Communication Module]]、antennas 與 sensors 等 drone components。\n- 來源提出 [[UAV UAS Drones T&M Solutions]]：standard system 包含 [[R&S TS9975 EMI Test System]]、[[R&S TS9982 EMS Test System]] 與 [[R&S TS8997]]；customised solution 包含 [[B-RID Environment Performance]]、[[CUAS System Performance Verification]]、[[Electromagnetic Environment Emulation]] 與 [[High-Intensity RF]]。\n- 商用無人機部分，來源列出 [[European EMC Directive]] 2014/30/EU、[[Radio Equipment Directive]] 2014/53/EU、[[ETSI EN 301 489]] 系列、[[CISPR 32]] / [[EN 55032]]、[[CISPR 35]]、[[EN 61000-4-3]]、[[EN 61000-4-6]]、[[EN 61000-4-2]]、[[EN 61000-4-4]]、[[EN 61000-4-5]]、[[EN 61000-4-11]]、[[EN 61000-3-2]]、[[EN 61000-3-3]] 與 [[ISO 7637-2]] 等線索。\n- 軍用 / 航太部分，來源列出 [[MIL-STD-461]]、[[MIL-STD-464]]、[[RTCA DO-160]]、[[DEF STAN 59-411]]、[[GJB 151B]]、[[GJB 1389A]] 等標準線索，並補充 [[MIL-STD-464]] 涵蓋 external RF EME、[[HPM]]、[[EMP]]、lightning、RADHAZ、HERP / HERF / HERO、electrical bonding、TEMPEST 與 platform radiated emission 等系統層議題。\n- 來源指出 commercial drone radiated RF immunity default test level 為 3 V/m、frequency range 80 MHz to 6 GHz，但也問「Is this test level adequate for all environment?」，並指出 test level 需由 drone manufacturer 依 applications 定義，例如 higher test level 10 V/m 或 specialized test level。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/2025RS Drone Solution.md"
+             },
+             "score": 6.419233
+            },
+            {
+             "text": "DO-160 airborne equipment EMC testing › Section 20 — Radio Frequency Susceptibility\n來源說此測試確保 EUT exposed to a level of RF modulated power 時不受影響，並分為：\n\n- Conducted Susceptibility（low freq）。\n- Radiated Susceptibility（high freq）。\n\n來源說 emissions can come from equipment installed inside aircraft as well as external radiators such as radar stations；Conducted Susceptibility similar to [[CS114]] test，Radiated Susceptibility similar to [[RS103]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+             },
+             "score": 4.763508
+            },
+            {
+             "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 13.88277
+            },
+            {
+             "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 12.08367
+            },
+            {
+             "text": "MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes › 重點摘要\n- [[MVG]]（Microwave Vision Group）已將 [[R&S CMX500 OBT]] 整合進 [[WaveStudio Software Suite]]。\n- 來源稱此整合讓使用者可直接使用 [[MVG]] antenna measurement systems 執行 [[5G NR]] 與 [[LTE]] [[OTA testing]] signaling tests。\n- [[R&S CMX500 OBT]] 被描述為支援 full stack generation and analysis of 4G、[[5G NR]]、[[WLAN]] 與 [[LTE]] signals。\n- 與 [[MVG]] multi-probe measurement systems 搭配時，來源稱可在 real-world conditions 下進行 precise OTA testing。\n- [[WaveStudio Software Suite]] 整合後，來源稱 [[MVG]] systems 可處理 [[5G NR Standalone]]（SA）mode、[[RedCap]] 與 [[LTE]]（FDD & TDD）signaling testing。\n- 來源稱整合支援 multiple hardware configurations of the [[R&S CMX500 OBT]]，包括 `CMX Lite` 與 `CMX Pro`；但未提供正式料號、BOM 或與既有 [[R&S CMX500]] standard hardware configurations 的對照。\n- 來源列出可支援的標準 / 場景包括 [[5G NR FR1]] SA、[[RedCap]] 與 [[LTE]]。\n- 來源稱此整合可移除 earlier setups 的複雜度，減少 preparation and measurements 所需時間，並加速 development cycles。\n- [[Pierre Jurek]] 以 [[MVG]] Chief Commercial Officer 身分表示，MVG 決定支援 different OBT configurations，並正快速擴充測試能力到 WiFi technologies，尤其是 [[Wi-Fi 7]] / [[IEEE 802.11be]]。\n- [[Christoph Pointner]] 以 [[Rohde & Schwarz]] Senior Vice President of Mobile Radio Testers 身分表示，[[R&S CMX500]] one-box signaling tester 的 multi-band capabilities 可顯著簡化 OTA test setup。\n- Press & media contact 為 [[Christian Mokry]]，PR Manager Test & measurement。\n- [[Rohde & Schwarz]] 公司資訊：2024/2025 fiscal year（July to June）net revenue EUR 3.16 billion；2025-06-30 員工超過 15,000 人。\n- [[MVG]] 公司資訊：Microwave Vision Group 提供 electromagnetic waves visualization 技術、antenna characterization、radar signature evaluation 與 electromagnetic measurements 測試方案；營運於 10 個國家，90% sales from exports，revenues exceeding €100 million。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md"
+             },
+             "score": 8.685293
+            },
+            {
+             "text": "MVG CMX500 OBT OTA signaling testing › 測試架構\n依 [[MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes]]：\n\n- [[R&S CMX500 OBT]] 被整合到 [[WaveStudio Software Suite]]。\n- [[WaveStudio Software Suite]] 控制 / 串接 [[MVG]] antenna measurement systems。\n- 與 [[MVG]] multi-probe measurement systems 搭配時，來源稱可進行 precise OTA testing under real-world conditions。\n- 目標是 streamlining test environment，簡化 next-generation wireless devices 的 OTA signaling testing processes。\n\n依 [[MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz]]：\n\n- [[MVG]] 已將 full [[WLAN]] signaling test functionality including [[Wi-Fi 7]] of the [[R&S CMX500 OBT]] 整合進 [[WaveStudio Software Suite]]。\n- Manufacturers 可在 single antenna measurement system 內執行 comprehensive 4G、5G 與 [[WLAN]] [[OTA testing]]。\n- [[WaveStudio Software Suite]] 整合 full Wi‑Fi（[[IEEE 802.11]] a/b/g/n/ac/ax/be）access point and station testing functionality。\n- Software now supports [[5G NR Non-Standalone]]（[[EN-DC]]）testing with the [[R&S CMX500]]。\n- [[MVG]] multiprobe measurement systems 被描述為 fully support Wi‑Fi and cellular standards within a single tester。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/MVG CMX500 OBT OTA signaling testing.md"
+             },
+             "score": 4.835912
+            },
+            {
+             "text": "MVG CMX500 OBT OTA signaling testing › 來源列出的測試能力\n目前兩份 MVG / R&S PR 明確列出的能力包含：\n\n- [[5G NR]] OTA signaling testing。\n- [[5G NR Standalone]]（SA）mode。\n- [[5G NR FR1]] SA。\n- [[5G NR Non-Standalone]]（[[EN-DC]]）。\n- [[RedCap]]。\n- [[LTE]] OTA signaling testing。\n- [[LTE]] FDD & TDD signaling testing。\n- Full Wi‑Fi / [[WLAN]] access point and station testing functionality。\n- [[IEEE 802.11]] a/b/g/n/ac/ax/be。\n- [[Wi-Fi 7]] / [[IEEE 802.11be]]。\n- multiple hardware configurations of [[R&S CMX500 OBT]]，包括 `CMX Lite` 與 `CMX Pro`（僅前一份來源列名，未定義正式 BOM）。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/MVG CMX500 OBT OTA signaling testing.md"
+             },
+             "score": 3.565899
+            },
+            {
+             "text": "MVG\n[[MVG]]（Microwave Vision Group）是提供 electromagnetic waves visualization、antenna characterization、radar signature evaluation 與 electromagnetic measurements 測試方案的公司；在 [[MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes]] 中，它將 [[R&S CMX500 OBT]] 整合進 [[WaveStudio Software Suite]]，使其 antenna measurement systems / multi-probe measurement systems 可執行 [[5G NR]] 與 [[LTE]] OTA signaling testing。[[MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz]] 進一步說明，[[MVG]] OTA test systems / multiprobe measurement systems 現在透過同一整合支援 full [[WLAN]] OTA signaling testing，包括 [[Wi-Fi 7]] / [[IEEE 802.11be]]，並與 4G / 5G cellular coverage 並列。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/MVG.md"
+             },
+             "score": 7.002722
+            },
+            {
+             "text": "MVG › CMX500 OBT / WaveStudio 整合\n依 [[MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes]]：\n\n- [[MVG]] 已將 [[R&S CMX500 OBT]] 整合進 [[WaveStudio Software Suite]]。\n- 使用者可透過 [[MVG]] antenna measurement systems 直接執行 [[5G NR]] 與 [[LTE]] OTA signaling testing。\n- 與 [[MVG]] multi-probe measurement systems 搭配時，可在 real-world conditions 下進行 OTA testing。\n- 整合後支援 [[5G NR Standalone]]（SA）mode、[[RedCap]] 與 [[LTE]]（FDD & TDD）signaling testing。\n- [[Pierre Jurek]] 表示，[[MVG]] 決定支援 different OBT configurations，並正快速擴充到 WiFi technologies，尤其是 [[Wi-Fi 7]] / [[IEEE 802.11be]]。\n\n依 [[MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz]]：\n\n- [[MVG]] 已將 full [[WLAN]] signaling test functionality including [[Wi-Fi 7]] of the [[R&S CMX500 OBT]] 整合進 [[WaveStudio Software Suite]]。\n- 來源稱此整合讓 manufacturers 可在 single antenna measurement system 中執行 comprehensive 4G、5G 與 [[WLAN]] [[OTA testing]]。\n- [[WaveStudio Software Suite]] 整合 full Wi‑Fi（[[IEEE 802.11]] a/b/g/n/ac/ax/be）access point and station testing functionality。\n- Software now supports [[5G NR Non-Standalone]]（[[EN-DC]]）testing with the [[R&S CMX500]]。\n- [[MVG]] multiprobe measurement systems 被描述為 fully support Wi‑Fi and cellular standards，包括 [[5G NR Standalone]]（SA）、[[5G NR Non-Standalone]]（EN-DC）、[[RedCap]] 與 [[LTE]]（FDD & TDD），all within a single tester。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/MVG.md"
+             },
+             "score": 4.181467
+            },
+            {
+             "text": "R&S AREG800A › 文件與適用條件\n- 來源文件：[[AREG800A_specs_en_3609-8015-22_v0900]]。\n- 文件編號：`PD 3609.8015.22`。\n- 文件版本：`Version 09.00`。\n- 文件日期：`September 2025（LA）`。\n- 文件名稱：`AREG800A Automotive Radar Echo Generator`。\n- Copyright：`© 2021–2025 Rohde & Schwarz`。\n- 資料註記：無 tolerance limits 的資料不具 binding 效力；資料 `subject to change`。\n\n產品資料適用條件（Version 09.00, September 2025）：\n\n- 於環境溫度儲存 3 小時後，進行 30 分鐘 warm-up operation。\n- 符合指定 environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有適用的 internal automatic adjustments。\n\n規格定義（Version 09.00, September 2025）：\n\n- `Specifications with limits`：以 `<`、`≤`、`>`、`≥`、`±`、maximum、minimum 等限制符號表示保證產品性能。\n- `Non-traceable specifications with limits (n. trc.)`：依 specifications with limits 測試，但因缺乏可追溯至 national metrology standards 的量測設備，Rohde & Schwarz 不保證。\n- `Specifications without limits`：表示保證產品性能，通常為 dimensions 或 setting parameter resolution 等值。\n- `Typical data (typ.)`、`Nominal values (nom.)`、`Measured values (meas.)` 不由 Rohde & Schwarz 保證。\n- `Uncertainties`：coverage factor 為 2，依 GUM 計算。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 17.322826
+            },
+            {
+             "text": "R&S AREG800A › Echo generation\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Echo generator type：`dynamic artificial object generation`。\n- Echo generation concept：\n  - `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n  - `digital`：用於 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 air gap value；maximum generated distance 為 `3000 m`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 6.421744
+            },
+            {
+             "text": "CMX500 GPRF Generator\n[[CMX500 GPRF Generator]] 是 [[CMX500_Callbox]] 中的 [[R&S CMX500]] non-signaling use case：在 CMX500 上產生 ARB、CW、dual tone 或 replay `.wv` waveform，支援 R&D waveform replay / creation 與 standalone TX measurement 工作流。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md"
+             },
+             "score": 10.375975
+            },
+            {
+             "text": "CMX500 GPRF Generator › Waveform replay\n來源描述可 replay any waveform from：\n\n- IQ capture。\n- MATLAB。\n- Other sources。\n\n流程線索包含：\n\n1. Convert with R&S MATLAB tools from App Note [[1GP60]]。\n2. Read in complex IQ vector。\n3. Add parameters（sample rate provided in `.info` file in CMX500 captures）。\n4. Run conversion script from [[1GP60]]。\n5. `.wv` stored in active directory。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md"
+             },
+             "score": 4.747293
+            },
+            {
+             "text": "CMX500 Desense Testing\n[[CMX500 Desense Testing]] 是 [[CMX500_Callbox]] 中描述的 WLAN + cellular one-box interference / desense use case：以 [[R&S CMX500]] 在真實連線下同時處理 WLAN、LTE 與 NR 測試，觀察互相干擾或 desense 影響。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Desense Testing.md"
+             },
+             "score": 6.184649
+            },
+            {
+             "text": "CMX500 Desense Testing › 與既有頁面的關係\n- [[WLAN offloading with Voice over WLAN]] 記錄 [[R&S CMX500]] 在 cellular 5G 與 WLAN interworking / offloading 的 PR use case。\n- 本頁聚焦 interference / desense 與 parallel measurements，不等同 offloading / voice continuity。\n- [[Wi-Fi 7 R&D and production testing]] 提供 Wi-Fi 7 R&D signaling / production non-signaling 的更大脈絡。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Desense Testing.md"
+             },
+             "score": 4.824538
+            },
+            {
+             "text": "軍用無人機 EMC 與 EME testing › Complex EME emulation\n來源的 RF electromagnetic environment 章節列出：\n\n- emulate complex EME signals。\n- enable the military electromagnetic spectrum operation。\n- emulating different electromagnetic environment。\n- evaluating military system level effects under EM interferences。\n- simulating different operational scenarios。\n\n這支持 [[Electromagnetic Environment Emulation]] 與 [[UAV UAS Drones T&M Solutions]] 的客製化測試方向，但來源未提供 signal library、scenario definition、threat emitter model、功率、頻段、同步或安全條件。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+             },
+             "score": 1.887466
+            },
+            {
+             "text": "軍用無人機 EMC 與 EME testing › MIL-STD-464 system-level testing\n[[2025RS Drone Solution]] 說 [[MIL-STD-464]] provides the basis of environment testing for vehicles that have to work in the most unforgiving condition，並將其描述為 system level testing standard。\n\n來源列出的 main chapter / sub-items 包含：\n\n- margins，6 dB margins。\n- intra-system EMC。\n- hull generated intermodulation interference / IMI。\n- shipboard internal EME。\n- multipaction。\n- induced levels at antenna ports of antenna-connected receivers。\n- external RF EME。\n- [[High Power Microwave]] / HPM sources。\n- lightning。\n- [[Electromagnetic Pulse]] / EMP。\n- subsystems and equipment electromagnetic interference / EMI。\n- portable electronics devices and carry-on equipment requirements。\n- non-developmental items / NDI and commercial items。\n- electrostatic environments。\n- radiation hazards / RADHAZ：HERP、HERF、HERO。\n- life cycle / E3 hardness。\n- electrical bonding、power current return path、antenna installations、mechanical interfaces、shock / fault / ignitable vapour protection。\n- external grounds。\n- TEMPEST。\n- system radiated emission、EMCON、platform radiated emission。\n- EM spectrum supportability。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+             },
+             "score": 1.659339
+            },
+            {
+             "text": "R&S CMX500 › Signaling options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---|---|\n| R&S CMX-KS350B | WLAN signaling, 802.11a/b/g/n/ac, basic | 1222.7064.xx | WLAN SISO signaling |\n| R&S CMX-KS351B | WLAN signaling, 802.11ax, STA testing, basic | 1222.7070.xx | 802.11ax station testing |\n| R&S CMX-KS352B | WLAN signaling, 802.11be, STA testing, basic | 1222.7087.xx | 802.11be station testing |\n| R&S CMX-KS353B | WLAN signaling, 802.11bn, STA testing, basic | 1222.9873.xx | 802.11bn station testing |\n| R&S CMX-KS355B | WLAN signaling, 802.11ax, AP testing, basic | 1222.7093.xx | 802.11ax AP testing |\n| R&S CMX-KS356B | WLAN signaling, 802.11be, AP testing, basic | 1222.7106.xx | 802.11be AP testing |\n| R&S CMX-KS357B | WLAN signaling, 802.11bn, AP testing, basic | 1222.9880.xx | 802.11bn AP testing |\n| R&S CMX-KS360B | WLAN signaling, 2x2 MIMO single user | 1222.7112.xx | 2x2 MIMO support |\n| R&S CMX-KS365B | WLAN advanced encryption and authentication | 1222.7129.xx | Enterprise security support |\n| R&S CMX-KS500B / M / X | LTE signaling basic / medium / expert | 1222.6380.xx / 1222.6397.xx / 1222.6400.xx | 僅 LTE standalone 需要；NR NSA LTE anchor cells 包含於 NR signaling options |\n| R&S CMX-KS550B | LTE-DTC extension for direct-to-cell communication | 1222.9573.xx | D2C fixed / variable delay |\n| R&S CMX-KS600B / M / X | NR signaling enabler, Rel. 15 | 1222.1672.xx / 1222.1650.xx / 1222.1695.xx | 包含 5G NR SA option 2、NSA option 3、DL 2x2/4x4 MIMO、one CC、UL 256QAM |\n| R&S CMX-KS610B / M / X | NR signaling extension, Rel. 15, feature set 3 | 1222.3700.xx / 1222.3717.xx / 1222.3723.xx | UL 2x2 MIMO、CA up to 9 CC |\n| R&S CMX-KS611B / M / X | NR signaling extension, SUL and Rel. 16 features | 1222.3730.xx / 1222.3746.xx / 1222.3752.xx | SUL / Rel. 16 features |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 25,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 8.539321
+            },
+            {
+             "text": "MVG CMX500 OBT OTA signaling testing\n[[MVG CMX500 OBT OTA signaling testing]] 是 [[MVG]] 與 [[Rohde & Schwarz]] 新聞稿中描述的整合測試情境：將 [[R&S CMX500 OBT]] 整合進 [[MVG]] 的 [[WaveStudio Software Suite]]，讓 [[MVG]] antenna / multiprobe measurement systems 可直接執行 [[5G NR]]、[[RedCap]]、[[LTE]] 與 [[WLAN]] OTA signaling tests。[[MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz]] 將此情境擴充到 full [[WLAN]] signaling test functionality including [[Wi-Fi 7]] / [[IEEE 802.11be]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/MVG CMX500 OBT OTA signaling testing.md"
+             },
+             "score": 2.840478
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [
+             {
+              "name": "technical_knowledge",
+              "citations": [
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 7,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/sources/2025RS Drone Solution.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 9,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 11,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 3,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 1,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 2,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/sources/MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md"
+               }
+              ],
+              "attempts": 1
+             }
+            ],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/sources/2025RS Drone Solution.md",
+             "raw_refs": [
+              "raw/Market/OneNote/2025RS Drone Solution.md",
+              "raw/Market/OneNote/UAV/6. UAV Technologies.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md",
+             "raw_refs": [
+              "raw/Market/OneNote/2025RS Drone Solution.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S CMX500.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+              "raw/Productions/PR/MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/MVG CMX500 OBT OTA signaling testing.md",
+             "raw_refs": [
+              "raw/Productions/PR/Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md",
+              "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+              "raw/Productions/PR/MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md",
+              "raw/Productions/PR/MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/MVG.md",
+             "raw_refs": [
+              "raw/Productions/PR/MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md",
+              "raw/Productions/PR/MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S AREG800A.md",
+             "raw_refs": [
+              "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md",
+             "raw_refs": [
+              "raw/Market/OneNote/CMX500_Callbox.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/CMX500 Desense Testing.md",
+             "raw_refs": [
+              "raw/Market/OneNote/CMX500_Callbox.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md",
+             "raw_refs": [
+              "raw/Market/OneNote/2025RS Drone Solution.md"
+             ]
+            }
+           ]
+          },
+          "anchor": {
+           "original": "For a Aerospace / Defense use case involving radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+           "model_version": "For a Aerospace / Defense use case involving radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+           "outcome": "same",
+           "reason": null,
+           "missing_terms": [],
+           "dropped_terms": [],
+           "context_terms": [],
+           "used_question": "For a Aerospace / Defense use case involving radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+           "supplementary_queries": []
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

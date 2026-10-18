@@ -1,0 +1,1853 @@
+{
+ "question": {
+  "id": "Q1001",
+  "text": "What is EVM, and which product-related measurement decisions depend on understanding it?",
+  "technical": "RF / Measurement Fundamentals",
+  "topic": "EVM",
+  "product_related": "true"
+ },
+ "session_id": "conversation-4f88ebb52f4243599273b6e54ae80db1",
+ "exchange": {
+  "sent": "What is EVM, and which product-related measurement decisions depend on understanding it?",
+  "http_status": 200,
+  "seconds": 45.594,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-4f88ebb52f4243599273b6e54ae80db1",
+    "actor": "leo.chi",
+    "title": "What is EVM, and which product-related measurement decisions depend on u…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-18T14:48:00.001508Z",
+    "updated_at": "2026-10-18T14:48:45.454553Z",
+    "messages": [
+     {
+      "message_id": "message-3373546806634689a08551231e8961d7",
+      "role": "user",
+      "text": "What is EVM, and which product-related measurement decisions depend on understanding it?",
+      "created_at": "2026-10-18T14:48:00.034634Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": [],
+      "workflow_form": null,
+      "action_card": null,
+      "action_cards": []
+     },
+     {
+      "message_id": "message-7ebd1ffe547849979952fff6ed0ccf9c",
+      "role": "assistant",
+      "text": "EVM is Error Vector Magnitude, a measurement of the difference between a reference waveform and a measured waveform; in base-station modulation-quality context, it is the difference between equalized ideal symbols and measured symbols, called the error vector [2][10].\n| Product-related measurement decision | What depends on understanding EVM |\n|---|---|\n| UE NR FR1 pre-conformance setup and pass/fail judgment | Test case 6.4.2.1 measures EVM for PUCCH/PUSCH, with Test ID setting RB allocation and modulation scheme, and the measured DUT EVM must be within the specified range [1]. |\n| UE NR FR1 max-power / min-power measurement planning | The same EVM test case requires EVM measurement at DUT max power and min power; CMX first sets max power, then DUT is set to min power using TPC Closed Loop settings after max-power EVM verification [1]. |\n| Modulation-dependent EVM limit selection | EVM result limits depend on modulation: Pi/2-BPSK 30+TT%, QPSK 17.5+TT%, 16QAM 12.5+TT%, 64QAM 8+TT%, and 256QAM 3.5+TT%; TT differs for 256QAM at max power and min power [3]. |\n| Base-station modulation-quality testing | 5G NR base-station modulation quality can be expressed by EVM, with requirements listed as QPSK 18.5%, 16QAM 13.5%, 64QAM 9%, and 256QAM 4.5% [10]. |\n| Base-station conducted TX instrument/option selection | Conducted base-station modulation quality test case 6.5.3 uses FSW Base Unit with FSW K144 in the listed setup [12]. |\n| FR2 OTA direction / spatial metric choice | For FR2 OTA, non-power measurements such as EVM can use TX beam peak direction; Slide 10 maps 6.4.2.2 EVM to TX-BP [13][80]. |\n| CMX500 SRS RF measurement use case | CMX500 SRS RF measurements include TX power, EVM and other measurements for 5G NR SRS modes/configurations, including SRS antenna switching and carrier switching scenarios [4][65]. |\n| CMX500 NR FR1 TX-test option decision | R&S CMX-KM600 is required for any NR FR1 uplink TX tests, and NR FR1 uplink measurements include multi-evaluation, PRACH, SRS and TPC measurement [7][27]. |\n| CMX500 product-spec interpretation | CMX500 NR FR1 analyzer EVM is specified as <0.5% under FR1, SCS 30 kHz, 16QAM, +15 °C to +35 °C, input level –25 dBm to –10 dBm RMS, and bandwidth 100 MHz; CMX500 NR generator EVM is also <0.5% under its stated PDSCH, modulation, bandwidth, level and temperature conditions [7]. |\n| CMP200 NR FR2 measurement option decision | CMP200 NR FR2 multi-evaluation measurement provides uplink PUSCH signal tests with Modulation, Spectrum and Power results, and NR FR2 measurement options include R&S CMP-KM601 as the basic single-carrier option, R&S CMP-KM603 for more than one carrier, and R&S CMP-KM605 for two RX antennas / switched MIMO [92]. |\n| CMP200 NR FR2 result interpretation | CMP200 NR FR2 multi-evaluation modulation results include EVM traces and single values, along with magnitude error, phase error, I/Q constellation and other TX metrics [19]. |\n| CMP200 IF generator EVM-spec interpretation | CMP200 IF generator EVM conditions are 5G NR PDSCH, 100 MHz channel bandwidth, full allocation, SCS 60 kHz / 120 kHz, 64QAM, +15 °C to +35 °C, signal PAR 11.8 dB, and the source marks EVM as measured values [91]. |\n| Wi-Fi over mmWave TX analysis planning | WoMT testing lists TX analysis items including EIRP, TRP, ACLR and EVM under Wi-Fi 7 modulation [58]. |\n| Small-cell production TX test planning | The small-cell WMT production demo lists TX measurement items including QPSK, ACLR, EVM and SEM, and maps 6.5.3 Modulation to EVM / 5G NR conducted base-station transmitter tests [28]. |\n\n來源：\n[1] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[2] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[3] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[4] Wiki：CMX500 SRS RF measurements（來源：`Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS.md`、`UL MIMO.md`、`CMX500_Callbox.md`）\n[7] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[10] Wiki：GFM313_3e_5G_NR_BaseStation_Tx_Tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[12] Wiki：GFM313_3e_5G_NR_BaseStation_Tx_Tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[13] Wiki：FR2 OTA spatial test metrics（來源：`TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md`）\n[19] Wiki：CMP200_Features_V8-14-22_en_09（來源：`CMP200_Features_V8-14-22_en_09.md`）\n[27] Wiki：CMX500_Features_CSW9-20-0_en_32（來源：`CMX500_Features_CSW9-20-0_en_32.md`）\n[28] Wiki：Small Cell WMT production demo（來源：`Small Cell BTS.md`、`MWC2025---WIC-INFRA.md`、`MWC26 purposal for customer.md`）\n[58] Wiki：Wi-Fi over mmWave Technology（來源：`FWA CPE.md`、`R&S for JIO Project.md`、`R&S solution for Jio project_202509_r3.md`）\n[65] Wiki：CMX500 SRS RF measurements（來源：`Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS.md`、`UL MIMO.md`、`CMX500_Callbox.md`）\n[80] Wiki：FR2 OTA spatial test metrics（來源：`TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md`）\n[91] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[92] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）",
+      "created_at": "2026-10-18T14:48:45.454553Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-5acf5c94a56f445184347576603b5660",
+       "request_id": "request-5acf5c94a56f445184347576603b5660",
+       "span_id": "span-5acf5c94a56f445184347576603b5660",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": [],
+      "workflow_form": null,
+      "action_card": null,
+      "action_cards": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "EVM is Error Vector Magnitude, a measurement of the difference between a reference waveform and a measured waveform; in base-station modulation-quality context, it is the difference between equalized ideal symbols and measured symbols, called the error vector [2][10].\n| Product-related measurement decision | What depends on understanding EVM |\n|---|---|\n| UE NR FR1 pre-conformance setup and pass/fail judgment | Test case 6.4.2.1 measures EVM for PUCCH/PUSCH, with Test ID setting RB allocation and modulation scheme, and the measured DUT EVM must be within the specified range [1]. |\n| UE NR FR1 max-power / min-power measurement planning | The same EVM test case requires EVM measurement at DUT max power and min power; CMX first sets max power, then DUT is set to min power using TPC Closed Loop settings after max-power EVM verification [1]. |\n| Modulation-dependent EVM limit selection | EVM result limits depend on modulation: Pi/2-BPSK 30+TT%, QPSK 17.5+TT%, 16QAM 12.5+TT%, 64QAM 8+TT%, and 256QAM 3.5+TT%; TT differs for 256QAM at max power and min power [3]. |\n| Base-station modulation-quality testing | 5G NR base-station modulation quality can be expressed by EVM, with requirements listed as QPSK 18.5%, 16QAM 13.5%, 64QAM 9%, and 256QAM 4.5% [10]. |\n| Base-station conducted TX instrument/option selection | Conducted base-station modulation quality test case 6.5.3 uses FSW Base Unit with FSW K144 in the listed setup [12]. |\n| FR2 OTA direction / spatial metric choice | For FR2 OTA, non-power measurements such as EVM can use TX beam peak direction; Slide 10 maps 6.4.2.2 EVM to TX-BP [13][80]. |\n| CMX500 SRS RF measurement use case | CMX500 SRS RF measurements include TX power, EVM and other measurements for 5G NR SRS modes/configurations, including SRS antenna switching and carrier switching scenarios [4][65]. |\n| CMX500 NR FR1 TX-test option decision | R&S CMX-KM600 is required for any NR FR1 uplink TX tests, and NR FR1 uplink measurements include multi-evaluation, PRACH, SRS and TPC measurement [7][27]. |\n| CMX500 product-spec interpretation | CMX500 NR FR1 analyzer EVM is specified as <0.5% under FR1, SCS 30 kHz, 16QAM, +15 °C to +35 °C, input level –25 dBm to –10 dBm RMS, and bandwidth 100 MHz; CMX500 NR generator EVM is also <0.5% under its stated PDSCH, modulation, bandwidth, level and temperature conditions [7]. |\n| CMP200 NR FR2 measurement option decision | CMP200 NR FR2 multi-evaluation measurement provides uplink PUSCH signal tests with Modulation, Spectrum and Power results, and NR FR2 measurement options include R&S CMP-KM601 as the basic single-carrier option, R&S CMP-KM603 for more than one carrier, and R&S CMP-KM605 for two RX antennas / switched MIMO [92]. |\n| CMP200 NR FR2 result interpretation | CMP200 NR FR2 multi-evaluation modulation results include EVM traces and single values, along with magnitude error, phase error, I/Q constellation and other TX metrics [19]. |\n| CMP200 IF generator EVM-spec interpretation | CMP200 IF generator EVM conditions are 5G NR PDSCH, 100 MHz channel bandwidth, full allocation, SCS 60 kHz / 120 kHz, 64QAM, +15 °C to +35 °C, signal PAR 11.8 dB, and the source marks EVM as measured values [91]. |\n| Wi-Fi over mmWave TX analysis planning | WoMT testing lists TX analysis items including EIRP, TRP, ACLR and EVM under Wi-Fi 7 modulation [58]. |\n| Small-cell production TX test planning | The small-cell WMT production demo lists TX measurement items including QPSK, ACLR, EVM and SEM, and maps 6.5.3 Modulation to EVM / 5G NR conducted base-station transmitter tests [28]. |\n\n來源：\n[1] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[2] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[3] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[4] Wiki：CMX500 SRS RF measurements（來源：`Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS.md`、`UL MIMO.md`、`CMX500_Callbox.md`）\n[7] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[10] Wiki：GFM313_3e_5G_NR_BaseStation_Tx_Tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[12] Wiki：GFM313_3e_5G_NR_BaseStation_Tx_Tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[13] Wiki：FR2 OTA spatial test metrics（來源：`TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md`）\n[19] Wiki：CMP200_Features_V8-14-22_en_09（來源：`CMP200_Features_V8-14-22_en_09.md`）\n[27] Wiki：CMX500_Features_CSW9-20-0_en_32（來源：`CMX500_Features_CSW9-20-0_en_32.md`）\n[28] Wiki：Small Cell WMT production demo（來源：`Small Cell BTS.md`、`MWC2025---WIC-INFRA.md`、`MWC26 purposal for customer.md`）\n[58] Wiki：Wi-Fi over mmWave Technology（來源：`FWA CPE.md`、`R&S for JIO Project.md`、`R&S solution for Jio project_202509_r3.md`）\n[65] Wiki：CMX500 SRS RF measurements（來源：`Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS.md`、`UL MIMO.md`、`CMX500_Callbox.md`）\n[80] Wiki：FR2 OTA spatial test metrics（來源：`TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md`）\n[91] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[92] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-5acf5c94a56f445184347576603b5660",
+      "request_id": "request-5acf5c94a56f445184347576603b5660",
+      "span_id": "span-5acf5c94a56f445184347576603b5660",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-5acf5c94a56f445184347576603b5660",
+       "request_id": "request-5acf5c94a56f445184347576603b5660",
+       "span_id": "span-5acf5c94a56f445184347576603b5660",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "EVM is Error Vector Magnitude, a measurement of the difference between a reference waveform and a measured waveform; in base-station modulation-quality context, it is the difference between equalized ideal symbols and measured symbols, called the error vector [2][10].\n| Product-related measurement decision | What depends on understanding EVM |\n|---|---|\n| UE NR FR1 pre-conformance setup and pass/fail judgment | Test case 6.4.2.1 measures EVM for PUCCH/PUSCH, with Test ID setting RB allocation and modulation scheme, and the measured DUT EVM must be within the specified range [1]. |\n| UE NR FR1 max-power / min-power measurement planning | The same EVM test case requires EVM measurement at DUT max power and min power; CMX first sets max power, then DUT is set to min power using TPC Closed Loop settings after max-power EVM verification [1]. |\n| Modulation-dependent EVM limit selection | EVM result limits depend on modulation: Pi/2-BPSK 30+TT%, QPSK 17.5+TT%, 16QAM 12.5+TT%, 64QAM 8+TT%, and 256QAM 3.5+TT%; TT differs for 256QAM at max power and min power [3]. |\n| Base-station modulation-quality testing | 5G NR base-station modulation quality can be expressed by EVM, with requirements listed as QPSK 18.5%, 16QAM 13.5%, 64QAM 9%, and 256QAM 4.5% [10]. |\n| Base-station conducted TX instrument/option selection | Conducted base-station modulation quality test case 6.5.3 uses FSW Base Unit with FSW K144 in the listed setup [12]. |\n| FR2 OTA direction / spatial metric choice | For FR2 OTA, non-power measurements such as EVM can use TX beam peak direction; Slide 10 maps 6.4.2.2 EVM to TX-BP [13][80]. |\n| CMX500 SRS RF measurement use case | CMX500 SRS RF measurements include TX power, EVM and other measurements for 5G NR SRS modes/configurations, including SRS antenna switching and carrier switching scenarios [4][65]. |\n| CMX500 NR FR1 TX-test option decision | R&S CMX-KM600 is required for any NR FR1 uplink TX tests, and NR FR1 uplink measurements include multi-evaluation, PRACH, SRS and TPC measurement [7][27]. |\n| CMX500 product-spec interpretation | CMX500 NR FR1 analyzer EVM is specified as <0.5% under FR1, SCS 30 kHz, 16QAM, +15 °C to +35 °C, input level –25 dBm to –10 dBm RMS, and bandwidth 100 MHz; CMX500 NR generator EVM is also <0.5% under its stated PDSCH, modulation, bandwidth, level and temperature conditions [7]. |\n| CMP200 NR FR2 measurement option decision | CMP200 NR FR2 multi-evaluation measurement provides uplink PUSCH signal tests with Modulation, Spectrum and Power results, and NR FR2 measurement options include R&S CMP-KM601 as the basic single-carrier option, R&S CMP-KM603 for more than one carrier, and R&S CMP-KM605 for two RX antennas / switched MIMO [92]. |\n| CMP200 NR FR2 result interpretation | CMP200 NR FR2 multi-evaluation modulation results include EVM traces and single values, along with magnitude error, phase error, I/Q constellation and other TX metrics [19]. |\n| CMP200 IF generator EVM-spec interpretation | CMP200 IF generator EVM conditions are 5G NR PDSCH, 100 MHz channel bandwidth, full allocation, SCS 60 kHz / 120 kHz, 64QAM, +15 °C to +35 °C, signal PAR 11.8 dB, and the source marks EVM as measured values [91]. |\n| Wi-Fi over mmWave TX analysis planning | WoMT testing lists TX analysis items including EIRP, TRP, ACLR and EVM under Wi-Fi 7 modulation [58]. |\n| Small-cell production TX test planning | The small-cell WMT production demo lists TX measurement items including QPSK, ACLR, EVM and SEM, and maps 6.5.3 Modulation to EVM / 5G NR conducted base-station transmitter tests [28]. |\n\n來源：\n[1] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[2] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[3] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[4] Wiki：CMX500 SRS RF measurements（來源：`Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS.md`、`UL MIMO.md`、`CMX500_Callbox.md`）\n[7] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[10] Wiki：GFM313_3e_5G_NR_BaseStation_Tx_Tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[12] Wiki：GFM313_3e_5G_NR_BaseStation_Tx_Tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[13] Wiki：FR2 OTA spatial test metrics（來源：`TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md`）\n[19] Wiki：CMP200_Features_V8-14-22_en_09（來源：`CMP200_Features_V8-14-22_en_09.md`）\n[27] Wiki：CMX500_Features_CSW9-20-0_en_32（來源：`CMX500_Features_CSW9-20-0_en_32.md`）\n[28] Wiki：Small Cell WMT production demo（來源：`Small Cell BTS.md`、`MWC2025---WIC-INFRA.md`、`MWC26 purposal for customer.md`）\n[58] Wiki：Wi-Fi over mmWave Technology（來源：`FWA CPE.md`、`R&S for JIO Project.md`、`R&S solution for Jio project_202509_r3.md`）\n[65] Wiki：CMX500 SRS RF measurements（來源：`Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS.md`、`UL MIMO.md`、`CMX500_Callbox.md`）\n[80] Wiki：FR2 OTA spatial test metrics（來源：`TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md`）\n[91] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[92] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_KK2Yai1DKK3BuwH7pRtQUWpC",
+        "name": "knowledge__rs-knowledge",
+        "arguments": {
+         "question": "What is EVM, and which product-related measurement decisions depend on understanding it?"
+        },
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "harness_verdict": "validated",
+          "harness_output": true,
+          "answer": "EVM is Error Vector Magnitude, a measurement of the difference between a reference waveform and a measured waveform; in base-station modulation-quality context, it is the difference between equalized ideal symbols and measured symbols, called the error vector [2][10].\n| Product-related measurement decision | What depends on understanding EVM |\n|---|---|\n| UE NR FR1 pre-conformance setup and pass/fail judgment | Test case 6.4.2.1 measures EVM for PUCCH/PUSCH, with Test ID setting RB allocation and modulation scheme, and the measured DUT EVM must be within the specified range [1]. |\n| UE NR FR1 max-power / min-power measurement planning | The same EVM test case requires EVM measurement at DUT max power and min power; CMX first sets max power, then DUT is set to min power using TPC Closed Loop settings after max-power EVM verification [1]. |\n| Modulation-dependent EVM limit selection | EVM result limits depend on modulation: Pi/2-BPSK 30+TT%, QPSK 17.5+TT%, 16QAM 12.5+TT%, 64QAM 8+TT%, and 256QAM 3.5+TT%; TT differs for 256QAM at max power and min power [3]. |\n| Base-station modulation-quality testing | 5G NR base-station modulation quality can be expressed by EVM, with requirements listed as QPSK 18.5%, 16QAM 13.5%, 64QAM 9%, and 256QAM 4.5% [10]. |\n| Base-station conducted TX instrument/option selection | Conducted base-station modulation quality test case 6.5.3 uses FSW Base Unit with FSW K144 in the listed setup [12]. |\n| FR2 OTA direction / spatial metric choice | For FR2 OTA, non-power measurements such as EVM can use TX beam peak direction; Slide 10 maps 6.4.2.2 EVM to TX-BP [13][80]. |\n| CMX500 SRS RF measurement use case | CMX500 SRS RF measurements include TX power, EVM and other measurements for 5G NR SRS modes/configurations, including SRS antenna switching and carrier switching scenarios [4][65]. |\n| CMX500 NR FR1 TX-test option decision | R&S CMX-KM600 is required for any NR FR1 uplink TX tests, and NR FR1 uplink measurements include multi-evaluation, PRACH, SRS and TPC measurement [7][27]. |\n| CMX500 product-spec interpretation | CMX500 NR FR1 analyzer EVM is specified as <0.5% under FR1, SCS 30 kHz, 16QAM, +15 °C to +35 °C, input level –25 dBm to –10 dBm RMS, and bandwidth 100 MHz; CMX500 NR generator EVM is also <0.5% under its stated PDSCH, modulation, bandwidth, level and temperature conditions [7]. |\n| CMP200 NR FR2 measurement option decision | CMP200 NR FR2 multi-evaluation measurement provides uplink PUSCH signal tests with Modulation, Spectrum and Power results, and NR FR2 measurement options include R&S CMP-KM601 as the basic single-carrier option, R&S CMP-KM603 for more than one carrier, and R&S CMP-KM605 for two RX antennas / switched MIMO [92]. |\n| CMP200 NR FR2 result interpretation | CMP200 NR FR2 multi-evaluation modulation results include EVM traces and single values, along with magnitude error, phase error, I/Q constellation and other TX metrics [19]. |\n| CMP200 IF generator EVM-spec interpretation | CMP200 IF generator EVM conditions are 5G NR PDSCH, 100 MHz channel bandwidth, full allocation, SCS 60 kHz / 120 kHz, 64QAM, +15 °C to +35 °C, signal PAR 11.8 dB, and the source marks EVM as measured values [91]. |\n| Wi-Fi over mmWave TX analysis planning | WoMT testing lists TX analysis items including EIRP, TRP, ACLR and EVM under Wi-Fi 7 modulation [58]. |\n| Small-cell production TX test planning | The small-cell WMT production demo lists TX measurement items including QPSK, ACLR, EVM and SEM, and maps 6.5.3 Modulation to EVM / 5G NR conducted base-station transmitter tests [28]. |\n\n來源：\n[1] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[2] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[3] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[4] Wiki：CMX500 SRS RF measurements（來源：`Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS.md`、`UL MIMO.md`、`CMX500_Callbox.md`）\n[7] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[10] Wiki：GFM313_3e_5G_NR_BaseStation_Tx_Tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[12] Wiki：GFM313_3e_5G_NR_BaseStation_Tx_Tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[13] Wiki：FR2 OTA spatial test metrics（來源：`TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md`）\n[19] Wiki：CMP200_Features_V8-14-22_en_09（來源：`CMP200_Features_V8-14-22_en_09.md`）\n[27] Wiki：CMX500_Features_CSW9-20-0_en_32（來源：`CMX500_Features_CSW9-20-0_en_32.md`）\n[28] Wiki：Small Cell WMT production demo（來源：`Small Cell BTS.md`、`MWC2025---WIC-INFRA.md`、`MWC26 purposal for customer.md`）\n[58] Wiki：Wi-Fi over mmWave Technology（來源：`FWA CPE.md`、`R&S for JIO Project.md`、`R&S solution for Jio project_202509_r3.md`）\n[65] Wiki：CMX500 SRS RF measurements（來源：`Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS.md`、`UL MIMO.md`、`CMX500_Callbox.md`）\n[80] Wiki：FR2 OTA spatial test metrics（來源：`TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md`）\n[91] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[92] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）",
+          "evidence": {
+           "raw_citations": 16,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "product_option_spec": 1
+           },
+           "claim_status": "supported"
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.3"
+           },
+           "trace": {
+            "trace_id": "trace-5dabcdb1f23f4d8da622ebda4134a9c8",
+            "request_id": "request-5dabcdb1f23f4d8da622ebda4134a9c8",
+            "span_id": "span-5dabcdb1f23f4d8da622ebda4134a9c8",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "What is EVM, and which product-related measurement decisions depend on understanding it?",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "EVM › 來源定義\n依 [[WIC Glossary]]（來源正式日期未標示；raw converted 2026-09-17）：\n\n- EVM 展開為 Error Vector Magnitude。\n\n依 [[1C111_1e_3GPPPreConfGuide]]（06.2025）：\n\n- Error Vector Magnitude（EVM）是 reference waveform 與 measured waveform 之間差異的量測。\n- 來源將 EVM 放在 [[3GPP TS 38.521-1]] test case **6.4.2.1 Error Vector Magnitude PUCCH/PUSCH**。\n- Test ID 會設定 RB Allocation 與 modulation scheme。\n- PUCCH subtests 需參考 application note chapter 2.1 notes。\n- Apply configuration 後，需確認 measured DUT EVM 位於 specified range 內。\n- Test case 要求在 DUT max power 與 min power 下量測 EVM。\n- CMX 會先自動設定 max power；完成 max power EVM verification 後，DUT 需使用 TPC Closed Loop settings 設定為 min power。\n\n[[1C111_0e_3GPPPreConfGuide]] 對同一 test case 的定義與限值摘要相同，並支撐既有 EVM 頁面內容。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EVM.md"
+              },
+              "score": 9.766588
+             },
+             {
+              "text": "EVM\n[[EVM]] 是 Error Vector Magnitude；[[WIC Glossary]] 只提供縮寫展開，[[1C111_0e_3GPPPreConfGuide]] 與 [[1C111_1e_3GPPPreConfGuide]] 則在 5G NR FR1 SA pre-conformance test case 6.4.2.1 中說明 EVM 是 reference waveform 與 measured waveform 之間差異的量測。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EVM.md"
+              },
+              "score": 9.745581
+             },
+             {
+              "text": "EVM › 1C111 中的 5G NR EVM limits\n依 [[1C111_1e_3GPPPreConfGuide]]，EVM measurement results 必須低於 [[3GPP TS 38.521-1]] Table 6.4.2.1.5-1 的 maximum error percentage，並套用 Table 6.4.2.1.5-2 定義的 Test Tolerance（TT）。來源摘錄的 Average EVM Level limits 為：\n\n| Modulation | Average EVM level limit |\n|---|---|\n| Pi/2-BPSK | 30 + TT % |\n| QPSK | 17.5 + TT % |\n| 16 QAM | 12.5 + TT % |\n| 64 QAM | 8 + TT % |\n| 256 QAM | 3.5 + TT % |\n\nTT 來源摘錄為：\n\n| 條件 | TT |\n|---|---|\n| All except 256QAM | 0% |\n| 256 QAM @ max power | 0.3% |\n| 256 QAM @ min power | 1.1% |\n\n來源範例：DUT on n78、100 MHz BW、PUCCH Test ID 1（QPSK）時，specified maximum EVM 為 **17.5 + 0 %**，且 CMX EVM measurement 位於 3GPP limits 內。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EVM.md"
+              },
+              "score": 3.598073
+             },
+             {
+              "text": "CMX500 SRS RF measurements\n[[CMX500 SRS RF measurements]] 是 [[CMX500_Callbox]] 中的 [[R&S CMX500]] RF measurement use case：針對 5G NR [[SRS]] modes / configurations 執行 TX power、[[EVM]] 等量測，並支援 [[SRS antenna switching]] / carrier switching 場景；[[Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS]] 進一步補充 SRS antenna switching 的 xTyR 技術背景與 receiver-side [[Receiver Pre-adder]] / selection 概念。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 SRS RF measurements.md"
+              },
+              "score": 9.716386
+             },
+             {
+              "text": "CMX500 SRS RF measurements › Option 線索\n來源明示：\n\n- [[R&S CMX-KS610B]] NR SIG EXT. FSET3 – for SRS carrier switching（來自 [[CMX500_Callbox]]）。\n\n來源未列出 [[R&S CMX-KS610B]] 的完整 order number，也未列出是否需要 [[R&S CMX-KM600]]、[[R&S CMX-KM604]]、receiver-chain hardware options 或其他 measurement options；需回正式 CMX500 features / configuration guide。\n\n[[Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS]] 雖提到 receiver side “on CMX”，但未標示完整 CMX 型號、software release、option stack 或 UI / automation 設定方式；不可據此推論 [[R&S CMX500]] 所有版本均支援所有 receiver pre-adder / selection 場景。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 SRS RF measurements.md"
+              },
+              "score": 2.939939
+             },
+             {
+              "text": "CMX500 SRS RF measurements › Receiver pre-adder / selection\n依 [[Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS]]，receiver side（來源文字：on CMX）不一定需要讓所有 received streams 都進入獨立 receiver chains；部分 received streams 可在進入 receiver chains 前先被 selected 或 added。這在 receiver chains 數量有限，或使用者希望只使用有限 receiver chains 時有用。\n\n來源的 general configuration 描述：\n\n- UE 端：logical ports mapping 到 UE 的 physical antenna ports；來源示例為 two logical ports mapped to two out of four physical antennas。\n- Receiver 端：receive streams 0 & 2 以及 receive streams 1 & 3 可先相加，再送入 receiver chains。\n- 對四個 receive streams，來源允許使用 1、2 或 4 條 receiver chains。\n- 若使用 4 條 receiver chains，所有 received streams 直接 mapping 到 receiver chains，不做 selection 或 addition。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 SRS RF measurements.md"
+              },
+              "score": 2.61733
+             },
+             {
+              "text": "R&S CMX500 › NR FR1\n依 [[CMX500_Features_CSW9-20-0_en_32]]，R&S CMX-KM600 是 frequency range 1 對 NR uplink signals 執行任何 TX tests 的必要 option。NR FR1 uplink measurements 包含 multi-evaluation、PRACH、SRS、TPC measurement。Multi-evaluation 支援 NR channel bandwidth **3 MHz 到 100 MHz**，可分析 FDD 與 TDD signals、NR standalone signals 與 intraband contiguous EN-DC signals。\n\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，R&S CMX-KM600 option 的 5G NR analyzer 條件為 FR1、SCS 30 kHz、16QAM、temperature range +15 °C to +35 °C；input level –25 dBm to –10 dBm RMS、bandwidth 100 MHz 時 EVM **< 0.5 %**。Frequency measurement uncertainty：**< 20 Hz + drift of timebase**；相對於同一台 CMX500 device 的 downlink signal 進行 frequency error measurements 時，uncertainty 符合 [[3GPP TS 38.521-1]] V18.5.0。\n\nR&S CMX-KW601 option 的 5G NR generator 條件：5G NR PDSCH、full allocation、SCS 30 kHz / 60 kHz、modulation 64QAM、PAR 11.8 dB、temperature +15 °C to +35 °C；ports RF Com 1、RF Com 2、RF Out 1 to RF Out 4；output level –5 dBm、bandwidth 100 MHz 時 EVM **< 0.5 %**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 30,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 18.010682
+             },
+             {
+              "text": "R&S CMX500 › Application tests 與 audio\n依 [[CMX500_Features_CSW9-20-0_en_32]]：\n\n- 未啟用 R&S CMX-KA100 等 application test license 時，IP application test functionality 降到最低；只能使用 standalone mode，不能連接 external servers，也不支援 IP based measurements 或 tools。\n- R&S CMX-KA100 提供 internal IP services 與 IP connection to DUT 測試 applications，包含 DNS、IMS、Message Center、FTP、HTTP、DNS monitor、IP logging、iPerf、Ping、throughput、Max Throughput Wizard、web server。\n- R&S CMX-KA110 增強 KA100，加入 QoS、ePDG、N3IWF、delay measurement、IP tune tool、SMPP / MT SMS advanced settings。\n- R&S CMX-KA150 提供 IP analysis tool，用於監控與分析 DUT uplink / downlink IP traffic。\n- R&S CMX-KA180 提供 audio codecs for 4G and 5G IMS voice call，支援 AMR-NB、AMR-WB、EVS，並包含 [[R&S CMX-ZG180A]] external sound card drivers and configuration settings。\n- R&S CMX-KA181 加入 [[POLQA]]，用於 measuring perceived speech quality；measurement version 為 3，mode 為 full-band 或 narrowband。\n- R&S CMX-KA401 支援 WAV player / recorder、upload/download WAV files、file-based POLQA measurements 與 end-to-end audio delay。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 35,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 13.242938
+             },
+             {
+              "text": "R&S CMX500 › 文件依據與版次\n本頁並列使用兩份來源：\n\n| 來源 | 文件類型 | 文件編號 | 版次 / 軟體 | 日期 | 用途 |\n|---|---|---|---|---|---|\n| [[CMX500_specs_en_5216-4127-22_v1100]] | Specifications | PD 5216.4127.22 | Version 11.00 | August 2025 | binding specifications、hardware unit 型號、order number、環境、尺寸、電源、service |\n| [[CMX500_Features_CSW9-20-0_en_32]] | Features and Functions | 1179.1164.02 | Version 32；CSW 9.20.0 and higher | 來源未標示；© 2026 | GUI、software features、signaling / application / measurement options 與使用介面 |\n\n[[CMX500_specs_en_5216-4127-22_v1100]] 的 product data 適用條件：ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘；符合指定 environmental conditions；遵守 recommended calibration interval；已執行所有適用的 internal automatic adjustments。文件區分 specifications with limits、non-traceable specifications、typical data、nominal values、measured values 與 uncertainties；non-traceable specifications、typical data、nominal values、measured values 不由 [[Rohde & Schwarz]] 擔保。\n\n[[CMX500_Features_CSW9-20-0_en_32]] 明示：**Subject to change – data without tolerance limits is not binding**。它是 features/functions overview，不是 technical specifications datasheet。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 9.527267
+             },
+             {
+              "text": "GFM313_3e_5G_NR_BaseStation_Tx_Tests › 6.5.3 Modulation quality\n- 定義為 measured carrier signal 與 reference signal 的差異。\n- 可用 EVM 表示。\n- EVM 是 equalization 後 ideal symbols 與 measured symbols 的差異讀值，該差異稱為 error vector。\n\nEVM requirements：\n\n- QPSK：18.5%。\n- 16QAM：13.5%。\n- 64QAM：9%。\n- 256QAM：4.5%。\n\nFrequency error 與 EVM SCPI 摘錄：\n\n- `CONFigure[:NR5G]:DL[:CC<cc>]:IDC <State>`\n- `FETCh[:CC<cc>][:ISRC<ant>][:FRAMe<fr>]:SUMMary:FERRor[:AVERage]?`\n- `FETCh[:CC<cc>][:ISRC<ant>][:FRAMe<fr>]:SUMMary:EVM[:ALL][:AVERage]?`",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 26,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md"
+              },
+              "score": 18.262767
+             },
+             {
+              "text": "GFM313_3e_5G_NR_BaseStation_Tx_Tests › Manual operation 共通流程\n來源說多數測試共用相同初始步驟：\n\n- 執行任何測試前，建議按下儀器前面板 PRESET 鍵，將儀器 reset 至 default state。\n- 某些量測需透過 external reference 將 FSW 同步至 high precision time reference。\n- 使用 external reference 時，需將 external reference signal 接至後面板 reference input，並將 reference frequency input 改為 External Reference。\n- FSW 前面板可透過 SETUP key → sidebar 選 Reference → popup list 選 External Reference：10 MHz、1…50 MHz、100 MHz、1 GHz。\n\n單次量測控制位於 front panel Function Keys：\n\n- RUN SINGLE：開始新的 single-shot measurement，量測後停止 acquisition。\n- RUN CONT：開始 continuous / repetitive measurements。\n\n不同 BS transmitter tests 需要不同 operation mode：\n\n- Spectrum mode。\n- 5G NR mode。\n\nSpectrum mode 量測用途：\n\n- Occupied bandwidth（OBW）：對應 6.6.2。\n- Transmitter spurious emissions：對應 6.6.5。\n\n5G NR mode 量測用途：\n\n- EVM/Frequency Err/Power：用於 Base station output power（6.2）、Frequency error（6.5.2）、Modulation quality（6.5.3）。\n- Time Alignment Error：用於 TAE（6.5.4）。\n- Transmit ON/OFF Power：用於 Transmit on/off power（6.4）。\n- Channel Power ACLR：用於 ACLR（6.6.3）。\n- SEM：用於 OBUE（6.6.4）。\n\nFSW 5G NR signal analysis overview-screen 可設定：Deployment、Channel bandwidth、Test model、Center-frequency、Reference level、FSW attenuation。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 18,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md"
+              },
+              "score": 15.900963
+             },
+             {
+              "text": "GFM313_3e_5G_NR_BaseStation_Tx_Tests › Test setup 與必要 options\n完整 Tx test setup 使用 [[R&S FSW]] spectrum analyzer 執行量測；完整 Tx test setup 使用 [[R&S SMW200A]] signal generator 作為 interferer。部分測試需要修改 setup，於各測試章節個別說明。\n\n來源列出的必要儀器與 options：\n\n| Test case | Analyzer / option | Generator / option |\n|---|---|---|\n| 6.2 Base station output power | FSW Base Unit；FSW K144 | 來源未列 |\n| 6.3.2 RE power control dynamic range | FSW Base Unit；FSW K144 | 來源未列 |\n| 6.3.3 Total power dynamic range | FSW Base Unit；FSW K144 | 來源未列 |\n| 6.3.4 NB-IoT RB power dynamic range | FSW Base Unit；FSW K144 | 來源未列 |\n| 6.4 Transmit ON/OFF power | FSW Base Unit；FSW K144 | 來源未列 |\n| 6.5.2 Frequency error | FSW Base Unit；FSW K144 | 來源未列 |\n| 6.5.3 Modulation quality | FSW Base Unit；FSW K144 | 來源未列 |\n| 6.5.4 Time alignment error | FSW Base Unit；FSW K144 | 來源未列 |\n| 6.6.2 Occupied bandwidth | FSW Base Unit；basic function：spectrum analyzer mode | 來源未列 |\n| 6.6.3 ACLR | FSW Base Unit；FSW K144 | 來源未列 |\n| 6.6.4 OBUE / SEM | FSW Base Unit；FSW K144 | 來源未列 |\n| 6.6.5 Transmitter spurious emissions | FSW Base Unit；basic function：spectrum analyzer mode | 來源未列 |\n| 6.7 Transmitter intermodulation | FSW Base Unit；combined measurements：ACLR, SEM and spurious emissions | SMW Base Unit；SMW K144 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 16,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md"
+              },
+              "score": 13.296192
+             },
+             {
+              "text": "FR2 OTA spatial test metrics › EIRP @ Beam Peak / TX Beam Peak metric\n來源文字：\n\n- EIRP metric：In best TX beam peak direction measure power。\n- TX Beam peak metric：Same as EIRP but non-power measurement, e.g. EVM。\n- For chapter 6 the beam peak is Tx beam peak = 100%-tile of EIRP CDF = strongest beam。\n\n因此在此來源中：\n\n- Power measurement at strongest TX beam 可用 [[EIRP]] @ beam peak。\n- 非 power measurement，例如 [[EVM]]，也可使用 TX beam peak direction 作為量測方向。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/FR2 OTA spatial test metrics.md"
+              },
+              "score": 6.795867
+             },
+             {
+              "text": "FR2 OTA spatial test metrics › TRP @ Beam Peak metric\n來源文字：\n\n- TRP metric – two antennas required, link + measurement。\n- Lock the beam in best TX beam。\n- Measure power per grid point。\n- Calculate average。\n\n判斷：本來源將 [[TRP]] @ beam peak 描述為固定最佳 TX beam 後，在 sphere grid 上量測 power 並平均；此處是 FR2 UE conformance presentation 的簡化說明，正式 grid / uncertainty / integration method 仍需回查 3GPP 或 application note。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/FR2 OTA spatial test metrics.md"
+              },
+              "score": 3.774039
+             },
+             {
+              "text": "FR2 OTA spatial test metrics › 使用限制\n- 本頁主要依 [[TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02]] Slide 10 整理，該來源是 2020-11-02 customer presentation 的 lossy derivative，不是 3GPP 標準全文。\n- Slide 10 中部分 test case numbering / labels 可能受 OCR 影響，例如 TX Spurious Emissions 與 6.5.3.1 的排列需回查原始投影片。\n- 本頁只保存 metric taxonomy 與來源語句，不提供測試限值、grid definition、uncertainty、measurement bandwidth、beam management procedure 或 pass/fail criteria。\n- [[EIRP]]、[[TRP]] 與 [[EIS]] 的正式定義與測試程序需回查對應 3GPP、R&S application note 或 chamber / test system 文件。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/FR2 OTA spatial test metrics.md"
+              },
+              "score": 2.74641
+             },
+             {
+              "text": "5G FR2 RF conformance testing › OTA / spatial test metrics\n本來源以 [[FR2 OTA spatial test metrics]] 方式整理 FR2 conformance 的 power / sensitivity / beam peak 量測語彙。\n\n依 Slide 10：\n\n- Scan / Max Power：[[EIRP]] CDF。\n- 6.2.1 Max Tx Power：[[TRP]] / [[EIRP]] @ TX-BP。\n- 6.3.1 Min Tx Power：[[EIRP]] @ TX-BP。\n- 6.3.2 Off Power：[[TRP]] @ TX-BP。\n- 6.4.2.2 EVM：@ TX-BP。\n- 6.5.2 SEM：[[TRP]] @ BP。\n- 6.5.3.2.4 ACLR：[[TRP]] / [[EIRP]] @ BP。\n- TX Spurious Emissions：[[TRP]] @ BP。\n- Scan / Throughput Scan：[[EIS]] CDF。\n- 7.3 Reference Sensitivity, EIS：@ RX-BP。\n- 7.4 Max Input Level：@ RX-BP。\n- 7.5 ACS：@ RX-BP。\n- 7.6.1 In-Band Blocking：@ RX-BP。\n- 7.9 Rx Spurious Emissions：[[TRP]] @ RX-BP。\n\nSlide note：\n\n- Chapter 6 的 beam peak 是 Tx beam peak，即 100%-tile of EIRP CDF = strongest beam。\n- Chapter 7 的 beam peak 是 Rx beam peak，即 0%-tile of EIS CDF = strongest beam；來源註明 0%-tile is where the most sensitive link was found。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G FR2 RF conformance testing.md"
+              },
+              "score": 6.680689
+             },
+             {
+              "text": "5G FR2 RF conformance testing › 2021 TS8980 roadmap（2020 presentation view）\n依 Slide 28：\n\n- Supported systems：`TS8980FTA-M1 / -3AM`。\n- NSA scope：1×LTE + 1×FR2；1×LTE + N×FR2。\n- M1 transmitter：in-band TX output power levels、occupied bandwidth、SEM、ACLR、spectrum emissions in-band；out-of-band TX OOB spurious。\n- 3AM1 transmitter / CTIA：TX beam peak search、EIRP、spherical coverage、TRP、output power dynamics、transmit signal quality。\n- Receiver：adjacent channel selectivity、blocking characteristics、RX beam peak search、REFSENS power level、EIS spherical coverage。\n- CA：additional TCs for in-band TX, out-of-band TX and in-band RX。\n- Performance / Demod：first TCs。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G FR2 RF conformance testing.md"
+              },
+              "score": 4.944127
+             },
+             {
+              "text": "5G FR2 RF conformance testing › Chamber / system portfolio\n依 [[TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02]] Slide 16：\n\n- [[WPTC]]：FR2 UE R&D / 20 cm QZ / cost efficient / can be rack-integrated。\n- [[ATS1000]]：FR2 production & R&D / flexible test capability / can be rack-integrated。\n- [[ATS800R]]：FR2 UE R&D / 20 cm QZ / cost efficient / can be rack-integrated。\n- [[R&S ATS1800C]]：FR2 UE conformance & CTIA / 30 cm QZ / RF, RRM, PCT。\n- [[CMQ200]] / [[CMQ500]]：FR2 chip and antenna R&D / fast, accurate, compact / 3-D thermal testing。\n\nSlide 17 區分：\n\n- DFF for Whitebox testing。\n- IFF for Blackbox testing。\n- 來源說 both systems use ATS form factor，但 implementation details 需要不同 chamber modifications，因此 CATR 版本使用 `c`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G FR2 RF conformance testing.md"
+              },
+              "score": 2.259449
+             },
+             {
+              "text": "CMP200 Features and Functions Version 09 › NR FR2 measurement results 與 settings\nNR FR2 multi-evaluation modulation results 包含 EVM traces and single values、magnitude error、phase error、I/Q constellation diagram、in-band emissions、equalizer spectrum flatness、I/Q origin offset、I/Q gain imbalance、I/Q quadrature error、carrier frequency error、transmit time error、sample clock error、total TX power、TX power per RX antenna、peak power、RB power。\n\nNR FR2 spectrum results 包含 spectrum emission mask、ACLR、occupied bandwidth（OBW）。CA 時 spectrum results 針對 aggregated bandwidth 測量；two RX antennas 時針對 two antenna signals 的 sum 測量。\n\nNR FR2 power results 包含 power monitor trace、power dynamics trace、on power RMS and peak、off power before / after on power。\n\nNR FR2 multi-evaluation measurement settings 抄錄：\n\n- Repetition：single shot 或 continuous measurement。\n- Measured subframes per radio frame：**1 subframe to 10 subframes**。\n- Subframes for power monitor：**1 subframe to 100 subframes**。\n- Measure slot：all，或 **0 to 79**。\n- Trigger source：free run（fast sync / no sync）、IF power、external signal at rear panel、trigger signal provided by other application。\n- Trigger threshold：**-50 dB to 0 dB**。\n- Trigger delay：**-250 µs to 250 µs**。\n- Trigger timeout：off，或 **10 ms to 167772150 ms**。\n- Minimum trigger gap：**0 µs to 1000 µs**。\n- Statistic count：**1 slot to 1000 slots**。\n- TX DC location offset：**-2048 subcarriers to 2047 subcarriers**。\n- UE power class：**1 to 4**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP200_Features_V8-14-22_en_09.md"
+              },
+              "score": 12.260998
+             },
+             {
+              "text": "CMP200 Features and Functions Version 09 › 與既有知識的關係\n- [[R&S CMP200]] 與既有 [[R&S CMP180]] 同屬 Rohde & Schwarz radio communication tester 類型，但本來源的 CMP200 功能焦點是 [[NR FR2]]、[[UWB]]、[[LP-IoT]]、UWB test plans 與 [[R&S VSE]] options；[[CMP180_Features_V11-9_en_09]] 則涵蓋 Bluetooth、WLAN、LTE、NR FR1、NB-IoT、UWB、GSM、WCDMA、CDMA2000 等更廣的 application option 清單。\n- 本來源是 **Features and Functions**，不是 specifications datasheet；量測範圍與 tolerance limits 需回到 **PD 5216.4391.22** 查證。\n- 本來源列出多個 order number 均以 `.xx` 結尾；本頁照抄，不推導完整尾碼。\n- [[R&S VSE]] 的 license 機制與既有 [[R&S CMP180]] 類似：可由 dongle 提供，也可由儀器提供；若由儀器提供，需要 **R&S CMP-KM150**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP200_Features_V8-14-22_en_09.md"
+              },
+              "score": 7.018761
+             },
+             {
+              "text": "CMP200 Features and Functions Version 09 › 產品與組織\n- [[R&S CMP200]]：Radio Communication Tester。\n- [[Rohde & Schwarz]]：文件版權方。\n- [[Rohde & Schwarz GmbH & Co. KG]]：R&S® registered trademark 所屬組織。\n- [[R&S VSE]]：Vector Signal Explorer / high-performance analysis software，supported instruments 清單包含 [[R&S CMP200]]。\n- [[FiRa Consortium]]：UWB PHY Test Suite 依據其 conformance test specifications 與 FiRa UCI test specification 執行。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP200_Features_V8-14-22_en_09.md"
+              },
+              "score": 6.876805
+             },
+             {
+              "text": "R&S CMP200 › 產品定位\n依 [[CMP200_specs_en_5216-4391-22_v0800]]，[[R&S CMP200]] 與 [[R&S CMPHEAD30]] / [[R&S CMPHEAD50]] remote radio head（RRH）形成 5G NR FR2（mmWave）nonsignaling one-box test solution，目標應用為：\n\n- R&D 的 RF parametric testing。\n- Manufacturing 的 high-volume RF parametric testing。\n- Fully assembled smart devices 的 pure radiated mmWave setup。\n- 具 IF interface 的 mmWave RF integrated circuits 的 mixed radiated mmWave / conducted IF setup。\n- 具 mmWave interface 的 mmWave RF integrated circuits 的 mixed radiated mmWave / conducted mmWave setup。\n\nCMP200 本體提供 IF frequency range 的 vector signal analysis 與 ARB-based generator functionality；[[R&S CMPHEAD30]] / [[R&S CMPHEAD50]] 作為 compact remote radio head，負責 upconversion / downconversion 至 5G NR FR2 frequencies。分離式 one-box tester + RRH 架構可在 mmWave frequency range 使用較短 RF cable lengths，以改善 radiated test environments 的 link budget。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP200.md"
+              },
+              "score": 7.836012
+             },
+             {
+              "text": "R&S CMP200 › R&S CMPHEAD50\n[[R&S CMPHEAD50]] remote radio head 覆蓋至 50.20 GHz，並支援 external LO：\n\n| 項目 | 規格 |\n|---|---|\n| Order No. | 1201.0002K26 |\n| Hardware unit | [[R&S CMPH-B23B]]，1430.8000.03 |\n| Software options | R&S CMPH-K50G extended frequency range up to 50.2 GHz；R&S CMPH-K51RX enable Rx Low Noise In port |\n| RF frequency range | 21.84 GHz to 50.20 GHz |\n| Duplex mode | half duplex（TDD） |\n| External LO | Tx LO In / Rx LO In，rear panel，SMA，8.0 GHz to 12.5 GHz，nominal +3 dBm，range +2 dBm to +4 dBm |\n| Generator output level range | 21.84–29.5 GHz PEP –84 dBm to +21 dBm；29.5–40 GHz PEP –84 dBm to +19 dBm；40–43.5 GHz PEP –84 dBm to +17 dBm；43.5–50.2 GHz PEP –84 dBm to +14 dBm |\n| Analyzer absolute maximum values | RF 1/RF 2 highest attenuation +22 dBm CW；lowest attenuation –8 dBm CW；Rx Low Noise In –10 dBm CW；0 V DC |\n| Analyzer frequency error | < ±0.01 ppm，符合 [[3GPP TS 38.521-2]] V17.0.0 |\n\n⚠️ [[CMP200_specs_en_5216-4391-22_v0800]]（August 2024）說 [[R&S CMPHEAD50]] external local oscillator EVM 測試搭配 [[R&S SMA100B]] 與 **R&S SMA-B711 ultra low phase noise option**，但既有頁面 [[R&S SMA100B]] 說 ultra low phase noise option code 為 **R&S SMAB-B711 / R&S SMAB-B711N**。判斷為跨文件 option code 抄錄差異；引用 CMPHEAD50 EVM 條件時照抄本來源，但報價或組態確認時需回查 SMA100B specifications 與原 PDF。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 19,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP200.md"
+              },
+              "score": 7.694441
+             },
+             {
+              "text": "R&S CMP200 › unresolved\n- [[CMP200_Features_V8-14-22_en_09]] 是功能總覽，許多 order number 以 `.xx` 結尾；[[CMP200_specs_en_5216-4391-22_v0800]] 提供部分完整 `.02` order number，但未補齊所有 feature/test-plan options 的後綴。\n- [[CMP200_specs_en_5216-4391-22_v0800]] 摘要未完整轉錄所有規格表、圖表與 footnotes；報價或測試規格引用前需回查原始來源。\n- Firmware version（base）≥ 4.0.7 且 TRX_BB hardware code < 11 時的 IF analyzer / CMPHEAD30 level uncertainty 條件需在實機組態中確認。\n- [[R&S CMPHEAD50]] external LO EVM 條件中的 **R&S SMA-B711** 與既有 [[R&S SMA100B]] 頁的 **R&S SMAB-B711** 寫法不一致，需回查原 PDF 與 SMA100B specifications。\n- 來源未提供價格。\n- n. trc.、typ.、nom.、meas. 數字不能當作 Rohde & Schwarz warranted product performance。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 26,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP200.md"
+              },
+              "score": 6.455853
+             },
+             {
+              "text": "CMX500_Features_CSW9-20-0_en_32 › 產品、硬體與附件\n- [[R&S CMX500]] — Radio Communication Tester，modular and scalable hardware architecture。\n- [[R&S CMX-B500x]] — IF unit；NR FR2 連接使用，來源未列完整 order no.。\n- [[R&S CMX-B500A]] — IF unit；remote radio heads 連接到 [[R&S CMX500]] 的 IF units 時列名，來源未列完整 order no.。\n- [[R&S CMX-B600x]] — RF unit；最高 8 GHz 連接使用，來源未列完整 order no.。\n- [[R&S CMXHEAD30]] — remote radio head，搭配 IF unit 時 RF frequencies 最高 43.5 GHz。\n- [[R&S CMXHEAD50]] — remote radio head，搭配 IF unit 時 RF frequencies 最高 50.2 GHz。\n- [[R&S CMQ500]]、[[R&S ATS800R]]、[[R&S ATS1800C]] — 建議用於 mmWave OTA 量測的 RF shield chambers。\n- [[R&S CMX-ZG180A]] — external sound card；R&S CMX-KA180 / KA401 audio use cases 中列名。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+              },
+              "score": 7.567531
+             },
+             {
+              "text": "CMX500_Features_CSW9-20-0_en_32 › LTE measurements\n- R&S CMX-KM500 提供 LTE uplink measurements，支援含 PUCCH/PUSCH signals、random access preambles、sounding reference signals。\n- LTE uplink multi-evaluation 支援 FDD / TDD signals、channel bandwidth 1.4 MHz、3 MHz、5 MHz、10 MHz、15 MHz、20 MHz、normal 或 extended cyclic prefix、arbitrary resource block allocation，以及 QPSK、16QAM、64QAM。\n- Carrier aggregation 支援 intraband contiguous UL CA signals；可量測 two、three 或 four carriers depending on bandwidth class。\n- LTE sidelink measurements 由 R&S CMX-KM570 提供，RF operating band 為 band 47。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 17,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+              },
+              "score": 7.06151
+             },
+             {
+              "text": "CMX500_Features_CSW9-20-0_en_32 › NR FR1 measurements\n- R&S CMX-KM600 是 frequency range 1 對 NR uplink signals 執行任何 TX tests 的必要選項。\n- R&S CMX-KM602 用於 UL carrier aggregation measurements；R&S CMX-KM604 用於 two TX antennas measurements。\n- NR FR1 uplink measurements 包含 multi-evaluation、PRACH、SRS、TPC measurement。\n- Multi-evaluation 支援 NR channel bandwidth **3 MHz 到 100 MHz**，可分析 FDD / TDD signals、NR standalone signals 與 intraband contiguous EN-DC signals。\n- 所有 uplink measurements 適用的 RF frequency bands 包含 n1 to n3、n5、n7、n8、n12 to n14、n18、n20、n24 to n26、n28、n30、n31、n34、n38 to n41、n46 to n48、n50、n51、n53、n65、n66、n68、n70、n71、n72、n74、n77 to n101、n104 to n106、n109、n110、n250 to n256；n247、n248 可 via IF unit。\n- NR FR1 sidelink measurement 的 RF frequency：n14、n38、n47、n79；list mode 不支援 sidelink measurements。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+              },
+              "score": 6.295295
+             },
+             {
+              "text": "Small Cell WMT production demo › TX 測試項目\n來源 Slide 2 將 TX 寫為：\n\n- Verification\n- QPSK\n- [[ACLR]]\n- [[EVM]]\n- [[SEM]]\n\n來源 Slide 3 將 RF Transmitter Tests 對應到 `TS 38.141-1, chapter 6`，列出：\n\n| Test case | 來源文字 | 對應既有主題 |\n|---|---|---|\n| 6.2 | Base station output power | [[5G NR conducted base station transmitter tests]] |\n| 6.5 | Transmitted signal quality | [[5G NR conducted base station transmitter tests]] |\n| 6.5.2 | Frequency error | [[5G NR conducted base station transmitter tests]] |\n| 6.5.3 | Modulation | [[EVM]] / [[5G NR conducted base station transmitter tests]] |\n| 6.6.2 | Occupied bandwidth | [[5G NR conducted base station transmitter tests]] |\n| 6.6.3 | Adjacent channel leakage power ratio (ACLR) | [[ACLR]] |\n| 6.6.4 | Operating band unwanted | [[SEM]] / [[OBUE]] |\n| 6.6.5 | Transmitter spurious emissions | [[5G NR conducted base station transmitter tests]] |\n\n注意：來源在 6.6.4 只寫 `Operating band unwanted`，未完整寫出 emissions；本頁不自行補成正式標準題名，只在概念連結中連到既有 [[SEM]] / [[OBUE]] 待確認語彙。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Small Cell WMT production demo.md"
+              },
+              "score": 9.533857
+             },
+             {
+              "text": "Small Cell WMT production demo › 與 PVT360A 的關係\n[[MWC26 purposal for customer]] 直接寫出 `WITH PVT360A` 與 `Reference 10MHz from PVT`，因此可確認 [[R&S PVT360A]] 被放入此 small cell WMT production demo proposal。\n\n但本來源不是 [[R&S PVT360A]] 的 datasheet、configuration guide 或 features document，因此不能用來新增或修改：\n\n- [[R&S PVT360A]] base unit order number。\n- RF unit / frequency / bandwidth 規格。\n- PVT-KW / PVT-KM / PVT-KB option 相依關係。\n- 支援幾個 DUT、幾條 RF path 或幾個 RF connector 的正式規格。\n- 10 MHz reference output / input 的方向、精度、connector 或相位雜訊規格。\n\n正式產品能力仍需回到 [[PVT360A_Features_V8-5-30_en_06]] 或 PVT360A specifications document。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Small Cell WMT production demo.md"
+              },
+              "score": 5.941301
+             },
+             {
+              "text": "Small Cell WMT production demo › Demo 架構\n來源 Slide 2 可讀文字如下：\n\n- `SMALL CELL WMT PRODCTION demo`\n- `1 BY 4 WITH PVT360A`\n- `TX measurement(RF Cable)`\n- 圖片替代文字：`FlexFi O-RU - LITE-ON Technology | RAN Radio Unit`\n- `Small Cell`\n- `FR1`\n- `Reference 10MHz from PVT`\n\n本頁只照抄來源。`1 BY 4`、`WMT`、`PVT` 未由來源展開；不可自行推論測試拓撲、DUT 數量、switch matrix、MIMO 階數或 production-line station 架構。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Small Cell WMT production demo.md"
+              },
+              "score": 4.429617
+             },
+             {
+              "text": "CMX500 Desense Testing › unresolved\n- 來源未列出 desense test 的 formal procedure、pass/fail criteria、measurement uncertainty、DUT configuration 或 reporting format。\n- 「against all LTE/NR bands」未列出 bands、band combinations 或 hardware RF path requirements。\n- 4096QAM / 320 MHz in 6GHz band 未提供對應 option、software release 或 binding specification。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Desense Testing.md"
+              },
+              "score": 1.447024
+             },
+             {
+              "text": "CMX500 Desense Testing\n[[CMX500 Desense Testing]] 是 [[CMX500_Callbox]] 中描述的 WLAN + cellular one-box interference / desense use case：以 [[R&S CMX500]] 在真實連線下同時處理 WLAN、LTE 與 NR 測試，觀察互相干擾或 desense 影響。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Desense Testing.md"
+              },
+              "score": 1.421085
+             },
+             {
+              "text": "CMX500 Desense Testing › Wi-Fi 7 線索\n來源在 desense 相關 slide 中列出：\n\n- Modulations：4096QAM。\n- 320 MHz BW in 6GHz Band。\n\n此處只可視為簡報中的 Wi-Fi 7 / WLAN test capability 線索；實際 channel、band plan、MCS、EVM limit、DUT 條件與 test setup 需回正式文件。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Desense Testing.md"
+              },
+              "score": 1.269386
+             },
+             {
+              "text": "R&S SMBV100B › Signal performance for selected standards\n- 3GPP FDD with R&S®SMBVB-K42：Error vector magnitude，1 DPCH，RMS，< 0.8 %，0.3 % measured；test frequency 1800 MHz to 2200 MHz。\n- 3GPP FDD ACLR 條件：test model 1、64 DPCH、1800 MHz to 2200 MHz、average channel power ≤ 0 dBm、I/Q input gain +4 dB、optimization mode high quality、temperature range +18 °C to +33 °C；5 MHz offset > 69 dB，typ. 72 dB；10 MHz offset > 71 dB，typ. 74 dB。\n- Custom digital modulation with R&S®SMBVB-K520 real-time mode：2FSK / 4FSK deviation error at symbol rate up to 2 MHz 為 0.4 % measured，up to 10 MHz 為 1.2 % measured；QPSK/OQPSK/π/4-DQPSK/8PSK/16QAM/32QAM/64QAM EVM at symbol rate up to 5 MHz 為 0.5 % RMS measured，up to 20 MHz 為 0.7 % RMS measured。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 26,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 18.100917
+             },
+             {
+              "text": "R&S SMBV100B › 文件與適用範圍\n- 主要來源：[[SMBV100B_specs_en_3607-8201-22_v1301]]。\n- 文件：R&S®SMBV100B Vector Signal Generator Specifications。\n- 文件編號：PD 3607.8201.22。\n- 文件版次：Specifications Version 13.01。\n- 文件日期：August 2025（footer：August 2025 (la)）。\n- 產品：R&S®SMBV100B vector signal generator。\n- 規格適用條件：ambient temperature 下 storage 3 hours、warm-up operation 30 minutes、specified environmental conditions met、recommended calibration interval adhered to、all applicable internal automatic adjustments performed。\n- Rohde & Schwarz 不 warranted：Non-traceable specifications with limits、typical data、nominal values、measured values。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 11.989646
+             },
+             {
+              "text": "R&S SMBV100B › Base unit\n| 項目 | 內容 |\n|---|---|\n| 型號 | R&S®SMBV100B |\n| Order No. | 1423.1003.02 |\n| 原文說明 | Vector signal generator；內含 baseband generator with ARB（64 Msamples、120 MHz RF bandwidth）、power cable、quick start guide。 |\n| 訂購限制 | Base unit 只能搭配 R&S®SMBVB-B103 frequency option 訂購。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 8.097742
+             },
+             {
+              "text": "WIC Glossary › RF、電氣與調變\n- [[4-PSK]] — See [[QPSK]]。\n- [[8-PSK]] — Higher-order [[PSK]] digital modulation。\n- [[50Ω]] — RF termination attenuator with 50 Ω wave impedance to prevent unwanted reflections for better [[VSWR]]。\n- [[AC]] — Alternating Current，並指向 [[DC]]。\n- [[DC]] — Direct Current，並指向 [[AC]]。\n- [[BB]] — Base Band；wanted signal 的 frequency range with a dedicated [[BW]]。\n- [[BW]] — Band Width。\n- [[BNC]] — Bayonet Neill-Concelman connector。\n- [[CATR]] — Compact Antenna Test Range。\n- [[CW]] — Continuous Wave/Waveform；constant amplitude and frequency 的 electromagnetic wave。\n- [[EVM]] — Error Vector Magnitude。\n- [[EMC]] — ElectroMagnetic Compatibility。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/WIC Glossary.md"
+              },
+              "score": 22.201652
+             },
+             {
+              "text": "WIC Glossary › 協定、網路與通訊角色\n- [[ACK]] — Acknowledged。\n- [[AMR]] — Adaptive Multi-Rate；set of audio codecs with patented audio data compression scheme optimized for speech coding。\n- [[ARFCN]] — Absolute Radio Frequency Channel Number；specifies a pair of [[UL]] + [[DL]] physical radio carriers and channels。\n- [[ARQ]] — Automatic Repeat Request。\n- [[ASCU]] — Advanced Signal Conditioning Unit；SCU with RF filters and amplifiers。\n- [[BCCH]] — BroadCast Control Channel。\n- [[BLER]] — Block Error Rate。\n- [[BS]] — [[Base Station]]，counterpart of [[MS]]。\n- [[BTS]] — Base Transceiver Station。\n- [[BU]] — Bad Urban fading profile。\n- [[CC]] — Call Control。\n- [[CDMA]] — Code Division Multiplex Access；channel access method allowing several transmitters over one physical channel。\n- [[CDMA2000]] — CDMA2000 family of standards describes use of CDMA technology。\n- [[Compass]] — Chinese [[GNSS]]。\n- [[CQI]] — Channel Quality Indicator。\n- [[CS]] — Circuit Switched，counterpart of [[PS]]，例如 classical [[GSM]]。\n- [[CSD]] — Circuit Switched Data，counterpart of [[GPRS]]，例如 classical [[GSM]]。\n- [[DCH]] — Dedicated Channel。\n- [[DCI]] — Downlink Control Information。\n- dedicated network connection — direct network connection between the test instrument and a PC；Windows may use [[APIPA]] to find IP configuration automatically。\n- [[DGPS]] — Differential-GPS with an enhancement from a difference signal to increase accuracy。\n- [[DL]] — Downlink，signal direction from base to mobile station，counterpart of [[UL]]。\n- [[DRB]] — Data Radio Bearer。\n- [[DSP]] — Digital Signal Processor；processor for manipulating digital signals。\n- [[DTX]] — Discontinuous Transmission。\n- [[DUT]] — Device Under Test；technology-independent name for a device tested with special instruments or test systems，例如 [[MS]]、[[BS]]、[[UE]]。\n- [[E-DCH]] — Enhanced uplink DCH。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/WIC Glossary.md"
+              },
+              "score": 6.303056
+             },
+             {
+              "text": "WIC Glossary › 概念\n- [[CMW setup]] — CMW operating setup 的簡稱，是 CMW subnet 中 test equipment 的 subset。\n- [[CMW subnet]] — 使用獨立且一致 IP address scheme 的 test equipment communications network。\n- [[CMW subnet node]] — CMW subnet 中的 test equipment。\n- [[AT command]] — 來源說 AT commands defined in [[3GPP TS 27.007]]，並可控制 DUT functions；來源也說它與 [[EMMI command]] 同義。\n- [[EMMI]] — Electrical Man Machine Interface；來源說 synonymous with AT，且 an AT command is sent over the EMM interface。\n- [[EMMI command]] — AT command 的同義詞線索。\n- [[DUT]] — Device Under Test，來源說它是 technology-independent name，可指被測的 [[MS]]、[[BS]] 或 [[UE]]。\n- [[Base Station]] — BS，來源定義為 counterpart of MS。\n- [[BTS]] — Base Transceiver Station。\n- [[EN-DC]] — E-UTRA - NR dual connectivity。\n- [[EVM]] — Error Vector Magnitude。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/WIC Glossary.md"
+              },
+              "score": 6.275273
+             },
+             {
+              "text": "R&S SMCV100B › 適用條件與規格定義\n依 [[SMCV100B_specs_en_3608-0627-22_v1700]]，產品資料適用條件：\n\n- 在 ambient temperature 儲存 `3 小時` 後，warm-up operation `30 分鐘`。\n- 符合指定 environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有適用的 internal automatic adjustments。\n\n規格定義：\n\n- Specifications with limits：以範圍或限制值表示 warranted product performance，使用 `<, ≤, >, ≥, ±, maximum, minimum` 等標示。\n- Non-traceable specifications with limits (`n. trc.`)：依 specifications with limits 測試，但因缺乏可追溯至 national metrology standards 的量測設備，Rohde & Schwarz 不保證。\n- Specifications without limits：代表 warranted product performance，通常為尺寸或設定解析度等無或可忽略偏差的值。\n- Typical data (`typ.`)：代表約 `80%` 量產儀器可達到的性能，或代表平均值。\n- Nominal values (`nom.`)：代表性數值，不做 statistical evaluation，生產時不測試。\n- Measured values (`meas.`)：來自個別樣品的 measurement results。\n- Uncertainties：coverage factor = `2`，依 GUM 規則計算，考慮 environmental conditions、aging、wear and tear。\n- Non-traceable specifications with limits、typical data、nominal values、measured values 不由 Rohde & Schwarz 保證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMCV100B.md"
+              },
+              "score": 28.526254
+             },
+             {
+              "text": "R&S SMCV100B › I/Q modulation\n- Operating mode：internal baseband I/Q。\n- RF modulation bandwidth 最大 signal bandwidth 取決於 baseband option configuration：`8 kHz < f ≤ 240 MHz` 為 `±50% of carrier frequency`；`f > 240 MHz` 為 `±120 MHz`。\n- RF frequency response：standard up to `120 MHz RF modulation bandwidth` 為 `< 3.5 dB`、`< 2.5 dB measured`；with `R&S®SMCVB-K547`、optimization mode high quality、up to `240 MHz RF modulation bandwidth` 為 `< 1.2 dB`、`< 0.3 dB measured`。\n- Carrier leakage：mode internal baseband I/Q，referenced to full-scale input，`< –60 dBc`、`< –80 dBc measured`。\n- Image sideband suppression：entire instrument in modulation bandwidth，up to `240 MHz RF modulation bandwidth`，`> 80 dB measured`，圖中少數頻率除外。\n- Modulation error ratio：`> 40 dB measured`；測量條件為 single carrier waveform signal、`8 Msample/s`、root raised cosine rolloff、`α = 0.20`、`64QAM`、`level = 0.0 dBm`。\n- Internal baseband characteristics：aliasing filter 具 amplitude、group delay、sin(x)/x correction；bandwidth rolloff to `–0.1 dB` 為 `250 MHz nominal`。\n\nI/Q compensation settings：\n\n| 項目 | Setting range | Resolution |\n|---|---|---|\n| Carrier leakage | `–10 % to +10 %` | `0.01 %` |\n| I/Q imbalance | `–1 dB to +1 dB` | `0.01 dB` |\n| Quadrature offset | `–10° to +10°` | `0.01°` |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMCV100B.md"
+              },
+              "score": 14.022043
+             },
+             {
+              "text": "R&S SMCV100B › Signal performance for digital standards and modulation systems\n3GPP FDD with `R&S®SMCVB-K242` option：EVM `1 DPCH`、RMS、frequency `1800 MHz to 2200 MHz` 為 `< 0.8%`、`0.3% measured`；ACLR test model 1、`64 DPCH`、frequency `1800 MHz to 2200 MHz`、average channel power `≤ 0 dBm`、optimization mode fast、temperature `+18 °C to +33 °C` 時，`5 MHz offset` 為 `< –63 dBc`、`–65 dBc typical`，`10 MHz offset` 為 `< –67 dBc`、`–69 dBc typical`。\n\nCustom digital modulation with `R&S®SMCVB-K199` option：2FSK/4FSK deviation error 在 symbol rate up to `2 MHz` 為 `0.4% measured`，up to `10 MHz` 為 `1.2% measured`；MSK phase error bit rate up to `10 MHz` 為 `0.3° measured`；EVM symbol rate up to `5 MHz` 為 `0.5% RMS measured`，up to `20 MHz` 為 `2.0% RMS measured`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 23,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMCV100B.md"
+              },
+              "score": 11.99826
+             },
+             {
+              "text": "3GPP TS 38.141-1 › Chapter 6 conducted transmitter characteristics\n來源在 `Tests according to 3GPP TS 38.141-1 v17.5 Chapter 6` 表中列出：\n\n- 6.2 Base station output power。\n- 6.3 Output power dynamics。\n- 6.4 Transmit ON/OFF power。\n- 6.5.2 Transmitted signal quality - Frequency error。\n- 6.5.3 Transmitted signal quality - Modulation quality。\n- 6.5.4 Transmitted signal quality - Time alignment error。\n- 6.6.2 Unwanted emissions - Occupied bandwidth。\n- 6.6.3 Unwanted emissions - Adjacent Channel Leakage Power Ratio（ACLR）。\n- 6.6.4 Unwanted emissions - Operating band unwanted emissions（SEM）。\n- 6.6.5 Unwanted emissions - Transmitter spurious emissions。\n- 6.7 Transmitter intermodulation。\n\n來源說其中部分可由 5G NR Option 支援，spurious emissions / occupied bandwidth 等也可由 spectrum analyzer 支援；transmitter intermodulation 需 additional signal generator。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/3GPP TS 38.141-1.md"
+              },
+              "score": 10.724526
+             },
+             {
+              "text": "3GPP TS 38.141-1 › 與 R&S 測試配置的關係\n依來源：\n\n- [[R&S FSVA3000]] 出現在 BS type 1-C output power、output power dynamics、frequency error、EVM、unwanted emissions 等對應 R&S setup 中。\n- [[R&S SMW200A]] 出現在 transmitter intermodulation 與 wanted / interferer signal generation 語境中。\n- [[R&S SMW200A]] Test Case wizard 可依 [[3GPP TS 38.141-1]] 與 [[3GPP TS 38.141-2]] 設定 5G NR gNB conformance test cases。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/3GPP TS 38.141-1.md"
+              },
+              "score": 5.052379
+             },
+             {
+              "text": "3GPP TS 38.141-1 › 使用限制\n- 本頁只摘要 2023-06 R&S 簡報中對 [[3GPP TS 38.141-1]] 的引用，不是 3GPP 標準全文。\n- 來源使用 v17.5 與部分 v16.8.0 表格；正式測試需回查對應 3GPP 版本。\n- 不可由本頁推論完整 pass / fail limits、measurement uncertainty budget、test tolerances、instrument options 或 software licenses。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/3GPP TS 38.141-1.md"
+              },
+              "score": 3.237537
+             },
+             {
+              "text": "5G NR OTA Base Station Transmitter Tests › OTA transmitter test cases\n來源涵蓋：\n\n| Clause | Test case | Metric / classification 線索 |\n|---|---|---|\n| 6.2 | Radiated transmit power | [[EIRP]]；Directional |\n| 6.3 | OTA base station output power | [[TRP]] |\n| 6.4.2 | OTA RE power control dynamic range | Directional；由 OTA modulation quality test 提供足夠 coverage |\n| 6.4.3 | OTA total power dynamic range | Directional |\n| 6.5.1 | OTA transmitter OFF power | FR1 co-location；FR2 [[TRP]] |\n| 6.5.2 | OTA transmitter transient period | FR1 co-location；FR2 directional |\n| 6.6.2 | OTA frequency error | Directional；與 OTA modulation quality 一起測試 |\n| 6.6.3 | OTA modulation quality | [[EVM]]；Directional |\n| 6.6.4 | OTA time alignment error | [[TAE]]；Directional |\n| 6.7.2 | OTA occupied bandwidth | [[OBW]]；Directional |\n| 6.7.3 | OTA ACLR | [[TRP]] ratio |\n| 6.7.4 | OTA operating band unwanted emissions | [[TRP]] |\n| 6.7.5.2 | General OTA transmitter spurious emissions | [[TRP]] |\n| 6.7.5.3 | Protection of BS receiver | Co-location requirement |\n| 6.7.5.4 | Additional spurious emissions requirements | [[TRP]] |\n| 6.7.5.5 | Co-location requirements | CLTA conducted output(s) |\n| 6.8 | OTA transmitter intermodulation | Co-location；BS type 2-O 不適用 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR OTA Base Station Transmitter Tests.md"
+              },
+              "score": 9.694868
+             },
+             {
+              "text": "5G NR OTA Base Station Transmitter Tests › Calibration 與量測方法\n來源指出 OTA system 必須在測試前校準，並使用：\n\n- SMW-K544。\n- FSW-K544。\n\n校準目標是納入 cable losses、antenna losses、OTA losses 等 system loss。流程包括 sweep CW signal、measure received power、create attenuation table、apply attenuation table and reference antenna gain table to K544。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR OTA Base Station Transmitter Tests.md"
+              },
+              "score": 6.533702
+             },
+             {
+              "text": "5G NR OTA Base Station Transmitter Tests › R&S OTA test solutions\n依 [[GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests]]（06.2020）：\n\n- [[R&S TS8991]] with WPTC：FR1、FR2。\n- [[R&S ATS1800C]]：CATR based 5G NR mmWave test chamber，適合 FR2。\n- [[R&S PWC200]]：Plane Wave Converter，適合 FR1 OTA massive MIMO base station testing。\n\n可用 signal and spectrum analyzers：\n\n- [[R&S FSW]]。\n- R&S FSV / FSVA。\n- R&S FSV3000 / FSVA3000。\n- R&S FPS。\n\n需要 5G NR downlink measurements software option：R&S FSW-/FSV-/FSV3-/FPS-K144。\n\nIntermodulation test case 6.8 的 interfering signal 可由配備 -K144 的 [[R&S SMW200A]] 或 [[R&S SMBV100B]] 產生；來源也說這兩款 vector signal generator 可作為 demonstration purposes 模擬 5G NR base station。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR OTA Base Station Transmitter Tests.md"
+              },
+              "score": 3.992655
+             },
+             {
+              "text": "5G NR Base Station Conformance Testing › Conducted transmitter characteristics\n來源在 `Tests according to 3GPP TS 38.141-1 v17.5 Chapter 6` 表中列出：\n\n- 6.2 Base station output power。\n- 6.3 Output power dynamics。\n- 6.4 Transmit ON/OFF power。\n- 6.5.2 Transmitted signal quality - Frequency error。\n- 6.5.3 Transmitted signal quality - Modulation quality。\n- 6.5.4 Transmitted signal quality - Time alignment error。\n- 6.6.2 Unwanted emissions - Occupied bandwidth。\n- 6.6.3 Unwanted emissions - Adjacent Channel Leakage Power Ratio（ACLR）。\n- 6.6.4 Unwanted emissions - Operating band unwanted emissions（SEM）。\n- 6.6.5 Unwanted emissions - Transmitter spurious emissions。\n- 6.7 Transmitter intermodulation。\n\n來源同頁寫 `All 38.141 measurements supported`，但未在轉檔文字中列出完整儀器 / license matrix，因此只能作為簡報層級 solution claim。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR Base Station Conformance Testing.md"
+              },
+              "score": 11.639445
+             },
+             {
+              "text": "5G NR Base Station Conformance Testing › Radiated transmitter characteristics\n來源在 `Tests according to 3GPP TS 38.141-2 v17.5 Chapter 6` 表中列出：\n\n- 6.2 Radiated transmit power。\n- 6.3 OTA Base station output power。\n- 6.4.2 OTA RE power control dynamic range。\n- 6.4.3 OTA total power dynamic range。\n- 6.5.1 OTA transmitter OFF power。\n- 6.5.2 OTA transmitter transient period。\n- 6.6.2 OTA transmitted signal quality - OTA frequency error。\n- 6.6.3 OTA transmitted signal quality - OTA modulation quality。\n- 6.6.4 OTA transmitted signal quality - OTA time alignment error。\n- 6.7.2 OTA unwanted emissions - OTA occupied bandwidth。\n- 6.7.3 OTA Adjacent Channel Leakage Power Ratio（ACLR）。\n- 6.7.4 OTA operating band unwanted emissions。\n- 6.7.5 OTA transmitter spurious emissions。\n- 6.8 OTA transmitter intermodulation。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR Base Station Conformance Testing.md"
+              },
+              "score": 10.676977
+             },
+             {
+              "text": "5G NR Base Station Conformance Testing › unresolved\n- 原始 PPTX 未在本次輸入中提供圖片原檔；markdown 轉檔是 lossy derivative，圖中符號、checkbox、儀器連線與部分文字可能遺失。\n- 來源未標示正式 document number、revision、classification policy 或完整 publication status；檔名含 `UR_Public`，但不可自行推論授權範圍。\n- 來源日期為 2023-06；與 2026 年後 3GPP / R&S product support 狀態可能不同，需回查最新 3GPP specs 與 R&S release notes。\n- Application notes GFM313 / GFM314 / GFM315 / GFM324 / GFM325 尚未 ingest。\n- [[3GPP TS 38.141-1]]、[[3GPP TS 38.141-2]]、[[3GPP TS 38.104]] 與 [[3GPP TR 37.843]] 的正式版本全文尚未 ingest。\n- [[RIB]]、[[TAB connector]]、[[RoAoA]]、[[OSDD]]、[[EIS]]、[[TRP]]、[[CATR]]、[[QDART]] 仍需要正式定義來源。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 21,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR Base Station Conformance Testing.md"
+              },
+              "score": 6.467941
+             },
+             {
+              "text": "5G NR Base station conformance testing - EN - UR_Public › 重點摘要\n- Conducted transmitter characteristics summary 說 `All 38.141 measurements supported`，並列出 chapter 6 的 BS output power、output power dynamics、transmit ON/OFF power、frequency error、modulation quality、time alignment error、occupied bandwidth、ACLR、operating band unwanted emissions、spurious emissions 與 transmitter intermodulation。\n- 來源圖示 / 文字把 BS type 1-C output power、output power dynamics、frequency error、EVM、unwanted emissions 等測試連到 [[R&S FSVA3000]]；transmitter intermodulation 例子連到 [[R&S SMW200A]]，且說 intermodulation 需 additional signal generator。\n- [[R&S SMW200A]] 的 Test Case wizard 被描述為可依 [[3GPP TS 38.141-1]] 與 [[3GPP TS 38.141-2]] 直接選擇 5G NR gNB conformance test case，支援 transmitter / receiver characteristic 與 receiver performance test cases，並支援 R15、R16（with K148）與 R17（with K171）。\n- Conducted receiver characteristics chapter 7 表列 wanted signal、AWGN、modulated interferer、CW interferer 在 reference sensitivity、dynamic range、ACS、in-band blocking、out-of-band blocking、receiver spurious emissions、receiver intermodulation、in-channel selectivity 的使用情境。\n- Conducted performance characteristics chapter 8 涵蓋 PUSCH、PUCCH、PRACH performance requirements，release 欄包含 15、16 與 planned 17 items。\n- [[R&S SMW200A]] fading / channel emulation 章節列出 5G NR Release 15/16 performance testing 依賴 TDL models，來源列出 TDLA30、TDLB100、TDLC60、TDLC300 delay profile 與 FR1 / FR2 channel model names。\n- 來源說 `Option Concept for WIDEBAND Baseband`：1×B15 for 1x1、2×B15 for 1x2 / 2x1 / 2x2 / 2x1x1、4×B15 for other MIMO configurations，並註記 assumes B13XT and 2×B9。\n- Measurement uncertainties 章節引用 38.141-1 section 4.1.2；對 transmitter tests，例子包含 6.2 BS output power、6.5.2 EVM、6.5.3 time alignment error。來源宣稱 [[R&S FSW]] level measurement uncertainty、EVM performance 與 transmitter branches time alignment uncertainty 的 R&S statement。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/5G NR Base station conformance testing - EN - UR_Public.md"
+              },
+              "score": 8.00449
+             },
+             {
+              "text": "5G NR Base station conformance testing - EN - UR_Public › 與既有知識的關係\n- [[Small Cell BTS]] 先前只保存 `5G NR Base station conformance testing - EN - UR_Public.pptx` 的待讀連結；本來源是該附件轉出的 lossy markdown，將 [[5G NR Base Station Conformance Testing]] 從 link hub 題名補強為有正文可追溯的測試概要。\n- [[Base Station]] 與 [[BTS]] 仍只提供 glossary / link-hub 層級定義；本來源補入 3GPP TS 38.141 的 base station type 與 conformance testing 語境。\n- [[EVM]] 既有頁面主要來自 UE pre-conformance testing；本來源只補充 base station transmitter signal quality 與 test system uncertainty 語境，不改寫 UE EVM limits。\n- [[R&S SMW200A]]、[[R&S FSVA3000]]、[[R&S FSW]]、[[R&S SGT100A]] 既有頁面以 Productions datasheet / specs 為主；本來源是 Market / application presentation，僅支撐 gNB conformance testing setup / solution-level 說法，不取代產品規格。\n- [[NR-NTN conformance testing]] 是 NTN UE / GCF / PTCRB conformance PR 脈絡；本來源是 terrestrial NR base station / gNB conformance testing，兩者不可合併。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/5G NR Base station conformance testing - EN - UR_Public.md"
+              },
+              "score": 5.603217
+             },
+             {
+              "text": "5G NR Base station conformance testing - EN - UR_Public › 原文未解的問題\n- 轉檔 frontmatter 指出原始檔是 PPTX，markdown 是 lossy derivative；圖片、圖例、表格空白符號與圖中 checkmarks 可能遺失，需回看原始簡報。\n- 來源未標示正式 document number、revision number、版權頁或完整 R&S public / internal 文件狀態；檔名含 `UR_Public` 但不可自行推論發布授權範圍。\n- 來源多處引用 [[3GPP TS 38.141-1]] / [[3GPP TS 38.141-2]] v17.5、另有 fading table 用 v16.8.0；未提供 3GPP release freeze date 或最新版本差異。\n- `All 38.141 measurements supported` 是簡報中的 solution-level 說法；未列出每個 measurement 的軟硬體 order number、license matrix、校準要求或支援版本邊界。\n- R&S measurement uncertainty statements、QDART validation、CTIA approved 等說法需回查正式 R&S datasheet、application note、CTIA record 或校準文件。\n- Application note URL 標題已列出，但正文未 ingest；不能由 URL 題名推論 application note 的完整測試流程或儀器配置。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/5G NR Base station conformance testing - EN - UR_Public.md"
+              },
+              "score": 5.151514
+             },
+             {
+              "text": "3GPP TS 38.141-2 › Chapter 6 radiated transmitter characteristics\n依 [[5G NR Base station conformance testing - EN - UR_Public]]（2023-06），`Tests according to 3GPP TS 38.141-2 v17.5 Chapter 6` 表中列出：\n\n- 6.2 Radiated transmit power。\n- 6.3 OTA Base station output power。\n- 6.4.2 OTA RE power control dynamic range。\n- 6.4.3 OTA total power dynamic range。\n- 6.5.1 OTA transmitter OFF power。\n- 6.5.2 OTA transmitter transient period。\n- 6.6.2 OTA transmitted signal quality - OTA frequency error。\n- 6.6.3 OTA transmitted signal quality - OTA modulation quality。\n- 6.6.4 OTA transmitted signal quality - OTA time alignment error。\n- 6.7.2 OTA unwanted emissions - OTA occupied bandwidth。\n- 6.7.3 OTA Adjacent Channel Leakage Power Ratio（ACLR）。\n- 6.7.4 OTA operating band unwanted emissions。\n- 6.7.5 OTA transmitter spurious emissions。\n- 6.8 OTA transmitter intermodulation。\n\n依 [[GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests]]（06.2020），Release 16 V16.3.0 的 Chapter 6 single carrier test coverage 更細分為：\n\n- 6.7.5.2 General OTA transmitter spurious emissions。\n- 6.7.5.3 Protection of the base station receiver of own or different base station。\n- 6.7.5.4 Additional spurious emissions requirements。\n- 6.7.5.5 Co-location requirements。\n\nGFM324 也說 6.8 OTA transmitter intermodulation 不適用於 BS type 2-O。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/3GPP TS 38.141-2.md"
+              },
+              "score": 9.791189
+             },
+             {
+              "text": "3GPP TS 38.141-2 › OTA uncertainty 與 calibration\n依 [[5G NR Base station conformance testing - EN - UR_Public]]（2023-06）：\n\n- Maximum acceptable uncertainty is specified for each radiated test（Chapter 4.1.2）。\n- Test requirement combines MU and minimum requirement。\n- 來源範例為 BS type 2-O normal conditions 的 OTA base station output power。\n- Additional uncertainty contributors 摘錄自 [[3GPP TR 37.843]]，包含 probe position、probe pattern knowledge、measurement distance、multiple reflections、receiver chain mismatch、probe antenna absolute gain、measurement repeatability / positioning repeatability。\n- OTA measurement chamber specific calibration procedures captured in [[3GPP TR 37.843]]。\n- FR2 calibration procedures in some areas are for further study（FFS）。\n\n依 [[GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests]]（06.2020）：\n\n- OTA system 必須在測試前校準。\n- Calibration 使用 SMW-K544 與 FSW-K544 user defined frequency response correction options。\n- System loss 包含 cable losses、antenna losses、OTA losses 等。\n- Calibration 流程包含 sweep CW signal、measure received power、create attenuation table、apply attenuation table and reference antenna gain table to K544。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/3GPP TS 38.141-2.md"
+              },
+              "score": 4.733856
+             },
+             {
+              "text": "3GPP TS 38.141-2 › Chapter 7 radiated receiver characteristics\n依 [[5G NR Base station conformance testing - EN - UR_Public]]（2023-06），`Tests according to 3GPP TS 38.141-2 v17.5 Chapter 7` 表中列出：\n\n- 7.2 OTA sensitivity。\n- 7.3 OTA reference sensitivity level。\n- 7.4 OTA Dynamic Range。\n- 7.5.1 OTA Adjacent Channel Selectivity（ACS）。\n- 7.5.2 OTA In-band blocking。\n- 7.6 OTA Out-of-band blocking。\n- 7.7 OTA Receiver spurious emissions。\n- 7.8 OTA Receiver intermodulation。\n- 7.9 OTA In-channel selectivity。\n\n表格用 wanted signal、AWGN、modulated interferer、CW interferer 描述各測試所需信號類型。\n\nGFM324 不涵蓋 Chapter 7；來源指出 Base station RF receiver tests 另見 GFM325。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/3GPP TS 38.141-2.md"
+              },
+              "score": 4.579871
+             },
+             {
+              "text": "Wi-Fi over mmWave Technology › 測試需求\n依 [[R&S for JIO Project]] 與 [[R&S solution for Jio project_202509_r3]]，WoMT 測試至少包含：\n\n- OTA precision measurement：使用 [[R&S ATS1800C]] CATR chamber。\n- TX analysis：[[EIRP]]、[[TRP]]、[[ACLR]]、EVM under Wi-Fi 7 modulation。\n- RX analysis：[[EIS]] sensitivity verification。\n- Spurious：Rx / OOB spurious emissions monitoring。\n- Occupied bandwidth。\n- Native Wi-Fi / IF / IB band：[[R&S CMP180]]。\n- mmWave signal generation and analysis：[[R&S CMP200]] / [[R&S CMPHEAD50]]。\n- R&D fine tuning：[[R&S FSW67]] 與 signal sources。\n- Production / manufacturing setup：[[R&S CMQ200]] 與 automation SW WMT 只作為來源列名，尚無詳細流程。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi over mmWave Technology.md"
+              },
+              "score": 7.270342
+             },
+             {
+              "text": "Wi-Fi over mmWave Technology › 架構與用途\n來源中的 WoMT 架構可整理為：\n\n1. 產生或處理 native [[Wi-Fi 7]] / IEEE 802.11be signal。\n2. 透過 [[AiP]] / antenna-in-package module 執行 integrated antenna 與 up-conversion。\n3. 將信號搬移到 27 GHz mmWave band，來源以 n257 / n258 表示。\n4. 用於 Integrated Radio CPEs 與 WoMT-AP。\n5. 在 RD / manufacturing setup 中分成 WIFI IB band 與 WIFI mmWave path。\n6. 透過 OTA / RF test 確認 EVM、[[EIRP]]、[[TRP]]、[[ACLR]]、[[EIS]]、occupied bandwidth 與 Rx / OOB spurious emissions。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi over mmWave Technology.md"
+              },
+              "score": 4.242828
+             },
+             {
+              "text": "Wi-Fi over mmWave Technology › 矛盾與口徑差異\n⚠️ [[R&S for JIO Project]]（來源正式日期未標示；raw converted 2026-09-17）說 [[R&S SMM100A]] frequency range up to 67 GHz，但既有頁面 [[R&S SMM100A]] 說 Version 31.00 specifications 的最高 frequency option 為 44 GHz；新來源 [[R&S solution for Jio project_202509_r3]]（來源正式日期未標示；raw converted 2026-09-17）在 RD site setup 仍列 [[R&S SMM100A]] as SG，卻在 appendix 以 [[R&S SMA100B]] 列出 8 kHz to 67 GHz。判斷：WoMT 方案材料中的 signal generator 型號 / 規格可能混用，正式頻率範圍須以產品 specifications 為準。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi over mmWave Technology.md"
+              },
+              "score": 4.157093
+             },
+             {
+              "text": "EVM › 使用限制\n- 本頁不是完整 EVM measurement tutorial，也不是 [[3GPP TS 38.521-1]] 標準全文。\n- [[WIC Glossary]] 只提供縮寫展開；[[1C111_0e_3GPPPreConfGuide]] 與 [[1C111_1e_3GPPPreConfGuide]] 只提供 selected NR-FR1 SA test case 摘要。\n- 不可由此頁推論 FR1、FR2、Wi-Fi、LTE、NR 或 production line test 的所有 EVM limits。\n- 任何正式 pass / fail limit 應回查對應標準、儀器文件、software version 與 test condition。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EVM.md"
+              },
+              "score": 2.975942
+             },
+             {
+              "text": "EVM › 與既有測試脈絡的關係\n- [[FWA CPE]] 與 [[FWA CPE 測試與驗證]] 中的戶外高階 mmWave ODU DVT 項目列出 FR2 EVM，但來源未提供 EVM limit、測試配置或標準章節。\n- [[Small Cell BTS 測試資料清單]] 保存 base station Tx / Rx / OTA tests 檔名，但附件未擷取，因此不能補充 EVM 測項。\n- [[1C111_1e_3GPPPreConfGuide]] 補入的是 NR-FR1 SA UE pre-conformance EVM PUCCH/PUSCH 脈絡，不等同 FR2、Wi-Fi、LTE、base station 或 production-line EVM limits。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EVM.md"
+              },
+              "score": 1.18785
+             },
+             {
+              "text": "EVM › unresolved\n- EVM 的完整公式、filtering、averaging、reference waveform 產生方式與 test equipment uncertainty 未由 [[WIC Glossary]] 提供。\n- [[1C111_1e_3GPPPreConfGuide]] 只摘錄 selected 3GPP conformance limits；完整 tables 需回查 [[3GPP TS 38.521-1]]。\n- [[FWA CPE]] 中 FR2 EVM 的標準依據與測試條件未標示。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EVM.md"
+              },
+              "score": 0.80845
+             },
+             {
+              "text": "EVM › 與 min power 的關係\n依 [[1C111_1e_3GPPPreConfGuide]]：\n\n- [[3GPP TS 38.521-1]] Table 6.3.1.3-1 定義 minimum power（Pmin）。\n- Channel BW 3–20 MHz 的 minimum output power 為 -40 dBm。\n- Channel BW 25–100 MHz 的 minimum output power 為 -40 + 10log10(BW/20)。\n- 256QAM Test IDs 的 target power 為 **Pmin + 10 dB**。\n- 來源另以 100 MHz BW 說明 min power according to Table 6.3.1.3-1 略低於 33 dB；此處照來源摘要保留單位字樣，不自行改寫。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EVM.md"
+              },
+              "score": 0.068116
+             },
+             {
+              "text": "CMX500 SRS RF measurements › SRS modes and configurations\n依 [[CMX500_Callbox]]：\n\n- CMX supports all SRS modes：regular SRS、SRS antenna switching、SRS carrier switching。\n- CMX supports all SRS configurations，例如 1T2R、1T4R、2T4R（2 SRS sent at a time on 4 antennas overall）。\n- Specific SRS measurements 包含 TX Power、EVM and more。\n- Scheduling is automatically adapted。\n- Measurement is aware of the SRS positions。\n- 使用者可 select the SRS resource to measure。\n\n依 [[Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS]]，[[3GPP TS 38.214]] 中的 xTyR 表示：同一時間 UE 以 Y 個 antennas 中的 X 個 antennas 同時傳送某個 SRS resource 的 X 個 SRS APs；另一時間再以其他 X 個 antennas 傳送另一個 SRS resource 的 X 個 SRS APs。來源列出的 configurations 包含 1T2R、2T4R、1T4R、1T4R/2T4R、1T=1R、2T=2R、4T=4R。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 SRS RF measurements.md"
+              },
+              "score": 2.402237
+             },
+             {
+              "text": "CMX500 SRS RF measurements › 2T4R example\n[[CMX500_Callbox]] 來源以 2T4R 示意圖標出 antenna 0–3、resource ID #1 / #2 與 slot pattern，但未提供完整 numerology、bandwidth、SRS resource configuration 或 expected limits。\n\n[[Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS]] 補充 2T4R 的一般定義：2 個 SRS resources，每個含 2 個 SRS ports，分別在不同 OFDM symbols 中對應不同 physical UE antenna pairs。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 SRS RF measurements.md"
+              },
+              "score": 1.845096
+             },
+             {
+              "text": "CMX500 SRS RF measurements › unresolved\n- [[CMX500_Callbox]] 未列出完整 option stack、BOM、DUT 條件或測試報告。\n- [[Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS]] 未標示正式日期、文件版本、作者、適用 CMX software release 或 receiver pre-adder configuration command。\n- 來源中的 draw.io 圖與 Figure 1–5 轉檔不完整，需回原 PDF / 圖檔確認。\n- 需要正式 [[3GPP TS 38.214]] 原文來驗證 Section 6.2.1.2 的 configuration list、guard period 與 xTyR 定義。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 SRS RF measurements.md"
+              },
+              "score": 1.643485
+             },
+             {
+              "text": "CMX500 SRS RF measurements › Guard period 與 1T4R 限制\n依 [[Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS]]，Tx switching transient time 需要兩個 SRS transmissions 之間的 minimum guard period：\n\n| SCS | Guard period |\n|---:|---:|\n| 15 kHz | 1 symbol |\n| 30 kHz | 1 symbol |\n| 60 kHz | 2 symbols |\n| 120 kHz | 2 symbols |\n\n來源註明：UE 在 guard period 期間不傳送任何其他 signal。\n\n來源並指出：由於一個 slot 最多可為 UE configure 6 symbols，1T4R antenna switching 因 guard period 資源不足，無法在一個 slot 內達成。此處是 [[Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS]] 對 [[3GPP TS 38.214]] antenna switching timing / resource 的說法；尚未由正式 3GPP 原文頁驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 SRS RF measurements.md"
+              },
+              "score": 1.450235
+             },
+             {
+              "text": "CMX500 SRS RF measurements › SRS antenna switching 技術背景\n依 [[Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS]]：\n\n- [[SRS antenna switching]] 讓 [[UE]] 可以將 SRS transmissions route 到其他可用 antenna ports。\n- 若 UE 支援此 feature，[[gNB]] 可要求 UE 在不同 symbols across all downlink receive antennas 傳送 SRS，以 better calibrate [[MIMO]] channel 並 improve downlink SNR。\n- 在 [[MIMO]] setup 中，UE 可能有比某個 physical signal 的 logical ports 更多的 physical antennas；UE 因此需要把 logical ports mapping 到可用 physical antennas 的 subset。\n- UE 可能在不同 [[OFDM symbol]] 中以不同 physical antennas 傳送，因此需要隨時間切換 logical-to-physical port mapping。\n- 來源稱 3GPP Release 15 的一個 use case 是 different SRS resources 的 SRS logical ports 在不同 OFDM symbols 中 transmission，以便從 UE 所有 physical transmit antennas 進行 channel sounding。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 SRS RF measurements.md"
+              },
+              "score": 1.3227
+             },
+             {
+              "text": "R&S CMX500 › Base unit 與主要訂購資訊\n依 [[CMX500_specs_en_5216-4127-22_v1100]]：\n\n| 項目 | Type / code | Order No. | 原文說明 |\n|---|---|---|---|\n| CMX500 Radio communication tester | CMX500 | 1201.0002K70 | accessories 包含 power cords、operating manual (getting started)、R&S CMX-B300C cables and adapters、R&S CMX-PB70H cables and adapters |\n| CMX500 basic assembly | R&S CMX-PB70H | 1222.0676.09 | basic assembly |\n| R&S CMX accelerator unit | R&S CMX-B200A | 1222.0747.02 | accelerated digital signal processing capabilities |\n| R&S CMX processing unit | R&S CMX-B300C | 1222.0801.04 | generic high-performance computing platform for advanced data processing |\n| R&S CMX IF unit | R&S CMX-B500A | 1222.0924.02 | IF frequency range vector signal analysis and ARB based generator |\n| R&S CMX RF unit | R&S CMX-B600B | 1222.0953.03 | FR1 frequency range vector signal analysis and ARB based generator |\n\n[[CMX500_Features_CSW9-20-0_en_32]] 使用 generic code [[R&S CMX-B500x]] 與 [[R&S CMX-B600x]]；[[CMX500_specs_en_5216-4127-22_v1100]] 在 ordering information 中列出具體 orderable unit 為 [[R&S CMX-B500A]] 與 [[R&S CMX-B600B]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 8.619075
+             },
+             {
+              "text": "R&S CMX500 › 使用介面與 automation\n依 [[CMX500_Features_CSW9-20-0_en_32]]：\n\n| 介面 | 原文定位 |\n|---|---|\n| [[CMsquares]] | 單一 graphical user interface，web-based、responsive，支援 RF tests、functional tests、advanced signaling tests、protocol tests |\n| [[R&S CMXmars]] | Message log analysis，可離線分析或在線監控 instrument messaging |\n| [[R&S CMsequencer]] | Graphical scripting interface，可在 CMX500 或 Windows PC 上建立、設定與執行 test scripts |\n| [[XLAPI]] | Python-based scripting interface，適合 complex scripting use cases |\n| [[SCPI]] | Remote control interface，適合 simple、standardized scripting use cases |\n\nXLAPI scripting environment：Python 3.10；script development computer 可為 Windows PC 或 CMX500；XLAPI installation package 為 **CMX-KF600X**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 36,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 7.553353
+             },
+             {
+              "text": "R&S CMX500 › 規格與數字的使用限制\n- [[CMX500_specs_en_5216-4127-22_v1100]] 是正式 Specifications Version 11.00（August 2025）；引用數字時仍需保留原文條件，例如溫度、warm-up、level alignment、overrange、EVM waveform、SCS、modulation、channel bandwidth、port、RMS / PEP、typ. / meas. / nom.。\n- [[CMX500_Features_CSW9-20-0_en_32]] 是 Features and Functions overview；其中沒有 tolerance limits 的 data 不具 binding。\n- 不能從 [[R&S CMX-B500x]]、[[R&S CMX-B600x]]、`.xx` 後綴或其他命名規則推導完整料號；完整 order number 只能抄自來源或正式 configure / ordering data。\n- [[R&S CMX-RF42E]] 的更多資料在另一份 PD 3609.7719.22 specifications；本頁不得補推該文件版次、日期或額外規格。\n- 報價與組態相容性需交由正式 configure 工具確認；wiki 只忠實記錄來源文字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 43,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 7.182748
+             },
+             {
+              "text": "R&S CMX500 › IF unit：R&S CMX-B500A\n[[R&S CMX-B500A]] 是 [[R&S CMX500]] 的 IF unit option；依 [[CMX500_specs_en_5216-4127-22_v1100]]，它提供 IF frequency range 的 vector signal analysis 與 ARB based generator functionality。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 6.56942
+             },
+             {
+              "text": "R&S CMX500 › RF unit：R&S CMX-B600B\n[[R&S CMX-B600B]] 是 [[R&S CMX500]] 的 RF unit option；依 [[CMX500_specs_en_5216-4127-22_v1100]]，它提供 FR1 frequency range 的 vector signal analysis 與 ARB based generator functionality。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 14,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 6.56942
+             },
+             {
+              "text": "GFM313_3e_5G_NR_BaseStation_Tx_Tests › Abbreviations\n來源列出縮寫：\n\n- 5G NR：5G New Radio。\n- ACLR：Adjacent channel leakage power ratio。\n- CA：Carrier aggregation。\n- DUT：Device under test。\n- EVM：Error vector magnitude。\n- FDD：Frequency division duplex。\n- FR1：Frequency range 1。\n- MIMO：Multiple input multiple output。\n- OBUE：Operating band unwanted emissions。\n- OBW：Occupied bandwidth。\n- OTA：Over the air。\n- PDSCH：Physical downlink shared channel。\n- Prat：Rated output power。\n- RB：Resource block。\n- RBW：Resolution bandwidth。\n- RF：Radio frequency。\n- RIB：Radiated interface boundary。\n- RS：Reference signal。\n- SCS：Subcarrier spacing。\n- SSB：Synchronization signal block。\n- TAB：Transceiver array boundary。\n- TAE：Time alignment error。\n- TDD：Time division duplex。\n- TM：Test model。\n- VSWR：Voltage standing wave ratio。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 36,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md"
+              },
+              "score": 12.555338
+             },
+             {
+              "text": "GFM313_3e_5G_NR_BaseStation_Tx_Tests › 6.5.2 Frequency error\n- 定義為 actual NR BS transmit frequency 與 assigned frequency 的差值讀值。\n- Frequency error requirements：\n  - Wide Area BS：±(0.05 ppm + 12 Hz)。\n  - Medium Range BS：±(0.1 ppm + 12 Hz)。\n  - Local Area BS：±(0.1 ppm + 12 Hz)。\n- 此量測中，FSW 必須透過 external reference 與 high precision time reference 同步。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 25,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md"
+              },
+              "score": 9.999158
+             },
+             {
+              "text": "GFM313_3e_5G_NR_BaseStation_Tx_Tests › 6.5.4 Time alignment error（TAE）\n- TAE 定義為任兩個 NR signals 之間最大的 timing difference。\n- Requirement 適用於 Tx diversity、MIMO transmission、carrier aggregation 及其組合的 frame timing。\n\nTAE limits：\n\n- MIMO / Tx diversity at each carrier frequency：90 ns。\n- Intra-band CA with or without MIMO or Tx diversity：285 ns。\n- Intra-band non-contiguous CA with or without MIMO or Tx diversity：3.025 μs。\n- Inter-band CA with or without MIMO or Tx diversity：3.025 μs。\n\n測試 setup：\n\n- DUT 通常以 NR-FR1-TM1.1 搭配 MIMO transmission 或 carrier aggregation transmitting。\n- 待量測 antennas 透過一個或多個 cascaded hybrid couplers 連接。\n- FSW 透過 attenuator 連接。\n- RF cables 應具有相同 electrical length。\n- 最多可 parallel 量測 4 antennas。\n- 量測基於個別 antennas 的 reference signal DM-RS。\n- PDSCHs 會被忽略。\n- 量測永遠相對於一個 reference antenna。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 27,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md"
+              },
+              "score": 8.760649
+             },
+             {
+              "text": "GFM313_3e_5G_NR_BaseStation_Tx_Tests › 6.4 Transmit ON/OFF power\n- Transmit OFF power requirements 僅適用於 NR BS 的 TDD operation。\n- Transmitter OFF power 定義為 transmitter OFF period 期間，使用 bandwidth 等於 BS transmission bandwidth configuration（BWconfig）且 centered on assigned channel frequency 的 square filter，於 70/N μs 內量測的 mean power。\n- N = SCS/15，其中 SCS 為 kHz 單位。\n- Transmitter OFF power limit：f ≤ 3.0 GHz 為 -83.0 dBm/MHz；3.0 GHz < f ≤ 6.0 GHz 為 -82.5 dBm/MHz。\n- 測試需要 RF limiter 限制 transmitter ON periods 期間 analyzer 接收的 power，使 OFF periods 量測可使用 full dynamic range。\n- 可額外使用 attenuator 吸收 limiter reflected power，以最佳化 VSWR。\n\nSCPI 摘錄：\n\n- `CONFigure[:NR5G]:MEASurement TPOO`\n- `[SENSe:]FREQuency:CENTer <Frequency>`\n- `[SENSe:]NR5G:OOPower:NCORrection <State>`\n- `UNIT:OPOWer <Unit>`\n- `TRAC6:DATA? LIST`",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 24,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md"
+              },
+              "score": 8.633843
+             },
+             {
+              "text": "GFM313_3e_5G_NR_BaseStation_Tx_Tests › 6.6.4 Operating band unwanted emissions（OBUE / SEM）\n- Spectrum Emission Mask（SEM）測試要求適用 Category A 或 Category B。\n- 最低強制要求見 [[3GPP TS 38.141-1]] subclause 6.6.4.5。\n- SEM 測試中，DUT 以 declared rated output power 發射。\n- SEM 測試需要使用 test models NR-FR1-TM1.1 與 NR-FR1-TM1.2。\n- TDD signal 的 SEM 測試 trigger 必須設定為 external。\n- SEM 量測可使用 FSW 的 `CONFigure[:NR5G]:MEASurement ESPectrum` 與 `CALCulate<n>:MARKer<m>:FUNCtion:POWer<sb>:RESult[:CURRent]? [<Measurement>]` 等 SCPI command。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 31,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md"
+              },
+              "score": 8.319338
+             },
+             {
+              "text": "FR2 OTA spatial test metrics › 來源中的 metric overview\n依 [[TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02]] Slide 10：\n\n| Test / context | Metric |\n|---|---|\n| Scan / Max Power | [[EIRP]] CDF |\n| 6.2.1 Max Tx Power | [[TRP]] / [[EIRP]] @ TX-BP |\n| 6.3.1 Min Tx Power | [[EIRP]] @ TX-BP |\n| 6.3.2 Off Power | [[TRP]] @ TX-BP |\n| 6.3.3 On/Off Time Mask | @ TX-BeamPeak |\n| 6.4.1 Frequency Error | @ TX-BP |\n| 6.4.2.1 Carrier Leakage | @ TX-BP |\n| 6.4.2.2 EVM | @ TX-BP |\n| 6.4.2.4 Spectral Flatness | @ TX-BP |\n| 6.5.3.1 OBW | @ TX-BP |\n| 6.5.2 SEM | [[TRP]] @ BP |\n| 6.5.3.2.4 ACLR | [[TRP]] / [[EIRP]] @ BP |\n| TX Spurious Emissions | [[TRP]] @ BP |\n| Scan / Throughput Scan | [[EIS]] CDF |\n| 7.3 Ref. Sensitivity, EIS | @ RX-BP |\n| 7.4 Max Input Level | @ RX-BP |\n| 7.5 ACS | @ RX-BP |\n| 7.6.1 In-Band Blocking | @ RX-BP |\n| 7.9 Rx Spurious Emissions | [[TRP]] @ RX-BP |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/FR2 OTA spatial test metrics.md"
+              },
+              "score": 2.544458
+             },
+             {
+              "text": "FR2 OTA spatial test metrics › EIRP CDF metric\n來源文字：\n\n- EIRP CDF metric：3D EIRP scan with the same link & measurement antenna, CDF for power。\n- 來源把 spherical coverage 連到 EIRP CDF metric。\n\n判斷：本來源將 [[EIRP]] CDF 作為 TX scan / spherical coverage 類 metric；這補充 [[EIRP]] 既有頁的方向性 radiated power 定義，但不取代 GFM324 的 formal test context。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/FR2 OTA spatial test metrics.md"
+              },
+              "score": 1.516825
+             },
+             {
+              "text": "FR2 OTA spatial test metrics › EIS CDF / RX Beam Peak metric\n來源文字：\n\n- EIS CDF metric：CDF for reference sensitivity with a 3D Throughput scan。\n- RX Beam peak metric：At best RX beam measure EIS for Ref Sens or interferer tests。\n- For chapter 7 the beam peak is Rx beam peak = 0%-tile of EIS CDF = strongest beam。\n- Source note：0%-tile is where the most sensitive link was found。\n\n判斷：本來源以 [[EIS]] CDF 支撐 receiver sensitivity / throughput scan 語境，並將 0%-tile 定義為最敏感 link / strongest RX beam 的方向。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/FR2 OTA spatial test metrics.md"
+              },
+              "score": 0.83087
+             },
+             {
+              "text": "5G FR2 RF conformance testing\n[[5G FR2 RF conformance testing]] 是針對 5G NR UE 在 [[NR FR2]] / mmWave 頻段的 RF / RRM conformance 測試主題；[[TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02]]（檔名日期 2020-11-02）以 [[R&S TS8980 Conformance Test Platform]] / [[R&S TS8980FTA]] series customer presentation 形式整理 3GPP 規格、FR2 bands、OTA spatial metrics、chamber portfolio、system configurations 與 2021 roadmap。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G FR2 RF conformance testing.md"
+              },
+              "score": 1.537107
+             },
+             {
+              "text": "5G FR2 RF conformance testing › 使用限制\n- 本頁主要依 2020-11-02 company restricted customer presentation 的 lossy markdown 轉檔整理，非正式 3GPP 標準本文、R&S datasheet、GCF / PTCRB official validation record 或現行 product support matrix。\n- [[Frequency Ranges, Bands and Bandwidth]] 提供的是 Knowledge 層級 frequency range / bandwidth 摘要，不提供 FR2 conformance test case procedure 或 validation status。\n- 來源內多張投影片是圖片 placeholder，若要確認 system configuration、certification selection、roadmap milestone 或 option detail，需回查原始 PPTX。\n- 2021 roadmap 是 presentation 時點的規劃，不可推論後續已完成或仍支援。\n- FR2 band table、n262、52–71 GHz study 與 channel bandwidth / SCS discussion 是 2020 年 10 月 RAN4 / RAN5 status，不可視為最新 3GPP 狀態。\n- `GCF TP298` 來源未展開，需另查 GCF / R&S 文件。\n- [[Frequency Ranges, Bands and Bandwidth]] 的 FR2 Release 17 band table 未被 raw 擷取，尚不能用它替換本頁 2020 band table。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G FR2 RF conformance testing.md"
+              },
+              "score": 1.484347
+             },
+             {
+              "text": "5G FR2 RF conformance testing › Frequency range baseline\n[[Frequency Ranges, Bands and Bandwidth]] 補入 FR1 / FR2 的基本 range 定義：\n\n| Frequency range | Range | Release 標示 | 來源 |\n|---|---:|---|---|\n| [[NR FR1]] | 410 MHz to 7125 MHz | Release 15 | [[Frequency Ranges, Bands and Bandwidth]] |\n| [[NR FR2]] / [[FR2-1]] | 24.25 GHz to 52.6 GHz | Release 15 | [[Frequency Ranges, Bands and Bandwidth]] |\n| [[FR2-2]] | 52.6 GHz to 71 GHz | Release 17 | [[Frequency Ranges, Bands and Bandwidth]] |\n\n判斷：這補充本頁的 FR2 測試背景，但不改寫 2020 presentation 的 band table 與 roadmap 內容；[[Frequency Ranges, Bands and Bandwidth]] 未提供 conformance test procedure、limits 或 GCF/PTCRB validation status。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G FR2 RF conformance testing.md"
+              },
+              "score": 1.276089
+             },
+             {
+              "text": "CMP200 Features and Functions Version 09 › NR FR2 PRACH measurement\nPRACH measurement 提供 [[NR FR2]] random access preambles 測試。PRACH measurement results 包含 modulation、power dynamics、power vs preamble，以及 per preamble 的 TX power、peak power、carrier frequency error、transmit time error 等結果。\n\nPRACH settings 抄錄：\n\n- No. of preambles per meas. interval：**1 to 64**。\n- Period of preambles：**1 ms、1.25 ms、2.5 ms、5 ms、10 ms、20 ms**。\n- Trigger source：IF power、external signal at rear panel、trigger signal provided by other application。\n- Trigger threshold：**-50 dB to 0 dB**。\n- Trigger timeout：off，或 **10 ms to 167772150 ms**。\n- Minimum trigger gap：**0 µs to 1000 µs**。\n- Selected OFDM symbol：**0 to 11**。\n- Statistic count：**1 interval to 1000 intervals**。\n- PRACH configuration index：**0 to 255**。\n- PRACH preamble format：**A1、A2、A3、B1、B2、B3、B4、C0、C2**。\n- PRACH subcarrier spacing：**60 kHz、120 kHz**。\n- Logical root sequence index：**0 to 137**。\n- Zero correlation zone config：**0 to 15**。\n- PRACH frequency offset：automatic detection，或 **0 to 60**。\n- Preamble sequence index：automatic detection，或 **0 to 63**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP200_Features_V8-14-22_en_09.md"
+              },
+              "score": 5.673332
+             },
+             {
+              "text": "CMP200 Features and Functions Version 09 › NR FR2 multi-evaluation list mode\nMulti-evaluation list mode 不需要 special list mode option。List mode 允許在 measurement 期間重新設定 basic signal settings，將 measurement interval 分割為多個 segments，每個 segment 具有 constant basic signal properties。\n\nList mode settings 抄錄：\n\n- List mode：on/off，applies to all segments。\n- Start segment：**1 to 2000**。\n- No of measured segments：**1 to 1000**；每次 measurement 最多 **4000 subframes**。\n- List mode offline segment number：**1 to 1000**。\n- Segment length：**1 to 1000 subframes**，per segment。\n- Retrigger flag：off、normal trigger source、IF power。\n- Evaluation offset：**0 to 1000 subframes**。\n- Modulation statistical length：**1 slot to 1000 slots**。\n- Spectrum emission mask statistical length：**1 slot to 1000 slots**。\n- ACLR statistical length：**1 slot to 1000 slots**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP200_Features_V8-14-22_en_09.md"
+              },
+              "score": 5.462688
+             },
+             {
+              "text": "CMP200 Features and Functions Version 09 › UWB measurement options\n| Code | Designation / 原文用途 | Order no. | 相依關係 / 限制 |\n|---|---|---|---|\n| R&S CMP-KM300 | UWB measurements；任何 UWB measurements 的 basic option | 1212.1886.xx | 支援 signals up to IEEE Std 802.15.4z‐2020；足以支援 all implemented test steps。 |\n| R&S CMP-KM301 | UWB 802.15.4ab measurements | 1212.4133.xx | 若具備 R&S CMP-KM301 及 R&S CMP-KM300，可量測 IEEE 802.15.4ab signals。 |\n\nUWB measurements 相關 standards：\n\n- [[IEEE Std 802.15.4-2020]]。\n- [[IEEE Std 802.15.4z-2020]]。\n- [[IEEE Std 802.15.4ab]]。\n\nUWB multi-evaluation measurement 提供 UWB TX signals 測試，結果包含 transmit spectrum mask、1 MHz / 50 MHz spectrum、normalized cross-correlation、NRMSE、symbol jitter、chip jitter、pulse mask、pulse level relative to SHR、pulse location and polarity、data decoding、power vs time 與 detected PPDU 等 signal results。\n\nUWB settings 抄錄：\n\n- Frequency：operating band **0 to 14**，以及 out-of-band frequencies。\n- External attenuation：**-50 dB to 90 dB**。\n- Measurement mode：single PPDU、multi PPDU。\n- Result at PPDU number：**1 to 20**。\n- Trigger threshold：**-50 dB to 0 dB**。\n- Trigger timeout：off，或 **10 ms to 300000 ms**。\n- Trigger delay：**-250 µs to 250 µs**。\n- Minimum trigger gap：**0 µs to 10000 µs**。\n- PPDU number：**1 to 20**。\n- STS segment length：**16、32、64、128、256、512**。\n- Evaluation offset：**0 µs to 15 µs**。\n- Capture length：**0.5 ms to 20 ms**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP200_Features_V8-14-22_en_09.md"
+              },
+              "score": 5.23152
+             },
+             {
+              "text": "CMP200 Features and Functions Version 09 › LP-IoT option\n| Code | Designation / 原文用途 | Order no. |\n|---|---|---|\n| R&S CMP-KM281 | LP-IoT measurements | 1212.3337.xx |\n\nR&S CMP-KM281 提供依據 **IEEE Std 802.15.4‐2020**、section 12、**O-QPSK PHY**、2450 MHz band 相關 sections 的 transmitter TX tests。CMP200 application 操作於：\n\n- **U-NII band 3**：**5.725 GHz to 5.825 GHz**。\n- **U-NII band 5**：**5.925 GHz to 6.425 GHz**。\n\nLP-IoT measurement results 包含 power vs time、modulation、spectrum、I/Q constellation。重要範圍抄錄：\n\n- Power vs time trace range：**-128 dBm to 30 dBm**。\n- Average power range：**-128 dBm to 30 dBm**。\n- Trigger to PPDU start duration：**-5 ms to 5 ms**。\n- Absolute and offset EVM vs chip：**0 % to 100 %**。\n- Symbol rate error：**-60 ppm to 60 ppm**。\n- Frequency accuracy in ppm：**-400 ppm to 400 ppm**。\n- Frequency accuracy in kHz：**-800 kHz to 800 kHz**。\n- Local oscillator leakage：**-99 dB to -3 dB**。\n- Power spectral density trace range：**-100 dB to 50 dB**。\n- Frequency offsets of the 6 margin points：**-12.5 MHz to 12.5 MHz**。\n\nLP-IoT settings 抄錄：\n\n- Repetition：single shot 或 continuous measurement。\n- Trigger threshold：**-50 dB to 0 dB**。\n- Trigger timeout：**0.01 s to 167772.15 s**。\n- Statistic count：**1 to 1000**。\n- Physical layer：**2450 MHz DSSS band**。\n- Remarks：**O-QPSK modulation**。\n- External attenuation：**-50 dB to 90 dB**。\n- RF frequency：depends on hardware；覆蓋 U-NII band 3 與 U-NII band 5。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP200_Features_V8-14-22_en_09.md"
+              },
+              "score": 4.921028
+             },
+             {
+              "text": "CMP200 Features and Functions Version 09 › 重點摘要\n這份來源是 [[R&S CMP200]] **Radio Communication Tester** 的 **Features and Functions** 文件，文件名稱標示為 **CMP200_Features_V8-14-22_en_09**，文件編號 **1179.4257.02**，文件版本 **Version 09**，文件頁尾標示 **Features and Functions 1179.4257.02 ─ 09**。\n\n文件列出的 features 對應 **software version 8.14.22 or higher**。文件用途是提供 [[R&S CMP200]] test applications 概覽；詳細描述需參考 **CMP200 help** 或 **user manuals**。含 tolerance limits 的 measurement ranges 需參考 specifications document **PD 5216.4391.22**；本來源未標示該 specifications document 的版次。\n\n文件版權與商標資訊：\n\n- **© 2026 Rohde & Schwarz**。\n- 地址：**Muehldorfstr. 15, 81671 Muenchen, Germany**。\n- **R&S®** 是 [[Rohde & Schwarz GmbH & Co. KG]] 的 registered trademark；手冊中以 **R&S** 表示 **R&S®**。\n- 文件註明：**Subject to change**；沒有 tolerance limits 的 data 不具 binding。\n\n本來源主要涵蓋：\n\n- [[NR FR2]] measurements options 與 multi-evaluation / PRACH / list mode 功能。\n- [[UWB]] measurements、[[IEEE 802.15.4ab]] extension 與 [[FiRa Consortium]] UWB PHY test suite 相關 licences。\n- [[LP-IoT]] measurements。\n- [[R&S VSE]] options。\n- Ordering information。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP200_Features_V8-14-22_en_09.md"
+              },
+              "score": 4.393348
+             },
+             {
+              "text": "R&S CMP200 › IF generator\n| 項目 | 規格 |\n|---|---|\n| Ports | 3 × IF Out，port 1/2/3 |\n| Connector | SMA |\n| Frequency range | 6 GHz to 20 GHz，含 modulation bandwidth |\n| Frequency resolution | < 0.1 Hz |\n| Frequency uncertainty | same as timebase + frequency resolution |\n| Frequency settling time | < 300 µs |\n| Maximum reverse power | 0 V DC，+25 dBm |\n| Output level range | 6 GHz ≤ f ≤ 20 GHz，PEP，best SNR/IMD performance：–20 dBm to +2 dBm；overrange up to +10 dBm |\n| Output level resolution | 0.1 dB |\n| Output level uncertainty | +15 °C 至 +35 °C、no overranging、6 GHz to 20 GHz：< 1.5 dB |\n| Output level repeatability | 1 h warm-up 後 typical < 0.1 dB |\n| Harmonics attenuation | second harmonics > 35 dB nom.；third harmonics > 45 dB nom. |\n\nIF generator EVM 條件為 5G NR PDSCH、100 MHz channel bandwidth、full allocation、SCS 60 kHz / 120 kHz、64QAM、+15 °C 至 +35 °C、signal PAR = 11.8 dB；來源標示 EVM 為 measured values。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP200.md"
+              },
+              "score": 6.189225
+             },
+             {
+              "text": "R&S CMP200 › NR FR2 options 與 measurements\n依 [[CMP200_Features_V8-14-22_en_09]] 與 [[CMP200_specs_en_5216-4391-22_v0800]]：\n\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---:|---|\n| R&S CMP-KM601 | NR FR2 measurements, singlecarrier / NR mmWave measurements | 1212.1140.02 | NR FR2 measurements basic option |\n| R&S CMP-KM603 | NR FR2 measurements, multicarrier / multi-carrier | 1212.2647.02 | 超過 1 carrier 需要此 option |\n| R&S CMP-KM605 | NR FR2 measurements, two RX antennas / switched MIMO | 1212.3195.02 | Two RX antennas / switched MIMO |\n| R&S CMP-KW601 | NR mmWave waveform playback | 1212.1163.02 | Enables R&S WinIQSIM2 waveforms for ARB generator |\n\nNR FR2 multi-evaluation measurement 提供含 PUSCH 的 uplink signals 測試，measurement results 包含 Modulation、Spectrum、Power。Common settings 包含 number of carriers 1 to 4、operating band n257/n258/n259/n260/n261/n262、channel bandwidth 50/100/200/400 MHz、subcarrier spacing 60/120 kHz、duplex mode TDD、external attenuation –50 dB to 90 dB。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP200.md"
+              },
+              "score": 6.160779
+             },
+             {
+              "text": "R&S CMP200 › Product data 使用限制\n依 [[CMP200_specs_en_5216-4391-22_v0800]]：\n\n- Product data 適用條件為 ambient temperature 儲存 3 小時後 warm-up operation 30 分鐘、符合指定 environmental conditions、遵守 recommended calibration interval，且如適用需完成 all internal automatic adjustments。\n- Specifications with limits 代表保證的 product performance，以 `<`、`≤`、`>`、`≥`、`±`、maximum、limit of、minimum 等形式標示。\n- Non-traceable specifications with limits（n. trc.）依 limits 測試，但因 measuring equipment 不可追溯至 national metrology standards，Rohde & Schwarz 不保證其 performance。\n- Typical data（typ.）、nominal values（nom.）、measured values（meas.）均不由 Rohde & Schwarz 保證。\n- Uncertainties 採 coverage factor 2，依 GUM 計算。\n- 3GPP 標準中 chip rates 以 Mcps 表示，bit rates / symbol rates 以 Gbps、Mbps、kbps、Msps、ksps 表示，sample rates 以 Msample/s 表示；這些不是 SI units。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP200.md"
+              },
+              "score": 5.744747
+             },
+             {
+              "text": "R&S CMP200 › IF analyzer\n| 項目 | 規格 |\n|---|---|\n| Ports | 3 × IF In，port 1/2/3 |\n| Connector | SMA |\n| Frequency range | 4 GHz to 20 GHz，含 modulation bandwidth |\n| Frequency resolution | < 0.1 Hz |\n| Absolute maximum level range | 0 V DC，+25 dBm |\n| Expected nominal power setting range | PEP，ADC full scale，4 GHz to 20 GHz：–5 dBm to +15 dBm |\n| Level uncertainty | +15 °C 至 +35 °C，4 GHz to 20 GHz，P > –45 dBm RMS：< 1.5 dB |\n| Bandwidth | up to 1 GHz |\n| Harmonic response | second harmonic > 45 dB nom.；third harmonic > 70 dB nom. |\n\nFirmware version（base）≥ 4.0.7 且 TRX_BB hardware code（[[R&S CMP-B500A]] IF unit 的一部分）< 11 時，4 GHz to 7.38 GHz 與 8.0 GHz to 20 GHz 的 level uncertainty 為 < 2.5 dB。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP200.md"
+              },
+              "score": 4.92025
+             },
+             {
+              "text": "R&S CMP200 › R&S VSE options\n[[R&S VSE]] 是 high-performance analysis software，supported instruments 清單包含 [[R&S CMP200]]。若由 CMP200 提供 VSE licenses，需要 VSE base software option **R&S CMP-KM150**。\n\n| Code | CMP200 designation | CMP200 order no. | Dongle type | Dongle order no. | 相依關係 |\n|---|---|---:|---|---:|---|\n| R&S CMP-KM150 | Signal analysis base software | 1212.3972.xx | R&S VSE | 1345.1105.xx | 由 CMP200 提供 VSE licenses 時需要 |\n| R&S CMP-KM152 | Signal analysis digital | 1212.3989.xx | R&S VSE-K70 | 1320.7522.xx | 來源未標示 |\n| R&S CMP-KM160 | WLAN 802.11a/b/g meas. | 1212.4340.xx | R&S VSE-K91 | 1320.7597.xx | 來源未標示 |\n| R&S CMP-KM162 | WLAN 802.11BE measurement | 1212.4362.xx | R&S VSE-K91BE | 1345.1428.xx | 需要 R&S CMP-KM160 |\n| R&S CMP-KM180 | OFDM signal analysis app. | 1212.4356.xx | R&S VSE-K96 | 1320.7922.xx | 來源未標示 |\n| R&S CMP-KM580 | OneWeb reverse link meas. | 1212.4085.xx | R&S VSE-K201 | 1345.2001.xx | 來源未標示 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 17,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP200.md"
+              },
+              "score": 4.741067
+             },
+             {
+              "text": "CMX500_Features_CSW9-20-0_en_32 › 與既有知識的關係\n- 本來源與 [[CMP180_Features_V11-9_en_09]]、[[CMP200_Features_V8-14-22_en_09]] 同屬 Rohde & Schwarz radio communication tester 的 Features and Functions 文件，但 [[R&S CMX500]] 聚焦於 5G/LTE/WLAN signaling、protocol/application tests、FR1/FR2 measurements、fading/AWGN 與可擴充 OBT hardware architecture。\n- [[R&S CMP180]] 的 Features and Functions 文件涵蓋 Bluetooth、WLAN、LTE、NR FR1、NB-IoT、UWB、GSM、WCDMA、CDMA2000 等 production / nonsignaling / TX/RX options；本來源未把 [[R&S CMX500]] 描述為 CMP180 的替代品，不應合併產品頁。\n- [[R&S CMP200]] 的 Features and Functions 文件主要聚焦 NR FR2、UWB、LP-IoT 與 UWB test plans；本來源的 [[R&S CMX500]] 也有 NR FR2 measurement options，但同時涵蓋 broader signaling、application 與 hardware deployment。\n- 本來源是 Features and Functions，不是 specifications datasheet；報價或規格保證仍需查 [[R&S CMX500]] specifications document / product brochure 與正式 ordering data。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 20,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+              },
+              "score": 5.611664
+             },
+             {
+              "text": "Inherent error vector magnitude\n(inherent EVM)\nFrequency measurement uncertainty",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-0a6d6df08c738f93",
+                "original_ref": "raw/Productions/CMW100-K06_specs_en_5214-8348-22_v0500.md",
+                "sha256": "0a6d6df08c738f93a1a77e4d5288f72d56b99f6bfc2e418ec9a4572cef95de68",
+                "raw_ref": "raw/Productions/CMW100-K06_specs_en_5214-8348-22_v0500.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/CMW100-K06_specs_en_5214-8348-22_v0500.md",
+               "section": 262,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 12.22864
+             },
+             {
+              "text": "Inherent error vector magnitude\n(inherent EVM)\nFrequency measurement uncertainty",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-84f0ccff28cb329b",
+                "original_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+                "sha256": "84f0ccff28cb329ba83809be58133fb1b917290733c05f3f34a8f44c32526203",
+                "raw_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+               "section": 498,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 12.22864
+             },
+             {
+              "text": "36  For average power measurement only.\n37  Product discontinued.",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-d9f5b6d241c1e5d8",
+                "original_ref": "raw/Productions/FSWP_specs_en_3683-7719-22_v0901.md",
+                "sha256": "d9f5b6d241c1e5d834b6f0c0df762971f0c39a6fc045fc2d7db2589ee858e26f",
+                "raw_ref": "raw/Productions/FSWP_specs_en_3683-7719-22_v0901.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/FSWP_specs_en_3683-7719-22_v0901.md",
+               "section": 920,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 12.043542
+             },
+             {
+              "text": "The following tables list the measurement results related to the option R&S CMX-\nKA100.",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-bc47a8ad4da77a6a",
+                "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+                "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+                "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "section": 3143,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 11.152654
+             }
+            ],
+            "text": "EVM is Error Vector Magnitude, a measurement of the difference between a reference waveform and a measured waveform; in base-station modulation-quality context, it is the difference between equalized ideal symbols and measured symbols, called the error vector [2][10].\n| Product-related measurement decision | What depends on understanding EVM |\n|---|---|\n| UE NR FR1 pre-conformance setup and pass/fail judgment | Test case 6.4.2.1 measures EVM for PUCCH/PUSCH, with Test ID setting RB allocation and modulation scheme, and the measured DUT EVM must be within the specified range [1]. |\n| UE NR FR1 max-power / min-power measurement planning | The same EVM test case requires EVM measurement at DUT max power and min power; CMX first sets max power, then DUT is set to min power using TPC Closed Loop settings after max-power EVM verification [1]. |\n| Modulation-dependent EVM limit selection | EVM result limits depend on modulation: Pi/2-BPSK 30+TT%, QPSK 17.5+TT%, 16QAM 12.5+TT%, 64QAM 8+TT%, and 256QAM 3.5+TT%; TT differs for 256QAM at max power and min power [3]. |\n| Base-station modulation-quality testing | 5G NR base-station modulation quality can be expressed by EVM, with requirements listed as QPSK 18.5%, 16QAM 13.5%, 64QAM 9%, and 256QAM 4.5% [10]. |\n| Base-station conducted TX instrument/option selection | Conducted base-station modulation quality test case 6.5.3 uses FSW Base Unit with FSW K144 in the listed setup [12]. |\n| FR2 OTA direction / spatial metric choice | For FR2 OTA, non-power measurements such as EVM can use TX beam peak direction; Slide 10 maps 6.4.2.2 EVM to TX-BP [13][80]. |\n| CMX500 SRS RF measurement use case | CMX500 SRS RF measurements include TX power, EVM and other measurements for 5G NR SRS modes/configurations, including SRS antenna switching and carrier switching scenarios [4][65]. |\n| CMX500 NR FR1 TX-test option decision | R&S CMX-KM600 is required for any NR FR1 uplink TX tests, and NR FR1 uplink measurements include multi-evaluation, PRACH, SRS and TPC measurement [7][27]. |\n| CMX500 product-spec interpretation | CMX500 NR FR1 analyzer EVM is specified as <0.5% under FR1, SCS 30 kHz, 16QAM, +15 °C to +35 °C, input level –25 dBm to –10 dBm RMS, and bandwidth 100 MHz; CMX500 NR generator EVM is also <0.5% under its stated PDSCH, modulation, bandwidth, level and temperature conditions [7]. |\n| CMP200 NR FR2 measurement option decision | CMP200 NR FR2 multi-evaluation measurement provides uplink PUSCH signal tests with Modulation, Spectrum and Power results, and NR FR2 measurement options include R&S CMP-KM601 as the basic single-carrier option, R&S CMP-KM603 for more than one carrier, and R&S CMP-KM605 for two RX antennas / switched MIMO [92]. |\n| CMP200 NR FR2 result interpretation | CMP200 NR FR2 multi-evaluation modulation results include EVM traces and single values, along with magnitude error, phase error, I/Q constellation and other TX metrics [19]. |\n| CMP200 IF generator EVM-spec interpretation | CMP200 IF generator EVM conditions are 5G NR PDSCH, 100 MHz channel bandwidth, full allocation, SCS 60 kHz / 120 kHz, 64QAM, +15 °C to +35 °C, signal PAR 11.8 dB, and the source marks EVM as measured values [91]. |\n| Wi-Fi over mmWave TX analysis planning | WoMT testing lists TX analysis items including EIRP, TRP, ACLR and EVM under Wi-Fi 7 modulation [58]. |\n| Small-cell production TX test planning | The small-cell WMT production demo lists TX measurement items including QPSK, ACLR, EVM and SEM, and maps 6.5.3 Modulation to EVM / 5G NR conducted base-station transmitter tests [28]. |",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "EVM › 來源定義\n依 [[WIC Glossary]]（來源正式日期未標示；raw converted 2026-09-17）：\n\n- EVM 展開為 Error Vector Magnitude。\n\n依 [[1C111_1e_3GPPPreConfGuide]]（06.2025）：\n\n- Error Vector Magnitude（EVM）是 reference waveform 與 measured waveform 之間差異的量測。\n- 來源將 EVM 放在 [[3GPP TS 38.521-1]] test case **6.4.2.1 Error Vector Magnitude PUCCH/PUSCH**。\n- Test ID 會設定 RB Allocation 與 modulation scheme。\n- PUCCH subtests 需參考 application note chapter 2.1 notes。\n- Apply configuration 後，需確認 measured DUT EVM 位於 specified range 內。\n- Test case 要求在 DUT max power 與 min power 下量測 EVM。\n- CMX 會先自動設定 max power；完成 max power EVM verification 後，DUT 需使用 TPC Closed Loop settings 設定為 min power。\n\n[[1C111_0e_3GPPPreConfGuide]] 對同一 test case 的定義與限值摘要相同，並支撐既有 EVM 頁面內容。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/EVM.md"
+             },
+             "score": 9.766588
+            },
+            {
+             "text": "EVM\n[[EVM]] 是 Error Vector Magnitude；[[WIC Glossary]] 只提供縮寫展開，[[1C111_0e_3GPPPreConfGuide]] 與 [[1C111_1e_3GPPPreConfGuide]] 則在 5G NR FR1 SA pre-conformance test case 6.4.2.1 中說明 EVM 是 reference waveform 與 measured waveform 之間差異的量測。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/EVM.md"
+             },
+             "score": 9.745581
+            },
+            {
+             "text": "EVM › 1C111 中的 5G NR EVM limits\n依 [[1C111_1e_3GPPPreConfGuide]]，EVM measurement results 必須低於 [[3GPP TS 38.521-1]] Table 6.4.2.1.5-1 的 maximum error percentage，並套用 Table 6.4.2.1.5-2 定義的 Test Tolerance（TT）。來源摘錄的 Average EVM Level limits 為：\n\n| Modulation | Average EVM level limit |\n|---|---|\n| Pi/2-BPSK | 30 + TT % |\n| QPSK | 17.5 + TT % |\n| 16 QAM | 12.5 + TT % |\n| 64 QAM | 8 + TT % |\n| 256 QAM | 3.5 + TT % |\n\nTT 來源摘錄為：\n\n| 條件 | TT |\n|---|---|\n| All except 256QAM | 0% |\n| 256 QAM @ max power | 0.3% |\n| 256 QAM @ min power | 1.1% |\n\n來源範例：DUT on n78、100 MHz BW、PUCCH Test ID 1（QPSK）時，specified maximum EVM 為 **17.5 + 0 %**，且 CMX EVM measurement 位於 3GPP limits 內。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/EVM.md"
+             },
+             "score": 3.598073
+            },
+            {
+             "text": "CMX500 SRS RF measurements\n[[CMX500 SRS RF measurements]] 是 [[CMX500_Callbox]] 中的 [[R&S CMX500]] RF measurement use case：針對 5G NR [[SRS]] modes / configurations 執行 TX power、[[EVM]] 等量測，並支援 [[SRS antenna switching]] / carrier switching 場景；[[Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS]] 進一步補充 SRS antenna switching 的 xTyR 技術背景與 receiver-side [[Receiver Pre-adder]] / selection 概念。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 SRS RF measurements.md"
+             },
+             "score": 9.716386
+            },
+            {
+             "text": "R&S CMX500 › NR FR1\n依 [[CMX500_Features_CSW9-20-0_en_32]]，R&S CMX-KM600 是 frequency range 1 對 NR uplink signals 執行任何 TX tests 的必要 option。NR FR1 uplink measurements 包含 multi-evaluation、PRACH、SRS、TPC measurement。Multi-evaluation 支援 NR channel bandwidth **3 MHz 到 100 MHz**，可分析 FDD 與 TDD signals、NR standalone signals 與 intraband contiguous EN-DC signals。\n\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，R&S CMX-KM600 option 的 5G NR analyzer 條件為 FR1、SCS 30 kHz、16QAM、temperature range +15 °C to +35 °C；input level –25 dBm to –10 dBm RMS、bandwidth 100 MHz 時 EVM **< 0.5 %**。Frequency measurement uncertainty：**< 20 Hz + drift of timebase**；相對於同一台 CMX500 device 的 downlink signal 進行 frequency error measurements 時，uncertainty 符合 [[3GPP TS 38.521-1]] V18.5.0。\n\nR&S CMX-KW601 option 的 5G NR generator 條件：5G NR PDSCH、full allocation、SCS 30 kHz / 60 kHz、modulation 64QAM、PAR 11.8 dB、temperature +15 °C to +35 °C；ports RF Com 1、RF Com 2、RF Out 1 to RF Out 4；output level –5 dBm、bandwidth 100 MHz 時 EVM **< 0.5 %**。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 30,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 18.010682
+            },
+            {
+             "text": "GFM313_3e_5G_NR_BaseStation_Tx_Tests › 6.5.3 Modulation quality\n- 定義為 measured carrier signal 與 reference signal 的差異。\n- 可用 EVM 表示。\n- EVM 是 equalization 後 ideal symbols 與 measured symbols 的差異讀值，該差異稱為 error vector。\n\nEVM requirements：\n\n- QPSK：18.5%。\n- 16QAM：13.5%。\n- 64QAM：9%。\n- 256QAM：4.5%。\n\nFrequency error 與 EVM SCPI 摘錄：\n\n- `CONFigure[:NR5G]:DL[:CC<cc>]:IDC <State>`\n- `FETCh[:CC<cc>][:ISRC<ant>][:FRAMe<fr>]:SUMMary:FERRor[:AVERage]?`\n- `FETCh[:CC<cc>][:ISRC<ant>][:FRAMe<fr>]:SUMMary:EVM[:ALL][:AVERage]?`",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 26,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md"
+             },
+             "score": 18.262767
+            },
+            {
+             "text": "GFM313_3e_5G_NR_BaseStation_Tx_Tests › Test setup 與必要 options\n完整 Tx test setup 使用 [[R&S FSW]] spectrum analyzer 執行量測；完整 Tx test setup 使用 [[R&S SMW200A]] signal generator 作為 interferer。部分測試需要修改 setup，於各測試章節個別說明。\n\n來源列出的必要儀器與 options：\n\n| Test case | Analyzer / option | Generator / option |\n|---|---|---|\n| 6.2 Base station output power | FSW Base Unit；FSW K144 | 來源未列 |\n| 6.3.2 RE power control dynamic range | FSW Base Unit；FSW K144 | 來源未列 |\n| 6.3.3 Total power dynamic range | FSW Base Unit；FSW K144 | 來源未列 |\n| 6.3.4 NB-IoT RB power dynamic range | FSW Base Unit；FSW K144 | 來源未列 |\n| 6.4 Transmit ON/OFF power | FSW Base Unit；FSW K144 | 來源未列 |\n| 6.5.2 Frequency error | FSW Base Unit；FSW K144 | 來源未列 |\n| 6.5.3 Modulation quality | FSW Base Unit；FSW K144 | 來源未列 |\n| 6.5.4 Time alignment error | FSW Base Unit；FSW K144 | 來源未列 |\n| 6.6.2 Occupied bandwidth | FSW Base Unit；basic function：spectrum analyzer mode | 來源未列 |\n| 6.6.3 ACLR | FSW Base Unit；FSW K144 | 來源未列 |\n| 6.6.4 OBUE / SEM | FSW Base Unit；FSW K144 | 來源未列 |\n| 6.6.5 Transmitter spurious emissions | FSW Base Unit；basic function：spectrum analyzer mode | 來源未列 |\n| 6.7 Transmitter intermodulation | FSW Base Unit；combined measurements：ACLR, SEM and spurious emissions | SMW Base Unit；SMW K144 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 16,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md"
+             },
+             "score": 13.296192
+            },
+            {
+             "text": "FR2 OTA spatial test metrics › EIRP @ Beam Peak / TX Beam Peak metric\n來源文字：\n\n- EIRP metric：In best TX beam peak direction measure power。\n- TX Beam peak metric：Same as EIRP but non-power measurement, e.g. EVM。\n- For chapter 6 the beam peak is Tx beam peak = 100%-tile of EIRP CDF = strongest beam。\n\n因此在此來源中：\n\n- Power measurement at strongest TX beam 可用 [[EIRP]] @ beam peak。\n- 非 power measurement，例如 [[EVM]]，也可使用 TX beam peak direction 作為量測方向。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/FR2 OTA spatial test metrics.md"
+             },
+             "score": 6.795867
+            },
+            {
+             "text": "CMP200 Features and Functions Version 09 › NR FR2 measurement results 與 settings\nNR FR2 multi-evaluation modulation results 包含 EVM traces and single values、magnitude error、phase error、I/Q constellation diagram、in-band emissions、equalizer spectrum flatness、I/Q origin offset、I/Q gain imbalance、I/Q quadrature error、carrier frequency error、transmit time error、sample clock error、total TX power、TX power per RX antenna、peak power、RB power。\n\nNR FR2 spectrum results 包含 spectrum emission mask、ACLR、occupied bandwidth（OBW）。CA 時 spectrum results 針對 aggregated bandwidth 測量；two RX antennas 時針對 two antenna signals 的 sum 測量。\n\nNR FR2 power results 包含 power monitor trace、power dynamics trace、on power RMS and peak、off power before / after on power。\n\nNR FR2 multi-evaluation measurement settings 抄錄：\n\n- Repetition：single shot 或 continuous measurement。\n- Measured subframes per radio frame：**1 subframe to 10 subframes**。\n- Subframes for power monitor：**1 subframe to 100 subframes**。\n- Measure slot：all，或 **0 to 79**。\n- Trigger source：free run（fast sync / no sync）、IF power、external signal at rear panel、trigger signal provided by other application。\n- Trigger threshold：**-50 dB to 0 dB**。\n- Trigger delay：**-250 µs to 250 µs**。\n- Trigger timeout：off，或 **10 ms to 167772150 ms**。\n- Minimum trigger gap：**0 µs to 1000 µs**。\n- Statistic count：**1 slot to 1000 slots**。\n- TX DC location offset：**-2048 subcarriers to 2047 subcarriers**。\n- UE power class：**1 to 4**。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/CMP200_Features_V8-14-22_en_09.md"
+             },
+             "score": 12.260998
+            },
+            {
+             "text": "CMX500_Features_CSW9-20-0_en_32 › NR FR1 measurements\n- R&S CMX-KM600 是 frequency range 1 對 NR uplink signals 執行任何 TX tests 的必要選項。\n- R&S CMX-KM602 用於 UL carrier aggregation measurements；R&S CMX-KM604 用於 two TX antennas measurements。\n- NR FR1 uplink measurements 包含 multi-evaluation、PRACH、SRS、TPC measurement。\n- Multi-evaluation 支援 NR channel bandwidth **3 MHz 到 100 MHz**，可分析 FDD / TDD signals、NR standalone signals 與 intraband contiguous EN-DC signals。\n- 所有 uplink measurements 適用的 RF frequency bands 包含 n1 to n3、n5、n7、n8、n12 to n14、n18、n20、n24 to n26、n28、n30、n31、n34、n38 to n41、n46 to n48、n50、n51、n53、n65、n66、n68、n70、n71、n72、n74、n77 to n101、n104 to n106、n109、n110、n250 to n256；n247、n248 可 via IF unit。\n- NR FR1 sidelink measurement 的 RF frequency：n14、n38、n47、n79；list mode 不支援 sidelink measurements。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 15,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+             },
+             "score": 6.295295
+            },
+            {
+             "text": "Small Cell WMT production demo › TX 測試項目\n來源 Slide 2 將 TX 寫為：\n\n- Verification\n- QPSK\n- [[ACLR]]\n- [[EVM]]\n- [[SEM]]\n\n來源 Slide 3 將 RF Transmitter Tests 對應到 `TS 38.141-1, chapter 6`，列出：\n\n| Test case | 來源文字 | 對應既有主題 |\n|---|---|---|\n| 6.2 | Base station output power | [[5G NR conducted base station transmitter tests]] |\n| 6.5 | Transmitted signal quality | [[5G NR conducted base station transmitter tests]] |\n| 6.5.2 | Frequency error | [[5G NR conducted base station transmitter tests]] |\n| 6.5.3 | Modulation | [[EVM]] / [[5G NR conducted base station transmitter tests]] |\n| 6.6.2 | Occupied bandwidth | [[5G NR conducted base station transmitter tests]] |\n| 6.6.3 | Adjacent channel leakage power ratio (ACLR) | [[ACLR]] |\n| 6.6.4 | Operating band unwanted | [[SEM]] / [[OBUE]] |\n| 6.6.5 | Transmitter spurious emissions | [[5G NR conducted base station transmitter tests]] |\n\n注意：來源在 6.6.4 只寫 `Operating band unwanted`，未完整寫出 emissions；本頁不自行補成正式標準題名，只在概念連結中連到既有 [[SEM]] / [[OBUE]] 待確認語彙。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Small Cell WMT production demo.md"
+             },
+             "score": 9.533857
+            },
+            {
+             "text": "Wi-Fi over mmWave Technology › 測試需求\n依 [[R&S for JIO Project]] 與 [[R&S solution for Jio project_202509_r3]]，WoMT 測試至少包含：\n\n- OTA precision measurement：使用 [[R&S ATS1800C]] CATR chamber。\n- TX analysis：[[EIRP]]、[[TRP]]、[[ACLR]]、EVM under Wi-Fi 7 modulation。\n- RX analysis：[[EIS]] sensitivity verification。\n- Spurious：Rx / OOB spurious emissions monitoring。\n- Occupied bandwidth。\n- Native Wi-Fi / IF / IB band：[[R&S CMP180]]。\n- mmWave signal generation and analysis：[[R&S CMP200]] / [[R&S CMPHEAD50]]。\n- R&D fine tuning：[[R&S FSW67]] 與 signal sources。\n- Production / manufacturing setup：[[R&S CMQ200]] 與 automation SW WMT 只作為來源列名，尚無詳細流程。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi over mmWave Technology.md"
+             },
+             "score": 7.270342
+            },
+            {
+             "text": "CMX500 SRS RF measurements › SRS modes and configurations\n依 [[CMX500_Callbox]]：\n\n- CMX supports all SRS modes：regular SRS、SRS antenna switching、SRS carrier switching。\n- CMX supports all SRS configurations，例如 1T2R、1T4R、2T4R（2 SRS sent at a time on 4 antennas overall）。\n- Specific SRS measurements 包含 TX Power、EVM and more。\n- Scheduling is automatically adapted。\n- Measurement is aware of the SRS positions。\n- 使用者可 select the SRS resource to measure。\n\n依 [[Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS]]，[[3GPP TS 38.214]] 中的 xTyR 表示：同一時間 UE 以 Y 個 antennas 中的 X 個 antennas 同時傳送某個 SRS resource 的 X 個 SRS APs；另一時間再以其他 X 個 antennas 傳送另一個 SRS resource 的 X 個 SRS APs。來源列出的 configurations 包含 1T2R、2T4R、1T4R、1T4R/2T4R、1T=1R、2T=2R、4T=4R。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 SRS RF measurements.md"
+             },
+             "score": 2.402237
+            },
+            {
+             "text": "FR2 OTA spatial test metrics › 來源中的 metric overview\n依 [[TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02]] Slide 10：\n\n| Test / context | Metric |\n|---|---|\n| Scan / Max Power | [[EIRP]] CDF |\n| 6.2.1 Max Tx Power | [[TRP]] / [[EIRP]] @ TX-BP |\n| 6.3.1 Min Tx Power | [[EIRP]] @ TX-BP |\n| 6.3.2 Off Power | [[TRP]] @ TX-BP |\n| 6.3.3 On/Off Time Mask | @ TX-BeamPeak |\n| 6.4.1 Frequency Error | @ TX-BP |\n| 6.4.2.1 Carrier Leakage | @ TX-BP |\n| 6.4.2.2 EVM | @ TX-BP |\n| 6.4.2.4 Spectral Flatness | @ TX-BP |\n| 6.5.3.1 OBW | @ TX-BP |\n| 6.5.2 SEM | [[TRP]] @ BP |\n| 6.5.3.2.4 ACLR | [[TRP]] / [[EIRP]] @ BP |\n| TX Spurious Emissions | [[TRP]] @ BP |\n| Scan / Throughput Scan | [[EIS]] CDF |\n| 7.3 Ref. Sensitivity, EIS | @ RX-BP |\n| 7.4 Max Input Level | @ RX-BP |\n| 7.5 ACS | @ RX-BP |\n| 7.6.1 In-Band Blocking | @ RX-BP |\n| 7.9 Rx Spurious Emissions | [[TRP]] @ RX-BP |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/FR2 OTA spatial test metrics.md"
+             },
+             "score": 2.544458
+            },
+            {
+             "text": "R&S CMP200 › IF generator\n| 項目 | 規格 |\n|---|---|\n| Ports | 3 × IF Out，port 1/2/3 |\n| Connector | SMA |\n| Frequency range | 6 GHz to 20 GHz，含 modulation bandwidth |\n| Frequency resolution | < 0.1 Hz |\n| Frequency uncertainty | same as timebase + frequency resolution |\n| Frequency settling time | < 300 µs |\n| Maximum reverse power | 0 V DC，+25 dBm |\n| Output level range | 6 GHz ≤ f ≤ 20 GHz，PEP，best SNR/IMD performance：–20 dBm to +2 dBm；overrange up to +10 dBm |\n| Output level resolution | 0.1 dB |\n| Output level uncertainty | +15 °C 至 +35 °C、no overranging、6 GHz to 20 GHz：< 1.5 dB |\n| Output level repeatability | 1 h warm-up 後 typical < 0.1 dB |\n| Harmonics attenuation | second harmonics > 35 dB nom.；third harmonics > 45 dB nom. |\n\nIF generator EVM 條件為 5G NR PDSCH、100 MHz channel bandwidth、full allocation、SCS 60 kHz / 120 kHz、64QAM、+15 °C 至 +35 °C、signal PAR = 11.8 dB；來源標示 EVM 為 measured values。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMP200.md"
+             },
+             "score": 6.189225
+            },
+            {
+             "text": "R&S CMP200 › NR FR2 options 與 measurements\n依 [[CMP200_Features_V8-14-22_en_09]] 與 [[CMP200_specs_en_5216-4391-22_v0800]]：\n\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---:|---|\n| R&S CMP-KM601 | NR FR2 measurements, singlecarrier / NR mmWave measurements | 1212.1140.02 | NR FR2 measurements basic option |\n| R&S CMP-KM603 | NR FR2 measurements, multicarrier / multi-carrier | 1212.2647.02 | 超過 1 carrier 需要此 option |\n| R&S CMP-KM605 | NR FR2 measurements, two RX antennas / switched MIMO | 1212.3195.02 | Two RX antennas / switched MIMO |\n| R&S CMP-KW601 | NR mmWave waveform playback | 1212.1163.02 | Enables R&S WinIQSIM2 waveforms for ARB generator |\n\nNR FR2 multi-evaluation measurement 提供含 PUSCH 的 uplink signals 測試，measurement results 包含 Modulation、Spectrum、Power。Common settings 包含 number of carriers 1 to 4、operating band n257/n258/n259/n260/n261/n262、channel bandwidth 50/100/200/400 MHz、subcarrier spacing 60/120 kHz、duplex mode TDD、external attenuation –50 dB to 90 dB。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 13,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMP200.md"
+             },
+             "score": 6.160779
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [
+             {
+              "name": "product_option_spec",
+              "citations": [
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 8,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/CMX500 SRS RF measurements.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 30,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 35,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 2,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 16,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 4,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/sources/CMP200_Features_V8-14-22_en_09.md"
+               }
+              ],
+              "attempts": 1
+             }
+            ],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/concepts/EVM.md",
+             "raw_refs": [
+              "raw/Market/OneNote/1C111_0e_3GPPPreConfGuide.md",
+              "raw/Market/OneNote/1C111_1e_3GPPPreConfGuide.md",
+              "raw/Market/OneNote/FWA CPE SmallCell/FWA CPE.md",
+              "raw/Market/OneNote/FWA CPE SmallCell/WIC Glossary.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/CMX500 SRS RF measurements.md",
+             "raw_refs": [
+              "raw/Knowledge/Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS.md",
+              "raw/Knowledge/UL MIMO.md",
+              "raw/Market/OneNote/CMX500_Callbox.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S CMX500.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+             "raw_refs": [
+              "raw/Market/OneNote/5G NR Base station conformance testing - EN - UR_Public.md",
+              "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/FR2 OTA spatial test metrics.md",
+             "raw_refs": [
+              "raw/Market/OneNote/TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/CMP200_Features_V8-14-22_en_09.md",
+             "raw_refs": [
+              "raw/Productions/CMP200_Features_V8-14-22_en_09.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/Small Cell WMT production demo.md",
+             "raw_refs": [
+              "raw/Market/OneNote/FWA CPE SmallCell/Small Cell BTS.md",
+              "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+              "raw/Market/OneNote/MWC26 purposal for customer.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/Wi-Fi over mmWave Technology.md",
+             "raw_refs": [
+              "raw/Market/OneNote/FWA CPE SmallCell/FWA CPE.md",
+              "raw/Market/OneNote/R&S for JIO Project.md",
+              "raw/Market/OneNote/R&S solution for Jio project_202509_r3.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S CMP200.md",
+             "raw_refs": [
+              "raw/Productions/CMP200_specs_en_5216-4391-22_v0800.md"
+             ]
+            }
+           ]
+          },
+          "anchor": {
+           "original": "What is EVM, and which product-related measurement decisions depend on understanding it?",
+           "model_version": "What is EVM, and which product-related measurement decisions depend on understanding it?",
+           "outcome": "same",
+           "reason": null,
+           "missing_terms": [],
+           "dropped_terms": [],
+           "context_terms": [],
+           "used_question": "What is EVM, and which product-related measurement decisions depend on understanding it?",
+           "supplementary_queries": []
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

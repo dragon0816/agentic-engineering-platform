@@ -1,0 +1,134 @@
+{
+ "question": {
+  "id": "Q0231",
+  "text": "How do changes in radar technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+  "market": "Aerospace / Defense",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": null,
+ "exchange": {
+  "sent": "How do changes in radar technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+  "route_forced": "direct",
+  "http_status": 200,
+  "seconds": 79.297,
+  "timed_out": false,
+  "reply": {
+   "answer": {
+    "ok": false,
+    "answer": "The Knowledge query did not produce a validated answer. Unverified requested facets: technical_knowledge.",
+    "record": null,
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-3bb97d28892e43feba398094aa7018d0",
+      "request_id": "request-3bb97d28892e43feba398094aa7018d0",
+      "span_id": "span-3bb97d28892e43feba398094aa7018d0",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-3bb97d28892e43feba398094aa7018d0",
+       "request_id": "request-3bb97d28892e43feba398094aa7018d0",
+       "span_id": "span-3bb97d28892e43feba398094aa7018d0",
+       "parent_span_id": null
+      },
+      "status": "failed",
+      "data": null,
+      "failure": {
+       "code": "knowledge_insufficient_evidence",
+       "message": "Capability invocation did not complete",
+       "retryable": false
+      },
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "output_limit_chars": 32873,
+    "full_result_hint": "完整答案保留在這次工具紀錄的 record 中；也可以在 Agent Web 的 Knowledge 頁直接問同一個問題，看到完整結果。",
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-9720aeea928040e9b0dc77211e0b1dcb",
+      "task_sha256": "eec7af678c491bdf9702ffb9a2f64e7da9428e7055782c5cd7ac81dec6026413",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.12.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "needs_input",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "needs_input",
+       "evidence_ref": null
+      }
+     ],
+     "checks": [],
+     "failure_code": "knowledge_insufficient_evidence"
+    },
+    "evidence": {
+     "raw_citations": 0,
+     "facet_status": "missing",
+     "missing_facets": [
+      "technical_knowledge"
+     ],
+     "relation_status": "not_requested",
+     "retrieval_attempts": {}
+    }
+   }
+  }
+ }
+}

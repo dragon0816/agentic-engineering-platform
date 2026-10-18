@@ -1,0 +1,128 @@
+{
+ "question": {
+  "id": "Q0461",
+  "text": "For a Automotive use case involving automotive radar, where would Oscilloscope fit in the test workflow?",
+  "market": "Automotive",
+  "product": "Oscilloscope",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": null,
+ "exchange": {
+  "sent": "For a Automotive use case involving automotive radar, where would Oscilloscope fit in the test workflow?",
+  "route_forced": "direct",
+  "http_status": 200,
+  "seconds": 58.125,
+  "timed_out": false,
+  "reply": {
+   "answer": {
+    "ok": false,
+    "answer": "No sufficient evidence was found in the selected Knowledge asset. (knowledge_insufficient_evidence)",
+    "record": null,
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-4645b76fd5f9433f88dea19617f6f1af",
+      "request_id": "request-4645b76fd5f9433f88dea19617f6f1af",
+      "span_id": "span-4645b76fd5f9433f88dea19617f6f1af",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-4645b76fd5f9433f88dea19617f6f1af",
+       "request_id": "request-4645b76fd5f9433f88dea19617f6f1af",
+       "span_id": "span-4645b76fd5f9433f88dea19617f6f1af",
+       "parent_span_id": null
+      },
+      "status": "failed",
+      "data": null,
+      "failure": {
+       "code": "knowledge_insufficient_evidence",
+       "message": "Capability invocation did not complete",
+       "retryable": false
+      },
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "output_limit_chars": 32867,
+    "full_result_hint": "完整答案保留在這次工具紀錄的 record 中；也可以在 Agent Web 的 Knowledge 頁直接問同一個問題，看到完整結果。",
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-4ba15f102c444985930edad4aec09f3d",
+      "task_sha256": "c61ebd0c7e49005aeadf1e74082ca0d194c6d71dc902005d876a9a5cba428912",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.12.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "needs_input",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "needs_input",
+       "evidence_ref": null
+      }
+     ],
+     "checks": [],
+     "failure_code": "knowledge_insufficient_evidence"
+    },
+    "evidence": {
+     "raw_citations": 0,
+     "facet_status": "not_assessed",
+     "missing_facets": null
+    }
+   }
+  }
+ }
+}

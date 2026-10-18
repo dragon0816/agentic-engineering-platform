@@ -1,0 +1,77 @@
+{
+ "id": "Q0911",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [],
+ "seconds": 29.296,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Virtual tester.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Virtual tester.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 75,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G device testing value chain.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 38,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G NR conducted base station receiver tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 34,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G NR conducted base station transmitter tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 76,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Validated results.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "They are lab equipment interfaces that can be integrated into repos, CI/CD, test frameworks, and log / analysis pipelines",
+   "For an RFIC validation use case, Signal Generator / Signal Analyzer would most defensibly be positioned as the RF stimulus-and-measurement layer",
+   "Analyzer outputs and measurement results feed debug and validation decisions"
+  ],
+  "reason": "The answer honestly notes that the passages do not explicitly cover a Semiconductor RFIC validation workflow, then makes a fair inference from the cited RF/parametric/characterization mapping and 5G Tx/Rx instrument setups. Some workflow-specific phrasing is extrapolated, but the main placement of signal generator/analyzer in RF stimulus, measurement, and characterization is backed by the passages.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

@@ -1,0 +1,84 @@
+{
+ "id": "Q0671",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [],
+ "seconds": 49.438,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 70,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 62,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 61,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 11,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 90,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 23,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 27,
+   "kind": "wiki",
+   "ref": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "the oscilloscope capability needed is eye-opening validation at the cited mV and ps/UI scale",
+   "If the AI-server high-speed transmission requirement is tested through an electrical interface “scope” path"
+  ],
+  "reason": "The answer accurately cites the passages for the AI-server PCB trend, SI/PI measurable items such as IL/Xtalk/eye/TDR, the mapping of interface test to scopes/BERTs/AWGs, and the lack of formal oscilloscope configuration details. Its final oscilloscope capability is explicitly framed as an inference rather than a directly stated datasheet requirement, which makes the overall mapping reasonable despite the cited passages not directly connecting AI-server requirements to PCIe Gen5 oscilloscope validation.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

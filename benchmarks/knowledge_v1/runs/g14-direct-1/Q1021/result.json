@@ -1,0 +1,118 @@
+{
+ "id": "Q1021",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [],
+ "seconds": 71.39,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 80,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NR resource grid.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 29,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G NR numerology.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 24,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NR sample rate.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 61,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NR cyclic prefix.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 20,
+   "kind": "wiki",
+   "ref": "wiki/sources/NR Frame Structure.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 93,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMW100 K06.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 94,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMW100 K06.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 43,
+   "kind": "wiki",
+   "ref": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 45,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G NR conducted base station transmitter tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 58,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G NR conducted base station receiver tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 96,
+   "kind": "wiki",
+   "ref": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "For R&S CMW100 K06 NR sub-6G measurements, the product decision includes selecting NR sub-6G RF analyzer options ... and supported analyzer bandwidths ...",
+   "For conducted 5G NR base-station receiver tests, the setup decision includes using an R&S SMW200A...",
+   "selecting NR analyzer bandwidths and waveform-related settings on CMW100 K06 or FSW-based 5G NR measurements requires understanding those OFDM parameters rather than treating the setup as only a center-frequency choice",
+   "understanding OFDM symbols affects whether and how that FSW K144 measurement is configured"
+  ],
+  "reason": "The OFDM explanation is mostly supported, and the WLAN OFDM analyzer decision is directly supported. But the answer overstates that several NR product option, bandwidth, mode, and receiver setup choices depend on understanding OFDM; the passages list those choices but do not establish that dependency, except in limited cases such as OFDM-symbol-based total power dynamic range.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The OFDM explanation is mostly supported, and the WLAN OFDM analyzer decision is directly supported. But the answer overstates that several NR product option, bandwidth, mode, and receiver setup choices depend on understanding OFDM; the passages list those choices but do not establish that dependenc"
+}

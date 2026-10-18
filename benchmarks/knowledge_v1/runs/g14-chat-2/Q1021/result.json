@@ -1,0 +1,114 @@
+{
+ "id": "Q1021",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 48.593,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 36,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Low-PAPR sequence.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 21,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G NR frame structure.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 78,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G NR numerology.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 25,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NR sample rate.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 96,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMW100 K06.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 68,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S VSE.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 54,
+   "kind": "wiki",
+   "ref": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 49,
+   "kind": "wiki",
+   "ref": "wiki/sources/CMP200_Features_V8-14-22_en_09.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 53,
+   "kind": "wiki",
+   "ref": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 35,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Low-PAPR sequence.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "Choosing R&S VSE measurement options for 5G NR, MIMO/beamforming, O-RAN, and LTE",
+   "Choosing FSW base-station transmitter measurement mode and test type",
+   "Setting 5G NR signal-analysis parameters such as deployment, channel bandwidth, test model, center frequency, reference level, and attenuation",
+   "Choosing NR FR2 list-mode and statistical-length settings on R&S CMP200",
+   "Choosing NR FR1 uplink measurement bandwidth and measurement types on R&S CMX500",
+   "Understanding OFDM time-frequency structure is needed when selecting NR-related measurement settings that are expressed in slots, subframes, OFDM symbols, subcarriers, resource elements, or channel bandwidth"
+  ],
+  "reason": "The answer’s basic explanation of OFDM and the WLAN OFDM product option/bandwidth points are supported. However, it broadly asserts that many VSE, FSW, CMP200, and CMX500 measurement choices depend on understanding OFDM, while the cited passages mostly only list product options/settings and do not establish that OFDM knowledge is needed for those decisions.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The answer’s basic explanation of OFDM and the WLAN OFDM product option/bandwidth points are supported. However, it broadly asserts that many VSE, FSW, CMP200, and CMX500 measurement choices depend on understanding OFDM, while the cited passages mostly only list product options/settings and do not e"
+}

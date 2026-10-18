@@ -1,0 +1,3220 @@
+{
+ "question": {
+  "id": "Q1091",
+  "text": "What is signal-integrity-to-oscilloscope, and which product-related measurement decisions depend on understanding it?",
+  "technical": "Cross-Knowledge Reasoning",
+  "topic": "signal-integrity-to-oscilloscope",
+  "product_related": "true"
+ },
+ "session_id": null,
+ "exchange": {
+  "sent": "What is signal-integrity-to-oscilloscope, and which product-related measurement decisions depend on understanding it?",
+  "route_forced": "direct",
+  "http_status": 200,
+  "seconds": 78.328,
+  "timed_out": false,
+  "reply": {
+   "answer": {
+    "ok": false,
+    "answer": "已查到可引用的部分資料：\n\nSignal-integrity-to-oscilloscope is not defined in the passages as a formal term or product; the supported meaning is a measurement-context link in high-speed digital / SerDes validation where Signal Integrity concerns such as IL, Xtalk, Eye diagram and TDR impedance are part of the PCB/PCBA SI flow, and oscilloscopes are listed as instruments for Interface Test and Power Distribution Network measurement contexts [1][3][16][63].\nProduct-related measurement decisions that depend on understanding this link include deciding whether an oscilloscope belongs in the Interface Test setup, where the source lists scopes together with BERTs, AWGs and switch matrices [1][3][16].  \nThey also include deciding whether an oscilloscope is relevant for Power Distribution Network testing, where the source lists scopes together with network analyzers [1][3][16][63].  \nThey include deciding which SI measurements are oscilloscope-adjacent versus better mapped to other PCB/SI tools or instruments, because the SI flow lists IL, Xtalk, Eye diagram, TDR impedance, Stackup Planner and TL Calculator, while the passages do not assign all of those to an oscilloscope product [1][2][3][63].  \nThey include deciding whether product planning must cover other instrument roles beyond oscilloscopes, because the validation blocks also list BERTs, AWGs, switch matrices, phase-noise analyzers, signal generators, network analyzers and spectrum analyzers [1][3][16].  \nThey include deciding whether a specific oscilloscope model, bandwidth, software option, fixture, standard version or pass/fail condition can be quoted; the passages explicitly say those product and test details are not provided [2][18][50].\n\n來源：\n[1] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[2] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[3] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[16] Wiki：0 Digital Test - What are SIPI and Serdes（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[18] Wiki：0 Digital Test - What are SIPI and Serdes（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[50] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[63] Wiki：0 Digital Test - What are SIPI and Serdes（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n\n未能以證據支持：product_option_spec。因此不能把上列資料當成完整的推薦或比較。",
+    "record": {
+     "asset": {
+      "namespace": "engineering",
+      "name": "rs-knowledge",
+      "version": "1.0.3"
+     },
+     "trace": {
+      "trace_id": "trace-6f37609073e845828f26291b24162d8e",
+      "request_id": "request-6f37609073e845828f26291b24162d8e",
+      "span_id": "span-6f37609073e845828f26291b24162d8e",
+      "parent_span_id": null
+     },
+     "answer": {
+      "question": "What is signal-integrity-to-oscilloscope, and which product-related measurement decisions depend on understanding it?",
+      "status": "answered",
+      "passages": [
+       {
+        "text": "SerDes 與 SI PI 測試概覽 › 測試脈絡整理\n| 區塊 | 來源明示文字 | 相關儀器 / 方法 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Interface Test | Scopes、BERTs、AWGs、Switch Matrices | [[Oscilloscope]]、[[BERT]]、[[AWG]]、[[Switch Matrix]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4；Slide 11 頁腳 6/13/2025 未決 | 未提供型號、頻寬、資料率或測試標準 |\n| Transmission Channel | Tx Package、PCBs、Connectors、Rx Package | Channel / test board / switch matrices | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 channel loss、fixture、connector 型號或 PCB stackup |\n| RefClk and PLL Jitter Performance | Phase Noise Analyzers、Signal Generators | [[Phase Noise Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 jitter mask、phase noise offset 或 PLL 規格 |\n| Power Distribution Network | Scopes、Network Analyzers | [[Oscilloscope]]、[[Network Analyzer]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 PDN impedance 目標值或測試方法 |\n| ADC / DAC Frontend Performance | Spectrum Analyzers、Signal Generators | [[Spectrum Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 ADC / DAC 指標或頻率 |\n| Signal integrity flow | IL / Xtalk / Eye diagram；TDR Impedance；Stackup Planner；TL Calculator | [[Insertion Loss]]、[[Crosstalk]]、[[Eye diagram]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供工具名稱、標準版本或 pass/fail 條件 |",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+        },
+        "score": 11.980134
+       },
+       {
+        "text": "SerDes 與 SI PI 測試概覽 › 未決事項\n- Slide 11 未標示各測試區塊對應的標準版本、測試流程、儀器型號、軟體 option 或測試條件。\n- Slide 20 未標示 IL、Xtalk、Eye diagram、TDR impedance、Stackup Planner 與 TL Calculator 的工具、供應商或規格。\n- 需回看原始 PPTX 才能確認圖片中的 waveform、diagram 與 instrument details。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 7,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+        },
+        "score": 5.359754
+       },
+       {
+        "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+        },
+        "score": 5.015919
+       },
+       {
+        "text": "PCIe Gen5 high-speed PCB layout › 可追溯限制\n- 本頁只追溯 [[snla426]]（June 2023）摘要中的 application note 內容。\n- 來源摘要未提供完整頁碼、圖號、TI URL、修訂紀錄或 PCI-SIG 條文引用。\n- 來源摘要未提供所有 stack-up、routing geometry、via / anti-pad / capacitor pad 圖的原圖。\n- 來源摘要未提供材料表格的測試結構、trace geometry、copper roughness、溫度、濕度或 measurement / simulation 條件。\n- 本頁不把 TI application note 規則推論為所有 PCB、所有 PCIe implementations 或所有 high-speed standards 的通用要求。\n- 本頁不支撐產品供應鏈、客戶導入、量產、出貨、成本或市場份額主張。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 16,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+        },
+        "score": 15.213054
+       },
+       {
+        "text": "PCIe Gen5 high-speed PCB layout › Eye opening requirements\n| Generation | Extrapolated Eye Height after EQ | Minimum Eye Width after EQ | 來源 | 日期 |\n|---|---:|---:|---|---|\n| [[PCIe Gen3]] | 25 mV | 0.3 UI（37.5 ps） | [[snla426]] | June 2023 |\n| [[PCIe Gen4]] | 15 ± 1.5 mV | 0.3 UI（18.75 ± 0.55 ps） | [[snla426]] | June 2023 |\n| [[PCIe Gen5]] | 15 ± 1.5 mV | 0.3 UI（9.375 ± 0.5 ps） | [[snla426]] | June 2023 |\n\n- [[snla426]]（June 2023）說 minimum eye width 與 eye height 在 post-equalization、3-tap DFE blocks 之前量測。\n- [[snla426]]（June 2023）說 PCIe redriver output 的 eye opening 需要大於或等於表列 eye opening 數值。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 4,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+        },
+        "score": 11.382969
+       },
+       {
+        "text": "PCIe Gen5 high-speed PCB layout › Dk / Df 與 fiber weave skew\n- [[snla426]]（June 2023）說 routing differential signals 時，每條 trace 會因 [[fiberglass weave]] 與 [[epoxy]] 的 static permittivity（εr）差異，而經歷不同 dielectric constants 與 signal velocities。\n- [[snla426]]（June 2023）說 fiberglass weave 的 εr 約為 6，epoxy 的 εr 約為 3。\n- [[snla426]]（June 2023）說 fiber glass laminate 中的 holes 或 openings 會造成 εr 與 loss tangent（Df）差異。\n- [[snla426]]（June 2023）說 εr 與 Df 差異會在 signal bandwidth 的不同頻率上造成 transmission media 的 [[return loss]] 或 [[insertion loss]] resonance / anti-resonance。\n- [[snla426]]（June 2023）說 differential pair 兩條 signal 若經過不同 fiberglass / epoxy 比例，會產生 [[intra-pair skew]]，並劣化 receiver 看到的 differential eye diagram。\n- [[snla426]]（June 2023）說 fiber weave skew 會造成 duty cycle distortion、AC common-mode voltage noise 與 EMI issues。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 8,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+        },
+        "score": 10.309674
+       },
+       {
+        "text": "RoBAT › 使用限制\n- [[HSD Cable test]] 只提供連結標題與括號註記，沒有擷取 [[RoBAT]] 產品清單、測試頻寬、支援介面、儀器架構、客戶、價格或文件版次。\n- 不可僅依 [[HSD Cable test]] 推論 [[RoBAT]] 產品可測 [[DAC]]、[[AEC]]、[[PCIe Gen 6]]、[[PCIe Gen 7]] 或 [[PAM4]]；來源沒有提供這些對應。\n- ATE for Cable Cartridge testing 是來源筆記中的括號註記，尚未確認是否為 [[RoBAT]] 官方用語。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/RoBAT.md"
+        },
+        "score": 6.539023
+       },
+       {
+        "text": "RoBAT\n[[RoBAT]] 是 [[HSD Cable test]] 中以 `robattest.com` 外部連結出現的 signal integrity test products / cable cartridge testing 相關名稱；本次來源未擷取 RoBAT 網站正文。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/RoBAT.md"
+        },
+        "score": 2.143264
+       },
+       {
+        "text": "RoBAT › 來源中的說法\n- [[HSD Cable test]]（路徑含 2026-7-22；converted 2026-09-17）列出 `https://robattest.com/`。\n- [[HSD Cable test]]（路徑含 2026-7-22；converted 2026-09-17）的連結文字為 RoBAT Leading Edge Signal Integrity Test Products。\n- [[HSD Cable test]]（路徑含 2026-7-22；converted 2026-09-17）在該連結後加註 ATE for Cable Cartridge testing。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/RoBAT.md"
+        },
+        "score": 1.759886
+       },
+       {
+        "text": "Keysight ENA › 可追溯限制\n- 來源未列出 ENA 的具體型號、頻率範圍、option code、校準件型號或 TDR option 名稱。\n- 來源未標示 ENA 與 PNA 在圖中流程的分工差異；本頁不自行推論哪些測試必須使用 ENA 或 PNA。\n- 來源未提供性能指標，因此本頁不記錄量測精度、動態範圍或頻寬。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Keysight ENA.md"
+        },
+        "score": 8.555519
+       },
+       {
+        "text": "Keysight ENA\n[[Keysight ENA]] 是 [[AI Server PCB test image 24]] 圖中列為 ENA / PNA 量測平台之一的 Keysight 產品系列名稱，用於該圖描述的材料量測、[[Delta-L]] 損耗、[[TDR 阻抗測量]] 與 [[Dk-Df]] 提取語境。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Keysight ENA.md"
+        },
+        "score": 3.158277
+       },
+       {
+        "text": "Keysight ENA › 相關來源\n- [[AI Server PCB test image 24]] — 未標示日期的 Keysight 高頻高速 PCB 測試解決方案流程圖。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 4,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Keysight ENA.md"
+        },
+        "score": 2.601026
+       },
+       {
+        "text": "Dk-Df › 來源中的說法\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）在原材料表徵階段寫明「测量原材料（如基材或层压板）的 Dk/Df」。\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）在材料選擇階段寫明「测量插入损耗、表面粗糙度和材料特性（Dk/Df）」。\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）在電路板抽樣測試階段寫明「测量插入损耗、阻抗变化和材料特性（Dk/Df）」。\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）在解決方案區塊寫明「基于 ENA/PNA 的 Delta-L 损耗、TDR 阻抗测量和 Dk/Df 提取」。\n- [[HSD PCB image 15]]（來源未標示日期；取得於 2026-09-04）稱[[玻纖布]]可依據[[介電係數]]（[[DK]]）和厚度做綜合等級區分。\n- [[HSD PCB image 15]]（來源未標示日期；取得於 2026-09-04）稱常聽到的 [[Low DK]] 是玻纖布材質低介電 / 低延遲的意思。\n- [[HSD PCB image 15]]（來源未標示日期；取得於 2026-09-04）將 [[Low DK 玻纖布]]列為次高階玻纖布，用途 / 特性欄為「高頻高速PCB板材、伺服器、車用、通訊」。\n- [[HSD PCB image 18]]（來源未標示日期；取得於 2026-09-04）在材料演進階梯中把 [[Low Dk]] / [[Low Df]] 標為「低損耗」，並寫「降低訊號損耗，AI/5G 標配（[[富喬]]、[[台玻]] 主力衝刺區）。」\n- [[snla426]]（June 2023）說 Loss tangent（Df）或 Dissipation Factor 是 signal 沿 transmission line 傳播時 signal attenuation 的量測。\n- [[snla426]]（June 2023）說 dielectric loss 來自 dielectric material 對 electromagnetic wave 的吸收；frequency 增加時，dielectric loss 也成比例增加。\n- [[snla426]]（June 2023）說 ultra-low loss materials 的 Df 通常範圍為 0.02 到 0.001；較小的 Df 會造成較低 signal attenuation；[[PCIe]] 等 high speed applications 需要低 Df。\n- [[snla426]]（June 2023）說 [[fiberglass weave]] 的 εr 約為 6，[[epoxy]] 的 εr 約為 3；fiber glass laminate 中的 holes 或 openings 會造成 εr 與 Df 差異。\n- [[snla426]]（June 2023）說 εr 與 Df 差異會在 signal bandwidth 的不同頻率上造成 transmission media 的 [[return loss]] 或 [[insertion loss]] resonance / anti-resonance。\n- [[snla426]]（June 2023）說 εr 通常範圍為 2.5 到 4.5，並隨 frequency 變化；frequency 增加時 εr 下降。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Dk-Df.md"
+        },
+        "score": 12.380909
+       },
+       {
+        "text": "Dk-Df › 可追溯限制\n- [[AI Server PCB test image 24]] 未定義 Dk 與 Df 的完整名稱、測試頻率、測試方法、量測標準或條件。\n- [[AI Server PCB test image 24]] 未提供任何 Dk 或 Df 數值。\n- [[AI Server PCB test image 24]] 未標示材料樣本、基材牌號、層壓板型號或供應商。\n- [[HSD PCB image 15]] 未提供 [[DK]] 或 [[Low DK]] 的數值門檻、測試頻率、測試方法、厚度範圍或標準版本。\n- [[HSD PCB image 15]] 未說明 [[Low DK 玻纖布]] 的主要台廠註記是否等同供應商、主要市場參與者、概念股或其他口徑。\n- [[HSD PCB image 18]] 未提供 [[Low Dk]] / [[Low Df]] 的數值門檻、測試頻率、測試方法、厚度範圍、產品型號、標準版本或價格。\n- [[HSD PCB image 18]] 的「AI/5G 標配」是未標示日期圖卡的說法；不得推論 [[富喬]] 或 [[台玻]] 已量產、出貨或取得特定 AI / 5G 客戶認證。\n- [[snla426]] 的 Df / εr / SDD21 表格是 TI application note 中的 high-speed PCB design reference；來源摘要未提供測試結構、trace geometry、stack-up、銅粗糙度、溫度、濕度或 measurement / simulation 條件。\n- [[snla426]] 中 `Roger` 材料名稱需回查原文確認是否為 Rogers 或特定 laminate product family；本頁照來源摘要保存。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Dk-Df.md"
+        },
+        "score": 10.902612
+       },
+       {
+        "text": "Dk-Df › 未決事項\n- [[AI Server PCB test image 24]] 未標示 Dk/Df 的測試標準、頻率、溫度、材料樣本或校準方法。\n- [[AI Server PCB test image 24]] 未標示 Dk/Df 提取使用的 ENA / PNA 型號與 option code。\n- 既有 [[CCL 產品規格分級]] 來源與 [[AI Server PCB test image 24]] 未提供共同測試條件，因此不同來源中的 Df 不能直接比較。\n- [[HSD PCB image 15]] 未定義 DK 的完整測試條件或數值門檻。\n- [[HSD PCB image 15]] 未說明 Low DK 的「低延遲」是定性描述、材料分類、產品等級或市場用語。\n- [[HSD PCB image 18]] 未標示日期、發布者、報告名稱或資料期間。\n- [[HSD PCB image 18]] 未定義 [[Low Dk]] / [[Low Df]] 的量化門檻、測試條件或產品範圍。\n- [[HSD PCB image 18]] 未說明「AI/5G 標配」的樣本、材料範圍、採用率或期間。\n- [[snla426]] 未提供 Df / SDD21 表格的完整測試條件與 measurement / simulation 方法。\n- [[snla426]] 未提供 Megtron 6、Roger、GETEK、Nelco 4000-6、FR4、Tetra Functional FR4 的正式 material datasheet reference。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 7,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Dk-Df.md"
+        },
+        "score": 10.452877
+       },
+       {
+        "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- 本來源是由 `0 Digital Test - What are SIPI and Serdes.pptx` 轉出的 lossy markdown，封面標題為 **What is Serdes and SI/PI?**，作者 / 講者標示為 [[Dr. Milton Lien]]，單位為 Product & Application Engineering, [[RSTW]]，日期標示 **2026.3.4**。\n- 簡報把 R&S Group division 1 targets 分成 **Digital**、**Power**、**RF** 三類，並將 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]] 與 [[PCB]] / [[PCBA]] 測試放在 Digital / high-speed digital 測試脈絡中。\n- Slide 4 列出多個 high speed SerDes standards / interfaces：[[GMSL]]、[[OIF CEI-112G]]、[[LVDS]]、[[JESD204D]]、[[DisplayPort]]、[[HDMI]]、[[MIPI]]、[[USB]]、[[ASA]]、[[UALink]]、[[PCIe]]、[[NVLink]]、[[Ultra Ethernet]]、[[InfiniBand]]、[[SATA]]、[[SAS]]；來源只列名，未提供各標準版本、發布組織、資料率或測試條件。\n- Slide 5 以 **Parallel v.s. Serial Interface** 作為主題，但轉檔文字主要只有標題與圖片嵌入，未擷取圖中細節；因此只能作為 [[Parallel Interface]] / [[Serial Interface]] 需回看原始簡報的線索。\n- Slide 9 以表格整理 [[High speed SerDes eco-chain]]，分成上游基礎材料與核心元件、中游模組整合與生產製造、下游終端應用與市場部署三層。\n- Slide 11 題為 **Transmission Channel and validation challenges electrical Interfaces**，把高速電性介面驗證拆成 transmission channel、measurement path to DUT / test board development、[[Power Distribution Network]]、ADC / DAC frontend performance、RefClk and PLL jitter performance、interface test 等區塊，並列出 scopes、BERTs、AWGs、switch matrices、phase noise analyzers、signal generators、network analyzers、spectrum analyzers 等儀器類型。\n- Slide 17 題為 **HDI vs Package substrate**，以 [[CoWoS]]、[[Package Substrate]]、[[ABF]]、L/S 與 pitch 等字樣比較，但轉檔文字排列不完整，數值對應關係未能可靠確認。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+        },
+        "score": 8.46888
+       },
+       {
+        "text": "0 Digital Test - What are SIPI and Serdes › 與既有知識的關係\n- 既有 [[SerDes]] 頁主要來自 D2D / SoC IP / XPU-HBM-Optical I/O 圖像來源；本來源補充 2026.3.4 簡報層級的 high speed SerDes standards、產業鏈與驗證挑戰脈絡，但不提供 SerDes 的資料率、lane 數或具體標準條文。\n- 既有 [[高頻高速 PCB 測試解決方案]] 主要記錄 Keysight 圖像中的原材料表徵、材料選擇、抽樣測試與量產監控；本來源的 [[R&S PCB test solutions]] 以 R&S 簡報角度列出 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 PL / process monitoring，可作為平行視角。\n- 既有 [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 已記錄 Keysight 圖像來源；本來源 Slide 21 再次把 DK/DF extraction、TDR、Delta-L 與 ISD/ADK 放在 PCB test solutions 流程中，但沒有新增標準版本、儀器型號或 option code。\n- 既有 [[Package Substrate]] 與 [[ABF載板]] 頁已有多份市場圖像來源；本來源 Slide 17 顯示 HDI vs Package substrate / CoWoS / ABF 對照，但因 OCR / 轉檔結果不足，僅作為待回看原始投影片的線索。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 4,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+        },
+        "score": 7.126481
+       },
+       {
+        "text": "0 Digital Test - What are SIPI and Serdes › 原文未解的問題\n- Slide 1 標示日期 **2026.3.4**，Slide 11 頁腳另出現 **6/13/2025 High-Speed Digital- Market Trends**；來源未說明 2025-06-13 是頁腳模板日期、內容來源日期或另一份簡報日期。\n- 來源未標示本簡報的文件版次、受眾、會議名稱、對外 / 對內使用限制細節；只可確定封面有 **COMPANY RESTRICTED**。\n- Slide 3、6、7、10、12–15、16、18、19、22–24、26 多數內容在 markdown 中主要是圖片嵌入，未 OCR 出可可靠摘錄的正文。\n- Slide 4 standards 清單未提供各標準的版本、發布組織、資料率、介面型態或適用測試方法。\n- Slide 5 Parallel v.s. Serial Interface 未擷取圖中說明，不能由本 markdown 直接比較 parallel 與 serial 的技術差異。\n- Slide 17 的 L/S 與 pitch 數值排列不完整，無法判定 6/6、60/60、30/30、?、60、120 分別對應 HDI、Package Substrate、CoWoS 或 ABF 的哪一欄。\n- Slide 21 未提供 R&S PCB test solutions 對應的正式產品型號、order number、software option、測試頻率、測試標準、fixture、calibration 或量測不確定度。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+        },
+        "score": 6.483882
+       },
+       {
+        "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+        },
+        "score": 12.640753
+       },
+       {
+        "text": "R&S PCB test solutions › 圖上工具 / 合作方文字\n| 圖上文字 | 可能角色 | 來源 | 限制 |\n|---|---|---|---|\n| [[SPEAG]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未說明是合作夥伴、工具、方法或範例 |\n| [[SWISSTO12]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[QWED]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[KEYCOM]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[RSTW]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未展開完整單位名稱 |\n| TDR | 測 impedance | [[0 Digital Test - What are SIPI and Serdes]] | 未提供 TDR option 或探頭型號 |\n| Delta-L | 損耗量測相關 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供方法定義、標準或軟體名稱 |\n| ISD/ADK | 圖上方法 / 工具文字 | [[0 Digital Test - What are SIPI and Serdes]] | 未展開縮寫，未說明與 Delta-L 的關係 |\n| w/ cable / connector testing | cable / connector testing | [[0 Digital Test - What are SIPI and Serdes]] | 未提供連接器類型、線纜規格或測試項目 |",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 4,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+        },
+        "score": 7.568349
+       },
+       {
+        "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+        },
+        "score": 6.470032
+       },
+       {
+        "text": "Digital design test success stories › 來源中的 mapping\n| 投影片 | 來源標題 | 明示對應儀器 | 可連到的主題 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Slide 2–3 | DAC/ADC testing => FSWP, SMA100B | [[R&S FSWP]]、[[R&S SMA100B]] | [[DAC ADC testing]] | 2026.7 | 只 OCR 出標題與儀器名稱；圖片內容未解讀 |\n| Slide 4–5 | SOC testing => FSWP, SMA100B, ZNA67 | [[R&S FSWP]]、[[R&S SMA100B]]、[[R&S ZNA67]] | [[SoC testing]] | 2026.7 | 未提供 DUT、介面、頻率、量測結果或 option |\n| Slide 6 | SOC testing=> ZNA67 | [[R&S ZNA67]] | [[SoC testing]] | 2026.7 | 圖片內容未 OCR；不可推論 ZNA67 的完整配置 |\n| Slide 7 | ATE PCB testing=> ZNA67 | [[R&S ZNA67]] | [[ATE PCB testing]]、[[R&S PCB test solutions]] | 2026.7 | 未標示 ATE 平台、fixture、頻率、PCB 板材或 pass/fail 條件 |\n| Slide 8 | O/E, E/O, TIA testing | 來源未標示 | [[O-E E-O TIA testing]]、[[TIA testing]] | 2026.7 | 未標示儀器、光電轉換器、資料率或標準 |\n| Slide 9–10 | High speed Cable testing | 來源未標示 | [[High speed Cable testing]]、[[HSD Cable test 外部資料清單]] | 2026.7 | 未標示 cable 類型、資料率、連接器或量測方法 |\n| Slide 11–12 | Digital Power Test | 來源未標示 | [[Digital Power Test]]、[[Power Integrity]] | 2026.7 | 未標示測試項目、電壓 / 電流、負載或儀器 |",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Digital design test success stories.md"
+        },
+        "score": 14.620094
+       },
+       {
+        "text": "Digital design test success stories › 與既有測試概念的關係\n- [[SerDes 與 SI PI 測試概覽]] 與 [[R&S PCB test solutions]] 提供 high-speed digital、SI/PI 與 PCB 測試流程脈絡；本頁只保存 success-story 簡報中的應用 / 儀器對應關係。\n- [[高頻高速 PCB 測試解決方案]] 主要來自 Keysight 圖像來源，描述原材料表徵、材料選擇、抽樣測試與量產監控；本頁的 ATE PCB testing 只指出 [[R&S ZNA67]] 被列名，不能推論完整流程。\n- [[HSD Cable test 外部資料清單]] 保存 cable / connector / signal integrity 外部待讀材料；本頁的 High speed Cable testing slide 未提供可採用的 cable test 主張。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 4,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Digital design test success stories.md"
+        },
+        "score": 8.883756
+       },
+       {
+        "text": "Digital design test success stories › 可追溯限制\n- [[DDT SuccessStories_202607]] 是 PowerPoint 轉出的 lossy markdown；除標題與少量文字外，大部分成功案例細節在圖片中，尚未 OCR。\n- 本頁不把 success-story mapping 解讀為正式 solution bundle、報價配置、必選 option、客戶背書或量產導入證據。\n- 本頁不推論 [[R&S FSWP]]、[[R&S SMA100B]]、[[R&S ZNA67]] 在各應用中的角色分工；例如 stimulus、analysis、phase noise、VNA 或 automation 角色都需後續來源補證。\n- Market 類資料會隨時間變動；本頁的時間點只限於來源標示的 2026.7。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Digital design test success stories.md"
+        },
+        "score": 3.985922
+       },
+       {
+        "text": "UI 與 Data Rate 換算 › 未決事項\n- [[Equations]] 未展開 `UI` 的縮寫。\n- [[Equations]] 未說明 `DR` 的完整名稱、口徑或測量 / 計算條件。\n- [[Equations]] 未標示公式是否適用於特定 [[SerDes]]、[[High speed SerDes standards]]、[[PCIe]]、[[Ethernet]]、[[NVLink]] 或其他介面。\n- [[Equations]] 未標示 `16.0 Gbps` 是否為 raw data rate、payload data rate、symbol rate 或 aggregate throughput。\n- Sheet2 與 Sheet3 為空表格，需回查原始 `Equations.xlsx` 才能確認是否有未轉出的公式或內容。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 6,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/UI 與 Data Rate 換算.md"
+        },
+        "score": 5.135337
+       },
+       {
+        "text": "UI 與 Data Rate 換算 › 使用限制\n- [[Equations]] 只是一個由 Excel 轉出的簡短表格；不能由此推論任何 [[SerDes]] 標準、產品、測試設備或 compliance 測試項目。\n- [[Equations]] 沒有標示 [[NRZ]]、[[PAM4]]、[[PAM-n]]、encoding overhead、FEC、clocking、jitter 或 lane count，因此不可把 `DR(Gbps)=16.0` 解讀為完整 link capability。\n- 本頁保留來源明示的公式與數字，不補推原始 Excel 可能存在的 cell formula、格式、隱藏欄列或未轉出的內容。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/UI 與 Data Rate 換算.md"
+        },
+        "score": 3.802098
+       },
+       {
+        "text": "UI 與 Data Rate 換算 › 與既有知識的關係\n- [[SerDes]]、[[SerDes 與 SI PI 測試概覽]] 與 [[High speed SerDes standards]] 提供 high-speed interface 與測試脈絡；本頁只補充一個資料率與 UI 的表格線索。\n- 若後續補入正式標準或教材來源，應另建或更新 [[Unit Interval]]、[[Data Rate]]、[[Line Rate]]、[[Symbol Rate]] 等概念頁，並標示標準版本與發布組織。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 4,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/UI 與 Data Rate 換算.md"
+        },
+        "score": 1.175428
+       },
+       {
+        "text": "High speed SerDes eco-chain › 分層整理\n| 層級 | 來源分類 | 來源明示內容 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| 上游 | 基礎材料與核心元件 | 半導體晶片、光模組 / 光元件、PCB 材、被動元件、高頻高速線材與接頭 | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供公司名單完整性、市占率、供應關係或材料規格 |\n| 中游 | 模組整合與生產製造 | 晶片封測、線材接頭組裝、系統級整合、消費電子裝置整合、高速 PCB 設計 | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供具體廠商、產能或客戶 |\n| 下游 | 終端應用與市場部署 | 通訊設備、伺服器與資料中心、雲端 / 邊緣、消費電子 / 車用、工業與智慧製造 | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供需求數字、出貨量或區域市場資料 |",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 6,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+        },
+        "score": 10.017385
+       },
+       {
+        "text": "High speed SerDes eco-chain › 中游 — 模組整合與生產製造\n- 晶片封測製造。\n- 高速連接線材與接頭組裝。\n- 系統級整合：製造通信設備、服務器用的光傳輸設備、交換機、路由器等中間件設備。\n- 電腦與消費性電子裝置整合 [[HDMI]]、[[USB]]、[[PCIe]] 介面等，含各類轉換器、擴充塢、模組等。\n- 高速 PCB 設計：涉及阻抗控制、差分對布局、地平面配置等，確保訊號品質。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 4,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+        },
+        "score": 7.909633
+       },
+       {
+        "text": "High speed SerDes eco-chain › 下游 — 終端應用與市場部署\n- 通訊設備製造商：核心網、5G 基站、光傳輸設備、交換機、路由器等。\n- 服務器與資料中心：協助 AI、高效能計算環境部署，需求高速內部連與介面連接。\n- 網通基礎建設與雲端應用：包含物聯網、雲計算與邊緣運算等場域皆需高速數據傳輸與處理能力。\n- 消費電子與車用領域：筆電 / 手機等需 [[HDMI]]、[[DisplayPort]]、[[USB]] 介面，汽車上的 [[ADAS]] 與 [[V2X]] 通訊亦需高速訊號傳輸。\n- 工業與智慧製造：工業自動化系統、高速資料擷取與辨識也仰賴高速訊號鏈路。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+        },
+        "score": 6.843184
+       },
+       {
+        "text": "Equations › 原文未解的問題\n- 來源未標示正式製作日期；只知道 raw frontmatter 的 `converted: 2026-09-17`。\n- 來源未標示作者、組織、文件版次、應用場景或表格目的。\n- `UI` 未展開縮寫，來源只標示 `UI(ps)`。\n- `DR(Gbps)` 未說明是 per-lane data rate、aggregate data rate、symbol rate、bit rate，或是否與 NRZ / PAM4 / PAM-n 調變相關。\n- `Data Rate=1/UI` 未標示單位換算說明、有效位數、四捨五入規則或適用限制。\n- Sheet2 與 Sheet3 在轉檔結果中為空，無法判定原始 Excel 是否含公式、圖表、隱藏欄列或格式資訊。\n- 需要回查原始 `Equations.xlsx` 才能確認是否有 Excel formula、cell formatting、sheet name、隱藏內容或其他未轉出的資料。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 4,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/Equations.md"
+        },
+        "score": 2.624933
+       },
+       {
+        "text": "Equations › 與既有知識的關係\n- [[SerDes 與 SI PI 測試概覽]] 與 [[High speed SerDes standards]] 已由 [[0 Digital Test - What are SIPI and Serdes]] 建立 high-speed digital / SerDes 測試脈絡；本來源可作為該脈絡下的簡易公式補充，但不能補上任何標準版本或產品支援狀態。\n- [[SerDes]] 頁已有多份來源指出 SerDes 作為 D2D、封裝模組或 SoC IP 區塊中的高速介面語彙；本來源只提供 `Data Rate=1/UI` 與一組數字，不足以說明 SerDes 的資料率、lane 數、調變或實作。\n- 因為來源沒有標示應用情境，本次不把 `16.0 Gbps` 解讀為任何特定產品、標準、測試項目或市場資料點。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/Equations.md"
+        },
+        "score": 1.322124
+       },
+       {
+        "text": "Equations › 重點摘要\n- 本來源是由 `Equations.xlsx` 轉出的 lossy markdown；frontmatter 標示原始檔路徑為 `C:/Users/Lien/OneDrive - Rohde & Schwarz/Chi Leo (5TWSDE)'s files - RS_Knowledge/drop/Market/OneNote/Equations.xlsx`，`converted: 2026-09-17`。\n- 來源正文未標示正式製作日期、作者、文件版次、用途、會議或技術領域；目前只能以 raw 轉檔日期 **2026-09-17** 作為處理時間線索。\n- Sheet1 是一個簡單換算表：`UI(ps): 62.5`，以及 `Data Rate=1/UI` 對應 `DR(Gbps): 16.0`。\n- Sheet2 與 Sheet3 在 markdown 中只剩空表格，沒有可抽取的正文主張。\n- 本來源支撐 [[UI 與 Data Rate 換算]] 這個簡易換算線索，但不支撐任何特定 [[SerDes]] 標準、lane 數、編碼方式、PAM 階數、clocking、jitter tolerance 或 compliance 測試條件。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/Equations.md"
+        },
+        "score": 0.958631
+       },
+       {
+        "text": "AI Server PCB test image 55 › 與既有知識的關係\n- [[AI Server PCB test image 55]] 與 [[AI Server PCB test image 30]] 都是未標示日期的 **图3. OAM互连信号损耗示意图**，且文字、數值與路徑內容高度一致；本頁將它視為同一類 OAM interconnect loss budget 圖像來源的另一份圖像，而不是獨立市場驗證。\n- [[OAM 互連信號損耗]] 是本來源最直接補強的概念頁，用來集中保存 30 dB、8dB、5 dB 與 baseboard budget 未辨識數值的限制。\n- [[AI 伺服器 CPU OAM UBB 板件比較]] 已使用 [[AI Server PCB test image 30]] 補充 OAM 互連 loss budget；本來源內容與該來源重疊，因此不得把兩張圖加總成兩個獨立樣本。\n- [[高頻高速 PCB 測試解決方案]] 記錄 [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 與 [[插入損耗]] 的測試流程；本來源只提供示意性的 dB loss budget，未提供測試方法、頻率、資料率或 pass/fail 條件。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 6,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/AI Server PCB test image 55.md"
+        },
+        "score": 9.506056
+       },
+       {
+        "text": "AI Server PCB test image 55 › 原文未解的問題\n- 來源未標示內容日期、年份、季度或資料期間。\n- 來源未標示發布者、公司、報告名稱、簡報名稱、頁碼、URL 或文件版次。\n- 來源未說明 [[OAM]] 的完整名稱、規格版本、資料率、lane 數、通道定義或適用平台。\n- 來源未說明 30 dB、8dB 與 5 dB 的完整定義、測試條件與加總關係。\n- 來源未清楚標示 TX / RX baseboard budget 的數值。\n- 來源未說明 [[QSFP-DD]]、[[Mated QSFP-DD SMT Connector]]、[[Mated Mezzanine Connector]]、[[28-AWG cable]] 的規格、長度、材料或供應商。\n- 來源未提供任何公司供應關係、客戶、導入、量產、出貨、市場份額或價格資訊。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 8,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/AI Server PCB test image 55.md"
+        },
+        "score": 8.352452
+       },
+       {
+        "text": "AI Server PCB test image 55 › 可追溯限制\n- 來源未標示內容日期；不得寫成任何年度、季度或產品世代的市場現況。\n- 來源未標示公司、發布者、報告名稱、簡報名稱、URL、文件版次或頁碼。\n- 來源未說明 [[OAM]] 的完整名稱、規格版本、資料率、lane 數、通道長度或適用平台。\n- 來源未說明 **30 dB** 是總通道損耗、插入損耗、設計預算上限或其他 loss budget 口徑。\n- 來源未說明 **8dB + 5 dB + 8dB** 與 **30 dB** 的完整加總關係。\n- 來源未清楚標示 TX / RX baseboard budget 的數值；不得由 30 dB 扣除其他數字補算。\n- 來源未提供任何公司供應關係、客戶、導入、量產、出貨、市場份額、價格或 ASP 資訊。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 7,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/AI Server PCB test image 55.md"
+        },
+        "score": 6.747032
+       },
+       {
+        "text": "Direct Attached Copper Cables › 未決事項\n- 來源未標示 [[Direct Attached Copper Cables]] 的完整型號、料號、產品系列階層、發布日期或資料表版次。\n- 來源未說明 112G / 224G 與 200G / 400G / 800G / 1.6T 的對應 lane 數、編碼、距離或測試條件。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Direct Attached Copper Cables.md"
+        },
+        "score": 7.238218
+       },
+       {
+        "text": "Direct Attached Copper Cables › 可追溯限制\n- [[HSD Cable test image 2]] 未標示內容日期；不得把 112G、224G、200G / 400G / 800G / 1.6T 或 PCIe Gen 5/6 寫成特定日期的量產、出貨或採用狀態。\n- 來源未提供 cable length、gauge、BER、eye diagram、active / passive 分界、功耗、合規證書、order number 或客戶導入證據。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Direct Attached Copper Cables.md"
+        },
+        "score": 4.270411
+       },
+       {
+        "text": "Direct Attached Copper Cables › 來源中的說法\n- [[HSD Cable test image 2]]（來源未標示日期；取得於 2026-09-04）左側主圖編號 4 標示 DIrect Attached Copper Cables，右側標題為 Direct Attached Copper Cables。\n- [[HSD Cable test image 2]]（來源未標示日期；取得於 2026-09-04）描述其為 112G and 224G high-speed I/O PCIe Gen 5/6 passive and active cables designed and manufactured for data centers、networking、HPC、telecom、server and storage solutions。\n- [[HSD Cable test image 2]]（來源未標示日期；取得於 2026-09-04）列出 [[OSFP Cables]]、[[OSFP-XD Copper Cables]]、[[QSFP DD Cables]]、[[CDFP Cables]]。\n- [[HSD Cable test image 2]]（來源未標示日期；取得於 2026-09-04）小標為 200G / 400G / 800G / 1.6T。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Direct Attached Copper Cables.md"
+        },
+        "score": 1.502031
+       },
+       {
+        "text": "Celerity 224 Gb-s BGA Mezzanine Connectors › 未決事項\n- 來源未提供 Celerity / Celerity LP 的完整產品型號、料號、stack height options、pin count、mechanical drawing 或 SI 測試報告。\n- 來源未說明 224 Gb/s PAM4 的 lane / channel 定義、測試 fixture 或標準版本。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Celerity 224 Gb-s BGA Mezzanine Connectors.md"
+        },
+        "score": 6.654642
+       },
+       {
+        "text": "Celerity 224 Gb-s BGA Mezzanine Connectors › 可追溯限制\n- 來源未標示正式內容日期、料號、BGA footprint、stack height 清單、測試條件、PAM4 eye diagram、BER、compliance 或 datasheet 版次。\n- `up to 224 Gb/s PAM4` 是 brochure claim；不可寫成特定日期的量產、認證、出貨或客戶採用狀態。\n- 來源未說明 Celerity 與 Celerity LP 的差異、產品階層或互配條件。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Celerity 224 Gb-s BGA Mezzanine Connectors.md"
+        },
+        "score": 5.008891
+       },
+       {
+        "text": "Celerity 224 Gb-s BGA Mezzanine Connectors › 來源中的說法\n- [[full-spectrum-data-center-connectivity-brochure]]（來源未標示日期；raw converted 2026-09-17）在 featured product 區塊列出 Celerity / Celerity LP 224 Gb/s BGA Mezzanine Connectors。\n- 來源稱 Celerity and Celerity LP 224 Gb/s BGA Mezzanine Connectors are designed to support data rates up to 224 Gb/s PAM4。\n- 來源稱其 feature hermaphroditic mating interfaces。\n- 來源稱這些 mating interfaces simplify board layouts、enable flexible stack height configurations and ensure robust alignment。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Celerity 224 Gb-s BGA Mezzanine Connectors.md"
+        },
+        "score": 1.228632
+       },
+       {
+        "text": "Amphenol OverPass Cable Systems › 可追溯限制\n- 來源未標示正式內容日期、產品型號、料號、datasheet 版次或測試條件。\n- `broad range of next gen capabilities` 與 `high-speed signal transmission` 是 brochure-level claim；不可推論實際傳輸距離、loss budget、BER、eye diagram、量產狀態或客戶導入。\n- 來源未明確說明 [[Amphenol OverPass Cable Systems]] 與既有 [[OSFP OverPass Assemblies]]、[[Direct Attached Copper Cables]] 或 [[OSFP Cable Assemblies]] 的產品階層關係。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Amphenol OverPass Cable Systems.md"
+        },
+        "score": 6.12471
+       },
+       {
+        "text": "Amphenol OverPass Cable Systems › 未決事項\n- 來源未提供 OverPass cable system 的完整產品系列、料號、支援速率、支援協定、線纜長度、connector form factor 或相容平台。\n- 來源未提供 next gen capabilities 的具體清單或驗證條件。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Amphenol OverPass Cable Systems.md"
+        },
+        "score": 4.808169
+       },
+       {
+        "text": "Amphenol OverPass Cable Systems › 來源中的說法\n- [[full-spectrum-data-center-connectivity-brochure]]（來源未標示日期；raw converted 2026-09-17）在 High-Speed I/O OverPass Cable Systems 區塊稱 Amphenol's OverPass cable systems offer a broad range of next gen capabilities。\n- 來源稱這些 capabilities enable high-speed signal transmission from ASIC packages to end-points across the system。\n- 來源的 featured product 區塊另列 [[OSFP Cable Assemblies]]，並提到 active electrical cables / direct attached cables and cable solutions。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Amphenol OverPass Cable Systems.md"
+        },
+        "score": 2.212883
+       },
+       {
+        "text": "Data center full-spectrum connectivity › 使用限制\n- [[full-spectrum-data-center-connectivity-brochure]] 未標示正式日期；所有產品能力、規格數字與 marketing claim 需標示來源日期缺口。\n- 來源是供應商 brochure，不是第三方市場報告；不可用來推論市占率、排名、客戶導入、採購關係或出貨量。\n- 來源未提供 datasheet 版次、order number、合規證書或測試條件；224G、448G、1.6T、300G、60A、+54V、60 contacts、0.6mm pitch 等數字只能作為來源文字摘錄。\n- PDF 轉檔為 lossy derivative；欄位串接與 OCR 風險需回看原始 PDF。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 7,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+        },
+        "score": 4.355721
+       },
+       {
+        "text": "Data center full-spectrum connectivity › High-speed electrical connectivity\n- [[Amphenol OverPass Cable Systems]] — 來源稱其 enable high-speed signal transmission from ASIC packages to end-points across the system。\n- [[ExtremePort OSFP Connectors]] — 來源稱 connectors and cages have 60 contacts per port、0.6 mm pitch，並 optimized for signal integrity、thermal management and multi-lane pluggable architecture。\n- [[Amphenol XtremePass]] — 來源稱 XtremePass 448G connector solution supports scalable form factors from 32DP to 128DP，並跨 Ethernet、NVLink、PCIe、InfiniBand systems。\n- [[OSFP Cable Assemblies]] — 來源稱 OSFP cable assemblies compatible with 25G/lane NRZ up to 224G/lane PAM4，deliver aggregate bandwidths of 200G、400G、800G and 1.6T per cable assembly，available in Passive and Active variants。\n- [[Sentry HD High-Speed Backplane Connector]] — 來源稱其是 next-generation high-speed backplane connector platform。\n- [[Celerity 224 Gb-s BGA Mezzanine Connectors]] — 來源稱其 designed to support data rates up to 224 Gb/s PAM4。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+        },
+        "score": 4.11531
+       },
+       {
+        "text": "Data center full-spectrum connectivity › 底部圖上產品清單\n來源底部再以清單列出多個 electrical interconnect / memory / card edge / cable connector 類別，包括 [[SOCAMM and LPCAMM CAMM2 Connectors]]、[[CompacLink PCIe Gen 6 Compression Board-to-Board Connectors]]、[[Mini Cool Edge IO]] / [[Multi-Trak]]、[[Titen]]、[[Cool Express Link]]、[[DDR5 and Next Gen Memory Connector]]、[[Double & Single Density Mini Cool Edge]]、[[U.2 SFF8639]]、[[PCIe CEM 7 Connectors]] 與 [[Direct Attached PCIe CEM Cable Connectors]]。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+        },
+        "score": 2.104498
+       },
+       {
+        "text": "SerDes 與 SI PI 測試概覽 › 與既有知識的關係\n- [[SerDes]] 已記錄 die-to-die、SoC IP 與封裝示意圖中的 SerDes 語彙；本頁補充 R&S 簡報中 SerDes 與 SI / PI / validation challenges 的測試場景。\n- [[高頻高速 PCB 測試解決方案]]、[[Dk-Df]]、[[Delta-L]] 與 [[TDR 阻抗測量]] 可承接 Slide 20–21 中對 high speed PCB / PCBA signal integrity flow 與 PCB test solutions 的列名。\n- [[Power Integrity 外部資料清單]] 保存既有 OneNote link hub 中的 PDN impedance 待讀資料；本頁只加入 Slide 11 明示的 [[Power Distribution Network]] 測試區塊。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 4,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+        },
+        "score": 4.342259
+       },
+       {
+        "text": "SerDes 與 SI PI 測試概覽 › 可追溯限制\n- 本來源是 lossy markdown derivative，多數圖像未 OCR；不可把未擷取的圖片內容當成已驗證主張。\n- Slide 11 的頁腳日期 **6/13/2025** 與封面日期 **2026.3.4** 並存，未能判定何者是內容日期。\n- 本頁不推論 R&S 具備所有列名儀器或方案，也不把儀器類型轉換成正式 product configuration。\n- 本頁不提供 [[Signal Integrity]]、[[Power Integrity]] 或 [[SerDes]] 的標準定義；只保存來源明示的測試區塊與儀器類型。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+        },
+        "score": 4.155996
+       },
+       {
+        "text": "SerDes 與 SI PI 測試概覽\n[[SerDes 與 SI PI 測試概覽]] 是依 [[0 Digital Test - What are SIPI and Serdes]] 建立的 high-speed digital 測試主題頁，用來連接 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]]、[[PCB]] / [[PCBA]] 與相關驗證儀器類型。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+        },
+        "score": 1.799379
+       },
+       {
+        "text": "SerDes 與 SI PI 測試概覽 › 相關來源\n- [[0 Digital Test - What are SIPI and Serdes]] — 2026.3.4 的 R&S / RSTW high-speed digital 測試簡報來源摘要。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 6,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+        },
+        "score": 0.120992
+       },
+       {
+        "text": "PCIe Gen5 high-speed PCB layout › 與既有知識的關係\n- [[SerDes 與 SI PI 測試概覽]] 提供 high-speed digital validation 與儀器類型的 R&S 簡報視角；本頁補入 TI 對 [[PCIe Gen5]] PCB layout 的 application note 規則。\n- [[Dk-Df]] 既有頁面整理市場圖卡中的 Dk / Df 語彙；本頁提供 Df / Dissipation Factor、dielectric loss 與 material insertion loss table 的 PCIe Gen5 應用脈絡。\n- [[玻纖布]] 既有頁面整理玻纖布市場分類；本頁提供 fiberglass weave / epoxy εr 差異造成 intra-pair skew 的 layout 層級解釋。\n- [[PCIe Gen5 SSD]] 是 SSD 產品 / controller 脈絡；本頁是 PCIe Gen5 channel / PCB layout 脈絡，兩者不可混用。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 15,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+        },
+        "score": 7.918003
+       },
+       {
+        "text": "PCIe Gen5 high-speed PCB layout › 未決事項\n- [[PCI Express Base Specification Revision 5.0]] 的正式版本、章節與發布組織頁尚未建立。\n- [[CXL 2.0]] 與 [[TI DS320PR1601]] data sheet 需另以正式 datasheet 補證。\n- `Roger` 是否應修正為 Rogers 或特定 laminate product family 仍需回查原文。\n- Megtron 6、GETEK、Nelco 4000-6、FR4、Tetra Functional FR4 的材料規格與 datasheet 未納入。\n- 來源未標示 TI 建議對不同 PCB stack-up、trace geometry 與 connector 類型的適用範圍。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 18,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+        },
+        "score": 5.277391
+       },
+       {
+        "text": "PCIe Gen5 high-speed PCB layout › Reference plane 與 vias\n- [[snla426]]（June 2023）說 high-speed signal trace 從 origination 到 termination 必須全程維持相同 GND reference。\n- [[snla426]]（June 2023）說若無法維持相同 GND reference，需 via-stitch 兩個 GND planes，以確保 continuous grounding 與 uniform impedance。\n- [[snla426]]（June 2023）說 stitching vias 應對稱放置於 signal transition vias 50 mils center-to-center 以內，越近越好。\n- [[snla426]]（June 2023）說 high-speed signals 必須 route over solid reference plane，除非絕對必要，不應跨越 plane split 或 reference plane void。\n- [[snla426]]（June 2023）說 TI 不建議 high-speed signal references 使用 power planes。\n- [[snla426]]（June 2023）說若完全無法避免 routing over a plane-split，需在 split 兩側放置 stitching capacitors，提供 high-frequency current return path；stitching capacitors 必須為 1 µF 或更低，並盡可能靠近 plane crossing。\n- [[snla426]]（June 2023）說 vias 需要 staggered placement；aligned vias 會阻擋 current return path。\n- [[snla426]]（June 2023）建議 high-speed traces 只放在 top layer 或 bottom layer；若需要 vias，應考慮 back drilling，否則 stub length 可能降低 signal bandwidth。\n- [[snla426]]（June 2023）說 via transitions 造成的 stubs 若長於 15 mils，應 back-drill 以降低 insertion losses 並避免 resonance。\n- [[snla426]]（June 2023）說 PCIe Gen5 20/80% rise/fall time 為 12 ps；為保留 12 ps rise/fall time，需要約 29 GHz bandwidth（0.35/0.12 ns rule）。\n- [[snla426]]（June 2023）說在 29 GHz bandwidth 且使用 Megtron 6（ε 約 3.4）時，quarter wavelength 約 54 mils；若未使用 back drilling，stub 必須小於約 54 mils；對 typical FR4（ε 約 4.2）PCB，maximum stub length 約 51 mils。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 12,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+        },
+        "score": 5.121016
+       },
+       {
+        "text": "PCIe Gen5 high-speed PCB layout › PCB material 與 insertion loss\n[[snla426]]（June 2023）指出：\n\n- 溫度與濕度升高時，[[insertion loss]] 會增加。\n- Data rate 越高，loss 越高。\n- [[Insertion loss]] 與 board material 有關。\n- Ultra Low Loss material 在不同 data rate 下的 loss 低於 standard loss material。\n- Megtron 6 等 ultra low-loss material 在高溫下的 insertion loss 預期比 nominal temperature 高最多 8%。\n- FR4 等 higher loss material 在高溫下的 insertion loss 比 nominal temperature 高 11%。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 6,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+        },
+        "score": 4.041857
+       },
+       {
+        "text": "PCIe Gen5 high-speed PCB layout › Routing quick rules\n[[snla426]]（June 2023）列出的 high-speed differential signal quick rules 包括：\n\n- 不可在任何 high-speed differential signal 上放置 probe 或 test points。\n- 不可將 high-speed traces route 在 crystals、oscillators、clock signal generators、switching power regulators、mounting holes、magnetic devices、board edge，或使用 / 複製 clock signals 的 ICs 下方或附近。\n- BGA breakout 後，high-speed differential signals 應避開 PCIe device，因為 internal state transitions 產生的 high current transients 很難濾除。\n- 盡可能將 high-speed differential pair signals route 在 PCB top layer 或 bottom layer，並搭配 adjacent GND layer。\n- High-speed differential signals 與 reference plane edge 的距離需 ≥ 5×W 或 5×RPH，取較大者。\n- High-speed differential signals 至少需距離 reference plane voids 4×RPH；此規則不適用於 high-speed differential signals 上 SMD pads 的 voiding。\n- PCIe device BGA escape 後需維持 constant trace width，以避免 transmission lines 中的 impedance mismatches。\n- 為改善 crosstalk，應遵循 ground-signal-ground signal routing，並將所有 high-speed differential pairs 對稱且平行地一起 routing。\n- Package escape 與 routing 到 connector pins 時會自然偏離此要求，但 trace deviations 必須盡可能短，否則可能需要 trace width compensation。\n- HFSS simulation 可用於最佳化 trace width。\n- 多個 high-speed interfaces 的 devices 中，需避免不同 interfaces 間的 crosstalk。\n- Package escape 後、connector termination 前，每個 differential pair 不應 route 在另一 differential pair 的 4–5×RPH mils 內。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 11,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+        },
+        "score": 3.137586
+       },
+       {
+        "text": "RoBAT › 未決事項\n- unresolved: [[RoBAT]] 網站正文未被擷取。\n- unresolved: 來源未提供 [[RoBAT]] 產品名稱、規格、版本、發布日期或 datasheet。\n- unresolved: ATE for Cable Cartridge testing 的正式產品範圍、支援線纜類型與測試條件未確認。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/RoBAT.md"
+        },
+        "score": 0.854469
+       },
+       {
+        "text": "Keysight ENA › 未決事項\n- [[AI Server PCB test image 24]] 未標示 [[Keysight ENA]] 的具體型號與 option code。\n- [[AI Server PCB test image 24]] 未標示 ENA 對 [[Delta-L]]、[[TDR 阻抗測量]]、[[Dk-Df]] 提取的測試條件。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Keysight ENA.md"
+        },
+        "score": 2.281215
+       },
+       {
+        "text": "Keysight ENA › 來源中的說法\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）列出 **N1500A + ENA/PNA 先进材料测量解决方案**。\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）列出 **基于 ENA/PNA 的 Delta-L 损耗、TDR 阻抗测量和 Dk/Df 提取**。\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）列出 **ENA / PNA与TDR选项和校准件**。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Keysight ENA.md"
+        },
+        "score": 0.779937
+       },
+       {
+        "text": "Dk-Df › 與既有知識的關係\n- [[CCL 產品規格分級]] 已記錄 [[AI Server PCB test image 19]] 中 [[聯茂]] CCL 產品的 [[Df]] 範圍與 M / M2 / M4 / M6 / M7 / M8 分級；該頁是產品分級資料。\n- [[AI Server PCB test image 24]] 補充的是 [[Dk-Df]] 在 [[高頻高速 PCB 測試解決方案]] 中的量測與提取流程；它沒有提供 CCL 型號、Df 數值範圍或 M 等級。\n- [[HSD PCB image 15]] 補充的是 [[DK]] 與 [[Low DK]] 在[[玻纖布]]分級圖卡中的語彙；它沒有提供 Dk / DK 數值、Df 數值、測試頻率或測試標準。\n- [[HSD PCB image 18]] 補充的是市場資訊圖把 [[Low Dk]] / [[Low Df]] 作為 [[E-Glass]] 與 [[T-Glass]] 之間的低損耗材料階梯，並連到 AI/5G 應用；它沒有提供 Dk、Df、損耗、頻率、厚度、樹脂、玻纖布規格或測試標準。\n- [[snla426]] 補充的是 [[PCIe Gen5 high-speed PCB layout]] application note 脈絡下，Df / Dissipation Factor、dielectric loss、εr、fiberglass / epoxy 差異與 material insertion loss 的設計說法。\n- 因 [[AI Server PCB test image 24]]、[[AI Server PCB test image 19]]、[[HSD PCB image 15]]、[[HSD PCB image 18]] 與 [[snla426]] 未提供共同測試條件，本頁不把其 Dk、DK、Df、M 等級或 SDD21 數字直接互相換算。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 4,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Dk-Df.md"
+        },
+        "score": 5.439074
+       },
+       {
+        "text": "Dk-Df › 相關來源\n- [[AI Server PCB test image 24]] — 未標示日期的 Keysight 高頻高速 PCB 測試解決方案流程圖。\n- [[AI Server PCB test image 19]] — 未標示日期的 CCL 產品規格分級圖，列出聯茂產品線與 Df 範圍。\n- [[AI Server PCB test image 21]] — 未標示日期的高階 CCL 公司產品比較表，使用 M6 / M7 / M8，但未提供 Df 範圍。\n- [[HSD PCB image 15]] — 來源未標示日期、取得於 2026-09-04 的玻纖布分級圖，使用 DK / Low DK 語彙。\n- [[HSD PCB image 18]] — 來源未標示日期、取得於 2026-09-04 的材料演進階梯圖，使用 Low Dk / Low Df 語彙。\n- [[snla426]] — Texas Instruments application note《High-Speed PCB Layout for PCIe Gen 5》，SNLA426，June 2023。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 6,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Dk-Df.md"
+        },
+        "score": 3.680241
+       },
+       {
+        "text": "0 Digital Test - What are SIPI and Serdes › 關鍵實體與概念\n- [[Dr. Milton Lien]] — 封面列名的作者 / 講者。\n- [[RSTW]] — 封面單位文字之一，來源未展開完整名稱。\n- [[SerDes]] — 本簡報主題之一，並在 standards / eco-chain / transmission channel 脈絡中出現。\n- [[Signal Integrity]] — Slide 20 以 high speed PCB/PCBA signal integrity flow 呈現，包含 [[IL]]、[[Xtalk]]、[[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]] 與 [[TL Calculator]]。\n- [[Power Integrity]] — 封面題名中的 PI；Slide 11 以 [[Power Distribution Network]] 形式出現，並列 scopes 與 network analyzers。\n- [[High speed SerDes standards]] — Slide 4 的高速介面 / 標準列名。\n- [[High speed SerDes eco-chain]] — Slide 9 的上中下游產業鏈分類。\n- [[R&S PCB test solutions]] — Slide 21 的 PCB fabricator / system house 測試流程與工具 / 方法集合。\n- [[HDI vs Package substrate]] — Slide 17 的 HDI、package substrate、CoWoS、ABF、L/S、pitch 對照線索。\n- [[高頻高速 PCB 測試解決方案]]、[[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] — 既有概念頁可承接 Slide 20–21 的 PCB / PCBA 測試內容。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+        },
+        "score": 5.465961
+       },
+       {
+        "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- Slide 21 題為 **R&S PCB test solutions**，面向 **PCB Fabricator and System House**，將流程分成 Material Measurement、Material/Stackup selection、Signal Integrity modeling/testing、Sampling testing、PL/Process Monitoring，並列出 impedance (TDR)、DK/DF extraction、IL、roughness、Xtalk、TL modeling、Eye diagram、Delta-L、ISD/ADK、w/ cable / connector testing 等項目。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+        },
+        "score": 3.364014
+       },
+       {
+        "text": "R&S PCB test solutions › 可追溯限制\n- 本來源沒有提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。\n- 本頁不把 Slide 21 的圖上列名解讀為正式解決方案型錄或完整採購配置。\n- [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]] 的角色未明，僅保留圖上列名。\n- [[ISD-ADK]] 與 PL 未展開縮寫，需後續來源補證。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 6,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+        },
+        "score": 6.190007
+       },
+       {
+        "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+        },
+        "score": 4.454128
+       },
+       {
+        "text": "R&S PCB test solutions › 未決事項\n- Slide 21 未標示 R&S PCB test solutions 的正式文件版次與產品 portfolio 對應。\n- Slide 21 未標示 [[TDR]]、[[Delta-L]]、ISD/ADK、DK/DF extraction 的標準版本、演算法、測試條件或工具型號。\n- Slide 21 未展開 PL、ISD、ADK、RSTW、SWISSTO12、QWED、KEYCOM。\n- 需回看原始 PPTX 圖像確認各圖示、商標、箭頭與工具對應關係。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 8,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+        },
+        "score": 4.018188
+       },
+       {
+        "text": "R&S PCB test solutions › 與既有知識的關係\n- [[高頻高速 PCB 測試解決方案]] 既有內容來自 Keysight 圖像，流程是原材料表徵、材料選擇、電路板抽樣測試、大批量監控；本頁保存 R&S 簡報中的類似但不完全相同的流程詞。\n- [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 均已有既有頁面；本來源增加 2026.3.4 R&S 簡報的追溯來源，但沒有新增可量化規格。\n- [[SerDes 與 SI PI 測試概覽]] 連接 Slide 11 和 Slide 20 的 validation challenges / SI flow；本頁聚焦 Slide 21 的 PCB test solutions。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+        },
+        "score": 3.953288
+       },
+       {
+        "text": "R&S PCB test solutions › 相關來源\n- [[0 Digital Test - What are SIPI and Serdes]] — 2026.3.4 的 R&S / RSTW high-speed digital 測試簡報來源摘要。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 7,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+        },
+        "score": 0.280698
+       },
+       {
+        "text": "Digital design test success stories › 未決事項\n- unresolved: Slide 2–7 圖片未 OCR，無法確認每個 success story 的客戶、DUT、測試配置、結果或導入狀態。\n- unresolved: Slide 8–12 未標示儀器 mapping，需回看原始 PPTX 或後續 OCR。\n- unresolved: 來源未標示是否所有案例都屬於同一期間、同一地區或同一業務單位。\n- unresolved: 來源未標示 [[DAC ADC testing]]、[[SoC testing]]、[[ATE PCB testing]]、[[O-E E-O TIA testing]]、[[High speed Cable testing]]、[[Digital Power Test]] 的正式定義或測試標準。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 7,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Digital design test success stories.md"
+        },
+        "score": 3.370083
+       },
+       {
+        "text": "Digital design test success stories › 與 R&S 儀器頁的關係\n- [[R&S FSWP]] 在既有 Productions 頁中被定義為 Phase Noise Analyzer and VCO Tester；[[DDT SuccessStories_202607]] 只說它出現在 DAC/ADC testing 與 SOC testing 的 success-story mapping 中，未新增規格。\n- [[R&S SMA100B]] 在既有 Productions 頁中被定義為 RF and Microwave Signal Generator；[[DDT SuccessStories_202607]] 只說它出現在 DAC/ADC testing 與 SOC testing 的 success-story mapping 中，未新增規格。\n- [[R&S ZNA67]] 在既有 Productions 頁中被定義為 67 GHz Vector Network Analyzer；[[DDT SuccessStories_202607]] 只說它出現在 SOC testing 與 ATE PCB testing 的 success-story mapping 中，未新增規格。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Digital design test success stories.md"
+        },
+        "score": 1.767085
+       },
+       {
+        "text": "Digital design test success stories\n[[Digital design test success stories]] 是 [[DDT SuccessStories_202607]] 中對 2026.7 digital design test 應用案例的簡報層級 mapping，將部分測試應用連到 [[R&S FSWP]]、[[R&S SMA100B]] 與 [[R&S ZNA67]]，但未提供細部配置或測試結果。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Digital design test success stories.md"
+        },
+        "score": 1.003245
+       },
+       {
+        "text": "UI 與 Data Rate 換算\n[[UI 與 Data Rate 換算]] 是 [[Equations]] 中以 `Data Rate=1/UI` 表示、並以 `UI(ps)=62.5` 對應 `DR(Gbps)=16.0` 的簡易換算線索；來源未展開 UI 的縮寫，也未標示應用情境。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/UI 與 Data Rate 換算.md"
+        },
+        "score": 0.263429
+       },
+       {
+        "text": "UI 與 Data Rate 換算 › 來源中的說法\n| 欄位 / 文字 | 值 | 日期 / 期間 | 來源 | 限制 |\n|---|---:|---|---|---|\n| `UI(ps):` | 62.5 | 來源正文未標示正式日期；raw converted 2026-09-17 | [[Equations]] | 未展開 UI 縮寫；未說明是否為 bit period、symbol period 或其他時間單位 |\n| `Data Rate=1/UI` | 原文公式文字 | 來源正文未標示正式日期；raw converted 2026-09-17 | [[Equations]] | 未標示單位換算、有效位數或適用條件 |\n| `DR(Gbps):` | 16.0 | 來源正文未標示正式日期；raw converted 2026-09-17 | [[Equations]] | 未說明是 per-lane、aggregate、raw bit rate、line rate 或 payload rate |",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/UI 與 Data Rate 換算.md"
+        },
+        "score": 0.254157
+       },
+       {
+        "text": "UI 與 Data Rate 換算 › 相關來源\n- [[Equations]] — raw converted 2026-09-17、來源正文未標示正式日期的 Excel 轉檔來源，Sheet1 含 `UI(ps)=62.5`、`Data Rate=1/UI` 與 `DR(Gbps)=16.0`。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/UI 與 Data Rate 換算.md"
+        },
+        "score": 0.229101
+       },
+       {
+        "text": "High speed SerDes eco-chain › 與既有知識的關係\n- [[台灣 SerDes IC-IP 公司名單]] 記錄台灣 IC design、silicon IP、networking IC、I/O interface IC 等公司線索；本頁是應用 / 供應鏈分層，沒有列出完整台灣公司名單。\n- [[高速伺服器儲存互連]] 與 [[HSD Cable test 外部資料清單]] 已有 Amphenol / connector / cable 線索；本頁補入 high speed SerDes eco-chain 對高頻高速線材與接頭的上游定位。\n- [[高頻高速 PCB 測試解決方案]] 與 [[R&S PCB test solutions]] 可承接 Slide 9 中「高速 PCB 設計」與 Slide 20–21 的測試流程。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 7,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+        },
+        "score": 5.69755
+       },
+       {
+        "text": "High speed SerDes eco-chain › 可追溯限制\n- Slide 9 是簡報中的分類表，不是市場調查表；不可由此推論完整供應鏈、排名、市占率或採購關係。\n- 來源未標示 Slide 9 的資料來源、調查期間、地域範圍或定義，因此本頁只保留分類語彙。\n- [[Amphenol]]、[[Molex]]、[[Samtec]]、[[TE]] 在本來源只作為連接方案供應商例子出現；不可推論特定產品、客戶或 R&S 往來。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 8,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+        },
+        "score": 3.863427
+       },
+       {
+        "text": "High speed SerDes eco-chain › 未決事項\n- Slide 9 未標示資料來源、公司選取標準、市場期間、區域範圍或分類依據。\n- Slide 9 未列出光模組 / 光元件、PCB 材、被動元件、封測、系統整合等分類的具體公司。\n- Slide 8 題為 **High speed Serdes eco-chain (Customers)**，但轉檔只擷取到 `HighSpeedSerdesIC`，需回看原始 PPTX 才能確認 customer list。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 10,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+        },
+        "score": 3.549885
+       },
+       {
+        "text": "High speed SerDes eco-chain › 上游 — 基礎材料與核心元件\n- 半導體晶片：控制器晶片、協定芯片、重驅動 / 重定時（Repeater / Re-timer）、介面協議轉換器等，用於 [[HDMI]]、[[USB]]、[[PCIe]]、[[DisplayPort]] 等高速數位介面。\n- 光模組 / 光元件。\n- [[PCB]] 印刷電路板材。\n- 被動元件。\n- 高頻高速連接線材與接頭：同軸 / 雙絞線（twinax）、飛線（Flyover®）、SFP / QSFP 倍率線纜，以及 [[Amphenol]]、[[Molex]]、[[Samtec]]、[[TE]] 提供的背板與板對板連結方案。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+        },
+        "score": 3.360707
+       },
+       {
+        "text": "High speed SerDes eco-chain › 相關來源\n- [[0 Digital Test - What are SIPI and Serdes]] — 2026.3.4 的 R&S / RSTW high-speed digital 測試簡報來源摘要。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 9,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+        },
+        "score": 1.06458
+       },
+       {
+        "text": "Equations › 關鍵實體與概念\n- [[UI 與 Data Rate 換算]] — Sheet1 明示 `Data Rate=1/UI`，並給出 `UI(ps)=62.5` 與 `DR(Gbps)=16.0` 的例子。\n- [[SerDes]] — 既有頁面中已有 high-speed interface / D2D / SoC IP 脈絡；本來源只提供 UI 與 data rate 的表格線索，不足以直接更新任何 SerDes 規格。\n- [[High speed SerDes standards]] — 既有頁面保存多個 high-speed SerDes standards / interfaces 清單；本來源沒有列出標準名稱或版本。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/Equations.md"
+        },
+        "score": 0.320209
+       },
+       {
+        "text": "AI Server PCB test image 55 › 圖上文字整理\n| 區域 | 圖上文字 | 日期 / 期間 |\n|---|---|---|\n| 頂部總標示 | 30 dB | 來源未標示日期 |\n| 左上標示 | 8dB | 來源未標示日期 |\n| 左模組預算 | Tx module budget | 來源未標示日期 |\n| 左模組元件 | Silicon | 來源未標示日期 |\n| 左模組元件 | Interposer | 來源未標示日期 |\n| 左模組元件 | Package | 來源未標示日期 |\n| 左模組內數值 | 8dB | 來源未標示日期 |\n| 左模組板 | Module PCB | 來源未標示日期 |\n| 左連接器 | Mated Mezzanine Connector | 來源未標示日期 |\n| 左底板 | Baseboard | 來源未標示日期 |\n| 左下預算 | TX Baseboard Budget (BGA pad to via) | 來源未標示日期 |\n| 中央標示 | 5 dB | 來源未標示日期 |\n| 中央預算 | QSFP-DD assembly budget | 來源未標示日期 |\n| 中央左連接器 | Mated QSFP-DD SMT Connector | 來源未標示日期 |\n| 中央線材 | 28-AWG cable | 來源未標示日期 |\n| 中央右連接器 | Mated QSFP-DD SMT Connector | 來源未標示日期 |\n| 右連接器 | Mated Mezzanine Connector | 來源未標示日期 |\n| 右底板 | Baseboard | 來源未標示日期 |\n| 右下預算 | RX Baseboard Budget (via to BGA pad) | 來源未標示日期 |\n| 右模組預算 | Rx module budget | 來源未標示日期 |\n| 右上標示 | 8dB | 來源未標示日期 |\n| 右模組元件 | Silicon | 來源未標示日期 |\n| 右模組元件 | Interposer | 來源未標示日期 |\n| 右模組元件 | Package | 來源未標示日期 |\n| 右模組板 | Module PCB | 來源未標示日期 |\n| 圖說 | 图3. OAM互连信号损耗示意图 | 來源未標示日期 |",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/AI Server PCB test image 55.md"
+        },
+        "score": 3.295789
+       },
+       {
+        "text": "AI Server PCB test image 55 › 重點摘要\n- 來源圖說為 **图3. OAM互连信号损耗示意图**。\n- 來源未標示內容日期、年份或季度；本頁只能寫作 **來源未標示日期**。\n- 圖表類型是工程結構 / 方塊示意圖，不是折線圖、長條圖、統計圖表或實物照片。\n- 圖上總體標示為 **30 dB**。\n- 圖上左側 **Tx module budget** 標示為 **8dB**。\n- 圖上中央 **QSFP-DD assembly budget** 標示為 **5 dB**。\n- 圖上右側 **Rx module budget** 標示為 **8dB**。\n- 圖上另列 **TX Baseboard Budget (BGA pad to via)** 與 **RX Baseboard Budget (via to BGA pad)**，但來源明示沒有看見清楚數值，因此不得補算或推定其 dB。\n- 圖上沒有明確公司名稱、產品型號、發布者、文件版次或頁碼之外的來源資訊。\n- 圖上技術名稱包含 [[OAM]]、[[QSFP-DD]]、[[BGA pad]]、[[via]]、[[28-AWG cable]]、[[Mated Mezzanine Connector]]、[[Mated QSFP-DD SMT Connector]]、[[Module PCB]]、[[Baseboard]]、[[Interposer]]、[[Package]] 與 [[Silicon]]。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 2,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/AI Server PCB test image 55.md"
+        },
+        "score": 2.704159
+       },
+       {
+        "text": "AI Server PCB test image 55\n[[AI Server PCB test image 55]] 是一張未標示日期的 [[OAM]] 互連信號損耗示意方塊圖，圖上標示總損耗預算 30 dB、Tx / Rx module budget 8dB、QSFP-DD assembly budget 5 dB，以及未標數值的 TX / RX baseboard budget 區段。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/AI Server PCB test image 55.md"
+        },
+        "score": 2.021302
+       },
+       {
+        "text": "AI Server PCB test image 55 › 互連路徑\n[[AI Server PCB test image 55]]（來源未標示日期；取得於 2026-09-04）從左到右描述一條 [[OAM]] 互連信號路徑：\n\n1. [[Silicon]]\n2. [[Interposer]]\n3. [[Package]]\n4. [[Module PCB]]\n5. [[Mated Mezzanine Connector]]\n6. [[Baseboard]]\n7. [[Mated QSFP-DD SMT Connector]]\n8. [[28-AWG cable]]\n9. [[Mated QSFP-DD SMT Connector]]\n10. [[Baseboard]]\n11. [[Mated Mezzanine Connector]]\n12. [[Module PCB]]\n13. [[Package]]\n14. [[Interposer]]\n15. [[Silicon]]",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 5,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/AI Server PCB test image 55.md"
+        },
+        "score": 1.059348
+       },
+       {
+        "text": "AI Server PCB test image 55 › 損耗預算\n| 區段 | 圖上文字 | 數值 | 單位 | 日期 / 期間 |\n|---|---|---:|---|---|\n| 總體 | 30 dB | 30 | dB | 來源未標示日期 |\n| 發送端模組 | Tx module budget | 8 | dB | 來源未標示日期 |\n| QSFP-DD 組件 | QSFP-DD assembly budget | 5 | dB | 來源未標示日期 |\n| 接收端模組 | Rx module budget | 8 | dB | 來源未標示日期 |\n| TX 底板 | TX Baseboard Budget (BGA pad to via) | 無法辨識 | dB | 來源未標示日期 |\n| RX 底板 | RX Baseboard Budget (via to BGA pad) | 無法辨識 | dB | 來源未標示日期 |",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 4,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/sources/AI Server PCB test image 55.md"
+        },
+        "score": 0.714281
+       },
+       {
+        "text": "Direct Attached Copper Cables › 相關來源\n- [[HSD Cable test image 2]] — 未標示日期、取得於 2026-09-04 的 [[Amphenol Communications Solutions]] 高速連接與供電產品解決方案圖。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 4,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Direct Attached Copper Cables.md"
+        },
+        "score": 1.02693
+       },
+       {
+        "text": "Direct Attached Copper Cables\n[[Direct Attached Copper Cables]] 是 [[HSD Cable test image 2]] 中 [[Amphenol Communications Solutions]] 列出的高速 I/O passive and active copper cable 產品類別，圖上把它連到 data centers、networking、HPC、telecom、server 與 storage solutions。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Direct Attached Copper Cables.md"
+        },
+        "score": 0.682274
+       },
+       {
+        "text": "Celerity 224 Gb-s BGA Mezzanine Connectors\n[[Celerity 224 Gb-s BGA Mezzanine Connectors]] 是 [[full-spectrum-data-center-connectivity-brochure]] 中列出的 [[Amphenol Communications Solutions]] featured product，來源稱 Celerity / Celerity LP 支援 up to 224 Gb/s PAM4。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Celerity 224 Gb-s BGA Mezzanine Connectors.md"
+        },
+        "score": 1.102246
+       },
+       {
+        "text": "Celerity 224 Gb-s BGA Mezzanine Connectors › 相關來源\n- [[full-spectrum-data-center-connectivity-brochure]] — Amphenol full-spectrum data center connectivity brochure，來源未標示正式日期。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 4,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Celerity 224 Gb-s BGA Mezzanine Connectors.md"
+        },
+        "score": 0.703582
+       },
+       {
+        "text": "Amphenol OverPass Cable Systems › 相關來源\n- [[full-spectrum-data-center-connectivity-brochure]] — Amphenol full-spectrum data center connectivity brochure，來源未標示正式日期。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 4,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Amphenol OverPass Cable Systems.md"
+        },
+        "score": 0.727559
+       },
+       {
+        "text": "Amphenol OverPass Cable Systems\n[[Amphenol OverPass Cable Systems]] 是 [[full-spectrum-data-center-connectivity-brochure]] 中列出的 high-speed I/O OverPass cable system，來源描述其讓 high-speed signal 從 ASIC packages 傳輸到 system endpoints。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/entities/Amphenol OverPass Cable Systems.md"
+        },
+        "score": 0.674994
+       },
+       {
+        "text": "Data center full-spectrum connectivity › 相關來源\n- [[full-spectrum-data-center-connectivity-brochure]] — 來源未標示正式日期、raw converted 2026-09-17 的 Amphenol full-spectrum data center connectivity brochure。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 8,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+        },
+        "score": 1.857678
+       },
+       {
+        "text": "Data center full-spectrum connectivity › 與既有概念的關係\n- [[Data center server 高速互連產品組合]] 偏向 data center server interconnect portfolio 的分類表；[[Data center full-spectrum connectivity]] 更強調 full-spectrum：electrical interconnect + optical + fiber + power + cooling。\n- [[Compute tray component solutions]] 偏向 compute tray connectors、cables、power connector、busbar 與 backplane interconnect；本頁納入 optical transceiver、CPO、fiber deployment 與 liquid cooling。\n- [[高速伺服器儲存互連]] 可連接本頁中的 [[Mini Cool Edge IO]]、[[Cool Express Link]]、[[Direct Attached Copper Cables]]、[[PCIe CEM 7 Connectors]] 與 storage / EDSFF 類產品。\n- [[CPO]]、[[Optical I-O]]、[[Near-Packaged Optics]] 可連接本頁的 [[Amphenol Co-packaged Optics]] 與 [[LEAP On-Board Transceiver]]，但本來源不是技術標準或市場採用證據。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 6,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+        },
+        "score": 1.517543
+       },
+       {
+        "text": "Time Domain Channel Properties\n[[Time Domain Channel Properties]]（TDCP）是 [[Release 18]] 中用於描述 channel time-domain behavior、[[UE]] relative mobility 與 associated Doppler 的新 measurement / CSI-related quantity，可協助 [[gNB]] 在 high-speed scenarios 中調整 transmission configuration。[[R18 CSI enhancements for high-speed Scenario]] [[TDCP Reporting]]",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 1,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/Time Domain Channel Properties.md"
+        },
+        "score": 3.663464
+       },
+       {
+        "text": "NR sample rate › 與既有 bandwidth 頁的關係\n- [[UE channel bandwidth]] 已依 [[Frequency Ranges, Bands and Bandwidth]] 保存 bandwidth / sample rate table，其中包含 30.72、61.44、122.88、245.76、491.52、983.04、1966.08 MS/s。\n- [[Maximum transmission bandwidth configuration]] 追蹤 [[3GPP TS 38.101-1]] / [[3GPP TS 38.101-2]] Table 5.3.2-1 的 N_RB matrix。\n- 本頁補充的是 physical layer sample-rate calculation 與 NFFT / SCS 對應，不取代 UE channel bandwidth 或 N_RB 標準表。",
+        "citation": {
+         "kind": "wiki",
+         "source": null,
+         "raw_ref": null,
+         "section": 6,
+         "page": null,
+         "slide": null,
+         "wiki_page": "wiki/concepts/NR sample rate.md"
+        },
+        "score": 2.036531
+       },
+       {
+        "text": "Material Measurement\nMaterial/Stackup selection\nSignal Integrity modeling/testing\nSampling testing\nPL/Process Monitoring",
+        "citation": {
+         "kind": "raw",
+         "source": {
+          "source_id": "src-74f44a4409e2b694",
+          "original_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+          "sha256": "74f44a4409e2b694065038d44c8327e72b9a3c1ceed3537fc8dc2669826c580d",
+          "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+          "page": null,
+          "slide": null,
+          "parent_source_id": null
+         },
+         "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+         "section": 110,
+         "page": null,
+         "slide": null,
+         "wiki_page": null
+        },
+        "score": 18.162052
+       },
+       {
+        "text": "# R&S Key Involvement: 3GPP Related Testing\nDeep Collaboration: R&S worked with JIO and ODMs to verify 3GPP mmWave-related test items.\nOptimization Focus: Precise tuning of EVM (Modulation Quality) and signal integrity after signal up-conversion.",
+        "citation": {
+         "kind": "raw",
+         "source": {
+          "source_id": "src-600ddf3fc41d2bb2",
+          "original_ref": "raw/Market/OneNote/R&S for JIO Project.md",
+          "sha256": "600ddf3fc41d2bb26d1bb08bbc2ea64ee64033937c66f026df48f8040dcfd7cc",
+          "raw_ref": "raw/Market/OneNote/R&S for JIO Project.md",
+          "page": null,
+          "slide": null,
+          "parent_source_id": null
+         },
+         "raw_ref": "raw/Market/OneNote/R&S for JIO Project.md",
+         "section": 25,
+         "page": null,
+         "slide": null,
+         "wiki_page": null
+        },
+        "score": 17.412424
+       },
+       {
+        "text": "![](Grafik73.jpg)\nTiming / Sync / Signal Integrity",
+        "citation": {
+         "kind": "raw",
+         "source": {
+          "source_id": "src-8ea3b55008b7c337",
+          "original_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+          "sha256": "8ea3b55008b7c337d029721ca2f0a210e3b1b6cf0fc902f9409ce7834ac35594",
+          "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+          "page": null,
+          "slide": null,
+          "parent_source_id": null
+         },
+         "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+         "section": 25,
+         "page": null,
+         "slide": null,
+         "wiki_page": null
+        },
+        "score": 16.452389
+       },
+       {
+        "text": "[Ultrafast Impedance Measurement of Active Ultra-High Current PDNs | Signal Integrity Journal](https://www.signalintegrityjournal.com/articles/3798-ultrafast-impedance-measurement-of-active-ultra-high-current-pdns)",
+        "citation": {
+         "kind": "raw",
+         "source": {
+          "source_id": "src-9e2c51edf50288ee",
+          "original_ref": "raw/Market/OneNote/AI DC PDU (2026-8-3)/PI for Digital Power.md",
+          "sha256": "9e2c51edf50288eed9abe492cfe280b30a54f83adb9a929c94c3aebf1c003155",
+          "raw_ref": "raw/Market/OneNote/AI DC PDU (2026-8-3)/PI for Digital Power.md",
+          "page": null,
+          "slide": null,
+          "parent_source_id": null
+         },
+         "raw_ref": "raw/Market/OneNote/AI DC PDU (2026-8-3)/PI for Digital Power.md",
+         "section": 3,
+         "page": null,
+         "slide": null,
+         "wiki_page": null
+        },
+        "score": 15.75513
+       }
+      ],
+      "text": "Signal-integrity-to-oscilloscope is not defined in the passages as a formal term or product; the supported meaning is a measurement-context link in high-speed digital / SerDes validation where Signal Integrity concerns such as IL, Xtalk, Eye diagram and TDR impedance are part of the PCB/PCBA SI flow, and oscilloscopes are listed as instruments for Interface Test and Power Distribution Network measurement contexts [1][3][16][63].\nProduct-related measurement decisions that depend on understanding this link include deciding whether an oscilloscope belongs in the Interface Test setup, where the source lists scopes together with BERTs, AWGs and switch matrices [1][3][16].  \nThey also include deciding whether an oscilloscope is relevant for Power Distribution Network testing, where the source lists scopes together with network analyzers [1][3][16][63].  \nThey include deciding which SI measurements are oscilloscope-adjacent versus better mapped to other PCB/SI tools or instruments, because the SI flow lists IL, Xtalk, Eye diagram, TDR impedance, Stackup Planner and TL Calculator, while the passages do not assign all of those to an oscilloscope product [1][2][3][63].  \nThey include deciding whether product planning must cover other instrument roles beyond oscilloscopes, because the validation blocks also list BERTs, AWGs, switch matrices, phase-noise analyzers, signal generators, network analyzers and spectrum analyzers [1][3][16].  \nThey include deciding whether a specific oscilloscope model, bandwidth, software option, fixture, standard version or pass/fail condition can be quoted; the passages explicitly say those product and test details are not provided [2][18][50].",
+      "synthesized_by": "company",
+      "failure": null
+     },
+     "cited_passages": [
+      {
+       "text": "SerDes 與 SI PI 測試概覽 › 測試脈絡整理\n| 區塊 | 來源明示文字 | 相關儀器 / 方法 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Interface Test | Scopes、BERTs、AWGs、Switch Matrices | [[Oscilloscope]]、[[BERT]]、[[AWG]]、[[Switch Matrix]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4；Slide 11 頁腳 6/13/2025 未決 | 未提供型號、頻寬、資料率或測試標準 |\n| Transmission Channel | Tx Package、PCBs、Connectors、Rx Package | Channel / test board / switch matrices | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 channel loss、fixture、connector 型號或 PCB stackup |\n| RefClk and PLL Jitter Performance | Phase Noise Analyzers、Signal Generators | [[Phase Noise Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 jitter mask、phase noise offset 或 PLL 規格 |\n| Power Distribution Network | Scopes、Network Analyzers | [[Oscilloscope]]、[[Network Analyzer]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 PDN impedance 目標值或測試方法 |\n| ADC / DAC Frontend Performance | Spectrum Analyzers、Signal Generators | [[Spectrum Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 ADC / DAC 指標或頻率 |\n| Signal integrity flow | IL / Xtalk / Eye diagram；TDR Impedance；Stackup Planner；TL Calculator | [[Insertion Loss]]、[[Crosstalk]]、[[Eye diagram]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供工具名稱、標準版本或 pass/fail 條件 |",
+       "citation": {
+        "kind": "wiki",
+        "source": null,
+        "raw_ref": null,
+        "section": 3,
+        "page": null,
+        "slide": null,
+        "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+       },
+       "score": 11.980134
+      },
+      {
+       "text": "SerDes 與 SI PI 測試概覽 › 未決事項\n- Slide 11 未標示各測試區塊對應的標準版本、測試流程、儀器型號、軟體 option 或測試條件。\n- Slide 20 未標示 IL、Xtalk、Eye diagram、TDR impedance、Stackup Planner 與 TL Calculator 的工具、供應商或規格。\n- 需回看原始 PPTX 才能確認圖片中的 waveform、diagram 與 instrument details。",
+       "citation": {
+        "kind": "wiki",
+        "source": null,
+        "raw_ref": null,
+        "section": 7,
+        "page": null,
+        "slide": null,
+        "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+       },
+       "score": 5.359754
+      },
+      {
+       "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+       "citation": {
+        "kind": "wiki",
+        "source": null,
+        "raw_ref": null,
+        "section": 2,
+        "page": null,
+        "slide": null,
+        "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+       },
+       "score": 5.015919
+      },
+      {
+       "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- 本來源是由 `0 Digital Test - What are SIPI and Serdes.pptx` 轉出的 lossy markdown，封面標題為 **What is Serdes and SI/PI?**，作者 / 講者標示為 [[Dr. Milton Lien]]，單位為 Product & Application Engineering, [[RSTW]]，日期標示 **2026.3.4**。\n- 簡報把 R&S Group division 1 targets 分成 **Digital**、**Power**、**RF** 三類，並將 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]] 與 [[PCB]] / [[PCBA]] 測試放在 Digital / high-speed digital 測試脈絡中。\n- Slide 4 列出多個 high speed SerDes standards / interfaces：[[GMSL]]、[[OIF CEI-112G]]、[[LVDS]]、[[JESD204D]]、[[DisplayPort]]、[[HDMI]]、[[MIPI]]、[[USB]]、[[ASA]]、[[UALink]]、[[PCIe]]、[[NVLink]]、[[Ultra Ethernet]]、[[InfiniBand]]、[[SATA]]、[[SAS]]；來源只列名，未提供各標準版本、發布組織、資料率或測試條件。\n- Slide 5 以 **Parallel v.s. Serial Interface** 作為主題，但轉檔文字主要只有標題與圖片嵌入，未擷取圖中細節；因此只能作為 [[Parallel Interface]] / [[Serial Interface]] 需回看原始簡報的線索。\n- Slide 9 以表格整理 [[High speed SerDes eco-chain]]，分成上游基礎材料與核心元件、中游模組整合與生產製造、下游終端應用與市場部署三層。\n- Slide 11 題為 **Transmission Channel and validation challenges electrical Interfaces**，把高速電性介面驗證拆成 transmission channel、measurement path to DUT / test board development、[[Power Distribution Network]]、ADC / DAC frontend performance、RefClk and PLL jitter performance、interface test 等區塊，並列出 scopes、BERTs、AWGs、switch matrices、phase noise analyzers、signal generators、network analyzers、spectrum analyzers 等儀器類型。\n- Slide 17 題為 **HDI vs Package substrate**，以 [[CoWoS]]、[[Package Substrate]]、[[ABF]]、L/S 與 pitch 等字樣比較，但轉檔文字排列不完整，數值對應關係未能可靠確認。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+       "citation": {
+        "kind": "wiki",
+        "source": null,
+        "raw_ref": null,
+        "section": 1,
+        "page": null,
+        "slide": null,
+        "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+       },
+       "score": 8.46888
+      },
+      {
+       "text": "0 Digital Test - What are SIPI and Serdes › 原文未解的問題\n- Slide 1 標示日期 **2026.3.4**，Slide 11 頁腳另出現 **6/13/2025 High-Speed Digital- Market Trends**；來源未說明 2025-06-13 是頁腳模板日期、內容來源日期或另一份簡報日期。\n- 來源未標示本簡報的文件版次、受眾、會議名稱、對外 / 對內使用限制細節；只可確定封面有 **COMPANY RESTRICTED**。\n- Slide 3、6、7、10、12–15、16、18、19、22–24、26 多數內容在 markdown 中主要是圖片嵌入，未 OCR 出可可靠摘錄的正文。\n- Slide 4 standards 清單未提供各標準的版本、發布組織、資料率、介面型態或適用測試方法。\n- Slide 5 Parallel v.s. Serial Interface 未擷取圖中說明，不能由本 markdown 直接比較 parallel 與 serial 的技術差異。\n- Slide 17 的 L/S 與 pitch 數值排列不完整，無法判定 6/6、60/60、30/30、?、60、120 分別對應 HDI、Package Substrate、CoWoS 或 ABF 的哪一欄。\n- Slide 21 未提供 R&S PCB test solutions 對應的正式產品型號、order number、software option、測試頻率、測試標準、fixture、calibration 或量測不確定度。",
+       "citation": {
+        "kind": "wiki",
+        "source": null,
+        "raw_ref": null,
+        "section": 5,
+        "page": null,
+        "slide": null,
+        "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+       },
+       "score": 6.483882
+      },
+      {
+       "text": "SerDes 與 SI PI 測試概覽 › 可追溯限制\n- 本來源是 lossy markdown derivative，多數圖像未 OCR；不可把未擷取的圖片內容當成已驗證主張。\n- Slide 11 的頁腳日期 **6/13/2025** 與封面日期 **2026.3.4** 並存，未能判定何者是內容日期。\n- 本頁不推論 R&S 具備所有列名儀器或方案，也不把儀器類型轉換成正式 product configuration。\n- 本頁不提供 [[Signal Integrity]]、[[Power Integrity]] 或 [[SerDes]] 的標準定義；只保存來源明示的測試區塊與儀器類型。",
+       "citation": {
+        "kind": "wiki",
+        "source": null,
+        "raw_ref": null,
+        "section": 5,
+        "page": null,
+        "slide": null,
+        "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+       },
+       "score": 4.155996
+      },
+      {
+       "text": "0 Digital Test - What are SIPI and Serdes › 關鍵實體與概念\n- [[Dr. Milton Lien]] — 封面列名的作者 / 講者。\n- [[RSTW]] — 封面單位文字之一，來源未展開完整名稱。\n- [[SerDes]] — 本簡報主題之一，並在 standards / eco-chain / transmission channel 脈絡中出現。\n- [[Signal Integrity]] — Slide 20 以 high speed PCB/PCBA signal integrity flow 呈現，包含 [[IL]]、[[Xtalk]]、[[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]] 與 [[TL Calculator]]。\n- [[Power Integrity]] — 封面題名中的 PI；Slide 11 以 [[Power Distribution Network]] 形式出現，並列 scopes 與 network analyzers。\n- [[High speed SerDes standards]] — Slide 4 的高速介面 / 標準列名。\n- [[High speed SerDes eco-chain]] — Slide 9 的上中下游產業鏈分類。\n- [[R&S PCB test solutions]] — Slide 21 的 PCB fabricator / system house 測試流程與工具 / 方法集合。\n- [[HDI vs Package substrate]] — Slide 17 的 HDI、package substrate、CoWoS、ABF、L/S、pitch 對照線索。\n- [[高頻高速 PCB 測試解決方案]]、[[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] — 既有概念頁可承接 Slide 20–21 的 PCB / PCBA 測試內容。",
+       "citation": {
+        "kind": "wiki",
+        "source": null,
+        "raw_ref": null,
+        "section": 3,
+        "page": null,
+        "slide": null,
+        "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+       },
+       "score": 5.465961
+      }
+     ],
+     "assessment": {
+      "status": "covered",
+      "facets": [
+       {
+        "name": "product_option_spec",
+        "citations": [
+         {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/Digital design test success stories.md"
+         },
+         {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 4,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/Digital design test success stories.md"
+         },
+         {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 5,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/Digital design test success stories.md"
+         },
+         {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/Digital design test success stories.md"
+         },
+         {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/Digital design test success stories.md"
+         }
+        ],
+        "attempts": 1
+       }
+      ],
+      "missing_facets": [],
+      "relation_required": false,
+      "relation_citations": [],
+      "relations": []
+     },
+     "citation_policy": "wiki_primary",
+     "wiki_provenance": [
+      {
+       "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+       "raw_refs": [
+        "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+       ]
+      },
+      {
+       "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md",
+       "raw_refs": [
+        "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+       ]
+      }
+     ]
+    },
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-6f37609073e845828f26291b24162d8e",
+      "request_id": "request-6f37609073e845828f26291b24162d8e",
+      "span_id": "span-6f37609073e845828f26291b24162d8e",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-6f37609073e845828f26291b24162d8e",
+       "request_id": "request-6f37609073e845828f26291b24162d8e",
+       "span_id": "span-6f37609073e845828f26291b24162d8e",
+       "parent_span_id": null
+      },
+      "status": "succeeded",
+      "data": {
+       "asset": {
+        "namespace": "engineering",
+        "name": "rs-knowledge",
+        "version": "1.0.3"
+       },
+       "trace": {
+        "trace_id": "trace-6f37609073e845828f26291b24162d8e",
+        "request_id": "request-6f37609073e845828f26291b24162d8e",
+        "span_id": "span-6f37609073e845828f26291b24162d8e",
+        "parent_span_id": null
+       },
+       "answer": {
+        "question": "What is signal-integrity-to-oscilloscope, and which product-related measurement decisions depend on understanding it?",
+        "status": "answered",
+        "passages": [
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 測試脈絡整理\n| 區塊 | 來源明示文字 | 相關儀器 / 方法 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Interface Test | Scopes、BERTs、AWGs、Switch Matrices | [[Oscilloscope]]、[[BERT]]、[[AWG]]、[[Switch Matrix]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4；Slide 11 頁腳 6/13/2025 未決 | 未提供型號、頻寬、資料率或測試標準 |\n| Transmission Channel | Tx Package、PCBs、Connectors、Rx Package | Channel / test board / switch matrices | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 channel loss、fixture、connector 型號或 PCB stackup |\n| RefClk and PLL Jitter Performance | Phase Noise Analyzers、Signal Generators | [[Phase Noise Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 jitter mask、phase noise offset 或 PLL 規格 |\n| Power Distribution Network | Scopes、Network Analyzers | [[Oscilloscope]]、[[Network Analyzer]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 PDN impedance 目標值或測試方法 |\n| ADC / DAC Frontend Performance | Spectrum Analyzers、Signal Generators | [[Spectrum Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 ADC / DAC 指標或頻率 |\n| Signal integrity flow | IL / Xtalk / Eye diagram；TDR Impedance；Stackup Planner；TL Calculator | [[Insertion Loss]]、[[Crosstalk]]、[[Eye diagram]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供工具名稱、標準版本或 pass/fail 條件 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 11.980134
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 未決事項\n- Slide 11 未標示各測試區塊對應的標準版本、測試流程、儀器型號、軟體 option 或測試條件。\n- Slide 20 未標示 IL、Xtalk、Eye diagram、TDR impedance、Stackup Planner 與 TL Calculator 的工具、供應商或規格。\n- 需回看原始 PPTX 才能確認圖片中的 waveform、diagram 與 instrument details。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 5.359754
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 5.015919
+         },
+         {
+          "text": "PCIe Gen5 high-speed PCB layout › 可追溯限制\n- 本頁只追溯 [[snla426]]（June 2023）摘要中的 application note 內容。\n- 來源摘要未提供完整頁碼、圖號、TI URL、修訂紀錄或 PCI-SIG 條文引用。\n- 來源摘要未提供所有 stack-up、routing geometry、via / anti-pad / capacitor pad 圖的原圖。\n- 來源摘要未提供材料表格的測試結構、trace geometry、copper roughness、溫度、濕度或 measurement / simulation 條件。\n- 本頁不把 TI application note 規則推論為所有 PCB、所有 PCIe implementations 或所有 high-speed standards 的通用要求。\n- 本頁不支撐產品供應鏈、客戶導入、量產、出貨、成本或市場份額主張。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 16,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+          },
+          "score": 15.213054
+         },
+         {
+          "text": "PCIe Gen5 high-speed PCB layout › Eye opening requirements\n| Generation | Extrapolated Eye Height after EQ | Minimum Eye Width after EQ | 來源 | 日期 |\n|---|---:|---:|---|---|\n| [[PCIe Gen3]] | 25 mV | 0.3 UI（37.5 ps） | [[snla426]] | June 2023 |\n| [[PCIe Gen4]] | 15 ± 1.5 mV | 0.3 UI（18.75 ± 0.55 ps） | [[snla426]] | June 2023 |\n| [[PCIe Gen5]] | 15 ± 1.5 mV | 0.3 UI（9.375 ± 0.5 ps） | [[snla426]] | June 2023 |\n\n- [[snla426]]（June 2023）說 minimum eye width 與 eye height 在 post-equalization、3-tap DFE blocks 之前量測。\n- [[snla426]]（June 2023）說 PCIe redriver output 的 eye opening 需要大於或等於表列 eye opening 數值。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+          },
+          "score": 11.382969
+         },
+         {
+          "text": "PCIe Gen5 high-speed PCB layout › Dk / Df 與 fiber weave skew\n- [[snla426]]（June 2023）說 routing differential signals 時，每條 trace 會因 [[fiberglass weave]] 與 [[epoxy]] 的 static permittivity（εr）差異，而經歷不同 dielectric constants 與 signal velocities。\n- [[snla426]]（June 2023）說 fiberglass weave 的 εr 約為 6，epoxy 的 εr 約為 3。\n- [[snla426]]（June 2023）說 fiber glass laminate 中的 holes 或 openings 會造成 εr 與 loss tangent（Df）差異。\n- [[snla426]]（June 2023）說 εr 與 Df 差異會在 signal bandwidth 的不同頻率上造成 transmission media 的 [[return loss]] 或 [[insertion loss]] resonance / anti-resonance。\n- [[snla426]]（June 2023）說 differential pair 兩條 signal 若經過不同 fiberglass / epoxy 比例，會產生 [[intra-pair skew]]，並劣化 receiver 看到的 differential eye diagram。\n- [[snla426]]（June 2023）說 fiber weave skew 會造成 duty cycle distortion、AC common-mode voltage noise 與 EMI issues。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+          },
+          "score": 10.309674
+         },
+         {
+          "text": "RoBAT › 使用限制\n- [[HSD Cable test]] 只提供連結標題與括號註記，沒有擷取 [[RoBAT]] 產品清單、測試頻寬、支援介面、儀器架構、客戶、價格或文件版次。\n- 不可僅依 [[HSD Cable test]] 推論 [[RoBAT]] 產品可測 [[DAC]]、[[AEC]]、[[PCIe Gen 6]]、[[PCIe Gen 7]] 或 [[PAM4]]；來源沒有提供這些對應。\n- ATE for Cable Cartridge testing 是來源筆記中的括號註記，尚未確認是否為 [[RoBAT]] 官方用語。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/RoBAT.md"
+          },
+          "score": 6.539023
+         },
+         {
+          "text": "RoBAT\n[[RoBAT]] 是 [[HSD Cable test]] 中以 `robattest.com` 外部連結出現的 signal integrity test products / cable cartridge testing 相關名稱；本次來源未擷取 RoBAT 網站正文。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/RoBAT.md"
+          },
+          "score": 2.143264
+         },
+         {
+          "text": "RoBAT › 來源中的說法\n- [[HSD Cable test]]（路徑含 2026-7-22；converted 2026-09-17）列出 `https://robattest.com/`。\n- [[HSD Cable test]]（路徑含 2026-7-22；converted 2026-09-17）的連結文字為 RoBAT Leading Edge Signal Integrity Test Products。\n- [[HSD Cable test]]（路徑含 2026-7-22；converted 2026-09-17）在該連結後加註 ATE for Cable Cartridge testing。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/RoBAT.md"
+          },
+          "score": 1.759886
+         },
+         {
+          "text": "Keysight ENA › 可追溯限制\n- 來源未列出 ENA 的具體型號、頻率範圍、option code、校準件型號或 TDR option 名稱。\n- 來源未標示 ENA 與 PNA 在圖中流程的分工差異；本頁不自行推論哪些測試必須使用 ENA 或 PNA。\n- 來源未提供性能指標，因此本頁不記錄量測精度、動態範圍或頻寬。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Keysight ENA.md"
+          },
+          "score": 8.555519
+         },
+         {
+          "text": "Keysight ENA\n[[Keysight ENA]] 是 [[AI Server PCB test image 24]] 圖中列為 ENA / PNA 量測平台之一的 Keysight 產品系列名稱，用於該圖描述的材料量測、[[Delta-L]] 損耗、[[TDR 阻抗測量]] 與 [[Dk-Df]] 提取語境。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Keysight ENA.md"
+          },
+          "score": 3.158277
+         },
+         {
+          "text": "Keysight ENA › 相關來源\n- [[AI Server PCB test image 24]] — 未標示日期的 Keysight 高頻高速 PCB 測試解決方案流程圖。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Keysight ENA.md"
+          },
+          "score": 2.601026
+         },
+         {
+          "text": "Dk-Df › 來源中的說法\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）在原材料表徵階段寫明「测量原材料（如基材或层压板）的 Dk/Df」。\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）在材料選擇階段寫明「测量插入损耗、表面粗糙度和材料特性（Dk/Df）」。\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）在電路板抽樣測試階段寫明「测量插入损耗、阻抗变化和材料特性（Dk/Df）」。\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）在解決方案區塊寫明「基于 ENA/PNA 的 Delta-L 损耗、TDR 阻抗测量和 Dk/Df 提取」。\n- [[HSD PCB image 15]]（來源未標示日期；取得於 2026-09-04）稱[[玻纖布]]可依據[[介電係數]]（[[DK]]）和厚度做綜合等級區分。\n- [[HSD PCB image 15]]（來源未標示日期；取得於 2026-09-04）稱常聽到的 [[Low DK]] 是玻纖布材質低介電 / 低延遲的意思。\n- [[HSD PCB image 15]]（來源未標示日期；取得於 2026-09-04）將 [[Low DK 玻纖布]]列為次高階玻纖布，用途 / 特性欄為「高頻高速PCB板材、伺服器、車用、通訊」。\n- [[HSD PCB image 18]]（來源未標示日期；取得於 2026-09-04）在材料演進階梯中把 [[Low Dk]] / [[Low Df]] 標為「低損耗」，並寫「降低訊號損耗，AI/5G 標配（[[富喬]]、[[台玻]] 主力衝刺區）。」\n- [[snla426]]（June 2023）說 Loss tangent（Df）或 Dissipation Factor 是 signal 沿 transmission line 傳播時 signal attenuation 的量測。\n- [[snla426]]（June 2023）說 dielectric loss 來自 dielectric material 對 electromagnetic wave 的吸收；frequency 增加時，dielectric loss 也成比例增加。\n- [[snla426]]（June 2023）說 ultra-low loss materials 的 Df 通常範圍為 0.02 到 0.001；較小的 Df 會造成較低 signal attenuation；[[PCIe]] 等 high speed applications 需要低 Df。\n- [[snla426]]（June 2023）說 [[fiberglass weave]] 的 εr 約為 6，[[epoxy]] 的 εr 約為 3；fiber glass laminate 中的 holes 或 openings 會造成 εr 與 Df 差異。\n- [[snla426]]（June 2023）說 εr 與 Df 差異會在 signal bandwidth 的不同頻率上造成 transmission media 的 [[return loss]] 或 [[insertion loss]] resonance / anti-resonance。\n- [[snla426]]（June 2023）說 εr 通常範圍為 2.5 到 4.5，並隨 frequency 變化；frequency 增加時 εr 下降。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Dk-Df.md"
+          },
+          "score": 12.380909
+         },
+         {
+          "text": "Dk-Df › 可追溯限制\n- [[AI Server PCB test image 24]] 未定義 Dk 與 Df 的完整名稱、測試頻率、測試方法、量測標準或條件。\n- [[AI Server PCB test image 24]] 未提供任何 Dk 或 Df 數值。\n- [[AI Server PCB test image 24]] 未標示材料樣本、基材牌號、層壓板型號或供應商。\n- [[HSD PCB image 15]] 未提供 [[DK]] 或 [[Low DK]] 的數值門檻、測試頻率、測試方法、厚度範圍或標準版本。\n- [[HSD PCB image 15]] 未說明 [[Low DK 玻纖布]] 的主要台廠註記是否等同供應商、主要市場參與者、概念股或其他口徑。\n- [[HSD PCB image 18]] 未提供 [[Low Dk]] / [[Low Df]] 的數值門檻、測試頻率、測試方法、厚度範圍、產品型號、標準版本或價格。\n- [[HSD PCB image 18]] 的「AI/5G 標配」是未標示日期圖卡的說法；不得推論 [[富喬]] 或 [[台玻]] 已量產、出貨或取得特定 AI / 5G 客戶認證。\n- [[snla426]] 的 Df / εr / SDD21 表格是 TI application note 中的 high-speed PCB design reference；來源摘要未提供測試結構、trace geometry、stack-up、銅粗糙度、溫度、濕度或 measurement / simulation 條件。\n- [[snla426]] 中 `Roger` 材料名稱需回查原文確認是否為 Rogers 或特定 laminate product family；本頁照來源摘要保存。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Dk-Df.md"
+          },
+          "score": 10.902612
+         },
+         {
+          "text": "Dk-Df › 未決事項\n- [[AI Server PCB test image 24]] 未標示 Dk/Df 的測試標準、頻率、溫度、材料樣本或校準方法。\n- [[AI Server PCB test image 24]] 未標示 Dk/Df 提取使用的 ENA / PNA 型號與 option code。\n- 既有 [[CCL 產品規格分級]] 來源與 [[AI Server PCB test image 24]] 未提供共同測試條件，因此不同來源中的 Df 不能直接比較。\n- [[HSD PCB image 15]] 未定義 DK 的完整測試條件或數值門檻。\n- [[HSD PCB image 15]] 未說明 Low DK 的「低延遲」是定性描述、材料分類、產品等級或市場用語。\n- [[HSD PCB image 18]] 未標示日期、發布者、報告名稱或資料期間。\n- [[HSD PCB image 18]] 未定義 [[Low Dk]] / [[Low Df]] 的量化門檻、測試條件或產品範圍。\n- [[HSD PCB image 18]] 未說明「AI/5G 標配」的樣本、材料範圍、採用率或期間。\n- [[snla426]] 未提供 Df / SDD21 表格的完整測試條件與 measurement / simulation 方法。\n- [[snla426]] 未提供 Megtron 6、Roger、GETEK、Nelco 4000-6、FR4、Tetra Functional FR4 的正式 material datasheet reference。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Dk-Df.md"
+          },
+          "score": 10.452877
+         },
+         {
+          "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- 本來源是由 `0 Digital Test - What are SIPI and Serdes.pptx` 轉出的 lossy markdown，封面標題為 **What is Serdes and SI/PI?**，作者 / 講者標示為 [[Dr. Milton Lien]]，單位為 Product & Application Engineering, [[RSTW]]，日期標示 **2026.3.4**。\n- 簡報把 R&S Group division 1 targets 分成 **Digital**、**Power**、**RF** 三類，並將 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]] 與 [[PCB]] / [[PCBA]] 測試放在 Digital / high-speed digital 測試脈絡中。\n- Slide 4 列出多個 high speed SerDes standards / interfaces：[[GMSL]]、[[OIF CEI-112G]]、[[LVDS]]、[[JESD204D]]、[[DisplayPort]]、[[HDMI]]、[[MIPI]]、[[USB]]、[[ASA]]、[[UALink]]、[[PCIe]]、[[NVLink]]、[[Ultra Ethernet]]、[[InfiniBand]]、[[SATA]]、[[SAS]]；來源只列名，未提供各標準版本、發布組織、資料率或測試條件。\n- Slide 5 以 **Parallel v.s. Serial Interface** 作為主題，但轉檔文字主要只有標題與圖片嵌入，未擷取圖中細節；因此只能作為 [[Parallel Interface]] / [[Serial Interface]] 需回看原始簡報的線索。\n- Slide 9 以表格整理 [[High speed SerDes eco-chain]]，分成上游基礎材料與核心元件、中游模組整合與生產製造、下游終端應用與市場部署三層。\n- Slide 11 題為 **Transmission Channel and validation challenges electrical Interfaces**，把高速電性介面驗證拆成 transmission channel、measurement path to DUT / test board development、[[Power Distribution Network]]、ADC / DAC frontend performance、RefClk and PLL jitter performance、interface test 等區塊，並列出 scopes、BERTs、AWGs、switch matrices、phase noise analyzers、signal generators、network analyzers、spectrum analyzers 等儀器類型。\n- Slide 17 題為 **HDI vs Package substrate**，以 [[CoWoS]]、[[Package Substrate]]、[[ABF]]、L/S 與 pitch 等字樣比較，但轉檔文字排列不完整，數值對應關係未能可靠確認。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+          },
+          "score": 8.46888
+         },
+         {
+          "text": "0 Digital Test - What are SIPI and Serdes › 與既有知識的關係\n- 既有 [[SerDes]] 頁主要來自 D2D / SoC IP / XPU-HBM-Optical I/O 圖像來源；本來源補充 2026.3.4 簡報層級的 high speed SerDes standards、產業鏈與驗證挑戰脈絡，但不提供 SerDes 的資料率、lane 數或具體標準條文。\n- 既有 [[高頻高速 PCB 測試解決方案]] 主要記錄 Keysight 圖像中的原材料表徵、材料選擇、抽樣測試與量產監控；本來源的 [[R&S PCB test solutions]] 以 R&S 簡報角度列出 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 PL / process monitoring，可作為平行視角。\n- 既有 [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 已記錄 Keysight 圖像來源；本來源 Slide 21 再次把 DK/DF extraction、TDR、Delta-L 與 ISD/ADK 放在 PCB test solutions 流程中，但沒有新增標準版本、儀器型號或 option code。\n- 既有 [[Package Substrate]] 與 [[ABF載板]] 頁已有多份市場圖像來源；本來源 Slide 17 顯示 HDI vs Package substrate / CoWoS / ABF 對照，但因 OCR / 轉檔結果不足，僅作為待回看原始投影片的線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+          },
+          "score": 7.126481
+         },
+         {
+          "text": "0 Digital Test - What are SIPI and Serdes › 原文未解的問題\n- Slide 1 標示日期 **2026.3.4**，Slide 11 頁腳另出現 **6/13/2025 High-Speed Digital- Market Trends**；來源未說明 2025-06-13 是頁腳模板日期、內容來源日期或另一份簡報日期。\n- 來源未標示本簡報的文件版次、受眾、會議名稱、對外 / 對內使用限制細節；只可確定封面有 **COMPANY RESTRICTED**。\n- Slide 3、6、7、10、12–15、16、18、19、22–24、26 多數內容在 markdown 中主要是圖片嵌入，未 OCR 出可可靠摘錄的正文。\n- Slide 4 standards 清單未提供各標準的版本、發布組織、資料率、介面型態或適用測試方法。\n- Slide 5 Parallel v.s. Serial Interface 未擷取圖中說明，不能由本 markdown 直接比較 parallel 與 serial 的技術差異。\n- Slide 17 的 L/S 與 pitch 數值排列不完整，無法判定 6/6、60/60、30/30、?、60、120 分別對應 HDI、Package Substrate、CoWoS 或 ABF 的哪一欄。\n- Slide 21 未提供 R&S PCB test solutions 對應的正式產品型號、order number、software option、測試頻率、測試標準、fixture、calibration 或量測不確定度。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+          },
+          "score": 6.483882
+         },
+         {
+          "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 12.640753
+         },
+         {
+          "text": "R&S PCB test solutions › 圖上工具 / 合作方文字\n| 圖上文字 | 可能角色 | 來源 | 限制 |\n|---|---|---|---|\n| [[SPEAG]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未說明是合作夥伴、工具、方法或範例 |\n| [[SWISSTO12]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[QWED]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[KEYCOM]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[RSTW]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未展開完整單位名稱 |\n| TDR | 測 impedance | [[0 Digital Test - What are SIPI and Serdes]] | 未提供 TDR option 或探頭型號 |\n| Delta-L | 損耗量測相關 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供方法定義、標準或軟體名稱 |\n| ISD/ADK | 圖上方法 / 工具文字 | [[0 Digital Test - What are SIPI and Serdes]] | 未展開縮寫，未說明與 Delta-L 的關係 |\n| w/ cable / connector testing | cable / connector testing | [[0 Digital Test - What are SIPI and Serdes]] | 未提供連接器類型、線纜規格或測試項目 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 7.568349
+         },
+         {
+          "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 6.470032
+         },
+         {
+          "text": "Digital design test success stories › 來源中的 mapping\n| 投影片 | 來源標題 | 明示對應儀器 | 可連到的主題 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Slide 2–3 | DAC/ADC testing => FSWP, SMA100B | [[R&S FSWP]]、[[R&S SMA100B]] | [[DAC ADC testing]] | 2026.7 | 只 OCR 出標題與儀器名稱；圖片內容未解讀 |\n| Slide 4–5 | SOC testing => FSWP, SMA100B, ZNA67 | [[R&S FSWP]]、[[R&S SMA100B]]、[[R&S ZNA67]] | [[SoC testing]] | 2026.7 | 未提供 DUT、介面、頻率、量測結果或 option |\n| Slide 6 | SOC testing=> ZNA67 | [[R&S ZNA67]] | [[SoC testing]] | 2026.7 | 圖片內容未 OCR；不可推論 ZNA67 的完整配置 |\n| Slide 7 | ATE PCB testing=> ZNA67 | [[R&S ZNA67]] | [[ATE PCB testing]]、[[R&S PCB test solutions]] | 2026.7 | 未標示 ATE 平台、fixture、頻率、PCB 板材或 pass/fail 條件 |\n| Slide 8 | O/E, E/O, TIA testing | 來源未標示 | [[O-E E-O TIA testing]]、[[TIA testing]] | 2026.7 | 未標示儀器、光電轉換器、資料率或標準 |\n| Slide 9–10 | High speed Cable testing | 來源未標示 | [[High speed Cable testing]]、[[HSD Cable test 外部資料清單]] | 2026.7 | 未標示 cable 類型、資料率、連接器或量測方法 |\n| Slide 11–12 | Digital Power Test | 來源未標示 | [[Digital Power Test]]、[[Power Integrity]] | 2026.7 | 未標示測試項目、電壓 / 電流、負載或儀器 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Digital design test success stories.md"
+          },
+          "score": 14.620094
+         },
+         {
+          "text": "Digital design test success stories › 與既有測試概念的關係\n- [[SerDes 與 SI PI 測試概覽]] 與 [[R&S PCB test solutions]] 提供 high-speed digital、SI/PI 與 PCB 測試流程脈絡；本頁只保存 success-story 簡報中的應用 / 儀器對應關係。\n- [[高頻高速 PCB 測試解決方案]] 主要來自 Keysight 圖像來源，描述原材料表徵、材料選擇、抽樣測試與量產監控；本頁的 ATE PCB testing 只指出 [[R&S ZNA67]] 被列名，不能推論完整流程。\n- [[HSD Cable test 外部資料清單]] 保存 cable / connector / signal integrity 外部待讀材料；本頁的 High speed Cable testing slide 未提供可採用的 cable test 主張。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Digital design test success stories.md"
+          },
+          "score": 8.883756
+         },
+         {
+          "text": "Digital design test success stories › 可追溯限制\n- [[DDT SuccessStories_202607]] 是 PowerPoint 轉出的 lossy markdown；除標題與少量文字外，大部分成功案例細節在圖片中，尚未 OCR。\n- 本頁不把 success-story mapping 解讀為正式 solution bundle、報價配置、必選 option、客戶背書或量產導入證據。\n- 本頁不推論 [[R&S FSWP]]、[[R&S SMA100B]]、[[R&S ZNA67]] 在各應用中的角色分工；例如 stimulus、analysis、phase noise、VNA 或 automation 角色都需後續來源補證。\n- Market 類資料會隨時間變動；本頁的時間點只限於來源標示的 2026.7。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Digital design test success stories.md"
+          },
+          "score": 3.985922
+         },
+         {
+          "text": "UI 與 Data Rate 換算 › 未決事項\n- [[Equations]] 未展開 `UI` 的縮寫。\n- [[Equations]] 未說明 `DR` 的完整名稱、口徑或測量 / 計算條件。\n- [[Equations]] 未標示公式是否適用於特定 [[SerDes]]、[[High speed SerDes standards]]、[[PCIe]]、[[Ethernet]]、[[NVLink]] 或其他介面。\n- [[Equations]] 未標示 `16.0 Gbps` 是否為 raw data rate、payload data rate、symbol rate 或 aggregate throughput。\n- Sheet2 與 Sheet3 為空表格，需回查原始 `Equations.xlsx` 才能確認是否有未轉出的公式或內容。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/UI 與 Data Rate 換算.md"
+          },
+          "score": 5.135337
+         },
+         {
+          "text": "UI 與 Data Rate 換算 › 使用限制\n- [[Equations]] 只是一個由 Excel 轉出的簡短表格；不能由此推論任何 [[SerDes]] 標準、產品、測試設備或 compliance 測試項目。\n- [[Equations]] 沒有標示 [[NRZ]]、[[PAM4]]、[[PAM-n]]、encoding overhead、FEC、clocking、jitter 或 lane count，因此不可把 `DR(Gbps)=16.0` 解讀為完整 link capability。\n- 本頁保留來源明示的公式與數字，不補推原始 Excel 可能存在的 cell formula、格式、隱藏欄列或未轉出的內容。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/UI 與 Data Rate 換算.md"
+          },
+          "score": 3.802098
+         },
+         {
+          "text": "UI 與 Data Rate 換算 › 與既有知識的關係\n- [[SerDes]]、[[SerDes 與 SI PI 測試概覽]] 與 [[High speed SerDes standards]] 提供 high-speed interface 與測試脈絡；本頁只補充一個資料率與 UI 的表格線索。\n- 若後續補入正式標準或教材來源，應另建或更新 [[Unit Interval]]、[[Data Rate]]、[[Line Rate]]、[[Symbol Rate]] 等概念頁，並標示標準版本與發布組織。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/UI 與 Data Rate 換算.md"
+          },
+          "score": 1.175428
+         },
+         {
+          "text": "High speed SerDes eco-chain › 分層整理\n| 層級 | 來源分類 | 來源明示內容 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| 上游 | 基礎材料與核心元件 | 半導體晶片、光模組 / 光元件、PCB 材、被動元件、高頻高速線材與接頭 | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供公司名單完整性、市占率、供應關係或材料規格 |\n| 中游 | 模組整合與生產製造 | 晶片封測、線材接頭組裝、系統級整合、消費電子裝置整合、高速 PCB 設計 | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供具體廠商、產能或客戶 |\n| 下游 | 終端應用與市場部署 | 通訊設備、伺服器與資料中心、雲端 / 邊緣、消費電子 / 車用、工業與智慧製造 | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供需求數字、出貨量或區域市場資料 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+          },
+          "score": 10.017385
+         },
+         {
+          "text": "High speed SerDes eco-chain › 中游 — 模組整合與生產製造\n- 晶片封測製造。\n- 高速連接線材與接頭組裝。\n- 系統級整合：製造通信設備、服務器用的光傳輸設備、交換機、路由器等中間件設備。\n- 電腦與消費性電子裝置整合 [[HDMI]]、[[USB]]、[[PCIe]] 介面等，含各類轉換器、擴充塢、模組等。\n- 高速 PCB 設計：涉及阻抗控制、差分對布局、地平面配置等，確保訊號品質。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+          },
+          "score": 7.909633
+         },
+         {
+          "text": "High speed SerDes eco-chain › 下游 — 終端應用與市場部署\n- 通訊設備製造商：核心網、5G 基站、光傳輸設備、交換機、路由器等。\n- 服務器與資料中心：協助 AI、高效能計算環境部署，需求高速內部連與介面連接。\n- 網通基礎建設與雲端應用：包含物聯網、雲計算與邊緣運算等場域皆需高速數據傳輸與處理能力。\n- 消費電子與車用領域：筆電 / 手機等需 [[HDMI]]、[[DisplayPort]]、[[USB]] 介面，汽車上的 [[ADAS]] 與 [[V2X]] 通訊亦需高速訊號傳輸。\n- 工業與智慧製造：工業自動化系統、高速資料擷取與辨識也仰賴高速訊號鏈路。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+          },
+          "score": 6.843184
+         },
+         {
+          "text": "Equations › 原文未解的問題\n- 來源未標示正式製作日期；只知道 raw frontmatter 的 `converted: 2026-09-17`。\n- 來源未標示作者、組織、文件版次、應用場景或表格目的。\n- `UI` 未展開縮寫，來源只標示 `UI(ps)`。\n- `DR(Gbps)` 未說明是 per-lane data rate、aggregate data rate、symbol rate、bit rate，或是否與 NRZ / PAM4 / PAM-n 調變相關。\n- `Data Rate=1/UI` 未標示單位換算說明、有效位數、四捨五入規則或適用限制。\n- Sheet2 與 Sheet3 在轉檔結果中為空，無法判定原始 Excel 是否含公式、圖表、隱藏欄列或格式資訊。\n- 需要回查原始 `Equations.xlsx` 才能確認是否有 Excel formula、cell formatting、sheet name、隱藏內容或其他未轉出的資料。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Equations.md"
+          },
+          "score": 2.624933
+         },
+         {
+          "text": "Equations › 與既有知識的關係\n- [[SerDes 與 SI PI 測試概覽]] 與 [[High speed SerDes standards]] 已由 [[0 Digital Test - What are SIPI and Serdes]] 建立 high-speed digital / SerDes 測試脈絡；本來源可作為該脈絡下的簡易公式補充，但不能補上任何標準版本或產品支援狀態。\n- [[SerDes]] 頁已有多份來源指出 SerDes 作為 D2D、封裝模組或 SoC IP 區塊中的高速介面語彙；本來源只提供 `Data Rate=1/UI` 與一組數字，不足以說明 SerDes 的資料率、lane 數、調變或實作。\n- 因為來源沒有標示應用情境，本次不把 `16.0 Gbps` 解讀為任何特定產品、標準、測試項目或市場資料點。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Equations.md"
+          },
+          "score": 1.322124
+         },
+         {
+          "text": "Equations › 重點摘要\n- 本來源是由 `Equations.xlsx` 轉出的 lossy markdown；frontmatter 標示原始檔路徑為 `C:/Users/Lien/OneDrive - Rohde & Schwarz/Chi Leo (5TWSDE)'s files - RS_Knowledge/drop/Market/OneNote/Equations.xlsx`，`converted: 2026-09-17`。\n- 來源正文未標示正式製作日期、作者、文件版次、用途、會議或技術領域；目前只能以 raw 轉檔日期 **2026-09-17** 作為處理時間線索。\n- Sheet1 是一個簡單換算表：`UI(ps): 62.5`，以及 `Data Rate=1/UI` 對應 `DR(Gbps): 16.0`。\n- Sheet2 與 Sheet3 在 markdown 中只剩空表格，沒有可抽取的正文主張。\n- 本來源支撐 [[UI 與 Data Rate 換算]] 這個簡易換算線索，但不支撐任何特定 [[SerDes]] 標準、lane 數、編碼方式、PAM 階數、clocking、jitter tolerance 或 compliance 測試條件。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Equations.md"
+          },
+          "score": 0.958631
+         },
+         {
+          "text": "AI Server PCB test image 55 › 與既有知識的關係\n- [[AI Server PCB test image 55]] 與 [[AI Server PCB test image 30]] 都是未標示日期的 **图3. OAM互连信号损耗示意图**，且文字、數值與路徑內容高度一致；本頁將它視為同一類 OAM interconnect loss budget 圖像來源的另一份圖像，而不是獨立市場驗證。\n- [[OAM 互連信號損耗]] 是本來源最直接補強的概念頁，用來集中保存 30 dB、8dB、5 dB 與 baseboard budget 未辨識數值的限制。\n- [[AI 伺服器 CPU OAM UBB 板件比較]] 已使用 [[AI Server PCB test image 30]] 補充 OAM 互連 loss budget；本來源內容與該來源重疊，因此不得把兩張圖加總成兩個獨立樣本。\n- [[高頻高速 PCB 測試解決方案]] 記錄 [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 與 [[插入損耗]] 的測試流程；本來源只提供示意性的 dB loss budget，未提供測試方法、頻率、資料率或 pass/fail 條件。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AI Server PCB test image 55.md"
+          },
+          "score": 9.506056
+         },
+         {
+          "text": "AI Server PCB test image 55 › 原文未解的問題\n- 來源未標示內容日期、年份、季度或資料期間。\n- 來源未標示發布者、公司、報告名稱、簡報名稱、頁碼、URL 或文件版次。\n- 來源未說明 [[OAM]] 的完整名稱、規格版本、資料率、lane 數、通道定義或適用平台。\n- 來源未說明 30 dB、8dB 與 5 dB 的完整定義、測試條件與加總關係。\n- 來源未清楚標示 TX / RX baseboard budget 的數值。\n- 來源未說明 [[QSFP-DD]]、[[Mated QSFP-DD SMT Connector]]、[[Mated Mezzanine Connector]]、[[28-AWG cable]] 的規格、長度、材料或供應商。\n- 來源未提供任何公司供應關係、客戶、導入、量產、出貨、市場份額或價格資訊。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AI Server PCB test image 55.md"
+          },
+          "score": 8.352452
+         },
+         {
+          "text": "AI Server PCB test image 55 › 可追溯限制\n- 來源未標示內容日期；不得寫成任何年度、季度或產品世代的市場現況。\n- 來源未標示公司、發布者、報告名稱、簡報名稱、URL、文件版次或頁碼。\n- 來源未說明 [[OAM]] 的完整名稱、規格版本、資料率、lane 數、通道長度或適用平台。\n- 來源未說明 **30 dB** 是總通道損耗、插入損耗、設計預算上限或其他 loss budget 口徑。\n- 來源未說明 **8dB + 5 dB + 8dB** 與 **30 dB** 的完整加總關係。\n- 來源未清楚標示 TX / RX baseboard budget 的數值；不得由 30 dB 扣除其他數字補算。\n- 來源未提供任何公司供應關係、客戶、導入、量產、出貨、市場份額、價格或 ASP 資訊。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AI Server PCB test image 55.md"
+          },
+          "score": 6.747032
+         },
+         {
+          "text": "Direct Attached Copper Cables › 未決事項\n- 來源未標示 [[Direct Attached Copper Cables]] 的完整型號、料號、產品系列階層、發布日期或資料表版次。\n- 來源未說明 112G / 224G 與 200G / 400G / 800G / 1.6T 的對應 lane 數、編碼、距離或測試條件。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Direct Attached Copper Cables.md"
+          },
+          "score": 7.238218
+         },
+         {
+          "text": "Direct Attached Copper Cables › 可追溯限制\n- [[HSD Cable test image 2]] 未標示內容日期；不得把 112G、224G、200G / 400G / 800G / 1.6T 或 PCIe Gen 5/6 寫成特定日期的量產、出貨或採用狀態。\n- 來源未提供 cable length、gauge、BER、eye diagram、active / passive 分界、功耗、合規證書、order number 或客戶導入證據。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Direct Attached Copper Cables.md"
+          },
+          "score": 4.270411
+         },
+         {
+          "text": "Direct Attached Copper Cables › 來源中的說法\n- [[HSD Cable test image 2]]（來源未標示日期；取得於 2026-09-04）左側主圖編號 4 標示 DIrect Attached Copper Cables，右側標題為 Direct Attached Copper Cables。\n- [[HSD Cable test image 2]]（來源未標示日期；取得於 2026-09-04）描述其為 112G and 224G high-speed I/O PCIe Gen 5/6 passive and active cables designed and manufactured for data centers、networking、HPC、telecom、server and storage solutions。\n- [[HSD Cable test image 2]]（來源未標示日期；取得於 2026-09-04）列出 [[OSFP Cables]]、[[OSFP-XD Copper Cables]]、[[QSFP DD Cables]]、[[CDFP Cables]]。\n- [[HSD Cable test image 2]]（來源未標示日期；取得於 2026-09-04）小標為 200G / 400G / 800G / 1.6T。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Direct Attached Copper Cables.md"
+          },
+          "score": 1.502031
+         },
+         {
+          "text": "Celerity 224 Gb-s BGA Mezzanine Connectors › 未決事項\n- 來源未提供 Celerity / Celerity LP 的完整產品型號、料號、stack height options、pin count、mechanical drawing 或 SI 測試報告。\n- 來源未說明 224 Gb/s PAM4 的 lane / channel 定義、測試 fixture 或標準版本。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Celerity 224 Gb-s BGA Mezzanine Connectors.md"
+          },
+          "score": 6.654642
+         },
+         {
+          "text": "Celerity 224 Gb-s BGA Mezzanine Connectors › 可追溯限制\n- 來源未標示正式內容日期、料號、BGA footprint、stack height 清單、測試條件、PAM4 eye diagram、BER、compliance 或 datasheet 版次。\n- `up to 224 Gb/s PAM4` 是 brochure claim；不可寫成特定日期的量產、認證、出貨或客戶採用狀態。\n- 來源未說明 Celerity 與 Celerity LP 的差異、產品階層或互配條件。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Celerity 224 Gb-s BGA Mezzanine Connectors.md"
+          },
+          "score": 5.008891
+         },
+         {
+          "text": "Celerity 224 Gb-s BGA Mezzanine Connectors › 來源中的說法\n- [[full-spectrum-data-center-connectivity-brochure]]（來源未標示日期；raw converted 2026-09-17）在 featured product 區塊列出 Celerity / Celerity LP 224 Gb/s BGA Mezzanine Connectors。\n- 來源稱 Celerity and Celerity LP 224 Gb/s BGA Mezzanine Connectors are designed to support data rates up to 224 Gb/s PAM4。\n- 來源稱其 feature hermaphroditic mating interfaces。\n- 來源稱這些 mating interfaces simplify board layouts、enable flexible stack height configurations and ensure robust alignment。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Celerity 224 Gb-s BGA Mezzanine Connectors.md"
+          },
+          "score": 1.228632
+         },
+         {
+          "text": "Amphenol OverPass Cable Systems › 可追溯限制\n- 來源未標示正式內容日期、產品型號、料號、datasheet 版次或測試條件。\n- `broad range of next gen capabilities` 與 `high-speed signal transmission` 是 brochure-level claim；不可推論實際傳輸距離、loss budget、BER、eye diagram、量產狀態或客戶導入。\n- 來源未明確說明 [[Amphenol OverPass Cable Systems]] 與既有 [[OSFP OverPass Assemblies]]、[[Direct Attached Copper Cables]] 或 [[OSFP Cable Assemblies]] 的產品階層關係。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Amphenol OverPass Cable Systems.md"
+          },
+          "score": 6.12471
+         },
+         {
+          "text": "Amphenol OverPass Cable Systems › 未決事項\n- 來源未提供 OverPass cable system 的完整產品系列、料號、支援速率、支援協定、線纜長度、connector form factor 或相容平台。\n- 來源未提供 next gen capabilities 的具體清單或驗證條件。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Amphenol OverPass Cable Systems.md"
+          },
+          "score": 4.808169
+         },
+         {
+          "text": "Amphenol OverPass Cable Systems › 來源中的說法\n- [[full-spectrum-data-center-connectivity-brochure]]（來源未標示日期；raw converted 2026-09-17）在 High-Speed I/O OverPass Cable Systems 區塊稱 Amphenol's OverPass cable systems offer a broad range of next gen capabilities。\n- 來源稱這些 capabilities enable high-speed signal transmission from ASIC packages to end-points across the system。\n- 來源的 featured product 區塊另列 [[OSFP Cable Assemblies]]，並提到 active electrical cables / direct attached cables and cable solutions。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Amphenol OverPass Cable Systems.md"
+          },
+          "score": 2.212883
+         },
+         {
+          "text": "Data center full-spectrum connectivity › 使用限制\n- [[full-spectrum-data-center-connectivity-brochure]] 未標示正式日期；所有產品能力、規格數字與 marketing claim 需標示來源日期缺口。\n- 來源是供應商 brochure，不是第三方市場報告；不可用來推論市占率、排名、客戶導入、採購關係或出貨量。\n- 來源未提供 datasheet 版次、order number、合規證書或測試條件；224G、448G、1.6T、300G、60A、+54V、60 contacts、0.6mm pitch 等數字只能作為來源文字摘錄。\n- PDF 轉檔為 lossy derivative；欄位串接與 OCR 風險需回看原始 PDF。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+          },
+          "score": 4.355721
+         },
+         {
+          "text": "Data center full-spectrum connectivity › High-speed electrical connectivity\n- [[Amphenol OverPass Cable Systems]] — 來源稱其 enable high-speed signal transmission from ASIC packages to end-points across the system。\n- [[ExtremePort OSFP Connectors]] — 來源稱 connectors and cages have 60 contacts per port、0.6 mm pitch，並 optimized for signal integrity、thermal management and multi-lane pluggable architecture。\n- [[Amphenol XtremePass]] — 來源稱 XtremePass 448G connector solution supports scalable form factors from 32DP to 128DP，並跨 Ethernet、NVLink、PCIe、InfiniBand systems。\n- [[OSFP Cable Assemblies]] — 來源稱 OSFP cable assemblies compatible with 25G/lane NRZ up to 224G/lane PAM4，deliver aggregate bandwidths of 200G、400G、800G and 1.6T per cable assembly，available in Passive and Active variants。\n- [[Sentry HD High-Speed Backplane Connector]] — 來源稱其是 next-generation high-speed backplane connector platform。\n- [[Celerity 224 Gb-s BGA Mezzanine Connectors]] — 來源稱其 designed to support data rates up to 224 Gb/s PAM4。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+          },
+          "score": 4.11531
+         },
+         {
+          "text": "Data center full-spectrum connectivity › 底部圖上產品清單\n來源底部再以清單列出多個 electrical interconnect / memory / card edge / cable connector 類別，包括 [[SOCAMM and LPCAMM CAMM2 Connectors]]、[[CompacLink PCIe Gen 6 Compression Board-to-Board Connectors]]、[[Mini Cool Edge IO]] / [[Multi-Trak]]、[[Titen]]、[[Cool Express Link]]、[[DDR5 and Next Gen Memory Connector]]、[[Double & Single Density Mini Cool Edge]]、[[U.2 SFF8639]]、[[PCIe CEM 7 Connectors]] 與 [[Direct Attached PCIe CEM Cable Connectors]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+          },
+          "score": 2.104498
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 與既有知識的關係\n- [[SerDes]] 已記錄 die-to-die、SoC IP 與封裝示意圖中的 SerDes 語彙；本頁補充 R&S 簡報中 SerDes 與 SI / PI / validation challenges 的測試場景。\n- [[高頻高速 PCB 測試解決方案]]、[[Dk-Df]]、[[Delta-L]] 與 [[TDR 阻抗測量]] 可承接 Slide 20–21 中對 high speed PCB / PCBA signal integrity flow 與 PCB test solutions 的列名。\n- [[Power Integrity 外部資料清單]] 保存既有 OneNote link hub 中的 PDN impedance 待讀資料；本頁只加入 Slide 11 明示的 [[Power Distribution Network]] 測試區塊。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 4.342259
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 可追溯限制\n- 本來源是 lossy markdown derivative，多數圖像未 OCR；不可把未擷取的圖片內容當成已驗證主張。\n- Slide 11 的頁腳日期 **6/13/2025** 與封面日期 **2026.3.4** 並存，未能判定何者是內容日期。\n- 本頁不推論 R&S 具備所有列名儀器或方案，也不把儀器類型轉換成正式 product configuration。\n- 本頁不提供 [[Signal Integrity]]、[[Power Integrity]] 或 [[SerDes]] 的標準定義；只保存來源明示的測試區塊與儀器類型。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 4.155996
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽\n[[SerDes 與 SI PI 測試概覽]] 是依 [[0 Digital Test - What are SIPI and Serdes]] 建立的 high-speed digital 測試主題頁，用來連接 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]]、[[PCB]] / [[PCBA]] 與相關驗證儀器類型。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 1.799379
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 相關來源\n- [[0 Digital Test - What are SIPI and Serdes]] — 2026.3.4 的 R&S / RSTW high-speed digital 測試簡報來源摘要。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 0.120992
+         },
+         {
+          "text": "PCIe Gen5 high-speed PCB layout › 與既有知識的關係\n- [[SerDes 與 SI PI 測試概覽]] 提供 high-speed digital validation 與儀器類型的 R&S 簡報視角；本頁補入 TI 對 [[PCIe Gen5]] PCB layout 的 application note 規則。\n- [[Dk-Df]] 既有頁面整理市場圖卡中的 Dk / Df 語彙；本頁提供 Df / Dissipation Factor、dielectric loss 與 material insertion loss table 的 PCIe Gen5 應用脈絡。\n- [[玻纖布]] 既有頁面整理玻纖布市場分類；本頁提供 fiberglass weave / epoxy εr 差異造成 intra-pair skew 的 layout 層級解釋。\n- [[PCIe Gen5 SSD]] 是 SSD 產品 / controller 脈絡；本頁是 PCIe Gen5 channel / PCB layout 脈絡，兩者不可混用。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 15,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+          },
+          "score": 7.918003
+         },
+         {
+          "text": "PCIe Gen5 high-speed PCB layout › 未決事項\n- [[PCI Express Base Specification Revision 5.0]] 的正式版本、章節與發布組織頁尚未建立。\n- [[CXL 2.0]] 與 [[TI DS320PR1601]] data sheet 需另以正式 datasheet 補證。\n- `Roger` 是否應修正為 Rogers 或特定 laminate product family 仍需回查原文。\n- Megtron 6、GETEK、Nelco 4000-6、FR4、Tetra Functional FR4 的材料規格與 datasheet 未納入。\n- 來源未標示 TI 建議對不同 PCB stack-up、trace geometry 與 connector 類型的適用範圍。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 18,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+          },
+          "score": 5.277391
+         },
+         {
+          "text": "PCIe Gen5 high-speed PCB layout › Reference plane 與 vias\n- [[snla426]]（June 2023）說 high-speed signal trace 從 origination 到 termination 必須全程維持相同 GND reference。\n- [[snla426]]（June 2023）說若無法維持相同 GND reference，需 via-stitch 兩個 GND planes，以確保 continuous grounding 與 uniform impedance。\n- [[snla426]]（June 2023）說 stitching vias 應對稱放置於 signal transition vias 50 mils center-to-center 以內，越近越好。\n- [[snla426]]（June 2023）說 high-speed signals 必須 route over solid reference plane，除非絕對必要，不應跨越 plane split 或 reference plane void。\n- [[snla426]]（June 2023）說 TI 不建議 high-speed signal references 使用 power planes。\n- [[snla426]]（June 2023）說若完全無法避免 routing over a plane-split，需在 split 兩側放置 stitching capacitors，提供 high-frequency current return path；stitching capacitors 必須為 1 µF 或更低，並盡可能靠近 plane crossing。\n- [[snla426]]（June 2023）說 vias 需要 staggered placement；aligned vias 會阻擋 current return path。\n- [[snla426]]（June 2023）建議 high-speed traces 只放在 top layer 或 bottom layer；若需要 vias，應考慮 back drilling，否則 stub length 可能降低 signal bandwidth。\n- [[snla426]]（June 2023）說 via transitions 造成的 stubs 若長於 15 mils，應 back-drill 以降低 insertion losses 並避免 resonance。\n- [[snla426]]（June 2023）說 PCIe Gen5 20/80% rise/fall time 為 12 ps；為保留 12 ps rise/fall time，需要約 29 GHz bandwidth（0.35/0.12 ns rule）。\n- [[snla426]]（June 2023）說在 29 GHz bandwidth 且使用 Megtron 6（ε 約 3.4）時，quarter wavelength 約 54 mils；若未使用 back drilling，stub 必須小於約 54 mils；對 typical FR4（ε 約 4.2）PCB，maximum stub length 約 51 mils。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 12,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+          },
+          "score": 5.121016
+         },
+         {
+          "text": "PCIe Gen5 high-speed PCB layout › PCB material 與 insertion loss\n[[snla426]]（June 2023）指出：\n\n- 溫度與濕度升高時，[[insertion loss]] 會增加。\n- Data rate 越高，loss 越高。\n- [[Insertion loss]] 與 board material 有關。\n- Ultra Low Loss material 在不同 data rate 下的 loss 低於 standard loss material。\n- Megtron 6 等 ultra low-loss material 在高溫下的 insertion loss 預期比 nominal temperature 高最多 8%。\n- FR4 等 higher loss material 在高溫下的 insertion loss 比 nominal temperature 高 11%。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+          },
+          "score": 4.041857
+         },
+         {
+          "text": "PCIe Gen5 high-speed PCB layout › Routing quick rules\n[[snla426]]（June 2023）列出的 high-speed differential signal quick rules 包括：\n\n- 不可在任何 high-speed differential signal 上放置 probe 或 test points。\n- 不可將 high-speed traces route 在 crystals、oscillators、clock signal generators、switching power regulators、mounting holes、magnetic devices、board edge，或使用 / 複製 clock signals 的 ICs 下方或附近。\n- BGA breakout 後，high-speed differential signals 應避開 PCIe device，因為 internal state transitions 產生的 high current transients 很難濾除。\n- 盡可能將 high-speed differential pair signals route 在 PCB top layer 或 bottom layer，並搭配 adjacent GND layer。\n- High-speed differential signals 與 reference plane edge 的距離需 ≥ 5×W 或 5×RPH，取較大者。\n- High-speed differential signals 至少需距離 reference plane voids 4×RPH；此規則不適用於 high-speed differential signals 上 SMD pads 的 voiding。\n- PCIe device BGA escape 後需維持 constant trace width，以避免 transmission lines 中的 impedance mismatches。\n- 為改善 crosstalk，應遵循 ground-signal-ground signal routing，並將所有 high-speed differential pairs 對稱且平行地一起 routing。\n- Package escape 與 routing 到 connector pins 時會自然偏離此要求，但 trace deviations 必須盡可能短，否則可能需要 trace width compensation。\n- HFSS simulation 可用於最佳化 trace width。\n- 多個 high-speed interfaces 的 devices 中，需避免不同 interfaces 間的 crosstalk。\n- Package escape 後、connector termination 前，每個 differential pair 不應 route 在另一 differential pair 的 4–5×RPH mils 內。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 11,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+          },
+          "score": 3.137586
+         },
+         {
+          "text": "RoBAT › 未決事項\n- unresolved: [[RoBAT]] 網站正文未被擷取。\n- unresolved: 來源未提供 [[RoBAT]] 產品名稱、規格、版本、發布日期或 datasheet。\n- unresolved: ATE for Cable Cartridge testing 的正式產品範圍、支援線纜類型與測試條件未確認。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/RoBAT.md"
+          },
+          "score": 0.854469
+         },
+         {
+          "text": "Keysight ENA › 未決事項\n- [[AI Server PCB test image 24]] 未標示 [[Keysight ENA]] 的具體型號與 option code。\n- [[AI Server PCB test image 24]] 未標示 ENA 對 [[Delta-L]]、[[TDR 阻抗測量]]、[[Dk-Df]] 提取的測試條件。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Keysight ENA.md"
+          },
+          "score": 2.281215
+         },
+         {
+          "text": "Keysight ENA › 來源中的說法\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）列出 **N1500A + ENA/PNA 先进材料测量解决方案**。\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）列出 **基于 ENA/PNA 的 Delta-L 损耗、TDR 阻抗测量和 Dk/Df 提取**。\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）列出 **ENA / PNA与TDR选项和校准件**。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Keysight ENA.md"
+          },
+          "score": 0.779937
+         },
+         {
+          "text": "Dk-Df › 與既有知識的關係\n- [[CCL 產品規格分級]] 已記錄 [[AI Server PCB test image 19]] 中 [[聯茂]] CCL 產品的 [[Df]] 範圍與 M / M2 / M4 / M6 / M7 / M8 分級；該頁是產品分級資料。\n- [[AI Server PCB test image 24]] 補充的是 [[Dk-Df]] 在 [[高頻高速 PCB 測試解決方案]] 中的量測與提取流程；它沒有提供 CCL 型號、Df 數值範圍或 M 等級。\n- [[HSD PCB image 15]] 補充的是 [[DK]] 與 [[Low DK]] 在[[玻纖布]]分級圖卡中的語彙；它沒有提供 Dk / DK 數值、Df 數值、測試頻率或測試標準。\n- [[HSD PCB image 18]] 補充的是市場資訊圖把 [[Low Dk]] / [[Low Df]] 作為 [[E-Glass]] 與 [[T-Glass]] 之間的低損耗材料階梯，並連到 AI/5G 應用；它沒有提供 Dk、Df、損耗、頻率、厚度、樹脂、玻纖布規格或測試標準。\n- [[snla426]] 補充的是 [[PCIe Gen5 high-speed PCB layout]] application note 脈絡下，Df / Dissipation Factor、dielectric loss、εr、fiberglass / epoxy 差異與 material insertion loss 的設計說法。\n- 因 [[AI Server PCB test image 24]]、[[AI Server PCB test image 19]]、[[HSD PCB image 15]]、[[HSD PCB image 18]] 與 [[snla426]] 未提供共同測試條件，本頁不把其 Dk、DK、Df、M 等級或 SDD21 數字直接互相換算。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Dk-Df.md"
+          },
+          "score": 5.439074
+         },
+         {
+          "text": "Dk-Df › 相關來源\n- [[AI Server PCB test image 24]] — 未標示日期的 Keysight 高頻高速 PCB 測試解決方案流程圖。\n- [[AI Server PCB test image 19]] — 未標示日期的 CCL 產品規格分級圖，列出聯茂產品線與 Df 範圍。\n- [[AI Server PCB test image 21]] — 未標示日期的高階 CCL 公司產品比較表，使用 M6 / M7 / M8，但未提供 Df 範圍。\n- [[HSD PCB image 15]] — 來源未標示日期、取得於 2026-09-04 的玻纖布分級圖，使用 DK / Low DK 語彙。\n- [[HSD PCB image 18]] — 來源未標示日期、取得於 2026-09-04 的材料演進階梯圖，使用 Low Dk / Low Df 語彙。\n- [[snla426]] — Texas Instruments application note《High-Speed PCB Layout for PCIe Gen 5》，SNLA426，June 2023。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Dk-Df.md"
+          },
+          "score": 3.680241
+         },
+         {
+          "text": "0 Digital Test - What are SIPI and Serdes › 關鍵實體與概念\n- [[Dr. Milton Lien]] — 封面列名的作者 / 講者。\n- [[RSTW]] — 封面單位文字之一，來源未展開完整名稱。\n- [[SerDes]] — 本簡報主題之一，並在 standards / eco-chain / transmission channel 脈絡中出現。\n- [[Signal Integrity]] — Slide 20 以 high speed PCB/PCBA signal integrity flow 呈現，包含 [[IL]]、[[Xtalk]]、[[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]] 與 [[TL Calculator]]。\n- [[Power Integrity]] — 封面題名中的 PI；Slide 11 以 [[Power Distribution Network]] 形式出現，並列 scopes 與 network analyzers。\n- [[High speed SerDes standards]] — Slide 4 的高速介面 / 標準列名。\n- [[High speed SerDes eco-chain]] — Slide 9 的上中下游產業鏈分類。\n- [[R&S PCB test solutions]] — Slide 21 的 PCB fabricator / system house 測試流程與工具 / 方法集合。\n- [[HDI vs Package substrate]] — Slide 17 的 HDI、package substrate、CoWoS、ABF、L/S、pitch 對照線索。\n- [[高頻高速 PCB 測試解決方案]]、[[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] — 既有概念頁可承接 Slide 20–21 的 PCB / PCBA 測試內容。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+          },
+          "score": 5.465961
+         },
+         {
+          "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- Slide 21 題為 **R&S PCB test solutions**，面向 **PCB Fabricator and System House**，將流程分成 Material Measurement、Material/Stackup selection、Signal Integrity modeling/testing、Sampling testing、PL/Process Monitoring，並列出 impedance (TDR)、DK/DF extraction、IL、roughness、Xtalk、TL modeling、Eye diagram、Delta-L、ISD/ADK、w/ cable / connector testing 等項目。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+          },
+          "score": 3.364014
+         },
+         {
+          "text": "R&S PCB test solutions › 可追溯限制\n- 本來源沒有提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。\n- 本頁不把 Slide 21 的圖上列名解讀為正式解決方案型錄或完整採購配置。\n- [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]] 的角色未明，僅保留圖上列名。\n- [[ISD-ADK]] 與 PL 未展開縮寫，需後續來源補證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 6.190007
+         },
+         {
+          "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 4.454128
+         },
+         {
+          "text": "R&S PCB test solutions › 未決事項\n- Slide 21 未標示 R&S PCB test solutions 的正式文件版次與產品 portfolio 對應。\n- Slide 21 未標示 [[TDR]]、[[Delta-L]]、ISD/ADK、DK/DF extraction 的標準版本、演算法、測試條件或工具型號。\n- Slide 21 未展開 PL、ISD、ADK、RSTW、SWISSTO12、QWED、KEYCOM。\n- 需回看原始 PPTX 圖像確認各圖示、商標、箭頭與工具對應關係。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 4.018188
+         },
+         {
+          "text": "R&S PCB test solutions › 與既有知識的關係\n- [[高頻高速 PCB 測試解決方案]] 既有內容來自 Keysight 圖像，流程是原材料表徵、材料選擇、電路板抽樣測試、大批量監控；本頁保存 R&S 簡報中的類似但不完全相同的流程詞。\n- [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 均已有既有頁面；本來源增加 2026.3.4 R&S 簡報的追溯來源，但沒有新增可量化規格。\n- [[SerDes 與 SI PI 測試概覽]] 連接 Slide 11 和 Slide 20 的 validation challenges / SI flow；本頁聚焦 Slide 21 的 PCB test solutions。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 3.953288
+         },
+         {
+          "text": "R&S PCB test solutions › 相關來源\n- [[0 Digital Test - What are SIPI and Serdes]] — 2026.3.4 的 R&S / RSTW high-speed digital 測試簡報來源摘要。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 0.280698
+         },
+         {
+          "text": "Digital design test success stories › 未決事項\n- unresolved: Slide 2–7 圖片未 OCR，無法確認每個 success story 的客戶、DUT、測試配置、結果或導入狀態。\n- unresolved: Slide 8–12 未標示儀器 mapping，需回看原始 PPTX 或後續 OCR。\n- unresolved: 來源未標示是否所有案例都屬於同一期間、同一地區或同一業務單位。\n- unresolved: 來源未標示 [[DAC ADC testing]]、[[SoC testing]]、[[ATE PCB testing]]、[[O-E E-O TIA testing]]、[[High speed Cable testing]]、[[Digital Power Test]] 的正式定義或測試標準。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Digital design test success stories.md"
+          },
+          "score": 3.370083
+         },
+         {
+          "text": "Digital design test success stories › 與 R&S 儀器頁的關係\n- [[R&S FSWP]] 在既有 Productions 頁中被定義為 Phase Noise Analyzer and VCO Tester；[[DDT SuccessStories_202607]] 只說它出現在 DAC/ADC testing 與 SOC testing 的 success-story mapping 中，未新增規格。\n- [[R&S SMA100B]] 在既有 Productions 頁中被定義為 RF and Microwave Signal Generator；[[DDT SuccessStories_202607]] 只說它出現在 DAC/ADC testing 與 SOC testing 的 success-story mapping 中，未新增規格。\n- [[R&S ZNA67]] 在既有 Productions 頁中被定義為 67 GHz Vector Network Analyzer；[[DDT SuccessStories_202607]] 只說它出現在 SOC testing 與 ATE PCB testing 的 success-story mapping 中，未新增規格。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Digital design test success stories.md"
+          },
+          "score": 1.767085
+         },
+         {
+          "text": "Digital design test success stories\n[[Digital design test success stories]] 是 [[DDT SuccessStories_202607]] 中對 2026.7 digital design test 應用案例的簡報層級 mapping，將部分測試應用連到 [[R&S FSWP]]、[[R&S SMA100B]] 與 [[R&S ZNA67]]，但未提供細部配置或測試結果。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Digital design test success stories.md"
+          },
+          "score": 1.003245
+         },
+         {
+          "text": "UI 與 Data Rate 換算\n[[UI 與 Data Rate 換算]] 是 [[Equations]] 中以 `Data Rate=1/UI` 表示、並以 `UI(ps)=62.5` 對應 `DR(Gbps)=16.0` 的簡易換算線索；來源未展開 UI 的縮寫，也未標示應用情境。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/UI 與 Data Rate 換算.md"
+          },
+          "score": 0.263429
+         },
+         {
+          "text": "UI 與 Data Rate 換算 › 來源中的說法\n| 欄位 / 文字 | 值 | 日期 / 期間 | 來源 | 限制 |\n|---|---:|---|---|---|\n| `UI(ps):` | 62.5 | 來源正文未標示正式日期；raw converted 2026-09-17 | [[Equations]] | 未展開 UI 縮寫；未說明是否為 bit period、symbol period 或其他時間單位 |\n| `Data Rate=1/UI` | 原文公式文字 | 來源正文未標示正式日期；raw converted 2026-09-17 | [[Equations]] | 未標示單位換算、有效位數或適用條件 |\n| `DR(Gbps):` | 16.0 | 來源正文未標示正式日期；raw converted 2026-09-17 | [[Equations]] | 未說明是 per-lane、aggregate、raw bit rate、line rate 或 payload rate |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/UI 與 Data Rate 換算.md"
+          },
+          "score": 0.254157
+         },
+         {
+          "text": "UI 與 Data Rate 換算 › 相關來源\n- [[Equations]] — raw converted 2026-09-17、來源正文未標示正式日期的 Excel 轉檔來源，Sheet1 含 `UI(ps)=62.5`、`Data Rate=1/UI` 與 `DR(Gbps)=16.0`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/UI 與 Data Rate 換算.md"
+          },
+          "score": 0.229101
+         },
+         {
+          "text": "High speed SerDes eco-chain › 與既有知識的關係\n- [[台灣 SerDes IC-IP 公司名單]] 記錄台灣 IC design、silicon IP、networking IC、I/O interface IC 等公司線索；本頁是應用 / 供應鏈分層，沒有列出完整台灣公司名單。\n- [[高速伺服器儲存互連]] 與 [[HSD Cable test 外部資料清單]] 已有 Amphenol / connector / cable 線索；本頁補入 high speed SerDes eco-chain 對高頻高速線材與接頭的上游定位。\n- [[高頻高速 PCB 測試解決方案]] 與 [[R&S PCB test solutions]] 可承接 Slide 9 中「高速 PCB 設計」與 Slide 20–21 的測試流程。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+          },
+          "score": 5.69755
+         },
+         {
+          "text": "High speed SerDes eco-chain › 可追溯限制\n- Slide 9 是簡報中的分類表，不是市場調查表；不可由此推論完整供應鏈、排名、市占率或採購關係。\n- 來源未標示 Slide 9 的資料來源、調查期間、地域範圍或定義，因此本頁只保留分類語彙。\n- [[Amphenol]]、[[Molex]]、[[Samtec]]、[[TE]] 在本來源只作為連接方案供應商例子出現；不可推論特定產品、客戶或 R&S 往來。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+          },
+          "score": 3.863427
+         },
+         {
+          "text": "High speed SerDes eco-chain › 未決事項\n- Slide 9 未標示資料來源、公司選取標準、市場期間、區域範圍或分類依據。\n- Slide 9 未列出光模組 / 光元件、PCB 材、被動元件、封測、系統整合等分類的具體公司。\n- Slide 8 題為 **High speed Serdes eco-chain (Customers)**，但轉檔只擷取到 `HighSpeedSerdesIC`，需回看原始 PPTX 才能確認 customer list。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+          },
+          "score": 3.549885
+         },
+         {
+          "text": "High speed SerDes eco-chain › 上游 — 基礎材料與核心元件\n- 半導體晶片：控制器晶片、協定芯片、重驅動 / 重定時（Repeater / Re-timer）、介面協議轉換器等，用於 [[HDMI]]、[[USB]]、[[PCIe]]、[[DisplayPort]] 等高速數位介面。\n- 光模組 / 光元件。\n- [[PCB]] 印刷電路板材。\n- 被動元件。\n- 高頻高速連接線材與接頭：同軸 / 雙絞線（twinax）、飛線（Flyover®）、SFP / QSFP 倍率線纜，以及 [[Amphenol]]、[[Molex]]、[[Samtec]]、[[TE]] 提供的背板與板對板連結方案。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+          },
+          "score": 3.360707
+         },
+         {
+          "text": "High speed SerDes eco-chain › 相關來源\n- [[0 Digital Test - What are SIPI and Serdes]] — 2026.3.4 的 R&S / RSTW high-speed digital 測試簡報來源摘要。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+          },
+          "score": 1.06458
+         },
+         {
+          "text": "Equations › 關鍵實體與概念\n- [[UI 與 Data Rate 換算]] — Sheet1 明示 `Data Rate=1/UI`，並給出 `UI(ps)=62.5` 與 `DR(Gbps)=16.0` 的例子。\n- [[SerDes]] — 既有頁面中已有 high-speed interface / D2D / SoC IP 脈絡；本來源只提供 UI 與 data rate 的表格線索，不足以直接更新任何 SerDes 規格。\n- [[High speed SerDes standards]] — 既有頁面保存多個 high-speed SerDes standards / interfaces 清單；本來源沒有列出標準名稱或版本。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Equations.md"
+          },
+          "score": 0.320209
+         },
+         {
+          "text": "AI Server PCB test image 55 › 圖上文字整理\n| 區域 | 圖上文字 | 日期 / 期間 |\n|---|---|---|\n| 頂部總標示 | 30 dB | 來源未標示日期 |\n| 左上標示 | 8dB | 來源未標示日期 |\n| 左模組預算 | Tx module budget | 來源未標示日期 |\n| 左模組元件 | Silicon | 來源未標示日期 |\n| 左模組元件 | Interposer | 來源未標示日期 |\n| 左模組元件 | Package | 來源未標示日期 |\n| 左模組內數值 | 8dB | 來源未標示日期 |\n| 左模組板 | Module PCB | 來源未標示日期 |\n| 左連接器 | Mated Mezzanine Connector | 來源未標示日期 |\n| 左底板 | Baseboard | 來源未標示日期 |\n| 左下預算 | TX Baseboard Budget (BGA pad to via) | 來源未標示日期 |\n| 中央標示 | 5 dB | 來源未標示日期 |\n| 中央預算 | QSFP-DD assembly budget | 來源未標示日期 |\n| 中央左連接器 | Mated QSFP-DD SMT Connector | 來源未標示日期 |\n| 中央線材 | 28-AWG cable | 來源未標示日期 |\n| 中央右連接器 | Mated QSFP-DD SMT Connector | 來源未標示日期 |\n| 右連接器 | Mated Mezzanine Connector | 來源未標示日期 |\n| 右底板 | Baseboard | 來源未標示日期 |\n| 右下預算 | RX Baseboard Budget (via to BGA pad) | 來源未標示日期 |\n| 右模組預算 | Rx module budget | 來源未標示日期 |\n| 右上標示 | 8dB | 來源未標示日期 |\n| 右模組元件 | Silicon | 來源未標示日期 |\n| 右模組元件 | Interposer | 來源未標示日期 |\n| 右模組元件 | Package | 來源未標示日期 |\n| 右模組板 | Module PCB | 來源未標示日期 |\n| 圖說 | 图3. OAM互连信号损耗示意图 | 來源未標示日期 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AI Server PCB test image 55.md"
+          },
+          "score": 3.295789
+         },
+         {
+          "text": "AI Server PCB test image 55 › 重點摘要\n- 來源圖說為 **图3. OAM互连信号损耗示意图**。\n- 來源未標示內容日期、年份或季度；本頁只能寫作 **來源未標示日期**。\n- 圖表類型是工程結構 / 方塊示意圖，不是折線圖、長條圖、統計圖表或實物照片。\n- 圖上總體標示為 **30 dB**。\n- 圖上左側 **Tx module budget** 標示為 **8dB**。\n- 圖上中央 **QSFP-DD assembly budget** 標示為 **5 dB**。\n- 圖上右側 **Rx module budget** 標示為 **8dB**。\n- 圖上另列 **TX Baseboard Budget (BGA pad to via)** 與 **RX Baseboard Budget (via to BGA pad)**，但來源明示沒有看見清楚數值，因此不得補算或推定其 dB。\n- 圖上沒有明確公司名稱、產品型號、發布者、文件版次或頁碼之外的來源資訊。\n- 圖上技術名稱包含 [[OAM]]、[[QSFP-DD]]、[[BGA pad]]、[[via]]、[[28-AWG cable]]、[[Mated Mezzanine Connector]]、[[Mated QSFP-DD SMT Connector]]、[[Module PCB]]、[[Baseboard]]、[[Interposer]]、[[Package]] 與 [[Silicon]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AI Server PCB test image 55.md"
+          },
+          "score": 2.704159
+         },
+         {
+          "text": "AI Server PCB test image 55\n[[AI Server PCB test image 55]] 是一張未標示日期的 [[OAM]] 互連信號損耗示意方塊圖，圖上標示總損耗預算 30 dB、Tx / Rx module budget 8dB、QSFP-DD assembly budget 5 dB，以及未標數值的 TX / RX baseboard budget 區段。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AI Server PCB test image 55.md"
+          },
+          "score": 2.021302
+         },
+         {
+          "text": "AI Server PCB test image 55 › 互連路徑\n[[AI Server PCB test image 55]]（來源未標示日期；取得於 2026-09-04）從左到右描述一條 [[OAM]] 互連信號路徑：\n\n1. [[Silicon]]\n2. [[Interposer]]\n3. [[Package]]\n4. [[Module PCB]]\n5. [[Mated Mezzanine Connector]]\n6. [[Baseboard]]\n7. [[Mated QSFP-DD SMT Connector]]\n8. [[28-AWG cable]]\n9. [[Mated QSFP-DD SMT Connector]]\n10. [[Baseboard]]\n11. [[Mated Mezzanine Connector]]\n12. [[Module PCB]]\n13. [[Package]]\n14. [[Interposer]]\n15. [[Silicon]]",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AI Server PCB test image 55.md"
+          },
+          "score": 1.059348
+         },
+         {
+          "text": "AI Server PCB test image 55 › 損耗預算\n| 區段 | 圖上文字 | 數值 | 單位 | 日期 / 期間 |\n|---|---|---:|---|---|\n| 總體 | 30 dB | 30 | dB | 來源未標示日期 |\n| 發送端模組 | Tx module budget | 8 | dB | 來源未標示日期 |\n| QSFP-DD 組件 | QSFP-DD assembly budget | 5 | dB | 來源未標示日期 |\n| 接收端模組 | Rx module budget | 8 | dB | 來源未標示日期 |\n| TX 底板 | TX Baseboard Budget (BGA pad to via) | 無法辨識 | dB | 來源未標示日期 |\n| RX 底板 | RX Baseboard Budget (via to BGA pad) | 無法辨識 | dB | 來源未標示日期 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AI Server PCB test image 55.md"
+          },
+          "score": 0.714281
+         },
+         {
+          "text": "Direct Attached Copper Cables › 相關來源\n- [[HSD Cable test image 2]] — 未標示日期、取得於 2026-09-04 的 [[Amphenol Communications Solutions]] 高速連接與供電產品解決方案圖。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Direct Attached Copper Cables.md"
+          },
+          "score": 1.02693
+         },
+         {
+          "text": "Direct Attached Copper Cables\n[[Direct Attached Copper Cables]] 是 [[HSD Cable test image 2]] 中 [[Amphenol Communications Solutions]] 列出的高速 I/O passive and active copper cable 產品類別，圖上把它連到 data centers、networking、HPC、telecom、server 與 storage solutions。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Direct Attached Copper Cables.md"
+          },
+          "score": 0.682274
+         },
+         {
+          "text": "Celerity 224 Gb-s BGA Mezzanine Connectors\n[[Celerity 224 Gb-s BGA Mezzanine Connectors]] 是 [[full-spectrum-data-center-connectivity-brochure]] 中列出的 [[Amphenol Communications Solutions]] featured product，來源稱 Celerity / Celerity LP 支援 up to 224 Gb/s PAM4。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Celerity 224 Gb-s BGA Mezzanine Connectors.md"
+          },
+          "score": 1.102246
+         },
+         {
+          "text": "Celerity 224 Gb-s BGA Mezzanine Connectors › 相關來源\n- [[full-spectrum-data-center-connectivity-brochure]] — Amphenol full-spectrum data center connectivity brochure，來源未標示正式日期。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Celerity 224 Gb-s BGA Mezzanine Connectors.md"
+          },
+          "score": 0.703582
+         },
+         {
+          "text": "Amphenol OverPass Cable Systems › 相關來源\n- [[full-spectrum-data-center-connectivity-brochure]] — Amphenol full-spectrum data center connectivity brochure，來源未標示正式日期。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Amphenol OverPass Cable Systems.md"
+          },
+          "score": 0.727559
+         },
+         {
+          "text": "Amphenol OverPass Cable Systems\n[[Amphenol OverPass Cable Systems]] 是 [[full-spectrum-data-center-connectivity-brochure]] 中列出的 high-speed I/O OverPass cable system，來源描述其讓 high-speed signal 從 ASIC packages 傳輸到 system endpoints。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Amphenol OverPass Cable Systems.md"
+          },
+          "score": 0.674994
+         },
+         {
+          "text": "Data center full-spectrum connectivity › 相關來源\n- [[full-spectrum-data-center-connectivity-brochure]] — 來源未標示正式日期、raw converted 2026-09-17 的 Amphenol full-spectrum data center connectivity brochure。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+          },
+          "score": 1.857678
+         },
+         {
+          "text": "Data center full-spectrum connectivity › 與既有概念的關係\n- [[Data center server 高速互連產品組合]] 偏向 data center server interconnect portfolio 的分類表；[[Data center full-spectrum connectivity]] 更強調 full-spectrum：electrical interconnect + optical + fiber + power + cooling。\n- [[Compute tray component solutions]] 偏向 compute tray connectors、cables、power connector、busbar 與 backplane interconnect；本頁納入 optical transceiver、CPO、fiber deployment 與 liquid cooling。\n- [[高速伺服器儲存互連]] 可連接本頁中的 [[Mini Cool Edge IO]]、[[Cool Express Link]]、[[Direct Attached Copper Cables]]、[[PCIe CEM 7 Connectors]] 與 storage / EDSFF 類產品。\n- [[CPO]]、[[Optical I-O]]、[[Near-Packaged Optics]] 可連接本頁的 [[Amphenol Co-packaged Optics]] 與 [[LEAP On-Board Transceiver]]，但本來源不是技術標準或市場採用證據。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+          },
+          "score": 1.517543
+         },
+         {
+          "text": "Time Domain Channel Properties\n[[Time Domain Channel Properties]]（TDCP）是 [[Release 18]] 中用於描述 channel time-domain behavior、[[UE]] relative mobility 與 associated Doppler 的新 measurement / CSI-related quantity，可協助 [[gNB]] 在 high-speed scenarios 中調整 transmission configuration。[[R18 CSI enhancements for high-speed Scenario]] [[TDCP Reporting]]",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Time Domain Channel Properties.md"
+          },
+          "score": 3.663464
+         },
+         {
+          "text": "NR sample rate › 與既有 bandwidth 頁的關係\n- [[UE channel bandwidth]] 已依 [[Frequency Ranges, Bands and Bandwidth]] 保存 bandwidth / sample rate table，其中包含 30.72、61.44、122.88、245.76、491.52、983.04、1966.08 MS/s。\n- [[Maximum transmission bandwidth configuration]] 追蹤 [[3GPP TS 38.101-1]] / [[3GPP TS 38.101-2]] Table 5.3.2-1 的 N_RB matrix。\n- 本頁補充的是 physical layer sample-rate calculation 與 NFFT / SCS 對應，不取代 UE channel bandwidth 或 N_RB 標準表。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NR sample rate.md"
+          },
+          "score": 2.036531
+         },
+         {
+          "text": "Material Measurement\nMaterial/Stackup selection\nSignal Integrity modeling/testing\nSampling testing\nPL/Process Monitoring",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-74f44a4409e2b694",
+            "original_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+            "sha256": "74f44a4409e2b694065038d44c8327e72b9a3c1ceed3537fc8dc2669826c580d",
+            "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+           "section": 110,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 18.162052
+         },
+         {
+          "text": "# R&S Key Involvement: 3GPP Related Testing\nDeep Collaboration: R&S worked with JIO and ODMs to verify 3GPP mmWave-related test items.\nOptimization Focus: Precise tuning of EVM (Modulation Quality) and signal integrity after signal up-conversion.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-600ddf3fc41d2bb2",
+            "original_ref": "raw/Market/OneNote/R&S for JIO Project.md",
+            "sha256": "600ddf3fc41d2bb26d1bb08bbc2ea64ee64033937c66f026df48f8040dcfd7cc",
+            "raw_ref": "raw/Market/OneNote/R&S for JIO Project.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/R&S for JIO Project.md",
+           "section": 25,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 17.412424
+         },
+         {
+          "text": "![](Grafik73.jpg)\nTiming / Sync / Signal Integrity",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-8ea3b55008b7c337",
+            "original_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+            "sha256": "8ea3b55008b7c337d029721ca2f0a210e3b1b6cf0fc902f9409ce7834ac35594",
+            "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+           "section": 25,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 16.452389
+         },
+         {
+          "text": "[Ultrafast Impedance Measurement of Active Ultra-High Current PDNs | Signal Integrity Journal](https://www.signalintegrityjournal.com/articles/3798-ultrafast-impedance-measurement-of-active-ultra-high-current-pdns)",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-9e2c51edf50288ee",
+            "original_ref": "raw/Market/OneNote/AI DC PDU (2026-8-3)/PI for Digital Power.md",
+            "sha256": "9e2c51edf50288eed9abe492cfe280b30a54f83adb9a929c94c3aebf1c003155",
+            "raw_ref": "raw/Market/OneNote/AI DC PDU (2026-8-3)/PI for Digital Power.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/AI DC PDU (2026-8-3)/PI for Digital Power.md",
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 15.75513
+         }
+        ],
+        "text": "Signal-integrity-to-oscilloscope is not defined in the passages as a formal term or product; the supported meaning is a measurement-context link in high-speed digital / SerDes validation where Signal Integrity concerns such as IL, Xtalk, Eye diagram and TDR impedance are part of the PCB/PCBA SI flow, and oscilloscopes are listed as instruments for Interface Test and Power Distribution Network measurement contexts [1][3][16][63].\nProduct-related measurement decisions that depend on understanding this link include deciding whether an oscilloscope belongs in the Interface Test setup, where the source lists scopes together with BERTs, AWGs and switch matrices [1][3][16].  \nThey also include deciding whether an oscilloscope is relevant for Power Distribution Network testing, where the source lists scopes together with network analyzers [1][3][16][63].  \nThey include deciding which SI measurements are oscilloscope-adjacent versus better mapped to other PCB/SI tools or instruments, because the SI flow lists IL, Xtalk, Eye diagram, TDR impedance, Stackup Planner and TL Calculator, while the passages do not assign all of those to an oscilloscope product [1][2][3][63].  \nThey include deciding whether product planning must cover other instrument roles beyond oscilloscopes, because the validation blocks also list BERTs, AWGs, switch matrices, phase-noise analyzers, signal generators, network analyzers and spectrum analyzers [1][3][16].  \nThey include deciding whether a specific oscilloscope model, bandwidth, software option, fixture, standard version or pass/fail condition can be quoted; the passages explicitly say those product and test details are not provided [2][18][50].",
+        "synthesized_by": "company",
+        "failure": null
+       },
+       "cited_passages": [
+        {
+         "text": "SerDes 與 SI PI 測試概覽 › 測試脈絡整理\n| 區塊 | 來源明示文字 | 相關儀器 / 方法 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Interface Test | Scopes、BERTs、AWGs、Switch Matrices | [[Oscilloscope]]、[[BERT]]、[[AWG]]、[[Switch Matrix]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4；Slide 11 頁腳 6/13/2025 未決 | 未提供型號、頻寬、資料率或測試標準 |\n| Transmission Channel | Tx Package、PCBs、Connectors、Rx Package | Channel / test board / switch matrices | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 channel loss、fixture、connector 型號或 PCB stackup |\n| RefClk and PLL Jitter Performance | Phase Noise Analyzers、Signal Generators | [[Phase Noise Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 jitter mask、phase noise offset 或 PLL 規格 |\n| Power Distribution Network | Scopes、Network Analyzers | [[Oscilloscope]]、[[Network Analyzer]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 PDN impedance 目標值或測試方法 |\n| ADC / DAC Frontend Performance | Spectrum Analyzers、Signal Generators | [[Spectrum Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 ADC / DAC 指標或頻率 |\n| Signal integrity flow | IL / Xtalk / Eye diagram；TDR Impedance；Stackup Planner；TL Calculator | [[Insertion Loss]]、[[Crosstalk]]、[[Eye diagram]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供工具名稱、標準版本或 pass/fail 條件 |",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+         },
+         "score": 11.980134
+        },
+        {
+         "text": "SerDes 與 SI PI 測試概覽 › 未決事項\n- Slide 11 未標示各測試區塊對應的標準版本、測試流程、儀器型號、軟體 option 或測試條件。\n- Slide 20 未標示 IL、Xtalk、Eye diagram、TDR impedance、Stackup Planner 與 TL Calculator 的工具、供應商或規格。\n- 需回看原始 PPTX 才能確認圖片中的 waveform、diagram 與 instrument details。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 7,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+         },
+         "score": 5.359754
+        },
+        {
+         "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+         },
+         "score": 5.015919
+        },
+        {
+         "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- 本來源是由 `0 Digital Test - What are SIPI and Serdes.pptx` 轉出的 lossy markdown，封面標題為 **What is Serdes and SI/PI?**，作者 / 講者標示為 [[Dr. Milton Lien]]，單位為 Product & Application Engineering, [[RSTW]]，日期標示 **2026.3.4**。\n- 簡報把 R&S Group division 1 targets 分成 **Digital**、**Power**、**RF** 三類，並將 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]] 與 [[PCB]] / [[PCBA]] 測試放在 Digital / high-speed digital 測試脈絡中。\n- Slide 4 列出多個 high speed SerDes standards / interfaces：[[GMSL]]、[[OIF CEI-112G]]、[[LVDS]]、[[JESD204D]]、[[DisplayPort]]、[[HDMI]]、[[MIPI]]、[[USB]]、[[ASA]]、[[UALink]]、[[PCIe]]、[[NVLink]]、[[Ultra Ethernet]]、[[InfiniBand]]、[[SATA]]、[[SAS]]；來源只列名，未提供各標準版本、發布組織、資料率或測試條件。\n- Slide 5 以 **Parallel v.s. Serial Interface** 作為主題，但轉檔文字主要只有標題與圖片嵌入，未擷取圖中細節；因此只能作為 [[Parallel Interface]] / [[Serial Interface]] 需回看原始簡報的線索。\n- Slide 9 以表格整理 [[High speed SerDes eco-chain]]，分成上游基礎材料與核心元件、中游模組整合與生產製造、下游終端應用與市場部署三層。\n- Slide 11 題為 **Transmission Channel and validation challenges electrical Interfaces**，把高速電性介面驗證拆成 transmission channel、measurement path to DUT / test board development、[[Power Distribution Network]]、ADC / DAC frontend performance、RefClk and PLL jitter performance、interface test 等區塊，並列出 scopes、BERTs、AWGs、switch matrices、phase noise analyzers、signal generators、network analyzers、spectrum analyzers 等儀器類型。\n- Slide 17 題為 **HDI vs Package substrate**，以 [[CoWoS]]、[[Package Substrate]]、[[ABF]]、L/S 與 pitch 等字樣比較，但轉檔文字排列不完整，數值對應關係未能可靠確認。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+         },
+         "score": 8.46888
+        },
+        {
+         "text": "0 Digital Test - What are SIPI and Serdes › 原文未解的問題\n- Slide 1 標示日期 **2026.3.4**，Slide 11 頁腳另出現 **6/13/2025 High-Speed Digital- Market Trends**；來源未說明 2025-06-13 是頁腳模板日期、內容來源日期或另一份簡報日期。\n- 來源未標示本簡報的文件版次、受眾、會議名稱、對外 / 對內使用限制細節；只可確定封面有 **COMPANY RESTRICTED**。\n- Slide 3、6、7、10、12–15、16、18、19、22–24、26 多數內容在 markdown 中主要是圖片嵌入，未 OCR 出可可靠摘錄的正文。\n- Slide 4 standards 清單未提供各標準的版本、發布組織、資料率、介面型態或適用測試方法。\n- Slide 5 Parallel v.s. Serial Interface 未擷取圖中說明，不能由本 markdown 直接比較 parallel 與 serial 的技術差異。\n- Slide 17 的 L/S 與 pitch 數值排列不完整，無法判定 6/6、60/60、30/30、?、60、120 分別對應 HDI、Package Substrate、CoWoS 或 ABF 的哪一欄。\n- Slide 21 未提供 R&S PCB test solutions 對應的正式產品型號、order number、software option、測試頻率、測試標準、fixture、calibration 或量測不確定度。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 5,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+         },
+         "score": 6.483882
+        },
+        {
+         "text": "SerDes 與 SI PI 測試概覽 › 可追溯限制\n- 本來源是 lossy markdown derivative，多數圖像未 OCR；不可把未擷取的圖片內容當成已驗證主張。\n- Slide 11 的頁腳日期 **6/13/2025** 與封面日期 **2026.3.4** 並存，未能判定何者是內容日期。\n- 本頁不推論 R&S 具備所有列名儀器或方案，也不把儀器類型轉換成正式 product configuration。\n- 本頁不提供 [[Signal Integrity]]、[[Power Integrity]] 或 [[SerDes]] 的標準定義；只保存來源明示的測試區塊與儀器類型。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 5,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+         },
+         "score": 4.155996
+        },
+        {
+         "text": "0 Digital Test - What are SIPI and Serdes › 關鍵實體與概念\n- [[Dr. Milton Lien]] — 封面列名的作者 / 講者。\n- [[RSTW]] — 封面單位文字之一，來源未展開完整名稱。\n- [[SerDes]] — 本簡報主題之一，並在 standards / eco-chain / transmission channel 脈絡中出現。\n- [[Signal Integrity]] — Slide 20 以 high speed PCB/PCBA signal integrity flow 呈現，包含 [[IL]]、[[Xtalk]]、[[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]] 與 [[TL Calculator]]。\n- [[Power Integrity]] — 封面題名中的 PI；Slide 11 以 [[Power Distribution Network]] 形式出現，並列 scopes 與 network analyzers。\n- [[High speed SerDes standards]] — Slide 4 的高速介面 / 標準列名。\n- [[High speed SerDes eco-chain]] — Slide 9 的上中下游產業鏈分類。\n- [[R&S PCB test solutions]] — Slide 21 的 PCB fabricator / system house 測試流程與工具 / 方法集合。\n- [[HDI vs Package substrate]] — Slide 17 的 HDI、package substrate、CoWoS、ABF、L/S、pitch 對照線索。\n- [[高頻高速 PCB 測試解決方案]]、[[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] — 既有概念頁可承接 Slide 20–21 的 PCB / PCBA 測試內容。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+         },
+         "score": 5.465961
+        }
+       ],
+       "assessment": {
+        "status": "covered",
+        "facets": [
+         {
+          "name": "product_option_spec",
+          "citations": [
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/Digital design test success stories.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 4,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/Digital design test success stories.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 5,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/Digital design test success stories.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 3,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/Digital design test success stories.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/Digital design test success stories.md"
+           }
+          ],
+          "attempts": 1
+         }
+        ],
+        "missing_facets": [],
+        "relation_required": false,
+        "relation_citations": [],
+        "relations": []
+       },
+       "citation_policy": "wiki_primary",
+       "wiki_provenance": [
+        {
+         "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+         "raw_refs": [
+          "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md",
+         "raw_refs": [
+          "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+         ]
+        }
+       ]
+      },
+      "failure": null,
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "output_limit_chars": 33467,
+    "full_result_hint": "完整答案保留在這次工具紀錄的 record 中；也可以在 Agent Web 的 Knowledge 頁直接問同一個問題，看到完整結果。",
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-8a8c2dd3ce3544869e251193cc9dedef",
+      "task_sha256": "e3bddf873a720f92ed98b2c14e90a6f1398bef6c369bb0c4938a2ee4eaf8f402",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.12.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "failed",
+     "retry_count": 1,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 3,
+       "kind": "validation_failed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "sequence": 4,
+       "kind": "retrying",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 5,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 6,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 7,
+       "kind": "validation_failed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "sequence": 8,
+       "kind": "failed",
+       "evidence_ref": "bridge_facet_assessment"
+      }
+     ],
+     "checks": [
+      {
+       "check_id": "answer_nonempty",
+       "status": "passed",
+       "evidence_ref": "bridge_raw_record"
+      },
+      {
+       "check_id": "facet_coverage",
+       "status": "failed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "check_id": "claim_support",
+       "status": "passed",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "failure_code": "host_check_failed"
+    },
+    "evidence": {
+     "raw_citations": 7,
+     "facet_status": "missing",
+     "missing_facets": [
+      "product_option_spec"
+     ],
+     "relation_status": "not_requested",
+     "retrieval_attempts": {
+      "product_option_spec": 1
+     },
+     "claim_status": "supported"
+    }
+   }
+  }
+ }
+}

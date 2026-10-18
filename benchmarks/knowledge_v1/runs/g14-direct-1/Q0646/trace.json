@@ -1,0 +1,134 @@
+{
+ "question": {
+  "id": "Q0646",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in AI, and what evidence supports each opportunity?",
+  "market": "AI",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": null,
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in AI, and what evidence supports each opportunity?",
+  "route_forced": "direct",
+  "http_status": 200,
+  "seconds": 50.657,
+  "timed_out": false,
+  "reply": {
+   "answer": {
+    "ok": false,
+    "answer": "The configured LLM Gateway could not synthesize an answer from the retrieved evidence. (knowledge_model_failed)",
+    "record": null,
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-e6a21f09951741ed8e208905371e1e35",
+      "request_id": "request-e6a21f09951741ed8e208905371e1e35",
+      "span_id": "span-e6a21f09951741ed8e208905371e1e35",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-e6a21f09951741ed8e208905371e1e35",
+       "request_id": "request-e6a21f09951741ed8e208905371e1e35",
+       "span_id": "span-e6a21f09951741ed8e208905371e1e35",
+       "parent_span_id": null
+      },
+      "status": "failed",
+      "data": null,
+      "failure": {
+       "code": "knowledge_model_failed",
+       "message": "Capability invocation did not complete",
+       "retryable": false
+      },
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "output_limit_chars": 32879,
+    "full_result_hint": "完整答案保留在這次工具紀錄的 record 中；也可以在 Agent Web 的 Knowledge 頁直接問同一個問題，看到完整結果。",
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-0b6c08da59d649f6a13793f4b7d75fd9",
+      "task_sha256": "65079d05d537742d748ffc4caa8fb401c5fcbec45a6e96b418f2d1367e7b62f8",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.12.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "failed",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "failed",
+       "evidence_ref": null
+      }
+     ],
+     "checks": [],
+     "failure_code": "knowledge_model_failed"
+    },
+    "evidence": {
+     "raw_citations": 0,
+     "facet_status": "missing",
+     "missing_facets": [
+      "technical_knowledge"
+     ],
+     "relation_status": "not_requested",
+     "retrieval_attempts": {}
+    }
+   }
+  }
+ }
+}
