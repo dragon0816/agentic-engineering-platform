@@ -74,3 +74,73 @@ def test_the_core_set_is_the_36_coverage_questions() -> None:
     assert len(ids) == len(set(ids)) == 36
     bank = {q["id"] for q in run.load()}
     assert set(ids) <= bank
+
+
+# --- `--set zh`: Traditional Chinese core questions (G2, owner 2026-10-18) -----
+
+
+def test_the_zh_set_translates_eight_core_questions_with_their_tags() -> None:
+    bank = run.load()
+    by_id = {q["id"]: q for q in bank}
+    core = json.loads((BENCH / "questions" / "coverage.json").read_text(encoding="utf-8"))["core"]
+    zh = run.choose("zh", bank)
+    assert len(zh) == len({q["id"] for q in zh}) == 8
+    for question in zh:
+        source = by_id[question["source_id"]]
+        assert question["id"] == source["id"] + "-zh" and source["id"] in core
+        assert any("一" <= ch <= "鿿" for ch in question["text"])
+        assert question["text"] != source["text"]
+        for key, value in source.items():
+            if key not in ("id", "text"):
+                assert question[key] == value
+    # Different types, markets and products of the core, plus a foundation question.
+    assert len({q.get("type") for q in zh if "type" in q}) == 6
+    assert len({q["market"] for q in zh if "market" in q}) == 5
+    assert len({q["product"] for q in zh if "product" in q}) == 4
+    assert any("technical" in q for q in zh)
+
+
+def test_the_pinned_bank_is_unchanged_and_zh_ids_can_be_named() -> None:
+    bank = run.load()  # raises when the pinned source changed
+    assert not any(q["id"].endswith("-zh") for q in bank)
+    assert [q["id"] for q in run.choose("Q0011,Q1041-zh", bank)] == ["Q0011", "Q1041-zh"]
+    assert len(run.choose("core", bank)) == 36
+
+
+def test_a_zh_question_with_tags_unlike_its_source_is_refused(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    bank = run.load()
+    tampered = [dict(q) for q in bank]
+    for question in tampered:
+        if question["id"] == "Q0011":
+            question["market"] = "Automotive"
+    with pytest.raises(SystemExit, match="tags differ"):
+        run.zh_core(tampered)
+
+
+def test_the_reviewer_gets_the_chinese_question(monkeypatch: pytest.MonkeyPatch) -> None:
+    (question,) = run.choose("Q1041-zh", run.load())
+    use = {
+        "route": "tool",
+        "status": "succeeded",
+        "failure": None,
+        "phase": "validated",
+        "tools": 1,
+        "harnessed": True,
+        "record": {"x": 1},
+        "text": "眼圖是 ... [1]",
+    }
+    monkeypatch.setattr(run, "knowledge_use", lambda exchange: use)
+    monkeypatch.setattr(run, "cited_passages", lambda used: [{"n": 1}])
+    monkeypatch.setattr(run, "verify", lambda passage, vault: {"ok": True})
+    asked: list[str] = []
+
+    class Judge:
+        def review(self, text: str, answer: str, passages: list[Any]) -> dict[str, Any]:
+            asked.append(text)
+            return {"ok": True, "supported": True, "reasonable": True, "confidence": "high"}
+
+    result = run.grade(question, {"http_status": 200, "seconds": 1.0}, Path("."), Judge())
+    assert result["status"] == "PASS" and result["id"] == "Q1041-zh"
+    assert asked == [question["text"]] and "眼圖" in asked[0]

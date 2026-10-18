@@ -20,7 +20,10 @@ The bank has 1,100 questions:
     .venv\Scripts\python benchmarks\knowledge_v1\run.py --run-id <id> --set all --workers 2
     .venv\Scripts\python benchmarks\knowledge_v1\run.py --run-id <id> --regrade
 
-`--set` also accepts a comma-separated list of question IDs.
+`--set` also accepts a comma-separated list of question IDs. `--set core` is the 36-question coverage core;
+`--set zh` asks `questions/zh-core.json`, Traditional Chinese translations of 8 core
+questions (ids `Qxxxx-zh`, each with its English `source_id` and the same tags), graded
+the same way with the Chinese text given to the reviewer. The pinned bank is unchanged.
 
 The runner works as follows:
 - Each question goes to Agent Web chat, the same path a person uses, in a new conversation. Questions are sent as written, without naming a knowledge base, so the Agent must pick Knowledge itself.

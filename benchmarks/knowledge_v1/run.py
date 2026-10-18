@@ -12,6 +12,9 @@ Vault lacks the evidence) is acceptable too, as the question file says.
     python benchmarks/knowledge_v1/run.py --run-id <id> --set core --route direct
         # U7 (owner 2026-10-18): the same questions through the direct route,
         # to compare with a `--route chat` run question by question
+    python benchmarks/knowledge_v1/run.py --run-id <id> --set zh
+        # G2 (owner 2026-10-18): 8 Traditional Chinese translations of core
+        # questions (`questions/zh-core.json`), graded the same way
         # grade stored traces again into runs/<id>/grader-1.4/, leaving the
         # original verdicts and report as they were
 
@@ -21,7 +24,10 @@ Agent Web routes the turn (direct when the Skill's intent matches, otherwise
 the conversation's tool route). `--route direct` asks the same Knowledge Harness
 through `/api/knowledge/ask` with the one installed Vault and Knowledge Skill,
 exactly as the chat's direct route does (`web.py` `_knowledge_reply`). `--set
-core` is the 36-question coverage core (`questions/coverage.json`). Traces,
+core` is the 36-question coverage core (`questions/coverage.json`). `--set zh`
+asks `questions/zh-core.json`: Traditional Chinese translations of 8 core
+questions, each with a `-zh` id, its English `source_id` and the source's tags;
+the pinned bank is unchanged and the reviewer sees the Chinese text. Traces,
 verdicts and reasons are kept per question under runs/<id>/<question>/.
 """
 
@@ -65,6 +71,42 @@ HOST_JSON = Path(
     os.path.expandvars(r"%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0\host.json")
 )
 STATUSES = ("PASS", "INSUFFICIENT_KNOWLEDGE", "FAIL", "NEEDS_HUMAN_REVIEW", "SYSTEM_ERROR")
+
+
+def zh_core(bank: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The Chinese core set, checked against the pinned bank: each entry
+    translates a core question and carries exactly its tags."""
+    data = json.loads((HERE / "questions" / "zh-core.json").read_text(encoding="utf-8"))
+    if data.get("source_sha256") != SOURCE_SHA256:
+        raise SystemExit("questions/zh-core.json was translated from another question bank")
+    by_id = {q["id"]: q for q in bank}
+    out: list[dict[str, Any]] = []
+    for item in data["questions"]:
+        source = by_id.get(item.get("source_id", ""))
+        if source is None or item["id"] != f"{source['id']}-zh":
+            raise SystemExit(f"zh-core.json: {item.get('id')} names no bank question")
+        tags_of = {k: v for k, v in source.items() if k not in ("id", "text")}
+        if {k: v for k, v in item.items() if k not in ("id", "text", "source_id")} != tags_of:
+            raise SystemExit(f"zh-core.json: {item['id']} tags differ from {source['id']}")
+        out.append(item)
+    return out
+
+
+def choose(name: str, bank: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The questions of `--set`: sample, core, zh, all, or comma-separated IDs
+    (bank or `-zh` IDs)."""
+    if name == "sample":
+        return sample(bank)
+    if name == "all":
+        return bank
+    if name == "zh":
+        return zh_core(bank)
+    if name == "core":
+        by_id = {q["id"]: q for q in bank}
+        core = json.loads((HERE / "questions" / "coverage.json").read_text(encoding="utf-8"))
+        return [by_id[str(i["id"] if isinstance(i, dict) else i)] for i in core["core"]]
+    by_id = {q["id"]: q for q in [*bank, *zh_core(bank)]}
+    return [by_id[i.strip()] for i in name.split(",")]
 
 
 def vault_root() -> Path:
@@ -368,7 +410,9 @@ def report(
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run-id", required=True)
-    parser.add_argument("--set", default="sample", help="sample | core | all | comma-separated IDs")
+    parser.add_argument(
+        "--set", default="sample", help="sample | core | zh | all | comma-separated IDs"
+    )
     parser.add_argument(
         "--route",
         choices=("chat", "direct"),
@@ -388,17 +432,8 @@ def main() -> int:
     if args.into and (not args.regrade or not plain):
         parser.error("--into needs --regrade and a plain folder name")
     bank = load()
-    by_id = {q["id"]: q for q in bank}
-    core = json.loads((HERE / "questions" / "coverage.json").read_text(encoding="utf-8"))["core"]
-    chosen = (
-        sample(bank)
-        if args.set == "sample"
-        else [by_id[str(i["id"] if isinstance(i, dict) else i)] for i in core]
-        if args.set == "core"
-        else bank
-        if args.set == "all"
-        else [by_id[i.strip()] for i in args.set.split(",")]
-    )
+    by_id = {q["id"]: q for q in [*bank, *zh_core(bank)]}
+    chosen = choose(args.set, bank)
     run_dir = HERE / "runs" / args.run_id
     run_dir.mkdir(parents=True, exist_ok=True)
     commit = subprocess.run(
