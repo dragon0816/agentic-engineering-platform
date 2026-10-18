@@ -480,7 +480,7 @@ Phase 1 的唯一目標：**驗證 Knowledge Strategy 與 Hybrid Retrieval 對 B
   - 名稱與 v1.0 相同。
   - 語意依文件：
     - **Ecosystem 是節點上的供應商 / 夥伴公司**（晶片、模組、認證夥伴），**Account 是買我方儀器的客戶**，兩者不混用（slide 5）。
-    - **Node 是固定的價值鏈位置**：文件說共 8 個，可辨識 7 個（晶片、模組、手機、CPE、基地台、電信網路、認證實驗室）。
+    - **Node 是固定的價值鏈位置**：文件列出 7 個（晶片、模組、手機、CPE、基地台、電信網路、認證實驗室）；owner 2026-10-18：「目前看到幾個就幾個」，v0 採這 7 個。
     - Opportunity 在文件中沒有欄位。
 - **Relationships（14 個名稱、22 個 domain 組合）：**
   - **18 個 `source-bi-doc`。** 其中 8 個欄位名稱直接出自文件（slide 7、8）：`related_tech`、`affects_nodes`、Ecosystem 的 `node`、Application 與 Concept 的 `technologies`、TestSolution 的 `applications`、`competing_solutions`、`vendor`。另外 10 個是文件描述的關鍵欄位，名稱暫定（provisional），例如 `supplied_technologies`、`suppliers`、`account`、`chip_modules`。
@@ -586,7 +586,7 @@ Phase 1 的唯一目標：**驗證 Knowledge Strategy 與 Hybrid Retrieval 對 B
 
 | 指標 | Hybrid（主門檻） | Graph-only | Wiki-only |
 |---|---|---|---|
-| Answer Accuracy（全體平均） | ≥ 0.55，且 ≥ Wiki-only + 0.05 | 記錄 | baseline，記錄 |
+| Answer Accuracy（全體平均） | **≥ 0.70**（owner 2026-10-18），且 ≥ Wiki-only + 0.05 | 記錄 | baseline，記錄 |
 | Answer Accuracy（Cross-domain Opportunity 類） | ≥ Wiki-only + 0.10（Hybrid 的價值假設） | 記錄 | 記錄 |
 | Evidence (a) 可解析率 | 100%（任何無法解析的引用即該題 FAIL） | 100% | 記錄 |
 | Evidence (b) 支持率 | ≥ 0.85 | ≥ 0.85 | 記錄 |
@@ -783,3 +783,12 @@ churn = 2026-10-01 以來修改該檔的 commit 數（`git log --since=2026-10-0
 11. **（原 Q9）ADR-K9**：K02+ 用 PR 還是在 main 直接 commit？
 12. **（原 Q12）編號**：AEP-K02… 是否改用其他前綴？
 13. **N3：v0.1 凍結**：是否要求 Atlas Coding Agent 在 AEP-K09 開始前確認 v0.1？
+
+## Owner 決定（2026-10-18）
+
+1. **Answer Accuracy 門檻：** Hybrid 全體平均 **≥ 0.70**（取代 §5.5 原提議的 0.55），仍需 ≥ Wiki-only + 0.05。
+2. **D3（G1–G4 先做或先量 U7）：** owner 要求先說明 G1–G4 與 U7，**仍待決**。
+3. **Node：** 「目前看到幾個就幾個」，v0 採文件列出的 7 個 Node；N1 中「第 8 個 Node」一項關閉。
+4. **N2 正式審閱者：** 待 owner 與同事開會討論後決定；在那之前 benchmark 維持 `draft-unreviewed`。
+5. **Q10 / N3：** 同意 `knowledge.read.metadata`（loopback、免 token）／`knowledge.read.content`（bearer token）的 scope 分法，並同意在 AEP-K09 開始前與 Atlas Coding Agent 共同凍結 Knowledge API v0.1。
+

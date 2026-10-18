@@ -41,7 +41,7 @@
 |---|---|---|---|---|---|
 | Trend | 3, 4 | 市場趨勢；鏈的第 1 步 | `measurement_impact`、`our_fit`、`stage`（bi-doc / provisional）；`market_segments`（proposed-v0） | UNCLASSIFIED | 否 |
 | Technology | 3, 4 | 驅動趨勢的技術 | `maturity`、`standards_body`（bi-doc / provisional）；影響節點 → 連結 `affects_nodes` | UNCLASSIFIED | 否 |
-| Node | 3, 4 | 價值鏈的**固定位置**：文件說共 8 個，列出晶片、模組、手機、CPE、基地台、電信網路、認證實驗室（可辨識 7 個） | `position_set`（proposed-v0：`bi-doc` 或 `proposed-v0-extension`） | UNCLASSIFIED | 否 |
+| Node | 3, 4 | 價值鏈的**固定位置**：列出晶片、模組、手機、CPE、基地台、電信網路、認證實驗室，共 7 個（owner 2026-10-18：看到幾個就幾個） | `position_set`（proposed-v0：`bi-doc` 或 `proposed-v0-extension`） | UNCLASSIFIED | 否 |
 | Ecosystem | 3, 4, 5 | **節點上的供應商與夥伴**（晶片、模組、認證夥伴） | `role`（bi-doc / provisional）；所在節點 → `node`；供應的技術 → `supplied_technologies` | UNCLASSIFIED | 否 |
 | Account | 5 | **買我們儀器的客戶**（不在 slide 3 的鏈圖上） | `region`、`customers`（bi-doc / provisional）；所在節點 → `node`；主要供應商 → `suppliers`；`synthetic`（proposed-v0，標記 mock） | CONFIDENTIAL | 是 |
 | CustomerProduct | 3, 5 | 客戶推出的產品（slide 3 稱 Product） | `launch_schedule`（bi-doc / provisional）；所屬客戶 → `account`；使用技術 → `technologies`；晶片模組 → `chip_modules` | CONFIDENTIAL | 是 |
@@ -168,7 +168,7 @@
 ## 8. 剩餘缺口（給 owner）
 
 1. `bi_schema.py`、`bi_ingest.py`、`bi_slides_extract.py` 與 mapping JSON 仍不可得。10 個 provisional 欄位名稱與所有列舉值待核對。
-2. slide 4 說 Node 共 8 個，但只列出 7 個；第 8 個是什麼？
+2. ~~slide 4 說 Node 共 8 個，但只列出 7 個~~ 已決定（owner 2026-10-18）：v0 採文件列出的 7 個。
 3. Application 的「價值鏈層級」是連到 Node，還是另一個層級列舉？
 4. Opportunity 在文件中沒有欄位；v0 的 3 個 proposed-v0 連結與 `hypothesis_status` 是否可以？
 5. Signal 是否應有連結欄位（v0 提議 `mentions`）？
