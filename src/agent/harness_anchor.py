@@ -16,33 +16,56 @@ This check is deterministic, with no model call:
 
 1. Entity preservation. Every entity-like term of the original (a token with a
    digit or a capital letter, a time word, a glossary term) must appear in the
-   model's version, directly or through a glossary synonym group. If one is
-   missing, the model's version is rejected and the original alone is used.
+   model's version, directly or through a glossary synonym group, or inside a
+   verified term (below). If one is missing, the model's version is rejected
+   and the original alone is used.
 2. Added terms. A term in the model's version that is not in the original, the
-   recent conversation or the glossary is dropped from it.
+   recent conversation, the glossary or a verified translation is dropped.
 
-Limitation (documented in docs/HARNESS_DESIGN.zh-TW.md): there is no general
-bilingual dictionary in the repository, so cross-language matching only works
-through the domain glossary's synonym groups (for Knowledge, the installed
-Skill procedure's facet and focus terms). Chinese text has no word boundaries:
-Chinese terms are runs split at common function words, matched as substrings,
-and only glossary or time terms of the original are required to survive.
+Language independence (owner 2026-10-18). The conversation model is bilingual;
+a string checker is not, and a correct translation of a Chinese question
+("眼圖會影響哪些產品決策" -> "Which product decisions does the eye diagram
+affect?") used to fail as missing terms with its English words dropped. So the
+model may also send, next to its version:
+
+- `original_terms`: key terms it copied verbatim from the person's sentence;
+- `term_translations`: each such term mapped to its translation or synonym in
+  the other language ({"眼圖": "eye diagram"}).
+
+The Host checks these without any language knowledge:
+
+- verbatim: a term (or translation key) counts only when it is a substring of
+  the original after whitespace, case and width (NFKC) normalisation; anything
+  else was invented by the model and is discarded and recorded;
+- coverage: a required term is kept when it appears in the model's version or
+  inside a verified term (a verified translation key is a verified term too);
+- added terms: a term of the model's version is also allowed when it appears
+  in the translation of a verified key.
+
+The translations, like the model's version, only widen retrieval (one
+bilingual keyword query of each verified term and its translation); synthesis
+and validation still answer the original. Chinese text has no word
+boundaries: Chinese terms are runs split at common function words, matched as
+substrings.
 """
 
 from __future__ import annotations
 
 import re
 import unicodedata
-from collections.abc import Iterable, Sequence
-from dataclasses import dataclass
+from collections.abc import Iterable, Mapping, Sequence
+from dataclasses import dataclass, replace
 from typing import Literal
 
 MAX_SUPPLEMENT_CHARS = 400
 MAX_RECORDED_CHARS = 2_000
+# Bounds on the model's claimed terms and translations (tool input).
+MAX_CLAIMED_TERMS = 20
+MAX_CLAIMED_TERM_CHARS = 80
 
 # Latin words, product codes and numbers: CMX500, 5G, Wi-Fi, 802.11ax, Q3.
 _LATIN = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9+._/-]*[A-Za-z0-9+])?")
-_CJK = re.compile(r"[㐀-䶿一-鿿豈-﫿]+")
+_CJK = re.compile(r"[㐀-䶿一-鿿豈-﫿]+")
 # Chinese function words that separate content terms inside a run.
 _CJK_FUNCTION = re.compile(
     "(?:什麼|甚麼|哪些|哪個|哪裡|如何|怎麼|怎樣|為什麼|是否|有沒有|有哪些|一下|以及|還有|"
@@ -105,6 +128,12 @@ AnchorOutcome = Literal["same", "accepted", "rejected", "absent"]
 
 def _norm(text: str) -> str:
     return unicodedata.normalize("NFKC", text or "").casefold()
+
+
+def _verbatim(text: str) -> str:
+    """Whitespace, case and width normalisation only: all the verbatim check
+    allows between a claimed term and the person's sentence."""
+    return " ".join(_norm(text).split())
 
 
 def _squash(text: str) -> str:
@@ -172,12 +201,46 @@ class Glossary:
         return tuple(dict.fromkeys(found))
 
 
+def _claimed(value: object) -> str | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    return value.strip()[:MAX_CLAIMED_TERM_CHARS]
+
+
 @dataclass(frozen=True)
 class ToolAnchor:
-    """What the Host passes to a Harness tool next to the model's argument."""
+    """What the Host passes to a Harness tool next to the model's argument.
+
+    `original` and `history` are the Host's own. `original_terms` and
+    `term_translations` are what the model claims (the tool input fields of
+    the same names); `check_anchor` verifies them against `original`."""
 
     original: str
     history: tuple[str, ...] = ()
+    original_terms: tuple[str, ...] = ()
+    term_translations: tuple[tuple[str, str], ...] = ()
+
+    def with_claims(self, arguments: Mapping[str, object]) -> ToolAnchor:
+        """This anchor with the model's claimed terms read from tool arguments.
+        The fields are optional and malformed entries are ignored, so a caller
+        that omits them behaves as before."""
+        terms: list[str] = []
+        raw_terms = arguments.get("original_terms")
+        if isinstance(raw_terms, list):
+            terms = [t for t in map(_claimed, raw_terms[:MAX_CLAIMED_TERMS]) if t is not None]
+        pairs: list[tuple[str, str]] = []
+        raw_pairs = arguments.get("term_translations")
+        if isinstance(raw_pairs, dict):
+            for key, value in list(raw_pairs.items())[:MAX_CLAIMED_TERMS]:
+                term, translation = _claimed(key), _claimed(value)
+                if term is not None and translation is not None:
+                    pairs.append((term, translation))
+        return ToolAnchor(
+            original=self.original,
+            history=self.history,
+            original_terms=tuple(dict.fromkeys(terms)),
+            term_translations=tuple(dict.fromkeys(pairs)),
+        )
 
 
 @dataclass(frozen=True)
@@ -190,6 +253,9 @@ class AnchorCheck:
     dropped: tuple[str, ...] = ()
     context_terms: tuple[str, ...] = ()
     supplement: str | None = None
+    verified: tuple[str, ...] = ()
+    discarded: tuple[str, ...] = ()
+    translations: tuple[tuple[str, str], ...] = ()
 
     @property
     def question(self) -> str:
@@ -201,11 +267,30 @@ class AnchorCheck:
         return self.original
 
     @property
+    def translation_query(self) -> str | None:
+        """One keyword query in both languages: each verified term followed by
+        the model's translation of it ("眼圖 eye diagram 產品決策 product decisions")."""
+        parts = dict.fromkeys(part for pair in self.translations for part in pair)
+        return " ".join(parts)[:MAX_SUPPLEMENT_CHARS] or None
+
+    @property
     def supplementary(self) -> tuple[str, ...]:
-        """Extra retrieval queries; they only widen what is retrieved."""
-        if self.outcome == "accepted" and self.supplement:
-            return (self.supplement,)
-        return ()
+        """Extra retrieval queries; they only widen what is retrieved. A
+        rejected version brings none, translations included (the original alone
+        is used), and an anchor without an original verifies nothing."""
+        if self.outcome == "rejected" or not self.original:
+            return ()
+        queries = [
+            *((self.supplement,) if self.outcome == "accepted" and self.supplement else ()),
+            *((self.translation_query,) if self.translation_query else ()),
+        ]
+        seen = {_verbatim(self.original)}
+        unique: list[str] = []
+        for query in queries:
+            if _verbatim(query) not in seen:
+                seen.add(_verbatim(query))
+                unique.append(query)
+        return tuple(unique)
 
     def record(self) -> dict[str, object]:
         """The tool record's anchor entry, from which the benchmark computes
@@ -220,6 +305,12 @@ class AnchorCheck:
             "context_terms": list(self.context_terms),
             "used_question": self.question[:MAX_RECORDED_CHARS],
             "supplementary_queries": list(self.supplementary),
+            "verified_terms": list(self.verified),
+            "discarded_terms": list(self.discarded),
+            "translations_used": [
+                {"term": term, "translation": translation}
+                for term, translation in self.translations
+            ],
         }
 
 
@@ -256,41 +347,96 @@ def required_terms(original: str, glossary: Glossary) -> list[str]:
     return required
 
 
+Translations = Sequence[tuple[str, str]] | Mapping[str, str]
+
+
+def verify_claims(
+    original: str,
+    original_terms: Sequence[str] = (),
+    term_translations: Translations = (),
+) -> tuple[tuple[str, ...], tuple[str, ...], tuple[tuple[str, str], ...]]:
+    """The verbatim check: (verified terms, discarded terms, verified
+    translations). A claimed term or translation key is verified only when it
+    is a substring of the original after whitespace, case and width
+    normalisation; no language knowledge is used."""
+    sentence = _verbatim(original)
+    pairs = (
+        tuple(term_translations.items())
+        if isinstance(term_translations, Mapping)
+        else tuple(term_translations)
+    )
+    verified: list[str] = []
+    discarded: list[str] = []
+
+    def judge(term: str) -> bool:
+        ok = bool(_verbatim(term)) and _verbatim(term) in sentence
+        bucket = verified if ok else discarded
+        if term not in bucket:
+            bucket.append(term)
+        return ok
+
+    for term in original_terms:
+        judge(term)
+    translations = [(key, value.strip()) for key, value in pairs if judge(key) and value.strip()]
+    return tuple(verified), tuple(discarded), tuple(dict.fromkeys(translations))
+
+
 def check_anchor(
     original: str,
     proposed: str,
     *,
     history: Sequence[str] = (),
     glossary: Glossary | None = None,
+    original_terms: Sequence[str] = (),
+    term_translations: Translations = (),
 ) -> AnchorCheck:
     """Compare the model's version with the person's sentence (see module doc)."""
     words = glossary or Glossary()
     original = (original or "").strip()
     proposed = (proposed or "").strip()
-    if not proposed:
-        return AnchorCheck(original, proposed, "absent", reason="no model version")
     if not original:
         # Nothing to anchor to (a turn without the person's text): the model's
-        # version is all there is, recorded as such.
-        return AnchorCheck(original, proposed, "absent", reason="no original message")
+        # version is all there is, recorded as such; no claim can be verified.
+        claimed = (*original_terms, *(key for key, _ in dict(term_translations).items()))
+        return AnchorCheck(
+            original,
+            proposed,
+            "absent",
+            reason="no model version" if not proposed else "no original message",
+            discarded=tuple(dict.fromkeys(claimed)),
+        )
+    verified, discarded, translations = verify_claims(original, original_terms, term_translations)
+
+    def claims(check: AnchorCheck) -> AnchorCheck:
+        return replace(check, verified=verified, discarded=discarded, translations=translations)
+
+    if not proposed:
+        return claims(AnchorCheck(original, proposed, "absent", reason="no model version"))
     if _squash(original) == _squash(proposed):
-        return AnchorCheck(original, proposed, "same")
+        return claims(AnchorCheck(original, proposed, "same"))
     proposed_norm = _norm(proposed)
+    verified_norm = [_norm(term) for term in verified]
     missing = [
         term
         for term in required_terms(original, words)
         if not any(_has_token(proposed_norm, item) for item in words.synonyms(term))
+        and not any(_has_token(text, term) for text in verified_norm)
     ]
     if missing:
-        return AnchorCheck(
-            original,
-            proposed,
-            "rejected",
-            reason="missing terms of the original: " + ", ".join(missing[:10]),
-            missing=tuple(missing),
+        return claims(
+            AnchorCheck(
+                original,
+                proposed,
+                "rejected",
+                reason="missing terms of the original: " + ", ".join(missing[:10]),
+                missing=tuple(missing),
+            )
         )
     original_norm = _norm(original)
     glossary_norm = "\n".join(_norm(term) for term in words.terms())
+    # A verified key's translation licenses the words it brings, as the
+    # original licenses its own words.
+    translated_norm = "\n".join(_norm(value) for _key, value in translations)
     history_norm = _norm("\n".join(history))
     dropped: list[str] = []
     context: list[str] = []
@@ -300,9 +446,9 @@ def check_anchor(
         if token.casefold() not in _STOPWORDS and not _has_token(original_norm, token)
     ] + [term for term in _cjk_terms(proposed) if _norm(term) not in original_norm]
     for term in dict.fromkeys(candidates):
-        if _grounded(term, (original_norm, glossary_norm)):
+        if _grounded(term, (original_norm, glossary_norm, translated_norm)):
             continue
-        if _grounded(term, (original_norm, glossary_norm, history_norm)):
+        if _grounded(term, (original_norm, glossary_norm, translated_norm, history_norm)):
             context.append(term)
         else:
             dropped.append(term)
@@ -318,12 +464,14 @@ def check_anchor(
                 flags=re.IGNORECASE,
             )
     supplement = " ".join(supplement.split())[:MAX_SUPPLEMENT_CHARS]
-    return AnchorCheck(
-        original,
-        proposed,
-        "accepted",
-        reason=("dropped terms not in the conversation or glossary" if dropped else None),
-        dropped=tuple(dropped),
-        context_terms=tuple(context),
-        supplement=supplement or None,
+    return claims(
+        AnchorCheck(
+            original,
+            proposed,
+            "accepted",
+            reason=("dropped terms not in the conversation or glossary" if dropped else None),
+            dropped=tuple(dropped),
+            context_terms=tuple(context),
+            supplement=supplement or None,
+        )
     )

@@ -207,6 +207,8 @@ class KnowledgeHarness:
             question,
             history=anchor.history if anchor is not None else (),
             glossary=knowledge_glossary(procedure),
+            original_terms=anchor.original_terms if anchor is not None else (),
+            term_translations=anchor.term_translations if anchor is not None else (),
         )
         result = self.ask(
             KnowledgeAskRequest(asset=asset, question=check.question or question, skill=skill),

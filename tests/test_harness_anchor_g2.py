@@ -260,3 +260,263 @@ def test_a_query_request_without_supplementary_queries_keeps_its_bytes() -> None
         }
     )
     assert "supplementary_queries" not in plain.model_dump(mode="json")
+
+
+# --- Language-independent anchor check (owner 2026-10-18) ---------------------
+# The model is bilingual; the checker is not. The model copies key terms
+# verbatim from the person's sentence and maps them to its translation; the Host
+# only checks that each claimed term is a substring of the original.
+
+EYE_ORIGINAL = "眼圖會影響哪些產品決策"
+EYE_ENGLISH = "Which product decisions does the eye diagram affect?"
+EYE_TRANSLATIONS = {"眼圖": "eye diagram", "產品決策": "product decisions", "影響": "affect"}
+EYE_GLOSSARY = Glossary.of([("眼圖",), ("產品決策",)])
+
+
+def test_a_translated_chinese_question_with_verified_terms_is_accepted() -> None:
+    # Without the claims, the correct English translation fails the string check.
+    before = check_anchor(EYE_ORIGINAL, EYE_ENGLISH, glossary=EYE_GLOSSARY)
+    assert before.outcome == "rejected" and "眼圖" in before.missing
+    check = check_anchor(
+        EYE_ORIGINAL,
+        EYE_ENGLISH,
+        glossary=EYE_GLOSSARY,
+        original_terms=["眼圖", "產品決策"],
+        term_translations=EYE_TRANSLATIONS,
+    )
+    assert check.outcome == "accepted" and check.missing == ()
+    assert check.dropped == ()
+    assert check.verified == ("眼圖", "產品決策", "影響") and check.discarded == ()
+    supplement, bilingual = check.supplementary
+    assert supplement == EYE_ENGLISH
+    # The verified translations reach retrieval in both languages.
+    assert bilingual == "眼圖 eye diagram 產品決策 product decisions 影響 affect"
+    # Synthesis and validation answer the person's sentence.
+    assert check.question == EYE_ORIGINAL
+
+
+def test_without_a_glossary_the_english_words_are_no_longer_dropped() -> None:
+    before = check_anchor(EYE_ORIGINAL, EYE_ENGLISH)
+    assert {"product", "decisions", "eye", "diagram", "affect"} <= set(before.dropped)
+    check = check_anchor(EYE_ORIGINAL, EYE_ENGLISH, term_translations=EYE_TRANSLATIONS)
+    assert check.outcome == "accepted" and check.dropped == ()
+
+
+def test_a_fabricated_original_term_is_discarded_and_cannot_cover() -> None:
+    original = "CMX500 支援哪些頻段？"
+    check = check_anchor(
+        original, "Which bands does it support?", original_terms=["CMX550", "頻段"]
+    )
+    assert check.discarded == ("CMX550",) and check.verified == ("頻段",)
+    assert check.outcome == "rejected" and check.missing == ("CMX500",)
+    record = check.record()
+    assert record["discarded_terms"] == ["CMX550"] and record["verified_terms"] == ["頻段"]
+    assert check.supplementary == ()
+
+
+def test_a_translation_whose_key_is_not_in_the_original_licenses_nothing() -> None:
+    check = check_anchor(
+        EYE_ORIGINAL,
+        "Which product decisions does the eye diagram affect for Keysight?",
+        term_translations={**EYE_TRANSLATIONS, "是德科技": "Keysight"},
+    )
+    assert check.outcome == "accepted"
+    assert check.dropped == ("Keysight",)
+    assert "是德科技" in check.discarded
+    assert ("是德科技", "Keysight") not in check.translations
+    assert all("Keysight" not in query for query in check.supplementary)
+
+
+@pytest.mark.parametrize(
+    ("original", "proposed", "terms", "missing", "verbatim"),
+    [
+        (
+            "Wi-Fi 8 的測試需求有哪些",
+            "What are the test needs of Wi-Fi 7?",
+            ["測試需求"],
+            "8",
+            "Wi-Fi 8",
+        ),
+        (
+            "CMP180 支援哪些標準",
+            "Which standards does the CMP200 support?",
+            ["標準"],
+            "CMP180",
+            "CMP180",
+        ),
+    ],
+)
+def test_a_latin_or_number_term_in_a_chinese_sentence_must_still_be_covered(
+    original: str, proposed: str, terms: list[str], missing: str, verbatim: str
+) -> None:
+    check = check_anchor(original, proposed, original_terms=terms)
+    assert check.outcome == "rejected" and missing in check.missing
+    # Copying the term verbatim covers it even when the model's version lost
+    # it; retrieval still runs on the original first.
+    covered = check_anchor(original, proposed, original_terms=[*terms, verbatim])
+    assert missing not in covered.missing
+
+
+def test_verbatim_means_whitespace_case_and_width_only() -> None:
+    original = "ＣＭＸ500  的 Wi-Fi 8 量測"  # full-width CMX
+    check = check_anchor(
+        original,
+        "CMX500 Wi-Fi 8 measurement",
+        original_terms=["cmx500", "wi-fi   8", "Wi-Fi8", "量測"],
+        term_translations={"量測": "measurement"},
+    )
+    assert check.verified == ("cmx500", "wi-fi   8", "量測")
+    assert check.discarded == ("Wi-Fi8",)
+    assert check.outcome == "accepted" and check.dropped == ()
+
+
+def test_a_caller_without_the_new_fields_behaves_as_before() -> None:
+    for original, proposed in [
+        ("What is an eye diagram?", "What is an eye diagram? cite Raw evidence"),
+        ("CMX500 頻段", "CMW500 bands"),
+        ("CMX500 支援哪些頻段？", "CMX500 支援哪些頻段?"),
+    ]:
+        plain = check_anchor(original, proposed, glossary=GLOSSARY)
+        empty = check_anchor(
+            original, proposed, glossary=GLOSSARY, original_terms=(), term_translations={}
+        )
+        assert plain == empty
+        assert plain.verified == plain.discarded == () and plain.translations == ()
+        assert plain.record()["translations_used"] == []
+    anchor = ToolAnchor(original="q").with_claims({"question": "q"})
+    assert anchor.original_terms == () and anchor.term_translations == ()
+
+
+def test_malformed_claims_are_ignored() -> None:
+    anchor = ToolAnchor(original="CMX500 頻段").with_claims(
+        {"original_terms": ["CMX500", 3, "", None], "term_translations": {"頻段": 1, "x": ""}}
+    )
+    assert anchor.original_terms == ("CMX500",) and anchor.term_translations == ()
+    anchor = ToolAnchor(original="q").with_claims(
+        {"original_terms": "CMX500", "term_translations": ["頻段", "bands"]}
+    )
+    assert anchor.original_terms == () and anchor.term_translations == ()
+
+
+def test_a_mixed_language_sentence_works() -> None:
+    original = "CMX500 在 Wi-Fi 7 的 EVM 量測要注意什麼"
+    check = check_anchor(
+        original,
+        "What should be considered for EVM measurement of Wi-Fi 7 on the CMX500?",
+        original_terms=["CMX500", "Wi-Fi 7", "EVM", "量測"],
+        term_translations={"量測": "measurement", "注意": "considered"},
+    )
+    assert check.outcome == "accepted" and check.missing == () and check.dropped == ()
+    assert check.discarded == ()
+    assert check.question == original
+    assert check.supplementary[1] == "量測 measurement 注意 considered"
+
+
+def test_an_unchanged_question_still_widens_with_its_translations() -> None:
+    check = check_anchor(
+        EYE_ORIGINAL, EYE_ORIGINAL + "?", term_translations={"眼圖": "eye diagram"}
+    )
+    assert check.outcome == "same" and check.question == EYE_ORIGINAL
+    assert check.supplementary == ("眼圖 eye diagram",)
+
+
+def test_a_rejected_version_brings_no_translation_query() -> None:
+    check = check_anchor("CMX500 頻段", "CMW500 bands", term_translations={"頻段": "bands"})
+    assert check.outcome == "rejected" and check.translations == (("頻段", "bands"),)
+    assert check.supplementary == () and check.question == "CMX500 頻段"
+
+
+def test_without_an_original_no_claim_is_verified() -> None:
+    check = check_anchor(
+        "", "eye diagram", original_terms=["眼圖"], term_translations={"眼圖": "x"}
+    )
+    assert check.outcome == "absent" and check.verified == ()
+    assert check.discarded == ("眼圖",) and check.supplementary == ()
+
+
+def test_the_vault_tool_schema_offers_the_optional_claim_fields() -> None:
+    from agent.gateway import VAULT_QUESTION_SCHEMA
+
+    properties = VAULT_QUESTION_SCHEMA["properties"]
+    assert isinstance(properties, dict)
+    assert VAULT_QUESTION_SCHEMA["required"] == ["question"]
+    terms, translations = properties["original_terms"], properties["term_translations"]
+    assert isinstance(terms, dict) and isinstance(translations, dict)
+    assert terms["type"] == "array" and translations["type"] == "object"
+    assert "EXACTLY" in str(terms["description"])
+    assert "EXACTLY" in str(translations["description"])
+
+
+def test_the_gateway_hands_the_models_claims_to_the_harness() -> None:
+    arguments: dict[str, Any] = {
+        "question": EYE_ENGLISH,
+        "original_terms": ["眼圖", "眼圖圖表"],
+        "term_translations": EYE_TRANSLATIONS,
+    }
+    model = CallsVault("knowledge__rs-knowledge", arguments)
+    built = gateway(model, Recording())
+    seen: list[ToolAnchor] = []
+
+    def harness(question: str, asset: Any, anchor: ToolAnchor) -> dict[str, Any]:
+        seen.append(anchor)
+        check = check_anchor(
+            anchor.original,
+            question,
+            history=anchor.history,
+            original_terms=anchor.original_terms,
+            term_translations=anchor.term_translations,
+        )
+        return {"ok": True, "answer": "decisions [1]", "evidence": {}, "anchor": check.record()}
+
+    built.knowledge_harness = harness
+    result = asyncio.run(
+        built.converse(request(EYE_ORIGINAL), (ModelMessage(role="user", text=EYE_ORIGINAL),))
+    )
+    (anchor,) = seen
+    assert anchor.original == EYE_ORIGINAL
+    assert anchor.original_terms == ("眼圖", "眼圖圖表")
+    assert dict(anchor.term_translations) == EYE_TRANSLATIONS
+    tool = result.tools[0]
+    assert tool.host is not None and isinstance(tool.host.data, dict)
+    recorded = tool.host.data["anchor"]
+    assert isinstance(recorded, dict) and recorded["outcome"] == "accepted"
+    assert recorded["discarded_terms"] == ["眼圖圖表"]
+    translations_used = recorded["translations_used"]
+    assert isinstance(translations_used, list) and len(translations_used) == 3
+
+
+def test_the_knowledge_adapter_answers_the_chinese_original_and_searches_both_languages(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from test_knowledge_vault_tools import RS
+    from test_knowledge_vault_tools import gateway as vault_gateway
+
+    skills = vault_gateway(CallsVault("x", {}), Recording()).router.commands.skills
+    harness = KnowledgeHarness(_Runtime(skills), "engineering")
+    asked: list[tuple[Any, tuple[str, ...]]] = []
+
+    def fake_ask(item: Any, *, catalog: Any = None, supplementary: tuple[str, ...] = ()) -> Any:
+        asked.append((item, supplementary))
+        return {"ok": True, "answer": "a [1]", "record": None}
+
+    monkeypatch.setattr(harness, "ask", fake_ask)
+    anchor = ToolAnchor(original=EYE_ORIGINAL).with_claims(
+        {"original_terms": ["眼圖"], "term_translations": EYE_TRANSLATIONS}
+    )
+    result = harness.for_tool(EYE_ENGLISH, RS, anchor)
+    item, supplementary = asked[0]
+    assert item.question == EYE_ORIGINAL
+    assert supplementary == (EYE_ENGLISH, "眼圖 eye diagram 產品決策 product decisions 影響 affect")
+    assert result["anchor"]["outcome"] == "accepted"
+    assert result["anchor"]["verified_terms"] == ["眼圖", "產品決策", "影響"]
+
+
+def test_retrieval_searches_a_query_once_whatever_its_case_or_spacing() -> None:
+    from capabilities.knowledge_query.handlers import _distinct
+
+    assert _distinct(
+        ["Eye  diagram", "eye diagram", "眼圖 eye diagram", "", "眼圖 Eye Diagram"]
+    ) == (
+        "Eye  diagram",
+        "眼圖 eye diagram",
+    )

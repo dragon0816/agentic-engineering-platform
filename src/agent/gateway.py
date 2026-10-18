@@ -99,10 +99,12 @@ TOOL_PROGRESS: ContextVar[Callable[[str, ToolProgressState], None] | None] = Con
 )
 
 
-#: The only field the model fills on a Knowledge vault tool. The installed
+#: The model fills the question on a Knowledge vault tool. The installed
 #: Knowledge Skill decides retrieval, citation and answer form; a request the
 #: model appended ("cite Raw evidence", "focus on X", "rank them") narrowed or
-#: collapsed answers in knowledge_v1 core-005 (2026-10-12).
+#: collapsed answers in knowledge_v1 core-005 (2026-10-12). The optional
+#: `original_terms` and `term_translations` let the G2 anchor check verify a
+#: translated question without any language knowledge (owner 2026-10-18).
 VAULT_QUESTION_SCHEMA: dict[str, JsonValue] = {
     "type": "object",
     "properties": {
@@ -115,7 +117,31 @@ VAULT_QUESTION_SCHEMA: dict[str, JsonValue] = {
                 "citations, evidence type, focus, products, ranking or format: the "
                 "vault cites its own evidence."
             ),
-        }
+        },
+        "original_terms": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {"type": "string", "maxLength": 80},
+            "description": (
+                "Optional. The key terms of the person's latest message (products, "
+                "models, numbers, technologies, markets, time words), each copied "
+                "EXACTLY, character for character, from that message. Never translate, "
+                "correct or paraphrase them here; a term that is not in the message is "
+                "discarded."
+            ),
+        },
+        "term_translations": {
+            "type": "object",
+            "maxProperties": 20,
+            "additionalProperties": {"type": "string", "maxLength": 80},
+            "description": (
+                "Optional. Maps each key term, copied EXACTLY from the person's latest "
+                "message, to its translation or synonym in the other language (English "
+                'or Traditional Chinese), for example {"眼圖": "eye diagram"}. Fill it '
+                "when your question uses another language than the person did; it only "
+                "widens the search."
+            ),
+        },
     },
     "required": ["question"],
     "additionalProperties": False,
@@ -900,11 +926,17 @@ class Gateway:
             checked = data.get("anchor") if isinstance(data, dict) else None
             if isinstance(checked, dict):
                 # Metadata only: the outcome and counts, never the sentences.
-                missing, dropped = checked.get("missing_terms"), checked.get("dropped_terms")
+                def count(key: str) -> int:
+                    value = checked.get(key)
+                    return len(value) if isinstance(value, list) else 0
+
                 step.update(
                     anchor_outcome=checked.get("outcome"),
-                    anchor_missing=len(missing) if isinstance(missing, list) else 0,
-                    anchor_dropped=len(dropped) if isinstance(dropped, list) else 0,
+                    anchor_missing=count("missing_terms"),
+                    anchor_dropped=count("dropped_terms"),
+                    anchor_verified=count("verified_terms"),
+                    anchor_discarded=count("discarded_terms"),
+                    anchor_translations=count("translations_used"),
                 )
             if not _tool_succeeded(item):
                 step.update(
@@ -985,7 +1017,9 @@ class Gateway:
                 self.knowledge_harness,
                 question,
                 asset,
-                anchor or ToolAnchor(original=context.message),
+                # G2: the model's claimed terms travel with the Host's anchor
+                # and are verified against the original there.
+                (anchor or ToolAnchor(original=context.message)).with_claims(call.arguments),
             )
             validated = bool(answer.get("ok"))
             # G1: a grounded Bridge record means the Harness produced output

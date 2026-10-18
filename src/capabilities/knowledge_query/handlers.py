@@ -86,6 +86,19 @@ WIKI_CITATION_FORM = (
 )
 
 
+def _distinct(queries: list[str]) -> tuple[str, ...]:
+    """Queries in order, each once; two that differ only in case or spacing
+    are the same lexical search."""
+    seen: set[str] = set()
+    kept: list[str] = []
+    for query in queries:
+        key = " ".join(query.casefold().split())
+        if key and key not in seen:
+            seen.add(key)
+            kept.append(query)
+    return tuple(kept)
+
+
 class MarketMatrixHandler:
     def __init__(self, catalog: KnowledgeCatalog) -> None:
         self.catalog = catalog
@@ -315,7 +328,9 @@ class KnowledgeQueryHandler:
             # A facet query without the question's words finds the same pages
             # for every question.
             prefix = content_words(request.question)
-        # The conversation model's accepted version only widens retrieval (G2).
+        # The conversation model's accepted version and its verified term
+        # translations only widen retrieval (G2). They join the bilingual
+        # rewrites below; the same query from both is searched once.
         queries = [
             request.question,
             *request.supplementary_queries,
@@ -331,7 +346,7 @@ class KnowledgeQueryHandler:
         sections = procedure.evidence_sections or (36 if bilingual else 24)
         chars = procedure.evidence_chars or 40000
         passages = snapshot.wiki_primary_passages(
-            tuple(dict.fromkeys(queries))[:12], k=sections, max_chars=chars, content_only=bilingual
+            _distinct(queries)[:12], k=sections, max_chars=chars, content_only=bilingual
         )
         if procedure.retrieval_rounds and passages:
             passages = search_rounds(
