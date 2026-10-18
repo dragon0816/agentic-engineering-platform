@@ -1,6 +1,7 @@
 """Installed Skill procedures and explicit route bindings, without executable imports."""
 
 import re
+from collections.abc import Iterable
 from typing import Annotated, Any, Literal, Self
 
 from pydantic import (
@@ -14,7 +15,7 @@ from pydantic import (
 )
 
 from common.assets import AssetIdentity, AssetMetadata, RegistryContract
-from common.base import Contract, Symbol, Text
+from common.base import Contract, Slug, Symbol, Text
 
 CommandName = Annotated[str, StringConstraints(pattern=r"^[a-zA-Z_][a-zA-Z0-9_]*$")]
 
@@ -42,6 +43,28 @@ class KeywordRule(Contract):
 
 
 HarnessDomain = Literal["workflow", "knowledge", "coding", "conversation"]
+BoundAssetKind = Literal["knowledge", "workflow", "strategy_config"]
+
+
+class SkillAssetBinding(Contract):
+    """An asset a Skill declares it serves (G3, owner 2026-10-18): a domain
+    adapter picks the Skill bound to the asset it works on. `version` None
+    binds every version; `priority` ranks several Skills bound to one asset.
+    A binding is a planning preference, never an execution grant."""
+
+    kind: BoundAssetKind
+    namespace: Slug
+    name: Slug
+    version: Text | None = None
+    priority: int = Field(default=0, ge=0, le=100, strict=True)
+
+    def matches(self, kind: str, asset: AssetIdentity) -> bool:
+        return (
+            self.kind == kind
+            and self.namespace == asset.namespace
+            and self.name == asset.name
+            and (self.version is None or self.version == asset.version)
+        )
 
 
 class SkillHarnessGuidance(Contract):
@@ -81,13 +104,19 @@ class SkillManifest(RegistryContract):
     # selector (JEV SystemOne) what this Skill is for and how it differs from
     # the others; `instructions` stays the guidance for the model.
     selector_hint: Annotated[str, StringConstraints(min_length=1, max_length=240)] | None = None
+    # Optional (G3): the assets this Skill serves. Without it the adapter's
+    # fallback (the first eligible Skill) applies, as before.
+    asset_bindings: tuple[SkillAssetBinding, ...] = Field(default=(), max_length=16)
 
     @model_serializer(mode="wrap")
     def _serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
-        # Manifests published before the hint keep their bytes and digests.
+        # Manifests published before the hint or the bindings keep their
+        # bytes and digests.
         data: dict[str, Any] = handler(self)
         if self.selector_hint is None:
             data.pop("selector_hint", None)
+        if not self.asset_bindings:
+            data.pop("asset_bindings", None)
         return data
 
     @model_validator(mode="after")
@@ -101,7 +130,28 @@ class SkillManifest(RegistryContract):
             raise ValueError("keyword rules must reference declared commands")
         if len({item.key for item in self.script_tools}) != len(self.script_tools):
             raise ValueError("script tool references must be unique")
+        keys = [(b.kind, b.namespace, b.name, b.version) for b in self.asset_bindings]
+        if len(keys) != len(set(keys)):
+            raise ValueError("asset bindings must be unique within a Skill")
         return self
+
+
+def bound_skill(
+    manifests: Iterable[SkillManifest], kind: str, asset: AssetIdentity
+) -> SkillManifest | None:
+    """The Skill bound to `asset` with the highest explicit priority (G3).
+
+    Equal priorities are decided by the Skill's identity, never by the order
+    the Skills were installed in; None when no Skill binds the asset."""
+    ranked = []
+    for manifest in manifests:
+        priorities = [b.priority for b in manifest.asset_bindings if b.matches(kind, asset)]
+        if priorities:
+            identity = manifest.metadata.identity
+            ranked.append(
+                ((-max(priorities), identity.namespace, identity.name, identity.version), manifest)
+            )
+    return min(ranked, key=lambda item: item[0])[1] if ranked else None
 
 
 class SkillRegistry:

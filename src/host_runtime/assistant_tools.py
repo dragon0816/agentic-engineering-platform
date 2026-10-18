@@ -155,7 +155,9 @@ class AssistantTools:
         knowledge = self.web.runtime.config.knowledge
         if not knowledge:
             return {"ok": False, "code": "knowledge_unavailable"}
-        skill = harness_skill(self.web.runtime.agent.gateway.router.commands.skills)
+        skill = harness_skill(
+            self.web.runtime.agent.gateway.router.commands.skills, knowledge[0].asset
+        )
         reply = self.web.knowledge_harness.ask(
             KnowledgeAskRequest(asset=knowledge[0].asset, question=question, skill=skill)
         )

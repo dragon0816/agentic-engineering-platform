@@ -184,7 +184,12 @@ from host_runtime.jev_shadow import SHADOW_LOG_FILE
 from host_runtime.knowledge_bench import latest as latest_benchmark
 from host_runtime.knowledge_bench import run_benchmark
 from host_runtime.knowledge_convert import ConvertRun, run_convert
-from host_runtime.knowledge_harness import KnowledgeHarness, harness_skill, knowledge_source_lines
+from host_runtime.knowledge_harness import (
+    KnowledgeHarness,
+    bound_harness_skill,
+    harness_skill,
+    knowledge_source_lines,
+)
 from host_runtime.knowledge_publish import (
     PublishError,
     publish_candidate,
@@ -2927,7 +2932,14 @@ class AgentWeb:
         eligible_skills = [
             item for item in self.assets()["skills"] if item["knowledge_harness_selectable"]
         ]
-        selected_skill = (
+        vault = AssetIdentity(
+            namespace=selected["namespace"], name=selected["name"], version=selected["version"]
+        )
+        # G3 (owner 2026-10-18): a Skill bound to this vault decides, as on the
+        # tool route; without a binding, the single eligible Skill as before.
+        selected_skill = bound_harness_skill(
+            self.runtime.agent.gateway.router.commands.skills, vault
+        ) or (
             AssetIdentity(
                 namespace=eligible_skills[0]["namespace"],
                 name=eligible_skills[0]["name"],
@@ -2937,15 +2949,7 @@ class AgentWeb:
             else None
         )
         result = self.ask_knowledge(
-            KnowledgeAskRequest(
-                asset=AssetIdentity(
-                    namespace=selected["namespace"],
-                    name=selected["name"],
-                    version=selected["version"],
-                ),
-                question=question,
-                skill=selected_skill,
-            )
+            KnowledgeAskRequest(asset=vault, question=question, skill=selected_skill)
         )
         if not result["ok"]:
             return {

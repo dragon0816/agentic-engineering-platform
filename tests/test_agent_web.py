@@ -140,6 +140,7 @@ def knowledge_runtime(
     harness_skill: bool = False,
     harness_skill_file: str = "knowledge-evidence.json",
     required_evidence: tuple[str, ...] | None = None,
+    extra_skills: tuple[dict[str, Any], ...] = (),
 ) -> Any:
     vault = copy_vault(tmp_path)
     grants = grant_record()
@@ -191,6 +192,8 @@ def knowledge_runtime(
         (layout.skills / "knowledge-evidence.json").write_text(
             json.dumps(skill_payload), encoding="utf-8"
         )
+    for index, extra in enumerate(extra_skills):
+        (layout.skills / f"extra-{index}.json").write_text(json.dumps(extra), encoding="utf-8")
     return build_runtime(config, layout=layout, model_transport=KnowledgeGateway())
 
 
@@ -1789,6 +1792,28 @@ def test_named_knowledge_chat_uses_one_installed_harness_skill(tmp_path: Path) -
     assert answer["evidence"]["raw_citations"] == 1
     assert "Sources (Raw):" in answer["answer"]
     assert "facet coverage not assessed" in answer["answer"]
+
+
+def test_named_knowledge_chat_uses_the_skill_bound_to_the_vault(tmp_path: Path) -> None:
+    # G3 (owner 2026-10-18): with two eligible Knowledge Skills the direct
+    # route used no Skill; one bound to the vault now decides, as on the tool route.
+    fixture = Path(__file__).parent / "fixtures/harness_skills/knowledge-evidence.json"
+    bound = json.loads(fixture.read_text(encoding="utf-8"))
+    bound["metadata"]["identity"]["name"] = "knowledge-bound"
+    bound["alias"] = "knowledge_bound"
+    bound["asset_bindings"] = [{"kind": "knowledge", "namespace": V1.namespace, "name": V1.name}]
+    with knowledge_runtime(tmp_path, harness_skill=True, extra_skills=(bound,)) as runtime:
+        web = AgentWeb(runtime)
+        created = web.create_conversation()["conversation"]
+        asked = web.conversation_turn(
+            ConversationTurnRequest(
+                session_id=created["session_id"],
+                message="According to widget-guide, what firmware does Safe mode require?",
+            )
+        )
+    answer = asked["answer"]
+    assert answer["harness"]["phase"] == "validated"
+    assert answer["harness"]["plan"]["skill"]["name"] == "knowledge-bound"
 
 
 def test_skill_declared_natural_knowledge_intent_selects_the_only_vault(tmp_path: Path) -> None:

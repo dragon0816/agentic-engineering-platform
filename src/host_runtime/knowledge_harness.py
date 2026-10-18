@@ -19,6 +19,7 @@ from typing import Any
 from agent.harness_anchor import Glossary, ToolAnchor, check_anchor
 from agent.harness_plan import plan_task
 from agent.harness_runner import run_harness
+from agent.skills import bound_skill
 from agent.task_contract import (
     CompletionCheck,
     ExpectedOutput,
@@ -74,20 +75,38 @@ def knowledge_source_lines(record: dict[str, Any]) -> list[str]:
     return lines
 
 
-def harness_skill(skills: Any) -> Any:
+def _eligible(manifest: Any) -> bool:
+    guidance = manifest.harness_guidance
+    return bool(
+        manifest.metadata.lifecycle in {"validated", "published"}
+        and guidance is not None
+        and "knowledge" in guidance.domains
+        and any(
+            command.kind == "capability" and command.target == KNOWLEDGE_QUERY_SPEC.identity
+            for command in manifest.commands
+        )
+    )
+
+
+def bound_harness_skill(skills: Any, asset: Any) -> Any:
+    """The eligible Knowledge Skill bound to this vault (G3), or None."""
+    found = bound_skill([m for m in skills.manifests() if _eligible(m)], "knowledge", asset)
+    return None if found is None else found.metadata.identity
+
+
+def harness_skill(skills: Any, asset: Any = None) -> Any:
     """The installed Knowledge Skill the Harness plans with: published or
-    validated, Knowledge harness guidance, and the exact query command."""
+    validated, Knowledge harness guidance, and the exact query command.
+
+    G3 (owner 2026-10-18): with a vault, the Skill bound to it wins by its
+    explicit priority, whatever the installation order; only when no eligible
+    Skill binds the vault is it the first eligible Skill, as before."""
+    if asset is not None:
+        bound = bound_harness_skill(skills, asset)
+        if bound is not None:
+            return bound
     for manifest in skills.manifests():
-        guidance = manifest.harness_guidance
-        if (
-            manifest.metadata.lifecycle in {"validated", "published"}
-            and guidance is not None
-            and "knowledge" in guidance.domains
-            and any(
-                command.kind == "capability" and command.target == KNOWLEDGE_QUERY_SPEC.identity
-                for command in manifest.commands
-            )
-        ):
+        if _eligible(manifest):
             return manifest.metadata.identity
     return None
 
@@ -160,7 +179,7 @@ class KnowledgeHarness:
         the Harness answers and validates; the model's `question` only adds
         retrieval queries once it passes the anchor check."""
         skills = self.runtime.agent.gateway.router.commands.skills
-        skill = harness_skill(skills)
+        skill = harness_skill(skills, asset)
         procedure = _procedure_of(skills, skill)
         check = check_anchor(
             anchor.original if anchor is not None else question,
