@@ -16,6 +16,7 @@ import uuid
 from pathlib import Path
 from typing import Any
 
+from agent.harness_anchor import Glossary, ToolAnchor, check_anchor
 from agent.harness_plan import plan_task
 from agent.harness_runner import run_harness
 from agent.task_contract import (
@@ -91,6 +92,28 @@ def harness_skill(skills: Any) -> Any:
     return None
 
 
+def knowledge_glossary(procedure: KnowledgeProcedure | None) -> Glossary:
+    """The Knowledge domain's glossary for G2: the installed Skill procedure's
+    bilingual facet, focus and relation terms, one synonym group each."""
+    if procedure is None:
+        return Glossary()
+    groups: list[tuple[str, ...]] = []
+    for facet in procedure.facets:
+        groups.extend(
+            (
+                facet.support_terms,
+                facet.link_terms,
+                facet.comparison_terms,
+                (*facet.search_queries, *facet.discovery_queries),
+            )
+        )
+    for hint in procedure.focus_hints:
+        groups.append((hint.query, *hint.evidence_terms, *hint.expansions))
+    groups.append(procedure.relation_terms)
+    groups.append(procedure.relation_search_queries)
+    return Glossary.of(groups)
+
+
 def broaden(procedure: KnowledgeProcedure, attempt: int) -> KnowledgeProcedure:
     """Wider retrieval for a retry: every facet query, more passages per
     facet, more Wiki index hits. The Skill's rules and policy are unchanged."""
@@ -110,23 +133,62 @@ def broaden(procedure: KnowledgeProcedure, attempt: int) -> KnowledgeProcedure:
     )
 
 
+def _procedure_of(skills: Any, identity: Any) -> KnowledgeProcedure | None:
+    """The installed Skill's validated Knowledge procedure, if it has one."""
+    if identity is None:
+        return None
+    for manifest in skills.manifests():
+        if manifest.metadata.identity == identity and manifest.procedure:
+            try:
+                return KnowledgeProcedure.model_validate(manifest.procedure)
+            except ValueError:
+                return None
+    return None
+
+
 class KnowledgeHarness:
     def __init__(self, runtime: Any, namespace: str | None) -> None:
         self.runtime = runtime
         self.namespace = namespace
 
-    def for_tool(self, question: str, asset: Any) -> dict[str, Any]:
-        """The conversation tool route: the same Harness as the direct route."""
-        skill = harness_skill(self.runtime.agent.gateway.router.commands.skills)
-        return self.ask(KnowledgeAskRequest(asset=asset, question=question, skill=skill))
+    def for_tool(
+        self, question: str, asset: Any, anchor: ToolAnchor | None = None
+    ) -> dict[str, Any]:
+        """The conversation tool route: the same Harness as the direct route.
 
-    def ask(self, request: KnowledgeAskRequest, *, catalog: Any = None) -> dict[str, Any]:
+        G2 (owner 2026-10-18): the person's original sentence is the question
+        the Harness answers and validates; the model's `question` only adds
+        retrieval queries once it passes the anchor check."""
+        skills = self.runtime.agent.gateway.router.commands.skills
+        skill = harness_skill(skills)
+        procedure = _procedure_of(skills, skill)
+        check = check_anchor(
+            anchor.original if anchor is not None else question,
+            question,
+            history=anchor.history if anchor is not None else (),
+            glossary=knowledge_glossary(procedure),
+        )
+        result = self.ask(
+            KnowledgeAskRequest(asset=asset, question=check.question or question, skill=skill),
+            supplementary=check.supplementary,
+        )
+        return {**result, "anchor": check.record()}
+
+    def ask(
+        self,
+        request: KnowledgeAskRequest,
+        *,
+        catalog: Any = None,
+        supplementary: tuple[str, ...] = (),
+    ) -> dict[str, Any]:
         """Ask through the installed Knowledge Skill. With `catalog`, the same
         Harness asks a Knowledge version that is not installed (a sandbox
         benchmark, collaboration C3) by calling the query handler directly."""
         item = KnowledgeAskRequest.model_validate(request)
         if item.skill is None:
-            return self._ask_knowledge_bridge(item, _trace(), catalog=catalog)
+            return self._ask_knowledge_bridge(
+                item, _trace(), catalog=catalog, supplementary=supplementary
+            )
         installed = self.runtime.agent.gateway.router.commands.skills.discover(item.skill.namespace)
         skill = next(
             (candidate for candidate in installed if candidate.metadata.identity == item.skill),
@@ -209,7 +271,9 @@ class KnowledgeHarness:
         )
         plan = plan_task(task, skill, "knowledge")
         actions = KnowledgeBridgeActions(
-            lambda: self._ask_knowledge_bridge(item, trace, procedure=procedure, catalog=catalog),
+            lambda: self._ask_knowledge_bridge(
+                item, trace, procedure=procedure, catalog=catalog, supplementary=supplementary
+            ),
             required_evidence=plan.skill_evidence,
             required_facets=required_facets,
             relation_required=relation_required,
@@ -219,7 +283,11 @@ class KnowledgeHarness:
             if procedure is None
             else (
                 lambda attempt: self._ask_knowledge_bridge(
-                    item, trace, procedure=broaden(procedure, attempt), catalog=catalog
+                    item,
+                    trace,
+                    procedure=broaden(procedure, attempt),
+                    catalog=catalog,
+                    supplementary=supplementary,
                 )
             ),
             retry_budget=plan.retry_budget,
@@ -375,9 +443,10 @@ class KnowledgeHarness:
         *,
         procedure: KnowledgeProcedure | None = None,
         catalog: Any = None,
+        supplementary: tuple[str, ...] = (),
     ) -> dict[str, Any]:
         if catalog is not None:
-            return self._ask_catalog(item, trace, procedure, catalog)
+            return self._ask_catalog(item, trace, procedure, catalog, supplementary)
         device = self.runtime.config.device
         local = LocalCapabilityRequest(
             ingress="local",
@@ -385,7 +454,10 @@ class KnowledgeHarness:
             bridge_id=device.bridge_id,
             target=KNOWLEDGE_QUERY_SPEC.identity,
             arguments=KnowledgeQueryRequest(
-                asset=item.asset, question=item.question, procedure=procedure
+                asset=item.asset,
+                question=item.question,
+                procedure=procedure,
+                supplementary_queries=supplementary,
             ).model_dump(mode="json", exclude_none=True),
             trace=trace,
         )
@@ -415,6 +487,7 @@ class KnowledgeHarness:
         trace: TraceIdentifiers,
         procedure: KnowledgeProcedure | None,
         catalog: Any,
+        supplementary: tuple[str, ...] = (),
     ) -> dict[str, Any]:
         """The installed query handler's model and alias over another catalog;
         the result has the Bridge route's shape, refusals included."""
@@ -439,7 +512,10 @@ class KnowledgeHarness:
             channel="knowledge-benchmark",
         )
         request = KnowledgeQueryRequest(
-            asset=item.asset, question=item.question, procedure=procedure
+            asset=item.asset,
+            question=item.question,
+            procedure=procedure,
+            supplementary_queries=supplementary,
         )
         try:
             data = asyncio.run(handler(context, request))

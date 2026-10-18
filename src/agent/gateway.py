@@ -30,12 +30,13 @@ from agent.decisions import (
     DecisionShadow,
     DecisionTrace,
 )
+from agent.harness_anchor import ToolAnchor
 from agent.harness_handoff import harness_reply, with_unverified_note
 from agent.routing import RequestRouter, RoutingOutcome
 from agent.skills import CommandBinding
 from capabilities.runtime import CapabilityInvocation
 from common.action_cards import CARD_KEY
-from common.assets import AssetIdentity
+from common.assets import AssetIdentity, reject_embedded_secrets
 from common.base import Contract, Symbol, Text
 from common.change_proposal import PROPOSE_GUIDANCE, PROPOSE_TOOL
 from common.execution import (
@@ -84,6 +85,8 @@ MAX_CONVERSATION_MESSAGE_CHARS = 4_000
 # The person's newest message may carry attached files' text (owner 2026-10-08).
 MAX_CURRENT_MESSAGE_CHARS = 40_000
 MAX_TOOL_OBSERVATION_CHARS = 16_000
+# A tool call's recorded arguments (G2 logging, owner 2026-10-18).
+MAX_RECORDED_ARGUMENTS_CHARS = 4_000
 
 ToolProgressState = Literal["running", "succeeded", "failed"]
 #: Set by a channel around one `converse` call to hear which installed tool
@@ -135,6 +138,19 @@ def _tool_progress(name: str, state: ToolProgressState) -> None:
         listener(name, state)
     except Exception:  # noqa: BLE001 - progress display cannot change the answer
         pass
+
+
+def _recorded_arguments(arguments: dict[str, JsonValue]) -> dict[str, JsonValue]:
+    """A tool call's arguments as recorded on its evidence: never credential
+    material, and bounded (a draft's script can be long)."""
+    keys: list[JsonValue] = list(sorted(arguments)[:20])
+    try:
+        reject_embedded_secrets(arguments)
+    except ValueError:
+        return {"redacted": "credential material", "keys": keys}
+    if len(json.dumps(arguments, ensure_ascii=False)) > MAX_RECORDED_ARGUMENTS_CHARS:
+        return {"truncated": True, "keys": keys}
+    return dict(arguments)
 
 
 def _tool_succeeded(item: "ConversationToolExecution") -> bool:
@@ -223,6 +239,9 @@ class ConversationToolExecution(Contract):
 
     call_id: Symbol
     name: Symbol
+    # What the model passed (G2, owner 2026-10-18): kept for the trace and
+    # benchmarks, never sent back to the model, without credentials.
+    arguments: dict[str, JsonValue] | None = None
     decision: RouteDecision | None = None
     capability: CapabilityResult | None = None
     workflow: WorkflowRunSnapshot | None = None
@@ -388,8 +407,11 @@ class Gateway:
         # exist (harness unification U4).
         self._workspace_roots = workspace_roots
         # The Knowledge Harness the tool route runs (harness unification U5):
-        # (question, vault asset) -> the Harness result. Set by the host.
-        self.knowledge_harness: Callable[[str, AssetIdentity], dict[str, Any]] | None = None
+        # (model's question, vault asset, the person's original sentence and
+        # recent conversation) -> the Harness result (G2). Set by the host.
+        self.knowledge_harness: (
+            Callable[[str, AssetIdentity, ToolAnchor], dict[str, Any]] | None
+        ) = None
         # Owner mode (2026-10-11): a side effect the model chose itself becomes
         # an approval request the person decides with a button.
         self.capability_approval: (
@@ -624,6 +646,12 @@ class Gateway:
             for index, message in enumerate(recent)
         )
         sees_images = any(message.images for message in bounded_history)
+        # G2: a Harness tool gets the person's own sentence next to the model's
+        # argument, and the recent conversation for resolving references.
+        anchor = ToolAnchor(
+            original=context.message,
+            history=tuple(message.text for message in bounded_history[:-1]),
+        )
         messages = [ModelMessage(role="system", text=prompt), *bounded_history]
         if tools:
             # This is the exact first-turn payload before an optional selector
@@ -779,7 +807,9 @@ class Gateway:
                         )
                     )
                     continue
-                item = await self._telemetered_tool(context, call, turn, host, bindings, bound)
+                item = await self._telemetered_tool(
+                    context, call, turn, host, bindings, bound, anchor
+                )
                 evidence.append(item)
                 harnessed = (
                     item.host.data
@@ -822,7 +852,11 @@ class Gateway:
                         model_turns=turn,
                         tools=tuple(evidence),
                     )
-                observation = json.dumps(item.model_dump(mode="json"), ensure_ascii=False)
+                # The model already knows its arguments; the observation stays
+                # what it was before they were recorded.
+                observation = json.dumps(
+                    item.model_dump(mode="json", exclude={"arguments"}), ensure_ascii=False
+                )
                 if len(observation) > MAX_TOOL_OBSERVATION_CHARS:
                     observation = json.dumps(
                         {
@@ -852,6 +886,7 @@ class Gateway:
         host: dict[str, HostTool],
         bindings: dict[str, Any],
         bound: dict[str, Any],
+        anchor: ToolAnchor | None = None,
     ) -> ConversationToolExecution:
         """One tool call, as a `tool.completed` span (telemetry contract v0.2)."""
         telemetry.note_tool()
@@ -860,7 +895,17 @@ class Gateway:
             attributes={"tool_id": call.name, "loop_index": turn},
             completed="tool.completed",
         ) as step:
-            item = await self._one_tool(context, call, host, bindings, bound)
+            item = await self._one_tool(context, call, host, bindings, bound, anchor)
+            data = item.host.data if item.host is not None else None
+            checked = data.get("anchor") if isinstance(data, dict) else None
+            if isinstance(checked, dict):
+                # Metadata only: the outcome and counts, never the sentences.
+                missing, dropped = checked.get("missing_terms"), checked.get("dropped_terms")
+                step.update(
+                    anchor_outcome=checked.get("outcome"),
+                    anchor_missing=len(missing) if isinstance(missing, list) else 0,
+                    anchor_dropped=len(dropped) if isinstance(dropped, list) else 0,
+                )
             if not _tool_succeeded(item):
                 step.update(
                     status="failed",
@@ -875,6 +920,7 @@ class Gateway:
         host: dict[str, HostTool],
         bindings: dict[str, Any],
         bound: dict[str, Any],
+        anchor: ToolAnchor | None = None,
     ) -> ConversationToolExecution:
         binding = bindings.get(call.name)
         if call.name in host:
@@ -893,10 +939,10 @@ class Gateway:
         else:
             _tool_progress(call.name, "running")
             item = await self._execute_conversation_tool(
-                context, call, binding, bound.get(call.name)
+                context, call, binding, bound.get(call.name), anchor
             )
             _tool_progress(call.name, "succeeded" if _tool_succeeded(item) else "failed")
-        return item
+        return item.model_copy(update={"arguments": _recorded_arguments(dict(call.arguments))})
 
     @staticmethod
     async def _execute_host_tool(
@@ -918,6 +964,7 @@ class Gateway:
         call: ModelToolCall,
         binding: CommandBinding,
         bound: dict[str, JsonValue] | None = None,
+        anchor: ToolAnchor | None = None,
     ) -> ConversationToolExecution:
         decision = RouteDecision(
             kind=binding.kind,
@@ -934,7 +981,12 @@ class Gateway:
             # route; its answer is validated by Host checks (owner 2026-10-09).
             question = str(call.arguments.get("question") or "")
             asset = AssetIdentity.model_validate(bound["asset"])
-            answer = await asyncio.to_thread(self.knowledge_harness, question, asset)
+            answer = await asyncio.to_thread(
+                self.knowledge_harness,
+                question,
+                asset,
+                anchor or ToolAnchor(original=context.message),
+            )
             validated = bool(answer.get("ok"))
             # G1: a grounded Bridge record means the Harness produced output
             # even when its Host checks did not pass (a partial answer).
@@ -965,6 +1017,13 @@ class Gateway:
                         "phase": state.get("phase"),
                         "failure_code": failure_code,
                         **kept,
+                        # G2: the person's sentence, the model's version and
+                        # the check outcome, for an intent drift rate.
+                        **(
+                            {"anchor": answer["anchor"]}
+                            if isinstance(answer.get("anchor"), dict)
+                            else {}
+                        ),
                         **(
                             {}
                             if produced

@@ -116,11 +116,25 @@ class KnowledgeQueryRequest(Contract):
     asset: AssetIdentity
     question: Text
     procedure: KnowledgeProcedure | None = None
+    # G2 (owner 2026-10-18): the conversation model's accepted version of the
+    # question. It only widens retrieval; synthesis and validation answer
+    # `question`, the person's own sentence.
+    supplementary_queries: tuple[
+        Annotated[str, StringConstraints(min_length=1, max_length=400)], ...
+    ] = Field(default=(), max_length=3)
 
     @model_validator(mode="after")
     def safe_question(self) -> Self:
         reject_embedded_secrets(self.model_dump(mode="json"))
         return self
+
+    @model_serializer(mode="wrap")
+    def _serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        # Requests without supplementary queries keep their bytes.
+        data: dict[str, Any] = handler(self)
+        if not self.supplementary_queries:
+            data.pop("supplementary_queries", None)
+        return data
 
 
 CitationPolicy = Literal["raw_only", "wiki_primary"]

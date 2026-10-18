@@ -315,7 +315,12 @@ class KnowledgeQueryHandler:
             # A facet query without the question's words finds the same pages
             # for every question.
             prefix = content_words(request.question)
-        queries = [request.question, *(focus.expansions if focus else ())]
+        # The conversation model's accepted version only widens retrieval (G2).
+        queries = [
+            request.question,
+            *request.supplementary_queries,
+            *(focus.expansions if focus else ()),
+        ]
         rewrites: tuple[str, ...] = ()
         if bilingual:
             rewrites = rewrite_queries(self.model, self.alias, request.question, context.trace)
@@ -340,7 +345,7 @@ class KnowledgeQueryHandler:
                 k=sections,
                 max_chars=chars,
                 per_page=procedure.evidence_sections_per_page,
-                rank_text=" ".join((request.question, *rewrites)),
+                rank_text=" ".join((request.question, *request.supplementary_queries, *rewrites)),
             )
         if not passages:
             raise CapabilityRefused("knowledge_insufficient_evidence")

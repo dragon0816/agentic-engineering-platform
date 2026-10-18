@@ -721,3 +721,29 @@ def test_e2e_01_ordinary_tools_keep_their_conversation_behaviour() -> None:
     assert capability.failure.code == "permission_denied"
     # A plain capability is not a Harness: its failure adds no Host note.
     assert denied.text == "The echo is not allowed."
+
+
+def test_e2e_01_wrong_device_requests_are_refused_before_any_command_in_conversation() -> None:
+    trap = TrapPhysicalAdapter()
+    wrong = DutPhysicalValidationRequest(
+        validation=validation_request("a" * 64, bridge_id="another-bridge")
+    )
+    model = ConversationModel(
+        "acme_dut__validate_physical", wrong.model_dump(mode="json"), "Validated on the rig."
+    )
+    gateway = conversation_gateway(
+        DUT_PHYSICAL_VALIDATE_SPEC,
+        PhysicalDutValidationHandler(physical_service(trap)),
+        DutPhysicalValidationRequest,
+        DutValidationEvidence,
+        model,
+        vendor_skill(),
+    )
+    result = converse_as_engineer(gateway, "validate the DUT on another bridge")
+    assert trap.calls == 0
+    tool = result.tools[0]
+    assert tool.capability is not None and tool.capability.failure is not None
+    assert tool.capability.status == "failed"
+    assert tool.capability.failure.code == "device_identity_mismatch"
+    # The tool record keeps what the model asked for (G2 logging).
+    assert tool.arguments == wrong.model_dump(mode="json")

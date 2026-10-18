@@ -34,8 +34,8 @@ def test_a_validated_harness_answer_is_the_turn_answer_without_a_rewrite() -> No
     built = gateway(model, handler)
     asked: list[Any] = []
 
-    def harness(question: str, asset: Any) -> dict[str, Any]:
-        asked.append((question, asset))
+    def harness(question: str, asset: Any, anchor: Any) -> dict[str, Any]:
+        asked.append((question, asset, anchor.original))
         return {"ok": True, "answer": "CMP180 supports 5G NR [1].", "evidence": {}}
 
     built.knowledge_harness = harness
@@ -51,7 +51,10 @@ def test_a_validated_harness_answer_is_the_turn_answer_without_a_rewrite() -> No
         )
     )
     assert result.text == "CMP180 supports 5G NR [1]." and len(model.calls) == 1
-    assert asked == [("CMP180?", RS)] and handler.inputs == []  # no raw capability call
+    # G2 (owner 2026-10-18): the person's sentence travels with the model's
+    # question; the adapter answers the original.
+    assert asked == [("CMP180?", RS, "CMP180 支援哪些標準？")]
+    assert handler.inputs == []  # no raw capability call
 
 
 def test_a_validated_tool_answer_keeps_its_cited_passages_for_checking() -> None:
@@ -67,7 +70,7 @@ def test_a_validated_tool_answer_keeps_its_cited_passages_for_checking() -> None
             ]
         }
     }
-    built.knowledge_harness = lambda question, asset: {
+    built.knowledge_harness = lambda question, asset, anchor: {
         "ok": True,
         "answer": "CMP180 supports 5G NR [1].",
         "evidence": {},
@@ -93,7 +96,7 @@ def test_a_validated_tool_answer_keeps_its_cited_passages_for_checking() -> None
 def test_an_unvalidated_answer_goes_back_to_the_model_marked_as_such() -> None:
     model, handler = CallsVault("knowledge__rs-knowledge", {"question": "CMP180?"}), Recording()
     built = gateway(model, handler)
-    built.knowledge_harness = lambda question, asset: {
+    built.knowledge_harness = lambda question, asset, anchor: {
         "ok": False,
         "answer": "No sufficient evidence.",
         "evidence": None,
