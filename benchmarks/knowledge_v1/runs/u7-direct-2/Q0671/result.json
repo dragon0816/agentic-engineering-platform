@@ -1,0 +1,52 @@
+{
+ "id": "Q0671",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [],
+ "seconds": 44.234,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 25,
+   "kind": "wiki",
+   "ref": "wiki/concepts/High speed SerDes eco-chain.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 67,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "Required Oscilloscope capability",
+   "required"
+  ],
+  "reason": "The cited passages support the chain at a high level: AI/HPC drives high-speed interconnects and PCB upgrades, the SI flow lists IL/Xtalk/Eye diagram/TDR impedance, and the interface-test block is mapped to scopes among other instruments. The only overreach is wording this as a specifically 'required' oscilloscope capability, since the passage shows scopes are associated with Interface Test but does not state a formal requirement or exclusive oscilloscope capability.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

@@ -1,0 +1,52 @@
+{
+ "id": "Q0881",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [],
+ "seconds": 44.204,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 98,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 53,
+   "kind": "wiki",
+   "ref": "wiki/concepts/O-RAN Beamforming Measurements.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 19,
+   "kind": "wiki",
+   "ref": "wiki/concepts/O-RAN Beamforming Measurements.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "RFIC validation 變化",
+   "Oscilloscope setup 會更需要同時量測至少 2 ports"
+  ],
+  "reason": "The answer accurately cites that RFIC includes arrays/RF+Baseband and that an R&S RTO-based O-RAN beamforming setup measures multiple antenna ports, including two ports simultaneously and amplitude/phase/time relations. It is appropriately cautious that the passages do not directly connect RFIC array validation changes to oscilloscope requirements, though wording about a 'change' and 'more need' goes beyond the cited evidence.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

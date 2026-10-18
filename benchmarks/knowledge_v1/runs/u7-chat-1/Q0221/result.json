@@ -1,0 +1,172 @@
+{
+ "id": "Q0221",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "failed",
+ "tools": [],
+ "seconds": 255.594,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 98,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 65,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G private network resilience against smart jamming.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 26,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Smart Jamming.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 31,
+   "kind": "wiki",
+   "ref": "wiki/sources/5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 43,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 GPRF Generator.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 44,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 GPRF Generator.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 11,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMP180.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 33,
+   "kind": "wiki",
+   "ref": "wiki/sources/5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 63,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G private network resilience against smart jamming.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 30,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Frequency hopping for 5G resilience.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G private network resilience against smart jamming.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 66,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 70,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G private network resilience against smart jamming.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 10,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMP180.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 75,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMP180.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 78,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMP180.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "The test used ping at 100 Hz, iPerf updated once per second, and target uplink / downlink data rate of 2 Mbit/s",
+   "尚未證實：direct_relationship"
+  ],
+  "reason": "The main chain is well supported: the passages connect Aerospace/Defense private 5G resilience needs under smart jamming/EW/contested spectrum to handover/RTT/iPerf/WebRTC measurements and to CMX500 signaling network-emulation capabilities, while separately supporting non-signaling waveform/IQ/RF test capabilities and noting the lack of physical jammer details. A few implementation details, especially ping rate/iPerf update rate and the meta claim about 'direct_relationship', are not visible in the cited passages, but they do not undermine the main answer.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

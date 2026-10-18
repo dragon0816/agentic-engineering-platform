@@ -1,0 +1,132 @@
+{
+ "question": {
+  "id": "Q0881",
+  "text": "How do changes in RFIC validation technology affect the measurement capability required from Oscilloscope?",
+  "market": "Semiconductor",
+  "product": "Oscilloscope",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": null,
+ "exchange": {
+  "sent": "How do changes in RFIC validation technology affect the measurement capability required from Oscilloscope?",
+  "route_forced": "direct",
+  "http_status": 200,
+  "seconds": 72.937,
+  "timed_out": false,
+  "reply": {
+   "answer": {
+    "ok": false,
+    "answer": "The Knowledge query did not produce a validated answer. Unverified requested facets: technical_knowledge.",
+    "record": null,
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-21af29632701426f9b1d3d4ac29e5964",
+      "request_id": "request-21af29632701426f9b1d3d4ac29e5964",
+      "span_id": "span-21af29632701426f9b1d3d4ac29e5964",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-21af29632701426f9b1d3d4ac29e5964",
+       "request_id": "request-21af29632701426f9b1d3d4ac29e5964",
+       "span_id": "span-21af29632701426f9b1d3d4ac29e5964",
+       "parent_span_id": null
+      },
+      "status": "failed",
+      "data": null,
+      "failure": {
+       "code": "knowledge_insufficient_evidence",
+       "message": "Capability invocation did not complete",
+       "retryable": false
+      },
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-674f4033e7c641408c2ab431db8bba3c",
+      "task_sha256": "86b9f7b574325d21edcad90f12b1306cdd28eba72f919a38a8806777d096d666",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.12.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "needs_input",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "needs_input",
+       "evidence_ref": null
+      }
+     ],
+     "checks": [],
+     "failure_code": "knowledge_insufficient_evidence"
+    },
+    "evidence": {
+     "raw_citations": 0,
+     "facet_status": "missing",
+     "missing_facets": [
+      "technical_knowledge"
+     ],
+     "relation_status": "not_requested",
+     "retrieval_attempts": {}
+    }
+   }
+  }
+ }
+}

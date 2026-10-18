@@ -1,0 +1,126 @@
+{
+ "question": {
+  "id": "Q0701",
+  "text": "What are the most important signal generation capabilities for applications in AI?",
+  "market": "AI",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "basic",
+  "difficulty": "L1"
+ },
+ "session_id": null,
+ "exchange": {
+  "sent": "What are the most important signal generation capabilities for applications in AI?",
+  "route_forced": "direct",
+  "http_status": 200,
+  "seconds": 69.078,
+  "timed_out": false,
+  "reply": {
+   "answer": {
+    "ok": false,
+    "answer": "No sufficient evidence was found in the selected Knowledge asset. (knowledge_insufficient_evidence)",
+    "record": null,
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-71155c9d7b844c78923cf998ed33e9e0",
+      "request_id": "request-71155c9d7b844c78923cf998ed33e9e0",
+      "span_id": "span-71155c9d7b844c78923cf998ed33e9e0",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-71155c9d7b844c78923cf998ed33e9e0",
+       "request_id": "request-71155c9d7b844c78923cf998ed33e9e0",
+       "span_id": "span-71155c9d7b844c78923cf998ed33e9e0",
+       "parent_span_id": null
+      },
+      "status": "failed",
+      "data": null,
+      "failure": {
+       "code": "knowledge_insufficient_evidence",
+       "message": "Capability invocation did not complete",
+       "retryable": false
+      },
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-6ff1ba874328409ba2de378b304f461a",
+      "task_sha256": "ec4e8114926669acc40f9786da2f1c7613b4880dd1551ae7bda895f5495a7e6b",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.12.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "needs_input",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "needs_input",
+       "evidence_ref": null
+      }
+     ],
+     "checks": [],
+     "failure_code": "knowledge_insufficient_evidence"
+    },
+    "evidence": {
+     "raw_citations": 0,
+     "facet_status": "not_assessed",
+     "missing_facets": null
+    }
+   }
+  }
+ }
+}

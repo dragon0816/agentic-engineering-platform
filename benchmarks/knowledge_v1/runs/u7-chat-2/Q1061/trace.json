@@ -1,0 +1,135 @@
+{
+ "question": {
+  "id": "Q1061",
+  "text": "What is non-signaling tester, and which product-related measurement decisions depend on understanding it?",
+  "technical": "Instrument & Measurement Principles",
+  "topic": "non-signaling tester",
+  "product_related": "true"
+ },
+ "session_id": "conversation-86b8dec33d974a049fecde7a193e3a70",
+ "exchange": {
+  "sent": "What is non-signaling tester, and which product-related measurement decisions depend on understanding it?",
+  "http_status": 200,
+  "seconds": 88.5,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-86b8dec33d974a049fecde7a193e3a70",
+    "actor": "leo.chi",
+    "title": "What is non-signaling tester, and which product-related measurement deci…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-18T10:19:02.747147Z",
+    "updated_at": "2026-10-18T10:20:31.095693Z",
+    "messages": [
+     {
+      "message_id": "message-f44d9cc3f45d43ca8b6725060aeb6b97",
+      "role": "user",
+      "text": "What is non-signaling tester, and which product-related measurement decisions depend on understanding it?",
+      "created_at": "2026-10-18T10:19:02.758163Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": [],
+      "workflow_form": null,
+      "action_card": null,
+      "action_cards": []
+     },
+     {
+      "message_id": "message-bfef5f268f734ef5bb490771915f7c21",
+      "role": "assistant",
+      "text": "The knowledge base gave no validated answer, so the evidence is insufficient for a fully cited answer. It did return partially supported material, summarized below.\n\nA **non-signaling tester** is a tester used for RF measurements without establishing a full protocol-level connection/signaling session with the device under test. In the returned evidence, it is framed mainly as a **production-phase RF measurement approach**: WLAN production RF tests are performed in **non-signaling mode** to save time, and the **R&S CMP180** is positioned for that role.\n\nProduct-related measurement decisions that depend on understanding “non-signaling” include:\n\n| Decision | Why it matters |\n|---|---|\n| **CMX500 vs CMP180** | Use **CMX500** for R&D signaling/interworking tests; use **CMP180** for production non-signaling RF tests. |\n| **Whether production RF testing should be non-signaling** | Non-signaling mode is used to reduce production test time. |\n| **Whether CMP180 fits the production RF scope** | CMP180 is described as a non-signaling RF measurement tester for technologies such as Wi‑Fi 6E, Wi‑Fi 7, and 5G NR FR1. |\n| **Frequency range configuration** | CMP180 frequency coverage depends on options, e.g. extension from 6 GHz to 8 GHz with **R&S CMP-K168**. |\n| **IF bandwidth configuration** | Basic IF bandwidth is 250 MHz; 500 MHz requires **R&S CMP-K185** and related hardware prerequisites. |\n| **RF port / MIMO scaling** | CMP180 supports multi-port and MIMO production testing; decisions include 2x2 single-box or scaling to 4x4 with multiple instruments. |\n| **WLAN measurement options** | Option choices depend on WLAN standard and test mode, e.g. 802.11a/b/g/n/ac, 802.11ax, 802.11be, and true MIMO options. |\n| **Whether wide waveform demos are product requirements** | A 480 MHz WLAN waveform demo was mentioned as a candidate/validation case, not necessarily a formal Wi‑Fi requirement. |\n\nNot from the knowledge base, but generally: the key distinction is that **signaling testing** exercises the device in a network-like protocol session, while **non-signaling testing** directly controls RF transmit/receive behavior for faster, repeatable measurements—especially useful in manufacturing.",
+      "created_at": "2026-10-18T10:20:31.095693Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-7c37c3daed9a4b1bbc9d5c3369a78a7b",
+       "request_id": "request-7c37c3daed9a4b1bbc9d5c3369a78a7b",
+       "span_id": "span-7c37c3daed9a4b1bbc9d5c3369a78a7b",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_validated) {}",
+      "attachments": [],
+      "workflow_form": null,
+      "action_card": null,
+      "action_cards": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_validated) {}",
+    "ok": true,
+    "answer": "The knowledge base gave no validated answer, so the evidence is insufficient for a fully cited answer. It did return partially supported material, summarized below.\n\nA **non-signaling tester** is a tester used for RF measurements without establishing a full protocol-level connection/signaling session with the device under test. In the returned evidence, it is framed mainly as a **production-phase RF measurement approach**: WLAN production RF tests are performed in **non-signaling mode** to save time, and the **R&S CMP180** is positioned for that role.\n\nProduct-related measurement decisions that depend on understanding “non-signaling” include:\n\n| Decision | Why it matters |\n|---|---|\n| **CMX500 vs CMP180** | Use **CMX500** for R&D signaling/interworking tests; use **CMP180** for production non-signaling RF tests. |\n| **Whether production RF testing should be non-signaling** | Non-signaling mode is used to reduce production test time. |\n| **Whether CMP180 fits the production RF scope** | CMP180 is described as a non-signaling RF measurement tester for technologies such as Wi‑Fi 6E, Wi‑Fi 7, and 5G NR FR1. |\n| **Frequency range configuration** | CMP180 frequency coverage depends on options, e.g. extension from 6 GHz to 8 GHz with **R&S CMP-K168**. |\n| **IF bandwidth configuration** | Basic IF bandwidth is 250 MHz; 500 MHz requires **R&S CMP-K185** and related hardware prerequisites. |\n| **RF port / MIMO scaling** | CMP180 supports multi-port and MIMO production testing; decisions include 2x2 single-box or scaling to 4x4 with multiple instruments. |\n| **WLAN measurement options** | Option choices depend on WLAN standard and test mode, e.g. 802.11a/b/g/n/ac, 802.11ax, 802.11be, and true MIMO options. |\n| **Whether wide waveform demos are product requirements** | A 480 MHz WLAN waveform demo was mentioned as a candidate/validation case, not necessarily a formal Wi‑Fi requirement. |\n\nNot from the knowledge base, but generally: the key distinction is that **signaling testing** exercises the device in a network-like protocol session, while **non-signaling testing** directly controls RF transmit/receive behavior for faster, repeatable measurements—especially useful in manufacturing.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-7c37c3daed9a4b1bbc9d5c3369a78a7b",
+      "request_id": "request-7c37c3daed9a4b1bbc9d5c3369a78a7b",
+      "span_id": "span-7c37c3daed9a4b1bbc9d5c3369a78a7b",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-7c37c3daed9a4b1bbc9d5c3369a78a7b",
+       "request_id": "request-7c37c3daed9a4b1bbc9d5c3369a78a7b",
+       "span_id": "span-7c37c3daed9a4b1bbc9d5c3369a78a7b",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave no validated answer, so the evidence is insufficient for a fully cited answer. It did return partially supported material, summarized below.\n\nA **non-signaling tester** is a tester used for RF measurements without establishing a full protocol-level connection/signaling session with the device under test. In the returned evidence, it is framed mainly as a **production-phase RF measurement approach**: WLAN production RF tests are performed in **non-signaling mode** to save time, and the **R&S CMP180** is positioned for that role.\n\nProduct-related measurement decisions that depend on understanding “non-signaling” include:\n\n| Decision | Why it matters |\n|---|---|\n| **CMX500 vs CMP180** | Use **CMX500** for R&D signaling/interworking tests; use **CMP180** for production non-signaling RF tests. |\n| **Whether production RF testing should be non-signaling** | Non-signaling mode is used to reduce production test time. |\n| **Whether CMP180 fits the production RF scope** | CMP180 is described as a non-signaling RF measurement tester for technologies such as Wi‑Fi 6E, Wi‑Fi 7, and 5G NR FR1. |\n| **Frequency range configuration** | CMP180 frequency coverage depends on options, e.g. extension from 6 GHz to 8 GHz with **R&S CMP-K168**. |\n| **IF bandwidth configuration** | Basic IF bandwidth is 250 MHz; 500 MHz requires **R&S CMP-K185** and related hardware prerequisites. |\n| **RF port / MIMO scaling** | CMP180 supports multi-port and MIMO production testing; decisions include 2x2 single-box or scaling to 4x4 with multiple instruments. |\n| **WLAN measurement options** | Option choices depend on WLAN standard and test mode, e.g. 802.11a/b/g/n/ac, 802.11ax, 802.11be, and true MIMO options. |\n| **Whether wide waveform demos are product requirements** | A 480 MHz WLAN waveform demo was mentioned as a candidate/validation case, not necessarily a formal Wi‑Fi requirement. |\n\nNot from the knowledge base, but generally: the key distinction is that **signaling testing** exercises the device in a network-like protocol session, while **non-signaling testing** directly controls RF transmit/receive behavior for faster, repeatable measurements—especially useful in manufacturing.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_2hci4sbKRRI6HhL7WUrKJ1b3",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "failed",
+         "data": {
+          "knowledge_harness": "not_validated",
+          "answer": "已查到可引用的部分資料：\n\n### Short answer\nA **non-signaling tester** is presented in the passages as a **production-phase RF measurement tester**: in WLAN device production, RF measurements are executed in **non-signaling mode** to save time, and the **R&S CMP180** is positioned as optimized for that purpose [5]. The key product-related measurement decisions that depend on understanding this are whether to use **R&S CMX500 for R&D signaling / interworking tests** or **R&S CMP180 for production non-signaling RF tests**, and then which CMP180 frequency, bandwidth, RF-port/MIMO, and measurement options are needed [6][3][5][59].\n### Product-related measurement decisions\n| Decision | What the passages support |\n|---|---|\n| Choose the right tester role: R&D signaling vs production non-signaling | The Wi-Fi 7 test workflow is split between **R&S CMX500** for R&D signaling / interworking testing and **R&S CMP180** for production non-signaling RF testing [6]. |\n| Decide whether production RF testing should be non-signaling | In the WLAN device production phase, **all RF measurements are performed in non-signaling mode to save time** [5]. |\n| Decide whether CMP180 fits the production RF scope | R&S CMP180 is described as a production-phase **non-signaling RF measurement tester** supporting cellular and non-cellular technologies including **Wi‑Fi 6E, Wi‑Fi 7, and 5G NR FR1**, up to **8 GHz** and bandwidths up to **500 MHz** [7]. |\n| Decide frequency-range configuration | CMP180 is **6 GHz maximum without R&S CMP-K168**, while **R&S CMP-K168** is the extended frequency range option from **6 GHz to 8 GHz** [3]. |\n| Decide IF bandwidth configuration | CMP180 IF bandwidth is **250 MHz basic** and **500 MHz with R&S CMP-K185**, and R&S CMP-K185 is only available if **R&S CMP-B805I or higher** is installed [3]. |\n| Decide RF-port / MIMO scaling | CMP180 integrates **two analyzers, two generators, and two sets of eight RF ports** for single-box **2x2 MIMO** testing, and two CMP180 instruments can be combined to support four analyzers and generators for **4x4 MIMO access points** [5]. |\n| Decide WLAN measurement options | CMP180 measurement options include **R&S CMP-KM350** for WLAN IEEE 802.11a/b/g/n/ac SISO measurements, **R&S CMP-KM351** for WLAN IEEE 802.11ax SISO measurements, **R&S CMP-KM352** for WLAN IEEE 802.11be SISO measurements, and **R&S CMP-KM360** for WLAN true MIMO 2x2 and 4x4 measurements [59]. |\n| Decide whether the 480 MHz waveform demo is a product requirement | CMP180 was to demonstrate loopback validation of a **480 MHz WLAN waveform**, but the source says it is only a potential candidate for yet-to-be-defined Wi‑Fi 8 / IEEE 802.11bn and not a formal Wi‑Fi 8 specification [5]. |\n\n來源：\n[3] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[5] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[6] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[7] Wiki：Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024（來源：`CMP180_specs_en_3609-7348-22_v0800.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[59] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n\n未能以證據支持：direct_relationship。因此不能把上列資料當成完整的推薦或比較。",
+          "evidence": {
+           "raw_citations": 5,
+           "facet_status": "missing",
+           "missing_facets": [],
+           "relation_status": "missing",
+           "retrieval_attempts": {
+            "product_option_spec": 1,
+            "technical_knowledge": 1
+           },
+           "claim_status": "supported"
+          },
+          "phase": "failed",
+          "failure_code": null,
+          "instruction": "The knowledge base did not validate an answer. Tell the person what is above; anything you add is not from the knowledge base and must say so."
+         },
+         "failure": {
+          "code": "knowledge_not_validated",
+          "message": "The Knowledge Harness did not validate an answer",
+          "retryable": false
+         }
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

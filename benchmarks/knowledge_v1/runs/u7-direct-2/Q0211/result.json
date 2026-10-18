@@ -1,0 +1,148 @@
+{
+ "id": "Q0211",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [],
+ "seconds": 86.594,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 25,
+   "kind": "wiki",
+   "ref": "wiki/sources/review-options.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 30,
+   "kind": "wiki",
+   "ref": "wiki/sources/SMW200A_config-guide_en_3606-8037-92_v0600.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 80,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S SMBV100B.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 Callbox.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 50,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 Callbox.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 7,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMP180.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 8,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMP180.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 18,
+   "kind": "wiki",
+   "ref": "wiki/sources/MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 21,
+   "kind": "wiki",
+   "ref": "wiki/sources/MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 73,
+   "kind": "wiki",
+   "ref": "wiki/sources/MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 94,
+   "kind": "wiki",
+   "ref": "wiki/sources/Signaling test solution.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 6,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 Callbox.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 58,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMP180.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 19,
+   "kind": "wiki",
+   "ref": "wiki/sources/MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "R&S SMW-K78 radar echo generation",
+   "R&S AREG800A / R&S SMW200A / R&S SMBV100B | Radar-specific test branch [25][30][80]"
+  ],
+  "reason": "The core placement is supported: CMX500/CMP180 are evidenced as signaling/non-signaling wireless communications testers, while AREG800A and SMBV100B passages support radar-oriented stimulus/application functions, so putting the tester in the communications branch rather than radar echo simulation is a fair reading. However, the cited passage [30] does not show SMW-K78 or radar echo generation, so that specific radar-tool example goes beyond the supplied evidence.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

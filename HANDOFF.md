@@ -2,6 +2,18 @@
 
 Updated: 2026-10-17 (Asia/Taipei), by Claude Code (Knowledge Strategy v1.2)
 
+
+## U7 baseline measured (2026-10-18, Claude Code) — latest
+
+U7 ran on the 36-question core, chat and direct routes, two passes each:
+`benchmarks/knowledge_v1/runs/u7-report.zh-TW.md`. The tool route is 11.5 pp behind the direct route
+on the same 26 questions (threshold 5 pp); the gap is mostly Q1041/Q1061/Q1091 (partial answers marked
+not validated: G1). **Next:** the owner decides whether to implement ADR-K6 G1–G4 (the G2 design
+discussed 2026-10-18: original question as anchor, structured rewrite with an entity-preservation
+check, added terms must come from history or the bilingual glossary, optional model check; first log
+the tool's question argument). After G1–G4, rerun the same four commands and compare per question.
+Knowledge Strategy v1.2 K02+ stays blocked on the owner.
+
 ## Knowledge Strategy v1.2 (2026-10-17, Claude Code) — awaiting owner confirmation
 
 **Status:** docs and contract design only, committed on main, not pushed. **v1.2 awaits the owner's

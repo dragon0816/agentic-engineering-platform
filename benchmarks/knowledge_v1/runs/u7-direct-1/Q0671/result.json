@@ -1,0 +1,101 @@
+{
+ "id": "Q0671",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [],
+ "seconds": 91.203,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 80,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 12,
+   "kind": "wiki",
+   "ref": "wiki/sources/AISeverEcosystem.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 8,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 63,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 61,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 72,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 71,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "AI 伺服器電源供應器分類列出 HVDC、5–10 kW PSU、液冷電源櫃、BBU",
+   "Blackwell 平台功耗翻倍推升高密度電源需求",
+   "Blackwell 平台功耗翻倍 / 5–10 kW PSU 等需求"
+  ],
+  "reason": "Most of the PCB/SI and PDN/power-rail mappings are backed by the passages, including high-speed PCB drivers, IL/Xtalk/Eye/TDR items, Interface Test mapped to scopes, and MXO mapped to power rail/multiphase DC/PI. However, the cited passages provided do not support the PSU-market details about HVDC, 5–10 kW PSU, liquid-cooled power cabinets, BBU, or Blackwell power doubling, which are used as a main market-requirement chain.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: Most of the PCB/SI and PDN/power-rail mappings are backed by the passages, including high-speed PCB drivers, IL/Xtalk/Eye/TDR items, Interface Test mapped to scopes, and MXO mapped to power rail/multiphase DC/PI. However, the cited passages provided do not support the PSU-market details about HVDC, "
+}

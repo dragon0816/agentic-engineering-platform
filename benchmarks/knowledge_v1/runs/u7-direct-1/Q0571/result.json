@@ -1,0 +1,61 @@
+{
+ "id": "Q0571",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [],
+ "seconds": 92.891,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 22,
+   "kind": "wiki",
+   "ref": "wiki/concepts/High speed SerDes eco-chain.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 41,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 42,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 47,
+   "kind": "wiki",
+   "ref": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "corresponding VNA capability checklist",
+   "required capability of Vector Network Analyzer",
+   "listed those PCB/SI parameters for high-speed PCB workflows"
+  ],
+  "reason": "The answer’s core chain is supported: automotive ADAS/V2X requires high-speed signal transmission, the PCB test passage lists measurable SI/PCB parameters, and the ZNA passage lists relevant VNA capability fields. It appropriately caveats that the cited evidence does not define a formal automotive ZNA configuration or exact required model/options, though the mapping from PCB parameters to VNA 'required' capabilities is partly inferential rather than directly stated.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

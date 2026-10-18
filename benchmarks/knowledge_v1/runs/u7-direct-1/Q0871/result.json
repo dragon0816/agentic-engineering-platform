@@ -1,0 +1,95 @@
+{
+ "id": "Q0871",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "failed",
+ "tools": [],
+ "seconds": 168.828,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 28,
+   "kind": "wiki",
+   "ref": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 26,
+   "kind": "wiki",
+   "ref": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 25,
+   "kind": "wiki",
+   "ref": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 65,
+   "kind": "wiki",
+   "ref": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 12,
+   "kind": "wiki",
+   "ref": "wiki/sources/Serdes IC-IP companies.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AI 伺服器 PMIC 與功率半導體轉型.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 40,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AI 伺服器 PMIC 與功率半導體轉型.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 41,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AI 伺服器 PMIC 與功率半導體轉型.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "Eye diagram is part of the high-speed PCB/PCBA signal integrity flow, alongside IL, Xtalk and TDR impedance.[28]",
+   "The R&S signal-integrity flow identifies measurable items including IL, Xtalk, Eye diagram and TDR impedance.[28]",
+   "PCIe Gen5 high-speed differential signals",
+   "Oscilloscope capability should support resolving PCIe Gen5 post-EQ eye height in the ~15 mV range and eye width around 9.375 ps",
+   "An oscilloscope used to observe PCIe Gen5 12 ps rise/fall behavior would need bandwidth on the order of 29 GHz"
+  ],
+  "reason": "The answer’s main chain—high-speed SerDes/PCIe context, PCIe eye-opening and rise/fall measurable parameters, scopes being among validation instruments, and lack of AI-server oscilloscope mapping—is broadly grounded in the cited passages and is appropriately caveated. Some oscilloscope-specific capability statements are inferred rather than directly stated, and the cited [28] excerpt does not show the claimed SI flow items IL/Xtalk/Eye/TDR.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

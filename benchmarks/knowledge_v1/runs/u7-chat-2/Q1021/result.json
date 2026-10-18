@@ -1,0 +1,118 @@
+{
+ "id": "Q1021",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 66.813,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 9,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G NR frame structure.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 12,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NR cyclic prefix.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 51,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G NR numerology.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 36,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Low-PAPR sequence.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 23,
+   "kind": "wiki",
+   "ref": "wiki/sources/FSVA3000_specs_en_5216-1211-22_v1601.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 44,
+   "kind": "wiki",
+   "ref": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 45,
+   "kind": "wiki",
+   "ref": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 26,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 76,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S FSW.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 38,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NR sample rate.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 91,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMW100 K06.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "understanding OFDM numerology is necessary when choosing or configuring product measurements",
+   "understanding whether the DUT signal is WLAN OFDM, 5G NR OFDM, or a generic OFDM signal affects whether to select..."
+  ],
+  "reason": "The answer’s main technical description of OFDM-related structure and its product measurement examples are backed by the cited passages. The selection/dependency language is partly inferential rather than explicitly stated, but it is a fair connection from passages that tie OFDM/SCS/bandwidth/standards to measurement modes and options.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

@@ -2455,3 +2455,16 @@ s-k-20261011T102952` (not published).
   CONTRACTS now say AEP does not integrate n8n. Source characterization of old n8n workflows
   is kept as a migration specification. Decision: DECISIONS 2026-10-17 "AEP does not
   integrate n8n".
+
+## U7: Knowledge tool-path baseline before G1–G4 (2026-10-18)
+
+- [x] U7 measured (2026-10-18, Claude Code; owner: run U7 first, then G1–G4; use the 36-question
+  coverage core, not the 110-question sample). `benchmarks/knowledge_v1/run.py` gained
+  `--set core` and `--route direct` (commit 3a97c8a0; tests `tests/test_knowledge_benchmark_route.py`).
+  Runs `u7-chat-1/2`, `u7-direct-1/2` at 3a97c8a0, grader 1.4. Acceptable: chat 30/36 and 30/36,
+  direct 34/36 and 33/36. On the 26 tool-routed questions: tool 82.7% vs direct 94.2%, **11.5 pp,
+  above the 5 pp parity threshold**. Q1041/Q1061/Q1091 fail `knowledge_not_validated` on the tool
+  route with supported claims and Raw citations but missing facets: the case G1 fixes. G2 cannot be
+  measured yet: traces do not record the tool's question argument. Report:
+  `benchmarks/knowledge_v1/runs/u7-report.zh-TW.md`. G1–G4 still need the owner's go-ahead.
+

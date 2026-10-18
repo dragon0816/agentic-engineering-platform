@@ -1,0 +1,1710 @@
+{
+ "question": {
+  "id": "Q0296",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Aerospace / Defense, and what evidence supports each opportunity?",
+  "market": "Aerospace / Defense",
+  "product": "Oscilloscope",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-b891b4de799c496887675f4c2cb87fd4",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Aerospace / Defense, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 105.188,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-b891b4de799c496887675f4c2cb87fd4",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-18T10:01:23.311778Z",
+    "updated_at": "2026-10-18T10:03:08.350560Z",
+    "messages": [
+     {
+      "message_id": "message-25305349601a45f38ad298f401e144e9",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Aerospace / Defense, and what evidence supports each opportunity?",
+      "created_at": "2026-10-18T10:01:23.325575Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": [],
+      "workflow_form": null,
+      "action_card": null,
+      "action_cards": []
+     },
+     {
+      "message_id": "message-548cf62e46db46539507cb959db2bf8e",
+      "role": "assistant",
+      "text": "### 推薦先賣\n| Opportunity | Evidence-supported reason |\n|---|---|\n| UAV image-processing / camera electronics using GMSL / LVDS is the most directly evidenced oscilloscope opportunity, because the UAV eco-chain maps 邑錡 / GMSL / LVDS to R&S RTO and R&S MXO, and the high-speed digital source separately lists GMSL and LVDS among high-speed interfaces while connecting interface testing to scopes [35][41][51][52]. |\n| UAV battery / power and motor / gimbal electronics are direct MXO leads, because UAVEcoChain lists 德鑫新技 in 電池電源 and 其昜先進 in 馬達動力雲台, and the R&S solution mapping lists 德鑫新技 and 其昜先進 as R&S MXO leads [35][41]. |\n| High-speed digital SI/PI and PCB/PCBA validation is a broader oscilloscope opportunity, because the R&S digital-test source connects Interface Test and PDN validation to scopes, and the PCB/PCBA flow includes TDR impedance, IL, Xtalk, Eye diagram, DK/DF, roughness and process-monitoring contexts, but the source does not tie this directly to a specific A&D account or scope model [51][71][72]. |\n| Military / aviation drone EMC and EME is a strong A&D test domain but not yet an oscilloscope-proven opportunity in the vault, because the sources support MIL-STD-461 / MIL-STD-464 / RTCA DO-160 and complex EME emulation needs, but the cited pages do not map RTO, MXO, or scopes to those EMC/EME tests [4][61][62][63]. |\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S RTO | UAV image-processing / camera electronics where 邑錡 is listed with GMSL and LVDS [35][41]. | 知識庫未標示 RTO option code, bandwidth, probe, software, fixture, or test method for this UAV mapping [41]. | The evidence directly maps 邑錡 / GMSL / LVDS to R&S RTO and R&S MXO in the UAV solution mapping [41]. | UAVEcoChain lists 邑錡 under 影像處理-相機 with GMSL and LVDS, and the R&S solution mapping lists 邑錡 / GMSL / LVDS → R&S RTO, R&S MXO [35][41]. | The mapping cannot be rewritten as a formal configuration guide, sold opportunity, customer adoption, certification, or test result [41]. |\n| R&S MXO | UAV image-processing / camera, battery / power, and motor / gimbal nodes where 邑錡, 德鑫新技, and 其昜先進 are mapped to MXO-related leads [35][41]. | 知識庫未標示 MXO option code, bandwidth, probe, software, fixture, or measurement procedure for these UAV mappings [41]. | The evidence directly maps 邑錡 / GMSL / LVDS to R&S MXO and also lists 德鑫新技 and 其昜先進 as MXO leads [35][41]. | UAVEcoChain lists 邑錡 / GMSL / LVDS → R&S RTO and R&S MXO, and lists 德鑫新技 and 其昜先進 → R&S MXO [35][41]. | The workbook contains many company / role leads but mostly lacks product model, formal specification, customer, supply relationship, shipment, certification, bid, revenue, or market-share evidence [34]. |\n| Oscilloscope instrument class | High-speed digital interface test and PDN validation [51]. | 知識庫未標示 oscilloscope model, bandwidth, data rate, jitter mask, PDN impedance target, or formal test standard for this source [51]. | The source explicitly connects Interface Test to scopes, BERTs, AWGs and switch matrices, and connects Power Distribution Network validation to scopes and network analyzers [51]. | The SerDes / SI-PI testing overview lists scopes under Interface Test and PDN validation, and separately lists SI flow items such as IL, Xtalk, Eye diagram and TDR Impedance [49][51]. | This source is a high-speed digital test source and does not by itself prove an Aerospace / Defense customer fit or a specific RTO / MXO configuration [51][60]. |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| UAV camera / image-processing boards | R&S RTO or R&S MXO where the account context matches 邑錡 / GMSL / LVDS [35][41]. | Use the directly evidenced UAV mapping first, then support the discussion with the generic high-speed interface-test evidence that scopes are used for Interface Test [41][51]. | The vault does not provide GMSL / LVDS version, data rate, compliance test item, RTO / MXO option, probe, fixture, or pass/fail condition [41][52]. |\n| UAV battery / power and motor / gimbal electronics | R&S MXO where the account context matches 德鑫新技 or 其昜先進 [35][41]. | Use the UAVEcoChain mapping because it directly lists 德鑫新技 and 其昜先進 as MXO leads [35][41]. | The vault does not state the electrical measurement item, voltage/current range, power-analysis option, motor-control method, or customer adoption result [34][41]. |\n| High-speed PCB/PCBA and SI/PI validation for system houses | Oscilloscope instrument class, with product model to be confirmed outside the current evidence [51][71][72]. | Use the R&S PCB test-solutions flow around TDR impedance, DK/DF extraction, IL, Xtalk, Eye diagram, sampling testing and process monitoring [71]. | The source does not provide formal R&S product model, option code, license, test frequency, test standard, fixture, or calibration method [72]. |\n| Military / aviation drone EMC and EME discussions | Do not lead with oscilloscope as a proven solution unless additional evidence is added [4][61][62][63]. | The supported A&D need is EMC / EME standards and complex electromagnetic-environment emulation, including MIL-STD-461, MIL-STD-464 and RTCA DO-160 contexts [4][61][62]. | The vault does not map RTO, MXO, or oscilloscope measurements to MIL-STD-461, MIL-STD-464, RTCA DO-160, HPM, EMP, lightning, RADHAZ, or EME emulation setups [63]. |\n### 限制\nThe vault does not provide an evidence-based ranking of oscilloscope opportunities in Aerospace / Defense, so no “strongest” ranking is proven [41][51].  \nThe R&S solution-mapping rows cannot be treated as formal configurations, sold opportunities, customer adoption, certification, or test results [41].  \nThe high-speed digital and PCB sources do not provide scope model, bandwidth, data rate, option code, fixture, calibration method, or pass/fail criteria [51][72].  \nThe military / aviation drone EMC and EME sources support the A&D test domain, but they do not provide an oscilloscope product mapping or executable test parameters [63].\n\n來源：\n[4] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[34] Wiki：UAVEcoChain（來源：`0. UAV產業分析報告架構.md`、`4. UAV Eco-chain in Taiwan.md`、`UAVEcoChain.md`…）\n[35] Wiki：UAVEcoChain（來源：`0. UAV產業分析報告架構.md`、`4. UAV Eco-chain in Taiwan.md`、`UAVEcoChain.md`…）\n[41] Wiki：UAV Eco-chain in Taiwan 外部資料清單（來源：`2025RS Drone Solution.md`、`4. UAV Eco-chain in Taiwan.md`、`5. Regulation and Policy.md`…）\n[49] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[51] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[52] Wiki：High speed SerDes standards（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[60] Wiki：0 Digital Test - What are SIPI and Serdes（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[61] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[62] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[63] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[71] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[72] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）",
+      "created_at": "2026-10-18T10:03:08.350560Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-f82d61a7d24b455d93d6cba259272223",
+       "request_id": "request-f82d61a7d24b455d93d6cba259272223",
+       "span_id": "span-f82d61a7d24b455d93d6cba259272223",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": [],
+      "workflow_form": null,
+      "action_card": null,
+      "action_cards": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "### 推薦先賣\n| Opportunity | Evidence-supported reason |\n|---|---|\n| UAV image-processing / camera electronics using GMSL / LVDS is the most directly evidenced oscilloscope opportunity, because the UAV eco-chain maps 邑錡 / GMSL / LVDS to R&S RTO and R&S MXO, and the high-speed digital source separately lists GMSL and LVDS among high-speed interfaces while connecting interface testing to scopes [35][41][51][52]. |\n| UAV battery / power and motor / gimbal electronics are direct MXO leads, because UAVEcoChain lists 德鑫新技 in 電池電源 and 其昜先進 in 馬達動力雲台, and the R&S solution mapping lists 德鑫新技 and 其昜先進 as R&S MXO leads [35][41]. |\n| High-speed digital SI/PI and PCB/PCBA validation is a broader oscilloscope opportunity, because the R&S digital-test source connects Interface Test and PDN validation to scopes, and the PCB/PCBA flow includes TDR impedance, IL, Xtalk, Eye diagram, DK/DF, roughness and process-monitoring contexts, but the source does not tie this directly to a specific A&D account or scope model [51][71][72]. |\n| Military / aviation drone EMC and EME is a strong A&D test domain but not yet an oscilloscope-proven opportunity in the vault, because the sources support MIL-STD-461 / MIL-STD-464 / RTCA DO-160 and complex EME emulation needs, but the cited pages do not map RTO, MXO, or scopes to those EMC/EME tests [4][61][62][63]. |\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S RTO | UAV image-processing / camera electronics where 邑錡 is listed with GMSL and LVDS [35][41]. | 知識庫未標示 RTO option code, bandwidth, probe, software, fixture, or test method for this UAV mapping [41]. | The evidence directly maps 邑錡 / GMSL / LVDS to R&S RTO and R&S MXO in the UAV solution mapping [41]. | UAVEcoChain lists 邑錡 under 影像處理-相機 with GMSL and LVDS, and the R&S solution mapping lists 邑錡 / GMSL / LVDS → R&S RTO, R&S MXO [35][41]. | The mapping cannot be rewritten as a formal configuration guide, sold opportunity, customer adoption, certification, or test result [41]. |\n| R&S MXO | UAV image-processing / camera, battery / power, and motor / gimbal nodes where 邑錡, 德鑫新技, and 其昜先進 are mapped to MXO-related leads [35][41]. | 知識庫未標示 MXO option code, bandwidth, probe, software, fixture, or measurement procedure for these UAV mappings [41]. | The evidence directly maps 邑錡 / GMSL / LVDS to R&S MXO and also lists 德鑫新技 and 其昜先進 as MXO leads [35][41]. | UAVEcoChain lists 邑錡 / GMSL / LVDS → R&S RTO and R&S MXO, and lists 德鑫新技 and 其昜先進 → R&S MXO [35][41]. | The workbook contains many company / role leads but mostly lacks product model, formal specification, customer, supply relationship, shipment, certification, bid, revenue, or market-share evidence [34]. |\n| Oscilloscope instrument class | High-speed digital interface test and PDN validation [51]. | 知識庫未標示 oscilloscope model, bandwidth, data rate, jitter mask, PDN impedance target, or formal test standard for this source [51]. | The source explicitly connects Interface Test to scopes, BERTs, AWGs and switch matrices, and connects Power Distribution Network validation to scopes and network analyzers [51]. | The SerDes / SI-PI testing overview lists scopes under Interface Test and PDN validation, and separately lists SI flow items such as IL, Xtalk, Eye diagram and TDR Impedance [49][51]. | This source is a high-speed digital test source and does not by itself prove an Aerospace / Defense customer fit or a specific RTO / MXO configuration [51][60]. |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| UAV camera / image-processing boards | R&S RTO or R&S MXO where the account context matches 邑錡 / GMSL / LVDS [35][41]. | Use the directly evidenced UAV mapping first, then support the discussion with the generic high-speed interface-test evidence that scopes are used for Interface Test [41][51]. | The vault does not provide GMSL / LVDS version, data rate, compliance test item, RTO / MXO option, probe, fixture, or pass/fail condition [41][52]. |\n| UAV battery / power and motor / gimbal electronics | R&S MXO where the account context matches 德鑫新技 or 其昜先進 [35][41]. | Use the UAVEcoChain mapping because it directly lists 德鑫新技 and 其昜先進 as MXO leads [35][41]. | The vault does not state the electrical measurement item, voltage/current range, power-analysis option, motor-control method, or customer adoption result [34][41]. |\n| High-speed PCB/PCBA and SI/PI validation for system houses | Oscilloscope instrument class, with product model to be confirmed outside the current evidence [51][71][72]. | Use the R&S PCB test-solutions flow around TDR impedance, DK/DF extraction, IL, Xtalk, Eye diagram, sampling testing and process monitoring [71]. | The source does not provide formal R&S product model, option code, license, test frequency, test standard, fixture, or calibration method [72]. |\n| Military / aviation drone EMC and EME discussions | Do not lead with oscilloscope as a proven solution unless additional evidence is added [4][61][62][63]. | The supported A&D need is EMC / EME standards and complex electromagnetic-environment emulation, including MIL-STD-461, MIL-STD-464 and RTCA DO-160 contexts [4][61][62]. | The vault does not map RTO, MXO, or oscilloscope measurements to MIL-STD-461, MIL-STD-464, RTCA DO-160, HPM, EMP, lightning, RADHAZ, or EME emulation setups [63]. |\n### 限制\nThe vault does not provide an evidence-based ranking of oscilloscope opportunities in Aerospace / Defense, so no “strongest” ranking is proven [41][51].  \nThe R&S solution-mapping rows cannot be treated as formal configurations, sold opportunities, customer adoption, certification, or test results [41].  \nThe high-speed digital and PCB sources do not provide scope model, bandwidth, data rate, option code, fixture, calibration method, or pass/fail criteria [51][72].  \nThe military / aviation drone EMC and EME sources support the A&D test domain, but they do not provide an oscilloscope product mapping or executable test parameters [63].\n\n來源：\n[4] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[34] Wiki：UAVEcoChain（來源：`0. UAV產業分析報告架構.md`、`4. UAV Eco-chain in Taiwan.md`、`UAVEcoChain.md`…）\n[35] Wiki：UAVEcoChain（來源：`0. UAV產業分析報告架構.md`、`4. UAV Eco-chain in Taiwan.md`、`UAVEcoChain.md`…）\n[41] Wiki：UAV Eco-chain in Taiwan 外部資料清單（來源：`2025RS Drone Solution.md`、`4. UAV Eco-chain in Taiwan.md`、`5. Regulation and Policy.md`…）\n[49] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[51] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[52] Wiki：High speed SerDes standards（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[60] Wiki：0 Digital Test - What are SIPI and Serdes（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[61] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[62] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[63] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[71] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[72] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-f82d61a7d24b455d93d6cba259272223",
+      "request_id": "request-f82d61a7d24b455d93d6cba259272223",
+      "span_id": "span-f82d61a7d24b455d93d6cba259272223",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-f82d61a7d24b455d93d6cba259272223",
+       "request_id": "request-f82d61a7d24b455d93d6cba259272223",
+       "span_id": "span-f82d61a7d24b455d93d6cba259272223",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "### 推薦先賣\n| Opportunity | Evidence-supported reason |\n|---|---|\n| UAV image-processing / camera electronics using GMSL / LVDS is the most directly evidenced oscilloscope opportunity, because the UAV eco-chain maps 邑錡 / GMSL / LVDS to R&S RTO and R&S MXO, and the high-speed digital source separately lists GMSL and LVDS among high-speed interfaces while connecting interface testing to scopes [35][41][51][52]. |\n| UAV battery / power and motor / gimbal electronics are direct MXO leads, because UAVEcoChain lists 德鑫新技 in 電池電源 and 其昜先進 in 馬達動力雲台, and the R&S solution mapping lists 德鑫新技 and 其昜先進 as R&S MXO leads [35][41]. |\n| High-speed digital SI/PI and PCB/PCBA validation is a broader oscilloscope opportunity, because the R&S digital-test source connects Interface Test and PDN validation to scopes, and the PCB/PCBA flow includes TDR impedance, IL, Xtalk, Eye diagram, DK/DF, roughness and process-monitoring contexts, but the source does not tie this directly to a specific A&D account or scope model [51][71][72]. |\n| Military / aviation drone EMC and EME is a strong A&D test domain but not yet an oscilloscope-proven opportunity in the vault, because the sources support MIL-STD-461 / MIL-STD-464 / RTCA DO-160 and complex EME emulation needs, but the cited pages do not map RTO, MXO, or scopes to those EMC/EME tests [4][61][62][63]. |\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S RTO | UAV image-processing / camera electronics where 邑錡 is listed with GMSL and LVDS [35][41]. | 知識庫未標示 RTO option code, bandwidth, probe, software, fixture, or test method for this UAV mapping [41]. | The evidence directly maps 邑錡 / GMSL / LVDS to R&S RTO and R&S MXO in the UAV solution mapping [41]. | UAVEcoChain lists 邑錡 under 影像處理-相機 with GMSL and LVDS, and the R&S solution mapping lists 邑錡 / GMSL / LVDS → R&S RTO, R&S MXO [35][41]. | The mapping cannot be rewritten as a formal configuration guide, sold opportunity, customer adoption, certification, or test result [41]. |\n| R&S MXO | UAV image-processing / camera, battery / power, and motor / gimbal nodes where 邑錡, 德鑫新技, and 其昜先進 are mapped to MXO-related leads [35][41]. | 知識庫未標示 MXO option code, bandwidth, probe, software, fixture, or measurement procedure for these UAV mappings [41]. | The evidence directly maps 邑錡 / GMSL / LVDS to R&S MXO and also lists 德鑫新技 and 其昜先進 as MXO leads [35][41]. | UAVEcoChain lists 邑錡 / GMSL / LVDS → R&S RTO and R&S MXO, and lists 德鑫新技 and 其昜先進 → R&S MXO [35][41]. | The workbook contains many company / role leads but mostly lacks product model, formal specification, customer, supply relationship, shipment, certification, bid, revenue, or market-share evidence [34]. |\n| Oscilloscope instrument class | High-speed digital interface test and PDN validation [51]. | 知識庫未標示 oscilloscope model, bandwidth, data rate, jitter mask, PDN impedance target, or formal test standard for this source [51]. | The source explicitly connects Interface Test to scopes, BERTs, AWGs and switch matrices, and connects Power Distribution Network validation to scopes and network analyzers [51]. | The SerDes / SI-PI testing overview lists scopes under Interface Test and PDN validation, and separately lists SI flow items such as IL, Xtalk, Eye diagram and TDR Impedance [49][51]. | This source is a high-speed digital test source and does not by itself prove an Aerospace / Defense customer fit or a specific RTO / MXO configuration [51][60]. |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| UAV camera / image-processing boards | R&S RTO or R&S MXO where the account context matches 邑錡 / GMSL / LVDS [35][41]. | Use the directly evidenced UAV mapping first, then support the discussion with the generic high-speed interface-test evidence that scopes are used for Interface Test [41][51]. | The vault does not provide GMSL / LVDS version, data rate, compliance test item, RTO / MXO option, probe, fixture, or pass/fail condition [41][52]. |\n| UAV battery / power and motor / gimbal electronics | R&S MXO where the account context matches 德鑫新技 or 其昜先進 [35][41]. | Use the UAVEcoChain mapping because it directly lists 德鑫新技 and 其昜先進 as MXO leads [35][41]. | The vault does not state the electrical measurement item, voltage/current range, power-analysis option, motor-control method, or customer adoption result [34][41]. |\n| High-speed PCB/PCBA and SI/PI validation for system houses | Oscilloscope instrument class, with product model to be confirmed outside the current evidence [51][71][72]. | Use the R&S PCB test-solutions flow around TDR impedance, DK/DF extraction, IL, Xtalk, Eye diagram, sampling testing and process monitoring [71]. | The source does not provide formal R&S product model, option code, license, test frequency, test standard, fixture, or calibration method [72]. |\n| Military / aviation drone EMC and EME discussions | Do not lead with oscilloscope as a proven solution unless additional evidence is added [4][61][62][63]. | The supported A&D need is EMC / EME standards and complex electromagnetic-environment emulation, including MIL-STD-461, MIL-STD-464 and RTCA DO-160 contexts [4][61][62]. | The vault does not map RTO, MXO, or oscilloscope measurements to MIL-STD-461, MIL-STD-464, RTCA DO-160, HPM, EMP, lightning, RADHAZ, or EME emulation setups [63]. |\n### 限制\nThe vault does not provide an evidence-based ranking of oscilloscope opportunities in Aerospace / Defense, so no “strongest” ranking is proven [41][51].  \nThe R&S solution-mapping rows cannot be treated as formal configurations, sold opportunities, customer adoption, certification, or test results [41].  \nThe high-speed digital and PCB sources do not provide scope model, bandwidth, data rate, option code, fixture, calibration method, or pass/fail criteria [51][72].  \nThe military / aviation drone EMC and EME sources support the A&D test domain, but they do not provide an oscilloscope product mapping or executable test parameters [63].\n\n來源：\n[4] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[34] Wiki：UAVEcoChain（來源：`0. UAV產業分析報告架構.md`、`4. UAV Eco-chain in Taiwan.md`、`UAVEcoChain.md`…）\n[35] Wiki：UAVEcoChain（來源：`0. UAV產業分析報告架構.md`、`4. UAV Eco-chain in Taiwan.md`、`UAVEcoChain.md`…）\n[41] Wiki：UAV Eco-chain in Taiwan 外部資料清單（來源：`2025RS Drone Solution.md`、`4. UAV Eco-chain in Taiwan.md`、`5. Regulation and Policy.md`…）\n[49] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[51] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[52] Wiki：High speed SerDes standards（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[60] Wiki：0 Digital Test - What are SIPI and Serdes（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[61] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[62] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[63] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[71] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[72] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_7ihmkOCtAwH9VGVlI7YGmpxp",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "### 推薦先賣\n| Opportunity | Evidence-supported reason |\n|---|---|\n| UAV image-processing / camera electronics using GMSL / LVDS is the most directly evidenced oscilloscope opportunity, because the UAV eco-chain maps 邑錡 / GMSL / LVDS to R&S RTO and R&S MXO, and the high-speed digital source separately lists GMSL and LVDS among high-speed interfaces while connecting interface testing to scopes [35][41][51][52]. |\n| UAV battery / power and motor / gimbal electronics are direct MXO leads, because UAVEcoChain lists 德鑫新技 in 電池電源 and 其昜先進 in 馬達動力雲台, and the R&S solution mapping lists 德鑫新技 and 其昜先進 as R&S MXO leads [35][41]. |\n| High-speed digital SI/PI and PCB/PCBA validation is a broader oscilloscope opportunity, because the R&S digital-test source connects Interface Test and PDN validation to scopes, and the PCB/PCBA flow includes TDR impedance, IL, Xtalk, Eye diagram, DK/DF, roughness and process-monitoring contexts, but the source does not tie this directly to a specific A&D account or scope model [51][71][72]. |\n| Military / aviation drone EMC and EME is a strong A&D test domain but not yet an oscilloscope-proven opportunity in the vault, because the sources support MIL-STD-461 / MIL-STD-464 / RTCA DO-160 and complex EME emulation needs, but the cited pages do not map RTO, MXO, or scopes to those EMC/EME tests [4][61][62][63]. |\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S RTO | UAV image-processing / camera electronics where 邑錡 is listed with GMSL and LVDS [35][41]. | 知識庫未標示 RTO option code, bandwidth, probe, software, fixture, or test method for this UAV mapping [41]. | The evidence directly maps 邑錡 / GMSL / LVDS to R&S RTO and R&S MXO in the UAV solution mapping [41]. | UAVEcoChain lists 邑錡 under 影像處理-相機 with GMSL and LVDS, and the R&S solution mapping lists 邑錡 / GMSL / LVDS → R&S RTO, R&S MXO [35][41]. | The mapping cannot be rewritten as a formal configuration guide, sold opportunity, customer adoption, certification, or test result [41]. |\n| R&S MXO | UAV image-processing / camera, battery / power, and motor / gimbal nodes where 邑錡, 德鑫新技, and 其昜先進 are mapped to MXO-related leads [35][41]. | 知識庫未標示 MXO option code, bandwidth, probe, software, fixture, or measurement procedure for these UAV mappings [41]. | The evidence directly maps 邑錡 / GMSL / LVDS to R&S MXO and also lists 德鑫新技 and 其昜先進 as MXO leads [35][41]. | UAVEcoChain lists 邑錡 / GMSL / LVDS → R&S RTO and R&S MXO, and lists 德鑫新技 and 其昜先進 → R&S MXO [35][41]. | The workbook contains many company / role leads but mostly lacks product model, formal specification, customer, supply relationship, shipment, certification, bid, revenue, or market-share evidence [34]. |\n| Oscilloscope instrument class | High-speed digital interface test and PDN validation [51]. | 知識庫未標示 oscilloscope model, bandwidth, data rate, jitter mask, PDN impedance target, or formal test standard for this source [51]. | The source explicitly connects Interface Test to scopes, BERTs, AWGs and switch matrices, and connects Power Distribution Network validation to scopes and network analyzers [51]. | The SerDes / SI-PI testing overview lists scopes under Interface Test and PDN validation, and separately lists SI flow items such as IL, Xtalk, Eye diagram and TDR Impedance [49][51]. | This source is a high-speed digital test source and does not by itself prove an Aerospace / Defense customer fit or a specific RTO / MXO configuration [51][60]. |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| UAV camera / image-processing boards | R&S RTO or R&S MXO where the account context matches 邑錡 / GMSL / LVDS [35][41]. | Use the directly evidenced UAV mapping first, then support the discussion with the generic high-speed interface-test evidence that scopes are used for Interface Test [41][51]. | The vault does not provide GMSL / LVDS version, data rate, compliance test item, RTO / MXO option, probe, fixture, or pass/fail condition [41][52]. |\n| UAV battery / power and motor / gimbal electronics | R&S MXO where the account context matches 德鑫新技 or 其昜先進 [35][41]. | Use the UAVEcoChain mapping because it directly lists 德鑫新技 and 其昜先進 as MXO leads [35][41]. | The vault does not state the electrical measurement item, voltage/current range, power-analysis option, motor-control method, or customer adoption result [34][41]. |\n| High-speed PCB/PCBA and SI/PI validation for system houses | Oscilloscope instrument class, with product model to be confirmed outside the current evidence [51][71][72]. | Use the R&S PCB test-solutions flow around TDR impedance, DK/DF extraction, IL, Xtalk, Eye diagram, sampling testing and process monitoring [71]. | The source does not provide formal R&S product model, option code, license, test frequency, test standard, fixture, or calibration method [72]. |\n| Military / aviation drone EMC and EME discussions | Do not lead with oscilloscope as a proven solution unless additional evidence is added [4][61][62][63]. | The supported A&D need is EMC / EME standards and complex electromagnetic-environment emulation, including MIL-STD-461, MIL-STD-464 and RTCA DO-160 contexts [4][61][62]. | The vault does not map RTO, MXO, or oscilloscope measurements to MIL-STD-461, MIL-STD-464, RTCA DO-160, HPM, EMP, lightning, RADHAZ, or EME emulation setups [63]. |\n### 限制\nThe vault does not provide an evidence-based ranking of oscilloscope opportunities in Aerospace / Defense, so no “strongest” ranking is proven [41][51].  \nThe R&S solution-mapping rows cannot be treated as formal configurations, sold opportunities, customer adoption, certification, or test results [41].  \nThe high-speed digital and PCB sources do not provide scope model, bandwidth, data rate, option code, fixture, calibration method, or pass/fail criteria [51][72].  \nThe military / aviation drone EMC and EME sources support the A&D test domain, but they do not provide an oscilloscope product mapping or executable test parameters [63].\n\n來源：\n[4] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[34] Wiki：UAVEcoChain（來源：`0. UAV產業分析報告架構.md`、`4. UAV Eco-chain in Taiwan.md`、`UAVEcoChain.md`…）\n[35] Wiki：UAVEcoChain（來源：`0. UAV產業分析報告架構.md`、`4. UAV Eco-chain in Taiwan.md`、`UAVEcoChain.md`…）\n[41] Wiki：UAV Eco-chain in Taiwan 外部資料清單（來源：`2025RS Drone Solution.md`、`4. UAV Eco-chain in Taiwan.md`、`5. Regulation and Policy.md`…）\n[49] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[51] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[52] Wiki：High speed SerDes standards（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[60] Wiki：0 Digital Test - What are SIPI and Serdes（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[61] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[62] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[63] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[71] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[72] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）",
+          "evidence": {
+           "raw_citations": 13,
+           "facet_status": "not_assessed",
+           "missing_facets": null
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.3"
+           },
+           "trace": {
+            "trace_id": "trace-20489c5a0ce041869e9171ea018ce9ed",
+            "request_id": "request-20489c5a0ce041869e9171ea018ce9ed",
+            "span_id": "span-20489c5a0ce041869e9171ea018ce9ed",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Aerospace / Defense, and what evidence supports each opportunity?",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "Randy Schnell\n[[Randy Schnell]] 是 [[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 封面列名的 Business Development Manager，Aerospace & Defense Test。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Randy Schnell.md"
+              },
+              "score": 2.090287
+             },
+             {
+              "text": "Randy Schnell › 使用限制\n- 來源未提供 Randy Schnell 的 email、部門正式全名、辦公地點或任職期間。\n- 來源未明示其是否為作者、講者、文件 owner 或 presenter；本頁只記錄封面列名與職稱。\n- 不從本來源推論其對 [[R&S CMX500]]、[[5G.MIL]]、[[Raytheon OXYGEN]] 或其他 program 的正式負責關係。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Randy Schnell.md"
+              },
+              "score": 1.672674
+             },
+             {
+              "text": "Randy Schnell › 來源中的列名\n依 [[2025-12-19 Making Deployed 5G Private Networks more Resilient]]（檔名 / raw title 含 2025-12-19；raw converted 2026-09-17）：\n\n- 封面列名：Randy Schnell。\n- 職稱 / 角色列名：Business Development Manager。\n- 組織 / 業務領域列名：Aerospace & Defense Test。\n- 簡報主題為 deployed [[5G]] private networks 在 [[Smart Jamming]] / [[EW]] 環境下的 resilience，以及 legacy [[Frequency hopping for 5G resilience]] 能否在不修改 [[DUT]] 的前提下提升連線韌性。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Randy Schnell.md"
+              },
+              "score": 1.223247
+             },
+             {
+              "text": "軍用無人機 EMC 與 EME testing › Complex EME emulation\n來源的 RF electromagnetic environment 章節列出：\n\n- emulate complex EME signals。\n- enable the military electromagnetic spectrum operation。\n- emulating different electromagnetic environment。\n- evaluating military system level effects under EM interferences。\n- simulating different operational scenarios。\n\n這支持 [[Electromagnetic Environment Emulation]] 與 [[UAV UAS Drones T&M Solutions]] 的客製化測試方向，但來源未提供 signal library、scenario definition、threat emitter model、功率、頻段、同步或安全條件。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+              },
+              "score": 5.149977
+             },
+             {
+              "text": "軍用無人機 EMC 與 EME testing\n[[軍用無人機 EMC 與 EME testing]] 是 [[2025RS Drone Solution]] 中針對 military / aviation drones 在 unforgiving electromagnetic environment、multi-domain operations 與 system-level effects 下的測試標準與 solution 線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+              },
+              "score": 3.900423
+             },
+             {
+              "text": "軍用無人機 EMC 與 EME testing › 與 standard EMC test 的差異\n[[2025RS Drone Solution]] 對 system level EME effects test 與 standard EMC test 的差異描述包含：\n\n- system level 依 requirements operate in fixed / operational environment。\n- operational environmental conditions may have no definition。\n- 分析 EM interference，涵蓋 time and frequency domain。\n- standard EMC test 則 according to test methods、frequency domain、research and design work 等。\n\n來源排版破碎，以上只保留可見語句，不延伸成正式測試方法。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+              },
+              "score": 3.670099
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing\n[[DO-160 airborne equipment EMC testing]] 是 [[2025RS Drone Solution]] 中引用 [[RTCA DO-160]] 作為 airborne equipment environmental conditions and test procedures 的測試線索，用於 military / aviation drone EMC proposal context。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 7.026587
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing › Section 20 — Radio Frequency Susceptibility\n來源說此測試確保 EUT exposed to a level of RF modulated power 時不受影響，並分為：\n\n- Conducted Susceptibility（low freq）。\n- Radiated Susceptibility（high freq）。\n\n來源說 emissions can come from equipment installed inside aircraft as well as external radiators such as radar stations；Conducted Susceptibility similar to [[CS114]] test，Radiated Susceptibility similar to [[RS103]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 4.763508
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing › 使用限制\n- 本頁不是 [[RTCA DO-160]] 正式標準摘要；只保存 [[2025RS Drone Solution]] 的簡報文字。\n- 不得由本頁推論 DO-160G / DO-160 任何 section 的完整 category、limit、waveform、test setup 或 pass / fail criteria。\n- 來源把 DO-160 放在 military / aviation drone example 中，但未說明特定 drone、eVTOL 或 avionics equipment 的 qualification plan。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 4.622271
+             },
+             {
+              "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 9.190144
+             },
+             {
+              "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 5.000953
+             },
+             {
+              "text": "R&S PCB test solutions › 與既有知識的關係\n- [[高頻高速 PCB 測試解決方案]] 既有內容來自 Keysight 圖像，流程是原材料表徵、材料選擇、電路板抽樣測試、大批量監控；本頁保存 R&S 簡報中的類似但不完全相同的流程詞。\n- [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 均已有既有頁面；本來源增加 2026.3.4 R&S 簡報的追溯來源，但沒有新增可量化規格。\n- [[SerDes 與 SI PI 測試概覽]] 連接 Slide 11 和 Slide 20 的 validation challenges / SI flow；本頁聚焦 Slide 21 的 PCB test solutions。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 4.20296
+             },
+             {
+              "text": "5G private network resilience against smart jamming › unresolved\n- [[3GPP TS 38.300]] 的引用版本與 handover interruption interval 章節未標示。\n- [[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 沒有 modem A / B 型號、chipset 或 firmware。\n- 白皮書沒有實體 smart jammer 測試條件；jammer waveform、jammer power、tracking delay、hop prediction capability 與 attack success rate 未標示。\n- Defense Prime Investment 與 program examples 缺少完整外部文件與資料口徑。\n- 來源引用 [[3GPP TS 23.501]] V15.4.0（2018-12）做 QoS table，但是否需用 newer release 做正式 mission-critical assessment 未裁決。\n- Future work 包含 MOS、more random frequencies、dual connectivity、multi-connectivity 與 [[DAPS]] handovers；本來源尚未提供結果。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+              },
+              "score": 6.846818
+             },
+             {
+              "text": "5G private network resilience against smart jamming › 與既有頁面的關係\n- [[DUT]]：本概念的限制條件是 unmodified 5G DUT。\n- [[Handover frequency hopping]]：白皮書中最具體的 implementation。\n- [[Frequency hopping for 5G resilience]]：本概念的主要技術方向。\n- [[Smart Jamming]]：本概念要處理的 threat model。\n- [[R&S CMX500]]：白皮書明示測試使用 CMX500 作為 network emulator；但該 Market source 不是 CMX500 binding specifications。\n- [[Counter-UAV 技術]]：簡報 mid-term roadmap 提到 drone detection 與 perimeter defense，但不是 counter-UAV 系統評估來源。\n- [[Beamforming]]：簡報短期 roadmap 提到 mmWave phased arrays field testing，但沒有 beamforming 定義或測試方法。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+              },
+              "score": 6.113839
+             },
+             {
+              "text": "5G private network resilience against smart jamming › 測試 setup\n白皮書中的 August 2025 測試 setup：\n\n- [[R&S CMX500]] 作為 5G network emulator。\n- CMX500 configured device 有兩個 [[NR FR1]] capable RF units，四個 RF ports，可建立最多八個 cells。\n- control PC command CMX500；measurement PC command UE。\n- M.2 modem 透過 USB adapter board 存取 [[AT command]] port，並以 RF cables 直接連到 CMX500 RF ports。\n- phones 使用 [[R&S CMU-Z10]] small anechoic chamber 與 [[Mini-Circuits ZN2PD2-63-S+]] RF combiner。\n- 測試三個 [[5G SA]] cells：n41 / 2.50713 GHz、n78 / 3.30087 GHz、n79 / 4.62399 GHz。\n- UE received power 固定 -70.2 dBm；DL/UL pattern 7:2；DL MCS 10、UL MCS 4；SISO。\n- ping 100 Hz；iPerf update 每秒一次；uplink / downlink target data rate 2 Mbit/s。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+              },
+              "score": 5.280455
+             },
+             {
+              "text": "UAV 通訊 › Signaling test 與驗證線索\n[[Signaling test solution]] 指出 [[R&S CMX500]] 可針對 [[LTE]]、[[5G]] 與 [[Wi-Fi]] UE 提供 single-technology signaling test；其 RF frequency range 在來源中寫為 **400 MHz 至 8 GHz**。來源列出的測試類別包含：\n\n- 基本 RF 量測：Power、Frequency、Spectrum、[[EVM]]、[[PER]] / [[BLER]]、[[MIMO]]。\n- Application layer tests：IP throughput、Video、Audio。\n- Protocol test。\n\n詳細配置線索見 [[UAV signaling test solution]]。使用限制：[[Signaling test solution]] 是 Market 類 OneNote solution note，未標示正式 configuration guide、軟體版本、license bundle、test case、pass / fail criteria 或 measurement uncertainty；正式規格仍需查 [[R&S CMX500]]、[[CMX500_specs_en_5216-4127-22_v1100]] 與 [[CMX500_Features_CSW9-20-0_en_32]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/UAV 通訊.md"
+              },
+              "score": 13.122948
+             },
+             {
+              "text": "UAV 通訊 › 無人機產品例子的核心通訊技術\n[[Signaling test solution]] 補充下列產品 / 機型例子，用來說明 UAV 可能同時使用 proprietary radio、Wi‑Fi、LTE、SATCOM、RTK 與 encrypted frequency-hopping radio：\n\n| 機型 | 來源列出的核心通訊技術 | 使用限制 |\n|---|---|---|\n| [[DJI Mini 4 Pro]]、[[DJI Mavic 3]] | O4 / O3+ proprietary image transmission（2.4 / 5.8 GHz） | 未提供 DJI 官方文件、地區限制、發射功率、頻寬或 modulation。 |\n| [[DJI Mavic 3 Enterprise]] | O3 proprietary radio + 4G LTE module | 未提供 LTE band、module 型號或 operator 條件。 |\n| [[Parrot ANAFI Ai]] | built-in 4G LTE mobile network | 未提供 bands、SIM / operator、throughput 或 certification。 |\n| [[XAG P100]] | RTK positioning communication + proprietary radio | 未提供 RTK radio frequency、protocol 或基地站條件。 |\n| [[Skydio X2E]] / telecom inspection solution | Wi‑Fi / proprietary radio + 4G LTE | 未提供 telecom inspection solution 的正式文件或型號。 |\n| [[RQ-4 Global Hawk]]、[[Switchblade]] | military SATCOM + encrypted frequency-hopping radio | 未提供軍規文件、頻段、加密方式或跳頻參數。 |\n\n這些例子是市場筆記線索，不等於完整產品規格或合規頻段清單。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/UAV 通訊.md"
+              },
+              "score": 10.800244
+             },
+             {
+              "text": "UAV 通訊 › 多技術整合與 De-sense 驗證\n[[Signaling test solution]] 指出 UAV 可能使用兩種以上通訊技術，其間可能造成相互干擾；[[R&S CMX500]] 因支援多種通訊技術，可進行 De-sense validation。\n\n來源給出的配置原則是：software options 合併 5G 與 Wi‑Fi 測試表格，hardware 以滿足兩者中最大的 carrier aggregation 或 [[MIMO]] 作為配置。來源同時提醒「配置如有疑問請與 1C PM 確認」。\n\n限制：來源未提供 De-sense 的干擾模型、jamming waveform、shielding / OTA chamber setup、測試流程、automation、limits 或結果。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/UAV 通訊.md"
+              },
+              "score": 9.794338
+             },
+             {
+              "text": "5G NTN validation and testing\n[[5G NTN validation and testing]] 是針對 [[5G Non-Terrestrial Networks]]、[[5G IoT-NTN]]、[[NR-NTN]]、[[NB-NTN]] 與 satellite connectivity devices，在 realistic and controlled laboratory conditions 下驗證 satellite connectivity behavior、radio channel modelling、orbit / channel emulation、protocol / performance / RF scenarios 與 system-level behavior 的測試活動。[[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]] 補充一個 [[MWC Barcelona 2024]] 展示例子：以 [[R&S CMX500 OBT]]、[[R&S SMBV100B]] 與 [[MediaTek]] NTN-NR device as DUT 展示基於 [[3GPP Release 17]] specifications 的 live [[5G NTN-NR]] connection。[[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]] 則補入 [[Viasat]] / [[Rohde & Schwarz]] 的 [[NB-NTN]] [[IoT]] certification test plan 語境，焦點是 device validation、interoperability with [[Viasat]] satellite network 與 [[3GPP Release 17]] compliance。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NTN validation and testing.md"
+              },
+              "score": 9.689809
+             },
+             {
+              "text": "5G NTN validation and testing › 使用限制\n- 本頁只整理 PR 層級合作、測試方法、certification test plan 與展示語境，不是產品規格、標準規格或 conformance test plan。\n- Gatehouse Satcom 來源未標示 published date、PR 編號或 formal version。\n- Rohde & Schwarz / MediaTek MWC 2024 來源未標示 published date、PR 編號或 formal version。\n- Rohde & Schwarz / Viasat 來源未標示 published date、test plan version、document number、test case list 或 certification body。\n- 來源未列 supported test cases、frequency bands、channel models、orbit emulation limits、payload types、UE categories、satellite operators 或 measurement accuracy。\n- [[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]] 未提供 MediaTek NTN-NR device 型號、R&S CMX500 OBT configuration、SMBV100B GNSS option code 或 physical test setup。\n- [[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]] 未提供 [[Viasat]] satellite network technical profile、NB-NTN device list、CMX500 option stack 或 first test results data。\n- future [[6G NTN testing and validation]] 只可視為 PR ambition；不可推論已有產品或測試能力。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NTN validation and testing.md"
+              },
+              "score": 7.589486
+             },
+             {
+              "text": "5G NTN validation and testing › 涉及的產品與能力口徑\n[[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]] 明示 [[Gatehouse Satcom]] gains access to the [[R&S CMX500]] platform，作為 joint effort 的一部分。\n\n但此來源是 PR，不是 [[R&S CMX500]] formal specifications；因此：\n\n- 可以說：[[R&S CMX500]] 是本合作中被明示使用的平台。\n- 可以說：合作方向包含 advanced orbit and channel emulation capabilities for NTN use cases。\n- 不可說：本來源證明某個 [[R&S CMX500]] option code、hardware configuration、frequency band、satellite orbit、channel model 或 3GPP release 已正式支援。\n- 正式配置仍需回 [[CMX500 NR-NTN configuration]]、[[CMX_Configuration_Guide_NR-NTN]]、[[CMX500_specs_en_5216-4127-22_v1100]] 與 [[CMX500_Features_CSW9-20-0_en_32]]。\n\n[[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]] 明示 [[R&S CMX500 OBT]]、[[R&S SMBV100B]] 與 [[MediaTek]] NTN-NR device as DUT 共同用於 demo setup：\n\n- [[R&S CMX500 OBT]] radio communication tester simulate the satellite base station。\n- [[R&S SMBV100B]] vector signal generator simulate different satellite constellations with its integrated GNSS option。\n- [[R&S CMX500]] operate in interactive callbox mode，讓 users trigger voice calls alongside RF-related measurements。\n\n[[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]] 明示 [[Viasat NB-NTN IoT test plan]] based on [[R&S CMX500]] one-box signaling tester：\n\n- [[R&S CMX500]] 被描述為 versatile solution designed for testing various NTN technologies，包括 [[NR-NTN]] 與 [[NB-NTN]]。\n- PR 稱 single instrument covers R&D through certification and carrier acceptance tests，並提供 reliable and repeatable results。\n- 此為 PR / solution-level claim；正式 configuration、license stack、measurement uncertainty、supported bands、NB-NTN test cases 與 carrier acceptance scope 未在來源中列出。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NTN validation and testing.md"
+              },
+              "score": 5.109467
+             },
+             {
+              "text": "NTN test and measurement aspects › SAN / base station in the sky testing\n來源以 [[TS 38.108]]、[[TS 38.181]] 描述 satellite / [[Satellite Access Node]]（SAN）testing：\n\n- TS 38.108 定義 SAN radio transmission and reception。\n- TS 38.181 定義 SAN conformance testing tolerances 與 test cases。\n- SAN type 包含 type 1-H、type 1-O、type 2-O。\n- FR1 hybrid setup 可 conducted 或 radiated；FR2 only OTA / radiated。\n- TS 38.181 chapters 包含 conducted transmitter、conducted receiver、conducted performance、radiated transmitter、radiated receiver、radiated performance。\n- 測試重點包含 output power、power dynamics、frequency error、modulation quality、ACLR、OBUE、receiver sensitivity、blocking、PUSCH / PUCCH / PRACH performance。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 3.87531
+             },
+             {
+              "text": "NTN test and measurement aspects › NTN 對 T&M 的 paradigm change\n來源指出 [[NTN]] 改變傳統 wireless T&M 假設：\n\n- 傳統假設 UE mobile、network entities stationary。\n- NTN 需考慮 UE 與 network entities 兩者 mobility。\n- 測試條件需 reproducible、accurate、comparable，但 setup 需加入 high path loss、Doppler shift、time delay、delay variance、atmospheric effects、Faraday effect、scintillation、weather influences。\n- satellite 入軌後 maintenance / replacement 困難，使 simulation、software-assisted testing、digital twin、in-orbit monitoring 更重要。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 3.793709
+             },
+             {
+              "text": "NTN test and measurement aspects › R&S CMX500 與 TS8980\n來源將 [[R&S CMX500]] 描述為 5G NTN 測試平台：\n\n- 可作 one-box testing setup。\n- 可整合進 [[R&S TS8980 Conformance Test Platform]]。\n- 支援 NR-NTN、NB-NTN、DTC。\n- 可執行 RF、protocol、signaling、E2E application、mobility、application testing。\n- 支援 FR1、FR2 與 future FR3 regions 的 white paper level 描述；正式 frequency coverage 需回查產品 specs / heads / RF frontends。\n- 支援 Constellation Insight tool，可 load、configure、visualize、deploy satellites。\n- CMX500 hardware 同時可啟動 cells 數量有限；來源說目前一台 box 最多 six cells。\n\n[[R&S TS8980 Conformance Test Platform]]：\n\n- 補充並擴展 CMX500。\n- 支援 full type approval functionality。\n- 支援 multiple cells、out-of-band emission、spurious emission、interfering / blocking performance tests。\n- 作為 accredited / validated test platform 用於 conformance / certification。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 3.791798
+             },
+             {
+              "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 重點摘要\n此來源是由 `3GPP NTN Signal Generator Solutions Overview-EN-UR.pptx` 轉出的 lossy markdown；封面標示 `1GP` 與 `12-2025`，末頁標示 `Last updated: 08/25`，其中 slide 27 另標示 `2025-09-29 Nokia Workshop at R&S - SigGen Product Update`。本頁以來源原文呈現的 2025 年簡報語境處理，不自行推論正式發布日。\n\n簡報主題是 [[Rohde & Schwarz]] 針對 [[3GPP]] [[NTN]] 的 signal generator / channel emulation 測試方案，涵蓋：\n\n- [[5G NTN-NR]] 的 Release 17 / 18 / 19 演進與頻段。\n- [[Satellite Access Node]]（[[SAN]]）conformance testing。\n- [[NTN signal generator solutions]] 的 component testing、SAN testing、end-to-end system testing 與 UE testing 分層。\n- [[R&S SMW200A]] 作為 channel emulator / signal generator 的 NTN 測試能力。\n- [[R&S FSW]] 與 [[R&S FSVA3000]] 在 component testing / SAN transmitter measurement 中的角色。\n- [[R&S Space Nexus]] 依 satellite trajectory 產生 [[R&S SMW200A]] fading files 的待請求 PC software 線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+              },
+              "score": 12.316503
+             },
+             {
+              "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 與既有知識的關係\n- 與 [[R&S SMW200A]]：補充 NTN channel emulation、SAN conformance testing 與 E2E testing 的 application / configuration 視角；不取代 [[SMW200A_specs_en_3606-8037-22_v3100]] 或 [[SMW200A_config-guide_en_3606-8037-92_v0600]]。\n- 與 [[R&S FSW]]：補充在 NTN component testing 中的分析角色與簡報級摘要規格；正式 frequency / bandwidth / option 仍以 [[FSW_specs_en_5215-6749-22_v1701]] 為準。\n- 與 [[R&S FSVA3000]]：補充 FSW / FSVA 5G NR options support Chapter 6 & 9 measurements 的簡報說法；未列出 FSVA3000 具體型號或 option stack。\n- 與 [[5G NTN validation and testing]]：新增 signal-generator-centric / channel-emulation-centric 的 NTN validation path，與既有 CMX500 / partner PR 語境互補。\n- 與 [[NR-NTN conformance testing]]：既有頁偏向 UE / GCF / PTCRB / TS8980 / CMX500 conformance validation；本來源聚焦 [[Satellite Access Node]] conformance testing 與 [[3GPP TS 38.181]] / [[3GPP TS 38.108]]。\n- 與 [[NTN propagation emulation and fading]]：既有頁整理 CMX500 PR 中 propagation emulation 與 fading 區分；本來源提供 SMW200A dynamic fading / Doppler / path delay 的 signal generator 實作線索，但未使用相同術語區分。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 14,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+              },
+              "score": 6.595176
+             },
+             {
+              "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › NTN end-to-end system testing\n來源 slide 24–28 說 E2E system testing 會以 channel emulator for service link 與 channel emulator for feeder link 模擬 UE、NTN payload 之間的 RF satellite link。\n\n來源 slide 25 標示 `SMW firmware version ≥ 5.30`，key features 包含：\n\n- Flexible definition of terrestrial channel profiles；B14 or B15 required。\n- Customized dynamic fading；K820 required。\n- Model satellite trajectory。\n- Account for frequency-dependent atmospheric effects。\n- Longer path delays and enhanced Doppler capabilities。\n- Up to 1073 ms delay。\n- Up to ±1 MHz Doppler（pure Doppler）。\n\n來源 slide 26 對 [[R&S SMW-K820]] customized dynamic fading 的 E2E testing key features：customer-provided list、flexible definition of satellite movement、possibility to account for frequency-dependent atmospheric effects、longer path delays and enhanced Doppler capabilities。Key parameters：update interval、delay、Doppler、pathloss。\n\n來源 slide 27 說 [[R&S Space Nexus]] 是 PC Software，available on request，可 generate SMW200A fading files based on a satellite trajectory；key parameters 同為 update interval、delay、Doppler、pathloss。\n\n來源 slide 28 的 SMW200A channel emulation table：",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+              },
+              "score": 5.63392
+             },
+             {
+              "text": "SDR-assisted UAV security › SDR 作為 attack / test tool\n來源明確指出 SDR technology 也可能削弱 security measures：\n\n- 可執行 GPS spoofing attacks。\n- 可產生 counterfeit GPS / GNSS signals。\n- 可發射 jamming signals。\n- 可用於 penetration testing，以檢查 UAV-based nodes 的 attack surface。\n\n例如：\n\n- [67] 使用 [[BladeRF x40]]、sensor data 與 NMEA messages 產生 mobile spoofing system，使 target GPS receivers 計算錯誤位置並被導向 designated landing areas。\n- [68] 使用 [[DJI Spark]]、[[Parrot Bebop 2 FPV]] 與 [[BladeRF x40]]，測試 barrage jamming、tone jamming、protocol-aware congestion 等 interference techniques；protocol-aware jamming 被描述為最有前景。\n- [69] 使用 [[DJI Phantom 3 Standard]] 與 [[BladeRF x40]] 建立 low-cost SDR-based portable anti-UAV system，具 detection、jamming、spoofing GPS signals 能力。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SDR-assisted UAV security.md"
+              },
+              "score": 7.021927
+             },
+             {
+              "text": "SDR-assisted UAV security › GPS spoofing / jamming detection\n來源指出 affordable SDR devices，如 [[HackRF One]]、[[BladeRF 2.0]] 與 [[BladeRF x40]]，可用於 GNSS spoofing / jamming attacks，也可用於測試 defense mechanisms：\n\n- [62] 提出 lightweight LSTM-based detection model，並以 knowledge distillation 壓縮，利於整合進 UAV control systems。\n- [63] 研究 [[HackRF One]] 1.0 與 external TCXO 對 GNSS signal spoofing / jamming threats 的影響；受測 UAV GNSS receivers 包含 3DR IRIS+、Tarot 650 v2.2、DJI Inspire、Sky Hunter。\n- [64] [[MAVIDS]] 使用 PCA 與 one-class classifiers，並以 [[HackRF One]]、[[GPS-SDR-SIM]] 與 [[GNU Radio Companion]] 進行 GPS spoofing / jamming experiments；macro-averaged F1 scores 為 GPS spoofing 90.57%、jamming 94.3%。\n- [66] 使用 cellular BS 與 Wi-Fi AP crowd-sourced information 進行 GPS spoofing detection / mitigation，並以 [[HackRF One]] + TCXO 產生 spoofing signals。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SDR-assisted UAV security.md"
+              },
+              "score": 6.917751
+             },
+             {
+              "text": "SDR-assisted UAV security\n[[SDR-assisted UAV security]] 是使用 [[Software-Defined Radio]] 在 UAV 系統中執行 PHY-layer monitoring、jamming detection、GPS spoofing / jamming assessment、intrusion detection、penetration testing 與 counter-UAV research 的安全技術方向；它同時包含防禦能力與攻擊面風險。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SDR-assisted UAV security.md"
+              },
+              "score": 4.841319
+             },
+             {
+              "text": "4. UAV Eco-chain in Taiwan › 重點摘要\n- 這份來源是 OneNote 複製出的台灣 UAV / drone eco-chain link hub；來源正文未標示正式發布日期，raw frontmatter 只標示 converted: 2026-09-17。\n- 來源把一組公司列在 System Integrator 區段，包括 [[漢翔]]、[[雷虎科技]]、[[亞洲航空股份有限公司]]、[[中光電]]、[[中光電智能機器人]]、[[豐兆航太]]、[[長榮航太]]、[[經緯航太]]、[[富蘭登科技]]、[[銘旺科技]]、[[擎壤科技]]、[[翔探科技]]、[[翔隆航太]]、[[智飛科技]]、[[AiSeed Tech]]、[[神耀科技]]、[[Tron Future]]、[[新樂飛無人機]]、[[泰世科技]]、[[田屋科技]]、[[璿元科技]] 與 [[華冠通訊]] 等。\n- 來源把另一組公司與技術列在 Key component/technology 區段，包括 [[邑錡]]、[[聯發科]]、[[新唐科技]]、[[圓剛]]、[[聰泰科技]]、[[亞光]]、[[神基科技]]、[[茂訊電腦]]、[[融程電]]、[[聯詠]]、[[事欣科]]、[[為升]]、[[華晶科]]、[[Josefina Pan Pacific]]、[[波力-KY]]、[[碳基科技]]、[[XDynamics]]、[[伸波通訊]]、[[鼎天國際]]、[[世紀民生科技]]、[[航見科技]]、[[台灣彩光]]、[[力山工業]]、[[八達創新集團]]、[[芳興科技]]、[[智頻科技]]、[[德鑫新技]]、[[六俊電機]] 與 [[其昜先進]] 等。\n- Key component/technology 區段中有少量文字描述：[[邑錡]]專注無人機影像處理技術並取得美軍規夜視鏡代理權；[[聯發科]]晶片可作為無人機核心處理器，負責運算與通訊；[[新唐科技]]提供 MCU，被描述為無人機穩定飛行的神經系統；[[圓剛]]視訊產品 / 技術有機會成為無人機影像傳輸關鍵零組件；[[聰泰科技]]提供影像擷取卡、視訊處理模組等電子與電腦零組件；[[亞光]]被描述為無人機鏡頭；[[神基科技]]、[[茂訊電腦]]、[[融程電]]被描述為軍用筆電及無人機控制台 GCS。\n- Global cooperation 區段列出 [[Shield.AI]] 與 [[Anduril]]，但未提供合作內容、合作對象、日期或文件正文。\n- 來源包含 [[Government support projects]] OneNote 內部連結、[[UAVEcoChain.xlsx]]、本機檔案 2025RS Drone Solution PDF，以及多張圖片 / ink SVG 嵌入；這些附件正文與圖片內容未被擷取，不可當成已讀證據。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/4. UAV Eco-chain in Taiwan.md"
+              },
+              "score": 13.86109
+             },
+             {
+              "text": "4. UAV Eco-chain in Taiwan › 關鍵實體與概念\n- 供應鏈 / 產業概念：[[台灣無人機供應鏈]]、[[台灣無人機產業]]、[[UAV Eco-chain in Taiwan 外部資料清單]]、[[GCS]]、[[無人機影像處理]]、[[無人機影像傳輸]]、[[無人機核心處理器]]。\n- System Integrator：[[漢翔]]、[[雷虎科技]]、[[亞洲航空股份有限公司]]、[[中光電]]、[[中光電智能機器人]]、[[豐兆航太]]、[[長榮航太]]、[[經緯航太]]、[[富蘭登科技]]、[[銘旺科技]]、[[擎壤科技]]、[[翔探科技]]、[[翔隆航太]]、[[智飛科技]]、[[AiSeed Tech]]、[[神耀科技]]、[[Tron Future]]、[[新樂飛無人機]]、[[泰世科技]]、[[田屋科技]]、[[璿元科技]]、[[華冠通訊]]。\n- Key component/technology：[[邑錡]]、[[聯發科]]、[[新唐科技]]、[[圓剛]]、[[聰泰科技]]、[[亞光]]、[[神基科技]]、[[茂訊電腦]]、[[融程電]]、[[聯詠]]、[[事欣科]]、[[為升]]、[[華晶科]]、[[Josefina Pan Pacific]]、[[波力-KY]]、[[碳基科技]]、[[XDynamics]]、[[伸波通訊]]、[[鼎天國際]]、[[世紀民生科技]]、[[航見科技]]、[[台灣彩光]]、[[力山工業]]、[[八達創新集團]]、[[芳興科技]]、[[智頻科技]]、[[德鑫新技]]、[[六俊電機]]、[[其昜先進]]。\n- Global cooperation 線索：[[Shield.AI]]、[[Anduril]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/4. UAV Eco-chain in Taiwan.md"
+              },
+              "score": 6.754209
+             },
+             {
+              "text": "4. UAV Eco-chain in Taiwan › 與既有知識的關係\n- [[0. UAV產業分析報告架構]] 已建立台灣無人機供應鏈上游 / 中游 / 下游三層分類；本來源改以 System Integrator 與 Key component/technology 兩大區塊整理公司，因此補充的是不同 taxonomy，不直接取代既有分類。\n- [[台灣無人機供應鏈]] 已有 [[漢翔]]、[[中光電]]、[[雷虎科技]]、[[經緯航太]]、[[長榮航太]]、[[聯發科]]、[[新唐科技]]、[[圓剛]]、[[聰泰]]、[[亞光]] 等列名；本來源新增更多公司 / URL 線索，並補出若干角色描述。\n- [[聯發科]] 既有頁已記錄其在 [[0. UAV產業分析報告架構]] 中被列為 AI晶片與通訊模組；本來源補充說其晶片可作為無人機核心處理器，負責運算與通訊。\n- [[漢翔]]、[[雷虎科技]]、[[中光電]]、[[經緯航太]]、[[長榮航太]] 既有頁主要來自 [[0. UAV產業分析報告架構]]；本來源把它們列在 System Integrator 區段，提供另一個分類視角。\n- [[事欣科]] 既有頁原本只保存 [[Space Supply Chain]] 中 Yahoo 股市連結標題線索；本來源新增其與 PARPRO aerospace / defense URL 同列的 UAV key component/technology 線索，但仍未擷取該外部頁正文。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/4. UAV Eco-chain in Taiwan.md"
+              },
+              "score": 6.549139
+             },
+             {
+              "text": "UAVEcoChain › 重點摘要\n- 這份來源是由 `UAVEcoChain.xlsx` 轉出的 lossy markdown derivative；原始檔路徑在 raw frontmatter 中標示為 OneDrive / SharePoint 底下的 `drop/Market/OneNote/UAVEcoChain.xlsx`，`converted: 2026-09-17`，正式發布日期、作者、版本與維護單位皆未標示。\n- `UAV` 工作表把台灣 UAV eco-chain 依零組件 / 功能分類，涵蓋 [[GPS定位]]、[[天線]]、[[系統整合商]]、[[影像處理-相機]]、[[通訊模組]]、[[馬達動力雲台]]、[[電池電源]]、[[雷達感應]]、[[筆電控制台]]、[[航太材料]]、[[認證實驗室]] 與 [[Payload]] 等欄位。\n- 來源同時保存若干 [[R&S solution mapping]] 與 sales kits 線索，例如 [[鼎天國際]] / GNSS RTK 對應 [[R&S SMBV100B]]，[[芳興科技]] / high isolation measurement 與 OTA passive testing 對應 [[R&S ZNB3000]] 與 [[R&S TS8991]]（[[R&S AMS32]]），[[伸波通訊]] / NTN 與 Wi‑Fi 對應 [[R&S CMX500]] 與 [[R&S CMP180]]，[[神基科技]] / Wi‑Fi 與 LTE 對應 [[R&S CMX500]] 與 [[R&S CMP180]]。\n- 來源列出多個 UAV 供應鏈公司與角色亮點，但多數列只有公司名稱，沒有產品型號、正式規格、客戶、供應關係、出貨、認證、標案、營收或市場占比。\n- `ICs(Notyet)` 工作表列出 GPU、CPU、DRAM、IC、晶圓代工、封裝測試、測試介面、網通、BMC 與高速傳輸 IC 公司清單，包括 [[輝達]]、[[AMD]]、[[英特爾]]、[[三星]]、[[海力士]]、[[美光]]、[[智原]]、[[創意]]、[[世芯-KY]]、[[台積電]]、[[日月光]]、[[旺矽]]、[[穎崴]]、[[中華精測]]、[[聯發科]]、[[達發]]、[[新唐]]、[[信驊]]、[[譜瑞-KY]] 與 [[祥碩]]；此表標題寫「伺服器晶片設計、生產」，與 UAV 主表層級不同，應視為同一 workbook 中的待分類 / not-yet 區塊，不宜直接併入 UAV 供應鏈。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/UAVEcoChain.md"
+              },
+              "score": 15.401793
+             },
+             {
+              "text": "UAVEcoChain › UAV 工作表整理\n| UAV零組件 / 類別 | 關鍵元件 / 角色亮點 | 企業列名 | R&S Solution / Sales kits 線索 | 日期 / 期間 |\n|---|---|---|---|---|\n| [[GPS定位]] | [[GNSS RTK]] | [[鼎天國際]]、[[亞洲航空]]、[[環天世通科技]]、[[大辰科技]]、[[碳基科技]] | [[R&S SMBV100B]]；RTK sales kit SharePoint link | 來源未標示正式日期；raw converted 2026-09-17 |\n| [[天線]] | high isolation measurement；OTA passive testing | [[芳興科技]] | [[R&S ZNB3000]]、[[R&S TS8991]]（[[R&S AMS32]]）；ZNB3000 customer presentation link | 來源未標示正式日期；raw converted 2026-09-17 |\n| [[系統整合商]] | 多數列未標示角色亮點；[[漢翔航空工業]]列有 signal analyzer with real-time option / EMC solution | [[漢翔航空工業]]、[[雷虎科技]]、[[亞洲航空]]、[[中強光電]]、[[中光電智能機器人]]、[[豐兆航太]]、[[長榮航太]]、[[經緯航太]]、[[富蘭登科技]]、[[銘旺科技]]、[[翔探科技]]、[[翔隆航太]]、[[智飛科技]]、[[艾知科技]]、[[神耀科技]]、[[創未來]]、[[新樂飛]]、[[泰世科技]]、[[田屋科技]]、[[璿元科技]]、[[華冠通訊]]、[[龍德造船]] | [[漢翔航空工業]]列 signal analyzer with real-time option、EMC solution；其餘多數未標示 | 來源未標示正式日期；raw converted 2026-09-17 |\n| [[影像處理-相機]] | image processor、Camera；[[邑錡]]列 GMSL、LVDS | [[邑錡]]、[[圓剛]]、[[聰泰科技]]、[[亞光]]、[[聯詠]]、[[華晶科]]、[[智動航科]]、[[瑀豐股份]]、[[台灣彩光]] | [[邑錡]]對應 [[R&S RTO]]、[[R&S MXO]] | 來源未標示正式日期；raw converted 2026-09-17 |\n| [[通訊模組]] | [[伸波通訊]]列 NTN、Wi‑Fi | [[伸波通訊]]、[[航見科技]]、[[智頻科技]]、[[連騰科技]]、[[円通]]、[[易達通]]、[[凌威航太]] | [[R&S CMX500]]、[[R&S CMP180]]；NTN toolkit 與 WLAN toolkit SharePoint links | 來源未標示正式日期；raw converted 2026-09-17 |\n| [[馬達動力雲台]] | 角色亮點多數未標示 | [[其昜先進]]、[[六俊電機]]、[[八達創新]]、[[力山工業]]、[[世紀民生]] | [[其昜先進]]列 [[R&S MXO]] | 來源未標示正式日期；raw converted 2026-09-17 |\n| [[電池電源]] | 角色亮點多數未標示 | [[德鑫新技]]、[[台船動力]]、[[其昜先進]]、[[有量科技]] | [[德鑫新技]]列 [[R&S MXO]] | 來源未標示正式日期；raw converted 2026-09-17 |\n| [[雷達感應]] | 角色亮點未標示 | [[為升]]、[[智頻科技]]、[[均利科技]] | 來源未標示 | 來源未標示正式日期；raw converted 2026-09-17 |\n| [[筆電控制台]] | 軍用筆電、無人機控制台 GCS；[[神基科技]]列 Wi‑Fi、LTE | [[神基科技]]、[[茂訊電腦]]、[[融程電]] | [[R&S CMX500]]、[[R&S CMP180]] | 來源未標示正式日期；raw converted 2026-09-17 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/UAVEcoChain.md"
+              },
+              "score": 14.354343
+             },
+             {
+              "text": "UAVEcoChain › 關鍵實體與概念\n- UAV 供應鏈概念：[[台灣無人機供應鏈]]、[[台灣無人機產業]]、[[台灣 UAV 產業鏈 R&S solution mapping]]、[[UAV Eco-chain in Taiwan 外部資料清單]]、[[UAV Ground Control Station]]、[[UAV 通訊]]、[[UAV power electronics 外部資料清單]]、[[UAV Payload]]。\n- 測試與 R&S solution：[[R&S SMBV100B]]、[[R&S ZNB3000]]、[[R&S TS8991]]、[[R&S AMS32]]、[[R&S CMX500]]、[[R&S CMP180]]、[[R&S MXO]]、[[R&S RTO]]、[[UAV EMC]]、[[GNSS RTK]]、[[OTA passive testing]]、[[high isolation measurement]]。\n- UAV 公司線索：[[鼎天國際]]、[[亞洲航空]]、[[環天世通科技]]、[[大辰科技]]、[[碳基科技]]、[[芳興科技]]、[[漢翔航空工業]]、[[雷虎科技]]、[[中強光電]]、[[中光電智能機器人]]、[[豐兆航太]]、[[長榮航太]]、[[經緯航太]]、[[富蘭登科技]]、[[銘旺科技]]、[[翔探科技]]、[[翔隆航太]]、[[智飛科技]]、[[艾知科技]]、[[神耀科技]]、[[創未來]]、[[新樂飛]]、[[泰世科技]]、[[田屋科技]]、[[璿元科技]]、[[華冠通訊]]、[[龍德造船]]、[[邑錡]]、[[圓剛]]、[[聰泰科技]]、[[亞光]]、[[聯詠]]、[[華晶科]]、[[智動航科]]、[[瑀豐股份]]、[[台灣彩光]]、[[伸波通訊]]、[[航見科技]]、[[智頻科技]]、[[連騰科技]]、[[円通]]、[[易達通]]、[[凌威航太]]、[[其昜先進]]、[[六俊電機]]、[[八達創新]]、[[力山工業]]、[[世紀民生]]、[[德鑫新技]]、[[台船動力]]、[[有量科技]]、[[為升]]、[[均利科技]]、[[神基科技]]、[[茂訊電腦]]、[[融程電]]、[[波力-KY]]、[[ETC]]、[[Dekra]]。\n- ICs(Notyet) 線索：[[輝達]]、[[AMD]]、[[英特爾]]、[[三星]]、[[海力士]]、[[美光]]、[[智原]]、[[創意]]、[[世芯-KY]]、[[台積電]]、[[日月光]]、[[旺矽]]、[[穎崴]]、[[中華精測]]、[[聯發科]]、[[達發]]、[[新唐]]、[[信驊]]、[[譜瑞-KY]]、[[祥碩]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/UAVEcoChain.md"
+              },
+              "score": 13.117436
+             },
+             {
+              "text": "台灣無人機供應鏈 › UAVEcoChain 的零組件分類補充\n[[UAVEcoChain]] 由 `UAVEcoChain.xlsx` 轉出，補入更細的 UAV 零組件 / 功能分類：\n\n- [[GPS定位]]：列出 [[鼎天國際]]、[[亞洲航空]]、[[環天世通科技]]、[[大辰科技]]、[[碳基科技]]；[[鼎天國際]]角色亮點為 [[GNSS RTK]]，R&S Solution 欄列 [[R&S SMBV100B]]。\n- [[天線]]：列出 [[芳興科技]]；角色亮點為 high isolation measurement / OTA passive testing，R&S Solution 欄列 [[R&S ZNB3000]] 與 [[R&S TS8991]]（[[R&S AMS32]]）。\n- [[系統整合商]]：列出 [[漢翔航空工業]]、[[雷虎科技]]、[[亞洲航空]]、[[中強光電]]、[[中光電智能機器人]]、[[豐兆航太]]、[[長榮航太]]、[[經緯航太]]、[[富蘭登科技]]、[[銘旺科技]]、[[翔探科技]]、[[翔隆航太]]、[[智飛科技]]、[[艾知科技]]、[[神耀科技]]、[[創未來]]、[[新樂飛]]、[[泰世科技]]、[[田屋科技]]、[[璿元科技]]、[[華冠通訊]]、[[龍德造船]]。\n- [[影像處理-相機]]：列出 [[邑錡]]、[[圓剛]]、[[聰泰科技]]、[[亞光]]、[[聯詠]]、[[華晶科]]、[[智動航科]]、[[瑀豐股份]]、[[台灣彩光]]；[[邑錡]]角色亮點為 GMSL、LVDS，R&S Solution 欄列 [[R&S RTO]]、[[R&S MXO]]。\n- [[通訊模組]]：列出 [[伸波通訊]]、[[航見科技]]、[[智頻科技]]、[[連騰科技]]、[[円通]]、[[易達通]]、[[凌威航太]]；[[伸波通訊]]角色亮點為 NTN、Wi‑Fi，R&S Solution 欄列 [[R&S CMX500]]、[[R&S CMP180]]。\n- [[馬達動力雲台]]：列出 [[其昜先進]]、[[六俊電機]]、[[八達創新]]、[[力山工業]]、[[世紀民生]]；[[其昜先進]] R&S Solution 欄列 [[R&S MXO]]。\n- [[電池電源]]：列出 [[德鑫新技]]、[[台船動力]]、[[其昜先進]]、[[有量科技]]；[[德鑫新技]] R&S Solution 欄列 [[R&S MXO]]。\n- [[雷達感應]]：列出 [[為升]]、[[智頻科技]]、[[均利科技]]。\n- [[筆電控制台]]：列出 [[神基科技]]、[[茂訊電腦]]、[[融程電]]；關鍵元件欄寫軍用筆電、無人機控制台 GCS，[[神基科技]]角色亮點為 Wi‑Fi、LTE，R&S Solution 欄列 [[R&S CMX500]]、[[R&S CMP180]]。\n- [[航太材料]]：列出 [[波力-KY]]、[[碳基科技]]。\n- [[認證實驗室]]：列出 [[ETC]]、[[Dekra]]；關鍵元件欄寫 [[UAV EMC]]，sales kits 欄列 2025RS Drone Solution。\n\n更完整的 R&S 對應另見 [[台灣 UAV 產業鏈 R&S solution mapping]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/台灣無人機供應鏈.md"
+              },
+              "score": 20.230513
+             },
+             {
+              "text": "台灣無人機供應鏈 › 供應鏈分層\n| 層級 | 來源中的功能 | 公司列名 | 日期 / 期間 |\n|---|---|---|---|\n| 上游 | 晶片、感測器、通訊模組 | [[聯發科]]、[[新唐科技]]、[[圓剛]]、[[聰泰]] | [[0. UAV產業分析報告架構]] 標題為 2025 年版；raw 轉檔 2026-09-17 |\n| 中游 | 模組製造與系統整合 | [[亞光]]、[[中光電]]、[[漢翔]] | [[0. UAV產業分析報告架構]] 標題為 2025 年版；raw 轉檔 2026-09-17 |\n| 下游 | 整機製造與應用服務 | [[雷虎科技]]、[[經緯航太]]、[[長榮航太]] | [[0. UAV產業分析報告架構]] 標題為 2025 年版；raw 轉檔 2026-09-17 |\n| System Integrator | OneNote eco-chain link hub 的系統整合 / 廠商清單 | [[漢翔]]、[[雷虎科技]]、[[亞洲航空股份有限公司]]、[[中光電]]、[[中光電智能機器人]]、[[豐兆航太]]、[[長榮航太]]、[[經緯航太]]、[[富蘭登科技]]、[[銘旺科技]]、[[擎壤科技]]、[[翔探科技]]、[[翔隆航太]]、[[智飛科技]]、[[AiSeed Tech]]、[[神耀科技]]、[[Tron Future]]、[[新樂飛無人機]]、[[泰世科技]]、[[田屋科技]]、[[璿元科技]]、[[華冠通訊]] | [[4. UAV Eco-chain in Taiwan]] 來源未標示正式日期；raw 轉檔 2026-09-17 |\n| Key component/technology | OneNote eco-chain link hub 的關鍵零組件 / 技術清單 | [[邑錡]]、[[聯發科]]、[[新唐科技]]、[[圓剛]]、[[聰泰科技]]、[[亞光]]、[[神基科技]]、[[茂訊電腦]]、[[融程電]]、[[聯詠]]、[[事欣科]]、[[為升]]、[[華晶科]]、[[Josefina Pan Pacific]]、[[波力-KY]]、[[碳基科技]]、[[XDynamics]]、[[伸波通訊]]、[[鼎天國際]]、[[世紀民生科技]]、[[航見科技]]、[[台灣彩光]]、[[力山工業]]、[[八達創新集團]]、[[芳興科技]]、[[智頻科技]]、[[德鑫新技]]、[[六俊電機]]、[[其昜先進]] | [[4. UAV Eco-chain in Taiwan]] 來源未標示正式日期；raw 轉檔 2026-09-17 |\n| UAV零組件 taxonomy | Excel 轉檔表格中的零組件 / 功能分類 | [[GPS定位]]、[[天線]]、[[系統整合商]]、[[影像處理-相機]]、[[通訊模組]]、[[馬達動力雲台]]、[[電池電源]]、[[雷達感應]]、[[筆電控制台]]、[[航太材料]]、[[認證實驗室]]、[[Payload]] | [[UAVEcoChain]] 來源未標示正式日期；raw converted 2026-09-17 |\n| 政府補助計畫公司 | 無人機關鍵晶片、AI 影像、飛控、通訊與模組自主化 | [[海華科技]]、[[臺灣希望]]、[[中光電智能機器人]]、[[芯鼎科技]]、[[英濟]]、[[智邦科技]]、[[威力工業網絡]]、[[和迪]]、[[臺灣希望創新]]、[[亞信電子]]、[[易發精機]]、[[聯發科]] | [[TW government support projects(無人機關鍵晶片及模組自主開發研發補助計畫)]] 來源未標示正式發布日期；raw 轉檔 2026-09-17 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/台灣無人機供應鏈.md"
+              },
+              "score": 17.954655
+             },
+             {
+              "text": "台灣無人機供應鏈 › 補助計畫層級的新增線索\n[[TW government support projects(無人機關鍵晶片及模組自主開發研發補助計畫)]] 補入下列計畫層級線索：\n\n- [[海華科技]] 主導、[[臺灣希望]] 合作：先進無人機 AI 影像模組，來源稱採用 [[聯發科]] [[Genio 720]]，研發投入逾新臺幣 2 億元。\n- [[中光電智能機器人]] 主導、[[芯鼎科技]] 合作：無人機 AI 影像晶片及系統模組，來源稱採用 6 奈米製程並支援 100MP / 8K / 100+ TOPS 以上。\n- [[英濟]]：無人機 AI 影像處理及辨識，結合雷射快速掃描、鏡頭與熱成像等空間運算。\n- [[智邦科技]]：高效能經濟化無人機飛控板，涵蓋國產晶片、RF 模組、備援切換、長距離低延遲通訊與抗電磁干擾。\n- [[威力工業網絡]] 主導、[[和迪]] 合作：國產晶片飛控系統生態，來源稱整合國產 COFDM 晶片長距離抗干擾數圖傳，通訊距離逾 300 公里。\n- [[臺灣希望創新]] 結合 [[亞信電子]]：高性能泛用型國產無人機關鍵模組，包含高效雙核微處理器、飛控模組、馬達控制器、長距離通訊、高精度定位與電源管理。\n- [[易發精機]]：國產自主飛控與載具驗證平台，來源稱以國產 MCU 為核心，與 [[PX4]]、[[ArduPilot]] 高度相容，並整合 IMU、氣壓計、磁力計與 GNSS。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/台灣無人機供應鏈.md"
+              },
+              "score": 10.131174
+             },
+             {
+              "text": "UAV Eco-chain in Taiwan 外部資料清單 › Key component/technology 連結線索\n[[4. UAV Eco-chain in Taiwan]] 在 Key component/technology 區段列出：[[邑錡]]、[[聯發科]]、[[新唐科技]]、[[圓剛]]、[[聰泰科技]]、[[亞光]]、[[神基科技]]、[[茂訊電腦]]、[[融程電]]、[[聯詠]]、[[事欣科]]、[[為升]]、[[華晶科]]、[[Josefina Pan Pacific]]、[[波力-KY]]、[[碳基科技]]、[[XDynamics]]、[[伸波通訊]]、[[鼎天國際]]、[[世紀民生科技]]、[[航見科技]]、[[台灣彩光]]、[[力山工業]]、[[八達創新集團]]、[[芳興科技]]、[[智頻科技]]、[[德鑫新技]]、[[六俊電機]]、[[其昜先進]]。\n\n[[UAVEcoChain]] 補出更細的分類：\n\n- [[GPS定位]]：[[鼎天國際]]、[[亞洲航空]]、[[環天世通科技]]、[[大辰科技]]、[[碳基科技]]。\n- [[天線]]：[[芳興科技]]。\n- [[影像處理-相機]]：[[邑錡]]、[[圓剛]]、[[聰泰科技]]、[[亞光]]、[[聯詠]]、[[華晶科]]、[[智動航科]]、[[瑀豐股份]]、[[台灣彩光]]。\n- [[通訊模組]]：[[伸波通訊]]、[[航見科技]]、[[智頻科技]]、[[連騰科技]]、[[円通]]、[[易達通]]、[[凌威航太]]。\n- [[馬達動力雲台]]：[[其昜先進]]、[[六俊電機]]、[[八達創新]]、[[力山工業]]、[[世紀民生]]。\n- [[電池電源]]：[[德鑫新技]]、[[台船動力]]、[[其昜先進]]、[[有量科技]]。\n- [[雷達感應]]：[[為升]]、[[智頻科技]]、[[均利科技]]。\n- [[筆電控制台]]：[[神基科技]]、[[茂訊電腦]]、[[融程電]]。\n- [[航太材料]]：[[波力-KY]]、[[碳基科技]]。\n- [[認證實驗室]]：[[ETC]]、[[Dekra]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/UAV Eco-chain in Taiwan 外部資料清單.md"
+              },
+              "score": 21.033704
+             },
+             {
+              "text": "UAV Eco-chain in Taiwan 外部資料清單 › R&S Solution / Sales kits 線索\n[[UAVEcoChain]] 補入若干 R&S solution mapping，另見 [[台灣 UAV 產業鏈 R&S solution mapping]]。目前可追溯的 mapping 包括：\n\n- [[鼎天國際]] / [[GNSS RTK]] → [[R&S SMBV100B]]，並連到 RTK sales kit。\n- [[芳興科技]] / high isolation measurement / OTA passive testing → [[R&S ZNB3000]]、[[R&S TS8991]]（[[R&S AMS32]]）。\n- [[邑錡]] / GMSL / LVDS → [[R&S RTO]]、[[R&S MXO]]。\n- [[伸波通訊]] / NTN / Wi‑Fi → [[R&S CMX500]]、[[R&S CMP180]]，並連到 NTN toolkit 與 WLAN toolkit。\n- [[神基科技]] / Wi‑Fi / LTE / GCS → [[R&S CMX500]]、[[R&S CMP180]]。\n- [[德鑫新技]]、[[其昜先進]] → [[R&S MXO]] 線索。\n\n這些欄位不可改寫為正式配置指南、已銷售機會、客戶採用、認證或測試結果。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/UAV Eco-chain in Taiwan 外部資料清單.md"
+              },
+              "score": 18.412704
+             },
+             {
+              "text": "UAV Eco-chain in Taiwan 外部資料清單 › System Integrator 連結線索\n[[4. UAV Eco-chain in Taiwan]] 在 System Integrator 區段列出：[[漢翔]]、[[雷虎科技]]、[[亞洲航空股份有限公司]]、[[中光電]]、[[中光電智能機器人]]、[[豐兆航太]]、[[長榮航太]]、[[經緯航太]]、[[富蘭登科技]]、[[銘旺科技]]、[[擎壤科技]]、[[翔探科技]]、[[翔隆航太]]、[[智飛科技]]、[[AiSeed Tech]]、[[神耀科技]]、[[Tron Future]]、[[新樂飛無人機]]、[[泰世科技]]、[[田屋科技]]、[[璿元科技]]、[[華冠通訊]]。\n\n[[UAVEcoChain]] 的 UAV 工作表在系統整合商分類列出：[[漢翔航空工業]]、[[雷虎科技]]、[[亞洲航空]]、[[中強光電]]、[[中光電智能機器人]]、[[豐兆航太]]、[[長榮航太]]、[[經緯航太]]、[[富蘭登科技]]、[[銘旺科技]]、[[翔探科技]]、[[翔隆航太]]、[[智飛科技]]、[[艾知科技]]、[[神耀科技]]、[[創未來]]、[[新樂飛]]、[[泰世科技]]、[[田屋科技]]、[[璿元科技]]、[[華冠通訊]]、[[龍德造船]]。\n\n名稱差異如 [[亞洲航空]] / [[亞洲航空股份有限公司]]、[[艾知科技]] / [[AiSeed Tech]]、[[創未來]] / [[Tron Future]]、[[新樂飛]] / [[新樂飛無人機]]、[[漢翔航空工業]] / [[漢翔]]、[[中強光電]] / [[中光電]] 目前只作為可能異名保存，未裁決合併。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/UAV Eco-chain in Taiwan 外部資料清單.md"
+              },
+              "score": 15.662353
+             },
+             {
+              "text": "0. UAV產業分析報告架構 › 重點摘要\n- 本來源是一份 OneNote / Microsoft 365 chat 複製出的「台灣無人機產業分析報告（2025年版）」架構與內容摘要，主題是 [[台灣無人機產業]]、[[台灣無人機供應鏈]]、政策、技術與市場機會。\n- 來源稱台灣無人機產業在 2025 年上半年外銷金額達 1,189 萬美元，年增超過 7 倍；但該數字來自來源內引用的 [[數位時代 BusinessNext]] 連結，raw 未擷取連結正文。\n- 來源稱政府投入 500 億元推動軍用無人機採購，並成立 [[台灣卓越無人機海外商機聯盟]]，但未提供政府公告、預算科目或聯盟正式文件。\n- 來源稱全球無人機市場預估由 2024 年 730 億美元成長至 2030 年 1,636 億美元，CAGR 約 14.3%；該數字來自來源內引用的 PDF 連結，raw 未擷取 PDF 正文。\n- 來源稱台灣國防部預計於 2026–2027 年間採購 5 萬架無人機；raw 未擷取該主張的正式採購公告或標案文件。\n- 來源把無人機供應鏈分成上游晶片 / 感測器 / 通訊模組、中游模組製造與系統整合、下游整機製造與應用服務三層，列出 [[聯發科]]、[[新唐科技]]、[[圓剛]]、[[聰泰]]、[[亞光]]、[[中光電]]、[[漢翔]]、[[雷虎科技]]、[[經緯航太]]與[[長榮航太]]等公司。\n- 技術趨勢方面，來源列出 [[AI]]、自主飛行、[[5G]]、[[低軌衛星]]通訊、AI 飛控、影像辨識與邊緣運算，但沒有逐項列出標準版本、產品型號或公司導入證據。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0. UAV產業分析報告架構.md"
+              },
+              "score": 12.822885
+             },
+             {
+              "text": "0. UAV產業分析報告架構 › 實體\n- [[聯發科]] — 來源列於上游晶片、感測器、通訊模組層，描述為 AI晶片與通訊模組。\n- [[新唐科技]] — 來源列於上游層，描述為微控制器 MCU。\n- [[圓剛]] — 來源列於上游層，描述為影像與視訊模組。\n- [[聰泰]] — 來源列於上游層，描述為影像與視訊模組。\n- [[亞光]] — 來源列於中游層，描述為高解析度鏡頭與感測器。\n- [[中光電]] — 來源列於中游層，描述為軍用與商用無人機整合。\n- [[漢翔]] — 來源列於中游層，描述為整機組裝與飛控系統。\n- [[雷虎科技]] — 來源列於下游層，描述為軍用與大型無人機。\n- [[經緯航太]] — 來源列於下游層，描述為智慧農業與多用途無人機。\n- [[長榮航太]] — 來源列於下游層，描述為艦載型監偵無人機。\n- [[台灣卓越無人機海外商機聯盟]] — 來源稱政府成立的無人機海外商機聯盟。\n- [[DJI]] — 來源在挑戰段落列為國際品牌競爭例子。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0. UAV產業分析報告架構.md"
+              },
+              "score": 11.218219
+             },
+             {
+              "text": "0. UAV產業分析報告架構 › 原文未解的問題\n- 來源是 Microsoft 365 chat / OneNote 複製內容，未標示作者、生成模型、製作日期或人工校訂者。\n- references 中的三個外部連結未被 raw 擷取正文；本頁不能把連結內容當成已讀證據。\n- 2025 年上半年外銷金額 1,189 萬美元、年增超過 7 倍的統計口徑、資料來源、商品分類與是否包含零組件未標示。\n- 政府投入 500 億元、2026–2027 年採購 5 萬架無人機的預算科目、採購單位、標案編號與是否已核定未標示。\n- 全球市場 2024–2030 預估的研究機構、報告日期、無人機分類範圍與 CAGR 計算口徑未標示。\n- 供應鏈公司列名未標示是否為實際供應、已得標、量產、研發、概念股或市場觀察名單。\n- 來源未提供 [[聯發科]]、[[新唐科技]]、[[圓剛]]、[[聰泰]]、[[亞光]]、[[中光電]]、[[漢翔]]、[[雷虎科技]]、[[經緯航太]]、[[長榮航太]]在無人機供應鏈中的產品型號或客戶。\n- 來源提到 AI、自主飛行、5G、低軌衛星通訊，但未提供標準版本、頻段、測試項目、產品型號或實作案例。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0. UAV產業分析報告架構.md"
+              },
+              "score": 8.568955
+             },
+             {
+              "text": "無人載具產業發展統籌型計畫 › 環境面：形成產業聚落生態系\n- [[經濟部]]打造創新研發中心，提供研發、測試及人培等功能。\n- [[國防部]]建立生產製造基地，來源稱興建[[中科院民雄院區]]並提供 100 家廠商進駐。\n- [[交通部]]、[[國防部]]規劃專屬飛測場域，來源稱提供 18 處以上大、中、小測試場域。\n- [[經濟部]]建置無人化創新科技實驗室，來源稱於沙崙及六甲成立，開發 26 款嚴苛情境無人機。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無人載具產業發展統籌型計畫.md"
+              },
+              "score": 10.759332
+             },
+             {
+              "text": "無人載具產業發展統籌型計畫 › 使用限制\n- 不得把「公部門擴大無人機採購」改寫為已公布採購數量、標案、得標廠商或預算。\n- 不得把「籌設聯盟組成國家隊」改寫為已成立法人、聯盟名單或國際訂單。\n- 不得把「國發基金策略性投資」改寫為已投資特定公司。\n- 不得把「100 家廠商進駐」改寫為已完成進駐或列出未在來源中出現的公司。\n- 不得把「18 處以上測試場域」改寫為正式測試場域清單或可執行測項。\n- 不得把「產品型式認證」或「國際驗證能量」改寫為特定產品已取得認證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無人載具產業發展統籌型計畫.md"
+              },
+              "score": 9.878082
+             },
+             {
+              "text": "無人載具產業發展統籌型計畫 › 法規面：訂定使用規範及推動資安檢測\n- [[交通部]]、[[經濟部]]、[[數發部]]：修訂無人機法規與檢測規範，並輔導取得產品型式認證。\n- [[工程會]]：建立公務部門採購作業指引與公務財產維護管理機制。\n- [[交通部]]、[[海委會]]：擬定水面 / 水下無人船管理規則，並評估海域作業環境。\n- [[經濟部]]：建置國際驗證能量，輔導業者取得認證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無人載具產業發展統籌型計畫.md"
+              },
+              "score": 7.711818
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 7.763012
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽\n[[SerDes 與 SI PI 測試概覽]] 是依 [[0 Digital Test - What are SIPI and Serdes]] 建立的 high-speed digital 測試主題頁，用來連接 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]]、[[PCB]] / [[PCBA]] 與相關驗證儀器類型。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 7.527354
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 測試脈絡整理\n| 區塊 | 來源明示文字 | 相關儀器 / 方法 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Interface Test | Scopes、BERTs、AWGs、Switch Matrices | [[Oscilloscope]]、[[BERT]]、[[AWG]]、[[Switch Matrix]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4；Slide 11 頁腳 6/13/2025 未決 | 未提供型號、頻寬、資料率或測試標準 |\n| Transmission Channel | Tx Package、PCBs、Connectors、Rx Package | Channel / test board / switch matrices | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 channel loss、fixture、connector 型號或 PCB stackup |\n| RefClk and PLL Jitter Performance | Phase Noise Analyzers、Signal Generators | [[Phase Noise Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 jitter mask、phase noise offset 或 PLL 規格 |\n| Power Distribution Network | Scopes、Network Analyzers | [[Oscilloscope]]、[[Network Analyzer]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 PDN impedance 目標值或測試方法 |\n| ADC / DAC Frontend Performance | Spectrum Analyzers、Signal Generators | [[Spectrum Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 ADC / DAC 指標或頻率 |\n| Signal integrity flow | IL / Xtalk / Eye diagram；TDR Impedance；Stackup Planner；TL Calculator | [[Insertion Loss]]、[[Crosstalk]]、[[Eye diagram]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供工具名稱、標準版本或 pass/fail 條件 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 5.242179
+             },
+             {
+              "text": "High speed SerDes standards › 來源中的說法\n| 圖上名稱 | 本 vault 連結 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|\n| GMSL | [[GMSL]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本、發布組織、資料率或測試項目 |\n| OIF CEI-112G | [[OIF CEI-112G]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示 OIF 文件版次或 CEI profile |\n| LVDS | [[LVDS]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 來源只重複 LVDS 字樣 |\n| JESD204 | [[JESD204D]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 圖上同列 JESD204 與 JESD204D；未說明是否專指 D 版 |\n| DisplayPort | [[DisplayPort]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本 |\n| HDMI | [[HDMI]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本 |\n| MIPI | [[MIPI]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示 D-PHY / C-PHY / M-PHY 等子標準 |\n| USB | [[USB]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示 USB 版本 |\n| ASA | [[ASA]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未展開縮寫 |\n| UALink | [[UALink]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本或發布組織 |\n| PCIE | [[PCIe]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 圖上拼作 PCIE；未標示 generation |\n| NVLink | [[NVLink]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 圖上重複 NVLink 字樣；未標示版本 |\n| UltraEthernet | [[Ultra Ethernet]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本或 organization |\n| Infiniband | [[InfiniBand]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 圖上拼作 Infiniband；未標示速率世代 |\n| SATA | [[SATA]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本 |\n| SAS | [[SAS]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/High speed SerDes standards.md"
+              },
+              "score": 6.749441
+             },
+             {
+              "text": "High speed SerDes standards › 可追溯限制\n- 本頁不把 Slide 4 清單解讀為完整 SerDes 標準版圖。\n- 本頁不推論任何標準之間的競合、速率、採用率、測試需求或 R&S 產品支援狀態。\n- 來源未提供標準版本與發布組織，因此本頁的標準頁連結多為待寫頁或待補證頁。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/High speed SerDes standards.md"
+              },
+              "score": 5.26837
+             },
+             {
+              "text": "High speed SerDes standards › 相關來源\n- [[0 Digital Test - What are SIPI and Serdes]] — 2026.3.4 的 R&S / RSTW high-speed digital 測試簡報來源摘要。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/High speed SerDes standards.md"
+              },
+              "score": 3.497797
+             },
+             {
+              "text": "High speed SerDes eco-chain › 下游 — 終端應用與市場部署\n- 通訊設備製造商：核心網、5G 基站、光傳輸設備、交換機、路由器等。\n- 服務器與資料中心：協助 AI、高效能計算環境部署，需求高速內部連與介面連接。\n- 網通基礎建設與雲端應用：包含物聯網、雲計算與邊緣運算等場域皆需高速數據傳輸與處理能力。\n- 消費電子與車用領域：筆電 / 手機等需 [[HDMI]]、[[DisplayPort]]、[[USB]] 介面，汽車上的 [[ADAS]] 與 [[V2X]] 通訊亦需高速訊號傳輸。\n- 工業與智慧製造：工業自動化系統、高速資料擷取與辨識也仰賴高速訊號鏈路。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+              },
+              "score": 11.285655
+             },
+             {
+              "text": "High speed SerDes eco-chain › 中游 — 模組整合與生產製造\n- 晶片封測製造。\n- 高速連接線材與接頭組裝。\n- 系統級整合：製造通信設備、服務器用的光傳輸設備、交換機、路由器等中間件設備。\n- 電腦與消費性電子裝置整合 [[HDMI]]、[[USB]]、[[PCIe]] 介面等，含各類轉換器、擴充塢、模組等。\n- 高速 PCB 設計：涉及阻抗控制、差分對布局、地平面配置等，確保訊號品質。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+              },
+              "score": 10.711638
+             },
+             {
+              "text": "High speed SerDes eco-chain › 分層整理\n| 層級 | 來源分類 | 來源明示內容 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| 上游 | 基礎材料與核心元件 | 半導體晶片、光模組 / 光元件、PCB 材、被動元件、高頻高速線材與接頭 | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供公司名單完整性、市占率、供應關係或材料規格 |\n| 中游 | 模組整合與生產製造 | 晶片封測、線材接頭組裝、系統級整合、消費電子裝置整合、高速 PCB 設計 | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供具體廠商、產能或客戶 |\n| 下游 | 終端應用與市場部署 | 通訊設備、伺服器與資料中心、雲端 / 邊緣、消費電子 / 車用、工業與智慧製造 | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供需求數字、出貨量或區域市場資料 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+              },
+              "score": 7.113777
+             },
+             {
+              "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- 本來源是由 `0 Digital Test - What are SIPI and Serdes.pptx` 轉出的 lossy markdown，封面標題為 **What is Serdes and SI/PI?**，作者 / 講者標示為 [[Dr. Milton Lien]]，單位為 Product & Application Engineering, [[RSTW]]，日期標示 **2026.3.4**。\n- 簡報把 R&S Group division 1 targets 分成 **Digital**、**Power**、**RF** 三類，並將 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]] 與 [[PCB]] / [[PCBA]] 測試放在 Digital / high-speed digital 測試脈絡中。\n- Slide 4 列出多個 high speed SerDes standards / interfaces：[[GMSL]]、[[OIF CEI-112G]]、[[LVDS]]、[[JESD204D]]、[[DisplayPort]]、[[HDMI]]、[[MIPI]]、[[USB]]、[[ASA]]、[[UALink]]、[[PCIe]]、[[NVLink]]、[[Ultra Ethernet]]、[[InfiniBand]]、[[SATA]]、[[SAS]]；來源只列名，未提供各標準版本、發布組織、資料率或測試條件。\n- Slide 5 以 **Parallel v.s. Serial Interface** 作為主題，但轉檔文字主要只有標題與圖片嵌入，未擷取圖中細節；因此只能作為 [[Parallel Interface]] / [[Serial Interface]] 需回看原始簡報的線索。\n- Slide 9 以表格整理 [[High speed SerDes eco-chain]]，分成上游基礎材料與核心元件、中游模組整合與生產製造、下游終端應用與市場部署三層。\n- Slide 11 題為 **Transmission Channel and validation challenges electrical Interfaces**，把高速電性介面驗證拆成 transmission channel、measurement path to DUT / test board development、[[Power Distribution Network]]、ADC / DAC frontend performance、RefClk and PLL jitter performance、interface test 等區塊，並列出 scopes、BERTs、AWGs、switch matrices、phase noise analyzers、signal generators、network analyzers、spectrum analyzers 等儀器類型。\n- Slide 17 題為 **HDI vs Package substrate**，以 [[CoWoS]]、[[Package Substrate]]、[[ABF]]、L/S 與 pitch 等字樣比較，但轉檔文字排列不完整，數值對應關係未能可靠確認。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+              },
+              "score": 8.668666
+             },
+             {
+              "text": "0 Digital Test - What are SIPI and Serdes › 與既有知識的關係\n- 既有 [[SerDes]] 頁主要來自 D2D / SoC IP / XPU-HBM-Optical I/O 圖像來源；本來源補充 2026.3.4 簡報層級的 high speed SerDes standards、產業鏈與驗證挑戰脈絡，但不提供 SerDes 的資料率、lane 數或具體標準條文。\n- 既有 [[高頻高速 PCB 測試解決方案]] 主要記錄 Keysight 圖像中的原材料表徵、材料選擇、抽樣測試與量產監控；本來源的 [[R&S PCB test solutions]] 以 R&S 簡報角度列出 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 PL / process monitoring，可作為平行視角。\n- 既有 [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 已記錄 Keysight 圖像來源；本來源 Slide 21 再次把 DK/DF extraction、TDR、Delta-L 與 ISD/ADK 放在 PCB test solutions 流程中，但沒有新增標準版本、儀器型號或 option code。\n- 既有 [[Package Substrate]] 與 [[ABF載板]] 頁已有多份市場圖像來源；本來源 Slide 17 顯示 HDI vs Package substrate / CoWoS / ABF 對照，但因 OCR / 轉檔結果不足，僅作為待回看原始投影片的線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+              },
+              "score": 7.943416
+             },
+             {
+              "text": "0 Digital Test - What are SIPI and Serdes › 原文未解的問題\n- Slide 1 標示日期 **2026.3.4**，Slide 11 頁腳另出現 **6/13/2025 High-Speed Digital- Market Trends**；來源未說明 2025-06-13 是頁腳模板日期、內容來源日期或另一份簡報日期。\n- 來源未標示本簡報的文件版次、受眾、會議名稱、對外 / 對內使用限制細節；只可確定封面有 **COMPANY RESTRICTED**。\n- Slide 3、6、7、10、12–15、16、18、19、22–24、26 多數內容在 markdown 中主要是圖片嵌入，未 OCR 出可可靠摘錄的正文。\n- Slide 4 standards 清單未提供各標準的版本、發布組織、資料率、介面型態或適用測試方法。\n- Slide 5 Parallel v.s. Serial Interface 未擷取圖中說明，不能由本 markdown 直接比較 parallel 與 serial 的技術差異。\n- Slide 17 的 L/S 與 pitch 數值排列不完整，無法判定 6/6、60/60、30/30、?、60、120 分別對應 HDI、Package Substrate、CoWoS 或 ABF 的哪一欄。\n- Slide 21 未提供 R&S PCB test solutions 對應的正式產品型號、order number、software option、測試頻率、測試標準、fixture、calibration 或量測不確定度。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+              },
+              "score": 5.496549
+             },
+             {
+              "text": "軍用無人機 EMC 與 EME testing › MIL-STD-464 system-level testing\n[[2025RS Drone Solution]] 說 [[MIL-STD-464]] provides the basis of environment testing for vehicles that have to work in the most unforgiving condition，並將其描述為 system level testing standard。\n\n來源列出的 main chapter / sub-items 包含：\n\n- margins，6 dB margins。\n- intra-system EMC。\n- hull generated intermodulation interference / IMI。\n- shipboard internal EME。\n- multipaction。\n- induced levels at antenna ports of antenna-connected receivers。\n- external RF EME。\n- [[High Power Microwave]] / HPM sources。\n- lightning。\n- [[Electromagnetic Pulse]] / EMP。\n- subsystems and equipment electromagnetic interference / EMI。\n- portable electronics devices and carry-on equipment requirements。\n- non-developmental items / NDI and commercial items。\n- electrostatic environments。\n- radiation hazards / RADHAZ：HERP、HERF、HERO。\n- life cycle / E3 hardness。\n- electrical bonding、power current return path、antenna installations、mechanical interfaces、shock / fault / ignitable vapour protection。\n- external grounds。\n- TEMPEST。\n- system radiated emission、EMCON、platform radiated emission。\n- EM spectrum supportability。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+              },
+              "score": 3.444038
+             },
+             {
+              "text": "軍用無人機 EMC 與 EME testing › Common MIL EMC standards\n[[2025RS Drone Solution]] 列出：\n\n- [[MIL-STD-461]] — requirements for the control of electromagnetic interference emission and susceptibility。\n- [[MIL-STD-464]] — electromagnetic environmental effects requirements for systems。\n- [[RTCA DO-160]] — environmental conditions and test procedures for airborne equipment。\n\n來源另在 example 頁將 military / aviation drone EMC test standards 分為 component level 與 full system level：\n\n| 層級 | 來源列名 |\n|---|---|\n| Component level | [[RTCA DO-160G]]、[[MIL-STD-461G]]、[[DEF STAN 59-411 Part 3]]、[[GJB 151B]] |\n| Full system level | [[MIL-STD-464D]]、[[DEF STAN 59-411 Part 4]]、[[GJB 1389A]] |\n\n使用限制：來源同時在另一頁將 applicable standards 列為 [[MIL-STD-464C]]，而 example 頁列 [[MIL-STD-464D]]；目前只保留為版本線索，未裁決適用版本。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+              },
+              "score": 2.091161
+             },
+             {
+              "text": "軍用無人機 EMC 與 EME testing › 使用限制\n- 本頁是 Market 類簡報摘要，不是 [[MIL-STD-461]]、[[MIL-STD-464]] 或 [[RTCA DO-160]] 標準文件。\n- 不可由此頁直接判定任一 drone / UAV / eVTOL 產品必須測哪些項目。\n- [[MIL-STD-464C]] / [[MIL-STD-464D]] 版本差異需後續查正式標準或 procurement documentation。\n- 系統層 EME / HPM / EMP / lightning / RADHAZ 測試涉及安全與法規限制，來源未提供可部署或可執行參數。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+              },
+              "score": 2.046636
+             },
+             {
+              "text": "軍用無人機 EMC 與 EME testing › MIL-STD-461G applicability\n來源說 [[MIL-STD-461G]] provides the basis of EMC testing for vehicles that have to work in the most unforgiving condition，並列出 Army、Navy、Air-force、Space categories。\n\n來源另說 MIL-STD461G applicability 使用：\n\n- A：Applicable。\n- L：Limited as specified in the individual sections of this standard。\n- S：Procuring activity must specify in procurement documentation。\n\n來源沒有提供完整 requirement matrix、test methods、frequency ranges 或 limit tables。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+              },
+              "score": 1.327956
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing › Section 22 — Lightning Induced Transients\n來源說此測試確保 equipment can withstand a selection of fast transients intended to represent induced effects of lightning，並在頁面標題中列 [[CS117]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 2.206261
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing › 來源列出的 sections\n| Section | 來源描述 |\n|---:|---|\n| 15 | Magnetic field / magnetic effect。 |\n| 16 | Power input（electrical testing, non-EMC）。 |\n| 17 | Voltage spike（AC / DC）。 |\n| 18 | Audio frequency conducted susceptibility - power inputs。 |\n| 19 | Induced signal susceptibility。 |\n| 20 | Radio frequency susceptibility（radiated and conducted）。 |\n| 21 | Emission of radio frequency energy。 |\n| 22 | Lightning induced transient susceptibility。 |\n| 25 | Electrostatic discharge。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 2.154226
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing › Section 25 — Electrostatic Discharge\n來源說此測試確保 equipment able to withstand an air discharged electromagnetic pulse，並指出 static electricity charges can result from human contact；contributing factors include low humidity、low temperature、low conductivity、carpets、vinyl seats and plastic structures。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 2.144076
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing › Section 21 — Emission of RF Energy\n來源說此測試確保 equipment does not emit excessive RF noise，以 protect aircraft sensors and receivers。來源分為：\n\n- Conducted Emissions（low freq）。\n- Radiated Emissions（high freq）。\n\n標題中同列 [[RE102]] / CE，但未提供 limit table 或 exact mapping。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 1.946562
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing › 來源中的 DO-160 定位\n[[2025RS Drone Solution]] 說 [[RTCA DO-160]] is important because it provides the minimum operational performance standards for electronic systems and equipment that support aviation to pursue increased safety, system capacity and efficiency。\n\n來源另說其 purpose 是提供 means of determining performance characteristics of airborne equipment in environmental conditions which may be encountered in airborne operation of the equipment，並可與 applicable standards 一起作為 minimum specification。\n\n使用限制：來源未提供 DO-160 的正式版次文件、section limit table、category matrix 或適用 drone 類型。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 1.265899
+             },
+             {
+              "text": "R&S PCB test solutions › 未決事項\n- Slide 21 未標示 R&S PCB test solutions 的正式文件版次與產品 portfolio 對應。\n- Slide 21 未標示 [[TDR]]、[[Delta-L]]、ISD/ADK、DK/DF extraction 的標準版本、演算法、測試條件或工具型號。\n- Slide 21 未展開 PL、ISD、ADK、RSTW、SWISSTO12、QWED、KEYCOM。\n- 需回看原始 PPTX 圖像確認各圖示、商標、箭頭與工具對應關係。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 3.753047
+             },
+             {
+              "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 3.392065
+             },
+             {
+              "text": "R&S PCB test solutions › 可追溯限制\n- 本來源沒有提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。\n- 本頁不把 Slide 21 的圖上列名解讀為正式解決方案型錄或完整採購配置。\n- [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]] 的角色未明，僅保留圖上列名。\n- [[ISD-ADK]] 與 PL 未展開縮寫，需後續來源補證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 3.009427
+             },
+             {
+              "text": "R&S PCB test solutions › 圖上工具 / 合作方文字\n| 圖上文字 | 可能角色 | 來源 | 限制 |\n|---|---|---|---|\n| [[SPEAG]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未說明是合作夥伴、工具、方法或範例 |\n| [[SWISSTO12]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[QWED]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[KEYCOM]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[RSTW]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未展開完整單位名稱 |\n| TDR | 測 impedance | [[0 Digital Test - What are SIPI and Serdes]] | 未提供 TDR option 或探頭型號 |\n| Delta-L | 損耗量測相關 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供方法定義、標準或軟體名稱 |\n| ISD/ADK | 圖上方法 / 工具文字 | [[0 Digital Test - What are SIPI and Serdes]] | 未展開縮寫，未說明與 Delta-L 的關係 |\n| w/ cable / connector testing | cable / connector testing | [[0 Digital Test - What are SIPI and Serdes]] | 未提供連接器類型、線纜規格或測試項目 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 2.74676
+             },
+             {
+              "text": "R&S PCB test solutions › 相關來源\n- [[0 Digital Test - What are SIPI and Serdes]] — 2026.3.4 的 R&S / RSTW high-speed digital 測試簡報來源摘要。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 0.951016
+             },
+             {
+              "text": "5G private network resilience against smart jamming › Program / roadmap 脈絡\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 把 private 5G resilience 放入 defense / Future-G roadmap：\n\n| 期間 | 來源說法 |\n|---|---|\n| 2025–2028 | widespread deployment of 5G tactical networks；mmWave phased arrays available for field testing；hybrid commercial / military networks such as 5G.MIL-style architectures |\n| 2028–2032 | 5G/6G-capable software-defined radios replacing multi-radio tactical stacks；early [[ISAC]] deployment for drone detection and perimeter defense；[[URLLC]] services for autonomy |\n| 2032–2035+ | full 6G networks with integrated sensing；AI-native battlefield connectivity；high-precision location sensing and spectrum-aware autonomy |\n\n來源也列出 [[5G.MIL]]、[[Raytheon OXYGEN]]、[[L3Harris Tactical Network Demo]]、[[DoD EMS Superiority Strategy]] 與 [[FutureG ISAC]] / spectrum sharing programs，作為 FHSS 與 5G convergence 的 program examples。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+              },
+              "score": 3.880445
+             },
+             {
+              "text": "5G private network resilience against smart jamming › 問題定義\n依 [[2025-12-19 Making Deployed 5G Private Networks more Resilient]]（檔名 / raw title 含 2025-12-19；raw converted 2026-09-17），簡報的 problem statement 是：\n\n- current vulnerability of 5G [[DUT]] connections under smart-jamming；\n- can legacy [[Frequency hopping for 5G resilience]] / [[FHSS]] techniques enhance 5G resilience；\n- can the connection to an unmodified 5G DUT be hardened against [[Smart Jamming]] by using legacy FH capabilities。\n\n來源特別強調 constraint：不修改 [[DUT]]；策略應放在 network / infrastructure / orchestration around it。\n\n[[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]]（Version 01.00，August 2025）補充：public safety agencies、critical infrastructure industries 與 military purposes 依賴 reliable、fast、secure communications；TETRA 等傳統系統 maximum data bit rate below 30 kbit/s，無法滿足 real-time video stream 至少 2 Mbit/s 與 extended reality 至少 30 Mbit/s 的需求。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+              },
+              "score": 2.82662
+             },
+             {
+              "text": "5G private network resilience against smart jamming\n[[5G private network resilience against smart jamming]] 是 mission-critical / tactical 5G 測試問題：在 contested RF / [[EW]] 環境中，如何讓 deployed private [[5G]] connections 對 [[Smart Jamming]] 更具服務連續性。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+              },
+              "score": 2.553799
+             },
+             {
+              "text": "5G private network resilience against smart jamming › Mission context 與 industry drivers\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 列出的 mission / market drivers 包含：\n\n- tactical edge connectivity needs；\n- rise of smart jamming and improved [[EW]] tactics；\n- complex RF environment 與 contested spectrum；\n- growing adoption of private 5G networks；\n- autonomous systems and drones requiring low latency；\n- expansion of tactical private 5G networks on military bases；\n- demand for secure command-and-control networks；\n- strategic partnerships，例如來源提到 Nokia + L3Harris in 2024；\n- multi-year contracts，例如來源提到 Northrop Grumman 5G battlefield networking in 2024。\n\n[[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 另稱 United States Department of Defense has recently embarked on a strategy leveraging both public and private 5G networks，並說 5G could become the de-facto communications network between NATO members。此為 white paper statement；來源未附完整 DoD / NATO 文件引用。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+              },
+              "score": 2.263552
+             },
+             {
+              "text": "5G private network resilience against smart jamming › 測試 outcome\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 的 outcome 投影片聲稱：\n\n- both modems showed sufficient performance for running video call；\n- throughput performance 與 [[WebRTC]] statistics 被用來評估；\n- video-call reliability 在 smart-jammer pressure 下透過 FH-aligned approach 維持；\n- 來源口語說明稱 jitter / packet loss contained。\n\n[[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 提供更完整數字：\n\n- modem B 的 HO interruption interval never employs more than 75 ms；modem A 可到 150 ms。\n- RTT 大多數時間（> 90%）低於 20 ms；0.1 percentile modem B 接近 80 ms、modem A 接近 200 ms。\n- late target cell activation 0–3 s waiting time 的 mean HO interruption interval 均為 68.0 ms，90% 均為 69 ms。\n- HO period 5 s 到 1 s 的 mean HO interruption interval 約 67.9–68.0 ms，90% 與 99% 均為 69 ms。\n- 一小時 [[Microsoft Teams]] / [[WebRTC]] video call：average RTT 127.8 ms、jitter buffer delay 53.1 ms、lost or discarded packets 0.0095%、reliability > 99.99%。\n- 白皮書結論稱最差 scenario（每秒跳頻、且下一個 cell 先前未啟用）下，data interruptions contained below 75 ms in 99% of the time。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+              },
+              "score": 1.909963
+             },
+             {
+              "text": "UAV 通訊 › 來源與日期口徑\n- [[Communication of UAVs]] 未標示正式發布日期、作者、版本或適用 UAV 類型。\n- [[Signaling test solution]] 未標示正式發布日期、作者、版本、客戶或適用專案；raw 轉檔日期為 2026-09-17。\n- raw 轉檔日期為 2026-09-17；不可當作內容發布日期。\n- 本頁是 Market 類整理；UAV 頻段、法規、通訊模組、測試配置與技術採用會隨地區、標準、產品與任務需求變動。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/UAV 通訊.md"
+              },
+              "score": 8.216226
+             },
+             {
+              "text": "UAV 通訊 › 硬體元件\n[[Communication of UAVs]] 列出下列 communication module hardware components：\n\n- Radio transceivers：處理 RF communication for control and telemetry。\n- Antennas：確保 signal reliability 並延伸 communication range。\n- Satcom modules：支援 satellite communication for BVLOS operations。\n- 4G/5G modems：提供 cellular connectivity for data-intensive applications。\n- IoT gateways：將 UAV 整合到 IoT ecosystems。\n- FPV modules：提供 live video transmission to operators。\n\n來源未提供供應商、模組型號、頻段、功率、天線增益、環境條件、認證或 R&S 測試配置。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/UAV 通訊.md"
+              },
+              "score": 7.141977
+             },
+             {
+              "text": "UAV 通訊 › 技術挑戰\n來源列出 UAV 通訊挑戰：\n\n- Range：長距離可靠通信。\n- Interference：多 RF devices 環境下管理 signal overlap。\n- Latency：real-time control 與 video streaming 的低延遲。\n- Bandwidth：處理 video 與 LiDAR feeds 等大量資料。\n- Security：防護 jamming、spoofing、unauthorized access。\n- Power efficiency：降低能源消耗以保留 UAV battery life。\n\n[[Signaling test solution]] 的 De-sense validation 線索與 Interference 挑戰相連，但該來源未提供具體 test methodology。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/UAV 通訊.md"
+              },
+              "score": 6.895966
+             },
+             {
+              "text": "UAV 通訊 › 應用場景\n[[Communication of UAVs]] 列出：\n\n- Surveillance and inspection：透過 RF 或 cellular networks 傳送 high-resolution video streams。\n- Search and rescue：UAV 與 GPS devices 或 IoT beacons 通訊以定位人員。\n- Agriculture：UAV-mounted sensors 的 data 分享給 ground stations 分析。\n- Delivery services：整合 cloud-based systems 做 route planning 與 tracking。\n- Military：使用 encrypted communication 做 secure C2 與 payload data transmission。\n\n這些是應用分類，不是特定產品、客戶、法規或供應鏈證據。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/UAV 通訊.md"
+              },
+              "score": 5.761986
+             },
+             {
+              "text": "UAV 通訊 › 通訊鏈路類型\n[[Communication of UAVs]] 將 UAV 通訊鏈路分成：\n\n- UAV-to-GCS：UAV 與 [[Ground Control Station]] 之間交換 command、telemetry 與 data。\n- UAV-to-UAV：UAV 之間為 swarm 或 collaborative operations 進行 coordination，可使用 [[Mesh Networks]] 或 custom protocols。\n- UAV-to-Cloud：real-time data upload 到 cloud platforms，用於 analysis、storage 與 AI-based decision-making。\n- UAV-to-Human：透過 mobile apps 或 displays 與 operators / field personnel 溝通。\n\n這些是高階鏈路分類；來源沒有提供網路拓樸、routing、handover、security、interoperability 或測試流程。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/UAV 通訊.md"
+              },
+              "score": 5.044438
+             },
+             {
+              "text": "5G NTN validation and testing › 來源中的測試目標\n- boost testing for [[Narrowband Non-terrestrial Networks]]（[[NB-NTN]]）[[IoT]] devices connecting via satellite。\n- thoroughly validate devices and confirm interoperability with [[Viasat]] network。\n- help ensure uninterrupted connectivity for satellite-based [[IoT]] applications。\n- ensure chipsets、modules and devices interoperate seamlessly with [[Viasat]] satellite network。\n- comply with [[3GPP Release 17]] standards。\n- uphold quality、performance and reliability for [[Viasat]] connectivity services in areas without terrestrial network coverage。\n- certification test plan entails protocol、performance and RF test scenarios。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NTN validation and testing.md"
+              },
+              "score": 3.5538
+             },
+             {
+              "text": "5G NTN validation and testing › 來源中的測試目標\n依 [[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]]，[[Gatehouse Satcom]] 與 [[Rohde & Schwarz]] 的合作目標包含：\n\n- strengthen validation and testing of [[5G IoT-NTN]] and [[NR-NTN]] technologies。\n- 在市場從 specification work 走向 real-world implementation 時，改善 validation 方法。\n- 在 realistic and controlled laboratory conditions 下測試 5G NTN technologies。\n- further develop advanced orbit and channel emulation capabilities for NTN use cases。\n- 支援更準確的 satellite radio channel modelling。\n- 更 realistic testing of 5G NTN behavior across different scenarios。\n- 支援 faster validation cycles、earlier identification of system-level issues 與 stronger test conditions。\n- reduce technical uncertainty and accelerate time to market for the broader NTN ecosystem。\n\n依 [[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]]，MWC 2024 展示目標包含：\n\n- demonstrate a [[5G Non-Terrestrial Network]] [[New Radio]] connection based on latest [[3GPP Release 17]] specifications。\n- emulate a [[Low Earth Orbit]] satellite access node。\n- showcase 5G technology providing connectivity in areas without terrestrial coverage。\n- 展示 basic mobile services，例如 voice、messaging 與 low data rate services，面向 maritime、aeronautical 與 rural applications。\n- 在 interactive callbox mode 中讓 users trigger voice calls alongside RF-related measurements。\n- 評估 future NTN-NR devices powered by [[MediaTek]] NTN test platform 在不同 conditions 下的 performance and reliability。\n\n依 [[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]]，[[Viasat]] 與 [[Rohde & Schwarz]] 的 NB-NTN IoT test plan 目標包含：",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NTN validation and testing.md"
+              },
+              "score": 3.374922
+             },
+             {
+              "text": "5G NTN validation and testing › 與既有 NTN discovery / configuration 的關係\n- [[NTN signaling customer discovery]]：用問卷釐清 service offering、test layer、release、satellite architecture、UE、QoS、mobility 與 constellation deployment；屬於需求蒐集。\n- [[R&S NTN signaling solutions]]：目前主要由 customer questionnaire 支撐，代表 [[Rohde & Schwarz]] 的 NTN signaling solution discovery 語境。\n- [[CMX500 NR-NTN configuration]]：整理 [[R&S CMX500]] 的 NR-NTN application-specific configuration guide，包含 S/L-band golden callbox、fading、mobility、Ku/Ka-band、preconformance 與 xLAPI automation。\n- [[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]]：補充 MWC 2024 demo / PR 語境，展示 Rel.17 [[5G NTN-NR]] connection、LEO access node emulation、voice calls 與 RF-related measurements。\n- [[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]]：補充 MWC Barcelona 2026 前後的 partner-specific [[NB-NTN]] / [[NB-IoT]] IoT device certification test plan 語境，涵蓋 protocol、performance 與 RF test scenarios。\n- 本頁的 PR 來源補充的是 ecosystem collaboration、validation methodology、demo / certification context，不取代需求問卷、configuration guide 或 formal specifications。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NTN validation and testing.md"
+              },
+              "score": 1.303069
+             },
+             {
+              "text": "5G NTN validation and testing › 軌道與標準化語境\n[[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]] 的標題強調 [[GEO]] and [[LEO]] NTN validation and testing；正文 quote 進一步提到 [[GEO]]、[[MEO]] and [[LEO]] satellite services。\n\n[[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]] 只明示 emulating a [[Low Earth Orbit]] satellite access node，並將展示連結到 latest [[3GPP Release 17]] specifications。\n\n[[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]] 明示 [[3GPP Release 17]] standards 與 [[Viasat]] satellite network interoperability，但未說明 orbit、frequency bands、payload type 或 gateway architecture。\n\nGatehouse Satcom 來源也將 NTN 產業背景描述為 converges on standardized, [[3GPP]] based solutions，並提到 today’s [[5G NTN]] rollout 與 future [[6G NTN testing and validation]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NTN validation and testing.md"
+              },
+              "score": 1.302353
+             },
+             {
+              "text": "NTN test and measurement aspects › Signal generation、analysis 與 SpaceNexus\n來源描述：\n\n- [[R&S SMW200A]] 可配備 fading emulator，支援 TDL / CDL、custom fading profile、Doppler、delay、path loss，以及 [[R&S SMW-K820]] customized dynamic fading。\n- [[R&S SpaceNexus]] 可設定 satellite constellation、UE position / mobility、time-variant Doppler、time-variant propagation delay、path loss、weather-induced attenuation，並 remote configure SMW200A。\n- [[R&S FSW]] / [[R&S FSWX]] 支援 satellite payload testing、EVM、ACLR、group delay、DVB-S2X analysis、phase-coherent multichannel measurement。\n- [[R&S PVT360A]] 被描述為 potential satellite production testing platform，整合 vector signal generator 與 vector spectrum analyzer。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 3.331138
+             },
+             {
+              "text": "NTN test and measurement aspects › 使用限制\n- 本頁是 T&M 技術總覽；正式 test methods、limits、tolerances、test case IDs 與 validation status 需查 [[TS 38.101-5]]、[[TS 38.521-5]]、[[TS 38.523]]、[[TS 38.533]]、[[TS 38.181]]、[[TS 38.108]]、GCF / PTCRB public documents。\n- R&S 產品能力需以正式 datasheet / configuration guide 為準；白皮書中的 solution-level 描述不可直接作為 quote / BOM / orderable capability。\n- OTA / PAAM setup 的 fixtures、antenna modules、chamber dimensions、quiet zone、polarization、frequency conversions 等需以原圖與 setup note 回查。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 3.005126
+             },
+             {
+              "text": "NTN test and measurement aspects › UE NTN testing\nUE NTN testing categories：\n\n- RF testing。\n- protocol testing。\n- performance testing。\n- carrier acceptance testing。\n- interoperability testing。\n\n相關規格：\n\n- [[TS 38.101-5]]：satellite NR UE RF and performance requirements。\n- [[TS 38.521-5]]：NR UE satellite access RF / performance conformance procedures。\n- [[TS 38.523]]：protocol conformance。\n- [[TS 38.533]]：RRM conformance。\n- [[TS 38.133]]：RRM requirements。\n\n目前 RF tests 多聚焦 FR1；來源預期未來會擴展到 FR2、Ka-band、Ku-band 與 moving satellite conditions。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 2.668385
+             },
+             {
+              "text": "NTN test and measurement aspects › OTA / phased array / PAAM testing\nNTN UE、VSAT、SAN、satellite 可能使用 directive antennas / phased array antennas，因此 OTA testing 重要。\n\n來源整理：\n\n- OTA methods：far field、near field、CATR、plane wave conversion、anechoic chamber、reverberation chamber。\n- PAAM metrics：radiation pattern、scan loss、pointing error、HPBW、sidelobe levels、EIRP、G/T、noise density、EVM、beam switching。\n- NTN beam metrics：beam center、beam peak、beam pair、beam pointing accuracy、beam stability、beam squint、OSDD、beam shape capability。\n- Rohde & Schwarz setups 使用 [[R&S ZNA]]、[[R&S SMW200A]]、[[R&S FSW]]、[[R&S FSWX]]、[[R&S ATS1800C]]、[[R&S ATS800B]]、[[R&S ATS800R]]、[[R&S ATS1800M]] 等。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 1.720007
+             },
+             {
+              "text": "NTN test and measurement aspects › Fading profiles and test channels\n來源整理 [[TR 38.811]]、[[TR 38.901]] 與 [[TS 38.181]] 的 NTN channel model / test condition：\n\n- [[CDL]]：clustered delay line，適用於 S-band / Ka-band，含 elevation / azimuth 的 3D model。\n- [[TDL]]：tapped delay line，用於 multipath power-delay profile。\n- TR 38.811 定義 NTN-CDL 與 NTN-TDL profiles，各有 LOS / NLOS profiles。\n- TS 38.181 為 SAN testing 定義 NTN-TDLA100、NTN-TDLC5、moving propagation condition。\n- Rel. 19 導入 NGSO time-varying Doppler shift and propagation delay channel model，用於更 realistic demodulation / RRM tests。\n\n來源內有一項需保留的讀法限制：同段中 `NTN-TDLA100-200` 被文字描述為 100 ms delay spread，但表格對 NTN-TDLA100 列 100 ns delay spread。此處需回查原 PDF / TS 38.181。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 1.659368
+             },
+             {
+              "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 5G NTN SAN conformance testing\n來源 slide 18–22 說 SAN conformance testing 以 transparent payload architecture 的 Satellite Access Node（DUT）為對象，包含 gateway、NTN payload RF、gNB、feeder link emulator、signal generator、service link channel emulator 與 throughput measurement point。\n\n來源 slide 19 列出：\n\n- NR SAN：[[3GPP TS 38.108]] transmitter characteristics test models、receiver characteristics fixed reference channels、performance tests fixed reference channels、propagation models（NTN-TDL, Moving Propagation），以及 [[3GPP TS 38.181]]。\n- E-UTRA SAN：[[3GPP TS 36.108]] 與 [[3GPP TS 36.181]]。\n\n來源 slide 20 說 [[R&S SMW200A]] 的 SAN testing key features 包含：\n\n- Fixed reference channels（FRCs）。\n- Test Models（TMs）。\n- Fading Module、AWGN Module。\n- Propagation models for static UE。\n- TDL and moving propagation。\n- SISO / MIMO。\n- NB-IoT：K119 / K115 / K143 / K146。\n- NR：K144 / K148 / K171。\n- B14 / B15 + K71（moving propagation）。\n\n來源 slide 21 說 5G NTN-NR channel models / delay profiles 包含：\n\n| Frequency | Channel model name | Fading profile | Maximum Doppler |\n|---|---|---|---:|\n| FR1 | NTN-TDLA100-200 | NTN-TDLA100 | 200 Hz |\n| FR1 | NTN-TDLC5-200 | NTN-TDLC5 | 200 Hz |\n| FR2 | NTN-TDLC5-1200 | NTN-TDLC5 | 1200 Hz |\n\n| Model | Channel taps | Delay spread RMS | Max. excess tap delay | Delay resolution |\n|---|---:|---:|---:|---:|\n| NTN-TDLA100 | 3 | 100 ns | 285 ns | 5 ns |\n| NTN-TDLC5 | 2 | 5 ns | 60 ns | 5 ns |\n\nNB-IoT NTN channel models 包含 NTN-TDLC5-5、NTN-TDLA100-5、NTN-TDLC5-1；moving propagation scenario X 使用 stationary UE: AWGN，moving UE: NTN-TDLA100-200，UE speed 120 km/h。來源說 more details in [[3GPP TS 38.181]] Annex G / [[3GPP TS 36.181]] Annex F，presets available，且 all defined 5G NTN-NR channel models in TS 38.181 can be set up on the SMW。\n\n來源 slide 22 對 3GPP SAN testing 的 summary：",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+              },
+              "score": 5.530344
+             },
+             {
+              "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 原文未解的問題\n- 正式發布日期未標示；來源只提供封面 `12-2025`、末頁 `Last updated: 08/25` 與 slide 27 的 `2025-09-29` workshop date。\n- 來源是 lossy markdown，圖片與圖表可能有遺漏；完整視覺資訊需回原始 pptx。\n- slide 8 對 n510–n512 的 channel bandwidth 欄位不完整，且 n512 bandwidth 註記 under discussion in 3GPP。\n- slide 28 的 B15 / K823 欄位部分空白；不能自行補上 max RF CA bandwidth、path delay 或 Doppler 數值。\n- slide 41 標題寫 `3GPP 38.181-1 v1.01`，與其他頁 `v17.1.0` 不一致；未判斷是否 OCR / 簡報筆誤。\n- slide 45 註記 `*Available in Q1 2021` 的對應項目不清楚，且與 2025 簡報語境相距較遠。\n- Recommended configurations 是簡報建議，不含價格、service contract、calibration、完整 accessory、export control 或最新 option availability。\n- [[R&S Space Nexus]] 的正式版本、料號、授權方式、輸出格式與 availability 條件未標示。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+              },
+              "score": 4.263575
+             },
+             {
+              "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 關鍵實體與概念\n- [[R&S SMW200A]]：核心 signal generator / channel emulator。\n- [[R&S FSW]]：component testing 與 SAN transmitter measurement 的 spectrum / signal analysis instrument。\n- [[R&S FSVA3000]]：來源 slide 33 說 5G NR options on FSW / FSVA support Chapter 6 & 9 measurements。\n- [[R&S Space Nexus]]：來源 slide 27 的 PC software，available on request，用於依 satellite trajectory 產生 SMW200A fading files。\n- [[NTN signal generator solutions]]：本來源的 solution-level 概念節點。\n- [[5G NR SAN conformance testing]]：本來源最明確的 3GPP conformance testing 應用。\n- [[SMW200A NTN end-to-end channel emulation]]：本來源對 SMW200A + K820 / Space Nexus 的 E2E satellite RF link emulation 說法。\n- [[3GPP TS 38.108]]、[[3GPP TS 38.181]]、[[3GPP TS 36.108]]、[[3GPP TS 36.181]]、[[3GPP TR 38.821]]、[[3GPP TR 38.863]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+              },
+              "score": 3.9337
+             },
+             {
+              "text": "https://www.parpro.com.tw/solutions/aerospace-defense/",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-6ae422456b68416f",
+                "original_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+                "sha256": "6ae422456b68416f9b973f5aa4e40338bdd570f8ca1ff01afc1f9718774b14d1",
+                "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 23.758653
+             },
+             {
+              "text": "<!-- Slide number: 1 -->\n# Making Deployed 5G Private Networks more Resilient\nRandy Schnell\nBusiness Development Manager\nAerospace & Defense Test",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-ee03d2faf62e9553",
+                "original_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+                "sha256": "ee03d2faf62e95530401e678c264a927c21cc58e47bb7aadc133b34233fc6940",
+                "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 19.139055
+             },
+             {
+              "text": "**事欣科** [航太與國防製造](https://www.parpro.com.tw/solutions/aerospace-defense/) - PARPRO Taiwan",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-3af86141ff1801c0",
+                "original_ref": "raw/Market/OneNote/UAV/4. UAV Eco-chain in Taiwan.md",
+                "sha256": "3af86141ff1801c06e7337e81bb83a54b53a878ea095f9c9ba7971ac695a5c87",
+                "raw_ref": "raw/Market/OneNote/UAV/4. UAV Eco-chain in Taiwan.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/UAV/4. UAV Eco-chain in Taiwan.md",
+               "section": 37,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 15.518242
+             },
+             {
+              "text": "Mission Context & Industry Drivers\nProblem statement\nTechnical Mapping\nTest setup\nOutcome\nCurrent FHSS Use in Defense\nCall to Action",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-ee03d2faf62e9553",
+                "original_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+                "sha256": "ee03d2faf62e95530401e678c264a927c21cc58e47bb7aadc133b34233fc6940",
+                "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 14.892335
+             }
+            ],
+            "text": "### 推薦先賣\n| Opportunity | Evidence-supported reason |\n|---|---|\n| UAV image-processing / camera electronics using GMSL / LVDS is the most directly evidenced oscilloscope opportunity, because the UAV eco-chain maps 邑錡 / GMSL / LVDS to R&S RTO and R&S MXO, and the high-speed digital source separately lists GMSL and LVDS among high-speed interfaces while connecting interface testing to scopes [35][41][51][52]. |\n| UAV battery / power and motor / gimbal electronics are direct MXO leads, because UAVEcoChain lists 德鑫新技 in 電池電源 and 其昜先進 in 馬達動力雲台, and the R&S solution mapping lists 德鑫新技 and 其昜先進 as R&S MXO leads [35][41]. |\n| High-speed digital SI/PI and PCB/PCBA validation is a broader oscilloscope opportunity, because the R&S digital-test source connects Interface Test and PDN validation to scopes, and the PCB/PCBA flow includes TDR impedance, IL, Xtalk, Eye diagram, DK/DF, roughness and process-monitoring contexts, but the source does not tie this directly to a specific A&D account or scope model [51][71][72]. |\n| Military / aviation drone EMC and EME is a strong A&D test domain but not yet an oscilloscope-proven opportunity in the vault, because the sources support MIL-STD-461 / MIL-STD-464 / RTCA DO-160 and complex EME emulation needs, but the cited pages do not map RTO, MXO, or scopes to those EMC/EME tests [4][61][62][63]. |\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S RTO | UAV image-processing / camera electronics where 邑錡 is listed with GMSL and LVDS [35][41]. | 知識庫未標示 RTO option code, bandwidth, probe, software, fixture, or test method for this UAV mapping [41]. | The evidence directly maps 邑錡 / GMSL / LVDS to R&S RTO and R&S MXO in the UAV solution mapping [41]. | UAVEcoChain lists 邑錡 under 影像處理-相機 with GMSL and LVDS, and the R&S solution mapping lists 邑錡 / GMSL / LVDS → R&S RTO, R&S MXO [35][41]. | The mapping cannot be rewritten as a formal configuration guide, sold opportunity, customer adoption, certification, or test result [41]. |\n| R&S MXO | UAV image-processing / camera, battery / power, and motor / gimbal nodes where 邑錡, 德鑫新技, and 其昜先進 are mapped to MXO-related leads [35][41]. | 知識庫未標示 MXO option code, bandwidth, probe, software, fixture, or measurement procedure for these UAV mappings [41]. | The evidence directly maps 邑錡 / GMSL / LVDS to R&S MXO and also lists 德鑫新技 and 其昜先進 as MXO leads [35][41]. | UAVEcoChain lists 邑錡 / GMSL / LVDS → R&S RTO and R&S MXO, and lists 德鑫新技 and 其昜先進 → R&S MXO [35][41]. | The workbook contains many company / role leads but mostly lacks product model, formal specification, customer, supply relationship, shipment, certification, bid, revenue, or market-share evidence [34]. |\n| Oscilloscope instrument class | High-speed digital interface test and PDN validation [51]. | 知識庫未標示 oscilloscope model, bandwidth, data rate, jitter mask, PDN impedance target, or formal test standard for this source [51]. | The source explicitly connects Interface Test to scopes, BERTs, AWGs and switch matrices, and connects Power Distribution Network validation to scopes and network analyzers [51]. | The SerDes / SI-PI testing overview lists scopes under Interface Test and PDN validation, and separately lists SI flow items such as IL, Xtalk, Eye diagram and TDR Impedance [49][51]. | This source is a high-speed digital test source and does not by itself prove an Aerospace / Defense customer fit or a specific RTO / MXO configuration [51][60]. |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| UAV camera / image-processing boards | R&S RTO or R&S MXO where the account context matches 邑錡 / GMSL / LVDS [35][41]. | Use the directly evidenced UAV mapping first, then support the discussion with the generic high-speed interface-test evidence that scopes are used for Interface Test [41][51]. | The vault does not provide GMSL / LVDS version, data rate, compliance test item, RTO / MXO option, probe, fixture, or pass/fail condition [41][52]. |\n| UAV battery / power and motor / gimbal electronics | R&S MXO where the account context matches 德鑫新技 or 其昜先進 [35][41]. | Use the UAVEcoChain mapping because it directly lists 德鑫新技 and 其昜先進 as MXO leads [35][41]. | The vault does not state the electrical measurement item, voltage/current range, power-analysis option, motor-control method, or customer adoption result [34][41]. |\n| High-speed PCB/PCBA and SI/PI validation for system houses | Oscilloscope instrument class, with product model to be confirmed outside the current evidence [51][71][72]. | Use the R&S PCB test-solutions flow around TDR impedance, DK/DF extraction, IL, Xtalk, Eye diagram, sampling testing and process monitoring [71]. | The source does not provide formal R&S product model, option code, license, test frequency, test standard, fixture, or calibration method [72]. |\n| Military / aviation drone EMC and EME discussions | Do not lead with oscilloscope as a proven solution unless additional evidence is added [4][61][62][63]. | The supported A&D need is EMC / EME standards and complex electromagnetic-environment emulation, including MIL-STD-461, MIL-STD-464 and RTCA DO-160 contexts [4][61][62]. | The vault does not map RTO, MXO, or oscilloscope measurements to MIL-STD-461, MIL-STD-464, RTCA DO-160, HPM, EMP, lightning, RADHAZ, or EME emulation setups [63]. |\n### 限制\nThe vault does not provide an evidence-based ranking of oscilloscope opportunities in Aerospace / Defense, so no “strongest” ranking is proven [41][51].  \nThe R&S solution-mapping rows cannot be treated as formal configurations, sold opportunities, customer adoption, certification, or test results [41].  \nThe high-speed digital and PCB sources do not provide scope model, bandwidth, data rate, option code, fixture, calibration method, or pass/fail criteria [51][72].  \nThe military / aviation drone EMC and EME sources support the A&D test domain, but they do not provide an oscilloscope product mapping or executable test parameters [63].",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "軍用無人機 EMC 與 EME testing › Complex EME emulation\n來源的 RF electromagnetic environment 章節列出：\n\n- emulate complex EME signals。\n- enable the military electromagnetic spectrum operation。\n- emulating different electromagnetic environment。\n- evaluating military system level effects under EM interferences。\n- simulating different operational scenarios。\n\n這支持 [[Electromagnetic Environment Emulation]] 與 [[UAV UAS Drones T&M Solutions]] 的客製化測試方向，但來源未提供 signal library、scenario definition、threat emitter model、功率、頻段、同步或安全條件。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+             },
+             "score": 5.149977
+            },
+            {
+             "text": "UAVEcoChain › 重點摘要\n- 這份來源是由 `UAVEcoChain.xlsx` 轉出的 lossy markdown derivative；原始檔路徑在 raw frontmatter 中標示為 OneDrive / SharePoint 底下的 `drop/Market/OneNote/UAVEcoChain.xlsx`，`converted: 2026-09-17`，正式發布日期、作者、版本與維護單位皆未標示。\n- `UAV` 工作表把台灣 UAV eco-chain 依零組件 / 功能分類，涵蓋 [[GPS定位]]、[[天線]]、[[系統整合商]]、[[影像處理-相機]]、[[通訊模組]]、[[馬達動力雲台]]、[[電池電源]]、[[雷達感應]]、[[筆電控制台]]、[[航太材料]]、[[認證實驗室]] 與 [[Payload]] 等欄位。\n- 來源同時保存若干 [[R&S solution mapping]] 與 sales kits 線索，例如 [[鼎天國際]] / GNSS RTK 對應 [[R&S SMBV100B]]，[[芳興科技]] / high isolation measurement 與 OTA passive testing 對應 [[R&S ZNB3000]] 與 [[R&S TS8991]]（[[R&S AMS32]]），[[伸波通訊]] / NTN 與 Wi‑Fi 對應 [[R&S CMX500]] 與 [[R&S CMP180]]，[[神基科技]] / Wi‑Fi 與 LTE 對應 [[R&S CMX500]] 與 [[R&S CMP180]]。\n- 來源列出多個 UAV 供應鏈公司與角色亮點，但多數列只有公司名稱，沒有產品型號、正式規格、客戶、供應關係、出貨、認證、標案、營收或市場占比。\n- `ICs(Notyet)` 工作表列出 GPU、CPU、DRAM、IC、晶圓代工、封裝測試、測試介面、網通、BMC 與高速傳輸 IC 公司清單，包括 [[輝達]]、[[AMD]]、[[英特爾]]、[[三星]]、[[海力士]]、[[美光]]、[[智原]]、[[創意]]、[[世芯-KY]]、[[台積電]]、[[日月光]]、[[旺矽]]、[[穎崴]]、[[中華精測]]、[[聯發科]]、[[達發]]、[[新唐]]、[[信驊]]、[[譜瑞-KY]] 與 [[祥碩]]；此表標題寫「伺服器晶片設計、生產」，與 UAV 主表層級不同，應視為同一 workbook 中的待分類 / not-yet 區塊，不宜直接併入 UAV 供應鏈。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/UAVEcoChain.md"
+             },
+             "score": 15.401793
+            },
+            {
+             "text": "UAVEcoChain › UAV 工作表整理\n| UAV零組件 / 類別 | 關鍵元件 / 角色亮點 | 企業列名 | R&S Solution / Sales kits 線索 | 日期 / 期間 |\n|---|---|---|---|---|\n| [[GPS定位]] | [[GNSS RTK]] | [[鼎天國際]]、[[亞洲航空]]、[[環天世通科技]]、[[大辰科技]]、[[碳基科技]] | [[R&S SMBV100B]]；RTK sales kit SharePoint link | 來源未標示正式日期；raw converted 2026-09-17 |\n| [[天線]] | high isolation measurement；OTA passive testing | [[芳興科技]] | [[R&S ZNB3000]]、[[R&S TS8991]]（[[R&S AMS32]]）；ZNB3000 customer presentation link | 來源未標示正式日期；raw converted 2026-09-17 |\n| [[系統整合商]] | 多數列未標示角色亮點；[[漢翔航空工業]]列有 signal analyzer with real-time option / EMC solution | [[漢翔航空工業]]、[[雷虎科技]]、[[亞洲航空]]、[[中強光電]]、[[中光電智能機器人]]、[[豐兆航太]]、[[長榮航太]]、[[經緯航太]]、[[富蘭登科技]]、[[銘旺科技]]、[[翔探科技]]、[[翔隆航太]]、[[智飛科技]]、[[艾知科技]]、[[神耀科技]]、[[創未來]]、[[新樂飛]]、[[泰世科技]]、[[田屋科技]]、[[璿元科技]]、[[華冠通訊]]、[[龍德造船]] | [[漢翔航空工業]]列 signal analyzer with real-time option、EMC solution；其餘多數未標示 | 來源未標示正式日期；raw converted 2026-09-17 |\n| [[影像處理-相機]] | image processor、Camera；[[邑錡]]列 GMSL、LVDS | [[邑錡]]、[[圓剛]]、[[聰泰科技]]、[[亞光]]、[[聯詠]]、[[華晶科]]、[[智動航科]]、[[瑀豐股份]]、[[台灣彩光]] | [[邑錡]]對應 [[R&S RTO]]、[[R&S MXO]] | 來源未標示正式日期；raw converted 2026-09-17 |\n| [[通訊模組]] | [[伸波通訊]]列 NTN、Wi‑Fi | [[伸波通訊]]、[[航見科技]]、[[智頻科技]]、[[連騰科技]]、[[円通]]、[[易達通]]、[[凌威航太]] | [[R&S CMX500]]、[[R&S CMP180]]；NTN toolkit 與 WLAN toolkit SharePoint links | 來源未標示正式日期；raw converted 2026-09-17 |\n| [[馬達動力雲台]] | 角色亮點多數未標示 | [[其昜先進]]、[[六俊電機]]、[[八達創新]]、[[力山工業]]、[[世紀民生]] | [[其昜先進]]列 [[R&S MXO]] | 來源未標示正式日期；raw converted 2026-09-17 |\n| [[電池電源]] | 角色亮點多數未標示 | [[德鑫新技]]、[[台船動力]]、[[其昜先進]]、[[有量科技]] | [[德鑫新技]]列 [[R&S MXO]] | 來源未標示正式日期；raw converted 2026-09-17 |\n| [[雷達感應]] | 角色亮點未標示 | [[為升]]、[[智頻科技]]、[[均利科技]] | 來源未標示 | 來源未標示正式日期；raw converted 2026-09-17 |\n| [[筆電控制台]] | 軍用筆電、無人機控制台 GCS；[[神基科技]]列 Wi‑Fi、LTE | [[神基科技]]、[[茂訊電腦]]、[[融程電]] | [[R&S CMX500]]、[[R&S CMP180]] | 來源未標示正式日期；raw converted 2026-09-17 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/UAVEcoChain.md"
+             },
+             "score": 14.354343
+            },
+            {
+             "text": "UAV Eco-chain in Taiwan 外部資料清單 › R&S Solution / Sales kits 線索\n[[UAVEcoChain]] 補入若干 R&S solution mapping，另見 [[台灣 UAV 產業鏈 R&S solution mapping]]。目前可追溯的 mapping 包括：\n\n- [[鼎天國際]] / [[GNSS RTK]] → [[R&S SMBV100B]]，並連到 RTK sales kit。\n- [[芳興科技]] / high isolation measurement / OTA passive testing → [[R&S ZNB3000]]、[[R&S TS8991]]（[[R&S AMS32]]）。\n- [[邑錡]] / GMSL / LVDS → [[R&S RTO]]、[[R&S MXO]]。\n- [[伸波通訊]] / NTN / Wi‑Fi → [[R&S CMX500]]、[[R&S CMP180]]，並連到 NTN toolkit 與 WLAN toolkit。\n- [[神基科技]] / Wi‑Fi / LTE / GCS → [[R&S CMX500]]、[[R&S CMP180]]。\n- [[德鑫新技]]、[[其昜先進]] → [[R&S MXO]] 線索。\n\n這些欄位不可改寫為正式配置指南、已銷售機會、客戶採用、認證或測試結果。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/UAV Eco-chain in Taiwan 外部資料清單.md"
+             },
+             "score": 18.412704
+            },
+            {
+             "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+             },
+             "score": 7.763012
+            },
+            {
+             "text": "SerDes 與 SI PI 測試概覽 › 測試脈絡整理\n| 區塊 | 來源明示文字 | 相關儀器 / 方法 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Interface Test | Scopes、BERTs、AWGs、Switch Matrices | [[Oscilloscope]]、[[BERT]]、[[AWG]]、[[Switch Matrix]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4；Slide 11 頁腳 6/13/2025 未決 | 未提供型號、頻寬、資料率或測試標準 |\n| Transmission Channel | Tx Package、PCBs、Connectors、Rx Package | Channel / test board / switch matrices | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 channel loss、fixture、connector 型號或 PCB stackup |\n| RefClk and PLL Jitter Performance | Phase Noise Analyzers、Signal Generators | [[Phase Noise Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 jitter mask、phase noise offset 或 PLL 規格 |\n| Power Distribution Network | Scopes、Network Analyzers | [[Oscilloscope]]、[[Network Analyzer]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 PDN impedance 目標值或測試方法 |\n| ADC / DAC Frontend Performance | Spectrum Analyzers、Signal Generators | [[Spectrum Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 ADC / DAC 指標或頻率 |\n| Signal integrity flow | IL / Xtalk / Eye diagram；TDR Impedance；Stackup Planner；TL Calculator | [[Insertion Loss]]、[[Crosstalk]]、[[Eye diagram]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供工具名稱、標準版本或 pass/fail 條件 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+             },
+             "score": 5.242179
+            },
+            {
+             "text": "High speed SerDes standards › 來源中的說法\n| 圖上名稱 | 本 vault 連結 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|\n| GMSL | [[GMSL]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本、發布組織、資料率或測試項目 |\n| OIF CEI-112G | [[OIF CEI-112G]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示 OIF 文件版次或 CEI profile |\n| LVDS | [[LVDS]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 來源只重複 LVDS 字樣 |\n| JESD204 | [[JESD204D]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 圖上同列 JESD204 與 JESD204D；未說明是否專指 D 版 |\n| DisplayPort | [[DisplayPort]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本 |\n| HDMI | [[HDMI]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本 |\n| MIPI | [[MIPI]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示 D-PHY / C-PHY / M-PHY 等子標準 |\n| USB | [[USB]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示 USB 版本 |\n| ASA | [[ASA]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未展開縮寫 |\n| UALink | [[UALink]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本或發布組織 |\n| PCIE | [[PCIe]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 圖上拼作 PCIE；未標示 generation |\n| NVLink | [[NVLink]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 圖上重複 NVLink 字樣；未標示版本 |\n| UltraEthernet | [[Ultra Ethernet]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本或 organization |\n| Infiniband | [[InfiniBand]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 圖上拼作 Infiniband；未標示速率世代 |\n| SATA | [[SATA]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本 |\n| SAS | [[SAS]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/High speed SerDes standards.md"
+             },
+             "score": 6.749441
+            },
+            {
+             "text": "0 Digital Test - What are SIPI and Serdes › 原文未解的問題\n- Slide 1 標示日期 **2026.3.4**，Slide 11 頁腳另出現 **6/13/2025 High-Speed Digital- Market Trends**；來源未說明 2025-06-13 是頁腳模板日期、內容來源日期或另一份簡報日期。\n- 來源未標示本簡報的文件版次、受眾、會議名稱、對外 / 對內使用限制細節；只可確定封面有 **COMPANY RESTRICTED**。\n- Slide 3、6、7、10、12–15、16、18、19、22–24、26 多數內容在 markdown 中主要是圖片嵌入，未 OCR 出可可靠摘錄的正文。\n- Slide 4 standards 清單未提供各標準的版本、發布組織、資料率、介面型態或適用測試方法。\n- Slide 5 Parallel v.s. Serial Interface 未擷取圖中說明，不能由本 markdown 直接比較 parallel 與 serial 的技術差異。\n- Slide 17 的 L/S 與 pitch 數值排列不完整，無法判定 6/6、60/60、30/30、?、60、120 分別對應 HDI、Package Substrate、CoWoS 或 ABF 的哪一欄。\n- Slide 21 未提供 R&S PCB test solutions 對應的正式產品型號、order number、software option、測試頻率、測試標準、fixture、calibration 或量測不確定度。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+             },
+             "score": 5.496549
+            },
+            {
+             "text": "軍用無人機 EMC 與 EME testing › MIL-STD-464 system-level testing\n[[2025RS Drone Solution]] 說 [[MIL-STD-464]] provides the basis of environment testing for vehicles that have to work in the most unforgiving condition，並將其描述為 system level testing standard。\n\n來源列出的 main chapter / sub-items 包含：\n\n- margins，6 dB margins。\n- intra-system EMC。\n- hull generated intermodulation interference / IMI。\n- shipboard internal EME。\n- multipaction。\n- induced levels at antenna ports of antenna-connected receivers。\n- external RF EME。\n- [[High Power Microwave]] / HPM sources。\n- lightning。\n- [[Electromagnetic Pulse]] / EMP。\n- subsystems and equipment electromagnetic interference / EMI。\n- portable electronics devices and carry-on equipment requirements。\n- non-developmental items / NDI and commercial items。\n- electrostatic environments。\n- radiation hazards / RADHAZ：HERP、HERF、HERO。\n- life cycle / E3 hardness。\n- electrical bonding、power current return path、antenna installations、mechanical interfaces、shock / fault / ignitable vapour protection。\n- external grounds。\n- TEMPEST。\n- system radiated emission、EMCON、platform radiated emission。\n- EM spectrum supportability。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+             },
+             "score": 3.444038
+            },
+            {
+             "text": "軍用無人機 EMC 與 EME testing › Common MIL EMC standards\n[[2025RS Drone Solution]] 列出：\n\n- [[MIL-STD-461]] — requirements for the control of electromagnetic interference emission and susceptibility。\n- [[MIL-STD-464]] — electromagnetic environmental effects requirements for systems。\n- [[RTCA DO-160]] — environmental conditions and test procedures for airborne equipment。\n\n來源另在 example 頁將 military / aviation drone EMC test standards 分為 component level 與 full system level：\n\n| 層級 | 來源列名 |\n|---|---|\n| Component level | [[RTCA DO-160G]]、[[MIL-STD-461G]]、[[DEF STAN 59-411 Part 3]]、[[GJB 151B]] |\n| Full system level | [[MIL-STD-464D]]、[[DEF STAN 59-411 Part 4]]、[[GJB 1389A]] |\n\n使用限制：來源同時在另一頁將 applicable standards 列為 [[MIL-STD-464C]]，而 example 頁列 [[MIL-STD-464D]]；目前只保留為版本線索，未裁決適用版本。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+             },
+             "score": 2.091161
+            },
+            {
+             "text": "軍用無人機 EMC 與 EME testing › 使用限制\n- 本頁是 Market 類簡報摘要，不是 [[MIL-STD-461]]、[[MIL-STD-464]] 或 [[RTCA DO-160]] 標準文件。\n- 不可由此頁直接判定任一 drone / UAV / eVTOL 產品必須測哪些項目。\n- [[MIL-STD-464C]] / [[MIL-STD-464D]] 版本差異需後續查正式標準或 procurement documentation。\n- 系統層 EME / HPM / EMP / lightning / RADHAZ 測試涉及安全與法規限制，來源未提供可部署或可執行參數。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+             },
+             "score": 2.046636
+            },
+            {
+             "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 3.392065
+            },
+            {
+             "text": "R&S PCB test solutions › 可追溯限制\n- 本來源沒有提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。\n- 本頁不把 Slide 21 的圖上列名解讀為正式解決方案型錄或完整採購配置。\n- [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]] 的角色未明，僅保留圖上列名。\n- [[ISD-ADK]] 與 PL 未展開縮寫，需後續來源補證。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 3.009427
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md",
+             "raw_refs": [
+              "raw/Market/OneNote/2025RS Drone Solution.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/UAVEcoChain.md",
+             "raw_refs": [
+              "raw/Market/OneNote/UAV/0. UAV產業分析報告架構.md",
+              "raw/Market/OneNote/UAV/4. UAV Eco-chain in Taiwan.md",
+              "raw/Market/OneNote/UAVEcoChain.md",
+              "raw/Market/OneNote/UAV_GroundStation/UAV GCS.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/UAV Eco-chain in Taiwan 外部資料清單.md",
+             "raw_refs": [
+              "raw/Market/OneNote/2025RS Drone Solution.md",
+              "raw/Market/OneNote/UAV/4. UAV Eco-chain in Taiwan.md",
+              "raw/Market/OneNote/UAV/5. Regulation and Policy.md",
+              "raw/Market/OneNote/UAVEcoChain.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+             "raw_refs": [
+              "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/High speed SerDes standards.md",
+             "raw_refs": [
+              "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md",
+             "raw_refs": [
+              "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/R&S PCB test solutions.md",
+             "raw_refs": [
+              "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

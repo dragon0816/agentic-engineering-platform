@@ -1,0 +1,113 @@
+{
+ "id": "Q0231",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 60.781,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 23,
+   "kind": "wiki",
+   "ref": "wiki/concepts/6G NTN 展望.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 24,
+   "kind": "wiki",
+   "ref": "wiki/concepts/6G NTN 展望.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S AREG800A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 45,
+   "kind": "wiki",
+   "ref": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 43,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S AREG800A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 7,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 14,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMP200.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 42,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S AREG800A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 41,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S AREG800A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 8,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "雷達相關技術正在往 sensing 與 communications 整合、FMCW / digital echo generation、mmWave、高頻寬、距離 / RCS / Doppler 動態目標量測等方向發展",
+   "雷達測試需要產生動態 artificial object，而非只量測一般通訊 TX/RX 指標",
+   "雷達 tester / echo generator 需要覆蓋不同近距離與遠距離 artificial object distance range",
+   "雷達測試能力需要 RCS 動態範圍與細緻 RCS control step size",
+   "雷達測試能力需要 Doppler / radial velocity 模擬與量測精度"
+  ],
+  "reason": "The answer accurately states that the passages do not directly connect radar technology changes to Signaling/Non-signaling Tester requirements, and its main conclusion is framed as an inference from AREG800A radar echo capabilities versus CMX500/CMP200 communication-tester positioning. Some wording generalizes product specifications into broad radar-testing “needs” or technology trends, but the answer mostly labels the key bridge as inference and does not present unsupported specifics as directly proven.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

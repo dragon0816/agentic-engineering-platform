@@ -1,0 +1,1838 @@
+{
+ "question": {
+  "id": "Q0196",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Vector Network Analyzer in Wireless Communication, and what evidence supports each opportunity?",
+  "market": "Wireless Communication",
+  "product": "Vector Network Analyzer",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-4483baad44b44afcaf3a870d6c13d9e5",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Vector Network Analyzer in Wireless Communication, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 75.516,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-4483baad44b44afcaf3a870d6c13d9e5",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-18T09:58:26.653327Z",
+    "updated_at": "2026-10-18T09:59:41.983983Z",
+    "messages": [
+     {
+      "message_id": "message-c66b3f336c9548c7946dc11b4130332c",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Vector Network Analyzer in Wireless Communication, and what evidence supports each opportunity?",
+      "created_at": "2026-10-18T09:58:26.666074Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": [],
+      "workflow_form": null,
+      "action_card": null,
+      "action_cards": []
+     },
+     {
+      "message_id": "message-2f710dd48cc34b2889f9f33d68ca9fd6",
+      "role": "assistant",
+      "text": "### 結論\n目前 vault 沒有提供「VNA 在 Wireless Communication 機會強弱排名」的來源，因此不能宣稱正式排名；但依直接證據密度，最有支撐的機會是：LEO / Kuiper 類衛星用戶終端相控陣 OTA 測試、network infrastructure 的 higher frequencies / mmWave / early 6G、無線法規 / 認證實驗室，以及衛星 / NTN / RF front-end 元件驗證。[40][49][58][43]\n### 推薦先賣\n1. **LEO / Kuiper 類 User Terminal 相控陣 OTA 測試**：Kuiper UT 測試流程明列 OTA 電波暗室核心設備包含「VNA 與信號分析儀」，校準步驟包含背景扣除、元素 A/P 校準、波束表生成，輸出品質包含增益誤差 < 0.5 dB、指向誤差 < 0.5° 與模式完整性。[40]  \n2. **Network infrastructure 的 higher frequencies / mmWave / early 6G**：Network Infrastructure T&M drivers 明確把 R&S ZNA、R&S ZNA67EXT、mmWave front ends / frequency converters 放在 Higher frequencies / mmWave / early 6G solution mapping 中，且 industry drivers 包含 More Spectrum Bands / Higher Frequencies / Expanding Bandwidth。[49][50]  \n3. **無線法規 / 認證實驗室**：Regulatory test for wireless devices 將 primary test instruments for wireless regulatory test labs 分成 wireless communication tester、EMI test receiver、signal & spectrum analyzer、network analyzer、vector signal generator、broadband amplifier 等類別，表示 network analyzer 是無線法規測試實驗室儀器類別之一。[58]  \n4. **衛星 / NTN / RF front-end 與高頻材料供應鏈驗證**：LEO 供應鏈被分成衛星本體高頻 PCB / RF 元件、地面設備與 User Terminal、系統整合與測試驗證等環節，且地面設備與用戶終端核心為相控陣列天線與 RF front-end。[43]  \n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S ZNA / R&S ZNA67 | LEO UT、相控陣列天線、mmWave / antenna measurement systems | ZNA 系列涵蓋 R&S ZNA26 / ZNA43 / ZNA50 / ZNA67，頻率最高到 67 GHz；ZNA-B26 direct IF access 的 IF input 可用於 mmWave converter 與 antenna measurement systems，bandwidth 1 GHz；ZNA-K8 / ZNA-B8 支援 mmWave converter；4-port model 最多 4 個 converters，2-port model 最多 2 個 converters。[61][64][70] | Kuiper UT OTA chamber 直接列出 VNA；ZNA 又明示支援 antenna array tests、antenna test systems、mmWave converters 與 direct IF access，因此是目前對 UT / 相控陣 OTA 證據最完整的 VNA 線索。[40][70] | Kuiper OTA 暗室核心設備包含 VNA 與信號分析儀；ZNA 支援 true parallel and coherent data acquisition，例如 antenna array tests 與 antenna test systems，並支援 mmWave converters 與 direct IF access。[40][70] | Kuiper UT 來源未提供儀器型號、校準標準或 measurement uncertainty，且 unresolved 指出仍需補充 OTA chamber、VNA、signal analyzer、network emulator、satellite channel emulator 的具體設備與校準方法。[40][42] |\n| R&S ZNA / R&S ZNA67EXT | Network infrastructure higher frequencies / mmWave / early 6G | ZNA67EXT 是基於 R&S ZNA67 的 110 GHz Vector Network Analyzer System，型號包含 2-port / 4-port 與 standard power / high power variants；Network Infrastructure mapping 明列 R&S ZNA、R&S ZNA67EXT、mmWave front ends / frequency converters。[34][49] | MWC2025 network infrastructure solution mapping 直接把 R&S ZNA / ZNA67EXT 放在 higher frequencies / mmWave / early 6G 類別，因此這是 wireless infrastructure 中最直接連到 VNA 產品線的證據。[49] | Industry drivers 包含 More Spectrum Bands / Higher Frequencies / Expanding Bandwidth；solution mapping 將 Higher frequencies / mmWave / early 6G 對應到 R&S ZNA、R&S ZNA67EXT、mmWave front ends / frequency converters。[49][50] | Network Infrastructure T&M drivers 的 unresolved 指出需回查原 PPTX 圖片與 speaker notes，以確認產品連線、license / option 與測試流程。[51] |\n| R&S ZNA with R&S ZNA-B15 | RF front-end / RFFE 控制與量測 | R&S ZNA-B15 RFFE GPIO interface 的 models .02 and .03 提供 two independent MIPI RFFE busses；model .03 提供 voltage and current measurement with switchable source resistance，32 internal ADC channels 可同時量測每個 RFFE 與 GPIO pin 的 voltage and current。[6] | LEO 地面設備與用戶終端核心包含 RF front-end，Direct-to-Cell 供應鏈也涵蓋 RF front-end；ZNA-B15 提供 RFFE / GPIO 控制與電壓電流量測，是 RF front-end 測試對接線索。[7][8][6] | 市場來源把低軌衛星地面設備與用戶終端主題集中於相控陣列天線、Ku/Ka-band、RF front-end 與系統整合能力，並把 Direct-to-Cell 主題涵蓋 satellite-side antenna、RF front-end、baseband、衛星內建基地台、手機品牌與電信商服務方案。[7][8] | 目前來源沒有直接說 ZNA-B15 已用於某個 LEO、Direct-to-Cell 或 RF front-end 客戶測試流程；只能說市場需求與產品能力可對接。[6][7][8] |\n| Network analyzer 類別，未指定型號 | Wireless regulatory / certification lab | 來源只列 primary test instruments 類別包含 network analyzer，未指定 R&S VNA 型號、option、頻率範圍或測試配置。[58] | 無線產品市場准入需要 regulatory compliance、industry certification 與 operator acceptance testing；regulatory test source 明列 network analyzer 是實驗室儀器類別之一。[60][58] | Wireless products 的 market access approval testing 被分成 Regulatory Compliance Test、Telecom Industry Certification Test、Cellular Network Operator Acceptance Test；primary test instruments for wireless regulatory test labs 包含 network analyzer。[60][58] | 來源未把 network analyzer 指定為 Vector Network Analyzer，也未列 ZNA / ZNB / ZNL 型號、option、校準方法或 uncertainty。[58] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| LEO / Kuiper 類 User Terminal OTA 暗室 | R&S ZNA / ZNA67 搭配 mmWave converter support、direct IF access 與 antenna measurement system 相關配置；具體 option 以 ZNA-K8、ZNA-B8、ZNA-B26 為知識庫已列線索。[61][64][70] | 以「VNA + signal analyzer」支援背景扣除、元素 A/P 校準、波束表生成、增益誤差與指向誤差管控。[40] | Kuiper 來源未提供 VNA 型號、校準標準、measurement uncertainty 或正式 test plan，需回查原始 PPTX 或正式 test plan。[42] |\n| LEO 衛星終端與相控陣列天線供應鏈 | R&S ZNA / ZNA-B15 作為 RF front-end / RFFE / GPIO 控制與量測線索，搭配 ZNA 的 phase-coherent sources、true receivers 與 antenna array test 支援。[6][70] | 供應鏈中地面設備與用戶終端核心為相控陣列天線與 RF front-end，相關公司能力包含相位陣列天線製造、Ku / Ka-band 主動式相控陣列天線、RF front-end 與系統整合。[45][46] | 目前未有來源證明特定廠商採用 R&S ZNA 或 ZNA-B15，也未提供客戶案例或設備清單。[45][6] |\n| Network infrastructure mmWave / early 6G R&D | R&S ZNA / ZNA67EXT、mmWave front ends / frequency converters。[49] | MWC2025 solution mapping 將 R&S ZNA / ZNA67EXT 明列於 Higher frequencies / mmWave / early 6G，industry drivers 包含 higher frequencies 與 expanding bandwidth。[49][50] | 該來源 unresolved 指出仍需回查原 PPTX 圖片與 speaker notes，以確認產品連線、license / option 與測試流程。[51] |\n| Wireless regulatory / certification labs | Network analyzer 類別；若需 R&S 型號，知識庫目前未指定。[58] | 法規測試來源明列 wireless regulatory test labs 的 primary test instruments 包含 network analyzer，且 wireless products 需要 regulatory compliance、industry certification 與 operator acceptance testing。[58][60] | 來源沒有說 network analyzer 等同 VNA，也沒有列 ZNA / ZNB / ZNL 型號、頻率、option 或測試不確定度。[58] |\n| RF components、high-frequency PCB、RFFE module 驗證 | R&S ZNA 或 ZNB3000 / ZNB3044 作為 VNA 候選；ZNA 側有 noise figure、mmWave converter、deembedding、RFFE GPIO interface 線索，ZNB3000 側有最高 54.0 GHz upgrade 與 mmWave converter LO/IF option 線索。[64][6][38][33] | LEO 供應鏈包含高頻 PCB、RF 元件、GaAs、低軌衛星與基地台高頻材料，地面終端核心包含 RF front-end。[43][44][45] | 目前來源沒有直接把 ZNA 或 ZNB3000 指定到這些廠商或元件測試流程，因此只能作為產品能力對市場需求的對接線索。[43][64][33] |\n### 限制\n- 目前 vault 沒有可引用的市場規模、客戶採購、VNA 滲透率或機會排名資料，因此「strongest」只能解讀為「目前證據最直接、最完整」，不能解讀為市場最大或成交機率最高。[71][51]  \n- Kuiper UT 測試流程雖直接列出 VNA，但來源未提供儀器型號、校準標準或 measurement uncertainty，且 unresolved 明確要求補充具體設備與校準方法。[40][42]  \n- Network infrastructure mapping 直接列出 R&S ZNA / ZNA67EXT，但 unresolved 指出仍需回查原 PPTX 與 speaker notes 才能確認產品連線、license / option 與測試流程。[49][51]  \n- Regulatory test 來源只說 primary test instruments 包含 network analyzer，未指定 VNA 型號或 R&S 產品線，因此不能把它改寫成 ZNA / ZNB / ZNL 的已驗證法規測試方案。[58]  \n- 低軌衛星市場報告提供 2026-09-15 的供應鏈與市場敘事，但部分數字與公司說法未提供逐項引用、報告名稱、網址、頁碼或方法論，因此不可延伸推算公司營收或採購量。[71]\n\n來源：\n[6] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[7] Wiki：2026台灣無線通訊代工製造產業_技術規格與市場分析報告（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`HSD PCB image 18.md`）\n[8] Wiki：2026台灣無線通訊代工製造產業_技術規格與市場分析報告（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`HSD PCB image 18.md`）\n[33] Wiki：R&S ZNB3000（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[34] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）\n[38] Wiki：R&S ZNB3044（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[40] Wiki：Kuiper UT 測試流程（來源：`Kuiper UT Test & Supply Chain.md`）\n[42] Wiki：Kuiper UT 測試流程（來源：`Kuiper UT Test & Supply Chain.md`）\n[43] Wiki：低軌衛星零組件與地面終端供應鏈（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`User Terminal.md`）\n[44] Wiki：低軌衛星零組件與地面終端供應鏈（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`User Terminal.md`）\n[45] Wiki：低軌衛星零組件與地面終端供應鏈（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`User Terminal.md`）\n[46] Wiki：相控陣列天線（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`Beamforming.md`、`User Terminal.md`）\n[49] Wiki：Network Infrastructure T&M drivers（來源：`MWC2025---WIC-INFRA.md`）\n[50] Wiki：Network Infrastructure T&M drivers（來源：`MWC2025---WIC-INFRA.md`）\n[51] Wiki：Network Infrastructure T&M drivers（來源：`MWC2025---WIC-INFRA.md`）\n[58] Wiki：Regulatory test for wireless devices with cellular technology（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[60] Wiki：Regulatory test for wireless devices with cellular technology（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[61] Wiki：ZNA_specs_en_5215-4652-22_v2400（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[64] Wiki：ZNA_specs_en_5215-4652-22_v2400（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[70] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[71] Wiki：2026台灣無線通訊代工製造產業_技術規格與市場分析報告（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`HSD PCB image 18.md`）",
+      "created_at": "2026-10-18T09:59:41.983983Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-6089b3fbfc2c4baea9a3e18ffd89b350",
+       "request_id": "request-6089b3fbfc2c4baea9a3e18ffd89b350",
+       "span_id": "span-6089b3fbfc2c4baea9a3e18ffd89b350",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": [],
+      "workflow_form": null,
+      "action_card": null,
+      "action_cards": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "### 結論\n目前 vault 沒有提供「VNA 在 Wireless Communication 機會強弱排名」的來源，因此不能宣稱正式排名；但依直接證據密度，最有支撐的機會是：LEO / Kuiper 類衛星用戶終端相控陣 OTA 測試、network infrastructure 的 higher frequencies / mmWave / early 6G、無線法規 / 認證實驗室，以及衛星 / NTN / RF front-end 元件驗證。[40][49][58][43]\n### 推薦先賣\n1. **LEO / Kuiper 類 User Terminal 相控陣 OTA 測試**：Kuiper UT 測試流程明列 OTA 電波暗室核心設備包含「VNA 與信號分析儀」，校準步驟包含背景扣除、元素 A/P 校準、波束表生成，輸出品質包含增益誤差 < 0.5 dB、指向誤差 < 0.5° 與模式完整性。[40]  \n2. **Network infrastructure 的 higher frequencies / mmWave / early 6G**：Network Infrastructure T&M drivers 明確把 R&S ZNA、R&S ZNA67EXT、mmWave front ends / frequency converters 放在 Higher frequencies / mmWave / early 6G solution mapping 中，且 industry drivers 包含 More Spectrum Bands / Higher Frequencies / Expanding Bandwidth。[49][50]  \n3. **無線法規 / 認證實驗室**：Regulatory test for wireless devices 將 primary test instruments for wireless regulatory test labs 分成 wireless communication tester、EMI test receiver、signal & spectrum analyzer、network analyzer、vector signal generator、broadband amplifier 等類別，表示 network analyzer 是無線法規測試實驗室儀器類別之一。[58]  \n4. **衛星 / NTN / RF front-end 與高頻材料供應鏈驗證**：LEO 供應鏈被分成衛星本體高頻 PCB / RF 元件、地面設備與 User Terminal、系統整合與測試驗證等環節，且地面設備與用戶終端核心為相控陣列天線與 RF front-end。[43]  \n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S ZNA / R&S ZNA67 | LEO UT、相控陣列天線、mmWave / antenna measurement systems | ZNA 系列涵蓋 R&S ZNA26 / ZNA43 / ZNA50 / ZNA67，頻率最高到 67 GHz；ZNA-B26 direct IF access 的 IF input 可用於 mmWave converter 與 antenna measurement systems，bandwidth 1 GHz；ZNA-K8 / ZNA-B8 支援 mmWave converter；4-port model 最多 4 個 converters，2-port model 最多 2 個 converters。[61][64][70] | Kuiper UT OTA chamber 直接列出 VNA；ZNA 又明示支援 antenna array tests、antenna test systems、mmWave converters 與 direct IF access，因此是目前對 UT / 相控陣 OTA 證據最完整的 VNA 線索。[40][70] | Kuiper OTA 暗室核心設備包含 VNA 與信號分析儀；ZNA 支援 true parallel and coherent data acquisition，例如 antenna array tests 與 antenna test systems，並支援 mmWave converters 與 direct IF access。[40][70] | Kuiper UT 來源未提供儀器型號、校準標準或 measurement uncertainty，且 unresolved 指出仍需補充 OTA chamber、VNA、signal analyzer、network emulator、satellite channel emulator 的具體設備與校準方法。[40][42] |\n| R&S ZNA / R&S ZNA67EXT | Network infrastructure higher frequencies / mmWave / early 6G | ZNA67EXT 是基於 R&S ZNA67 的 110 GHz Vector Network Analyzer System，型號包含 2-port / 4-port 與 standard power / high power variants；Network Infrastructure mapping 明列 R&S ZNA、R&S ZNA67EXT、mmWave front ends / frequency converters。[34][49] | MWC2025 network infrastructure solution mapping 直接把 R&S ZNA / ZNA67EXT 放在 higher frequencies / mmWave / early 6G 類別，因此這是 wireless infrastructure 中最直接連到 VNA 產品線的證據。[49] | Industry drivers 包含 More Spectrum Bands / Higher Frequencies / Expanding Bandwidth；solution mapping 將 Higher frequencies / mmWave / early 6G 對應到 R&S ZNA、R&S ZNA67EXT、mmWave front ends / frequency converters。[49][50] | Network Infrastructure T&M drivers 的 unresolved 指出需回查原 PPTX 圖片與 speaker notes，以確認產品連線、license / option 與測試流程。[51] |\n| R&S ZNA with R&S ZNA-B15 | RF front-end / RFFE 控制與量測 | R&S ZNA-B15 RFFE GPIO interface 的 models .02 and .03 提供 two independent MIPI RFFE busses；model .03 提供 voltage and current measurement with switchable source resistance，32 internal ADC channels 可同時量測每個 RFFE 與 GPIO pin 的 voltage and current。[6] | LEO 地面設備與用戶終端核心包含 RF front-end，Direct-to-Cell 供應鏈也涵蓋 RF front-end；ZNA-B15 提供 RFFE / GPIO 控制與電壓電流量測，是 RF front-end 測試對接線索。[7][8][6] | 市場來源把低軌衛星地面設備與用戶終端主題集中於相控陣列天線、Ku/Ka-band、RF front-end 與系統整合能力，並把 Direct-to-Cell 主題涵蓋 satellite-side antenna、RF front-end、baseband、衛星內建基地台、手機品牌與電信商服務方案。[7][8] | 目前來源沒有直接說 ZNA-B15 已用於某個 LEO、Direct-to-Cell 或 RF front-end 客戶測試流程；只能說市場需求與產品能力可對接。[6][7][8] |\n| Network analyzer 類別，未指定型號 | Wireless regulatory / certification lab | 來源只列 primary test instruments 類別包含 network analyzer，未指定 R&S VNA 型號、option、頻率範圍或測試配置。[58] | 無線產品市場准入需要 regulatory compliance、industry certification 與 operator acceptance testing；regulatory test source 明列 network analyzer 是實驗室儀器類別之一。[60][58] | Wireless products 的 market access approval testing 被分成 Regulatory Compliance Test、Telecom Industry Certification Test、Cellular Network Operator Acceptance Test；primary test instruments for wireless regulatory test labs 包含 network analyzer。[60][58] | 來源未把 network analyzer 指定為 Vector Network Analyzer，也未列 ZNA / ZNB / ZNL 型號、option、校準方法或 uncertainty。[58] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| LEO / Kuiper 類 User Terminal OTA 暗室 | R&S ZNA / ZNA67 搭配 mmWave converter support、direct IF access 與 antenna measurement system 相關配置；具體 option 以 ZNA-K8、ZNA-B8、ZNA-B26 為知識庫已列線索。[61][64][70] | 以「VNA + signal analyzer」支援背景扣除、元素 A/P 校準、波束表生成、增益誤差與指向誤差管控。[40] | Kuiper 來源未提供 VNA 型號、校準標準、measurement uncertainty 或正式 test plan，需回查原始 PPTX 或正式 test plan。[42] |\n| LEO 衛星終端與相控陣列天線供應鏈 | R&S ZNA / ZNA-B15 作為 RF front-end / RFFE / GPIO 控制與量測線索，搭配 ZNA 的 phase-coherent sources、true receivers 與 antenna array test 支援。[6][70] | 供應鏈中地面設備與用戶終端核心為相控陣列天線與 RF front-end，相關公司能力包含相位陣列天線製造、Ku / Ka-band 主動式相控陣列天線、RF front-end 與系統整合。[45][46] | 目前未有來源證明特定廠商採用 R&S ZNA 或 ZNA-B15，也未提供客戶案例或設備清單。[45][6] |\n| Network infrastructure mmWave / early 6G R&D | R&S ZNA / ZNA67EXT、mmWave front ends / frequency converters。[49] | MWC2025 solution mapping 將 R&S ZNA / ZNA67EXT 明列於 Higher frequencies / mmWave / early 6G，industry drivers 包含 higher frequencies 與 expanding bandwidth。[49][50] | 該來源 unresolved 指出仍需回查原 PPTX 圖片與 speaker notes，以確認產品連線、license / option 與測試流程。[51] |\n| Wireless regulatory / certification labs | Network analyzer 類別；若需 R&S 型號，知識庫目前未指定。[58] | 法規測試來源明列 wireless regulatory test labs 的 primary test instruments 包含 network analyzer，且 wireless products 需要 regulatory compliance、industry certification 與 operator acceptance testing。[58][60] | 來源沒有說 network analyzer 等同 VNA，也沒有列 ZNA / ZNB / ZNL 型號、頻率、option 或測試不確定度。[58] |\n| RF components、high-frequency PCB、RFFE module 驗證 | R&S ZNA 或 ZNB3000 / ZNB3044 作為 VNA 候選；ZNA 側有 noise figure、mmWave converter、deembedding、RFFE GPIO interface 線索，ZNB3000 側有最高 54.0 GHz upgrade 與 mmWave converter LO/IF option 線索。[64][6][38][33] | LEO 供應鏈包含高頻 PCB、RF 元件、GaAs、低軌衛星與基地台高頻材料，地面終端核心包含 RF front-end。[43][44][45] | 目前來源沒有直接把 ZNA 或 ZNB3000 指定到這些廠商或元件測試流程，因此只能作為產品能力對市場需求的對接線索。[43][64][33] |\n### 限制\n- 目前 vault 沒有可引用的市場規模、客戶採購、VNA 滲透率或機會排名資料，因此「strongest」只能解讀為「目前證據最直接、最完整」，不能解讀為市場最大或成交機率最高。[71][51]  \n- Kuiper UT 測試流程雖直接列出 VNA，但來源未提供儀器型號、校準標準或 measurement uncertainty，且 unresolved 明確要求補充具體設備與校準方法。[40][42]  \n- Network infrastructure mapping 直接列出 R&S ZNA / ZNA67EXT，但 unresolved 指出仍需回查原 PPTX 與 speaker notes 才能確認產品連線、license / option 與測試流程。[49][51]  \n- Regulatory test 來源只說 primary test instruments 包含 network analyzer，未指定 VNA 型號或 R&S 產品線，因此不能把它改寫成 ZNA / ZNB / ZNL 的已驗證法規測試方案。[58]  \n- 低軌衛星市場報告提供 2026-09-15 的供應鏈與市場敘事，但部分數字與公司說法未提供逐項引用、報告名稱、網址、頁碼或方法論，因此不可延伸推算公司營收或採購量。[71]\n\n來源：\n[6] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[7] Wiki：2026台灣無線通訊代工製造產業_技術規格與市場分析報告（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`HSD PCB image 18.md`）\n[8] Wiki：2026台灣無線通訊代工製造產業_技術規格與市場分析報告（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`HSD PCB image 18.md`）\n[33] Wiki：R&S ZNB3000（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[34] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）\n[38] Wiki：R&S ZNB3044（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[40] Wiki：Kuiper UT 測試流程（來源：`Kuiper UT Test & Supply Chain.md`）\n[42] Wiki：Kuiper UT 測試流程（來源：`Kuiper UT Test & Supply Chain.md`）\n[43] Wiki：低軌衛星零組件與地面終端供應鏈（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`User Terminal.md`）\n[44] Wiki：低軌衛星零組件與地面終端供應鏈（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`User Terminal.md`）\n[45] Wiki：低軌衛星零組件與地面終端供應鏈（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`User Terminal.md`）\n[46] Wiki：相控陣列天線（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`Beamforming.md`、`User Terminal.md`）\n[49] Wiki：Network Infrastructure T&M drivers（來源：`MWC2025---WIC-INFRA.md`）\n[50] Wiki：Network Infrastructure T&M drivers（來源：`MWC2025---WIC-INFRA.md`）\n[51] Wiki：Network Infrastructure T&M drivers（來源：`MWC2025---WIC-INFRA.md`）\n[58] Wiki：Regulatory test for wireless devices with cellular technology（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[60] Wiki：Regulatory test for wireless devices with cellular technology（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[61] Wiki：ZNA_specs_en_5215-4652-22_v2400（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[64] Wiki：ZNA_specs_en_5215-4652-22_v2400（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[70] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[71] Wiki：2026台灣無線通訊代工製造產業_技術規格與市場分析報告（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`HSD PCB image 18.md`）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-6089b3fbfc2c4baea9a3e18ffd89b350",
+      "request_id": "request-6089b3fbfc2c4baea9a3e18ffd89b350",
+      "span_id": "span-6089b3fbfc2c4baea9a3e18ffd89b350",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-6089b3fbfc2c4baea9a3e18ffd89b350",
+       "request_id": "request-6089b3fbfc2c4baea9a3e18ffd89b350",
+       "span_id": "span-6089b3fbfc2c4baea9a3e18ffd89b350",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "### 結論\n目前 vault 沒有提供「VNA 在 Wireless Communication 機會強弱排名」的來源，因此不能宣稱正式排名；但依直接證據密度，最有支撐的機會是：LEO / Kuiper 類衛星用戶終端相控陣 OTA 測試、network infrastructure 的 higher frequencies / mmWave / early 6G、無線法規 / 認證實驗室，以及衛星 / NTN / RF front-end 元件驗證。[40][49][58][43]\n### 推薦先賣\n1. **LEO / Kuiper 類 User Terminal 相控陣 OTA 測試**：Kuiper UT 測試流程明列 OTA 電波暗室核心設備包含「VNA 與信號分析儀」，校準步驟包含背景扣除、元素 A/P 校準、波束表生成，輸出品質包含增益誤差 < 0.5 dB、指向誤差 < 0.5° 與模式完整性。[40]  \n2. **Network infrastructure 的 higher frequencies / mmWave / early 6G**：Network Infrastructure T&M drivers 明確把 R&S ZNA、R&S ZNA67EXT、mmWave front ends / frequency converters 放在 Higher frequencies / mmWave / early 6G solution mapping 中，且 industry drivers 包含 More Spectrum Bands / Higher Frequencies / Expanding Bandwidth。[49][50]  \n3. **無線法規 / 認證實驗室**：Regulatory test for wireless devices 將 primary test instruments for wireless regulatory test labs 分成 wireless communication tester、EMI test receiver、signal & spectrum analyzer、network analyzer、vector signal generator、broadband amplifier 等類別，表示 network analyzer 是無線法規測試實驗室儀器類別之一。[58]  \n4. **衛星 / NTN / RF front-end 與高頻材料供應鏈驗證**：LEO 供應鏈被分成衛星本體高頻 PCB / RF 元件、地面設備與 User Terminal、系統整合與測試驗證等環節，且地面設備與用戶終端核心為相控陣列天線與 RF front-end。[43]  \n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S ZNA / R&S ZNA67 | LEO UT、相控陣列天線、mmWave / antenna measurement systems | ZNA 系列涵蓋 R&S ZNA26 / ZNA43 / ZNA50 / ZNA67，頻率最高到 67 GHz；ZNA-B26 direct IF access 的 IF input 可用於 mmWave converter 與 antenna measurement systems，bandwidth 1 GHz；ZNA-K8 / ZNA-B8 支援 mmWave converter；4-port model 最多 4 個 converters，2-port model 最多 2 個 converters。[61][64][70] | Kuiper UT OTA chamber 直接列出 VNA；ZNA 又明示支援 antenna array tests、antenna test systems、mmWave converters 與 direct IF access，因此是目前對 UT / 相控陣 OTA 證據最完整的 VNA 線索。[40][70] | Kuiper OTA 暗室核心設備包含 VNA 與信號分析儀；ZNA 支援 true parallel and coherent data acquisition，例如 antenna array tests 與 antenna test systems，並支援 mmWave converters 與 direct IF access。[40][70] | Kuiper UT 來源未提供儀器型號、校準標準或 measurement uncertainty，且 unresolved 指出仍需補充 OTA chamber、VNA、signal analyzer、network emulator、satellite channel emulator 的具體設備與校準方法。[40][42] |\n| R&S ZNA / R&S ZNA67EXT | Network infrastructure higher frequencies / mmWave / early 6G | ZNA67EXT 是基於 R&S ZNA67 的 110 GHz Vector Network Analyzer System，型號包含 2-port / 4-port 與 standard power / high power variants；Network Infrastructure mapping 明列 R&S ZNA、R&S ZNA67EXT、mmWave front ends / frequency converters。[34][49] | MWC2025 network infrastructure solution mapping 直接把 R&S ZNA / ZNA67EXT 放在 higher frequencies / mmWave / early 6G 類別，因此這是 wireless infrastructure 中最直接連到 VNA 產品線的證據。[49] | Industry drivers 包含 More Spectrum Bands / Higher Frequencies / Expanding Bandwidth；solution mapping 將 Higher frequencies / mmWave / early 6G 對應到 R&S ZNA、R&S ZNA67EXT、mmWave front ends / frequency converters。[49][50] | Network Infrastructure T&M drivers 的 unresolved 指出需回查原 PPTX 圖片與 speaker notes，以確認產品連線、license / option 與測試流程。[51] |\n| R&S ZNA with R&S ZNA-B15 | RF front-end / RFFE 控制與量測 | R&S ZNA-B15 RFFE GPIO interface 的 models .02 and .03 提供 two independent MIPI RFFE busses；model .03 提供 voltage and current measurement with switchable source resistance，32 internal ADC channels 可同時量測每個 RFFE 與 GPIO pin 的 voltage and current。[6] | LEO 地面設備與用戶終端核心包含 RF front-end，Direct-to-Cell 供應鏈也涵蓋 RF front-end；ZNA-B15 提供 RFFE / GPIO 控制與電壓電流量測，是 RF front-end 測試對接線索。[7][8][6] | 市場來源把低軌衛星地面設備與用戶終端主題集中於相控陣列天線、Ku/Ka-band、RF front-end 與系統整合能力，並把 Direct-to-Cell 主題涵蓋 satellite-side antenna、RF front-end、baseband、衛星內建基地台、手機品牌與電信商服務方案。[7][8] | 目前來源沒有直接說 ZNA-B15 已用於某個 LEO、Direct-to-Cell 或 RF front-end 客戶測試流程；只能說市場需求與產品能力可對接。[6][7][8] |\n| Network analyzer 類別，未指定型號 | Wireless regulatory / certification lab | 來源只列 primary test instruments 類別包含 network analyzer，未指定 R&S VNA 型號、option、頻率範圍或測試配置。[58] | 無線產品市場准入需要 regulatory compliance、industry certification 與 operator acceptance testing；regulatory test source 明列 network analyzer 是實驗室儀器類別之一。[60][58] | Wireless products 的 market access approval testing 被分成 Regulatory Compliance Test、Telecom Industry Certification Test、Cellular Network Operator Acceptance Test；primary test instruments for wireless regulatory test labs 包含 network analyzer。[60][58] | 來源未把 network analyzer 指定為 Vector Network Analyzer，也未列 ZNA / ZNB / ZNL 型號、option、校準方法或 uncertainty。[58] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| LEO / Kuiper 類 User Terminal OTA 暗室 | R&S ZNA / ZNA67 搭配 mmWave converter support、direct IF access 與 antenna measurement system 相關配置；具體 option 以 ZNA-K8、ZNA-B8、ZNA-B26 為知識庫已列線索。[61][64][70] | 以「VNA + signal analyzer」支援背景扣除、元素 A/P 校準、波束表生成、增益誤差與指向誤差管控。[40] | Kuiper 來源未提供 VNA 型號、校準標準、measurement uncertainty 或正式 test plan，需回查原始 PPTX 或正式 test plan。[42] |\n| LEO 衛星終端與相控陣列天線供應鏈 | R&S ZNA / ZNA-B15 作為 RF front-end / RFFE / GPIO 控制與量測線索，搭配 ZNA 的 phase-coherent sources、true receivers 與 antenna array test 支援。[6][70] | 供應鏈中地面設備與用戶終端核心為相控陣列天線與 RF front-end，相關公司能力包含相位陣列天線製造、Ku / Ka-band 主動式相控陣列天線、RF front-end 與系統整合。[45][46] | 目前未有來源證明特定廠商採用 R&S ZNA 或 ZNA-B15，也未提供客戶案例或設備清單。[45][6] |\n| Network infrastructure mmWave / early 6G R&D | R&S ZNA / ZNA67EXT、mmWave front ends / frequency converters。[49] | MWC2025 solution mapping 將 R&S ZNA / ZNA67EXT 明列於 Higher frequencies / mmWave / early 6G，industry drivers 包含 higher frequencies 與 expanding bandwidth。[49][50] | 該來源 unresolved 指出仍需回查原 PPTX 圖片與 speaker notes，以確認產品連線、license / option 與測試流程。[51] |\n| Wireless regulatory / certification labs | Network analyzer 類別；若需 R&S 型號，知識庫目前未指定。[58] | 法規測試來源明列 wireless regulatory test labs 的 primary test instruments 包含 network analyzer，且 wireless products 需要 regulatory compliance、industry certification 與 operator acceptance testing。[58][60] | 來源沒有說 network analyzer 等同 VNA，也沒有列 ZNA / ZNB / ZNL 型號、頻率、option 或測試不確定度。[58] |\n| RF components、high-frequency PCB、RFFE module 驗證 | R&S ZNA 或 ZNB3000 / ZNB3044 作為 VNA 候選；ZNA 側有 noise figure、mmWave converter、deembedding、RFFE GPIO interface 線索，ZNB3000 側有最高 54.0 GHz upgrade 與 mmWave converter LO/IF option 線索。[64][6][38][33] | LEO 供應鏈包含高頻 PCB、RF 元件、GaAs、低軌衛星與基地台高頻材料，地面終端核心包含 RF front-end。[43][44][45] | 目前來源沒有直接把 ZNA 或 ZNB3000 指定到這些廠商或元件測試流程，因此只能作為產品能力對市場需求的對接線索。[43][64][33] |\n### 限制\n- 目前 vault 沒有可引用的市場規模、客戶採購、VNA 滲透率或機會排名資料，因此「strongest」只能解讀為「目前證據最直接、最完整」，不能解讀為市場最大或成交機率最高。[71][51]  \n- Kuiper UT 測試流程雖直接列出 VNA，但來源未提供儀器型號、校準標準或 measurement uncertainty，且 unresolved 明確要求補充具體設備與校準方法。[40][42]  \n- Network infrastructure mapping 直接列出 R&S ZNA / ZNA67EXT，但 unresolved 指出仍需回查原 PPTX 與 speaker notes 才能確認產品連線、license / option 與測試流程。[49][51]  \n- Regulatory test 來源只說 primary test instruments 包含 network analyzer，未指定 VNA 型號或 R&S 產品線，因此不能把它改寫成 ZNA / ZNB / ZNL 的已驗證法規測試方案。[58]  \n- 低軌衛星市場報告提供 2026-09-15 的供應鏈與市場敘事，但部分數字與公司說法未提供逐項引用、報告名稱、網址、頁碼或方法論，因此不可延伸推算公司營收或採購量。[71]\n\n來源：\n[6] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[7] Wiki：2026台灣無線通訊代工製造產業_技術規格與市場分析報告（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`HSD PCB image 18.md`）\n[8] Wiki：2026台灣無線通訊代工製造產業_技術規格與市場分析報告（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`HSD PCB image 18.md`）\n[33] Wiki：R&S ZNB3000（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[34] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）\n[38] Wiki：R&S ZNB3044（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[40] Wiki：Kuiper UT 測試流程（來源：`Kuiper UT Test & Supply Chain.md`）\n[42] Wiki：Kuiper UT 測試流程（來源：`Kuiper UT Test & Supply Chain.md`）\n[43] Wiki：低軌衛星零組件與地面終端供應鏈（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`User Terminal.md`）\n[44] Wiki：低軌衛星零組件與地面終端供應鏈（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`User Terminal.md`）\n[45] Wiki：低軌衛星零組件與地面終端供應鏈（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`User Terminal.md`）\n[46] Wiki：相控陣列天線（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`Beamforming.md`、`User Terminal.md`）\n[49] Wiki：Network Infrastructure T&M drivers（來源：`MWC2025---WIC-INFRA.md`）\n[50] Wiki：Network Infrastructure T&M drivers（來源：`MWC2025---WIC-INFRA.md`）\n[51] Wiki：Network Infrastructure T&M drivers（來源：`MWC2025---WIC-INFRA.md`）\n[58] Wiki：Regulatory test for wireless devices with cellular technology（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[60] Wiki：Regulatory test for wireless devices with cellular technology（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[61] Wiki：ZNA_specs_en_5215-4652-22_v2400（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[64] Wiki：ZNA_specs_en_5215-4652-22_v2400（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[70] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[71] Wiki：2026台灣無線通訊代工製造產業_技術規格與市場分析報告（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`HSD PCB image 18.md`）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_Fvq13kPe3RRqpMdEWY5gyyVK",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "### 結論\n目前 vault 沒有提供「VNA 在 Wireless Communication 機會強弱排名」的來源，因此不能宣稱正式排名；但依直接證據密度，最有支撐的機會是：LEO / Kuiper 類衛星用戶終端相控陣 OTA 測試、network infrastructure 的 higher frequencies / mmWave / early 6G、無線法規 / 認證實驗室，以及衛星 / NTN / RF front-end 元件驗證。[40][49][58][43]\n### 推薦先賣\n1. **LEO / Kuiper 類 User Terminal 相控陣 OTA 測試**：Kuiper UT 測試流程明列 OTA 電波暗室核心設備包含「VNA 與信號分析儀」，校準步驟包含背景扣除、元素 A/P 校準、波束表生成，輸出品質包含增益誤差 < 0.5 dB、指向誤差 < 0.5° 與模式完整性。[40]  \n2. **Network infrastructure 的 higher frequencies / mmWave / early 6G**：Network Infrastructure T&M drivers 明確把 R&S ZNA、R&S ZNA67EXT、mmWave front ends / frequency converters 放在 Higher frequencies / mmWave / early 6G solution mapping 中，且 industry drivers 包含 More Spectrum Bands / Higher Frequencies / Expanding Bandwidth。[49][50]  \n3. **無線法規 / 認證實驗室**：Regulatory test for wireless devices 將 primary test instruments for wireless regulatory test labs 分成 wireless communication tester、EMI test receiver、signal & spectrum analyzer、network analyzer、vector signal generator、broadband amplifier 等類別，表示 network analyzer 是無線法規測試實驗室儀器類別之一。[58]  \n4. **衛星 / NTN / RF front-end 與高頻材料供應鏈驗證**：LEO 供應鏈被分成衛星本體高頻 PCB / RF 元件、地面設備與 User Terminal、系統整合與測試驗證等環節，且地面設備與用戶終端核心為相控陣列天線與 RF front-end。[43]  \n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S ZNA / R&S ZNA67 | LEO UT、相控陣列天線、mmWave / antenna measurement systems | ZNA 系列涵蓋 R&S ZNA26 / ZNA43 / ZNA50 / ZNA67，頻率最高到 67 GHz；ZNA-B26 direct IF access 的 IF input 可用於 mmWave converter 與 antenna measurement systems，bandwidth 1 GHz；ZNA-K8 / ZNA-B8 支援 mmWave converter；4-port model 最多 4 個 converters，2-port model 最多 2 個 converters。[61][64][70] | Kuiper UT OTA chamber 直接列出 VNA；ZNA 又明示支援 antenna array tests、antenna test systems、mmWave converters 與 direct IF access，因此是目前對 UT / 相控陣 OTA 證據最完整的 VNA 線索。[40][70] | Kuiper OTA 暗室核心設備包含 VNA 與信號分析儀；ZNA 支援 true parallel and coherent data acquisition，例如 antenna array tests 與 antenna test systems，並支援 mmWave converters 與 direct IF access。[40][70] | Kuiper UT 來源未提供儀器型號、校準標準或 measurement uncertainty，且 unresolved 指出仍需補充 OTA chamber、VNA、signal analyzer、network emulator、satellite channel emulator 的具體設備與校準方法。[40][42] |\n| R&S ZNA / R&S ZNA67EXT | Network infrastructure higher frequencies / mmWave / early 6G | ZNA67EXT 是基於 R&S ZNA67 的 110 GHz Vector Network Analyzer System，型號包含 2-port / 4-port 與 standard power / high power variants；Network Infrastructure mapping 明列 R&S ZNA、R&S ZNA67EXT、mmWave front ends / frequency converters。[34][49] | MWC2025 network infrastructure solution mapping 直接把 R&S ZNA / ZNA67EXT 放在 higher frequencies / mmWave / early 6G 類別，因此這是 wireless infrastructure 中最直接連到 VNA 產品線的證據。[49] | Industry drivers 包含 More Spectrum Bands / Higher Frequencies / Expanding Bandwidth；solution mapping 將 Higher frequencies / mmWave / early 6G 對應到 R&S ZNA、R&S ZNA67EXT、mmWave front ends / frequency converters。[49][50] | Network Infrastructure T&M drivers 的 unresolved 指出需回查原 PPTX 圖片與 speaker notes，以確認產品連線、license / option 與測試流程。[51] |\n| R&S ZNA with R&S ZNA-B15 | RF front-end / RFFE 控制與量測 | R&S ZNA-B15 RFFE GPIO interface 的 models .02 and .03 提供 two independent MIPI RFFE busses；model .03 提供 voltage and current measurement with switchable source resistance，32 internal ADC channels 可同時量測每個 RFFE 與 GPIO pin 的 voltage and current。[6] | LEO 地面設備與用戶終端核心包含 RF front-end，Direct-to-Cell 供應鏈也涵蓋 RF front-end；ZNA-B15 提供 RFFE / GPIO 控制與電壓電流量測，是 RF front-end 測試對接線索。[7][8][6] | 市場來源把低軌衛星地面設備與用戶終端主題集中於相控陣列天線、Ku/Ka-band、RF front-end 與系統整合能力，並把 Direct-to-Cell 主題涵蓋 satellite-side antenna、RF front-end、baseband、衛星內建基地台、手機品牌與電信商服務方案。[7][8] | 目前來源沒有直接說 ZNA-B15 已用於某個 LEO、Direct-to-Cell 或 RF front-end 客戶測試流程；只能說市場需求與產品能力可對接。[6][7][8] |\n| Network analyzer 類別，未指定型號 | Wireless regulatory / certification lab | 來源只列 primary test instruments 類別包含 network analyzer，未指定 R&S VNA 型號、option、頻率範圍或測試配置。[58] | 無線產品市場准入需要 regulatory compliance、industry certification 與 operator acceptance testing；regulatory test source 明列 network analyzer 是實驗室儀器類別之一。[60][58] | Wireless products 的 market access approval testing 被分成 Regulatory Compliance Test、Telecom Industry Certification Test、Cellular Network Operator Acceptance Test；primary test instruments for wireless regulatory test labs 包含 network analyzer。[60][58] | 來源未把 network analyzer 指定為 Vector Network Analyzer，也未列 ZNA / ZNB / ZNL 型號、option、校準方法或 uncertainty。[58] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| LEO / Kuiper 類 User Terminal OTA 暗室 | R&S ZNA / ZNA67 搭配 mmWave converter support、direct IF access 與 antenna measurement system 相關配置；具體 option 以 ZNA-K8、ZNA-B8、ZNA-B26 為知識庫已列線索。[61][64][70] | 以「VNA + signal analyzer」支援背景扣除、元素 A/P 校準、波束表生成、增益誤差與指向誤差管控。[40] | Kuiper 來源未提供 VNA 型號、校準標準、measurement uncertainty 或正式 test plan，需回查原始 PPTX 或正式 test plan。[42] |\n| LEO 衛星終端與相控陣列天線供應鏈 | R&S ZNA / ZNA-B15 作為 RF front-end / RFFE / GPIO 控制與量測線索，搭配 ZNA 的 phase-coherent sources、true receivers 與 antenna array test 支援。[6][70] | 供應鏈中地面設備與用戶終端核心為相控陣列天線與 RF front-end，相關公司能力包含相位陣列天線製造、Ku / Ka-band 主動式相控陣列天線、RF front-end 與系統整合。[45][46] | 目前未有來源證明特定廠商採用 R&S ZNA 或 ZNA-B15，也未提供客戶案例或設備清單。[45][6] |\n| Network infrastructure mmWave / early 6G R&D | R&S ZNA / ZNA67EXT、mmWave front ends / frequency converters。[49] | MWC2025 solution mapping 將 R&S ZNA / ZNA67EXT 明列於 Higher frequencies / mmWave / early 6G，industry drivers 包含 higher frequencies 與 expanding bandwidth。[49][50] | 該來源 unresolved 指出仍需回查原 PPTX 圖片與 speaker notes，以確認產品連線、license / option 與測試流程。[51] |\n| Wireless regulatory / certification labs | Network analyzer 類別；若需 R&S 型號，知識庫目前未指定。[58] | 法規測試來源明列 wireless regulatory test labs 的 primary test instruments 包含 network analyzer，且 wireless products 需要 regulatory compliance、industry certification 與 operator acceptance testing。[58][60] | 來源沒有說 network analyzer 等同 VNA，也沒有列 ZNA / ZNB / ZNL 型號、頻率、option 或測試不確定度。[58] |\n| RF components、high-frequency PCB、RFFE module 驗證 | R&S ZNA 或 ZNB3000 / ZNB3044 作為 VNA 候選；ZNA 側有 noise figure、mmWave converter、deembedding、RFFE GPIO interface 線索，ZNB3000 側有最高 54.0 GHz upgrade 與 mmWave converter LO/IF option 線索。[64][6][38][33] | LEO 供應鏈包含高頻 PCB、RF 元件、GaAs、低軌衛星與基地台高頻材料，地面終端核心包含 RF front-end。[43][44][45] | 目前來源沒有直接把 ZNA 或 ZNB3000 指定到這些廠商或元件測試流程，因此只能作為產品能力對市場需求的對接線索。[43][64][33] |\n### 限制\n- 目前 vault 沒有可引用的市場規模、客戶採購、VNA 滲透率或機會排名資料，因此「strongest」只能解讀為「目前證據最直接、最完整」，不能解讀為市場最大或成交機率最高。[71][51]  \n- Kuiper UT 測試流程雖直接列出 VNA，但來源未提供儀器型號、校準標準或 measurement uncertainty，且 unresolved 明確要求補充具體設備與校準方法。[40][42]  \n- Network infrastructure mapping 直接列出 R&S ZNA / ZNA67EXT，但 unresolved 指出仍需回查原 PPTX 與 speaker notes 才能確認產品連線、license / option 與測試流程。[49][51]  \n- Regulatory test 來源只說 primary test instruments 包含 network analyzer，未指定 VNA 型號或 R&S 產品線，因此不能把它改寫成 ZNA / ZNB / ZNL 的已驗證法規測試方案。[58]  \n- 低軌衛星市場報告提供 2026-09-15 的供應鏈與市場敘事，但部分數字與公司說法未提供逐項引用、報告名稱、網址、頁碼或方法論，因此不可延伸推算公司營收或採購量。[71]\n\n來源：\n[6] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[7] Wiki：2026台灣無線通訊代工製造產業_技術規格與市場分析報告（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`HSD PCB image 18.md`）\n[8] Wiki：2026台灣無線通訊代工製造產業_技術規格與市場分析報告（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`HSD PCB image 18.md`）\n[33] Wiki：R&S ZNB3000（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[34] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）\n[38] Wiki：R&S ZNB3044（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[40] Wiki：Kuiper UT 測試流程（來源：`Kuiper UT Test & Supply Chain.md`）\n[42] Wiki：Kuiper UT 測試流程（來源：`Kuiper UT Test & Supply Chain.md`）\n[43] Wiki：低軌衛星零組件與地面終端供應鏈（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`User Terminal.md`）\n[44] Wiki：低軌衛星零組件與地面終端供應鏈（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`User Terminal.md`）\n[45] Wiki：低軌衛星零組件與地面終端供應鏈（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`User Terminal.md`）\n[46] Wiki：相控陣列天線（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`Beamforming.md`、`User Terminal.md`）\n[49] Wiki：Network Infrastructure T&M drivers（來源：`MWC2025---WIC-INFRA.md`）\n[50] Wiki：Network Infrastructure T&M drivers（來源：`MWC2025---WIC-INFRA.md`）\n[51] Wiki：Network Infrastructure T&M drivers（來源：`MWC2025---WIC-INFRA.md`）\n[58] Wiki：Regulatory test for wireless devices with cellular technology（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[60] Wiki：Regulatory test for wireless devices with cellular technology（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[61] Wiki：ZNA_specs_en_5215-4652-22_v2400（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[64] Wiki：ZNA_specs_en_5215-4652-22_v2400（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[70] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[71] Wiki：2026台灣無線通訊代工製造產業_技術規格與市場分析報告（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`HSD PCB image 18.md`）",
+          "evidence": {
+           "raw_citations": 21,
+           "facet_status": "not_assessed",
+           "missing_facets": null
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.3"
+           },
+           "trace": {
+            "trace_id": "trace-c2af0a9faca04e379a945d0aa62be281",
+            "request_id": "request-c2af0a9faca04e379a945d0aa62be281",
+            "span_id": "span-c2af0a9faca04e379a945d0aa62be281",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "Based on current vault evidence, what are the strongest opportunities for Vector Network Analyzer in Wireless Communication, and what evidence supports each opportunity?",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "ZNA_specs_en_5215-4652-22_v2400 › 與既有知識的關係\n- 本來源補齊 [[R&S ZNA]] 主系列，與既有 [[R&S ZNA67EXT]] 形成關聯：[[R&S ZNA67EXT]] 是 1.0 mm Vector Network Analyzer System，量測範圍 10 MHz to 110 GHz；本來源的 [[R&S ZNA67]] 是 67 GHz base VNA 型號，並可透過 [[mmWave converter support]] 與 accessories 延伸應用。\n- 本來源與既有 [[R&S FSW]]、[[R&S FSWP]]、[[R&S FSWX]] 等 spectrum / phase-noise analyzer 頁面在 [[Spectrum analyzer mode]]、[[Phase noise]]、[[Noise figure measurement]] 等功能上有橫向關聯，但本來源屬於 VNA 產品規格，不應與市場或技術背景合併。\n- [[R&S ZNA-K980]] HUMS 與既有其他產品頁的 [[Health and utilization monitoring service]] 有橫向關聯；本來源列出 SNMP、REST JSON、SCPI、device web 等 readout/display protocols。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+              },
+              "score": 13.521664
+             },
+             {
+              "text": "ZNA_specs_en_5215-4652-22_v2400 › 規格條件與資料定義\n- Specifications with limits：表示 warranted product performance；以 <、≤、>、≥、±、maximum、limit of、minimum 等符號標示；compliance 由 testing 確保或由 design 推導。\n- Non-traceable specifications with limits（n. trc.）：依 specifications with limits 指定與測試，但因缺乏可追溯至 national metrology standards 的 measuring equipment，product performance 不保證。\n- Specifications without limits：表示 warranted product performance；未特別標記時表示數值沒有或只有可忽略偏差。\n- Typical data（typ.）：representative information；若標示 <、> 或 range，代表約 80% instruments 在 production time 可達成的 performance，其他情況代表 mean value。\n- Nominal values（nom.）：representative value；production 期間不測試該 parameter。\n- Measured values（meas.）：individual samples 的 measurement results。\n- Uncertainties：coverage factor 2，依 Guide to the Expression of Uncertainty in Measurement（GUM），並考量 environmental conditions、aging、wear and tear。\n- 來源明確說明：non-traceable specifications with limits、typical data、nominal values、measured values 不由 Rohde & Schwarz 保證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+              },
+              "score": 12.15309
+             },
+             {
+              "text": "ZNA_specs_en_5215-4652-22_v2400 › 讀圖補充\n來源包含「【讀圖補充】原文這幾頁沒有文字層」；以下內容可信度低於正文，引用時應標示「[[ZNA_specs_en_5215-4652-22_v2400]]（讀圖）」。本次輸入的來源摘錄未提供圖片嵌入 wikilink，因此無法在 wiki 頁帶入原圖附件。\n\n- p001（讀圖）：封面可辨識 R&S®ZNA、VECTOR NETWORK ANALYZER、Specifications、Version 24.00、ROHDE&SCHWARZ、Make ideas real、ZNA - Vector Network Analyzer、R&S；背景有類似 Smith chart 的大型圓形網格圖；設備螢幕顯示多個黑底網格曲線圖視窗；前面板可辨識 Port 1、Port 3、Port 2；可辨識數值只有 Version 24.00。\n- p044（讀圖）：頁首 Version 24.00, April 2026；圖說為 Test set configuration for R&S®ZNAXx-B501 low power spurious reduction port 1。可辨識 Source、–20 dB、R&S®ZNAXx-B21 source step attenuator 0 dB to 70 dB / 10 dB、R&S®ZNAXx-B161 direct source monitor access、R&S®ZNAXx-B501 low-power spurious reduction 30 dB、R&S®ZNAXx-B31 receiver step attenuators 0 dB to 35 dB / 5 dB、Meas receiver、Ref receiver、Port 1、Source Out、Source In、Meas Out、Meas In、Ref Out、Ref In、Src Mon Out、10 dB。\n- p050（讀圖）：頁首 Version 24.00, April 2026；圖說為 Side view of the R&S®ZNA；可辨識尺寸數值 452.1、407.6、131、272.43、272.43、116.1、161.95、56.3、110.5；尺寸數值旁單位無法辨識。\n- p059（讀圖）：頁面幾乎空白，無實質內容；可辨識 Version 24.00, April 2026；Rohde & Schwarz R&S®ZNA Vector Network Analyzer；59。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+              },
+              "score": 11.692875
+             },
+             {
+              "text": "R&S ZNA\n[[R&S ZNA]] 是 Rohde & Schwarz 的 Vector Network Analyzer 系列，依 Version 24.00（April 2026）規格書涵蓋 [[R&S ZNA26]]、[[R&S ZNA43]]、[[R&S ZNA50]]、[[R&S ZNA67]]，頻率範圍從 10 MHz 延伸到最高 67 GHz。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 10.518342
+             },
+             {
+              "text": "R&S ZNA › 讀圖補充\n[[ZNA_specs_en_5215-4652-22_v2400]]（讀圖）包含 4 頁無文字層頁面的模型讀圖結果；可信度低於正文，不應用來推翻正文。來源摘錄未提供圖片嵌入 wikilink，因此本頁無法帶入原圖附件。\n\n- p001（讀圖）：封面可辨識 R&S®ZNA、VECTOR NETWORK ANALYZER、Specifications、Version 24.00、ROHDE&SCHWARZ、Make ideas real；前面板可辨識 Port 1、Port 3、Port 2。\n- p044（讀圖）：圖說為 Test set configuration for R&S®ZNAXx-B501 low power spurious reduction port 1；可辨識 R&S®ZNAXx-B21、R&S®ZNAXx-B161、R&S®ZNAXx-B501、R&S®ZNAXx-B31 與 Source / Meas / Ref 連接標示。\n- p050（讀圖）：Side view of the R&S®ZNA，尺寸數值 452.1、407.6、131、272.43、272.43、116.1、161.95、56.3、110.5；尺寸單位無法辨識。\n- p059（讀圖）：頁面幾乎空白，無實質內容。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 19,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 9.601355
+             },
+             {
+              "text": "R&S ZNA › R&S®ZNA-B15 RFFE GPIO interface 規格摘錄\n- Models .02 and .03 提供 two independent MIPI RFFE busses。\n- Connector type：25-pin D-Sub，female。\n- RFFE port 1 / 2 的 VIO、DATA、CLK 電壓範圍為 0 V to +2 V，1 mV step，maximum current 20 mA。\n- CLK configurable clock rate：31.25 kHz to 26 MHz。\n- GPIO 1 to GPIO 8：voltage range –5 V to +10 V；typ. –6 V to +12 V；voltage step size 5 mV；maximum current 20 mA。\n- GPIO 9 and 10：voltage range –5 V to +10 V；typ. –6 V to +12 V；voltage step size 5 mV；maximum current 100 mA。\n- Model .03 提供 voltage and current measurement with switchable source resistance；32 internal ADC channels 可同時量測每個 RFFE 與 GPIO pin 的 voltage and current。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 9.053155
+             },
+             {
+              "text": "2026台灣無線通訊代工製造產業_技術規格與市場分析報告 › 概念\n- [[Wi-Fi 7 網通設備代工製造]] — 2026 年台灣網通 ODM / OEM 成長主題，核心規格包含 320 MHz、4096-QAM、MLO、6 GHz 與散熱設計。\n- [[低軌衛星零組件與地面終端供應鏈]] — 來源中的 LEO 供應鏈主題，包含高頻 PCB、RF 元件、相控陣列天線、UT、系統整合與測試驗證。\n- [[手機直連衛星供應鏈]] — 來源中的 Direct-to-Cell 主題，涵蓋衛星端天線、RF front-end、baseband、衛星內建基地台、手機品牌與電信商服務方案。\n- [[網路通訊設備產業鏈]] — 既有頁面記錄未標示日期的網路通訊設備四層供應鏈；本來源提供 2026-09-15 的 Wi-Fi 7 / FWA / CPE 市場補充。\n- [[整體通訊產業鏈]] — 既有頁面記錄未標示日期的整體通訊產業鏈；本來源提供 2026-09-15 的無線通訊代工與衛星通訊補充。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+              },
+              "score": 11.380312
+             },
+             {
+              "text": "2026台灣無線通訊代工製造產業_技術規格與市場分析報告 › 重點摘要\n- 報告日期：2026-09-15；來源轉檔日期：2026-09-15。\n- 報告主張 2026 年台灣無線通訊代工製造產業呈現雙引擎成長：既有的 [[Wi-Fi 7 網通設備代工製造]]，以及新興的 [[低軌衛星零組件與地面終端供應鏈]]。\n- 在 [[Wi-Fi 7]] 部分，來源列出 [[IEEE 802.11be]]、320 MHz channel bandwidth、4096-QAM、[[MLO]]、STR、eMLSR、6 GHz band、thermal throttling 等技術規格，並指出台灣已於 2026 年全面開放 6 GHz 頻段 5925–6425 MHz。\n- 在台灣網通 ODM / OEM 廠商版圖部分，來源列出 [[智易]]、[[智邦]]、[[中磊]]、[[啟碁]]、[[建漢]]、[[友訊]]、[[合勤控]]、[[正文]]等廠商，並分別描述 2026 年動態與受惠程度。\n- 在 [[低軌衛星]] 供應鏈部分，來源將產業鏈分成衛星本體製造與關鍵材料、地面設備與用戶終端、系統整合與測試驗證、衛星營運商服務四大環節。\n- 衛星本體零組件表列 [[華通]]、[[昇達科]]、[[同欣電]]、[[穩懋]]、[[台燿]]，並將 [[華通]]定位為衛星用高頻高密度連接板 / HDI 廠商，將 [[台燿]]定位為高頻高速 [[CCL]] 材料供應商。\n- 地面設備與用戶終端表列 [[啟碁]]、[[耀登]]、[[鐳洋科技]]、[[稜研科技]]、[[濰元科技]]，主題集中於[[相控陣列天線]]、Ku/Ka-band、RF front-end 與系統整合能力。\n- 手機直連衛星部分，來源將 [[Direct-to-Cell]] 描述為一般 4G/5G 手機無需額外硬體、修改韌體或安裝特殊軟體即可直接連結低軌衛星的技術，並連到 [[3GPP Release 17]]與[[3GPP Release 18]]。\n- 市場數字包括：[[TrendForce]] 最新研究指出 2026 年全球手機直連衛星市場規模預估為 76 億美元、年成長率約 49%；來源未提供該 TrendForce 報告名稱、發布日期或頁碼。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+              },
+              "score": 8.10326
+             },
+             {
+              "text": "2026台灣無線通訊代工製造產業_技術規格與市場分析報告 › 與既有知識的關係\n- [[網路通訊設備產業鏈]]與[[整體通訊產業鏈]]多來自未標示日期的圖像來源；本來源有明確報告日期 2026-09-15，可作為 2026 年市場敘事補充，但仍需遵守來源自身限制。\n- [[華通]]既有頁面已記錄其在 [[HDI板]] / [[臺灣 PCB 產業鏈]]中的列名；本來源新增 LEO satellite PCB、SpaceX / Amazon Leo / OneWeb、泰國新廠與星鏈太空板市占率約 9 成等市場說法。\n- [[台燿]]既有頁面已記錄其在 [[AI PCB 概念股]]與 [[AI 伺服器 PCB 原物料台日韓供應鏈]]中的 CCL 列名；本來源新增低軌衛星與基地台高頻材料供應說法。\n- [[穩懋]]既有頁面只記錄其在第三代半導體 / GaAs 通訊射頻供應鏈概念股圖中的列名；本來源新增全球最大 GaAs 晶圓代工廠、衛星間高頻連結與手機直連衛星 RF 元件等市場說法。\n- [[TrendForce]]既有頁面記錄其作為 AI server PCB 供應鏈圖的來源標示；本來源新增 TrendForce 研究被引用於手機直連衛星市場規模，但未提供完整報告書目資訊。\n- [[建漢]]既有頁面主要記錄 [[HSD PCB image 18]] 中 T-Glass 圖卡列名；本來源將建漢寫為 Compal Broadband Networks、Cable/DSL broadband router ODM。兩者可能是同名、OCR / 讀圖誤植或不同公司，需保留矛盾。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+              },
+              "score": 6.213481
+             },
+             {
+              "text": "無線通訊認證實驗室資料清單 › TTC 毫米波測試量能線索\n[[低軌衛星通信終端設備技術規範與相關檢測]]（來源標示 111年08月）介紹[[電信技術中心]]毫米波頻段測試量能：\n\n- 5G FR2 毫米波天線縮距量測場 CATR。\n- 來源稱該 chamber 依據 3GPP 技術規範標準，已通過 TAF 認證。\n- 可支援主波發射頻段 3–40 GHz。\n- 不必要發射至 90 GHz。\n- 可量測 TRP、TIS、EVM。\n- Quiet Zone 可達 90 cm。\n\n同一來源另描述[[電信技術中心]]提供電信設備審驗認證服務，並協助研擬電信技術標準規範。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+              },
+              "score": 20.576966
+             },
+             {
+              "text": "無線通訊認證實驗室資料清單\n[[無線通訊認證實驗室資料清單]]原本由 [[Test House]] 提供待讀材料索引；[[低軌衛星通信終端設備技術規範與相關檢測]]新增了[[電信技術中心]]在 111年08月簡報中的毫米波頻段測試量能描述；[[無線通訊認證實驗室]]則補入 `無線通訊認證實驗室.pptx` 的簡報正文摘要。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+              },
+              "score": 11.597631
+             },
+             {
+              "text": "無線通訊認證實驗室資料清單 › 台灣認證實驗室線索\n[[無線通訊認證實驗室]]列出台灣領先認證實驗室：\n\n| 實驗室 | 來源列出的核心能力 | 來源列出的特色 |\n|---|---|---|\n| [[耕興]]（SPORTON） | 5G / Wi‑Fi / mmWave | 全球最大發證量、首張 Wi‑Fi 8 證書 |\n| [[SGS]] | EMC / RF / 安規 | 國際認可、GMA 一站式 |\n| [[電信技術中心]] / [[ISL]] | RF 認證、測試 | 台灣政府 6G 研究支援 |\n\n來源另列[[耕興]]亮點：30 MHz–325 GHz 全頻段測試能力、108 座測試場地、連續 10 年 FCC 最佳實驗室認證、10 米半電波暗室、OTA / SAR / [[相控陣列天線]]測試。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+              },
+              "score": 10.543307
+             },
+             {
+              "text": "NTN test and measurement aspects › R&S CMX500 與 TS8980\n來源將 [[R&S CMX500]] 描述為 5G NTN 測試平台：\n\n- 可作 one-box testing setup。\n- 可整合進 [[R&S TS8980 Conformance Test Platform]]。\n- 支援 NR-NTN、NB-NTN、DTC。\n- 可執行 RF、protocol、signaling、E2E application、mobility、application testing。\n- 支援 FR1、FR2 與 future FR3 regions 的 white paper level 描述；正式 frequency coverage 需回查產品 specs / heads / RF frontends。\n- 支援 Constellation Insight tool，可 load、configure、visualize、deploy satellites。\n- CMX500 hardware 同時可啟動 cells 數量有限；來源說目前一台 box 最多 six cells。\n\n[[R&S TS8980 Conformance Test Platform]]：\n\n- 補充並擴展 CMX500。\n- 支援 full type approval functionality。\n- 支援 multiple cells、out-of-band emission、spurious emission、interfering / blocking performance tests。\n- 作為 accredited / validated test platform 用於 conformance / certification。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 8.084725
+             },
+             {
+              "text": "NTN test and measurement aspects › NTN 對 T&M 的 paradigm change\n來源指出 [[NTN]] 改變傳統 wireless T&M 假設：\n\n- 傳統假設 UE mobile、network entities stationary。\n- NTN 需考慮 UE 與 network entities 兩者 mobility。\n- 測試條件需 reproducible、accurate、comparable，但 setup 需加入 high path loss、Doppler shift、time delay、delay variance、atmospheric effects、Faraday effect、scintillation、weather influences。\n- satellite 入軌後 maintenance / replacement 困難，使 simulation、software-assisted testing、digital twin、in-orbit monitoring 更重要。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 7.383227
+             },
+             {
+              "text": "NTN test and measurement aspects\n[[NTN test and measurement aspects]] 是 [[5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100]] 對 NTN device、satellite、SAN、payload、phased array antenna、network 與 production testing 的總覽，涵蓋 RF、protocol、RRM、LBS、conformance、OTA、field testing 與 software-assisted testing。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 6.632722
+             },
+             {
+              "text": "5G NTN validation and testing › 涉及的產品與能力口徑\n[[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]] 明示 [[Gatehouse Satcom]] gains access to the [[R&S CMX500]] platform，作為 joint effort 的一部分。\n\n但此來源是 PR，不是 [[R&S CMX500]] formal specifications；因此：\n\n- 可以說：[[R&S CMX500]] 是本合作中被明示使用的平台。\n- 可以說：合作方向包含 advanced orbit and channel emulation capabilities for NTN use cases。\n- 不可說：本來源證明某個 [[R&S CMX500]] option code、hardware configuration、frequency band、satellite orbit、channel model 或 3GPP release 已正式支援。\n- 正式配置仍需回 [[CMX500 NR-NTN configuration]]、[[CMX_Configuration_Guide_NR-NTN]]、[[CMX500_specs_en_5216-4127-22_v1100]] 與 [[CMX500_Features_CSW9-20-0_en_32]]。\n\n[[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]] 明示 [[R&S CMX500 OBT]]、[[R&S SMBV100B]] 與 [[MediaTek]] NTN-NR device as DUT 共同用於 demo setup：\n\n- [[R&S CMX500 OBT]] radio communication tester simulate the satellite base station。\n- [[R&S SMBV100B]] vector signal generator simulate different satellite constellations with its integrated GNSS option。\n- [[R&S CMX500]] operate in interactive callbox mode，讓 users trigger voice calls alongside RF-related measurements。\n\n[[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]] 明示 [[Viasat NB-NTN IoT test plan]] based on [[R&S CMX500]] one-box signaling tester：\n\n- [[R&S CMX500]] 被描述為 versatile solution designed for testing various NTN technologies，包括 [[NR-NTN]] 與 [[NB-NTN]]。\n- PR 稱 single instrument covers R&D through certification and carrier acceptance tests，並提供 reliable and repeatable results。\n- 此為 PR / solution-level claim；正式 configuration、license stack、measurement uncertainty、supported bands、NB-NTN test cases 與 carrier acceptance scope 未在來源中列出。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NTN validation and testing.md"
+              },
+              "score": 6.694939
+             },
+             {
+              "text": "5G NTN validation and testing › 來源中的測試目標\n依 [[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]]，[[Gatehouse Satcom]] 與 [[Rohde & Schwarz]] 的合作目標包含：\n\n- strengthen validation and testing of [[5G IoT-NTN]] and [[NR-NTN]] technologies。\n- 在市場從 specification work 走向 real-world implementation 時，改善 validation 方法。\n- 在 realistic and controlled laboratory conditions 下測試 5G NTN technologies。\n- further develop advanced orbit and channel emulation capabilities for NTN use cases。\n- 支援更準確的 satellite radio channel modelling。\n- 更 realistic testing of 5G NTN behavior across different scenarios。\n- 支援 faster validation cycles、earlier identification of system-level issues 與 stronger test conditions。\n- reduce technical uncertainty and accelerate time to market for the broader NTN ecosystem。\n\n依 [[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]]，MWC 2024 展示目標包含：\n\n- demonstrate a [[5G Non-Terrestrial Network]] [[New Radio]] connection based on latest [[3GPP Release 17]] specifications。\n- emulate a [[Low Earth Orbit]] satellite access node。\n- showcase 5G technology providing connectivity in areas without terrestrial coverage。\n- 展示 basic mobile services，例如 voice、messaging 與 low data rate services，面向 maritime、aeronautical 與 rural applications。\n- 在 interactive callbox mode 中讓 users trigger voice calls alongside RF-related measurements。\n- 評估 future NTN-NR devices powered by [[MediaTek]] NTN test platform 在不同 conditions 下的 performance and reliability。\n\n依 [[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]]，[[Viasat]] 與 [[Rohde & Schwarz]] 的 NB-NTN IoT test plan 目標包含：",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NTN validation and testing.md"
+              },
+              "score": 5.299187
+             },
+             {
+              "text": "5G NTN validation and testing › 來源中的測試目標\n- boost testing for [[Narrowband Non-terrestrial Networks]]（[[NB-NTN]]）[[IoT]] devices connecting via satellite。\n- thoroughly validate devices and confirm interoperability with [[Viasat]] network。\n- help ensure uninterrupted connectivity for satellite-based [[IoT]] applications。\n- ensure chipsets、modules and devices interoperate seamlessly with [[Viasat]] satellite network。\n- comply with [[3GPP Release 17]] standards。\n- uphold quality、performance and reliability for [[Viasat]] connectivity services in areas without terrestrial network coverage。\n- certification test plan entails protocol、performance and RF test scenarios。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NTN validation and testing.md"
+              },
+              "score": 4.823146
+             },
+             {
+              "text": "R&S ATS1800C › 來源中的定位\n依 [[TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02]]（2020-11-02）：\n\n- Slide 16 的 OTA testing portfolio 將 [[R&S ATS1800C]] 標示為 `FR2 UE conformance & CTIA`、`30 cm QZ`、`RF, RRM, PCT`。\n- Slide 19 標題為 `CATR with ATS1800C`。\n- Slide 20 標題為 `ATS1800C – compact 5G NR mmWave test chamber`。\n- Slide 20 描述其為 very compact and mobile far-field over-the-air test system，based on compact antenna test range technology。\n- Slide 20 說明其具備 state-of-the-art CATR reflector、optimized edges、high-precision surface finishing、high shielding effectiveness >90 dB、large 30 cm and 3GPP compliant quiet zone、spherical 3D positioner 與 built-in hardware triggering functionality。\n- Slide 20 稱其 suitable for conformance testing as specified by 3GPP, CTIA antenna performance testing and device beam characterization。\n- Slide 22 的 FR2 system configuration elements 將 [[R&S ATS1800C]] 與 [[R&S CMW500]] + [[R&S CMX500]]、IF boards & RRHs、RF connection box、[[R&S CMX-RF42]] 同列。\n\n依 [[5G NR Base station conformance testing - EN - UR_Public]]（2023-06）：\n\n- Slide 標題為 `ATS1800C conformance grade catr chamber`。\n- 來源位於 [[5G NR Base Station Conformance Testing]] 的 OTA measurement system set-ups / chamber section。\n- 來源語境連到 [[3GPP TS 38.141-2]] radiated conformance testing、[[CATR]]、OTA chamber types 與 FR2 OTA 測試。\n\n依 [[GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests]]（06.2020）：\n\n- [[R&S ATS1800C]] 是 compact antenna test range（CATR）test system。\n- 設計用於 5G NR antennas、modules、devices（user equipment, UE）的 characterization，涵蓋 R&D 到 conformance tests。\n- 支援 active 與 passive measurements，包括 3D antenna gain patterns、ACLR、EVM、EiRP、TRP、EiS。\n- 適合 FR2 base station conformance transmitter tests。\n- Ordering information：Compact antenna test range OTA test system，Order No. `1534.1800K02`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ATS1800C.md"
+              },
+              "score": 13.946247
+             },
+             {
+              "text": "R&S ATS1800C\n[[R&S ATS1800C]] 是 Rohde & Schwarz 的 compact antenna test range（CATR）OTA test system；來源 [[TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02]]（2020-11-02）將其放在 [[R&S TS8980FTA]] FR2 UE conformance / CTIA portfolio 中，標示 30 cm QZ、RF/RRM/PCT；[[5G NR Base station conformance testing - EN - UR_Public]]（2023-06）將其列為 conformance grade CATR chamber；[[GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests]]（06.2020）將其列為適合 FR2 base station conformance transmitter tests 的 CATR based 5G NR mmWave test chamber；[[GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests]]（06.2020）則將其列為 FR2 OTA base station receiver tests 的 OTA antenna test solution；[[MWC2025---WIC-INFRA]]（MWC 2025）再把它列為 Network Infrastructure OTA testing / densification portfolio 中的 chamber solution。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ATS1800C.md"
+              },
+              "score": 11.361641
+             },
+             {
+              "text": "R&S ATS1800C › 與 5G NR OTA base station tests 的關係\n- 依 [[GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests]]（06.2020），[[R&S ATS1800C]] 是 [[5G NR OTA Base Station Transmitter Tests]] 中可用的 OTA antenna test solution 之一，適用 FR2 base station conformance transmitter tests。\n- 依 [[GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests]]（06.2020），[[R&S ATS1800C]] 也是 [[5G NR OTA Base Station Receiver Tests]] 中可用的 OTA antenna test solution，適用 FR2 多數 receiver tests；但 7.6 OTA out-of-band blocking 與 7.7 OTA receiver spurious emissions 標示 TBC。\n- 來源與 [[R&S TS8991]]、[[R&S PWC200]] 並列為 R&S OTA antenna test solutions。\n- [[MWC2025---WIC-INFRA]]（MWC 2025）把 [[R&S ATS1800C]] 放在 OTA testing、FR2 compact test system 與 network densification / small cells portfolio 脈絡。\n- [[TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02]]（2020-11-02）則把 [[R&S ATS1800C]] 放在 [[R&S TS8980FTA]] FR2 UE conformance、CTIA、RF/RRM/PCT 與 30 cm quiet zone portfolio 脈絡。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ATS1800C.md"
+              },
+              "score": 8.10094
+             },
+             {
+              "text": "R&S TS8980 Conformance Test Platform › System architecture\n依 [[RS_TS8980FTA_PRE_Series_SystemManual_en_63]]：\n\n- [[R&S CONTEST]] 執行於所有 system configurations。\n- 在列出的 test system types 中，[[R&S CONTEST]] 執行於 system controller PC。\n- System controller PC 是標準 PC，作業系統為 Microsoft Windows 10 或 Windows 11。\n- System controller PC 執行 [[R&S CONTEST]] GUI、test applications、tools，並支援 devices 的 remote control。\n- 系統主要測試儀器為 [[R&S CMW500]] 或 [[R&S CMX500]]。\n- [[R&S CMW500]] 或 [[R&S CMX500]] 對 DUT 模擬 NR、LTE、WCDMA、TD-SCDMA、GSM 或 CDMA2000 network，建立 link 並執行 dedicated measurements。\n- 系統可包含 spectrum analyzer 或 vector signal analyzer，用於 DUT transmitter measurements。\n- 額外 signal generators、[[R&S CMW500]] 與 [[R&S CMX500]] 可包含 baseband fading，用於模擬 multi-path、Doppler 與 interference conditions。\n- 所有 devices 透過 cable set 與 connection box / switching box 耦合。\n- Auxiliary devices 可包含 power meter、power supply、climate chambers 或 vibration tables；外部設備可 remote control 並納入 automated testing process。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS8980 Conformance Test Platform.md"
+              },
+              "score": 13.534918
+             },
+             {
+              "text": "R&S TS8980 Conformance Test Platform › TS8980FTA-M1\n- `TS8980FTA-M1` full type approval systems 支援 RF 與 RRM OTA conformance test cases。\n- `TS8980FTA-M1` single-rack test systems 搭配 mmWave test chambers，例如 [[R&S ATS1800C]] 或 [[R&S ATS1800M]] CATR-based 5G NR mmWave test chamber。\n- `TS8980FTA-M1` 設計用於符合 [[TS 38.521-2]]、[[TS 38.521-3]] 或 [[TS 38.533]] 的 RF / RRM conformance test cases。\n- `TS8980FTA-M1` systems 提供基於 [[R&S CMW500]] 的 full signaling。\n- [[R&S CMX500]] 搭配 [[R&S CMXHEAD30]] remote radio head，擴充 [[R&S CMW500]] 對 5G NR FR1 與 FR2 的 signaling capabilities。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS8980 Conformance Test Platform.md"
+              },
+              "score": 10.456816
+             },
+             {
+              "text": "R&S TS8980 Conformance Test Platform › 來源中的角色（NR-NTN PR）\n依 [[Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP]]：\n\n- Test cases are conducted on the [[R&S TS8980 Conformance Test Platform]]、[[R&S TS-RRM]] and [[R&S CMX500]]。\n- 目的為 preparing the system’s upcoming validation by [[GCF]] and [[PTCRB]] for [[NR-NTN]] in [[NR FR1]]。\n- 測試領域包含 [[RF]]、[[RRM]] 與 [[PCT]]，但來源未指定 [[R&S TS8980 Conformance Test Platform]] 對應其中哪一個或哪些 domain。\n\n依 [[Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains]]：\n\n- All measurements were conducted on [[R&S TS8980 Conformance Test Platform]]、[[R&S TS-RRM]] and [[R&S CMX500]] in [[NR FR1]]。\n- 測試用於 verifying latest [[Samsung NR-NTN chipset]] from [[Samsung]] as DUT。\n- 來源把這些 measurements 連到 [[GCF]] validated [[3GPP Release 17]] [[NR-NTN]] conformance test cases across [[RF]]、[[RRM]] and [[PCT]] domains。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS8980 Conformance Test Platform.md"
+              },
+              "score": 7.404596
+             },
+             {
+              "text": "ZNB3000_specs_en_3647-5184-22_v0900 › p001（讀圖）\n- 可見文字：R&S®ZNB3000、VECTOR NETWORK ANALYZER、Specifications、Version 09.00、ROHDE&SCHWARZ、Make ideas real、ZNB Vector Network Analyzer。\n- 頁面為文件封面樣式，主體是 R&S ZNB3000 VECTOR NETWORK ANALYZER 儀器照片。\n- 儀器正面有大螢幕、右側實體按鍵與旋鈕、左右把手、前面板下方多個射頻連接埠。\n- 螢幕顯示多個網路分析儀量測圖窗；圖表細部標示、座標數值與按鍵文字多數無法辨識。\n- 可清楚辨識的數值只有 Version 09.00。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+              },
+              "score": 39.35827
+             },
+             {
+              "text": "ZNB3000_specs_en_3647-5184-22_v0900 › 與既有知識的關係\n- 本來源更新既有 [[R&S ZNB3000]] 系列頁面，補齊 extended power range order no.、manual / automatic calibration units、inline calibration units、switch matrices、test cables、hardware add-ons 與讀圖補充。\n- [[R&S ZNB3044]] 可透過 frequency upgrade option 達 54.0 GHz；既有 [[R&S ZNA67]] 依 Version 24.00 達 67 GHz，[[R&S ZNA67EXT]] 依 Version 09.00 達 110 GHz。這是不同產品線與不同文件，不合併。\n- 本來源列出 [[R&S ZNB3-K30]] noise figure measurement、[[R&S ZNB3-K8]] mmWave converter support、[[R&S ZNB3-K980]] HUMS 等功能，與既有 ZNA 系列頁面有功能層面的橫向連結，但 option code 與 order no. 不可互用。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+              },
+              "score": 8.379195
+             },
+             {
+              "text": "ZNB3000_specs_en_3647-5184-22_v0900 › 關鍵實體與概念\n- [[R&S ZNB3000]] — Vector Network Analyzer 系列入口，涵蓋 4.5 GHz、20 GHz、32 GHz、43.5 GHz base models 與 frequency upgrade options。\n- [[R&S ZNB3004]] — type N female connector，9 kHz to 4.5 GHz；with [[R&S ZNB3-B082]] / [[R&S ZNB3-B084]] 為 9 kHz to 9.0 GHz。\n- [[R&S ZNB3020]] — 3.5 mm ruggedized male connector，9 kHz to 20.0 GHz；with [[R&S ZNB3-B262]] / [[R&S ZNB3-B264]] 為 9 kHz to 26.5 GHz。\n- [[R&S ZNB3032]] — 2.92 mm ruggedized male connector，9 kHz to 32.0 GHz；with [[R&S ZNB3-B442]] / [[R&S ZNB3-B444]] 為 9 kHz to 43.5 GHz。\n- [[R&S ZNB3044]] — 1.85 mm ruggedized male connector，9 kHz to 43.5 GHz；with [[R&S ZNB3-B542]] / [[R&S ZNB3-B544]] 為 9 kHz to 54.0 GHz。\n- [[Vector Network Analyzer]]、[[Dynamic range]]、[[Measurement bandwidth]]、[[Effective system data]]、[[Noise figure measurement]]、[[mmWave converter support]]、[[Health and utilization monitoring service]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+              },
+              "score": 8.352039
+             },
+             {
+              "text": "ZNL_specs_en_3607-1071-22_v1000 › 重點摘要\n- Product data 適用條件：於環境溫度下存放 3 小時後，進行 30 分鐘 warm-up operation；符合 specified environmental conditions；遵守 recommended calibration interval；已執行所有 applicable internal automatic adjustments。\n- 文件定義：Specifications with limits 與 specifications without limits 代表保證性能；non-traceable specifications with limits、typical data、nominal values、measured values 不由 Rohde & Schwarz 保證；uncertainties 以 coverage factor 2 並依 GUM 計算。\n- 共通 VNA 量測：impedance 50 Ω；number of test ports 2；frequency resolution 1 Hz；number of measurement points per trace 1 to 100001；measurement bandwidth 1 Hz to 500 kHz，1/1.5/2/3/5/7 sequence。\n- VNA frequency range：[[R&S ZNL3]] 為 5 kHz to 3 GHz；[[R&S ZNL4]] 為 5 kHz to 4.5 GHz；[[R&S ZNL6]] 為 5 kHz to 6 GHz；[[R&S ZNL14]] 為 5 kHz to 14 GHz；[[R&S ZNL20]] 為 5 kHz to 20 GHz。\n- Test port connector：[[R&S ZNL3]]、[[R&S ZNL4]]、[[R&S ZNL6]]、[[R&S ZNL14]] 為 N, female；[[R&S ZNL20]] 為 3.5 mm, male。\n- Dynamic range 規格條件：0 dBm source power 與 transmission magnitude data trace RMS value 的差；test ports short-circuited；10 Hz measurement bandwidth；without system error correction。使用 1 Hz measurement bandwidth 可增加 dynamic range。\n- Measurement accuracy 有效條件：+18 °C to +28 °C；calibration 後溫度變化不超過 1 °C；依 port connector 使用 [[R&S ZV-Z270]] 或 [[R&S ZN-Z235]] calibration kit；TOSM/SOLT；measurement 與 calibration 的 frequency points、measurement bandwidth、sweep time 相同；不允許 interpolation。\n- Spectrum analysis 為 option：[[R&S ZNL3-B1]]、[[R&S ZNL4-B1]]、[[R&S ZNL6-B1]]、[[R&S ZNL14-B1]]、[[R&S ZNL20-B1]]。搭配 spectrum analysis option 時，[[R&S ZNL20-B1]] 的 spectrum analysis frequency range 可到 26.5 GHz。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNL_specs_en_3607-1071-22_v1000.md"
+              },
+              "score": 10.661823
+             },
+             {
+              "text": "ZNL_specs_en_3607-1071-22_v1000 › 讀圖補充\n下列內容來自來源中的「讀圖補充」，可信度低於正文，不能用來推翻正文。\n\n- [[ZNL_specs_en_3607-1071-22_v1000]]（讀圖 p001）指出封面可見 R&S®ZNL、VECTOR NETWORK ANALYZER、Specifications、Version 10.00、ROHDE&SCHWARZ、Make ideas real。產品照片機身可辨識 ZNL6、Vector Network Analyzer、10 kHz to 3 GHz；但正文與 ordering information 均明列 [[R&S ZNL6]] VNA frequency range 為 5 kHz to 6 GHz，因此本次以正文為準並在 [[R&S ZNL]]、[[R&S ZNL6]] 標註讀圖矛盾。\n- [[ZNL_specs_en_3607-1071-22_v1000]]（讀圖 p030）可見 Version 10.00, September 2025；30；Rohde & Schwarz R&S®ZNL Vector Network Analyzer，無可見表格、圖表、方塊圖、曲線圖或螢幕截圖。\n- [[ZNL_specs_en_3607-1071-22_v1000]]（讀圖 p031）可見 Version 10.00, September 2025；Rohde & Schwarz R&S®ZNL Vector Network Analyzer；31，無可見表格、圖表、方塊圖、曲線圖或螢幕截圖。\n- 來源提供的分段萃取文字未包含讀圖頁面的圖片嵌入 wikilink；本頁無法帶入原圖附件，需回查 raw/PDF 影像核對。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNL_specs_en_3607-1071-22_v1000.md"
+              },
+              "score": 10.540229
+             },
+             {
+              "text": "ZNL_specs_en_3607-1071-22_v1000 › 與既有知識的關係\n- 本來源新增並補強 [[R&S ZNL]] 產品線，與既有 [[R&S ZNA]]、[[R&S ZNB3000]]、[[R&S ZNA67EXT]] 同屬 Rohde & Schwarz [[Vector Network Analyzer]] 產品資料，但型號、文件版本、frequency range、measurement bandwidth 與 options 不同，需分頁保存。\n- [[R&S ZNL]] 同時使用部分 [[R&S FPL1003]] / FPL 系列中出現過的 option code，例如 [[R&S FPL1-B4]]、[[R&S FPL1-B5]]、[[R&S FPL1-B10]]、[[R&S FPL1-B30]]、[[R&S FPL1-B31]]、[[R&S FPL1-B40]]、[[R&S FPL1-K7]]、[[R&S FPL1-K9]]、[[R&S FPL1-K30]]；本次僅記錄來源明示的 ZNL 適用條件，不推論 FPL 與 ZNL 間的相容性。\n- 本來源屬於 Productions，內容可用於規格與報價前查核；市場採用、供應鏈、客戶案例不寫入本頁。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNL_specs_en_3607-1071-22_v1000.md"
+              },
+              "score": 7.48066
+             },
+             {
+              "text": "R&S ZNB3000 › 讀圖補充\n- [[ZNB3000_specs_en_3647-5184-22_v0900]]（讀圖）p001 為封面，顯示 R&S®ZNB3000、VECTOR NETWORK ANALYZER、Specifications、Version 09.00 與儀器正面照片；螢幕圖表細節多數無法辨識。\n- [[ZNB3000_specs_en_3647-5184-22_v0900]]（讀圖）p006 顯示 Measurement speed 圖解，條件為 firmware version 4.12 and Windows 11，並定義 TPREP、TSAMPLE、TPOST、TACO、TSWEEP、TRETRACE、TCYCLE；本頁未標出具體時間數值或單位。\n- [[ZNB3000_specs_en_3647-5184-22_v0900]]（讀圖）p035 為 Side view of the R&S®ZNB3000，可辨識 361.5、162.5、217、0、75.5、251.5 等尺寸數值，但圖上未清楚顯示尺寸單位；不覆蓋正文 dimensions。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3000.md"
+              },
+              "score": 9.090235
+             },
+             {
+              "text": "R&S ZNB3000 › Base units 與 ordering information\n| 型號 | 原文說明 | Order No. |\n|---|---|---:|\n| R&S®ZNB3004 2-port | Vector network analyzer，9 kHz to 4.5 GHz，N connector | 1351.5050.02 |\n| R&S®ZNB3004 4-port | Vector network analyzer，9 kHz to 4.5 GHz，N connector | 1351.5050.04 |\n| R&S®ZNB3020 2-port | Vector network analyzer，9 kHz to 20 GHz，3.5 mm connector | 1351.5050.22 |\n| R&S®ZNB3020 4-port | Vector network analyzer，9 kHz to 20 GHz，3.5 mm connector | 1351.5050.24 |\n| R&S®ZNB3032 2-port | Vector network analyzer，9 kHz to 32 GHz，2.92 mm connector | 1351.5050.32 |\n| R&S®ZNB3032 4-port | Vector network analyzer，9 kHz to 32 GHz，2.92 mm connector | 1351.5050.34 |\n| R&S®ZNB3044 2-port | Vector network analyzer，9 kHz to 43.5 GHz，1.85 mm connector | 1351.5050.42 |\n| R&S®ZNB3044 4-port | Vector network analyzer，9 kHz to 43.5 GHz，1.85 mm connector | 1351.5050.44 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3000.md"
+              },
+              "score": 8.748765
+             },
+             {
+              "text": "R&S ZNB3000 › 共通硬體 options（摘錄）\n| Code | 名稱 / 原文說明 | Order No. | 相依關係 / 限制 |\n|---|---|---:|---|\n| R&S®ZNB-B4 | Precision frequency reference (OCXO) | 1316.1769.02 | Retrofit |\n| R&S®ZNB3-B8 | mmWave converter LO/IF，2-port model | 1351.5109.02 | 適用 [[R&S ZNB3020]] only with R&S®ZNB3-B26x option、[[R&S ZNB3032]]、[[R&S ZNB3044]] |\n| R&S®ZNB3-B8 | mmWave converter LO/IF，4-port model | 1351.5109.04 | 適用 [[R&S ZNB3020]] only with R&S®ZNB3-B26x option、[[R&S ZNB3032]]、[[R&S ZNB3044]] |\n| R&S®ZNB-B10 | GPIB interface | 1311.5995.04 | remote control interface in line with IEEE 488、IEC 60625；Retrofit / On site |\n| R&S®ZNB-B12 | Device control | 1319.5088.02 | Direct control bus output；Retrofit / On site |\n| R&S®ZN-B121 | Direct control cable | 1323.9290.00 | Retrofit / On site |\n| R&S®ZN-B14 | Handler I/O | 1316.2459.05 | Keysight handler interface compatibility type 3；Retrofit / On site |\n| R&S®ZN-Z15 | RFFE GPIO interface external | 1325.5905.02 | Retrofit / On site |\n| R&S®ZN-Z15 | RFFE GPIO interface external with voltage/current measurement | 1325.5905.03 | Retrofit / On site |\n| R&S®ZNB-B81 | DC inputs | 1316.0004.02 | 4 DC inputs；maximum measurement bandwidth 10 kHz；Retrofit |\n| R&S®ZNB3-B19 | Additional removable SSD，512 Gbyte | 1351.5821.02 | Retrofit / On site |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3000.md"
+              },
+              "score": 6.943676
+             },
+             {
+              "text": "R&S ZNA67EXT › 型號與 base units\n來源列出同一 type `R&S®ZNA67EXT` 的 6 個 order no. / model suffix variants：\n\n| 說明 | Type | Order No. | Port / power 摘要 |\n|---|---|---:|---|\n| Vector network analyzer system, 110 GHz, 2 test ports, complete system based on R&S®ZNA67, 2-port model, two millimeterwave converter heads, standard power | R&S®ZNA67EXT | 1352.1888K12 | models .12；2 test ports；standard power |\n| Vector network analyzer system, 110 GHz, 2 test ports, complete system based on R&S®ZNA67, 4-port model, two millimeterwave converter heads, standard power | R&S®ZNA67EXT | 1352.1888K13 | models .13；2 test ports；standard power |\n| Vector network analyzer system, 110 GHz, 4 test ports, four millimeterwave converter heads, standard power | R&S®ZNA67EXT | 1352.1888K14 | models .14；4 test ports；standard power |\n| Vector network analyzer system, 110 GHz, 2 test ports, complete system based on R&S®ZNA67, 2-port model, two millimeterwave converter heads, high power | R&S®ZNA67EXT | 1352.1888K15 | models .15；2 test ports；high power |\n| Vector network analyzer system, 110 GHz, 2 test ports, two millimeterwave converter heads, high power | R&S®ZNA67EXT | 1352.1888K16 | models .16；2 test ports；high power |\n| Vector network analyzer system, 110 GHz, 4 test ports, four millimeterwave converter heads, high power | R&S®ZNA67EXT | 1352.1888K17 | models .17；4 test ports；high power |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+              },
+              "score": 14.420557
+             },
+             {
+              "text": "R&S ZNA67EXT › p001\n![[ZNA67EXT_specs_en_5216-3743-22_v0900-p001.png]]\n\n讀圖可辨識文字：R&S®ZNA67EXT、VECTOR NETWORK ANALYZER SYSTEM、Specifications、Specifications Version 09.00、ROHDE&SCHWARZ、Make ideas real，以及 logo 內的 R / S。讀圖描述指出封面照片包含一台主機設備、前方兩個外接模組/機箱與多條纜線；設備螢幕上的細部內容無法辨識。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 24,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+              },
+              "score": 13.357641
+             },
+             {
+              "text": "R&S ZNA67EXT › Unresolved\n- 來源未提供價格。\n- 來源未完整列出 [[R&S ZNA67]] interfaces，並指向 R&S ZNA specifications document **PD 5215.4652.22**。\n- Cable set `R&S®ZN-ZCASGO` 在轉換文字中有四個 order no.，但 `.02/.03/.04/.05` 的完整差異只部分可見；報價或配置前需回查原 PDF 表格。\n- Options 表格的 Service center upgrade / On-site upgrade 欄位在轉換文字中對齊不完整；本頁未據此推論升級方式。\n- 多個 option 的 `Requires` 欄位為空白；本頁以「來源未標示」記錄，未自行推論相依關係。\n- 讀圖 p001 的設備螢幕細小文字無法辨識。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 25,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+              },
+              "score": 8.218656
+             },
+             {
+              "text": "R&S ZNB3044 › Base unit 與 ordering information\n| 型號 | 說明 | Order No. |\n|---|---|---:|\n| R&S®ZNB3044 2-port | Vector network analyzer，2-port，9 kHz to 43.5 GHz，1.85 mm connector | 1351.5050.42 |\n| R&S®ZNB3044 4-port | Vector network analyzer，4-port，9 kHz to 43.5 GHz，1.85 mm connector | 1351.5050.44 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3044.md"
+              },
+              "score": 6.08222
+             },
+             {
+              "text": "R&S ZNB3044\n[[R&S ZNB3044]] 是 [[R&S ZNB3000]] 系列的 43.5 GHz Vector Network Analyzer 型號，依 Version 09.00（July 2026）base frequency range 為 9 kHz to 43.5 GHz，搭配 frequency upgrade option 可到 54.0 GHz。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3044.md"
+              },
+              "score": 4.882782
+             },
+             {
+              "text": "R&S ZNB3044 › 文件依據\n- 來源：[[ZNB3000_specs_en_3647-5184-22_v0900]]。\n- 文件：R&S®ZNB3000 Vector Network Analyzer Specifications。\n- 文件編號：PD 3647.5184.22。\n- 文件版本：Version 09.00。\n- 發布時間：July 2026。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3044.md"
+              },
+              "score": 4.74596
+             },
+             {
+              "text": "Kuiper UT 測試流程 › OTA 電波暗室配置\nSlide 7 列出 OTA 電波暗室資訊：\n\n- 核心設備：3 × 3 × 3 m 暗室、多探頭陣列 48–192 個、VNA 與信號分析儀。\n- 校準步驟：背景扣除、元素 A/P 校準、波束表生成。\n- 輸出品質：增益誤差 < 0.5 dB、指向誤差 < 0.5°、模式完整性。\n\n此段可連到 [[Phased Array OTA testing]]、[[相控陣列天線]]與 [[低軌衛星終端設備檢測]]，但來源未提供儀器型號、校準標準或 measurement uncertainty。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+              },
+              "score": 20.357119
+             },
+             {
+              "text": "Kuiper UT 測試流程 › 系統整合與現場試驗\nSlide 11 的系統整合測試：\n\n- 基帶 / [[Amazon Prometheus SoC]]：協議棧驗證、資料處理 1Tbps 等級。\n- 加密與安全：[[AWS]] 整合，私有網路延伸。\n- 端對端模擬：使用網路仿真器，模擬衛星延遲與衰落。\n- 合規檢驗：FCC / ITU 規範，PFD、雜散限制。\n\nSlide 12 的現場試驗目標：\n\n- Protoflight（2023）：100% 成功率，雙向視訊通話驗證。\n- 1000+ 單位測試（2024）：FCC 授權，多地點涵蓋驗證。\n- 實衛星速率（2025）：達成 1+ Gbps 下行、450 Mbps 上行。\n- 商用化準備（2026 Q1）：5 國上線服務驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+              },
+              "score": 12.400705
+             },
+             {
+              "text": "Kuiper UT 測試流程 › unresolved\n- 需要取得原始 PPTX 或正式 test plan 以確認表格、圖像與備註是否在 markdown 轉檔中遺失。\n- 需要確認 FCC 授權案號、ITU filing、測試地點、終端數量與 prototype / production 的區分。\n- 需要補充 OTA chamber、VNA、signal analyzer、network emulator、satellite channel emulator 的具體設備與校準方法。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+              },
+              "score": 11.680482
+             },
+             {
+              "text": "低軌衛星零組件與地面終端供應鏈 › 產業鏈結構\n[[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]]（2026-09-15）將低軌衛星產業鏈分為四大環節：\n\n1. 衛星本體製造與關鍵材料：高頻 [[PCB]]、[[射頻元件]]。\n2. 地面設備與用戶終端：[[User Terminal]] / UT，核心為[[相控陣列天線]]與 [[RF front-end]]。\n3. 系統整合與測試驗證。\n4. 衛星營運商服務。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/低軌衛星零組件與地面終端供應鏈.md"
+              },
+              "score": 16.431682
+             },
+             {
+              "text": "低軌衛星零組件與地面終端供應鏈 › 衛星本體零組件\n| 廠商 | 技術定位 | 關鍵規格 / 能力 | 來源中的市場地位 | 日期 |\n|---|---|---|---|---|\n| [[華通]] / Compeq | 衛星用高頻高密度連接板 / [[HDI]] | 來源稱掌握 [[SpaceX]]、[[Amazon Leo]]、[[OneWeb]]等四大低軌衛星業者訂單；泰國新廠專門生產衛星板與伺服器板，以因應非中非台供應鏈需求 | 全球低軌衛星 PCB 龍頭；來源稱星鏈太空板市占率約 9 成 | 2026-09-15 |\n| [[昇達科]] / GCS | 微波與毫米波 RF 元件 | 來源稱 2026 年首季衛星營收占比約 8 成，主要供應濾波器、雙工器等高頻元件 | 台股中血統最純的低軌衛星概念股，毛利率高 | 2026-09-15 |\n| [[同欣電]] / Sunwaytop | 高頻陶瓷封裝 RF transceiver module | 來源稱以高頻陶瓷封裝技術切入 [[SpaceX]] 衛星本體 RF transceiver module | 高技術門檻太空零組件供應商 | 2026-09-15 |\n| [[穩懋]] / WIN Semiconductors | [[GaAs]] 晶圓代工 | 來源稱產品涵蓋衛星間高頻連結與手機直連技術所需 RF 元件 | 全球最大 GaAs 晶圓代工廠；早期即參與 SpaceX 計畫的晶圓代工夥伴 | 2026-09-15 |\n| [[台燿]] / Elite Material | 高頻高速 [[CCL]] | 來源稱供應低軌衛星與基地台用高頻材料 | 衛星板上游關鍵材料供應商 | 2026-09-15 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/低軌衛星零組件與地面終端供應鏈.md"
+              },
+              "score": 11.352651
+             },
+             {
+              "text": "低軌衛星零組件與地面終端供應鏈 › 地面設備與用戶終端\n| 廠商 | 技術能力 | 來源備註 | 日期 |\n|---|---|---|---|\n| [[啟碁]] / WNC | 相位陣列天線製造能力；切入衛星通訊終端設備 | 全球通訊設備大廠，同時佈局 Wi-Fi、5G 基地台與衛星終端整合 | 2026-09-15 |\n| [[耀登]] / Amphenol-affiliated / Auden | 相位陣列天線研發；航太與衛星通訊高階天線量測 | 來源稱其為台灣少數同時具備航太、衛星通訊高階天線供應能力的廠商，產品已打入歐美供應鏈 | 2026-09-15 |\n| [[鐳洋科技]] / Rapidtek | Ku / Ka-band 主動式相控陣列天線；衛星平台、升降頻器到地面終端的系統整合 | 來源稱其 2025 年底發射黑鳶1號 8U 立方衛星，2026 年 3 月發射黑鳶2號；關鍵組件已部署於 Eutelsat 全球用戶終端 | 2026-09-15 |\n| [[稜研科技]] / TMYTEK | 模組化相位陣列天線架構，整合 RF front-end 與演算法 | 來源稱其與美商 [[Comtech]] 合作推出可動態切換 GEO / MEO / LEO 的多軌道地面終端整機，市場足跡遍及全球 35 個國家 | 2026-09-15 |\n| [[濰元科技]] / Foremostar | 個人可攜式衛星通訊終端裝置 | 來源稱其整合相位陣列、RF front-end、控制演算法與終端機構，整體功耗可降低約 30% | 2026-09-15 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/低軌衛星零組件與地面終端供應鏈.md"
+              },
+              "score": 9.850819
+             },
+             {
+              "text": "相控陣列天線 › 低軌衛星供應鏈來源\n[[低軌衛星零組件與地面終端供應鏈]] 依 [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]]（2026-09-15）整理：\n\n- 地面設備與用戶終端的核心為 [[相控陣列天線]] 與 [[RF front-end]]。\n- [[啟碁]] 被列為具相位陣列天線製造能力並切入衛星通訊終端設備。\n- [[耀登]] 被列為具相位陣列天線研發與航太 / 衛星通訊高階天線量測能力。\n- [[鐳洋科技]] 被列為 Ku / Ka-band 主動式相控陣列天線、衛星平台、升降頻器到地面終端的系統整合相關公司。\n- [[稜研科技]] 被列為模組化相位陣列天線架構與 RF front-end / 演算法整合相關公司。\n- [[濰元科技]] 被列為整合相位陣列、RF front-end、控制演算法與終端機構的個人可攜式衛星通訊終端裝置相關公司。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/相控陣列天線.md"
+              },
+              "score": 20.813122
+             },
+             {
+              "text": "相控陣列天線\n[[相控陣列天線]]是本 vault 中連接低軌衛星地面終端、[[Beamforming]]、mmWave antenna、satellite communications terminal、FWA CPE 測試線索與 [[User Terminal]] satellite terminal link hub 的主題；目前可追溯來源以市場報告與待讀連結為主，尚未建立正式天線工程定義。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/相控陣列天線.md"
+              },
+              "score": 8.867748
+             },
+             {
+              "text": "相控陣列天線 › User Terminal link hub\n[[User Terminal]]（連結狀態標示 January 7, 2026, 1:33 PM CST；raw converted 2026-09-17）把 satellite user terminal、flat-panel antenna、ESA、phased array testing 與 supply-chain 待讀資料集中在同一頁：\n\n- OneWeb / Eutelsat OneWeb user terminal 線索中出現 [[Intellian]] OW10H/OW11F、[[Hughes]] HL1100W/HL1120W、[[Kymeta]] Goshawk u8、[[Gilat ESR-2030Ku]]、[[ThinKom Ka2517]]、[[SatixFy ESMA]] 與 [[Intelsat ESA]]。\n- Kuiper technical references 包含 Microwave Journal / MVG phased array OTA testing methodology、[[Rohde & Schwarz]] Characterizing Active Phased Array Antennas、R&S NewSpace terminal testing challenges 與 [[Keysight]] phased array antenna design / test ebook。\n- Starlink references 包含 Rev4 teardown、beamformer comparison、antenna evolution、FCC Ku-band G/T / EIRP filings、R&S satellite ground station / terminal testing 與 GSOA VSAT standards。\n- 來源也列出 [[Qorvo]] time delay solutions 與 flat-panel antenna market 相關連結。\n\n上述資料尚未擷取外部正文，因此只能支持「這些 phased array / ESA / flat-panel antenna 待讀材料存在於 [[User Terminal]] link hub」，不可直接用來證明天線架構、元件數、頻段、EIRP、G/T、beam steering range 或測試流程。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/相控陣列天線.md"
+              },
+              "score": 7.560256
+             },
+             {
+              "text": "Network Infrastructure T&M drivers › Solution mapping 摘要\n依 [[MWC2025---WIC-INFRA]]：\n\n- [[Beamforming]] / [[Massive MIMO]]：[[R&S SMW200A]]、[[R&S SGT100A]]、[[R&S VSE]]、[[R&S NRQ6]]、[[R&S NRPM]]、[[R&S ZNBT]]。\n- [[OTA testing]] / base station conformance：[[R&S ATS1800C]]、[[R&S PWC200]]、5G NR Test Case Wizard、[[3GPP TS 38.141-2]]。\n- Higher frequencies / mmWave / early 6G：[[R&S SMA100B]]、[[R&S SMW200A]]、[[R&S SMM100A]]、[[R&S SMBV100B]]、[[R&S FSW]]、[[R&S FSVA3000]]、[[R&S PVT360A]]、[[R&S CMP200]]、[[R&S ZNA]]、[[R&S ZNA67EXT]]、mmWave front ends / frequency converters。\n- Digital design & power：[[VNA]]、probes、phase noise analyzer、power supplies、multimeter、oscilloscopes、signal source。\n- Network energy saving：[[R&S NGP800]]、[[R&S RTO]] / [[R&S RTP]]、RT-ZHD07、RT-ZC31、[[R&S SMW-K546]]、[[R&S FSW-K18]]。\n- [[O-RU testing]]：[[O-RAN test manager]]、[[R&S VSE]]、[[R&S FSW]] / [[R&S FSVA3000]]、O-RU tester C/U/S/M planes、[[R&S SMW200A]] / [[R&S SMBV100B]]、[[R&S PVT360A]]、[[R&S RTO6]]。\n- Network densification / small cells：[[R&S ATS1800C]]、[[R&S FSV]]、[[R&S FE44A]]、[[R&S CMQ200]]、[[R&S CMPHEAD30]]、Wireless Manufacturing Test（WMT）。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Network Infrastructure T&M drivers.md"
+              },
+              "score": 11.741888
+             },
+             {
+              "text": "Network Infrastructure T&M drivers › Industry drivers\n來源列出的 industry drivers 包含：\n\n| Driver | 來源語彙 | 對應知識頁 |\n|---|---|---|\n| MIMO / Beamforming | Increasing MIMO Degrees & Beamforming | [[Beamforming]]、[[Massive MIMO]]、[[MIMO]] |\n| OTA | Over-The-Air | [[OTA testing]]、[[5G NR Base Station Conformance Testing]] |\n| Spectrum / frequency | More Spectrum Bands / Higher Frequencies / Expanding Bandwidth | [[More Spectrum Bands and Higher Frequencies]]、[[Early 6G RF testing]] |\n| Digital / power | Digital Design & Power | [[Digital Design & Power]]、[[Power Integrity]] |\n| Energy | Energy Efficiency / Network energy saving | [[Network energy saving]] |\n| Densification | Network Densification | [[FWA CPE 測試與驗證]]、[[Small Cell BTS 測試資料清單]] |\n| Economic efficiency | Cost Efficiency / Flexibility | [[HUMS]]、[[Floating Licensing Models]] |\n| Private networks | Private Networks | [[Private Networks]] |\n| Open RAN | Disaggregation & Virtualization / Towards Open RAN based networks | [[O-RU testing]] |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Network Infrastructure T&M drivers.md"
+              },
+              "score": 11.308407
+             },
+             {
+              "text": "Network Infrastructure T&M drivers › unresolved\n- 需要回查原 PPTX 圖片與 speaker notes，以確認產品連線、圖中箭頭、license / option 與測試流程。\n- [[O-RAN Alliance WG4 Conformance Specifications]]、[[ETSI ES 202 706-1]]、[[3GPP TS 38.141]] 的版本未標示。\n- [[R&S CMPHEAD30]]、[[R&S CMQ200]]、[[R&S NRPM]]、[[R&S ZNBT]]、[[R&S NGP800]] 等產品仍需 formal product sources 補強。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Network Infrastructure T&M drivers.md"
+              },
+              "score": 4.990768
+             },
+             {
+              "text": "Wi-Fi over mmWave Technology › 測試需求\n依 [[R&S for JIO Project]] 與 [[R&S solution for Jio project_202509_r3]]，WoMT 測試至少包含：\n\n- OTA precision measurement：使用 [[R&S ATS1800C]] CATR chamber。\n- TX analysis：[[EIRP]]、[[TRP]]、[[ACLR]]、EVM under Wi-Fi 7 modulation。\n- RX analysis：[[EIS]] sensitivity verification。\n- Spurious：Rx / OOB spurious emissions monitoring。\n- Occupied bandwidth。\n- Native Wi-Fi / IF / IB band：[[R&S CMP180]]。\n- mmWave signal generation and analysis：[[R&S CMP200]] / [[R&S CMPHEAD50]]。\n- R&D fine tuning：[[R&S FSW67]] 與 signal sources。\n- Production / manufacturing setup：[[R&S CMQ200]] 與 automation SW WMT 只作為來源列名，尚無詳細流程。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi over mmWave Technology.md"
+              },
+              "score": 10.78581
+             },
+             {
+              "text": "Wi-Fi over mmWave Technology › 架構與用途\n來源中的 WoMT 架構可整理為：\n\n1. 產生或處理 native [[Wi-Fi 7]] / IEEE 802.11be signal。\n2. 透過 [[AiP]] / antenna-in-package module 執行 integrated antenna 與 up-conversion。\n3. 將信號搬移到 27 GHz mmWave band，來源以 n257 / n258 表示。\n4. 用於 Integrated Radio CPEs 與 WoMT-AP。\n5. 在 RD / manufacturing setup 中分成 WIFI IB band 與 WIFI mmWave path。\n6. 透過 OTA / RF test 確認 EVM、[[EIRP]]、[[TRP]]、[[ACLR]]、[[EIS]]、occupied bandwidth 與 Rx / OOB spurious emissions。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi over mmWave Technology.md"
+              },
+              "score": 5.522521
+             },
+             {
+              "text": "Wi-Fi over mmWave Technology › 來源定義\n依 [[R&S for JIO Project]]：\n\n- WoMT project 的完整描述出現在 slide 1：`Technical Achievements and Measurement Results for JIO WoMT Project`。\n- Slide 3 說核心問題是 [[Wi-Fi 7]] 原生運作於 2.4 / 5 / 6 GHz，而 27 GHz、n257 / n258 屬 [[3GPP]] mmWave bands。\n- Slide 3 說目前缺乏 Wi-Fi operating in mmWave bands 的 established global test standards。\n- Slide 4 說 transmission principle 是透過 [[AiP]] modules 將 Wi-Fi 7 signals up-convert 到 27 GHz mmWave band。\n- Slide 4 說 device types 包含 Integrated Radio CPEs 與 WoMT-AP（Access Point）。\n- Slide 8 提到 test basis 為 `Standard for Wi-Fi over mmWave (n257, n258)`。\n\n依 [[R&S solution for Jio project_202509_r3]]：\n\n- 來源未重新定義 WoMT，但在 Jio project RD and manufacturing setup 中明確分出 WIFI IB band 與 WIFI mmWave。\n- [[R&S CMP180]] 被放在 WIFI IB band / native Wi-Fi testing path。\n- [[R&S CMP200]] 與 [[R&S CMPHEAD50]] 被放在 WIFI mmWave path。\n- RD site 以 [[R&S ATS1800C]]、[[R&S FSW67]]、[[R&S SMM100A]] 做 Tx / Rx measurement。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi over mmWave Technology.md"
+              },
+              "score": 5.412754
+             },
+             {
+              "text": "R&S WoMT 測試方案 › 儀器角色\n| 儀器 / 軟體 | 來源中的角色 | 使用限制 |\n|---|---|---|\n| [[R&S CMP180]] | Native Wi-Fi / WIFI IB band、Wi-Fi 7 with 2x SA/SG、RD and manufacturing site setup | 簡報規格不得覆蓋 [[R&S CMP180]] formal specifications；variant 與 500 MHz bandwidth 條件需查正式頁 |\n| [[R&S CMP200]] | Compact FR2 mmWave VSA / VSG、IF 4–20 GHz + RRH 24–44 GHz、WIFI mmWave path | 本來源概述不等於完整 CMP200 / CMPHEAD formal specs |\n| [[R&S CMPHEAD50]] | mmWave remote radio head，用於 CMP200 path | 來源 slide 4 僅列名，未提供 full spec |\n| [[R&S ATS1800C]] | OTA / CATR chamber、beam characterization / verification、Tx / Rx measurement | 與正式 OTA chamber application notes 分層保存 |\n| [[R&S CMQ200]] | Production test / manufacturing setup 相關 chamber 線索 | 來源未提供 CMQ200 規格、DUT fixture 或 shielding data |\n| [[R&S AMS32]] | Full spec setup 中的 automation / measurement software 線索 | 來源未提供版本、license 或 workflow |\n| [[R&S FSW67]] | Signal analyzer / spectrum analyzer，用於 RD site、transient / unwanted emissions / WLAN R&D | 來源 slide 23 為 appendix overview，正式 specs 另查 |\n| [[R&S SMM100A]] | RD site setup 中標示為 signal generator | 來源未給 SMM100A 頻率上限；需避免與 SMA100B 67 GHz混用 |\n| [[R&S SMA100B]] | Appendix slide 24 的 signal generator spec 範例，8 kHz to 67 GHz | 來源未明確說 SMA100B 被納入 Jio RD site setup，只能作 appendix 方案線索 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S WoMT 測試方案.md"
+              },
+              "score": 11.883026
+             },
+             {
+              "text": "R&S WoMT 測試方案 › RD site setup\n依 [[R&S solution for Jio project_202509_r3]] slide 5，RD site setup 包含：\n\n- [[R&S FSW67]] signal analyzer。\n- [[R&S ATS1800C]]。\n- Tx measurement。\n- [[R&S SMM100A]] signal generator。\n- Rx measurement。\n\n依 [[R&S for JIO Project]]，RD / OTA precision measurement 也以 [[R&S ATS1800C]] CATR chamber、[[R&S FSW67]] analyzer 與 signal sources 做 TX / RX verification。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S WoMT 測試方案.md"
+              },
+              "score": 6.101502
+             },
+             {
+              "text": "R&S WoMT 測試方案 › 測試目標與技術背景\n依 [[R&S for JIO Project]]：\n\n- [[Wi-Fi 7]] 原生運作於 2.4 / 5 / 6 GHz，而 project deck 描述的 WoMT 目標是透過 [[AiP]] modules 將 Wi-Fi 7 signals up-convert 到 27 GHz mmWave band。\n- 來源稱 27 GHz、n257 / n258 屬 [[3GPP]] mmWave bands，且全球缺乏 Wi-Fi operating in mmWave bands 的既有 test standards。\n- device types 包含 Integrated Radio CPEs 與 WoMT-AP。\n- 測試與標準化敘事包含 [[SGS]]、Indian Government、measurement procedures 與 formal WoMT standard proposal，但未提供正式文件。\n\n依 [[R&S solution for Jio project_202509_r3]]：\n\n- 測試方案分為 full spec、RD and manufacture site、RD site、ref. spec 與 appendix。\n- RD / manufacturing setup 顯示 native Wi-Fi / IB band 與 mmWave path 分工：[[R&S CMP180]] 處理 WIFI IB band，[[R&S CMP200]] 搭配 [[R&S CMPHEAD50]] 處理 WIFI mmWave。\n- RD site setup 顯示 [[R&S FSW67]]、[[R&S ATS1800C]]、[[R&S SMM100A]] 與 Tx / Rx measurement。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S WoMT 測試方案.md"
+              },
+              "score": 5.789171
+             },
+             {
+              "text": "Regulatory test for wireless devices with cellular technology › 重點摘要\n- 來源將 [[EN 303 981]] 測試描述為 antenna characterizations 的 radiated measurement，列出 antenna beam pointing、off/on-axis spurious radiation、carrier suppression / cessation、blocking performance、adjacent signal selectivity、image frequency rejection、WBES location / identification、control and monitoring functions、receive antenna off-axis gain pattern，並連到 [[R&S SMBV100B]]、[[R&S ELEKTRA]]、[[R&S TS8996]]。\n- 來源列出 FCC CFR47 §25 Mobile Satellite Service / Mobile Earth Station test items：RF output power、occupied bandwidth、emission mask within 25% of authorized BW、out of band emissions、additional unwanted emission 1559–1610 MHz、carrier-off state emissions 1559–1610 MHz、frequency stability，並提到 ANSI C63.26 / FCC KDBs。\n- 最後來源把 primary test instruments for wireless regulatory test labs 分成 wireless communication tester、EMI test receiver、signal & spectrum analyzer、network analyzer、vector signal generator、broadband amplifier 等類別。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+              },
+              "score": 10.608221
+             },
+             {
+              "text": "Regulatory test for wireless devices with cellular technology › 重點摘要\n- 來源指出 smartphone Art 3.3g / [[Delegated Regulation (EU) 2019-320]] / E112 是沒有 ETSI EN standard 的 regulatory compliance requirement；當沒有 EN standard available 時需 Notified body involved，並稱 [[R&S TS-LBS]] 是 first test solution available to perform the necessary LBS compliance tests。\n- [[FCC 無線設備法規測試]]部分列出 [[47 CFR]]、[[ANSI C63.26]]、[[ANSI C63.10]]、[[IEEE Std 1528-2013]]、[[C63.19]] 等測試依據，並列出 licensed cellular CFR47 test items：RF power output、modulation characteristics、occupied bandwidth、band edge、spurious emissions、frequency stability、peak to average ratio、field strength of spurious radiation。\n- 來源以 [[ITU-R SM.329-12]] 與 [[47 CFR §2.1057]] 對照 CE RED / FCC 的 frequency range：5G NR FR1 的 CE RED 30 MHz–26 GHz、FCC 9 kHz–40 GHz；5G NR FR2 的 CE RED 30 MHz–90 GHz、FCC 9 kHz–200 GHz；並提到 [[R&S FSV3000]] / [[R&S FSVA3000]]、[[R&S FSW]]、[[R&S ESW]]。\n- [[NTN 裝置法規測試]]部分把 NTN device implementation 分成 proprietary、3GPP < R16、3GPP R17 NTN-IoT、reuse spectrum assets / 3GPP unmodified UE 等路徑，例子包含 iPhone 14 / Globalstar、Qualcomm / Iridium、MTK / Bullitt / Skylo、AT&T / AST Space Mobile、T-Mobile / Starlink、Optus / Lynk。\n- 來源列出衛星 / NTN 相關 EN standards：[[EN 301 441]]、[[EN 301 442]]、[[EN 301 444]]、[[EN 301 681]]、[[EN 302 574]]、[[EN 303 981]]，並將 iPhone14、Bullitt defy satellite link、StarLink Dish 作為 DoC / market product examples。\n- 來源將 [[EN 301 681]] 測試偏向 conducted measurement，列出 spectrum analyzer、signal generator、BER measure / system emulator / mobile radio tester 等 required instruments，並明示 latest [[R&S CMW500]] software can support 3GPP R17 NB-NTN signalling。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+              },
+              "score": 10.031918
+             },
+             {
+              "text": "Regulatory test for wireless devices with cellular technology › 重點摘要\n- 來源將 wireless products 的 market access approval testing 分成三類：[[Regulatory Compliance Test]]、[[Telecom Industry Certification Test]]、[[Cellular Network Operator Acceptance Test]]。Regulatory compliance 被描述為各區域法律面 market access 的必要條件；industry certification 例子包含 [[GCF]] / Cellular、[[Bluetooth SIG]]、[[FiRa]] / [[UWB]]、[[Wi-Fi Alliance]]；operator acceptance test 例子包含 AT&T、VzW、T-mobile、CMCC。\n- 來源主張 wireless products 需要 [[CE marking]] / [[FCC ID]]；test results 是 technical documentation 的一部分，需在產品投放市場前準備、可提供給 surveillance authorities，並自 placed on the market 起保存 10 years。\n- 來源列出 Ericsson Mobility Visualizer Jan 2023 的 mobile subscriptions 表，顯示 2022–2028 的 5G subscriptions 由 1046.006 增至 4974.568；但單位與表格數值口徑未在轉檔文字中完整標示。\n- [[CE RED 無線設備法規測試]]被整理成四類 essential requirements：Art 3.1a Health & Safety、Art 3.1b EMC、Art 3.2 Radio Spectrum、Art 3.3 Specific topics。來源列出多個 ETSI EN standards，例如 [[EN 300 328]]、[[EN 301 893]]、[[EN 303 687]]、[[EN 301 908-1]]、[[EN 301 908-13]]、[[EN 301 908-24]]、[[EN 301 908-25]]、[[EN 301 489-52]] 等。\n- 對 [[5G NR SAR testing]]，來源指出 5G NR network emulator is required to drive EUT to extreme transmission condition，multi-radio UE 的 average-SAR feature 需要 flexible signaling functions，涵蓋 cellular standards、Wi-Fi 與 Bluetooth；來源將 [[R&S CMW500]] / [[R&S CMX500]] 稱為 SAR / HAC signaling solution。\n- 對 Art 3.1b EMC，來源指出 EMC tests 需要 radio enabled 與 radio disabled conditions，因此 5G NR 也需要 signaling solution；mobile phone 仍需要 [[Audio Breakthrough]] test，從 GSM 到 VoLTE / VoNR by 5G。來源提到 [[R&S TS9982 EMS Test System]] 與 [[R&S TS9975 EMI Test System]]。\n- 對 Art 3.2 Radio Spectrum，來源指出 5G NR specification 包含 FR1 與 FR2；FR1 test setup stays conducted，FR2 test setup becomes radiated；並把 3GPP test cases、CTIA-OTA test cases、TRP / TRS、RSE 測試連到 [[R&S TS8991]] 與 [[R&S TS8996]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+              },
+              "score": 8.103899
+             },
+             {
+              "text": "ZNA_specs_en_5215-4652-22_v2400 › 重點摘要\n- 型號頻率範圍：\n  - [[R&S ZNA26]]：10 MHz to 26.5 GHz。\n  - [[R&S ZNA43]]：10 MHz to 43.5 GHz，可為 2.92 mm 或 2.4 mm ruggedized male test port connector。\n  - [[R&S ZNA50]]：10 MHz to 50 GHz。\n  - [[R&S ZNA67]]：10 MHz to 67 GHz。\n- 各型號提供 2 ports 或 4 ports base unit；test port impedance 為 50 Ω，DC block 為 standard。\n- Key performance 包含：dynamic range > 129 dB specification without options、147 dB typical with options、maximum attainable range up to 170 dB allowing full 2-port correction；sensitivity > –120 dBm at 1 Hz IF bandwidth specification without options，並有 –162 dBm measured with options（1 kHz measurement bandwidth normalized to 1 Hz）。\n- Measurement bandwidth：base unit 1 Hz to 1.5 MHz；搭配 [[R&S ZNA-K17]] increased IF bandwidth 30 MHz option 時為 1 Hz to 30 MHz。\n- Measurement speed 條件包含 firmware version 3.20、Windows 11 (64 bit)；例：10 MHz to 43.5 GHz、500 kHz measurement bandwidth、1601 points、2-port calibration 時 sweep time 96 ms nominal。\n- 4-port instruments：最多 4 sources，independently configurable、phase coherent、phase controlled；另有第 5 source 可作為 LO supply；每 port 有 2 true receivers，4-port model 總計 8 true receivers，無 multiplexing。\n- 2-port instruments：最多 2 sources，independently configurable、phase coherent、phase controlled；另有第 3 source 可作為 LO supply；每 port 有 2 true receivers，2-port model 總計 4 true receivers，無 multiplexing。\n- Optional rear panel LO out 可支援 mmWave converters；4-port model 最多 4 個 converters，2-port model 最多 2 個 converters，無需 external signal generator；rear panel LO out typ. +25 dBm，最高 26.5 GHz。\n- [[R&S ZNA-K28]] continuous data recording 支援 infinite data point capture、circular buffer，並可透過 LAN 或 USB 連續資料傳輸。\n- [[R&S ZNA-B26]] direct IF access：IF input 可用於 mmWave converter 與 antenna measurement systems，bandwidth 1 GHz；IF output up to 2 GHz bandwidth 可用於 external pulse analysis。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+              },
+              "score": 7.363645
+             },
+             {
+              "text": "ZNA_specs_en_5215-4652-22_v2400 › 關鍵實體與概念\n- [[R&S ZNA]] — Vector Network Analyzer 系列，涵蓋 26.5 GHz、43.5 GHz、50 GHz、67 GHz 型號。\n- [[R&S ZNA26]] — 26.5 GHz 型號，3.5 mm ruggedized male connector。\n- [[R&S ZNA43]] — 43.5 GHz 型號，2.92 mm 或 2.4 mm ruggedized male connector。\n- [[R&S ZNA50]] — 50 GHz 型號，2.4 mm ruggedized male connector。\n- [[R&S ZNA67]] — 67 GHz 型號，1.85 mm ruggedized male connector。\n- [[Vector Network Analyzer]]、[[Dynamic range]]、[[Measurement bandwidth]]、[[Direct source and receiver access]]、[[Noise figure measurement]]、[[mmWave converter support]]、[[Phase-coherent source control]]、[[Health and utilization monitoring service]]、[[Time domain analysis]]、[[Deembedding]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+              },
+              "score": 7.201631
+             },
+             {
+              "text": "ZNA_specs_en_5215-4652-22_v2400 › 原文未解的問題\n- 來源有列出大量 options、accessories 與相依關係；本次 wiki 摘要保留主要可報價項目的 code、order no.、名稱與原文相依關係，但未逐字展開所有 calibration accessories、test cables、switch matrix extensions 的完整規格表。\n- 部分表格同時出現 spec.、typ.、meas. 或 nom. 數值；本摘要依原文標示保留，不自行調和。\n- 來源註明 Internal PC is subject to change without notice；因此 internal PC 規格需以此 Version 24.00（April 2026）為準。\n- [[R&S ZNA-K121]] RF off boot up 在本次來源摘錄中列出名稱，但未提供 Order No.；頁面標示為來源未標示。\n- 讀圖補充 p050 的尺寸數值旁單位無法辨識；不得推論為 mm 或其他單位。\n- 本次輸入摘錄未提供讀圖頁面的圖片嵌入 wikilink，故 wiki 無法帶入原圖供核對。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+              },
+              "score": 6.172428
+             },
+             {
+              "text": "ZNA_specs_en_5215-4652-22_v2400 › Option 與 licence 摘要\n- Hardware options：[[R&S ZNA-B4]] precision frequency reference、[[R&S ZNA-B5]] 2nd internal LO source、[[R&S ZNA-B7]] data streaming memory、[[R&S ZNA-B8]] mmWave converter LO、[[R&S ZNA-B12]] device control、[[R&S ZNA-B15]] RFFE GPIO interface、[[R&S ZNA-B19]] additional removable hard disk、[[R&S ZNA-B26]] direct IF access、[[R&S ZNA-B91]] trigger and control I/O board。\n- 型號依附 hardware options：direct source and receiver access、source step attenuators、receiver step attenuators、internal pulse modulators、3rd and 4th internal sources、2nd internal source and LO、source monitor access、low-noise amplifier、low-power spurious reduction、internal combiner。\n- Software / measurement options：[[R&S ZNA-K1]] spectrum analyzer mode、[[R&S ZNA-K2]] time domain analysis、[[R&S ZNA-K20]] extended time domain analysis、[[R&S ZNA-K4]] scalar mixer measurements、[[R&S ZNA-K5]] vector mixer measurements、[[R&S ZNA-K6]] phase coherent source control、[[R&S ZNA-K61]] true differential mode、[[R&S ZNA-K7]] measurements on pulsed signals、[[R&S ZNA-K17]] increased IF bandwidth 30 MHz、[[R&S ZNA-K8]] mmWave converter support、[[R&S ZNA-K9]] group delay measurements、[[R&S ZNA-K19]] 1 mHz frequency resolution、[[R&S ZNA-K28]] continuous data recording、[[R&S ZNA-K30]] noise figure measurement、[[R&S ZNA-K50]] uncertainty analysis、[[R&S ZNA-K51]] security write protection、[[R&S ZNA-K66]] speed improvement、[[R&S ZNA-K100]] SNP assistant、[[R&S ZNA-K121]] RF off boot up、[[R&S ZNA-K210]] EaZy deembedding、[[R&S ZNA-K220]] in-situ deembedding、[[R&S ZNA-K230]] smart fixture deembedding、[[R&S ZNA-K231]] Delta-L PCB characterization、[[R&S ZNA-K980]] health and utilization monitoring service。\n- 明確 excludes：[[R&S ZNA-K1]] spectrum analyzer mode cannot be combined with R&S®ZNA50-B312、R&S®ZNA67-B312、R&S®ZNA50-B511、R&S®ZNA67-B511。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+              },
+              "score": 5.624843
+             },
+             {
+              "text": "ZNA_specs_en_5215-4652-22_v2400 › 重點摘要\n這份來源是 **R&S®ZNA Vector Network Analyzer Specifications**，文件編號 **PD 5215.4652.22**，**Version 24.00**，發布時間 **April 2026**，涵蓋 [[R&S ZNA]] 系列與 [[R&S ZNA26]]、[[R&S ZNA43]]、[[R&S ZNA50]]、[[R&S ZNA67]] 四個型號。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+              },
+              "score": 3.977407
+             },
+             {
+              "text": "R&S ZNA › Measurement speed\n- Measurement speed 測試條件：firmware version 3.20、Windows 11 (64 bit)。\n- Acquisition time per point：1 MHz measurement bandwidth、IF filter analog wideband 時 1 µs；30 MHz measurement bandwidth 時 32 ns。\n- Linear frequency sweep 條件 201 points、10 GHz center frequency、200 MHz span：1 MHz measurement bandwidth、IF filter analog normal 時 time per sweep < 3.9 ms；sweep cycle time < 4.9 ms。\n- IEC/IEEE VXI11 over 1 Gbit/s LAN：201 measurement points、800 MHz start frequency、1 GHz stop frequency、1 MHz measurement bandwidth 的 measurement and data transfer time 為 14 ms / 13 ms；201 measurement points magnitude 的 data transfer time 為 1.7 ms / 0.9 ms。\n- Switching time between channels with a maximum of 2001 points：< 2 ms。\n- Continuous mode 不需要額外 data transfer time，因為 data transfer 與 measurement 同時進行。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 8.735796
+             },
+             {
+              "text": "R&S ZNA › 文件依據\n- 來源：[[ZNA_specs_en_5215-4652-22_v2400]]。\n- 文件：R&S®ZNA Vector Network Analyzer Specifications。\n- 文件編號：PD 5215.4652.22。\n- 文件版本：Version 24.00。\n- 發布時間：April 2026。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 6.936881
+             },
+             {
+              "text": "R&S ZNA › Key performance（Version 24.00）\n- Dynamic range：> 129 dB specification without options；147 dB typical with options；maximum attainable range up to 170 dB allowing full 2-port correction。\n- Sensitivity：> –120 dBm，1 Hz IF bandwidth，specification without options；–162 dBm，1 Hz IF bandwidth，measured with options。來源註明 –162 dBm 是以 1 kHz measurement bandwidth 量測後 normalized to 1 Hz。\n- Power sweep range：100 dB typical continuous electronic sweep range；可使用 mechanical step attenuators 位移 sweep range。\n- Source power linearity：0.2 dB typical，範圍 –40 dBm to +10 dBm。\n- Receiver compression：0.05 dB typical，up to +8 dBm at test port，referenced to –10 dBm。\n- Trace noise：0.005 dB specification RMS、0.002 dB typical RMS，條件為 10 GHz、100 kHz measurement bandwidth、0 dB reflection。\n- Speed example：10 MHz to 43.5 GHz、500 kHz measurement bandwidth、1601 points、2-port calibration 時 sweep time 96 ms nominal。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 6.085596
+             },
+             {
+              "text": "R&S ZNA › 重要 recommended setups\n- [[R&S ZNA-K5]] vector corrected converter measurements：recommended setup 為 4-port R&S®ZNA；需要 R&S®ZNA-K4、R&S®ZNA-B5、R&S®ZNA-B8 mmWave converter LO、R&S®ZN-ZM292 calibration mixer 與 calibration accessories。\n- [[R&S ZNA-K8]] mmWave converter support：two mmWave converters with 2-port R&S®ZNA，或 four mmWave converters with 4-port R&S®ZNA；需要 R&S®ZNA-K8、R&S®ZNA-B8、R&S®ZNA-B26、R&S®ZCAKN 與 accessories。Alternative setup：two mmWave converters with 4-port R&S®ZNA，需要 R&S®ZNA-K8、R&S®ZNAxx-B16、R&S®ZCAKN 與 accessories。\n- [[R&S ZNA-K9]] group delay measurements：4-port R&S®ZNA recommended setup 需要 R&S®ZNAxx-B213、R&S®ZNA-B5、R&S®ZNA-K9；2-port R&S®ZNA recommended setup 需要 R&S®ZNAxx-B212、R&S®ZNAxx-B52、R&S®ZNA-K9。\n- [[R&S ZNA-K30]] noise figure measurement：recommended setup 使用 port 1 as driving and port 2 as receiving port；需要 R&S®ZNAxx-B16、R&S®ZNAxx-B21、R&S®ZNAxx-B32、R&S®ZNAxx-B161、R&S®ZNAxx-B302、diode power sensor（例如 R&S®NRP40S）與 accessories（test cables、fixed attenuators 3 dB / 6 dB / 10 dB 等）。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 5.220883
+             },
+             {
+              "text": "R&S ZNA › 2-port / 4-port 架構\n依 [[ZNA_specs_en_5215-4652-22_v2400]]（Version 24.00, April 2026）：\n\n- 4-port instruments：最多 4 sources，independently configurable、phase coherent、phase controlled；另有第 5 source 可作為 LO supply。\n- 2-port instruments：最多 2 sources，independently configurable、phase coherent、phase controlled；另有第 3 source 可作為 LO supply。\n- 4-port model 每 port 有 2 true receivers，總計 8 true receivers；2-port model 每 port 有 2 true receivers，總計 4 true receivers；來源明確說明無 multiplexing。\n- 支援 true parallel and coherent data acquisition，例如 antenna array tests 與 antenna test systems，從 100 kHz 開始。\n- Optional rear panel LO out 可支援 mmWave converters；4-port model 最多 4 個 converters，2-port model 最多 2 個 converters，無需 external signal generator。\n- Rear panel LO out 提供 high-power LO signal，typ. +25 dBm，最高 26.5 GHz，可作為 mixer measurements 的 LO source。\n- Optional second LO source 可讓 mixer/frequency convertor measurements 速度加倍並最佳化 trace noise。\n- 使用 [[R&S ZNA-K9]] option、1 kHz measurement bandwidth 時，mixer group delay 與 deviation from linear phase 的 group delay trace noise peak-to-peak 可由 200 ps 降至 15 ps。\n- 最多 4 pulse modulators、最多 8 pulse generators（4-port）；最多 2 pulse modulators、最多 4 pulse generators（2-port）。\n- Minimum pulse width：40 ns。\n- Optional direct IF access（in/out）：IF input 可用於 mmWave converter 與 antenna measurement systems，bandwidth 1 GHz；IF output up to 2 GHz bandwidth 可用於 external pulse analysis。\n- Selectable reference signal access：1 GHz external reference，可同步 external equipment，例如 signal generators，改善 mmWave converters up to terahertz frequencies 的 performance。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 5.105247
+             },
+             {
+              "text": "2026台灣無線通訊代工製造產業_技術規格與市場分析報告 › 原文未解的問題\n- 來源雖標示報告日期 2026-09-15，但部分數字標為公開財報、產業新聞、法人預估或 TrendForce 最新研究，未提供逐項引用、報告名稱、網址、頁碼或方法論。\n- 來源未說明 [[TrendForce]] 手機直連衛星市場規模 76 億美元與 49% 年成長率的完整報告名稱、發布日期、統計範圍與幣別口徑；雖可記為美元，但不可延伸推算區域市場或公司營收。\n- 來源稱台灣已於 2026 年全面開放 6 GHz 頻段 5925–6425 MHz，但未提供主管機關公告編號或法規文件。\n- 來源稱 [[華通]]星鏈太空板市占率約 9 成、[[華通]]掌握 SpaceX / Amazon Leo / OneWeb 等訂單，但未提供客戶公告、合約、出貨量、營收占比或市占統計口徑。\n- 來源稱 [[SpaceX]]旗下星鏈於 2026 年 6 月掛牌且市值突破 1.77 兆美元，但未提供交易所、股票代號、公告或資料來源；本次僅記錄來源說法，不建立為已驗證資本市場事實。\n- 來源稱 SpaceX 規劃部署百萬顆衛星藍圖，但未提供 FCC 文件、申請案號或官方計畫版本。\n- 來源稱台灣政府未來十年投入新台幣 400 億元發展 B5G 低軌通訊衛星計畫，未提供政府計畫名稱、預算來源或公告日期。\n- 來源未提供各廠商受惠程度的量化評分方法或分類標準。\n- 來源未說明 [[耀登]]之 Amphenol-affiliated / Auden 關係的法律或股權口徑。\n- 來源未說明 [[建漢]]在本報告中與既有 [[建漢]] T-Glass 圖卡列名是否為同一實體。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+              },
+              "score": 3.027879
+             },
+             {
+              "text": "2026台灣無線通訊代工製造產業_技術規格與市場分析報告 › 實體\n- [[華通]] — 來源稱其掌握 SpaceX、Amazon Leo、OneWeb 等四大低軌衛星業者訂單，並稱星鏈太空板市占率約 9 成。\n- [[台燿]] — 來源稱其供應低軌衛星與基地台用高頻材料，為衛星板上游關鍵材料供應商。\n- [[穩懋]] — 來源稱其為全球最大 GaAs 晶圓代工廠，產品涵蓋衛星間高頻連結與手機直連技術所需 RF 元件，並稱早期參與 SpaceX 計畫。\n- [[建漢]] — 來源稱其為 Compal Broadband Networks，主力產品為 Cable / DSL 寬頻路由器 ODM。\n- [[TrendForce]] — 來源引用其最新研究，指出 2026 年全球手機直連衛星市場規模預估為 76 億美元、年成長率約 49%。\n- [[智易]]、[[智邦]]、[[中磊]]、[[啟碁]]、[[友訊]]、[[合勤控]]、[[正文]] — 來源列為 2026 年台灣網通 ODM / OEM 廠商版圖中的主要公司。\n- [[昇達科]]、[[同欣電]]、[[耀登]]、[[鐳洋科技]]、[[稜研科技]]、[[濰元科技]] — 來源列為低軌衛星零組件、地面終端或相控陣列天線相關公司。\n- [[Starlink]]、[[Amazon Leo]]、[[Eutelsat OneWeb]]、[[AST SpaceMobile]]、[[SpaceX]] — 來源列為低軌衛星或手機直連衛星市場相關營運商 / 專案。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+              },
+              "score": 2.966655
+             },
+             {
+              "text": "2026台灣無線通訊代工製造產業_技術規格與市場分析報告\n這份來源是 2026-09-15 的台灣無線通訊代工製造市場分析，涵蓋 [[Wi-Fi 7 網通設備代工製造]]、[[低軌衛星零組件與地面終端供應鏈]]與[[手機直連衛星供應鏈]]三個主題。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+              },
+              "score": 2.16422
+             },
+             {
+              "text": "無線通訊認證實驗室資料清單 › LEO 衛星終端與高頻測試線索\n[[無線通訊認證實驗室]]將認證實驗室應用連到 [[LEO 衛星終端認證]]：\n\n- 支援 [[Starlink]] / [[Project Kuiper]] 用戶終端 RF 驗證。\n- [[相控陣列天線]] beamforming 測試。\n- [[mmWave]] 與 [[MIMO]] 高頻測試能力。\n- 台灣供應鏈加速全球市場准入。\n- [[耕興]]等 [[RCB]] 提供 8–12 週 GMA 週期。\n\n這些說法可連到 [[低軌衛星終端設備檢測]]、[[相控陣列天線]]、[[Satellite User Terminal 外部資料清單]]，但不可直接改寫為已驗證的 Starlink / Kuiper 認證服務、客戶案例或完整測試能力。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+              },
+              "score": 5.320764
+             },
+             {
+              "text": "無線通訊認證實驗室資料清單 › 目前已知內容\n- [[Test House]] 只包含一個本機檔案連結：`無線通訊認證實驗室.pptx`。\n- [[Test House]] 來源 converted 日期為 2026-09-17，但正文未標示正式發布日期或文件版次。\n- 先前 [[Test House]] 沒有可抽取的簡報正文、圖表、標準清單、實驗室名稱、認證範圍或設備配置。\n- [[無線通訊認證實驗室]]已補入該 PPT 的 markitdown 轉檔文字；raw frontmatter 顯示 converted 日期為 2026-09-17，但簡報本身仍未標示正式發布日期與版次。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+              },
+              "score": 4.903505
+             },
+             {
+              "text": "無線通訊認證實驗室資料清單 › 未決事項\n- [[Test House]] 來源未標示正式日期、作者、版本、發布單位與適用地區。\n- [[無線通訊認證實驗室]]來源未標示正式發布日期、作者、版本與簡報用途。\n- [[無線通訊認證實驗室]] Slide 8 僅有 `圖片2.jpg` 嵌入，未提供 OCR 文字。\n- [[ISL]] 完整名稱、組織角色與與 [[電信技術中心]] 的關係未標示。\n- [[耕興]]的 30 MHz–325 GHz、108 座測試場地、連續 10 年 FCC 最佳實驗室認證與首張 Wi‑Fi 8 證書需官方來源補證。\n- [[SGS]] 的台灣場地、認可範圍與 GMA service scope 未標示。\n- [[Test House]] 是否為特定機構、一般概念或 OneNote 分類名稱，來源未標示。\n- 需要取得[[電信技術中心]] CATR / FR2 測試場之 TAF 認證證書、認證範圍、有效日期與量測不確定度。\n- 需要確認 111年08月簡報中的 3–40 GHz、unwanted emission 至 90 GHz、TRP / TIS / EVM 與 Quiet Zone 90 cm 是否仍為現行能力。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+              },
+              "score": 4.497275
+             },
+             {
+              "text": "無線通訊認證實驗室資料清單 › 已擷取的無線通訊認證實驗室簡報內容\n依 [[無線通訊認證實驗室]]：\n\n- [[無線通訊認證實驗室]]用於測試與驗證無線設備符合法規、安全與性能標準，涵蓋 [[RF 測試]]、[[EMC]]、安規及一致性認證。\n- 來源稱其可經 [[NCC]]、[[TAF]]、[[FCC]] 等機構認可，並支援 [[Global Market Access]] 與上市加速。\n- 主要測試項目包含：頻譜、輸出功率、[[DFS]]、[[SAR]]、EMI / EMS、靜電放電、電源突波、[[Protocol 相容性]]、互操作性測試、[[PTCRB]] / [[GCF]] 認證。\n- 認證必要性包含防止電磁干擾與頻譜衝突、保障用戶安全、加速上市、降低召回與法律風險，以及滿足台灣供應鏈衛星終端、6G 等需求。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+              },
+              "score": 4.004806
+             },
+             {
+              "text": "無線通訊認證實驗室資料清單 › 台灣 NCC 認證流程線索\n[[無線通訊認證實驗室]]列出台灣 [[NCC]] 認證流程：\n\n1. 準備：文件、樣品、電路圖、天線規格。\n2. 提交初審：[[RCB]] 核驗機構檢查材料。\n3. 實驗室測試：[[TAF]] 認可實驗室進行 RF / EMC 測試，來源標示 3–4 週。\n4. 審核與核發：報告審查、證書核發，來源標示證書 5 年有效。\n\n限制：來源未提供 NCC 法規名稱、公告日期、產品類別、RCB 名單、TAF 認可範圍或正式流程文件，因此只能作為簡報層級線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+              },
+              "score": 3.921229
+             },
+             {
+              "text": "NTN test and measurement aspects › Signal generation、analysis 與 SpaceNexus\n來源描述：\n\n- [[R&S SMW200A]] 可配備 fading emulator，支援 TDL / CDL、custom fading profile、Doppler、delay、path loss，以及 [[R&S SMW-K820]] customized dynamic fading。\n- [[R&S SpaceNexus]] 可設定 satellite constellation、UE position / mobility、time-variant Doppler、time-variant propagation delay、path loss、weather-induced attenuation，並 remote configure SMW200A。\n- [[R&S FSW]] / [[R&S FSWX]] 支援 satellite payload testing、EVM、ACLR、group delay、DVB-S2X analysis、phase-coherent multichannel measurement。\n- [[R&S PVT360A]] 被描述為 potential satellite production testing platform，整合 vector signal generator 與 vector spectrum analyzer。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 5.469944
+             },
+             {
+              "text": "NTN test and measurement aspects › Mobile network testing（MNT）\n來源指出 [[Mobile network testing]] 可擴展至 NTN：\n\n- passive testing：scanner 監測 downlink spectrum，不建立連線。\n- active testing：test UE / QualiPoc Android 做 connected mode / E2E QoS / QoE testing。\n- NTN MNT metrics 包含 RSRP、RSRQ、RS-SINR、RSSI、spectrum clearance、RTT、packet loss、BLER、throughput、mobility、random access success、SIB decoding、SMS / voice / video QoE。\n- DTC LEO 與 Skylo IoT-NTN drive test examples 被作為 MNT early scenarios。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 5.328253
+             },
+             {
+              "text": "NTN test and measurement aspects › SAN / base station in the sky testing\n來源以 [[TS 38.108]]、[[TS 38.181]] 描述 satellite / [[Satellite Access Node]]（SAN）testing：\n\n- TS 38.108 定義 SAN radio transmission and reception。\n- TS 38.181 定義 SAN conformance testing tolerances 與 test cases。\n- SAN type 包含 type 1-H、type 1-O、type 2-O。\n- FR1 hybrid setup 可 conducted 或 radiated；FR2 only OTA / radiated。\n- TS 38.181 chapters 包含 conducted transmitter、conducted receiver、conducted performance、radiated transmitter、radiated receiver、radiated performance。\n- 測試重點包含 output power、power dynamics、frequency error、modulation quality、ACLR、OBUE、receiver sensitivity、blocking、PUSCH / PUCCH / PRACH performance。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 4.884141
+             },
+             {
+              "text": "NTN test and measurement aspects › Conformance / certification testing\n來源描述 certification ecosystem 包含 certification organization、neutral test house、test equipment vendor、network operator / equipment vendor。\n\n- NTN NB-IoT certification program 已於 late 2024 launched，聚焦 n255 / n256。\n- conformance tests 在 [[GCF]] [[WI-555]] 與 [[PTCRB]] [[RFT 555]] umbrella 下定義。\n- 來源說 GCF WI-555 描述 124 個 NTN conformance testing 相關 test cases。\n- early 2026 狀態：IoT_NTN test cases 約 174；GSO RF TRX / Performance / RRM 為 58 / 6 / 46，NGSO RF TRX / Performance / RRM 為 56 / 8 / 0。\n- 目前狀態另列 NR-NTN testing 約 RRM 93、RF 38、protocol 22 test cases。\n- 2025 年 GCF 擴展 certification program，納入 NR-NTN 與 DTC certification testing。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 4.029809
+             },
+             {
+              "text": "NTN test and measurement aspects › UE NTN testing\nUE NTN testing categories：\n\n- RF testing。\n- protocol testing。\n- performance testing。\n- carrier acceptance testing。\n- interoperability testing。\n\n相關規格：\n\n- [[TS 38.101-5]]：satellite NR UE RF and performance requirements。\n- [[TS 38.521-5]]：NR UE satellite access RF / performance conformance procedures。\n- [[TS 38.523]]：protocol conformance。\n- [[TS 38.533]]：RRM conformance。\n- [[TS 38.133]]：RRM requirements。\n\n目前 RF tests 多聚焦 FR1；來源預期未來會擴展到 FR2、Ka-band、Ku-band 與 moving satellite conditions。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 3.596289
+             },
+             {
+              "text": "5G NTN validation and testing › 使用限制\n- 本頁只整理 PR 層級合作、測試方法、certification test plan 與展示語境，不是產品規格、標準規格或 conformance test plan。\n- Gatehouse Satcom 來源未標示 published date、PR 編號或 formal version。\n- Rohde & Schwarz / MediaTek MWC 2024 來源未標示 published date、PR 編號或 formal version。\n- Rohde & Schwarz / Viasat 來源未標示 published date、test plan version、document number、test case list 或 certification body。\n- 來源未列 supported test cases、frequency bands、channel models、orbit emulation limits、payload types、UE categories、satellite operators 或 measurement accuracy。\n- [[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]] 未提供 MediaTek NTN-NR device 型號、R&S CMX500 OBT configuration、SMBV100B GNSS option code 或 physical test setup。\n- [[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]] 未提供 [[Viasat]] satellite network technical profile、NB-NTN device list、CMX500 option stack 或 first test results data。\n- future [[6G NTN testing and validation]] 只可視為 PR ambition；不可推論已有產品或測試能力。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NTN validation and testing.md"
+              },
+              "score": 4.107453
+             },
+             {
+              "text": "5G NTN validation and testing › 與既有 NTN discovery / configuration 的關係\n- [[NTN signaling customer discovery]]：用問卷釐清 service offering、test layer、release、satellite architecture、UE、QoS、mobility 與 constellation deployment；屬於需求蒐集。\n- [[R&S NTN signaling solutions]]：目前主要由 customer questionnaire 支撐，代表 [[Rohde & Schwarz]] 的 NTN signaling solution discovery 語境。\n- [[CMX500 NR-NTN configuration]]：整理 [[R&S CMX500]] 的 NR-NTN application-specific configuration guide，包含 S/L-band golden callbox、fading、mobility、Ku/Ka-band、preconformance 與 xLAPI automation。\n- [[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]]：補充 MWC 2024 demo / PR 語境，展示 Rel.17 [[5G NTN-NR]] connection、LEO access node emulation、voice calls 與 RF-related measurements。\n- [[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]]：補充 MWC Barcelona 2026 前後的 partner-specific [[NB-NTN]] / [[NB-IoT]] IoT device certification test plan 語境，涵蓋 protocol、performance 與 RF test scenarios。\n- 本頁的 PR 來源補充的是 ecosystem collaboration、validation methodology、demo / certification context，不取代需求問卷、configuration guide 或 formal specifications。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NTN validation and testing.md"
+              },
+              "score": 3.206185
+             },
+             {
+              "text": "5G NTN validation and testing\n[[5G NTN validation and testing]] 是針對 [[5G Non-Terrestrial Networks]]、[[5G IoT-NTN]]、[[NR-NTN]]、[[NB-NTN]] 與 satellite connectivity devices，在 realistic and controlled laboratory conditions 下驗證 satellite connectivity behavior、radio channel modelling、orbit / channel emulation、protocol / performance / RF scenarios 與 system-level behavior 的測試活動。[[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]] 補充一個 [[MWC Barcelona 2024]] 展示例子：以 [[R&S CMX500 OBT]]、[[R&S SMBV100B]] 與 [[MediaTek]] NTN-NR device as DUT 展示基於 [[3GPP Release 17]] specifications 的 live [[5G NTN-NR]] connection。[[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]] 則補入 [[Viasat]] / [[Rohde & Schwarz]] 的 [[NB-NTN]] [[IoT]] certification test plan 語境，焦點是 device validation、interoperability with [[Viasat]] satellite network 與 [[3GPP Release 17]] compliance。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NTN validation and testing.md"
+              },
+              "score": 3.167775
+             },
+             {
+              "text": "5G NTN validation and testing › 軌道與標準化語境\n[[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]] 的標題強調 [[GEO]] and [[LEO]] NTN validation and testing；正文 quote 進一步提到 [[GEO]]、[[MEO]] and [[LEO]] satellite services。\n\n[[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]] 只明示 emulating a [[Low Earth Orbit]] satellite access node，並將展示連結到 latest [[3GPP Release 17]] specifications。\n\n[[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]] 明示 [[3GPP Release 17]] standards 與 [[Viasat]] satellite network interoperability，但未說明 orbit、frequency bands、payload type 或 gateway architecture。\n\nGatehouse Satcom 來源也將 NTN 產業背景描述為 converges on standardized, [[3GPP]] based solutions，並提到 today’s [[5G NTN]] rollout 與 future [[6G NTN testing and validation]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NTN validation and testing.md"
+              },
+              "score": 1.347704
+             },
+             {
+              "text": "R&S ATS1800C › 來源中的定位\n依 [[GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests]]（06.2020）：\n\n- [[R&S ATS1800C]] 是 CATR based 5G NR mmWave test chamber。\n- 在 OTA base station receiver tests 中，ATS1800C 適用 FR2。\n- Source abbreviations 中簡稱 `ATS1800C`。\n- 來源的 OTA antenna test solution applicability table 中，FR2 ATS1800C 適用於 7.2 OTA sensitivity、7.3 OTA reference sensitivity level、7.4 OTA dynamic range、7.5.1 OTA adjacent channel selectivity、7.5.2 OTA in-band blocking、7.8 OTA receiver intermodulation 與 7.9 OTA in-channel selectivity。\n- 7.6 OTA out-of-band blocking 與 7.7 OTA receiver spurious emissions 在 FR2 ATS1800C 欄位標示為 `TBC`。\n- Ordering information：Compact antenna test range OTA test system，Order No. `1534.1800.02`。\n\n依 [[MWC2025---WIC-INFRA]]（MWC 2025 Barcelona；raw converted 2026-09-17）：\n\n- [[R&S ATS1800C]] 被列為 `Solutions for OTA testing` 中的 RF Performance at Small Test Chamber Footprints solution。\n- 來源將其定位為 FR2 compact test system with a high-quality quiet zone。\n- Slide 8 同頁列出 Ø 30 cm Quiet zone、high shielding effective chamber with IFF（indirect far-field）solution。\n- Slide 26 的 densification / small cells / RF design and compliance portfolio 也列出 [[R&S ATS1800C]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ATS1800C.md"
+              },
+              "score": 8.084476
+             },
+             {
+              "text": "R&S ATS1800C › Quiet zone 說明\n依 [[TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02]] Slide 13–14：\n\n- Quiet zone 是 chamber 中 DUT 被近似 uniform amplitude and phase 照射的 volume。\n- 典型 quiet zone specifications：phase variation 10 degrees、amplitude ripple ±0.5 dB、amplitude taper 1 dB。\n- Quiet zone quality 取決於 chamber quality、measurement antenna、reflector precision / surface roughness 與 size limitation。\n- Quiet zone evaluation 使用 complex quiet zone measurement procedure based on TRP and EIRP for 7 points with standard gain horn antenna。\n- Slide 14 example measurement：taper less than 0.7 dB、ripple ±0.35 dB。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ATS1800C.md"
+              },
+              "score": 6.078307
+             },
+             {
+              "text": "R&S ATS1800C › Key features and benefits（2023-06 簡報）\n依 [[5G NR Base station conformance testing - EN - UR_Public]]（2023-06）：\n\n- Frequency range in-band：23.5 GHz–44.3 GHz。\n- Extendable for OOB：from (6) 12 GHz to 90 GHz and beyond。\n- 30 cm Quiet Zone（QZ），footprint 1.3 m²。\n- 40 cm Quiet Zone（QZ）optional and upgradeable。\n- Easily transportable on wheels。\n- Very high shielding effectiveness：>90 dB。\n- Rugged, accurate and fast 3D positioner with HW trigger。\n- 3GPP compliant and CTIA approved。\n- Validated in QDART。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ATS1800C.md"
+              },
+              "score": 2.397317
+             },
+             {
+              "text": "R&S ATS1800C › 與既有資料的矛盾與更新\n⚠️ [[GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests]]（06.2020）說 [[R&S ATS1800C]] Compact antenna test range OTA test system 的 Order No. 是 `1534.1800.02`，但既有頁面 [[R&S ATS1800C]] 說 [[GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests]]（06.2020）為 Order No. `1534.1800K02`。判斷：兩份同月 application notes 的 order number 後綴不一致，暫並列，需回查 ATS1800C 正式 ordering document 或 R&S configurator。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ATS1800C.md"
+              },
+              "score": 2.132155
+             },
+             {
+              "text": "R&S ATS1800C › GFM324 / GFM325 補充規格與限制\n依 [[GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests]]（06.2020）與 [[GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests]]（06.2020）：\n\n- In-band frequency range：23.5 GHz 至 44 GHz。\n- Out-of-band frequency range：6 GHz 至 110 GHz。\n- Quiet zone：約 30 cm × 30 cm。\n- Positioner DUT load capacity：8 kg。\n- Feedthroughs：\n  - CATR-CSRF1：1.85 mm female。\n  - CATR-FEED2：2 × 2.4 mm。\n- Measurement devices 位於 chamber rear side。\n- 為降低 path loss，來源建議 measurement devices 靠近 feedthroughs，並使用短 cable。\n- 若 base station modules 超過 quiet zone 或 load capacity 限制，需聯絡 Rohde & Schwarz 取得 customized solution。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ATS1800C.md"
+              },
+              "score": 1.731536
+             },
+             {
+              "text": "R&S TS8980 Conformance Test Platform › TS8980FTA / TS8980PRE 系列\n依 [[RS_TS8980FTA_PRE_Series_SystemManual_en_63]]：\n\n- [[R&S TS8980FTA]] 與 [[R&S TS8980PRE]] 是基於 [[R&S CONTEST]] 的 test systems series。\n- [[R&S TS8980FTA]] 用於 **full conformance testing**；FTA 展開為 **full type approval**。\n- [[R&S TS8980PRE]] 用於 **pre-conformance testing**；PRE 展開為 **pre-conformance**。\n- 文件描述的 variants 包含 `R&S®TS8980FTA-3`、`R&S®TS8980FTA-3A`、`R&S®TS8980FTA-M1`、`R&S®TS8980PRE-3`、`R&S®TS8980PRE-3A`、`R&S®TS8980PRE-M1`。\n- R&S CONTEST-based test system series 用於量測 DUT 的 RF 與 RRM properties。\n- DUT 需依適用情況符合 [[3GPP]] Release 99 到 15 的 GSM、WCDMA、LTE 或 NR 5G。\n- Test system series 支援 LTE 與 NR 的 R&D 與 pre-conformance measurements。\n- Hardware setups、implemented test methods 與 test cases 涵蓋 transmitter、receiver 與 performance measurements。\n- Hardware configuration 可依所需 test case coverage 調整。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS8980 Conformance Test Platform.md"
+              },
+              "score": 7.236426
+             },
+             {
+              "text": "R&S TS8980 Conformance Test Platform › TS8980PRE-3 / TS8980PRE-3A / TS8980PRE-M1\n- [[R&S TS8980PRE]]-3 test system 用於 pre-conformance R&D environment 的 design test 與 verification。\n- `R&S TS8980PRE-3 (TS8980)` 的重要設計目標是相較 final conformance tests 達到良好 measurement accuracy 與高 confidence level。\n- `R&S TS8980PRE-3 (TS8980)` 與 `R&S TS8980FTA-3 (TS8980)` RF conformance test system 共用許多但非全部 hardware components，因此來源稱兩系統的 test results 通常可預期非常接近。\n- PRE 與 FTA 的主要硬體差異包括：PRE 的 frequency reference 一律為 [[R&S CMW500]]，不可連接 rubidium standard；PRE 使用 [[R&S SSCU3PA-1]] 與 [[R&S SSCU3PB-1]]；single rack 最多 2 台 [[R&S CMW500]]。\n- `R&S TS-CMX-2RF2IF-ATS800R-4R (TS8980PRE-M1)` 是無 signal conditioning unit + [[R&S CMX500]] + [[R&S ATS800R]] 的 setup example。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS8980 Conformance Test Platform.md"
+              },
+              "score": 5.599134
+             },
+             {
+              "text": "R&S TS8980 Conformance Test Platform › 與 pre-conformance workflow 的區分\n[[1C111_1e_3GPPPreConfGuide]] 明示其 [[R&S CMX500]] pre-conformance procedure 可能相較 [[3GPP]] specification 更 streamlined 或 simplified，並且不嚴格遵循所有 parameters。該 application note 中的 [[R&S CMX500]] WebGUI workflow 適合 early-stage validation、debugging 與 step-by-step verification；strict RF conformance testing 與 validated test cases 則被來源另行指向 [[R&S TS8980 Conformance Test Platform]]。\n\n[[RS_TS8980FTA_PRE_Series_SystemManual_en_63]] 補充：[[R&S TS8980PRE]] 是 pre-conformance test system series，用於 R&D environment 的 design test 與 verification；這是 system-family 層級，不等同於 1C111 的單一 CMX500 WebGUI workflow。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS8980 Conformance Test Platform.md"
+              },
+              "score": 5.114283
+             },
+             {
+              "text": "R&S TS8980 Conformance Test Platform › TS8980FTA-3 / TS8980FTA-3A\n- [[R&S TS8980FTA]]-3 / -3A full type approval systems 支援 RF 與 RRM conformance test cases。\n- `R&S TS8980FTA-3 (TS8980)` dual-rack test systems 設計用於符合下列規範的 RF / RRM conformance test cases：\n  - [[TS 51.010-1]]\n  - [[TS 34.121-1]]\n  - [[TS 36.521-1]]\n  - [[TS 36.521-3]]\n  - [[TS 38.521-1]]\n  - [[TS 38.521-3]]\n  - [[TS 38.521-4]]\n  - [[TS 38.533]]\n- `R&S TS8980FTA-3 (TS8980)` 提供基於 [[R&S CMWflexx]]、[[R&S CMWC]] 與最多 4 台 [[R&S CMW500]] 的 full signaling。\n- `TS8980FTA-3A` 以 [[R&S CMX500]] radio communication tester 擴充 [[R&S CMW500]] 的 5G NR signaling capabilities。\n- [[R&S SMW200A]] 用於 RF interference。\n- [[R&S FSW]] 可執行特殊 5G NR、LTE 與 WCDMA measurements。\n- [[R&S SSCU3A-1]] 與 [[R&S SSCU3B-1]] signal switching and conditioning units 結合 inband、wideband、filtering 與 net-op functionality。\n- 16 個 DUT connectors 支援 DUT 與 test system 的彈性連接。\n- `R&S TS8980FTA-3 (TS8980)` 是 `R&S TS8980FTA-2` system 的後繼系統；來源稱改良元件支援 5G NR 與 LTE-Advanced Pro 的 additional carrier aggregation 與 MIMO schemes。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS8980 Conformance Test Platform.md"
+              },
+              "score": 4.447716
+             },
+             {
+              "text": "![](Picture4.jpg)\nWireless communication tester\nEMI test receiver\nSignal & spectrum analyzer\nWireless communication tester",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-4a179a13677acd8f",
+                "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+                "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+                "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+               "section": 175,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 24.704136
+             },
+             {
+              "text": "R&S®ZNA\nVECTOR NETWORK ANALYZER",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-f1351a1b7fda64ad",
+                "original_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+                "sha256": "f1351a1b7fda64ad785212c8f7a8d8b142ebc59d7ba52185cda0819016cc0533",
+                "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 22.833339
+             },
+             {
+              "text": "R&S®ZNL\nVECTOR NETWORK ANALYZER",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-9b0b29b71d0a06d2",
+                "original_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+                "sha256": "9b0b29b71d0a06d220ca923e588ced6eceab3b355fca18cedd1f7092c8cb29f0",
+                "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 22.833339
+             },
+             {
+              "text": "Ordering information\nDesignation\nBase units\nVector network analyzer, 2-port, 9 kHz to 4.5 GHz (N)\nVector network analyzer, 4-port, 9 kHz to 4.5 GHz (N)\nVector network analyzer, 2-port, 9 kHz to 20 GHz (3.5 mm)\nVector network analyzer, 4-port, 9 kHz to 20 GHz (3.5 mm)\nVector network analyzer, 2-port 9 kHz to 32 GHz (2.92 mm)\nVector network analyzer, 4-port 9 kHz to 32 GHz (2.92 mm)\nVector network analyzer, 2-port 9 kHz to 43.5 GHz (1.85 mm)\nVector network analyzer, 4-port 9 kHz to 43.5 GHz (1.85 mm)\nOptions\nFrequency upgrade",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-eca8f030d797ca58",
+                "original_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+                "sha256": "eca8f030d797ca582f839557d9c3e7f42b1c17f02f069d3f8be510e8231aeae8",
+                "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "section": 596,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 22.8204
+             }
+            ],
+            "text": "### 結論\n目前 vault 沒有提供「VNA 在 Wireless Communication 機會強弱排名」的來源，因此不能宣稱正式排名；但依直接證據密度，最有支撐的機會是：LEO / Kuiper 類衛星用戶終端相控陣 OTA 測試、network infrastructure 的 higher frequencies / mmWave / early 6G、無線法規 / 認證實驗室，以及衛星 / NTN / RF front-end 元件驗證。[40][49][58][43]\n### 推薦先賣\n1. **LEO / Kuiper 類 User Terminal 相控陣 OTA 測試**：Kuiper UT 測試流程明列 OTA 電波暗室核心設備包含「VNA 與信號分析儀」，校準步驟包含背景扣除、元素 A/P 校準、波束表生成，輸出品質包含增益誤差 < 0.5 dB、指向誤差 < 0.5° 與模式完整性。[40]  \n2. **Network infrastructure 的 higher frequencies / mmWave / early 6G**：Network Infrastructure T&M drivers 明確把 R&S ZNA、R&S ZNA67EXT、mmWave front ends / frequency converters 放在 Higher frequencies / mmWave / early 6G solution mapping 中，且 industry drivers 包含 More Spectrum Bands / Higher Frequencies / Expanding Bandwidth。[49][50]  \n3. **無線法規 / 認證實驗室**：Regulatory test for wireless devices 將 primary test instruments for wireless regulatory test labs 分成 wireless communication tester、EMI test receiver、signal & spectrum analyzer、network analyzer、vector signal generator、broadband amplifier 等類別，表示 network analyzer 是無線法規測試實驗室儀器類別之一。[58]  \n4. **衛星 / NTN / RF front-end 與高頻材料供應鏈驗證**：LEO 供應鏈被分成衛星本體高頻 PCB / RF 元件、地面設備與 User Terminal、系統整合與測試驗證等環節，且地面設備與用戶終端核心為相控陣列天線與 RF front-end。[43]  \n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S ZNA / R&S ZNA67 | LEO UT、相控陣列天線、mmWave / antenna measurement systems | ZNA 系列涵蓋 R&S ZNA26 / ZNA43 / ZNA50 / ZNA67，頻率最高到 67 GHz；ZNA-B26 direct IF access 的 IF input 可用於 mmWave converter 與 antenna measurement systems，bandwidth 1 GHz；ZNA-K8 / ZNA-B8 支援 mmWave converter；4-port model 最多 4 個 converters，2-port model 最多 2 個 converters。[61][64][70] | Kuiper UT OTA chamber 直接列出 VNA；ZNA 又明示支援 antenna array tests、antenna test systems、mmWave converters 與 direct IF access，因此是目前對 UT / 相控陣 OTA 證據最完整的 VNA 線索。[40][70] | Kuiper OTA 暗室核心設備包含 VNA 與信號分析儀；ZNA 支援 true parallel and coherent data acquisition，例如 antenna array tests 與 antenna test systems，並支援 mmWave converters 與 direct IF access。[40][70] | Kuiper UT 來源未提供儀器型號、校準標準或 measurement uncertainty，且 unresolved 指出仍需補充 OTA chamber、VNA、signal analyzer、network emulator、satellite channel emulator 的具體設備與校準方法。[40][42] |\n| R&S ZNA / R&S ZNA67EXT | Network infrastructure higher frequencies / mmWave / early 6G | ZNA67EXT 是基於 R&S ZNA67 的 110 GHz Vector Network Analyzer System，型號包含 2-port / 4-port 與 standard power / high power variants；Network Infrastructure mapping 明列 R&S ZNA、R&S ZNA67EXT、mmWave front ends / frequency converters。[34][49] | MWC2025 network infrastructure solution mapping 直接把 R&S ZNA / ZNA67EXT 放在 higher frequencies / mmWave / early 6G 類別，因此這是 wireless infrastructure 中最直接連到 VNA 產品線的證據。[49] | Industry drivers 包含 More Spectrum Bands / Higher Frequencies / Expanding Bandwidth；solution mapping 將 Higher frequencies / mmWave / early 6G 對應到 R&S ZNA、R&S ZNA67EXT、mmWave front ends / frequency converters。[49][50] | Network Infrastructure T&M drivers 的 unresolved 指出需回查原 PPTX 圖片與 speaker notes，以確認產品連線、license / option 與測試流程。[51] |\n| R&S ZNA with R&S ZNA-B15 | RF front-end / RFFE 控制與量測 | R&S ZNA-B15 RFFE GPIO interface 的 models .02 and .03 提供 two independent MIPI RFFE busses；model .03 提供 voltage and current measurement with switchable source resistance，32 internal ADC channels 可同時量測每個 RFFE 與 GPIO pin 的 voltage and current。[6] | LEO 地面設備與用戶終端核心包含 RF front-end，Direct-to-Cell 供應鏈也涵蓋 RF front-end；ZNA-B15 提供 RFFE / GPIO 控制與電壓電流量測，是 RF front-end 測試對接線索。[7][8][6] | 市場來源把低軌衛星地面設備與用戶終端主題集中於相控陣列天線、Ku/Ka-band、RF front-end 與系統整合能力，並把 Direct-to-Cell 主題涵蓋 satellite-side antenna、RF front-end、baseband、衛星內建基地台、手機品牌與電信商服務方案。[7][8] | 目前來源沒有直接說 ZNA-B15 已用於某個 LEO、Direct-to-Cell 或 RF front-end 客戶測試流程；只能說市場需求與產品能力可對接。[6][7][8] |\n| Network analyzer 類別，未指定型號 | Wireless regulatory / certification lab | 來源只列 primary test instruments 類別包含 network analyzer，未指定 R&S VNA 型號、option、頻率範圍或測試配置。[58] | 無線產品市場准入需要 regulatory compliance、industry certification 與 operator acceptance testing；regulatory test source 明列 network analyzer 是實驗室儀器類別之一。[60][58] | Wireless products 的 market access approval testing 被分成 Regulatory Compliance Test、Telecom Industry Certification Test、Cellular Network Operator Acceptance Test；primary test instruments for wireless regulatory test labs 包含 network analyzer。[60][58] | 來源未把 network analyzer 指定為 Vector Network Analyzer，也未列 ZNA / ZNB / ZNL 型號、option、校準方法或 uncertainty。[58] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| LEO / Kuiper 類 User Terminal OTA 暗室 | R&S ZNA / ZNA67 搭配 mmWave converter support、direct IF access 與 antenna measurement system 相關配置；具體 option 以 ZNA-K8、ZNA-B8、ZNA-B26 為知識庫已列線索。[61][64][70] | 以「VNA + signal analyzer」支援背景扣除、元素 A/P 校準、波束表生成、增益誤差與指向誤差管控。[40] | Kuiper 來源未提供 VNA 型號、校準標準、measurement uncertainty 或正式 test plan，需回查原始 PPTX 或正式 test plan。[42] |\n| LEO 衛星終端與相控陣列天線供應鏈 | R&S ZNA / ZNA-B15 作為 RF front-end / RFFE / GPIO 控制與量測線索，搭配 ZNA 的 phase-coherent sources、true receivers 與 antenna array test 支援。[6][70] | 供應鏈中地面設備與用戶終端核心為相控陣列天線與 RF front-end，相關公司能力包含相位陣列天線製造、Ku / Ka-band 主動式相控陣列天線、RF front-end 與系統整合。[45][46] | 目前未有來源證明特定廠商採用 R&S ZNA 或 ZNA-B15，也未提供客戶案例或設備清單。[45][6] |\n| Network infrastructure mmWave / early 6G R&D | R&S ZNA / ZNA67EXT、mmWave front ends / frequency converters。[49] | MWC2025 solution mapping 將 R&S ZNA / ZNA67EXT 明列於 Higher frequencies / mmWave / early 6G，industry drivers 包含 higher frequencies 與 expanding bandwidth。[49][50] | 該來源 unresolved 指出仍需回查原 PPTX 圖片與 speaker notes，以確認產品連線、license / option 與測試流程。[51] |\n| Wireless regulatory / certification labs | Network analyzer 類別；若需 R&S 型號，知識庫目前未指定。[58] | 法規測試來源明列 wireless regulatory test labs 的 primary test instruments 包含 network analyzer，且 wireless products 需要 regulatory compliance、industry certification 與 operator acceptance testing。[58][60] | 來源沒有說 network analyzer 等同 VNA，也沒有列 ZNA / ZNB / ZNL 型號、頻率、option 或測試不確定度。[58] |\n| RF components、high-frequency PCB、RFFE module 驗證 | R&S ZNA 或 ZNB3000 / ZNB3044 作為 VNA 候選；ZNA 側有 noise figure、mmWave converter、deembedding、RFFE GPIO interface 線索，ZNB3000 側有最高 54.0 GHz upgrade 與 mmWave converter LO/IF option 線索。[64][6][38][33] | LEO 供應鏈包含高頻 PCB、RF 元件、GaAs、低軌衛星與基地台高頻材料，地面終端核心包含 RF front-end。[43][44][45] | 目前來源沒有直接把 ZNA 或 ZNB3000 指定到這些廠商或元件測試流程，因此只能作為產品能力對市場需求的對接線索。[43][64][33] |\n### 限制\n- 目前 vault 沒有可引用的市場規模、客戶採購、VNA 滲透率或機會排名資料，因此「strongest」只能解讀為「目前證據最直接、最完整」，不能解讀為市場最大或成交機率最高。[71][51]  \n- Kuiper UT 測試流程雖直接列出 VNA，但來源未提供儀器型號、校準標準或 measurement uncertainty，且 unresolved 明確要求補充具體設備與校準方法。[40][42]  \n- Network infrastructure mapping 直接列出 R&S ZNA / ZNA67EXT，但 unresolved 指出仍需回查原 PPTX 與 speaker notes 才能確認產品連線、license / option 與測試流程。[49][51]  \n- Regulatory test 來源只說 primary test instruments 包含 network analyzer，未指定 VNA 型號或 R&S 產品線，因此不能把它改寫成 ZNA / ZNB / ZNL 的已驗證法規測試方案。[58]  \n- 低軌衛星市場報告提供 2026-09-15 的供應鏈與市場敘事，但部分數字與公司說法未提供逐項引用、報告名稱、網址、頁碼或方法論，因此不可延伸推算公司營收或採購量。[71]",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "R&S ZNA › R&S®ZNA-B15 RFFE GPIO interface 規格摘錄\n- Models .02 and .03 提供 two independent MIPI RFFE busses。\n- Connector type：25-pin D-Sub，female。\n- RFFE port 1 / 2 的 VIO、DATA、CLK 電壓範圍為 0 V to +2 V，1 mV step，maximum current 20 mA。\n- CLK configurable clock rate：31.25 kHz to 26 MHz。\n- GPIO 1 to GPIO 8：voltage range –5 V to +10 V；typ. –6 V to +12 V；voltage step size 5 mV；maximum current 20 mA。\n- GPIO 9 and 10：voltage range –5 V to +10 V；typ. –6 V to +12 V；voltage step size 5 mV；maximum current 100 mA。\n- Model .03 提供 voltage and current measurement with switchable source resistance；32 internal ADC channels 可同時量測每個 RFFE 與 GPIO pin 的 voltage and current。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNA.md"
+             },
+             "score": 9.053155
+            },
+            {
+             "text": "2026台灣無線通訊代工製造產業_技術規格與市場分析報告 › 概念\n- [[Wi-Fi 7 網通設備代工製造]] — 2026 年台灣網通 ODM / OEM 成長主題，核心規格包含 320 MHz、4096-QAM、MLO、6 GHz 與散熱設計。\n- [[低軌衛星零組件與地面終端供應鏈]] — 來源中的 LEO 供應鏈主題，包含高頻 PCB、RF 元件、相控陣列天線、UT、系統整合與測試驗證。\n- [[手機直連衛星供應鏈]] — 來源中的 Direct-to-Cell 主題，涵蓋衛星端天線、RF front-end、baseband、衛星內建基地台、手機品牌與電信商服務方案。\n- [[網路通訊設備產業鏈]] — 既有頁面記錄未標示日期的網路通訊設備四層供應鏈；本來源提供 2026-09-15 的 Wi-Fi 7 / FWA / CPE 市場補充。\n- [[整體通訊產業鏈]] — 既有頁面記錄未標示日期的整體通訊產業鏈；本來源提供 2026-09-15 的無線通訊代工與衛星通訊補充。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+             },
+             "score": 11.380312
+            },
+            {
+             "text": "2026台灣無線通訊代工製造產業_技術規格與市場分析報告 › 重點摘要\n- 報告日期：2026-09-15；來源轉檔日期：2026-09-15。\n- 報告主張 2026 年台灣無線通訊代工製造產業呈現雙引擎成長：既有的 [[Wi-Fi 7 網通設備代工製造]]，以及新興的 [[低軌衛星零組件與地面終端供應鏈]]。\n- 在 [[Wi-Fi 7]] 部分，來源列出 [[IEEE 802.11be]]、320 MHz channel bandwidth、4096-QAM、[[MLO]]、STR、eMLSR、6 GHz band、thermal throttling 等技術規格，並指出台灣已於 2026 年全面開放 6 GHz 頻段 5925–6425 MHz。\n- 在台灣網通 ODM / OEM 廠商版圖部分，來源列出 [[智易]]、[[智邦]]、[[中磊]]、[[啟碁]]、[[建漢]]、[[友訊]]、[[合勤控]]、[[正文]]等廠商，並分別描述 2026 年動態與受惠程度。\n- 在 [[低軌衛星]] 供應鏈部分，來源將產業鏈分成衛星本體製造與關鍵材料、地面設備與用戶終端、系統整合與測試驗證、衛星營運商服務四大環節。\n- 衛星本體零組件表列 [[華通]]、[[昇達科]]、[[同欣電]]、[[穩懋]]、[[台燿]]，並將 [[華通]]定位為衛星用高頻高密度連接板 / HDI 廠商，將 [[台燿]]定位為高頻高速 [[CCL]] 材料供應商。\n- 地面設備與用戶終端表列 [[啟碁]]、[[耀登]]、[[鐳洋科技]]、[[稜研科技]]、[[濰元科技]]，主題集中於[[相控陣列天線]]、Ku/Ka-band、RF front-end 與系統整合能力。\n- 手機直連衛星部分，來源將 [[Direct-to-Cell]] 描述為一般 4G/5G 手機無需額外硬體、修改韌體或安裝特殊軟體即可直接連結低軌衛星的技術，並連到 [[3GPP Release 17]]與[[3GPP Release 18]]。\n- 市場數字包括：[[TrendForce]] 最新研究指出 2026 年全球手機直連衛星市場規模預估為 76 億美元、年成長率約 49%；來源未提供該 TrendForce 報告名稱、發布日期或頁碼。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+             },
+             "score": 8.10326
+            },
+            {
+             "text": "R&S ZNB3000 › 共通硬體 options（摘錄）\n| Code | 名稱 / 原文說明 | Order No. | 相依關係 / 限制 |\n|---|---|---:|---|\n| R&S®ZNB-B4 | Precision frequency reference (OCXO) | 1316.1769.02 | Retrofit |\n| R&S®ZNB3-B8 | mmWave converter LO/IF，2-port model | 1351.5109.02 | 適用 [[R&S ZNB3020]] only with R&S®ZNB3-B26x option、[[R&S ZNB3032]]、[[R&S ZNB3044]] |\n| R&S®ZNB3-B8 | mmWave converter LO/IF，4-port model | 1351.5109.04 | 適用 [[R&S ZNB3020]] only with R&S®ZNB3-B26x option、[[R&S ZNB3032]]、[[R&S ZNB3044]] |\n| R&S®ZNB-B10 | GPIB interface | 1311.5995.04 | remote control interface in line with IEEE 488、IEC 60625；Retrofit / On site |\n| R&S®ZNB-B12 | Device control | 1319.5088.02 | Direct control bus output；Retrofit / On site |\n| R&S®ZN-B121 | Direct control cable | 1323.9290.00 | Retrofit / On site |\n| R&S®ZN-B14 | Handler I/O | 1316.2459.05 | Keysight handler interface compatibility type 3；Retrofit / On site |\n| R&S®ZN-Z15 | RFFE GPIO interface external | 1325.5905.02 | Retrofit / On site |\n| R&S®ZN-Z15 | RFFE GPIO interface external with voltage/current measurement | 1325.5905.03 | Retrofit / On site |\n| R&S®ZNB-B81 | DC inputs | 1316.0004.02 | 4 DC inputs；maximum measurement bandwidth 10 kHz；Retrofit |\n| R&S®ZNB3-B19 | Additional removable SSD，512 Gbyte | 1351.5821.02 | Retrofit / On site |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNB3000.md"
+             },
+             "score": 6.943676
+            },
+            {
+             "text": "R&S ZNA67EXT › 型號與 base units\n來源列出同一 type `R&S®ZNA67EXT` 的 6 個 order no. / model suffix variants：\n\n| 說明 | Type | Order No. | Port / power 摘要 |\n|---|---|---:|---|\n| Vector network analyzer system, 110 GHz, 2 test ports, complete system based on R&S®ZNA67, 2-port model, two millimeterwave converter heads, standard power | R&S®ZNA67EXT | 1352.1888K12 | models .12；2 test ports；standard power |\n| Vector network analyzer system, 110 GHz, 2 test ports, complete system based on R&S®ZNA67, 4-port model, two millimeterwave converter heads, standard power | R&S®ZNA67EXT | 1352.1888K13 | models .13；2 test ports；standard power |\n| Vector network analyzer system, 110 GHz, 4 test ports, four millimeterwave converter heads, standard power | R&S®ZNA67EXT | 1352.1888K14 | models .14；4 test ports；standard power |\n| Vector network analyzer system, 110 GHz, 2 test ports, complete system based on R&S®ZNA67, 2-port model, two millimeterwave converter heads, high power | R&S®ZNA67EXT | 1352.1888K15 | models .15；2 test ports；high power |\n| Vector network analyzer system, 110 GHz, 2 test ports, two millimeterwave converter heads, high power | R&S®ZNA67EXT | 1352.1888K16 | models .16；2 test ports；high power |\n| Vector network analyzer system, 110 GHz, 4 test ports, four millimeterwave converter heads, high power | R&S®ZNA67EXT | 1352.1888K17 | models .17；4 test ports；high power |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+             },
+             "score": 14.420557
+            },
+            {
+             "text": "R&S ZNB3044\n[[R&S ZNB3044]] 是 [[R&S ZNB3000]] 系列的 43.5 GHz Vector Network Analyzer 型號，依 Version 09.00（July 2026）base frequency range 為 9 kHz to 43.5 GHz，搭配 frequency upgrade option 可到 54.0 GHz。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNB3044.md"
+             },
+             "score": 4.882782
+            },
+            {
+             "text": "Kuiper UT 測試流程 › OTA 電波暗室配置\nSlide 7 列出 OTA 電波暗室資訊：\n\n- 核心設備：3 × 3 × 3 m 暗室、多探頭陣列 48–192 個、VNA 與信號分析儀。\n- 校準步驟：背景扣除、元素 A/P 校準、波束表生成。\n- 輸出品質：增益誤差 < 0.5 dB、指向誤差 < 0.5°、模式完整性。\n\n此段可連到 [[Phased Array OTA testing]]、[[相控陣列天線]]與 [[低軌衛星終端設備檢測]]，但來源未提供儀器型號、校準標準或 measurement uncertainty。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+             },
+             "score": 20.357119
+            },
+            {
+             "text": "Kuiper UT 測試流程 › unresolved\n- 需要取得原始 PPTX 或正式 test plan 以確認表格、圖像與備註是否在 markdown 轉檔中遺失。\n- 需要確認 FCC 授權案號、ITU filing、測試地點、終端數量與 prototype / production 的區分。\n- 需要補充 OTA chamber、VNA、signal analyzer、network emulator、satellite channel emulator 的具體設備與校準方法。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+             },
+             "score": 11.680482
+            },
+            {
+             "text": "低軌衛星零組件與地面終端供應鏈 › 產業鏈結構\n[[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]]（2026-09-15）將低軌衛星產業鏈分為四大環節：\n\n1. 衛星本體製造與關鍵材料：高頻 [[PCB]]、[[射頻元件]]。\n2. 地面設備與用戶終端：[[User Terminal]] / UT，核心為[[相控陣列天線]]與 [[RF front-end]]。\n3. 系統整合與測試驗證。\n4. 衛星營運商服務。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/低軌衛星零組件與地面終端供應鏈.md"
+             },
+             "score": 16.431682
+            },
+            {
+             "text": "低軌衛星零組件與地面終端供應鏈 › 衛星本體零組件\n| 廠商 | 技術定位 | 關鍵規格 / 能力 | 來源中的市場地位 | 日期 |\n|---|---|---|---|---|\n| [[華通]] / Compeq | 衛星用高頻高密度連接板 / [[HDI]] | 來源稱掌握 [[SpaceX]]、[[Amazon Leo]]、[[OneWeb]]等四大低軌衛星業者訂單；泰國新廠專門生產衛星板與伺服器板，以因應非中非台供應鏈需求 | 全球低軌衛星 PCB 龍頭；來源稱星鏈太空板市占率約 9 成 | 2026-09-15 |\n| [[昇達科]] / GCS | 微波與毫米波 RF 元件 | 來源稱 2026 年首季衛星營收占比約 8 成，主要供應濾波器、雙工器等高頻元件 | 台股中血統最純的低軌衛星概念股，毛利率高 | 2026-09-15 |\n| [[同欣電]] / Sunwaytop | 高頻陶瓷封裝 RF transceiver module | 來源稱以高頻陶瓷封裝技術切入 [[SpaceX]] 衛星本體 RF transceiver module | 高技術門檻太空零組件供應商 | 2026-09-15 |\n| [[穩懋]] / WIN Semiconductors | [[GaAs]] 晶圓代工 | 來源稱產品涵蓋衛星間高頻連結與手機直連技術所需 RF 元件 | 全球最大 GaAs 晶圓代工廠；早期即參與 SpaceX 計畫的晶圓代工夥伴 | 2026-09-15 |\n| [[台燿]] / Elite Material | 高頻高速 [[CCL]] | 來源稱供應低軌衛星與基地台用高頻材料 | 衛星板上游關鍵材料供應商 | 2026-09-15 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/低軌衛星零組件與地面終端供應鏈.md"
+             },
+             "score": 11.352651
+            },
+            {
+             "text": "低軌衛星零組件與地面終端供應鏈 › 地面設備與用戶終端\n| 廠商 | 技術能力 | 來源備註 | 日期 |\n|---|---|---|---|\n| [[啟碁]] / WNC | 相位陣列天線製造能力；切入衛星通訊終端設備 | 全球通訊設備大廠，同時佈局 Wi-Fi、5G 基地台與衛星終端整合 | 2026-09-15 |\n| [[耀登]] / Amphenol-affiliated / Auden | 相位陣列天線研發；航太與衛星通訊高階天線量測 | 來源稱其為台灣少數同時具備航太、衛星通訊高階天線供應能力的廠商，產品已打入歐美供應鏈 | 2026-09-15 |\n| [[鐳洋科技]] / Rapidtek | Ku / Ka-band 主動式相控陣列天線；衛星平台、升降頻器到地面終端的系統整合 | 來源稱其 2025 年底發射黑鳶1號 8U 立方衛星，2026 年 3 月發射黑鳶2號；關鍵組件已部署於 Eutelsat 全球用戶終端 | 2026-09-15 |\n| [[稜研科技]] / TMYTEK | 模組化相位陣列天線架構，整合 RF front-end 與演算法 | 來源稱其與美商 [[Comtech]] 合作推出可動態切換 GEO / MEO / LEO 的多軌道地面終端整機，市場足跡遍及全球 35 個國家 | 2026-09-15 |\n| [[濰元科技]] / Foremostar | 個人可攜式衛星通訊終端裝置 | 來源稱其整合相位陣列、RF front-end、控制演算法與終端機構，整體功耗可降低約 30% | 2026-09-15 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/低軌衛星零組件與地面終端供應鏈.md"
+             },
+             "score": 9.850819
+            },
+            {
+             "text": "相控陣列天線 › 低軌衛星供應鏈來源\n[[低軌衛星零組件與地面終端供應鏈]] 依 [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]]（2026-09-15）整理：\n\n- 地面設備與用戶終端的核心為 [[相控陣列天線]] 與 [[RF front-end]]。\n- [[啟碁]] 被列為具相位陣列天線製造能力並切入衛星通訊終端設備。\n- [[耀登]] 被列為具相位陣列天線研發與航太 / 衛星通訊高階天線量測能力。\n- [[鐳洋科技]] 被列為 Ku / Ka-band 主動式相控陣列天線、衛星平台、升降頻器到地面終端的系統整合相關公司。\n- [[稜研科技]] 被列為模組化相位陣列天線架構與 RF front-end / 演算法整合相關公司。\n- [[濰元科技]] 被列為整合相位陣列、RF front-end、控制演算法與終端機構的個人可攜式衛星通訊終端裝置相關公司。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/相控陣列天線.md"
+             },
+             "score": 20.813122
+            },
+            {
+             "text": "Network Infrastructure T&M drivers › Solution mapping 摘要\n依 [[MWC2025---WIC-INFRA]]：\n\n- [[Beamforming]] / [[Massive MIMO]]：[[R&S SMW200A]]、[[R&S SGT100A]]、[[R&S VSE]]、[[R&S NRQ6]]、[[R&S NRPM]]、[[R&S ZNBT]]。\n- [[OTA testing]] / base station conformance：[[R&S ATS1800C]]、[[R&S PWC200]]、5G NR Test Case Wizard、[[3GPP TS 38.141-2]]。\n- Higher frequencies / mmWave / early 6G：[[R&S SMA100B]]、[[R&S SMW200A]]、[[R&S SMM100A]]、[[R&S SMBV100B]]、[[R&S FSW]]、[[R&S FSVA3000]]、[[R&S PVT360A]]、[[R&S CMP200]]、[[R&S ZNA]]、[[R&S ZNA67EXT]]、mmWave front ends / frequency converters。\n- Digital design & power：[[VNA]]、probes、phase noise analyzer、power supplies、multimeter、oscilloscopes、signal source。\n- Network energy saving：[[R&S NGP800]]、[[R&S RTO]] / [[R&S RTP]]、RT-ZHD07、RT-ZC31、[[R&S SMW-K546]]、[[R&S FSW-K18]]。\n- [[O-RU testing]]：[[O-RAN test manager]]、[[R&S VSE]]、[[R&S FSW]] / [[R&S FSVA3000]]、O-RU tester C/U/S/M planes、[[R&S SMW200A]] / [[R&S SMBV100B]]、[[R&S PVT360A]]、[[R&S RTO6]]。\n- Network densification / small cells：[[R&S ATS1800C]]、[[R&S FSV]]、[[R&S FE44A]]、[[R&S CMQ200]]、[[R&S CMPHEAD30]]、Wireless Manufacturing Test（WMT）。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Network Infrastructure T&M drivers.md"
+             },
+             "score": 11.741888
+            },
+            {
+             "text": "Network Infrastructure T&M drivers › Industry drivers\n來源列出的 industry drivers 包含：\n\n| Driver | 來源語彙 | 對應知識頁 |\n|---|---|---|\n| MIMO / Beamforming | Increasing MIMO Degrees & Beamforming | [[Beamforming]]、[[Massive MIMO]]、[[MIMO]] |\n| OTA | Over-The-Air | [[OTA testing]]、[[5G NR Base Station Conformance Testing]] |\n| Spectrum / frequency | More Spectrum Bands / Higher Frequencies / Expanding Bandwidth | [[More Spectrum Bands and Higher Frequencies]]、[[Early 6G RF testing]] |\n| Digital / power | Digital Design & Power | [[Digital Design & Power]]、[[Power Integrity]] |\n| Energy | Energy Efficiency / Network energy saving | [[Network energy saving]] |\n| Densification | Network Densification | [[FWA CPE 測試與驗證]]、[[Small Cell BTS 測試資料清單]] |\n| Economic efficiency | Cost Efficiency / Flexibility | [[HUMS]]、[[Floating Licensing Models]] |\n| Private networks | Private Networks | [[Private Networks]] |\n| Open RAN | Disaggregation & Virtualization / Towards Open RAN based networks | [[O-RU testing]] |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Network Infrastructure T&M drivers.md"
+             },
+             "score": 11.308407
+            },
+            {
+             "text": "Network Infrastructure T&M drivers › unresolved\n- 需要回查原 PPTX 圖片與 speaker notes，以確認產品連線、圖中箭頭、license / option 與測試流程。\n- [[O-RAN Alliance WG4 Conformance Specifications]]、[[ETSI ES 202 706-1]]、[[3GPP TS 38.141]] 的版本未標示。\n- [[R&S CMPHEAD30]]、[[R&S CMQ200]]、[[R&S NRPM]]、[[R&S ZNBT]]、[[R&S NGP800]] 等產品仍需 formal product sources 補強。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Network Infrastructure T&M drivers.md"
+             },
+             "score": 4.990768
+            },
+            {
+             "text": "Regulatory test for wireless devices with cellular technology › 重點摘要\n- 來源將 [[EN 303 981]] 測試描述為 antenna characterizations 的 radiated measurement，列出 antenna beam pointing、off/on-axis spurious radiation、carrier suppression / cessation、blocking performance、adjacent signal selectivity、image frequency rejection、WBES location / identification、control and monitoring functions、receive antenna off-axis gain pattern，並連到 [[R&S SMBV100B]]、[[R&S ELEKTRA]]、[[R&S TS8996]]。\n- 來源列出 FCC CFR47 §25 Mobile Satellite Service / Mobile Earth Station test items：RF output power、occupied bandwidth、emission mask within 25% of authorized BW、out of band emissions、additional unwanted emission 1559–1610 MHz、carrier-off state emissions 1559–1610 MHz、frequency stability，並提到 ANSI C63.26 / FCC KDBs。\n- 最後來源把 primary test instruments for wireless regulatory test labs 分成 wireless communication tester、EMI test receiver、signal & spectrum analyzer、network analyzer、vector signal generator、broadband amplifier 等類別。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+             },
+             "score": 10.608221
+            },
+            {
+             "text": "Regulatory test for wireless devices with cellular technology › 重點摘要\n- 來源將 wireless products 的 market access approval testing 分成三類：[[Regulatory Compliance Test]]、[[Telecom Industry Certification Test]]、[[Cellular Network Operator Acceptance Test]]。Regulatory compliance 被描述為各區域法律面 market access 的必要條件；industry certification 例子包含 [[GCF]] / Cellular、[[Bluetooth SIG]]、[[FiRa]] / [[UWB]]、[[Wi-Fi Alliance]]；operator acceptance test 例子包含 AT&T、VzW、T-mobile、CMCC。\n- 來源主張 wireless products 需要 [[CE marking]] / [[FCC ID]]；test results 是 technical documentation 的一部分，需在產品投放市場前準備、可提供給 surveillance authorities，並自 placed on the market 起保存 10 years。\n- 來源列出 Ericsson Mobility Visualizer Jan 2023 的 mobile subscriptions 表，顯示 2022–2028 的 5G subscriptions 由 1046.006 增至 4974.568；但單位與表格數值口徑未在轉檔文字中完整標示。\n- [[CE RED 無線設備法規測試]]被整理成四類 essential requirements：Art 3.1a Health & Safety、Art 3.1b EMC、Art 3.2 Radio Spectrum、Art 3.3 Specific topics。來源列出多個 ETSI EN standards，例如 [[EN 300 328]]、[[EN 301 893]]、[[EN 303 687]]、[[EN 301 908-1]]、[[EN 301 908-13]]、[[EN 301 908-24]]、[[EN 301 908-25]]、[[EN 301 489-52]] 等。\n- 對 [[5G NR SAR testing]]，來源指出 5G NR network emulator is required to drive EUT to extreme transmission condition，multi-radio UE 的 average-SAR feature 需要 flexible signaling functions，涵蓋 cellular standards、Wi-Fi 與 Bluetooth；來源將 [[R&S CMW500]] / [[R&S CMX500]] 稱為 SAR / HAC signaling solution。\n- 對 Art 3.1b EMC，來源指出 EMC tests 需要 radio enabled 與 radio disabled conditions，因此 5G NR 也需要 signaling solution；mobile phone 仍需要 [[Audio Breakthrough]] test，從 GSM 到 VoLTE / VoNR by 5G。來源提到 [[R&S TS9982 EMS Test System]] 與 [[R&S TS9975 EMI Test System]]。\n- 對 Art 3.2 Radio Spectrum，來源指出 5G NR specification 包含 FR1 與 FR2；FR1 test setup stays conducted，FR2 test setup becomes radiated；並把 3GPP test cases、CTIA-OTA test cases、TRP / TRS、RSE 測試連到 [[R&S TS8991]] 與 [[R&S TS8996]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+             },
+             "score": 8.103899
+            },
+            {
+             "text": "ZNA_specs_en_5215-4652-22_v2400 › 重點摘要\n- 型號頻率範圍：\n  - [[R&S ZNA26]]：10 MHz to 26.5 GHz。\n  - [[R&S ZNA43]]：10 MHz to 43.5 GHz，可為 2.92 mm 或 2.4 mm ruggedized male test port connector。\n  - [[R&S ZNA50]]：10 MHz to 50 GHz。\n  - [[R&S ZNA67]]：10 MHz to 67 GHz。\n- 各型號提供 2 ports 或 4 ports base unit；test port impedance 為 50 Ω，DC block 為 standard。\n- Key performance 包含：dynamic range > 129 dB specification without options、147 dB typical with options、maximum attainable range up to 170 dB allowing full 2-port correction；sensitivity > –120 dBm at 1 Hz IF bandwidth specification without options，並有 –162 dBm measured with options（1 kHz measurement bandwidth normalized to 1 Hz）。\n- Measurement bandwidth：base unit 1 Hz to 1.5 MHz；搭配 [[R&S ZNA-K17]] increased IF bandwidth 30 MHz option 時為 1 Hz to 30 MHz。\n- Measurement speed 條件包含 firmware version 3.20、Windows 11 (64 bit)；例：10 MHz to 43.5 GHz、500 kHz measurement bandwidth、1601 points、2-port calibration 時 sweep time 96 ms nominal。\n- 4-port instruments：最多 4 sources，independently configurable、phase coherent、phase controlled；另有第 5 source 可作為 LO supply；每 port 有 2 true receivers，4-port model 總計 8 true receivers，無 multiplexing。\n- 2-port instruments：最多 2 sources，independently configurable、phase coherent、phase controlled；另有第 3 source 可作為 LO supply；每 port 有 2 true receivers，2-port model 總計 4 true receivers，無 multiplexing。\n- Optional rear panel LO out 可支援 mmWave converters；4-port model 最多 4 個 converters，2-port model 最多 2 個 converters，無需 external signal generator；rear panel LO out typ. +25 dBm，最高 26.5 GHz。\n- [[R&S ZNA-K28]] continuous data recording 支援 infinite data point capture、circular buffer，並可透過 LAN 或 USB 連續資料傳輸。\n- [[R&S ZNA-B26]] direct IF access：IF input 可用於 mmWave converter 與 antenna measurement systems，bandwidth 1 GHz；IF output up to 2 GHz bandwidth 可用於 external pulse analysis。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+             },
+             "score": 7.363645
+            },
+            {
+             "text": "ZNA_specs_en_5215-4652-22_v2400 › Option 與 licence 摘要\n- Hardware options：[[R&S ZNA-B4]] precision frequency reference、[[R&S ZNA-B5]] 2nd internal LO source、[[R&S ZNA-B7]] data streaming memory、[[R&S ZNA-B8]] mmWave converter LO、[[R&S ZNA-B12]] device control、[[R&S ZNA-B15]] RFFE GPIO interface、[[R&S ZNA-B19]] additional removable hard disk、[[R&S ZNA-B26]] direct IF access、[[R&S ZNA-B91]] trigger and control I/O board。\n- 型號依附 hardware options：direct source and receiver access、source step attenuators、receiver step attenuators、internal pulse modulators、3rd and 4th internal sources、2nd internal source and LO、source monitor access、low-noise amplifier、low-power spurious reduction、internal combiner。\n- Software / measurement options：[[R&S ZNA-K1]] spectrum analyzer mode、[[R&S ZNA-K2]] time domain analysis、[[R&S ZNA-K20]] extended time domain analysis、[[R&S ZNA-K4]] scalar mixer measurements、[[R&S ZNA-K5]] vector mixer measurements、[[R&S ZNA-K6]] phase coherent source control、[[R&S ZNA-K61]] true differential mode、[[R&S ZNA-K7]] measurements on pulsed signals、[[R&S ZNA-K17]] increased IF bandwidth 30 MHz、[[R&S ZNA-K8]] mmWave converter support、[[R&S ZNA-K9]] group delay measurements、[[R&S ZNA-K19]] 1 mHz frequency resolution、[[R&S ZNA-K28]] continuous data recording、[[R&S ZNA-K30]] noise figure measurement、[[R&S ZNA-K50]] uncertainty analysis、[[R&S ZNA-K51]] security write protection、[[R&S ZNA-K66]] speed improvement、[[R&S ZNA-K100]] SNP assistant、[[R&S ZNA-K121]] RF off boot up、[[R&S ZNA-K210]] EaZy deembedding、[[R&S ZNA-K220]] in-situ deembedding、[[R&S ZNA-K230]] smart fixture deembedding、[[R&S ZNA-K231]] Delta-L PCB characterization、[[R&S ZNA-K980]] health and utilization monitoring service。\n- 明確 excludes：[[R&S ZNA-K1]] spectrum analyzer mode cannot be combined with R&S®ZNA50-B312、R&S®ZNA67-B312、R&S®ZNA50-B511、R&S®ZNA67-B511。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+             },
+             "score": 5.624843
+            },
+            {
+             "text": "R&S ZNA › 2-port / 4-port 架構\n依 [[ZNA_specs_en_5215-4652-22_v2400]]（Version 24.00, April 2026）：\n\n- 4-port instruments：最多 4 sources，independently configurable、phase coherent、phase controlled；另有第 5 source 可作為 LO supply。\n- 2-port instruments：最多 2 sources，independently configurable、phase coherent、phase controlled；另有第 3 source 可作為 LO supply。\n- 4-port model 每 port 有 2 true receivers，總計 8 true receivers；2-port model 每 port 有 2 true receivers，總計 4 true receivers；來源明確說明無 multiplexing。\n- 支援 true parallel and coherent data acquisition，例如 antenna array tests 與 antenna test systems，從 100 kHz 開始。\n- Optional rear panel LO out 可支援 mmWave converters；4-port model 最多 4 個 converters，2-port model 最多 2 個 converters，無需 external signal generator。\n- Rear panel LO out 提供 high-power LO signal，typ. +25 dBm，最高 26.5 GHz，可作為 mixer measurements 的 LO source。\n- Optional second LO source 可讓 mixer/frequency convertor measurements 速度加倍並最佳化 trace noise。\n- 使用 [[R&S ZNA-K9]] option、1 kHz measurement bandwidth 時，mixer group delay 與 deviation from linear phase 的 group delay trace noise peak-to-peak 可由 200 ps 降至 15 ps。\n- 最多 4 pulse modulators、最多 8 pulse generators（4-port）；最多 2 pulse modulators、最多 4 pulse generators（2-port）。\n- Minimum pulse width：40 ns。\n- Optional direct IF access（in/out）：IF input 可用於 mmWave converter 與 antenna measurement systems，bandwidth 1 GHz；IF output up to 2 GHz bandwidth 可用於 external pulse analysis。\n- Selectable reference signal access：1 GHz external reference，可同步 external equipment，例如 signal generators，改善 mmWave converters up to terahertz frequencies 的 performance。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNA.md"
+             },
+             "score": 5.105247
+            },
+            {
+             "text": "2026台灣無線通訊代工製造產業_技術規格與市場分析報告 › 原文未解的問題\n- 來源雖標示報告日期 2026-09-15，但部分數字標為公開財報、產業新聞、法人預估或 TrendForce 最新研究，未提供逐項引用、報告名稱、網址、頁碼或方法論。\n- 來源未說明 [[TrendForce]] 手機直連衛星市場規模 76 億美元與 49% 年成長率的完整報告名稱、發布日期、統計範圍與幣別口徑；雖可記為美元，但不可延伸推算區域市場或公司營收。\n- 來源稱台灣已於 2026 年全面開放 6 GHz 頻段 5925–6425 MHz，但未提供主管機關公告編號或法規文件。\n- 來源稱 [[華通]]星鏈太空板市占率約 9 成、[[華通]]掌握 SpaceX / Amazon Leo / OneWeb 等訂單，但未提供客戶公告、合約、出貨量、營收占比或市占統計口徑。\n- 來源稱 [[SpaceX]]旗下星鏈於 2026 年 6 月掛牌且市值突破 1.77 兆美元，但未提供交易所、股票代號、公告或資料來源；本次僅記錄來源說法，不建立為已驗證資本市場事實。\n- 來源稱 SpaceX 規劃部署百萬顆衛星藍圖，但未提供 FCC 文件、申請案號或官方計畫版本。\n- 來源稱台灣政府未來十年投入新台幣 400 億元發展 B5G 低軌通訊衛星計畫，未提供政府計畫名稱、預算來源或公告日期。\n- 來源未提供各廠商受惠程度的量化評分方法或分類標準。\n- 來源未說明 [[耀登]]之 Amphenol-affiliated / Auden 關係的法律或股權口徑。\n- 來源未說明 [[建漢]]在本報告中與既有 [[建漢]] T-Glass 圖卡列名是否為同一實體。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+             },
+             "score": 3.027879
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/entities/R&S ZNA.md",
+             "raw_refs": [
+              "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md",
+             "raw_refs": [
+              "raw/Market/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md",
+              "raw/Market/HSD PCB image 18.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S ZNB3000.md",
+             "raw_refs": [
+              "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S ZNA67EXT.md",
+             "raw_refs": [
+              "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S ZNB3044.md",
+             "raw_refs": [
+              "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md",
+             "raw_refs": [
+              "raw/Market/OneNote/Kuiper UT Test & Supply Chain.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/低軌衛星零組件與地面終端供應鏈.md",
+             "raw_refs": [
+              "raw/Market/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md",
+              "raw/Market/OneNote/Satellite/User Terminal.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/相控陣列天線.md",
+             "raw_refs": [
+              "raw/Market/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md",
+              "raw/Market/OneNote/PhasedArray/Beamforming.md",
+              "raw/Market/OneNote/Satellite/User Terminal.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/Network Infrastructure T&M drivers.md",
+             "raw_refs": [
+              "raw/Market/OneNote/MWC2025---WIC-INFRA.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md",
+             "raw_refs": [
+              "raw/Market/OneNote/2025RS Drone Solution.md",
+              "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md",
+             "raw_refs": [
+              "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}
