@@ -2503,7 +2503,8 @@ s-k-20261011T102952` (not published).
   `tests/test_knowledge_benchmark_route.py`. Design `docs/HARNESS_DESIGN.zh-TW.md` §5.6 G2;
   decision `docs/DECISIONS.md` 2026-10-18 "G2 anchor check is language-independent".
   Verification: see HANDOFF.md; the two full suites wait for the owner's U7 rerun to finish.
-- [ ] Full suites after the U7 rerun (owner's signal): project `.venv` and `C:\aepci-wk\venv`
-  (`pip install -e ".[dev,office]"`, `--basetemp=C:/aepci-wk/bt`).
+- [x] Full suites after the U7 rerun (owner's signal), at 519b85a2: project `.venv` 3159
+  passed, 7 skipped, 0 failed; `C:\aepci-wk\venv` (`pip install -e ".[dev,office]"`,
+  `--basetemp=C:/aepci-wk/bt`) 3136 passed, 30 skipped, 0 failed; ruff, format and mypy clean.
 - [ ] Live check after the next Agent Web restart: a Chinese question in chat records
   `translations_used` in `host.data.anchor`; then `run.py --set zh` (owner decides when).

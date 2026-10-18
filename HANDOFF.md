@@ -5,10 +5,8 @@ Updated: 2026-10-18 (Asia/Taipei), by Claude Code (G2 language-independent ancho
 
 ## G2 anchor check made language-independent (2026-10-18, Claude Code) — latest
 
-**Status:** committed on main, **not pushed**, Agent Web **not restarted** (the owner's U7 rerun
-was running against the live Agent Web while this was written; do not restart it). The two
-full test suites have **not** been run yet, on purpose: the owner asked to wait until the U7
-rerun finishes so the benchmark's latency is not distorted.
+**Status:** committed on main, **not pushed**, Agent Web **not restarted**. The owner's U7
+rerun finished (commit 519b85a2) before the full suites were run; both are green.
 
 - **Goal:** the G2 anchor check rejected correct translations (a Chinese question the model
   translated to English failed as "missing terms" and lost its English words as "added
@@ -35,7 +33,9 @@ rerun finishes so the benchmark's latency is not distorted.
   - targeted: `tests/test_harness_anchor_g2.py` (33), G1/G3/G4 rule tests, `test_gateway*.py`,
     every `test_knowledge_*.py`, `test_product_e2e_01.py`: all passed (156 in the rule/E2E
     subset; 383 in `test_knowledge_*` + `test_gateway*`);
-  - full suites: **not run yet** (waiting for the owner's signal).
+  - full suites at 519b85a2 (after the U7 rerun): project `.venv` 3159 passed, 7 skipped,
+    0 failed; `C:\aepci-wk\venv` (reinstalled `-e ".[dev,office]"`, `--basetemp=C:/aepci-wk/bt`)
+    ruff, format and mypy clean, 3136 passed, 30 skipped, 0 failed.
   - No existing test was changed except the module docstring line of
     `tests/test_knowledge_benchmark_route.py`. All tests use fakes; the live benchmark was not run.
 - **Risks:**
@@ -47,10 +47,7 @@ rerun finishes so the benchmark's latency is not distorted.
     dropped it; the model's version is still searched only as a supplement and any term it
     added that is not licensed is dropped.
 - **Next:**
-  1. When the owner says the U7 rerun is finished: run both full suites (project `.venv`, and
-     `C:\aepci-wk\venv` after `pip install -e ".[dev,office]"` with `--basetemp=C:/aepci-wk/bt`)
-     and record the results here and in `docs/TASKS.md`.
-  2. After the owner's next Agent Web restart: ask a Chinese question in chat and check
+  1. After the owner's next Agent Web restart: ask a Chinese question in chat and check
      `host.data.anchor.translations_used`; then the owner decides when to run `--set zh`.
 
 
