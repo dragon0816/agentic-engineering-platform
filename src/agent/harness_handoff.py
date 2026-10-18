@@ -1,4 +1,4 @@
-"""How a domain Harness result leaves the conversation loop (G1, owner 2026-10-18).
+"""How a domain Harness result leaves the conversation loop (G1, G4; owner 2026-10-18).
 
 Generic for every domain; the Knowledge, Workflow and Coding adapters only
 supply their verdicts.
@@ -23,6 +23,10 @@ an authoring tool, is ordinary conversation and is left alone):
   a `run_id` and `status: failed`;
 - a capability whose result is a Host validator's verdict (the Coding Harness,
   DUT validation evidence): data with `status: failed`.
+
+G4, consistent output length: a Harness result leaves the loop at the limit
+its domain declares (`output_limit_chars`); a cut says so and where the full
+result is (`full_result_hint`), never silently.
 """
 
 from __future__ import annotations
@@ -106,3 +110,21 @@ def with_unverified_note(text: str, tools: Sequence[Any]) -> str:
     if not lines:
         return text
     return text + UNVERIFIED_NOTE + "；".join(lines) + "。）"
+
+
+# G4: what a Harness that declares no output limit gets. It equals the
+# Knowledge default (4,000 synthesis tokens at 4 characters per token).
+DEFAULT_OUTPUT_LIMIT_CHARS = 16_000
+
+
+def capped(
+    text: str, limit: Any, full_result: str | None = None
+) -> tuple[str, dict[str, int] | None]:
+    """Cut at the domain's declared limit, never silently (G4)."""
+    bound = limit if isinstance(limit, int) and not isinstance(limit, bool) and limit > 0 else None
+    bound = bound or DEFAULT_OUTPUT_LIMIT_CHARS
+    if len(text) <= bound:
+        return text, None
+    where = full_result or "完整結果保留在這次工具紀錄（record）中。"
+    note = f"\n\n…（Host 註記：結果超過這個領域宣告的輸出上限 {bound} 字，已在此截斷。{where}）"
+    return text[:bound] + note, {"limit_chars": bound, "full_chars": len(text)}

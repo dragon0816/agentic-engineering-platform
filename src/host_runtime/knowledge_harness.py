@@ -36,7 +36,16 @@ from host_runtime.knowledge_observation import KnowledgeBridgeActions
 from knowledge.evidence import connected_facets, evidence_excerpt
 from knowledge.evolution import KnowledgeAnswerRecord, KnowledgeQueryRequest
 from knowledge.procedure import KnowledgeProcedure
-from knowledge.query import cited_numbers
+from knowledge.query import DEFAULT_SYNTHESIS_MAX_OUTPUT_TOKENS, cited_numbers
+
+# G4 (owner 2026-10-18): characters per synthesis token when the Knowledge
+# domain declares its output limit. An English token averages about 4
+# characters and a Chinese one 1-2, so 4 bounds both.
+OUTPUT_CHARS_PER_TOKEN = 4
+FULL_RESULT_HINT = (
+    "完整答案保留在這次工具紀錄的 record 中；也可以在 Agent Web 的 Knowledge 頁直接問同一個問題，"
+    "看到完整結果。"
+)
 
 
 def _trace() -> TraceIdentifiers:
@@ -109,6 +118,18 @@ def harness_skill(skills: Any, asset: Any = None) -> Any:
         if _eligible(manifest):
             return manifest.metadata.identity
     return None
+
+
+def output_limit_chars(procedure: KnowledgeProcedure | None, synthesized: str, visible: str) -> int:
+    """The Knowledge domain's declared output limit in characters (G4): the
+    Skill procedure's synthesis output tokens, plus whatever the Host added
+    to the model's text (source lines, gap notes)."""
+    tokens = (
+        procedure.synthesis_max_output_tokens
+        if procedure is not None
+        else DEFAULT_SYNTHESIS_MAX_OUTPUT_TOKENS
+    )
+    return tokens * OUTPUT_CHARS_PER_TOKEN + max(0, len(visible) - len(synthesized))
 
 
 def knowledge_glossary(procedure: KnowledgeProcedure | None) -> Glossary:
@@ -365,10 +386,13 @@ class KnowledgeHarness:
                 visible_answer += "\n\n來源：\n" + "\n".join(knowledge_source_lines(record))
         else:
             visible_answer = "The selected Skill requires evidence this Host cannot yet verify."
+        synthesized = ((base.get("record") or {}).get("answer") or {}).get("text") or ""
         return {
             **base,
             "ok": run.phase == "validated" and base["ok"],
             "answer": visible_answer,
+            "output_limit_chars": output_limit_chars(procedure, synthesized, visible_answer),
+            "full_result_hint": FULL_RESULT_HINT,
             "harness": run.model_dump(mode="json"),
             "evidence": {
                 "raw_citations": len((base.get("record") or {}).get("cited_passages") or ()),

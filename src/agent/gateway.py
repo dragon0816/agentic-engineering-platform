@@ -31,7 +31,7 @@ from agent.decisions import (
     DecisionTrace,
 )
 from agent.harness_anchor import ToolAnchor
-from agent.harness_handoff import harness_reply, with_unverified_note
+from agent.harness_handoff import capped, harness_reply, with_unverified_note
 from agent.routing import RequestRouter, RoutingOutcome
 from agent.skills import CommandBinding
 from capabilities.runtime import CapabilityInvocation
@@ -1001,6 +1001,13 @@ class Gateway:
             # The answer's outcome is the Bridge call's: its code sits on the capability.
             failure_code = ((ran.get("capability") or {}).get("failure") or {}).get("code")
             verdict = "validated" if validated else "not_validated"
+            # G4: the domain's declared output limit, and never a silent cut.
+            hint = answer.get("full_result_hint")
+            shown, cut = capped(
+                str(answer.get("answer") or ""),
+                answer.get("output_limit_chars"),
+                hint if isinstance(hint, str) else None,
+            )
             return ConversationToolExecution(
                 call_id=call.call_id,
                 name=call.name,
@@ -1012,7 +1019,8 @@ class Gateway:
                         "knowledge_harness": verdict,
                         "harness_verdict": verdict,
                         "harness_output": produced,
-                        "answer": str(answer.get("answer") or "")[:12000],
+                        "answer": shown,
+                        **({"truncated": cut} if cut is not None else {}),
                         "evidence": answer.get("evidence"),
                         "phase": state.get("phase"),
                         "failure_code": failure_code,
