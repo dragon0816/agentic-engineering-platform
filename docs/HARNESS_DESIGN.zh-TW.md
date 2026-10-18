@@ -182,16 +182,29 @@ flowchart TD
 
 - Host 把本回合使用者的原句（`RequestContext.message`）與最近的對話，連同模型的參數一起交給 Harness 工具（`ToolAnchor`）。
 - 領域 adapter 以原句為主要輸入：Knowledge 的合成與驗證（facet coverage、claim support）都針對原句。模型的版本只能「加」，而且必須先通過確定性檢查（不呼叫模型）：
-  1. **實體保留**：原句的每個實體類詞都必須出現在模型版本中，直接出現或透過 glossary 同義組都算。實體類詞指：含數字或大寫的詞（產品、型號、數字、年份）、時間詞、glossary 詞。缺任何一個，模型版本就被拒絕，只用原句。
-  2. **新增詞要有來源**：模型新增的詞，若不在最近對話、也不在 glossary 中，就被刪掉。因此「那車用呢?」這種代名詞可以靠歷史補足。
+  1. **實體保留**：原句的每個實體類詞都必須出現在模型版本中，直接出現、透過 glossary 同義組、或包含在已驗證的原句詞（見下）中都算。實體類詞指：含數字或大寫的詞（產品、型號、數字、年份）、時間詞、glossary 詞。缺任何一個，模型版本就被拒絕，只用原句。
+  2. **新增詞要有來源**：模型新增的詞，若不在最近對話、glossary、或已驗證的翻譯中，就被刪掉。因此「那車用呢?」這種代名詞可以靠歷史補足。
+- **跨語言檢查不需要語言知識**（owner 2026-10-18）。GPT-5.5 是雙語的，問題出在字串比對：中文問題「眼圖會影響哪些產品決策」被模型正確譯成英文後，原本會被判「缺詞」，英文詞也會被當成「新增詞」刪掉。因此 Knowledge 工具（`knowledge__<vault>`）的輸入多了兩個**選填**欄位：
+  - `original_terms`：模型從使用者訊息中**逐字照抄**的關鍵詞；
+  - `term_translations`：每個原句詞 → 模型給的另一語言翻譯或同義詞，例如 `{"眼圖": "eye diagram"}`。
+  - Host 的檢查只做字串包含，與語言無關：
+    - **逐字檢查**：每個 `original_terms` 項目與每個 `term_translations` 的 key，必須是原句的子字串（只做空白、大小寫與全半形 NFKC 正規化）。不是子字串的就是模型編造的，丟棄並記錄。已驗證的翻譯 key 也算已驗證的原句詞。
+    - **涵蓋檢查**：必要詞出現在模型版本中，**或**包含在已驗證的原句詞中，就算保留；兩邊都沒有才拒絕。
+    - **新增詞檢查**：模型版本的詞，若在最近對話、glossary 中，**或**出現在已驗證 key 的翻譯值中，就保留；否則照舊刪掉。key 沒通過驗證的翻譯，不能讓任何詞通過。
+  - 仍是確定性檢查，不多呼叫一次模型。舊的呼叫端不帶這兩個欄位時，行為與之前完全相同。
+  - 安全性不變：合成與驗證永遠針對原句；模型版本與翻譯只擴大檢索。
 - 通過檢查的版本是**補充檢索查詢**（`KnowledgeQueryRequest.supplementary_queries`），只擴大檢索，和 `query_rewrite.py` 一樣。只有當它用到對話歷史的詞（原句本身不完整）時，才附在原句後面一起作為問題。
+- 已驗證的翻譯另外組成一個雙語關鍵詞查詢（每個原句詞後接它的翻譯，例如「眼圖 eye diagram 產品決策 product decisions」），也是補充檢索查詢。模型原封不動傳原句（outcome same）時也會加；模型版本被拒絕時不加，只用原句。
+  - 與 `query_rewrite.py` 的關係：rewrite 是 Knowledge 端另一次模型呼叫，只在 procedure 開啟 `bilingual_retrieval` 時執行，產生同義詞與相關主題。翻譯則是對話模型已經寫好的、免費的、針對原句詞的對照。兩者合併，不互相取代：檢索查詢依序為原句、rewrite、補充查詢（含翻譯），再以大小寫與空白正規化後去重（`handlers._distinct`），同一查詢只搜一次。沒開 `bilingual_retrieval` 的 procedure 也因此能拿到雙語詞。
 - Knowledge 的 glossary ＝ 已安裝 Skill procedure 的 facet、focus、relation 詞，每組一個同義組（`knowledge_glossary`）。
 - 紀錄：
   - 每個工具呼叫都記錄 `arguments`，不含憑證、有長度上限，也不回送給模型。U7 發現原本沒有這個欄位。
-  - Knowledge 工具資料另有 `anchor`：原句、模型版本、outcome（same / accepted / rejected / absent）、原因、缺少的詞、刪掉的詞、對話補足的詞、實際使用的問題。
-  - 遙測只記 `anchor_outcome` 與計數，不記句子。benchmark 可據此算「意圖偏移率」（rejected / 全部）。
+  - Knowledge 工具資料另有 `anchor`：原句、模型版本、outcome（same / accepted / rejected / absent）、原因、缺少的詞、刪掉的詞、對話補足的詞、實際使用的問題，以及 `verified_terms`、`discarded_terms`、`translations_used`。
+  - 遙測只記 `anchor_outcome` 與計數（missing、dropped、verified、discarded、translations），不記句子。benchmark 可據此算「意圖偏移率」（rejected / 全部）。
+  - `benchmarks/knowledge_v1/run.py --set zh` 問 8 題核心題的繁中翻譯（`questions/zh-core.json`，題號 `Qxxxx-zh`，帶英文原題 `source_id` 與相同標籤；釘選題庫不變），評分方式相同，reviewer 看到的是中文題目。
 - 已知限制：
-  - repo 沒有通用的雙語字典，所以跨語言比對只能靠 glossary 同義組。
+  - 翻譯本身不驗證（Host 沒有語言知識）；只驗證翻譯的 key 確實出自原句。錯誤的翻譯最多讓檢索多搜一些不相關的段落，答案仍須引用並通過 Host 檢查。
+  - 模型若沒填這兩個欄位，跨語言比對仍只能靠 glossary 同義組。
   - 中文沒有分詞：中文詞是按常見虛詞切開的片段，用子字串比對；原句的中文詞只有 glossary 詞與時間詞必須保留。
   - raw-only 引用政策的檢索還沒使用補充查詢。
   - 以模型判斷等價的檢查不在範圍內。

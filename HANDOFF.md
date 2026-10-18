@@ -1,9 +1,60 @@
 # Handoff
 
-Updated: 2026-10-18 (Asia/Taipei), by Claude Code (Generic Harness hand-off rules G1–G4)
+Updated: 2026-10-18 (Asia/Taipei), by Claude Code (G2 language-independent anchor check)
 
 
-## Generic Harness hand-off rules G1–G4 implemented (2026-10-18, Claude Code) — latest
+## G2 anchor check made language-independent (2026-10-18, Claude Code) — latest
+
+**Status:** committed on main, **not pushed**, Agent Web **not restarted** (the owner's U7 rerun
+was running against the live Agent Web while this was written; do not restart it). The two
+full test suites have **not** been run yet, on purpose: the owner asked to wait until the U7
+rerun finishes so the benchmark's latency is not distorted.
+
+- **Goal:** the G2 anchor check rejected correct translations (a Chinese question the model
+  translated to English failed as "missing terms" and lost its English words as "added
+  terms"). The owner approved a checker that needs no language knowledge.
+- **What changed:**
+  - `src/agent/gateway.py`: `VAULT_QUESTION_SCHEMA` gains optional `original_terms` (array) and
+    `term_translations` (object); the tool route passes them to the Harness through
+    `ToolAnchor.with_claims`; telemetry adds `anchor_verified`, `anchor_discarded`,
+    `anchor_translations` counts.
+  - `src/agent/harness_anchor.py`: `verify_claims` (substring check after whitespace, case and
+    NFKC normalisation), coverage through verified terms, added terms licensed by verified
+    translations, `AnchorCheck.translation_query` and the new record fields `verified_terms`,
+    `discarded_terms`, `translations_used`.
+  - `src/host_runtime/knowledge_harness.py`: `for_tool` passes the claims to `check_anchor`.
+  - `src/capabilities/knowledge_query/handlers.py`: retrieval queries deduplicated by case and
+    spacing (`_distinct`), so the translation query and the `query_rewrite.py` rewrites combine
+    without searching the same query twice.
+  - `benchmarks/knowledge_v1/questions/zh-core.json` (8 Traditional Chinese core questions) and
+    `run.py --set zh` (`zh_core`, `choose`); README updated. The pinned bank is unchanged.
+- **Where it is documented:** `docs/HARNESS_DESIGN.zh-TW.md` §5.6 G2; `docs/DECISIONS.md`
+  2026-10-18 "G2 anchor check is language-independent"; `docs/TASKS.md` new section.
+- **Verification (project `.venv`):**
+  - ruff check, ruff format --check (873 files) and mypy on src + tests (627 files): clean;
+  - targeted: `tests/test_harness_anchor_g2.py` (33), G1/G3/G4 rule tests, `test_gateway*.py`,
+    every `test_knowledge_*.py`, `test_product_e2e_01.py`: all passed (156 in the rule/E2E
+    subset; 383 in `test_knowledge_*` + `test_gateway*`);
+  - full suites: **not run yet** (waiting for the owner's signal).
+  - No existing test was changed except the module docstring line of
+    `tests/test_knowledge_benchmark_route.py`. All tests use fakes; the live benchmark was not run.
+- **Risks:**
+  - The model may not fill the new fields until it learns them from the schema description; then
+    behaviour is exactly as before.
+  - Translations themselves are not verified (only their keys); a wrong translation only widens
+    retrieval.
+  - Copying a required term into `original_terms` covers it even when the model's version
+    dropped it; the model's version is still searched only as a supplement and any term it
+    added that is not licensed is dropped.
+- **Next:**
+  1. When the owner says the U7 rerun is finished: run both full suites (project `.venv`, and
+     `C:\aepci-wk\venv` after `pip install -e ".[dev,office]"` with `--basetemp=C:/aepci-wk/bt`)
+     and record the results here and in `docs/TASKS.md`.
+  2. After the owner's next Agent Web restart: ask a Chinese question in chat and check
+     `host.data.anchor.translations_used`; then the owner decides when to run `--set zh`.
+
+
+## Generic Harness hand-off rules G1–G4 implemented (2026-10-18, Claude Code)
 
 **Status:** code, tests and docs committed on main, **not pushed**, Agent Web **not restarted**,
 U7 **not rerun**. The owner approved G1–G4 after U7 ("好做"). Knowledge Strategy v1.2 K02+ stays

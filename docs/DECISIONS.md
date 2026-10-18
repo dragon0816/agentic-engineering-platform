@@ -3329,3 +3329,50 @@ in scope; the check stays deterministic); letting the model's version replace th
 it passes the check (synthesis and validation must answer what the person asked); deciding equal
 binding priorities by installation order; feature flags (each rule is one revertible commit,
 per v1.2 §7.5).
+
+## 2026-10-18 — G2 anchor check is language-independent
+
+Owner approved 2026-10-18. G2 (commit 9e89053b) compared the conversation model's version of a
+Knowledge question with the person's sentence by string matching. The model (GPT-5.5) is
+bilingual; the checker is not: a Chinese question such as 「眼圖會影響哪些產品決策」 that the model
+correctly translated to English failed as "missing terms" and its English words were dropped as
+"added terms", although retrieval is lexical BM25 over a mixed-language vault and bilingual
+queries are exactly what helps it.
+
+Decision: the model supplies the language knowledge, the Host only checks substrings.
+
+- The `knowledge__<vault>` tool input gains two optional fields: `original_terms` (key terms
+  copied verbatim from the person's message) and `term_translations` (each such term mapped to
+  its translation or synonym in the other language). `question` is unchanged and still the only
+  required field; callers without the new fields behave exactly as before.
+- Verbatim check: an `original_terms` entry or a `term_translations` key is verified only when it
+  is a substring of the original after whitespace, case and width (NFKC) normalisation; anything
+  else is discarded and recorded. A verified translation key counts as a verified term.
+- Coverage: a required term is satisfied by the model's version or by a verified term; reject only
+  when it is in neither. Added terms: also allowed when they appear in the value of a verified
+  translation. A translation whose key is not in the original licenses nothing.
+- Still deterministic, no extra model call. Synthesis and validation still answer the original;
+  the model's version and the translations only widen retrieval. The verified translations form
+  one bilingual keyword query (term, translation, term, translation...) added to
+  `supplementary_queries` for the outcomes same and accepted, never for rejected.
+- `query_rewrite.py` already writes bilingual keyword queries, but with a separate Knowledge-side
+  model call, only when the procedure sets `bilingual_retrieval`, and about synonyms and related
+  topics rather than the person's own terms. The two are combined, not substituted: retrieval asks
+  the original, the rewrites, then the supplementary queries, deduplicated by case and spacing
+  (`handlers._distinct`), so a query both produce is searched once.
+- Logging: `host.data.anchor` gains `verified_terms`, `discarded_terms` and `translations_used`;
+  telemetry adds only counts (`anchor_verified`, `anchor_discarded`, `anchor_translations`).
+- Benchmark: `benchmarks/knowledge_v1/questions/zh-core.json` holds Traditional Chinese
+  translations of 8 core questions (ids `Qxxxx-zh`, `source_id`, the source's tags), run with
+  `run.py --set zh` and graded the same way, the reviewer seeing the Chinese text. The pinned
+  bank (`questions.json`, `source_sha256`) is unchanged; the runner refuses a zh file whose bank
+  hash, source ids or tags do not match.
+
+Rejected: a bilingual dictionary in the repository (large, domain-specific, never complete);
+a model call to judge equivalence (not deterministic, extra latency and cost); verifying the
+translations themselves (the Host has no language knowledge; a wrong translation can only widen
+retrieval, and every claim is still cited and Host-checked); letting the translations or the
+model's version become the question; replacing `query_rewrite.py` with the translations (the
+rewrite's synonyms measurably raised recall, 2026-10-09); adding the translation query when the
+model's version was rejected (a rejected turn uses the original alone, as before); changing
+`questions.json` to add Chinese questions (it is pinned by hash).

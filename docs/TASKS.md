@@ -2488,3 +2488,22 @@ s-k-20261011T102952` (not published).
   direct × 2, 36-question core, grader 1.4) and compare per question with
   `benchmarks/knowledge_v1/runs/u7-report.zh-TW.md`; compute the G2 intent drift rate from the
   tool records' `anchor` entries.
+
+## G2 anchor check is language-independent (2026-10-18)
+
+- [x] G2 refined (2026-10-18, Claude Code; owner approved the direction 2026-10-18). The
+  `knowledge__<vault>` tool takes optional `original_terms` and `term_translations`; the Host
+  verifies them as substrings of the original (whitespace, case and width only), lets verified
+  terms cover required terms and verified translations license added terms, and adds one
+  bilingual keyword query to retrieval, deduplicated with the `query_rewrite.py` rewrites.
+  Synthesis and validation still answer the original. `host.data.anchor` records
+  `verified_terms`, `discarded_terms`, `translations_used`; telemetry counts only. New
+  `benchmarks/knowledge_v1/questions/zh-core.json` (8 Traditional Chinese core questions) and
+  `run.py --set zh`. Tests: `tests/test_harness_anchor_g2.py`,
+  `tests/test_knowledge_benchmark_route.py`. Design `docs/HARNESS_DESIGN.zh-TW.md` §5.6 G2;
+  decision `docs/DECISIONS.md` 2026-10-18 "G2 anchor check is language-independent".
+  Verification: see HANDOFF.md; the two full suites wait for the owner's U7 rerun to finish.
+- [ ] Full suites after the U7 rerun (owner's signal): project `.venv` and `C:\aepci-wk\venv`
+  (`pip install -e ".[dev,office]"`, `--basetemp=C:/aepci-wk/bt`).
+- [ ] Live check after the next Agent Web restart: a Chinese question in chat records
+  `translations_used` in `host.data.anchor`; then `run.py --set zh` (owner decides when).
