@@ -106,7 +106,10 @@ def test_an_unvalidated_answer_goes_back_to_the_model_marked_as_such() -> None:
     from models.contracts import ModelMessage
 
     result = asyncio.run(built.converse(request("q"), (ModelMessage(role="user", text="q"),)))
-    assert result.text == "answered" and len(model.calls) == 2
+    # G1 (owner 2026-10-18): the model still answers, and the Host adds its
+    # "not verified" note; the model's own text is kept unchanged before it.
+    assert result.text.startswith("answered\n\n") and len(model.calls) == 2
+    assert "Host 註記" in result.text and "knowledge_insufficient_evidence" in result.text
     observation = model.calls[1].messages[-1].text
     assert "not_validated" in observation and "not from the knowledge base" in observation
     assert '"record"' not in observation  # the model's observation stays small

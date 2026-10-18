@@ -30,6 +30,7 @@ from agent.decisions import (
     DecisionShadow,
     DecisionTrace,
 )
+from agent.harness_handoff import harness_reply, with_unverified_note
 from agent.routing import RequestRouter, RoutingOutcome
 from agent.skills import CommandBinding
 from capabilities.runtime import CapabilityInvocation
@@ -738,7 +739,10 @@ class Gateway:
                     return GatewayConversationResult(
                         trace=context.trace,
                         status="answered",
-                        text=response.text,
+                        # G1: a Harness result of this turn that failed its
+                        # Host checks keeps the Host's note, whatever the
+                        # model wrote about it.
+                        text=with_unverified_note(response.text, evidence),
                         model_turns=turn,
                         tools=tuple(evidence),
                     )
@@ -805,13 +809,16 @@ class Gateway:
                         model_turns=turn,
                         tools=tuple(evidence),
                     )
-                if harnessed.get("knowledge_harness") == "validated":
-                    # The validated Knowledge answer is the turn's answer; the
-                    # model does not rewrite it (owner 2026-10-09, option a).
+                reply = harness_reply(harnessed)
+                if reply is not None:
+                    # A domain Harness's answer, validated or not validated
+                    # with output, is the turn's answer as the Harness wrote it,
+                    # Host note included; the model does not rewrite it
+                    # (owner 2026-10-09 option a; G1, owner 2026-10-18).
                     return GatewayConversationResult(
                         trace=context.trace,
                         status="answered",
-                        text=str(harnessed.get("answer") or ""),
+                        text=reply,
                         model_turns=turn,
                         tools=tuple(evidence),
                     )
@@ -929,31 +936,51 @@ class Gateway:
             asset = AssetIdentity.model_validate(bound["asset"])
             answer = await asyncio.to_thread(self.knowledge_harness, question, asset)
             validated = bool(answer.get("ok"))
+            # G1: a grounded Bridge record means the Harness produced output
+            # even when its Host checks did not pass (a partial answer).
+            produced = validated or isinstance(answer.get("record"), dict)
             raw_outcome, raw_state = answer.get("outcome"), answer.get("harness")
             ran = raw_outcome if isinstance(raw_outcome, dict) else {}
             state = raw_state if isinstance(raw_state, dict) else {}
-            # A validated answer ends the turn, so its record (the cited
-            # passages) is kept for whoever checks the citations; an
-            # unvalidated one goes back to the model and stays small.
-            kept = {"record": answer.get("record")} if validated else {}
+            # An answer with output ends the turn, so its record (the cited
+            # passages) is kept for whoever checks the citations; one without
+            # output goes back to the model and stays small.
+            kept = {"record": answer.get("record")} if produced else {}
             # The answer's outcome is the Bridge call's: its code sits on the capability.
             failure_code = ((ran.get("capability") or {}).get("failure") or {}).get("code")
+            verdict = "validated" if validated else "not_validated"
             return ConversationToolExecution(
                 call_id=call.call_id,
                 name=call.name,
                 host=HostToolOutcome(
-                    status="succeeded" if validated else "failed",
+                    # Whether the Harness produced a result, as the direct
+                    # route's Bridge status says; the verdict is separate.
+                    status="succeeded" if produced else "failed",
                     data={
-                        "knowledge_harness": "validated" if validated else "not_validated",
+                        "knowledge_harness": verdict,
+                        "harness_verdict": verdict,
+                        "harness_output": produced,
                         "answer": str(answer.get("answer") or "")[:12000],
                         "evidence": answer.get("evidence"),
                         "phase": state.get("phase"),
                         "failure_code": failure_code,
                         **kept,
+                        **(
+                            {}
+                            if produced
+                            else {
+                                "host_note": "知識庫沒有產生通過證據檢查的答案"
+                                + (f"（{failure_code}）" if failure_code else "")
+                                + "；上面的內容未經知識庫驗證"
+                            }
+                        ),
                         "instruction": (
                             "This answer passed the Host's evidence checks and is shown to "
                             "the person as it is."
                             if validated
+                            else "This partial answer is shown to the person as it is, with "
+                            "the Host's note on what the evidence does not support."
+                            if produced
                             else "The knowledge base did not validate an answer. Tell the "
                             "person what is above; anything you add is not from the "
                             "knowledge base and must say so."
