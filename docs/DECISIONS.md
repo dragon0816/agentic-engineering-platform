@@ -3283,3 +3283,49 @@ is called by n8n workflows.
 
 Rejected: keeping the adapter as an unused optional seam (it suggests n8n is a supported
 integration and keeps a contract nobody may use).
+
+## 2026-10-18 — Generic Harness hand-off rules G1–G4
+
+Owner, 2026-10-18, after the U7 baseline ("好做"): implement Knowledge Strategy v1.2 ADR-K6
+option A. U7 measured the tool route 11.5 pp behind the direct route on the same 26 questions
+(threshold 5 pp), mostly Q1041/Q1061/Q1091: partial answers with supported claims that the tool
+route marked not validated and handed back to the model. The rules sit at the seam between the
+conversation tool loop and any domain Harness, so they are generic, not Knowledge cases. As built:
+`docs/HARNESS_DESIGN.zh-TW.md` §5.6; commits 6d0fe421 (G1), 9e89053b (G2), 209fb885 (G3),
+0c9b1095 (G4).
+
+- **G1, a result that failed Host checks is not rewritten by the model.** A Harness result that
+  is not validated but has output (for Knowledge, a grounded record) is the turn's answer as the
+  Harness wrote it, Host note included, with record and evidence kept: the same text the direct
+  route shows. With no output, the model answers and the Host appends a visible "not verified"
+  note. Workflow and Coding Harnesses produce a status, not answer text, so they take the second
+  branch: a failed Workflow run (steps or output checks), a failed draft trial run, or a Host
+  validator's `status: failed` (Coding Harness, DUT evidence) keeps a Host note on the model's
+  answer unless a later call of the same tool in the turn succeeded. Plain capabilities and host
+  tools are unchanged. The Knowledge tool's `status` now says whether the Harness produced a
+  result (as the direct route's Bridge status does); the verdict is `harness_verdict` and
+  `failure: knowledge_not_validated`.
+- **G2, the person's original sentence is the anchor.** The Host passes the current turn's text
+  and recent conversation with the model's argument. The adapter answers and validates the
+  original. The model's version only adds: a supplementary retrieval query, after a
+  deterministic check that keeps every entity-like term of the original (digits, capitals, time
+  words, glossary terms; else rejected and the original alone is used) and drops added terms
+  found in neither the conversation nor the glossary (the Knowledge Skill procedure's terms). It
+  joins the question only when it resolved terms from the conversation. Every tool call now
+  records its arguments (no credentials, bounded, not sent back to the model) and Knowledge
+  records the anchor outcome, so a benchmark can compute an intent drift rate.
+- **G3, Skill selection by bound asset.** Optional `SkillManifest.asset_bindings` (kind, asset,
+  optional exact version, priority), omitted from the bytes when empty. The bound Skill wins by
+  priority, ties by identity, never installation order; without a binding, the first eligible
+  Skill as before. Tool and direct routes use the same binding.
+- **G4, consistent output length.** The loop returns a Harness result up to the domain's
+  declared limit (Knowledge: synthesis tokens × 4 characters plus the Host's own text), and a
+  cut appends a Host note saying where the full result is. Replaces the fixed 12,000 characters.
+
+Rejected: Knowledge-only special cases in the Gateway (the seam is shared by every domain);
+ending the turn on every failed Workflow or Coding result (it would remove the model's repair
+loop, so a repaired run clears the note instead); a model-based equivalence check for G2 (not
+in scope; the check stays deterministic); letting the model's version replace the question when
+it passes the check (synthesis and validation must answer what the person asked); deciding equal
+binding priorities by installation order; feature flags (each rule is one revertible commit,
+per v1.2 §7.5).

@@ -41,7 +41,7 @@
 | D1 | 第一批目標使用者是 **BD / Marketing**。情境：市場情報、供應鏈、技術趨勢、客戶產品、測試商機分析。建立 25 題 benchmark 草案（5 類 × 5 題）。owner 為 **Benchmark Owner**；BD、PM、AE 為*建議的* Domain Reviewer，尚未指派正式審閱者。**未審閱的 Expected Answer 不是正式 Ground Truth。** 措辭須合成或不敏感 | decided | §5、[knowledge_benchmark_v0/](knowledge_benchmark_v0/README.md) |
 | D2 | 建立 **BI Schema v0**，作為 PoC 契約（`bi.schema/v0`），與儲存及 Harness 解耦 | decided（內容待 owner 確認） | §4.3、ADR-K10、[bi_schema_v0/](bi_schema_v0/README.md) |
 | D2a | owner 同日提供「BI 知識庫」文件（17 頁簡報，內部，不放進 repo）：**Schema v0 必須完全保留文件定義的 Entity Types 與 Relationships**，標 `origin: source-bi-doc` 並附頁碼；超出文件的部分標 `proposed-v0`，盡量少並附理由 | decided | §4.3、ADR-K10、[bi_schema_v0/](bi_schema_v0/README.md) |
-| D3 | ADR-K6 的 Harness 通用規則 G1–G4，或是先量測 U7 | **未決定（pending）** | ADR-K6、§7.5 |
+| D3 | ADR-K6 的 Harness 通用規則 G1–G4，或是先量測 U7 | **decided**：先量 U7（2026-10-18），之後 owner 核准 G1–G4（2026-10-18「好做」），已實作 | ADR-K6、§7.5 |
 | D4 | **E2E-01 Gate 不得受影響**。Knowledge Strategy PoC 可平行準備，但不得擋住核心開發；不重排已核准的工作 | decided | §7.3、§7.4 |
 | D5 | Atlas 由另一個 Atlas Coding Agent 建置；現在就定義最小 Knowledge API 契約與 mock | decided | §6、ADR-K7、[../contracts/knowledge-api/](../contracts/knowledge-api/README.md) |
 | D6 | 架構要求重申：Agent Web 是主要 Knowledge Management UI（Drop、Editing、Review、Publishing、Asking，**新增 Strategy Selection**）；Obsidian 只是可選 adapter，永遠不是必要依賴；Strategy = 既有 Workflow + Skills + Configuration，不建第二個 workflow engine；Phase 1 只驗證 Knowledge Strategy 與 Hybrid Retrieval 的價值，**不做 PostgreSQL、Object Storage 與完整的多人審核** | decided | §1.2、§1.4、§4.1、ADR-K1、K2、K3、K5 |
@@ -201,7 +201,7 @@ R = Reuse、E = Extend、N = New。路徑皆已在 K01 驗證；v1.2 新增的�
 | K3 | Agent Web 主要 UI；Obsidian 為可選 adapter | **decided**（owner，D6；含 Strategy Selection） |
 | K4 | 共用 Document / Evidence ID 與 Provenance | proposed（v1.2 修訂：evidence_id 不寫回 Raw） |
 | K5 | 可設定的 Review Policy | proposed；Phase 1 只用 `general_collab`（D6：不做完整多人審核）；`domain_owner_review` 內容 pending |
-| K6 | Harness 接合處通用規則 G1–G4 | **pending**（D3：G1–G4 或先量 U7，未決定） |
+| K6 | Harness 接合處通用規則 G1–G4 | **decided 並已實作**（owner 2026-10-18；先量 U7，再做 G1–G4） |
 | K7 | Atlas Knowledge API 契約與版本 | 機制 **decided**（owner，D5）；scope 模型（Q10）：proposed，待確認 |
 | K8 | 資料分類與外部模型路由 | 定義 proposed；BI 內容類別 **pending** |
 | K9 | 協作流程（PR vs main） | **pending** |
@@ -325,7 +325,13 @@ R = Reuse、E = Extend、N = New。路徑皆已在 K01 驗證；v1.2 新增的�
   | DECISIONS 2026-10-11 no lock | 不衝突（不加鎖） |
   | ARCHITECTURE:757、PRODUCT_ACCEPTANCE_TESTS:197, 218 vs KNOWLEDGE_COLLAB | 既有矛盾，與本提案無關，owner 需裁定 |
 
-### ADR-K6：Harness 接合處的通用規則（**pending：owner 尚未決定 G1–G4 或先量 U7**）
+### ADR-K6：Harness 接合處的通用規則（**decided 並已實作，owner 2026-10-18**）
+
+> **2026-10-18 狀態：** owner 先要求量 U7（`benchmarks/knowledge_v1/runs/u7-report.zh-TW.md`：工具路徑落後直接路徑
+> 11.5 pp），看完後核准甲方案（「好做」）。G1–G4 已依 §7.5 回歸計畫實作，一條規則一個 commit：
+> 6d0fe421（G1）、9e89053b（G2）、209fb885（G3）、0c9b1095（G4）；設計寫在 `docs/HARNESS_DESIGN.zh-TW.md` §5.6，
+> 決策寫在 `docs/DECISIONS.md` 2026-10-18「Generic Harness hand-off rules G1–G4」。E2E-01 斷言已加入
+> `tests/test_product_e2e_01.py`。G2 的模型等價檢查不在範圍內。下一步：owner 重啟 Agent Web 後，用 U7 相同命令重跑並逐題比較。
 
 - **Context（K01 §2）.**
   - 「工具路徑 10/74」是 2026-10-07 sample-003 的數字，早於 U5（`0b39228a`）。
@@ -787,7 +793,7 @@ churn = 2026-10-01 以來修改該檔的 commit 數（`git log --since=2026-10-0
 ## Owner 決定（2026-10-18）
 
 1. **Answer Accuracy 門檻：** Hybrid 全體平均 **≥ 0.70**（取代 §5.5 原提議的 0.55），仍需 ≥ Wiki-only + 0.05。
-2. **D3（G1–G4 先做或先量 U7）：** owner 要求先說明 G1–G4 與 U7，**仍待決**。
+2. **D3（G1–G4 先做或先量 U7）：** owner 要求先說明 G1–G4 與 U7，**仍待決**。（同日稍後：先量 U7，再核准 G1–G4，已實作；見 ADR-K6 的 2026-10-18 狀態。）
 3. **Node：** 「目前看到幾個就幾個」，v0 採文件列出的 7 個 Node；N1 中「第 8 個 Node」一項關閉。
 4. **N2 正式審閱者：** 待 owner 與同事開會討論後決定；在那之前 benchmark 維持 `draft-unreviewed`。
 5. **Q10 / N3：** 同意 `knowledge.read.metadata`（loopback、免 token）／`knowledge.read.content`（bearer token）的 scope 分法，並同意在 AEP-K09 開始前與 Atlas Coding Agent 共同凍結 Knowledge API v0.1。

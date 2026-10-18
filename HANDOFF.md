@@ -1,14 +1,93 @@
 # Handoff
 
-Updated: 2026-10-17 (Asia/Taipei), by Claude Code (Knowledge Strategy v1.2)
+Updated: 2026-10-18 (Asia/Taipei), by Claude Code (Generic Harness hand-off rules G1–G4)
 
 
-## U7 baseline measured (2026-10-18, Claude Code) — latest
+## Generic Harness hand-off rules G1–G4 implemented (2026-10-18, Claude Code) — latest
+
+**Status:** code, tests and docs committed on main, **not pushed**, Agent Web **not restarted**,
+U7 **not rerun**. The owner approved G1–G4 after U7 ("好做"). Knowledge Strategy v1.2 K02+ stays
+blocked on the owner.
+
+- **Goal:** Knowledge Strategy v1.2 ADR-K6 option A. These are generic rules at the seam between
+  the conversation tool loop and any domain Harness, not Knowledge special cases. They follow the
+  regression plan in v1.2 §7.5: a frozen baseline, one commit per rule with failing-first tests,
+  and E2E-01 assertions.
+- **Commits:**
+  - 6d0fe421 G1;
+  - 9e89053b G2;
+  - 209fb885 G3;
+  - 0c9b1095 G4;
+  - then one docs commit.
+- **Where it is documented:**
+  - design: `docs/HARNESS_DESIGN.zh-TW.md` §5.6 (§7.1 and §11.2 now carry the U7 figures);
+  - decision: `docs/DECISIONS.md` 2026-10-18 "Generic Harness hand-off rules G1–G4";
+  - v1.2 ADR-K6 is marked decided and implemented;
+  - `docs/TASKS.md` has a new row, and the old tool-route decision line is ticked.
+- **What changed:**
+  - **G1:** `src/agent/harness_handoff.py` and `gateway.py`. A not-validated Knowledge result with
+    a grounded record is the turn's answer, exactly the text the direct route shows; the record is
+    kept.
+    - With no output, the model answers and the Host appends a "Host 註記" note.
+    - Failed Workflow runs, failed draft trial runs, and Host validator verdicts with
+      `status: failed` (Coding Harness, DUT evidence) keep a Host note unless a later call of the
+      same tool succeeded.
+    - The Knowledge tool's `status` is now "succeeded" whenever the Harness produced output; the
+      verdict lives in `harness_verdict` and `failure: knowledge_not_validated`. The benchmark
+      grader therefore treats a tool-route partial answer like a direct-route one.
+  - **G2:** `src/agent/harness_anchor.py`. The deterministic anchor check; the Knowledge adapter
+    answers the original sentence.
+    - An accepted model version goes into `KnowledgeQueryRequest.supplementary_queries`, which
+      only the wiki-primary retrieval uses.
+    - Every tool record has `arguments`; the Knowledge record has `anchor`.
+  - **G3:** optional `SkillManifest.asset_bindings` and `bound_skill`; `harness_skill(skills, asset)`
+    is used by the tool route, the direct route and the assistant tool.
+  - **G4:** `output_limit_chars` and `full_result_hint` from the Knowledge adapter; `capped` in
+    the loop.
+- **Verification:**
+  - Baseline at ac9221e9:
+    - project `.venv` full pytest: 3099 passed, 7 skipped;
+    - subset (E2E-01..05, DUT, the 47 test files that import `agent.gateway`, knowledge unified,
+      conversation harness): 565 passed, 1 skipped, 1 order-dependent flake
+      (`test_ai_proposed_changes`, passes alone);
+    - `C:\aepci-wk\venv` (run from a worktree at HEAD): 3075 passed, 30 skipped, 1 failed
+      (`test_script_tools` `script_timeout`, under CPU contention).
+  - Final:
+    - project `.venv`: ruff check, ruff format --check (873 files) and mypy (627 files) clean;
+    - full pytest: 3136 passed, 7 skipped, 2 failed. Both failures are real-browser tests
+      (`test_browser` signed-in profile, `test_schedule_web` panel) and pass on rerun;
+    - `C:\aepci-wk\venv` (reinstalled `.[dev,office]`): ruff and mypy clean, full pytest 3115 passed, 30 skipped, 0 failed.
+  - Each rule's subset run was green: 582, 623, 688 + 1 flake, 699 passed.
+  - All tests use fakes. No live model, benchmark, install or vault was touched.
+- **Changed existing tests:** both in `tests/test_knowledge_unified.py`, both required by the new
+  rules.
+  - G1: the unvalidated case now expects the Host note after the model's text.
+  - G2: the three fakes take the anchor, and the first test also asserts that the original
+    sentence reaches the adapter.
+- **Risks:**
+  - G2 can reject the model's version often for Chinese questions that the model translates.
+    There is no bilingual dictionary; only the Skill procedure's terms act as a glossary. A
+    rejection is safe (the original alone is used) but loses retrieval breadth.
+  - The original sentence is now the question. A long multi-part message is asked as a whole.
+  - G1's note can appear on turns where the model correctly explains a failed Workflow; that is
+    intended.
+  - Turns where the model wrote a Knowledge rewrite will differ from U7 on purpose.
+- **Next:**
+  1. The owner reviews, then checks `/api/tasks` and restarts Agent Web.
+  2. Live checks:
+     - a partial Knowledge answer in chat (for example Q1041 "What is an eye diagram…") should show
+       the same "已查到可引用的部分資料：…未能以證據支持：…" text as the direct route;
+     - the conversation's stored outcome should have `tools[].arguments` and `host.data.anchor`;
+     - a long answer should not end at 12,000 characters.
+  3. Rerun U7 with the same four commands, compare per question with `u7-report.zh-TW.md`, and
+     compute the intent drift rate from `anchor.outcome`.
+
+## U7 baseline measured (2026-10-18, Claude Code)
 
 U7 ran on the 36-question core, chat and direct routes, two passes each:
 `benchmarks/knowledge_v1/runs/u7-report.zh-TW.md`. The tool route is 11.5 pp behind the direct route
 on the same 26 questions (threshold 5 pp); the gap is mostly Q1041/Q1061/Q1091 (partial answers marked
-not validated: G1). **Next:** the owner decides whether to implement ADR-K6 G1–G4 (the G2 design
+not validated: G1). (Done since: the owner approved G1–G4, implemented above.) Original next step: the owner decides whether to implement ADR-K6 G1–G4 (the G2 design
 discussed 2026-10-18: original question as anchor, structured rewrite with an entity-preservation
 check, added terms must come from history or the bilingual glossary, optional model check; first log
 the tool's question argument). After G1–G4, rerun the same four commands and compare per question.

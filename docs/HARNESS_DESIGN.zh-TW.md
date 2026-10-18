@@ -1,6 +1,7 @@
 # AEP Harness 設計說明（審閱用）
 
 日期：2026-10-09　版本：已更新為 Harness 統一後（U1–U6）的狀態　撰寫：Claude Code
+2026-10-18 更新：加入 Harness 交接規則 G1–G4（§5.6），§7.1、§11.2 改為 U7 數字。
 用途：給 owner 審閱目前 Harness 的實際設計、邊界、限制與已知缺口。內容描述「程式現在怎麼做」，與規劃文件不一致之處另列於第 12 節。
 
 ---
@@ -21,6 +22,8 @@ owner 審閱本文件後決定**統一成一個 Harness 骨架**（`docs/phases/
 | Coding（coding/change） | 模型提出計畫並檢查路徑/命令 | 套用變更（沙箱、worktree 不變） | declared_commands（宣告的 pytest） | 從 execute 重試＝修復；用盡為 repair_budget_exceeded |
 | Workflow | — | Workflow 引擎（journal/復原不變） | steps_succeeded＋Workflow 宣告的輸出檢查（`checks`） | 0（整個 Workflow 不重跑，避免重複副作用） |
 | 對話回合 | — | Gateway tool loop | no_unbacked_action_claim、named_outputs_exist | 1 次，帶失敗原因；仍失敗則答案附上 Host 註記 |
+
+2026-10-18：對話迴圈與領域 Harness 的接合處改依通用規則 G1–G4（§5.6）：未通過驗收但有輸出的結果原樣回傳、使用者原句是錨點、依綁定資產選 Skill、輸出長度與領域宣告一致。
 
 其他：Knowledge 工具路徑改為**直接回傳 Harness 驗證過的答案**（模型不再改寫）；草稿修訂若刪除步驟必須明確聲明；外部 agent 執行已安裝未修改的 Workflow 也比照「安裝即核准」；遙測各領域回報相同的 phase 名稱，coding 有獨立的 `coding_change` run。下文第 6–12 節中標註「（已處理）」者為統一前的狀態描述。
 
@@ -150,6 +153,69 @@ flowchart TD
 
 `model_not_configured`、`model_unavailable`、`model_context_mismatch`、`empty_model_answer`、`tool_loop_limit`、供應商錯誤（如 `model_output_truncated`）；工具層 `uninstalled_tool`、`host_tool_failed`、`workflow_parameters_invalid`。
 
+### 5.6 Harness 交接規則 G1–G4（owner 2026-10-18 核准；所有領域通用）
+
+對話工具迴圈把工作交給領域 Harness（Knowledge、Workflow、Coding），結果再回到迴圈。U7 量到工具路徑比直接路徑低 11.5 pp，差距幾乎都出在這個接合處（`benchmarks/knowledge_v1/runs/u7-report.zh-TW.md`）。以下四條規則不是 Knowledge 特例，任何領域經過對話迴圈都適用。來源：`docs/proposals/KNOWLEDGE_STRATEGY_v1.2.md` ADR-K6；決策：`docs/DECISIONS.md` 2026-10-18。
+
+實作位置：`agent/harness_handoff.py`（G1、G4）、`agent/harness_anchor.py`（G2）、`agent/skills.py` `SkillAssetBinding` / `bound_skill`（G3）；Knowledge 的領域 adapter 在 `host_runtime/knowledge_harness.py`，迴圈在 `agent/gateway.py`。
+
+**G1：未通過 Host 檢查的結果不交給模型改寫。**
+
+- Harness 有輸出但未驗證時，迴圈直接回傳 Harness 自己的文字，Host 註記一起保留，record 與 evidence 也保留在工具紀錄。
+  - Knowledge 的「有輸出」＝ Bridge 回傳了有引用的紀錄。典型情況是 claim 有依據、但 facet 或關係不完整（U7 的 Q1041、Q1061、Q1091）。
+  - 回傳的文字就是 `KnowledgeHarness.ask` 給直接路徑的同一段，例如「已查到可引用的部分資料：…未能以證據支持：product_option_spec。」。
+- 工具紀錄的欄位：
+  - `harness_verdict`：validated 或 not_validated（`knowledge_harness` 欄位保留，給 benchmark 相容）。
+  - `harness_output`：Harness 是否有輸出。
+  - `status`：Harness 是否產生結果，與直接路徑的 Bridge 狀態對應。未驗證仍以 `failure: knowledge_not_validated` 表示。
+- Harness 什麼都沒產生時（例如 `knowledge_insufficient_evidence`），才交回模型。模型的答案由 **Host** 附上「Host 註記：…未經驗證」，不是靠 prompt。
+- Workflow 與 Coding 的 Harness 只產生狀態、沒有答案文字，所以都走上一條：模型負責說明，Host 附註記標明哪個結果未通過。適用的結果：
+  - Workflow 工具：步驟失敗或宣告的輸出檢查失敗（`workflow_output_check_failed`）；
+  - 草稿試跑：host 資料帶 `run_id` 且 `status: failed`；
+  - capability 結果是 Host validator 的判定：資料帶 `status: failed`，例如 Coding Harness、DUT 量測。
+- 同一回合中，同一個工具後來成功了（修復），註記就不加。
+- 不屬於 Harness 的工具，行為不變：一般 capability、authoring、browser、desktop、MCP。E2E-01 測試有兩個斷言：
+  - 超出限制的 DUT 量測，經對話迴圈後仍是 failed，不論模型怎麼寫；
+  - 一般 capability 的觀察與文字不變，被拒絕時也不加註記。
+
+**G2：使用者原句是錨點。**
+
+- Host 把本回合使用者的原句（`RequestContext.message`）與最近的對話，連同模型的參數一起交給 Harness 工具（`ToolAnchor`）。
+- 領域 adapter 以原句為主要輸入：Knowledge 的合成與驗證（facet coverage、claim support）都針對原句。模型的版本只能「加」，而且必須先通過確定性檢查（不呼叫模型）：
+  1. **實體保留**：原句的每個實體類詞都必須出現在模型版本中，直接出現或透過 glossary 同義組都算。實體類詞指：含數字或大寫的詞（產品、型號、數字、年份）、時間詞、glossary 詞。缺任何一個，模型版本就被拒絕，只用原句。
+  2. **新增詞要有來源**：模型新增的詞，若不在最近對話、也不在 glossary 中，就被刪掉。因此「那車用呢?」這種代名詞可以靠歷史補足。
+- 通過檢查的版本是**補充檢索查詢**（`KnowledgeQueryRequest.supplementary_queries`），只擴大檢索，和 `query_rewrite.py` 一樣。只有當它用到對話歷史的詞（原句本身不完整）時，才附在原句後面一起作為問題。
+- Knowledge 的 glossary ＝ 已安裝 Skill procedure 的 facet、focus、relation 詞，每組一個同義組（`knowledge_glossary`）。
+- 紀錄：
+  - 每個工具呼叫都記錄 `arguments`，不含憑證、有長度上限，也不回送給模型。U7 發現原本沒有這個欄位。
+  - Knowledge 工具資料另有 `anchor`：原句、模型版本、outcome（same / accepted / rejected / absent）、原因、缺少的詞、刪掉的詞、對話補足的詞、實際使用的問題。
+  - 遙測只記 `anchor_outcome` 與計數，不記句子。benchmark 可據此算「意圖偏移率」（rejected / 全部）。
+- 已知限制：
+  - repo 沒有通用的雙語字典，所以跨語言比對只能靠 glossary 同義組。
+  - 中文沒有分詞：中文詞是按常見虛詞切開的片段，用子字串比對；原句的中文詞只有 glossary 詞與時間詞必須保留。
+  - raw-only 引用政策的檢索還沒使用補充查詢。
+  - 以模型判斷等價的檢查不在範圍內。
+- Workflow 與 capability 原本就在 `RequestContext.message` 收到原句；它們的參數是結構化欄位，不經過這個檢查，但同樣會記錄 `arguments`。
+
+**G3：依綁定的資產選 Skill。**
+
+- `SkillManifest` 有選填欄位 `asset_bindings`，每筆包含：kind（knowledge / workflow / strategy_config）、namespace、name、選填的精確 version、priority 0–100。
+  - 欄位為空時不寫入 manifest 的位元組，既有 manifest 與 S3 產生的草稿 digest 都不變。
+  - 綁定只是規劃偏好，不是執行授權。
+- 選擇規則：
+  - 多個 Skill 綁同一資產時，比明確的 priority；同分時依 Skill identity 決定，**永遠不看安裝順序**。
+  - 沒有任何合格 Skill 綁定時，才退回原本的「第一個合格 Skill」。
+- 工具路徑（`for_tool`）、直接路徑（Agent Web `_knowledge_reply`）與 assistant 的 knowledge 工具，都用同一套綁定，兩條路徑選到同一個 Skill。
+- Workflow 與 Strategy Config 的 adapter 目前不選 Skill；kind 先定義好。
+
+**G4：輸出長度一致。**
+
+- 迴圈回傳 Harness 結果的上限，等於該領域宣告的上限（`output_limit_chars`），取代原本固定的 12,000 字。
+- Knowledge 的上限 ＝ Skill procedure 的 `synthesis_max_output_tokens`（256–8,192，預設 4,000）× 4 字／token，再加上 Host 加在模型文字之後的部分（來源清單、缺口註記）。
+  - 英文一個 token 平均約 4 字元、中文約 1–2 字，所以 4 能涵蓋兩者。
+  - 沒宣告上限的 Harness 用 16,000（＝ 4,000 × 4）。
+- 仍需截斷時，附上 Host 註記，說明上限，以及完整結果在哪裡：工具紀錄的 record，或 Agent Web 的 Knowledge 頁。工具資料記 `truncated`，絕不無聲截斷。
+
 ---
 
 ## 6. 通用 Harness 狀態機（第 2、4、6 層的共用契約）
@@ -197,11 +263,13 @@ stateDiagram-v2
 | | 直接路徑 | 工具路徑 |
 |---|---|---|
 | 進入點 | 路由命中指名/推斷 Knowledge → `ask_knowledge` | 對話模型呼叫 `knowledge__<vault>` 工具 |
-| 共用狀態機與 Host checks | **有** | 沒有 |
-| 使用者看到的答案 | Harness 產生並驗證過的答案 | 對話模型讀取 Bridge 結果後**自己重寫** |
+| 共用狀態機與 Host checks | **有** | **有**（同一個 `KnowledgeHarness`，U5 起） |
+| 使用者看到的答案 | Harness 產生的答案（驗證過的，或附缺口註記的部分答案） | 同一段文字（G1，2026-10-18）；Harness 沒有輸出時才由模型回答並附 Host 註記 |
+| 問題 | 使用者原句 | 使用者原句；模型版本通過 G2 檢查後只作補充檢索 |
+| Skill | 綁定該 vault 的 Skill，否則唯一合格 Skill（G3） | 綁定該 vault 的 Skill，否則第一個合格 Skill（G3） |
 | Bridge 能力與 procedure | 相同 | 相同 |
 
-knowledge_v1 sample-003：直接路徑 25/34 PASS，工具路徑 10/74 PASS——**工具路徑的模型改寫是目前最大弱點**（owner 已暫停此決策，見 §11）。
+U7（2026-10-18，36 題涵蓋率核心層，grader 1.4，G1–G4 修改前）：chat 30/36 與 30/36、direct 34/36 與 33/36；在路由走工具路徑的 26 題上，工具路徑 82.7%、直接路徑 94.2%，差 11.5 pp（門檻 5 pp）。差距主要是 Q1041、Q1061、Q1091：部分有依據的答案在工具路徑被標成未驗證、交回模型——G1 修的就是這個。G1–G4 之後要用相同命令重跑比較（報告：`benchmarks/knowledge_v1/runs/u7-report.zh-TW.md`）。舊的 sample-003 數字（直接 25/34、工具 10/74）早於 U5，已不代表現況。
 
 ### 7.2 執行步驟（`knowledge-query/ask@1.0.0`，read、免核准）
 
@@ -324,7 +392,7 @@ flowchart LR
 |---|---|---|
 | coding_v1（20 題） | 自然語言程式任務經 Agent Web，由獨立 validator 判定 | build `db38f28`：19/20（兩次，T13、T16 屬 Agent 細心度問題）；更早 build 曾 20/20 |
 | business_workflow_lab（16 runs） | SAP 模擬網站、桌面 App、CLI、跨系統任務；填 Excel；以第二組參數重跑已安裝 Workflow | fix-010：14/16（C02 覆寫公式、X02 漏掉逾期發票） |
-| knowledge_v1（110 題樣本，全集 1,100） | Harness 迴圈有跑、證據在 Vault 中可驗證、模型審閱者認為合理 | sample-003：68/110 可接受（直接路徑 25/34、工具路徑 10/74）；所有被檢查的引用都存在 |
+| knowledge_v1（36 題涵蓋率核心層；110 題樣本，全集 1,100） | Harness 迴圈有跑、證據在 Vault 中可驗證、模型審閱者認為合理 | U7（2026-10-18，`3a97c8a0`，G1–G4 之前）：chat 30/36、30/36，direct 34/36、33/36；工具路徑 26 題 82.7% vs 直接 94.2%（差 11.5 pp）。G1–G4 之後待重跑。110 題樣本最後一次是 sample-003（早於 U5，已過時） |
 | authoring_v1 | 外部 coding agent 能否做出系統可用的 Workflow/Skill | Claude Code 3/3 PASS；Codex、Copilot 未安裝 |
 
 階段閘門的完成條件是「lab 與 coding_v1 在同一個 build 上全部通過」，目前未達成，owner 暫停決策中。
@@ -347,7 +415,7 @@ flowchart LR
 
 ## 13. 請 owner 審閱與決定的項目（2026-10-09：1、3–6 已依建議決定並實作；2 仍暫停；7 已更新）
 
-1. **Knowledge 工具路徑**（暫停中）：(a) 直接回傳 Harness 答案、(b) 讓更多問題走直接路徑、(c) 維持現狀。
+1. **Knowledge 工具路徑**（2026-10-09 已決定 (a)，U5 實作；2026-10-18 再以 G1–G4 處理未驗證但有輸出的答案）：(a) 直接回傳 Harness 答案、(b) 讓更多問題走直接路徑、(c) 維持現狀。
 2. **階段閘門 / Coding Skill 1.8.0 措辭**（暫停中）：是否採用 #4 分析提出的規則（完整閱讀規則、缺值依請求或範本、保留範本公式、輸出對照輸入檢查）。
 3. **G4 優先順序**：是否把 Coding 與 Workflow 接上共用狀態機（plan/host checks/retry），讓三個領域有一致的驗收與遙測語意？
 4. **Knowledge 重試預算**：是否把直接路徑的 `max_retries` 從 0 調高，讓「驗收失敗→重新收集」在共用狀態機中發生？

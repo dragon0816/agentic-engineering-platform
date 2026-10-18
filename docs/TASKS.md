@@ -1451,8 +1451,10 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   analysis proposes coding Skill 1.8.0 wording (read rules in full, missing
   values follow the request/template, keep template formulas, check outputs
   against inputs) plus a separately tested X02 wording.
-- [ ] Knowledge tool route (owner decision): return the harness's validated
+- [x] Knowledge tool route (owner decision): return the harness's validated
   answer as is, or route more Knowledge questions to the direct harness.
+  Decided 2026-10-09 (option a, Harness unification U5); partial answers
+  follow G1 since 2026-10-18 (see "Generic Harness hand-off rules G1–G4").
 - [x] Per-person pixel-art avatars in Agent Web (owner request; owner chose to
   keep the One Piece sheet in the repo) (`cbb11e0`). Live after the next
   restart.
@@ -2468,3 +2470,21 @@ s-k-20261011T102952` (not published).
   measured yet: traces do not record the tool's question argument. Report:
   `benchmarks/knowledge_v1/runs/u7-report.zh-TW.md`. G1–G4 still need the owner's go-ahead.
 
+## Generic Harness hand-off rules G1–G4 (2026-10-18)
+
+- [x] G1–G4 implemented (2026-10-18, Claude Code; owner approved after U7: "好做"; Knowledge
+  Strategy v1.2 ADR-K6 option A, regression plan §7.5). One commit per rule with failing-first
+  tests: 6d0fe421 G1 (a not-validated Harness result with output is returned as the Harness wrote
+  it, record kept; otherwise the model's answer carries a Host note; Workflow/Coding/DUT failures
+  keep a Host note unless repaired), 9e89053b G2 (original sentence is the anchor; deterministic
+  entity-preservation and added-term check; model version only as supplementary retrieval
+  query; tool arguments and anchor outcome recorded), 209fb885 G3 (optional
+  `SkillManifest.asset_bindings`, priority, never installation order; tool and direct routes),
+  0c9b1095 G4 (domain-declared output limit, never a silent cut). New E2E-01 assertions: failed
+  measurement stays failed through the conversation loop, wrong device refused before any
+  command, ordinary tools unchanged. Design `docs/HARNESS_DESIGN.zh-TW.md` §5.6; decision
+  `docs/DECISIONS.md` 2026-10-18. Verification: see HANDOFF.md.
+- [ ] U7 rerun after G1–G4 (owner): restart Agent Web, run the same four commands (chat × 2,
+  direct × 2, 36-question core, grader 1.4) and compare per question with
+  `benchmarks/knowledge_v1/runs/u7-report.zh-TW.md`; compute the G2 intent drift rate from the
+  tool records' `anchor` entries.
