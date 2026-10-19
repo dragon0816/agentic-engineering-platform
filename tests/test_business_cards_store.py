@@ -419,3 +419,71 @@ def test_the_needs_confirmation_label_names_fields_in_chinese() -> None:
         chart.needs_label(["department", "division", "business_group", "title"])
         == "需確認：部門、處、事業群、職稱"
     )
+
+
+def test_a_degree_is_kept_out_of_the_title_and_the_division_keeps_its_suffix(
+    tmp_path: Path,
+) -> None:
+    """Live test 2026-10-20: the title absorbed 博士 and 研展處 I lost its "I"."""
+    store = _store(tmp_path)
+    doctor = _add(
+        store,
+        {"name": "范博", "company": "範例科技", "division": "研展處 I", "title": "資深經理 博士"},
+    )
+    view = store.view(doctor.person_id)
+    assert (view.title, view.honorific, view.division) == ("資深經理", "博士", "研展處 I")
+    other = _add(
+        store,
+        {
+            "name": "Ann Lee",
+            "company": "範例科技",
+            "division": "研展處 II",
+            "title": "Dr. Director",
+        },
+    )
+    assert (store.view(other.person_id).title, store.view(other.person_id).honorific) == (
+        "Director",
+        "Dr.",
+    )
+    phd = _add(store, {"name": "Bo Lin", "company": "範例科技", "title": "Engineer, Ph.D."})
+    assert (store.view(phd.person_id).title, store.view(phd.person_id).honorific) == (
+        "Engineer",
+        "Ph.D.",
+    )
+    postdoc = _add(store, {"name": "林後", "company": "範例科技", "title": "博士後研究員"})
+    assert store.view(postdoc.person_id).title == "博士後研究員"
+    assert store.view(postdoc.person_id).honorific == ""
+    from capabilities.business_cards import chart
+
+    people, _, _ = store.chart_data("範例科技", include_left=False)
+    labels = set(chart._tree(people).children)
+    assert {"研展處 I", "研展處 II"} <= labels
+
+
+def test_the_unified_business_number_is_always_its_own_field(tmp_path: Path) -> None:
+    """Card B put 統一編號 in notes, card A did not: it is company_tax_id now."""
+    store = _store(tmp_path)
+    b = _add(store, {**CARD, "notes": "統一編號：12345678；週五休"})
+    view = store.view(b.person_id)
+    assert (view.company_tax_id, view.notes) == ("12345678", "週五休")
+    a = _add(
+        store,
+        {"name": "陳一", "company": "範例科技", "company_tax_id": "12345678", "notes": ""},
+    )
+    assert store.view(a.person_id).company_tax_id == "12345678"
+    c = _add(store, {"name": "陳二", "company": "範例科技", "notes": "統編 87654321"})
+    assert (store.view(c.person_id).company_tax_id, store.view(c.person_id).notes) == (
+        "87654321",
+        "",
+    )
+
+
+def test_an_older_store_gains_the_new_columns(tmp_path: Path) -> None:
+    store = _store(tmp_path)
+    with sqlite3.connect(store.path) as con:
+        con.execute("ALTER TABLE people DROP COLUMN honorific")
+        con.execute("ALTER TABLE people DROP COLUMN company_tax_id")
+    reopened = _store(tmp_path)
+    added = _add(reopened, {**CARD, "title": "經理 博士", "company_tax_id": "12345678"})
+    view = reopened.view(added.person_id)
+    assert (view.honorific, view.company_tax_id) == ("博士", "12345678")

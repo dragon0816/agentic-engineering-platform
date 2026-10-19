@@ -18,10 +18,12 @@ FieldName = Literal[
     "name",
     "romanised_name",
     "company",
+    "company_tax_id",
     "business_group",
     "division",
     "department",
     "title",
+    "honorific",
     "phone",
     "ext",
     "mobile",
@@ -36,10 +38,12 @@ FIELDS: tuple[FieldName, ...] = (
     "name",
     "romanised_name",
     "company",
+    "company_tax_id",
     "business_group",
     "division",
     "department",
     "title",
+    "honorific",
     "phone",
     "ext",
     "mobile",
@@ -54,10 +58,12 @@ FIELD_LABELS: dict[str, str] = {
     "name": "姓名",
     "romanised_name": "英文名",
     "company": "公司",
+    "company_tax_id": "統一編號",
     "business_group": "事業群",
     "division": "處",
     "department": "部門",
     "title": "職稱",
+    "honorific": "學位/尊稱",
     "phone": "電話",
     "ext": "分機",
     "mobile": "手機",
@@ -81,10 +87,15 @@ class CardFields(Contract):
     name: str = Field(default="", max_length=120)
     romanised_name: str = Field(default="", max_length=120)
     company: str = Field(default="", max_length=_SHORT)
+    # The company's unified business number (統一編號), always here, never
+    # in notes (DECISIONS 2026-10-20).
+    company_tax_id: str = Field(default="", max_length=40)
     business_group: str = Field(default="", max_length=_SHORT)
     division: str = Field(default="", max_length=_SHORT)
     department: str = Field(default="", max_length=_SHORT)
     title: str = Field(default="", max_length=_SHORT)
+    # An academic or honorific title (博士, Dr., PhD), never part of `title`.
+    honorific: str = Field(default="", max_length=60)
     phone: str = Field(default="", max_length=60)
     ext: str = Field(default="", max_length=30)
     mobile: str = Field(default="", max_length=60)

@@ -23,7 +23,7 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
-from capabilities.business_cards import names
+from capabilities.business_cards import names, reading
 from capabilities.business_cards.contracts import (
     FIELD_LABELS,
     FIELDS,
@@ -61,10 +61,12 @@ CREATE TABLE IF NOT EXISTS people (
     name TEXT NOT NULL DEFAULT '',
     romanised_name TEXT NOT NULL DEFAULT '',
     company TEXT NOT NULL DEFAULT '',
+    company_tax_id TEXT NOT NULL DEFAULT '',
     business_group TEXT NOT NULL DEFAULT '',
     division TEXT NOT NULL DEFAULT '',
     department TEXT NOT NULL DEFAULT '',
     title TEXT NOT NULL DEFAULT '',
+    honorific TEXT NOT NULL DEFAULT '',
     phone TEXT NOT NULL DEFAULT '',
     ext TEXT NOT NULL DEFAULT '',
     mobile TEXT NOT NULL DEFAULT '',
@@ -200,6 +202,11 @@ class CardStore:
         path.parent.mkdir(parents=True, exist_ok=True)
         with self._connect() as con:
             con.executescript(_SCHEMA)
+            # A store from before a field existed gains its column.
+            have = {row["name"] for row in con.execute("PRAGMA table_info(people)")}
+            for name in FIELDS:
+                if name not in have:
+                    con.execute(f"ALTER TABLE people ADD COLUMN {name} TEXT NOT NULL DEFAULT ''")
 
     @classmethod
     def for_actor(cls, workspace_root: Path, actor: str) -> CardStore:
@@ -452,7 +459,7 @@ class CardStore:
         uncertain: Sequence[FieldName],
         actor: str,
     ) -> AddResult:
-        clean: dict[str, str] = {name: str(values.get(name, "")).strip() for name in FIELDS}
+        clean = reading.tidy({name: str(values.get(name, "")).strip() for name in FIELDS})
         if not clean["name"] and not clean["romanised_name"] and not clean["email"]:
             raise CardStoreError("card_without_name")
         if not clean["name"]:

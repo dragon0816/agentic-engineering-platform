@@ -19,11 +19,45 @@ from capabilities.business_cards import names
 from capabilities.business_cards.contracts import DroppedField, FieldName
 
 _TOKENS = re.compile(r"[a-z0-9]+")
+#: Academic or honorific titles that belong in `honorific`, never in `title`.
+#: 博士後 (postdoc) is a job title and stays.
+_HONORIFIC = re.compile(r"博士(?!後)|\bDr\.?(?=\s|$|,)|\bPh\.?\s?D\.?", re.IGNORECASE)
+_SEPARATORS = " ,，、/|;；"
+#: The unified business number (統一編號), 8 digits in Taiwan.
+_TAX_ID = re.compile(
+    r"(?:統一編號|統一编号|統編|UBN|Tax\s*ID|VAT\s*(?:No\.?|Number)?)\s*[:：#]?\s*(\d{8})",
+    re.IGNORECASE,
+)
 _ADDRESS = re.compile(r"\S+@\S+")
 
 
 def _letters(text: str) -> str:
     return "".join(_TOKENS.findall(unicodedata.normalize("NFKC", text).casefold()))
+
+
+def _trim(text: str) -> str:
+    return re.sub(r"\s{2,}", " ", text).strip(_SEPARATORS)
+
+
+def tidy(values: Mapping[str, str]) -> dict[str, str]:
+    """A reading with each value in its own field: a degree or honorific in
+    the title moves to `honorific`; a unified business number in the notes
+    moves to `company_tax_id`. Division and department text is kept exactly
+    as read (研展處 I stays 研展處 I)."""
+    out = dict(values)
+    title = out.get("title", "")
+    found = [match.group(0).strip() for match in _HONORIFIC.finditer(title)]
+    if found:
+        out["title"] = _trim(_HONORIFIC.sub(" ", title))
+        known = [part for part in re.split(r"[、,，/ ]+", out.get("honorific", "")) if part]
+        merged = list(dict.fromkeys(known + [item.rstrip(",") for item in found]))
+        out["honorific"] = " ".join(merged)
+    notes = out.get("notes", "")
+    match = _TAX_ID.search(notes)
+    if match and out.get("company_tax_id", "") in ("", match.group(1)):
+        out["company_tax_id"] = match.group(1)
+        out["notes"] = _trim(notes[: match.start()] + " " + notes[match.end() :])
+    return out
 
 
 def printed(romanised: str, evidence: str) -> bool:

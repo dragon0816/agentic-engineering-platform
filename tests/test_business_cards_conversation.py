@@ -435,3 +435,16 @@ def test_the_tools_and_skill_say_a_romanised_name_must_be_printed() -> None:
     assert "romanised_name_printed" in add["properties"]
     assert "never derive it from the email" in PROCEDURE
     assert "never change the email to match a name" in PROCEDURE
+
+
+def test_the_skill_keeps_degrees_out_of_the_title_and_divisions_exact() -> None:
+    from capabilities.business_cards.manifest import PROCEDURE
+    from capabilities.business_cards.signatures import PROMPT
+
+    add = next(schema for name, _, _, schema in TOOLS if name == "cards__add_card")
+    assert "honorific" in add["properties"] and "company_tax_id" in add["properties"]
+    assert "博士" in add["properties"]["title"]["description"]
+    assert "研展處 I" in add["properties"]["division"]["description"]
+    for text in (PROCEDURE, PROMPT):
+        assert "honorific" in text and "company_tax_id" in text
+    assert "never in title" in PROCEDURE and "including suffixes" in PROCEDURE

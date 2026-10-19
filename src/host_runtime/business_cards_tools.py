@@ -43,8 +43,18 @@ _FIELD_PROPS["email"] = {
     "description": "exactly as printed; never changed to match a name",
 }
 _FIELD_PROPS["business_group"] = {"type": "string", "description": "事業群 / BG"}
-_FIELD_PROPS["division"] = {"type": "string", "description": "處 / BU"}
-_FIELD_PROPS["department"] = {"type": "string", "description": "部 / 課 / team"}
+_EXACT = "copied exactly, including suffixes such as I, II or 一處"
+_FIELD_PROPS["division"] = {"type": "string", "description": f"處 / BU, {_EXACT} (研展處 I)"}
+_FIELD_PROPS["department"] = {"type": "string", "description": f"部 / 課 / team, {_EXACT}"}
+_FIELD_PROPS["title"] = {
+    "type": "string",
+    "description": "the job title only; a degree or honorific (博士, Dr., PhD) goes in honorific",
+}
+_FIELD_PROPS["honorific"] = {"type": "string", "description": "博士, Dr., PhD, ..."}
+_FIELD_PROPS["company_tax_id"] = {
+    "type": "string",
+    "description": "the company's unified business number 統一編號 (never in notes)",
+}
 _FIELD_PROPS["phone"] = {"type": "string", "description": "desk number"}
 _FIELD_PROPS["ext"] = {"type": "string", "description": "desk extension"}
 _FIELD_PROPS["mobile"] = {"type": "string", "description": "cellphone"}
