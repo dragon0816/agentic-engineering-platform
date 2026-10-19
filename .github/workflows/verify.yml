@@ -1,9 +1,43 @@
 name: Platform verification
 
+# Pushes that change only records no test reads (benchmark runs, progress and
+# decision logs, phase and proposal prose) skip the 14-minute Windows build
+# (owner 2026-10-19, Actions minutes). Docs a test does read stay included:
+# docs/contracts, the docs/proposals data files, LLM_GATEWAY.md and the two
+# loop documents. Later patterns override earlier ones.
 on:
   pull_request:
+    paths:
+      - "**"
+      - "!benchmarks/*/runs/**"
+      - "!HANDOFF.md"
+      - "!docs/*.md"
+      - "!docs/archive/**"
+      - "!docs/phases/**"
+      - "!docs/proposals/*.md"
+      - "docs/deployment-validation-loop.md"
+      - "docs/remote-testing-codex-loop.md"
+      - "docs/phases/LLM_GATEWAY.md"
   push:
     branches: [main, "phase-*/**"]
+    paths:
+      - "**"
+      - "!benchmarks/*/runs/**"
+      - "!HANDOFF.md"
+      - "!docs/*.md"
+      - "!docs/archive/**"
+      - "!docs/phases/**"
+      - "!docs/proposals/*.md"
+      - "docs/deployment-validation-loop.md"
+      - "docs/remote-testing-codex-loop.md"
+      - "docs/phases/LLM_GATEWAY.md"
+
+# A newer push to the same branch or PR cancels the run still in progress;
+# only the latest commit is verified. A cancelled run is not "success", so it
+# never triggers the deployment-validation request.
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read

@@ -3549,3 +3549,21 @@ every PC); renewing by re-signing in with a password (needs that copy); a longer
 lifetime instead of renewal (a leaked code would live longer); revoking through
 `admin/members/sign-out` (an administrator route, and it ends every login of the
 member); leaving the sign-in's browser login active (a 30-day credential nobody uses).
+
+## 2026-10-19 — CI skips record-only pushes and cancels superseded runs
+
+Owner: "可以先做1, 2項" (ahead of a possible switch to a private repository, where Windows Actions
+minutes count double against a monthly quota; the last 19 days ran 43 verify builds of about 14
+minutes each).
+
+- `verify.yml` runs only when a push or pull request touches something a test can read: it skips
+  `benchmarks/*/runs/**`, `HANDOFF.md`, `docs/*.md`, `docs/archive/**`, `docs/phases/**` and
+  `docs/proposals/*.md`, and re-includes the docs tests read (`docs/deployment-validation-loop.md`,
+  `docs/remote-testing-codex-loop.md`, `docs/phases/LLM_GATEWAY.md`). `docs/contracts/**`, the
+  `docs/proposals/` data files, `deploy/**` and all code still trigger it.
+- `concurrency: verify-<ref>` with `cancel-in-progress`: a newer push cancels the older run. A
+  cancelled run is not `success`, so it never raises a deployment-validation request.
+
+Rejected for now: moving most steps to Linux runners (would halve the cost but needs a parity check
+of the Windows-only tests); a self-hosted runner (machine must stay on and runs repository code).
+When a test starts reading a skipped document, add it back to the include list.
