@@ -3596,3 +3596,18 @@ Every closing links its evidence. Owner-only security items are not filed as iss
 Rejected: any contributor closing any issue (a decision could be closed by someone other than the
 decider); keeping the open items only in `docs/TASKS.md` (the owner kept forgetting them and wants to
 discuss them with colleagues).
+
+
+## 2026-10-20 — Switched-off Skills are named in the Gateway system prompt
+
+Live test 2026-10-20: with `hermes/business-cards` installed but switched off, the Gateway model
+offered to install it and asked for its name and version, because a switched-off Skill is not among
+its tools and nothing else told it the Skill exists. The Gateway system prompt now names the
+switched-off Skills (`namespace/name` only, at most 80, leaving out any name with another version
+switched on) and says: installed but switched off, switch it on in Agent Web > Capabilities, never
+install, draft or re-create it. The Host supplies the names from `assets/skills/disabled/` each turn.
+
+Rejected: offering switched-off Skills as tools (a switched-off Skill must not run, and its tools
+would crowd the catalogue it was switched off to keep small); a host tool listing them (one more
+model call before every such answer); descriptions or versions in the list (the Hermes pack alone
+ships about fifty switched off; names are enough to recognise one).

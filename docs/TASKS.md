@@ -2681,3 +2681,10 @@ s-k-20261011T102952` (not published).
   `needs_input` shown as stopped); `TurnProgress` keeps the stage a run ended in. Tests
   `tests/test_turn_progress.py`, `tests/test_turn_progress_web.py` (progress route),
   `tests/test_telegram_turn_progress.py` (status text); `docs/HARNESS_DESIGN.zh-TW.md` §5.5.1.
+- [x] A switched-off Skill is described as installed but switched off (2026-10-20, Claude Code;
+  live test 2026-10-20, the model offered to "install" `hermes/business-cards` and asked for its
+  name and version). The Gateway system prompt names the switched-off Skills (names only, at most
+  80, none with another version switched on) and says to switch one on in Agent Web > Capabilities,
+  never to install or re-create it; the Host reads the names from `assets/skills/disabled/`. Tests
+  `tests/test_switched_off_skills.py`; `docs/HARNESS_DESIGN.zh-TW.md` §5.1; decision
+  `docs/DECISIONS.md` 2026-10-20.

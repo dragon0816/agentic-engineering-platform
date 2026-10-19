@@ -1961,6 +1961,17 @@ def host_report(
     )
 
 
+def _switched_off_skills(layout: HostLayout) -> list[str]:
+    """`namespace/name` of each Skill on the Capabilities shelf (switched off)."""
+    from host_runtime.asset_shelf import disabled_assets
+
+    return [
+        f"{item['namespace']}/{item['name']}"
+        for item in disabled_assets(layout)
+        if item["kind"] == "skill"
+    ]
+
+
 def _use_now(
     gateway: Gateway, manifest: WorkflowManifest, grants: tuple[CapabilityGrant, ...]
 ) -> None:
@@ -2030,6 +2041,9 @@ def build_runtime(
         *mcp.tools(gateway.bridge),
         *workflow_form_tools(gateway.engine),
     )
+    # Skills installed but switched off, by name, so the model never offers to
+    # install one (live test 2026-10-20).
+    gateway.switched_off_skills = lambda: _switched_off_skills(place)
     # An installed Workflow run from the chat with incomplete values becomes
     # its form (owner 2026-10-15), as on the Gateway's own Workflow tools.
     chat_authoring.form_offer = lambda identity, values: _chat_form_offer(gateway, identity, values)

@@ -118,6 +118,7 @@ flowchart TD
 - 每個已安裝 Skill 的命令（目標能力或 Workflow 已安裝）→ 工具 `alias__command`，描述＝Skill instructions＋目標身分。
 - Workflow 工具的參數 schema 只含 `agent_fields`（runtime 參數），static 設定由 Host 填。
 - Knowledge 命令 → **每個 vault 一個工具** `alias__<vault>`，模型只能填 `question`；vault 與 Skill procedure 由 Host 綁定。
+- **已安裝但關閉的 Skill**（2026-10-20 實測修正）：不在工具目錄裡，但系統提示列出它們的名稱（只有 `namespace/name`，最多 80 個；同名有其他版本開著的不列），並要求模型說明「已安裝但已關閉，可在 Agent Web > Capabilities 開啟」，不得提議安裝、起草或重建，也不得詢問名稱與版本。名單由 Host 從 `assets/skills/disabled/` 讀取（`host.py` `_switched_off_skills`，每回合讀一次）。過去模型看不到它們，把關閉的 `hermes/business-cards` 當成沒安裝，提議「安裝」並詢問名稱與版本。
 - **Host 工具**（在 Skill 篩選之後加入，選擇器看不到）：authoring 工具、`browser__operate`、`desktop__operate`、`mcp__<server>__<tool>`。全部仍經 Bridge。
 
 ### 5.2 Skill 篩選（DecisionService）

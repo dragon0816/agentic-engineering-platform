@@ -98,6 +98,10 @@ MAX_RECORDED_ARGUMENTS_CHARS = 4_000
 # window; past this total the oldest observations are replaced by a short
 # note (owner 2026-10-19, with the 150-call cap). The newest is always kept.
 MAX_TURN_OBSERVATION_CHARS = 160_000
+# Switched-off Skills named in the system prompt (names only, live test
+# 2026-10-20); the Hermes pack alone ships about fifty switched off.
+MAX_SWITCHED_OFF_SKILLS = 80
+MAX_SWITCHED_OFF_NAME_CHARS = 80
 COMPACTED_NOTE = (
     "This older tool result was removed to keep the turn within the model's context. "
     "Rely on what you concluded from it; read again only what you still need."
@@ -417,6 +421,10 @@ class Gateway:
         # Host-owned conversation tools (G4 authoring); the host may set it after
         # construction, once the services behind the tools exist.
         self.host_tools = host_tools
+        # `namespace/name` of the Skills installed but switched off, which the
+        # model must not mistake for missing ones (live test 2026-10-20); the
+        # host sets it.
+        self.switched_off_skills: Callable[[], Sequence[str]] | None = None
         self.router = router
         self.bridge = bridge
         self.engine = engine
@@ -574,6 +582,32 @@ class Gateway:
                 # Telemetry cannot change the answer a person receives.
                 pass
         return result
+
+    def _switched_off_note(self) -> str:
+        """Names the Skills installed but switched off (names only, bounded), so
+        the model says where to switch one on instead of offering to install it."""
+        if self.switched_off_skills is None:
+            return ""
+        try:
+            listed = list(self.switched_off_skills())
+        except Exception:  # noqa: BLE001 - an unreadable shelf adds no note
+            return ""
+        on = {
+            f"{m.metadata.identity.namespace}/{m.metadata.identity.name}"
+            for m in self.router.commands.skills.manifests()
+        }
+        names = sorted({str(name)[:MAX_SWITCHED_OFF_NAME_CHARS] for name in listed} - on)
+        if not names:
+            return ""
+        shown = ", ".join(names[:MAX_SWITCHED_OFF_SKILLS])
+        if len(names) > MAX_SWITCHED_OFF_SKILLS:
+            shown += f" and {len(names) - MAX_SWITCHED_OFF_SKILLS} more"
+        return (
+            f"These Skills are installed but switched off, so they are not among your tools: "
+            f"{shown}. When a request needs one, say it is installed but switched off and that "
+            "the person can switch it on in Agent Web > Capabilities; never offer to install, "
+            "draft or re-create it, and never ask for its name or version."
+        )
 
     def limits(self) -> ConversationLimits:
         """The Host's per-turn limits as they are now (defaults without a setting)."""
@@ -735,6 +769,9 @@ class Gateway:
         )
         if self._workspace_note:
             prompt += " " + self._workspace_note
+        switched_off = self._switched_off_note()
+        if switched_off:
+            prompt += " " + switched_off
         if persona_guidance:
             prompt += (
                 "\n\nThe following local persona controls name and speaking style only. "
