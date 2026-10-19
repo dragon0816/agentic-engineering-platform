@@ -22,6 +22,10 @@
 > 標為「decided」的，是 owner 的決定，核准後才寫入 DECISIONS。
 > **v1.3 待 owner 確認：§5.5 門檻細節、BI Schema v1、ADR-K11（含 priority 評分準則）、§4.4 資料處理對應、§7.3 整合排程。AEP-K02 之後的所有工作仍被擋住，
 > 等 owner 核准 v1.3 才開始。**
+>
+> **2026-10-19 owner 已回答 §8.2 的七題**（見文末「Owner 決定（2026-10-19）：對 §8.2 的回答」）：`competing_vendors` 要加；priority 分 market、分期間；
+> judgement 欄位清單與 Node 擴充接受；Opportunity 要；講者備註可以（已實作於 `office.py`）；API 版本「好」；ADR-K9 寫好可以進 main。
+> 本文件就地更新（不另開 v1.4），差異同步記在 [KNOWLEDGE_STRATEGY_v1.3_DIFF.md](KNOWLEDGE_STRATEGY_v1.3_DIFF.md) §7。
 
 ## 0. 修訂原則與 owner 決定
 
@@ -63,6 +67,7 @@ D1、D2、D4、D5、D6 對應 owner 編號中的第 1、2、4、5 項與補充�
 | E3 | owner 問：Application 的 `priority` 合理嗎？大家一直調會不會亂掉？ | 問題 | ADR-K11 |
 | E4 | owner 分享 Codex「BI Knowledge Source Brief v6」 | 輸入（逐項核實） | §4.5 資料品質、§4.6 Dashboard 注意事項、§4.7 Case A–E、§5.2 第二組題目 |
 | E5 | Node 依 owner 2026-10-18 規則（「目前看到幾個就幾個」）改用範例 vault 的 **8 個** | 依既有規則套用 | §4.3 |
+| E6 | owner 回答 §8.2 的七題（`competing_vendors`、priority 範圍、judgement 欄位與 Node 擴充、Opportunity、講者備註、API 版本、ADR-K9） | **decided**（owner 2026-10-19；第 6 題的解讀待確認） | 文末「Owner 決定（2026-10-19）：對 §8.2 的回答」 |
 
 **已決定、不重開**（Brief v6 把這些列為待決，但它們已經決定）：
 - 第一批使用者是 BD / Marketing（D1）。
@@ -228,9 +233,9 @@ R = Reuse、E = Extend、N = New。路徑皆已在 K01 驗證；v1.2 新增的�
 | K6 | Harness 接合處通用規則 G1–G4 | **decided 並已實作**（owner 2026-10-18；先量 U7，再做 G1–G4） |
 | K7 | Atlas Knowledge API 契約與版本 | 機制 **decided**（owner，D5）；scope 模型（Q10）：proposed，待確認 |
 | K8 | 資料分類與外部模型路由 | 定義 proposed；BI 內容類別 **pending** |
-| K9 | 協作流程（PR vs main） | **pending** |
+| K9 | 協作流程（PR vs main） | **decided**（owner 2026-10-19：寫好且驗證通過就直接進 main） |
 | K10 | Schema 與儲存、Harness 解耦 | proposed；v1.3：Schema v1 依此產生並以 upcast 升級 mock，機制已演練 |
-| K11（新，v1.3） | Judgement 欄位與欄位層級 provenance | proposed；priority 評分準則與是否分團隊 / 期間 **pending** |
+| K11（新，v1.3） | Judgement 欄位與欄位層級 provenance | proposed；欄位清單 **decided**、priority 分 market 與期間 **decided**（owner 2026-10-19）；評分準則與 market 定義子問題 **pending** |
 
 ### ADR-K1：Strategy = Workflow + Skills + Configuration（**decided，owner 2026-10-17**）
 
@@ -432,14 +437,16 @@ R = Reuse、E = Extend、N = New。路徑皆已在 K01 驗證；v1.2 新增的�
 - **Pending：** BI 客戶 / 商機內容標 CONFIDENTIAL 還是 RESTRICTED；Gateway 核准是否涵蓋 CONFIDENTIAL。
 - **Phase 1 的做法：** 含客戶資料的三種類型**只在合成 fixture 上**跑抽取與 benchmark（§5.4），真實 vault 上不抽取這三種類型。這樣 ADR-K8 的決定不會擋住 PoC。
 
-### ADR-K9：協作流程（PR vs 在 main 直接 commit）（**pending**）
+### ADR-K9：協作流程（PR vs 在 main 直接 commit）（**decided，owner 2026-10-19：A**）
 
+- **決定（owner 2026-10-19）：「如果寫好了，可以進main」** → 選項 A：完成且通過驗證的工作直接 commit 到 main，不需要 PR 流程。這就是現行做法；
+  已寫入 `docs/DECISIONS.md`（2026-10-19「Verified work is committed directly to main」）。push 仍由 owner 決定時點。
 - 內容同 v1.1。實況是自 2026-10-05 起都直接在 main commit；沒有規則規定任一方式（K01 §10）。
 - 選項：
   - A：維持現況。
   - B：K02+ 一律走 feature branch + PR。
   - C：docs 直接 commit，程式變更走 PR。
-- 若選 B 或 C，需要修改的文件見 §7.6。
+- 若選 B 或 C，需要修改的文件見 §7.6。（owner 選 A，§7.6 的 ADR-K9 一列不需執行；`AGENTS.md` 只補一句明文。）
 
 ### ADR-K10（新）：Schema 與儲存、Harness 解耦（proposed）
 
@@ -482,7 +489,7 @@ R = Reuse、E = Extend、N = New。路徑皆已在 K01 驗證；v1.2 新增的�
   - mock 與 benchmark 以 `upcast_from_v0` 升級：只改資料與 config，沒有任何 Harness 或 backend 程式——這正是本 ADR 要證明的。
   - 修訂 upcast 規則一處：claim 的內容永不改寫，但改名的關係以 v1 名稱重算 `relationship_id`，claim 指向的 relationship id 依 `relationship_id_map` 更新。
 
-### ADR-K11（新，v1.3）：Judgement 欄位與欄位層級 provenance（proposed；評分準則 **pending**）
+### ADR-K11（新，v1.3）：Judgement 欄位與欄位層級 provenance（proposed；欄位清單與 priority 範圍 **decided，owner 2026-10-19**；評分準則 **pending**）
 
 - **Context（owner 2026-10-19 的問題：priority 合理嗎？一直調會不會亂掉？）**
   - `bi_schema.py:75` 把 Application `priority` 定義為 int 1–5；Dashboard 依它排序（`BI/Dashboard.md` 第 6 節顯示它）。
@@ -490,8 +497,8 @@ R = Reuse、E = Extend、N = New。路徑皆已在 K01 驗證；v1.2 新增的�
   - OneDrive 同步的 vault 上多人改同一份 Markdown 是 last-write-wins，沒有歷史（vault 不用 Git，DECISIONS 2026-10-11）。
   - priority 是判斷，不是有來源的事實：沒有評分準則、負責人、日期或理由。`bi_ingest.py` 的「不覆蓋人工內文」只保護**內文**與未知欄位（`:15-17`、`append_note` `:588-597`），不保護欄位值。
 - **Decision（proposed）：**
-  1. **欄位分類。** Schema v1 每個欄位標 `sourced` / `judgement` / `derived`（`x-field-class`，[bi_schema_v1/README.md](bi_schema_v1/README.md) §4）。依程式逐一判斷：
-     - judgement：所有 `confidence`、Application `priority`、Trend `stage` / `time_to_demand` / `market_impact` / `measurement_impact` / `our_fit`、Technology `maturity`、Competitor `strengths` / `weaknesses` / `pricing_position`、CustomerProduct `volume_tier`、Ecosystem `relationship_to_us`、Concept `audience` / `review_status`、Signal `so_what` / `reliability`，以及關係 `competing_solutions`、`influence_on`、`inferred_applications`。
+  1. **欄位分類（清單 decided，owner 2026-10-19「接受」）。** Schema v1 每個欄位標 `sourced` / `judgement` / `derived`（`x-field-class`，[bi_schema_v1/README.md](bi_schema_v1/README.md) §4）。依程式逐一判斷：
+     - judgement：所有 `confidence`、Application `priority`（2026-10-19 起為 `priorities`）、Trend `stage` / `time_to_demand` / `market_impact` / `measurement_impact` / `our_fit`、Technology `maturity`、Competitor `strengths` / `weaknesses` / `pricing_position`、CustomerProduct `volume_tier`、Ecosystem `relationship_to_us`、Concept `audience` / `review_status`、Signal `so_what` / `reliability`，以及關係 `competing_solutions`、`influence_on`、`inferred_applications`。
      - Application `lifecycle` 判為 sourced：它描述應用所處的階段類別（RD / Certification / Production …），不是排序。
      - derived：`updated`、`is_own_solution`、`legacy_v0`。
   2. **欄位層級 provenance（storage 介面，見 ADR-K2 `fields`）。** 每個值保留 `origin`（import / human / agent / migration）、`set_by`、`set_at`、選填 `reason`、`source_ref` 與它被接受的 `version`。人設定 judgement 值時 `reason` 必填。
@@ -509,12 +516,20 @@ R = Reuse、E = Extend、N = New。路徑皆已在 K01 驗證；v1.2 新增的�
      | 1 | 不追：不在我方產品範圍或已決定不投入 |
 
      每次人工設定需寫理由並引用依據（Signal、CustomerProduct、Opportunity）；建議每季檢視一次。
-  7. **單一 priority 還是分團隊 / 期間？（pending）**
+     2026-10-19 起準則**在所選 market 內**判斷，6 / 18 / 36 個月從期間第一天起算（第 7 點）；準則本身仍待 owner 與 BD 確認。
+  7. **單一 priority 還是分團隊 / 期間？（decided，owner 2026-10-19：分 market、分期間）**
      - 甲：維持 `bi_schema.py` 的單一 `priority`，加 provenance 與準則（相容現有工具與 Dashboard）。
      - 乙：改成有範圍的 priority，例如 `{scope: "BD", period: "2026-Q4", value: 4}`，不同團隊各自排序，過期的期間自動降為歷史。
-     - **建議：Phase 1 用甲**（只有 BD 一個使用團隊，D1），把現有 priority 視為「BD、當期」；若 PM / AE 也開始排序，再升為乙（schema 變更走 ADR-K10 upcast）。**待 owner 決定。**
+     - ~~建議：Phase 1 用甲~~ **owner 2026-10-19 決定：「分 market，分期間」。** 範圍是 **market × 期間**（不是團隊）：
+       - Schema v1.1：Application `priorities` = `[{market, period, value 1–5, origin, set_by, set_at, reason, source_ref, version}]`，每個 (market, period) 至多一筆；provenance 在每一筆裡。
+       - **market** = `src/knowledge/market_matrix.py` `TargetMarket` 的五個值（即 v1 既有 `market_segments` 與 Knowledge API `market_segment` 篩選的值）+ `unspecified`。`bi_schema.py` 與範例 vault 沒有 market 欄位（`value_chain`、Node `layer` 是供應鏈位置；Account `region` 是自由文字）。**子問題待 owner：** market 指市場區隔，還是業務區域 / 客戶群？
+       - **期間** = 日曆季 `YYYY-Qn`（例 `2026-Q4`）。
+       - **單一 priority 的升級**（既有工具與 vault）：`{market: unspecified, period: 值的 set_at 季，否則卡片 updated 的季，否則匯入日的季, value}`；例：`5G-FR2-AiP-OTA驗證.md` priority 4、updated 2026-10-14 → unspecified / 2026-Q4 / 4。
+       - **Dashboard 排序：** 選一個 market 與期間；先列該範圍的值（高到低），再列同期間 unspecified（標「未分 market」），其餘標「未評」並只顯示最近較早值作參考。過去期間不自動延用。
+       - **Trend 不分範圍：** 程式的 Trend 沒有 priority；Dashboard 的趨勢優先度 `measurement_impact × our_fit` 是算出值，不儲存。
+       - 細節：[bi_schema_v1/README.md](bi_schema_v1/README.md) §7、JSON `priority_scoping`；工具 `bi_schema.py` 不需修改（匯入時升級）。
 - **Consequences.**
-  - 契約已反映：`bi_schema_v1.json` 的 `field_provenance_record` 與 `x-field-class`；Knowledge API 的 `Entity.field_provenance`、`record_version` 與 history 端點；mock 中 `Application:psu-efficiency-transient` 示範人工修改、過期編輯被拒與匯入成為待審提議。
+  - 契約已反映：`bi_schema_v1.json` 的 `field_provenance_record`、`priority_entry`、`priority_scoping` 與 `x-field-class`；Knowledge API 的 `Entity.field_provenance`、`record_version`、history 端點與 `FieldChange.scope`；mock 中 `Application:psu-efficiency-transient` 示範 ai_server / 2026-Q4 的人工設定、過期編輯被拒、匯入成為待審提議，以及單一 priority 升級成的 unspecified / 2026-Q3 舊值。
   - 實作落在 AEP-K04（storage `fields` 介面）、AEP-K07（Agent Web 編輯與衝突審核）、AEP-K14（匯入遵守本規則）。
   - 補充題 SUP-01（§5.2）量測答案能否說出 priority 的來龍去脈。
 
@@ -533,7 +548,7 @@ Phase 1 的唯一目標：**驗證 Knowledge Strategy 與 Hybrid Retrieval 對 B
 | Case A 垂直流程：CSV → mapping 預覽 → 逐卡 diff → 確認 → 寫入 → 查詢 → 限定範圍的缺口回答（§4.7） | 投影片 OCR（Case E 的 OCR 屬後期評估） |
 | Document / Evidence ID（衍生索引）與型別無關 Storage Backend（選項 A） | **Object Storage** |
 | `general_wiki` Strategy（既有 ingest 包成 Workflow）；Strategy Selection | **完整多人審核**、`domain_owner_review`（ADR-K5 pending） |
-| `bi_knowledge_graph` Strategy PoC：12 種類型（11 種來自 `bi_schema.py`，Opportunity proposed）；Account / CustomerProduct / Opportunity 只在合成 fixture 與範例 vault fixture 上 | 真實客戶資料的抽取（ADR-K8 pending） |
+| `bi_knowledge_graph` Strategy PoC：12 種類型（11 種來自 `bi_schema.py`，Opportunity 為 owner 2026-10-19 決定的正式類型）；Account / CustomerProduct / Opportunity 只在合成 fixture 與範例 vault fixture 上 | 真實客戶資料的抽取（ADR-K8 pending） |
 | Graph candidate 進 sandbox、在 Agent Web Knowledge 頁審核、經既有 push 發佈 | Submission server、多人並發寫入 |
 | GraphRetriever 與 Hybrid（RRF、evidence_id 去重、缺口檢查），在同一個 knowledge-query 能力內 | `auto` 策略推薦 |
 | Knowledge API v0.1 唯讀路由（契約與 mock 已交付） | `POST /query`、conflicts / feedback / review queue API |
@@ -560,15 +575,16 @@ Phase 1 的唯一目標：**驗證 Knowledge Strategy 與 Hybrid Retrieval 對 B
   - Account `suppliers` → **`key_suppliers`**（`:120`）；
   - CustomerProduct `chip_modules` → **`chipset_modules`**（`:96`）。
   - 另外 v0 提議的 Signal `mentions` 其實是程式既有的 **`related`**（`:182`）。
-- **類型：** 11 種卡全部 `source-bi-schema-py`（名稱同 v0）；**Opportunity 不在程式中**（沒有 schema、資料夾或模板，只在 `README.md:18` 的分析鏈），維持 `proposed`。
-- **關係：** 25 個名稱、37 個 (domain, 名稱) 組合；33 個出自程式，4 個 `proposed`（Opportunity 的 `account`、`test_solutions`、`customer_product`，以及 v1.3 新增的 TestSolution `competing_vendors`）。程式**沒有記錄連結目標類型**，所以每個 range 都附 `range_basis`。
-- **Node：8 個**（v1.2 是 7 個）。程式不固定 Node 清單；範例 vault 有 8 張 Node 卡（L1-Chipset、L2-Antenna-Module、L2-RF-FEM-Module、L3-Handset、L3-WiFi-Router-CPE、L4-Base-Station、L5-Carrier-Network、X-Certification-Lab），依 owner 2026-10-18「目前看到幾個就幾個」改用 8 個（`position_set: vault-reference`）。簡報的「模組」在 vault 拆成天線模組與 RF 前端模組。AI 資料中心、車用雷達等擴充節點與「通訊模組」維持 `proposed-extension`（範例 vault 的 module 廠沒有 node，例如 `BI/Ecosystem/Quectel.md` 只有 `role: module`）。
+- **類型：** 11 種卡全部 `source-bi-schema-py`（名稱同 v0）；**Opportunity 不在程式中**（沒有 schema、資料夾或模板，只在 `README.md:18` 的分析鏈）。v1.3 原維持 `proposed`；**owner 2026-10-19「要」→ 正式類型**（`origin: owner-decision-2026-10-19`）：`name`、`account`、`customer_product`、`test_solutions`、`opportunity_stage`（取代 `hypothesis_status`）、`confidence`、`updated`；建議的 `bi_schema.py` 程式行在 [bi_schema_v1/README.md](bi_schema_v1/README.md) §8。
+- **關係：** 25 個名稱、37 個 (domain, 名稱) 組合；33 個出自程式，4 個原為 `proposed`（Opportunity 的 `account`、`test_solutions`、`customer_product`，以及 v1.3 新增的 TestSolution `competing_vendors`），**2026-10-19 起都是 `owner-decision-2026-10-19`**（owner 決定為正式，`bi_schema.py` 待 owner 依 README §8 加入）。程式**沒有記錄連結目標類型**，所以每個 range 都附 `range_basis`。
+- **Node：8 個**（v1.2 是 7 個）。程式不固定 Node 清單；範例 vault 有 8 張 Node 卡（L1-Chipset、L2-Antenna-Module、L2-RF-FEM-Module、L3-Handset、L3-WiFi-Router-CPE、L4-Base-Station、L5-Carrier-Network、X-Certification-Lab），依 owner 2026-10-18「目前看到幾個就幾個」改用 8 個（`position_set: vault-reference`）。簡報的「模組」在 vault 拆成天線模組與 RF 前端模組。AI 資料中心、車用雷達等擴充節點與「通訊模組」維持 `proposed-extension`（範例 vault 的 module 廠沒有 node，例如 `BI/Ecosystem/Quectel.md` 只有 `role: module`）；**owner 2026-10-19 接受這些擴充節點**（值名稱不變）。
 - **程式的結構事實（v1 已編碼）：** 欄位種類 str / int / bool / date / enum / list / link / linklist / virtual（`:3-6`）；Signal `title` 是 virtual，只進檔名（`:174-175`）；命名欄位是 `name`，CustomerProduct 是 `product_name`（`:92`）；Account、Node、Signal 沒有 `confidence` 與 `updated`（`tail=False`，`:124, 133, 185`）；Signal `reliability` 不等於驗證；Application `lifecycle` 與 CustomerProduct `test_stage_now` 是不同列舉（規則 `lifecycle_stage_mapping`）；`launch_window` 是自由文字；缺連結目標只警告，沒有穩定 entity_id，也沒有目標類型檢查（`bi_ingest.py:722-727`）。
 - **與 v0 的主要屬性差異：** Trend `our_fit`、`measurement_impact` 改為 1–5 整數，`stage` 列舉不同；Technology `maturity` 列舉不同、`standards_body` → `standard_body`；Ecosystem `role` 11 個值；Account `region` 改自由文字、`customers` 改為 `key_customers` 連結；CustomerProduct `launch_schedule` → `launch_window`；Application `measurement_topic` → `measurement_topics`（清單）並新增 `priority`；Concept `review_state` → `review_status`、`audience` 改列舉；Competitor `confirmed` 併入 `confidence`；紀錄層 `sources` 移除（程式只有 `ingested_from` 檔名）。完整表格見 [bi_schema_v1/README.md](bi_schema_v1/README.md) §3。
 - **保留的 `proposed` 欄位（附理由）：** TestSolution `is_own_solution`（vendor 空白規則的明確形式，derived）、`product_family`；Trend / Application / Opportunity `market_segments`；Account `synthetic`；Node `position_set`、`reference_position`；每個類型的 `legacy_v0`（upcast 保留舊值）。
 - **欄位分類（ADR-K11）：** 每個欄位標 `sourced` / `judgement` / `derived`。
 - **v0 → v1 upcast（ADR-K10）：** `upcast_from_v0` 列出 type / record / property / relationship 對照；mock 與 benchmark 已依此升級。
-- **待 owner 確認：** `competing_vendors` 是否寫回 `bi_schema.py`；`influence_on`、`key_customers` 的 range 推論；Node 擴充是否接受；priority 準則與範圍（ADR-K11）。
+- **owner 2026-10-19 已決定：** `competing_vendors` 要加（建議程式行見 README §8）；Node 擴充接受；priority 分 market、分期間（Application `priorities`，ADR-K11 第 7 點）；judgement 欄位清單接受。
+- **仍待 owner：** `influence_on`、`key_customers` 的 range 推論；priority 評分準則（BD 確認）；market 的定義子問題（市場區隔或業務區域）。
 
 ### 4.4 資料處理方法：實際的 BI 管線，以及它在 AEP 架構中的位置
 
@@ -609,7 +625,7 @@ Workflow 沒有條件分支，所以「表格匯入」與「文件抽取」是�
 | 7 upsert | 確認後走既有 sandbox → merge → gate → push；storage `stage` / `publish` 依 ADR-K11 欄位規則 | **重用**發佈路徑；**不另建寫入路徑**（`bi_ingest.py` 直接寫檔，AEP 不這樣做） |
 | 8 來源標記 | `provenance.document_ids`（上傳檔 sha）+ evidence locator（表格與列）+ `field_provenance` | **擴充**（ADR-K4、K11） |
 | 9 模板 | Legacy Export Adapter 由 Schema v1 產生 | **adapter**（AEP-K15） |
-| 10 投影片擷取 | 既有 convert：`src/knowledge/office.py` `PptxExtractor` / `PdfExtractor` → Raw | **重用，不建第二個 pptx / pdf 解析器**。缺口：講者備註未擷取（`office.py:122-124`「Speaker notes are not extracted」）——若需要，作為 `office.py` 的小擴充另案評估；OCR 屬後期（P8）；疑似方案頁與既有卡提及由 Graph Skill 依 backend `find_entities` 判斷 |
+| 10 投影片擷取 | 既有 convert：`src/knowledge/office.py` `PptxExtractor` / `PdfExtractor` → Raw | **重用，不建第二個 pptx / pdf 解析器**。講者備註：v1.3 時 `office.py` 不擷取；**owner 2026-10-19「我覺得可以」→ 已實作**：`PptxExtractor`（`pptx.v2`）把每張投影片的講者備註放在該投影片內容之後，成為同一 `slide` 的 text section，首行 `Speaker notes:`，空白備註不產生 section。Raw 是 write-once、以內容識別：已轉換的檔案保留 `pptx.v1` 的 Raw（不重寫，同一檔再放入是 `duplicate`），只有新檔或內容改變的檔（`drifted`，新 Raw supersedes 舊 Raw）才含備註；OCR 屬後期（P8）；疑似方案頁與既有卡提及由 Graph Skill 依 backend `find_entities` 判斷 |
 | 11 蒸餾 | graph-extract 能力 + `bi-graph-extract` Skill；輸出依 Schema v1 驗證；對既有卡的修改成為欄位提議（ADR-K11） | **新**（AEP-K06）；**多類型分派**（一份文件產出 Signal、TestSolution、補充、Concept 候選）與**核准步驟**必須明確建模：分派結果是同一個 candidate set 的多種 entity；核准是 Agent Web 的審核，不是聊天中「人工確認後再跑一次」 |
 | 12 確認後匯入 | 同 7 | 重用 |
 | 13 Concept 候選 | `concept-candidates` 能力（對已發佈 graph 的決定性掃描）→ Agent Web 審閱佇列；Concept `review_status` 是 judgement | **新**（小，可併入 AEP-K14） |
@@ -637,7 +653,7 @@ Workflow 沒有條件分支，所以「表格匯入」與「文件抽取」是�
 |---|---|---|---|
 | DQ-1 | **虛構卡標 verified**：`BI/CustomerProduct/Account-A-旗艦手機2027.md:16`、`BI/CustomerProduct/Account-B-WiFi7路由器.md:14` 是 `confidence: verified`，內文卻寫「(虛構範例)」（`:21`、`:19`）；`README.md:12` 說全部資料虛構或待查證 | 規則 `fictional_cards_quarantined`：來源標示虛構 / 範例 / 測試的卡標 `synthetic: true`（測試資料隔離），信任度上限 assumed；只有人帶理由才能改為 verified（ADR-K11） | 匯入 fixture 後，0 張卡被當成已驗證；兩張 CustomerProduct 都被標記並列在報告中 |
 | DQ-2 | **快照與重新匯入的差異**：vault 是過去匯入與手改的快照，無法分辨哪個值來自匯入、哪個是人改的；兩張 CustomerProduct 卡沒有 `ingested_from`，`tools/samples/` 也沒有 CustomerProduct 樣本，來源不明；merge 會以標準格式重寫 frontmatter 並丟掉 YAML 註解（`tools/README.md:49`） | 第一次 legacy 匯入時，每個值記 `origin: import`、`set_by: legacy-snapshot:<vault digest>`；沒有 `ingested_from` 的卡，其 judgement 值保守地視為 human（受保護）；之後的重新匯入一律以逐卡 diff 呈現 | 對已匯入的快照再匯入同一份 samples：0 個語意變更、0 張重複卡；格式差異不算變更 |
-| DQ-3 | **`competing_solutions` 型別不一致**：`BI/TestSolution/FR2-AiP-OTA緊縮場方案.md:16` → Competitor-X、`BI/TestSolution/WiFi7-MLO互通與吞吐量方案.md:16` → Competitor-Y 都是公司卡；`tools/README.md:83` 與 `slide_distill.md:14` 說應該是方案卡 | 規則 `competing_solutions_type_check`：指向 Competitor 的值成為 `competing_vendors` candidate 並警告；或（若 owner 選擇）只警告。是否把 `competing_vendors` 寫回 `bi_schema.py` 是 §8 的問題 | 匯入 fixture：2 個 `competing_vendors` candidate、2 個警告、0 個指向 Competitor 的 `competing_solutions`（VE-02、VE-08） |
+| DQ-3 | **`competing_solutions` 型別不一致**：`BI/TestSolution/FR2-AiP-OTA緊縮場方案.md:16` → Competitor-X、`BI/TestSolution/WiFi7-MLO互通與吞吐量方案.md:16` → Competitor-Y 都是公司卡；`tools/README.md:83` 與 `slide_distill.md:14` 說應該是方案卡 | 規則 `competing_solutions_type_check`：指向 Competitor 的值遷移成 `competing_vendors` candidate 並警告，審核後發佈。**owner 2026-10-19「要加」：`competing_vendors`（TestSolution → Competitor）是正式欄位**，`bi_schema.py` 的建議程式行見 [bi_schema_v1/README.md](bi_schema_v1/README.md) §8.1 | 匯入 fixture：2 個 `competing_vendors` candidate、2 個警告、0 個指向 Competitor 的 `competing_solutions`（VE-02、VE-08） |
 | DQ-4 | **內文與結構化連結不一致**：Account-A 產品的 `inferred_applications` 只有 5G-FR2-AiP-OTA驗證（`:14-15`），內文「推論的量測需求」另列衛星通道模擬與產線 RF 校正（`:27`）；Account-B 的 `inferred_applications: []`（`:13`），內文卻寫 MLO 互通（`:22`） | **永不默默從內文推出連結**。Graph Skill 可以提出 `claim_kind: inference` 的候選，標明來源是內文，需人審核 | VE-03、VE-04 的「不應存在」三元組在匯入後仍不存在；若有推論候選，狀態是 candidate 且標 inference |
 | DQ-5 | **缺連結目標**：frontmatter 指向 6 個不存在的卡（例：`BI/Concept/MLO.md:10` 的「吞吐量」「共存」）；`bi_ingest.py` 只警告（`:722-727`） | 規則 `links_need_resolved_targets`：不存關係；名稱進「詞彙缺口」清單（含引用的卡），在 Agent Web 決定建卡、改名或捨棄 | 匯入 fixture：報告列出 6 個缺口與引用卡；0 個指向不存在 entity 的關係 |
 | DQ-6 | **亂碼檔名**：`BI/Ecosystem/` 有 3 個檔名是亂碼（例：`BI/Ecosystem/瘚瑁.md` 一類），它們 frontmatter 的 `name` 也含 U+FFFD 替代字元，無法由 frontmatter 還原；疑為讀檔編碼回退 `errors="replace"`（`bi_ingest.py:173`）所致。fixture 位元組保持原樣 | 檔名與 frontmatter `name` 比對；含 U+FFFD 或私用區字元的名稱隔離、不發佈，要求以正確編碼重新匯入 | 匯入 fixture：3 張卡被隔離並列出；0 張發佈 |
@@ -826,6 +842,7 @@ Case 的字母順序沿用 Brief v6；B–D 的內容為本文依 fixture 整理
   - `knowledge.read.content`：bearer token；段落、claim 敘述、文件標題 / 路徑、敏感類型的 label 都屬於這個 scope。
   - 沒有 content scope 時，這些欄位為 null，並標 `*_redacted: true`。
 - **凍結前修訂（v1.3，2026-10-19）：** v0.1 尚未凍結，所以就地修訂、`contract_version` 仍是 `0.1`：關係與屬性名稱改用 Schema v1；`Relationship.origin` 改為 `source-bi-schema-py` / `proposed`；`Entity` 加選填 `record_version`、`field_provenance`；新增 history 端點。改名對照表在契約 README「Pre-freeze revision」，給 Atlas Coding Agent 照改。
+- **第二次凍結前修訂（owner 決定，2026-10-19）：** `Relationship.origin` 加 `owner-decision-2026-10-19`；Application `priority` → `priorities`（market × 期間）；Opportunity `hypothesis_status` → `opportunity_stage` 並加 `confidence`、`updated`；`FieldChange` 加選填 `scope`。版本：owner 對「就地修訂或升 0.2」回答「好」，本文解讀為接受現行做法（就地修訂、仍是 0.1），**此解讀待與 owner 確認**。
 - **Mock：**
   - 93 個 entity（12 種類型；新增範例 vault 的兩個 Node：天線模組、RF 前端模組）、166 個 relationship（25 個名稱中用到 17 個）、166 個 claim、167 段 evidence、10 份文件。
   - 另有 1 個 `competing_vendors` candidate（型別檢查規則的實例）、每個 judgement 值的 `field_provenance`、`entity_history.json`。
@@ -929,7 +946,7 @@ churn = 2026-10-01 以來修改該檔的 commit 數（`git log --since=2026-10-0
 | `docs/PRODUCT_ACCEPTANCE_TESTS.md` | E2E-05 criterion 8 與 KNOWLEDGE_COLLAB 的矛盾需 owner 裁定；本計畫不取代 active gate E2E-01 | ADR-K5 |
 | `docs/phases/KNOWLEDGE_COLLAB.md` | 加註適用範圍與 BI policy 例外（若採用） | ADR-K5 |
 | `docs/HARNESS_DESIGN.zh-TW.md`、`docs/HARNESS_6_LAYER_STATUS.md` | 更新過時的 10/74 與迴圈數字；G1–G4 若採用，寫入對話 Harness 一節 | K13 |
-| `AGENTS.md` / `CLAUDE.md`、`.agents/skills/*` | 若採 PR 流程 | ADR-K9 |
+| `AGENTS.md` / `CLAUDE.md`、`.agents/skills/*` | ~~若採 PR 流程~~ owner 2026-10-19 選 A（直接進 main）：不需 PR 流程；`AGENTS.md` 只補一句明文 | ADR-K9（decided） |
 | `docs/TASKS.md` | 新增 Knowledge Strategy 段落（本次只新增一列）；`:20-22` 過時說法 | — |
 | `.github/workflows/verify.yml` | 不需要改：新測試 `tests/test_knowledge_strategy_docs.py` 只用 stdlib，CI 的 pytest 已會跑 | — |
 
@@ -953,26 +970,26 @@ churn = 2026-10-01 以來修改該檔的 commit 數（`git log --since=2026-10-0
 
 ### 8.2 仍待 owner 決定
 
-1. **確認 v1.3 的內容**：BI Schema v1（§4.3；含 Node 改為 8 個、Opportunity 維持 proposed）；ADR-K11；§4.4 資料處理對應（兩條 Strategy：`bi_card_import` 與 `bi_knowledge_graph`；`bi_ingest.py` 以 AEP 能力**重寫**而不是 import，AEP-K14）；§4.5 資料品質規則；§4.7 以 Case A 為第一條垂直流程；§7.3 整合排程。
-2. **`competing_solutions` 型別（新）**：範例 vault 指向公司卡，README 與 prompt 說指向方案卡。要（甲）新增 `competing_vendors` 並寫回 `bi_schema.py`，還是（乙）維持一個欄位、只做型別警告？v1.3 採甲作為提案。
+1. **確認 v1.3 的內容**：BI Schema v1（§4.3；含 Node 改為 8 個；Opportunity 2026-10-19 已改為正式類型）；ADR-K11；§4.4 資料處理對應（兩條 Strategy：`bi_card_import` 與 `bi_knowledge_graph`；`bi_ingest.py` 以 AEP 能力**重寫**而不是 import，AEP-K14）；§4.5 資料品質規則；§4.7 以 Case A 為第一條垂直流程；§7.3 整合排程。
+2. ~~**`competing_solutions` 型別（新）**：範例 vault 指向公司卡，README 與 prompt 說指向方案卡。要（甲）新增 `competing_vendors` 並寫回 `bi_schema.py`，還是（乙）維持一個欄位、只做型別警告？v1.3 採甲作為提案。~~ **decided（2026-10-19）：要加（甲）。**
 3. **link range 推論（新）**：`bi_schema.py` 沒有記錄連結目標類型。`influence_on` → Account、`key_customers` → Account 的推論是否正確？是否要在 `bi_schema.py` 加目標類型？
-4. **priority（新，ADR-K11）**：§ADR-K11 第 6 點的 1–5 評分準則草案是否可用（需 BD 確認）？單一 priority（甲，建議 Phase 1）還是分團隊 / 期間（乙）？
-5. **judgement 欄位清單（新，ADR-K11）**：依程式判定的清單是否同意？特別是 Application `lifecycle` 判為 sourced、Concept `review_status` 判為 judgement。
-6. **Node 擴充**：是否接受 AI 資料中心、車用雷達、交換器 ASIC、光模組、通訊模組等 `proposed-extension` 節點？還是 Phase 1 只用範例 vault 的 8 個？
-7. **Opportunity**：程式沒有這個類型。維持 `proposed`（v1.3 建議），還是請 owner 在 `bi_schema.py` 加入？
+4. **priority（新，ADR-K11）**：§ADR-K11 第 6 點的 1–5 評分準則草案是否可用（需 BD 確認）？~~單一 priority（甲，建議 Phase 1）還是分團隊 / 期間（乙）？~~ **範圍 decided（2026-10-19）：分 market、分期間**；評分準則與 market 定義子問題仍待。
+5. ~~**judgement 欄位清單（新，ADR-K11）**：依程式判定的清單是否同意？特別是 Application `lifecycle` 判為 sourced、Concept `review_status` 判為 judgement。~~ **decided（2026-10-19）：接受。**
+6. ~~**Node 擴充**：是否接受 AI 資料中心、車用雷達、交換器 ASIC、光模組、通訊模組等 `proposed-extension` 節點？還是 Phase 1 只用範例 vault 的 8 個？~~ **decided（2026-10-19）：接受。**
+7. ~~**Opportunity**：程式沒有這個類型。維持 `proposed`（v1.3 建議），還是請 owner 在 `bi_schema.py` 加入？~~ **decided（2026-10-19）：要**（正式類型，建議程式行見 bi_schema_v1/README.md §8.2）。
 8. **真實 BI 卡片的匯入時點與分類**：範例 vault 已可當測試資料；真實卡片（含客戶資料）何時、以什麼分類匯入？與 ADR-K8 相關。
-9. **講者備註（新）**：`bi_slides_extract.py` 擷取講者備註，`office.py` 不擷取。是否要把它列為 `office.py` 的小擴充（另案，會影響既有擷取結果與 Phase 7 parity，需評估）？
-10. **N2：正式審閱者**：BD、PM、AE 各由誰審？審閱期限？（owner 2026-10-18：開會後決定）。第二組 8 題範例 vault 題也需要審閱者。
+9. ~~**講者備註（新）**：`bi_slides_extract.py` 擷取講者備註，`office.py` 不擷取。是否要把它列為 `office.py` 的小擴充（另案，會影響既有擷取結果與 Phase 7 parity，需評估）？~~ **decided（2026-10-19）：可以，已實作**（`pptx.v2`；既有 Raw 不重寫；Phase 7 Knowledge parity 尚未開始，沒有既有 parity 證據受影響）。
+10. **N2：正式審閱者**：BD、PM、AE 各由誰審？審閱期限？（owner 2026-10-18：開會後決定）。第二組 8 題範例 vault 題也需要審閱者。**仍待。**
 11. **（原 Q1）核准範圍**：ADR-K4、K5（Phase 1 機制）、K10、K11 的建議是否接受？
 12. **（原 Q2 後半）ADR-K2 中央 DB**：AEP-K10 後再決定是否可以？IT 能否提供 PostgreSQL？
 13. **（原 Q6）門檻細節**：Hybrid 是否必須在 Cross-domain Opportunity 類優於 Wiki-only 0.10 才算成功，或「不退化且關係準確率提高」即可？
 14. **（原 Q7）Review Policy**：Phase 2 是否採用 domain_owner_review？E2E-05 criterion 8 與 KNOWLEDGE_COLLAB 以哪份為準？
-15. **（原 Q8）資料分類**：BI 客戶 / 商機內容標 CONFIDENTIAL 還是 RESTRICTED？Gateway 核准是否涵蓋 CONFIDENTIAL？
-16. **（原 Q9）ADR-K9**：K02+ 用 PR 還是在 main 直接 commit？
+15. **（原 Q8）資料分類**：BI 客戶 / 商機內容標 CONFIDENTIAL 還是 RESTRICTED？Gateway 核准是否涵蓋 CONFIDENTIAL？**仍待（ADR-K8）。**
+16. ~~**（原 Q9）ADR-K9**：K02+ 用 PR 還是在 main 直接 commit？~~ **decided（2026-10-19）：寫好且驗證通過就直接進 main（選項 A）。**
 17. **（原 Q12）編號**：AEP-K02… 是否改用其他前綴？
-18. **Knowledge API 凍結前修訂**：v1.3 就地修訂 v0.1（名稱改用 v1、加 `field_provenance` 與 history 端點），`contract_version` 仍是 0.1。是否同意，或要升為 0.2 以示區別？
+18. **Knowledge API 凍結前修訂**：v1.3 就地修訂 v0.1（名稱改用 v1、加 `field_provenance` 與 history 端點），`contract_version` 仍是 0.1。是否同意，或要升為 0.2 以示區別？**owner 2026-10-19：「好」**——這是二選一的問題，回答有歧義；本文解讀為接受現行做法（就地修訂、仍是 0.1），**待與 owner 確認**。
 
-**已關閉（2026-10-19）：** N1 欄位名稱（v1 完成核對）；「第 8 個 Node」（範例 vault 有 8 個）；範例 vault 是否可 commit 為測試資料（owner：可以，已 commit）。
+**已關閉（2026-10-19）：** N1 欄位名稱（v1 完成核對）；「第 8 個 Node」（範例 vault 有 8 個）；範例 vault 是否可 commit 為測試資料（owner：可以，已 commit）；第 2、4（範圍）、5、6、7、9、16 題（owner 同日回答，見文末）；第 18 題的解讀待確認。
 
 ## Owner 決定（2026-10-18）
 
@@ -986,3 +1003,19 @@ churn = 2026-10-01 以來修改該檔的 commit 數（`git log --since=2026-10-0
 
 1. **範例 vault 可 commit 為測試資料：** 「files/BI_Vault_Example 可以commit 進repo當測試資料」→ `tests/fixtures/bi_vault_example/`（e30cd8bf）。
 2. **priority 問題：** 「priority 合理嗎？大家一直調會不會亂掉？」→ ADR-K11（提案；評分準則與範圍待決，§8.2 第 4 點）。
+
+## Owner 決定（2026-10-19）：對 §8.2 的回答
+
+owner 的回答（原文）與落實。第 1、3、8、11–15、17 題與 N2 未在這次回答中，仍待。
+
+| # | §8.2 題目 | owner 回答 | 落實 |
+|---|---|---|---|
+| 1 | `competing_vendors`（§8.2 第 2 題） | 「要加」 | Schema v1.1：TestSolution → Competitor、linklist，`origin: owner-decision-2026-10-19`。`competing_solutions` 的 range 仍是 TestSolution；vault 中指向 Competitor 的值依規則 `competing_solutions_type_check` 遷移成 `competing_vendors` candidate 並警告（§4.5 DQ-3）。建議的 `bi_schema.py` 程式行：[bi_schema_v1/README.md](bi_schema_v1/README.md) §8.1。owner 的 `bi_schema.py` 與 fixture 都沒有修改 |
+| 2 | priority 範圍（第 4 題） | 「分 market，分期間」 | Application `priorities`：每個 (market, period) 一筆 `{market, period, value 1–5, origin, set_by, set_at, reason, …}`。market = `TargetMarket` 五值 + `unspecified`（**子問題待 owner**：市場區隔還是業務區域）；期間 = `YYYY-Qn`；單一 priority 升級為 unspecified + 日期所在季；Dashboard 依所選 market 與期間排序；評分準則不變（ADR-K11 第 6、7 點、[bi_schema_v1/README.md](bi_schema_v1/README.md) §7）。Trend 不分範圍。mock、`field_provenance`、`entity_history.json`、SUP-01 已更新 |
+| 3 | judgement 欄位清單與 Node 擴充（第 5、6 題） | 「接受」 | 兩者 decided：ADR-K11 第 1 點、§4.3；JSON `field_classes_decision`、`node_reference_set` |
+| 4 | Opportunity（第 7 題） | 「要」 | 正式類型：`name`、`account`、`customer_product`、`test_solutions`、`opportunity_stage`（取代 `hypothesis_status`；不叫 `stage` 是為了避開 `ENUM_ALIASES` 依欄位名稱共用的 Trend 別名）、`confidence`、`updated`；建議程式行在 README §8.2、§8.3；mock 與 API 已更新 |
+| 5 | 講者備註（第 9 題） | 「我覺得可以」 | `src/knowledge/office.py` `PptxExtractor` → `pptx.v2`：每張投影片內容之後一個 `Speaker notes:` text section（同一 `slide`）；空白備註不產生；既有 Raw 不重寫（§4.4.2 第 10 列） |
+| 6 | Knowledge API 就地修訂或升 0.2（第 18 題） | 「好」 | 二選一的問題，回答有歧義。**解讀為接受現行做法**：就地修訂、`contract_version` 仍是 `0.1`（契約 README「Second pre-freeze revision」）。**待與 owner 確認** |
+| 7 | ADR-K9 協作流程（第 16 題） | 「如果寫好了，可以進main」 | decided：選項 A，完成且驗證通過的工作直接 commit 到 main，不需 PR（現行做法）；`docs/DECISIONS.md` 2026-10-19 條目；`AGENTS.md` 補一句明文 |
+
+仍待：N2 正式審閱者；ADR-K8 資料分類；link range 推論；priority 評分準則（BD）；market 定義子問題；第 6 題解讀的確認；v1.3 整體核准（AEP-K02 起仍被擋住）。

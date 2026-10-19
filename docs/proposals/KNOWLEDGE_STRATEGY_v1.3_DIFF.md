@@ -73,3 +73,21 @@
 
 - **關閉：** N1 欄位名稱；第 8 個 Node；範例 vault 是否可 commit（owner 2026-10-19：可以）。
 - **新增：** `competing_vendors` 是否寫回 `bi_schema.py`；link range 推論；priority 準則與範圍；judgement 欄位清單；Opportunity 是否加入程式；講者備註是否擴充 `office.py`；Knowledge API 就地修訂或升 0.2。
+
+## 7. Owner 決定（2026-10-19）：v1.3 就地更新
+
+owner 同日回答 v1.3 §8.2 的七題。本版不另開 v1.4，直接更新 v1.3 與相關契約、mock、benchmark；`src/` 只改了講者備註一項。
+
+| # | owner 回答 | v1.3 變更 |
+|---|---|---|
+| 1 | `competing_vendors`：「要加」 | Schema v1.1：TestSolution → Competitor、linklist，`origin` 由 `proposed` 改為 `owner-decision-2026-10-19`（新的 origin：owner 決定為正式、`bi_schema.py` 尚未加入）。`competing_solutions` 的 range 仍是 TestSolution，指向 Competitor 的值遷移成 `competing_vendors` candidate 並警告。建議的 `bi_schema.py` 程式行在 `bi_schema_v1/README.md` §8「Changes to apply to the BI tooling」，測試檢查它與 JSON 逐字一致 |
+| 2 | priority：「分 market，分期間」 | Application `priority` → `priorities`（每個 market × 期間一筆，provenance 在每一筆裡）；新 JSON `priority_entry`、`priority_scoping`、規則 `priorities_scoped_by_market_and_period`、`upcast_from_tooling`。market = `TargetMarket` 五值 + `unspecified`（定義的子問題留給 owner）；期間 `YYYY-Qn`；單一值升級為 unspecified + 日期所在季；Dashboard 排序規則；評分準則不變。Trend 不分範圍（程式沒有 Trend priority，Dashboard 的是算出值）。mock 的 11 個 Application、`entity_history.json`（`field: priorities` + `scope`）、SUP-01 已改 |
+| 3 | judgement 欄位清單、Node 擴充：「接受」 | ADR-K11 第 1 點、§4.3 標 decided；JSON `field_classes_decision`、`node_reference_set` |
+| 4 | Opportunity：「要」 | 正式類型（`owner-decision-2026-10-19`）：`name`、`account`、`customer_product`、`test_solutions`、`opportunity_stage`（取代 `hypothesis_status`）、`confidence`、`updated`；建議程式行（類型與列舉別名）在 README §8.2、§8.3；mock 的 5 個 Opportunity 已改 |
+| 5 | 講者備註：「我覺得可以」 | `office.py` `PptxExtractor` 升為 `pptx.v2`：講者備註成為該投影片的最後一個 text section，首行 `Speaker notes:`；空白備註不產生；既有 Raw 不重寫；`docs/CONTRACTS.md` 同步；`tests/test_office.py` 新增 3 個測試 |
+| 6 | API 版本：「好」 | 二選一的問題，回答有歧義；解讀為接受現行做法（就地修訂、仍是 0.1），**待確認**。契約 README 新增「Second pre-freeze revision」表：`Relationship.origin` 加 `owner-decision-2026-10-19`、`priorities`、`opportunity_stage`、`FieldChange.scope` |
+| 7 | ADR-K9：「如果寫好了，可以進main」 | ADR-K9 decided（選項 A）；`docs/DECISIONS.md` 2026-10-19 條目；`AGENTS.md` 補一句 |
+
+測試 `tests/test_knowledge_strategy_docs.py`：沒有刪除或放寬斷言。改寫的斷言（Opportunity 不再是 `proposed` 而是 `owner-decision-2026-10-19`；priority 歷史改依 market × 期間比對）都更嚴格或等價，並新增 `test_owner_decisions_of_2026_10_19_are_in_schema_v1`（README 建議程式行與 JSON 逐字一致、`TargetMarket` 對照、fixture 升級範例、API origin）。Schema v1 檔案變更後，strategies 的 schema digest 已重新釘選。
+
+仍待：N2 正式審閱者、ADR-K8 資料分類、link range 推論、priority 評分準則、market 定義子問題、第 6 題解讀確認、v1.3 整體核准。

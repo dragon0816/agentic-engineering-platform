@@ -33,6 +33,18 @@ v0.1 is not frozen yet (owner 2026-10-18: freeze jointly before AEP-K09), so it 
 | New endpoint (additive) | — | `GET /api/v1/knowledge/entities/{entity_id}/history`: field change history; `reason` needs content scope |
 | Mock | 91 entities, 163 relationships | 93 entities (two Node cards of the example vault added), 166 relationships (one `competing_vendors` candidate, two Node `upstream` links), `entity_history.json` |
 
+**Second pre-freeze revision.** The same day, from the owner's decisions on Knowledge Strategy v1.3 (2026-10-19;
+`docs/proposals/KNOWLEDGE_STRATEGY_v1.3.md` "Owner 決定（2026-10-19）"). Asked whether to revise v0.1 in place or
+raise it to 0.2, the owner answered "好"; AEP read that as accepting the current approach, so `contract_version`
+stays `"0.1"` (to be confirmed with the owner).
+
+| Change | Before | After |
+|---|---|---|
+| `Relationship.origin` (additive enum value) | `source-bi-schema-py`, `proposed` | adds `owner-decision-2026-10-19`: TestSolution `competing_vendors` and the Opportunity links `account`, `customer_product`, `test_solutions` are official but not yet in `bi_schema.py` |
+| Application `properties` | `priority` (one integer 1–5) | `priorities`: a list of `{market, period, value, origin, set_by, set_at, reason, source_ref, version, reason_redacted}`, one per market (`market_segment` values plus `unspecified`) and quarter (`2026-Q4`); each entry carries its own provenance, so `field_provenance` has no `priorities` key; `reason` is content (null with `reason_redacted: true` in metadata scope) |
+| Opportunity `properties` | `hypothesis_status` | `opportunity_stage` (`hypothesis`, `qualified`, `pursuing`, `won`, `lost`, `rejected`) plus `confidence` and `updated`; Opportunity is an official type |
+| `FieldChange` (additive, optional) | — | `scope: {market, period}` for a change to one priority entry; `field` is then `priorities` |
+
 ## 1. Conventions (same as the telemetry contract)
 
 These follow `docs/telemetry/AEP_ATLAS_TELEMETRY_CONTRACT.md` v0.3, which Atlas already consumes.
@@ -173,16 +185,19 @@ The mapping is checked against the Atlas repository's `applications/rs_knowledge
     other mock nodes are `proposed-extension`.
 - Size: 93 entities (all 12 types), 166 relationships (17 of the 25 relationship names), 166 claims, 167
   evidence passages and 10 documents.
-- Field provenance: every judgement value (for example Application `priority`, Trend `our_fit`, card
-  `confidence`) has a `field_provenance` entry. `Application:psu-efficiency-transient` shows a person's
-  change, a rejected stale edit and an import kept as a pending proposal (`entity_history.json`).
+- Field provenance: every judgement value (for example Trend `our_fit`, card `confidence`) has a
+  `field_provenance` entry; each Application `priorities` entry carries its own. Priority is scoped per
+  market and quarter (owner 2026-10-19): imported single values became `unspecified` entries.
+  `Application:psu-efficiency-transient` shows a person's `ai_server` / `2026-Q4` value, a rejected stale
+  edit and an import kept as a pending proposal (`entity_history.json`).
 - The mock exercises:
   - two stale cards;
   - one disputed claim;
   - inference-only Opportunity links;
   - one Application with no solution;
   - Technologies without a Concept;
-  - one `competing_vendors` candidate (a `competing_solutions` value that named a company);
+  - one `competing_vendors` candidate (a `competing_solutions` value that named a company, staged with a
+    warning; `competing_vendors` itself is official since 2026-10-19);
   - v0 values kept in `properties.legacy_v0` by the upcast.
 - The mock graph is the gold graph of the benchmark draft (`docs/proposals/knowledge_benchmark_v0/`). Every
   expected entity and triple of the 25 questions exists in it, and the test enforces this.

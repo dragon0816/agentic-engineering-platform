@@ -1616,8 +1616,8 @@
     {
       "id": "SUP-01",
       "category": "judgement_provenance",
-      "title": "PSU 效率應用的 priority 為什麼是 5、誰改的",
-      "question": "「PSU 效率與動態響應量測」這個 Application 的 priority 現在是多少？誰在什麼時候、為什麼把它改成這個值？後來的匯入為什麼沒有把它改回去？",
+      "title": "PSU 效率應用在 ai_server、2026-Q4 的 priority 為什麼是 5、誰設的",
+      "question": "「PSU 效率與動態響應量測」這個 Application 在 ai_server market、2026-Q4 的 priority 現在是多少？誰在什麼時候、為什麼設定這個值？後來的匯入為什麼沒有把它改掉？它還有沒有未分 market 的舊值？",
       "expected_entities": [
         "Application:psu-efficiency-transient",
         "Signal:800v-dc-rack-proposal",
@@ -1638,11 +1638,18 @@
       ],
       "expected_field_history": {
         "entity": "Application:psu-efficiency-transient",
-        "field": "priority",
+        "field": "priorities",
+        "market": "ai_server",
+        "period": "2026-Q4",
         "current_value": 5,
         "current_origin": "human",
         "current_set_by": "member:bd-analyst-a",
-        "previous_value": 3,
+        "legacy_entry": {
+          "market": "unspecified",
+          "period": "2026-Q3",
+          "value": 3,
+          "origin": "import"
+        },
         "rejected_stale_value": 4,
         "pending_import_value": 3
       },
@@ -1653,9 +1660,9 @@
         "must_report_verification_status": false,
         "must_report_gap": false,
         "classification_ceiling": "INTERNAL",
-        "notes": "答案須引用欄位歷史（GET /entities/{id}/history），不得把 priority 當作文件事實；priority 是 judgement。"
+        "notes": "答案須引用欄位歷史（GET /entities/{id}/history），並說明 priority 分 market、分期間（owner 2026-10-19）；不得把 priority 當作文件事實；priority 是 judgement。"
       },
-      "expected_answer": "priority 目前是 5（判斷值，不是文件事實）。原本由匯入設為 3（2026-09-01，app_priority_synthetic.csv）；2026-10-05 由 member:bd-analyst-a 改為 5，理由是 800V DC 機櫃提案訊號與 Beta 800V PSU 商機讓需求進入 6 個月內，且我方 Power analyzer 可對應。2026-10-06 一筆以舊版本為基礎改成 4 的編輯因版本過期被拒。2026-10-12 重新匯入同一份 CSV 想改回 3，但目前值是人工設定，所以只成為待審提議，沒有覆蓋。",
+      "expected_answer": "ai_server、2026-Q4 的 priority 是 5（判斷值，不是文件事實；priority 分 market、分期間）。2026-10-05 由 member:bd-analyst-a 設定，理由是 800V DC 機櫃提案訊號與 Beta 800V PSU 商機讓需求進入 6 個月內，且我方 Power analyzer 可對應。2026-10-06 一筆以舊版本為基礎、想把同一 market 與期間設成 4 的編輯因版本過期被拒。2026-10-12 匯入 BD 的 2026-Q4 表（含 market 與期間欄）想改成 3，但目前值是人工設定，所以只成為待審提議，沒有覆蓋。另有一筆未分 market 的舊值：2026-09-01 匯入的單一 priority 3，升級為 unspecified、2026-Q3，只是歷史參考，不用於 ai_server 2026-Q4 的排序。",
       "review_domain": "BD",
       "review_status": "draft-unreviewed",
       "reviewer": null,

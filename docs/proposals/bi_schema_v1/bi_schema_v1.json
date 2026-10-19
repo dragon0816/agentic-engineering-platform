@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:aep:bi.schema:v1",
   "schema_id": "bi.schema/v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "status": "poc-contract",
   "title": "BI Knowledge Schema v1 (PoC contract from bi_schema.py; not a production schema)",
   "source": {
@@ -18,7 +18,8 @@
     "origins": {
       "source-bi-schema-py": "defined in bi_schema.py; code_ref / x-code gives the line",
       "proposed": "not in bi_schema.py; kept from v0 or added by v1.3, each with a reason",
-      "aep-record": "AEP storage record envelope (ids, classification, publication status), not a card field"
+      "aep-record": "AEP storage record envelope (ids, classification, publication status), not a card field",
+      "owner-decision-2026-10-19": "official by the owner's decision of 2026-10-19 but not yet in bi_schema.py; suggested_code / x-suggested-code is the exact line to add (bi_schema_v1/README.md section 8); decision names the item"
     },
     "field_kinds": {
       "str": "string",
@@ -122,6 +123,121 @@
         "description": "record_version that this value was accepted in."
       }
     }
+  },
+  "priority_entry": {
+    "description": "One Application priority for one market and one period (owner decision 2026-10-19). It carries its own field provenance, so priorities has no field_provenance key.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "market",
+      "period",
+      "value",
+      "origin",
+      "set_by",
+      "set_at",
+      "reason",
+      "version"
+    ],
+    "properties": {
+      "market": {
+        "enum": [
+          "wireless_communications",
+          "aerospace_defense",
+          "automotive",
+          "ai_server",
+          "semiconductor",
+          "unspecified"
+        ],
+        "description": "priority_scoping.market"
+      },
+      "period": {
+        "type": "string",
+        "pattern": "^[0-9]{4}-Q[1-4]$",
+        "description": "Calendar quarter, e.g. 2026-Q4 (priority_scoping.period)."
+      },
+      "value": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 5,
+        "description": "ADR-K11 rubric level 1-5."
+      },
+      "origin": {
+        "enum": [
+          "import",
+          "human",
+          "agent",
+          "migration"
+        ]
+      },
+      "set_by": {
+        "type": "string",
+        "minLength": 1
+      },
+      "set_at": {
+        "type": "string",
+        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+      },
+      "reason": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Required (non-null) when origin is human."
+      },
+      "source_ref": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "version": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "record_version this entry was accepted in."
+      },
+      "reason_redacted": {
+        "type": "boolean",
+        "description": "Knowledge API only: true in knowledge.read.metadata scope when a reason exists and was withheld; storage does not keep it."
+      }
+    }
+  },
+  "priority_scoping": {
+    "decision": "docs/proposals/KNOWLEDGE_STRATEGY_v1.3.md, Owner 決定（2026-10-19） item 2: 「分 market，分期間」",
+    "applies_to": [
+      "Application.priorities"
+    ],
+    "market": {
+      "values": [
+        "wireless_communications",
+        "aerospace_defense",
+        "automotive",
+        "ai_server",
+        "semiconductor",
+        "unspecified"
+      ],
+      "basis": "src/knowledge/market_matrix.py TargetMarket: the values of the existing market_segments property and of the Knowledge API market_segment filter, which is Atlas's market binding (contract README section 4). bi_schema.py and the example vault have no market field: value_chain (bi_schema.py:67) and Node layer (bi_schema.py:129) are supply-chain positions, Account region (bi_schema.py:122) is free text, and Trend market_impact (bi_schema.py:169) is a rating, not a market.",
+      "unspecified": "the value arrived without a market (the single priority of bi_schema.py:75 and the vault).",
+      "owner_question": "Pending owner: does market mean these five market segments, or a sales region / customer group? Values can be added; a region would need its own enum."
+    },
+    "period": {
+      "format": "YYYY-Qn",
+      "pattern": "^[0-9]{4}-Q[1-4]$",
+      "basis": "Calendar quarters: the ADR-K11 rubric is reviewed quarterly, and launch_window already uses this style (e.g. 2027-Q1). If the company plans by fiscal quarter, the owner says so and the mapping changes, not the format."
+    },
+    "uniqueness": "At most one entry per (market, period). A new value for an existing (market, period) replaces it through the ADR-K11 edit flow (base_version); the old value stays in the entity history.",
+    "provenance": "Per entry (origin, set_by, set_at, reason, source_ref, version). A person's entry needs a reason; an import or agent never overwrites an entry whose origin is human: it becomes a pending_review proposal.",
+    "upcast_from_single_priority": {
+      "code_ref": "bi_schema.py:75",
+      "to": "one entry {market: unspecified, period, value}",
+      "period": "quarter of the value's set_at when field provenance knows it; else of the card's updated date (vault cards; bi_ingest.py writes updated on each import); else of the import date",
+      "origin": "import, set_by import:<ingested_from> or legacy-snapshot:<vault digest>. A card without ingested_from keeps the value protected as if a person set it (v1.3 DQ-2).",
+      "example": "tests/fixtures/bi_vault_example/BI/Application/5G-FR2-AiP-OTA驗證.md has priority: 4 and updated: 2026-10-14 -> {market: unspecified, period: 2026-Q4, value: 4, origin: import, set_by: import:application_sample.csv}"
+    },
+    "import_with_scope": "A table column for market (aliases 市場, market) and for period (aliases 期間, 季度, period), or mapping defaults that set them, write that scope; otherwise market is unspecified and period is the quarter of the import date. bi_schema.py itself needs no change for this (its F kinds cannot hold a list of objects); the importer maps the single priority column into one entry.",
+    "dashboard_sort": "The viewer picks one market and one period (default: the last choice, else unspecified and the current quarter). Ranked first: entries for exactly that (market, period), value descending; then entries for (unspecified, same period), labelled 未分 market. The remaining Applications are listed after them as 未評, each showing its latest earlier entry as a reference only, never as its sort value. Ties sort by name.",
+    "rubric": "The ADR-K11 1-5 rubric is unchanged. It is applied within the chosen market, and its 6 / 18 / 36-month windows count from the first day of the period.",
+    "history": "An entry for a past period stays as history and is never carried forward automatically.",
+    "trend": "Trend is not scoped: bi_schema.py gives Trend no priority, and the Dashboard's trend priority is measurement_impact x our_fit (BI/Dashboard.md:5, 8), a derived number that is not stored. Trend market_impact, measurement_impact and our_fit stay single judgement values; if the owner wants them per market too, the same entry shape applies."
   },
   "entity_record": {
     "description": "Storage-neutral entity record. The backend stores entity_type plus a properties document; it validates properties against entity_types[entity_type].properties_schema of the schema_id the record names.",
@@ -716,7 +832,7 @@
               "proposed-extension"
             ],
             "x-origin": "proposed",
-            "x-reason": "bi_schema.py fixes no Node list (Node cards are data). vault-reference = one of the 8 Node cards of the example vault (owner rule 2026-10-18: as many as seen); proposed-extension = a node added for the owner's non-wireless BD scenarios, pending owner acceptance.",
+            "x-reason": "bi_schema.py fixes no Node list (Node cards are data). vault-reference = one of the 8 Node cards of the example vault (owner rule 2026-10-18: as many as seen); proposed-extension = a node added for the owner's non-wireless BD scenarios, accepted by the owner on 2026-10-19 (the value name is kept).",
             "x-field-class": "sourced"
           },
           "reference_position": {
@@ -1192,19 +1308,26 @@
             ],
             "x-field-class": "sourced"
           },
-          "priority": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 5,
-            "x-origin": "source-bi-schema-py",
-            "x-code": "bi_schema.py:75",
-            "x-kind": "int",
+          "priorities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/priority_entry"
+            },
+            "x-origin": "owner-decision-2026-10-19",
+            "x-decision": "docs/proposals/KNOWLEDGE_STRATEGY_v1.3.md, Owner 決定（2026-10-19） item 2（分 market，分期間）",
+            "x-replaces-code": "bi_schema.py:75",
+            "x-kind": "scoped-collection",
             "x-aliases": [
               "優先度",
               "priority"
             ],
             "x-field-class": "judgement",
-            "x-note": "Ranking with no rubric, owner, date or reason in the code; see ADR-K11 rubric draft."
+            "x-provenance": "per-entry",
+            "x-unique-by": [
+              "market",
+              "period"
+            ],
+            "x-note": "Replaces the single priority of bi_schema.py:75; see priority_scoping for the market and period definitions, the upcast of the single value, the Dashboard sort and the rubric."
           },
           "confidence": {
             "enum": [
@@ -2071,35 +2194,102 @@
       }
     },
     "Opportunity": {
-      "origin": "proposed",
-      "reason": "bi_schema.py defines no Opportunity type, folder or fields; it appears only as the end of the analysis chain in tests/fixtures/bi_vault_example/README.md:18 (and the BI document slide 3). Kept from v0 so the chain can end in an inferred, reviewable lead.",
+      "origin": "owner-decision-2026-10-19",
+      "decision": "docs/proposals/KNOWLEDGE_STRATEGY_v1.3.md, Owner 決定（2026-10-19） item 4（要）",
+      "reason": "bi_schema.py had no Opportunity type, folder or fields (only the analysis chain end in tests/fixtures/bi_vault_example/README.md:18); the owner made it official on 2026-10-19.",
       "code_ref": null,
-      "code_key": null,
-      "frontmatter_type": null,
-      "folder": null,
-      "filename_fields": null,
-      "naming_field": null,
-      "has_confidence_and_updated": false,
-      "description": "Chain step 8. The document names it (and 'customer opportunity leads' as an output) but defines no fields or links; v0 adds the minimum.",
+      "code_key": "opportunity",
+      "suggested_code": "    \"opportunity\": schema(\"Opportunity\", [\"name\"], [",
+      "frontmatter_type": "opportunity",
+      "folder": "Opportunity",
+      "filename_fields": [
+        "name"
+      ],
+      "naming_field": {
+        "field": "name",
+        "code_ref": null,
+        "suggested_code": "        (\"name\", F(\"str\", [\"商機名稱\", \"商機\", \"名稱\", \"opportunity\", \"name\"], required=True)),",
+        "code_kind": "str",
+        "aliases": [
+          "商機名稱",
+          "商機",
+          "名稱",
+          "opportunity",
+          "name"
+        ],
+        "maps_to": "display_name",
+        "note": "naming field; the card file name is built from it"
+      },
+      "has_confidence_and_updated": true,
+      "body_sections_suggested": [
+        "## 商機假設",
+        "## 依據(Signal / CustomerProduct)",
+        "## 下一步"
+      ],
+      "description": "Chain step 8: a test-business lead for one account, about a customer product, proposing our test solutions. Official by owner decision 2026-10-19.",
       "default_classification": "CONFIDENTIAL",
       "label_is_content": true,
       "suggested_review_domain": "BD",
+      "required_basis": "required = fields the code marks required=True plus fields with a code default; bi_ingest.py:410-424 (with_defaults) fills defaults on every new card, so a normalized record always carries them.",
       "properties_schema": {
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "hypothesis_status"
+          "opportunity_stage",
+          "confidence",
+          "updated"
         ],
         "properties": {
-          "hypothesis_status": {
+          "opportunity_stage": {
             "enum": [
               "hypothesis",
               "qualified",
+              "pursuing",
+              "won",
+              "lost",
               "rejected"
             ],
-            "x-origin": "proposed",
-            "x-reason": "Kept from v0: an opportunity is an inference until a reviewer qualifies it.",
-            "x-field-class": "judgement"
+            "x-origin": "owner-decision-2026-10-19",
+            "x-suggested-code": "        (\"opportunity_stage\", F(\"enum\", [\"商機階段\", \"opportunity stage\"],\n                                enum=[\"hypothesis\", \"qualified\", \"pursuing\", \"won\", \"lost\", \"rejected\"],\n                                default=\"hypothesis\")),",
+            "x-kind": "enum",
+            "x-aliases": [
+              "商機階段",
+              "opportunity stage"
+            ],
+            "x-field-class": "judgement",
+            "x-default": "hypothesis",
+            "x-note": "Replaces v1.0 hypothesis_status (same first values). Not named stage: ENUM_ALIASES is keyed by field name across all types (bi_schema.py:190) and bi_ingest.py convert does not re-check the enum after an alias (bi_ingest.py:154-160), so Trend's stage aliases (觀察 -> watch ...) would write Trend values into an Opportunity."
+          },
+          "confidence": {
+            "enum": [
+              "verified",
+              "assumed"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:18",
+            "x-kind": "enum",
+            "x-aliases": [
+              "信心度",
+              "可信度"
+            ],
+            "x-field-class": "judgement",
+            "x-note": "A person changes assumed to verified after checking (tools/README.md:68).",
+            "x-default": "assumed",
+            "x-enum-aliases-code": "bi_schema.py:211"
+          },
+          "updated": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:19",
+            "x-kind": "date",
+            "x-aliases": [
+              "更新日期",
+              "更新",
+              "最後更新"
+            ],
+            "x-field-class": "derived",
+            "x-default": "today"
           },
           "market_segments": {
             "type": "array",
@@ -2124,7 +2314,11 @@
           }
         }
       },
-      "x-defaults": {}
+      "x-defaults": {
+        "opportunity_stage": "hypothesis",
+        "confidence": "assumed",
+        "updated": "today"
+      }
     }
   },
   "relationship_types": [
@@ -2306,7 +2500,7 @@
     {
       "name": "competing_solutions",
       "range": "TestSolution",
-      "range_basis": "tools/README.md:83 and tools/prompts/slide_distill.md:14 say our card lists the competitor's TestSolution card. The example vault instead links Competitor cards (BI/TestSolution/FR2-AiP-OTA緊縮場方案.md:16, BI/TestSolution/WiFi7-MLO互通與吞吐量方案.md:16); rule competing_solutions_type_check turns such links into competing_vendors candidates.",
+      "range_basis": "tools/README.md:83 and tools/prompts/slide_distill.md:14 say our card lists the competitor's TestSolution card. The example vault instead links Competitor cards (BI/TestSolution/FR2-AiP-OTA緊縮場方案.md:16, BI/TestSolution/WiFi7-MLO互通與吞吐量方案.md:16); rule competing_solutions_type_check migrates such links to competing_vendors (official, owner 2026-10-19) as candidates with a warning.",
       "description": "Our TestSolution points at a comparable competitor TestSolution.",
       "sources": [
         {
@@ -2443,11 +2637,14 @@
         },
         {
           "domain": "Opportunity",
-          "origin": "proposed",
+          "origin": "owner-decision-2026-10-19",
           "reason": "Kept from v0 (proposed-v0): an opportunity needs its customer.",
           "code_ref": null,
           "cardinality": "one",
-          "field_class": "judgement"
+          "field_class": "judgement",
+          "decision": "docs/proposals/KNOWLEDGE_STRATEGY_v1.3.md, Owner 決定（2026-10-19） item 4（要）",
+          "suggested_code": "        (\"account\", F(\"link\", [\"客戶\", \"account\"])),",
+          "code_kind": "link"
         }
       ]
     },
@@ -2639,11 +2836,14 @@
         },
         {
           "domain": "Opportunity",
-          "origin": "proposed",
+          "origin": "owner-decision-2026-10-19",
           "reason": "Kept from v0 (proposed-v0): chain step 7 -> 8, an opportunity proposes our solution.",
           "code_ref": null,
           "cardinality": "many",
-          "field_class": "judgement"
+          "field_class": "judgement",
+          "decision": "docs/proposals/KNOWLEDGE_STRATEGY_v1.3.md, Owner 決定（2026-10-19） item 4（要）",
+          "suggested_code": "        (\"test_solutions\", F(\"linklist\", [\"對應方案\", \"相關方案\", \"test solutions\"])),",
+          "code_kind": "linklist"
         }
       ]
     },
@@ -2765,32 +2965,38 @@
     {
       "name": "customer_product",
       "range": "CustomerProduct",
-      "range_basis": "proposed",
+      "range_basis": "owner decision 2026-10-19 (Opportunity official).",
       "description": "The customer product an opportunity is about.",
       "sources": [
         {
           "domain": "Opportunity",
-          "origin": "proposed",
+          "origin": "owner-decision-2026-10-19",
           "reason": "Kept from v0 (proposed-v0): chain step 5 -> 8.",
           "code_ref": null,
           "cardinality": "many",
-          "field_class": "judgement"
+          "field_class": "judgement",
+          "decision": "docs/proposals/KNOWLEDGE_STRATEGY_v1.3.md, Owner 決定（2026-10-19） item 4（要）",
+          "suggested_code": "        (\"customer_product\", F(\"linklist\", [\"客戶產品\", \"產品\", \"customer product\"])),",
+          "code_kind": "linklist"
         }
       ]
     },
     {
       "name": "competing_vendors",
       "range": "Competitor",
-      "range_basis": "proposed",
-      "description": "Our TestSolution names a competitor company it competes with, when no competitor TestSolution card exists.",
+      "range_basis": "owner decision 2026-10-19: TestSolution -> Competitor (company).",
+      "description": "Our TestSolution names a competitor company it competes with. competing_solutions stays for a competitor's TestSolution; a competing_solutions value that names a Competitor is migrated here as a candidate with a warning (rule competing_solutions_type_check).",
       "sources": [
         {
           "domain": "TestSolution",
-          "origin": "proposed",
+          "origin": "owner-decision-2026-10-19",
           "reason": "bi_schema.py:52 competing_solutions is one linklist with aliases 競品方案 / 競品 / competitors; the example vault fills it with Competitor cards (company), the README and prompt with TestSolution cards (solution). v1 keeps competing_solutions -> TestSolution and stages company targets here instead of silently mixing types (rule competing_solutions_type_check).",
           "code_ref": null,
           "cardinality": "many",
-          "field_class": "judgement"
+          "field_class": "judgement",
+          "decision": "docs/proposals/KNOWLEDGE_STRATEGY_v1.3.md, Owner 決定（2026-10-19） item 1（要加）",
+          "suggested_code": "        (\"competing_vendors\", F(\"linklist\", [\"競爭廠商\", \"對手廠商\", \"competing vendors\"])),",
+          "code_kind": "linklist"
         }
       ]
     }
@@ -2837,7 +3043,7 @@
     {
       "id": "own_solution_vendor",
       "origin": "source-bi-schema-py",
-      "statement": "Our TestSolution leaves vendor empty (no vendor link) and there is no Competitor card for our own company. A competitor's TestSolution has exactly one vendor link to its Competitor card. competing_solutions goes from our solution to a competitor's solution.",
+      "statement": "Our TestSolution leaves vendor empty (no vendor link) and there is no Competitor card for our own company. A competitor's TestSolution has exactly one vendor link to its Competitor card. competing_solutions goes from our solution to a competitor's solution. competing_vendors goes from our solution to a competitor company (owner 2026-10-19).",
       "code_ref": "bi_schema.py:37",
       "also": "tests/fixtures/bi_vault_example/tools/README.md:83-84; tools/prompts/slide_distill.md:9-14"
     },
@@ -2890,8 +3096,9 @@
     {
       "id": "node_reference_set",
       "origin": "proposed",
-      "statement": "bi_schema.py fixes no node list; Node layer is the code enum L1-L5 / X (bi_schema.py:129). The reference set is the 8 Node cards of the example vault (tests/fixtures/bi_vault_example/BI/Node/, owner rule 2026-10-18 'as many as seen'): L1-Chipset, L2-Antenna-Module, L2-RF-FEM-Module, L3-Handset, L3-WiFi-Router-CPE, L4-Base-Station, L5-Carrier-Network, X-Certification-Lab. Further positions are proposed-extension, pending owner acceptance.",
-      "replaces_v0": "node_fixed_set (7 from the BI document)"
+      "statement": "bi_schema.py fixes no node list; Node layer is the code enum L1-L5 / X (bi_schema.py:129). The reference set is the 8 Node cards of the example vault (tests/fixtures/bi_vault_example/BI/Node/, owner rule 2026-10-18 'as many as seen'): L1-Chipset, L2-Antenna-Module, L2-RF-FEM-Module, L3-Handset, L3-WiFi-Router-CPE, L4-Base-Station, L5-Carrier-Network, X-Certification-Lab. Further positions are proposed-extension; the owner accepted them on 2026-10-19.",
+      "replaces_v0": "node_fixed_set (7 from the BI document)",
+      "decision": "docs/proposals/KNOWLEDGE_STRATEGY_v1.3.md, Owner 決定（2026-10-19）item 3（接受）"
     },
     {
       "id": "import_idempotent_merge",
@@ -2911,7 +3118,7 @@
     {
       "id": "inference_needs_basis",
       "origin": "proposed",
-      "statement": "An inference claim lists derived_from_claim_ids and is never verified; a reviewer qualifies the derived Opportunity instead."
+      "statement": "An inference claim lists derived_from_claim_ids and is never verified; a reviewer qualifies the derived Opportunity instead (opportunity_stage hypothesis -> qualified)."
     },
     {
       "id": "disputed_needs_both_sides",
@@ -2935,8 +3142,9 @@
     },
     {
       "id": "competing_solutions_type_check",
-      "origin": "proposed",
-      "statement": "A competing_solutions target that resolves to a Competitor card is a type mismatch: it is not stored as competing_solutions; it is staged as a competing_vendors candidate with a warning. Nothing is inferred silently."
+      "origin": "owner-decision-2026-10-19",
+      "statement": "competing_vendors (TestSolution -> Competitor) is an official field (owner 2026-10-19); competing_solutions keeps range TestSolution. A competing_solutions target that resolves to a Competitor card is a type mismatch: it is not stored as competing_solutions; the import migrates it to competing_vendors as a candidate with a warning, for review. Nothing is inferred or published silently.",
+      "decision": "docs/proposals/KNOWLEDGE_STRATEGY_v1.3.md, Owner 決定（2026-10-19） item 1"
     },
     {
       "id": "links_need_resolved_targets",
@@ -2963,6 +3171,12 @@
       "origin": "source-bi-schema-py",
       "code_ref": "bi_schema.py:18, 184",
       "statement": "confidence (verified|assumed) exists only on types with tail fields; Account, Node and Signal have none. Signal.reliability (high|medium|low) rates the source, not verification."
+    },
+    {
+      "id": "priorities_scoped_by_market_and_period",
+      "origin": "owner-decision-2026-10-19",
+      "decision": "docs/proposals/KNOWLEDGE_STRATEGY_v1.3.md, Owner 決定（2026-10-19） item 2",
+      "statement": "Application priority is one entry per (market, period) in properties.priorities, never one global value. The single priority of bi_schema.py:75 upcasts to market unspecified and the quarter of its date; the Dashboard sorts by one chosen market and period (priority_scoping)."
     }
   ],
   "gap_checks": [
@@ -3267,6 +3481,24 @@
         "高": "premium",
         "高價": "premium"
       }
+    },
+    "opportunity_stage": {
+      "suggested_code": "    \"opportunity_stage\": {\"假設\": \"hypothesis\", \"推論\": \"hypothesis\", \"確認\": \"qualified\", \"已確認\": \"qualified\",\n                          \"跟進中\": \"pursuing\", \"進行中\": \"pursuing\", \"贏得\": \"won\", \"成交\": \"won\",\n                          \"失去\": \"lost\", \"未成交\": \"lost\", \"否決\": \"rejected\", \"不成立\": \"rejected\"},",
+      "map": {
+        "假設": "hypothesis",
+        "推論": "hypothesis",
+        "確認": "qualified",
+        "已確認": "qualified",
+        "跟進中": "pursuing",
+        "進行中": "pursuing",
+        "贏得": "won",
+        "成交": "won",
+        "失去": "lost",
+        "未成交": "lost",
+        "否決": "rejected",
+        "不成立": "rejected"
+      },
+      "origin": "owner-decision-2026-10-19"
     }
   },
   "upcast_from_v0": {
@@ -3286,7 +3518,7 @@
       "Signal": "Signal",
       "Opportunity": "Opportunity"
     },
-    "type_map_note": "Identity: v0 already used the folder names. Opportunity stays proposed.",
+    "type_map_note": "Identity: v0 already used the folder names. Opportunity is official since 2026-10-19 (owner).",
     "record_map": {
       "updated": {
         "to": "updated",
@@ -3490,8 +3722,9 @@
       },
       "Opportunity": {
         "hypothesis_status": {
-          "to": "hypothesis_status",
-          "action": "keep_proposed"
+          "to": "opportunity_stage",
+          "action": "rename",
+          "note": "Same values (hypothesis, qualified, rejected); v1.1 adds pursuing, won, lost. Owner 2026-10-19."
         },
         "market_segments": {
           "to": "market_segments",
@@ -3701,5 +3934,33 @@
       "relationship_map; every renamed relationship gets a new relationship_id from the v1 name and an entry in relationship_id_map; claims keep claim_id, statement, modality and evidence, and their relationship pointer follows relationship_id_map",
       "apply is idempotent by (entity_type, canonical_key) and relationship_id; document ids and evidence ids are never rewritten"
     ]
-  }
+  },
+  "revisions": [
+    {
+      "version": "1.0.0",
+      "date": "2026-10-19",
+      "change": "Generated from bi_schema.py (Knowledge Strategy v1.3)."
+    },
+    {
+      "version": "1.1.0",
+      "date": "2026-10-19",
+      "change": "Owner decisions of 2026-10-19: TestSolution competing_vendors and the Opportunity type are official (origin owner-decision-2026-10-19, suggested bi_schema.py patch in README section 8); Application priority is scoped per market and period (priorities, priority_scoping); Opportunity hypothesis_status became opportunity_stage; the field classification and the proposed-extension Nodes are accepted. schema_id stays bi.schema/v1 (pre-freeze PoC contract).",
+      "decision": "docs/proposals/KNOWLEDGE_STRATEGY_v1.3.md, Owner 決定（2026-10-19）"
+    }
+  ],
+  "upcast_from_tooling": [
+    {
+      "code_ref": "bi_schema.py:75",
+      "field": "Application.priority",
+      "to": "Application.priorities",
+      "rule": "priority_scoping.upcast_from_single_priority"
+    },
+    {
+      "code_ref": "bi_schema.py:52",
+      "field": "TestSolution.competing_solutions",
+      "to": "TestSolution.competing_vendors when the target is a Competitor card",
+      "rule": "competing_solutions_type_check"
+    }
+  ],
+  "field_classes_decision": "docs/proposals/KNOWLEDGE_STRATEGY_v1.3.md, Owner 決定（2026-10-19）item 3（接受）: the judgement / sourced / derived classification of every field (ADR-K11), including Application lifecycle = sourced and Concept review_status = judgement, is accepted."
 }

@@ -177,7 +177,8 @@ paths:
       summary: Field change history of one entity (ADR-K11, pre-freeze revision 2026-10-19).
       description: |
         Every accepted, pending, rejected (including stale-base) and reverted field change, oldest
-        first, so a judgement value such as Application priority shows who set it, when and why.
+        first, so a judgement value such as an Application priority shows who set it, when and why.
+        A change to one priority entry has field priorities and scope {market, period}.
         reason is content: in knowledge.read.metadata scope it is null with reason_redacted true.
       x-aep-scope: knowledge.read.metadata (reason needs knowledge.read.content)
       parameters:

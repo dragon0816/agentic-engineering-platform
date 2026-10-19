@@ -158,6 +158,25 @@
           "type": "string",
           "minLength": 1
         },
+        "scope": {
+          "type": "object",
+          "description": "Optional (owner decision 2026-10-19): for a scoped field such as Application priorities, the market and period the change applies to.",
+          "additionalProperties": false,
+          "required": [
+            "market",
+            "period"
+          ],
+          "properties": {
+            "market": {
+              "type": "string",
+              "minLength": 1
+            },
+            "period": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-Q[1-4]$"
+            }
+          }
+        },
         "old_value": {},
         "new_value": {},
         "status": {

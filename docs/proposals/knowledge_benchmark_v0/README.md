@@ -106,7 +106,7 @@
 
 | 題號 | 題目 | 依據 | Expected Answer 摘要 |
 |---|---|---|---|
-| SUP-01<br>PSU 效率應用的 priority 為什麼是 5、誰改的 | 「PSU 效率與動態響應量測」的 priority 現在是多少？誰在什麼時候、為什麼改？後來的匯入為什麼沒有改回去？ | `mock/entity_history.json`、`Application:psu-efficiency-transient` 的 `field_provenance` | 目前 5（judgement）。匯入設 3 → 2026-10-05 member:bd-analyst-a 改 5 並寫理由 → 以舊版本為基礎改 4 的編輯被拒（stale base）→ 重新匯入想改回 3，因為目前值是人工設定，只成為待審提議（ADR-K11） |
+| SUP-01<br>PSU 效率應用在 ai_server、2026-Q4 的 priority 為什麼是 5、誰設的 | 「PSU 效率與動態響應量測」在 ai_server market、2026-Q4 的 priority 現在是多少？誰在什麼時候、為什麼設定？後來的匯入為什麼沒有改掉？有沒有未分 market 的舊值？ | `mock/entity_history.json`（`field: priorities`、`scope`）、`Application:psu-efficiency-transient` 的 `priorities` | ai_server、2026-Q4 是 5（judgement；priority 分 market、分期間，owner 2026-10-19）。2026-10-05 member:bd-analyst-a 設 5 並寫理由 → 以舊版本為基礎、同一範圍改 4 的編輯被拒（stale base）→ 匯入 BD 的 2026-Q4 表想改成 3，因為目前值是人工設定，只成為待審提議（ADR-K11）。另有 2026-09-01 匯入的單一 priority 3，升級為 unspecified、2026-Q3，只是歷史參考 |
 
 ## 第二組：BI 範例 vault 題（8 題，不計入 25 題門檻）
 

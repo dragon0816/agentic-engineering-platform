@@ -4,6 +4,10 @@
 > 機器可讀版本：[bi_schema_v1.json](bi_schema_v1.json)（JSON Schema 2020-12 片段）。v0 保留作歷史，不修改：[../bi_schema_v0/](../bi_schema_v0/README.md)。
 > 合成實例：[../../contracts/knowledge-api/mock/](../../contracts/knowledge-api/mock/)；benchmark：[../knowledge_benchmark_v0/](../knowledge_benchmark_v0/README.md)。
 > 一致性測試：`tests/test_knowledge_strategy_docs.py`（每個 `source-bi-schema-py` 名稱都檢查 `bi_schema.py` 對應行）。
+>
+> **v1.1（2026-10-19，owner 決定）：** `competing_vendors` 與 Opportunity 成為正式欄位 / 類型（`origin: owner-decision-2026-10-19`，
+> `bi_schema.py` 尚未加入，建議的程式行見 §8）；Application `priority` 改為分 market、分期間的 `priorities`（§7）；
+> Opportunity `hypothesis_status` 改名為 `opportunity_stage`。`schema_id` 仍是 `bi.schema/v1`（凍結前的 PoC 契約），JSON `version` 1.1.0，`revisions` 記錄變更。
 
 ## 1. 來源與方法
 
@@ -16,6 +20,7 @@
   | origin | 意義 |
   |---|---|
   | `source-bi-schema-py` | 在 `bi_schema.py` 定義；`code_ref` / `x-code` 是 `bi_schema.py:<行>` |
+  | `owner-decision-2026-10-19` | owner 2026-10-19 決定為正式，但 `bi_schema.py` 還沒有；`decision` / `x-decision` 指出決定，`suggested_code` / `x-suggested-code` 是要加入 `bi_schema.py` 的那一行（§8），測試檢查 §8 逐字包含 |
   | `proposed` | `bi_schema.py` 沒有；從 v0 保留或 v1.3 新增，每一項附 `reason` / `x-reason` |
   | `aep-record` | AEP 儲存紀錄的外殼（id、分類、發佈狀態），不是卡片欄位 |
 - 範例 vault（`tests/fixtures/bi_vault_example/BI/`，不含 `_Templates` 與 `Dashboard.md`）共 **103 張卡**：Node 8、Ecosystem 57、Account 4、Application 4、Competitor 6、Concept 8、CustomerProduct 2、Signal 3、Technology 4、TestSolution 3、Trend 4。內容為虛構或未查證（`README.md:12`），只當測試資料。
@@ -35,7 +40,7 @@
 | 沒有穩定的 entity_id：卡片以檔名識別，檔名由命名欄位經清理產生 | `bi_ingest.py:58-60, 427-434` | AEP 的 `entity_id` / `canonical_key` 規則不變（`id_rules`） |
 | 必填只有命名欄位，Signal 另有 `date`、`summary`、`so_what` | `:176, 181, 183` | `required` = 程式必填 + 有預設值的欄位（`bi_ingest.py:410-424` 建卡時一律補預設值） |
 | 列舉中文別名、欄名別名 | `:188`、`:190-244` | `global_aliases`、`enum_aliases`、每個欄位的 `x-aliases`（給匯入正規化用） |
-| Opportunity **沒有** schema、資料夾或欄位；只出現在 `README.md:18` 的分析鏈 | — | 維持 `proposed`（見 §5） |
+| Opportunity **沒有** schema、資料夾或欄位；只出現在 `README.md:18` 的分析鏈 | — | v1.0 維持 `proposed`；**v1.1 依 owner 2026-10-19 決定成為正式類型**（`owner-decision-2026-10-19`，見 §5、§8） |
 
 ## 3. 與 v0 的差異（以程式為準）
 
@@ -44,7 +49,7 @@
 | 類型 | v0 | v1（`bi_schema.py`） | 差異 |
 |---|---|---|---|
 | 全部 11 種卡 | `source-bi-doc` | `source-bi-schema-py`，`:35`（TestSolution）… `:174`（Signal） | 名稱相同（資料夾名）；frontmatter 的 `type:` 值是 snake_case（`test_solution`、`customer_product` …），記在 `frontmatter_type` |
-| Opportunity | `source-bi-doc`（簡報有名稱、無欄位） | **程式沒有** | `proposed`，保留 `hypothesis_status`、`market_segments` 與 3 個連結 |
+| Opportunity | `source-bi-doc`（簡報有名稱、無欄位） | **程式沒有** | v1.0 `proposed`；**v1.1 正式（owner 2026-10-19）**：`name`、`opportunity_stage`（取代 `hypothesis_status`）、`confidence`、`updated`、`market_segments` 與 3 個連結 |
 | Node 清單 | 7 個（簡報 slide 4 列出的；owner 2026-10-18「看到幾個就幾個」） | 程式不固定清單；範例 vault 有 **8 張 Node 卡**：L1-Chipset、L2-Antenna-Module、L2-RF-FEM-Module、L3-Handset、L3-WiFi-Router-CPE、L4-Base-Station、L5-Carrier-Network、X-Certification-Lab | v1 依同一規則改用 **8 個**（簡報的「模組」在 vault 拆成天線模組與 RF 前端模組，這也解開了 v1.2 的「slide 4 說 8 個只列 7 個」）。`layer` 列舉 L1–L5、X（`:129`） |
 
 ### 3.2 屬性（property）
@@ -67,7 +72,7 @@
 | CustomerProduct | `launch_schedule` | `launch_window`（`:97`） | 改名 |
 | CustomerProduct | — | `volume_tier`、`test_stage_now`（`:98-99`） | 新增 |
 | Application | `measurement_topic`（必填字串） | `measurement_topics` 清單（`:74`），非必填 | 改名、改型別 |
-| Application | — | `value_chain`（`:67`）、`lifecycle`（`:69`）、`priority` int 1–5（`:75`） | 新增；`priority` 是 judgement（ADR-K11） |
+| Application | — | `value_chain`（`:67`）、`lifecycle`（`:69`）、`priority` int 1–5（`:75`） | 新增；**v1.1 把 `priority` 改為 `priorities`**：每個 market × 期間一筆（owner 2026-10-19，§7）；單一值依 §7 升級 |
 | TestSolution | `is_own_solution`（source-v1.0）、`product_family`（proposed-v0） | 程式都沒有；保留為 `proposed`（`is_own_solution` 是 `vendor` 空白規則的明確形式，derived） | |
 | TestSolution | — | `test_type`、`tier`、`automation`、`dut`、`test_items`、`standards`、`instruments`、`price_band`、`services`、`status`（預設 planning）、`owner`（`:41-55`） | 新增 |
 | Competitor | `confirmed` | 程式沒有；併入卡片 `confidence`（true→verified、false→assumed） | 移除 |
@@ -110,7 +115,7 @@ v0 的 8 個 `doc` 名稱（`related_tech`、`affects_nodes`、Ecosystem `node`�
 | `reference_customers` | TestSolution `:53` | Account | 新 |
 | `trends` | Application `:73` | Trend | 新 |
 | `node` | Competitor `:80`、CustomerProduct `:94`、Ecosystem `:105`、Account `:119`（皆 one） | Node | Competitor、CustomerProduct 為新 |
-| `account` | CustomerProduct `:93`（one）；Opportunity（proposed） | Account | |
+| `account` | CustomerProduct `:93`（one）；Opportunity（owner 2026-10-19，one） | Account | |
 | `chipset_modules` | CustomerProduct `:96` | Ecosystem | 新名稱 |
 | `inferred_applications` | CustomerProduct `:100` | Application | 新名稱 |
 | `influence_on` | Ecosystem `:112` | Account（推論） | 新 |
@@ -119,19 +124,19 @@ v0 的 8 個 `doc` 名稱（`related_tech`、`affects_nodes`、Ecosystem `node`�
 | `upstream`、`downstream` | Node `:130`、`:131` | Node | 新 |
 | `affects_nodes` | Technology `:140` | Node | |
 | `related_concepts` | Concept `:155` | Concept | 新 |
-| `test_solutions` | Concept `:154`；Opportunity（proposed） | TestSolution | |
+| `test_solutions` | Concept `:154`；Opportunity（owner 2026-10-19） | TestSolution | |
 | `related_tech` | Trend `:164` | Technology | |
 | `affected_nodes` | Trend `:165` | Node | 新 |
 | `related_applications` | Trend `:166` | Application | 新 |
 | `related` | Signal `:182` | 除 Signal、Opportunity 外的 10 種 | 新名稱（v0 `mentions`） |
-| `customer_product` | Opportunity（proposed） | CustomerProduct | |
-| `competing_vendors` | TestSolution（**proposed，v1.3**） | Competitor | 新 |
+| `customer_product` | Opportunity（owner 2026-10-19） | CustomerProduct | |
+| `competing_vendors` | TestSolution（**owner 2026-10-19，正式**） | Competitor | 新 |
 
 **`competing_solutions` 型別不一致（以程式與資料為準的重要發現）。** `bi_schema.py:52` 只有一個 linklist，別名是「競品方案 / 競品 / competitors」；
 `tools/README.md:83` 與 `tools/prompts/slide_distill.md:14` 說我方卡列出對手的 **TestSolution** 卡；但範例 vault 的兩個值都指向 **Competitor**（公司）卡
 （`BI/TestSolution/FR2-AiP-OTA緊縮場方案.md:16` → Competitor-X、`BI/TestSolution/WiFi7-MLO互通與吞吐量方案.md:16` → Competitor-Y）。v1 的處理：
-`competing_solutions` 維持 range TestSolution；指向 Competitor 的值不默默收下，而是成為 `competing_vendors` candidate 並發出型別警告（規則 `competing_solutions_type_check`）。
-是否把 `competing_vendors` 寫回 `bi_schema.py`，是給 owner 的問題（v1.3 §8）。
+`competing_solutions` 維持 range TestSolution；指向 Competitor 的值不默默收下，而是遷移成 `competing_vendors` candidate 並發出型別警告（規則 `competing_solutions_type_check`），審核後才發佈。
+**owner 2026-10-19：「要加」** → `competing_vendors`（TestSolution → Competitor，linklist）成為正式欄位，建議的 `bi_schema.py` 程式行見 §8。
 
 ## 4. 欄位分類（ADR-K11）
 
@@ -139,14 +144,25 @@ v0 的 8 個 `doc` 名稱（`related_tech`、`affects_nodes`、Ecosystem `node`�
 
 | 類別 | 意義 | v1 中的欄位 |
 |---|---|---|
-| `judgement` | 人的評估；保留誰、何時、為何；匯入或 agent 永不覆蓋人設定的值 | 所有類型的 `confidence`；Application `priority`；Trend `stage`、`time_to_demand`、`market_impact`、`measurement_impact`、`our_fit`；Technology `maturity`；Competitor `strengths`、`weaknesses`、`pricing_position`；CustomerProduct `volume_tier`；Ecosystem `relationship_to_us`；Concept `audience`、`review_status`；Signal `so_what`、`reliability`；Opportunity `hypothesis_status`；關係 `competing_solutions`、`competing_vendors`、`influence_on`、`inferred_applications` 與 Opportunity 的連結 |
+| `judgement` | 人的評估；保留誰、何時、為何；匯入或 agent 永不覆蓋人設定的值 | 所有類型的 `confidence`；Application `priorities`（每筆自帶 provenance，§7）；Trend `stage`、`time_to_demand`、`market_impact`、`measurement_impact`、`our_fit`；Technology `maturity`；Competitor `strengths`、`weaknesses`、`pricing_position`；CustomerProduct `volume_tier`；Ecosystem `relationship_to_us`；Concept `audience`、`review_status`；Signal `so_what`、`reliability`；Opportunity `opportunity_stage`；關係 `competing_solutions`、`competing_vendors`、`influence_on`、`inferred_applications` 與 Opportunity 的連結 |
 | `derived` | 由其他資料算出，不直接編輯 | `updated`、`is_own_solution`、`synthetic`、`legacy_v0` |
 | `sourced` | 來自文件或匯入的事實 | 其餘全部（例如 Application `lifecycle`：它描述應用所處的階段類別，不是排序，所以判為 sourced） |
 
 ## 5. Opportunity 與 Signal
 
-- **Opportunity：** `bi_schema.py` 沒有這個類型（也沒有資料夾或模板，`BI/_Templates/` 只有 11 個）。它只是 `README.md:18` 分析鏈的終點。v1 維持 `proposed`，
-  保留 `hypothesis_status` 與連結 `account`、`test_solutions`、`customer_product`，理由同 v0：鏈的終點需要一個可審閱的推論型商機。
+- **Opportunity：** `bi_schema.py` 沒有這個類型（也沒有資料夾或模板，`BI/_Templates/` 只有 11 個）。它只是 `README.md:18` 分析鏈的終點。v1.0 維持 `proposed`。
+  **owner 2026-10-19：「要」** → v1.1 正式類型（`owner-decision-2026-10-19`）：
+  | 欄位 | 種類 | 分類 | 說明 |
+  |---|---|---|---|
+  | `name` | str（必填，命名欄位） | — | → `display_name`；檔名由它產生 |
+  | `account` | link → Account | judgement | 商機是推論，客戶歸屬也要人確認 |
+  | `customer_product` | linklist → CustomerProduct | judgement | |
+  | `test_solutions` | linklist → TestSolution | judgement | 提出的我方方案 |
+  | `opportunity_stage` | enum hypothesis / qualified / pursuing / won / lost / rejected，預設 hypothesis | judgement | 取代 v1.0 `hypothesis_status`（前三個值相同）。不叫 `stage`：`ENUM_ALIASES` 依欄位名稱跨類型共用（`bi_schema.py:190`），`bi_ingest.py` 套別名後不再檢查列舉（`:154-160`），Trend `stage` 的別名（觀察 → watch …）會把 Trend 的值寫進 Opportunity |
+  | `confidence`、`updated` | tail 欄位（`bi_schema.py:16-20`，`tail=True`） | judgement、derived | 與其他 tail 類型相同 |
+  | `market_segments` | AEP 提議欄位（不在工具中） | sourced | 同 v1.0 |
+
+  分類維持 CONFIDENTIAL、`label_is_content: true`（ADR-K8 pending）。建議的 `bi_schema.py` 程式行見 §8。
 - **Signal：** 程式有完整定義（`:174-185`）。v0 提議的 `mentions` 其實就是程式的 `related`；`summary` 與 `so_what` 必填；
   沒有 `confidence` / `updated`；`reliability` 不等於驗證。
 
@@ -163,9 +179,77 @@ v0 的 8 個 `doc` 名稱（`related_tech`、`affects_nodes`、Ecosystem `node`�
 
 mock（`docs/contracts/knowledge-api/mock/`）與 benchmark 已依這些規則升級，可當作 upcast 的實例。
 
-## 7. 仍待 owner 決定（摘要，完整見 v1.3 §8）
+## 7. Application priority：分 market、分期間（owner 2026-10-19）
 
-- `competing_vendors` 是否寫回 `bi_schema.py`，或只做型別警告。
-- link range 的推論是否正確，特別是 `influence_on` 與 `key_customers`（程式沒有目標類型）。
-- Node 擴充（AI 資料中心、車用雷達、交換器 ASIC、光模組、通訊模組）是否接受；範例 vault 的 module 廠（role `module`）沒有 node。
-- Application `priority` 的評分準則與是否依團隊、期間分開（ADR-K11）。
+owner 對 v1.3 §8.2 第 4 點的回答：「分 market，分期間」。priority 不是單一全域值。完整定義在 JSON `priority_scoping` 與 `priority_entry`。
+
+- **形狀：** Application `priorities` 是清單，每筆 `{market, period, value 1–5, origin, set_by, set_at, reason, source_ref, version}`；每個 (market, period) 至多一筆。
+  provenance 在每一筆裡（`x-provenance: per-entry`），所以 `field_provenance` 沒有 `priorities` 這個 key。人設定的那一筆必須有 `reason`；匯入或 agent 永不覆蓋 origin 是 human 的那一筆，只會成為待審提議（ADR-K11）。
+- **market 指什麼：** `src/knowledge/market_matrix.py` 的 `TargetMarket` 五個值（`wireless_communications`、`aerospace_defense`、`automotive`、`ai_server`、`semiconductor`），加上 `unspecified`。
+  - 依據：這就是 v1 既有的 `market_segments` 屬性的值，也是 Knowledge API `market_segment` 篩選（Atlas 的 market binding）的值。
+  - `bi_schema.py` 與範例 vault **沒有** market 欄位：`value_chain`（`:67`）與 Node `layer`（`:129`）是供應鏈位置；Account `region`（`:122`）是自由文字；Trend `market_impact`（`:169`）是評分，不是市場。
+  - **待 owner 確認（子問題）：** market 是指這五個市場區隔，還是業務區域 / 客戶群？可以加值；若是區域，要另一個列舉。
+- **期間格式：** 日曆季 `YYYY-Qn`（例 `2026-Q4`，pattern `^[0-9]{4}-Q[1-4]$`）。ADR-K11 建議每季檢視；`launch_window` 也用同樣寫法（例 `2027-Q1`）。若公司用會計季度，改的是對照，不是格式。
+- **單一 priority 的升級**（`bi_schema.py:75`、範例 vault、既有工具）：一筆 `{market: unspecified, period, value}`。
+  - period：已知值的 `set_at`（欄位 provenance）就用它的季；否則用卡片 `updated` 的季（`bi_ingest.py` 每次匯入會寫 `updated`）；再否則用匯入日的季。
+  - origin `import`，`set_by` 是 `import:<ingested_from>` 或 `legacy-snapshot:<vault digest>`；沒有 `ingested_from` 的卡，值視同人工設定而受保護（v1.3 DQ-2）。
+  - 例：`BI/Application/5G-FR2-AiP-OTA驗證.md` 的 `priority: 4`、`updated: 2026-10-14` → `{market: unspecified, period: 2026-Q4, value: 4, origin: import, set_by: import:application_sample.csv}`（測試對照 fixture 檢查）。
+  - 之後的匯入：表格有 market 欄（別名 市場、market）與期間欄（別名 期間、季度、period），或 mapping 的 `defaults` 指定，就寫入那個範圍；否則 unspecified + 匯入日的季。`bi_schema.py` 不必為此修改（`F` 的種類放不下物件清單）。
+- **Dashboard 排序：** 使用者選一個 market 和一個期間（預設上次的選擇，否則 unspecified + 本季）。
+  1. 先列該 (market, period) 有值的 Application，依 value 由高到低；
+  2. 再列同期間 `unspecified` 的，標「未分 market」；
+  3. 其餘列在最後，標「未評」，並顯示最近一筆較早的值**僅供參考**，不作為排序值。
+  同分依名稱。過去期間的值留作歷史，不自動延用到新期間。
+- **評分準則：** ADR-K11 的 1–5 準則不變，在所選 market 內判斷；6 / 18 / 36 個月的窗口從期間第一天起算。
+- **Trend 不分範圍：** `bi_schema.py` 的 Trend 沒有 priority；Dashboard 的趨勢優先度是 `measurement_impact × our_fit`（`BI/Dashboard.md:5, 8`），是算出來、不儲存的值。Trend 的 `market_impact`、`measurement_impact`、`our_fit` 維持單一 judgement 值；若 owner 要它們也分 market，套用同樣的 entry 形狀。
+
+## 8. Changes to apply to the BI tooling（給 owner 套用到自己的 `bi_schema.py`）
+
+AEP 不修改 owner 的 `bi_schema.py`（repo 中的 `tests/fixtures/bi_vault_example/tools/bi_schema.py` 是逐字快照，測試以 sha256 釘住；
+owner 的工作副本在 repo 之外）。以下三處變更讓工具與 Schema v1.1 一致。下列每一行都與 `bi_schema_v1.json` 的 `suggested_code` / `x-suggested-code` 逐字相同，測試會檢查。
+行號是快照（sha256 `395ff4e7…`）的行號。
+
+**8.1 `competing_vendors`（owner 第 1 點「要加」）：** 在 TestSolution 的 `competing_solutions`（`bi_schema.py:52`）之後、`reference_customers`（`:53`）之前插入一行：
+
+```text
+        ("competing_solutions", F("linklist", ["競品方案", "競品", "competitors", "competing solutions"])),
+        ("competing_vendors", F("linklist", ["競爭廠商", "對手廠商", "competing vendors"])),
+        ("reference_customers", F("linklist", ["參考客戶", "客戶", "reference customers"])),
+```
+
+只有中間那一行是新的。別名不用「競品廠商」，因為它已經是 `vendor` 的別名（`:37`）。`competing_solutions` 的別名不改；它的值若指向 Competitor 卡，AEP 匯入時依規則
+`competing_solutions_type_check` 遷移成 `competing_vendors` candidate 並警告。範例 vault 的兩個值（`BI/TestSolution/FR2-AiP-OTA緊縮場方案.md:16`、`WiFi7-MLO互通與吞吐量方案.md:16`）可由 owner 手動改到 `competing_vendors`。
+
+**8.2 Opportunity 類型（owner 第 4 點「要」）：** 在 `SCHEMAS` 的 `"signal"` 項目之後（`bi_schema.py:185` 之後、結尾 `}`（`:186`）之前）加入：
+
+```text
+    # ------------------------------------------------------------ opportunity layer (owner decision 2026-10-19)
+    "opportunity": schema("Opportunity", ["name"], [
+        ("name", F("str", ["商機名稱", "商機", "名稱", "opportunity", "name"], required=True)),
+        ("account", F("link", ["客戶", "account"])),
+        ("customer_product", F("linklist", ["客戶產品", "產品", "customer product"])),
+        ("test_solutions", F("linklist", ["對應方案", "相關方案", "test solutions"])),
+        ("opportunity_stage", F("enum", ["商機階段", "opportunity stage"],
+                                enum=["hypothesis", "qualified", "pursuing", "won", "lost", "rejected"],
+                                default="hypothesis")),
+    ], ["## 商機假設", "## 依據(Signal / CustomerProduct)", "## 下一步"]),
+```
+
+`tail` 用預設 `True`，所以 `confidence` 與 `updated` 自動加上。加入後 `bi_ingest.py --type opportunity` 可用，`--emit-templates` 會產生 Opportunity 模板；vault 需要 `BI/Opportunity/` 資料夾。
+
+**8.3 `opportunity_stage` 的列舉別名：** 在 `ENUM_ALIASES` 最後一項 `"pricing_position"`（`bi_schema.py:243`）之後、結尾 `}`（`:244`）之前加入：
+
+```text
+    "opportunity_stage": {"假設": "hypothesis", "推論": "hypothesis", "確認": "qualified", "已確認": "qualified",
+                          "跟進中": "pursuing", "進行中": "pursuing", "贏得": "won", "成交": "won",
+                          "失去": "lost", "未成交": "lost", "否決": "rejected", "不成立": "rejected"},
+```
+
+**priority 不需要改工具：** 工具維持單一 `priority`（`:75`），AEP 依 §7 升級成 `{market: unspecified, period, value}`。
+
+套用後請告訴 AEP：重新以 `ast` 產生對照、更新 `source.primary_sha256` 與測試的釘選，並把這三處的 origin 改回 `source-bi-schema-py`、附上新的行號。
+
+## 9. 仍待 owner 決定（摘要，完整見 v1.3 §8.2）
+
+- **已決定（2026-10-19）：** `competing_vendors` 要加（§3.4、§8.1）；priority 分 market、分期間（§7）；judgement 欄位清單與 Node 擴充（`proposed-extension`）接受；Opportunity 要（§5、§8.2）。
+- **仍待：** link range 的推論（`influence_on`、`key_customers`，程式沒有目標類型）；§7 的 market 定義子問題（市場區隔還是業務區域）。

@@ -11,6 +11,11 @@ v1.3 (2026-10-19) moved the mock and the benchmark from BI Schema v0 (built from
 BI slides) to v1 (built from the owner's bi_schema.py, committed as test data under
 tests/fixtures/bi_vault_example). v0 is kept unchanged for history; its checks here
 are that it is unchanged and that its upcast to v1 covers every v0 name.
+
+The owner's decisions of 2026-10-19 made TestSolution competing_vendors and the
+Opportunity type official before bi_schema.py has them (origin
+owner-decision-2026-10-19, with the exact line to add in the v1 README), and scoped
+Application priority per market and period.
 """
 
 from __future__ import annotations
@@ -35,6 +40,9 @@ BI_SCHEMA_PY = FIXTURE / "tools/bi_schema.py"
 API = ROOT / "docs/contracts/knowledge-api"
 SCHEMAS = API / "schemas"
 MOCKS = API / "mock"
+BI_SCHEMA_README = ROOT / "docs/proposals/bi_schema_v1/README.md"
+MARKET_MATRIX = ROOT / "src/knowledge/market_matrix.py"
+DECIDED = "owner-decision-2026-10-19"
 
 _TYPES: dict[str, tuple[type, ...]] = {
     "object": (dict,),
@@ -260,15 +268,21 @@ def test_bi_schema_v1_traces_every_name_to_bi_schema_py() -> None:
     assert schema["schema_id"] == "bi.schema/v1"
     assert sha256_lf(BI_SCHEMA_PY) == schema["source"]["primary_sha256"]
     types = schema["entity_types"]
-    assert [t for t, s in types.items() if s["origin"] == "proposed"] == ["Opportunity"]
+    assert [t for t, s in types.items() if s["origin"] == "proposed"] == []
+    assert [t for t, s in types.items() if s["origin"] == DECIDED] == ["Opportunity"]
     for name, spec in types.items():
-        if spec["origin"] == "proposed":
-            assert spec["reason"] and spec["code_ref"] is None
-            continue
-        assert spec["origin"] == "source-bi-schema-py"
-        assert f'"{spec["code_key"]}": schema("{spec["folder"]}"' in _code_line(spec["code_ref"])
         naming = spec["naming_field"]
-        assert f'("{naming["field"]}", F(' in _code_line(naming["code_ref"])
+        if spec["origin"] == DECIDED:
+            # Official by owner decision, not yet in bi_schema.py: the line to add is given.
+            assert spec["decision"] and spec["code_ref"] is None and naming["code_ref"] is None
+            assert f'"{spec["code_key"]}": schema("{spec["folder"]}"' in spec["suggested_code"]
+            assert f'("{naming["field"]}", F("{naming["code_kind"]}"' in naming["suggested_code"]
+        else:
+            assert spec["origin"] == "source-bi-schema-py"
+            assert f'"{spec["code_key"]}": schema("{spec["folder"]}"' in _code_line(
+                spec["code_ref"]
+            )
+            assert f'("{naming["field"]}", F(' in _code_line(naming["code_ref"])
         assert naming["field"] == {"Signal": "title", "CustomerProduct": "product_name"}.get(
             name, "name"
         )
@@ -277,6 +291,15 @@ def test_bi_schema_v1_traces_every_name_to_bi_schema_py() -> None:
             assert prop_spec["x-field-class"] in ("sourced", "judgement", "derived"), (name, prop)
             if prop_spec["x-origin"] == "proposed":
                 assert prop_spec["x-reason"], (name, prop)
+                continue
+            if prop_spec["x-origin"] == DECIDED:
+                assert "x-code" not in prop_spec, (name, prop)
+                if "x-replaces-code" in prop_spec:
+                    assert prop_spec["x-decision"], (name, prop)
+                    assert "F(" in _code_line(prop_spec["x-replaces-code"]), (name, prop)
+                else:
+                    suggested = prop_spec["x-suggested-code"]
+                    assert f'("{prop}", F("{prop_spec["x-kind"]}"' in suggested, (name, prop)
                 continue
             line = _code_line(prop_spec["x-code"])
             assert f'("{prop}", F(' in line or f'f["{prop}"] = F(' in line, (name, prop, line)
@@ -290,17 +313,21 @@ def test_bi_schema_v1_traces_every_name_to_bi_schema_py() -> None:
             if source["origin"] == "proposed":
                 assert source["reason"] and source["code_ref"] is None, rel["name"]
                 continue
+            if source["origin"] == DECIDED:
+                assert source["decision"] and source["code_ref"] is None, rel["name"]
+                assert f'("{rel["name"]}", F("{source["code_kind"]}"' in source["suggested_code"]
+                assert source["cardinality"] == ("one" if source["code_kind"] == "link" else "many")
+                continue
             assert source["origin"] == "source-bi-schema-py"
             line = _code_line(source["code_ref"])
             assert f'("{rel["name"]}", F("{source["code_kind"]}"' in line, (rel["name"], line)
             assert source["cardinality"] == ("one" if source["code_kind"] == "link" else "many")
-    proposed_rels = {
-        (s["domain"], t["name"])
-        for t in schema["relationship_types"]
-        for s in t["sources"]
-        if s["origin"] == "proposed"
-    }
-    assert proposed_rels == {
+    by_origin: dict[str, set[tuple[str, str]]] = {}
+    for t in schema["relationship_types"]:
+        for s in t["sources"]:
+            by_origin.setdefault(s["origin"], set()).add((s["domain"], t["name"]))
+    assert "proposed" not in by_origin
+    assert by_origin[DECIDED] == {
         ("Opportunity", "account"),
         ("Opportunity", "test_solutions"),
         ("Opportunity", "customer_product"),
@@ -308,6 +335,84 @@ def test_bi_schema_v1_traces_every_name_to_bi_schema_py() -> None:
     }
     reference = types["Node"]["properties_schema"]["properties"]["reference_position"]["enum"]
     assert sorted(reference) == sorted(p.stem for p in (FIXTURE / "BI/Node").glob("*.md"))
+
+
+def _suggested_code(node: Any) -> list[str]:
+    """Every suggested_code / x-suggested-code value in the schema."""
+    if isinstance(node, dict):
+        found = [v for k, v in node.items() if k in ("suggested_code", "x-suggested-code")]
+        return found + [line for value in node.values() for line in _suggested_code(value)]
+    if isinstance(node, list):
+        return [line for value in node for line in _suggested_code(value)]
+    return []
+
+
+def test_owner_decisions_of_2026_10_19_are_in_schema_v1() -> None:
+    schema = load(BI_SCHEMA)
+    readme = BI_SCHEMA_README.read_text(encoding="utf-8")
+    # The owner applies the bi_schema.py patch from the README: it must be the schema's lines.
+    tooling = readme[readme.index("## 8. Changes to apply to the BI tooling") :]
+    suggested = _suggested_code(schema)
+    assert len(suggested) == 8
+    for code in suggested:
+        assert code in tooling, code
+    for item in schema["upcast_from_tooling"]:
+        assert f'("{item["field"].split(".")[1]}", F(' in _code_line(item["code_ref"]), item
+
+    # 1. competing_vendors is official; competing_solutions keeps its range.
+    rel_types = {t["name"]: t for t in schema["relationship_types"]}
+    vendors = rel_types["competing_vendors"]
+    assert vendors["range"] == "Competitor"
+    assert [(s["domain"], s["origin"]) for s in vendors["sources"]] == [("TestSolution", DECIDED)]
+    assert rel_types["competing_solutions"]["range"] == "TestSolution"
+    rule = next(r for r in schema["rules"] if r["id"] == "competing_solutions_type_check")
+    assert rule["origin"] == DECIDED and "candidate with a warning" in rule["statement"]
+    staged = [r for r in _relationships() if r["relationship_type"] == "competing_vendors"]
+    assert staged and all(r["status"] == "candidate" for r in staged)
+
+    # 4. Opportunity is an official type with name, stage, confidence and updated.
+    opportunity = schema["entity_types"]["Opportunity"]
+    assert opportunity["origin"] == DECIDED and opportunity["has_confidence_and_updated"]
+    props = opportunity["properties_schema"]["properties"]
+    assert {"opportunity_stage", "confidence", "updated"} <= set(props)
+    assert props["opportunity_stage"]["x-field-class"] == "judgement"
+    assert "hypothesis_status" not in props
+    assert schema["upcast_from_v0"]["property_map"]["Opportunity"]["hypothesis_status"]["to"] == (
+        "opportunity_stage"
+    )
+
+    # 2. priority is scoped per market and period, never one global value.
+    app = schema["entity_types"]["Application"]["properties_schema"]["properties"]
+    assert "priority" not in app
+    priorities = app["priorities"]
+    assert priorities["x-origin"] == DECIDED and priorities["x-unique-by"] == ["market", "period"]
+    assert '("priority", F("int"' in _code_line(priorities["x-replaces-code"])
+    entry = schema["priority_entry"]["properties"]
+    match = re.search(r"TargetMarket = Literal\[(.*?)\]", MARKET_MATRIX.read_text("utf-8"), re.S)
+    assert match
+    target_markets = re.findall(r'"([a-z_]+)"', match.group(1))
+    assert entry["market"]["enum"] == [*target_markets, "unspecified"]
+    assert app["market_segments"]["items"]["enum"] == target_markets
+    assert schema["priority_scoping"]["market"]["values"] == entry["market"]["enum"]
+    assert re.fullmatch(entry["period"]["pattern"], "2026-Q4")
+    assert not re.fullmatch(entry["period"]["pattern"], "2026-Q5")
+    for name in ("entities.json", "entities.metadata.json"):
+        for entity in load(MOCKS / name)["data"]:
+            if entity["entity_type"] == "Application":
+                scopes = [(p["market"], p["period"]) for p in entity["properties"]["priorities"]]
+                assert scopes and len(scopes) == len(set(scopes)), entity["entity_id"]
+    # The documented upcast example is the fixture card's own priority and quarter.
+    example = schema["priority_scoping"]["upcast_from_single_priority"]["example"]
+    card = (FIXTURE / "BI/Application/5G-FR2-AiP-OTA驗證.md").read_text(encoding="utf-8")
+    priority = re.search(r"^priority: (\d)$", card, re.M)
+    updated = re.search(r"^updated: (\d{4})-(\d{2})-\d{2}$", card, re.M)
+    assert priority and updated
+    period = f"{updated.group(1)}-Q{(int(updated.group(2)) - 1) // 3 + 1}"
+    assert f"period: {period}, value: {priority.group(1)}" in example
+
+    # The API carries the new origin.
+    origin = load(SCHEMAS / "relationship.schema.json")["$defs"]["Relationship"]["properties"]
+    assert DECIDED in origin["origin"]["enum"]
 
 
 def test_mock_graph_obeys_bi_schema_v1() -> None:
@@ -384,7 +489,14 @@ def test_judgement_fields_carry_field_provenance() -> None:
         provenance = entity["field_provenance"]
         assert set(provenance) <= set(entity["properties"]), name
         for field in entity["properties"]:
-            if props[field]["x-field-class"] == "judgement":
+            if props[field].get("x-provenance") == "per-entry":
+                # A scoped collection: each entry carries its own provenance.
+                assert field not in provenance, (name, field)
+                for item in entity["properties"][field]:
+                    assert item["version"] <= entity["record_version"], (name, field, item)
+                    if item["origin"] == "human" and not item["reason_redacted"]:
+                        assert item["reason"], (name, field, item)
+            elif props[field]["x-field-class"] == "judgement":
                 assert field in provenance, (name, field)
         for field, item in provenance.items():
             assert item["version"] <= entity["record_version"], (name, field)
@@ -392,39 +504,58 @@ def test_judgement_fields_carry_field_provenance() -> None:
                 assert item["reason"], (name, field)
     for entity in load(MOCKS / "entities.metadata.json")["data"]:
         assert all(p["reason"] is None for p in entity["field_provenance"].values())
+        assert all(p["reason"] is None for p in entity["properties"].get("priorities", []))
     humans = [
         e
         for e in _entities().values()
-        if e["field_provenance"].get("priority", {}).get("origin") == "human"
+        if any(p["origin"] == "human" for p in e["properties"].get("priorities", []))
     ]
     assert humans, "the mock should exercise a human-set judgement field"
+
+
+def _scope(change: dict[str, Any]) -> tuple[str, str]:
+    return change["scope"]["market"], change["scope"]["period"]
 
 
 def test_entity_history_never_lets_an_import_overwrite_a_person() -> None:
     history = load(MOCKS / "entity_history.json")["data"]
     entity = next(e for e in _entities().values() if e["entity_id"] == history["entity_id"])
     assert history["record_version"] == entity["record_version"]
-    changes = [c for c in history["changes"] if c["field"] == "priority"]
-    accepted = [c for c in changes if c["status"] == "accepted"]
-    assert accepted[-1]["new_value"] == entity["properties"]["priority"]
-    current = entity["field_provenance"]["priority"]
-    assert (current["origin"], current["set_by"], current["version"]) == (
-        accepted[-1]["origin"],
-        accepted[-1]["set_by"],
-        accepted[-1]["version"],
-    )
-    for before, after in zip(accepted, accepted[1:], strict=False):
-        assert (
-            after["old_value"] == before["new_value"] and after["base_version"] == before["version"]
+    # Record level: every accepted change, of any field, builds on the one before it.
+    accepted_all = [c for c in history["changes"] if c["status"] == "accepted"]
+    assert accepted_all[-1]["version"] == entity["record_version"]
+    for before, after in zip(accepted_all, accepted_all[1:], strict=False):
+        assert after["base_version"] == before["version"]
+        assert after["version"] == before["version"] + 1
+    changes = [c for c in history["changes"] if c["field"] == "priorities"]
+    assert changes and all("scope" in c for c in changes)
+    entries = {(p["market"], p["period"]): p for p in entity["properties"]["priorities"]}
+    for scope, current in entries.items():
+        accepted = [c for c in changes if c["status"] == "accepted" and _scope(c) == scope]
+        assert accepted[-1]["new_value"] == current["value"], scope
+        assert (current["origin"], current["set_by"], current["version"]) == (
+            accepted[-1]["origin"],
+            accepted[-1]["set_by"],
+            accepted[-1]["version"],
         )
+        for before, after in zip(accepted, accepted[1:], strict=False):
+            assert after["old_value"] == before["new_value"]
+            assert after["base_version"] >= before["version"]
     for change in changes:
+        current = entries[_scope(change)]
         if change["status"] == "rejected_stale_base":
-            newer = [c for c in accepted if c["set_at"] < change["set_at"]]
+            newer = [
+                c
+                for c in changes
+                if c["status"] == "accepted"
+                and _scope(c) == _scope(change)
+                and c["set_at"] < change["set_at"]
+            ]
             assert change["base_version"] < newer[-1]["version"]
             assert change["version"] is None
         if change["status"] == "pending_review" and change["origin"] in ("import", "agent"):
             assert current["origin"] == "human" and change["version"] is None
-            assert change["new_value"] != entity["properties"]["priority"]
+            assert change["new_value"] != current["value"]
     assert any(c["status"] == "pending_review" and c["origin"] == "import" for c in changes)
 
 
@@ -554,13 +685,23 @@ def test_supplemental_question_matches_the_history_mock() -> None:
         expected = q["expected_field_history"]
         entity = entities[expected["entity"]]
         assert history["entity_id"] == entity["entity_id"]
-        assert entity["properties"][expected["field"]] == expected["current_value"]
-        current = entity["field_provenance"][expected["field"]]
+        assert expected["field"] == "priorities", "priority is scoped (owner 2026-10-19)"
+        entries = {(p["market"], p["period"]): p for p in entity["properties"]["priorities"]}
+        current = entries[(expected["market"], expected["period"])]
+        assert current["value"] == expected["current_value"]
         assert (current["origin"], current["set_by"]) == (
             expected["current_origin"],
             expected["current_set_by"],
         )
-        by_status = {c["status"]: c for c in history["changes"] if c["field"] == expected["field"]}
+        legacy = expected["legacy_entry"]
+        assert entries[(legacy["market"], legacy["period"])]["value"] == legacy["value"]
+        assert entries[(legacy["market"], legacy["period"])]["origin"] == legacy["origin"]
+        by_status = {
+            c["status"]: c
+            for c in history["changes"]
+            if c["field"] == expected["field"]
+            and _scope(c) == (expected["market"], expected["period"])
+        }
         assert by_status["rejected_stale_base"]["new_value"] == expected["rejected_stale_value"]
         assert by_status["pending_review"]["new_value"] == expected["pending_import_value"]
 
