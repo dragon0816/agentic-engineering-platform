@@ -2267,6 +2267,36 @@ drafts a Workflow or Skill shows its install card"):
   drafts (`ChatCandidate.session_id`, new `SkillCandidate.session_id`) and install requests,
   never on run requests.
 
+### Revising an installed Workflow (2026-10-19)
+
+`docs/phases/WORKFLOW_REVISION.md`; decision `docs/DECISIONS.md` 2026-10-19.
+- Conversation tools (`host_runtime.chat_authoring`):
+  - `authoring__get_workflow` (`host.authoring.get.v1`): `candidate_id` (a draft) or `workflow`
+    (installed: `namespace/name@version`, `name@version`, `namespace/name`, `name` = highest
+    installed version), optional `offset`. Installed body: `workflow`, `owner` (`type:id`),
+    `visibility`, `lifecycle`, `description`, `parameters`, `steps`, `checks`,
+    `progress_steps`, `occupies_machine`, `secret_names`, `origin: installed`, `digest`, `next`.
+    Draft body as before plus `checks` and `revision_of`. Over `MAX_VIEW_CHARS` (20,000) JSON
+    characters: `workflow`, `truncated`, `total_chars`, `offset`, `next_offset`, `json_text`,
+    `notice`. Codes `workflow_unknown` (with close readable names), `workflow_ambiguous`,
+    `workflow_reference_invalid`, `workflow_missing`, `candidate_unknown`.
+  - `authoring__revise_workflow` (`host.authoring.revise.v1`): `workflow`, optional `title`.
+    Data `candidate_id`, `workflow`, `revision_of`, `base_digest`, `forked`, `continued`, `next`,
+    `note` when forked. Failure `workflow_invalid` with `problems`.
+  - `authoring__show_capability_source` (`host.authoring.capability_source.v1`): `capability`,
+    optional `file`, `offset`. Data `ok`, `package`, `read_only: true`, `how_to_change`, and
+    `files` [{`file`, `chars`}] or `file`, `source`, `total_chars`, `offset`, `next_offset`,
+    `truncated`, `notice`. Codes `capability_package_unknown`, `capability_file_refused`.
+- `ChatCandidate.base_digest` (optional); a revision's `source` is
+  `revision:<namespace/name@version>` and stays so through later edits.
+- Draft card preview: "Revision of <ns/name> <a> → <b>" or "Fork of <identity> as <identity>",
+  "Changes:" lines, "Installing it keeps <identity> installed and its run history."
+- External (`host_runtime.mcp_server`, `aep-host assets`): `aep_show_installed_workflow`
+  {`workflow`, `offset`} / `show-installed-workflow --workflow [--offset]`;
+  `aep_revise_workflow` {`workflow`, `title`} / `revise-workflow --workflow [--title]`. Only
+  Workflows owned by the Host's owner with a `chat-candidate:` validation reference; otherwise
+  `{ok: false, code: workflow_withheld, next}`.
+
 ## Shared-platform transport (Phase 7, slice 2i)
 
 `common.sync` is the wire between a Bridge and the shared platform: seven

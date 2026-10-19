@@ -3426,3 +3426,48 @@ safe cancel point); a per-turn token budget (no gap beyond the context growth ha
 streaming tool arguments or partial answers to the page (the owner asked for state, not content);
 delaying the Telegram status message to 10 s (the owner asked on 2026-10-06 for it to appear at
 once, and an existing test pins that behaviour; the edit rate limit is what prevents a stream).
+
+## 2026-10-19 — The Agent revises an installed Workflow by building on its real code
+
+Owner approved 2026-10-19. Asked to change the Issue Key fallback rule (`GH-76` when there is no
+`GTM-xxx`) of an installed Workflow, the Agent said the platform did not expose its source and
+rewrote a "v2" from scratch with the whole logic as one embedded `coding/run-python` script.
+`authoring__get_workflow` claimed to show installed Workflows but read only chat candidates, and
+a Workflow whose logic ships as a capability package had no readable source.
+
+Decision (spec `docs/phases/WORKFLOW_REVISION.md`):
+
+- `authoring__get_workflow` takes `workflow` (an installed identity, or a name for its highest
+  installed version) as well as `candidate_id`, and returns the full manifest the model needs,
+  embedded scripts included, in 20,000-character slices with a notice and `offset`.
+- Readable: the owner and contributors always; otherwise published and either owned by a team,
+  organization or service (bundle, Marketplace, Shared Platform selection) or visible to the
+  organization. Another person's `private`/`team` Workflow answers `workflow_unknown`.
+- `authoring__revise_workflow` copies an installed Workflow into a chat candidate one patch
+  version up with `source: revision:<identity>` and `base_digest`. The owner or a co-editor
+  (`metadata.contributors`) keeps the name; a co-editor's version keeps the original owner.
+  Anyone else, including for a team-owned shipped Workflow, forks to `<name>-<actor>` and is
+  told so. Editing a revision does not climb versions. Fields the draft format cannot express
+  (`progress_steps`, `occupies_machine`, `secrets`, central execution, categories) are carried
+  over from the Workflow a draft continues.
+- Installing stays the person's press on the in-chat card (or Capabilities) through the existing
+  install path: a new version file beside the old, which stays installed with its history. The
+  card reads "Revision of X 1.0.0 → 1.0.1" with changed steps, inputs, parameters and the script
+  line delta; an unchanged revision gets no card.
+- `authoring__show_capability_source` reads, never edits, Python and manifest files under one
+  package folder of the installed `capabilities` package, size-capped, path traversal refused,
+  credential-looking lines masked. Behaviour changes go through a revision Workflow.
+- External agents get `aep_show_installed_workflow` and `aep_revise_workflow` (CLI
+  `show-installed-workflow`, `revise-workflow`) only for Workflows installed from an authoring
+  draft on this Host by its owner, the drafts `aep_get` already shows; everything else is
+  `workflow_withheld` (PUBLIC rule). No capability-source tool for them.
+- Agent Web Capabilities: an installed Workflow has **Revise in chat**, which opens a new
+  session with the request typed in, unsent.
+
+Rejected: letting the model edit installed files or the AEP package (bypasses review and
+breaks published immutability); showing every installed Workflow to external agents (the PUBLIC
+rule withholds person-written steps); a separate `authoring__show_installed_workflow` tool (one
+read tool with two keys is easier for the model to find); keying a fork on the Shared Platform's
+co-editor records (not available on a local Host; `contributors` is what the manifest carries);
+installing a revision under the original team-owned name with a person as owner (it would claim
+the team's name and collide with the next bundle upgrade).

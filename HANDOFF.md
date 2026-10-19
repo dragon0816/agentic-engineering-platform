@@ -1,9 +1,64 @@
 # Handoff
 
-Updated: 2026-10-19 (Asia/Taipei), by Claude Code (tool cap 150 with guards; live Harness state)
+Updated: 2026-10-19 (Asia/Taipei), by Claude Code (revise an installed Workflow from chat; earlier: tool cap 150 and live Harness state)
 
 
-## Tool cap 150 with guards; live Harness state in the chat (2026-10-19, Claude Code) — latest
+## Revise an installed Workflow from chat (2026-10-19, Claude Code) — latest
+
+**Status:** committed on main, **not pushed**, Agent Web **not restarted**. Owner approved
+2026-10-19. Spec `docs/phases/WORKFLOW_REVISION.md`; decision `docs/DECISIONS.md` 2026-10-19
+"The Agent revises an installed Workflow by building on its real code"; contracts in
+`docs/CONTRACTS.md` "Revising an installed Workflow"; `docs/TASKS.md` new section.
+
+- **Goal:** asked to change an installed Workflow, the Agent rewrote a "v2" from scratch
+  because it could not read installed Workflows or shipped capability source. Now it reads,
+  copies one version up, edits, and the person installs from the card.
+- **What changed:**
+  - `src/host_runtime/workflow_revision.py` (new): reference resolution, who may read,
+    the paged view (20,000 JSON characters per slice), the revision summary, read-only
+    capability source.
+  - `src/host_runtime/chat_authoring.py`: `authoring__get_workflow` takes `workflow` or
+    `candidate_id` (+ `offset`); new `authoring__revise_workflow`,
+    `authoring__show_capability_source`; `ChatCandidate.base_digest`; revisions keep
+    `source: revision:<identity>` and one version above the installed one; fields the draft
+    format cannot express are carried over; contributors count as co-editors;
+    `ChatAuthoringError.detail` (model-only message).
+  - `src/host_runtime/draft_cards.py`: "Revision of X a → b" / "Fork of X as Y" with a change
+    summary; an unchanged revision gets no card.
+  - `src/host_runtime/external_authoring.py`, `mcp_server.py`, `cli.py`:
+    `aep_show_installed_workflow`, `aep_revise_workflow` (CLI `show-installed-workflow`,
+    `revise-workflow`), only for Workflows installed from an authoring draft on this Host;
+    else `workflow_withheld`.
+  - `creators/aep-workflow-creator/SKILL.md`, `conversation_backends.AGENT_POLICY`: the flow.
+  - `web_page.py`: Capabilities → installed Workflow → **Revise in chat** (new session, request
+    typed in, unsent).
+  - `deploy/windows-preview/USER_GUIDE.zh-TW.md` §5.4: one note.
+- **Commits:** 1b7b854d (read, revise, card, external), 363c03bf (Revise in chat + chat and
+  browser tests), then the docs commit.
+- **Verification:** ruff, format and mypy clean in both venvs. Full suites (with the parallel
+  turn-progress work in the tree): project `.venv` 3216 passed, 7 skipped, 0 failed;
+  `C:\aepci-wk\venv` (reinstalled `-e ".[dev,office]"`, `--basetemp=C:/aepci-wk/bt`) 3192
+  passed, 30 skipped, 1 failed (`test_member_portal_tabs.py` real-browser test, a flake under
+  load; 2 passed alone). Tests `tests/test_workflow_revision.py` (24) and `tests/test_workflow_revision_chat.py`
+  (3, one real browser; screenshots `.scratch/workflow-revise-ui/`). Fakes and fixtures only;
+  the owner's weekly report Workflows were never run, read or changed.
+- **Risks / open:**
+  - A team-owned shipped Workflow (e.g. the weekly report, owned by `team:engineering`) is
+    forked to `<name>-<actor>`, not bumped in place: the Host has no record that the person
+    belongs to the team. If the owner wants in-place revisions of shipped Workflows, that needs a
+    group-membership rule (decision needed).
+  - External agents see only Workflows drafted here (PUBLIC rule); they have no
+    capability-source tool.
+  - Two versions of a name stay installed side by side; a bare name resolves to the highest.
+- **Next:**
+  1. After the owner's next Agent Web restart, with a fixture Workflow (never the weekly
+     report): Capabilities → the fixture → **Revise in chat** → ask for a small change → the card
+     shows "Revision of … 1.0.0 → 1.0.1" and the right changes → Install → both versions listed.
+  2. Optional: ask the Agent to show `weekly_report` source (`authoring__show_capability_source`)
+     to confirm the read-only view in the live install; do not run the Workflow.
+
+
+## Tool cap 150 with guards; live Harness state in the chat (2026-10-19, Claude Code)
 
 **Status:** committed on main (906716ce, bfe07ae7, plus the docs commit), **not pushed**, Agent
 Web **not restarted**. Another agent worked in parallel on "revise an existing Workflow from chat"

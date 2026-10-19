@@ -2532,3 +2532,27 @@ s-k-20261011T102952` (not published).
 - [ ] Live check after the next Agent Web restart (owner): a long chat turn shows the stepper,
   tool lines and 「工具 n/150」; Settings shows the two new fields; Telegram's status message
   shows the same lines and is edited, not repeated.
+
+## Revise an installed Workflow from chat (2026-10-19)
+
+- [x] Read, revise and card (2026-10-19, Claude Code; owner approved 2026-10-19).
+  `host_runtime/workflow_revision.py` (resolution, readability, paged view, revision summary,
+  capability source); `ChatAuthoring.installed_workflow`, `show_installed`, `revise`,
+  `revision_base`, `revision_changes`, `capability_source`; `ChatCandidate.base_digest`;
+  tools `authoring__get_workflow` (`workflow`, `offset`), `authoring__revise_workflow`,
+  `authoring__show_capability_source`; draft card "Revision of X a → b" with a change summary;
+  external `aep_show_installed_workflow`, `aep_revise_workflow` (CLI `show-installed-workflow`,
+  `revise-workflow`) for Workflows drafted here only; `aep-workflow-creator` and the agent-mode
+  policy teach the flow; Agent Web Capabilities **Revise in chat**. Tests:
+  `tests/test_workflow_revision.py`, `tests/test_workflow_revision_chat.py` (fake-model chat,
+  real-browser check, screenshots in `.scratch/workflow-revise-ui/`). Spec
+  `docs/phases/WORKFLOW_REVISION.md`; decision `docs/DECISIONS.md` 2026-10-19.
+  Verification: ruff, format and mypy clean in both venvs. Full suites (with the parallel
+  turn-progress work in the tree): project `.venv` 3216 passed, 7 skipped, 0 failed;
+  `C:\aepci-wk\venv` (`pip install -e ".[dev,office]"`, `--basetemp=C:/aepci-wk/bt`) 3192
+  passed, 30 skipped, 1 failed (`test_member_portal_tabs.py::test_the_tabbed_portal_in_a_real_browser`,
+  a browser flake under load; 2 passed when run alone).
+- [ ] Live check after the next Agent Web restart (owner), with a fixture Workflow, never the
+  weekly report: Capabilities → the fixture → **Revise in chat**, ask for a small change, check
+  the card says "Revision of … 1.0.0 → 1.0.1" with the right changes, press Install, check both
+  versions are listed.
