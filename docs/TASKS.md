@@ -2713,3 +2713,9 @@ s-k-20261011T102952` (not published).
 - [ ] Live test with the owner's real cards and mail (owner; steps in HANDOFF.md). Not done by the
   agent: no real card, mail, gateway or Telegram was used.
 - [ ] Later: a Contacts page in Agent Web; accepting a proposal with a button.
+
+- [x] A Skill install card names a switched-off Skill of the same name (2026-10-20, Claude Code;
+  owner: "按照你建議的做吧"). `draft_cards.switched_off_twins` adds one line pointing to Capabilities;
+  the Install button stays. Commit d380d277, tests `tests/test_draft_card_switched_off_twin.py`.
+  Full suites at 056f53bb: project `.venv` 3306 passed, 7 skipped; CI-like venv 3283 passed, 30 skipped.
+
