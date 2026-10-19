@@ -445,3 +445,25 @@ def test_harvest_is_read_only_and_the_writes_are_low_risk() -> None:
     for spec in WRITE_SPECS:
         assert spec.side_effect == "write" and spec.policy.risk == "low"
         assert spec.policy.policy_refs == ("personal-contacts-policy",)
+
+
+def test_harvest_follows_a_six_month_scope(tmp_path: Path) -> None:
+    """The scope is whatever Settings says (the owner allows 6 months): a
+    message 100 days old is read, one 200 days old is not."""
+    mail = FakeMail(
+        [
+            _message(
+                "r1", "a@example.com", BODY.format(name="近期", title="經理", ext="1"), days_ago=100
+            ),
+            _message(
+                "r2", "b@example.com", BODY.format(name="太舊", title="經理", ext="2"), days_ago=200
+            ),
+        ]
+    )
+    model = SignatureModel()
+    bridge = _bridge(tmp_path, mail=mail, scope=MailScope(max_days=180), model=model)
+    harvested = _run(bridge, "harvest-signatures", {"domain": "example.com", "days": 365})
+    assert harvested.status == "succeeded", harvested.failure
+    assert [item["name"] for item in harvested.data["candidates"]] == ["近期"]
+    assert mail.opened == ["r1"]
+    assert all(NOW - since <= timedelta(days=180, minutes=1) for _, since in mail.listed)
