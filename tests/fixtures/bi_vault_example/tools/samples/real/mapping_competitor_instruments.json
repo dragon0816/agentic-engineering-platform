@@ -1,0 +1,10 @@
+{
+  "explode": [{"column": "代表廠", "into": "name"}],
+  "columns": {"儀器類別": "product_lines"},
+  "derive": {
+    "technologies": {"from": ["應用場景", "儀器類別"], "all": true, "map": {"WiFi ?7|Wi-Fi ?7": "WiFi-7", "mmWave|毫米波|FR2": "5G-NR-FR2"}}
+  },
+  "compose": {"body": "{儀器類別}:{應用場景}\n對應產品:{對應產品}\n備註:{__note}"},
+  "exclude_names": ["Rohde & Schwarz"],
+  "defaults": {"confidence": "assumed"}
+}

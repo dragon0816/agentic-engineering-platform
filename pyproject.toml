@@ -73,6 +73,10 @@ extend-exclude = [
     "packages/*/*/vendor",
     "benchmarks/*/runs",
     "src/capabilities/ncc_plan/rules.py",
+    # The owner's BI example tools, kept verbatim as reference fixtures (2026-10-19).
+    "tests/fixtures/bi_vault_example",
+    # The owner's untracked working folder.
+    "files",
 ]
 
 [tool.ruff.lint]
@@ -90,6 +94,8 @@ python_version = "3.11"
 strict = true
 files = ["src", "tests"]
 plugins = ["pydantic.mypy"]
+# The owner's BI example tools are verbatim reference fixtures, not our code.
+exclude = ["tests/fixtures/bi_vault_example/"]
 
 # lxml ships no stubs; it is reached only through the typed office libraries.
 [[tool.mypy.overrides]]

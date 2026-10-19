@@ -1,0 +1,9 @@
+{
+  "skip_rows": [{"column": "認證類別", "contains": ["PTP"]}],
+  "explode": [{"column": "代表機構", "into": "name", "strip_after": " — "}],
+  "derive": {
+    "technologies": {"from": ["驗證內容", "認證類別"], "all": true, "map": {"WiFi ?7|Wi-Fi ?7": "WiFi-7"}}
+  },
+  "compose": {"body": "認證類別:{認證類別}\n驗證內容:{驗證內容}\n對應產品:{對應產品}\n備註:{__note}"},
+  "defaults": {"role": "cert-lab", "node": "X-Certification-Lab", "confidence": "assumed"}
+}

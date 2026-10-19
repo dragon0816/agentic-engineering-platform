@@ -2609,3 +2609,13 @@ s-k-20261011T102952` (not published).
   https, fingerprint unchanged on 8775/8776, Member Portal page loads, `POST
   /v1/member/logins/revoke` without a session answers 401 (404 before), Agent Web
   `/api/platform` answered with 18 catalog entries.
+
+## BI vault example committed as test data (2026-10-19)
+
+- [x] Commit the owner's BI example as a test fixture (2026-10-19, Claude Code; owner:
+  "files/BI_Vault_Example 可以commit 進repo當測試資料"). Snapshot in
+  `tests/fixtures/bi_vault_example/` (103 cards, templates, Dashboard, tools, samples; `SOURCE.md`
+  records provenance and trust). Not copied: third-party `.obsidian/plugins/`, personal editor
+  state, `__pycache__`. Secret scan clean. Ruff and mypy exclude the verbatim tools; ruff also
+  excludes the untracked `files/` working folder.
+

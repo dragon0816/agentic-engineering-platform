@@ -1,0 +1,11 @@
+{
+  "skip_rows": [{"column": "項目", "contains": ["應用", "NB／PC ODM", "台灣系統廠", "被動元件"]}],
+  "explode": [{"column": "代表廠商", "into": "name"}],
+  "derive": {
+    "role": {"from": ["項目"], "map": {"封測": "osat", "代理": "distributor", "模組": "module", "SoC|晶片": "chipset", "FEM|RF|晶振": "component"}},
+    "node": {"from": ["項目"], "map": {"SoC|晶片": "L1-Chipset", "FEM|RF 前端": "L2-RF-FEM-Module"}}
+  },
+  "compose": {"body": "【{層級}】{項目}\n備註:{__note}"},
+  "exclude_names": ["啟碁", "亞旭", "正文"],
+  "defaults": {"confidence": "assumed"}
+}

@@ -1,0 +1,18 @@
+{
+  "skip_rows": [{"column": "供應鏈層級", "contains": ["OTA測試", "PCB", "多層板", "銅箔", "電源", "PoE", "散熱", "機構", "電感", "電容", "石英"]}],
+  "explode": [
+    {"column": "全球代表廠", "into": "name", "set": {"__origin": "全球"}},
+    {"column": "台系代表廠", "into": "name", "set": {"__origin": "台灣"}}
+  ],
+  "derive": {
+    "role": {"from": ["供應鏈層級"], "map": {"SoC|Baseband|Modem|Ethernet": "chipset", "RF|濾波|天線|光": "component"}},
+    "node": {"from": ["供應鏈層級"], "map": {"SoC|Baseband|Modem|Ethernet": "L1-Chipset", "RF PA|濾波|RF Switch": "L2-RF-FEM-Module", "天線": "L2-Antenna-Module"}},
+    "technologies": {"from": ["供應鏈層級", "料件/技術", "說明", "對應產品"], "all": true,
+      "map": {"WiFi ?7|Wi-Fi ?7": "WiFi-7", "mmWave|毫米波|FR2|相控陣列": "5G-NR-FR2", "LEO|衛星": "NTN-Satellite"}}
+  },
+  "compose": {
+    "body": "【{供應鏈層級}】{料件/技術}\n說明:{說明}\n對應產品:{對應產品}\n備註:{__note}\n來源地區:{__origin}"
+  },
+  "exclude_names": ["啟碁", "台揚", "Keysight", "Rohde & Schwarz", "Anritsu", "EMC-ESD", "LitePoint", "Teradyne", "倚強科技"],
+  "defaults": {"confidence": "assumed"}
+}

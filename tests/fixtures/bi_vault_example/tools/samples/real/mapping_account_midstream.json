@@ -1,0 +1,12 @@
+{
+  "columns": {"公司": "name", "代號": "ticker"},
+  "text_replace": [{"column": "主要上游依賴", "into": "key_suppliers", "pairs": [
+    ["FPGA\\(Xilinx/Intel\\)", "AMD、Intel"],
+    ["RF元件\\(Qorvo/MACOM\\)", "Qorvo、MACOM"],
+    ["NXP/FPGA", "NXP"],
+    ["Broadcom/MaxLinear\\(DOCSIS SoC\\)", "Broadcom、MaxLinear"],
+    ["Qualcomm/Broadcom\\(WiFi SoC\\)", "Qualcomm、Broadcom"]
+  ]}],
+  "compose": {"body": "Small Cell:{Small Cell}\nCPE:{CPE}\nWiFi AP:{WiFi AP}\n主要下游市場:{主要下游市場}\n主要上游依賴(原文):{主要上游依賴}"},
+  "defaults": {"confidence": "assumed"}
+}
