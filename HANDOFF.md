@@ -1,6 +1,6 @@
 # Handoff
 
-Updated: 2026-10-19 (Asia/Taipei), by Claude Code (Knowledge Strategy v1.3 — BI Schema v1 from bi_schema.py, awaiting owner review; earlier the same day: Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-19 (Asia/Taipei), by Claude Code (owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
 
 **Redeploy on 141 (2026-10-19, Claude Code):** the Shared Platform on 172.25.228.141 now runs
@@ -10,7 +10,47 @@ health ok, certificate fingerprint unchanged, Member Portal loads, `logins/revok
 session answers 401, Agent Web `/api/platform` answered (18 catalog entries). The "not
 redeployed" line below is superseded.
 
-## Knowledge Strategy v1.3 (2026-10-19, Claude Code) — awaiting owner review
+## Owner decisions on Knowledge Strategy v1.3 (2026-10-19, Claude Code) — latest
+
+**Goal / scope:** apply the owner's answers to v1.3 section 8.2. v1.3 updated in place (no v1.4): closing
+section "Owner 決定（2026-10-19）：對 §8.2 的回答", DIFF section 7. Only `src/` change: speaker notes in
+`src/knowledge/office.py`. No AEP-K02 work, no live install / 141 / OneDrive vault / fixture / `files/`
+touched, not pushed.
+
+**Done (committed on main, see `git log`):**
+- `competing_vendors` official (TestSolution → Competitor); new origin `owner-decision-2026-10-19`
+  for things the owner made official that `bi_schema.py` lacks. Opportunity official (`name`,
+  `account`, `customer_product`, `test_solutions`, `opportunity_stage` replacing
+  `hypothesis_status`, `confidence`, `updated`). Suggested patch for the owner's `bi_schema.py`:
+  `docs/proposals/bi_schema_v1/README.md` section 8 (test checks it equals the JSON's
+  `suggested_code` lines).
+- Priority scoped: Application `priorities` (market × quarter); market = `TargetMarket` +
+  `unspecified`; JSON `priority_entry`, `priority_scoping`; mock, `entity_history.json` (`scope`),
+  API `FieldChange.scope`, `Relationship.origin`, SUP-01 updated; strategy digest re-pinned.
+- `PptxExtractor` → `pptx.v2`: per-slide `Speaker notes:` text section; old Raw not rewritten.
+  `docs/CONTRACTS.md` updated. Tests in `tests/test_office.py`.
+- ADR-K9 decided: `docs/DECISIONS.md` "Verified work is committed directly to main"; one line in
+  `AGENTS.md`.
+
+**Verification (2026-10-19):** `ruff check .` passed; `ruff format --check .` 893 files formatted; `mypy` no issues in 643
+files. Full pytest, project `.venv`: 3256 passed, 7 skipped, 4 failed; `C:epci-wkenv` (`.[dev,office]`,
+`--basetemp=C:/aepci-wk/bt`): 3233 passed, 30 skipped, 4 failed. The two suites ran at the same time; all
+8 failures were browser / timing tests (`test_web_capabilities`, `test_web_script`, `test_workflow_preview`,
+`test_schedule_web`, `test_telegram_turn_progress`) and passed when rerun alone in each venv (15 and 19
+passed). `tests/test_knowledge_strategy_docs.py` 37 passed, `tests/test_office.py` 11 passed. Changed JSON
+parses; `openapi.yaml` parses (15 paths).
+
+**Open / to confirm with the owner:**
+- Item 6 ("好" to "revise v0.1 in place or bump to 0.2") is ambiguous; read as keeping v0.1.
+- Market definition: TargetMarket segments vs sales region / customer group.
+- When the owner applies the section 8 patch to `bi_schema.py`: regenerate line refs, update
+  `source.primary_sha256` and the pins, switch those origins back to `source-bi-schema-py`.
+- Still pending: N2 reviewers, ADR-K8, link ranges, priority rubric (BD), v1.3 approval.
+
+**Next:** owner confirms item 6 and the market definition; nothing in AEP-K02+ starts before v1.3
+approval.
+
+## Knowledge Strategy v1.3 (2026-10-19, Claude Code) — awaiting owner review (superseded in part by the section above)
 
 **Goal / scope:** reconcile the Knowledge Strategy proposal's provisional BI Schema v0 with the real
 BI tooling the owner supplied (now the test fixture `tests/fixtures/bi_vault_example/`, e30cd8bf);

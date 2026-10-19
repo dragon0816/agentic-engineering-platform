@@ -2468,6 +2468,27 @@ s-k-20261011T102952` (not published).
   8-question `vault_example_questions.json`. Test extended (36 tests). No `src/`, DECISIONS or
   ARCHITECTURE change; no issue, PR or push. **v1.3 awaits owner review; AEP-K02 and later stay
   blocked.** Verification: see HANDOFF.md.
+- [x] Apply the owner's 2026-10-19 decisions on Knowledge Strategy v1.3 (2026-10-19, Claude Code;
+  owner answers to v1.3 section 8.2). v1.3 updated in place (no v1.4) with a closing "Owner 決定
+  （2026-10-19）" section and DIFF section 7. (1) `competing_vendors` "要加": official TestSolution →
+  Competitor linklist, new origin `owner-decision-2026-10-19`; `competing_solutions` values naming a
+  Competitor still migrate to `competing_vendors` candidates with a warning. (2) priority "分 market，
+  分期間": Application `priorities` (one entry per market and quarter, per-entry provenance); market
+  = `src/knowledge/market_matrix.py` TargetMarket + `unspecified` (sub-question for the owner:
+  segment or sales region); period `YYYY-Qn`; single priority upcasts to unspecified + its date's
+  quarter; Dashboard sort and rubric defined; Trend not scoped. (3) judgement-field list and Node
+  extensions accepted. (4) Opportunity "要": official type (`name`, `account`, `customer_product`,
+  `test_solutions`, `opportunity_stage` replacing `hypothesis_status`, `confidence`, `updated`).
+  Suggested `bi_schema.py` patch in `docs/proposals/bi_schema_v1/README.md` section 8 (owner's
+  file and the fixture untouched). Mock, `entity_history.json` (`scope`), API schemas
+  (`Relationship.origin`, `FieldChange.scope`), contract README, SUP-01 updated; strategy digest
+  re-pinned. (5) Speaker notes "我覺得可以": `PptxExtractor` is now `pptx.v2` and adds each slide's
+  notes as a last text section on that slide starting `Speaker notes:`; existing Raw is not
+  rewritten (identical originals stay `duplicate`; only new or changed originals get notes).
+  (6) API version "好": read as keeping the in-place v0.1 revision; to be confirmed with the owner.
+  (7) ADR-K9 "如果寫好了，可以進main": decided, DECISIONS entry, one line in `AGENTS.md`. Still
+  pending: N2 reviewers, ADR-K8, link ranges, priority rubric, market definition, v1.3 approval
+  (AEP-K02 and later stay blocked). Verification: see HANDOFF.md.
 
 ## n8n integration removed (2026-10-17)
 
