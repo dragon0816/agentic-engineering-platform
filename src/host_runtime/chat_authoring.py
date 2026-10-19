@@ -59,6 +59,7 @@ from host_runtime.skill_authoring import (
     installed_skills,
     skill_digest,
 )
+from host_runtime.team_membership import TeamMembership, membership_note
 from host_runtime.workflow_revision import (
     capability_source,
     may_revise_in_place,
@@ -109,6 +110,11 @@ class ChatCandidate(Contract):
     # `source: revision:<namespace/name@version>` and the digest of that
     # installed manifest when the revision was made.
     base_digest: Text | None = None
+    # A revision kept under a team-owned Workflow's name because the person
+    # belongs to that team (owner 2026-10-19): the team, and where the
+    # membership came from (`platform`, `platform_cache` or `declared`).
+    member_team: Symbol | None = None
+    membership_source: Text | None = None
 
 
 REVISION_PREFIX = "revision:"
@@ -248,8 +254,13 @@ class ChatAuthoring:
         skills_dir: Path | None = None,
         coding_workspace_roots: tuple[str, ...] = (),
         on_installed: Callable[[WorkflowManifest, tuple[CapabilityGrant, ...]], None] | None = None,
+        teams: Callable[[str], TeamMembership] | None = None,
     ) -> None:
         self.root = root
+        # actor -> the teams they belong to (platform, its cache, or the PC's
+        # declaration); decides only whether a revision of a team-owned
+        # Workflow keeps its name. None: nobody is a team member here.
+        self.teams = teams
         # Makes an installed Workflow usable at once, without a restart
         # (owner 2026-10-08: a Workflow installed from the draft list said
         # workflow_not_installed when run from the Capabilities page).
@@ -354,7 +365,11 @@ class ChatAuthoring:
         the candidate, or None with the problems the model must fix."""
         previous = self.candidate(candidate_id, actor) if candidate_id else None
         manifest, problems = self.check(
-            actor, raw, previous, base=previous.draft if previous is not None else None
+            actor,
+            raw,
+            previous,
+            base=previous.draft if previous is not None else None,
+            member_team=previous.member_team if previous is not None else None,
         )
         if manifest is None:
             return None, problems
@@ -378,6 +393,8 @@ class ChatAuthoring:
             installed_as=previous.installed_as if previous is not None else None,
             installed_digest=previous.installed_digest if previous is not None else None,
             base_digest=previous.base_digest if previous is not None else None,
+            member_team=previous.member_team if previous is not None else None,
+            membership_source=previous.membership_source if previous is not None else None,
             status="installed"
             if previous is not None and previous.installed_digest == digest(manifest)
             else "draft",
@@ -391,14 +408,16 @@ class ChatAuthoring:
         previous: ChatCandidate | None = None,
         *,
         base: WorkflowManifest | None = None,
+        member_team: str | None = None,
     ) -> tuple[WorkflowManifest | None, list[str]]:
         """The Workflow the host would keep, or the problems to fix; saves
         nothing. `base` is the Workflow this one continues (the previous
         draft, or the installed Workflow a revision copies): what the draft
-        format has no field for is carried over from it."""
+        format has no field for is carried over from it. `member_team` is the
+        team a revision is made as a member of: its name stays usable."""
         assembled = assemble(raw, namespace=self.namespace, owner=actor, installed=self.installed)
         if base is not None:
-            _carry_over(assembled, base, actor)
+            _carry_over(assembled, base, actor, member_team)
         identity = assembled["metadata"]["identity"]
         # A name belongs to whoever installed it first; its versions only go up,
         # so a new draft of an existing name never reuses an installed version
@@ -411,6 +430,8 @@ class ChatAuthoring:
                 if (m.metadata.owner.type, m.metadata.owner.id) != ("user", actor)
                 # A co-editor (recorded contributor) publishes the next version.
                 and actor not in m.metadata.contributors
+                # So does a member of the owning team, revising (owner 2026-10-19).
+                and (m.metadata.owner.type, m.metadata.owner.id) != ("team", member_team)
             }
         )
         if others:
@@ -952,9 +973,10 @@ class ChatAuthoring:
         self, actor: str, session_id: str | None, reference: str, title: str = ""
     ) -> tuple[ChatCandidate | None, list[str], dict[str, JsonValue]]:
         """Copy an installed Workflow into a draft one version up (owner
-        2026-10-19). Its owner or a co-editor keeps the name; anyone else gets
-        a fork under a name of their own. The draft is the actor's, private
-        and unpublished; installing it is the person's press, as for any draft.
+        2026-10-19). Its owner, a co-editor or a member of the owning team keeps
+        the name; anyone else gets a fork under a name of their own. The draft
+        is the actor's, private and unpublished; installing it is the person's
+        press, as for any draft.
         Returns the candidate, or None with the problems; and notes."""
         base = self.installed_workflow(reference, actor)
         base_key = _key(base.metadata.identity)
@@ -967,6 +989,9 @@ class ChatAuthoring:
                 in_place = open_item.draft.metadata.identity.name == base.metadata.identity.name
                 return open_item, [], {"continued": True, "forked": not in_place}
         in_place = may_revise_in_place(base.metadata, actor, self.namespace)
+        member = None if in_place else self._team_member(base, actor)
+        in_place = in_place or member is not None
+        member_team = base.metadata.owner.id if member is not None else None
         name = (
             base.metadata.identity.name
             if in_place
@@ -979,7 +1004,7 @@ class ChatAuthoring:
             "steps": [step.model_dump(mode="json") for step in base.steps],
             "checks": [c.model_dump(mode="json") for c in base.checks],
         }
-        manifest, problems = self.check(actor, raw, base=base)
+        manifest, problems = self.check(actor, raw, base=base, member_team=member_team)
         if manifest is None:
             return None, problems, {}
         self.prepare_workspaces(manifest)
@@ -995,8 +1020,27 @@ class ChatAuthoring:
             updated_at=now,
             draft=manifest,
             base_digest=digest(base),
+            member_team=member_team,
+            membership_source=member.source if member is not None else None,
         )
         return self._save_candidate(item), [], {"continued": False, "forked": not in_place}
+
+    def _team_member(self, base: WorkflowManifest, actor: str) -> TeamMembership | None:
+        """The membership that lets `actor` revise a team-owned Workflow in
+        place (owner 2026-10-19), or None. Only the Workflow's own namespace
+        can be drafted here; a lookup that fails counts as not a member."""
+        owner = base.metadata.owner
+        if (
+            self.teams is None
+            or owner.type != "team"
+            or base.metadata.identity.namespace != self.namespace
+        ):
+            return None
+        try:
+            membership = self.teams(actor)
+        except Exception:  # noqa: BLE001 - unknown membership forks, never fails
+            return None
+        return membership if membership.includes(owner.id) else None
 
     def capability_source(
         self, reference: str, file: str | None, offset: int = 0
@@ -1474,6 +1518,15 @@ class ChatAuthoring:
                     "this candidate_id and the whole Workflow. The person installs it with the "
                     "card's Install button; never say it is installed before that.",
                 }
+                if item.member_team:
+                    data["member_of_team"] = item.member_team
+                    data["membership_source"] = item.membership_source
+                    data["note_membership"] = membership_note(
+                        item.member_team, item.membership_source
+                    ) + (
+                        "; tell the person, and that publishing it to the shared platform "
+                        "is still checked there."
+                    )
                 if forked:
                     data["note"] = (
                         f"{base} is not this person's to revise, so this is a fork under the "
@@ -1643,8 +1696,9 @@ class ChatAuthoring:
                         "Change an installed Workflow by building on its real steps instead of "
                         "rewriting it: copies it into a draft one version up (1.0.0 -> 1.0.1, "
                         "same name) that you then edit with authoring__draft_workflow and its "
-                        "candidate_id. When the Workflow is not the person's, the draft is a "
-                        "fork under a new name of theirs. Nothing is installed: the person "
+                        "candidate_id. When the Workflow is neither the person's nor their "
+                        "team's, the draft is a fork under a new name of theirs. Nothing is "
+                        "installed: the person "
                         "presses Install on the card."
                     ),
                     input_contract="host.authoring.revise.v1",
@@ -1704,7 +1758,9 @@ _SLUG_SPLIT = re.compile(r"[^a-z0-9]+")
 _CARRIED = ("progress_steps", "occupies_machine", "secrets")
 
 
-def _carry_over(assembled: dict[str, Any], base: WorkflowManifest, actor: str) -> None:
+def _carry_over(
+    assembled: dict[str, Any], base: WorkflowManifest, actor: str, member_team: str | None = None
+) -> None:
     """Keep what `assemble` cannot express from the Workflow a draft continues:
     progress stages, the machine flag, secret names, central execution and
     discovery categories. A co-editor's next version keeps the name's owner."""
@@ -1726,7 +1782,9 @@ def _carry_over(assembled: dict[str, Any], base: WorkflowManifest, actor: str) -
     )
     owner = base.metadata.owner
     co_editor = actor in base.metadata.contributors and (owner.type, owner.id) != ("user", actor)
-    if same_name and co_editor:
+    # A team member's revision keeps the team as owner (owner 2026-10-19).
+    team_member = member_team is not None and (owner.type, owner.id) == ("team", member_team)
+    if same_name and (co_editor or team_member):
         metadata["owner"] = owner.model_dump(mode="json")
         metadata["contributors"] = list(base.metadata.contributors)
 

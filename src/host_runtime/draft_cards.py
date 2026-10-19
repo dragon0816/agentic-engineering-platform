@@ -42,6 +42,7 @@ from host_runtime.chat_authoring import (
     run_codes,
 )
 from host_runtime.skill_authoring import SkillCandidate, skill_digest
+from host_runtime.team_membership import membership_note
 
 CARDS_FILE = Path("authoring") / "draft-cards.json"
 PREFIX = "dr"
@@ -310,6 +311,10 @@ class DraftCards:
         identity = item.draft.metadata.identity
         if base_name == f"{identity.namespace}/{identity.name}":
             lines = [f"Revision of {base_name} {base_version} → {identity.version}"]
+            if item.member_team:
+                # Kept under the team's name as its member (owner 2026-10-19);
+                # says where the membership came from, e.g. declared on this PC.
+                lines.append(membership_note(item.member_team, item.membership_source))
         else:
             lines = [f"Fork of {base_key} as {_key(identity)} (a new name of yours)"]
         changes = chat.revision_changes(item)

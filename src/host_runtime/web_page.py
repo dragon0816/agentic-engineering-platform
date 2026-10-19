@@ -1073,6 +1073,18 @@ tr:last-child td { border-bottom: none; }
         <p id="shared-status" class="note" role="status" aria-live="polite"></p>
       </form>
     </div>
+    <div class="card settings" id="team-card">
+      <form id="team-settings" autocomplete="off">
+        <label for="team-declared">Teams I belong to on this PC</label>
+        <input id="team-declared" placeholder="engineering, qa">
+        <p class="note">Lets you revise a Workflow your team owns under its own name
+          (1.0.0 → 1.0.1) instead of a copy named after you. When this PC is connected to
+          the shared platform, the teams come from the platform and this list is not used.
+          It only affects drafts on this PC: publishing is still checked by the platform.</p>
+        <p><button class="go" id="team-save" type="submit">Save teams</button></p>
+        <p id="team-status" class="note" role="status" aria-live="polite"></p>
+      </form>
+    </div>
     <h2>Laya decision acceleration</h2>
     <p class="note">Laya answers small routing decisions fast. The Agent reaches it only
       through an SSH tunnel to a port on this computer, so nothing travels unencrypted to
@@ -4082,6 +4094,7 @@ async function loadSettings() {
   el("persona-soul").value = persona.soul;
   showTelegram(settings.telegram);
   loadSharedPlatform().catch(() => {});
+  loadTeams().catch(() => {});
   loadLaya().catch(() => {});
   loadCodingAgents().catch(() => {});
   loadAgentModeSettings().catch(() => {});
@@ -4335,6 +4348,45 @@ function showSharedPlatform(info, saved) {
   }
   el("shared-status").textContent = parts.join(" · ");
 }
+
+// "Teams I belong to on this PC" (owner 2026-10-19).
+const TEAM_SOURCES = {
+  platform: "from the shared platform",
+  platform_cache: "from the shared platform's last answer (offline)",
+  declared: "declared on this PC",
+};
+
+function showTeams(info) {
+  const field = el("team-declared");
+  if (document.activeElement !== field) field.value = (info.declared_teams || []).join(", ");
+  const teams = (info.teams || []).join(", ") || "none";
+  el("team-status").textContent = "Teams used for revisions: " + teams
+    + (TEAM_SOURCES[info.source] ? " (" + TEAM_SOURCES[info.source] + ")" : "")
+    + (info.checked_at ? " · checked " + new Date(info.checked_at).toLocaleString() : "");
+}
+
+async function loadTeams() {
+  const info = await call("/api/settings/teams");
+  if (info.ok !== false) showTeams(info);
+}
+
+el("team-settings").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const status = el("team-status"), save = el("team-save");
+  save.disabled = true; status.classList.remove("bad");
+  try {
+    const reply = await call("/api/settings/teams",
+      {declared_teams: el("team-declared").value});
+    if (reply.ok === false) {
+      status.classList.add("bad");
+      status.textContent = "Not saved: " + (reply.message || reply.code);
+    } else {
+      showTeams(reply); status.textContent = "Saved. " + status.textContent;
+    }
+  } catch (failure) {
+    status.classList.add("bad"); status.textContent = "Not saved: " + failure.message;
+  } finally { save.disabled = false; }
+});
 
 async function loadSharedPlatform() {
   const info = await call("/api/settings/shared-platform");

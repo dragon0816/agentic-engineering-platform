@@ -3494,3 +3494,32 @@ Rejected: a new message per change (floods the chat; the owner has never wanted 
 the 5 s timer (the owner wants changes shown as they happen); editing on every event without a
 window (Telegram rate-limits about one edit a second per chat and would answer 429s); dropping
 changes inside the window instead of deferring them (the last state of a burst could be lost).
+
+## 2026-10-19 — A member of the owning team revises a team-owned Workflow in place
+
+Owner approved 2026-10-19. Amends 2026-10-19 "The Agent revises an installed Workflow by building
+on its real code", where a team-owned shipped Workflow always forked to `<name>-<actor>` because
+the Host had no record of team membership.
+
+- A Workflow owned by `team:<id>` (in the Host's authoring namespace) is revised in place
+  (1.0.0 → 1.0.1, same name, owner stays the team) by a member of `<id>`. Non-members still fork.
+- Membership source, in order: (1) the Shared Platform, when host.json `publishing` is set:
+  the existing `POST /v1/member/me` returns the signed-in member's own groups, through the
+  existing `MemberPortalPublisher` and its certificate pinning; only this PC's account gets
+  them; reused for 5 minutes and cached in the workspace with `checked_at`, the cache answering
+  while the platform cannot be reached; a platform refusal means no teams. (2) Otherwise "Teams
+  I belong to on this PC" in Agent Web Settings, kept in the workspace (`team-membership.json`),
+  never in host.json.
+- The rule only names the local draft. Installing still needs the person's Install; publishing
+  back to the platform is checked by the platform against its own records, so a team claimed on
+  a PC grants nothing there. The install card says where membership came from, e.g. "Revision as
+  a member of team engineering (declared on this PC)".
+- No new platform endpoint: `me` already exposes only the caller's own groups (tested), so the
+  Shared Platform on 141 needs no redeploy for this change.
+
+Rejected: adding a separate `GET` teams endpoint (`me` already answers it with the same auth);
+trusting the declaration when the platform is reachable (the platform's record is the source of
+truth); using a stale cache after the platform refused the login (a revoked member would keep a
+team); adding the member to `contributors` on revision (membership, not a recorded co-editor, is
+the basis, and it would outlive leaving the team); keeping the declaration in host.json (it is a
+preference, not configuration, and host.json holds credential references).

@@ -206,6 +206,16 @@ class MemberPortalPublisher:
             raise PublishError("bad_reply")
         return actor
 
+    def membership(self) -> tuple[str, tuple[str, ...]]:
+        """This member's account and the platform groups (teams) recorded for
+        it (`me`, owner 2026-10-19). The platform answers only for the
+        signed-in member; used to decide where a local revision is named."""
+        reply = self._call("me", {})
+        actor, groups = reply.get("actor"), reply.get("groups", [])
+        if not isinstance(actor, str) or not actor or not isinstance(groups, list):
+            raise PublishError("bad_reply")
+        return actor, tuple(str(group) for group in groups if isinstance(group, str))
+
     def select(self, bridge_id: str, asset: dict[str, str]) -> dict[str, Any]:
         """Choose one exact version for this computer's Bridge as the member
         (Agent Web "+ Add to this Agent", owner 2026-10-15). Another version

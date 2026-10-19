@@ -2282,14 +2282,27 @@ drafts a Workflow or Skill shows its install card"):
     `workflow_reference_invalid`, `workflow_missing`, `candidate_unknown`.
   - `authoring__revise_workflow` (`host.authoring.revise.v1`): `workflow`, optional `title`.
     Data `candidate_id`, `workflow`, `revision_of`, `base_digest`, `forked`, `continued`, `next`,
-    `note` when forked. Failure `workflow_invalid` with `problems`.
+    `note` when forked; `member_of_team`, `membership_source` (`platform`, `platform_cache`,
+    `declared`) and `note_membership` when kept in place as a team member (2026-10-19).
+    Failure `workflow_invalid` with `problems`.
   - `authoring__show_capability_source` (`host.authoring.capability_source.v1`): `capability`,
     optional `file`, `offset`. Data `ok`, `package`, `read_only: true`, `how_to_change`, and
     `files` [{`file`, `chars`}] or `file`, `source`, `total_chars`, `offset`, `next_offset`,
     `truncated`, `notice`. Codes `capability_package_unknown`, `capability_file_refused`.
 - `ChatCandidate.base_digest` (optional); a revision's `source` is
-  `revision:<namespace/name@version>` and stays so through later edits.
-- Draft card preview: "Revision of <ns/name> <a> → <b>" or "Fork of <identity> as <identity>",
+  `revision:<namespace/name@version>` and stays so through later edits. `member_team` and
+  `membership_source` (optional, 2026-10-19) record a team member's in-place revision.
+- Team membership (2026-10-19, `host_runtime.team_membership`): `TeamMembership` {`teams`,
+  `source` (`platform` | `platform_cache` | `declared` | `none`), `account`, `checked_at`};
+  workspace files `team-membership.json` {`declared_teams`: up to 20 `Symbol`s} and
+  `team-membership-cache.json` (a `TeamMembership`). Source: the existing Member Portal
+  `POST /v1/member/me` (`MemberIdentityReply.groups`, only the signed-in member's own) via
+  `MemberPortalPublisher.membership()`. Agent Web `GET /api/settings/teams` and
+  `POST /api/settings/teams` {`declared_teams`: list or comma-separated text} answer
+  {`ok`, `declared_teams`, `teams`, `source`, `account`, `checked_at`} or {`ok: false`, `code`
+  (`teams_invalid`, `teams_unavailable`), `message`}; page token required, never a credential.
+- Draft card preview: "Revision of <ns/name> <a> → <b>" (then "Revision as a member of team
+  <id> (<where>)" for a team member) or "Fork of <identity> as <identity>",
   "Changes:" lines, "Installing it keeps <identity> installed and its run history."
 - External (`host_runtime.mcp_server`, `aep-host assets`): `aep_show_installed_workflow`
   {`workflow`, `offset`} / `show-installed-workflow --workflow [--offset]`;

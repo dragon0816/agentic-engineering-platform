@@ -294,6 +294,7 @@ from host_runtime.runtime import inspect_host
 from host_runtime.state import SqliteLocalState
 from host_runtime.sync import PlatformClient
 from host_runtime.task_artifacts import LocalTaskArtifacts
+from host_runtime.team_membership import TeamMembershipStore
 from host_runtime.telegram_settings import windows_user_environment
 from host_runtime.workflow_form_tool import workflow_form_tools
 from host_runtime.workflow_settings import SETTINGS_FILE, WorkflowSettingsStore, settings_key
@@ -471,6 +472,9 @@ class HostRuntime:
         # MCP servers the owner added in Agent Web (owner 2026-10-08); they
         # connect when a long-running command starts them.
         self.mcp: McpHub | None = None
+        # Which teams this PC's person belongs to (owner 2026-10-19); set by
+        # `build_runtime`. Decides only where a local revision is named.
+        self.team_membership: TeamMembershipStore | None = None
 
     @property
     def actor(self) -> str:
@@ -2068,7 +2072,29 @@ def build_runtime(
     from host_runtime.conversation_context import ConversationContextStore
 
     gateway.conversation_limits = ConversationContextStore(place.workspace_root).limits
+    # Team membership for revising a team-owned Workflow in place (owner
+    # 2026-10-19): the Shared Platform's answer for this PC's member (cached
+    # for offline use), else the teams declared in Agent Web Settings.
+    runtime.team_membership = TeamMembershipStore(
+        place.workspace_root,
+        client=lambda: _membership_client(runtime),
+        account=lambda: runtime.actor,
+    )
+    chat_authoring.teams = runtime.team_membership.membership
     return runtime
+
+
+def _membership_client(runtime: HostRuntime) -> Any:
+    """The Member Portal client for the current `publishing` binding, kept
+    while the binding is the same object (Settings replaces it on save)."""
+    from host_runtime.platform_publish import publisher_for
+
+    binding = runtime.config.publishing
+    held = getattr(runtime, "_membership_publisher", None)
+    if held is None or held[0] is not binding:
+        held = (binding, publisher_for(binding, runtime.config.credential_environment()))
+        runtime._membership_publisher = held  # type: ignore[attr-defined]
+    return held[1]
 
 
 def _register_knowledge_pipeline(

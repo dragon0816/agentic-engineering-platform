@@ -464,6 +464,10 @@ Agent **不會自己**安裝、核准或發布任何東西。需要你決定時�
   1.0.1」並列出改了哪些步驟、參數和腳本行數。按 **Install** 才會安裝；舊版本保留、
   執行紀錄不變。不是你自己的 Workflow（例如跟 AEP 一起出貨的）會改成你自己名下的新名稱
   （fork），卡片會寫明。
+- 團隊擁有的 Workflow（例如 `team:engineering`）：如果你是該團隊成員，會在原名稱下改成
+  1.0.1，不會 fork。成員資格先問共享平台（離線時用上次的結果）；沒有連平台時，用 Settings →
+  Shared platform 的 **Teams I belong to on this PC**，這時卡片會寫「(declared on this PC)」。
+  這只影響這台電腦上的草稿名稱；發布回平台時，平台仍會用它自己的紀錄檢查。
 - Knowledge 的詳細頁有 **Ask this Knowledge source**：選 **Knowledge Asking Skill**、
   輸入 **Question**，按 **Ask Knowledge**，下方列出引用來源。
 - 最下面的 **Recent runs** 列出最近的執行紀錄。

@@ -269,6 +269,7 @@ from host_runtime.slash_commands import (
     parse_slash_command,
 )
 from host_runtime.tasks import TaskLog, TaskStatus, task_list
+from host_runtime.team_membership import MAX_DECLARED_TEAMS, TeamDeclaration
 from host_runtime.telegram_loop import ResidentTelegram
 from host_runtime.telegram_settings import (
     TelegramSettingsError,
@@ -1926,6 +1927,40 @@ class AgentWeb:
         with self._one_at_a_time:
             saved = self.preferences.save(self.runtime.actor, request)
         return {"ok": True, "preferences": saved.model_dump(mode="json")}
+
+    # -- "Teams I belong to on this PC" (owner 2026-10-19) -------------------
+    # Decides only whether a revision of a team-owned Workflow keeps its name
+    # on this PC; publishing is still checked by the platform's own records.
+
+    def team_settings(self) -> dict[str, Any]:
+        store = self.runtime.team_membership
+        if store is None:
+            return {"ok": False, "code": "teams_unavailable"}
+        return store.view(self.runtime.actor)
+
+    def update_team_settings(self, body: dict[str, Any]) -> dict[str, Any]:
+        store = self.runtime.team_membership
+        if store is None:
+            return {"ok": False, "code": "teams_unavailable"}
+        raw = body.get("declared_teams", [])
+        if isinstance(raw, str):
+            raw = [part.strip() for part in raw.split(",")]
+        if not isinstance(raw, list):
+            return {"ok": False, "code": "teams_invalid", "message": "Give a list of teams."}
+        try:
+            declaration = TeamDeclaration.model_validate(
+                {"declared_teams": [str(item).strip() for item in raw if str(item).strip()]}
+            )
+        except ValueError:
+            return {
+                "ok": False,
+                "code": "teams_invalid",
+                "message": "Team names use letters, digits, . - _ only, separated by commas "
+                f"(at most {MAX_DECLARED_TEAMS}), for example engineering.",
+            }
+        with self._one_at_a_time:
+            store.save_declared(declaration)
+        return store.view(self.runtime.actor)
 
     def update_context_settings(self, request: ConversationContextSettings) -> dict[str, Any]:
         with self._one_at_a_time:
@@ -5385,6 +5420,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.laya_settings())
         elif parsed.path == "/api/settings/shared-platform":
             self._json(200, web.shared_platform_settings())
+        elif parsed.path == "/api/settings/teams":
+            self._json(200, web.team_settings())
         elif parsed.path == "/api/settings/gateway":
             self._json(200, web.gateway_settings())
         elif parsed.path == "/api/knowledge/reingest":
@@ -5481,6 +5518,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/settings/laya",
             "/api/settings/shared-platform",
             "/api/settings/shared-platform/certificate",
+            "/api/settings/teams",
             "/api/settings/gateway",
             "/api/settings/telegram",
             "/api/mcp/save",
@@ -5568,6 +5606,11 @@ class _Handler(BaseHTTPRequestHandler):
         if path == "/api/settings/shared-platform":
             self._json(
                 200, self.server.web.update_shared_platform(body if isinstance(body, dict) else {})
+            )
+            return
+        if path == "/api/settings/teams":
+            self._json(
+                200, self.server.web.update_team_settings(body if isinstance(body, dict) else {})
             )
             return
         if path == "/api/settings/shared-platform/certificate":

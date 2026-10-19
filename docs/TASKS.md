@@ -2569,3 +2569,19 @@ s-k-20261011T102952` (not published).
   turn's state changes". Verification: see HANDOFF.md.
 - [ ] Live check after the next Agent Web restart (owner): a Telegram turn that uses tools shows
   each phase and tool in the one status message within about a second, never a second message.
+
+## Team members revise a team-owned Workflow in place (2026-10-19)
+
+- [x] Team-membership rule (2026-10-19, Claude Code; owner approved 2026-10-19).
+  `host_runtime/team_membership.py` (`TeamMembershipStore`: platform `me` groups via
+  `MemberPortalPublisher.membership()`, workspace cache for offline, Agent Web declaration);
+  `ChatAuthoring.teams`, `_team_member`, `ChatCandidate.member_team` / `membership_source`;
+  the name check and `_carry_over` keep a team member's revision under the team; card line
+  "Revision as a member of team X (…)"; Agent Web Settings → Shared platform "Teams I belong to
+  on this PC" (`/api/settings/teams`). Tests `tests/test_team_membership.py`. Spec
+  `docs/phases/WORKFLOW_REVISION.md`; decision `docs/DECISIONS.md` 2026-10-19 "A member of the
+  owning team revises a team-owned Workflow in place". No platform change (141 needs no
+  redeploy). Verification: see HANDOFF.md.
+- [ ] Live check after the next Agent Web restart (owner), with a fixture team Workflow, never the
+  weekly report: Settings shows the teams and their source; Revise in chat gives "Revision of …
+  1.0.0 → 1.0.1" with the membership line, not a fork.

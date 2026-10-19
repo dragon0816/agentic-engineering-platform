@@ -36,10 +36,32 @@ get_workflow (installed) → revise_workflow → get_workflow (candidate) → dr
   or visible to the organization. Another person's `private` or `team` Workflow answers
   `workflow_unknown`, the same as a missing one. Manifests never hold credentials
   (`RegistryContract`); secrets appear by name only.
-- **Same name or fork.** The owner, or a co-editor (a name in `metadata.contributors`), keeps
-  the name and the next version; a co-editor's version keeps the original owner. Anyone else,
-  including a team-owned shipped Workflow, gets a fork `<name>-<actor>` (a numeric suffix when
-  taken) at 1.0.0, owned by them; the tool says so (`forked`, `note`).
+- **Same name or fork.** The owner, a co-editor (a name in `metadata.contributors`), or a
+  member of the owning team (below) keeps the name and the next version; a co-editor's or team
+  member's version keeps the original owner. Anyone else gets a fork `<name>-<actor>` (a numeric
+  suffix when taken) at 1.0.0, owned by them; the tool says so (`forked`, `note`).
+- **Team members** (owner 2026-10-19). A Workflow owned by `team:<id>` in the Host's authoring
+  namespace is revised in place by a member of `<id>`. Membership
+  (`host_runtime/team_membership.py`, `TeamMembershipStore`), in this order:
+  1. The Shared Platform, when host.json `publishing` is set: `POST /v1/member/me` with the
+     Personal Agent session (the existing `MemberPortalPublisher`, its certificate pinning
+     included) answers the signed-in member's own `groups`. Only this PC's account
+     (`device.registered_by`) gets them. The answer is reused for 5 minutes and cached in the
+     workspace (`team-membership-cache.json`, with `checked_at`); while the platform cannot be
+     reached (`platform_unreachable`, `certificate_untrusted`, `bad_reply`, `request_failed`)
+     the cache answers (`platform_cache`). A refusal from the platform (a revoked login, a
+     disabled account) means no teams, and the cache is not used.
+  2. Otherwise (no `publishing`, or no Personal Agent code saved): "Teams I belong to on this
+     PC" in Agent Web Settings → Shared platform (`team-membership.json` in the workspace, never
+     host.json; `GET/POST /api/settings/teams`). It applies only to the PC's own account.
+  The tool returns `member_of_team`, `membership_source` and `note_membership`; the candidate
+  keeps `member_team` and `membership_source`, and the card adds "Revision as a member of team
+  <id> (confirmed by the shared platform | from the shared platform's last answer on this PC |
+  declared on this PC)". The rule only names the local draft: installing is still the person's
+  **Install**, and publishing the revision goes through the platform's own check, where
+  membership claimed on a PC grants nothing (`publisher_not_authorized`). A failed lookup counts
+  as not a member (fork). No platform endpoint was added: `me` already answers only for the
+  signed-in member.
 - **Version.** Editing a revision keeps the one version above the highest installed one; it does
   not climb with each edit as an ordinary candidate does.
 - **What the draft format cannot express** is carried over from the Workflow a draft continues:
@@ -76,6 +98,8 @@ the person sends it.
 
 ## Tests
 
+`tests/test_team_membership.py` (team members: platform, cache, declaration, non-members, the
+platform's publish refusal and `me` auth on the in-process platform fixture),
 `tests/test_workflow_revision.py` (fakes; a fixture modelled on the weekly report) and
 `tests/test_workflow_revision_chat.py` (fake-model chat end to end, and the headless-browser
 check; screenshots with `AEP_UI_SHOTS=.scratch/workflow-revise-ui`).
