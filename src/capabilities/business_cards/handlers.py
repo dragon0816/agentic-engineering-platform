@@ -271,6 +271,7 @@ class EditPersonHandler(_Cards):
                 changes=tuple(changes),
                 confirmed=tuple(confirmed),
                 needs_confirmation=store.needs_confirmation(row["person_id"]),
+                to_confirm=store.to_confirm(row["person_id"]),
                 change_id=change_id,
             )
 

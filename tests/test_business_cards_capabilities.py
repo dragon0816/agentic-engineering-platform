@@ -636,7 +636,9 @@ def test_a_wrong_value_can_be_cleared_in_chat(tmp_path: Path) -> None:
         {"person": {"name": "范例"}, "clear": ["romanised_name"], "reason": "不在名片上"},
     )
     assert cleared.status == "succeeded", cleared.failure
-    assert cleared.data["changes"] == [{"field": "romanised_name", "old": "Yanji Fan", "new": ""}]
+    assert cleared.data["changes"] == [
+        {"field": "romanised_name", "label": "英文名", "old": "Yanji Fan", "new": ""}
+    ]
     person = _run(bridge, "find", {"query": "范例"}).data["people"][0]
     assert person["romanised_name"] == ""
     # A later scan does not bring it back: the person's empty value is kept.

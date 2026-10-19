@@ -10,7 +10,7 @@ from __future__ import annotations
 from datetime import date
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from common.base import Contract
 
@@ -139,16 +139,36 @@ class AddFromSignatureRequest(Contract):
     entries: tuple[SignatureEntry, ...] = Field(min_length=1, max_length=50)
 
 
-class FieldChange(Contract):
+class _Labelled(Contract):
+    """An item naming a field, with the field's Chinese label for the reply
+    (英文名, never `romanised_name`)."""
+
     field: FieldName
+    label: str = ""
+
+    @model_validator(mode="before")
+    @classmethod
+    def _label(cls, data: object) -> object:
+        if isinstance(data, dict) and not data.get("label"):
+            return {**data, "label": FIELD_LABELS.get(str(data.get("field", "")), "")}
+        return data
+
+
+class FieldChange(_Labelled):
     old: str
     new: str
 
 
-class KeptField(Contract):
+class ToConfirm(_Labelled):
+    """A field to ask the person about, with what is stored now: a question
+    names the stored value (「英文名目前是 Clark Wang，對嗎？」)."""
+
+    stored: str
+
+
+class KeptField(_Labelled):
     """A value that was offered and not taken, and why."""
 
-    field: FieldName
     current: str
     offered: str
     # email_differs: a reading matched by image or name + company brought
@@ -158,10 +178,9 @@ class KeptField(Contract):
     reason: Literal["user_set", "older_evidence", "uncertain", "email_differs", "less_complete"]
 
 
-class DroppedField(Contract):
+class DroppedField(_Labelled):
     """A value the Host did not store, and why."""
 
-    field: FieldName
     value: str
     # not_on_card: a romanised name the reading could not show printed.
     reason: Literal["not_on_card"]
@@ -188,6 +207,9 @@ class AddResult(Contract):
     # Fields any reading flagged that the person has not confirmed or
     # corrected yet: still to ask about, even when this scan was sure.
     needs_confirmation: tuple[FieldName, ...] = ()
+    # The fields to ask about (uncertain this time or still to confirm),
+    # each with its label and the value stored now.
+    to_confirm: tuple[ToConfirm, ...] = ()
     dropped: tuple[DroppedField, ...] = ()
     # Set when this reading's email differs from the stored one: say so.
     email_differs: EmailDiffers | None = None
@@ -228,6 +250,7 @@ class EditResult(Contract):
     changes: tuple[FieldChange, ...] = ()
     confirmed: tuple[FieldName, ...] = ()
     needs_confirmation: tuple[FieldName, ...] = ()
+    to_confirm: tuple[ToConfirm, ...] = ()
     change_id: str | None = None
 
 

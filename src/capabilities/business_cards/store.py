@@ -41,6 +41,7 @@ from capabilities.business_cards.contracts import (
     ProposalView,
     Source,
     Status,
+    ToConfirm,
 )
 
 STORE_FOLDER = "business-cards"
@@ -710,6 +711,7 @@ class CardStore:
                 existed=False,
                 uncertain=unsure,
                 needs_confirmation=self._needs(con, person_id),
+                to_confirm=self._to_confirm(con, person_id, unsure),
                 observation_id=observation_id,
                 change_id=change_id,
             )
@@ -746,6 +748,7 @@ class CardStore:
             kept=tuple(merge.kept),
             uncertain=unsure,
             needs_confirmation=self._needs(con, row["person_id"]),
+            to_confirm=self._to_confirm(con, row["person_id"], unsure),
             email_differs=differs,
             status=fresh["status"],
             summary=_summary(row, merge, differs),
@@ -998,6 +1001,21 @@ class CardStore:
     def needs_confirmation(self, person_id: str) -> tuple[FieldName, ...]:
         with self._connect() as con:
             return self._needs(con, person_id)
+
+    def to_confirm(self, person_id: str, also: Sequence[FieldName] = ()) -> tuple[ToConfirm, ...]:
+        with self._connect() as con:
+            return self._to_confirm(con, person_id, also)
+
+    def _to_confirm(
+        self, con: sqlite3.Connection, person_id: str, also: Sequence[FieldName] = ()
+    ) -> tuple[ToConfirm, ...]:
+        """The fields to ask about (still to confirm, and `also`), each with
+        the value stored now."""
+        row = con.execute("SELECT * FROM people WHERE person_id = ?", (person_id,)).fetchone()
+        if row is None:
+            return ()
+        wanted = set(self._needs(con, person_id)) | set(also)
+        return tuple(ToConfirm(field=name, stored=row[name]) for name in FIELDS if name in wanted)
 
     # -- status and reporting lines -----------------------------------
 
@@ -1672,22 +1690,30 @@ def _summary(before: sqlite3.Row, merge: _Merge, differs: EmailDiffers | None = 
 
 
 def _changes_sentence(before: sqlite3.Row, merge: _Merge) -> str:
-    if not merge.changes:
+    """Only what changed: never 「上次是X，現在是X」 (live re-test 2026-10-20)."""
+    changes = [c for c in merge.changes if not _same(c.old, c.new)]
+    if not changes:
         return "已在名片夾中，資料沒有變。" if not merge.kept else ""
-    changed = {change.field for change in merge.changes}
+    changed = {change.field for change in changes}
     parts: list[str] = []
     if changed & set(ORG_FIELDS):
         old: dict[str, str] = {name: before[name] for name in ORG_FIELDS}
         new = dict(old)
-        for change in merge.changes:
+        for change in changes:
             new[change.field] = change.new
+        was, now = old["company"] + _describe(old), new["company"] + _describe(new)
         if "company" in changed:
-            parts.append(
-                f"上次是{old['company']}{_describe(old)}, 現在是{new['company']}{_describe(new)}"
-            )
-        else:
+            parts.append(f"上次是{was}, 現在是{now}")
+        elif not _same(_describe(old), _describe(new)):
             parts.append(f"上次是{_describe(old) or '（未標示）'}, 現在是{_describe(new)}")
-    other = [c for c in merge.changes if c.field not in ORG_FIELDS and c.field != "notes"]
+        else:
+            # The department and title read the same: name the field itself.
+            parts.extend(
+                f"{_LABELS[c.field]}：上次是{c.old or '（未標示）'}，現在是{c.new or '（空白）'}"
+                for c in changes
+                if c.field in ORG_FIELDS
+            )
+    other = [c for c in changes if c.field not in ORG_FIELDS and c.field != "notes"]
     if other:
         parts.append("、".join(_LABELS[c.field] for c in other) + " 也更新了")
     return "；".join(parts) + "。" if parts else ""

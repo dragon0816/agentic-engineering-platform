@@ -22,7 +22,7 @@ from typing import Any
 
 from agent.gateway import GatewayConversationResult, HostTool, HostToolOutcome
 from capabilities.business_cards import handlers as cards
-from capabilities.business_cards.contracts import FIELDS
+from capabilities.business_cards.contracts import FIELD_LABELS, FIELDS
 from capabilities.business_cards.manifest import CARDS_SKILL
 from capabilities.contracts import CapabilitySpec
 from capabilities.runtime import CapabilityInvocation
@@ -378,7 +378,12 @@ def _tool(
             )
         )
         if result.status == "succeeded":
-            return HostToolOutcome(status="succeeded", data=result.data)
+            # The fields' Chinese names, so a reply says 英文名, never
+            # `romanised_name` (live re-test 2026-10-20).
+            data = result.data
+            if isinstance(data, dict):
+                data = {**data, "field_labels": dict(FIELD_LABELS)}
+            return HostToolOutcome(status="succeeded", data=data)
         approval = getattr(gateway, "capability_approval", None)
         if (
             result.failure is not None

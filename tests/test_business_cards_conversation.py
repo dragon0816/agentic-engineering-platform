@@ -377,7 +377,12 @@ def test_a_romanised_name_not_printed_on_the_card_is_dropped(
     assert _turn(agent_web, session, "store this card")["ok"]
     stored = json.loads(model.tool_results()[-1])["host"]["data"]
     assert stored["dropped"] == [
-        {"field": "romanised_name", "value": "Yanji Fan", "reason": "not_on_card"}
+        {
+            "field": "romanised_name",
+            "label": "英文名",
+            "value": "Yanji Fan",
+            "reason": "not_on_card",
+        }
     ]
     assert "email" in stored["uncertain"] and "email" in stored["needs_confirmation"]
     model.then({"tools": [("cards__find", {"query": "范例"})]}, {"text": "找到了。"})
@@ -502,3 +507,37 @@ def test_harvested_people_are_stored_on_all_of_them_without_a_second_harvest(
     from capabilities.business_cards.manifest import PROCEDURE
 
     assert "cards__store_candidates" in PROCEDURE and "never harvest again" in PROCEDURE
+
+
+class _SucceedingBridge(_FailingBridge):
+    async def execute(self, invocation: Any) -> Any:
+        from common.execution import CapabilityResult
+
+        self.calls.append(invocation)
+        return CapabilityResult(
+            trace=invocation.context.trace,
+            status="succeeded",
+            data={"person_id": "p-1", "needs_confirmation": ["romanised_name"]},
+            handler_invoked=True,
+        )
+
+
+def test_tool_results_carry_chinese_field_labels_and_the_skill_uses_them() -> None:
+    """Live re-test 2026-10-20: replies named fields `romanised_name`, reported
+    a change when nothing changed and asked about a field without its value."""
+    from capabilities.business_cards.manifest import PROCEDURE
+
+    gateway = type("G", (), {"bridge": _SucceedingBridge("unused")})()
+    name, spec, description, schema = next(t for t in TOOLS if t[0] == "cards__add_card")
+    tool = _tool(gateway, name, spec, description, schema)
+
+    async def call() -> Any:
+        return await tool.handler(_context(), {"name": "王則閔"})
+
+    outcome = asyncio.run(call())
+    assert outcome.status == "succeeded"
+    assert outcome.data["field_labels"]["romanised_name"] == "英文名"
+    assert outcome.data["person_id"] == "p-1"
+    assert "field_labels" in PROCEDURE and "never show raw field names" in PROCEDURE
+    assert "to_confirm" in PROCEDURE and "stored value" in PROCEDURE
+    assert "never say something changed" in PROCEDURE

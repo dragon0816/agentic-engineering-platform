@@ -704,3 +704,37 @@ def test_a_shared_mail_domain_or_an_ambiguous_part_is_no_company(tmp_path: Path)
     assert store.resolve_company("Foo Technology") == "Foo Technology Inc."
     assert store.resolve_company("foo") == "Foo Technology Inc."
     assert store.resolve_company("technology") == ""
+
+
+def test_the_summary_never_reports_a_change_that_did_not_happen(tmp_path: Path) -> None:
+    """Live re-test 2026-10-20: 「上次是研展三部資深經理，現在是研展三部資深經理」.
+    When the department and title stay, the summary names the field that
+    changed; values are named by their Chinese labels."""
+    store = _store(tmp_path)
+    first = _add(store, {**CARD, "title": "資深經理", "department": "研展三部"})
+    moved = _add(
+        store,
+        {**CARD, "title": "資深經理", "department": "研展三部", "business_group": "寬頻事業群"},
+        when=date(2026, 2, 1),
+    )
+    assert moved.person_id == first.person_id
+    assert "現在是研展三部資深經理" not in moved.summary
+    assert "事業群：上次是網通事業群，現在是寬頻事業群" in moved.summary
+    assert [(c.field, c.label) for c in moved.changes] == [("business_group", "事業群")]
+
+
+def test_a_result_names_fields_in_chinese_and_states_what_is_stored(tmp_path: Path) -> None:
+    """Live re-test 2026-10-20: replies showed `romanised_name`, and asked
+    「是否要保持空白？」 about a field that held "Clark Wang"."""
+    store = _store(tmp_path)
+    first = _add(store, {**CARD, "romanised_name": "Clark Wang"}, uncertain=("romanised_name",))
+    assert [(item.field, item.label, item.stored) for item in first.to_confirm] == [
+        ("romanised_name", "英文名", "Clark Wang")
+    ]
+    kept = _add(
+        store,
+        {**CARD, "romanised_name": "Clark Wong"},
+        when=date(2026, 2, 1),
+        uncertain=("romanised_name",),
+    )
+    assert [(k.field, k.label) for k in kept.kept] == [("romanised_name", "英文名")]
