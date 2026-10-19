@@ -2602,3 +2602,10 @@ s-k-20261011T102952` (not published).
 - [ ] Live check after the next Agent Web restart (owner): Settings → Shared platform →
   sign in with the platform password → "Personal Agent code valid until …"; the Bridge
   token's expiry shows.
+- [x] Redeployed the Shared Platform on 141 with a1076c53 (contains 927e9b29 `logins/revoke`)
+  (2026-10-19, Claude Code; owner approved 2026-10-19). Bundle
+  `aep-shared-platform-preview-0.1.0-a1076c535fcd.zip` from `git archive HEAD`; `install.cmd`
+  kept `platform.json`; downtime about 22 s. Verified from the PC: `/v1/health` ok over pinned
+  https, fingerprint unchanged on 8775/8776, Member Portal page loads, `POST
+  /v1/member/logins/revoke` without a session answers 401 (404 before), Agent Web
+  `/api/platform` answered with 18 catalog entries.

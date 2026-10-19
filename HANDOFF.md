@@ -3,6 +3,13 @@
 Updated: 2026-10-19 (Asia/Taipei), by Claude Code (Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal; earlier: revise an installed Workflow from chat)
 
 
+**Redeploy on 141 (2026-10-19, Claude Code):** the Shared Platform on 172.25.228.141 now runs
+a1076c53 (includes 927e9b29 `POST /v1/member/logins/revoke`), bundle
+`aep-shared-platform-preview-0.1.0-a1076c535fcd.zip`, downtime about 22 s. Verified: pinned-https
+health ok, certificate fingerprint unchanged, Member Portal loads, `logins/revoke` without a
+session answers 401, Agent Web `/api/platform` answered (18 catalog entries). The "not
+redeployed" line below is superseded.
+
 ## Four owner-approved changes (2026-10-19, Claude Code) — latest
 
 **Status:** committed on main (c3c5f1f8, 1b25b64b, 7310c3cd, 927e9b29, 75ee0f74), **not pushed**,
