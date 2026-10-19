@@ -2508,3 +2508,27 @@ s-k-20261011T102952` (not published).
   `--basetemp=C:/aepci-wk/bt`) 3136 passed, 30 skipped, 0 failed; ruff, format and mypy clean.
 - [ ] Live check after the next Agent Web restart: a Chinese question in chat records
   `translations_used` in `host.data.anchor`; then `run.py --set zh` (owner decides when).
+
+## Conversation tool cap 150 with guards; live Harness state (2026-10-19)
+
+- [x] Cap 150 and guards (2026-10-19, Claude Code; owner approved 2026-10-19).
+  `MAX_CONVERSATION_TOOL_CALLS` 150, turn budget 151; Host setting `tool_call_limit` (1–150) and
+  `turn_time_limit_minutes` (1–120, default 30) in Agent Web Settings; `tool_repeat_limit` (3
+  identical failures in a row, or a 6th identical call with nothing new in between),
+  `turn_time_limit`, `tool_loop_limit` kept; telemetry `turn.stopped`; replies in Agent Web and
+  Telegram; old tool observations compacted past 160,000 characters per turn;
+  `AgentProfile.max_turns` bound 151. Tests: `tests/test_conversation_turn_guards.py`, updated
+  `tests/test_gateway.py` (the invented-tool loop now varies its arguments so the cap, not the
+  repetition guard, stops it). Design `docs/HARNESS_DESIGN.zh-TW.md` §5.3, §5.5; decision
+  `docs/DECISIONS.md` 2026-10-19.
+- [x] Live Harness state in the chat (2026-10-19, Claude Code). `agent/turn_progress.py`
+  (`TurnProgress`, `TURN_PROGRESS`, `TurnProgressBoard`), reported by the Gateway tool loop and
+  the shared Harness runner; `GET /api/conversations/progress`; Agent Web progress view (polled
+  every second); agent-mode tool requests; Telegram status message with the same text, edits at
+  most every 5 s. Tests: `tests/test_turn_progress_web.py` (route, session ownership, clearing,
+  stop replies, settings, real-browser view with screenshots in `.scratch/turn-progress-ui/`),
+  `tests/test_telegram_turn_progress.py`. Design `docs/HARNESS_DESIGN.zh-TW.md` §5.5.1.
+  Verification: see HANDOFF.md.
+- [ ] Live check after the next Agent Web restart (owner): a long chat turn shows the stepper,
+  tool lines and 「工具 n/150」; Settings shows the two new fields; Telegram's status message
+  shows the same lines and is edited, not repeated.

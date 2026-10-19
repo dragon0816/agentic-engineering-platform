@@ -263,6 +263,12 @@ Settings 頁由上往下的卡片：
 |---|---|---|
 | **Recent messages, including the new question** | 1～40 | 每次送給模型的最近幾則訊息（含這次的問題） |
 | **History text budget (UTF-8 bytes)** | 4000～48000 | 對話歷史最多送多少位元組 |
+| **Tool calls per turn (1–150)** | 150 / 1～150 | 一則訊息最多可以呼叫幾次工具 |
+| **Time limit per turn (minutes, 1–120)** | 30 / 1～120 | 一則訊息最多可以做多久 |
+
+後兩項是「一則訊息最多做多少工作」。到上限時 Agent 會先停下來，說明原因，已做的步驟會
+留在對話中，回覆「繼續」就接著做。Agent 用相同內容重複呼叫同一個工具時也會提早停下：
+連續失敗 3 次，或中間沒有新動作卻重複超過 5 次。
 
 按 **Save context limits** 立即生效。問題本身超過預算時，Agent 會退回讓你修改，
 **不會偷偷截斷**。每個 session 會保存在這台電腦；不同 session 之間**不共用記憶**。
@@ -312,6 +318,13 @@ MCP server 可以給 Agent 加新工具（例如 GitHub、檔案系統）。**�
   - **評價**：👍 有幫助 / 👎 沒幫助 / ➖ 普通，可以補一句原因。**👎 和原因會進入每晚的
     經驗回顧**（6.6 節），幫 Agent 改進。
 - 目前**沒有**中途停止回答的按鈕；不想等可以開新的 session。
+- 等待回答時，原本的「working…」會換成即時進度：Harness 走到哪個階段（例如
+  「① 規劃 ✓ ② 查資料（第 2 輪）… ③ 執行 ④ 驗收」）、最近用了哪些工具，以及
+  「工具 12/150 · 3:05 / 30:00」（已用次數／上限 · 經過時間／時間上限）。只顯示名稱和
+  數字，不顯示內容。Claude Code、Copilot 後端只顯示它要求使用的工具；Codex 只顯示經過時間。
+  Telegram 會在同一則「⏳ Working on it…」訊息裡更新同樣的資訊，最多每 5 秒更新一次。
+- 一則訊息做到上限（工具次數、時間，或重複呼叫同一個工具）時會先停下來，回覆「繼續」
+  就接著做；上限在 3.4 節設定。
 
 ### 4.2 選擇模型後端
 
@@ -444,6 +457,13 @@ Agent **不會自己**安裝、核准或發布任何東西。需要你決定時�
   （`workspace\assets\skills\` 或 `workspace\assets\workflows\`），再按 **Refresh status**。
 - Skill 的詳細頁有 **Ask /<指令>** 按鈕，會把指令放進對話輸入框。
 - Workflow 的詳細頁有 **Settings on this computer**（第 9 章）和 **Run this Workflow**。
+- Workflow 的詳細頁還有 **Revise in chat**：開一個新對話，輸入框裡先填好「Revise the
+  installed Workflow <名稱@版本>: 」，你把要改的地方寫完再按 **Send**（不會自動送出）。
+  Agent 會讀出這個 Workflow 原本的步驟（包含內嵌的 Python 腳本）、複製成版本加一的草稿
+  （例如 1.0.0 → 1.0.1，同一個名稱）再改，對話裡出現安裝卡「Revision of X 1.0.0 →
+  1.0.1」並列出改了哪些步驟、參數和腳本行數。按 **Install** 才會安裝；舊版本保留、
+  執行紀錄不變。不是你自己的 Workflow（例如跟 AEP 一起出貨的）會改成你自己名下的新名稱
+  （fork），卡片會寫明。
 - Knowledge 的詳細頁有 **Ask this Knowledge source**：選 **Knowledge Asking Skill**、
   輸入 **Question**，按 **Ask Knowledge**，下方列出引用來源。
 - 最下面的 **Recent runs** 列出最近的執行紀錄。

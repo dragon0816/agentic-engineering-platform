@@ -1,9 +1,79 @@
 # Handoff
 
-Updated: 2026-10-18 (Asia/Taipei), by Claude Code (G2 language-independent anchor check)
+Updated: 2026-10-19 (Asia/Taipei), by Claude Code (tool cap 150 with guards; live Harness state)
 
 
-## G2 anchor check made language-independent (2026-10-18, Claude Code) — latest
+## Tool cap 150 with guards; live Harness state in the chat (2026-10-19, Claude Code) — latest
+
+**Status:** committed on main (906716ce, bfe07ae7, plus the docs commit), **not pushed**, Agent
+Web **not restarted**. Another agent worked in parallel on "revise an existing Workflow from chat"
+(`workflow_revision.py`, authoring modules, a few `web_page.py` lines); none of its changes are
+in these commits, which were staged as HEAD plus this work only.
+
+- **Goal:** two owner-approved changes (2026-10-19): (1) 150 tool calls per conversation turn,
+  with guards against spinning; (2) show the running turn's Harness state in the chat instead of
+  "working…".
+- **Change 1 (906716ce):**
+  - `agent/backend_contracts.py`: `MAX_CONVERSATION_TOOL_CALLS` 150, `MAX_CONVERSATION_TURNS`
+    151, `MAX_IDENTICAL_FAILURES` 3, `MAX_IDENTICAL_CALLS` 5, `ConversationLimits`
+    (tool calls 1–150, time 60 s–120 min, default 30 min).
+  - `agent/gateway.py` `_converse`: Host cap, time budget checked before every model and tool
+    call, `tool_repeat_limit` (3 identical failures in a row, or a 6th identical call with no
+    new call in between), telemetry `turn.stopped` (reason and counts only), old tool
+    observations compacted past 160,000 characters per turn. `Gateway.conversation_limits`,
+    `Gateway.clock`, `Gateway.limits()`.
+  - `host_runtime/conversation_context.py`: settings `tool_call_limit`,
+    `turn_time_limit_minutes`; `host.py` wires them to the Gateway (read at each turn).
+  - Agent Web Settings (two fields with an explanation); stop replies in Agent Web and Telegram
+    (`host_runtime/turn_summary.py` `stop_reply`); `AgentProfile.max_turns` bound 151.
+  - `agent/task_execution.py` (scheduled tasks, `min(max_backend_turns, 5)`) left alone: a
+    background task budget, not the conversation limit.
+- **Change 2 (bfe07ae7):**
+  - `agent/turn_progress.py`: `TurnProgress`, `TURN_PROGRESS`, `TurnProgressBoard`; reported by
+    the Gateway tool loop and the shared Harness runner (`run_harness`, `run_harness_async`).
+  - `GET /api/conversations/progress?session_id=` (page token; same actor only; null when no
+    turn runs); `AgentMode.observer` adds agent-mode tool requests.
+  - Agent Web progress view (polled every second while a turn runs); Telegram's single status
+    message shows the same compact text and is edited at most every 5 s after the first edit.
+- **Docs:** `docs/HARNESS_DESIGN.zh-TW.md` §5.3, §5.5, §5.5.1; `docs/DECISIONS.md` 2026-10-19;
+  `docs/TASKS.md`; `deploy/windows-preview/USER_GUIDE.zh-TW.md` §3.4 and §4.1.
+- **Verification:**
+  - project `.venv`: ruff check, ruff format --check, mypy (637 files) clean; full pytest
+    3216 passed, 7 skipped, 0 failed;
+  - `C:\aepci-wk\venv` (reinstalled `-e ".[dev,office]"`, `--basetemp=C:/aepci-wk/bt`): ruff,
+    format, mypy clean; full pytest 3193 passed, 30 skipped, 0 failed;
+  - both runs include the other agent's uncommitted work in the tree;
+  - commit 1's content alone was checked in an exported copy (ruff, format, mypy, 156 targeted
+    tests passed);
+  - E2E-01 (`tests/test_product_e2e_01.py`) passed in both suites;
+  - real-browser test of the progress view (light, dark, 390 px, no horizontal scroll; the view
+    has no buttons) with screenshots in `.scratch/turn-progress-ui/`.
+  - One existing test changed: `tests/test_gateway.py`
+    `test_conversation_cannot_execute_an_invented_tool_and_stops` now gives each invented call
+    different arguments, so the count cap (now 150), not the new repetition guard, stops it; all
+    its assertions are unchanged.
+- **Decisions to note:**
+  - Telegram still sends its status message at once (owner 2026-10-06, pinned by an existing
+    test) rather than after 10 s; the 5 s edit limit is what prevents a stream.
+  - The count cap and the repetition guard apply per pass of the tool loop (the conversation
+    check's retry is a new pass); the time budget covers the whole turn.
+  - A running model or tool call is not interrupted at the deadline.
+- **Risks:**
+  - Long turns now cost up to 150 model calls; the 30-minute budget is the practical bound.
+  - A desktop or browser task that polls the same "look" more than 5 times with nothing in
+    between stops with `tool_repeat_limit`; the person can reply 繼續.
+  - Compaction removes old observations from the model's view in very long turns.
+- **Next (after the owner's next Agent Web restart):**
+  1. Settings → Conversation context shows "Tool calls per turn" 150 and "Time limit per turn"
+     30.
+  2. A multi-step chat turn shows the stepper, tool lines and "工具 n/150 · m:ss / 30:00",
+     and the view disappears when the answer arrives.
+  3. A Knowledge question shows "Knowledge：① 規劃 ✓ ② 查資料…".
+  4. In Telegram, a slow turn edits one "⏳ Working on it…" message with the same lines.
+  5. Telemetry: a stopped turn has a `turn.stopped` event.
+
+
+## G2 anchor check made language-independent (2026-10-18, Claude Code)
 
 **Status:** committed on main, **not pushed**, Agent Web **not restarted**. The owner's U7
 rerun finished (commit 519b85a2) before the full suites were run; both are green.

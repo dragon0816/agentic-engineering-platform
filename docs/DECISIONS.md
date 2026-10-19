@@ -3376,3 +3376,53 @@ model's version become the question; replacing `query_rewrite.py` with the trans
 rewrite's synonyms measurably raised recall, 2026-10-09); adding the translation query when the
 model's version was rejected (a rejected turn uses the original alone, as before); changing
 `questions.json` to add Chinese questions (it is pinned by hash).
+
+## 2026-10-19 — Conversation tool cap 150 with guards; live Harness state in the chat
+
+Owner approved 2026-10-19, both together.
+
+**Cap and guards.** One conversation turn may make up to 150 tool calls (was 20; the turn
+budget is 151 model turns). The cap is a Host setting (`conversation-context.json`
+`tool_call_limit`, 1–150, default 150) shown in Agent Web Settings and read at every turn, so a
+change applies without a restart. The higher cap came with three guards:
+
+- `tool_repeat_limit`: the same tool with the same arguments (a digest of name and canonical
+  JSON, kept in memory only) failing 3 times in a row stops the turn.
+- `tool_repeat_limit` also when an identical call would run a 6th time since the last call
+  never made before in the pass (N = 5). Identical input usually means identical output, and
+  five looks are enough to wait for a change; a call that is new in the turn is progress and
+  resets the counts, so draft → run → fix draft → run the same Workflow is never stopped.
+  Knowledge and Workflow retries happen inside the Harness (one tool call) and are not counted.
+- `turn_time_limit`: a per-turn wall-clock budget, default 30 minutes (`turn_time_limit_minutes`,
+  1–120), checked before each model call and each tool call; a running call is not interrupted.
+- `tool_loop_limit` stays the count stop. All three end the turn as `needs_input` with the tool
+  record kept; Agent Web and Telegram explain the reason and keep 「回覆『繼續』我會接著做」.
+- Each stop emits telemetry `turn.stopped` with the reason and counts, never content.
+- The count cap and the repetition guard apply per pass of the tool loop (the conversation
+  check's retry is a new pass); the time budget covers the whole turn.
+- Context growth: 150 observations of up to 16,000 characters would outgrow any context window
+  (`prepare_history` bounds only the carried transcript), so observations kept in one turn's
+  messages are capped at 160,000 characters; the oldest are replaced by a short note, the newest
+  is always kept. No token budget was added: output per model call stays 8,000 tokens and the
+  turn total is bounded by the cap and the time limit.
+- `AgentProfile.max_turns` is now bounded by the Gateway turn budget (151, was 100) so the two
+  bounds cannot disagree. The scheduled task executor keeps its own `min(max_backend_turns, 5)`:
+  a background task budget, not the conversation limit.
+
+**Live Harness state.** A running turn records content-free progress in memory, by session:
+tool calls started and finished (name, status, duration), Harness phase transitions reported by
+the shared runner with the `AgentHarnessRun` phase names and retry number, the tool count against
+the cap and the elapsed time against the budget. `GET /api/conversations/progress?session_id=`
+returns it only to the actor that started the turn and only while it runs. Agent Web polls it
+every second during a turn and draws a stepper, the recent tool lines and 「工具 n/150 · m:ss /
+30:00」. Agent-mode backends show their tool requests (waiting, allowed, refused); Codex shows only
+the elapsed time. Telegram keeps its single status message, now with the same compact text, and
+edits it at most every 5 s after the first edit.
+
+Rejected: a fixed cap without guards (a spinning model would burn 150 calls); counting identical
+calls per turn without the progress reset (breaks fix-and-rerun cycles and polling a window
+between actions); interrupting a running tool at the deadline (a Workflow or Bridge call has no
+safe cancel point); a per-turn token budget (no gap beyond the context growth handled above);
+streaming tool arguments or partial answers to the page (the owner asked for state, not content);
+delaying the Telegram status message to 10 s (the owner asked on 2026-10-06 for it to appear at
+once, and an existing test pins that behaviour; the edit rate limit is what prevents a stream).

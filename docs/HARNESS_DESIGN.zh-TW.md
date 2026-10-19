@@ -131,14 +131,37 @@ flowchart TD
 | 參數 | 值 |
 |---|---|
 | 每輪最大輸出 token `CONVERSATION_MAX_OUTPUT_TOKENS` | 8,000 |
-| 每回合最多工具呼叫 `MAX_CONVERSATION_TOOL_CALLS` | 20（2026-10-07 owner 設定） |
-| 最多模型輪數 `MAX_CONVERSATION_TURNS` | 21 |
+| 每回合最多工具呼叫 `MAX_CONVERSATION_TOOL_CALLS` | 150（2026-10-19 owner 設定；原為 20）。Host 設定 `tool_call_limit` 可調為 1–150，預設 150 |
+| 最多模型輪數 `MAX_CONVERSATION_TURNS` | 151 |
+| 每回合時間上限 | 預設 30 分鐘；Host 設定 `turn_time_limit_minutes` 1–120 |
+| 同一工具＋相同參數連續失敗 `MAX_IDENTICAL_FAILURES` | 3 次即停（`tool_repeat_limit`） |
+| 同一工具＋相同參數重複呼叫 `MAX_IDENTICAL_CALLS` | 5 次；第 6 次不執行、停止（`tool_repeat_limit`）。中間出現本回合沒呼叫過的新呼叫就重新計數 |
+| 本回合留在訊息中的工具觀察總字數 `MAX_TURN_OBSERVATION_CHARS` | 160,000；超過時最舊的觀察換成一行說明（最新一筆一定保留） |
 | 輸出被截斷時的重試 `MAX_TRUNCATED_RETRIES` | 2（附「請更簡短」提示，會佔用輪數） |
 | 送入模型的歷史訊息數 | 預設 12（1–40） |
 | 單則歷史訊息字數 | 4,000；最新一則 40,000（可含附件文字） |
 | 單次工具觀察結果字數 `MAX_TOOL_OBSERVATION_CHARS` | 16,000（超過截斷為 preview） |
+| Agent profile 宣告的 `max_turns` 上限 | 151（`agent/contracts.py`，原為 100；目前沒有執行路徑讀它） |
 
-每輪流程：呼叫模型 → 截斷則重試 → 其他失敗則結束 → 無工具呼叫且有文字＝回答完成 → 有工具呼叫則依序執行（超過 20 次的回覆 `skipped`）→ 觀察結果回給模型 → 下一輪。用盡輪數或工具預算 → `tool_loop_limit`（Agent Web 顯示「回覆『繼續』我會接著做」）。
+每輪流程：檢查時間 → 呼叫模型 → 截斷則重試 → 其他失敗則結束 → 無工具呼叫且有文字＝回答完成 → 有工具呼叫則依序執行（每個呼叫前檢查時間與重複；超過上限的回覆 `skipped`）→ 觀察結果回給模型 → 下一輪。
+
+上限與防空轉（owner 2026-10-19，`docs/DECISIONS.md` 同日）：
+
+- **次數上限**：用盡工具預算或輪數 → `tool_loop_limit`。上限在 Agent Web「Settings → Conversation context」設定，每回合開始時讀取（`ConversationContextStore.limits`，`host.json` 不需改，存檔即生效，不必重啟）。
+- **重複呼叫**：比對的是「工具名稱＋參數完整內容」的雜湊，只存在記憶體裡。
+  - 連續 3 次相同呼叫都失敗 → `tool_repeat_limit`（中間有成功或其他呼叫就重新計數）。
+  - 相同呼叫成功也一樣：從上一次「本回合沒出現過的新呼叫」算起，同一呼叫第 6 次要求時停止。N = 5 的理由：完全相同的輸入得到的通常是相同的結果，連續看 5 次已足以等待一個變化；而「修改草稿 → 再跑同一個 Workflow」這種修正循環中，每次草稿都是新呼叫，會重新計數，不會被擋。Knowledge 與 Workflow 自己的重試在 Harness 內部（同一個工具呼叫裡），不算在這裡。
+- **時間上限**：從回合開始（含對話檢查的重試一輪）計時，每次呼叫模型與每次呼叫工具之前檢查；已在執行的模型或工具呼叫不會被中斷，所以實際結束時間可能略超過上限 → `turn_time_limit`。
+- 三種停止都回 `needs_input`，保留工具紀錄；Agent Web 與 Telegram 都說明原因並提示「回覆『繼續』我會接著做」（文字在 `agent/turn_progress.py` `stop_reply`）。
+- 每次停止寫一筆遙測 `turn.stopped`：`stop_reason`、`tool_calls`、`tool_cap`、`elapsed_s`、`time_limit_s`，重複停止另有 `repeat_kind`、`repeats`、`tool_id`；不含參數或任何內容。
+- 次數上限與重複防護以「一輪工具迴圈」計（對話檢查失敗的重試是新的一輪）；時間上限涵蓋整個回合。
+- 排程任務（`agent/task_execution.py`）另有自己的上限：`min(max_backend_turns, 5)` 輪，這是背景任務的預算，與對話上限不同，維持不變。
+
+150 次呼叫時的 token 與 context：
+
+- 每次模型呼叫的輸出仍以 8,000 token 為上限；整個回合的輸出總量沒有另設上限，實際由 150 次與 30 分鐘限制。
+- `prepare_history` 只限制「帶進來的對話紀錄」（最近 12 則、48,000 bytes），不包含本回合內累積的工具觀察。
+- 舊上限 20 次 × 16,000 字已可達 320,000 字；150 次會遠超任何 context window（預設宣告 128k token）。因此加上 `MAX_TURN_OBSERVATION_CHARS`：超過 160,000 字時，最舊的觀察換成 `{"compacted": true, "tool": …}` 與一句說明。這不是 token 預算，只是讓訊息不會無限成長；一般回合（觀察結果不大）完全不受影響。
 
 ### 5.4 系統提示的行為規則（摘要）
 
@@ -151,7 +174,28 @@ flowchart TD
 
 ### 5.5 停止原因
 
-`model_not_configured`、`model_unavailable`、`model_context_mismatch`、`empty_model_answer`、`tool_loop_limit`、供應商錯誤（如 `model_output_truncated`）；工具層 `uninstalled_tool`、`host_tool_failed`、`workflow_parameters_invalid`。
+`model_not_configured`、`model_unavailable`、`model_context_mismatch`、`empty_model_answer`、`tool_loop_limit`、`tool_repeat_limit`、`turn_time_limit`（後兩者 2026-10-19 新增，見 §5.3）、供應商錯誤（如 `model_output_truncated`）；工具層 `uninstalled_tool`、`host_tool_failed`、`workflow_parameters_invalid`。
+
+### 5.5.1 回合進行中的即時狀態（owner 2026-10-19）
+
+回合執行時，聊天畫面顯示 Harness 現在做到哪裡，不再只有「working…」。
+
+- **記錄**：`agent/turn_progress.py` 的 `TurnProgress`，只存在記憶體，以 session 為鍵（`TurnProgressBoard`），回合結束即清除。
+  - 內容只有名稱、階段、次數、狀態與耗時：回合開始時間、每個工具呼叫的名稱／狀態／秒數、Harness 階段（用 `AgentHarnessRun` 的 phase 名稱：collecting、executing、validating，加上重試次數）、工具次數／上限、經過時間／時間上限。
+  - 不含工具參數、工具結果或回答文字。
+- **誰回報**：
+  - Gateway 工具迴圈：每個工具呼叫的開始與結束（`_telemetered_tool`），以及上限。
+  - 共用 Harness runner（`run_harness`、`run_harness_async`）：每次進入新階段；Knowledge、Workflow、Coding 與對話檢查都經過這裡，所以不必各自接線。
+  - 透過 context variable `TURN_PROGRESS` 傳遞；`asyncio.to_thread` 與新的 asyncio task 會複製它，所以工具裡的 Harness 也回報到同一回合。
+  - Agent 模式（Claude Code／Copilot）：只有已經收到的工具請求（`AgentMode.observer`：等待確認、允許、拒絕）。Codex 沒有事件，只顯示經過時間。
+- **讀取**：`GET /api/conversations/progress?session_id=…`（需要頁面 token），只回傳該 session、且由同一個 actor 開始的回合；沒有回合時 `progress` 是 `null`。
+- **Agent Web**：回合「working」時每秒讀一次（仿 `watchAgentCards`），顯示：
+  - 一行狀態（`aria-live="polite"`，只有階段或工具變了才更新）；
+  - 階段步驟，例如「① 規劃 ✓ ② 查資料（第 2 輪）… ③ 執行 ④ 驗收」；
+  - 最近 4 個工具；
+  - 「工具 12/150 · 3:05 / 30:00」。
+  - 回合結束即停止輪詢。
+- **Telegram**：沿用原本的單一狀態訊息（2026-10-06 owner 要求：一開始就送「⏳ Working on it…」），內容加上同樣的步驟與「工具 n/150 · 經過 / 上限」。第一次編輯立即送出，之後最多每 5 秒編輯一次（一連串工具事件合併成一次編輯），完成時改成「✅ Done／⚠️ Stopped」。不會連續發多則訊息。
 
 ### 5.6 Harness 交接規則 G1–G4（owner 2026-10-18 核准；所有領域通用）
 
