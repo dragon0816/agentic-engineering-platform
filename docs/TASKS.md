@@ -2723,6 +2723,26 @@ s-k-20261011T102952` (not published).
   1882da22, 643d8f7b, ad3a15d4, 3e3a97e8 and the docs commit. Tests `tests/test_outlook_mail_folders.py` (with a read-only live Outlook check, skipped
   when Outlook is not running) and the business-cards test modules. Verification: HANDOFF.md.
 - [ ] Owner re-test of these fixes in Agent Web and Telegram (steps in HANDOFF.md).
+- [x] Fixes from the second business-cards live re-test (2026-10-20, Claude Code; the owner's
+  re-test of the row above found them): COM initialised on the thread that uses Outlook / Excel
+  (`integrations.com.apartment`; a second harvest after a restart failed with CO_E_NOTINITIALIZED,
+  unmapped); harvested candidates kept per conversation for an hour and stored by id with the new
+  `store-candidates` / `cards__store_candidates` (the model re-harvested on 「都存進去」); a card
+  image already seen and the same name + company with another email find the stored person
+  (email kept, flagged, proposal, `email_differs`; namesakes in another department stay apart);
+  `other_text` and the address are scanned for the 統一編號 and an old 統一編號 note is tidied
+  with history; a shorter reading never replaces a more complete value (`less_complete`); a
+  company query resolves by name, capitalised short name or mail domain (WNC, 啟碁); Chinese
+  field labels, `to_confirm` with stored values, a summary that never reports an unchanged
+  value; chart boxes show 姓名 + 博士, desk phone #ext, then mobile; the legend lists 需確認; a
+  test that confirming writes a `confirm` history row. Decisions 2026-10-20 "How a re-scanned
+  card finds its person…", "How a company query finds the company", "COM is initialised on the
+  thread that uses it". Commits ce8cfc99, 06ab71d9, 102d2925, 2b7ec0a2, 0d7e95be, 4c738cf8,
+  86b6a24d, 01c07df6, f8bac401 and the docs commit. Tests `tests/test_outlook_com_threads.py`,
+  `tests/test_outlook_mail_folders.py` (live two-thread check), the business-cards test modules.
+  Verification: HANDOFF.md.
+- [ ] Owner re-test of the second-round fixes (steps in HANDOFF.md), including harvest → store →
+  chart with signature people.
 - [ ] Later: a Contacts page in Agent Web; accepting a proposal with a button.
 
 - [x] A Skill install card names a switched-off Skill of the same name (2026-10-20, Claude Code;

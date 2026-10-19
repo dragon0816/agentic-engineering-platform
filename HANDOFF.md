@@ -1,8 +1,72 @@
 # Handoff
 
-Updated: 2026-10-20 (Asia/Taipei), by Claude Code (business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-20 (Asia/Taipei), by Claude Code (business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## Business-cards live-test fixes (2026-10-20, Claude Code) — latest
+## Business-cards second-round re-test fixes (2026-10-20, Claude Code) — latest
+
+**Goal / scope:** the ten issues the owner's 2026-10-20 re-test of the first-round fixes found
+(Gateway backend). Not pushed; Agent Web not restarted; the live `cards.db` and mail untouched
+except the guarded read-only Outlook checks in `tests/test_outlook_mail_folders.py` (folder
+strings only; they ran and passed on this PC with Outlook running).
+
+**Done (commits on main; each fix has a failing-first test, item 9 is a verification test that passed as written):**
+1. ce8cfc99 [blocker] COM per thread: `integrations.com.apartment()` (CoInitialize/CoUninitialize,
+   nested uses counted) around every `OutlookComMailbox` / `OutlookComDraft` /
+   `OutlookComDraftSender` call (Outlook asked for inside it, no COM object kept, failures mapped
+   to `mail_failed` / `draft_failed` / `send_failed`; new `connect=` parameter), and around the
+   weekly and chipset Excel runs. Tests `tests/test_outlook_com_threads.py` (fake COM refusing
+   uninitialised and cross-thread use; two `to_thread` workers) and a live test listing the
+   Inbox from two worker threads (fails on the old adapter with com_error, passes now).
+2. 06ab71d9 [blocker] harvest keeps candidates per conversation (`candidates` table, `s1`…,
+   one hour, replaced by the next harvest); `store-candidates` / `cards__store_candidates`
+   stores by id or `all`; procedure: never re-harvest to store.
+3. 102d2925 matching: same image hash → that person; same name + company with another email →
+   same person unless department/division differ; stored email kept, proposal, flagged,
+   `email_differs`. Telegram fixtures now send a distinct photo per card.
+4. 2b7ec0a2 統一編號 from `other_text` and the address; an old 統一編號 note tidied with history.
+5. 0d7e95be a shorter reading never replaces a more complete value (`less_complete`; not title).
+6. 4c738cf8 company queries resolve by name, capitalised short name or mail domain (WNC, 啟碁);
+   results carry the canonical company.
+7. 86b6a24d Chinese `label` / `field_labels`, `to_confirm` with stored values, summary never
+   reports an unchanged value; procedure updated.
+8. 01c07df6 chart box: 姓名 + 博士, title, phone #ext, 手機, 需確認; legend lists 需確認.
+9. f8bac401 test: confirming in chat writes one `confirm` history row.
+10. Docs commit: `docs/phases/BUSINESS_CARDS.md`, `docs/CONTRACTS.md`, `docs/DECISIONS.md` (three
+    2026-10-20 entries: re-scanned card matching, company queries, COM per thread),
+    `docs/TASKS.md`, user guide §4.7.
+
+**Verification (2026-10-20):** `ruff check .` passed; `ruff format --check .` 913 files
+formatted; `mypy` no issues (662 files). Full pytest, project `.venv`: 3359 passed, 7 skipped,
+0 failed (includes both live Outlook checks). CI-like venv `C:\aepci-wk\venv`
+(`pip install -e ".[dev,office]"`, no pywin32, `--basetemp=C:/aepci-wk/bt`): 3334 passed, 32 skipped, 0 failed (run after the first suite finished, with the docs in place).
+Docs and user guide changed after the first full run; `tests/test_bundled_skills.py` re-run
+after the guide change: 15 passed.
+
+**Open / risks:**
+- The matching rule takes namesakes at one company with the same (or unread) department and
+  division, but different emails, as one person (documented limit; the email is flagged).
+- Company aliases from mail domains join spellings that share a corporate domain; public mail
+  services are excluded by a fixed list (`names.PUBLIC_DOMAINS`).
+- Candidates live in `cards.db`; an Agent Web restart keeps them (one hour).
+- The Excel apartment wrap is covered only by a fake; no live Excel run was made.
+
+**Next (owner live re-test; check `/api/tasks` before restarting Agent Web):**
+1. Restart Agent Web so the new code loads (`cards.db` gains the `candidates` table on open).
+2. Gateway chat: 「從 wnc.com.tw 的信件簽名檔整理聯絡人」 → candidates listed as s1, s2, …;
+   run it a second time → still works (no `handler_error`; COM fix).
+3. 「都存進去」 → one `cards__store_candidates` call, no new harvest; 「<某人> 的歷史」 shows an
+   `email_signature` observation with the message id.
+4. 「WNC 的組織圖」, then 「wnc 組織圖」 and 「啟碁的組織圖」 → the same company, card and
+   signature people together; boxes show 「王則閔 博士」, phone #ext, 手機; legend lists 需確認.
+5. Re-send card A (same photo) → no new person; if the email reads differently the reply says the
+   two emails differ and asks which is right; the stored one is kept.
+6. Re-scan a card whose 事業群 reads shorter → stored value kept; summary never says
+   「上次是X，現在是X」.
+7. Card A with 統一編號 → stored in 統一編號; an old 「統一編號：…」 note disappears from notes.
+8. Replies name fields in Chinese (英文名), and a question about a field states its stored value.
+9. 「email 正確」 → 「<某人> 的歷史」 shows a `confirm` row by `<you> via local|telegram`.
+
+## Business-cards live-test fixes (2026-10-20, Claude Code)
 
 **Goal / scope:** the eight bugs from the 2026-10-20 live test of native business cards (Gateway
 backend). Not pushed; Agent Web not restarted; the live `cards.db` and mail untouched except the

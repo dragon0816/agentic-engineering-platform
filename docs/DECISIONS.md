@@ -3681,3 +3681,81 @@ Rejected: degrees and the tax number in `notes` (the minimal option; notes are f
 chart, find and the merge could not use them and two cards would again differ); a separate company
 table for the tax number (a larger schema change for one value); stripping roman numerals or
 "一處" when matching divisions (they name different divisions).
+
+## 2026-10-20 — How a re-scanned card finds its person, and which reading wins
+
+Context: in the second live re-test (2026-10-20) re-sending card A created a second person. The
+reading misread the email without flagging it, and the name + company match was skipped whenever
+the two emails differed, although the image's sha256 was the same as an earlier observation's. A
+re-scan also replaced the stored business group "Connectivity & Solutions 事業群" with the shorter
+reading "Connectivity & Solutions".
+
+Decision (`capabilities/business_cards/store.py`, `docs/phases/BUSINESS_CARDS.md` §2):
+
+- Matching, in order: (1) the same card image (`sha256:` source ref) as an earlier observation →
+  the person that observation was stored as; (2) the same email (case-insensitive); (3) the same
+  name (local or romanised) at the same company. A different email no longer makes it someone
+  else, unless their place differs too: both readings have a department and they differ, or
+  both have a division and they differ.
+- When a match by image or name brings another email, the stored email stays; the new one is an
+  open proposal; the email needs confirmation (the reading's observation lists it as uncertain)
+  unless the person set or confirmed the stored one; the result carries `email_differs` and its
+  summary says so.
+- An automatic reading that is a strict prefix or substring of the stored value (spaces and case
+  ignored) leaves the value as it is (`kept`, reason `less_complete`), for every field except
+  `title` (副總經理 → 總經理 is a real change), `notes` (appended) and `email` (the key). A more
+  complete reading still replaces a shorter one under the usual evidence-date rule. A user-set
+  value is never overwritten, for `business_group` as for every field.
+
+Limits: two namesakes at one company with different emails and the same (or an unread)
+department and division are taken to be one person; the flagged email and the proposal let the
+person correct it, and `edit-person` / `undo` remain. A wrong but identical-looking image hash is
+impossible in practice; a cropped or re-photographed card has another hash and falls through to
+email and name.
+
+Rejected: email always decides (it is the field most often misread on a photo, which is how the
+duplicate arose); replacing the stored email with the newer reading (the newer reading was the
+wrong one in the live test); matching on name + company alone even when the department differs
+(namesakes at a large company are common); treating any shorter title as partial (promotions
+shorten titles).
+
+## 2026-10-20 — How a company query finds the company
+
+Context: "WNC" drew the company's org chart once and failed the next time: the stored company was
+啟碁科技股份有限公司, people from signatures were stored as "WNC", and only a suffix-stripped name
+comparison was made.
+
+Decision (`CardStore.resolve_company`): the store groups its company spellings into companies,
+joining two spellings that are the same name without legal suffixes or that share an alias. An
+alias is a 2–6 letter word printed in capitals in the name (`WNC`, `ASUS`) or the company part of
+an email address or website (`wnc` for `@wnc.com.tw`), never a public mail service (gmail,
+yahoo, hotmail, outlook, hinet, ...). A query resolves, in order, by the exact or
+suffix-stripped name, by alias, or by being part of exactly one company's name (啟碁 → 啟碁科技);
+two candidates at any step mean no answer, and `org-chart`, `list` and `find` then fall back to
+the name comparison. Results name the canonical spelling: the one most people carry, the
+longest on a tie.
+
+Rejected: an alias table the person maintains (more work for the person than the data already
+carries); every English word of a name as an alias ("Technology" would join unrelated companies);
+asking the model to pass the stored company name (it does not know it before a call, which is
+how the inconsistency arose).
+
+## 2026-10-20 — COM is initialised on the thread that uses it
+
+Context: after an Agent Web restart the first signature harvest worked and every later mail call
+failed with `handler_error`. A probe confirmed `Dispatch("Outlook.Application")` inside
+`asyncio.to_thread` raised CO_E_NOTINITIALIZED: only the thread that first imported pywin32 had COM
+initialised, and the adapters kept a dispatch object across calls.
+
+Decision: `integrations.com.apartment()` initialises COM (CoInitialize / CoUninitialize, nested
+uses counted) around each use. The Outlook mailbox, draft writer and draft sender ask for
+Outlook inside it on every call and keep no COM object afterwards; their failures are caught
+inside the block (so no COM object outlives it) and mapped to their own codes. The weekly-report
+and chipset Excel runs, which hold Excel from the first write to `close` on one worker thread,
+run inside one apartment each. Without pywin32 the apartment does nothing and the adapters refuse
+with `library_missing` as before.
+
+Rejected: a dedicated COM thread for all Office calls (a queue and lifetime to manage for calls
+that already run on worker threads); initialising each worker thread once and never releasing it
+(threads of the default pool are shared with unrelated work); `pythoncom.CoInitializeEx` with a
+multithreaded apartment (Outlook's object model expects a single-threaded apartment).

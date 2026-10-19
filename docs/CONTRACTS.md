@@ -2339,16 +2339,26 @@ drafts a Workflow or Skill shows its install card"):
   `<workspace>/business-cards/<actor-key>/cards.db` (`store.actor_key`).
   - Writes (`side_effect: write`, `approval_required: true`, confirmed standing by the Host):
     `add-card` (`AddCardRequest`: card fields, `uncertain` [field names],
-    `romanised_name_printed`, `image_path`, `card_date`) → `AddResult` {`person_id`, `name`,
-    `company`, `outcome` (`created` | `updated` | `unchanged`), `existed`, `matched_by` (`email` |
-    `name_company` | `romanised_name`), `changes` [{`field`, `old`, `new`}], `kept` [{`field`,
-    `current`, `offered`, `reason` (`user_set` | `older_evidence` | `uncertain`)}], `uncertain`,
-    `needs_confirmation` [field names], `dropped` [{`field`, `value`, `reason` (`not_on_card`)}],
-    `status`, `summary`, `observation_id`, `change_id`}; `add-from-signature` {`entries`: 1–50 card fields +
-    `message_id`, `message_date`, `uncertain`} → {`results`: [`AddResult`]}; `edit-person`
+    `romanised_name_printed`, `other_text` (printed text not placed in a field; scanned only for
+    the 統一編號, not stored; 2026-10-20 re-test), `image_path`, `card_date`) → `AddResult`
+    {`person_id`, `name`, `company`, `outcome` (`created` | `updated` | `unchanged`), `existed`,
+    `matched_by` (`image` | `email` | `name_company` | `romanised_name`), `changes` [{`field`,
+    `label`, `old`, `new`}], `kept` [{`field`, `label`, `current`, `offered`, `reason`
+    (`user_set` | `older_evidence` | `uncertain` | `email_differs` | `less_complete`)}],
+    `uncertain`, `needs_confirmation` [field names], `to_confirm` [{`field`, `label`,
+    `stored`}], `dropped` [{`field`, `label`, `value`, `reason` (`not_on_card`)}],
+    `email_differs` ({`stored`, `read`} or null), `status`, `summary`, `observation_id`,
+    `change_id`}. `label` is the field's Chinese name (`contracts.FIELD_LABELS`).
+    `add-from-signature` {`entries`: 1–50 card fields +
+    `message_id`, `message_date`, `uncertain`} → {`results`: [`AddResult`]};
+    `store-candidates` (2026-10-20 re-test) {`candidate_ids`: 1–50 ids from this conversation's
+    latest harvest (`s1`, ...) or [`all`]} → {`results`: [`AddResult`], `stored`,
+    `already_stored`, `unknown` [ids]}: stored with source `email_signature`, the candidate's
+    message id and date; refused `candidates_expired` when the conversation (`<channel>:<session
+    id>`) has none left (one hour after the harvest); `edit-person`
     {`person`, `fields` (optional), `confirm` [field names], `clear` [field names], `reason`} →
     {`person_id`, `name`,
-    `changes`, `confirmed`, `needs_confirmation`, `change_id`};
+    `changes`, `confirmed`, `needs_confirmation`, `to_confirm`, `change_id`};
     `set-status` {`person`, `status` (`left` | `active`), `reason`, `effective_date`} →
     {`person_id`, `name`, `old_status`, `new_status`, `left_at`, `change_id`} (no `said_by`
     since 2026-10-20: who is the request's `<actor> via <channel>`, also in history actors,
@@ -2361,7 +2371,8 @@ drafts a Workflow or Skill shows its install card"):
     `people_updated`, `source`}.
   - Reads: `find` {`query`, `status` (`active` | `left` | `any`), `limit` ≤ 100} and `list`
     {`company`, `source` (`card` | `email_signature` | `user` | `import` | ""), `status`,
-    `limit` ≤ 200} → {`people`: [`PersonView`], `total`}; `history` {`person`, `limit`} →
+    `limit` ≤ 200} → {`people`: [`PersonView`], `total`, `company` (the stored company the
+    query or `company` named, else "")}; `history` {`person`, `limit`} →
     {`person`, `history` [{`change_id`, `at`, `actor`, `kind`, `field`, `old`, `new`,
     `reason`, `source`}], `observations` [{`observation_id`, `source`, `source_date`,
     `source_ref`, `uncertain`}], `proposals` [{`field`, `current`, `proposed`, `source`}]};
@@ -2370,8 +2381,15 @@ drafts a Workflow or Skill shows its install card"):
     `legend_markdown`, `note`, `attach` [{`path`, `media_type`, `filename`}]};
     `harvest-signatures` {`domain`, `days` (capped at the mail scope's `max_days`), `limit` ≤ 40,
     `folder`} → {`scanned`, `from_domain`, `with_signature`, `candidates` [card fields +
-    `message_id`, `message_date`, `uncertain`, `existing_person_id`, `would_change`], `note`,
-    `skipped` [{`code`, `count`}], `skipped_note`}.
+    `candidate_id`, `message_id`, `message_date`, `uncertain`, `existing_person_id`,
+    `would_change`], `note`, `skipped` [{`code`, `count`}], `skipped_note`, `expires_at`}; the
+    candidates are kept in the actor's store for this conversation (table `candidates`; fields,
+    message id and date only) until `expires_at` or the next harvest.
+  - A company in `org-chart`, `list` and `find` resolves against the stored companies: the name
+    without legal suffixes, then an alias (a capitalised 2–6 letter short name such as `WNC`, or
+    an email / website domain other than a public mail service), then an unambiguous part of a
+    name; the result names the canonical spelling (decision 2026-10-20 "How a company query
+    finds the company").
   - `PersonRef` {`person_id` | `name` (local or romanised) + optional `company`}. Card fields:
     `name`, `romanised_name`, `company`, `company_tax_id`, `business_group`, `division`,
     `department`, `title`, `honorific`, `phone`, `ext`, `mobile`, `fax`, `email`, `address`,
@@ -2381,7 +2399,7 @@ drafts a Workflow or Skill shows its install card"):
     `card_without_name`, `line_to_self`, `line_cycle`, `change_unknown`,
     `change_already_undone`, `undo_conflict`, `company_has_no_contacts`,
     `chart_renderer_missing`, `import_unreadable`, `model_not_configured`, `model_unavailable`,
-    and the mail codes of `outlook.search` / `outlook.read`.
+    `candidates_expired`, and the mail codes of `outlook.search` / `outlook.read`.
   - Signature model call: structured output `business-cards.signature.v1`
     {`people`: [{`i`, card fields except `email`/`notes`, `uncertain`}]}, ≤ 10 blocks per call.
 - `LocalPolicy.confirm_writes(spec)` / `confirmed_writes`: a host-declared standing
@@ -2389,13 +2407,19 @@ drafts a Workflow or Skill shows its install card"):
   those capabilities. Grants still apply.
 - Conversation tools (`host_runtime.business_cards_tools`, `host.cards__<op>.v1`, offered while
   some version of `engineering/business-cards` is switched on): `cards__add_card`,
-  `cards__add_from_signature`, `cards__edit_person`, `cards__find`, `cards__list`,
+  `cards__store_candidates`, `cards__add_from_signature`, `cards__edit_person`, `cards__find`,
+  `cards__list`,
   `cards__history`, `cards__set_status`, `cards__set_reporting_line`,
   `cards__remove_reporting_line`, `cards__undo`, `cards__org_chart`,
   `cards__harvest_signatures`, `cards__import_hermes`; each dispatches with `origin: model`,
   after dropping identity keys (`said_by`, `set_by`, `actor`, `recorded_by`, `confirmed_by`) from
-  the model's arguments. A failed call's `failure.message` is `<Chinese sentence>（<code>）` plus
+  the model's arguments. A succeeded call's data also carries `field_labels` (field name →
+  Chinese label). A failed call's `failure.message` is `<Chinese sentence>（<code>）` plus
   `: <Bridge message>` when the Bridge gave a specific one (`FAILURE_TEXT`).
+- COM (`integrations.com.apartment()`, 2026-10-20 re-test): `OutlookComMailbox`, `OutlookComDraft`
+  and `OutlookComDraftSender` take `connect` (how to get Outlook on the calling thread; default
+  `Dispatch`) beside `dispatch`, initialise COM around each call and map every COM failure to
+  their codes (`mail_failed`, `draft_failed`, `send_failed`).
 - Skill `engineering/business-cards@1.0.0` (alias `cards`, no commands), in
   `host_runtime.assets.shipped()`.
 - Agent Web: a Gateway answer that drew a chart carries `files` and stores them on the assistant

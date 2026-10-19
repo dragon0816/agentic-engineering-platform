@@ -17,7 +17,7 @@ uncertain), but nothing could store it. The only implementation was the Hermes c
 |---|---|
 | No source column | every observation records `card`, `email_signature`, `user` or `import` |
 | No status / departure, no update or delete | `status` (`active` / `left`), `left_at`, `status_set_by`, `status_reason`; edits; undo |
-| Duplicates only by exact name + company | email first (case-insensitive); then name + company, where a romanised name matches the local-language name |
+| Duplicates only by exact name + company | the same card image; then email (case-insensitive); then name + company (a romanised name matches the local-language name), also with another email unless the department or division differs |
 | No fax, no business group | `fax`, `ext`; `business_group` (事業群), `division` (處), `department` kept apart |
 | No reporting lines | `reporting_lines` with evidence kind, reference, confidence and inferred flag |
 
@@ -42,7 +42,26 @@ short hash, so two actors never share a file.
   delete (`removed_at`, `removed_by`, `removed_reason`), so it can be restored.
 - **history**: every change, grouped by `change_id`: who, when, why, kind, field, old and new
   value. Undo replays a change group backwards and is itself a new change.
-- **proposals**: a conflict between an automatic source and a user-set value.
+- **proposals**: a conflict between an automatic source and a user-set value, or another
+  email for a person matched by image or name.
+- **candidates**: a signature harvest's candidates for one conversation (`<channel>:<session
+  id>`), with short ids (`s1`, ...), fields, uncertain, message id and date (never a body); kept
+  one hour or until the conversation's next harvest (§5).
+
+### Which person a reading is (2026-10-20 re-test; decision "How a re-scanned card finds its person")
+
+1. the same card image (`sha256:` ref) as an earlier observation → the person it was stored as
+   (`matched_by: image`);
+2. the same email (case-insensitive);
+3. the same name (local or romanised) at the same company. Another email does not make it
+   someone else unless the place differs too: both have a department and they differ, or both a
+   division and they differ.
+
+When 1 or 3 brings another email, the stored email stays, the new one is a proposal, the email
+needs confirmation (unless the person set or confirmed it) and the result carries
+`email_differs` {`stored`, `read`} with a sentence in `summary`. Limit: namesakes at one company
+with different emails and the same or an unread department and division are taken to be one
+person; the flagged email lets the person correct it.
 
 ### Field-level provenance (in the spirit of ADR-K11)
 
@@ -53,7 +72,11 @@ When a card, signature or import brings a value for a field:
    and the result says so ("kept your value");
 3. current value from an automatic source → replaced only when the new evidence is not older
    than the current value's evidence date; the change is in history;
-4. a value the reading marked **uncertain** fills an empty field but never replaces a value.
+4. a value the reading marked **uncertain** fills an empty field but never replaces a value;
+5. a reading that is a strict prefix or substring of the stored value (spaces and case ignored)
+   never replaces it (`less_complete`: "Connectivity & Solutions" does not replace
+   "Connectivity & Solutions 事業群", 研展處 does not replace 研展處 I); not for `title`
+   (副總經理 → 總經理 is a promotion), `notes` or `email`.
 
 `edit_person` sets values with source `user`.
 
@@ -80,9 +103,13 @@ keys (`said_by`, `set_by`, `actor`, ...) from a model's arguments.
   uncertain when its local part repeats the dropped name. A signature candidate keeps a romanised
   name only when its block prints it.
 - A degree or honorific in `title` (博士, Dr., PhD; not 博士後) moves to `honorific`.
-- A unified business number in `notes` (統一編號 / 統編 / UBN / Tax ID + 8 digits) moves to
-  `company_tax_id`. Decision `docs/DECISIONS.md` 2026-10-20 "Degrees and the unified business
-  number are contact fields".
+- A unified business number in `notes` or `address` (統一編號 / 統編 / UBN / Tax ID + 8 digits)
+  moves to `company_tax_id`; `add-card` also takes `other_text` (printed text the reading did
+  not place in a field), which the Host scans for the number and does not store (re-test
+  2026-10-20: card A's printed number was missed). When `company_tax_id` holds a number that
+  the stored notes still mention (a note from before the field existed), the mention is taken
+  out of the notes with a history row. Decision `docs/DECISIONS.md` 2026-10-20 "Degrees and the
+  unified business number are contact fields".
 - Division and department text is never normalised: 研展處 I and 研展處 II are two boxes.
 
 ## 3. Operations (Bridge capabilities, namespace `business-cards`, version 1.0.0)
@@ -91,17 +118,27 @@ keys (`said_by`, `set_by`, `actor`, ...) from a model's arguments.
 |---|---|---|
 | `add-card` | write | Fields + `uncertain` read from a card photo; returns created / updated / unchanged, what changed, what was kept, and a "上次是…, 現在是…" line |
 | `add-from-signature` | write | 1–50 entries with message id and date; source `email_signature` |
+| `store-candidates` | write | This conversation's harvested candidates by id (`s1`, ...) or `all`; the Host supplies message id and date |
 | `edit-person` | write | The person's own corrections, source `user` |
 | `set-status` | write | `left` / `active`, with reason, who said it and the date |
 | `set-reporting-line` | write | Person → manager with evidence; replaces the person's current line |
 | `remove-reporting-line` | write | Soft-removes the current line, with a reason |
 | `undo` | write | Reverts one change group by its `change_id` |
 | `import-hermes` | write | One-time, idempotent import of `~/.business-cards/cards.db` (`BUSINESS_CARDS_HOME`) |
-| `find` | read | People matching a text (name, romanised name, email, company, title) |
-| `list` | read | People by company, source and status |
+| `find` | read | People matching a text (name, romanised name, email, company, title); a company query returns all its people |
+| `list` | read | People by company (resolved as below), source and status |
 | `history` | read | One person's changes and observations, with change ids |
 | `org-chart` | read | PNG + Markdown legend for a company (writes only the derived files) |
 | `harvest-signatures` | read | Mail in the configured scope from one company domain → signature candidates |
+
+**Company queries** (re-test 2026-10-20: "WNC" worked once and failed once). `org-chart`, `list`
+and `find` resolve a company against the stored companies: the exact or legal-suffix-stripped
+name; then an alias (a 2–6 letter word in capitals in the name such as `WNC`, or the company part
+of an email or website domain, `wnc.com.tw` → `wnc`, never a public mail service); then a part of
+exactly one company's name (啟碁 → 啟碁科技). Spellings sharing a name or an alias are one
+company; the result names the canonical spelling (most people, then longest). Ambiguous or
+unknown queries fall back to the plain name comparison. Decision "How a company query finds the
+company".
 
 Every capability is a typed contract (`capabilities/business_cards/contracts.py`); the dispatcher
 validates inputs and outputs as for any capability. Nothing here sends mail or reaches the network
@@ -122,7 +159,8 @@ selection like any other. Switching the Skill off removes the tools.
 The Skill `engineering/business-cards@1.0.0` (alias `cards`) is shipped switched on
 (`host_runtime.assets.shipped()`). It carries the procedure; it has no commands, because a Skill
 command to a capability gives the model no argument schema. The Host offers host tools
-`cards__add_card`, `cards__add_from_signature`, `cards__edit_person`, `cards__find`, `cards__list`,
+`cards__add_card`, `cards__store_candidates`, `cards__add_from_signature`, `cards__edit_person`,
+`cards__find`, `cards__list`,
 `cards__history`, `cards__set_status`, `cards__set_reporting_line`, `cards__remove_reporting_line`,
 `cards__undo`, `cards__org_chart`, `cards__harvest_signatures`, `cards__import_hermes`, each with its
 JSON schema, **only while some version of that Skill is switched on** and its capabilities are
@@ -143,7 +181,17 @@ Procedure (from the Hermes `SKILL.md`, adapted):
   including suffixes such as I, II, 一處; 統一編號 in `company_tax_id`, never in notes;
 - ask about `needs_confirmation` too; "email 正確" → `cards__edit_person` `confirm: ["email"]`;
 - when a tool fails, tell its failure message and code; mention Settings only when the message
-  names it.
+  names it;
+- name fields in Chinese with the result's `field_labels` (every succeeded `cards__*` result
+  carries them; changed, kept and dropped items carry `label`), never raw names such as
+  `romanised_name`; report only what changed; a question about a field states its stored value
+  (`to_confirm` [{`field`, `label`, `stored`}]);
+- `email_differs`: say the email read this time differs from the stored one, which was kept;
+- look for the 統一編號 on every card and put unplaced printed text in `other_text`;
+- a company is passed as the person says it (WNC, 啟碁); the result's `company` is its stored
+  name;
+- after a harvest list each candidate with its id; on 「都存進去」 or 「存 s1、s3」 call
+  `cards__store_candidates`; never harvest again just to store.
 
 ## 5. Email signatures
 
@@ -153,8 +201,21 @@ Settings → Agent mode (folders, `max_days`, exclusions), never wider: `days` i
 lines before any quoted reply are cut as the signature block (≤ 1,200 characters), credential-shaped
 text is redacted, and at most 10 blocks go to the internal gateway model per structured call
 (`business-cards.signature.v1`), at most 40 messages per harvest. The result is candidates
-(fields, message id, date, whether the person exists and what would change). Nothing is stored
-until `add-from-signature`; only fields, the message id and the date are ever stored.
+(a short `candidate_id`, fields, message id, date, whether the person exists and what would
+change). Nothing is stored in the contacts until the person confirms; the candidates are kept for
+this conversation (`candidates` table, one hour, replaced by its next harvest; `expires_at`), and
+`store-candidates` stores them by id or `all` with source `email_signature`, the message id and
+the date, so the model never copies message ids (re-test 2026-10-20: on 「都存進去」 the model
+re-ran the harvest because the ids were not in its context). An expired set is refused
+`candidates_expired`. Only fields, the message id and the date are ever stored.
+
+**COM on worker threads** (re-test 2026-10-20). Mail is read on `asyncio.to_thread` workers. COM
+must be initialised on each thread that uses it; only the thread that first imported pywin32
+was, so after a restart the first harvest worked and later mail calls failed with
+CO_E_NOTINITIALIZED (unmapped, so `handler_error`). `integrations.com.apartment()` now wraps
+every Outlook call (mailbox, draft, send: Outlook is asked for inside it on every call and no
+COM object is kept) and each Excel run of the weekly and chipset reports; COM failures map to the
+adapters' codes. The guarded live test lists the Inbox from two different worker threads.
 
 A message that cannot be read is skipped and counted by its code (`skipped` [{`code`, `count`}]),
 never the whole harvest; `skipped_note` says it for the person, e.g. 「讀信失敗：1 封信無法讀取
@@ -178,11 +239,15 @@ kept after it.
 `org-chart(company, include_left)` lays out business group → division → department as nested
 boxes, people inside by title seniority, and draws reporting lines: solid for evidenced lines
 (signature, email content, user), dashed for inferred ones (title inference or `inferred`). People
-who left are omitted, or drawn grey with "已離職" when `include_left` is true. Rendered with Pillow
+who left are omitted, or drawn grey with "已離職" when `include_left` is true. A person's box
+reads: the name with the honorific (「王則閔 博士」), the title, the desk phone with its
+extension, the mobile when there is one (「手機 …」), and 「需確認：…」 in the warning colour
+(re-test 2026-10-20: the box showed only the mobile and no 博士). Rendered with Pillow
 (shipped in the bundle with the `weekly-mail` extra and in CI with `office`), no Graphviz; a CJK
 font is taken from Windows Fonts (Microsoft JhengHei, then others) when present. The Markdown
-legend lists each line with its evidence and whether it is inferred, and says plainly that without
-evidenced lines the layout is a grouping by title, not a reporting chart. Files go to
+legend lists each line with its evidence and whether it is inferred, says plainly that without
+evidenced lines the layout is a grouping by title, not a reporting chart, and lists each person
+with fields still to confirm (「- 王則閔 博士：Email」). Files go to
 `<workspace>/business-cards/<actor-key>/charts/`; the result names them in `attach`.
 
 **Showing it.** Agent Web: after a Gateway turn, files named by a `cards__org_chart` result are
