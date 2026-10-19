@@ -30,7 +30,7 @@ from typing import Any
 
 from agent.harness_plan import build_plan
 from agent.harness_run import HarnessCheckResult
-from agent.harness_runner import run_harness_async
+from agent.harness_runner import HarnessActionFailure, run_harness_async
 from agent.skills import SkillHarnessGuidance
 from capabilities.coding_change.workspaces import containing_root
 from common.assets import AssetIdentity
@@ -142,20 +142,16 @@ class ConversationActions:
                 ),
             )
         self.result = await self.run_turn(self.history, retry)
+        if self.result.status != "answered":
+            # No answer to check: the run stops where the turn did, failed or
+            # waiting for the person (a question, a guard stop), never
+            # `validated` (live test 2026-10-20).
+            self.reasons = []
+            code = self.result.failure.code if self.result.failure is not None else "not_answered"
+            raise HarnessActionFailure(code, needs_input=self.result.status == "needs_input")
         return f"turn-{self.result.model_turns}"
 
     def validate(self) -> tuple[HarnessCheckResult, ...]:
-        if self.result.status != "answered":
-            # A question to the person, or a stopped loop: nothing was claimed.
-            self.reasons = []
-            return (
-                HarnessCheckResult(
-                    check_id=CLAIM_CHECK, status="passed", evidence_ref="not-answered"
-                ),
-                HarnessCheckResult(
-                    check_id=OUTPUT_CHECK, status="passed", evidence_ref="not-answered"
-                ),
-            )
         checks, self.reasons = check_answer(self.result.text, self.result.tools, self.roots)
         if self.reasons:
             self.checked, self.checked_reasons = self.result, list(self.reasons)

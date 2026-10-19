@@ -194,6 +194,10 @@ flowchart TD
   - 共用 Harness runner（`run_harness`、`run_harness_async`）：每次進入新階段；Knowledge、Workflow、Coding 與對話檢查都經過這裡，所以不必各自接線。
   - 透過 context variable `TURN_PROGRESS` 傳遞；`asyncio.to_thread` 與新的 asyncio task 會複製它，所以工具裡的 Harness 也回報到同一回合。
   - Agent 模式（Claude Code／Copilot）：只有已經收到的工具請求（`AgentMode.observer`：等待確認、允許、拒絕）。Codex 沒有事件，只顯示經過時間。
+- **結束狀態**（2026-10-20 實測修正）：Harness 的結束狀態要與回合結果一致。
+  - 過去對話檢查在回合「沒有回答」（`failed` 或 `needs_input`）時兩項檢查都算通過，進度因此停在 `validated`、三步都打勾，而回合其實失敗。
+  - 現在 `ConversationActions.execute` 在回合沒有回答時以 `HarnessActionFailure`（回合的失敗碼）停止 Harness：`failed` → phase `failed`；`needs_input`（向使用者提問、工具上限／重複／時間停止）→ phase `needs_input`。只有真正的回答才進入驗收。
+  - 步驟顯示：`validated` 全部 ✓；其他結束狀態時，停下的那一步是 `failed`（✗）或 `stopped`（⏸，`needs_input`），之前的步驟 ✓，之後沒跑到的步驟維持 `waiting`。`TurnProgress` 記下 Harness 結束時所在的階段（`ended_in`）。Agent Web 與 Telegram 的步驟文字相同。
 - **讀取**：`GET /api/conversations/progress?session_id=…`（需要頁面 token），只回傳該 session、且由同一個 actor 開始的回合；沒有回合時 `progress` 是 `null`。
 - **Agent Web**：回合「working」時每秒讀一次（仿 `watchAgentCards`），顯示：
   - 一行狀態（`aria-live="polite"`，只有階段或工具變了才更新）；

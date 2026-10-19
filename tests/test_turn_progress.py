@@ -140,3 +140,77 @@ def test_the_board_serves_only_the_owner_and_forgets_a_finished_turn() -> None:
     assert board.read("s3", "me") is None
     board.end(mine)
     assert board.read("s1", "me") is None and board.read("s2", "me") is not None
+
+
+def _outcome(status: str, code: str | None = None) -> Any:
+    from agent.gateway import GatewayConversationResult
+    from common.execution import Failure, TraceIdentifiers
+
+    return GatewayConversationResult(
+        trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"),
+        status=status,
+        text="text",
+        model_turns=1,
+        failure=None if code is None else Failure(code=code, message="m"),
+    )
+
+
+def _checked(*outcomes: Any) -> tuple[Any, dict[str, Any]]:
+    """Run the conversation check over scripted turn outcomes; the result and
+    the progress the turn ended with."""
+    import asyncio
+
+    from agent.conversation_harness import checked_turn
+
+    queue = list(outcomes)
+
+    async def run_turn(history: tuple[Any, ...], retry: tuple[Any, ...]) -> Any:
+        return queue.pop(0)
+
+    progress = TurnProgress(turn_id="t1", session_id="s1", owner="me")
+    token = TURN_PROGRESS.set(progress)
+    try:
+        result = asyncio.run(
+            checked_turn(run_turn, (), (), lambda role, text: (role, text), "request-1")
+        )
+    finally:
+        TURN_PROGRESS.reset(token)
+    return result, progress.snapshot()
+
+
+def test_a_failed_turn_ends_its_progress_failed_not_validated() -> None:
+    """Live test 2026-10-20: the turn failed, but the progress ended at
+    `validated` with every step done."""
+    result, snapshot = _checked(_outcome("failed", "conversation_history_invalid"))
+    assert result.status == "failed"
+    harness = snapshot["harness"]
+    assert harness["done"] is True and harness["phase"] == "failed"
+    states = {step["stage"]: step["state"] for step in harness["steps"]}
+    assert states == {"plan": "done", "execute": "failed", "validate": "waiting"}
+    assert compact_lines(snapshot)[0] == "對話檢查：① 規劃 ✓ ② 執行 ✗ ③ 驗收"
+
+
+def test_a_stopped_turn_ends_its_progress_stopped() -> None:
+    """A guard stop or a question to the person is `needs_input`: stopped,
+    not failed, and never shown as checked."""
+    result, snapshot = _checked(_outcome("needs_input", "tool_loop_limit"))
+    assert result.status == "needs_input"
+    harness = snapshot["harness"]
+    assert harness["done"] is True and harness["phase"] == "needs_input"
+    states = {step["stage"]: step["state"] for step in harness["steps"]}
+    assert states == {"plan": "done", "execute": "stopped", "validate": "waiting"}
+    assert compact_lines(snapshot)[0] == "對話檢查：① 規劃 ✓ ② 執行 ⏸ ③ 驗收"
+
+
+def test_a_failed_retry_pass_ends_failed_and_an_answered_turn_validated() -> None:
+    claim = _outcome("answered").model_copy(update={"text": "我已經儲存了。"})
+    result, snapshot = _checked(claim, _outcome("failed", "model_output_truncated"))
+    # The person gets the first answer with the Host note (bug 1), and the
+    # progress says the turn did not pass its checks.
+    assert result.status == "answered" and "Host 檢查未通過" in result.text
+    harness = snapshot["harness"]
+    assert harness["phase"] == "failed" and harness["retry"] == 1
+    assert [step["state"] for step in harness["steps"]] == ["done", "failed", "waiting"]
+    _, passed = _checked(_outcome("answered"))
+    assert passed["harness"]["phase"] == "validated"
+    assert [step["state"] for step in passed["harness"]["steps"]] == ["done"] * 3

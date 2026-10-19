@@ -60,6 +60,8 @@ class _Harness:
     phase: str
     retry: int = 0
     done: bool = False
+    #: The stage the run was in when it ended (None: it never reached one).
+    ended_in: str | None = None
 
 
 @dataclass
@@ -136,6 +138,8 @@ class TurnProgress:
             if current is None:
                 current = _Harness(domain=_name(domain), stages=tuple(stages), phase=phase)
                 self._harness.append(current)
+            if phase in _TERMINAL and not current.done:
+                current.ended_in = _PHASE_STAGE.get(current.phase)
             current.phase, current.retry = phase, retry
             current.done = phase in _TERMINAL
         self._notify()
@@ -197,12 +201,17 @@ def _harness_view(run: _Harness) -> dict[str, Any]:
     current = _PHASE_STAGE.get(run.phase)
     order = ("plan", *run.stages)
     reached = order.index(current) if current in order else len(order)
+    if run.done and run.phase != "validated":
+        # The run ended without passing its checks: the stage it was in is
+        # failed (or stopped, waiting for the person); later ones never ran.
+        reached = order.index(run.ended_in) if run.ended_in in order else len(order) - 1
     steps = []
     for index, stage in enumerate(order):
-        if run.done:
-            # A stopped run failed its checks (or a stage before them).
-            failed = run.phase != "validated" and stage == "validate"
-            state = "failed" if failed else "done"
+        if run.done and run.phase == "validated":
+            state = "done"
+        elif run.done:
+            ended = "stopped" if run.phase == "needs_input" else "failed"
+            state = "done" if index < reached else ended if index == reached else "waiting"
         elif index < reached:
             state = "done"
         elif index == reached:
@@ -238,7 +247,9 @@ def compact_lines(snapshot: dict[str, Any]) -> list[str]:
             label = step["label"]
             if step["state"] == "active" and harness["retry"] and step["stage"] != "plan":
                 label += f"（第 {harness['retry'] + 1} 輪）"
-            suffix = {"done": " ✓", "active": "…", "failed": " ✗"}.get(step["state"], "")
+            suffix = {"done": " ✓", "active": "…", "failed": " ✗", "stopped": " ⏸"}.get(
+                step["state"], ""
+            )
             parts.append(f"{marks[index]} {label}{suffix}")
         lines.append(f"{harness['label']}：" + " ".join(parts))
     counts = []

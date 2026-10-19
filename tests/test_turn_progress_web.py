@@ -158,6 +158,73 @@ def test_the_progress_route_shows_a_running_turn_to_its_session_only(
     assert _progress(url, token, session_id) == {"ok": True, "progress": None}
 
 
+def test_the_progress_route_ends_a_failed_turn_failed(
+    served: AgentWebServer,  # noqa: F811
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Live test 2026-10-20: the route ended at `validated`, all steps done,
+    for a turn whose status was failed."""
+    from agent.conversation_harness import checked_turn
+    from common.execution import Failure
+
+    release = threading.Event()
+    failed = GatewayConversationResult(
+        trace=TRACE,
+        status="failed",
+        text="could not complete this turn",
+        model_turns=0,
+        failure=Failure(code="conversation_history_invalid", message="m"),
+    )
+
+    async def converse(request: Any, history: Any, **_: Any) -> LocalConversationOutcome:
+        import asyncio
+
+        async def run_turn(messages: Any, retry: Any) -> GatewayConversationResult:
+            return failed
+
+        result = await checked_turn(run_turn, (), (), lambda role, text: None, "request-1")
+        await asyncio.to_thread(release.wait, 60)
+        return LocalConversationOutcome(
+            trace=TRACE, ingress="local", actor=request.actor, conversation=result
+        )
+
+    monkeypatch.setattr(served.web.runtime.agent, "converse", converse)
+    url, token = base(served), served.token
+    session_id = _session(url, token)
+    finished: list[Any] = []
+    turn = threading.Thread(
+        target=lambda: finished.append(
+            fetch(
+                url + "/api/conversations/turn",
+                token=token,
+                body={"session_id": session_id, "message": "請解析這張名片"},
+            ).json()
+        )
+    )
+    turn.start()
+    try:
+        shown = _wait_for(
+            lambda: (
+                ((_progress(url, token, session_id)["progress"] or {}).get("harness") or {}).get(
+                    "done"
+                )
+                and _progress(url, token, session_id)["progress"]
+            )
+        )
+        harness = shown["harness"]
+        assert harness["domain"] == "conversation"
+        assert harness["phase"] == "failed"
+        assert [(step["stage"], step["state"]) for step in harness["steps"]] == [
+            ("plan", "done"),
+            ("execute", "failed"),
+            ("validate", "waiting"),
+        ]
+    finally:
+        release.set()
+        turn.join(timeout=30)
+    assert finished and finished[0]["answer"]["status"] == "failed"
+
+
 def test_the_progress_board_is_owned_by_the_actor_that_started_the_turn(
     served: AgentWebServer,  # noqa: F811
 ) -> None:

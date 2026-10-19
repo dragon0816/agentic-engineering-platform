@@ -232,3 +232,36 @@ def test_a_harness_phase_from_a_worker_thread_edits_the_message(tmp_path: Path) 
     transport = TimedTransport()
     _drive(tmp_path, transport, steps, interval=0.05)
     assert any("Workflow：① 規劃 ✓ ② 執行…" in text for _, text in transport.delivered())
+
+
+def test_a_failed_turn_shows_a_failed_step_in_the_status_message(tmp_path: Path) -> None:
+    """Live test 2026-10-20: a failed turn's stepper read as all checked."""
+    from agent.conversation_harness import checked_turn
+    from agent.gateway import GatewayConversationResult
+    from agent.turn_progress import TURN_PROGRESS
+    from common.execution import Failure, TraceIdentifiers
+
+    failed = GatewayConversationResult(
+        trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"),
+        status="failed",
+        text="could not complete this turn",
+        model_turns=0,
+        failure=Failure(code="conversation_history_invalid", message="m"),
+    )
+
+    async def run_turn(history: Any, retry: Any) -> GatewayConversationResult:
+        return failed
+
+    async def steps(turn: TurnProgress, _progress: object) -> None:
+        token = TURN_PROGRESS.set(turn)
+        try:
+            await checked_turn(run_turn, (), (), lambda role, text: None, "request-1")
+        finally:
+            TURN_PROGRESS.reset(token)
+        await asyncio.sleep(0.3)
+
+    transport = TimedTransport()
+    _drive(tmp_path, transport, steps, interval=0.05)
+    texts = [text for _, text in transport.delivered()]
+    assert any("對話檢查：① 規劃 ✓ ② 執行 ✗ ③ 驗收" in text for text in texts), texts
+    assert not any("驗收 ✓" in text for text in texts), texts

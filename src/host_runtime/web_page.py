@@ -2895,7 +2895,7 @@ function showTurnProgress(box, progress) {
       label += "（第 " + (harness.retry + 1) + " 輪）";
     }
     label += step.state === "done" ? " ✓" : step.state === "active" ? "…"
-      : step.state === "failed" ? " ✗" : "";
+      : step.state === "failed" ? " ✗" : step.state === "stopped" ? " ⏸" : "";
     item.textContent = label;
     return item;
   }) : []));

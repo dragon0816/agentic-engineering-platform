@@ -2675,3 +2675,9 @@ s-k-20261011T102952` (not published).
   goes to `_converse(..., retry=...)` after the person's message, which keeps its picture (sent
   once); a retry pass that fails returns the first answer with the Host note. Tests
   `tests/test_conversation_harness.py`; `docs/HARNESS_DESIGN.zh-TW.md` §5.3.
+- [x] The live progress ends in the turn's real outcome (2026-10-20, Claude Code; live test
+  2026-10-20, `/api/conversations/progress` ended `validated` with every step done for a failed
+  turn). A turn without an answer stops the conversation Harness in `execute` (`failed`, or
+  `needs_input` shown as stopped); `TurnProgress` keeps the stage a run ended in. Tests
+  `tests/test_turn_progress.py`, `tests/test_turn_progress_web.py` (progress route),
+  `tests/test_telegram_turn_progress.py` (status text); `docs/HARNESS_DESIGN.zh-TW.md` §5.5.1.
