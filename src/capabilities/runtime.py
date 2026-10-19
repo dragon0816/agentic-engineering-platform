@@ -126,6 +126,10 @@ class LocalPolicy:
         owner_mode: bool = False,
     ) -> None:
         self.owner_mode = owner_mode
+        # Writes the Host itself declared need no per-call confirmation (host
+        # code, never asset content): the person's own contact store, which is
+        # local, recorded and undoable (docs/phases/BUSINESS_CARDS.md §3).
+        self.confirmed_writes: set[tuple[str, str, str]] = set()
         self._grants: dict[tuple[str, tuple[str, str, str]], CapabilityGrant] = {}
         for grant in grants:
             checked = CapabilityGrant.model_validate(grant)
@@ -140,10 +144,23 @@ class LocalPolicy:
         checked = CapabilityGrant.model_validate(grant)
         self._grants.setdefault((checked.actor, checked.asset.key), checked)
 
+    def confirm_writes(self, spec: CapabilitySpec) -> None:
+        """A standing confirmation for one local `write` capability. Only a
+        low-risk `write` qualifies: never execute or an external side effect."""
+        if spec.side_effect != "write" or spec.policy.risk != "low":
+            raise ValueError("only a low-risk local write may be confirmed standing")
+        self.confirmed_writes.add(spec.identity.key)
+
     def confirmation_needed(self, spec: CapabilitySpec, origin: str) -> bool:
         """In owner mode, a side effect the model chose itself is not run until
-        the person confirms it; reads, and anything a person asked for, run."""
-        return self.owner_mode and origin == "model" and spec.side_effect != "read"
+        the person confirms it; reads, anything a person asked for, and the
+        writes the Host confirmed standing (`confirm_writes`) run."""
+        return (
+            self.owner_mode
+            and origin == "model"
+            and spec.side_effect != "read"
+            and spec.identity.key not in self.confirmed_writes
+        )
 
     def authorize(self, context: RequestContext, spec: CapabilitySpec) -> ExecutionAuthorization:
         grant = self._grants.get((context.actor, spec.identity.key))
