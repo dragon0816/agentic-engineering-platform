@@ -138,6 +138,8 @@ MemberErrorCode = Literal[
     # One-click sign-in from Agent Web (owner 2026-10-15).
     "ticket_used",
     "ticket_expired",
+    # A member revokes one of their own logins (owner 2026-10-19).
+    "login_missing",
 ]
 
 T = TypeVar("T")

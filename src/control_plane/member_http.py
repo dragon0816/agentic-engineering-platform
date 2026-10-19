@@ -134,6 +134,9 @@ STATUS_FOR = {
     # One-click sign-in from Agent Web (owner 2026-10-15).
     "ticket_used": 409,
     "ticket_expired": 401,
+    # A member revokes one of their own logins (owner 2026-10-19): a login
+    # that is not theirs answers the same as one that does not exist.
+    "login_missing": 404,
 }
 # The label of a login a member issues for their Personal Agent, so the
 # portal and an audit can tell it from the browser's own.
@@ -299,6 +302,7 @@ class _Handler(BaseHTTPRequestHandler):
             "admin/submissions/approve",
             "admin/submissions/reject",
             "logins/issue-agent",
+            "logins/revoke",
             "bridges/enroll",
             "admin/bridges/list",
             "admin/bridges/disable",
@@ -449,6 +453,22 @@ class _Handler(BaseHTTPRequestHandler):
                         "expires_at": login.grant.expires_at.isoformat(),
                     },
                 )
+                return
+            elif operation == "logins/revoke":
+                # A member ends one of their own logins by its id (owner
+                # 2026-10-19: Agent Web revokes the code it replaced). Another
+                # member's login, an unknown one and one already ended all
+                # answer `login_missing`, so ids reveal nothing.
+                (login_id,) = _strings(raw, "login_id")
+                member = self.server.service.identity(*credential)
+                now = self.server.service.now()
+                owned = {
+                    grant.login_id for grant in self.server.logins.active(member.actor, now=now)
+                }
+                if login_id not in owned:
+                    raise MemberError("login_missing")
+                revoked = self.server.logins.revoke(login_id)
+                self._json(200, {"login_id": revoked.login_id, "status": revoked.status})
                 return
             elif operation == "bridges/enroll":
                 # The member's own Agent enrolls this computer. The Bridge
