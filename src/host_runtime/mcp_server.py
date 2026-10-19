@@ -31,7 +31,9 @@ INSTRUCTIONS = (
     "and Skills), then aep_workflow_format or aep_skill_format for the full format, and "
     "aep_capability for each capability's input schema. When the request is unclear, ask the "
     "person before writing. Check a draft with aep_check_*, submit it with aep_submit_*, "
-    "run a Workflow with test values, then ask to install it. Runs that change something, "
+    "run a Workflow with test values, then ask to install it. To change an installed Workflow "
+    "drafted here, read it with aep_show_installed_workflow and copy it with "
+    "aep_revise_workflow instead of rewriting it. Runs that change something, "
     "and every install, wait for the owner's approval in Agent Web; follow them with "
     "aep_status. You get statuses "
     "and codes, never the data a run read."
@@ -75,6 +77,24 @@ TOOLS: dict[str, tuple[str, dict[str, Any]]] = {
     "aep_get": (
         "One submitted candidate in full.",
         {"type": "object", "properties": _ID, "required": ["candidate_id"]},
+    ),
+    "aep_show_installed_workflow": (
+        "An installed Workflow in full (namespace/name@version or name), when it was drafted "
+        "on this Host through AEP authoring; long ones come in slices (offset).",
+        {
+            "type": "object",
+            "properties": {"workflow": {"type": "string"}, "offset": {"type": "integer"}},
+            "required": ["workflow"],
+        },
+    ),
+    "aep_revise_workflow": (
+        "Copy an installed Workflow drafted here into a candidate one version up (same name), "
+        "to edit and resubmit with its candidate_id instead of rewriting it.",
+        {
+            "type": "object",
+            "properties": {"workflow": {"type": "string"}, "title": {"type": "string"}},
+            "required": ["workflow"],
+        },
     ),
     "aep_status": (
         "An approval's outcome: statuses and codes.",
@@ -136,6 +156,10 @@ def _object(args: dict[str, Any], key: str) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
+def _int(value: Any) -> int:
+    return value if isinstance(value, int) and not isinstance(value, bool) and value > 0 else 0
+
+
 def dispatch(authoring: ExternalAuthoring, name: str, args: dict[str, Any]) -> dict[str, JsonValue]:
     ident = str(args.get("candidate_id") or "")
     revise = ident or None
@@ -147,6 +171,12 @@ def dispatch(authoring: ExternalAuthoring, name: str, args: dict[str, Any]) -> d
         "aep_skill_format": authoring.skill_format,
         "aep_list": authoring.list,
         "aep_get": lambda: authoring.get(ident),
+        "aep_show_installed_workflow": lambda: authoring.show_installed(
+            str(args.get("workflow") or ""), _int(args.get("offset"))
+        ),
+        "aep_revise_workflow": lambda: authoring.revise_workflow(
+            str(args.get("workflow") or ""), title
+        ),
         "aep_status": lambda: authoring.status(str(args.get("approval_id") or "")),
         "aep_check_workflow": lambda: authoring.check_workflow(_object(args, "workflow")),
         "aep_submit_workflow": lambda: authoring.submit_workflow(

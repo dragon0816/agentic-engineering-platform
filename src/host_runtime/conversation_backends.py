@@ -42,7 +42,8 @@ AGENT_POLICY = (
     "and never claim one ran when the tool says the person must run it. To build a new "
     "Workflow or Skill for AEP, follow the aep-workflow-creator or aep-skill-creator skill "
     "with the `aep` tools (aep_catalog, aep_workflow_format, aep_capability, "
-    "aep_check_workflow, aep_submit_workflow, ...); "
+    "aep_check_workflow, aep_submit_workflow, ...); to change an installed Workflow, read it "
+    "with aep_show_installed_workflow and copy it with aep_revise_workflow, never rewrite it; "
     "when the request is unclear, reply with short questions first. Do not write files or "
     "run commands."
 )

@@ -25,6 +25,28 @@ operations with the CLI, which prints JSON:
 | `aep_run_workflow` | `run-workflow --candidate wf-... --arguments '{"month": "2026-09"}'` |
 | `aep_install_workflow` | `install-workflow --candidate wf-...` |
 | `aep_status` / `aep_list` / `aep_get` | `status --approval ap-...` / `list` / `get --candidate ...` |
+| `aep_show_installed_workflow` | `show-installed-workflow --workflow ns/name@1.2.3 [--offset N]` |
+| `aep_revise_workflow` | `revise-workflow --workflow ns/name@1.2.3 [--title "..."]` |
+
+## Changing an installed Workflow
+
+Never rewrite an installed Workflow from scratch, and never call a copy
+"v2". Build on its real steps:
+
+1. `aep_show_installed_workflow` shows it in full (parameters, steps, every
+   input, an embedded `coding/run-python` script). A long one comes in slices:
+   call again with `offset` and join them.
+2. `aep_revise_workflow` copies it into a candidate one version up
+   (1.0.0 → 1.0.1, same name). Read it with `aep_get`.
+3. Change only what was asked, then `aep_submit_workflow` with that
+   `candidate_id` and the whole Workflow.
+4. Test it and ask to install it as below. The owner's Install keeps the old
+   version installed with its history.
+
+Only Workflows drafted on this Host through AEP authoring are shown to you
+(`workflow_withheld` otherwise). A Workflow that came with AEP, the
+Marketplace or the Shared Platform is revised by the person in Agent Web:
+Capabilities, the Workflow, **Revise in chat**.
 
 ## Procedure
 

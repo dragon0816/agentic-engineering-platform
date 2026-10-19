@@ -196,6 +196,17 @@ def _parser() -> argparse.ArgumentParser:
         chosen.add_argument("--candidate", required=True)
         if action == "run-workflow":
             chosen.add_argument("--arguments", default="{}", help="run values as JSON")
+    # Revising an installed Workflow drafted here (owner 2026-10-19).
+    shown = asset_actions.add_parser(
+        "show-installed-workflow", help="an installed Workflow drafted here, in full"
+    )
+    shown.add_argument("--workflow", dest="workflow_ref", required=True)
+    shown.add_argument("--offset", type=int, default=0, help="read a long one from here")
+    revised = asset_actions.add_parser(
+        "revise-workflow", help="copy an installed Workflow drafted here into a candidate"
+    )
+    revised.add_argument("--workflow", dest="workflow_ref", required=True)
+    revised.add_argument("--title", default="")
     asset_status = asset_actions.add_parser("status", help="an approval's outcome")
     asset_status.add_argument("--approval", required=True)
     # Member publish to the shared platform (owner 2026-10-15): the submission
@@ -390,6 +401,10 @@ def _assets(args: argparse.Namespace) -> int:
             call[f"{name}_id"] = getattr(args, name)
     if action == "run-workflow":
         call["arguments"] = args.arguments
+    if getattr(args, "workflow_ref", None):
+        call["workflow"] = args.workflow_ref
+        call["offset"] = getattr(args, "offset", 0)
+        call["title"] = getattr(args, "title", "")
     outcome = dispatch(authoring, "aep_" + action.replace("-", "_"), call)
     print(json.dumps(outcome, ensure_ascii=False, indent=2))
     return 1 if outcome.get("ok") is False else 0

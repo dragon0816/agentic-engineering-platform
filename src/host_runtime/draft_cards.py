@@ -15,6 +15,11 @@ the shared `ActionCard`. One open card per draft and conversation: a newer
 revision closes the earlier card as "Replaced" and shows a new one under the
 newer answer. Drafts with no conversation (an external agent outside Agent
 Web) get no card; they wait in Capabilities as before.
+
+A revision of an installed Workflow (owner 2026-10-19,
+`docs/phases/WORKFLOW_REVISION.md`) reads "Revision of X 1.0.0 → 1.0.1" (or
+"Fork of X 1.0.0 as Y 1.0.0") with a short summary of what it changes; a
+revision that changes nothing yet gets no card.
 """
 
 from __future__ import annotations
@@ -29,6 +34,7 @@ from common.assets import WorkflowManifest, WorkflowStep
 from common.workflow_parameters import WorkflowParameterError, validate_run_parameters
 from host_runtime.card_store import CardStore, PendingRecord, new_card_id
 from host_runtime.chat_authoring import (
+    REVISION_PREFIX,
     ChatAuthoring,
     ChatAuthoringError,
     ChatCandidate,
@@ -174,6 +180,13 @@ class DraftCards:
             request = asked.get(item.candidate_id, "")
             changed = _stamp(item.updated_at)
             fresh = changed is not None and changed >= start
+            if (
+                not request
+                and isinstance(item, ChatCandidate)
+                and chat.revision_changes(item) == []
+            ):
+                # A copy of an installed Workflow that changes nothing yet.
+                continue
             if request or (fresh and (item.candidate_id, item.revision) not in shown):
                 found.append((item, request))
         return found
@@ -289,12 +302,40 @@ class DraftCards:
             )
         return lines
 
+    @staticmethod
+    def _revision_lines(chat: ChatAuthoring, item: ChatCandidate) -> list[str]:
+        """ "Revision of X 1.0.0 → 1.0.1" and what it changes."""
+        base_key = item.source.removeprefix(REVISION_PREFIX)
+        base_name, _, base_version = base_key.partition("@")
+        identity = item.draft.metadata.identity
+        if base_name == f"{identity.namespace}/{identity.name}":
+            lines = [f"Revision of {base_name} {base_version} → {identity.version}"]
+        else:
+            lines = [f"Fork of {base_key} as {_key(identity)} (a new name of yours)"]
+        changes = chat.revision_changes(item)
+        if changes is None:
+            lines.append("Changes: the original is no longer installed, so none are shown.")
+        elif changes:
+            lines.append("Changes:")
+            lines.extend(f"  • {line}" for line in changes)
+        else:
+            lines.append("Changes: none yet (the same as the original).")
+        lines.append(f"Installing it keeps {base_key} installed and its run history.")
+        return lines
+
     def draw(self, record: DraftCard, message: str = "") -> ActionCard:
         chat = self._chat()
         item = self._candidate(chat, record) if chat is not None else None
         word = "Workflow" if record.asset == "workflow" else "Skill"
-        who = AGENT_LABELS.get(record.source, record.source.removeprefix("external:"))
+        revision = record.source.startswith(REVISION_PREFIX)
+        who = (
+            "this conversation"
+            if revision
+            else AGENT_LABELS.get(record.source, record.source.removeprefix("external:"))
+        )
         lines = [f"{record.name} · revision {record.revision} · drafted by {who}"]
+        if chat is not None and isinstance(item, ChatCandidate) and revision:
+            lines.extend(self._revision_lines(chat, item))
         if chat is not None and isinstance(item, ChatCandidate):
             lines.extend(self._workflow_preview(chat, item.draft))
         elif isinstance(item, SkillCandidate):

@@ -28,6 +28,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import json
+import re
 import secrets
 from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
@@ -58,6 +59,14 @@ from host_runtime.skill_authoring import (
     installed_skills,
     skill_digest,
 )
+from host_runtime.workflow_revision import (
+    capability_source,
+    may_revise_in_place,
+    page,
+    resolve,
+    revision_summary,
+    view,
+)
 from host_runtime.workspace import documents, write_atomically
 from models.contracts import ModelTool
 from workflow.dispatch import BridgeExecutor
@@ -68,14 +77,15 @@ CandidateStatus = Literal["draft", "previewed", "installed"]
 ApprovalKind = Literal["run", "install", "install_skill", "capability"]
 ApprovalStatus = Literal["pending", "approved", "rejected", "failed"]
 MAX_DATA_CHARS = 4_000
-MAX_DRAFT_CHARS = 14_000
 GENERIC_FAILURE = "Capability invocation did not complete"
 RUN_TIMEOUT_SECONDS = 900.0
 
 
 class ChatAuthoringError(Exception):
-    def __init__(self, code: str) -> None:
+    def __init__(self, code: str, detail: str = "") -> None:
         self.code = code
+        # Shown to the conversation model only, never to an external agent.
+        self.detail = detail
         super().__init__(code)
 
 
@@ -95,6 +105,13 @@ class ChatCandidate(Contract):
     status: CandidateStatus = "draft"
     installed_as: Text | None = None
     installed_digest: Text | None = None
+    # A revision of an installed Workflow (owner 2026-10-19) records
+    # `source: revision:<namespace/name@version>` and the digest of that
+    # installed manifest when the revision was made.
+    base_digest: Text | None = None
+
+
+REVISION_PREFIX = "revision:"
 
 
 class ApprovalRequest(Contract):
@@ -211,7 +228,10 @@ DRAFT_GUIDE = (
     'N, "kind": "files_nonempty"|"file_exists"|"data_nonempty", "pattern": '
     '"*.xlsx"}] (a run-python step lists its output files). '
     "Never put a password, token or key in a fixed value. Pass `candidate_id` to revise a "
-    "candidate you drafted before. The host fills in owner, version and lifecycle."
+    "candidate you drafted before, with the whole Workflow. To change an installed Workflow, "
+    "never rewrite it from scratch: read it with authoring__get_workflow (`workflow`), copy "
+    "it into a draft with authoring__revise_workflow, then edit that draft here. "
+    "The host fills in owner, version and lifecycle."
 )
 
 
@@ -333,11 +353,16 @@ class ChatAuthoring:
         """Validate the model's Workflow and keep it as a candidate. Returns
         the candidate, or None with the problems the model must fix."""
         previous = self.candidate(candidate_id, actor) if candidate_id else None
-        manifest, problems = self.check(actor, raw, previous)
+        manifest, problems = self.check(
+            actor, raw, previous, base=previous.draft if previous is not None else None
+        )
         if manifest is None:
             return None, problems
         self.prepare_workspaces(manifest)
         now = _now()
+        if previous is not None and previous.source.startswith(REVISION_PREFIX):
+            # A revision stays one, whoever edits it next.
+            source = previous.source
         item = ChatCandidate(
             candidate_id=previous.candidate_id
             if previous is not None
@@ -352,6 +377,7 @@ class ChatAuthoring:
             draft=manifest,
             installed_as=previous.installed_as if previous is not None else None,
             installed_digest=previous.installed_digest if previous is not None else None,
+            base_digest=previous.base_digest if previous is not None else None,
             status="installed"
             if previous is not None and previous.installed_digest == digest(manifest)
             else "draft",
@@ -359,11 +385,20 @@ class ChatAuthoring:
         return self._save_candidate(item), []
 
     def check(
-        self, actor: str, raw: dict[str, Any], previous: ChatCandidate | None = None
+        self,
+        actor: str,
+        raw: dict[str, Any],
+        previous: ChatCandidate | None = None,
+        *,
+        base: WorkflowManifest | None = None,
     ) -> tuple[WorkflowManifest | None, list[str]]:
         """The Workflow the host would keep, or the problems to fix; saves
-        nothing."""
+        nothing. `base` is the Workflow this one continues (the previous
+        draft, or the installed Workflow a revision copies): what the draft
+        format has no field for is carried over from it."""
         assembled = assemble(raw, namespace=self.namespace, owner=actor, installed=self.installed)
+        if base is not None:
+            _carry_over(assembled, base, actor)
         identity = assembled["metadata"]["identity"]
         # A name belongs to whoever installed it first; its versions only go up,
         # so a new draft of an existing name never reuses an installed version
@@ -374,6 +409,8 @@ class ChatAuthoring:
                 m.metadata.owner.id
                 for m in published
                 if (m.metadata.owner.type, m.metadata.owner.id) != ("user", actor)
+                # A co-editor (recorded contributor) publishes the next version.
+                and actor not in m.metadata.contributors
             }
         )
         if others:
@@ -383,7 +420,13 @@ class ChatAuthoring:
                 "you co-edit it"
             ]
         taken = [_core(m.metadata.identity.version) for m in published]
-        if previous is not None and previous.draft.metadata.identity.name == identity["name"]:
+        # A revision of an installed Workflow keeps the one version above what
+        # is installed (1.0.0 -> 1.0.1) however often it is edited.
+        if (
+            previous is not None
+            and previous.draft.metadata.identity.name == identity["name"]
+            and not previous.source.startswith(REVISION_PREFIX)
+        ):
             taken.append(_core(previous.draft.metadata.identity.version))
         major, minor, patch = max(taken) if taken else (1, 0, -1)
         identity["version"] = f"{major}.{minor}.{patch + 1}"
@@ -852,6 +895,120 @@ class ChatAuthoring:
                 continue
         return found
 
+    # -- revising an installed Workflow (owner 2026-10-19) --------------------
+
+    def installed_workflow(self, reference: str, actor: str) -> WorkflowManifest:
+        """The installed Workflow `reference` names that this actor may read:
+        an exact version, or the highest installed version of a name."""
+        manifest, code, close = resolve(self.installed_workflows(), reference, actor)
+        if manifest is None:
+            raise ChatAuthoringError(
+                code, f"{code}; installed Workflows like it: {', '.join(close)}" if close else ""
+            )
+        return manifest
+
+    def show_installed(self, actor: str, reference: str, offset: int = 0) -> dict[str, JsonValue]:
+        manifest = self.installed_workflow(reference, actor)
+        body = view(manifest)
+        body.update(
+            {
+                "origin": "installed",
+                "digest": digest(manifest),
+                "next": "To change it, call authoring__revise_workflow with this workflow, "
+                "then edit the draft; never rewrite it from scratch.",
+            }
+        )
+        return page(body, offset)
+
+    def revision_base(self, item: ChatCandidate) -> WorkflowManifest | None:
+        """The installed Workflow a revision candidate copied, while installed."""
+        if not item.source.startswith(REVISION_PREFIX):
+            return None
+        wanted = item.source.removeprefix(REVISION_PREFIX)
+        return next(
+            (m for m in self.installed_workflows() if _key(m.metadata.identity) == wanted), None
+        )
+
+    def revision_changes(self, item: ChatCandidate) -> list[str] | None:
+        """What a revision changes against its base; None when it is not a
+        revision or its base is no longer installed."""
+        base = self.revision_base(item)
+        return None if base is None else revision_summary(base, item.draft)
+
+    def _fork_name(self, name: str, actor: str) -> str:
+        """A name of the actor's own for a Workflow they may not revise in place."""
+        suffix = "-".join(part for part in _SLUG_SPLIT.split(actor.lower()) if part) or "mine"
+        for number in range(1, 20):
+            candidate = f"{name}-{suffix}" + ("" if number == 1 else f"-{number}")
+            owners = {
+                (m.metadata.owner.type, m.metadata.owner.id)
+                for m in self._published(self.namespace, candidate)
+            }
+            if owners <= {("user", actor)}:
+                return candidate
+        raise ChatAuthoringError("workflow_fork_name_unavailable")
+
+    def revise(
+        self, actor: str, session_id: str | None, reference: str, title: str = ""
+    ) -> tuple[ChatCandidate | None, list[str], dict[str, JsonValue]]:
+        """Copy an installed Workflow into a draft one version up (owner
+        2026-10-19). Its owner or a co-editor keeps the name; anyone else gets
+        a fork under a name of their own. The draft is the actor's, private
+        and unpublished; installing it is the person's press, as for any draft.
+        Returns the candidate, or None with the problems; and notes."""
+        base = self.installed_workflow(reference, actor)
+        base_key = _key(base.metadata.identity)
+        for open_item in self.candidates(actor):
+            if open_item.source == REVISION_PREFIX + base_key and open_item.status != "installed":
+                if open_item.session_id != session_id:
+                    open_item = self._save_candidate(
+                        open_item.model_copy(update={"session_id": session_id})
+                    )
+                in_place = open_item.draft.metadata.identity.name == base.metadata.identity.name
+                return open_item, [], {"continued": True, "forked": not in_place}
+        in_place = may_revise_in_place(base.metadata, actor, self.namespace)
+        name = (
+            base.metadata.identity.name
+            if in_place
+            else self._fork_name(base.metadata.identity.name, actor)
+        )
+        raw: dict[str, Any] = {
+            "name": name,
+            "description": base.description,
+            "parameters": [p.model_dump(mode="json") for p in base.parameters],
+            "steps": [step.model_dump(mode="json") for step in base.steps],
+            "checks": [c.model_dump(mode="json") for c in base.checks],
+        }
+        manifest, problems = self.check(actor, raw, base=base)
+        if manifest is None:
+            return None, problems, {}
+        self.prepare_workspaces(manifest)
+        now = _now()
+        item = ChatCandidate(
+            candidate_id=f"wf-{datetime.now(UTC):%Y%m%d-%H%M%S}-{secrets.token_hex(3)}",
+            actor=actor,
+            session_id=session_id,
+            source=REVISION_PREFIX + base_key,
+            title=title.strip()
+            or f"{'Revision' if in_place else 'Fork'} of {base.metadata.identity.name}",
+            created_at=now,
+            updated_at=now,
+            draft=manifest,
+            base_digest=digest(base),
+        )
+        return self._save_candidate(item), [], {"continued": False, "forked": not in_place}
+
+    def capability_source(
+        self, reference: str, file: str | None, offset: int = 0
+    ) -> dict[str, JsonValue]:
+        """Read-only source of a capability package shipped inside AEP."""
+        handlers: list[tuple[str, str, object]] = []
+        for spec in self.installed.discover():
+            binding = self.installed.get(spec.identity)
+            if binding is not None:
+                handlers.append((_key(spec.identity), spec.name, binding.handler))
+        return capability_source(reference, file, offset, handlers)
+
     def check_skill(
         self, actor: str, raw: dict[str, Any], previous: SkillCandidate | None = None
     ) -> tuple[SkillManifest | None, list[str]]:
@@ -1260,7 +1417,19 @@ class ChatAuthoring:
 
         async def get_tool(context: RequestContext, args: Args) -> HostToolOutcome:
             def work() -> HostToolOutcome:
-                item = self.candidate(str(args.get("candidate_id") or ""), context.actor)
+                reference = str(args.get("workflow") or "").strip()
+                candidate_id = str(args.get("candidate_id") or "").strip()
+                if reference and not candidate_id:
+                    return HostToolOutcome(
+                        status="succeeded",
+                        data=self.show_installed(context.actor, reference, _offset(args)),
+                    )
+                if not candidate_id:
+                    return _refused(
+                        "workflow_missing",
+                        "give `workflow` (an installed Workflow) or `candidate_id` (a draft)",
+                    )
+                item = self.candidate(candidate_id, context.actor)
                 body: dict[str, JsonValue] = {
                     "candidate_id": item.candidate_id,
                     "workflow": _key(item.draft.metadata.identity),
@@ -1269,7 +1438,72 @@ class ChatAuthoring:
                     "parameters": [p.model_dump(mode="json") for p in item.draft.parameters],
                     "steps": [step.model_dump(mode="json") for step in item.draft.steps],
                 }
-                return HostToolOutcome(status="succeeded", data=_excerpt(body, MAX_DRAFT_CHARS))
+                if item.draft.checks:
+                    body["checks"] = [c.model_dump(mode="json") for c in item.draft.checks]
+                if item.source.startswith(REVISION_PREFIX):
+                    body["revision_of"] = item.source.removeprefix(REVISION_PREFIX)
+                return HostToolOutcome(status="succeeded", data=page(body, _offset(args)))
+
+            return await run_sync(work)
+
+        async def revise_tool(context: RequestContext, args: Args) -> HostToolOutcome:
+            def work() -> HostToolOutcome:
+                reference = str(args.get("workflow") or "").strip()
+                if not reference:
+                    return _refused("workflow_missing", "name the installed Workflow to revise")
+                item, problems, notes = self.revise(
+                    context.actor, context.session_id, reference, str(args.get("title") or "")
+                )
+                if item is None:
+                    return HostToolOutcome(
+                        status="failed",
+                        data={"problems": problems},
+                        failure=Failure(code="workflow_invalid", message="; ".join(problems)[:500]),
+                    )
+                base = item.source.removeprefix(REVISION_PREFIX)
+                forked = bool(notes.get("forked"))
+                data: dict[str, JsonValue] = {
+                    "candidate_id": item.candidate_id,
+                    "workflow": _key(item.draft.metadata.identity),
+                    "revision_of": base,
+                    "base_digest": item.base_digest,
+                    "forked": forked,
+                    "continued": bool(notes.get("continued")),
+                    "next": "Read the draft with authoring__get_workflow (candidate_id), change "
+                    "only what was asked, and save it with authoring__draft_workflow passing "
+                    "this candidate_id and the whole Workflow. The person installs it with the "
+                    "card's Install button; never say it is installed before that.",
+                }
+                if forked:
+                    data["note"] = (
+                        f"{base} is not this person's to revise, so this is a fork under the "
+                        f"new name {item.draft.metadata.identity.name}, owned by them; tell "
+                        "them so."
+                    )
+                if notes.get("continued"):
+                    data["note_continued"] = (
+                        "An open revision draft of this Workflow already existed; this "
+                        "continues it."
+                    )
+                return HostToolOutcome(status="succeeded", data=data)
+
+            return await run_sync(work)
+
+        async def source_tool(context: RequestContext, args: Args) -> HostToolOutcome:
+            def work() -> HostToolOutcome:
+                file = args.get("file")
+                data = self.capability_source(
+                    str(args.get("capability") or ""),
+                    str(file) if isinstance(file, str) and file else None,
+                    _offset(args),
+                )
+                if data.get("ok") is False:
+                    return HostToolOutcome(
+                        status="failed",
+                        data=data,
+                        failure=Failure(code=str(data.get("code")), message=str(data.get("code"))),
+                    )
+                return HostToolOutcome(status="succeeded", data=data)
 
             return await run_sync(work)
 
@@ -1299,7 +1533,7 @@ class ChatAuthoring:
                     outcome: HostToolOutcome = await handler(context, args)
                     return outcome
                 except ChatAuthoringError as error:
-                    return _refused(error.code, error.code)
+                    return _refused(error.code, error.detail or error.code)
 
             return call
 
@@ -1383,17 +1617,74 @@ class ChatAuthoring:
                 ModelTool(
                     name="authoring__get_workflow",
                     description=(
-                        "Show a drafted or installed Workflow in full (parameters and steps "
-                        "with their inputs), to check or revise it."
+                        "Show a Workflow in full: parameters, and steps with every input "
+                        "(including an embedded run-python script). Pass `workflow` for an "
+                        "installed one (namespace/name@version, or a name for its highest "
+                        "installed version), whether it came from the bundle, the Marketplace, "
+                        "the Shared Platform or a conversation; pass `candidate_id` for a "
+                        "draft. A long Workflow comes in slices: read the rest with `offset`."
                     ),
                     input_contract="host.authoring.get.v1",
                     input_schema={
                         "type": "object",
-                        "properties": candidate,
-                        "required": ["candidate_id"],
+                        "properties": {
+                            **candidate,
+                            "workflow": {"type": "string"},
+                            "offset": {"type": "integer", "minimum": 0},
+                        },
                     },
                 ),
                 guarded(get_tool),
+            ),
+            HostTool(
+                ModelTool(
+                    name="authoring__revise_workflow",
+                    description=(
+                        "Change an installed Workflow by building on its real steps instead of "
+                        "rewriting it: copies it into a draft one version up (1.0.0 -> 1.0.1, "
+                        "same name) that you then edit with authoring__draft_workflow and its "
+                        "candidate_id. When the Workflow is not the person's, the draft is a "
+                        "fork under a new name of theirs. Nothing is installed: the person "
+                        "presses Install on the card."
+                    ),
+                    input_contract="host.authoring.revise.v1",
+                    input_schema={
+                        "type": "object",
+                        "properties": {
+                            "workflow": {
+                                "type": "string",
+                                "description": "namespace/name@version or name",
+                            },
+                            "title": {"type": "string"},
+                        },
+                        "required": ["workflow"],
+                    },
+                ),
+                guarded(revise_tool),
+            ),
+            HostTool(
+                ModelTool(
+                    name="authoring__show_capability_source",
+                    description=(
+                        "Read, never edit, the Python source of a capability that ships inside "
+                        "AEP (a package such as weekly_report, or an installed capability "
+                        "target), to base a revision on the original logic. Without `file` it "
+                        "lists the package's files; long files come in slices (`offset`). To "
+                        "change the behaviour, revise the Workflow that uses it (a parameter, "
+                        "or a coding/run-python step with the adjusted logic)."
+                    ),
+                    input_contract="host.authoring.capability_source.v1",
+                    input_schema={
+                        "type": "object",
+                        "properties": {
+                            "capability": {"type": "string"},
+                            "file": {"type": "string"},
+                            "offset": {"type": "integer", "minimum": 0},
+                        },
+                        "required": ["capability"],
+                    },
+                ),
+                guarded(source_tool),
             ),
             HostTool(
                 ModelTool(
@@ -1406,6 +1697,43 @@ class ChatAuthoring:
                 guarded(list_tool),
             ),
         )
+
+
+_SLUG_SPLIT = re.compile(r"[^a-z0-9]+")
+#: What the draft format has no field for, kept from the Workflow a draft continues.
+_CARRIED = ("progress_steps", "occupies_machine", "secrets")
+
+
+def _carry_over(assembled: dict[str, Any], base: WorkflowManifest, actor: str) -> None:
+    """Keep what `assemble` cannot express from the Workflow a draft continues:
+    progress stages, the machine flag, secret names, central execution and
+    discovery categories. A co-editor's next version keeps the name's owner."""
+    data = base.model_dump(mode="json")
+    for name in _CARRIED:
+        if name in data:
+            assembled[name] = data[name]
+    if base.execution.mode != "local":
+        assembled["execution"] = data["execution"]
+        assembled["dependencies"]["central_services"] = data["dependencies"]["central_services"]
+        assembled["dependencies"]["central_required"] = data["dependencies"]["central_required"]
+    metadata = assembled["metadata"]
+    if base.metadata.categories:
+        metadata["categories"] = list(base.metadata.categories)
+    identity = base.metadata.identity
+    same_name = (identity.namespace, identity.name) == (
+        metadata["identity"]["namespace"],
+        metadata["identity"]["name"],
+    )
+    owner = base.metadata.owner
+    co_editor = actor in base.metadata.contributors and (owner.type, owner.id) != ("user", actor)
+    if same_name and co_editor:
+        metadata["owner"] = owner.model_dump(mode="json")
+        metadata["contributors"] = list(base.metadata.contributors)
+
+
+def _offset(args: dict[str, JsonValue]) -> int:
+    value = args.get("offset")
+    return value if isinstance(value, int) and not isinstance(value, bool) and value > 0 else 0
 
 
 def _arguments(args: dict[str, JsonValue]) -> dict[str, JsonValue]:

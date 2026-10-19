@@ -13,7 +13,12 @@ entries offer the same operations with the same limits:
   `external:<agent>`; the agent name is what the caller said it is;
 - a Workflow whose steps only read may run now; its result comes back as
   statuses and codes. Every other run, and every install, waits for the
-  owner's button in Agent Web.
+  owner's button in Agent Web;
+- an installed Workflow can be read in full and revised (owner 2026-10-19,
+  `docs/phases/WORKFLOW_REVISION.md`) only when it was drafted on this Host
+  through authoring by its owner, the same drafts `get` already shows. A
+  Workflow from the bundle, the Marketplace or the Shared Platform is
+  withheld: the person revises it in Agent Web's chat.
 """
 
 from __future__ import annotations
@@ -26,7 +31,7 @@ from typing import Any
 
 from pydantic import JsonValue
 
-from common.assets import AssetIdentity
+from common.assets import AssetIdentity, WorkflowManifest
 from host_runtime.chat_authoring import (
     ChatAuthoring,
     ChatAuthoringError,
@@ -427,6 +432,63 @@ class ExternalAuthoring:
 
     def status(self, approval_id: str) -> dict[str, JsonValue]:
         return self.chat.external_view(self.chat.approval(approval_id, self.actor))
+
+    def _authored_here(self, manifest: WorkflowManifest) -> bool:
+        """Installed from one of this owner's authoring drafts on this Host."""
+        owner = manifest.metadata.owner
+        return (owner.type, owner.id) == ("user", self.actor) and any(
+            ref.startswith("chat-candidate:") for ref in manifest.metadata.validation_refs
+        )
+
+    def _installed(self, reference: str) -> WorkflowManifest:
+        manifest = self.chat.installed_workflow(reference, self.actor)
+        if not self._authored_here(manifest):
+            raise ChatAuthoringError("workflow_withheld")
+        return manifest
+
+    def show_installed(self, reference: str, offset: int = 0) -> dict[str, JsonValue]:
+        """An installed Workflow in full, when it was drafted here (PUBLIC rule)."""
+        try:
+            manifest = self._installed(reference)
+        except ChatAuthoringError as error:
+            if error.code != "workflow_withheld":
+                raise
+            return {
+                "ok": False,
+                "code": "workflow_withheld",
+                "next": "Only Workflows drafted on this Host through AEP authoring are shown "
+                "to coding agents (company data rule). Ask the person to revise it in Agent "
+                "Web: Capabilities, the Workflow, Revise in chat.",
+            }
+        shown = self.chat.show_installed(
+            self.actor, f"{_target(manifest.metadata.identity)}", offset
+        )
+        return {"ok": True, **shown}
+
+    def revise_workflow(self, reference: str, title: str = "") -> dict[str, JsonValue]:
+        """Copy an installed Workflow drafted here into a candidate one version
+        up, to edit with `submit_workflow` and its candidate_id."""
+        try:
+            manifest = self._installed(reference)
+        except ChatAuthoringError as error:
+            if error.code != "workflow_withheld":
+                raise
+            return self.show_installed(reference)
+        item, problems, notes = self.chat.revise(
+            self.actor, self.session_id, _target(manifest.metadata.identity), title
+        )
+        if item is None:
+            return {"ok": False, "problems": list(problems)}
+        return {
+            "ok": True,
+            "candidate_id": item.candidate_id,
+            "workflow": _target(item.draft.metadata.identity),
+            "revision_of": _target(manifest.metadata.identity),
+            "base_digest": item.base_digest,
+            "forked": bool(notes.get("forked")),
+            "next": "read it with aep_get, change only what was asked, resubmit it with "
+            "aep_submit_workflow and this candidate_id, then ask to install it",
+        }
 
     # -- Workflows ---------------------------------------------------------
 
