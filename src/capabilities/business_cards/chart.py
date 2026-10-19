@@ -57,7 +57,9 @@ NOTE = (
 )
 NO_LINES_NOTE = "這張圖沒有任何有證據的回報關係：框內的上下順序只代表職稱高低，不代表誰向誰報告。"
 
-CARD_W, CARD_H = 210, 78
+CARD_W, CARD_H = 210, 104
+#: Where each line of a card's text starts, from the card's top.
+_LINE_Y = (6, 28, 45, 62, 79)
 PAD, GAP, HEADER = 12, 14, 30
 MAX_ROW_W = 2600
 TITLE_H = 72
@@ -72,6 +74,36 @@ _UNSURE = (196, 127, 0)
 def needs_label(fields: Sequence[str]) -> str:
     """The card's "needs confirmation" line, fields named in Chinese."""
     return "需確認：" + "、".join(FIELD_LABELS.get(name, name) for name in fields)
+
+
+def display_name(person: Mapping[str, Any] | sqlite3.Row) -> str:
+    """The name with the honorific after it: 「王則閔 博士」."""
+    honorific = str(person["honorific"] or "").strip()
+    return f"{person['name']} {honorific}".strip()
+
+
+def card_lines(person: Mapping[str, Any] | sqlite3.Row, needs: Sequence[str]) -> list[str]:
+    """What a person's box says, top to bottom: the name with the honorific,
+    the title (or 已離職), the desk phone with its extension, the mobile, and
+    the fields still to confirm (live re-test 2026-10-20: the box showed only
+    the mobile and left out 博士)."""
+    lines = [display_name(person)]
+    if person["status"] == "left":
+        lines.append(f"已離職 {person['left_at']}".strip())
+    else:
+        second = person["title"] or person["romanised_name"]
+        if second:
+            lines.append(second)
+    phone = str(person["phone"] or "").strip()
+    if phone:
+        lines.append(phone + (f" #{person['ext']}" if person["ext"] else ""))
+    elif person["ext"]:
+        lines.append(f"分機 {person['ext']}")
+    if person["mobile"]:
+        lines.append(f"手機 {person['mobile']}")
+    if needs:
+        lines.append(needs_label(needs))
+    return lines
 
 
 def rank_title(title: str) -> int:
@@ -279,18 +311,14 @@ def render(
             width=2 if unsure else 1,
         )
         ink = _GREY if left else _INK
-        name = person["name"] + ("  ！" if unsure else "")
+        text = card_lines(person, uncertain.get(person["person_id"], ()))
+        name = text[0] + ("  ！" if unsure else "")
         draw.text((x0 + 8, y0 + 6), _fit(draw, name, mid, CARD_W - 16), fill=ink, font=mid)
-        second = person["title"] or person["romanised_name"]
-        if left:
-            second = f"已離職 {person['left_at']}".strip()
-        draw.text((x0 + 8, y0 + 30), _fit(draw, second, small, CARD_W - 16), fill=ink, font=small)
-        contact = person["mobile"] or (
-            person["phone"] + (f" #{person['ext']}" if person["ext"] else "")
-        )
-        if unsure:
-            contact = needs_label(uncertain[person["person_id"]])
-        draw.text((x0 + 8, y0 + 50), _fit(draw, contact, small, CARD_W - 16), fill=ink, font=small)
+        for offset, said in zip(_LINE_Y[1:], text[1:], strict=False):
+            colour = _UNSURE if unsure and said == text[-1] else ink
+            draw.text(
+                (x0 + 8, y0 + offset), _fit(draw, said, small, CARD_W - 16), fill=colour, font=small
+            )
     path.parent.mkdir(parents=True, exist_ok=True)
     image.save(path, "PNG")
 
@@ -302,8 +330,10 @@ def legend(
     *,
     include_left: bool,
     left_omitted: int,
+    uncertain: Mapping[str, Sequence[str]] | None = None,
 ) -> str:
-    """The Markdown that goes with the picture: what it is and every line's evidence."""
+    """The Markdown that goes with the picture: what it is, every line's
+    evidence, and who has fields still to confirm."""
     named = {person["person_id"]: person["name"] for person in people}
     shown = [line for line in lines if line["person_id"] in named and line["manager_id"] in named]
     evidenced = [line for line in shown if not line["inferred"]]
@@ -324,4 +354,12 @@ def legend(
                 f"| {named[line['person_id']]} | {named[line['manager_id']]} | {evidence} | "
                 f"{'是（虛線）' if line['inferred'] else '否（實線）'} |"
             )
+    doubtful = [person for person in people if (uncertain or {}).get(person["person_id"])]
+    if doubtful and uncertain is not None:
+        out += ["", "**需確認**（讀取時不確定、還沒確認的欄位；框線為橘色）："]
+        out += [
+            f"- {display_name(person)}："
+            + "、".join(FIELD_LABELS.get(name, name) for name in uncertain[person["person_id"]])
+            for person in doubtful
+        ]
     return "\n".join(out)

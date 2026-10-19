@@ -738,3 +738,44 @@ def test_a_result_names_fields_in_chinese_and_states_what_is_stored(tmp_path: Pa
         uncertain=("romanised_name",),
     )
     assert [(k.field, k.label) for k in kept.kept] == [("romanised_name", "英文名")]
+
+
+def test_a_chart_card_shows_the_desk_phone_first_and_the_honorific_with_the_name(
+    tmp_path: Path,
+) -> None:
+    """Live re-test 2026-10-20: the box showed the mobile instead of the desk
+    phone and extension, and left out 博士."""
+    from capabilities.business_cards import chart
+
+    store = _store(tmp_path)
+    added = _add(
+        store,
+        {
+            "name": "王則閔",
+            "company": "範例科技",
+            "title": "資深經理 博士",
+            "phone": "03-123-4567",
+            "ext": "1234",
+            "mobile": "0912-000-111",
+            "email": "zm.wang@example.com",
+        },
+        uncertain=("email",),
+    )
+    people, _, _ = store.chart_data("範例科技", include_left=False)
+    needs = store.uncertain_now([added.person_id])
+    lines = chart.card_lines(people[0], needs.get(added.person_id, []))
+    assert lines == [
+        "王則閔 博士",
+        "資深經理",
+        "03-123-4567 #1234",
+        "手機 0912-000-111",
+        "需確認：Email",
+    ]
+    only_mobile = dict(people[0])
+    only_mobile.update(phone="", ext="", honorific="")
+    assert chart.card_lines(only_mobile, []) == ["王則閔", "資深經理", "手機 0912-000-111"]
+    # The legend lists who needs confirmation, fields in Chinese.
+    text = chart.legend("範例科技", people, [], include_left=False, left_omitted=0, uncertain=needs)
+    assert "需確認" in text and "王則閔 博士：Email" in text
+    chart.render(tmp_path / "c.png", "範例科技", people, [], uncertain=needs)
+    assert (tmp_path / "c.png").read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"

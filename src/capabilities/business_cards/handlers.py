@@ -448,21 +448,17 @@ class OrgChartHandler(_Cards):
             safe = "".join(ch if ch.isalnum() else "-" for ch in request.company)[:40] or "company"
             png = folder / f"org-{safe}-{stamp}.png"
             md = folder / f"org-{safe}-{stamp}.md"
+            needs = store.uncertain_now([p["person_id"] for p in people])
             text = chart.legend(
                 company,
                 people,
                 lines,
                 include_left=request.include_left,
                 left_omitted=omitted,
+                uncertain=needs,
             )
             try:
-                chart.render(
-                    png,
-                    company,
-                    people,
-                    lines,
-                    uncertain=store.uncertain_now([p["person_id"] for p in people]),
-                )
+                chart.render(png, company, people, lines, uncertain=needs)
             except ImportError:
                 raise CardStoreError("chart_renderer_missing") from None
             folder.mkdir(parents=True, exist_ok=True)
