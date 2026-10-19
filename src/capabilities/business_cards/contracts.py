@@ -198,6 +198,9 @@ class EditPersonRequest(Contract):
     fields: CardFields = CardFields()
     # Fields the person says are right as stored ("email 正確").
     confirm: tuple[FieldName, ...] = Field(default=(), max_length=len(FIELDS))
+    # Fields the person says are wrong and should be empty (kept empty: a
+    # later scan does not refill them).
+    clear: tuple[FieldName, ...] = Field(default=(), max_length=len(FIELDS))
     reason: str = Field(default="", max_length=_SHORT)
 
 

@@ -225,6 +225,7 @@ class EditPersonHandler(_Cards):
                 actor=who(context),
                 reason=request.reason,
                 confirm=request.confirm,
+                clear=request.clear,
             )
             return EditResult(
                 person_id=row["person_id"],

@@ -610,7 +610,8 @@ class CardStore:
                     KeptField(field=name, current=current, offered=new, reason="uncertain")
                 )
                 continue
-            elif current and previous is not None and previous["source"] == "user":
+            elif previous is not None and previous["source"] == "user":
+                # Also a value the person emptied: a scan does not refill it.
                 merge.kept.append(
                     KeptField(field=name, current=current, offered=new, reason="user_set")
                 )
@@ -664,9 +665,11 @@ class CardStore:
         actor: str,
         reason: str,
         confirm: Sequence[FieldName] = (),
+        clear: Sequence[FieldName] = (),
     ) -> tuple[sqlite3.Row, list[FieldChange], list[FieldName], str | None]:
-        """The person's own values (source `user`), and the fields they say
-        are right as stored. Re-stating the stored value confirms it."""
+        """The person's own values (source `user`), the fields they say are
+        right as stored, and the fields they say are wrong (emptied, and kept
+        empty). Re-stating the stored value confirms it."""
         with self._connect() as con:
             row = self._resolve(con, ref)
             change_id = _new_change()
@@ -677,7 +680,8 @@ class CardStore:
             today = date.today().isoformat()
             for name in FIELDS:
                 new = str(values.get(name, "")).strip()
-                if new and not _same(row[name], new):
+                emptied = name in clear and not new and bool(row[name])
+                if emptied or (new and not _same(row[name], new)):
                     changes.append(
                         self._set_field(
                             con,

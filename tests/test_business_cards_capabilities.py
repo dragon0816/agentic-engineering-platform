@@ -614,3 +614,41 @@ def test_a_signature_keeps_a_romanised_name_only_when_the_block_prints_it(
     data = _run(bridge, "harvest-signatures", {"domain": "example.com"}).data
     names = {item["name"]: item["romanised_name"] for item in data["candidates"]}
     assert names == {"王小明": "Hsiao-Ming Wang", "李大華": ""}
+
+
+def test_a_wrong_value_can_be_cleared_in_chat(tmp_path: Path) -> None:
+    """The romanised name invented in the live test must be removable."""
+    bridge = _bridge(tmp_path)
+    _run(
+        bridge,
+        "add-card",
+        {
+            "name": "范例",
+            "company": "範例科技",
+            "romanised_name": "Yanji Fan",
+            "romanised_name_printed": "Yanji Fan",
+        },
+    )
+    cleared = _run(
+        bridge,
+        "edit-person",
+        {"person": {"name": "范例"}, "clear": ["romanised_name"], "reason": "不在名片上"},
+    )
+    assert cleared.status == "succeeded", cleared.failure
+    assert cleared.data["changes"] == [{"field": "romanised_name", "old": "Yanji Fan", "new": ""}]
+    person = _run(bridge, "find", {"query": "范例"}).data["people"][0]
+    assert person["romanised_name"] == ""
+    # A later scan does not bring it back: the person's empty value is kept.
+    again = _run(
+        bridge,
+        "add-card",
+        {
+            "name": "范例",
+            "company": "範例科技",
+            "romanised_name": "Yanji Fan",
+            "romanised_name_printed": "Yanji Fan",
+        },
+    ).data
+    assert [item["reason"] for item in again["kept"]] == ["user_set"]
+    undone = _run(bridge, "undo", {"change_id": cleared.data["change_id"]})
+    assert undone.status == "succeeded", undone.failure

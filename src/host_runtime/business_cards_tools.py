@@ -169,7 +169,8 @@ TOOLS: tuple[tuple[str, CapabilitySpec, str, dict[str, Any]], ...] = (
         cards.EDIT_SPEC,
         "Correct a contact's fields as the person says (recorded as the person's own value, "
         "never overwritten by later scans), or confirm fields that are right as stored "
-        "('email 正確' -> confirm ['email']). Either clears needs_confirmation.",
+        "('email 正確' -> confirm ['email']), or empty wrong fields (clear). Each clears "
+        "needs_confirmation.",
         _object(
             {
                 "person": _PERSON,
@@ -178,6 +179,11 @@ TOOLS: tuple[tuple[str, CapabilitySpec, str, dict[str, Any]], ...] = (
                     "type": "array",
                     "items": {"type": "string", "enum": list(FIELDS)},
                     "description": "fields the person says are right as stored",
+                },
+                "clear": {
+                    "type": "array",
+                    "items": {"type": "string", "enum": list(FIELDS)},
+                    "description": "fields the person says are wrong and should be empty",
                 },
                 "reason": _S,
             },
