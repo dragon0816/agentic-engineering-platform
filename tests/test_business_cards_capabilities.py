@@ -37,7 +37,7 @@ from capabilities.runtime import (
 )
 from common.assets import ExecutionDependencies
 from common.execution import RequestContext, TraceIdentifiers
-from integrations.outlook_mail import MailMessage, MailScope, MailSummary
+from integrations.outlook_mail import MailError, MailMessage, MailScope, MailSummary
 from models.contracts import ModelRequest, ModelResponse, ModelStreamEvent
 from workflow.dispatch import BridgeExecutor
 
@@ -467,3 +467,41 @@ def test_harvest_follows_a_six_month_scope(tmp_path: Path) -> None:
     assert [item["name"] for item in harvested.data["candidates"]] == ["近期"]
     assert mail.opened == ["r1"]
     assert all(NOW - since <= timedelta(days=180, minutes=1) for _, since in mail.listed)
+
+
+class FlakyMail(FakeMail):
+    """One message cannot be opened (Outlook said `message_unknown`)."""
+
+    def get(self, message_id: str) -> MailMessage:
+        if message_id == "bad":
+            self.opened.append(message_id)
+            raise MailError("message_unknown")
+        return super().get(message_id)
+
+
+def test_harvest_skips_a_message_it_cannot_read_and_says_so(tmp_path: Path) -> None:
+    mail = FlakyMail(
+        [
+            _message("bad", "x@example.com", BODY.format(name="讀不到", title="經理", ext="9")),
+            _message(
+                "ok1",
+                "a@example.com",
+                BODY.format(name="王小明", title="協理", ext="1"),
+                days_ago=2,
+            ),
+            _message(
+                "ok2",
+                "b@example.com",
+                BODY.format(name="李大華", title="工程師", ext="2"),
+                days_ago=3,
+            ),
+        ]
+    )
+    bridge = _bridge(tmp_path, mail=mail, model=SignatureModel())
+    harvested = _run(bridge, "harvest-signatures", {"domain": "example.com"})
+    assert harvested.status == "succeeded", harvested.failure
+    data = harvested.data
+    assert [item["name"] for item in data["candidates"]] == ["王小明", "李大華"]
+    assert data["skipped"] == [{"code": "message_unknown", "count": 1}]
+    assert "1 封信無法讀取（message_unknown），已略過" in data["skipped_note"]
+    assert "其餘 2 封已處理" in data["skipped_note"]

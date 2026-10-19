@@ -42,6 +42,7 @@ from capabilities.business_cards.contracts import (
     SetLineRequest,
     SetStatusRequest,
     SignatureCandidate,
+    SkippedMessages,
     StatusResult,
     UndoRequest,
     UndoResult,
@@ -424,6 +425,14 @@ class OrgChartHandler(_Cards):
         return await self.run(work)
 
 
+def skipped_note(skipped: dict[str, int], opened: int) -> str:
+    """One line for the person about messages that could not be read."""
+    if not skipped:
+        return ""
+    parts = "、".join(f"{count} 封信無法讀取（{code}）" for code, count in skipped.items())
+    return f"讀信失敗：{parts}，已略過；其餘 {opened} 封已處理。"
+
+
 class HarvestHandler(_Cards):
     """Mail of one company domain, in the person's mail scope, never wider."""
 
@@ -448,7 +457,7 @@ class HarvestHandler(_Cards):
             raise CapabilityRefused("model_not_configured")
         domain = request.domain.lstrip("@").casefold()
 
-        def collect() -> tuple[int, int, list[signatures.Block]]:
+        def collect() -> tuple[int, int, list[signatures.Block], dict[str, int], int]:
             reader, scope = self._reader(), self._scope()
             days = min(request.days or scope.max_days, scope.max_days)
             found = search(
@@ -460,7 +469,8 @@ class HarvestHandler(_Cards):
                 limit=50,
             )
             newest: dict[str, signatures.Block] = {}
-            matched = 0
+            skipped: dict[str, int] = {}
+            matched = opened = 0
             for item in found:
                 if not signatures.from_domain(item.sender, domain):
                     continue
@@ -468,7 +478,13 @@ class HarvestHandler(_Cards):
                 address = signatures.sender_address(item.sender).casefold()
                 if address in newest or len(newest) >= request.limit:
                     continue
-                message = read(reader, scope, item.message_id)
+                try:
+                    message = read(reader, scope, item.message_id)
+                except MailError as error:
+                    # One unreadable message is skipped and counted, by its code.
+                    skipped[error.code] = skipped.get(error.code, 0) + 1
+                    continue
+                opened += 1
                 block = signatures.signature_block(message.body)
                 if block is None:
                     continue
@@ -478,10 +494,10 @@ class HarvestHandler(_Cards):
                     received=item.received.date().isoformat(),
                     text=block,
                 )
-            return len(found), matched, list(newest.values())
+            return len(found), matched, list(newest.values()), skipped, opened
 
         try:
-            scanned, matched, blocks = await asyncio.to_thread(collect)
+            scanned, matched, blocks, skipped, opened = await asyncio.to_thread(collect)
         except MailError as error:
             raise CapabilityRefused(error.code) from None
         try:
@@ -521,7 +537,12 @@ class HarvestHandler(_Cards):
                 with_signature=len(out),
                 candidates=tuple(out),
                 note="Nothing was stored. Show these to the person; store the ones they "
-                "confirm with add_from_signature (message_id and message_date as given).",
+                "confirm with add_from_signature (message_id and message_date as given)."
+                + (" Tell the person skipped_note as written." if skipped else ""),
+                skipped=tuple(
+                    SkippedMessages(code=code, count=count) for code, count in skipped.items()
+                ),
+                skipped_note=skipped_note(skipped, opened),
             )
 
         return await self.run(candidates)

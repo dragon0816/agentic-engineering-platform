@@ -35,6 +35,8 @@ MailErrorCode = Literal[
 OUTLOOK_PROGID = "Outlook.Application"
 #: olFolderInbox, olFolderSentMail, olFolderDrafts.
 _DEFAULT_FOLDERS = {"inbox": 6, "sent items": 5, "sent": 5, "drafts": 16}
+#: OlObjectClass.olFolder: a MAPIFolder (the Namespace above a store root is not one).
+_OL_FOLDER = 2
 MAX_RESULTS = 50
 MAX_BODY_CHARS = 20_000
 SNIPPET_CHARS = 240
@@ -234,19 +236,43 @@ class OutlookComMailbox:
         return folder
 
     @staticmethod
-    def _folder_path(item: Any) -> str:
+    def _folder_path(namespace: Any, item: Any) -> str:
+        """The item's folder as `list` names it: relative to the default
+        store's root, the default folders by their canonical names (`Inbox`
+        also when Outlook calls it 收件匣). A folder of another store keeps
+        that store's name in front, so it never matches a scope entry.
+
+        The walk stops at a store root: a folder whose parent is not a
+        folder (the Namespace has `Folders` too, which is how the store root
+        once crept into the path; live test 2026-10-20)."""
+        canonical: dict[str, str] = {}
+        root_id = ""
+        for name, number in (("Inbox", 6), ("Sent Items", 5), ("Drafts", 16)):
+            try:
+                default = namespace.GetDefaultFolder(number)
+            except Exception:
+                continue
+            canonical[_text(getattr(default, "EntryID", ""))] = name
+            if not root_id:
+                root_id = _text(getattr(getattr(default, "Parent", None), "EntryID", ""))
+        canonical.pop("", None)
         names: list[str] = []
         folder = getattr(item, "Parent", None)
-        for _ in range(8):
-            name = _text(getattr(folder, "Name", ""))
-            parent = getattr(folder, "Parent", None)
-            if not name or parent is None or not hasattr(parent, "Folders"):
+        for _ in range(16):
+            if getattr(folder, "Class", None) != _OL_FOLDER:
                 break
-            names.append(name)
-            folder = parent
-        return "/".join(reversed(names)) or _text(
-            getattr(getattr(item, "Parent", None), "Name", "")
-        )
+            entry = _text(getattr(folder, "EntryID", ""))
+            if root_id and entry == root_id:
+                break
+            if entry in canonical:
+                names.append(canonical[entry])
+                break
+            names.append(_text(getattr(folder, "Name", "")))
+            if getattr(getattr(folder, "Parent", None), "Class", None) != _OL_FOLDER:
+                # The root of a store other than the default one: kept.
+                break
+            folder = getattr(folder, "Parent", None)
+        return "/".join(reversed([name for name in names if name]))
 
     def _summary(self, item: Any, folder: str) -> MailSummary:
         attachments = tuple(
@@ -291,7 +317,7 @@ class OutlookComMailbox:
         except Exception:
             raise MailError("message_unknown") from None
         try:
-            summary = self._summary(item, self._folder_path(item))
+            summary = self._summary(item, self._folder_path(namespace, item))
             return MailMessage(
                 **summary.model_dump(),
                 cc=_text(getattr(item, "CC", "")),

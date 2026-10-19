@@ -340,9 +340,20 @@ class SignatureCandidate(CardFields):
     would_change: tuple[FieldName, ...] = ()
 
 
+class SkippedMessages(Contract):
+    """Messages that could not be read, by the mail reader's code."""
+
+    code: str
+    count: int
+
+
 class HarvestResult(Contract):
     scanned: int
     from_domain: int
     with_signature: int
     candidates: tuple[SignatureCandidate, ...]
     note: str = ""
+    # A message that could not be read is skipped, never the whole harvest.
+    skipped: tuple[SkippedMessages, ...] = ()
+    # For the person, e.g. "讀信失敗：1 封信無法讀取（message_unknown），已略過；其餘 3 封已處理。"
+    skipped_note: str = ""
