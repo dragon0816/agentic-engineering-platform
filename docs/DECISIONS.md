@@ -3567,3 +3567,18 @@ minutes each).
 Rejected for now: moving most steps to Linux runners (would halve the cost but needs a parity check
 of the Windows-only tests); a self-hosted runner (machine must stay on and runs repository code).
 When a test starts reading a skipped document, add it back to the include list.
+
+## 2026-10-19 — Verified work is committed directly to main
+
+Owner, answering Knowledge Strategy v1.3 ADR-K9 (PR flow or direct commits to main): "如果寫好了，可以進main".
+
+- Finished work that passed the repository's verification is committed directly to `main`. No feature
+  branch or pull request is required, for documentation or code. This is the practice since 2026-10-05,
+  now stated as a rule (one line in `AGENTS.md`).
+- When to push stays with the owner; an agent pushes only when told to.
+- Knowledge Strategy v1.3 marks ADR-K9 decided (option A).
+
+Rejected: a feature branch and pull request for every K02+ change (option B) and pull requests for code
+only (option C): with one owner reviewing and agents verifying locally and in CI, they add waiting
+without adding a reviewer.
+

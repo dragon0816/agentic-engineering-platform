@@ -71,6 +71,8 @@ Before modifying implementation code, read `docs/ARCHITECTURE.md`, `docs/ROADMAP
 
 `docs/TASKS.md` is the progress record and accumulates; `HANDOFF.md` is rewritten each time and carries only where the current work stopped.
 
+Finished work that passed verification is committed directly to `main`; a pull request is not required (owner decision 2026-10-19, `docs/DECISIONS.md`).
+
 Use repository procedures under `.agents/skills/`:
 - `architecture-guard` before implementation or architectural changes;
 - `implementation-planning` to convert requirements into small implementation slices;
