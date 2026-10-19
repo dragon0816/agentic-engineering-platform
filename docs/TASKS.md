@@ -2712,6 +2712,17 @@ s-k-20261011T102952` (not published).
   legend as a document. Tests `tests/test_business_cards_telegram.py` (fake Bot API).
 - [ ] Live test with the owner's real cards and mail (owner; steps in HANDOFF.md). Not done by the
   agent: no real card, mail, gateway or Telegram was used.
+- [x] Fixes from the 2026-10-20 business-cards live test (2026-10-20, Claude Code): Outlook
+  `get()` folder path now agrees with `list()` (signature harvest, `outlook.read` and agent-mode
+  reads failed every Inbox message with `message_unknown`), a harvest skips an unreadable message
+  with `skipped_note`; a romanised name only when printed (`romanised_name_printed`, `dropped`);
+  `needs_confirmation` persists until the person confirms (`edit-person` `confirm`) or corrects;
+  需確認 labels in Chinese; `honorific` and `company_tax_id` fields (decision 2026-10-20);
+  who = `<actor> via <channel>`, never `said_by`; failed `cards__*` calls carry a short accurate
+  message; `edit-person` `clear` empties a wrong field. Commits 77562560, 16d8c189, bc36e346,
+  1882da22, 643d8f7b, ad3a15d4, 3e3a97e8 and the docs commit. Tests `tests/test_outlook_mail_folders.py` (with a read-only live Outlook check, skipped
+  when Outlook is not running) and the business-cards test modules. Verification: HANDOFF.md.
+- [ ] Owner re-test of these fixes in Agent Web and Telegram (steps in HANDOFF.md).
 - [ ] Later: a Contacts page in Agent Web; accepting a proposal with a button.
 
 - [x] A Skill install card names a switched-off Skill of the same name (2026-10-20, Claude Code;

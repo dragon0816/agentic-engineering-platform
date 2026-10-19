@@ -2338,17 +2338,21 @@ drafts a Workflow or Skill shows its install card"):
   `low`, permission `business-cards.<name>`. Store per actor:
   `<workspace>/business-cards/<actor-key>/cards.db` (`store.actor_key`).
   - Writes (`side_effect: write`, `approval_required: true`, confirmed standing by the Host):
-    `add-card` (`AddCardRequest`: card fields, `uncertain` [field names], `image_path`,
-    `card_date`) → `AddResult` {`person_id`, `name`, `company`, `outcome` (`created` | `updated`
-    | `unchanged`), `existed`, `matched_by` (`email` | `name_company` | `romanised_name`),
-    `changes` [{`field`, `old`, `new`}], `kept` [{`field`, `current`, `offered`, `reason`
-    (`user_set` | `older_evidence` | `uncertain`)}], `uncertain`, `status`, `summary`,
-    `observation_id`, `change_id`}; `add-from-signature` {`entries`: 1–50 card fields +
+    `add-card` (`AddCardRequest`: card fields, `uncertain` [field names],
+    `romanised_name_printed`, `image_path`, `card_date`) → `AddResult` {`person_id`, `name`,
+    `company`, `outcome` (`created` | `updated` | `unchanged`), `existed`, `matched_by` (`email` |
+    `name_company` | `romanised_name`), `changes` [{`field`, `old`, `new`}], `kept` [{`field`,
+    `current`, `offered`, `reason` (`user_set` | `older_evidence` | `uncertain`)}], `uncertain`,
+    `needs_confirmation` [field names], `dropped` [{`field`, `value`, `reason` (`not_on_card`)}],
+    `status`, `summary`, `observation_id`, `change_id`}; `add-from-signature` {`entries`: 1–50 card fields +
     `message_id`, `message_date`, `uncertain`} → {`results`: [`AddResult`]}; `edit-person`
-    {`person`, `fields`, `reason`} → {`person_id`, `name`, `changes`, `change_id`};
-    `set-status` {`person`, `status` (`left` | `active`), `reason`, `said_by`,
-    `effective_date`} → {`person_id`, `name`, `old_status`, `new_status`, `left_at`,
-    `change_id`}; `set-reporting-line` {`person`, `manager`, `evidence_kind` (`signature` |
+    {`person`, `fields` (optional), `confirm` [field names], `clear` [field names], `reason`} →
+    {`person_id`, `name`,
+    `changes`, `confirmed`, `needs_confirmation`, `change_id`};
+    `set-status` {`person`, `status` (`left` | `active`), `reason`, `effective_date`} →
+    {`person_id`, `name`, `old_status`, `new_status`, `left_at`, `change_id`} (no `said_by`
+    since 2026-10-20: who is the request's `<actor> via <channel>`, also in history actors,
+    `status_set_by` and reporting lines); `set-reporting-line` {`person`, `manager`, `evidence_kind` (`signature` |
     `email_content` | `title_inference` | `user`), `evidence_ref`, `confidence` 0–1,
     `inferred`} and `remove-reporting-line` {`person`, `reason`} → {`person_id`, `name`,
     `manager_id`, `manager`, `evidence_kind`, `inferred`, `replaced`, `removed`, `change_id`};
@@ -2366,10 +2370,13 @@ drafts a Workflow or Skill shows its install card"):
     `legend_markdown`, `note`, `attach` [{`path`, `media_type`, `filename`}]};
     `harvest-signatures` {`domain`, `days` (capped at the mail scope's `max_days`), `limit` ≤ 40,
     `folder`} → {`scanned`, `from_domain`, `with_signature`, `candidates` [card fields +
-    `message_id`, `message_date`, `uncertain`, `existing_person_id`, `would_change`], `note`}.
+    `message_id`, `message_date`, `uncertain`, `existing_person_id`, `would_change`], `note`,
+    `skipped` [{`code`, `count`}], `skipped_note`}.
   - `PersonRef` {`person_id` | `name` (local or romanised) + optional `company`}. Card fields:
-    `name`, `romanised_name`, `company`, `business_group`, `division`, `department`, `title`,
-    `phone`, `ext`, `mobile`, `fax`, `email`, `address`, `website`, `notes`.
+    `name`, `romanised_name`, `company`, `company_tax_id`, `business_group`, `division`,
+    `department`, `title`, `honorific`, `phone`, `ext`, `mobile`, `fax`, `email`, `address`,
+    `website`, `notes`. `PersonView` adds `needs_confirmation`. History kinds include `confirm`
+    and `unconfirm` (its undo).
   - Refusal codes: `person_unknown`, `person_ambiguous`, `person_unspecified`,
     `card_without_name`, `line_to_self`, `line_cycle`, `change_unknown`,
     `change_already_undone`, `undo_conflict`, `company_has_no_contacts`,
@@ -2385,7 +2392,10 @@ drafts a Workflow or Skill shows its install card"):
   `cards__add_from_signature`, `cards__edit_person`, `cards__find`, `cards__list`,
   `cards__history`, `cards__set_status`, `cards__set_reporting_line`,
   `cards__remove_reporting_line`, `cards__undo`, `cards__org_chart`,
-  `cards__harvest_signatures`, `cards__import_hermes`; each dispatches with `origin: model`.
+  `cards__harvest_signatures`, `cards__import_hermes`; each dispatches with `origin: model`,
+  after dropping identity keys (`said_by`, `set_by`, `actor`, `recorded_by`, `confirmed_by`) from
+  the model's arguments. A failed call's `failure.message` is `<Chinese sentence>（<code>）` plus
+  `: <Bridge message>` when the Bridge gave a specific one (`FAILURE_TEXT`).
 - Skill `engineering/business-cards@1.0.0` (alias `cards`, no commands), in
   `host_runtime.assets.shipped()`.
 - Agent Web: a Gateway answer that drew a chart carries `files` and stores them on the assistant

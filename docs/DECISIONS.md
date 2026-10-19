@@ -3655,3 +3655,29 @@ Workflow parameters cannot carry the card's field lists); host tools that dispat
 (`origin` would misstate who chose the call); Graphviz or matplotlib for the chart (Graphviz is not
 on a colleague's PC, matplotlib is not in CI; Pillow is in both); storing email bodies or card
 images; a Contacts page in Agent Web in this slice (the chat covers find, list and history).
+
+## 2026-10-20 — Degrees and the unified business number are contact fields
+
+Context: the second business-cards live test (2026-10-20) stored card A's title as "資深經理 博士"
+(the degree absorbed into the title) and its division 研展處 I as 研展處; card B put its 統一編號 in
+notes while card A did not. The procedure said "omit rather than invent" but nothing kept those
+values apart.
+
+Decision (`docs/phases/BUSINESS_CARDS.md` §2 "Host checks on a reading"):
+
+- A person has `honorific` (博士, Dr., PhD) and `company_tax_id` (統一編號). The Host moves a degree
+  out of `title` (博士後 stays: it is a job title) and an 8-digit unified business number out of
+  `notes` on every automatic reading; the Skill, the tool schema and the signature prompt say
+  the same. An existing `cards.db` gains the two columns when it is opened.
+- `company_tax_id` is on the person, not a company record: the store has no company table, and
+  a number on the person is shown and merged with the same provenance rules as every field.
+- Division and department text is never normalised; the procedure says to copy suffixes such as
+  I, II or 一處 exactly, so 研展處 I and 研展處 II are two boxes on the chart.
+- With these: a romanised name is kept only when the reading says where it is printed, a field
+  stays "needs confirmation" until the person confirms or corrects it, and who made a change is
+  the request's actor and channel, never a model argument.
+
+Rejected: degrees and the tax number in `notes` (the minimal option; notes are free text, so the
+chart, find and the merge could not use them and two cards would again differ); a separate company
+table for the tax number (a larger schema change for one value); stripping roman numerals or
+"一處" when matching divisions (they name different divisions).

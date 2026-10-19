@@ -1,8 +1,79 @@
 # Handoff
 
-Updated: 2026-10-20 (Asia/Taipei), by Claude Code (native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-20 (Asia/Taipei), by Claude Code (business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## Native business cards and org chart (2026-10-20, Claude Code) — latest
+## Business-cards live-test fixes (2026-10-20, Claude Code) — latest
+
+**Goal / scope:** the eight bugs from the 2026-10-20 live test of native business cards (Gateway
+backend). Not pushed; Agent Web not restarted; the live `cards.db` and mail untouched except the
+guarded read-only folder check (`tests/test_outlook_mail_folders.py`, last test: it lists one
+Inbox message and compares folder strings only, when Outlook is already running).
+
+**Done (commits on main):**
+1. 77562560 — [blocker] `OutlookComMailbox.get()` named an Inbox message `<mailbox>/Inbox`
+   (`_folder_path` did not stop at the store root: the MAPI Namespace has `Folders` too), so
+   `outlook_mail.read()` refused every Inbox message with `message_unknown` — signature harvest,
+   `outlook.read` (`capabilities/mail_read`) and agent mode (`host_runtime/agent_mail`). The walk
+   now stops at the default store root (OlObjectClass + EntryID), names default folders
+   canonically (Inbox also for 收件匣) and keeps another store's name in front. The fix is in the
+   adapter, so all three callers are fixed; tests drive each through a fake of Outlook's object
+   model. `HarvestHandler.collect` skips an unreadable message (`skipped`, `skipped_note`). The
+   live check failed before the fix (`<address>/Inbox` vs `Inbox`) and passes after it.
+2. 16d8c189 — a failed `cards__*` call carries `<中文說明>（<code>）` instead of "Capability
+   invocation did not complete" (`business_cards_tools.FAILURE_TEXT`; Settings only for
+   `folder_unknown` / `permission_denied`); procedure "IF A TOOL FAILS".
+3. bc36e346 — who = `<actor> via <channel>` in history, `status_set_by`, lines, confirmations and
+   undo; `SetStatusRequest.said_by` removed; the host tools drop identity keys from model args.
+4. 1882da22 — `needs_confirmation` persists while any observation flagged a field and the value is
+   not the person's (source `user`); `edit-person` `confirm: [...]` ("email 正確"), history kind
+   `confirm`, undoable; chart label 「需確認：英文名、Email」 (`contracts.FIELD_LABELS`).
+5. 643d8f7b — `romanised_name` kept only with `romanised_name_printed`; else dropped (`dropped`) and
+   an email whose local part repeats it is marked uncertain; signatures keep it only when the
+   block prints it; procedure / schema: never derive it from the email, never change the email.
+6. ad3a15d4 — `honorific` and `company_tax_id` fields (decision `docs/DECISIONS.md` 2026-10-20
+   "Degrees and the unified business number are contact fields"); Host moves 博士 / Dr. / PhD out
+   of `title` (not 博士後) and 統一編號 out of notes; an existing `cards.db` gains the columns on
+   open; procedure: copy division / department exactly (研展處 I).
+7. 3e3a97e8 — `edit-person` `clear: [...]` empties a wrong field as the person's own value (a scan
+   does not refill it), so the invented "Yanji Fan" can be removed.
+8. Docs commit: `docs/phases/BUSINESS_CARDS.md`, `docs/CONTRACTS.md`, `docs/DECISIONS.md`,
+   `docs/TASKS.md`, user guide §4.7.
+
+**Verification (2026-10-20):** `ruff check .` passed; `ruff format --check .` 912 files
+formatted; `mypy` no issues (661 files). Full pytest, project `.venv` at 3e3a97e8: 3329 passed,
+7 skipped, 0 failed (includes the live Outlook folder check, which ran and passed).
+`C:epci-wkenv` (`pip install -e ".[dev,office]"`, `--basetemp=C:/aepci-wk/bt`), run after the
+first suite finished: 3305 passed, 31 skipped, 0 failed. Docs-only commit after that.
+
+**Open / risks:**
+- The model may still invent `romanised_name_printed`; the Host check only catches a missing or
+  email-only evidence line. The email-misread flag fires only when a romanised name was dropped.
+- The division suffix rule is procedure only (the Host cannot know a suffix was dropped).
+- Values stored wrongly in the first live test stay until corrected: a re-scan of card A with the
+  right email does not match the stored person (the stored email differs, and email decides), so
+  it would create a second person. Correct the stored email and clear the English name in chat
+  first (step 3 below).
+- Other stores' (shared mailbox / PST) folders are now named `<store>/<folder>`, so a scope entry
+  must name the store to read them (before, they were refused anyway).
+
+**Next (live re-test; check `/api/tasks` before restarting Agent Web):**
+1. Restart Agent Web so the new code loads (the existing `cards.db` gains `honorific` and
+   `company_tax_id` on first use).
+2. Agent Web Gateway chat: 「從 wnc.com.tw 的信件簽名檔整理聯絡人」 → candidates (no
+   `message_unknown` for Inbox mail); if some message is unreadable, the reply says
+   「讀信失敗：N 封信無法讀取（code），已略過；其餘 M 封已處理」.
+3. First fix card A's old record in chat: 「范○○ 的 email 改成 ryan.rj.fan@wnc.com.tw」 and
+   「把范○○ 的英文名刪掉」 (edit-person `fields` / `clear`). Then re-send card A (no English name): no romanised name stored, the reply says it was not on the
+   card if the model tried; email as printed (ryan.rj.fan@...) or flagged 需確認.
+4. Re-send card A again with a sure reading: the email stays 需確認 on the chart until
+   「email 正確」; then 「范… 的歷史」 shows a `confirm` row by `<you> via local|telegram`.
+5. Card with 「資深經理 博士」 and 「研展處 I」: title 資深經理, 學位 博士, division 研展處 I.
+   Card B with 統一編號: stored as the company's 統一編號, not in notes.
+6. 「X 已經離職」 → history / view shows `status_set_by` = `<you> via telegram` (Telegram) or
+   `via local` (Agent Web), never 使用者; 「復原」 works.
+7. Org chart: the 需確認 line shows Chinese field names.
+
+## Native business cards and org chart (2026-10-20, Claude Code)
 
 **Goal / scope:** owner 2026-10-20 "當然選a": business cards as a native AEP capability in Gateway chat
 and Telegram (Telegram photos are the main way cards arrive, owner update the same day), switched on

@@ -27,9 +27,11 @@ A Host-local SQLite file per actor: `<workspace>/business-cards/<actor-key>/card
 across members; contacts are personal data. `<actor-key>` is the actor's name made file-safe plus a
 short hash, so two actors never share a file.
 
-- **people**: `person_id`, `name`, `romanised_name`, `company`, `business_group`, `division`,
-  `department`, `title`, `phone`, `ext`, `mobile`, `fax`, `email`, `address`, `website`, `notes`,
-  `status` (`active` / `left`), `left_at`, `status_set_by`, `status_reason`, created / updated.
+- **people**: `person_id`, `name`, `romanised_name`, `company`, `company_tax_id` (統一編號),
+  `business_group`, `division`, `department`, `title`, `honorific` (博士, Dr., PhD), `phone`, `ext`,
+  `mobile`, `fax`, `email`, `address`, `website`, `notes`, `status` (`active` / `left`), `left_at`,
+  `status_set_by`, `status_reason`, created / updated. A store opened by a newer version gains any
+  missing field column (`ALTER TABLE ... ADD COLUMN`).
 - **field_sources**: field-level provenance, one row per person and field: the source that set the
   current value (`card` / `email_signature` / `user` / `import`), its evidence date and observation.
 - **observations**: every scan or sighting is kept ("every scan is kept"): source, source date,
@@ -54,6 +56,34 @@ When a card, signature or import brings a value for a field:
 4. a value the reading marked **uncertain** fills an empty field but never replaces a value.
 
 `edit_person` sets values with source `user`.
+
+**Needs confirmation.** A field needs confirmation while any observation of the person listed it in
+`uncertain` and its current value is not the person's own (source `user`). A later scan that is
+sure does not clear it. The person clears it by confirming the stored value (`edit-person`
+`confirm: ["email"]`, history kind `confirm`, undoable) or by correcting it (`fields`); re-stating
+the stored value in `fields` also confirms it. A wrong value is emptied with `edit-person`
+`clear: ["romanised_name"]`: the empty value is the person's own, so a later scan does not refill
+it (it becomes a proposal). `add-card`, `edit-person` and every person view
+report `needs_confirmation`, and the org chart marks those people with
+「需確認：英文名、Email」 (field names in Chinese, `contracts.FIELD_LABELS`).
+
+**Who.** Every write records who made it as the Host knows it: the request's actor and channel
+(`alice via telegram`, `alice via local`), in history, `status_set_by`, reporting lines and undo.
+Never a model argument: `set-status` has no `said_by`, and the `cards__*` tools drop identity
+keys (`said_by`, `set_by`, `actor`, ...) from a model's arguments.
+
+**Host checks on a reading** (`capabilities/business_cards/reading.py`):
+
+- `romanised_name` is kept only when printed: `add-card` takes `romanised_name_printed` (where it
+  is printed, copied as printed); without it, or when it is only an email address, the Host drops
+  the romanised name (`dropped` [{`field`, `value`, `reason: not_on_card`}]) and marks the email
+  uncertain when its local part repeats the dropped name. A signature candidate keeps a romanised
+  name only when its block prints it.
+- A degree or honorific in `title` (博士, Dr., PhD; not 博士後) moves to `honorific`.
+- A unified business number in `notes` (統一編號 / 統編 / UBN / Tax ID + 8 digits) moves to
+  `company_tax_id`. Decision `docs/DECISIONS.md` 2026-10-20 "Degrees and the unified business
+  number are contact fields".
+- Division and department text is never normalised: 研展處 I and 研展處 II are two boxes.
 
 ## 3. Operations (Bridge capabilities, namespace `business-cards`, version 1.0.0)
 
@@ -106,7 +136,14 @@ Procedure (from the Hermes `SKILL.md`, adapted):
 - after a scan, confirm the key fields in one block and ask only about the uncertain ones;
 - lead with the change when the person was already on file;
 - the org chart is not a reporting chart unless lines have evidence; say what it is every time;
-- a departure only when the user says so, recorded with the date and the user as source, undoable.
+- a departure only when the user says so, recorded with the date and the user as source, undoable;
+- `romanised_name` only when printed on the card (with `romanised_name_printed`); never derived
+  from the email, never the email changed to match a name;
+- `title` is the job title only (degrees to `honorific`); division and department copied exactly,
+  including suffixes such as I, II, 一處; 統一編號 in `company_tax_id`, never in notes;
+- ask about `needs_confirmation` too; "email 正確" → `cards__edit_person` `confirm: ["email"]`;
+- when a tool fails, tell its failure message and code; mention Settings only when the message
+  names it.
 
 ## 5. Email signatures
 
@@ -118,6 +155,23 @@ text is redacted, and at most 10 blocks go to the internal gateway model per str
 (`business-cards.signature.v1`), at most 40 messages per harvest. The result is candidates
 (fields, message id, date, whether the person exists and what would change). Nothing is stored
 until `add-from-signature`; only fields, the message id and the date are ever stored.
+
+A message that cannot be read is skipped and counted by its code (`skipped` [{`code`, `count`}]),
+never the whole harvest; `skipped_note` says it for the person, e.g. 「讀信失敗：1 封信無法讀取
+（message_unknown），已略過；其餘 3 封已處理。」.
+
+**Folder names.** `OutlookComMailbox.get()` names a message's folder the way `list()` does:
+relative to the default store's root, default folders by their canonical names (`Inbox` also
+when Outlook calls it 收件匣), another store's folders with that store's name in front (so they
+never match the scope). Before the fix `get()` returned `<mailbox>/Inbox` (the walk did not stop
+at the store root, because the MAPI Namespace also has `Folders`), so `outlook_mail.read()`
+refused every Inbox message with `message_unknown`: signature harvesting, `outlook.read` and agent
+mode's mail read (live test 2026-10-20).
+
+**Failures in the conversation.** A failed `cards__*` call reaches the model with a short Chinese
+sentence naming the code instead of the Bridge's generic "Capability invocation did not complete"
+(`business_cards_tools.FAILURE_TEXT`), with a specific Bridge message (where the input was wrong)
+kept after it.
 
 ## 6. Org chart
 
