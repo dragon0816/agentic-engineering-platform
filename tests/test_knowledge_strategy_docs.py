@@ -25,7 +25,8 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 BI_SCHEMA_V0 = ROOT / "docs/proposals/bi_schema_v0/bi_schema_v0.json"
-BI_SCHEMA_V0_SHA256 = "391553d65f394ede4c5336710f6f38014865f40ffc9970b887ddfe30900acaf0"
+# sha256 of the committed (LF) bytes; checkouts may convert to CRLF, so hashes normalize.
+BI_SCHEMA_V0_SHA256 = "ccb98e583503bae330b7e66e1b3c7c03416c323e5f0d5dfd579603e6ba23b3de"
 BI_SCHEMA = ROOT / "docs/proposals/bi_schema_v1/bi_schema_v1.json"
 BENCHMARK = ROOT / "docs/proposals/knowledge_benchmark_v0/questions.json"
 VAULT_QUESTIONS = ROOT / "docs/proposals/knowledge_benchmark_v0/vault_example_questions.json"
@@ -47,6 +48,11 @@ _TYPES: dict[str, tuple[type, ...]] = {
 
 def load(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def sha256_lf(path: Path) -> str:
+    """sha256 with CRLF normalized to LF: the same on Windows and Linux checkouts."""
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
 
 def _resolve(ref: str, base: Path, doc: Any) -> tuple[Any, Path, Any]:
@@ -212,7 +218,7 @@ def _matches(pattern: str, value: str) -> bool:
 
 
 def test_bi_schema_v0_is_kept_for_history() -> None:
-    assert hashlib.sha256(BI_SCHEMA_V0.read_bytes()).hexdigest() == BI_SCHEMA_V0_SHA256
+    assert sha256_lf(BI_SCHEMA_V0) == BI_SCHEMA_V0_SHA256
     schema = load(BI_SCHEMA_V0)
     assert schema["schema_id"] == "bi.schema/v0"
     origins = {s["origin"] for t in schema["relationship_types"] for s in t["sources"]}
@@ -252,9 +258,7 @@ def test_bi_schema_v1_traces_every_name_to_bi_schema_py() -> None:
     """Each source-bi-schema-py name points at the bi_schema.py line that defines it."""
     schema = load(BI_SCHEMA)
     assert schema["schema_id"] == "bi.schema/v1"
-    assert (
-        hashlib.sha256(BI_SCHEMA_PY.read_bytes()).hexdigest() == schema["source"]["primary_sha256"]
-    )
+    assert sha256_lf(BI_SCHEMA_PY) == schema["source"]["primary_sha256"]
     types = schema["entity_types"]
     assert [t for t, s in types.items() if s["origin"] == "proposed"] == ["Opportunity"]
     for name, spec in types.items():
@@ -425,7 +429,7 @@ def test_entity_history_never_lets_an_import_overwrite_a_person() -> None:
 
 
 def test_strategy_config_pins_schema_v1_digest() -> None:
-    digest = "sha256:" + hashlib.sha256(BI_SCHEMA.read_bytes()).hexdigest()
+    digest = "sha256:" + sha256_lf(BI_SCHEMA)
     for strategy in load(MOCKS / "strategies.json")["data"]:
         if strategy["schema"] is not None:
             assert strategy["schema"]["schema_id"] == "bi.schema/v1"
