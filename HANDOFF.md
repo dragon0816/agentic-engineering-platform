@@ -1,9 +1,59 @@
 # Handoff
 
-Updated: 2026-10-19 (Asia/Taipei), by Claude Code (revise an installed Workflow from chat; earlier: tool cap 150 and live Harness state)
+Updated: 2026-10-19 (Asia/Taipei), by Claude Code (Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal; earlier: revise an installed Workflow from chat)
 
 
-## Revise an installed Workflow from chat (2026-10-19, Claude Code) — latest
+## Four owner-approved changes (2026-10-19, Claude Code) — latest
+
+**Status:** committed on main (c3c5f1f8, 1b25b64b, 7310c3cd, 927e9b29, 75ee0f74), **not pushed**,
+Agent Web **not restarted**, the Shared Platform on 141 **not redeployed**.
+
+- **Telegram status on every change** (c3c5f1f8; decision 2026-10-19 "Telegram's status message
+  is edited whenever the turn's state changes", superseding the 5 s rule): `TurnProgress.listener`;
+  `channels/telegram.py` `_Progress` edits the one status message on each change, at most one
+  edit per second per chat (deferred, never dropped; latest state shown), identical text skipped,
+  429 `retry_after` honoured. Tests `tests/test_telegram_turn_progress.py`. Design §5.5.1.
+- **Team members revise a team-owned Workflow in place** (1b25b64b; decision 2026-10-19 "A member
+  of the owning team revises a team-owned Workflow in place"; spec `docs/phases/WORKFLOW_REVISION.md`):
+  `host_runtime/team_membership.py`. Membership from the platform's existing `POST /v1/member/me`
+  (own groups only; cached in `team-membership-cache.json`, used offline), else Settings → Shared
+  platform "Teams I belong to on this PC" (`team-membership.json`, `/api/settings/teams`). Card line
+  "Revision as a member of team X (declared on this PC)". Installing and platform publishing are
+  unchanged. No new platform endpoint. Tests `tests/test_team_membership.py`.
+- **Label** (7310c3cd): "Bridge API URL" → "Platform sync URL (Bridge API)" with the explanation;
+  UI text and two guide sentences only.
+- **Personal Agent code from Agent Web, renewed** (927e9b29 platform route, 75ee0f74 host; decision
+  2026-10-19 "Agent Web gets the Personal Agent code by password sign-in and renews it"; spec
+  `docs/phases/PASSWORD_SIGN_IN.md`): platform `logins/revoke` (own logins only, else 404
+  `login_missing`); `host_runtime/agent_code.py`; `POST /api/settings/shared-platform/sign-in`;
+  hourly renewal under 7 days left (`start_agent_code_renewal`, started by `aep-host web`); expiry
+  of the code and the Bridge token in Settings, reminder under 14 days. Tests
+  `tests/test_agent_code.py` (incl. headless browser, screenshots `.scratch/agent-code-signin-ui/`),
+  `tests/test_member_login_revoke.py`.
+- **Verification:** ruff, format, mypy clean in both venvs. Full suites: project `.venv` 3247
+  passed, 7 skipped, 0 failed; `C:epci-wkenv` (`pip install -e ".[dev,office]"`,
+  `--basetemp=C:/aepci-wk/bt`) 3224 passed, 30 skipped, 0 failed. Fakes and in-process platform
+  fixtures only; weekly report Workflows never run, read or changed.
+- **Risks / open:**
+  - 141 needs a redeploy for `logins/revoke`. Until then renewal stores the new code and the old one
+    expires on its own (recorded as `unrevoked`), and the sign-in's browser login stays until it
+    expires (30 days). The team-membership change needs no redeploy.
+  - A code pasted before this change has no record; the first hourly check renews it once to learn
+    its expiry (the old code is revoked once the route exists).
+  - The membership lookup calls the platform at most every 5 minutes; a refusal (revoked login)
+    gives no teams.
+- **Next:**
+  1. Owner restarts Agent Web (check `/api/tasks` first). Telegram: a tool-using turn updates the one
+     status message about every second, never a second message.
+  2. Settings → Shared platform: "Platform sync URL (Bridge API)"; "Sign in to get a code" with the
+     platform password → "Personal Agent code valid until …"; the Bridge token's expiry shows.
+  3. Settings: "Teams I belong to on this PC" shows the platform's teams and source; with a fixture
+     team Workflow (never the weekly report), Revise in chat gives "Revision of … 1.0.0 → 1.0.1" with
+     the membership line.
+  4. Redeploy 141 with the owner for `logins/revoke`.
+
+
+## Revise an installed Workflow from chat (2026-10-19, Claude Code)
 
 **Status:** committed on main, **not pushed**, Agent Web **not restarted**. Owner approved
 2026-10-19. Spec `docs/phases/WORKFLOW_REVISION.md`; decision `docs/DECISIONS.md` 2026-10-19
