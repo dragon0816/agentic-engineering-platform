@@ -261,6 +261,8 @@ class PersonView(CardFields):
 class PeopleResult(Contract):
     people: tuple[PersonView, ...]
     total: int
+    # The stored company the query named ("WNC" -> 啟碁科技股份有限公司), if any.
+    company: str = ""
 
 
 class HistoryRequest(Contract):

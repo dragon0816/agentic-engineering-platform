@@ -79,5 +79,88 @@ def same_name(a: str, b: str) -> bool:
     return bool(name_keys(a) & name_keys(b))
 
 
+#: Mail and web hosts many companies share: never a company's alias.
+PUBLIC_DOMAINS = frozenset(
+    {
+        "gmail",
+        "googlemail",
+        "yahoo",
+        "hotmail",
+        "outlook",
+        "live",
+        "msn",
+        "icloud",
+        "me",
+        "aol",
+        "proton",
+        "protonmail",
+        "qq",
+        "163",
+        "126",
+        "hinet",
+        "seed",
+        "pchome",
+        "linkedin",
+        "facebook",
+    }
+)
+#: Labels at the end of a host name that say nothing about the company.
+_DOMAIN_SUFFIXES = frozenset(
+    {
+        "com",
+        "net",
+        "org",
+        "co",
+        "edu",
+        "gov",
+        "biz",
+        "info",
+        "io",
+        "ai",
+        "tw",
+        "cn",
+        "hk",
+        "jp",
+        "kr",
+        "sg",
+        "us",
+        "uk",
+        "de",
+        "fr",
+        "in",
+        "idv",
+        "www",
+        "mail",
+        "email",
+    }
+)
+
+
+def domain_alias(address: str) -> str:
+    """The company's name in an email address or website: `wnc` for
+    `ze.wang@wnc.com.tw` or `https://www.wnc.com.tw/`; nothing for a public
+    mail service."""
+    text = address.strip().casefold()
+    host = text.rsplit("@", 1)[1] if "@" in text else re.sub(r"^[a-z]+://", "", text)
+    host = host.split("/", 1)[0].split(":", 1)[0]
+    labels = [label for label in host.split(".") if label and label not in _DOMAIN_SUFFIXES]
+    if not labels:
+        return ""
+    alias = labels[-1]
+    return "" if alias in PUBLIC_DOMAINS or len(alias) < 2 else alias
+
+
+def short_names(company: str) -> frozenset[str]:
+    """Romanised short names in a company name: words printed in capitals,
+    2-6 letters ("WNC" in "WNC 啟碁科技"), legal suffixes left out. A common
+    word ("Technology") is no alias: two companies would share it."""
+    words = re.findall(r"[A-Za-z0-9]+", unicodedata.normalize("NFKC", company))
+    return frozenset(
+        word.casefold()
+        for word in words
+        if 2 <= len(word) <= 6 and word.isupper() and word.casefold() not in _SUFFIXES
+    )
+
+
 def search_text(*parts: str) -> str:
     return " ".join(unicodedata.normalize("NFKC", part).casefold() for part in parts if part)

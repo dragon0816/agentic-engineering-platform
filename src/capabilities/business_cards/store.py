@@ -16,7 +16,7 @@ import json
 import re
 import secrets
 import sqlite3
-from collections.abc import Iterator, Mapping, Sequence
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from contextlib import closing, contextmanager
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, timedelta
@@ -233,6 +233,34 @@ def _describe(values: Mapping[str, str]) -> str:
 
 
 @dataclass
+class _Company:
+    """One company as stored: its spellings, how many people each has, and
+    its aliases (romanised short names, mail / web domains)."""
+
+    name: str
+    people: int = 0
+    aliases: set[str] = field(default_factory=set)
+    counts: dict[str, int] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        self.counts.setdefault(self.name, self.people)
+
+    @property
+    def spellings(self) -> tuple[str, ...]:
+        return tuple(self.counts)
+
+    def absorb(self, other: _Company) -> None:
+        for name, count in other.counts.items():
+            self.counts[name] = self.counts.get(name, 0) + count
+        self.aliases |= other.aliases
+
+    def canonical(self) -> str:
+        """The spelling most people carry; on a tie the longest (the full
+        legal name)."""
+        return max(self.counts, key=lambda name: (self.counts[name], len(name)))
+
+
+@dataclass
 class _Merge:
     changes: list[FieldChange] = field(default_factory=list)
     kept: list[KeptField] = field(default_factory=list)
@@ -320,6 +348,83 @@ class CardStore:
             return None, None
         found.sort(key=lambda item: item[0])
         return found[0][1], found[0][2]
+
+    def _companies(self, con: sqlite3.Connection) -> list[_Company]:
+        """The stored companies, each spelling joined with the others that are
+        the same company: the same name without legal suffixes, or the same
+        alias (a romanised short name, or an email or website domain other
+        than a public mail service)."""
+        spellings: dict[str, _Company] = {}
+        for row in self._people(con):
+            company = row["company"].strip()
+            if not company:
+                continue
+            item = spellings.setdefault(company, _Company(company))
+            item.people += 1
+            item.aliases |= names.short_names(company)
+            for value in (row["email"], row["website"]):
+                alias = names.domain_alias(value) if value else ""
+                if alias:
+                    item.aliases.add(alias)
+        groups: list[_Company] = []
+        for item in spellings.values():
+            joined = [
+                group
+                for group in groups
+                if any(names.same_company(item.name, other) for other in group.spellings)
+                or item.aliases & group.aliases
+            ]
+            merged = _Company(item.name, people=item.people, aliases=set(item.aliases))
+            for group in joined:
+                groups.remove(group)
+                merged.absorb(group)
+            groups.append(merged)
+        return groups
+
+    def _company_group(self, con: sqlite3.Connection, query: str) -> _Company | None:
+        """The one stored company a query names, or None (unknown or
+        ambiguous): by name without legal suffixes, then alias, then an
+        unambiguous part of a name."""
+        key = names.company_key(query)
+        if not key:
+            return None
+        groups = self._companies(con)
+
+        def by_name(group: _Company) -> bool:
+            return any(names.company_key(name) == key for name in group.spellings)
+
+        def by_alias(group: _Company) -> bool:
+            return key in group.aliases
+
+        def by_part(group: _Company) -> bool:
+            return len(key) >= 2 and any(key in names.company_key(name) for name in group.spellings)
+
+        tests: tuple[Callable[[_Company], bool], ...] = (by_name, by_alias, by_part)
+        for test in tests:
+            hits = [group for group in groups if test(group)]
+            if len(hits) == 1:
+                return hits[0]
+            if hits:
+                return None
+        return None
+
+    def resolve_company(self, query: str) -> str:
+        """The stored company a query names ("WNC", "啟碁" -> 啟碁科技股份有限公司),
+        or "" when none or more than one."""
+        with self._connect() as con:
+            group = self._company_group(con, query)
+            return "" if group is None else group.canonical()
+
+    def _in_company(
+        self, con: sqlite3.Connection, query: str
+    ) -> tuple[Callable[[sqlite3.Row], bool], str]:
+        """Who belongs to the company a query names, and its canonical name;
+        an unresolved query falls back to comparing names."""
+        group = self._company_group(con, query)
+        if group is None:
+            return (lambda row: names.same_company(row["company"], query)), ""
+        members = set(group.spellings)
+        return (lambda row: row["company"].strip() in members), group.canonical()
 
     def _resolve(self, con: sqlite3.Connection, ref: PersonRef) -> sqlite3.Row:
         if ref.person_id:
@@ -1243,9 +1348,14 @@ class CardStore:
         words = names.search_text(query).split()
         romanised = names.name_keys(query)
         with self._connect() as con:
+            group = self._company_group(con, query)
+            members = set() if group is None else set(group.spellings)
             hits = []
             for row in self._people(con):
                 if status != "any" and row["status"] != status:
+                    continue
+                if row["company"].strip() in members:
+                    hits.append(row)
                     continue
                 text = names.search_text(
                     *(row[name] for name in FIELDS if name not in ("address", "notes"))
@@ -1264,11 +1374,12 @@ class CardStore:
         self, *, company: str, source: str, status: str, limit: int
     ) -> tuple[list[PersonView], int]:
         with self._connect() as con:
+            member, _ = self._in_company(con, company)
             hits = []
             for row in self._people(con):
                 if status != "any" and row["status"] != status:
                     continue
-                if company and not names.same_company(row["company"], company):
+                if company and not member(row):
                     continue
                 if (
                     source
@@ -1360,9 +1471,8 @@ class CardStore:
         """People of a company (and how many who left were left out) and the
         active lines between them."""
         with self._connect() as con:
-            everyone = [
-                row for row in self._people(con) if names.same_company(row["company"], company)
-            ]
+            member, _ = self._in_company(con, company)
+            everyone = [row for row in self._people(con) if member(row)]
             shown = [row for row in everyone if include_left or row["status"] != "left"]
             ids = {row["person_id"] for row in shown}
             lines = [

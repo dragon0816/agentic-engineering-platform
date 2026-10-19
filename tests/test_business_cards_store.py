@@ -649,3 +649,58 @@ def test_a_business_group_the_person_set_is_never_overwritten(tmp_path: Path) ->
     )
     assert store.view(first.person_id).business_group == "C&S 事業群"
     assert {k.field: k.reason for k in later.kept} == {"business_group": "user_set"}
+
+
+def _wnc(store: CardStore) -> None:
+    _add(
+        store,
+        {
+            "name": "王則閔",
+            "company": "啟碁科技股份有限公司",
+            "department": "研展三部",
+            "title": "資深經理",
+            "email": "ze.wang@wnc.com.tw",
+        },
+    )
+    _add(
+        store,
+        {"name": "Ann Li", "company": "WNC", "title": "Engineer", "email": "ann.li@wnc.com.tw"},
+        source="email_signature",
+        ref="<m1>",
+    )
+    _add(store, {"name": "陳範", "company": "範例網通", "email": "chen@gmail.com"})
+    _add(store, {"name": "林範", "company": "其他科技", "email": "lin@gmail.com"})
+
+
+@pytest.mark.parametrize("query", ["WNC", "wnc", "啟碁", "啟碁科技", "啟碁科技股份有限公司"])
+def test_a_company_is_found_by_its_name_alias_or_domain(tmp_path: Path, query: str) -> None:
+    """Live re-test 2026-10-20: "WNC" found the company once and not the next
+    time. A company query resolves against the stored companies: the name
+    without legal suffixes, an alias from the website or email domain
+    (wnc.com.tw -> WNC) or a romanised short name, or an unambiguous part."""
+    store = _store(tmp_path)
+    _wnc(store)
+    assert store.resolve_company(query) == "啟碁科技股份有限公司"
+    people, _, _ = store.chart_data(query, include_left=False)
+    assert {p["name"] for p in people} == {"王則閔", "Ann Li"}
+    listed, total = store.list_people(company=query, source="", status="any", limit=10)
+    assert total == 2
+    found, count = store.find(query, status="any", limit=10)
+    assert {p.name for p in found} == {"王則閔", "Ann Li"} and count == 2
+
+
+def test_a_shared_mail_domain_or_an_ambiguous_part_is_no_company(tmp_path: Path) -> None:
+    store = _store(tmp_path)
+    _wnc(store)
+    # gmail.com is no company: 範例網通 and 其他科技 stay apart.
+    assert store.resolve_company("gmail") == ""
+    assert store.resolve_company("範例網通") == "範例網通"
+    # "科技" is part of two companies: not resolved.
+    assert store.resolve_company("科技") == ""
+    assert store.resolve_company("Unknown Corp") == ""
+    # A common word in two English names is no alias.
+    _add(store, {"name": "Bo", "company": "Foo Technology Inc.", "email": "bo@footech.com"})
+    _add(store, {"name": "Cy", "company": "Bar Technology Ltd", "email": "cy@bartech.com"})
+    assert store.resolve_company("Foo Technology") == "Foo Technology Inc."
+    assert store.resolve_company("foo") == "Foo Technology Inc."
+    assert store.resolve_company("technology") == ""

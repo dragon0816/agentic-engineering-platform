@@ -75,6 +75,11 @@ _PERSON = {
     "description": "person_id, or name (with company when names repeat)",
 }
 _DATE = {"type": "string", "description": "YYYY-MM-DD"}
+_COMPANY = {
+    "type": "string",
+    "description": "as the person says it: name, short name (WNC) or mail domain; the "
+    "result names the stored company",
+}
 
 
 #: What a failure code means, for the conversation model to tell the person
@@ -235,7 +240,7 @@ TOOLS: tuple[tuple[str, CapabilitySpec, str, dict[str, Any]], ...] = (
         "List contacts by company, by source (card, email_signature, user, import) and status.",
         _object(
             {
-                "company": _S,
+                "company": _COMPANY,
                 "source": {
                     "type": "string",
                     "enum": ["", "card", "email_signature", "user", "import"],
@@ -306,7 +311,7 @@ TOOLS: tuple[tuple[str, CapabilitySpec, str, dict[str, Any]], ...] = (
         cards.CHART_SPEC,
         "Draw a company's org chart from the contacts: a PNG the person sees and a Markdown "
         "legend to include in the answer. People who left are left out unless include_left.",
-        _object({"company": _S, "include_left": {"type": "boolean"}}, ("company",)),
+        _object({"company": _COMPANY, "include_left": {"type": "boolean"}}, ("company",)),
     ),
     (
         "cards__harvest_signatures",

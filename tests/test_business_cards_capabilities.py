@@ -764,3 +764,23 @@ def test_a_printed_unified_business_number_is_stored_even_outside_its_field(
     ).data
     assert {c["field"] for c in edited["changes"]} == {"company_tax_id", "notes"}
     assert _run(bridge, "find", {"query": "陳二"}).data["people"][0]["notes"] == "週五休"
+
+
+def test_the_chart_list_and_find_return_the_canonical_company(tmp_path: Path) -> None:
+    bridge = _bridge(tmp_path)
+    for card in (
+        {"name": "王則閔", "company": "啟碁科技股份有限公司", "email": "ze.wang@wnc.com.tw"},
+        {"name": "Ann Li", "company": "WNC", "email": "ann.li@wnc.com.tw"},
+    ):
+        assert _run(bridge, "add-card", card).status == "succeeded"
+    for query in ("WNC", "wnc", "啟碁", "啟碁科技"):
+        chart = _run(bridge, "org-chart", {"company": query})
+        assert chart.status == "succeeded", (query, chart.failure)
+        assert chart.data["company"] == "啟碁科技股份有限公司" and chart.data["people"] == 2
+        listed = _run(bridge, "list", {"company": query}).data
+        assert listed["company"] == "啟碁科技股份有限公司" and listed["total"] == 2
+        found = _run(bridge, "find", {"query": query}).data
+        assert found["company"] == "啟碁科技股份有限公司" and found["total"] == 2
+    from capabilities.business_cards.manifest import PROCEDURE
+
+    assert "COMPANIES" in PROCEDURE and "short name or domain" in PROCEDURE

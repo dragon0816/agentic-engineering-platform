@@ -393,10 +393,11 @@ class FindHandler(_Cards):
         request = FindRequest.model_validate(inputs)
 
         def work() -> Contract:
-            people, total = self.store(context).find(
-                request.query, status=request.status, limit=request.limit
+            store = self.store(context)
+            people, total = store.find(request.query, status=request.status, limit=request.limit)
+            return PeopleResult(
+                people=tuple(people), total=total, company=store.resolve_company(request.query)
             )
-            return PeopleResult(people=tuple(people), total=total)
 
         return await self.run(work)
 
@@ -406,13 +407,15 @@ class ListHandler(_Cards):
         request = ListRequest.model_validate(inputs)
 
         def work() -> Contract:
-            people, total = self.store(context).list_people(
+            store = self.store(context)
+            people, total = store.list_people(
                 company=request.company,
                 source=request.source,
                 status=request.status,
                 limit=request.limit,
             )
-            return PeopleResult(people=tuple(people), total=total)
+            company = store.resolve_company(request.company) if request.company else ""
+            return PeopleResult(people=tuple(people), total=total, company=company)
 
         return await self.run(work)
 
@@ -436,7 +439,9 @@ class OrgChartHandler(_Cards):
             )
             if not people:
                 raise CardStoreError("company_has_no_contacts")
-            company = people[0]["company"] or request.company
+            company = (
+                store.resolve_company(request.company) or people[0]["company"] or request.company
+            )
             folder = store_dir(self.workspace_root, context.actor) / "charts"
             stamp = f"{datetime.now(UTC):%Y%m%d-%H%M%S}"
             safe = "".join(ch if ch.isalnum() else "-" for ch in request.company)[:40] or "company"
