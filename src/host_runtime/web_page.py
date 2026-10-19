@@ -383,6 +383,30 @@ p.note { color: var(--dim); font-size: 13px; margin: 4px 0 12px; }
   margin: 8px 0 0; line-height: 1.65; overflow-wrap: anywhere;
 }
 .said.bad { color: var(--bad); }
+/* A running turn's live progress (owner 2026-10-19): Harness phases, recent
+   tool lines, tool count and time. Names and numbers only. */
+.turn-progress { margin: 0; padding: 8px 12px; max-width: 640px; border: 1px solid var(--line);
+  border-radius: 8px; background: var(--panel); font-size: 13px; line-height: 1.5;
+  overflow-wrap: anywhere; }
+.turn-progress .tp-status { margin: 0 0 4px; font-weight: 600; color: var(--ink); }
+.turn-progress .tp-steps { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 0 0 6px;
+  padding: 0; list-style: none; }
+.turn-progress .tp-steps[hidden], .turn-progress .tp-tools[hidden] { display: none; }
+.turn-progress .tp-steps li { margin: 0; color: var(--dim); }
+.turn-progress .tp-steps li.done { color: var(--good); }
+.turn-progress .tp-steps li.active { color: var(--accent); font-weight: 600; }
+.turn-progress .tp-steps li.failed { color: var(--bad); }
+.turn-progress .tp-tools { margin: 0 0 6px; padding: 0; list-style: none;
+  font-family: var(--mono); font-size: 12px; }
+.turn-progress .tp-tools li { margin: 1px 0; display: flex; gap: 6px; min-width: 0; }
+.turn-progress .tp-tools .tp-name { flex: 1; min-width: 0; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; }
+.turn-progress .tp-tools .tp-mark { flex: none; width: 1.4em; text-align: center; }
+.turn-progress .tp-tools .tp-mark.good { color: var(--good); }
+.turn-progress .tp-tools .tp-mark.bad { color: var(--bad); }
+.turn-progress .tp-tools .tp-mark.wait { color: var(--warn); }
+.turn-progress .tp-tools .tp-time { flex: none; color: var(--dim); }
+.turn-progress .tp-meter { margin: 0; color: var(--dim); font-variant-numeric: tabular-nums; }
 .approval-card { margin: 12px 0; padding: 10px 12px; border: 1px solid var(--accent);
   border-radius: 8px; background: var(--accent-soft); }
 .approval-card p { margin: 6px 0 8px; white-space: pre-wrap; overflow-wrap: anywhere; }
@@ -2770,9 +2794,119 @@ function sessionBusy(sessionId) {
 function showPendingState(entry) {
   if (!entry.said) return;
   entry.said.className = "said" + (entry.state === "failed" ? " bad" : " waiting");
+  if (entry.state === "working" && entry.progress) {
+    if (!entry.said.querySelector(".turn-progress")) {
+      entry.said.replaceChildren(turnProgressView());
+    }
+    showTurnProgress(entry.said.querySelector(".turn-progress"), entry.progress);
+    return;
+  }
   entry.said.replaceChildren(text(entry.state === "queued" ? "排隊中…"
     : entry.state === "working" ? "working…"
       : "The request did not finish: " + entry.error));
+}
+
+// -- Live turn progress (owner 2026-10-19) ------------------------------------
+// While a turn runs, its progress is read every second and drawn in place of
+// "working…": the Harness phases, the recent tool lines, and the tool count
+// and time against their limits. The server sends names and numbers only.
+
+const STEP_MARKS = ["①", "②", "③", "④", "⑤"];
+const TOOL_MARKS = {
+  running: ["…", ""], succeeded: ["✓", "good"], failed: ["✗", "bad"],
+  waiting: ["?", "wait"], allowed: ["✓", "good"], refused: ["✗", "bad"],
+};
+
+function clockText(seconds) {
+  const whole = Math.max(0, Math.floor(seconds || 0));
+  return Math.floor(whole / 60) + ":" + String(whole % 60).padStart(2, "0");
+}
+
+function turnProgressView() {
+  const box = document.createElement("div"); box.className = "turn-progress";
+  const status = document.createElement("p"); status.className = "tp-status";
+  status.setAttribute("role", "status"); status.setAttribute("aria-live", "polite");
+  const steps = document.createElement("ol"); steps.className = "tp-steps";
+  steps.setAttribute("aria-label", "Harness 階段");
+  const tools = document.createElement("ul"); tools.className = "tp-tools";
+  tools.setAttribute("aria-label", "最近的工具");
+  const meter = document.createElement("p"); meter.className = "tp-meter";
+  box.append(status, steps, tools, meter);
+  return box;
+}
+
+function progressStatus(progress) {
+  const harness = progress.harness;
+  if (harness && !harness.done) {
+    const step = harness.steps.find(item => item.state === "active");
+    return harness.label + "：" + (step ? step.label : harness.phase)
+      + (harness.retry ? "（第 " + (harness.retry + 1) + " 輪）" : "") + "…";
+  }
+  const running = (progress.tools || []).filter(tool => tool.status === "running"
+    || tool.status === "waiting");
+  if (running.length) {
+    const last = running[running.length - 1];
+    return (last.status === "waiting" ? "等待你確認：" : "執行中：") + last.name;
+  }
+  return progress.tool_count ? "思考下一步…" : "working…";
+}
+
+function showTurnProgress(box, progress) {
+  if (!box) return;
+  const status = progressStatus(progress);
+  const quiet = box.querySelector(".tp-status");
+  if (quiet.textContent !== status) quiet.textContent = status;
+  const steps = box.querySelector(".tp-steps"), harness = progress.harness;
+  steps.hidden = !harness;
+  steps.replaceChildren(...(harness ? harness.steps.map((step, index) => {
+    const item = document.createElement("li"); item.className = step.state;
+    let label = (STEP_MARKS[index] || "") + " " + step.label;
+    if (step.state === "active" && harness.retry && step.stage !== "plan") {
+      label += "（第 " + (harness.retry + 1) + " 輪）";
+    }
+    label += step.state === "done" ? " ✓" : step.state === "active" ? "…"
+      : step.state === "failed" ? " ✗" : "";
+    item.textContent = label;
+    return item;
+  }) : []));
+  const tools = box.querySelector(".tp-tools"), recent = (progress.tools || []).slice(-4);
+  tools.hidden = !recent.length;
+  tools.replaceChildren(...recent.map(tool => {
+    const [mark, tone] = TOOL_MARKS[tool.status] || ["·", ""];
+    const item = document.createElement("li");
+    const sign = document.createElement("span"); sign.className = "tp-mark " + tone;
+    sign.textContent = mark; sign.setAttribute("aria-label", tool.status);
+    const name = document.createElement("span"); name.className = "tp-name";
+    name.textContent = tool.name; name.title = tool.name;
+    const time = document.createElement("span"); time.className = "tp-time";
+    time.textContent = (tool.duration_s || 0).toFixed(1) + " s";
+    item.append(sign, name, time);
+    return item;
+  }));
+  const parts = [];
+  if (progress.tool_cap) parts.push("工具 " + progress.tool_count + "/" + progress.tool_cap);
+  else if (progress.tool_count) parts.push("工具 " + progress.tool_count);
+  parts.push(clockText(progress.elapsed_s)
+    + (progress.time_limit_s ? " / " + clockText(progress.time_limit_s) : ""));
+  box.querySelector(".tp-meter").textContent = parts.join(" · ");
+}
+
+function watchTurnProgress(session, entry) {
+  let stopped = false, timer = null;
+  const tick = async () => {
+    if (stopped) return;
+    try {
+      const read = await call("/api/conversations/progress?session_id="
+        + encodeURIComponent(session));
+      if (!stopped && read.progress && entry.state === "working") {
+        entry.progress = read.progress;
+        if (session === activeConversation) showPendingState(entry);
+      }
+    } catch (failure) { /* the next tick tries again */ }
+    if (!stopped) timer = setTimeout(tick, 1000);
+  };
+  timer = setTimeout(tick, 400);
+  return {stop() { stopped = true; if (timer) clearTimeout(timer); entry.progress = null; }};
 }
 
 function renderPendingTurns(sessionId) {
@@ -3062,6 +3196,7 @@ form.addEventListener("submit", (event) => {
     let answer = null;
     avatarWorking(1);
     const watching = watchAgentCards(session, entry);
+    const progressing = watchTurnProgress(session, entry);
     try {
       const completed = await call("/api/conversations/turn", {
         session_id: session, message: asked,
@@ -3074,7 +3209,7 @@ form.addEventListener("submit", (event) => {
       entry.state = "failed"; entry.error = failure.message;
       showPendingState(entry);
     } finally { avatarWorking(-1); }
-    watching.stop();
+    watching.stop(); progressing.stop();
     try {
       if (session === activeConversation) await loadConversations(session);
       else { conversationRows = (await call("/api/conversations")).conversations;

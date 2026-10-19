@@ -59,6 +59,7 @@ from agent.data_policy import ContextMaterial, OutboundContext
 from agent.gateway import GatewayConversationResult
 from agent.routing import DOT_COMMAND
 from agent.skills import SkillManifest
+from agent.turn_progress import TURN_PROGRESS, TurnProgress, TurnProgressBoard
 from capabilities.knowledge_pipeline.handlers import (
     ADOPT_SPEC,
     CONVERT_SPEC,
@@ -615,6 +616,10 @@ class AgentWeb:
             self.agent_mode, reader=_outlook_mailbox, writer=_outlook_drafts, sender=_outlook_sender
         )
         self.agent_mode.mail = self.agent_mail
+        # Live, content-free progress of each session's running turn (owner
+        # 2026-10-19); an agent-mode backend's tool requests join it.
+        self.turn_progress = TurnProgressBoard()
+        self.agent_mode.observer = self._agent_tool_progress
 
     @property
     def request_lock(self) -> threading.RLock:
@@ -2416,7 +2421,45 @@ class AgentWeb:
         except Exception:  # noqa: BLE001 - the reply then names no number
             return None
 
+    def _agent_tool_progress(self, session_id: str, tool: str, status: str) -> None:
+        progress = self.turn_progress.get(session_id)
+        if progress is not None:
+            progress.agent_tool(tool, status)
+
+    def conversation_progress(self, session_id: str) -> dict[str, Any]:
+        """The session's running turn as names, phases, counts and status only
+        (owner 2026-10-19); `progress` is None when no turn is running."""
+        return {
+            "ok": True,
+            "progress": self.turn_progress.read(session_id, self.runtime.actor),
+        }
+
     def conversation_turn(self, request: ConversationTurnRequest) -> dict[str, Any]:
+        """One turn, with its live progress readable while it runs."""
+        item = ConversationTurnRequest.model_validate(request)
+        record = self.runtime.state.conversation(item.session_id, self.runtime.actor)
+        backend = record.backend if record is not None else ""
+        progress = TurnProgress(
+            turn_id=f"turn-{uuid.uuid4().hex[:12]}",
+            session_id=item.session_id,
+            owner=self.runtime.actor,
+            backend=backend,
+        )
+        if backend == "gateway":
+            try:
+                limits = self.conversation_context.limits()
+                progress.set_limits(limits.tool_calls, limits.time_limit_seconds)
+            except Exception:  # noqa: BLE001 - the Gateway sets them when it starts
+                pass
+        self.turn_progress.begin(progress)
+        listening = TURN_PROGRESS.set(progress)
+        try:
+            return self._conversation_turn(item)
+        finally:
+            TURN_PROGRESS.reset(listening)
+            self.turn_progress.end(progress)
+
+    def _conversation_turn(self, request: ConversationTurnRequest) -> dict[str, Any]:
         item = ConversationTurnRequest.model_validate(request)
         with self._turn_lock(item.session_id):
             record = self.runtime.state.conversation(item.session_id, self.runtime.actor)
@@ -5326,6 +5369,9 @@ class _Handler(BaseHTTPRequestHandler):
                 self._json(200, web.cards(session or None))
         elif parsed.path == "/api/agent-mode":
             self._json(200, web.agent_mode_settings())
+        elif parsed.path == "/api/conversations/progress":
+            session = parse_qs(parsed.query).get("session_id", [""])[0]
+            self._json(200, web.conversation_progress(session))
         elif parsed.path == "/api/agent-mode/session":
             session = parse_qs(parsed.query).get("session_id", [""])[0]
             self._json(200, web.agent_session(session))

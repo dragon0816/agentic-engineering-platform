@@ -203,6 +203,9 @@ class AgentMode:
         self.mail: Any = None
         # Skill folders the agent reads from (AEP's read-only skills).
         self.skill_roots: tuple[Path, ...] = ()
+        # Set by AgentWeb: hears (session, tool name, waiting|allowed|refused)
+        # for the running turn's live progress. Names only; it decides nothing.
+        self.observer: Callable[[str, str, str], None] | None = None
 
     # -- settings ------------------------------------------------------------
 
@@ -426,8 +429,10 @@ class AgentMode:
         )
         if verdict.decision == "free":
             run.free.append(redact(f"{request.tool} {target}")[:120])
+            self._observe(run, request.tool, "allowed")
             return True, ""
         if verdict.decision == "refuse":
+            self._observe(run, request.tool, "refused")
             run.refused.append(target)
             task = self.tasks().start(
                 "agent_permission",
@@ -436,7 +441,18 @@ class AgentMode:
             )
             self.tasks().finish(task, "failed", redact(verdict.message))
             return False, verdict.message
-        return self.ask(run, request, scope=verdict.scope, kind=kind)
+        self._observe(run, request.tool, "waiting")
+        allowed, message = self.ask(run, request, scope=verdict.scope, kind=kind)
+        self._observe(run, request.tool, "allowed" if allowed else "refused")
+        return allowed, message
+
+    def _observe(self, run: AgentRun, tool: str, status: str) -> None:
+        if self.observer is None:
+            return
+        try:
+            self.observer(run.session_id, tool, status)
+        except Exception:  # noqa: BLE001 - progress display decides nothing
+            pass
 
     def ask(
         self,

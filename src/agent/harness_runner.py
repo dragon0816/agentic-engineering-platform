@@ -8,6 +8,7 @@ import inspect
 from typing import Any, Protocol
 
 import telemetry.recorder as telemetry
+from agent import turn_progress
 from agent.harness_plan import AgentHarnessPlan
 from agent.harness_run import (
     AgentHarnessRun,
@@ -19,6 +20,15 @@ from agent.harness_run import (
     validate_run,
 )
 from common.base import Symbol
+
+
+def _show(run: AgentHarnessRun) -> None:
+    """The phase on the running turn's live progress (names only)."""
+    turn_progress.report(
+        lambda progress: progress.harness_phase(
+            run.plan.domain, tuple(run.plan.stages), run.phase, run.retry_count
+        )
+    )
 
 
 class HarnessActionFailure(Exception):
@@ -46,6 +56,7 @@ def run_harness(plan: AgentHarnessPlan, actions: HarnessActions) -> AgentHarness
     run = start_harness(plan)
     attempt = 0
     while run.phase not in ("validated", "needs_input", "failed"):
+        _show(run)
         telemetry.emit(
             "state.entered", status="started", state=run.phase, attributes={"loop_index": attempt}
         )
@@ -79,7 +90,10 @@ def run_harness(plan: AgentHarnessPlan, actions: HarnessActions) -> AgentHarness
                 state="stopped",
                 attributes={"failure_code": error.code},
             )
-            return stop_harness(run, error.code, needs_input=error.needs_input)
+            stopped = stop_harness(run, error.code, needs_input=error.needs_input)
+            _show(stopped)
+            return stopped
+    _show(run)
     telemetry.emit(
         "state.entered",
         status="succeeded" if run.phase == "validated" else "failed",
@@ -98,6 +112,7 @@ async def run_harness_async(plan: AgentHarnessPlan, actions: Any) -> AgentHarnes
     run = start_harness(plan)
     attempt = 0
     while run.phase not in ("validated", "needs_input", "failed"):
+        _show(run)
         telemetry.emit(
             "state.entered",
             status="started",
@@ -133,7 +148,10 @@ async def run_harness_async(plan: AgentHarnessPlan, actions: Any) -> AgentHarnes
                 state="stopped",
                 attributes={"failure_code": error.code},
             )
-            return stop_harness(run, error.code, needs_input=error.needs_input)
+            stopped = stop_harness(run, error.code, needs_input=error.needs_input)
+            _show(stopped)
+            return stopped
+    _show(run)
     telemetry.emit(
         "state.entered",
         status="succeeded" if run.phase == "validated" else "failed",

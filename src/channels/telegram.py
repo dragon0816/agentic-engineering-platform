@@ -31,6 +31,7 @@ from pydantic import Field, JsonValue, StrictBool, field_validator, model_valida
 
 from agent.gateway import TOOL_PROGRESS, ToolProgressState
 from agent.routing import DOT_COMMAND
+from agent.turn_progress import TURN_PROGRESS, TurnProgress, compact_lines
 from channels import telegram_flow
 from common.action_cards import CARD_TAP, ActionCard, card_in, telegram_card
 from common.assets import (
@@ -529,11 +530,20 @@ def _handled(outcome: LocalAgentOutcome) -> bool:
 
 class _Progress:
     """One "working on it" message per request, edited in place while the
-    Agent works: how long it has taken and which skills it used. Only tool
-    names are shown, never arguments or results. Every Bot API call runs off
-    the event loop, one at a time, so edits arrive in order."""
+    Agent works: how long it has taken and which skills it used, and for a
+    conversation the Harness phase and the tool count and time against their
+    limits (owner 2026-10-19). Only names and numbers are shown, never
+    arguments or results. Every Bot API call runs off the event loop, one at a
+    time, so edits arrive in order; after the first edit, at most one edit per
+    `progress_refresh_s` (a burst of tool events becomes one edit)."""
 
-    def __init__(self, ingress: "TelegramIngress", chat_id: int, title: str) -> None:
+    def __init__(
+        self,
+        ingress: "TelegramIngress",
+        chat_id: int,
+        title: str,
+        turn: TurnProgress | None = None,
+    ) -> None:
         self._ingress = ingress
         self._chat_id = chat_id
         self._title = title
@@ -543,6 +553,9 @@ class _Progress:
         self._lock = asyncio.Lock()
         self._pending: set[asyncio.Task[None]] = set()
         self._ticker: asyncio.Task[None] | None = None
+        self.turn = turn
+        self._last_edit: float | None = None
+        self._dirty = False
 
     def text(self, outcome: bool | None = None) -> str:
         seconds = int(time.monotonic() - self._started)
@@ -551,6 +564,8 @@ class _Progress:
         else:
             head = f"{'✅ Done' if outcome else '⚠️ Stopped'} after {seconds} s"
         lines = [head]
+        if outcome is None and self.turn is not None:
+            lines.extend(compact_lines(self.turn.snapshot()))
         if self._steps:
             lines.append("Skills used:" if outcome is not None else "Skills:")
             lines.extend(
@@ -571,7 +586,12 @@ class _Progress:
     def tool(self, name: str, state: ToolProgressState) -> None:
         """The Gateway's TOOL_PROGRESS listener; called on the event loop."""
         self._steps[name] = state
-        self._schedule()
+        self._dirty = True
+        if (
+            self._last_edit is None
+            or time.monotonic() - self._last_edit >= self._ingress.progress_refresh_s
+        ):
+            self._schedule()
 
     async def finish(self, succeeded: bool) -> None:
         if self._ticker is not None:
@@ -586,6 +606,7 @@ class _Progress:
             self._schedule()
 
     def _schedule(self) -> None:
+        self._last_edit, self._dirty = time.monotonic(), False
         task = asyncio.get_running_loop().create_task(self._edit(self.text()))
         self._pending.add(task)
         task.add_done_callback(self._pending.discard)
@@ -1168,14 +1189,19 @@ class TelegramIngress:
             turn = [*history, ModelMessage(role="user", text=f"{text}\n\n{listing}")]
             # The files ride on the newest message only, as in Agent Web.
             sent = [*history, ModelMessage(role="user", text=f"{text}\n\n{note}", images=images)]
-        progress = await self._progress(base["chat_id"], "Working on it")
+        # The turn's live progress (owner 2026-10-19): Harness phase, tool
+        # count and time, shown in the one status message.
+        turn_state = TurnProgress(turn_id=f"telegram-{update.update_id if update else 0}")
+        progress = await self._progress(base["chat_id"], "Working on it", turn_state)
         listening = TOOL_PROGRESS.set(progress.tool)
+        tracking = TURN_PROGRESS.set(turn_state)
         answered = False
         started = datetime.now(UTC)
         try:
             result = await self.agent.converse(request, tuple(sent))
             answered = result.conversation is not None and result.conversation.status == "answered"
         finally:
+            TURN_PROGRESS.reset(tracking)
             TOOL_PROGRESS.reset(listening)
             await progress.finish(answered)
         if result.refusal is not None:
@@ -1536,8 +1562,10 @@ class TelegramIngress:
             )
         )
 
-    async def _progress(self, chat_id: int, title: str) -> "_Progress":
-        progress = _Progress(self, chat_id, title)
+    async def _progress(
+        self, chat_id: int, title: str, turn: TurnProgress | None = None
+    ) -> "_Progress":
+        progress = _Progress(self, chat_id, title, turn)
         await progress.open()
         return progress
 

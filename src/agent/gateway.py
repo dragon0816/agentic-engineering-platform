@@ -19,6 +19,7 @@ from typing import Any, Literal, Self
 from pydantic import Field, JsonValue, TypeAdapter, model_validator
 
 import telemetry.recorder as telemetry
+from agent import turn_progress
 from agent.backend_contracts import (
     CONVERSATION_MAX_OUTPUT_TOKENS,
     MAX_CONVERSATION_TOOL_CALLS,
@@ -814,6 +815,8 @@ class Gateway:
         cap = limits.tool_calls
         started = started if started is not None else self.clock()
         deadline = started + limits.time_limit_seconds
+        turn_progress.report(lambda progress: progress.set_limits(cap, limits.time_limit_seconds))
+        turn_progress.report(lambda progress: progress.begin_pass())
         # Repetition guard (owner 2026-10-19): identical calls since the last
         # call never made before in this pass, and the identical-failure streak.
         seen_calls: set[str] = set()
@@ -1066,7 +1069,29 @@ class Gateway:
         bound: dict[str, Any],
         anchor: ToolAnchor | None = None,
     ) -> ConversationToolExecution:
-        """One tool call, as a `tool.completed` span (telemetry contract v0.2)."""
+        """One tool call, as a `tool.completed` span (telemetry contract v0.2),
+        and as a line on the running turn's live progress (name and status)."""
+        turn_progress.report(lambda progress: progress.tool_started(call.name))
+        status = "failed"
+        try:
+            item = await self._telemetered_tool_call(
+                context, call, turn, host, bindings, bound, anchor
+            )
+            status = "succeeded" if _tool_succeeded(item) else "failed"
+            return item
+        finally:
+            turn_progress.report(lambda progress: progress.tool_finished(call.name, status))
+
+    async def _telemetered_tool_call(
+        self,
+        context: RequestContext,
+        call: ModelToolCall,
+        turn: int,
+        host: dict[str, HostTool],
+        bindings: dict[str, Any],
+        bound: dict[str, Any],
+        anchor: ToolAnchor | None = None,
+    ) -> ConversationToolExecution:
         telemetry.note_tool()
         with telemetry.span(
             "tool",
