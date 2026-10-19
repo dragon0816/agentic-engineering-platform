@@ -2660,3 +2660,10 @@ s-k-20261011T102952` (not published).
   state, `__pycache__`. Secret scan clean. Ruff and mypy exclude the verbatim tools; ruff also
   excludes the untracked `files/` working folder.
 
+## Open items tracked in GitHub Issues (2026-10-19)
+
+- [x] Open decisions and verification tasks moved to GitHub Issues #211–#222 (owner request
+  2026-10-19), labelled `decision-needed`, `meeting`, `coordination`, `verification`, `on-hold`,
+  `knowledge-strategy`. This file stays the record of completed work; an issue closes when its result
+  is recorded here or in `docs/DECISIONS.md`. Owner-only security items are not in the issues.
+
