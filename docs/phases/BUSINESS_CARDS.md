@@ -1,0 +1,159 @@
+# Business cards and org chart (native capability)
+
+Owner decision 2026-10-20 ("當然選a"): business cards become a native AEP capability, usable in
+Gateway chat in Agent Web and in Telegram, switched on by default in the colleague bundle, with
+no data leaving for an external model. Decision record: `docs/DECISIONS.md` 2026-10-20 "Business
+cards are a native AEP capability".
+
+## 1. Why
+
+A live test (2026-10-20) showed AEP's Gateway chat reads a business-card photo well through the
+internal gateway (a 90°-rotated card read correctly; the one wrong field, the email, was flagged
+uncertain), but nothing could store it. The only implementation was the Hermes coding-agent Skill
+`hermes/business-cards` (`SKILL.md` + `scripts/cards.py`), which needs agent mode and a shell.
+`cards.py` also lacks what an org chart needs:
+
+| Gap in `cards.py` | Native version |
+|---|---|
+| No source column | every observation records `card`, `email_signature`, `user` or `import` |
+| No status / departure, no update or delete | `status` (`active` / `left`), `left_at`, `status_set_by`, `status_reason`; edits; undo |
+| Duplicates only by exact name + company | email first (case-insensitive); then name + company, where a romanised name matches the local-language name |
+| No fax, no business group | `fax`, `ext`; `business_group` (事業群), `division` (處), `department` kept apart |
+| No reporting lines | `reporting_lines` with evidence kind, reference, confidence and inferred flag |
+
+## 2. Storage
+
+A Host-local SQLite file per actor: `<workspace>/business-cards/<actor-key>/cards.db`. Never shared
+across members; contacts are personal data. `<actor-key>` is the actor's name made file-safe plus a
+short hash, so two actors never share a file.
+
+- **people**: `person_id`, `name`, `romanised_name`, `company`, `business_group`, `division`,
+  `department`, `title`, `phone`, `ext`, `mobile`, `fax`, `email`, `address`, `website`, `notes`,
+  `status` (`active` / `left`), `left_at`, `status_set_by`, `status_reason`, created / updated.
+- **field_sources**: field-level provenance, one row per person and field: the source that set the
+  current value (`card` / `email_signature` / `user` / `import`), its evidence date and observation.
+- **observations**: every scan or sighting is kept ("every scan is kept"): source, source date,
+  source ref (`sha256:<hex>` of the card image, the mail's message id, or `hermes-cards:<row>`),
+  the raw extracted fields and `uncertain`. Never an email body, never an image.
+- **reporting_lines**: person → manager, `evidence_kind` (`signature` / `email_content` /
+  `title_inference` / `user`), `evidence_ref`, `confidence` (0–1), `inferred`; removal is a soft
+  delete (`removed_at`, `removed_by`, `removed_reason`), so it can be restored.
+- **history**: every change, grouped by `change_id`: who, when, why, kind, field, old and new
+  value. Undo replays a change group backwards and is itself a new change.
+- **proposals**: a conflict between an automatic source and a user-set value.
+
+### Field-level provenance (in the spirit of ADR-K11)
+
+When a card, signature or import brings a value for a field:
+
+1. empty field → set; provenance = that source and date;
+2. current value set by the **user** → never overwritten; a differing value becomes a proposal
+   and the result says so ("kept your value");
+3. current value from an automatic source → replaced only when the new evidence is not older
+   than the current value's evidence date; the change is in history;
+4. a value the reading marked **uncertain** fills an empty field but never replaces a value.
+
+`edit_person` sets values with source `user`.
+
+## 3. Operations (Bridge capabilities, namespace `business-cards`, version 1.0.0)
+
+| Capability | Side effect | What it does |
+|---|---|---|
+| `add-card` | write | Fields + `uncertain` read from a card photo; returns created / updated / unchanged, what changed, what was kept, and a "上次是…, 現在是…" line |
+| `add-from-signature` | write | 1–50 entries with message id and date; source `email_signature` |
+| `edit-person` | write | The person's own corrections, source `user` |
+| `set-status` | write | `left` / `active`, with reason, who said it and the date |
+| `set-reporting-line` | write | Person → manager with evidence; replaces the person's current line |
+| `remove-reporting-line` | write | Soft-removes the current line, with a reason |
+| `undo` | write | Reverts one change group by its `change_id` |
+| `import-hermes` | write | One-time, idempotent import of `~/.business-cards/cards.db` (`BUSINESS_CARDS_HOME`) |
+| `find` | read | People matching a text (name, romanised name, email, company, title) |
+| `list` | read | People by company, source and status |
+| `history` | read | One person's changes and observations, with change ids |
+| `org-chart` | read | PNG + Markdown legend for a company (writes only the derived files) |
+| `harvest-signatures` | read | Mail in the configured scope from one company domain → signature candidates |
+
+Every capability is a typed contract (`capabilities/business_cards/contracts.py`); the dispatcher
+validates inputs and outputs as for any capability. Nothing here sends mail or reaches the network
+except the internal gateway model call in `harvest-signatures`.
+
+### Writes without a confirmation every time
+
+The write capabilities are `side_effect: write`, `risk: low`, with policy ref
+`personal-contacts-policy`. In owner mode a write the conversation model chooses normally waits for
+the person's approval button. For these capabilities only, the Host declares a **standing
+confirmation** (`LocalPolicy.confirmed_writes`): host configuration, never asset content, limited to
+the person's own contact store, which is local, never networked, recorded in history and undoable.
+Grants still apply (`authorize`), so on a host governed by members' decisions the capability needs a
+selection like any other. Switching the Skill off removes the tools.
+
+## 4. Conversation tools and the Skill
+
+The Skill `engineering/business-cards@1.0.0` (alias `cards`) is shipped switched on
+(`host_runtime.assets.shipped()`). It carries the procedure; it has no commands, because a Skill
+command to a capability gives the model no argument schema. The Host offers host tools
+`cards__add_card`, `cards__add_from_signature`, `cards__edit_person`, `cards__find`, `cards__list`,
+`cards__history`, `cards__set_status`, `cards__set_reporting_line`, `cards__remove_reporting_line`,
+`cards__undo`, `cards__org_chart`, `cards__harvest_signatures`, `cards__import_hermes`, each with its
+JSON schema, **only while some version of that Skill is switched on** and its capabilities are
+installed. Every call is a `CapabilityInvocation` through the Bridge with `origin: model`.
+
+Procedure (from the Hermes `SKILL.md`, adapted):
+
+- reading rules and the JSON fields; local-language `name` / `company`, the romanised form in
+  `romanised_name`; `phone` is the desk number, `mobile` the cellphone, `ext` the extension;
+  `uncertain` names every field not read with confidence; omit rather than invent;
+- after a scan, confirm the key fields in one block and ask only about the uncertain ones;
+- lead with the change when the person was already on file;
+- the org chart is not a reporting chart unless lines have evidence; say what it is every time;
+- a departure only when the user says so, recorded with the date and the user as source, undoable.
+
+## 5. Email signatures
+
+`harvest-signatures(domain, days, limit, folder)` searches the Outlook scope set in Agent Web
+Settings → Agent mode (folders, `max_days`, exclusions), never wider: `days` is capped at
+`max_days`. Only messages whose sender address ends with `@<domain>` are read. For each, the last
+lines before any quoted reply are cut as the signature block (≤ 1,200 characters), credential-shaped
+text is redacted, and at most 10 blocks go to the internal gateway model per structured call
+(`business-cards.signature.v1`), at most 40 messages per harvest. The result is candidates
+(fields, message id, date, whether the person exists and what would change). Nothing is stored
+until `add-from-signature`; only fields, the message id and the date are ever stored.
+
+## 6. Org chart
+
+`org-chart(company, include_left)` lays out business group → division → department as nested
+boxes, people inside by title seniority, and draws reporting lines: solid for evidenced lines
+(signature, email content, user), dashed for inferred ones (title inference or `inferred`). People
+who left are omitted, or drawn grey with "已離職" when `include_left` is true. Rendered with Pillow
+(shipped in the bundle with the `weekly-mail` extra and in CI with `office`), no Graphviz; a CJK
+font is taken from Windows Fonts (Microsoft JhengHei, then others) when present. The Markdown
+legend lists each line with its evidence and whether it is inferred, and says plainly that without
+evidenced lines the layout is a grouping by title, not a reporting chart. Files go to
+`<workspace>/business-cards/<actor-key>/charts/`; the result names them in `attach`.
+
+**Showing it.** Agent Web: after a Gateway turn, files named by a `cards__org_chart` result are
+kept on the answer (`ConversationMessage.attachments`) and the page shows the PNG inline, fetched
+through `GET /api/conversations/file` (token header; only files recorded on that conversation's
+answers, under the workspace). Telegram: the PNG is sent with `sendPhoto` after the text reply.
+The legend is in the answer text (appended by the Host when the model left it out).
+
+## 7. Telegram
+
+A Telegram photo is downloaded into the attachment store and reaches the model as an image (the
+same `for_model` path as Agent Web), so "store this card" works there unchanged. The chart PNG goes
+back with `sendPhoto` (multipart, through the bot's own transport).
+
+## 8. Import from the Hermes store
+
+`aep-host cards import [--from PATH] [--actor NAME]` or the `cards__import_hermes` tool reads
+`cards.db` from `BUSINESS_CARDS_HOME` or `~/.business-cards` (the tool reads only that default
+place). Every row becomes an observation with source `card`, its `captured_at` date and source ref
+`hermes-cards:<id>`; rows are merged oldest first, so newer scans win. Running it again adds
+nothing. The Hermes `business-cards` pack Skill stays switched off.
+
+## 9. Not in this slice
+
+- A "Contacts" page in Agent Web (the chat covers find / list / history; a page would be a large
+  addition to `web_page.py`).
+- Accepting a proposal from a button (the user says so in chat; `edit-person` records it).
+- Graph layout of deep reporting trees beyond the grouped boxes and connecting lines.
