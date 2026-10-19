@@ -118,12 +118,22 @@ class PdfExtractor:
         return out.done()
 
 
+# The first line of the text section that holds a slide's speaker notes.
+SPEAKER_NOTES_LABEL = "Speaker notes:"
+
+
 class PptxExtractor:
     """Per slide, in shape order and into groups: text frames gathered into
     one text section, tables as Markdown, pictures (placeholders included) as
-    image sections. Speaker notes are not extracted."""
+    image sections. A slide's speaker notes follow its content as one more
+    text section on the same slide, its first line `SPEAKER_NOTES_LABEL`, so a
+    citation still names the slide; a slide with empty notes gets none.
 
-    name = "pptx.v1"
+    `pptx.v2` added the notes. Raw is write-once and content-addressed, so a
+    Raw written by `pptx.v1` keeps its sections and its `extractor` line; only
+    new or changed originals are extracted with notes."""
+
+    name = "pptx.v2"
     suffixes = (".pptx",)
 
     def extract(self, data: bytes, assets: AssetSink) -> tuple[RawSection, ...]:
@@ -159,9 +169,22 @@ class PptxExtractor:
             for number, slide in enumerate(deck.slides, 1):
                 walk(slide.shapes, number)
                 out.flush(slide=number)
+                notes = _speaker_notes(slide)
+                if notes:
+                    out.text(f"{SPEAKER_NOTES_LABEL}\n{notes}")
+                    out.flush(slide=number)
         except (PythonPptxError, LxmlError, *_CORRUPT) as error:
             raise _undecodable(error) from error
         return out.done()
+
+
+def _speaker_notes(slide: Any) -> str:
+    """The slide's notes text, or "" when it has none. `has_notes_slide` is
+    checked first because reading `notes_slide` would create an empty one."""
+    if not slide.has_notes_slide:
+        return ""
+    frame = slide.notes_slide.notes_text_frame
+    return str(frame.text).strip() if frame is not None else ""
 
 
 class DocxExtractor:

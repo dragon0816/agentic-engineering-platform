@@ -559,7 +559,10 @@ the same name as a no-op and refuses different bytes (`raw_exists`).
 
 Sections keep their relationships: PDF text and images per `page`; PPTX text
 frames, tables and pictures per `slide` in shape order, descending into groups
-and including pictures placed in placeholders; DOCX paragraphs (headings
+and including pictures placed in placeholders, then the slide's speaker notes
+as one more text section on that slide whose first line is `Speaker notes:`
+(none when the notes are empty; added 2026-10-19 as extractor `pptx.v2`, Raw
+written by `pptx.v1` is not rewritten); DOCX paragraphs (headings
 become Markdown `#`), tables and inline pictures in body order — content
 controls (`w:sdt`) included, and pictures inside table cells following their
 table — with no page. `table_markdown` renders a GitHub-style table with cells
@@ -571,7 +574,7 @@ standard-library errors broken streams raise) with the cause chained. An
 unreadable *image* inside a readable original — a filter pypdf cannot decode,
 a linked rather than embedded picture — is skipped, not fatal: the text is
 still evidence. Known limitations: PDF tables arrive as text in reading
-order, PPTX speaker notes are not extracted, a skipped image leaves no trace
+order, a skipped image leaves no trace
 in the Raw file, and images are stored as the library provides them (pypdf
 converts raw image streams to PNG, which needs its `image` extra — declared).
 

@@ -10,7 +10,13 @@ from pathlib import Path
 import pytest
 from test_raw import drop, make_vault
 
-from knowledge.office import DocxExtractor, PdfExtractor, PptxExtractor, table_markdown
+from knowledge.office import (
+    SPEAKER_NOTES_LABEL,
+    DocxExtractor,
+    PdfExtractor,
+    PptxExtractor,
+    table_markdown,
+)
 from knowledge.raw import DropIntake, ExtractionError, StagedAssets, parse
 
 pytest.importorskip("pypdf")
@@ -174,6 +180,59 @@ def test_pptx_keeps_text_tables_and_pictures_by_slide() -> None:
     assert sections[1].image_ref == sections[4].image_ref and len(staged.items) == 1
     with pytest.raises(ExtractionError, match="undecodable"):
         PptxExtractor().extract(b"PK\x03\x04 not a deck", staged)
+
+
+def make_pptx_with_notes() -> bytes:
+    """Slide 1 has notes, slide 2 none, slide 3 a notes page with blank text."""
+    from pptx import Presentation
+    from pptx.util import Inches
+
+    deck = Presentation()
+    blank = deck.slide_layouts[6]
+    for text in ("Market overview", "No notes here", "Blank notes"):
+        slide = deck.slides.add_slide(blank)
+        slide.shapes.add_textbox(Inches(1), Inches(1), Inches(4), Inches(1)).text_frame.text = text
+    first, _, third = deck.slides
+    first.notes_slide.notes_text_frame.text = "Say the 2027 ramp first.\nThen the risks."
+    third.notes_slide.notes_text_frame.text = "  \n "
+    out = io.BytesIO()
+    deck.save(out)
+    return out.getvalue()
+
+
+def test_pptx_speaker_notes_follow_their_slide_labelled() -> None:
+    sections = PptxExtractor().extract(make_pptx_with_notes(), StagedAssets("raw/deck/assets"))
+    assert [(s.kind, s.slide, s.text) for s in sections] == [
+        ("text", 1, "Market overview"),
+        ("text", 1, f"{SPEAKER_NOTES_LABEL}\nSay the 2027 ramp first.\nThen the risks."),
+        ("text", 2, "No notes here"),
+        ("text", 3, "Blank notes"),
+    ]
+    assert PptxExtractor.name == "pptx.v2"
+
+
+def test_pptx_without_notes_extracts_as_before() -> None:
+    from pptx import Presentation
+
+    # The fixture deck has no notes pages; extraction must not create them either.
+    data = make_pptx()
+    sections = PptxExtractor().extract(data, StagedAssets("raw/deck/assets"))
+    assert not any(s.text.startswith(SPEAKER_NOTES_LABEL) for s in sections)
+    assert len(sections) == 5
+    assert not any(slide.has_notes_slide for slide in Presentation(io.BytesIO(data)).slides)
+
+
+def test_speaker_notes_round_trip_through_raw(tmp_path: Path) -> None:
+    vault = make_vault(tmp_path)
+    intake = DropIntake(vault, [PptxExtractor()])
+    drop(vault, "drop/bd/deck.pptx", make_pptx_with_notes())
+    [outcome] = intake.intake_all(["drop/bd/deck.pptx"], mode="apply", today=TODAY)
+    assert outcome.status == "written"
+    text = vault.read("raw/bd/deck.md")
+    assert "extractor: pptx.v2" in text
+    assert "<!-- raw-section 2 kind=text slide=1 -->\nSpeaker notes:\n" in text
+    notes = [s for s in parse(text).sections if s.text.startswith(SPEAKER_NOTES_LABEL)]
+    assert [(s.slide, s.text.splitlines()[1]) for s in notes] == [(1, "Say the 2027 ramp first.")]
 
 
 def test_docx_keeps_order_headings_tables_and_pictures() -> None:
