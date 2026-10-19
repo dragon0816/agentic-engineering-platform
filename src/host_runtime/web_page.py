@@ -3690,6 +3690,19 @@ function appendRemove(actions, shelf, item) {
   }
 }
 
+// Revise an installed Workflow from chat (owner 2026-10-19): a new session with
+// the request typed in; the person edits and sends it. Nothing is sent here.
+async function reviseInChat(item) {
+  const key = capabilityKey(item);
+  const created = await call("/api/conversations", {});
+  await selectPrimaryTab("ask");
+  await loadChat(created.conversation.session_id);
+  field.value = "Revise the installed Workflow " + key + ": ";
+  field.dispatchEvent(new Event("input"));
+  field.focus();
+  field.setSelectionRange(field.value.length, field.value.length);
+}
+
 function showCapabilityDetail(row, kind) {
   const content = el("capability-detail-content"); content.className = "";
   content.replaceChildren();
@@ -3710,6 +3723,10 @@ function showCapabilityDetail(row, kind) {
     [tag(true, "installed", "")]);
   const badges = head.badges;
   const shelf = SHELF_KINDS[kind];
+  if (kind === "workflows") {
+    head.actions.append(actionButton("Revise in chat", "btn revise-in-chat",
+      () => reviseInChat(item)));
+  }
   if (shelf) {
     head.actions.append(actionButton("Switch off", "btn",
       (button) => switchAsset(shelf, item, false, button)));
