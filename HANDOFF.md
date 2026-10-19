@@ -1,6 +1,40 @@
 # Handoff
 
-Updated: 2026-10-19 (Asia/Taipei), by Claude Code (owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-20 (Asia/Taipei), by Claude Code (three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+
+## Live test fixes 2026-10-20 (Claude Code) — latest
+
+**Goal / scope:** three bugs from the 2026-10-20 live test. Code in `src/agent/gateway.py`,
+`src/agent/conversation_harness.py`, `src/agent/turn_progress.py`, one JS line in
+`src/host_runtime/web_page.py`, a three-line hook in `src/host_runtime/host.py`. Not pushed; Agent Web
+not restarted; live install untouched. A parallel agent built native business cards
+(`src/capabilities/business_cards/`, commits 039a1724..21f05327); not part of this work.
+
+**Done (three commits on main):**
+1. 17b607b5 — an image turn survives the conversation check's retry: the retry pair goes to
+   `_converse(..., retry=...)` after the person's message (image sent once, on that message); a retry
+   pass that fails returns the first answer with the Host note. `docs/HARNESS_DESIGN.zh-TW.md` §5.3.
+2. 9ec22f74 — progress ends in the real outcome: a turn without an answer stops the conversation
+   Harness in `execute` (`failed`, or `needs_input` shown as `stopped` ⏸); `TurnProgress` records the
+   stage a run ended in. §5.5.1.
+3. 0ba829e4 — switched-off Skills are named (names only, ≤80) in the Gateway system prompt with
+   "switch it on in Agent Web > Capabilities; never install or re-create it". §5.1;
+   `docs/DECISIONS.md` 2026-10-20.
+
+**Verification (2026-10-20):** ruff check / format --check on the changed files passed (whole repo
+after the business-cards commits: `ruff check .` passed, 909 files formatted); `mypy` no issues (645
+files). Full pytest, project `.venv` (at 0ba829e4): 3272 passed, 7 skipped, 0 failed.
+`C:\aepci-wk\venv` (`.[dev,office]`, `--basetemp=C:/aepci-wk/bt`, run while the business-cards agent
+was committing): 3274 passed, 30 skipped, 2 failed
+(`test_platform_transport::test_sync_installs_what_the_member_chose_onto_a_real_host`,
+`test_weekly_report_workflow::test_doctor_reports_the_integrations_without_contacting_anything`);
+both passed when rerun alone.
+
+**Next:** live re-test after the owner restarts Agent Web: business-card photo + 「請解析這張名片並存進
+名片資料庫」 (expect an answer, not `conversation_history_invalid`); progress shows ✗/⏸ on failed or
+stopped turns; asking for business cards while `hermes/business-cards` is off gets the Capabilities hint.
+Open question: should drafting a Skill whose name is switched off also be refused in
+`chat_authoring.check_skill` (today only the prompt guards it)?
 
 
 **Redeploy on 141 (2026-10-19, Claude Code):** the Shared Platform on 172.25.228.141 now runs
