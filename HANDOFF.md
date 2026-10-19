@@ -1,6 +1,6 @@
 # Handoff
 
-Updated: 2026-10-19 (Asia/Taipei), by Claude Code (Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal; earlier: revise an installed Workflow from chat)
+Updated: 2026-10-19 (Asia/Taipei), by Claude Code (Knowledge Strategy v1.3 — BI Schema v1 from bi_schema.py, awaiting owner review; earlier the same day: Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
 
 **Redeploy on 141 (2026-10-19, Claude Code):** the Shared Platform on 172.25.228.141 now runs
@@ -9,6 +9,46 @@ a1076c53 (includes 927e9b29 `POST /v1/member/logins/revoke`), bundle
 health ok, certificate fingerprint unchanged, Member Portal loads, `logins/revoke` without a
 session answers 401, Agent Web `/api/platform` answered (18 catalog entries). The "not
 redeployed" line below is superseded.
+
+## Knowledge Strategy v1.3 (2026-10-19, Claude Code) — awaiting owner review
+
+**Goal / scope:** reconcile the Knowledge Strategy proposal's provisional BI Schema v0 with the real
+BI tooling the owner supplied (now the test fixture `tests/fixtures/bi_vault_example/`, e30cd8bf);
+fold in the owner's priority question (ADR-K11) and the owner-shared Codex "BI Knowledge Source
+Brief v6" (each finding re-checked against the fixture with file:line). Docs, contracts and
+benchmark data only: no `src/`, no AEP-K02, no issues / PRs, not pushed. Supersedes the "Knowledge
+Strategy v1.2" section below as the current state of that track.
+
+**Done (committed on main):**
+- `docs/proposals/KNOWLEDGE_STRATEGY_v1.3.md` + `_v1.3_DIFF.md` (v1.2 unchanged). New: §0.3 inputs
+  and "already decided, not reopened"; §4.3 Schema v1; §4.4 BI pipeline → Strategy = Workflow +
+  Skills + Config; §4.5 DQ-1..9; §4.6 Dashboard caveats; §4.7 Case A–E; ADR-K11; issues AEP-K14
+  (rewrite `bi_ingest.py` behaviour as capabilities), K15 (Legacy Obsidian adapter), K16 (vault-
+  example runner); K13 marked done.
+- `docs/proposals/bi_schema_v1/` (`bi_schema_v1.json` + README). Generated from `bi_schema.py` with
+  `ast`; the generator was a one-off scratch script (not committed) — the test re-checks every
+  `bi_schema.py:<line>` reference and the file's sha256, so drift is caught.
+- Knowledge API v0.1 pre-freeze revision (README "Pre-freeze revision" table for the Atlas agent);
+  mock upcast to v1; `entity_history.json`; strategies digest = sha256 of `bi_schema_v1.json`
+  (re-pin it if that file changes: `test_strategy_config_pins_schema_v1_digest`).
+- Benchmark: 33 triples renamed; SUP-01; `vault_example_questions.json` (8, real example names).
+- `tests/test_knowledge_strategy_docs.py`: 36 tests (v0 pinned unchanged + upcast totality; mock vs
+  v1; v1 traced to code lines; judgement provenance; history; digest; SUP-01; vault set vs fixture).
+
+**Verification (2026-10-19, project `.venv`):** `ruff check .` passed; `ruff format --check .` 893
+files formatted; `mypy` no issues in 643 files; `pytest -q -p no:cacheprovider
+tests/test_knowledge_strategy_docs.py` 36 passed; `pytest -k "docs or readme or tasks or
+knowledge_strategy"` 51 passed; every new or changed JSON parses and `openapi.yaml` parses (15 paths).
+Full suite not run (no code changed).
+
+**Open / risks:**
+- Owner decisions listed in v1.3 §8.2 (Schema v1, ADR-K11 rubric and single vs scoped priority,
+  `competing_vendors`, link-range inferences, Node extensions, Opportunity, speaker notes, in-place
+  API revision vs 0.2). N2 reviewers still pending.
+- The Atlas Coding Agent must apply the relationship renames in the contract README.
+- `files/` (owner's working copy) stays untracked; the fixture is the committed snapshot.
+
+**Next:** owner reviews v1.3. Nothing in AEP-K02+ starts before approval.
 
 ## Four owner-approved changes (2026-10-19, Claude Code) — latest
 

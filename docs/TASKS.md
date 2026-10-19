@@ -2448,6 +2448,26 @@ s-k-20261011T102952` (not published).
   DECISIONS or ARCHITECTURE change; no issue, PR or push. **AEP-K02 and later stay blocked until
   the owner confirms the thresholds, Schema v0 and the schedule and approves v1.2.**
   Verification: see HANDOFF.md.
+- [x] Knowledge Strategy v1.3 — docs, contracts and benchmark data only (2026-10-19, Claude Code;
+  owner supplied the real BI tools and example vault, approved committing it as test data in
+  `tests/fixtures/bi_vault_example/` (e30cd8bf), asked whether Application `priority` survives
+  people adjusting it, and shared a Codex "BI Knowledge Source Brief v6"). Wrote
+  `docs/proposals/KNOWLEDGE_STRATEGY_v1.3.md` (v1.2 kept) and `_v1.3_DIFF.md`;
+  `docs/proposals/bi_schema_v1/` generated from `bi_schema.py` by `ast` (not executed): 11 types
+  `source-bi-schema-py` with `bi_schema.py:<line>`, Opportunity `proposed`, 25 relationship names /
+  37 domain pairs, Node = the vault's 8, field classes, v0 → v1 upcast. N1 resolved: of the 10
+  provisional links 5 confirmed, 5 renamed (`nodes`, `inferred_applications`, `technologies`,
+  `key_suppliers`, `chipset_modules`); v0 `mentions` = code `related`; `competing_solutions`
+  holds Competitor cards in the vault → proposed `competing_vendors`. New sections: BI pipeline
+  mapped onto `bi_card_import` / `bi_knowledge_graph` Strategies (rewrite `bi_ingest.py` behaviour
+  as AEP-K14, reuse `office.py`, Obsidian parts only in the Legacy adapter AEP-K15), data-quality
+  rules DQ-1..9, Dashboard caveats, Case A first flow; ADR-K11 judgement fields and field-level
+  provenance (priority rubric and scoping pending). API v0.1 revised before freeze (v1 names,
+  `field_provenance`, `/entities/{id}/history`); mock upcast to v1 (93 entities, 166
+  relationships, `entity_history.json`); benchmark triples renamed, SUP-01 added, separate
+  8-question `vault_example_questions.json`. Test extended (36 tests). No `src/`, DECISIONS or
+  ARCHITECTURE change; no issue, PR or push. **v1.3 awaits owner review; AEP-K02 and later stay
+  blocked.** Verification: see HANDOFF.md.
 
 ## n8n integration removed (2026-10-17)
 
