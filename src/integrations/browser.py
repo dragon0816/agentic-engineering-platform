@@ -32,6 +32,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
+from http.client import HTTPException
 from pathlib import Path
 from types import TracebackType
 from typing import Any, Literal, Self
@@ -412,7 +413,7 @@ class Browser:
             with Devtools(str(endpoint), timeout_s=10) as browser:
                 browser.call("Browser.close")
             return True
-        except (OSError, ValueError, WebSocketError, DevtoolsRefused):
+        except (OSError, ValueError, HTTPException, WebSocketError, DevtoolsRefused):
             return False
 
     def _still_answering(self, port: int | None) -> bool:
@@ -424,7 +425,9 @@ class Browser:
             ) as answer:
                 answer.read()
             return True
-        except (OSError, ValueError):
+        except (OSError, ValueError, HTTPException):
+            # A browser that is shutting down can answer with a broken status
+            # line (http.client.BadStatusLine is not an OSError; CI 2026-10-19).
             return False
 
     def close(self) -> None:
