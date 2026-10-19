@@ -44,6 +44,8 @@ from capabilities.business_cards.contracts import (
     SignatureCandidate,
     SkippedMessages,
     StatusResult,
+    StoreCandidatesRequest,
+    StoreCandidatesResult,
     UndoRequest,
     UndoResult,
 )
@@ -89,6 +91,11 @@ ADD_SIGNATURE_SPEC = _spec(
     "Store people read from email signatures in the person's contacts",
     "write",
 )
+STORE_CANDIDATES_SPEC = _spec(
+    "store-candidates",
+    "Store people from this conversation's latest signature harvest by candidate id",
+    "write",
+)
 EDIT_SPEC = _spec("edit-person", "Correct a contact's fields as the person says", "write")
 STATUS_SPEC = _spec(
     "set-status", "Mark a contact as left or active, recorded and undoable", "write"
@@ -119,6 +126,7 @@ HARVEST_SPEC = _spec(
 WRITE_SPECS = (
     ADD_CARD_SPEC,
     ADD_SIGNATURE_SPEC,
+    STORE_CANDIDATES_SPEC,
     EDIT_SPEC,
     STATUS_SPEC,
     SET_LINE_SPEC,
@@ -131,6 +139,11 @@ WRITE_SPECS = (
 def hermes_store() -> Path:
     home = os.environ.get(HERMES_HOME_VARIABLE)
     return (Path(home) if home else Path.home() / ".business-cards") / "cards.db"
+
+
+def session_key(context: RequestContext) -> str:
+    """Which conversation a harvest's candidates belong to."""
+    return f"{context.channel}:{context.session_id or '-'}"
 
 
 def who(context: RequestContext) -> str:
@@ -209,6 +222,27 @@ class AddFromSignatureHandler(_Cards):
                     )
                 )
             return AddFromSignatureResult(results=tuple(results))
+
+        return await self.run(work)
+
+
+class StoreCandidatesHandler(_Cards):
+    """This conversation's harvested candidates, stored by id: the model never
+    copies a message id or a date (live test 2026-10-20)."""
+
+    async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
+        request = StoreCandidatesRequest.model_validate(inputs)
+
+        def work() -> Contract:
+            results, stored, already, unknown = self.store(context).store_candidates(
+                session_key(context), request.candidate_ids, actor=who(context)
+            )
+            return StoreCandidatesResult(
+                results=tuple(results),
+                stored=tuple(stored),
+                already_stored=tuple(already),
+                unknown=tuple(unknown),
+            )
 
         return await self.run(work)
 
@@ -552,14 +586,24 @@ class HarvestHandler(_Cards):
                         would_change=changes,
                     )
                 )
+            ids, expires = store.keep_candidates(
+                session_key(context), [item.model_dump(mode="json") for item in out]
+            )
+            out = [
+                item.model_copy(update={"candidate_id": candidate_id})
+                for item, candidate_id in zip(out, ids, strict=True)
+            ]
             return HarvestResult(
                 scanned=scanned,
                 from_domain=matched,
                 with_signature=len(out),
                 candidates=tuple(out),
-                note="Nothing was stored. Show these to the person; store the ones they "
-                "confirm with add_from_signature (message_id and message_date as given)."
+                note="Nothing was stored. List each candidate with its candidate_id (s1, s2, "
+                "...). When the person confirms, call cards__store_candidates with those "
+                'candidate_ids, or ["all"]; never harvest again just to store. The '
+                "candidates can be stored until expires_at."
                 + (" Tell the person skipped_note as written." if skipped else ""),
+                expires_at=expires,
                 skipped=tuple(
                     SkippedMessages(code=code, count=count) for code, count in skipped.items()
                 ),
@@ -588,6 +632,12 @@ def bindings(
             AddFromSignatureHandler(workspace_root),
             AddFromSignatureRequest,
             AddFromSignatureResult,
+        ),
+        (
+            STORE_CANDIDATES_SPEC,
+            StoreCandidatesHandler(workspace_root),
+            StoreCandidatesRequest,
+            StoreCandidatesResult,
         ),
         (EDIT_SPEC, EditPersonHandler(workspace_root), EditPersonRequest, EditResult),
         (STATUS_SPEC, SetStatusHandler(workspace_root), SetStatusRequest, StatusResult),

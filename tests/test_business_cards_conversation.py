@@ -448,3 +448,57 @@ def test_the_skill_keeps_degrees_out_of_the_title_and_divisions_exact() -> None:
     for text in (PROCEDURE, PROMPT):
         assert "honorific" in text and "company_tax_id" in text
     assert "never in title" in PROCEDURE and "including suffixes" in PROCEDURE
+
+
+def test_harvested_people_are_stored_on_all_of_them_without_a_second_harvest(
+    web: tuple[AgentWeb, Conversation],
+) -> None:
+    """Live test 2026-10-20: harvest, then 「都存進去」; the model re-ran the
+    harvest instead of storing, because the candidates' message ids and dates
+    were not in its context. Now it stores them by id with
+    cards__store_candidates and copies no message id."""
+    from test_business_cards_capabilities import SignatureModel, _harvest_mail
+
+    from capabilities.business_cards.handlers import HARVEST_SPEC
+    from integrations.outlook_mail import MailScope
+
+    agent_web, model = web
+    gateway = agent_web.runtime.agent.gateway
+    installed = gateway.bridge.installed.get(HARVEST_SPEC.identity)
+    assert installed is not None
+    harvester: Any = installed.handler
+    mail = _harvest_mail()
+    harvester._reader = lambda: mail
+    harvester._scope = lambda: MailScope()
+    harvester.model = SignatureModel()
+    session = agent_web.create_conversation()["conversation"]["session_id"]
+
+    model.then(
+        {"tools": [("cards__harvest_signatures", {"domain": "example.com"})]},
+        {"text": "找到 2 位：s1 王小明 協理、s2 李大華 工程師。要存哪些？"},
+    )
+    assert _turn(agent_web, session, "從 example.com 的信件簽名檔整理聯絡人")["ok"]
+    harvested = json.loads(model.tool_results()[-1])["host"]["data"]
+    assert [c["candidate_id"] for c in harvested["candidates"]] == ["s1", "s2"]
+    opened = list(mail.opened)
+
+    model.then(
+        {"tools": [("cards__store_candidates", {"candidate_ids": ["all"]})]},
+        {"text": "已存 2 位。"},
+    )
+    assert _turn(agent_web, session, "都存進去")["ok"]
+    stored = json.loads(model.tool_results()[-1])["host"]
+    assert stored["status"] == "succeeded", stored
+    assert sorted(stored["data"]["stored"]) == ["s1", "s2"]
+    assert mail.opened == opened  # the mail was not read again
+
+    model.then({"tools": [("cards__history", {"person": {"name": "李大華"}})]}, {"text": "好。"})
+    assert _turn(agent_web, session, "李大華 的歷史")["ok"]
+    history = json.loads(model.tool_results()[-1])["host"]["data"]
+    assert [(o["source"], o["source_ref"]) for o in history["observations"]] == [
+        ("email_signature", "m-lee")
+    ]
+    assert agent_web.approvals(session)["approvals"] == []
+    from capabilities.business_cards.manifest import PROCEDURE
+
+    assert "cards__store_candidates" in PROCEDURE and "never harvest again" in PROCEDURE

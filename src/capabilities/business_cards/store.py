@@ -19,7 +19,7 @@ import sqlite3
 from collections.abc import Iterator, Mapping, Sequence
 from contextlib import closing, contextmanager
 from dataclasses import dataclass, field
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -53,6 +53,9 @@ ORG_FIELDS: tuple[FieldName, ...] = (
     "title",
 )
 CONTACT_FIELDS: tuple[FieldName, ...] = ("phone", "ext", "mobile", "fax", "email")
+#: How long a harvest's candidates can be stored by id.
+CANDIDATE_TTL = timedelta(hours=1)
+ALL_CANDIDATES = "all"
 _LABELS = FIELD_LABELS
 
 _SCHEMA = """
@@ -149,6 +152,18 @@ CREATE TABLE IF NOT EXISTS proposals (
     created_at TEXT NOT NULL,
     state TEXT NOT NULL DEFAULT 'open'
 );
+CREATE TABLE IF NOT EXISTS candidates (
+    session_key TEXT NOT NULL,
+    candidate_id TEXT NOT NULL,
+    fields_json TEXT NOT NULL,
+    uncertain_json TEXT NOT NULL DEFAULT '[]',
+    message_id TEXT NOT NULL,
+    message_date TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    expires_at TEXT NOT NULL,
+    stored_person_id TEXT NOT NULL DEFAULT '',
+    PRIMARY KEY (session_key, candidate_id)
+);
 """
 
 
@@ -171,8 +186,12 @@ def store_dir(workspace_root: Path, actor: str) -> Path:
     return workspace_root / STORE_FOLDER / actor_key(actor)
 
 
+def _clock() -> datetime:
+    return datetime.now(UTC)
+
+
 def _now() -> str:
-    return datetime.now(UTC).isoformat(timespec="seconds")
+    return _clock().isoformat(timespec="seconds")
 
 
 def _new_change() -> str:
@@ -1236,6 +1255,90 @@ class CardStore:
                     found[person_id] = list(needs)
         return found
 
+    # -- signature candidates -----------------------------------------
+
+    def keep_candidates(
+        self, session_key: str, candidates: Sequence[Mapping[str, Any]]
+    ) -> tuple[list[str], str]:
+        """A harvest's candidates for this conversation, replacing its earlier
+        set, with short ids ("s1", ...) in order, and when they expire. Each
+        keeps fields, uncertain, message id and date; never a body. Expired
+        candidates of any conversation are removed."""
+        now = _clock()
+        expires = (now + CANDIDATE_TTL).isoformat(timespec="seconds")
+        ids: list[str] = []
+        with self._connect() as con:
+            con.execute("DELETE FROM candidates WHERE expires_at <= ?", (_iso(now),))
+            con.execute("DELETE FROM candidates WHERE session_key = ?", (session_key,))
+            for number, item in enumerate(candidates, 1):
+                candidate_id = f"s{number}"
+                con.execute(
+                    "INSERT INTO candidates (session_key, candidate_id, fields_json, "
+                    "uncertain_json, message_id, message_date, created_at, expires_at) "
+                    "VALUES (?,?,?,?,?,?,?,?)",
+                    (
+                        session_key,
+                        candidate_id,
+                        json.dumps(
+                            {name: str(item.get(name, "")) for name in FIELDS}, ensure_ascii=False
+                        ),
+                        json.dumps(list(item.get("uncertain", ()))),
+                        str(item["message_id"]),
+                        str(item["message_date"]),
+                        _iso(now),
+                        expires,
+                    ),
+                )
+                ids.append(candidate_id)
+        return ids, expires
+
+    def store_candidates(
+        self, session_key: str, wanted: Sequence[str], *, actor: str
+    ) -> tuple[list[AddResult], list[str], list[str], list[str]]:
+        """This conversation's candidates by id (or `all`), stored with source
+        `email_signature`, their message id and date, oldest first. Returns
+        the results, and which ids were stored, already stored or unknown.
+        `candidates_expired` when the conversation has none left."""
+        now = _iso(_clock())
+        with self._connect() as con:
+            rows = {
+                row["candidate_id"]: row
+                for row in con.execute(
+                    "SELECT * FROM candidates WHERE session_key = ? AND expires_at > ?",
+                    (session_key, now),
+                )
+            }
+            if not rows:
+                raise CardStoreError("candidates_expired")
+            asked = [item.strip() for item in wanted if item.strip()]
+            if any(item.casefold() == ALL_CANDIDATES for item in asked):
+                asked = list(rows)
+            chosen = [rows[item] for item in dict.fromkeys(asked) if item in rows]
+            unknown = [item for item in dict.fromkeys(asked) if item not in rows]
+            already = [row["candidate_id"] for row in chosen if row["stored_person_id"]]
+            pending = sorted(
+                (row for row in chosen if not row["stored_person_id"]),
+                key=lambda row: (row["message_date"], row["candidate_id"]),
+            )
+            results: list[AddResult] = []
+            for row in pending:
+                result = self._add(
+                    con,
+                    json.loads(row["fields_json"]),
+                    source="email_signature",
+                    source_date=date.fromisoformat(row["message_date"]),
+                    source_ref=row["message_id"],
+                    uncertain=[u for u in json.loads(row["uncertain_json"]) if u in FIELDS],
+                    actor=actor,
+                )
+                con.execute(
+                    "UPDATE candidates SET stored_person_id = ? "
+                    "WHERE session_key = ? AND candidate_id = ?",
+                    (result.person_id, session_key, row["candidate_id"]),
+                )
+                results.append(result)
+            return results, [row["candidate_id"] for row in pending], already, unknown
+
     # -- the Hermes store ----------------------------------------------
 
     def import_hermes(self, source: Path, *, actor: str) -> ImportResult:
@@ -1297,6 +1400,10 @@ class CardStore:
             people_updated=updated,
             source=str(source),
         )
+
+
+def _iso(moment: datetime) -> str:
+    return moment.isoformat(timespec="seconds")
 
 
 def _history_item(row: sqlite3.Row) -> HistoryItem:

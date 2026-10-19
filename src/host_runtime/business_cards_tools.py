@@ -92,6 +92,8 @@ FAILURE_TEXT = {
     "card_without_name": "這張名片沒有讀到姓名或 Email，沒有存",
     "company_has_no_contacts": "名片夾裡沒有這家公司的人",
     "chart_renderer_missing": "這台電腦缺少畫組織圖用的 Pillow 元件",
+    "candidates_expired": "這段對話沒有可存的簽名檔候選人（超過一小時已失效，或還沒整理）；"
+    "請重新整理簽名檔",
     "change_unknown": "找不到這個變更編號",
     "change_already_undone": "這個變更已經復原過了",
     "undo_conflict": "之後又有變更動到同一筆資料，無法直接復原",
@@ -142,10 +144,27 @@ TOOLS: tuple[tuple[str, CapabilitySpec, str, dict[str, Any]], ...] = (
         ),
     ),
     (
+        "cards__store_candidates",
+        cards.STORE_CANDIDATES_SPEC,
+        "Store people from this conversation's latest cards__harvest_signatures by their "
+        'candidate_id (s1, s2, ...), or ["all"] when the person says to store all (都存進去). '
+        "The Host keeps each candidate's message id and date; never harvest again to store.",
+        _object(
+            {
+                "candidate_ids": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": 'candidate ids from the harvest, e.g. ["s1", "s3"], or ["all"]',
+                }
+            },
+            ("candidate_ids",),
+        ),
+    ),
+    (
         "cards__add_from_signature",
         cards.ADD_SIGNATURE_SPEC,
-        "Store people the person confirmed from email signatures (from "
-        "cards__harvest_signatures), with each message_id and message_date as given.",
+        "Store people read from email signatures with their message_id and message_date. "
+        "For people from cards__harvest_signatures use cards__store_candidates instead.",
         _object(
             {
                 "entries": {

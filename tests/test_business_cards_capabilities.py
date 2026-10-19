@@ -99,14 +99,14 @@ class SignatureModel:
         raise NotImplementedError
 
 
-def _context(actor: str = "alice", channel: str = "local") -> RequestContext:
+def _context(actor: str = "alice", channel: str = "local", session: str = "s-1") -> RequestContext:
     return RequestContext(
         trace=TraceIdentifiers(trace_id="t1", request_id="r1", span_id="s1"),
         actor=actor,
         namespace="engineering",
         message="cards",
         channel=channel,
-        session_id="s-1",
+        session_id=session,
     )
 
 
@@ -159,13 +159,14 @@ def _run(
     *,
     actor: str = "alice",
     channel: str = "local",
+    session: str = "s-1",
 ) -> Any:
     """The `CapabilityResult`, typed loosely so tests can read its JSON data."""
     spec = next(binding for binding in bridge.installed.discover() if binding.identity.name == name)
     return asyncio.run(
         bridge.execute(
             CapabilityInvocation(
-                context=_context(actor, channel),
+                context=_context(actor, channel, session),
                 origin="model",
                 target=spec.identity,
                 arguments=arguments,
@@ -395,7 +396,7 @@ def test_signature_harvest_respects_the_scope_and_stores_nothing(tmp_path: Path)
     assert "m1" in dumped and "email_signature" in dumped
 
 
-_NOT_ENTRY = {"existing_person_id", "would_change"}
+_NOT_ENTRY = {"existing_person_id", "would_change", "candidate_id"}
 
 
 def test_harvest_needs_a_model_and_a_domain(tmp_path: Path) -> None:
@@ -652,3 +653,80 @@ def test_a_wrong_value_can_be_cleared_in_chat(tmp_path: Path) -> None:
     assert [item["reason"] for item in again["kept"]] == ["user_set"]
     undone = _run(bridge, "undo", {"change_id": cleared.data["change_id"]})
     assert undone.status == "succeeded", undone.failure
+
+
+def _harvest_mail() -> FakeMail:
+    return FakeMail(
+        [
+            _message(
+                "m-wang",
+                "Wang <hm.wang@example.com>",
+                BODY.format(name="王小明", title="協理", ext="1"),
+            ),
+            _message(
+                "m-lee",
+                "lee@example.com",
+                BODY.format(name="李大華", title="工程師", ext="2"),
+                days_ago=2,
+            ),
+        ]
+    )
+
+
+def test_harvested_candidates_are_stored_by_id_without_copying_message_ids(
+    tmp_path: Path,
+) -> None:
+    """Live test 2026-10-20: on 「都存進去」 the model re-ran the harvest, because
+    the candidates' message ids and dates were not in its context. The Host
+    keeps the candidates of this conversation and stores them by short id."""
+    mail = _harvest_mail()
+    bridge = _bridge(tmp_path, mail=mail, model=SignatureModel())
+    harvested = _run(bridge, "harvest-signatures", {"domain": "example.com"}).data
+    ids = {item["name"]: item["candidate_id"] for item in harvested["candidates"]}
+    assert sorted(ids.values()) == ["s1", "s2"]
+    assert "store_candidates" in harvested["note"] and harvested["expires_at"]
+    opened = list(mail.opened)
+    stored = _run(bridge, "store-candidates", {"candidate_ids": ["all"]})
+    assert stored.status == "succeeded", stored.failure
+    assert sorted(stored.data["stored"]) == ["s1", "s2"]
+    assert {item["outcome"] for item in stored.data["results"]} == {"created"}
+    assert mail.opened == opened  # no second harvest
+    history = _run(bridge, "history", {"person": {"name": "王小明"}}).data
+    assert [(o["source"], o["source_ref"]) for o in history["observations"]] == [
+        ("email_signature", "m-wang")
+    ]
+    assert history["observations"][0]["source_date"] == (NOW - timedelta(days=1)).date().isoformat()
+    # Stored once: asking again stores nothing more.
+    again = _run(bridge, "store-candidates", {"candidate_ids": ["s1"]}).data
+    assert again["stored"] == [] and again["already_stored"] == ["s1"]
+
+
+def test_only_the_named_candidates_are_stored_and_unknown_ids_are_reported(
+    tmp_path: Path,
+) -> None:
+    bridge = _bridge(tmp_path, mail=_harvest_mail(), model=SignatureModel())
+    harvested = _run(bridge, "harvest-signatures", {"domain": "example.com"}).data
+    lee = next(c["candidate_id"] for c in harvested["candidates"] if c["name"] == "李大華")
+    stored = _run(bridge, "store-candidates", {"candidate_ids": [lee, "s9"]}).data
+    assert stored["stored"] == [lee] and stored["unknown"] == ["s9"]
+    assert _run(bridge, "find", {"query": "王小明"}).data["total"] == 0
+    assert _run(bridge, "find", {"query": "李大華"}).data["total"] == 1
+
+
+def test_candidates_expire_and_belong_to_one_conversation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from capabilities.business_cards import store as store_module
+
+    bridge = _bridge(tmp_path, mail=_harvest_mail(), model=SignatureModel())
+    assert _run(bridge, "harvest-signatures", {"domain": "example.com"}).status == "succeeded"
+    # Another actor (another store) has no candidates.
+    other = _run(bridge, "store-candidates", {"candidate_ids": ["all"]}, actor="bob")
+    assert other.failure is not None and other.failure.code == "candidates_expired"
+    # Another conversation of the same person has none either.
+    elsewhere = _run(bridge, "store-candidates", {"candidate_ids": ["all"]}, session="s-2")
+    assert elsewhere.failure is not None and elsewhere.failure.code == "candidates_expired"
+    later = datetime.now(UTC) + store_module.CANDIDATE_TTL + timedelta(minutes=1)
+    monkeypatch.setattr(store_module, "_clock", lambda: later)
+    expired = _run(bridge, "store-candidates", {"candidate_ids": ["all"]})
+    assert expired.failure is not None and expired.failure.code == "candidates_expired"

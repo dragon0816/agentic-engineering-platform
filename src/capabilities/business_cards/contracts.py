@@ -386,6 +386,9 @@ class HarvestRequest(Contract):
 
 
 class SignatureCandidate(CardFields):
+    # A short id for this conversation ("s1"), to store it with
+    # `store-candidates`; the Host keeps the message id and date.
+    candidate_id: str = ""
     message_id: str
     message_date: date
     uncertain: tuple[FieldName, ...] = ()
@@ -410,3 +413,20 @@ class HarvestResult(Contract):
     skipped: tuple[SkippedMessages, ...] = ()
     # For the person, e.g. "讀信失敗：1 封信無法讀取（message_unknown），已略過；其餘 3 封已處理。"
     skipped_note: str = ""
+    # When this conversation's candidates can no longer be stored by id.
+    expires_at: str = ""
+
+
+class StoreCandidatesRequest(Contract):
+    """Candidates of this conversation's latest harvest, by id ("s1"), or
+    ["all"]. The Host stores them with source `email_signature`, each with its
+    message id and date; the model copies neither."""
+
+    candidate_ids: tuple[str, ...] = Field(min_length=1, max_length=50)
+
+
+class StoreCandidatesResult(Contract):
+    results: tuple[AddResult, ...] = ()
+    stored: tuple[str, ...] = ()
+    already_stored: tuple[str, ...] = ()
+    unknown: tuple[str, ...] = ()
