@@ -203,6 +203,19 @@ def _same(a: str, b: str) -> bool:
     return " ".join(a.split()).casefold() == " ".join(b.split()).casefold()
 
 
+#: Fields where a shorter reading can be a real change (副總經理 → 總經理 is a
+#: promotion), or that have their own rules (notes are appended; an email is
+#: the person's key).
+_ANY_CHANGE = frozenset({"title", "notes", "email"})
+
+
+def _less_complete(new: str, current: str) -> bool:
+    """Whether `new` is a strict prefix or substring of `current` (spaces and
+    case ignored): an automatic reading that lost part of the stored value."""
+    short, full = " ".join(new.split()).casefold(), " ".join(current.split()).casefold()
+    return bool(short) and short != full and short in full
+
+
 def _elsewhere(row: Mapping[str, Any] | sqlite3.Row, values: Mapping[str, str]) -> bool:
     """Whether a reading places the person somewhere else than the stored
     row: both have a department and they differ, or both a division and they
@@ -701,6 +714,13 @@ class CardStore:
                 )
                 self._propose(
                     con, change_id, actor, person_id, name, current, new, source, observation_id
+                )
+                continue
+            elif current and name not in _ANY_CHANGE and _less_complete(new, current):
+                # "Connectivity & Solutions" after "Connectivity & Solutions
+                # 事業群", "研展處" after "研展處 I": a partial reading.
+                merge.kept.append(
+                    KeptField(field=name, current=current, offered=new, reason="less_complete")
                 )
                 continue
             elif current and previous is not None and when < previous["source_date"]:

@@ -153,7 +153,9 @@ class KeptField(Contract):
     offered: str
     # email_differs: a reading matched by image or name + company brought
     # another email; the stored one is kept and the new one is a proposal.
-    reason: Literal["user_set", "older_evidence", "uncertain", "email_differs"]
+    # less_complete: the reading is a strict prefix or substring of the
+    # stored value ("研展處" for "研展處 I"), so the stored one stays.
+    reason: Literal["user_set", "older_evidence", "uncertain", "email_differs", "less_complete"]
 
 
 class DroppedField(Contract):

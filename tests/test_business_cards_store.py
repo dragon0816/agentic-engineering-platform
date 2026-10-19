@@ -602,3 +602,50 @@ def test_a_stored_note_with_the_unified_business_number_is_moved_with_history(
     history = store.history(PersonRef(person_id=old.person_id), limit=50).history
     moved = [item for item in history if item.field == "notes"]
     assert moved and "company_tax_id" in moved[0].reason
+
+
+def test_a_shorter_reading_never_replaces_a_more_complete_value(tmp_path: Path) -> None:
+    """Live re-test 2026-10-20: a re-scan replaced "Connectivity & Solutions
+    事業群" with "Connectivity & Solutions". An automatic reading that is a
+    strict prefix or substring of the stored value leaves it as it is."""
+    store = _store(tmp_path)
+    group = "Connectivity & Solutions 事業群"
+    base = {**CARD, "business_group": group, "division": "研展處 I"}
+    first = _add(store, base)
+    again = _add(
+        store,
+        {**CARD, "business_group": "Connectivity & Solutions", "division": "研展處"},
+        when=date(2026, 5, 1),
+    )
+    view = store.view(first.person_id)
+    assert (view.business_group, view.division) == (group, "研展處 I")
+    assert again.outcome == "unchanged" and again.changes == ()
+    assert {k.field: k.reason for k in again.kept} == {
+        "business_group": "less_complete",
+        "division": "less_complete",
+    }
+    assert "現在是" not in again.summary
+    # A more complete reading still fills it in.
+    longer = _add(store, {**base, "department": "射頻部 一課"}, when=date(2026, 6, 1))
+    assert [(c.field, c.new) for c in longer.changes] == [("department", "射頻部 一課")]
+    # A title is not held back: 總經理 after 副總經理 is a promotion.
+    promoted = _add(store, {**base, "title": "副總經理"}, when=date(2026, 7, 1))
+    assert promoted.changes
+    topped = _add(store, {**base, "title": "總經理"}, when=date(2026, 8, 1))
+    assert [(c.field, c.new) for c in topped.changes] == [("title", "總經理")]
+
+
+def test_a_business_group_the_person_set_is_never_overwritten(tmp_path: Path) -> None:
+    store = _store(tmp_path)
+    first = _add(store, CARD)
+    store.edit(
+        PersonRef(person_id=first.person_id),
+        {"business_group": "C&S 事業群"},
+        actor="a",
+        reason="",
+    )
+    later = _add(
+        store, {**CARD, "business_group": "Connectivity & Solutions 事業群"}, when=date(2026, 9, 1)
+    )
+    assert store.view(first.person_id).business_group == "C&S 事業群"
+    assert {k.field: k.reason for k in later.kept} == {"business_group": "user_set"}
