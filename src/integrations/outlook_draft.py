@@ -19,12 +19,12 @@ by writing another adapter and nothing else.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any, Literal, Protocol
 
 from common.base import Contract, Text
-from integrations.com import progid_is_registered
+from integrations.com import apartment, progid_is_registered
 
 DraftErrorCode = Literal[
     "library_missing",
@@ -131,6 +131,17 @@ def require_com() -> None:
         raise DraftError("outlook_missing")
 
 
+def _dispatch_outlook() -> Any:
+    """The running Outlook, on the calling thread. Outlook is a
+    single-instance application: `DispatchEx` would be answered by the running
+    copy anyway, and asking for the running one is what the object model
+    documents."""
+    require_com()
+    import win32com.client
+
+    return win32com.client.Dispatch(OUTLOOK_PROGID)
+
+
 class OutlookComDraft:
     """The draft through Outlook itself, on the Windows machine that has it.
 
@@ -141,27 +152,38 @@ class OutlookComDraft:
     `docs/TASKS.md` records beside the Excel adapter's identical caveat.
     """
 
-    def __init__(self, *, dispatch: Any | None = None) -> None:
+    def __init__(
+        self, *, dispatch: Any | None = None, connect: Callable[[], Any] | None = None
+    ) -> None:
+        # `dispatch`: a ready Outlook object (tests); `connect`: how to get one
+        # on the calling thread (default: Dispatch the running Outlook).
         self._dispatch = dispatch
-
-    def _application(self) -> Any:
-        if self._dispatch is not None:
-            return self._dispatch
-        require_com()
-        import win32com.client
-
-        # Outlook is a single-instance application: `DispatchEx` would be
-        # answered by the running copy anyway, and asking for the running one
-        # is what the object model documents.
-        return win32com.client.Dispatch(OUTLOOK_PROGID)
+        self._connect = connect or _dispatch_outlook
 
     def save(self, draft: MailDraft) -> DraftReceipt:
+        """Inside a COM apartment on the calling thread (any worker thread);
+        the Outlook object is asked for inside it and not kept."""
         checked = MailDraft.model_validate(draft)
         # Checked before Outlook is touched: a missing picture should not
         # leave a half-built item in somebody's drafts.
         _require_files(checked)
-        application = self._application()
+        code: DraftErrorCode
         try:
+            with apartment():
+                # Caught inside the block, so no COM object outlives it.
+                try:
+                    return self._save(checked)
+                except DraftError as error:
+                    code = error.code
+                except Exception:
+                    code = "draft_failed"
+        except Exception:  # CoInitialize itself failed
+            code = "draft_failed"
+        raise DraftError(code)
+
+    def _save(self, checked: MailDraft) -> DraftReceipt:
+        try:
+            application = self._dispatch if self._dispatch is not None else self._connect()
             item = application.CreateItem(_MAIL_ITEM)
             item.Subject = checked.subject
             item.HTMLBody = checked.html_body

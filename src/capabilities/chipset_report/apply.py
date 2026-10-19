@@ -22,6 +22,7 @@ from capabilities.runtime import CapabilityRefused
 from common.base import Contract
 from common.execution import RequestContext
 from integrations import excel
+from integrations.com import apartment
 from integrations.excel import WorkbookError
 from integrations.excel_writer import (
     WorkbookWriteError,
@@ -225,14 +226,21 @@ class ChipsetApplyHandler:
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         item = ChipsetApplyInput.model_validate(inputs)
         try:
-            return await asyncio.to_thread(
-                apply_plan,
-                item.plan,
-                self.settings,
-                self.writer(),
-                staging_root=self.staging_root,
-                state_dir=self.state_dir,
-            )
+            writer = self.writer()
+
+            def run() -> ChipsetApplied:
+                # The whole run in one COM apartment on this worker thread:
+                # the Excel writer holds Excel until `close`.
+                with apartment():
+                    return apply_plan(
+                        item.plan,
+                        self.settings,
+                        writer,
+                        staging_root=self.staging_root,
+                        state_dir=self.state_dir,
+                    )
+
+            return await asyncio.to_thread(run)
         except (WorkbookWriteError, WorkbookError, ChipsetPreviewError, RulesetError) as error:
             raise CapabilityRefused(str(error)) from None
         except (BadZipFile, ValueError):

@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import asyncio
 import sys
+import threading
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -248,3 +249,25 @@ def test_live_outlook_list_and_get_agree_on_the_inbox_folder() -> None:
         pytest.skip("the Inbox has no message in the last year")
     got = box.get(listed[0].message_id)
     assert (listed[0].folder, got.folder) == ("Inbox", "Inbox")
+
+
+@pytest.mark.skipif(_outlook_running() is None, reason="Outlook is not running on this computer")
+def test_live_outlook_is_read_from_two_different_worker_threads() -> None:
+    """Read only, against the real Outlook (live test 2026-10-20: the second
+    mail call after a restart failed with CO_E_NOTINITIALIZED). `list` runs on
+    two different worker threads; each gets Outlook on its own thread. Only
+    the folder strings are compared; no subject or body is printed."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    box = OutlookComMailbox()
+
+    def one() -> tuple[int, list[str]]:
+        listed = box.list("Inbox", NOW - timedelta(days=365), 1)
+        return threading.get_ident(), [item.folder for item in listed]
+
+    with ThreadPoolExecutor(max_workers=1) as first, ThreadPoolExecutor(max_workers=1) as second:
+        thread_a, folders_a = first.submit(one).result(timeout=60)
+        thread_b, folders_b = second.submit(one).result(timeout=60)
+    assert thread_a != thread_b
+    assert folders_a == folders_b
+    assert set(folders_a) <= {"Inbox"}

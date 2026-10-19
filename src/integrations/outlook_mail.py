@@ -19,15 +19,17 @@ from __future__ import annotations
 
 import html
 import re
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any, Literal, Protocol
+from typing import Any, Literal, Protocol, TypeVar
 
 from pydantic import Field
 
 from common.base import Contract
-from integrations.com import progid_is_registered
+from integrations.com import apartment, progid_is_registered
+
+_T = TypeVar("_T")
 
 MailErrorCode = Literal[
     "library_missing", "outlook_missing", "folder_unknown", "message_unknown", "mail_failed"
@@ -200,23 +202,61 @@ def _plain(body: str) -> str:
     return html.unescape(re.sub(r"\s+\n", "\n", body)).strip()
 
 
+def _dispatch_outlook() -> Any:
+    """The running Outlook (single instance), on the calling thread."""
+    require_com()
+    import win32com.client
+
+    return win32com.client.Dispatch(OUTLOOK_PROGID)
+
+
 class OutlookComMailbox:
     """Outlook's own items through COM, on the machine that has Outlook.
 
-    **Not exercised by the test suite** (no Outlook in CI): the tests drive a
-    `MailReader` fake and this adapter with a fake dispatch object. Written to
-    the documented object model; proven when the owner first uses it."""
+    Every call initialises COM on its own thread (`integrations.com.apartment`)
+    and asks for Outlook inside it, so it works from any worker thread
+    (`asyncio.to_thread`); no COM object is kept between calls. Whatever COM
+    raises becomes a `MailError` code.
 
-    def __init__(self, *, dispatch: Any | None = None) -> None:
+    The tests drive a `MailReader` fake and this adapter with a fake object
+    model; a guarded live test reads folder strings from the real Outlook."""
+
+    def __init__(
+        self, *, dispatch: Any | None = None, connect: Callable[[], Any] | None = None
+    ) -> None:
+        # `dispatch`: a ready Outlook object (tests); `connect`: how to get one
+        # on the calling thread (default: Dispatch the running Outlook).
         self._dispatch = dispatch
+        self._connect = connect or _dispatch_outlook
 
-    def _namespace(self) -> Any:
-        if self._dispatch is None:
-            require_com()
-            import win32com.client
+    def _call(self, work: Callable[[Any], _T]) -> _T:
+        """`work(namespace)` inside a COM apartment on this thread, with every
+        COM failure mapped to a code."""
+        code: MailErrorCode
+        try:
+            with apartment():
+                # The failure is caught inside the block, so its traceback, and
+                # the COM objects its frames hold, are gone before COM is
+                # released on this thread.
+                try:
+                    return self._in_apartment(work)
+                except MailError as error:
+                    code = error.code
+                except Exception:
+                    code = "mail_failed"
+        except Exception:  # CoInitialize itself failed
+            code = "mail_failed"
+        raise MailError(code)
 
-            self._dispatch = win32com.client.Dispatch(OUTLOOK_PROGID)
-        return self._dispatch.GetNamespace("MAPI")
+    def _in_apartment(self, work: Callable[[Any], _T]) -> _T:
+        try:
+            application = self._dispatch if self._dispatch is not None else self._connect()
+            namespace = application.GetNamespace("MAPI")
+        except MailError:
+            raise
+        except Exception:
+            raise MailError("mail_failed") from None
+        return work(namespace)
 
     def _folder(self, namespace: Any, path: str) -> Any:
         parts = [part for part in re.split(r"[\\/]", path) if part.strip()]
@@ -290,8 +330,7 @@ class OutlookComMailbox:
             snippet=_plain(_text(getattr(item, "Body", "")))[:SNIPPET_CHARS],
         )
 
-    def list(self, folder: str, since: datetime, limit: int) -> list[MailSummary]:
-        namespace = self._namespace()
+    def _list(self, namespace: Any, folder: str, since: datetime, limit: int) -> list[MailSummary]:
         target = self._folder(namespace, folder)
         try:
             items = target.Items
@@ -310,8 +349,13 @@ class OutlookComMailbox:
         except Exception:
             raise MailError("mail_failed") from None
 
+    def list(self, folder: str, since: datetime, limit: int) -> list[MailSummary]:
+        return self._call(lambda namespace: self._list(namespace, folder, since, limit))
+
     def get(self, message_id: str) -> MailMessage:
-        namespace = self._namespace()
+        return self._call(lambda namespace: self._get(namespace, message_id))
+
+    def _get(self, namespace: Any, message_id: str) -> MailMessage:
         try:
             item = namespace.GetItemFromID(message_id)
         except Exception:
@@ -327,7 +371,10 @@ class OutlookComMailbox:
             raise MailError("mail_failed") from None
 
     def save_attachment(self, message_id: str, name: str, target: Path) -> Path:
-        namespace = self._namespace()
+        return self._call(lambda namespace: self._save(namespace, message_id, name, target))
+
+    @staticmethod
+    def _save(namespace: Any, message_id: str, name: str, target: Path) -> Path:
         try:
             item = namespace.GetItemFromID(message_id)
             for index in range(int(item.Attachments.Count)):

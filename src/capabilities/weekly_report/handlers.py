@@ -35,6 +35,7 @@ from capabilities.weekly_report.plan import build_plan, resolve_window
 from common.base import Contract, Symbol, Text
 from common.execution import RequestContext
 from integrations import excel, outlook_draft
+from integrations.com import apartment
 from integrations.excel import digest_rows
 from integrations.excel_writer import WorkbookWriteError, WorkbookWriter
 from integrations.github_project import GitHubError, GitHubProjectClient, ProjectItem
@@ -487,7 +488,14 @@ class ApplyHandler:
                 retired_fills=0,
                 skipped=True,
             )
-        return await asyncio.to_thread(self._apply, item.plan)
+        return await asyncio.to_thread(self._apply_in_apartment, item.plan)
+
+    def _apply_in_apartment(self, plan: WeeklyReportPlan) -> WeeklyReportApplied:
+        """The whole run inside one COM apartment on this worker thread: the
+        Excel writer holds Excel from the first write to `close`, and COM must
+        be initialised on the thread that uses it (live test 2026-10-20)."""
+        with apartment():
+            return self._apply(plan)
 
     def _apply(self, plan: WeeklyReportPlan) -> WeeklyReportApplied:
         try:

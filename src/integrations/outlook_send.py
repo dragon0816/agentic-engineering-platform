@@ -16,9 +16,10 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from typing import Any, Literal, Protocol
 
+from integrations.com import apartment
 from integrations.outlook_mail import OUTLOOK_PROGID, MailError, require_com
 
 SendErrorCode = Literal[
@@ -62,33 +63,69 @@ class DraftSender(Protocol):
     def discard(self, entry_id: str) -> None: ...
 
 
+def _dispatch_outlook() -> Any:
+    """The running Outlook, on the calling thread."""
+    require_com()
+    import win32com.client
+
+    return win32com.client.Dispatch(OUTLOOK_PROGID)
+
+
 class OutlookComDraftSender:
     """Outlook's own Send on a saved draft. **Not exercised by the test
     suite** apart from a fake dispatch; proven when the owner first sends."""
 
-    def __init__(self, *, dispatch: Any | None = None) -> None:
+    def __init__(
+        self, *, dispatch: Any | None = None, connect: Callable[[], Any] | None = None
+    ) -> None:
+        # `dispatch`: a ready Outlook object (tests); `connect`: how to get one
+        # on the calling thread (default: Dispatch the running Outlook).
         self._dispatch = dispatch
+        self._connect = connect or _dispatch_outlook
 
-    def _item(self, entry_id: str) -> Any:
-        if self._dispatch is None:
-            try:
-                require_com()
-            except MailError as error:
-                raise SendError(
-                    error.code
-                    if error.code in ("library_missing", "outlook_missing")
-                    else "send_failed"
-                ) from None
-            import win32com.client
-
-            self._dispatch = win32com.client.Dispatch(OUTLOOK_PROGID)
+    def _call(self, work: Callable[[Any], None]) -> None:
+        """`work(item)` inside a COM apartment on the calling thread; the
+        Outlook object is asked for inside it and not kept."""
+        code: SendErrorCode
         try:
-            return self._dispatch.GetNamespace("MAPI").GetItemFromID(entry_id)
+            with apartment():
+                # Caught inside the block, so no COM object outlives it.
+                try:
+                    return work(self._application())
+                except SendError as error:
+                    code = error.code
+                except Exception:
+                    code = "send_failed"
+        except Exception:  # CoInitialize itself failed
+            code = "send_failed"
+        raise SendError(code)
+
+    def _application(self) -> Any:
+        if self._dispatch is not None:
+            return self._dispatch
+        try:
+            return self._connect()
+        except MailError as error:
+            code: SendErrorCode = "send_failed"
+            if error.code == "library_missing" or error.code == "outlook_missing":
+                code = error.code
+            raise SendError(code) from None
+        except Exception:
+            # Outlook could not be reached: nothing was sent.
+            raise SendError("send_failed") from None
+
+    @staticmethod
+    def _item(application: Any, entry_id: str) -> Any:
+        try:
+            return application.GetNamespace("MAPI").GetItemFromID(entry_id)
         except Exception:
             raise SendError("draft_unknown") from None
 
     def send(self, entry_id: str, fingerprint: str) -> None:
-        item = self._item(entry_id)
+        self._call(lambda application: self._send(application, entry_id, fingerprint))
+
+    def _send(self, application: Any, entry_id: str, fingerprint: str) -> None:
+        item = self._item(application, entry_id)
         try:
             names = [
                 str(item.Attachments.Item(index + 1).FileName)
@@ -107,7 +144,10 @@ class OutlookComDraftSender:
             raise SendError("send_failed") from None
 
     def discard(self, entry_id: str) -> None:
-        item = self._item(entry_id)
+        self._call(lambda application: self._discard(application, entry_id))
+
+    def _discard(self, application: Any, entry_id: str) -> None:
+        item = self._item(application, entry_id)
         try:
             item.Delete()
         except Exception:
