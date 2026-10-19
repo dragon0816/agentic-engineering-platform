@@ -147,7 +147,9 @@ class KeptField(Contract):
     field: FieldName
     current: str
     offered: str
-    reason: Literal["user_set", "older_evidence", "uncertain"]
+    # email_differs: a reading matched by image or name + company brought
+    # another email; the stored one is kept and the new one is a proposal.
+    reason: Literal["user_set", "older_evidence", "uncertain", "email_differs"]
 
 
 class DroppedField(Contract):
@@ -159,13 +161,21 @@ class DroppedField(Contract):
     reason: Literal["not_on_card"]
 
 
+class EmailDiffers(Contract):
+    """The reading's email is not the stored one (the person matched by the
+    card image or by name and company)."""
+
+    stored: str
+    read: str
+
+
 class AddResult(Contract):
     person_id: str
     name: str
     company: str
     outcome: Literal["created", "updated", "unchanged"]
     existed: bool
-    matched_by: Literal["email", "name_company", "romanised_name"] | None = None
+    matched_by: Literal["image", "email", "name_company", "romanised_name"] | None = None
     changes: tuple[FieldChange, ...] = ()
     kept: tuple[KeptField, ...] = ()
     uncertain: tuple[FieldName, ...] = ()
@@ -173,6 +183,8 @@ class AddResult(Contract):
     # corrected yet: still to ask about, even when this scan was sure.
     needs_confirmation: tuple[FieldName, ...] = ()
     dropped: tuple[DroppedField, ...] = ()
+    # Set when this reading's email differs from the stored one: say so.
+    email_differs: EmailDiffers | None = None
     status: Status = "active"
     # "上次是研發部經理, 現在是協理": the sentence to lead with.
     summary: str = ""

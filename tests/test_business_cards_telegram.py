@@ -59,6 +59,12 @@ CARDS = [
 ]
 
 
+def _card(number: int) -> bytes:
+    """A distinct photo per card: the same image is the same person (its hash
+    finds the person it was stored as), so two cards never share bytes."""
+    return PNG + f"card-{number}".encode()
+
+
 class CardModel:
     """Follows the Skill: one `cards__add_card` per attached picture, then a
     short reply that leads with the change; the chart when asked."""
@@ -163,7 +169,7 @@ def test_a_bare_photo_is_stored_in_the_same_turn_and_a_rescan_leads_with_the_cha
             [message(2, OWNER, caption="名片", photo=photo_sizes("ph2"))],
             [message(3, OWNER, photo=photo_sizes("ph3"))],
         ],
-        {"ph1": PNG, "ph2": PNG, "ph3": PNG},
+        {"ph1": _card(1), "ph2": _card(2), "ph3": _card(3)},
     )
     first = poll(item).deliveries[0]
     assert first.disposition == "answered" and first.replied
@@ -192,14 +198,14 @@ def test_a_photo_sent_as_a_file_reaches_the_model_as_an_image(tmp_path: Path) ->
                         "file_id": "doc1",
                         "file_name": "IMG_0001.JPG",
                         "mime_type": "image/jpeg",
-                        "file_size": len(PNG),
+                        "file_size": len(_card(1)),
                     },
                 )
             ],
             # A file without a name: its type comes from the MIME type.
             [message(2, OWNER, document={"file_id": "doc2", "mime_type": "image/png"})],
         ],
-        {"doc1": PNG, "doc2": PNG},
+        {"doc1": _card(1), "doc2": _card(2)},
     )
     assert poll(item).deliveries[0].replied
     assert poll(item).deliveries[0].replied
@@ -216,7 +222,7 @@ def test_an_album_is_one_turn_with_one_card_per_photo(tmp_path: Path) -> None:
                 message(2, OWNER, photo=photo_sizes("a2"), group="album-1"),
             ]
         ],
-        {"a1": PNG, "a2": PNG},
+        {"a1": _card(1), "a2": _card(2)},
     )
     result = poll(item)
     assert len(result.deliveries) == 1

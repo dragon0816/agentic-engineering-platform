@@ -102,8 +102,10 @@ def test_email_is_the_key_across_a_card_and_a_signature(tmp_path: Path) -> None:
         company="範例科技", source="email_signature", status="any", limit=50
     )
     assert total == 1 and people[0].person_id == card.person_id
-    # A different email with the same name is someone else.
-    other = _add(store, {**CARD, "email": "another.wang@example.com"})
+    # A different email with the same name, company and department is the
+    # same person with a doubtful email (live test 2026-10-20, bug 3); with a
+    # different department too, it is someone else.
+    other = _add(store, {**CARD, "email": "another.wang@example.com", "department": "天線部"})
     assert other.outcome == "created"
 
 
@@ -487,3 +489,81 @@ def test_an_older_store_gains_the_new_columns(tmp_path: Path) -> None:
     added = _add(reopened, {**CARD, "title": "經理 博士", "company_tax_id": "12345678"})
     view = reopened.view(added.person_id)
     assert (view.honorific, view.company_tax_id) == ("博士", "12345678")
+
+
+IMAGE = "sha256:" + "ab" * 32
+
+
+def test_the_same_card_image_finds_the_person_it_was_stored_as(tmp_path: Path) -> None:
+    """Live test 2026-10-20: re-sending card A created a second person, because
+    the reading misread the email and did not flag it. The image's hash was the
+    same as before: the same image is the same person."""
+    store = _store(tmp_path)
+    first = _add(store, CARD, ref=IMAGE)
+    misread = _add(
+        store, {**CARD, "email": "hm.wamg@example.com"}, when=date(2026, 2, 1), ref=IMAGE
+    )
+    assert misread.person_id == first.person_id and misread.matched_by == "image"
+    view = store.view(first.person_id)
+    assert view.email == CARD["email"]  # the stored email is kept
+    assert "email" in misread.needs_confirmation and "email" in view.needs_confirmation
+    assert misread.email_differs is not None
+    assert (misread.email_differs.stored, misread.email_differs.read) == (
+        CARD["email"],
+        "hm.wamg@example.com",
+    )
+    assert "Email" in misread.summary and "hm.wamg@example.com" in misread.summary
+    history = store.history(PersonRef(person_id=first.person_id), limit=50)
+    assert [(p.field, p.proposed) for p in history.proposals] == [("email", "hm.wamg@example.com")]
+    people, total = store.list_people(company="範例科技", source="", status="any", limit=50)
+    assert total == 1
+
+
+def test_the_same_name_and_company_with_another_email_updates_the_person(
+    tmp_path: Path,
+) -> None:
+    store = _store(tmp_path)
+    first = _add(store, CARD)
+    again = _add(
+        store,
+        {**CARD, "email": "hm.wang2@example.com", "title": "協理"},
+        when=date(2026, 3, 1),
+    )
+    assert again.person_id == first.person_id and again.matched_by == "name_company"
+    view = store.view(first.person_id)
+    assert view.email == CARD["email"] and view.title == "協理"
+    assert again.needs_confirmation == ("email",)
+    assert again.email_differs is not None and again.email_differs.read == "hm.wang2@example.com"
+    assert {k.field: k.reason for k in again.kept} == {"email": "email_differs"}
+    # A stored email the person set or confirmed is theirs: a proposal, no flag.
+    store.edit(PersonRef(person_id=first.person_id), {}, actor="a", reason="", confirm=("email",))
+    third = _add(store, {**CARD, "email": "hm.wang3@example.com"}, when=date(2026, 4, 1))
+    assert third.person_id == first.person_id
+    assert third.needs_confirmation == ()
+    assert {k.field: k.reason for k in third.kept} == {"email": "user_set"}
+    assert store.view(first.person_id).email == CARD["email"]
+
+
+def test_namesakes_in_another_department_with_another_email_stay_apart(
+    tmp_path: Path,
+) -> None:
+    """The limit of the rule: two people with the same name at the same company
+    are told apart only by a different email and a different department (or
+    division). Same name, same company, same department, different email is
+    taken to be one person whose email needs confirmation."""
+    store = _store(tmp_path)
+    one = _add(store, CARD)
+    two = _add(
+        store,
+        {**CARD, "email": "hm.wang@lab.example.com", "department": "天線部", "phone": ""},
+    )
+    assert two.outcome == "created" and two.person_id != one.person_id
+    other_division = _add(
+        store,
+        {"name": "王小明", "company": "範例科技", "division": "業務處", "email": "w3@example.com"},
+    )
+    assert other_division.outcome == "created"
+    assert store.view(one.person_id).needs_confirmation == ()
+    from capabilities.business_cards.manifest import PROCEDURE
+
+    assert "email_differs" in PROCEDURE

@@ -28,6 +28,7 @@ from capabilities.business_cards.contracts import (
     FIELD_LABELS,
     FIELDS,
     AddResult,
+    EmailDiffers,
     FieldChange,
     FieldName,
     HistoryItem,
@@ -202,6 +203,17 @@ def _same(a: str, b: str) -> bool:
     return " ".join(a.split()).casefold() == " ".join(b.split()).casefold()
 
 
+def _elsewhere(row: Mapping[str, Any] | sqlite3.Row, values: Mapping[str, str]) -> bool:
+    """Whether a reading places the person somewhere else than the stored
+    row: both have a department and they differ, or both a division and they
+    differ."""
+    for level in ("department", "division"):
+        stored, read = str(row[level] or "").strip(), str(values.get(level, "")).strip()
+        if stored and read and not _same(stored, read):
+            return True
+    return False
+
+
 def _describe(values: Mapping[str, str]) -> str:
     place = values.get("department") or values.get("division") or values.get("business_group")
     return "".join(part for part in (place or "", values.get("title") or "") if part)
@@ -245,8 +257,26 @@ class CardStore:
         return list(con.execute("SELECT * FROM people ORDER BY created_at, person_id"))
 
     def _match(
-        self, con: sqlite3.Connection, values: Mapping[str, str]
+        self, con: sqlite3.Connection, values: Mapping[str, str], source_ref: str = ""
     ) -> tuple[sqlite3.Row | None, str | None]:
+        """Who a reading is (DECISIONS 2026-10-20 "How a card finds its person"):
+
+        1. the same card image (`sha256:` ref) as an earlier observation: the
+           person that observation was stored as;
+        2. the same email (case-insensitive);
+        3. the same name (local or romanised) at the same company. A different
+           email does not make it someone else, unless their place differs too
+           (both have a department, or a division, and they differ): two
+           namesakes at one company are told apart only that way.
+        """
+        if source_ref.startswith("sha256:"):
+            row = con.execute(
+                "SELECT p.* FROM observations o JOIN people p ON p.person_id = o.person_id "
+                "WHERE o.source_ref = ? ORDER BY o.observation_id DESC LIMIT 1",
+                (source_ref,),
+            ).fetchone()
+            if row is not None:
+                return row, "image"
         email = names.email_key(values.get("email", ""))
         if email:
             row = con.execute("SELECT * FROM people WHERE email_key = ?", (email,)).fetchone()
@@ -260,10 +290,11 @@ class CardStore:
         for row in self._people(con):
             if not names.same_company(row["company"], company):
                 continue
-            if email and row["email_key"] and row["email_key"] != email:
+            other_email = bool(email and row["email_key"] and row["email_key"] != email)
+            if other_email and _elsewhere(row, values):
                 continue
             if name and names.same_name(row["name"], name):
-                found.append((0, row, "name_company"))
+                found.append((0 + 2 * other_email, row, "name_company"))
             elif (name and names.same_name(row["romanised_name"], name)) or (
                 romanised
                 and (
@@ -271,7 +302,7 @@ class CardStore:
                     or names.same_name(row["romanised_name"], romanised)
                 )
             ):
-                found.append((1, row, "romanised_name"))
+                found.append((1 + 2 * other_email, row, "romanised_name"))
         if not found:
             return None, None
         found.sort(key=lambda item: item[0])
@@ -485,7 +516,23 @@ class CardStore:
             clean["name"] = clean["romanised_name"] or clean["email"]
         unsure = tuple(dict.fromkeys(uncertain))
         when = source_date.isoformat()
-        row, matched_by = self._match(con, clean)
+        row, matched_by = self._match(con, clean, source_ref)
+        differs: EmailDiffers | None = None
+        stored_email = "" if row is None else row["email"]
+        if (
+            row is not None
+            and clean["email"]
+            and stored_email
+            and names.email_key(stored_email) != names.email_key(clean["email"])
+        ):
+            # Matched by the image or by name + company, with another email:
+            # one of the two readings is wrong. The stored email stays; unless
+            # the person set or confirmed it, it needs confirmation (kept with
+            # this observation's uncertain fields).
+            differs = EmailDiffers(stored=stored_email, read=clean["email"])
+            email_source = self._sources(con, row["person_id"]).get("email")
+            if email_source is None or email_source["source"] != "user":
+                unsure = tuple(dict.fromkeys((*unsure, "email")))
         cursor = con.execute(
             "INSERT INTO observations (person_id, source, source_date, source_ref, fields_json, "
             "uncertain_json, recorded_at, recorded_by) VALUES (?,?,?,?,?,?,?,?)",
@@ -558,6 +605,7 @@ class CardStore:
             when=when,
             observation_id=observation_id,
             uncertain=unsure,
+            email_differs=differs is not None,
         )
         if merge.changes:
             con.execute(
@@ -577,11 +625,13 @@ class CardStore:
             kept=tuple(merge.kept),
             uncertain=unsure,
             needs_confirmation=self._needs(con, row["person_id"]),
+            email_differs=differs,
             status=fresh["status"],
-            summary=_summary(row, merge),
+            summary=_summary(row, merge, differs),
             observation_id=observation_id,
             change_id=change_id
-            if merge.changes or any(item.reason == "user_set" for item in merge.kept)
+            if merge.changes
+            or any(item.reason in ("user_set", "email_differs") for item in merge.kept)
             else None,
         )
 
@@ -597,6 +647,7 @@ class CardStore:
         when: str,
         observation_id: int,
         uncertain: Sequence[FieldName],
+        email_differs: bool = False,
     ) -> _Merge:
         merge = _Merge()
         person_id = row["person_id"]
@@ -620,6 +671,17 @@ class CardStore:
             if name == "name" and names.same_name(current, new):
                 continue
             previous = sources.get(name)
+            user_set = previous is not None and previous["source"] == "user"
+            if name == "email" and email_differs and not user_set:
+                # Never replaced automatically: a proposal, and the email needs
+                # confirmation (a user-set email takes the user_set path below).
+                merge.kept.append(
+                    KeptField(field=name, current=current, offered=new, reason="email_differs")
+                )
+                self._propose(
+                    con, change_id, actor, person_id, name, current, new, source, observation_id
+                )
+                continue
             if name == "notes" and current:
                 if new.casefold() in current.casefold():
                     continue
@@ -634,22 +696,8 @@ class CardStore:
                 merge.kept.append(
                     KeptField(field=name, current=current, offered=new, reason="user_set")
                 )
-                con.execute(
-                    "INSERT INTO proposals (person_id, field, current, proposed, source, "
-                    "observation_id, created_at) VALUES (?,?,?,?,?,?,?)",
-                    (person_id, name, current, new, source, observation_id, _now()),
-                )
-                self._record(
-                    con,
-                    change_id,
-                    actor,
-                    person_id,
-                    "proposal",
-                    field_name=name,
-                    old=current,
-                    new=new,
-                    source=source,
-                    reason="your value is kept; the new one is a proposal",
+                self._propose(
+                    con, change_id, actor, person_id, name, current, new, source, observation_id
                 )
                 continue
             elif current and previous is not None and when < previous["source_date"]:
@@ -673,6 +721,37 @@ class CardStore:
                 )
             )
         return merge
+
+    def _propose(
+        self,
+        con: sqlite3.Connection,
+        change_id: str,
+        actor: str,
+        person_id: str,
+        name: str,
+        current: str,
+        new: str,
+        source: str,
+        observation_id: int,
+    ) -> None:
+        """An offered value that was not taken, kept as an open proposal."""
+        con.execute(
+            "INSERT INTO proposals (person_id, field, current, proposed, source, "
+            "observation_id, created_at) VALUES (?,?,?,?,?,?,?)",
+            (person_id, name, current, new, source, observation_id, _now()),
+        )
+        self._record(
+            con,
+            change_id,
+            actor,
+            person_id,
+            "proposal",
+            field_name=name,
+            old=current,
+            new=new,
+            source=source,
+            reason="the stored value is kept; the new one is a proposal",
+        )
 
     # -- the person's own edits ----------------------------------------
 
@@ -1420,8 +1499,18 @@ def _history_item(row: sqlite3.Row) -> HistoryItem:
     )
 
 
-def _summary(before: sqlite3.Row, merge: _Merge) -> str:
+def _summary(before: sqlite3.Row, merge: _Merge, differs: EmailDiffers | None = None) -> str:
     """The sentence a reply leads with when the person was already on file."""
+    note = (
+        ""
+        if differs is None
+        else f"這次讀到的 Email（{differs.read}）和名片夾裡的（{differs.stored}）不同，"
+        "已保留原本的，請確認哪一個正確。"
+    )
+    return _changes_sentence(before, merge) + note
+
+
+def _changes_sentence(before: sqlite3.Row, merge: _Merge) -> str:
     if not merge.changes:
         return "已在名片夾中，資料沒有變。" if not merge.kept else ""
     changed = {change.field for change in merge.changes}
