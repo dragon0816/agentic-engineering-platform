@@ -235,8 +235,8 @@ class SetStatusRequest(Contract):
     person: PersonRef
     status: Status
     reason: str = Field(default="", max_length=_SHORT)
-    # Who said so; the conversation's actor when empty.
-    said_by: str = Field(default="", max_length=120)
+    # Who said so is never an argument: the Host records the request's actor
+    # and channel (live test 2026-10-20 stored the model's "使用者").
     effective_date: date | None = None
 
 

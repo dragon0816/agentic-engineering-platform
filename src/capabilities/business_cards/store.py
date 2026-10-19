@@ -697,11 +697,11 @@ class CardStore:
         status: Status,
         *,
         actor: str,
-        said_by: str,
         reason: str,
         effective: date | None,
     ) -> tuple[sqlite3.Row, str, str, str | None]:
-        """A departure (or return) the person stated; recorded and undoable."""
+        """A departure (or return) the person stated; recorded and undoable.
+        `actor` is who said it, as the Host knows them (actor and channel)."""
         with self._connect() as con:
             row = self._resolve(con, ref)
             old = row["status"]
@@ -712,7 +712,7 @@ class CardStore:
             con.execute(
                 "UPDATE people SET status = ?, left_at = ?, status_set_by = ?, status_reason = ?, "
                 "updated_at = ? WHERE person_id = ?",
-                (status, left_at, said_by or actor, reason, _now(), row["person_id"]),
+                (status, left_at, actor, reason, _now(), row["person_id"]),
             )
             self._record(
                 con,
@@ -726,7 +726,6 @@ class CardStore:
                 reason=reason,
                 source="user",
                 extra={
-                    "said_by": said_by or actor,
                     "prev_left_at": row["left_at"],
                     "prev_set_by": row["status_set_by"],
                     "prev_reason": row["status_reason"],

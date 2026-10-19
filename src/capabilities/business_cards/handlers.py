@@ -133,6 +133,12 @@ def hermes_store() -> Path:
     return (Path(home) if home else Path.home() / ".business-cards") / "cards.db"
 
 
+def who(context: RequestContext) -> str:
+    """Who made a change, as the Host knows it: the request's actor and its
+    channel (`alice via telegram`). Never a model argument."""
+    return f"{context.actor} via {context.channel}"
+
+
 class _Cards:
     """The store of the request's actor, opened on a worker thread."""
 
@@ -173,7 +179,7 @@ class AddCardHandler(_Cards):
                 source_date=request.card_date or date.today(),
                 source_ref=self.image_ref(request.image_path),
                 uncertain=request.uncertain,
-                actor=context.actor,
+                actor=who(context),
             )
         )
 
@@ -193,7 +199,7 @@ class AddFromSignatureHandler(_Cards):
                         source_date=entry.message_date,
                         source_ref=entry.message_id,
                         uncertain=entry.uncertain,
-                        actor=context.actor,
+                        actor=who(context),
                     )
                 )
             return AddFromSignatureResult(results=tuple(results))
@@ -207,7 +213,7 @@ class EditPersonHandler(_Cards):
 
         def work() -> Contract:
             row, changes, change_id = self.store(context).edit(
-                request.person, request.fields.values(), actor=context.actor, reason=request.reason
+                request.person, request.fields.values(), actor=who(context), reason=request.reason
             )
             return EditResult(
                 person_id=row["person_id"],
@@ -227,8 +233,7 @@ class SetStatusHandler(_Cards):
             row, old, new, change_id = self.store(context).set_status(
                 request.person,
                 request.status,
-                actor=context.actor,
-                said_by=request.said_by,
+                actor=who(context),
                 reason=request.reason,
                 effective=request.effective_date,
             )
@@ -266,7 +271,7 @@ class SetLineHandler(_Cards):
                 evidence_ref=request.evidence_ref,
                 confidence=confidence,
                 inferred=inferred,
-                actor=context.actor,
+                actor=who(context),
             )
             return LineResult(
                 person_id=row["person_id"],
@@ -288,7 +293,7 @@ class RemoveLineHandler(_Cards):
 
         def work() -> Contract:
             row, line, change_id = self.store(context).remove_line(
-                request.person, actor=context.actor, reason=request.reason
+                request.person, actor=who(context), reason=request.reason
             )
             return LineResult(
                 person_id=row["person_id"],
@@ -309,7 +314,7 @@ class UndoHandler(_Cards):
         request = UndoRequest.model_validate(inputs)
 
         def work() -> Contract:
-            reverted, change_id = self.store(context).undo(request.change_id, actor=context.actor)
+            reverted, change_id = self.store(context).undo(request.change_id, actor=who(context))
             return UndoResult(
                 undone=request.change_id, reverted=tuple(reverted), change_id=change_id
             )
@@ -327,7 +332,7 @@ class ImportHandler(_Cards):
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         ImportRequest.model_validate(inputs)
         return await self.run(
-            lambda: self.store(context).import_hermes(self.source(), actor=context.actor)
+            lambda: self.store(context).import_hermes(self.source(), actor=who(context))
         )
 
 

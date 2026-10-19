@@ -10,6 +10,7 @@ fake model, no network.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import re
 from collections.abc import Iterator
@@ -18,13 +19,14 @@ from typing import Any
 
 import pytest
 from test_ai_proposed_changes import LAYA
+from test_business_cards_capabilities import _context
 from test_host_models import binding, endpoint
 from test_host_wiring import host_json, ready
 
 from capabilities.business_cards.handlers import ADD_CARD_SPEC, WRITE_SPECS
 from capabilities.business_cards.manifest import CARDS_SKILL, business_cards_skill
 from capabilities.runtime import LocalPolicy
-from host_runtime.business_cards_tools import CHART_TOOL, business_cards_tools
+from host_runtime.business_cards_tools import CHART_TOOL, TOOLS, _tool, business_cards_tools
 from host_runtime.conversations import ConversationTurnRequest
 from host_runtime.host import build_runtime
 from host_runtime.web import AgentWeb
@@ -286,12 +288,6 @@ class _FailingBridge:
 
 
 def _failed(code: str, message: str = "Capability invocation did not complete") -> Any:
-    import asyncio
-
-    from test_business_cards_capabilities import _context
-
-    from host_runtime.business_cards_tools import TOOLS, _tool
-
     gateway = type("G", (), {})()
     gateway.bridge = _FailingBridge(code, message)
     name, spec, description, schema = next(t for t in TOOLS if t[0] == "cards__harvest_signatures")
@@ -327,3 +323,22 @@ def test_a_failed_tool_says_what_failed_not_a_generic_line() -> None:
     from capabilities.business_cards.manifest import PROCEDURE
 
     assert "IF A TOOL FAILS" in PROCEDURE
+
+
+def test_the_host_tool_drops_who_said_it_from_the_models_arguments() -> None:
+    from host_runtime.business_cards_tools import TOOLS
+
+    status = next(schema for name, _, _, schema in TOOLS if name == "cards__set_status")
+    assert "said_by" not in status["properties"]
+    bridge = _FailingBridge("person_unknown")
+    gateway = type("G", (), {"bridge": bridge})()
+    name, spec, description, schema = next(t for t in TOOLS if t[0] == "cards__set_status")
+    tool = _tool(gateway, name, spec, description, schema)
+
+    async def call() -> Any:
+        return await tool.handler(
+            _context(), {"person": {"name": "X"}, "status": "left", "said_by": "使用者"}
+        )
+
+    asyncio.run(call())
+    assert bridge.calls[0].arguments == {"person": {"name": "X"}, "status": "left"}

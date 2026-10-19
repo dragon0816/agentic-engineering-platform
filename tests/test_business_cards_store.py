@@ -190,14 +190,17 @@ def test_a_departure_is_recorded_and_undone_with_history(tmp_path: Path) -> None
     row, old, new, change = store.set_status(
         PersonRef(name="Hsiao-Ming Wang"),
         "left",
-        actor="alice",
-        said_by="alice",
+        actor="alice via telegram",
         reason="moved to another company",
         effective=date(2026, 10, 1),
     )
     assert (old, new) == ("active", "left") and change is not None
     view = store.view(person.person_id)
-    assert (view.status, view.left_at, view.status_set_by) == ("left", "2026-10-01", "alice")
+    assert (view.status, view.left_at, view.status_set_by) == (
+        "left",
+        "2026-10-01",
+        "alice via telegram",
+    )
     assert store.list_people(company="範例科技", source="", status="active", limit=10)[1] == 0
     reverted, undo_change = store.undo(change, actor="alice")
     assert [item.kind for item in reverted] == ["status"]
@@ -285,7 +288,6 @@ def test_each_actor_has_a_separate_store(tmp_path: Path) -> None:
             PersonRef(name="王小明"),
             "left",
             actor="bob",
-            said_by="bob",
             reason="",
             effective=None,
         )

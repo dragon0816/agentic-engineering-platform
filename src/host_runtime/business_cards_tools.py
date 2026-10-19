@@ -192,13 +192,12 @@ TOOLS: tuple[tuple[str, CapabilitySpec, str, dict[str, Any]], ...] = (
         "cards__set_status",
         cards.STATUS_SPEC,
         "Only when the person says so: mark a contact as left (or active again), with the "
-        "reason, who said it and the date. Recorded and undoable.",
+        "reason and the date. Who said it is recorded by the Host. Recorded and undoable.",
         _object(
             {
                 "person": _PERSON,
                 "status": {"type": "string", "enum": ["left", "active"]},
                 "reason": _S,
-                "said_by": _S,
                 "effective_date": _DATE,
             },
             ("person", "status"),
@@ -295,10 +294,16 @@ def _procedure(gateway: Any) -> str:
     return found[-1].instructions if found else ""
 
 
+#: Who did something is the request's actor, never a model argument: these
+#: keys are dropped from a call before it reaches the Bridge.
+IDENTITY_KEYS = frozenset({"said_by", "set_by", "actor", "recorded_by", "confirmed_by"})
+
+
 def _tool(
     gateway: Any, name: str, spec: CapabilitySpec, description: str, schema: dict[str, Any]
 ) -> HostTool:
     async def call(context: RequestContext, arguments: dict[str, Any]) -> HostToolOutcome:
+        arguments = {key: value for key, value in arguments.items() if key not in IDENTITY_KEYS}
         result = await gateway.bridge.execute(
             CapabilityInvocation(
                 context=context, origin="model", target=spec.identity, arguments=arguments

@@ -99,13 +99,13 @@ class SignatureModel:
         raise NotImplementedError
 
 
-def _context(actor: str = "alice") -> RequestContext:
+def _context(actor: str = "alice", channel: str = "local") -> RequestContext:
     return RequestContext(
         trace=TraceIdentifiers(trace_id="t1", request_id="r1", span_id="s1"),
         actor=actor,
         namespace="engineering",
         message="cards",
-        channel="local",
+        channel=channel,
         session_id="s-1",
     )
 
@@ -153,14 +153,22 @@ def _bridge(
 
 
 def _run(
-    bridge: BridgeExecutor, name: str, arguments: dict[str, Any], *, actor: str = "alice"
+    bridge: BridgeExecutor,
+    name: str,
+    arguments: dict[str, Any],
+    *,
+    actor: str = "alice",
+    channel: str = "local",
 ) -> Any:
     """The `CapabilityResult`, typed loosely so tests can read its JSON data."""
     spec = next(binding for binding in bridge.installed.discover() if binding.identity.name == name)
     return asyncio.run(
         bridge.execute(
             CapabilityInvocation(
-                context=_context(actor), origin="model", target=spec.identity, arguments=arguments
+                context=_context(actor, channel),
+                origin="model",
+                target=spec.identity,
+                arguments=arguments,
             )
         )
     )
@@ -505,3 +513,49 @@ def test_harvest_skips_a_message_it_cannot_read_and_says_so(tmp_path: Path) -> N
     assert data["skipped"] == [{"code": "message_unknown", "count": 1}]
     assert "1 封信無法讀取（message_unknown），已略過" in data["skipped_note"]
     assert "其餘 2 封已處理" in data["skipped_note"]
+
+
+def test_who_is_recorded_comes_from_the_request_never_from_the_model(tmp_path: Path) -> None:
+    """Live test 2026-10-20 stored the model's "使用者" as status_set_by. Every
+    write records the request's actor and channel; the model gives a reason only."""
+    bridge = _bridge(tmp_path)
+    _people(bridge)
+    told = _run(
+        bridge,
+        "set-status",
+        {"person": {"name": "林離"}, "status": "left", "said_by": "使用者"},
+        channel="telegram",
+    )
+    assert told.failure is not None and told.failure.code == "invalid_input"
+    left = _run(
+        bridge,
+        "set-status",
+        {"person": {"name": "林離"}, "status": "left", "reason": "他說的"},
+        channel="telegram",
+    )
+    assert left.status == "succeeded", left.failure
+    _run(
+        bridge,
+        "edit-person",
+        {"person": {"name": "陳美"}, "fields": {"title": "資深業務"}},
+        channel="telegram",
+    )
+    _run(
+        bridge,
+        "set-reporting-line",
+        {"person": {"name": "陳美"}, "manager": {"name": "王小明"}, "evidence_kind": "user"},
+    )
+    _run(bridge, "undo", {"change_id": left.data["change_id"]}, channel="telegram")
+    gone = _run(bridge, "history", {"person": {"name": "林離"}}).data
+    assert gone["person"]["status"] == "active"
+    actors = {(item["kind"], item["actor"]) for item in gone["history"]}
+    assert actors >= {("status", "alice via telegram")}
+    _run(bridge, "set-status", {"person": {"name": "林離"}, "status": "left"})
+    view = _run(bridge, "history", {"person": {"name": "林離"}}).data["person"]
+    assert view["status_set_by"] == "alice via local"
+    chen = _run(bridge, "history", {"person": {"name": "陳美"}}).data["history"]
+    assert {(item["kind"], item["actor"]) for item in chen} >= {
+        ("field", "alice via telegram"),
+        ("line_add", "alice via local"),
+    }
+    assert all("使用者" not in item["actor"] for item in chen)
