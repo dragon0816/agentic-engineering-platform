@@ -35,7 +35,12 @@ _S: dict[str, Any] = {"type": "string"}
 _FIELD_PROPS: dict[str, Any] = {name: _S for name in FIELDS}
 _FIELD_PROPS["romanised_name"] = {
     "type": "string",
-    "description": "the romanised / English form of the name",
+    "description": "the romanised / English name ONLY when it is printed on the card; never "
+    "derived from the email or the Chinese name; empty when not printed",
+}
+_FIELD_PROPS["email"] = {
+    "type": "string",
+    "description": "exactly as printed; never changed to match a name",
 }
 _FIELD_PROPS["business_group"] = {"type": "string", "description": "事業群 / BG"}
 _FIELD_PROPS["division"] = {"type": "string", "description": "處 / BU"}
@@ -114,6 +119,12 @@ TOOLS: tuple[tuple[str, CapabilitySpec, str, dict[str, Any]], ...] = (
             {
                 **_FIELD_PROPS,
                 "uncertain": _UNCERTAIN,
+                "romanised_name_printed": {
+                    "type": "string",
+                    "description": "where romanised_name is printed, copied as printed "
+                    "(e.g. 'Ryan Fan, under the Chinese name'); required with romanised_name, "
+                    "else the Host drops it",
+                },
                 "image_path": {"type": "string", "description": "the attached photo's path"},
                 "card_date": _DATE,
             },

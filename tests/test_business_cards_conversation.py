@@ -39,6 +39,7 @@ PNG = bytes.fromhex(
 CARD = {
     "name": "周範例",
     "romanised_name": "Fan-Li Chou",
+    "romanised_name_printed": "Fan-Li Chou (printed under the Chinese name)",
     "company": "EXN 範例網通",
     "business_group": "網通事業群",
     "division": "研發處",
@@ -351,3 +352,86 @@ def test_the_person_can_confirm_a_field_in_chat() -> None:
     assert edit["properties"]["confirm"]["items"]["enum"][0] == "name"
     assert edit["required"] == ["person"]
     assert "needs_confirmation" in PROCEDURE and "email 正確" in PROCEDURE
+
+
+def test_a_romanised_name_not_printed_on_the_card_is_dropped(
+    web: tuple[AgentWeb, Conversation],
+) -> None:
+    """Live test 2026-10-20: card A had no English name, yet the model stored
+    "Yanji Fan" and bent the email to match it. The Host keeps a romanised
+    name only when the model says where it is printed, and marks an email
+    that looks made to match a dropped name as needing confirmation."""
+    agent_web, model = web
+    session = agent_web.create_conversation()["conversation"]["session_id"]
+    invented = {
+        "name": "范例",
+        "romanised_name": "Yanji Fan",
+        "company": "WNC 範例",
+        "email": "Yanji.fan@wnc.example",
+        "uncertain": ["romanised_name"],
+    }
+    model.then(
+        {"tools": [("cards__add_card", invented)]},
+        {"text": "已存：范例。"},
+    )
+    assert _turn(agent_web, session, "store this card")["ok"]
+    stored = json.loads(model.tool_results()[-1])["host"]["data"]
+    assert stored["dropped"] == [
+        {"field": "romanised_name", "value": "Yanji Fan", "reason": "not_on_card"}
+    ]
+    assert "email" in stored["uncertain"] and "email" in stored["needs_confirmation"]
+    model.then({"tools": [("cards__find", {"query": "范例"})]}, {"text": "找到了。"})
+    assert _turn(agent_web, session, "find 范例")["ok"]
+    person = json.loads(model.tool_results()[-1])["host"]["data"]["people"][0]
+    assert person["romanised_name"] == ""
+    # An evidence line that is the email is no evidence.
+    model.then(
+        {
+            "tools": [
+                (
+                    "cards__add_card",
+                    {
+                        **invented,
+                        "name": "范二",
+                        "email": "yanji.fan2@wnc.example",
+                        "romanised_name_printed": "yanji.fan2@wnc.example",
+                    },
+                )
+            ]
+        },
+        {"text": "已存。"},
+    )
+    assert _turn(agent_web, session, "and this one")["ok"]
+    second = json.loads(model.tool_results()[-1])["host"]["data"]
+    assert [item["field"] for item in second["dropped"]] == ["romanised_name"]
+    # Printed on the card: kept.
+    model.then(
+        {
+            "tools": [
+                (
+                    "cards__add_card",
+                    {
+                        "name": "范瑞",
+                        "romanised_name": "Ryan Fan",
+                        "romanised_name_printed": "Ryan R.J. Fan, under the Chinese name",
+                        "company": "WNC 範例",
+                        "email": "ryan.rj.fan@wnc.example",
+                    },
+                )
+            ]
+        },
+        {"text": "已存。"},
+    )
+    assert _turn(agent_web, session, "a third card")["ok"]
+    kept = json.loads(model.tool_results()[-1])["host"]["data"]
+    assert kept["dropped"] == [] and kept["uncertain"] == []
+
+
+def test_the_tools_and_skill_say_a_romanised_name_must_be_printed() -> None:
+    from capabilities.business_cards.manifest import PROCEDURE
+
+    add = next(schema for name, _, _, schema in TOOLS if name == "cards__add_card")
+    assert "printed" in add["properties"]["romanised_name"]["description"]
+    assert "romanised_name_printed" in add["properties"]
+    assert "never derive it from the email" in PROCEDURE
+    assert "never change the email to match a name" in PROCEDURE

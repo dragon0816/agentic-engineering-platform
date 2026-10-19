@@ -17,7 +17,7 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any, Literal
 
-from capabilities.business_cards import chart, signatures
+from capabilities.business_cards import chart, reading, signatures
 from capabilities.business_cards.contracts import (
     AddCardRequest,
     AddFromSignatureRequest,
@@ -172,16 +172,22 @@ class _Cards:
 class AddCardHandler(_Cards):
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = AddCardRequest.model_validate(inputs)
-        return await self.run(
-            lambda: self.store(context).add(
-                request.values(),
+        values, uncertain, dropped = reading.check_romanised(
+            request.values(), request.uncertain, request.romanised_name_printed
+        )
+
+        def work() -> Contract:
+            result = self.store(context).add(
+                values,
                 source="card",
                 source_date=request.card_date or date.today(),
                 source_ref=self.image_ref(request.image_path),
-                uncertain=request.uncertain,
+                uncertain=uncertain,
                 actor=who(context),
             )
-        )
+            return result.model_copy(update={"dropped": dropped})
+
+        return await self.run(work)
 
 
 class AddFromSignatureHandler(_Cards):
@@ -532,6 +538,8 @@ class HarvestHandler(_Cards):
                     continue
                 values, unsure = read_fields[block.message_id]
                 values = {**values, "email": block.sender}
+                # A romanised name is kept only when the block prints it.
+                values, unsure, _ = reading.check_romanised(values, unsure, block.text)
                 existing, changes = store.preview(values)
                 out.append(
                     SignatureCandidate(

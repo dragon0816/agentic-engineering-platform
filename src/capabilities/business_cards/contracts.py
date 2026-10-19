@@ -102,6 +102,9 @@ class AddCardRequest(CardFields):
     """A card the model read from a photo."""
 
     uncertain: tuple[FieldName, ...] = Field(default=(), max_length=len(FIELDS))
+    # Where the romanised name is printed, copied as printed ("Ryan Fan, under
+    # the Chinese name"). Without it the Host drops romanised_name.
+    romanised_name_printed: str = Field(default="", max_length=200)
     # The attached photo's path, as the conversation listed it. Only its hash
     # is kept, and only for a file inside this Host's attachment store.
     image_path: str = Field(default="", max_length=1000)
@@ -136,6 +139,15 @@ class KeptField(Contract):
     reason: Literal["user_set", "older_evidence", "uncertain"]
 
 
+class DroppedField(Contract):
+    """A value the Host did not store, and why."""
+
+    field: FieldName
+    value: str
+    # not_on_card: a romanised name the reading could not show printed.
+    reason: Literal["not_on_card"]
+
+
 class AddResult(Contract):
     person_id: str
     name: str
@@ -149,6 +161,7 @@ class AddResult(Contract):
     # Fields any reading flagged that the person has not confirmed or
     # corrected yet: still to ask about, even when this scan was sure.
     needs_confirmation: tuple[FieldName, ...] = ()
+    dropped: tuple[DroppedField, ...] = ()
     status: Status = "active"
     # "上次是研發部經理, 現在是協理": the sentence to lead with.
     summary: str = ""

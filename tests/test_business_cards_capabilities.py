@@ -580,3 +580,37 @@ def test_a_field_is_confirmed_in_chat_through_edit_person(tmp_path: Path) -> Non
     assert confirmed.data["confirmed"] == ["email"] and confirmed.data["change_id"]
     found = _run(bridge, "find", {"query": "范例"}).data["people"][0]
     assert found["needs_confirmation"] == []
+
+
+class RomanisingModel(SignatureModel):
+    """Adds a romanised name to every person, printed in the block or not."""
+
+    def generate(self, request: ModelRequest) -> ModelResponse:
+        response = super().generate(request)
+        output: Any = response.structured_output
+        for person in output["people"]:
+            person["romanised_name"] = "Hsiao-Ming Wang" if person["name"] == "王小明" else "Da Lee"
+        return response
+
+
+def test_a_signature_keeps_a_romanised_name_only_when_the_block_prints_it(
+    tmp_path: Path,
+) -> None:
+    body = BODY.replace("{name}\n", "{name}\nHsiao-Ming Wang\n", 1)
+    mail = FakeMail(
+        [
+            _message(
+                "m1", "hm.wang@example.com", body.format(name="王小明", title="協理", ext="1")
+            ),
+            _message(
+                "m2",
+                "lee@example.com",
+                BODY.format(name="李大華", title="工程師", ext="2"),
+                days_ago=2,
+            ),
+        ]
+    )
+    bridge = _bridge(tmp_path, mail=mail, model=RomanisingModel())
+    data = _run(bridge, "harvest-signatures", {"domain": "example.com"}).data
+    names = {item["name"]: item["romanised_name"] for item in data["candidates"]}
+    assert names == {"王小明": "Hsiao-Ming Wang", "李大華": ""}
