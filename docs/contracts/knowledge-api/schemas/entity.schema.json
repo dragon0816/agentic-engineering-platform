@@ -54,7 +54,7 @@
         },
         "properties": {
           "type": "object",
-          "description": "Validated against bi.schema/v0 entity_types[entity_type].properties_schema."
+          "description": "Validated against bi.schema/v1 entity_types[entity_type].properties_schema."
         },
         "schema_id": {
           "type": "string",
@@ -83,6 +83,18 @@
         },
         "updated_at": {
           "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        "record_version": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Optional (contract 0.1 pre-freeze revision 2026-10-19, ADR-K11): incremented by every accepted change."
+        },
+        "field_provenance": {
+          "type": "object",
+          "description": "Optional (ADR-K11): property name -> field provenance; present for every judgement field with a value.",
+          "additionalProperties": {
+            "$ref": "common.schema.json#/$defs/field_provenance"
+          }
         }
       }
     },
@@ -115,6 +127,109 @@
           "additionalProperties": {
             "type": "integer",
             "minimum": 0
+          }
+        }
+      }
+    },
+    "FieldChange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "change_id",
+        "field",
+        "old_value",
+        "new_value",
+        "status",
+        "origin",
+        "set_by",
+        "set_at",
+        "reason",
+        "reason_redacted",
+        "source_ref",
+        "base_version",
+        "version"
+      ],
+      "properties": {
+        "change_id": {
+          "type": "string",
+          "pattern": "^chg-[0-9a-f]{12}$"
+        },
+        "field": {
+          "type": "string",
+          "minLength": 1
+        },
+        "old_value": {},
+        "new_value": {},
+        "status": {
+          "enum": [
+            "accepted",
+            "pending_review",
+            "rejected",
+            "rejected_stale_base",
+            "reverted"
+          ]
+        },
+        "origin": {
+          "$ref": "common.schema.json#/$defs/field_origin"
+        },
+        "set_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "set_at": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reason_redacted": {
+          "type": "boolean"
+        },
+        "source_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "base_version": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "version": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        }
+      }
+    },
+    "EntityHistory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entity_id",
+        "record_version",
+        "changes"
+      ],
+      "properties": {
+        "entity_id": {
+          "$ref": "common.schema.json#/$defs/entity_id"
+        },
+        "record_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "changes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FieldChange"
           }
         }
       }

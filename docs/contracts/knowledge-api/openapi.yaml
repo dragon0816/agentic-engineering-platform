@@ -4,8 +4,11 @@ info:
   version: "0.1"
   summary: Read-only Entity, Relationship/Graph, Evidence, Quality and Strategy Run queries.
   description: |
-    Draft contract v0.1 of 2026-10-17 (Knowledge Strategy v1.2, ADR-K7). Status: proposal,
-    awaiting owner confirmation; no AEP route serves it yet. Atlas develops against the
+    Draft contract v0.1 of 2026-10-17 (Knowledge Strategy v1.2, ADR-K7), revised before the
+    freeze on 2026-10-19 (Knowledge Strategy v1.3): relationship and property names follow
+    bi.schema/v1 (from bi_schema.py), entities may carry record_version and field_provenance,
+    and /entities/{entity_id}/history was added (README "Pre-freeze revision"). Status:
+    proposal, awaiting owner confirmation; no AEP route serves it yet. Atlas develops against the
     synthetic files in ./mock/ (see README.md and mock/index.json).
 
     Conventions (from docs/telemetry/AEP_ATLAS_TELEMETRY_CONTRACT.md):
@@ -166,6 +169,31 @@ paths:
               schema: {$ref: "./schemas/envelope.schema.json"}
               examples:
                 mock: {externalValue: "./mock/entity_detail.json"}
+        "404": {$ref: "#/components/responses/Error"}
+  /api/v1/knowledge/entities/{entity_id}/history:
+    get:
+      tags: [entities]
+      operationId: getEntityHistory
+      summary: Field change history of one entity (ADR-K11, pre-freeze revision 2026-10-19).
+      description: |
+        Every accepted, pending, rejected (including stale-base) and reverted field change, oldest
+        first, so a judgement value such as Application priority shows who set it, when and why.
+        reason is content: in knowledge.read.metadata scope it is null with reason_redacted true.
+      x-aep-scope: knowledge.read.metadata (reason needs knowledge.read.content)
+      parameters:
+        - $ref: "#/components/parameters/entity_id_path"
+        - name: field
+          in: query
+          required: false
+          schema: {type: string}
+      responses:
+        "200":
+          description: "Envelope; data: entity.schema.json#/$defs/EntityHistory"
+          content:
+            application/json:
+              schema: {$ref: "./schemas/envelope.schema.json"}
+              examples:
+                mock: {externalValue: "./mock/entity_history.json"}
         "404": {$ref: "#/components/responses/Error"}
   /api/v1/knowledge/relationships:
     get:

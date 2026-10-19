@@ -8,7 +8,7 @@
     "backend": "mock",
     "vault": "bi-fixture",
     "vault_version": "sha256:9203f65d4aad10f6d785e60a980ed734f25c954a7039b7869e76a238c1eb896e",
-    "schema_id": "bi.schema/v0",
+    "schema_id": "bi.schema/v1",
     "synthetic": true
   },
   "data": {
@@ -22,10 +22,12 @@
         "IEEE 802.11bn"
       ],
       "properties": {
-        "maturity": "pre_standard",
-        "standards_body": "IEEE 802.11"
+        "maturity": "emerging",
+        "standard_body": "IEEE 802.11",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -49,9 +51,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "maturity": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     "claims": [
       {
@@ -93,10 +116,9 @@
     ],
     "relationship_counts": {
       "affects_nodes": 2,
-      "mentions": 1,
+      "related": 1,
       "related_tech": 1,
-      "supplied_technologies": 1,
-      "technologies": 3
+      "technologies": 4
     }
   },
   "pagination": null,

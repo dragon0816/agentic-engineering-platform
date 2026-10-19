@@ -1,19 +1,37 @@
 # AEP Knowledge API, contract v0.1 (for the Atlas Coding Agent)
 
 **Status:** draft of 2026-10-17, part of Knowledge Strategy v1.2 (`docs/proposals/KNOWLEDGE_STRATEGY_v1.2.md`
-§6, ADR-K7). Awaiting owner confirmation. **No AEP route serves this API yet**: AEP-K09 builds it after the
+§6, ADR-K7), revised before the freeze on 2026-10-19 by v1.3 (`docs/proposals/KNOWLEDGE_STRATEGY_v1.3.md`;
+see "Pre-freeze revision" below). Awaiting owner confirmation. **No AEP route serves this API yet**: AEP-K09 builds it after the
 owner approves v1.2. Atlas can build against the mock files now, without PostgreSQL, a vault or a
 running AEP Knowledge Service. **Owner:** AEP. **Consumer:** Atlas.
 
 | File | What it is |
 |---|---|
-| `openapi.yaml` | OpenAPI 3.1: 14 GET operations in five groups, scopes, error responses, mock examples |
+| `openapi.yaml` | OpenAPI 3.1: 15 GET operations in five groups, scopes, error responses, mock examples |
 | `schemas/*.schema.json` | JSON Schema 2020-12 for the envelope, the error and every `data` shape |
 | `mock/*.json` | Synthetic responses: complete envelopes, as AEP would return them |
 | `mock/index.json` | For each mock: method, path, query, scope, HTTP status and the schema of its `data` |
 
 AEP's own consistency check is `tests/test_knowledge_strategy_docs.py`. It validates every mock against its
-schema, and checks the mock graph against BI Schema v0 and the benchmark draft.
+schema, and checks the mock graph against BI Schema v1 and the benchmark draft.
+
+## Pre-freeze revision (2026-10-19, Knowledge Strategy v1.3)
+
+v0.1 is not frozen yet (owner 2026-10-18: freeze jointly before AEP-K09), so it was revised in place and
+`contract_version` stays `"0.1"`. What an Atlas build against the 2026-10-17 mock must change:
+
+| Change | Before | After |
+|---|---|---|
+| `relationship_type` names (now from `bi_schema.py`, BI Schema v1) | Ecosystem `supplied_technologies`; Account `suppliers`; CustomerProduct `chip_modules`; CustomerProduct `applications`; Application `node`; Signal `mentions` | `technologies`; `key_suppliers`; `chipset_modules`; `inferred_applications`; `nodes`; `related` |
+| `relationship_type` enum | 14 names | 25 names (`docs/proposals/bi_schema_v1/`); draw an unknown name as a generic edge |
+| `relationship_id` of renamed relationships | hash of the v0 name | hash of the v1 name (same rule); the upcast keeps a v0 → v1 id map |
+| `Relationship.origin` | `source-bi-doc`, `source-v1.0`, `proposed-v0` | `source-bi-schema-py`, `proposed` |
+| `schema_id` everywhere | `bi.schema/v0` | `bi.schema/v1` |
+| `Entity.properties` | v0 property names | v1 names (for example `launch_schedule` → `launch_window`, Concept `review_state` → `review_status`, `standards_body` → `standard_body`); `legacy_v0` holds values with no v1 field |
+| `Entity` (additive, optional) | — | `record_version`, `field_provenance` (ADR-K11: who set a value, when, how, and why) |
+| New endpoint (additive) | — | `GET /api/v1/knowledge/entities/{entity_id}/history`: field change history; `reason` needs content scope |
+| Mock | 91 entities, 163 relationships | 93 entities (two Node cards of the example vault added), 166 relationships (one `competing_vendors` candidate, two Node `upstream` links), `entity_history.json` |
 
 ## 1. Conventions (same as the telemetry contract)
 
@@ -58,6 +76,7 @@ These follow `docs/telemetry/AEP_ATLAS_TELEMETRY_CONTRACT.md` v0.3, which Atlas 
 |---|---|---|
 | Entity Query | `GET /api/v1/knowledge/entities` (`entity_type`, `q`, `market_segment`, `review_status`) | metadata |
 | | `GET /api/v1/knowledge/entities/{entity_id}`: entity, claims, relationship counts | metadata; claim statements need content |
+| | `GET /api/v1/knowledge/entities/{entity_id}/history` (`field`): field change history (ADR-K11) | metadata; `reason` needs content |
 | Relationship / Graph Query | `GET /api/v1/knowledge/relationships` (`relationship_type`, `subject_entity_id`, `object_entity_id`, `graph_state`) | metadata |
 | | `GET /api/v1/knowledge/graph` (`seed`, `depth` 1–3, filters): `{nodes, edges}` | metadata; sensitive labels need content |
 | Evidence Query | `GET /api/v1/knowledge/evidence` (exactly one of `document_id`, `entity_id`, `relationship_id`, `claim_id`) | metadata; `text` needs content |
@@ -121,7 +140,7 @@ The mapping is checked against the Atlas repository's `applications/rs_knowledge
   - A node is `stale` when its card's `updated` date is more than 90 days old. This is the BI Knowledge Base
     rule; the entity carries `updated` and `stale`.
   - Atlas's `graph_path` (Market → Application → Technology → Requirement → Measurement → Product → Competitor)
-    maps onto BI Schema v0 like this:
+    maps onto BI Schema v1 like this:
     - Market becomes `market_segments` properties and the `market_segment` filter;
     - Requirement and Measurement are Application;
     - Product is TestSolution or CustomerProduct.
@@ -146,20 +165,25 @@ The mapping is checked against the Atlas repository's `applications/rs_knowledge
   - evidence text starting `（合成段落）`.
 - No real customer, supplier, product or market claim is included. Technology names (Wi-Fi 7/8, 5G-RedCap,
   5G FWA, CPO, 800G, GaN, 800V DC, 77 GHz radar, 6G, NTN) are public vocabulary.
-- Types and relationship names follow BI Schema v0 (`docs/proposals/bi_schema_v0/`), which carries the
-  types and link fields of the owner's BI Knowledge Base document, such as `related_tech`, `affects_nodes`,
-  `node`, `technologies`, `applications`, `competing_solutions` and `vendor`.
-  - In that document, Ecosystem cards are supplier or partner companies.
-  - Account cards are customers.
-  - Node is a fixed set of value-chain positions.
-- Size: 91 entities (all 12 types), 163 relationships (all 14 relationship names), 163 claims, 167 evidence
-  passages and 10 documents.
+- Types, properties and relationship names follow BI Schema v1 (`docs/proposals/bi_schema_v1/`), which is
+  generated from the owner's `bi_schema.py` (committed as test data under `tests/fixtures/bi_vault_example/`).
+  v0 (`docs/proposals/bi_schema_v0/`, from the BI slides) is kept for history.
+  - Ecosystem cards are supplier or partner companies; Account cards are customers.
+  - Node: the 8 Node cards of the example vault are the reference set (`position_set: vault-reference`);
+    other mock nodes are `proposed-extension`.
+- Size: 93 entities (all 12 types), 166 relationships (17 of the 25 relationship names), 166 claims, 167
+  evidence passages and 10 documents.
+- Field provenance: every judgement value (for example Application `priority`, Trend `our_fit`, card
+  `confidence`) has a `field_provenance` entry. `Application:psu-efficiency-transient` shows a person's
+  change, a rejected stale edit and an import kept as a pending proposal (`entity_history.json`).
 - The mock exercises:
   - two stale cards;
   - one disputed claim;
   - inference-only Opportunity links;
   - one Application with no solution;
-  - Technologies without a Concept.
+  - Technologies without a Concept;
+  - one `competing_vendors` candidate (a `competing_solutions` value that named a company);
+  - v0 values kept in `properties.legacy_v0` by the upcast.
 - The mock graph is the gold graph of the benchmark draft (`docs/proposals/knowledge_benchmark_v0/`). Every
   expected entity and triple of the 25 questions exists in it, and the test enforces this.
 - Scope variants: `entities.json` vs `entities.metadata.json`, `documents.content.json` vs `documents.json`,

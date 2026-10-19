@@ -1,0 +1,103 @@
+{
+  "schema_version": "aep.knowledge.v1",
+  "contract_version": "0.1",
+  "request_id": "req-6fc0802ce333",
+  "generated_at": "2026-10-19T08:00:00Z",
+  "source": {
+    "producer": "mock",
+    "backend": "mock",
+    "vault": "bi-fixture",
+    "vault_version": "sha256:9203f65d4aad10f6d785e60a980ed734f25c954a7039b7869e76a238c1eb896e",
+    "schema_id": "bi.schema/v1",
+    "synthetic": true
+  },
+  "data": {
+    "entity_id": "ent-application-psu-efficiency-transient",
+    "record_version": 3,
+    "changes": [
+      {
+        "change_id": "chg-f9954faf31f5",
+        "field": "priority",
+        "old_value": null,
+        "new_value": 3,
+        "status": "accepted",
+        "origin": "import",
+        "set_by": "import:app_priority_synthetic.csv",
+        "set_at": "2026-09-01T02:00:00Z",
+        "reason": null,
+        "reason_redacted": false,
+        "source_ref": "app_priority_synthetic.csv",
+        "base_version": null,
+        "version": 1
+      },
+      {
+        "change_id": "chg-69fc10eb2c44",
+        "field": "priority",
+        "old_value": 3,
+        "new_value": 5,
+        "status": "accepted",
+        "origin": "human",
+        "set_by": "member:bd-analyst-a",
+        "set_at": "2026-10-05T03:20:00Z",
+        "reason": "Raised from 3 to 5 (synthetic): the 800V DC rack proposal signal and the Beta 800V PSU opportunity move demand inside 6 months, and our power analyzer covers it (rubric level 5 draft).",
+        "reason_redacted": false,
+        "source_ref": null,
+        "base_version": 1,
+        "version": 2
+      },
+      {
+        "change_id": "chg-9b189f0ea2c3",
+        "field": "priority",
+        "old_value": 3,
+        "new_value": 4,
+        "status": "rejected_stale_base",
+        "origin": "human",
+        "set_by": "member:pm-b",
+        "set_at": "2026-10-06T07:45:00Z",
+        "reason": "Set to 4 from an older screen (synthetic); rejected because version 2 already changed priority. Shown to the editor with the current value.",
+        "reason_redacted": false,
+        "source_ref": null,
+        "base_version": 1,
+        "version": null
+      },
+      {
+        "change_id": "chg-dd1932172e5d",
+        "field": "priority",
+        "old_value": 5,
+        "new_value": 3,
+        "status": "pending_review",
+        "origin": "import",
+        "set_by": "import:app_priority_synthetic.csv",
+        "set_at": "2026-10-12T02:00:00Z",
+        "reason": "Re-import of the same CSV; the current value was set by a person, so the import became a proposal instead of overwriting it.",
+        "reason_redacted": false,
+        "source_ref": "app_priority_synthetic.csv",
+        "base_version": 2,
+        "version": null
+      },
+      {
+        "change_id": "chg-10d364e4bb3a",
+        "field": "confidence",
+        "old_value": null,
+        "new_value": "assumed",
+        "status": "accepted",
+        "origin": "migration",
+        "set_by": "upcast:bi.schema/v0->v1",
+        "set_at": "2026-10-19T01:00:00Z",
+        "reason": null,
+        "reason_redacted": false,
+        "source_ref": "bi.schema/v0",
+        "base_version": 2,
+        "version": 3
+      }
+    ]
+  },
+  "pagination": null,
+  "warnings": [
+    {
+      "code": "synthetic_data",
+      "message": "Synthetic mock data; no real customer or product claim."
+    }
+  ],
+  "error": null
+}

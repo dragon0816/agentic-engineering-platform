@@ -57,21 +57,33 @@
       ]
     },
     "relationship_type": {
+      "description": "bi.schema/v1 relationship names (bi_schema.py link fields plus proposed ones). v0 names map through bi_schema_v1.json upcast_from_v0.relationship_map; Atlas should draw an unknown name as a generic edge.",
       "enum": [
-        "related_tech",
-        "affects_nodes",
-        "node",
-        "technologies",
-        "applications",
-        "competing_solutions",
         "vendor",
-        "supplied_technologies",
-        "suppliers",
+        "applications",
+        "technologies",
+        "nodes",
+        "competing_solutions",
+        "reference_customers",
+        "trends",
+        "node",
         "account",
-        "chip_modules",
+        "chipset_modules",
+        "inferred_applications",
+        "influence_on",
+        "key_suppliers",
+        "key_customers",
+        "upstream",
+        "downstream",
+        "affects_nodes",
         "test_solutions",
+        "related_concepts",
+        "related_tech",
+        "affected_nodes",
+        "related_applications",
+        "related",
         "customer_product",
-        "mentions"
+        "competing_vendors"
       ]
     },
     "status": {
@@ -155,6 +167,59 @@
         "schema_id": {
           "type": "string",
           "minLength": 1
+        }
+      }
+    },
+    "field_origin": {
+      "enum": [
+        "import",
+        "human",
+        "agent",
+        "migration"
+      ]
+    },
+    "field_provenance": {
+      "description": "ADR-K11 field-level provenance of one property value. In knowledge.read.metadata scope reason is null and reason_redacted is true when a reason exists.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "origin",
+        "set_by",
+        "set_at",
+        "reason",
+        "reason_redacted",
+        "source_ref",
+        "version"
+      ],
+      "properties": {
+        "origin": {
+          "$ref": "#/$defs/field_origin"
+        },
+        "set_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "set_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reason_redacted": {
+          "type": "boolean"
+        },
+        "source_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
         }
       }
     }

@@ -1,15 +1,21 @@
-"""The Knowledge Strategy v1.2 contract files agree with each other.
+"""The Knowledge Strategy contract files (v1.2, revised by v1.3) agree with each other.
 
-BI Schema v0, the 25-question benchmark draft and the Knowledge API mock data are
+BI Schema v1, the 25-question benchmark draft and the Knowledge API mock data are
 documentation, but the Atlas Coding Agent builds against the mock files without a
 running AEP. A mock that drifts from its JSON Schema, or a benchmark triple that
 names a relationship the schema does not allow, would be found only when Atlas
 breaks. The repository has no JSON Schema library, so a small validator below
 covers the subset of JSON Schema 2020-12 these files use.
+
+v1.3 (2026-10-19) moved the mock and the benchmark from BI Schema v0 (built from the
+BI slides) to v1 (built from the owner's bi_schema.py, committed as test data under
+tests/fixtures/bi_vault_example). v0 is kept unchanged for history; its checks here
+are that it is unchanged and that its upcast to v1 covers every v0 name.
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -18,8 +24,13 @@ from typing import Any
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-BI_SCHEMA = ROOT / "docs/proposals/bi_schema_v0/bi_schema_v0.json"
+BI_SCHEMA_V0 = ROOT / "docs/proposals/bi_schema_v0/bi_schema_v0.json"
+BI_SCHEMA_V0_SHA256 = "391553d65f394ede4c5336710f6f38014865f40ffc9970b887ddfe30900acaf0"
+BI_SCHEMA = ROOT / "docs/proposals/bi_schema_v1/bi_schema_v1.json"
 BENCHMARK = ROOT / "docs/proposals/knowledge_benchmark_v0/questions.json"
+VAULT_QUESTIONS = ROOT / "docs/proposals/knowledge_benchmark_v0/vault_example_questions.json"
+FIXTURE = ROOT / "tests/fixtures/bi_vault_example"
+BI_SCHEMA_PY = FIXTURE / "tools/bi_schema.py"
 API = ROOT / "docs/contracts/knowledge-api"
 SCHEMAS = API / "schemas"
 MOCKS = API / "mock"
@@ -132,7 +143,14 @@ def test_validator_rejects_what_it_should() -> None:
 
 
 def test_every_new_json_file_parses() -> None:
-    files = [BI_SCHEMA, BENCHMARK, *sorted(SCHEMAS.glob("*.json")), *sorted(MOCKS.glob("*.json"))]
+    files = [
+        BI_SCHEMA_V0,
+        BI_SCHEMA,
+        BENCHMARK,
+        VAULT_QUESTIONS,
+        *sorted(SCHEMAS.glob("*.json")),
+        *sorted(MOCKS.glob("*.json")),
+    ]
     assert len(files) > 20
     for path in files:
         load(path)
@@ -193,22 +211,132 @@ def _matches(pattern: str, value: str) -> bool:
     return value.startswith(pattern[:-1]) if pattern.endswith("*") else value == pattern
 
 
-def test_mock_graph_obeys_bi_schema_v0() -> None:
-    schema = load(BI_SCHEMA)
+def test_bi_schema_v0_is_kept_for_history() -> None:
+    assert hashlib.sha256(BI_SCHEMA_V0.read_bytes()).hexdigest() == BI_SCHEMA_V0_SHA256
+    schema = load(BI_SCHEMA_V0)
     assert schema["schema_id"] == "bi.schema/v0"
+    origins = {s["origin"] for t in schema["relationship_types"] for s in t["sources"]}
+    assert origins <= {"source-bi-doc", "source-v1.0", "proposed-v0"}
+    assert all(t["origin"] == "source-bi-doc" for t in schema["entity_types"].values())
+
+
+def test_v0_to_v1_upcast_covers_every_v0_name() -> None:
+    v0, v1 = load(BI_SCHEMA_V0), load(BI_SCHEMA)
+    upcast = v1["upcast_from_v0"]
+    assert upcast["from"] == "bi.schema/v0" and upcast["to"] == "bi.schema/v1"
+    assert set(upcast["type_map"]) == set(v0["entity_types"])
+    assert set(upcast["type_map"].values()) == set(v1["entity_types"])
+    for name, spec in v0["entity_types"].items():
+        assert set(spec["properties_schema"]["properties"]) == set(upcast["property_map"][name])
+        v1_props = v1["entity_types"][name]["properties_schema"]["properties"]
+        for rule in upcast["property_map"][name].values():
+            assert rule["to"] is None or rule["to"] in v1_props, (name, rule)
+    v0_pairs = {(s["domain"], t["name"]) for t in v0["relationship_types"] for s in t["sources"]}
+    mapped = {(r["domain"], r["from"]): r["to"] for r in upcast["relationship_map"]}
+    assert set(mapped) == v0_pairs
+    v1_rel = {t["name"]: t for t in v1["relationship_types"]}
+    for (domain, _), target in mapped.items():
+        assert _source(v1_rel[target], domain) is not None, (domain, target)
+    assert set(upcast["record_map"]) == set(v0["entity_record"]["properties"]) - set(
+        v1["entity_record"]["properties"]
+    ) | {"updated"}
+
+
+def _code_line(ref: str) -> str:
+    match = re.fullmatch(r"bi_schema\.py:(\d+)", ref)
+    assert match, ref
+    return BI_SCHEMA_PY.read_text(encoding="utf-8").splitlines()[int(match.group(1)) - 1]
+
+
+def test_bi_schema_v1_traces_every_name_to_bi_schema_py() -> None:
+    """Each source-bi-schema-py name points at the bi_schema.py line that defines it."""
+    schema = load(BI_SCHEMA)
+    assert schema["schema_id"] == "bi.schema/v1"
+    assert (
+        hashlib.sha256(BI_SCHEMA_PY.read_bytes()).hexdigest() == schema["source"]["primary_sha256"]
+    )
+    types = schema["entity_types"]
+    assert [t for t, s in types.items() if s["origin"] == "proposed"] == ["Opportunity"]
+    for name, spec in types.items():
+        if spec["origin"] == "proposed":
+            assert spec["reason"] and spec["code_ref"] is None
+            continue
+        assert spec["origin"] == "source-bi-schema-py"
+        assert f'"{spec["code_key"]}": schema("{spec["folder"]}"' in _code_line(spec["code_ref"])
+        naming = spec["naming_field"]
+        assert f'("{naming["field"]}", F(' in _code_line(naming["code_ref"])
+        assert naming["field"] == {"Signal": "title", "CustomerProduct": "product_name"}.get(
+            name, "name"
+        )
+        assert spec["has_confidence_and_updated"] is (name not in ("Account", "Node", "Signal"))
+        for prop, prop_spec in spec["properties_schema"]["properties"].items():
+            assert prop_spec["x-field-class"] in ("sourced", "judgement", "derived"), (name, prop)
+            if prop_spec["x-origin"] == "proposed":
+                assert prop_spec["x-reason"], (name, prop)
+                continue
+            line = _code_line(prop_spec["x-code"])
+            assert f'("{prop}", F(' in line or f'f["{prop}"] = F(' in line, (name, prop, line)
+            assert f'F("{prop_spec["x-kind"]}"' in line, (name, prop)
+        assert (
+            "confidence" in spec["properties_schema"]["properties"]
+            or not spec["has_confidence_and_updated"]
+        )
+    for rel in schema["relationship_types"]:
+        for source in rel["sources"]:
+            if source["origin"] == "proposed":
+                assert source["reason"] and source["code_ref"] is None, rel["name"]
+                continue
+            assert source["origin"] == "source-bi-schema-py"
+            line = _code_line(source["code_ref"])
+            assert f'("{rel["name"]}", F("{source["code_kind"]}"' in line, (rel["name"], line)
+            assert source["cardinality"] == ("one" if source["code_kind"] == "link" else "many")
+    proposed_rels = {
+        (s["domain"], t["name"])
+        for t in schema["relationship_types"]
+        for s in t["sources"]
+        if s["origin"] == "proposed"
+    }
+    assert proposed_rels == {
+        ("Opportunity", "account"),
+        ("Opportunity", "test_solutions"),
+        ("Opportunity", "customer_product"),
+        ("TestSolution", "competing_vendors"),
+    }
+    reference = types["Node"]["properties_schema"]["properties"]["reference_position"]["enum"]
+    assert sorted(reference) == sorted(p.stem for p in (FIXTURE / "BI/Node").glob("*.md"))
+
+
+def test_mock_graph_obeys_bi_schema_v1() -> None:
+    schema = load(BI_SCHEMA)
     types = schema["entity_types"]
     entities = _entities()
     for ref, entity in entities.items():
+        assert entity["schema_id"] == "bi.schema/v1", ref
         spec = types[entity["entity_type"]]
         found = errors(entity["properties"], spec["properties_schema"], BI_SCHEMA, schema)
         assert found == [], (ref, found)
+        for field in spec["x-defaults"]:
+            assert field in entity["properties"], (ref, field)
+        if entity["entity_type"] == "Node":
+            properties = entity["properties"]
+            has_reference = "reference_position" in properties
+            assert has_reference is (properties["position_set"] == "vault-reference"), ref
     keys = {(e["entity_type"], e["canonical_key"]) for e in entities.values()}
     accounts = {key for kind, key in keys if kind == "Account"}
     assert accounts.isdisjoint({key for kind, key in keys if kind == "Ecosystem"})
+    reference_nodes = {
+        e["properties"].get("reference_position")
+        for e in entities.values()
+        if e["entity_type"] == "Node"
+    }
+    assert reference_nodes - {None} == set(
+        types["Node"]["properties_schema"]["properties"]["reference_position"]["enum"]
+    )
 
     by_id = {e["entity_id"]: e for e in entities.values()}
     rel_types = {t["name"]: t for t in schema["relationship_types"]}
     vendors: dict[str, int] = {}
+    single: dict[tuple[str, str], int] = {}
     for rel in _relationships():
         spec = rel_types[rel["relationship_type"]]
         subject, obj = by_id[rel["subject_entity_id"]], by_id[rel["object_entity_id"]]
@@ -216,19 +344,92 @@ def test_mock_graph_obeys_bi_schema_v0() -> None:
         assert source is not None, rel
         assert _in_range(spec, obj["entity_type"]), rel
         assert rel["origin"] == source["origin"]
+        assert rel["provenance"]["schema_id"] == "bi.schema/v1"
+        if source["cardinality"] == "one":
+            key = (subject["entity_id"], rel["relationship_type"])
+            single[key] = single.get(key, 0) + 1
         if rel["relationship_type"] == "vendor":
             vendors[subject["entity_id"]] = vendors.get(subject["entity_id"], 0) + 1
-        if rel["relationship_type"] == "competing_solutions":
+        if rel["relationship_type"] in ("competing_solutions", "competing_vendors"):
             assert subject["properties"]["is_own_solution"] is True, rel
+        if rel["relationship_type"] == "competing_solutions":
             assert obj["properties"]["is_own_solution"] is False, rel
-    # Slide 8: our solutions have no vendor; a competitor's has exactly one.
+    assert all(count == 1 for count in single.values()), single
+    # bi_schema.py:37 / tools README: our solutions have no vendor; a competitor's has one.
     for entity in entities.values():
         if entity["entity_type"] == "TestSolution":
             expected = 0 if entity["properties"]["is_own_solution"] else 1
             assert vendors.get(entity["entity_id"], 0) == expected, entity["entity_id"]
-    origins = {s["origin"] for t in schema["relationship_types"] for s in t["sources"]}
-    assert origins <= {"source-bi-doc", "source-v1.0", "proposed-v0"}
-    assert all(t["origin"] == "source-bi-doc" for t in types.values())
+    used = {r["relationship_type"] for r in _relationships()}
+    assert "competing_vendors" in used, "the mock should exercise the type-check rule"
+    graph = load(MOCKS / "graph.json")["data"]
+    assert {n["id"] for n in graph["nodes"]} == set(by_id)
+    assert {(e["id"], e["type"]) for e in graph["edges"]} == {
+        (r["relationship_id"], r["relationship_type"]) for r in _relationships()
+    }
+
+
+def test_judgement_fields_carry_field_provenance() -> None:
+    """ADR-K11: every judgement value says who set it, when, how and (if a person) why."""
+    schema = load(BI_SCHEMA)
+    for name, entity in [
+        *_entities().items(),
+        *((e["entity_id"], e) for e in load(MOCKS / "entities.metadata.json")["data"]),
+    ]:
+        props = schema["entity_types"][entity["entity_type"]]["properties_schema"]["properties"]
+        provenance = entity["field_provenance"]
+        assert set(provenance) <= set(entity["properties"]), name
+        for field in entity["properties"]:
+            if props[field]["x-field-class"] == "judgement":
+                assert field in provenance, (name, field)
+        for field, item in provenance.items():
+            assert item["version"] <= entity["record_version"], (name, field)
+            if item["origin"] == "human" and not item["reason_redacted"]:
+                assert item["reason"], (name, field)
+    for entity in load(MOCKS / "entities.metadata.json")["data"]:
+        assert all(p["reason"] is None for p in entity["field_provenance"].values())
+    humans = [
+        e
+        for e in _entities().values()
+        if e["field_provenance"].get("priority", {}).get("origin") == "human"
+    ]
+    assert humans, "the mock should exercise a human-set judgement field"
+
+
+def test_entity_history_never_lets_an_import_overwrite_a_person() -> None:
+    history = load(MOCKS / "entity_history.json")["data"]
+    entity = next(e for e in _entities().values() if e["entity_id"] == history["entity_id"])
+    assert history["record_version"] == entity["record_version"]
+    changes = [c for c in history["changes"] if c["field"] == "priority"]
+    accepted = [c for c in changes if c["status"] == "accepted"]
+    assert accepted[-1]["new_value"] == entity["properties"]["priority"]
+    current = entity["field_provenance"]["priority"]
+    assert (current["origin"], current["set_by"], current["version"]) == (
+        accepted[-1]["origin"],
+        accepted[-1]["set_by"],
+        accepted[-1]["version"],
+    )
+    for before, after in zip(accepted, accepted[1:], strict=False):
+        assert (
+            after["old_value"] == before["new_value"] and after["base_version"] == before["version"]
+        )
+    for change in changes:
+        if change["status"] == "rejected_stale_base":
+            newer = [c for c in accepted if c["set_at"] < change["set_at"]]
+            assert change["base_version"] < newer[-1]["version"]
+            assert change["version"] is None
+        if change["status"] == "pending_review" and change["origin"] in ("import", "agent"):
+            assert current["origin"] == "human" and change["version"] is None
+            assert change["new_value"] != entity["properties"]["priority"]
+    assert any(c["status"] == "pending_review" and c["origin"] == "import" for c in changes)
+
+
+def test_strategy_config_pins_schema_v1_digest() -> None:
+    digest = "sha256:" + hashlib.sha256(BI_SCHEMA.read_bytes()).hexdigest()
+    for strategy in load(MOCKS / "strategies.json")["data"]:
+        if strategy["schema"] is not None:
+            assert strategy["schema"]["schema_id"] == "bi.schema/v1"
+            assert strategy["schema"]["digest"] == digest, strategy["strategy_id"]
 
 
 def test_claims_keep_assertion_inference_and_review_apart() -> None:
@@ -284,6 +485,7 @@ def test_benchmark_draft_is_consistent_and_marked_unreviewed() -> None:
     for category in categories:
         assert sum(1 for q in questions if q["category"] == category) == 5
     assert len({q["id"] for q in questions}) == 25
+    assert bench["schema_id"] == "bi.schema/v1"
 
     schema = load(BI_SCHEMA)
     rel_types = {t["name"]: t for t in schema["relationship_types"]}
@@ -321,3 +523,104 @@ def test_benchmark_draft_is_consistent_and_marked_unreviewed() -> None:
                 and _matches(triple["object"], by_id[o])
                 for s, r, o in present
             ), (q["id"], triple)
+
+
+def test_supplemental_question_matches_the_history_mock() -> None:
+    bench = load(BENCHMARK)
+    supplemental = bench["supplemental_questions"]
+    assert [q["id"] for q in supplemental] == ["SUP-01"]
+    assert all(q["id"] not in {x["id"] for x in bench["questions"]} for q in supplemental)
+    entities = _entities()
+    present = {
+        (r["subject_entity_id"], r["relationship_type"], r["object_entity_id"])
+        for r in _relationships()
+    }
+    history = load(MOCKS / "entity_history.json")["data"]
+    for q in supplemental:
+        assert q["review_status"] == "draft-unreviewed" and q["reviewer"] is None
+        for ref in q["expected_entities"]:
+            assert ref in entities, ref
+        for triple in q["expected_relationships"]:
+            key = (
+                entities[triple["subject"]]["entity_id"],
+                triple["relationship"],
+                entities[triple["object"]]["entity_id"],
+            )
+            assert key in present, triple
+        expected = q["expected_field_history"]
+        entity = entities[expected["entity"]]
+        assert history["entity_id"] == entity["entity_id"]
+        assert entity["properties"][expected["field"]] == expected["current_value"]
+        current = entity["field_provenance"][expected["field"]]
+        assert (current["origin"], current["set_by"]) == (
+            expected["current_origin"],
+            expected["current_set_by"],
+        )
+        by_status = {c["status"]: c for c in history["changes"] if c["field"] == expected["field"]}
+        assert by_status["rejected_stale_base"]["new_value"] == expected["rejected_stale_value"]
+        assert by_status["pending_review"]["new_value"] == expected["pending_import_value"]
+
+
+def _card(ref: str) -> Path:
+    folder, _, stem = ref.partition(":")
+    return FIXTURE / "BI" / folder / f"{stem}.md"
+
+
+def _frontmatter_links(path: Path) -> dict[str, list[str]]:
+    """Frontmatter key -> wikilink targets, for the inline and block list forms the vault uses."""
+    text = path.read_text(encoding="utf-8")
+    block = text.split("---", 2)[1]
+    links: dict[str, list[str]] = {}
+    key = ""
+    for line in block.splitlines():
+        match = re.match(r"^([a-z_]+):(.*)$", line)
+        if match:
+            key = match.group(1)
+            links[key] = re.findall(r"\[\[([^\]|]+)", match.group(2))
+        elif line.startswith("  - ") and key:
+            links[key] += re.findall(r"\[\[([^\]|]+)", line)
+    return links
+
+
+def test_vault_example_questions_are_grounded_in_the_fixture() -> None:
+    bench = load(VAULT_QUESTIONS)
+    questions = bench["questions"]
+    assert len(questions) == 8 and len({q["id"] for q in questions}) == 8
+    assert bench["ground_truth_status"] == "draft-unreviewed" and bench["formal_reviewers"] == []
+    assert bench["schema_id"] == "bi.schema/v1"
+    assert not {q["id"] for q in questions} & {q["id"] for q in load(BENCHMARK)["questions"]}
+    rel_types = {t["name"]: t for t in load(BI_SCHEMA)["relationship_types"]}
+    for q in questions:
+        assert q["review_status"] == "draft-unreviewed" and q["reviewer"] is None, q["id"]
+        assert q["corpus"] == "vault_example"
+        for ref in q["expected_entities"]:
+            assert _card(ref).is_file(), (q["id"], ref)
+        for ref in q.get("expected_absent_cards", []):
+            assert not _card(ref).exists(), (q["id"], ref)
+        for triple in q["expected_relationships"]:
+            subject_type = triple["subject"].split(":")[0]
+            object_type = triple["object"].split(":")[0]
+            spec = rel_types[triple["relationship"]]
+            assert _source(spec, subject_type) is not None, (q["id"], triple)
+            assert _in_range(spec, object_type), (q["id"], triple)
+            field = triple.get("source_field", triple["relationship"])
+            target = triple["object"].split(":", 1)[1]
+            assert target in _frontmatter_links(_card(triple["subject"])).get(field, []), (
+                q["id"],
+                triple,
+            )
+        for triple in q["expected_absent_relationships"]:
+            if "*" in triple["subject"]:
+                folder = triple["subject"].split(":")[0]
+                subjects = sorted((FIXTURE / "BI" / folder).glob("*.md"))
+            else:
+                subjects = [_card(triple["subject"])]
+            for subject in subjects:
+                targets = _frontmatter_links(subject).get(triple["relationship"], [])
+                obj = triple["object"].split(":", 1)[1]
+                if obj == "*":
+                    folder = triple["object"].split(":")[0]
+                    hits = [t for t in targets if (FIXTURE / "BI" / folder / f"{t}.md").is_file()]
+                else:
+                    hits = [t for t in targets if t == obj]
+                assert hits == [], (q["id"], subject.name, triple)

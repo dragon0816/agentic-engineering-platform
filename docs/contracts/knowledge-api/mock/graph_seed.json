@@ -8,7 +8,7 @@
     "backend": "mock",
     "vault": "bi-fixture",
     "vault_version": "sha256:9203f65d4aad10f6d785e60a980ed734f25c954a7039b7869e76a238c1eb896e",
-    "schema_id": "bi.schema/v0",
+    "schema_id": "bi.schema/v1",
     "synthetic": true
   },
   "data": {
@@ -159,10 +159,10 @@
         "claim_count": 1
       },
       {
-        "id": "rel-b0350bb122b455f3",
+        "id": "rel-df5d956d6cd6b41d",
         "source": "ent-ecosystem-chip-vendor-kappa",
         "target": "ent-technology-wifi-8",
-        "type": "supplied_technologies",
+        "type": "technologies",
         "state": "covered",
         "weight": 1.0,
         "claim_count": 1
@@ -177,10 +177,10 @@
         "claim_count": 1
       },
       {
-        "id": "rel-ba1c608b6c235fb2",
+        "id": "rel-fedb37e4e7e0ff46",
         "source": "ent-account-network-oem-gamma",
         "target": "ent-ecosystem-chip-vendor-kappa",
-        "type": "suppliers",
+        "type": "key_suppliers",
         "state": "covered",
         "weight": 1.0,
         "claim_count": 1
@@ -213,28 +213,28 @@
         "claim_count": 1
       },
       {
-        "id": "rel-215e8330b4389993",
+        "id": "rel-f481fec5bed16a00",
         "source": "ent-customerproduct-gamma-wifi7-router",
         "target": "ent-ecosystem-chip-vendor-kappa",
-        "type": "chip_modules",
+        "type": "chipset_modules",
         "state": "covered",
         "weight": 1.0,
         "claim_count": 1
       },
       {
-        "id": "rel-5b5469bbf9ac0c43",
+        "id": "rel-d6d97c13ccca66bc",
         "source": "ent-customerproduct-gamma-wifi8-ap-proto",
         "target": "ent-ecosystem-chip-vendor-kappa",
-        "type": "chip_modules",
+        "type": "chipset_modules",
         "state": "weak",
         "weight": 1.0,
         "claim_count": 1
       },
       {
-        "id": "rel-618a88243683f0f1",
+        "id": "rel-314810b05b9759ff",
         "source": "ent-customerproduct-gamma-wifi8-ap-proto",
         "target": "ent-application-wifi-rf-signaling-test",
-        "type": "applications",
+        "type": "inferred_applications",
         "state": "covered",
         "weight": 1.0,
         "claim_count": 1
@@ -249,10 +249,10 @@
         "claim_count": 1
       },
       {
-        "id": "rel-80d1a95eb7eec1ec",
+        "id": "rel-34c69a1a16d4e6a5",
         "source": "ent-application-wifi-rf-signaling-test",
         "target": "ent-node-cpe",
-        "type": "node",
+        "type": "nodes",
         "state": "covered",
         "weight": 1.0,
         "claim_count": 1

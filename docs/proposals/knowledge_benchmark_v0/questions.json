@@ -1,8 +1,8 @@
 {
   "benchmark_id": "knowledge_bi_v0",
-  "version": "0.1.0-draft",
+  "version": "0.2.0-draft",
   "created": "2026-10-17",
-  "schema_id": "bi.schema/v0",
+  "schema_id": "bi.schema/v1",
   "target_users": "BD / Marketing",
   "benchmark_owner": "owner",
   "suggested_domain_reviewers": [
@@ -14,7 +14,7 @@
   "ground_truth_status": "draft-unreviewed",
   "grading_note": "Expected answers and triples are drafts written by Claude Code from synthetic data. They are not formal ground truth until a Domain Reviewer sets review_status=reviewed. Any grade against a draft-unreviewed question is indicative only.",
   "entity_ref_format": "<EntityType>:<canonical_key>, resolved in docs/contracts/knowledge-api/mock/entities.json",
-  "triple_format": "{subject, relationship, object}; relationship is a bi.schema/v0 relationship_type; object TestSolution:* means any TestSolution",
+  "triple_format": "{subject, relationship, object}; relationship is a bi.schema/v1 relationship_type; object TestSolution:* means any TestSolution",
   "corpus_note": "corpus=synthetic_fixture: the questions are answerable from the synthetic documents behind the mock data. real_vault_candidate=true marks questions a reviewer may re-anchor to a copy of the real vault; Account / CustomerProduct / Opportunity questions stay synthetic.",
   "categories": [
     {
@@ -84,7 +84,7 @@
         "must_report_verification_status": true,
         "must_report_gap": false,
         "classification_ceiling": "UNCLASSIFIED",
-        "notes": "800V DC affects_nodes AI 伺服器 PSU 為 assumed，必須標示；AI 伺服器 PSU 是 proposed-v0 擴充節點。"
+        "notes": "800V DC affects_nodes AI 伺服器 PSU 為 assumed，必須標示；AI 伺服器 PSU 是 proposed-extension 節點（v1；v0 稱 proposed-v0 擴充節點）。"
       },
       "expected_answer": "related_tech 是 800V DC 機櫃配電與 GaN 功率元件；兩者都影響「AI 伺服器 PSU」節點。GaN 的影響已驗證；800V DC 的影響是 assumed，應標示待查證。",
       "review_domain": "BD",
@@ -110,12 +110,12 @@
       "expected_relationships": [
         {
           "subject": "Signal:wifi8-first-rf-demo",
-          "relationship": "mentions",
+          "relationship": "related",
           "object": "Trend:wifi-generation-transition"
         },
         {
           "subject": "Signal:wifi8-first-rf-demo",
-          "relationship": "mentions",
+          "relationship": "related",
           "object": "Technology:wifi-8"
         },
         {
@@ -183,7 +183,7 @@
         },
         {
           "subject": "Ecosystem:optics-chip-xi",
-          "relationship": "supplied_technologies",
+          "relationship": "technologies",
           "object": "Technology:cpo"
         }
       ],
@@ -236,12 +236,12 @@
         },
         {
           "subject": "Ecosystem:radar-mmic-omicron",
-          "relationship": "supplied_technologies",
+          "relationship": "technologies",
           "object": "Technology:automotive-radar-77ghz"
         },
         {
           "subject": "Signal:radar-band-regulation-update",
-          "relationship": "mentions",
+          "relationship": "related",
           "object": "Trend:vehicle-radar-proliferation"
         }
       ],
@@ -301,7 +301,7 @@
         },
         {
           "subject": "Signal:6g-study-item",
-          "relationship": "mentions",
+          "relationship": "related",
           "object": "Trend:6g-pre-standard"
         }
       ],
@@ -414,7 +414,7 @@
         },
         {
           "subject": "Ecosystem:optics-chip-xi",
-          "relationship": "supplied_technologies",
+          "relationship": "technologies",
           "object": "Technology:800g-ethernet"
         }
       ],
@@ -473,7 +473,7 @@
         },
         {
           "subject": "Ecosystem:module-maker-lambda",
-          "relationship": "supplied_technologies",
+          "relationship": "technologies",
           "object": "Technology:5g-redcap"
         },
         {
@@ -529,12 +529,12 @@
         },
         {
           "subject": "Ecosystem:chip-vendor-kappa",
-          "relationship": "supplied_technologies",
+          "relationship": "technologies",
           "object": "Technology:wifi-7"
         },
         {
           "subject": "Ecosystem:chip-vendor-kappa",
-          "relationship": "supplied_technologies",
+          "relationship": "technologies",
           "object": "Technology:wifi-8"
         },
         {
@@ -544,7 +544,7 @@
         },
         {
           "subject": "Ecosystem:cert-lab-mu",
-          "relationship": "supplied_technologies",
+          "relationship": "technologies",
           "object": "Technology:wifi-7"
         },
         {
@@ -587,7 +587,7 @@
       "expected_relationships": [
         {
           "subject": "Account:network-oem-gamma",
-          "relationship": "suppliers",
+          "relationship": "key_suppliers",
           "object": "Ecosystem:chip-vendor-kappa"
         },
         {
@@ -602,7 +602,7 @@
         },
         {
           "subject": "CustomerProduct:gamma-wifi8-ap-proto",
-          "relationship": "chip_modules",
+          "relationship": "chipset_modules",
           "object": "Ecosystem:chip-vendor-kappa"
         }
       ],
@@ -662,12 +662,12 @@
         },
         {
           "subject": "CustomerProduct:gamma-wifi7-router",
-          "relationship": "applications",
+          "relationship": "inferred_applications",
           "object": "Application:wifi-production-test"
         },
         {
           "subject": "CustomerProduct:gamma-wifi8-ap-proto",
-          "relationship": "applications",
+          "relationship": "inferred_applications",
           "object": "Application:wifi-rf-signaling-test"
         }
       ],
@@ -722,12 +722,12 @@
         },
         {
           "subject": "CustomerProduct:beta-ai-psu",
-          "relationship": "applications",
+          "relationship": "inferred_applications",
           "object": "Application:psu-efficiency-transient"
         },
         {
           "subject": "CustomerProduct:beta-ai-psu",
-          "relationship": "applications",
+          "relationship": "inferred_applications",
           "object": "Application:power-integrity"
         },
         {
@@ -785,7 +785,7 @@
         },
         {
           "subject": "Signal:alpha-capacity-expansion",
-          "relationship": "mentions",
+          "relationship": "related",
           "object": "Account:odm-alpha"
         }
       ],
@@ -834,17 +834,17 @@
         },
         {
           "subject": "CustomerProduct:delta-77ghz-radar",
-          "relationship": "chip_modules",
+          "relationship": "chipset_modules",
           "object": "Ecosystem:radar-mmic-omicron"
         },
         {
           "subject": "CustomerProduct:delta-77ghz-radar",
-          "relationship": "applications",
+          "relationship": "inferred_applications",
           "object": "Application:radar-target-simulation"
         },
         {
           "subject": "CustomerProduct:delta-77ghz-radar",
-          "relationship": "applications",
+          "relationship": "inferred_applications",
           "object": "Application:radar-production-calibration"
         }
       ],
@@ -894,12 +894,12 @@
         },
         {
           "subject": "CustomerProduct:sigma-redcap-cpe",
-          "relationship": "chip_modules",
+          "relationship": "chipset_modules",
           "object": "Ecosystem:module-maker-lambda"
         },
         {
           "subject": "CustomerProduct:sigma-redcap-cpe",
-          "relationship": "applications",
+          "relationship": "inferred_applications",
           "object": "Application:redcap-device-test"
         },
         {
@@ -1209,7 +1209,7 @@
         },
         {
           "subject": "Application:cpo-optoelectronic-test",
-          "relationship": "node",
+          "relationship": "nodes",
           "object": "Node:optical-module"
         }
       ],
@@ -1266,7 +1266,7 @@
         },
         {
           "subject": "CustomerProduct:gamma-wifi8-ap-proto",
-          "relationship": "applications",
+          "relationship": "inferred_applications",
           "object": "Application:wifi-rf-signaling-test"
         },
         {
@@ -1276,7 +1276,7 @@
         },
         {
           "subject": "Signal:wifi8-first-rf-demo",
-          "relationship": "mentions",
+          "relationship": "related",
           "object": "Technology:wifi-8"
         },
         {
@@ -1327,7 +1327,7 @@
       "expected_relationships": [
         {
           "subject": "Signal:800v-dc-rack-proposal",
-          "relationship": "mentions",
+          "relationship": "related",
           "object": "Trend:ai-dc-power-density"
         },
         {
@@ -1347,7 +1347,7 @@
         },
         {
           "subject": "CustomerProduct:beta-ai-psu",
-          "relationship": "applications",
+          "relationship": "inferred_applications",
           "object": "Application:psu-efficiency-transient"
         },
         {
@@ -1422,7 +1422,7 @@
         },
         {
           "subject": "Signal:cpo-switch-sampling",
-          "relationship": "mentions",
+          "relationship": "related",
           "object": "Trend:optical-interconnect-shift"
         },
         {
@@ -1480,7 +1480,7 @@
       "expected_relationships": [
         {
           "subject": "Signal:radar-band-regulation-update",
-          "relationship": "mentions",
+          "relationship": "related",
           "object": "Trend:vehicle-radar-proliferation"
         },
         {
@@ -1490,7 +1490,7 @@
         },
         {
           "subject": "CustomerProduct:delta-77ghz-radar",
-          "relationship": "applications",
+          "relationship": "inferred_applications",
           "object": "Application:radar-production-calibration"
         },
         {
@@ -1562,12 +1562,12 @@
         },
         {
           "subject": "CustomerProduct:gamma-wifi8-ap-proto",
-          "relationship": "applications",
+          "relationship": "inferred_applications",
           "object": "Application:wifi-rf-signaling-test"
         },
         {
           "subject": "CustomerProduct:delta-77ghz-radar",
-          "relationship": "applications",
+          "relationship": "inferred_applications",
           "object": "Application:radar-target-simulation"
         },
         {
@@ -1607,6 +1607,61 @@
       "reviewed_at": null,
       "hops": 4,
       "expected_shape": "chain",
+      "corpus": "synthetic_fixture",
+      "real_vault_candidate": false
+    }
+  ],
+  "supplemental_note": "supplemental_questions are outside the owner-fixed 25 (5 categories x 5, D1) and outside the Answer Accuracy threshold; they test ADR-K11 judgement provenance against mock/entity_history.json.",
+  "supplemental_questions": [
+    {
+      "id": "SUP-01",
+      "category": "judgement_provenance",
+      "title": "PSU 效率應用的 priority 為什麼是 5、誰改的",
+      "question": "「PSU 效率與動態響應量測」這個 Application 的 priority 現在是多少？誰在什麼時候、為什麼把它改成這個值？後來的匯入為什麼沒有把它改回去？",
+      "expected_entities": [
+        "Application:psu-efficiency-transient",
+        "Signal:800v-dc-rack-proposal",
+        "Opportunity:beta-800v-psu-test",
+        "TestSolution:own-power-analyzer"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "TestSolution:own-power-analyzer",
+          "relationship": "applications",
+          "object": "Application:psu-efficiency-transient"
+        },
+        {
+          "subject": "Opportunity:beta-800v-psu-test",
+          "relationship": "test_solutions",
+          "object": "TestSolution:own-power-analyzer"
+        }
+      ],
+      "expected_field_history": {
+        "entity": "Application:psu-efficiency-transient",
+        "field": "priority",
+        "current_value": 5,
+        "current_origin": "human",
+        "current_set_by": "member:bd-analyst-a",
+        "previous_value": 3,
+        "rejected_stale_value": 4,
+        "pending_import_value": 3
+      },
+      "evidence_requirements": {
+        "min_independent_documents": 1,
+        "cite_evidence_per_relationship": true,
+        "must_label_claim_kind": false,
+        "must_report_verification_status": false,
+        "must_report_gap": false,
+        "classification_ceiling": "INTERNAL",
+        "notes": "答案須引用欄位歷史（GET /entities/{id}/history），不得把 priority 當作文件事實；priority 是 judgement。"
+      },
+      "expected_answer": "priority 目前是 5（判斷值，不是文件事實）。原本由匯入設為 3（2026-09-01，app_priority_synthetic.csv）；2026-10-05 由 member:bd-analyst-a 改為 5，理由是 800V DC 機櫃提案訊號與 Beta 800V PSU 商機讓需求進入 6 個月內，且我方 Power analyzer 可對應。2026-10-06 一筆以舊版本為基礎改成 4 的編輯因版本過期被拒。2026-10-12 重新匯入同一份 CSV 想改回 3，但目前值是人工設定，所以只成為待審提議，沒有覆蓋。",
+      "review_domain": "BD",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 1,
+      "expected_shape": "history",
       "corpus": "synthetic_fixture",
       "real_vault_candidate": false
     }

@@ -1,0 +1,369 @@
+{
+  "benchmark_id": "knowledge_bi_vault_example_v0",
+  "version": "0.1.0-draft",
+  "created": "2026-10-19",
+  "schema_id": "bi.schema/v1",
+  "corpus": "tests/fixtures/bi_vault_example/BI (owner-approved test data, committed e30cd8bf; fictional or unverified content)",
+  "purpose": "A second set beside the 25 synthetic questions, grounded in the BI example vault and its data-quality cases. Not part of the 25-question threshold (owner decision D1); reported separately.",
+  "source": "Proposed in the owner-shared Codex BI Knowledge Source Brief v6 (2026-10-19); re-checked by Claude Code against the fixture files.",
+  "benchmark_owner": "owner",
+  "formal_reviewers": [],
+  "ground_truth_status": "draft-unreviewed",
+  "entity_ref_format": "<Type folder>:<card file stem>, resolved as tests/fixtures/bi_vault_example/BI/<Type folder>/<stem>.md",
+  "triple_format": "{subject, relationship, object[, source_field]}; relationship is a bi.schema/v1 name; source_field is the frontmatter key when it differs (a competing_solutions value naming a Competitor card becomes competing_vendors)",
+  "questions": [
+    {
+      "id": "VE-01",
+      "title": "沒有方案的 Application",
+      "question": "範例 vault 中哪些 Application 沒有任何 Test Solution？哪些只有規劃中（planning）的方案？",
+      "expected_entities": [
+        "Application:5G-FR2手機產線RF校正",
+        "Application:5G-FR2-AiP-OTA驗證",
+        "Application:衛星直連-通道模擬驗證",
+        "TestSolution:FR2-AiP-OTA緊縮場方案",
+        "TestSolution:NTN衛星通道模擬方案"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "TestSolution:FR2-AiP-OTA緊縮場方案",
+          "relationship": "applications",
+          "object": "Application:5G-FR2-AiP-OTA驗證"
+        },
+        {
+          "subject": "TestSolution:NTN衛星通道模擬方案",
+          "relationship": "applications",
+          "object": "Application:衛星直連-通道模擬驗證"
+        }
+      ],
+      "expected_absent_relationships": [
+        {
+          "subject": "TestSolution:*",
+          "relationship": "applications",
+          "object": "Application:5G-FR2手機產線RF校正"
+        }
+      ],
+      "evidence_requirements": {
+        "cite_card_and_line": true,
+        "must_report_gap": true,
+        "notes": "Dashboard caveat: section 6 counts any TestSolution inlink."
+      },
+      "expected_answer": "「5G-FR2手機產線RF校正」沒有任何 Test Solution（刻意示範缺口）。「5G-FR2-AiP-OTA驗證」與「衛星直連-通道模擬驗證」各有一個我方方案，但兩者 status 都是 planning：已建立但尚不可銷售。Dashboard 第 6 節把 planning 也算成已覆蓋，回答必須分開「已建立」與「可銷售」。範圍限於此範例資料集。",
+      "review_domain": "AE",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 1,
+      "expected_shape": "list_with_gap",
+      "corpus": "vault_example"
+    },
+    {
+      "id": "VE-02",
+      "title": "WiFi7 MLO 的方案",
+      "question": "Wi-Fi 7 MLO 互通與吞吐量驗證有哪些方案？是我方還是對手的？可以賣了嗎？對手是誰？",
+      "expected_entities": [
+        "Application:WiFi7-MLO互通與吞吐量驗證",
+        "TestSolution:WiFi7-MLO互通與吞吐量方案",
+        "Competitor:Competitor-Y",
+        "Concept:MLO"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "TestSolution:WiFi7-MLO互通與吞吐量方案",
+          "relationship": "applications",
+          "object": "Application:WiFi7-MLO互通與吞吐量驗證"
+        },
+        {
+          "subject": "TestSolution:WiFi7-MLO互通與吞吐量方案",
+          "relationship": "competing_vendors",
+          "object": "Competitor:Competitor-Y",
+          "source_field": "competing_solutions"
+        },
+        {
+          "subject": "Concept:MLO",
+          "relationship": "test_solutions",
+          "object": "TestSolution:WiFi7-MLO互通與吞吐量方案"
+        }
+      ],
+      "expected_absent_relationships": [
+        {
+          "subject": "TestSolution:WiFi7-MLO互通與吞吐量方案",
+          "relationship": "vendor",
+          "object": "Competitor:*"
+        }
+      ],
+      "evidence_requirements": {
+        "cite_card_and_line": true,
+        "must_report_gap": true,
+        "notes": "competing_solutions type mismatch (DQ-3)."
+      },
+      "expected_answer": "一個方案：「WiFi7-MLO互通與吞吐量方案」，vendor 空白，所以是我方方案；status available（可銷售），測試類型 protocol、整合型、半自動。競品欄位 competing_solutions 指向 Competitor-Y，但那是公司卡而不是方案卡，所以在 v1 是 competing_vendors，且沒有對手的方案卡可比。內容全部 confidence: assumed。",
+      "review_domain": "PM",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 1,
+      "expected_shape": "list",
+      "corpus": "vault_example"
+    },
+    {
+      "id": "VE-03",
+      "title": "Account-A 產品：明確連結與只在內文的需求",
+      "question": "Account-A 的旗艦手機 2027 需要哪些量測應用？哪些是卡片欄位明確連結的，哪些只出現在內文？",
+      "expected_entities": [
+        "CustomerProduct:Account-A-旗艦手機2027",
+        "Account:Account-A",
+        "Application:5G-FR2-AiP-OTA驗證",
+        "Technology:5G-NR-FR2",
+        "Technology:NTN-Satellite"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "CustomerProduct:Account-A-旗艦手機2027",
+          "relationship": "account",
+          "object": "Account:Account-A"
+        },
+        {
+          "subject": "CustomerProduct:Account-A-旗艦手機2027",
+          "relationship": "inferred_applications",
+          "object": "Application:5G-FR2-AiP-OTA驗證"
+        },
+        {
+          "subject": "CustomerProduct:Account-A-旗艦手機2027",
+          "relationship": "technologies",
+          "object": "Technology:5G-NR-FR2"
+        },
+        {
+          "subject": "CustomerProduct:Account-A-旗艦手機2027",
+          "relationship": "technologies",
+          "object": "Technology:NTN-Satellite"
+        }
+      ],
+      "expected_absent_relationships": [
+        {
+          "subject": "CustomerProduct:Account-A-旗艦手機2027",
+          "relationship": "inferred_applications",
+          "object": "Application:衛星直連-通道模擬驗證"
+        },
+        {
+          "subject": "CustomerProduct:Account-A-旗艦手機2027",
+          "relationship": "inferred_applications",
+          "object": "Application:5G-FR2手機產線RF校正"
+        }
+      ],
+      "evidence_requirements": {
+        "cite_card_and_line": true,
+        "must_report_gap": true,
+        "notes": "Body text vs structured edges (DQ-4); fictional card marked verified (DQ-1)."
+      },
+      "expected_answer": "欄位明確連結的只有「5G-FR2-AiP-OTA驗證」。內文「推論的量測需求」另寫了衛星通道模擬與產線 RF 校正，但沒有對應的連結；回答可以提到它們只出現在內文，不能當成已建立的關係。這張卡標 confidence: verified，但內文寫「虛構範例」，是測試資料，不可當成已驗證事實。",
+      "review_domain": "BD",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 1,
+      "expected_shape": "list_with_gap",
+      "corpus": "vault_example"
+    },
+    {
+      "id": "VE-04",
+      "title": "Account-B 產品沒有推論應用",
+      "question": "Account-B 的 Wi-Fi 7 路由器需要哪些量測應用？",
+      "expected_entities": [
+        "CustomerProduct:Account-B-WiFi7路由器",
+        "Account:Account-B",
+        "Technology:WiFi-7",
+        "TestSolution:WiFi7-MLO互通與吞吐量方案"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "CustomerProduct:Account-B-WiFi7路由器",
+          "relationship": "account",
+          "object": "Account:Account-B"
+        },
+        {
+          "subject": "CustomerProduct:Account-B-WiFi7路由器",
+          "relationship": "technologies",
+          "object": "Technology:WiFi-7"
+        },
+        {
+          "subject": "TestSolution:WiFi7-MLO互通與吞吐量方案",
+          "relationship": "reference_customers",
+          "object": "Account:Account-B"
+        }
+      ],
+      "expected_absent_relationships": [
+        {
+          "subject": "CustomerProduct:Account-B-WiFi7路由器",
+          "relationship": "inferred_applications",
+          "object": "Application:*"
+        }
+      ],
+      "evidence_requirements": {
+        "cite_card_and_line": true,
+        "must_report_gap": true,
+        "notes": "Never infer edges silently (DQ-4)."
+      },
+      "expected_answer": "卡片的 inferred_applications 是空的，所以結構化資料沒有任何量測應用。內文提到量產 RF 測試與 MLO 互通與吞吐量驗證，但那只是內文；不可默默補成連結。另外，我方 WiFi7 MLO 方案把 Account-B 列為參考客戶。這張卡也是標 verified 的虛構範例。",
+      "review_domain": "BD",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 1,
+      "expected_shape": "yes_no_with_detail",
+      "corpus": "vault_example"
+    },
+    {
+      "id": "VE-05",
+      "title": "聯發科 / MediaTek 別名合併",
+      "question": "聯發科 和 MediaTek 是兩家公司嗎？範例 vault 有幾張卡？它位於哪個節點？",
+      "expected_entities": [
+        "Ecosystem:MediaTek",
+        "Node:L1-Chipset",
+        "Technology:WiFi-7"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "Ecosystem:MediaTek",
+          "relationship": "node",
+          "object": "Node:L1-Chipset"
+        },
+        {
+          "subject": "Ecosystem:MediaTek",
+          "relationship": "technologies",
+          "object": "Technology:WiFi-7"
+        }
+      ],
+      "expected_absent_relationships": [],
+      "evidence_requirements": {
+        "cite_card_and_line": true,
+        "must_report_gap": true,
+        "notes": "Alias merge at import (bi_ingest.py:612-615)."
+      },
+      "expected_answer": "同一家。tools/samples/real/name_aliases.json 把「聯發科」對應到 MediaTek，所以只有一張 Ecosystem 卡 MediaTek（role chipset，位於 L1-Chipset，技術 WiFi-7），ingested_from 有兩份來源。",
+      "review_domain": "BD",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 1,
+      "expected_shape": "yes_no_with_detail",
+      "corpus": "vault_example",
+      "expected_absent_cards": [
+        "Ecosystem:聯發科"
+      ]
+    },
+    {
+      "id": "VE-06",
+      "title": "中磊 是客戶不是對手",
+      "question": "中磊 是競爭對手嗎？範例 vault 有沒有它的卡？",
+      "expected_entities": [],
+      "expected_relationships": [],
+      "expected_absent_relationships": [],
+      "evidence_requirements": {
+        "cite_card_and_line": true,
+        "must_report_gap": true,
+        "notes": "Account vs Competitor vs Ecosystem role split; missing card = vocabulary gap (DQ-5)."
+      },
+      "expected_answer": "不是對手。tools/samples/real/README.md 的角色劃分寫明廠商比較表中的中磊是客戶（Account），Competitor 只放量測儀器廠。範例 vault 沒有中磊的 Account 卡；它只出現在幾張 Ecosystem 卡的內文（例如 Broadcom 的 PON SoC 說明）。這是一個詞彙缺口：要建卡時應建 Account，不是 Competitor。",
+      "review_domain": "BD",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 0,
+      "expected_shape": "yes_no_with_detail",
+      "corpus": "vault_example",
+      "expected_absent_cards": [
+        "Competitor:中磊",
+        "Account:中磊"
+      ]
+    },
+    {
+      "id": "VE-07",
+      "title": "用 Concept 解釋 MLO",
+      "question": "用業務聽得懂的話解釋 MLO；它和哪個技術、應用與方案有關？這份解釋審閱過了嗎？",
+      "expected_entities": [
+        "Concept:MLO",
+        "Technology:WiFi-7",
+        "Application:WiFi7-MLO互通與吞吐量驗證",
+        "TestSolution:WiFi7-MLO互通與吞吐量方案"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "Concept:MLO",
+          "relationship": "technologies",
+          "object": "Technology:WiFi-7"
+        },
+        {
+          "subject": "Concept:MLO",
+          "relationship": "applications",
+          "object": "Application:WiFi7-MLO互通與吞吐量驗證"
+        },
+        {
+          "subject": "Concept:MLO",
+          "relationship": "test_solutions",
+          "object": "TestSolution:WiFi7-MLO互通與吞吐量方案"
+        }
+      ],
+      "expected_absent_relationships": [],
+      "evidence_requirements": {
+        "cite_card_and_line": true,
+        "must_report_gap": true,
+        "notes": "Concept review_status draft must be reported."
+      },
+      "expected_answer": "MLO 是 Wi-Fi 7 的功能，讓一台裝置同時用多個頻段連線，像高速公路同時開多條車道。相關技術 WiFi-7、應用「WiFi7-MLO互通與吞吐量驗證」、方案「WiFi7-MLO互通與吞吐量方案」。review_status 仍是 draft，業務尚未試讀確認，必須說明。related_concepts 中的「吞吐量」「共存」沒有卡（詞彙缺口）。",
+      "review_domain": "BD",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 1,
+      "expected_shape": "explain",
+      "corpus": "vault_example",
+      "expected_absent_cards": [
+        "Concept:吞吐量",
+        "Concept:共存"
+      ]
+    },
+    {
+      "id": "VE-08",
+      "title": "Competitor-X 是公司不是方案",
+      "question": "FR2 AiP OTA 緊縮場方案的競品是什麼？是一個方案嗎？",
+      "expected_entities": [
+        "TestSolution:FR2-AiP-OTA緊縮場方案",
+        "Competitor:Competitor-X",
+        "Node:L2-Antenna-Module"
+      ],
+      "expected_relationships": [
+        {
+          "subject": "TestSolution:FR2-AiP-OTA緊縮場方案",
+          "relationship": "competing_vendors",
+          "object": "Competitor:Competitor-X",
+          "source_field": "competing_solutions"
+        },
+        {
+          "subject": "Competitor:Competitor-X",
+          "relationship": "node",
+          "object": "Node:L2-Antenna-Module"
+        }
+      ],
+      "expected_absent_relationships": [
+        {
+          "subject": "TestSolution:FR2-AiP-OTA緊縮場方案",
+          "relationship": "competing_solutions",
+          "object": "TestSolution:*"
+        }
+      ],
+      "evidence_requirements": {
+        "cite_card_and_line": true,
+        "must_report_gap": true,
+        "notes": "competing_solutions type mismatch (DQ-3)."
+      },
+      "expected_answer": "競品欄位指向 Competitor-X，它是一張公司卡（位於 L2-Antenna-Module，技術 5G-NR-FR2，定位 premium），不是方案卡；範例沒有對手的 FR2 方案卡可比。v1 把它記為 competing_vendors 並提出型別警告。我方方案本身 status 是 planning。",
+      "review_domain": "PM",
+      "review_status": "draft-unreviewed",
+      "reviewer": null,
+      "reviewed_at": null,
+      "hops": 1,
+      "expected_shape": "yes_no_with_detail",
+      "corpus": "vault_example"
+    }
+  ]
+}

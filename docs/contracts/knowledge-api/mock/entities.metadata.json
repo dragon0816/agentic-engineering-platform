@@ -8,7 +8,7 @@
     "backend": "mock",
     "vault": "bi-fixture",
     "vault_version": "sha256:9203f65d4aad10f6d785e60a980ed734f25c954a7039b7869e76a238c1eb896e",
-    "schema_id": "bi.schema/v0",
+    "schema_id": "bi.schema/v1",
     "synthetic": true
   },
   "data": [
@@ -22,14 +22,18 @@
         "5G FWA growth"
       ],
       "properties": {
-        "measurement_impact": "CPE 與模組的 RF / 產線測試量增加",
-        "our_fit": "high",
-        "stage": "growth",
+        "our_fit": 4,
+        "stage": "accelerating",
         "market_segments": [
           "wireless_communications"
-        ]
+        ],
+        "confidence": "assumed",
+        "updated": "2026-10-10",
+        "legacy_v0": {
+          "measurement_impact": "CPE 與模組的 RF / 產線測試量增加"
+        }
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -47,9 +51,39 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "stage": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "our_fit": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-trend-wifi-generation-transition",
@@ -59,14 +93,18 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "measurement_impact": "新 PHY 特性需要 signaling RF 測試",
-        "our_fit": "high",
+        "our_fit": 4,
         "stage": "emerging",
         "market_segments": [
           "wireless_communications"
-        ]
+        ],
+        "confidence": "assumed",
+        "updated": "2026-10-10",
+        "legacy_v0": {
+          "measurement_impact": "新 PHY 特性需要 signaling RF 測試"
+        }
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -85,9 +123,39 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "stage": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "our_fit": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-trend-ai-dc-power-density",
@@ -97,14 +165,18 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "measurement_impact": "PSU 效率與動態響應量測需求增加",
-        "our_fit": "medium",
-        "stage": "growth",
+        "our_fit": 3,
+        "stage": "accelerating",
         "market_segments": [
           "ai_server"
-        ]
+        ],
+        "confidence": "assumed",
+        "updated": "2026-10-10",
+        "legacy_v0": {
+          "measurement_impact": "PSU 效率與動態響應量測需求增加"
+        }
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -123,9 +195,39 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "stage": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "our_fit": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-trend-optical-interconnect-shift",
@@ -135,15 +237,19 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "measurement_impact": "光電共封裝與高速介面測試",
-        "our_fit": "low",
+        "our_fit": 2,
         "stage": "emerging",
         "market_segments": [
           "ai_server",
           "semiconductor"
-        ]
+        ],
+        "confidence": "assumed",
+        "updated": "2026-10-10",
+        "legacy_v0": {
+          "measurement_impact": "光電共封裝與高速介面測試"
+        }
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -162,9 +268,39 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "stage": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "our_fit": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-trend-vehicle-radar-proliferation",
@@ -174,14 +310,18 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "measurement_impact": "雷達目標模擬與產線校正量增加",
-        "our_fit": "high",
-        "stage": "growth",
+        "our_fit": 4,
+        "stage": "accelerating",
         "market_segments": [
           "automotive"
-        ]
+        ],
+        "confidence": "assumed",
+        "updated": "2026-10-10",
+        "legacy_v0": {
+          "measurement_impact": "雷達目標模擬與產線校正量增加"
+        }
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -199,9 +339,39 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "stage": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "our_fit": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-trend-6g-pre-standard",
@@ -211,13 +381,15 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "our_fit": "medium",
+        "our_fit": 3,
         "stage": "emerging",
         "market_segments": [
           "wireless_communications"
-        ]
+        ],
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -235,9 +407,39 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "stage": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "our_fit": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-trend-ntn-commercialization",
@@ -247,15 +449,19 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "measurement_impact": "NTN 終端一致性與 RF 測試",
-        "our_fit": "high",
+        "our_fit": 4,
         "stage": "emerging",
         "market_segments": [
           "wireless_communications",
           "aerospace_defense"
-        ]
+        ],
+        "confidence": "assumed",
+        "updated": "2026-10-10",
+        "legacy_v0": {
+          "measurement_impact": "NTN 終端一致性與 RF 測試"
+        }
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -272,9 +478,39 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "stage": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "our_fit": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-technology-wifi-7",
@@ -286,10 +522,12 @@
         "IEEE 802.11be"
       ],
       "properties": {
-        "maturity": "deployed",
-        "standards_body": "IEEE 802.11"
+        "maturity": "mature",
+        "standard_body": "IEEE 802.11",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -313,9 +551,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "maturity": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-technology-wifi-8",
@@ -327,10 +586,12 @@
         "IEEE 802.11bn"
       ],
       "properties": {
-        "maturity": "pre_standard",
-        "standards_body": "IEEE 802.11"
+        "maturity": "emerging",
+        "standard_body": "IEEE 802.11",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -354,9 +615,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "maturity": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-technology-5g-redcap",
@@ -368,10 +650,12 @@
         "NR RedCap"
       ],
       "properties": {
-        "maturity": "standardized",
-        "standards_body": "3GPP"
+        "maturity": "growth",
+        "standard_body": "3GPP",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -395,9 +679,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "maturity": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-technology-5g-ntn",
@@ -407,10 +712,12 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "maturity": "standardized",
-        "standards_body": "3GPP"
+        "maturity": "growth",
+        "standard_body": "3GPP",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -434,9 +741,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "maturity": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-technology-6g-sub-thz",
@@ -446,10 +774,12 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "maturity": "research",
-        "standards_body": "3GPP"
+        "maturity": "emerging",
+        "standard_body": "3GPP",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -468,9 +798,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "maturity": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-technology-cpo",
@@ -482,10 +833,12 @@
         "CPO"
       ],
       "properties": {
-        "maturity": "pre_standard",
-        "standards_body": "OIF"
+        "maturity": "emerging",
+        "standard_body": "OIF",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -507,9 +860,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "maturity": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-technology-800g-ethernet",
@@ -521,10 +895,12 @@
         "800GbE"
       ],
       "properties": {
-        "maturity": "deployed",
-        "standards_body": "IEEE 802.3"
+        "maturity": "mature",
+        "standard_body": "IEEE 802.3",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -548,9 +924,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "maturity": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-technology-1-6t-ethernet",
@@ -560,10 +957,12 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "maturity": "standardized",
-        "standards_body": "IEEE 802.3"
+        "maturity": "growth",
+        "standard_body": "IEEE 802.3",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -581,9 +980,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "maturity": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-technology-800v-dc-distribution",
@@ -593,9 +1013,11 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "maturity": "pre_standard"
+        "maturity": "emerging",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -617,9 +1039,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "maturity": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-technology-gan-power",
@@ -629,9 +1072,11 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "maturity": "deployed"
+        "maturity": "mature",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -654,9 +1099,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "maturity": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-technology-automotive-radar-77ghz",
@@ -666,10 +1132,12 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "maturity": "deployed",
-        "standards_body": "ETSI"
+        "maturity": "mature",
+        "standard_body": "ETSI",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -693,9 +1161,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "maturity": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-node-chipset",
@@ -707,9 +1196,11 @@
         "chipset"
       ],
       "properties": {
-        "position_set": "bi-doc"
+        "position_set": "vault-reference",
+        "reference_position": "L1-Chipset",
+        "layer": "L1"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -731,9 +1222,11 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {}
     },
     {
       "entity_id": "ent-node-module",
@@ -745,9 +1238,10 @@
         "module"
       ],
       "properties": {
-        "position_set": "bi-doc"
+        "position_set": "proposed-extension",
+        "layer": "L2"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -767,9 +1261,91 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {}
+    },
+    {
+      "entity_id": "ent-node-rf-fem-module",
+      "entity_type": "Node",
+      "canonical_key": "rf-fem-module",
+      "display_name": "RF 前端模組",
+      "display_name_redacted": false,
+      "aliases": [
+        "RF front-end module"
+      ],
+      "properties": {
+        "position_set": "vault-reference",
+        "reference_position": "L2-RF-FEM-Module",
+        "layer": "L2"
+      },
+      "schema_id": "bi.schema/v1",
+      "classification": "UNCLASSIFIED",
+      "status": "published",
+      "review_status": "reviewed",
+      "updated": "2026-10-19",
+      "stale": false,
+      "provenance": {
+        "document_ids": [
+          "src-00f367845fa35048",
+          "src-b4550f519ea89142"
+        ],
+        "evidence_ids": [
+          "ev-057901ad4ccbd34a0b49",
+          "ev-5cda46eb81a4ef784c87",
+          "ev-d1c0c97d1c4b92ff299e"
+        ],
+        "strategy_id": "bi_knowledge_graph",
+        "strategy_run_id": "srun-5a65c5b3e464",
+        "extracted_by": "knowledge/bi-graph-extract@0.1.0",
+        "extracted_at": "2026-10-16T09:30:00Z",
+        "schema_id": "bi.schema/v1"
+      },
+      "updated_at": "2026-10-19T01:00:00Z",
+      "record_version": 2,
+      "field_provenance": {}
+    },
+    {
+      "entity_id": "ent-node-antenna-module",
+      "entity_type": "Node",
+      "canonical_key": "antenna-module",
+      "display_name": "天線模組",
+      "display_name_redacted": false,
+      "aliases": [
+        "Antenna module"
+      ],
+      "properties": {
+        "position_set": "vault-reference",
+        "reference_position": "L2-Antenna-Module",
+        "layer": "L2"
+      },
+      "schema_id": "bi.schema/v1",
+      "classification": "UNCLASSIFIED",
+      "status": "published",
+      "review_status": "reviewed",
+      "updated": "2026-10-19",
+      "stale": false,
+      "provenance": {
+        "document_ids": [
+          "src-00f367845fa35048",
+          "src-b4550f519ea89142"
+        ],
+        "evidence_ids": [
+          "ev-057901ad4ccbd34a0b49",
+          "ev-5cda46eb81a4ef784c87",
+          "ev-d1c0c97d1c4b92ff299e"
+        ],
+        "strategy_id": "bi_knowledge_graph",
+        "strategy_run_id": "srun-5a65c5b3e464",
+        "extracted_by": "knowledge/bi-graph-extract@0.1.0",
+        "extracted_at": "2026-10-16T09:30:00Z",
+        "schema_id": "bi.schema/v1"
+      },
+      "updated_at": "2026-10-19T01:00:00Z",
+      "record_version": 2,
+      "field_provenance": {}
     },
     {
       "entity_id": "ent-node-handset",
@@ -781,9 +1357,11 @@
         "handset"
       ],
       "properties": {
-        "position_set": "bi-doc"
+        "position_set": "vault-reference",
+        "reference_position": "L3-Handset",
+        "layer": "L3"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -803,9 +1381,11 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {}
     },
     {
       "entity_id": "ent-node-cpe",
@@ -815,9 +1395,11 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "position_set": "bi-doc"
+        "position_set": "vault-reference",
+        "reference_position": "L3-WiFi-Router-CPE",
+        "layer": "L3"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -841,9 +1423,11 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {}
     },
     {
       "entity_id": "ent-node-base-station",
@@ -855,9 +1439,11 @@
         "base station"
       ],
       "properties": {
-        "position_set": "bi-doc"
+        "position_set": "vault-reference",
+        "reference_position": "L4-Base-Station",
+        "layer": "L4"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -875,9 +1461,11 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {}
     },
     {
       "entity_id": "ent-node-telecom-network",
@@ -889,9 +1477,11 @@
         "telecom network"
       ],
       "properties": {
-        "position_set": "bi-doc"
+        "position_set": "vault-reference",
+        "reference_position": "L5-Carrier-Network",
+        "layer": "L5"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -908,9 +1498,11 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {}
     },
     {
       "entity_id": "ent-node-certification-lab",
@@ -922,9 +1514,11 @@
         "certification lab"
       ],
       "properties": {
-        "position_set": "bi-doc"
+        "position_set": "vault-reference",
+        "reference_position": "X-Certification-Lab",
+        "layer": "X"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -943,9 +1537,11 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {}
     },
     {
       "entity_id": "ent-node-ai-server-psu",
@@ -955,9 +1551,10 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "position_set": "proposed-v0-extension"
+        "position_set": "proposed-extension",
+        "layer": "L2"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -979,9 +1576,11 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {}
     },
     {
       "entity_id": "ent-node-ai-server-odm",
@@ -991,9 +1590,10 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "position_set": "proposed-v0-extension"
+        "position_set": "proposed-extension",
+        "layer": "L3"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -1012,9 +1612,11 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {}
     },
     {
       "entity_id": "ent-node-switch-asic",
@@ -1024,9 +1626,10 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "position_set": "proposed-v0-extension"
+        "position_set": "proposed-extension",
+        "layer": "L1"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -1045,9 +1648,11 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {}
     },
     {
       "entity_id": "ent-node-optical-module",
@@ -1057,9 +1662,10 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "position_set": "proposed-v0-extension"
+        "position_set": "proposed-extension",
+        "layer": "L2"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -1082,9 +1688,11 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {}
     },
     {
       "entity_id": "ent-node-radar-module",
@@ -1094,9 +1702,10 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "position_set": "proposed-v0-extension"
+        "position_set": "proposed-extension",
+        "layer": "L2"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -1118,9 +1727,11 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {}
     },
     {
       "entity_id": "ent-ecosystem-chip-vendor-kappa",
@@ -1130,9 +1741,11 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "role": "chipset_supplier"
+        "role": "chipset",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -1155,9 +1768,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-ecosystem-module-maker-lambda",
@@ -1167,9 +1792,11 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "role": "module_supplier"
+        "role": "module",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -1189,9 +1816,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-ecosystem-cert-lab-mu",
@@ -1201,9 +1840,11 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "role": "certification_partner"
+        "role": "cert-lab",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -1221,9 +1862,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-ecosystem-gan-supplier-nu",
@@ -1233,9 +1886,11 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "role": "component_supplier"
+        "role": "component",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -1254,9 +1909,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-ecosystem-optics-chip-xi",
@@ -1266,9 +1933,11 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "role": "chipset_supplier"
+        "role": "chipset",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -1289,9 +1958,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-ecosystem-radar-mmic-omicron",
@@ -1301,9 +1982,11 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "role": "chipset_supplier"
+        "role": "chipset",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -1323,9 +2006,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-ecosystem-ntn-chip-pi",
@@ -1335,9 +2030,11 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "role": "chipset_supplier"
+        "role": "chipset",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -1357,9 +2054,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-account-network-oem-gamma",
@@ -1370,12 +2079,14 @@
       "aliases": null,
       "properties": {
         "region": "apac",
-        "customers": [
-          "電信商客戶（合成）"
-        ],
-        "synthetic": true
+        "synthetic": true,
+        "legacy_v0": {
+          "customers": [
+            "電信商客戶（合成）"
+          ]
+        }
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "CONFIDENTIAL",
       "status": "published",
       "review_status": "reviewed",
@@ -1397,9 +2108,11 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {}
     },
     {
       "entity_id": "ent-account-fwa-odm-sigma",
@@ -1410,12 +2123,14 @@
       "aliases": null,
       "properties": {
         "region": "apac",
-        "customers": [
-          "FWA 電信商（合成）"
-        ],
-        "synthetic": true
+        "synthetic": true,
+        "legacy_v0": {
+          "customers": [
+            "FWA 電信商（合成）"
+          ]
+        }
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "CONFIDENTIAL",
       "status": "published",
       "review_status": "reviewed",
@@ -1436,9 +2151,11 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {}
     },
     {
       "entity_id": "ent-account-psu-maker-beta",
@@ -1451,7 +2168,7 @@
         "region": "apac",
         "synthetic": true
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "CONFIDENTIAL",
       "status": "published",
       "review_status": "reviewed",
@@ -1472,9 +2189,11 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {}
     },
     {
       "entity_id": "ent-account-odm-alpha",
@@ -1487,7 +2206,7 @@
         "region": "apac",
         "synthetic": true
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "CONFIDENTIAL",
       "status": "published",
       "review_status": "reviewed",
@@ -1507,9 +2226,11 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {}
     },
     {
       "entity_id": "ent-account-optics-epsilon",
@@ -1522,7 +2243,7 @@
         "region": "apac",
         "synthetic": true
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "CONFIDENTIAL",
       "status": "published",
       "review_status": "reviewed",
@@ -1544,9 +2265,11 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {}
     },
     {
       "entity_id": "ent-account-tier1-delta",
@@ -1559,7 +2282,7 @@
         "region": "emea",
         "synthetic": true
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "CONFIDENTIAL",
       "status": "published",
       "review_status": "reviewed",
@@ -1580,9 +2303,11 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {}
     },
     {
       "entity_id": "ent-account-handset-maker-tau",
@@ -1595,7 +2320,7 @@
         "region": "apac",
         "synthetic": true
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "CONFIDENTIAL",
       "status": "published",
       "review_status": "reviewed",
@@ -1615,9 +2340,11 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {}
     },
     {
       "entity_id": "ent-customerproduct-gamma-wifi7-router",
@@ -1627,9 +2354,11 @@
       "display_name_redacted": true,
       "aliases": null,
       "properties": {
-        "launch_schedule": "2026-Q1"
+        "launch_window": "2026-Q1",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "CONFIDENTIAL",
       "status": "published",
       "review_status": "reviewed",
@@ -1650,9 +2379,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-customerproduct-gamma-wifi8-ap-proto",
@@ -1662,9 +2403,11 @@
       "display_name_redacted": true,
       "aliases": null,
       "properties": {
-        "launch_schedule": "2027-Q4"
+        "launch_window": "2027-Q4",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "CONFIDENTIAL",
       "status": "published",
       "review_status": "reviewed",
@@ -1685,9 +2428,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-customerproduct-sigma-redcap-cpe",
@@ -1697,9 +2452,11 @@
       "display_name_redacted": true,
       "aliases": null,
       "properties": {
-        "launch_schedule": "2027-Q2"
+        "launch_window": "2027-Q2",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "CONFIDENTIAL",
       "status": "published",
       "review_status": "reviewed",
@@ -1721,9 +2478,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-customerproduct-beta-ai-psu",
@@ -1733,9 +2502,11 @@
       "display_name_redacted": true,
       "aliases": null,
       "properties": {
-        "launch_schedule": "2027-Q1"
+        "launch_window": "2027-Q1",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "CONFIDENTIAL",
       "status": "published",
       "review_status": "reviewed",
@@ -1757,9 +2528,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-customerproduct-alpha-ai-rack",
@@ -1769,9 +2552,11 @@
       "display_name_redacted": true,
       "aliases": null,
       "properties": {
-        "launch_schedule": "2026-Q4"
+        "launch_window": "2026-Q4",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "CONFIDENTIAL",
       "status": "published",
       "review_status": "reviewed",
@@ -1792,9 +2577,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-customerproduct-delta-77ghz-radar",
@@ -1804,9 +2601,11 @@
       "display_name_redacted": true,
       "aliases": null,
       "properties": {
-        "launch_schedule": "2026-Q3"
+        "launch_window": "2026-Q3",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "CONFIDENTIAL",
       "status": "published",
       "review_status": "reviewed",
@@ -1829,9 +2628,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-customerproduct-epsilon-800g-module",
@@ -1841,9 +2652,11 @@
       "display_name_redacted": true,
       "aliases": null,
       "properties": {
-        "launch_schedule": "2026-Q2"
+        "launch_window": "2026-Q2",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "CONFIDENTIAL",
       "status": "published",
       "review_status": "reviewed",
@@ -1864,9 +2677,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-customerproduct-tau-ntn-handset",
@@ -1876,9 +2701,11 @@
       "display_name_redacted": true,
       "aliases": null,
       "properties": {
-        "launch_schedule": "2027-Q3"
+        "launch_window": "2027-Q3",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "CONFIDENTIAL",
       "status": "published",
       "review_status": "reviewed",
@@ -1899,9 +2726,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-application-wifi-rf-signaling-test",
@@ -1911,12 +2750,17 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "measurement_topic": "RF TX/RX（signaling）",
+        "measurement_topics": [
+          "RF TX/RX（signaling）"
+        ],
         "market_segments": [
           "wireless_communications"
-        ]
+        ],
+        "priority": 4,
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -1940,9 +2784,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "priority": {
+          "origin": "import",
+          "set_by": "import:app_priority_synthetic.csv",
+          "set_at": "2026-09-01T02:00:00Z",
+          "reason": null,
+          "source_ref": "app_priority_synthetic.csv",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-application-wifi-production-test",
@@ -1952,12 +2817,17 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "measurement_topic": "產線 RF 校正與驗證",
+        "measurement_topics": [
+          "產線 RF 校正與驗證"
+        ],
         "market_segments": [
           "wireless_communications"
-        ]
+        ],
+        "priority": 3,
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -1981,9 +2851,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "priority": {
+          "origin": "import",
+          "set_by": "import:app_priority_synthetic.csv",
+          "set_at": "2026-09-01T02:00:00Z",
+          "reason": null,
+          "source_ref": "app_priority_synthetic.csv",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-application-redcap-device-test",
@@ -1993,12 +2884,17 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "measurement_topic": "RedCap RF 與協定",
+        "measurement_topics": [
+          "RedCap RF 與協定"
+        ],
         "market_segments": [
           "wireless_communications"
-        ]
+        ],
+        "priority": 4,
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -2021,9 +2917,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "priority": {
+          "origin": "import",
+          "set_by": "import:app_priority_synthetic.csv",
+          "set_at": "2026-09-01T02:00:00Z",
+          "reason": null,
+          "source_ref": "app_priority_synthetic.csv",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-application-ntn-device-test",
@@ -2033,13 +2950,18 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "measurement_topic": "NTN RF 與一致性",
+        "measurement_topics": [
+          "NTN RF 與一致性"
+        ],
         "market_segments": [
           "wireless_communications",
           "aerospace_defense"
-        ]
+        ],
+        "priority": 3,
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -2061,9 +2983,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "priority": {
+          "origin": "import",
+          "set_by": "import:app_priority_synthetic.csv",
+          "set_at": "2026-09-01T02:00:00Z",
+          "reason": null,
+          "source_ref": "app_priority_synthetic.csv",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-application-6g-channel-sounding",
@@ -2073,12 +3016,17 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "measurement_topic": "sub-THz 通道特性",
+        "measurement_topics": [
+          "sub-THz 通道特性"
+        ],
         "market_segments": [
           "wireless_communications"
-        ]
+        ],
+        "priority": 2,
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -2099,9 +3047,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "priority": {
+          "origin": "import",
+          "set_by": "import:app_priority_synthetic.csv",
+          "set_at": "2026-09-01T02:00:00Z",
+          "reason": null,
+          "source_ref": "app_priority_synthetic.csv",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-application-psu-efficiency-transient",
@@ -2111,12 +3080,17 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "measurement_topic": "效率、動態響應、hold-up",
+        "measurement_topics": [
+          "效率、動態響應、hold-up"
+        ],
         "market_segments": [
           "ai_server"
-        ]
+        ],
+        "priority": 5,
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -2139,9 +3113,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 3,
+      "field_provenance": {
+        "priority": {
+          "origin": "human",
+          "set_by": "member:bd-analyst-a",
+          "set_at": "2026-10-05T03:20:00Z",
+          "reason": null,
+          "source_ref": null,
+          "version": 2,
+          "reason_redacted": true
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 3,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-application-power-integrity",
@@ -2151,12 +3146,17 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "measurement_topic": "PDN 阻抗與漣波",
+        "measurement_topics": [
+          "PDN 阻抗與漣波"
+        ],
         "market_segments": [
           "ai_server"
-        ]
+        ],
+        "priority": 3,
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -2179,9 +3179,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "priority": {
+          "origin": "import",
+          "set_by": "import:app_priority_synthetic.csv",
+          "set_at": "2026-09-01T02:00:00Z",
+          "reason": null,
+          "source_ref": "app_priority_synthetic.csv",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-application-serdes-compliance",
@@ -2191,13 +3212,18 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "measurement_topic": "眼圖、抖動、一致性",
+        "measurement_topics": [
+          "眼圖、抖動、一致性"
+        ],
         "market_segments": [
           "ai_server",
           "semiconductor"
-        ]
+        ],
+        "priority": 3,
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -2222,9 +3248,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "priority": {
+          "origin": "import",
+          "set_by": "import:app_priority_synthetic.csv",
+          "set_at": "2026-09-01T02:00:00Z",
+          "reason": null,
+          "source_ref": "app_priority_synthetic.csv",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-application-cpo-optoelectronic-test",
@@ -2234,13 +3281,18 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "measurement_topic": "光電共封裝特性",
+        "measurement_topics": [
+          "光電共封裝特性"
+        ],
         "market_segments": [
           "ai_server",
           "semiconductor"
-        ]
+        ],
+        "priority": 4,
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -2258,9 +3310,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "priority": {
+          "origin": "import",
+          "set_by": "import:app_priority_synthetic.csv",
+          "set_at": "2026-09-01T02:00:00Z",
+          "reason": null,
+          "source_ref": "app_priority_synthetic.csv",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-application-radar-target-simulation",
@@ -2270,12 +3343,17 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "measurement_topic": "目標模擬、RF 參數",
+        "measurement_topics": [
+          "目標模擬、RF 參數"
+        ],
         "market_segments": [
           "automotive"
-        ]
+        ],
+        "priority": 3,
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -2298,9 +3376,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "priority": {
+          "origin": "import",
+          "set_by": "import:app_priority_synthetic.csv",
+          "set_at": "2026-09-01T02:00:00Z",
+          "reason": null,
+          "source_ref": "app_priority_synthetic.csv",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-application-radar-production-calibration",
@@ -2310,12 +3409,17 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "measurement_topic": "產線校正、EOL",
+        "measurement_topics": [
+          "產線校正、EOL"
+        ],
         "market_segments": [
           "automotive"
-        ]
+        ],
+        "priority": 4,
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -2340,9 +3444,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "priority": {
+          "origin": "import",
+          "set_by": "import:app_priority_synthetic.csv",
+          "set_at": "2026-09-01T02:00:00Z",
+          "reason": null,
+          "source_ref": "app_priority_synthetic.csv",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-testsolution-own-wireless-signaling-tester",
@@ -2353,9 +3478,12 @@
       "aliases": [],
       "properties": {
         "is_own_solution": true,
-        "product_family": "signaling_wireless"
+        "product_family": "signaling_wireless",
+        "status": "planning",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -2379,9 +3507,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-testsolution-own-nonsignaling-tester",
@@ -2392,9 +3532,12 @@
       "aliases": [],
       "properties": {
         "is_own_solution": true,
-        "product_family": "nonsignaling_wireless"
+        "product_family": "nonsignaling_wireless",
+        "status": "planning",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -2413,9 +3556,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-testsolution-own-signal-gen-analyzer",
@@ -2426,9 +3581,12 @@
       "aliases": [],
       "properties": {
         "is_own_solution": true,
-        "product_family": "signal_generation_analysis"
+        "product_family": "signal_generation_analysis",
+        "status": "planning",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -2449,9 +3607,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-testsolution-own-vna",
@@ -2462,9 +3632,12 @@
       "aliases": [],
       "properties": {
         "is_own_solution": true,
-        "product_family": "vector_network_analysis"
+        "product_family": "vector_network_analysis",
+        "status": "planning",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -2483,9 +3656,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-testsolution-own-oscilloscope",
@@ -2496,9 +3681,12 @@
       "aliases": [],
       "properties": {
         "is_own_solution": true,
-        "product_family": "oscilloscope"
+        "product_family": "oscilloscope",
+        "status": "planning",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -2518,9 +3706,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-testsolution-own-power-analyzer",
@@ -2531,9 +3731,12 @@
       "aliases": [],
       "properties": {
         "is_own_solution": true,
-        "product_family": "power_analysis"
+        "product_family": "power_analysis",
+        "status": "planning",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -2552,9 +3755,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-testsolution-own-radar-target-simulator",
@@ -2565,9 +3780,12 @@
       "aliases": [],
       "properties": {
         "is_own_solution": true,
-        "product_family": "radar_test"
+        "product_family": "radar_test",
+        "status": "planning",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -2588,9 +3806,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-testsolution-competitor-a-serdes-suite",
@@ -2601,9 +3831,12 @@
       "aliases": [],
       "properties": {
         "is_own_solution": false,
-        "product_family": "oscilloscope"
+        "product_family": "oscilloscope",
+        "status": "planning",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "INTERNAL",
       "status": "published",
       "review_status": "reviewed",
@@ -2623,9 +3856,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-testsolution-competitor-b-wifi-tester",
@@ -2636,9 +3881,12 @@
       "aliases": [],
       "properties": {
         "is_own_solution": false,
-        "product_family": "nonsignaling_wireless"
+        "product_family": "nonsignaling_wireless",
+        "status": "planning",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "INTERNAL",
       "status": "published",
       "review_status": "reviewed",
@@ -2657,9 +3905,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-testsolution-competitor-b-radar-eol-tester",
@@ -2670,9 +3930,12 @@
       "aliases": [],
       "properties": {
         "is_own_solution": false,
-        "product_family": "radar_test"
+        "product_family": "radar_test",
+        "status": "planning",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "INTERNAL",
       "status": "published",
       "review_status": "reviewed",
@@ -2693,9 +3956,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-competitor-competitor-a",
@@ -2714,9 +3989,10 @@
         "product_lines": [
           "oscilloscope"
         ],
-        "confirmed": true
+        "confidence": "verified",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "INTERNAL",
       "status": "published",
       "review_status": "reviewed",
@@ -2733,9 +4009,39 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "strengths": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-385b20f6d5d503cc",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "weaknesses": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-385b20f6d5d503cc",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-competitor-competitor-b",
@@ -2755,9 +4061,10 @@
           "wireless tester",
           "radar tester"
         ],
-        "confirmed": false
+        "confidence": "assumed",
+        "updated": "2026-05-20"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "INTERNAL",
       "status": "published",
       "review_status": "reviewed",
@@ -2775,9 +4082,39 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "strengths": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-385b20f6d5d503cc",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "weaknesses": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-385b20f6d5d503cc",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-concept-mlo",
@@ -2791,10 +4128,12 @@
       "properties": {
         "one_liner": "一台裝置同時用多個頻段連線。",
         "analogy": "像同時開好幾條車道。",
-        "audience": "BD",
-        "review_state": "reviewed"
+        "audience": "sales",
+        "review_status": "reviewed",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -2811,9 +4150,39 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "audience": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "review_status": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-4655934c7dc131d0",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-concept-dru",
@@ -2827,10 +4196,12 @@
       "properties": {
         "one_liner": "把資源單元分散到更寬的頻寬上。",
         "analogy": "把貨分散到多輛車。",
-        "audience": "BD",
-        "review_state": "draft"
+        "audience": "sales",
+        "review_status": "draft",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -2847,9 +4218,39 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "audience": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "review_status": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-4655934c7dc131d0",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-concept-pam4",
@@ -2863,10 +4264,12 @@
       "properties": {
         "one_liner": "每個符號傳兩個位元。",
         "analogy": "紅綠燈多了兩種顏色。",
-        "audience": "BD",
-        "review_state": "reviewed"
+        "audience": "sales",
+        "review_status": "reviewed",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -2883,9 +4286,39 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "audience": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "review_status": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-949f65d8479ae218",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-concept-hold-up-time",
@@ -2897,10 +4330,12 @@
       "properties": {
         "one_liner": "斷電後電源還能撐多久。",
         "analogy": "像水塔的存水。",
-        "audience": "BD",
-        "review_state": "draft"
+        "audience": "sales",
+        "review_status": "draft",
+        "confidence": "assumed",
+        "updated": "2026-10-10"
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -2919,9 +4354,39 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "audience": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        },
+        "review_status": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-94d7f386a187d6c5",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "confidence": {
+          "origin": "migration",
+          "set_by": "upcast:bi.schema/v0->v1",
+          "set_at": "2026-10-19T01:00:00Z",
+          "reason": null,
+          "source_ref": "bi.schema/v0",
+          "version": 2,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-signal-wifi8-first-rf-demo",
@@ -2931,12 +4396,17 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "date": "2026-03",
+        "date": "2026-03-01",
         "source": "公開展會報導（合成摘要）",
         "reliability": "high",
-        "so_what": "Wi-Fi 8 研發測試需求開始出現"
+        "so_what": "Wi-Fi 8 研發測試需求開始出現",
+        "summary": "Wi-Fi 8 首批 RF signaling 測試公開展示",
+        "source_type": "conference",
+        "legacy_v0": {
+          "date_precision": "month"
+        }
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -2954,9 +4424,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "so_what": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-4655934c7dc131d0",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "reliability": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-4655934c7dc131d0",
+          "version": 1,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-signal-fwa-operator-tender",
@@ -2966,12 +4457,17 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "date": "2026-09",
+        "date": "2026-09-01",
         "source": "研討會簡報（合成）",
         "reliability": "medium",
-        "so_what": "FWA CPE 出貨量可能上升"
+        "so_what": "FWA CPE 出貨量可能上升",
+        "summary": "電信商 5G FWA 標案訊號（合成）",
+        "source_type": "conference",
+        "legacy_v0": {
+          "date_precision": "month"
+        }
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -2988,9 +4484,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "so_what": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-00f367845fa35048",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "reliability": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-00f367845fa35048",
+          "version": 1,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-signal-800v-dc-rack-proposal",
@@ -3000,12 +4517,17 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "date": "2025-10",
+        "date": "2025-10-01",
         "source": "公開技術提案（合成摘要）",
         "reliability": "medium",
-        "so_what": "高壓直流 PSU 驗證需求"
+        "so_what": "高壓直流 PSU 驗證需求",
+        "summary": "800V DC 機櫃配電架構公開提案",
+        "source_type": "report",
+        "legacy_v0": {
+          "date_precision": "month"
+        }
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -3022,9 +4544,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "so_what": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-94d7f386a187d6c5",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "reliability": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-94d7f386a187d6c5",
+          "version": 1,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-signal-cpo-switch-sampling",
@@ -3034,12 +4577,17 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "date": "2026-05",
+        "date": "2026-05-01",
         "source": "產業新聞（合成摘要）",
         "reliability": "medium",
-        "so_what": "CPO 測試需求提前"
+        "so_what": "CPO 測試需求提前",
+        "summary": "CPO 交換器送樣消息",
+        "source_type": "news",
+        "legacy_v0": {
+          "date_precision": "month"
+        }
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -3056,9 +4604,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "so_what": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-949f65d8479ae218",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "reliability": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-949f65d8479ae218",
+          "version": 1,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-signal-radar-band-regulation-update",
@@ -3068,12 +4637,17 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "date": "2026-01",
+        "date": "2026-01-01",
         "source": "法規公告（合成摘要）",
         "reliability": "high",
-        "so_what": "產線校正需重新驗證"
+        "so_what": "產線校正需重新驗證",
+        "summary": "車用雷達頻段法規更新",
+        "source_type": "regulator",
+        "legacy_v0": {
+          "date_precision": "month"
+        }
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -3090,9 +4664,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "so_what": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-3238265128202ade",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "reliability": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-3238265128202ade",
+          "version": 1,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-signal-6g-study-item",
@@ -3102,12 +4697,17 @@
       "display_name_redacted": false,
       "aliases": [],
       "properties": {
-        "date": "2025-06",
+        "date": "2025-06-01",
         "source": "標準組織公告（合成摘要）",
         "reliability": "high",
-        "so_what": "6G 通道量測研究需求"
+        "so_what": "6G 通道量測研究需求",
+        "summary": "3GPP 6G study item 啟動",
+        "source_type": "standard",
+        "legacy_v0": {
+          "date_precision": "month"
+        }
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "UNCLASSIFIED",
       "status": "published",
       "review_status": "reviewed",
@@ -3124,9 +4724,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "so_what": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-e7662d469d6417eb",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "reliability": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-e7662d469d6417eb",
+          "version": 1,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-signal-alpha-capacity-expansion",
@@ -3136,12 +4757,17 @@
       "display_name_redacted": true,
       "aliases": null,
       "properties": {
-        "date": "2026-08",
+        "date": "2026-08-01",
         "source": "客戶拜訪（合成）",
         "reliability": "low",
-        "so_what": "可能需要更多電源完整性測試"
+        "so_what": "可能需要更多電源完整性測試",
+        "summary": null,
+        "source_type": "customer",
+        "legacy_v0": {
+          "date_precision": "month"
+        }
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "CONFIDENTIAL",
       "status": "published",
       "review_status": "reviewed",
@@ -3158,9 +4784,30 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "so_what": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-c139b845db42da86",
+          "version": 1,
+          "reason_redacted": false
+        },
+        "reliability": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-c139b845db42da86",
+          "version": 1,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-opportunity-gamma-wifi8-rd",
@@ -3175,7 +4822,7 @@
           "wireless_communications"
         ]
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "CONFIDENTIAL",
       "status": "published",
       "review_status": "reviewed",
@@ -3195,9 +4842,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "hypothesis_status": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-c139b845db42da86",
+          "version": 1,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-opportunity-sigma-redcap-cpe",
@@ -3212,7 +4871,7 @@
           "wireless_communications"
         ]
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "CONFIDENTIAL",
       "status": "published",
       "review_status": "reviewed",
@@ -3232,9 +4891,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "hypothesis_status": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-c139b845db42da86",
+          "version": 1,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-opportunity-beta-800v-psu-test",
@@ -3249,7 +4920,7 @@
           "ai_server"
         ]
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "CONFIDENTIAL",
       "status": "published",
       "review_status": "reviewed",
@@ -3269,9 +4940,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "hypothesis_status": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-c139b845db42da86",
+          "version": 1,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-opportunity-epsilon-cpo-test",
@@ -3287,7 +4970,7 @@
           "semiconductor"
         ]
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "CONFIDENTIAL",
       "status": "published",
       "review_status": "reviewed",
@@ -3304,9 +4987,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "hypothesis_status": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-949f65d8479ae218",
+          "version": 1,
+          "reason_redacted": false
+        }
+      }
     },
     {
       "entity_id": "ent-opportunity-delta-radar-production",
@@ -3321,7 +5016,7 @@
           "automotive"
         ]
       },
-      "schema_id": "bi.schema/v0",
+      "schema_id": "bi.schema/v1",
       "classification": "CONFIDENTIAL",
       "status": "published",
       "review_status": "reviewed",
@@ -3341,9 +5036,21 @@
         "strategy_run_id": "srun-5a65c5b3e464",
         "extracted_by": "knowledge/bi-graph-extract@0.1.0",
         "extracted_at": "2026-10-16T09:30:00Z",
-        "schema_id": "bi.schema/v0"
+        "schema_id": "bi.schema/v1"
       },
-      "updated_at": "2026-10-16T10:00:00Z"
+      "updated_at": "2026-10-16T10:00:00Z",
+      "record_version": 2,
+      "field_provenance": {
+        "hypothesis_status": {
+          "origin": "agent",
+          "set_by": "knowledge/bi-graph-extract@0.1.0",
+          "set_at": "2026-10-16T09:30:00Z",
+          "reason": null,
+          "source_ref": "src-c139b845db42da86",
+          "version": 1,
+          "reason_redacted": false
+        }
+      }
     }
   ],
   "pagination": {
