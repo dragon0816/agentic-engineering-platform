@@ -2585,3 +2585,20 @@ s-k-20261011T102952` (not published).
 - [ ] Live check after the next Agent Web restart (owner), with a fixture team Workflow, never the
   weekly report: Settings shows the teams and their source; Revise in chat gives "Revision of …
   1.0.0 → 1.0.1" with the membership line, not a fork.
+
+## Personal Agent code from Agent Web, renewed automatically (2026-10-19)
+
+- [x] Option A (2026-10-19, Claude Code; owner approved 2026-10-19). Platform route
+  `logins/revoke` (own logins only); `MemberPortalPublisher.password_sign_in`,
+  `issue_agent_login`, `revoke_login`; `host_runtime/agent_code.py` (record, status,
+  sign-in, renewal); Agent Web `POST /api/settings/shared-platform/sign-in`,
+  `renew_agent_code`, `start_agent_code_renewal` (started by `aep-host web`); Settings
+  card "Personal Agent code" (sign-in, expiry, Bridge token reminder). Tests
+  `tests/test_agent_code.py`, `tests/test_member_login_revoke.py`; screenshots
+  `.scratch/agent-code-signin-ui/`. Spec `docs/phases/PASSWORD_SIGN_IN.md`; decision
+  `docs/DECISIONS.md` 2026-10-19. Verification: see HANDOFF.md.
+- [ ] Redeploy the Shared Platform on 141 for `logins/revoke` (owner with the
+  coordinator). Until then renewal stores the new code and the old one expires.
+- [ ] Live check after the next Agent Web restart (owner): Settings → Shared platform →
+  sign in with the platform password → "Personal Agent code valid until …"; the Bridge
+  token's expiry shows.

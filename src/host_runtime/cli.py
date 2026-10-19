@@ -859,6 +859,7 @@ def _web(
         if web.telegram_loop is not None:
             print("Telegram messages are answered while this runs.")
         web.start_feedback_sync()
+        web.start_agent_code_renewal()
         web.start_experience_nightly()
         web.start_laya_tunnel()
         web.start_mcp()

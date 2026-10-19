@@ -2067,6 +2067,23 @@ A `ValidationError` on a name field (`actor`, `groups`, `members`,
 and returns its bearer once. The Agent trades it at `session` for one-hour
 sessions and never sends it to the Bridge API.
 
+`logins/revoke` (2026-10-19) {`login_id`} ends one of the signed-in member's own
+active logins: 200 {`login_id`, `status: revoked`}. Another member's login, an
+unknown id and an ended login all answer 404 {`code: login_missing`}; a body
+other than exactly `login_id` answers 400 `invalid_request`. Agent Web uses it
+for the code it replaced on renewal and for the browser login of its own
+password sign-in; a platform without the route answers 404 `invalid_request`.
+
+Agent Web (2026-10-19, `docs/phases/PASSWORD_SIGN_IN.md`):
+`POST /api/settings/shared-platform/sign-in` {`member_portal_url`, `base_url`,
+`account`, `password`} answers the Shared platform settings plus `signed_in: true`,
+or {`ok: false`, `code`, `message`} (`authentication_failed`, `password_missing`,
+`account_invalid`, `device_owner_mismatch`, `bad_reply`, a platform code). The
+settings (`GET /api/settings/shared-platform`) add `agent_code` {`state`: `none` |
+`unknown` | `valid` | `renew_soon` | `expired`, `login_id`, `expires_at`,
+`estimated`, `source`, `renewals`, `unrevoked`} and `bridge_token` {`expires_at`,
+`days_left`, `remind` (under 14 days), `expired`}. Never a secret.
+
 ### Bridge self-enrollment (2026-10-15)
 
 `docs/phases/BRIDGE_ENROLLMENT.md`. Member portal operations:

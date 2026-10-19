@@ -101,7 +101,7 @@ from common.workflow_parameters import (
 from common.workflow_run_form import form_offer, offer_in, run_intent
 from extensions.package import PortableExtensionPackage
 from extensions.runtime import ExtensionLifecycleStore
-from host_runtime import asset_shelf, gateway_link, telemetry_api
+from host_runtime import agent_code, asset_shelf, gateway_link, telemetry_api
 from host_runtime.agent_mail import AgentMail
 from host_runtime.agent_mode import AgentMode
 from host_runtime.answers import readable
@@ -3747,6 +3747,16 @@ class AgentWeb:
             "enrolled": record.model_dump(mode="json") if enrolled and record else None,
             "assets_only": self.runtime.layout.grants.is_file(),
             "last_catalog": getattr(self, "last_catalog", None),
+            # Expiry of the Personal Agent code and the Bridge token (owner
+            # 2026-10-19): ids and dates only, never a secret.
+            "agent_code": agent_code.code_status(
+                agent_code.read_record(self.runtime.layout.workspace_root),
+                bool(login_variable and environment.get(login_variable)),
+                utc_now(),
+            ),
+            "bridge_token": agent_code.bridge_token_status(
+                record.expires_at if enrolled and record else None, utc_now()
+            ),
         }
 
     def update_shared_platform(self, body: dict[str, Any]) -> dict[str, Any]:
@@ -3790,6 +3800,10 @@ class AgentWeb:
                     assert updated.publishing is not None
                     variable = updated.credential_environment()[updated.publishing.credential.name]
                     save_secret(self.user_environment, variable, code)
+                    agent_code.write_record(
+                        self.runtime.layout.workspace_root,
+                        agent_code.pasted_record(code, utc_now()),
+                    )
             except SharedPlatformError as error:
                 return self._shared_problem(error.code)
             reply: dict[str, Any] = {"ok": True, "restart_required": False}
@@ -3817,6 +3831,145 @@ class AgentWeb:
                 probed = asyncio.run(self.runtime.platform.probe())
                 reply["probe"] = probed.status
         return {**self.shared_platform_settings(), **reply}
+
+    # -- the Personal Agent code from Agent Web (owner 2026-10-19, Option A) ----
+    # An Agent Web settings route only, behind the page token like the other
+    # credential routes; no model or agent tool reaches it.
+
+    def sign_in_for_agent_code(self, body: dict[str, Any]) -> dict[str, Any]:
+        """Sign in to the platform once with the member's account and
+        password, get a Personal Agent code, store it as the paste path does
+        and drop the session. The password is used in that one request: it is
+        never stored, logged, echoed or put in the task list."""
+        password = body.pop("password", None)
+        if self.config_path is None:
+            return self._shared_problem("settings_read_only")
+        account = str(body.get("account") or "").strip()
+        if not isinstance(password, str) or not password:
+            return self._code_problem("password_missing")
+        if not re.fullmatch(r"[a-zA-Z_][a-zA-Z0-9_.-]*", account):
+            return self._code_problem("account_invalid")
+        if account != self.runtime.config.device.registered_by:
+            # The platform would refuse this PC's enrollment for another account.
+            return self._shared_problem("device_owner_mismatch")
+        with self._one_at_a_time:
+            try:
+                portal = portal_url(str(body.get("member_portal_url") or ""))
+                raw_bridge = str(body.get("base_url") or "").strip()
+                base = bridge_url(raw_bridge) if raw_bridge else None
+                try:
+                    current = read_config(self.config_path)
+                    updated = with_settings(current, member_portal_url=portal, base_url=base)
+                except (OSError, ValueError):
+                    raise SharedPlatformError("settings_invalid") from None
+            except SharedPlatformError as error:
+                return self._shared_problem(error.code)
+            assert updated.publishing is not None
+            publisher = publisher_for(updated.publishing, updated.credential_environment())
+            assert publisher is not None
+            task = self.tasks().start(
+                "agent_code", "Get a Personal Agent code from the shared platform", portal
+            )
+            try:
+                code, record, unrevoked = agent_code.sign_in(
+                    publisher, account, password, utc_now()
+                )
+                variable = updated.credential_environment()[updated.publishing.credential.name]
+                save_secret(self.user_environment, variable, code)
+            except PlatformPublishError as error:
+                self.tasks().finish(task, "failed", error.code)
+                return self._code_problem(error.code, error.message)
+            except (agent_code.AgentCodeError, SharedPlatformError) as error:
+                self.tasks().finish(task, "failed", error.code)
+                return self._code_problem(error.code)
+            finally:
+                password = None
+            del code
+            agent_code.write_record(self.runtime.layout.workspace_root, record)
+            try:
+                save_config(self.config_path, updated, now=utc_now())
+            except OSError:
+                self.tasks().finish(task, "failed", "settings_not_saved")
+                return self._shared_problem("settings_not_saved")
+            self._switch_platform(updated)
+            self.tasks().finish(
+                task,
+                "succeeded",
+                f"code {record.login_id} valid until {record.expires_at:%Y-%m-%d}"
+                + (f"; browser login not revoked ({unrevoked})" if unrevoked else ""),
+            )
+        return {**self.shared_platform_settings(), "ok": True, "signed_in": True}
+
+    def _code_problem(self, code: str, message: str | None = None) -> dict[str, Any]:
+        text = (
+            message
+            or agent_code.SIGN_IN_PROBLEMS.get(code)
+            or SHARED_PLATFORM_PROBLEMS.get(code)
+            or explain(code)
+        )
+        return {"ok": False, "code": code, "message": text}
+
+    def renew_agent_code(self, *, force: bool = False) -> dict[str, Any]:
+        """Renew the Personal Agent code when it is due (under 7 days left, or
+        saved before this PC kept a record): a new code from the current
+        one, stored, and the old one revoked. Counted in the record and the
+        task list; never a secret."""
+        config = self.runtime.config
+        binding = config.publishing
+        if binding is None:
+            return {"ok": True, "renewed": False, "reason": "not_configured"}
+        variable = config.credential_environment().get(binding.credential.name)
+        current = UserEnvironment().get(variable) if variable else None
+        workspace = self.runtime.layout.workspace_root
+        record = agent_code.read_record(workspace)
+        now = utc_now()
+        if not force and not agent_code.due(record, bool(current), now):
+            return {"ok": True, "renewed": False}
+        publisher = self._publisher()
+        if publisher is None or variable is None or not current:
+            return {"ok": True, "renewed": False, "reason": "no_code"}
+        task = self.tasks().start("agent_code", "Renew the Personal Agent code", "")
+        try:
+            renewed = agent_code.renew(
+                publisher,
+                record,
+                lambda value: save_secret(self.user_environment, variable, value),
+                now,
+                old_code_login_id=agent_code.login_id_of(current),
+            )
+        except (PlatformPublishError, agent_code.AgentCodeError, SharedPlatformError) as error:
+            self.tasks().finish(task, "failed", error.code)
+            if error.code in ("authentication_failed", "session_expired") and record is not None:
+                agent_code.write_record(
+                    workspace, record.model_copy(update={"refused": error.code})
+                )
+            return {"ok": False, "renewed": False, "code": error.code}
+        agent_code.write_record(workspace, renewed)
+        self._member_publisher = (None, None)  # the next call uses the new code
+        self.tasks().finish(
+            task,
+            "succeeded",
+            f"renewal {renewed.renewals}: code {renewed.login_id} valid until "
+            f"{renewed.expires_at:%Y-%m-%d}"
+            + (f"; old code not revoked: {renewed.unrevoked}" if renewed.unrevoked else ""),
+        )
+        return {"ok": True, "renewed": True, "renewals": renewed.renewals}
+
+    def start_agent_code_renewal(
+        self, *, check_s: float = agent_code.CHECK_INTERVAL_SECONDS
+    ) -> None:
+        """Check the Personal Agent code about hourly while Agent Web runs."""
+
+        def loop() -> None:
+            time.sleep(min(60.0, check_s))
+            while True:
+                try:
+                    self.renew_agent_code()
+                except Exception:  # noqa: BLE001 - checked again next time
+                    pass
+                time.sleep(check_s)
+
+        threading.Thread(target=loop, name="agent-code-renewal", daemon=True).start()
 
     def _enroll(
         self, config: CompanyHostConfiguration, base: str, portal: str
@@ -5519,6 +5672,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/settings/shared-platform",
             "/api/settings/shared-platform/certificate",
             "/api/settings/teams",
+            "/api/settings/shared-platform/sign-in",
             "/api/settings/gateway",
             "/api/settings/telegram",
             "/api/mcp/save",
@@ -5606,6 +5760,13 @@ class _Handler(BaseHTTPRequestHandler):
         if path == "/api/settings/shared-platform":
             self._json(
                 200, self.server.web.update_shared_platform(body if isinstance(body, dict) else {})
+            )
+            return
+        if path == "/api/settings/shared-platform/sign-in":
+            # The password is in this body only; it is never echoed or logged.
+            self._json(
+                200,
+                self.server.web.sign_in_for_agent_code(body if isinstance(body, dict) else {}),
             )
             return
         if path == "/api/settings/teams":

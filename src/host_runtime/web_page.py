@@ -133,6 +133,8 @@ body {
   border-radius: 8px; min-width: 0; }
 #xp-suggest legend { font-weight: 600; padding: 0 4px; }
 #xp-card .kp-actions button { min-height: 44px; }
+#shared-signin input, #shared-signin button, #team-card input, #team-card button {
+  min-height: 44px; }
 #xp-suggest label { display: flex; align-items: center; gap: 8px; min-height: 44px; }
 #xp-sensitivity label { align-items: flex-start; padding: 6px 0; }
 #xp-sensitivity input { margin-top: 4px; min-width: 20px; min-height: 20px; }
@@ -1056,6 +1058,21 @@ tr:last-child td { border-bottom: none; }
                  autocomplete="off" placeholder="paste once; it is not shown again"></label>
         </div>
         <p class="note" id="shared-this-pc"></p>
+        <fieldset class="shared-cert" id="shared-signin">
+          <legend>Personal Agent code</legend>
+          <p class="note" id="shared-code-state" role="status"></p>
+          <p class="note">Instead of copying the code from the Member Portal, sign in here with
+            your platform account and password: this PC gets its own code and renews it before
+            it expires. The password is used once for this sign-in and is not kept.</p>
+          <div class="laya-grid">
+            <label>Platform account <input id="shared-signin-account"
+                   autocomplete="username"></label>
+            <label>Password <input id="shared-signin-password" type="password"
+                   autocomplete="current-password"></label>
+          </div>
+          <p><button id="shared-signin-go" type="button">Sign in to get a code</button></p>
+          <p class="note" id="shared-token-note"></p>
+        </fieldset>
         <fieldset class="shared-cert" id="shared-cert">
           <legend>Platform certificate</legend>
           <p class="note">A platform on the company network with its own (self-signed)
@@ -4348,7 +4365,71 @@ function showSharedPlatform(info, saved) {
       + " (" + info.last_catalog.status + ")");
   }
   el("shared-status").textContent = parts.join(" · ");
+  showAgentCode(info);
 }
+
+// The Personal Agent code and the Bridge token: expiry only (owner 2026-10-19).
+function showAgentCode(info) {
+  const code = info.agent_code || {state: "none"}, state = el("shared-code-state");
+  const when = (iso) => new Date(iso).toLocaleString();
+  const account = el("shared-signin-account");
+  if (!account.value && info.registered_by) account.value = info.registered_by;
+  state.classList.toggle("bad", code.state === "expired");
+  el("shared-signin-go").textContent = code.state === "expired"
+    ? "Sign in to get a new code" : "Sign in to get a code";
+  if (code.state === "none") {
+    state.textContent = "No Personal Agent code on this PC yet: sign in below, or paste one.";
+  } else if (code.state === "unknown") {
+    state.textContent = "A Personal Agent code is saved; its expiry is checked and the code "
+      + "renewed automatically.";
+  } else if (code.state === "expired") {
+    state.textContent = "Your Personal Agent code has expired. Sign in to get a new code.";
+  } else {
+    state.textContent = "Personal Agent code valid until " + when(code.expires_at)
+      + (code.estimated ? " (estimated from when it was pasted)" : "")
+      + (code.state === "renew_soon" ? " · it is renewed automatically" : "")
+      + (code.renewals ? " · renewed " + code.renewals + "×" : "");
+  }
+  const token = info.bridge_token || {}, note = el("shared-token-note");
+  note.classList.toggle("bad", !!token.remind);
+  note.textContent = !token.expires_at ? ""
+    : token.expired ? "The Bridge token has expired: press \"Enroll this PC\" again."
+      : "Bridge token valid until " + when(token.expires_at)
+        + (token.remind ? " · under 14 days left: press \"Enroll this PC\" again." : "");
+}
+
+async function signInForCode() {
+  const field = el("shared-signin-password"), go = el("shared-signin-go");
+  const status = el("shared-status");
+  const password = field.value;
+  field.value = "";  // the password never stays on the page
+  status.classList.remove("bad");
+  if (!password) {
+    status.classList.add("bad"); status.textContent = "Enter your password."; return;
+  }
+  go.disabled = true; status.textContent = "Signing in to get a Personal Agent code…";
+  try {
+    const reply = await call("/api/settings/shared-platform/sign-in", {
+      member_portal_url: el("shared-portal-url").value.trim(),
+      base_url: el("shared-bridge-url").value.trim(),
+      account: el("shared-signin-account").value.trim(), password});
+    if (reply.member_portal_url !== undefined) showSharedPlatform(reply, reply.ok !== false);
+    if (reply.ok === false) {
+      status.classList.add("bad");
+      status.textContent = "No code: " + (reply.message || reply.code);
+    } else {
+      status.textContent = "Personal Agent code saved. " + status.textContent;
+    }
+  } catch (failure) {
+    status.classList.add("bad"); status.textContent = "No code: " + failure.message;
+  } finally { go.disabled = false; }
+}
+
+el("shared-signin-go").addEventListener("click", signInForCode);
+el("shared-signin-password").addEventListener("keydown", (event) => {
+  // Enter signs in; it never submits the card's Save with the password typed.
+  if (event.key === "Enter") { event.preventDefault(); signInForCode(); }
+});
 
 // "Teams I belong to on this PC" (owner 2026-10-19).
 const TEAM_SOURCES = {

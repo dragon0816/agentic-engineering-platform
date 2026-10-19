@@ -151,3 +151,61 @@ and the set-password step measured by size.
   reset link.
 - Behind one tunnel every member shares one address; the per-address limit is
   therefore 20, and a determined guesser is still stopped per account at 5.
+
+## The Personal Agent code from Agent Web (owner 2026-10-19, "Option A")
+
+Before, the Personal Agent code came only from the Member Portal ("Connect a
+Personal Agent") and was pasted into Agent Web. Now Agent Web can get it, and
+renews it.
+
+**Getting a code.** Settings → Shared platform → "Personal Agent code": the
+person types their platform account and password and presses "Sign in to get a
+code" (`POST /api/settings/shared-platform/sign-in`, page token required; an
+Agent Web settings route only, which no model or agent tool reaches). Agent Web
+(`host_runtime/agent_code.py`, `MemberPortalPublisher`):
+
+1. signs in once with `sign-in/password` over the configured, certificate-pinned
+   client;
+2. calls `logins/issue-agent` with that session;
+3. stores the code exactly as the paste path does (this Windows user's
+   environment, `AEP_PLATFORM_MEMBER_LOGIN` unless host.json maps another
+   variable) and writes host.json `publishing` as a Save would;
+4. revokes the browser login the sign-in created (`logins/revoke`) and drops the
+   session.
+
+The password is used in that one request: it is popped from the request body at
+once, never stored, logged, echoed, put in the task list, telemetry or a
+conversation, and the page clears the field before the request leaves. The
+account must be this PC's `device.registered_by` (`device_owner_mismatch`
+otherwise). A wrong password or a locked account shows the portal's own wording
+("Account or password is wrong, or there were too many attempts (wait 15
+minutes)…"). The paste field stays as an alternative.
+
+**What is recorded.** `personal-agent-code.json` in the workspace: `login_id`,
+`expires_at`, `issued_at`, `source` (`sign_in`, `pasted`, `renewed`), `estimated`
+(a pasted code's expiry is assumed to be 30 days from the paste), `renewals`,
+`refused` (the platform refused the code) and `unrevoked` (an old code that could
+not be revoked, and why). Never the secret.
+
+**Renewal.** About hourly while Agent Web runs (`start_agent_code_renewal`), and
+when the code has under 7 days left: a session from the still-valid code calls
+`logins/issue-agent`, the new code is stored, and the old one is revoked with
+`logins/revoke`. A code saved before this record existed is renewed once to
+learn its expiry. A platform without `logins/revoke` (before this change was
+deployed) answers `invalid_request`: the new code is kept, the old one simply
+expires, and the record and the task list say it was not revoked (by `login_id`,
+without the secret). An expired or refused code is not renewed; Settings then
+says "Your Personal Agent code has expired. Sign in to get a new code." Each
+renewal is counted in the record and the task list ("renewal N").
+
+**Display.** Settings shows "Personal Agent code valid until …" (marked
+estimated for a pasted code) and "Bridge token valid until …"; with under 14
+days left on the Bridge token it adds "press Enroll this PC again".
+
+**Platform route.** `logins/revoke` {`login_id`}: a member ends one of their
+own active logins; another member's login, an unknown one and one already ended
+answer 404 `login_missing`. Tests `tests/test_member_login_revoke.py`; the Agent
+Web side `tests/test_agent_code.py` (sign-in, wrong password, renewal with and
+without the route, a code saved before the record, expiry, the Bridge token
+reminder, and the card in a headless browser, screenshots
+`.scratch/agent-code-signin-ui/`).

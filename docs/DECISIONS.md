@@ -3523,3 +3523,29 @@ truth); using a stale cache after the platform refused the login (a revoked memb
 team); adding the member to `contributors` on revision (membership, not a recorded co-editor, is
 the basis, and it would outlive leaving the team); keeping the declaration in host.json (it is a
 preference, not configuration, and host.json holds credential references).
+
+## 2026-10-19 — Agent Web gets the Personal Agent code by password sign-in and renews it
+
+Owner approved 2026-10-19 ("先用執行A方案").
+
+- Settings → Shared platform can get the code: account and password, one
+  `sign-in/password` over the pinned client, `logins/issue-agent` with that session,
+  the code stored as the paste path stores it, the sign-in's browser login revoked,
+  the session dropped. The password is used in one request and kept nowhere (not in
+  files, the environment, logs, the task list, telemetry, replies or conversations).
+  An Agent Web settings route only; no model or agent tool reaches it. The paste
+  field remains.
+- The Host keeps `personal-agent-code.json` (login id, expiry, source, renewals; no
+  secret) and renews the code about hourly-checked when under 7 days are left: a
+  new code from the current one, stored, then the old one revoked.
+- New platform route `logins/revoke`: a member revokes only their own login
+  (`login_missing` otherwise). Until the platform is redeployed, renewal still works
+  and the old code expires on its own; the miss is recorded without the secret.
+- Settings shows the code's and the Bridge token's expiry and reminds the person to
+  enroll again under 14 days.
+
+Rejected: storing the password to sign in again later (a long-lived password copy on
+every PC); renewing by re-signing in with a password (needs that copy); a longer code
+lifetime instead of renewal (a leaked code would live longer); revoking through
+`admin/members/sign-out` (an administrator route, and it ends every login of the
+member); leaving the sign-in's browser login active (a 30-day credential nobody uses).

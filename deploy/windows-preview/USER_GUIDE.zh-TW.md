@@ -956,6 +956,13 @@ Agent Web 要在執行中，Telegram 才會有回應。
    - **Personal Agent code**：貼上剛剛的代碼；
    - 按 **Save**。代碼只存在你的 Windows 使用者環境裡，不會寫進任何檔案，也不會再顯示。
 
+**更簡單的做法（不用複製代碼）**：在同一張卡片的 **Personal Agent code** 區塊輸入平台帳號
+和密碼，按 **Sign in to get a code**。Agent Web 會用這組帳密登入一次、取得代碼並存好；
+密碼只用這一次，不會被保存、記錄或顯示，按下後欄位就清空。之後代碼剩不到 7 天時會自動
+換新（舊代碼同時作廢），卡片顯示「Personal Agent code valid until …」。代碼過期時會顯示
+**Sign in to get a new code**，再登入一次即可。卡片也會顯示 Bridge token 的到期日，
+剩不到 14 天時提醒你再按一次 **Enroll this PC**。
+
 ### 10.4 註冊這台電腦（Enroll this PC，只做一次）
 
 在同一張卡片按 **Enroll this PC**：

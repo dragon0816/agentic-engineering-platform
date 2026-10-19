@@ -43,9 +43,12 @@ class PublishError(Exception):
     """A publish step that failed, with a code the page and CLI can explain.
     The message never carries a credential."""
 
-    def __init__(self, code: str, status: int | None = None) -> None:
+    def __init__(self, code: str, status: int | None = None, message: str | None = None) -> None:
         self.code = code
         self.status = status
+        # The platform's own words for a refusal (a rejected password), when
+        # it gives them; never a value the person typed.
+        self.message = message
         super().__init__(code)
 
 
@@ -114,25 +117,32 @@ class MemberPortalPublisher:
             https_handler(self.binding.certificate_sha256, self.binding.ca_file)
         )
 
-    def _post(self, operation: str, authorization: str, body: object | None) -> dict[str, Any]:
+    def _post(
+        self, operation: str, authorization: str | None, body: object | None
+    ) -> dict[str, Any]:
         raw = b"" if body is None else json.dumps(body).encode("utf-8")
         request = urllib.request.Request(
             f"{self.binding.member_portal_url}/v1/member/{operation}",
             method="POST",
             data=raw,
         )
-        request.add_header("Authorization", authorization)
+        if authorization is not None:
+            request.add_header("Authorization", authorization)
         if body is not None:
             request.add_header("Content-Type", "application/json")
         try:
             with self._opener.open(request, timeout=self.binding.timeout_seconds) as answer:
                 reply = json.loads(answer.read())
         except urllib.error.HTTPError as refused:
+            message = None
             try:
-                code = json.loads(refused.read()).get("code", "request_failed")
-            except ValueError:
+                answer = json.loads(refused.read())
+                code = answer.get("code", "request_failed")
+                text = answer.get("message")
+                message = text if isinstance(text, str) else None
+            except (ValueError, AttributeError):
                 code = "request_failed"
-            raise PublishError(str(code), refused.code) from None
+            raise PublishError(str(code), refused.code, message) from None
         except (urllib.error.URLError, TimeoutError, OSError) as failed:
             if certificate_problem(failed) is not None:
                 raise PublishError("certificate_untrusted") from None
@@ -239,6 +249,34 @@ class MemberPortalPublisher:
         """One exact version's published content (`assets/manifest`), for a
         member it is shared with; `asset_not_published` otherwise."""
         return self._call("assets/manifest", {"asset": asset})
+
+    # -- the Personal Agent code from Agent Web (owner 2026-10-19, Option A) --
+
+    def password_sign_in(self, account: str, password: str) -> tuple[str, str | None]:
+        """Sign in with the member's account and password (the portal's
+        `sign-in/password`) and return the one-hour session and the browser
+        login the platform issued with it. The password goes in this one
+        request and is kept nowhere; the caller drops both values."""
+        reply = self._post("sign-in/password", None, {"account": account, "password": password})
+        session, login = reply.get("session"), reply.get("login")
+        if not isinstance(session, str) or ":" not in session:
+            raise PublishError("bad_reply")
+        return session, login if isinstance(login, str) else None
+
+    def issue_agent_login(self, session: str | None = None) -> dict[str, Any]:
+        """A new Personal Agent code (`logins/issue-agent`): with `session`
+        from a password sign-in, else as this PC's current code (renewal)."""
+        if session is not None:
+            return self._post("logins/issue-agent", f"Bearer {session}", {})
+        return self._call("logins/issue-agent", {})
+
+    def revoke_login(self, login_id: str, session: str | None = None) -> dict[str, Any]:
+        """End one of the member's own logins (`logins/revoke`, 2026-10-19).
+        A platform without the route answers `invalid_request` (404)."""
+        body = {"login_id": login_id}
+        if session is not None:
+            return self._post("logins/revoke", f"Bearer {session}", body)
+        return self._call("logins/revoke", body)
 
     def enroll(self, request: dict[str, Any]) -> dict[str, Any]:
         """Enroll this computer as the member (`bridges/enroll`, owner
