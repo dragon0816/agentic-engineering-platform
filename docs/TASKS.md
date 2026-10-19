@@ -2667,3 +2667,11 @@ s-k-20261011T102952` (not published).
   `knowledge-strategy`. This file stays the record of completed work; an issue closes when its result
   is recorded here or in `docs/DECISIONS.md`. Owner-only security items are not in the issues.
 
+
+## Live test fixes: image retry, progress end state, switched-off Skills (2026-10-20)
+
+- [x] An image turn survives the conversation check's retry (2026-10-20, Claude Code; live test
+  2026-10-20, business-card photo failed 2/2 with `conversation_history_invalid`). The retry pair
+  goes to `_converse(..., retry=...)` after the person's message, which keeps its picture (sent
+  once); a retry pass that fails returns the first answer with the Host note. Tests
+  `tests/test_conversation_harness.py`; `docs/HARNESS_DESIGN.zh-TW.md` §5.3.

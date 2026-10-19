@@ -537,10 +537,13 @@ class Gateway:
         limits = self.limits()
         with opened:
 
-            async def turn(messages: tuple[ModelMessage, ...]) -> GatewayConversationResult:
+            async def turn(
+                messages: tuple[ModelMessage, ...], retry: tuple[ModelMessage, ...]
+            ) -> GatewayConversationResult:
                 return await self._converse(
                     request,
                     messages,
+                    retry=retry,
                     persona_guidance=persona_guidance,
                     allowed_tools=allowed_tools,
                     max_turns=max_turns,
@@ -618,6 +621,7 @@ class Gateway:
         max_history_messages: int = MAX_CONVERSATION_HISTORY,
         started: float | None = None,
         limits: ConversationLimits | None = None,
+        retry: tuple[ModelMessage, ...] = (),
     ) -> GatewayConversationResult:
         """Use installed commands as tools in a bounded loop (the Host's tool cap,
         at most `MAX_CONVERSATION_TOOL_CALLS`, a time budget and a repetition guard).
@@ -641,6 +645,13 @@ class Gateway:
             or message.tool_calls
             or message.tool_call_id is not None
             for index, message in enumerate(history)
+        ):
+            return self._conversation_failure(context, "conversation_history_invalid", 0, ())
+        # The Host check's retry pair (its answer, then the Host's note) comes
+        # after the person's message, which keeps its pictures: text only.
+        if retry and (
+            [message.role for message in retry] != ["assistant", "user"]
+            or any(message.images or message.tool_calls for message in retry)
         ):
             return self._conversation_failure(context, "conversation_history_invalid", 0, ())
         if self.router.model is None:
@@ -744,6 +755,9 @@ class Gateway:
                 images=message.images,
             )
             for index, message in enumerate(recent)
+        ) + tuple(
+            ModelMessage(role=message.role, text=message.text[:MAX_CONVERSATION_MESSAGE_CHARS])
+            for message in retry
         )
         sees_images = any(message.images for message in bounded_history)
         # G2: a Harness tool gets the person's own sentence next to the model's

@@ -11,7 +11,13 @@ against what actually happened in the turn, never against the model's word:
 
 A failed check gets one retry: the model sees which check failed and why. If it
 still fails, the answer is returned with the Host's note, so the person is
-never told about work that did not happen.
+never told about work that did not happen. If the retry pass itself fails (a
+stopped loop, a model failure), the person gets the first answer with the
+Host's note rather than a bare failure.
+
+The retry pair (the answer and the Host's note) is passed to the turn apart
+from the person's history: pictures the person attached stay on their own
+message, sent once, and the retry pair is text (live test 2026-10-20).
 """
 
 from __future__ import annotations
@@ -101,10 +107,15 @@ def _succeeded(item: Any) -> bool:
     return workflow is not None and workflow.run.status == "succeeded"
 
 
+#: `run_turn(history, retry)`: the person's history, and the Host check's retry
+#: pair to put after it (empty on the first pass).
+RunTurn = Callable[[tuple[Any, ...], tuple[Any, ...]], Awaitable[Any]]
+
+
 class ConversationActions:
     def __init__(
         self,
-        run_turn: Callable[[tuple[Any, ...]], Awaitable[Any]],
+        run_turn: RunTurn,
         history: tuple[Any, ...],
         roots: tuple[str, ...],
         message: Callable[[str, str], Any],
@@ -112,13 +123,16 @@ class ConversationActions:
         self.run_turn, self.history, self.roots, self.message = run_turn, history, roots, message
         self.result: Any = None
         self.reasons: list[str] = []
+        # The answer that failed a check, and why: what the person gets with
+        # the Host's note when the retry pass does not produce an answer.
+        self.checked: Any = None
+        self.checked_reasons: list[str] = []
 
     async def execute(self) -> str:
-        history = self.history
+        retry: tuple[Any, ...] = ()
         if self.result is not None and self.reasons:
             # The retry: the model sees its answer and what the Host found.
-            history = (
-                *history,
+            retry = (
                 self.message("assistant", self.result.text or ""),
                 self.message(
                     "user",
@@ -127,7 +141,7 @@ class ConversationActions:
                     + ". Fix this and answer again.",
                 ),
             )
-        self.result = await self.run_turn(history)
+        self.result = await self.run_turn(self.history, retry)
         return f"turn-{self.result.model_turns}"
 
     def validate(self) -> tuple[HarnessCheckResult, ...]:
@@ -143,11 +157,13 @@ class ConversationActions:
                 ),
             )
         checks, self.reasons = check_answer(self.result.text, self.result.tools, self.roots)
+        if self.reasons:
+            self.checked, self.checked_reasons = self.result, list(self.reasons)
         return tuple(checks)
 
 
 async def checked_turn(
-    run_turn: Callable[[tuple[Any, ...]], Awaitable[Any]],
+    run_turn: RunTurn,
     history: tuple[Any, ...],
     roots: tuple[str, ...],
     message: Callable[[str, str], Any],
@@ -167,6 +183,18 @@ async def checked_turn(
     run = await run_harness_async(plan, actions)
     result = actions.result
     if run.phase != "validated" and actions.reasons and result is not None:
-        note = "\n\n（Host 檢查未通過：" + "；".join(actions.reasons) + "）"
-        result = result.model_copy(update={"text": (result.text or "") + note})
+        result = _with_note(result, actions.reasons)
+    elif (
+        result is not None
+        and result.status == "failed"
+        and actions.checked is not None
+        and actions.checked is not result
+    ):
+        # The retry pass failed outright: the first answer, marked by the Host.
+        result = _with_note(actions.checked, actions.checked_reasons)
     return result
+
+
+def _with_note(result: Any, reasons: list[str]) -> Any:
+    note = "\n\n（Host 檢查未通過：" + "；".join(reasons) + "）"
+    return result.model_copy(update={"text": (result.text or "") + note})

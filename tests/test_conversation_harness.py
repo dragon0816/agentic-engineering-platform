@@ -7,12 +7,12 @@ import asyncio
 from pathlib import Path
 from typing import Any
 
-from test_gateway import _call, _host_gateway, _text, request
+from test_gateway import _call, _cut, _host_gateway, _text, request
 
 from agent.conversation_harness import check_answer, named_files
 from agent.gateway import HostTool, HostToolOutcome
 from common.execution import RequestContext
-from models.contracts import ModelTool
+from models.contracts import ModelMessage, ModelTool
 
 
 def tool(status: str = "succeeded") -> HostTool:
@@ -66,3 +66,43 @@ def test_paths_outside_the_task_folders_and_plain_answers_are_not_checked(tmp_pa
     built, model = _host_gateway([], [_text("請問要哪一個月份？")])
     result = asyncio.run(built.converse(request("做報表"), ()))
     assert result.text == "請問要哪一個月份？" and len(model.calls) == 1
+
+
+CARD = "data:image/png;base64,iVBORw0KGgo="
+
+
+def test_the_retry_keeps_the_picture_on_the_persons_message() -> None:
+    """Live test 2026-10-20: a business-card photo plus an unbacked "stored" claim
+    failed with conversation_history_invalid, because the retry appended the
+    answer and the Host note after the message that carries the picture."""
+    built, model = _host_gateway(
+        [], [_text("名片已經儲存到資料庫了。"), _text("名片內容：王小明。我沒有儲存它。")]
+    )
+    history = (ModelMessage(role="user", text="請解析這張名片並存進名片資料庫", images=(CARD,)),)
+    result = asyncio.run(built.converse(request("請解析這張名片並存進名片資料庫"), history))
+    assert result.status == "answered", result.failure
+    assert result.text == "名片內容：王小明。我沒有儲存它。"
+    assert len(model.calls) == 2
+    retry = model.calls[1]
+    assert retry.requirements.vision is True
+    roles = [message.role for message in retry.messages]
+    assert roles == ["system", "user", "assistant", "user"]
+    # The picture is sent once, on the person's own message, never on the retry pair.
+    assert [message.images for message in retry.messages] == [(), (CARD,), (), ()]
+    assert retry.messages[1].text == "請解析這張名片並存進名片資料庫"
+    assert retry.messages[2].text == "名片已經儲存到資料庫了。"
+    assert retry.messages[3].text.startswith("[Host check failed]")
+
+
+def test_a_failed_retry_returns_the_first_answer_with_the_host_note() -> None:
+    """The person sees what the first answer found, marked by the Host, never a
+    bare "could not complete this turn"."""
+    built, model = _host_gateway(
+        [], [_text("名片內容：王小明。已經儲存到資料庫了。"), _cut(), _cut(), _cut()]
+    )
+    history = (ModelMessage(role="user", text="存名片", images=(CARD,)),)
+    result = asyncio.run(built.converse(request("存名片"), history))
+    assert len(model.calls) == 4
+    assert result.status == "answered" and result.failure is None
+    assert result.text.startswith("名片內容：王小明。已經儲存到資料庫了。")
+    assert "Host 檢查未通過" in result.text and "no tool call succeeded" in result.text
