@@ -41,7 +41,7 @@ from host_runtime.chat_authoring import (
     digest,
     run_codes,
 )
-from host_runtime.skill_authoring import SkillCandidate, skill_digest
+from host_runtime.skill_authoring import SkillCandidate, installed_skills, skill_digest
 from host_runtime.team_membership import membership_note
 
 CARDS_FILE = Path("authoring") / "draft-cards.json"
@@ -103,6 +103,32 @@ def _stamp(value: str) -> datetime | None:
 
 def _key(identity: Any) -> str:
     return f"{identity.namespace}/{identity.name}@{identity.version}"
+
+
+def switched_off_twins(skills_dir: Path, identity: Any) -> list[str]:
+    """A line naming installed but switched-off Skills of the same name, in any
+    namespace and not switched on in another version (owner 2026-10-20): a
+    person about to install a near-duplicate is told it can be switched on
+    instead. Only a reminder; the Install button stays."""
+    enabled = {
+        (m.metadata.identity.namespace, m.metadata.identity.name)
+        for m in installed_skills(skills_dir)
+    }
+    twins = sorted(
+        {
+            f"{m.metadata.identity.namespace}/{m.metadata.identity.name}"
+            for m in installed_skills(skills_dir / "disabled")
+            if m.metadata.identity.name == identity.name
+            and (m.metadata.identity.namespace, m.metadata.identity.name) not in enabled
+        }
+    )
+    if not twins:
+        return []
+    return [
+        "Note: a Skill of the same name is installed but switched off: "
+        + ", ".join(twins)
+        + ". You can switch it on in Capabilities instead of installing this draft."
+    ]
 
 
 def tryable(manifest: WorkflowManifest) -> bool:
@@ -348,6 +374,8 @@ class DraftCards:
             about = draft.selector_hint or draft.instructions.strip().splitlines()[0][:300]
             lines.append(f"What it does: {about}")
             lines.append(f"Alias: /{draft.alias}")
+            if chat is not None:
+                lines.extend(switched_off_twins(chat._skills_dir(), draft.metadata.identity))
             commands = [f"  {c.name} → {_key(c.target)}" for c in draft.commands]
             lines.extend(["Commands:", *commands] if commands else ["Commands: none"])
         lines.append("Check: passed (what the Host checks before it keeps a draft).")
