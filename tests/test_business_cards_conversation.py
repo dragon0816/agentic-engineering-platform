@@ -263,3 +263,67 @@ def test_the_page_shows_an_answers_picture_through_the_token_guarded_route() -> 
     assert "function answerImage(session, file)" in PAGE
     assert '"/api/conversations/file?" + query' in PAGE
     assert 'if (file.kind === "image") said.parentNode.append(answerImage(' in PAGE
+
+
+class _FailingBridge:
+    """A Bridge whose every call fails with one code and the generic message."""
+
+    def __init__(self, code: str, message: str = "Capability invocation did not complete") -> None:
+        self.code, self.message = code, message
+        self.installed = type("I", (), {"get": lambda self, identity: object()})()
+        self.calls: list[Any] = []
+
+    async def execute(self, invocation: Any) -> Any:
+        from common.execution import CapabilityResult, Failure
+
+        self.calls.append(invocation)
+        return CapabilityResult(
+            trace=invocation.context.trace,
+            status="failed",
+            failure=Failure(code=self.code, message=self.message),
+            handler_invoked=True,
+        )
+
+
+def _failed(code: str, message: str = "Capability invocation did not complete") -> Any:
+    import asyncio
+
+    from test_business_cards_capabilities import _context
+
+    from host_runtime.business_cards_tools import TOOLS, _tool
+
+    gateway = type("G", (), {})()
+    gateway.bridge = _FailingBridge(code, message)
+    name, spec, description, schema = next(t for t in TOOLS if t[0] == "cards__harvest_signatures")
+    tool = _tool(gateway, name, spec, description, schema)
+
+    async def call() -> Any:
+        return await tool.handler(_context(), {"domain": "example.com"})
+
+    return asyncio.run(call())
+
+
+def test_a_failed_tool_says_what_failed_not_a_generic_line() -> None:
+    """Live test 2026-10-20: the model got only "Capability invocation did not
+    complete" and told the person to check Settings. The failure now carries
+    the code and a short, accurate sentence; Settings only when it is the cause."""
+    unread = _failed("message_unknown")
+    assert unread.status == "failed" and unread.failure is not None
+    assert unread.failure.code == "message_unknown"
+    assert "Capability invocation did not complete" not in unread.failure.message
+    assert "message_unknown" in unread.failure.message
+    assert "Settings" not in unread.failure.message
+    scope = _failed("folder_unknown").failure
+    assert "Settings" in scope.message and "folder_unknown" in scope.message
+    nobody = _failed("person_unknown").failure
+    assert "person_unknown" in nobody.message and "Settings" not in nobody.message
+    # A specific message from the Bridge (where the input was wrong) is kept.
+    kept = _failed("invalid_input", "Invalid input at domain: string_pattern_mismatch").failure
+    assert kept.message.endswith("Invalid input at domain: string_pattern_mismatch")
+    # An unknown code still names itself.
+    other = _failed("something_new").failure
+    assert "something_new" in other.message
+    assert "Capability invocation did not complete" not in other.message
+    from capabilities.business_cards.manifest import PROCEDURE
+
+    assert "IF A TOOL FAILS" in PROCEDURE

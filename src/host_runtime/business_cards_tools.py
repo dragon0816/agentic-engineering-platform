@@ -60,6 +60,45 @@ _PERSON = {
 _DATE = {"type": "string", "description": "YYYY-MM-DD"}
 
 
+#: What a failure code means, for the conversation model to tell the person
+#: (live test 2026-10-20: the generic Bridge line made it guess "check
+#: Settings"). Settings is named only where the scope there is the cause.
+FAILURE_TEXT = {
+    "message_unknown": "讀信失敗：這封信無法讀取（不存在、已移動或不在讀信範圍內）",
+    "folder_unknown": "這個資料夾不在 Agent Web Settings → Agent mode 設定的讀信範圍內，或找不到",
+    "outlook_missing": "這台電腦上沒有可用的 Outlook",
+    "library_missing": "這台電腦缺少讀 Outlook 用的 pywin32 元件",
+    "mail_failed": "Outlook 讀信時出錯，請稍後再試",
+    "model_not_configured": "沒有設定可用的內部模型，無法讀簽名檔",
+    "model_unavailable": "內部模型這次沒有回應，請稍後再試",
+    "person_unknown": "名片夾裡找不到這個人",
+    "person_ambiguous": "名片夾裡有不只一個同名的人，請加上公司或用 person_id",
+    "person_unspecified": "沒有指明是哪一位",
+    "card_without_name": "這張名片沒有讀到姓名或 Email，沒有存",
+    "company_has_no_contacts": "名片夾裡沒有這家公司的人",
+    "chart_renderer_missing": "這台電腦缺少畫組織圖用的 Pillow 元件",
+    "change_unknown": "找不到這個變更編號",
+    "change_already_undone": "這個變更已經復原過了",
+    "undo_conflict": "之後又有變更動到同一筆資料，無法直接復原",
+    "line_to_self": "不能把一個人設成自己的主管",
+    "line_cycle": "這條回報關係會形成循環，沒有記錄",
+    "import_unreadable": "舊的 Hermes 名片資料庫讀不出來",
+    "permission_denied": "這項名片功能沒有授權給你（在 Agent Web 的 Capabilities 選取）",
+    "invalid_input": "工具參數不正確",
+    "timeout": "這次操作逾時",
+    "handler_error": "名片功能內部出錯",
+}
+GENERIC_FAILURE = "Capability invocation did not complete"
+
+
+def explain(failure: Failure) -> Failure:
+    """The failure with a short, accurate sentence naming its code; a
+    specific Bridge message (where the input was wrong) is kept after it."""
+    text = FAILURE_TEXT.get(failure.code, "名片功能沒有完成")
+    detail = "" if failure.message in ("", GENERIC_FAILURE) else f": {failure.message}"
+    return failure.model_copy(update={"message": f"{text}（{failure.code}）{detail}"})
+
+
 def _object(properties: dict[str, Any], required: Sequence[str] = ()) -> dict[str, Any]:
     return {"type": "object", "properties": properties, "required": list(required)}
 
@@ -278,7 +317,7 @@ def _tool(
         return HostToolOutcome(
             status="failed",
             data=result.data,
-            failure=result.failure or Failure(code=result.status, message=result.status),
+            failure=explain(result.failure or Failure(code=result.status, message="")),
         )
 
     return HostTool(
