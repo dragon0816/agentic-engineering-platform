@@ -407,6 +407,32 @@ Agent **不會自己**安裝、核准或發布任何東西。需要你決定時�
 最後會列出所有值，**會改變東西的 Workflow 一定要按確認才會執行**。缺少的 Workflow
 設定只能在 Agent Web 填。
 
+### 4.7 名片與組織圖
+
+安裝後預設就開著（Capabilities 裡的 **engineering/business-cards**）。名片資料只存在這台電腦、
+只屬於你自己（`<workspace>\business-cards\`），不會分享給其他成員，也不會送到外部模型；
+讀照片和簽名檔都只經過公司內部的 LLM gateway。
+
+- **存名片（最常用：Telegram）**：在 Telegram 直接把名片照片傳給 bot，不用打字也可以；一次選
+  多張照片（相簿）會一張一張存。以「檔案」方式傳的 JPG／PNG 也可以（iPhone 的 HEIC 檔請改用一般
+  照片傳送）。在 Agent Web 則在 Gateway 對話按迴紋針附上照片，說「幫我存這張名片」。Agent 會列出讀到的公司、姓名、事業群／處／部門、職稱、電話、
+  分機、手機、傳真、Email，**只問它不確定的欄位**。同一個人再掃一次，它會先講變化，例如
+  「上次是研發部經理，現在是協理」；每次掃描都留紀錄。
+- **改資料**：直接說「王小明的手機是 0912-…」。你自己改的值，之後的名片或簽名檔不會覆蓋，
+  只會記成「待確認的提議」。
+- **組織圖**：說「範例公司的組織圖」。對話裡會出現 PNG 圖和說明表格：框代表事業群 → 處 →
+  部門，框內依職稱高低排序；**只有畫出來的線才是回報關係**，實線有證據（簽名檔、郵件、你告訴
+  它的），虛線是依職稱推測的。沒有實線時，這張圖只是分組，不是回報關係圖。Telegram 會在
+  簡短的文字回覆後傳組織圖照片（附一句說明），再附上完整說明檔（.md）。
+- **回報關係**：說「李大華向王小明報告」，Agent 會記成「使用者告知」的實線。
+- **離職**：只有你說了才會記，例如「陳美已經離職了」。之後的組織圖不畫她（要看可說
+  「包含離職的人」，會以灰色顯示）。說錯了就說「復原」，或說「陳美還在」。
+- **從簽名檔整理**：說「從 example.com 的信件簽名檔整理聯絡人」。只會讀 Settings → Agent
+  mode 設定的信件範圍（資料夾、天數），只讀那個網域寄來的信，只把簽名檔那幾行送給內部模型；
+  它先列出候選名單，你確認後才存。信件內文不會被保存。
+- **舊的 Hermes 名片**：如果以前用過 Hermes 的 business-cards（`~/.business-cards/cards.db`），
+  說「匯入舊名片」或執行 `aep-host cards import --config <host.json>`，可以重複執行，不會重複匯入。
+
 ---
 
 ## 5. Capabilities：管理 Skill 與 Workflow
@@ -1206,6 +1232,8 @@ Agent 的選擇。例如：
   `architecture-diagram`、`humanizer`、`p5js`、`manim-video`…
 - 其他：`business-cards`、`google-workspace`、`notion`、`airtable`、`box`、`obsidian`、`maps`、
   `email-inbox-triage`、`himalaya`、`claude-code`、`codex`…
+
+名片請用預設開著的 `engineering/business-cards`（第 4.7 節），不必打開 Hermes 的 `business-cards`。
 
 部分 skill 需要額外的指令或環境變數（例如 `NOTION_API_KEY`），說明寫在 skill 內容開頭的
 「AEP note」裡；`teams-meeting-pipeline` 和 `sdlc-review` 需要 Hermes 本身才能用。

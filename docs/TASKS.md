@@ -2688,3 +2688,28 @@ s-k-20261011T102952` (not published).
   never to install or re-create it; the Host reads the names from `assets/skills/disabled/`. Tests
   `tests/test_switched_off_skills.py`; `docs/HARNESS_DESIGN.zh-TW.md` §5.1; decision
   `docs/DECISIONS.md` 2026-10-20.
+
+
+## Native business cards and org chart (2026-10-20)
+
+- [x] Business cards as a native AEP capability (2026-10-20, Claude Code; owner 2026-10-20 "當然選a").
+  Spec `docs/phases/BUSINESS_CARDS.md`; decision `docs/DECISIONS.md` 2026-10-20; contracts
+  `docs/CONTRACTS.md` "Business cards and org chart". `capabilities/business_cards/` (contracts,
+  store per actor with observations, field provenance, reporting lines, history, undo, proposals;
+  name and company matching; Pillow org chart and legend; signature cutting and the gateway model
+  call; 13 capabilities); `LocalPolicy.confirm_writes` (standing confirmation for the low-risk
+  contact-store writes); `host_runtime/business_cards_tools.py` (`cards__*` tools while the Skill is
+  on; chart files and legend for the answer); Skill `engineering/business-cards@1.0.0` shipped
+  switched on; Agent Web shows the chart PNG under the answer (`GET /api/conversations/file`);
+  Telegram sends it with `sendPhoto`; `aep-host cards import`; CI checks the Skill is installed
+  switched on. User guide §4.7. Tests `tests/test_business_cards_store.py`,
+  `tests/test_business_cards_capabilities.py`, `tests/test_business_cards_conversation.py`,
+  `tests/test_business_cards_telegram.py`, `tests/test_bundled_skills.py`. Verification: see
+  HANDOFF.md.
+- [x] Telegram as the main way cards arrive (2026-10-20, Claude Code; owner update the same day): a
+  bare photo, a photo sent as a file and an album (one card per photo) are stored in the same turn;
+  short reply; the chart comes back as a photo captioned with the reporting-line note plus the
+  legend as a document. Tests `tests/test_business_cards_telegram.py` (fake Bot API).
+- [ ] Live test with the owner's real cards and mail (owner; steps in HANDOFF.md). Not done by the
+  agent: no real card, mail, gateway or Telegram was used.
+- [ ] Later: a Contacts page in Agent Web; accepting a proposal with a button.

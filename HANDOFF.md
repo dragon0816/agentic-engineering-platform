@@ -1,6 +1,61 @@
 # Handoff
 
-Updated: 2026-10-20 (Asia/Taipei), by Claude Code (three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-20 (Asia/Taipei), by Claude Code (native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+
+## Native business cards and org chart (2026-10-20, Claude Code) — latest
+
+**Goal / scope:** owner 2026-10-20 "當然選a": business cards as a native AEP capability in Gateway chat
+and Telegram (Telegram photos are the main way cards arrive, owner update the same day), switched on
+by default, nothing sent to an external model, an org chart from cards and email signatures that
+adjusts when someone left. Spec `docs/phases/BUSINESS_CARDS.md`; decision `docs/DECISIONS.md`
+2026-10-20; contracts `docs/CONTRACTS.md` "Business cards and org chart"; user guide §4.7. Not
+pushed; Agent Web not restarted; live install, the owner's real cards and mail untouched (no real
+data in the repo). `gateway.py` / `conversation_harness.py` not edited.
+
+**Done (commits on main):** 039a1724 spec; db7233a0 store + 13 capabilities +
+`LocalPolicy.confirm_writes`; e9cd101f Host wiring, `cards__*` tools, Skill
+`engineering/business-cards@1.0.0` shipped on, `aep-host cards import`, CI bundle checks; 21f05327
+chart PNG in Agent Web (`GET /api/conversations/file`) and Telegram; ff845dac Telegram-first (bare
+photo, photo as file, album = one card per photo, short reply, chart photo with the note + legend
+document); 0b7f7c62 six-month mail-scope test; then the docs commit.
+
+- Store: `<workspace>/business-cards/<actor-key>/cards.db` per actor; observations (source, date,
+  image hash / message id), field provenance (user value never overwritten, newer evidence wins, an
+  uncertain reading never replaces a value), reporting lines with evidence, history +
+  `undo(change_id)`, proposals.
+- Writes are `write` / risk low, confirmed standing by the Host (no approval card per call); reads
+  and `harvest-signatures` are `read`. The capabilities install only when the Skill file is present
+  (switched on or off).
+
+**Verification (2026-10-20):** `ruff check .` passed; `ruff format --check .` 909 files formatted;
+`mypy` no issues (658 files). Full pytest, project `.venv` (final code): 3304 passed, 7 skipped,
+2 failed (`test_draft_install_cards` real-browser card, `test_telegram_settings` no-senders bot),
+both passed when rerun alone (load from a parallel agent's suites). `C:\aepci-wk\venv`
+(`pip install -e ".[dev,office]"`, `--basetemp=C:/aepci-wk/bt`): 3276 passed, 30 skipped, 0 failed
+(run before the Telegram-first commit); after it, the business-cards, Telegram, bundled-Skill,
+weekly-report and platform-transport tests there: 109 passed, 3 skipped. Bundle: wheel built and
+contains the new modules; `aep-host assets install-bundled` replayed into a temp workspace (business
+cards on, Hermes copy off). Full `install.ps1` replay not run: it writes the user's gateway settings,
+user environment and coding-agent settings on this PC.
+
+**Open / risks:**
+- No Contacts page in Agent Web (chat covers find / list / history); proposals have no button.
+- HEIC files sent as documents are refused (send as a photo); an album split across two polls
+  becomes two turns.
+- On a host governed by members' decisions (or an active profile) the cards capabilities need a
+  selection like any other, else `permission_denied`.
+- The org chart is nested boxes with routed lines; a very large company gives a wide image.
+
+**Next (live test with the owner, after checking `/api/tasks` and restarting Agent Web):**
+1. Capabilities shows `engineering/business-cards` on (an existing install gets it from the next
+   bundle update or `aep-host assets install-bundled`).
+2. Telegram: send one card photo without text → short reply, uncertain fields asked one per line;
+   send the second card; re-send one → "上次是…, 現在是…"; both as an album → one line per card.
+3. Telegram: "<company> 組織圖" → photo with the note, legend file, short text.
+4. "X 已經離職" → recorded, chart without X; "復原" → back.
+5. Agent Web Gateway chat: attach a card photo, store, ask for the chart → PNG under the answer.
+6. "從 <domain> 的信件簽名檔整理聯絡人" (mail scope 6 months) → candidates, confirm, stored.
+7. If `~/.business-cards/cards.db` exists: `aep-host cards import --config <host.json>` twice.
 
 ## Live test fixes 2026-10-20 (Claude Code) — latest
 

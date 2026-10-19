@@ -2330,6 +2330,74 @@ drafts a Workflow or Skill shows its install card"):
   Workflows owned by the Host's owner with a `chat-candidate:` validation reference; otherwise
   `{ok: false, code: workflow_withheld, next}`.
 
+### Business cards and org chart (2026-10-20)
+
+`docs/phases/BUSINESS_CARDS.md`; decision `docs/DECISIONS.md` 2026-10-20.
+- Capabilities `business-cards/<name>@1.0.0` (`capabilities.business_cards.handlers`), contracts
+  `business-cards.<name>.input.v1` / `.output.v1`, policy ref `personal-contacts-policy`, risk
+  `low`, permission `business-cards.<name>`. Store per actor:
+  `<workspace>/business-cards/<actor-key>/cards.db` (`store.actor_key`).
+  - Writes (`side_effect: write`, `approval_required: true`, confirmed standing by the Host):
+    `add-card` (`AddCardRequest`: card fields, `uncertain` [field names], `image_path`,
+    `card_date`) → `AddResult` {`person_id`, `name`, `company`, `outcome` (`created` | `updated`
+    | `unchanged`), `existed`, `matched_by` (`email` | `name_company` | `romanised_name`),
+    `changes` [{`field`, `old`, `new`}], `kept` [{`field`, `current`, `offered`, `reason`
+    (`user_set` | `older_evidence` | `uncertain`)}], `uncertain`, `status`, `summary`,
+    `observation_id`, `change_id`}; `add-from-signature` {`entries`: 1–50 card fields +
+    `message_id`, `message_date`, `uncertain`} → {`results`: [`AddResult`]}; `edit-person`
+    {`person`, `fields`, `reason`} → {`person_id`, `name`, `changes`, `change_id`};
+    `set-status` {`person`, `status` (`left` | `active`), `reason`, `said_by`,
+    `effective_date`} → {`person_id`, `name`, `old_status`, `new_status`, `left_at`,
+    `change_id`}; `set-reporting-line` {`person`, `manager`, `evidence_kind` (`signature` |
+    `email_content` | `title_inference` | `user`), `evidence_ref`, `confidence` 0–1,
+    `inferred`} and `remove-reporting-line` {`person`, `reason`} → {`person_id`, `name`,
+    `manager_id`, `manager`, `evidence_kind`, `inferred`, `replaced`, `removed`, `change_id`};
+    `undo` {`change_id`} → {`undone`, `reverted` [history items], `change_id`};
+    `import-hermes` {} → {`found`, `rows`, `imported`, `already`, `people_created`,
+    `people_updated`, `source`}.
+  - Reads: `find` {`query`, `status` (`active` | `left` | `any`), `limit` ≤ 100} and `list`
+    {`company`, `source` (`card` | `email_signature` | `user` | `import` | ""), `status`,
+    `limit` ≤ 200} → {`people`: [`PersonView`], `total`}; `history` {`person`, `limit`} →
+    {`person`, `history` [{`change_id`, `at`, `actor`, `kind`, `field`, `old`, `new`,
+    `reason`, `source`}], `observations` [{`observation_id`, `source`, `source_date`,
+    `source_ref`, `uncertain`}], `proposals` [{`field`, `current`, `proposed`, `source`}]};
+    `org-chart` {`company`, `include_left`} → {`company`, `people`, `left_shown`,
+    `left_omitted`, `lines_evidenced`, `lines_inferred`, `png_path`, `legend_path`,
+    `legend_markdown`, `note`, `attach` [{`path`, `media_type`, `filename`}]};
+    `harvest-signatures` {`domain`, `days` (capped at the mail scope's `max_days`), `limit` ≤ 40,
+    `folder`} → {`scanned`, `from_domain`, `with_signature`, `candidates` [card fields +
+    `message_id`, `message_date`, `uncertain`, `existing_person_id`, `would_change`], `note`}.
+  - `PersonRef` {`person_id` | `name` (local or romanised) + optional `company`}. Card fields:
+    `name`, `romanised_name`, `company`, `business_group`, `division`, `department`, `title`,
+    `phone`, `ext`, `mobile`, `fax`, `email`, `address`, `website`, `notes`.
+  - Refusal codes: `person_unknown`, `person_ambiguous`, `person_unspecified`,
+    `card_without_name`, `line_to_self`, `line_cycle`, `change_unknown`,
+    `change_already_undone`, `undo_conflict`, `company_has_no_contacts`,
+    `chart_renderer_missing`, `import_unreadable`, `model_not_configured`, `model_unavailable`,
+    and the mail codes of `outlook.search` / `outlook.read`.
+  - Signature model call: structured output `business-cards.signature.v1`
+    {`people`: [{`i`, card fields except `email`/`notes`, `uncertain`}]}, ≤ 10 blocks per call.
+- `LocalPolicy.confirm_writes(spec)` / `confirmed_writes`: a host-declared standing
+  confirmation for a low-risk `write` (anything else raises); `confirmation_needed` is false for
+  those capabilities. Grants still apply.
+- Conversation tools (`host_runtime.business_cards_tools`, `host.cards__<op>.v1`, offered while
+  some version of `engineering/business-cards` is switched on): `cards__add_card`,
+  `cards__add_from_signature`, `cards__edit_person`, `cards__find`, `cards__list`,
+  `cards__history`, `cards__set_status`, `cards__set_reporting_line`,
+  `cards__remove_reporting_line`, `cards__undo`, `cards__org_chart`,
+  `cards__harvest_signatures`, `cards__import_hermes`; each dispatches with `origin: model`.
+- Skill `engineering/business-cards@1.0.0` (alias `cards`, no commands), in
+  `host_runtime.assets.shipped()`.
+- Agent Web: a Gateway answer that drew a chart carries `files` and stores them on the assistant
+  message's `attachments` [{`filename`, `kind` (`image` | `text`), `path`}];
+  `GET /api/conversations/file?session_id=&path=` (page token) serves only a file listed on that
+  conversation's answers and inside the workspace (`image/png`, `text/markdown`), else 404.
+- Telegram: `TelegramDelivery.photos` and `documents` (paths); after the text reply each photo is
+  sent with `sendPhoto` (multipart `chat_id`, `caption` = the chart note, `photo`), then each
+  document with `sendDocument` (`chat_id`, `document`). The text carries the legend without its
+  table (`business_cards_tools.with_legend(short=True)`).
+- CLI: `aep-host cards import --config <host.json> [--from <cards.db>] [--actor <name>]`.
+
 ## Shared-platform transport (Phase 7, slice 2i)
 
 `common.sync` is the wire between a Bridge and the shared platform: seven

@@ -3611,3 +3611,47 @@ Rejected: offering switched-off Skills as tools (a switched-off Skill must not r
 would crowd the catalogue it was switched off to keep small); a host tool listing them (one more
 model call before every such answer); descriptions or versions in the list (the Hermes pack alone
 ships about fifty switched off; names are enough to recognise one).
+
+
+## 2026-10-20 — Business cards are a native AEP capability
+
+Owner, 2026-10-20: "當然選a" (option a: build business cards into AEP rather than keep the Hermes
+coding-agent Skill). A live test showed the Gateway chat reads a card photo well through the
+internal gateway, but only the Hermes Skill (`cards.py`, agent mode and a shell) could store it,
+and its store has no source, status, update, fax, business group or reporting lines. The owner
+wants it in normal Agent Web chat and Telegram, switched on by default, nothing sent to an
+external model, and an org chart from cards and email signatures that adjusts when someone left.
+
+Decision (spec `docs/phases/BUSINESS_CARDS.md`):
+
+- Capabilities `business-cards/*@1.0.0` with typed contracts, executed on the Bridge; a SQLite
+  store per actor under the workspace, never shared. Every observation kept (source, date, ref:
+  image hash or message id, never a body or an image); field-level provenance as in ADR-K11: a
+  user-set value is never overwritten by an automatic source (a proposal instead), newer
+  evidence updates an automatic value, everything in history and undoable by change id.
+- Identity: email first; else name + company, romanised names matching the local name.
+- Writes to the contact store are `write`, risk `low`, and the Host confirms them standing
+  (`LocalPolicy.confirm_writes`), so a model-chosen store, departure or line runs without an
+  approval card each time. Host code declares it, never an asset; only a low-risk `write`
+  qualifies; grants still apply; switching the Skill off removes the tools.
+- The Skill `engineering/business-cards` is shipped switched on and carries the procedure; the
+  Host offers `cards__*` tools with argument schemas while it is on (a Skill command to a
+  capability carries no schema). The Hermes pack's copy stays switched off; an idempotent import
+  (`aep-host cards import`, `cards__import_hermes`) keeps every old row as a `card` observation.
+- Org chart: Pillow (in the bundle with `weekly-mail`, in CI with `office`), nested boxes by
+  business group → division → department, solid evidenced and dashed inferred lines, people who
+  left omitted or grey, a Markdown legend that says when it is not a reporting chart. Agent Web
+  shows the PNG under the answer (a token-guarded route serving only files listed on that
+  conversation's answers); Telegram sends it with `sendPhoto`.
+- Email signatures: a read-only harvest within the mail scope set in Settings (never wider),
+  only messages from the named domain, only the cut signature block (≤ 1,200 characters,
+  secrets redacted) to the internal gateway model; it proposes, the person confirms, then
+  `add-from-signature` stores fields, message id and date.
+
+Rejected: an approval card for every stored card or departure (the store is the person's own,
+local and undoable; per-call cards would make photographing a stack of cards unusable); one-step
+Workflows wrapping each write (a Workflow run, journal and form for each contact edit, and
+Workflow parameters cannot carry the card's field lists); host tools that dispatch as the person
+(`origin` would misstate who chose the call); Graphviz or matplotlib for the chart (Graphviz is not
+on a colleague's PC, matplotlib is not in CI; Pillow is in both); storing email bodies or card
+images; a Contacts page in Agent Web in this slice (the chat covers find, list and history).
