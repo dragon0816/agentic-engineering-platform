@@ -20,6 +20,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from capabilities.business_cards.contracts import FIELD_LABELS
+
 #: Seniority, used only to order people inside their box (from the Hermes
 #: `cards.py`, with a few more titles). An unknown title sorts last.
 TITLE_RANKS: tuple[tuple[tuple[str, ...], int], ...] = (
@@ -65,6 +67,11 @@ _GREY = (150, 150, 150)
 _FRAMES = ((220, 230, 245), (232, 240, 236), (246, 241, 230))
 _LINE = (60, 90, 160)
 _UNSURE = (196, 127, 0)
+
+
+def needs_label(fields: Sequence[str]) -> str:
+    """The card's "needs confirmation" line, fields named in Chinese."""
+    return "需確認：" + "、".join(FIELD_LABELS.get(name, name) for name in fields)
 
 
 def rank_title(title: str) -> int:
@@ -282,7 +289,7 @@ def render(
             person["phone"] + (f" #{person['ext']}" if person["ext"] else "")
         )
         if unsure:
-            contact = "需確認：" + ", ".join(uncertain[person["person_id"]])
+            contact = needs_label(uncertain[person["person_id"]])
         draw.text((x0 + 8, y0 + 50), _fit(draw, contact, small, CARD_W - 16), fill=ink, font=small)
     path.parent.mkdir(parents=True, exist_ok=True)
     image.save(path, "PNG")

@@ -559,3 +559,24 @@ def test_who_is_recorded_comes_from_the_request_never_from_the_model(tmp_path: P
         ("line_add", "alice via local"),
     }
     assert all("使用者" not in item["actor"] for item in chen)
+
+
+def test_a_field_is_confirmed_in_chat_through_edit_person(tmp_path: Path) -> None:
+    bridge = _bridge(tmp_path)
+    card = {"name": "范例", "company": "範例科技", "email": "ryan.rj.fan@example.com"}
+    first = _run(bridge, "add-card", {**card, "uncertain": ["email"]}).data
+    assert first["needs_confirmation"] == ["email"]
+    rescan = _run(bridge, "add-card", card).data
+    assert rescan["needs_confirmation"] == ["email"]
+    found = _run(bridge, "find", {"query": "范例"}).data["people"][0]
+    assert found["needs_confirmation"] == ["email"]
+    confirmed = _run(
+        bridge,
+        "edit-person",
+        {"person": {"name": "范例"}, "confirm": ["email"], "reason": "email 正確"},
+        channel="telegram",
+    )
+    assert confirmed.status == "succeeded", confirmed.failure
+    assert confirmed.data["confirmed"] == ["email"] and confirmed.data["change_id"]
+    found = _run(bridge, "find", {"query": "范例"}).data["people"][0]
+    assert found["needs_confirmation"] == []

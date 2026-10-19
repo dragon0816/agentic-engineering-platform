@@ -342,3 +342,12 @@ def test_the_host_tool_drops_who_said_it_from_the_models_arguments() -> None:
 
     asyncio.run(call())
     assert bridge.calls[0].arguments == {"person": {"name": "X"}, "status": "left"}
+
+
+def test_the_person_can_confirm_a_field_in_chat() -> None:
+    from capabilities.business_cards.manifest import PROCEDURE
+
+    edit = next(schema for name, _, _, schema in TOOLS if name == "cards__edit_person")
+    assert edit["properties"]["confirm"]["items"]["enum"][0] == "name"
+    assert edit["required"] == ["person"]
+    assert "needs_confirmation" in PROCEDURE and "email 正確" in PROCEDURE

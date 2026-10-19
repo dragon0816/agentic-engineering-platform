@@ -49,6 +49,24 @@ FIELDS: tuple[FieldName, ...] = (
     "website",
     "notes",
 )
+#: How a field is named to the person (the org chart, replies).
+FIELD_LABELS: dict[str, str] = {
+    "name": "姓名",
+    "romanised_name": "英文名",
+    "company": "公司",
+    "business_group": "事業群",
+    "division": "處",
+    "department": "部門",
+    "title": "職稱",
+    "phone": "電話",
+    "ext": "分機",
+    "mobile": "手機",
+    "fax": "傳真",
+    "email": "Email",
+    "address": "地址",
+    "website": "網站",
+    "notes": "備註",
+}
 Source = Literal["card", "email_signature", "user", "import"]
 Status = Literal["active", "left"]
 EvidenceKind = Literal["signature", "email_content", "title_inference", "user"]
@@ -128,6 +146,9 @@ class AddResult(Contract):
     changes: tuple[FieldChange, ...] = ()
     kept: tuple[KeptField, ...] = ()
     uncertain: tuple[FieldName, ...] = ()
+    # Fields any reading flagged that the person has not confirmed or
+    # corrected yet: still to ask about, even when this scan was sure.
+    needs_confirmation: tuple[FieldName, ...] = ()
     status: Status = "active"
     # "上次是研發部經理, 現在是協理": the sentence to lead with.
     summary: str = ""
@@ -150,7 +171,9 @@ class PersonRef(Contract):
 
 class EditPersonRequest(Contract):
     person: PersonRef
-    fields: CardFields
+    fields: CardFields = CardFields()
+    # Fields the person says are right as stored ("email 正確").
+    confirm: tuple[FieldName, ...] = Field(default=(), max_length=len(FIELDS))
     reason: str = Field(default="", max_length=_SHORT)
 
 
@@ -158,6 +181,8 @@ class EditResult(Contract):
     person_id: str
     name: str
     changes: tuple[FieldChange, ...] = ()
+    confirmed: tuple[FieldName, ...] = ()
+    needs_confirmation: tuple[FieldName, ...] = ()
     change_id: str | None = None
 
 
@@ -184,6 +209,7 @@ class PersonView(CardFields):
     manager: str = ""
     manager_line: Literal["evidenced", "inferred", ""] = ""
     open_proposals: int = 0
+    needs_confirmation: tuple[FieldName, ...] = ()
     updated_at: str = ""
 
 

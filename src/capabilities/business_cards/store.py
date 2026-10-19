@@ -25,6 +25,7 @@ from typing import Any
 
 from capabilities.business_cards import names
 from capabilities.business_cards.contracts import (
+    FIELD_LABELS,
     FIELDS,
     AddResult,
     FieldChange,
@@ -52,23 +53,7 @@ ORG_FIELDS: tuple[FieldName, ...] = (
     "title",
 )
 CONTACT_FIELDS: tuple[FieldName, ...] = ("phone", "ext", "mobile", "fax", "email")
-_LABELS = {
-    "company": "公司",
-    "business_group": "事業群",
-    "division": "處",
-    "department": "部門",
-    "title": "職稱",
-    "phone": "電話",
-    "ext": "分機",
-    "mobile": "手機",
-    "fax": "傳真",
-    "email": "Email",
-    "address": "地址",
-    "website": "網站",
-    "name": "姓名",
-    "romanised_name": "英文名",
-    "notes": "備註",
-}
+_LABELS = FIELD_LABELS
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS people (
@@ -306,6 +291,21 @@ class CardStore:
         ).fetchone()
         return found
 
+    def _needs(self, con: sqlite3.Connection, person_id: str) -> tuple[FieldName, ...]:
+        """Fields any reading of this person flagged as uncertain that hold a
+        value the person has not confirmed or set (source `user`)."""
+        flagged: set[str] = set()
+        for item in con.execute(
+            "SELECT uncertain_json FROM observations WHERE person_id = ?", (person_id,)
+        ):
+            flagged.update(json.loads(item["uncertain_json"] or "[]"))
+        sources = self._sources(con, person_id)
+        return tuple(
+            name
+            for name in FIELDS
+            if name in flagged and name in sources and sources[name]["source"] != "user"
+        )
+
     def _view(self, con: sqlite3.Connection, row: sqlite3.Row) -> PersonView:
         person_id = row["person_id"]
         sources = sorted(
@@ -332,6 +332,7 @@ class CardStore:
             manager="" if line is None else line["manager_name"],
             manager_line="" if line is None else ("inferred" if line["inferred"] else "evidenced"),
             open_proposals=int(proposals),
+            needs_confirmation=self._needs(con, person_id),
             updated_at=row["updated_at"],
         )
 
@@ -517,6 +518,7 @@ class CardStore:
                 outcome="created",
                 existed=False,
                 uncertain=unsure,
+                needs_confirmation=self._needs(con, person_id),
                 observation_id=observation_id,
                 change_id=change_id,
             )
@@ -548,6 +550,7 @@ class CardStore:
             changes=tuple(merge.changes),
             kept=tuple(merge.kept),
             uncertain=unsure,
+            needs_confirmation=self._needs(con, row["person_id"]),
             status=fresh["status"],
             summary=_summary(row, merge),
             observation_id=observation_id,
@@ -647,39 +650,77 @@ class CardStore:
     # -- the person's own edits ----------------------------------------
 
     def edit(
-        self, ref: PersonRef, values: Mapping[str, str], *, actor: str, reason: str
-    ) -> tuple[sqlite3.Row, list[FieldChange], str | None]:
+        self,
+        ref: PersonRef,
+        values: Mapping[str, str],
+        *,
+        actor: str,
+        reason: str,
+        confirm: Sequence[FieldName] = (),
+    ) -> tuple[sqlite3.Row, list[FieldChange], list[FieldName], str | None]:
+        """The person's own values (source `user`), and the fields they say
+        are right as stored. Re-stating the stored value confirms it."""
         with self._connect() as con:
             row = self._resolve(con, ref)
             change_id = _new_change()
             sources = self._sources(con, row["person_id"])
-            changes = []
+            needs = set(self._needs(con, row["person_id"]))
+            changes: list[FieldChange] = []
+            confirmed: list[FieldName] = []
             today = date.today().isoformat()
             for name in FIELDS:
                 new = str(values.get(name, "")).strip()
-                if not new or _same(row[name], new):
-                    continue
-                changes.append(
-                    self._set_field(
-                        con,
-                        change_id,
-                        actor,
-                        row,
-                        name,
-                        new,
-                        source="user",
-                        source_date=today,
-                        observation_id=None,
-                        reason=reason or "set by the person",
-                        previous=sources.get(name),
+                if new and not _same(row[name], new):
+                    changes.append(
+                        self._set_field(
+                            con,
+                            change_id,
+                            actor,
+                            row,
+                            name,
+                            new,
+                            source="user",
+                            source_date=today,
+                            observation_id=None,
+                            reason=reason or "set by the person",
+                            previous=sources.get(name),
+                        )
                     )
-                )
+                    con.execute(
+                        "UPDATE proposals SET state = 'resolved' WHERE person_id = ? AND field = ? "
+                        "AND state = 'open'",
+                        (row["person_id"], name),
+                    )
+                    continue
+                asked = name in confirm or (bool(new) and name in needs)
+                previous = sources.get(name)
+                if not asked or not row[name] or previous is None:
+                    continue
+                if previous["source"] == "user":
+                    continue
                 con.execute(
-                    "UPDATE proposals SET state = 'resolved' WHERE person_id = ? AND field = ? "
-                    "AND state = 'open'",
-                    (row["person_id"], name),
+                    "INSERT OR REPLACE INTO field_sources VALUES (?,?,?,?,?)",
+                    (row["person_id"], name, "user", today, None),
                 )
-            if changes:
+                self._record(
+                    con,
+                    change_id,
+                    actor,
+                    row["person_id"],
+                    "confirm",
+                    field_name=name,
+                    old=row[name],
+                    new=row[name],
+                    reason=reason or "confirmed by the person",
+                    source="user",
+                    extra={
+                        "prev_source": previous["source"],
+                        "prev_date": previous["source_date"],
+                        "prev_observation": previous["observation_id"],
+                    },
+                )
+                confirmed.append(name)
+            if changes or confirmed:
                 con.execute(
                     "UPDATE people SET updated_at = ? WHERE person_id = ?",
                     (_now(), row["person_id"]),
@@ -687,7 +728,11 @@ class CardStore:
             fresh = con.execute(
                 "SELECT * FROM people WHERE person_id = ?", (row["person_id"],)
             ).fetchone()
-            return fresh, changes, change_id if changes else None
+            return fresh, changes, confirmed, change_id if changes or confirmed else None
+
+    def needs_confirmation(self, person_id: str) -> tuple[FieldName, ...]:
+        with self._connect() as con:
+            return self._needs(con, person_id)
 
     # -- status and reporting lines -----------------------------------
 
@@ -993,6 +1038,31 @@ class CardStore:
                         source="user",
                         extra={"line_id": extra.get("line_id")},
                     )
+                elif kind == "confirm":
+                    if person is None:
+                        continue
+                    con.execute(
+                        "INSERT OR REPLACE INTO field_sources VALUES (?,?,?,?,?)",
+                        (
+                            item["person_id"],
+                            item["field"],
+                            extra.get("prev_source") or "card",
+                            extra.get("prev_date") or "",
+                            extra.get("prev_observation"),
+                        ),
+                    )
+                    self._record(
+                        con,
+                        new_change,
+                        actor,
+                        item["person_id"],
+                        "unconfirm",
+                        field_name=item["field"],
+                        old=item["new"],
+                        new=item["new"],
+                        reason=f"undo {change_id}",
+                        source=extra.get("prev_source") or "",
+                    )
                 elif kind == "proposal":
                     con.execute(
                         "UPDATE proposals SET state = 'dismissed' "
@@ -1145,26 +1215,14 @@ class CardStore:
             return shown, lines, len(everyone) - len(shown)
 
     def uncertain_now(self, person_ids: Sequence[str]) -> dict[str, list[str]]:
-        """Fields of each person's latest observation that were read with
-        doubt and still hold that reading (not corrected by the person)."""
+        """Each person's fields still to confirm: flagged by any reading and
+        neither confirmed nor set by the person."""
         found: dict[str, list[str]] = {}
         with self._connect() as con:
             for person_id in person_ids:
-                latest = con.execute(
-                    "SELECT * FROM observations WHERE person_id = ? "
-                    "ORDER BY observation_id DESC LIMIT 1",
-                    (person_id,),
-                ).fetchone()
-                if latest is None:
-                    continue
-                sources = self._sources(con, person_id)
-                unsure = [
-                    name
-                    for name in json.loads(latest["uncertain_json"] or "[]")
-                    if name in sources and sources[name]["source"] != "user"
-                ]
-                if unsure:
-                    found[person_id] = unsure
+                needs = self._needs(con, person_id)
+                if needs:
+                    found[person_id] = list(needs)
         return found
 
     # -- the Hermes store ----------------------------------------------

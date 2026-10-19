@@ -212,13 +212,20 @@ class EditPersonHandler(_Cards):
         request = EditPersonRequest.model_validate(inputs)
 
         def work() -> Contract:
-            row, changes, change_id = self.store(context).edit(
-                request.person, request.fields.values(), actor=who(context), reason=request.reason
+            store = self.store(context)
+            row, changes, confirmed, change_id = store.edit(
+                request.person,
+                request.fields.values(),
+                actor=who(context),
+                reason=request.reason,
+                confirm=request.confirm,
             )
             return EditResult(
                 person_id=row["person_id"],
                 name=row["name"],
                 changes=tuple(changes),
+                confirmed=tuple(confirmed),
+                needs_confirmation=store.needs_confirmation(row["person_id"]),
                 change_id=change_id,
             )
 

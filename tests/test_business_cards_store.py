@@ -147,7 +147,7 @@ def test_business_group_division_and_department_are_kept_apart(tmp_path: Path) -
 def test_a_user_set_value_is_not_overwritten_by_a_signature(tmp_path: Path) -> None:
     store = _store(tmp_path)
     person = _add(store, CARD)
-    _, changes, _ = store.edit(
+    _, changes, _, _ = store.edit(
         PersonRef(person_id=person.person_id),
         {"title": "資深經理"},
         actor="alice",
@@ -368,3 +368,54 @@ def test_the_import_command_is_idempotent(
     missing = tmp_path / "none.db"
     assert main(["cards", "import", "--config", str(path), "--from", str(missing)]) == 0
     assert "no Hermes business-cards store" in capsys.readouterr().out
+
+
+def test_a_doubtful_field_needs_confirmation_until_the_person_confirms_it(
+    tmp_path: Path,
+) -> None:
+    """Live test 2026-10-20: the second scan did not flag the email, and the
+    chart stopped warning about it. A field stays "needs confirmation" while any
+    reading flagged it and the person has not confirmed or corrected it."""
+    store = _store(tmp_path)
+    first = _add(store, CARD, uncertain=("email", "fax"))
+    assert first.needs_confirmation == ("fax", "email")
+    again = _add(store, CARD, when=date(2026, 2, 1))
+    assert again.uncertain == () and again.needs_confirmation == ("fax", "email")
+    assert store.view(first.person_id).needs_confirmation == ("fax", "email")
+    assert store.uncertain_now([first.person_id]) == {first.person_id: ["fax", "email"]}
+    # "email 正確": confirmed, recorded in history, and undoable.
+    row, changes, confirmed, change = store.edit(
+        PersonRef(person_id=first.person_id),
+        {},
+        actor="alice via telegram",
+        reason="the person said the email is right",
+        confirm=("email",),
+    )
+    assert changes == [] and confirmed == ["email"] and change is not None
+    assert row["email"] == CARD["email"]
+    assert store.view(first.person_id).needs_confirmation == ("fax",)
+    history = store.history(PersonRef(person_id=first.person_id), limit=50).history
+    assert ("confirm", "email", "alice via telegram") in {
+        (item.kind, item.field, item.actor) for item in history
+    }
+    # Once the person confirmed it, a later doubtful reading does not reopen it.
+    _add(store, CARD, when=date(2026, 3, 1), uncertain=("email",))
+    assert store.view(first.person_id).needs_confirmation == ("fax",)
+    store.undo(change, actor="alice")
+    assert store.view(first.person_id).needs_confirmation == ("fax", "email")
+    # A correction clears it too; so does re-stating the stored value.
+    store.edit(PersonRef(person_id=first.person_id), {"fax": "02-2345-1111"}, actor="a", reason="")
+    store.edit(PersonRef(person_id=first.person_id), {"email": CARD["email"]}, actor="a", reason="")
+    assert store.view(first.person_id).needs_confirmation == ()
+    assert store.uncertain_now([first.person_id]) == {}
+
+
+def test_the_needs_confirmation_label_names_fields_in_chinese() -> None:
+    from capabilities.business_cards import chart
+
+    assert chart.needs_label(["romanised_name", "email"]) == "需確認：英文名、Email"
+    assert chart.needs_label(["phone", "ext", "mobile", "fax"]) == "需確認：電話、分機、手機、傳真"
+    assert (
+        chart.needs_label(["department", "division", "business_group", "title"])
+        == "需確認：部門、處、事業群、職稱"
+    )
