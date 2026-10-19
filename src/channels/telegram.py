@@ -26,6 +26,7 @@ import time
 import uuid
 from collections.abc import Callable, Iterator, Mapping
 from datetime import UTC, datetime
+from functools import partial
 from pathlib import Path
 from typing import Any, Literal, Self
 
@@ -34,6 +35,7 @@ from pydantic import Field, JsonValue, StrictBool, field_validator, model_valida
 from agent.gateway import TOOL_PROGRESS, ToolProgressState
 from agent.routing import DOT_COMMAND
 from agent.turn_progress import TURN_PROGRESS, TurnProgress, compact_lines
+from capabilities.business_cards.chart import NOTE as CHART_NOTE
 from channels import telegram_flow
 from common.action_cards import CARD_TAP, ActionCard, card_in, telegram_card
 from common.assets import (
@@ -229,6 +231,8 @@ class TelegramDelivery(Contract):
     # Pictures sent after the reply (an org chart; docs/phases/BUSINESS_CARDS.md):
     # paths of files a tool produced on this Host, never model text.
     photos: tuple[str, ...] = ()
+    # Files sent after the pictures (the chart's full Markdown legend).
+    documents: tuple[str, ...] = ()
     replied: StrictBool = False
     outcome: LocalAgentOutcome | None = None
     failure: Failure | None = None
@@ -879,6 +883,10 @@ class TelegramIngress:
                     await asyncio.to_thread(self._reply, update.chat_id, UNDELIVERED_REPLY)
                 for photo in delivery.photos:
                     await asyncio.to_thread(self._send_photo, update.chat_id, Path(photo))
+                for document in delivery.documents:
+                    await asyncio.to_thread(
+                        partial(self._send_photo, document=True), update.chat_id, Path(document)
+                    )
                 delivery = delivery.model_copy(update={"replied": replied})
             deliveries.append(delivery)
         if highest is None or highest == offset:
@@ -1377,9 +1385,10 @@ class TelegramIngress:
         return TelegramDelivery(
             **base,
             disposition="answered",
-            reply=scrub(with_legend(answer, charts)),
+            reply=scrub(with_legend(answer, charts, short=True)),
             buttons=buttons,
             photos=tuple(item["path"] for item in charts if item["kind"] == "image"),
+            documents=tuple(item["path"] for item in charts if item["kind"] != "image"),
         )
 
     def _carded(
@@ -1759,30 +1768,36 @@ class TelegramIngress:
             )
         return status == 200
 
-    def _send_photo(self, chat_id: int, path: Path) -> bool:
-        """One `sendPhoto` with the file as multipart form data, through the
-        bot's own transport; a photo that cannot be sent is not retried."""
+    def _send_photo(self, chat_id: int, path: Path, *, document: bool = False) -> bool:
+        """One `sendPhoto` (with the chart's short note as its caption) or
+        `sendDocument`, the file as multipart form data, through the bot's own
+        transport; a file that cannot be sent is not retried."""
         try:
             data = path.read_bytes()
             boundary = f"aep-{uuid.uuid4().hex}"
             name = re.sub(r"[^A-Za-z0-9._-]", "_", path.name) or "chart.png"
-            head = "\r\n".join(
-                (
-                    f"--{boundary}",
-                    'Content-Disposition: form-data; name="chat_id"',
-                    "",
-                    str(chat_id),
-                    f"--{boundary}",
-                    f'Content-Disposition: form-data; name="photo"; filename="{name}"',
-                    "Content-Type: image/png",
-                    "",
-                    "",
-                )
+            field, method, media = (
+                ("document", "sendDocument", "text/markdown")
+                if document
+                else ("photo", "sendPhoto", "image/png")
             )
+            parts = [f"--{boundary}", 'Content-Disposition: form-data; name="chat_id"', ""]
+            parts.append(str(chat_id))
+            if not document:
+                parts += [f"--{boundary}", 'Content-Disposition: form-data; name="caption"', ""]
+                parts.append(CHART_NOTE)
+            parts += [
+                f"--{boundary}",
+                f'Content-Disposition: form-data; name="{field}"; filename="{name}"',
+                f"Content-Type: {media}",
+                "",
+                "",
+            ]
+            head = "\r\n".join(parts)
             body = head.encode("utf-8") + data + f"\r\n--{boundary}--\r\n".encode()
             token = self._resolver.resolve(self.config.credential)
             reply = self._transport.send(
-                f"{self.config.api_base}/bot{token}/sendPhoto",
+                f"{self.config.api_base}/bot{token}/{method}",
                 body,
                 {"Content-Type": f"multipart/form-data; boundary={boundary}"},
                 float(self.config.poll_timeout_seconds + POLL_MARGIN_SECONDS),

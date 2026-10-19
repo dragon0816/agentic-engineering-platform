@@ -134,14 +134,25 @@ evidenced lines the layout is a grouping by title, not a reporting chart. Files 
 **Showing it.** Agent Web: after a Gateway turn, files named by a `cards__org_chart` result are
 kept on the answer (`ConversationMessage.attachments`) and the page shows the PNG inline, fetched
 through `GET /api/conversations/file` (token header; only files recorded on that conversation's
-answers, under the workspace). Telegram: the PNG is sent with `sendPhoto` after the text reply.
+answers, under the workspace). Telegram: the PNG is sent with `sendPhoto` after the text reply (§7).
 The legend is in the answer text (appended by the Host when the model left it out).
 
-## 7. Telegram
+## 7. Telegram (the main way cards arrive)
 
-A Telegram photo is downloaded into the attachment store and reaches the model as an image (the
-same `for_model` path as Agent Web), so "store this card" works there unchanged. The chart PNG goes
-back with `sendPhoto` (multipart, through the bot's own transport).
+Owner update 2026-10-20: most cards arrive as a photo sent to the Telegram bot.
+
+- A compressed photo, or a photo sent as a file (JPEG / PNG / WebP / GIF / BMP; a file without a
+  name is typed from its MIME type), is downloaded into the attachment store and reaches the model
+  as an image (the same `for_model` path as Agent Web). A bare photo with no caption is a card to
+  store; the card is stored in the same turn. HEIC files are refused with the usual "file type not
+  supported" reply (send it as a photo, which Telegram converts to JPEG).
+- An album (a media group in one poll batch) is one turn with every picture; the Skill stores one
+  card per photo and answers one short line per card.
+- The reply is short: the confirmed fields, the uncertain ones asked one per line, and the
+  "上次是…, 現在是…" sentence for a known person who changed.
+- The org chart goes back with `sendPhoto` (multipart, through the bot's own transport) captioned
+  with the short note (only drawn lines are reporting lines), then the full Markdown legend with
+  `sendDocument`; the text reply carries the legend's title and notes without the table.
 
 ## 8. Import from the Hermes store
 

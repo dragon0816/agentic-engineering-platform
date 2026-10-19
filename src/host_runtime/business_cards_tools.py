@@ -338,15 +338,25 @@ def chart_files(result: GatewayConversationResult | None) -> list[dict[str, str]
     return files
 
 
-def with_legend(answer: str, files: Sequence[dict[str, str]]) -> str:
-    """The answer with each chart's legend, when the model left it out."""
+def short_legend(legend: str) -> str:
+    """The legend without its table: the title and what the picture is
+    (for a phone screen; the full legend goes along as a file)."""
+    kept = [line for line in legend.splitlines() if not line.startswith("|")]
+    return "\n".join(kept).strip()
+
+
+def with_legend(answer: str, files: Sequence[dict[str, str]], *, short: bool = False) -> str:
+    """The answer with each chart's legend, when the model left it out;
+    `short` keeps only its title and notes (Telegram)."""
     out = answer
     for entry in files:
         legend = entry.get("legend")
         if not legend:
             continue
+        if short:
+            legend = short_legend(legend)
         first = legend.splitlines()[0] if legend.splitlines() else legend
-        table = "| 成員 | 主管 |" in legend
+        table = "| 成員 | 主管 |" in legend and not short
         if first not in out or (table and "| 成員 | 主管 |" not in out):
             out = f"{out.rstrip()}\n\n{legend}" if out.strip() else legend
     return out
