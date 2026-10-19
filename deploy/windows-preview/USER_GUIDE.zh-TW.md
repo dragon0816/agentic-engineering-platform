@@ -883,7 +883,9 @@ Agent Web 要在執行中，Telegram 才會有回應。
    字母、數字和 `. - _`，**不要用 email**。不確定時看 **Settings → Shared platform** 卡片
    上「registered by」的值。
 2. **Member Portal URL**（例如 `https://172.25.228.141:8776`）。
-3. **Bridge API URL**（例如 `https://172.25.228.141:8775`）。
+3. **Bridge API URL**（例如 `https://172.25.228.141:8775`）。Bridge 是跑在你這台電腦上的
+   執行端；「Bridge API」是平台那一端讓各台電腦的 Bridge 連過去的網址（註冊、同步、token），
+   在 Agent Web 裡的欄位叫 **Platform sync URL (Bridge API)**，工作仍然都在你這台電腦上執行。
 4. **憑證指紋（SHA-256）**：一串 64 個英數字，例如 `83:95:B0:90:…:BA:8B`。平台用的是
    管理員自己簽的憑證（自簽憑證），Windows 不認得它，你要用這串指紋確認連到的是真的平台。
 
@@ -892,7 +894,7 @@ Agent Web 要在執行中，Telegram 才會有回應。
 ### 10.1.1 信任平台的憑證（第一次，在 Agent Web）
 
 1. 打開 Agent Web → **Settings → Shared platform**，在 **Member Portal URL** 和
-   **Bridge API URL** 填上兩個 `https://` 網址。
+   **Platform sync URL (Bridge API)** 填上兩個 `https://` 網址。
 2. 在 **Platform certificate** 區塊按 **Fetch & show fingerprint**。畫面顯示
    `SHA-256 83:95:B0:…`（兩個網址是同一張憑證）和 `not trusted yet`。
 3. **逐段比對**這串指紋和管理員給你的是否**完全相同**：
@@ -950,7 +952,7 @@ Agent Web 要在執行中，Telegram 才會有回應。
 1. 在 Member Portal 的 **Publish from your Personal Agent** 區塊按
    **Connect a Personal Agent**，複製出現的代碼（只會顯示這一次）。
 2. 打開 Agent Web → **Settings → Shared platform**（`https://` 平台先做完 10.1.1）：
-   - **Member Portal URL**、**Bridge API URL**：填 10.1 拿到的兩個網址；
+   - **Member Portal URL**、**Platform sync URL (Bridge API)**：填 10.1 拿到的兩個網址；
    - **Personal Agent code**：貼上剛剛的代碼；
    - 按 **Save**。代碼只存在你的 Windows 使用者環境裡，不會寫進任何檔案，也不會再顯示。
 

@@ -1042,15 +1042,16 @@ tr:last-child td { border-bottom: none; }
     <h2>Shared platform</h2>
     <p class="note">The company's shared platform: Skills and Workflows your team published,
       and where you publish yours. The Member Portal is the Marketplace in your browser;
-      "Open Marketplace" uses this address. The Bridge API is what this PC synchronizes
-      from. Paste the Personal Agent code from the Member Portal ("Connect a Personal
-      Agent") once, then press "Enroll this PC". Codes and tokens are kept only in this
-      Windows user's environment and never shown again.</p>
+      "Open Marketplace" uses this address. Platform sync URL (Bridge API): This PC's
+      Bridge connects here to enroll and to download what your team published; everything
+      still runs on this PC. Paste the Personal Agent code from the Member Portal
+      ("Connect a Personal Agent") once, then press "Enroll this PC". Codes and tokens are
+      kept only in this Windows user's environment and never shown again.</p>
     <div class="card settings" id="shared-platform-card">
       <form id="shared-platform-settings" autocomplete="off">
         <div class="laya-grid">
           <label>Member Portal URL <input id="shared-portal-url"></label>
-          <label>Bridge API URL <input id="shared-bridge-url"></label>
+          <label>Platform sync URL (Bridge API) <input id="shared-bridge-url"></label>
           <label>Personal Agent code <input id="shared-code" type="password"
                  autocomplete="off" placeholder="paste once; it is not shown again"></label>
         </div>
