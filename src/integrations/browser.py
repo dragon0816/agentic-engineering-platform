@@ -519,7 +519,17 @@ class Browser:
         page = self.page()
         try:
             answer = page.call("Page.navigate", url=url)
-        except (DevtoolsRefused, WebSocketError) as failure:
+        except WebSocketError:
+            # A freshly started browser can replace its first tab, which drops
+            # the socket to the old one (CI 2026-10-19, WinError 10053). Attach
+            # to the current tab once and ask again; a second loss is real.
+            self._page = None
+            page = self.page()
+            try:
+                answer = page.call("Page.navigate", url=url)
+            except (DevtoolsRefused, WebSocketError) as failure:
+                raise BrowserError("navigation_failed", type(failure).__name__) from None
+        except DevtoolsRefused as failure:
             raise BrowserError("navigation_failed", type(failure).__name__) from None
         if answer.get("errorText"):
             # The browser's own word for why, which is about the address and
