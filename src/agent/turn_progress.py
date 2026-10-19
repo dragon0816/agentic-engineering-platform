@@ -78,6 +78,9 @@ class TurnProgress:
     _tools: deque[_Tool] = field(default_factory=lambda: deque(maxlen=MAX_RECENT_TOOLS))
     _harness: deque[_Harness] = field(default_factory=lambda: deque(maxlen=MAX_HARNESS_RUNS))
     _lock: threading.Lock = field(default_factory=threading.Lock)
+    #: Called (no arguments, from the writing thread) after every change, so a
+    #: channel can redraw on change instead of on a timer (Telegram).
+    listener: Callable[[], None] | None = field(default=None, repr=False, compare=False)
 
     def __post_init__(self) -> None:
         if not self.started:
@@ -85,20 +88,32 @@ class TurnProgress:
 
     # -- writers ---------------------------------------------------------------
 
+    def _notify(self) -> None:
+        listener = self.listener
+        if listener is None:
+            return
+        try:
+            listener()
+        except Exception:  # noqa: BLE001 - display cannot change the turn
+            pass
+
     def set_limits(self, tool_cap: int | None, time_limit_s: int | None) -> None:
         with self._lock:
             self.tool_cap, self.time_limit_s = tool_cap, time_limit_s
+        self._notify()
 
     def begin_pass(self) -> None:
         """A new pass of the tool loop (the conversation check's retry): the
         cap applies per pass, so the count starts again."""
         with self._lock:
             self.tool_count = 0
+        self._notify()
 
     def tool_started(self, name: str) -> None:
         with self._lock:
             self.tool_count += 1
             self._tools.append(_Tool(name=_name(name), started=self.clock()))
+        self._notify()
 
     def tool_finished(self, name: str, status: str) -> None:
         with self._lock:
@@ -106,7 +121,8 @@ class TurnProgress:
                 if tool.name == _name(name) and tool.status == "running":
                     tool.status = status
                     tool.duration_s = round(self.clock() - tool.started, 1)
-                    return
+                    break
+        self._notify()
 
     def harness_phase(self, domain: str, stages: tuple[str, ...], phase: str, retry: int) -> None:
         """A Harness run entered `phase` (an `AgentHarnessRun` phase name)."""
@@ -122,6 +138,7 @@ class TurnProgress:
                 self._harness.append(current)
             current.phase, current.retry = phase, retry
             current.done = phase in _TERMINAL
+        self._notify()
 
     def agent_tool(self, name: str, status: str) -> None:
         """A native agent's tool request (agent mode): `waiting` while its card
@@ -132,12 +149,19 @@ class TurnProgress:
                     if tool.name == _name(name) and tool.status == "waiting":
                         tool.status = status
                         tool.duration_s = round(self.clock() - tool.started, 1)
-                        return
-            self.tool_count += 1
-            line = _Tool(name=_name(name), started=self.clock(), status=status)
-            if status != "waiting":
-                line.duration_s = 0.0
-            self._tools.append(line)
+                        break
+                else:
+                    self._agent_line(name, status)
+            else:
+                self._agent_line(name, status)
+        self._notify()
+
+    def _agent_line(self, name: str, status: str) -> None:
+        self.tool_count += 1
+        line = _Tool(name=_name(name), started=self.clock(), status=status)
+        if status != "waiting":
+            line.duration_s = 0.0
+        self._tools.append(line)
 
     # -- readers ---------------------------------------------------------------
 

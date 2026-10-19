@@ -2556,3 +2556,16 @@ s-k-20261011T102952` (not published).
   weekly report: Capabilities → the fixture → **Revise in chat**, ask for a small change, check
   the card says "Revision of … 1.0.0 → 1.0.1" with the right changes, press Install, check both
   versions are listed.
+
+## Telegram status message edited on every state change (2026-10-19)
+
+- [x] Edit on change, coalesced (2026-10-19, Claude Code; owner approved 2026-10-19, superseding
+  the 5 s rule). `TurnProgress.listener`; `channels/telegram.py` `_Progress` redraws on each
+  change, at most one edit per second per chat (`STATUS_EDIT_INTERVAL_SECONDS`), deferred not
+  dropped, identical text skipped, 429 `retry_after` honoured (`_edit_status` returns it). Tests
+  `tests/test_telegram_turn_progress.py` (each change, burst coalescing, identical text, 429,
+  worker-thread phase, one status message). Design `docs/HARNESS_DESIGN.zh-TW.md` §5.5.1;
+  decision `docs/DECISIONS.md` 2026-10-19 "Telegram's status message is edited whenever the
+  turn's state changes". Verification: see HANDOFF.md.
+- [ ] Live check after the next Agent Web restart (owner): a Telegram turn that uses tools shows
+  each phase and tool in the one status message within about a second, never a second message.

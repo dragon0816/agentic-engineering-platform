@@ -667,6 +667,10 @@ def test_a_conversation_shows_it_is_working_and_which_skills_it_used(tmp_path: P
 
     transport = FakeTransport([[update(1, OWNER, "please release the package")]])
     item, agent, _ = ingress(tmp_path, transport)
+    # This turn takes milliseconds; with the one-second edit window the
+    # "running" state would be coalesced into "done" (owner 2026-10-19). The
+    # window is tested in test_telegram_turn_progress.py; here, every state.
+    item.status_edit_interval_s = 0.0
     agent.gateway.router.model = UsingATool()
     delivery = poll(item).deliveries[0]
     assert delivery.disposition == "answered" and delivery.replied

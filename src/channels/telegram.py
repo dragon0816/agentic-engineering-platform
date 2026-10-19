@@ -21,6 +21,7 @@ failure rules.
 import asyncio
 import json
 import re
+import threading
 import time
 from collections.abc import Callable, Iterator, Mapping
 from datetime import UTC, datetime
@@ -140,8 +141,14 @@ def attachment_reply(code: str) -> str:
 
 #: Turns of a Telegram chat kept as context for the next one (memory only).
 MAX_CHAT_HISTORY = 12
-#: How often a "working on it" message refreshes its elapsed time.
+#: How often a "working on it" message refreshes its elapsed time when
+#: nothing else changed.
 PROGRESS_REFRESH_SECONDS = 5.0
+#: Shortest gap between two status edits in one chat: Telegram allows about
+#: one a second; changes inside the gap are coalesced (owner 2026-10-19).
+STATUS_EDIT_INTERVAL_SECONDS = 1.0
+#: Longest a 429's `retry_after` may hold back the live status edits.
+MAX_STATUS_BACKOFF_S = 60.0
 _STEP_MARKS: dict[ToolProgressState, str] = {
     "running": "running…",
     "succeeded": "done",
@@ -484,13 +491,13 @@ def _describe(outcome: LocalAgentOutcome) -> str:
     return f"{target.name}: {decision.kind}"
 
 
-def _retry_after(body: bytes) -> float:
-    """Seconds Telegram asked to wait after a 429, at most `MAX_RETRY_WAIT_S`."""
+def _retry_after(body: bytes, cap: float = MAX_RETRY_WAIT_S) -> float:
+    """Seconds Telegram asked to wait after a 429, at most `cap`."""
     try:
         seconds = json.loads(body).get("parameters", {}).get("retry_after", 1)
     except (ValueError, AttributeError):
         seconds = 1
-    return float(min(max(seconds if isinstance(seconds, int | float) else 1, 0), MAX_RETRY_WAIT_S))
+    return float(min(max(seconds if isinstance(seconds, int | float) else 1, 0), cap))
 
 
 def _no_answer_reply(record: str | None) -> str:
@@ -533,9 +540,17 @@ class _Progress:
     Agent works: how long it has taken and which skills it used, and for a
     conversation the Harness phase and the tool count and time against their
     limits (owner 2026-10-19). Only names and numbers are shown, never
-    arguments or results. Every Bot API call runs off the event loop, one at a
-    time, so edits arrive in order; after the first edit, at most one edit per
-    `progress_refresh_s` (a burst of tool events becomes one edit)."""
+    arguments or results.
+
+    The message is edited whenever the shown state changes (owner 2026-10-19:
+    a new Harness phase, a tool starting or finishing, a retry, a stop), not on
+    a timer. Edits are coalesced to at most one per `status_edit_interval_s`
+    per chat (Telegram allows about one a second): a change inside the window
+    is rendered and sent when the window ends, so the newest state is the one
+    shown and none is dropped. Text identical to the last edit is not sent; a
+    429 pushes the next edit back by Telegram's `retry_after`. Every Bot API
+    call runs off the event loop, one at a time, so edits arrive in order. The
+    elapsed-time line also refreshes every `progress_refresh_s`."""
 
     def __init__(
         self,
@@ -553,9 +568,16 @@ class _Progress:
         self._lock = asyncio.Lock()
         self._pending: set[asyncio.Task[None]] = set()
         self._ticker: asyncio.Task[None] | None = None
+        self._loop: asyncio.AbstractEventLoop | None = None
+        self._loop_thread: int | None = None
+        # A render already queued (next loop pass, or the end of the rate
+        # window); every change before it runs is covered by it.
+        self._due: asyncio.Handle | None = None
+        self._last_text: str | None = None
+        self._closed = False
         self.turn = turn
-        self._last_edit: float | None = None
-        self._dirty = False
+        if turn is not None:
+            turn.listener = self.changed
 
     def text(self, outcome: bool | None = None) -> str:
         seconds = int(time.monotonic() - self._started)
@@ -577,45 +599,109 @@ class _Progress:
         return scrub("\n".join(lines))
 
     async def open(self) -> None:
-        self._message_id = await asyncio.to_thread(
-            self._ingress._send_status, self._chat_id, self.text()
-        )
+        self._loop = asyncio.get_running_loop()
+        self._loop_thread = threading.get_ident()
+        text = self.text()
+        self._message_id = await asyncio.to_thread(self._ingress._send_status, self._chat_id, text)
         if self._message_id is not None:
+            self._last_text = text
             self._ticker = asyncio.create_task(self._tick())
 
     def tool(self, name: str, state: ToolProgressState) -> None:
         """The Gateway's TOOL_PROGRESS listener; called on the event loop."""
         self._steps[name] = state
-        self._dirty = True
-        if (
-            self._last_edit is None
-            or time.monotonic() - self._last_edit >= self._ingress.progress_refresh_s
-        ):
-            self._schedule()
+        self._changed()
+
+    def changed(self) -> None:
+        """The turn's state changed (`TurnProgress.listener`). Safe from any
+        thread: a Harness inside a tool may run in a worker thread."""
+        loop = self._loop
+        if loop is None or self._closed:
+            return
+        if threading.get_ident() == self._loop_thread:
+            self._changed()
+            return
+        try:
+            loop.call_soon_threadsafe(self._changed)
+        except RuntimeError:  # the loop has closed: the turn is over
+            pass
+
+    def _changed(self) -> None:
+        if self._closed or self._message_id is None or self._due is not None:
+            return
+        loop = asyncio.get_running_loop()
+        wait = self._ingress._status_wait(self._chat_id)
+        # Rendered on the next loop pass at the earliest, so the events of one
+        # step (a tool's count and its "running" line) become one edit.
+        if wait > 0:
+            self._due = loop.call_later(wait, self._render)
+        else:
+            self._due = loop.call_soon(self._render)
+
+    def _render(self) -> None:
+        self._due = None
+        if self._closed:
+            return
+        loop = asyncio.get_running_loop()
+        wait = self._ingress._status_wait(self._chat_id)
+        if wait > 0:  # a 429 or another status edit in this chat moved the window
+            self._due = loop.call_later(wait, self._render)
+            return
+        text = self.text()
+        if text == self._last_text:
+            return
+        self._last_text = text
+        self._ingress._status_sent(self._chat_id)
+        task = loop.create_task(self._send(text))
+        self._pending.add(task)
+        task.add_done_callback(self._pending.discard)
+
+    async def _send(self, text: str) -> None:
+        retry = await self._edit(text)
+        if retry is not None and not self._closed:
+            # Rate-limited: wait as told, then show the newest state.
+            self._ingress._status_blocked(self._chat_id, retry)
+            if self._last_text == text:
+                self._last_text = None
+            self._changed()
 
     async def finish(self, succeeded: bool) -> None:
+        self._closed = True
+        if self.turn is not None:
+            self.turn.listener = None
         if self._ticker is not None:
             self._ticker.cancel()
+        if self._due is not None:
+            self._due.cancel()
+            self._due = None
         if self._pending:
             await asyncio.gather(*self._pending, return_exceptions=True)
-        await self._edit(self.text(succeeded))
+        text = self.text(succeeded)
+        if self._message_id is None or text == self._last_text:
+            return
+        # The final edit keeps the window too; the wait is short and bounded.
+        wait = min(self._ingress._status_wait(self._chat_id), MAX_RETRY_WAIT_S)
+        if wait > 0:
+            await asyncio.sleep(wait)
+        self._ingress._status_sent(self._chat_id)
+        retry = await self._edit(text)
+        if retry is not None:
+            await asyncio.sleep(min(retry, MAX_RETRY_WAIT_S))
+            self._ingress._status_sent(self._chat_id)
+            await self._edit(text)
+        self._last_text = text
 
     async def _tick(self) -> None:
         while True:
             await asyncio.sleep(self._ingress.progress_refresh_s)
-            self._schedule()
+            self._changed()
 
-    def _schedule(self) -> None:
-        self._last_edit, self._dirty = time.monotonic(), False
-        task = asyncio.get_running_loop().create_task(self._edit(self.text()))
-        self._pending.add(task)
-        task.add_done_callback(self._pending.discard)
-
-    async def _edit(self, text: str) -> None:
+    async def _edit(self, text: str) -> float | None:
+        """One edit; the seconds Telegram asked to wait after a 429, else None."""
         if self._message_id is None:
-            return
+            return None
         async with self._lock:
-            await asyncio.to_thread(
+            return await asyncio.to_thread(
                 self._ingress._edit_status, self._chat_id, self._message_id, text
             )
 
@@ -643,6 +729,9 @@ class TelegramIngress:
         self._transport = transport if transport is not None else UrllibTransport()
         self.unmapped: dict[int, UnmappedSender] = {}
         self.progress_refresh_s = PROGRESS_REFRESH_SECONDS
+        self.status_edit_interval_s = STATUS_EDIT_INTERVAL_SECONDS
+        # When each chat may next have its status message edited (monotonic).
+        self._status_slots: dict[int, float] = {}
         self._histories: dict[tuple[int, int], list[ModelMessage]] = {}
         # Conversation run and install requests (G4); set by the host once it exists.
         self.approvals: ChatAuthoring | None = None
@@ -1582,13 +1671,27 @@ class TelegramIngress:
         except Exception:  # noqa: BLE001 - see above
             return None
 
-    def _edit_status(self, chat_id: int, message_id: int, text: str) -> None:
+    def _edit_status(self, chat_id: int, message_id: int, text: str) -> float | None:
+        """Edit a status message; after a 429, the seconds Telegram asked to
+        wait (its `retry_after`), else None."""
         try:
-            self._call(
+            status, body = self._call(
                 "editMessageText", {"chat_id": chat_id, "message_id": message_id, "text": text}
             )
         except Exception:  # noqa: BLE001 - a stale status line is not worth a failure
-            pass
+            return None
+        return _retry_after(body, MAX_STATUS_BACKOFF_S) if status == 429 else None
+
+    def _status_wait(self, chat_id: int) -> float:
+        """Seconds until this chat's status message may be edited again."""
+        return max(0.0, self._status_slots.get(chat_id, 0.0) - time.monotonic())
+
+    def _status_sent(self, chat_id: int) -> None:
+        self._status_slots[chat_id] = time.monotonic() + self.status_edit_interval_s
+
+    def _status_blocked(self, chat_id: int, seconds: float) -> None:
+        until = time.monotonic() + max(seconds, self.status_edit_interval_s)
+        self._status_slots[chat_id] = max(self._status_slots.get(chat_id, 0.0), until)
 
     def _status(self) -> str:
         snapshot = self.agent.snapshot(observed_at=datetime.now(UTC))

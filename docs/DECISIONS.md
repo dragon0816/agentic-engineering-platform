@@ -3471,3 +3471,26 @@ read tool with two keys is easier for the model to find); keying a fork on the S
 co-editor records (not available on a local Host; `contributors` is what the manifest carries);
 installing a revision under the original team-owned name with a person as owner (it would claim
 the team's name and collide with the next bundle upgrade).
+
+## 2026-10-19 — Telegram's status message is edited whenever the turn's state changes
+
+Owner approved 2026-10-19 (「狀態有變就發」). Supersedes the Telegram part of 2026-10-19
+"Conversation tool cap 150 with guards; live Harness state in the chat" ("edits it at most every
+5 s after the first edit"); that entry is kept as history.
+
+- The one status message ("⏳ Working on it…", sent at the start as since 2026-10-06) is edited
+  whenever the shown state changes: a new Harness phase, a tool starting or finishing, a retry,
+  a stop. `TurnProgress` calls a `listener` after each change; Telegram's `_Progress` redraws
+  from it (thread-safe: a Harness in a worker thread hops to the event loop).
+- Rate: at most one status edit per second per chat (`STATUS_EDIT_INTERVAL_SECONDS`). A change
+  inside the window is rendered when the window ends, so the newest state is shown and none is
+  dropped; the events of one step become one edit. Identical text is never sent. A 429 defers
+  the next edit by its `retry_after` (capped at 60 s), then the newest state is sent.
+- The elapsed-time line still refreshes every 5 s when nothing else changes. The final
+  "✅ Done / ⚠️ Stopped" edit keeps the window (waiting at most 5 s). Still one message per turn,
+  never one message per change.
+
+Rejected: a new message per change (floods the chat; the owner has never wanted that); keeping
+the 5 s timer (the owner wants changes shown as they happen); editing on every event without a
+window (Telegram rate-limits about one edit a second per chat and would answer 429s); dropping
+changes inside the window instead of deferring them (the last state of a burst could be lost).
