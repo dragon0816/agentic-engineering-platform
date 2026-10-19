@@ -730,3 +730,37 @@ def test_candidates_expire_and_belong_to_one_conversation(
     monkeypatch.setattr(store_module, "_clock", lambda: later)
     expired = _run(bridge, "store-candidates", {"candidate_ids": ["all"]})
     assert expired.failure is not None and expired.failure.code == "candidates_expired"
+
+
+def test_a_printed_unified_business_number_is_stored_even_outside_its_field(
+    tmp_path: Path,
+) -> None:
+    """Live re-test 2026-10-20: card A printed its 統一編號 but the reading left
+    it out. Other printed text the reading did not place is scanned for it."""
+    bridge = _bridge(tmp_path)
+    stored = _run(
+        bridge,
+        "add-card",
+        {"name": "范例", "company": "範例科技", "other_text": "統編：12345678\n品質第一"},
+    )
+    assert stored.status == "succeeded", stored.failure
+    person = _run(bridge, "find", {"query": "范例"}).data["people"][0]
+    assert person["company_tax_id"] == "12345678" and person["notes"] == ""
+    # Set by the person later: an old note naming it is tidied away, with history.
+    _run(
+        bridge,
+        "add-card",
+        {"name": "陳二", "company": "範例科技", "notes": "週五休"},
+    )
+    from capabilities.business_cards.store import CardStore
+
+    store = CardStore.for_actor(tmp_path / "workspace", "alice")
+    with sqlite3.connect(store.path) as con:
+        con.execute("UPDATE people SET notes = '統一編號 87654321 週五休' WHERE name = '陳二'")
+    edited = _run(
+        bridge,
+        "edit-person",
+        {"person": {"name": "陳二"}, "fields": {"company_tax_id": "87654321"}},
+    ).data
+    assert {c["field"] for c in edited["changes"]} == {"company_tax_id", "notes"}
+    assert _run(bridge, "find", {"query": "陳二"}).data["people"][0]["notes"] == "週五休"

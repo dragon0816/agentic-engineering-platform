@@ -53,7 +53,9 @@ _FIELD_PROPS["title"] = {
 _FIELD_PROPS["honorific"] = {"type": "string", "description": "博士, Dr., PhD, ..."}
 _FIELD_PROPS["company_tax_id"] = {
     "type": "string",
-    "description": "the company's unified business number 統一編號 (never in notes)",
+    "description": "the company's unified business number 統一編號 / 統編 / Tax ID, 8 digits: "
+    "always fill it when printed anywhere on the card (often near the company name or "
+    "address); never in notes",
 }
 _FIELD_PROPS["phone"] = {"type": "string", "description": "desk number"}
 _FIELD_PROPS["ext"] = {"type": "string", "description": "desk extension"}
@@ -136,6 +138,11 @@ TOOLS: tuple[tuple[str, CapabilitySpec, str, dict[str, Any]], ...] = (
                     "description": "where romanised_name is printed, copied as printed "
                     "(e.g. 'Ryan Fan, under the Chinese name'); required with romanised_name, "
                     "else the Host drops it",
+                },
+                "other_text": {
+                    "type": "string",
+                    "description": "any other printed text not placed in a field, one line "
+                    "each (e.g. a 統一編號 line); scanned by the Host, not stored",
                 },
                 "image_path": {"type": "string", "description": "the attached photo's path"},
                 "card_date": _DATE,

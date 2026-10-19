@@ -567,3 +567,38 @@ def test_namesakes_in_another_department_with_another_email_stay_apart(
     from capabilities.business_cards.manifest import PROCEDURE
 
     assert "email_differs" in PROCEDURE
+
+
+def test_the_unified_business_number_is_found_wherever_the_reading_put_it() -> None:
+    """Live re-test 2026-10-20: card A's 統一編號 was printed but not stored.
+    The Host also finds it in the address and in other printed text."""
+    from capabilities.business_cards import reading
+
+    moved = reading.tidy({"address": "新竹市科學園區 統一編號：12345678", "company_tax_id": ""})
+    assert (moved["company_tax_id"], moved["address"]) == ("12345678", "新竹市科學園區")
+    assert reading.tax_id_in("Tel 03-1234567\n統編 87654321\nISO 9001") == "87654321"
+    assert reading.tax_id_in("統一編號：１２３４５６７８") == "12345678"  # full-width digits
+    assert reading.tax_id_in("Tel 03-12345678") == ""
+
+
+def test_a_stored_note_with_the_unified_business_number_is_moved_with_history(
+    tmp_path: Path,
+) -> None:
+    """Live re-test 2026-10-20: after company_tax_id was set, the old
+    「統一編號：…」 note stayed in notes."""
+    store = _store(tmp_path)
+    old = _add(store, CARD)
+    with sqlite3.connect(store.path) as con:  # a note stored before the field existed
+        con.execute(
+            "UPDATE people SET notes = ? WHERE person_id = ?",
+            ("統一編號：12345678；週五休", old.person_id),
+        )
+    again = _add(store, {**CARD, "company_tax_id": "12345678"}, when=date(2026, 2, 1))
+    view = store.view(old.person_id)
+    assert (view.company_tax_id, view.notes) == ("12345678", "週五休")
+    assert ("notes", "統一編號：12345678；週五休", "週五休") in {
+        (c.field, c.old, c.new) for c in again.changes
+    }
+    history = store.history(PersonRef(person_id=old.person_id), limit=50).history
+    moved = [item for item in history if item.field == "notes"]
+    assert moved and "company_tax_id" in moved[0].reason

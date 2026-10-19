@@ -185,8 +185,12 @@ class _Cards:
 class AddCardHandler(_Cards):
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = AddCardRequest.model_validate(inputs)
+        read = request.values()
+        if not read["company_tax_id"]:
+            # Printed but not placed in its field (live re-test 2026-10-20).
+            read["company_tax_id"] = reading.tax_id_in(request.other_text)
         values, uncertain, dropped = reading.check_romanised(
-            request.values(), request.uncertain, request.romanised_name_printed
+            read, request.uncertain, request.romanised_name_printed
         )
 
         def work() -> Contract:

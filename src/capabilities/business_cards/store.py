@@ -607,6 +607,9 @@ class CardStore:
             uncertain=unsure,
             email_differs=differs is not None,
         )
+        moved = self._tidy_notes(con, change_id, actor, row["person_id"])
+        if moved is not None:
+            merge.changes.append(moved)
         if merge.changes:
             con.execute(
                 "UPDATE people SET updated_at = ? WHERE person_id = ?", (_now(), row["person_id"])
@@ -722,6 +725,31 @@ class CardStore:
             )
         return merge
 
+    def _tidy_notes(
+        self, con: sqlite3.Connection, change_id: str, actor: str, person_id: str
+    ) -> FieldChange | None:
+        """A 「統一編號：…」 mention in the notes of the number now stored in
+        `company_tax_id` (a note from before the field existed) is taken out
+        of the notes, keeping the notes' source; recorded in history."""
+        row = con.execute("SELECT * FROM people WHERE person_id = ?", (person_id,)).fetchone()
+        tidied = reading.without_tax_id(row["notes"], row["company_tax_id"])
+        if tidied == row["notes"]:
+            return None
+        previous = self._sources(con, person_id).get("notes")
+        return self._set_field(
+            con,
+            change_id,
+            actor,
+            row,
+            "notes",
+            tidied,
+            source=previous["source"] if previous is not None else "card",
+            source_date=previous["source_date"] if previous is not None else _now()[:10],
+            observation_id=previous["observation_id"] if previous is not None else None,
+            reason="統一編號 moved to company_tax_id",
+            previous=previous,
+        )
+
     def _propose(
         self,
         con: sqlite3.Connection,
@@ -829,6 +857,9 @@ class CardStore:
                     },
                 )
                 confirmed.append(name)
+            moved = self._tidy_notes(con, change_id, actor, row["person_id"])
+            if moved is not None:
+                changes.append(moved)
             if changes or confirmed:
                 con.execute(
                     "UPDATE people SET updated_at = ? WHERE person_id = ?",

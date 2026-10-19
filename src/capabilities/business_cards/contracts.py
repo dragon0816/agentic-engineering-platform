@@ -116,6 +116,10 @@ class AddCardRequest(CardFields):
     # Where the romanised name is printed, copied as printed ("Ryan Fan, under
     # the Chinese name"). Without it the Host drops romanised_name.
     romanised_name_printed: str = Field(default="", max_length=200)
+    # Any other printed text not placed in a field, one line each (a
+    # 統一編號 line, a slogan). The Host only scans it for the unified
+    # business number; it is not stored.
+    other_text: str = Field(default="", max_length=1000)
     # The attached photo's path, as the conversation listed it. Only its hash
     # is kept, and only for a file inside this Host's attachment store.
     image_path: str = Field(default="", max_length=1000)

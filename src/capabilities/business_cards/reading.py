@@ -41,8 +41,8 @@ def _trim(text: str) -> str:
 
 def tidy(values: Mapping[str, str]) -> dict[str, str]:
     """A reading with each value in its own field: a degree or honorific in
-    the title moves to `honorific`; a unified business number in the notes
-    moves to `company_tax_id`. Division and department text is kept exactly
+    the title moves to `honorific`; a unified business number in the notes or
+    the address moves to `company_tax_id`. Division and department text is kept exactly
     as read (研展處 I stays 研展處 I)."""
     out = dict(values)
     title = out.get("title", "")
@@ -52,12 +52,28 @@ def tidy(values: Mapping[str, str]) -> dict[str, str]:
         known = [part for part in re.split(r"[、,，/ ]+", out.get("honorific", "")) if part]
         merged = list(dict.fromkeys(known + [item.rstrip(",") for item in found]))
         out["honorific"] = " ".join(merged)
-    notes = out.get("notes", "")
-    match = _TAX_ID.search(notes)
-    if match and out.get("company_tax_id", "") in ("", match.group(1)):
-        out["company_tax_id"] = match.group(1)
-        out["notes"] = _trim(notes[: match.start()] + " " + notes[match.end() :])
+    for name in ("notes", "address"):
+        text = out.get(name, "")
+        match = _TAX_ID.search(text)
+        if match and out.get("company_tax_id", "") in ("", match.group(1)):
+            out["company_tax_id"] = match.group(1)
+            out[name] = _trim(text[: match.start()] + " " + text[match.end() :])
     return out
+
+
+def tax_id_in(text: str) -> str:
+    """The unified business number printed anywhere in `text` (a reading's
+    other printed text), or nothing. Full-width digits count."""
+    match = _TAX_ID.search(unicodedata.normalize("NFKC", text))
+    return match.group(1) if match else ""
+
+
+def without_tax_id(notes: str, tax_id: str) -> str:
+    """`notes` without a 「統一編號：<tax_id>」 mention of that number."""
+    match = _TAX_ID.search(notes)
+    if not tax_id or match is None or match.group(1) != tax_id:
+        return notes
+    return _trim(notes[: match.start()] + " " + notes[match.end() :])
 
 
 def printed(romanised: str, evidence: str) -> bool:
