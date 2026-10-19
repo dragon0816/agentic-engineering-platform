@@ -73,6 +73,21 @@ Before modifying implementation code, read `docs/ARCHITECTURE.md`, `docs/ROADMAP
 
 Finished work that passed verification is committed directly to `main`; a pull request is not required (owner decision 2026-10-19, `docs/DECISIONS.md`).
 
+Open decisions and tasks are tracked in GitHub Issues (owner decision 2026-10-19). Who closes an issue:
+- `decision-needed`, `meeting`: the owner or the decision maker the owner named. The decision is
+  recorded in `docs/DECISIONS.md` first and the issue gets a comment linking it. An agent may close one
+  only after the owner stated the decision, and says so in the closing comment ("closed on the owner's
+  decision of <date>"); the owner may reopen it.
+- `verification`: the person who verified it, with the result in a comment. A problem found becomes a
+  new bug issue; the verification issue is not closed as passed.
+- implementation work: closed by the commit that completes it (`Closes #N` in the commit message,
+  pushed to `main` after verification). If CI then fails, reopen the issue and fix it.
+- `coordination`, `on-hold`: the owner, with the reason in a comment.
+Every closing leaves evidence: a commit, a `docs/DECISIONS.md` entry or a verification result.
+Contributors may close the implementation and verification issues they own; decision issues are
+closed only by the owner or the named decision maker. Owner-only security items are never filed as
+issues.
+
 Use repository procedures under `.agents/skills/`:
 - `architecture-guard` before implementation or architectural changes;
 - `implementation-planning` to convert requirements into small implementation slices;

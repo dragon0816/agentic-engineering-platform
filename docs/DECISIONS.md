@@ -3582,3 +3582,17 @@ Rejected: a feature branch and pull request for every K02+ change (option B) and
 only (option C): with one owner reviewing and agents verifying locally and in CI, they add waiting
 without adding a reviewer.
 
+
+## 2026-10-19 — Open items live in GitHub Issues, and who closes them
+
+Owner: "把現在留下來的問題和任務放在github issues"; then agreed ("同意") to the closing rules.
+Issues #211–#222 hold the open decisions and verification tasks; `docs/TASKS.md` stays the record of
+completed work. Closing rules (also in `AGENTS.md`): decision and meeting issues are closed by the owner
+or a named decision maker after the decision is in this file (an agent may close one only on a stated
+owner decision, saying so); verification issues by whoever verified; implementation issues by the
+completing commit (`Closes #N`), reopened if CI fails; coordination and on-hold issues by the owner.
+Every closing links its evidence. Owner-only security items are not filed as issues.
+
+Rejected: any contributor closing any issue (a decision could be closed by someone other than the
+decider); keeping the open items only in `docs/TASKS.md` (the owner kept forgetting them and wants to
+discuss them with colleagues).
