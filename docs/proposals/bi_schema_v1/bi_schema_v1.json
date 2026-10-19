@@ -1,0 +1,3704 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aep:bi.schema:v1",
+  "schema_id": "bi.schema/v1",
+  "version": "1.0.0",
+  "status": "poc-contract",
+  "title": "BI Knowledge Schema v1 (PoC contract from bi_schema.py; not a production schema)",
+  "source": {
+    "primary": "tests/fixtures/bi_vault_example/tools/bi_schema.py (owner-provided 2026-10-19; committed as test data in e30cd8bf with owner approval). Its docstring calls it the single source of truth for card schemas. Line references are bi_schema.py:<line>.",
+    "primary_sha256": "395ff4e7142cdb44d02de1e4d6f376d763082eae2b0afcaebd3518195cd367da",
+    "read_without_executing": "Parsed with Python ast by the generator; the tool was never run.",
+    "secondary": [
+      "tests/fixtures/bi_vault_example/tools/bi_ingest.py (merge, normalisation, missing-target warnings)",
+      "tests/fixtures/bi_vault_example/tools/README.md, tests/fixtures/bi_vault_example/README.md, tests/fixtures/bi_vault_example/BI/Dashboard.md, tools/prompts/slide_distill.md",
+      "docs/proposals/bi_schema_v0/bi_schema_v0.json (kept unchanged for history)"
+    ],
+    "origins": {
+      "source-bi-schema-py": "defined in bi_schema.py; code_ref / x-code gives the line",
+      "proposed": "not in bi_schema.py; kept from v0 or added by v1.3, each with a reason",
+      "aep-record": "AEP storage record envelope (ids, classification, publication status), not a card field"
+    },
+    "field_kinds": {
+      "str": "string",
+      "int": "integer (optional range)",
+      "bool": "boolean",
+      "date": "YYYY-MM-DD",
+      "enum": "enum",
+      "list": "array of strings",
+      "link": "single relationship (cardinality one)",
+      "linklist": "relationship list (cardinality many)",
+      "virtual": "file name only, never stored as a property (bi_schema.py:4-6)"
+    },
+    "field_kinds_code_ref": "bi_schema.py:3-6, 10-12",
+    "analysis_chain": [
+      "Trend",
+      "Technology",
+      "Node",
+      "Ecosystem",
+      "CustomerProduct",
+      "Application",
+      "TestSolution",
+      "Opportunity"
+    ],
+    "analysis_chain_source": "tests/fixtures/bi_vault_example/README.md:18 (Opportunity appears only here; no type in bi_schema.py)",
+    "link_targets_untyped": "bi_schema.py records no target type for link / linklist fields and bi_ingest.py only warns on a missing target (bi_ingest.py:722-727). Every v1 range is therefore inferred; range_basis says from what.",
+    "example_vault_counts": {
+      "note": "tests/fixtures/bi_vault_example/BI, excluding _Templates and Dashboard.md; 103 cards",
+      "Node": 8,
+      "Ecosystem": 57,
+      "Account": 4,
+      "Application": 4,
+      "Competitor": 6,
+      "Concept": 8,
+      "CustomerProduct": 2,
+      "Signal": 3,
+      "Technology": 4,
+      "TestSolution": 3,
+      "Trend": 4
+    }
+  },
+  "id_rules": {
+    "entity_id": "ent-<lowercase entity_type>-<canonical_key>",
+    "canonical_key": "^[a-z0-9]+(-[a-z0-9]+)*$, unique per entity_type",
+    "relationship_id": "rel-<sha256(subject_entity_id|relationship_type|object_entity_id)[:16]> with the v1 relationship_type; the upcast writes relationship_id_map (v0 id -> v1 id) and old ids are never reused",
+    "claim_id": "clm-<sha256(relationship_id or subject_entity_id|statement)[:16]>",
+    "document_id": "src-<sha256(original bytes)[:16]> (existing source_id, src/knowledge/raw.py source_for)",
+    "evidence_id": "ev-<sha256(document_id|locator|normalized_text)[:20]> (ADR-K4)"
+  },
+  "field_classes": {
+    "sourced": "a fact taken from a document or an import; may be refreshed by a later import unless a person set it",
+    "judgement": "a human assessment (ranking, rating, verification, comparability); keeps who, when and why, and is never overwritten by an import or agent (ADR-K11)",
+    "derived": "computed from other data (updated, is_own_solution, legacy_v0); never edited directly"
+  },
+  "field_provenance_record": {
+    "description": "ADR-K11 field-level provenance of one property value.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "origin",
+      "set_by",
+      "set_at",
+      "reason",
+      "version"
+    ],
+    "properties": {
+      "origin": {
+        "enum": [
+          "import",
+          "human",
+          "agent",
+          "migration"
+        ],
+        "description": "migration = a schema upcast set the value (e.g. v0 our_fit high -> 4)."
+      },
+      "set_by": {
+        "type": "string",
+        "minLength": 1,
+        "description": "member id, importer id (import:<mapping or file>), agent id (namespace/name@version) or upcaster id."
+      },
+      "set_at": {
+        "type": "string",
+        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+      },
+      "reason": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Required (non-null) for origin=human on a judgement field."
+      },
+      "source_ref": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "import file / mapping, or document_id for agent extraction."
+      },
+      "version": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "record_version that this value was accepted in."
+      }
+    }
+  },
+  "entity_record": {
+    "description": "Storage-neutral entity record. The backend stores entity_type plus a properties document; it validates properties against entity_types[entity_type].properties_schema of the schema_id the record names.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "entity_id",
+      "entity_type",
+      "canonical_key",
+      "display_name",
+      "properties",
+      "schema_id",
+      "classification",
+      "status",
+      "review_status"
+    ],
+    "properties": {
+      "entity_id": {
+        "type": "string",
+        "pattern": "^ent-[a-z]+-[a-z0-9]+(-[a-z0-9]+)*$"
+      },
+      "entity_type": {
+        "enum": [
+          "Trend",
+          "Technology",
+          "Node",
+          "Ecosystem",
+          "Account",
+          "CustomerProduct",
+          "Application",
+          "TestSolution",
+          "Competitor",
+          "Concept",
+          "Signal",
+          "Opportunity"
+        ]
+      },
+      "canonical_key": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+      },
+      "display_name": {
+        "type": "string",
+        "minLength": 1
+      },
+      "aliases": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "properties": {
+        "type": "object"
+      },
+      "schema_id": {
+        "const": "bi.schema/v1"
+      },
+      "classification": {
+        "enum": [
+          "PUBLIC",
+          "INTERNAL",
+          "CONFIDENTIAL",
+          "RESTRICTED",
+          "UNCLASSIFIED"
+        ]
+      },
+      "status": {
+        "enum": [
+          "candidate",
+          "reviewed",
+          "published",
+          "rejected"
+        ]
+      },
+      "review_status": {
+        "enum": [
+          "draft",
+          "reviewed",
+          "rejected"
+        ]
+      },
+      "edited_by_human": {
+        "type": "boolean"
+      },
+      "updated": {
+        "type": "string",
+        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+        "x-origin": "aep-record",
+        "description": "Record last-change date used by the 90-day stale rule. Equals properties.updated where the type has it; for Account, Node and Signal (no updated in the code) it is the last accepted change."
+      },
+      "record_version": {
+        "type": "integer",
+        "minimum": 1,
+        "x-origin": "proposed",
+        "description": "ADR-K11: incremented by every accepted change; an edit names its base version."
+      },
+      "field_provenance": {
+        "type": "object",
+        "x-origin": "proposed",
+        "description": "ADR-K11: field name -> field_provenance_record, at least for every judgement field that has a value.",
+        "additionalProperties": {
+          "$ref": "#/field_provenance_record"
+        }
+      }
+    }
+  },
+  "claim_record": {
+    "description": "Every relationship and every entity fact is carried by claims. Source rule: distinguish assertion from inference, assumed from verified, draft from reviewed.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "claim_id",
+      "subject_entity_id",
+      "claim_kind",
+      "verification_status",
+      "review_status",
+      "evidence"
+    ],
+    "properties": {
+      "claim_id": {
+        "type": "string",
+        "pattern": "^clm-[0-9a-f]{16}$"
+      },
+      "subject_entity_id": {
+        "type": "string"
+      },
+      "relationship_id": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "statement": {
+        "type": "string",
+        "minLength": 1
+      },
+      "claim_kind": {
+        "enum": [
+          "source_assertion",
+          "inference"
+        ]
+      },
+      "verification_status": {
+        "enum": [
+          "assumed",
+          "verified",
+          "disputed"
+        ]
+      },
+      "review_status": {
+        "enum": [
+          "draft",
+          "reviewed",
+          "rejected"
+        ]
+      },
+      "evidence": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "evidence_id",
+            "role"
+          ],
+          "properties": {
+            "evidence_id": {
+              "type": "string",
+              "pattern": "^ev-[0-9a-f]{20}$"
+            },
+            "role": {
+              "enum": [
+                "supports",
+                "contradicts",
+                "context"
+              ]
+            }
+          }
+        }
+      },
+      "derived_from_claim_ids": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "classification": {
+        "enum": [
+          "PUBLIC",
+          "INTERNAL",
+          "CONFIDENTIAL",
+          "RESTRICTED",
+          "UNCLASSIFIED"
+        ]
+      },
+      "valid_from": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "valid_to": {
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    }
+  },
+  "entity_types": {
+    "Trend": {
+      "origin": "source-bi-schema-py",
+      "code_ref": "bi_schema.py:162",
+      "code_key": "trend",
+      "frontmatter_type": "trend",
+      "folder": "Trend",
+      "filename_fields": [
+        "name"
+      ],
+      "naming_field": {
+        "field": "name",
+        "code_ref": "bi_schema.py:163",
+        "code_kind": "str",
+        "aliases": [
+          "趨勢",
+          "名稱",
+          "name"
+        ],
+        "maps_to": "display_name",
+        "note": "naming field; the card file name is built from it"
+      },
+      "has_confidence_and_updated": true,
+      "body_sections_code": "bi_schema.py:172-172",
+      "description": "A market trend; chain step 1.",
+      "default_classification": "UNCLASSIFIED",
+      "label_is_content": false,
+      "suggested_review_domain": "BD",
+      "required_basis": "required = fields the code marks required=True plus fields with a code default; bi_ingest.py:410-424 (with_defaults) fills defaults on every new card, so a normalized record always carries them.",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "confidence",
+          "updated"
+        ],
+        "properties": {
+          "stage": {
+            "enum": [
+              "watch",
+              "emerging",
+              "accelerating",
+              "peak",
+              "fading"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:167",
+            "x-kind": "enum",
+            "x-aliases": [
+              "階段",
+              "stage"
+            ],
+            "x-field-class": "judgement",
+            "x-enum-aliases-code": "bi_schema.py:240"
+          },
+          "time_to_demand": {
+            "enum": [
+              "0-6m",
+              "6-18m",
+              "18-36m",
+              "36m+"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:168",
+            "x-kind": "enum",
+            "x-aliases": [
+              "需求時間",
+              "time to demand"
+            ],
+            "x-field-class": "judgement"
+          },
+          "market_impact": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:169",
+            "x-kind": "int",
+            "x-aliases": [
+              "市場影響",
+              "market impact"
+            ],
+            "x-field-class": "judgement"
+          },
+          "measurement_impact": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:170",
+            "x-kind": "int",
+            "x-aliases": [
+              "量測影響",
+              "measurement impact"
+            ],
+            "x-field-class": "judgement"
+          },
+          "our_fit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:171",
+            "x-kind": "int",
+            "x-aliases": [
+              "我方契合度",
+              "契合度",
+              "our fit"
+            ],
+            "x-field-class": "judgement"
+          },
+          "confidence": {
+            "enum": [
+              "verified",
+              "assumed"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:18",
+            "x-kind": "enum",
+            "x-aliases": [
+              "信心度",
+              "可信度"
+            ],
+            "x-field-class": "judgement",
+            "x-note": "A person changes assumed to verified after checking (tools/README.md:68).",
+            "x-default": "assumed",
+            "x-enum-aliases-code": "bi_schema.py:211"
+          },
+          "updated": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:19",
+            "x-kind": "date",
+            "x-aliases": [
+              "更新日期",
+              "更新",
+              "最後更新"
+            ],
+            "x-field-class": "derived",
+            "x-default": "today"
+          },
+          "market_segments": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "wireless_communications",
+                "aerospace_defense",
+                "automotive",
+                "ai_server",
+                "semiconductor"
+              ]
+            },
+            "x-origin": "proposed",
+            "x-reason": "Kept from v0 (proposed-v0): Atlas market filter, values of src/knowledge/market_matrix.py TargetMarket. bi_schema.py has no market field.",
+            "x-field-class": "sourced"
+          },
+          "legacy_v0": {
+            "type": "object",
+            "x-origin": "proposed",
+            "x-reason": "ADR-K10 upcast: v0 values with no v1 field are kept here, never dropped silently.",
+            "x-field-class": "derived"
+          }
+        }
+      },
+      "x-defaults": {
+        "confidence": "assumed",
+        "updated": "today"
+      }
+    },
+    "Technology": {
+      "origin": "source-bi-schema-py",
+      "code_ref": "bi_schema.py:135",
+      "code_key": "technology",
+      "frontmatter_type": "technology",
+      "folder": "Technology",
+      "filename_fields": [
+        "name"
+      ],
+      "naming_field": {
+        "field": "name",
+        "code_ref": "bi_schema.py:136",
+        "code_kind": "str",
+        "aliases": [
+          "技術",
+          "名稱",
+          "name"
+        ],
+        "maps_to": "display_name",
+        "note": "naming field; the card file name is built from it"
+      },
+      "has_confidence_and_updated": true,
+      "body_sections_code": "bi_schema.py:142-142",
+      "description": "A technology that drives trends; chain step 2.",
+      "default_classification": "UNCLASSIFIED",
+      "label_is_content": false,
+      "suggested_review_domain": "AE",
+      "required_basis": "required = fields the code marks required=True plus fields with a code default; bi_ingest.py:410-424 (with_defaults) fills defaults on every new card, so a normalized record always carries them.",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "confidence",
+          "updated"
+        ],
+        "properties": {
+          "standard_body": {
+            "type": "string",
+            "minLength": 1,
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:137",
+            "x-kind": "str",
+            "x-aliases": [
+              "標準組織",
+              "standard body"
+            ],
+            "x-field-class": "sourced"
+          },
+          "spec_milestones": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:138",
+            "x-kind": "list",
+            "x-aliases": [
+              "標準時程",
+              "里程碑",
+              "spec milestones"
+            ],
+            "x-field-class": "sourced"
+          },
+          "maturity": {
+            "enum": [
+              "emerging",
+              "growth",
+              "mature",
+              "declining"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:139",
+            "x-kind": "enum",
+            "x-aliases": [
+              "成熟度",
+              "maturity"
+            ],
+            "x-field-class": "judgement",
+            "x-enum-aliases-code": "bi_schema.py:242"
+          },
+          "new_test_requirements": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:141",
+            "x-kind": "list",
+            "x-aliases": [
+              "新增測試需求",
+              "new test requirements"
+            ],
+            "x-field-class": "sourced"
+          },
+          "confidence": {
+            "enum": [
+              "verified",
+              "assumed"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:18",
+            "x-kind": "enum",
+            "x-aliases": [
+              "信心度",
+              "可信度"
+            ],
+            "x-field-class": "judgement",
+            "x-note": "A person changes assumed to verified after checking (tools/README.md:68).",
+            "x-default": "assumed",
+            "x-enum-aliases-code": "bi_schema.py:211"
+          },
+          "updated": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:19",
+            "x-kind": "date",
+            "x-aliases": [
+              "更新日期",
+              "更新",
+              "最後更新"
+            ],
+            "x-field-class": "derived",
+            "x-default": "today"
+          },
+          "legacy_v0": {
+            "type": "object",
+            "x-origin": "proposed",
+            "x-reason": "ADR-K10 upcast: v0 values with no v1 field are kept here, never dropped silently.",
+            "x-field-class": "derived"
+          }
+        }
+      },
+      "x-defaults": {
+        "confidence": "assumed",
+        "updated": "today"
+      }
+    },
+    "Node": {
+      "origin": "source-bi-schema-py",
+      "code_ref": "bi_schema.py:127",
+      "code_key": "node",
+      "frontmatter_type": "node",
+      "folder": "Node",
+      "filename_fields": [
+        "name"
+      ],
+      "naming_field": {
+        "field": "name",
+        "code_ref": "bi_schema.py:128",
+        "code_kind": "str",
+        "aliases": [
+          "節點",
+          "名稱",
+          "name"
+        ],
+        "maps_to": "display_name",
+        "note": "naming field; the card file name is built from it"
+      },
+      "has_confidence_and_updated": false,
+      "body_sections_code": "bi_schema.py:133-133",
+      "description": "A fixed position in the value chain; chain step 3. The document says 8 fixed nodes and lists chipset, module, handset, CPE, base station, telecom network and certification lab (7 legible).",
+      "default_classification": "UNCLASSIFIED",
+      "label_is_content": false,
+      "suggested_review_domain": "BD",
+      "required_basis": "required = fields the code marks required=True plus fields with a code default; bi_ingest.py:410-424 (with_defaults) fills defaults on every new card, so a normalized record always carries them.",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "position_set"
+        ],
+        "properties": {
+          "layer": {
+            "enum": [
+              "L1",
+              "L2",
+              "L3",
+              "L4",
+              "L5",
+              "X"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:129",
+            "x-kind": "enum",
+            "x-aliases": [
+              "層級",
+              "layer"
+            ],
+            "x-field-class": "sourced"
+          },
+          "typical_test_needs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:132",
+            "x-kind": "list",
+            "x-aliases": [
+              "典型量測需求",
+              "typical test needs"
+            ],
+            "x-field-class": "sourced"
+          },
+          "position_set": {
+            "enum": [
+              "vault-reference",
+              "proposed-extension"
+            ],
+            "x-origin": "proposed",
+            "x-reason": "bi_schema.py fixes no Node list (Node cards are data). vault-reference = one of the 8 Node cards of the example vault (owner rule 2026-10-18: as many as seen); proposed-extension = a node added for the owner's non-wireless BD scenarios, pending owner acceptance.",
+            "x-field-class": "sourced"
+          },
+          "reference_position": {
+            "enum": [
+              "L1-Chipset",
+              "L2-Antenna-Module",
+              "L2-RF-FEM-Module",
+              "L3-Handset",
+              "L3-WiFi-Router-CPE",
+              "L4-Base-Station",
+              "L5-Carrier-Network",
+              "X-Certification-Lab"
+            ],
+            "x-origin": "proposed",
+            "x-reason": "Names of the 8 Node cards in tests/fixtures/bi_vault_example/BI/Node/ (generic value-chain positions). Present iff position_set=vault-reference.",
+            "x-field-class": "sourced"
+          },
+          "legacy_v0": {
+            "type": "object",
+            "x-origin": "proposed",
+            "x-reason": "ADR-K10 upcast: v0 values with no v1 field are kept here, never dropped silently.",
+            "x-field-class": "derived"
+          }
+        }
+      },
+      "x-defaults": {}
+    },
+    "Ecosystem": {
+      "origin": "source-bi-schema-py",
+      "code_ref": "bi_schema.py:103",
+      "code_key": "ecosystem",
+      "frontmatter_type": "ecosystem",
+      "folder": "Ecosystem",
+      "filename_fields": [
+        "name"
+      ],
+      "naming_field": {
+        "field": "name",
+        "code_ref": "bi_schema.py:104",
+        "code_kind": "str",
+        "aliases": [
+          "名稱",
+          "廠商",
+          "公司",
+          "成員",
+          "name"
+        ],
+        "maps_to": "display_name",
+        "note": "naming field; the card file name is built from it"
+      },
+      "has_confidence_and_updated": true,
+      "body_sections_code": "bi_schema.py:115-115",
+      "description": "A supplier or partner company on a node (chip, module, certification partner); chain step 4.",
+      "default_classification": "UNCLASSIFIED",
+      "label_is_content": false,
+      "suggested_review_domain": "BD",
+      "required_basis": "required = fields the code marks required=True plus fields with a code default; bi_ingest.py:410-424 (with_defaults) fills defaults on every new card, so a normalized record always carries them.",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "confidence",
+          "updated"
+        ],
+        "properties": {
+          "role": {
+            "enum": [
+              "chipset",
+              "module",
+              "ODM",
+              "OEM",
+              "carrier",
+              "cert-lab",
+              "integrator",
+              "distributor",
+              "standards",
+              "component",
+              "osat"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:106",
+            "x-kind": "enum",
+            "x-aliases": [
+              "角色",
+              "類別",
+              "role"
+            ],
+            "x-field-class": "sourced",
+            "x-enum-aliases-code": "bi_schema.py:222"
+          },
+          "relationship_to_us": {
+            "enum": [
+              "customer",
+              "partner",
+              "influencer",
+              "competitor",
+              "none"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:110",
+            "x-kind": "enum",
+            "x-aliases": [
+              "與我關係",
+              "關係",
+              "relationship to us"
+            ],
+            "x-field-class": "judgement",
+            "x-enum-aliases-code": "bi_schema.py:230"
+          },
+          "reference_design": {
+            "type": "boolean",
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:113",
+            "x-kind": "bool",
+            "x-aliases": [
+              "參考設計",
+              "reference design"
+            ],
+            "x-field-class": "sourced"
+          },
+          "ticker": {
+            "type": "string",
+            "minLength": 1,
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:114",
+            "x-kind": "str",
+            "x-aliases": [
+              "代號",
+              "股票代號",
+              "ticker"
+            ],
+            "x-field-class": "sourced"
+          },
+          "confidence": {
+            "enum": [
+              "verified",
+              "assumed"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:18",
+            "x-kind": "enum",
+            "x-aliases": [
+              "信心度",
+              "可信度"
+            ],
+            "x-field-class": "judgement",
+            "x-note": "A person changes assumed to verified after checking (tools/README.md:68).",
+            "x-default": "assumed",
+            "x-enum-aliases-code": "bi_schema.py:211"
+          },
+          "updated": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:19",
+            "x-kind": "date",
+            "x-aliases": [
+              "更新日期",
+              "更新",
+              "最後更新"
+            ],
+            "x-field-class": "derived",
+            "x-default": "today"
+          },
+          "legacy_v0": {
+            "type": "object",
+            "x-origin": "proposed",
+            "x-reason": "ADR-K10 upcast: v0 values with no v1 field are kept here, never dropped silently.",
+            "x-field-class": "derived"
+          }
+        }
+      },
+      "x-defaults": {
+        "confidence": "assumed",
+        "updated": "today"
+      }
+    },
+    "Account": {
+      "origin": "source-bi-schema-py",
+      "code_ref": "bi_schema.py:117",
+      "code_key": "account",
+      "frontmatter_type": "account",
+      "folder": "Account",
+      "filename_fields": [
+        "name"
+      ],
+      "naming_field": {
+        "field": "name",
+        "code_ref": "bi_schema.py:118",
+        "code_kind": "str",
+        "aliases": [
+          "客戶名稱",
+          "名稱",
+          "客戶",
+          "name"
+        ],
+        "maps_to": "display_name",
+        "note": "naming field; the card file name is built from it"
+      },
+      "has_confidence_and_updated": false,
+      "body_sections_code": "bi_schema.py:124-124",
+      "description": "A customer that buys our instruments.",
+      "default_classification": "CONFIDENTIAL",
+      "label_is_content": true,
+      "suggested_review_domain": "Account Owner",
+      "required_basis": "required = fields the code marks required=True plus fields with a code default; bi_ingest.py:410-424 (with_defaults) fills defaults on every new card, so a normalized record always carries them.",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [],
+        "properties": {
+          "region": {
+            "type": "string",
+            "minLength": 1,
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:122",
+            "x-kind": "str",
+            "x-aliases": [
+              "地區",
+              "region"
+            ],
+            "x-field-class": "sourced"
+          },
+          "ticker": {
+            "type": "string",
+            "minLength": 1,
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:123",
+            "x-kind": "str",
+            "x-aliases": [
+              "代號",
+              "股票代號",
+              "ticker"
+            ],
+            "x-field-class": "sourced"
+          },
+          "synthetic": {
+            "type": "boolean",
+            "x-origin": "proposed",
+            "x-reason": "Kept from v0: marks mock / test data. Also the quarantine marker for fictional example cards (v1.3 data-quality rule DQ-1).",
+            "x-field-class": "derived"
+          },
+          "legacy_v0": {
+            "type": "object",
+            "x-origin": "proposed",
+            "x-reason": "ADR-K10 upcast: v0 values with no v1 field are kept here, never dropped silently.",
+            "x-field-class": "derived"
+          }
+        }
+      },
+      "x-defaults": {}
+    },
+    "CustomerProduct": {
+      "origin": "source-bi-schema-py",
+      "code_ref": "bi_schema.py:91",
+      "code_key": "customer_product",
+      "frontmatter_type": "customer_product",
+      "folder": "CustomerProduct",
+      "filename_fields": [
+        "product_name"
+      ],
+      "naming_field": {
+        "field": "product_name",
+        "code_ref": "bi_schema.py:92",
+        "code_kind": "str",
+        "aliases": [
+          "產品名稱",
+          "產品",
+          "名稱",
+          "product name",
+          "product"
+        ],
+        "maps_to": "display_name",
+        "note": "naming field; the card file name is built from it"
+      },
+      "has_confidence_and_updated": true,
+      "body_sections_code": "bi_schema.py:101-101",
+      "description": "A product a customer launches; chain step 5 (named Product on slide 3).",
+      "default_classification": "CONFIDENTIAL",
+      "label_is_content": true,
+      "suggested_review_domain": "Account Owner",
+      "required_basis": "required = fields the code marks required=True plus fields with a code default; bi_ingest.py:410-424 (with_defaults) fills defaults on every new card, so a normalized record always carries them.",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "confidence",
+          "updated"
+        ],
+        "properties": {
+          "launch_window": {
+            "type": "string",
+            "minLength": 1,
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:97",
+            "x-kind": "str",
+            "x-aliases": [
+              "上市時程",
+              "上市時間",
+              "上市",
+              "launch window"
+            ],
+            "x-field-class": "sourced"
+          },
+          "volume_tier": {
+            "enum": [
+              "low",
+              "mid",
+              "high"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:98",
+            "x-kind": "enum",
+            "x-aliases": [
+              "量級",
+              "出貨量級",
+              "volume tier"
+            ],
+            "x-field-class": "judgement",
+            "x-enum-aliases-code": "bi_schema.py:221"
+          },
+          "test_stage_now": {
+            "enum": [
+              "RD",
+              "cert",
+              "production"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:99",
+            "x-kind": "enum",
+            "x-aliases": [
+              "目前階段",
+              "測試階段",
+              "test stage now"
+            ],
+            "x-field-class": "sourced",
+            "x-enum-aliases-code": "bi_schema.py:220"
+          },
+          "confidence": {
+            "enum": [
+              "verified",
+              "assumed"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:18",
+            "x-kind": "enum",
+            "x-aliases": [
+              "信心度",
+              "可信度"
+            ],
+            "x-field-class": "judgement",
+            "x-note": "A person changes assumed to verified after checking (tools/README.md:68).",
+            "x-default": "assumed",
+            "x-enum-aliases-code": "bi_schema.py:211"
+          },
+          "updated": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:19",
+            "x-kind": "date",
+            "x-aliases": [
+              "更新日期",
+              "更新",
+              "最後更新"
+            ],
+            "x-field-class": "derived",
+            "x-default": "today"
+          },
+          "legacy_v0": {
+            "type": "object",
+            "x-origin": "proposed",
+            "x-reason": "ADR-K10 upcast: v0 values with no v1 field are kept here, never dropped silently.",
+            "x-field-class": "derived"
+          }
+        }
+      },
+      "x-defaults": {
+        "confidence": "assumed",
+        "updated": "today"
+      }
+    },
+    "Application": {
+      "origin": "source-bi-schema-py",
+      "code_ref": "bi_schema.py:65",
+      "code_key": "application",
+      "frontmatter_type": "application",
+      "folder": "Application",
+      "filename_fields": [
+        "name"
+      ],
+      "naming_field": {
+        "field": "name",
+        "code_ref": "bi_schema.py:66",
+        "code_kind": "str",
+        "aliases": [
+          "應用名稱",
+          "名稱",
+          "應用場景",
+          "應用",
+          "name"
+        ],
+        "maps_to": "display_name",
+        "note": "naming field; the card file name is built from it"
+      },
+      "has_confidence_and_updated": true,
+      "body_sections_code": "bi_schema.py:76-76",
+      "description": "A measurement application a product needs; chain step 6.",
+      "default_classification": "UNCLASSIFIED",
+      "label_is_content": false,
+      "suggested_review_domain": "AE",
+      "required_basis": "required = fields the code marks required=True plus fields with a code default; bi_ingest.py:410-424 (with_defaults) fills defaults on every new card, so a normalized record always carries them.",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "confidence",
+          "updated"
+        ],
+        "properties": {
+          "value_chain": {
+            "enum": [
+              "L1",
+              "L2",
+              "L3",
+              "L4",
+              "L5",
+              "X"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:67",
+            "x-kind": "enum",
+            "x-aliases": [
+              "價值鏈",
+              "價值鏈層級",
+              "value chain"
+            ],
+            "x-field-class": "sourced"
+          },
+          "lifecycle": {
+            "enum": [
+              "RD",
+              "Certification",
+              "Production",
+              "Reliability",
+              "Field"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:69",
+            "x-kind": "enum",
+            "x-aliases": [
+              "生命週期",
+              "階段",
+              "lifecycle"
+            ],
+            "x-field-class": "sourced",
+            "x-note": "Classified sourced: it names the application's stage category, not a ranking.",
+            "x-enum-aliases-code": "bi_schema.py:213"
+          },
+          "measurement_topics": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:74",
+            "x-kind": "list",
+            "x-aliases": [
+              "量測主題",
+              "量測項目",
+              "measurement topics"
+            ],
+            "x-field-class": "sourced"
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:75",
+            "x-kind": "int",
+            "x-aliases": [
+              "優先度",
+              "priority"
+            ],
+            "x-field-class": "judgement",
+            "x-note": "Ranking with no rubric, owner, date or reason in the code; see ADR-K11 rubric draft."
+          },
+          "confidence": {
+            "enum": [
+              "verified",
+              "assumed"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:18",
+            "x-kind": "enum",
+            "x-aliases": [
+              "信心度",
+              "可信度"
+            ],
+            "x-field-class": "judgement",
+            "x-note": "A person changes assumed to verified after checking (tools/README.md:68).",
+            "x-default": "assumed",
+            "x-enum-aliases-code": "bi_schema.py:211"
+          },
+          "updated": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:19",
+            "x-kind": "date",
+            "x-aliases": [
+              "更新日期",
+              "更新",
+              "最後更新"
+            ],
+            "x-field-class": "derived",
+            "x-default": "today"
+          },
+          "market_segments": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "wireless_communications",
+                "aerospace_defense",
+                "automotive",
+                "ai_server",
+                "semiconductor"
+              ]
+            },
+            "x-origin": "proposed",
+            "x-reason": "Kept from v0 (proposed-v0): Atlas market filter, values of src/knowledge/market_matrix.py TargetMarket. bi_schema.py has no market field.",
+            "x-field-class": "sourced"
+          },
+          "legacy_v0": {
+            "type": "object",
+            "x-origin": "proposed",
+            "x-reason": "ADR-K10 upcast: v0 values with no v1 field are kept here, never dropped silently.",
+            "x-field-class": "derived"
+          }
+        }
+      },
+      "x-defaults": {
+        "confidence": "assumed",
+        "updated": "today"
+      }
+    },
+    "TestSolution": {
+      "origin": "source-bi-schema-py",
+      "code_ref": "bi_schema.py:35",
+      "code_key": "test_solution",
+      "frontmatter_type": "test_solution",
+      "folder": "TestSolution",
+      "filename_fields": [
+        "name"
+      ],
+      "naming_field": {
+        "field": "name",
+        "code_ref": "bi_schema.py:36",
+        "code_kind": "str",
+        "aliases": [
+          "方案名稱",
+          "方案",
+          "名稱",
+          "solution",
+          "solution name"
+        ],
+        "maps_to": "display_name",
+        "note": "naming field; the card file name is built from it"
+      },
+      "has_confidence_and_updated": true,
+      "body_sections_code": "bi_schema.py:56-63",
+      "description": "A test solution, ours or a competitor's; chain step 7.",
+      "default_classification": "UNCLASSIFIED",
+      "label_is_content": false,
+      "suggested_review_domain": "PM",
+      "required_basis": "required = fields the code marks required=True plus fields with a code default; bi_ingest.py:410-424 (with_defaults) fills defaults on every new card, so a normalized record always carries them.",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "status",
+          "confidence",
+          "updated",
+          "is_own_solution"
+        ],
+        "properties": {
+          "test_type": {
+            "enum": [
+              "conducted",
+              "OTA",
+              "protocol",
+              "channel-emu",
+              "spectrum",
+              "power",
+              "ATE"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:41",
+            "x-kind": "enum",
+            "x-aliases": [
+              "測試類型",
+              "類型",
+              "test type"
+            ],
+            "x-field-class": "sourced",
+            "x-enum-aliases-code": "bi_schema.py:191"
+          },
+          "tier": {
+            "enum": [
+              "instrument",
+              "integrated",
+              "automated",
+              "service"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:43",
+            "x-kind": "enum",
+            "x-aliases": [
+              "方案型態",
+              "型態",
+              "tier"
+            ],
+            "x-field-class": "sourced",
+            "x-enum-aliases-code": "bi_schema.py:200"
+          },
+          "automation": {
+            "enum": [
+              "manual",
+              "semi",
+              "full"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:45",
+            "x-kind": "enum",
+            "x-aliases": [
+              "自動化程度",
+              "自動化"
+            ],
+            "x-field-class": "sourced",
+            "x-enum-aliases-code": "bi_schema.py:206"
+          },
+          "dut": {
+            "type": "string",
+            "minLength": 1,
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:46",
+            "x-kind": "str",
+            "x-aliases": [
+              "被測物",
+              "DUT"
+            ],
+            "x-field-class": "sourced"
+          },
+          "test_items": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:47",
+            "x-kind": "list",
+            "x-aliases": [
+              "測試項目",
+              "test items"
+            ],
+            "x-field-class": "sourced"
+          },
+          "standards": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:48",
+            "x-kind": "list",
+            "x-aliases": [
+              "標準",
+              "標準法規",
+              "standards"
+            ],
+            "x-field-class": "sourced"
+          },
+          "instruments": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:49",
+            "x-kind": "list",
+            "x-aliases": [
+              "儀器配置",
+              "儀器",
+              "設備",
+              "instruments"
+            ],
+            "x-field-class": "sourced"
+          },
+          "price_band": {
+            "enum": [
+              "entry",
+              "mid",
+              "high"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:50",
+            "x-kind": "enum",
+            "x-aliases": [
+              "價格帶",
+              "價格"
+            ],
+            "x-field-class": "sourced",
+            "x-enum-aliases-code": "bi_schema.py:207"
+          },
+          "services": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:51",
+            "x-kind": "list",
+            "x-aliases": [
+              "服務",
+              "services"
+            ],
+            "x-field-class": "sourced"
+          },
+          "status": {
+            "enum": [
+              "planning",
+              "available",
+              "EOL"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:54",
+            "x-kind": "enum",
+            "x-aliases": [
+              "狀態",
+              "status"
+            ],
+            "x-field-class": "sourced",
+            "x-default": "planning",
+            "x-enum-aliases-code": "bi_schema.py:209"
+          },
+          "owner": {
+            "type": "string",
+            "minLength": 1,
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:55",
+            "x-kind": "str",
+            "x-aliases": [
+              "負責人",
+              "owner"
+            ],
+            "x-field-class": "sourced"
+          },
+          "confidence": {
+            "enum": [
+              "verified",
+              "assumed"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:18",
+            "x-kind": "enum",
+            "x-aliases": [
+              "信心度",
+              "可信度"
+            ],
+            "x-field-class": "judgement",
+            "x-note": "A person changes assumed to verified after checking (tools/README.md:68).",
+            "x-default": "assumed",
+            "x-enum-aliases-code": "bi_schema.py:211"
+          },
+          "updated": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:19",
+            "x-kind": "date",
+            "x-aliases": [
+              "更新日期",
+              "更新",
+              "最後更新"
+            ],
+            "x-field-class": "derived",
+            "x-default": "today"
+          },
+          "is_own_solution": {
+            "type": "boolean",
+            "x-origin": "proposed",
+            "x-reason": "Kept from v0 (source-v1.0): explicit, queryable form of the code rule 'vendor empty = our own solution' (bi_schema.py:37 comment, tools/README.md:83). Derived: must equal 'has no vendor link'.",
+            "x-field-class": "derived"
+          },
+          "product_family": {
+            "enum": [
+              "nonsignaling_wireless",
+              "signaling_wireless",
+              "signal_generation_analysis",
+              "vector_network_analysis",
+              "oscilloscope",
+              "radar_test",
+              "power_analysis",
+              "other"
+            ],
+            "x-origin": "proposed",
+            "x-reason": "Kept from v0: aligns with src/knowledge/market_matrix.py ProductFamily for the Atlas product filter. bi_schema.py has no such field (test_type / tier describe the method, not the product family).",
+            "x-field-class": "sourced"
+          },
+          "legacy_v0": {
+            "type": "object",
+            "x-origin": "proposed",
+            "x-reason": "ADR-K10 upcast: v0 values with no v1 field are kept here, never dropped silently.",
+            "x-field-class": "derived"
+          }
+        }
+      },
+      "x-defaults": {
+        "status": "planning",
+        "confidence": "assumed",
+        "updated": "today"
+      }
+    },
+    "Competitor": {
+      "origin": "source-bi-schema-py",
+      "code_ref": "bi_schema.py:78",
+      "code_key": "competitor",
+      "frontmatter_type": "competitor",
+      "folder": "Competitor",
+      "filename_fields": [
+        "name"
+      ],
+      "naming_field": {
+        "field": "name",
+        "code_ref": "bi_schema.py:79",
+        "code_kind": "str",
+        "aliases": [
+          "名稱",
+          "公司",
+          "廠商",
+          "競品公司",
+          "name"
+        ],
+        "maps_to": "display_name",
+        "note": "naming field; the card file name is built from it"
+      },
+      "has_confidence_and_updated": true,
+      "body_sections_code": "bi_schema.py:88-88",
+      "description": "A competitor.",
+      "default_classification": "INTERNAL",
+      "label_is_content": false,
+      "suggested_review_domain": "PM",
+      "required_basis": "required = fields the code marks required=True plus fields with a code default; bi_ingest.py:410-424 (with_defaults) fills defaults on every new card, so a normalized record always carries them.",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "confidence",
+          "updated"
+        ],
+        "properties": {
+          "product_lines": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:82",
+            "x-kind": "list",
+            "x-aliases": [
+              "產品線",
+              "主要產品",
+              "product lines"
+            ],
+            "x-field-class": "sourced"
+          },
+          "strengths": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:83",
+            "x-kind": "list",
+            "x-aliases": [
+              "強項",
+              "優勢",
+              "strengths"
+            ],
+            "x-field-class": "judgement"
+          },
+          "weaknesses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:84",
+            "x-kind": "list",
+            "x-aliases": [
+              "弱項",
+              "劣勢",
+              "weaknesses"
+            ],
+            "x-field-class": "judgement"
+          },
+          "pricing_position": {
+            "enum": [
+              "low",
+              "par",
+              "premium"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:85",
+            "x-kind": "enum",
+            "x-aliases": [
+              "價格定位",
+              "價位",
+              "pricing position"
+            ],
+            "x-field-class": "judgement",
+            "x-enum-aliases-code": "bi_schema.py:243"
+          },
+          "recent_moves": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:86",
+            "x-kind": "list",
+            "x-aliases": [
+              "近期動態",
+              "動態",
+              "recent moves"
+            ],
+            "x-field-class": "sourced"
+          },
+          "ticker": {
+            "type": "string",
+            "minLength": 1,
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:87",
+            "x-kind": "str",
+            "x-aliases": [
+              "代號",
+              "股票代號",
+              "ticker"
+            ],
+            "x-field-class": "sourced"
+          },
+          "confidence": {
+            "enum": [
+              "verified",
+              "assumed"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:18",
+            "x-kind": "enum",
+            "x-aliases": [
+              "信心度",
+              "可信度"
+            ],
+            "x-field-class": "judgement",
+            "x-note": "A person changes assumed to verified after checking (tools/README.md:68).",
+            "x-default": "assumed",
+            "x-enum-aliases-code": "bi_schema.py:211"
+          },
+          "updated": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:19",
+            "x-kind": "date",
+            "x-aliases": [
+              "更新日期",
+              "更新",
+              "最後更新"
+            ],
+            "x-field-class": "derived",
+            "x-default": "today"
+          },
+          "legacy_v0": {
+            "type": "object",
+            "x-origin": "proposed",
+            "x-reason": "ADR-K10 upcast: v0 values with no v1 field are kept here, never dropped silently.",
+            "x-field-class": "derived"
+          }
+        }
+      },
+      "x-defaults": {
+        "confidence": "assumed",
+        "updated": "today"
+      }
+    },
+    "Concept": {
+      "origin": "source-bi-schema-py",
+      "code_ref": "bi_schema.py:145",
+      "code_key": "concept",
+      "frontmatter_type": "concept",
+      "folder": "Concept",
+      "filename_fields": [
+        "name"
+      ],
+      "naming_field": {
+        "field": "name",
+        "code_ref": "bi_schema.py:146",
+        "code_kind": "str",
+        "aliases": [
+          "名詞",
+          "概念",
+          "術語",
+          "名稱",
+          "name",
+          "term"
+        ],
+        "maps_to": "display_name",
+        "note": "naming field; the card file name is built from it"
+      },
+      "has_confidence_and_updated": true,
+      "body_sections_code": "bi_schema.py:160-160",
+      "description": "A plain-language explanation for sales.",
+      "default_classification": "UNCLASSIFIED",
+      "label_is_content": false,
+      "suggested_review_domain": "BD",
+      "required_basis": "required = fields the code marks required=True plus fields with a code default; bi_ingest.py:410-424 (with_defaults) fills defaults on every new card, so a normalized record always carries them.",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "audience",
+          "review_status",
+          "confidence",
+          "updated"
+        ],
+        "properties": {
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:147",
+            "x-kind": "list",
+            "x-aliases": [
+              "別名",
+              "英文",
+              "全名",
+              "aliases"
+            ],
+            "x-field-class": "sourced"
+          },
+          "category": {
+            "enum": [
+              "radio",
+              "protocol",
+              "metric",
+              "measurement",
+              "standard",
+              "device"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:148",
+            "x-kind": "enum",
+            "x-aliases": [
+              "類別",
+              "分類",
+              "category"
+            ],
+            "x-field-class": "sourced",
+            "x-enum-aliases-code": "bi_schema.py:235"
+          },
+          "one_liner": {
+            "type": "string",
+            "minLength": 1,
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:150",
+            "x-kind": "str",
+            "x-aliases": [
+              "一句話",
+              "一句話定義",
+              "one liner",
+              "one_liner"
+            ],
+            "x-field-class": "sourced"
+          },
+          "analogy": {
+            "type": "string",
+            "minLength": 1,
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:151",
+            "x-kind": "str",
+            "x-aliases": [
+              "比喻",
+              "生活比喻",
+              "analogy"
+            ],
+            "x-field-class": "sourced"
+          },
+          "audience": {
+            "enum": [
+              "sales",
+              "sales+FAE",
+              "engineer"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:156",
+            "x-kind": "enum",
+            "x-aliases": [
+              "對象",
+              "讀者",
+              "audience"
+            ],
+            "x-field-class": "judgement",
+            "x-default": "sales",
+            "x-enum-aliases-code": "bi_schema.py:237"
+          },
+          "review_status": {
+            "enum": [
+              "draft",
+              "reviewed"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:157",
+            "x-kind": "enum",
+            "x-aliases": [
+              "審閱狀態",
+              "審閱",
+              "review status",
+              "review_status"
+            ],
+            "x-field-class": "judgement",
+            "x-default": "draft",
+            "x-enum-aliases-code": "bi_schema.py:238"
+          },
+          "reviewer": {
+            "type": "string",
+            "minLength": 1,
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:159",
+            "x-kind": "str",
+            "x-aliases": [
+              "審閱者",
+              "審閱人",
+              "reviewer"
+            ],
+            "x-field-class": "sourced"
+          },
+          "confidence": {
+            "enum": [
+              "verified",
+              "assumed"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:18",
+            "x-kind": "enum",
+            "x-aliases": [
+              "信心度",
+              "可信度"
+            ],
+            "x-field-class": "judgement",
+            "x-note": "A person changes assumed to verified after checking (tools/README.md:68).",
+            "x-default": "assumed",
+            "x-enum-aliases-code": "bi_schema.py:211"
+          },
+          "updated": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:19",
+            "x-kind": "date",
+            "x-aliases": [
+              "更新日期",
+              "更新",
+              "最後更新"
+            ],
+            "x-field-class": "derived",
+            "x-default": "today"
+          },
+          "legacy_v0": {
+            "type": "object",
+            "x-origin": "proposed",
+            "x-reason": "ADR-K10 upcast: v0 values with no v1 field are kept here, never dropped silently.",
+            "x-field-class": "derived"
+          }
+        }
+      },
+      "x-defaults": {
+        "audience": "sales",
+        "review_status": "draft",
+        "confidence": "assumed",
+        "updated": "today"
+      }
+    },
+    "Signal": {
+      "origin": "source-bi-schema-py",
+      "code_ref": "bi_schema.py:174",
+      "code_key": "signal",
+      "frontmatter_type": "signal",
+      "folder": "Signal",
+      "filename_fields": [
+        "date",
+        "title"
+      ],
+      "naming_field": {
+        "field": "title",
+        "code_ref": "bi_schema.py:175",
+        "code_kind": "virtual",
+        "aliases": [
+          "標題",
+          "主題",
+          "名稱",
+          "title"
+        ],
+        "maps_to": "display_name",
+        "note": "virtual: used only in the file name (date-title), never written to YAML (bi_schema.py:6)"
+      },
+      "has_confidence_and_updated": false,
+      "body_sections_code": "bi_schema.py:185-185",
+      "description": "One piece of external intelligence (e.g. a conference deck, a customer visit).",
+      "default_classification": "UNCLASSIFIED",
+      "label_is_content": false,
+      "suggested_review_domain": "BD",
+      "required_basis": "required = fields the code marks required=True plus fields with a code default; bi_ingest.py:410-424 (with_defaults) fills defaults on every new card, so a normalized record always carries them.",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "date",
+          "summary",
+          "so_what",
+          "reliability"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:176",
+            "x-kind": "date",
+            "x-aliases": [
+              "日期",
+              "時間",
+              "date"
+            ],
+            "x-field-class": "sourced",
+            "x-default": "today"
+          },
+          "source_type": {
+            "enum": [
+              "standard",
+              "regulator",
+              "report",
+              "filing",
+              "news",
+              "conference",
+              "customer",
+              "competitor",
+              "internal"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:177",
+            "x-kind": "enum",
+            "x-aliases": [
+              "來源類型",
+              "source type"
+            ],
+            "x-field-class": "sourced",
+            "x-enum-aliases-code": "bi_schema.py:232"
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1,
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:180",
+            "x-kind": "str",
+            "x-aliases": [
+              "來源",
+              "出處",
+              "連結",
+              "source"
+            ],
+            "x-field-class": "sourced"
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1,
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:181",
+            "x-kind": "str",
+            "x-aliases": [
+              "摘要",
+              "重點",
+              "summary"
+            ],
+            "x-field-class": "sourced"
+          },
+          "so_what": {
+            "type": "string",
+            "minLength": 1,
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:183",
+            "x-kind": "str",
+            "x-aliases": [
+              "所以呢",
+              "意涵",
+              "對我們的意義",
+              "so what",
+              "so_what"
+            ],
+            "x-field-class": "judgement"
+          },
+          "reliability": {
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ],
+            "x-origin": "source-bi-schema-py",
+            "x-code": "bi_schema.py:184",
+            "x-kind": "enum",
+            "x-aliases": [
+              "可靠度",
+              "reliability"
+            ],
+            "x-field-class": "judgement",
+            "x-default": "medium",
+            "x-enum-aliases-code": "bi_schema.py:239"
+          },
+          "legacy_v0": {
+            "type": "object",
+            "x-origin": "proposed",
+            "x-reason": "ADR-K10 upcast: v0 values with no v1 field are kept here, never dropped silently.",
+            "x-field-class": "derived"
+          }
+        }
+      },
+      "x-defaults": {
+        "date": "today",
+        "reliability": "medium"
+      }
+    },
+    "Opportunity": {
+      "origin": "proposed",
+      "reason": "bi_schema.py defines no Opportunity type, folder or fields; it appears only as the end of the analysis chain in tests/fixtures/bi_vault_example/README.md:18 (and the BI document slide 3). Kept from v0 so the chain can end in an inferred, reviewable lead.",
+      "code_ref": null,
+      "code_key": null,
+      "frontmatter_type": null,
+      "folder": null,
+      "filename_fields": null,
+      "naming_field": null,
+      "has_confidence_and_updated": false,
+      "description": "Chain step 8. The document names it (and 'customer opportunity leads' as an output) but defines no fields or links; v0 adds the minimum.",
+      "default_classification": "CONFIDENTIAL",
+      "label_is_content": true,
+      "suggested_review_domain": "BD",
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "hypothesis_status"
+        ],
+        "properties": {
+          "hypothesis_status": {
+            "enum": [
+              "hypothesis",
+              "qualified",
+              "rejected"
+            ],
+            "x-origin": "proposed",
+            "x-reason": "Kept from v0: an opportunity is an inference until a reviewer qualifies it.",
+            "x-field-class": "judgement"
+          },
+          "market_segments": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "wireless_communications",
+                "aerospace_defense",
+                "automotive",
+                "ai_server",
+                "semiconductor"
+              ]
+            },
+            "x-origin": "proposed",
+            "x-reason": "Kept from v0 (proposed-v0): Atlas market filter, values of src/knowledge/market_matrix.py TargetMarket. bi_schema.py has no market field.",
+            "x-field-class": "sourced"
+          },
+          "legacy_v0": {
+            "type": "object",
+            "x-origin": "proposed",
+            "x-reason": "ADR-K10 upcast: v0 values with no v1 field are kept here, never dropped silently.",
+            "x-field-class": "derived"
+          }
+        }
+      },
+      "x-defaults": {}
+    }
+  },
+  "relationship_types": [
+    {
+      "name": "vendor",
+      "range": "Competitor",
+      "range_basis": "tools/README.md:83 and tools/prompts/slide_distill.md:9: vendor names a Competitor card; empty = our own solution.",
+      "description": "A competitor's TestSolution names its Competitor card; our own solutions leave vendor empty.",
+      "sources": [
+        {
+          "domain": "TestSolution",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:37",
+          "code_kind": "link",
+          "cardinality": "one",
+          "field_class": "sourced",
+          "aliases": [
+            "廠商",
+            "方案廠商",
+            "競品廠商",
+            "vendor"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "applications",
+      "range": "Application",
+      "range_basis": "Field name and Dataview DV_SOLUTIONS (bi_schema.py:27-28) query BI/Application links.",
+      "description": "Measurement applications a card refers to.",
+      "sources": [
+        {
+          "domain": "TestSolution",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:38",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "對應應用",
+            "應用",
+            "應用場景",
+            "application",
+            "applications"
+          ]
+        },
+        {
+          "domain": "Concept",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:153",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "相關應用",
+            "應用",
+            "applications"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "technologies",
+      "range": "Technology",
+      "range_basis": "Field name; Dashboard section 4 and DV_CONCEPTS (bi_schema.py:30-31) match it against BI/Technology.",
+      "description": "Technologies a card refers to.",
+      "sources": [
+        {
+          "domain": "TestSolution",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:39",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "技術",
+            "technology",
+            "technologies"
+          ]
+        },
+        {
+          "domain": "Application",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:72",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "技術",
+            "technologies"
+          ]
+        },
+        {
+          "domain": "Competitor",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:81",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "技術",
+            "technologies"
+          ]
+        },
+        {
+          "domain": "CustomerProduct",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:95",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "技術",
+            "technologies"
+          ]
+        },
+        {
+          "domain": "Ecosystem",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:109",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "技術",
+            "主要技術",
+            "technologies"
+          ]
+        },
+        {
+          "domain": "Concept",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:152",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "相關技術",
+            "技術",
+            "technologies"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "nodes",
+      "range": "Node",
+      "range_basis": "Field name; aliases 節點 / 價值鏈節點.",
+      "description": "Value-chain nodes a card spans.",
+      "sources": [
+        {
+          "domain": "TestSolution",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:40",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "節點",
+            "價值鏈節點",
+            "node",
+            "nodes"
+          ]
+        },
+        {
+          "domain": "Application",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:71",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "節點",
+            "nodes"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "competing_solutions",
+      "range": "TestSolution",
+      "range_basis": "tools/README.md:83 and tools/prompts/slide_distill.md:14 say our card lists the competitor's TestSolution card. The example vault instead links Competitor cards (BI/TestSolution/FR2-AiP-OTA緊縮場方案.md:16, BI/TestSolution/WiFi7-MLO互通與吞吐量方案.md:16); rule competing_solutions_type_check turns such links into competing_vendors candidates.",
+      "description": "Our TestSolution points at a comparable competitor TestSolution.",
+      "sources": [
+        {
+          "domain": "TestSolution",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:52",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "judgement",
+          "aliases": [
+            "競品方案",
+            "競品",
+            "competitors",
+            "competing solutions"
+          ],
+          "note": "Which solutions are comparable is a judgement (tools/prompts/slide_distill.md:14 lets the model only suggest)."
+        }
+      ]
+    },
+    {
+      "name": "reference_customers",
+      "range": "Account",
+      "range_basis": "Aliases 參考客戶 / 客戶; Account is the customer card type (samples/real README role split).",
+      "description": "Reference customers of a solution.",
+      "sources": [
+        {
+          "domain": "TestSolution",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:53",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "參考客戶",
+            "客戶",
+            "reference customers"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "trends",
+      "range": "Trend",
+      "range_basis": "Field name; Dashboard section 10 matches Application.trends against BI/Trend.",
+      "description": "Trends behind an application.",
+      "sources": [
+        {
+          "domain": "Application",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:73",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "趨勢",
+            "trends"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "node",
+      "range": "Node",
+      "range_basis": "Field name; Dashboard section 3 groups Ecosystem by node; vault cards link BI/Node cards.",
+      "description": "The node a card sits on (single link).",
+      "sources": [
+        {
+          "domain": "Competitor",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:80",
+          "code_kind": "link",
+          "cardinality": "one",
+          "field_class": "sourced",
+          "aliases": [
+            "節點",
+            "node"
+          ]
+        },
+        {
+          "domain": "CustomerProduct",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:94",
+          "code_kind": "link",
+          "cardinality": "one",
+          "field_class": "sourced",
+          "aliases": [
+            "節點",
+            "node"
+          ]
+        },
+        {
+          "domain": "Ecosystem",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:105",
+          "code_kind": "link",
+          "cardinality": "one",
+          "field_class": "sourced",
+          "aliases": [
+            "節點",
+            "node"
+          ]
+        },
+        {
+          "domain": "Account",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:119",
+          "code_kind": "link",
+          "cardinality": "one",
+          "field_class": "sourced",
+          "aliases": [
+            "節點",
+            "node"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "account",
+      "range": "Account",
+      "range_basis": "Field name; Dashboard section 2 shows it as 客戶.",
+      "description": "The customer a card belongs to.",
+      "sources": [
+        {
+          "domain": "CustomerProduct",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:93",
+          "code_kind": "link",
+          "cardinality": "one",
+          "field_class": "sourced",
+          "aliases": [
+            "客戶",
+            "account"
+          ]
+        },
+        {
+          "domain": "Opportunity",
+          "origin": "proposed",
+          "reason": "Kept from v0 (proposed-v0): an opportunity needs its customer.",
+          "code_ref": null,
+          "cardinality": "one",
+          "field_class": "judgement"
+        }
+      ]
+    },
+    {
+      "name": "chipset_modules",
+      "range": "Ecosystem",
+      "range_basis": "Aliases 晶片模組 / 晶片商; chip and module makers are Ecosystem cards (role chipset / module).",
+      "description": "Chip or module suppliers inside a customer product.",
+      "sources": [
+        {
+          "domain": "CustomerProduct",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:96",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "晶片模組",
+            "晶片/模組",
+            "晶片商",
+            "chipset modules"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "inferred_applications",
+      "range": "Application",
+      "range_basis": "Alias 推論應用 / 對應應用.",
+      "description": "Applications inferred for a customer product.",
+      "sources": [
+        {
+          "domain": "CustomerProduct",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:100",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "judgement",
+          "aliases": [
+            "推論應用",
+            "對應應用",
+            "inferred applications"
+          ],
+          "note": "An inference by name; the vault example shows body-only needs absent here."
+        }
+      ]
+    },
+    {
+      "name": "influence_on",
+      "range": "Account",
+      "range_basis": "Alias 影響客戶 (influences the customer's instrument choice, body heading bi_schema.py:115). Interpretation: Account; the code does not type link targets.",
+      "description": "Customers an ecosystem member influences.",
+      "sources": [
+        {
+          "domain": "Ecosystem",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:112",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "judgement",
+          "aliases": [
+            "影響客戶",
+            "影響對象",
+            "influence on"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "key_suppliers",
+      "range": "Ecosystem",
+      "range_basis": "Dashboard section 12 ranks Ecosystem cards by how many Accounts list them in key_suppliers.",
+      "description": "An account's main suppliers.",
+      "sources": [
+        {
+          "domain": "Account",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:120",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "主要供應商",
+            "供應商",
+            "key suppliers"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "key_customers",
+      "range": "Account",
+      "range_basis": "Alias 主要客戶. Interpretation: an Account's own customers; targets without a card only raise the ingest's missing-target warning.",
+      "description": "An account's own main customers.",
+      "sources": [
+        {
+          "domain": "Account",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:121",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "主要客戶",
+            "key customers"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "upstream",
+      "range": "Node",
+      "range_basis": "Node-to-Node value chain; example vault Node cards link Node cards.",
+      "description": "Upstream nodes.",
+      "sources": [
+        {
+          "domain": "Node",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:130",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "上游",
+            "upstream"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "downstream",
+      "range": "Node",
+      "range_basis": "Node-to-Node value chain; example vault Node cards link Node cards.",
+      "description": "Downstream nodes.",
+      "sources": [
+        {
+          "domain": "Node",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:131",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "下游",
+            "downstream"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "affects_nodes",
+      "range": "Node",
+      "range_basis": "Field name.",
+      "description": "Nodes a technology affects.",
+      "sources": [
+        {
+          "domain": "Technology",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:140",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "影響節點",
+            "affects nodes"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "test_solutions",
+      "range": "TestSolution",
+      "range_basis": "Alias 相關方案 / 對應方案.",
+      "description": "Test solutions a card refers to.",
+      "sources": [
+        {
+          "domain": "Concept",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:154",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "相關方案",
+            "對應方案",
+            "test solutions",
+            "test_solutions"
+          ]
+        },
+        {
+          "domain": "Opportunity",
+          "origin": "proposed",
+          "reason": "Kept from v0 (proposed-v0): chain step 7 -> 8, an opportunity proposes our solution.",
+          "code_ref": null,
+          "cardinality": "many",
+          "field_class": "judgement"
+        }
+      ]
+    },
+    {
+      "name": "related_concepts",
+      "range": "Concept",
+      "range_basis": "Alias 相關概念.",
+      "description": "Related concepts.",
+      "sources": [
+        {
+          "domain": "Concept",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:155",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "相關概念",
+            "related concepts"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "related_tech",
+      "range": "Technology",
+      "range_basis": "DV_TREND_BY_TECH (bi_schema.py:23-24) matches Trend.related_tech against the Technology page.",
+      "description": "Technologies behind a trend.",
+      "sources": [
+        {
+          "domain": "Trend",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:164",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "相關技術",
+            "技術",
+            "related tech"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "affected_nodes",
+      "range": "Node",
+      "range_basis": "Alias 影響節點.",
+      "description": "Nodes a trend affects.",
+      "sources": [
+        {
+          "domain": "Trend",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:165",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "影響節點",
+            "節點",
+            "affected nodes"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "related_applications",
+      "range": "Application",
+      "range_basis": "Alias 相關應用.",
+      "description": "Applications a trend affects.",
+      "sources": [
+        {
+          "domain": "Trend",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:166",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "相關應用",
+            "應用",
+            "related applications"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "related",
+      "range": [
+        "Trend",
+        "Technology",
+        "Node",
+        "Ecosystem",
+        "Account",
+        "CustomerProduct",
+        "Application",
+        "TestSolution",
+        "Competitor",
+        "Concept"
+      ],
+      "range_basis": "Alias 相關卡片 (any card); DV_SIGNALS (bi_schema.py:25-26) lists Signals whose related contains the page. Signal-to-Signal is not used.",
+      "description": "The cards a Signal informs.",
+      "sources": [
+        {
+          "domain": "Signal",
+          "origin": "source-bi-schema-py",
+          "code_ref": "bi_schema.py:182",
+          "code_kind": "linklist",
+          "cardinality": "many",
+          "field_class": "sourced",
+          "aliases": [
+            "相關",
+            "相關卡片",
+            "related"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "customer_product",
+      "range": "CustomerProduct",
+      "range_basis": "proposed",
+      "description": "The customer product an opportunity is about.",
+      "sources": [
+        {
+          "domain": "Opportunity",
+          "origin": "proposed",
+          "reason": "Kept from v0 (proposed-v0): chain step 5 -> 8.",
+          "code_ref": null,
+          "cardinality": "many",
+          "field_class": "judgement"
+        }
+      ]
+    },
+    {
+      "name": "competing_vendors",
+      "range": "Competitor",
+      "range_basis": "proposed",
+      "description": "Our TestSolution names a competitor company it competes with, when no competitor TestSolution card exists.",
+      "sources": [
+        {
+          "domain": "TestSolution",
+          "origin": "proposed",
+          "reason": "bi_schema.py:52 competing_solutions is one linklist with aliases 競品方案 / 競品 / competitors; the example vault fills it with Competitor cards (company), the README and prompt with TestSolution cards (solution). v1 keeps competing_solutions -> TestSolution and stages company targets here instead of silently mixing types (rule competing_solutions_type_check).",
+          "code_ref": null,
+          "cardinality": "many",
+          "field_class": "judgement"
+        }
+      ]
+    }
+  ],
+  "source_links": [
+    {
+      "name": "claim_about",
+      "from": "Claim",
+      "to": "Entity",
+      "origin": "source-v1.0",
+      "description": "kg.claim.subject_entity_id."
+    },
+    {
+      "name": "supports",
+      "from": "Claim",
+      "to": "Evidence",
+      "origin": "source-v1.0",
+      "description": "kg.claim_evidence role=supports."
+    },
+    {
+      "name": "contradicts",
+      "from": "Claim",
+      "to": "Evidence",
+      "origin": "source-v1.0",
+      "description": "kg.claim_evidence role=contradicts."
+    },
+    {
+      "name": "context",
+      "from": "Claim",
+      "to": "Evidence",
+      "origin": "source-v1.0",
+      "description": "kg.claim_evidence role=context."
+    }
+  ],
+  "rules": [
+    {
+      "id": "account_not_ecosystem",
+      "origin": "source-bi-doc",
+      "pages": [
+        5
+      ],
+      "statement": "Account is a customer that buys our instruments; Ecosystem is a supply-chain chip, module or certification partner. They are never mixed: one canonical_key never names both, and an Account reaches an Ecosystem only through suppliers (or a CustomerProduct through chip_modules)."
+    },
+    {
+      "id": "own_solution_vendor",
+      "origin": "source-bi-schema-py",
+      "statement": "Our TestSolution leaves vendor empty (no vendor link) and there is no Competitor card for our own company. A competitor's TestSolution has exactly one vendor link to its Competitor card. competing_solutions goes from our solution to a competitor's solution.",
+      "code_ref": "bi_schema.py:37",
+      "also": "tests/fixtures/bi_vault_example/tools/README.md:83-84; tools/prompts/slide_distill.md:9-14"
+    },
+    {
+      "id": "own_solution_explicit",
+      "origin": "source-v1.0",
+      "statement": "is_own_solution is required and equals 'has no vendor link'."
+    },
+    {
+      "id": "coverage_counts_own_only",
+      "origin": "source-bi-doc",
+      "pages": [
+        8,
+        13
+      ],
+      "statement": "Solution coverage of an Application counts our solutions only; competitor solutions appear only in the comparison."
+    },
+    {
+      "id": "claim_modality",
+      "origin": "source-bi-doc",
+      "pages": [
+        11,
+        12
+      ],
+      "statement": "Every claim separates what the source says (source_assertion) from what we infer (inference), and states assumed / verified (verified only after checking) and draft / reviewed. Uncertain facts go to a to-verify list (verification_status=assumed), never stated as fact. Each claim from a deck cites its page."
+    },
+    {
+      "id": "claim_record_fields",
+      "origin": "source-v1.0",
+      "statement": "claim_kind, verification_status, review_status and the evidence roles supports / contradicts / context follow kg.claim and kg.claim_evidence of v1.0."
+    },
+    {
+      "id": "concept_review",
+      "origin": "source-bi-doc",
+      "pages": [
+        9,
+        12
+      ],
+      "statement": "A Concept starts as properties.review_status=draft (bi_schema.py:157) and becomes reviewed after sales have read it.",
+      "code_ref": "bi_schema.py:157"
+    },
+    {
+      "id": "stale_after_90_days",
+      "origin": "source-bi-doc",
+      "pages": [
+        12
+      ],
+      "statement": "Every card records its sources and updated date; a card not updated for more than 90 days is flagged stale (Atlas graph_state stale, gap STALE_DATA). Note: the example Dashboard computes staleness from file.mtime, not updated, and only for Ecosystem, Technology, Trend and CustomerProduct (Dashboard.md section 8); AEP uses the record updated for every type."
+    },
+    {
+      "id": "node_reference_set",
+      "origin": "proposed",
+      "statement": "bi_schema.py fixes no node list; Node layer is the code enum L1-L5 / X (bi_schema.py:129). The reference set is the 8 Node cards of the example vault (tests/fixtures/bi_vault_example/BI/Node/, owner rule 2026-10-18 'as many as seen'): L1-Chipset, L2-Antenna-Module, L2-RF-FEM-Module, L3-Handset, L3-WiFi-Router-CPE, L4-Base-Station, L5-Carrier-Network, X-Certification-Lab. Further positions are proposed-extension, pending owner acceptance.",
+      "replaces_v0": "node_fixed_set (7 from the BI document)"
+    },
+    {
+      "id": "import_idempotent_merge",
+      "origin": "source-bi-doc",
+      "pages": [
+        10,
+        11
+      ],
+      "statement": "Imports run dry-run first, are repeatable without duplicate cards, merge into existing cards without overwriting human-written text, keep extraction output out of the published set until reviewed, and keep only summaries and sources, not full source text.",
+      "also": "bi_ingest.py:15-17, 563-574, 588-597; tools/README.md:44-49. v1.3 tightens it to field level: ADR-K11."
+    },
+    {
+      "id": "assertion_needs_support",
+      "origin": "proposed",
+      "statement": "A source_assertion claim has at least one supports evidence item."
+    },
+    {
+      "id": "inference_needs_basis",
+      "origin": "proposed",
+      "statement": "An inference claim lists derived_from_claim_ids and is never verified; a reviewer qualifies the derived Opportunity instead."
+    },
+    {
+      "id": "disputed_needs_both_sides",
+      "origin": "proposed",
+      "statement": "A disputed claim has both supports and contradicts evidence."
+    },
+    {
+      "id": "domain_range",
+      "origin": "proposed",
+      "statement": "A relationship's subject type is one of its sources' domains and its object type is in its range."
+    },
+    {
+      "id": "classification_inherits_max",
+      "origin": "proposed",
+      "statement": "A record takes the highest classification of its evidence documents and its type default (ADR-K8 pending)."
+    },
+    {
+      "id": "label_is_content",
+      "origin": "proposed",
+      "statement": "Labels of Account, CustomerProduct and Opportunity, or of any CONFIDENTIAL/RESTRICTED record, are content (Knowledge API scope knowledge.read.content)."
+    },
+    {
+      "id": "competing_solutions_type_check",
+      "origin": "proposed",
+      "statement": "A competing_solutions target that resolves to a Competitor card is a type mismatch: it is not stored as competing_solutions; it is staged as a competing_vendors candidate with a warning. Nothing is inferred silently."
+    },
+    {
+      "id": "links_need_resolved_targets",
+      "origin": "proposed",
+      "statement": "bi_ingest.py only warns when a link target card is missing (bi_ingest.py:722-727) and never checks the target's type. AEP stores a relationship only when the target resolves to an entity of a type in the range; an unresolved name becomes a vocabulary-gap candidate (v1.3 DQ-5)."
+    },
+    {
+      "id": "lifecycle_stage_mapping",
+      "origin": "proposed",
+      "statement": "Application.lifecycle (RD, Certification, Production, Reliability, Field; bi_schema.py:69-70) and CustomerProduct.test_stage_now (RD, cert, production; bi_schema.py:99) are different enums. Mapping: test_stage_now RD -> lifecycle RD; cert -> Certification; production -> Production. Reliability and Field have no test_stage_now value."
+    },
+    {
+      "id": "judgement_fields_never_overwritten_by_import",
+      "origin": "proposed",
+      "statement": "ADR-K11: an import or agent never overwrites a value whose field provenance origin is human; it creates a pending field proposal (conflict) for review. bi_ingest.py merge would overwrite it (new non-empty scalar overwrites, bi_ingest.py:563-574)."
+    },
+    {
+      "id": "fictional_cards_quarantined",
+      "origin": "proposed",
+      "statement": "A card the source marks fictional or example (e.g. body text 虛構範例) is test data: synthetic=true, never trusted, its confidence is not taken as verified (v1.3 DQ-1)."
+    },
+    {
+      "id": "confidence_is_not_reliability",
+      "origin": "source-bi-schema-py",
+      "code_ref": "bi_schema.py:18, 184",
+      "statement": "confidence (verified|assumed) exists only on types with tail fields; Account, Node and Signal have none. Signal.reliability (high|medium|low) rates the source, not verification."
+    }
+  ],
+  "gap_checks": [
+    {
+      "id": "application_without_own_solution",
+      "origin": "source-bi-doc",
+      "pages": [
+        13
+      ],
+      "atlas_gap_type": "RELATION_GAP",
+      "caveat": "Dashboard.md section 6 counts any TestSolution inlink, so a planning solution or a competitor's solution hides the gap; AEP counts our solutions only and reports built (exists), sellable (status available) and ours (no vendor) separately."
+    },
+    {
+      "id": "technology_without_concept",
+      "origin": "source-bi-doc",
+      "pages": [
+        9,
+        13
+      ],
+      "atlas_gap_type": "METADATA_GAP"
+    },
+    {
+      "id": "inferred_share",
+      "origin": "source-bi-doc",
+      "pages": [
+        13
+      ],
+      "atlas_gap_type": "REASONING_GAP",
+      "caveat": "Dashboard.md section 7 groups by confidence with WHERE confidence, so Account, Node and Signal (no field) are skipped; AEP reports the denominator."
+    },
+    {
+      "id": "stale_cards",
+      "origin": "source-bi-doc",
+      "pages": [
+        12,
+        13
+      ],
+      "atlas_gap_type": "STALE_DATA"
+    },
+    {
+      "id": "disputed_claims",
+      "origin": "proposed",
+      "atlas_gap_type": "CONFLICT"
+    }
+  ],
+  "global_aliases": {
+    "code_ref": "bi_schema.py:188",
+    "map": {
+      "body": [
+        "body",
+        "內文",
+        "備註",
+        "說明",
+        "notes",
+        "note",
+        "description",
+        "描述"
+      ]
+    }
+  },
+  "enum_aliases": {
+    "test_type": {
+      "code_ref": "bi_schema.py:191",
+      "map": {
+        "傳導": "conducted",
+        "傳導式": "conducted",
+        "傳導式射頻量測": "conducted",
+        "射頻量測": "conducted",
+        "ota": "OTA",
+        "空中": "OTA",
+        "空中量測": "OTA",
+        "暗室": "OTA",
+        "協定": "protocol",
+        "信令": "protocol",
+        "協定與信令": "protocol",
+        "互通": "protocol",
+        "通道模擬": "channel-emu",
+        "衰落": "channel-emu",
+        "通道": "channel-emu",
+        "網路模擬": "channel-emu",
+        "頻譜": "spectrum",
+        "頻譜監測": "spectrum",
+        "訊號分析": "spectrum",
+        "功耗": "power",
+        "電源": "power",
+        "功耗與電源": "power",
+        "ate": "ATE",
+        "產線": "ATE",
+        "參數化": "ATE",
+        "量產測試": "ATE"
+      }
+    },
+    "tier": {
+      "code_ref": "bi_schema.py:200",
+      "map": {
+        "單機": "instrument",
+        "單機量測": "instrument",
+        "儀器": "instrument",
+        "整合": "integrated",
+        "整合方案": "integrated",
+        "自動化": "automated",
+        "自動化系統": "automated",
+        "系統": "automated",
+        "服務": "service",
+        "服務方案": "service"
+      }
+    },
+    "automation": {
+      "code_ref": "bi_schema.py:206",
+      "map": {
+        "手動": "manual",
+        "半自動": "semi",
+        "全自動": "full",
+        "自動": "full"
+      }
+    },
+    "price_band": {
+      "code_ref": "bi_schema.py:207",
+      "map": {
+        "入門": "entry",
+        "低": "entry",
+        "低階": "entry",
+        "中階": "mid",
+        "中": "mid",
+        "高階": "high",
+        "高": "high"
+      }
+    },
+    "status": {
+      "code_ref": "bi_schema.py:209",
+      "map": {
+        "規劃中": "planning",
+        "規劃": "planning",
+        "可銷售": "available",
+        "可販售": "available",
+        "上市": "available",
+        "停產": "EOL",
+        "即將停產": "EOL"
+      }
+    },
+    "confidence": {
+      "code_ref": "bi_schema.py:211",
+      "map": {
+        "已驗證": "verified",
+        "驗證": "verified",
+        "推測": "assumed",
+        "假設": "assumed",
+        "未驗證": "assumed"
+      }
+    },
+    "lifecycle": {
+      "code_ref": "bi_schema.py:213",
+      "map": {
+        "研發": "RD",
+        "研發與設計驗證": "RD",
+        "設計驗證": "RD",
+        "認證": "Certification",
+        "標準符合性與認證": "Certification",
+        "量產": "Production",
+        "量產測試": "Production",
+        "產線": "Production",
+        "可靠度": "Reliability",
+        "品質與可靠度": "Reliability",
+        "現場": "Field",
+        "維運": "Field",
+        "現場與維運": "Field"
+      }
+    },
+    "test_stage_now": {
+      "code_ref": "bi_schema.py:220",
+      "map": {
+        "研發": "RD",
+        "認證": "cert",
+        "量產": "production"
+      }
+    },
+    "volume_tier": {
+      "code_ref": "bi_schema.py:221",
+      "map": {
+        "低": "low",
+        "中": "mid",
+        "高": "high"
+      }
+    },
+    "role": {
+      "code_ref": "bi_schema.py:222",
+      "map": {
+        "晶片商": "chipset",
+        "晶片": "chipset",
+        "模組": "module",
+        "模組廠": "module",
+        "代工": "ODM",
+        "品牌": "OEM",
+        "電信商": "carrier",
+        "認證實驗室": "cert-lab",
+        "實驗室": "cert-lab",
+        "整合商": "integrator",
+        "代理": "distributor",
+        "代理商": "distributor",
+        "通路": "distributor",
+        "標準組織": "standards",
+        "協會": "standards",
+        "元件": "component",
+        "零組件": "component",
+        "封測": "osat",
+        "封測廠": "osat"
+      }
+    },
+    "relationship_to_us": {
+      "code_ref": "bi_schema.py:230",
+      "map": {
+        "客戶": "customer",
+        "夥伴": "partner",
+        "合作": "partner",
+        "影響者": "influencer",
+        "競爭": "competitor",
+        "競品": "competitor",
+        "無": "none"
+      }
+    },
+    "source_type": {
+      "code_ref": "bi_schema.py:232",
+      "map": {
+        "標準": "standard",
+        "法規": "regulator",
+        "報告": "report",
+        "財報": "filing",
+        "法說": "filing",
+        "新聞": "news",
+        "展會": "conference",
+        "研討會": "conference",
+        "客戶": "customer",
+        "競品": "competitor",
+        "內部": "internal"
+      }
+    },
+    "category": {
+      "code_ref": "bi_schema.py:235",
+      "map": {
+        "無線電": "radio",
+        "射頻": "radio",
+        "協定": "protocol",
+        "指標": "metric",
+        "量測": "measurement",
+        "量測方法": "measurement",
+        "標準": "standard",
+        "規範": "standard",
+        "設備": "device",
+        "裝置": "device"
+      }
+    },
+    "audience": {
+      "code_ref": "bi_schema.py:237",
+      "map": {
+        "業務": "sales",
+        "業務+FAE": "sales+FAE",
+        "工程師": "engineer"
+      }
+    },
+    "review_status": {
+      "code_ref": "bi_schema.py:238",
+      "map": {
+        "草稿": "draft",
+        "已審閱": "reviewed",
+        "已確認": "reviewed"
+      }
+    },
+    "reliability": {
+      "code_ref": "bi_schema.py:239",
+      "map": {
+        "高": "high",
+        "中": "medium",
+        "低": "low"
+      }
+    },
+    "stage": {
+      "code_ref": "bi_schema.py:240",
+      "map": {
+        "觀察": "watch",
+        "萌芽": "emerging",
+        "新興": "emerging",
+        "加速": "accelerating",
+        "高峰": "peak",
+        "衰退": "fading"
+      }
+    },
+    "maturity": {
+      "code_ref": "bi_schema.py:242",
+      "map": {
+        "新興": "emerging",
+        "成長": "growth",
+        "成熟": "mature",
+        "衰退": "declining"
+      }
+    },
+    "pricing_position": {
+      "code_ref": "bi_schema.py:243",
+      "map": {
+        "低": "low",
+        "同等": "par",
+        "持平": "par",
+        "高": "premium",
+        "高價": "premium"
+      }
+    }
+  },
+  "upcast_from_v0": {
+    "from": "bi.schema/v0",
+    "to": "bi.schema/v1",
+    "type_map": {
+      "Trend": "Trend",
+      "Technology": "Technology",
+      "Node": "Node",
+      "Ecosystem": "Ecosystem",
+      "Account": "Account",
+      "CustomerProduct": "CustomerProduct",
+      "Application": "Application",
+      "TestSolution": "TestSolution",
+      "Competitor": "Competitor",
+      "Concept": "Concept",
+      "Signal": "Signal",
+      "Opportunity": "Opportunity"
+    },
+    "type_map_note": "Identity: v0 already used the folder names. Opportunity stays proposed.",
+    "record_map": {
+      "updated": {
+        "to": "updated",
+        "action": "keep",
+        "note": "Record-level date kept for the API stale rule; for types with has_confidence_and_updated it equals properties.updated (bi_schema.py:19)."
+      },
+      "sources": {
+        "to": null,
+        "action": "drop",
+        "note": "Not in bi_schema.py. bi_ingest.py writes ingested_from (an input file name only, bi_ingest.py:577-585); AEP keeps provenance.document_ids / evidence_ids instead (ADR-K4)."
+      }
+    },
+    "property_map": {
+      "Trend": {
+        "measurement_impact": {
+          "to": "measurement_impact",
+          "action": "type_change",
+          "note": "v0 free text -> v1 int 1-5 (bi_schema.py:170). The text moves to legacy_v0.measurement_impact; the int is left empty unless a person or the mock sets it (judgement field, origin migration needs review)."
+        },
+        "our_fit": {
+          "to": "our_fit",
+          "action": "value_map",
+          "value_map": {
+            "high": 4,
+            "medium": 3,
+            "low": 2
+          },
+          "note": "v0 enum -> v1 int 1-5 (bi_schema.py:171); mapped value carries field provenance origin=migration and needs human confirmation."
+        },
+        "stage": {
+          "to": "stage",
+          "action": "value_map",
+          "value_map": {
+            "emerging": "emerging",
+            "growth": "accelerating",
+            "mature": "peak",
+            "declining": "fading"
+          },
+          "note": "v0 proposed values differ from the code enum (bi_schema.py:167)."
+        },
+        "market_segments": {
+          "to": "market_segments",
+          "action": "keep_proposed"
+        }
+      },
+      "Technology": {
+        "maturity": {
+          "to": "maturity",
+          "action": "value_map",
+          "value_map": {
+            "research": "emerging",
+            "pre_standard": "emerging",
+            "standardized": "growth",
+            "deployed": "mature"
+          },
+          "note": "bi_schema.py:139."
+        },
+        "standards_body": {
+          "to": "standard_body",
+          "action": "rename",
+          "note": "bi_schema.py:137."
+        }
+      },
+      "Node": {
+        "position_set": {
+          "to": "position_set",
+          "action": "value_map",
+          "value_map": {
+            "bi-doc": "vault-reference",
+            "proposed-v0-extension": "proposed-extension"
+          },
+          "note": "The code fixes no node list; layer (bi_schema.py:129) is new and required by nothing, set from the node's position."
+        }
+      },
+      "Ecosystem": {
+        "role": {
+          "to": "role",
+          "action": "value_map",
+          "value_map": {
+            "chipset_supplier": "chipset",
+            "module_supplier": "module",
+            "certification_partner": "cert-lab",
+            "component_supplier": "component",
+            "other": null
+          },
+          "note": "bi_schema.py:106-108; 'other' has no code value and moves to legacy_v0.role."
+        }
+      },
+      "Account": {
+        "region": {
+          "to": "region",
+          "action": "type_change",
+          "note": "v0 enum -> v1 free text (bi_schema.py:122); the v0 value is kept as text."
+        },
+        "customers": {
+          "to": null,
+          "action": "to_relationship_or_legacy",
+          "note": "v1 key_customers is a linklist (bi_schema.py:121). Names that resolve to an Account become key_customers relationships; others move to legacy_v0.customers (missing-target vocabulary gap, DQ-5)."
+        },
+        "synthetic": {
+          "to": "synthetic",
+          "action": "keep_proposed"
+        }
+      },
+      "CustomerProduct": {
+        "launch_schedule": {
+          "to": "launch_window",
+          "action": "rename",
+          "note": "bi_schema.py:97; free text such as 2027-Q1, not a date."
+        }
+      },
+      "Application": {
+        "measurement_topic": {
+          "to": "measurement_topics",
+          "action": "rename_to_list",
+          "note": "v0 single string -> v1 list (bi_schema.py:74); no longer required."
+        },
+        "market_segments": {
+          "to": "market_segments",
+          "action": "keep_proposed"
+        }
+      },
+      "TestSolution": {
+        "is_own_solution": {
+          "to": "is_own_solution",
+          "action": "keep_proposed"
+        },
+        "product_family": {
+          "to": "product_family",
+          "action": "keep_proposed"
+        }
+      },
+      "Competitor": {
+        "strengths": {
+          "to": "strengths",
+          "action": "keep"
+        },
+        "weaknesses": {
+          "to": "weaknesses",
+          "action": "keep"
+        },
+        "product_lines": {
+          "to": "product_lines",
+          "action": "keep"
+        },
+        "confirmed": {
+          "to": "confidence",
+          "action": "value_map",
+          "value_map": {
+            "true": "verified",
+            "false": "assumed"
+          },
+          "note": "No confirmed field in the code; the card-level confidence (bi_schema.py:18) carries it."
+        }
+      },
+      "Concept": {
+        "one_liner": {
+          "to": "one_liner",
+          "action": "keep"
+        },
+        "analogy": {
+          "to": "analogy",
+          "action": "keep"
+        },
+        "audience": {
+          "to": "audience",
+          "action": "value_map",
+          "value_map": {
+            "BD": "sales",
+            "sales": "sales",
+            "FAE": "sales+FAE",
+            "engineer": "engineer"
+          },
+          "note": "v0 free text -> v1 enum (bi_schema.py:156); unmapped text moves to legacy_v0.audience."
+        },
+        "review_state": {
+          "to": "review_status",
+          "action": "rename",
+          "note": "bi_schema.py:157. It is the card's sales trial-read state, a property; it is not the record-level publication review_status."
+        }
+      },
+      "Signal": {
+        "date": {
+          "to": "date",
+          "action": "normalize",
+          "note": "v1 date is YYYY-MM-DD (bi_schema.py:176); a v0 month value YYYY-MM becomes YYYY-MM-01 and legacy_v0.date_precision=month."
+        },
+        "source": {
+          "to": "source",
+          "action": "keep"
+        },
+        "reliability": {
+          "to": "reliability",
+          "action": "keep",
+          "note": "Same enum high|medium|low (bi_schema.py:184). Reliability is the source's credibility, not verification."
+        },
+        "so_what": {
+          "to": "so_what",
+          "action": "keep"
+        }
+      },
+      "Opportunity": {
+        "hypothesis_status": {
+          "to": "hypothesis_status",
+          "action": "keep_proposed"
+        },
+        "market_segments": {
+          "to": "market_segments",
+          "action": "keep_proposed"
+        }
+      }
+    },
+    "new_required_without_value": "A v1-required property with no value after mapping takes the code default if bi_schema.py has one (bi_ingest.py:410-424); otherwise the record returns to review_status=draft and status=candidate. Example: Signal.summary (bi_schema.py:181) has no default.",
+    "relationship_map": [
+      {
+        "domain": "Trend",
+        "from": "related_tech",
+        "to": "related_tech",
+        "action": "keep",
+        "code_ref": "bi_schema.py:164",
+        "v0_name_status": "doc",
+        "v1_origin": "source-bi-schema-py"
+      },
+      {
+        "domain": "Technology",
+        "from": "affects_nodes",
+        "to": "affects_nodes",
+        "action": "keep",
+        "code_ref": "bi_schema.py:140",
+        "v0_name_status": "doc",
+        "v1_origin": "source-bi-schema-py"
+      },
+      {
+        "domain": "Ecosystem",
+        "from": "node",
+        "to": "node",
+        "action": "keep",
+        "code_ref": "bi_schema.py:105",
+        "v0_name_status": "doc",
+        "v1_origin": "source-bi-schema-py"
+      },
+      {
+        "domain": "Account",
+        "from": "node",
+        "to": "node",
+        "action": "keep",
+        "code_ref": "bi_schema.py:119",
+        "v0_name_status": "provisional",
+        "v1_origin": "source-bi-schema-py"
+      },
+      {
+        "domain": "Application",
+        "from": "node",
+        "to": "nodes",
+        "action": "rename",
+        "code_ref": "bi_schema.py:71",
+        "v0_name_status": "provisional"
+      },
+      {
+        "domain": "Application",
+        "from": "technologies",
+        "to": "technologies",
+        "action": "keep",
+        "code_ref": "bi_schema.py:72",
+        "v0_name_status": "doc",
+        "v1_origin": "source-bi-schema-py"
+      },
+      {
+        "domain": "Concept",
+        "from": "technologies",
+        "to": "technologies",
+        "action": "keep",
+        "code_ref": "bi_schema.py:152",
+        "v0_name_status": "doc",
+        "v1_origin": "source-bi-schema-py"
+      },
+      {
+        "domain": "CustomerProduct",
+        "from": "technologies",
+        "to": "technologies",
+        "action": "keep",
+        "code_ref": "bi_schema.py:95",
+        "v0_name_status": "provisional",
+        "v1_origin": "source-bi-schema-py"
+      },
+      {
+        "domain": "TestSolution",
+        "from": "applications",
+        "to": "applications",
+        "action": "keep",
+        "code_ref": "bi_schema.py:38",
+        "v0_name_status": "doc",
+        "v1_origin": "source-bi-schema-py"
+      },
+      {
+        "domain": "CustomerProduct",
+        "from": "applications",
+        "to": "inferred_applications",
+        "action": "rename",
+        "code_ref": "bi_schema.py:100",
+        "v0_name_status": "provisional"
+      },
+      {
+        "domain": "Concept",
+        "from": "applications",
+        "to": "applications",
+        "action": "keep",
+        "code_ref": "bi_schema.py:153",
+        "v0_name_status": "provisional",
+        "v1_origin": "source-bi-schema-py"
+      },
+      {
+        "domain": "TestSolution",
+        "from": "competing_solutions",
+        "to": "competing_solutions",
+        "action": "keep",
+        "code_ref": "bi_schema.py:52",
+        "v0_name_status": "doc",
+        "v1_origin": "source-bi-schema-py"
+      },
+      {
+        "domain": "TestSolution",
+        "from": "vendor",
+        "to": "vendor",
+        "action": "keep",
+        "code_ref": "bi_schema.py:37",
+        "v0_name_status": "doc",
+        "v1_origin": "source-bi-schema-py"
+      },
+      {
+        "domain": "Ecosystem",
+        "from": "supplied_technologies",
+        "to": "technologies",
+        "action": "rename",
+        "code_ref": "bi_schema.py:109",
+        "v0_name_status": "provisional"
+      },
+      {
+        "domain": "Account",
+        "from": "suppliers",
+        "to": "key_suppliers",
+        "action": "rename",
+        "code_ref": "bi_schema.py:120",
+        "v0_name_status": "provisional"
+      },
+      {
+        "domain": "CustomerProduct",
+        "from": "account",
+        "to": "account",
+        "action": "keep",
+        "code_ref": "bi_schema.py:93",
+        "v0_name_status": "provisional",
+        "v1_origin": "source-bi-schema-py"
+      },
+      {
+        "domain": "Opportunity",
+        "from": "account",
+        "to": "account",
+        "action": "keep",
+        "code_ref": null,
+        "v0_name_status": "proposed",
+        "v1_origin": "proposed"
+      },
+      {
+        "domain": "CustomerProduct",
+        "from": "chip_modules",
+        "to": "chipset_modules",
+        "action": "rename",
+        "code_ref": "bi_schema.py:96",
+        "v0_name_status": "provisional"
+      },
+      {
+        "domain": "Concept",
+        "from": "test_solutions",
+        "to": "test_solutions",
+        "action": "keep",
+        "code_ref": "bi_schema.py:154",
+        "v0_name_status": "provisional",
+        "v1_origin": "source-bi-schema-py"
+      },
+      {
+        "domain": "Opportunity",
+        "from": "test_solutions",
+        "to": "test_solutions",
+        "action": "keep",
+        "code_ref": null,
+        "v0_name_status": "proposed",
+        "v1_origin": "proposed"
+      },
+      {
+        "domain": "Opportunity",
+        "from": "customer_product",
+        "to": "customer_product",
+        "action": "keep",
+        "code_ref": null,
+        "v0_name_status": "proposed",
+        "v1_origin": "proposed"
+      },
+      {
+        "domain": "Signal",
+        "from": "mentions",
+        "to": "related",
+        "action": "rename",
+        "code_ref": "bi_schema.py:182",
+        "v0_name_status": "proposed"
+      }
+    ],
+    "steps": [
+      "dry_run: report counts, renamed / unmapped names, value-map results, records sent back to candidate, conflicts with edited_by_human or human-set judgement fields",
+      "type_map (identity)",
+      "property_map per type; unmapped values move to properties.legacy_v0; mapped judgement values get field_provenance origin=migration and stay pending human confirmation",
+      "relationship_map; every renamed relationship gets a new relationship_id from the v1 name and an entry in relationship_id_map; claims keep claim_id, statement, modality and evidence, and their relationship pointer follows relationship_id_map",
+      "apply is idempotent by (entity_type, canonical_key) and relationship_id; document ids and evidence ids are never rewritten"
+    ]
+  }
+}
