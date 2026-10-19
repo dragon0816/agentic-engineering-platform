@@ -23,6 +23,7 @@ import json
 import re
 import threading
 import time
+import uuid
 from collections.abc import Callable, Iterator, Mapping
 from datetime import UTC, datetime
 from pathlib import Path
@@ -59,6 +60,7 @@ from host_runtime.attachments import (
     for_model,
     safe_name,
 )
+from host_runtime.business_cards_tools import chart_files, with_legend
 from host_runtime.chat_authoring import ChatAuthoring, ChatAuthoringError, approval_text
 from host_runtime.identity_presets import IdentityPresets
 from host_runtime.schedule_policy import target_side_effect
@@ -224,6 +226,9 @@ class TelegramDelivery(Contract):
     # Replace this message of the chat (a tapped multi-select) instead of
     # sending a new one.
     edit_message_id: int | None = Field(default=None, strict=True)
+    # Pictures sent after the reply (an org chart; docs/phases/BUSINESS_CARDS.md):
+    # paths of files a tool produced on this Host, never model text.
+    photos: tuple[str, ...] = ()
     replied: StrictBool = False
     outcome: LocalAgentOutcome | None = None
     failure: Failure | None = None
@@ -872,6 +877,8 @@ class TelegramIngress:
                 if not replied:
                     # Never silent: say that the answer did not arrive.
                     await asyncio.to_thread(self._reply, update.chat_id, UNDELIVERED_REPLY)
+                for photo in delivery.photos:
+                    await asyncio.to_thread(self._send_photo, update.chat_id, Path(photo))
                 delivery = delivery.model_copy(update={"replied": replied})
             deliveries.append(delivery)
         if highest is None or highest == offset:
@@ -1366,8 +1373,13 @@ class TelegramIngress:
             )
         if drafted:
             return self._carded(base, answer, buttons, drafted)
+        charts = chart_files(conversation)
         return TelegramDelivery(
-            **base, disposition="answered", reply=scrub(answer), buttons=buttons
+            **base,
+            disposition="answered",
+            reply=scrub(with_legend(answer, charts)),
+            buttons=buttons,
+            photos=tuple(item["path"] for item in charts if item["kind"] == "image"),
         )
 
     def _carded(
@@ -1746,6 +1758,42 @@ class TelegramIngress:
                 {key: value for key, value in payload.items() if key != "reply_markup"},
             )
         return status == 200
+
+    def _send_photo(self, chat_id: int, path: Path) -> bool:
+        """One `sendPhoto` with the file as multipart form data, through the
+        bot's own transport; a photo that cannot be sent is not retried."""
+        try:
+            data = path.read_bytes()
+            boundary = f"aep-{uuid.uuid4().hex}"
+            name = re.sub(r"[^A-Za-z0-9._-]", "_", path.name) or "chart.png"
+            head = "\r\n".join(
+                (
+                    f"--{boundary}",
+                    'Content-Disposition: form-data; name="chat_id"',
+                    "",
+                    str(chat_id),
+                    f"--{boundary}",
+                    f'Content-Disposition: form-data; name="photo"; filename="{name}"',
+                    "Content-Type: image/png",
+                    "",
+                    "",
+                )
+            )
+            body = head.encode("utf-8") + data + f"\r\n--{boundary}--\r\n".encode()
+            token = self._resolver.resolve(self.config.credential)
+            reply = self._transport.send(
+                f"{self.config.api_base}/bot{token}/sendPhoto",
+                body,
+                {"Content-Type": f"multipart/form-data; boundary={boundary}"},
+                float(self.config.poll_timeout_seconds + POLL_MARGIN_SECONDS),
+            )
+            try:
+                b"".join(reply.chunks())
+            finally:
+                close_quietly(reply)
+            return reply.status == 200
+        except Exception:  # noqa: BLE001 - the text answer already went out
+            return False
 
     def _acknowledge(self, callback_id: str) -> None:
         try:

@@ -115,6 +115,7 @@ from host_runtime.attachments import (
 from host_runtime.attachments import summary as attachment_summary
 from host_runtime.authoring import AuthoringError, AuthoringSession, AuthoringStudio
 from host_runtime.avatars import UserPreferences, UserPreferencesStore, catalog
+from host_runtime.business_cards_tools import chart_files, with_legend
 from host_runtime.change_proposals import ChangeProposals
 from host_runtime.chat_authoring import ChatAuthoringError, approval_text
 from host_runtime.choice_sources import ChoiceSources
@@ -369,6 +370,12 @@ def with_tools(message: ConversationMessage) -> str:
     if message.role != "assistant" or not message.tool_summary:
         return message.text
     return f"{message.text}\n\n[工具紀錄]\n{message.tool_summary}"
+
+
+def _answer_files(answer: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """The files a turn's tools produced for its answer (an org chart)."""
+    files = answer.get("files")
+    return [item for item in files if isinstance(item, dict)] if isinstance(files, list) else []
 
 
 def _listed_cards(answer: Mapping[str, Any]) -> tuple[dict[str, Any], ...]:
@@ -2461,6 +2468,34 @@ class AgentWeb:
         if progress is not None:
             progress.agent_tool(tool, status)
 
+    def conversation_file(self, session_id: str, path: str) -> tuple[bytes, str] | None:
+        """A file a tool produced for one of this conversation's answers (an
+        org chart), read only when that answer lists it and it lies in the
+        workspace; None for anything else."""
+        record = self.runtime.state.conversation(session_id, self.runtime.actor)
+        if record is None or not path:
+            return None
+        listed = {
+            item.get("path")
+            for message in record.messages
+            if message.role == "assistant"
+            for item in message.attachments
+        }
+        if path not in listed:
+            return None
+        try:
+            target = Path(path).resolve()
+            if not target.is_relative_to(self.runtime.layout.workspace_root.resolve()):
+                return None
+            data = target.read_bytes()
+        except (OSError, ValueError):
+            return None
+        kind = {
+            ".png": "image/png",
+            ".md": "text/markdown; charset=utf-8",
+        }.get(target.suffix.lower(), "application/octet-stream")
+        return data, kind
+
     def conversation_progress(self, session_id: str) -> dict[str, Any]:
         """The session's running turn as names, phases, counts and status only
         (owner 2026-10-19); `progress` is None when no turn is running."""
@@ -2788,13 +2823,17 @@ class AgentWeb:
                     result = conversational.conversation
                     offered = offer_in(result.tools) if result is not None else None
                     carded = card_in(result.tools) if result is not None else None
+                    # An org chart drawn in this turn (docs/phases/BUSINESS_CARDS.md):
+                    # its PNG shows under the answer, its legend is in the text.
+                    charts = chart_files(result)
                     answer = {
                         **({"workflow_form": offered} if offered is not None else {}),
                         **({CARD_KEY: carded} if carded is not None else {}),
+                        **({"files": charts} if charts else {}),
                         "tool_summary": tool_summary(result),
                         "ok": result is not None and result.status == "answered",
                         "answer": (
-                            self._gateway_conversation_text(result)
+                            with_legend(self._gateway_conversation_text(result), charts)
                             if result is not None
                             else f"The request was refused ({conversational.refusal})."
                         ),
@@ -2883,6 +2922,10 @@ class AgentWeb:
                                 workflow_form=answer.get("workflow_form"),
                                 action_card=answer.get(CARD_KEY),
                                 action_cards=_listed_cards(answer),
+                                attachments=tuple(
+                                    {key: str(item[key]) for key in ("filename", "kind", "path")}
+                                    for item in _answer_files(answer)
+                                ),
                                 trace=(
                                     None
                                     if trace_data is None
@@ -5560,6 +5603,15 @@ class _Handler(BaseHTTPRequestHandler):
         elif parsed.path == "/api/conversations/progress":
             session = parse_qs(parsed.query).get("session_id", [""])[0]
             self._json(200, web.conversation_progress(session))
+        elif parsed.path == "/api/conversations/file":
+            query = parse_qs(parsed.query)
+            served = web.conversation_file(
+                query.get("session_id", [""])[0], query.get("path", [""])[0]
+            )
+            if served is None:
+                self._json(404, {"error": "no such file in this conversation"})
+            else:
+                self._send(200, served[0], served[1])
         elif parsed.path == "/api/agent-mode/session":
             session = parse_qs(parsed.query).get("session_id", [""])[0]
             self._json(200, web.agent_session(session))

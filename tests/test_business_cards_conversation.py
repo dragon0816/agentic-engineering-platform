@@ -1,0 +1,265 @@
+"""Business cards in a real Host, through Agent Web's Gateway chat (docs/phases/BUSINESS_CARDS.md).
+
+A fake model plays the conversation end to end: "parse this card and store
+it" with a photo attached, then "the EXN org chart", then "X has left", then
+"undo that". The tools exist only while the Skill is switched on; the
+writes run without an approval card; the chart's PNG is kept on the answer
+and served to the page; the legend is in the answer text. Synthetic people,
+fake model, no network.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+from collections.abc import Iterator
+from pathlib import Path
+from typing import Any
+
+import pytest
+from test_ai_proposed_changes import LAYA
+from test_host_models import binding, endpoint
+from test_host_wiring import host_json, ready
+
+from capabilities.business_cards.handlers import ADD_CARD_SPEC, WRITE_SPECS
+from capabilities.business_cards.manifest import CARDS_SKILL, business_cards_skill
+from capabilities.runtime import LocalPolicy
+from host_runtime.business_cards_tools import CHART_TOOL, business_cards_tools
+from host_runtime.conversations import ConversationTurnRequest
+from host_runtime.host import build_runtime
+from host_runtime.web import AgentWeb
+from models.contracts import ModelRequest, ModelResponse, ModelStreamEvent, ModelToolCall
+
+PNG = bytes.fromhex(
+    "89504e470d0a1a0a0000000d4948445200000001000000010806000000"
+    "1f15c4890000000d4944415478da63646060f80f0002040101b5d1c5a70000000049454e44ae426082"
+)
+CARD = {
+    "name": "周範例",
+    "romanised_name": "Fan-Li Chou",
+    "company": "EXN 範例網通",
+    "business_group": "網通事業群",
+    "division": "研發處",
+    "department": "射頻部",
+    "title": "經理",
+    "mobile": "0912-000-001",
+    "email": "fanli.chou@exn.example",
+    "uncertain": ["email"],
+}
+
+
+class Conversation:
+    """One scripted reply per model call; records what it was shown."""
+
+    def __init__(self) -> None:
+        self.script: list[dict[str, Any]] = []
+        self.requests: list[ModelRequest] = []
+
+    def then(self, *replies: dict[str, Any]) -> None:
+        self.script.extend(replies)
+
+    def generate(self, request: ModelRequest) -> ModelResponse:
+        self.requests.append(request)
+        reply = self.script.pop(0)
+        if callable(reply.get("tools")):
+            reply = {**reply, "tools": reply["tools"](request)}
+        calls = tuple(
+            ModelToolCall(call_id=f"c{len(self.requests)}-{index}", name=name, arguments=args)
+            for index, (name, args) in enumerate(reply.get("tools", []))
+        )
+        return ModelResponse(
+            trace=request.trace,
+            model_alias=request.model_alias,
+            text=reply.get("text", ""),
+            tool_calls=calls,
+        )
+
+    def stream(self, request: ModelRequest) -> Iterator[ModelStreamEvent]:
+        raise NotImplementedError
+
+    def tool_results(self) -> list[str]:
+        return [m.text for m in self.requests[-1].messages if m.role == "tool"]
+
+
+@pytest.fixture
+def web(tmp_path: Path) -> Iterator[tuple[AgentWeb, Conversation]]:
+    # A colleague's install: owner mode, the product default.
+    config, layout = ready(
+        tmp_path,
+        config_changes={
+            "laya": LAYA,
+            "local_owner_grants": True,
+            "models": binding(
+                catalog={
+                    "endpoints": [endpoint(credential=None, model="fixture-model")],
+                    "routes": [{"name": "default", "alias": "company"}],
+                }
+            ),
+        },
+    )
+    layout.skills.mkdir(parents=True, exist_ok=True)
+    skill = business_cards_skill()
+    (layout.skills / "engineering__business-cards__1.0.0.json").write_text(
+        skill.model_dump_json(), encoding="utf-8"
+    )
+    path = host_json(tmp_path, config)
+    with build_runtime(config, layout=layout) as runtime:
+        agent_web = AgentWeb(runtime, config_path=path)
+        agent_web.start_laya_tunnel = lambda settings=None: None  # type: ignore[method-assign]
+        model = Conversation()
+        runtime.agent.gateway.router.model = model
+        yield agent_web, model
+
+
+def _tools(web: AgentWeb) -> list[str]:
+    host_tools = web.runtime.agent.gateway.host_tools
+    assert host_tools is not None
+    return [item.tool.name for item in host_tools()]
+
+
+def test_the_tools_follow_the_skills_switch_and_writes_are_confirmed(
+    web: tuple[AgentWeb, Conversation],
+) -> None:
+    agent_web, _ = web
+    gateway = agent_web.runtime.agent.gateway
+    assert gateway.bridge.installed.get(ADD_CARD_SPEC.identity) is not None
+    names = _tools(agent_web)
+    assert "cards__add_card" in names and CHART_TOOL in names
+    assert "cards__set_status" in names and "cards__undo" in names
+    first = next(t for t in business_cards_tools(gateway) if t.tool.name == "cards__add_card")
+    assert "uncertain" in first.tool.description and first.tool.input_schema is not None
+    policy = gateway.bridge.policy
+    assert isinstance(policy, LocalPolicy)
+    assert {spec.identity.key for spec in WRITE_SPECS} <= policy.confirmed_writes
+    # Switched off: the tools are gone.
+    gateway.router.commands.skills.remove(CARDS_SKILL)
+    assert not any(name.startswith("cards__") for name in _tools(agent_web))
+
+
+def _turn(agent_web: AgentWeb, session: str, message: str, files: list[str] | None = None) -> Any:
+    return agent_web.conversation_turn(
+        ConversationTurnRequest(session_id=session, message=message, attachments=files or [])
+    )
+
+
+def test_store_a_card_draw_the_chart_record_a_departure_and_undo_it(
+    web: tuple[AgentWeb, Conversation],
+) -> None:
+    agent_web, model = web
+    session = agent_web.create_conversation()["conversation"]["session_id"]
+    uploaded = agent_web.add_attachment(session, "card.png", PNG)
+    assert uploaded["ok"], uploaded
+    file_id = uploaded["attachment"]["file_id"]
+    photo_path = agent_web.attachments.get(session, file_id).path
+
+    # 1. "Parse this card and store it."
+    model.then(
+        {"tools": [("cards__add_card", {**CARD, "image_path": photo_path})]},
+        {"text": "已存：周範例，EXN 範例網通 研發處 射頻部 經理。Email 我不太確定，請確認。"},
+    )
+    replied = _turn(agent_web, session, "parse this card and store it", [file_id])
+    assert replied["ok"], replied
+    seen = model.requests[0].messages[-1]
+    assert seen.images and seen.images[0].startswith("data:image/png;base64,")
+    stored = json.loads(model.tool_results()[-1])
+    assert "approval" not in json.dumps(stored)
+    assert stored["host"]["status"] == "succeeded", stored
+    assert stored["host"]["data"]["outcome"] == "created"
+    assert stored["host"]["data"]["uncertain"] == ["email"]
+
+    # A second card under the same manager, with a line the person stated.
+    model.then(
+        {
+            "tools": [
+                (
+                    "cards__add_card",
+                    {
+                        "name": "吳測試",
+                        "company": "EXN 範例網通",
+                        "division": "研發處",
+                        "department": "射頻部",
+                        "title": "工程師",
+                    },
+                ),
+                (
+                    "cards__set_reporting_line",
+                    {
+                        "person": {"name": "吳測試"},
+                        "manager": {"name": "Fan-Li Chou"},
+                        "evidence_kind": "user",
+                        "evidence_ref": "the person said so",
+                    },
+                ),
+            ]
+        },
+        {"text": "已存吳測試，並記下他向周範例報告。"},
+    )
+    assert _turn(agent_web, session, "also this one; he reports to Chou")["ok"]
+
+    # 2. "EXN org chart": the PNG is on the answer, the legend in its text.
+    model.then(
+        {"tools": [(CHART_TOOL, {"company": "EXN"})]},
+        {"text": "這是 EXN 的組織圖。"},
+    )
+    charted = _turn(agent_web, session, "EXN org chart")
+    assert charted["ok"], charted
+    answer = charted["answer"]["answer"]
+    assert "這是 EXN 的組織圖" in answer
+    assert "| 吳測試 | 周範例 | 使用者告知（the person said so） | 否（實線） |" in answer
+    files = charted["conversation"]["messages"][-1]["attachments"]
+    image = next(item for item in files if item["kind"] == "image")
+    served = agent_web.conversation_file(session, image["path"])
+    assert served is not None and served[1] == "image/png"
+    assert served[0][:8] == b"\x89PNG\r\n\x1a\n"
+    # Only a file listed on this conversation's answers is served.
+    assert agent_web.conversation_file(session, photo_path) is None
+    assert agent_web.conversation_file("nope", image["path"]) is None
+
+    # 3. "周範例 has left."
+    model.then(
+        {
+            "tools": [
+                (
+                    "cards__set_status",
+                    {
+                        "person": {"name": "周範例"},
+                        "status": "left",
+                        "reason": "the person said he left",
+                        "said_by": agent_web.runtime.actor,
+                    },
+                )
+            ]
+        },
+        {"text": "已記錄周範例離職，可以復原。"},
+    )
+    assert _turn(agent_web, session, "周範例 has left")["ok"]
+    status = json.loads(model.tool_results()[-1])
+    change = re.search(r'"change_id":\s*"(c-[^"]+)"', json.dumps(status))
+    assert change is not None
+    model.then(
+        {"tools": [(CHART_TOOL, {"company": "EXN"})]},
+        {"text": "更新後的組織圖。"},
+    )
+    after = _turn(agent_web, session, "EXN org chart again")
+    assert "已離職的 1 人沒有畫出" in after["answer"]["answer"]
+
+    # 4. "Undo that."
+    model.then(
+        {"tools": [("cards__undo", {"change_id": change.group(1)})]},
+        {"text": "已復原：周範例回到在職。"},
+    )
+    assert _turn(agent_web, session, "undo that")["ok"]
+    model.then({"tools": [("cards__find", {"query": "周範例"})]}, {"text": "周範例在職。"})
+    assert _turn(agent_web, session, "is Chou still there?")["ok"]
+    found = json.loads(model.tool_results()[-1])
+    assert '"status": "active"' in json.dumps(found)
+    # Nothing waited for an approval button.
+    assert agent_web.approvals(session)["approvals"] == []
+
+
+def test_the_page_shows_an_answers_picture_through_the_token_guarded_route() -> None:
+    from host_runtime.web_page import PAGE
+
+    assert "function answerImage(session, file)" in PAGE
+    assert '"/api/conversations/file?" + query' in PAGE
+    assert 'if (file.kind === "image") said.parentNode.append(answerImage(' in PAGE

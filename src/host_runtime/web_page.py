@@ -780,6 +780,10 @@ tr:last-child td { border-bottom: none; }
   .backend-control select { width: 100%; max-width: none; }
   .send-button { width: 100%; }
 }
+.answer-image { margin: 8px 0 4px; }
+.answer-image img { max-width: 100%; border: 1px solid #d0d7de; border-radius: 6px;
+  cursor: zoom-in; background: #fff; }
+.answer-image figcaption { font-size: 12px; color: #6a737d; }
 </style>
 </head>
 <body>
@@ -2067,6 +2071,29 @@ function turn(asked, replyQuestion, files) {
   return block.querySelector(".said");
 }
 
+// A picture a tool drew for an answer (an org chart, docs/phases/BUSINESS_CARDS.md):
+// fetched with the page's token, shown inline, opened full size on a click.
+function answerImage(session, file) {
+  const figure = document.createElement("figure");
+  figure.className = "answer-image";
+  const image = document.createElement("img");
+  image.alt = file.filename || "";
+  const caption = document.createElement("figcaption");
+  caption.append(text(file.filename || ""));
+  figure.append(image, caption);
+  const query = "session_id=" + encodeURIComponent(session)
+    + "&path=" + encodeURIComponent(file.path || "");
+  fetch("/api/conversations/file?" + query, {headers: {"Authorization": "Bearer " + TOKEN}})
+    .then(reply => reply.ok ? reply.blob() : Promise.reject(new Error(String(reply.status))))
+    .then(blob => {
+      const url = URL.createObjectURL(blob);
+      image.src = url;
+      image.addEventListener("click", () => window.open(url, "_blank", "noopener"));
+    })
+    .catch(() => { caption.replaceChildren(text((file.filename || "") + " (not available)")); });
+  return figure;
+}
+
 function renderConversation(record) {
   log.replaceChildren();
   closeTurnMenu();
@@ -2088,6 +2115,9 @@ function renderConversation(record) {
     if (replied) {
       said.className = "said" + (replied.status === "failed" ? " bad" : "");
       renderAnswer(said, replied.text);
+      for (const file of replied.attachments || []) {
+        if (file.kind === "image") said.parentNode.append(answerImage(record.session_id, file));
+      }
       attachTurnControls(said.parentNode, asked.text, replied);
       const installForm = replied.workflow_form
         && replied.workflow_form.origin === "install";
