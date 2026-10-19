@@ -33,6 +33,9 @@ from capabilities.browser_session.handlers import (
     BrowserResult,
     BrowserSessionHandler,
 )
+from capabilities.business_cards.handlers import WRITE_SPECS as CARDS_WRITE_SPECS
+from capabilities.business_cards.handlers import bindings as business_cards_bindings
+from capabilities.business_cards.manifest import CARDS_SKILL
 from capabilities.chipset_report.apply import ChipsetApplyHandler, ChipsetWorkbookWriter
 from capabilities.chipset_report.contracts import (
     ChipsetApplied,
@@ -272,6 +275,7 @@ from harness.restricted_runner import (
 from host_runtime.agent import LocalAgent
 from host_runtime.attachments import AttachmentStore
 from host_runtime.bridge_tools import bridge_tools
+from host_runtime.business_cards_tools import business_cards_tools
 from host_runtime.chat_authoring import ChatAuthoring
 from host_runtime.choice_sources import FOLDER_FILES, ChoiceFunction, ChoiceSources, folder_files
 from host_runtime.contracts import (
@@ -1139,6 +1143,22 @@ def build_gateway(
         WorkflowDraft,
         ExecutionDependencies(central_required=False),
     )
+    # Business cards (owner 2026-10-20, docs/phases/BUSINESS_CARDS.md): the
+    # person's own contact store under the workspace, installed when this host
+    # has the Skill (switched on or off, so switching it on needs no restart);
+    # the conversation tools appear only while it is switched on.
+    if _has_business_cards_skill(layout):
+        _register_business_cards(
+            installed,
+            layout,
+            model=drafting_model,
+            alias=(
+                binding.routing_alias
+                if binding is not None and binding.routing_alias is not None
+                else "routing"
+            ),
+            local_only=binding.require_local_model if binding is not None else False,
+        )
     if config.coding is not None and config.coding.workspace_roots:
         installed.register(
             CODING_RUN_SPEC,
@@ -1221,6 +1241,9 @@ def build_gateway(
         policy = LocalPolicy(grants, owner_mode=authorization is None and config.local_owner_grants)
     except ValueError as error:
         raise HostError("grants_invalid", layout.grants) from error
+    for spec in CARDS_WRITE_SPECS:
+        if installed.get(spec.identity) is not None:
+            policy.confirm_writes(spec)
     bridge = BridgeExecutor(installed, policy, timeout_seconds=config.capability_timeout_seconds)
     router = build_router(
         config, CommandRouter(skills), resolver=resolver, transport=model_transport
@@ -2038,6 +2061,7 @@ def build_runtime(
     gateway.host_tools = lambda: (
         *chat_authoring.tools(),
         *bridge_tools(gateway.bridge),
+        *business_cards_tools(gateway),
         *mcp.tools(gateway.bridge),
         *workflow_form_tools(gateway.engine),
     )
@@ -2109,6 +2133,38 @@ def _membership_client(runtime: HostRuntime) -> Any:
         held = (binding, publisher_for(binding, runtime.config.credential_environment()))
         runtime._membership_publisher = held  # type: ignore[attr-defined]
     return held[1]
+
+
+def _has_business_cards_skill(layout: HostLayout) -> bool:
+    pattern = f"{CARDS_SKILL.namespace}__{CARDS_SKILL.name}__*.json"
+    return any(layout.skills.glob(pattern)) or any((layout.skills / "disabled").glob(pattern))
+
+
+def _register_business_cards(
+    installed: InstalledCapabilities,
+    layout: HostLayout,
+    *,
+    model: ModelClient | None,
+    alias: str,
+    local_only: bool,
+) -> None:
+    """The contact store's capabilities; mail is read in the scope set in
+    Agent Web Settings > Agent mode, read at each call."""
+    from host_runtime.agent_mode_settings import AgentModeStore
+    from integrations.outlook_mail import OutlookComMailbox
+
+    store = AgentModeStore(layout.workspace_root)
+    for spec, handler, request, response in business_cards_bindings(
+        layout.workspace_root,
+        reader=OutlookComMailbox,
+        scope=lambda: store.load().mail,
+        model=model,
+        alias=alias,
+        local_only=local_only,
+    ):
+        installed.register(
+            spec, handler, request, response, ExecutionDependencies(central_required=False)
+        )
 
 
 def _register_knowledge_pipeline(

@@ -15,10 +15,12 @@ import pytest
 from test_host_wiring import host_json, ready
 
 from agent.skills import SkillManifest, SkillRegistry
+from capabilities.business_cards.manifest import CARDS_SKILL
 from common.assets import AssetIdentity
 from host_runtime import agent_setup, asset_shelf, skill_packs
 from host_runtime.agent_setup import MARKER_FILE, SKILLS, Environment
 from host_runtime.assets import personal, shipped
+from host_runtime.business_cards_tools import business_cards_tools
 from host_runtime.cli import main
 from host_runtime.contracts import HostLayout
 from host_runtime.host import build_runtime
@@ -113,6 +115,27 @@ def test_a_host_starts_with_the_bundled_skills(tmp_path: Path, bundle: Path) -> 
         m.metadata.identity for m in runtime.agent.gateway.router.commands.skills.manifests()
     }
     assert KNOWLEDGE in offered and DOCX not in offered
+
+
+def test_business_cards_are_on_by_default_and_the_hermes_copy_stays_off(
+    tmp_path: Path, bundle: Path
+) -> None:
+    """Owner 2026-10-20: the native business-cards Skill is switched on in every
+    install, and its tools are offered; the Hermes pack's business-cards Skill
+    stays a switched-off backup (docs/phases/BUSINESS_CARDS.md)."""
+    config, layout = ready(tmp_path)
+    _install(layout, bundle)
+    hermes = AssetIdentity(namespace="hermes", name="business-cards", version="1.0.0")
+    assert (layout.skills / _file(CARDS_SKILL)).exists()
+    assert (layout.skills / "disabled" / _file(hermes)).exists()
+    assert not (layout.skills / _file(hermes)).exists()
+    runtime = build_runtime(config, layout=layout)
+    offered = {
+        m.metadata.identity for m in runtime.agent.gateway.router.commands.skills.manifests()
+    }
+    assert CARDS_SKILL in offered and hermes not in offered
+    names = {item.tool.name for item in business_cards_tools(runtime.agent.gateway)}
+    assert {"cards__add_card", "cards__org_chart", "cards__set_status", "cards__undo"} <= names
 
 
 def test_an_update_keeps_what_the_person_chose(tmp_path: Path, bundle: Path) -> None:

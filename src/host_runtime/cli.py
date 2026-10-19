@@ -344,6 +344,20 @@ def _parser() -> argparse.ArgumentParser:
     )
     suggest.add_argument("--actor", help="whose conversations to mine; the device owner by default")
     suggest.add_argument("--json", action="store_true")
+    cards = commands.add_parser("cards", help="the business-cards contact store on this Host")
+    card_actions = cards.add_subparsers(dest="cards_action", required=True)
+    card_import = card_actions.add_parser(
+        "import",
+        help="import the Hermes business-cards store once (cards.db); repeating it adds nothing",
+    )
+    card_import.add_argument("--config", required=True, type=Path)
+    card_import.add_argument(
+        "--from",
+        dest="source",
+        type=Path,
+        help="the cards.db to read; BUSINESS_CARDS_HOME or ~/.business-cards by default",
+    )
+    card_import.add_argument("--actor", help="whose contacts; the device owner by default")
     mcp = commands.add_parser("mcp", help="serve authoring tools to a coding agent over stdio")
     mcp.add_argument("--config", required=True, type=Path)
     mcp.add_argument("--agent", default="mcp", help="who is connecting, e.g. codex")
@@ -1315,6 +1329,37 @@ def _experience_suggest(
     return 1 if result.counts.error else 0
 
 
+def _cards_import(args: argparse.Namespace) -> int:
+    """`aep-host cards import`: every row of a Hermes `cards.db` kept as a
+    `card` observation with its own date (docs/phases/BUSINESS_CARDS.md §8)."""
+    from capabilities.business_cards.handlers import hermes_store
+    from capabilities.business_cards.store import CardStore, CardStoreError
+
+    try:
+        config = _load(args.config)
+    except (OSError, ValueError) as error:
+        print(f"cannot read {args.config}: {type(error).__name__}", file=sys.stderr)
+        return 2
+    actor = args.actor or config.device.registered_by
+    source = args.source if args.source is not None else hermes_store()
+    try:
+        result = CardStore.for_actor(Path(config.workspace_root), actor).import_hermes(
+            source, actor=actor
+        )
+    except CardStoreError as error:
+        print(f"not imported: {error.code}", file=sys.stderr)
+        return 1
+    if not result.found:
+        print(f"no Hermes business-cards store at {source}")
+        return 0
+    print(
+        f"{result.rows} rows in {source}: {result.imported} imported "
+        f"({result.people_created} new people, {result.people_updated} updated), "
+        f"{result.already} already here"
+    )
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     _write_in_utf8()
     args = _parser().parse_args(argv)
@@ -1330,6 +1375,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
     if args.command == "assets":
         return _assets(args)
+    if args.command == "cards":
+        return _cards_import(args)
     if args.command == "mcp":
         return _mcp(args)
     if args.command == "assistant-mcp":

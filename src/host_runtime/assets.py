@@ -22,6 +22,7 @@ from collections.abc import Mapping
 from pathlib import Path
 
 from agent.skills import SkillManifest
+from capabilities.business_cards.manifest import business_cards_skill
 from capabilities.chipset_report.manifest import preview_skill as chipset_preview_skill
 from capabilities.chipset_report.manifest import preview_workflow as chipset_preview_workflow
 from capabilities.chipset_report.manifest import report_workflow as chipset_report_workflow
@@ -82,6 +83,8 @@ def shipped() -> tuple[SkillManifest | WorkflowManifest, ...]:
         coding_skill(),
         coding_workflow(),
         run_python_workflow(),
+        # Business cards (owner 2026-10-20): switched on in every install.
+        business_cards_skill(),
     )
 
 

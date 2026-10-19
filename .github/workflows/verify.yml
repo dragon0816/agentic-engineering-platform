@@ -94,7 +94,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'The installed bundle did not pass verify.cmd.' }
           # The bundle is offline, so the extras it claims to carry have to be
           # importable from it alone -- no index was available to fill a gap.
-          & "$installRoot\.venv\Scripts\python.exe" -c "import openpyxl, win32com.client, matplotlib"
+          & "$installRoot\.venv\Scripts\python.exe" -c "import openpyxl, win32com.client, matplotlib, PIL"
           if ($LASTEXITCODE -ne 0) { throw 'The bundle did not install the excel, windows and weekly-mail extras.' }
           # The LLM gateway: offline in its own venv, configured, the model set to it,
           # and a launcher that refuses to start without the company token.
@@ -119,6 +119,9 @@ jobs:
           # switched on, the Hermes skill pack switched off, its coding-agent
           # folders in AEP's own store.
           if (-not (Test-Path "$installRoot\workspace\assets\skills\engineering__knowledge-query__1.0.1.json")) { throw 'The bundled in-use Skills were not installed switched on.' }
+          # Business cards are on by default (docs/phases/BUSINESS_CARDS.md); the Hermes copy stays off.
+          if (-not (Test-Path "$installRoot\workspace\assets\skills\engineering__business-cards__1.0.0.json")) { throw 'The business-cards Skill was not installed switched on.' }
+          if (Test-Path "$installRoot\workspace\assets\skills\hermes__business-cards__1.0.0.json") { throw 'The Hermes business-cards Skill was installed switched on.' }
           if (-not (Test-Path "$installRoot\workspace\assets\skills\disabled\hermes__docx__1.1.0.json")) { throw 'The Hermes skill pack was not installed switched off.' }
           if (Test-Path "$installRoot\workspace\assets\skills\hermes__docx__1.1.0.json") { throw 'A Hermes skill was installed switched on.' }
           if (-not (Test-Path "$installRoot\workspace\agent-skills\hermes-docx\SKILL.md")) { throw 'The Hermes coding-agent skill folders were not stored.' }
