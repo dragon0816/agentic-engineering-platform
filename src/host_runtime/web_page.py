@@ -970,6 +970,16 @@ tr:last-child td { border-bottom: none; }
           <div><label for="context-budget">History text budget (UTF-8 bytes)</label>
             <input id="context-budget" type="number" min="4000" max="48000" required></div>
         </div>
+        <div class="two">
+          <div><label for="context-tool-calls">Tool calls per turn (1–150)</label>
+            <input id="context-tool-calls" type="number" min="1" max="150" required></div>
+          <div><label for="context-time-limit">Time limit per turn (minutes, 1–120)</label>
+            <input id="context-time-limit" type="number" min="1" max="120" required></div>
+        </div>
+        <p class="note">How much work the Agent may do for one message before it stops and
+          asks you to reply 繼續. It also stops early when it calls the same tool with the
+          same input three times in a row and it fails, or more than five times with nothing
+          new in between. Lower these if a turn runs too long; the work done so far is kept.</p>
         <p class="note">UTF-8 bytes conservatively bound history text. System guidance,
           tool definitions and tool results use additional context. A question that
           exceeds this budget is returned for editing, never silently shortened.</p>
@@ -3946,6 +3956,8 @@ async function loadSettings() {
     : "No administrator data-transfer approval is recorded for this Gateway.";
   el("context-messages").value = settings.context.recent_messages;
   el("context-budget").value = settings.context.history_budget_bytes;
+  el("context-tool-calls").value = settings.context.tool_call_limit;
+  el("context-time-limit").value = settings.context.turn_time_limit_minutes;
   el("context-result").textContent = "Active now. Model-declared capacity: "
     + (model.declared_context_tokens == null
       ? "not configured" : model.declared_context_tokens + " tokens")
@@ -4038,10 +4050,14 @@ el("context-settings").addEventListener("submit", async (event) => {
     const saved = await call("/api/settings/context", {
       recent_messages: Number(el("context-messages").value),
       history_budget_bytes: Number(el("context-budget").value),
+      tool_call_limit: Number(el("context-tool-calls").value),
+      turn_time_limit_minutes: Number(el("context-time-limit").value),
     });
     result.textContent = "Saved. The next ordinary chat turn uses "
       + saved.context.recent_messages + " recent messages within "
-      + saved.context.history_budget_bytes + " UTF-8 bytes of history text.";
+      + saved.context.history_budget_bytes + " UTF-8 bytes of history text, and may make up to "
+      + saved.context.tool_call_limit + " tool calls in "
+      + saved.context.turn_time_limit_minutes + " minutes.";
   } catch (failure) {
     result.textContent = "Context limits were not saved: " + failure.message;
   } finally { button.disabled = false; }

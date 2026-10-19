@@ -5,6 +5,7 @@ from typing import Protocol, Self
 
 from pydantic import AwareDatetime, Field, model_validator
 
+from agent.backend_contracts import MAX_CONVERSATION_TURNS
 from common.assets import AssetIdentity, AssetMetadata, RegistryContract
 from common.base import Symbol, Text
 from common.execution import RequestContext, RouteDecision
@@ -20,7 +21,8 @@ class AgentProfile(RegistryContract):
     may_delegate_to: tuple[AssetIdentity, ...] = ()
     policy_constraints: tuple[Text, ...] = ()
     model_requirements: ModelRequirements = ModelRequirements()
-    max_turns: int = Field(default=8, ge=1, le=100, strict=True)
+    # Bounded by the Gateway's own turn budget (owner 2026-10-19: 150 tool calls).
+    max_turns: int = Field(default=8, ge=1, le=MAX_CONVERSATION_TURNS, strict=True)
     max_retries: int = Field(default=1, ge=0, le=10, strict=True)
 
     @model_validator(mode="after")

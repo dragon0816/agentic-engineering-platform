@@ -2063,6 +2063,11 @@ def build_runtime(
     from host_runtime.knowledge_harness import KnowledgeHarness
 
     gateway.knowledge_harness = KnowledgeHarness(runtime, checked.namespace).for_tool
+    # The per-turn tool cap and time budget are Agent Web settings (owner
+    # 2026-10-19), read at each turn so a change applies without a restart.
+    from host_runtime.conversation_context import ConversationContextStore
+
+    gateway.conversation_limits = ConversationContextStore(place.workspace_root).limits
     return runtime
 
 

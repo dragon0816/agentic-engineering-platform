@@ -6,6 +6,12 @@ from pathlib import Path
 
 from pydantic import Field
 
+from agent.backend_contracts import (
+    DEFAULT_TURN_TIME_LIMIT_SECONDS,
+    MAX_CONVERSATION_TOOL_CALLS,
+    MAX_TURN_TIME_LIMIT_SECONDS,
+    ConversationLimits,
+)
 from common.assets import RegistryContract
 from host_runtime.workspace import write_atomically
 from models.contracts import ModelMessage
@@ -27,6 +33,23 @@ class ConversationContextSettings(RegistryContract):
     history_budget_bytes: int = Field(
         default=MAX_HISTORY_BYTES, ge=4_000, le=MAX_HISTORY_BYTES, strict=True
     )
+    # Per-turn limits of the Gateway tool loop (owner 2026-10-19): how many
+    # tool calls one turn may make, and how long it may run.
+    tool_call_limit: int = Field(
+        default=MAX_CONVERSATION_TOOL_CALLS, ge=1, le=MAX_CONVERSATION_TOOL_CALLS, strict=True
+    )
+    turn_time_limit_minutes: int = Field(
+        default=DEFAULT_TURN_TIME_LIMIT_SECONDS // 60,
+        ge=1,
+        le=MAX_TURN_TIME_LIMIT_SECONDS // 60,
+        strict=True,
+    )
+
+    def limits(self) -> ConversationLimits:
+        return ConversationLimits(
+            tool_calls=self.tool_call_limit,
+            time_limit_seconds=self.turn_time_limit_minutes * 60,
+        )
 
 
 class ConversationContextStore:
@@ -39,6 +62,10 @@ class ConversationContextStore:
         return ConversationContextSettings.model_validate_json(
             self.path.read_text(encoding="utf-8-sig")
         )
+
+    def limits(self) -> ConversationLimits:
+        """The Gateway's per-turn limits as saved now; read at each turn."""
+        return self.load().limits()
 
     def save(self, request: ConversationContextSettings) -> ConversationContextSettings:
         checked = ConversationContextSettings.model_validate(request)

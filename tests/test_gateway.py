@@ -483,10 +483,13 @@ def test_conversation_cannot_execute_an_invented_tool_and_stops() -> None:
                 trace=item.trace,
                 model_alias=item.model_alias,
                 tool_calls=(
+                    # Each call differs, so the repetition guard (owner
+                    # 2026-10-19, tests/test_conversation_turn_guards.py)
+                    # leaves the count cap to stop the loop.
                     ModelToolCall(
                         call_id=f"call-{len(self.calls)}",
                         name="admin__shell",
-                        arguments={},
+                        arguments={"attempt": len(self.calls)},
                     ),
                 ),
             )

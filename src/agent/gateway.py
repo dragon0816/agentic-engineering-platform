@@ -7,7 +7,9 @@ deterministic ones, so a trigger's origin never changes what may execute.
 """
 
 import asyncio
+import hashlib
 import json
+import time
 from collections.abc import Awaitable, Callable, Sequence
 from contextlib import nullcontext
 from contextvars import ContextVar
@@ -21,6 +23,9 @@ from agent.backend_contracts import (
     CONVERSATION_MAX_OUTPUT_TOKENS,
     MAX_CONVERSATION_TOOL_CALLS,
     MAX_CONVERSATION_TURNS,
+    MAX_IDENTICAL_CALLS,
+    MAX_IDENTICAL_FAILURES,
+    ConversationLimits,
 )
 from agent.conversation_harness import checked_turn
 from agent.decisions import (
@@ -87,6 +92,18 @@ MAX_CURRENT_MESSAGE_CHARS = 40_000
 MAX_TOOL_OBSERVATION_CHARS = 16_000
 # A tool call's recorded arguments (G2 logging, owner 2026-10-18).
 MAX_RECORDED_ARGUMENTS_CHARS = 4_000
+# Tool observations one turn keeps in the model's messages. With 150 calls of
+# up to MAX_TOOL_OBSERVATION_CHARS each, a turn would outgrow any context
+# window; past this total the oldest observations are replaced by a short
+# note (owner 2026-10-19, with the 150-call cap). The newest is always kept.
+MAX_TURN_OBSERVATION_CHARS = 160_000
+COMPACTED_NOTE = (
+    "This older tool result was removed to keep the turn within the model's context. "
+    "Rely on what you concluded from it; read again only what you still need."
+)
+# Stops that leave the work unfinished and ask the person how to go on; each
+# keeps the turn's tool record so a reply of 繼續 can pick it up.
+TURN_STOP_CODES = frozenset({"tool_loop_limit", "tool_repeat_limit", "turn_time_limit"})
 
 ToolProgressState = Literal["running", "succeeded", "failed"]
 #: Set by a channel around one `converse` call to hear which installed tool
@@ -164,6 +181,13 @@ def _tool_progress(name: str, state: ToolProgressState) -> None:
         listener(name, state)
     except Exception:  # noqa: BLE001 - progress display cannot change the answer
         pass
+
+
+def _call_key(call: ModelToolCall) -> str:
+    """Identity of a call for the repetition guard: tool and exact arguments,
+    as a digest held in memory only."""
+    arguments = json.dumps(call.arguments, sort_keys=True, ensure_ascii=False, default=str)
+    return hashlib.sha256(f"{call.name}\0{arguments}".encode()).hexdigest()
 
 
 def _recorded_arguments(arguments: dict[str, JsonValue]) -> dict[str, JsonValue]:
@@ -443,6 +467,11 @@ class Gateway:
         self.capability_approval: (
             Callable[[RequestContext, AssetIdentity, dict[str, JsonValue]], dict[str, Any]] | None
         ) = None
+        # The Host's per-turn limits (Agent Web Settings, owner 2026-10-19),
+        # read at the start of each turn; without it the defaults apply.
+        self.conversation_limits: Callable[[], ConversationLimits] | None = None
+        # The clock the turn's time budget is measured on (a test fakes it).
+        self.clock: Callable[[], float] = time.monotonic
 
     def _vault_tools(
         self,
@@ -501,6 +530,10 @@ class Gateway:
             if telemetry.current_run() is None
             else nullcontext()
         )
+        # The time budget covers the whole turn, the Host check's retry pass
+        # included; the tool cap and the repetition guard apply per pass.
+        started = self.clock()
+        limits = self.limits()
         with opened:
 
             async def turn(messages: tuple[ModelMessage, ...]) -> GatewayConversationResult:
@@ -511,6 +544,8 @@ class Gateway:
                     allowed_tools=allowed_tools,
                     max_turns=max_turns,
                     max_history_messages=max_history_messages,
+                    started=started,
+                    limits=limits,
                 )
 
             # The tool loop executes; the Host checks the answer against the
@@ -536,6 +571,41 @@ class Gateway:
                 pass
         return result
 
+    def limits(self) -> ConversationLimits:
+        """The Host's per-turn limits as they are now (defaults without a setting)."""
+        if self.conversation_limits is None:
+            return ConversationLimits()
+        try:
+            return ConversationLimits.model_validate(self.conversation_limits())
+        except Exception:  # noqa: BLE001 - an unreadable setting keeps the defaults
+            return ConversationLimits()
+
+    def _stopped(
+        self,
+        context: RequestContext,
+        code: str,
+        turns: int,
+        evidence: list["ConversationToolExecution"],
+        limits: ConversationLimits,
+        started: float,
+        **counts: Any,
+    ) -> GatewayConversationResult:
+        """A guard stopped the turn: recorded with its reason and counts only."""
+        telemetry.emit(
+            "turn.stopped",
+            status="failed",
+            state="tool_loop",
+            attributes={
+                "stop_reason": code,
+                "tool_calls": len(evidence),
+                "tool_cap": limits.tool_calls,
+                "elapsed_s": round(self.clock() - started, 1),
+                "time_limit_s": limits.time_limit_seconds,
+                **counts,
+            },
+        )
+        return self._conversation_failure(context, code, turns, tuple(evidence))
+
     async def _converse(
         self,
         request: RequestContext,
@@ -545,8 +615,11 @@ class Gateway:
         allowed_tools: frozenset[str] | None = None,
         max_turns: int = MAX_CONVERSATION_TURNS,
         max_history_messages: int = MAX_CONVERSATION_HISTORY,
+        started: float | None = None,
+        limits: ConversationLimits | None = None,
     ) -> GatewayConversationResult:
-        """Use installed commands as tools in a bounded loop (`MAX_CONVERSATION_TOOL_CALLS`).
+        """Use installed commands as tools in a bounded loop (the Host's tool cap,
+        at most `MAX_CONVERSATION_TOOL_CALLS`, a time budget and a repetition guard).
 
         The model receives aliases for installed commands, never raw capability
         authority. Every accepted call is resolved back to its manifest target
@@ -737,7 +810,24 @@ class Gateway:
                 tools = [tool for tool in tools if tool.name != person_tool]
         evidence: list[ConversationToolExecution] = []
         truncated_retries = 0
+        limits = limits if limits is not None else self.limits()
+        cap = limits.tool_calls
+        started = started if started is not None else self.clock()
+        deadline = started + limits.time_limit_seconds
+        # Repetition guard (owner 2026-10-19): identical calls since the last
+        # call never made before in this pass, and the identical-failure streak.
+        seen_calls: set[str] = set()
+        since_new: dict[str, int] = {}
+        last_key: str | None = None
+        failure_streak = 0
+        # Tool observations in `messages`, oldest first: (index, tool, chars).
+        observed: list[tuple[int, str, int]] = []
+        observed_chars = 0
         for turn in range(1, max_turns + 1):
+            if self.clock() >= deadline:
+                return self._stopped(
+                    context, "turn_time_limit", turn - 1, evidence, limits, started
+                )
             model_request = ModelRequest(
                 trace=context.trace,
                 model_alias=self.router.model_alias,
@@ -814,7 +904,7 @@ class Gateway:
                 )
             )
             for call in response.tool_calls:
-                if len(evidence) >= MAX_CONVERSATION_TOOL_CALLS:
+                if len(evidence) >= cap:
                     telemetry.emit(
                         "tool.completed",
                         status="skipped",
@@ -833,10 +923,37 @@ class Gateway:
                         )
                     )
                     continue
+                if self.clock() >= deadline:
+                    return self._stopped(
+                        context, "turn_time_limit", turn, evidence, limits, started
+                    )
+                key = _call_key(call)
+                if since_new.get(key, 0) >= MAX_IDENTICAL_CALLS:
+                    # The same call again with nothing new in between: spinning.
+                    return self._stopped(
+                        context,
+                        "tool_repeat_limit",
+                        turn,
+                        evidence,
+                        limits,
+                        started,
+                        repeat_kind="identical_calls",
+                        repeats=since_new[key],
+                        tool_id=call.name,
+                    )
+                if key not in seen_calls:
+                    seen_calls.add(key)
+                    since_new.clear()
+                since_new[key] = since_new.get(key, 0) + 1
                 item = await self._telemetered_tool(
                     context, call, turn, host, bindings, bound, anchor
                 )
                 evidence.append(item)
+                if _tool_succeeded(item):
+                    failure_streak = 0
+                else:
+                    failure_streak = failure_streak + 1 if key == last_key else 1
+                last_key = key
                 harnessed = (
                     item.host.data
                     if item.host is not None and isinstance(item.host.data, dict)
@@ -878,6 +995,18 @@ class Gateway:
                         model_turns=turn,
                         tools=tuple(evidence),
                     )
+                if failure_streak >= MAX_IDENTICAL_FAILURES:
+                    return self._stopped(
+                        context,
+                        "tool_repeat_limit",
+                        turn,
+                        evidence,
+                        limits,
+                        started,
+                        repeat_kind="identical_failures",
+                        repeats=failure_streak,
+                        tool_id=call.name,
+                    )
                 # The model already knows its arguments; the observation stays
                 # what it was before they were recorded.
                 observation = json.dumps(
@@ -898,8 +1027,31 @@ class Gateway:
                         text=observation,
                     )
                 )
-            if len(evidence) >= MAX_CONVERSATION_TOOL_CALLS:
+                observed.append((len(messages) - 1, call.name, len(observation)))
+                observed_chars += len(observation)
+                while observed_chars > MAX_TURN_OBSERVATION_CHARS and len(observed) > 1:
+                    index, name, chars = observed.pop(0)
+                    observed_chars -= chars
+                    messages[index] = ModelMessage(
+                        role="tool",
+                        tool_call_id=messages[index].tool_call_id,
+                        text=json.dumps({"compacted": True, "tool": name, "note": COMPACTED_NOTE}),
+                    )
+            if len(evidence) >= cap:
                 break
+        telemetry.emit(
+            "turn.stopped",
+            status="failed",
+            state="tool_loop",
+            attributes={
+                "stop_reason": "tool_loop_limit",
+                "tool_calls": len(evidence),
+                "tool_cap": cap,
+                "model_turns": max_turns,
+                "elapsed_s": round(self.clock() - started, 1),
+                "time_limit_s": limits.time_limit_seconds,
+            },
+        )
         return self._conversation_failure(
             context, "tool_loop_limit", min(max_turns, len(evidence)), tuple(evidence)
         )
@@ -1181,12 +1333,12 @@ class Gateway:
             trace=context.trace,
             status=(
                 "needs_input"
-                if code in {"model_not_configured", "no_installed_tools", "tool_loop_limit"}
+                if code in {"model_not_configured", "no_installed_tools"} | TURN_STOP_CODES
                 else "failed"
             ),
             text=(
                 "I need more information or a supported installed tool before I can continue."
-                if code in {"model_not_configured", "no_installed_tools", "tool_loop_limit"}
+                if code in {"model_not_configured", "no_installed_tools"} | TURN_STOP_CODES
                 else "The Personal Agent could not complete this turn."
             ),
             model_turns=turns,

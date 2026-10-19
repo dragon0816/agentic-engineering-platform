@@ -13,10 +13,23 @@ from models.contracts import ModelMessage
 CONVERSATION_MAX_OUTPUT_TOKENS = 8_000
 # Tool calls one conversation turn may make (coding_v1 G3: 8; owner 2026-10-07:
 # 20, for business tasks that explore, extract, write, check and run a Workflow
-# in one turn); the turn budget is one more so the model can answer after its
-# last call.
-MAX_CONVERSATION_TOOL_CALLS = 20
+# in one turn; owner 2026-10-19: 150, together with the repetition and time
+# guards below); the turn budget is one more so the model can answer after its
+# last call. The Host setting may lower the tool cap, never raise it.
+MAX_CONVERSATION_TOOL_CALLS = 150
 MAX_CONVERSATION_TURNS = MAX_CONVERSATION_TOOL_CALLS + 1
+# The same tool with the same arguments failing this many times in a row stops
+# the turn (`tool_repeat_limit`, owner 2026-10-19).
+MAX_IDENTICAL_FAILURES = 3
+# The same tool with the same arguments may run this many times with no new
+# call in between; the next identical request stops the turn
+# (`tool_repeat_limit`). A call never made before in the turn is progress and
+# resets the count, so a fix-and-rerun cycle is not a repeat.
+MAX_IDENTICAL_CALLS = 5
+# Wall-clock budget of one conversation turn (`turn_time_limit`), checked
+# before every model call and every tool call; a running call is not cut off.
+DEFAULT_TURN_TIME_LIMIT_SECONDS = 30 * 60
+MAX_TURN_TIME_LIMIT_SECONDS = 120 * 60
 
 BackendKind = Literal["model", "agent"]
 BackendHarness = Literal["aep", "native"]
@@ -47,6 +60,20 @@ class BackendHealth(Contract):
     backend_id: Symbol
     state: BackendHealthState
     reason: str | None = None
+
+
+class ConversationLimits(Contract):
+    """The Host's per-turn limits for the Gateway tool loop (owner 2026-10-19)."""
+
+    tool_calls: int = Field(
+        default=MAX_CONVERSATION_TOOL_CALLS, ge=1, le=MAX_CONVERSATION_TOOL_CALLS, strict=True
+    )
+    time_limit_seconds: int = Field(
+        default=DEFAULT_TURN_TIME_LIMIT_SECONDS,
+        ge=60,
+        le=MAX_TURN_TIME_LIMIT_SECONDS,
+        strict=True,
+    )
 
 
 class GatewayConversationRequest(Contract):

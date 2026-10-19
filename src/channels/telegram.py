@@ -60,7 +60,7 @@ from host_runtime.attachments import (
 from host_runtime.chat_authoring import ChatAuthoring, ChatAuthoringError, approval_text
 from host_runtime.identity_presets import IdentityPresets
 from host_runtime.schedule_policy import target_side_effect
-from host_runtime.turn_summary import tool_summary
+from host_runtime.turn_summary import stop_reply, tool_summary
 from host_runtime.workflow_uploads import (
     MAX_UPLOAD_BYTES,
     WorkflowUploadError,
@@ -1205,11 +1205,20 @@ class TelegramIngress:
             if code == "empty_model_answer":
                 # Never a silent turn: say what happened (owner 2026-10-15).
                 reply = _no_answer_reply(record)
-            if code == "tool_loop_limit" and conversation is not None:
-                reply = (
-                    f"這個回合已用完 {len(conversation.tools)} 次工具呼叫，工作還沒完成；"
-                    "回覆「繼續」我會接著做。"
+            stopped = (
+                None
+                if conversation is None
+                else stop_reply(
+                    code,
+                    len(conversation.tools),
+                    self.agent.gateway.limits().time_limit_seconds // 60,
+                    recorded=False,
                 )
+            )
+            if stopped is not None:
+                # A guard stopped the turn (tool_loop_limit, tool_repeat_limit,
+                # turn_time_limit; owner 2026-10-19).
+                reply = stopped
                 # Keep what was done so 繼續 can pick it up.
                 turn.append(ModelMessage(role="assistant", text=f"{reply}\n\n[工具紀錄]\n{record}"))
                 self._histories[key] = turn[-MAX_CHAT_HISTORY:]

@@ -277,7 +277,7 @@ from host_runtime.telegram_settings import (
     telegram_status,
     windows_user_environment,
 )
-from host_runtime.turn_summary import tool_summary
+from host_runtime.turn_summary import stop_reply, tool_summary
 from host_runtime.workflow_form_tool import resolve as resolve_workflow
 from host_runtime.workflow_settings import (
     SETTINGS_FILE,
@@ -1000,11 +1000,20 @@ class AgentWeb:
         )
         if explained is not None:
             return explained
-        if result.failure is not None and result.failure.code == "tool_loop_limit":
-            return (
-                f"這個回合已用完 {len(result.tools)} 次工具呼叫，工作還沒完成。"
-                "目前做到的步驟已記錄在這段對話中；回覆「繼續」我會接著做。"
+        stopped = (
+            None
+            if result.failure is None
+            else stop_reply(
+                result.failure.code,
+                len(result.tools),
+                self._turn_time_limit_minutes(),
+                recorded=True,
             )
+        )
+        if stopped is not None:
+            # A guard stopped the turn (owner 2026-10-19): the steps so far
+            # are kept, and 繼續 picks them up.
+            return stopped
         if result.failure is not None and result.failure.code == "empty_model_answer":
             return (
                 "The LLM Gateway returned an empty answer (empty_model_answer). "
@@ -2400,6 +2409,12 @@ class AgentWeb:
             if message.feedback is None
             else message.feedback.model_dump(mode="json"),
         }
+
+    def _turn_time_limit_minutes(self) -> int | None:
+        try:
+            return self.conversation_context.load().turn_time_limit_minutes
+        except Exception:  # noqa: BLE001 - the reply then names no number
+            return None
 
     def conversation_turn(self, request: ConversationTurnRequest) -> dict[str, Any]:
         item = ConversationTurnRequest.model_validate(request)

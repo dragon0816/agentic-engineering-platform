@@ -91,3 +91,26 @@ def tool_summary(result: GatewayConversationResult | None) -> str | None:
         lines.append(f"(turn stopped: {result.failure.code})")
     text = "\n".join(lines)
     return text if len(text) <= MAX_SUMMARY_CHARS else text[:MAX_SUMMARY_CHARS] + "\n…"
+
+
+def stop_reply(
+    code: str, tool_calls: int, time_limit_minutes: int | None, *, recorded: bool
+) -> str | None:
+    """What the person is told when a guard stopped the turn (owner 2026-10-19),
+    or None for any other outcome. `recorded`: the channel keeps the turn's
+    steps in the conversation (Agent Web says so)."""
+    if code == "tool_loop_limit":
+        head = f"這個回合已用完 {tool_calls} 次工具呼叫，工作還沒完成"
+    elif code == "turn_time_limit":
+        minutes = f" {time_limit_minutes} 分鐘的" if time_limit_minutes else ""
+        head = f"這個回合已用完{minutes}時間上限，工作還沒完成（用了 {tool_calls} 次工具呼叫）"
+    elif code == "tool_repeat_limit":
+        head = (
+            "同一個工具用相同的內容重複呼叫，沒有新的進展，所以先停下來"
+            f"（用了 {tool_calls} 次工具呼叫）；可以補充說明或換個做法"
+        )
+    else:
+        return None
+    if recorded:
+        return f"{head}。目前做到的步驟已記錄在這段對話中；回覆「繼續」我會接著做。"
+    return f"{head}；回覆「繼續」我會接著做。"
