@@ -541,3 +541,44 @@ def test_tool_results_carry_chinese_field_labels_and_the_skill_uses_them() -> No
     assert "field_labels" in PROCEDURE and "never show raw field names" in PROCEDURE
     assert "to_confirm" in PROCEDURE and "stored value" in PROCEDURE
     assert "never say something changed" in PROCEDURE
+
+
+def test_confirming_a_flagged_field_in_chat_writes_a_confirm_history_row(
+    web: tuple[AgentWeb, Conversation],
+) -> None:
+    """Not exercised in the live test: 「email 正確」 must leave a `confirm` row
+    in history, by the person via the channel, and clear the flag."""
+    agent_web, model = web
+    session = agent_web.create_conversation()["conversation"]["session_id"]
+    model.then(
+        {"tools": [("cards__add_card", CARD)]},
+        {"text": "已存周範例；Email 目前是 fanli.chou@exn.example，正確嗎？"},
+    )
+    assert _turn(agent_web, session, "store this card")["ok"]
+    stored = json.loads(model.tool_results()[-1])["host"]["data"]
+    assert stored["needs_confirmation"] == ["email"]
+    assert stored["to_confirm"][0]["stored"] == CARD["email"]
+    model.then(
+        {
+            "tools": [
+                (
+                    "cards__edit_person",
+                    {"person": {"name": "周範例"}, "confirm": ["email"], "reason": "email 正確"},
+                )
+            ]
+        },
+        {"text": "好，已確認 Email。"},
+    )
+    assert _turn(agent_web, session, "email 正確")["ok"]
+    confirmed = json.loads(model.tool_results()[-1])["host"]
+    assert confirmed["status"] == "succeeded", confirmed
+    assert confirmed["data"]["confirmed"] == ["email"]
+    assert confirmed["data"]["needs_confirmation"] == []
+    model.then({"tools": [("cards__history", {"person": {"name": "周範例"}})]}, {"text": "好。"})
+    assert _turn(agent_web, session, "周範例 的歷史")["ok"]
+    history = json.loads(model.tool_results()[-1])["host"]["data"]["history"]
+    rows = [item for item in history if item["kind"] == "confirm"]
+    assert len(rows) == 1
+    assert rows[0]["field"] == "email" and rows[0]["new"] == CARD["email"]
+    assert rows[0]["actor"] == f"{agent_web.runtime.actor} via local"
+    assert rows[0]["change_id"] == confirmed["data"]["change_id"]
