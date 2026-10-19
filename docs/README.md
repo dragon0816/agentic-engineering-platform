@@ -34,10 +34,13 @@ in [archive/](archive/); they are kept for history, not for current work.
 
 | Document | What it is for |
 |---|---|
-| [proposals/KNOWLEDGE_STRATEGY_v1.2.md](proposals/KNOWLEDGE_STRATEGY_v1.2.md) | **Current.** Knowledge Strategy v1.2: owner decisions of 2026-10-17, ADR status (K1/K3/K7 decided; K2 central DB, K6 G1-G4, K9 pending; new K10 schema decoupling), BD benchmark plan and thresholds, integrated schedule around E2E-01 / Phase 7 / S3 |
+| [proposals/KNOWLEDGE_STRATEGY_v1.3.md](proposals/KNOWLEDGE_STRATEGY_v1.3.md) | **Current.** Knowledge Strategy v1.3 (awaiting owner review): BI Schema v1 from the real `bi_schema.py` (N1 resolved), the BI data-processing pipeline mapped onto Strategy = Workflow + Skills + Config, data-quality rules, Case A first flow, new ADR-K11 judgement fields and field-level provenance |
+| [proposals/KNOWLEDGE_STRATEGY_v1.3_DIFF.md](proposals/KNOWLEDGE_STRATEGY_v1.3_DIFF.md) | What changed from v1.2 to v1.3 and why (including findings taken from the owner-shared Codex brief) |
+| [proposals/bi_schema_v1/README.md](proposals/bi_schema_v1/README.md) | BI Schema v1 (`bi.schema/v1`, PoC contract) generated from `tests/fixtures/bi_vault_example/tools/bi_schema.py`, every name with its code line; v0 → v1 upcast |
+| [proposals/knowledge_benchmark_v0/README.md](proposals/knowledge_benchmark_v0/README.md) | 25-question BD / Marketing benchmark draft on Schema v1 (unreviewed), supplemental SUP-01, and the separate 8-question vault-example set |
+| [proposals/KNOWLEDGE_STRATEGY_v1.2.md](proposals/KNOWLEDGE_STRATEGY_v1.2.md) | Superseded by v1.3; kept for history |
 | [proposals/KNOWLEDGE_STRATEGY_v1.2_DIFF.md](proposals/KNOWLEDGE_STRATEGY_v1.2_DIFF.md) | What changed from v1.1 to v1.2 and why, with the issue renumbering |
-| [proposals/bi_schema_v0/README.md](proposals/bi_schema_v0/README.md) | BI Schema v0 (`bi.schema/v0`, PoC contract) from the owner's BI Knowledge Base document, with page citations |
-| [proposals/knowledge_benchmark_v0/README.md](proposals/knowledge_benchmark_v0/README.md) | 25-question BD / Marketing benchmark draft (unreviewed; `questions.json` is machine-readable) |
+| [proposals/bi_schema_v0/README.md](proposals/bi_schema_v0/README.md) | BI Schema v0 from the BI Knowledge Base slides; superseded by v1, kept unchanged for history |
 | [contracts/knowledge-api/README.md](contracts/knowledge-api/README.md) | Knowledge API contract v0.1 for Atlas: OpenAPI 3.1, JSON Schemas, synthetic mock data |
 | [proposals/KNOWLEDGE_STRATEGY_v1.1.md](proposals/KNOWLEDGE_STRATEGY_v1.1.md) | Superseded by v1.2; kept for history |
 | [proposals/K01_AS_IS_GAP_ANALYSIS.md](proposals/K01_AS_IS_GAP_ANALYSIS.md) | K01 audit behind v1.1, including the Knowledge tool-path investigation |
