@@ -164,3 +164,28 @@ def short_names(company: str) -> frozenset[str]:
 
 def search_text(*parts: str) -> str:
     return " ".join(unicodedata.normalize("NFKC", part).casefold() for part in parts if part)
+
+
+_EXTENSION = re.compile(r"(?:ext\.?|extension|分機|轉|#|x)\s*(\d+)\s*$")
+_PHONE_TEXT = re.compile(r"^[\d\s\-.()+/]*$")
+
+
+def phone_key(number: str) -> str:
+    """A phone, fax or mobile number as digits and extension, ignoring spaces,
+    hyphens, dots and parentheses, with +886 read as a leading 0 (third live
+    test 2026-10-20: "(03) 666 7799" is "(03) 666-7799"). "" when the text is
+    not a number, so it is compared as written."""
+    text = number.casefold().strip()
+    extension = ""
+    found = _EXTENSION.search(text)
+    if found:
+        extension, text = found.group(1), text[: found.start()]
+    if not _PHONE_TEXT.match(text):
+        return ""
+    digits = re.sub(r"[\s\-.()/]", "", text)
+    if digits.startswith("+886"):
+        rest = digits[4:]
+        digits = "0" + (rest[1:] if rest.startswith("0") else rest)
+    if not digits.lstrip("+"):
+        return ""
+    return digits + (f"#{extension}" if extension else "")

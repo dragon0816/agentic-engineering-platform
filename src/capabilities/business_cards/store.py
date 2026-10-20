@@ -204,6 +204,21 @@ def _same(a: str, b: str) -> bool:
     return " ".join(a.split()).casefold() == " ".join(b.split()).casefold()
 
 
+#: Numbers compared by digits and extension, not by how they are written.
+NUMBER_FIELDS = frozenset({"phone", "fax", "mobile"})
+
+
+def _same_value(name: str, a: str, b: str) -> bool:
+    """Whether two values of a field are the same: a number that differs only
+    in formatting ("(03) 666-7799", "03 666 7799", "+886 3 666 7799") is."""
+    if _same(a, b):
+        return True
+    if name in NUMBER_FIELDS:
+        key = names.phone_key(a)
+        return bool(key) and key == names.phone_key(b)
+    return False
+
+
 #: Fields where a shorter reading can be a real change (副總經理 → 總經理 is a
 #: promotion), or that have their own rules (notes are appended; an email is
 #: the person's key).
@@ -786,7 +801,7 @@ class CardStore:
         for name in FIELDS:
             new = offered[name]
             current = row[name]
-            if not new or _same(current, new):
+            if not new or _same_value(name, current, new):
                 continue
             # Another spelling of the same company or name (a legal suffix,
             # a romanisation) is not a change.
@@ -935,7 +950,7 @@ class CardStore:
             for name in FIELDS:
                 new = str(values.get(name, "")).strip()
                 emptied = name in clear and not new and bool(row[name])
-                if emptied or (new and not _same(row[name], new)):
+                if emptied or (new and not _same_value(name, row[name], new)):
                     changes.append(
                         self._set_field(
                             con,
@@ -1480,7 +1495,9 @@ class CardStore:
             if row is None:
                 return "", ()
             return row["person_id"], tuple(
-                name for name in FIELDS if clean[name] and not _same(row[name], clean[name])
+                name
+                for name in FIELDS
+                if clean[name] and not _same_value(name, row[name], clean[name])
             )
 
     def chart_data(

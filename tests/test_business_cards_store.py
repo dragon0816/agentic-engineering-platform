@@ -779,3 +779,46 @@ def test_a_chart_card_shows_the_desk_phone_first_and_the_honorific_with_the_name
     assert "需確認" in text and "王則閔 博士：Email" in text
     chart.render(tmp_path / "c.png", "範例科技", people, [], uncertain=needs)
     assert (tmp_path / "c.png").read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
+
+
+def test_a_number_that_differs_only_in_formatting_is_not_a_change(tmp_path: Path) -> None:
+    """Third live test 2026-10-20: a re-scan read "(03) 666 7799" for the stored
+    "(03) 666-7799"; the history logged a change and the reply said 電話、傳真也
+    更新了, and each re-scan could flip the format back. Phone, fax and mobile
+    compare by digits and extension; +886 is a leading 0."""
+    store = _store(tmp_path)
+    numbers = {"phone": "(03) 666-7799", "fax": "(03) 666-7799", "mobile": "0912-345-678"}
+    first = _add(store, {**CARD, **numbers})
+    again = _add(
+        store,
+        {
+            **CARD,
+            "phone": "(03) 666 7799",
+            "fax": "03.666.7799",
+            "mobile": "+886 912 345 678",
+        },
+        when=date(2026, 3, 1),
+    )
+    assert again.outcome == "unchanged" and again.changes == ()
+    assert again.kept == () and "更新" not in again.summary
+    view = store.view(first.person_id)
+    assert (view.phone, view.fax, view.mobile) == ("(03) 666-7799", "(03) 666-7799", "0912-345-678")
+    history = store.history(PersonRef(person_id=first.person_id), limit=50)
+    assert not [item for item in history.history if item.kind == "field"]
+    # The extension counts: another extension is another number.
+    moved = _add(store, {**CARD, **numbers, "phone": "(03) 666-7799 #12"}, when=date(2026, 4, 1))
+    assert [c.field for c in moved.changes] == ["phone"]
+    # A real change is still a change.
+    other = _add(store, {**CARD, **numbers, "fax": "(03) 666-7700"}, when=date(2026, 5, 1))
+    assert [c.field for c in other.changes] == ["fax"]
+
+
+def test_the_phone_key_ignores_formatting() -> None:
+    from capabilities.business_cards.names import phone_key
+
+    assert phone_key("(03) 666-7799") == phone_key("03 666 7799") == phone_key("03.666.7799")
+    assert phone_key("+886 3 666 7799") == phone_key("+886 (0)3 666-7799") == "036667799"
+    assert phone_key("02-2345-6789 ext. 312") == phone_key("(02) 2345 6789 #312")
+    assert phone_key("02-2345-6789 分機 312") == "0223456789#312"
+    assert phone_key("02-2345-6789") != phone_key("02-2345-6789 #312")
+    assert phone_key("call the desk") == ""
