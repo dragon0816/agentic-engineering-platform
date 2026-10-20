@@ -2763,3 +2763,22 @@ s-k-20261011T102952` (not published).
   the Install button stays. Commit d380d277, tests `tests/test_draft_card_switched_off_twin.py`.
   Full suites at 056f53bb: project `.venv` 3306 passed, 7 skipped; CI-like venv 3283 passed, 30 skipped.
 
+## Agent recovery and reuse fixes (2026-10-20)
+
+- [x] Four improvements from the 2026-10-20 org-chart conversation (2026-10-20, Claude Code;
+  owner 「請幫我全做」). Decision `docs/DECISIONS.md` 2026-10-20 "Fixable tool failures are
+  retried, lasting-change claims need a changing tool, reusable means a Workflow draft";
+  `docs/HARNESS_DESIGN.zh-TW.md` §5.4, §8.2, §8.4; user guide §4.5.
+  1. 48650111 run-python creates a missing task folder under a coding root (input/, output/,
+     `workspace_created`); outside the roots and `..` refused, nothing created. Tests
+     `tests/test_run_python.py`.
+  2. 9ad33be2 failed tool calls carry `recovery {recoverable, hint}`; the prompt says to fix and
+     retry recoverable ones in the same turn and ask only when the person is needed. Tests
+     `tests/test_tool_recovery.py`.
+  3. 301e39e6 `no_unbacked_action_claim` catches lasting-change claims (「規則我已改成」, "from now
+     on I will") that no changing tool backs; the prompt says there is no rule memory. Tests
+     `tests/test_persistent_change_claims.py`.
+  4. a054384b reusable requests get a Workflow draft (prompt, draft guide, coding Skill 1.8.0, Host
+     check `reusable_request_drafted`); install only on the card. Tests
+     `tests/test_reusable_drafts.py`.
+- [ ] Owner live check of the four fixes (steps in HANDOFF.md).

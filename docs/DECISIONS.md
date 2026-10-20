@@ -3786,3 +3786,54 @@ Supersedes the part of "How a re-scanned card finds its person" that left a user
 without a flag. Rejected: flagging only email (the owner asked for every field); proposing a
 partial reading (it would flag every shortened 事業群); keeping the newest format of a number (each
 re-scan would flip it).
+
+## 2026-10-20 — Fixable tool failures are retried, lasting-change claims need a changing tool, reusable means a Workflow draft
+
+Context: a live Gateway conversation on 2026-10-20 (interactive HTML org chart). `coding__run`
+failed with `coding_workspace_missing` for a folder under `Documents\aep-workflows`, and the Agent
+twice asked the owner to create it by hand, after two or three tool calls of a 150-call budget.
+Told 「執行時不需要問是否包含在職人員…」, it answered 「規則我已改成…」 after only `cards__list`;
+nothing was saved and the Host check passed it, because any successful tool backed any claim. The
+owner expected something to apply again, but only one-off code ran: no draft, no install card,
+nothing in Capabilities. Owner approval 2026-10-20: 「請幫我全做」.
+
+Decisions:
+
+1. **A missing task folder under a coding root is created** (`capabilities/coding_change/run_python.py`,
+   `workspaces.py`): after every pre-run check (runner, network block), with `input/` and
+   `output/`; the result carries `workspace_created`. Outside the roots it stays
+   `coding_workspace_not_allowed`; a path with `..` is refused even when it resolves inside a root;
+   a file is `coding_workspace_not_a_folder`. The workspace note tells the model the folder is
+   created. No default folder when the model gives none: `engineering/run-python@1.0.0` keeps
+   `workspace` required (making it optional needs new Workflow and Skill versions; the model picks
+   a task-named folder under the root as the note says).
+2. **Every failed conversation tool call carries `recovery {recoverable, hint}`**
+   (`agent/tool_recovery.py`), decided by the Host from the failure code: wrong or missing
+   arguments (`invalid_input` with the field named, Workflow run values, draft problems, a folder
+   outside the roots, an unknown tool name) and retryable failures are recoverable; permission,
+   approval, credentials, missing installs, connectivity and mail scope need the person; unknown
+   codes are not recoverable. The system prompt: fix a recoverable call and retry in the same turn;
+   ask the person only when it needs them or the corrected call failed too. The repetition guard
+   stays.
+3. **A claim of a lasting change needs a tool that changes something** (`no_unbacked_action_claim`,
+   `agent/conversation_harness.py`): 「規則我已改成」「已改成」「已設定」「已更新規則」「已記住」
+   「以後都會」, "I've updated the rule", "from now on I will", "I'll remember". Chinese phrases
+   count at a clause start or after a first-person subject. Read-only tools (Knowledge answers;
+   commands starting list, get, show, preview, search, read, find, lookup, view, history,
+   proposals, inspect, query, ask) and failed tools do not back it. The system prompt says the
+   Agent keeps no rules between conversations unless a tool saves them, and should propose a
+   Workflow draft or a settings proposal instead.
+4. **Reusable means a Workflow draft**: the Gateway prompt (when `authoring__draft_workflow` is
+   offered), the draft tool description and coding Skill `engineering/coding@1.8.0` say that a
+   reusable request is answered with a Workflow draft whose step is `coding/run-python@1.0.0` with
+   the script fixed and typed parameters; a one-off request may use `coding__run` alone. A new Host
+   check `reusable_request_drafted` sends back once a turn whose person asked for something
+   reusable, that ran `coding__…` and drafted nothing, while a draft tool was offered. The person's
+   press on the install card remains the only install.
+
+Rejected: a model-judged "is this fixable" (the Host decides from codes, deterministic); treating
+every non-read capability by its manifest side effect for item 3 (the claim check sees only the
+turn's tool record; command names are enough and err toward not flagging); auto-drafting a
+Workflow from a `coding__run` without the model (the model writes the parameters); naming the
+coding Skill revision 1.7.1 (the change is a behaviour rule, a minor version; the paused
+rule-following wording proposal once called "1.8.0" stays paused and would come later).

@@ -1,8 +1,74 @@
 # Handoff
 
-Updated: 2026-10-20 (Asia/Taipei), by Claude Code (business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-20 (Asia/Taipei), by Claude Code (agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## Business-cards third-round fixes (2026-10-20, Claude Code) — latest
+## Agent recovery and reuse fixes (2026-10-20, Claude Code) — latest
+
+**Goal / scope:** four owner-approved improvements (2026-10-20, 「請幫我全做」) from a live Gateway
+conversation in which the owner asked for an interactive HTML org chart: `coding__run` failed with
+`coding_workspace_missing` and the Agent asked the owner twice to create the folder by hand; it
+answered 「規則我已改成…」 after only `cards__list` (nothing saved, Host check passed it); and it ran
+one-off code where the owner expected a reusable Workflow. Not pushed; Agent Web not restarted;
+live install untouched. A parallel agent works on the native HTML org chart / in-chat file viewer
+(business_cards, web.py, web_page.py, telegram.py); its uncommitted work is not part of these
+commits.
+
+**Done (commits on main):**
+1. 48650111 `coding/run-python` creates a missing task folder under a coding root (with `input/`
+   and `output/`, after the runner and network-block checks; result `workspace_created`). Outside
+   the roots → `coding_workspace_not_allowed`; any `..` refused; a file →
+   `coding_workspace_not_a_folder`. Workspace note: never ask the person to create it. No default
+   folder when none is given (the run-python Workflow keeps `workspace` required; changing it
+   needs new Workflow and Skill versions). Tests `tests/test_run_python.py`.
+2. 9ad33be2 every failed conversation tool call carries `recovery {recoverable, hint}`
+   (`agent/tool_recovery.py`, Host-decided from the failure code); system prompt: fix and retry
+   recoverable ones in the same turn, ask only when the person is needed. Tests
+   `tests/test_tool_recovery.py` (reactive fake model: fails once with `invalid_input`, retries,
+   succeeds; `permission_denied` → asks).
+3. 301e39e6 `no_unbacked_action_claim` also catches lasting-change claims (「規則我已改成」「已改成」
+   「已設定」「已更新規則」「已記住」「以後都會」, "I've updated the rule", "from now on I will")
+   unless a changing (non-read) tool succeeded; prompt `MEMORY_GUIDANCE` says there is no rule
+   memory, propose a Workflow draft or `propose_change`. Tests
+   `tests/test_persistent_change_claims.py`.
+4. a054384b reusable requests → Workflow draft: `REUSABLE_GUIDANCE` in the Gateway prompt when
+   `authoring__draft_workflow` is offered, `DRAFT_GUIDE`, coding Skill `engineering/coding@1.8.0`
+   (1.7.0 set aside on install), and a new Host check `reusable_request_drafted` (reusable
+   request + `coding__…` succeeded + no draft → one retry). Tests `tests/test_reusable_drafts.py`
+   (incl. Agent Web: the draft card appears, nothing installed or run until Install).
+5. Docs commit: `docs/DECISIONS.md` (2026-10-20 "Fixable tool failures are retried, …"),
+   `docs/TASKS.md`, user guide §4.5 (「做成可以重複用的」), this file;
+   `docs/HARNESS_DESIGN.zh-TW.md` §5.4, §8.2, §8.4 went with the code commits.
+
+**Verification (2026-10-20, on a clean worktree of a054384b, so the parallel agent's uncommitted
+files were not included):** `ruff check .` passed; `ruff format --check .` 917 files formatted;
+`mypy` no issues (666 files). Full pytest, project `.venv`: 3387 passed, 7 skipped, 1 failed
+(`test_browser.py::test_a_throwaway_profile_is_removed_although_the_browser_holds_it`, timing;
+passed when re-run alone). CI-like venv `C:\aepci-wk\venv` (`pip install -e ".[dev,office]"`,
+`--basetemp=C:/aepci-wk/bt`): 3344 passed, 34 skipped, 1 failed
+(`test_telegram_turn_progress.py::test_a_rate_limit_is_waited_out…`, timing) and 16 setup errors
+(basetemp clean-up collisions on `C:/aepci-wk/bt`); all 17 passed when re-run alone in a separate
+basetemp. E2E-01 (`tests/test_product_e2e_01.py`) 7 passed. The CI venv's editable install points
+back at the main repo afterwards. Only docs text changed after the suites.
+
+**Open / risks:**
+- The model's behaviour (retrying, not claiming, drafting) is covered by fake-model tests only;
+  prompts guide it, Host checks catch the claim and the missing draft with one retry.
+- Read-tool detection for item 3 is by command name (list, get, show, preview, search, read,
+  find, lookup, view, history, proposals, inspect, query, ask); an unknown name counts as changing
+  (errs toward not flagging).
+- 「，以後都會…」 in a neutral sentence without a changing tool is flagged (one retry).
+- browser/operate still refuses a missing workspace (`browser_workspace_missing`); not in scope.
+
+**Next (owner live check; check `/api/tasks` before restarting Agent Web):**
+1. Restart Agent Web so the new code and coding Skill 1.8.0 load.
+2. 「幫我做一個互動式 HTML 組織圖，放在 aep-workflows\org-chart-test」 (folder absent) → the folder
+   is created, the script runs, no request to create it.
+3. 「執行時不需要問是否包含在職人員」 → the reply says it applies to this conversation and offers a
+   Workflow draft or proposal, never 「規則我已改成」.
+4. 「把這個做成可重複使用的 workflow」 → an install card appears; nothing in Capabilities until
+   Install; after Install it runs from the card's form.
+
+## Business-cards third-round fixes (2026-10-20, Claude Code)
 
 **Goal / scope:** the five minor issues from the owner's third live test (2026-10-20, owner:
 「幫忙把上面1~5小問題也修掉」), Gateway backend. Not pushed; Agent Web not restarted (the owner was
