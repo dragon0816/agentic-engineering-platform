@@ -23,7 +23,16 @@ uncertain), but nothing could store it. The only implementation was the Hermes c
 
 ## 2. Storage
 
-A Host-local SQLite file per actor: `<workspace>/business-cards/<actor-key>/cards.db`. Never shared
+Since accumulated memory M1 (2026-10-20) the store is the `contacts/org` space of the actor's
+Memory Service: `<workspace>/memory/<actor-key>/memory.sqlite`
+(`docs/phases/ACCUMULATED_MEMORY.md` §11). The tables below keep their columns: `people`,
+`reporting_lines` and `candidates` are the space's own tables (`contacts_org__people`, ...);
+`field_sources`, `observations`, `history`, `undone` and `proposals` are the Memory Service's shared
+tables (each row carries `space`, `entity_id` for `person_id`, `source_kind` for `source`).
+Every statement of the person (an edit, a confirmation, a departure, a reporting line) is also a
+`user` observation. An actor's earlier `<workspace>/business-cards/<actor-key>/cards.db` is moved
+there once, after a verified backup beside it, and never written again. Before M1 it was a
+Host-local SQLite file per actor: `<workspace>/business-cards/<actor-key>/cards.db`. Never shared
 across members; contacts are personal data. `<actor-key>` is the actor's name made file-safe plus a
 short hash, so two actors never share a file.
 

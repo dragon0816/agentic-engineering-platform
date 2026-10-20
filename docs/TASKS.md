@@ -2808,3 +2808,24 @@ s-k-20261011T102952` (not published).
   alone: passed); separate CI-like venv `C:/aepci-wk/venv-cards` (`.[dev,office]`): 3375
   passed, 34 skipped, 0 failed.
 - [ ] Owner live check of the HTML chart in Agent Web and Telegram (steps in HANDOFF.md).
+
+## Accumulated memory M1 (2026-10-20)
+
+- [x] M1: Memory Service skeleton and the business-cards migration (2026-10-20, Claude Code; owner
+  approved the design 2026-10-20). Spec `docs/phases/ACCUMULATED_MEMORY.md` §11 "M1 as built";
+  decision `docs/DECISIONS.md` 2026-10-20 "Accumulated memory M1"; `docs/CONTRACTS.md` "Memory
+  spaces and the Memory Service"; `docs/phases/BUSINESS_CARDS.md` §2.
+  1. ab31240b `memory_spaces` on Skill and Workflow manifests (no digest change when empty);
+     `common/memory.py`, `memory/service.py`, `memory/merge.py`, `memory/registry.py`,
+     `host_runtime/memory_spaces.py`; `contacts/org` declared by the business-cards Skill with
+     the owner's default merge rules. Tests `tests/test_memory_service.py`.
+  2. 58de8bb8 The business-cards store on the Memory Service; one-time, verified, transactional
+     migration of `cards.db` with a backup beside it. Tests
+     `tests/test_business_cards_migration.py`; existing business-cards tests pass (two adapted in
+     raw storage access only).
+  Verification: ruff check, ruff format --check, mypy clean; full pytest project `.venv` 3437
+  passed, 9 skipped, 0 failed; CI-like `C:/aepci-wk/venv` (`.[dev,office]`) 3414 passed, 34
+  skipped, 0 failed.
+- [ ] Owner review, then the live migration on Agent Web restart (steps in HANDOFF.md).
+- [ ] M2: sync state and the incremental org chart.
+

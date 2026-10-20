@@ -3885,3 +3885,61 @@ the frame's URL, where the frame and history can read it, and the route sends
 syntax-highlighting library (the page is one inline string with no external code). HTML a
 `coding/run-python` step writes in a workspace is not attached to answers today, so it is not
 shown inline; the viewer shows any file that does become an answer attachment the same way.
+
+## 2026-10-20 — Accumulated memory M1: one memory database per actor, spaces declared in manifests, merge rules as data
+
+Context: the owner approved the accumulated-memory design (`docs/phases/ACCUMULATED_MEMORY.md`,
+decisions §10) and asked for M1: the Memory Service skeleton, space registration in manifests,
+the shared provenance / history / undo / proposals, per-actor isolation, and the business-cards
+`cards.db` moved into the first space with every existing behaviour and test kept.
+
+Decisions (Claude Code, within the approved design; §11 of the spec has the details):
+
+1. **One SQLite file per actor** (`<workspace>/memory/<actor-key>/memory.sqlite`), the shared
+   facilities in **shared tables keyed by `space`** (observations, field_sources, history, undone,
+   proposals, external_ids) and each manager's own tables **named after the space**
+   (`contacts_org__people`). Shared tables let M4 list everything to confirm across spaces with
+   one query; change ids, observation ids and proposal ids stay unique per actor.
+2. **Declarations in the manifest** (`memory_spaces` on Skill and Workflow manifests), optional and
+   omitted when empty so no existing manifest's bytes or digest change (only the business-cards
+   Skill gains one). Roles nest (manager ⊃ contributor ⊃ reader); an asset is known by namespace
+   and name, so every version keeps its access. One manager per space, refused at sync and when
+   switching a Skill or Workflow on; the Host's registry also takes the shipped manifests (the
+   Host's own code), so the native business-cards capabilities keep their access even while the
+   installed copy of the Skill predates the section.
+3. **Merge rules are data** (`MergeRules`, stored as JSON in the space's registry row), evaluated by
+   one generic `decide`: the person's statement wins; a value the person set is never replaced and
+   differing evidence becomes a proposal; `precedence` by trust class for the company (card over
+   C4C, C4C mismatches propose); newest evidence for title and place; uncertain or older readings
+   kept out; external ids match only; reporting lines solid only on `user`, `signature` or
+   `email_content`; auto-merge across sources only on an identical email or a mapped external id.
+   For contacts the person's value proposes on **any** differing evidence, older included, as
+   the store already did after the third live test; `propose_if_newer` exists as data for spaces
+   that want the owner's narrower wording. Business-card matching (image hash, email, name +
+   company) stays the business-cards package's own rule; the cross-source auto-merge rule is for
+   other contributors.
+4. **Writes are observations only.** Observations are append-only (SQLite triggers refuse DELETE
+   and any UPDATE but setting `retracted_by` once). The person's edits, confirmations,
+   departures and reporting lines are `user` observations plus history; undoing a change retracts
+   the person's statements in it, while card and signature sightings stay. Undoing a creation now
+   retracts that person's observations instead of deleting them. `cards__history` keeps listing
+   only sightings.
+5. **Provenance in ADR-K11 terms**: `field_sources` gains `origin` (`human` | `tool` | `import` |
+   `agent` | `migration`), `set_by` (the Host's `<actor> via <channel>`), `set_at`, `reason`.
+   Contracts are shared with Knowledge Strategy, never the data (owner §10.5).
+6. **Migration once, lossless, transactional**, with a verified byte copy first
+   (`cards.db.bak-<UTC stamp>`, under SQLite's shared read lock, same SHA-256, integrity check,
+   same row counts; an identical copy is reused), every id kept so every reference still holds,
+   each row read back and compared before commit, a marker with the source's size, time and hash.
+   `cards.db` is opened read-only and never written again. On failure: **a clear error, not a
+   read-only fallback** (one code path; the old file and its backup stay for the previous version).
+   If `cards.db` changes after the migration (the previous version was run again), the store
+   refuses (`memory_legacy_changed`) instead of silently ignoring that data.
+
+Rejected: one table set per space for everything (duplicates the shared facilities and needs a
+union per space for the cross-space confirm page); a generic key-value store (§3.10); deleting
+observations on undo (breaks append-only); SQLite's backup API for the copy (its output is not
+byte-identical, so an identical earlier backup could not be recognised and repeated failures
+would pile up copies); keeping `cards.db` as a live fallback store (two stores to keep in step);
+re-migrating automatically when `cards.db` changes after the migration (would merge two
+histories with clashing ids).

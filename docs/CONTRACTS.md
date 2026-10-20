@@ -2335,8 +2335,9 @@ drafts a Workflow or Skill shows its install card"):
 `docs/phases/BUSINESS_CARDS.md`; decision `docs/DECISIONS.md` 2026-10-20.
 - Capabilities `business-cards/<name>@1.0.0` (`capabilities.business_cards.handlers`), contracts
   `business-cards.<name>.input.v1` / `.output.v1`, policy ref `personal-contacts-policy`, risk
-  `low`, permission `business-cards.<name>`. Store per actor:
-  `<workspace>/business-cards/<actor-key>/cards.db` (`store.actor_key`).
+  `low`, permission `business-cards.<name>`. Store per actor: the `contacts/org` space of the
+  actor's Memory Service, `<workspace>/memory/<actor-key>/memory.sqlite` (accumulated memory M1,
+  below); before M1 `<workspace>/business-cards/<actor-key>/cards.db` (`actor_key`), moved once.
   - Writes (`side_effect: write`, `approval_required: true`, confirmed standing by the Host):
     `add-card` (`AddCardRequest`: card fields, `uncertain` [field names],
     `romanised_name_printed`, `other_text` (printed text not placed in a field; scanned only for
@@ -2344,7 +2345,8 @@ drafts a Workflow or Skill shows its install card"):
     {`person_id`, `name`, `company`, `outcome` (`created` | `updated` | `unchanged`), `existed`,
     `matched_by` (`image` | `email` | `name_company` | `romanised_name`), `changes` [{`field`,
     `label`, `old`, `new`}], `kept` [{`field`, `label`, `current`, `offered`, `reason`
-    (`user_set` | `older_evidence` | `uncertain` | `email_differs` | `less_complete`)}],
+    (`user_set` | `older_evidence` | `uncertain` | `email_differs` | `less_complete` |
+    `lower_trust` (M1: a lower trust class than the stored value's, e.g. C4C after a card))}],
     `uncertain`, `needs_confirmation` [field names], `to_confirm` [{`field`, `label`,
     `stored`}], `dropped` [{`field`, `label`, `value`, `reason` (`not_on_card`)}],
     `email_differs` ({`stored`, `read`} or null), `proposals` [`ProposalView`], `match`
@@ -2473,6 +2475,83 @@ drafts a Workflow or Skill shows its install card"):
   document with `sendDocument` (`chat_id`, `document`). The text carries the legend without its
   table (`business_cards_tools.with_legend(short=True)`).
 - CLI: `aep-host cards import --config <host.json> [--from <cards.db>] [--actor <name>]`.
+
+### Memory spaces and the Memory Service (accumulated memory M1, 2026-10-20)
+
+`docs/phases/ACCUMULATED_MEMORY.md` §11; decision `docs/DECISIONS.md` 2026-10-20 "Accumulated
+memory M1". Contracts in `common.memory`; service in `memory.service`, `memory.merge`,
+`memory.registry`; Host registry in `host_runtime.memory_spaces`.
+
+- **Manifest section** (`SkillManifest.memory_spaces`, `WorkflowManifest.memory_spaces`;
+  optional, at most 16, omitted from the serialized manifest when empty so older bytes and
+  digests are unchanged): `MemorySpaceDeclaration` {`space` (`<domain>/<name>`, lower case, 2–3
+  segments, e.g. `contacts/org`), `role` (`manager` | `contributor` | `reader`; each includes the
+  next), `kinds` [`entities` | `sync_state` | `preferences` | `facts` | `notes`], `sensitivity`
+  (`PUBLIC` | `INTERNAL` | `CONFIDENTIAL` | `RESTRICTED`), `retention` (`until_deleted` |
+  `P<n>D` | `P<n>M` | `P<n>Y`), `schema_ref`, `merge_rules` (versioned refs `a.b.c.v1`)}. A
+  manager declares all of kinds, sensitivity, retention, schema_ref and merge_rules; a
+  contributor or reader declares none of the last four. One declaration per space per manifest.
+  A space has one manager: a second asset declaring itself manager is refused by Shared
+  Platform sync (`asset_conflict`), by switching it on in Agent Web
+  (`memory_space_has_a_manager`), and left out of the Host's registry.
+- **Merge rules** (data the manager ships; stored as JSON in the space's registry row):
+  `MergeRules` {`rules_id`, `trust` {source kind → `user_stated` | `document` |
+  `system_record` | `inferred`} (must map `user` to `user_stated`; any other kind is refused),
+  `default` / `fields` {field → `FieldMergeRule` {`policy` (`newest_evidence` | `precedence`),
+  `precedence` (trust classes, highest first), `lower_conflict` (`propose` | `keep`),
+  `user_conflict` (`propose` | `propose_if_newer`)}}, `external_ids` (systems kept for
+  matching only), `relations` [{`relation`, `solid_evidence` [source kinds]}], `auto_merge`
+  {`identities` (e.g. `email`), `mapped_external_ids`}}. `memory.merge.decide` returns
+  `Decision` {`action` (`take` | `keep` | `propose`), `reason` (`empty` | `same` | `user_set` |
+  `lower_trust` | `uncertain` | `older_evidence` | `match_only`)}; `resolve` folds observations
+  into current values and conflicts; `auto_merge` returns {`entity_id`, `by`, `ask`,
+  `candidates`}.
+- **Storage**: `<workspace>/memory/<actor-key>/memory.sqlite` per actor (`memory_path`).
+  `meta`, `spaces` {`space`, `manager` (`namespace/name`), `table_prefix`, `declaration_json`,
+  `rules_json`}; shared tables, each row with `space`: `observations` {`observation_id`,
+  `entity_id`, `claim` (`fields` | `status` | `relation`), `source_kind`, `trust`,
+  `source_date`, `source_ref`, `fields_json`, `uncertain_json`, `recorded_at`, `recorded_by`,
+  `contributor`, `change_id`, `retracted_by`} (append-only: triggers refuse DELETE and any UPDATE
+  but setting `retracted_by` once), `field_sources` {`entity_id`, `field`, `source_kind`,
+  `source_date`, `observation_id`, `origin` (`human` | `tool` | `import` | `agent` |
+  `migration`), `set_by`, `set_at`, `reason`} (ADR-K11), `history` {`history_id`, `change_id`,
+  `at`, `actor`, `entity_id`, `kind`, `field`, `old`, `new`, `reason`, `source`, `extra_json`},
+  `undone` {`change_id`, `undone_by`}, `proposals` {`proposal_id`, `entity_id`, `field`,
+  `current`, `proposed`, `source_kind`, `observation_id`, `created_at`, `state` (`open` |
+  `accepted` | `rejected` | `dismissed`), `decided_at`, `decided_by`}, `external_ids`
+  {`system`, `external_id`, `entity_id`, `created_at`, `created_by`}. A manager's own tables are
+  named `<space with _>__<name>` (`contacts_org__people`).
+- **API** (`memory.service`): `MemoryService(path, registry)` / `.for_actor(workspace, actor,
+  registry)` registers every managed space the registry has rules for;
+  `register_space(declaration, manager=, rules=)`; `spaces()`; `space(space, asset=)` →
+  `MemorySpace` (refusals: `memory_space_not_declared`, `memory_space_unknown`).
+  `MemorySpace.transaction()` → `SpaceTx`; one-shot helpers `add_observation`, `observations`,
+  `resolve`, `history`, `proposals`, `undo`, `map_external_id`, `entity_for_external_id`.
+  `SpaceTx` (role-checked: read = reader, write = contributor, own tables and provenance =
+  manager; `memory_read_not_declared`, `memory_write_not_declared`, `memory_manager_only`):
+  `add_observation(entity_id, fields, source_kind=, source_date=, recorded_by=, source_ref=,
+  uncertain=, change_id=, claim=)` (`memory_source_unknown`), `observations(...)`,
+  `retract`, `provenance` / `field_provenance`, `set_provenance`, `drop_provenance`,
+  `provenance_extra` / `restore_provenance` (for undo), `decide`, `resolve`, `solid(relation,
+  evidence_kind)`, `record`, `history`, `changed_since`, `undo(change_id, actor=, handlers=)`
+  (`change_unknown`, `change_already_undone`; `proposal` rows dismissed generically, the
+  person's statements in the change retracted), `propose`, `proposals`, `set_proposal_state`,
+  `reopen`, `forget_entity`, `map_external_id` (`external_id_taken`), `entity_for_external_id`,
+  `external_ids`, `auto_merge`, `table(name)`, `con` (manager only). `recorded_by` / `actor` /
+  `set_by` are always the Host's `<actor> via <channel>`.
+- **`contacts/org`** (`capabilities.business_cards.space`): manager
+  `engineering/business-cards`, kinds `entities`, `CONFIDENTIAL`, `until_deleted`,
+  `contacts.org.person.v1`, `contacts.org.merge.v1` (company by precedence, card over C4C;
+  title / department / division / business group by newest evidence; the person's value wins
+  and differing evidence proposes; `c4c_account` / `c4c_contact` match only; reporting lines
+  solid only on `user`, `signature` or `email_content`; auto-merge on an identical email or a
+  mapped external id).
+- **Migration** (`capabilities.business_cards.migration`): on the first open, verified byte
+  copy `cards.db.bak-<UTC stamp>` beside `cards.db`, then one transaction copying every row with
+  its id, read back and compared, then the marker `migrated:contacts/org` in `meta`. Refusals:
+  `memory_backup_failed`, `memory_migration_failed`, `memory_migration_mismatch`,
+  `memory_migration_target_not_empty`, `memory_legacy_changed` (the old store changed after the
+  migration).
 
 ## Shared-platform transport (Phase 7, slice 2i)
 

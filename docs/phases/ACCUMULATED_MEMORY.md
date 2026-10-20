@@ -1,6 +1,6 @@
 # 可累積的記憶管理（設計稿，待 owner 確認）
 
-Owner 討論：2026-10-20。狀態：**design approved 2026-10-20（決定見 §10），尚未實作；M1 起依 §9 進行。** 架構層級的決定，依 `CLAUDE.md`
+Owner 討論：2026-10-20。狀態：**design approved 2026-10-20（決定見 §10）；M1 implemented 2026-10-20（見 §11「M1 as built」），M2 起依 §9 進行。** 架構層級的決定，依 `CLAUDE.md`
 先討論、owner 確認方向後才開始實作。已決定的部分：採用 **混合式**（集中管理、分開擁有）。
 
 ## 1. 為什麼需要
@@ -215,7 +215,7 @@ run id、圖片 hash）；來源被刪時記憶保留，標「來源已刪除」
 
 | 階段 | 內容 | 完成條件 |
 |---|---|---|
-| M1 | Memory Service 骨架：空間註冊（manifest 宣告）、共用 provenance／history／undo／proposals、每人隔離；名片 `cards.db` 遷移成第一個空間 | 名片既有測試全過、資料無損遷移 |
+| M1（**implemented 2026-10-20**，§11） | Memory Service 骨架：空間註冊（manifest 宣告）、共用 provenance／history／undo／proposals、每人隔離；名片 `cards.db` 遷移成第一個空間 | 名片既有測試全過、資料無損遷移 |
 | M2 | 同步進度 + 組織圖增量整理 | 第二次組織圖只讀新信；改版時正確重整 |
 | M3 | 偏好：確認卡、注入、矛盾檢查；筆記：一鍵存、Agent 提議（每段對話最多一次）、依宣告或「之前記過什麼」查詢 | 對話中說的規則按一下後生效、之後不再詢問；回答旁一鍵存筆記，並能被查詢引用 |
 | M4 | Agent Web 記憶頁 | 五個區塊可用；E2E 與瀏覽器測試 |
@@ -238,3 +238,129 @@ run id、圖片 hash）；來源被刪時記憶保留，標「來源已刪除」
 7. 跨來源對不上時：**email 完全相同或外部 ID 已在對照表中時自動合併並留紀錄，其餘先問使用者**。
 8. 筆記：對話中一鍵存；Agent 可主動提議（每段對話最多一次）；只在 Skill／Workflow 宣告讀取、或
    使用者提到「之前有記過什麼」時查詢（§3.9）。
+
+## 11. M1 as built（2026-10-20，Claude Code）
+
+決定紀錄：`docs/DECISIONS.md` 2026-10-20「Accumulated memory M1: one memory database per actor,
+spaces declared in manifests, merge rules as data」。契約：`docs/CONTRACTS.md`「Memory spaces and
+the Memory Service」。
+
+### 11.1 架構
+
+| 位置 | 內容 |
+|---|---|
+| `src/common/memory.py` | 共用契約（不含資料）：`MemorySpaceDeclaration`、`MergeRules`／`FieldMergeRule`／`RelationRule`／`AutoMergeRule`、`Decision`、`FieldProvenance`（ADR-K11 的 `origin`／`set_by`／`set_at`／`reason`） |
+| `src/memory/service.py` | Memory Service：每個 actor 一份 `<workspace>/memory/<actor-key>/memory.sqlite`；`MemoryService`（空間註冊）、`MemorySpace`（為某個 asset 開啟的空間）、`SpaceTx`（一個交易內的共用能力） |
+| `src/memory/merge.py` | 合併規則的評估：`decide`、`resolve`、`auto_merge`；不碰儲存 |
+| `src/memory/registry.py` | `MemoryRegistry`：哪個 asset 在哪個空間是 manager／contributor／reader，以及 manager 提供的合併規則 |
+| `src/host_runtime/memory_spaces.py` | Host 的 registry（AEP 內建 manifest ＋ 本機安裝的 Skill／Workflow，含已關閉的）；安裝時的「一個空間一個 manager」檢查 |
+| `src/capabilities/business_cards/space.py` | 第一個空間 `contacts/org`：宣告、合併規則（資料）、空間自己的資料表 |
+| `src/capabilities/business_cards/migration.py` | `cards.db` → `contacts/org` 的一次性遷移 |
+| `src/capabilities/business_cards/store.py` | 名片專屬邏輯（比對、尊稱與統編、公司別名、匯報線、組織圖資料）建在共用能力之上 |
+
+`memory.sqlite` 的資料表：
+
+- `meta`（schema 版本、遷移標記）、`spaces`（每個空間一列：manager、資料表前綴、宣告與合併規則的 JSON）。
+- 共用（每列帶 `space`）：`observations`（只增不改：trigger 拒絕 DELETE，UPDATE 只允許把
+  `retracted_by` 從空白設一次）、`field_sources`、`history`、`undone`、`proposals`
+  （多了 `decided_at`／`decided_by`）、`external_ids`。
+- 空間自己的（以空間命名）：`contacts_org__people`、`contacts_org__reporting_lines`（多了
+  `observation_id`）、`contacts_org__candidates`。
+
+### 11.2 Manifest 宣告
+
+Skill 與 Workflow manifest 多一個可省略的 `memory_spaces`（最多 16 項）；空的時候序列化時省略，
+manifest 的 bytes 與 digest 不變（與 G3 的 `asset_bindings` 同樣做法）。每項：
+
+```json
+{"space": "contacts/org", "role": "manager", "kinds": ["entities"],
+ "sensitivity": "CONFIDENTIAL", "retention": "until_deleted",
+ "schema_ref": "contacts.org.person.v1", "merge_rules": "contacts.org.merge.v1"}
+```
+
+- `space`：`<領域>/<名稱>`（小寫，2–3 段）。`role`：`manager`（定義 schema 與合併規則，可讀寫）、
+  `contributor`（加觀察、可讀）、`reader`（只讀）；manager 包含 contributor，contributor 包含 reader。
+- manager 必須宣告 `kinds`、`sensitivity`、`retention`（`until_deleted` 或 `P30D`／`P12M`／`P2Y`）、
+  `schema_ref`、`merge_rules`；contributor／reader 不得宣告後四項。一個 manifest 每個空間只宣告一次。
+- 安裝時驗證：所有安裝路徑都經過 manifest 驗證；另外 Shared Platform 同步（`asset_conflict`）與
+  Agent Web 重新開啟 Skill／Workflow（`memory_space_has_a_manager`）會拒絕第二個 manager。
+- 名片 Skill（`engineering/business-cards@1.0.0`）宣告自己是 `contacts/org` 的 manager。
+
+### 11.3 存取規則
+
+- 模型只能經由 Skill 的工具（`cards__*`）接觸記憶；沒有任何「讀取全部記憶」的工具。
+- `MemoryService.space(space, asset=...)`：沒有宣告 → `memory_space_not_declared`；reader 寫入 →
+  `memory_write_not_declared`；只有 manager 能用空間自己的資料表與寫 provenance（`memory_manager_only`）；
+  觀察的來源類型必須是合併規則認得的（`memory_source_unknown`）。
+- 寫入只有觀察：使用者的修改、確認、離職、匯報線也都是 `user`（或證據類型）來源的觀察，再加上
+  history；目前值由 manager 依合併規則算出並保存在自己的檢視（`contacts_org__people`）。
+- `set_by`／`recorded_by`／`actor` 一律由 Host 從 request context 填（`<actor> via <channel>`）。
+- Bridge 的 grants 與審批照舊：名片 capability 仍經 Bridge 以 actor 的 grants 執行。
+
+### 11.4 合併規則（資料）
+
+`MergeRules` 以 JSON 存在 `spaces.rules_json`。`contacts/org` 的預設（§3.8.3、§10.6–10.7）：
+
+- `trust`：`user` → user_stated；`card`、`email_signature`、`import`、`signature`、`email_content` →
+  document；`c4c` → system_record；`title_inference`、`agent` → inferred。
+- `company`：`precedence`（user_stated > document > system_record > inferred）：名片勝過 C4C，
+  C4C 不一致時變成待確認（`lower_trust`）；名片即使較舊也會取代 C4C 的值；同一等級以最新證據為準。
+- `title`、`department`、`division`、`business_group` 與其他欄位：`newest_evidence`，任何來源。
+- 使用者的值優先：不同的證據一律變成待確認（`user_conflict: propose`；較舊的證據也提議，沿用
+  第三次 live test 的「不論確定與否都不覆蓋」；`propose_if_newer` 是可選的另一種寫法）。
+- `external_ids`：`c4c_account`、`c4c_contact`，只用來對應，不成為欄位值（`match_only`）。
+- `relations`：`reporting_line` 只有 `user`、`signature`、`email_content` 是實線；其他一律虛線。
+- `auto_merge`：其他來源只在 email 完全相同或外部 ID 已在對照表時自動合併，其餘先問。名片與簽名檔
+  之間仍用名片自己已決定的比對規則（圖片 hash、email、姓名＋公司；DECISIONS 2026-10-20）。
+
+`SpaceTx.decide` 的順序：沒有值或值相同 → 保留；外部 ID → 保留（只對應）；使用者自己說的 → 採用；
+目前值是使用者的 → 提議；沒有目前值 → 採用；優先序較低 → 提議（或依規則保留）；讀值不確定 → 保留；
+證據較舊 → 保留；其餘 → 採用。
+名片的 `_merge` 先處理名片專屬的情況（同一公司或姓名的另一種寫法、email 不同、備註附加、
+只讀到一部分），其餘交給 `decide`。
+
+### 11.5 遷移（名片 `cards.db` → `contacts/org`）
+
+第一次開啟名片庫時（每個 actor 各自）：
+
+1. 在 `memory.sqlite` 取得寫入鎖，確認尚未遷移、目標是空的。
+2. 備份：在 `cards.db` 旁寫 `cards.db.bak-<UTC 時間>`，在 SQLite 的共享讀鎖下逐 byte 複製，
+   檢查 SHA-256 相同、`PRAGMA integrity_check` 為 ok、每張表的列數相同；不符就刪掉暫存檔並停止
+   （`memory_backup_failed`）。已有相同內容的備份就沿用。
+3. 在同一個交易內複製八張表的每一列，保留所有 id（observation、proposal、line、history、change id），
+   所以彼此的參照不變；provenance 補上 ADR-K11 的 `origin`（由來源推得）、`set_by`／`set_at`
+   （由設定該值的 history 列推得）與 `reason`「migrated from cards.db」。
+4. 逐列讀回並與原表比對；任何差異（`memory_migration_mismatch`）或錯誤（`memory_migration_failed`）
+   都會整個 rollback，`memory.sqlite` 不留任何部分資料；`cards.db` 只以唯讀開啟，從不寫入。
+5. 寫入標記（來源、備份、各表列數、時間、`cards.db` 的大小、修改時間與 SHA-256），之後開啟就略過。
+
+之後 `cards.db` 不再被寫入。若它在遷移後又被改過（例如退回舊版 AEP 並存了名片），名片庫會拒絕
+（`memory_legacy_changed`），不會默默忽略那些變更。
+
+**正式環境第一次啟動會做什麼**：Agent Web 以新程式啟動後，第一次有名片工具被呼叫時（或
+`aep-host cards import`），對該 actor 的 `%LOCALAPPDATA%` 工作區
+`business-cards/<actor-key>/cards.db` 做上述 1–5；新增 `memory/<actor-key>/memory.sqlite`。
+
+**如何退回**：停掉 Agent Web，checkout 之前的 commit；舊程式照舊使用 `cards.db`（遷移不會改它；
+備份也在旁邊）。遷移之後在新版做的修改只在 `memory.sqlite`。要再升級：若退回期間 `cards.db`
+有變更，先把 `memory/<actor-key>/memory.sqlite` 移到別處，新版就會從 `cards.db` 重新遷移；
+若沒變更，直接升級即可。
+
+### 11.6 與設計稿的差異與補充
+
+- 觀察只增不改；以前「復原新增」會刪掉該人的觀察，現在改為 retract（內容保留、不再參與）。
+  使用者陳述在其變更被復原時也會 retract；名片或簽名檔的讀值（sighting）在復原後仍保留。
+- `cards__history` 的 `observations` 只列讀值（名片、簽名檔、匯入），使用者自己的陳述在 history。
+- 失敗時採「清楚的錯誤」而不是唯讀 fallback（中文說明見 `business_cards_tools.FAILURE_TEXT`）。
+- `<workspace>/business-cards/<actor-key>/` 仍保留組織圖檔案、舊的 `cards.db` 與備份。
+
+### 11.7 留給後續階段的擴充點
+
+- **M2 同步進度**：`kinds` 已有 `sync_state`；在 `memory.sqlite` 加共用表（`space, source, key,
+  last_message_date, last_message_ids, extractor_version`）與 `SpaceTx` 方法即可，不需要改宣告格式。
+- **M3 偏好與筆記**：`kinds` 已有 `preferences`、`notes`；同樣是共用表加 API，觀察與 history 可直接沿用。
+- **M4 記憶頁**：`MemoryService.spaces()`、跨空間的 `proposals`（每列帶 `space`）可直接列出「待確認」；
+  `retention` 已在宣告中，可接上到期處理。
+- 非內建 manager 的合併規則目前只能由程式提供（`MemoryRegistry.provide_rules`）；從 Skill 套件載入規則資料
+  留待之後。
+

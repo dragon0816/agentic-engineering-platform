@@ -1,8 +1,69 @@
 # Handoff
 
-Updated: 2026-10-20 (Asia/Taipei), by Claude Code (interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-20 (Asia/Taipei), by Claude Code (accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## Interactive HTML org chart and files in the chat (2026-10-20, Claude Code) — latest
+## Accumulated memory M1: Memory Service and the business-cards migration (2026-10-20, Claude Code) — latest
+
+**Goal / scope:** M1 of `docs/phases/ACCUMULATED_MEMORY.md` (owner-approved 2026-10-20): the
+Memory Service skeleton (spaces declared in manifests, shared observations / provenance /
+history / undo / proposals / external ids, per-actor isolation, merge rules as data) and the
+business-cards `cards.db` moved into the first space, `contacts/org`, with every existing
+business-cards behaviour and test kept. No UI (M4), no sync state (M2), no preferences or notes
+(M3). Not pushed; Agent Web not restarted; the owner's live `cards.db` untouched (the live
+migration runs when Agent Web restarts on this code, after the owner's review).
+
+**Done (commits on main):**
+1. ab31240b Memory Service and declarations: `common/memory.py` (contracts),
+   `memory/service.py`, `memory/merge.py`, `memory/registry.py`, `memory_spaces` on Skill and
+   Workflow manifests (omitted when empty: no digest changes), `host_runtime/memory_spaces.py`
+   (Host registry from shipped + installed manifests; one manager per space refused at sync and
+   switch-on), `capabilities/business_cards/space.py` (`contacts/org` declaration, merge rules,
+   space tables), the business-cards Skill declares itself manager. Tests
+   `tests/test_memory_service.py`.
+2. 58de8bb8 Business cards on the Memory Service: `store.py` rewritten on `SpaceTx` (matching,
+   honorific / tax id, companies, lines, chart data stay in the package), `migration.py`
+   (verified byte backup, one transaction, ids kept, read-back compare, marker,
+   `memory_legacy_changed`), handlers and Host pass the registry, Chinese failure texts. Tests
+   `tests/test_business_cards_migration.py`; two existing tests adapted in storage access only
+   (raw SQL now names `contacts_org__people`; the leak check reads `memory/*/memory.sqlite`).
+3. (this commit) Docs: spec §11 "M1 as built", `docs/CONTRACTS.md`, `docs/DECISIONS.md`,
+   `docs/phases/BUSINESS_CARDS.md` §2, `docs/TASKS.md`.
+
+**Verification (2026-10-20):** `ruff check .` passed; `ruff format --check .` 931 files formatted;
+`mypy` no issues (679 files). Full pytest, project `.venv`: 3437 passed, 9 skipped, 0 failed.
+CI-like `C:epci-wk env` (confirmed pointing at this repo, `pip install -e ".[dev,office]"`,
+`--basetemp=C:/aepci-wk/bt-m1`): 3414 passed, 34 skipped, 0 failed. The existing business-cards
+suites (store, capabilities, conversation, html, telegram, file viewer: 96 tests) pass; two of them
+changed only in raw storage access (table `contacts_org__people`, file `memory/*/memory.sqlite`).
+New: `tests/test_memory_service.py` (29), `tests/test_business_cards_migration.py` (8).
+
+**What the live start will do:** on the first `cards__*` call (or `aep-host cards import`) per
+actor: back up `%LOCALAPPDATA%\...\workspace\business-cards\<actor-key>\cards.db` to
+`cards.db.bak-<UTC stamp>` beside it (verified), copy every row into
+`workspace\memory\<actor-key>\memory.sqlite` in one transaction, compare, mark. `cards.db` is never
+written again. **Rollback:** stop Agent Web and run the code from before ab31240b (for example
+`git revert 58de8bb8 ab31240b`); the old code uses `cards.db` as before. Changes made on the new code are only in `memory.sqlite`. To upgrade
+again after using the old code: move `memory\<actor-key>\memory.sqlite` aside so the migration
+runs again from `cards.db` (otherwise the store refuses with `memory_legacy_changed`).
+
+**Open / risks:**
+- The live Host's installed copy of the business-cards Skill JSON predates `memory_spaces`; the
+  Host registry takes the shipped manifest for that identity, so access works; a re-export
+  (`aep-host export-assets`) writes the new manifest.
+- The registry is built at Host start; a Skill installed later reaches memory after a restart.
+- Merge rules for managers that are not native code cannot be loaded from a Skill package yet.
+- The person's value proposes on any differing evidence (older too), the store's existing
+  behaviour; the owner's wording says "newer". `propose_if_newer` exists as data if the owner
+  wants the narrower rule.
+
+**Next:**
+1. Owner review; then check `/api/tasks`, restart Agent Web, send a card or ask 「列出名片」 and
+   confirm the backup file and `memory\<actor-key>\memory.sqlite` appear and the contacts are
+   all there (`cards__list`), history and undo still work.
+2. M2: sync state + incremental org chart (`docs/phases/ACCUMULATED_MEMORY.md` §4, §9; extension
+   points in §11.7).
+
+## Interactive HTML org chart and files in the chat (2026-10-20, Claude Code)
 
 **Goal / scope:** owner 2026-10-20 「請幫我全做」: the org chart as interactive HTML (tree view,
 grouped view, search opening a person card), general (no company built in), shown in the chat;
