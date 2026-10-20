@@ -581,6 +581,21 @@ def shelf_message(code: str) -> str:
     return SHELF_MESSAGES.get(code, code)
 
 
+def _local_day(stamp: str | None, moment: datetime) -> str:
+    """The local date of a stored ISO time. `last_review` is written in UTC,
+    so its first ten characters are a different day before 08:00 in Taipei,
+    which let the nightly review run several times a night."""
+    if not stamp:
+        return ""
+    try:
+        parsed = datetime.fromisoformat(stamp)
+    except ValueError:
+        return stamp[:10]
+    if parsed.tzinfo is None:
+        return parsed.date().isoformat()
+    return parsed.astimezone(moment.tzinfo).date().isoformat()
+
+
 class AgentWeb:
     """What the pages ask for, with no HTTP in it.
 
@@ -1963,8 +1978,8 @@ class AgentWeb:
             self.tasks().tracked(
                 "memory_health", "Memory health check (nightly)", "", self._memory_health_task
             )()
-        last = store.meta("last_review") or ""
-        if load_settings(workspace).nightly and last[:10] != today:
+        last_review = _local_day(store.meta("last_review"), moment)
+        if load_settings(workspace).nightly and last_review != today:
             self.experience_harvest()
             if store.cases("open") or self._suggestions_due():
                 self.tasks().tracked(
