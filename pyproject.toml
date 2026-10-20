@@ -53,6 +53,9 @@ where = ["src"]
 "host_runtime" = ["avatars/*.png", "avatars/*.json", "creators/*/SKILL.md", "icons/*.ico"]
 # The skill writing guide and templates the Knowledge page and its Skill assistant show.
 "knowledge" = ["skill_guide/*.md"]
+# The loan replies' message texts, carried from rs_workflow_system's
+# config/loan-templates (Workflow 06b); overridable per install.
+"capabilities.loan_reply" = ["loan-templates/*.txt"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -73,6 +76,15 @@ extend-exclude = [
     "packages/*/*/vendor",
     "benchmarks/*/runs",
     "src/capabilities/ncc_plan/rules.py",
+    # The loan jobs (06/06b) are the source modules apart from the replacements
+    # SOURCE.md lists, and the source tests are vendored as the oracle;
+    # tests/test_loan_reply_parity.py compares them with the source text.
+    "src/capabilities/loan_reply/rules.py",
+    "src/capabilities/loan_reply/templates.py",
+    "src/capabilities/loan_reply/queue.py",
+    "src/capabilities/loan_reply/scan.py",
+    "src/capabilities/loan_reply/process.py",
+    "tests/test_loan_*_source.py",
     # The owner's BI example tools, kept verbatim as reference fixtures (2026-10-19).
     "tests/fixtures/bi_vault_example",
     # The owner's untracked working folder.
@@ -96,6 +108,16 @@ files = ["src", "tests"]
 plugins = ["pydantic.mypy"]
 # The owner's BI example tools are verbatim reference fixtures, not our code.
 exclude = ["tests/fixtures/bi_vault_example/"]
+
+# The source loan tests, vendored unchanged apart from their imports as the
+# oracle for capabilities.loan_reply (tests/loan_oracle.py); they carry no
+# annotations, and adding them would make them no longer the source's tests.
+[[tool.mypy.overrides]]
+module = [
+    "test_loan_rules_source", "test_loan_queue_source", "test_loan_templates_source",
+    "test_loan_scan_start_source", "test_loan_process_source",
+]
+ignore_errors = true
 
 # lxml ships no stubs; it is reached only through the typed office libraries.
 [[tool.mypy.overrides]]
