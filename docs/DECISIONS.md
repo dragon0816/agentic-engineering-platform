@@ -3943,3 +3943,47 @@ byte-identical, so an identical earlier backup could not be recognised and repea
 would pile up copies); keeping `cards.db` as a live fallback store (two stores to keep in step);
 re-migrating automatically when `cards.db` changes after the migration (would merge two
 histories with clashing ids).
+
+## 2026-10-20 — Accumulated memory M2: generic sync state, incremental harvest, the org chart harvests in the same call
+
+Context: M2 of `docs/phases/ACCUMULATED_MEMORY.md` (§3.3, §4, §9; owner decision §10.1: when the
+org chart is asked for, first read the company's new mail incrementally; new people still need
+confirmation; no nightly background harvest). Spec §12 "M2 as built".
+
+Decisions:
+
+1. **Sync state is a Memory Service facility, not a business-cards table.** Shared tables
+   `sync_state` (`space`, `source`, `key` → `last_message_date`, a bounded id set (500),
+   `extractor_version`, `updated_at`, `updated_by`) and `sync_history` (every advance, reset and
+   restore with the full state before and after), usable by any space whose manager declares the
+   `sync_state` kind. It only moves forward; another extractor version needs a reset first; a
+   reset deletes the row and keeps the old value in history, and `restore_sync` puts any earlier
+   state back. The business-cards declaration adds the kind (only its manifest digest changes).
+2. **The window**: first pass = the configured scope; then from the last processed message minus
+   one day of overlap, skipping the ids processed near the boundary; the configured scope always
+   caps it. Messages already observed (`source_ref`) are skipped and counted. After a failure
+   nothing moves; with messages left unprocessed (unreadable, or beyond the people limit) the state
+   stops just before the oldest of them. Only processed-before messages in an incremental pass:
+   nothing moves and no history row is written.
+3. **Extractor changes re-read stored mail but propose only differences.** `EXTRACTOR_VERSION` in
+   `signatures.py`; a mismatch resets and reads the full scope, including messages already
+   observed, and lists a stored person again only when the new reading would change a field. A
+   manual 「重新整理」 (`full: true`) resets and reads the full scope but still skips observed
+   messages (declined or expired candidates come back).
+4. **The org chart harvests inside the same capability call** (`org-chart` `harvest_first`), with
+   the Skill procedure telling the conversation to pass `true` when the person asks for a chart.
+   One tool call returns the chart of what is stored plus the harvest's candidates (never stored,
+   not on the chart) or a `harvest_note` saying why the harvest was skipped (no known domain, mail
+   or model unavailable); the chart is drawn either way. The capability default stays `false`.
+5. **The 50-message search cap stays**; a pass that hits it says so (`truncated`, 「只處理了最新的
+   50 封」) instead of pretending to be complete.
+6. The M1 open point (the person's value proposes on any differing evidence vs only newer,
+   `propose_if_newer`) is left to the owner; M2 changes no merge rule.
+
+Rejected: per-skill sync tables (§3.3: one shared facility); advancing the state only when the
+person stores the candidates (a declined person would be proposed forever, and a harvest the
+person ignores would re-read the same mail every time); a separate orchestrated "harvest then
+chart" step or Workflow (an extra layer, and it invites auto-storing); defaulting `harvest_first`
+to true in the Host (every existing caller, CLI and Workflow included, would start reading mail);
+re-reading observed mail on a manual reset (re-proposes everyone already stored); moving the state
+to the newest message even when some could not be read (silently loses them).

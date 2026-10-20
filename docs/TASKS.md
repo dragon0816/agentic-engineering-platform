@@ -2827,5 +2827,26 @@ s-k-20261011T102952` (not published).
   passed, 9 skipped, 0 failed; CI-like `C:/aepci-wk/venv` (`.[dev,office]`) 3414 passed, 34
   skipped, 0 failed.
 - [ ] Owner review, then the live migration on Agent Web restart (steps in HANDOFF.md).
-- [ ] M2: sync state and the incremental org chart.
+- [x] M2: sync state and the incremental org chart (see the section below).
+
+## Accumulated memory M2 (2026-10-20)
+
+- [x] M2: sync state + incremental org-chart harvest (2026-10-20, Claude Code). Spec
+  `docs/phases/ACCUMULATED_MEMORY.md` §12 "M2 as built"; decision `docs/DECISIONS.md` 2026-10-20
+  "Accumulated memory M2"; `docs/CONTRACTS.md` (Sync state; `org-chart`, `harvest-signatures`);
+  `docs/phases/BUSINESS_CARDS.md` §5, §6; `USER_GUIDE.zh-TW.md` §4.7.
+  1. 9f6a5080 Generic sync state in the Memory Service (`sync_state`, `sync_history`; advance
+     only forward, reset, restore, per actor; `memory_kind_not_declared`); `contacts/org` declares
+     `sync_state`. Tests `tests/test_memory_sync_state.py`.
+  2. bbaeb442 Incremental signature harvest (`capabilities/business_cards/harvest.py`;
+     `EXTRACTOR_VERSION`; `full`, `company`) and `org-chart` `harvest_first` (candidates returned,
+     never stored; `harvest_note` when skipped). Tests `tests/test_business_cards_incremental.py`
+     (including the fake-model 「WNC 組織圖」 → 「都存進去」 → second 「WNC 組織圖」 conversation);
+     one existing exact `scan_note` assertion updated to the new window prefix.
+  Verification: ruff check, ruff format --check, mypy clean; full pytest project `.venv` 3453
+  passed, 9 skipped, 1 failed (`test_schedule_web` real-browser timing; re-run alone: 5 passed);
+  CI-like `C:/aepci-wk/venv` (`.[dev,office]`, `--basetemp=C:/aepci-wk/bt-m2`): 3428 passed, 34 skipped, 1 failed (`test_workflow_preview` practice SOP under load; re-run alone: 4 passed).
+- [ ] Owner live check of the incremental org chart (steps in HANDOFF.md).
+- [ ] Owner decision (from M1): `propose_if_newer` or keep proposing on any differing evidence.
+- [ ] M3: preferences and notes.
 

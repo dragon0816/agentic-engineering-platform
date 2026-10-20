@@ -163,8 +163,8 @@ keys (`said_by`, `set_by`, `actor`, ...) from a model's arguments.
 | `list` | read | People by company (resolved as below), source and status |
 | `history` | read | One person's changes and observations, with change ids, labels and local times |
 | `proposals` | read | Open proposals, one person's or everyone's, with a sentence (`note`) for the reply |
-| `org-chart` | read | PNG and/or interactive HTML (`format`) + Markdown legend for a company (writes only the derived files) |
-| `harvest-signatures` | read | Mail in the configured scope from one company domain → signature candidates |
+| `org-chart` | read | PNG and/or interactive HTML (`format`) + Markdown legend for a company (writes only the derived files); with `harvest_first` it first runs the incremental harvest of the company's mail domains and returns its candidates (M2) |
+| `harvest-signatures` | read | Mail in the configured scope from one company domain (or a stored company's domains), only what is new since the last harvest unless `full` → signature candidates; keeps the candidates and the sync state, never contacts |
 
 **Company queries** (re-test 2026-10-20: "WNC" worked once and failed once). `org-chart`, `list`
 and `find` resolve a company against the stored companies: the exact or legal-suffix-stripped
@@ -285,6 +285,24 @@ sentence naming the code instead of the Bridge's generic "Capability invocation 
 (`business_cards_tools.FAILURE_TEXT`), with a specific Bridge message (where the input was wrong)
 kept after it.
 
+**Incremental harvest (accumulated memory M2, 2026-10-20).** Spec
+`docs/phases/ACCUMULATED_MEMORY.md` §4 and §12 "M2 as built". Each harvest of a domain reads the
+sync state `(contacts/org, "mail:<folder>", <domain>)` of the Memory Service: the first time the
+full configured scope; afterwards only mail newer than the last processed message minus one day
+of overlap, the ids processed near that boundary skipped, and any message an observation already
+names (`source_ref`) skipped and counted (`already_seen`). The scope always caps the window. The
+state moves forward only after a successful pass (a model or mail failure moves nothing); a
+message that could not be read, or one left for later because the pass reached `limit` people,
+holds it to just before that message. `signatures.EXTRACTOR_VERSION` changing, or `full: true`
+(「重新整理 <公司或網域> 的簽名檔」), resets the state and reads the full scope again; after an
+extractor change the mail of people already stored is read again too and proposed only when the
+new reading changes something. `scan_note` leads with the window: 「首次整理（收件匣 180 天內）：
+…」, 「從 10/19 之後的新信：…」, 「重新整理（…）：…」, 「簽名檔擷取規則已更新，這次重新整理全部範圍內的
+信（…）：…」; `domains` gives each domain's mode, start and the state's date after the pass. A
+harvest that found nobody keeps the conversation's earlier candidates storable. `company` instead
+of `domain` reads every mail domain of the stored company's emails and websites
+(`company_has_no_domain` when there is none).
+
 ## 6. Org chart
 
 `org-chart(company, include_left)` lays out business group → division → department as nested
@@ -344,6 +362,21 @@ from `cards__org_chart` today), so it is not shown inline yet. Telegram: the PNG
 `sendPhoto` after the text reply, the HTML with `sendDocument` and a one-line caption to open it
 in a browser (§7). The legend is in the answer text (appended by the Host when the model left it
 out), carried by the first picture or page.
+
+**Reads new mail first (accumulated memory M2, owner decision 2026-10-20 §10.1).** When the
+person asks for a company's org chart, the procedure calls `cards__org_chart` with
+`harvest_first: true`. In the same capability call the Host takes the company's mail domains from
+its stored emails and websites (`CardStore.company_domains`, the M1 alias logic; a query that is
+itself a domain is used too), runs the incremental harvest (§5), keeps any new people as this
+conversation's candidates and draws the chart from what is stored. The result carries `harvest`
+(the harvest result; its candidates are **not on the chart and never stored** until the person
+confirms with `cards__store_candidates`, after which the procedure redraws with `harvest_first:
+false`) or `harvest_note` when the harvest was skipped: no known domain, or mail or the model
+unavailable (「這次沒有先整理新信：這台電腦上沒有可用的 Outlook（outlook_missing）；組織圖依已存的
+資料畫。」); the chart is drawn either way and no sync state moves. A company with no stored
+contact but candidates from its domain returns the candidates without a chart. The option
+defaults to false in the capability contract, so CLI and Workflow callers never read mail
+implicitly.
 
 ## 7. Telegram (the main way cards arrive)
 

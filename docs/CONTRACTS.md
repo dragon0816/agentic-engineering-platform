@@ -2396,21 +2396,26 @@ drafts a Workflow or Skill shows its install card"):
     [{`observation_id`, `source`, `source_date`, `source_ref`, `uncertain`, `source_label`}],
     `proposals` [`ProposalView`]}; `proposals` {`person` (optional), `limit` ≤ 200} →
     {`proposals` [`ProposalView`], `total`, `note`};
-    `org-chart` {`company`, `include_left`, `format` (`png` default | `html` | `both`)} →
+    `org-chart` {`company`, `include_left`, `format` (`png` default | `html` | `both`),
+    `harvest_first` (M2, default false)} →
     {`company`, `people`, `left_shown`, `left_omitted`, `lines_evidenced`, `lines_inferred`,
     `format`, `png_path` ("" for html), `html_path` ("" for png), `legend_path`,
     `legend_markdown`, `note`, `attach` [{`path`, `media_type` (`image/png`, `text/html`,
-    `text/markdown`), `filename`}]}; the HTML is one self-contained page (inline CSS, script
+    `text/markdown`), `filename`}], `harvest` (M2: the harvest result, or null), `harvest_note`
+    (why the harvest was skipped)}; the HTML is one self-contained page (inline CSS, script
     and JSON data with `<`, `>`, `&` escaped; no network) built from the same rows, always
     with the people who left (toggled, shown by default only with `include_left`);
-    `harvest-signatures` {`domain`, `days` (capped at the mail scope's `max_days`), `limit` ≤ 40,
-    `folder`} → {`scanned`, `from_domain`, `with_signature`, `candidates` [card fields +
+    `harvest-signatures` {`domain` or `company` (M2: the stored company's mail domains), `days`
+    (capped at the mail scope's `max_days`), `limit` ≤ 40, `folder`, `full` (M2: reset the sync
+    state, read the full scope)} → {`scanned`, `from_domain`, `with_signature`, `candidates` [card fields +
     `candidate_id`, `message_id`, `message_date`, `uncertain`, `existing_person_id`,
     `would_change`], `note`, `skipped` [{`code`, `count`}], `skipped_note`, `expires_at`,
-    `without_signature`, `same_sender`, `unreadable_signature`, `scan_note` (「掃描 5 封，1 封有
-    簽名檔，4 封沒有簽名檔。」)}; the
-    candidates are kept in the actor's store for this conversation (table `candidates`; fields,
-    message id and date only) until `expires_at` or the next harvest.
+    `without_signature`, `same_sender`, `unreadable_signature`, `scan_note` (led by the window,
+    「從 10/19 之後的新信：掃描 5 封，1 封有簽名檔，4 封沒有簽名檔。」), and M2: `already_seen`,
+    `over_limit`, `truncated`, `domains` [{`domain`, `source`, `mode` (`first` | `incremental` |
+    `reset` | `extractor`), `since`, `synced_to`, `note`}]}; the candidates are kept in the
+    actor's store for this conversation (table `candidates`; fields, message id and date only)
+    until `expires_at` or the next harvest that finds someone. Refusal `company_has_no_domain`.
   - A company in `org-chart`, `list` and `find` resolves against the stored companies: the name
     without legal suffixes, then an alias (a capitalised 2–6 letter short name such as `WNC`, or
     an email / website domain other than a public mail service), then an unambiguous part of a
@@ -2539,8 +2544,23 @@ memory M1". Contracts in `common.memory`; service in `memory.service`, `memory.m
   `reopen`, `forget_entity`, `map_external_id` (`external_id_taken`), `entity_for_external_id`,
   `external_ids`, `auto_merge`, `table(name)`, `con` (manager only). `recorded_by` / `actor` /
   `set_by` are always the Host's `<actor> via <channel>`.
+- **Sync state** (accumulated memory M2, `ACCUMULATED_MEMORY.md` §12): for a space whose manager
+  declares the `sync_state` kind (otherwise `memory_kind_not_declared`). Tables `sync_state`
+  {`space`, `source` (e.g. `mail:Inbox`), `key` (e.g. `wnc.com.tw`), `last_message_date` (ISO
+  UTC), `last_message_ids_json` (at most `MAX_SYNC_IDS` = 500, newest first), `extractor_version`,
+  `updated_at`, `updated_by`} keyed by (`space`, `source`, `key`), and `sync_history`
+  {`history_id`, `space`, `source`, `key`, `action` (`advance` | `reset` | `restore`), `at`,
+  `actor`, `reason`, `old_json`, `new_json`}. Contracts `common.memory.SyncState`,
+  `SyncHistoryEntry`. `SpaceTx` (and one-shot `MemorySpace`) methods: `sync_state(source, key)`,
+  `sync_states(source=)` (reader); `advance_sync(source, key, last_message_date=, message_ids=,
+  extractor_version=, actor=, reason=)` (contributor; only forward, `sync_state_backwards`;
+  another extractor version needs a reset first, `sync_extractor_changed`; `sync_date_invalid`;
+  ids join the earlier ones on the same or a later date); `reset_sync(source, key, actor=,
+  reason=)` (the row goes, its old value is kept in history); `restore_sync(history_id, actor=)`
+  (puts back the state one history row replaced; `sync_history_unknown`); `sync_history(source=,
+  key=, limit=)`. Per actor like every table (one file per actor).
 - **`contacts/org`** (`capabilities.business_cards.space`): manager
-  `engineering/business-cards`, kinds `entities`, `CONFIDENTIAL`, `until_deleted`,
+  `engineering/business-cards`, kinds `entities` and `sync_state` (M2), `CONFIDENTIAL`, `until_deleted`,
   `contacts.org.person.v1`, `contacts.org.merge.v1` (company by precedence, card over C4C;
   title / department / division / business group by newest evidence; the person's value wins
   and differing evidence proposes; `c4c_account` / `c4c_contact` match only; reporting lines

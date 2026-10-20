@@ -1,8 +1,59 @@
 # Handoff
 
-Updated: 2026-10-20 (Asia/Taipei), by Claude Code (accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-20 (Asia/Taipei), by Claude Code (accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## Accumulated memory M1: Memory Service and the business-cards migration (2026-10-20, Claude Code) — latest
+## Accumulated memory M2: sync state and the incremental org chart (2026-10-20, Claude Code) — latest
+
+**Goal / scope:** M2 of `docs/phases/ACCUMULATED_MEMORY.md` (§3.3, §4, §9; owner decision §10.1:
+the org chart reads new mail first, new people still need confirmation; no nightly harvest).
+Spec §12 "M2 as built". Not pushed; Agent Web not restarted; live data and real mail untouched.
+
+**Done (commits on main):**
+1. 9f6a5080 Generic sync state in the Memory Service: tables `sync_state`, `sync_history`
+   (created on open, no migration); `SpaceTx`/`MemorySpace` `sync_state`, `sync_states`,
+   `advance_sync` (only forward; reset needed before another extractor version), `reset_sync`,
+   `restore_sync`, `sync_history`; only for spaces declaring the `sync_state` kind. `contacts/org`
+   declares it (only the business-cards manifest digest changes).
+2. bbaeb442 Incremental harvest (`capabilities/business_cards/harvest.py`): key
+   `(contacts/org, "mail:<folder>", <domain>)`; first pass = full scope; then from the last
+   processed message minus 1 day, ids at the boundary and observed messages skipped; scope caps
+   the window; unreadable / deferred messages hold the state back; `EXTRACTOR_VERSION` change or
+   `full: true` (「重新整理」) re-reads the full scope (extractor change re-reads stored mail, lists
+   only people whose reading changed). `scan_note` names the window. `harvest-signatures` takes
+   `company` instead of `domain`. `org-chart` `harvest_first` (capability default false; the Skill
+   procedure asks for true): one call harvests the company's domains, returns `harvest`
+   candidates (never stored, not on the chart) or `harvest_note`, and draws the chart.
+3. (this commit) Docs: spec §12, CONTRACTS, DECISIONS, BUSINESS_CARDS §5/§6, TASKS, USER_GUIDE §4.7.
+
+**Verification (2026-10-20):** ruff check, ruff format --check, mypy clean. Full pytest project
+`.venv`: 3453 passed, 9 skipped, 1 failed (`test_schedule_web` real-browser timing under load;
+re-run alone 5 passed). CI-like `C:epci-wkenv` (confirmed pointing at this repo,
+`.[dev,office]`, `--basetemp=C:/aepci-wk/bt-m2`): 3428 passed, 34 skipped, 1 failed (`test_workflow_preview` practice SOP under load; re-run alone: 4 passed). New tests:
+`tests/test_memory_sync_state.py` (4), `tests/test_business_cards_incremental.py` (11).
+
+**Live check (owner, after `/api/tasks` is idle and Agent Web is restarted on this code):**
+1. 「WNC 組織圖」: the reply says 「首次整理（收件匣 180 天內）：掃描 N 封…」, lists new people as
+   s1, s2… and the chart shows only stored people.
+2. 「都存進去」: stored, chart redrawn with them, no mail re-read.
+3. 「WNC 組織圖」 again: 「從 M/D 之後的新信：掃描 …」, only new mail (fast, few or no model calls).
+4. 「重新整理 WNC 的簽名檔」: 「重新整理（收件匣 180 天內）：…」.
+5. With Outlook closed: the chart is still drawn with 「這次沒有先整理新信：…」.
+
+**Open / risks:**
+- Owner decision still open from M1: propose on any differing evidence (current) or only newer
+  (`propose_if_newer`). Rules unchanged.
+- The 50-message search cap stays; a pass that hits it says 「只處理了最新的 50 封」; older mail in
+  the window is not reachable incrementally (same as before M2). Paging would need a reader
+  "until" parameter.
+- Candidates the person never answers expire in an hour and the state has moved past them;
+  「重新整理」 brings them back.
+- The tool default for `harvest_first` is false; the conversation relies on the procedure.
+
+**Next:**
+1. Owner live check above; owner decision on `propose_if_newer`.
+2. M3: preferences and notes (§5, §3.9).
+
+## Accumulated memory M1: Memory Service and the business-cards migration (2026-10-20, Claude Code)
 
 **Goal / scope:** M1 of `docs/phases/ACCUMULATED_MEMORY.md` (owner-approved 2026-10-20): the
 Memory Service skeleton (spaces declared in manifests, shared observations / provenance /

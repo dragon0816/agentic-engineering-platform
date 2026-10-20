@@ -1,6 +1,6 @@
 # 可累積的記憶管理（設計稿，待 owner 確認）
 
-Owner 討論：2026-10-20。狀態：**design approved 2026-10-20（決定見 §10）；M1 implemented 2026-10-20（見 §11「M1 as built」），M2 起依 §9 進行。** 架構層級的決定，依 `CLAUDE.md`
+Owner 討論：2026-10-20。狀態：**design approved 2026-10-20（決定見 §10）；M1 implemented 2026-10-20（見 §11「M1 as built」）；M2 implemented 2026-10-20（見 §12「M2 as built」），M3 起依 §9 進行。** 架構層級的決定，依 `CLAUDE.md`
 先討論、owner 確認方向後才開始實作。已決定的部分：採用 **混合式**（集中管理、分開擁有）。
 
 ## 1. 為什麼需要
@@ -216,7 +216,7 @@ run id、圖片 hash）；來源被刪時記憶保留，標「來源已刪除」
 | 階段 | 內容 | 完成條件 |
 |---|---|---|
 | M1（**implemented 2026-10-20**，§11） | Memory Service 骨架：空間註冊（manifest 宣告）、共用 provenance／history／undo／proposals、每人隔離；名片 `cards.db` 遷移成第一個空間 | 名片既有測試全過、資料無損遷移 |
-| M2 | 同步進度 + 組織圖增量整理 | 第二次組織圖只讀新信；改版時正確重整 |
+| M2（**implemented 2026-10-20**，§12） | 同步進度 + 組織圖增量整理 | 第二次組織圖只讀新信；改版時正確重整 |
 | M3 | 偏好：確認卡、注入、矛盾檢查；筆記：一鍵存、Agent 提議（每段對話最多一次）、依宣告或「之前記過什麼」查詢 | 對話中說的規則按一下後生效、之後不再詢問；回答旁一鍵存筆記，並能被查詢引用 |
 | M4 | Agent Web 記憶頁 | 五個區塊可用；E2E 與瀏覽器測試 |
 | M5 | 品質工具：新鮮度、每晚健康檢查、「為什麼這樣做」 | 健康檢查產生建議卡片 |
@@ -363,4 +363,88 @@ manifest 的 bytes 與 digest 不變（與 G3 的 `asset_bindings` 同樣做法�
   `retention` 已在宣告中，可接上到期處理。
 - 非內建 manager 的合併規則目前只能由程式提供（`MemoryRegistry.provide_rules`）；從 Skill 套件載入規則資料
   留待之後。
+
+## 12. M2 as built（2026-10-20，Claude Code）
+
+決定紀錄：`docs/DECISIONS.md` 2026-10-20「Accumulated memory M2: generic sync state, incremental
+harvest, the org chart harvests in the same call」。契約：`docs/CONTRACTS.md`「Memory spaces and the
+Memory Service」的 Sync state 一項，以及名片的 `org-chart`／`harvest-signatures`。名片端的說明：
+`docs/phases/BUSINESS_CARDS.md` §5、§6。
+
+### 12.1 通用同步進度（Memory Service）
+
+- `memory.sqlite` 新增共用表 `sync_state`（主鍵 `space, source, key`；`last_message_date`（UTC ISO）、
+  `last_message_ids`（最多 500 個，最新的在前）、`extractor_version`、`updated_at`、`updated_by`）與
+  `sync_history`（每次 `advance`／`reset`／`restore` 一列，存變更前後的完整狀態、actor、原因）。
+  `CREATE TABLE IF NOT EXISTS`，M1 的資料庫開啟時自動加上，不需要遷移。
+- 只有 manager 宣告了 `sync_state` 種類的空間能用（否則 `memory_kind_not_declared`）；讀需要 reader、
+  寫需要 contributor，與其他共用能力相同。每個 actor 一個資料庫，所以每人各自一份。
+- `SpaceTx`／`MemorySpace`：`sync_state`、`sync_states`、`advance_sync`（只能往前：較早的日期
+  `sync_state_backwards`；`extractor_version` 不同時必須先 reset，`sync_extractor_changed`；同一天或之後
+  的 id 與舊的合併）、`reset_sync`（刪掉該列，舊值留在 history）、`restore_sync(history_id)`（把某一列
+  history 之前的狀態放回去，可用來復原 reset）、`sync_history`。
+- 「只在成功之後前進」是呼叫端的責任：名片的整理在讀信或模型失敗時完全不動進度。
+- 名片 Skill 的宣告加上 `sync_state`（`kinds: ["entities", "sync_state"]`）；只有名片 Skill 的 manifest
+  digest 改變，其他 shipped manifest 不變（`memory_spaces` 仍然只有它有）。
+
+### 12.2 增量整理簽名檔（`capabilities/business_cards/harvest.py`）
+
+- 進度鍵：`(contacts/org, "mail:<資料夾>", <網域>)`；沒指定資料夾時是設定裡所有資料夾（`mail:Inbox`、
+  `mail:Inbox+Sent Items`）。資料夾組合不同就是另一個來源，第一次會讀滿範圍。
+- 視窗（`harvest.plan`）：
+  - **首次**（沒有進度）：讀信設定的全部範圍（`days` 與 `max_days` 取小）。
+  - **增量**：從 `last_message_date` 往前一天（`OVERLAP`，接住晚到資料夾、日期較早的信）開始，
+    上次處理過的 message id 直接略過；**讀信設定一定封頂**：視窗開始不會早於設定範圍（回覆會加
+    「（讀信設定只到 N 天內）」）。
+  - **重新整理**（`full: true`，「重新整理 WNC 的簽名檔」）與**擷取規則改版**（`signatures.EXTRACTOR_VERSION`
+    與進度裡的不同）：讀滿範圍；成功後先 reset（history 記原因）再前進。
+- 已經被觀察過的信（`observations.source_ref` 是該 message id）略過並計數（`already_seen`），不再提議。
+  例外是擷取規則改版：已存的人的信也重讀，但只有新讀法**真的改變**某些欄位時才列為候選（其餘算
+  `already_seen`），所以改版後只看到有差別的人。手動重新整理仍略過已存的信，上次沒存（拒絕或過期）
+  的人會再列出來。
+- 進度前進到哪裡（`harvest.target`）：
+  - 全部處理完：最新一封處理過的信的時間（範圍內沒有信時是這次掃描的時間）。
+  - 有信沒處理（讀不到，或超過這次的人數上限 `limit`）：停在**最早一封沒處理的信之前**，下次會再讀，
+    處理過的靠 id 略過；回覆說「整理進度只更新到 M/D，沒有處理的信下次會再讀」。
+  - 增量時只有上次已處理的信：進度不動（不寫 history）。永遠不往回。
+  - 模型或讀信失敗：整個整理失敗，進度不動。
+- 搜尋一次最多 50 封（`outlook_mail.MAX_RESULTS`，既有上限）。範圍內超過 50 封時只處理最新的 50 封，
+  `truncated` 為 true，回覆明說「範圍內的信超過 50 封，只處理了最新的 50 封」；更早的信增量整理讀不到
+  （這和 M1 前的行為相同），需要時縮小範圍或之後擴充分頁。
+- 這次沒找到新的人時不覆蓋這段對話先前的候選名單（之前列的還能用 `cards__store_candidates` 存）。
+- `scan_note` 以視窗開頭：「首次整理（收件匣 180 天內）：…」、「從 10/19 之後的新信：…」、
+  「重新整理（收件匣 180 天內）：…」、「簽名檔擷取規則已更新，這次重新整理全部範圍內的信（收件匣 180 天內）：…」；
+  多個網域時每個網域一句、前面加網域。`domains` 列出每個網域的 mode、起點與前進後的日期。
+- `harvest-signatures` 可用 `company` 代替 `domain`：網域取自該公司已存的人的 Email 與網站
+  （`CardStore.company_domains`，M1 的別名邏輯；公用信箱不算）；沒有就 `company_has_no_domain`。
+
+### 12.3 組織圖先整理新信（owner 決定 §10.1）
+
+**選擇：工具選項 `cards__org_chart(harvest_first=true)` ＋ Skill procedure 指示**，不是另一個編排步驟：
+
+- 一次 capability 呼叫裡完成「找網域 → 增量整理 → 留候選 → 用已存的資料畫圖」，回傳 `harvest`
+  （候選名單，**不在圖上、不會存**）或 `harvest_note`（略過的原因）。對話模型不必先呼叫整理、
+  再呼叫畫圖，比「只畫圖」不多任何一輪模型呼叫；讀簽名檔的模型呼叫只在有新信時發生（每 10 個簽名檔一次）。
+- 「候選需要確認」不變：圖只畫已存的人；使用者說「都存進去」→ `cards__store_candidates` →
+  `cards__org_chart(harvest_first=false)` 重畫。
+- capability 契約的預設是 `false`，Host 不會偷偷替模型打開：CLI、Workflow 或其他呼叫者畫圖時不會
+  意外去讀信（測試環境也不會碰到真的 Outlook）；對話裡由 procedure 指示「問組織圖時用 true」。
+- 沒有已知網域：不整理，`harvest_note` 說明，照樣畫圖。Outlook 不能用（沒開、COM 錯誤）或沒有內部模型：
+  照樣畫圖，`harvest_note` 說「這次沒有先整理新信：<原因>（<code>）；組織圖依已存的資料畫。」，進度不動。
+- 公司還沒有任何已存的人、但網域的信裡有候選：回傳候選、不畫圖，等使用者存了再畫。
+
+被捨棄：單獨的「整理後畫圖」編排步驟或 Workflow（多一層、而且畫圖前就要決定候選，容易變成自動存）；
+Host 端把 `harvest_first` 預設為 true（所有既有呼叫者都會開始讀信）。
+
+### 12.4 仍待 owner 決定（M1 留下的）
+
+使用者設定的值遇到**任何**不同證據都提議（現況），還是只有**較新**的證據才提議（規則裡的
+`propose_if_newer`）。M2 沒有改動合併規則，維持現況。
+
+### 12.5 留給 M3 之後
+
+- 記憶頁（M4）的「同步進度」區塊：`sync_states`、`sync_history`、`reset_sync`／`restore_sync` 已備好，
+  只差 UI；「重新整理」按鈕就是 `reset_sync`（或 `harvest-signatures` 的 `full`）。
+- 搜尋上限 50 封：若真實信件量常超過，可在 `MailReader` 加上「直到某時間」的分頁，讓增量整理由舊到新讀完。
+- `extractor_version` 目前是程式常數；之後若擷取規則變成 Skill 資料，版本應跟著資料走。
 
