@@ -385,8 +385,14 @@ class Browser:
                         )
                     except WebSocketError:
                         continue
-                    page.call("Page.enable")
-                    page.call("Runtime.enable")
+                    try:
+                        page.call("Page.enable")
+                        page.call("Runtime.enable")
+                    except (DevtoolsRefused, WebSocketError):
+                        # A just-started browser may still be replacing this
+                        # tab (CI 2026-10-20): drop it and look again.
+                        page.close()
+                        continue
                     self._page = page
                     return page
             time.sleep(0.2)

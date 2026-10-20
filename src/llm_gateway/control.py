@@ -597,7 +597,7 @@ def set_autostart(
 
 
 class UserEnvironment:
-    """HKCU\Environment: where AEP's credential mapping finds the local key
+    r"""HKCU\Environment: where AEP's credential mapping finds the local key
     (`LITELLM_MASTER_KEY`) in processes started after this. Injectable so
     tests never touch the registry."""
 

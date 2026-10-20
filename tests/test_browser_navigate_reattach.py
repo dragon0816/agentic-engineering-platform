@@ -50,3 +50,29 @@ def test_a_second_loss_is_a_navigation_failure() -> None:
     with pytest.raises(BrowserError) as failed:
         browser.navigate("http://127.0.0.1/", settle_s=0)
     assert failed.value.code == "navigation_failed"
+
+
+def test_a_tab_lost_while_enabling_is_dropped_and_the_next_one_is_used(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """CI 2026-10-20: the reattached tab dropped during Page.enable."""
+    made: list[Any] = []
+
+    class Socket(Tab):
+        def __init__(self, url: str, timeout_s: float) -> None:
+            super().__init__(fail=not made)
+            self.closed = False
+            made.append(self)
+
+        def close(self) -> None:
+            self.closed = True
+
+    monkeypatch.setattr("integrations.browser.Devtools", Socket)
+    browser = Browser.__new__(Browser)
+    browser._page = None
+    browser.timeout_s = 5
+    target = {"type": "page", "webSocketDebuggerUrl": "ws://127.0.0.1/x"}
+    browser._targets = lambda port=None: [target]  # type: ignore[method-assign]
+    page: Any = browser.page()
+    assert len(made) == 2 and made[0].closed and page is made[1]
+    assert made[1].calls == ["Page.enable", "Runtime.enable"]
