@@ -93,6 +93,14 @@ MODULES: dict[str, tuple[str, tuple[tuple[str, str], ...]]] = {
                 "            from capabilities.loan_reply.processes import pid_exists\n\n"
                 "            if not pid_exists(pid):\n",
             ),
+            (
+                "    try:\n        return (time.time() - path.stat().st_mtime) > ttl\n",
+                "    if ttl <= 0:\n"
+                "        # A file time can equal or lead time.time() on Windows; a TTL of 0 means\n"
+                "        # expired (AEP port: the source compared age > 0, which flaked on CI).\n"
+                "        return True\n"
+                "    try:\n        return (time.time() - path.stat().st_mtime) > ttl\n",
+            ),
         ),
     ),
 }

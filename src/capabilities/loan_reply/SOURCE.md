@@ -29,7 +29,7 @@ f35470f5ab2c, README 88733b124a13.
 |---|---|---|
 | `_loan_rules.py` | `rules.py` | carried; two import lines (pinned by `tests/test_loan_reply_parity.py`) |
 | `_loan_templates.py` | `templates.py` | carried; the default folder is the package's `loan-templates/` (the source's dumped files, identical to the built-in text) |
-| `_loan_queue.py` | `queue.py` | carried; imports, a home-folder default root (the host always passes its workspace), `_read` returns only JSON objects, `psutil.pid_exists` -> `processes.pid_exists` (psutil is not an AEP dependency) |
+| `_loan_queue.py` | `queue.py` | carried; imports, a home-folder default root (the host always passes its workspace), `_read` returns only JSON objects, `psutil.pid_exists` -> `processes.pid_exists` (psutil is not an AEP dependency), a TTL of 0 or less is always expired (Windows file times can equal or lead `time.time()`; CI 2026-10-21) |
 | `loan_scan.py` | `scan.py` | carried; `run(..., bridge, root, stamp)`; `resolve_start(write=False)` for the read step; `write_start_stamp` for the write step; no CLI |
 | `loan_process.py` | `process.py` | carried; `process_one` = `look_up` + `draft_reply`; failure notice named `draft_failure_notice`; `run(..., bridge, root)`; screenshots beside the queue (`loan-shots`); `requests` errors -> built-in `ConnectionError` (`BridgeUnavailable`); no CLI (`--write-templates`, `--show-templates`) |
 | `jobs/_bridge_client.py` | `bridge_api.py` (protocol, `BridgeClientError`) and `bridge.py` (`LoanBridge`) | the same calls and payloads, answered by `integrations.outlook_mail` (new `list_bodies`, HTML and SMTP sender), `integrations.outlook_draft` (new `reply`, never sends) and `integrations.browser.Browser` |

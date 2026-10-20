@@ -309,6 +309,10 @@ def _lock_is_stale(payload: Mapping[str, Any] | None, path: Path, ttl: float) ->
                 return True
         except Exception:  # noqa: BLE001 - psutil missing or refusing; fall back to time
             pass
+    if ttl <= 0:
+        # A file time can equal or lead time.time() on Windows; a TTL of 0 means
+        # expired (AEP port: the source compared age > 0, which flaked on CI).
+        return True
     try:
         return (time.time() - path.stat().st_mtime) > ttl
     except OSError:
