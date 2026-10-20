@@ -200,8 +200,10 @@ def summarize(snapshot: WorkflowRunSnapshot) -> dict[str, JsonValue]:
 
 DRAFT_GUIDE = (
     "Draft or revise a Workflow from this conversation so it can be previewed, run and reused. "
-    "Use it whenever the person asks for a Workflow for this platform, a reusable Workflow, or "
-    "a run on the platform runtime; a workflow file written by a script is not one, and never "
+    "Use it whenever the person asks for a Workflow for this platform, a reusable Workflow, "
+    "anything to keep and reuse (做成可以重複用的, 以後都用這個, 建立一個工具), or a run on the "
+    "platform runtime; the person installs the draft from the card in the conversation. A "
+    "workflow file written by a script is not one, and never "
     "say something ran on the platform unless authoring__run_workflow ran it. "
     '`workflow` is {"name": kebab-case, "description": one sentence, "parameters": '
     '[{"name": snake_case, "label": question, "kind": "text"|"date"|"integer"|'

@@ -11,7 +11,13 @@ against what actually happened in the turn, never against the model's word:
   succeeded in this turn (owner 2026-10-20: after a read tool the Agent
   answered 「規則我已改成…」 with nothing saved);
 - `named_outputs_exist`: every file the answer names under a task folder
-  (`coding.workspace_roots`) exists and is not empty.
+  (`coding.workspace_roots`) exists and is not empty;
+- `reusable_request_drafted`: when the person asked for something reusable
+  (「做成可以重複用的」, 「做成 workflow」, 「以後都用這個」, 「建立一個工具」)
+  and the turn ran one-off code (`coding__…`) but drafted no Workflow, the
+  answer fails while a draft tool is offered: the person gets the install
+  card only from a draft (owner 2026-10-20: an org-chart script ran once and
+  nothing reached Capabilities).
 
 A failed check gets one retry: the model sees which check failed and why. If it
 still fails, the answer is returned with the Host's note, so the person is
@@ -41,6 +47,9 @@ from common.assets import AssetIdentity
 
 CLAIM_CHECK = "no_unbacked_action_claim"
 OUTPUT_CHECK = "named_outputs_exist"
+REUSE_CHECK = "reusable_request_drafted"
+#: The tools that give the person a Workflow draft and its install card.
+DRAFT_TOOLS = frozenset({"authoring__draft_workflow", "authoring__revise_workflow"})
 TURN_SKILL = AssetIdentity(namespace="host", name="conversation-turn", version="1.0.0")
 
 # A completed action on something concrete, in Chinese or English.
@@ -69,6 +78,18 @@ _PERSISTENT = re.compile(
     r"I(?:'ll|\s+will)\b"
     r"|\bI(?:'ve|\s+have)\s+(?:noted|remembered|memori[sz]ed)\b",
     re.IGNORECASE | re.MULTILINE,
+)
+# The person asks for something to keep and reuse, not a one-off result.
+_REUSABLE = re.compile(
+    r"可以?(?:重複|重覆)(?:使)?用|可重用|重複使用|重覆使用"
+    r"|(?:做成|建立|建成|變成|存成|弄成|寫成|做一個|建一個|做個|建個)\s*(?:一個|一個新的)?\s*"
+    r"(?:workflow|工作流程|工具)"
+    r"|以後都(?:用|照|跑)(?:這個|這樣|這套|這支|這份)"
+    r"|(?:建立|做|寫|建)(?:一)?個(?:小)?工具"
+    r"|\breusable\b|\breuse\s+(?:it|this)\b"
+    r"|\b(?:make|turn|save|build)\s+(?:it|this|that)?\s*(?:into|as)?\s*(?:a\s+)?"
+    r"(?:workflow|tool)\b",
+    re.IGNORECASE,
 )
 # A tool whose command only reads (`cards__list`, `authoring__get_workflow`)
 # cannot back a lasting change.
@@ -122,8 +143,8 @@ def check_answer(
             "the answer says a lasting change was made (a rule, a setting, something "
             "remembered for later), but no tool that changes anything succeeded in this "
             "turn. You keep no rules between conversations unless a tool saves them: say it "
-            "applies to this conversation only, and offer a Workflow or Skill draft or a "
-            "settings proposal for the person to apply instead"
+            "applies to this conversation only, and offer a Workflow draft or a settings "
+            "proposal for the person to apply instead"
         )
     missing = []
     for path in named_files(text, roots):
@@ -145,6 +166,29 @@ def check_answer(
             evidence_ref="files-checked",
         ),
     ], reasons
+
+
+def check_reuse(
+    person: str, tools: tuple[Any, ...], can_draft: bool
+) -> tuple[HarnessCheckResult, str | None]:
+    """A reusable request answered with one-off code and no Workflow draft."""
+    one_off = any(_succeeded(item) and str(item.name).startswith("coding__") for item in tools)
+    drafted = any(_succeeded(item) and item.name in DRAFT_TOOLS for item in tools)
+    failed = can_draft and one_off and not drafted and bool(_REUSABLE.search(person or ""))
+    reason = (
+        "the person asked for something reusable, but this turn only ran one-off code and "
+        "drafted no Workflow, so nothing reaches Capabilities. Draft it with "
+        "authoring__draft_workflow: a coding/run-python@1.0.0 step with the script as a fixed "
+        "input and the values that change as typed parameters; the person installs it from "
+        "the card"
+        if failed
+        else None
+    )
+    return HarnessCheckResult(
+        check_id=REUSE_CHECK,
+        status="failed" if failed else "passed",
+        evidence_ref="drafts-checked",
+    ), reason
 
 
 def _succeeded(item: Any) -> bool:
@@ -181,8 +225,12 @@ class ConversationActions:
         history: tuple[Any, ...],
         roots: tuple[str, ...],
         message: Callable[[str, str], Any],
+        person: str = "",
+        can_draft: Callable[[], bool] = lambda: False,
     ) -> None:
         self.run_turn, self.history, self.roots, self.message = run_turn, history, roots, message
+        # The person's own message, and whether this turn offered a draft tool.
+        self.person, self.can_draft = person, can_draft
         self.result: Any = None
         self.reasons: list[str] = []
         # The answer that failed a check, and why: what the person gets with
@@ -215,6 +263,10 @@ class ConversationActions:
 
     def validate(self) -> tuple[HarnessCheckResult, ...]:
         checks, self.reasons = check_answer(self.result.text, self.result.tools, self.roots)
+        reuse, reason = check_reuse(self.person, self.result.tools, self.can_draft())
+        checks.append(reuse)
+        if reason is not None:
+            self.reasons.append(reason)
         if self.reasons:
             self.checked, self.checked_reasons = self.result, list(self.reasons)
         return tuple(checks)
@@ -226,16 +278,19 @@ async def checked_turn(
     roots: tuple[str, ...],
     message: Callable[[str, str], Any],
     request_id: str,
+    *,
+    person: str = "",
+    can_draft: Callable[[], bool] = lambda: False,
 ) -> Any:
     """Run the turn, check it, retry once on a failed check."""
-    actions = ConversationActions(run_turn, history, roots, message)
+    actions = ConversationActions(run_turn, history, roots, message, person, can_draft)
     plan = build_plan(
         task_id="turn-" + hashlib.sha256(request_id.encode()).hexdigest()[:12],
         task_sha256=hashlib.sha256(request_id.encode()).hexdigest(),
         domain="conversation",
         skill=TURN_SKILL,
         guidance=SkillHarnessGuidance(domains=("conversation",), fallback="retry", max_retries=1),
-        host_checks=(CLAIM_CHECK, OUTPUT_CHECK),
+        host_checks=(CLAIM_CHECK, OUTPUT_CHECK, REUSE_CHECK),
         max_retries=1,
     )
     run = await run_harness_async(plan, actions)

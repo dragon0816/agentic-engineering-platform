@@ -28,7 +28,7 @@ from agent.backend_contracts import (
     MAX_IDENTICAL_FAILURES,
     ConversationLimits,
 )
-from agent.conversation_harness import checked_turn
+from agent.conversation_harness import DRAFT_TOOLS, checked_turn
 from agent.decisions import (
     DecisionProvider,
     DecisionResult,
@@ -121,6 +121,20 @@ MEMORY_GUIDANCE = (
     "behaviour to last, apply it in this conversation, say it is not saved yet, and propose "
     "it for them to apply: a Workflow draft (authoring__draft_workflow) with the rule built "
     "in, or a settings proposal (propose_change), whichever of these tools you have."
+)
+
+# Reusable means a Workflow draft (owner 2026-10-20: an org-chart script ran
+# once with coding__run and nothing reached Capabilities). Told to the model
+# when the draft tool is offered; the Host's reuse check backs it.
+DRAFT_TOOL = "authoring__draft_workflow"
+REUSABLE_GUIDANCE = (
+    "When the person asks for something reusable (做成可以重複用的, 做成 workflow, 以後都用這個, "
+    "建立一個工具, make it reusable), the result is a Workflow draft made with "
+    "authoring__draft_workflow, not only a one-off coding__run: try the script with coding__run "
+    "if you need to, then draft a Workflow whose step is coding/run-python@1.0.0 with the "
+    "script as a fixed input and the values that change between runs as typed parameters the "
+    "script reads. The person installs it from the card in the conversation; you never "
+    "install it. A request to just do it now may use coding__run alone."
 )
 
 ToolProgressState = Literal["running", "succeeded", "failed"]
@@ -559,6 +573,8 @@ class Gateway:
         # included; the tool cap and the repetition guard apply per pass.
         started = self.clock()
         limits = self.limits()
+        # The tools a pass offered the model, for the Host's reuse check.
+        offered: set[str] = set()
         with opened:
 
             async def turn(
@@ -574,6 +590,7 @@ class Gateway:
                     max_history_messages=max_history_messages,
                     started=started,
                     limits=limits,
+                    offered=offered,
                 )
 
             # The tool loop executes; the Host checks the answer against the
@@ -584,6 +601,8 @@ class Gateway:
                 self._workspace_roots,
                 lambda role, text: ModelMessage(role=role, text=text),
                 request.trace.request_id,
+                person=request.message,
+                can_draft=lambda: bool(offered & DRAFT_TOOLS),
             )
             telemetry.set_run(
                 outcome=result.status,
@@ -672,6 +691,7 @@ class Gateway:
         started: float | None = None,
         limits: ConversationLimits | None = None,
         retry: tuple[ModelMessage, ...] = (),
+        offered: set[str] | None = None,
     ) -> GatewayConversationResult:
         """Use installed commands as tools in a bounded loop (the Host's tool cap,
         at most `MAX_CONVERSATION_TOOL_CALLS`, a time budget and a repetition guard).
@@ -879,6 +899,12 @@ class Gateway:
                 # schedule): not offered.
                 del host[person_tool]
                 tools = [tool for tool in tools if tool.name != person_tool]
+        if DRAFT_TOOL in host:
+            messages[0] = ModelMessage(
+                role="system", text=f"{messages[0].text} {REUSABLE_GUIDANCE}"
+            )
+        if offered is not None:
+            offered.update(tool.name for tool in tools)
         evidence: list[ConversationToolExecution] = []
         truncated_retries = 0
         limits = limits if limits is not None else self.limits()

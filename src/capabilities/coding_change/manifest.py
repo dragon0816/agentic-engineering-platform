@@ -10,7 +10,7 @@ from capabilities.contracts import CapabilitySpec
 from common.assets import AssetIdentity, WorkflowManifest
 
 WORKFLOW = AssetIdentity(namespace="engineering", name="coding-change", version="1.0.0")
-SKILL = AssetIdentity(namespace="engineering", name="coding", version="1.7.0")
+SKILL = AssetIdentity(namespace="engineering", name="coding", version="1.8.0")
 RUN_WORKFLOW = AssetIdentity(namespace="engineering", name="run-python", version="1.0.0")
 REPOSITORIES_FUNCTION = "coding.repositories"
 
@@ -201,7 +201,14 @@ def coding_skill() -> SkillManifest:
                 "A Workflow for "
                 "this platform, or a run on the platform runtime, is not this tool's job: draft "
                 "and run it with the authoring tools; a workflow file a script writes is not a "
-                "platform Workflow. A result made with these tools does not show the Workflow "
+                "platform Workflow. When the person asks for something reusable "
+                "(做成可以重複用的, 做成 workflow, 以後都用這個, 建立一個工具), `run` alone "
+                "is not the answer: once the script works, draft a Workflow with "
+                "authoring__draft_workflow whose step is coding/run-python@1.0.0 with the "
+                "script as a fixed input and the values that change between runs as typed "
+                "parameters the script reads from AEP_WORKFLOW_PARAMS; the person installs it "
+                "from the card in the conversation. A request to just do it now uses `run` "
+                "alone. A result made with these tools does not show the Workflow "
                 "works: before calling a Workflow ready for reuse, run the installed version "
                 "and check what it wrote. `change`: "
                 "change one file in a configured repository against existing pytest tests; "

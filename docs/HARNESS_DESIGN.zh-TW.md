@@ -419,9 +419,17 @@ flowchart LR
 
 已接受的殘餘風險（`CODING_ON_BRIDGE.md`）：可讀取帳號能讀的任何檔案；loopback 與 Zscaler proxy（127.0.0.1:9000）可達；未採用 AppContainer。
 
-### 8.4 Coding Skill `engineering/coding@1.7.0` 重點規則
+### 8.4 Coding Skill `engineering/coding@1.8.0` 重點規則
 
-只用於處理本機檔案、在指定資料夾寫並執行程式、或修改 repository；不用於回答問題或查 Knowledge。會改變結果的規則先問；先探查真實輸入再寫完整腳本；回答前重新打開每個輸出逐項核對需求；用給定的範本複製填寫而不是自己重建；輸出只寫 `output/`；需要登入或操作的系統用 browser/desktop 工具，不從腳本抓取；可重用的 Workflow 透過 authoring 工具，並在宣稱可重用前實際執行已安裝版本。1.8.0 的措辭修訂由 owner 暫停中。
+只用於處理本機檔案、在指定資料夾寫並執行程式、或修改 repository；不用於回答問題或查 Knowledge。會改變結果的規則先問；先探查真實輸入再寫完整腳本；回答前重新打開每個輸出逐項核對需求；用給定的範本複製填寫而不是自己重建；輸出只寫 `output/`；需要登入或操作的系統用 browser/desktop 工具，不從腳本抓取；可重用的 Workflow 透過 authoring 工具，並在宣稱可重用前實際執行已安裝版本。
+
+1.8.0（owner 2026-10-20）：使用者要「可重複使用」的東西（「做成可以重複用的」「做成 workflow」「以後都用這個」「建立一個工具」）時，只跑 `run` 不算完成：腳本可用後，以 `authoring__draft_workflow` 起草 Workflow，步驟是 `coding/run-python@1.0.0`，腳本是固定輸入、每次會變的值是有型別的參數（腳本從 `AEP_WORKFLOW_PARAMS` 讀）；使用者在對話中的卡片按「安裝」。「現在做一次」的請求仍可只用 `run`。1.7.0 由安裝流程移到 `disabled/`。先前 #4 分析提出的規則遵循措辭（文件中曾稱「1.8.0 措辭」）不在這一版，仍由 owner 暫停中。
+
+可重用＝Workflow 草稿的三層保障（owner 2026-10-20）：
+
+- Gateway 系統提示：有 `authoring__draft_workflow` 時加上 `REUSABLE_GUIDANCE`（同上規則；模型永遠不安裝）。草稿工具描述 `DRAFT_GUIDE` 也列出這些說法。
+- Coding Skill 1.8.0（上段）。
+- 對話檢查 `reusable_request_drafted`（`agent/conversation_harness.py`，與 `no_unbacked_action_claim`、`named_outputs_exist` 並列）：使用者本回合的原句是可重用請求、本回合有 `coding__…` 工具成功、卻沒有成功的 `authoring__draft_workflow`／`authoring__revise_workflow`，且本回合有提供草稿工具時，檢查失敗，重試一次並告訴模型要起草。只問問題、只起草、或「現在做一次」的請求都不會觸發。
 
 ---
 
