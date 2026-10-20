@@ -13,7 +13,7 @@ from __future__ import annotations
 import threading
 from collections.abc import Iterator, Sequence
 from datetime import UTC, datetime
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
@@ -344,7 +344,7 @@ def served(tmp_path: Path) -> Iterator[str]:
         def log_message(self, *args: object) -> None:
             return None
 
-    server = HTTPServer(("127.0.0.1", 0), Handler)
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     try:

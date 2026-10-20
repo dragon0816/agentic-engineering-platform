@@ -15,7 +15,7 @@ from __future__ import annotations
 import sys
 import threading
 from collections.abc import Iterator
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 import pytest
@@ -60,7 +60,7 @@ class Site:
             def log_message(self, *args: object) -> None:
                 return None
 
-        self.server = HTTPServer(("127.0.0.1", 0), Handler)
+        self.server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
         self.thread.start()
 
