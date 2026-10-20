@@ -4181,3 +4181,53 @@ company's internal gateway, never to external agents such as Claude Code or Code
 control. Who may read is decided by who the vault or database is shared with, as the owner described; no extra
 per-user permission layer is added. ADR-K8 is decided. CONFIDENTIAL and RESTRICTED stay available for data the
 owner marks explicitly.
+
+## 2026-10-21 — Accumulated memory M3: preferences and notes are Host-managed spaces; only the person's press saves
+
+Context: M3 of `docs/phases/ACCUMULATED_MEMORY.md` (§5, §3.9, §9; owner decisions §10.3 「按一下才存、
+Agent Web 可管理」 and §10.8: notes saved in one click, the Agent may propose at most once per
+conversation, notes are queried only when a Skill or Workflow declares a read or when the person asks
+about earlier notes). Spec §14 "M3 as built"; contracts in `docs/CONTRACTS.md` (Preferences and notes).
+
+Decisions:
+
+1. **Two spaces the Host manages, not a Skill**: `personal/preferences` and `personal/notes`
+   (`memory.personal`, manager `host/memory`, declared before any manifest so no installed asset can
+   take them). They live in the same per-actor `memory.sqlite`, reuse M1's history and undo, and add
+   `SpaceTx.changed_after` (an undo is refused when a later change touched the same row). A Skill or
+   Workflow reads notes by declaring `personal/notes` as reader and going through the manager's API
+   (`memory.notes.for_reader`); preferences are read only by the Host.
+2. **No model tool saves.** The model gets `memory__propose_preference` and `memory__propose_note`,
+   which only create a card (`mm-` ids, 24 h); the press in Agent Web or Telegram saves, recorded as
+   `<actor> via <channel>` with the conversation and message as the source. One-click note saving is an
+   Agent Web route (`/api/memory/notes/save`) that takes the text from the stored answer; a selection
+   must be inside it (compared on letters and digits, so Markdown marks do not matter).
+3. **Memory cards do not end the turn** (`ActionCard.ends_turn`, default true for every existing
+   card): the model finishes its answer and the card shows under it. Telegram needed one branch to put
+   the answer before such a card.
+4. **The conflict check is deterministic**: same scope, same subject (the text without negation and
+   filler words, equal or `difflib` ratio ≥ 0.8, or equal given subjects) and opposite polarity
+   (negation words, with 別 inside words such as 特別 excluded). A conflict turns the card into a
+   question showing both (取代舊的 / 兩條都留 / 不用); a duplicate is not saved again. No model check:
+   the deterministic rule covers "the same thing, the other way round" with no egress and no latency;
+   different wordings of the same rule are left to the M5 health check.
+5. **Injection follows the tools a pass offers**: the Gateway asks the Host (`Gateway.turn_memory`)
+   with the Skills whose tools are offered after selection (commands `<alias>__…` and host tools under
+   the alias, such as `cards__…`); the Host adds those Skills' active preferences (the Skill scope and
+   the spaces it declares), newest first, at most 12 and 1,600 characters, labelled as the person's.
+   Their ids are recorded on the result and the stored answer (`preferences_used`) for M5.
+6. **Notes search**: `notes__search` is offered when a Skill in use declares a notes read, or the
+   person's message matches `NOTES_ASKED` (documented phrases). Results carry `[筆記 <note_id>]`.
+   Notes are never injected. The business-cards Skill declares the read for the org chart's 「相關筆記」,
+   so while it is switched on the search is offered in every turn.
+7. **The note proposal limit** is counted by the Host from its card records per conversation; a
+   Telegram chat (whose session never ends) counts per Asia/Taipei day. The Host check's retry in the
+   same turn gets the same card back.
+8. The proposals never back a "lasting change" claim (`PROPOSAL_ONLY_TOOLS`); `MEMORY_GUIDANCE` and
+   the claim check's retry text point to `memory__propose_preference`.
+
+Rejected: a model tool that saves directly (against §10.3); ending the turn on a memory card (the
+answer to the actual request would be lost, in Telegram entirely); a model-based conflict check at
+save (egress and latency for each press, and the owner asked for cheap); per-Skill preference tables
+(§3.3: one shared facility); injecting notes (§3.9); offering `notes__search` in every turn regardless
+of declarations.

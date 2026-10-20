@@ -1,6 +1,6 @@
 # 可累積的記憶管理（設計稿，待 owner 確認）
 
-Owner 討論：2026-10-20。狀態：**design approved 2026-10-20（決定見 §10）；M1 implemented 2026-10-20（見 §11「M1 as built」）；M2 implemented 2026-10-20（見 §12「M2 as built」），M3 起依 §9 進行。** 架構層級的決定，依 `CLAUDE.md`
+Owner 討論：2026-10-20。狀態：**design approved 2026-10-20（決定見 §10）；M1 implemented 2026-10-20（見 §11「M1 as built」）；M2 implemented 2026-10-20（見 §12「M2 as built」）；M3 implemented 2026-10-21（見 §14「M3 as built」），M4 起依 §9 進行。** 架構層級的決定，依 `CLAUDE.md`
 先討論、owner 確認方向後才開始實作。已決定的部分：採用 **混合式**（集中管理、分開擁有）。
 
 ## 1. 為什麼需要
@@ -229,7 +229,7 @@ run id、圖片 hash）；來源被刪時記憶保留，標「來源已刪除」
 |---|---|---|
 | M1（**implemented 2026-10-20**，§11） | Memory Service 骨架：空間註冊（manifest 宣告）、共用 provenance／history／undo／proposals、每人隔離；名片 `cards.db` 遷移成第一個空間 | 名片既有測試全過、資料無損遷移 |
 | M2（**implemented 2026-10-20**，§12） | 同步進度 + 組織圖增量整理 | 第二次組織圖只讀新信；改版時正確重整 |
-| M3 | 偏好：確認卡、注入、矛盾檢查；筆記：一鍵存、Agent 提議（每段對話最多一次）、依宣告或「之前記過什麼」查詢 | 對話中說的規則按一下後生效、之後不再詢問；回答旁一鍵存筆記，並能被查詢引用 |
+| M3（**implemented 2026-10-21**，§14） | 偏好：確認卡、注入、矛盾檢查；筆記：一鍵存、Agent 提議（每段對話最多一次）、依宣告或「之前記過什麼」查詢 | 對話中說的規則按一下後生效、之後不再詢問；回答旁一鍵存筆記，並能被查詢引用 |
 | M4 | Agent Web 記憶頁 | 五個區塊可用；E2E 與瀏覽器測試 |
 | M5 | 品質工具：新鮮度、每晚健康檢查、「為什麼這樣做」 | 健康檢查產生建議卡片 |
 | M6（第二版） | 跨空間宣告讀取、提升成團隊知識（Shared Platform 審核發布） | 一筆聯絡人經審核成為 BI Account |
@@ -488,3 +488,104 @@ stays a proposal」。規則見 §3.8.3「新證據」。
 - 測試：`tests/test_business_cards_new_evidence.py`；調整既有測試中以舊規則為前提的斷言
   （`test_business_cards_store.py`、`test_memory_service.py`、`test_business_cards_capabilities.py`）。
 
+## 14. M3 as built（2026-10-21，Claude Code）
+
+決定紀錄：`docs/DECISIONS.md` 2026-10-21「Accumulated memory M3: preferences and notes are Host-managed
+spaces; only the person's press saves」。契約：`docs/CONTRACTS.md`「Memory spaces and the Memory
+Service」的 Preferences and notes 一項。
+
+### 14.1 兩個由 Host 管理的空間
+
+| 空間 | 種類 | manager | 誰讀 |
+|---|---|---|---|
+| `personal/preferences` | `preferences` | Host（`host/memory`） | 只有 Host：在一輪對話開始時注入 |
+| `personal/notes` | `notes` | Host（`host/memory`） | 宣告 `{"space": "personal/notes", "role": "reader"}` 的 Skill／Workflow（經 manager 的 API `memory.notes.for_reader`），以及 `notes__search` |
+
+- 宣告與規則在 `src/memory/personal.py`；Host 的 registry（`host_runtime.memory_spaces.registry`、
+  `business_cards.space.default_registry`）在任何 manifest 之前先宣告它們（`from_manifests(first=)`），
+  所以沒有已安裝的 Skill 能當它們的 manager（`conflicts()` 也把它們算進去）。
+- 仍在同一個 `memory/<actor-key>/memory.sqlite`（每人一份）；各自的資料表
+  `personal_preferences__items`、`personal_notes__items`；歷史、復原用 M1 的 `history`／`undone`／
+  `SpaceTx.undo`（各自的 undo handler）。新增 `SpaceTx.changed_after`：之後還有沒被復原的變更動到同一筆時，
+  復原被拒（`undo_conflict`）。
+- 名片 Skill 多宣告一項 `personal/notes` reader（組織圖的「相關筆記」）；只有名片 Skill 的 manifest digest 改變。
+
+### 14.2 偏好（§5）
+
+- **每一條**：`preference_id`（`p-…`）、`text`（使用者的原話，NFKC、單行、最多 300 字）、`scope`
+  （`skill:<namespace>/<name>`，或 `space:<space>`）、`scope_label`（名片 Skill 是「名片／組織圖」）、
+  `subject`、`polarity`、`status`（`active`／`removed`／`replaced`）、`created_by`（`<actor> via <channel>`，
+  Agent Web 是 `web`）、`created_at`、`source_session`、`source_message`（使用者那句話的 message id）、
+  `proposed_by`（`agent`）、`replaced_by`。
+- **提議**：模型只有 `memory__propose_preference(rule, skill, subject?)`，它只建一張卡片
+  「要把這條記成『<Skill 名稱>』的偏好嗎？」（存成偏好／不用，24 小時有效，card id `mm-…`）。**沒有任何
+  模型工具會直接存偏好。** `skill` 可以是工具前綴（`cards`）、名稱或 `namespace/name`；找不到時拒絕並列出
+  已開啟的 Skill。已經存過一樣的（同 scope、同主題、同方向）：拒絕提議（`preference_already_saved`）。
+  同一段對話裡同一條還在等的卡片不會重複建立。
+- **卡片不結束這一輪**（`ActionCard.ends_turn = false`，新欄位，預設 true）：模型的回答照常寫完，卡片顯示在
+  回答下面；Telegram 也是先回答再卡片（`telegram.py` 只改這一個分支）。
+- **按下才存**：`AgentWeb.decide_card` 的 `mm-` 分支 → `PersonalMemory.decide`。存的時候先做**矛盾檢查**：
+  - 決定：**只用確定性的檢查**，不呼叫模型。`polarity`：句子裡有否定詞（不需要、不用、不要、不必、不再、
+    不會、無需、勿、別（「特別、分別、區別、個別、類別…」裡的「別」不算）、never、don't、no need、skip、
+    without、stop…）就是 `negative`。`subject`：去掉否定詞與「以後、每次、一律、都、要、請、always、
+    please…」之類的字，只留字母與數字。兩條 **同 scope、主題相同**（完全相同或 `difflib` 相似度 ≥ 0.8，
+    或提議時給的 `subject` 正規化後相同）：方向相同 = 重複，方向相反 = 矛盾。
+  - 重複：不再存，卡片寫「已經有相同的偏好（p-…），沒有重複存」。
+  - 矛盾：**先問**，卡片變成「這條偏好和『名片／組織圖』既有的偏好矛盾，要怎麼辦？」，表格列出
+    既有那條（之前）與新的（之後），按鈕「取代舊的」（舊的變 `replaced`，同一個 change id，一次復原兩條都回來）、
+    「兩條都留」、「不用」。
+  - 模型檢查（經內部 gateway、structured output）沒有做：確定性的規則已涵蓋「同主題、相反方向」，
+    不送資料出去、沒有延遲；語意上的矛盾留給 M5 的每晚健康檢查。
+- **套用**：Gateway 每一個 pass 在決定好工具後問 Host（`Gateway.turn_memory`，Host 的
+  `PersonalMemory.turn`），給它「這一輪提供了工具的 Skill」（Skill 指令 `<alias>__…` 或以 alias 開頭的
+  Host 工具，例如名片的 `cards__…`）。Host 把這些 Skill 的 scope（`skill:` 本身，加上它宣告的非 personal
+  空間 `space:`）中 `active` 的偏好放進 system prompt，標明是使用者自己存的偏好、照做不必再問、不改變權限或工具；
+  最新的在前，最多 12 條、1,600 字。名片 Skill 開著時它的工具每一輪都提供，所以它的偏好每一輪都會帶上。
+- **記錄用了哪些**：`GatewayConversationResult.preferences_used`、`ConversationMessage.preferences_used`
+  （只有回答有），Agent Web 的回覆 JSON 也有 `preferences_used`。M5 的「為什麼這樣做」用它。
+- **說了「規則我已改成」**：`MEMORY_GUIDANCE` 與 `no_unbacked_action_claim` 的重試說明都改成指向
+  `memory__propose_preference`；`memory__propose_preference`／`memory__propose_note` 不算「會改變東西的工具」，
+  所以只有提議、卻說「已記住／已改成」仍會被擋下重試。
+
+### 14.3 筆記（§3.9）
+
+- **每一則**：`note_id`（`n-…`）、`text`（Markdown，最多 20,000 字）、`tags`（最多 8 個，去 `#`、不分大小寫去重）、
+  `entities`（`<space>:<kind>:<id>`，例如 `contacts/org:person:p-…`，最多 12 個）、`source_kind`
+  （`answer`／`selection`／`agent_proposal`）、`source_session`、`source_message`、`excerpt`
+  （`{start, end}`：選取內容在原始回答文字中的位置）、`status`（`active`／`deleted`）、`created_by`、
+  `created_at`、`updated_by`、`updated_at`。`update`（文字、標籤、連結）、`delete` 都寫 history、可復原。
+- **一鍵存（Agent Web）**：每則回答的工具列多一個 📝「存成筆記」（右鍵選單也有）；在回答裡選取文字會
+  出現「存選取內容」按鈕。都打 `POST /api/memory/notes/save {session_id, message_id, selection?}`：
+  文字一律由伺服器從存著的回答取；選取內容必須真的在那則回答裡（只比對字母與數字，所以 Markdown 的
+  `**`、清單符號不影響；不在裡面就 `selection_not_in_answer`）。同一則回答同樣的內容存第二次會回
+  「已經存過了」。存好後顯示「已存成筆記（n-…）。 復原」。不需要模型工具。
+- **Agent 提議**：`memory__propose_note(text, tags?, entities?)` → 卡片「要存成筆記嗎？」（存成筆記／不用）。
+  **每段對話最多一次**：Host 檢查卡片紀錄；已經提議過就不再提供這個工具，直接呼叫也拒絕
+  （`note_already_proposed`）；同一輪 Host 檢查的重試拿到的是同一張卡片。Telegram 的 session 不會結束，
+  所以 Telegram 以「同一個聊天、同一天（Asia/Taipei）」算一段對話。按下後存，來源是顯示卡片的那則回答。
+- **查詢**：`notes__search(query, tag, entity, since, until, limit≤20)`，只在
+  1. 這一輪提供了工具的 Skill 宣告了 `personal/notes` 讀取（目前是名片 Skill，所以它開著時每輪都有），或
+  2. 使用者這句話提到以前的筆記（`memory.notes.NOTES_ASKED`，確定性比對）：「之前／以前／上次…有記過／存過／
+     寫過」、「記過什麼／哪些／嗎」、「有沒有記過」、「我的筆記／之前的筆記／記過的筆記」、「查／找／翻／搜尋
+     （一下）（我的）筆記」、「筆記裡有／寫」、"what did I note"、"did I write down"、"my notes"、
+     "earlier/previous notes"、"I noted"。「存成筆記」、「記得幫我…」不算。
+  結果每則帶 `note_id` 與 `cite`（`[筆記 n-…]`），說明要求回答時標出引用；筆記**從不自動注入**。日期以
+  Asia/Taipei 的日子算。
+- **組織圖**：HTML 組織圖的名片卡多一段「相關筆記」：連到 `contacts/org:person:<person_id>` 的筆記，
+  最新 5 則，每則日期、前 140 字與 id；資料照樣只用 `textContent` 顯示。沒有宣告讀取或讀不到時就沒有這段。
+
+### 14.4 每人隔離、歷史、復原
+
+- 兩種都在 actor 自己的 `memory.sqlite`；卡片紀錄（`<workspace>/memory/memory-cards.json`）記著提議的 actor，
+  按下時寫進那個 actor 的資料庫。其他成員看不到、也搜不到。
+- Agent Web 的最小路由（記憶頁是 M4）：`GET /api/memory/notes`、`GET /api/memory/preferences`、
+  `POST /api/memory/delete {kind: note|preference, id}`、`POST /api/memory/undo {kind, change_id}`。
+
+### 14.5 留給 M4 之後
+
+- 記憶頁的「偏好」與「筆記」區塊：列表、修改、刪除、復原的 API 都已備好（`Preferences.listed/remove/undo`、
+  `Notes.listed/search/update/delete/undo`），只差 UI；筆記的 Markdown 匯出、標籤篩選也在這裡。
+- Agent Web 以外（Telegram）沒有一鍵存筆記，只有 Agent 的提議卡片。
+- 名片 Skill 宣告了筆記讀取，所以它開著時 `notes__search` 每輪都提供；若 owner 希望更少，可改成只在
+  使用者提到筆記時提供（宣告只給組織圖用）。
+- 偏好的語意矛盾（不同說法、同一件事）與「沒在用的偏好」留給 M5 的健康檢查。

@@ -2864,7 +2864,26 @@ s-k-20261011T102952` (not published).
   passed, 9 skipped, 2 failed (the conversation email test, then adapted, and a real-browser
   timing test; both re-run alone: passed); CI-like `C:/aepci-wk/venv` (`--basetemp=
   C:/aepci-wk/bt-m2r`): 3438 passed, 34 skipped, 0 failed.
-- [ ] M3: preferences and notes.
+- [x] M3: preferences and notes (2026-10-21, Claude Code; commit 2228b1e6). Spec
+  `docs/phases/ACCUMULATED_MEMORY.md` §14 "M3 as built"; decision `docs/DECISIONS.md` 2026-10-21
+  "Accumulated memory M3"; `docs/CONTRACTS.md` (Preferences and notes); `USER_GUIDE.zh-TW.md` §4.8.
+  Host-managed spaces `personal/preferences` and `personal/notes` (`memory/personal.py`,
+  `memory/preferences.py`, `memory/notes.py`); `host_runtime/personal_memory.py` (proposal tools,
+  `mm-` cards, `Gateway.turn_memory`, `/api/memory/*`); `ActionCard.ends_turn`; deterministic
+  conflict check; `preferences_used` on the result and the stored answer; `notes__search` only on a
+  declared read or `NOTES_ASKED`; 「存成筆記」 / 「存選取內容」 in Agent Web; 「相關筆記」 on the HTML
+  org chart's person card; the business-cards Skill declares a notes read.
+  Tests `tests/test_memory_preferences.py`, `tests/test_memory_notes.py`,
+  `tests/test_memory_notes_ui.py` (real browser, screenshots `.scratch/notes-ui/`);
+  `test_memory_service.py` updated for the new business-cards declaration.
+  Verification: ruff check, ruff format --check, mypy clean; full pytest project `.venv` 3707 passed,
+  9 skipped, 0 failed (E2E-01 included; one earlier run caught the turn-renderer harness, fixed by
+  moving the notes script out of the Turn groups section); CI-like `C:/aepci-wk/venv` (confirmed
+  pointing at this repo, `.[dev,office]`, `--basetemp=C:/aepci-wk/bt-m3`): 3681 passed, 34 skipped,
+  1 failed (`test_agent_web.py::test_capability_workspace_is_interactive_in_a_real_browser`,
+  real-browser load flake; re-run alone with `tests/test_memory_notes_ui.py`: 3 passed).
+- [ ] Owner live check of preferences and notes (steps in HANDOFF.md).
+- [ ] M4: the memory page in Agent Web (five sections; preferences and notes APIs are ready).
 
 
 ## CI real-browser failures: diagnostics (2026-10-20)

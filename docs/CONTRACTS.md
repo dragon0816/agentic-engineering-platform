@@ -2581,6 +2581,64 @@ memory M1". Contracts in `common.memory`; service in `memory.service`, `memory.m
   `memory_backup_failed`, `memory_migration_failed`, `memory_migration_mismatch`,
   `memory_migration_target_not_empty`, `memory_legacy_changed` (the old store changed after the
   migration).
+- **Preferences and notes** (accumulated memory M3, `ACCUMULATED_MEMORY.md` §14; decision
+  2026-10-21). Two spaces the Host manages (`memory.personal`, manager asset `host/memory`,
+  declared before any manifest via `MemoryRegistry.from_manifests(first=)`; no installed asset can
+  manage them): `personal/preferences` (kind `preferences`, `personal.preference.v1`,
+  `personal.preferences.v1`) and `personal/notes` (kind `notes`, `personal.note.v1`,
+  `personal.notes.v1`), both `CONFIDENTIAL`, `until_deleted`, per actor. A Skill or Workflow
+  reads notes by declaring `{"space": "personal/notes", "role": "reader"}` (`memory.personal.
+  NOTES_READ`; the business-cards Skill does) and calling `memory.notes.for_reader(service,
+  asset, refs)` (`memory_read_not_declared`). Preferences are read by the Host only.
+  - `memory.preferences.Preferences(service)`: table `personal_preferences__items`
+    {`preference_id` (`p-<10 hex>`), `scope` (`skill:<ns>/<name>` | `space:<space>`,
+    `preference_scope_invalid`), `scope_label`, `text` (normalised, ≤ 300), `subject`,
+    `polarity` (`positive` | `negative`), `status` (`active` | `removed` | `replaced`),
+    `created_by`, `created_at`, `updated_at`, `source_session`, `source_message`, `proposed_by`,
+    `replaced_by`}. `check(scope, text, given_subject)` → `Check` {`duplicates`, `conflicts`}
+    (same scope, same subject: equal or `difflib` ratio ≥ 0.8 of `subject(text)`, or equal
+    normalised given subjects; same polarity = duplicate, opposite = conflict).
+    `save(scope, text, actor=, scope_label=, given_subject=, source_session=, source_message=,
+    proposed_by=, replace=, keep_conflicts=)` → (`Preference`, change id); an open conflict
+    raises `PreferenceConflict` (`preference_conflict`, `.conflicts`); `replace` marks those
+    `replaced` in the same change. `remove`, `listed(scope=, include_inactive=)`,
+    `active(scopes)`, `get`, `history`, `undo(change_id, actor=)` (history kinds
+    `preference_add` / `preference_replace` / `preference_remove`; `undo_conflict` when a later
+    change touched the same row, via `SpaceTx.changed_after`).
+  - `memory.notes.Notes(service)`: table `personal_notes__items` {`note_id` (`n-<10 hex>`),
+    `text` (Markdown, ≤ 20,000), `tags_json` (≤ 8), `entities_json` (≤ 12 refs
+    `<space>:<kind>:<id>`, `note_entity_invalid`), `source_kind` (`answer` | `selection` |
+    `agent_proposal`), `source_session`, `source_message`, `excerpt_json` ({`start`, `end`} in
+    the stored answer), `status` (`active` | `deleted`), `created_by`, `created_at`,
+    `updated_by`, `updated_at`}. `save`, `update(note_id, text=, tags=, entities=)`, `delete`,
+    `undo` (kinds `note_add` / `note_update` / `note_delete`), `get`, `listed`,
+    `from_source(session, message, text)`, `search(text=, tag=, entity=, since=, until=,
+    limit≤20)` (Asia/Taipei days, `note_date_invalid`), `linked(refs)`. `notes_asked(message)`:
+    the deterministic trigger `NOTES_ASKED`.
+  - Conversation (`host_runtime.personal_memory`): `Gateway.turn_memory`
+    (`TurnMemoryProvider`: request, the Skills whose tools the pass offers → `TurnMemory`
+    {`guidance`, `preferences_used`, `tools`}); the result's `preferences_used` (≤ 40 ids) is on
+    `GatewayConversationResult` and the stored answer (`ConversationMessage.preferences_used`).
+    Model tools: `memory__propose_preference` {`rule`, `skill`, `subject`?} and
+    `memory__propose_note` {`text`, `tags`?, `entities`?} (only with a session; the note tool at
+    most once per conversation, a Telegram chat per day: `note_already_proposed`), and
+    `notes__search` {`query`, `tag`, `entity`, `since`, `until`, `limit`} → {`notes` [note +
+    `cite` `[筆記 <note_id>]`], `count`, `note`}, offered only when a Skill in use declares a
+    notes read or `notes_asked` matches. No tool saves. The proposals never back a lasting-change
+    claim (`conversation_harness.PROPOSAL_ONLY_TOOLS`).
+  - Cards: `MemoryCard` records (`mm-` ids, 24 h, `<workspace>/memory/memory-cards.json`) drawn
+    as `ActionCard` kind `memory_preference` | `memory_note` with `ends_turn` false (new
+    `ActionCard` field, default true: the Gateway ends a turn only on a card that ends it).
+    Buttons `save` / `decline`; a conflict at save turns the card into `replace` / `keep_both`
+    / `decline` with a row per conflicting preference (before = it, after = the new one).
+    Statuses `pending` → `saved` | `declined` | `duplicate` | `expired` | `failed`.
+  - Agent Web routes: `POST /api/memory/notes/save` {`session_id`, `message_id`,
+    `selection`?} → {`ok`, `already`, `note`, `change_id`, `message`} (`conversation_unknown`,
+    `message_unknown`, `selection_not_in_answer`); `GET /api/memory/notes`,
+    `GET /api/memory/preferences`; `POST /api/memory/delete` {`kind`: `note` | `preference`,
+    `id`}; `POST /api/memory/undo` {`kind`, `change_id`}. All answer 200 with `ok`/`code`.
+  - Org chart HTML: each person in the page data has `notes` [{`id`, `text` (≤ 140), `date`}]
+    from notes linked to `contacts/org:person:<person_id>` (newest 5), shown as 「相關筆記」.
 
 ## Shared-platform transport (Phase 7, slice 2i)
 

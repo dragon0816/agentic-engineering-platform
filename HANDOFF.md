@@ -1,8 +1,62 @@
 # Handoff
 
-Updated: 2026-10-21 (Asia/Taipei), by Claude Code (loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-21 (Asia/Taipei), by Claude Code (accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## Loan replies 06 / 06b without n8n (2026-10-20/21, Claude Code) — latest
+## Accumulated memory M3: preferences and notes (2026-10-21, Claude Code) — latest
+
+**Goal / scope:** M3 of `docs/phases/ACCUMULATED_MEMORY.md` (§5, §3.9, §9; owner decisions §10.3
+「按一下才存、Agent Web 可管理」 and §10.8). Spec §14 "M3 as built"; decision `docs/DECISIONS.md`
+2026-10-21 "Accumulated memory M3"; contracts `docs/CONTRACTS.md` (Preferences and notes); user guide
+§4.8. Not pushed; Agent Web not restarted; live data untouched. No memory page yet (M4).
+
+**Done (commits on main):** 2228b1e6 "Add preferences and notes to the Memory Service and the
+chat" (code + tests `tests/test_memory_preferences.py`, `tests/test_memory_notes.py`,
+`tests/test_memory_notes_ui.py`, screenshots `.scratch/notes-ui/`); then the docs commit.
+- Host-managed spaces `personal/preferences` / `personal/notes` (`src/memory/personal.py`,
+  `preferences.py`, `notes.py`; `SpaceTx.changed_after`; registries declare them first).
+- `src/host_runtime/personal_memory.py`: `memory__propose_preference`, `memory__propose_note`
+  (once per conversation; Telegram per chat per day), `notes__search` (declared read or
+  `NOTES_ASKED`), `mm-` cards with `ends_turn=false`, the press saves (deterministic conflict check →
+  取代舊的 / 兩條都留 / 不用), `Gateway.turn_memory` injects the in-use Skills' preferences (≤ 12,
+  ≤ 1,600 chars) and records `preferences_used`; Agent Web routes `/api/memory/notes/save`, `/delete`,
+  `/undo`, `GET /api/memory/notes|preferences`.
+- Agent Web: 📝「存成筆記」 in each answer's tools (and the context menu), 「存選取內容」 for a selection;
+  Telegram: one branch puts the answer before a non-ending card; HTML org chart: 「相關筆記」.
+- The business-cards Skill declares a `personal/notes` read (its manifest digest changes).
+
+**Verification:** ruff check, ruff format --check, mypy clean; full pytest project `.venv` 3707 passed,
+9 skipped, 0 failed (E2E-01 included; one earlier run caught the turn-renderer harness, fixed by
+moving the notes script out of the Turn groups section); CI-like `C:/aepci-wk/venv` (confirmed
+pointing at this repo, `.[dev,office]`, `--basetemp=C:/aepci-wk/bt-m3`): 3681 passed, 34 skipped,
+1 failed (`test_agent_web.py::test_capability_workspace_is_interactive_in_a_real_browser`,
+real-browser load flake; re-run alone with `tests/test_memory_notes_ui.py`: 3 passed).
+
+**Live check (owner, after `/api/tasks` is idle and Agent Web is restarted on this code):**
+1. Say 「WNC 組織圖，執行時不需要問是否包含在職人員」: the answer comes first, then the card
+   「要把這條記成『名片／組織圖』的偏好嗎？」. Press 存成偏好 → 「已存成偏好（p-…）」.
+2. New conversation, 「WNC 組織圖」: it should not ask about current staff. (The answer JSON /
+   stored message carries `preferences_used`.)
+3. Say 「執行時要問是否包含在職人員，記成偏好」 and press 存成偏好: the card asks first with both rules;
+   try 取代舊的.
+4. Hover an answer → 📝: 「已存成筆記（n-…）」 and 復原. Select a sentence → 「存選取內容」.
+5. 「我之前有記過什麼關於 WNC 的？」: the answer cites `[筆記 n-…]`.
+6. Telegram: state a rule; the reply ends with the card and 存成偏好 / 不用 buttons.
+7. A note linked to a contact (from an Agent proposal with `contacts/org:person:<id>`) shows under
+   「相關筆記」 on that person's card in the HTML org chart.
+
+**Open / risks:**
+- While the business-cards Skill is on, `notes__search` is offered every turn (its declared read);
+  narrow it if the owner prefers (spec §14.5).
+- Conflict check is wording-based (same subject, opposite polarity); different wordings of the same
+  rule are not caught (M5 health check).
+- One-click note saving is Agent Web only; Telegram has only the Agent's proposal card.
+- Linking a one-click note to a contact needs the M4 page (or an Agent proposal with `entities`).
+
+**Next:**
+1. Owner live check above.
+2. M4: the memory page (preferences and notes sections use the existing APIs).
+
+## Loan replies 06 / 06b without n8n (2026-10-20/21, Claude Code)
 
 **Goal / scope:** owner request 2026-10-20: port rs_workflow_system 06 (loan_scan) and 06b
 (loan_process) as two AEP Workflows; drafts by default, optional send with one approval per
