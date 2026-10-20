@@ -2639,6 +2639,69 @@ memory M1". Contracts in `common.memory`; service in `memory.service`, `memory.m
     `id`}; `POST /api/memory/undo` {`kind`, `change_id`}. All answer 200 with `ok`/`code`.
   - Org chart HTML: each person in the page data has `notes` [{`id`, `text` (≤ 140), `date`}]
     from notes linked to `contacts/org:person:<person_id>` (newest 5), shown as 「相關筆記」.
+- **Memory page** (accumulated memory M4, `ACCUMULATED_MEMORY.md` §15; decision 2026-10-21).
+  `host_runtime.memory_page.MemoryPage` (`AgentWeb.memory_page`): Agent Web routes behind the page
+  token, for `web.runtime.actor` only (another actor's ids name nothing); every change is recorded
+  as `<actor> via web`; no model tool reaches them. All answer 200 with `ok` and, on refusal,
+  `code` and a Chinese `message`.
+  - `GET /api/memory/overview` → {`ok`, `actor`, `proposals` [{`space`, `space_label`,
+    `proposal_id`, `entity_id`, `entity_label`, `field`, `field_label`, `current`, `proposed`,
+    `source`, `source_label`, `evidence_date`, `evidence_ref`, `created_at`, `created_at_local`,
+    `actions` (`keep`, `accept`), `person_id`}], `preferences` [{`scope`, `label`, `items`
+    [preference + `created_at_local`, `updated_at_local`, `used_count`, `used` (≤ 5
+    {`session_id`, `message_id`, `title`, `at`, `at_local`})]}], `notes` {`notes` [note +
+    `created_at_local`, `updated_at_local`], `tags`, `entities` {ref: label}}, `spaces`
+    [{`space`, `label`, `manager`, `manager_label`, `manager_state` (`on` | `off` | `host` |
+    `missing`), `orphan`, `kinds`, `kind_labels`, `sensitivity`, `sensitivity_label`,
+    `retention`, `retention_label`, `counts` [{`name`, `label`, `count`}], `observations`,
+    `open_proposals`, `sync_states`, `last_updated`, `last_updated_local`, `view` (`people` |
+    ``)}], `sync` [{`space`, `space_label`, `source`, `key`, `state` ({`last_message_date`,
+    `last_message_date_local`, `extractor_version`, `updated_at`, `updated_at_local`,
+    `updated_by`} | null), `latest` ({`history_id`, `action`, `at_local`, `actor`} | null),
+    `can_reset`, `can_restore`}], `records` {`conversations` {`count`, `max_messages`,
+    `retention_label`}, `runs` {`days`, `max_mb`}, `experience` {`retention_days`}},
+    `deletions` [{`deletion_id`, `space`, `label`, `at`, `at_local`, `actor`, `reason`,
+    `counts`}]}.
+  - `GET /api/memory/people?q=&status=any|active|left` → {`people` [{`person_id`, `name`,
+    `romanised_name`, `company`, `department`, `title`, `email`, `status`, `status_label`,
+    `open_proposals`, `updated_at_local`}] (≤ 200), `total`}; `GET /api/memory/person?person_id=`
+    → the business-cards `HistoryResult` (`person_unknown`).
+  - `GET /api/memory/export?space=` → {`filename`, `data` {`format`
+    `aep-memory-space-export/1`, `space`, `manager`, `exported_at`, `declaration`, `rules`,
+    `tables` {own table suffix: rows}, `shared` {shared table: the space's rows}}}
+    (`memory_space_unknown`); `GET /api/memory/notes/export?ids=a,b` (all active notes when
+    none) → {`count`, `filename` `notes-<YYYYMMDD-HHMM>.md`, `markdown`}.
+  - `POST /api/memory/proposals/decide` {`space`, `proposal_id`, `action` `keep` | `accept`} →
+    {`change_id`, `undo`, `message`}. `contacts/org` fields go through `CardStore.edit`
+    (`keep` = `confirm=[field]`, `accept` = the proposal's value as the person's); other spaces
+    take `keep` only (state `rejected`, history kind `proposal_rejected`;
+    `proposal_accept_unsupported`). `proposal_unknown`, `proposal_closed`,
+    `proposal_action_unknown`. `POST /api/memory/proposals/undo` {`space` `contacts/org`,
+    `change_id`} (`CardStore.undo`).
+  - `POST /api/memory/preferences/edit` {`id`, `text`, `resolve`? `replace` | `keep_both`,
+    `replace`? [ids]} → {`preference`, `change_id`} via `Preferences.edit(preference_id, text,
+    actor=, replace=, keep_conflicts=)` (same id; history kind `preference_edit`, undone back to
+    the old words; `preference_duplicate`, `preference_unchanged`, `preference_unknown`,
+    `preference_conflict` with `conflicts` [{`preference_id`, `text`}]).
+  - `POST /api/memory/notes/edit` {`id`, `text`?, `tags`? [..], `entities`? [refs]} → {`change_id`}
+    (`Notes.update`; `note_unknown`, `note_entity_invalid`, `note_tags_invalid`). Delete and undo
+    use M3's `/api/memory/delete` and `/api/memory/undo`.
+  - `POST /api/memory/sync/reset` {`space`, `source`, `key`} (`sync_unknown`,
+    `memory_kind_not_declared`); `POST /api/memory/sync/restore` {`space`, `source`, `key`}
+    restores the latest history row when it is a reset (`sync_history_unknown`,
+    `sync_nothing_to_restore`).
+  - `POST /api/memory/space/delete` {`space`, `confirm` (= `space`)} → {`counts`, `message`}
+    (`space_delete_unconfirmed`, `memory_space_unknown`).
+  - `memory.service.MemoryService` (the person's own management, Host routes only): `owned(space)`
+    (the space with the manager's reach), `overview()`, `open_proposals(limit=)`,
+    `proposal(space, id)`, `sync_overview()`, `export_space(space)`, `delete_space(space, actor=,
+    reason=)` → counts per table (one transaction: the space's own tables emptied and its rows
+    removed from `SHARED_TABLES`, observations included with the append-only trigger dropped and
+    re-created inside the transaction; the space stays registered; not undoable),
+    `deletions(limit=)`. Table `space_deletions` {`deletion_id`, `space`, `at`, `actor`,
+    `reason`, `counts_json`}: never content.
+  - `host_runtime.memory_spaces.manager_states(layout)` → {`<ns>/<name>`: `on` | `off`} of
+    installed managers; a space whose manager is neither (nor `host/memory`) is an orphan.
 
 ## Shared-platform transport (Phase 7, slice 2i)
 

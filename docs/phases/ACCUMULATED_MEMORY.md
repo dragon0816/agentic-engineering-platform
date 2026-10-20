@@ -1,6 +1,6 @@
 # 可累積的記憶管理（設計稿，待 owner 確認）
 
-Owner 討論：2026-10-20。狀態：**design approved 2026-10-20（決定見 §10）；M1 implemented 2026-10-20（見 §11「M1 as built」）；M2 implemented 2026-10-20（見 §12「M2 as built」）；M3 implemented 2026-10-21（見 §14「M3 as built」），M4 起依 §9 進行。** 架構層級的決定，依 `CLAUDE.md`
+Owner 討論：2026-10-20。狀態：**design approved 2026-10-20（決定見 §10）；M1 implemented 2026-10-20（見 §11「M1 as built」）；M2 implemented 2026-10-20（見 §12「M2 as built」）；M3 implemented 2026-10-21（見 §14「M3 as built」）；M4 implemented 2026-10-21（見 §15「M4 as built」），M5 起依 §9 進行。** 架構層級的決定，依 `CLAUDE.md`
 先討論、owner 確認方向後才開始實作。已決定的部分：採用 **混合式**（集中管理、分開擁有）。
 
 ## 1. 為什麼需要
@@ -230,7 +230,7 @@ run id、圖片 hash）；來源被刪時記憶保留，標「來源已刪除」
 | M1（**implemented 2026-10-20**，§11） | Memory Service 骨架：空間註冊（manifest 宣告）、共用 provenance／history／undo／proposals、每人隔離；名片 `cards.db` 遷移成第一個空間 | 名片既有測試全過、資料無損遷移 |
 | M2（**implemented 2026-10-20**，§12） | 同步進度 + 組織圖增量整理 | 第二次組織圖只讀新信；改版時正確重整 |
 | M3（**implemented 2026-10-21**，§14） | 偏好：確認卡、注入、矛盾檢查；筆記：一鍵存、Agent 提議（每段對話最多一次）、依宣告或「之前記過什麼」查詢 | 對話中說的規則按一下後生效、之後不再詢問；回答旁一鍵存筆記，並能被查詢引用 |
-| M4 | Agent Web 記憶頁 | 五個區塊可用；E2E 與瀏覽器測試 |
+| M4（**implemented 2026-10-21**，§15） | Agent Web 記憶頁 | 五個區塊可用；E2E 與瀏覽器測試 |
 | M5 | 品質工具：新鮮度、每晚健康檢查、「為什麼這樣做」 | 健康檢查產生建議卡片 |
 | M6（第二版） | 跨空間宣告讀取、提升成團隊知識（Shared Platform 審核發布） | 一筆聯絡人經審核成為 BI Account |
 
@@ -589,3 +589,64 @@ Service」的 Preferences and notes 一項。
 - 名片 Skill 宣告了筆記讀取，所以它開著時 `notes__search` 每輪都提供；若 owner 希望更少，可改成只在
   使用者提到筆記時提供（宣告只給組織圖用）。
 - 偏好的語意矛盾（不同說法、同一件事）與「沒在用的偏好」留給 M5 的健康檢查。
+
+## 15. M4 as built（2026-10-21，Claude Code）
+
+決定紀錄：`docs/DECISIONS.md` 2026-10-21「Accumulated memory M4: the memory page acts as the owner of the
+actor's database」。契約：`docs/CONTRACTS.md`「Memory spaces and the Memory Service」的 Memory page 一項。
+使用說明：`USER_GUIDE.zh-TW.md` §4.9。
+
+### 15.1 頁面
+
+Agent Web 左邊多一個「**記憶**」（`#panel-memory`），六個分頁（§6 的五個區塊加上 §3.9 的筆記），
+一次 `GET /api/memory/overview` 取得全部，動作後重畫，結果與「復原」顯示在分頁上方：
+
+| 分頁 | 內容 | 動作 |
+|---|---|---|
+| 待確認 | 所有空間開著的 proposals：空間、對象（`contacts/org` 是「姓名（公司）」）、欄位、存著的值、新讀到的值、證據（觀察的來源、日期、ref）、提出時間 | 保留原值、改用新值（`contacts/org` 的欄位）、開啟該聯絡人；`contacts/org` 的決定可復原 |
+| 偏好 | `active` 的偏好依 scope（Skill）分組：原話、誰、何時、「來源對話」、「用過 N 次」（最近 100 段對話的 `preferences_used`，最多列 5 則） | 修改（M3 的矛盾檢查）、刪除、復原 |
+| 筆記 | 全部 `active` 筆記，Markdown 顯示；搜尋（每個字都要出現）、依標籤、依關聯對象篩選（在瀏覽器裡篩） | 修改（Markdown）、加標籤／×移除、連結聯絡人（搜尋 `contacts/org`）／×取消連結、刪除、復原、勾選後匯出 Markdown、開啟原本的對話 |
+| 資料 | 每個空間一列：名稱、管理者與狀態（已開啟／已關閉／內建／**無主**）、種類、敏感度、保留期限、各資料表筆數與待確認數、最後更新 | `contacts/org`：開啟聯絡人（搜尋、全部／在職／已離職、每人的「歷史」：變更、讀到的來源、待確認數）；組織圖仍在對話中 |
+| 同步進度 | 每個 (空間, 來源, 鍵)：整理到的日期、擷取版本、誰與何時、上一次的動作 | 重新整理（`reset_sync`，先 `confirm()`）、復原上次重設（`restore_sync`，只在最後一筆是 reset 時） |
+| 紀錄 | 保留期限：對話（保留到刪除，每段 100 則，現有規則）、執行紀錄（telemetry 30 天或 500 MB，固定）、經驗回顧案例（可改，沿用 Reviews 的 `/api/experience/settings`）、各記憶空間的 `retention`（唯讀）；每個空間的匯出與刪除；刪除紀錄 | 匯出 JSON；刪除資料（要輸入空間名稱，`confirm` 欄位也在伺服器端檢查） |
+
+- 每個動作記成 `<actor> via web`（`set_by`、`decided_by`、history 的 `actor`、sync 的 `updated_by`）。
+- 會刪東西的動作都先問：偏好、筆記刪除與同步重設用 `confirm()`；刪除空間資料是頁內的確認框，要輸入空間名稱。
+- 44 px 的點擊目標、淺色與深色、390 px 寬沒有橫向捲動（瀏覽器測試量過）。分頁是 `div`（`section` 會被
+  `section{display:none}` 藏起來）。
+
+### 15.2 後端
+
+- `src/host_runtime/memory_page.py`：`MemoryPage`（`AgentWeb.memory_page`），路由見 CONTRACTS。只用
+  `web.runtime.actor` 的資料庫；別人的 id 在這裡什麼都找不到。**沒有任何模型工具**：沿用 M3 的三個工具
+  （兩個只提議、一個只搜尋筆記），測試確認沒有工具名稱或路由對應到這些動作。
+- `MemoryService`（`src/memory/service.py`）新增「擁有者的管理」：`owned(space)`（以 manager 的權限開啟，
+  只給 Host 路由用）、`overview()`、`open_proposals()`、`proposal()`、`sync_overview()`、`export_space()`、
+  `delete_space()`、`deletions()`；新表 `space_deletions`（`CREATE TABLE IF NOT EXISTS`，舊資料庫開啟時自動加上）。
+- 待確認的決定：`contacts/org` 用名片庫既有的 `CardStore.edit`：保留原值＝`confirm=[欄位]`（存著的變成使用者
+  確認的值，開著的提議 rejected），改用新值＝把那一筆提議的值設為使用者的值（該提議 accepted），和對話中說
+  「Email 正確」「用新的」完全相同，可用 `CardStore.undo` 復原（`/api/memory/proposals/undo`）。其他空間沒有
+  管理者的轉接，只能保留原值（提議 rejected，寫一列 `proposal_rejected` history），不提供改用新值。
+- 偏好修改：`Preferences.edit`（同一個 id，history `preference_edit`，undo 放回原話）；和其他偏好重複 →
+  `preference_duplicate`；矛盾 → `preference_conflict` 並列出，頁面問「取代舊的」（同一個 change 把那條變
+  `replaced`）或「兩條都留」。修改後 `subject` 清空（舊的主題可能已不適用）。
+- 筆記：`Notes.update` 的 text／tags／entities（只改送來的欄位），`/api/memory/delete`、`/api/memory/undo`
+  沿用 M3。
+- 無主：空間的 manager 不是 Host，且不在這台電腦已安裝（開或關）的 Skill／Workflow 中
+  （`memory_spaces.manager_states`）。
+- 匯出：`{format: "aep-memory-space-export/1", space, manager, exported_at, declaration, rules,
+  tables（空間自己的表）, shared（該空間在共用表的列）}`，瀏覽器下載 `memory-<space>-<時間>.json`。
+- 刪除（§3.6）：一個交易內清空空間自己的表與該空間在所有共用表的列（含 observations：只有這裡在交易內暫時拿掉
+  append-only trigger，結束前放回）；空間仍註冊、表仍在；`space_deletions` 一列記時間、誰、原因、各表筆數，**沒有內容**；
+  不能復原。`meta`（例如 `cards.db` 已遷移的標記）保留，所以不會重新遷移舊資料。
+
+### 15.3 沒做的與留給之後
+
+- 舊的 `business-cards/<actor>/cards.db` 與備份不在記憶資料庫裡，刪除 `contacts/org` 不會刪它們（確認框與使用
+  說明都寫了）。要不要一起刪留給 owner 決定。
+- 記憶空間的 `retention` 目前只顯示，沒有到期處理；對話沒有依日期的保留設定（只有每段 100 則），執行紀錄的
+  30 天／500 MB 是程式常數。若要可設定，另外決定。
+- 沒有管理者轉接的空間不能「改用新值」；之後的空間可以提供自己的轉接（像 `contacts/org` 的 `CardStore.edit`）。
+- Telegram 沒有記憶頁（範圍外）。
+- 測試：`tests/test_memory_page.py`（每個動作的路由、每人隔離、沒有模型工具）、`tests/test_memory_page_ui.py`
+  （真的瀏覽器：每個分頁、動作端到端、淺色／深色／390 px、權杖；截圖 `.scratch/memory-page/`）。

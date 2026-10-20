@@ -4231,3 +4231,41 @@ answer to the actual request would be lost, in Telegram entirely); a model-based
 save (egress and latency for each press, and the owner asked for cheap); per-Skill preference tables
 (§3.3: one shared facility); injecting notes (§3.9); offering `notes__search` in every turn regardless
 of declarations.
+
+## 2026-10-21 — Accumulated memory M4: the memory page acts as the owner of the actor's database
+
+Context: M4 of `docs/phases/ACCUMULATED_MEMORY.md` (§6 memory page, §3.6 export and delete, §3.9
+notes management). Spec §15 "M4 as built"; contracts in `docs/CONTRACTS.md` (Memory page); user guide
+§4.9.
+
+Decisions:
+
+1. **The page is the person's own management, not an asset.** Host routes for the signed-in actor
+   open spaces through `MemoryService.owned(space)` with the manager's reach; no asset declaration is
+   involved and no model tool reaches any of it (the three M3 tools stay the only memory tools). Each
+   change is recorded as `<actor> via web`.
+2. **Proposal decisions reuse the manager.** For `contacts/org`, 保留原值 / 改用新值 are the same
+   `CardStore.edit` calls as 「Email 正確」 / 「用新的」 in the chat (confirm the field; take that
+   proposal's value), so provenance, history and undo are the store's. A space without such an adapter
+   can only keep the stored value (the proposal is rejected with a history row); taking a value there
+   would bypass its manager's merge rules.
+3. **A preference edit keeps its id** (`Preferences.edit`, history `preference_edit`) and goes through
+   the same deterministic check as a save: another active preference with the same rule refuses, a
+   contradiction is asked about (取代舊的 replaces it in the same change / 兩條都留).
+4. **Deleting a space's data is the one exception to append-only observations**: in one transaction
+   the space's own tables and its rows of every shared table go (the observations trigger is dropped
+   and re-created inside it); the space stays registered; one `space_deletions` row keeps time, actor,
+   reason and row counts, never content (§3.6). Not undoable, so the page offers the export first and
+   asks for the space name, which the route checks too. `meta` stays, so a migrated `cards.db` is not
+   migrated again; the old `cards.db` and its backups are outside the memory database and are not
+   deleted (said on the page and in the guide; owner to decide if they should be).
+5. **Retention uses what exists.** Conversations (kept until deleted, 100 messages each) and run
+   records (30 days / 500 MB) are shown read-only; the experience-case retention is the existing
+   Reviews setting; the spaces' declared retention is shown read-only. No new retention settings and no
+   expiry processing in M4.
+6. **One overview call**, filtering notes in the browser; an orphan is a space whose manager is neither
+   the Host nor an installed (on or off) Skill or Workflow.
+
+Rejected: a generic "take the new value" for any space (bypasses the manager's own view and rules);
+deleting by marking rows (content would stay, against §3.6); a new conversation-retention setting
+(not asked for; changes record handling beyond M4); a model tool for any of these (§3.4, §10.3).

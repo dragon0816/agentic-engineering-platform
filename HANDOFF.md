@@ -1,8 +1,57 @@
 # Handoff
 
-Updated: 2026-10-21 (Asia/Taipei), by Claude Code (accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-21 (Asia/Taipei), by Claude Code (accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## Accumulated memory M3: preferences and notes (2026-10-21, Claude Code) — latest
+## Accumulated memory M4: the Agent Web memory page (2026-10-21, Claude Code) — latest
+
+**Goal / scope:** M4 of `docs/phases/ACCUMULATED_MEMORY.md` (§6, §3.6, §3.9): a 「記憶」 tab for the
+signed-in actor. Spec §15 "M4 as built"; decision `docs/DECISIONS.md` 2026-10-21 "Accumulated memory
+M4"; contracts `docs/CONTRACTS.md` (Memory page); user guide §4.9. Not pushed; Agent Web not restarted;
+live data untouched. Telegram out of scope.
+
+**Done (commits on main):** 336a0f08 "Add the memory page to Agent Web" (code + tests); then the docs
+commit.
+- `src/host_runtime/memory_page.py` (`AgentWeb.memory_page`): GET `/api/memory/overview`, `people`,
+  `person`, `export`, `notes/export`; POST `proposals/decide` (保留原值 = `CardStore.edit(confirm=)`,
+  改用新值 = the proposal's value; other spaces keep-only), `proposals/undo`, `preferences/edit`
+  (`Preferences.edit`, M3 conflict check), `notes/edit`, `sync/reset`, `sync/restore`,
+  `space/delete` (typed confirmation). M3's `/api/memory/delete` and `/undo` are reused. Every change
+  `<actor> via web`; no model tool.
+- `MemoryService`: `owned`, `overview`, `open_proposals`, `proposal`, `sync_overview`,
+  `export_space`, `delete_space` (one transaction; observations' trigger dropped and re-created
+  inside it), `deletions`; table `space_deletions` (no content).
+- `memory_spaces.manager_states` → orphan flag; the 記憶 tab (待確認, 偏好, 筆記, 資料 with the
+  contacts list and history, 同步進度, 紀錄 with retention, JSON export and delete).
+
+**Verification:** ruff check, ruff format --check, mypy clean; full pytest project `.venv` 3725 passed,
+9 skipped, 1 failed (`test_loan_reply_parity`: a concurrent session's commit e7247e3e changed
+`loan_reply/queue.py` during the run; re-run alone: 16 passed); CI-like `C:/aepci-wk/venv` (points at
+this repo, `.[dev,office]`, `--basetemp=C:/aepci-wk/bt-m4`): 3701 passed, 34 skipped, 0 failed.
+Real-browser test `tests/test_memory_page_ui.py` passes; screenshots `.scratch/memory-page/`.
+
+**Live check (owner, after `/api/tasks` is idle and Agent Web is restarted on this code):**
+1. Left side → 「記憶」. The tab counts match what you expect.
+2. 待確認: an Email proposal from a new card shows stored / new / 證據; press 改用新值, then 復原 in the
+   notice, then 保留原值. The person's history (資料 → 開啟聯絡人 → 歷史) shows `<you> via web`.
+3. 偏好: 修改 a rule into its opposite of another one → 取代舊的 / 兩條都留; 刪除 → 復原; 來源對話 opens
+   the conversation at the message.
+4. 筆記: search, tag and contact filters; 加標籤, 連結聯絡人, × to remove; tick two → 匯出選取（Markdown）.
+5. 資料: spaces with counts; an uninstalled manager shows 「無主」.
+6. 同步進度: 重新整理 `wnc.com.tw` (asks first) → 復原上次重設.
+7. 紀錄: 匯出 JSON of 筆記. Only on a test actor: 刪除資料… needs the space name; a row appears under 刪除紀錄.
+
+**Open / risks:**
+- Deleting `contacts/org` does not delete the old `business-cards/<actor>/cards.db` and its backups
+  (said on the page); owner to decide.
+- Space retention is display-only; no expiry processing. No date-based conversation retention.
+- Spaces without a manager adapter can only keep the stored value.
+- A concurrent session is committing on main (e7247e3e); only M4 files were committed here.
+
+**Next:**
+1. Owner live check above (and the M3 one below).
+2. M5 quality tools (freshness, nightly health check, 「為什麼這樣做」).
+
+## Accumulated memory M3: preferences and notes (2026-10-21, Claude Code)
 
 **Goal / scope:** M3 of `docs/phases/ACCUMULATED_MEMORY.md` (§5, §3.9, §9; owner decisions §10.3
 「按一下才存、Agent Web 可管理」 and §10.8). Spec §14 "M3 as built"; decision `docs/DECISIONS.md`

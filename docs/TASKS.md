@@ -2883,6 +2883,23 @@ s-k-20261011T102952` (not published).
   1 failed (`test_agent_web.py::test_capability_workspace_is_interactive_in_a_real_browser`,
   real-browser load flake; re-run alone with `tests/test_memory_notes_ui.py`: 3 passed).
 - [ ] Owner live check of preferences and notes (steps in HANDOFF.md).
+- [x] M4: the Agent Web memory page (2026-10-21, Claude Code; commit 336a0f08). Spec
+  `docs/phases/ACCUMULATED_MEMORY.md` §15 "M4 as built"; decision `docs/DECISIONS.md` 2026-10-21
+  "Accumulated memory M4"; `docs/CONTRACTS.md` (Memory page); `USER_GUIDE.zh-TW.md` §4.9.
+  `host_runtime/memory_page.py` (`/api/memory/overview`, `people`, `person`, `export`,
+  `notes/export`, `proposals/decide`, `proposals/undo`, `preferences/edit`, `notes/edit`,
+  `sync/reset`, `sync/restore`, `space/delete`); `MemoryService.owned/overview/open_proposals/
+  sync_overview/export_space/delete_space/deletions` and table `space_deletions`;
+  `Preferences.edit`; `memory_spaces.manager_states`; the 記憶 tab in `web_page.py` (待確認, 偏好,
+  筆記, 資料, 同步進度, 紀錄). Tests `tests/test_memory_page.py` (16: every route action, isolation,
+  no model tool) and `tests/test_memory_page_ui.py` (real browser end to end, light / dark / 390 px,
+  token; screenshots `.scratch/memory-page/`).
+  Verification: ruff check, ruff format --check, mypy clean; full pytest project `.venv` 3725
+  passed, 9 skipped, 1 failed (`test_loan_reply_parity` source-module check: a concurrent commit,
+  e7247e3e, changed `loan_reply/queue.py` mid-run; re-run alone: 16 passed); CI-like
+  `C:/aepci-wk/venv` (confirmed pointing at this repo, `.[dev,office]`, `--basetemp=
+  C:/aepci-wk/bt-m4`): 3701 passed, 34 skipped, 0 failed.
+- [ ] Owner live check of the memory page (steps in HANDOFF.md).
 - [ ] M4: the memory page in Agent Web (five sections; preferences and notes APIs are ready).
 
 
