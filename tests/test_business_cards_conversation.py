@@ -214,8 +214,14 @@ def test_store_a_card_draw_the_chart_record_a_departure_and_undo_it(
     served = agent_web.conversation_file(session, image["path"])
     assert served is not None and served[1] == "image/png"
     assert served[0][:8] == b"\x89PNG\r\n\x1a\n"
-    # Only a file listed on this conversation's answers is served.
-    assert agent_web.conversation_file(session, photo_path) is None
+    # Only a file listed on this conversation's messages is served: the
+    # person's own attached photo is (the file viewer, owner 2026-10-20),
+    # a file attached in another conversation is not.
+    assert agent_web.conversation_file(session, photo_path) is not None
+    other = agent_web.create_conversation()["conversation"]["session_id"]
+    elsewhere = agent_web.add_attachment(other, "other.png", PNG)
+    other_path = agent_web.attachments.get(other, elsewhere["attachment"]["file_id"]).path
+    assert agent_web.conversation_file(session, other_path) is None
     assert agent_web.conversation_file("nope", image["path"]) is None
 
     # 3. "周範例 has left."
@@ -264,8 +270,10 @@ def test_the_page_shows_an_answers_picture_through_the_token_guarded_route() -> 
     from host_runtime.web_page import PAGE
 
     assert "function answerImage(session, file)" in PAGE
-    assert '"/api/conversations/file?" + query' in PAGE
-    assert 'if (file.kind === "image") said.parentNode.append(answerImage(' in PAGE
+    assert 'fetch("/api/conversations/file?" + fileQuery(session, file),' in PAGE
+    assert '{headers: {"Authorization": "Bearer " + TOKEN}})' in PAGE
+    assert 'if (kind === "image") said.parentNode.append(answerImage(' in PAGE
+    assert 'else if (kind === "html") said.parentNode.append(answerHtml(' in PAGE
 
 
 class _FailingBridge:
@@ -729,3 +737,47 @@ def test_history_departure_and_undo_results_carry_display_strings(
     assert "status_label" in PROCEDURE and "at_local" in PROCEDURE
     assert "「可以說『復原』撤回」" in PROCEDURE
     assert "show one only when the person asks to undo a specific change" in PROCEDURE
+
+
+def test_an_interactive_html_chart_request_draws_the_page_and_attaches_it(
+    web: tuple[AgentWeb, Conversation],
+) -> None:
+    """「用 HTML 互動式呈現 <公司> 的組織圖」 → `cards__org_chart` with format html
+    (owner 2026-10-20: the Agent tried a one-off script before); the answer
+    carries the HTML file, which the page shows in its sandboxed frame."""
+    agent_web, model = web
+    session = agent_web.create_conversation()["conversation"]["session_id"]
+    model.then(
+        {"tools": [("cards__add_card", {**CARD})]},
+        {"text": "已存周範例。"},
+    )
+    assert _turn(agent_web, session, "store this card")["ok"]
+
+    def choose(request: ModelRequest) -> list[tuple[str, dict[str, Any]]]:
+        # What the model is offered: the chart tool with a format argument and
+        # a procedure that says when to use html.
+        (chart,) = [tool for tool in request.tools if tool.name == CHART_TOOL]
+        schema: Any = chart.input_schema
+        assert schema["properties"]["format"]["enum"] == ["png", "html", "both"]
+        assert "format html" in json.dumps([tool.description for tool in request.tools])
+        assert "HTML" in request.messages[-1].text and "互動式" in request.messages[-1].text
+        return [(CHART_TOOL, {"company": "EXN", "format": "html"})]
+
+    model.then({"tools": choose}, {"text": "這是 EXN 的互動式組織圖。"})
+    charted = _turn(agent_web, session, "用 HTML 互動式呈現 EXN 的組織圖")
+    assert charted["ok"], charted
+    call = json.loads(model.tool_results()[-1])
+    assert call["host"]["status"] == "succeeded", call
+    assert call["host"]["data"]["format"] == "html" and call["host"]["data"]["png_path"] == ""
+    files = charted["conversation"]["messages"][-1]["attachments"]
+    assert [item["kind"] for item in files] == ["html", "text"]
+    page = next(item for item in files if item["kind"] == "html")
+    assert page["filename"].endswith(".html")
+    served = agent_web.conversation_file(session, page["path"])
+    assert served is not None and served[1] == "text/plain; charset=utf-8"
+    assert b"<!DOCTYPE html>" in served[0] and "EXN 範例網通 組織圖".encode() in served[0]
+    link = agent_web.conversation_view_link(session, page["path"])
+    assert link["ok"] and agent_web.viewed_file(link["url"].split("nonce=", 1)[1]) == served[0]
+    # The legend is still in the answer text.
+    assert "EXN 範例網通 組織圖" in charted["answer"]["answer"]
+    assert not list(agent_web.runtime.layout.workspace_root.rglob("*.py"))

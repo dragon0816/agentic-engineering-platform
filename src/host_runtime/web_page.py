@@ -784,6 +784,60 @@ tr:last-child td { border-bottom: none; }
 .answer-image img { max-width: 100%; border: 1px solid #d0d7de; border-radius: 6px;
   cursor: zoom-in; background: #fff; }
 .answer-image figcaption { font-size: 12px; color: #6a737d; }
+
+/* Files in the chat (owner 2026-10-20): every file is a chip that opens the
+   viewer panel; an HTML file also shows inline in a sandboxed frame. */
+.file-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
+.file-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 44px;
+  max-width: 100%; padding: 4px 12px; border: 1px solid var(--line); border-radius: 22px;
+  background: var(--panel); color: var(--ink); font: inherit; font-size: 13px;
+  cursor: pointer; }
+.file-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-chip:hover { border-color: var(--accent); }
+.answer-html { margin: 8px 0 4px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--panel); max-width: 100%; }
+.answer-html .frame-wrap { height: 480px; min-height: 200px; resize: vertical;
+  overflow: hidden; border-bottom: 1px solid var(--line); }
+.answer-html.tall .frame-wrap { height: 80vh; }
+.answer-html iframe, .viewer-preview iframe { display: block; width: 100%; height: 100%;
+  border: 0; background: #fff; }
+.answer-html .frame-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  padding: 4px 8px; font-size: 13px; color: var(--dim); }
+.answer-html .frame-bar .name { flex: 1 1 160px; min-width: 0; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; }
+.viewer-button { min-height: 44px; min-width: 44px; padding: 0 12px; border: 1px solid var(--line);
+  border-radius: 8px; background: var(--bg); color: var(--ink); font: inherit; font-size: 13px;
+  cursor: pointer; }
+.viewer-button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent);
+  color: #fff; }
+.file-viewer { position: fixed; top: 0; right: 0; bottom: 0; width: min(720px, 52vw);
+  display: flex; flex-direction: column; background: var(--bg); color: var(--ink);
+  border-left: 1px solid var(--line); box-shadow: -6px 0 24px rgba(0, 0, 0, 0.18);
+  z-index: 60; }
+.viewer-head { display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  padding: 8px 10px; border-bottom: 1px solid var(--line); background: var(--panel); }
+.viewer-head h2 { flex: 1 1 100%; order: -1; margin: 0; font-size: 15px;
+  overflow-wrap: anywhere; padding-right: 52px; }
+.viewer-modes { display: inline-flex; gap: 4px; }
+.viewer-close { position: absolute; top: 6px; right: 8px; }
+.viewer-body { flex: 1 1 auto; min-height: 0; overflow: auto; }
+.viewer-preview { height: 100%; }
+.viewer-preview.doc { height: auto; padding: 8px 16px; }
+.viewer-preview img { max-width: 100%; display: block; margin: 8px auto; background: #fff; }
+.viewer-note { margin: 8px 12px; color: var(--dim); font-size: 13px; }
+.code-view { display: grid; grid-template-columns: auto minmax(0, 1fr); margin: 0;
+  font: 12.5px/1.55 var(--mono); }
+.code-view pre { margin: 0; padding: 8px 10px; white-space: pre; overflow: visible; }
+.code-view .gutter { color: var(--dim); text-align: right; user-select: none;
+  border-right: 1px solid var(--line); background: var(--panel); }
+.code-scroll { overflow: auto; }
+.csv-table { border-collapse: collapse; font-size: 13px; margin: 8px 12px; }
+.csv-table th, .csv-table td { border: 1px solid var(--line); padding: 3px 8px;
+  text-align: left; vertical-align: top; }
+@media (max-width: 760px) {
+  .file-viewer { width: 100vw; left: 0; border-left: 0; }
+  .answer-html .frame-wrap { height: 420px; }
+}
 </style>
 </head>
 <body>
@@ -1821,6 +1875,24 @@ tr:last-child td { border-bottom: none; }
 </div>
 </div>
 
+<aside class="file-viewer" id="file-viewer" role="dialog" aria-modal="true"
+  aria-labelledby="viewer-name" hidden>
+  <div class="viewer-head">
+    <h2 id="viewer-name"></h2>
+    <div class="viewer-modes" id="viewer-modes" role="group" aria-label="檢視方式">
+      <button type="button" class="viewer-button" id="viewer-preview-mode"
+        aria-pressed="true">Preview</button>
+      <button type="button" class="viewer-button" id="viewer-code-mode"
+        aria-pressed="false">Code</button>
+    </div>
+    <button type="button" class="viewer-button" id="viewer-open">在瀏覽器開啟</button>
+    <button type="button" class="viewer-button" id="viewer-download">下載</button>
+    <button type="button" class="viewer-button" id="viewer-copy" hidden>複製</button>
+    <button type="button" class="viewer-button viewer-close" id="viewer-close"
+      aria-label="關閉">&#x2715;</button>
+  </div>
+  <div class="viewer-body" id="viewer-body"></div>
+</aside>
 <script>
 "use strict";
 const TOKEN = new URLSearchParams(location.search).get("token") || "";
@@ -2064,15 +2136,101 @@ let pendingPublicBackend = "";
 let activeConversationPublic = false;
 let activeConversationMessages = 0;
 
-function turn(asked, replyQuestion, files) {
-  const block = turnBlock(asked, replyQuestion, files);
+function turn(asked, replyQuestion, files, session) {
+  const block = turnBlock(asked, replyQuestion, files, session);
   log.append(block);
   log.scrollTop = log.scrollHeight;
   return block.querySelector(".said");
 }
 
+// -- Files in the chat ----------------------------------------------------
+// Owner 2026-10-20: a file on an answer (or one the person attached) is a
+// chip that opens the viewer panel with Preview / Code, as in Codex and
+// Claude Code. Files come only through the token-checked, path-confined
+// /api/conversations/file route; an HTML file is rendered only in a frame
+// with sandbox="allow-scripts" (no allow-same-origin), loaded from a
+// short-lived /view/file?nonce= address served with a strict CSP, so the
+// page token never reaches the frame (docs/DECISIONS.md 2026-10-20).
+
+const CODE_MAX_LINES = 5000;
+const CODE_MAX_CHARS = 1000000;
+const TEXT_KINDS = new Set(["json", "csv", "tsv", "txt", "log", "py", "ps1", "psm1", "yaml",
+  "yml", "toml", "ini", "cfg", "xml", "sql", "sh", "bat", "cmd", "js", "ts", "css"]);
+
+function fileExtension(file) {
+  const name = String(file.filename || file.path || "");
+  const dot = name.lastIndexOf(".");
+  return dot < 0 ? "" : name.slice(dot + 1).toLowerCase();
+}
+
+function fileKind(file) {
+  const ext = fileExtension(file);
+  if (file.kind === "image" || ["png", "jpg", "jpeg", "gif", "webp", "bmp"].includes(ext)) {
+    return "image";
+  }
+  if (ext === "html" || ext === "htm") return "html";
+  if (ext === "md" || ext === "markdown") return "md";
+  if (ext === "csv") return "csv";
+  if (TEXT_KINDS.has(ext)) return "text";
+  return "other";
+}
+
+function fileQuery(session, file) {
+  return "session_id=" + encodeURIComponent(session)
+    + "&path=" + encodeURIComponent(file.path || "");
+}
+
+function fetchFile(session, file) {
+  return fetch("/api/conversations/file?" + fileQuery(session, file),
+    {headers: {"Authorization": "Bearer " + TOKEN}})
+    .then(reply => reply.ok ? reply.blob() : Promise.reject(new Error(String(reply.status))));
+}
+
+async function htmlViewUrl(session, file) {
+  const reply = await fetch("/api/conversations/view-link?" + fileQuery(session, file),
+    {headers: {"Authorization": "Bearer " + TOKEN}});
+  const data = await reply.json();
+  if (!reply.ok || !data.ok) throw new Error(data.code || String(reply.status));
+  return data.url;
+}
+
+function sandboxFrame(url, title) {
+  const frame = document.createElement("iframe");
+  // Scripts inside the file only; no allow-same-origin, so the frame has an
+  // opaque origin and cannot read this page, its token, cookies or APIs.
+  frame.setAttribute("sandbox", "allow-scripts");
+  frame.setAttribute("referrerpolicy", "no-referrer");
+  frame.title = title || "HTML";
+  frame.src = url;
+  return frame;
+}
+
+function fileIcon(kind) {
+  return {image: "\ud83d\uddbc", html: "\ud83c\udf10", md: "\ud83d\udcdd", csv: "\ud83d\udcca",
+    text: "\ud83d\udcc4"}[kind] || "\ud83d\udcce";
+}
+
+function fileChip(session, file) {
+  const chip = document.createElement("button");
+  chip.type = "button"; chip.className = "file-chip";
+  chip.dataset.path = file.path || "";
+  chip.setAttribute("aria-label", "開啟檔案 " + (file.filename || ""));
+  const name = document.createElement("span");
+  name.append(text(file.filename || ""));
+  chip.append(text(fileIcon(fileKind(file))), name);
+  chip.addEventListener("click", () => openFileViewer(session, file, chip));
+  return chip;
+}
+
+function fileChips(session, files) {
+  const row = document.createElement("div");
+  row.className = "file-chips";
+  for (const file of files) row.append(fileChip(session, file));
+  return row;
+}
+
 // A picture a tool drew for an answer (an org chart, docs/phases/BUSINESS_CARDS.md):
-// fetched with the page's token, shown inline, opened full size on a click.
+// fetched with the page's token, shown inline, opened in the viewer on a click.
 function answerImage(session, file) {
   const figure = document.createElement("figure");
   figure.className = "answer-image";
@@ -2081,18 +2239,264 @@ function answerImage(session, file) {
   const caption = document.createElement("figcaption");
   caption.append(text(file.filename || ""));
   figure.append(image, caption);
-  const query = "session_id=" + encodeURIComponent(session)
-    + "&path=" + encodeURIComponent(file.path || "");
-  fetch("/api/conversations/file?" + query, {headers: {"Authorization": "Bearer " + TOKEN}})
-    .then(reply => reply.ok ? reply.blob() : Promise.reject(new Error(String(reply.status))))
+  fetchFile(session, file)
     .then(blob => {
-      const url = URL.createObjectURL(blob);
-      image.src = url;
-      image.addEventListener("click", () => window.open(url, "_blank", "noopener"));
+      image.src = URL.createObjectURL(blob);
+      image.addEventListener("click", () => openFileViewer(session, file, image));
     })
     .catch(() => { caption.replaceChildren(text((file.filename || "") + " (not available)")); });
   return figure;
 }
+
+// An HTML file on an answer (the interactive org chart): inline, sandboxed,
+// at a reasonable height, resizable, with Expand / Open in panel / browser.
+function answerHtml(session, file) {
+  const box = document.createElement("figure");
+  box.className = "answer-html";
+  box.dataset.path = file.path || "";
+  const wrap = document.createElement("div");
+  wrap.className = "frame-wrap";
+  const bar = document.createElement("figcaption");
+  bar.className = "frame-bar";
+  const name = document.createElement("span");
+  name.className = "name"; name.append(text(file.filename || ""));
+  const expand = viewerButton("放大", () => {
+    const tall = box.classList.toggle("tall");
+    expand.textContent = tall ? "縮小" : "放大";
+    expand.setAttribute("aria-pressed", String(tall));
+  });
+  expand.setAttribute("aria-pressed", "false");
+  const panel = viewerButton("在面板開啟", () => openFileViewer(session, file, panel));
+  const browser = viewerButton("在瀏覽器開啟", () => openInBrowser(session, file));
+  bar.append(name, expand, panel, browser);
+  box.append(wrap, bar);
+  htmlViewUrl(session, file)
+    .then(url => wrap.append(sandboxFrame(url, file.filename)))
+    .catch(() => { name.replaceChildren(text((file.filename || "") + " (not available)")); });
+  return box;
+}
+
+function viewerButton(label, action) {
+  const button = document.createElement("button");
+  button.type = "button"; button.className = "viewer-button";
+  button.append(text(label));
+  button.addEventListener("click", action);
+  return button;
+}
+
+async function openInBrowser(session, file) {
+  // A blank tab first (a tab opened after an await is blocked), cut off from
+  // this page, then pointed at the file.
+  const tab = window.open("", "_blank");
+  if (tab) tab.opener = null;
+  try {
+    const url = fileKind(file) === "html"
+      ? await htmlViewUrl(session, file)
+      : URL.createObjectURL(await fetchFile(session, file));
+    if (tab) tab.location.replace(url); else window.open(url, "_blank", "noopener");
+  } catch (error) {
+    if (tab) tab.close();
+  }
+}
+
+async function downloadFile(session, file) {
+  try {
+    const blob = await fetchFile(session, file);
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = file.filename || "file";
+    document.body.append(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(link.href), 30000);
+  } catch (error) { /* the chip stays; the panel says when a file is gone */ }
+}
+
+const viewer = {session: "", file: null, mode: "preview", text: null, returnTo: null};
+
+function codeView(source) {
+  let shown = String(source), notice = "";
+  if (shown.length > CODE_MAX_CHARS) shown = shown.slice(0, CODE_MAX_CHARS);
+  let lines = shown.replace(/\r\n?/g, "\n").split("\n");
+  if (lines.length > CODE_MAX_LINES || shown.length < String(source).length) {
+    lines = lines.slice(0, CODE_MAX_LINES);
+    notice = "檔案較大，只顯示前 " + lines.length + " 行";
+  }
+  const out = document.createDocumentFragment();
+  if (notice) {
+    const note = document.createElement("p");
+    note.className = "viewer-note"; note.append(text(notice)); out.append(note);
+  }
+  const scroll = document.createElement("div");
+  scroll.className = "code-scroll";
+  const grid = document.createElement("div");
+  grid.className = "code-view";
+  const gutter = document.createElement("pre");
+  gutter.className = "gutter"; gutter.setAttribute("aria-hidden", "true");
+  gutter.append(text(lines.map((_, index) => String(index + 1)).join("\n")));
+  const code = document.createElement("pre");
+  code.className = "code"; code.tabIndex = 0;
+  code.setAttribute("aria-label", "檔案內容");
+  code.append(text(lines.join("\n")));
+  grid.append(gutter, code); scroll.append(grid); out.append(scroll);
+  return out;
+}
+
+function csvRows(source, limit) {
+  const rows = []; let row = [], cell = "", quoted = false;
+  for (let index = 0; index < source.length && rows.length < limit; index += 1) {
+    const ch = source[index];
+    if (quoted) {
+      if (ch === '"' && source[index + 1] === '"') { cell += '"'; index += 1; }
+      else if (ch === '"') quoted = false;
+      else cell += ch;
+    } else if (ch === '"') quoted = true;
+    else if (ch === ",") { row.push(cell); cell = ""; }
+    else if (ch === "\n" || ch === "\r") {
+      if (ch === "\r" && source[index + 1] === "\n") index += 1;
+      row.push(cell); rows.push(row); row = []; cell = "";
+    } else cell += ch;
+  }
+  if ((cell || row.length) && rows.length < limit) { row.push(cell); rows.push(row); }
+  return rows;
+}
+
+function csvTable(source) {
+  const rows = csvRows(String(source), 501);
+  const wrap = document.createElement("div");
+  wrap.className = "table-scroll"; wrap.tabIndex = 0;
+  wrap.setAttribute("role", "region"); wrap.setAttribute("aria-label", "CSV");
+  const table = document.createElement("table");
+  table.className = "csv-table";
+  rows.forEach((cells, index) => {
+    const tr = document.createElement("tr");
+    for (const value of cells) {
+      const cell = document.createElement(index === 0 ? "th" : "td");
+      cell.append(text(value)); tr.append(cell);
+    }
+    table.append(tr);
+  });
+  wrap.append(table);
+  if (rows.length > 500) {
+    const note = document.createElement("p");
+    note.className = "viewer-note"; note.append(text("檔案較大，只顯示前 500 列"));
+    wrap.append(note);
+  }
+  return wrap;
+}
+
+function viewerModes(kind) {
+  if (kind === "html" || kind === "md" || kind === "csv") return ["preview", "code"];
+  if (kind === "image") return ["preview"];
+  if (kind === "text") return ["code"];
+  return [];
+}
+
+async function viewerText() {
+  if (viewer.text === null) {
+    viewer.text = await (await fetchFile(viewer.session, viewer.file)).text();
+  }
+  return viewer.text;
+}
+
+async function showViewer() {
+  const body = el("viewer-body");
+  const file = viewer.file, kind = fileKind(file), modes = viewerModes(kind);
+  el("viewer-modes").hidden = modes.length < 2;
+  el("viewer-preview-mode").setAttribute("aria-pressed", String(viewer.mode === "preview"));
+  el("viewer-code-mode").setAttribute("aria-pressed", String(viewer.mode === "code"));
+  el("viewer-copy").hidden = viewer.mode !== "code";
+  body.replaceChildren();
+  const pane = document.createElement("div");
+  pane.className = "viewer-preview";
+  body.append(pane);
+  const wanted = file;
+  try {
+    if (!modes.length) {
+      const note = document.createElement("p");
+      note.className = "viewer-note";
+      note.append(text("這種檔案無法在這裡預覽；請用「下載」或「在瀏覽器開啟」。"));
+      pane.append(note);
+    } else if (viewer.mode === "code") {
+      const source = await viewerText();
+      if (viewer.file === wanted) pane.append(codeView(source));
+    } else if (kind === "html") {
+      const url = await htmlViewUrl(viewer.session, file);
+      if (viewer.file === wanted) pane.append(sandboxFrame(url, file.filename));
+    } else if (kind === "image") {
+      const image = document.createElement("img");
+      image.alt = file.filename || "";
+      image.src = URL.createObjectURL(await fetchFile(viewer.session, file));
+      pane.classList.add("doc"); pane.append(image);
+    } else if (kind === "md") {
+      const source = await viewerText();
+      pane.classList.add("doc"); pane.append(renderMarkdown(source));
+    } else if (kind === "csv") {
+      pane.classList.add("doc"); pane.append(csvTable(await viewerText()));
+    }
+  } catch (error) {
+    const note = document.createElement("p");
+    note.className = "viewer-note";
+    note.append(text((file.filename || "") + "：無法讀取（" + error.message + "）"));
+    pane.replaceChildren(note);
+  }
+}
+
+function openFileViewer(session, file, returnTo) {
+  viewer.session = session; viewer.file = file; viewer.text = null;
+  viewer.returnTo = returnTo || document.activeElement;
+  viewer.mode = viewerModes(fileKind(file))[0] || "preview";
+  el("viewer-name").textContent = file.filename || "";
+  el("file-viewer").hidden = false;
+  showViewer();
+  el("viewer-close").focus();
+}
+
+function closeFileViewer() {
+  const panel = el("file-viewer");
+  if (panel.hidden) return false;
+  panel.hidden = true;
+  el("viewer-body").replaceChildren();
+  viewer.file = null; viewer.text = null;
+  if (viewer.returnTo && document.contains(viewer.returnTo)) viewer.returnTo.focus();
+  return true;
+}
+
+function setViewerMode(mode) {
+  if (!viewer.file || !viewerModes(fileKind(viewer.file)).includes(mode)) return;
+  viewer.mode = mode;
+  showViewer();
+}
+
+el("viewer-close").addEventListener("click", closeFileViewer);
+el("viewer-preview-mode").addEventListener("click", () => setViewerMode("preview"));
+el("viewer-code-mode").addEventListener("click", () => setViewerMode("code"));
+el("viewer-open").addEventListener("click",
+  () => { if (viewer.file) openInBrowser(viewer.session, viewer.file); });
+el("viewer-download").addEventListener("click",
+  () => { if (viewer.file) downloadFile(viewer.session, viewer.file); });
+el("viewer-copy").addEventListener("click", async () => {
+  const button = el("viewer-copy");
+  try {
+    await navigator.clipboard.writeText(await viewerText());
+    button.textContent = "已複製";
+  } catch (error) { button.textContent = "無法複製"; }
+  setTimeout(() => { button.textContent = "複製"; }, 1500);
+});
+el("file-viewer").addEventListener("keydown", (event) => {
+  if (event.key === "Escape") { event.stopPropagation(); closeFileViewer(); return; }
+  if (event.key !== "Tab") return;
+  // Keep focus inside the panel while it is open.
+  const items = Array.from(el("file-viewer").querySelectorAll(
+    "button:not([hidden]), [tabindex='0'], iframe")).filter(node => node.offsetParent !== null);
+  if (!items.length) return;
+  const first = items[0], last = items[items.length - 1];
+  if (event.shiftKey && document.activeElement === first) { last.focus(); event.preventDefault(); }
+  else if (!event.shiftKey && document.activeElement === last) {
+    first.focus(); event.preventDefault();
+  }
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeFileViewer();
+});
 
 function renderConversation(record) {
   log.replaceChildren();
@@ -2110,14 +2514,18 @@ function renderConversation(record) {
     const asked = record.messages[index];
     const replied = record.messages[index + 1];
     const said = turn(asked.text, asked.reply_to ? questions.get(asked.reply_to) || "" : null,
-      asked.attachments || []);
+      asked.attachments || [], record.session_id);
     said.parentNode.dataset.askedId = asked.message_id;
     if (replied) {
       said.className = "said" + (replied.status === "failed" ? " bad" : "");
       renderAnswer(said, replied.text);
-      for (const file of replied.attachments || []) {
-        if (file.kind === "image") said.parentNode.append(answerImage(record.session_id, file));
+      const answerFiles = replied.attachments || [];
+      for (const file of answerFiles) {
+        const kind = fileKind(file);
+        if (kind === "image") said.parentNode.append(answerImage(record.session_id, file));
+        else if (kind === "html") said.parentNode.append(answerHtml(record.session_id, file));
       }
+      if (answerFiles.length) said.parentNode.append(fileChips(record.session_id, answerFiles));
       attachTurnControls(said.parentNode, asked.text, replied);
       const installForm = replied.workflow_form
         && replied.workflow_form.origin === "install";
@@ -2459,7 +2867,7 @@ const RATINGS = [["up", "\u{1F44D}", "\u6709\u5e6b\u52a9"],
   ["down", "\u{1F44E}", "\u6c92\u5e6b\u52a9"], ["neutral", "\u2796", "\u666e\u901a"]];
 let replyTarget = null;
 
-function turnBlock(asked, replyQuestion, files) {
+function turnBlock(asked, replyQuestion, files, session) {
   const block = document.createElement("div");
   block.className = "turn"; block.tabIndex = 0;
   block.setAttribute("role", "group");
@@ -2476,7 +2884,12 @@ function turnBlock(asked, replyQuestion, files) {
   const said = document.createElement("div");
   said.className = "said waiting"; said.append(text("working\u2026"));
   block.append(line);
-  if (files && files.length) {
+  if (files && files.length && session && files.every(file => file.path)) {
+    // Stored attachments open in the viewer like an answer's files.
+    const chips = fileChips(session, files);
+    chips.classList.add("asked-files");
+    block.append(chips);
+  } else if (files && files.length) {
     const attached = document.createElement("div");
     attached.className = "asked-files";
     attached.append(text("\ud83d\udcce " + files.map(file => file.filename).join("\u3001")));

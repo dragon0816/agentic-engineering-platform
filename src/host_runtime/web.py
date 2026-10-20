@@ -372,6 +372,69 @@ def with_tools(message: ConversationMessage) -> str:
     return f"{message.text}\n\n[工具紀錄]\n{message.tool_summary}"
 
 
+#: How long a sandboxed-viewer address for an HTML file lives.
+FILE_VIEW_TTL_S = 15 * 60
+HTML_SUFFIXES = frozenset({".html", ".htm"})
+#: The sandboxed viewer's policy: scripts and styles inside the file only, no
+#: network, no forms, no plugins, an opaque origin (the CSP `sandbox` also
+#: applies when the address is opened in its own tab), framed only by Agent Web.
+FILE_VIEW_CSP = (
+    "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; "
+    "img-src data:; font-src data:; form-action 'none'; base-uri 'none'; "
+    "frame-ancestors 'self'; sandbox allow-scripts"
+)
+_IMAGE_TYPES = {
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".gif": "image/gif",
+    ".webp": "image/webp",
+    ".bmp": "image/bmp",
+}
+_TEXT_SUFFIXES = frozenset(
+    {
+        ".md",
+        ".markdown",
+        ".txt",
+        ".log",
+        ".json",
+        ".csv",
+        ".tsv",
+        ".py",
+        ".ps1",
+        ".psm1",
+        ".yaml",
+        ".yml",
+        ".toml",
+        ".ini",
+        ".cfg",
+        ".xml",
+        ".sql",
+        ".sh",
+        ".bat",
+        ".cmd",
+        ".js",
+        ".ts",
+        ".css",
+        ".html",
+        ".htm",
+    }
+)
+
+
+def file_media_type(path: Path) -> str:
+    """What the token-checked file route says a file is: an image as
+    itself, text (HTML included) as UTF-8 plain text, anything else as bytes."""
+    suffix = path.suffix.lower()
+    if suffix in _IMAGE_TYPES:
+        return _IMAGE_TYPES[suffix]
+    if suffix in (".md", ".markdown"):
+        return "text/markdown; charset=utf-8"
+    if suffix in _TEXT_SUFFIXES:
+        return "text/plain; charset=utf-8"
+    return "application/octet-stream"
+
+
 def _answer_files(answer: Mapping[str, Any]) -> list[dict[str, Any]]:
     """The files a turn's tools produced for its answer (an org chart)."""
     files = answer.get("files")
@@ -555,6 +618,10 @@ class AgentWeb:
         self._session_guard = threading.Lock()
         self._turn_locks: dict[str, threading.Lock] = {}
         self._record_locks: dict[str, threading.Lock] = {}
+        # Short-lived links for showing an HTML file in the sandboxed viewer:
+        # nonce -> (session, path, expiry). The page token is never in a frame URL.
+        self._file_views: dict[str, tuple[str, str, float]] = {}
+        self._file_views_lock = threading.Lock()
         # The opt-in resident schedule loop, when `aep-host web` started one.
         # It shares the lock above, so a scheduled run never overlaps a request.
         self.schedule_loop: Any = None
@@ -2468,33 +2535,73 @@ class AgentWeb:
         if progress is not None:
             progress.agent_tool(tool, status)
 
-    def conversation_file(self, session_id: str, path: str) -> tuple[bytes, str] | None:
-        """A file a tool produced for one of this conversation's answers (an
-        org chart), read only when that answer lists it and it lies in the
-        workspace; None for anything else."""
+    def _conversation_file_path(self, session_id: str, path: str) -> Path | None:
+        """The file, when one of this conversation's messages lists it (a
+        file a tool produced for an answer, or one the person attached) and
+        it lies in the workspace; None for anything else."""
         record = self.runtime.state.conversation(session_id, self.runtime.actor)
         if record is None or not path:
             return None
-        listed = {
-            item.get("path")
-            for message in record.messages
-            if message.role == "assistant"
-            for item in message.attachments
-        }
+        listed = {item.get("path") for message in record.messages for item in message.attachments}
         if path not in listed:
             return None
         try:
             target = Path(path).resolve()
             if not target.is_relative_to(self.runtime.layout.workspace_root.resolve()):
                 return None
-            data = target.read_bytes()
+            if not target.is_file():
+                return None
         except (OSError, ValueError):
             return None
-        kind = {
-            ".png": "image/png",
-            ".md": "text/markdown; charset=utf-8",
-        }.get(target.suffix.lower(), "application/octet-stream")
-        return data, kind
+        return target
+
+    def conversation_file(self, session_id: str, path: str) -> tuple[bytes, str] | None:
+        """A file listed on this conversation (an org chart, an attachment),
+        read only through `_conversation_file_path`. Text, HTML included, is
+        served as plain text: the page shows it with `textContent`, and an
+        HTML file is rendered only by the sandboxed viewer route."""
+        target = self._conversation_file_path(session_id, path)
+        if target is None:
+            return None
+        try:
+            data = target.read_bytes()
+        except OSError:
+            return None
+        return data, file_media_type(target)
+
+    def conversation_view_link(self, session_id: str, path: str) -> dict[str, Any]:
+        """A short-lived address showing one listed HTML file in the
+        sandboxed viewer (`/view/file?nonce=`), so a frame never carries the
+        page token (docs/DECISIONS.md 2026-10-20 "In-chat HTML ...")."""
+        target = self._conversation_file_path(session_id, path)
+        if target is None or target.suffix.lower() not in HTML_SUFFIXES:
+            return {"ok": False, "code": "file_unknown"}
+        nonce = secrets.token_urlsafe(24)
+        now = time.monotonic()
+        with self._file_views_lock:
+            for key in [k for k, v in self._file_views.items() if v[2] <= now]:
+                del self._file_views[key]
+            self._file_views[nonce] = (session_id, path, now + FILE_VIEW_TTL_S)
+        return {
+            "ok": True,
+            "url": "/view/file?" + urlencode({"nonce": nonce}),
+            "expires_in": FILE_VIEW_TTL_S,
+        }
+
+    def viewed_file(self, nonce: str) -> bytes | None:
+        """The HTML a live view nonce names, still listed on its conversation."""
+        with self._file_views_lock:
+            found = self._file_views.get(nonce) if nonce else None
+            if found is None or found[2] <= time.monotonic():
+                self._file_views.pop(nonce, None)
+                return None
+        target = self._conversation_file_path(found[0], found[1])
+        if target is None or target.suffix.lower() not in HTML_SUFFIXES:
+            return None
+        try:
+            return target.read_bytes()
+        except OSError:
+            return None
 
     def conversation_progress(self, session_id: str) -> dict[str, Any]:
         """The session's running turn as names, phases, counts and status only
@@ -5477,6 +5584,21 @@ class _Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _send_sandboxed(self, body: bytes) -> None:
+        """An HTML file for the in-chat viewer: framed only by this page, in
+        an opaque-origin sandbox with no network (`FILE_VIEW_CSP`)."""
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Content-Security-Policy", FILE_VIEW_CSP)
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("X-Frame-Options", "SAMEORIGIN")
+        self.send_header("Referrer-Policy", "no-referrer")
+        self.send_header("Cross-Origin-Resource-Policy", "same-origin")
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(body)
+
     def _json(self, status: int, payload: Mapping[str, Any]) -> None:
         self._send(
             status,
@@ -5557,6 +5679,18 @@ class _Handler(BaseHTTPRequestHandler):
         # (owner 2026-10-08); see host_runtime/telemetry_api.py.
         if telemetry_api.handle(self, parsed.path, parsed.query):
             return
+        if parsed.path == "/view/file":
+            # The sandboxed HTML viewer: let in by a short-lived nonce the
+            # page obtained with its token, never by the token itself.
+            nonce = parse_qs(parsed.query).get("nonce", [""])[0]
+            body = self.server.web.viewed_file(nonce)
+            if body is None:
+                self._send(
+                    404, b"This view has expired; open it again from the chat.", "text/plain"
+                )
+            else:
+                self._send_sandboxed(body)
+            return
         if not self._authorized():
             self._json(401, {"error": "this request carried no usable token"})
             return
@@ -5603,6 +5737,12 @@ class _Handler(BaseHTTPRequestHandler):
         elif parsed.path == "/api/conversations/progress":
             session = parse_qs(parsed.query).get("session_id", [""])[0]
             self._json(200, web.conversation_progress(session))
+        elif parsed.path == "/api/conversations/view-link":
+            query = parse_qs(parsed.query)
+            link = web.conversation_view_link(
+                query.get("session_id", [""])[0], query.get("path", [""])[0]
+            )
+            self._json(200 if link.get("ok") else 404, link)
         elif parsed.path == "/api/conversations/file":
             query = parse_qs(parsed.query)
             served = web.conversation_file(
