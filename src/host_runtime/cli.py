@@ -508,7 +508,7 @@ def _connect_user(args: argparse.Namespace) -> int:
 def _install_bundled(args: argparse.Namespace) -> int:
     """`assets install-bundled`: what install.ps1 and update.ps1 run."""
     from host_runtime import agent_setup, skill_packs
-    from host_runtime.assets import manifests
+    from host_runtime.assets import manifests, shipped_off
 
     try:
         layout = HostLayout.under(_load(args.config).workspace_root)
@@ -522,6 +522,7 @@ def _install_bundled(args: argparse.Namespace) -> int:
             shipped=()
             if args.no_shipped
             else manifests(include_personal=args.include_personal or include_personal_requested()),
+            shipped_off=() if args.no_shipped else shipped_off(),
             extra_off=args.off,
             extra_agent_skills=args.agent_skills,
             extra_pack=args.agent_pack,

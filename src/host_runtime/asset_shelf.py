@@ -82,11 +82,11 @@ def _file(identity: AssetIdentity) -> str:
 @lru_cache(maxsize=1)
 def shipped_keys() -> frozenset[tuple[str, str, str, str]]:
     """(kind, namespace, name, version) of every manifest AEP ships."""
-    from host_runtime.assets import shipped
+    from host_runtime.assets import shipped, shipped_off
 
     return frozenset(
         ("skill" if isinstance(item, SkillManifest) else "workflow", *item.metadata.identity.key)
-        for item in shipped()
+        for item in (*shipped(), *shipped_off())
     )
 
 

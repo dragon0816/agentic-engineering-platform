@@ -53,3 +53,38 @@ def readable(outcome: LocalAgentOutcome) -> str:
     if outcome.unrecorded is not None:
         lines.append(f"the run record could not be written: {outcome.unrecorded}")
     return "\n".join(lines) or "nothing came back"
+
+
+#: Keys a Workflow's last step may carry for the channels (loan replies,
+#: owner 2026-10-20): a Workflow the person may start next, and the ids of
+#: action cards the run made. Both are offers; nothing runs or sends by them.
+FOLLOW_UP_KEY = "follow_up"
+CARDS_KEY = "action_cards"
+
+
+def run_follow_up(outcome: LocalAgentOutcome) -> dict[str, object] | None:
+    """The `follow_up` of a succeeded Workflow run's last step, if any."""
+    data = _last_step_data(outcome)
+    offered = data.get(FOLLOW_UP_KEY) if data is not None else None
+    if isinstance(offered, dict) and isinstance(offered.get("workflow"), dict):
+        return offered
+    return None
+
+
+def run_cards(outcome: LocalAgentOutcome) -> list[str]:
+    """The action card ids a Workflow run's last step made."""
+    data = _last_step_data(outcome)
+    listed = data.get(CARDS_KEY) if data is not None else None
+    if not isinstance(listed, list):
+        return []
+    return [item for item in listed if isinstance(item, str)]
+
+
+def _last_step_data(outcome: LocalAgentOutcome) -> dict[str, object] | None:
+    workflow = outcome.workflow
+    if outcome.refusal is not None or workflow is None or workflow.run.status != "succeeded":
+        return None
+    if not workflow.step_results:
+        return None
+    data = workflow.step_results[-1].data
+    return dict(data) if isinstance(data, dict) else None

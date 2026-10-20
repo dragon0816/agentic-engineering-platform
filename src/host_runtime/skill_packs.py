@@ -347,6 +347,7 @@ def install_bundle(
     bundle: Path | None,
     *,
     shipped: Iterable[SkillManifest | WorkflowManifest] = (),
+    shipped_off: Iterable[SkillManifest | WorkflowManifest] = (),
     extra_off: Iterable[Path] = (),
     extra_agent_skills: Iterable[Path] = (),
     extra_pack: str = BUNDLE_PACK,
@@ -355,7 +356,9 @@ def install_bundle(
     """What `install.ps1` runs: the shipped manifests and the bundle's
     in-use ones switched on, its packs switched off."""
     on: list[SkillManifest | WorkflowManifest] = list(shipped)
-    off: list[SkillManifest | WorkflowManifest] = []
+    # Shipped switched off (the loan reply Workflows): in `disabled/` once,
+    # never switched on by an update.
+    off: list[SkillManifest | WorkflowManifest] = list(shipped_off)
     stores: list[tuple[Path, str]] = []
     if bundle is not None:
         on.extend(manifests_in(bundle / BUNDLE_IN_USE))

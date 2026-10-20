@@ -8,6 +8,9 @@ personal, not bundled"):
 
 - `shipped()`: what every installation gets. The Windows bundle installs
   these (`aep-host assets install-bundled`) and `export-assets` writes them;
+- `shipped_off()`: what every installation gets **switched off** (the loan
+  reply Workflows, owner 2026-10-20): installed into `disabled/` once, never
+  switched on by an update; a person switches them on in Agent Web;
 - `personal()`: the owner's own Workflows (the SDE weekly report). They stay
   in the package so the owner's install and upgrade keep working, but they
   are written or installed only when asked for, with `--include-personal`
@@ -38,6 +41,7 @@ from capabilities.company_agent.manifest import (
     personal_proof_workflow,
     workflow_author_skill,
 )
+from capabilities.loan_reply.manifest import loan_skill, reply_workflow, scan_workflow
 from capabilities.ncc_plan.manifest import plan_skill as ncc_plan_skill
 from capabilities.ncc_plan.manifest import plan_workflow as ncc_plan_workflow
 from capabilities.release_package.manifest import commit_workflow as release_commit_workflow
@@ -88,6 +92,13 @@ def shipped() -> tuple[SkillManifest | WorkflowManifest, ...]:
     )
 
 
+def shipped_off() -> tuple[SkillManifest | WorkflowManifest, ...]:
+    """Shipped switched off: business Workflows of one team (the loan desk's
+    replies, rs_workflow_system 06/06b). Their capabilities are installed only
+    once a person switches a Workflow on, and grants and settings stay separate."""
+    return (loan_skill(), scan_workflow(), reply_workflow())
+
+
 #: Set to 1 on the owner's own computer so install and upgrade bring his
 #: personal Workflows too.
 INCLUDE_PERSONAL_VARIABLE = "AEP_INCLUDE_PERSONAL_ASSETS"
@@ -112,10 +123,13 @@ def manifests(*, include_personal: bool = False) -> tuple[SkillManifest | Workfl
 def export_assets(directory: Path, *, include_personal: bool = False) -> tuple[Path, ...]:
     """Write the shipped manifests (and, when asked, the personal ones) as
     `skills/` and `workflows/` under `directory`, named as a sync would
-    name them."""
+    name them; the ones shipped switched off go into their `disabled/`."""
     written: list[Path] = []
-    for manifest in manifests(include_personal=include_personal):
+    off = shipped_off()
+    for manifest in (*manifests(include_personal=include_personal), *off):
         folder = "skills" if isinstance(manifest, SkillManifest) else "workflows"
+        if manifest in off:
+            folder += "/disabled"
         identity = manifest.metadata.identity
         path = (
             directory / folder / f"{identity.namespace}__{identity.name}__{identity.version}.json"

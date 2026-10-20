@@ -52,6 +52,7 @@ from common.execution import Failure, TraceIdentifiers
 from common.local_agent import LocalAgentRequest, LocalWorkflowRequest
 from common.workflow_run_form import form_offer, offer_in, person_prefill, run_intent
 from host_runtime.agent import LocalAgent, LocalAgentOutcome
+from host_runtime.answers import run_cards, run_follow_up
 from host_runtime.attachments import (
     KINDS,
     MAX_FILE_BYTES,
@@ -325,6 +326,8 @@ CREDENTIAL_REPLY = "That message was not forwarded: it looks like it contains a 
 #: Where a card Telegram may not decide is applied (owner 2026-10-15). No
 #: address: Agent Web's page key must never travel in a chat.
 CARD_WHERE = "Agent Web on this PC, Tasks > Pending changes"
+#: A run summary (a Workflow's `preview`) in a Telegram reply.
+MAX_RUN_SUMMARY_CHARS = 3_000
 #: The data of an approval button (G4): `approve:<id>` or `reject:<id>`.
 APPROVAL_TAP = re.compile(r"^(approve|reject):(ap-[A-Za-z0-9-]{1,64})$")
 
@@ -1569,7 +1572,44 @@ class TelegramIngress:
                 f"{run.completed_steps} step(s)"
                 + (f" ({run.failure.code})" if run.failure is not None else "")
             )
-        return TelegramDelivery(**base, disposition="routed", reply=scrub(reply), outcome=outcome)
+        texts, buttons = self._run_extras(outcome)
+        return TelegramDelivery(
+            **base,
+            disposition="routed",
+            reply=scrub("\n\n".join([reply, *texts])),
+            buttons=buttons,
+            outcome=outcome,
+        )
+
+    def _run_extras(
+        self, outcome: LocalAgentOutcome
+    ) -> tuple[list[str], tuple[tuple[tuple[str, str], ...], ...]]:
+        """What a run's last step offers the person (loan replies, owner
+        2026-10-20): its summary, its action cards (drawn; answered where the
+        card says) and a button that opens the next Workflow's questions. A
+        button only starts a question flow; nothing runs or sends by itself."""
+        texts: list[str] = []
+        rows: list[tuple[tuple[str, str], ...]] = []
+        workflow = outcome.workflow
+        if workflow is not None and workflow.step_results:
+            data = workflow.step_results[-1].data
+            shown = data.get("preview") if isinstance(data, dict) else None
+            if isinstance(shown, str) and shown.strip():
+                texts.append(shown.strip()[:MAX_RUN_SUMMARY_CHARS])
+        lookup = getattr(self.cards, "card", None)
+        for card_id in run_cards(outcome):
+            found = lookup(card_id) if lookup is not None else None
+            if isinstance(found, dict):
+                drawn, card_buttons = telegram_card(ActionCard.model_validate(found), CARD_WHERE)
+                texts.append(drawn)
+                rows.extend(card_buttons)
+        offered = run_follow_up(outcome)
+        if offered is not None:
+            target = offered["workflow"]
+            assert isinstance(target, dict)
+            label = str(offered.get("label") or "Next")[:60]
+            rows.append(((label, f"/run {target.get('namespace')}/{target.get('name')}"[:64]),))
+        return texts, tuple(rows)
 
     async def _flow_upload(
         self,

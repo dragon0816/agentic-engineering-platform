@@ -154,6 +154,31 @@ from capabilities.knowledge_query.handlers import (
     KnowledgeQueryHandler,
     MarketMatrixHandler,
 )
+from capabilities.loan_reply import handlers as loan_handlers
+from capabilities.loan_reply import manifest as loan_manifest
+from capabilities.loan_reply.bridge_api import Bridge as LoanBridgeApi
+from capabilities.loan_reply.contracts import (
+    DraftStepInput as LoanDraftStepInput,
+)
+from capabilities.loan_reply.contracts import (
+    EnqueueStepInput as LoanEnqueueStepInput,
+)
+from capabilities.loan_reply.contracts import (
+    LoanDrafts,
+    LoanEnqueued,
+    LoanLookUps,
+    LoanReplyResult,
+    LoanScan,
+)
+from capabilities.loan_reply.contracts import (
+    LookUpStepInput as LoanLookUpStepInput,
+)
+from capabilities.loan_reply.contracts import (
+    OfferStepInput as LoanOfferStepInput,
+)
+from capabilities.loan_reply.contracts import (
+    ScanStepInput as LoanScanStepInput,
+)
 from capabilities.mail_draft.handlers import DRAFT_SPEC as MAIL_DRAFT_SPEC
 from capabilities.mail_draft.handlers import MailDraftHandler, MailDraftRequest, MailDraftResult
 from capabilities.mail_read.handlers import READ_SPEC as MAIL_READ_SPEC
@@ -611,6 +636,84 @@ def _decided_grants(
     return tuple(grants)
 
 
+def _loan_bridge_factory(
+    layout: HostLayout, drafter: Callable[[], DraftWriter] | None
+) -> Callable[[], LoanBridgeApi]:
+    """One `LoanBridge` per host, made on first use: this computer's Outlook
+    and its own Edge profiles for the loan portal and C4C."""
+    made: list[LoanBridgeApi] = []
+
+    def factory() -> LoanBridgeApi:
+        if not made:
+            from capabilities.loan_reply.bridge import LoanBridge
+            from integrations.outlook_mail import OutlookComMailbox
+
+            made.append(
+                LoanBridge(
+                    layout.workspace_root,
+                    mailbox=OutlookComMailbox,
+                    drafts=drafter if drafter is not None else OutlookComDraft,
+                    replies=OutlookComDraft,
+                )
+            )
+        return made[0]
+
+    return factory
+
+
+def _register_loan_reply(
+    installed: InstalledCapabilities,
+    layout: HostLayout,
+    uses: set[tuple[str, str, str]],
+    loan_bridge: Callable[[], LoanBridgeApi] | None,
+    drafter: Callable[[], DraftWriter] | None,
+) -> None:
+    """The loan capabilities an installed Workflow uses. The send itself
+    (`loan_manifest.SEND_SPEC`) is never registered: only a person's press on
+    a send card sends (`host_runtime.loan_reply_cards`)."""
+    from host_runtime.loan_reply_cards import LoanReplyCards
+
+    bridge = loan_bridge if loan_bridge is not None else _loan_bridge_factory(layout, drafter)
+    workspace = layout.workspace_root
+    cards = LoanReplyCards(workspace)
+    for spec, handler, step_input, output in (
+        (
+            loan_manifest.SCAN_SPEC,
+            loan_handlers.ScanMailHandler(bridge, workspace),
+            LoanScanStepInput,
+            LoanScan,
+        ),
+        (
+            loan_manifest.ENQUEUE_SPEC,
+            loan_handlers.EnqueueHandler(workspace),
+            LoanEnqueueStepInput,
+            LoanEnqueued,
+        ),
+        (
+            loan_manifest.LOOK_UP_SPEC,
+            loan_handlers.LookUpHandler(bridge, workspace),
+            LoanLookUpStepInput,
+            LoanLookUps,
+        ),
+        (
+            loan_manifest.DRAFT_SPEC,
+            loan_handlers.DraftRepliesHandler(bridge, workspace),
+            LoanDraftStepInput,
+            LoanDrafts,
+        ),
+        (
+            loan_manifest.OFFER_SPEC,
+            loan_handlers.OfferSendHandler(cards.offer),
+            LoanOfferStepInput,
+            LoanReplyResult,
+        ),
+    ):
+        if spec.identity.key in uses:
+            installed.register(
+                spec, handler, step_input, output, ExecutionDependencies(central_required=False)
+            )
+
+
 def _target_name(step: AssetIdentity | WorkflowStep) -> tuple[str, str, str]:
     return (step.capability if isinstance(step, WorkflowStep) else step).key
 
@@ -634,6 +737,7 @@ def build_integrations(
     writer: Callable[[], WorkbookWriter] | None = None,
     chipset_writer: Callable[[], ChipsetWorkbookWriter] | None = None,
     drafter: Callable[[], DraftWriter] | None = None,
+    loan_bridge: Callable[[], LoanBridgeApi] | None = None,
 ) -> None:
     """The capabilities the migrated workflows need, from what this host was
     given. Jira's token is resolved through the host's credential mapping at
@@ -789,6 +893,9 @@ def build_integrations(
             UpsertResult,
             ExecutionDependencies(central_required=False),
         )
+    # Workflows 06 / 06b, the loan replies (owner 2026-10-20): installed when
+    # an installed Workflow uses them; they ship switched off.
+    _register_loan_reply(installed, layout, uses, loan_bridge, drafter)
     # The Outlook draft building block: installed when a Workflow uses it.
     if MAIL_DRAFT_SPEC.identity.key in uses:
         installed.register(
@@ -1016,6 +1123,7 @@ def build_gateway(
     model_transport: Transport | None = None,
     membership: BridgeMembership | None = None,
     dut_adapter: DutAdapter | None = None,
+    loan_bridge: Callable[[], LoanBridgeApi] | None = None,
 ) -> Gateway:
     """The platform's own wiring, with what this host was given.
 
@@ -1098,6 +1206,7 @@ def build_gateway(
         writer=writer,
         chipset_writer=chipset_writer,
         drafter=drafter,
+        loan_bridge=loan_bridge,
     )
     if config.dut is not None:
         active_membership = (
@@ -2018,6 +2127,7 @@ def build_runtime(
     drafter: Callable[[], DraftWriter] | None = None,
     model_transport: Transport | None = None,
     dut_adapter: DutAdapter | None = None,
+    loan_bridge: Callable[[], LoanBridgeApi] | None = None,
 ) -> HostRuntime:
     """Assemble this company host, or say which file stopped it."""
     checked = CompanyHostConfiguration.model_validate(config)
@@ -2035,6 +2145,7 @@ def build_runtime(
         model_transport=model_transport,
         membership=membership,
         dut_adapter=dut_adapter,
+        loan_bridge=loan_bridge,
     )
     # Conversational authoring (G4): the Agent drafts, previews and asks to
     # run or install a Workflow; the owner approves outside the model.

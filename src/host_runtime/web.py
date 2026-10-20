@@ -104,7 +104,7 @@ from extensions.runtime import ExtensionLifecycleStore
 from host_runtime import agent_code, asset_shelf, gateway_link, telemetry_api
 from host_runtime.agent_mail import AgentMail
 from host_runtime.agent_mode import AgentMode
-from host_runtime.answers import readable
+from host_runtime.answers import readable, run_cards, run_follow_up
 from host_runtime.assistant_tools import AssistantTools, assistant_token
 from host_runtime.assistant_tools import handle as assistant_handle
 from host_runtime.attachments import (
@@ -208,6 +208,7 @@ from host_runtime.laya import LayaError, SshTunnel, current_settings
 from host_runtime.laya import accelerator_for as laya_accelerator
 from host_runtime.laya import last_decision as laya_last_decision
 from host_runtime.laya import probe as laya_probe
+from host_runtime.loan_reply_cards import LoanReplyCards
 from host_runtime.persona import AgentPersonaStore, AgentPersonaUpdateRequest
 from host_runtime.platform_publish import (
     ASSET_REFERENCE,
@@ -693,6 +694,9 @@ class AgentWeb:
             self.agent_mode, reader=_outlook_mailbox, writer=_outlook_drafts, sender=_outlook_sender
         )
         self.agent_mode.mail = self.agent_mail
+        # Send cards of the loan reply Workflow (owner 2026-10-20): one press,
+        # one mail, in Agent Web only.
+        self.loan_cards = LoanReplyCards(runtime.layout.workspace_root, sender=_outlook_sender)
         # Live, content-free progress of each session's running turn (owner
         # 2026-10-19); an agent-mode backend's tool requests join it.
         self.turn_progress = TurnProgressBoard()
@@ -2198,6 +2202,7 @@ class AgentWeb:
             "cp-": self.proposals,
             "pm-": self.agent_mode,
             "ml-": self.agent_mail,
+            "ls-": self.loan_cards,
         }
         if card_id.startswith("dr-"):
             return self.draft_cards.card(card_id)
@@ -2218,6 +2223,8 @@ class AgentWeb:
             *proposals,
             *self.agent_mode.open_cards(session_id),
             *self.agent_mail.open_cards(session_id),
+            # Loan send cards belong to a Workflow run, not to a conversation.
+            *(self.loan_cards.open_cards() if session_id is None else ()),
         ]
         return {"ok": True, "cards": [item.model_dump(mode="json") for item in found]}
 
@@ -2232,6 +2239,8 @@ class AgentWeb:
             return self.agent_mode.decide(card_id, action, channel=channel)
         if card_id.startswith("ml-"):
             return self.agent_mail.decide(card_id, action, channel=channel)
+        if card_id.startswith("ls-"):
+            return self.loan_cards.decide(card_id, action, channel=channel)
         if card_id.startswith("dr-"):
             with self._one_at_a_time:
                 drafted = self.draft_cards.decide(card_id, action, channel=channel)
@@ -4734,9 +4743,14 @@ class AgentWeb:
         arguments: dict[str, Any],
         answer: str,
         succeeded: bool,
+        *,
+        follow_up: dict[str, Any] | None = None,
+        cards: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any] | None:
         """A run from a conversation's inline form, kept in that conversation
-        as a pair (what was run, then its result) so the Agent sees it later."""
+        as a pair (what was run, then its result) so the Agent sees it later.
+        A Workflow the run offers next comes with its form, and cards the run
+        made (loan send cards) under the answer; neither runs or sends."""
         hidden = (
             {item.name for item in manifest.parameters if item.kind == "upload"}
             if manifest is not None
@@ -4765,6 +4779,8 @@ class AgentWeb:
                 text=answer.strip() or "The run finished without a summary.",
                 created_at=now,
                 status="answered" if succeeded else "failed",
+                workflow_form=follow_up,
+                action_cards=tuple(cards or ()),
             )
             self.runtime.state.save_conversation(
                 record.model_copy(
@@ -4776,6 +4792,34 @@ class AgentWeb:
             )
             recorded: dict[str, Any] = json.loads(added.model_dump_json())
             return recorded
+
+    def _follow_up_form(self, offered: dict[str, object] | None) -> dict[str, Any] | None:
+        """The run form of the Workflow a run offers next (the loan scan's
+        hand-off to its reply Workflow), when that Workflow is installed and
+        switched on here. The person presses Run; nothing starts by itself."""
+        if offered is None:
+            return None
+        try:
+            identity = AssetIdentity.model_validate(offered.get("workflow"))
+        except ValueError:
+            return None
+        manifest = next(
+            (
+                installed
+                for installed in manifests(self.runtime.layout.workflows, WorkflowManifest)
+                if installed.metadata.identity == identity
+            ),
+            None,
+        )
+        if manifest is None:
+            return None
+        offer = form_offer(
+            manifest, {}, self.runtime.agent.gateway.engine.settings_provider, origin="follow_up"
+        )
+        label = offered.get("label")
+        if isinstance(label, str) and label and not offer["missing_settings"]:
+            offer["message"] = f"{label}：按「Run」開始；不會自動執行。"
+        return offer
 
     def launch_workflow(self, request: WorkflowLaunchRequest) -> dict[str, Any]:
         """Run one exact installed Workflow through the resident Agent."""
@@ -4818,7 +4862,16 @@ class AgentWeb:
         answer = readable(outcome)
         recorded = (
             self._record_form_run(
-                item.session_id, manifest, item.workflow, arguments, answer, succeeded
+                item.session_id,
+                manifest,
+                item.workflow,
+                arguments,
+                answer,
+                succeeded,
+                follow_up=self._follow_up_form(run_follow_up(outcome)),
+                cards=[
+                    card for card in (self.card(card_id) for card_id in run_cards(outcome)) if card
+                ],
             )
             if item.session_id is not None
             else None

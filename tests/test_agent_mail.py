@@ -419,13 +419,30 @@ def test_no_send_verb_is_reachable_except_a_mail_cards_decision() -> None:
         for path in root.rglob("*.py")
         if importing.search(path.read_text(encoding="utf-8"))
     )
-    assert users == ["host_runtime/agent_mail.py", "host_runtime/web.py"]
+    # The loan reply send cards (owner 2026-10-20) are the second card whose
+    # press sends one draft; tests/test_loan_reply_send.py pins them the same way.
+    assert users == [
+        "host_runtime/agent_mail.py",
+        "host_runtime/loan_reply_cards.py",
+        "host_runtime/web.py",
+    ]
     web_source = (root / "host_runtime" / "web.py").read_text(encoding="utf-8")
-    assert len(importing.findall(web_source)) == 1  # the factory handed to AgentMail
+    assert len(importing.findall(web_source)) == 1  # the factory handed to both card kinds
     mail_source = inspect.getsource(AgentMail)
     assert mail_source.count("self._sender().send(") == 1
     decide = inspect.getsource(AgentMail.decide)
     assert "self._sender().send(" in decide
+    from host_runtime.loan_reply_cards import LoanReplyCards
+
+    assert inspect.getsource(LoanReplyCards).count(".send(") == 1
+    assert "self.sender().send(" in inspect.getsource(LoanReplyCards.decide)
+    # Nothing else in the source tree presses a sender's send.
+    senders = sorted(
+        str(path.relative_to(root)).replace("\\", "/")
+        for path in root.rglob("*.py")
+        if re.search(r"sender\(\)\.send\(", path.read_text(encoding="utf-8"))
+    )
+    assert senders == ["host_runtime/agent_mail.py", "host_runtime/loan_reply_cards.py"]
     from host_runtime.agent_mode import MCP_TOOLS
 
     assert not any("send" in name for name in MCP_TOOLS)
