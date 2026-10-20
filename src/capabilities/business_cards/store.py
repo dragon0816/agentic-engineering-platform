@@ -1651,6 +1651,26 @@ class CardStore:
             ]
             return shown, lines, len(everyone) - len(shown)
 
+    def sources_seen(self, person_ids: Sequence[str]) -> dict[str, list[tuple[str, str]]]:
+        """Each person's sources with the latest evidence date of each
+        (observations and field provenance), newest first: the interactive
+        chart's person card lists them."""
+        found: dict[str, list[tuple[str, str]]] = {}
+        with self._connect() as con:
+            for person_id in person_ids:
+                latest: dict[str, str] = {}
+                for item in con.execute(
+                    "SELECT source, source_date FROM observations WHERE person_id = ? "
+                    "UNION ALL SELECT source, source_date FROM field_sources WHERE person_id = ?",
+                    (person_id, person_id),
+                ):
+                    date = str(item["source_date"] or "")
+                    if date > latest.get(item["source"], ""):
+                        latest[item["source"]] = date
+                    latest.setdefault(item["source"], date)
+                found[person_id] = sorted(latest.items(), key=lambda pair: pair[1], reverse=True)
+        return found
+
     def uncertain_now(self, person_ids: Sequence[str]) -> dict[str, list[str]]:
         """Each person's fields still to confirm: flagged by any reading and
         neither confirmed nor set by the person."""

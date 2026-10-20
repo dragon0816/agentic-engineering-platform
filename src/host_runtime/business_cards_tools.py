@@ -325,9 +325,23 @@ TOOLS: tuple[tuple[str, CapabilitySpec, str, dict[str, Any]], ...] = (
     (
         CHART_TOOL,
         cards.CHART_SPEC,
-        "Draw a company's org chart from the contacts: a PNG the person sees and a Markdown "
-        "legend to include in the answer. People who left are left out unless include_left.",
-        _object({"company": _COMPANY, "include_left": {"type": "boolean"}}, ("company",)),
+        "Draw a company's org chart from the contacts: a PNG the person sees (format png, the "
+        "default), an interactive HTML page with a tree view, a grouped view, search and "
+        "person cards (format html, when the person asks for an interactive, HTML, searchable "
+        "or tree view), or both; and a Markdown legend to include in the answer. People who "
+        "left are left out unless include_left (the HTML page can toggle them).",
+        _object(
+            {
+                "company": _COMPANY,
+                "include_left": {"type": "boolean"},
+                "format": {
+                    "type": "string",
+                    "enum": ["png", "html", "both"],
+                    "description": "png (default), html (interactive page) or both",
+                },
+            },
+            ("company",),
+        ),
     ),
     (
         "cards__harvest_signatures",
@@ -439,6 +453,11 @@ def business_cards_tools(gateway: Any) -> Sequence[HostTool]:
     return tools
 
 
+#: How a chart file is shown: the PNG as a picture, the interactive page in a
+#: sandboxed frame (Agent Web) or as a document (Telegram), the legend as text.
+_KINDS = {"image/png": "image", "text/html": "html"}
+
+
 def chart_files(result: GatewayConversationResult | None) -> list[dict[str, str]]:
     """The files `cards__org_chart` produced in this turn, with the legend
     text on the PNG's entry, newest chart last."""
@@ -462,11 +481,13 @@ def chart_files(result: GatewayConversationResult | None) -> list[dict[str, str]
                 continue
             shown = {
                 "filename": str(entry.get("filename") or Path(path).name),
-                "kind": "image" if entry.get("media_type") == "image/png" else "text",
+                "kind": _KINDS.get(str(entry.get("media_type")), "text"),
                 "path": path,
             }
-            if shown["kind"] == "image" and isinstance(legend, str):
+            # The legend rides on the chart's first picture or page.
+            if shown["kind"] != "text" and isinstance(legend, str):
                 shown["legend"] = legend
+                legend = None
             files.append(shown)
     return files
 

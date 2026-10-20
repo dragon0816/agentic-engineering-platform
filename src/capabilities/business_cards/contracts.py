@@ -512,9 +512,14 @@ class ImportResult(Contract):
     source: str = ""
 
 
+ChartFormat = Literal["png", "html", "both"]
+
+
 class ChartRequest(Contract):
     company: str = Field(min_length=1, max_length=_SHORT)
     include_left: bool = False
+    # png (default, unchanged), html (the interactive page) or both (owner 2026-10-20).
+    format: ChartFormat = "png"
 
 
 class ChartFile(Contract):
@@ -530,7 +535,9 @@ class ChartResult(Contract):
     left_omitted: int = 0
     lines_evidenced: int = 0
     lines_inferred: int = 0
-    png_path: str
+    format: ChartFormat = "png"
+    png_path: str = ""
+    html_path: str = ""
     legend_path: str
     legend_markdown: str
     note: str

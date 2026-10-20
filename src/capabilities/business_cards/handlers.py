@@ -17,7 +17,7 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any, Literal
 
-from capabilities.business_cards import chart, reading, signatures
+from capabilities.business_cards import chart, chart_html, reading, signatures
 from capabilities.business_cards.contracts import (
     STATUS_LABELS,
     UNDO_HINT,
@@ -58,6 +58,7 @@ from capabilities.business_cards.store import (
     CardStore,
     CardStoreError,
     EditOutcome,
+    local_time,
     store_dir,
     undo_note,
 )
@@ -128,7 +129,9 @@ PROPOSALS_SPEC = _spec(
     "read",
 )
 CHART_SPEC = _spec(
-    "org-chart", "Draw a company's org chart from the contacts (PNG and legend)", "read"
+    "org-chart",
+    "Draw a company's org chart from the contacts (PNG and/or interactive HTML, and legend)",
+    "read",
 )
 HARVEST_SPEC = _spec(
     "harvest-signatures",
@@ -476,20 +479,30 @@ class OrgChartHandler(_Cards):
 
         def work() -> Contract:
             store = self.store(context)
-            people, lines, omitted = store.chart_data(
-                request.company, include_left=request.include_left
-            )
+            # Everyone, also who left: the HTML page toggles them; the PNG and
+            # the legend show them only when asked.
+            everyone, all_lines, _ = store.chart_data(request.company, include_left=True)
+            people = [p for p in everyone if request.include_left or p["status"] != "left"]
+            omitted = len(everyone) - len(people)
+            shown_ids = {p["person_id"] for p in people}
+            lines = [
+                line
+                for line in all_lines
+                if line["person_id"] in shown_ids and line["manager_id"] in shown_ids
+            ]
             if not people:
                 raise CardStoreError("company_has_no_contacts")
             company = (
                 store.resolve_company(request.company) or people[0]["company"] or request.company
             )
             folder = store_dir(self.workspace_root, context.actor) / "charts"
-            stamp = f"{datetime.now(UTC):%Y%m%d-%H%M%S}"
+            now = datetime.now(UTC)
+            stamp = f"{now:%Y%m%d-%H%M%S}"
             safe = "".join(ch if ch.isalnum() else "-" for ch in request.company)[:40] or "company"
             png = folder / f"org-{safe}-{stamp}.png"
+            page = folder / f"org-{safe}-{stamp}.html"
             md = folder / f"org-{safe}-{stamp}.md"
-            needs = store.uncertain_now([p["person_id"] for p in people])
+            needs = store.uncertain_now([p["person_id"] for p in everyone])
             text = chart.legend(
                 company,
                 people,
@@ -498,12 +511,28 @@ class OrgChartHandler(_Cards):
                 left_omitted=omitted,
                 uncertain=needs,
             )
-            try:
-                chart.render(png, company, people, lines, uncertain=needs)
-            except ImportError:
-                raise CardStoreError("chart_renderer_missing") from None
+            files: list[ChartFile] = []
+            if request.format in ("png", "both"):
+                try:
+                    chart.render(png, company, people, lines, uncertain=needs)
+                except ImportError:
+                    raise CardStoreError("chart_renderer_missing") from None
+                files.append(ChartFile(path=str(png), media_type="image/png", filename=png.name))
+            if request.format in ("html", "both"):
+                chart_html.render(
+                    page,
+                    company,
+                    everyone,
+                    all_lines,
+                    uncertain=needs,
+                    sources=store.sources_seen([p["person_id"] for p in everyone]),
+                    show_left=request.include_left,
+                    generated_at=local_time(now.isoformat()),
+                )
+                files.append(ChartFile(path=str(page), media_type="text/html", filename=page.name))
             folder.mkdir(parents=True, exist_ok=True)
             md.write_text(text + "\n", encoding="utf-8")
+            files.append(ChartFile(path=str(md), media_type="text/markdown", filename=md.name))
             evidenced = sum(1 for line in lines if not line["inferred"])
             return ChartResult(
                 company=company,
@@ -512,14 +541,13 @@ class OrgChartHandler(_Cards):
                 left_omitted=omitted,
                 lines_evidenced=evidenced,
                 lines_inferred=len(lines) - evidenced,
-                png_path=str(png),
+                format=request.format,
+                png_path=str(png) if request.format != "html" else "",
+                html_path=str(page) if request.format != "png" else "",
                 legend_path=str(md),
                 legend_markdown=text,
                 note=chart.NOTE if evidenced else chart.NO_LINES_NOTE,
-                attach=(
-                    ChartFile(path=str(png), media_type="image/png", filename=png.name),
-                    ChartFile(path=str(md), media_type="text/markdown", filename=md.name),
-                ),
+                attach=tuple(files),
             )
 
         return await self.run(work)
