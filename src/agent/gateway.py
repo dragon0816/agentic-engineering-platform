@@ -40,6 +40,7 @@ from agent.harness_anchor import ToolAnchor
 from agent.harness_handoff import capped, harness_reply, with_unverified_note
 from agent.routing import RequestRouter, RoutingOutcome
 from agent.skills import CommandBinding
+from agent.tool_recovery import RECOVERY_GUIDANCE, ToolRecovery, recovery_for
 from capabilities.runtime import CapabilityInvocation
 from common.action_cards import CARD_KEY
 from common.assets import AssetIdentity, reject_embedded_secrets
@@ -302,6 +303,9 @@ class ConversationToolExecution(Contract):
     workflow: WorkflowRunSnapshot | None = None
     host: HostToolOutcome | None = None
     failure: Failure | None = None
+    # On a failed call (owner 2026-10-20): whether the model can fix it itself
+    # and how, decided by the Host from the failure code (`agent/tool_recovery`).
+    recovery: ToolRecovery | None = None
 
     @model_validator(mode="after")
     def one_outcome(self) -> Self:
@@ -765,7 +769,8 @@ class Gateway:
             "evidence, say first that the knowledge base gave no answer; anything you add "
             "from general knowledge must be marked as not from the knowledge base and "
             "uncited. After a "
-            "tool result, explain what happened and what the user should do next."
+            "tool result, explain what happened and what the user should do next. "
+            + RECOVERY_GUIDANCE
         )
         if self._workspace_note:
             prompt += " " + self._workspace_note
@@ -1202,7 +1207,10 @@ class Gateway:
                 context, call, binding, bound.get(call.name), anchor
             )
             _tool_progress(call.name, "succeeded" if _tool_succeeded(item) else "failed")
-        return item.model_copy(update={"arguments": _recorded_arguments(dict(call.arguments))})
+        update: dict[str, Any] = {"arguments": _recorded_arguments(dict(call.arguments))}
+        if not _tool_succeeded(item):
+            update["recovery"] = recovery_for(item)
+        return item.model_copy(update=update)
 
     @staticmethod
     async def _execute_host_tool(

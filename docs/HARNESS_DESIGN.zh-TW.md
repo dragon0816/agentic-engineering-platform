@@ -176,7 +176,12 @@ flowchart TD
 - 除非工具確實回傳，不得聲稱讀過某來源；沒有工具時直說無法存取。
 - 缺輸入就問。**會改變結果的規則（哪些紀錄、哪個期間/狀態、標記什麼）沒說清楚時，先問、該輪不做其他事**（lab X02 經驗）。沒指定篩選＝不篩選。
 - Knowledge 工具失敗或找不到證據時，**先說知識庫沒有答案**；用一般知識補充必須標示「非來自知識庫、無引用」。
-- 工作資料夾只能在 coding roots 底下，未指定時建議 `aep-workflows\<任務名>`（2026-10-08）。
+- 工作資料夾只能在 coding roots 底下，未指定時建議 `aep-workflows\<任務名>`（2026-10-08）；root 底下不存在的資料夾由 run-python 自動建立，不請使用者建立（2026-10-20）。
+- **可自行修正的失敗就修正重試**（owner 2026-10-20，`agent/tool_recovery.py`）：每個失敗的工具呼叫，Host 依失敗碼加上 `recovery: {recoverable, hint}`，放在給模型的觀察結果裡（不是模型自己判斷）。
+  - `recoverable: true`（模型自己的呼叫有誤）：`invalid_input`（hint 點名欄位，取自 Bridge 的「Invalid input at 欄位: 類型」）、`workflow_parameters_invalid`、`workflow_invalid`（草稿問題）、`workflow_missing`、`candidate_unknown`、`uninstalled_tool`、工作資料夾不在 root／不是絕對路徑／是檔案，以及標記 `retryable` 的暫時失敗。
+  - `recoverable: false`（需要使用者）：`permission_denied`、`approval_required`、`secret_resolution_unavailable`、`capability_not_installed`、`missing_local_capability`、`workflow_not_installed`、`needs_connectivity`，以及失敗碼含 credential、token、login、sign_in、scope（郵件範圍）、not_installed、disabled 等字的；其他未知失敗碼也是 false（請模型說明、不要原樣重試）。
+  - `knowledge_not_validated` 不加（G1 已有自己的指示）。
+  - 系統提示規則：`recoverable` 為 true 時，依 hint 修正參數並在**同一回合**重試，不把錯誤丟給使用者；只有 false 或修正後仍失敗時才問使用者；不得原樣重複失敗的呼叫。重複防護（相同呼叫連續 3 次失敗即停）照舊。
 - persona 只控制名稱與說話風格，不能改變政策、權限、工具或證據。
 
 ### 5.5 停止原因
