@@ -2900,6 +2900,26 @@ s-k-20261011T102952` (not published).
   `C:/aepci-wk/venv` (confirmed pointing at this repo, `.[dev,office]`, `--basetemp=
   C:/aepci-wk/bt-m4`): 3701 passed, 34 skipped, 0 failed.
 - [ ] Owner live check of the memory page (steps in HANDOFF.md).
+- [x] M5: memory quality tools (2026-10-21, Claude Code). Spec `docs/phases/ACCUMULATED_MEMORY.md`
+  §16 "M5 as built"; decision `docs/DECISIONS.md` 2026-10-21 "Accumulated memory M5";
+  `docs/CONTRACTS.md` (Memory quality); `USER_GUIDE.zh-TW.md` §4.10. Freshness rules as merge-rule
+  data (`FreshnessRule`, `contacts/org` 12 months / sync 30 days); `src/memory/health.py` (the check,
+  table `health_findings`, settings in `meta`); `host_runtime/memory_health.py` (per actor, nightly in
+  `AgentWeb.nightly_tick` with the experience review, 「立即檢查」, presses: merge / 仍在職 / 已離職 /
+  stop a preference, each undoable; bounded structured contradiction question through the internal
+  model; counts-only report and telemetry); `CardStore.merge_people/confirm_active/duplicates/
+  last_seen`; `Preferences.mark_used/last_used`; 「為什麼」: `ConversationMessage.memory_used`,
+  `host_runtime/memory_why.py`, `GET /api/memory/why`, the page's 「為什麼？」 and Telegram `/why`;
+  health cards in 待確認 and settings in 紀錄. Tests `tests/test_memory_health.py`,
+  `tests/test_memory_quality_web.py`, `tests/test_memory_why_ui.py` (screenshots
+  `.scratch/memory-why/`).
+  Commit 1ae662ef. Verification: ruff check, ruff format --check, mypy clean; full pytest project
+  `.venv` 3743 passed, 9 skipped, 2 failed (`test_telegram_settings.py::test_the_form_accepts_an_id_
+  alone_and_a_token_copied_with_bot`, load flake, passes alone; `test_memory_health.py` duplicate
+  order assumed a creation-time tie order, test fixed to compare sets, passes); CI-like
+  `C:/aepci-wk/venv` (confirmed pointing at this repo, `.[dev,office]`,
+  `--basetemp=C:/aepci-wk/bt-m5`, after the fix): 3726 passed, 34 skipped, 0 failed.
+- [ ] Owner live check of the memory quality tools (steps in HANDOFF.md).
 - [ ] M4: the memory page in Agent Web (five sections; preferences and notes APIs are ready).
 
 

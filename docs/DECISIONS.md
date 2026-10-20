@@ -4270,6 +4270,53 @@ Rejected: a generic "take the new value" for any space (bypasses the manager's o
 deleting by marking rows (content would stay, against §3.6); a new conversation-retention setting
 (not asked for; changes record handling beyond M4); a model tool for any of these (§3.4, §10.3).
 
+## 2026-10-21 — Accumulated memory M5: the health check only finds; every fix is a press
+
+Context: M5 of `docs/phases/ACCUMULATED_MEMORY.md` (§7 what goes wrong, §8.2 freshness, §8.4 nightly
+health check, §8.5 「為什麼這樣做」). Spec §16 "M5 as built"; contracts in `docs/CONTRACTS.md` (Memory
+quality); user guide §4.10.
+
+Decisions:
+
+1. **Freshness is merge-rule data.** `MergeRules.freshness` (`FreshnessRule`: `entities` with an
+   entity kind, a period, the statuses asked about and a question with `{name}`; `sync_state` with a
+   period). `contacts/org` ships 12 months / 「{name} 是否仍在職？」 for active people and 30 days for
+   sync states. The rules id stays `contacts.org.merge.v2` (an added, defaulted field; the stored
+   `rules_json` updates on open); the person's `freshness_months` setting overrides the entity period.
+   "Seen" is the newest observation of any source, the person's own word included, so 仍在職 is a
+   `user` observation and needs no new field.
+2. **The check reads; its only output is its own table.** `health_findings` in the actor's database,
+   keyed (`space`, `kind`, `key`) so a second run updates rather than repeats: dismissed stays
+   dismissed (an unused preference is asked again after another `unused_days`), a fix that was undone
+   opens again, an open one no longer found goes. Fixes are the person's presses through the stores'
+   existing, undoable writes (`set_status`, `Preferences.remove`) and one new one, `merge_people`.
+3. **Merging keeps observations append-only.** The dropped entry's row goes (kept whole in its
+   `merged_away` history row, so `CardStore.undo` puts it back first); its observations stay under its
+   old id; `keep` takes only values it lacks, as the person's (`user`), and the dropped entry's lines.
+   Never automatic, and only for pairs the check offered (same email, or same name and company the
+   matcher kept apart).
+4. **Contradictions: one bounded structured question per scope**, to the internal model the experience
+   review already uses (`review_model`, through the internal gateway): only scopes with ≥ 2 active
+   preferences, ≤ 5 scopes, ≤ 12 rules each, rule texts only, `max_output_tokens` 500, ≤ 5 pairs back,
+   numbers checked. Pairs the deterministic M3 check finds are dropped (they were kept on purpose).
+   No model: skipped and said so; the other checks still run. Switched off or fewer than two: no call.
+5. **Unused = not carried by an answer**, from a small `uses` table (ids and times; Agent Web and
+   Telegram both record) plus the stored conversations' `preferences_used` from before M5.
+6. **Per actor, nightly with the experience review.** `nightly_tick` runs the check for every memory
+   database on the Host (each names its actor in `meta.actor`, written on open), each with its own
+   switch, then the review as before; the report gets counts only (`ReviewReport.memory_health`), and a
+   night without a review writes a counts-only report. Telemetry: counts and the model state only.
+7. **「為什麼」 records references, not content.** `ConversationMessage.memory_used` (≤ 40
+   `<space>:<kind>:<id>`), derived from the turn's tool results (contacts returned by `cards__*`, sync
+   keys a harvest moved, notes the answer cites from `notes__search`); labels are looked up when the
+   person asks. Telegram keeps the last turn per chat in memory for `/why`.
+
+Rejected: auto-merging duplicates or auto-marking people as left (against §10.7 and "按一下才存");
+a model call on every preference save (M3 decided deterministic; the nightly bounded question covers
+the rest); storing the "why" text on each message (content duplicated, stale after edits); a separate
+health-report file outside `review-*` (the owner asked for it in the nightly report); hard-coded
+freshness periods in the check.
+
 ## 2026-10-21 — CI real-browser failures, round 2: socket traces, a pong fix, and the hung-navigation lead
 
 Context: CI run 39479473515 (e7247e3e) failed `tests/test_browser.py::test_the_element_list_is_what_can_be_used_and_nothing_else`

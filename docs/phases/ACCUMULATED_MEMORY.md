@@ -1,6 +1,6 @@
 # 可累積的記憶管理（設計稿，待 owner 確認）
 
-Owner 討論：2026-10-20。狀態：**design approved 2026-10-20（決定見 §10）；M1 implemented 2026-10-20（見 §11「M1 as built」）；M2 implemented 2026-10-20（見 §12「M2 as built」）；M3 implemented 2026-10-21（見 §14「M3 as built」）；M4 implemented 2026-10-21（見 §15「M4 as built」），M5 起依 §9 進行。** 架構層級的決定，依 `CLAUDE.md`
+Owner 討論：2026-10-20。狀態：**design approved 2026-10-20（決定見 §10）；M1 implemented 2026-10-20（見 §11「M1 as built」）；M2 implemented 2026-10-20（見 §12「M2 as built」）；M3 implemented 2026-10-21（見 §14「M3 as built」）；M4 implemented 2026-10-21（見 §15「M4 as built」）；M5 implemented 2026-10-21（見 §16「M5 as built」），M6 起依 §9 進行。** 架構層級的決定，依 `CLAUDE.md`
 先討論、owner 確認方向後才開始實作。已決定的部分：採用 **混合式**（集中管理、分開擁有）。
 
 ## 1. 為什麼需要
@@ -231,7 +231,7 @@ run id、圖片 hash）；來源被刪時記憶保留，標「來源已刪除」
 | M2（**implemented 2026-10-20**，§12） | 同步進度 + 組織圖增量整理 | 第二次組織圖只讀新信；改版時正確重整 |
 | M3（**implemented 2026-10-21**，§14） | 偏好：確認卡、注入、矛盾檢查；筆記：一鍵存、Agent 提議（每段對話最多一次）、依宣告或「之前記過什麼」查詢 | 對話中說的規則按一下後生效、之後不再詢問；回答旁一鍵存筆記，並能被查詢引用 |
 | M4（**implemented 2026-10-21**，§15） | Agent Web 記憶頁 | 五個區塊可用；E2E 與瀏覽器測試 |
-| M5 | 品質工具：新鮮度、每晚健康檢查、「為什麼這樣做」 | 健康檢查產生建議卡片 |
+| M5（**implemented 2026-10-21**，§16） | 品質工具：新鮮度、每晚健康檢查、「為什麼這樣做」 | 健康檢查產生建議卡片 |
 | M6（第二版） | 跨空間宣告讀取、提升成團隊知識（Shared Platform 審核發布） | 一筆聯絡人經審核成為 BI Account |
 
 ## 10. Owner 決定（2026-10-20）
@@ -650,3 +650,102 @@ Agent Web 左邊多一個「**記憶**」（`#panel-memory`），六個分頁（
 - Telegram 沒有記憶頁（範圍外）。
 - 測試：`tests/test_memory_page.py`（每個動作的路由、每人隔離、沒有模型工具）、`tests/test_memory_page_ui.py`
   （真的瀏覽器：每個分頁、動作端到端、淺色／深色／390 px、權杖；截圖 `.scratch/memory-page/`）。
+
+## 16. M5 as built（2026-10-21，Claude Code）
+
+決定紀錄：`docs/DECISIONS.md` 2026-10-21「Accumulated memory M5」。契約：`docs/CONTRACTS.md`「Memory spaces and the
+Memory Service」的 Memory quality 一項。使用說明：`USER_GUIDE.zh-TW.md` §4.10。
+
+### 16.1 新鮮度（§8.2）：規則是資料
+
+- `MergeRules.freshness`（`common.memory.FreshnessRule`，可省略，預設沒有）：
+  - `kind: entities`：`entity`（`person`）、`after`（`P12M`／`P30D`）、`status`（只問這些狀態的，`active`）、
+    `question`（含 `{name}`）。最新一筆觀察（任何來源，包含使用者自己的話）早於期限就成為一個待確認問題。
+  - `kind: sync_state`：`after` 內沒有前進的同步進度，列在健康報告與待確認（「整理進度停住」，只有「知道了」）。
+- `contacts/org` 的規則（`contacts.org.merge.v2` 仍是同一個 id；`spaces.rules_json` 開啟時自動更新）：
+  `{kind: entities, after: P12M, entity: person, question: "{name} 是否仍在職？", status: [active]}`、
+  `{kind: sync_state, after: P30D}`。
+- 「仍在職」：`CardStore.confirm_active`，一筆 `user` 觀察（claim `status`，`still_active`）加 history `still_active`，
+  新鮮度從那天重新算；「已離職」：既有的 `set_status`（可復原）。
+- 人的設定 `freshness_months`（0 = 用規則的期限）覆蓋 entities 規則的期限；`sync_state` 的期限只看規則。
+- 「沒前進」以 `sync_state.updated_at` 判斷。增量整理沒有新信時進度不寫（§12.2），所以一個常被整理、但一直沒有新信的
+  網域也可能被列出；這只是提醒，「知道了」即可。
+
+### 16.2 每晚健康檢查（§8.4）
+
+- `src/memory/health.py`：`run_check(service, preferences, last_used, entities, manager_state, ask, now, settings)`
+  只讀記憶，唯一的輸出是 actor 自己資料庫的新表 `health_findings`（`finding_id`、`space`、`kind`、`key`、`subject_json`、
+  `state` open／dismissed／resolved／gone、`check_id`、建立／更新／決定時間與人、`action`；`(space, kind, key)` 唯一）。
+  同一個問題再跑一次是更新，不重複：已「不用／保留」的維持關閉（很久沒用的偏好例外：再過 `unused_days` 會再問），
+  修好又被復原的會重新打開，沒再出現的 open 項目變 `gone`。`health_findings` 也是 `SHARED_TABLES` 之一（匯出、刪除空間時一起）。
+- 找什麼（每個 actor 各自）：
+  | kind | 條件 | key |
+  |---|---|---|
+  | `duplicate` | `contacts/org` 兩人 email 相同，或同公司同名但 matcher 沒合併（`CardStore.duplicates`） | 兩個 person id |
+  | `stale` | entities 新鮮度規則（`CardStore.last_seen`） | person id ＠ 最後出現日 |
+  | `contradiction` | 同一個 scope 有 ≥ 2 條 active 偏好時，問一次內部模型；M3 確定性檢查會抓到的（同主題、相反方向）不再列 | 兩個 preference id |
+  | `unused` | 最後一次被回答帶上（`preferences_used`）早於 `unused_days` | preference id |
+  | `orphan` | 管理者不是 Host、也不在這台電腦（開或關） | space |
+  | `stale_sync` | sync_state 新鮮度規則 | 來源｜鍵 ＠ 最後前進日 |
+- **矛盾的模型問題**：`host_runtime.memory_health.ask_with` 經 `experience_review.structured_call`，用經驗回顧同一個
+  內部模型（`review_model`，Knowledge capability 的 company model，經內部 gateway）；structured output、
+  `output_contract: memory_health_contradictions`、`max_output_tokens: 500`；每個 scope 一次、最多 `MAX_SCOPES = 5`
+  個 scope、每次最多 `MAX_RULES_PER_SCOPE = 12` 條（最新的），只送偏好原文的編號清單；回覆 `{"pairs": [{a, b, why}]}`
+  最多 5 對、編號必須在範圍內。少於兩條、檢查關閉時不呼叫；沒有內部模型時略過（`model: unavailable`），
+  呼叫失敗時 `failed`，兩種都不動既有的矛盾項目。
+- **「沒在用」的資料**：`Preferences.mark_used`／`last_used`（`personal_preferences__uses`：id、最後時間、次數，沒有內容），
+  Agent Web 每個回答存檔後與 Telegram 每個回答都記；再加上該 actor 最近 200 段對話的 `preferences_used`（M5 之前的紀錄）。
+- **每晚**：`AgentWeb.nightly_tick`（原本夜間迴圈每 30 分鐘看一次）02:00 後每晚一次：先跑健康檢查
+  （Tasks 頁「Memory health check (nightly)」，`MemoryHealth.run_all`：`<workspace>/memory/*/memory.sqlite` 的每個 actor，
+  每個資料庫的 `meta.actor` 記著是誰的——`MemoryService.for_actor` 開啟時寫入；各自的開關），再照舊做經驗回顧。
+  經驗回顧的 `review-*.json`／`.md` 多一個 `memory_health`（`HealthSummary`：actor 數、檢查／關閉／失敗數、各 kind 筆數、
+  新開／open／gone、模型呼叫數與各狀態），只有筆數；那晚不需要經驗回顧時，另寫一份只有這一段的 `review-*` 報告。
+- **立即檢查**：記憶頁「待確認」上方的按鈕，`POST /api/memory/health/run`，只檢查登入的 actor；檢查關閉時拒絕（`health_off`）。
+- **遙測**：每個 actor 一個 `memory_health` run 與一個 `memory.health_checked` 事件，屬性只有布林、數字與模型狀態
+  （`found_<kind>`、`opened`、`open`、`gone`、`model`、`model_calls`），沒有任何內容或名字。
+- **使用者按了才改**：`MemoryHealth.decide`（`POST /api/memory/health/decide {finding_id, action}`），每個動作都經過
+  既有、可復原的寫入：
+  | kind | action | 做什麼 | 復原 |
+  |---|---|---|---|
+  | duplicate | `merge` | `CardStore.merge_people(第 1 筆, 第 2 筆)`：第 1 筆空白的欄位用第 2 筆補（`user` 來源）、匯報線移過來（第 1 筆已有主管時不覆蓋）、第 2 筆的待確認 dismissed、第 2 筆的列刪除（觀察照舊保留）；一個 change | `cards.undo`（`/api/memory/proposals/undo`）：先把第 2 筆整列放回（history `merged_away` 存整列）、待確認重開，再退欄位與線 |
+  | duplicate | `dismiss` | 不是同一人 | — |
+  | stale | `still_active`／`left` | `confirm_active`／`set_status(left)` | `left` 可復原 |
+  | contradiction | `remove_a`／`remove_b`／`keep_both` | `Preferences.remove`（停用）／保留 | `/api/memory/undo kind=preference` |
+  | unused | `remove`／`keep` | 同上 | 同上 |
+  | orphan | `keep` | 保留（匯出或刪除在「紀錄」） | — |
+  | stale_sync | `dismiss` | 知道了 | — |
+  每個動作都記成 `<actor> via web`；別的 actor 的 finding id 在這裡找不到（`finding_unknown`）。
+
+### 16.3 「為什麼這樣做」（§8.5）
+
+- **每一輪記什麼**：`ConversationMessage.memory_used`（只有回答，最多 40 個參照 `<space>:<kind>:<id>`，沒有內容），
+  由 `host_runtime.memory_why.memory_used_in(工具紀錄, 回答文字)` 從這一輪的工具結果取：名片工具（`cards__*`）結果裡的
+  `person_id`（`contacts/org:person:p-…`）、整理簽名檔（含組織圖的 `harvest`）前進的網域（`contacts/org:sync:<網域>`）、
+  `notes__search` 找到且回答有引用（`[筆記 n-…]`）的筆記（`personal/notes:note:n-…`）。偏好仍是 M3 的 `preferences_used`。
+  Agent Web 的回覆 JSON 也有 `memory_used`。
+- **Agent Web**：有用到偏好或記憶的回答下方有小的「為什麼？」按鈕；按下 `GET /api/memory/why?session_id&message_id`
+  （只讀登入 actor 自己的對話與記憶），列出每一項（偏好原文與 Skill、聯絡人姓名與公司、筆記前 60 字、整理進度的網域），
+  已刪除的標「（已刪除）」，其餘有「到記憶頁修改或刪除」（整理進度是「到同步進度」）：開啟記憶頁對應分頁並標出那一項
+  （`memGoto`；聯絡人開啟歷史）。
+- **Telegram**：`/why` 回覆這個聊天上一則回答用到的偏好與記憶（`TelegramIngress._why`，記在記憶體：actor、偏好 id、參照），
+  最後一句「要修改或刪除，請到 Agent Web 的「記憶」頁。」；沒有時「上一則回答沒有用到你的偏好或記憶。」HELP 也寫了 `/why`。
+
+### 16.4 設定（§8，紀錄分頁）
+
+- 「記憶」→「紀錄」→「健康檢查」：每晚檢查開／關（預設開）、`freshness_months`（0–120，0 = 依規則）、
+  `unused_days`（1–3650，預設 90）。存在 actor 自己資料庫的 `meta.health_settings`（JSON），只改送來的鍵、
+  其他（之後版本的）鍵保留；`POST /api/memory/health/settings`，值不對時 `health_settings_invalid`。
+- 記憶頁一次 `GET /api/memory/overview` 多一個 `health`：`settings`、`rule_periods`、`last_run`（筆數）、`findings`
+  （每項：標題、`pairs`、`actions`、`links`、`kind_label`）。待確認分頁的數字＝提議數＋健康檢查項目數。
+
+### 16.5 沒做的與留給之後
+
+- `orphan` 只提供「保留」與連到「紀錄」；刪除仍走 M4 要輸入空間名稱的流程。
+- 「合併」固定保留第 1 筆（建立較早的；同一秒建立時依 id）；要保留另一筆可先「不是同一人」再在對話中處理。
+- 一個人被合併後，他舊名片圖片的觀察仍掛在舊 id；之後重掃同一張圖片會改由 email／姓名＋公司找到合併後的人。
+- Telegram 的 `/why` 只記最後一則、只在記憶體（Bridge 重啟後就沒有）。
+- 測試：`tests/test_memory_health.py`（新鮮度與假時鐘、重複與合併／復原、矛盾與假模型、範圍上限、沒在用、無主、
+  同步停住、檢查不改資料、設定、每人隔離）、`tests/test_memory_quality_web.py`（記憶頁路由與按下後的修正與復原、
+  設定往返、關閉時不呼叫模型、每人隔離、夜間報告與遙測只有筆數、每一輪的「為什麼」資料、Telegram `/why`）、
+  `tests/test_memory_why_ui.py`（真的瀏覽器：「為什麼？」與連結、健康檢查卡片、設定、深色 390 px；截圖
+  `.scratch/memory-why/`）。

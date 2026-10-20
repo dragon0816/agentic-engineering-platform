@@ -2702,6 +2702,60 @@ memory M1". Contracts in `common.memory`; service in `memory.service`, `memory.m
     `reason`, `counts_json`}: never content.
   - `host_runtime.memory_spaces.manager_states(layout)` → {`<ns>/<name>`: `on` | `off`} of
     installed managers; a space whose manager is neither (nor `host/memory`) is an orphan.
+- **Memory quality** (accumulated memory M5, `ACCUMULATED_MEMORY.md` §16; decision 2026-10-21).
+  - `common.memory.FreshnessRule` {`kind` `entities` | `sync_state`, `after` (`P<n>M` | `P<n>D`),
+    `entity`?, `question` (with `{name}`, required for `entities`), `status` [..]};
+    `MergeRules.freshness` (≤ 8, default none). `contacts/org`: `entities` person `P12M`
+    「{name} 是否仍在職？」 status `active`; `sync_state` `P30D`. Rules id unchanged.
+  - `memory.health.run_check(service, *, preferences, last_used (None = unknown), entities
+    {space: EntitySource}, manager_state(manager) → host|on|off|missing, ask (scope, rules) →
+    [(id, id, why)] | None, now?, settings?)` → `HealthReport` {`check_id`, `at`, `enabled`, `found`
+    {kind: n}, `opened`, `still_open`, `gone`, `model` `used` | `not_needed` | `unavailable` |
+    `failed` | `off`, `model_calls`, `skipped`}. Reads only; writes `health_findings` and
+    `meta.health_last_run` (counts). Kinds `duplicate`, `stale`, `contradiction`, `unused`,
+    `orphan`, `stale_sync`. Table `health_findings` {`finding_id` `h-…`, `space`, `kind`, `key`,
+    `subject_json`, `state` `open` | `dismissed` | `resolved` | `gone`, `check_id`, `created_at`,
+    `updated_at`, `decided_at`, `decided_by`, `action`; unique (`space`, `kind`, `key`)}, one of
+    `SHARED_TABLES`. Bounds: `MAX_SCOPES = 5`, `MAX_RULES_PER_SCOPE = 12`; asked only for a scope
+    with ≥ 2 active preferences; pairs the M3 check finds are dropped.
+  - Settings `meta.health_settings` {`enabled` (bool, default true), `freshness_months` (0–120,
+    0 = the rule's), `unused_days` (1–3650, default 90)}; `save_settings` changes only the keys
+    sent and keeps unknown ones (`health_settings_invalid`). `meta.actor` names the database's
+    actor (written by `MemoryService.for_actor`); `MemoryService.set_meta(key, value)`.
+  - Contacts: `CardStore.last_seen(statuses)`, `duplicates()` (`same_email` |
+    `same_name_company`, older first), `confirm_active(ref, actor=, reason=)` (a `user` `status`
+    observation, history `still_active`), `merge_people(keep, drop, actor=, reason=)` → change id
+    (fills `keep`'s empty fields, moves lines, dismisses `drop`'s proposals, deletes `drop`'s row;
+    history `merged_away` keeps the row; `CardStore.undo` restores it; `merge_same_person`,
+    `person_unknown`). Preferences: `mark_used(ids, at=)`, `last_used()` (table
+    `personal_preferences__uses`: id, last time, count).
+  - `host_runtime.memory_health.MemoryHealth` (`AgentWeb.memory_health`): `run(actor, now=)`,
+    `run_all(now=)` → `HealthSummary` {`at`, `actors`, `checked`, `switched_off`, `failed`, `found`,
+    `opened`, `open`, `gone`, `model_calls`, `model` {use: actors}}; the contradiction question is
+    `structured_call` on `review_model(runtime)` with `output_contract`
+    `memory_health_contradictions`, `max_output_tokens` 500, reply {`pairs` [{`a`, `b`, `why`}]} (≤ 5).
+    Telemetry: run kind `memory_health`, event `memory.health_checked` with counts only.
+  - Routes (page token, signed-in actor): `POST /api/memory/health/run` → {`counts`, `message`}
+    (`health_off`); `POST /api/memory/health/decide` {`finding_id`, `action`} → {`message`,
+    `undo`? {`kind` `contacts` | `preference`, `change_id`}} (`finding_unknown`, `finding_closed`,
+    `finding_action_unknown`; actions: duplicate `merge` | `dismiss`; stale `still_active` |
+    `left`; contradiction `remove_a` | `remove_b` | `keep_both`; unused `remove` | `keep`; orphan
+    `keep`; stale_sync `dismiss`); `POST /api/memory/health/settings` {`enabled`?,
+    `freshness_months`?, `unused_days`?} → {`settings`}. The overview adds `health` {`settings`,
+    `rule_periods`, `last_run`, `findings` [{`finding_id`, `kind`, `kind_label`, `space`, `title`,
+    `pairs` [[label, value]], `links` [{`label`, `person_id` | `tab`+`id`}], `actions` [{`action`,
+    `label`, `style`}], `created_at_local`}], `kind_labels`}.
+  - Nightly: `AgentWeb.nightly_tick(now=)` after 02:00 local, once a night (experience meta
+    `last_memory_health`): the health check of every actor, then the experience review as before.
+    `ReviewReport.memory_health` (`HealthSummary`, counts only) in `review-*.json` / `.md`
+    (`## Memory health`); a night without a review writes `memory_health_report` alone.
+  - 「為什麼」: `ConversationMessage.memory_used` (answers only, ≤ 40 refs
+    `<space>:<kind>:<id>`: `contacts/org:person:<id>`, `contacts/org:sync:<domain>`,
+    `personal/notes:note:<id>`); the Agent Web reply JSON has `memory_used`.
+    `host_runtime.memory_why.memory_used_in(tools, answer)`; `GET /api/memory/why?session_id=&
+    message_id=` → {`items` [{`kind` `preference` | `person` | `sync` | `note`, `id`, `label`,
+    `detail`, `gone`, `tab`}]} (`message_unknown`). Telegram `/why` → the chat's last answer
+    (`MemoryWhy.text`), or 「上一則回答沒有用到你的偏好或記憶。」.
 
 ## Shared-platform transport (Phase 7, slice 2i)
 

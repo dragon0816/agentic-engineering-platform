@@ -1,6 +1,6 @@
 # Handoff
 
-Updated: 2026-10-21 (Asia/Taipei), by Claude Code (accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-21 (Asia/Taipei), by Claude Code (accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
 ## Live-check fixes B1 / B2 (2026-10-21, Claude Code) — beside M5
 
@@ -20,7 +20,54 @@ and where the earlier file was kept; (3) restart Agent Web; (4) 記憶 → 資�
 (6) 「整理 WNC 的簽名檔」 (or 「重新整理 wnc.com.tw 的簽名檔」): KevinRK Chen is said to be already
 stored, not offered.
 
-## Accumulated memory M4: the Agent Web memory page (2026-10-21, Claude Code) — latest
+## Accumulated memory M5: memory quality tools (2026-10-21, Claude Code) — latest
+
+**Goal / scope:** M5 of `docs/phases/ACCUMULATED_MEMORY.md` (§7–§8): freshness rules as data, a nightly
+and on-demand memory health check, 「為什麼這樣做」, settings. Spec §16 "M5 as built"; decision
+`docs/DECISIONS.md` 2026-10-21 "Accumulated memory M5"; contracts `docs/CONTRACTS.md` (Memory quality);
+user guide §4.10. Not pushed; Agent Web not restarted; live data untouched.
+
+**Done (commits on main):** 1ae662ef "Add memory health check and "why" to the Memory Service and Agent
+Web" (code + tests); then the docs commit.
+- `MergeRules.freshness` (`FreshnessRule`); `contacts/org`: 12 months 「{name} 是否仍在職？」, sync 30 days.
+- `src/memory/health.py` (`run_check`, table `health_findings`, settings in `meta.health_settings`);
+  `src/host_runtime/memory_health.py` (`MemoryHealth`: per actor, presses, bounded contradiction
+  question via `review_model` + `structured_call`, telemetry counts only); `AgentWeb.nightly_tick`
+  (health check every night after 02:00, then the review; `ReviewReport.memory_health`).
+- `CardStore.merge_people/confirm_active/duplicates/last_seen`; `Preferences.mark_used/last_used`;
+  `MemoryService.set_meta`, `meta.actor`.
+- 「為什麼」: `ConversationMessage.memory_used`, `src/host_runtime/memory_why.py`,
+  `GET /api/memory/why`, the 「為什麼？」 button under answers, Telegram `/why`.
+- Memory page: health cards in 待確認 (「立即檢查」), settings in 紀錄.
+
+**Verification:** ruff check, ruff format --check, mypy clean; full pytest project `.venv` 3743 passed,
+9 skipped, 2 failed (telegram settings load flake, passes alone; one new test's tie-order assumption,
+fixed); CI-like `C:/aepci-wk/venv` (this repo, `.[dev,office]`, `--basetemp=C:/aepci-wk/bt-m5`):
+3726 passed, 34 skipped, 0 failed. Real-browser test `tests/test_memory_why_ui.py` passes; screenshots
+`.scratch/memory-why/`.
+
+**Live check (owner, after `/api/tasks` is idle and Agent Web is restarted on this code):**
+1. 記憶 → 待確認 → 「立即檢查」: health cards appear with 「健康檢查：…」 tags (e.g. 可能重複, 很久沒出現).
+2. On a duplicate: 「合併（保留第 1 筆）」 → 復原 in the notice brings both back; 「不是同一人」 is not asked again.
+3. On a stale contact: 仍在職 / 已離職 (復原). On a preference contradiction: 停用第 1 條 → 復原.
+4. 紀錄 → 健康檢查: change months/days, 儲存; switch off → 「立即檢查」 is disabled.
+5. Ask 「WNC 組織圖」 with a saved preference: the answer shows 「為什麼？」; its links open the item on 記憶.
+6. Telegram: send a question, then `/why`.
+7. Next morning: Reviews' latest report has a "Memory health" section (counts only); Tasks lists
+   "Memory health check (nightly)".
+
+**Open / risks:**
+- A concurrent session committed B1 / B2 (above) on main meanwhile; its manager state `outdated` is
+  not an orphan for the health check either (only `missing` is).
+- 「整理進度停住」 uses `sync_state.updated_at`; incremental passes with no new mail do not move it,
+  so a quiet domain may be listed (a reminder only).
+- Telegram `/why` is in memory, last turn per chat only. Merge always keeps 第 1 筆.
+
+**Next:**
+1. Owner live check above (and the M4 / M3 ones below).
+2. M6 (cross-space reads, promotion to team knowledge) when the owner asks.
+
+## Accumulated memory M4: the Agent Web memory page (2026-10-21, Claude Code)
 
 **Goal / scope:** M4 of `docs/phases/ACCUMULATED_MEMORY.md` (§6, §3.6, §3.9): a 「記憶」 tab for the
 signed-in actor. Spec §15 "M4 as built"; decision `docs/DECISIONS.md` 2026-10-21 "Accumulated memory
