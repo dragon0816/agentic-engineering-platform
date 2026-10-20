@@ -70,6 +70,7 @@ from capabilities.business_cards.space import (
     default_registry,
 )
 from common.assets import AssetIdentity
+from common.memory import SyncState
 from memory.registry import MemoryRegistry, asset_label
 from memory.service import (
     MemoryService,
@@ -400,6 +401,74 @@ class CardStore:
         with self._connect() as tx:
             group = self._company_group(tx, query)
             return "" if group is None else group.canonical()
+
+    def company_domains(self, query: str) -> tuple[str, tuple[str, ...]]:
+        """The stored company a query names and the mail domains of its
+        people's emails and websites, most used first (M2: the org chart
+        reads their new mail first). A query that is itself a domain
+        (`wnc.com.tw`) is one of them. No public mail service is a domain."""
+        with self._connect() as tx:
+            member, company = self._in_company(tx, query)
+            counts: dict[str, int] = {}
+            for row in self._people(tx):
+                if not member(row):
+                    continue
+                for value in (row["email"], row["website"]):
+                    domain = names.mail_domain(value) if value else ""
+                    if domain:
+                        counts[domain] = counts.get(domain, 0) + 1
+        asked = names.mail_domain(query) if "." in query else ""
+        if asked:
+            counts[asked] = max(counts.values(), default=0) + 1
+        ordered = sorted(counts, key=lambda domain: (-counts[domain], domain))
+        return company, tuple(ordered)
+
+    def observed(self, source_refs: Sequence[str]) -> set[str]:
+        """Which of these source refs (message ids) an observation in the
+        space already names."""
+        found: set[str] = set()
+        with self._connect() as tx:
+            for ref in dict.fromkeys(source_refs):
+                if ref and tx.observations(source_ref=ref, claim=None, limit=1):
+                    found.add(ref)
+        return found
+
+    def sync_state(self, source: str, key: str) -> SyncState | None:
+        with self._connect() as tx:
+            return tx.sync_state(source, key)
+
+    def finish_sync(
+        self,
+        source: str,
+        key: str,
+        *,
+        last_message_date: datetime,
+        message_ids: Sequence[str],
+        extractor_version: str,
+        actor: str,
+        reset_reason: str = "",
+    ) -> SyncState:
+        """After a successful pass, in one transaction: reset first when the
+        pass read the full scope again (`reset_reason`), then move the state
+        forward (never back: an earlier date keeps the stored one)."""
+        with self._connect() as tx:
+            if reset_reason:
+                tx.reset_sync(source, key, actor=actor, reason=reset_reason)
+            stored = tx.sync_state(source, key)
+            moment = last_message_date.astimezone(UTC).isoformat()
+            if stored is not None:
+                previous = datetime.fromisoformat(stored.last_message_date)
+                if previous > last_message_date:
+                    moment = stored.last_message_date
+            return tx.advance_sync(
+                source,
+                key,
+                last_message_date=moment,
+                message_ids=message_ids,
+                extractor_version=extractor_version,
+                actor=actor,
+                reason="signature harvest",
+            )
 
     def _in_company(self, tx: SpaceTx, query: str) -> tuple[Callable[[sqlite3.Row], bool], str]:
         """Who belongs to the company a query names, and its canonical name;

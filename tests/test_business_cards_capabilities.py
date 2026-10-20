@@ -809,7 +809,11 @@ def test_a_harvest_counts_the_messages_without_a_signature(tmp_path: Path) -> No
     assert data is not None
     assert (data["scanned"], data["with_signature"], data["without_signature"]) == (5, 1, 4)
     assert data["skipped"] == []
-    assert data["scan_note"] == "掃描 5 封，1 封有簽名檔，4 封沒有簽名檔。"
+    # Led by the window it read (accumulated memory M2): the first pass reads
+    # the whole scope.
+    assert data["scan_note"] == (
+        "首次整理（收件匣 30 天內）：掃描 5 封，1 封有簽名檔，4 封沒有簽名檔。"
+    )
     assert "scan_note" in data["note"]
     from capabilities.business_cards.manifest import PROCEDURE
 

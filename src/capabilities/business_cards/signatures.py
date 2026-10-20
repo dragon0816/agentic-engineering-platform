@@ -25,6 +25,11 @@ MAX_BLOCK_CHARS = 1200
 MAX_BLOCK_LINES = 16
 BATCH = 10
 OUTPUT_CONTRACT = "business-cards.signature.v1"
+#: Which extraction a harvest's sync state was made with (accumulated memory
+#: M2). Bump it whenever `PROMPT`, the fields read or `signature_block`
+#: change: the next harvest of every domain then reads its full scope again
+#: with the new rules, and says so.
+EXTRACTOR_VERSION = "signature.1"
 
 _QUOTED = re.compile(
     r"^\s*(?:>|From:|寄件者[:：]|-{3,}\s*Original Message|_{10,}|On .{4,200} wrote:|"

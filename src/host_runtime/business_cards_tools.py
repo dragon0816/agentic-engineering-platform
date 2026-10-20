@@ -98,6 +98,8 @@ FAILURE_TEXT = {
     "person_unspecified": "沒有指明是哪一位",
     "card_without_name": "這張名片沒有讀到姓名或 Email，沒有存",
     "company_has_no_contacts": "名片夾裡沒有這家公司的人",
+    "company_has_no_domain": "名片夾裡這家公司的人沒有公司 email 或網站，不知道要讀哪個網域的信；"
+    "請直接說網域（例如 wnc.com.tw）",
     "chart_renderer_missing": "這台電腦缺少畫組織圖用的 Pillow 元件",
     "candidates_expired": "這段對話沒有可存的簽名檔候選人（超過一小時已失效，或還沒整理）；"
     "請重新整理簽名檔",
@@ -120,6 +122,10 @@ FAILURE_TEXT = {
     "memory_write_not_declared": "這項功能沒有宣告可以寫入聯絡人記憶空間",
     "memory_read_not_declared": "這項功能沒有宣告可以讀取聯絡人記憶空間",
     "memory_space_unknown": "聯絡人記憶空間還沒有註冊",
+    # Accumulated memory M2: the sync state of a harvest.
+    "memory_kind_not_declared": "這個記憶空間沒有宣告同步進度",
+    "sync_state_backwards": "同步進度只能往前，沒有更新",
+    "sync_extractor_changed": "簽名檔擷取規則已更新，需要先重新整理",
     "permission_denied": "這項名片功能沒有授權給你（在 Agent Web 的 Capabilities 選取）",
     "invalid_input": "工具參數不正確",
     "timeout": "這次操作逾時",
@@ -351,6 +357,13 @@ TOOLS: tuple[tuple[str, CapabilitySpec, str, dict[str, Any]], ...] = (
                     "enum": ["png", "html", "both"],
                     "description": "png (default), html (interactive page) or both",
                 },
+                "harvest_first": {
+                    "type": "boolean",
+                    "description": "true when the person asks for the org chart: first read "
+                    "the company's new mail since the last time and return new people as "
+                    "candidates to confirm (never stored); false only to redraw right after "
+                    "cards__store_candidates or when the person says not to read mail",
+                },
             },
             ("company",),
         ),
@@ -359,16 +372,25 @@ TOOLS: tuple[tuple[str, CapabilitySpec, str, dict[str, Any]], ...] = (
         "cards__harvest_signatures",
         cards.HARVEST_SPEC,
         "Read signature blocks from the person's mail from one company domain (e.g. "
-        "example.com), within the mail scope set in Settings; returns candidates and stores "
-        "nothing.",
+        "example.com), or from a stored company's mail domains, within the mail scope set in "
+        "Settings; only mail that is new since the last harvest unless full. Returns "
+        "candidates and stores nothing.",
         _object(
             {
                 "domain": _S,
+                "company": {
+                    "type": "string",
+                    "description": "instead of domain: the company as the person says it; "
+                    "its people's mail domains are read",
+                },
+                "full": {
+                    "type": "boolean",
+                    "description": "重新整理: read the whole mail scope again, not only new mail",
+                },
                 "days": {"type": "integer"},
                 "limit": {"type": "integer"},
                 "folder": _S,
-            },
-            ("domain",),
+            }
         ),
     ),
     (

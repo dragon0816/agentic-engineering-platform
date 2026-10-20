@@ -150,6 +150,24 @@ def domain_alias(address: str) -> str:
     return "" if alias in PUBLIC_DOMAINS or len(alias) < 2 else alias
 
 
+_HOST = re.compile(r"^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$")
+
+
+def mail_domain(address: str) -> str:
+    """The mail domain a company's email or website names, for reading its
+    mail: `wnc.com.tw` for `ze.wang@wnc.com.tw` or `https://www.wnc.com.tw/`;
+    nothing for a public mail service (`domain_alias` decides) or a value
+    that is no host name."""
+    if not domain_alias(address):
+        return ""
+    text = address.strip().casefold()
+    host = text.rsplit("@", 1)[1] if "@" in text else re.sub(r"^[a-z]+://", "", text)
+    host = host.split("/", 1)[0].split(":", 1)[0].strip(".")
+    if "@" not in text and host.startswith("www."):
+        host = host[4:]
+    return host if _HOST.fullmatch(host) and "." in host else ""
+
+
 def short_names(company: str) -> frozenset[str]:
     """Romanised short names in a company name: words printed in capitals,
     2-6 letters ("WNC" in "WNC 啟碁科技"), legal suffixes left out. A common

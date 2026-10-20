@@ -8,7 +8,7 @@ the gaps closed: `romanised_name`, `ext`, `fax`, and `business_group`
 from __future__ import annotations
 
 from datetime import date
-from typing import Literal
+from typing import Literal, Self
 
 from pydantic import Field, model_validator
 
@@ -525,6 +525,10 @@ class ChartRequest(Contract):
     include_left: bool = False
     # png (default, unchanged), html (the interactive page) or both (owner 2026-10-20).
     format: ChartFormat = "png"
+    # Accumulated memory M2 (owner 2026-10-20): read the company's new mail
+    # first (an incremental signature harvest of its domains); new people
+    # come back as candidates to confirm, never stored by the chart.
+    harvest_first: bool = False
 
 
 class ChartFile(Contract):
@@ -533,27 +537,25 @@ class ChartFile(Contract):
     filename: str
 
 
-class ChartResult(Contract):
-    company: str
-    people: int
-    left_shown: int = 0
-    left_omitted: int = 0
-    lines_evidenced: int = 0
-    lines_inferred: int = 0
-    format: ChartFormat = "png"
-    png_path: str = ""
-    html_path: str = ""
-    legend_path: str
-    legend_markdown: str
-    note: str
-    attach: tuple[ChartFile, ...]
-
-
 class HarvestRequest(Contract):
-    domain: str = Field(min_length=3, max_length=120, pattern=r"^@?[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
+    """One company's signatures: its `domain`, or the stored `company` whose
+    people's mail domains are read. `full` is 「重新整理」: the sync state is
+    reset and the full mail scope read again."""
+
+    domain: str = Field(
+        default="", max_length=120, pattern=r"^(?:@?[A-Za-z0-9.-]+\.[A-Za-z]{2,})?$"
+    )
+    company: str = Field(default="", max_length=_SHORT)
     days: int | None = Field(default=None, ge=1, le=365)
     limit: int = Field(default=20, ge=1, le=40)
     folder: str = Field(default="", max_length=200)
+    full: bool = False
+
+    @model_validator(mode="after")
+    def names_the_company(self) -> Self:
+        if not self.domain and not self.company.strip():
+            raise ValueError("a harvest names a domain or a company")
+        return self
 
 
 class SignatureCandidate(CardFields):
@@ -565,6 +567,18 @@ class SignatureCandidate(CardFields):
     uncertain: tuple[FieldName, ...] = ()
     existing_person_id: str = ""
     would_change: tuple[FieldName, ...] = ()
+
+
+class HarvestWindow(Contract):
+    """One domain's pass: which window it read (`first`, `incremental`,
+    `reset`, `extractor`), from when, and the sync state's date after it."""
+
+    domain: str
+    source: str
+    mode: Literal["first", "incremental", "reset", "extractor"]
+    since: str
+    synced_to: str = ""
+    note: str = ""
 
 
 class SkippedMessages(Contract):
@@ -595,6 +609,34 @@ class HarvestResult(Contract):
     scan_note: str = ""
     # When this conversation's candidates can no longer be stored by id.
     expires_at: str = ""
+    # Accumulated memory M2: messages skipped because the space already has
+    # them (observed, or processed by the previous pass), messages left for
+    # a later pass (more people than `limit`), whether the search reached
+    # its cap, and each domain's window and sync state after the pass.
+    already_seen: int = 0
+    over_limit: int = 0
+    truncated: bool = False
+    domains: tuple[HarvestWindow, ...] = ()
+
+
+class ChartResult(Contract):
+    company: str
+    people: int
+    left_shown: int = 0
+    left_omitted: int = 0
+    lines_evidenced: int = 0
+    lines_inferred: int = 0
+    format: ChartFormat = "png"
+    png_path: str = ""
+    html_path: str = ""
+    legend_path: str
+    legend_markdown: str
+    note: str
+    attach: tuple[ChartFile, ...]
+    # harvest_first (M2): the harvest's result (candidates to confirm, not on
+    # the chart until stored), or why it was skipped (`harvest_note`).
+    harvest: HarvestResult | None = None
+    harvest_note: str = ""
 
 
 class StoreCandidatesRequest(Contract):
