@@ -15,7 +15,14 @@ extracted from the business-cards store where they were proven:
 - `external_ids`: the mapping of other systems' ids to entities (§3.8.4);
 - `sync_state` (M2, §3.3): how far each source was processed for a key, for a
   space that declares the `sync_state` kind, with `sync_history` rows for
-  every advance, reset and restore.
+  every advance, reset and restore;
+- `space_deletions` (M4, §3.6): one row per deletion of a space's data, with
+  who, when and how many rows, never the content.
+
+The person's own management (the Agent Web memory page, M4) goes through
+`MemoryService.owned` and the overview, export and delete methods: the
+person owns every space in their database; no asset and no model reaches
+these.
 
 A space's own tables (a manager's current-value view, its relationships)
 are named after the space (`contacts_org__people`). Access goes through a
@@ -195,7 +202,32 @@ CREATE TABLE IF NOT EXISTS sync_history (
     new_json TEXT
 );
 CREATE INDEX IF NOT EXISTS sync_history_key ON sync_history(space, source, key);
+CREATE TABLE IF NOT EXISTS space_deletions (
+    deletion_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    space TEXT NOT NULL,
+    at TEXT NOT NULL,
+    actor TEXT NOT NULL,
+    reason TEXT NOT NULL DEFAULT '',
+    counts_json TEXT NOT NULL DEFAULT '{}'
+);
 """
+#: The facilities every space shares, each row carrying `space` (what an
+#: export holds and a deletion clears, besides the space's own tables).
+SHARED_TABLES = (
+    "observations",
+    "field_sources",
+    "history",
+    "undone",
+    "proposals",
+    "external_ids",
+    "sync_state",
+    "sync_history",
+)
+_OBSERVATIONS_NEVER_DELETED = """CREATE TRIGGER IF NOT EXISTS observations_never_deleted
+BEFORE DELETE ON observations
+BEGIN
+    SELECT RAISE(ABORT, 'memory_observation_append_only');
+END"""
 
 #: States a proposal moves between; `open` until the person decides.
 PROPOSAL_STATES = frozenset({"open", "accepted", "rejected", "dismissed"})
@@ -1320,6 +1352,213 @@ class MemoryService:
         with self.connect() as con:
             row = con.execute("SELECT value FROM meta WHERE key = ?", (key,)).fetchone()
         return None if row is None else str(row["value"])
+
+    # -- the person's own management (M4, the Agent Web memory page) --------
+
+    def _summary_of(self, space: str) -> SpaceSummary:
+        with self.connect() as con:
+            row = con.execute("SELECT * FROM spaces WHERE space = ?", (space,)).fetchone()
+        if row is None:
+            raise MemoryServiceError("memory_space_unknown")
+        return _summary(row)
+
+    def owned(self, space: str) -> MemorySpace:
+        """A space opened for the person who owns this database, with the
+        manager's reach (the memory page: sync reset and restore, a proposal
+        kept). Only Host routes for the signed-in actor call this; no asset
+        or model does. `memory_space_unknown`."""
+        summary = self._summary_of(space)
+        namespace, _, name = summary.manager.partition("/")
+        return MemorySpace(self, summary, (namespace, name), "manager")
+
+    @staticmethod
+    def _own_tables(con: sqlite3.Connection, prefix: str) -> list[str]:
+        return sorted(
+            str(row["name"])
+            for row in con.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
+            if str(row["name"]).startswith(prefix)
+        )
+
+    def overview(self) -> list[dict[str, Any]]:
+        """Every registered space with its row counts (its own tables and
+        the shared facilities) and when anything in it last changed."""
+        found: list[dict[str, Any]] = []
+        with self.connect() as con:
+            rows = list(con.execute("SELECT * FROM spaces ORDER BY space"))
+            for row in rows:
+                summary = _summary(row)
+                space = summary.space
+                tables = {
+                    name[len(summary.table_prefix) :]: int(
+                        con.execute(f"SELECT COUNT(*) FROM {name}").fetchone()[0]
+                    )
+                    for name in self._own_tables(con, summary.table_prefix)
+                }
+                counts = {
+                    key: int(con.execute(query, (space,)).fetchone()[0])
+                    for key, query in (
+                        (
+                            "observations",
+                            "SELECT COUNT(*) FROM observations WHERE space = ? "
+                            "AND retracted_by = ''",
+                        ),
+                        (
+                            "open_proposals",
+                            "SELECT COUNT(*) FROM proposals WHERE space = ? AND state = 'open'",
+                        ),
+                        ("sync_states", "SELECT COUNT(*) FROM sync_state WHERE space = ?"),
+                        ("history", "SELECT COUNT(*) FROM history WHERE space = ?"),
+                    )
+                }
+                stamps = [
+                    con.execute(query, (space,)).fetchone()[0]
+                    for query in (
+                        "SELECT MAX(at) FROM history WHERE space = ?",
+                        "SELECT MAX(recorded_at) FROM observations WHERE space = ?",
+                        "SELECT MAX(at) FROM sync_history WHERE space = ?",
+                    )
+                ]
+                found.append(
+                    {
+                        "summary": summary,
+                        "registered_at": row["registered_at"],
+                        "tables": tables,
+                        **counts,
+                        "last_updated": max((str(item) for item in stamps if item), default=""),
+                    }
+                )
+        return found
+
+    def open_proposals(self, *, limit: int = 500) -> list[dict[str, Any]]:
+        """Open proposals of every space, oldest first, each with the
+        evidence it came from (the observation's source, date and ref)."""
+        with self.connect() as con:
+            rows = con.execute(
+                "SELECT pr.*, ob.source_kind AS evidence_kind, ob.source_date AS evidence_date, "
+                "ob.source_ref AS evidence_ref FROM proposals pr LEFT JOIN observations ob "
+                "ON ob.observation_id = pr.observation_id WHERE pr.state = 'open' "
+                "ORDER BY pr.proposal_id LIMIT ?",
+                (limit,),
+            )
+            return [dict(row) for row in rows]
+
+    def proposal(self, space: str, proposal_id: int) -> dict[str, Any] | None:
+        with self.connect() as con:
+            row = con.execute(
+                "SELECT * FROM proposals WHERE space = ? AND proposal_id = ?",
+                (space, proposal_id),
+            ).fetchone()
+        return None if row is None else dict(row)
+
+    def sync_overview(self) -> list[dict[str, Any]]:
+        """Every source and key of every space that keeps sync state: the
+        state now (None after a reset) and the latest history row, so a reset
+        can be restored."""
+        found: list[dict[str, Any]] = []
+        with self.connect() as con:
+            keys = list(
+                con.execute(
+                    "SELECT space, source, key FROM sync_state UNION "
+                    "SELECT space, source, key FROM sync_history ORDER BY 1, 2, 3"
+                )
+            )
+            for item in keys:
+                args = (item["space"], item["source"], item["key"])
+                state = con.execute(
+                    "SELECT * FROM sync_state WHERE space = ? AND source = ? AND key = ?", args
+                ).fetchone()
+                latest = con.execute(
+                    "SELECT * FROM sync_history WHERE space = ? AND source = ? AND key = ? "
+                    "ORDER BY history_id DESC LIMIT 1",
+                    args,
+                ).fetchone()
+                found.append(
+                    {
+                        "space": item["space"],
+                        "source": item["source"],
+                        "key": item["key"],
+                        "state": None if state is None else _sync_state(state),
+                        "latest": None if latest is None else _sync_entry(latest),
+                    }
+                )
+        return found
+
+    def export_space(self, space: str) -> dict[str, Any]:
+        """Everything one space holds, as JSON-ready data (§3.6): its
+        declaration and merge rules, its own tables and its rows of the
+        shared facilities. `memory_space_unknown`."""
+        summary = self._summary_of(space)
+        with self.connect() as con:
+            own = {
+                name[len(summary.table_prefix) :]: [
+                    dict(row) for row in con.execute(f"SELECT * FROM {name}")
+                ]
+                for name in self._own_tables(con, summary.table_prefix)
+            }
+            shared = {
+                table: [
+                    dict(row)
+                    for row in con.execute(f"SELECT * FROM {table} WHERE space = ?", (space,))
+                ]
+                for table in SHARED_TABLES
+            }
+        return {
+            "format": "aep-memory-space-export/1",
+            "space": space,
+            "manager": summary.manager,
+            "exported_at": now_iso(),
+            "declaration": summary.declaration.model_dump(mode="json"),
+            "rules": summary.rules.model_dump(mode="json"),
+            "tables": own,
+            "shared": shared,
+        }
+
+    def delete_space(self, space: str, *, actor: str, reason: str = "") -> dict[str, int]:
+        """Delete every row one space holds (its own tables and its rows of
+        the shared facilities, observations included) in one transaction; the
+        space stays registered, its tables stay, empty. One `space_deletions`
+        row records who, when and how many rows, never the content (§3.6).
+        Not undoable: the memory page asks first and offers the export."""
+        summary = self._summary_of(space)
+        counts: dict[str, int] = {}
+        with self.connect(immediate=True) as con:
+            for name in self._own_tables(con, summary.table_prefix):
+                counts[name[len(summary.table_prefix) :]] = con.execute(
+                    f"DELETE FROM {name}"
+                ).rowcount
+            # Observations are append-only for every caller; the person's
+            # deletion of the whole space is the one exception, inside this
+            # transaction (a failure rolls the trigger's removal back too).
+            con.execute("DROP TRIGGER IF EXISTS observations_never_deleted")
+            for table in SHARED_TABLES:
+                counts[table] = con.execute(
+                    f"DELETE FROM {table} WHERE space = ?", (space,)
+                ).rowcount
+            con.execute(_OBSERVATIONS_NEVER_DELETED)
+            con.execute(
+                "INSERT INTO space_deletions (space, at, actor, reason, counts_json) "
+                "VALUES (?,?,?,?,?)",
+                (space, now_iso(), actor, reason, json.dumps(counts, sort_keys=True)),
+            )
+        return counts
+
+    def deletions(self, *, limit: int = 50) -> list[dict[str, Any]]:
+        """Deletions of spaces' data, newest first (no content)."""
+        with self.connect() as con:
+            rows = con.execute(
+                "SELECT * FROM space_deletions ORDER BY deletion_id DESC LIMIT ?", (limit,)
+            )
+            return [
+                {
+                    "deletion_id": row["deletion_id"],
+                    "space": row["space"],
+                    "at": row["at"],
+                    "actor": row["actor"],
+                    "reason": row["reason"],
+                    "counts": json.loads(row["counts_json"] or "{}"),
+                }
+                for row in rows
+            ]
 
 
 def _summary(row: sqlite3.Row) -> SpaceSummary:

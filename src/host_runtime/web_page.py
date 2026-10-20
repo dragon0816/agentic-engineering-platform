@@ -99,6 +99,92 @@ body {
 #nav-knowledge::before { content: "\25a4"; }
 #nav-tasks::before { content: "\2630"; }
 #nav-reviews::before { content: "\2611"; }
+#nav-memory::before { content: "\25ce"; }
+/* The memory page (accumulated memory M4): the person's own memory. Panes are
+   divs, not sections (a section is hidden unless it is an open panel). */
+.mem-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 0 12px;
+  border-bottom: 1px solid var(--line); }
+.mem-tabs button { min-height: 44px; padding: 8px 14px; color: var(--dim);
+  background: transparent; border: 0; border-bottom: 3px solid transparent;
+  font: inherit; font-weight: 600; cursor: pointer; }
+.mem-tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.mem-count { margin-left: 6px; color: var(--dim); font-size: 12px; font-weight: 400; }
+.mem-notice { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px;
+  min-height: 22px; margin: 0 0 10px; color: var(--dim); font-size: 13px; }
+.mem-notice.good { color: var(--good); }
+.mem-notice.bad { color: var(--bad); }
+.mem-pane { max-width: 980px; }
+.mem-intro { color: var(--dim); font-size: 13px; margin: 0 0 12px; }
+.mem-item { margin: 0 0 10px; padding: 10px 14px; border: 1px solid var(--line);
+  border-radius: 10px; background: var(--panel); overflow-wrap: anywhere; }
+.mem-item-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.mem-item-head strong { font-size: 15px; }
+.mem-pairs { display: grid; grid-template-columns: max-content minmax(0, 1fr);
+  gap: 4px 12px; margin: 8px 0; font-size: 14px; }
+.mem-pairs dt { color: var(--dim); }
+.mem-pairs dd { margin: 0; min-width: 0; }
+.mem-new { color: var(--accent); font-weight: 600; }
+.mem-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 0; }
+.mem-btn { display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; min-width: 44px; padding: 0 14px; border: 1px solid var(--line);
+  border-radius: 8px; background: var(--bg); color: var(--ink); font: inherit;
+  font-size: 14px; cursor: pointer; }
+.mem-btn:hover { border-color: var(--accent); }
+.mem-btn.primary { border-color: var(--accent); background: var(--accent); color: var(--bg);
+  font-weight: 600; }
+.mem-btn.danger { border-color: var(--bad); color: var(--bad); }
+.mem-btn.link { border-color: transparent; background: transparent; color: var(--accent);
+  padding: 0 8px; }
+.mem-btn.link:hover { text-decoration: underline; }
+.mem-btn[disabled] { opacity: .5; cursor: default; }
+.mem-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0 6px;
+  margin: 2px 0; color: var(--dim); font-size: 13px; }
+.mem-text { margin: 0 0 4px; font-size: 15px; }
+.mem-group { margin: 18px 0 8px; font-size: 15px; }
+.mem-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.mem-chip { display: inline-flex; align-items: center; min-height: 44px; padding: 0 0 0 12px;
+  border: 1px solid var(--line); border-radius: 22px; background: var(--bg); font-size: 13px; }
+.mem-chip.entity { border-color: var(--accent); }
+.mem-chip .mem-btn { border: 0; background: transparent; color: var(--dim); }
+.mem-chip .mem-btn:hover { color: var(--bad); }
+.mem-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 12px; }
+.mem-field { min-height: 44px; padding: 8px 10px; border: 1px solid var(--line);
+  border-radius: 8px; background: var(--bg); color: var(--ink); font: inherit; font-size: 14px; }
+.mem-toolbar input.mem-field { flex: 1 1 220px; min-width: 0; }
+select.mem-field { width: auto; flex: 0 1 220px; min-width: 0; max-width: 100%; }
+.mem-check { display: inline-flex; align-items: center; gap: 8px; min-height: 44px;
+  font-size: 14px; cursor: pointer; }
+.mem-check input { width: 20px; height: 20px; margin: 0; }
+.mem-editor { margin: 8px 0 0; }
+.mem-editor textarea { min-height: 120px; font: 14px/1.5 "Segoe UI", system-ui, sans-serif; }
+.mem-inline { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 0; }
+.mem-inline input.mem-field { flex: 1 1 200px; min-width: 0; }
+.mem-conflict { margin: 8px 0; padding: 8px 12px; border: 1px solid var(--warn);
+  border-radius: 8px; }
+.mem-conflict p { margin: 4px 0; }
+.mem-danger { margin: 8px 0; padding: 10px 12px; border: 1px solid var(--bad); border-radius: 8px; }
+.mem-danger p { margin: 4px 0; }
+.mem-note-body { margin: 6px 0; line-height: 1.6; }
+.mem-note-body > :first-child { margin-top: 0; }
+.mem-note-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.tag.mem-orphan { color: var(--warn); border-color: var(--warn); }
+.tag.mem-off { color: var(--dim); }
+.mem-results { display: grid; gap: 4px; margin: 6px 0 0; }
+.mem-results .mem-btn { justify-content: flex-start; text-align: left; }
+.mem-list { margin: 6px 0; padding-left: 20px; }
+.mem-list li { margin: 4px 0; overflow-wrap: anywhere; }
+.mem-sub { margin: 14px 0 0; padding: 12px 14px; border: 1px solid var(--line);
+  border-radius: 10px; }
+.mem-sub h3 { margin: 0 0 8px; font-size: 15px; }
+.mem-records dt { font-weight: 600; color: var(--ink); }
+.mem-records dd { color: var(--dim); }
+.mem-inline input.mem-field.mem-days { flex: 0 0 7em; width: 7em; }
+#mem-refresh { flex: none; white-space: nowrap; }
+.mem-used summary { padding: 11px 0; cursor: pointer; color: var(--dim); font-size: 13px; }
+@media (max-width: 520px) {
+  .mem-pairs { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .mem-pairs dd { margin: 0 0 6px; }
+}
 .rv-card { border: 1px solid var(--line, #ddd); border-radius: 8px; padding: 10px 14px;
   margin: 10px 0; background: var(--panel, #fff); }
 .rv-card h3 { margin: 0 0 4px; font-size: 15px; }
@@ -862,6 +948,7 @@ tr:last-child td { border-bottom: none; }
     <button id="nav-knowledge" type="button">Knowledge</button>
     <button id="nav-tasks" type="button">Tasks</button>
     <button id="nav-reviews" type="button">Reviews</button>
+    <button id="nav-memory" type="button">記憶</button>
   </div>
   <div class="session-heading"><span>Sessions</span><span id="session-count">0</span></div>
   <input id="session-search" class="session-search" type="search"
@@ -1820,6 +1907,85 @@ tr:last-child td { border-bottom: none; }
           <button id="xp-save" type="button">Save settings</button>
         </div>
         <div id="xp-report" class="kp-markdown"></div></details>
+  </section>
+  <section id="panel-memory" lang="zh-Hant">
+    <div class="workspace-head">
+      <div><h2>記憶</h2>
+        <p class="note">Agent 記得的你的事：待確認的項目、偏好、筆記、各 Skill 的資料與整理進度。
+          只有你看得到；這裡的每個變更都記成「你 via web」，大多可以復原。
+          Agent 沒有任何工具能讀或改這一頁。</p></div>
+      <button id="mem-refresh" class="mem-btn" type="button">更新</button>
+    </div>
+    <div class="mem-tabs" id="mem-tabs" role="tablist" aria-label="記憶">
+      <button type="button" role="tab" data-mem="confirm" aria-selected="true">待確認<span
+        class="mem-count"></span></button>
+      <button type="button" role="tab" data-mem="preferences" aria-selected="false">偏好<span
+        class="mem-count"></span></button>
+      <button type="button" role="tab" data-mem="notes" aria-selected="false">筆記<span
+        class="mem-count"></span></button>
+      <button type="button" role="tab" data-mem="data" aria-selected="false">資料<span
+        class="mem-count"></span></button>
+      <button type="button" role="tab" data-mem="sync" aria-selected="false">同步進度<span
+        class="mem-count"></span></button>
+      <button type="button" role="tab" data-mem="records" aria-selected="false">紀錄<span
+        class="mem-count"></span></button>
+    </div>
+    <div id="mem-notice" class="mem-notice" role="status" aria-live="polite"></div>
+    <div class="mem-pane" id="mem-pane-confirm" role="tabpanel" aria-label="待確認">
+      <p class="mem-intro">自動讀到的值和存著的不一樣時，不會直接覆蓋，而是等你決定。
+        平常在對話中就能處理；
+        這裡列出所有空間還沒決定的項目。</p>
+      <div id="mem-confirm-list"></div>
+    </div>
+    <div class="mem-pane" id="mem-pane-preferences" role="tabpanel" aria-label="偏好" hidden>
+      <p class="mem-intro">你說過、按了「存成偏好」的規則。使用該 Skill 時 Agent 會照做、不再詢問。
+        修改時會檢查是否和同一個 Skill 的其他偏好矛盾。</p>
+      <div id="mem-preferences-list"></div>
+    </div>
+    <div class="mem-pane" id="mem-pane-notes" role="tabpanel" aria-label="筆記" hidden>
+      <p class="mem-intro">對話中存下的筆記。Agent 只在需要時查詢，不會自動帶進每一輪。</p>
+      <div class="mem-toolbar">
+        <input id="mem-note-search" class="mem-field" type="search" placeholder="搜尋筆記"
+               aria-label="搜尋筆記">
+        <select id="mem-note-tag" class="mem-field" aria-label="依標籤篩選"></select>
+        <select id="mem-note-entity" class="mem-field" aria-label="依關聯對象篩選"></select>
+      </div>
+      <div class="mem-toolbar">
+        <label class="mem-check"><input id="mem-note-all" type="checkbox">
+          全選（目前列出的）</label>
+        <button id="mem-note-export" class="mem-btn" type="button">匯出選取（Markdown）</button>
+      </div>
+      <div id="mem-notes-list"></div>
+    </div>
+    <div class="mem-pane" id="mem-pane-data" role="tabpanel" aria-label="資料" hidden>
+      <p class="mem-intro">每個記憶空間一列：由哪個 Skill 管理、存了多少、最後何時更新。
+        管理的 Skill 已不在這台電腦時標示「無主」，資料保留，由你決定是否刪除（在「紀錄」）。</p>
+      <div id="mem-spaces-list"></div>
+      <div id="mem-people" class="mem-sub" hidden>
+        <h3>聯絡人</h3>
+        <p class="mem-intro">組織圖請在對話中說「&lt;公司&gt; 組織圖」。</p>
+        <div class="mem-toolbar">
+          <input id="mem-people-search" class="mem-field" type="search"
+                 placeholder="搜尋姓名、公司、Email"
+                 aria-label="搜尋聯絡人">
+          <select id="mem-people-status" class="mem-field" aria-label="在職狀態">
+            <option value="any">全部</option><option value="active">在職</option>
+            <option value="left">已離職</option></select>
+        </div>
+        <div id="mem-people-list"></div>
+        <div id="mem-person"></div>
+      </div>
+    </div>
+    <div class="mem-pane" id="mem-pane-sync" role="tabpanel" aria-label="同步進度" hidden>
+      <p class="mem-intro">每個來源整理到哪裡。「重新整理」讓下次從頭整理（例如簽名檔擷取有誤時）；
+        按錯了可以「復原上次重設」。</p>
+      <div id="mem-sync-list"></div>
+    </div>
+    <div class="mem-pane" id="mem-pane-records" role="tabpanel" aria-label="紀錄" hidden>
+      <p class="mem-intro">紀錄是發生過的事（對話、執行），會依期限清掉；
+        記憶是整理出來、之後會再用的東西。</p>
+      <div id="mem-records"></div>
+    </div>
   </section>
   <section id="panel-tasks">
     <div class="workspace-head">
@@ -8497,9 +8663,617 @@ el("task-refresh").addEventListener("click", () => loadTasks().catch((failure) =
   el("task-counts").textContent = failure.message;
 }));
 
+// -- The memory page (accumulated memory M4) --------------------------------
+// The person's own memory, one overview call; every action is a token-checked
+// route that acts only for the signed-in actor. Nothing here is a model tool.
+const MEM_PANES = ["confirm", "preferences", "notes", "data", "sync", "records"];
+let memData = null, memPane = "confirm";
+const memSelected = new Set();
+
+function memEl(tagName, className, ...children) {
+  const node = document.createElement(tagName);
+  if (className) node.className = className;
+  for (const child of children) {
+    if (child == null || child === "") continue;
+    node.append(child instanceof Node ? child : text(child));
+  }
+  return node;
+}
+
+function memButton(label, onClick, kind, aria) {
+  const button = document.createElement("button");
+  button.type = "button"; button.className = "mem-btn" + (kind ? " " + kind : "");
+  button.append(text(label));
+  if (aria) button.setAttribute("aria-label", aria);
+  button.addEventListener("click", (event) => {
+    event.preventDefault(); Promise.resolve(onClick()).catch((failure) =>
+      memNotice({ok: false, message: failure.message}));
+  });
+  return button;
+}
+
+function memNotice(reply, undo) {
+  const box = el("mem-notice"); box.replaceChildren();
+  if (!reply) { box.className = "mem-notice"; return; }
+  box.className = "mem-notice " + (reply.ok ? "good" : "bad");
+  box.append(memEl("span", "", reply.message || reply.code || ""));
+  if (reply.ok && undo) {
+    box.append(memButton("復原", async () => {
+      memNotice(null);
+      const back = await undo();
+      if (back && back.ok) await loadMemory().catch(() => {});
+      memNotice(back, null);
+    }, "link"));
+  }
+}
+
+// One action: the page drawn again from the server, then the answer in the
+// notice (with 復原 when `undoFor` gives one).
+async function memAct(path, body, undoFor) {
+  memNotice(null);
+  let reply;
+  try { reply = await call(path, body); }
+  catch (failure) { reply = {ok: false, message: failure.message}; }
+  const undo = reply.ok && undoFor ? undoFor(reply) : null;
+  if (reply.ok) await loadMemory().catch(() => {});
+  memNotice(reply, undo);
+  return reply;
+}
+
+const memUndo = (kind) => (reply) => reply.change_id
+  ? () => call("/api/memory/undo", {kind, change_id: reply.change_id}) : null;
+
+function memDownload(filename, body, type) {
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(new Blob([body], {type}));
+  link.download = filename; document.body.append(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(link.href), 30000);
+}
+
+function memShortRef(ref) {
+  return ref.length > 28 ? ref.slice(0, 18) + "…" + ref.slice(-6) : ref;
+}
+
+async function memOpenConversation(sessionId, messageId) {
+  const listed = await call("/api/conversations?session_id=" + encodeURIComponent(sessionId));
+  if (!listed.selected || listed.selected.session_id !== sessionId) {
+    memNotice({ok: false, message: "這段對話已經刪除了；偏好與筆記仍保留。"}); return;
+  }
+  await selectPrimaryTab("ask");
+  activeConversation = sessionId; log.replaceChildren();
+  await loadChat(sessionId);
+  const target = [...log.querySelectorAll(".turn")].find((block) =>
+    block.dataset.askedId === messageId || block.dataset.messageId === messageId);
+  if (target) {
+    for (const old of log.querySelectorAll(".turn.sg-target")) old.classList.remove("sg-target");
+    target.classList.add("sg-target");
+    target.scrollIntoView({block: "center"}); target.focus({preventScroll: true});
+  }
+}
+
+async function loadMemory() {
+  memData = await call("/api/memory/overview");
+  memRender();
+}
+
+function memShow(name) {
+  memPane = name;
+  for (const button of document.querySelectorAll("#mem-tabs [data-mem]")) {
+    button.setAttribute("aria-selected", String(button.dataset.mem === name));
+  }
+  for (const key of MEM_PANES) el("mem-pane-" + key).hidden = key !== name;
+}
+
+function memRender() {
+  if (!memData || !memData.ok) return;
+  const counts = {
+    confirm: memData.proposals.length,
+    preferences: memData.preferences.reduce((sum, group) => sum + group.items.length, 0),
+    notes: memData.notes.notes.length, data: memData.spaces.length, sync: memData.sync.length,
+    records: null,
+  };
+  for (const button of document.querySelectorAll("#mem-tabs [data-mem]")) {
+    const count = counts[button.dataset.mem];
+    button.querySelector(".mem-count").textContent = count == null ? "" : String(count);
+  }
+  memShow(memPane);
+  memRenderConfirm(); memRenderPreferences(); memRenderNotes(); memRenderSpaces();
+  memRenderSync(); memRenderRecords();
+}
+
+// 待確認
+function memRenderConfirm() {
+  const list = el("mem-confirm-list"); list.replaceChildren();
+  if (!memData.proposals.length) {
+    list.append(memEl("p", "empty", "沒有待確認的項目。")); return;
+  }
+  for (const item of memData.proposals) {
+    const card = memEl("article", "mem-item"); card.dataset.proposal = item.proposal_id;
+    card.append(memEl("div", "mem-item-head",
+      memEl("strong", "", item.entity_label + " · " + item.field_label),
+      memEl("span", "tag", item.space_label)));
+    const pairs = memEl("dl", "mem-pairs");
+    const evidence = [item.source_label, item.evidence_date,
+      item.evidence_ref ? memShortRef(item.evidence_ref) : ""].filter(Boolean).join(" · ");
+    pairs.append(memEl("dt", "", "存著的"), memEl("dd", "", item.current || "（空白）"),
+      memEl("dt", "", "新讀到"), memEl("dd", "mem-new", item.proposed),
+      memEl("dt", "", "證據"), memEl("dd", "", evidence || "—"),
+      memEl("dt", "", "提出"), memEl("dd", "", item.created_at_local));
+    const actions = memEl("div", "mem-actions");
+    actions.append(memButton("保留原值", () => memDecide(item, "keep")));
+    if (item.actions.includes("accept")) {
+      actions.append(memButton("改用新值", () => memDecide(item, "accept"), "primary"));
+    }
+    if (item.person_id) {
+      actions.append(memButton("開啟該聯絡人", () => memOpenPerson(item.person_id), "link"));
+    }
+    card.append(pairs, actions); list.append(card);
+  }
+}
+
+function memDecide(item, action) {
+  return memAct("/api/memory/proposals/decide",
+    {space: item.space, proposal_id: item.proposal_id, action},
+    (reply) => reply.undo ? () => call("/api/memory/proposals/undo",
+      {space: item.space, change_id: reply.change_id}) : null);
+}
+
+// 偏好
+function memRenderPreferences() {
+  const box = el("mem-preferences-list"); box.replaceChildren();
+  if (!memData.preferences.length) {
+    box.append(memEl("p", "empty",
+      "還沒有偏好。在對話中說出規則，按卡片上的「存成偏好」才會保存。")); return;
+  }
+  for (const group of memData.preferences) {
+    box.append(memEl("h3", "mem-group", group.label));
+    for (const item of group.items) box.append(memPreference(item));
+  }
+}
+
+function memPreference(item) {
+  const card = memEl("article", "mem-item"); card.dataset.preference = item.preference_id;
+  card.append(memEl("p", "mem-text", item.text));
+  const meta = memEl("div", "mem-meta", item.created_by + " · " + item.created_at_local);
+  if (item.updated_at !== item.created_at) {
+    meta.append(memEl("span", "", "修改於 " + item.updated_at_local));
+  }
+  if (item.source_session) {
+    meta.append(memButton("來源對話", () => memOpenConversation(item.source_session,
+      item.source_message), "link", "開啟存下這條偏好的對話"));
+  }
+  card.append(meta);
+  if (item.used_count) {
+    const used = memEl("details", "mem-used",
+      memEl("summary", "", "用過 " + item.used_count + " 次"));
+    const uses = memEl("div", "mem-results");
+    for (const use of item.used) {
+      uses.append(memButton(use.at_local + " · " + (use.title || use.session_id),
+        () => memOpenConversation(use.session_id, use.message_id), "link"));
+    }
+    used.append(uses); card.append(used);
+  }
+  const editor = memEl("div", "mem-editor"); editor.hidden = true;
+  const area = document.createElement("textarea");
+  area.value = item.text; area.maxLength = 300; area.setAttribute("aria-label", "偏好內容");
+  const conflict = memEl("div", "mem-conflict"); conflict.hidden = true;
+  const save = async (resolve, replace) => {
+    memNotice(null);
+    let reply;
+    try {
+      reply = await call("/api/memory/preferences/edit",
+        {id: item.preference_id, text: area.value, resolve: resolve || "", replace: replace || []});
+    } catch (failure) { reply = {ok: false, message: failure.message}; }
+    if (reply.code === "preference_conflict") {
+      conflict.hidden = false;
+      conflict.replaceChildren(memEl("p", "", "這條和同一個 Skill 既有的偏好矛盾，要怎麼辦？"));
+      for (const other of reply.conflicts) conflict.append(memEl("p", "", "既有：" + other.text));
+      conflict.append(memEl("p", "", "修改後：" + area.value));
+      const ids = reply.conflicts.map((other) => other.preference_id);
+      conflict.append(memEl("div", "mem-actions",
+        memButton("取代舊的", () => save("replace", ids), "primary"),
+        memButton("兩條都留", () => save("keep_both", [])),
+        memButton("取消", () => { conflict.hidden = true; })));
+      return;
+    }
+    if (reply.ok) await loadMemory().catch(() => {});
+    memNotice(reply, reply.ok ? memUndo("preference")(reply) : null);
+  };
+  editor.append(area, conflict, memEl("div", "mem-actions",
+    memButton("儲存", () => save("", []), "primary"),
+    memButton("取消", () => {
+      editor.hidden = true; area.value = item.text; conflict.hidden = true;
+    })));
+  card.append(memEl("div", "mem-actions",
+    memButton("修改", () => { editor.hidden = false; area.focus(); }),
+    memButton("刪除", () => {
+      if (!confirm("刪除這條偏好？之後使用『" + item.scope_label
+        + "』時不再套用。可以復原。")) return;
+      return memAct("/api/memory/delete", {kind: "preference", id: item.preference_id},
+        memUndo("preference"));
+    }, "danger")), editor);
+  return card;
+}
+
+// 筆記
+function memNoteVisible(note) {
+  const words = el("mem-note-search").value.toLowerCase().split(/\s+/).filter(Boolean);
+  const tag = el("mem-note-tag").value, entity = el("mem-note-entity").value;
+  if (tag && !note.tags.some((item) => item.toLowerCase() === tag.toLowerCase())) return false;
+  if (entity && !note.entities.includes(entity)) return false;
+  const haystack = (note.text + " " + note.tags.join(" ")).toLowerCase();
+  return words.every((word) => haystack.includes(word));
+}
+
+function memFillSelect(select, first, options) {
+  const chosen = select.value; select.replaceChildren(new Option(first, ""));
+  for (const [value, label] of options) select.append(new Option(label, value));
+  select.value = options.some(([value]) => value === chosen) ? chosen : "";
+}
+
+function memRenderNotes() {
+  const notes = memData.notes;
+  memFillSelect(el("mem-note-tag"), "所有標籤", notes.tags.map((tag) => [tag, "#" + tag]));
+  memFillSelect(el("mem-note-entity"), "所有關聯對象", Object.entries(notes.entities));
+  const list = el("mem-notes-list"); list.replaceChildren();
+  const known = new Set(notes.notes.map((note) => note.note_id));
+  for (const id of [...memSelected]) if (!known.has(id)) memSelected.delete(id);
+  const shown = notes.notes.filter(memNoteVisible);
+  el("mem-note-all").checked = shown.length > 0
+    && shown.every((note) => memSelected.has(note.note_id));
+  if (!notes.notes.length) {
+    list.append(memEl("p", "empty",
+      "還沒有筆記。在回答旁按 📝「存成筆記」，或選取一段文字存起來。"));
+    return;
+  }
+  if (!shown.length) { list.append(memEl("p", "empty", "沒有符合的筆記。")); return; }
+  for (const note of shown) list.append(memNote(note, notes.entities));
+}
+
+function memNote(note, labels) {
+  const card = memEl("article", "mem-item"); card.dataset.note = note.note_id;
+  const pick = document.createElement("input"); pick.type = "checkbox";
+  pick.checked = memSelected.has(note.note_id);
+  pick.addEventListener("change", () => {
+    if (pick.checked) memSelected.add(note.note_id); else memSelected.delete(note.note_id);
+  });
+  card.append(memEl("div", "mem-note-head",
+    memEl("label", "mem-check", pick, note.created_at_local),
+    memEl("span", "mem-meta", note.note_id)));
+  const edit = (body) => memAct("/api/memory/notes/edit", {id: note.note_id, ...body},
+    memUndo("note"));
+  const chips = memEl("div", "mem-chips");
+  for (const tag of note.tags) {
+    chips.append(memEl("span", "mem-chip", "#" + tag, memButton("×",
+      () => edit({tags: note.tags.filter((item) => item !== tag)}), "", "移除標籤 " + tag)));
+  }
+  for (const ref of note.entities) {
+    const label = labels[ref] || ref;
+    chips.append(memEl("span", "mem-chip entity", label, memButton("×",
+      () => edit({entities: note.entities.filter((item) => item !== ref)}), "",
+      "取消連結 " + label)));
+  }
+  if (chips.childNodes.length) card.append(chips);
+  const body = memEl("div", "mem-note-body kp-markdown"); body.append(renderMarkdown(note.text));
+  card.append(body);
+  const meta = memEl("div", "mem-meta", note.created_by);
+  if (note.updated_at !== note.created_at) {
+    meta.append(memEl("span", "", "修改於 " + note.updated_at_local));
+  }
+  if (note.source && note.source.conversation) {
+    meta.append(memButton("開啟原本的對話", () => memOpenConversation(note.source.conversation,
+      note.source.message), "link"));
+  }
+  card.append(meta);
+  const extra = memEl("div", "");
+  const editor = () => {
+    const area = document.createElement("textarea"); area.value = note.text;
+    area.setAttribute("aria-label", "筆記內容（Markdown）");
+    extra.replaceChildren(memEl("div", "mem-editor", area, memEl("div", "mem-actions",
+      memButton("儲存", () => edit({text: area.value}), "primary"),
+      memButton("取消", () => extra.replaceChildren()))));
+    area.focus();
+  };
+  const tagger = () => {
+    const input = memEl("input", "mem-field"); input.placeholder = "新標籤";
+    input.setAttribute("aria-label", "新標籤");
+    const add = () => input.value.trim() && edit({tags: [...note.tags, input.value.trim()]});
+    input.addEventListener("keydown", (event) => { if (event.key === "Enter") add(); });
+    extra.replaceChildren(memEl("div", "mem-inline", input, memButton("加入", add, "primary"),
+      memButton("取消", () => extra.replaceChildren())));
+    input.focus();
+  };
+  const linker = () => {
+    const input = memEl("input", "mem-field"); input.type = "search";
+    input.placeholder = "搜尋聯絡人"; input.setAttribute("aria-label", "搜尋要連結的聯絡人");
+    const results = memEl("div", "mem-results");
+    const find = async () => {
+      const found = await call("/api/memory/people?q=" + encodeURIComponent(input.value.trim()));
+      results.replaceChildren();
+      if (!found.ok) { results.append(memEl("p", "empty", found.message || found.code)); return; }
+      if (!found.people.length) {
+        results.append(memEl("p", "empty", "找不到符合的聯絡人。")); return;
+      }
+      for (const person of found.people.slice(0, 8)) {
+        const ref = "contacts/org:person:" + person.person_id;
+        const label = person.name + (person.company ? "（" + person.company + "）" : "");
+        results.append(memButton(note.entities.includes(ref) ? label + "（已連結）" : label,
+          () => note.entities.includes(ref) ? null : edit({entities: [...note.entities, ref]}),
+          "link", "連結 " + label));
+      }
+    };
+    input.addEventListener("keydown", (event) => { if (event.key === "Enter") find(); });
+    extra.replaceChildren(memEl("div", "mem-inline", input, memButton("搜尋", find, "primary"),
+      memButton("取消", () => extra.replaceChildren())), results);
+    input.focus();
+  };
+  card.append(memEl("div", "mem-actions",
+    memButton("修改", editor), memButton("加標籤", tagger), memButton("連結聯絡人", linker),
+    memButton("刪除", () => {
+      if (!confirm("刪除這則筆記？可以復原。")) return;
+      return memAct("/api/memory/delete", {kind: "note", id: note.note_id}, memUndo("note"));
+    }, "danger")), extra);
+  return card;
+}
+
+async function memExportNotes() {
+  memNotice(null);
+  const shown = memData.notes.notes.filter(memNoteVisible).map((note) => note.note_id);
+  const chosen = shown.filter((id) => memSelected.has(id));
+  const ids = chosen.length ? chosen : shown;
+  if (!ids.length) { memNotice({ok: false, message: "沒有可匯出的筆記。"}); return; }
+  const reply = await call("/api/memory/notes/export?ids=" + encodeURIComponent(ids.join(",")));
+  if (!reply.ok) { memNotice(reply); return; }
+  memDownload(reply.filename, reply.markdown, "text/markdown;charset=utf-8");
+  memNotice({ok: true, message: "已匯出 " + reply.count + " 則筆記（" + reply.filename + "）。"});
+}
+
+// 資料
+const MEM_MANAGER_STATES = {on: ["已開啟", "on"], off: ["已關閉（唯讀）", "mem-off"],
+  host: ["內建", "on"], missing: ["無主：管理的 Skill 已不在這台電腦", "mem-orphan"]};
+
+function memRenderSpaces() {
+  const list = el("mem-spaces-list"); list.replaceChildren();
+  for (const space of memData.spaces) {
+    const card = memEl("article", "mem-item"); card.dataset.space = space.space;
+    const [stateLabel, stateClass] = MEM_MANAGER_STATES[space.manager_state]
+      || [space.manager_state, ""];
+    card.append(memEl("div", "mem-item-head", memEl("strong", "", space.label),
+      memEl("span", "mem-meta", space.space), memEl("span", "tag " + stateClass, stateLabel)));
+    const counts = space.counts.map((item) => item.label + " " + item.count).join("、") || "0";
+    const pairs = memEl("dl", "mem-pairs");
+    pairs.append(memEl("dt", "", "管理"),
+      memEl("dd", "", space.manager_label + "（" + space.manager + "）"),
+      memEl("dt", "", "種類"), memEl("dd", "", space.kind_labels.join("、")),
+      memEl("dt", "", "敏感度"),
+      memEl("dd", "", space.sensitivity_label + "（" + space.sensitivity + "）"),
+      memEl("dt", "", "保留"), memEl("dd", "", space.retention_label),
+      memEl("dt", "", "筆數"), memEl("dd", "", counts + (space.open_proposals
+        ? "；待確認 " + space.open_proposals : "")),
+      memEl("dt", "", "最後更新"), memEl("dd", "", space.last_updated_local || "—"));
+    card.append(pairs);
+    if (space.view === "people") {
+      card.append(memEl("div", "mem-actions",
+        memButton("開啟聯絡人", () => memOpenPeople(), "primary")));
+    }
+    list.append(card);
+  }
+}
+
+async function memOpenPeople() {
+  memShow("data"); el("mem-people").hidden = false;
+  await memLoadPeople(); el("mem-people").scrollIntoView({block: "start"});
+}
+
+async function memLoadPeople() {
+  const query = el("mem-people-search").value.trim(), status = el("mem-people-status").value;
+  const reply = await call("/api/memory/people?q=" + encodeURIComponent(query)
+    + "&status=" + encodeURIComponent(status));
+  const list = el("mem-people-list"); list.replaceChildren();
+  if (!reply.ok) { list.append(memEl("p", "empty", reply.message || reply.code)); return; }
+  if (!reply.people.length) { list.append(memEl("p", "empty", "沒有符合的聯絡人。")); return; }
+  const more = reply.total > reply.people.length
+    ? "，列出前 " + reply.people.length + " 人" : "";
+  list.append(memEl("p", "mem-meta", "共 " + reply.total + " 人" + more));
+  for (const person of reply.people) {
+    const card = memEl("article", "mem-item"); card.dataset.person = person.person_id;
+    card.append(memEl("div", "mem-item-head",
+      memEl("strong", "", person.name || person.romanised_name),
+      memEl("span", "tag " + (person.status === "active" ? "on" : "mem-off"), person.status_label),
+      person.open_proposals
+        ? memEl("span", "tag mem-orphan", "待確認 " + person.open_proposals) : ""));
+    card.append(memEl("div", "mem-meta", [person.company, person.department, person.title]
+      .filter(Boolean).join(" · ")));
+    if (person.email) card.append(memEl("div", "mem-meta", person.email));
+    card.append(memEl("div", "mem-actions",
+      memButton("歷史", () => memOpenPerson(person.person_id), "link", "歷史：" + person.name)));
+    list.append(card);
+  }
+}
+
+async function memOpenPerson(personId) {
+  if (memPane !== "data" || el("mem-people").hidden) await memOpenPeople();
+  const reply = await call("/api/memory/person?person_id=" + encodeURIComponent(personId));
+  const box = el("mem-person"); box.replaceChildren();
+  if (!reply.ok) { box.append(memEl("p", "empty", reply.message || reply.code)); return; }
+  const person = reply.person;
+  const panel = memEl("div", "mem-sub"); panel.id = "mem-person-panel";
+  panel.append(memEl("h3", "", (person.name || person.romanised_name) + " 的歷史"),
+    memEl("div", "mem-meta", [person.company, person.department, person.title, person.status_label]
+      .filter(Boolean).join(" · ")));
+  if (reply.proposals.length) {
+    panel.append(memEl("p", "", "待確認 " + reply.proposals.length + " 項，在「待確認」處理。"));
+  }
+  const changes = memEl("ul", "mem-list");
+  for (const item of reply.history) {
+    const change = item.field_label ? item.field_label + "：" + (item.old_display || "（空白）")
+      + " → " + (item.new_display || "（空白）") : "";
+    changes.append(memEl("li", "", [item.at_local, item.kind_label, change, item.actor]
+      .filter(Boolean).join(" · ")));
+  }
+  panel.append(memEl("strong", "", "變更"),
+    reply.history.length ? changes : memEl("p", "empty", "沒有變更。"));
+  const seen = memEl("ul", "mem-list");
+  for (const item of reply.observations) {
+    seen.append(memEl("li", "", [item.source_label, item.source_date,
+      item.source_ref ? memShortRef(item.source_ref) : ""].filter(Boolean).join(" · ")));
+  }
+  panel.append(memEl("strong", "", "讀到的來源"),
+    reply.observations.length ? seen : memEl("p", "empty", "沒有。"));
+  box.append(panel); panel.scrollIntoView({block: "start"});
+}
+
+// 同步進度
+function memRenderSync() {
+  const list = el("mem-sync-list"); list.replaceChildren();
+  if (!memData.sync.length) {
+    list.append(memEl("p", "empty", "還沒有整理進度。第一次整理（例如問組織圖）後會出現在這裡。"));
+    return;
+  }
+  for (const item of memData.sync) {
+    const card = memEl("article", "mem-item");
+    card.dataset.sync = item.space + "|" + item.source + "|" + item.key;
+    card.append(memEl("div", "mem-item-head", memEl("strong", "", item.key),
+      memEl("span", "mem-meta", item.source), memEl("span", "tag", item.space_label)));
+    const pairs = memEl("dl", "mem-pairs");
+    if (item.state) {
+      pairs.append(memEl("dt", "", "整理到"), memEl("dd", "", item.state.last_message_date_local),
+        memEl("dt", "", "擷取版本"), memEl("dd", "", item.state.extractor_version || "—"),
+        memEl("dt", "", "更新"), memEl("dd", "", item.state.updated_by + " · "
+          + item.state.updated_at_local));
+    } else {
+      pairs.append(memEl("dt", "", "狀態"), memEl("dd", "", "已重設，下次從頭整理"));
+    }
+    if (item.latest) {
+      const actions = {advance: "前進", reset: "重設", restore: "復原"};
+      pairs.append(memEl("dt", "", "上一次"), memEl("dd", "", (actions[item.latest.action]
+        || item.latest.action) + " · " + item.latest.actor + " · " + item.latest.at_local));
+    }
+    const body = {space: item.space, source: item.source, key: item.key};
+    const reset = memButton("重新整理", () => {
+      if (!confirm("重新整理「" + item.key + "」（" + item.source + "）？"
+        + "下次整理會從頭讀範圍內的來源。"
+        + "按錯了可以「復原上次重設」。")) return;
+      return memAct("/api/memory/sync/reset", body);
+    }, "danger");
+    reset.disabled = !item.can_reset;
+    const restore = memButton("復原上次重設", () => memAct("/api/memory/sync/restore", body));
+    restore.disabled = !item.can_restore;
+    card.append(pairs, memEl("div", "mem-actions", reset, restore));
+    list.append(card);
+  }
+}
+
+// 紀錄
+function memRenderRecords() {
+  const box = el("mem-records"); box.replaceChildren();
+  const records = memData.records;
+  const days = document.createElement("input"); days.type = "number"; days.min = "1";
+  days.max = "3650"; days.value = records.experience.retention_days;
+  days.className = "mem-field mem-days"; days.id = "mem-experience-days";
+  days.setAttribute("aria-label", "經驗回顧案例保留天數");
+  const keep = memEl("dl", "mem-pairs mem-records");
+  keep.append(memEl("dt", "", "對話"), memEl("dd", "", records.conversations.retention_label
+      + "；每段對話保存最近 " + records.conversations.max_messages + " 則訊息。刪除對話在左側清單。"
+      + "目前 " + records.conversations.count + " 段" + (records.conversations.count >= 100
+        ? "以上" : "") + "。"),
+    memEl("dt", "", "執行紀錄"), memEl("dd", "", "保留 " + records.runs.days + " 天，總量超過 "
+      + records.runs.max_mb + " MB 時先刪最舊的（固定）。"),
+    memEl("dt", "", "經驗回顧案例"), memEl("dd", "", memEl("span", "mem-inline", days, "天",
+      memButton("儲存", async () => {
+        memNotice(null);
+        // The Reviews page's own setting and route (experience review).
+        const reply = await call("/api/experience/settings", {retention_days: Number(days.value)});
+        const saved = days.value;
+        if (reply.ok !== false) await loadMemory().catch(() => {});
+        memNotice(reply.ok === false ? {ok: false, message: "天數要在 1 到 3650 之間。"}
+          : {ok: true, message: "已儲存：經驗回顧案例保留 " + saved + " 天。"});
+      }))));
+  for (const space of memData.spaces) {
+    keep.append(memEl("dt", "", "記憶：" + space.label),
+      memEl("dd", "", space.retention_label + "（由管理的 Skill 決定，目前不能在這裡改）"));
+  }
+  box.append(memEl("h3", "mem-group", "保留期限"), keep);
+  box.append(memEl("h3", "mem-group", "匯出與刪除記憶"),
+    memEl("p", "mem-intro", "每個空間可以匯出成 JSON。刪除會永久清掉該空間的所有資料，不能復原，"
+      + "只留下一筆刪除紀錄（時間、筆數，沒有內容）。"));
+  for (const space of memData.spaces) {
+    const card = memEl("article", "mem-item"); card.dataset.recordSpace = space.space;
+    const confirmBox = memEl("div", "");
+    const total = space.counts.reduce((sum, item) => sum + item.count, 0) + space.observations;
+    card.append(memEl("div", "mem-item-head", memEl("strong", "", space.label),
+      memEl("span", "mem-meta", space.space + " · " + total + " 筆")),
+    memEl("div", "mem-actions",
+      memButton("匯出 JSON", async () => {
+        memNotice(null);
+        const reply = await call("/api/memory/export?space=" + encodeURIComponent(space.space));
+        if (!reply.ok) { memNotice(reply); return; }
+        memDownload(reply.filename, JSON.stringify(reply.data, null, 2), "application/json");
+        memNotice({ok: true, message: "已匯出『" + space.label + "』（" + reply.filename + "）。"});
+      }),
+      memButton("刪除資料…", () => {
+        const input = memEl("input", "mem-field");
+        input.setAttribute("aria-label", "輸入空間名稱確認");
+        input.placeholder = space.space;
+        const go = memButton("確定刪除", () => memAct("/api/memory/space/delete",
+          {space: space.space, confirm: input.value.trim()}), "danger");
+        go.disabled = true;
+        input.addEventListener("input", () => {
+          go.disabled = input.value.trim() !== space.space;
+        });
+        confirmBox.replaceChildren(memEl("div", "mem-danger",
+          memEl("p", "", "會永久刪除『" + space.label + "』的所有資料（" + total + " 筆），"
+            + "不能復原。"
+            + "建議先匯出。"),
+          space.space === "contacts/org" ? memEl("p", "",
+            "舊版的 cards.db 與它的備份不在記憶資料庫裡，"
+            + "不會被刪除。") : "",
+          memEl("p", "", "請輸入 " + space.space + " 確認："),
+          memEl("div", "mem-inline", input, go,
+            memButton("取消", () => confirmBox.replaceChildren()))));
+        input.focus();
+      }, "danger")), confirmBox);
+    box.append(card);
+  }
+  box.append(memEl("h3", "mem-group", "刪除紀錄"));
+  if (!memData.deletions.length) { box.append(memEl("p", "empty", "沒有刪除過。")); return; }
+  const done = memEl("ul", "mem-list");
+  for (const item of memData.deletions) {
+    const total = Object.values(item.counts).reduce((sum, count) => sum + count, 0);
+    done.append(memEl("li", "", item.at_local + " · " + item.label + "（" + item.space + "）· "
+      + total + " 筆 · " + item.actor));
+  }
+  box.append(done);
+}
+
+for (const button of document.querySelectorAll("#mem-tabs [data-mem]")) {
+  button.addEventListener("click", () => { memNotice(null); memShow(button.dataset.mem); });
+}
+el("mem-refresh").addEventListener("click", () => loadMemory().catch((failure) =>
+  memNotice({ok: false, message: failure.message})));
+for (const id of ["mem-note-search", "mem-note-tag", "mem-note-entity"]) {
+  el(id).addEventListener(id === "mem-note-search" ? "input" : "change", () => {
+    if (memData) memRenderNotes();
+  });
+}
+el("mem-note-all").addEventListener("change", () => {
+  for (const note of memData.notes.notes.filter(memNoteVisible)) {
+    if (el("mem-note-all").checked) memSelected.add(note.note_id);
+    else memSelected.delete(note.note_id);
+  }
+  memRenderNotes();
+});
+el("mem-note-export").addEventListener("click", () => memExportNotes().catch((failure) =>
+  memNotice({ok: false, message: failure.message})));
+el("mem-people-search").addEventListener("keydown", (event) => {
+  if (event.key === "Enter") memLoadPeople().catch(() => {});
+});
+el("mem-people-search").addEventListener("search", () => memLoadPeople().catch(() => {}));
+el("mem-people-status").addEventListener("change", () => memLoadPeople().catch(() => {}));
+
 const panels = {ask: null, installed: loadCapabilities,
   settings: loadSettings, schedules: loadSchedules, knowledge: loadKnowledge, tasks: loadTasks,
-  reviews: loadReviews};
+  reviews: loadReviews, memory: loadMemory};
 
 function showBootError(failure) {
   const banner = el("boot-error"); banner.hidden = false;
@@ -8516,6 +9290,7 @@ async function selectPrimaryTab(name) {
   el("nav-knowledge").toggleAttribute("aria-current", name === "knowledge");
   el("nav-tasks").toggleAttribute("aria-current", name === "tasks");
   el("nav-reviews").toggleAttribute("aria-current", name === "reviews");
+  el("nav-memory").toggleAttribute("aria-current", name === "memory");
   if (name === "ask") { field.focus(); return; }
   try { await panels[name](); }
   catch (failure) { showBootError(failure); }
@@ -8527,6 +9302,7 @@ el("nav-schedules").addEventListener("click", () => selectPrimaryTab("schedules"
 el("nav-knowledge").addEventListener("click", () => selectPrimaryTab("knowledge"));
 el("nav-tasks").addEventListener("click", () => selectPrimaryTab("tasks"));
 el("nav-reviews").addEventListener("click", () => selectPrimaryTab("reviews"));
+el("nav-memory").addEventListener("click", () => selectPrimaryTab("memory"));
 
 assetsReady = loadAssets();
 Promise.all([loadAbout(), assetsReady, loadChat(), loadSlashCommands(), loadAvatars(), loadMcp()])

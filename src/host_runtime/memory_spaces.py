@@ -79,3 +79,30 @@ def conflicts(layout: HostLayout, candidate: SkillManifest | WorkflowManifest) -
         asset_key(candidate.metadata.identity),
         declared,
     )
+
+
+def manager_states(layout: HostLayout) -> dict[str, str]:
+    """`<namespace>/<name>` of every Skill or Workflow installed here that
+    declares itself a space's manager, `on` or `off` (switched off): a space
+    whose manager is neither (nor the Host) is an orphan (§3.6, the memory
+    page)."""
+    found: dict[str, str] = {}
+    folders: tuple[tuple[Path, type[SkillManifest] | type[WorkflowManifest], str], ...] = (
+        (layout.skills, SkillManifest, "on"),
+        (layout.skills / DISABLED, SkillManifest, "off"),
+        (layout.workflows, WorkflowManifest, "on"),
+        (layout.workflows / DISABLED, WorkflowManifest, "off"),
+    )
+    for folder, model, state in folders:
+        if not folder.is_dir():
+            continue
+        for path in sorted(folder.glob("*__*__*.json")):
+            try:
+                manifest = model.model_validate_json(path.read_text(encoding="utf-8-sig"))
+            except (OSError, ValueError):
+                continue
+            if any(item.role == "manager" for item in declarations_of(manifest)):
+                namespace, name = asset_key(manifest.metadata.identity)
+                if found.get(f"{namespace}/{name}") != "on":
+                    found[f"{namespace}/{name}"] = state
+    return found

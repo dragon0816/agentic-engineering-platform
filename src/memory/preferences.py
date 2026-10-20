@@ -85,7 +85,7 @@ _FILLER = re.compile(
 
 class PreferenceError(MemoryServiceError):
     """A refusal by code (`preference_unknown`, `preference_scope_invalid`,
-    `preference_text_empty`, `undo_conflict`)."""
+    `preference_text_empty`, `preference_duplicate`, `undo_conflict`)."""
 
 
 @dataclass(frozen=True)
@@ -324,6 +324,85 @@ class Preferences:
                 )
         return made, change
 
+    def edit(
+        self,
+        preference_id: str,
+        text: str,
+        *,
+        actor: str,
+        replace: Sequence[str] = (),
+        keep_conflicts: bool = False,
+    ) -> tuple[Preference, str]:
+        """Change an active preference's wording (the memory page, M4), as one
+        change: the same deterministic check as a save, against the other
+        active preferences of its scope. The same rule already saved refuses
+        (`preference_duplicate`); a contradiction refuses
+        (`PreferenceConflict`) unless named in `replace` (they become
+        `replaced` in the same change) or `keep_conflicts`. Undo puts the
+        words back."""
+        rule = normalise(text)
+        if not rule:
+            raise PreferenceError("preference_text_empty")
+        current = self.get(preference_id)
+        if current is None or current.status != "active":
+            raise PreferenceError("preference_unknown")
+        if rule == current.text:
+            raise PreferenceError("preference_unchanged")
+        found = self.check(current.scope, rule)
+        others = [item for item in found.duplicates if item.preference_id != preference_id]
+        if others:
+            raise PreferenceError("preference_duplicate")
+        open_conflicts = [
+            item
+            for item in found.conflicts
+            if item.preference_id != preference_id and item.preference_id not in replace
+        ]
+        if open_conflicts and not keep_conflicts:
+            raise PreferenceConflict(open_conflicts)
+        change = new_change_id()
+        stamp = now_iso()
+        with self._space.transaction(immediate=True) as tx:
+            table = tx.table(_TABLE)
+            tx.con.execute(
+                f"UPDATE {table} SET text = ?, polarity = ?, subject = '', updated_at = ? "
+                "WHERE preference_id = ?",
+                (rule, polarity(rule), stamp, preference_id),
+            )
+            tx.record(
+                change,
+                actor,
+                preference_id,
+                "preference_edit",
+                old=current.text,
+                new=rule,
+                source="user",
+                reason="edited by the person",
+                extra={"old": {"text": current.text, "subject": current.subject}},
+            )
+            for old_id in replace:
+                if old_id == preference_id:
+                    continue
+                old = self._rows(tx, "preference_id = ? AND status = 'active'", (old_id,))
+                if not old:
+                    continue
+                tx.con.execute(
+                    f"UPDATE {table} SET status = 'replaced', replaced_by = ?, updated_at = ? "
+                    "WHERE preference_id = ?",
+                    (preference_id, stamp, old_id),
+                )
+                tx.record(
+                    change,
+                    actor,
+                    old_id,
+                    "preference_replace",
+                    old=old[0].text,
+                    new=rule,
+                    reason=f"replaced by {preference_id}",
+                )
+        edited = self.get(preference_id)
+        assert edited is not None
+        return edited, change
+
     def remove(self, preference_id: str, *, actor: str, reason: str = "") -> str:
         """Stop applying one preference (kept, status `removed`); undoable."""
         change = new_change_id()
@@ -381,8 +460,22 @@ def _undo_back(tx: SpaceTx, row: sqlite3.Row, extra: Mapping[str, Any], change: 
     return _set_status(tx, row["entity_id"], "active")
 
 
+def _undo_edit(tx: SpaceTx, row: sqlite3.Row, extra: Mapping[str, Any], change: str) -> bool:
+    old = extra.get("old") or {}
+    words = str(old.get("text") or row["old"])
+    return (
+        tx.con.execute(
+            f"UPDATE {tx.table(_TABLE)} SET text = ?, polarity = ?, subject = ?, updated_at = ? "
+            "WHERE preference_id = ?",
+            (words, polarity(words), str(old.get("subject") or ""), now_iso(), row["entity_id"]),
+        ).rowcount
+        > 0
+    )
+
+
 _HANDLERS = {
     "preference_add": _undo_add,
+    "preference_edit": _undo_edit,
     "preference_replace": _undo_back,
     "preference_remove": _undo_back,
 }

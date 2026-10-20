@@ -209,6 +209,9 @@ from host_runtime.laya import accelerator_for as laya_accelerator
 from host_runtime.laya import last_decision as laya_last_decision
 from host_runtime.laya import probe as laya_probe
 from host_runtime.loan_reply_cards import LoanReplyCards
+from host_runtime.memory_page import GET_ROUTES as MEMORY_PAGE_GET_ROUTES
+from host_runtime.memory_page import POST_ROUTES as MEMORY_PAGE_POST_ROUTES
+from host_runtime.memory_page import MemoryPage
 from host_runtime.persona import AgentPersonaStore, AgentPersonaUpdateRequest
 from host_runtime.personal_memory import ROUTES as MEMORY_ROUTES
 from host_runtime.personal_memory import PersonalMemory, preferences_in
@@ -683,6 +686,8 @@ class AgentWeb:
         # Preferences and notes (accumulated memory M3): the proposal cards,
         # the preferences a turn is given, the one-click note routes.
         self.personal_memory = PersonalMemory(self)
+        # The memory page (accumulated memory M4): the actor's own memory.
+        self.memory_page = MemoryPage(self)
         gateway.turn_memory = self.personal_memory.turn
         # Agent mode for the Claude Code / Copilot backends (owner 2026-10-15,
         # docs/phases/AGENT_MODE_BACKENDS.md): working folders, approval cards,
@@ -5812,6 +5817,10 @@ class _Handler(BaseHTTPRequestHandler):
         elif parsed.path in ("/api/memory/notes", "/api/memory/preferences"):
             # Minimal lists (M3); the memory page is M4.
             self._json(200, web.personal_memory.listed(parsed.path.rsplit("/", 1)[1]))
+        elif parsed.path in MEMORY_PAGE_GET_ROUTES:
+            # The memory page (M4): the signed-in actor's own memory only.
+            asked = {key: values[0] for key, values in parse_qs(parsed.query).items() if values}
+            self._json(200, web.memory_page.get(parsed.path, asked))
         elif parsed.path == "/api/agent-mode":
             self._json(200, web.agent_mode_settings())
         elif parsed.path == "/api/conversations/progress":
@@ -5970,6 +5979,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/approvals/decide",
             "/api/cards/decide",
             *MEMORY_ROUTES,
+            *MEMORY_PAGE_POST_ROUTES,
             "/api/agent-mode/settings",
             "/api/agent-mode/session",
             "/api/drafts/install",
@@ -6168,6 +6178,10 @@ class _Handler(BaseHTTPRequestHandler):
         if path in MEMORY_ROUTES:
             given = body if isinstance(body, dict) else {}
             self._json(200, self.server.web.personal_memory.route(path, given))
+            return
+        if path in MEMORY_PAGE_POST_ROUTES:
+            given = body if isinstance(body, dict) else {}
+            self._json(200, self.server.web.memory_page.post(path, given))
             return
         if path == "/api/cards/decide":
             chosen = body if isinstance(body, dict) else {}
