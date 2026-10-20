@@ -52,10 +52,60 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: python -m pip install -e ".[dev,office]"
+      # The real-browser tests drive the installed Edge/Chrome. Which version
+      # this runner has is logged so a browser change shows up in the record
+      # (CI 2026-10-20: tabs vanished with no record of the version).
+      - name: Show the installed browsers
+        shell: pwsh
+        run: |
+          foreach ($name in 'msedge.exe', 'chrome.exe') {
+            $exe = $null
+            foreach ($root in 'HKLM:', 'HKCU:') {
+              $key = "$root\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\$name"
+              if (-not $exe -and (Test-Path $key)) { $exe = (Get-ItemProperty $key).'(default)' }
+            }
+            if (-not $exe -or -not (Test-Path $exe)) { "${name}: not registered"; continue }
+            $item = Get-Item $exe
+            "${name}: $exe $($item.VersionInfo.ProductVersion)"
+            # Version folders and a staged in-place update (new_*.exe) beside it.
+            Get-ChildItem $item.DirectoryName | Where-Object { $_.Name -match '^\d+\.' -or $_.Name -like 'new_*' } | ForEach-Object { "  $($_.Name)  $($_.LastWriteTimeUtc.ToString('o'))" }
+          }
+          Get-Service -Name edgeupdate, edgeupdatem -ErrorAction SilentlyContinue | ForEach-Object { "service $($_.Name): $($_.Status) $($_.StartType)" }
       - run: python -m pytest --junitxml=pytest-results.xml
+        env:
+          # Opt-in browser diagnostics (src/integrations/browser.py).
+          AEP_BROWSER_DIAG_DIR: ${{ runner.temp }}/browser-diag
       - name: Annotate failed tests
         if: failure()
         run: python scripts/ci_annotate.py pytest-results.xml
+      - name: Record the browsers after the tests
+        if: failure()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force "$env:RUNNER_TEMP/browser-diag" | Out-Null
+          & {
+            foreach ($name in 'msedge.exe', 'chrome.exe') {
+              $exe = $null
+              foreach ($root in 'HKLM:', 'HKCU:') {
+                $key = "$root\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\$name"
+                if (-not $exe -and (Test-Path $key)) { $exe = (Get-ItemProperty $key).'(default)' }
+              }
+              if (-not $exe -or -not (Test-Path $exe)) { "${name}: not registered"; continue }
+              $item = Get-Item $exe
+              "${name}: $exe $($item.VersionInfo.ProductVersion)"
+              # Version folders and a staged in-place update (new_*.exe) beside it.
+              Get-ChildItem $item.DirectoryName | Where-Object { $_.Name -match '^\d+\.' -or $_.Name -like 'new_*' } | ForEach-Object { "  $($_.Name)  $($_.LastWriteTimeUtc.ToString('o'))" }
+            }
+            Get-Service -Name edgeupdate, edgeupdatem -ErrorAction SilentlyContinue | ForEach-Object { "service $($_.Name): $($_.Status) $($_.StartType)" }
+          } *> "$env:RUNNER_TEMP/browser-diag/browsers-after.txt"
+      - name: Upload browser diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-diagnostics-${{ github.sha }}
+          path: ${{ runner.temp }}/browser-diag
+          if-no-files-found: ignore
+          retention-days: 14
       - run: python -m ruff check .
       - run: python -m ruff format --check .
       - run: python -m mypy

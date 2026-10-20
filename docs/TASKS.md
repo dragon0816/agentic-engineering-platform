@@ -2850,3 +2850,21 @@ s-k-20261011T102952` (not published).
 - [ ] Owner decision (from M1): `propose_if_newer` or keep proposing on any differing evidence.
 - [ ] M3: preferences and notes.
 
+
+## CI real-browser failures: diagnostics (2026-10-20)
+
+- [x] Opt-in browser diagnostics `AEP_BROWSER_DIAG_DIR` (2026-10-20, Claude Code). Decision
+  `docs/DECISIONS.md` 2026-10-20 "Opt-in browser diagnostics". `src/integrations/browser.py`
+  (stderr log + `--enable-logging=stderr --v=0`; `/json/version` and `/json/list` types/URLs on
+  every `no_page`/`navigation_failed`); `.github/workflows/verify.yml` (browser versions before
+  pytest, the variable on pytest, a listing after a failure, artifact `browser-diagnostics-<sha>` on
+  failure). Tests `tests/test_browser_diagnostics.py` (unset is unchanged; set logs and records).
+  Log finding: green a794b590 and red d0c1009e..99949c63 ran on the same runner image
+  `windows-2025-vs2026` 20261007.264.1, so a runner-image change is ruled out. The Edge version was
+  not logged.
+  Verification (clean worktree of HEAD + this change, project `.venv`): ruff check, ruff format
+  --check, mypy clean; browser and workflow tests 475 passed; real-browser tests with the switch on
+  23 passed; full suite 3457 passed, 9 skipped, 1 failed
+  (`test_agent_web.py::test_capability_workspace_is_interactive_in_a_real_browser`, a real-browser
+  flake under load; passes alone).
+- [ ] Read the `browser-diagnostics-<sha>` artifact of the next red run and decide the fix.

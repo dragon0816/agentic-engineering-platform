@@ -26,6 +26,7 @@ Two rules shape all of it, both from the owner's decisions of 2026-09-24:
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -35,7 +36,7 @@ import urllib.request
 from http.client import HTTPException
 from pathlib import Path
 from types import TracebackType
-from typing import Any, Literal, Self
+from typing import IO, Any, Literal, Self
 
 from common.base import Contract, Text
 from integrations.websocket import Devtools, DevtoolsRefused, WebSocketError
@@ -70,6 +71,12 @@ PROFILE_RELEASE_SECONDS = 10.0
 #: What is listed as clickable. Deliberately short: a model choosing from
 #: four hundred elements chooses badly.
 INTERACTIVE = "a, button, input, select, textarea, [role=button], [role=link]"
+#: Opt-in diagnostics for CI (2026-10-20: tabs vanished on the hosted runner
+#: and nothing said why). When this names a folder, the browser's own stderr
+#: log goes there and every `no_page`/`navigation_failed` writes what the
+#: DevTools endpoint reported -- target types and addresses, never page
+#: content. Unset, nothing here changes.
+DIAG_DIR_ENV = "AEP_BROWSER_DIAG_DIR"
 
 
 class BrowserError(Exception):
@@ -212,6 +219,10 @@ class Browser:
     what the owner's decision avoids.
     """
 
+    #: Class defaults so a `Browser.__new__` stand-in in a test still works.
+    _diag_dir: Path | None = None
+    _diag_stderr: IO[bytes] | None = None
+
     def __init__(
         self,
         profile: Path,
@@ -229,6 +240,8 @@ class Browser:
         self._process: subprocess.Popen[bytes] | None = None
         self._page: Devtools | None = None
         self._port: int | None = None
+        configured = os.environ.get(DIAG_DIR_ENV, "").strip()
+        self._diag_dir = Path(configured) if configured else None
 
     # -- starting and stopping ----------------------------------------
 
@@ -253,6 +266,8 @@ class Browser:
             # mode, which is what makes a page behave as it would for a
             # person: the old one differed in ways that mattered.
             arguments.extend(["--headless=new", "--disable-gpu"])
+        if self._diag_dir is not None:
+            arguments.extend(["--enable-logging=stderr", "--v=0"])
         arguments.extend(self.extra_arguments)
         arguments.append("about:blank")
         return arguments
@@ -289,11 +304,12 @@ class Browser:
     def _launch(self) -> None:
         # A stale port file from a previous run would be read as this run's.
         (self.profile / PORT_FILE).unlink(missing_ok=True)
+        arguments = self._arguments()
         try:
             self._process = subprocess.Popen(
-                self._arguments(),
+                arguments,
                 stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
+                stderr=self._diag_stderr_for(arguments),
             )
         except OSError as failure:
             raise BrowserError("browser_would_not_start", type(failure).__name__) from None
@@ -413,7 +429,7 @@ class Browser:
                     self._page = page
                     return page
             time.sleep(0.2)
-        raise BrowserError("no_page")
+        raise self._failure("no_page")
 
     def _ask_it_to_close(self, port: int | None) -> bool:
         """`Browser.close`, which is the browser shutting itself down.
@@ -491,6 +507,7 @@ class Browser:
                     check=False,
                 )
         self._await_profile_release()
+        self._close_diag_stderr()
 
     def discard_profile(self) -> None:
         """Remove a throwaway profile, waiting for the browser to let go.
@@ -519,6 +536,80 @@ class Browser:
         traceback: TracebackType | None,
     ) -> None:
         self.close()
+
+    # -- diagnostics (opt-in, DIAG_DIR_ENV) -----------------------------
+
+    def _diag_name(self, suffix: str) -> Path:
+        assert self._diag_dir is not None
+        self._diag_dir.mkdir(parents=True, exist_ok=True)
+        return self._diag_dir / f"browser-{time.time_ns()}-{os.getpid()}{suffix}"
+
+    def _diag_stderr_for(self, arguments: list[str]) -> IO[bytes] | int:
+        """Where the browser's stderr goes: nowhere, unless diagnostics are on."""
+        if self._diag_dir is None:
+            return subprocess.DEVNULL
+        self._close_diag_stderr()
+        try:
+            handle = self._diag_name(".stderr.log").open("ab")
+            header = {"arguments": arguments, "test": os.environ.get("PYTEST_CURRENT_TEST", "")}
+            handle.write((json.dumps(header) + "\n").encode("utf-8"))
+            handle.flush()
+        except OSError:
+            return subprocess.DEVNULL
+        self._diag_stderr = handle
+        return handle
+
+    def _close_diag_stderr(self) -> None:
+        handle, self._diag_stderr = self._diag_stderr, None
+        if handle is not None:
+            handle.close()
+
+    def _diag_endpoint(self, path: str) -> Any:
+        """One DevTools HTTP endpoint's answer, or why there was none."""
+        if self._port is None:
+            return {"unavailable": "no port"}
+        try:
+            with urllib.request.urlopen(
+                f"http://127.0.0.1:{self._port}{path}", timeout=2
+            ) as answer:
+                return json.loads(answer.read())
+        except (OSError, ValueError, HTTPException) as failure:
+            return {"unavailable": type(failure).__name__}
+
+    def _failure(self, code: BrowserErrorCode, detail: str = "") -> BrowserError:
+        """The error to raise, recorded first when diagnostics are on.
+
+        What is recorded is the browser's version and its targets' types and
+        addresses -- the same things `/json/list` publishes -- and never
+        anything read from a page."""
+        if self._diag_dir is not None:
+            try:
+                listed = self._diag_endpoint("/json/list")
+                targets = (
+                    [
+                        {"type": item.get("type"), "url": item.get("url")}
+                        for item in listed
+                        if isinstance(item, dict)
+                    ]
+                    if isinstance(listed, list)
+                    else listed
+                )
+                record = {
+                    "code": code,
+                    "detail": detail,
+                    "test": os.environ.get("PYTEST_CURRENT_TEST", ""),
+                    "executable": self.executable,
+                    "profile": str(self.profile),
+                    "port": self._port,
+                    "version": self._diag_endpoint("/json/version"),
+                    "targets": targets,
+                }
+                self._diag_name(f"-{code}.json").write_text(
+                    json.dumps(record, indent=2), encoding="utf-8"
+                )
+            except OSError:
+                pass  # A diagnostic never replaces the failure it describes.
+        return BrowserError(code, detail)
 
     # -- looking -------------------------------------------------------
 
@@ -558,13 +649,13 @@ class Browser:
             try:
                 answer = page.call("Page.navigate", url=url)
             except (DevtoolsRefused, WebSocketError) as failure:
-                raise BrowserError("navigation_failed", type(failure).__name__) from None
+                raise self._failure("navigation_failed", type(failure).__name__) from None
         except DevtoolsRefused as failure:
-            raise BrowserError("navigation_failed", type(failure).__name__) from None
+            raise self._failure("navigation_failed", type(failure).__name__) from None
         if answer.get("errorText"):
             # The browser's own word for why, which is about the address and
             # not about anything on a page.
-            raise BrowserError("navigation_failed", str(answer["errorText"]))
+            raise self._failure("navigation_failed", str(answer["errorText"]))
         self._await_load(page)
         # What a page does to itself after loading, which no event announces.
         time.sleep(settle_s)

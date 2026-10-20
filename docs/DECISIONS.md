@@ -3987,3 +3987,48 @@ chart" step or Workflow (an extra layer, and it invites auto-storing); defaultin
 to true in the Host (every existing caller, CLI and Workflow included, would start reading mail);
 re-reading observed mail on a manual reset (re-proposes everyone already stored); moving the state
 to the newest message even when some could not be read (silently loses them).
+
+## 2026-10-20 — Opt-in browser diagnostics (`AEP_BROWSER_DIAG_DIR`) for the CI real-browser failures
+
+Context: since 2026-10-20 04:58 UTC every "Platform verification" run has failed
+`tests/test_browser.py::test_a_signed_in_profile_is_what_carries_the_session` (and in the latest
+run two more real-browser tests) with `WebSocketError: closed` then `BrowserError: no_page`.
+Locally they pass. The logs disproved the leading hypothesis: the green run a794b590 and all red
+runs ran on the same runner image (`windows-2025-vs2026` 20261007.264.1, provisioner
+20261002.596), and the same test had already failed once at 4b87b145 (2026-10-19 13:11) on that
+image. The first red commit, d0c1009e, changed no browser code. The Edge version was never logged,
+so an Edge change inside the same image (an in-place update) can be neither confirmed nor ruled
+out.
+
+Decision: diagnose before any further fix, and do not skip, xfail or weaken the tests (owner,
+option A).
+
+1. `integrations.browser` reads `AEP_BROWSER_DIAG_DIR` once per `Browser`. When it is set and not
+   blank, the browser gets `--enable-logging=stderr --v=0` and its stderr is appended to
+   `browser-<ns>-<pid>.stderr.log` in that folder (first line: the arguments and the current
+   pytest test id), and every `no_page` and `navigation_failed` writes
+   `browser-<ns>-<pid>-<code>.json` with `/json/version` and `/json/list` reduced to each target's
+   `type` and `url`. No titles or page content are written. A diagnostic that cannot be written is
+   ignored, and the original error is still raised.
+2. Unset or blank, nothing changes: the same arguments, stderr to `DEVNULL`, no endpoint fetched
+   and no file written (`tests/test_browser_diagnostics.py`).
+3. `.github/workflows/verify.yml` logs the Edge/Chrome version, version folders, staged
+   `new_*.exe` updates and the Edge update services before pytest. It sets the variable for
+   pytest and, on failure, records the same listing again and uploads the folder as
+   `browser-diagnostics-<sha>`.
+
+Lead from the first local run with the switch on (Edge 155.0.4283.45, not yet seen on CI): a
+fresh headless profile publishes an `edge://sync-confirmation-dialog/` target of type `page`,
+listed before the `about:blank` tab, in 7 of 8 samples. `Browser.page()` takes the first `page`
+target, so it drives that browser-UI dialog rather than the tab. If Edge closes that dialog, the
+socket would close mid-navigation and a reattach could pick the dialog again, which is the CI
+signature. The image ships Edge 154.0.4258.62 and Chrome 155.0.8059.40. Whether the runner's Edge
+updates itself or shows this dialog is exactly what the artifact will show. Proposed fix, not
+applied: `page()` prefers a `page` target that is not browser UI (`edge://`, `chrome://`), and
+only falls back to the first `page` target.
+
+Rejected: changing launch flags now (`--no-startup-window` plus `Target.createTarget`, disabling
+Edge features or the updater). Nothing in the logs proves which startup behaviour closes the tab,
+and three blind hardening commits (24ecf729, 7c4ef3b1, 99949c63) did not stop it. Always-on
+logging was also rejected: it would change what every installed Agent writes, and the browser log
+can be large.
