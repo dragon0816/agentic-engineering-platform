@@ -75,6 +75,18 @@ FIELD_LABELS: dict[str, str] = {
 }
 Source = Literal["card", "email_signature", "user", "import"]
 Status = Literal["active", "left"]
+#: How a source, an evidence kind and a status are named to the person
+#: (third live test 2026-10-20: replies showed `email_signature`, `left`).
+SOURCE_LABELS: dict[str, str] = {
+    "card": "名片",
+    "email_signature": "郵件簽名檔",
+    "user": "使用者",
+    "import": "匯入",
+    "signature": "簽名檔",
+    "email_content": "郵件內容",
+    "title_inference": "依職稱推論",
+}
+STATUS_LABELS: dict[str, str] = {"active": "在職", "left": "已離職"}
 EvidenceKind = Literal["signature", "email_content", "title_inference", "user"]
 
 _SHORT = 200
@@ -186,6 +198,24 @@ class DroppedField(_Labelled):
     reason: Literal["not_on_card"]
 
 
+class ProposalView(_Labelled):
+    """An automatic reading that differs from the person's own (set or
+    confirmed) value, or another email for a matched person: still open
+    until the person keeps the stored value or takes the read one. The field
+    needs confirmation while it is open."""
+
+    current: str  # the value stored now
+    proposed: str  # the value read
+    source: str
+    source_label: str = ""
+    proposal_id: int = 0
+    observation_id: int | None = None
+    person_id: str = ""
+    name: str = ""
+    company: str = ""
+    created_at: str = ""
+
+
 class EmailDiffers(Contract):
     """The reading's email is not the stored one (the person matched by the
     card image or by name and company)."""
@@ -213,6 +243,9 @@ class AddResult(Contract):
     dropped: tuple[DroppedField, ...] = ()
     # Set when this reading's email differs from the stored one: say so.
     email_differs: EmailDiffers | None = None
+    # The person's open proposals (this reading's and earlier ones): each
+    # field here needs confirmation; ask which value is right.
+    proposals: tuple[ProposalView, ...] = ()
     status: Status = "active"
     # "上次是研發部經理, 現在是協理": the sentence to lead with.
     summary: str = ""
@@ -241,6 +274,9 @@ class EditPersonRequest(Contract):
     # Fields the person says are wrong and should be empty (kept empty: a
     # later scan does not refill them).
     clear: tuple[FieldName, ...] = Field(default=(), max_length=len(FIELDS))
+    # Fields whose open proposal the person takes ("用新的"): the value read
+    # becomes their own.
+    accept: tuple[FieldName, ...] = Field(default=(), max_length=len(FIELDS))
     reason: str = Field(default="", max_length=_SHORT)
 
 
@@ -249,6 +285,13 @@ class EditResult(Contract):
     name: str
     changes: tuple[FieldChange, ...] = ()
     confirmed: tuple[FieldName, ...] = ()
+    # Asked to confirm, but already the person's own value with nothing open.
+    already_confirmed: tuple[FieldName, ...] = ()
+    # Proposals closed: the read value taken (accepted) or the stored one kept
+    # (rejected).
+    accepted: tuple[FieldName, ...] = ()
+    rejected: tuple[FieldName, ...] = ()
+    proposals: tuple[ProposalView, ...] = ()
     needs_confirmation: tuple[FieldName, ...] = ()
     to_confirm: tuple[ToConfirm, ...] = ()
     change_id: str | None = None
@@ -313,18 +356,26 @@ class ObservationView(Contract):
     uncertain: tuple[str, ...] = ()
 
 
-class ProposalView(Contract):
-    field: str
-    current: str
-    proposed: str
-    source: str
-
-
 class HistoryResult(Contract):
     person: PersonView
     history: tuple[HistoryItem, ...]
     observations: tuple[ObservationView, ...]
     proposals: tuple[ProposalView, ...] = ()
+
+
+class ProposalsRequest(Contract):
+    """Open proposals: one person's, or everyone's when no person is named."""
+
+    person: PersonRef | None = None
+    limit: int = Field(default=50, ge=1, le=200)
+
+
+class ProposalsResult(Contract):
+    proposals: tuple[ProposalView, ...]
+    total: int
+    # One sentence for the reply, e.g.
+    # 「目前有 1 項待確認：王小明 的 Email（名片夾：…；這次讀到：…）。」
+    note: str
 
 
 class SetStatusRequest(Contract):

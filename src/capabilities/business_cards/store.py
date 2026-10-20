@@ -27,6 +27,7 @@ from capabilities.business_cards import names, reading
 from capabilities.business_cards.contracts import (
     FIELD_LABELS,
     FIELDS,
+    SOURCE_LABELS,
     AddResult,
     EmailDiffers,
     FieldChange,
@@ -484,18 +485,68 @@ class CardStore:
 
     def _needs(self, con: sqlite3.Connection, person_id: str) -> tuple[FieldName, ...]:
         """Fields any reading of this person flagged as uncertain that hold a
-        value the person has not confirmed or set (source `user`)."""
+        value the person has not confirmed or set (source `user`), and fields
+        with an open proposal (a reading that differs from the person's own
+        value, or another email), whatever their source."""
         flagged: set[str] = set()
         for item in con.execute(
             "SELECT uncertain_json FROM observations WHERE person_id = ?", (person_id,)
         ):
             flagged.update(json.loads(item["uncertain_json"] or "[]"))
         sources = self._sources(con, person_id)
+        proposed = {
+            item["field"]
+            for item in con.execute(
+                "SELECT field FROM proposals WHERE person_id = ? AND state = 'open'", (person_id,)
+            )
+        }
         return tuple(
             name
             for name in FIELDS
-            if name in flagged and name in sources and sources[name]["source"] != "user"
+            if name in proposed
+            or (name in flagged and name in sources and sources[name]["source"] != "user")
         )
+
+    def _open_proposals(
+        self, con: sqlite3.Connection, person_id: str | None, limit: int = 200
+    ) -> list[ProposalView]:
+        """Open proposals, oldest first: one person's, or everyone's. `current`
+        is the value stored now."""
+        rows = con.execute(
+            "SELECT pr.proposal_id, pr.person_id, pr.field, pr.current, pr.proposed, "
+            "pr.source, pr.observation_id, pr.created_at, p.* "
+            "FROM proposals pr JOIN people p ON p.person_id = pr.person_id "
+            "WHERE pr.state = 'open' AND (? IS NULL OR pr.person_id = ?) "
+            "ORDER BY pr.proposal_id LIMIT ?",
+            (person_id, person_id, limit),
+        ).fetchall()
+        found: list[ProposalView] = []
+        for row in rows:
+            name = row["field"]
+            found.append(
+                ProposalView(
+                    field=name,
+                    current=str(row[name]) if name in FIELDS else row["current"],
+                    proposed=row["proposed"],
+                    source=row["source"],
+                    source_label=SOURCE_LABELS.get(row["source"], row["source"]),
+                    proposal_id=row["proposal_id"],
+                    observation_id=row["observation_id"],
+                    person_id=row["person_id"],
+                    name=row["name"],
+                    company=row["company"],
+                    created_at=row["created_at"],
+                )
+            )
+        return found
+
+    def proposals(self, ref: PersonRef | None, *, limit: int) -> tuple[list[ProposalView], str]:
+        """Open proposals (one person's, or everyone's) and a sentence for the
+        reply."""
+        with self._connect() as con:
+            person_id = None if ref is None else self._resolve(con, ref)["person_id"]
+            found = self._open_proposals(con, person_id, limit)
+            return found, proposals_note(found)
 
     def _view(self, con: sqlite3.Connection, row: sqlite3.Row) -> PersonView:
         person_id = row["person_id"]
@@ -576,6 +627,7 @@ class CardStore:
         observation_id: int | None,
         reason: str,
         previous: sqlite3.Row | None,
+        closed_proposals: Sequence[Mapping[str, Any]] = (),
     ) -> FieldChange:
         person_id = person["person_id"]
         old = person[name]
@@ -604,6 +656,7 @@ class CardStore:
                 "prev_source": None if previous is None else previous["source"],
                 "prev_date": None if previous is None else previous["source_date"],
                 "prev_observation": None if previous is None else previous["observation_id"],
+                "closed_proposals": [dict(item) for item in closed_proposals],
             },
         )
         return FieldChange(field=name, old=old, new=value)
@@ -765,8 +818,9 @@ class CardStore:
             needs_confirmation=self._needs(con, row["person_id"]),
             to_confirm=self._to_confirm(con, row["person_id"], unsure),
             email_differs=differs,
+            proposals=tuple(self._open_proposals(con, row["person_id"])),
             status=fresh["status"],
-            summary=_summary(row, merge, differs),
+            summary=_summary(row, merge),
             observation_id=observation_id,
             change_id=change_id
             if merge.changes
@@ -825,13 +879,19 @@ class CardStore:
                 if new.casefold() in current.casefold():
                     continue
                 new = f"{current}\n{new}"
-            elif current and name in uncertain:
+            elif current and name not in _ANY_CHANGE and _less_complete(new, current):
+                # "Connectivity & Solutions" after "Connectivity & Solutions
+                # 事業群", "研展處" after "研展處 I": a partial reading, not a
+                # conflict, even with the person's own value.
                 merge.kept.append(
-                    KeptField(field=name, current=current, offered=new, reason="uncertain")
+                    KeptField(field=name, current=current, offered=new, reason="less_complete")
                 )
                 continue
-            elif previous is not None and previous["source"] == "user":
-                # Also a value the person emptied: a scan does not refill it.
+            elif user_set:
+                # The person's own (set or confirmed) value, also one they
+                # emptied: never replaced by a scan, sure or not; the reading
+                # is a proposal and the field needs confirmation (third live
+                # test 2026-10-20).
                 merge.kept.append(
                     KeptField(field=name, current=current, offered=new, reason="user_set")
                 )
@@ -839,11 +899,9 @@ class CardStore:
                     con, change_id, actor, person_id, name, current, new, source, observation_id
                 )
                 continue
-            elif current and name not in _ANY_CHANGE and _less_complete(new, current):
-                # "Connectivity & Solutions" after "Connectivity & Solutions
-                # 事業群", "研展處" after "研展處 I": a partial reading.
+            elif current and name in uncertain:
                 merge.kept.append(
-                    KeptField(field=name, current=current, offered=new, reason="less_complete")
+                    KeptField(field=name, current=current, offered=new, reason="uncertain")
                 )
                 continue
             elif current and previous is not None and when < previous["source_date"]:
@@ -905,7 +963,14 @@ class CardStore:
         source: str,
         observation_id: int,
     ) -> None:
-        """An offered value that was not taken, kept as an open proposal."""
+        """An offered value that was not taken, kept as an open proposal; the
+        same value already open is not proposed again."""
+        for item in con.execute(
+            "SELECT proposed FROM proposals WHERE person_id = ? AND field = ? AND state = 'open'",
+            (person_id, name),
+        ):
+            if _same_value(name, item["proposed"], new):
+                return
         con.execute(
             "INSERT INTO proposals (person_id, field, current, proposed, source, "
             "observation_id, created_at) VALUES (?,?,?,?,?,?,?)",
@@ -935,22 +1000,55 @@ class CardStore:
         reason: str,
         confirm: Sequence[FieldName] = (),
         clear: Sequence[FieldName] = (),
+        accept: Sequence[FieldName] = (),
+        outcome: EditOutcome | None = None,
     ) -> tuple[sqlite3.Row, list[FieldChange], list[FieldName], str | None]:
         """The person's own values (source `user`), the fields they say are
-        right as stored, and the fields they say are wrong (emptied, and kept
-        empty). Re-stating the stored value confirms it."""
+        right as stored, the fields they say are wrong (emptied, and kept
+        empty) and the fields whose open proposal they take ("用新的").
+        Re-stating the stored value confirms it and rejects the field's open
+        proposals; the proposed value accepts them. `outcome`, when given,
+        is filled with what happened to the proposals."""
+        result = outcome if outcome is not None else EditOutcome()
         with self._connect() as con:
             row = self._resolve(con, ref)
+            person_id = row["person_id"]
             change_id = _new_change()
-            sources = self._sources(con, row["person_id"])
-            needs = set(self._needs(con, row["person_id"]))
+            sources = self._sources(con, person_id)
+            needs = set(self._needs(con, person_id))
+            wanted = {name: str(values.get(name, "")).strip() for name in FIELDS}
+            for name in dict.fromkeys(accept):
+                newest = con.execute(
+                    "SELECT proposed FROM proposals WHERE person_id = ? AND field = ? "
+                    "AND state = 'open' ORDER BY proposal_id DESC LIMIT 1",
+                    (person_id, name),
+                ).fetchone()
+                if newest is None:
+                    raise CardStoreError("proposal_unknown")
+                wanted[name] = newest["proposed"]
             changes: list[FieldChange] = []
             confirmed: list[FieldName] = []
             today = date.today().isoformat()
             for name in FIELDS:
-                new = str(values.get(name, "")).strip()
+                new = wanted[name]
                 emptied = name in clear and not new and bool(row[name])
+                open_rows = list(
+                    con.execute(
+                        "SELECT proposal_id, proposed FROM proposals WHERE person_id = ? "
+                        "AND field = ? AND state = 'open'",
+                        (person_id, name),
+                    )
+                )
                 if emptied or (new and not _same_value(name, row[name], new)):
+                    closed = [
+                        {
+                            "id": item["proposal_id"],
+                            "state": "accepted"
+                            if new and _same_value(name, item["proposed"], new)
+                            else "rejected",
+                        }
+                        for item in open_rows
+                    ]
                     changes.append(
                         self._set_field(
                             con,
@@ -964,29 +1062,44 @@ class CardStore:
                             observation_id=None,
                             reason=reason or "set by the person",
                             previous=sources.get(name),
+                            closed_proposals=closed,
                         )
                     )
-                    con.execute(
-                        "UPDATE proposals SET state = 'resolved' WHERE person_id = ? AND field = ? "
-                        "AND state = 'open'",
-                        (row["person_id"], name),
-                    )
+                    for item in closed:
+                        con.execute(
+                            "UPDATE proposals SET state = ? WHERE proposal_id = ?",
+                            (item["state"], item["id"]),
+                        )
+                    if any(item["state"] == "accepted" for item in closed):
+                        result.accepted.append(name)
+                    elif closed:
+                        result.rejected.append(name)
                     continue
                 asked = name in confirm or (bool(new) and name in needs)
                 previous = sources.get(name)
-                if not asked or not row[name] or previous is None:
+                if not asked or previous is None:
                     continue
-                if previous["source"] == "user":
+                if not open_rows and (not row[name] or previous["source"] == "user"):
+                    if row[name] and name in confirm:
+                        result.already_confirmed.append(name)
                     continue
+                # The stored value is right: kept as the person's own, and any
+                # open proposal for the field is rejected.
+                rejected = [item["proposal_id"] for item in open_rows]
+                for proposal_id in rejected:
+                    con.execute(
+                        "UPDATE proposals SET state = 'rejected' WHERE proposal_id = ?",
+                        (proposal_id,),
+                    )
                 con.execute(
                     "INSERT OR REPLACE INTO field_sources VALUES (?,?,?,?,?)",
-                    (row["person_id"], name, "user", today, None),
+                    (person_id, name, "user", today, None),
                 )
                 self._record(
                     con,
                     change_id,
                     actor,
-                    row["person_id"],
+                    person_id,
                     "confirm",
                     field_name=name,
                     old=row[name],
@@ -997,9 +1110,12 @@ class CardStore:
                         "prev_source": previous["source"],
                         "prev_date": previous["source_date"],
                         "prev_observation": previous["observation_id"],
+                        "rejected_proposals": rejected,
                     },
                 )
                 confirmed.append(name)
+                if rejected:
+                    result.rejected.append(name)
             moved = self._tidy_notes(con, change_id, actor, row["person_id"])
             if moved is not None:
                 changes.append(moved)
@@ -1261,6 +1377,7 @@ class CardStore:
                             "DELETE FROM field_sources WHERE person_id = ? AND field = ?",
                             (item["person_id"], name),
                         )
+                    _reopen(con, [entry["id"] for entry in extra.get("closed_proposals") or ()])
                     self._record(
                         con,
                         new_change,
@@ -1349,6 +1466,7 @@ class CardStore:
                             extra.get("prev_observation"),
                         ),
                     )
+                    _reopen(con, extra.get("rejected_proposals") or ())
                     self._record(
                         con,
                         new_change,
@@ -1461,17 +1579,7 @@ class CardStore:
                     (pid, limit),
                 )
             ]
-            proposals = [
-                ProposalView(
-                    field=item["field"],
-                    current=item["current"],
-                    proposed=item["proposed"],
-                    source=item["source"],
-                )
-                for item in con.execute(
-                    "SELECT * FROM proposals WHERE person_id = ? AND state = 'open'", (pid,)
-                )
-            ]
+            proposals = self._open_proposals(con, pid)
             return HistoryResult(
                 person=self._view(con, row),
                 history=tuple(items),
@@ -1677,6 +1785,36 @@ class CardStore:
         )
 
 
+def _reopen(con: sqlite3.Connection, proposal_ids: Sequence[int]) -> None:
+    for proposal_id in proposal_ids:
+        con.execute("UPDATE proposals SET state = 'open' WHERE proposal_id = ?", (proposal_id,))
+
+
+@dataclass
+class EditOutcome:
+    """What an edit did to the open proposals, and what was asked to be
+    confirmed that already was the person's own value."""
+
+    accepted: list[FieldName] = field(default_factory=list)
+    rejected: list[FieldName] = field(default_factory=list)
+    already_confirmed: list[FieldName] = field(default_factory=list)
+
+
+def proposals_note(found: Sequence[ProposalView]) -> str:
+    """One sentence about the open proposals, for the reply."""
+    if not found:
+        return "目前沒有待確認的項目。"
+    items = "；".join(
+        f"{item.name} 的 {item.label}（名片夾：{item.current or '（空白）'}；"
+        f"這次讀到：{item.proposed}）"
+        for item in found
+    )
+    return (
+        f"目前有 {len(found)} 項待確認：{items}。"
+        "說「<姓名> 的 <欄位> 正確」保留名片夾的值，或說「用新的」改成讀到的值。"
+    )
+
+
 def _iso(moment: datetime) -> str:
     return moment.isoformat(timespec="seconds")
 
@@ -1695,14 +1833,17 @@ def _history_item(row: sqlite3.Row) -> HistoryItem:
     )
 
 
-def _summary(before: sqlite3.Row, merge: _Merge, differs: EmailDiffers | None = None) -> str:
-    """The sentence a reply leads with when the person was already on file."""
-    note = (
-        ""
-        if differs is None
-        else f"這次讀到的 Email（{differs.read}）和名片夾裡的（{differs.stored}）不同，"
-        "已保留原本的，請確認哪一個正確。"
-    )
+def _summary(before: sqlite3.Row, merge: _Merge) -> str:
+    """The sentence a reply leads with when the person was already on file:
+    what changed, then each value read that differs from the person's own
+    (or another email), kept and asked about."""
+    differ = [
+        f"這次讀到的{_LABELS[item.field]}（{item.offered}）和名片夾裡的"
+        f"（{item.current or '空白'}）不同"
+        for item in merge.kept
+        if item.reason in ("user_set", "email_differs")
+    ]
+    note = "；".join(differ) + "，已保留原本的，請確認哪一個正確。" if differ else ""
     return _changes_sentence(before, merge) + note
 
 

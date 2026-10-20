@@ -582,3 +582,89 @@ def test_confirming_a_flagged_field_in_chat_writes_a_confirm_history_row(
     assert rows[0]["field"] == "email" and rows[0]["new"] == CARD["email"]
     assert rows[0]["actor"] == f"{agent_web.runtime.actor} via local"
     assert rows[0]["change_id"] == confirmed["data"]["change_id"]
+
+
+def test_a_differing_email_is_a_proposal_kept_or_taken_in_chat(
+    web: tuple[AgentWeb, Conversation],
+) -> None:
+    """Third live test 2026-10-20: a re-scan read another email than the
+    confirmed one; the reply asked which was right, but nothing was flagged or
+    proposed, so 「X 的 email 正確」 got 「目前沒有欄位被新增確認」. Now the
+    reading is a proposal and the field needs confirmation; keeping the stored
+    value rejects it with a confirm row, 「用新的」 accepts it."""
+    agent_web, model = web
+    session = agent_web.create_conversation()["conversation"]["session_id"]
+
+    def photo() -> tuple[str, str]:
+        uploaded = agent_web.add_attachment(session, "card.png", PNG)
+        file_id = uploaded["attachment"]["file_id"]
+        return file_id, str(agent_web.attachments.get(session, file_id).path)
+
+    def call(message: str, tool: str, args: dict[str, Any], files: list[str] | None = None) -> Any:
+        model.then({"tools": [(tool, args)]}, {"text": "好。"})
+        assert _turn(agent_web, session, message, files)["ok"]
+        result = json.loads(model.tool_results()[-1])["host"]
+        assert result["status"] == "succeeded", result
+        return result["data"]
+
+    file_id, path = photo()
+    call("store this card", "cards__add_card", {**CARD, "image_path": path}, [file_id])
+    call(
+        "email 正確",
+        "cards__edit_person",
+        {"person": {"name": "周範例"}, "confirm": ["email"]},
+    )
+    # The same photo again, the email read differently.
+    file_id, path = photo()
+    misread = {**CARD, "email": "fanli.chuo@exn.example", "image_path": path}
+    again = call("store this card", "cards__add_card", misread, [file_id])
+    assert again["matched_by"] == "image" and "email" in again["needs_confirmation"]
+    assert [(p["field"], p["current"], p["proposed"]) for p in again["proposals"]] == [
+        ("email", CARD["email"], "fanli.chuo@exn.example")
+    ]
+    assert again["proposals"][0]["observation_id"] == again["observation_id"]
+    assert "請確認哪一個正確" in again["summary"]
+    listed = call("有哪些待確認？", "cards__proposals", {})
+    assert listed["total"] == 1 and "fanli.chuo@exn.example" in listed["note"]
+
+    # 「周範例 的 email 正確」: the stored one stays, the proposal is rejected.
+    kept = call(
+        "周範例 的 email 正確",
+        "cards__edit_person",
+        {"person": {"name": "周範例"}, "confirm": ["email"]},
+    )
+    assert kept["confirmed"] == ["email"] and kept["rejected"] == ["email"]
+    assert kept["proposals"] == [] and kept["needs_confirmation"] == []
+    history = call("周範例 的歷史", "cards__history", {"person": {"name": "周範例"}})
+    rows = [item for item in history["history"] if item["change_id"] == kept["change_id"]]
+    assert [(r["kind"], r["field"], r["new"]) for r in rows] == [
+        ("confirm", "email", CARD["email"])
+    ]
+    assert rows[0]["actor"] == f"{agent_web.runtime.actor} via local"
+    assert history["person"]["email"] == CARD["email"] and history["proposals"] == []
+
+    # Another misreading, and this time 「用新的」.
+    file_id, path = photo()
+    newer = {**CARD, "email": "fl.chou@exn.example", "image_path": path}
+    assert call("store this card", "cards__add_card", newer, [file_id])["proposals"]
+    taken = call(
+        "用新的", "cards__edit_person", {"person": {"name": "周範例"}, "accept": ["email"]}
+    )
+    assert taken["accepted"] == ["email"] and taken["needs_confirmation"] == []
+    assert [(c["field"], c["new"]) for c in taken["changes"]] == [("email", "fl.chou@exn.example")]
+    history = call("周範例 的歷史", "cards__history", {"person": {"name": "周範例"}})
+    rows = [item for item in history["history"] if item["change_id"] == taken["change_id"]]
+    assert [(r["kind"], r["field"], r["new"]) for r in rows] == [
+        ("field", "email", "fl.chou@exn.example")
+    ]
+
+
+def test_the_skill_closes_proposals_by_confirm_or_accept() -> None:
+    from capabilities.business_cards.manifest import PROCEDURE
+
+    assert "cards__proposals" in PROCEDURE and "accept ['email']" in PROCEDURE
+    assert "confirm ['email']" in PROCEDURE and "用新的" in PROCEDURE
+    names = [name for name, *_ in TOOLS]
+    assert "cards__proposals" in names
+    edit = next(schema for name, _, _, schema in TOOLS if name == "cards__edit_person")
+    assert "accept" in edit["properties"]

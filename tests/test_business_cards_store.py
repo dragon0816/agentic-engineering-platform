@@ -535,11 +535,14 @@ def test_the_same_name_and_company_with_another_email_updates_the_person(
     assert again.needs_confirmation == ("email",)
     assert again.email_differs is not None and again.email_differs.read == "hm.wang2@example.com"
     assert {k.field: k.reason for k in again.kept} == {"email": "email_differs"}
-    # A stored email the person set or confirmed is theirs: a proposal, no flag.
+    # A stored email the person set or confirmed is theirs: kept, and the
+    # reading is a proposal that needs confirmation (third live test
+    # 2026-10-20: without the flag 「email 正確」 found nothing to confirm).
     store.edit(PersonRef(person_id=first.person_id), {}, actor="a", reason="", confirm=("email",))
     third = _add(store, {**CARD, "email": "hm.wang3@example.com"}, when=date(2026, 4, 1))
     assert third.person_id == first.person_id
-    assert third.needs_confirmation == ()
+    assert third.needs_confirmation == ("email",)
+    assert [p.proposed for p in third.proposals] == ["hm.wang3@example.com"]
     assert {k.field: k.reason for k in third.kept} == {"email": "user_set"}
     assert store.view(first.person_id).email == CARD["email"]
 
@@ -822,3 +825,97 @@ def test_the_phone_key_ignores_formatting() -> None:
     assert phone_key("02-2345-6789 分機 312") == "0223456789#312"
     assert phone_key("02-2345-6789") != phone_key("02-2345-6789 #312")
     assert phone_key("call the desk") == ""
+
+
+def test_a_reading_that_differs_from_a_confirmed_email_needs_confirmation(
+    tmp_path: Path,
+) -> None:
+    """Third live test 2026-10-20: a re-scan read another email than the one the
+    person had confirmed; the reply asked which was right, but there was no
+    proposal and no 需確認, so 「X 的 email 正確」 found nothing to confirm."""
+    store = _store(tmp_path)
+    first = _add(store, CARD, ref=IMAGE)
+    store.edit(
+        PersonRef(person_id=first.person_id), {}, actor="alice", reason="", confirm=["email"]
+    )
+    assert store.view(first.person_id).needs_confirmation == ()
+    misread = _add(
+        store,
+        {**CARD, "email": "hm.wamg@example.com"},
+        when=date(2026, 2, 1),
+        ref=IMAGE,
+        uncertain=("email",),
+    )
+    assert store.view(first.person_id).email == CARD["email"]
+    assert "email" in misread.needs_confirmation
+    assert [(p.field, p.current, p.proposed, p.observation_id) for p in misread.proposals] == [
+        ("email", CARD["email"], "hm.wamg@example.com", misread.observation_id)
+    ]
+    assert "hm.wamg@example.com" in misread.summary and "請確認" in misread.summary
+    assert store.uncertain_now([first.person_id]) == {first.person_id: ["email"]}
+    # The same reading again does not open a second proposal.
+    _add(store, {**CARD, "email": "hm.wamg@example.com"}, when=date(2026, 2, 2), ref=IMAGE)
+    listed, note = store.proposals(None, limit=50)
+    assert [(p.name, p.field, p.label) for p in listed] == [("王小明", "email", "Email")]
+    assert "王小明" in note and "hm.wamg@example.com" in note and CARD["email"] in note
+    # 「王小明 的 email 正確」: the stored one stays, the proposal is rejected,
+    # and a confirm row is written.
+    row, changes, confirmed, change_id = store.edit(
+        PersonRef(name="王小明"), {}, actor="alice via telegram", reason="", confirm=["email"]
+    )
+    assert confirmed == ["email"] and changes == [] and change_id is not None
+    assert row["email"] == CARD["email"]
+    assert store.view(first.person_id).needs_confirmation == ()
+    assert store.proposals(None, limit=50) == ([], "目前沒有待確認的項目。")
+    history = store.history(PersonRef(person_id=first.person_id), limit=50)
+    confirms = [item for item in history.history if item.change_id == change_id]
+    assert [(i.kind, i.field, i.actor) for i in confirms] == [
+        ("confirm", "email", "alice via telegram")
+    ]
+    with sqlite3.connect(store.path) as con:
+        states = [state for (state,) in con.execute("SELECT state FROM proposals")]
+    assert states == ["rejected"]
+    # Undoing the confirmation opens the proposal again.
+    store.undo(change_id, actor="alice")
+    assert "email" in store.view(first.person_id).needs_confirmation
+    assert len(store.proposals(None, limit=50)[0]) == 1
+
+
+def test_any_field_read_differently_from_the_persons_own_value_needs_confirmation(
+    tmp_path: Path,
+) -> None:
+    store = _store(tmp_path)
+    first = _add(store, CARD)
+    store.edit(PersonRef(person_id=first.person_id), {"title": "資深經理"}, actor="a", reason="")
+    later = _add(store, {**CARD, "title": "協理"}, when=date(2026, 3, 1))
+    assert {k.field: k.reason for k in later.kept} == {"title": "user_set"}
+    assert later.needs_confirmation == ("title",)
+    assert [(p.field, p.current, p.proposed) for p in later.proposals] == [
+        ("title", "資深經理", "協理")
+    ]
+    # 「用新的」: the proposal is accepted and becomes the person's value.
+    row, changes, confirmed, change_id = store.edit(
+        PersonRef(person_id=first.person_id), {}, actor="a", reason="", accept=["title"]
+    )
+    assert row["title"] == "協理" and [(c.field, c.new) for c in changes] == [("title", "協理")]
+    assert store.view(first.person_id).needs_confirmation == ()
+    with sqlite3.connect(store.path) as con:
+        states = [state for (state,) in con.execute("SELECT state FROM proposals")]
+    assert states == ["accepted"]
+    history = store.history(PersonRef(person_id=first.person_id), limit=50)
+    assert [(i.kind, i.field, i.new) for i in history.history if i.change_id == change_id] == [
+        ("field", "title", "協理")
+    ]
+    # Undo puts the old value back and opens the proposal again.
+    store.undo(change_id, actor="a")
+    assert store.view(first.person_id).title == "資深經理"
+    assert store.view(first.person_id).needs_confirmation == ("title",)
+    # Answering with the other value accepts the proposal too.
+    store.edit(PersonRef(person_id=first.person_id), {"title": "協理"}, actor="a", reason="")
+    with sqlite3.connect(store.path) as con:
+        states = [state for (state,) in con.execute("SELECT state FROM proposals")]
+    assert states == ["accepted"]
+    assert store.view(first.person_id).needs_confirmation == ()
+    with pytest.raises(CardStoreError) as refused:
+        store.edit(PersonRef(person_id=first.person_id), {}, actor="a", reason="", accept=["fax"])
+    assert refused.value.code == "proposal_unknown"

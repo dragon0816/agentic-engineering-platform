@@ -101,6 +101,7 @@ FAILURE_TEXT = {
     "chart_renderer_missing": "這台電腦缺少畫組織圖用的 Pillow 元件",
     "candidates_expired": "這段對話沒有可存的簽名檔候選人（超過一小時已失效，或還沒整理）；"
     "請重新整理簽名檔",
+    "proposal_unknown": "這個欄位沒有待確認的新讀值，沒有可改用的值",
     "change_unknown": "找不到這個變更編號",
     "change_already_undone": "這個變更已經復原過了",
     "undo_conflict": "之後又有變更動到同一筆資料，無法直接復原",
@@ -200,8 +201,9 @@ TOOLS: tuple[tuple[str, CapabilitySpec, str, dict[str, Any]], ...] = (
         cards.EDIT_SPEC,
         "Correct a contact's fields as the person says (recorded as the person's own value, "
         "never overwritten by later scans), or confirm fields that are right as stored "
-        "('email 正確' -> confirm ['email']), or empty wrong fields (clear). Each clears "
-        "needs_confirmation.",
+        "('email 正確' -> confirm ['email']: keeps the stored value and rejects the open "
+        "proposal), or take the value read ('用新的' -> accept ['email']), or empty wrong "
+        "fields (clear). Each clears needs_confirmation.",
         _object(
             {
                 "person": _PERSON,
@@ -215,6 +217,12 @@ TOOLS: tuple[tuple[str, CapabilitySpec, str, dict[str, Any]], ...] = (
                     "type": "array",
                     "items": {"type": "string", "enum": list(FIELDS)},
                     "description": "fields the person says are wrong and should be empty",
+                },
+                "accept": {
+                    "type": "array",
+                    "items": {"type": "string", "enum": list(FIELDS)},
+                    "description": "fields whose open proposal the person takes ('用新的'): "
+                    "the value read becomes theirs",
                 },
                 "reason": _S,
             },
@@ -255,6 +263,14 @@ TOOLS: tuple[tuple[str, CapabilitySpec, str, dict[str, Any]], ...] = (
         cards.HISTORY_SPEC,
         "One contact's changes (with change ids for cards__undo), sightings and open proposals.",
         _object({"person": _PERSON, "limit": {"type": "integer"}}, ("person",)),
+    ),
+    (
+        "cards__proposals",
+        cards.PROPOSALS_SPEC,
+        "Open proposals: readings that differ from a contact's confirmed value (or another "
+        "email), each with the stored value, the value read and its source; one person's or "
+        "everyone's. note is a sentence to tell the person.",
+        _object({"person": _PERSON, "limit": {"type": "integer"}}),
     ),
     (
         "cards__set_status",

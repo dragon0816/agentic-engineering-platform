@@ -38,6 +38,9 @@ from capabilities.business_cards.contracts import (
     LineResult,
     ListRequest,
     PeopleResult,
+    PersonRef,
+    ProposalsRequest,
+    ProposalsResult,
     RemoveLineRequest,
     SetLineRequest,
     SetStatusRequest,
@@ -49,7 +52,12 @@ from capabilities.business_cards.contracts import (
     UndoRequest,
     UndoResult,
 )
-from capabilities.business_cards.store import CardStore, CardStoreError, store_dir
+from capabilities.business_cards.store import (
+    CardStore,
+    CardStoreError,
+    EditOutcome,
+    store_dir,
+)
 from capabilities.contracts import CapabilitySpec
 from capabilities.runtime import CapabilityRefused
 from common.base import Contract
@@ -111,6 +119,11 @@ IMPORT_SPEC = _spec(
 FIND_SPEC = _spec("find", "Find contacts by name, email, company or title; read only", "read")
 LIST_SPEC = _spec("list", "List contacts by company, source and status; read only", "read")
 HISTORY_SPEC = _spec("history", "One contact's changes and sightings; read only", "read")
+PROPOSALS_SPEC = _spec(
+    "proposals",
+    "Readings that differ from a contact's confirmed value, still to decide; read only",
+    "read",
+)
 CHART_SPEC = _spec(
     "org-chart", "Draw a company's org chart from the contacts (PNG and legend)", "read"
 )
@@ -257,6 +270,7 @@ class EditPersonHandler(_Cards):
 
         def work() -> Contract:
             store = self.store(context)
+            outcome = EditOutcome()
             row, changes, confirmed, change_id = store.edit(
                 request.person,
                 request.fields.values(),
@@ -264,12 +278,19 @@ class EditPersonHandler(_Cards):
                 reason=request.reason,
                 confirm=request.confirm,
                 clear=request.clear,
+                accept=request.accept,
+                outcome=outcome,
             )
+            remaining, _ = store.proposals(PersonRef(person_id=row["person_id"]), limit=50)
             return EditResult(
                 person_id=row["person_id"],
                 name=row["name"],
                 changes=tuple(changes),
                 confirmed=tuple(confirmed),
+                already_confirmed=tuple(outcome.already_confirmed),
+                accepted=tuple(outcome.accepted),
+                rejected=tuple(outcome.rejected),
+                proposals=tuple(remaining),
                 needs_confirmation=store.needs_confirmation(row["person_id"]),
                 to_confirm=store.to_confirm(row["person_id"]),
                 change_id=change_id,
@@ -427,6 +448,17 @@ class HistoryHandler(_Cards):
         return await self.run(
             lambda: self.store(context).history(request.person, limit=request.limit)
         )
+
+
+class ProposalsHandler(_Cards):
+    async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
+        request = ProposalsRequest.model_validate(inputs)
+
+        def work() -> Contract:
+            found, note = self.store(context).proposals(request.person, limit=request.limit)
+            return ProposalsResult(proposals=tuple(found), total=len(found), note=note)
+
+        return await self.run(work)
 
 
 class OrgChartHandler(_Cards):
@@ -654,6 +686,7 @@ def bindings(
         (FIND_SPEC, FindHandler(workspace_root), FindRequest, PeopleResult),
         (LIST_SPEC, ListHandler(workspace_root), ListRequest, PeopleResult),
         (HISTORY_SPEC, HistoryHandler(workspace_root), HistoryRequest, HistoryResult),
+        (PROPOSALS_SPEC, ProposalsHandler(workspace_root), ProposalsRequest, ProposalsResult),
         (CHART_SPEC, OrgChartHandler(workspace_root), ChartRequest, ChartResult),
         (
             HARVEST_SPEC,
