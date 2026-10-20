@@ -556,6 +556,8 @@ SHELF_MESSAGES = {
     "alias_in_use": "Another version of this Skill is switched on; the Agent uses one "
     "version per alias. Switch that one off first.",
     "asset_unreadable": "That file cannot be read as a manifest.",
+    "memory_space_has_a_manager": "It declares itself manager of a memory space another "
+    "Skill or Workflow here already manages; a space has one manager.",
     "kind_not_removable": "Only Skills and Workflows can be switched off or removed here.",
     "bad_reference": "Name the asset as namespace/name@version.",
     "workspace_unwritable": "Windows did not let the Agent move the file; nothing changed.",

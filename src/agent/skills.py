@@ -16,6 +16,7 @@ from pydantic import (
 
 from common.assets import AssetIdentity, AssetMetadata, RegistryContract
 from common.base import Contract, Slug, Symbol, Text
+from common.memory import MemorySpaceDeclaration, check_declarations
 
 CommandName = Annotated[str, StringConstraints(pattern=r"^[a-zA-Z_][a-zA-Z0-9_]*$")]
 
@@ -107,6 +108,10 @@ class SkillManifest(RegistryContract):
     # Optional (G3): the assets this Skill serves. Without it the adapter's
     # fallback (the first eligible Skill) applies, as before.
     asset_bindings: tuple[SkillAssetBinding, ...] = Field(default=(), max_length=16)
+    # Optional (accumulated memory M1): the memory spaces this Skill manages,
+    # contributes to or reads (docs/phases/ACCUMULATED_MEMORY.md §3). Without
+    # it the Skill reaches no memory, and its bytes and digest stay as they were.
+    memory_spaces: tuple[MemorySpaceDeclaration, ...] = Field(default=(), max_length=16)
 
     @model_serializer(mode="wrap")
     def _serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
@@ -117,6 +122,8 @@ class SkillManifest(RegistryContract):
             data.pop("selector_hint", None)
         if not self.asset_bindings:
             data.pop("asset_bindings", None)
+        if not self.memory_spaces:
+            data.pop("memory_spaces", None)
         return data
 
     @model_validator(mode="after")
@@ -133,6 +140,7 @@ class SkillManifest(RegistryContract):
         keys = [(b.kind, b.namespace, b.name, b.version) for b in self.asset_bindings]
         if len(keys) != len(set(keys)):
             raise ValueError("asset bindings must be unique within a Skill")
+        check_declarations(self.memory_spaces)
         return self
 
 

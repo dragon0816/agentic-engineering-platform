@@ -73,6 +73,7 @@ from common.sync import (
 )
 from host_runtime.agent import LocalAgent, LocalAgentOutcome
 from host_runtime.contracts import HostLayout, PlatformBinding
+from host_runtime.memory_spaces import conflicts as memory_conflicts
 from host_runtime.state import SqliteLocalState
 from host_runtime.workspace import documents, write_atomically
 from knowledge.evolution import KnowledgeManifest, decision_digest, knowledge_digest, raw_digest
@@ -548,6 +549,9 @@ class PlatformClient:
                 update={"package": None}
             ):
                 raise SyncRefused("asset_invalid")
+            if not isinstance(manifest, AgentProfile) and memory_conflicts(layout, manifest):
+                # A memory space has one manager (accumulated memory M1).
+                raise SyncRefused("asset_conflict")
             directory = {
                 "workflow": layout.workflows,
                 "skill": layout.skills,

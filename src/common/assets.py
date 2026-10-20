@@ -15,6 +15,7 @@ from pydantic import (
 )
 
 from common.base import Contract, Sha256, Slug, Symbol, Text
+from common.memory import MemorySpaceDeclaration, check_declarations
 
 SEMVER = re.compile(
     r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"
@@ -525,12 +526,24 @@ class WorkflowManifest(ExecutableManifest):
     occupies_machine: StrictBool = False
     # Output checks the Host runs after the steps; empty keeps older digests.
     checks: tuple[WorkflowOutputCheck, ...] = Field(default=(), max_length=20)
+    # Memory spaces this Workflow manages, contributes to or reads
+    # (accumulated memory M1); empty keeps older digests.
+    memory_spaces: tuple[MemorySpaceDeclaration, ...] = Field(default=(), max_length=16)
 
     @model_serializer(mode="wrap")
     def _serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
         return _omit_unused(
-            self, handler, frozenset({"progress_steps", "occupies_machine", "checks"})
+            self,
+            handler,
+            frozenset({"progress_steps", "occupies_machine", "checks", "memory_spaces"}),
         )
+
+    @field_validator("memory_spaces")
+    @classmethod
+    def unique_memory_spaces(
+        cls, value: tuple[MemorySpaceDeclaration, ...]
+    ) -> tuple[MemorySpaceDeclaration, ...]:
+        return check_declarations(value)
 
     @field_validator("parameters")
     @classmethod

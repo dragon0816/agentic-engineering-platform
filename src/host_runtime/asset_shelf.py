@@ -186,6 +186,17 @@ def switch_on(
                 wanted.alias,
             ):
                 raise ShelfError("alias_in_use")
+    if kind == "skill" or kind == "workflow":
+        # A memory space has one manager (accumulated memory M1).
+        from host_runtime.memory_spaces import conflicts
+
+        model = SkillManifest if kind == "skill" else WorkflowManifest
+        try:
+            candidate = model.model_validate_json(source.read_text(encoding="utf-8-sig"))
+        except (OSError, ValueError):
+            raise ShelfError("asset_unreadable") from None
+        if conflicts(layout, candidate):
+            raise ShelfError("memory_space_has_a_manager")
     os.replace(source, target)
     return Shelved(identity, source, target, _agent_copy(layout, kind, identity, environment))
 
