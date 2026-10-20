@@ -379,3 +379,40 @@ def test_each_command_is_numbered_so_answers_cannot_be_swapped(
         page.call("DOM.enable")
     assert [item["id"] for item in asked] == [1, 2, 3]
     assert [item["method"] for item in asked] == ["Page.enable", "Runtime.enable", "DOM.enable"]
+
+
+# -- a pong that cannot be sent -------------------------------------------
+
+
+class Unsendable:
+    """The client's socket, except that nothing can be sent on it any more:
+    what Windows reports as WinError 10053 once the connection is aborted."""
+
+    def __init__(self, real: socket.socket) -> None:
+        self.real = real
+
+    def recv(self, size: int) -> bytes:
+        return self.real.recv(size)
+
+    def sendall(self, data: bytes) -> None:
+        raise ConnectionAbortedError(10053, "aborted by the software in your host machine")
+
+    def close(self) -> None:
+        self.real.close()
+
+
+def test_a_pong_that_cannot_be_sent_is_a_lost_socket_not_a_bare_os_error(
+    served: list[Server],
+) -> None:
+    """Every caller catches WebSocketError. A ping arriving on a socket that
+    can no longer send used to escape as ConnectionAbortedError instead."""
+
+    def ping(connection: socket.socket) -> None:
+        connection.sendall(server_frame(PING, b"there?"))
+
+    server = start(served, ping)
+    with WebSocket(server.url, timeout_s=5) as ws:
+        ws.socket = Unsendable(ws.socket)  # type: ignore[assignment]
+        with pytest.raises(WebSocketError) as lost:
+            ws.receive()
+    assert lost.value.code == "closed"

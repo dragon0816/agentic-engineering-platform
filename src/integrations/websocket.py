@@ -189,7 +189,13 @@ class WebSocket:
             if kind == CLOSE:
                 raise WebSocketError("closed")
             if kind == PING:
-                self.socket.sendall(frame(PONG, chunk))
+                # A pong that cannot be sent is a lost socket like any other,
+                # and surfaces as one rather than as a bare OSError that no
+                # caller catches.
+                try:
+                    self.socket.sendall(frame(PONG, chunk))
+                except OSError:
+                    raise WebSocketError("closed") from None
                 continue
             if kind == PONG:
                 continue
