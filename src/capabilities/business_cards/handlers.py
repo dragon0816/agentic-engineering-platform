@@ -19,6 +19,8 @@ from typing import Any, Literal
 
 from capabilities.business_cards import chart, reading, signatures
 from capabilities.business_cards.contracts import (
+    STATUS_LABELS,
+    UNDO_HINT,
     AddCardRequest,
     AddFromSignatureRequest,
     AddFromSignatureResult,
@@ -57,6 +59,7 @@ from capabilities.business_cards.store import (
     CardStoreError,
     EditOutcome,
     store_dir,
+    undo_note,
 )
 from capabilities.contracts import CapabilitySpec
 from capabilities.runtime import CapabilityRefused
@@ -318,6 +321,9 @@ class SetStatusHandler(_Cards):
                 new_status=new,
                 left_at=row["left_at"],
                 change_id=change_id,
+                old_status_label=STATUS_LABELS[old],
+                new_status_label=STATUS_LABELS[new],
+                undo_hint=UNDO_HINT if change_id else "",
             )
 
         return await self.run(work)
@@ -390,7 +396,10 @@ class UndoHandler(_Cards):
         def work() -> Contract:
             reverted, change_id = self.store(context).undo(request.change_id, actor=who(context))
             return UndoResult(
-                undone=request.change_id, reverted=tuple(reverted), change_id=change_id
+                undone=request.change_id,
+                reverted=tuple(reverted),
+                change_id=change_id,
+                note=undo_note(reverted),
             )
 
         return await self.run(work)

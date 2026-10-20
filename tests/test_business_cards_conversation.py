@@ -692,3 +692,40 @@ def test_a_card_reply_opens_with_whom_the_card_matched(
     assert data["summary"] == "更新了傳真。"
     assert "match.lead" in PROCEDURE and "已對到既有聯絡人" in PROCEDURE
     assert "never open with a bare list of updated fields" in PROCEDURE
+
+
+def test_history_departure_and_undo_results_carry_display_strings(
+    web: tuple[AgentWeb, Conversation],
+) -> None:
+    """Third live test 2026-10-20: replies showed `active`, `left`,
+    `email_signature`, change ids and UTC times. Results carry Chinese labels
+    and Asia/Taipei times; ids stay for undo, and the procedure shows them only
+    when the person asks to undo a specific change."""
+    from capabilities.business_cards.manifest import PROCEDURE
+
+    agent_web, model = web
+    session = agent_web.create_conversation()["conversation"]["session_id"]
+
+    def call(tool: str, args: dict[str, Any]) -> Any:
+        model.then({"tools": [(tool, args)]}, {"text": "好。"})
+        assert _turn(agent_web, session, "go")["ok"]
+        result = json.loads(model.tool_results()[-1])["host"]
+        assert result["status"] == "succeeded", result
+        return result["data"]
+
+    call("cards__add_card", CARD)
+    left = call("cards__set_status", {"person": {"name": "周範例"}, "status": "left"})
+    assert (left["old_status_label"], left["new_status_label"]) == ("在職", "已離職")
+    assert left["undo_hint"] == "可以說『復原』撤回。" and left["change_id"]
+    history = call("cards__history", {"person": {"name": "周範例"}})
+    assert history["person"]["status_label"] == "已離職"
+    status = next(item for item in history["history"] if item["kind"] == "status")
+    assert (status["old_display"], status["new_display"]) == ("在職", "已離職")
+    assert re.fullmatch(r"\d{4}-\d\d-\d\d \d\d:\d\d", status["at_local"])
+    assert history["observations"][0]["source_label"] == "名片"
+    undone = call("cards__undo", {"change_id": left["change_id"]})
+    assert undone["note"] == "已復原 1 項：在職狀態。"
+    assert left["change_id"] not in undone["note"]
+    assert "status_label" in PROCEDURE and "at_local" in PROCEDURE
+    assert "「可以說『復原』撤回」" in PROCEDURE
+    assert "show one only when the person asks to undo a specific change" in PROCEDURE

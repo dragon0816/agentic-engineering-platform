@@ -87,6 +87,20 @@ SOURCE_LABELS: dict[str, str] = {
     "title_inference": "依職稱推論",
 }
 STATUS_LABELS: dict[str, str] = {"active": "在職", "left": "已離職"}
+#: How a history row's kind and field are named to the person.
+KIND_LABELS: dict[str, str] = {
+    "create": "新增",
+    "field": "欄位變更",
+    "confirm": "確認",
+    "unconfirm": "取消確認",
+    "proposal": "待確認的新讀值",
+    "status": "在職狀態",
+    "line_add": "新增回報線",
+    "line_remove": "移除回報線",
+    "delete": "刪除",
+}
+#: Shown instead of a change id unless the person asks to undo a specific change.
+UNDO_HINT = "可以說『復原』撤回。"
 EvidenceKind = Literal["signature", "email_content", "title_inference", "user"]
 
 _SHORT = 200
@@ -353,6 +367,9 @@ class PersonView(CardFields):
     open_proposals: int = 0
     needs_confirmation: tuple[FieldName, ...] = ()
     updated_at: str = ""
+    # For the reply: 在職 / 已離職, and the update time in Asia/Taipei.
+    status_label: str = ""
+    updated_at_local: str = ""
 
 
 class PeopleResult(Contract):
@@ -368,8 +385,9 @@ class HistoryRequest(Contract):
 
 
 class HistoryItem(Contract):
+    # Kept for cards__undo; shown only when the person asks to undo this one.
     change_id: str
-    at: str
+    at: str  # UTC, ISO
     actor: str
     kind: str
     field: str = ""
@@ -377,6 +395,16 @@ class HistoryItem(Contract):
     new: str = ""
     reason: str = ""
     source: str = ""
+    # For the reply (third live test 2026-10-20 showed `left`,
+    # `email_signature` and UTC times): Asia/Taipei time "2026-10-20 14:03",
+    # Chinese names of the kind, field and source, and old / new with a
+    # status named 在職 / 已離職.
+    at_local: str = ""
+    kind_label: str = ""
+    field_label: str = ""
+    source_label: str = ""
+    old_display: str = ""
+    new_display: str = ""
 
 
 class ObservationView(Contract):
@@ -385,6 +413,7 @@ class ObservationView(Contract):
     source_date: str
     source_ref: str = ""
     uncertain: tuple[str, ...] = ()
+    source_label: str = ""
 
 
 class HistoryResult(Contract):
@@ -425,6 +454,9 @@ class StatusResult(Contract):
     new_status: Status
     left_at: str = ""
     change_id: str | None = None
+    old_status_label: str = ""
+    new_status_label: str = ""
+    undo_hint: str = ""
 
 
 class SetLineRequest(Contract):
@@ -462,6 +494,8 @@ class UndoResult(Contract):
     undone: str
     reverted: tuple[HistoryItem, ...]
     change_id: str | None = None
+    # 「已復原 2 項變更：…」, with labels and local times, no ids.
+    note: str = ""
 
 
 class ImportRequest(Contract):

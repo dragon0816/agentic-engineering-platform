@@ -11,6 +11,7 @@ isolation and the one-time import of a Hermes `cards.db`.
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 from datetime import date
 from pathlib import Path
@@ -959,3 +960,27 @@ def test_a_rescan_says_whom_it_matched_and_never_starts_mid_thought(tmp_path: Pa
     by_email = _add(store, {"email": CARD["email"], "name": "王小明"}, when=date(2026, 4, 1))
     assert by_email.match is not None and by_email.match.by == "email"
     assert by_email.match.by_label == "Email"
+
+
+def test_history_and_status_carry_chinese_display_strings(tmp_path: Path) -> None:
+    """Third live test 2026-10-20: history, departure and undo replies showed
+    `active`, `left`, `email_signature` and UTC times."""
+    store = _store(tmp_path)
+    first = _add(store, CARD, source="email_signature", ref="<m1>")
+    store.set_status(
+        PersonRef(person_id=first.person_id), "left", actor="a", reason="", effective=None
+    )
+    history = store.history(PersonRef(person_id=first.person_id), limit=50)
+    assert history.person.status_label == "已離職"
+    status = next(item for item in history.history if item.kind == "status")
+    assert (status.old_display, status.new_display) == ("在職", "已離職")
+    assert status.kind_label == "在職狀態" and status.field_label == "在職狀態"
+    created = next(item for item in history.history if item.kind == "create")
+    assert created.source_label == "郵件簽名檔" and created.kind_label == "新增"
+    assert history.observations[0].source_label == "郵件簽名檔"
+    # Local time (Asia/Taipei), minutes, for a UTC instant.
+    assert re.fullmatch(r"\d{4}-\d\d-\d\d \d\d:\d\d", status.at_local)
+    from capabilities.business_cards.store import local_time
+
+    assert local_time("2026-10-20T06:03:09+00:00") == "2026-10-20 14:03"
+    assert local_time("not a time") == "not a time"

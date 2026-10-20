@@ -22,13 +22,16 @@ from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from capabilities.business_cards import names, reading
 from capabilities.business_cards.contracts import (
     FIELD_LABELS,
     FIELDS,
+    KIND_LABELS,
     MATCH_LABELS,
     SOURCE_LABELS,
+    STATUS_LABELS,
     AddResult,
     EmailDiffers,
     FieldChange,
@@ -62,6 +65,8 @@ CONTACT_FIELDS: tuple[FieldName, ...] = ("phone", "ext", "mobile", "fax", "email
 CANDIDATE_TTL = timedelta(hours=1)
 ALL_CANDIDATES = "all"
 _LABELS = FIELD_LABELS
+#: Times are shown to the person in this zone.
+LOCAL_ZONE = ZoneInfo("Asia/Taipei")
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS people (
@@ -578,6 +583,8 @@ class CardStore:
             open_proposals=int(proposals),
             needs_confirmation=self._needs(con, person_id),
             updated_at=row["updated_at"],
+            status_label=STATUS_LABELS.get(row["status"], row["status"]),
+            updated_at_local=local_time(row["updated_at"]),
         )
 
     # -- history -------------------------------------------------------
@@ -1588,6 +1595,7 @@ class CardStore:
                     source_date=item["source_date"],
                     source_ref=item["source_ref"],
                     uncertain=tuple(json.loads(item["uncertain_json"] or "[]")),
+                    source_label=SOURCE_LABELS.get(item["source"], item["source"]),
                 )
                 for item in con.execute(
                     "SELECT * FROM observations WHERE person_id = ? ORDER BY observation_id DESC "
@@ -1835,18 +1843,58 @@ def _iso(moment: datetime) -> str:
     return moment.isoformat(timespec="seconds")
 
 
+def local_time(value: str) -> str:
+    """An ISO instant as Asia/Taipei time to the minute ("2026-10-20 14:03");
+    the text unchanged when it is not a time."""
+    try:
+        moment = datetime.fromisoformat(value)
+    except (TypeError, ValueError):
+        return value
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=UTC)
+    return moment.astimezone(LOCAL_ZONE).strftime("%Y-%m-%d %H:%M")
+
+
+#: Names of the non-field values a history row can carry.
+_ROW_FIELDS = {"status": "在職狀態", "manager": "主管"}
+
+
 def _history_item(row: sqlite3.Row) -> HistoryItem:
+    kind, name = row["kind"], row["field"]
+
+    def display(value: str) -> str:
+        return STATUS_LABELS.get(value, value) if name == "status" else value
+
     return HistoryItem(
         change_id=row["change_id"],
         at=row["at"],
         actor=row["actor"],
-        kind=row["kind"],
-        field=row["field"],
+        kind=kind,
+        field=name,
         old=row["old"],
         new=row["new"],
         reason=row["reason"],
         source=row["source"],
+        at_local=local_time(row["at"]),
+        kind_label=KIND_LABELS.get(kind, kind),
+        field_label=_LABELS.get(name) or _ROW_FIELDS.get(name, name),
+        source_label=SOURCE_LABELS.get(row["source"], row["source"]),
+        old_display=display(row["old"]),
+        new_display=display(row["new"]),
     )
+
+
+def undo_note(reverted: Sequence[HistoryItem]) -> str:
+    """One sentence about what an undo reverted, without change ids."""
+    if not reverted:
+        return "這個變更沒有需要復原的內容。"
+    parts = "、".join(
+        item.kind_label
+        if not item.field_label or item.field_label == item.kind_label
+        else f"{item.kind_label}（{item.field_label}）"
+        for item in reverted
+    )
+    return f"已復原 {len(reverted)} 項：{parts}。"
 
 
 def _match_summary(
