@@ -93,18 +93,64 @@ class DraftWriter(Protocol):
     def save(self, draft: MailDraft) -> DraftReceipt: ...
 
 
+class ReplyDraft(Contract):
+    """A reply to a mail already in Outlook, saved as a draft (the loan
+    Workflow's answer on the approval notice, rs_workflow_system 06b). The
+    text goes above the quoted original, as the source Bridge's `/email/reply`
+    wrote it; Outlook chooses the recipients from the original."""
+
+    entry_id: Text
+    text_body: Text
+    attachments: tuple[Text, ...] = ()
+
+
+class ReplyReceipt(DraftReceipt):
+    """The saved reply as Outlook made it: who it goes to and its subject are
+    read back, so a later send card shows (and checks) what is really there."""
+
+    to: tuple[str, ...] = ()
+    cc: tuple[str, ...] = ()
+    subject: str = ""
+    attachments: tuple[str, ...] = ()
+
+
+class ReplyWriter(Protocol):
+    """Saving a reply as a draft, and no verb that delivers."""
+
+    def reply(self, draft: ReplyDraft) -> ReplyReceipt: ...
+
+
+def _addresses(value: str) -> tuple[str, ...]:
+    return tuple(part.strip() for part in value.replace(",", ";").split(";") if part.strip())
+
+
 class RecordingDraftWriter:
     """Every draft it was asked to save, and no Outlook. This is what the
     tests drive, and what a host without Outlook could use to see the mail."""
 
     def __init__(self) -> None:
         self.drafts: list[MailDraft] = []
+        self.replies: list[ReplyDraft] = []
 
     def save(self, draft: MailDraft) -> DraftReceipt:
         checked = MailDraft.model_validate(draft)
         _require_files(checked)
         self.drafts.append(checked)
         return DraftReceipt(saved=True, entry_id=f"recorded-{len(self.drafts)}", folder="recorded")
+
+    def reply(self, draft: ReplyDraft) -> ReplyReceipt:
+        checked = ReplyDraft.model_validate(draft)
+        if any(not Path(path).is_file() for path in checked.attachments):
+            raise DraftError("attachment_missing")
+        self.replies.append(checked)
+        return ReplyReceipt(
+            saved=True,
+            entry_id=f"recorded-reply-{len(self.replies)}",
+            folder="recorded",
+            to=(f"sender-of-{checked.entry_id}@example.com",),
+            subject=f"RE: {checked.entry_id}",
+            attachments=tuple(Path(path).name for path in checked.attachments),
+        )
 
 
 def _require_files(draft: MailDraft) -> None:
@@ -209,6 +255,55 @@ class OutlookComDraft:
         except Exception:
             # Whatever COM raised is not re-raised: its message can carry the
             # subject line and the recipients.
+            raise DraftError("draft_failed") from None
+
+    def reply(self, draft: ReplyDraft) -> ReplyReceipt:
+        """A reply to `entry_id` saved in Drafts (`ReplyWriter`), inside a COM
+        apartment on the calling thread like `save`. **Not exercised by the
+        test suite** beyond a fake object model; proven on the company PC."""
+        checked = ReplyDraft.model_validate(draft)
+        if any(not Path(path).is_file() for path in checked.attachments):
+            raise DraftError("attachment_missing")
+        code: DraftErrorCode
+        try:
+            with apartment():
+                try:
+                    return self._reply(checked)
+                except DraftError as error:
+                    code = error.code
+                except Exception:
+                    code = "draft_failed"
+        except Exception:  # CoInitialize itself failed
+            code = "draft_failed"
+        raise DraftError(code)
+
+    def _reply(self, checked: ReplyDraft) -> ReplyReceipt:
+        try:
+            application = self._dispatch if self._dispatch is not None else self._connect()
+            original = application.GetNamespace("MAPI").GetItemFromID(checked.entry_id)
+            item = original.Reply()
+            # Plain text above the quoted original (the source's text_body path).
+            item.Body = checked.text_body + "\r\n\r\n" + str(item.Body or "")
+            item.Save()
+            for path in checked.attachments:
+                item.Attachments.Add(str(Path(path).resolve()))
+            item.Save()
+            names = tuple(
+                str(item.Attachments.Item(index + 1).FileName)
+                for index in range(int(item.Attachments.Count))
+            )
+            return ReplyReceipt(
+                saved=True,
+                entry_id=str(item.EntryID or ""),
+                folder=str(getattr(item.Parent, "Name", "") or ""),
+                to=_addresses(str(item.To or "")),
+                cc=_addresses(str(item.CC or "")),
+                subject=str(item.Subject or ""),
+                attachments=names,
+            )
+        except DraftError:
+            raise
+        except Exception:
             raise DraftError("draft_failed") from None
 
 

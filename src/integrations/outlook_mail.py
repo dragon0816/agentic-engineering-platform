@@ -109,6 +109,25 @@ class MailMessage(MailSummary):
     body: str = ""
 
 
+class MailBody(Contract):
+    """One message with its HTML, for a Workflow that parses links out of
+    mail (the loan approval notices, rs_workflow_system 06). Read only, like
+    everything here; the Workflow's own settings name the folder."""
+
+    message_id: str
+    subject: str = ""
+    sender: str = ""
+    received: datetime
+    body: str = ""
+    html_body: str = ""
+
+
+class MailBodyLister(Protocol):
+    """Newest first, received at or after `since`, at most `limit`."""
+
+    def list_bodies(self, folder: str, since: datetime, limit: int) -> Sequence[MailBody]: ...
+
+
 class MailReader(Protocol):
     """The raw mailbox, before the scope: tests give a fake."""
 
@@ -200,6 +219,23 @@ def _when(value: Any) -> datetime:
 
 def _plain(body: str) -> str:
     return html.unescape(re.sub(r"\s+\n", "\n", body)).strip()
+
+
+#: PR_SENDER_SMTP_ADDRESS: an Exchange sender's SMTP address, where
+#: `SenderEmailAddress` is the X.500 form (`/O=EXCHANGELABS/...`).
+_SENDER_SMTP = "http://schemas.microsoft.com/mapi/proptag/0x5D01001F"
+
+
+def _smtp_sender(item: Any) -> str:
+    """The sender's SMTP address when Outlook has one, else what it shows."""
+    raw = _text(getattr(item, "SenderEmailAddress", ""))
+    if _text(getattr(item, "SenderEmailType", "")).upper() != "EX":
+        return raw
+    try:
+        smtp = _text(item.PropertyAccessor.GetProperty(_SENDER_SMTP))
+    except Exception:  # noqa: BLE001 - the X.500 form is still an identity
+        smtp = ""
+    return smtp or raw
 
 
 def _dispatch_outlook() -> Any:
@@ -351,6 +387,45 @@ class OutlookComMailbox:
 
     def list(self, folder: str, since: datetime, limit: int) -> list[MailSummary]:
         return self._call(lambda namespace: self._list(namespace, folder, since, limit))
+
+    def list_bodies(self, folder: str, since: datetime, limit: int) -> Sequence[MailBody]:
+        """Messages with their HTML (`MailBodyLister`), newest first. An item
+        that cannot be read is left out rather than ending the list, as the
+        source Bridge's `/email/list` did."""
+        return self._call(lambda namespace: self._list_bodies(namespace, folder, since, limit))
+
+    def _list_bodies(
+        self, namespace: Any, folder: str, since: datetime, limit: int
+    ) -> Sequence[MailBody]:
+        target = self._folder(namespace, folder)
+        try:
+            items = target.Items
+            items.Sort("[ReceivedTime]", True)
+            stamp = since.astimezone().strftime("%m/%d/%Y %I:%M %p")
+            restricted = items.Restrict(f"[ReceivedTime] >= '{stamp}'")
+            found: list[MailBody] = []
+            item = restricted.GetFirst()
+            while item is not None and len(found) < limit:
+                if getattr(item, "Class", 43) == 43:  # olMail
+                    try:
+                        found.append(
+                            MailBody(
+                                message_id=_text(item.EntryID),
+                                subject=_text(getattr(item, "Subject", "")),
+                                sender=_smtp_sender(item),
+                                received=_when(getattr(item, "ReceivedTime", None)),
+                                body=_text(getattr(item, "Body", "")),
+                                html_body=_text(getattr(item, "HTMLBody", "")),
+                            )
+                        )
+                    except Exception:  # noqa: BLE001 - one unreadable item is skipped
+                        pass
+                item = restricted.GetNext()
+            return found
+        except MailError:
+            raise
+        except Exception:
+            raise MailError("mail_failed") from None
 
     def get(self, message_id: str) -> MailMessage:
         return self._call(lambda namespace: self._get(namespace, message_id))
