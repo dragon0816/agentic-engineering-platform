@@ -2,6 +2,24 @@
 
 Updated: 2026-10-21 (Asia/Taipei), by Claude Code (accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
+## Live-check fixes B1 / B2 (2026-10-21, Claude Code) — beside M5
+
+Two commits on main, not pushed, Agent Web not restarted, live data untouched (decisions in
+`docs/DECISIONS.md` 2026-10-21, rows in `docs/TASKS.md`):
+- **B1** `install-bundled` now refreshes a shipped manifest AEP wrote and nobody changed (ledger
+  `workspace/bundled-assets.json`; on/off kept; "updated …" in the output); files from before the
+  ledger are refreshed once with a copy in `workspace/replaced-assets/`. 資料 shows an installed
+  manager without its declaration as 「Skill 已安裝但版本較舊…」, not 「無主」.
+- **B2** a harvested signature of a stored person with nothing new is `already_stored_people`, not
+  a candidate.
+
+Owner re-check: (1) check `/api/tasks` is idle; (2) run `update.ps1` (or `aep-host assets
+install-bundled --bundle <bundle>`): the output lists `updated skill engineering/business-cards@1.0.0`
+and where the earlier file was kept; (3) restart Agent Web; (4) 記憶 → 資料: `contacts/org` shows
+已開啟, no 「無主」; (5) a business-card turn (e.g. 「WNC 的人有哪些筆記？」) offers `notes__search`;
+(6) 「整理 WNC 的簽名檔」 (or 「重新整理 wnc.com.tw 的簽名檔」): KevinRK Chen is said to be already
+stored, not offered.
+
 ## Accumulated memory M4: the Agent Web memory page (2026-10-21, Claude Code) — latest
 
 **Goal / scope:** M4 of `docs/phases/ACCUMULATED_MEMORY.md` (§6, §3.6, §3.9): a 「記憶」 tab for the

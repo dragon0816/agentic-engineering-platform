@@ -2968,3 +2968,12 @@ s-k-20261011T102952` (not published).
   `memory_spaces.manager_states` → `outdated` instead of 「無主」 for an installed manager without its
   declaration. Decision `docs/DECISIONS.md` 2026-10-21 "An update refreshes a shipped manifest".
   Tests in `tests/test_bundled_skills.py`.
+- [x] Live-check fix B2: a stored person with nothing new is not a harvest candidate
+  (2026-10-21, Claude Code). `HarvestResult.already_stored` / `already_stored_people`, scan note
+  and procedure. Tests in `tests/test_business_cards_incremental.py`.
+  Verification (B1 + B2, shared tree with M5 in progress): ruff check, ruff format --check, mypy
+  clean; project `.venv` 3750 passed, 9 skipped, 1 failed (`test_business_cards_html.py::
+  test_the_page_works_in_a_real_browser`, passes alone); `C:/aepci-wk/venv` (points at this repo,
+  `--basetemp=C:/aepci-wk/bt-b1`) 3725 passed, 34 skipped, 1 failed (M5's
+  `test_memory_health.py::test_duplicates_are_offered_and_merged_only_by_the_press`, passes alone).
+- [ ] Owner live re-check of B1/B2 (steps in HANDOFF.md).

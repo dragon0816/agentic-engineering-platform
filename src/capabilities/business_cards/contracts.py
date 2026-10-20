@@ -571,6 +571,16 @@ class SignatureCandidate(CardFields):
     would_change: tuple[FieldName, ...] = ()
 
 
+class StoredMatch(Contract):
+    """A harvested signature of a person already stored, with nothing new:
+    not a candidate, so the reply says the person is already there."""
+
+    person_id: str
+    name: str = ""
+    company: str = ""
+    email: str = ""
+
+
 class HarvestWindow(Contract):
     """One domain's pass: which window it read (`first`, `incremental`,
     `reset`, `extractor`), from when, and the sync state's date after it."""
@@ -619,6 +629,10 @@ class HarvestResult(Contract):
     over_limit: int = 0
     truncated: bool = False
     domains: tuple[HarvestWindow, ...] = ()
+    # Signatures of people already stored whose reading changes nothing
+    # (live check 2026-10-21: a known person was proposed again as new).
+    already_stored: int = 0
+    already_stored_people: tuple[StoredMatch, ...] = ()
 
 
 class ChartResult(Contract):

@@ -156,6 +156,9 @@ class DomainPass:
     # Filled once the model has read the blocks.
     with_signature: int = 0
     unreadable_signature: int = 0
+    #: Signatures of people already stored whose reading changes nothing:
+    #: counted, never proposed again as candidates.
+    already_stored: int = 0
 
 
 def _aware(moment: datetime) -> datetime:

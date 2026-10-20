@@ -52,6 +52,7 @@ from capabilities.business_cards.contracts import (
     StatusResult,
     StoreCandidatesRequest,
     StoreCandidatesResult,
+    StoredMatch,
     UndoRequest,
     UndoResult,
 )
@@ -493,6 +494,7 @@ def scan_note(
     unreadable_signature: int = 0,
     skipped: int = 0,
     already_seen: int = 0,
+    already_stored: int = 0,
     over_limit: int = 0,
     truncated: bool = False,
     window: str = "",
@@ -506,6 +508,8 @@ def scan_note(
         parts.append(f"{unreadable_signature} 封的簽名檔讀不出聯絡人")
     if same_sender:
         parts.append(f"{same_sender} 封是同一寄件人較舊的信，未讀")
+    if already_stored:
+        parts.append(f"{already_stored} 位已在通訊錄、沒有新資料，不列為候選")
     if already_seen:
         parts.append(f"{already_seen} 封先前已整理過，略過")
     if skipped:
@@ -565,6 +569,10 @@ _HARVEST_NOTE = (
 )
 _NOTHING_NEW = (
     "Nothing was stored and no new people were found. Tell the person scan_note as written."
+)
+_ALREADY_STORED = (
+    " already_stored_people are ALREADY in the contacts with nothing new: they are not "
+    "candidates; say they are already stored (已在通訊錄), never ask whether to store them."
 )
 _CHART_NOTE = (
     " These people are NOT on the chart yet: ask whether to store them; after "
@@ -648,6 +656,7 @@ class _Harvesting(_Cards):
             raise HarvestFailed("model_unavailable") from None
 
         out: list[SignatureCandidate] = []
+        stored: list[StoredMatch] = []
         for done, _ in passes:
             for block in done.blocks:
                 if block.message_id not in read_fields:
@@ -663,6 +672,19 @@ class _Harvesting(_Cards):
                     done.already += 1
                     continue
                 done.with_signature += 1
+                if existing and not changes:
+                    # A person already stored, and this signature adds nothing:
+                    # not a candidate (live check 2026-10-21).
+                    done.already_stored += 1
+                    stored.append(
+                        StoredMatch(
+                            person_id=existing,
+                            name=values.get("name", ""),
+                            company=values.get("company", ""),
+                            email=values.get("email", ""),
+                        )
+                    )
+                    continue
                 out.append(
                     SignatureCandidate(
                         **values,
@@ -711,6 +733,7 @@ class _Harvesting(_Cards):
                 unreadable_signature=done.unreadable_signature,
                 skipped=sum(done.skipped.values()),
                 already_seen=done.already,
+                already_stored=done.already_stored,
                 over_limit=done.over_limit,
                 truncated=done.truncated,
                 window=harvest.window_text(done, scope, folder),
@@ -729,6 +752,8 @@ class _Harvesting(_Cards):
             )
         found = [done for done, _ in passes]
         note = (_HARVEST_NOTE + (_CHART_NOTE if for_chart else "")) if out else _NOTHING_NEW
+        if stored:
+            note += _ALREADY_STORED
         if skipped:
             note += " Tell the person skipped_note as written."
         return HarvestResult(
@@ -750,6 +775,8 @@ class _Harvesting(_Cards):
             ),
             skipped_note=skipped_note(skipped, sum(done.opened for done in found)),
             domains=tuple(windows),
+            already_stored=len(stored),
+            already_stored_people=tuple(stored),
         )
 
 

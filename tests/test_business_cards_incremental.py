@@ -339,7 +339,9 @@ def test_the_chart_harvests_first_and_new_people_wait_for_confirmation(tmp_path:
     assert data["people"] == 1  # only who is stored
     found = data["harvest"]
     assert found["domains"][0]["domain"] == "example.com"
-    assert sorted(c["name"] for c in found["candidates"]) == ["李大華", "王小明"]
+    # 王小明 is stored and his signature adds nothing: already there, not proposed.
+    assert [c["name"] for c in found["candidates"]] == ["李大華"]
+    assert [p["name"] for p in found["already_stored_people"]] == ["王小明"]
     assert "NOT on the chart yet" in found["note"] and "harvest_first false" in found["note"]
     # Never stored by the chart.
     assert _run(bridge, "find", {"query": "李大華"}).data["total"] == 0
@@ -490,3 +492,51 @@ def test_a_conversation_harvests_on_the_chart_and_reads_only_new_mail_the_second
     assert [c["name"] for c in second["harvest"]["candidates"]] == ["吳凱"]
     assert second["people"] == 3 and second["attach"]
     assert agent_web.approvals(session)["approvals"] == []
+
+
+def test_a_stored_person_with_nothing_new_is_not_proposed_again(tmp_path: Path) -> None:
+    """Live check 2026-10-21 (WNC): a first harvest proposed a person who was
+    already stored (same email, would_change empty) as a new candidate."""
+    mail = _mail()
+    bridge = _bridge(tmp_path, mail=mail, scope=SCOPE, model=SignatureModel())
+    card = {
+        "name": "王小明",
+        "company": "範例科技",
+        "title": "協理",
+        "email": "hm.wang@example.com",
+    }
+    added = _run(bridge, "add-card", card).data
+    first = _run(bridge, "harvest-signatures", {"domain": "example.com"}).data
+    assert [c["name"] for c in first["candidates"]] == ["李大華"]
+    assert first["already_stored"] == 1
+    (known,) = first["already_stored_people"]
+    assert known["person_id"] == added["person_id"] and known["name"] == "王小明"
+    assert known["email"] == "hm.wang@example.com"
+    assert "1 位已在通訊錄、沒有新資料，不列為候選" in first["scan_note"]
+    assert "2 封有簽名檔" in first["scan_note"]
+    assert "already_stored_people are ALREADY in the contacts" in first["note"]
+    # Storing "all" stores only the new person; the known one is untouched.
+    assert _run(bridge, "store-candidates", {"candidate_ids": ["all"]}).status == "succeeded"
+    assert _run(bridge, "find", {"query": "李大華"}).data["total"] == 1
+    assert _run(bridge, "find", {"query": "王小明"}).data["total"] == 1
+    assert "already_stored_people" in PROCEDURE
+
+
+def test_a_stored_person_whose_signature_changes_something_is_still_proposed(
+    tmp_path: Path,
+) -> None:
+    mail = _mail()
+    bridge = _bridge(tmp_path, mail=mail, scope=SCOPE, model=SignatureModel())
+    card = {
+        "name": "王小明",
+        "company": "範例科技",
+        "title": "經理",
+        "email": "hm.wang@example.com",
+    }
+    added = _run(bridge, "add-card", card).data
+    data = _run(bridge, "harvest-signatures", {"domain": "example.com"}).data
+    proposed = {c["name"]: c for c in data["candidates"]}
+    assert proposed["王小明"]["existing_person_id"] == added["person_id"]
+    assert "title" in proposed["王小明"]["would_change"]
+    assert data["already_stored"] == 0 and data["already_stored_people"] == []
+    assert "已在通訊錄" not in data["scan_note"]

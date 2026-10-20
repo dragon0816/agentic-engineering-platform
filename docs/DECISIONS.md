@@ -4376,3 +4376,20 @@ identities (loses hand edits and breaks Shared Platform syncs); refreshing legac
 backup (a hand edit before the record existed could not be told apart); a provenance field inside
 the manifest (changes the bytes and digests of every published manifest).
 
+## 2026-10-21 — A harvested signature of a stored person with nothing new is not a candidate
+
+Context (live check, WNC first harvest): KevinRK Chen was already stored (same email); the
+result carried `existing_person_id` and `would_change=[]`, yet he was listed as a candidate and the
+answer said 「尚未存入通訊錄」. Only a re-read after an extractor change skipped such a match.
+
+Decision: in `_Harvesting.harvest` any signature whose `CardStore.preview` matches a stored person
+and changes no field is counted in `HarvestResult.already_stored` and listed in
+`already_stored_people` (`StoredMatch`: person_id, name, company, email), never in `candidates`.
+`scan_note` says 「N 位已在通訊錄、沒有新資料，不列為候選」 (the signature still counts in 「有簽名檔」),
+the result's `note` tells the model to say they are already stored and never ask to store them, and
+the business-cards procedure says the same. A stored person whose signature changes something is
+still proposed with `existing_person_id` and `would_change`.
+
+Rejected alternatives: leaving them as candidates with a flag (the model already ignored
+`existing_person_id`); storing an observation for them silently (a harvest stores nothing without
+the person's confirmation).
