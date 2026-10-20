@@ -106,6 +106,8 @@ GET_ROUTES = (
     "/api/memory/person",
     "/api/memory/export",
     "/api/memory/notes/export",
+    # M5: what one answer used (「為什麼」).
+    "/api/memory/why",
 )
 POST_ROUTES = (
     "/api/memory/proposals/decide",
@@ -115,6 +117,10 @@ POST_ROUTES = (
     "/api/memory/sync/reset",
     "/api/memory/sync/restore",
     "/api/memory/space/delete",
+    # M5: the memory health check (「立即檢查」, a finding's press, settings).
+    "/api/memory/health/run",
+    "/api/memory/health/decide",
+    "/api/memory/health/settings",
 )
 
 
@@ -191,6 +197,9 @@ class MemoryPage:
             "/api/memory/notes/export": lambda: self.export_notes(
                 [item for item in query.get("ids", "").split(",") if item]
             ),
+            "/api/memory/why": lambda: self.web.memory_why.for_message(
+                query.get("session_id", ""), query.get("message_id", "")
+            ),
         }
         handler = handlers.get(path)
         if handler is None:
@@ -225,6 +234,8 @@ class MemoryPage:
                 {**item, "at_local": local_time(item["at"]), "label": self._space_label(item)}
                 for item in service.deletions()
             ],
+            # M5: the health check's open findings, its settings and last run.
+            "health": self.web.memory_health.overview(self.actor),
         }
 
     @staticmethod
@@ -542,6 +553,13 @@ class MemoryPage:
             "/api/memory/sync/reset": self.reset_sync,
             "/api/memory/sync/restore": self.restore_sync,
             "/api/memory/space/delete": self.delete_space,
+            "/api/memory/health/run": lambda _body: self.web.memory_health.check_now(self.actor),
+            "/api/memory/health/decide": lambda body: self.web.memory_health.decide(
+                self.actor, body
+            ),
+            "/api/memory/health/settings": lambda body: self.web.memory_health.update_settings(
+                self.actor, body
+            ),
         }
         handler = handlers.get(path)
         if handler is None:

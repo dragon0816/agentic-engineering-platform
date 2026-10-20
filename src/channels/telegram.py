@@ -66,6 +66,8 @@ from host_runtime.attachments import (
 from host_runtime.business_cards_tools import chart_files, with_legend
 from host_runtime.chat_authoring import ChatAuthoring, ChatAuthoringError, approval_text
 from host_runtime.identity_presets import IdentityPresets
+from host_runtime.memory_why import NOTHING as WHY_NOTHING
+from host_runtime.memory_why import memory_used_in
 from host_runtime.schedule_policy import target_side_effect
 from host_runtime.turn_summary import stop_reply, tool_summary
 from host_runtime.workflow_uploads import (
@@ -113,6 +115,7 @@ HELP = (
     "Talk to the Agent in words, or send a skill command as /<skill> <command> "
     "[arguments]. /run <number or name> asks a Workflow's fields one by one. /status "
     "shows this Bridge's state. /new starts a fresh conversation and forgets its files. "
+    "/why lists the preferences and memory the last answer used. "
     "Send files or photos with a caption to have the Agent work on them."
 )
 #: Telegram lets a bot download at most 20 MB a file (the Bot API's limit).
@@ -749,6 +752,9 @@ class TelegramIngress:
         # When each chat may next have its status message edited (monotonic).
         self._status_slots: dict[int, float] = {}
         self._histories: dict[tuple[int, int], list[ModelMessage]] = {}
+        # What the chat's last answer used of the person's memory (M5,
+        # /why): the actor, preference ids and memory references, no content.
+        self._why: dict[tuple[int, int], tuple[str, tuple[str, ...], tuple[str, ...]]] = {}
         # Conversation run and install requests (G4); set by the host once it exists.
         self.approvals: ChatAuthoring | None = None
         # Within a process, a duplicate inside one response is skipped; across
@@ -982,7 +988,7 @@ class TelegramIngress:
             del self._flows[key]
             active = None
         if active is not None and not (
-            parsed is not None and parsed[0] in ("run", "start", "help", "status")
+            parsed is not None and parsed[0] in ("run", "start", "help", "status", "why")
         ):
             step = telegram_flow.answer(active, text)
             return await self._flow_step(base, key, active, step, actor, update)
@@ -997,6 +1003,10 @@ class TelegramIngress:
             return TelegramDelivery(
                 **base, disposition="answered", reply="Started a fresh conversation."
             )
+        if parsed is not None and parsed[0] == "why":
+            # 「為什麼」 (accumulated memory M5): what the chat's last answer used.
+            reply = await asyncio.to_thread(self._why_reply, key)
+            return TelegramDelivery(**base, disposition="answered", reply=reply)
         if parsed is not None and parsed[0] == "status":
             # A durable read under the store's lock, so never on the event loop.
             report = await asyncio.to_thread(self._status)
@@ -1039,6 +1049,23 @@ class TelegramIngress:
         return TelegramDelivery(
             **base, disposition="routed", reply=scrub(_describe(outcome)), outcome=outcome
         )
+
+    def _remember_why(self, key: tuple[int, int], actor: str, conversation: Any) -> None:
+        """What this answer used of the person's memory, for /why, and when
+        each preference was last carried (the health check's unused ones)."""
+        preferences = tuple(str(item) for item in conversation.preferences_used)
+        self._why[key] = (actor, preferences, memory_used_in(conversation.tools, conversation.text))
+        why = getattr(self.cards, "memory_why", None)
+        if why is not None and preferences:
+            why.remember(actor, preferences)
+
+    def _why_reply(self, key: tuple[int, int]) -> str:
+        found = self._why.get(key)
+        why = getattr(self.cards, "memory_why", None)
+        if found is None or why is None:
+            return WHY_NOTHING
+        actor, preferences, used = found
+        return str(why.text(actor, preferences, used))
 
     def _request(self, update: _Update, actor: str, text: str) -> LocalAgentRequest | None:
         """The Agent request for `text`, or None when the request contract
@@ -1363,6 +1390,7 @@ class TelegramIngress:
                 return self._carded(base, reply, buttons, drafted)
             return TelegramDelivery(**base, disposition="answered", reply=reply, buttons=buttons)
         answer = conversation.text if conversation.text.strip() else _no_answer_reply(record)
+        await asyncio.to_thread(self._remember_why, key, request.actor, conversation)
         remembered = answer if record is None else f"{answer}\n\n[工具紀錄]\n{record}"
         turn.append(ModelMessage(role="assistant", text=remembered))
         self._histories[key] = turn[-MAX_CHAT_HISTORY:]

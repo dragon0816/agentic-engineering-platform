@@ -22,6 +22,7 @@ from pydantic import ValidationError
 from common.base import Contract
 from common.execution import TraceIdentifiers
 from host_runtime.experience import ExperienceCase, ExperienceStore, group
+from host_runtime.memory_health import HealthSummary
 from host_runtime.skill_suggestions import SuggestionCounts, SuggestionItem, SuggestionPass
 from models.contracts import ModelClient, ModelMessage, ModelRequest, ModelRequirements
 
@@ -87,6 +88,8 @@ class ReviewReport(Contract):
     # qualified and dropped with the reason; counts beside it.
     suggestions: tuple[SuggestionItem, ...] = ()
     suggestion_counts: SuggestionCounts | None = None
+    # The night's memory health check (accumulated memory M5): counts only.
+    memory_health: HealthSummary | None = None
 
     def markdown(self) -> str:
         lines = [
@@ -120,6 +123,8 @@ class ReviewReport(Contract):
                 .markdown()
                 .rstrip("\n")
             )
+        if self.memory_health is not None:
+            lines += ["", self.memory_health.markdown().rstrip("\n")]
         return "\n".join(lines) + "\n"
 
 
@@ -198,8 +203,9 @@ def run_review(
     harvested: int = 0,
     max_groups: int = MAX_GROUPS,
     suggestions: SuggestionPass | None = None,
+    memory_health: HealthSummary | None = None,
 ) -> ReviewReport:
-    review_id = f"review-{datetime.now(UTC).strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:4]}"
+    review_id = new_review_id()
     open_cases = store.cases("open")
     groups = list(group(open_cases).items())
     findings = []
@@ -247,12 +253,37 @@ def run_review(
         skipped_groups=max(0, len(groups) - max_groups),
         suggestions=suggestions.suggestions if suggestions is not None else (),
         suggestion_counts=suggestions.counts if suggestions is not None else None,
+        memory_health=memory_health,
         finished_at=datetime.now(UTC).isoformat(timespec="seconds"),
     )
+    write_report(workspace, report)
+    return report
+
+
+def new_review_id() -> str:
+    return f"review-{datetime.now(UTC).strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:4]}"
+
+
+def write_report(workspace: Path, report: ReviewReport) -> None:
+    """`review-*.json` and `.md` under `<workspace>/experience-reviews/`."""
     folder = workspace / REVIEWS_DIR
     folder.mkdir(exist_ok=True)
-    (folder / f"{review_id}.json").write_text(report.model_dump_json(indent=1), encoding="utf-8")
-    (folder / f"{review_id}.md").write_text(report.markdown(), encoding="utf-8")
+    (folder / f"{report.review_id}.json").write_text(
+        report.model_dump_json(indent=1), encoding="utf-8"
+    )
+    (folder / f"{report.review_id}.md").write_text(report.markdown(), encoding="utf-8")
+
+
+def memory_health_report(workspace: Path, summary: HealthSummary) -> ReviewReport:
+    """A night without a review to run still reports its memory health check."""
+    stamp = datetime.now(UTC).isoformat(timespec="seconds")
+    report = ReviewReport(
+        review_id=new_review_id(),
+        started_at=stamp,
+        finished_at=stamp,
+        memory_health=summary,
+    )
+    write_report(workspace, report)
     return report
 
 

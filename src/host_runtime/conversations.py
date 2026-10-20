@@ -1,9 +1,9 @@
 """Durable, local-only Personal Agent conversation evidence."""
 
 from datetime import datetime
-from typing import Any, Literal, Self
+from typing import Annotated, Any, Literal, Self
 
-from pydantic import Field, JsonValue, StrictBool, model_validator
+from pydantic import Field, JsonValue, StrictBool, StringConstraints, model_validator
 
 from common.assets import REDACTED, SECRET_PATTERN, reject_embedded_secrets
 from common.base import Contract, Symbol, Text
@@ -11,6 +11,8 @@ from common.execution import TraceIdentifiers
 from host_runtime.conversation_backends import ConversationBackendName
 
 MAX_STORED_MESSAGES = 100
+#: A memory item an answer used, by reference only (`<space>:<kind>:<id>`).
+MemoryRef = Annotated[str, StringConstraints(pattern=r"^[a-z][a-z0-9/-]*:[a-z_]+:\S{1,160}$")]
 
 
 FeedbackRating = Literal["up", "down", "neutral"]
@@ -57,6 +59,9 @@ class ConversationMessage(Contract):
     # The person's saved preferences the answer was given (accumulated memory
     # M3), by id, so "why did you do that" can name them later (M5).
     preferences_used: tuple[Symbol, ...] = Field(default=(), max_length=40)
+    # The memory items the answer's tools read (M5, 「為什麼」): contacts,
+    # sync states, cited notes, by reference only, never content.
+    memory_used: tuple[MemoryRef, ...] = Field(default=(), max_length=40)
 
     @model_validator(mode="before")
     @classmethod
@@ -91,8 +96,8 @@ class ConversationMessage(Contract):
             raise ValueError("only an answer shows an action card")
         if self.role == "user" and self.tool_summary is not None:
             raise ValueError("only an answer records the tools it used")
-        if self.role == "user" and self.preferences_used:
-            raise ValueError("only an answer records the preferences it was given")
+        if self.role == "user" and (self.preferences_used or self.memory_used):
+            raise ValueError("only an answer records the preferences and memory it used")
         reject_embedded_secrets(self.model_dump(mode="json"))
         return self
 

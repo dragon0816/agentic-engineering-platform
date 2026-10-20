@@ -181,6 +181,23 @@ select.mem-field { width: auto; flex: 0 1 220px; min-width: 0; max-width: 100%; 
 .mem-inline input.mem-field.mem-days { flex: 0 0 7em; width: 7em; }
 #mem-refresh { flex: none; white-space: nowrap; }
 .mem-used summary { padding: 11px 0; cursor: pointer; color: var(--dim); font-size: 13px; }
+/* M5: the health check's findings (a distinct 待確認 type) and 「為什麼」. */
+.mem-item.mem-health { border-left: 4px solid var(--warn); }
+.tag.mem-health-tag { color: var(--warn); border-color: var(--warn); }
+.mem-item.mem-target { outline: 2px solid var(--accent); outline-offset: 2px; }
+.why-btn { display: inline-flex; align-items: center; min-height: 32px; margin: 6px 0 0;
+  padding: 0 10px; border: 1px solid var(--line); border-radius: 16px; background: var(--bg);
+  color: var(--dim); font: inherit; font-size: 12px; cursor: pointer; }
+.why-btn:hover, .why-btn[aria-expanded="true"] { color: var(--ink); border-color: var(--accent); }
+.why-box { margin: 6px 0 0; padding: 8px 12px; border: 1px solid var(--line);
+  border-radius: 8px; font-size: 13px; }
+.why-box ul { margin: 4px 0; padding-left: 18px; }
+.why-box li { margin: 4px 0; overflow-wrap: anywhere; }
+.why-box .why-kind { color: var(--dim); }
+.why-box .why-gone { color: var(--bad); }
+.why-box button { border: 0; background: transparent; color: var(--accent); cursor: pointer;
+  font: inherit; font-size: 13px; padding: 4px 6px; min-height: 32px; }
+.why-box button:hover { text-decoration: underline; }
 @media (max-width: 520px) {
   .mem-pairs { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .mem-pairs dd { margin: 0 0 6px; }
@@ -1935,6 +1952,11 @@ tr:last-child td { border-bottom: none; }
       <p class="mem-intro">自動讀到的值和存著的不一樣時，不會直接覆蓋，而是等你決定。
         平常在對話中就能處理；
         這裡列出所有空間還沒決定的項目。</p>
+      <div class="mem-toolbar" id="mem-health-bar">
+        <button id="mem-health-run" class="mem-btn" type="button">立即檢查</button>
+        <span id="mem-health-last" class="mem-meta"></span>
+      </div>
+      <div id="mem-health-list"></div>
       <div id="mem-confirm-list"></div>
     </div>
     <div class="mem-pane" id="mem-pane-preferences" role="tabpanel" aria-label="偏好" hidden>
@@ -3111,6 +3133,11 @@ function attachTurnControls(block, question, message) {
   keep.addEventListener("click", () => saveNote(block, message.message_id, ""));
   tools.append(keep);
   block.append(tools);
+  // 「為什麼」 (accumulated memory M5): what of the person's memory this answer
+  // used, each linked to where it can be edited or deleted on the memory page.
+  if ((message.preferences_used || []).length || (message.memory_used || []).length) {
+    block.append(whyButton(message.message_id));
+  }
   const area = document.createElement("div");
   area.className = "turn-feedback-area";
   if (message.feedback) area.append(feedbackSummary(message.feedback));
@@ -3119,6 +3146,53 @@ function attachTurnControls(block, question, message) {
     event.preventDefault();
     showTurnMenu(event.clientX, event.clientY, block, question, message);
   });
+}
+
+const WHY_KINDS = {preference: "偏好", person: "聯絡人", sync: "整理進度", note: "筆記"};
+
+function whyButton(messageId) {
+  const wrap = document.createElement("div"); wrap.className = "why";
+  const button = document.createElement("button");
+  button.type = "button"; button.className = "why-btn"; button.append(text("為什麼？"));
+  button.title = "這則回答用了哪些偏好與記憶";
+  button.setAttribute("aria-expanded", "false");
+  const box = document.createElement("div"); box.className = "why-box"; box.hidden = true;
+  button.addEventListener("click", async () => {
+    const open = box.hidden;
+    box.hidden = !open; button.setAttribute("aria-expanded", String(open));
+    if (!open || box.dataset.loaded) return;
+    box.replaceChildren(text("讀取中…"));
+    let reply;
+    try {
+      reply = await call("/api/memory/why?session_id=" + encodeURIComponent(activeConversation)
+        + "&message_id=" + encodeURIComponent(messageId));
+    } catch (failure) { reply = {ok: false, message: failure.message}; }
+    box.replaceChildren();
+    if (!reply.ok) { box.append(text(reply.message || reply.code)); return; }
+    box.dataset.loaded = "1";
+    box.append(text("這則回答用到："));
+    const list = document.createElement("ul");
+    for (const item of reply.items) {
+      const row = document.createElement("li");
+      const kind = document.createElement("span"); kind.className = "why-kind";
+      kind.append(text((WHY_KINDS[item.kind] || item.kind) + "："));
+      row.append(kind, text(item.label + (item.detail ? "（" + item.detail + "）" : "")));
+      if (item.gone) {
+        const gone = document.createElement("span"); gone.className = "why-gone";
+        gone.append(text("（已刪除）")); row.append(gone);
+      } else {
+        const link = document.createElement("button"); link.type = "button";
+        link.append(text(item.kind === "sync" ? "到同步進度" : "到記憶頁修改或刪除"));
+        link.addEventListener("click", () => memGoto(item).catch((failure) =>
+          memNotice({ok: false, message: failure.message})));
+        row.append(link);
+      }
+      list.append(row);
+    }
+    box.append(list);
+  });
+  wrap.append(button, box);
+  return wrap;
 }
 
 function openFeedback(block, message, rating) {
@@ -8767,7 +8841,7 @@ function memShow(name) {
 function memRender() {
   if (!memData || !memData.ok) return;
   const counts = {
-    confirm: memData.proposals.length,
+    confirm: memData.proposals.length + memData.health.findings.length,
     preferences: memData.preferences.reduce((sum, group) => sum + group.items.length, 0),
     notes: memData.notes.notes.length, data: memData.spaces.length, sync: memData.sync.length,
     records: null,
@@ -8781,11 +8855,91 @@ function memRender() {
   memRenderSync(); memRenderRecords();
 }
 
-// 待確認
+// 待確認: the health check's findings (M5), then the spaces' proposals.
+function memRenderHealth() {
+  const health = memData.health;
+  const run = el("mem-health-run");
+  run.disabled = !health.settings.enabled;
+  const last = health.last_run;
+  el("mem-health-last").textContent = !health.settings.enabled
+    ? "健康檢查已關閉（在「紀錄」可以打開）。"
+    : last ? "上次檢查：" + last.at_local + "（每晚自動檢查；只找問題，不會自己改資料）"
+    : "還沒檢查過（每晚自動檢查；只找問題，不會自己改資料）";
+  const list = el("mem-health-list"); list.replaceChildren();
+  for (const item of health.findings) {
+    const card = memEl("article", "mem-item mem-health"); card.dataset.finding = item.finding_id;
+    card.append(memEl("div", "mem-item-head", memEl("strong", "", item.title),
+      memEl("span", "tag mem-health-tag", "健康檢查：" + item.kind_label)));
+    const pairs = memEl("dl", "mem-pairs");
+    for (const [label, value] of item.pairs) {
+      pairs.append(memEl("dt", "", label), memEl("dd", "", value || "—"));
+    }
+    pairs.append(memEl("dt", "", "發現"), memEl("dd", "", item.created_at_local));
+    const actions = memEl("div", "mem-actions");
+    for (const choice of item.actions) {
+      actions.append(memButton(choice.label, () => memHealthDecide(item, choice), choice.style));
+    }
+    for (const link of item.links) {
+      actions.append(memButton(link.label, () => memGoto(link.person_id
+        ? {kind: "person", id: link.person_id} : {kind: link.tab, id: link.id}), "link"));
+    }
+    card.append(pairs, actions); list.append(card);
+  }
+}
+
+function memHealthDecide(item, choice) {
+  if (choice.style === "danger" && !confirm(choice.label + "？可以復原。")) return;
+  return memAct("/api/memory/health/decide", {finding_id: item.finding_id, action: choice.action},
+    (reply) => {
+      const undo = reply.undo;
+      if (!undo) return null;
+      if (undo.kind === "preference") {
+        return () => call("/api/memory/undo", {kind: "preference", change_id: undo.change_id});
+      }
+      return () => call("/api/memory/proposals/undo",
+        {space: "contacts/org", change_id: undo.change_id});
+    });
+}
+
+// Go to one item on the memory page (a finding's link, an answer's 「為什麼」).
+async function memGoto(item) {
+  if (!el("panel-memory").hasAttribute("data-open")) await selectPrimaryTab("memory");
+  else if (!memData) await loadMemory();
+  if (item.kind === "person") { await memOpenPerson(item.id); return; }
+  const panes = {preference: "preferences", preferences: "preferences", note: "notes",
+    notes: "notes", sync: "sync", records: "records", data: "data"};
+  const pane = panes[item.kind] || "confirm";
+  memShow(pane);
+  if (pane === "notes") {
+    el("mem-note-search").value = ""; el("mem-note-tag").value = "";
+    el("mem-note-entity").value = ""; memRenderNotes();
+  }
+  const selectors = {preferences: "[data-preference]", notes: "[data-note]",
+    sync: "[data-sync]", records: "[data-record-space]"};
+  const found = [...document.querySelectorAll("#mem-pane-" + pane + " "
+    + (selectors[pane] || ".mem-item"))].find((node) => {
+    const value = node.dataset.preference || node.dataset.note || node.dataset.recordSpace
+      || node.dataset.sync || "";
+    return value === item.id || value.endsWith("|" + item.id);
+  });
+  for (const old of document.querySelectorAll(".mem-item.mem-target")) {
+    old.classList.remove("mem-target");
+  }
+  if (found) {
+    found.classList.add("mem-target"); found.scrollIntoView({block: "center"});
+  } else if (item.kind === "preference" || item.kind === "note") {
+    memNotice({ok: false, message: "這一項已經刪除或停用了。"});
+  }
+}
+
 function memRenderConfirm() {
+  memRenderHealth();
   const list = el("mem-confirm-list"); list.replaceChildren();
   if (!memData.proposals.length) {
-    list.append(memEl("p", "empty", "沒有待確認的項目。")); return;
+    if (!memData.health.findings.length) {
+      list.append(memEl("p", "empty", "沒有待確認的項目。"));
+    }
+    return;
   }
   for (const item of memData.proposals) {
     const card = memEl("article", "mem-item"); card.dataset.proposal = item.proposal_id;
@@ -9164,7 +9318,39 @@ function memRenderSync() {
   }
 }
 
-// 紀錄
+// 紀錄: the health check's settings (M5), kept in the person's own database.
+function memHealthSettings() {
+  const settings = memData.health.settings;
+  const section = memEl("div", "mem-sub"); section.id = "mem-health-settings";
+  const on = document.createElement("input"); on.type = "checkbox"; on.id = "mem-health-on";
+  on.checked = settings.enabled;
+  const months = document.createElement("input"); months.type = "number"; months.min = "0";
+  months.max = "120"; months.value = settings.freshness_months;
+  months.className = "mem-field mem-days"; months.id = "mem-health-months";
+  months.setAttribute("aria-label", "聯絡人多久沒出現就問是否仍在職（月；0 依規則）");
+  const days = document.createElement("input"); days.type = "number"; days.min = "1";
+  days.max = "3650"; days.value = settings.unused_days;
+  days.className = "mem-field mem-days"; days.id = "mem-health-days";
+  days.setAttribute("aria-label", "偏好多久沒用就提醒（天）");
+  const rule = (memData.health.rule_periods || []).map((period) =>
+    period.endsWith("M") ? period.slice(1, -1) + " 個月" : period.slice(1, -1) + " 天").join("、");
+  const pairs = memEl("dl", "mem-pairs mem-records");
+  pairs.append(memEl("dt", "", "每晚健康檢查"),
+    memEl("dd", "", memEl("label", "mem-check", on,
+      "打開（找重複、過期、矛盾、沒在用的偏好、無主的資料）")),
+    memEl("dt", "", "聯絡人"), memEl("dd", "", memEl("span", "mem-inline", months,
+      "個月沒出現就問是否仍在職（0 = 依空間的規則" + (rule ? "：" + rule : "") + "）")),
+    memEl("dt", "", "偏好"), memEl("dd", "", memEl("span", "mem-inline", days,
+      "天沒用到就提醒")));
+  section.append(memEl("h3", "", "健康檢查"),
+    memEl("p", "mem-intro", "健康檢查只找出問題放到「待確認」，不會自己改任何資料；"
+      + "矛盾的偏好會用內部模型檢查（同一個 Skill 有兩條以上才問）。"),
+    pairs, memEl("div", "mem-actions", memButton("儲存", () => memAct(
+      "/api/memory/health/settings", {enabled: on.checked, freshness_months: Number(months.value),
+        unused_days: Number(days.value)}), "primary")));
+  return section;
+}
+
 function memRenderRecords() {
   const box = el("mem-records"); box.replaceChildren();
   const records = memData.records;
@@ -9194,6 +9380,7 @@ function memRenderRecords() {
       memEl("dd", "", space.retention_label + "（由管理的 Skill 決定，目前不能在這裡改）"));
   }
   box.append(memEl("h3", "mem-group", "保留期限"), keep);
+  box.append(memHealthSettings());
   box.append(memEl("h3", "mem-group", "匯出與刪除記憶"),
     memEl("p", "mem-intro", "每個空間可以匯出成 JSON。刪除會永久清掉該空間的所有資料，不能復原，"
       + "只留下一筆刪除紀錄（時間、筆數，沒有內容）。"));
@@ -9251,6 +9438,10 @@ for (const button of document.querySelectorAll("#mem-tabs [data-mem]")) {
 }
 el("mem-refresh").addEventListener("click", () => loadMemory().catch((failure) =>
   memNotice({ok: false, message: failure.message})));
+el("mem-health-run").addEventListener("click", () => {
+  el("mem-health-last").textContent = "檢查中…";
+  memAct("/api/memory/health/run", {});
+});
 for (const id of ["mem-note-search", "mem-note-tag", "mem-note-entity"]) {
   el(id).addEventListener(id === "mem-note-search" ? "input" : "change", () => {
     if (memData) memRenderNotes();

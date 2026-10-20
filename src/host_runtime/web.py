@@ -178,7 +178,12 @@ from host_runtime.experience_proposals import (
     ReviewProposal,
     make_cards,
 )
-from host_runtime.experience_review import latest_review, review_model, run_review
+from host_runtime.experience_review import (
+    latest_review,
+    memory_health_report,
+    review_model,
+    run_review,
+)
 from host_runtime.gateway_link import explain_model_failure
 from host_runtime.host import HostRuntime, build_telegram, choice_sources, load_authorization
 from host_runtime.identity_presets import IdentityPresets
@@ -209,12 +214,14 @@ from host_runtime.laya import accelerator_for as laya_accelerator
 from host_runtime.laya import last_decision as laya_last_decision
 from host_runtime.laya import probe as laya_probe
 from host_runtime.loan_reply_cards import LoanReplyCards
+from host_runtime.memory_health import MemoryHealth
 from host_runtime.memory_page import GET_ROUTES as MEMORY_PAGE_GET_ROUTES
 from host_runtime.memory_page import POST_ROUTES as MEMORY_PAGE_POST_ROUTES
 from host_runtime.memory_page import MemoryPage
+from host_runtime.memory_why import MemoryWhy, memory_used_in
 from host_runtime.persona import AgentPersonaStore, AgentPersonaUpdateRequest
 from host_runtime.personal_memory import ROUTES as MEMORY_ROUTES
-from host_runtime.personal_memory import PersonalMemory, preferences_in
+from host_runtime.personal_memory import PersonalMemory, memory_in, preferences_in
 from host_runtime.platform_publish import (
     ASSET_REFERENCE,
     MemberPortalPublisher,
@@ -688,6 +695,10 @@ class AgentWeb:
         self.personal_memory = PersonalMemory(self)
         # The memory page (accumulated memory M4): the actor's own memory.
         self.memory_page = MemoryPage(self)
+        # Memory quality (accumulated memory M5): the health check and
+        # 「為什麼」 for each answer that used memory.
+        self.memory_health = MemoryHealth(self)
+        self.memory_why = MemoryWhy(self)
         gateway.turn_memory = self.personal_memory.turn
         # Agent mode for the Claude Code / Copilot backends (owner 2026-10-15,
         # docs/phases/AGENT_MODE_BACKENDS.md): working folders, approval cards,
@@ -1656,6 +1667,7 @@ class AgentWeb:
             workspace=self.runtime.layout.workspace_root,
             harvested=added,
             suggestions=suggestions,
+            memory_health=self._take_health_summary(),
         )
         self._experience_store().set_meta("last_review", report.started_at)
         return {
@@ -1921,31 +1933,64 @@ class AgentWeb:
 
     def start_experience_nightly(self, check_s: float = 1800.0) -> None:
         """Review once a night after 02:00 local time when there are new cases
-        (owner, 2026-10-12)."""
+        (owner, 2026-10-12), with the memory health check (M5) before it."""
 
         def loop() -> None:
             while True:
                 time.sleep(check_s)
                 try:
-                    workspace = self.runtime.layout.workspace_root
-                    if not load_settings(workspace).nightly:
-                        continue
-                    now = datetime.now().astimezone()
-                    last = self._experience_store().meta("last_review") or ""
-                    if now.hour < 2 or last[:10] == now.date().isoformat():
-                        continue
-                    self.experience_harvest()
-                    if self._experience_store().cases("open") or self._suggestions_due():
-                        self.tasks().tracked(
-                            "experience_review",
-                            "Experience review (nightly)",
-                            "",
-                            self._experience_review_task,
-                        )()
+                    self.nightly_tick()
                 except Exception:  # noqa: BLE001 - a failed night is retried the next
                     continue
 
         threading.Thread(target=loop, name="experience-nightly", daemon=True).start()
+
+    def nightly_tick(self, now: datetime | None = None) -> None:
+        """One look of the nightly job: after 02:00 local time, once a night,
+        the memory health check of every actor (accumulated memory M5; each
+        actor's own switch), then the experience review when it is switched
+        on and has new cases. The night's report (`review-*.json` / `.md`)
+        carries the health check's counts; a night without a review writes
+        one with the counts alone."""
+        workspace = self.runtime.layout.workspace_root
+        moment = now or datetime.now().astimezone()
+        if moment.hour < 2:
+            return
+        today = moment.date().isoformat()
+        store = self._experience_store()
+        if (store.meta("last_memory_health") or "")[:10] != today:
+            store.set_meta("last_memory_health", moment.isoformat(timespec="seconds"))
+            self.tasks().tracked(
+                "memory_health", "Memory health check (nightly)", "", self._memory_health_task
+            )()
+        last = store.meta("last_review") or ""
+        if load_settings(workspace).nightly and last[:10] != today:
+            self.experience_harvest()
+            if store.cases("open") or self._suggestions_due():
+                self.tasks().tracked(
+                    "experience_review",
+                    "Experience review (nightly)",
+                    "",
+                    self._experience_review_task,
+                )()
+        summary = self._take_health_summary()
+        if summary is not None:
+            memory_health_report(workspace, summary)
+
+    def _memory_health_task(self) -> tuple[TaskStatus, str]:
+        summary = self.memory_health.run_all()
+        self._health_unreported = True
+        return (
+            "failed" if summary.failed and not summary.checked else "succeeded",
+            f"{summary.checked} of {summary.actors} checked, {summary.open} to decide",
+        )
+
+    def _take_health_summary(self) -> Any:
+        """The night's health counts, once, for the report."""
+        if not getattr(self, "_health_unreported", False):
+            return None
+        self._health_unreported = False
+        return self.memory_health.last_summary
 
     def start_feedback_sync(self) -> None:
         """Send queued feedback to the Shared Platform while this runs."""
@@ -2974,6 +3019,13 @@ class AgentWeb:
                             if result is not None and result.preferences_used
                             else {}
                         ),
+                        # What memory the turn's tools read (M5, 「為什麼」).
+                        **(
+                            {"memory_used": list(used)}
+                            if result is not None
+                            and (used := memory_used_in(result.tools, result.text))
+                            else {}
+                        ),
                         "tool_summary": tool_summary(result),
                         "ok": result is not None and result.status == "answered",
                         "answer": (
@@ -3067,6 +3119,7 @@ class AgentWeb:
                                 action_card=answer.get(CARD_KEY),
                                 action_cards=_listed_cards(answer),
                                 preferences_used=preferences_in(answer),
+                                memory_used=memory_in(answer),
                                 attachments=tuple(
                                     {key: str(item[key]) for key in ("filename", "kind", "path")}
                                     for item in _answer_files(answer)
@@ -3085,6 +3138,8 @@ class AgentWeb:
                 saved = self.runtime.state.save_conversation(updated)
             finally:
                 record_lock.release()
+            # When each preference was last carried (M5: unused preferences).
+            self.memory_why.remember(self.runtime.actor, preferences_in(answer))
             problem = answer.pop("problem", None)
             draft = None
             if isinstance(problem, str):

@@ -60,7 +60,15 @@ CREATE TABLE IF NOT EXISTS {table} (
     replaced_by TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX IF NOT EXISTS {table}_scope ON {table}(scope, status);
+CREATE TABLE IF NOT EXISTS {uses} (
+    preference_id TEXT PRIMARY KEY,
+    last_used_at TEXT NOT NULL,
+    uses INTEGER NOT NULL DEFAULT 0
+);
 """
+#: When an answer last carried a preference (M5: the health check's unused
+#: preferences, whichever channel the answer went to). Ids and times only.
+_USES = "uses"
 
 _SCOPE = re.compile(
     r"^(?:skill:[a-z0-9][a-z0-9_.-]*/[a-z0-9][a-z0-9_.-]*"
@@ -182,7 +190,7 @@ class Preferences:
         self.service = service
         self._space = service.space(PREFERENCES_SPACE, asset=HOST_MEMORY)
         with self._space.transaction() as tx:
-            tx.con.executescript(_SCHEMA.format(table=tx.table(_TABLE)))
+            tx.con.executescript(_SCHEMA.format(table=tx.table(_TABLE), uses=tx.table(_USES)))
 
     # -- reads -----------------------------------------------------------
 
@@ -424,6 +432,29 @@ class Preferences:
                 reason=reason or "removed by the person",
             )
         return change
+
+    def mark_used(self, preference_ids: Iterable[str], *, at: str | None = None) -> None:
+        """An answer carried these preferences (M5); ids and the time only."""
+        wanted = sorted(set(preference_ids))
+        if not wanted:
+            return
+        stamp = at or now_iso()
+        with self._space.transaction(immediate=True) as tx:
+            for preference_id in wanted:
+                tx.con.execute(
+                    f"INSERT INTO {tx.table(_USES)} (preference_id, last_used_at, uses) "
+                    "VALUES (?, ?, 1) ON CONFLICT(preference_id) DO UPDATE SET "
+                    "last_used_at = MAX(last_used_at, excluded.last_used_at), uses = uses + 1",
+                    (preference_id, stamp),
+                )
+
+    def last_used(self) -> dict[str, str]:
+        """Each preference's latest use an answer recorded (`mark_used`)."""
+        with self._space.transaction() as tx:
+            return {
+                str(row["preference_id"]): str(row["last_used_at"])
+                for row in tx.con.execute(f"SELECT * FROM {tx.table(_USES)}")
+            }
 
     def history(self, preference_id: str | None = None) -> list[sqlite3.Row]:
         with self._space.transaction() as tx:

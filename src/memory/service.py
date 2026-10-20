@@ -17,7 +17,11 @@ extracted from the business-cards store where they were proven:
   space that declares the `sync_state` kind, with `sync_history` rows for
   every advance, reset and restore;
 - `space_deletions` (M4, §3.6): one row per deletion of a space's data, with
-  who, when and how many rows, never the content.
+  who, when and how many rows, never the content;
+- `health_findings` (M5, §8): what the nightly memory health check found
+  (a duplicate, a stale fact, a contradiction, an unused preference, an
+  orphan space) and what the person decided; the check never changes the
+  memory itself.
 
 The person's own management (the Agent Web memory page, M4) goes through
 `MemoryService.owned` and the overview, export and delete methods: the
@@ -210,6 +214,21 @@ CREATE TABLE IF NOT EXISTS space_deletions (
     reason TEXT NOT NULL DEFAULT '',
     counts_json TEXT NOT NULL DEFAULT '{}'
 );
+CREATE TABLE IF NOT EXISTS health_findings (
+    finding_id TEXT PRIMARY KEY,
+    space TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    key TEXT NOT NULL,
+    subject_json TEXT NOT NULL DEFAULT '{}',
+    state TEXT NOT NULL DEFAULT 'open',
+    check_id TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    decided_at TEXT NOT NULL DEFAULT '',
+    decided_by TEXT NOT NULL DEFAULT '',
+    action TEXT NOT NULL DEFAULT '',
+    UNIQUE (space, kind, key)
+);
 """
 #: The facilities every space shares, each row carrying `space` (what an
 #: export holds and a deletion clears, besides the space's own tables).
@@ -222,6 +241,9 @@ SHARED_TABLES = (
     "external_ids",
     "sync_state",
     "sync_history",
+    # M5: the health check's findings about the space (what it found, the
+    # person's decision); never the memory itself.
+    "health_findings",
 )
 _OBSERVATIONS_NEVER_DELETED = """CREATE TRIGGER IF NOT EXISTS observations_never_deleted
 BEFORE DELETE ON observations
@@ -1262,7 +1284,12 @@ class MemoryService:
 
     @classmethod
     def for_actor(cls, workspace_root: Path, actor: str, registry: MemoryRegistry) -> MemoryService:
-        return cls(memory_path(workspace_root, actor), registry)
+        service = cls(memory_path(workspace_root, actor), registry)
+        # Whose database this is (M5): the nightly health check goes through
+        # every database on the Host and needs the actor's conversations.
+        with service.connect() as con:
+            con.execute("INSERT OR IGNORE INTO meta (key, value) VALUES ('actor', ?)", (actor,))
+        return service
 
     @contextmanager
     def connect(self, *, immediate: bool = False) -> Iterator[sqlite3.Connection]:
@@ -1352,6 +1379,16 @@ class MemoryService:
         with self.connect() as con:
             row = con.execute("SELECT value FROM meta WHERE key = ?", (key,)).fetchone()
         return None if row is None else str(row["value"])
+
+    def set_meta(self, key: str, value: str) -> None:
+        """A Host setting or marker of this database (M5: the health check's
+        settings and last run). Never memory content."""
+        with self.connect() as con:
+            con.execute(
+                "INSERT INTO meta (key, value) VALUES (?, ?) "
+                "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+                (key, value),
+            )
 
     # -- the person's own management (M4, the Agent Web memory page) --------
 

@@ -176,6 +176,34 @@ class AutoMergeRule(Contract):
     mapped_external_ids: bool = True
 
 
+#: A freshness period: days or months (`P30D`, `P12M`).
+FreshnessPeriod = Annotated[str, StringConstraints(pattern=r"^P[1-9][0-9]{0,3}[DM]$")]
+
+
+class FreshnessRule(Contract):
+    """When something a space holds is stale (accumulated memory M5, §8.2),
+    as data the manager ships, never code:
+
+    - `entities`: an entity of `entity` kind (`person`) whose newest
+      observation (any source, the person's own word included) is older than
+      `after` becomes a question for the person (`question`, with `{name}`),
+      e.g. 「{name} 是否仍在職？」; only entities in `status` are asked about;
+    - `sync_state`: a source whose state did not move for `after` is listed
+      in the health report."""
+
+    kind: Literal["entities", "sync_state"]
+    after: FreshnessPeriod
+    entity: Symbol | None = None
+    question: str = Field(default="", max_length=120)
+    status: tuple[Symbol, ...] = ()
+
+    @model_validator(mode="after")
+    def entity_rules_ask(self) -> Self:
+        if self.kind == "entities" and (not self.entity or "{name}" not in self.question):
+            raise ValueError("an entity freshness rule names its entity and asks with {name}")
+        return self
+
+
 class MergeRules(Contract):
     """A space's merge rules, as data (§3.8.3)."""
 
@@ -195,6 +223,8 @@ class MergeRules(Contract):
     #: new evidence only when their identity was never observed before for
     #: the entity, and without a stable identity never.
     undated: tuple[Symbol, ...] = ()
+    #: When what the space holds is stale (M5); none by default.
+    freshness: tuple[FreshnessRule, ...] = Field(default=(), max_length=8)
 
     @model_validator(mode="after")
     def user_is_known(self) -> Self:

@@ -833,6 +833,14 @@ def preferences_in(answer: Mapping[str, object]) -> tuple[str, ...]:
     return tuple(str(item) for item in found) if isinstance(found, list | tuple) else ()
 
 
+def memory_in(answer: Mapping[str, object]) -> tuple[str, ...]:
+    """The memory references an Agent Web answer carries (`memory_used`, M5)."""
+    found = answer.get("memory_used")
+    if not isinstance(found, list):
+        return ()
+    return tuple(str(item) for item in found if isinstance(item, str))[:40]
+
+
 def notes_allowed(message: str, skills: tuple[SkillManifest, ...]) -> bool:
     """`notes__search` is offered only when a Skill in use declares a read of
     `personal/notes`, or the person's message asks about earlier notes."""

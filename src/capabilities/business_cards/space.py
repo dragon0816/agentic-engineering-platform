@@ -15,6 +15,7 @@ from typing import Final
 from common.memory import (
     AutoMergeRule,
     FieldMergeRule,
+    FreshnessRule,
     MemorySpaceDeclaration,
     MergeRules,
     RelationRule,
@@ -98,6 +99,18 @@ MERGE_RULES = MergeRules(
     auto_merge=AutoMergeRule(identities=("email",), mapped_external_ids=True),
     # A card's date is when it was scanned, not when it was true.
     undated=("card", "import"),
+    # M5 (§8.2): a person at work not seen in any evidence for 12 months is
+    # asked about; a mail folder not read for 30 days is reported.
+    freshness=(
+        FreshnessRule(
+            kind="entities",
+            after="P12M",
+            entity="person",
+            question="{name} 是否仍在職？",
+            status=("active",),
+        ),
+        FreshnessRule(kind="sync_state", after="P30D"),
+    ),
 )
 
 DECLARATION = MemorySpaceDeclaration(

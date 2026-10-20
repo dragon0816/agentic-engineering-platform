@@ -22,6 +22,7 @@ moved there once (`migration`). Nothing here reaches the network.
 from __future__ import annotations
 
 import json
+import re
 import secrets
 import sqlite3
 from collections.abc import Callable, Iterator, Mapping, Sequence
@@ -221,6 +222,9 @@ class _Merge:
 
 
 #: Why a merge rule kept a stored value, as a result names it.
+#: A column name of the people table, as an undone merge restores it.
+_COLUMN = re.compile(r"^[a-z_]{1,40}$")
+
 _KEPT_REASONS: dict[str, KeptReason] = {
     "user_set": "user_set",
     "older_evidence": "older_evidence",
@@ -1626,6 +1630,30 @@ class CardStore:
             )
             return True
 
+        def merged_away(tx: SpaceTx, item: sqlite3.Row, extra: dict[str, Any], new: str) -> bool:
+            # The person merged into another (M5) comes back as they were.
+            saved = extra.get("row")
+            pid = item["entity_id"]
+            if not isinstance(saved, dict) or self._person(tx, pid) is not None:
+                raise CardStoreError("undo_conflict")
+            columns = [name for name in saved if _COLUMN.fullmatch(name)]
+            tx.con.execute(
+                f"INSERT INTO {PEOPLE} ({', '.join(columns)}) "
+                f"VALUES ({', '.join('?' for _ in columns)})",
+                tuple(saved[name] for name in columns),
+            )
+            tx.reopen([int(number) for number in extra.get("dismissed_proposals") or ()])
+            tx.record(
+                new,
+                actor,
+                pid,
+                "unmerge",
+                old=item["new"],
+                reason=f"undo {change_id}",
+                source="user",
+            )
+            return True
+
         handlers = {
             "proposal_rule": rule,
             "create": create,
@@ -1634,10 +1662,231 @@ class CardStore:
             "line_add": line_add,
             "line_remove": line_remove,
             "confirm": confirm,
+            "merged_away": merged_away,
         }
         with self._connect() as tx:
             rows, new_change = tx.undo(change_id, actor=actor, handlers=handlers)
             return [_history_item(item) for item in rows], new_change
+
+    # -- memory health (accumulated memory M5) ---------------------------
+
+    def last_seen(self, statuses: Sequence[str] = ()) -> list[dict[str, str]]:
+        """Each person (in `statuses`, or all) with the date of their newest
+        observation, whatever its source: a card, a signature, the person's
+        own word (「仍在職」 is one). Nothing is written."""
+        with self._connect() as tx:
+            newest = {
+                str(row["entity_id"]): str(row["seen"] or "")
+                for row in tx.con.execute(
+                    "SELECT entity_id, MAX(source_date) AS seen FROM observations "
+                    "WHERE space = ? AND retracted_by = '' AND entity_id IS NOT NULL "
+                    "GROUP BY entity_id",
+                    (CONTACTS_ORG,),
+                )
+            }
+            found = []
+            for row in self._people(tx):
+                if statuses and row["status"] not in statuses:
+                    continue
+                person_id = row["person_id"]
+                found.append(
+                    {
+                        "person_id": person_id,
+                        "name": row["name"] or row["romanised_name"],
+                        "company": row["company"],
+                        "last_seen": newest.get(person_id) or str(row["created_at"])[:10],
+                    }
+                )
+            return found
+
+    def duplicates(self) -> list[dict[str, Any]]:
+        """Pairs of people who look like one person: the same email, or the
+        same name at the same company that the matcher kept apart (their
+        emails or places differ). Only offered to the person, never merged
+        here. The older entry first."""
+        with self._connect() as tx:
+            people = self._people(tx)
+        found: list[dict[str, Any]] = []
+        for index, first in enumerate(people):
+            for second in people[index + 1 :]:
+                if first["email_key"] and first["email_key"] == second["email_key"]:
+                    reason = "same_email"
+                elif (
+                    first["company"]
+                    and second["company"]
+                    and names.same_company(first["company"], second["company"])
+                    and any(
+                        a and b and names.same_name(a, b)
+                        for a in (first["name"], first["romanised_name"])
+                        for b in (second["name"], second["romanised_name"])
+                    )
+                ):
+                    reason = "same_name_company"
+                else:
+                    continue
+                found.append(
+                    {
+                        "reason": reason,
+                        "people": [
+                            {
+                                "person_id": row["person_id"],
+                                "name": row["name"] or row["romanised_name"],
+                                "company": row["company"],
+                                "department": row["department"],
+                                "title": row["title"],
+                                "email": row["email"],
+                                "status": row["status"],
+                            }
+                            for row in (first, second)
+                        ],
+                    }
+                )
+        return found
+
+    def confirm_active(self, ref: PersonRef, *, actor: str, reason: str) -> str:
+        """「仍在職」: the person's word that someone still works there, a
+        `user` observation dated today (which makes them fresh again) and a
+        history row. Nothing else changes."""
+        with self._connect() as tx:
+            row = self._resolve(tx, ref)
+            change_id = new_change_id()
+            tx.add_observation(
+                row["person_id"],
+                {"status": row["status"], "still_active": "yes", "reason": reason},
+                source_kind="user",
+                source_date=_clock().astimezone(LOCAL_ZONE).date().isoformat(),
+                recorded_by=actor,
+                change_id=change_id,
+                claim="status",
+            )
+            tx.record(
+                change_id,
+                actor,
+                row["person_id"],
+                "still_active",
+                field_name="status",
+                old=row["status"],
+                new=row["status"],
+                reason=reason,
+                source="user",
+            )
+            return change_id
+
+    def merge_people(self, keep: str, drop: str, *, actor: str, reason: str) -> str:
+        """Two entries the person says are one person (M5 health check, only
+        on their press): `keep` takes `drop`'s values where its own are empty,
+        `drop`'s reporting lines move to `keep`, `drop`'s open proposals are
+        dismissed and its entry goes. `drop`'s observations stay (they are
+        never deleted). One change, undoable with `undo`."""
+        if keep == drop:
+            raise CardStoreError("merge_same_person")
+        with self._connect() as tx:
+            kept = self._person(tx, keep)
+            gone = self._person(tx, drop)
+            if kept is None or gone is None:
+                raise CardStoreError("person_unknown")
+            change_id = new_change_id()
+            today = _clock().astimezone(LOCAL_ZONE).date().isoformat()
+            fill: dict[str, str] = {
+                name: str(gone[name])
+                for name in FIELDS
+                if not str(kept[name] or "").strip() and str(gone[name] or "").strip()
+            }
+            observation_id = tx.add_observation(
+                keep,
+                {**fill, "merged_from": drop},
+                source_kind="user",
+                source_date=today,
+                recorded_by=actor,
+                change_id=change_id,
+                claim="merge",
+            )
+            sources = tx.provenance(keep)
+            for name, value in fill.items():
+                fresh = self._person(tx, keep)
+                assert fresh is not None
+                self._set_field(
+                    tx,
+                    change_id,
+                    actor,
+                    fresh,
+                    name,  # type: ignore[arg-type]
+                    value,
+                    source="user",
+                    source_date=today,
+                    observation_id=observation_id,
+                    reason=reason,
+                    previous=sources.get(name),
+                )
+            lines = list(
+                tx.con.execute(
+                    f"SELECT l.*, p.name AS manager_name FROM {LINES} l "
+                    f"JOIN {PEOPLE} p ON p.person_id = l.manager_id "
+                    "WHERE (l.person_id = ? OR l.manager_id = ?) AND l.removed_at IS NULL "
+                    "ORDER BY l.line_id",
+                    (drop, drop),
+                )
+            )
+            has_manager = self._manager(tx, keep) is not None
+            for line in lines:
+                self._remove_line(tx, change_id, actor, line, "merged into another entry")
+                person = keep if line["person_id"] == drop else line["person_id"]
+                boss = keep if line["manager_id"] == drop else line["manager_id"]
+                if person == boss or (person == keep and has_manager):
+                    continue
+                if person == keep:
+                    has_manager = True
+                cursor = tx.con.execute(
+                    f"INSERT INTO {LINES} (person_id, manager_id, evidence_kind, evidence_ref, "
+                    "confidence, inferred, created_at, created_by, observation_id) "
+                    "VALUES (?,?,?,?,?,?,?,?,?)",
+                    (
+                        person,
+                        boss,
+                        line["evidence_kind"],
+                        line["evidence_ref"],
+                        line["confidence"],
+                        line["inferred"],
+                        _now(),
+                        actor,
+                        line["observation_id"],
+                    ),
+                )
+                manager = self._person(tx, boss)
+                tx.record(
+                    change_id,
+                    actor,
+                    person,
+                    "line_add",
+                    field_name="manager",
+                    new="" if manager is None else manager["name"],
+                    source=line["evidence_kind"],
+                    reason="merged entries",
+                    extra={
+                        "line_id": int(cursor.lastrowid or 0),
+                        "inferred": bool(line["inferred"]),
+                    },
+                )
+            dismissed = [int(item["proposal_id"]) for item in tx.proposals(drop, limit=10_000)]
+            for proposal_id in dismissed:
+                tx.set_proposal_state(proposal_id, "dismissed", actor=actor)
+            tx.con.execute(f"DELETE FROM {PEOPLE} WHERE person_id = ?", (drop,))
+            tx.con.execute(
+                f"UPDATE {PEOPLE} SET updated_at = ? WHERE person_id = ?", (_now(), keep)
+            )
+            # Last, so an undo brings the entry back first.
+            tx.record(
+                change_id,
+                actor,
+                drop,
+                "merged_away",
+                old=gone["name"] or gone["romanised_name"],
+                new=keep,
+                reason=reason,
+                source="user",
+                extra={"row": dict(gone), "dismissed_proposals": dismissed, "into": keep},
+            )
+            return change_id
 
     # -- reading -------------------------------------------------------
 
