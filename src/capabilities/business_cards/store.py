@@ -27,6 +27,7 @@ from capabilities.business_cards import names, reading
 from capabilities.business_cards.contracts import (
     FIELD_LABELS,
     FIELDS,
+    MATCH_LABELS,
     SOURCE_LABELS,
     AddResult,
     EmailDiffers,
@@ -36,6 +37,7 @@ from capabilities.business_cards.contracts import (
     HistoryResult,
     ImportResult,
     KeptField,
+    MatchSummary,
     ObservationView,
     PersonRef,
     PersonView,
@@ -771,14 +773,18 @@ class CardStore:
                 "UPDATE people SET email_key = ? WHERE person_id = ?",
                 (names.email_key(clean["email"]), person_id),
             )
+            needs = self._needs(con, person_id)
             return AddResult(
                 person_id=person_id,
                 name=clean["name"],
                 company=clean["company"],
                 outcome="created",
                 existed=False,
+                match=_match_summary(
+                    "new", person_id, clean["name"], clean["company"], needs=needs
+                ),
                 uncertain=unsure,
-                needs_confirmation=self._needs(con, person_id),
+                needs_confirmation=needs,
                 to_confirm=self._to_confirm(con, person_id, unsure),
                 observation_id=observation_id,
                 change_id=change_id,
@@ -805,6 +811,7 @@ class CardStore:
         fresh = con.execute(
             "SELECT * FROM people WHERE person_id = ?", (row["person_id"],)
         ).fetchone()
+        needs = self._needs(con, row["person_id"])
         return AddResult(
             person_id=row["person_id"],
             name=fresh["name"],
@@ -812,10 +819,19 @@ class CardStore:
             outcome="updated" if merge.changes else "unchanged",
             existed=True,
             matched_by=matched_by,
+            match=_match_summary(
+                matched_by or "name_company",
+                row["person_id"],
+                fresh["name"],
+                fresh["company"],
+                changed=[c.field for c in merge.changes if not _same(c.old, c.new)],
+                kept=[k.field for k in merge.kept],
+                needs=needs,
+            ),
             changes=tuple(merge.changes),
             kept=tuple(merge.kept),
             uncertain=unsure,
-            needs_confirmation=self._needs(con, row["person_id"]),
+            needs_confirmation=needs,
             to_confirm=self._to_confirm(con, row["person_id"], unsure),
             email_differs=differs,
             proposals=tuple(self._open_proposals(con, row["person_id"])),
@@ -1833,6 +1849,35 @@ def _history_item(row: sqlite3.Row) -> HistoryItem:
     )
 
 
+def _match_summary(
+    by: str,
+    person_id: str,
+    name: str,
+    company: str,
+    *,
+    changed: Sequence[str] = (),
+    kept: Sequence[str] = (),
+    needs: Sequence[str] = (),
+) -> MatchSummary:
+    """Whom a reading was stored as, with the sentence the reply opens with."""
+    who = f"{name}（{company}）" if company else name
+    label = MATCH_LABELS.get(by, by)
+    lead = f"已新增聯絡人 {who}。" if by == "new" else f"已對到既有聯絡人 {who}，依{label}比對。"
+    return MatchSummary.model_validate(
+        {
+            "by": by,
+            "by_label": label,
+            "person_id": person_id,
+            "name": name,
+            "company": company,
+            "lead": lead,
+            "changed": [_LABELS[item] for item in dict.fromkeys(changed)],
+            "kept": [_LABELS[item] for item in dict.fromkeys(kept)],
+            "needs_confirmation": [_LABELS[item] for item in dict.fromkeys(needs)],
+        }
+    )
+
+
 def _summary(before: sqlite3.Row, merge: _Merge) -> str:
     """The sentence a reply leads with when the person was already on file:
     what changed, then each value read that differs from the person's own
@@ -1873,5 +1918,7 @@ def _changes_sentence(before: sqlite3.Row, merge: _Merge) -> str:
             )
     other = [c for c in changes if c.field not in ORG_FIELDS and c.field != "notes"]
     if other:
-        parts.append("、".join(_LABELS[c.field] for c in other) + " 也更新了")
+        # Never a dangling 也 when nothing came before (third live test 2026-10-20).
+        listed = "、".join(_LABELS[c.field] for c in other)
+        parts.append(f"{listed} 也更新了" if parts else f"更新了{listed}")
     return "；".join(parts) + "。" if parts else ""

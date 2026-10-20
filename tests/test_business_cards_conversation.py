@@ -668,3 +668,27 @@ def test_the_skill_closes_proposals_by_confirm_or_accept() -> None:
     assert "cards__proposals" in names
     edit = next(schema for name, _, _, schema in TOOLS if name == "cards__edit_person")
     assert "accept" in edit["properties"]
+
+
+def test_a_card_reply_opens_with_whom_the_card_matched(
+    web: tuple[AgentWeb, Conversation],
+) -> None:
+    """Third live test 2026-10-20: the reply opened mid-thought (「統一編號、電話、
+    傳真也更新了。」). The tool result carries `match` with its lead sentence,
+    and the procedure says to open with it, then the changes, then questions."""
+    from capabilities.business_cards.manifest import PROCEDURE
+
+    agent_web, model = web
+    session = agent_web.create_conversation()["conversation"]["session_id"]
+    model.then({"tools": [("cards__add_card", CARD)]}, {"text": "好。"})
+    assert _turn(agent_web, session, "store this card")["ok"]
+    created = json.loads(model.tool_results()[-1])["host"]["data"]["match"]
+    assert created["by"] == "new" and created["lead"] == "已新增聯絡人 周範例（EXN 範例網通）。"
+    model.then({"tools": [("cards__add_card", {**CARD, "fax": "02-1234-5678"})]}, {"text": "好。"})
+    assert _turn(agent_web, session, "store this card")["ok"]
+    data = json.loads(model.tool_results()[-1])["host"]["data"]
+    assert data["match"]["by"] == "email" and data["match"]["changed"] == ["傳真"]
+    assert data["match"]["lead"].startswith("已對到既有聯絡人 周範例（EXN 範例網通）")
+    assert data["summary"] == "更新了傳真。"
+    assert "match.lead" in PROCEDURE and "已對到既有聯絡人" in PROCEDURE
+    assert "never open with a bare list of updated fields" in PROCEDURE

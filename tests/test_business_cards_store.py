@@ -919,3 +919,43 @@ def test_any_field_read_differently_from_the_persons_own_value_needs_confirmatio
     with pytest.raises(CardStoreError) as refused:
         store.edit(PersonRef(person_id=first.person_id), {}, actor="a", reason="", accept=["fax"])
     assert refused.value.code == "proposal_unknown"
+
+
+def test_a_rescan_says_whom_it_matched_and_never_starts_mid_thought(tmp_path: Path) -> None:
+    """Third live test 2026-10-20: the reply opened with 「統一編號、電話、傳真也
+    更新了。」 (a dangling 也) and never said the card matched a known contact.
+    The result carries `match` (how it matched, who, what changed / was kept /
+    needs confirmation) with a lead sentence; the summary stands on its own."""
+    store = _store(tmp_path)
+    first = _add(store, CARD, ref=IMAGE)
+    assert first.match is not None
+    assert first.match.by == "new"
+    assert first.match.lead == "已新增聯絡人 王小明（範例科技股份有限公司）。"
+    store.edit(PersonRef(person_id=first.person_id), {"title": "資深經理"}, actor="a", reason="")
+    again = _add(
+        store,
+        {
+            **CARD,
+            "company_tax_id": "12345678",
+            "phone": "02-2345-6000",
+            "fax": "02-2345-1111",
+            "title": "協理",
+        },
+        when=date(2026, 3, 1),
+        ref=IMAGE,
+        uncertain=("department",),
+    )
+    match = again.match
+    assert match is not None
+    assert (match.by, match.by_label, match.person_id) == ("image", "名片圖片", first.person_id)
+    assert (match.name, match.company) == ("王小明", "範例科技股份有限公司")
+    assert match.lead.startswith("已對到既有聯絡人 王小明（範例科技股份有限公司）")
+    assert "名片圖片" in match.lead
+    assert match.changed == ("統一編號", "電話", "傳真")
+    assert match.kept == ("職稱",)
+    assert "職稱" in match.needs_confirmation
+    assert again.summary.startswith("更新了統一編號、電話、傳真")
+    assert "也" not in again.summary.split("。")[0]
+    by_email = _add(store, {"email": CARD["email"], "name": "王小明"}, when=date(2026, 4, 1))
+    assert by_email.match is not None and by_email.match.by == "email"
+    assert by_email.match.by_label == "Email"

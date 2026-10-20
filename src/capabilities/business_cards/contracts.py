@@ -224,13 +224,44 @@ class EmailDiffers(Contract):
     read: str
 
 
+MatchedBy = Literal["image", "email", "name_company", "romanised_name"]
+#: How a reading found its person, named to the person.
+MATCH_LABELS: dict[str, str] = {
+    "image": "名片圖片",
+    "email": "Email",
+    "name_company": "姓名與公司",
+    "romanised_name": "英文名與公司",
+    "new": "新聯絡人",
+}
+
+
+class MatchSummary(Contract):
+    """Whom a card or signature was stored as, for the reply's first line
+    (third live test 2026-10-20: the reply began 「統一編號、電話、傳真也更新了」
+    and never said the card matched a known contact)."""
+
+    by: MatchedBy | Literal["new"]
+    by_label: str
+    person_id: str
+    name: str
+    company: str = ""
+    # 「已對到既有聯絡人 王小明（範例科技），依名片圖片比對。」 or
+    # 「已新增聯絡人 王小明（範例科技）。」: the reply starts with it.
+    lead: str
+    # Chinese field labels: what changed, what was kept, what to confirm.
+    changed: tuple[str, ...] = ()
+    kept: tuple[str, ...] = ()
+    needs_confirmation: tuple[str, ...] = ()
+
+
 class AddResult(Contract):
     person_id: str
     name: str
     company: str
     outcome: Literal["created", "updated", "unchanged"]
     existed: bool
-    matched_by: Literal["image", "email", "name_company", "romanised_name"] | None = None
+    matched_by: MatchedBy | None = None
+    match: MatchSummary | None = None
     changes: tuple[FieldChange, ...] = ()
     kept: tuple[KeptField, ...] = ()
     uncertain: tuple[FieldName, ...] = ()
