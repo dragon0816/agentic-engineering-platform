@@ -2889,3 +2889,22 @@ s-k-20261011T102952` (not published).
   uploads unchanged). Verification: the four tests that read `verify.yml` 42 passed (clean worktree, project `.venv`); YAML parsed and
   every step condition checked.
 - [ ] Read the `browser-diagnostics-<sha>` artifact of the next red run and decide the fix.
+
+## Loan replies 06 / 06b without n8n (2026-10-20)
+
+- [x] Port rs_workflow_system 06 (loan_scan) and 06b (loan_process) as two Workflows, drafts by
+  default, optional per-message approved send, no schedule (owner 2026-10-20; Claude Code).
+  Plan `docs/phases/RS_WORKFLOW_MIGRATION.md` (06/06b row, "Loan replies 06 / 06b as built",
+  owner question 5 closed); decision `docs/DECISIONS.md` 2026-10-20 "Loan replies 06 / 06b";
+  `docs/CONTRACTS.md` "Workflows 06 / 06b parity"; `src/capabilities/loan_reply/SOURCE.md`;
+  `USER_GUIDE.zh-TW.md` §9.3.
+  1. a982725f ported jobs and the vendored source tests (162 cases) as the oracle.
+  2. eb96b149 `LoanBridge` over Outlook (HTML listing, reply drafts) and Edge profiles.
+  3. 7e8bfe2c Workflows `engineering/rs-loan-customer-block-scan` (`/run 6`) and
+     `engineering/rs-loan-queue-reply`, capabilities with side effects, `ls-` send cards, run
+     follow-up and cards in Agent Web and Telegram, shipped switched off; `test_agent_mail`'s
+     send-reachability guard extended to the second card kind.
+  Verification: ruff, ruff format --check, mypy clean; isolated worktree with `C:/aepci-wk/venv`
+  (`.[dev,office]`, `--basetemp=C:/aepci-wk/bt-loan`): 3656 passed, 34 skipped, 0 failed;
+  project `.venv` (shared tree): 3681 passed, 9 skipped, 0 failed.
+- [ ] Owner live check on the company PC (checklist in `docs/phases/RS_WORKFLOW_MIGRATION.md`).

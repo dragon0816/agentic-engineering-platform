@@ -952,7 +952,47 @@ Agent Web 要在執行中，Telegram 才會有回應。
 - **Push to the release repository**（預設**關**，會再確認）：只推這次 run 做出的 commit，
   永遠不會 force push。dry run 時忽略。
 
-### 9.3 個人 Workflow 不在安裝包裡
+### 9.3 借用單回信（rs-loan-customer-block-scan / rs-loan-queue-reply）
+
+兩個 Workflow，接替舊的 06 / 06b（不需要 n8n）：
+
+| Workflow | 做什麼 |
+|---|---|
+| `engineering/rs-loan-customer-block-scan`（`/run 6`） | 讀 Outlook 收件匣，找「簽核通知」裡的借用單連結（DR…），每個借用單號排入一筆佇列。否決通知、排除的類別、已處理過的單號都會略過。 |
+| `engineering/rs-loan-queue-reply` | 一筆一筆處理佇列：在出借系統讀客戶，到 C4C 查 Delivery Block，把回信存成 **Outlook 草稿**（附 C4C 截圖）。查不到客戶或失敗時，改建一封內部通知草稿。 |
+
+**第一次使用**
+
+1. 這兩個 Workflow 安裝時是**關閉**的：**Capabilities → Workflows**，選它們，按 **Switch on**。
+2. 在 **Settings on this computer** 填：掃描的資料夾（預設 `Inbox`）、「只處理這個時間之後
+   收到的信」（留空＝第一次正式執行的時間）、**內部通知寄給誰**、需要時的回信範本資料夾。
+   **不需要也不要填任何密碼**：出借系統和 C4C 的登入由瀏覽器設定檔帶著（出借系統會自動選
+   公司帳號；第一次請保持「顯示瀏覽器視窗」打開，看得到登入過程）。
+3. 先跑一次 **dry run**（兩個 Workflow 的第一個問題都是「只試跑？」）：掃描只列出會排入
+   哪些借用單；回信會讀出借系統和 C4C，但不建草稿、不動佇列。
+
+**平常的流程**
+
+1. 執行 `rs-loan-customer-block-scan`。結果會列出排入的借用單。佇列有待處理時，答案下方
+   會出現 `rs-loan-queue-reply` 的執行表單（Telegram 是一個按鈕）；**它不會自己開始**，
+   要你按 **Run**。
+2. `rs-loan-queue-reply` 會問「這次處理幾筆？」和「草稿建好後，每封各給一張「寄出」確認卡？」。
+   回信一律先存在 Outlook 草稿匣。
+3. **寄出**（選用）：勾了確認卡時，每封草稿各有一張卡片，顯示收件者、主旨、附件和內文，
+   按鈕是 **寄出** 和 **留在草稿匣**。
+   - 每一封都要**各按一次**；沒有「全部寄出」。
+   - 只在 **Agent Web** 按（Telegram 只顯示卡片，並提示到 Agent Web 的
+     **Tasks > Pending changes** 按）。
+   - 卡片顯示後若你在 Outlook 改過那封草稿（收件者、主旨或附件），按寄出會**不寄**，請在
+     Outlook 自己寄。
+   - 一天內沒按，卡片過期，草稿留在草稿匣。
+   - 回信是回覆簽核通知那封信，收件者由 Outlook 依原信決定；**按寄出前請看卡片上的收件者**。
+
+**排程（之後自己決定）**：目前沒有建立任何排程。要定時掃描時，到 **Schedules** 新增
+`rs-loan-customer-block-scan`（例如每天 09:00 / 14:00），**Highest effect to allow** 選
+`write`。回信 Workflow 建議仍由你手動執行；就算排程，它也只建草稿，寄出永遠要你按卡片。
+
+### 9.4 個人 Workflow 不在安裝包裡
 
 安裝包只帶給大家共用的 Skill 和 Workflow。個人自己的 Workflow 不會放進安裝包，也不會被
 安裝或排程；需要的話請從共享平台安裝別人分享的能力（第 10 章）。更新時不會刪掉你電腦上已經

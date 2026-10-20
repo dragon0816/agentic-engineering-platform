@@ -1,8 +1,54 @@
 # Handoff
 
-Updated: 2026-10-20 (Asia/Taipei), by Claude Code (owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-21 (Asia/Taipei), by Claude Code (loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## Accumulated memory M2: sync state and the incremental org chart (2026-10-20, Claude Code) — latest
+## Loan replies 06 / 06b without n8n (2026-10-20/21, Claude Code) — latest
+
+**Goal / scope:** owner request 2026-10-20: port rs_workflow_system 06 (loan_scan) and 06b
+(loan_process) as two AEP Workflows; drafts by default, optional send with one approval per
+message; no schedule. Not pushed; Agent Web not restarted; no real mail, portal or send touched.
+
+**Done (commits on main):**
+1. a982725f Ported jobs (`src/capabilities/loan_reply/`: rules, templates, queue verbatim plus
+   declared replacements; scan, process with seams; `process_one` = `look_up` + `draft_reply`);
+   source tests vendored as the oracle (`tests/test_loan_*_source.py`, `tests/loan_oracle.py`).
+2. eb96b149 `LoanBridge` (Outlook HTML listing with SMTP sender, reply drafts never sent, Edge
+   profiles per system, Playwright selectors via page script and DevTools input).
+3. 7e8bfe2c Workflows `engineering/rs-loan-customer-block-scan` (`/run 6`) and
+   `engineering/rs-loan-queue-reply`; capabilities `loan/scan-mail` (read), `loan/enqueue`
+   (write), `loan/look-up` (read), `loan/draft-replies` (write), `loan/offer-send` (write),
+   `loan/send-reply` (external_side_effect, never installed); `ls-` send cards
+   (`host_runtime/loan_reply_cards.py`, Agent Web only, one press one mail); `follow_up` /
+   `action_cards` result keys drawn by Agent Web (run form, cards) and Telegram (summary, cards,
+   `/run` button); shipped switched off (`assets.shipped_off`).
+4. (this commit) Docs: RS_WORKFLOW_MIGRATION (row, decisions, question 5 closed, real-PC
+   checklist), CONTRACTS parity record, USER_GUIDE §9.3, TASKS. The DECISIONS entry
+   ("Loan replies 06 / 06b") was swept into d7adf4c0 by a concurrent session's commit.
+
+**Verification (2026-10-21):** ruff check, ruff format --check, mypy (709 files) clean. Isolated
+worktree of 7e8bfe2c with `C:\aepci-wk\venv` (confirmed editable at this repo, `.[dev,office]`
+reinstalled, `--basetemp=C:/aepci-wk/bt-loan`): 3656 passed, 34 skipped, 0 failed. Project
+`.venv` full run on the shared tree: 3681 passed, 9 skipped, 0 failed. New tests: 162 vendored
+source cases, `test_loan_reply_workflows.py` (19), `test_loan_reply_send.py` (12),
+`test_loan_reply_parity.py` (16), `test_loan_bridge.py` (9, one real headless Edge).
+Note: another session works on accumulated memory M3 in this same working tree; its files were
+not part of these commits.
+
+**Open / risks:**
+- Unproven until the owner's company-PC run: Outlook COM HTML listing and reply draft, the
+  selectors on the real portal and SAPUI5 C4C (fill via `Input.insertText`, Enter via
+  `Input.dispatchKeyEvent`), Entra account tile in the persistent profile, screenshot size
+  (viewport, not full page).
+- The reply goes to whoever Outlook's Reply addresses (the approval notice's sender), as in the
+  source; the owner should confirm that is the intended recipient before pressing 寄出.
+- Send cards are Agent Web only (as mail cards); pressing in Telegram would be a new decision.
+
+**Next:**
+1. Owner live check: `docs/phases/RS_WORKFLOW_MIGRATION.md` "Loan replies: what the owner
+   verifies on the company PC" (switch on, settings, dry runs, one real run, one card press).
+2. If the owner wants a timed scan: Schedules > rs-loan-customer-block-scan, effect `write`.
+
+## Accumulated memory M2: sync state and the incremental org chart (2026-10-20, Claude Code)
 
 **Goal / scope:** M2 of `docs/phases/ACCUMULATED_MEMORY.md` (§3.3, §4, §9; owner decision §10.1:
 the org chart reads new mail first, new people still need confirmation; no nightly harvest).

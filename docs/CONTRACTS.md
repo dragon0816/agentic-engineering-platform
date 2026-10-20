@@ -3641,3 +3641,70 @@ application/standard, product and option specifications, and independent
 customer/use-case validation. `market_fit_verified` is always false in v1.
 These lexical discovery labels cannot authorize a recommendation. Existing
 `knowledge-query/ask@1.0.0` and its grounded answer contract are unchanged.
+
+# Workflows 06 / 06b parity: loan replies (2026-10-20)
+
+Source baseline: `dragon0816/rs_workflow_system@896046e8fe2170d21f9213e56e5ce2f93c05ba43`,
+committed files (SHA-256 of the working copy, identical to the commit):
+`host-bridge/jobs/_loan_queue.py` 5d818baa6d7f629d728bbcd29c803ee396c76d767211c8010d05ac18e7601b33,
+`_loan_rules.py` f94ce39f224663e72a116758fb163d4aa3601869cfaaf7d31ec8db58126c745c,
+`_loan_templates.py` f6ba083eabd28433afc4caed6d876a608ea8e2ff9553163577ea147df5098a7c,
+`loan_process.py` ea07cfc230c76d04b2877a46cf09182fbfecd19b232bcb14ac379870fb40a933,
+`loan_scan.py` 5f7961091c92ebce546b4670d61195288858c5cb682f2ecaddb1f76b932ac734;
+tests `test_loan_process.py` f2b8c7cbfe889b4ae90f4457d01ce6d02afbe8fb240fbff076429acb9d8b7473,
+`test_loan_queue.py` 7919bfbe8a6c240cf19759f205bfc0819789ad27bb19b1a1d300b24e95458ca2,
+`test_loan_rules.py` aae376e2302329c8a280283fd6b5cac80d12ec94f5484d86e81995bdc9237ec3,
+`test_loan_scan_start.py` f6171b74802d0dcbc820be5d68b06288974b47a4201720da10e1e3213f3a43d6,
+`test_loan_templates.py` 647654ac3765b92aaf9d1265bb03fc42f7aceec1ced6f16e45b8e6557c45abe4. Uncommitted installation files
+`config/loan-templates/*.txt` (the job's `--write-templates` output): blocked-reply
+12b3a49da66a419dd9d9c56b69e1180e4aa96d1b06e1bcb9c54d5f5c1b560373, customer-not-found-body
+4401dd130c20c6582e8825ac5cef61b9a731ae301570d68900628964d888ce50, customer-not-found-subject
+5df6de7fdda841e4cc2cc1b4ddd9d7cf6e6b312118ec11fd34bf8955755164df, failure-body
+2c349ed06b204d7bed61d09b7d5ee2b9464f0fe37127e08da346e5a896114dc0, failure-subject
+5152bafce46c6b5789d1ce89d7a06ebb7e24cc56152ae0969511415c0045622a, shipping-reply
+f35470f5ab2cb88d89797cf94b3c5b88f9ccb7d98820e2f13b64f468e88430f8.
+
+**Contracts.** Producer `engineering/rs-loan-customer-block-scan@1.0.0` (`/run 6`): settings
+`mail_folder` (Inbox), `max_messages` (200), `process_from`, `require_sender` (false),
+`sender_smtp`, `exclude_categories`; run `dry_run`, `process_from_once`. Steps
+`loan/scan-mail@1.0.0` (read; `loan.scan-mail.input.v1` = `ScanStepInput{request}`, output
+`LoanScan`) and `loan/enqueue@1.0.0` (write, low risk, approval; output `LoanEnqueued` with
+`preview`, `verdict`, `follow_up`). Consumer `engineering/rs-loan-queue-reply@1.0.0`
+(`occupies_machine`): settings `alert_recipient`, `template_dir`, `portal_origin`,
+`c4c_home_url`, `loan_account`, `close_browsers_after`, `show_browser`, `settle_ms`,
+`busy_timeout_ms`, `nav_timeout_ms`; run `dry_run`, `max_items` (1–20), `offer_send` (false).
+Steps `loan/look-up@1.0.0` (read), `loan/draft-replies@1.0.0` (write, medium risk, approval),
+`loan/offer-send@1.0.0` (write, low risk, approval; output `LoanReplyResult` with `preview`,
+`verdict`, `action_cards`). `loan/send-reply@1.0.0` is `external_side_effect`, high risk,
+approval; declared, never installed. All under `loan-reply-policy`, permission `loan.<name>`.
+Refusal codes: `loan_process_from_invalid`, `loan_mail_unreadable`, `loan_outlook_unavailable`,
+`loan_scan_refused`, `loan_browser_unavailable`, `loan_template_invalid`.
+
+**Result keys for the channels** (new, generic): a Workflow's last step may carry `follow_up`
+(`{workflow, label, reason}`) and `action_cards` (card ids). Agent Web's form run records the
+follow-up as the answer's `workflow_form` (origin `follow_up`) and the cards as its
+`action_cards`; Telegram appends the step's `preview`, draws the cards and adds a
+`/run namespace/name` button. Neither runs nor sends anything.
+
+**Send cards.** `ls-` + 12 hex; `LoanReplyCard` (borrow number, draft entry id, fingerprint of
+to/cc/subject/attachment names, the text shown); actions `send`, `keep_draft`; statuses pending,
+sent, kept, expired (24 h), failed; `web_only`. `decide(channel="telegram")` is `web_only`.
+
+**Parity evidence** (`tests/test_loan_reply_parity.py`, `tests/test_loan_*_source.py`):
+
+| Baseline item | Evidence |
+|---|---|
+| Source tests (141 functions, 162 cases) | vendored; pass against `capabilities.loan_reply`; text equals source + import replacements |
+| `rules`, `templates`, `queue` | text equals source + declared replacements |
+| Page scripts, selectors, sign-in and C4C reading (`_Page`, `_Edge`, `read_loan_form`, `open_accounts`, `read_delivery_blocks`, constants) | source text, compared |
+| Message texts | shipped `loan-templates/*.txt` equal the built-in text and the source installation's files |
+| Dry-run plan (scan) | same candidates, skips and counts as source `loan_scan.run(dryRun=True)` on one mailbox (four categories, a rejection, a duplicate, non-loan and undated mail, an excluded category) |
+| Normalised queue output (scan) | same queue files (minus timestamps) as the source run |
+| Drafts and queue end state (06b) | shipping, blocked, customer not found, fields unreadable, form failed; dry run and real: same reply / draft calls (kind, to, subject, body, attachments, `send: false`), same queue files, same failures and preview bodies as source `loan_process.run` |
+
+Differences (each with a test, listed in `src/capabilities/loan_reply/SOURCE.md`): steps instead
+of one run; a dry scan writes no stamp; links only to `portal_origin`; no HTTP Bridge
+(`BridgeUnavailable`); notices as HTML drafts with the same text; optional per-message send;
+no read-step run lock. Not proven by tests: Outlook COM listing and reply drafting, the browser
+on the real portal and C4C, the profile sign-in (owner checklist in
+`docs/phases/RS_WORKFLOW_MIGRATION.md`).
