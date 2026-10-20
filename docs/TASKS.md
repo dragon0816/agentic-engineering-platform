@@ -2925,6 +2925,22 @@ s-k-20261011T102952` (not published).
   uploads unchanged). Verification: the four tests that read `verify.yml` 42 passed (clean worktree, project `.venv`); YAML parsed and
   every step condition checked.
 - [ ] Read the `browser-diagnostics-<sha>` artifact of the next red run and decide the fix.
+- [x] Round 2 (2026-10-21, Claude Code): read run 39479473515's artifact (one `page` target at the
+  test site, no `edge://` dialog; 121 s = two 60 s socket timeouts). Decision `docs/DECISIONS.md`
+  2026-10-21 "CI real-browser failures, round 2". Fixed an unguarded pong (bare WinError 10053 out
+  of `WebSocket.receive`); added `SocketTrace` and per-attach records to the opt-in diagnostics
+  (`*-sockets.jsonl`); closed the socket lost under `Page.navigate`; added
+  `AEP_BROWSER_EXECUTABLE` (unused by CI). Tests `tests/test_websocket.py`,
+  `tests/test_browser_diagnostics.py`, `tests/test_browser_navigate_reattach.py`. Local: 30 + 15
+  (under load) real-browser runs green apart from two unrelated load flakes (a throwaway profile
+  not released within 10 s; a loopback HTTP request in `test_member_login_revoke.py` aborted with
+  WinError 10053, no browser involved); CI signature reproduced only by wedging the
+  single-threaded test server. Verification (clean worktree of 25283e73 + these commits,
+  `C:/aepci-wk/venv` `.[dev,office]`, import path confirmed): ruff check, ruff format --check,
+  mypy clean; browser, websocket and `verify.yml` tests 115 passed; full suite 3709 passed,
+  34 skipped, 0 failed (`--basetemp=C:/aepci-wk/bt-ws`).
+- [ ] Next red run: read `*-sockets.jsonl` (timeout vs abort vs server close) and decide on the
+  `ThreadingHTTPServer` test site and timeout handling proposed in that decision.
 
 ## Loan replies 06 / 06b without n8n (2026-10-20)
 

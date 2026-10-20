@@ -4269,3 +4269,61 @@ Decisions:
 Rejected: a generic "take the new value" for any space (bypasses the manager's own view and rules);
 deleting by marking rows (content would stay, against §3.6); a new conversation-retention setting
 (not asked for; changes record handling beyond M4); a model tool for any of these (§3.4, §10.3).
+
+## 2026-10-21 — CI real-browser failures, round 2: socket traces, a pong fix, and the hung-navigation lead
+
+Context: CI run 39479473515 (e7247e3e) failed `tests/test_browser.py::test_the_element_list_is_what_can_be_used_and_nothing_else`
+with `no_page`. Its diagnostics artifact showed one target, a `page` already at the test site's
+`/index.html`; no `edge://` dialog (the 2026-10-20 sync-dialog lead is not supported). Edge
+154.0.4258.62, `--headless=new`, running elevated. The browser was launched at 19:03:09 and the
+`no_page` record written at 19:05:10: 121 s, two of the fixture's 60 s socket timeouts.
+
+Findings:
+
+1. `integrations.websocket` reports a socket **timeout** as `closed`: `TimeoutError` is an
+   `OSError`, and `_take` maps every `OSError` to `closed`. So "every new socket to the tab was
+   closed" may have been "every DevTools command to the tab went unanswered".
+2. Reproduced locally (Edge 155, not elevated) by holding one idle TCP connection open to the
+   single-threaded `http.server.HTTPServer` that `tests/test_browser.py` serves the site with, then
+   navigating: `Page.navigate` got `frameStartedNavigating`/`frameStartedLoading` and no answer
+   until the socket timeout; every re-attach then timed out under `Page.enable` (a tab with a
+   pending navigation does not answer it); `/json/list` already showed the target at
+   `/index.html`. That is the CI signature, including the 2 × timeout duration.
+3. Not reproduced naturally: 30 runs of the three real-browser test files alone and 15 under
+   full-suite load passed (attach max 3.2 s). Edge was seen opening speculative connections that
+   send nothing (2 of 5 short probe sessions), which is what wedges a one-connection-at-a-time
+   server; whether that happens on the runner is what the new traces will show. Elevation could
+   not be tried: this machine's shell is not elevated and UAC was not bypassed.
+4. Review of `websocket.py`: no extension or compression negotiated, so no compressed frames; no
+   `Origin` header is sent, so `--remote-allow-origins` does not apply; client frames are masked;
+   continuation frames and pings between fragments are handled; the 64 MiB limit is far above any
+   `Page.enable` burst; `Sec-WebSocket-Accept` is checked; sockets to one target are independent.
+   **One bug:** the pong for a server ping was sent unguarded, so a ping on a socket that could no
+   longer send escaped as a bare `ConnectionAbortedError` (WinError 10053) that no caller catches.
+   Minor, not changed: a new data frame during a fragmented message silently restarts it; the
+   receive buffer is re-sliced per frame (quadratic only for very large messages).
+
+Decisions:
+
+1. Fix the pong: it is sent like every other frame and a failure is `WebSocketError("closed")`
+   (test with a socket that cannot send).
+2. Extend the opt-in diagnostics, same switch `AEP_BROWSER_DIAG_DIR`, no behaviour change unset:
+   `SocketTrace` per DevTools socket (handshake status and headers, last 40 frames' direction,
+   opcode, FIN and length, last 40 DevTools ids and method names, the server's close code and
+   reason, and the first failure's phase, code, OS error class, errno and winerror or "end of
+   stream"); `Browser.page` records every attach attempt (target id, outcome, elapsed) to
+   `browser-<ns>-<pid>-sockets.jsonl` with the trace, sockets lost under navigate, evaluate,
+   load waiting and screenshot are appended there, and `no_page`/`navigation_failed` records repeat
+   the attempts and name the log. No payloads, titles or page content are recorded.
+3. The socket lost under `Page.navigate` is closed explicitly before reattaching (it was left to
+   the garbage collector).
+4. `AEP_BROWSER_EXECUTABLE`, when set, is the browser to drive, used as given (a wrong path fails
+   loudly at start). CI does not set it; switching CI to Chrome is the owner's decision.
+
+Not done, proposed for the owner: serve the `tests/test_browser.py` site with
+`ThreadingHTTPServer` (a test-harness fix that changes no assertion), and give a socket timeout its
+own handling so one unanswered command does not consume the whole `page()` budget. Both wait for
+the next red run's traces to confirm a timeout under a pending navigation.
+
+Rejected: a new `timed_out` error code now (a contract change on a guess; the trace already tells
+timeout from abort); switching CI to Chrome (owner's call).
