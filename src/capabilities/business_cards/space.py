@@ -71,7 +71,8 @@ MERGE_RULES = MergeRules(
 DECLARATION = MemorySpaceDeclaration(
     space=CONTACTS_ORG,
     role="manager",
-    kinds=("entities",),
+    # sync_state (M2): how far each mail folder was read for a domain.
+    kinds=("entities", "sync_state"),
     sensitivity="CONFIDENTIAL",
     retention="until_deleted",
     schema_ref=SCHEMA_REF,

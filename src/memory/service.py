@@ -12,7 +12,10 @@ extracted from the business-cards store where they were proven:
 - `history` in change groups, `undone`, and `undo` that replays a group
   backwards as a new change;
 - `proposals`: offered values the merge rules did not take;
-- `external_ids`: the mapping of other systems' ids to entities (§3.8.4).
+- `external_ids`: the mapping of other systems' ids to entities (§3.8.4);
+- `sync_state` (M2, §3.3): how far each source was processed for a key, for a
+  space that declares the `sync_state` kind, with `sync_history` rows for
+  every advance, reset and restore.
 
 A space's own tables (a manager's current-value view, its relationships)
 are named after the space (`contacts_org__people`). Access goes through a
@@ -39,12 +42,15 @@ from typing import Any
 
 from common.assets import AssetIdentity
 from common.memory import (
+    MAX_SYNC_IDS,
     Decision,
     FieldProvenance,
     MemoryRole,
     MemorySpaceDeclaration,
     MergeRules,
     SpaceSummary,
+    SyncHistoryEntry,
+    SyncState,
     origin_for,
 )
 from memory import merge
@@ -165,6 +171,30 @@ CREATE TABLE IF NOT EXISTS external_ids (
     PRIMARY KEY (space, system, external_id)
 );
 CREATE INDEX IF NOT EXISTS external_ids_entity ON external_ids(space, entity_id);
+CREATE TABLE IF NOT EXISTS sync_state (
+    space TEXT NOT NULL,
+    source TEXT NOT NULL,
+    key TEXT NOT NULL,
+    last_message_date TEXT NOT NULL,
+    last_message_ids_json TEXT NOT NULL DEFAULT '[]',
+    extractor_version TEXT NOT NULL DEFAULT '',
+    updated_at TEXT NOT NULL,
+    updated_by TEXT NOT NULL,
+    PRIMARY KEY (space, source, key)
+);
+CREATE TABLE IF NOT EXISTS sync_history (
+    history_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    space TEXT NOT NULL,
+    source TEXT NOT NULL,
+    key TEXT NOT NULL,
+    action TEXT NOT NULL,
+    at TEXT NOT NULL,
+    actor TEXT NOT NULL,
+    reason TEXT NOT NULL DEFAULT '',
+    old_json TEXT,
+    new_json TEXT
+);
+CREATE INDEX IF NOT EXISTS sync_history_key ON sync_history(space, source, key);
 """
 
 #: States a proposal moves between; `open` until the person decides.
@@ -810,6 +840,228 @@ class SpaceTx:
             possible=possible,
         )
 
+    # -- sync state (M2) ---------------------------------------------------
+
+    def _need_sync(self, needed: MemoryRole) -> None:
+        """Sync state is for a space that declares the `sync_state` kind."""
+        self._need(needed)
+        if "sync_state" not in self.summary.declaration.kinds:
+            raise MemoryAccessError("memory_kind_not_declared")
+
+    def _sync_row(self, source: str, key: str) -> sqlite3.Row | None:
+        found: sqlite3.Row | None = self._con.execute(
+            "SELECT * FROM sync_state WHERE space = ? AND source = ? AND key = ?",
+            (self.space, source, key),
+        ).fetchone()
+        return found
+
+    def sync_state(self, source: str, key: str) -> SyncState | None:
+        """How far `source` was processed for `key`, or None (never, or reset)."""
+        self._need_sync("reader")
+        row = self._sync_row(source, key)
+        return None if row is None else _sync_state(row)
+
+    def sync_states(self, source: str | None = None) -> list[SyncState]:
+        self._need_sync("reader")
+        where, args = ["space = ?"], [self.space]
+        if source is not None:
+            where.append("source = ?")
+            args.append(source)
+        rows = self._con.execute(
+            f"SELECT * FROM sync_state WHERE {' AND '.join(where)} ORDER BY source, key", args
+        )
+        return [_sync_state(row) for row in rows]
+
+    def advance_sync(
+        self,
+        source: str,
+        key: str,
+        *,
+        last_message_date: str,
+        message_ids: Sequence[str],
+        extractor_version: str,
+        actor: str,
+        reason: str = "",
+    ) -> SyncState:
+        """Move the state forward after a successful pass: never backwards
+        (`sync_state_backwards`), and never across an extractor change without
+        a reset first (`sync_extractor_changed`). On the same date the ids
+        join the earlier ones; the newest `MAX_SYNC_IDS` are kept. A history
+        row records the change."""
+        self._need_sync("contributor")
+        if not source.strip() or not key.strip():
+            raise MemoryServiceError("sync_state_unnamed")
+        moment = _moment(last_message_date)
+        old_row = self._sync_row(source, key)
+        old = None if old_row is None else _sync_state(old_row)
+        ids = list(dict.fromkeys(item for item in message_ids if item))
+        if old is not None:
+            if old.extractor_version != extractor_version:
+                raise MemoryServiceError("sync_extractor_changed")
+            if moment < _moment(old.last_message_date):
+                raise MemoryServiceError("sync_state_backwards")
+            ids = list(dict.fromkeys([*ids, *old.last_message_ids]))
+        new = SyncState(
+            space=self.space,
+            source=source,
+            key=key,
+            last_message_date=moment.isoformat(),
+            last_message_ids=tuple(ids[:MAX_SYNC_IDS]),
+            extractor_version=extractor_version,
+            updated_at=now_iso(),
+            updated_by=actor,
+        )
+        self._write_sync(new)
+        self._sync_record(source, key, "advance", actor=actor, reason=reason, old=old, new=new)
+        return new
+
+    def reset_sync(self, source: str, key: str, *, actor: str, reason: str) -> SyncState | None:
+        """Forget how far `source` was processed for `key`: the next pass
+        reads the full scope. The state before is kept in history (it can be
+        restored); returns it, or None when there was none."""
+        self._need_sync("contributor")
+        old_row = self._sync_row(source, key)
+        old = None if old_row is None else _sync_state(old_row)
+        self._con.execute(
+            "DELETE FROM sync_state WHERE space = ? AND source = ? AND key = ?",
+            (self.space, source, key),
+        )
+        self._sync_record(source, key, "reset", actor=actor, reason=reason, old=old, new=None)
+        return old
+
+    def restore_sync(self, history_id: int, *, actor: str) -> SyncState | None:
+        """Put back the state one history row replaced (undoing a reset or an
+        advance), as a new history row. `sync_history_unknown`."""
+        self._need_sync("contributor")
+        row = self._con.execute(
+            "SELECT * FROM sync_history WHERE space = ? AND history_id = ?",
+            (self.space, history_id),
+        ).fetchone()
+        if row is None:
+            raise MemoryServiceError("sync_history_unknown")
+        entry = _sync_entry(row)
+        current_row = self._sync_row(entry.source, entry.key)
+        current = None if current_row is None else _sync_state(current_row)
+        if entry.old is None:
+            self._con.execute(
+                "DELETE FROM sync_state WHERE space = ? AND source = ? AND key = ?",
+                (self.space, entry.source, entry.key),
+            )
+            restored = None
+        else:
+            restored = entry.old.model_copy(update={"updated_at": now_iso(), "updated_by": actor})
+            self._write_sync(restored)
+        self._sync_record(
+            entry.source,
+            entry.key,
+            "restore",
+            actor=actor,
+            reason=f"restore history {history_id}",
+            old=current,
+            new=restored,
+        )
+        return restored
+
+    def sync_history(
+        self, source: str | None = None, key: str | None = None, *, limit: int = 50
+    ) -> list[SyncHistoryEntry]:
+        """Advances, resets and restores, newest first."""
+        self._need_sync("reader")
+        where, args = ["space = ?"], [self.space]
+        if source is not None:
+            where.append("source = ?")
+            args.append(source)
+        if key is not None:
+            where.append("key = ?")
+            args.append(key)
+        rows = self._con.execute(
+            f"SELECT * FROM sync_history WHERE {' AND '.join(where)} "
+            "ORDER BY history_id DESC LIMIT ?",
+            (*args, limit),
+        )
+        return [_sync_entry(row) for row in rows]
+
+    def _write_sync(self, state: SyncState) -> None:
+        self._con.execute(
+            "INSERT OR REPLACE INTO sync_state (space, source, key, last_message_date, "
+            "last_message_ids_json, extractor_version, updated_at, updated_by) "
+            "VALUES (?,?,?,?,?,?,?,?)",
+            (
+                self.space,
+                state.source,
+                state.key,
+                state.last_message_date,
+                json.dumps(list(state.last_message_ids), ensure_ascii=False),
+                state.extractor_version,
+                state.updated_at,
+                state.updated_by,
+            ),
+        )
+
+    def _sync_record(
+        self,
+        source: str,
+        key: str,
+        action: str,
+        *,
+        actor: str,
+        reason: str,
+        old: SyncState | None,
+        new: SyncState | None,
+    ) -> None:
+        self._con.execute(
+            "INSERT INTO sync_history (space, source, key, action, at, actor, reason, old_json, "
+            "new_json) VALUES (?,?,?,?,?,?,?,?,?)",
+            (
+                self.space,
+                source,
+                key,
+                action,
+                now_iso(),
+                actor,
+                reason,
+                None if old is None else old.model_dump_json(),
+                None if new is None else new.model_dump_json(),
+            ),
+        )
+
+
+def _moment(value: str) -> datetime:
+    """An ISO date or time as an aware UTC moment (`sync_date_invalid`)."""
+    try:
+        moment = datetime.fromisoformat(value.strip())
+    except ValueError:
+        raise MemoryServiceError("sync_date_invalid") from None
+    return moment.replace(tzinfo=UTC) if moment.tzinfo is None else moment.astimezone(UTC)
+
+
+def _sync_state(row: sqlite3.Row) -> SyncState:
+    return SyncState(
+        space=row["space"],
+        source=row["source"],
+        key=row["key"],
+        last_message_date=row["last_message_date"],
+        last_message_ids=tuple(json.loads(row["last_message_ids_json"] or "[]")),
+        extractor_version=row["extractor_version"],
+        updated_at=row["updated_at"],
+        updated_by=row["updated_by"],
+    )
+
+
+def _sync_entry(row: sqlite3.Row) -> SyncHistoryEntry:
+    return SyncHistoryEntry(
+        history_id=int(row["history_id"]),
+        space=row["space"],
+        source=row["source"],
+        key=row["key"],
+        action=row["action"],
+        at=row["at"],
+        actor=row["actor"],
+        reason=row["reason"],
+        old=None if row["old_json"] is None else SyncState.model_validate_json(row["old_json"]),
+        new=None if row["new_json"] is None else SyncState.model_validate_json(row["new_json"]),
+    )
+
 
 def _dismiss_proposal(tx: SpaceTx, item: sqlite3.Row, extra: dict[str, Any], change: str) -> bool:
     for row in tx.proposals(item["entity_id"], field_name=item["field"]):
@@ -895,6 +1147,50 @@ class MemorySpace:
     def entity_for_external_id(self, system: str, external_id: str) -> str | None:
         with self.transaction() as tx:
             return tx.entity_for_external_id(system, external_id)
+
+    def sync_state(self, source: str, key: str) -> SyncState | None:
+        with self.transaction() as tx:
+            return tx.sync_state(source, key)
+
+    def sync_states(self, source: str | None = None) -> list[SyncState]:
+        with self.transaction() as tx:
+            return tx.sync_states(source)
+
+    def advance_sync(
+        self,
+        source: str,
+        key: str,
+        *,
+        last_message_date: str,
+        message_ids: Sequence[str],
+        extractor_version: str,
+        actor: str,
+        reason: str = "",
+    ) -> SyncState:
+        with self.transaction(immediate=True) as tx:
+            return tx.advance_sync(
+                source,
+                key,
+                last_message_date=last_message_date,
+                message_ids=message_ids,
+                extractor_version=extractor_version,
+                actor=actor,
+                reason=reason,
+            )
+
+    def reset_sync(self, source: str, key: str, *, actor: str, reason: str) -> SyncState | None:
+        with self.transaction(immediate=True) as tx:
+            return tx.reset_sync(source, key, actor=actor, reason=reason)
+
+    def restore_sync(self, history_id: int, *, actor: str) -> SyncState | None:
+        with self.transaction(immediate=True) as tx:
+            return tx.restore_sync(history_id, actor=actor)
+
+    def sync_history(
+        self, source: str | None = None, key: str | None = None, *, limit: int = 50
+    ) -> list[SyncHistoryEntry]:
+        with self.transaction() as tx:
+            return tx.sync_history(source, key, limit=limit)
 
 
 class MemoryService:

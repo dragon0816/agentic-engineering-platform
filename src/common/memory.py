@@ -241,6 +241,49 @@ class SpaceSummary(Contract):
     rules: MergeRules
 
 
+# -- sync state (accumulated memory M2, §3.3 and §4) ----------------------
+
+#: How many message ids a sync state keeps for de-duplication at its
+#: boundary (the overlap window re-reads a little of the previous pass).
+MAX_SYNC_IDS = 500
+SyncAction = Literal["advance", "reset", "restore"]
+
+
+class SyncState(Contract):
+    """How far one source has been processed for one key in a space, e.g.
+    `{space: contacts/org, source: mail:Inbox, key: wnc.com.tw}`: everything
+    up to `last_message_date` was processed by `extractor_version`;
+    `last_message_ids` are the ids processed near that boundary, so an
+    overlapping re-read skips them. `updated_by` is filled by the Host
+    (`<actor> via <channel>`)."""
+
+    space: SpaceName
+    source: Text
+    key: Text
+    last_message_date: str
+    last_message_ids: tuple[str, ...] = ()
+    extractor_version: str = ""
+    updated_at: str
+    updated_by: str
+
+
+class SyncHistoryEntry(Contract):
+    """One change of a sync state, kept so a reset is audited and can be
+    restored: the state before (`old`, None when there was none) and after
+    (`new`, None after a reset)."""
+
+    history_id: int
+    space: SpaceName
+    source: Text
+    key: Text
+    action: SyncAction
+    at: str
+    actor: str
+    reason: str = ""
+    old: SyncState | None = None
+    new: SyncState | None = None
+
+
 def origin_for(trust: TrustClass | None, source_kind: str) -> Origin:
     """ADR-K11 `origin` of a value from a source of this trust class."""
     if trust == "user_stated":

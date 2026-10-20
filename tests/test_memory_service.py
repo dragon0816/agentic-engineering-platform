@@ -95,7 +95,8 @@ def test_a_manifest_without_memory_spaces_keeps_its_bytes_and_digest() -> None:
 def test_the_business_cards_skill_manages_contacts_org() -> None:
     declared = business_cards_skill().memory_spaces
     assert declared == (DECLARATION,)
-    assert DECLARATION.role == "manager" and DECLARATION.kinds == ("entities",)
+    assert DECLARATION.role == "manager"
+    assert DECLARATION.kinds == ("entities", "sync_state")  # M2: mail sync state
     assert DECLARATION.sensitivity == "CONFIDENTIAL"
     assert DECLARATION.merge_rules == MERGE_RULES.rules_id
     round_trip = SkillManifest.model_validate_json(business_cards_skill().model_dump_json())
