@@ -110,6 +110,18 @@ COMPACTED_NOTE = (
 # Stops that leave the work unfinished and ask the person how to go on; each
 # keeps the turn's tool record so a reply of 繼續 can pick it up.
 TURN_STOP_CODES = frozenset({"tool_loop_limit", "tool_repeat_limit", "turn_time_limit"})
+# The Agent keeps no rules between conversations (owner 2026-10-20: it
+# answered 「規則我已改成…」 with nothing saved). The Host's claim check
+# (`agent/conversation_harness.py`) catches such an answer; this tells the
+# model what to do instead.
+MEMORY_GUIDANCE = (
+    "You keep no rule, preference or instruction between conversations unless a tool saves "
+    "it. Never say you changed a rule or a setting, or that you will do something from now "
+    "on, unless a tool that changes it succeeded in this turn. When the person wants a "
+    "behaviour to last, apply it in this conversation, say it is not saved yet, and propose "
+    "it for them to apply: a Workflow draft (authoring__draft_workflow) with the rule built "
+    "in, or a settings proposal (propose_change), whichever of these tools you have."
+)
 
 ToolProgressState = Literal["running", "succeeded", "failed"]
 #: Set by a channel around one `converse` call to hear which installed tool
@@ -771,6 +783,8 @@ class Gateway:
             "uncited. After a "
             "tool result, explain what happened and what the user should do next. "
             + RECOVERY_GUIDANCE
+            + " "
+            + MEMORY_GUIDANCE
         )
         if self._workspace_note:
             prompt += " " + self._workspace_note

@@ -182,7 +182,15 @@ flowchart TD
   - `recoverable: false`（需要使用者）：`permission_denied`、`approval_required`、`secret_resolution_unavailable`、`capability_not_installed`、`missing_local_capability`、`workflow_not_installed`、`needs_connectivity`，以及失敗碼含 credential、token、login、sign_in、scope（郵件範圍）、not_installed、disabled 等字的；其他未知失敗碼也是 false（請模型說明、不要原樣重試）。
   - `knowledge_not_validated` 不加（G1 已有自己的指示）。
   - 系統提示規則：`recoverable` 為 true 時，依 hint 修正參數並在**同一回合**重試，不把錯誤丟給使用者；只有 false 或修正後仍失敗時才問使用者；不得原樣重複失敗的呼叫。重複防護（相同呼叫連續 3 次失敗即停）照舊。
+- **沒有規則記憶**（owner 2026-10-20，`gateway.py` `MEMORY_GUIDANCE`）：除非工具保存，Agent 不會在對話之間保留任何規則或偏好；不得說「已改規則／以後都會」，除非本回合有改變東西的工具成功。要讓做法長期有效，就在本次對話套用、說明尚未保存，並提出讓使用者套用的提案：內建該規則的 Workflow 草稿（`authoring__draft_workflow`）或設定提案（`propose_change`）。
 - persona 只控制名稱與說話風格，不能改變政策、權限、工具或證據。
+
+對話檢查 `no_unbacked_action_claim` 的「持久變更」判斷（owner 2026-10-20，`agent/conversation_harness.py`）：
+
+- 原本只要本回合有任何工具成功，「已執行／已產生／已更新」這類說法就算有依據。2026-10-20 實測：只呼叫了讀取的 `cards__list`，回答卻說「規則我已改成…」，檢查沒有攔到。
+- 現在另有一組「持久變更」說法：中文「規則我已改成」「已改成」「已設定（為／好）」「已更新規則」「已記住」「我會記住」「以後／從現在起（我）都會」；英文 "I've updated the rule/setting"、"I'll remember"、"from now on I will"、"I've noted"。中文須在句首、標點後或「我／規則／設定」之後，所以「你的資料夾已設定為…」「安裝以後會出現在…」「如果以後都會用到…」不算。
+- 這類說法需要本回合有一個**會改變東西**的工具成功；只讀的不算：Knowledge 回答，以及命令以 list、get、show、preview、search、read、find、lookup、view、history、proposals、inspect、query、ask 開頭的工具（例如 `cards__list`、`authoring__get_workflow`）。失敗的工具也不算。
+- 未通過時照既有規則：重試一次並告訴模型原因（沒有規則記憶，改提 Workflow 草稿或設定提案）；仍未通過就附 Host 註記。
 
 ### 5.5 停止原因
 

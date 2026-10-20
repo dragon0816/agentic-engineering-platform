@@ -5,7 +5,11 @@ against what actually happened in the turn, never against the model's word:
 
 - `no_unbacked_action_claim`: an answer that says it ran, wrote, created,
   installed or downloaded something needs a tool call that succeeded in this
-  turn;
+  turn; an answer that says it made a lasting change (a rule, a setting,
+  something remembered for later: 「規則我已改成」, 「以後都會」, "I've updated
+  the rule") needs a tool that changes something, not only reads, to have
+  succeeded in this turn (owner 2026-10-20: after a read tool the Agent
+  answered 「規則我已改成…」 with nothing saved);
 - `named_outputs_exist`: every file the answer names under a task folder
   (`coding.workspace_roots`) exists and is not empty.
 
@@ -46,6 +50,44 @@ _CLAIM = re.compile(
     r"saved|installed|downloaded|uploaded|submitted)\b",
     re.IGNORECASE,
 )
+# A lasting change: a rule, a setting or preference, something remembered for
+# later. First person or at a clause start, so a description of the person's
+# own settings (「資料夾已設定為…」) or of what a button will do is not one.
+_CN_START = r"(?:^|[。！!？?，,、；;：:\s]|我|規則|設定|偏好|預設|做法)"
+_PERSISTENT = re.compile(
+    _CN_START + r"(?:也|都)?(?:已經|已)(?:把.{0,20}?)?"
+    r"(?:改成|改為|設定為|設定成|設定好|設好|設定|記住|記下|更新規則|更新設定|"
+    r"更新了規則|調整規則|調整了規則|修改規則|修改了規則)(?![的過])"
+    r"|我(?:會|將)(?:記住|記得)"
+    r"|(?:^|[。！!？?，,；;：:\s]|我)(?:以後|往後|今後|從今以後|從現在起|從現在開始|"
+    r"下次起|下次開始)(?:我)?(?:都|一律|就)?會"
+    r"|\b(?:I've|I\s+have|I)\s+(?:updated|changed|set|saved|adjusted|modified)\s+"
+    r"(?:the\s+|your\s+|this\s+|that\s+|my\s+)?(?:rules?|settings?|preferences?|defaults?|"
+    r"behaviou?r)\b"
+    r"|\bI(?:'ll|\s+will)\s+(?:always\s+)?remember\b"
+    r"|\b(?:from\s+now\s+on|going\s+forward|in\s+(?:the\s+)?future|next\s+time)\s*,?\s+"
+    r"I(?:'ll|\s+will)\b"
+    r"|\bI(?:'ve|\s+have)\s+(?:noted|remembered|memori[sz]ed)\b",
+    re.IGNORECASE | re.MULTILINE,
+)
+# A tool whose command only reads (`cards__list`, `authoring__get_workflow`)
+# cannot back a lasting change.
+_READ_COMMANDS = (
+    "list",
+    "get",
+    "show",
+    "preview",
+    "search",
+    "read",
+    "find",
+    "lookup",
+    "view",
+    "history",
+    "proposals",
+    "inspect",
+    "query",
+    "ask",
+)
 _PATH = re.compile(
     r"[A-Za-z]:[\\/][^\s\"'<>|*?`，。、）)]+?\.[A-Za-z0-9]{1,8}(?=[\s\"'`，。、）)]|$)"
 )
@@ -71,6 +113,17 @@ def check_answer(
         reasons.append(
             "the answer says an action was completed, but no tool call succeeded "
             "in this turn; do it with a tool, or do not say it was done"
+        )
+    elif not any(_succeeded(item) and not _reads_only(item) for item in tools) and (
+        _PERSISTENT.search(text or "")
+    ):
+        claim_ok = False
+        reasons.append(
+            "the answer says a lasting change was made (a rule, a setting, something "
+            "remembered for later), but no tool that changes anything succeeded in this "
+            "turn. You keep no rules between conversations unless a tool saves them: say it "
+            "applies to this conversation only, and offer a Workflow or Skill draft or a "
+            "settings proposal for the person to apply instead"
         )
     missing = []
     for path in named_files(text, roots):
@@ -105,6 +158,15 @@ def _succeeded(item: Any) -> bool:
         return bool(item.capability.status == "succeeded")
     workflow = getattr(item, "workflow", None)
     return workflow is not None and workflow.run.status == "succeeded"
+
+
+def _reads_only(item: Any) -> bool:
+    """A Knowledge answer, or a tool whose command is a read verb."""
+    host = getattr(item, "host", None)
+    if host is not None and isinstance(host.data, dict) and "knowledge_harness" in host.data:
+        return True
+    command = str(getattr(item, "name", "")).rsplit("__", 1)[-1].lower()
+    return command.startswith(_READ_COMMANDS)
 
 
 #: `run_turn(history, retry)`: the person's history, and the Host check's retry
