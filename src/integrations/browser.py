@@ -546,7 +546,14 @@ class Browser:
             # A freshly started browser can replace its first tab, which drops
             # the socket to the old one (CI 2026-10-19, WinError 10053). Attach
             # to the current tab once and ask again; a second loss is real.
+            # If the browser itself is gone -- a profile reopened right after a
+            # close can reach one that is still shutting down (CI 2026-10-20)
+            # -- launch it once more instead of waiting for a tab that will
+            # never come.
             self._page = None
+            if not self._still_answering(self._port):
+                self._await_profile_release()
+                self._launch()
             page = self.page()
             try:
                 answer = page.call("Page.navigate", url=url)

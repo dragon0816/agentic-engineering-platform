@@ -35,6 +35,9 @@ def browser_with(tabs: list[Tab]) -> Browser:
 
     browser.page = page  # type: ignore[method-assign]
     browser._await_load = lambda page: None  # type: ignore[method-assign]
+    # A browser that still answers on its port: lost tabs are reattached.
+    browser._port = 1
+    browser._still_answering = lambda port: True  # type: ignore[method-assign]
     return browser
 
 
@@ -76,3 +79,28 @@ def test_a_tab_lost_while_enabling_is_dropped_and_the_next_one_is_used(
     page: Any = browser.page()
     assert len(made) == 2 and made[0].closed and page is made[1]
     assert made[1].calls == ["Page.enable", "Runtime.enable"]
+
+
+def test_a_browser_that_went_away_is_launched_again_before_the_retry() -> None:
+    """CI 2026-10-20: the reopened profile reached a browser still shutting
+    down; it vanished under the first Page.navigate."""
+    old, new = Tab(fail=True), Tab(fail=False)
+    browser = browser_with([old, new])
+    launched: list[str] = []
+    browser._port = 1
+    browser._still_answering = lambda port: False  # type: ignore[method-assign]
+    browser._await_profile_release = lambda: True  # type: ignore[method-assign]
+    browser._launch = lambda: launched.append("launch")  # type: ignore[method-assign]
+    browser.navigate("http://127.0.0.1/", settle_s=0)
+    assert launched == ["launch"] and new.calls == ["Page.navigate"]
+
+
+def test_a_live_browser_is_only_reattached_not_relaunched() -> None:
+    old, new = Tab(fail=True), Tab(fail=False)
+    browser = browser_with([old, new])
+    launched: list[str] = []
+    browser._port = 1
+    browser._still_answering = lambda port: True  # type: ignore[method-assign]
+    browser._launch = lambda: launched.append("launch")  # type: ignore[method-assign]
+    browser.navigate("http://127.0.0.1/", settle_s=0)
+    assert launched == [] and new.calls == ["Page.navigate"]
