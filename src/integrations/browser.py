@@ -58,6 +58,8 @@ APP_PATHS = (
 )
 #: Chromium writes the port it chose into the profile it was given.
 PORT_FILE = "DevToolsActivePort"
+#: How long `start` waits for a usable tab before it relaunches once.
+STARTUP_PAGE_SECONDS = 20.0
 #: Chromium names the profile lock differently by platform and distribution.
 #: Edge on Windows uses `lockfile`; Chrome on POSIX uses `SingletonLock`.
 PROFILE_LOCK_FILES = ("lockfile", "SingletonLock")
@@ -270,6 +272,21 @@ class Browser:
             if not self._await_profile_release():
                 raise BrowserError("profile_in_use")
         self.profile.mkdir(parents=True, exist_ok=True)
+        self._launch()
+        # A profile reopened right after a close can reach a browser that is
+        # still flushing and then goes away (CI 2026-10-20: no_page on the
+        # second start). Confirm a usable tab; if the browser reached is gone,
+        # launch once more.
+        try:
+            self.page(within_s=min(self.timeout_s, STARTUP_PAGE_SECONDS))
+        except (BrowserError, WebSocketError, DevtoolsRefused):
+            self._page = None
+            if self._still_answering(self._port):
+                return
+            self._await_profile_release()
+            self._launch()
+
+    def _launch(self) -> None:
         # A stale port file from a previous run would be read as this run's.
         (self.profile / PORT_FILE).unlink(missing_ok=True)
         try:
@@ -369,13 +386,13 @@ class Browser:
             raise BrowserError("browser_lost") from None
         return [item for item in found if isinstance(item, dict)]
 
-    def page(self) -> Devtools:
+    def page(self, *, within_s: float | None = None) -> Devtools:
         """The tab. Extensions publish targets of their own -- this machine's
         Edge lists five background pages -- so the type is checked rather
         than the first one taken."""
         if self._page is not None:
             return self._page
-        end = time.time() + self.timeout_s
+        end = time.time() + (self.timeout_s if within_s is None else within_s)
         while time.time() < end:
             for target in self._targets():
                 if target.get("type") == "page" and target.get("webSocketDebuggerUrl"):

@@ -28,7 +28,7 @@ def browser_with(tabs: list[Tab]) -> Browser:
     browser = Browser.__new__(Browser)
     browser._page = tabs.pop(0)  # type: ignore[assignment]
 
-    def page() -> Any:
+    def page(*, within_s: float | None = None) -> Any:
         if browser._page is None:
             browser._page = tabs.pop(0)  # type: ignore[assignment]
         return browser._page
