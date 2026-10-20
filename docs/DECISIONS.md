@@ -3759,3 +3759,30 @@ Rejected: a dedicated COM thread for all Office calls (a queue and lifetime to m
 that already run on worker threads); initialising each worker thread once and never releasing it
 (threads of the default pool are shared with unrelated work); `pythoncom.CoInitializeEx` with a
 multithreaded apartment (Outlook's object model expects a single-threaded apartment).
+
+## 2026-10-20 — A reading that differs from the person's own value needs confirmation
+
+Context: in the third live test (2026-10-20) a re-scan read another email than the one the person
+had confirmed. The reply asked which was right, but the field was not flagged and no proposal was
+open (the reading had listed the email as uncertain, which kept it without a proposal, and a
+user-set field was never flagged), so 「X 的 email 正確」 found nothing to confirm. A re-scan also
+logged "(03) 666-7799" → "(03) 666 7799" as a change.
+
+Decision (`capabilities/business_cards/store.py`, `docs/phases/BUSINESS_CARDS.md` §2):
+
+- Any automatic reading that differs from the person's own (set or confirmed) value is one open
+  proposal (stored value, read value, observation id; the same value is not proposed twice), sure
+  or unsure. A field needs confirmation while it has an open proposal, whatever its source, so the
+  chart and legend show 需確認. A reading that is part of the stored value (`less_complete`) is not
+  a conflict and is not proposed.
+- `edit-person` closes proposals: `confirm` keeps the stored value, rejects the field's open
+  proposals and writes a `confirm` row; the read value in `fields`, or `accept` (「用新的」),
+  takes it and accepts them (a `field` row). Undo opens them again. `proposals` lists the open
+  ones.
+- Phone, fax and mobile compare by digits and extension (`names.phone_key`: spaces, hyphens, dots
+  and parentheses ignored, +886 is a leading 0); a formatting-only difference is no change.
+
+Supersedes the part of "How a re-scanned card finds its person" that left a user-set email
+without a flag. Rejected: flagging only email (the owner asked for every field); proposing a
+partial reading (it would flag every shortened 事業群); keeping the newest format of a number (each
+re-scan would flip it).

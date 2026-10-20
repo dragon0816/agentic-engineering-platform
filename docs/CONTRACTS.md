@@ -2347,8 +2347,18 @@ drafts a Workflow or Skill shows its install card"):
     (`user_set` | `older_evidence` | `uncertain` | `email_differs` | `less_complete`)}],
     `uncertain`, `needs_confirmation` [field names], `to_confirm` [{`field`, `label`,
     `stored`}], `dropped` [{`field`, `label`, `value`, `reason` (`not_on_card`)}],
-    `email_differs` ({`stored`, `read`} or null), `status`, `summary`, `observation_id`,
-    `change_id`}. `label` is the field's Chinese name (`contracts.FIELD_LABELS`).
+    `email_differs` ({`stored`, `read`} or null), `proposals` [`ProposalView`], `match`
+    (`MatchSummary`), `status`, `summary`, `observation_id`, `change_id`}. `label` is the
+    field's Chinese name (`contracts.FIELD_LABELS`). `MatchSummary` (third live test
+    2026-10-20) {`by` (`image` | `email` | `name_company` | `romanised_name` | `new`),
+    `by_label`, `person_id`, `name`, `company`, `lead` (「已對到既有聯絡人 <姓名>（<公司>），依…比對。」
+    or 「已新增聯絡人 …」), `changed`, `kept`, `needs_confirmation` [Chinese labels]}.
+    `ProposalView` {`proposal_id`, `field`, `label`, `current` (stored now), `proposed`,
+    `source`, `source_label`, `observation_id`, `person_id`, `name`, `company`, `created_at`}:
+    any automatic reading that differs from a user-set or confirmed value (or another email for
+    a matched person) is one open proposal, and a field with an open proposal is in
+    `needs_confirmation`. Phone, fax and mobile compare by digits and extension
+    (`names.phone_key`).
     `add-from-signature` {`entries`: 1–50 card fields +
     `message_id`, `message_date`, `uncertain`} → {`results`: [`AddResult`]};
     `store-candidates` (2026-10-20 re-test) {`candidate_ids`: 1–50 ids from this conversation's
@@ -2356,17 +2366,22 @@ drafts a Workflow or Skill shows its install card"):
     `already_stored`, `unknown` [ids]}: stored with source `email_signature`, the candidate's
     message id and date; refused `candidates_expired` when the conversation (`<channel>:<session
     id>`) has none left (one hour after the harvest); `edit-person`
-    {`person`, `fields` (optional), `confirm` [field names], `clear` [field names], `reason`} →
-    {`person_id`, `name`,
-    `changes`, `confirmed`, `needs_confirmation`, `to_confirm`, `change_id`};
+    {`person`, `fields` (optional), `confirm` [field names], `clear` [field names], `accept`
+    [field names: take the field's newest open proposal; refused `proposal_unknown` without
+    one], `reason`} → {`person_id`, `name`, `changes`, `confirmed`, `already_confirmed`,
+    `accepted`, `rejected`, `proposals`, `needs_confirmation`, `to_confirm`, `change_id`}
+    (`confirm` rejects the field's open proposals with a `confirm` row; the read value, in
+    `fields` or by `accept`, accepts them with a `field` row; undo reopens them);
     `set-status` {`person`, `status` (`left` | `active`), `reason`, `effective_date`} →
-    {`person_id`, `name`, `old_status`, `new_status`, `left_at`, `change_id`} (no `said_by`
+    {`person_id`, `name`, `old_status`, `new_status`, `left_at`, `change_id`,
+    `old_status_label`, `new_status_label` (在職 / 已離職), `undo_hint`} (no `said_by`
     since 2026-10-20: who is the request's `<actor> via <channel>`, also in history actors,
     `status_set_by` and reporting lines); `set-reporting-line` {`person`, `manager`, `evidence_kind` (`signature` |
     `email_content` | `title_inference` | `user`), `evidence_ref`, `confidence` 0–1,
     `inferred`} and `remove-reporting-line` {`person`, `reason`} → {`person_id`, `name`,
     `manager_id`, `manager`, `evidence_kind`, `inferred`, `replaced`, `removed`, `change_id`};
-    `undo` {`change_id`} → {`undone`, `reverted` [history items], `change_id`};
+    `undo` {`change_id`} → {`undone`, `reverted` [history items], `change_id`, `note`
+    (what was reverted, no ids)};
     `import-hermes` {} → {`found`, `rows`, `imported`, `already`, `people_created`,
     `people_updated`, `source`}.
   - Reads: `find` {`query`, `status` (`active` | `left` | `any`), `limit` ≤ 100} and `list`
@@ -2374,15 +2389,20 @@ drafts a Workflow or Skill shows its install card"):
     `limit` ≤ 200} → {`people`: [`PersonView`], `total`, `company` (the stored company the
     query or `company` named, else "")}; `history` {`person`, `limit`} →
     {`person`, `history` [{`change_id`, `at`, `actor`, `kind`, `field`, `old`, `new`,
-    `reason`, `source`}], `observations` [{`observation_id`, `source`, `source_date`,
-    `source_ref`, `uncertain`}], `proposals` [{`field`, `current`, `proposed`, `source`}]};
+    `reason`, `source`, `at_local` (Asia/Taipei, `YYYY-MM-DD HH:MM`), `kind_label`,
+    `field_label`, `source_label`, `old_display`, `new_display`}], `observations`
+    [{`observation_id`, `source`, `source_date`, `source_ref`, `uncertain`, `source_label`}],
+    `proposals` [`ProposalView`]}; `proposals` {`person` (optional), `limit` ≤ 200} →
+    {`proposals` [`ProposalView`], `total`, `note`};
     `org-chart` {`company`, `include_left`} → {`company`, `people`, `left_shown`,
     `left_omitted`, `lines_evidenced`, `lines_inferred`, `png_path`, `legend_path`,
     `legend_markdown`, `note`, `attach` [{`path`, `media_type`, `filename`}]};
     `harvest-signatures` {`domain`, `days` (capped at the mail scope's `max_days`), `limit` ≤ 40,
     `folder`} → {`scanned`, `from_domain`, `with_signature`, `candidates` [card fields +
     `candidate_id`, `message_id`, `message_date`, `uncertain`, `existing_person_id`,
-    `would_change`], `note`, `skipped` [{`code`, `count`}], `skipped_note`, `expires_at`}; the
+    `would_change`], `note`, `skipped` [{`code`, `count`}], `skipped_note`, `expires_at`,
+    `without_signature`, `same_sender`, `unreadable_signature`, `scan_note` (「掃描 5 封，1 封有
+    簽名檔，4 封沒有簽名檔。」)}; the
     candidates are kept in the actor's store for this conversation (table `candidates`; fields,
     message id and date only) until `expires_at` or the next harvest.
   - A company in `org-chart`, `list` and `find` resolves against the stored companies: the name
@@ -2393,13 +2413,15 @@ drafts a Workflow or Skill shows its install card"):
   - `PersonRef` {`person_id` | `name` (local or romanised) + optional `company`}. Card fields:
     `name`, `romanised_name`, `company`, `company_tax_id`, `business_group`, `division`,
     `department`, `title`, `honorific`, `phone`, `ext`, `mobile`, `fax`, `email`, `address`,
-    `website`, `notes`. `PersonView` adds `needs_confirmation`. History kinds include `confirm`
-    and `unconfirm` (its undo).
+    `website`, `notes`. `PersonView` adds `needs_confirmation`, `status_label`,
+    `updated_at_local`. History kinds include `confirm` and `unconfirm` (its undo). Labels:
+    `contracts.SOURCE_LABELS`, `STATUS_LABELS`, `KIND_LABELS`, `MATCH_LABELS`.
   - Refusal codes: `person_unknown`, `person_ambiguous`, `person_unspecified`,
     `card_without_name`, `line_to_self`, `line_cycle`, `change_unknown`,
     `change_already_undone`, `undo_conflict`, `company_has_no_contacts`,
     `chart_renderer_missing`, `import_unreadable`, `model_not_configured`, `model_unavailable`,
-    `candidates_expired`, and the mail codes of `outlook.search` / `outlook.read`.
+    `candidates_expired`, `proposal_unknown`, and the mail codes of `outlook.search` /
+    `outlook.read`.
   - Signature model call: structured output `business-cards.signature.v1`
     {`people`: [{`i`, card fields except `email`/`notes`, `uncertain`}]}, ≤ 10 blocks per call.
 - `LocalPolicy.confirm_writes(spec)` / `confirmed_writes`: a host-declared standing
@@ -2409,7 +2431,7 @@ drafts a Workflow or Skill shows its install card"):
   some version of `engineering/business-cards` is switched on): `cards__add_card`,
   `cards__store_candidates`, `cards__add_from_signature`, `cards__edit_person`, `cards__find`,
   `cards__list`,
-  `cards__history`, `cards__set_status`, `cards__set_reporting_line`,
+  `cards__history`, `cards__proposals`, `cards__set_status`, `cards__set_reporting_line`,
   `cards__remove_reporting_line`, `cards__undo`, `cards__org_chart`,
   `cards__harvest_signatures`, `cards__import_hermes`; each dispatches with `origin: model`,
   after dropping identity keys (`said_by`, `set_by`, `actor`, `recorded_by`, `confirmed_by`) from

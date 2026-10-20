@@ -1,8 +1,62 @@
 # Handoff
 
-Updated: 2026-10-20 (Asia/Taipei), by Claude Code (business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-20 (Asia/Taipei), by Claude Code (business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## Business-cards second-round re-test fixes (2026-10-20, Claude Code) — latest
+## Business-cards third-round fixes (2026-10-20, Claude Code) — latest
+
+**Goal / scope:** the five minor issues from the owner's third live test (2026-10-20, owner:
+「幫忙把上面1~5小問題也修掉」), Gateway backend. Not pushed; Agent Web not restarted (the owner was
+live-testing Telegram); the live `cards.db` and mail untouched.
+
+**Done (commits on main; every fix has a failing-first test):**
+1. 078e0d6d phone, fax and mobile compare by digits + extension (`names.phone_key`; spaces,
+   hyphens, dots, parentheses ignored; +886 = leading 0): a formatting-only difference keeps the
+   stored value, records nothing, reports nothing.
+2. 5184a031 (+ d941745b typing) any automatic reading that differs from a user-set or confirmed
+   value is one open proposal (stored, read, observation id), sure or unsure, and the field needs
+   confirmation (chart 需確認). `edit-person` `confirm` rejects it and writes a `confirm` row;
+   `accept` (「用新的」) or the read value in `fields` accepts it (`field` row); undo reopens.
+   New read capability `business-cards.proposals` / tool `cards__proposals` with a `note`.
+   The full chat cycle is tested with a fake model, including the `confirm` row.
+3. 6c65fb22 `add-card` results carry `match` {`by`, `by_label`, person, `changed`, `kept`,
+   `needs_confirmation`, `lead` 「已對到既有聯絡人 <姓名>（<公司>），依…比對。」 / 「已新增聯絡人 …」};
+   the summary says 「更新了…」 (no dangling 也); the procedure opens with `lead`.
+4. 77c3375e display strings: `status_label` (在職 / 已離職), `source_label` (名片 / 郵件簽名檔 /
+   使用者), `kind_label`, `field_label`, `old_display` / `new_display`, `at_local` (Asia/Taipei,
+   2026-10-20 14:03); `set-status` `undo_hint`, `undo` `note`; ids only on a specific undo.
+5. 3938c5e7 harvest: `without_signature`, `same_sender`, `unreadable_signature`, `scan_note`
+   (「掃描 5 封，1 封有簽名檔，4 封沒有簽名檔。」), separate from `skipped`.
+6. Docs commit: `docs/phases/BUSINESS_CARDS.md`, `docs/CONTRACTS.md`, `docs/DECISIONS.md`
+   (2026-10-20 "A reading that differs from the person's own value needs confirmation"),
+   `docs/TASKS.md`, user guide §4.7.
+
+**Verification (2026-10-20):** `ruff check .` passed; `ruff format --check .` 913 files
+formatted; `mypy` no issues (662 files). Full pytest, project `.venv`: 3370 passed, 7 skipped,
+0 failed (includes the guarded live Outlook checks, read-only). CI-like venv `C:epci-wkenv`
+(`pip install -e ".[dev,office]"`, `--basetemp=C:/aepci-wk/bt`): 3345 passed, 32 skipped, 0 failed (run
+after the first suite finished). Both suites ran with the code, user guide and spec in place; only
+HANDOFF.md, TASKS.md, DECISIONS.md and CONTRACTS.md text changed afterwards (no test reads them).
+
+**Open / risks:**
+- The `confirm` history row in a real chat is covered by fake-model tests only; still to see live.
+- `less_complete` readings (a shorter 事業群) are not proposed even against the person's own value.
+- A number that is not digits-only text (e.g. contains words) is compared as written.
+- Adds the `business-cards/proposals` capability: on a host governed by members' decisions it
+  needs a grant like the others (owner mode grants it).
+
+**Next (owner live re-test; check `/api/tasks` before restarting Agent Web):**
+1. Restart Agent Web so the new code loads.
+2. Re-scan a card whose phone reads "(03) 666 7799" for "(03) 666-7799" → no change reported;
+   「<某人> 的歷史」 shows no new field row.
+3. Confirm an email, re-send the card with the email misread → reply opens 「已對到既有聯絡人 …」,
+   says the two emails differ; chart legend lists 需確認：Email; 「有哪些待確認？」 lists it.
+4. 「<某人> 的 email 正確」 → history shows a `confirm` row (確認, 使用者, Taipei time);
+   repeat with 「用新的」 → the email changes, a 欄位變更 row.
+5. 「<某人> 離職了」, 「<某人> 的歷史」, 「復原」 → 在職 / 已離職, 郵件簽名檔, local times; no change
+   ids unless you ask to undo a specific one.
+6. Harvest a domain → the reply says 「掃描 N 封，M 封有簽名檔，K 封沒有簽名檔。」.
+
+## Business-cards second-round re-test fixes (2026-10-20, Claude Code)
 
 **Goal / scope:** the ten issues the owner's 2026-10-20 re-test of the first-round fixes found
 (Gateway backend). Not pushed; Agent Web not restarted; the live `cards.db` and mail untouched

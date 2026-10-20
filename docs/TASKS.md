@@ -2743,6 +2743,19 @@ s-k-20261011T102952` (not published).
   Verification: HANDOFF.md.
 - [ ] Owner re-test of the second-round fixes (steps in HANDOFF.md), including harvest → store →
   chart with signature people.
+- [x] Five fixes from the third business-cards live test (2026-10-20, Claude Code; owner:
+  「幫忙把上面1~5小問題也修掉」): phone, fax and mobile compare by digits and extension
+  (`names.phone_key`), so a formatting-only difference is no change; any reading that differs from
+  the person's own value is an open proposal and the field needs confirmation (chart 需確認);
+  `edit-person` `confirm` rejects it with a `confirm` row, `accept` / the read value accepts it;
+  new read capability `proposals` / tool `cards__proposals`; add-card results carry `match`
+  (how, who, changed / kept / to confirm, `lead` 「已對到既有聯絡人 …」) and a summary without a
+  dangling 也; history, status and undo results carry Chinese labels and Asia/Taipei times, change
+  ids shown only on a specific undo; a harvest reports `without_signature`, `same_sender`,
+  `unreadable_signature` and `scan_note`. Decision 2026-10-20 "A reading that differs from the
+  person's own value needs confirmation". Commits 078e0d6d, 5184a031, d941745b, 6c65fb22, 77c3375e,
+  3938c5e7 and the docs commit. Tests: the business-cards test modules. Verification: HANDOFF.md.
+- [ ] Owner re-test of the third-round fixes (steps in HANDOFF.md).
 - [ ] Later: a Contacts page in Agent Web; accepting a proposal with a button.
 
 - [x] A Skill install card names a switched-off Skill of the same name (2026-10-20, Claude Code;

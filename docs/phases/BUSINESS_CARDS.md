@@ -42,8 +42,10 @@ short hash, so two actors never share a file.
   delete (`removed_at`, `removed_by`, `removed_reason`), so it can be restored.
 - **history**: every change, grouped by `change_id`: who, when, why, kind, field, old and new
   value. Undo replays a change group backwards and is itself a new change.
-- **proposals**: a conflict between an automatic source and a user-set value, or another
-  email for a person matched by image or name.
+- **proposals**: a conflict between an automatic source and a user-set or confirmed value, or
+  another email for a person matched by image or name: stored value, read value, source,
+  observation id, `state` (`open`, then `rejected` when the person keeps the stored value,
+  `accepted` when they take the read one, `dismissed` when its scan is undone).
 - **candidates**: a signature harvest's candidates for one conversation (`<channel>:<session
   id>`), with short ids (`s1`, ...), fields, uncertain, message id and date (never a body); kept
   one hour or until the conversation's next harvest (§5).
@@ -58,8 +60,17 @@ short hash, so two actors never share a file.
    division and they differ.
 
 When 1 or 3 brings another email, the stored email stays, the new one is a proposal, the email
-needs confirmation (unless the person set or confirmed it) and the result carries
-`email_differs` {`stored`, `read`} with a sentence in `summary`. Limit: namesakes at one company
+needs confirmation (also when the person set or confirmed it: third live test 2026-10-20) and
+the result carries `email_differs` {`stored`, `read`} with a sentence in `summary`.
+
+Every `add-card` result carries `match` (third live test 2026-10-20: the reply began
+「統一編號、電話、傳真也更新了。」 and never said the card matched a known contact): `by`
+(`image` / `email` / `name_company` / `romanised_name` / `new`) and `by_label` (名片圖片, Email,
+姓名與公司, 英文名與公司, 新聯絡人), `person_id`, `name`, `company`, the labels of what
+`changed`, was `kept` and `needs_confirmation`, and `lead`: 「已對到既有聯絡人 王小明（範例科技），
+依名片圖片比對。」 or 「已新增聯絡人 王小明（範例科技）。」. The reply opens with `lead`, then the
+changes (`summary`; a summary of updated fields only says 「更新了統一編號、電話、傳真。」, never a
+dangling 也), then the questions. Limit: namesakes at one company
 with different emails and the same or an unread department and division are taken to be one
 person; the flagged email lets the person correct it.
 
@@ -68,23 +79,37 @@ person; the flagged email lets the person correct it.
 When a card, signature or import brings a value for a field:
 
 1. empty field → set; provenance = that source and date;
-2. current value set by the **user** → never overwritten; a differing value becomes a proposal
-   and the result says so ("kept your value");
+2. current value set (or confirmed) by the **user** → never overwritten; a differing value,
+   sure or unsure, becomes an open proposal, the field needs confirmation and the result says so
+   ("kept your value", with both values);
 3. current value from an automatic source → replaced only when the new evidence is not older
    than the current value's evidence date; the change is in history;
 4. a value the reading marked **uncertain** fills an empty field but never replaces a value;
 5. a reading that is a strict prefix or substring of the stored value (spaces and case ignored)
    never replaces it (`less_complete`: "Connectivity & Solutions" does not replace
    "Connectivity & Solutions 事業群", 研展處 does not replace 研展處 I); not for `title`
-   (副總經理 → 總經理 is a promotion), `notes` or `email`.
+   (副總經理 → 總經理 is a promotion), `notes` or `email`; such a reading is not proposed
+   either, even against the person's own value;
+6. phone, fax and mobile are compared by digits and extension (`names.phone_key`: spaces,
+   hyphens, dots and parentheses ignored, +886 read as a leading 0): "(03) 666 7799" is
+   "(03) 666-7799", so the stored value stays, nothing is recorded and nothing is reported
+   (third live test 2026-10-20: each re-scan flipped the format and said 電話、傳真也更新了).
 
 `edit_person` sets values with source `user`.
 
 **Needs confirmation.** A field needs confirmation while any observation of the person listed it in
-`uncertain` and its current value is not the person's own (source `user`). A later scan that is
-sure does not clear it. The person clears it by confirming the stored value (`edit-person`
-`confirm: ["email"]`, history kind `confirm`, undoable) or by correcting it (`fields`); re-stating
-the stored value in `fields` also confirms it. A wrong value is emptied with `edit-person`
+`uncertain` and its current value is not the person's own (source `user`), and while it has an
+open proposal, whatever its source (decision 2026-10-20 "A reading that differs from the
+person's own value needs confirmation"). A later scan that is sure does not clear it. The person
+clears it by confirming the stored value (`edit-person` `confirm: ["email"]`: the field's open
+proposals are rejected and a `confirm` history row is written, undoable, which opens them
+again), by taking the value read (`accept: ["email"]`, 「用新的」, or that value in `fields`: the
+proposal is accepted, a `field` history row) or by correcting it (`fields`); re-stating the
+stored value in `fields` also confirms it. `accept` without an open proposal is refused
+`proposal_unknown`. `edit-person` reports `confirmed`, `already_confirmed`, `accepted`,
+`rejected` and the person's remaining `proposals`; `add-card` results carry the person's open
+`proposals` [{`proposal_id`, `field`, `label`, `current` (stored now), `proposed`, `source`,
+`source_label`, `observation_id`, `person_id`, `name`, `company`}]. A wrong value is emptied with `edit-person`
 `clear: ["romanised_name"]`: the empty value is the person's own, so a later scan does not refill
 it (it becomes a proposal). `add-card`, `edit-person` and every person view
 report `needs_confirmation`, and the org chart marks those people with
@@ -127,7 +152,8 @@ keys (`said_by`, `set_by`, `actor`, ...) from a model's arguments.
 | `import-hermes` | write | One-time, idempotent import of `~/.business-cards/cards.db` (`BUSINESS_CARDS_HOME`) |
 | `find` | read | People matching a text (name, romanised name, email, company, title); a company query returns all its people |
 | `list` | read | People by company (resolved as below), source and status |
-| `history` | read | One person's changes and observations, with change ids |
+| `history` | read | One person's changes and observations, with change ids, labels and local times |
+| `proposals` | read | Open proposals, one person's or everyone's, with a sentence (`note`) for the reply |
 | `org-chart` | read | PNG + Markdown legend for a company (writes only the derived files) |
 | `harvest-signatures` | read | Mail in the configured scope from one company domain → signature candidates |
 
@@ -161,7 +187,8 @@ The Skill `engineering/business-cards@1.0.0` (alias `cards`) is shipped switched
 command to a capability gives the model no argument schema. The Host offers host tools
 `cards__add_card`, `cards__store_candidates`, `cards__add_from_signature`, `cards__edit_person`,
 `cards__find`, `cards__list`,
-`cards__history`, `cards__set_status`, `cards__set_reporting_line`, `cards__remove_reporting_line`,
+`cards__history`, `cards__proposals`, `cards__set_status`, `cards__set_reporting_line`,
+`cards__remove_reporting_line`,
 `cards__undo`, `cards__org_chart`, `cards__harvest_signatures`, `cards__import_hermes`, each with its
 JSON schema, **only while some version of that Skill is switched on** and its capabilities are
 installed. Every call is a `CapabilityInvocation` through the Bridge with `origin: model`.
@@ -180,6 +207,15 @@ Procedure (from the Hermes `SKILL.md`, adapted):
 - `title` is the job title only (degrees to `honorific`); division and department copied exactly,
   including suffixes such as I, II, 一處; 統一編號 in `company_tax_id`, never in notes;
 - ask about `needs_confirmation` too; "email 正確" → `cards__edit_person` `confirm: ["email"]`;
+  a result's `proposals`: say the stored and the read value and ask which is right; the other
+  value or 「用新的」 → `accept: ["email"]`; `cards__proposals` lists the open ones (tell its
+  `note`);
+- start every card reply with `match.lead`, then the changes, then the questions;
+- name statuses, sources and times with the results' labels (`status_label`, `source_label`,
+  `kind_label`, `field_label`, `old_display` / `new_display`, `at_local`: Asia/Taipei, e.g.
+  2026-10-20 14:03), never `active`, `left`, `email_signature` or UTC times; change ids stay in
+  the results, shown only when the person asks to undo a specific change, otherwise
+  「可以說『復原』撤回」 (`undo_hint` on `set-status`; `undo` returns a `note` without ids);
 - when a tool fails, tell its failure message and code; mention Settings only when the message
   names it;
 - name fields in Chinese with the result's `field_labels` (every succeeded `cards__*` result
@@ -190,8 +226,8 @@ Procedure (from the Hermes `SKILL.md`, adapted):
 - look for the 統一編號 on every card and put unplaced printed text in `other_text`;
 - a company is passed as the person says it (WNC, 啟碁); the result's `company` is its stored
   name;
-- after a harvest list each candidate with its id; on 「都存進去」 or 「存 s1、s3」 call
-  `cards__store_candidates`; never harvest again just to store.
+- after a harvest list each candidate with its id and tell `scan_note`; on 「都存進去」 or
+  「存 s1、s3」 call `cards__store_candidates`; never harvest again just to store.
 
 ## 5. Email signatures
 
@@ -216,6 +252,12 @@ CO_E_NOTINITIALIZED (unmapped, so `handler_error`). `integrations.com.apartment(
 every Outlook call (mailbox, draft, send: Outlook is asked for inside it on every call and no
 COM object is kept) and each Excel run of the weekly and chipset reports; COM failures map to the
 adapters' codes. The guarded live test lists the Inbox from two different worker threads.
+
+**What was scanned** (third live test 2026-10-20: 5 scanned, 1 signature, `skipped` empty, and
+nothing said about the other 4). The result counts `without_signature` (read, no signature
+block), `same_sender` (older mail of a sender already read; not opened), `unreadable_signature`
+(a block the model found no person in), apart from `skipped`, and `scan_note` says it:
+「掃描 5 封，1 封有簽名檔，4 封沒有簽名檔。」 (the other counts are added when not zero).
 
 A message that cannot be read is skipped and counted by its code (`skipped` [{`code`, `count`}]),
 never the whole harvest; `skipped_note` says it for the person, e.g. 「讀信失敗：1 封信無法讀取
@@ -285,5 +327,6 @@ nothing. The Hermes `business-cards` pack Skill stays switched off.
 
 - A "Contacts" page in Agent Web (the chat covers find / list / history; a page would be a large
   addition to `web_page.py`).
-- Accepting a proposal from a button (the user says so in chat; `edit-person` records it).
+- Accepting a proposal from a button (the user says so in chat; `edit-person` `confirm` /
+  `accept` records it).
 - Graph layout of deep reporting trees beyond the grouped boxes and connecting lines.
