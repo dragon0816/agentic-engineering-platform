@@ -11,8 +11,10 @@ accumulated memory M3), declared before any manifest.
 
 from __future__ import annotations
 
-from collections.abc import Iterable
-from pathlib import Path
+import threading
+from collections.abc import Iterable, Iterator
+from contextlib import contextmanager
+from functools import cache
 
 from agent.skills import SkillManifest
 from common.assets import WorkflowManifest
@@ -31,46 +33,138 @@ def shipped_rules() -> tuple[MergeRules, ...]:
     return (MERGE_RULES, *personal.RULES)
 
 
-def _installed(layout: HostLayout) -> list[SkillManifest | WorkflowManifest]:
-    found: list[SkillManifest | WorkflowManifest] = []
-    folders: tuple[tuple[Path, type[SkillManifest] | type[WorkflowManifest]], ...] = (
-        (layout.skills, SkillManifest),
-        (layout.skills / DISABLED, SkillManifest),
-        (layout.workflows, WorkflowManifest),
-        (layout.workflows / DISABLED, WorkflowManifest),
-    )
-    for folder, model in folders:
+#: Where installed Skills and Workflows are, and whether one there is `on`
+#: or `off` (switched off).
+_FOLDERS: tuple[tuple[str, str, type[SkillManifest] | type[WorkflowManifest], str], ...] = (
+    ("skills", "", SkillManifest, "on"),
+    ("skills", DISABLED, SkillManifest, "off"),
+    ("workflows", "", WorkflowManifest, "on"),
+    ("workflows", DISABLED, WorkflowManifest, "off"),
+)
+#: One parsed manifest per file, kept while the file's size and modification
+#: time stay the same (live check B3, 2026-10-21: the memory page parsed every
+#: installed manifest several times per call; `docs/DECISIONS.md`).
+_PARSED: dict[str, tuple[tuple[int, int], SkillManifest | WorkflowManifest | None]] = {}
+#: The registry built from one set of installed files, by their signature.
+_REGISTRIES: dict[str, tuple[tuple[object, ...], MemoryRegistry]] = {}
+_LOCK = threading.Lock()
+#: A bound on both caches (a test run makes many workspaces).
+_MAX_KEPT = 2000
+
+
+@cache
+def _shipped() -> tuple[SkillManifest | WorkflowManifest, ...]:
+    """The manifests AEP ships: code, so built once per process."""
+    from host_runtime.assets import shipped
+
+    return tuple(shipped())
+
+
+_Scan = tuple[tuple[tuple[object, ...], ...], list[tuple["SkillManifest | WorkflowManifest", str]]]
+#: The scan a thread reuses inside `one_scan()`, by workspace.
+_SCANS = threading.local()
+
+
+@contextmanager
+def one_scan(layout: HostLayout) -> Iterator[None]:
+    """Inside the block, this thread looks at the installed Skill and
+    Workflow files once (one Agent Web request: the memory page builds the
+    registry and the managers' states several times)."""
+    held: dict[str, _Scan] | None = getattr(_SCANS, "held", None)
+    if held is None:
+        held = {}
+        _SCANS.held = held
+    root = str(layout.workspace_root)
+    if root in held:
+        yield
+        return
+    held[root] = _scan(layout)
+    try:
+        yield
+    finally:
+        held.pop(root, None)
+
+
+def _installed_files(layout: HostLayout) -> _Scan:
+    held: dict[str, _Scan] | None = getattr(_SCANS, "held", None)
+    if held:
+        found = held.get(str(layout.workspace_root))
+        if found is not None:
+            return found
+    return _scan(layout)
+
+
+def _scan(layout: HostLayout) -> _Scan:
+    """Every installed Skill and Workflow file with its state (`on`/`off`),
+    and the files' signature (name, size, modification time). A file is parsed
+    again only when its size or modification time changed; an unreadable or
+    invalid file is left out, as before."""
+    signature: list[tuple[object, ...]] = []
+    found: list[tuple[SkillManifest | WorkflowManifest, str]] = []
+    for kind, sub, model, state in _FOLDERS:
+        base = getattr(layout, kind)
+        folder = base / sub if sub else base
         if not folder.is_dir():
             continue
         for path in sorted(folder.glob("*__*__*.json")):
             try:
-                found.append(model.model_validate_json(path.read_text(encoding="utf-8-sig")))
-            except (OSError, ValueError):
+                info = path.stat()
+            except OSError:
                 continue
-    return found
+            stamp = (info.st_size, info.st_mtime_ns)
+            signature.append((str(path), *stamp))
+            key = f"{model.__name__}:{path}"
+            with _LOCK:
+                held = _PARSED.get(key)
+            if held is not None and held[0] == stamp:
+                manifest = held[1]
+            else:
+                try:
+                    manifest = model.model_validate_json(path.read_text(encoding="utf-8-sig"))
+                except (OSError, ValueError):
+                    manifest = None
+                with _LOCK:
+                    if len(_PARSED) >= _MAX_KEPT:
+                        _PARSED.clear()
+                    _PARSED[key] = (stamp, manifest)
+            if manifest is not None:
+                found.append((manifest, state))
+    return tuple(signature), found
+
+
+def _installed(layout: HostLayout) -> list[SkillManifest | WorkflowManifest]:
+    return [manifest for manifest, _ in _installed_files(layout)[1]]
 
 
 def registry(layout: HostLayout) -> MemoryRegistry:
-    """The memory registry of this Host."""
-    from host_runtime.assets import shipped
-
-    ours = list(shipped())
+    """The memory registry of this Host: built again only when an installed
+    Skill or Workflow file changed (the shipped ones are code)."""
+    signature, installed = _installed_files(layout)
+    root = str(layout.workspace_root)
+    with _LOCK:
+        held = _REGISTRIES.get(root)
+    if held is not None and held[0] == signature:
+        return held[1]
+    ours = list(_shipped())
     known = {item.metadata.identity.key for item in ours}
-    others = [item for item in _installed(layout) if item.metadata.identity.key not in known]
-    return MemoryRegistry.from_manifests(
+    others = [item for item, _ in installed if item.metadata.identity.key not in known]
+    built = MemoryRegistry.from_manifests(
         [*ours, *others], rules=shipped_rules(), first=personal.HOST_DECLARED
     )
+    with _LOCK:
+        if len(_REGISTRIES) >= _MAX_KEPT:
+            _REGISTRIES.clear()
+        _REGISTRIES[root] = (signature, built)
+    return built
 
 
 def conflicts(layout: HostLayout, candidate: SkillManifest | WorkflowManifest) -> tuple[str, ...]:
     """Spaces `candidate` would manage that another asset here (or shipped)
     already manages: a space has one manager, so the install is refused."""
-    from host_runtime.assets import shipped
-
     declared = declarations_of(candidate)
     if not declared:
         return ()
-    present: Iterable[SkillManifest | WorkflowManifest] = [*shipped(), *_installed(layout)]
+    present: Iterable[SkillManifest | WorkflowManifest] = [*_shipped(), *_installed(layout)]
     return manager_conflicts(
         [
             *personal.HOST_DECLARED,
@@ -91,25 +185,12 @@ def manager_states(layout: HostLayout) -> dict[str, str]:
     2026-10-21)."""
     found: dict[str, str] = {}
     installed: set[str] = set()
-    folders: tuple[tuple[Path, type[SkillManifest] | type[WorkflowManifest], str], ...] = (
-        (layout.skills, SkillManifest, "on"),
-        (layout.skills / DISABLED, SkillManifest, "off"),
-        (layout.workflows, WorkflowManifest, "on"),
-        (layout.workflows / DISABLED, WorkflowManifest, "off"),
-    )
-    for folder, model, state in folders:
-        if not folder.is_dir():
-            continue
-        for path in sorted(folder.glob("*__*__*.json")):
-            try:
-                manifest = model.model_validate_json(path.read_text(encoding="utf-8-sig"))
-            except (OSError, ValueError):
-                continue
-            namespace, name = asset_key(manifest.metadata.identity)
-            installed.add(f"{namespace}/{name}")
-            if any(item.role == "manager" for item in declarations_of(manifest)):
-                if found.get(f"{namespace}/{name}") != "on":
-                    found[f"{namespace}/{name}"] = state
+    for manifest, state in _installed_files(layout)[1]:
+        namespace, name = asset_key(manifest.metadata.identity)
+        installed.add(f"{namespace}/{name}")
+        if any(item.role == "manager" for item in declarations_of(manifest)):
+            if found.get(f"{namespace}/{name}") != "on":
+                found[f"{namespace}/{name}"] = state
     for key in installed - found.keys():
         found[key] = "outdated"
     return found

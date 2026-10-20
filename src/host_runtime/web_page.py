@@ -114,6 +114,15 @@ body {
 .mem-notice.good { color: var(--good); }
 .mem-notice.bad { color: var(--bad); }
 .mem-pane { max-width: 980px; }
+/* A pane's loading or error line (B3): visible at once, never empty counts. */
+.mem-status { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px;
+  min-height: 44px; margin: 0 0 12px; padding: 8px 12px; border: 1px dashed var(--line);
+  border-radius: 6px; color: var(--dim); font-size: 14px; }
+.mem-status.error { border-style: solid; border-color: var(--bad); color: var(--bad); }
+.mem-spinner { flex: none; width: 14px; height: 14px; border: 2px solid var(--line);
+  border-top-color: var(--accent); border-radius: 50%; animation: mem-spin 1s linear infinite; }
+@keyframes mem-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .mem-spinner { animation: none; } }
 .mem-intro { color: var(--dim); font-size: 13px; margin: 0 0 12px; }
 .mem-item { margin: 0 0 10px; padding: 10px 14px; border: 1px solid var(--line);
   border-radius: 10px; background: var(--panel); overflow-wrap: anywhere; }
@@ -1952,6 +1961,8 @@ tr:last-child td { border-bottom: none; }
       <p class="mem-intro">自動讀到的值和存著的不一樣時，不會直接覆蓋，而是等你決定。
         平常在對話中就能處理；
         這裡列出所有空間還沒決定的項目。</p>
+      <div class="mem-status" id="mem-status-confirm" role="status" aria-live="polite"
+           hidden></div>
       <div class="mem-toolbar" id="mem-health-bar">
         <button id="mem-health-run" class="mem-btn" type="button">立即檢查</button>
         <span id="mem-health-last" class="mem-meta"></span>
@@ -1962,10 +1973,14 @@ tr:last-child td { border-bottom: none; }
     <div class="mem-pane" id="mem-pane-preferences" role="tabpanel" aria-label="偏好" hidden>
       <p class="mem-intro">你說過、按了「存成偏好」的規則。使用該 Skill 時 Agent 會照做、不再詢問。
         修改時會檢查是否和同一個 Skill 的其他偏好矛盾。</p>
+      <div class="mem-status" id="mem-status-preferences" role="status" aria-live="polite"
+           hidden></div>
       <div id="mem-preferences-list"></div>
     </div>
     <div class="mem-pane" id="mem-pane-notes" role="tabpanel" aria-label="筆記" hidden>
       <p class="mem-intro">對話中存下的筆記。Agent 只在需要時查詢，不會自動帶進每一輪。</p>
+      <div class="mem-status" id="mem-status-notes" role="status" aria-live="polite"
+           hidden></div>
       <div class="mem-toolbar">
         <input id="mem-note-search" class="mem-field" type="search" placeholder="搜尋筆記"
                aria-label="搜尋筆記">
@@ -1982,6 +1997,8 @@ tr:last-child td { border-bottom: none; }
     <div class="mem-pane" id="mem-pane-data" role="tabpanel" aria-label="資料" hidden>
       <p class="mem-intro">每個記憶空間一列：由哪個 Skill 管理、存了多少、最後何時更新。
         管理的 Skill 已不在這台電腦時標示「無主」，資料保留，由你決定是否刪除（在「紀錄」）。</p>
+      <div class="mem-status" id="mem-status-data" role="status" aria-live="polite"
+           hidden></div>
       <div id="mem-spaces-list"></div>
       <div id="mem-people" class="mem-sub" hidden>
         <h3>聯絡人</h3>
@@ -2001,11 +2018,15 @@ tr:last-child td { border-bottom: none; }
     <div class="mem-pane" id="mem-pane-sync" role="tabpanel" aria-label="同步進度" hidden>
       <p class="mem-intro">每個來源整理到哪裡。「重新整理」讓下次從頭整理（例如簽名檔擷取有誤時）；
         按錯了可以「復原上次重設」。</p>
+      <div class="mem-status" id="mem-status-sync" role="status" aria-live="polite"
+           hidden></div>
       <div id="mem-sync-list"></div>
     </div>
     <div class="mem-pane" id="mem-pane-records" role="tabpanel" aria-label="紀錄" hidden>
       <p class="mem-intro">紀錄是發生過的事（對話、執行），會依期限清掉；
         記憶是整理出來、之後會再用的東西。</p>
+      <div class="mem-status" id="mem-status-records" role="status" aria-live="polite"
+           hidden></div>
       <div id="mem-records"></div>
     </div>
   </section>
@@ -8742,6 +8763,9 @@ el("task-refresh").addEventListener("click", () => loadTasks().catch((failure) =
 // route that acts only for the signed-in actor. Nothing here is a model tool.
 const MEM_PANES = ["confirm", "preferences", "notes", "data", "sync", "records"];
 let memData = null, memPane = "confirm";
+// The sections an action on a preference, a note or a sync state changes.
+const MEM_PREFERENCES = ["preferences", "spaces"], MEM_NOTES = ["notes", "spaces"];
+const MEM_SYNC = ["sync", "spaces"];
 const memSelected = new Set();
 
 function memEl(tagName, className, ...children) {
@@ -8766,7 +8790,7 @@ function memButton(label, onClick, kind, aria) {
   return button;
 }
 
-function memNotice(reply, undo) {
+function memNotice(reply, undo, sections) {
   const box = el("mem-notice"); box.replaceChildren();
   if (!reply) { box.className = "mem-notice"; return; }
   box.className = "mem-notice " + (reply.ok ? "good" : "bad");
@@ -8775,22 +8799,23 @@ function memNotice(reply, undo) {
     box.append(memButton("復原", async () => {
       memNotice(null);
       const back = await undo();
-      if (back && back.ok) await loadMemory().catch(() => {});
+      if (back && back.ok) await loadMemory(sections);
       memNotice(back, null);
     }, "link"));
   }
 }
 
-// One action: the page drawn again from the server, then the answer in the
-// notice (with 復原 when `undoFor` gives one).
-async function memAct(path, body, undoFor) {
+// One action: the sections it changed (`sections`; all when not given) drawn
+// again from the server, then the answer in the notice (with 復原 when
+// `undoFor` gives one).
+async function memAct(path, body, undoFor, sections) {
   memNotice(null);
   let reply;
   try { reply = await call(path, body); }
   catch (failure) { reply = {ok: false, message: failure.message}; }
   const undo = reply.ok && undoFor ? undoFor(reply) : null;
-  if (reply.ok) await loadMemory().catch(() => {});
-  memNotice(reply, undo);
+  if (reply.ok) await loadMemory(sections);
+  memNotice(reply, undo, sections);
   return reply;
 }
 
@@ -8825,8 +8850,66 @@ async function memOpenConversation(sessionId, messageId) {
   }
 }
 
-async function loadMemory() {
-  memData = await call("/api/memory/overview");
+// Which pane shows each overview section (B3): a pane says 「載入中…」 while
+// its sections load, its count shows 「…」, a failure shows inline with 重試,
+// and an action reloads only the sections it changed.
+const MEM_SECTION_PANES = {proposals: "confirm", health: "confirm", preferences: "preferences",
+  notes: "notes", spaces: "data", sync: "sync", records: "records", deletions: "records"};
+
+function memPanesOf(sections) {
+  if (!sections) return MEM_PANES.slice();
+  const panes = new Set(sections.map((name) => MEM_SECTION_PANES[name]).filter(Boolean));
+  if (sections.includes("spaces")) panes.add("records");  // 紀錄 lists the spaces too
+  return [...panes];
+}
+
+function memCount(pane, value) {
+  const button = document.querySelector('#mem-tabs [data-mem="' + pane + '"]');
+  if (button) button.querySelector(".mem-count").textContent = value;
+}
+
+function memStatus(pane, state, message, retry) {
+  const box = el("mem-status-" + pane); box.replaceChildren();
+  box.className = "mem-status" + (state ? " " + state : "");
+  box.hidden = !state;
+  const panel = el("mem-pane-" + pane);
+  if (state === "loading") panel.setAttribute("aria-busy", "true");
+  else panel.removeAttribute("aria-busy");
+  if (state === "loading") box.append(memEl("span", "mem-spinner"), memEl("span", "", message));
+  if (state === "error") {
+    box.append(memEl("span", "", message));
+    if (retry) box.append(memButton("重試", retry, "link"));
+  }
+}
+
+// The overview, or only `sections` of it once the page has the rest. Never
+// throws: a failure is shown on the panes it concerns.
+async function loadMemory(sections) {
+  const only = Array.isArray(sections) && sections.length && memData ? sections : null;
+  const panes = memPanesOf(only);
+  const first = !memData;
+  for (const pane of panes) {
+    memStatus(pane, "loading", first ? "載入中…" : "更新中…");
+    // Until the first answer the counts are unknown (「…」), never empty;
+    // afterwards the shown ones stay while a pane updates.
+    if (first) memCount(pane, "…");
+  }
+  if (first) el("mem-health-run").disabled = true;
+  let reply;
+  try {
+    reply = await call("/api/memory/overview"
+      + (only ? "?only=" + encodeURIComponent(only.join(",")) : ""));
+    if (!reply || !reply.ok) throw new Error((reply && (reply.message || reply.code)) || "");
+  } catch (failure) {
+    for (const pane of panes) {
+      memStatus(pane, "error", "載入失敗" + (failure.message ? "：" + failure.message : "")
+        + "。", () => loadMemory(sections));
+      if (!memData) memCount(pane, "—");
+    }
+    return;
+  }
+  memData = only ? {...memData, ...reply} : reply;
+  for (const pane of panes) memStatus(pane, "");
   memRender();
 }
 
@@ -8848,6 +8931,9 @@ function memRender() {
   };
   for (const button of document.querySelectorAll("#mem-tabs [data-mem]")) {
     const count = counts[button.dataset.mem];
+    const status = el("mem-status-" + button.dataset.mem);
+    // A pane still loading (or failed) keeps its 「…」 or 「—」.
+    if (status && !status.hidden) continue;
     button.querySelector(".mem-count").textContent = count == null ? "" : String(count);
   }
   memShow(memPane);
@@ -8898,7 +8984,7 @@ function memHealthDecide(item, choice) {
       }
       return () => call("/api/memory/proposals/undo",
         {space: "contacts/org", change_id: undo.change_id});
-    });
+    }, ["health", "proposals", "preferences", "spaces"]);
 }
 
 // Go to one item on the memory page (a finding's link, an answer's 「為什麼」).
@@ -8969,7 +9055,7 @@ function memDecide(item, action) {
   return memAct("/api/memory/proposals/decide",
     {space: item.space, proposal_id: item.proposal_id, action},
     (reply) => reply.undo ? () => call("/api/memory/proposals/undo",
-      {space: item.space, change_id: reply.change_id}) : null);
+      {space: item.space, change_id: reply.change_id}) : null, ["proposals", "spaces"]);
 }
 
 // 偏好
@@ -9030,8 +9116,8 @@ function memPreference(item) {
         memButton("取消", () => { conflict.hidden = true; })));
       return;
     }
-    if (reply.ok) await loadMemory().catch(() => {});
-    memNotice(reply, reply.ok ? memUndo("preference")(reply) : null);
+    if (reply.ok) await loadMemory(MEM_PREFERENCES);
+    memNotice(reply, reply.ok ? memUndo("preference")(reply) : null, MEM_PREFERENCES);
   };
   editor.append(area, conflict, memEl("div", "mem-actions",
     memButton("儲存", () => save("", []), "primary"),
@@ -9044,7 +9130,7 @@ function memPreference(item) {
       if (!confirm("刪除這條偏好？之後使用『" + item.scope_label
         + "』時不再套用。可以復原。")) return;
       return memAct("/api/memory/delete", {kind: "preference", id: item.preference_id},
-        memUndo("preference"));
+        memUndo("preference"), MEM_PREFERENCES);
     }, "danger")), editor);
   return card;
 }
@@ -9095,7 +9181,7 @@ function memNote(note, labels) {
     memEl("label", "mem-check", pick, note.created_at_local),
     memEl("span", "mem-meta", note.note_id)));
   const edit = (body) => memAct("/api/memory/notes/edit", {id: note.note_id, ...body},
-    memUndo("note"));
+    memUndo("note"), MEM_NOTES);
   const chips = memEl("div", "mem-chips");
   for (const tag of note.tags) {
     chips.append(memEl("span", "mem-chip", "#" + tag, memButton("×",
@@ -9165,7 +9251,8 @@ function memNote(note, labels) {
     memButton("修改", editor), memButton("加標籤", tagger), memButton("連結聯絡人", linker),
     memButton("刪除", () => {
       if (!confirm("刪除這則筆記？可以復原。")) return;
-      return memAct("/api/memory/delete", {kind: "note", id: note.note_id}, memUndo("note"));
+      return memAct("/api/memory/delete", {kind: "note", id: note.note_id}, memUndo("note"),
+        MEM_NOTES);
     }, "danger")), extra);
   return card;
 }
@@ -9309,10 +9396,11 @@ function memRenderSync() {
       if (!confirm("重新整理「" + item.key + "」（" + item.source + "）？"
         + "下次整理會從頭讀範圍內的來源。"
         + "按錯了可以「復原上次重設」。")) return;
-      return memAct("/api/memory/sync/reset", body);
+      return memAct("/api/memory/sync/reset", body, null, MEM_SYNC);
     }, "danger");
     reset.disabled = !item.can_reset;
-    const restore = memButton("復原上次重設", () => memAct("/api/memory/sync/restore", body));
+    const restore = memButton("復原上次重設",
+      () => memAct("/api/memory/sync/restore", body, null, MEM_SYNC));
     restore.disabled = !item.can_restore;
     card.append(pairs, memEl("div", "mem-actions", reset, restore));
     list.append(card);
@@ -9348,7 +9436,7 @@ function memHealthSettings() {
       + "矛盾的偏好會用內部模型檢查（同一個 Skill 有兩條以上才問）。"),
     pairs, memEl("div", "mem-actions", memButton("儲存", () => memAct(
       "/api/memory/health/settings", {enabled: on.checked, freshness_months: Number(months.value),
-        unused_days: Number(days.value)}), "primary")));
+        unused_days: Number(days.value)}, null, ["health"]), "primary")));
   return section;
 }
 
@@ -9372,7 +9460,7 @@ function memRenderRecords() {
         // The Reviews page's own setting and route (experience review).
         const reply = await call("/api/experience/settings", {retention_days: Number(days.value)});
         const saved = days.value;
-        if (reply.ok !== false) await loadMemory().catch(() => {});
+        if (reply.ok !== false) await loadMemory(["records"]);
         memNotice(reply.ok === false ? {ok: false, message: "天數要在 1 到 3650 之間。"}
           : {ok: true, message: "已儲存：經驗回顧案例保留 " + saved + " 天。"});
       }))));
@@ -9437,11 +9525,10 @@ function memRenderRecords() {
 for (const button of document.querySelectorAll("#mem-tabs [data-mem]")) {
   button.addEventListener("click", () => { memNotice(null); memShow(button.dataset.mem); });
 }
-el("mem-refresh").addEventListener("click", () => loadMemory().catch((failure) =>
-  memNotice({ok: false, message: failure.message})));
+el("mem-refresh").addEventListener("click", () => loadMemory());
 el("mem-health-run").addEventListener("click", () => {
   el("mem-health-last").textContent = "檢查中…";
-  memAct("/api/memory/health/run", {});
+  memAct("/api/memory/health/run", {}, null, ["health"]);
 });
 for (const id of ["mem-note-search", "mem-note-tag", "mem-note-entity"]) {
   el(id).addEventListener(id === "mem-note-search" ? "input" : "change", () => {

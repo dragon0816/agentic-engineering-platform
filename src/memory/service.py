@@ -44,6 +44,7 @@ import json
 import re
 import secrets
 import sqlite3
+import threading
 from collections.abc import Callable, Iterator, Mapping, Sequence
 from contextlib import closing, contextmanager
 from dataclasses import dataclass
@@ -70,6 +71,34 @@ from memory.registry import AssetKey, MemoryRegistry, asset_key, asset_label
 MEMORY_FOLDER = "memory"
 DB_FILE = "memory.sqlite"
 SCHEMA_VERSION = "1"
+#: Databases this process already set up (schema, registered spaces, owner),
+#: by path: the file's identity after the setup, the registry and the actor.
+#: A database whose file changed since (any write, a replaced file) or that
+#: is opened with another registry is set up again (live check B3,
+#: 2026-10-21: the memory page set up the same database dozens of times per
+#: call; `docs/DECISIONS.md`).
+_READY: dict[str, tuple[tuple[int, int, int] | None, MemoryRegistry, str]] = {}
+_READY_LOCK = threading.Lock()
+_MAX_READY = 2000
+#: The connection a thread shares for one database inside `session()`.
+_SESSIONS = threading.local()
+
+
+def _file_stamp(path: Path) -> tuple[int, int, int] | None:
+    try:
+        info = path.stat()
+    except OSError:
+        return None
+    return (info.st_ino, info.st_size, info.st_mtime_ns)
+
+
+def _sessions() -> dict[str, list[Any]]:
+    held: dict[str, list[Any]] | None = getattr(_SESSIONS, "held", None)
+    if held is None:
+        held = {}
+        _SESSIONS.held = held
+    return held
+
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS meta (
@@ -1268,33 +1297,87 @@ class MemorySpace:
 class MemoryService:
     """One actor's memory database, with the spaces the registry knows."""
 
-    def __init__(self, path: Path, registry: MemoryRegistry) -> None:
+    def __init__(self, path: Path, registry: MemoryRegistry, *, actor: str = "") -> None:
         self.path = path
         self.registry = registry
+        key = str(path)
+        with _READY_LOCK:
+            held = _READY.get(key)
+        if (
+            held is not None
+            and held[1] is registry
+            and held[2] == actor
+            and held[0] is not None
+            and held[0] == _file_stamp(path)
+        ):
+            # Set up by this process and unchanged since: nothing to do.
+            return
         path.parent.mkdir(parents=True, exist_ok=True)
+        self._setup(actor)
+        with _READY_LOCK:
+            if len(_READY) >= _MAX_READY:
+                _READY.clear()
+            _READY[key] = (_file_stamp(path), registry, actor)
+
+    def _setup(self, actor: str) -> None:
+        """The schema, the registry's spaces and the owner of the database."""
         with self.connect() as con:
             con.executescript(_SCHEMA)
             con.execute(
                 "INSERT OR IGNORE INTO meta (key, value) VALUES ('schema_version', ?)",
                 (SCHEMA_VERSION,),
             )
-        for manager, declaration, rules in registry.managed():
+        for manager, declaration, rules in self.registry.managed():
             if rules is not None:
                 self.register_space(declaration, manager=manager, rules=rules)
+        if actor:
+            # Whose database this is (M5): the nightly health check goes
+            # through every database on the Host and needs the actor's
+            # conversations.
+            with self.connect() as con:
+                con.execute("INSERT OR IGNORE INTO meta (key, value) VALUES ('actor', ?)", (actor,))
 
     @classmethod
     def for_actor(cls, workspace_root: Path, actor: str, registry: MemoryRegistry) -> MemoryService:
-        service = cls(memory_path(workspace_root, actor), registry)
-        # Whose database this is (M5): the nightly health check goes through
-        # every database on the Host and needs the actor's conversations.
-        with service.connect() as con:
-            con.execute("INSERT OR IGNORE INTO meta (key, value) VALUES ('actor', ?)", (actor,))
-        return service
+        return cls(memory_path(workspace_root, actor), registry, actor=actor)
+
+    @contextmanager
+    def session(self) -> Iterator[None]:
+        """Inside the block, everything this thread does on this database
+        (through any `MemoryService` of the same path) shares one connection,
+        one transaction at a time: one Agent Web request opens the actor's
+        database once (B3). A nested `connect()` while that connection is in a
+        transaction opens its own connection, as outside a session."""
+        held = _sessions()
+        key = str(self.path)
+        if key in held:
+            yield
+            return
+        con = sqlite3.connect(self.path, timeout=10)
+        con.row_factory = sqlite3.Row
+        held[key] = [con, 0]
+        try:
+            yield
+        finally:
+            del held[key]
+            con.close()
 
     @contextmanager
     def connect(self, *, immediate: bool = False) -> Iterator[sqlite3.Connection]:
         """One transaction: committed on success, rolled back on any error.
         `immediate` takes the write lock at once."""
+        shared = _sessions().get(str(self.path))
+        if shared is not None and shared[1] == 0 and not shared[0].in_transaction:
+            con = shared[0]
+            shared[1] += 1
+            try:
+                with con:
+                    if immediate:
+                        con.execute("BEGIN IMMEDIATE")
+                    yield con
+            finally:
+                shared[1] -= 1
+            return
         with closing(sqlite3.connect(self.path, timeout=10)) as con:
             con.row_factory = sqlite3.Row
             with con:

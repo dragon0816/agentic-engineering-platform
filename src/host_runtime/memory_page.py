@@ -18,7 +18,7 @@ conflict check, and a note edit, tag and link from the page.
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from datetime import datetime
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -30,11 +30,13 @@ from capabilities.business_cards.contracts import (
     PersonRef,
 )
 from capabilities.business_cards.space import CONTACTS_ORG
-from capabilities.business_cards.store import CardStore, CardStoreError
+from capabilities.business_cards.store import DB_FILE as CARDS_DB
+from capabilities.business_cards.store import CardStore, CardStoreError, store_dir
 from host_runtime.conversations import MAX_STORED_MESSAGES
+from host_runtime.memory_spaces import one_scan
 from memory import personal
-from memory.notes import ENTITY_REF, Note, NoteError, clean_tags
-from memory.preferences import Preference, PreferenceConflict
+from memory.notes import ENTITY_REF, Note, NoteError, Notes, clean_tags
+from memory.preferences import Preference, PreferenceConflict, Preferences
 from memory.service import MemoryService, MemoryServiceError, new_change_id
 from telemetry.store import RETENTION_BYTES, RETENTION_DAYS
 
@@ -68,6 +70,17 @@ TABLE_LABELS = {
     personal.PREFERENCES_SPACE: {"items": "偏好"},
     personal.NOTES_SPACE: {"items": "筆記"},
 }
+#: The overview's sections, in the order they are built; `only=` names some.
+SECTIONS = (
+    "proposals",
+    "preferences",
+    "notes",
+    "spaces",
+    "sync",
+    "records",
+    "deletions",
+    "health",
+)
 #: A proposal decision on the page: keep the stored value, or take the new one.
 DECISIONS = ("keep", "accept")
 #: What a refusal means, for the person.
@@ -178,17 +191,22 @@ class MemoryPage:
         service: MemoryService = self.web.personal_memory.service(self.actor)
         return service
 
-    def cards(self) -> CardStore:
-        from host_runtime.memory_spaces import registry
-
+    def cards(self, service: MemoryService | None = None) -> CardStore:
+        """The actor's `contacts/org` store, on `service` when given."""
         layout = self.web.runtime.layout
-        return CardStore.for_actor(layout.workspace_root, self.actor, registry(layout))
+        if service is None:
+            from host_runtime.memory_spaces import registry
+
+            return CardStore.for_actor(layout.workspace_root, self.actor, registry(layout))
+        return CardStore(service, legacy=store_dir(layout.workspace_root, self.actor) / CARDS_DB)
 
     # -- GET --------------------------------------------------------------
 
     def get(self, path: str, query: Mapping[str, str]) -> dict[str, Any]:
         handlers: dict[str, Callable[[], dict[str, Any]]] = {
-            "/api/memory/overview": self.overview,
+            "/api/memory/overview": lambda: self.overview(
+                [item for item in query.get("only", "").split(",") if item]
+            ),
             "/api/memory/people": lambda: self.people(
                 query.get("q", ""), query.get("status", "any")
             ),
@@ -205,38 +223,64 @@ class MemoryPage:
         if handler is None:
             return _refused("memory_route_unknown")
         try:
-            return handler()
+            # One look at the installed manifests and one connection to the
+            # actor's database for the whole request (B3).
+            with one_scan(self.web.runtime.layout), self.service().session():
+                return handler()
         except CardStoreError as error:
             return _refused(error.code)
         except MemoryServiceError as error:
             return _refused(error.code)
 
-    def overview(self) -> dict[str, Any]:
-        """Everything the page shows, in one answer."""
+    def overview(self, only: Sequence[str] = ()) -> dict[str, Any]:
+        """Everything the page shows, in one answer; with `only`, just those
+        sections (the page refreshes what an action changed; B3)."""
+        wanted = {item for item in only if item in SECTIONS} or set(SECTIONS)
         service = self.service()
         # Opening the stores creates their tables, so the counts are complete.
-        preferences = self.web.personal_memory.preferences(self.actor).listed()
-        notes = self.web.personal_memory.notes(self.actor).listed()
-        try:
-            cards: CardStore | None = self.cards()
-        except CardStoreError:
-            cards = None
-        return {
-            "ok": True,
-            "actor": self.actor,
-            "proposals": self._proposals(service, cards),
-            "preferences": self._preferences(preferences),
-            "notes": self._notes(notes, cards),
-            "spaces": self._spaces(service, cards, len(preferences), len(notes)),
-            "sync": self._sync(service),
-            "records": self._records(),
-            "deletions": [
+        # Every store shares the one service (and, inside `get`, its one
+        # connection).
+        preferences: list[Preference] = []
+        notes: list[Note] = []
+        if wanted & {"preferences", "spaces"}:
+            preferences = Preferences(service).listed()
+        if wanted & {"notes", "spaces"}:
+            notes = Notes(service).listed()
+        cards: CardStore | None = None
+        if wanted & {"proposals", "notes", "spaces"}:
+            try:
+                cards = self.cards(service)
+            except CardStoreError:
+                cards = None
+        conversations: list[Any] = []
+        if wanted & {"preferences", "records"}:
+            conversations = self._conversations()
+        builders: dict[str, Callable[[], Any]] = {
+            "proposals": lambda: self._proposals(service, cards),
+            "preferences": lambda: self._preferences(preferences, conversations),
+            "notes": lambda: self._notes(notes, cards),
+            "spaces": lambda: self._spaces(service, cards, len(preferences), len(notes)),
+            "sync": lambda: self._sync(service),
+            "records": lambda: self._records(conversations),
+            "deletions": lambda: [
                 {**item, "at_local": local_time(item["at"]), "label": self._space_label(item)}
                 for item in service.deletions()
             ],
             # M5: the health check's open findings, its settings and last run.
-            "health": self.web.memory_health.overview(self.actor),
+            "health": lambda: self.web.memory_health.overview(self.actor),
         }
+        answer: dict[str, Any] = {"ok": True, "actor": self.actor}
+        for name in SECTIONS:
+            if name in wanted:
+                answer[name] = builders[name]()
+        return answer
+
+    def _conversations(self) -> list[Any]:
+        """The actor's latest 100 conversations, read once per overview."""
+        try:
+            return list(self.web.runtime.state.conversations(self.actor, limit=100))
+        except (AttributeError, ValueError):
+            return []
 
     @staticmethod
     def _space_label(item: Mapping[str, Any]) -> str:
@@ -284,14 +328,11 @@ class MemoryPage:
             found.append(item)
         return found
 
-    def _used(self) -> dict[str, list[dict[str, str]]]:
+    @staticmethod
+    def _used(records: Sequence[Any]) -> dict[str, list[dict[str, str]]]:
         """Which answers carried each preference (`preferences_used`), the
         newest first, from the actor's latest 100 conversations."""
         used: dict[str, list[dict[str, str]]] = {}
-        try:
-            records = self.web.runtime.state.conversations(self.actor, limit=100)
-        except (AttributeError, ValueError):
-            return used
         for record in records:
             for message in record.messages:
                 for preference_id in getattr(message, "preferences_used", ()) or ():
@@ -307,8 +348,10 @@ class MemoryPage:
             items.sort(key=lambda entry: entry["at"], reverse=True)
         return used
 
-    def _preferences(self, listed: list[Preference]) -> list[dict[str, Any]]:
-        used = self._used()
+    def _preferences(
+        self, listed: list[Preference], conversations: Sequence[Any]
+    ) -> list[dict[str, Any]]:
+        used = self._used(conversations)
         groups: dict[str, dict[str, Any]] = {}
         for item in listed:
             group = groups.setdefault(
@@ -446,16 +489,12 @@ class MemoryPage:
             )
         return found
 
-    def _records(self) -> dict[str, Any]:
+    def _records(self, conversations: Sequence[Any]) -> dict[str, Any]:
         from host_runtime.experience import load_settings
 
-        try:
-            conversations = len(self.web.runtime.state.conversations(self.actor, limit=100))
-        except (AttributeError, ValueError):
-            conversations = 0
         return {
             "conversations": {
-                "count": conversations,
+                "count": len(conversations),
                 "max_messages": MAX_STORED_MESSAGES,
                 "retention_label": "保留到你刪除",
             },
@@ -565,7 +604,8 @@ class MemoryPage:
         if handler is None:
             return _refused("memory_route_unknown")
         try:
-            return handler(body)
+            with one_scan(self.web.runtime.layout), self.service().session():
+                return handler(body)
         except PreferenceConflict as conflict:
             return {
                 **_refused("preference_conflict"),
