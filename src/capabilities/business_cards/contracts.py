@@ -102,6 +102,9 @@ KIND_LABELS: dict[str, str] = {
 #: Shown instead of a change id unless the person asks to undo a specific change.
 UNDO_HINT = "可以說『復原』撤回。"
 EvidenceKind = Literal["signature", "email_content", "title_inference", "user"]
+KeptReason = Literal[
+    "user_set", "older_evidence", "uncertain", "email_differs", "less_complete", "lower_trust"
+]
 
 _SHORT = 200
 _LONG = 600
@@ -201,7 +204,9 @@ class KeptField(_Labelled):
     # another email; the stored one is kept and the new one is a proposal.
     # less_complete: the reading is a strict prefix or substring of the
     # stored value ("研展處" for "研展處 I"), so the stored one stays.
-    reason: Literal["user_set", "older_evidence", "uncertain", "email_differs", "less_complete"]
+    # lower_trust: a source of a lower trust class than the stored value's
+    # (C4C after a card, for the company); kept, and proposed.
+    reason: KeptReason
 
 
 class DroppedField(_Labelled):

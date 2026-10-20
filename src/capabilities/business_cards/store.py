@@ -1,19 +1,27 @@
-"""The person's contact store: one SQLite file per actor on this Host.
+"""The person's contact store: the `contacts/org` memory space of one actor
+(docs/phases/BUSINESS_CARDS.md §2; docs/phases/ACCUMULATED_MEMORY.md M1).
 
-Every scan or signature sighting is an observation that is never rewritten.
-`people` holds the current view, with field-level provenance in
-`field_sources`: a value the person set (`user`) is never replaced by an
-automatic source, which leaves a proposal instead; an automatic value is
-replaced only by evidence that is not older. Every change is a `history` row
-in a change group, and `undo` replays a group backwards as a new change.
-Nothing here reaches the network.
+Every scan or signature sighting is an observation that is never rewritten,
+and so is every statement the person makes (an edit, a confirmation, a
+departure, a reporting line): a `user` observation. `people` holds the
+current view, with field-level provenance: a value the person set (`user`)
+is never replaced by an automatic source, which leaves a proposal instead;
+an automatic value is replaced only by evidence that is not older (the
+space's merge rules, `space.MERGE_RULES`). Every change is a `history` row in
+a change group, and `undo` replays a group backwards as a new change.
+
+The observations, provenance, history, undo, proposals and external ids are
+the Memory Service's generic facilities (`memory.service`); this store keeps
+what is particular to business cards: who a reading is, the honorific and
+unified-business-number handling, company spellings, reporting lines and
+the chart's data. The space lives in `<workspace>/memory/<actor-key>/
+memory.sqlite`; an actor's earlier `business-cards/<actor-key>/cards.db` is
+moved there once (`migration`). Nothing here reaches the network.
 """
 
 from __future__ import annotations
 
-import hashlib
 import json
-import re
 import secrets
 import sqlite3
 from collections.abc import Callable, Iterator, Mapping, Sequence
@@ -24,7 +32,7 @@ from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
-from capabilities.business_cards import names, reading
+from capabilities.business_cards import migration, names, reading
 from capabilities.business_cards.contracts import (
     FIELD_LABELS,
     FIELDS,
@@ -40,6 +48,7 @@ from capabilities.business_cards.contracts import (
     HistoryResult,
     ImportResult,
     KeptField,
+    KeptReason,
     MatchSummary,
     ObservationView,
     PersonRef,
@@ -49,8 +58,29 @@ from capabilities.business_cards.contracts import (
     Status,
     ToConfirm,
 )
+from capabilities.business_cards.manifest import CARDS_SKILL
+from capabilities.business_cards.space import (
+    CANDIDATES,
+    CONTACTS_ORG,
+    LINES,
+    MERGE_RULES,
+    PEOPLE,
+    REPORTING_LINE,
+    SPACE_SCHEMA,
+    default_registry,
+)
+from common.assets import AssetIdentity
+from memory.registry import MemoryRegistry, asset_label
+from memory.service import (
+    MemoryService,
+    MemoryServiceError,
+    SpaceTx,
+    actor_key,
+    new_change_id,
+)
 
 STORE_FOLDER = "business-cards"
+#: The store before accumulated memory M1; moved into the Memory Service once.
 DB_FILE = "cards.db"
 #: Fields that say where a person sits; a change there leads the reply.
 ORG_FIELDS: tuple[FieldName, ...] = (
@@ -68,114 +98,6 @@ _LABELS = FIELD_LABELS
 #: Times are shown to the person in this zone.
 LOCAL_ZONE = ZoneInfo("Asia/Taipei")
 
-_SCHEMA = """
-CREATE TABLE IF NOT EXISTS people (
-    person_id TEXT PRIMARY KEY,
-    name TEXT NOT NULL DEFAULT '',
-    romanised_name TEXT NOT NULL DEFAULT '',
-    company TEXT NOT NULL DEFAULT '',
-    company_tax_id TEXT NOT NULL DEFAULT '',
-    business_group TEXT NOT NULL DEFAULT '',
-    division TEXT NOT NULL DEFAULT '',
-    department TEXT NOT NULL DEFAULT '',
-    title TEXT NOT NULL DEFAULT '',
-    honorific TEXT NOT NULL DEFAULT '',
-    phone TEXT NOT NULL DEFAULT '',
-    ext TEXT NOT NULL DEFAULT '',
-    mobile TEXT NOT NULL DEFAULT '',
-    fax TEXT NOT NULL DEFAULT '',
-    email TEXT NOT NULL DEFAULT '',
-    email_key TEXT NOT NULL DEFAULT '',
-    address TEXT NOT NULL DEFAULT '',
-    website TEXT NOT NULL DEFAULT '',
-    notes TEXT NOT NULL DEFAULT '',
-    status TEXT NOT NULL DEFAULT 'active',
-    left_at TEXT NOT NULL DEFAULT '',
-    status_set_by TEXT NOT NULL DEFAULT '',
-    status_reason TEXT NOT NULL DEFAULT '',
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
-);
-CREATE INDEX IF NOT EXISTS people_email ON people(email_key);
-CREATE TABLE IF NOT EXISTS field_sources (
-    person_id TEXT NOT NULL,
-    field TEXT NOT NULL,
-    source TEXT NOT NULL,
-    source_date TEXT NOT NULL,
-    observation_id INTEGER,
-    PRIMARY KEY (person_id, field)
-);
-CREATE TABLE IF NOT EXISTS observations (
-    observation_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    person_id TEXT,
-    source TEXT NOT NULL,
-    source_date TEXT NOT NULL,
-    source_ref TEXT NOT NULL DEFAULT '',
-    fields_json TEXT NOT NULL,
-    uncertain_json TEXT NOT NULL DEFAULT '[]',
-    recorded_at TEXT NOT NULL,
-    recorded_by TEXT NOT NULL
-);
-CREATE INDEX IF NOT EXISTS observations_ref ON observations(source_ref);
-CREATE TABLE IF NOT EXISTS reporting_lines (
-    line_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    person_id TEXT NOT NULL,
-    manager_id TEXT NOT NULL,
-    evidence_kind TEXT NOT NULL,
-    evidence_ref TEXT NOT NULL DEFAULT '',
-    confidence REAL NOT NULL,
-    inferred INTEGER NOT NULL,
-    created_at TEXT NOT NULL,
-    created_by TEXT NOT NULL,
-    removed_at TEXT,
-    removed_by TEXT,
-    removed_reason TEXT
-);
-CREATE TABLE IF NOT EXISTS history (
-    history_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    change_id TEXT NOT NULL,
-    at TEXT NOT NULL,
-    actor TEXT NOT NULL,
-    person_id TEXT NOT NULL,
-    kind TEXT NOT NULL,
-    field TEXT NOT NULL DEFAULT '',
-    old TEXT NOT NULL DEFAULT '',
-    new TEXT NOT NULL DEFAULT '',
-    reason TEXT NOT NULL DEFAULT '',
-    source TEXT NOT NULL DEFAULT '',
-    extra_json TEXT NOT NULL DEFAULT '{}'
-);
-CREATE INDEX IF NOT EXISTS history_change ON history(change_id);
-CREATE INDEX IF NOT EXISTS history_person ON history(person_id);
-CREATE TABLE IF NOT EXISTS undone (
-    change_id TEXT PRIMARY KEY,
-    undone_by TEXT NOT NULL
-);
-CREATE TABLE IF NOT EXISTS proposals (
-    proposal_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    person_id TEXT NOT NULL,
-    field TEXT NOT NULL,
-    current TEXT NOT NULL,
-    proposed TEXT NOT NULL,
-    source TEXT NOT NULL,
-    observation_id INTEGER,
-    created_at TEXT NOT NULL,
-    state TEXT NOT NULL DEFAULT 'open'
-);
-CREATE TABLE IF NOT EXISTS candidates (
-    session_key TEXT NOT NULL,
-    candidate_id TEXT NOT NULL,
-    fields_json TEXT NOT NULL,
-    uncertain_json TEXT NOT NULL DEFAULT '[]',
-    message_id TEXT NOT NULL,
-    message_date TEXT NOT NULL,
-    created_at TEXT NOT NULL,
-    expires_at TEXT NOT NULL,
-    stored_person_id TEXT NOT NULL DEFAULT '',
-    PRIMARY KEY (session_key, candidate_id)
-);
-"""
-
 
 class CardStoreError(Exception):
     """A refusal a person can act on, by code; never carries the data."""
@@ -185,14 +107,9 @@ class CardStoreError(Exception):
         super().__init__(code)
 
 
-def actor_key(actor: str) -> str:
-    """A file-safe folder name for one actor; a hash keeps two actors apart
-    even when their safe names coincide."""
-    safe = re.sub(r"[^A-Za-z0-9_.-]", "_", actor)[:40] or "actor"
-    return f"{safe}-{hashlib.sha256(actor.encode('utf-8')).hexdigest()[:8]}"
-
-
 def store_dir(workspace_root: Path, actor: str) -> Path:
+    """The actor's business-cards folder: the charts drawn, and the
+    `cards.db` of before M1 with its backup."""
     return workspace_root / STORE_FOLDER / actor_key(actor)
 
 
@@ -202,10 +119,6 @@ def _clock() -> datetime:
 
 def _now() -> str:
     return _clock().isoformat(timespec="seconds")
-
-
-def _new_change() -> str:
-    return f"c-{datetime.now(UTC):%Y%m%d%H%M%S}-{secrets.token_hex(3)}"
 
 
 def _same(a: str, b: str) -> bool:
@@ -225,6 +138,10 @@ def _same_value(name: str, a: str, b: str) -> bool:
         key = names.phone_key(a)
         return bool(key) and key == names.phone_key(b)
     return False
+
+
+def _same_as(name: str) -> Callable[[str, str], bool]:
+    return lambda a, b: _same_value(name, a, b)
 
 
 #: Fields where a shorter reading can be a real change (副總經理 → 總經理 is a
@@ -290,39 +207,87 @@ class _Merge:
     kept: list[KeptField] = field(default_factory=list)
 
 
-class CardStore:
-    """One actor's store. Opened per call; SQLite serialises writers."""
+#: Why a merge rule kept a stored value, as a result names it.
+_KEPT_REASONS: dict[str, KeptReason] = {
+    "user_set": "user_set",
+    "older_evidence": "older_evidence",
+    "uncertain": "uncertain",
+    "lower_trust": "lower_trust",
+}
 
-    def __init__(self, path: Path) -> None:
-        self.path = path
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with self._connect() as con:
-            con.executescript(_SCHEMA)
-            # A store from before a field existed gains its column.
-            have = {row["name"] for row in con.execute("PRAGMA table_info(people)")}
-            for name in FIELDS:
-                if name not in have:
-                    con.execute(f"ALTER TABLE people ADD COLUMN {name} TEXT NOT NULL DEFAULT ''")
+
+class CardStore:
+    """One actor's contacts: the `contacts/org` space opened for the
+    business-cards Skill. Opened per call; SQLite serialises writers."""
+
+    def __init__(
+        self,
+        memory: MemoryService,
+        *,
+        legacy: Path | None = None,
+        asset: AssetIdentity = CARDS_SKILL,
+    ) -> None:
+        self.memory = memory
+        self.path = memory.path
+        self.legacy = legacy
+        try:
+            self._space = memory.space(CONTACTS_ORG, asset=asset)
+            with self._space.transaction() as tx:
+                if self._space.role == "manager":
+                    con = tx.con
+                    con.executescript(SPACE_SCHEMA)
+                    # A store from before a field existed gains its column.
+                    have = {row["name"] for row in con.execute(f"PRAGMA table_info({PEOPLE})")}
+                    for name in FIELDS:
+                        if name not in have:
+                            con.execute(
+                                f"ALTER TABLE {PEOPLE} ADD COLUMN {name} TEXT NOT NULL DEFAULT ''"
+                            )
+            if legacy is not None and self._space.role == "manager":
+                migration.migrate(
+                    memory, legacy, rules=MERGE_RULES, manager=asset_label(self._space.asset)
+                )
+        except migration.MigrationError as error:
+            raise CardStoreError(error.code) from error
+        except MemoryServiceError as error:
+            raise CardStoreError(error.code) from error
 
     @classmethod
-    def for_actor(cls, workspace_root: Path, actor: str) -> CardStore:
-        return cls(store_dir(workspace_root, actor) / DB_FILE)
+    def for_actor(
+        cls, workspace_root: Path, actor: str, registry: MemoryRegistry | None = None
+    ) -> CardStore:
+        """The actor's store in the Memory Service; `registry` is the Host's
+        (the shipped business-cards declaration when none is given)."""
+        memory = MemoryService.for_actor(
+            workspace_root, actor, registry if registry is not None else default_registry()
+        )
+        return cls(memory, legacy=store_dir(workspace_root, actor) / DB_FILE)
 
     @contextmanager
-    def _connect(self) -> Iterator[sqlite3.Connection]:
-        with closing(sqlite3.connect(self.path, timeout=10)) as con:
-            con.row_factory = sqlite3.Row
-            with con:
-                yield con
+    def _connect(self) -> Iterator[SpaceTx]:
+        """One transaction on the space; a Memory Service refusal becomes the
+        store's own, by code."""
+        try:
+            with self._space.transaction() as tx:
+                yield tx
+        except MemoryServiceError as error:
+            raise CardStoreError(error.code) from error
 
     # -- lookups -------------------------------------------------------
 
     @staticmethod
-    def _people(con: sqlite3.Connection) -> list[sqlite3.Row]:
-        return list(con.execute("SELECT * FROM people ORDER BY created_at, person_id"))
+    def _people(tx: SpaceTx) -> list[sqlite3.Row]:
+        return list(tx.con.execute(f"SELECT * FROM {PEOPLE} ORDER BY created_at, person_id"))
+
+    @staticmethod
+    def _person(tx: SpaceTx, person_id: str) -> sqlite3.Row | None:
+        found: sqlite3.Row | None = tx.con.execute(
+            f"SELECT * FROM {PEOPLE} WHERE person_id = ?", (person_id,)
+        ).fetchone()
+        return found
 
     def _match(
-        self, con: sqlite3.Connection, values: Mapping[str, str], source_ref: str = ""
+        self, tx: SpaceTx, values: Mapping[str, str], source_ref: str = ""
     ) -> tuple[sqlite3.Row | None, str | None]:
         """Who a reading is (DECISIONS 2026-10-20 "How a card finds its person"):
 
@@ -335,16 +300,13 @@ class CardStore:
            namesakes at one company are told apart only that way.
         """
         if source_ref.startswith("sha256:"):
-            row = con.execute(
-                "SELECT p.* FROM observations o JOIN people p ON p.person_id = o.person_id "
-                "WHERE o.source_ref = ? ORDER BY o.observation_id DESC LIMIT 1",
-                (source_ref,),
-            ).fetchone()
-            if row is not None:
-                return row, "image"
+            for seen in tx.observations(source_ref=source_ref, newest_first=True):
+                row = None if seen.entity_id is None else self._person(tx, seen.entity_id)
+                if row is not None:
+                    return row, "image"
         email = names.email_key(values.get("email", ""))
         if email:
-            row = con.execute("SELECT * FROM people WHERE email_key = ?", (email,)).fetchone()
+            row = tx.con.execute(f"SELECT * FROM {PEOPLE} WHERE email_key = ?", (email,)).fetchone()
             if row is not None:
                 return row, "email"
         name, company = values.get("name", ""), values.get("company", "")
@@ -352,7 +314,7 @@ class CardStore:
         if not (name or romanised) or not company:
             return None, None
         found: list[tuple[int, sqlite3.Row, str]] = []
-        for row in self._people(con):
+        for row in self._people(tx):
             if not names.same_company(row["company"], company):
                 continue
             other_email = bool(email and row["email_key"] and row["email_key"] != email)
@@ -373,13 +335,13 @@ class CardStore:
         found.sort(key=lambda item: item[0])
         return found[0][1], found[0][2]
 
-    def _companies(self, con: sqlite3.Connection) -> list[_Company]:
+    def _companies(self, tx: SpaceTx) -> list[_Company]:
         """The stored companies, each spelling joined with the others that are
         the same company: the same name without legal suffixes, or the same
         alias (a romanised short name, or an email or website domain other
         than a public mail service)."""
         spellings: dict[str, _Company] = {}
-        for row in self._people(con):
+        for row in self._people(tx):
             company = row["company"].strip()
             if not company:
                 continue
@@ -405,14 +367,14 @@ class CardStore:
             groups.append(merged)
         return groups
 
-    def _company_group(self, con: sqlite3.Connection, query: str) -> _Company | None:
+    def _company_group(self, tx: SpaceTx, query: str) -> _Company | None:
         """The one stored company a query names, or None (unknown or
         ambiguous): by name without legal suffixes, then alias, then an
         unambiguous part of a name."""
         key = names.company_key(query)
         if not key:
             return None
-        groups = self._companies(con)
+        groups = self._companies(tx)
 
         def by_name(group: _Company) -> bool:
             return any(names.company_key(name) == key for name in group.spellings)
@@ -435,34 +397,30 @@ class CardStore:
     def resolve_company(self, query: str) -> str:
         """The stored company a query names ("WNC", "啟碁" -> 啟碁科技股份有限公司),
         or "" when none or more than one."""
-        with self._connect() as con:
-            group = self._company_group(con, query)
+        with self._connect() as tx:
+            group = self._company_group(tx, query)
             return "" if group is None else group.canonical()
 
-    def _in_company(
-        self, con: sqlite3.Connection, query: str
-    ) -> tuple[Callable[[sqlite3.Row], bool], str]:
+    def _in_company(self, tx: SpaceTx, query: str) -> tuple[Callable[[sqlite3.Row], bool], str]:
         """Who belongs to the company a query names, and its canonical name;
         an unresolved query falls back to comparing names."""
-        group = self._company_group(con, query)
+        group = self._company_group(tx, query)
         if group is None:
             return (lambda row: names.same_company(row["company"], query)), ""
         members = set(group.spellings)
         return (lambda row: row["company"].strip() in members), group.canonical()
 
-    def _resolve(self, con: sqlite3.Connection, ref: PersonRef) -> sqlite3.Row:
+    def _resolve(self, tx: SpaceTx, ref: PersonRef) -> sqlite3.Row:
         if ref.person_id:
-            row = con.execute(
-                "SELECT * FROM people WHERE person_id = ?", (ref.person_id,)
-            ).fetchone()
+            row = self._person(tx, ref.person_id)
             if row is None:
                 raise CardStoreError("person_unknown")
-            return row  # type: ignore[no-any-return]
+            return row
         if not ref.name.strip():
             raise CardStoreError("person_unspecified")
         hits = [
             row
-            for row in self._people(con)
+            for row in self._people(tx)
             if (
                 names.same_name(row["name"], ref.name)
                 or names.same_name(row["romanised_name"], ref.name)
@@ -475,57 +433,45 @@ class CardStore:
             raise CardStoreError("person_ambiguous")
         return hits[0]
 
-    def _sources(self, con: sqlite3.Connection, person_id: str) -> dict[str, sqlite3.Row]:
-        return {
-            row["field"]: row
-            for row in con.execute("SELECT * FROM field_sources WHERE person_id = ?", (person_id,))
-        }
-
-    def _manager(self, con: sqlite3.Connection, person_id: str) -> sqlite3.Row | None:
-        found: sqlite3.Row | None = con.execute(
-            "SELECT l.*, p.name AS manager_name FROM reporting_lines l "
-            "JOIN people p ON p.person_id = l.manager_id "
+    @staticmethod
+    def _manager(tx: SpaceTx, person_id: str) -> sqlite3.Row | None:
+        found: sqlite3.Row | None = tx.con.execute(
+            f"SELECT l.*, p.name AS manager_name FROM {LINES} l "
+            f"JOIN {PEOPLE} p ON p.person_id = l.manager_id "
             "WHERE l.person_id = ? AND l.removed_at IS NULL ORDER BY l.line_id DESC LIMIT 1",
             (person_id,),
         ).fetchone()
         return found
 
-    def _needs(self, con: sqlite3.Connection, person_id: str) -> tuple[FieldName, ...]:
+    def _needs(self, tx: SpaceTx, person_id: str) -> tuple[FieldName, ...]:
         """Fields any reading of this person flagged as uncertain that hold a
         value the person has not confirmed or set (source `user`), and fields
         with an open proposal (a reading that differs from the person's own
         value, or another email), whatever their source."""
         flagged: set[str] = set()
-        for item in con.execute(
-            "SELECT uncertain_json FROM observations WHERE person_id = ?", (person_id,)
-        ):
-            flagged.update(json.loads(item["uncertain_json"] or "[]"))
-        sources = self._sources(con, person_id)
-        proposed = {
-            item["field"]
-            for item in con.execute(
-                "SELECT field FROM proposals WHERE person_id = ? AND state = 'open'", (person_id,)
-            )
-        }
+        for item in tx.observations(person_id):
+            flagged.update(item.uncertain)
+        sources = tx.provenance(person_id)
+        proposed = {item["field"] for item in tx.proposals(person_id, limit=10_000)}
         return tuple(
             name
             for name in FIELDS
             if name in proposed
-            or (name in flagged and name in sources and sources[name]["source"] != "user")
+            or (name in flagged and name in sources and sources[name]["source_kind"] != "user")
         )
 
     def _open_proposals(
-        self, con: sqlite3.Connection, person_id: str | None, limit: int = 200
+        self, tx: SpaceTx, person_id: str | None, limit: int = 200
     ) -> list[ProposalView]:
         """Open proposals, oldest first: one person's, or everyone's. `current`
         is the value stored now."""
-        rows = con.execute(
-            "SELECT pr.proposal_id, pr.person_id, pr.field, pr.current, pr.proposed, "
-            "pr.source, pr.observation_id, pr.created_at, p.* "
-            "FROM proposals pr JOIN people p ON p.person_id = pr.person_id "
-            "WHERE pr.state = 'open' AND (? IS NULL OR pr.person_id = ?) "
+        rows = tx.con.execute(
+            "SELECT pr.proposal_id, pr.entity_id AS person_id, pr.field, pr.current, "
+            "pr.proposed, pr.source_kind AS source, pr.observation_id, pr.created_at, p.* "
+            f"FROM proposals pr JOIN {PEOPLE} p ON p.person_id = pr.entity_id "
+            "WHERE pr.space = ? AND pr.state = 'open' AND (? IS NULL OR pr.entity_id = ?) "
             "ORDER BY pr.proposal_id LIMIT ?",
-            (person_id, person_id, limit),
+            (CONTACTS_ORG, person_id, person_id, limit),
         ).fetchall()
         found: list[ProposalView] = []
         for row in rows:
@@ -550,26 +496,32 @@ class CardStore:
     def proposals(self, ref: PersonRef | None, *, limit: int) -> tuple[list[ProposalView], str]:
         """Open proposals (one person's, or everyone's) and a sentence for the
         reply."""
-        with self._connect() as con:
-            person_id = None if ref is None else self._resolve(con, ref)["person_id"]
-            found = self._open_proposals(con, person_id, limit)
+        with self._connect() as tx:
+            person_id = None if ref is None else self._resolve(tx, ref)["person_id"]
+            found = self._open_proposals(tx, person_id, limit)
             return found, proposals_note(found)
 
-    def _view(self, con: sqlite3.Connection, row: sqlite3.Row) -> PersonView:
-        person_id = row["person_id"]
-        sources = sorted(
-            {
-                item["source"]
-                for item in con.execute(
-                    "SELECT DISTINCT source FROM observations WHERE person_id = ?", (person_id,)
-                )
-            }
-            | {item["source"] for item in self._sources(con, person_id).values()}
+    @staticmethod
+    def _sighting_sources(tx: SpaceTx, person_id: str) -> list[sqlite3.Row]:
+        """Source kind and date of each sighting of a person (not the
+        person's own statements, which provenance names) and of each current
+        value's provenance."""
+        return list(
+            tx.con.execute(
+                "SELECT source_kind, source_date FROM observations WHERE space = ? "
+                "AND entity_id = ? AND claim = 'fields' AND trust != 'user_stated' "
+                "AND retracted_by = '' "
+                "UNION ALL SELECT source_kind, source_date FROM field_sources "
+                "WHERE space = ? AND entity_id = ?",
+                (CONTACTS_ORG, person_id, CONTACTS_ORG, person_id),
+            )
         )
-        line = self._manager(con, person_id)
-        proposals = con.execute(
-            "SELECT COUNT(*) FROM proposals WHERE person_id = ? AND state = 'open'", (person_id,)
-        ).fetchone()[0]
+
+    def _view(self, tx: SpaceTx, row: sqlite3.Row) -> PersonView:
+        person_id = row["person_id"]
+        sources = sorted({item["source_kind"] for item in self._sighting_sources(tx, person_id)})
+        line = self._manager(tx, person_id)
+        proposals = len(tx.proposals(person_id, limit=10_000))
         return PersonView(
             **{name: row[name] for name in FIELDS},
             person_id=person_id,
@@ -581,7 +533,7 @@ class CardStore:
             manager="" if line is None else line["manager_name"],
             manager_line="" if line is None else ("inferred" if line["inferred"] else "evidenced"),
             open_proposals=int(proposals),
-            needs_confirmation=self._needs(con, person_id),
+            needs_confirmation=self._needs(tx, person_id),
             updated_at=row["updated_at"],
             status_label=STATUS_LABELS.get(row["status"], row["status"]),
             updated_at_local=local_time(row["updated_at"]),
@@ -589,69 +541,42 @@ class CardStore:
 
     # -- history -------------------------------------------------------
 
-    @staticmethod
-    def _record(
-        con: sqlite3.Connection,
-        change_id: str,
-        actor: str,
-        person_id: str,
-        kind: str,
-        *,
-        field_name: str = "",
-        old: str = "",
-        new: str = "",
-        reason: str = "",
-        source: str = "",
-        extra: Mapping[str, Any] | None = None,
-    ) -> None:
-        con.execute(
-            "INSERT INTO history (change_id, at, actor, person_id, kind, field, old, new, "
-            "reason, source, extra_json) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-            (
-                change_id,
-                _now(),
-                actor,
-                person_id,
-                kind,
-                field_name,
-                old,
-                new,
-                reason,
-                source,
-                json.dumps(dict(extra or {}), ensure_ascii=False),
-            ),
-        )
-
     def _set_field(
         self,
-        con: sqlite3.Connection,
+        tx: SpaceTx,
         change_id: str,
         actor: str,
         person: sqlite3.Row,
         name: FieldName,
         value: str,
         *,
-        source: Source,
+        source: str,
         source_date: str,
         observation_id: int | None,
         reason: str,
         previous: sqlite3.Row | None,
         closed_proposals: Sequence[Mapping[str, Any]] = (),
+        origin: str | None = None,
     ) -> FieldChange:
         person_id = person["person_id"]
         old = person[name]
-        con.execute(f"UPDATE people SET {name} = ? WHERE person_id = ?", (value, person_id))
+        tx.con.execute(f"UPDATE {PEOPLE} SET {name} = ? WHERE person_id = ?", (value, person_id))
         if name == "email":
-            con.execute(
-                "UPDATE people SET email_key = ? WHERE person_id = ?",
+            tx.con.execute(
+                f"UPDATE {PEOPLE} SET email_key = ? WHERE person_id = ?",
                 (names.email_key(value), person_id),
             )
-        con.execute(
-            "INSERT OR REPLACE INTO field_sources VALUES (?,?,?,?,?)",
-            (person_id, name, source, source_date, observation_id),
+        tx.set_provenance(
+            person_id,
+            name,
+            source_kind=source,
+            source_date=source_date,
+            observation_id=observation_id,
+            set_by=actor,
+            reason=reason,
+            origin=origin,
         )
-        self._record(
-            con,
+        tx.record(
             change_id,
             actor,
             person_id,
@@ -662,9 +587,7 @@ class CardStore:
             reason=reason,
             source=source,
             extra={
-                "prev_source": None if previous is None else previous["source"],
-                "prev_date": None if previous is None else previous["source_date"],
-                "prev_observation": None if previous is None else previous["observation_id"],
+                **tx.provenance_extra(previous),
                 "closed_proposals": [dict(item) for item in closed_proposals],
             },
         )
@@ -683,9 +606,9 @@ class CardStore:
         actor: str,
     ) -> AddResult:
         """One scan or sighting: kept as an observation, merged into the person."""
-        with self._connect() as con:
+        with self._connect() as tx:
             return self._add(
-                con,
+                tx,
                 values,
                 source=source,
                 source_date=source_date,
@@ -696,7 +619,7 @@ class CardStore:
 
     def _add(
         self,
-        con: sqlite3.Connection,
+        tx: SpaceTx,
         values: Mapping[str, str],
         *,
         source: Source,
@@ -712,7 +635,7 @@ class CardStore:
             clean["name"] = clean["romanised_name"] or clean["email"]
         unsure = tuple(dict.fromkeys(uncertain))
         when = source_date.isoformat()
-        row, matched_by = self._match(con, clean, source_ref)
+        row, matched_by = self._match(tx, clean, source_ref)
         differs: EmailDiffers | None = None
         stored_email = "" if row is None else row["email"]
         if (
@@ -726,38 +649,28 @@ class CardStore:
             # the person set or confirmed it, it needs confirmation (kept with
             # this observation's uncertain fields).
             differs = EmailDiffers(stored=stored_email, read=clean["email"])
-            email_source = self._sources(con, row["person_id"]).get("email")
-            if email_source is None or email_source["source"] != "user":
+            email_source = tx.provenance(row["person_id"]).get("email")
+            if email_source is None or email_source["source_kind"] != "user":
                 unsure = tuple(dict.fromkeys((*unsure, "email")))
-        cursor = con.execute(
-            "INSERT INTO observations (person_id, source, source_date, source_ref, fields_json, "
-            "uncertain_json, recorded_at, recorded_by) VALUES (?,?,?,?,?,?,?,?)",
-            (
-                None if row is None else row["person_id"],
-                source,
-                when,
-                source_ref,
-                json.dumps(clean, ensure_ascii=False),
-                json.dumps(list(unsure)),
-                _now(),
-                actor,
-            ),
+        change_id = new_change_id()
+        person_id = f"p-{secrets.token_hex(5)}" if row is None else row["person_id"]
+        observation_id = tx.add_observation(
+            person_id,
+            clean,
+            source_kind=source,
+            source_date=when,
+            source_ref=source_ref,
+            uncertain=unsure,
+            recorded_by=actor,
+            change_id=change_id,
         )
-        observation_id = int(cursor.lastrowid or 0)
-        change_id = _new_change()
         if row is None:
-            person_id = f"p-{secrets.token_hex(5)}"
             stamp = _now()
-            con.execute(
-                "INSERT INTO people (person_id, created_at, updated_at) VALUES (?,?,?)",
+            tx.con.execute(
+                f"INSERT INTO {PEOPLE} (person_id, created_at, updated_at) VALUES (?,?,?)",
                 (person_id, stamp, stamp),
             )
-            con.execute(
-                "UPDATE observations SET person_id = ? WHERE observation_id = ?",
-                (person_id, observation_id),
-            )
-            self._record(
-                con,
+            tx.record(
                 change_id,
                 actor,
                 person_id,
@@ -768,19 +681,23 @@ class CardStore:
             )
             for name in FIELDS:
                 if clean[name]:
-                    con.execute(
-                        f"UPDATE people SET {name} = ? WHERE person_id = ?",
+                    tx.con.execute(
+                        f"UPDATE {PEOPLE} SET {name} = ? WHERE person_id = ?",
                         (clean[name], person_id),
                     )
-                    con.execute(
-                        "INSERT OR REPLACE INTO field_sources VALUES (?,?,?,?,?)",
-                        (person_id, name, source, when, observation_id),
+                    tx.set_provenance(
+                        person_id,
+                        name,
+                        source_kind=source,
+                        source_date=when,
+                        observation_id=observation_id,
+                        set_by=actor,
                     )
-            con.execute(
-                "UPDATE people SET email_key = ? WHERE person_id = ?",
+            tx.con.execute(
+                f"UPDATE {PEOPLE} SET email_key = ? WHERE person_id = ?",
                 (names.email_key(clean["email"]), person_id),
             )
-            needs = self._needs(con, person_id)
+            needs = self._needs(tx, person_id)
             return AddResult(
                 person_id=person_id,
                 name=clean["name"],
@@ -792,12 +709,12 @@ class CardStore:
                 ),
                 uncertain=unsure,
                 needs_confirmation=needs,
-                to_confirm=self._to_confirm(con, person_id, unsure),
+                to_confirm=self._to_confirm(tx, person_id, unsure),
                 observation_id=observation_id,
                 change_id=change_id,
             )
         merge = self._merge(
-            con,
+            tx,
             change_id,
             actor,
             row,
@@ -808,19 +725,18 @@ class CardStore:
             uncertain=unsure,
             email_differs=differs is not None,
         )
-        moved = self._tidy_notes(con, change_id, actor, row["person_id"])
+        moved = self._tidy_notes(tx, change_id, actor, person_id)
         if moved is not None:
             merge.changes.append(moved)
         if merge.changes:
-            con.execute(
-                "UPDATE people SET updated_at = ? WHERE person_id = ?", (_now(), row["person_id"])
+            tx.con.execute(
+                f"UPDATE {PEOPLE} SET updated_at = ? WHERE person_id = ?", (_now(), person_id)
             )
-        fresh = con.execute(
-            "SELECT * FROM people WHERE person_id = ?", (row["person_id"],)
-        ).fetchone()
-        needs = self._needs(con, row["person_id"])
+        fresh = self._person(tx, person_id)
+        assert fresh is not None
+        needs = self._needs(tx, person_id)
         return AddResult(
-            person_id=row["person_id"],
+            person_id=person_id,
             name=fresh["name"],
             company=fresh["company"],
             outcome="updated" if merge.changes else "unchanged",
@@ -828,7 +744,7 @@ class CardStore:
             matched_by=matched_by,
             match=_match_summary(
                 matched_by or "name_company",
-                row["person_id"],
+                person_id,
                 fresh["name"],
                 fresh["company"],
                 changed=[c.field for c in merge.changes if not _same(c.old, c.new)],
@@ -839,9 +755,9 @@ class CardStore:
             kept=tuple(merge.kept),
             uncertain=unsure,
             needs_confirmation=needs,
-            to_confirm=self._to_confirm(con, row["person_id"], unsure),
+            to_confirm=self._to_confirm(tx, person_id, unsure),
             email_differs=differs,
-            proposals=tuple(self._open_proposals(con, row["person_id"])),
+            proposals=tuple(self._open_proposals(tx, person_id)),
             status=fresh["status"],
             summary=_summary(row, merge),
             observation_id=observation_id,
@@ -853,7 +769,7 @@ class CardStore:
 
     def _merge(
         self,
-        con: sqlite3.Connection,
+        tx: SpaceTx,
         change_id: str,
         actor: str,
         row: sqlite3.Row,
@@ -865,9 +781,14 @@ class CardStore:
         uncertain: Sequence[FieldName],
         email_differs: bool = False,
     ) -> _Merge:
+        """A reading merged into the person: first what is particular to
+        business cards (another spelling of the same company or name, a
+        differing email, appended notes, a partial reading), then the space's
+        merge rule (`SpaceTx.decide`): the person's own value is kept and the
+        reading proposed; an uncertain or older reading is kept out."""
         merge = _Merge()
         person_id = row["person_id"]
-        sources = self._sources(con, person_id)
+        sources = tx.provenance(person_id)
         offered = dict(clean)
         # A romanised name in the name slot (an English signature) is the
         # person's romanised name, not a new name.
@@ -887,7 +808,7 @@ class CardStore:
             if name == "name" and names.same_name(current, new):
                 continue
             previous = sources.get(name)
-            user_set = previous is not None and previous["source"] == "user"
+            user_set = previous is not None and previous["source_kind"] == "user"
             if name == "email" and email_differs and not user_set:
                 # Never replaced automatically: a proposal, and the email needs
                 # confirmation (a user-set email takes the user_set path below).
@@ -895,7 +816,7 @@ class CardStore:
                     KeptField(field=name, current=current, offered=new, reason="email_differs")
                 )
                 self._propose(
-                    con, change_id, actor, person_id, name, current, new, source, observation_id
+                    tx, change_id, actor, person_id, name, current, new, source, observation_id
                 )
                 continue
             if name == "notes" and current:
@@ -910,31 +831,48 @@ class CardStore:
                     KeptField(field=name, current=current, offered=new, reason="less_complete")
                 )
                 continue
-            elif user_set:
-                # The person's own (set or confirmed) value, also one they
-                # emptied: never replaced by a scan, sure or not; the reading
-                # is a proposal and the field needs confirmation (third live
-                # test 2026-10-20).
-                merge.kept.append(
-                    KeptField(field=name, current=current, offered=new, reason="user_set")
+            else:
+                # The space's rule: the person's own (set or confirmed) value,
+                # also one they emptied, is never replaced by a scan, sure or
+                # not; the reading is a proposal and the field needs
+                # confirmation (third live test 2026-10-20). An uncertain or
+                # older reading never replaces a value.
+                verdict = tx.decide(
+                    name,
+                    current=current,
+                    current_source=previous,
+                    offered=new,
+                    offered_kind=source,
+                    offered_date=when,
+                    uncertain=name in uncertain,
+                    same=_same_as(name),
                 )
-                self._propose(
-                    con, change_id, actor, person_id, name, current, new, source, observation_id
-                )
-                continue
-            elif current and name in uncertain:
-                merge.kept.append(
-                    KeptField(field=name, current=current, offered=new, reason="uncertain")
-                )
-                continue
-            elif current and previous is not None and when < previous["source_date"]:
-                merge.kept.append(
-                    KeptField(field=name, current=current, offered=new, reason="older_evidence")
-                )
-                continue
+                if verdict.action != "take":
+                    reason = _KEPT_REASONS.get(verdict.reason, "uncertain")
+                    merge.kept.append(
+                        KeptField(
+                            field=name,
+                            current=current,
+                            offered=new,
+                            reason=reason,
+                        )
+                    )
+                    if verdict.action == "propose":
+                        self._propose(
+                            tx,
+                            change_id,
+                            actor,
+                            person_id,
+                            name,
+                            current,
+                            new,
+                            source,
+                            observation_id,
+                        )
+                    continue
             merge.changes.append(
                 self._set_field(
-                    con,
+                    tx,
                     change_id,
                     actor,
                     row,
@@ -950,33 +888,35 @@ class CardStore:
         return merge
 
     def _tidy_notes(
-        self, con: sqlite3.Connection, change_id: str, actor: str, person_id: str
+        self, tx: SpaceTx, change_id: str, actor: str, person_id: str
     ) -> FieldChange | None:
         """A 「統一編號：…」 mention in the notes of the number now stored in
         `company_tax_id` (a note from before the field existed) is taken out
         of the notes, keeping the notes' source; recorded in history."""
-        row = con.execute("SELECT * FROM people WHERE person_id = ?", (person_id,)).fetchone()
+        row = self._person(tx, person_id)
+        assert row is not None
         tidied = reading.without_tax_id(row["notes"], row["company_tax_id"])
         if tidied == row["notes"]:
             return None
-        previous = self._sources(con, person_id).get("notes")
+        previous = tx.provenance(person_id).get("notes")
         return self._set_field(
-            con,
+            tx,
             change_id,
             actor,
             row,
             "notes",
             tidied,
-            source=previous["source"] if previous is not None else "card",
+            source=previous["source_kind"] if previous is not None else "card",
             source_date=previous["source_date"] if previous is not None else _now()[:10],
             observation_id=previous["observation_id"] if previous is not None else None,
             reason="統一編號 moved to company_tax_id",
             previous=previous,
+            origin=previous["origin"] or None if previous is not None else None,
         )
 
     def _propose(
         self,
-        con: sqlite3.Connection,
+        tx: SpaceTx,
         change_id: str,
         actor: str,
         person_id: str,
@@ -988,28 +928,16 @@ class CardStore:
     ) -> None:
         """An offered value that was not taken, kept as an open proposal; the
         same value already open is not proposed again."""
-        for item in con.execute(
-            "SELECT proposed FROM proposals WHERE person_id = ? AND field = ? AND state = 'open'",
-            (person_id, name),
-        ):
-            if _same_value(name, item["proposed"], new):
-                return
-        con.execute(
-            "INSERT INTO proposals (person_id, field, current, proposed, source, "
-            "observation_id, created_at) VALUES (?,?,?,?,?,?,?)",
-            (person_id, name, current, new, source, observation_id, _now()),
-        )
-        self._record(
-            con,
+        tx.propose(
             change_id,
             actor,
             person_id,
-            "proposal",
-            field_name=name,
-            old=current,
-            new=new,
-            source=source,
-            reason="the stored value is kept; the new one is a proposal",
+            name,
+            current,
+            new,
+            source_kind=source,
+            observation_id=observation_id,
+            same=_same_as(name),
         )
 
     # -- the person's own edits ----------------------------------------
@@ -1030,39 +958,58 @@ class CardStore:
         right as stored, the fields they say are wrong (emptied, and kept
         empty) and the fields whose open proposal they take ("用新的").
         Re-stating the stored value confirms it and rejects the field's open
-        proposals; the proposed value accepts them. `outcome`, when given,
-        is filled with what happened to the proposals."""
+        proposals; the proposed value accepts them. What the person said is
+        one `user` observation. `outcome`, when given, is filled with what
+        happened to the proposals."""
         result = outcome if outcome is not None else EditOutcome()
-        with self._connect() as con:
-            row = self._resolve(con, ref)
+        with self._connect() as tx:
+            row = self._resolve(tx, ref)
             person_id = row["person_id"]
-            change_id = _new_change()
-            sources = self._sources(con, person_id)
-            needs = set(self._needs(con, person_id))
+            change_id = new_change_id()
+            sources = tx.provenance(person_id)
+            needs = set(self._needs(tx, person_id))
             wanted = {name: str(values.get(name, "")).strip() for name in FIELDS}
             for name in dict.fromkeys(accept):
-                newest = con.execute(
-                    "SELECT proposed FROM proposals WHERE person_id = ? AND field = ? "
-                    "AND state = 'open' ORDER BY proposal_id DESC LIMIT 1",
-                    (person_id, name),
-                ).fetchone()
-                if newest is None:
+                newest = tx.proposals(person_id, field_name=name, newest_first=True, limit=1)
+                if not newest:
                     raise CardStoreError("proposal_unknown")
-                wanted[name] = newest["proposed"]
-            changes: list[FieldChange] = []
-            confirmed: list[FieldName] = []
-            today = date.today().isoformat()
+                wanted[name] = newest[0]["proposed"]
+            # What the person's words do to each field, decided on the store
+            # as it was: a value set (or emptied), or the stored one confirmed.
+            plan: list[tuple[FieldName, bool, str, list[sqlite3.Row]]] = []
             for name in FIELDS:
                 new = wanted[name]
                 emptied = name in clear and not new and bool(row[name])
-                open_rows = list(
-                    con.execute(
-                        "SELECT proposal_id, proposed FROM proposals WHERE person_id = ? "
-                        "AND field = ? AND state = 'open'",
-                        (person_id, name),
-                    )
-                )
+                open_rows = tx.proposals(person_id, field_name=name, limit=10_000)
                 if emptied or (new and not _same_value(name, row[name], new)):
+                    plan.append((name, True, new, open_rows))
+                    continue
+                asked = name in confirm or (bool(new) and name in needs)
+                previous = sources.get(name)
+                if not asked or previous is None:
+                    continue
+                if not open_rows and (not row[name] or previous["source_kind"] == "user"):
+                    if row[name] and name in confirm:
+                        result.already_confirmed.append(name)
+                    continue
+                plan.append((name, False, row[name], open_rows))
+            observation_id = (
+                tx.add_observation(
+                    person_id,
+                    {name: value for name, _, value, _ in plan},
+                    source_kind="user",
+                    source_date=date.today().isoformat(),
+                    recorded_by=actor,
+                    change_id=change_id,
+                )
+                if plan
+                else None
+            )
+            changes: list[FieldChange] = []
+            confirmed: list[FieldName] = []
+            today = date.today().isoformat()
+            for name, setting, new, open_rows in plan:
+                if setting:
                     closed = [
                         {
                             "id": item["proposal_id"],
@@ -1074,7 +1021,7 @@ class CardStore:
                     ]
                     changes.append(
                         self._set_field(
-                            con,
+                            tx,
                             change_id,
                             actor,
                             row,
@@ -1082,44 +1029,35 @@ class CardStore:
                             new,
                             source="user",
                             source_date=today,
-                            observation_id=None,
+                            observation_id=observation_id,
                             reason=reason or "set by the person",
                             previous=sources.get(name),
                             closed_proposals=closed,
                         )
                     )
                     for item in closed:
-                        con.execute(
-                            "UPDATE proposals SET state = ? WHERE proposal_id = ?",
-                            (item["state"], item["id"]),
-                        )
+                        tx.set_proposal_state(int(item["id"]), str(item["state"]), actor=actor)
                     if any(item["state"] == "accepted" for item in closed):
                         result.accepted.append(name)
                     elif closed:
                         result.rejected.append(name)
                     continue
-                asked = name in confirm or (bool(new) and name in needs)
-                previous = sources.get(name)
-                if not asked or previous is None:
-                    continue
-                if not open_rows and (not row[name] or previous["source"] == "user"):
-                    if row[name] and name in confirm:
-                        result.already_confirmed.append(name)
-                    continue
                 # The stored value is right: kept as the person's own, and any
                 # open proposal for the field is rejected.
+                previous = sources[name]
                 rejected = [item["proposal_id"] for item in open_rows]
                 for proposal_id in rejected:
-                    con.execute(
-                        "UPDATE proposals SET state = 'rejected' WHERE proposal_id = ?",
-                        (proposal_id,),
-                    )
-                con.execute(
-                    "INSERT OR REPLACE INTO field_sources VALUES (?,?,?,?,?)",
-                    (person_id, name, "user", today, None),
+                    tx.set_proposal_state(int(proposal_id), "rejected", actor=actor)
+                tx.set_provenance(
+                    person_id,
+                    name,
+                    source_kind="user",
+                    source_date=today,
+                    observation_id=observation_id,
+                    set_by=actor,
+                    reason=reason or "confirmed by the person",
                 )
-                self._record(
-                    con,
+                tx.record(
                     change_id,
                     actor,
                     person_id,
@@ -1129,46 +1067,40 @@ class CardStore:
                     new=row[name],
                     reason=reason or "confirmed by the person",
                     source="user",
-                    extra={
-                        "prev_source": previous["source"],
-                        "prev_date": previous["source_date"],
-                        "prev_observation": previous["observation_id"],
-                        "rejected_proposals": rejected,
-                    },
+                    extra={**tx.provenance_extra(previous), "rejected_proposals": rejected},
                 )
                 confirmed.append(name)
                 if rejected:
                     result.rejected.append(name)
-            moved = self._tidy_notes(con, change_id, actor, row["person_id"])
+            moved = self._tidy_notes(tx, change_id, actor, person_id)
             if moved is not None:
                 changes.append(moved)
             if changes or confirmed:
-                con.execute(
-                    "UPDATE people SET updated_at = ? WHERE person_id = ?",
-                    (_now(), row["person_id"]),
+                tx.con.execute(
+                    f"UPDATE {PEOPLE} SET updated_at = ? WHERE person_id = ?",
+                    (_now(), person_id),
                 )
-            fresh = con.execute(
-                "SELECT * FROM people WHERE person_id = ?", (row["person_id"],)
-            ).fetchone()
+            fresh = self._person(tx, person_id)
+            assert fresh is not None
             return fresh, changes, confirmed, change_id if changes or confirmed else None
 
     def needs_confirmation(self, person_id: str) -> tuple[FieldName, ...]:
-        with self._connect() as con:
-            return self._needs(con, person_id)
+        with self._connect() as tx:
+            return self._needs(tx, person_id)
 
     def to_confirm(self, person_id: str, also: Sequence[FieldName] = ()) -> tuple[ToConfirm, ...]:
-        with self._connect() as con:
-            return self._to_confirm(con, person_id, also)
+        with self._connect() as tx:
+            return self._to_confirm(tx, person_id, also)
 
     def _to_confirm(
-        self, con: sqlite3.Connection, person_id: str, also: Sequence[FieldName] = ()
+        self, tx: SpaceTx, person_id: str, also: Sequence[FieldName] = ()
     ) -> tuple[ToConfirm, ...]:
         """The fields to ask about (still to confirm, and `also`), each with
         the value stored now."""
-        row = con.execute("SELECT * FROM people WHERE person_id = ?", (person_id,)).fetchone()
+        row = self._person(tx, person_id)
         if row is None:
             return ()
-        wanted = set(self._needs(con, person_id)) | set(also)
+        wanted = set(self._needs(tx, person_id)) | set(also)
         return tuple(ToConfirm(field=name, stored=row[name]) for name in FIELDS if name in wanted)
 
     # -- status and reporting lines -----------------------------------
@@ -1184,20 +1116,28 @@ class CardStore:
     ) -> tuple[sqlite3.Row, str, str, str | None]:
         """A departure (or return) the person stated; recorded and undoable.
         `actor` is who said it, as the Host knows them (actor and channel)."""
-        with self._connect() as con:
-            row = self._resolve(con, ref)
+        with self._connect() as tx:
+            row = self._resolve(tx, ref)
             old = row["status"]
             left_at = (effective or date.today()).isoformat() if status == "left" else ""
             if old == status and row["left_at"] == left_at:
                 return row, old, status, None
-            change_id = _new_change()
-            con.execute(
-                "UPDATE people SET status = ?, left_at = ?, status_set_by = ?, status_reason = ?, "
-                "updated_at = ? WHERE person_id = ?",
+            change_id = new_change_id()
+            tx.add_observation(
+                row["person_id"],
+                {"status": status, "left_at": left_at, "reason": reason},
+                source_kind="user",
+                source_date=date.today().isoformat(),
+                recorded_by=actor,
+                change_id=change_id,
+                claim="status",
+            )
+            tx.con.execute(
+                f"UPDATE {PEOPLE} SET status = ?, left_at = ?, status_set_by = ?, "
+                "status_reason = ?, updated_at = ? WHERE person_id = ?",
                 (status, left_at, actor, reason, _now(), row["person_id"]),
             )
-            self._record(
-                con,
+            tx.record(
                 change_id,
                 actor,
                 row["person_id"],
@@ -1214,9 +1154,8 @@ class CardStore:
                     "left_at": left_at,
                 },
             )
-            fresh = con.execute(
-                "SELECT * FROM people WHERE person_id = ?", (row["person_id"],)
-            ).fetchone()
+            fresh = self._person(tx, row["person_id"])
+            assert fresh is not None
             return fresh, old, status, change_id
 
     def set_line(
@@ -1230,20 +1169,35 @@ class CardStore:
         inferred: bool,
         actor: str,
     ) -> tuple[sqlite3.Row, sqlite3.Row, bool, str]:
-        with self._connect() as con:
-            row = self._resolve(con, person)
-            boss = self._resolve(con, manager)
+        """A reporting line with its evidence, kept as an observation. It is
+        solid only on the person's word or explicit evidence (the space's
+        rule); any other line is an inference, drawn dashed."""
+        with self._connect() as tx:
+            row = self._resolve(tx, person)
+            boss = self._resolve(tx, manager)
             if row["person_id"] == boss["person_id"]:
                 raise CardStoreError("line_to_self")
-            if self._reaches(con, boss["person_id"], row["person_id"]):
+            if self._reaches(tx, boss["person_id"], row["person_id"]):
                 raise CardStoreError("line_cycle")
-            change_id = _new_change()
-            current = self._manager(con, row["person_id"])
+            inferred = inferred or not tx.solid(REPORTING_LINE, evidence_kind)
+            change_id = new_change_id()
+            observation_id = tx.add_observation(
+                row["person_id"],
+                {"relation": REPORTING_LINE, "manager_id": boss["person_id"]},
+                source_kind=evidence_kind,
+                source_date=date.today().isoformat(),
+                source_ref=evidence_ref,
+                recorded_by=actor,
+                change_id=change_id,
+                claim="relation",
+            )
+            current = self._manager(tx, row["person_id"])
             if current is not None:
-                self._remove_line(con, change_id, actor, current, "replaced by a new line")
-            cursor = con.execute(
-                "INSERT INTO reporting_lines (person_id, manager_id, evidence_kind, evidence_ref, "
-                "confidence, inferred, created_at, created_by) VALUES (?,?,?,?,?,?,?,?)",
+                self._remove_line(tx, change_id, actor, current, "replaced by a new line")
+            cursor = tx.con.execute(
+                f"INSERT INTO {LINES} (person_id, manager_id, evidence_kind, evidence_ref, "
+                "confidence, inferred, created_at, created_by, observation_id) "
+                "VALUES (?,?,?,?,?,?,?,?,?)",
                 (
                     row["person_id"],
                     boss["person_id"],
@@ -1253,10 +1207,10 @@ class CardStore:
                     1 if inferred else 0,
                     _now(),
                     actor,
+                    observation_id,
                 ),
             )
-            self._record(
-                con,
+            tx.record(
                 change_id,
                 actor,
                 row["person_id"],
@@ -1269,7 +1223,7 @@ class CardStore:
             )
             return row, boss, current is not None, change_id
 
-    def _reaches(self, con: sqlite3.Connection, start: str, target: str) -> bool:
+    def _reaches(self, tx: SpaceTx, start: str, target: str) -> bool:
         """Whether `start`'s chain of managers reaches `target`."""
         seen: set[str] = set()
         node = start
@@ -1277,22 +1231,21 @@ class CardStore:
             seen.add(node)
             if node == target:
                 return True
-            line = self._manager(con, node)
+            line = self._manager(tx, node)
             if line is None:
                 return False
             node = line["manager_id"]
         return False
 
     def _remove_line(
-        self, con: sqlite3.Connection, change_id: str, actor: str, line: sqlite3.Row, reason: str
+        self, tx: SpaceTx, change_id: str, actor: str, line: sqlite3.Row, reason: str
     ) -> None:
-        con.execute(
-            "UPDATE reporting_lines SET removed_at = ?, removed_by = ?, removed_reason = ? "
+        tx.con.execute(
+            f"UPDATE {LINES} SET removed_at = ?, removed_by = ?, removed_reason = ? "
             "WHERE line_id = ?",
             (_now(), actor, reason, line["line_id"]),
         )
-        self._record(
-            con,
+        tx.record(
             change_id,
             actor,
             line["person_id"],
@@ -1307,13 +1260,26 @@ class CardStore:
     def remove_line(
         self, person: PersonRef, *, actor: str, reason: str
     ) -> tuple[sqlite3.Row, sqlite3.Row | None, str | None]:
-        with self._connect() as con:
-            row = self._resolve(con, person)
-            current = self._manager(con, row["person_id"])
+        with self._connect() as tx:
+            row = self._resolve(tx, person)
+            current = self._manager(tx, row["person_id"])
             if current is None:
                 return row, None, None
-            change_id = _new_change()
-            self._remove_line(con, change_id, actor, current, reason or "removed by the person")
+            change_id = new_change_id()
+            tx.add_observation(
+                row["person_id"],
+                {
+                    "relation": REPORTING_LINE,
+                    "manager_id": "",
+                    "removed_line": str(current["line_id"]),
+                },
+                source_kind="user",
+                source_date=date.today().isoformat(),
+                recorded_by=actor,
+                change_id=change_id,
+                claim="relation",
+            )
+            self._remove_line(tx, change_id, actor, current, reason or "removed by the person")
             return row, current, change_id
 
     # -- undo ----------------------------------------------------------
@@ -1321,211 +1287,162 @@ class CardStore:
     def undo(self, change_id: str, *, actor: str) -> tuple[list[HistoryItem], str | None]:
         """Revert one change group, newest row first, as a new change. Refused
         when a later change touched the same values (`undo_conflict`)."""
-        with self._connect() as con:
-            rows = list(
-                con.execute(
-                    "SELECT * FROM history WHERE change_id = ? ORDER BY history_id DESC",
-                    (change_id,),
+
+        def create(tx: SpaceTx, item: sqlite3.Row, extra: dict[str, Any], new: str) -> bool:
+            pid = item["entity_id"]
+            if self._person(tx, pid) is None:
+                return False
+            if tx.changed_since(pid, change_id):
+                raise CardStoreError("undo_conflict")
+            tx.con.execute(f"DELETE FROM {PEOPLE} WHERE person_id = ?", (pid,))
+            tx.forget_entity(pid, new)
+            tx.con.execute(
+                f"UPDATE {LINES} SET removed_at = ?, removed_by = ?, "
+                "removed_reason = 'undo' WHERE (person_id = ? OR manager_id = ?) "
+                "AND removed_at IS NULL",
+                (_now(), actor, pid, pid),
+            )
+            tx.record(new, actor, pid, "delete", old=item["new"], reason=f"undo {change_id}")
+            return True
+
+        def field_row(tx: SpaceTx, item: sqlite3.Row, extra: dict[str, Any], new: str) -> bool:
+            pid, name = item["entity_id"], item["field"]
+            person = self._person(tx, pid)
+            if person is None or not _same(person[name], item["new"]):
+                raise CardStoreError("undo_conflict")
+            tx.con.execute(
+                f"UPDATE {PEOPLE} SET {name} = ?, updated_at = ? WHERE person_id = ?",
+                (item["old"], _now(), pid),
+            )
+            if name == "email":
+                tx.con.execute(
+                    f"UPDATE {PEOPLE} SET email_key = ? WHERE person_id = ?",
+                    (names.email_key(item["old"]), pid),
                 )
+            tx.restore_provenance(pid, name, extra)
+            tx.reopen([entry["id"] for entry in extra.get("closed_proposals") or ()])
+            tx.record(
+                new,
+                actor,
+                pid,
+                "field",
+                field_name=name,
+                old=item["new"],
+                new=item["old"],
+                reason=f"undo {change_id}",
+                source="user",
             )
-            if not rows:
-                raise CardStoreError("change_unknown")
-            if con.execute("SELECT 1 FROM undone WHERE change_id = ?", (change_id,)).fetchone():
-                raise CardStoreError("change_already_undone")
-            new_change = _new_change()
-            reverted: list[HistoryItem] = []
-            for item in rows:
-                extra = json.loads(item["extra_json"] or "{}")
-                person = con.execute(
-                    "SELECT * FROM people WHERE person_id = ?", (item["person_id"],)
-                ).fetchone()
-                kind = item["kind"]
-                if kind == "create":
-                    if person is None:
-                        continue
-                    later = con.execute(
-                        "SELECT 1 FROM history WHERE person_id = ? AND change_id != ? "
-                        "AND change_id NOT IN (SELECT change_id FROM undone) "
-                        "AND change_id NOT IN (SELECT undone_by FROM undone) LIMIT 1",
-                        (item["person_id"], change_id),
-                    ).fetchone()
-                    if later is not None:
-                        raise CardStoreError("undo_conflict")
-                    pid = item["person_id"]
-                    for table in ("people", "field_sources", "observations", "proposals"):
-                        con.execute(f"DELETE FROM {table} WHERE person_id = ?", (pid,))
-                    con.execute(
-                        "UPDATE reporting_lines SET removed_at = ?, removed_by = ?, "
-                        "removed_reason = 'undo' WHERE (person_id = ? OR manager_id = ?) "
-                        "AND removed_at IS NULL",
-                        (_now(), actor, pid, pid),
-                    )
-                    self._record(
-                        con,
-                        new_change,
-                        actor,
-                        pid,
-                        "delete",
-                        old=item["new"],
-                        reason=f"undo {change_id}",
-                    )
-                elif kind == "field":
-                    if person is None:
-                        raise CardStoreError("undo_conflict")
-                    name = item["field"]
-                    if not _same(person[name], item["new"]):
-                        raise CardStoreError("undo_conflict")
-                    con.execute(
-                        f"UPDATE people SET {name} = ?, updated_at = ? WHERE person_id = ?",
-                        (item["old"], _now(), item["person_id"]),
-                    )
-                    if name == "email":
-                        con.execute(
-                            "UPDATE people SET email_key = ? WHERE person_id = ?",
-                            (names.email_key(item["old"]), item["person_id"]),
-                        )
-                    if extra.get("prev_source"):
-                        con.execute(
-                            "INSERT OR REPLACE INTO field_sources VALUES (?,?,?,?,?)",
-                            (
-                                item["person_id"],
-                                name,
-                                extra["prev_source"],
-                                extra.get("prev_date") or "",
-                                extra.get("prev_observation"),
-                            ),
-                        )
-                    else:
-                        con.execute(
-                            "DELETE FROM field_sources WHERE person_id = ? AND field = ?",
-                            (item["person_id"], name),
-                        )
-                    _reopen(con, [entry["id"] for entry in extra.get("closed_proposals") or ()])
-                    self._record(
-                        con,
-                        new_change,
-                        actor,
-                        item["person_id"],
-                        "field",
-                        field_name=name,
-                        old=item["new"],
-                        new=item["old"],
-                        reason=f"undo {change_id}",
-                        source="user",
-                    )
-                elif kind == "status":
-                    if person is None or person["status"] != item["new"]:
-                        raise CardStoreError("undo_conflict")
-                    con.execute(
-                        "UPDATE people SET status = ?, left_at = ?, status_set_by = ?, "
-                        "status_reason = ?, updated_at = ? WHERE person_id = ?",
-                        (
-                            item["old"],
-                            extra.get("prev_left_at") or "",
-                            extra.get("prev_set_by") or "",
-                            extra.get("prev_reason") or "",
-                            _now(),
-                            item["person_id"],
-                        ),
-                    )
-                    self._record(
-                        con,
-                        new_change,
-                        actor,
-                        item["person_id"],
-                        "status",
-                        field_name="status",
-                        old=item["new"],
-                        new=item["old"],
-                        reason=f"undo {change_id}",
-                        source="user",
-                    )
-                elif kind == "line_add":
-                    con.execute(
-                        "UPDATE reporting_lines SET removed_at = ?, removed_by = ?, "
-                        "removed_reason = ? WHERE line_id = ? AND removed_at IS NULL",
-                        (_now(), actor, f"undo {change_id}", extra.get("line_id")),
-                    )
-                    self._record(
-                        con,
-                        new_change,
-                        actor,
-                        item["person_id"],
-                        "line_remove",
-                        field_name="manager",
-                        old=item["new"],
-                        reason=f"undo {change_id}",
-                        source="user",
-                        extra={"line_id": extra.get("line_id")},
-                    )
-                elif kind == "line_remove":
-                    con.execute(
-                        "UPDATE reporting_lines SET removed_at = NULL, removed_by = NULL, "
-                        "removed_reason = NULL WHERE line_id = ?",
-                        (extra.get("line_id"),),
-                    )
-                    self._record(
-                        con,
-                        new_change,
-                        actor,
-                        item["person_id"],
-                        "line_add",
-                        field_name="manager",
-                        new=item["old"],
-                        reason=f"undo {change_id}",
-                        source="user",
-                        extra={"line_id": extra.get("line_id")},
-                    )
-                elif kind == "confirm":
-                    if person is None:
-                        continue
-                    con.execute(
-                        "INSERT OR REPLACE INTO field_sources VALUES (?,?,?,?,?)",
-                        (
-                            item["person_id"],
-                            item["field"],
-                            extra.get("prev_source") or "card",
-                            extra.get("prev_date") or "",
-                            extra.get("prev_observation"),
-                        ),
-                    )
-                    _reopen(con, extra.get("rejected_proposals") or ())
-                    self._record(
-                        con,
-                        new_change,
-                        actor,
-                        item["person_id"],
-                        "unconfirm",
-                        field_name=item["field"],
-                        old=item["new"],
-                        new=item["new"],
-                        reason=f"undo {change_id}",
-                        source=extra.get("prev_source") or "",
-                    )
-                elif kind == "proposal":
-                    con.execute(
-                        "UPDATE proposals SET state = 'dismissed' "
-                        "WHERE person_id = ? AND field = ? AND proposed = ? AND state = 'open'",
-                        (item["person_id"], item["field"], item["new"]),
-                    )
-                else:
-                    continue
-                reverted.append(_history_item(item))
-            con.execute(
-                "INSERT INTO undone (change_id, undone_by) VALUES (?, ?)", (change_id, new_change)
+            return True
+
+        def status(tx: SpaceTx, item: sqlite3.Row, extra: dict[str, Any], new: str) -> bool:
+            pid = item["entity_id"]
+            person = self._person(tx, pid)
+            if person is None or person["status"] != item["new"]:
+                raise CardStoreError("undo_conflict")
+            tx.con.execute(
+                f"UPDATE {PEOPLE} SET status = ?, left_at = ?, status_set_by = ?, "
+                "status_reason = ?, updated_at = ? WHERE person_id = ?",
+                (
+                    item["old"],
+                    extra.get("prev_left_at") or "",
+                    extra.get("prev_set_by") or "",
+                    extra.get("prev_reason") or "",
+                    _now(),
+                    pid,
+                ),
             )
-            return reverted, new_change
+            tx.record(
+                new,
+                actor,
+                pid,
+                "status",
+                field_name="status",
+                old=item["new"],
+                new=item["old"],
+                reason=f"undo {change_id}",
+                source="user",
+            )
+            return True
+
+        def line_add(tx: SpaceTx, item: sqlite3.Row, extra: dict[str, Any], new: str) -> bool:
+            tx.con.execute(
+                f"UPDATE {LINES} SET removed_at = ?, removed_by = ?, "
+                "removed_reason = ? WHERE line_id = ? AND removed_at IS NULL",
+                (_now(), actor, f"undo {change_id}", extra.get("line_id")),
+            )
+            tx.record(
+                new,
+                actor,
+                item["entity_id"],
+                "line_remove",
+                field_name="manager",
+                old=item["new"],
+                reason=f"undo {change_id}",
+                source="user",
+                extra={"line_id": extra.get("line_id")},
+            )
+            return True
+
+        def line_remove(tx: SpaceTx, item: sqlite3.Row, extra: dict[str, Any], new: str) -> bool:
+            tx.con.execute(
+                f"UPDATE {LINES} SET removed_at = NULL, removed_by = NULL, "
+                "removed_reason = NULL WHERE line_id = ?",
+                (extra.get("line_id"),),
+            )
+            tx.record(
+                new,
+                actor,
+                item["entity_id"],
+                "line_add",
+                field_name="manager",
+                new=item["old"],
+                reason=f"undo {change_id}",
+                source="user",
+                extra={"line_id": extra.get("line_id")},
+            )
+            return True
+
+        def confirm(tx: SpaceTx, item: sqlite3.Row, extra: dict[str, Any], new: str) -> bool:
+            pid = item["entity_id"]
+            if self._person(tx, pid) is None:
+                return False
+            tx.restore_provenance(pid, item["field"], extra, fallback_kind="card")
+            tx.reopen(extra.get("rejected_proposals") or ())
+            tx.record(
+                new,
+                actor,
+                pid,
+                "unconfirm",
+                field_name=item["field"],
+                old=item["new"],
+                new=item["new"],
+                reason=f"undo {change_id}",
+                source=extra.get("prev_source") or "",
+            )
+            return True
+
+        handlers = {
+            "create": create,
+            "field": field_row,
+            "status": status,
+            "line_add": line_add,
+            "line_remove": line_remove,
+            "confirm": confirm,
+        }
+        with self._connect() as tx:
+            rows, new_change = tx.undo(change_id, actor=actor, handlers=handlers)
+            return [_history_item(item) for item in rows], new_change
 
     # -- reading -------------------------------------------------------
 
     def find(self, query: str, *, status: str, limit: int) -> tuple[list[PersonView], int]:
         words = names.search_text(query).split()
         romanised = names.name_keys(query)
-        with self._connect() as con:
-            group = self._company_group(con, query)
+        with self._connect() as tx:
+            group = self._company_group(tx, query)
             members = set() if group is None else set(group.spellings)
             hits = []
-            for row in self._people(con):
+            for row in self._people(tx):
                 if status != "any" and row["status"] != status:
                     continue
                 if row["company"].strip() in members:
@@ -1542,27 +1459,22 @@ class CardStore:
                     )
                 ):
                     hits.append(row)
-            return [self._view(con, row) for row in hits[:limit]], len(hits)
+            return [self._view(tx, row) for row in hits[:limit]], len(hits)
 
     def list_people(
         self, *, company: str, source: str, status: str, limit: int
     ) -> tuple[list[PersonView], int]:
-        with self._connect() as con:
-            member, _ = self._in_company(con, company)
+        with self._connect() as tx:
+            member, _ = self._in_company(tx, company)
             hits = []
-            for row in self._people(con):
+            for row in self._people(tx):
                 if status != "any" and row["status"] != status:
                     continue
                 if company and not member(row):
                     continue
-                if (
-                    source
-                    and not con.execute(
-                        "SELECT 1 FROM observations WHERE person_id = ? AND source = ? "
-                        "UNION SELECT 1 FROM field_sources WHERE person_id = ? AND source = ? "
-                        "LIMIT 1",
-                        (row["person_id"], source, row["person_id"], source),
-                    ).fetchone()
+                if source and not any(
+                    item["source_kind"] == source
+                    for item in self._sighting_sources(tx, row["person_id"])
                 ):
                     continue
                 hits.append(row)
@@ -1575,55 +1487,52 @@ class CardStore:
                     r["name"],
                 )
             )
-            return [self._view(con, row) for row in hits[:limit]], len(hits)
+            return [self._view(tx, row) for row in hits[:limit]], len(hits)
 
     def history(self, ref: PersonRef, *, limit: int) -> HistoryResult:
-        with self._connect() as con:
-            row = self._resolve(con, ref)
+        """A person's changes and sightings; the person's own statements
+        are in the changes, not among the sightings."""
+        with self._connect() as tx:
+            row = self._resolve(tx, ref)
             pid = row["person_id"]
-            items = [
-                _history_item(item)
-                for item in con.execute(
-                    "SELECT * FROM history WHERE person_id = ? ORDER BY history_id DESC LIMIT ?",
-                    (pid, limit),
-                )
-            ]
+            items = [_history_item(item) for item in tx.history(pid, limit=limit)]
             observations = [
                 ObservationView(
                     observation_id=item["observation_id"],
-                    source=item["source"],
+                    source=item["source_kind"],
                     source_date=item["source_date"],
                     source_ref=item["source_ref"],
                     uncertain=tuple(json.loads(item["uncertain_json"] or "[]")),
-                    source_label=SOURCE_LABELS.get(item["source"], item["source"]),
+                    source_label=SOURCE_LABELS.get(item["source_kind"], item["source_kind"]),
                 )
-                for item in con.execute(
-                    "SELECT * FROM observations WHERE person_id = ? ORDER BY observation_id DESC "
-                    "LIMIT ?",
-                    (pid, limit),
+                for item in tx.con.execute(
+                    "SELECT * FROM observations WHERE space = ? AND entity_id = ? "
+                    "AND claim = 'fields' AND trust != 'user_stated' AND retracted_by = '' "
+                    "ORDER BY observation_id DESC LIMIT ?",
+                    (CONTACTS_ORG, pid, limit),
                 )
             ]
-            proposals = self._open_proposals(con, pid)
+            proposals = self._open_proposals(tx, pid)
             return HistoryResult(
-                person=self._view(con, row),
+                person=self._view(tx, row),
                 history=tuple(items),
                 observations=tuple(observations),
                 proposals=tuple(proposals),
             )
 
     def view(self, person_id: str) -> PersonView:
-        with self._connect() as con:
-            row = con.execute("SELECT * FROM people WHERE person_id = ?", (person_id,)).fetchone()
+        with self._connect() as tx:
+            row = self._person(tx, person_id)
             if row is None:
                 raise CardStoreError("person_unknown")
-            return self._view(con, row)
+            return self._view(tx, row)
 
     def preview(self, values: Mapping[str, str]) -> tuple[str, tuple[FieldName, ...]]:
         """Who these fields would merge into and which fields would change;
         nothing is written."""
         clean: dict[str, str] = {name: str(values.get(name, "")).strip() for name in FIELDS}
-        with self._connect() as con:
-            row, _ = self._match(con, clean)
+        with self._connect() as tx:
+            row, _ = self._match(tx, clean)
             if row is None:
                 return "", ()
             return row["person_id"], tuple(
@@ -1637,15 +1546,15 @@ class CardStore:
     ) -> tuple[list[sqlite3.Row], list[sqlite3.Row], int]:
         """People of a company (and how many who left were left out) and the
         active lines between them."""
-        with self._connect() as con:
-            member, _ = self._in_company(con, company)
-            everyone = [row for row in self._people(con) if member(row)]
+        with self._connect() as tx:
+            member, _ = self._in_company(tx, company)
+            everyone = [row for row in self._people(tx) if member(row)]
             shown = [row for row in everyone if include_left or row["status"] != "left"]
             ids = {row["person_id"] for row in shown}
             lines = [
                 line
-                for line in con.execute(
-                    "SELECT * FROM reporting_lines WHERE removed_at IS NULL ORDER BY line_id"
+                for line in tx.con.execute(
+                    f"SELECT * FROM {LINES} WHERE removed_at IS NULL ORDER BY line_id"
                 )
                 if line["person_id"] in ids and line["manager_id"] in ids
             ]
@@ -1656,18 +1565,14 @@ class CardStore:
         (observations and field provenance), newest first: the interactive
         chart's person card lists them."""
         found: dict[str, list[tuple[str, str]]] = {}
-        with self._connect() as con:
+        with self._connect() as tx:
             for person_id in person_ids:
                 latest: dict[str, str] = {}
-                for item in con.execute(
-                    "SELECT source, source_date FROM observations WHERE person_id = ? "
-                    "UNION ALL SELECT source, source_date FROM field_sources WHERE person_id = ?",
-                    (person_id, person_id),
-                ):
-                    date = str(item["source_date"] or "")
-                    if date > latest.get(item["source"], ""):
-                        latest[item["source"]] = date
-                    latest.setdefault(item["source"], date)
+                for item in self._sighting_sources(tx, person_id):
+                    seen = str(item["source_date"] or "")
+                    if seen > latest.get(item["source_kind"], ""):
+                        latest[item["source_kind"]] = seen
+                    latest.setdefault(item["source_kind"], seen)
                 found[person_id] = sorted(latest.items(), key=lambda pair: pair[1], reverse=True)
         return found
 
@@ -1675,9 +1580,9 @@ class CardStore:
         """Each person's fields still to confirm: flagged by any reading and
         neither confirmed nor set by the person."""
         found: dict[str, list[str]] = {}
-        with self._connect() as con:
+        with self._connect() as tx:
             for person_id in person_ids:
-                needs = self._needs(con, person_id)
+                needs = self._needs(tx, person_id)
                 if needs:
                     found[person_id] = list(needs)
         return found
@@ -1694,13 +1599,14 @@ class CardStore:
         now = _clock()
         expires = (now + CANDIDATE_TTL).isoformat(timespec="seconds")
         ids: list[str] = []
-        with self._connect() as con:
-            con.execute("DELETE FROM candidates WHERE expires_at <= ?", (_iso(now),))
-            con.execute("DELETE FROM candidates WHERE session_key = ?", (session_key,))
+        with self._connect() as tx:
+            con = tx.con
+            con.execute(f"DELETE FROM {CANDIDATES} WHERE expires_at <= ?", (_iso(now),))
+            con.execute(f"DELETE FROM {CANDIDATES} WHERE session_key = ?", (session_key,))
             for number, item in enumerate(candidates, 1):
                 candidate_id = f"s{number}"
                 con.execute(
-                    "INSERT INTO candidates (session_key, candidate_id, fields_json, "
+                    f"INSERT INTO {CANDIDATES} (session_key, candidate_id, fields_json, "
                     "uncertain_json, message_id, message_date, created_at, expires_at) "
                     "VALUES (?,?,?,?,?,?,?,?)",
                     (
@@ -1727,11 +1633,11 @@ class CardStore:
         the results, and which ids were stored, already stored or unknown.
         `candidates_expired` when the conversation has none left."""
         now = _iso(_clock())
-        with self._connect() as con:
+        with self._connect() as tx:
             rows = {
                 row["candidate_id"]: row
-                for row in con.execute(
-                    "SELECT * FROM candidates WHERE session_key = ? AND expires_at > ?",
+                for row in tx.con.execute(
+                    f"SELECT * FROM {CANDIDATES} WHERE session_key = ? AND expires_at > ?",
                     (session_key, now),
                 )
             }
@@ -1750,7 +1656,7 @@ class CardStore:
             results: list[AddResult] = []
             for row in pending:
                 result = self._add(
-                    con,
+                    tx,
                     json.loads(row["fields_json"]),
                     source="email_signature",
                     source_date=date.fromisoformat(row["message_date"]),
@@ -1758,8 +1664,8 @@ class CardStore:
                     uncertain=[u for u in json.loads(row["uncertain_json"]) if u in FIELDS],
                     actor=actor,
                 )
-                con.execute(
-                    "UPDATE candidates SET stored_person_id = ? "
+                tx.con.execute(
+                    f"UPDATE {CANDIDATES} SET stored_person_id = ? "
                     "WHERE session_key = ? AND candidate_id = ?",
                     (result.person_id, session_key, row["candidate_id"]),
                 )
@@ -1781,13 +1687,11 @@ class CardStore:
             except sqlite3.DatabaseError as error:
                 raise CardStoreError("import_unreadable") from error
         imported = already = created = updated = 0
-        with self._connect() as con:
+        with self._connect() as tx:
             for item in rows:
                 keys = item.keys()
                 ref = f"hermes-cards:{item['id']}"
-                if con.execute(
-                    "SELECT 1 FROM observations WHERE source_ref = ?", (ref,)
-                ).fetchone():
+                if tx.observations(source_ref=ref, claim=None, limit=1):
                     already += 1
                     continue
                 values: dict[str, str] = {
@@ -1803,7 +1707,7 @@ class CardStore:
                     when = date.today()
                 try:
                     result = self._add(
-                        con,
+                        tx,
                         values,
                         source="card",
                         source_date=when,
@@ -1827,11 +1731,6 @@ class CardStore:
             people_updated=updated,
             source=str(source),
         )
-
-
-def _reopen(con: sqlite3.Connection, proposal_ids: Sequence[int]) -> None:
-    for proposal_id in proposal_ids:
-        con.execute("UPDATE proposals SET state = 'open' WHERE proposal_id = ?", (proposal_id,))
 
 
 @dataclass

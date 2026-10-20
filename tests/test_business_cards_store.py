@@ -20,6 +20,7 @@ from typing import Any
 import pytest
 
 from capabilities.business_cards.contracts import PersonRef
+from capabilities.business_cards.space import PEOPLE
 from capabilities.business_cards.store import CardStore, CardStoreError, store_dir
 
 CARD = {
@@ -484,8 +485,8 @@ def test_the_unified_business_number_is_always_its_own_field(tmp_path: Path) -> 
 def test_an_older_store_gains_the_new_columns(tmp_path: Path) -> None:
     store = _store(tmp_path)
     with sqlite3.connect(store.path) as con:
-        con.execute("ALTER TABLE people DROP COLUMN honorific")
-        con.execute("ALTER TABLE people DROP COLUMN company_tax_id")
+        con.execute(f"ALTER TABLE {PEOPLE} DROP COLUMN honorific")
+        con.execute(f"ALTER TABLE {PEOPLE} DROP COLUMN company_tax_id")
     reopened = _store(tmp_path)
     added = _add(reopened, {**CARD, "title": "經理 博士", "company_tax_id": "12345678"})
     view = reopened.view(added.person_id)
@@ -594,7 +595,7 @@ def test_a_stored_note_with_the_unified_business_number_is_moved_with_history(
     old = _add(store, CARD)
     with sqlite3.connect(store.path) as con:  # a note stored before the field existed
         con.execute(
-            "UPDATE people SET notes = ? WHERE person_id = ?",
+            f"UPDATE {PEOPLE} SET notes = ? WHERE person_id = ?",
             ("統一編號：12345678；週五休", old.person_id),
         )
     again = _add(store, {**CARD, "company_tax_id": "12345678"}, when=date(2026, 2, 1))

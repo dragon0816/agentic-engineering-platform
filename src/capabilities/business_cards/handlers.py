@@ -67,6 +67,7 @@ from capabilities.runtime import CapabilityRefused
 from common.base import Contract
 from common.execution import RequestContext
 from integrations.outlook_mail import MailError, MailReader, MailScope, read, search
+from memory.registry import MemoryRegistry
 from models.contracts import ModelClient
 
 NAMESPACE = "business-cards"
@@ -172,13 +173,15 @@ def who(context: RequestContext) -> str:
 
 
 class _Cards:
-    """The store of the request's actor, opened on a worker thread."""
+    """The store of the request's actor, opened on a worker thread: the
+    `contacts/org` memory space, as the Host's memory registry allows."""
 
-    def __init__(self, workspace_root: Path) -> None:
+    def __init__(self, workspace_root: Path, memory: MemoryRegistry | None = None) -> None:
         self.workspace_root = workspace_root
+        self.memory = memory
 
     def store(self, context: RequestContext) -> CardStore:
-        return CardStore.for_actor(self.workspace_root, context.actor)
+        return CardStore.for_actor(self.workspace_root, context.actor, self.memory)
 
     async def run(self, work: Callable[[], Contract]) -> Contract:
         try:
@@ -411,8 +414,13 @@ class UndoHandler(_Cards):
 class ImportHandler(_Cards):
     """Only the default Hermes place is read: a model cannot point this at a file."""
 
-    def __init__(self, workspace_root: Path, source: Callable[[], Path] = hermes_store) -> None:
-        super().__init__(workspace_root)
+    def __init__(
+        self,
+        workspace_root: Path,
+        source: Callable[[], Path] = hermes_store,
+        memory: MemoryRegistry | None = None,
+    ) -> None:
+        super().__init__(workspace_root, memory)
         self.source = source
 
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
@@ -594,8 +602,9 @@ class HarvestHandler(_Cards):
         model: ModelClient | None,
         alias: str,
         local_only: bool = False,
+        memory: MemoryRegistry | None = None,
     ) -> None:
-        super().__init__(workspace_root)
+        super().__init__(workspace_root, memory)
         self._reader, self._scope = reader, scope
         self.model, self.alias, self.local_only = model, alias, local_only
 
@@ -741,38 +750,41 @@ def bindings(
     alias: str,
     local_only: bool = False,
     hermes: Callable[[], Path] = hermes_store,
+    memory: MemoryRegistry | None = None,
 ) -> tuple[tuple[CapabilitySpec, Any, type[Contract], type[Contract]], ...]:
     """Every business-cards capability with its handler and contracts, for a
-    host to register."""
+    host to register. `memory` is the Host's memory registry (the shipped
+    business-cards declaration when None)."""
+    root, m = workspace_root, memory
     return (
-        (ADD_CARD_SPEC, AddCardHandler(workspace_root), AddCardRequest, AddResult),
+        (ADD_CARD_SPEC, AddCardHandler(root, m), AddCardRequest, AddResult),
         (
             ADD_SIGNATURE_SPEC,
-            AddFromSignatureHandler(workspace_root),
+            AddFromSignatureHandler(root, m),
             AddFromSignatureRequest,
             AddFromSignatureResult,
         ),
         (
             STORE_CANDIDATES_SPEC,
-            StoreCandidatesHandler(workspace_root),
+            StoreCandidatesHandler(root, m),
             StoreCandidatesRequest,
             StoreCandidatesResult,
         ),
-        (EDIT_SPEC, EditPersonHandler(workspace_root), EditPersonRequest, EditResult),
-        (STATUS_SPEC, SetStatusHandler(workspace_root), SetStatusRequest, StatusResult),
-        (SET_LINE_SPEC, SetLineHandler(workspace_root), SetLineRequest, LineResult),
-        (REMOVE_LINE_SPEC, RemoveLineHandler(workspace_root), RemoveLineRequest, LineResult),
-        (UNDO_SPEC, UndoHandler(workspace_root), UndoRequest, UndoResult),
-        (IMPORT_SPEC, ImportHandler(workspace_root, hermes), ImportRequest, ImportResult),
-        (FIND_SPEC, FindHandler(workspace_root), FindRequest, PeopleResult),
-        (LIST_SPEC, ListHandler(workspace_root), ListRequest, PeopleResult),
-        (HISTORY_SPEC, HistoryHandler(workspace_root), HistoryRequest, HistoryResult),
-        (PROPOSALS_SPEC, ProposalsHandler(workspace_root), ProposalsRequest, ProposalsResult),
-        (CHART_SPEC, OrgChartHandler(workspace_root), ChartRequest, ChartResult),
+        (EDIT_SPEC, EditPersonHandler(root, m), EditPersonRequest, EditResult),
+        (STATUS_SPEC, SetStatusHandler(root, m), SetStatusRequest, StatusResult),
+        (SET_LINE_SPEC, SetLineHandler(root, m), SetLineRequest, LineResult),
+        (REMOVE_LINE_SPEC, RemoveLineHandler(root, m), RemoveLineRequest, LineResult),
+        (UNDO_SPEC, UndoHandler(root, m), UndoRequest, UndoResult),
+        (IMPORT_SPEC, ImportHandler(root, hermes, m), ImportRequest, ImportResult),
+        (FIND_SPEC, FindHandler(root, m), FindRequest, PeopleResult),
+        (LIST_SPEC, ListHandler(root, m), ListRequest, PeopleResult),
+        (HISTORY_SPEC, HistoryHandler(root, m), HistoryRequest, HistoryResult),
+        (PROPOSALS_SPEC, ProposalsHandler(root, m), ProposalsRequest, ProposalsResult),
+        (CHART_SPEC, OrgChartHandler(root, m), ChartRequest, ChartResult),
         (
             HARVEST_SPEC,
             HarvestHandler(
-                workspace_root, reader, scope, model=model, alias=alias, local_only=local_only
+                root, reader, scope, model=model, alias=alias, local_only=local_only, memory=m
             ),
             HarvestRequest,
             HarvestResult,

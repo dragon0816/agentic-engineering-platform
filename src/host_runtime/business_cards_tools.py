@@ -108,6 +108,18 @@ FAILURE_TEXT = {
     "line_to_self": "不能把一個人設成自己的主管",
     "line_cycle": "這條回報關係會形成循環，沒有記錄",
     "import_unreadable": "舊的 Hermes 名片資料庫讀不出來",
+    # Accumulated memory M1: the contact store moved into the Memory Service.
+    "memory_migration_failed": "名片資料搬進記憶庫時失敗，什麼都沒有搬；原本的名片資料沒有變動，"
+    "旁邊也留有備份",
+    "memory_migration_mismatch": "名片資料搬進記憶庫後核對不一致，已取消；原本的名片資料沒有變動",
+    "memory_migration_target_not_empty": "記憶庫裡已經有聯絡人資料，舊的名片資料沒有自動搬入",
+    "memory_backup_failed": "搬移前無法備份舊的名片資料，所以沒有搬；原本的名片資料沒有變動",
+    "memory_legacy_changed": "舊的名片資料在搬進記憶庫之後又被改過（可能用過舊版 AEP），"
+    "為了不漏掉那些變更，請先依說明重新搬移",
+    "memory_space_not_declared": "這項功能沒有宣告可以使用聯絡人記憶空間",
+    "memory_write_not_declared": "這項功能沒有宣告可以寫入聯絡人記憶空間",
+    "memory_read_not_declared": "這項功能沒有宣告可以讀取聯絡人記憶空間",
+    "memory_space_unknown": "聯絡人記憶空間還沒有註冊",
     "permission_denied": "這項名片功能沒有授權給你（在 Agent Web 的 Capabilities 選取）",
     "invalid_input": "工具參數不正確",
     "timeout": "這次操作逾時",

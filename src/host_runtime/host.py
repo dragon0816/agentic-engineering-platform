@@ -2149,8 +2149,11 @@ def _register_business_cards(
     local_only: bool,
 ) -> None:
     """The contact store's capabilities; mail is read in the scope set in
-    Agent Web Settings > Agent mode, read at each call."""
+    Agent Web Settings > Agent mode, read at each call. The store lives in
+    the actor's Memory Service (`<workspace>/memory/<actor-key>/memory.sqlite`);
+    an older `business-cards/<actor-key>/cards.db` moves there on first use."""
     from host_runtime.agent_mode_settings import AgentModeStore
+    from host_runtime.memory_spaces import registry as memory_registry
     from integrations.outlook_mail import OutlookComMailbox
 
     store = AgentModeStore(layout.workspace_root)
@@ -2161,6 +2164,9 @@ def _register_business_cards(
         model=model,
         alias=alias,
         local_only=local_only,
+        # The contact store is the `contacts/org` memory space (accumulated
+        # memory M1): the Host's registry says who may read and write it.
+        memory=memory_registry(layout),
     ):
         installed.register(
             spec, handler, request, response, ExecutionDependencies(central_required=False)

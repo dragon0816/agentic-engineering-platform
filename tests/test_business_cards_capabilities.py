@@ -388,7 +388,7 @@ def test_signature_harvest_respects_the_scope_and_stores_nothing(tmp_path: Path)
         },
     )
     assert stored.status == "succeeded", stored.failure
-    db = next((tmp_path / "workspace" / "business-cards").glob("*/cards.db"))
+    db = next((tmp_path / "workspace" / "memory").glob("*/memory.sqlite"))
     with sqlite3.connect(db) as con:
         dumped = "\n".join(str(row) for row in con.iterdump())
     for leaked in ("Falcon", "hunter2", "Hi team", "Quoted Person"):
@@ -754,11 +754,12 @@ def test_a_printed_unified_business_number_is_stored_even_outside_its_field(
         "add-card",
         {"name": "陳二", "company": "範例科技", "notes": "週五休"},
     )
+    from capabilities.business_cards.space import PEOPLE
     from capabilities.business_cards.store import CardStore
 
     store = CardStore.for_actor(tmp_path / "workspace", "alice")
     with sqlite3.connect(store.path) as con:
-        con.execute("UPDATE people SET notes = '統一編號 87654321 週五休' WHERE name = '陳二'")
+        con.execute(f"UPDATE {PEOPLE} SET notes = '統一編號 87654321 週五休' WHERE name = '陳二'")
     edited = _run(
         bridge,
         "edit-person",
