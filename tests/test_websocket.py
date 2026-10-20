@@ -23,6 +23,7 @@ from integrations.websocket import (
     TEXT,
     Devtools,
     DevtoolsRefused,
+    SocketTrace,
     WebSocket,
     WebSocketError,
     accept_for,
@@ -416,3 +417,97 @@ def test_a_pong_that_cannot_be_sent_is_a_lost_socket_not_a_bare_os_error(
         with pytest.raises(WebSocketError) as lost:
             ws.receive()
     assert lost.value.code == "closed"
+
+
+# -- the opt-in trace -------------------------------------------------------
+
+
+def test_a_trace_records_protocol_facts_and_never_a_payload(served: list[Server]) -> None:
+    def behave(connection: socket.socket) -> None:
+        connection.sendall(server_frame(TEXT, b'{"method": "Page.frameNavigated", "x": 1}'))
+        _opcode, asked = read_frame(connection)
+        reply = {"id": json.loads(asked)["id"], "result": {"value": "SECRET-ON-SCREEN"}}
+        connection.sendall(server_frame(TEXT, json.dumps(reply).encode()))
+        connection.sendall(server_frame(CLOSE, struct.pack(">H", 1001) + b"going away"))
+
+    server = start(served, behave)
+    trace = SocketTrace()
+    with Devtools(server.url, timeout_s=5, trace=trace) as page:
+        page.call("Runtime.evaluate", expression="'SECRET-TYPED'")
+        with pytest.raises(WebSocketError):
+            page.socket.receive()
+    record = trace.as_record()
+    assert record["url"] == server.url
+    assert " 101 " in record["handshake"]["status"]
+    assert any(
+        h.lower().startswith("sec-websocket-accept:") for h in record["handshake"]["headers"]
+    )
+    assert [(f["dir"], f["op"]) for f in record["frames"]] == [
+        ("out", TEXT),
+        ("in", TEXT),
+        ("in", TEXT),
+        ("in", CLOSE),
+    ]
+    assert [(m["dir"], m.get("id"), m.get("method")) for m in record["messages"]] == [
+        ("out", 1, "Runtime.evaluate"),
+        ("in", None, "Page.frameNavigated"),
+        ("in", 1, None),
+    ]
+    assert record["server_close"]["code"] == 1001
+    assert record["server_close"]["reason"] == "going away"
+    assert record["failure"]["phase"] == "receive"
+    assert record["closed_by_client_at"] is not None
+    written = json.dumps(record)
+    assert "SECRET" not in written
+
+
+def test_a_trace_tells_a_timeout_from_an_abort_from_an_end_of_stream(
+    served: list[Server],
+) -> None:
+    """All three read as `closed` to a caller; the trace is where they differ."""
+    hold = threading.Event()
+
+    def silent(connection: socket.socket) -> None:
+        hold.wait(5)
+
+    def reset(connection: socket.socket) -> None:
+        connection.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", 1, 0))
+
+    def leave(connection: socket.socket) -> None:
+        return None
+
+    outcomes: dict[str, dict[str, object]] = {}
+    for name, behave, timeout in (
+        ("timeout", silent, 0.3),
+        ("abort", reset, 5.0),
+        ("eof", leave, 5.0),
+    ):
+        server = start(served, behave)
+        trace = SocketTrace()
+        with WebSocket(server.url, timeout_s=5, trace=trace) as ws:
+            # Short only after the handshake, which a loaded machine may be
+            # slow to finish.
+            ws.socket.settimeout(timeout)
+            with pytest.raises(WebSocketError) as lost:
+                ws.receive()
+        assert lost.value.code == "closed"
+        assert trace.failure is not None
+        outcomes[name] = trace.failure
+    hold.set()
+    assert outcomes["timeout"]["os_error"] == "TimeoutError"
+    assert outcomes["abort"]["os_error"] in ("ConnectionResetError", "ConnectionAbortedError")
+    assert outcomes["abort"]["errno"] is not None
+    assert outcomes["eof"]["os_error"] == "end of stream"
+    assert {str(failure["phase"]) for failure in outcomes.values()} == {"receive"}
+
+
+def test_a_connection_refused_is_traced_with_the_os_error() -> None:
+    spare = socket.socket()
+    spare.bind(("127.0.0.1", 0))
+    port = spare.getsockname()[1]
+    spare.close()
+    trace = SocketTrace()
+    with pytest.raises(WebSocketError):
+        WebSocket(f"ws://127.0.0.1:{port}/x", timeout_s=2, trace=trace)
+    assert trace.failure is not None and trace.failure["phase"] == "connect"
+    assert trace.failure["code"] == "connect_failed"

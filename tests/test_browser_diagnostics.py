@@ -13,7 +13,12 @@ from typing import Any
 
 import pytest
 
-from integrations.browser import DIAG_DIR_ENV, Browser, BrowserError
+from integrations.browser import (
+    DIAG_DIR_ENV,
+    Browser,
+    BrowserError,
+)
+from integrations.websocket import SocketTrace, WebSocketError
 
 LOGGING = ("--enable-logging=stderr", "--v=0")
 
@@ -137,3 +142,114 @@ def test_a_navigation_failure_is_recorded_and_still_raised(
     record = json.loads(record_path.read_text(encoding="utf-8"))
     assert record["detail"] == "net::ERR_CONNECTION_REFUSED"
     assert record["version"] == {"unavailable": "no port"}
+
+
+# -- attach attempts and socket traces (CI 2026-10-21) ---------------------
+
+
+class Attaching:
+    """A `Devtools` stand-in: the first socket is lost under `Page.enable`,
+    the second attaches. Records the trace it was handed."""
+
+    made: list["Attaching"] = []
+
+    def __init__(self, url: str, *, timeout_s: float, trace: Any = None) -> None:
+        self.url = url
+        self.trace = trace
+        self.closed = False
+        self.lose = not Attaching.made
+        Attaching.made.append(self)
+
+    def call(self, method: str, **params: Any) -> dict[str, Any]:
+        if self.lose:
+            if self.trace is not None:
+                self.trace.failed("receive", "closed", ConnectionAbortedError(10053, "x"))
+            raise WebSocketError("closed")
+        return {}
+
+    def close(self) -> None:
+        self.closed = True
+
+
+def attach_twice(monkeypatch: pytest.MonkeyPatch, browser: Browser) -> Any:
+    Attaching.made = []
+    monkeypatch.setattr("integrations.browser.Devtools", Attaching)
+    target = {"id": "TAB1", "type": "page", "webSocketDebuggerUrl": "ws://127.0.0.1:1/p/TAB1"}
+    browser._targets = lambda port=None: [target]  # type: ignore[method-assign]
+    return browser.page(within_s=5)
+
+
+def test_unset_attaches_without_a_trace_and_writes_nothing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv(DIAG_DIR_ENV, raising=False)
+    monkeypatch.chdir(tmp_path)
+    browser = Browser(tmp_path / "profile", executable="msedge.exe")
+    page = attach_twice(monkeypatch, browser)
+    assert page is Attaching.made[1] and Attaching.made[0].closed
+    assert [made.trace for made in Attaching.made] == [None, None]
+    assert browser._diag_attaches == ()
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_set_records_every_attach_attempt_and_who_ended_the_socket(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    diag = tmp_path / "diag"
+    monkeypatch.setenv(DIAG_DIR_ENV, str(diag))
+    browser = Browser(tmp_path / "profile", executable="msedge.exe")
+    browser._port = 4711
+    page = attach_twice(monkeypatch, browser)
+    assert page is Attaching.made[1]
+    assert all(isinstance(made.trace, SocketTrace) for made in Attaching.made)
+    (log,) = diag.glob("*-sockets.jsonl")
+    lines = [json.loads(line) for line in log.read_text(encoding="utf-8").splitlines()]
+    assert [(line["event"], line["target_id"], line["outcome"]) for line in lines] == [
+        ("attach", "TAB1", "enable:closed"),
+        ("attach", "TAB1", "attached"),
+    ]
+    assert all(line["elapsed_s"] >= 0 and line["port"] == 4711 for line in lines)
+    assert lines[0]["socket"]["failure"]["os_error"] == "ConnectionAbortedError"
+    assert lines[0]["socket"]["failure"]["errno"] == 10053
+
+    # A no_page record repeats the attempts and names the socket log.
+    browser._page = None
+    browser._targets = lambda port=None: []  # type: ignore[method-assign]
+    browser._diag_endpoint = lambda path: {}  # type: ignore[method-assign]
+    with pytest.raises(BrowserError):
+        browser.page(within_s=0)
+    (record_path,) = diag.glob("*-no_page.json")
+    record = json.loads(record_path.read_text(encoding="utf-8"))
+    assert [item["outcome"] for item in record["attach_attempts"]] == [
+        "enable:closed",
+        "attached",
+    ]
+    assert record["socket_log"] == str(log)
+
+
+def test_a_socket_lost_under_navigate_is_traced_and_closed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    diag = tmp_path / "diag"
+    monkeypatch.setenv(DIAG_DIR_ENV, str(diag))
+    browser = Browser(tmp_path / "profile", executable="msedge.exe")
+    lost = Attaching("ws://127.0.0.1:1/p/TAB1", timeout_s=1, trace=SocketTrace())
+    lost.lose = True
+    browser._page = lost  # type: ignore[assignment]
+    browser._port = 4711
+    browser._still_answering = lambda port: True  # type: ignore[method-assign]
+    browser._diag_endpoint = lambda path: {}  # type: ignore[method-assign]
+    fresh = Attaching("ws://127.0.0.1:1/p/TAB1", timeout_s=1, trace=SocketTrace())
+    fresh.lose = True
+
+    def page(*, within_s: float | None = None) -> Any:
+        return browser._page or fresh
+
+    browser.page = page  # type: ignore[method-assign]
+    with pytest.raises(BrowserError) as refused:
+        browser.navigate("http://127.0.0.1/", settle_s=0)
+    assert refused.value.code == "navigation_failed"
+    assert lost.closed
+    (log,) = diag.glob("*-sockets.jsonl")
+    events = [json.loads(line)["event"] for line in log.read_text(encoding="utf-8").splitlines()]
+    assert events == ["navigate_lost", "navigate_lost_again"]

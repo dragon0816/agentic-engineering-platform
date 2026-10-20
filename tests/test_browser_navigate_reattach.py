@@ -16,12 +16,16 @@ class Tab:
     def __init__(self, fail: bool) -> None:
         self.fail = fail
         self.calls: list[str] = []
+        self.closed = False
 
     def call(self, method: str, **params: Any) -> dict[str, Any]:
         self.calls.append(method)
         if self.fail:
             raise WebSocketError("closed")
         return {}
+
+    def close(self) -> None:
+        self.closed = True
 
 
 def browser_with(tabs: list[Tab]) -> Browser:
@@ -46,6 +50,8 @@ def test_a_lost_first_tab_is_reattached_once() -> None:
     browser = browser_with([old, new])
     browser.navigate("http://127.0.0.1/", settle_s=0)
     assert old.calls == ["Page.navigate"] and new.calls == ["Page.navigate"]
+    # The lost socket is closed rather than left for the collector.
+    assert old.closed and not new.closed
 
 
 def test_a_second_loss_is_a_navigation_failure() -> None:
@@ -62,13 +68,9 @@ def test_a_tab_lost_while_enabling_is_dropped_and_the_next_one_is_used(
     made: list[Any] = []
 
     class Socket(Tab):
-        def __init__(self, url: str, timeout_s: float) -> None:
+        def __init__(self, url: str, timeout_s: float, trace: object = None) -> None:
             super().__init__(fail=not made)
-            self.closed = False
             made.append(self)
-
-        def close(self) -> None:
-            self.closed = True
 
     monkeypatch.setattr("integrations.browser.Devtools", Socket)
     browser = Browser.__new__(Browser)

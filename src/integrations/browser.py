@@ -39,7 +39,7 @@ from types import TracebackType
 from typing import IO, Any, Literal, Self
 
 from common.base import Contract, Text
-from integrations.websocket import Devtools, DevtoolsRefused, WebSocketError
+from integrations.websocket import Devtools, DevtoolsRefused, SocketTrace, WebSocketError
 
 BrowserErrorCode = Literal[
     "browser_missing",
@@ -77,6 +77,8 @@ INTERACTIVE = "a, button, input, select, textarea, [role=button], [role=link]"
 #: DevTools endpoint reported -- target types and addresses, never page
 #: content. Unset, nothing here changes.
 DIAG_DIR_ENV = "AEP_BROWSER_DIAG_DIR"
+#: How many attach attempts a failure record repeats.
+DIAG_ATTACHES_KEPT = 20
 
 
 class BrowserError(Exception):
@@ -187,6 +189,15 @@ _LIST_ELEMENTS = """
 """
 
 
+def _named(failure: Exception) -> str:
+    """A failure's code or method, for a diagnostic: never its message."""
+    if isinstance(failure, WebSocketError):
+        return failure.code
+    if isinstance(failure, DevtoolsRefused):
+        return f"refused {failure.method}"
+    return type(failure).__name__
+
+
 def browser_path() -> str | None:
     """Where Windows says a Chromium browser is, or nothing.
 
@@ -222,6 +233,8 @@ class Browser:
     #: Class defaults so a `Browser.__new__` stand-in in a test still works.
     _diag_dir: Path | None = None
     _diag_stderr: IO[bytes] | None = None
+    _diag_sockets: Path | None = None
+    _diag_attaches: tuple[dict[str, Any], ...] = ()
 
     def __init__(
         self,
@@ -412,20 +425,27 @@ class Browser:
         while time.time() < end:
             for target in self._targets():
                 if target.get("type") == "page" and target.get("webSocketDebuggerUrl"):
+                    trace = SocketTrace() if self._diag_dir is not None else None
+                    began = time.monotonic()
                     try:
                         page = Devtools(
-                            str(target["webSocketDebuggerUrl"]), timeout_s=self.timeout_s
+                            str(target["webSocketDebuggerUrl"]),
+                            timeout_s=self.timeout_s,
+                            trace=trace,
                         )
-                    except WebSocketError:
+                    except WebSocketError as failure:
+                        self._diag_attach(target, f"connect:{failure.code}", began, trace)
                         continue
                     try:
                         page.call("Page.enable")
                         page.call("Runtime.enable")
-                    except (DevtoolsRefused, WebSocketError):
+                    except (DevtoolsRefused, WebSocketError) as failure:
                         # A just-started browser may still be replacing this
                         # tab (CI 2026-10-20): drop it and look again.
                         page.close()
+                        self._diag_attach(target, f"enable:{_named(failure)}", began, trace)
                         continue
+                    self._diag_attach(target, "attached", began, trace)
                     self._page = page
                     return page
             time.sleep(0.2)
@@ -564,6 +584,49 @@ class Browser:
         if handle is not None:
             handle.close()
 
+    def _diag_socket(self, event: str, trace: SocketTrace | None, **facts: Any) -> None:
+        """One socket's story, appended to this browser's socket log: who
+        closed it, how, and what was asked of it last. Protocol facts only
+        (`SocketTrace`)."""
+        if self._diag_dir is None or trace is None:
+            return
+        record = {
+            "event": event,
+            "test": os.environ.get("PYTEST_CURRENT_TEST", ""),
+            "port": self._port,
+            **facts,
+            "socket": trace.as_record(),
+        }
+        try:
+            if self._diag_sockets is None:
+                self._diag_sockets = self._diag_name("-sockets.jsonl")
+            with self._diag_sockets.open("a", encoding="utf-8") as handle:
+                handle.write(json.dumps(record) + "\n")
+        except OSError:
+            pass  # A diagnostic never replaces what it describes.
+
+    def _diag_attach(
+        self,
+        target: dict[str, Any],
+        outcome: str,
+        began: float,
+        trace: SocketTrace | None,
+    ) -> None:
+        """One attempt by `page` to attach to a tab, and how it ended."""
+        if self._diag_dir is None:
+            return
+        attempt = {
+            "target_id": str(target.get("id", "")),
+            "outcome": outcome,
+            "elapsed_s": round(time.monotonic() - began, 3),
+        }
+        self._diag_attaches = (*self._diag_attaches, attempt)[-DIAG_ATTACHES_KEPT:]
+        self._diag_socket("attach", trace, **attempt)
+
+    def _diag_lost(self, event: str, page: Any) -> None:
+        """A socket that was in use and failed: its trace says who ended it."""
+        self._diag_socket(event, getattr(page, "trace", None))
+
     def _diag_endpoint(self, path: str) -> Any:
         """One DevTools HTTP endpoint's answer, or why there was none."""
         if self._port is None:
@@ -587,7 +650,11 @@ class Browser:
                 listed = self._diag_endpoint("/json/list")
                 targets = (
                     [
-                        {"type": item.get("type"), "url": item.get("url")}
+                        {
+                            **({"id": item["id"]} if "id" in item else {}),
+                            "type": item.get("type"),
+                            "url": item.get("url"),
+                        }
                         for item in listed
                         if isinstance(item, dict)
                     ]
@@ -603,6 +670,8 @@ class Browser:
                     "port": self._port,
                     "version": self._diag_endpoint("/json/version"),
                     "targets": targets,
+                    "attach_attempts": list(self._diag_attaches),
+                    "socket_log": str(self._diag_sockets) if self._diag_sockets else "",
                 }
                 self._diag_name(f"-{code}.json").write_text(
                     json.dumps(record, indent=2), encoding="utf-8"
@@ -618,6 +687,7 @@ class Browser:
         try:
             answer = page.call("Runtime.evaluate", expression=expression, returnByValue=True)
         except (DevtoolsRefused, WebSocketError) as failure:
+            self._diag_lost("evaluate_lost", page)
             raise BrowserError("browser_lost", type(failure).__name__) from None
         result = answer.get("result", {})
         if answer.get("exceptionDetails"):
@@ -641,6 +711,8 @@ class Browser:
             # close can reach one that is still shutting down (CI 2026-10-20)
             # -- launch it once more instead of waiting for a tab that will
             # never come.
+            self._diag_lost("navigate_lost", page)
+            page.close()
             self._page = None
             if not self._still_answering(self._port):
                 self._await_profile_release()
@@ -649,6 +721,7 @@ class Browser:
             try:
                 answer = page.call("Page.navigate", url=url)
             except (DevtoolsRefused, WebSocketError) as failure:
+                self._diag_lost("navigate_lost_again", page)
                 raise self._failure("navigation_failed", type(failure).__name__) from None
         except DevtoolsRefused as failure:
             raise self._failure("navigation_failed", type(failure).__name__) from None
@@ -679,6 +752,7 @@ class Browser:
                 # is how the event is noticed at all.
                 page.call("Runtime.evaluate", expression="1", returnByValue=True)
             except (DevtoolsRefused, WebSocketError):
+                self._diag_lost("await_load_lost", page)
                 return
             if page.drain("Page.loadEventFired"):
                 return
@@ -714,6 +788,7 @@ class Browser:
         try:
             answer = page.call("Page.captureScreenshot", format="png")
         except (DevtoolsRefused, WebSocketError) as failure:
+            self._diag_lost("screenshot_lost", page)
             raise BrowserError("browser_lost", type(failure).__name__) from None
         import base64
 
