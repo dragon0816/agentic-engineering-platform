@@ -71,7 +71,17 @@ jobs:
             Get-ChildItem $item.DirectoryName | Where-Object { $_.Name -match '^\d+\.' -or $_.Name -like 'new_*' } | ForEach-Object { "  $($_.Name)  $($_.LastWriteTimeUtc.ToString('o'))" }
           }
           Get-Service -Name edgeupdate, edgeupdatem -ErrorAction SilentlyContinue | ForEach-Object { "service $($_.Name): $($_.Status) $($_.StartType)" }
-      - run: python -m pytest --junitxml=pytest-results.xml
+      # A pytest failure no longer skips the checks after it (owner 2026-10-20).
+      # Each later check runs when every earlier step passed, or when pytest
+      # failed: the independent checks (ruff, format, mypy, build, pip check)
+      # then all run, so one red run reports every problem. Cancelled runs
+      # stop. The job stays red: pytest's failure is never masked (no
+      # continue-on-error). The two bundle steps also require
+      # `steps.build.outcome == 'success'`, so a broken wheel build does not
+      # cascade into confusing install failures. The preview uploads keep the
+      # default `success()`: a red commit never publishes a bundle.
+      - id: pytest
+        run: python -m pytest --junitxml=pytest-results.xml
         env:
           # Opt-in browser diagnostics (src/integrations/browser.py).
           AEP_BROWSER_DIAG_DIR: ${{ runner.temp }}/browser-diag
@@ -106,12 +116,19 @@ jobs:
           path: ${{ runner.temp }}/browser-diag
           if-no-files-found: ignore
           retention-days: 14
-      - run: python -m ruff check .
-      - run: python -m ruff format --check .
-      - run: python -m mypy
-      - run: python -m build
-      - run: python -m pip check
+      - if: ${{ !cancelled() && (success() || steps.pytest.outcome == 'failure') }}
+        run: python -m ruff check .
+      - if: ${{ !cancelled() && (success() || steps.pytest.outcome == 'failure') }}
+        run: python -m ruff format --check .
+      - if: ${{ !cancelled() && (success() || steps.pytest.outcome == 'failure') }}
+        run: python -m mypy
+      - id: build
+        if: ${{ !cancelled() && (success() || steps.pytest.outcome == 'failure') }}
+        run: python -m build
+      - if: ${{ !cancelled() && (success() || steps.pytest.outcome == 'failure') }}
+        run: python -m pip check
       - name: Build and install Windows offline preview
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && (success() || steps.pytest.outcome == 'failure') }}
         shell: pwsh
         run: |
           python -m pip download --only-binary=:all: --dest dist/windows-preview-wheels "pydantic>=2.10,<3" "tzdata>=2025.2,<2028" "openpyxl>=3.1,<4" "pypdf>=6,<7" "pywin32>=306" "matplotlib>=3.11,<4" "numpy>=1.26,<2" "contourpy>=1.3,<1.4"
@@ -236,6 +253,7 @@ jobs:
           & "$($bundle.FullName)\uninstall.ps1" -InstallRoot $installRoot
           & "$($bundle.FullName)\uninstall.ps1" -InstallRoot $installRoot -Apply
       - name: Build and install Shared Platform offline preview
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && (success() || steps.pytest.outcome == 'failure') }}
         shell: pwsh
         run: |
           python -m pip download --only-binary=:all: --dest dist/shared-platform-wheels "pydantic>=2.10,<3" "tzdata>=2025.2,<2028"

@@ -4032,3 +4032,23 @@ Edge features or the updater). Nothing in the logs proves which startup behaviou
 and three blind hardening commits (24ecf729, 7c4ef3b1, 99949c63) did not stop it. Always-on
 logging was also rejected: it would change what every installed Agent writes, and the browser log
 can be large.
+
+## 2026-10-20 — Later CI checks run when pytest fails
+
+Context: owner, 2026-10-20. Since the real-browser failures began, every red pytest step skipped
+the rest of "Platform verification": ruff, ruff format, mypy, build, pip check and both bundle
+build/install steps. A red run reported one problem and hid any others.
+
+Decision: in `.github/workflows/verify.yml` the pytest step has `id: pytest`. The checks after it
+use `if: ${{ !cancelled() && (success() || steps.pytest.outcome == 'failure') }}`, so they run when
+every earlier step passed or when pytest failed. The two bundle build/install steps also require
+`steps.build.outcome == 'success'`, so a broken wheel build is not followed by confusing install
+failures. "Annotate failed tests" and the browser-diagnostics steps keep `if: failure()`. The two
+preview uploads keep the default `success()`, so a red commit never publishes a bundle (deployment
+already takes only successful runs).
+
+The job still ends failed whenever pytest or any other step fails, and every test still runs.
+
+Rejected: `continue-on-error: true` on pytest (the job would turn green with failing tests);
+`always()` (it would run after cancellation and after a failed install, where every later step
+fails for that reason alone).

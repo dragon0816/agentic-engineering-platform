@@ -2867,4 +2867,9 @@ s-k-20261011T102952` (not published).
   23 passed; full suite 3457 passed, 9 skipped, 1 failed
   (`test_agent_web.py::test_capability_workspace_is_interactive_in_a_real_browser`, a real-browser
   flake under load; passes alone).
+- [x] Later CI checks run when pytest fails (2026-10-20, owner-approved, Claude Code). Decision
+  `docs/DECISIONS.md` 2026-10-20 "Later CI checks run when pytest fails";
+  `.github/workflows/verify.yml` (`id: pytest`, `id: build`, `if:` conditions on the later checks;
+  uploads unchanged). Verification: the four tests that read `verify.yml` 42 passed (clean worktree, project `.venv`); YAML parsed and
+  every step condition checked.
 - [ ] Read the `browser-diagnostics-<sha>` artifact of the next red run and decide the fix.
