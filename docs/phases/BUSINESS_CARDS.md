@@ -88,9 +88,17 @@ person; the flagged email lets the person correct it.
 When a card, signature or import brings a value for a field:
 
 1. empty field → set; provenance = that source and date;
-2. current value set (or confirmed) by the **user** → never overwritten; a differing value,
-   sure or unsure, becomes an open proposal, the field needs confirmation and the result says so
-   ("kept your value", with both values);
+2. current value set (or confirmed) by the **user** → touched only by **new evidence** (owner
+   2026-10-20, `ACCUMULATED_MEMORY.md` §3.8.3 and §13): a card image never observed for that
+   person before (cards carry no evidence date; a re-scan of a seen image, or a card without an
+   image, is old evidence), or an email signature sent after the day of the person's last change
+   to the field. Old evidence is ignored silently. New evidence **updates** title, department,
+   division, business group, honorific, phone / ext / mobile / fax and address directly
+   (「換部門, 或換職位, 就修改那一筆資料」; history reason `new card <ref>` / `newer email <id>`,
+   undoable; an uncertain reading only proposes); for the email (the identity key) and the other
+   fields it becomes an open proposal that needs confirmation ("kept your value", both values).
+   Open proposals from old evidence made before this rule are dismissed once, undoably (§13 of
+   the spec);
 3. current value from an automatic source → replaced only when the new evidence is not older
    than the current value's evidence date; the change is in history;
 4. a value the reading marked **uncertain** fills an empty field but never replaces a value;

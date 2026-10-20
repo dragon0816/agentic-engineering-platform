@@ -110,7 +110,19 @@ run id、圖片 hash）；來源被刪時記憶保留，標「來源已刪除」
    | 客戶編號（C4C Account ID 等外部 ID） | 只作為對應用的外部 ID（見第 4 點），不決定名稱 |
    | 職稱、部門、處、事業群 | **以最新的證據為準**（名片、簽名檔、C4C 皆可），較舊的不能覆蓋較新的 |
    | 匯報關係 | 只有使用者口頭說、或有明確證據的才畫實線；推論一律虛線 |
-   | 使用者親口說的值 | **優先**；之後若出現**較新的**不同證據，變成待確認，不自動改 |
+   | 使用者親口說的值 | **只有新證據能動它**（owner 決定 2026-10-20，見下方「新證據」）：舊證據一律不理會、不提示；新證據對**組織欄位**（職稱、部門、處、事業群、學位、電話／分機／手機／傳真、地址）**直接改成新值**（「換部門, 或換職位, 就修改那一筆資料」；寫 history、可復原；讀值不確定時只提議）；對 **email**（身分鍵，模型多次讀錯）與其他欄位只變成待確認、不覆蓋 |
+
+   **新證據**（owner 決定 2026-10-20，取代「較新的不同證據變成待確認」）：
+   - **名片沒有證據日期**。新不新只看**名片圖片**：對這個人**從沒看過的圖片 hash** 是新名片＝新證據；
+     **同一張圖片重掃**是舊證據。名片的掃描日期不拿來比較。沒有圖片的名片（以及匯入的 Hermes 舊名片）
+     沒有穩定的身分可判斷，一律當作**不是**新證據。
+   - **email 簽名檔**：信的**寄出日期**晚於使用者**最後一次修改該欄位**的那一天，才是新證據（同一天或較早
+     都不是）；寄出日期也決定同步視窗（§4）。
+   - 之後其他沒有日期的來源，只有具備穩定身分（例如圖片 hash）時才比照名片；否則一律當作不是新證據，
+     因為無法分辨是不是使用者已經看過、改正過的內容。
+   - **不是**使用者設定的欄位，不同的讀值照原本的規則（最新證據、優先序）處理。
+   - 規則是資料：`MergeRules.undated`（`card`、`import`）與每個欄位的 `user_conflict`
+     （組織欄位 `take_if_newer`，email、公司名稱與其他欄位 `propose_if_newer`）。
 
 4. **外部 ID 對照**：同一個人或公司在各來源有不同代碼（email、C4C ID、名片圖片 hash、姓名＋公司）。
    空間維護一張對照表；對不上時**不自動合併，先問使用者**（自動合併的條件見 §10 第 7 題）。
@@ -306,8 +318,8 @@ manifest 的 bytes 與 digest 不變（與 G3 的 `asset_bindings` 同樣做法�
 - `company`：`precedence`（user_stated > document > system_record > inferred）：名片勝過 C4C，
   C4C 不一致時變成待確認（`lower_trust`）；名片即使較舊也會取代 C4C 的值；同一等級以最新證據為準。
 - `title`、`department`、`division`、`business_group` 與其他欄位：`newest_evidence`，任何來源。
-- 使用者的值優先：不同的證據一律變成待確認（`user_conflict: propose`；較舊的證據也提議，沿用
-  第三次 live test 的「不論確定與否都不覆蓋」；`propose_if_newer` 是可選的另一種寫法）。
+- 使用者的值：M1 時不同的證據一律變成待確認（`user_conflict: propose`）；**2026-10-20 owner 決定後改為
+  只有新證據能動它**（§3.8.3「新證據」、§13；規則 `contacts.org.merge.v2`）。
 - `external_ids`：`c4c_account`、`c4c_contact`，只用來對應，不成為欄位值（`match_only`）。
 - `relations`：`reporting_line` 只有 `user`、`signature`、`email_content` 是實線；其他一律虛線。
 - `auto_merge`：其他來源只在 email 完全相同或外部 ID 已在對照表時自動合併，其餘先問。名片與簽名檔
@@ -436,10 +448,9 @@ Memory Service」的 Sync state 一項，以及名片的 `org-chart`／`harvest-
 被捨棄：單獨的「整理後畫圖」編排步驟或 Workflow（多一層、而且畫圖前就要決定候選，容易變成自動存）；
 Host 端把 `harvest_first` 預設為 true（所有既有呼叫者都會開始讀信）。
 
-### 12.4 仍待 owner 決定（M1 留下的）
+### 12.4 M1 留下的待決事項（已決定）
 
-使用者設定的值遇到**任何**不同證據都提議（現況），還是只有**較新**的證據才提議（規則裡的
-`propose_if_newer`）。M2 沒有改動合併規則，維持現況。
+使用者設定的值遇到不同證據時怎麼辦：owner 2026-10-20 已決定（§3.8.3「新證據」、§13）。
 
 ### 12.5 留給 M3 之後
 
@@ -447,4 +458,33 @@ Host 端把 `harvest_first` 預設為 true（所有既有呼叫者都會開始�
   只差 UI；「重新整理」按鈕就是 `reset_sync`（或 `harvest-signatures` 的 `full`）。
 - 搜尋上限 50 封：若真實信件量常超過，可在 `MailReader` 加上「直到某時間」的分頁，讓增量整理由舊到新讀完。
 - `extractor_version` 目前是程式常數；之後若擷取規則變成 Skill 資料，版本應跟著資料走。
+
+## 13. 新證據直接更新組織欄位、email 仍是待確認（owner 決定 2026-10-20，Claude Code 實作）
+
+決定紀錄：`docs/DECISIONS.md` 2026-10-20「New evidence updates organisational fields directly; email
+stays a proposal」。規則見 §3.8.3「新證據」。
+
+- **合併規則**（`contacts.org.merge.v2`）：`FieldMergeRule.user_conflict` 多了 `take_if_newer`；
+  `MergeRules.undated`（沒有證據日期的來源：`card`、`import`）。`merge.decide` 對使用者設定的值：
+  `undated` 來源只有 `novel`（圖片沒看過）才算新證據，否則 `keep`／`seen_evidence`；有日期的來源只有
+  日期（以天計）**晚於**使用者那次修改的日期才算，否則 `keep`／`older_evidence`；新證據在
+  `take_if_newer` 欄位直接 `take`（`new_evidence`，讀值不確定時仍 `propose`），其他欄位 `propose`。
+- **名片**：`CardStore._novel`——這個人的觀察裡從沒出現過這個 `sha256:` 圖片 ref。沒有圖片＝不是新證據。
+  名片觀察的 `source_date` 仍是掃描日，只用於非使用者值的最新證據排序與顯示，**不**用於使用者值的判斷。
+- **比較的「使用者修改時間」**：該欄位 provenance 的 `source_date`，也就是使用者說的那一天（與 `set_at`
+  同一天，本地日期）；簽名檔的寄出日期以天比較。
+- **舊證據**：不改、不提議、不列在 `kept`、不設 `email_differs`（完全不提）。
+- **新證據更新使用者的值**：一般的 `field` history，reason 為 `new card <圖片 ref>` 或
+  `newer email <message id>`，可用 `cards__undo` 復原（provenance 回到使用者）；回覆照常以
+  「上次是…，現在是…」開頭。
+- **Email**：永遠不被讀值覆蓋。使用者設定的 email 只有新證據才提議；不是使用者設定的照舊（不同就提議、
+  需確認）。
+- **一次性清理**（`CardStore._apply_newer_evidence_rule`，meta 標記
+  `contacts_org:rule:new_evidence_only:2026-10-20`）：開啟名片庫時（在 `cards.db` 遷移之後）把
+  針對使用者值、來自舊證據的待確認關閉（重掃已看過的圖片，或寄出日期不晚於使用者修改的簽名檔），
+  同一個 change id、每筆一列 history（kind `proposal_rule`，reason
+  「older than the person's change, rule 2026-10-20」），`cards__undo` 該 change id 就重新打開
+  （kind `proposal_reopen`）。只做一次；復原後不會再被關。來自新證據、仍開著的待確認保留給使用者決定。
+- 測試：`tests/test_business_cards_new_evidence.py`；調整既有測試中以舊規則為前提的斷言
+  （`test_business_cards_store.py`、`test_memory_service.py`、`test_business_cards_capabilities.py`）。
 

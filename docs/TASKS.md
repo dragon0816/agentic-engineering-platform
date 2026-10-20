@@ -2847,7 +2847,23 @@ s-k-20261011T102952` (not published).
   passed, 9 skipped, 1 failed (`test_schedule_web` real-browser timing; re-run alone: 5 passed);
   CI-like `C:/aepci-wk/venv` (`.[dev,office]`, `--basetemp=C:/aepci-wk/bt-m2`): 3428 passed, 34 skipped, 1 failed (`test_workflow_preview` practice SOP under load; re-run alone: 4 passed).
 - [ ] Owner live check of the incremental org chart (steps in HANDOFF.md).
-- [ ] Owner decision (from M1): `propose_if_newer` or keep proposing on any differing evidence.
+- [x] Owner decision (from M1), 2026-10-20: new evidence updates organisational fields directly;
+  email stays a proposal (Claude Code). Spec `docs/phases/ACCUMULATED_MEMORY.md` §3.8.3 "新證據" and
+  §13; decision `docs/DECISIONS.md` 2026-10-20 "New evidence updates organisational fields
+  directly; email stays a proposal"; `docs/CONTRACTS.md`; `docs/phases/BUSINESS_CARDS.md` §2;
+  `USER_GUIDE.zh-TW.md` §4.7.
+  1. f4d491ca `take_if_newer`, `MergeRules.undated`, `decide(novel=)`, `contacts.org.merge.v2`; cards
+     new only by an unseen image, signatures by sent date after the change; one-time undoable
+     cleanup of old-evidence proposals (after the migration too). Tests
+     `tests/test_business_cards_new_evidence.py` (5); assertions written for the superseded
+     "propose on any differing evidence" rule adapted in `test_business_cards_store.py`,
+     `test_memory_service.py`, `test_business_cards_capabilities.py`,
+     `test_business_cards_conversation.py` (re-scans of the same photo now stay silent; new photos
+     propose the email / update the place).
+  Verification: ruff check, ruff format --check, mypy clean; full pytest project `.venv` 3461
+  passed, 9 skipped, 2 failed (the conversation email test, then adapted, and a real-browser
+  timing test; both re-run alone: passed); CI-like `C:/aepci-wk/venv` (`--basetemp=
+  C:/aepci-wk/bt-m2r`): 3438 passed, 34 skipped, 0 failed.
 - [ ] M3: preferences and notes.
 
 

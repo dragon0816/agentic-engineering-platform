@@ -1,6 +1,6 @@
 # Handoff
 
-Updated: 2026-10-20 (Asia/Taipei), by Claude Code (accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-20 (Asia/Taipei), by Claude Code (owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
 ## Accumulated memory M2: sync state and the incremental org chart (2026-10-20, Claude Code) — latest
 
@@ -23,9 +23,25 @@ Spec §12 "M2 as built". Not pushed; Agent Web not restarted; live data and real
    `company` instead of `domain`. `org-chart` `harvest_first` (capability default false; the Skill
    procedure asks for true): one call harvests the company's domains, returns `harvest`
    candidates (never stored, not on the chart) or `harvest_note`, and draws the chart.
-3. (this commit) Docs: spec §12, CONTRACTS, DECISIONS, BUSINESS_CARDS §5/§6, TASKS, USER_GUIDE §4.7.
+3. 835e4867 Docs: spec §12, CONTRACTS, DECISIONS, BUSINESS_CARDS §5/§6, TASKS, USER_GUIDE §4.7.
+4. f4d491ca Owner rule 2026-10-20 (closes the M1 open point; spec §3.8.3 "新證據", §13): a value
+   the person set is touched only by new evidence: a card image never observed for that person
+   (cards carry no evidence date; re-scans and cards without an image are old evidence) or a
+   signature sent after the day of the person's change. Old evidence is ignored silently. New
+   evidence updates title / department / division / business group / honorific / phone / ext /
+   mobile / fax / address directly (history `new card <ref>` / `newer email <id>`, undoable);
+   the email and the other fields stay proposals. One-time cleanup on first open (after the
+   `cards.db` migration) dismisses open proposals from old evidence (kind `proposal_rule`,
+   undoable with `cards__undo` on its change id; meta marker so it runs once).
+5. (this commit) Docs for 4: spec §3.8 / §11.4 / §12.4 / §13, CONTRACTS, DECISIONS, BUSINESS_CARDS
+   §2, TASKS, USER_GUIDE §4.7.
 
-**Verification (2026-10-20):** ruff check, ruff format --check, mypy clean. Full pytest project
+**Verification for 4 (2026-10-20):** ruff check, ruff format --check, mypy clean; full pytest
+project `.venv` 3461 passed, 9 skipped, 2 failed (one conversation test then adapted to the rule,
+one real-browser timing test; both re-run alone: passed); CI-like `C:epci-wkenv`: 3438 passed, 34 skipped, 0 failed.
+New: `tests/test_business_cards_new_evidence.py` (5).
+
+**Verification for 1–3 (2026-10-20):** ruff check, ruff format --check, mypy clean. Full pytest project
 `.venv`: 3453 passed, 9 skipped, 1 failed (`test_schedule_web` real-browser timing under load;
 re-run alone 5 passed). CI-like `C:epci-wkenv` (confirmed pointing at this repo,
 `.[dev,office]`, `--basetemp=C:/aepci-wk/bt-m2`): 3428 passed, 34 skipped, 1 failed (`test_workflow_preview` practice SOP under load; re-run alone: 4 passed). New tests:
@@ -38,10 +54,17 @@ re-run alone 5 passed). CI-like `C:epci-wkenv` (confirmed pointing at this rep
 3. 「WNC 組織圖」 again: 「從 M/D 之後的新信：掃描 …」, only new mail (fast, few or no model calls).
 4. 「重新整理 WNC 的簽名檔」: 「重新整理（收件匣 180 天內）：…」.
 5. With Outlook closed: the chart is still drawn with 「這次沒有先整理新信：…」.
+6. New-evidence rule: the first card call after the restart runs the one-time cleanup; B's
+   「研展處 I → 研展處」 (a re-scan of the same old card) should no longer be listed by
+   「有哪些待確認？」 and 「B 的歷史」 shows a 依規則關閉的待確認讀值 row (「復原」 reopens it). Re-send
+   an old card photo: nothing changes and nothing is asked. Send a new card with another
+   department: the department updates with 「上次是…，現在是…」.
 
 **Open / risks:**
-- Owner decision still open from M1: propose on any differing evidence (current) or only newer
-  (`propose_if_newer`). Rules unchanged.
+- The card's `source_date` is still the scan day: it orders readings of fields the person did
+  not set (newest-evidence rule) and shows "seen on"; it is never compared with the person's
+  change. A misread re-scan of the same card can still change a field the person did not set
+  when filed under a later date (existing behaviour, rule 3 of the owner's decision).
 - The 50-message search cap stays; a pass that hits it says 「只處理了最新的 50 封」; older mail in
   the window is not reachable incrementally (same as before M2). Paging would need a reader
   "until" parameter.
@@ -50,7 +73,7 @@ re-run alone 5 passed). CI-like `C:epci-wkenv` (confirmed pointing at this rep
 - The tool default for `harvest_first` is false; the conversation relies on the procedure.
 
 **Next:**
-1. Owner live check above; owner decision on `propose_if_newer`.
+1. Owner live check above (steps 1–6).
 2. M3: preferences and notes (§5, §3.9).
 
 ## Accumulated memory M1: Memory Service and the business-cards migration (2026-10-20, Claude Code)

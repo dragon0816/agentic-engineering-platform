@@ -3988,6 +3988,54 @@ to true in the Host (every existing caller, CLI and Workflow included, would sta
 re-reading observed mail on a manual reset (re-proposes everyone already stored); moving the state
 to the newest message even when some could not be read (silently loses them).
 
+## 2026-10-20 — New evidence updates organisational fields directly; email stays a proposal (owner)
+
+Context: the M1 open point (a value the person set: propose on any differing evidence, or only on
+newer evidence). Owner decision 2026-10-20, final wording 「換部門, 或換職位, 就修改那一筆資料」:
+a department or title change simply updates that person's record. Spec
+`docs/phases/ACCUMULATED_MEMORY.md` §3.8.3 "新證據" and §13.
+
+Decisions:
+
+1. **What is new evidence** against a value the person set:
+   - a **business card** carries no evidence date: a card image hash **never observed before for
+     that person** is new; a re-scan of a seen image is old evidence. A card without an image (and
+     an imported Hermes card) has no stable identity and is never new evidence. The card's scan
+     date is never compared with the person's change;
+   - an **email signature** is new when its **sent date** (by day) is after the day of the
+     person's last change to that field (`field_sources.source_date` of the `user` value, the
+     local day of `set_at`); the same day or earlier is old. The sent date also drives the sync
+     window (M2);
+   - future sources without a date follow the card rule only with a stable identity (an image
+     hash); otherwise they are never new evidence, because nothing tells whether the person has
+     already seen and corrected them.
+2. **Old evidence** never changes or challenges a value the person set: no change, no proposal,
+   no `kept` entry, no `email_differs`. Fields the person did not set keep the existing
+   newest-evidence and precedence rules.
+3. **New evidence updates the organisational fields directly**, even over the person's value:
+   title, department, division, business group, honorific, phone, ext, mobile, fax, address
+   (`user_conflict: take_if_newer`). A normal `field` history row (reason `new card <image ref>` or
+   `newer email <message id>`), undoable; the reply leads with 「上次是…，現在是…」. An uncertain
+   reading only proposes.
+4. **The email stays a proposal** (the identity key; the model has misread emails on cards
+   several times): new evidence with another email is a 需確認 proposal, never an overwrite. The
+   company's official name keeps its precedence rule (card over C4C) and, like the remaining
+   fields, new evidence against the person's value proposes (`propose_if_newer`).
+5. **Rules as data**: `FieldMergeRule.user_conflict` gains `take_if_newer`; `MergeRules.undated`
+   lists the undated kinds (`card`, `import`); `merge.decide(novel=)`; `contacts.org.merge.v2`.
+6. **One-time cleanup**: on the first open of each actor's store (after the `cards.db` migration,
+   so moved data is covered), open proposals against a user-set value that came from old evidence
+   (a re-scanned seen image, a signature not newer than the change) are dismissed in one change
+   group, a `proposal_rule` history row each (reason "older than the person's change, rule
+   2026-10-20"), undoable with `cards__undo` (rows `proposal_reopen`); a meta marker makes it run
+   once, so an undo is not redone. Proposals from new evidence stay open for the person.
+
+Rejected: comparing a card's scan date (a re-scan would always look newer; the first-seen-date
+variant the owner considered first still invents a date a card does not have); proposing on new
+evidence for the organisational fields too (the owner wants the record simply updated);
+overwriting the email on new evidence (repeated misreads of the identity key); re-running the
+cleanup on every open (an undo would be silently redone).
+
 ## 2026-10-20 — Opt-in browser diagnostics (`AEP_BROWSER_DIAG_DIR`) for the CI real-browser failures
 
 Context: since 2026-10-20 04:58 UTC every "Platform verification" run has failed

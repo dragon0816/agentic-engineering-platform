@@ -2504,11 +2504,15 @@ memory M1". Contracts in `common.memory`; service in `memory.service`, `memory.m
   `system_record` | `inferred`} (must map `user` to `user_stated`; any other kind is refused),
   `default` / `fields` {field → `FieldMergeRule` {`policy` (`newest_evidence` | `precedence`),
   `precedence` (trust classes, highest first), `lower_conflict` (`propose` | `keep`),
-  `user_conflict` (`propose` | `propose_if_newer`)}}, `external_ids` (systems kept for
+  `user_conflict` (`propose` | `propose_if_newer` | `take_if_newer`: only new evidence counts
+  against the person's value; it proposes, or is taken unless uncertain)}}, `undated` (source
+  kinds without an evidence date, e.g. `card`: new only when `novel`, an identity never observed
+  for the entity), `external_ids` (systems kept for
   matching only), `relations` [{`relation`, `solid_evidence` [source kinds]}], `auto_merge`
   {`identities` (e.g. `email`), `mapped_external_ids`}}. `memory.merge.decide` returns
   `Decision` {`action` (`take` | `keep` | `propose`), `reason` (`empty` | `same` | `user_set` |
-  `lower_trust` | `uncertain` | `older_evidence` | `match_only`)}; `resolve` folds observations
+  `lower_trust` | `uncertain` | `older_evidence` | `match_only` | `seen_evidence` |
+  `new_evidence`)}; `decide(..., novel=)`; `resolve` folds observations
   into current values and conflicts; `auto_merge` returns {`entity_id`, `by`, `ask`,
   `candidates`}.
 - **Storage**: `<workspace>/memory/<actor-key>/memory.sqlite` per actor (`memory_path`).
@@ -2561,9 +2565,14 @@ memory M1". Contracts in `common.memory`; service in `memory.service`, `memory.m
   key=, limit=)`. Per actor like every table (one file per actor).
 - **`contacts/org`** (`capabilities.business_cards.space`): manager
   `engineering/business-cards`, kinds `entities` and `sync_state` (M2), `CONFIDENTIAL`, `until_deleted`,
-  `contacts.org.person.v1`, `contacts.org.merge.v1` (company by precedence, card over C4C;
-  title / department / division / business group by newest evidence; the person's value wins
-  and differing evidence proposes; `c4c_account` / `c4c_contact` match only; reporting lines
+  `contacts.org.person.v1`, `contacts.org.merge.v2` (company by precedence, card over C4C;
+  title / department / division / business group by newest evidence; owner 2026-10-20: the
+  person's value is touched only by new evidence (`undated` `card` and `import` by image
+  novelty, signatures by sent date after the day of the change), which updates title,
+  department, division, business group, honorific, phone, ext, mobile, fax and address
+  (`take_if_newer`) and proposes for the email, the company and the rest (`propose_if_newer`);
+  a one-time cleanup dismisses old-evidence proposals, history kind `proposal_rule`, undone as
+  `proposal_reopen`; `c4c_account` / `c4c_contact` match only; reporting lines
   solid only on `user`, `signature` or `email_content`; auto-merge on an identical email or a
   mapped external id).
 - **Migration** (`capabilities.business_cards.migration`): on the first open, verified byte
