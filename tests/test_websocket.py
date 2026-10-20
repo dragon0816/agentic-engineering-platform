@@ -470,7 +470,12 @@ def test_a_trace_tells_a_timeout_from_an_abort_from_an_end_of_stream(
     def silent(connection: socket.socket) -> None:
         hold.wait(5)
 
+    shaken = threading.Event()
+
     def reset(connection: socket.socket) -> None:
+        # Reset only once the client holds the handshake answer: on Windows an
+        # RST discards data not yet read, which would fail the handshake instead.
+        shaken.wait(5)
         connection.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", 1, 0))
 
     def leave(connection: socket.socket) -> None:
@@ -484,7 +489,9 @@ def test_a_trace_tells_a_timeout_from_an_abort_from_an_end_of_stream(
     ):
         server = start(served, behave)
         trace = SocketTrace()
+        shaken.clear()
         with WebSocket(server.url, timeout_s=5, trace=trace) as ws:
+            shaken.set()
             # Short only after the handshake, which a loaded machine may be
             # slow to finish.
             ws.socket.settimeout(timeout)
