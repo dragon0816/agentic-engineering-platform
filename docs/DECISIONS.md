@@ -4100,3 +4100,75 @@ The job still ends failed whenever pytest or any other step fails, and every tes
 Rejected: `continue-on-error: true` on pytest (the job would turn green with failing tests);
 `always()` (it would run after cancellation and after a failed install, where every later step
 fails for that reason alone).
+
+## 2026-10-20 — Loan replies 06 / 06b: two Workflows, drafts, per-message send
+
+Context: owner, 2026-10-20: port rs_workflow_system 06 (loan_scan) and 06b (loan_process) without
+n8n; two Workflows; drafts by default with an optional send that needs one approval per message;
+no schedule for now. Closes owner question 5 of `docs/phases/RS_WORKFLOW_MIGRATION.md`.
+
+Decision:
+1. Two Workflows, `engineering/rs-loan-customer-block-scan` (`/run 6`) and
+   `engineering/rs-loan-queue-reply`, each runnable alone. The producer does not start the
+   consumer: its last step returns a `follow_up` (a Workflow identity and a label) that Agent Web
+   draws as the consumer's run form under the answer (`workflow_form`, origin `follow_up`) and
+   Telegram as a button sending `/run engineering/rs-loan-queue-reply`, which opens the question
+   flow. The consumer writes customer-facing drafts and drives signed-in browsers; a chain would
+   skip the per-run confirmation the run-approval model requires for `write` Workflows.
+2. ADAPT with the source modules carried: `rules`, `templates`, `queue` are the source text plus
+   declared replacements; `scan`, `process` are the source jobs with seams (bridge, queue root,
+   stamp switch) and `process_one` split into `look_up` + `draft_reply`. The source tests are
+   vendored unchanged apart from imports as the oracle (`tests/loan_oracle.py`). WRAP was not
+   possible: the jobs need the source's HTTP Bridge, `requests` and its PowerShell Edge sessions.
+3. Capabilities: `loan/scan-mail` (read), `loan/enqueue` (write), `loan/look-up` (read, web),
+   `loan/draft-replies` (write, Outlook draft), `loan/offer-send` (write, local cards); the send
+   `loan/send-reply` is `external_side_effect`, declared and never installed.
+4. Sending: `host_runtime/loan_reply_cards.py` keeps `ls-` cards (CardStore, shared file between
+   the offering step and Agent Web). Send / Keep as draft; one card per draft; no send-all; Agent
+   Web only (Telegram shows the card, `web_only`), as for the agent's mail cards; the draft is
+   sent only if its recipients, subject and attachment names still match the card
+   (`integrations.outlook_send`); a card expires after 24 hours and the draft stays. The guard
+   test now allows exactly two importers of `outlook_send` besides Agent Web and pins one
+   `send(` call in each card's `decide`.
+5. Queue: the source's dedicated file queue under `workspace/loan-reply/loan-queue` (pending /
+   claimed / done / failed, atomic-rename claims, reclaim TTL, run lock), not the Memory Service
+   `sync_state`, which is a forward-only cursor and has no per-item claim or failed state.
+6. Credentials: none are stored or asked. The loan portal and C4C sign in through persistent
+   Edge profiles under `workspace/loan-reply/edge/`; the portal's Entra account tile is clicked as
+   in the source (`loan_account` setting is an address, not a secret).
+7. A queued link is opened only when it points at `portal_origin` (default
+   `https://rstw-portal.rsint.net`); the source opened any FastView link from a mail.
+8. A dry run writes nothing: the first-run cut-off is stamped by the first real scan (the
+   source's dry scan stamped it).
+9. Shipped switched off (`host_runtime.assets.shipped_off`, installed into `disabled/` once by
+   `install-bundled` and written there by `export-assets`): a loan desk's business Workflows; a
+   colleague who needs them switches them on.
+10. No schedule is created; the person may add one in Schedules (USER_GUIDE §9.3).
+
+Rejected alternatives:
+- One Workflow with an automatic chain (the n8n shape): the consumer would run unconfirmed.
+- Sending in bulk or from Telegram: the owner's rule is one press per message; mail cards are
+  decided in Agent Web.
+- Reusing the agent's `ml-` mail cards: they belong to a waiting agent turn and expire when it
+  ends; Workflow drafts have no waiting turn.
+- Memory Service `sync_state` as the queue (see 5).
+- A send capability a Workflow step could call: any caller other than a card press could send.
+
+## 2026-10-21 — Knowledge Strategy v1.3 approved; BI domain review; priority lives in the Skill
+
+Owner answers on GitHub issues #211, #213 and #222 (2026-10-21):
+
+- **#211 Knowledge Strategy v1.3 approved** ("核準"): BI Schema v1, the revised MVP scope (Case A first) and
+  the integrated schedule. AEP-K02 and later are no longer blocked on owner approval; they follow the
+  schedule in v1.3 §7 and the E2E-01 priority.
+- **#213 BI knowledge gets domain-owner review** ("是的"). This is a BI exception to
+  `docs/phases/KNOWLEDGE_COLLAB.md` (no domain-owner approval for the general Wiki), which stays as it is
+  for the general Wiki. ADR-K5 is decided. The E2E-05 / ARCHITECTURE wording that required domain-owner
+  approval is to be reconciled to "BI: yes; general Wiki: no" when K07 is built.
+- **#222 priority is not stored per document or record.** Owner: priority means "how much this helps a
+  company opportunity", a domain-knowledge judgement; it belongs in the **Skill** (its procedure and rubric),
+  not as a field set on every document. This supersedes the 2026-10-19 decision to scope a stored
+  `priorities` collection by market and period, and the ADR-K11 priority rubric as stored data: Schema v1
+  and the mock drop the stored `priorities`; ranking is computed by the BI Skill when asked, and the
+  dashboard ranks by the Skill's assessment with its reasons shown. The "market" question (#222) is
+  therefore closed.
