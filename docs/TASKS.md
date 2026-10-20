@@ -2960,3 +2960,11 @@ s-k-20261011T102952` (not published).
   (`.[dev,office]`, `--basetemp=C:/aepci-wk/bt-loan`): 3656 passed, 34 skipped, 0 failed;
   project `.venv` (shared tree): 3681 passed, 9 skipped, 0 failed.
 - [ ] Owner live check on the company PC (checklist in `docs/phases/RS_WORKFLOW_MIGRATION.md`).
+- [x] Live-check fix B1: shipped manifests changed after install reach existing installs
+  (2026-10-21, Claude Code). `host_runtime/skill_packs.py`: digest ledger
+  `workspace/bundled-assets.json`, in-place refresh of files AEP wrote and nobody changed (switch
+  state kept, "updated" in the installer output), edited and Shared Platform identities kept,
+  pre-ledger files refreshed with a copy in `workspace/replaced-assets/`;
+  `memory_spaces.manager_states` → `outdated` instead of 「無主」 for an installed manager without its
+  declaration. Decision `docs/DECISIONS.md` 2026-10-21 "An update refreshes a shipped manifest".
+  Tests in `tests/test_bundled_skills.py`.

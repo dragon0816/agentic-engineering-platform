@@ -4327,3 +4327,52 @@ the next red run's traces to confirm a timeout under a pending navigation.
 
 Rejected: a new `timed_out` error code now (a contract change on a guess; the trace already tells
 timeout from abort); switching CI to Chrome (owner's call).
+
+## 2026-10-21 — An update refreshes a shipped manifest AEP wrote and nobody changed; a manager without its declaration is "outdated", not orphaned
+
+Context (live check after updating to accumulated memory M1–M4): the installed
+`engineering/business-cards@1.0.0` (written 10/20) had no `memory_spaces`, so the memory page
+called `contacts/org` 「無主」, `notes__search` was not offered on business-card turns, and every
+procedure fix made to that Skill since 10/20 had never reached the PC. `install-bundled`
+(`update.ps1`) kept any file whose identity was already present ("kept"), and the business-cards
+manifest had been changed in place at 1.0.0 some twenty times since 10/20 (other shipped Skills
+changed in M1–M4 or the loan work were bumped, e.g. `coding` 1.7.0 → 1.8.0, or are new, the loan
+Skill and Workflows; business-cards is the only shipped manifest with `memory_spaces`).
+
+Decision:
+1. `skill_packs.install` records the sha256 of every manifest file it writes in
+   `workspace/bundled-assets.json` (`<kind>/<file name>`). On an update, an identity already
+   present, on or off, is refreshed in place to the shipped content when the file is what AEP
+   wrote (digest matches the record). It never moves, so a switched-off Skill stays off and a
+   switched-on one stays on; nothing is switched on again; removed ones are still not brought back.
+   The installer prints `Updated to this version's content, switched on or off as before: N` and
+   `updated <kind> <ns>/<name>@<version>` per asset.
+2. Left as they are: a file whose bytes differ from the record (changed on this PC: "changed on
+   this PC since it was installed, so not updated"), and an identity this PC takes from the Shared
+   Platform (`platform-selections.json` / `authorization.json` select it: published versions are
+   immutable and a sync refuses another file under the same identity). Identities AEP does not
+   ship are never touched.
+3. A file installed before the record existed (every PC updated before today) is refreshed once,
+   and its earlier bytes are kept in `workspace/replaced-assets/<UTC time>/skills|workflows/[disabled/]`
+   so a hand edit, if there was one, can be recovered; the output names the copy.
+4. `memory_spaces.manager_states` marks a Skill or Workflow that is installed but whose file
+   declares no manager role (an older copy) `outdated`, not missing. The 資料 tab shows
+   「Skill 已安裝但版本較舊：請更新 AEP，資料不必刪除」, and the M5 health check does not count it as
+   an orphan.
+
+Reason: a general fix, so any shipped manifest change (procedure, `memory_spaces`, selector hints)
+reaches existing installs without a version bump; the switch state and the person's edits stay
+theirs. A bump to 1.1.0 was checked and rejected for this case: the old 1.0.0 would be set aside in
+`disabled/` (or the new one kept off when the person had switched 1.0.0 off), the
+`business-cards/*@1.0.0` capabilities and their grants are separate identities and stay 1.0.0, the
+memory registry's manager key is `<namespace>/<name>` (unchanged), the tools are offered for any
+switched-on version, `CardStore` opens the space as `CARDS_SKILL` (would follow the constant), and
+draft-card twin detection keys on the name with the newer version on — workable, yet it fixes only
+this one Skill, leaves any later in-place change of another shipped manifest stuck, and every future
+procedure fix would need another bump.
+
+Rejected alternatives: bumping business-cards to 1.1.0 only (above); always overwriting shipped
+identities (loses hand edits and breaks Shared Platform syncs); refreshing legacy files without a
+backup (a hand edit before the record existed could not be told apart); a provenance field inside
+the manifest (changes the bytes and digests of every published manifest).
+

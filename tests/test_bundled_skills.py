@@ -17,7 +17,7 @@ from test_host_wiring import host_json, ready
 from agent.skills import SkillManifest, SkillRegistry
 from capabilities.business_cards.manifest import CARDS_SKILL
 from common.assets import AssetIdentity
-from host_runtime import agent_setup, asset_shelf, skill_packs
+from host_runtime import agent_setup, asset_shelf, memory_spaces, skill_packs
 from host_runtime.agent_setup import MARKER_FILE, SKILLS, Environment
 from host_runtime.assets import personal, shipped
 from host_runtime.business_cards_tools import business_cards_tools
@@ -425,3 +425,130 @@ def test_an_update_leaves_earlier_weekly_assets_alone_and_never_brings_them_back
     assert not (layout.skills / WEEKLY_FILES["skills"]).exists()
     assert not workflow.exists()
     assert not list((layout.skills / "disabled").glob("*weekly-report*"))
+
+
+# -- a shipped manifest changed after it was installed (live check 2026-10-21) --
+
+
+def _stale_cards() -> bytes:
+    """The business-cards Skill as an earlier install wrote it: same identity,
+    no memory_spaces (installed on 10/20, before M1)."""
+    (manifest,) = [m for m in shipped() if m.metadata.identity == CARDS_SKILL]
+    old = manifest.model_copy(update={"memory_spaces": (), "instructions": "Old procedure."})
+    return (json.dumps(old.model_dump(mode="json"), indent=2, ensure_ascii=False) + "\n").encode(
+        "utf-8"
+    )
+
+
+def _shipped_cards() -> bytes:
+    (manifest,) = [m for m in shipped() if m.metadata.identity == CARDS_SKILL]
+    return (
+        json.dumps(manifest.model_dump(mode="json"), indent=2, ensure_ascii=False) + "\n"
+    ).encode("utf-8")
+
+
+def test_a_stale_shipped_manifest_from_before_the_ledger_is_refreshed(
+    tmp_path: Path, bundle: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    config, layout = ready(tmp_path)
+    _install(layout, bundle)
+    cards = layout.skills / _file(CARDS_SKILL)
+    # An install from before the ledger: the old bytes, and no record.
+    cards.write_bytes(_stale_cards())
+    (layout.workspace_root / skill_packs.LEDGER).unlink()
+    assert memory_spaces.manager_states(layout)["engineering/business-cards"] == "outdated"
+    path = host_json(tmp_path, config)
+    args = ["assets", "--config", str(path), "install-bundled", "--bundle", str(bundle)]
+    assert main([*args, "--no-agent-skills"]) == 0
+    out = capsys.readouterr().out
+    assert "updated skill engineering/business-cards@1.0.0" in out
+    assert cards.read_bytes() == _shipped_cards()
+    manifest = SkillManifest.model_validate_json(cards.read_text(encoding="utf-8"))
+    assert manifest.memory_spaces
+    assert memory_spaces.manager_states(layout)["engineering/business-cards"] == "on"
+    # The earlier bytes are kept, in case someone had edited them.
+    (backup,) = (layout.workspace_root / skill_packs.REPLACED).rglob(_file(CARDS_SKILL))
+    assert backup.read_bytes() == _stale_cards()
+    assert backup.parent.name == "skills"
+    # Idempotent: a second run changes nothing and keeps no further copy.
+    ledger = skill_packs.read_ledger(layout)
+    again = skill_packs.install_bundle(layout, bundle, shipped=shipped())
+    assert again.updated == [] and again.switched_on == [] and again.switched_off == []
+    assert skill_packs.read_ledger(layout) == ledger
+    assert len(list((layout.workspace_root / skill_packs.REPLACED).rglob("*.json"))) == 1
+    assert cards.read_bytes() == _shipped_cards()
+
+
+def test_a_refresh_keeps_a_switched_off_skill_off(tmp_path: Path, bundle: Path) -> None:
+    layout = HostLayout.under(tmp_path / "workspace")
+    _install(layout, bundle)
+    asset_shelf.switch_off(layout, "skill", CARDS_SKILL)
+    shelved = layout.skills / "disabled" / _file(CARDS_SKILL)
+    # AEP wrote the older content (recorded), and nobody changed it since.
+    shelved.write_bytes(_stale_cards())
+    ledger = skill_packs.read_ledger(layout)
+    ledger[f"skill/{_file(CARDS_SKILL)}"] = skill_packs._digest(_stale_cards())
+    skill_packs._write_ledger(layout, ledger)
+
+    report = skill_packs.install_bundle(layout, bundle, shipped=shipped())
+
+    assert report.updated == ["skill engineering/business-cards@1.0.0"]
+    assert report.switched_on == [] and report.switched_off == []
+    assert shelved.read_bytes() == _shipped_cards()
+    assert not (layout.skills / _file(CARDS_SKILL)).exists()
+    # Recorded, so no backup copy was needed.
+    assert not (layout.workspace_root / skill_packs.REPLACED).exists()
+    assert memory_spaces.manager_states(layout)["engineering/business-cards"] == "off"
+
+
+def test_an_edited_or_own_asset_is_never_overwritten(tmp_path: Path, bundle: Path) -> None:
+    layout = HostLayout.under(tmp_path / "workspace")
+    own = AssetIdentity(namespace="lab", name="mine", version="1.0.0")
+    skill_packs.install(layout, switched_on=[_skill(own, "mine")])
+    mine = layout.skills / _file(own)
+    mine.write_text(mine.read_text(encoding="utf-8").replace("Do the thing.", "Mine."), "utf-8")
+    own_bytes = mine.read_bytes()
+    _install(layout, bundle)
+    cards = layout.skills / _file(CARDS_SKILL)
+    # Edited on this PC after AEP installed it: the ledger says AEP wrote other bytes.
+    edited = cards.read_bytes().replace(b"Business cards and org chart", b"My cards")
+    cards.write_bytes(edited)
+
+    report = skill_packs.install_bundle(layout, bundle, shipped=shipped())
+
+    assert report.updated == []
+    assert cards.read_bytes() == edited
+    assert any(
+        "business-cards@1.0.0: changed on this PC since it was installed" in line
+        for line in report.lines
+    )
+    assert mine.read_bytes() == own_bytes
+    assert not (layout.workspace_root / skill_packs.REPLACED).exists()
+
+
+def test_a_shipped_identity_taken_from_the_platform_is_left_as_it_is(
+    tmp_path: Path, bundle: Path
+) -> None:
+    from common.authorization import DeviceAssetSelection, DeviceAuthorization
+
+    layout = HostLayout.under(tmp_path / "workspace")
+    _install(layout, bundle)
+    cards = layout.skills / _file(CARDS_SKILL)
+    cards.write_bytes(_stale_cards())
+    (layout.workspace_root / skill_packs.LEDGER).unlink()
+    now = datetime.now(UTC)
+    decided = DeviceAuthorization(
+        bridge_id="bridge-a",
+        issued_at=now,
+        selections=(
+            DeviceAssetSelection(
+                bridge_id="bridge-a", actor="alice", kind="skill", asset=CARDS_SKILL, decided_at=now
+            ),
+        ),
+    )
+    layout.platform_selections.write_text(decided.model_dump_json(), encoding="utf-8")
+
+    report = skill_packs.install_bundle(layout, bundle, shipped=shipped())
+
+    assert report.updated == [] and cards.read_bytes() == _stale_cards()
+    assert any("taken from the Shared Platform" in line for line in report.lines)

@@ -14,7 +14,14 @@ Two kinds arrive with a bundle:
 Rules, the same on a first install and on every update:
 
 - a manifest whose exact identity is already here, switched on or off, is
-  left as it is: never overwritten, never switched on again;
+  never switched on again; its file is refreshed in place (on stays on, off
+  stays off) only when AEP wrote it and nobody changed it since: the digest
+  of what each install wrote is recorded in `workspace/bundled-assets.json`.
+  A file changed on this PC since, or one this PC takes from the Shared
+  Platform, is left as it is. A file installed before that record existed
+  is refreshed and its earlier bytes are kept in
+  `workspace/replaced-assets/<time>/` (live check 2026-10-21: a shipped
+  1.0.0 manifest changed after it was installed never reached updates);
 - one the person removed (`workspace/removed/removed.jsonl`) is not brought
   back;
 - a Skill meant to be on stays off when the person switched an earlier
@@ -37,6 +44,7 @@ import re
 import shutil
 from collections.abc import Iterable
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal
 
@@ -50,6 +58,10 @@ Kind = Literal["skill", "workflow"]
 STORE = "agent-skills"
 DISABLED = "disabled"
 REMOVED_JOURNAL = Path("removed") / "removed.jsonl"
+#: What each install wrote, by `<kind>/<file name>`: the sha256 of the bytes.
+LEDGER = Path("bundled-assets.json")
+#: Where a refresh keeps a file installed before the ledger existed.
+REPLACED = Path("replaced-assets")
 #: Where a bundle keeps what this module installs.
 BUNDLE_IN_USE = "aep-skills"
 BUNDLE_PACK = "hermes"
@@ -62,6 +74,7 @@ class Report:
 
     switched_on: list[str] = field(default_factory=list)
     switched_off: list[str] = field(default_factory=list)
+    updated: list[str] = field(default_factory=list)
     kept: list[str] = field(default_factory=list)
     lines: list[str] = field(default_factory=list)
 
@@ -70,9 +83,97 @@ class Report:
             f"Skills and Workflows installed switched on: {len(self.switched_on)}",
             f"Installed switched off (switch on in Agent Web > Capabilities): "
             f"{len(self.switched_off)}",
+            f"Updated to this version's content, switched on or off as before: {len(self.updated)}",
+            *(f"  updated {label}" for label in self.updated),
             f"Already here, left as they are: {len(self.kept)}",
             *self.lines,
         ]
+
+
+def _digest(content: bytes) -> str:
+    return hashlib.sha256(content).hexdigest()
+
+
+def read_ledger(layout: HostLayout) -> dict[str, str]:
+    """`<kind>/<file name>` -> sha256 of the bytes an install wrote there."""
+    path = layout.workspace_root / LEDGER
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    assets = data.get("assets") if isinstance(data, dict) else None
+    if not isinstance(assets, dict):
+        return {}
+    return {str(key): value for key, value in assets.items() if isinstance(value, str)}
+
+
+def _write_ledger(layout: HostLayout, ledger: dict[str, str]) -> None:
+    payload = json.dumps({"assets": dict(sorted(ledger.items()))}, indent=2) + "\n"
+    write_atomically(layout.workspace_root / LEDGER, payload.encode("utf-8"))
+
+
+def _from_platform(layout: HostLayout, kind: Kind, identity: AssetIdentity) -> bool:
+    """The Shared Platform's last synchronized decisions select this identity
+    here: its bytes are the platform's (published versions are immutable),
+    and a sync refuses another file under the same identity."""
+    from common.authorization import DeviceAuthorization
+
+    for path in (layout.platform_selections, layout.authorization):
+        if not path.is_file():
+            continue
+        try:
+            decided = DeviceAuthorization.model_validate_json(path.read_text(encoding="utf-8-sig"))
+        except (OSError, ValueError):
+            continue
+        if any(item.kind == kind and item.asset.key == identity.key for item in decided.selections):
+            return True
+    return False
+
+
+def _refresh(
+    layout: HostLayout,
+    present: Path,
+    kind: Kind,
+    identity: AssetIdentity,
+    content: bytes,
+    *,
+    ledger: dict[str, str],
+    report: Report,
+    label: str,
+) -> None:
+    """An identity already here, on or off: bring its file to the shipped
+    content when AEP wrote it and nobody changed it since. It never moves, so
+    a switched-off one stays off."""
+    key = f"{kind}/{present.name}"
+    try:
+        current = present.read_bytes()
+    except OSError:
+        report.kept.append(label)
+        return
+    if current == content:
+        ledger[key] = _digest(content)
+        report.kept.append(label)
+        return
+    if _from_platform(layout, kind, identity):
+        report.kept.append(label)
+        report.lines.append(f"  {label}: taken from the Shared Platform, so it is left as it is")
+        return
+    recorded = ledger.get(key)
+    if recorded is not None and recorded != _digest(current):
+        report.kept.append(label)
+        report.lines.append(f"  {label}: changed on this PC since it was installed, so not updated")
+        return
+    if recorded is None:
+        # Installed before the ledger existed: keep the earlier bytes.
+        stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+        assets = (layout.skills if kind == "skill" else layout.workflows).parent
+        backup = layout.workspace_root / REPLACED / stamp / present.relative_to(assets)
+        backup.parent.mkdir(parents=True, exist_ok=True)
+        backup.write_bytes(current)
+        report.lines.append(f"  {label}: the earlier file is kept in {backup}")
+    write_atomically(present, content)
+    ledger[key] = _digest(content)
+    report.updated.append(label)
 
 
 def store_dir(layout: HostLayout) -> Path:
@@ -148,14 +249,24 @@ def install_manifest(
     enabled: bool,
     removed: set[tuple[str, str]],
     report: Report,
+    ledger: dict[str, str] | None = None,
 ) -> None:
     kind: Kind = "skill" if isinstance(manifest, SkillManifest) else "workflow"
     folder = layout.skills if kind == "skill" else layout.workflows
     identity = manifest.metadata.identity
     name = _file(identity)
     label = f"{kind} {_label(identity)}"
-    if (folder / name).exists() or (folder / DISABLED / name).exists():
-        report.kept.append(label)
+    payload = json.dumps(manifest.model_dump(mode="json"), indent=2, ensure_ascii=False)
+    content = payload.encode("utf-8") + b"\n"
+    for present in (folder / name, folder / DISABLED / name):
+        if not present.exists():
+            continue
+        if ledger is None:
+            report.kept.append(label)
+        else:
+            _refresh(
+                layout, present, kind, identity, content, ledger=ledger, report=report, label=label
+            )
         return
     if (kind, _label(identity)) in removed:
         report.kept.append(label)
@@ -191,8 +302,9 @@ def install_manifest(
                     report.switched_off.append(older_label)
                 report.lines.append(f"  set aside the older {path.stem} in disabled")
     target = folder / name if on else folder / DISABLED / name
-    payload = json.dumps(manifest.model_dump(mode="json"), indent=2, ensure_ascii=False)
-    write_atomically(target, payload.encode("utf-8") + b"\n")
+    write_atomically(target, content)
+    if ledger is not None:
+        ledger[f"{kind}/{name}"] = _digest(content)
     (report.switched_on if on else report.switched_off).append(label)
 
 
@@ -325,6 +437,8 @@ def install(
     the store and, with an `environment`, match the agents' copies."""
     report = Report()
     removed = removed_by_person(layout)
+    ledger = read_ledger(layout)
+    before = dict(ledger)
     layout.skills.mkdir(parents=True, exist_ok=True)
     layout.workflows.mkdir(parents=True, exist_ok=True)
     # Lower versions first, so a newer one sets the older aside.
@@ -332,9 +446,15 @@ def install(
         switched_on, key=lambda m: (m.metadata.identity.key[:2], _version(m.metadata.identity))
     )
     for manifest in on:
-        install_manifest(layout, manifest, enabled=True, removed=removed, report=report)
+        install_manifest(
+            layout, manifest, enabled=True, removed=removed, report=report, ledger=ledger
+        )
     for manifest in switched_off:
-        install_manifest(layout, manifest, enabled=False, removed=removed, report=report)
+        install_manifest(
+            layout, manifest, enabled=False, removed=removed, report=report, ledger=ledger
+        )
+    if ledger != before:
+        _write_ledger(layout, ledger)
     for source, pack in agent_stores:
         install_agent_store(layout, source, pack=pack, report=report)
     if environment is not None:

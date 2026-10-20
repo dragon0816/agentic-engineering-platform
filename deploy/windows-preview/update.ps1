@@ -13,7 +13,8 @@ param(
 # host.json and the workspace are kept: install.ps1 rewrites only the device
 # identity and keeps every other host.json setting. Bundled Skills new in this
 # bundle are added; those already here keep their state (a switched-off one is
-# never switched on again, a removed one is not brought back).
+# never switched on again, a removed one is not brought back) and get this
+# bundle's content unless they were changed on this PC.
 $ErrorActionPreference = "Stop"
 $ConfigPath = Join-Path $InstallRoot "host.json"
 if (-not (Test-Path -LiteralPath $ConfigPath -PathType Leaf)) {

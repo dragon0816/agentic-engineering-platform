@@ -265,8 +265,10 @@ else {
     }
 }
 # The bundled Skills: AEP's in-use Skills (and the Workflows they call)
-# switched on, the Hermes skill pack switched off. What is already here is
-# kept as it is, switched on or off; nothing removed is brought back. The
+# switched on, the Hermes skill pack switched off. What is already here keeps
+# its state, switched on or off; a file AEP wrote and nobody changed is
+# refreshed to this bundle's content (skill_packs.py); nothing removed is
+# brought back. The
 # coding-agent copy of a pack skill reaches Claude Code / Copilot only while
 # it is switched on, and not at all with -NoAgentSkills.
 $BundledArguments = @("assets", "--config", $ConfigPath, "install-bundled", "--bundle", $BundleRoot)

@@ -85,8 +85,12 @@ def manager_states(layout: HostLayout) -> dict[str, str]:
     """`<namespace>/<name>` of every Skill or Workflow installed here that
     declares itself a space's manager, `on` or `off` (switched off): a space
     whose manager is neither (nor the Host) is an orphan (§3.6, the memory
-    page)."""
+    page). A Skill or Workflow installed here whose file declares no manager
+    role (an older copy, written before its manifest declared its spaces) is
+    `outdated`: installed, waiting for an update, not an orphan (live check
+    2026-10-21)."""
     found: dict[str, str] = {}
+    installed: set[str] = set()
     folders: tuple[tuple[Path, type[SkillManifest] | type[WorkflowManifest], str], ...] = (
         (layout.skills, SkillManifest, "on"),
         (layout.skills / DISABLED, SkillManifest, "off"),
@@ -101,8 +105,11 @@ def manager_states(layout: HostLayout) -> dict[str, str]:
                 manifest = model.model_validate_json(path.read_text(encoding="utf-8-sig"))
             except (OSError, ValueError):
                 continue
+            namespace, name = asset_key(manifest.metadata.identity)
+            installed.add(f"{namespace}/{name}")
             if any(item.role == "manager" for item in declarations_of(manifest)):
-                namespace, name = asset_key(manifest.metadata.identity)
                 if found.get(f"{namespace}/{name}") != "on":
                     found[f"{namespace}/{name}"] = state
+    for key in installed - found.keys():
+        found[key] = "outdated"
     return found

@@ -9184,7 +9184,8 @@ async function memExportNotes() {
 
 // 資料
 const MEM_MANAGER_STATES = {on: ["已開啟", "on"], off: ["已關閉（唯讀）", "mem-off"],
-  host: ["內建", "on"], missing: ["無主：管理的 Skill 已不在這台電腦", "mem-orphan"]};
+  host: ["內建", "on"], missing: ["無主：管理的 Skill 已不在這台電腦", "mem-orphan"],
+  outdated: ["Skill 已安裝但版本較舊：請更新 AEP，資料不必刪除", "mem-off"]};
 
 function memRenderSpaces() {
   const list = el("mem-spaces-list"); list.replaceChildren();
