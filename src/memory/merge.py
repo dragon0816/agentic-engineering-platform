@@ -39,6 +39,7 @@ def decide(
     offered_date: str,
     uncertain: bool = False,
     same: Callable[[str, str], bool] = same_text,
+    novel: bool = False,
 ) -> Decision:
     """What the rules do with `offered` for a field whose current value is
     `current`, set from a source of `current_kind` dated `current_date` (no
@@ -48,8 +49,11 @@ def decide(
     2. an external id system's value: kept, it is for matching only;
     3. the person's own statement: taken;
     4. the current value is the person's own (also an emptied one): never
-       replaced; the offered value is a proposal (`propose_if_newer`: only
-       when it is not older than the statement);
+       replaced by old evidence; the offered value is a proposal
+       (`propose_if_newer` / `take_if_newer`: only new evidence counts, a
+       dated source dated after the statement's day, an `undated` source
+       only when `novel`, its identity never seen before; `take_if_newer`
+       takes new evidence unless uncertain);
     5. nothing current: taken;
     6. `precedence`: a lower trust class never replaces a higher one (a
        proposal, or kept); a higher one wins whatever its date;
@@ -69,8 +73,19 @@ def decide(
     rule = rules.rule_for(field_name)
     current_trust = None if current_kind is None else rules.trust_of(current_kind)
     if current_trust == "user_stated":
-        if rule.user_conflict == "propose_if_newer" and offered_date < current_date:
-            return Decision(action="keep", reason="older_evidence")
+        # Owner 2026-10-20: only new evidence counts against the person's
+        # value. An undated source (a card) by its identity, never by a date;
+        # a dated one by day, after the statement's day. New evidence is a
+        # proposal (`propose_if_newer`) or, sure, the new value
+        # (`take_if_newer`).
+        if rule.user_conflict in ("propose_if_newer", "take_if_newer"):
+            if offered_kind in rules.undated:
+                if not novel:
+                    return Decision(action="keep", reason="seen_evidence")
+            elif offered_date[:10] <= current_date[:10]:
+                return Decision(action="keep", reason="older_evidence")
+            if rule.user_conflict == "take_if_newer" and not uncertain:
+                return Decision(action="take", reason="new_evidence")
         return Decision(action="propose", reason="user_set")
     if not current:
         return Decision(action="take")

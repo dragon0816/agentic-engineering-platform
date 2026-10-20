@@ -122,6 +122,18 @@ def _now() -> str:
     return _clock().isoformat(timespec="seconds")
 
 
+#: The one-time cleanup of the owner's rule 2026-10-20 (user-set values are
+#: challenged only by new evidence).
+NEWER_RULE_MARKER = "contacts_org:rule:new_evidence_only:2026-10-20"
+NEWER_RULE_ACTOR = "AEP (rule 2026-10-20)"
+NEWER_RULE_REASON = "older than the person's change, rule 2026-10-20"
+
+
+def _newer(evidence: str, statement: str) -> bool:
+    """Whether dated evidence is after the day of the person's statement."""
+    return evidence[:10] > statement[:10]
+
+
 def _same(a: str, b: str) -> bool:
     return " ".join(a.split()).casefold() == " ".join(b.split()).casefold()
 
@@ -248,6 +260,9 @@ class CardStore:
                 migration.migrate(
                     memory, legacy, rules=MERGE_RULES, manager=asset_label(self._space.asset)
                 )
+            if self._space.role == "manager":
+                # After the migration, so data moved from `cards.db` is covered.
+                self._apply_newer_evidence_rule()
         except migration.MigrationError as error:
             raise CardStoreError(error.code) from error
         except MemoryServiceError as error:
@@ -662,6 +677,89 @@ class CardStore:
         )
         return FieldChange(field=name, old=old, new=value)
 
+    @staticmethod
+    def _novel(tx: SpaceTx, person_id: str, source_ref: str) -> bool:
+        """Whether a card image (`sha256:` ref) was never observed for this
+        person before; a reading without an image has no identity and is
+        never novel."""
+        if not source_ref.startswith("sha256:"):
+            return False
+        return not any(
+            seen.entity_id == person_id
+            for seen in tx.observations(source_ref=source_ref, claim=None, include_retracted=True)
+        )
+
+    @staticmethod
+    def _challenges(source: str, when: str, novel: bool, statement_date: str) -> bool:
+        """Whether a reading is new evidence against a value the person set:
+        an undated source (a card) by its image, a dated one (an email's sent
+        date) when after the day of the person's change."""
+        if source in MERGE_RULES.undated:
+            return novel
+        return _newer(when, statement_date)
+
+    def _apply_newer_evidence_rule(self) -> int:
+        """Once per memory database (owner 2026-10-20): open proposals against
+        a value the person set that the rule would not have made are
+        dismissed: a re-scanned card image already observed for that person
+        before, or dated evidence (a signature) not newer than the person's
+        change. One change group, a history row each, undoable with `undo`.
+        Runs after the `cards.db` migration, so moved data is covered too.
+        Returns how many were dismissed."""
+        with self._connect() as tx:
+            con = tx.con
+            if con.execute("SELECT 1 FROM meta WHERE key = ?", (NEWER_RULE_MARKER,)).fetchone():
+                return 0
+            change_id = new_change_id()
+            dismissed = 0
+            for item in tx.proposals(limit=1_000_000):
+                current = tx.provenance(item["entity_id"]).get(item["field"])
+                if current is None or current["source_kind"] != "user":
+                    continue
+                seen = con.execute(
+                    "SELECT * FROM observations WHERE space = ? AND observation_id = ?",
+                    (CONTACTS_ORG, item["observation_id"]),
+                ).fetchone()
+                if seen is None:
+                    continue
+                if seen["source_kind"] in MERGE_RULES.undated:
+                    # Only a re-scan of an image seen earlier for this person.
+                    ref = seen["source_ref"]
+                    stale = ref.startswith("sha256:") and (
+                        con.execute(
+                            "SELECT 1 FROM observations WHERE space = ? AND source_ref = ? "
+                            "AND entity_id = ? AND observation_id < ? LIMIT 1",
+                            (CONTACTS_ORG, ref, item["entity_id"], seen["observation_id"]),
+                        ).fetchone()
+                        is not None
+                    )
+                else:
+                    stale = not _newer(seen["source_date"], current["source_date"])
+                if not stale:
+                    continue
+                tx.set_proposal_state(int(item["proposal_id"]), "dismissed", actor=NEWER_RULE_ACTOR)
+                tx.record(
+                    change_id,
+                    NEWER_RULE_ACTOR,
+                    item["entity_id"],
+                    "proposal_rule",
+                    field_name=item["field"],
+                    old=item["current"],
+                    new=item["proposed"],
+                    reason=NEWER_RULE_REASON,
+                    source=item["source_kind"],
+                    extra={"proposal_id": int(item["proposal_id"])},
+                )
+                dismissed += 1
+            con.execute(
+                "INSERT INTO meta (key, value) VALUES (?, ?)",
+                (
+                    NEWER_RULE_MARKER,
+                    json.dumps({"at": _now(), "dismissed": dismissed, "change_id": change_id}),
+                ),
+            )
+            return dismissed
+
     # -- adding --------------------------------------------------------
 
     def add(
@@ -705,6 +803,9 @@ class CardStore:
         unsure = tuple(dict.fromkeys(uncertain))
         when = source_date.isoformat()
         row, matched_by = self._match(tx, clean, source_ref)
+        # A card is new evidence only by its image (owner 2026-10-20): an
+        # image hash never observed for this person before.
+        novel = row is not None and self._novel(tx, row["person_id"], source_ref)
         differs: EmailDiffers | None = None
         stored_email = "" if row is None else row["email"]
         if (
@@ -721,6 +822,10 @@ class CardStore:
             email_source = tx.provenance(row["person_id"]).get("email")
             if email_source is None or email_source["source_kind"] != "user":
                 unsure = tuple(dict.fromkeys((*unsure, "email")))
+            elif not self._challenges(source, when, novel, email_source["source_date"]):
+                # Not new evidence against the email the person set: what they
+                # already saw and corrected is ignored silently.
+                differs = None
         change_id = new_change_id()
         person_id = f"p-{secrets.token_hex(5)}" if row is None else row["person_id"]
         observation_id = tx.add_observation(
@@ -793,6 +898,8 @@ class CardStore:
             observation_id=observation_id,
             uncertain=unsure,
             email_differs=differs is not None,
+            novel=novel,
+            source_ref=source_ref,
         )
         moved = self._tidy_notes(tx, change_id, actor, person_id)
         if moved is not None:
@@ -849,6 +956,8 @@ class CardStore:
         observation_id: int,
         uncertain: Sequence[FieldName],
         email_differs: bool = False,
+        novel: bool = False,
+        source_ref: str = "",
     ) -> _Merge:
         """A reading merged into the person: first what is particular to
         business cards (another spelling of the same company or name, a
@@ -868,6 +977,7 @@ class CardStore:
         for name in FIELDS:
             new = offered[name]
             current = row[name]
+            why = f"{source} {when}"
             if not new or _same_value(name, current, new):
                 continue
             # Another spelling of the same company or name (a legal suffix,
@@ -915,8 +1025,18 @@ class CardStore:
                     offered_date=when,
                     uncertain=name in uncertain,
                     same=_same_as(name),
+                    novel=novel,
                 )
+                if verdict.reason == "new_evidence":
+                    # New evidence over the person's own value (owner
+                    # 2026-10-20): updated, with the evidence in history.
+                    kind = "new card" if source in MERGE_RULES.undated else "newer email"
+                    why = f"{kind} {source_ref or when}".strip()
                 if verdict.action != "take":
+                    if user_set and verdict.reason in ("older_evidence", "seen_evidence"):
+                        # Not new evidence against the person's own value:
+                        # ignored silently (owner 2026-10-20).
+                        continue
                     reason = _KEPT_REASONS.get(verdict.reason, "uncertain")
                     merge.kept.append(
                         KeptField(
@@ -950,7 +1070,7 @@ class CardStore:
                     source=source,
                     source_date=when,
                     observation_id=observation_id,
-                    reason=f"{source} {when}",
+                    reason=why,
                     previous=previous,
                 )
             )
@@ -1490,7 +1610,24 @@ class CardStore:
             )
             return True
 
+        def rule(tx: SpaceTx, item: sqlite3.Row, extra: dict[str, Any], new: str) -> bool:
+            # A proposal the 2026-10-20 rule dismissed is open again.
+            tx.reopen([int(extra["proposal_id"])])
+            tx.record(
+                new,
+                actor,
+                item["entity_id"],
+                "proposal_reopen",
+                field_name=item["field"],
+                old=item["old"],
+                new=item["new"],
+                reason=f"undo {change_id}",
+                source=item["source"],
+            )
+            return True
+
         handlers = {
+            "proposal_rule": rule,
             "create": create,
             "field": field_row,
             "status": status,

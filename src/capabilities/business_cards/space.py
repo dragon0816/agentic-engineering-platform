@@ -10,6 +10,8 @@ external ids) are the Memory Service's (`memory.service`).
 
 from __future__ import annotations
 
+from typing import Final
+
 from common.memory import (
     AutoMergeRule,
     FieldMergeRule,
@@ -22,7 +24,8 @@ from memory.service import table_prefix
 
 CONTACTS_ORG = "contacts/org"
 SCHEMA_REF = "contacts.org.person.v1"
-RULES_ID = "contacts.org.merge.v1"
+#: v2 (owner 2026-10-20): only new evidence touches the person's value.
+RULES_ID = "contacts.org.merge.v2"
 REPORTING_LINE = "reporting_line"
 
 #: The owner's defaults (2026-10-20, §3.8.3 and §10.6–10.7):
@@ -33,11 +36,35 @@ REPORTING_LINE = "reporting_line"
 #: - external ids (C4C account / contact) only match, never name anything;
 #: - a reporting line is solid only on the person's word or explicit
 #:   evidence; anything else is drawn dashed;
-#: - the person's own value wins; differing evidence becomes a proposal
-#:   (older evidence too: never replaced by a scan, sure or not, third live
-#:   test 2026-10-20);
+#: - a value the person set is touched only by new evidence (owner
+#:   2026-10-20): an email signature sent after the day of the person's
+#:   change to that field; a business card, which carries no evidence date,
+#:   only when its image was never observed for that person before (a
+#:   re-scan of a seen card, or a card without an image, an imported Hermes
+#:   card included, never is). Old evidence is ignored silently. New evidence
+#:   updates the organisational fields directly ("換部門, 或換職位, 就修改那一
+#:   筆資料"; history, undoable; an uncertain reading only proposes); the
+#:   email, the identity key, and the other fields stay a proposal;
 #: - another source joins a person by itself only on an identical email or
 #:   an already-mapped external id; otherwise ask.
+#: New evidence proposes against the person's value; old is ignored.
+NEWER: Final = "propose_if_newer"
+#: New evidence replaces the person's value; old is ignored.
+TAKE: Final = "take_if_newer"
+#: Where a person sits and how to reach them: new evidence updates them.
+ORG_UPDATE_FIELDS = (
+    "title",
+    "department",
+    "division",
+    "business_group",
+    "honorific",
+    "phone",
+    "ext",
+    "mobile",
+    "fax",
+    "address",
+)
+
 MERGE_RULES = MergeRules(
     rules_id=RULES_ID,
     trust={
@@ -51,13 +78,16 @@ MERGE_RULES = MergeRules(
         "title_inference": "inferred",
         "agent": "inferred",
     },
-    default=FieldMergeRule(policy="newest_evidence", user_conflict="propose"),
+    default=FieldMergeRule(policy="newest_evidence", user_conflict=NEWER),
     fields={
-        "company": FieldMergeRule(policy="precedence", lower_conflict="propose"),
-        "title": FieldMergeRule(policy="newest_evidence"),
-        "department": FieldMergeRule(policy="newest_evidence"),
-        "division": FieldMergeRule(policy="newest_evidence"),
-        "business_group": FieldMergeRule(policy="newest_evidence"),
+        "company": FieldMergeRule(
+            policy="precedence", lower_conflict="propose", user_conflict=NEWER
+        ),
+        **{
+            name: FieldMergeRule(policy="newest_evidence", user_conflict=TAKE)
+            for name in ORG_UPDATE_FIELDS
+        },
+        "email": FieldMergeRule(policy="newest_evidence", user_conflict=NEWER),
     },
     external_ids=("c4c_account", "c4c_contact"),
     relations=(
@@ -66,6 +96,8 @@ MERGE_RULES = MergeRules(
         ),
     ),
     auto_merge=AutoMergeRule(identities=("email",), mapped_external_ids=True),
+    # A card's date is when it was scanned, not when it was true.
+    undated=("card", "import"),
 )
 
 DECLARATION = MemorySpaceDeclaration(

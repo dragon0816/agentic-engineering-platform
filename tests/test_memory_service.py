@@ -340,26 +340,100 @@ def test_title_and_place_follow_the_newest_evidence_from_any_source() -> None:
         assert (older.action, older.reason) == ("keep", "older_evidence"), field
 
 
-def test_the_persons_value_wins_and_differing_evidence_becomes_a_proposal() -> None:
-    newer = _decide("title", "資深經理", "user", "2026-02-01", "協理", "card", "2026-03-01")
-    assert (newer.action, newer.reason) == ("propose", "user_set")
+def test_only_new_evidence_touches_the_persons_value() -> None:
+    """Owner 2026-10-20: a value the person set is touched only by new
+    evidence: a signature sent after the day of the change; a card (undated)
+    only when its image was never seen for the person, never by its date.
+    New evidence updates an organisational field ("換部門, 或換職位, 就修改那
+    一筆資料") and proposes for the email and the other fields."""
+    newer = _decide(
+        "title", "資深經理", "user", "2026-02-01", "協理", "email_signature", "2026-03-01"
+    )
+    assert (newer.action, newer.reason) == ("take", "new_evidence")
+    email = _decide(
+        "email", "a@x.com", "user", "2026-02-01", "b@x.com", "email_signature", "2026-03-01"
+    )
+    assert (email.action, email.reason) == ("propose", "user_set")
+    named = _decide(
+        "name", "王小明", "user", "2026-02-01", "王曉明", "email_signature", "2026-03-01"
+    )
+    assert (named.action, named.reason) == ("propose", "user_set")
+    unsure = merge.decide(
+        MERGE_RULES,
+        "title",
+        current="資深經理",
+        current_kind="user",
+        current_date="2026-02-01",
+        offered="協理",
+        offered_kind="email_signature",
+        offered_date="2026-03-01",
+        uncertain=True,
+    )
+    assert (unsure.action, unsure.reason) == ("propose", "user_set")
+    for on in ("2026-01-01", "2026-02-01"):  # older, and the same day
+        older = _decide("title", "資深經理", "user", "2026-02-01", "協理", "email_signature", on)
+        assert (older.action, older.reason) == ("keep", "older_evidence"), on
     stated = _decide("title", "資深經理", "card", "2026-02-01", "協理", "user", "2020-01-01")
     assert stated.action == "take"
-    # Newest-only variant, as data: older evidence is then kept silently.
-    rules = MERGE_RULES.model_copy(
-        update={"default": FieldMergeRule(user_conflict="propose_if_newer"), "fields": {}}
+
+    def card(on: str, *, novel: bool) -> Decision:
+        return merge.decide(
+            MERGE_RULES,
+            "title",
+            current="資深經理",
+            current_kind="user",
+            current_date="2026-02-01",
+            offered="協理",
+            offered_kind="card",
+            offered_date=on,
+            novel=novel,
+        )
+
+    # A card never uses its date: a new image counts even dated long ago, a
+    # seen image never does even dated later.
+    assert (card("2020-01-01", novel=True).action, card("2020-01-01", novel=True).reason) == (
+        "take",
+        "new_evidence",
     )
-    older = merge.decide(
+    assert (card("2030-01-01", novel=False).action, card("2030-01-01", novel=False).reason) == (
+        "keep",
+        "seen_evidence",
+    )
+    # The rule is data, per field.
+    assert MERGE_RULES.default.user_conflict == "propose_if_newer"
+    org = (
+        "title",
+        "department",
+        "division",
+        "business_group",
+        "honorific",
+        "phone",
+        "ext",
+        "mobile",
+        "fax",
+        "address",
+    )
+    assert {name: rule.user_conflict for name, rule in MERGE_RULES.fields.items()} == {
+        "company": "propose_if_newer",
+        "email": "propose_if_newer",
+        **{name: "take_if_newer" for name in org},
+    }
+    assert MERGE_RULES.undated == ("card", "import")
+    # The earlier "any differing evidence" behaviour is still expressible as data.
+    rules = MERGE_RULES.model_copy(
+        update={"default": FieldMergeRule(user_conflict="propose"), "fields": {}}
+    )
+    any_evidence = merge.decide(
         rules,
         "title",
         current="資深經理",
         current_kind="user",
         current_date="2026-02-01",
         offered="協理",
-        offered_kind="card",
+        offered_kind="email_signature",
         offered_date="2026-01-01",
     )
-    assert (older.action, older.reason) == ("keep", "older_evidence")
+    assert (any_evidence.action, any_evidence.reason) == ("propose", "user_set")
 
 
 def test_external_ids_only_match_and_uncertain_readings_never_replace() -> None:
@@ -420,12 +494,26 @@ def test_current_values_resolve_from_observations_with_conflicts_left_to_the_per
     )
     found = c4c.resolve("p-1")
     assert found.values["company"].value == "範例科技股份有限公司"
-    assert found.values["title"].value == "資深經理"
+    # A signature sent after the person's change updates the title (owner
+    # 2026-10-20); one sent before it is ignored.
+    assert found.values["title"].value == "副總"
     assert "c4c_account" not in found.values
     assert [(c.field, c.proposed, c.reason) for c in found.conflicts] == [
         ("company", "範例科技", "lower_trust"),
-        ("title", "副總", "user_set"),
     ]
+    cards.add_observation(
+        "p-1", {"title": "處長"}, source_kind="user", source_date="2026-09-01", recorded_by="a"
+    )
+    cards.add_observation(
+        "p-1",
+        {"title": "協理"},
+        source_kind="email_signature",
+        source_date="2026-07-01",
+        recorded_by="a",
+    )
+    again = c4c.resolve("p-1")
+    assert again.values["title"].value == "處長"
+    assert [c.field for c in again.conflicts] == ["company"]
 
 
 def test_another_source_joins_a_person_only_on_an_identical_email_or_a_mapped_id(

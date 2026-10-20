@@ -135,13 +135,20 @@ class FieldMergeRule(Contract):
       it becomes a proposal); within one class, the newest evidence wins.
 
     Whatever the policy, a value the person stated wins: differing evidence
-    becomes a proposal (`user_conflict: propose`), or only when it is newer
-    than the person's statement (`propose_if_newer`)."""
+    becomes a proposal (`user_conflict: propose`), or only new evidence
+    counts (owner 2026-10-20): a dated source when its date is after the day
+    of the person's statement (older or same-day evidence is what they
+    already saw and corrected, ignored silently); a source listed in
+    `MergeRules.undated` only when its identity was never observed for that
+    entity before (a card image hash), never by a date. New evidence then
+    becomes a proposal (`propose_if_newer`) or replaces the person's value
+    (`take_if_newer`: "換部門, 或換職位, 就修改那一筆資料"; an uncertain
+    reading still only proposes)."""
 
     policy: Literal["newest_evidence", "precedence"] = "newest_evidence"
     precedence: tuple[TrustClass, ...] = DEFAULT_PRECEDENCE
     lower_conflict: Literal["propose", "keep"] = "propose"
-    user_conflict: Literal["propose", "propose_if_newer"] = "propose"
+    user_conflict: Literal["propose", "propose_if_newer", "take_if_newer"] = "propose"
 
     @model_validator(mode="after")
     def complete_precedence(self) -> Self:
@@ -183,6 +190,11 @@ class MergeRules(Contract):
     external_ids: tuple[Symbol, ...] = ()
     relations: tuple[RelationRule, ...] = ()
     auto_merge: AutoMergeRule = AutoMergeRule()
+    #: Source kinds whose dates are not evidence dates (a business card says
+    #: nothing about when it was true): under `propose_if_newer` they are
+    #: new evidence only when their identity was never observed before for
+    #: the entity, and without a stable identity never.
+    undated: tuple[Symbol, ...] = ()
 
     @model_validator(mode="after")
     def user_is_known(self) -> Self:
@@ -213,6 +225,8 @@ class Decision(Contract):
         "uncertain",
         "older_evidence",
         "match_only",
+        "seen_evidence",
+        "new_evidence",
     ] = ""
 
 

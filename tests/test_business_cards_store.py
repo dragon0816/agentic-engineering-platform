@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -41,6 +41,10 @@ CARD = {
 
 def _store(tmp_path: Path, actor: str = "alice") -> CardStore:
     return CardStore.for_actor(tmp_path, actor)
+
+
+#: After the person's edits (made today): a signature sent then is new evidence.
+LATER = date.today() + timedelta(days=1)
 
 
 def _add(
@@ -148,7 +152,10 @@ def test_business_group_division_and_department_are_kept_apart(tmp_path: Path) -
     )
 
 
-def test_a_user_set_value_is_not_overwritten_by_a_signature(tmp_path: Path) -> None:
+def test_a_user_set_title_follows_only_a_newer_signature(tmp_path: Path) -> None:
+    """Owner 2026-10-20: 「換部門, 或換職位, 就修改那一筆資料」. A signature sent
+    after the person's change updates the title directly (history, undoable);
+    an older one changes nothing and says nothing."""
     store = _store(tmp_path)
     person = _add(store, CARD)
     _, changes, _, _ = store.edit(
@@ -162,20 +169,37 @@ def test_a_user_set_value_is_not_overwritten_by_a_signature(tmp_path: Path) -> N
         store,
         {"email": CARD["email"], "name": "王小明", "title": "副理", "department": "天線部"},
         source="email_signature",
-        when=date(2026, 9, 1),
+        when=LATER,
         ref="<sig>",
     )
-    assert store.view(person.person_id).title == "資深經理"
-    kept = {k.field: k for k in later.kept}
-    assert kept["title"].reason == "user_set" and kept["title"].offered == "副理"
-    # An automatic value is still updated by newer evidence.
+    assert store.view(person.person_id).title == "副理"
+    assert ("title", "資深經理", "副理") in {(c.field, c.old, c.new) for c in later.changes}
+    assert "上次是" in later.summary and later.proposals == ()
+    # An automatic value is updated by newer evidence as before.
     assert store.view(person.person_id).department == "天線部"
     history = store.history(PersonRef(person_id=person.person_id), limit=50)
-    assert [(p.field, p.proposed) for p in history.proposals] == [("title", "副理")]
+    rows = [i for i in history.history if i.change_id == later.change_id and i.field == "title"]
+    assert [(i.kind, i.old, i.new) for i in rows] == [("field", "資深經理", "副理")]
+    assert rows[0].reason == "newer email <sig>"
+    # Undoable: the person's value is back.
+    store.undo(later.change_id, actor="a")
+    assert store.view(person.person_id).title == "資深經理"
+    # A signature sent before the person's change (or the same day) is
+    # ignored silently: no proposal, nothing kept (owner 2026-10-20).
+    for sent in (date(2026, 9, 1), date.today()):
+        old_mail = _add(
+            store,
+            {"email": CARD["email"], "name": "王小明", "title": "處長"},
+            source="email_signature",
+            when=sent,
+            ref=f"<old-{sent}>",
+        )
+        assert old_mail.kept == () and old_mail.proposals == () and old_mail.changes == ()
+    assert store.view(person.person_id).title == "資深經理"
     # Older evidence never replaces a newer automatic value.
     older = _add(store, {**CARD, "department": "舊部門"}, when=date(2025, 1, 1))
     assert {k.field: k.reason for k in older.kept}["department"] == "older_evidence"
-    assert store.view(person.person_id).department == "天線部"
+    assert store.view(person.person_id).department == "射頻部"  # the card's, as undone
 
 
 def test_an_uncertain_reading_never_replaces_a_value(tmp_path: Path) -> None:
@@ -494,6 +518,8 @@ def test_an_older_store_gains_the_new_columns(tmp_path: Path) -> None:
 
 
 IMAGE = "sha256:" + "ab" * 32
+IMAGE_NEW = "sha256:" + "cd" * 32
+IMAGE_3 = "sha256:" + "ef" * 32
 
 
 def test_the_same_card_image_finds_the_person_it_was_stored_as(tmp_path: Path) -> None:
@@ -541,7 +567,13 @@ def test_the_same_name_and_company_with_another_email_updates_the_person(
     # reading is a proposal that needs confirmation (third live test
     # 2026-10-20: without the flag 「email 正確」 found nothing to confirm).
     store.edit(PersonRef(person_id=first.person_id), {}, actor="a", reason="", confirm=("email",))
-    third = _add(store, {**CARD, "email": "hm.wang3@example.com"}, when=date(2026, 4, 1))
+    # A card without a photo is no new evidence: ignored (owner 2026-10-20).
+    plain = _add(store, {**CARD, "email": "hm.wang4@example.com"}, when=date(2026, 4, 1))
+    assert plain.email_differs is None and plain.proposals == () and plain.kept == ()
+    # A new card image is.
+    third = _add(
+        store, {**CARD, "email": "hm.wang3@example.com"}, when=date(2026, 4, 1), ref=IMAGE_NEW
+    )
     assert third.person_id == first.person_id
     assert third.needs_confirmation == ("email",)
     assert [p.proposed for p in third.proposals] == ["hm.wang3@example.com"]
@@ -640,7 +672,7 @@ def test_a_shorter_reading_never_replaces_a_more_complete_value(tmp_path: Path) 
     assert [(c.field, c.new) for c in topped.changes] == [("title", "總經理")]
 
 
-def test_a_business_group_the_person_set_is_never_overwritten(tmp_path: Path) -> None:
+def test_a_business_group_the_person_set_follows_only_a_new_card(tmp_path: Path) -> None:
     store = _store(tmp_path)
     first = _add(store, CARD)
     store.edit(
@@ -650,10 +682,26 @@ def test_a_business_group_the_person_set_is_never_overwritten(tmp_path: Path) ->
         reason="",
     )
     later = _add(
-        store, {**CARD, "business_group": "Connectivity & Solutions 事業群"}, when=date(2026, 9, 1)
+        store,
+        {**CARD, "business_group": "Connectivity & Solutions 事業群"},
+        when=date(2026, 9, 1),
+        ref=IMAGE_NEW,
+    )
+    # A new card image updates it directly (owner 2026-10-20).
+    assert store.view(first.person_id).business_group == "Connectivity & Solutions 事業群"
+    assert later.kept == () and [c.field for c in later.changes] == ["business_group"]
+    store.edit(
+        PersonRef(person_id=first.person_id), {"business_group": "C&S 事業群"}, actor="a", reason=""
+    )
+    # The same card scanned again changes nothing.
+    rescan = _add(
+        store,
+        {**CARD, "business_group": "Connectivity & Solutions II 事業群"},
+        when=date(2030, 1, 1),
+        ref=IMAGE_NEW,
     )
     assert store.view(first.person_id).business_group == "C&S 事業群"
-    assert {k.field: k.reason for k in later.kept} == {"business_group": "user_set"}
+    assert rescan.kept == () and rescan.proposals == () and rescan.changes == ()
 
 
 def _wnc(store: CardStore) -> None:
@@ -832,20 +880,30 @@ def test_the_phone_key_ignores_formatting() -> None:
 def test_a_reading_that_differs_from_a_confirmed_email_needs_confirmation(
     tmp_path: Path,
 ) -> None:
-    """Third live test 2026-10-20: a re-scan read another email than the one the
-    person had confirmed; the reply asked which was right, but there was no
-    proposal and no 需確認, so 「X 的 email 正確」 found nothing to confirm."""
+    """Third live test 2026-10-20: a reading of another email than the one the
+    person had confirmed asked which was right, but there was no proposal and
+    no 需確認, so 「X 的 email 正確」 found nothing to confirm. Owner 2026-10-20:
+    only new evidence asks (a re-scan of the same card image never does)."""
     store = _store(tmp_path)
     first = _add(store, CARD, ref=IMAGE)
     store.edit(
         PersonRef(person_id=first.person_id), {}, actor="alice", reason="", confirm=["email"]
     )
     assert store.view(first.person_id).needs_confirmation == ()
+    rescan = _add(
+        store,
+        {**CARD, "email": "hm.wamg@example.com"},
+        when=date(2030, 2, 1),
+        ref=IMAGE,
+        uncertain=("email",),
+    )
+    assert rescan.proposals == () and rescan.email_differs is None
+    assert store.view(first.person_id).needs_confirmation == ()
     misread = _add(
         store,
         {**CARD, "email": "hm.wamg@example.com"},
         when=date(2026, 2, 1),
-        ref=IMAGE,
+        ref=IMAGE_NEW,
         uncertain=("email",),
     )
     assert store.view(first.person_id).email == CARD["email"]
@@ -855,8 +913,8 @@ def test_a_reading_that_differs_from_a_confirmed_email_needs_confirmation(
     ]
     assert "hm.wamg@example.com" in misread.summary and "請確認" in misread.summary
     assert store.uncertain_now([first.person_id]) == {first.person_id: ["email"]}
-    # The same reading again does not open a second proposal.
-    _add(store, {**CARD, "email": "hm.wamg@example.com"}, when=date(2026, 2, 2), ref=IMAGE)
+    # The same reading again, from yet another card, does not open a second proposal.
+    _add(store, {**CARD, "email": "hm.wamg@example.com"}, when=date(2026, 2, 2), ref=IMAGE_3)
     listed, note = store.proposals(None, limit=50)
     assert [(p.name, p.field, p.label) for p in listed] == [("王小明", "email", "Email")]
     assert "王小明" in note and "hm.wamg@example.com" in note and CARD["email"] in note
@@ -889,7 +947,14 @@ def test_any_field_read_differently_from_the_persons_own_value_needs_confirmatio
     store = _store(tmp_path)
     first = _add(store, CARD)
     store.edit(PersonRef(person_id=first.person_id), {"title": "資深經理"}, actor="a", reason="")
-    later = _add(store, {**CARD, "title": "協理"}, when=date(2026, 3, 1))
+    # A new card read without confidence: a proposal, not an update.
+    later = _add(
+        store,
+        {**CARD, "title": "協理"},
+        when=date(2026, 3, 1),
+        ref=IMAGE_NEW,
+        uncertain=("title",),
+    )
     assert {k.field: k.reason for k in later.kept} == {"title": "user_set"}
     assert later.needs_confirmation == ("title",)
     assert [(p.field, p.current, p.proposed) for p in later.proposals] == [
@@ -955,8 +1020,10 @@ def test_a_rescan_says_whom_it_matched_and_never_starts_mid_thought(tmp_path: Pa
     assert match.lead.startswith("已對到既有聯絡人 王小明（範例科技股份有限公司）")
     assert "名片圖片" in match.lead
     assert match.changed == ("統一編號", "電話", "傳真")
-    assert match.kept == ("職稱",)
-    assert "職稱" in match.needs_confirmation
+    # The same card image is no new evidence against the person's title
+    # (owner 2026-10-20): nothing kept, nothing to confirm.
+    assert match.kept == ()
+    assert "職稱" not in match.needs_confirmation
     assert again.summary.startswith("更新了統一編號、電話、傳真")
     assert "也" not in again.summary.split("。")[0]
     by_email = _add(store, {"email": CARD["email"], "name": "王小明"}, when=date(2026, 4, 1))

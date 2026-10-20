@@ -595,16 +595,19 @@ def test_confirming_a_flagged_field_in_chat_writes_a_confirm_history_row(
 def test_a_differing_email_is_a_proposal_kept_or_taken_in_chat(
     web: tuple[AgentWeb, Conversation],
 ) -> None:
-    """Third live test 2026-10-20: a re-scan read another email than the
+    """Third live test 2026-10-20: a card read another email than the
     confirmed one; the reply asked which was right, but nothing was flagged or
     proposed, so 「X 的 email 正確」 got 「目前沒有欄位被新增確認」. Now the
-    reading is a proposal and the field needs confirmation; keeping the stored
-    value rejects it with a confirm row, 「用新的」 accepts it."""
+    reading of a new card is a proposal and the field needs confirmation;
+    keeping the stored value rejects it with a confirm row, 「用新的」 accepts
+    it. Owner 2026-10-20: a re-scan of the same photo is old evidence and
+    never questions the person's email."""
     agent_web, model = web
     session = agent_web.create_conversation()["conversation"]["session_id"]
 
-    def photo() -> tuple[str, str]:
-        uploaded = agent_web.add_attachment(session, "card.png", PNG)
+    def photo(card: int = 0) -> tuple[str, str]:
+        # Another card is another image (trailing bytes after IEND).
+        uploaded = agent_web.add_attachment(session, "card.png", PNG + bytes(card))
         file_id = uploaded["attachment"]["file_id"]
         return file_id, str(agent_web.attachments.get(session, file_id).path)
 
@@ -622,11 +625,17 @@ def test_a_differing_email_is_a_proposal_kept_or_taken_in_chat(
         "cards__edit_person",
         {"person": {"name": "周範例"}, "confirm": ["email"]},
     )
-    # The same photo again, the email read differently.
+    # The same photo again, the email read differently: old evidence, nothing said.
     file_id, path = photo()
     misread = {**CARD, "email": "fanli.chuo@exn.example", "image_path": path}
+    rescan = call("store this card", "cards__add_card", misread, [file_id])
+    assert rescan["matched_by"] == "image" and rescan["proposals"] == []
+    assert rescan["email_differs"] is None and "email" not in rescan["needs_confirmation"]
+    # A new card with that email: a proposal, never an overwrite.
+    file_id, path = photo(1)
+    misread = {**CARD, "email": "fanli.chuo@exn.example", "image_path": path}
     again = call("store this card", "cards__add_card", misread, [file_id])
-    assert again["matched_by"] == "image" and "email" in again["needs_confirmation"]
+    assert again["matched_by"] == "name_company" and "email" in again["needs_confirmation"]
     assert [(p["field"], p["current"], p["proposed"]) for p in again["proposals"]] == [
         ("email", CARD["email"], "fanli.chuo@exn.example")
     ]
@@ -651,8 +660,8 @@ def test_a_differing_email_is_a_proposal_kept_or_taken_in_chat(
     assert rows[0]["actor"] == f"{agent_web.runtime.actor} via local"
     assert history["person"]["email"] == CARD["email"] and history["proposals"] == []
 
-    # Another misreading, and this time 「用新的」.
-    file_id, path = photo()
+    # Another new card, and this time 「用新的」.
+    file_id, path = photo(2)
     newer = {**CARD, "email": "fl.chou@exn.example", "image_path": path}
     assert call("store this card", "cards__add_card", newer, [file_id])["proposals"]
     taken = call(

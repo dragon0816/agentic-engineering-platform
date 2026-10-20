@@ -641,7 +641,9 @@ def test_a_wrong_value_can_be_cleared_in_chat(tmp_path: Path) -> None:
     ]
     person = _run(bridge, "find", {"query": "范例"}).data["people"][0]
     assert person["romanised_name"] == ""
-    # A later scan does not bring it back: the person's empty value is kept.
+    # A later scan of a card without a photo does not bring it back: the
+    # person's empty value is kept, and (no new card image, so no new
+    # evidence; owner 2026-10-20) nothing is proposed or reported.
     again = _run(
         bridge,
         "add-card",
@@ -652,7 +654,8 @@ def test_a_wrong_value_can_be_cleared_in_chat(tmp_path: Path) -> None:
             "romanised_name_printed": "Yanji Fan",
         },
     ).data
-    assert [item["reason"] for item in again["kept"]] == ["user_set"]
+    assert again["kept"] == [] and again["proposals"] == []
+    assert _run(bridge, "find", {"query": "范例"}).data["people"][0]["romanised_name"] == ""
     undone = _run(bridge, "undo", {"change_id": cleared.data["change_id"]})
     assert undone.status == "succeeded", undone.failure
 

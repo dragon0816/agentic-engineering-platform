@@ -98,6 +98,8 @@ KIND_LABELS: dict[str, str] = {
     "line_add": "新增回報線",
     "line_remove": "移除回報線",
     "delete": "刪除",
+    "proposal_rule": "依規則關閉的待確認讀值（不是比你的修改新的證據）",
+    "proposal_reopen": "重新開啟待確認讀值",
 }
 #: Shown instead of a change id unless the person asks to undo a specific change.
 UNDO_HINT = "可以說『復原』撤回。"

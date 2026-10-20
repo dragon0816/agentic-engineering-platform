@@ -548,8 +548,11 @@ class SpaceTx:
         offered_date: str,
         uncertain: bool = False,
         same: Callable[[str, str], bool] = merge.same_text,
+        novel: bool = False,
     ) -> Decision:
-        """The space's merge rule for one offered value (`merge.decide`)."""
+        """The space's merge rule for one offered value (`merge.decide`);
+        `novel`: an undated source whose identity was never observed for the
+        entity before."""
         self._need("reader")
         return merge.decide(
             self.rules,
@@ -562,6 +565,7 @@ class SpaceTx:
             offered_date=offered_date,
             uncertain=uncertain,
             same=same,
+            novel=novel,
         )
 
     def resolve(self, entity_id: str) -> merge.Resolution:

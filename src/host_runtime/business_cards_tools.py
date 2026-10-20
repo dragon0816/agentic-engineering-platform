@@ -218,7 +218,8 @@ TOOLS: tuple[tuple[str, CapabilitySpec, str, dict[str, Any]], ...] = (
         "cards__edit_person",
         cards.EDIT_SPEC,
         "Correct a contact's fields as the person says (recorded as the person's own value, "
-        "never overwritten by later scans), or confirm fields that are right as stored "
+        "changed later only by new evidence: a new card or a newer email), or confirm "
+        "fields that are right as stored "
         "('email 正確' -> confirm ['email']: keeps the stored value and rejects the open "
         "proposal), or take the value read ('用新的' -> accept ['email']), or empty wrong "
         "fields (clear). Each clears needs_confirmation.",
