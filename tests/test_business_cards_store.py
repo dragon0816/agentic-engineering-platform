@@ -908,6 +908,7 @@ def test_any_field_read_differently_from_the_persons_own_value_needs_confirmatio
         ("field", "title", "協理")
     ]
     # Undo puts the old value back and opens the proposal again.
+    assert change_id is not None
     store.undo(change_id, actor="a")
     assert store.view(first.person_id).title == "資深經理"
     assert store.view(first.person_id).needs_confirmation == ("title",)
