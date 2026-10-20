@@ -79,6 +79,11 @@ INTERACTIVE = "a, button, input, select, textarea, [role=button], [role=link]"
 DIAG_DIR_ENV = "AEP_BROWSER_DIAG_DIR"
 #: How many attach attempts a failure record repeats.
 DIAG_ATTACHES_KEPT = 20
+#: Which browser to drive, when the registry's first choice is not the one
+#: wanted (a CI runner has both Edge and Chrome). Unset, the registry decides
+#: exactly as before. Set, it is used as given, so a wrong path fails loudly
+#: as `browser_would_not_start` rather than quietly picking another browser.
+EXECUTABLE_ENV = "AEP_BROWSER_EXECUTABLE"
 
 
 class BrowserError(Exception):
@@ -203,8 +208,12 @@ def browser_path() -> str | None:
 
     The registry, and not a search of the disk: it is the same read the Excel
     and Outlook adapters use, it starts nothing, and it answers the question
-    a doctor is allowed to ask.
+    a doctor is allowed to ask. `AEP_BROWSER_EXECUTABLE`, when set, answers
+    instead.
     """
+    chosen = os.environ.get(EXECUTABLE_ENV, "").strip()
+    if chosen:
+        return chosen
     if sys.platform != "win32":
         return None
     import winreg

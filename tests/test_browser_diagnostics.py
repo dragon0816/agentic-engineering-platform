@@ -15,8 +15,10 @@ import pytest
 
 from integrations.browser import (
     DIAG_DIR_ENV,
+    EXECUTABLE_ENV,
     Browser,
     BrowserError,
+    browser_path,
 )
 from integrations.websocket import SocketTrace, WebSocketError
 
@@ -253,3 +255,17 @@ def test_a_socket_lost_under_navigate_is_traced_and_closed(
     (log,) = diag.glob("*-sockets.jsonl")
     events = [json.loads(line)["event"] for line in log.read_text(encoding="utf-8").splitlines()]
     assert events == ["navigate_lost", "navigate_lost_again"]
+
+
+def test_the_executable_switch_is_used_as_given_and_unset_changes_nothing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv(EXECUTABLE_ENV, raising=False)
+    default = browser_path()
+    monkeypatch.setenv(EXECUTABLE_ENV, r"C:\nowhere\chrome.exe")
+    # As given, even where nothing is: a wrong path fails loudly at start
+    # rather than quietly driving a different browser.
+    assert browser_path() == r"C:\nowhere\chrome.exe"
+    assert Browser(Path("profile")).executable == r"C:\nowhere\chrome.exe"
+    monkeypatch.setenv(EXECUTABLE_ENV, "  ")
+    assert browser_path() == default
