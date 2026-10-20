@@ -525,6 +525,27 @@ class OrgChartHandler(_Cards):
         return await self.run(work)
 
 
+def scan_note(
+    scanned: int,
+    with_signature: int,
+    without_signature: int,
+    *,
+    same_sender: int = 0,
+    unreadable_signature: int = 0,
+    skipped: int = 0,
+) -> str:
+    """One sentence for the person on what a harvest found in the mail."""
+    parts = [f"掃描 {scanned} 封", f"{with_signature} 封有簽名檔"]
+    parts.append(f"{without_signature} 封沒有簽名檔")
+    if unreadable_signature:
+        parts.append(f"{unreadable_signature} 封的簽名檔讀不出聯絡人")
+    if same_sender:
+        parts.append(f"{same_sender} 封是同一寄件人較舊的信，未讀")
+    if skipped:
+        parts.append(f"{skipped} 封無法讀取")
+    return "，".join(parts) + "。"
+
+
 def skipped_note(skipped: dict[str, int], opened: int) -> str:
     """One line for the person about messages that could not be read."""
     if not skipped:
@@ -557,7 +578,7 @@ class HarvestHandler(_Cards):
             raise CapabilityRefused("model_not_configured")
         domain = request.domain.lstrip("@").casefold()
 
-        def collect() -> tuple[int, int, list[signatures.Block], dict[str, int], int]:
+        def collect() -> tuple[int, int, list[signatures.Block], dict[str, int], int, int, int]:
             reader, scope = self._reader(), self._scope()
             days = min(request.days or scope.max_days, scope.max_days)
             found = search(
@@ -570,13 +591,14 @@ class HarvestHandler(_Cards):
             )
             newest: dict[str, signatures.Block] = {}
             skipped: dict[str, int] = {}
-            matched = opened = 0
+            matched = opened = without = same_sender = 0
             for item in found:
                 if not signatures.from_domain(item.sender, domain):
                     continue
                 matched += 1
                 address = signatures.sender_address(item.sender).casefold()
                 if address in newest or len(newest) >= request.limit:
+                    same_sender += 1
                     continue
                 try:
                     message = read(reader, scope, item.message_id)
@@ -587,6 +609,7 @@ class HarvestHandler(_Cards):
                 opened += 1
                 block = signatures.signature_block(message.body)
                 if block is None:
+                    without += 1
                     continue
                 newest[address] = signatures.Block(
                     message_id=item.message_id,
@@ -594,10 +617,18 @@ class HarvestHandler(_Cards):
                     received=item.received.date().isoformat(),
                     text=block,
                 )
-            return len(found), matched, list(newest.values()), skipped, opened
+            return len(found), matched, list(newest.values()), skipped, opened, without, same_sender
 
         try:
-            scanned, matched, blocks, skipped, opened = await asyncio.to_thread(collect)
+            (
+                scanned,
+                matched,
+                blocks,
+                skipped,
+                opened,
+                without,
+                same_sender,
+            ) = await asyncio.to_thread(collect)
         except MailError as error:
             raise CapabilityRefused(error.code) from None
         try:
@@ -640,12 +671,25 @@ class HarvestHandler(_Cards):
                 item.model_copy(update={"candidate_id": candidate_id})
                 for item, candidate_id in zip(out, ids, strict=True)
             ]
+            unreadable = len(blocks) - len(out)
             return HarvestResult(
                 scanned=scanned,
                 from_domain=matched,
                 with_signature=len(out),
+                without_signature=without,
+                same_sender=same_sender,
+                unreadable_signature=unreadable,
+                scan_note=scan_note(
+                    scanned,
+                    len(out),
+                    without,
+                    same_sender=same_sender,
+                    unreadable_signature=unreadable,
+                    skipped=sum(skipped.values()),
+                ),
                 candidates=tuple(out),
-                note="Nothing was stored. List each candidate with its candidate_id (s1, s2, "
+                note="Nothing was stored. Tell the person scan_note as written. List each "
+                "candidate with its candidate_id (s1, s2, "
                 "...). When the person confirms, call cards__store_candidates with those "
                 'candidate_ids, or ["all"]; never harvest again just to store. The '
                 "candidates can be stored until expires_at."

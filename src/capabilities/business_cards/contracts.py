@@ -572,6 +572,15 @@ class HarvestResult(Contract):
     skipped: tuple[SkippedMessages, ...] = ()
     # For the person, e.g. "讀信失敗：1 封信無法讀取（message_unknown），已略過；其餘 3 封已處理。"
     skipped_note: str = ""
+    # Messages read whose text has no signature block (third live test
+    # 2026-10-20: 5 scanned, 1 signature, nothing said about the other 4),
+    # older messages of a sender already read (not opened), and signature
+    # blocks the model found no person in.
+    without_signature: int = 0
+    same_sender: int = 0
+    unreadable_signature: int = 0
+    # One sentence for the reply: 「掃描 5 封，1 封有簽名檔，4 封沒有簽名檔。」
+    scan_note: str = ""
     # When this conversation's candidates can no longer be stored by id.
     expires_at: str = ""
 

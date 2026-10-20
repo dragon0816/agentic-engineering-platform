@@ -786,3 +786,30 @@ def test_the_chart_list_and_find_return_the_canonical_company(tmp_path: Path) ->
     from capabilities.business_cards.manifest import PROCEDURE
 
     assert "COMPANIES" in PROCEDURE and "short name or domain" in PROCEDURE
+
+
+def test_a_harvest_counts_the_messages_without_a_signature(tmp_path: Path) -> None:
+    """Third live test 2026-10-20: 5 messages scanned, 1 with a signature, and
+    `skipped` empty: nothing said what happened to the other 4. Messages read
+    without a signature block are `without_signature`, apart from `skipped`
+    (unreadable, by code), and `scan_note` says it in one sentence."""
+    signed = BODY.format(name="王小明", title="協理", ext="312")
+    mail = FakeMail(
+        [
+            _message("m1", "hm.wang@example.com", signed),
+            _message("m2", "a@example.com", "Thanks, see you tomorrow."),
+            _message("m3", "b@example.com", "ok"),
+            _message("m4", "c@example.com", "Noted."),
+            _message("m5", "d@example.com", "收到"),
+        ]
+    )
+    bridge = _bridge(tmp_path, mail=mail, model=SignatureModel())
+    data = _run(bridge, "harvest-signatures", {"domain": "example.com"}).data
+    assert data is not None
+    assert (data["scanned"], data["with_signature"], data["without_signature"]) == (5, 1, 4)
+    assert data["skipped"] == []
+    assert data["scan_note"] == "掃描 5 封，1 封有簽名檔，4 封沒有簽名檔。"
+    assert "scan_note" in data["note"]
+    from capabilities.business_cards.manifest import PROCEDURE
+
+    assert "scan_note" in PROCEDURE
