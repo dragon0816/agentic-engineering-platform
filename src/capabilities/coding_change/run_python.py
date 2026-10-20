@@ -16,6 +16,11 @@ start a few child processes (`coding.run_python_max_processes`, default 4) so
 it can run a command-line tool; they inherit the low-integrity token and die
 with the run (owner decision 2026-10-06, lab gap L3). Each script is kept under
 `.aep-run/` in the workspace as evidence.
+
+A workspace under a root that does not exist yet is created, with input/ and
+output/, and the result says so (`workspace_created`, owner 2026-10-20);
+outside the roots, or by a path that climbs with `..`, it is refused and
+nothing is created.
 """
 
 from __future__ import annotations
@@ -28,7 +33,11 @@ from pathlib import Path
 from pydantic import Field, JsonValue
 
 from capabilities.coding_change.contracts import CodingHostBinding
-from capabilities.coding_change.workspaces import containing_root
+from capabilities.coding_change.workspaces import (
+    containing_root,
+    create_workspace,
+    has_traversal,
+)
 from capabilities.contracts import CapabilitySpec
 from capabilities.runtime import CapabilityRefused
 from common.base import Contract, Text
@@ -83,6 +92,8 @@ class RunPythonResult(Contract):
     output: str
     files: tuple[OutputFile, ...]
     script_path: str
+    # The workspace did not exist and this run created it under its root.
+    workspace_created: bool = False
 
 
 class RunPythonHandler:
@@ -102,14 +113,18 @@ class RunPythonHandler:
         return await asyncio.to_thread(self.run, step_input.request, step_input.arguments)
 
     def _workspace(self, raw: str) -> Path:
+        """The resolved workspace, checked but not created: it lies under a
+        root, names no `..`, and is a folder or nothing yet."""
         path = Path(raw.strip())
         if not path.is_absolute():
             raise CapabilityRefused("coding_workspace_not_absolute")
+        if has_traversal(raw):
+            raise CapabilityRefused("coding_workspace_not_allowed")
         resolved = containing_root(raw, self.binding.workspace_roots)
         if resolved is None:
             raise CapabilityRefused("coding_workspace_not_allowed")
-        if not resolved.is_dir():
-            raise CapabilityRefused("coding_workspace_missing")
+        if resolved.exists() and not resolved.is_dir():
+            raise CapabilityRefused("coding_workspace_not_a_folder")
         return resolved
 
     def run(
@@ -130,6 +145,10 @@ class RunPythonHandler:
             raise CapabilityRefused(error.code) from None
         if self.binding.require_network_block and not self.rule_present(python):
             raise CapabilityRefused("coding_network_block_missing")
+        # Created only once every check passed, so a refused run leaves nothing.
+        created = not workspace.is_dir()
+        if created:
+            create_workspace(workspace)
         output = workspace / "output"
         output.mkdir(exist_ok=True)
         runs = workspace / ".aep-run"
@@ -159,4 +178,5 @@ class RunPythonHandler:
             output=result.output[-MAX_OUTPUT_CHARS:],
             files=tuple(files),
             script_path=script.relative_to(workspace).as_posix(),
+            workspace_created=created,
         )

@@ -391,6 +391,7 @@ flowchart LR
 能力屬性：execute、需要核准（以 grant 形式的常設授權，不是每次彈窗）。
 
 - 工作資料夾必須在 `coding.workspace_roots` 底下（目前：`C:\Users\Chi_L\Documents\aep-workflows`、兩個 benchmark runs 資料夾）。草稿階段就會檢查（2026-10-08）。
+- **資料夾不存在時自動建立**（owner 2026-10-20）：路徑在 root 底下、但資料夾還沒有時，執行前的檢查（runner、網路封鎖）都通過後才建立，連同 `input/`、`output/`；結果帶 `workspace_created: true`。root 以外的路徑仍回 `coding_workspace_not_allowed`，含 `..` 的路徑一律拒絕（即使解析後落在 root 內），不會建立任何資料夾；路徑是檔案時回 `coding_workspace_not_a_folder`。已存在的資料夾照舊使用。過去回 `coding_workspace_missing`，Agent 因此兩次請使用者手動建立資料夾（2026-10-20 實測）。系統提示的工作資料夾說明也改成「不存在會自動建立，不要請使用者建立」。沒給資料夾時不另設預設：`engineering/run-python` Workflow 的 `workspace` 仍是必填，模型依說明自己選 root 底下以任務命名的新資料夾（改成選填需要升 Workflow 與 coding Skill 版本，這次不做）。
 - 只有 `output/` 與該次執行資料夾可寫；`input/` 唯讀。腳本保存在 `.aep-run/run-NNN/` 作為證據；Workflow 參數經 `AEP_WORKFLOW_PARAMS` 傳入。
 - 最多 4 個子程序（可呼叫 CLI 工具）、120 秒、1,024 MB；輸出 12,000 字。
 

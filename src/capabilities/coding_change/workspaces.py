@@ -4,6 +4,11 @@ One containment rule for every place that checks a task workspace: the
 run-python handler at run time, Workflow drafting before anything runs, and
 what the Agent is told (owner 2026-10-08, after a Workflow fixed a folder
 outside `coding.workspace_roots` and failed only at its approved run).
+
+A task folder under a root that does not exist yet is created (owner
+2026-10-20): the Agent used to hand `coding_workspace_missing` to the person
+and ask them to make the folder by hand. Outside the roots, or by a path with
+`..`, nothing is created and the request is refused as before.
 """
 
 from __future__ import annotations
@@ -25,6 +30,21 @@ def containing_root(raw: str, roots: Sequence[str]) -> Path | None:
     return None
 
 
+def has_traversal(raw: str) -> bool:
+    """Whether a workspace path climbs with `..`: refused outright, even when
+    it would resolve inside a root, so a folder is never made by a path that
+    reads as somewhere else."""
+    return ".." in Path(raw.strip()).parts
+
+
+def create_workspace(resolved: Path) -> None:
+    """Make a missing task folder, with input/ and output/ as every task
+    folder has (the same layout `prepare_workspaces` gives a Workflow's fixed
+    folder). The caller has already checked it lies under a root."""
+    for part in ("input", "output"):
+        (resolved / part).mkdir(parents=True, exist_ok=True)
+
+
 def workspace_note(roots: Sequence[str]) -> str:
     """What the Agent is told, so it never suggests a folder that will be refused."""
     if not roots:
@@ -34,5 +54,7 @@ def workspace_note(roots: Sequence[str]) -> str:
         "Task folders for coding/run-python, browser downloads and Workflow steps must be "
         f"folders under one of these roots: {listed}. When the person has not named one, "
         f"suggest a new folder under {roots[0]} named after the task (for example "
-        f"{Path(roots[0]) / 'stock-price'}); never suggest a folder outside these roots."
+        f"{Path(roots[0]) / 'stock-price'}); never suggest a folder outside these roots. "
+        "coding/run-python creates a task folder under these roots that does not exist yet "
+        "(with input/ and output/), so never ask the person to create it."
     )

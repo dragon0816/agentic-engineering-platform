@@ -90,15 +90,86 @@ def test_input_and_other_folders_are_not_writable_and_a_failure_is_returned(tmp_
 
 def test_only_workspaces_under_an_allowed_root(tmp_path: Path) -> None:
     (tmp_path / "elsewhere").mkdir()
+    (tmp_path / "tasks").mkdir()
+    (tmp_path / "tasks" / "a-file").write_text("x", encoding="utf-8")
     for raw, code in (
         (str(tmp_path / "elsewhere"), "coding_workspace_not_allowed"),
+        (str(tmp_path / "elsewhere" / "new-task"), "coding_workspace_not_allowed"),
         ("relative/path", "coding_workspace_not_absolute"),
-        (str(tmp_path / "tasks" / "missing"), "coding_workspace_missing"),
+        (str(tmp_path / "tasks" / "a-file"), "coding_workspace_not_a_folder"),
     ):
-        (tmp_path / "tasks").mkdir(exist_ok=True)
         with pytest.raises(CapabilityRefused) as refused:
             handler(tmp_path / "tasks").run(RunPythonRequest(workspace=raw, script="print(1)"))
         assert refused.value.code == code
+    assert not (tmp_path / "elsewhere" / "new-task").exists()
+
+
+def test_a_path_that_climbs_out_of_the_root_is_refused_and_creates_nothing(
+    tmp_path: Path,
+) -> None:
+    """Owner 2026-10-20: never create a folder outside the roots; `..` is
+    refused even when it would land back inside one."""
+    (tmp_path / "tasks").mkdir()
+    for raw in (
+        str(tmp_path / "tasks") + r"\..\escaped",
+        str(tmp_path / "tasks") + "/../escaped",
+        str(tmp_path / "tasks") + r"\sub\..\inside",
+    ):
+        with pytest.raises(CapabilityRefused) as refused:
+            handler(tmp_path / "tasks").run(RunPythonRequest(workspace=raw, script="print(1)"))
+        assert refused.value.code == "coding_workspace_not_allowed"
+    assert not (tmp_path / "escaped").exists()
+    assert not (tmp_path / "tasks" / "inside").exists()
+    assert not (tmp_path / "tasks" / "sub").exists()
+
+
+def test_a_missing_folder_under_a_root_is_checked_but_made_only_when_the_run_starts(
+    tmp_path: Path,
+) -> None:
+    """Live test 2026-10-20: `coding_workspace_missing` made the Agent ask the
+    person to create the folder by hand. A refusal before the run (here the
+    network block) leaves nothing behind."""
+    root = tmp_path / "aep-workflows"
+    target = root / "interactive-org-chart"
+    runner = handler(root)
+    assert runner._workspace(str(target)) == target.resolve()
+    assert not target.exists()
+    runner.rule_present = lambda _python: False
+    with pytest.raises(CapabilityRefused) as refused:
+        runner.run(RunPythonRequest(workspace=str(target), script="print(1)"))
+    assert refused.value.code == "coding_network_block_missing"
+    assert not target.exists()
+
+
+@requires_win32
+def test_a_missing_folder_under_a_root_is_created_and_the_run_goes_on(tmp_path: Path) -> None:
+    root = tmp_path / "aep-workflows"
+    root.mkdir()
+    target = root / "interactive-org-chart"
+    run = handler(root).run(
+        RunPythonRequest(
+            workspace=str(target), script="open('output/chart.html', 'w').write('<p>ok</p>')\n"
+        )
+    )
+    assert run.exit_code == 0, run.output
+    assert run.workspace_created is True
+    assert (target / "input").is_dir() and (target / "output" / "chart.html").is_file()
+    assert [item.path for item in run.files] == ["output/chart.html"]
+
+
+@requires_win32
+def test_an_existing_folder_is_used_as_it_is(tmp_path: Path) -> None:
+    workspace = task(tmp_path)
+    before = sorted(path.relative_to(workspace) for path in workspace.rglob("*"))
+    run = handler(tmp_path / "tasks").run(
+        RunPythonRequest(workspace=str(workspace), script="print('hi')\n")
+    )
+    assert run.exit_code == 0 and run.workspace_created is False
+    assert (workspace / "input" / "data.csv").read_text(encoding="utf-8") == "a,b\n1,2\n"
+    after = {path.relative_to(workspace) for path in workspace.rglob("*")}
+    # Only what every run adds: output/ and the run's evidence under .aep-run/.
+    added = {path for path in after - set(before) if path.parts[0] not in {"output", ".aep-run"}}
+    assert set(before) <= after and added == set()
 
 
 def test_the_skill_says_when_not_to_use_it() -> None:
