@@ -2394,9 +2394,13 @@ drafts a Workflow or Skill shows its install card"):
     [{`observation_id`, `source`, `source_date`, `source_ref`, `uncertain`, `source_label`}],
     `proposals` [`ProposalView`]}; `proposals` {`person` (optional), `limit` ≤ 200} →
     {`proposals` [`ProposalView`], `total`, `note`};
-    `org-chart` {`company`, `include_left`} → {`company`, `people`, `left_shown`,
-    `left_omitted`, `lines_evidenced`, `lines_inferred`, `png_path`, `legend_path`,
-    `legend_markdown`, `note`, `attach` [{`path`, `media_type`, `filename`}]};
+    `org-chart` {`company`, `include_left`, `format` (`png` default | `html` | `both`)} →
+    {`company`, `people`, `left_shown`, `left_omitted`, `lines_evidenced`, `lines_inferred`,
+    `format`, `png_path` ("" for html), `html_path` ("" for png), `legend_path`,
+    `legend_markdown`, `note`, `attach` [{`path`, `media_type` (`image/png`, `text/html`,
+    `text/markdown`), `filename`}]}; the HTML is one self-contained page (inline CSS, script
+    and JSON data with `<`, `>`, `&` escaped; no network) built from the same rows, always
+    with the people who left (toggled, shown by default only with `include_left`);
     `harvest-signatures` {`domain`, `days` (capped at the mail scope's `max_days`), `limit` ≤ 40,
     `folder`} → {`scanned`, `from_domain`, `with_signature`, `candidates` [card fields +
     `candidate_id`, `message_id`, `message_date`, `uncertain`, `existing_person_id`,
@@ -2438,6 +2442,22 @@ drafts a Workflow or Skill shows its install card"):
   the model's arguments. A succeeded call's data also carries `field_labels` (field name →
   Chinese label). A failed call's `failure.message` is `<Chinese sentence>（<code>）` plus
   `: <Bridge message>` when the Bridge gave a specific one (`FAILURE_TEXT`).
+- Files in Agent Web chat (owner 2026-10-20): `GET /api/conversations/file?session_id&path`
+  (page token) serves a file listed on one of that conversation's messages (an answer's
+  tool files or the person's attachments) that lies in the workspace: images as themselves,
+  `.md` as `text/markdown`, other text (HTML included) as `text/plain; charset=utf-8`, anything
+  else as `application/octet-stream`. `GET /api/conversations/view-link?session_id&path` (page
+  token) → {`ok`, `url`: `/view/file?nonce=<random>`, `expires_in` (900 s)} for a listed
+  `.html`/`.htm` file, else 404 {`ok`: false, `code`: `file_unknown`}. `GET /view/file?nonce=`
+  (no token; the nonce lets in that one file while it is still listed) serves it as
+  `text/html` with `Content-Security-Policy: default-src 'none'; script-src 'unsafe-inline';
+  style-src 'unsafe-inline'; img-src data:; font-src data:; form-action 'none'; base-uri
+  'none'; frame-ancestors 'self'; sandbox allow-scripts` (`web.FILE_VIEW_CSP`),
+  `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: no-referrer`; unknown or expired → 404. The
+  page frames it with `sandbox="allow-scripts"` (never `allow-same-origin`).
+  `business_cards_tools.chart_files` kinds: `image` (PNG), `html`, `text`; the legend rides on
+  the first `image` or `html` entry. Telegram sends an `.html` chart with `sendDocument`
+  (`text/html`, caption `HTML_CHART_CAPTION`).
 - COM (`integrations.com.apartment()`, 2026-10-20 re-test): `OutlookComMailbox`, `OutlookComDraft`
   and `OutlookComDraftSender` take `connect` (how to get Outlook on the calling thread; default
   `Dispatch`) beside `dispatch`, initialise COM around each call and map every COM failure to

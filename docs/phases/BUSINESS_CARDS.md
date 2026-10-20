@@ -154,7 +154,7 @@ keys (`said_by`, `set_by`, `actor`, ...) from a model's arguments.
 | `list` | read | People by company (resolved as below), source and status |
 | `history` | read | One person's changes and observations, with change ids, labels and local times |
 | `proposals` | read | Open proposals, one person's or everyone's, with a sentence (`note`) for the reply |
-| `org-chart` | read | PNG + Markdown legend for a company (writes only the derived files) |
+| `org-chart` | read | PNG and/or interactive HTML (`format`) + Markdown legend for a company (writes only the derived files) |
 | `harvest-signatures` | read | Mail in the configured scope from one company domain → signature candidates |
 
 **Company queries** (re-test 2026-10-20: "WNC" worked once and failed once). `org-chart`, `list`
@@ -292,11 +292,49 @@ evidenced lines the layout is a grouping by title, not a reporting chart, and li
 with fields still to confirm (「- 王則閔 博士：Email」). Files go to
 `<workspace>/business-cards/<actor-key>/charts/`; the result names them in `attach`.
 
+**Format** (owner 2026-10-20, 「請幫我全做」: a live test asked for the chart as interactive
+HTML and the Agent tried a one-off `coding__run` script). `org-chart` takes `format`: `png`
+(the default, unchanged), `html` or `both`. The Skill uses `html` when the person asks for an
+interactive, HTML, searchable or tree view. The HTML (`capabilities/business_cards/chart_html.py`)
+is one self-contained file beside the PNG in `charts/`, built from the same rows (grouping path,
+title order, lines, fields to confirm), general (the title comes from the data, nothing about a
+company is built in):
+
+- **Tree view**: company → business group → division → department → people, collapsible
+  (`<details>`). Where reporting lines exist, a reporting tree comes first (solid = evidence,
+  dashed = inferred, each edge labelled with its evidence); the grouping follows, labelled as
+  grouping only. Without evidenced lines the page shows the same warning as the legend.
+- **Grouped view**: the nested boxes, like the PNG.
+- **Search** by name, romanised name, title, business group, division, department or email;
+  arrow keys and Enter, or a click, open the **person card**: name and honorific, company,
+  business group / division / department, title, phone#ext, mobile, fax, email, 在職 / 已離職,
+  需確認 fields, sources (名片 / 郵件簽名檔 / 使用者) with their latest dates (Asia/Taipei), and
+  reporting lines with evidence. Esc closes it.
+- **顯示已離職** toggle: the page always carries the people who left; they are hidden unless
+  `include_left` was asked for, and drawn grey. The PNG and legend still follow `include_left`.
+- Light and dark mode (`prefers-color-scheme`), responsive to 390 px with no horizontal page
+  scroll, keyboard accessible, 44 px targets.
+- **Safety**: inline CSS, script and data only; a `<meta>` CSP `default-src 'none'`; no network,
+  no CDN. The data is JSON in `<script type="application/json">` with `<`, `>`, `&`, U+2028/9
+  escaped, and the script builds every element with text nodes (no `innerHTML`), so a contact
+  field holding `<script>` stays text.
+
 **Showing it.** Agent Web: after a Gateway turn, files named by a `cards__org_chart` result are
-kept on the answer (`ConversationMessage.attachments`) and the page shows the PNG inline, fetched
-through `GET /api/conversations/file` (token header; only files recorded on that conversation's
-answers, under the workspace). Telegram: the PNG is sent with `sendPhoto` after the text reply (§7).
-The legend is in the answer text (appended by the Host when the model left it out).
+kept on the answer (`ConversationMessage.attachments`; kinds `image`, `html`, `text`). Every file
+on an answer, and every file the person attached, is a chip that opens the **file viewer** panel
+(Preview / Code); the PNG shows inline, and the HTML shows inline in a sandboxed frame (480 px,
+resizable, 放大, 在面板開啟, 在瀏覽器開啟). Files come only through `GET
+/api/conversations/file` (token header; only files listed on that conversation's messages, under
+the workspace; text, HTML included, served as plain text). The HTML is rendered only from
+`/view/file?nonce=`, a short-lived address the page asks for with its token, served with a strict
+CSP (`default-src 'none'`, inline script and style only, `sandbox allow-scripts`, `frame-ancestors
+'self'`) inside `<iframe sandbox="allow-scripts">` without `allow-same-origin` (decision
+2026-10-20 "In-chat HTML runs in an opaque-origin sandbox from a nonce address"). HTML a
+`coding/run-python` step writes in a workspace is not attached to answers (attachments come only
+from `cards__org_chart` today), so it is not shown inline yet. Telegram: the PNG is sent with
+`sendPhoto` after the text reply, the HTML with `sendDocument` and a one-line caption to open it
+in a browser (§7). The legend is in the answer text (appended by the Host when the model left it
+out), carried by the first picture or page.
 
 ## 7. Telegram (the main way cards arrive)
 
@@ -313,7 +351,9 @@ Owner update 2026-10-20: most cards arrive as a photo sent to the Telegram bot.
   "上次是…, 現在是…" sentence for a known person who changed.
 - The org chart goes back with `sendPhoto` (multipart, through the bot's own transport) captioned
   with the short note (only drawn lines are reporting lines), then the full Markdown legend with
-  `sendDocument`; the text reply carries the legend's title and notes without the table.
+  `sendDocument`; the text reply carries the legend's title and notes without the table. An
+  interactive chart (`format` `html` or `both`) arrives as an `.html` document captioned
+  「互動式組織圖：請下載後用瀏覽器開啟（可搜尋、切換樹狀／分組檢視）。」, before the legend.
 
 ## 8. Import from the Hermes store
 
@@ -329,4 +369,5 @@ nothing. The Hermes `business-cards` pack Skill stays switched off.
   addition to `web_page.py`).
 - Accepting a proposal from a button (the user says so in chat; `edit-person` `confirm` /
   `accept` records it).
-- Graph layout of deep reporting trees beyond the grouped boxes and connecting lines.
+- Graph layout of deep reporting trees beyond the grouped boxes and connecting lines (the HTML
+  page shows the reporting tree as an indented list).

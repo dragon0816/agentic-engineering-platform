@@ -2763,6 +2763,7 @@ s-k-20261011T102952` (not published).
   the Install button stays. Commit d380d277, tests `tests/test_draft_card_switched_off_twin.py`.
   Full suites at 056f53bb: project `.venv` 3306 passed, 7 skipped; CI-like venv 3283 passed, 30 skipped.
 
+
 ## Agent recovery and reuse fixes (2026-10-20)
 
 - [x] Four improvements from the 2026-10-20 org-chart conversation (2026-10-20, Claude Code;
@@ -2782,3 +2783,28 @@ s-k-20261011T102952` (not published).
      check `reusable_request_drafted`); install only on the card. Tests
      `tests/test_reusable_drafts.py`.
 - [ ] Owner live check of the four fixes (steps in HANDOFF.md).
+
+
+## Interactive org chart and files in the chat (2026-10-20)
+
+- [x] Interactive HTML org chart and in-chat file viewer (2026-10-20, Claude Code; owner
+  「請幫我全做」, extended the same day with the Preview / Code viewer). Decision
+  `docs/DECISIONS.md` 2026-10-20 "In-chat HTML runs in an opaque-origin sandbox from a nonce
+  address; files open in a viewer panel"; spec `docs/phases/BUSINESS_CARDS.md` §6–§7;
+  `docs/CONTRACTS.md`; user guide §4.1 and §4.7.
+  1. 69d12960 `org-chart` / `cards__org_chart` `format` png (default) | html | both; one self-contained
+     HTML page (tree, grouped view, search, person card, left toggle, dark mode, 390 px).
+     Tests `tests/test_business_cards_html.py` (incl. a headless browser run, screenshots in
+     `.scratch/org-chart-html/`).
+  2. c8189832 Agent Web: file chips and the viewer panel; HTML inline in `<iframe sandbox="allow-scripts">`
+     from `/view/file?nonce=` with a strict CSP. Tests `tests/test_file_viewer_web.py`
+     (headless, screenshots in `.scratch/file-viewer/`).
+  3. bc7de7c1 Telegram: the HTML as `sendDocument` with a caption. Test in
+     `tests/test_business_cards_telegram.py`; fake-model chat in
+     `tests/test_business_cards_conversation.py`.
+  Verification: ruff check, ruff format --check, mypy clean; full pytest project `.venv` 3401
+  passed, 7 skipped, 1 failed (an assertion that the person's own photo is not served, which
+  the viewer now serves on purpose; updated to a file from another conversation and re-run
+  alone: passed); separate CI-like venv `C:/aepci-wk/venv-cards` (`.[dev,office]`): 3375
+  passed, 34 skipped, 0 failed.
+- [ ] Owner live check of the HTML chart in Agent Web and Telegram (steps in HANDOFF.md).

@@ -1,8 +1,71 @@
 # Handoff
 
-Updated: 2026-10-20 (Asia/Taipei), by Claude Code (agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-20 (Asia/Taipei), by Claude Code (interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## Agent recovery and reuse fixes (2026-10-20, Claude Code) — latest
+## Interactive HTML org chart and files in the chat (2026-10-20, Claude Code) — latest
+
+**Goal / scope:** owner 2026-10-20 「請幫我全做」: the org chart as interactive HTML (tree view,
+grouped view, search opening a person card), general (no company built in), shown in the chat;
+extended the same day: every chat file opens in a viewer panel with Preview / Code, as in Codex
+and Claude Code. Not pushed; Agent Web not restarted (the owner may be testing live); the live
+`cards.db` and mail untouched.
+
+**Done (commits on main):**
+1. 69d12960 `org-chart` / `cards__org_chart` `format` png (default) | html | both
+   (`capabilities/business_cards/chart_html.py`): one self-contained page (inline CSS, script,
+   escaped JSON data; no network), tree (reporting tree first when lines exist, solid/dashed),
+   grouped boxes, search (name, romanised, title, BG/division/department, email), person card
+   (all fields, 在職/已離職, 需確認, sources with dates, reporting lines with evidence), 顯示已離職
+   toggle (hidden by default), dark mode, 390 px, keyboard, 44 px. Skill procedure: html for
+   interactive / HTML / searchable / tree requests, never a script.
+2. c8189832 Agent Web: file chips on answers and on the person's attachments open the viewer
+   panel (side panel; full-screen under 760 px): HTML Preview (sandboxed frame) / Code, Markdown
+   Preview (existing DOM renderer) / Code, CSV table / Code, images preview, text files Code
+   with line numbers (5,000 lines / 1 MB cap with notice), copy, download, open in browser,
+   Esc closes. HTML is framed only from `/view/file?nonce=` (15 min, page asks
+   `/api/conversations/view-link` with its token) with CSP `default-src 'none'; script-src
+   'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; ... sandbox allow-scripts`, in
+   `<iframe sandbox="allow-scripts">` without `allow-same-origin`. The chart shows inline in its
+   answer (480 px, resizable, 放大, 在面板開啟, 在瀏覽器開啟). `/api/conversations/file` now also
+   serves the person's attachments listed on the conversation and serves text (HTML included)
+   as `text/plain`.
+3. bc7de7c1 Telegram: the HTML as `sendDocument` with a one-line caption; PNG kept for `both`.
+4. Docs: `docs/phases/BUSINESS_CARDS.md` §6–§7, `docs/CONTRACTS.md`, `docs/DECISIONS.md`
+   2026-10-20 "In-chat HTML runs in an opaque-origin sandbox from a nonce address; files open in
+   a viewer panel" (why not `srcdoc`, blob or the token route), `docs/TASKS.md`, user guide §4.1
+   and §4.7.
+
+**Verification (2026-10-20):** `ruff check .` passed; `ruff format --check .` 921 files
+formatted; `mypy` no issues (669 files). Full pytest, project `.venv`: 3401 passed, 7 skipped,
+1 failed: `test_store_a_card_draw_the_chart_record_a_departure_and_undo_it` asserted that the
+person's own attached photo is not served, which the viewer now does on purpose; the assertion
+now uses a file attached in another conversation (still refused) and passed when re-run alone.
+CI-like run: the shared `C:\aepci-wk\venv` had been re-pointed (editable install) at another
+agent's worktree `C:\aepci-wk\wt-recovery`, so a separate venv `C:\aepci-wk\venv-cards`
+(`pip install -e ".[dev,office]"`, `--basetemp=C:/aepci-wk/bt-cards`) was used: 3375 passed,
+34 skipped, 0 failed. Headless browser tests ran here; screenshots in `.scratch/org-chart-html/`
+and `.scratch/file-viewer/`.
+
+**Open / risks:**
+- HTML written by `coding/run-python` in a workspace is not attached to answers (attachments
+  come only from `cards__org_chart`), so it is not shown inline yet; the viewer would show it the
+  same way once it is attached.
+- Esc pressed while focus is inside the sandboxed frame goes to the frame (it closes the chart's
+  own person card), not to the panel; Esc outside the frame closes the panel.
+- A view nonce lives 15 minutes; an answer re-rendered after that asks for a new one (each render
+  and each "在瀏覽器開啟" asks afresh).
+- The reporting tree in the HTML is an indented list, not a drawn graph.
+
+**Next (owner live check; check `/api/tasks` before restarting Agent Web):**
+1. Restart Agent Web so the new code loads.
+2. In Agent Web: 「用 HTML 互動式呈現 <公司> 的組織圖」 → the answer shows the chart inline;
+   switch 樹狀 / 分組, search a name (the card opens), toggle 顯示已離職, try dark mode.
+3. Click the chips under the answer: the .html (Preview / Code), the .md legend (Preview /
+   Code); Esc closes; 在瀏覽器開啟 opens the chart in a tab.
+4. Telegram: the same request → the PNG (if both), the .html document with the caption, the .md
+   legend; open the .html on a phone browser.
+
+## Agent recovery and reuse fixes (2026-10-20, Claude Code)
 
 **Goal / scope:** four owner-approved improvements (2026-10-20, 「請幫我全做」) from a live Gateway
 conversation in which the owner asked for an interactive HTML org chart: `coding__run` failed with

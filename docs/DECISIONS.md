@@ -3837,3 +3837,51 @@ turn's tool record; command names are enough and err toward not flagging); auto-
 Workflow from a `coding__run` without the model (the model writes the parameters); naming the
 coding Skill revision 1.7.1 (the change is a behaviour rule, a minor version; the paused
 rule-following wording proposal once called "1.8.0" stays paused and would come later).
+
+## 2026-10-20 — In-chat HTML runs in an opaque-origin sandbox from a nonce address; files open in a viewer panel
+
+Owner (2026-10-20, 「請幫我全做」, then extended the same day): the org chart can be interactive
+HTML, shown in the chat; every file on an answer opens in a viewer panel with Preview / Code, as
+in Codex and Claude Code.
+
+Decision:
+
+1. **The org chart gains `format` (`png` default, `html`, `both`)**, generated natively
+   (`capabilities/business_cards/chart_html.py`) from the same rows as the PNG, as one
+   self-contained file: inline CSS, script and JSON data, no network, no CDN, a `<meta>` CSP
+   `default-src 'none'`. Data is escaped for the `<script>` block and the script uses only text
+   nodes, so contact data cannot inject markup. General: no company is built in.
+2. **HTML in Agent Web is framed from a short-lived nonce address, not `srcdoc` and not the
+   token route.** The page asks `GET /api/conversations/view-link` with its token; the Host
+   returns `/view/file?nonce=<24 random bytes>` (15 minutes, bound to one conversation and one
+   listed file, which must still be listed and under the workspace). That address is served with
+   `Content-Security-Policy: default-src 'none'; script-src 'unsafe-inline'; style-src
+   'unsafe-inline'; img-src data:; font-src data:; form-action 'none'; base-uri 'none';
+   frame-ancestors 'self'; sandbox allow-scripts`, `X-Frame-Options: SAMEORIGIN`,
+   `Referrer-Policy: no-referrer`, and framed with `<iframe sandbox="allow-scripts">`, never
+   `allow-same-origin`. So the frame has an opaque origin: it cannot read the page, its
+   `TOKEN`, storage or cookies, cannot call the API with the token, cannot reach any network,
+   and its own address carries only the nonce, which opens that one file. Opened in a tab of its
+   own ("在瀏覽器開啟"), the CSP `sandbox` keeps it opaque-origin too.
+3. **The token route serves text as plain text.** `/api/conversations/file` (token header) now
+   also serves the person's own attachments listed on the conversation, and serves HTML and other
+   text as `text/plain; charset=utf-8` (images as themselves, `.md` as `text/markdown`) with
+   `X-Frame-Options: DENY`; the page shows text with `textContent` (Code view) or the existing
+   DOM-building Markdown renderer (no raw HTML). The viewer never builds a path: it only asks
+   for paths listed on the conversation's messages.
+4. **The viewer panel** (side panel; full-screen sheet under 760 px): chip per file; Preview /
+   Code where both apply (HTML, Markdown, CSV table), image preview only, text files Code only
+   with line numbers, a 5,000-line / 1 MB cap with a notice, copy, download, open in browser,
+   Esc to close, focus kept inside, 44 px targets.
+5. **Telegram** sends the HTML with `sendDocument` and a one-line caption to open it in a
+   browser; the PNG photo stays when the format is `both`.
+
+Rejected: `srcdoc` fetched by the parent (a `srcdoc` document inherits the parent's policy and
+gets no response header of its own, so the required CSP header could not be set, and the parent
+would hold and inject the markup); `iframe src` on the token route (the token would have to be in
+the frame's URL, where the frame and history can read it, and the route sends
+`X-Frame-Options: DENY`); a blob URL (inherits the parent's origin policy, no CSP header);
+`allow-same-origin` (would give the file the page's origin and so its token); a Markdown or
+syntax-highlighting library (the page is one inline string with no external code). HTML a
+`coding/run-python` step writes in a workspace is not attached to answers today, so it is not
+shown inline; the viewer shows any file that does become an answer attachment the same way.
