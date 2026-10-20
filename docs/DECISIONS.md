@@ -4172,3 +4172,12 @@ Owner answers on GitHub issues #211, #213 and #222 (2026-10-21):
   and the mock drop the stored `priorities`; ranking is computed by the BI Skill when asked, and the
   dashboard ranks by the Skill's assessment with its reasons shown. The "market" question (#222) is
   therefore closed.
+
+## 2026-10-21 — BI data is INTERNAL; classification routes models, sharing decides access
+
+Owner on GitHub #214 ("按你的意思做"): BI customer data (and the BI vault / contacts memory derived from it)
+is classified **INTERNAL**. Classification decides which model may receive the data — INTERNAL goes only to the
+company's internal gateway, never to external agents such as Claude Code or Codex — and does **not** add access
+control. Who may read is decided by who the vault or database is shared with, as the owner described; no extra
+per-user permission layer is added. ADR-K8 is decided. CONFIDENTIAL and RESTRICTED stay available for data the
+owner marks explicitly.
