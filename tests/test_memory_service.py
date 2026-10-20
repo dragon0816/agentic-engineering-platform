@@ -29,6 +29,7 @@ from host_runtime.assets import shipped
 from host_runtime.contracts import HostLayout
 from host_runtime.memory_spaces import conflicts, registry
 from memory import merge
+from memory.personal import NOTES_READ
 from memory.registry import MemoryRegistry, MemoryRegistryError
 from memory.service import (
     MemoryAccessError,
@@ -94,7 +95,9 @@ def test_a_manifest_without_memory_spaces_keeps_its_bytes_and_digest() -> None:
 
 def test_the_business_cards_skill_manages_contacts_org() -> None:
     declared = business_cards_skill().memory_spaces
-    assert declared == (DECLARATION,)
+    # M3: it also reads the person's notes (the org chart's 「相關筆記」).
+    assert declared == (DECLARATION, NOTES_READ)
+    assert NOTES_READ.space == "personal/notes" and NOTES_READ.role == "reader"
     assert DECLARATION.role == "manager"
     assert DECLARATION.kinds == ("entities", "sync_state")  # M2: mail sync state
     assert DECLARATION.sensitivity == "CONFIDENTIAL"

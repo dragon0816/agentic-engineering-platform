@@ -54,6 +54,9 @@ class ConversationMessage(Contract):
     # 2026-10-15, AGENT_MODE_BACKENDS): permissions, a first mail read, mail
     # to send, as they were decided. Kept for the history; never a secret.
     action_cards: tuple[dict[str, JsonValue], ...] = Field(default=(), max_length=60)
+    # The person's saved preferences the answer was given (accumulated memory
+    # M3), by id, so "why did you do that" can name them later (M5).
+    preferences_used: tuple[Symbol, ...] = Field(default=(), max_length=40)
 
     @model_validator(mode="before")
     @classmethod
@@ -88,6 +91,8 @@ class ConversationMessage(Contract):
             raise ValueError("only an answer shows an action card")
         if self.role == "user" and self.tool_summary is not None:
             raise ValueError("only an answer records the tools it used")
+        if self.role == "user" and self.preferences_used:
+            raise ValueError("only an answer records the preferences it was given")
         reject_embedded_secrets(self.model_dump(mode="json"))
         return self
 

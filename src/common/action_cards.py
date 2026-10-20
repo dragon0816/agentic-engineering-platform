@@ -91,6 +91,10 @@ class ActionCard(Contract):
     expires_at: datetime | None = None
     # Decided only in Agent Web: Telegram shows the card and says where.
     web_only: bool = False
+    # Whether the turn that made the card ends with it (a change proposal
+    # does). A memory proposal (accumulated memory M3) does not: the answer
+    # goes on and the card shows under it.
+    ends_turn: bool = True
     # The answer text of the turn that showed the card.
     message: Text = Field(max_length=600)
 

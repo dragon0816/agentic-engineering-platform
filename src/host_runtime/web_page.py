@@ -371,6 +371,12 @@ p.note { color: var(--dim); font-size: 13px; margin: 4px 0 12px; }
 .turn-feedback-row { display: flex; gap: 8px; align-items: center;
   font-size: 12px; color: var(--dim); }
 .turn-feedback-saved { font-size: 12px; color: var(--dim); margin: 6px 0 0; }
+.note-saved { font-size: 12px; color: var(--dim); margin: 6px 0 0; }
+.note-saved.bad { color: var(--bad); }
+#save-selection { position: fixed; z-index: 40; min-height: 36px; padding: 4px 12px;
+  border: 1px solid var(--accent); border-radius: 8px; background: var(--bg);
+  color: var(--accent); cursor: pointer; font-size: 13px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .18); }
 .turn-menu { position: fixed; z-index: 50; min-width: 170px; padding: 4px;
   border: 1px solid var(--line); border-radius: 8px; background: var(--bg);
   box-shadow: 0 6px 24px rgba(0,0,0,.18); }
@@ -2932,6 +2938,12 @@ function attachTurnControls(block, question, message) {
   reply.setAttribute("aria-label", reply.title);
   reply.addEventListener("click", () => chooseReply(message.message_id, question));
   tools.append(reply);
+  // 「存成筆記」 (accumulated memory M3): the whole answer, in one click.
+  const keep = document.createElement("button");
+  keep.type = "button"; keep.className = "save-note"; keep.append(text("\ud83d\udcdd"));
+  keep.title = "存成筆記"; keep.setAttribute("aria-label", "存成筆記");
+  keep.addEventListener("click", () => saveNote(block, message.message_id, ""));
+  tools.append(keep);
   block.append(tools);
   const area = document.createElement("div");
   area.className = "turn-feedback-area";
@@ -3012,6 +3024,7 @@ function showTurnMenu(x, y, block, question, message) {
     ["\u56de\u8986\u9019\u6bb5\u5c0d\u8a71", () => chooseReply(message.message_id, question)],
     ["\u8907\u88fd\u56de\u8986", () => { closeTurnMenu();
       if (navigator.clipboard) navigator.clipboard.writeText(message.text); }],
+    ["存成筆記", () => { closeTurnMenu(); saveNote(block, message.message_id, ""); }],
     ...RATINGS.map(([rating, icon, label]) => [
       "\u8a55\u50f9\uff1a" + icon + " " + label,
       () => { closeTurnMenu(); openFeedback(block, message, rating); },
@@ -3032,6 +3045,89 @@ function showTurnMenu(x, y, block, question, message) {
 }
 
 // -- end Turn groups
+
+// -- Notes (accumulated memory M3): an answer, or a selection of it, in one
+// click. The server takes the text from the stored answer; a selection must
+// be in it. Only this press saves; 「復原」 undoes it.
+
+async function saveNote(block, messageId, selection) {
+  const area = block.querySelector(".turn-feedback-area") || block;
+  const line = document.createElement("div");
+  line.className = "note-saved"; line.setAttribute("role", "status");
+  line.append(text(selection ? "存選取內容中…" : "存成筆記中…"));
+  area.append(line);
+  try {
+    const saved = await call("/api/memory/notes/save",
+      {session_id: activeConversation, message_id: messageId, selection: selection || ""});
+    line.replaceChildren(text(saved.message || saved.code));
+    if (!saved.ok) { line.classList.add("bad"); return; }
+    if (saved.change_id) {
+      const undo = document.createElement("button");
+      undo.type = "button"; undo.className = "link-button note-undo"; undo.append(text("復原"));
+      undo.addEventListener("click", async () => {
+        undo.disabled = true;
+        try {
+          const undone = await call("/api/memory/undo",
+            {kind: "note", change_id: saved.change_id});
+          line.replaceChildren(text(undone.ok ? "已復原：這則筆記沒有保留。"
+            : (undone.message || undone.code)));
+        } catch (failure) {
+          undo.disabled = false; line.append(text(" " + failure.message));
+        }
+      });
+      line.append(text(" "), undo);
+    }
+  } catch (failure) {
+    line.classList.add("bad");
+    line.replaceChildren(text("無法存成筆記：" + failure.message));
+  }
+}
+
+const selectionNote = document.createElement("button");
+selectionNote.type = "button"; selectionNote.id = "save-selection"; selectionNote.hidden = true;
+selectionNote.append(text("存選取內容"));
+document.body.append(selectionNote);
+let selectionTarget = null;
+let selectionTimer = 0;
+
+function selectedAnswer() {
+  const chosen = window.getSelection();
+  if (!chosen || chosen.isCollapsed || !chosen.rangeCount) return null;
+  const range = chosen.getRangeAt(0);
+  const node = (item) => item.nodeType === 1 ? item : item.parentElement;
+  const start = node(range.startContainer), end = node(range.endContainer);
+  const said = start && start.closest(".said");
+  if (!said || !end || end.closest(".said") !== said) return null;
+  const block = said.closest(".turn");
+  if (!block || !block.dataset.messageId) return null;
+  const picked = chosen.toString().trim();
+  return picked ? {block: block, range: range, text: picked} : null;
+}
+
+function placeSelectionNote() {
+  const found = selectedAnswer();
+  selectionTarget = found;
+  if (!found) { selectionNote.hidden = true; return; }
+  const box = found.range.getBoundingClientRect();
+  selectionNote.style.left = Math.max(8, Math.min(box.left, window.innerWidth - 150)) + "px";
+  selectionNote.style.top = Math.max(8, Math.min(box.bottom + 6, window.innerHeight - 48)) + "px";
+  selectionNote.hidden = false;
+}
+
+document.addEventListener("selectionchange", () => {
+  clearTimeout(selectionTimer);
+  selectionTimer = setTimeout(placeSelectionNote, 120);
+});
+// Keep the selection while the button is pressed.
+selectionNote.addEventListener("mousedown", (event) => event.preventDefault());
+selectionNote.addEventListener("click", () => {
+  const found = selectionTarget;
+  selectionNote.hidden = true;
+  if (!found) return;
+  saveNote(found.block, found.block.dataset.messageId, found.text);
+  const chosen = window.getSelection();
+  if (chosen) chosen.removeAllRanges();
+});
 
 function renderSessionList() {
   const query = el("session-search").value.trim().toLowerCase();

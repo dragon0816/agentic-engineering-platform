@@ -55,6 +55,7 @@ from capabilities.business_cards.contracts import (
     UndoRequest,
     UndoResult,
 )
+from capabilities.business_cards.manifest import CARDS_SKILL
 from capabilities.business_cards.store import (
     CardStore,
     CardStoreError,
@@ -843,6 +844,12 @@ class OrgChartHandler(_Harvesting):
                 sources=store.sources_seen([p["person_id"] for p in everyone]),
                 show_left=request.include_left,
                 generated_at=local_time(now.isoformat()),
+                # 「相關筆記」 on each person card (accumulated memory M3).
+                notes=chart_html.linked_notes(
+                    store.memory,
+                    [p["person_id"] for p in everyone],
+                    (CARDS_SKILL.namespace, CARDS_SKILL.name),
+                ),
             )
             files.append(ChartFile(path=str(page), media_type="text/html", filename=page.name))
         folder.mkdir(parents=True, exist_ok=True)

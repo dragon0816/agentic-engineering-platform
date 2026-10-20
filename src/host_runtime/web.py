@@ -210,6 +210,8 @@ from host_runtime.laya import last_decision as laya_last_decision
 from host_runtime.laya import probe as laya_probe
 from host_runtime.loan_reply_cards import LoanReplyCards
 from host_runtime.persona import AgentPersonaStore, AgentPersonaUpdateRequest
+from host_runtime.personal_memory import ROUTES as MEMORY_ROUTES
+from host_runtime.personal_memory import PersonalMemory, preferences_in
 from host_runtime.platform_publish import (
     ASSET_REFERENCE,
     MemberPortalPublisher,
@@ -678,6 +680,10 @@ class AgentWeb:
         )
         if runtime.telegram is not None:
             runtime.telegram.cards = self
+        # Preferences and notes (accumulated memory M3): the proposal cards,
+        # the preferences a turn is given, the one-click note routes.
+        self.personal_memory = PersonalMemory(self)
+        gateway.turn_memory = self.personal_memory.turn
         # Agent mode for the Claude Code / Copilot backends (owner 2026-10-15,
         # docs/phases/AGENT_MODE_BACKENDS.md): working folders, approval cards,
         # email and the Knowledge pipeline as the agent's tools.
@@ -2199,6 +2205,7 @@ class AgentWeb:
 
     def card(self, card_id: str) -> dict[str, Any] | None:
         handlers: dict[str, Any] = {
+            "mm-": self.personal_memory,
             "cp-": self.proposals,
             "pm-": self.agent_mode,
             "ml-": self.agent_mail,
@@ -2223,6 +2230,7 @@ class AgentWeb:
             *proposals,
             *self.agent_mode.open_cards(session_id),
             *self.agent_mail.open_cards(session_id),
+            *self.personal_memory.open_cards(session_id),
             # Loan send cards belong to a Workflow run, not to a conversation.
             *(self.loan_cards.open_cards() if session_id is None else ()),
         ]
@@ -2241,6 +2249,13 @@ class AgentWeb:
             return self.agent_mail.decide(card_id, action, channel=channel)
         if card_id.startswith("ls-"):
             return self.loan_cards.decide(card_id, action, channel=channel)
+        if card_id.startswith("mm-"):
+            # A preference or note the Agent proposed (M3): only this press saves.
+            remembered = self.personal_memory.decide(card_id, action, channel=channel)
+            shown = remembered.get("card")
+            if isinstance(shown, dict) and remembered.get("session_id"):
+                self._update_card_message(str(remembered["session_id"]), shown)
+            return remembered
         if card_id.startswith("dr-"):
             with self._one_at_a_time:
                 drafted = self.draft_cards.decide(card_id, action, channel=channel)
@@ -2948,6 +2963,12 @@ class AgentWeb:
                         **({"workflow_form": offered} if offered is not None else {}),
                         **({CARD_KEY: carded} if carded is not None else {}),
                         **({"files": charts} if charts else {}),
+                        # The person's preferences this turn was given (M3).
+                        **(
+                            {"preferences_used": list(result.preferences_used)}
+                            if result is not None and result.preferences_used
+                            else {}
+                        ),
                         "tool_summary": tool_summary(result),
                         "ok": result is not None and result.status == "answered",
                         "answer": (
@@ -3040,6 +3061,7 @@ class AgentWeb:
                                 workflow_form=answer.get("workflow_form"),
                                 action_card=answer.get(CARD_KEY),
                                 action_cards=_listed_cards(answer),
+                                preferences_used=preferences_in(answer),
                                 attachments=tuple(
                                     {key: str(item[key]) for key in ("filename", "kind", "path")}
                                     for item in _answer_files(answer)
@@ -5787,6 +5809,9 @@ class _Handler(BaseHTTPRequestHandler):
                 )
             else:
                 self._json(200, web.cards(session or None))
+        elif parsed.path in ("/api/memory/notes", "/api/memory/preferences"):
+            # Minimal lists (M3); the memory page is M4.
+            self._json(200, web.personal_memory.listed(parsed.path.rsplit("/", 1)[1]))
         elif parsed.path == "/api/agent-mode":
             self._json(200, web.agent_mode_settings())
         elif parsed.path == "/api/conversations/progress":
@@ -5944,6 +5969,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/contributions",
             "/api/approvals/decide",
             "/api/cards/decide",
+            *MEMORY_ROUTES,
             "/api/agent-mode/settings",
             "/api/agent-mode/session",
             "/api/drafts/install",
@@ -6138,6 +6164,10 @@ class _Handler(BaseHTTPRequestHandler):
                 else web.update_agent_session(given)
             )
             self._json(200, result)
+            return
+        if path in MEMORY_ROUTES:
+            given = body if isinstance(body, dict) else {}
+            self._json(200, self.server.web.personal_memory.route(path, given))
             return
         if path == "/api/cards/decide":
             chosen = body if isinstance(body, dict) else {}

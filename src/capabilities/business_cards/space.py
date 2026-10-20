@@ -178,8 +178,14 @@ CREATE TABLE IF NOT EXISTS {CANDIDATES} (
 
 
 def default_registry() -> MemoryRegistry:
-    """The declarations of the shipped business-cards Skill and its rules:
-    what a store opened outside a Host (the CLI, tests) uses."""
+    """The declarations of the shipped business-cards Skill and its rules,
+    with the Host's personal spaces: what a store opened outside a Host
+    (the CLI, tests) uses."""
     from capabilities.business_cards.manifest import business_cards_skill
+    from memory import personal
 
-    return MemoryRegistry.from_manifests([business_cards_skill()], rules=[MERGE_RULES])
+    return MemoryRegistry.from_manifests(
+        [business_cards_skill()],
+        rules=[MERGE_RULES, *personal.RULES],
+        first=personal.HOST_DECLARED,
+    )

@@ -91,14 +91,21 @@ class MemoryRegistry:
 
     @classmethod
     def from_manifests(
-        cls, manifests: Iterable[object], *, rules: Iterable[MergeRules] = ()
+        cls,
+        manifests: Iterable[object],
+        *,
+        rules: Iterable[MergeRules] = (),
+        first: Iterable[tuple[AssetKey, Iterable[MemorySpaceDeclaration]]] = (),
     ) -> MemoryRegistry:
         """A registry from Skill and Workflow manifests. A manifest whose
         declarations conflict with one taken earlier is left out: its asset
-        then reaches no memory, and the earlier manager keeps the space."""
+        then reaches no memory, and the earlier manager keeps the space.
+        `first` is declared before any manifest (the Host's own spaces)."""
         registry = cls()
         for item in rules:
             registry.provide_rules(item)
+        for asset, declared in first:
+            registry.declare(asset, declared)
         for manifest in manifests:
             declared = declarations_of(manifest)
             if not declared:

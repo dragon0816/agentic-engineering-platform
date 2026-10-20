@@ -14,7 +14,9 @@ element with `textContent`, never `innerHTML`, so a contact field holding
 
 Built from the same rows as the PNG (`chart.render`): the grouping path,
 the title order, the reporting lines (solid = evidence, dashed = inferred)
-and the fields still to confirm.
+and the fields still to confirm. A person card lists the person's notes
+linked to them (「相關筆記」, accumulated memory M3): the Skill declares a
+read of `personal/notes`, and `linked_notes` asks the notes' manager.
 """
 
 from __future__ import annotations
@@ -29,6 +31,42 @@ from typing import Any
 from capabilities.business_cards import chart
 from capabilities.business_cards.contracts import FIELD_LABELS, SOURCE_LABELS, STATUS_LABELS
 from capabilities.business_cards.store import local_time
+from memory.service import MemoryService, MemoryServiceError
+
+#: How many linked notes a person card shows, and how much of each.
+CARD_NOTES = 5
+CARD_NOTE_CHARS = 140
+
+
+def person_ref(person_id: str) -> str:
+    """How a note links to a contact (`contacts/org:person:<id>`)."""
+    return f"contacts/org:person:{person_id}"
+
+
+def linked_notes(
+    memory: MemoryService, person_ids: Sequence[str], reader: tuple[str, str]
+) -> dict[str, list[dict[str, str]]]:
+    """The person's notes linked to each contact, newest first, as a card
+    shows them (id, a short excerpt, the day); nothing when the Skill
+    declared no read of the notes or the notes cannot be read."""
+    from memory.notes import for_reader
+
+    try:
+        found = for_reader(memory, reader, [person_ref(pid) for pid in person_ids])
+    except MemoryServiceError:
+        return {}
+    shown: dict[str, list[dict[str, str]]] = {}
+    for pid in person_ids:
+        for note in found.get(person_ref(pid), [])[:CARD_NOTES]:
+            flat = " ".join(note.text.split())
+            shown.setdefault(pid, []).append(
+                {
+                    "id": note.note_id,
+                    "text": flat[:CARD_NOTE_CHARS] + ("…" if len(flat) > CARD_NOTE_CHARS else ""),
+                    "date": local_time(note.created_at)[:10],
+                }
+            )
+    return shown
 
 
 def _evidence(line: sqlite3.Row) -> str:
@@ -45,6 +83,7 @@ def chart_data(
     sources: Mapping[str, Sequence[tuple[str, str]]],
     show_left: bool,
     generated_at: str = "",
+    notes: Mapping[str, Sequence[Mapping[str, str]]] | None = None,
 ) -> dict[str, Any]:
     """What the page shows, as plain data (the page escapes nothing itself:
     it only ever sets text)."""
@@ -92,6 +131,7 @@ def chart_data(
                     for source, date in sources.get(pid, ())
                 ],
                 "manager": manager.get(pid),
+                "notes": [dict(item) for item in (notes or {}).get(pid, ())],
                 "reports": [
                     {
                         "id": member,
@@ -149,6 +189,7 @@ def render(
     sources: Mapping[str, Sequence[tuple[str, str]]],
     show_left: bool,
     generated_at: str = "",
+    notes: Mapping[str, Sequence[Mapping[str, str]]] | None = None,
 ) -> None:
     """Write the HTML file."""
     data = chart_data(
@@ -159,6 +200,7 @@ def render(
         sources=sources,
         show_left=show_left,
         generated_at=generated_at,
+        notes=notes,
     )
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(page(data), encoding="utf-8")
@@ -461,6 +503,11 @@ function openCard(id) {
   parts.push(el("h3", null, "回報關係"));
   parts.push(lines.length ? el("ul", null, ...lines)
     : el("p", {className: "empty"}, "沒有記錄（分組不代表回報關係）"));
+  if (p.notes && p.notes.length) {
+    parts.push(el("h3", null, "相關筆記"));
+    parts.push(el("ul", {className: "notes"}, ...p.notes.map(
+      n => el("li", null, (n.date ? n.date + "　" : "") + n.text + "（" + n.id + "）"))));
+  }
   body.replaceChildren(...parts);
   const card = document.getElementById("card");
   card.hidden = false;

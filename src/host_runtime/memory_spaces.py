@@ -4,7 +4,9 @@
 Built from the `memory_spaces` declarations of the manifests AEP ships (the
 Host's own code, so they win for their identities) and of the Skills and
 Workflows installed here, switched on or off (a switched-off Skill's space
-stays; §3.6). Merge rules are data the managers ship.
+stays; §3.6). Merge rules are data the managers ship. The Host itself
+manages the personal spaces (`personal/preferences`, `personal/notes`;
+accumulated memory M3), declared before any manifest.
 """
 
 from __future__ import annotations
@@ -16,6 +18,7 @@ from agent.skills import SkillManifest
 from common.assets import WorkflowManifest
 from common.memory import MergeRules, declarations_of, manager_conflicts
 from host_runtime.contracts import HostLayout
+from memory import personal
 from memory.registry import MemoryRegistry, asset_key
 
 DISABLED = "disabled"
@@ -25,7 +28,7 @@ def shipped_rules() -> tuple[MergeRules, ...]:
     """The merge rules of the spaces shipped managers own."""
     from capabilities.business_cards.space import MERGE_RULES
 
-    return (MERGE_RULES,)
+    return (MERGE_RULES, *personal.RULES)
 
 
 def _installed(layout: HostLayout) -> list[SkillManifest | WorkflowManifest]:
@@ -54,7 +57,9 @@ def registry(layout: HostLayout) -> MemoryRegistry:
     ours = list(shipped())
     known = {item.metadata.identity.key for item in ours}
     others = [item for item in _installed(layout) if item.metadata.identity.key not in known]
-    return MemoryRegistry.from_manifests([*ours, *others], rules=shipped_rules())
+    return MemoryRegistry.from_manifests(
+        [*ours, *others], rules=shipped_rules(), first=personal.HOST_DECLARED
+    )
 
 
 def conflicts(layout: HostLayout, candidate: SkillManifest | WorkflowManifest) -> tuple[str, ...]:
@@ -67,7 +72,10 @@ def conflicts(layout: HostLayout, candidate: SkillManifest | WorkflowManifest) -
         return ()
     present: Iterable[SkillManifest | WorkflowManifest] = [*shipped(), *_installed(layout)]
     return manager_conflicts(
-        [(asset_key(item.metadata.identity), declarations_of(item)) for item in present],
+        [
+            *personal.HOST_DECLARED,
+            *((asset_key(item.metadata.identity), declarations_of(item)) for item in present),
+        ],
         asset_key(candidate.metadata.identity),
         declared,
     )

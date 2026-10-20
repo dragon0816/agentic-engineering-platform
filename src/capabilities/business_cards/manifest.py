@@ -13,6 +13,7 @@ from __future__ import annotations
 from agent.skills import SkillManifest
 from capabilities.business_cards.space import DECLARATION
 from common.assets import AssetIdentity
+from memory.personal import NOTES_READ
 
 CARDS_SKILL = AssetIdentity(namespace="engineering", name="business-cards", version="1.0.0")
 
@@ -160,6 +161,11 @@ def business_cards_skill() -> SkillManifest:
             "instructions": PROCEDURE,
             # The manager of the `contacts/org` memory space (accumulated
             # memory M1): it adds observations and keeps the current view.
-            "memory_spaces": [DECLARATION.model_dump(mode="json", exclude_none=True)],
+            # It reads the person's notes (M3): a person card on the HTML
+            # org chart lists the notes linked to that person.
+            "memory_spaces": [
+                DECLARATION.model_dump(mode="json", exclude_none=True),
+                NOTES_READ.model_dump(mode="json", exclude_none=True),
+            ],
         }
     )

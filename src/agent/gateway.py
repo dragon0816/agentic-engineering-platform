@@ -39,7 +39,7 @@ from agent.decisions import (
 from agent.harness_anchor import ToolAnchor
 from agent.harness_handoff import capped, harness_reply, with_unverified_note
 from agent.routing import RequestRouter, RoutingOutcome
-from agent.skills import CommandBinding
+from agent.skills import CommandBinding, SkillManifest
 from agent.tool_recovery import RECOVERY_GUIDANCE, ToolRecovery, recovery_for
 from capabilities.runtime import CapabilityInvocation
 from common.action_cards import CARD_KEY
@@ -119,8 +119,10 @@ MEMORY_GUIDANCE = (
     "it. Never say you changed a rule or a setting, or that you will do something from now "
     "on, unless a tool that changes it succeeded in this turn. When the person wants a "
     "behaviour to last, apply it in this conversation, say it is not saved yet, and propose "
-    "it for them to apply: a Workflow draft (authoring__draft_workflow) with the rule built "
-    "in, or a settings proposal (propose_change), whichever of these tools you have."
+    "it for them to apply: a preference for the Skill it belongs to "
+    "(memory__propose_preference), a Workflow draft (authoring__draft_workflow) with the rule "
+    "built in, or a settings proposal (propose_change), whichever of these tools you have. A "
+    "proposal saves nothing until the person presses its button: never say it is saved."
 )
 
 # Reusable means a Workflow draft (owner 2026-10-20: an org-chart script ran
@@ -316,6 +318,24 @@ class HostTool:
     handler: Callable[[RequestContext, dict[str, JsonValue]], Awaitable[HostToolOutcome]]
 
 
+@dataclass(frozen=True)
+class TurnMemory:
+    """What the person's memory adds to one pass of a turn (accumulated
+    memory M3): `guidance` for the system prompt (the saved preferences of
+    the Skills in use, labelled as the person's, and how to use the memory
+    tools), the ids of the preferences it carries, and the memory tools
+    offered in this turn (proposals, and the notes search only where it is
+    allowed). The Host decides all three; the model only sees them."""
+
+    guidance: str = ""
+    preferences_used: tuple[str, ...] = ()
+    tools: tuple[HostTool, ...] = ()
+
+
+#: (the request, the Skills whose tools this pass offers) -> what memory adds.
+TurnMemoryProvider = Callable[[RequestContext, tuple[SkillManifest, ...]], TurnMemory]
+
+
 class ConversationToolExecution(Contract):
     """Evidence for one model-proposed call after installed-target lookup."""
 
@@ -363,6 +383,9 @@ class GatewayConversationResult(Contract):
         default=(), max_length=MAX_CONVERSATION_TOOL_CALLS
     )
     failure: Failure | None = None
+    # The person's saved preferences the turn was given (accumulated memory
+    # M3), by id, for "why did you do that" later (M5).
+    preferences_used: tuple[Symbol, ...] = Field(default=(), max_length=40)
 
     @model_validator(mode="after")
     def terminal_state(self) -> Self:
@@ -511,6 +534,10 @@ class Gateway:
         self.conversation_limits: Callable[[], ConversationLimits] | None = None
         # The clock the turn's time budget is measured on (a test fakes it).
         self.clock: Callable[[], float] = time.monotonic
+        # The person's memory for a turn (accumulated memory M3): their
+        # preferences for the Skills in use and the memory tools. Set by the
+        # host; without it a turn carries no memory.
+        self.turn_memory: TurnMemoryProvider | None = None
 
     def _vault_tools(
         self,
@@ -575,6 +602,8 @@ class Gateway:
         limits = self.limits()
         # The tools a pass offered the model, for the Host's reuse check.
         offered: set[str] = set()
+        # The preferences a pass was given (M3).
+        used: set[str] = set()
         with opened:
 
             async def turn(
@@ -591,6 +620,7 @@ class Gateway:
                     started=started,
                     limits=limits,
                     offered=offered,
+                    used=used,
                 )
 
             # The tool loop executes; the Host checks the answer against the
@@ -604,6 +634,8 @@ class Gateway:
                 person=request.message,
                 can_draft=lambda: bool(offered & DRAFT_TOOLS),
             )
+            if used:
+                result = result.model_copy(update={"preferences_used": tuple(sorted(used))[:40]})
             telemetry.set_run(
                 outcome=result.status,
                 model_turns=result.model_turns,
@@ -617,6 +649,23 @@ class Gateway:
                 # Telemetry cannot change the answer a person receives.
                 pass
         return result
+
+    async def _turn_memory(self, context: RequestContext, tools: Sequence[ModelTool]) -> TurnMemory:
+        """What the person's memory adds to this pass: asked of the host with
+        the Skills whose tools are offered (a Skill command `<alias>__...` or
+        a host tool under the Skill's alias, such as `cards__...`)."""
+        if self.turn_memory is None:
+            return TurnMemory()
+        names = [tool.name for tool in tools]
+        try:
+            in_use = tuple(
+                manifest
+                for manifest in self.router.commands.skills.manifests()
+                if any(name.startswith(f"{manifest.alias}__") for name in names)
+            )
+            return await asyncio.to_thread(self.turn_memory, context, in_use)
+        except Exception:  # noqa: BLE001 - unreadable memory leaves the turn as it was
+            return TurnMemory()
 
     def _switched_off_note(self) -> str:
         """Names the Skills installed but switched off (names only, bounded), so
@@ -692,6 +741,7 @@ class Gateway:
         limits: ConversationLimits | None = None,
         retry: tuple[ModelMessage, ...] = (),
         offered: set[str] | None = None,
+        used: set[str] | None = None,
     ) -> GatewayConversationResult:
         """Use installed commands as tools in a bounded loop (the Host's tool cap,
         at most `MAX_CONVERSATION_TOOL_CALLS`, a time budget and a repetition guard).
@@ -903,6 +953,25 @@ class Gateway:
             messages[0] = ModelMessage(
                 role="system", text=f"{messages[0].text} {REUSABLE_GUIDANCE}"
             )
+        # The person's memory (accumulated memory M3): the saved preferences
+        # of the Skills this pass offers, and the memory tools the Host allows.
+        memory = await self._turn_memory(context, tools)
+        for memory_tool in memory.tools:
+            name = memory_tool.tool.name
+            if (
+                name in host
+                or name in bindings
+                or (allowed_tools is not None and name not in allowed_tools)
+            ):
+                continue
+            host[name] = memory_tool
+            tools.append(memory_tool.tool)
+        if memory.guidance:
+            messages[0] = ModelMessage(
+                role="system", text=f"{messages[0].text}\n\n{memory.guidance}"
+            )
+        if used is not None:
+            used.update(memory.preferences_used)
         if offered is not None:
             offered.update(tool.name for tool in tools)
         evidence: list[ConversationToolExecution] = []
@@ -1071,9 +1140,10 @@ class Gateway:
                         tools=tuple(evidence),
                     )
                 card = harnessed.get(CARD_KEY)
-                if isinstance(card, dict):
+                if isinstance(card, dict) and card.get("ends_turn", True):
                     # A proposal waits for the person's press (owner
-                    # 2026-10-15): the turn ends with the card.
+                    # 2026-10-15): the turn ends with the card. A memory
+                    # proposal (M3) does not: the answer goes on above it.
                     return GatewayConversationResult(
                         trace=context.trace,
                         status="answered",

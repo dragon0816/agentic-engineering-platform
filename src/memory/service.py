@@ -646,6 +646,20 @@ class SpaceTx:
         ).fetchone()
         return row is not None
 
+    def changed_after(self, entity_id: str, change_id: str) -> bool:
+        """Whether a change made after `change_id`, and not undone, touched
+        the entity (M3: undoing a note or preference edit that a later
+        change built on is refused)."""
+        self._need("reader")
+        row = self._con.execute(
+            "SELECT 1 FROM history WHERE space = ? AND entity_id = ? AND change_id != ? "
+            "AND history_id > (SELECT COALESCE(MAX(history_id), 0) FROM history "
+            "WHERE space = ? AND change_id = ?) "
+            "AND change_id NOT IN (SELECT change_id FROM undone) LIMIT 1",
+            (self.space, entity_id, change_id, self.space, change_id),
+        ).fetchone()
+        return row is not None
+
     def undo(
         self, change_id: str, *, actor: str, handlers: Mapping[str, UndoHandler]
     ) -> tuple[list[sqlite3.Row], str]:

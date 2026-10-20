@@ -1379,13 +1379,18 @@ class TelegramIngress:
         if card is not None:
             # A proposal: the card, with Apply/Cancel only for the kinds
             # Telegram may apply (owner 2026-10-15).
-            drawn, card_buttons = telegram_card(ActionCard.model_validate(card), CARD_WHERE)
-            return TelegramDelivery(
-                **base,
-                disposition="answered",
-                reply=scrub(drawn),
-                buttons=(*card_buttons, *buttons),
-            )
+            shown = ActionCard.model_validate(card)
+            drawn, card_buttons = telegram_card(shown, CARD_WHERE)
+            if shown.ends_turn:
+                return TelegramDelivery(
+                    **base,
+                    disposition="answered",
+                    reply=scrub(drawn),
+                    buttons=(*card_buttons, *buttons),
+                )
+            # A memory proposal (accumulated memory M3) comes under the answer.
+            answer = f"{answer}\n\n{drawn}"
+            buttons = (*card_buttons, *buttons)
         if drafted:
             return self._carded(base, answer, buttons, drafted)
         charts = chart_files(conversation)

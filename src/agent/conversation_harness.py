@@ -9,7 +9,8 @@ against what actually happened in the turn, never against the model's word:
   something remembered for later: 「規則我已改成」, 「以後都會」, "I've updated
   the rule") needs a tool that changes something, not only reads, to have
   succeeded in this turn (owner 2026-10-20: after a read tool the Agent
-  answered 「規則我已改成…」 with nothing saved);
+  answered 「規則我已改成…」 with nothing saved); a memory proposal (M3) is
+  not such a tool, since nothing is saved before the person's press;
 - `named_outputs_exist`: every file the answer names under a task folder
   (`coding.workspace_roots`) exists and is not empty;
 - `reusable_request_drafted`: when the person asked for something reusable
@@ -50,6 +51,9 @@ OUTPUT_CHECK = "named_outputs_exist"
 REUSE_CHECK = "reusable_request_drafted"
 #: The tools that give the person a Workflow draft and its install card.
 DRAFT_TOOLS = frozenset({"authoring__draft_workflow", "authoring__revise_workflow"})
+#: Memory proposals (accumulated memory M3): a card the person presses; until
+#: then nothing is saved, so they never back a claim of a lasting change.
+PROPOSAL_ONLY_TOOLS = frozenset({"memory__propose_preference", "memory__propose_note"})
 TURN_SKILL = AssetIdentity(namespace="host", name="conversation-turn", version="1.0.0")
 
 # A completed action on something concrete, in Chinese or English.
@@ -143,8 +147,9 @@ def check_answer(
             "the answer says a lasting change was made (a rule, a setting, something "
             "remembered for later), but no tool that changes anything succeeded in this "
             "turn. You keep no rules between conversations unless a tool saves them: say it "
-            "applies to this conversation only, and offer a Workflow draft or a settings "
-            "proposal for the person to apply instead"
+            "applies to this conversation only, and propose it as a preference "
+            "(memory__propose_preference: saved only when the person presses 存成偏好), a "
+            "Workflow draft or a settings proposal for the person to apply instead"
         )
     missing = []
     for path in named_files(text, roots):
@@ -205,7 +210,10 @@ def _succeeded(item: Any) -> bool:
 
 
 def _reads_only(item: Any) -> bool:
-    """A Knowledge answer, or a tool whose command is a read verb."""
+    """A Knowledge answer, a tool whose command is a read verb, or a memory
+    proposal (nothing is saved before the person's press)."""
+    if str(getattr(item, "name", "")) in PROPOSAL_ONLY_TOOLS:
+        return True
     host = getattr(item, "host", None)
     if host is not None and isinstance(host.data, dict) and "knowledge_harness" in host.data:
         return True
