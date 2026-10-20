@@ -88,7 +88,9 @@ class CardModel:
                 text = "\n".join(lines)
             return ModelResponse(trace=request.trace, model_alias=request.model_alias, text=text)
         if "org chart" in user.text:
-            calls = [(CHART_TOOL, {"company": "範例科技"})]
+            # "HTML" asks for the interactive page too (owner 2026-10-20).
+            wanted = {"format": "both"} if "HTML" in user.text else {}
+            calls = [(CHART_TOOL, {"company": "範例科技", **wanted})]
         else:
             paths = re.findall(r"\(image[^)]*\): (.+)", user.text)
             assert len(user.images) == len(paths) > 0, "every photo reaches the model"
@@ -259,6 +261,32 @@ def test_the_org_chart_comes_back_as_a_photo_with_the_short_note(tmp_path: Path)
     assert "只有畫出的線才是回報關係".encode() in photo
     assert "組織圖".encode() in document and b'name="document"' in document
     assert TOKEN.encode() not in photo + document
+
+
+def test_the_interactive_chart_comes_as_a_document_to_open_in_a_browser(
+    tmp_path: Path,
+) -> None:
+    item, transport, _, _ = _bot(
+        tmp_path,
+        [
+            [message(1, OWNER, caption="store this card", photo=photo_sizes("ph1"))],
+            [update(2, OWNER, "範例科技 org chart, HTML 互動式")],
+        ],
+        {"ph1": PNG},
+    )
+    poll(item)
+    delivery = poll(item).deliveries[0]
+    assert delivery.replied and len(delivery.photos) == 1 and len(delivery.documents) == 2
+    methods = [upload[0] for upload in transport.uploads]
+    assert methods == ["sendPhoto", "sendDocument", "sendDocument"]
+    page = transport.uploads[1][1]
+    assert b'name="document"; filename="org-' in page and b".html" in page
+    assert b"Content-Type: text/html" in page and b"<!DOCTYPE html>" in page
+    assert "請下載後用瀏覽器開啟".encode() in page
+    # The PNG keeps its short note; the legend stays a Markdown document.
+    assert "只有畫出的線才是回報關係".encode() in transport.uploads[0][1]
+    assert b"Content-Type: text/markdown" in transport.uploads[2][1]
+    assert TOKEN.encode() not in b"".join(upload[1] for upload in transport.uploads)
 
 
 def test_the_skill_says_how_a_telegram_card_is_handled() -> None:

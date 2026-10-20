@@ -137,6 +137,10 @@ _ATTACHMENT_REPLIES = {
     "attachment_unknown": "找不到這個附件。",
 }
 
+#: The interactive org chart arrives as a file (owner 2026-10-20); one line
+#: says what to do with it.
+HTML_CHART_CAPTION = "互動式組織圖：請下載後用瀏覽器開啟（可搜尋、切換樹狀／分組檢視）。"
+
 
 def attachment_reply(code: str) -> str:
     """What the person is told about an attachment refusal, by its code."""
@@ -1776,16 +1780,18 @@ class TelegramIngress:
             data = path.read_bytes()
             boundary = f"aep-{uuid.uuid4().hex}"
             name = re.sub(r"[^A-Za-z0-9._-]", "_", path.name) or "chart.png"
+            page = path.suffix.lower() in (".html", ".htm")
             field, method, media = (
-                ("document", "sendDocument", "text/markdown")
+                ("document", "sendDocument", "text/html" if page else "text/markdown")
                 if document
                 else ("photo", "sendPhoto", "image/png")
             )
+            caption = HTML_CHART_CAPTION if page else ("" if document else CHART_NOTE)
             parts = [f"--{boundary}", 'Content-Disposition: form-data; name="chat_id"', ""]
             parts.append(str(chat_id))
-            if not document:
+            if caption:
                 parts += [f"--{boundary}", 'Content-Disposition: form-data; name="caption"', ""]
-                parts.append(CHART_NOTE)
+                parts.append(caption)
             parts += [
                 f"--{boundary}",
                 f'Content-Disposition: form-data; name="{field}"; filename="{name}"',
