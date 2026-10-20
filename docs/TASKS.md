@@ -2997,3 +2997,18 @@ s-k-20261011T102952` (not published).
   `--basetemp=C:/aepci-wk/bt-b1`) 3725 passed, 34 skipped, 1 failed (M5's
   `test_memory_health.py::test_duplicates_are_offered_and_merged_only_by_the_press`, passes alone).
 - [ ] Owner live re-check of B1/B2 (steps in HANDOFF.md).
+- [x] Live-check fix B3: the memory page is fast and shows that it is loading
+  (2026-10-21, Claude Code). `memory_spaces`: parsed manifests and the registry kept by file
+  signature, `one_scan`; `MemoryService`: setup skipped while the file is unchanged,
+  `session()` shares one connection per request; `MemoryPage.overview(only=…)`
+  (`GET /api/memory/overview?only=`), one service and one conversation read per overview; page:
+  per-pane 「載入中…」/「更新中…」, 「…」 counts, inline error with 重試, actions reload only their
+  sections. Fixture overview 1.66 s → 0.13 s, opens of `memory.sqlite` 46 → 1 per overview.
+  Decision `docs/DECISIONS.md` 2026-10-21 "The memory page reads the installed manifests and sets
+  up a memory database once (B3)". Tests: `tests/test_memory_page_performance.py` (counts opens,
+  setups and scans; generous time budget), `tests/test_memory_page_loading_ui.py` (real browser;
+  screenshots `.scratch/memory-perf/`).
+  Verification: ruff check, ruff format --check, mypy clean; project `.venv` 3766 passed,
+  9 skipped, 0 failed; `C:/aepci-wk/venv` (points at this repo, `--basetemp=C:/aepci-wk/bt-b3`)
+  3741 passed, 34 skipped, 0 failed.
+- [ ] Owner live re-check of B3 (steps in HANDOFF.md).

@@ -2,6 +2,27 @@
 
 Updated: 2026-10-21 (Asia/Taipei), by Claude Code (accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
+## Live-check fix B3: the slow 記憶 page (2026-10-21, Claude Code) — latest
+
+Commits on main, not pushed, Agent Web not restarted, live data untouched. Decision
+`docs/DECISIONS.md` 2026-10-21 "The memory page reads the installed manifests and sets up a memory
+database once (B3)"; row in `docs/TASKS.md`; `?only=` in `docs/CONTRACTS.md` (Memory page).
+- Cause: each overview rebuilt the memory registry five times (all ~70 installed manifests parsed
+  each time) and set up the memory database on every `MemoryService` (46 opens of `memory.sqlite`).
+- Fix: manifests/registry cached by file signature (`memory_spaces`, `one_scan`), setup skipped while
+  the database file is unchanged, `MemoryService.session()` (one connection per request),
+  `GET /api/memory/overview?only=…`; the page shows 「載入中…」/「更新中…」 per pane, 「…」 counts, an
+  inline error with 重試, and reloads only what an action changed.
+- Fixture (owner's sizes, synthetic): overview 1.66 s → 0.13 s. Verification: see `docs/TASKS.md`.
+
+Owner re-check: (1) `/api/tasks` idle; (2) restart Agent Web on this code; (3) open 記憶: each tab
+shows 「載入中…」 and counts 「…」 briefly, then the data (expect ~1–2 s at most instead of 7–18 s);
+(4) DevTools → Network: `/api/memory/overview` well under 2 s; (5) delete and 復原 a note, edit a
+preference, 保留原值 on a proposal: each finishes in about a second, the request is
+`/api/memory/overview?only=notes,spaces` (or the matching sections), other tabs keep their data;
+(6) 更新 still reloads everything; (7) switch the business-cards Skill off and on in Capabilities: 資料
+shows 已關閉/已開啟 at once (the cache follows the files).
+
 ## Live-check fixes B1 / B2 (2026-10-21, Claude Code) — beside M5
 
 Two commits on main, not pushed, Agent Web not restarted, live data untouched (decisions in

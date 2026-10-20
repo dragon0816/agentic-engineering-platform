@@ -749,3 +749,18 @@ Memory Service」的 Memory quality 一項。使用說明：`USER_GUIDE.zh-TW.md
   設定往返、關閉時不呼叫模型、每人隔離、夜間報告與遙測只有筆數、每一輪的「為什麼」資料、Telegram `/why`）、
   `tests/test_memory_why_ui.py`（真的瀏覽器：「為什麼？」與連結、健康檢查卡片、設定、深色 390 px；截圖
   `.scratch/memory-why/`）。
+
+## 17. B3：記憶頁的速度與載入狀態（2026-10-21，Claude Code）
+
+決定紀錄：`docs/DECISIONS.md` 2026-10-21「The memory page reads the installed manifests and sets up a
+memory database once (B3)」。
+
+- 原因：每次 overview 重建記憶 registry 五次（每次解析約 70 個已安裝的 manifest），每個 `MemoryService`
+  都重跑資料庫設定（一次 overview 開 `memory.sqlite` 46 次）。
+- 現在：已解析的 manifest 與 registry 依檔案（路徑、大小、修改時間）保留，檔案一變就重讀；資料庫檔案沒變時
+  不重跑設定；一個請求共用一個連線（`MemoryService.session()`）。
+- `GET /api/memory/overview?only=<區塊>,…` 只回那些區塊；頁面動作後只重載受影響的區塊，每個分頁有
+  「載入中…」／「更新中…」、第一次載入前數字是「…」、失敗在分頁內顯示並可「重試」。
+- 測試：`tests/test_memory_page_performance.py`（數開啟次數、設定次數、掃描次數）、
+  `tests/test_memory_page_loading_ui.py`（真的瀏覽器；截圖 `.scratch/memory-perf/`）。
+

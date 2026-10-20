@@ -2661,7 +2661,10 @@ memory M1". Contracts in `common.memory`; service in `memory.service`, `memory.m
     `can_reset`, `can_restore`}], `records` {`conversations` {`count`, `max_messages`,
     `retention_label`}, `runs` {`days`, `max_mb`}, `experience` {`retention_days`}},
     `deletions` [{`deletion_id`, `space`, `label`, `at`, `at_local`, `actor`, `reason`,
-    `counts`}]}.
+    `counts`}]}. With `?only=<section>[,<section>…]` (`proposals`, `preferences`, `notes`,
+    `spaces`, `sync`, `records`, `deletions`, `health`) only those sections are answered, beside
+    `ok` and `actor` (B3: the page reloads what an action changed); unknown names are ignored,
+    none known means all.
   - `GET /api/memory/people?q=&status=any|active|left` → {`people` [{`person_id`, `name`,
     `romanised_name`, `company`, `department`, `title`, `email`, `status`, `status_label`,
     `open_proposals`, `updated_at_local`}] (≤ 200), `total`}; `GET /api/memory/person?person_id=`

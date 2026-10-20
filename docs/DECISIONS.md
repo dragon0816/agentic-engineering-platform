@@ -4440,3 +4440,44 @@ still proposed with `existing_person_id` and `would_change`.
 Rejected alternatives: leaving them as candidates with a flag (the model already ignored
 `existing_person_id`); storing an observation for them silently (a harvest stores nothing without
 the person's confirmation).
+
+## 2026-10-21 — The memory page reads the installed manifests and sets up a memory database once (B3)
+
+Context (live check B3): on the owner's PC `GET /api/memory/overview` took 17–18 s and every action
+8–14 s (it reloads the overview). Profiled on a fixture of the owner's sizes (about 70 installed
+Skill/Workflow files, 200 conversations, 9 people, a few preferences and notes; synthetic content):
+1.66 s per overview on this PC, of which about 85 % was the memory registry being rebuilt five
+times per call (every installed manifest parsed and validated each time, plus the shipped manifests
+built again) and the Memory Service setting up the same database (schema script, every space's
+registration, the owner row) on each of the dozen `MemoryService` objects a call made; the actor's
+`memory.sqlite` was opened 46 times per overview. The owner's PC is about ten times slower on file
+opens (company endpoint protection), which matches the 17 s.
+
+Decision:
+1. `host_runtime.memory_spaces` keeps each parsed installed manifest while its file's size and
+   modification time are unchanged, builds the shipped manifests once per process, and keeps the
+   registry built from one set of installed files (keyed by every file's path, size and
+   modification time). A changed, added, removed or moved file (switching a Skill off) is seen on
+   the next call; nothing needs a restart. `one_scan(layout)` lets one request look at the folders
+   once.
+2. `MemoryService` skips its setup when this process set up the same file with the same registry
+   and actor and the file's identity (inode, size, modification time) is unchanged since. Any write
+   from elsewhere or a replaced file runs the setup again, as before.
+3. `MemoryService.session()`: inside it, everything one thread does on one database (through any
+   service of the same path) shares one connection, one transaction at a time; a nested `connect()`
+   during a transaction still opens its own. The memory page wraps each GET and POST in it, so one
+   overview opens the actor's database once. The overview builds every store on one service and
+   reads the conversations once.
+4. `GET /api/memory/overview?only=a,b` answers only the named sections; the page reloads only what
+   an action changed and shows 「載入中…」/「更新中…」 per pane, 「…」 counts until the first answer
+   and an inline error with 重試.
+
+Result on the fixture: overview 1.66 s → 0.12–0.14 s; single sections 8–110 ms; the M3
+preference and note lists about 0.25 s → 13–15 ms; one overview opens `memory.sqlite` once and
+reads no manifest twice (tests count it).
+
+Rejected alternatives: a time-based cache (a just-installed or switched-off Skill would show late);
+caching `MemoryService` objects per actor (would hide changes made by the Bridge or another
+process); keeping one connection per actor for the whole process (a long-lived connection across
+threads and requests, and the nightly check works from another thread); moving the conversations'
+`preferences_used` into an index table (the parse is about 0.1 s here; not the cause).
