@@ -71,7 +71,7 @@
 | 選項 | 作用 |
 |---|---|
 | `-Actor <帳號>` | 你的員工帳號（不加會在視窗裡問你） |
-| `-Namespace <團隊>` | 你的團隊代號，預設 `engineering`；對話一直回「No namespace is configured」時，加這個參數重跑一次安裝 |
+| `-Namespace <團隊>` | **已不需要**：namespace 固定是 `engineering`，安裝程式一律寫入。舊指令裡有這個參數也能照常執行，填別的值會被忽略並顯示一行說明；`host.json` 裡原本是別的值時，會改成 `engineering` 並顯示改了什麼 |
 | `-PythonExe "<路徑>"` | 指定 Python 3.12 的 `python.exe` |
 | `-BridgeId <名稱>` | 這台電腦在平台上的名稱；預設是 `bridge-<電腦名稱>`，兩台電腦同名時才需要。Bridge 跑在這台電腦上；「Bridge API」是平台上讓各台電腦的 Bridge 連過去的網址（註冊、同步、token），Settings 裡叫 **Platform sync URL (Bridge API)** |
 | `-InstallRoot "<資料夾>"` | 改安裝位置（例如路徑太深時用 `C:\aep\preview`） |

@@ -219,8 +219,10 @@ both is refused. Only the Workflows and Skills named there are installed, and
 the grants are derived from the tool selections against each capability's own
 declaration, so a decision never has to name a permission.
 
-`--namespace` selects which namespace a request addresses; pass `-Namespace`
-at install time to record a default in `host.json`.
+`--namespace` selects which namespace a request addresses. The installer always
+writes `"namespace": "engineering"` to `host.json` (owner decision 2026-10-21);
+`-Namespace` is still accepted so older commands work, and any other value is
+ignored with a one-line notice.
 
 ## Telegram (optional)
 

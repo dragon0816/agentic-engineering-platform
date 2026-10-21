@@ -1,7 +1,9 @@
 param(
     [Parameter(Mandatory = $true)][ValidatePattern('^[a-zA-Z_][a-zA-Z0-9_.-]*$')][string]$Actor,
     [string]$BridgeId,
-    [ValidatePattern('^[a-z0-9]+(-[a-z0-9]+)*$')][string]$Namespace,
+    # Accepted so commands already sent to colleagues keep working, and
+    # ignored: the namespace is fixed to engineering (owner, 2026-10-21).
+    [string]$Namespace,
     [string]$PythonExe = "python",
     [string]$InstallRoot = "$env:LOCALAPPDATA\AgenticEngineeringPlatform\preview-0.1.0",
     [switch]$NoShortcut,
@@ -124,8 +126,13 @@ $Config = [ordered]@{
     }
     workspace_root = $Workspace
 }
-if (-not [string]::IsNullOrWhiteSpace($Namespace)) {
-    $Config.namespace = $Namespace
+# The namespace is fixed (owner, 2026-10-21): no colleague chooses one, and
+# -Namespace is accepted only so commands already sent keep working. It is
+# part of what the installer writes, so an existing host.json is corrected.
+$FixedNamespace = "engineering"
+$Config.namespace = $FixedNamespace
+if (-not [string]::IsNullOrWhiteSpace($Namespace) -and $Namespace -ne $FixedNamespace) {
+    Write-Host "The namespace is fixed to $FixedNamespace; -Namespace $Namespace was ignored."
 }
 # Keep what the operator added. The installer owns the device identity and
 # the workspace path and writes those afresh, but everything else in this
@@ -144,6 +151,10 @@ if (Test-Path -LiteralPath $ConfigPath -PathType Leaf) {
             "Move it aside and run install.cmd again; everything in it was typed by hand, so it " +
             "is not overwritten.")
     }
+    $OldNamespace = $Existing.PSObject.Properties["namespace"]
+    if ($null -ne $OldNamespace -and [string]$OldNamespace.Value -ne $FixedNamespace) {
+        Write-Host "Changed the namespace in host.json from '$($OldNamespace.Value)' to $FixedNamespace (the namespace is fixed)."
+    }
     $Kept = @()
     foreach ($Property in $Existing.PSObject.Properties) {
         if (-not $Config.Contains($Property.Name)) {
@@ -154,13 +165,6 @@ if (Test-Path -LiteralPath $ConfigPath -PathType Leaf) {
     if ($Kept.Count -gt 0) {
         Write-Host ("Kept from the existing host.json: " + ($Kept -join ", "))
     }
-}
-# Without a namespace every chat answers "No namespace is configured", and the
-# manual's command names only -Actor, so a host that has none gets the
-# company default (2026-10-21: a colleague's fresh install).
-if (-not $Config.Contains("namespace") -or [string]::IsNullOrWhiteSpace([string]$Config.namespace)) {
-    $Config.namespace = "engineering"
-    Write-Host "Set the namespace to engineering (change it with -Namespace)."
 }
 # The Natural-language model goes through the built-in gateway, but only when
 # this host has no model yet: a model someone configured is theirs, and an

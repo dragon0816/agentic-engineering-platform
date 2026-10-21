@@ -4561,3 +4561,30 @@ Rejected alternatives: shipping `bi.schema/v1` (it lacks the robotics fields and
 12 robotics CSVs would have unknown columns); importing the owner's `bi_ingest.py` (v1.3: the
 tools are a specification source, not code we run); storing Trend priority (owner: computed);
 keeping both demo sets (two datasets for one demo and more to test today).
+
+## 2026-10-21 — The Windows installer always writes the engineering namespace; -Namespace is accepted and ignored
+
+Context: commit 4b051234 (same day) gave a fresh install `"namespace": "engineering"` only when
+neither `-Namespace` nor an existing `host.json` set one, and the manual documented `-Namespace`
+for colleagues whose chats answered "No namespace is configured". The owner then decided
+(2026-10-21): 「不應該讓使用者安裝的時候選 namespace……直接設定 namespace 就好」.
+
+Decision:
+1. `deploy/windows-preview/install.ps1` puts `namespace = "engineering"` in the configuration it
+   owns (`$Config`, beside the device identity and the workspace path), so it is written on every
+   install and update; an existing `host.json` with another value is corrected and the installer
+   prints `Changed the namespace in host.json from '<old>' to engineering`.
+2. `-Namespace` stays as a plain `[string]` parameter (no validation) so commands already sent to
+   colleagues (`install.cmd -Actor x -Namespace engineering`) keep working; another value prints
+   one line, `The namespace is fixed to engineering; -Namespace <value> was ignored.`
+3. `update.ps1` has no `-Namespace` and passes none; it gets the rule through `install.ps1`.
+4. The manual marks `-Namespace` 「已不需要」.
+
+Why: colleagues do not know what a namespace is, and a wrong or missing one breaks every chat;
+there is one team namespace today. Writing it in `$Config` (not as a default after the merge) is
+what makes an update repair a host that already has a wrong one.
+
+Rejected alternatives: keeping the default-when-missing rule of 4b051234 (leaves a wrong value in
+place); removing `-Namespace` (breaks the commands already sent: PowerShell rejects an unknown
+parameter); making the namespace a bundle manifest setting (no second namespace exists yet; can be
+done when one does).

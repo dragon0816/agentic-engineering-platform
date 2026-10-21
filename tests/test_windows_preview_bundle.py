@@ -414,15 +414,33 @@ def test_the_installer_sets_up_the_gateway_unless_told_not_to() -> None:
     assert "gateway autostart --off" in uninstall and "gateway stop" in uninstall
 
 
-def test_the_installer_gives_a_host_without_a_namespace_the_default() -> None:
-    """A colleague installed with only -Actor (the manual's command) and every
-    chat answered "No namespace is configured" (2026-10-21). The default is
-    applied after the existing host.json is merged, so a namespace someone set
-    is kept, and -Namespace still wins."""
-    template = Path(__file__).resolve().parents[1] / "deploy" / "windows-preview"
-    installer = (template / "install.ps1").read_text(encoding="utf-8")
-    default = installer.index('$Config.namespace = "engineering"')
-    assert installer.index("Kept from the existing host.json") < default
-    assert installer.index("$Config.namespace = $Namespace") < default
-    manual = (template / "INSTALL.zh-TW.md").read_text(encoding="utf-8")
-    assert "`-Namespace <團隊>`" in manual and "No namespace is configured" in manual
+TEMPLATE = Path(__file__).resolve().parents[1] / "deploy" / "windows-preview"
+
+
+def _template(name: str) -> str:
+    return (TEMPLATE / name).read_text(encoding="utf-8")
+
+
+def test_the_installer_always_writes_the_engineering_namespace() -> None:
+    """Owner decision 2026-10-21: colleagues do not choose a namespace. The
+    installer writes engineering into the config it owns, so an existing
+    host.json with another one is corrected (and says so); -Namespace is
+    still accepted for commands already sent, and another value is ignored
+    with one line. This replaces the earlier default-when-missing rule."""
+    installer = _template("install.ps1")
+    assert "[string]$Namespace," in installer
+    assert "ValidatePattern('^[a-z0-9]+(-[a-z0-9]+)*$')][string]$Namespace" not in installer
+    assert '$FixedNamespace = "engineering"' in installer
+    assert "$Config.namespace = $FixedNamespace" in installer
+    assert "$Config.namespace = $Namespace" not in installer
+    assert "-Namespace $Namespace was ignored" in installer
+    assert "Changed the namespace in host.json from" in installer
+    # Written before the merge, so the existing file's value never survives.
+    assert installer.index("$Config.namespace = $FixedNamespace") < installer.index(
+        "Kept from the existing host.json"
+    )
+    update = _template("update.ps1")
+    assert "-Namespace" not in update.replace("No -Namespace", "")
+    manual = _template("INSTALL.zh-TW.md")
+    assert "`-Namespace <團隊>` | **已不需要**" in manual
+    assert "No namespace is configured" not in manual
