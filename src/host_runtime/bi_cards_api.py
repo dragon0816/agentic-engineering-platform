@@ -4,6 +4,10 @@ Mounted in `web.py` after the loopback and Bearer-token guards, like every
 other `/api/*` route. The contract is in `docs/CONTRACTS.md` ("BI cards
 API"). Errors are `{"ok": false, "code", "message"}` with a 4xx status.
 Imports and edits are recorded as `<actor> via web`.
+
+Each dataset follows the schema it was created with (owner 2026-10-21):
+cards, import, detail, edits and history use that schema; the Dashboard and
+the demo are BI-only and refuse a dataset whose schema is not `bi.schema/*`.
 """
 
 from __future__ import annotations
@@ -14,9 +18,14 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import ParseResult, parse_qs
 
-from capabilities.bi_cards import dashboard, importer, service
-from capabilities.bi_cards.schema import registry
-from capabilities.bi_cards.store import DEFAULT_DATASET, BiStore, BiStoreError
+from capabilities.bi_cards import catalog, dashboard, importer, service
+from capabilities.bi_cards.store import (
+    DATASET_RE,
+    DEFAULT_DATASET,
+    BiStore,
+    BiStoreError,
+    datasets,
+)
 
 #: A CSV travels in the JSON body; larger than an ordinary request.
 MAX_BI_BODY_BYTES = 8 * 1024 * 1024
@@ -32,6 +41,12 @@ def _dataset(value: Any) -> str:
     return str(value or DEFAULT_DATASET)
 
 
+#: The Dashboard is BI-only: a dataset of another schema gets this empty state
+#: (200, not an error), so the page can say so instead of failing.
+NO_DASHBOARD = "這個 schema 沒有 Dashboard"
+NOT_BI = "示範資料是 BI 資料，只能載入使用 bi.schema/* 的資料集"
+
+
 def route(
     workspace: Path,
     actor: str,
@@ -43,8 +58,18 @@ def route(
     """One request; pure apart from the dataset files."""
     try:
         return _route(workspace, actor, method, path, query, body)
+    except catalog.SchemaInstallError as error:
+        # An installed id@version is immutable: different content is a conflict.
+        return 409 if error.code == "schema_version_exists" else 400, {
+            "ok": False,
+            "code": error.code,
+            "message": error.message,
+            "errors": error.errors,
+        }
     except BiStoreError as error:
         status = 404 if error.code.endswith("_unknown") else 400
+        if error.code == "dataset_exists":
+            return 409, {"ok": False, "code": error.code, "message": error.message, **error.detail}
         if error.code == "stale_edit":
             return 409, {
                 "ok": False,
@@ -70,10 +95,26 @@ def _route(
     if method == "GET":
         store = BiStore(workspace, _dataset(query.get("dataset")))
         if path == "/api/bi/schema":
-            return 200, service.schema_api()
+            # No dataset: the shipped bi.schema/v1.1, as before per-dataset schemas.
+            given_dataset = "dataset" in query
+            return 200, service.schema_api(catalog.for_store(store) if given_dataset else None)
+        if path == "/api/bi/schemas":
+            return 200, {"schemas": catalog.listing(workspace)}
+        if path == "/api/bi/schemas/example":
+            return 200, catalog.example()
         if path == "/api/bi/datasets":
             return 200, {"datasets": service.dataset_list(workspace)}
         if path == "/api/bi/dashboard":
+            reg = catalog.for_store(store)
+            if not reg.is_bi:
+                return 200, {
+                    "dashboard": False,
+                    "code": "no_dashboard",
+                    "message": NO_DASHBOARD,
+                    "schema": reg.ref,
+                    "domain": None,
+                    "sections": [],
+                }
             return 200, dashboard.dashboard(store, str(query.get("domain") or "robotics"))
         if path == "/api/bi/cards":
             found = service.search(
@@ -98,8 +139,16 @@ def _route(
         return _error(404, "route_unknown", "沒有這個 BI 路徑")
     if method != "POST":
         return _error(405, "method_not_allowed", "只接受 GET 與 POST")
+    if path == "/api/bi/schemas/install":
+        return 200, catalog.install(
+            workspace, str(given.get("filename") or ""), given.get("json_text")
+        )
+    if path == "/api/bi/datasets":
+        return _create_dataset(workspace, given)
     if path == "/api/bi/demo/load":
         store = BiStore(workspace, _dataset(given.get("dataset")))
+        if not catalog.for_store(store).is_bi:
+            return _error(400, "schema_not_bi", NOT_BI)
         return 200, {"ok": True, "imported": service.load_demo(store)}
     if path == "/api/bi/import/preview":
         store = BiStore(workspace, _dataset(given.get("dataset")))
@@ -150,12 +199,37 @@ def _route(
     return _error(404, "route_unknown", "沒有這個 BI 路徑")
 
 
+def _create_dataset(workspace: Path, given: dict[str, Any]) -> Answer:
+    name = str(given.get("name") or "").strip()
+    if not DATASET_RE.match(name):
+        return _error(400, "dataset_invalid", "資料集名稱只能用英文字母、數字、- 與 _，1–40 個字")
+    store = BiStore(workspace, name)  # refuses a reserved name
+    if any(other.lower() == name.lower() and other != name for other in datasets(workspace)):
+        return _error(409, "dataset_exists", f"已經有名稱相同（只差大小寫）的資料集「{name}」")
+    reg = catalog.resolve(workspace, str(given.get("schema") or ""))
+    store.create(reg.ref)
+    return 200, {
+        "ok": True,
+        "dataset": {
+            "name": name,
+            "cards": 0,
+            "updated": None,
+            "schema": reg.ref,
+            "dashboard": reg.is_bi,
+        },
+    }
+
+
 def _set_field(workspace: Path, who: str, card_id: str, given: dict[str, Any]) -> Answer:
     store = BiStore(workspace, _dataset(given.get("dataset")))
     card = store.card(card_id)
     if card is None:
         return _error(404, "card_unknown", "找不到這張卡片")
-    entity = registry().type(card["entity_type"])
+    reg = catalog.for_store(store)
+    try:
+        entity = reg.type(card["entity_type"])
+    except KeyError:
+        return _error(400, "type_unknown", f"schema 沒有類型 {card['entity_type']}")
     name = str(given.get("field") or "")
     item = entity.get(name)
     if item is None:
@@ -177,7 +251,7 @@ def _set_field(workspace: Path, who: str, card_id: str, given: dict[str, Any]) -
         if value is None:
             return _error(400, "value_invalid", f"{item.label} 不是清單欄位")
     else:
-        value, problems = registry().normalize(item, str(raw))
+        value, problems = reg.normalize(item, str(raw))
         if value is None:
             message = problems[0][1] if problems else f"{item.label} 的值無法採用"
             return _error(400, "value_invalid", message)

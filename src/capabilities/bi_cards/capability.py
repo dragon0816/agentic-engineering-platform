@@ -4,6 +4,9 @@ The Host offers it as the `bi__query` tool while some version of the
 `engineering/bi-knowledge` Skill is switched on (`host_runtime.bi_cards_tools`).
 Each card comes back with every field's source (`kind:ref`), so the answer
 can cite `[卡片 <type>:<key>]`; previews and proposals are never searched.
+
+The chat is BI-specific (owner 2026-10-21): a dataset bound to a schema that
+is not `bi.schema/*` is refused with `schema_not_bi`.
 """
 
 from __future__ import annotations
@@ -15,6 +18,7 @@ from typing import Any
 from pydantic import Field
 
 from capabilities.bi_cards import dashboard, service
+from capabilities.bi_cards.catalog import for_store
 from capabilities.bi_cards.store import DEFAULT_DATASET, BiStore, BiStoreError
 from capabilities.contracts import CapabilitySpec
 from capabilities.runtime import CapabilityRefused
@@ -78,6 +82,8 @@ class QueryHandler:
 
         def work() -> Contract:
             store = BiStore(self.workspace_root, request.dataset)
+            if not for_store(store).is_bi:
+                raise BiStoreError("schema_not_bi")
             if request.analysis:
                 sections = dashboard.analysis(
                     store, request.analysis, (request.domain or "robotics").lower()

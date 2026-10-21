@@ -27,12 +27,19 @@ FAILURE_TEXT = {
     "permission_denied": "BI 卡片查詢沒有授權給你（在 Agent Web 的 Capabilities 選取）",
     "invalid_input": "工具參數不正確",
     "timeout": "這次查詢逾時",
+    "schema_not_bi": "這個資料集用的不是 BI schema（bi.schema/*），對話的 BI 查詢只支援 BI 資料集；"
+    "請在 Agent Web 的 BI 卡片頁查看它的卡片",
+    "schema_missing": "這個資料集的 schema 不在這台電腦上",
 }
 
 SCHEMA: dict[str, Any] = {
     "type": "object",
     "properties": {
-        "dataset": {"type": "string", "description": "the dataset; demo by default"},
+        "dataset": {
+            "type": "string",
+            "description": "the dataset; demo by default. Only datasets using a bi.schema/* "
+            "schema can be queried; any other is refused with schema_not_bi",
+        },
         "entity_type": {
             "type": "string",
             "description": "Trend, Technology, Node, Ecosystem, Account, CustomerProduct, "

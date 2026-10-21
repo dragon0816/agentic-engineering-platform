@@ -23,6 +23,9 @@ from typing import Any
 
 SCHEMA_FILE = Path(__file__).with_name("bi_schema_v1_1.json")
 SCHEMA_ID = "bi.schema/v1.1"
+#: Schema ids under this prefix are the shipped BI schemas: only their datasets
+#: get the Dashboard and the chat's `bi__query` (owner 2026-10-21).
+BI_PREFIX = "bi.schema/"
 EMPTY = {"", "nan", "none", "null", "n/a", "na", "-", "—", "tbd", "待定"}
 TRUE_SET = {"true", "yes", "y", "1", "是", "有", "t"}
 FALSE_SET = {"false", "no", "n", "0", "否", "無", "f"}
@@ -73,13 +76,16 @@ class TypeDef:
 
 
 class Registry:
-    """One loaded schema document."""
+    """One loaded schema document (the shipped one or an installed one)."""
 
-    def __init__(self, document: dict[str, Any]) -> None:
+    def __init__(self, document: dict[str, Any], source: str = "shipped") -> None:
         self.document = document
+        self.source = source
         self.schema_id = str(document["schema_id"])
-        self.domains: tuple[str, ...] = tuple(document["domains"])
-        self.enum_aliases: dict[str, dict[str, str]] = document["enum_aliases"]
+        self.version = str(document.get("version") or "")
+        self.title = str(document.get("title") or self.schema_id)
+        self.domains: tuple[str, ...] = tuple(document.get("domains") or ())
+        self.enum_aliases: dict[str, dict[str, str]] = dict(document.get("enum_aliases") or {})
         ignored = document.get("ignored_fields", {})
         types = []
         for raw in document["types"]:
@@ -111,6 +117,16 @@ class Registry:
                 )
             )
         self.types: dict[str, TypeDef] = {t.name: t for t in types}
+
+    @property
+    def ref(self) -> str:
+        """`<schema_id>@<version>`, what a dataset is bound to."""
+        return f"{self.schema_id}@{self.version}"
+
+    @property
+    def is_bi(self) -> bool:
+        """A shipped BI schema: its datasets have the Dashboard and `bi__query`."""
+        return self.schema_id.startswith(BI_PREFIX)
 
     def type(self, name: str) -> TypeDef:
         found = self.types.get(name) or next(

@@ -56,8 +56,9 @@ where = ["src"]
 # The loan replies' message texts, carried from rs_workflow_system's
 # config/loan-templates (Workflow 06b); overridable per install.
 "capabilities.loan_reply" = ["loan-templates/*.txt"]
-# The BI cards demo set: the robotics sample's 12 CSVs (owner 2026-10-21).
-"capabilities.bi_cards" = ["demo/*.csv"]
+# The BI cards demo set: the robotics sample's 12 CSVs, and the example
+# non-BI schema with its CSVs, offered but not installed (owner 2026-10-21).
+"capabilities.bi_cards" = ["demo/*.csv", "samples/*.json", "samples/*.csv"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

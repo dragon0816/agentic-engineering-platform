@@ -1,0 +1,66 @@
+{
+  "schema_id": "example/product-spec",
+  "version": "1.0.0",
+  "title": "產品規格（範例）",
+  "description": "A sample schema for product specifications: suppliers, components, products and their spec items. Not installed by default; install it from Agent Web (Knowledge → BI 卡片 → 安裝 schema).",
+  "enum_aliases": {
+    "tier": {"策略": "strategic", "策略供應商": "strategic", "合格": "approved", "合格供應商": "approved", "試用": "trial"},
+    "category": {"電源": "power", "感測器": "sensor", "微控制器": "mcu", "機構": "mechanical", "連接器": "connector"},
+    "qualification": {"已核准": "approved", "核准": "approved", "審核中": "pending", "待審": "pending", "不合格": "rejected"},
+    "status": {"概念": "concept", "開發中": "development", "量產": "mass_production", "停產": "eol"}
+  },
+  "types": [
+    {
+      "name": "Supplier",
+      "label": "供應商",
+      "fields": [
+        {"name": "name", "label": "供應商名稱", "kind": "str", "class": "sourced", "aliases": ["供應商名稱", "供應商", "supplier"], "required": true},
+        {"name": "country", "label": "國家", "kind": "str", "class": "sourced", "aliases": ["國家", "地區", "country"]},
+        {"name": "tier", "label": "等級", "kind": "enum", "class": "judgement", "enum": ["strategic", "approved", "trial"], "aliases": ["等級", "供應商等級", "tier"]},
+        {"name": "contact", "label": "聯絡窗口", "kind": "str", "class": "sourced", "aliases": ["聯絡窗口", "窗口", "contact"]},
+        {"name": "body", "label": "備註", "kind": "str", "class": "sourced", "aliases": ["備註", "說明", "notes"]}
+      ]
+    },
+    {
+      "name": "Component",
+      "label": "零組件",
+      "fields": [
+        {"name": "name", "label": "零件名稱", "kind": "str", "class": "sourced", "aliases": ["零件名稱", "零組件", "component"], "required": true},
+        {"name": "part_number", "label": "料號", "kind": "str", "class": "sourced", "aliases": ["料號", "part number", "pn"]},
+        {"name": "category", "label": "類別", "kind": "enum", "class": "sourced", "enum": ["power", "sensor", "mcu", "mechanical", "connector"], "aliases": ["類別", "category"]},
+        {"name": "supplier", "label": "供應商", "kind": "link", "class": "sourced", "link_to": ["Supplier"], "aliases": ["供應商", "supplier"]},
+        {"name": "unit_price", "label": "單價", "kind": "int", "class": "sourced", "range": [0, 1000000], "aliases": ["單價", "價格", "unit price"]},
+        {"name": "lead_time_weeks", "label": "交期（週）", "kind": "int", "class": "sourced", "range": [0, 104], "aliases": ["交期", "交期週", "lead time"]},
+        {"name": "rohs", "label": "符合 RoHS", "kind": "bool", "class": "sourced", "aliases": ["RoHS", "符合RoHS"]},
+        {"name": "qualification", "label": "認證狀態", "kind": "enum", "class": "judgement", "enum": ["approved", "pending", "rejected"], "default": "pending", "aliases": ["認證狀態", "認證", "qualification"]},
+        {"name": "body", "label": "備註", "kind": "str", "class": "sourced", "aliases": ["備註", "說明", "notes"]}
+      ]
+    },
+    {
+      "name": "Product",
+      "label": "產品",
+      "fields": [
+        {"name": "name", "label": "產品名稱", "kind": "str", "class": "sourced", "aliases": ["產品名稱", "產品", "product"], "required": true},
+        {"name": "model", "label": "型號", "kind": "str", "class": "sourced", "aliases": ["型號", "model"]},
+        {"name": "status", "label": "狀態", "kind": "enum", "class": "sourced", "enum": ["concept", "development", "mass_production", "eol"], "default": "concept", "aliases": ["狀態", "階段", "status"]},
+        {"name": "launch_date", "label": "上市日期", "kind": "date", "class": "sourced", "aliases": ["上市日期", "上市", "launch date"]},
+        {"name": "components", "label": "使用零件", "kind": "linklist", "class": "sourced", "link_to": ["Component"], "aliases": ["使用零件", "零件", "components"]},
+        {"name": "owner", "label": "負責人", "kind": "str", "class": "sourced", "aliases": ["負責人", "PM", "owner"]},
+        {"name": "body", "label": "備註", "kind": "str", "class": "sourced", "aliases": ["備註", "說明", "notes"]}
+      ]
+    },
+    {
+      "name": "SpecItem",
+      "label": "規格項目",
+      "naming": ["product", "name"],
+      "fields": [
+        {"name": "product", "label": "產品", "kind": "link", "class": "sourced", "link_to": ["Product"], "aliases": ["產品", "產品名稱", "product"], "required": true},
+        {"name": "name", "label": "規格項目", "kind": "str", "class": "sourced", "aliases": ["規格項目", "項目", "spec"], "required": true},
+        {"name": "value", "label": "規格值", "kind": "str", "class": "sourced", "aliases": ["規格值", "數值", "value"]},
+        {"name": "unit", "label": "單位", "kind": "str", "class": "sourced", "aliases": ["單位", "unit"]},
+        {"name": "test_method", "label": "量測方法", "kind": "str", "class": "sourced", "aliases": ["量測方法", "測試方法", "test method"]},
+        {"name": "verified", "label": "已實測", "kind": "bool", "class": "judgement", "aliases": ["已實測", "實測"]}
+      ]
+    }
+  ]
+}

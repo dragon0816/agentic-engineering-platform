@@ -13,7 +13,8 @@ from pathlib import Path
 from typing import Any
 
 from capabilities.bi_cards import importer
-from capabilities.bi_cards.schema import Registry, TypeDef, registry
+from capabilities.bi_cards.catalog import for_store
+from capabilities.bi_cards.schema import BI_PREFIX, Registry, TypeDef, registry
 from capabilities.bi_cards.store import BiStore, datasets
 
 #: The robotics demo (owner 2026-10-21): every type, loaded so links resolve.
@@ -76,8 +77,15 @@ def dataset_list(workspace: Path) -> list[dict[str, Any]]:
     found = []
     for name in datasets(workspace):
         store = BiStore(workspace, name)
+        schema = store.schema_ref()
         found.append(
-            {"name": name, "cards": len(store.card_rows()), "updated": store.last_updated()}
+            {
+                "name": name,
+                "cards": len(store.card_rows()),
+                "updated": store.last_updated(),
+                "schema": schema,
+                "dashboard": schema.startswith(BI_PREFIX),
+            }
         )
     return found
 
@@ -86,6 +94,11 @@ def schema_api(reg: Registry | None = None) -> dict[str, Any]:
     reg = reg or registry()
     return {
         "schema_id": reg.schema_id,
+        "version": reg.version,
+        "ref": reg.ref,
+        "title": reg.title,
+        "bi": reg.is_bi,
+        "domains": list(reg.domains),
         "types": [
             {
                 "name": t.name,
@@ -138,10 +151,12 @@ def card_summary(card: Any, fields: dict[str, dict[str, Any]]) -> dict[str, Any]
     }
 
 
-def _in_domain(fields: dict[str, dict[str, Any]], domain: str) -> bool:
-    value = _value(fields, "domain") or "wireless"  # v4: no domain = wireless
+def _in_domain(fields: dict[str, dict[str, Any]], domain: str, reg: Registry) -> bool:
+    value = _value(fields, "domain")
+    if value is None and reg.is_bi:
+        value = "wireless"  # v4: no domain = wireless
     values = value if isinstance(value, list) else [value]
-    return domain.lower() in {str(v).lower() for v in values}
+    return domain.lower() in {str(v).lower() for v in values if v is not None}
 
 
 def _matches(card: Any, fields: dict[str, dict[str, Any]], text: str) -> bool:
@@ -165,13 +180,16 @@ def search(
     field: str | None = None,
     value: str | None = None,
 ) -> list[tuple[Any, dict[str, dict[str, Any]]]]:
+    reg = for_store(store)
+    if not reg.domains:
+        domain = None  # a schema without domains has nothing to filter by
     everything = store.all_fields()
     found = []
     for card in store.card_rows():
         if entity_type and card["entity_type"].lower() != entity_type.lower():
             continue
         fields = everything.get(card["id"], {})
-        if domain and not _in_domain(fields, domain):
+        if domain and not _in_domain(fields, domain, reg):
             continue
         if text and not _matches(card, fields, text):
             continue
@@ -194,7 +212,7 @@ def _type_of(reg: Registry, name: str) -> TypeDef | None:
 
 
 def links(store: BiStore, card: Any, fields: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
-    reg = registry()
+    reg = for_store(store)
     entity = _type_of(reg, card["entity_type"])
     if entity is None:
         return []
@@ -232,7 +250,7 @@ def card_detail(store: BiStore, card_id: str) -> dict[str, Any] | None:
         return None
     fields = store.fields(card_id)
     counts = store.history_counts(card_id)
-    entity = _type_of(registry(), card["entity_type"])
+    entity = _type_of(for_store(store), card["entity_type"])
     order = [f.name for f in entity.fields] if entity is not None else []
     shown = []
     for name in sorted(fields, key=lambda n: order.index(n) if n in order else len(order)):

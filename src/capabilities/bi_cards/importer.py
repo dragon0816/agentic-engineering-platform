@@ -24,7 +24,8 @@ from collections import OrderedDict
 from dataclasses import dataclass, field
 from typing import Any
 
-from capabilities.bi_cards.schema import Registry, TypeDef, norm_key, registry
+from capabilities.bi_cards.catalog import for_store
+from capabilities.bi_cards.schema import Registry, TypeDef, norm_key
 from capabilities.bi_cards.store import ApplyResult, BiStore, PlannedRow
 
 #: The fixture marks example data in the text (「(虛構範例)」, 「[範例資料,待業務/FAE
@@ -132,8 +133,9 @@ def preview(
     extra_keys: dict[str, set[str]] | None = None,
     schema: Registry | None = None,
 ) -> Preview:
-    """Read, map and normalise a CSV against the store; writes nothing."""
-    reg = schema or registry()
+    """Read, map and normalise a CSV against the store and the dataset's
+    schema; writes nothing."""
+    reg = schema or for_store(store)
     mapping = dict(mapping or {})
     headers, raw_rows = read_rows(csv_text)
     explicit: dict[str, str] = {

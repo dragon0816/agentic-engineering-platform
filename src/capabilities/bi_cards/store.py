@@ -9,6 +9,11 @@ person's edit carries `base_version`; a stale one is refused with the
 current value, who and when. A whole import can be undone; the undo is
 recorded as new history rows, never by deleting old ones.
 
+Each dataset is bound to one schema (`meta.schema`, `<schema_id>@<version>`),
+chosen when it is created and never changed (owner 2026-10-21). A dataset
+from before the binding existed has no `meta` row and is read as
+`LEGACY_SCHEMA`; its next write records that binding.
+
 Reading never creates the database: a preview of an empty dataset leaves
 the workspace byte-for-byte unchanged.
 """
@@ -29,6 +34,11 @@ from typing import Any
 DEFAULT_DATASET = "demo"
 DATASET_RE = re.compile(r"^[A-Za-z0-9_-]{1,40}$")
 DB_FILE = "bi.sqlite"
+#: The binding of a dataset created before per-dataset schemas, or implicitly
+#: by an import or the demo load: the shipped `bi.schema/v1.1`.
+LEGACY_SCHEMA = "bi.schema/v1.1@1.1.0"
+#: `<workspace>/bi/schemas/` holds installed schema files, so no dataset may use it.
+RESERVED_DATASETS = {"schemas"}
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS cards (
@@ -78,6 +88,10 @@ CREATE TABLE IF NOT EXISTS proposals (
   import_id TEXT,
   status TEXT NOT NULL DEFAULT 'pending'
 );
+CREATE TABLE IF NOT EXISTS meta (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS imports (
   id TEXT PRIMARY KEY,
   filename TEXT NOT NULL,
@@ -103,7 +117,9 @@ def now() -> str:
 
 def dataset_dir(workspace: Path, dataset: str) -> Path:
     if not DATASET_RE.match(dataset):
-        raise BiStoreError("dataset_invalid", "資料集名稱只能用英數字、-、_")
+        raise BiStoreError("dataset_invalid", "資料集名稱只能用英數字、-、_，最多 40 個字")
+    if dataset.lower() in RESERVED_DATASETS:
+        raise BiStoreError("dataset_invalid", f"「{dataset}」是保留名稱，請換一個資料集名稱")
     return workspace / "bi" / dataset
 
 
@@ -111,7 +127,11 @@ def datasets(workspace: Path) -> list[str]:
     root = workspace / "bi"
     if not root.is_dir():
         return []
-    return sorted(p.name for p in root.iterdir() if (p / DB_FILE).is_file())
+    return sorted(
+        p.name
+        for p in root.iterdir()
+        if p.name.lower() not in RESERVED_DATASETS and (p / DB_FILE).is_file()
+    )
 
 
 def _dump(value: Any) -> str:
@@ -145,6 +165,7 @@ class ApplyResult:
 
 class BiStore:
     def __init__(self, workspace: Path, dataset: str = DEFAULT_DATASET) -> None:
+        self.workspace = workspace
         self.dataset = dataset
         self.dir = dataset_dir(workspace, dataset)
         self.path = self.dir / DB_FILE
@@ -164,11 +185,45 @@ class BiStore:
         try:
             if write:
                 connection.executescript(SCHEMA)
+                # A dataset written before the binding existed keeps v1.1.
+                connection.execute(
+                    "INSERT OR IGNORE INTO meta (key, value) VALUES ('schema', ?)",
+                    (LEGACY_SCHEMA,),
+                )
             yield connection
             if write:
                 connection.commit()
         finally:
             connection.close()
+
+    # -- the schema binding ---------------------------------------------
+
+    def schema_ref(self) -> str:
+        """The dataset's schema (`<id>@<version>`); `LEGACY_SCHEMA` when unbound."""
+        if not self.exists:
+            return LEGACY_SCHEMA
+        with self._db() as db:
+            try:
+                row = db.execute("SELECT value FROM meta WHERE key = 'schema'").fetchone()
+            except sqlite3.OperationalError:  # a dataset from before the binding
+                return LEGACY_SCHEMA
+        return str(row[0]) if row else LEGACY_SCHEMA
+
+    def create(self, schema_ref: str) -> None:
+        """A new, empty dataset bound to `schema_ref`; an existing one is refused
+        (its schema cannot be changed after creation)."""
+        if self.exists:
+            current = self.schema_ref()
+            raise BiStoreError(
+                "dataset_exists",
+                f"資料集「{self.dataset}」已經存在（schema {current}）。建立後不能更換 schema；"
+                "要用別的 schema，請用新的名稱另建一個資料集",
+                schema=current,
+            )
+        with self._db(write=True) as db:
+            db.execute(
+                "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema', ?)", (schema_ref,)
+            )
 
     # -- reading --------------------------------------------------------
 
