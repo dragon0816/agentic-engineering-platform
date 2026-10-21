@@ -3201,3 +3201,12 @@ s-k-20261011T102952` (not published).
   (`--basetemp=C:/aepci-wk/bt-sch`).
 - [ ] Owner live check after a restart on this code (when `/api/tasks` is idle).
 - [ ] Deferred: a "schema pack" (declarative Dashboard and per-pack chat Skill).
+- [x] Release `release-20261021-2237-df57c718` (2026-10-21, Claude Code; owner: build after the
+  installer fixes, the model menu and the per-dataset BI schemas): zip
+  `aep-windows-preview-0.1.0-df57c7185f71.zip`, SHA-256 `90511d83…b3ca`, on `S:\AE\leo\20261021-2237-df57c718\`
+  with `BI_DEMO.zh-TW.md` and `README-請先看.txt` (supersedes 1635, 1550 and 1115). Built from a pinned
+  worktree; the full suite on df57c718 in a clean worktree with `C:/aepci-wk/venv` 3846 passed,
+  34 skipped; release `--quick`. Live on this PC after a restart: the `demo` dataset reads as
+  `bi.schema/v1.1@1.1.0` with 104 cards and 15 dashboard sections; the composer lists the gateway's
+  models (default gpt-5.5); a conversation switched to claude-sonnet-5 and back (the answer cannot
+  name its model, so the model used was not confirmed live).
