@@ -14,10 +14,12 @@ from typing import Any
 from agent.gateway import HostTool, HostToolOutcome
 from capabilities.bi_cards.capability import QUERY_SPEC
 from capabilities.bi_cards.dashboard import ANALYSES
-from capabilities.bi_cards.manifest import BI_SKILL
+from capabilities.bi_cards.manifest import BI_SKILL, bi_question
 from capabilities.runtime import CapabilityInvocation
 from common.execution import Failure, RequestContext
 from models.contracts import ModelTool
+
+__all__ = ["bi_cards_tools", "bi_question", "bi_skill_on"]
 
 TOOL_NAME = "bi__query"
 FAILURE_TEXT = {
