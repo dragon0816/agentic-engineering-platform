@@ -44,3 +44,27 @@ Upstream research (2026-10-21):
 
 Do not extrapolate cloud CPU measurements to a company Windows PC. Thresholds and final
 corpus scale are pending Leo; absent those, selection remains pending even if a pilot runs.
+
+## Executed feasibility result (2026-10-21)
+
+[Environment](../../benchmarks/voice_to_knowledge/evidence/environment.json):
+CTranslate2 4.8.3 reports CPU `float32`, `int8`, `int8_float32`; CUDA device count **0**.
+Installed faster-whisper 1.2.1, PyAV 19.0.1; all packages pinned in
+[requirements.lock](../../benchmarks/voice_to_knowledge/requirements.lock).
+The FFmpeg CLI and PyAV use separately packaged multimedia libraries; PCM input constrains
+that variability. This lock is a tested environment snapshot, not a cross-platform guarantee.
+
+[Download evidence](../../benchmarks/voice_to_knowledge/evidence/blocked.json): both model and
+FLEURS metadata GET requests denied by the environment proxy (403). No artifact download retry
+or alternate transport was attempted. Zero corpus audio collected; zero model files; real
+inference NOT_RUN. Thus no model checksum/revision or per-segment STT measurements can be
+reported yet. Public pilot, company terminology acceptance and deployment selection are blocked.
+
+[Runner instructions](../../benchmarks/voice_to_knowledge/README.md) describe an executable
+local-only path for approved artifacts. [Verification](../../benchmarks/voice_to_knowledge/evidence/verification.md)
+separates fake tests from inference. No model recommendation follows from these contract tests.
+
+Limits: CPU-only runner; no GPU or concurrent throughput benchmark. Process-cold applies only
+to the first sample; disk cache is not controlled. Timeout bounds each full repetition, not each
+sample. RSS is a 10ms sampled process peak, not a guaranteed OS high-water mark. Number/negation
+lists are lexical diagnostics, not semantic correctness scores. Thresholds remain unset.

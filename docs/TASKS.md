@@ -3025,3 +3025,16 @@ s-k-20261011T102952` (not published).
   `aep-windows-preview-0.1.0-607a59ea3f03.zip`, SHA-256 `efece1d8…573b`; the release script's ruff,
   mypy and full pytest passed; CI green on 607a59ea; no weekly-report asset in the bundle; commented
   on #218. Tag local only.
+
+## Voice-to-Knowledge Phase 0 — isolated feasibility (2026-10-21)
+
+- [x] On `feature/voice-to-knowledge`, baseline main `a7f72e3c`, docs-only initial commit
+  `64d3ba58` and Draft PR #240; then isolated provider/scoring/Mock Submission (`4fc79142`)
+  and offline benchmark runner (`5b5cf3f2`). No existing runtime behavior change.
+- [x] 30 new fake/contract tests pass, including pytest-only venv; 77 focused tests including
+  Telegram/Knowledge regressions pass; focused ruff/format/strict mypy pass. Exact commands:
+  `benchmarks/voice_to_knowledge/evidence/verification.md`.
+- [ ] Real STT NOT_RUN: model and public FLEURS metadata downloads denied by proxy 403;
+  no licensed audio/model artifact collected, no scores or selection. GPU count 0.
+- [ ] Leo #234/#236 integration contract and #237/#239 corpus/access/threshold decisions.
+  Details and remaining limits: `docs/voice-to-knowledge/VOICE_PROGRESS.md`. No issues closed.
