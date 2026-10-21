@@ -4625,3 +4625,22 @@ Rejected alternatives: keeping the default-when-missing rule of 4b051234 (leaves
 place); removing `-Namespace` (breaks the commands already sent: PowerShell rejects an unknown
 parameter); making the namespace a bundle manifest setting (no second namespace exists yet; can be
 done when one does).
+
+## 2026-10-21 — Knowledge storage stays on SQLite; no central PostgreSQL (ADR-K2, #212)
+
+- **Decision (owner, 2026-10-21):** 「好換成sqlite而且他的可攜性比較好」. AEP keeps SQLite for knowledge
+  storage (BI cards, memory, the Shared Platform registry). The central PostgreSQL in ADR-K2 option C
+  is not introduced; this replaces the owner's earlier 2026-10-21 agreement in #212 to adopt it,
+  which had stalled on where to host it.
+- **Why:** SQLite is portable (one file per dataset, no server, works offline, local-first per
+  AGENTS.md), and covers what is needed now: one maintainer per dataset, read-only sharing through
+  Shared Platform snapshots (`docs/proposals/BI_DATASET_SHARING.md` option A), the dashboard and chat
+  queries. PostgreSQL would add an operated component and a hosting decision with no near-term gain.
+- **Kept:** every storage stays behind the type-agnostic backend interface and its contract tests
+  (ADR-K2, ADR-K10), so a PostgreSQL (or other) backend can be added later without changing callers.
+  SQLite files are never shared through OneDrive or network drives (corruption risk); sharing goes
+  through snapshots.
+- **Revisit when:** several people must edit the same dataset live, row-level access by data
+  classification is required, or data volume or query load outgrows SQLite.
+- **Rejected:** PostgreSQL on host 141 (LAN only, one more service to run); a cloud PostgreSQL (no
+  server available).
