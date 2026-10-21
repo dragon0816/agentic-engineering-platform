@@ -2341,3 +2341,12 @@ do not discard concurrent platform handoff entries. PR remains Draft, not merge-
 
 Synchronization update: main 20351c96 is now merged into this feature branch.
 The platform handoff above is preserved byte-for-byte. Earlier drift notes describe the prior state.
+
+Voice post-sync verification: merge 0f4a78e3 includes main 20351c96, upstream HANDOFF/TASKS
+prefixes preserved. Related tests 134 passed / 1 skipped. Full Linux suite 3690 passed /
+130 skipped / 3 failed; all failures reproduced on pure main with upstream src. Linux mypy
+26 errors likewise identical to main. Windows-target mypy, focused mypy, repo ruff/format,
+build and pip check pass. Commands/evidence: benchmarks/voice_to_knowledge/evidence/sync-verification.md.
+CI for merge head (39535239198) still in progress at evidence collection; no claim of CI success.
+Network approval still pending; no model/corpus retry, real STT NOT_RUN. Next: check latest
+PR #240 Windows CI, then Leo artifact-source/corpus/threshold decisions.

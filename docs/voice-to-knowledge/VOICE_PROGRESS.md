@@ -86,3 +86,11 @@ Post-sync checks in `/tmp/aep-sync-venv` (`pip install -e '.[dev,office]'`):
 
 No network authorization changed. Real inference remains blocked/NOT_RUN; see
 [exact hosts and required artifacts](VOICE_NETWORK_REQUIREMENTS.md).
+
+Full post-sync Linux suite: **3690 passed, 130 skipped, 3 failed**. All three failures reproduce
+on detached main 20351c96 with upstream src explicitly selected; no Voice regression identified.
+Default Linux mypy's 26 diagnostics also exactly match detached main. Windows-target full mypy,
+focused strict mypy, ruff, format, build and pip check pass. Details/commands:
+`benchmarks/voice_to_knowledge/evidence/sync-verification.md`.
+CI run 39535239198 on merge head was in progress at pytest when evidence was collected;
+initial run 39533933211 was superseded/cancelled. No CI pass or completed failure asserted.

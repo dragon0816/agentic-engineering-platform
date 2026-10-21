@@ -3070,3 +3070,8 @@ s-k-20261011T102952` (not published).
   no licensed audio/model artifact collected, no scores or selection. GPU count 0.
 - [ ] Leo #234/#236 integration contract and #237/#239 corpus/access/threshold decisions.
   Details and remaining limits: `docs/voice-to-knowledge/VOICE_PROGRESS.md`. No issues closed.
+- [x] Authorized main-to-feature merge `0f4a78e3` (main `20351c96`), preserving all upstream
+  HANDOFF/TASKS content. Related tests 134 passed/1 skipped; full Linux 3690 passed/130 skipped/
+  3 failed, all three reproduced on pure main. Repo lint/format, Windows-target mypy, focused
+  mypy, build/pip check pass. Linux mypy diagnostics identical to main. Evidence:
+  `benchmarks/voice_to_knowledge/evidence/sync-verification.md`. GitHub CI pending at recording.
