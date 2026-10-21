@@ -1,3 +1,5 @@
+from typing import Any
+
 from benchmarks.voice_to_knowledge.metrics import score
 
 
@@ -35,3 +37,24 @@ def test_number_and_negation_diagnostics() -> None:
     assert result["diagnostics"]["reference_numbers"] == ["180", "8"]
     assert result["diagnostics"]["hypothesis_numbers"] == ["180", "7"]
     assert result["diagnostics"]["reference_negations"] == ["不", "not"]
+
+
+def test_micro_summary_keeps_failures_and_undefined_silence_rate() -> None:
+    from benchmarks.voice_to_knowledge.metrics import summarize
+
+    common = dict(language="en", kind="human", split="pilot", thermal="warm")
+    rows: list[dict[str, Any]] = [
+        {
+            **common,
+            "id": "1",
+            "status": "ok",
+            "metrics": score("a b", "a"),
+            "latency_seconds": 1.0,
+            "rtf": 0.5,
+        },
+        {**common, "id": "2", "status": "failed"},
+    ]
+    result = summarize(rows)["en/human/pilot/warm"]
+    assert result["attempts"] == 2 and result["failed"] == 1
+    assert result["normalized"]["wer"]["rate"] == 0.5
+    assert result["silence"]["rate"] is None

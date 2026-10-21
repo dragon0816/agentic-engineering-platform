@@ -1,7 +1,9 @@
 import time
 import wave
+from collections.abc import Iterator
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Any
 
 import pytest
 
@@ -16,14 +18,14 @@ from benchmarks.voice_to_knowledge.provider import (
 def test_generator_is_exhausted_and_late_errors_propagate() -> None:
     seen = []
 
-    def segments():
+    def segments() -> Iterator[SimpleNamespace]:
         for index in range(3):
             seen.append(index)
             yield SimpleNamespace(start=index, end=index + 1, text=str(index))
 
     assert len(consume(segments())) == 3 and seen == [0, 1, 2]
 
-    def broken():
+    def broken() -> Iterator[SimpleNamespace]:
         yield SimpleNamespace(start=0, end=1, text="partial")
         raise RuntimeError("late failure")
 
@@ -33,8 +35,10 @@ def test_generator_is_exhausted_and_late_errors_propagate() -> None:
 
 def test_provider_times_lazy_inference() -> None:
     class Model:
-        def transcribe(self, path, **kwargs):
-            def segments():
+        def transcribe(
+            self, path: str, **kwargs: Any
+        ) -> tuple[Iterator[SimpleNamespace], SimpleNamespace]:
+            def segments() -> Iterator[SimpleNamespace]:
                 time.sleep(0.02)
                 yield SimpleNamespace(start=0, end=1, text="synthetic")
 

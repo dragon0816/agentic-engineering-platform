@@ -1,4 +1,5 @@
 from dataclasses import replace
+from typing import Any
 
 import pytest
 
@@ -63,7 +64,7 @@ def test_permissions_checked_even_on_replay_and_cross_scope_reads() -> None:
         {"claims": (Claim(kind="fact", text="Synthetic", start=-1, end=8),)},
     ],
 )
-def test_invalid_provenance_is_refused(change: dict) -> None:
+def test_invalid_provenance_is_refused(change: dict[str, Any]) -> None:
     with pytest.raises(SubmissionError, match="invalid_request"):
         MockSubmission().create(identity(), "key", replace(payload(), **change), "r1")
 

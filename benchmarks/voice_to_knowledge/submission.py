@@ -134,7 +134,7 @@ class MockSubmission:
                     raise SubmissionError("idempotency_conflict")
                 return Receipt(draft_id, request_id)
             draft_id = "mock-" + uuid4().hex
-            # JSON string quoting makes arbitrary transcript Markdown inert in this text artifact.
+            # Plain text evidence only; consumers must escape/sanitize before any HTML rendering.
             markdown = "# Mock draft — unverified\n\n" + "\n".join(
                 f"- {c.kind}: {json.dumps(c.text, ensure_ascii=False)} "
                 f"[{submission.source_id}:{c.start}:{c.end}]"

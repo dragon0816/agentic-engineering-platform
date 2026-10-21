@@ -92,3 +92,52 @@ def score(reference: str, hypothesis: str) -> dict[str, Any]:
         ]
     }
     return output
+
+
+def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Micro-average within strata; failed inference never disappears from counts."""
+    groups: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        key = "/".join(str(row[k]) for k in ("language", "kind", "split", "thermal"))
+        groups.setdefault(key, []).append(row)
+    output: dict[str, Any] = {}
+    for key, values in groups.items():
+        success = [r for r in values if r["status"] == "ok"]
+        summary: dict[str, Any] = {
+            "attempts": len(values),
+            "success": len(success),
+            "failed": len(values) - len(success),
+            "unique_samples": len({r["id"] for r in values}),
+        }
+        for variant in ("raw", "normalized"):
+            summary[variant] = {}
+            for metric in ("cer", "wer", "mer"):
+                edits = sum(r["metrics"][variant][metric]["edits"] for r in success)
+                count = sum(r["metrics"][variant][metric]["reference_units"] for r in success)
+                summary[variant][metric] = {
+                    "edits": edits,
+                    "reference_units": count,
+                    "rate": edits / count if count else None,
+                }
+        tp, fp, fn = (sum(r["metrics"]["terms"][k] for r in success) for k in ("tp", "fp", "fn"))
+        summary["terms"] = {
+            "tp": tp,
+            "fp": fp,
+            "fn": fn,
+            "precision": tp / (tp + fp) if tp + fp else None,
+            "recall": tp / (tp + fn) if tp + fn else None,
+        }
+        silence = [
+            r["metrics"]["silence_hallucination"]
+            for r in success
+            if r["metrics"]["silence_hallucination"] is not None
+        ]
+        summary["silence"] = {
+            "evaluated": len(silence),
+            "hallucinated": sum(silence),
+            "rate": sum(silence) / len(silence) if silence else None,
+        }
+        summary["latency_seconds"] = [r["latency_seconds"] for r in success]
+        summary["rtf"] = [r["rtf"] for r in success]
+        output[key] = summary
+    return output
