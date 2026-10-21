@@ -282,6 +282,27 @@ def test_not_now_keeps_the_draft_in_capabilities(served: Any) -> None:
     assert web.draft_action("install", draft["candidate_id"])["ok"]
 
 
+def test_pending_changes_leave_draft_cards_to_their_answer(served: Any) -> None:
+    """#233: `GET /api/cards` lists no `dr-` card, with or without a session;
+    the card waits on its answer and the draft in Capabilities > Drafts."""
+    web, _server, _recorder, _ = served
+    session = web.create_conversation()["conversation"]["session_id"]
+    replied = _gateway_turn(
+        web,
+        session,
+        "draft it",
+        {"tools": [(DRAFT, {"title": "Echo", "workflow": workflow("write-it")})]},
+        {"text": "Drafted."},
+    )
+    (card,) = _draft_cards(replied["answer"])
+    assert card["status"] == "pending"
+    for listed in (web.cards(), web.cards(session)):
+        assert not [item for item in listed["cards"] if item["card_id"].startswith("dr-")]
+    assert web.card(card["card_id"])["status"] == "pending"
+    assert _stored(web, session)[-1]["action_cards"][0]["card_id"] == card["card_id"]
+    assert [item["asset"] for item in web.drafts()["drafts"]] == ["engineering/echo-month@1.0.0"]
+
+
 def test_the_models_install_request_is_answered_on_the_card(served: Any) -> None:
     web, _server, _recorder, _ = served
     session = web.create_conversation()["conversation"]["session_id"]

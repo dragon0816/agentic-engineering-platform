@@ -2202,7 +2202,8 @@ One card for every "the Agent asks, the person decides" moment
   `message`. `ConversationMessage.action_card` keeps the last drawn card on the answer;
   a decision redraws it (`LocalState.set_message_card`) and appends
   `[card <id>] <status>: <outcome>` to that answer's `tool_summary`.
-- Agent Web: `GET /api/cards` (open cards, any channel), `GET /api/cards?card_id=`,
+- Agent Web: `GET /api/cards` (open cards, any channel; not draft install cards `dr-`,
+  which wait on their answer and in Capabilities > Drafts), `GET /api/cards?card_id=`,
   `POST /api/cards/decide` (`card_id`, `action`) answers `ok`, `code`, `message`,
   `card`. Codes: `card_unknown`, `card_action_unknown`, `proposal_<status>`,
   `proposal_stale`, `web_only`, `applied`, `apply_failed`, `cancelled`.
