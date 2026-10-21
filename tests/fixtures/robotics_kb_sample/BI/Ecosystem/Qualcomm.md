@@ -1,0 +1,30 @@
+---
+type: ecosystem
+name: Qualcomm
+domain: [robotics]
+node: "[[L1-Robot-Chipset]]"
+nodes: ["[[L1-Robot-Chipset]]", "[[L2-Comms-Module]]"]
+role: chipset
+technologies: ["[[5G-Private-Network]]", "[[Wi-Fi-7]]", "[[Edge-AI-SoC]]"]
+relationship_to_us: influencer
+influence_on: ["[[新漢]]"]
+reference_design: true
+ticker: QCOM
+confidence: assumed
+updated: 2026-10-21
+ingested_from: ecosystem_robotics.csv
+---
+
+## 角色說明
+
+[範例資料,待業務/FAE 驗證]
+
+## 如何影響客戶的量測設備選型
+
+## 使用此成員的客戶產品
+```dataview
+TABLE account AS 客戶, node AS 節點, launch_date AS 上市日
+FROM "BI/CustomerProduct"
+WHERE contains(default(ecosystem, []), this.file.link)
+SORT launch_date ASC
+```

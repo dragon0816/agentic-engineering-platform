@@ -56,6 +56,8 @@ where = ["src"]
 # The loan replies' message texts, carried from rs_workflow_system's
 # config/loan-templates (Workflow 06b); overridable per install.
 "capabilities.loan_reply" = ["loan-templates/*.txt"]
+# The BI cards demo set: the robotics sample's 12 CSVs (owner 2026-10-21).
+"capabilities.bi_cards" = ["demo/*.csv"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -87,6 +89,8 @@ extend-exclude = [
     "tests/test_loan_*_source.py",
     # The owner's BI example tools, kept verbatim as reference fixtures (2026-10-19).
     "tests/fixtures/bi_vault_example",
+    # The robotics BI sample (schema v4), kept verbatim (owner 2026-10-21).
+    "tests/fixtures/robotics_kb_sample",
     # The owner's untracked working folder.
     "files",
 ]
@@ -107,7 +111,7 @@ strict = true
 files = ["src", "tests"]
 plugins = ["pydantic.mypy"]
 # The owner's BI example tools are verbatim reference fixtures, not our code.
-exclude = ["tests/fixtures/bi_vault_example/"]
+exclude = ["tests/fixtures/bi_vault_example/", "tests/fixtures/robotics_kb_sample/"]
 
 # The source loan tests, vendored unchanged apart from their imports as the
 # oracle for capabilities.loan_reply (tests/loan_oracle.py); they carry no

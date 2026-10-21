@@ -960,6 +960,172 @@ tr:last-child td { border-bottom: none; }
   .file-viewer { width: 100vw; left: 0; border-left: 0; }
   .answer-html .frame-wrap { height: 420px; }
 }
+/* BI cards (Knowledge Strategy v1.3 Case A, 2026-10-21): a sub-tab of Knowledge.
+   Panes are divs (a section is hidden unless it is an open panel); 44 px targets,
+   colour is never the only cue (every flag carries a text badge). */
+.kn-tabs { margin-top: -4px; }
+.bi-pane { max-width: 1240px; min-width: 0; }
+.bi-pane button.go { min-height: 44px; }
+.bi-bar { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+  gap: 10px 16px; padding: 12px 14px; margin: 0 0 10px; }
+.bi-bar-main { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 14px;
+  min-width: 0; flex: 1 1 420px; }
+.bi-bar-main > div { min-width: 0; flex: 0 1 200px; }
+.bi-pane label.bi-label { display: block; font-size: 12px; color: var(--dim); margin: 0 0 4px; }
+.bi-pane select, .bi-input { min-height: 44px; max-width: 100%; padding: 8px 10px;
+  color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+  font: 14px "Segoe UI", system-ui, sans-serif; }
+.bi-input { width: 100%; }
+.bi-pane input[type="file"] { max-width: 100%; min-height: 44px; font: inherit; }
+.bi-counts { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; min-height: 44px;
+  color: var(--dim); font-size: 14px; }
+.bi-counts strong { color: var(--ink); font-size: 20px; }
+.bi-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.bi-btn { min-height: 44px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--bg); color: var(--ink); font: inherit; cursor: pointer;
+  transition: border-color 150ms ease; }
+.bi-btn:hover { border-color: var(--accent); }
+.bi-btn:disabled, .bi-pane button.go:disabled { opacity: .5; cursor: not-allowed; }
+.bi-hint { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 10px 14px;
+  margin: 0 0 12px; border-radius: 10px; background: var(--accent-soft); font-size: 14px; }
+.bi-hint .bi-hint-text { flex: 1 1 320px; min-width: 0; }
+.bi-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
+  border: 1px solid var(--line); border-radius: 999px; font-size: 13px; background: var(--bg); }
+.bi-chip b { font-size: 15px; font-variant-numeric: tabular-nums; }
+.bi-chip.good { color: var(--good); border-color: var(--good); }
+.bi-chip.warn { color: var(--warn); border-color: var(--warn); }
+.bi-chip.bad { color: var(--bad); border-color: var(--bad); }
+.bi-chip.accent { color: var(--accent); border-color: var(--accent); }
+.bi-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; }
+.bi-badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px;
+  font-weight: 600; border: 1px solid currentColor; white-space: nowrap; background: var(--bg); }
+.bi-badge.type, .bi-badge.accent { color: var(--accent); }
+.bi-badge.warn { color: var(--warn); }
+.bi-badge.bad { color: var(--bad); }
+.bi-badge.good { color: var(--good); }
+.bi-badge.dim { color: var(--dim); }
+.bi-meta { color: var(--dim); font-size: 12.5px; }
+.bi-empty { color: var(--dim); padding: 18px 12px; text-align: center; }
+.bi-scroll { overflow-x: auto; max-width: 100%; }
+.bi-table td, .bi-table th { vertical-align: top; }
+.bi-table td { overflow-wrap: anywhere; min-width: 72px; }
+.bi-table tr.bi-flag-red td:first-child { box-shadow: inset 4px 0 0 var(--bad); }
+.bi-table tr.bi-flag-warn td:first-child { box-shadow: inset 4px 0 0 var(--warn); }
+.bi-table tr.bi-flag-red { background: color-mix(in srgb, var(--bad) 7%, transparent); }
+.bi-table tr.bi-flag-warn { background: color-mix(in srgb, var(--warn) 8%, transparent); }
+.bi-flag-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.bi-link { border: 0; background: transparent; color: var(--accent); text-decoration: underline;
+  text-underline-offset: 2px; font: inherit; cursor: pointer; padding: 6px 2px; min-height: 32px;
+  text-align: left; }
+.bi-link:hover { color: var(--ink); }
+.bi-summary { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+.bi-stat { flex: 1 1 150px; min-width: 0; padding: 10px 14px; border: 1px solid var(--line);
+  border-left: 4px solid var(--line); border-radius: 8px; background: var(--panel); }
+.bi-stat b { display: block; font-size: 24px; line-height: 1.2;
+  font-variant-numeric: tabular-nums; }
+.bi-stat.red { border-left-color: var(--bad); } .bi-stat.red b { color: var(--bad); }
+.bi-stat.warn { border-left-color: var(--warn); } .bi-stat.warn b { color: var(--warn); }
+.bi-stat.dim { border-left-color: var(--dim); }
+.bi-sec { overflow: visible; margin: 0 0 10px; }
+.bi-sec > summary { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px;
+  min-height: 48px; padding: 10px 14px; cursor: pointer; font-weight: 600; list-style: none; }
+.bi-sec > summary::-webkit-details-marker { display: none; }
+.bi-sec > summary::before { content: "\25B8"; color: var(--dim); transition: transform 150ms ease; }
+.bi-sec[open] > summary::before { transform: rotate(90deg); }
+.bi-sec > summary:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+.bi-sec-title { flex: 1 1 200px; min-width: 0; }
+.bi-sec-body { padding: 0 14px 14px; min-width: 0; }
+.bi-sec-note { color: var(--dim); font-size: 13px; margin: 0 0 8px; }
+.bi-matrix { width: auto; min-width: 100%; }
+.bi-matrix th, .bi-matrix td { text-align: center; padding: 6px 10px;
+  font-variant-numeric: tabular-nums; }
+.bi-matrix th:first-child, .bi-matrix td:first-child { text-align: left; position: sticky; left: 0;
+  background: var(--panel); white-space: nowrap; }
+.bi-matrix td.bi-zero { color: var(--dim); opacity: .45; }
+.bi-matrix td.bi-hot { font-weight: 700; background: var(--accent-soft); }
+.bi-funnel { display: grid; gap: 8px; }
+.bi-funnel-row { display: grid; grid-template-columns: minmax(70px, 160px) minmax(0, 1fr) 3em;
+  gap: 10px; align-items: center; }
+.bi-funnel-label { overflow-wrap: anywhere; }
+.bi-funnel-track { height: 26px; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--bg); overflow: hidden; }
+.bi-funnel-bar { height: 100%; min-width: 3px; background: var(--accent); }
+.bi-funnel-items { margin: -4px 0 4px; overflow-wrap: anywhere; }
+.bi-funnel-n { font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+.bi-filters { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: flex-end;
+  margin: 0 0 10px; }
+.bi-filters > div { min-width: 0; flex: 1 1 200px; }
+.bi-filters > div:first-child { flex: 0 1 220px; }
+.bi-browse { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: 14px;
+  align-items: start; }
+.bi-cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 72vh;
+  overflow: auto; }
+.bi-card-row { width: 100%; min-height: 56px; display: grid; gap: 3px; padding: 8px 12px;
+  text-align: left; border: 1px solid var(--line); border-radius: 8px; background: var(--panel);
+  color: var(--ink); font: inherit; cursor: pointer; transition: border-color 150ms ease; }
+.bi-card-row:hover { border-color: var(--accent); }
+.bi-card-row[aria-current="true"] { border-color: var(--accent);
+  box-shadow: inset 3px 0 0 var(--accent); }
+.bi-card-top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.bi-card-name { font-weight: 600; overflow-wrap: anywhere; }
+.bi-detail { min-width: 0; padding: 14px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--panel); }
+.bi-detail h3 { margin: 0 0 6px; font-size: 18px; outline: none; overflow-wrap: anywhere; }
+.bi-detail h4 { margin: 16px 0 6px; font-size: 14px; }
+.bi-fields { display: grid; gap: 8px; }
+.bi-field { padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--bg); overflow-wrap: anywhere; min-width: 0; }
+.bi-field-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.bi-field-head strong { margin-right: auto; }
+.bi-field-value { font-size: 15px; margin: 2px 0; white-space: pre-wrap; }
+.bi-field-foot { display: flex; flex-wrap: wrap; align-items: center;
+  justify-content: space-between; gap: 4px 10px; }
+.bi-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.bi-list li { padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--bg); overflow-wrap: anywhere; }
+.bi-missing { color: var(--bad); font-weight: 600; }
+.bi-edit { display: grid; gap: 6px; margin-top: 8px; padding-top: 8px;
+  border-top: 1px dashed var(--line); }
+.bi-edit textarea { min-height: 64px; font: 14px "Segoe UI", system-ui, sans-serif; }
+.bi-stale { margin: 6px 0; padding: 8px 12px; border: 1px solid var(--warn); border-radius: 8px;
+  background: color-mix(in srgb, var(--warn) 10%, transparent); }
+.bi-err { color: var(--bad); font-size: 13px; }
+.bi-kept, .bi-kept td { background: color-mix(in srgb, var(--warn) 15%, transparent); }
+.bi-row { margin: 0 0 6px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--bg); }
+.bi-row-head { display: flex; align-items: center; gap: 2px; }
+.bi-row-check { display: flex; align-items: center; justify-content: center; flex: none;
+  min-width: 44px; min-height: 44px; cursor: pointer; }
+.bi-row-check input { width: 20px; height: 20px; margin: 0; }
+.bi-row-toggle { flex: 1; min-width: 0; min-height: 44px; display: flex; flex-wrap: wrap;
+  align-items: center; gap: 4px 10px; padding: 6px 10px 6px 0; border: 0; background: transparent;
+  color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.bi-row-toggle::after { content: "\25BE"; margin-left: auto; color: var(--dim); }
+.bi-row-toggle[aria-expanded="true"]::after { content: "\25B4"; }
+.bi-row-body { padding: 0 12px 12px; min-width: 0; }
+.bi-arrow { color: var(--dim); padding: 0 4px; }
+.bi-warnings { margin: 6px 0 0; padding-left: 18px; color: var(--warn); }
+.bi-step { padding: 12px 14px; overflow: visible; }
+.bi-step h3 { margin: 0 0 8px; font-size: 16px; }
+.bi-step-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px 14px; align-items: end; }
+.bi-apply { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 10px; }
+.bi-result { padding: 12px 14px; border-color: var(--good); overflow: visible; }
+@media (max-width: 900px) {
+  .bi-browse { grid-template-columns: minmax(0, 1fr); }
+  .bi-cards { max-height: none; }
+}
+@media (max-width: 640px) {
+  table.bi-stack thead { display: none; }
+  table.bi-stack, table.bi-stack tbody, table.bi-stack tr, table.bi-stack td { display: block;
+    width: 100%; }
+  table.bi-stack tr { padding: 6px 0; border-bottom: 1px solid var(--line); }
+  table.bi-stack td { border: 0; padding: 2px 4px; }
+  table.bi-stack td[data-label]::before { content: attr(data-label) "\FF1A"; color: var(--dim);
+    font-size: 12px; }
+  .bi-funnel-row { grid-template-columns: minmax(60px, 96px) minmax(0, 1fr) 2.5em; }
+  .bi-bar-main > div { flex: 1 1 140px; }
+}
 </style>
 </head>
 <body>
@@ -1614,6 +1780,13 @@ tr:last-child td { border-bottom: none; }
           your own sandbox. Nothing reaches the vault until you push.</p></div>
       <button id="kp-refresh" type="button">Refresh</button>
     </div>
+    <div class="mem-tabs kn-tabs" id="kn-tabs" role="tablist" aria-label="Knowledge">
+      <button type="button" role="tab" data-kn="pipeline" aria-selected="true"
+        lang="zh-Hant">知識庫維護</button>
+      <button type="button" role="tab" data-kn="bi" aria-selected="false"
+        lang="zh-Hant">BI 卡片</button>
+    </div>
+    <div id="kn-pane-pipeline" role="tabpanel" aria-label="知識庫維護">
     <div id="kp-disabled" class="empty" hidden>The Knowledge pipeline is not configured on
       this machine (host.json <code>knowledge_pipeline</code>).</div>
     <div class="kp-top">
@@ -1882,6 +2055,108 @@ tr:last-child td { border-bottom: none; }
             <button type="button" data-go="ingest">&larr; Back: Ingest data</button><span></span>
           </div>
         </section>
+      </div>
+    </div>
+    </div>
+    <div id="kn-pane-bi" class="bi-pane" lang="zh-Hant" role="tabpanel" aria-label="BI 卡片"
+         hidden>
+      <div class="card bi-bar">
+        <div class="bi-bar-main">
+          <div><label class="bi-label" for="bi-dataset">資料集</label>
+            <select id="bi-dataset"><option value="demo">demo</option></select></div>
+          <div><label class="bi-label" for="bi-domain">領域</label>
+            <select id="bi-domain">
+              <option value="robotics" selected>機器人 Robotics</option>
+              <option value="wireless">無線通訊 Wireless</option>
+              <option value="aidc">AIDC</option>
+            </select></div>
+          <div class="bi-counts" id="bi-counts" role="status" aria-live="polite">&hellip;</div>
+        </div>
+        <div class="bi-actions">
+          <button class="go" id="bi-demo" type="button">載入示範資料</button>
+          <button class="bi-btn" id="bi-refresh" type="button">更新</button>
+        </div>
+      </div>
+      <div class="mem-status" id="bi-status-bar" role="status" aria-live="polite" hidden></div>
+      <div id="bi-notice" class="mem-notice" role="status" aria-live="polite"></div>
+      <aside class="bi-hint" aria-label="對話中使用卡片">
+        <span class="bi-hint-text"><strong>對話也會用這些卡片回答。</strong>
+          在對話中問：「哪些測試方案對應 WiFi 7？」回答會以「[卡片 …]」標出引用的卡片。</span>
+        <button class="bi-btn" id="bi-ask" type="button">到對話中問</button>
+      </aside>
+      <div class="mem-tabs" id="bi-views" role="tablist" aria-label="BI 卡片檢視">
+        <button type="button" role="tab" data-bi-view="dashboard"
+          aria-selected="true">Dashboard</button>
+        <button type="button" role="tab" data-bi-view="cards" aria-selected="false">卡片</button>
+        <button type="button" role="tab" data-bi-view="import"
+          aria-selected="false">匯入 CSV</button>
+      </div>
+      <div id="bi-view-dashboard" role="tabpanel" aria-label="Dashboard">
+        <div class="mem-status" id="bi-status-dash" role="status" aria-live="polite" hidden></div>
+        <div id="bi-dash-summary" class="bi-summary"></div>
+        <div id="bi-dash-sections"></div>
+      </div>
+      <div id="bi-view-cards" role="tabpanel" aria-label="卡片" hidden>
+        <div class="bi-filters">
+          <div><label class="bi-label" for="bi-type">類型</label>
+            <select id="bi-type"><option value="">全部類型</option></select></div>
+          <div><label class="bi-label" for="bi-q">搜尋</label>
+            <input id="bi-q" class="bi-input" type="search" autocomplete="off"
+              placeholder="名稱或代碼"></div>
+        </div>
+        <div class="bi-browse">
+          <div>
+            <div class="mem-status" id="bi-status-cards" role="status" aria-live="polite"
+                 hidden></div>
+            <p class="bi-meta" id="bi-card-count"></p>
+            <ul id="bi-cards" class="bi-cards" aria-label="卡片清單"></ul>
+          </div>
+          <div class="bi-detail" id="bi-detail">
+            <div class="mem-status" id="bi-status-detail" role="status" aria-live="polite"
+                 hidden></div>
+            <div id="bi-detail-body"><p class="bi-empty">選一張卡片，查看欄位、來源、關聯與歷史。
+              </p></div>
+          </div>
+        </div>
+      </div>
+      <div id="bi-view-import" role="tabpanel" aria-label="匯入 CSV" hidden>
+        <div class="card bi-step">
+          <h3>1. 選擇 CSV 檔</h3>
+          <div class="bi-step-grid">
+            <div><label class="bi-label" for="bi-file">CSV 檔（UTF-8，含 BOM 亦可）</label>
+              <input id="bi-file" type="file" accept=".csv,text/csv"></div>
+            <div><label class="bi-label" for="bi-entity">卡片類型</label>
+              <select id="bi-entity"><option value="">自動判斷</option></select></div>
+            <div><button class="go" id="bi-preview-go" type="button" disabled>預覽</button></div>
+          </div>
+          <p class="bi-meta">預覽只比對，不寫入任何資料；按「確認寫入」才會寫入，
+            寫入後也可以復原。</p>
+        </div>
+        <div class="mem-status" id="bi-status-import" role="status" aria-live="polite" hidden></div>
+        <div id="bi-preview" hidden>
+          <div class="card bi-step">
+            <h3>2. 欄位對應</h3>
+            <div id="bi-summary-chips" class="bi-chips" aria-label="預覽摘要"></div>
+            <div class="bi-scroll"><table class="bi-table bi-stack" id="bi-mapping">
+              <thead><tr><th>CSV 欄位</th><th>對應到</th><th>狀態</th><th>說明</th></tr></thead>
+              <tbody></tbody></table></div>
+          </div>
+          <div class="card bi-step">
+            <h3>3. 逐卡差異</h3>
+            <p class="bi-meta">展開每一列，看原始值 → 正規化後的值，以及目前值 → 新值。
+              人工設定過的值不會被覆蓋，會改成待審提議。</p>
+            <div class="bi-actions" style="margin: 0 0 8px">
+              <button class="bi-btn" id="bi-select-all" type="button">全選</button>
+              <button class="bi-btn" id="bi-select-none" type="button">全不選</button>
+            </div>
+            <div id="bi-rows"></div>
+            <div class="bi-apply">
+              <button class="go" id="bi-apply" type="button">確認寫入</button>
+              <span class="bi-meta" id="bi-apply-note"></span>
+            </div>
+          </div>
+        </div>
+        <div id="bi-result" class="card bi-result" role="status" aria-live="polite" hidden></div>
       </div>
     </div>
   </section>
@@ -9587,8 +9862,891 @@ el("mem-people-search").addEventListener("keydown", (event) => {
 el("mem-people-search").addEventListener("search", () => memLoadPeople().catch(() => {}));
 el("mem-people-status").addEventListener("change", () => memLoadPeople().catch(() => {}));
 
+// -- Knowledge sub-tabs and BI cards (Knowledge Strategy v1.3 Case A) -------
+// 「BI 卡片」: a dataset of typed cards. Dashboard, a card browser with
+// field-level sources and history, and the CSV import wizard (preview →
+// per-card diff → 確認寫入 → 復原). Nothing is written before 確認寫入.
+let knPane = "pipeline", knPipelineLoaded = false;
+
+async function loadKnowledgeTab() {
+  let stored = "pipeline";
+  try { stored = localStorage.getItem("kn-pane") || "pipeline"; } catch (e) { /* */ }
+  if (stored === "bi") { knShow("bi"); return; }
+  knShow("pipeline", false);
+  await loadKnowledge(); knPipelineLoaded = true;
+}
+
+function knShow(name, load = true) {
+  knPane = name === "bi" ? "bi" : "pipeline";
+  for (const button of document.querySelectorAll("#kn-tabs [data-kn]")) {
+    button.setAttribute("aria-selected", String(button.dataset.kn === knPane));
+  }
+  el("kn-pane-pipeline").hidden = knPane !== "pipeline";
+  el("kn-pane-bi").hidden = knPane !== "bi";
+  el("kp-refresh").hidden = knPane !== "pipeline";
+  try { localStorage.setItem("kn-pane", knPane); } catch (e) { /* */ }
+  if (!load) return;
+  if (knPane === "bi") biLoad();
+  else if (!knPipelineLoaded) {
+    knPipelineLoaded = true; kpRun("Reading", loadKnowledge);
+  }
+}
+
+for (const button of document.querySelectorAll("#kn-tabs [data-kn]")) {
+  button.addEventListener("click", () => knShow(button.dataset.kn));
+}
+
+const BI_GAP_SECTIONS = ["6", "10", "19", "18"];
+const BI_CLASS = {sourced: ["事實", "accent"], judgement: ["判斷", "warn"],
+  derived: ["衍生", "dim"], human: ["人工", "good"]};
+const BI_REVIEW = {
+  // The sample data (all assumed) arrives as draft: 範例資料／待驗證.
+  draft: ["範例資料／待驗證", "warn"], synthetic: ["草稿／虛構", "warn"],
+  fictional: ["草稿／虛構", "warn"], assumed: ["範例資料／待驗證", "warn"],
+  sample: ["範例資料／待驗證", "warn"], unverified: ["範例資料／待驗證", "warn"],
+  candidate: ["候選", "warn"], pending: ["待審", "warn"],
+  reviewed: ["已審閱", "good"], verified: ["已驗證", "good"], published: ["已發佈", "good"],
+};
+const BI_ACTION = {create: ["新增", "good"], update: ["更新", "accent"],
+  unchanged: ["不變", "dim"], skip: ["略過", "warn"]};
+const BI_MAPPING = {mapped: ["已對應", "good"], alias: ["別名對應", "accent"],
+  unknown: ["未知欄位", "warn"], ignored: ["不匯入", "dim"]};
+const BI_CHANGE = {add: ["新增", "good"], change: ["變更", "accent"], same: ["不變", "dim"],
+  human_kept: ["人工值保留，改成提議", "warn"]};
+
+const bi = {schema: null, datasets: [], view: "dashboard", loaded: {}, cards: [],
+  cardId: null, detail: null, preview: null, csv: null, importId: null, searchTimer: 0};
+
+const bh = (tag, cls, ...children) => memEl(tag, cls, ...children);
+
+function biDataset() { return el("bi-dataset").value || "demo"; }
+function biDomain() { return el("bi-domain").value || "robotics"; }
+
+async function biCall(path, body) {
+  let reply;
+  try { reply = await call(path, body); }
+  catch (failure) {
+    const payload = failure.payload || {};
+    const problem = new Error(payload.message || failure.message || "連線失敗");
+    problem.code = payload.code || failure.code; problem.payload = payload; throw problem;
+  }
+  if (!reply || reply.ok === false) {
+    const problem = new Error((reply && (reply.message || reply.code)) || "主機沒有回應");
+    problem.code = reply && reply.code; problem.payload = reply || {}; throw problem;
+  }
+  return reply;
+}
+
+function biButton(label, onClick, cls, aria) {
+  const button = document.createElement("button");
+  button.type = "button"; button.className = cls || "bi-btn"; button.append(text(label));
+  if (aria) button.setAttribute("aria-label", aria);
+  button.addEventListener("click", (event) => {
+    event.preventDefault();
+    Promise.resolve(onClick(event)).catch((failure) => biNotice(false, failure.message));
+  });
+  return button;
+}
+
+function biBadge(label, cls) { return bh("span", "bi-badge " + (cls || ""), label); }
+
+function biNotice(ok, message) {
+  const box = el("bi-notice"); box.replaceChildren();
+  box.className = "mem-notice" + (message ? (ok ? " good" : " bad") : "");
+  if (message) box.append(bh("span", "", message));
+}
+
+function biStatus(id, state, message, retry) {
+  const box = el(id); box.replaceChildren();
+  box.className = "mem-status" + (state ? " " + state : ""); box.hidden = !state;
+  const owner = box.parentElement;
+  if (state === "loading") owner.setAttribute("aria-busy", "true");
+  else owner.removeAttribute("aria-busy");
+  if (state === "loading") box.append(bh("span", "mem-spinner"), bh("span", "", message));
+  if (state === "error") {
+    box.append(bh("span", "", message));
+    if (retry) box.append(biButton("重試", retry, "bi-btn"));
+  }
+}
+
+function biTime(iso) {
+  if (!iso) return "—";
+  const when = new Date(iso);
+  if (isNaN(when.getTime())) return String(iso);
+  const pad = (n) => String(n).padStart(2, "0");
+  return when.getFullYear() + "/" + pad(when.getMonth() + 1) + "/" + pad(when.getDate()) + " "
+    + pad(when.getHours()) + ":" + pad(when.getMinutes());
+}
+
+function biValue(value) {
+  if (value == null || value === "") return "—";
+  if (Array.isArray(value)) return value.length ? value.map(biValue).join("、") : "—";
+  if (typeof value === "boolean") return value ? "是" : "否";
+  if (typeof value === "object") {
+    if (value.label || value.card_id) return value.label || value.card_id;
+    return JSON.stringify(value);
+  }
+  return String(value);
+}
+
+function biTypeLabel(name) {
+  const found = bi.schema && bi.schema.types.find((type) => type.name === name);
+  return found ? found.label || found.name : name || "—";
+}
+
+function biSchemaField(typeName, fieldName) {
+  const found = bi.schema && bi.schema.types.find((type) => type.name === typeName);
+  return found ? found.fields.find((item) => item.name === fieldName) || null : null;
+}
+
+function biReview(status, synthetic) {
+  if (synthetic && !["draft", "assumed", "sample"].includes(String(status || "").toLowerCase())) {
+    return biBadge("範例資料／待驗證", "warn");
+  }
+  const known = BI_REVIEW[String(status || "").toLowerCase()];
+  return known ? biBadge(known[0], known[1]) : biBadge(status || "未標示", "dim");
+}
+
+function biSource(source) {
+  if (!source) return "來源不明";
+  const kind = source.kind;
+  const head = kind === "import" ? "匯入 " + (source.ref || "")
+    : kind === "human" ? "人工" + (source.by ? " · " + source.by : "")
+    : kind === "demo" || kind === "fixture" ? "示範資料" + (source.ref ? " " + source.ref : "")
+    : kind === "agent" ? "Agent 提出" + (source.ref ? " " + source.ref : "")
+    : kind === "migration" ? "移轉" : (kind || "來源") + (source.ref ? " " + source.ref : "");
+  return head.trim() + (source.at ? " · " + biTime(source.at) : "");
+}
+
+// -- loading -----------------------------------------------------------------
+async function biLoad() {
+  biStatus("bi-status-bar", "loading", "載入中…");
+  el("bi-counts").textContent = "…";
+  try {
+    const [schema, datasets] = await Promise.all([
+      bi.schema ? Promise.resolve(bi.schema) : biCall("/api/bi/schema"),
+      biCall("/api/bi/datasets")]);
+    bi.schema = schema; bi.datasets = datasets.datasets || [];
+  } catch (failure) {
+    el("bi-counts").textContent = "—";
+    biStatus("bi-status-bar", "error", "載入失敗：" + failure.message + "。", biLoad);
+    return;
+  }
+  biStatus("bi-status-bar", "");
+  biRenderBar(); biRenderTypes();
+  bi.loaded = {};
+  await biShowView(bi.view);
+}
+
+function biRenderBar() {
+  const select = el("bi-dataset"), keep = select.value || "demo";
+  select.replaceChildren();
+  const names = bi.datasets.map((item) => item.name);
+  if (!names.includes(keep)) names.unshift(keep);
+  for (const name of names) {
+    const option = document.createElement("option"); option.value = name;
+    option.textContent = name; select.append(option);
+  }
+  select.value = keep;
+  const current = bi.datasets.find((item) => item.name === keep);
+  const counts = el("bi-counts"); counts.replaceChildren();
+  counts.append(bh("strong", "", String(current ? current.cards : 0)), text("張卡片"));
+  counts.append(bh("span", "", current && current.updated ? "· 更新於 " + biTime(current.updated)
+    : "· 尚未載入資料"));
+}
+
+function biRenderTypes() {
+  for (const id of ["bi-type", "bi-entity"]) {
+    const select = el(id), keep = select.value;
+    select.replaceChildren();
+    const first = document.createElement("option"); first.value = "";
+    first.textContent = id === "bi-type" ? "全部類型" : "自動判斷"; select.append(first);
+    for (const type of (bi.schema && bi.schema.types) || []) {
+      const option = document.createElement("option"); option.value = type.name;
+      option.textContent = type.label && type.label !== type.name
+        ? type.label + "（" + type.name + "）" : type.name;
+      select.append(option);
+    }
+    select.value = keep;
+  }
+}
+
+async function biShowView(name) {
+  bi.view = name;
+  for (const button of document.querySelectorAll("#bi-views [data-bi-view]")) {
+    button.setAttribute("aria-selected", String(button.dataset.biView === name));
+  }
+  for (const key of ["dashboard", "cards", "import"]) {
+    el("bi-view-" + key).hidden = key !== name;
+  }
+  if (bi.loaded[name]) return;
+  if (name === "dashboard") await biLoadDashboard();
+  if (name === "cards") await biLoadCards();
+}
+
+for (const button of document.querySelectorAll("#bi-views [data-bi-view]")) {
+  button.addEventListener("click", () => biShowView(button.dataset.biView));
+}
+el("bi-refresh").addEventListener("click", () => biLoad());
+el("bi-dataset").addEventListener("change", () => { bi.cardId = null; biLoad(); });
+el("bi-domain").addEventListener("change", () => {
+  bi.loaded = {}; bi.cardId = null; biShowView(bi.view);
+});
+el("bi-demo").addEventListener("click", async () => {
+  const button = el("bi-demo"); button.disabled = true; button.setAttribute("aria-busy", "true");
+  biNotice(true, "");
+  biStatus("bi-status-bar", "loading", "正在載入示範資料…");
+  try {
+    const reply = await biCall("/api/bi/demo/load", {dataset: biDataset()});
+    const done = reply.imported || {};
+    biNotice(true, "示範資料已載入：新增 " + (done.created || 0) + "、更新 " + (done.updated || 0)
+      + "、不變 " + (done.unchanged || 0) + "。");
+    await biLoad();
+  } catch (failure) {
+    biStatus("bi-status-bar", "error", "示範資料沒有載入：" + failure.message + "。",
+      () => el("bi-demo").click());
+  } finally { button.disabled = false; button.removeAttribute("aria-busy"); }
+});
+el("bi-ask").addEventListener("click", () => {
+  field.value = "哪些測試方案對應 WiFi 7？";
+  selectPrimaryTab("ask");
+});
+
+// -- Dashboard -----------------------------------------------------------------
+function biSectionKey(id) {
+  const match = String(id == null ? "" : id).match(/(\d+[a-z]?)/i);
+  return match ? match[1].toLowerCase() : String(id);
+}
+
+function biCell(value) {
+  const box = document.createDocumentFragment();
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => {
+      if (index) box.append(text("、"));
+      box.append(biCell(item));
+    });
+    return box;
+  }
+  if (value && typeof value === "object" && value.card_id) {
+    box.append(biButton(value.label || value.card_id, () => biOpenCard(value.card_id), "bi-link"));
+    return box;
+  }
+  if (value == null || value === "") { box.append(text("—")); return box; }
+  const source = typeof value === "object" ? JSON.stringify(value) : String(value);
+  const pattern = /\[\[card:([^|\]]+)\|([^\]]*)\]\]/g;
+  let last = 0, match;
+  while ((match = pattern.exec(source))) {
+    if (match.index > last) box.append(text(source.slice(last, match.index)));
+    const id = match[1], label = match[2] || match[1];
+    box.append(biButton(label, () => biOpenCard(id), "bi-link"));
+    last = pattern.lastIndex;
+  }
+  if (last < source.length) box.append(text(source.slice(last)));
+  return box;
+}
+
+async function biLoadDashboard() {
+  biStatus("bi-status-dash", "loading", "載入中…");
+  el("bi-dash-summary").replaceChildren(); el("bi-dash-sections").replaceChildren();
+  let reply;
+  try {
+    reply = await biCall("/api/bi/dashboard?dataset=" + encodeURIComponent(biDataset())
+      + "&domain=" + encodeURIComponent(biDomain()));
+  } catch (failure) {
+    biStatus("bi-status-dash", "error", "Dashboard 載入失敗：" + failure.message + "。",
+      biLoadDashboard);
+    return;
+  }
+  biStatus("bi-status-dash", ""); bi.loaded.dashboard = true;
+  biRenderDashboard(reply);
+}
+
+function biRenderDashboard(reply) {
+  const sections = (reply.sections || []).slice();
+  const holder = el("bi-dash-sections"), strip = el("bi-dash-summary");
+  if (!sections.length) {
+    holder.append(bh("p", "bi-empty", "這個領域還沒有卡片。先「載入示範資料」或「匯入 CSV」。"));
+    return;
+  }
+  const rank = (section) => {
+    const at = BI_GAP_SECTIONS.indexOf(biSectionKey(section.id));
+    return at < 0 ? BI_GAP_SECTIONS.length : at;
+  };
+  sections.sort((a, b) => rank(a) - rank(b));  // stable: gaps first, the rest as sent
+  let red = 0, warn = 0, stale = 0;
+  for (const section of sections) {
+    for (const flag of section.flags || []) {
+      if (flag.level === "red") red += 1; else warn += 1;
+      if (/過期|推測|待驗證|stale|assumed/i.test(flag.text || "")) stale += 1;
+    }
+    if (biSectionKey(section.id) === "8") stale += (section.rows || []).length;
+  }
+  const given = reply.summary || {};
+  const stat = (cls, count, label) => bh("div", "bi-stat " + cls, bh("b", "", String(count)),
+    bh("span", "", label));
+  strip.append(stat("red", given.red ?? red, "紅色缺口"), stat("warn", given.warn ?? warn, "警告"),
+    stat("dim", given.stale ?? stale, "過期或推測內容"));
+  strip.setAttribute("aria-label", "Dashboard 摘要");
+  for (const section of sections) holder.append(biSection(section));
+}
+
+function biSection(section) {
+  const box = document.createElement("details");
+  box.className = "card bi-sec"; box.dataset.section = biSectionKey(section.id);
+  const flags = section.flags || [];
+  if (BI_GAP_SECTIONS.includes(box.dataset.section)) box.open = true;
+  const summary = bh("summary", "", bh("span", "bi-sec-title", section.title || section.id));
+  const reds = flags.filter((flag) => flag.level === "red").length;
+  if (reds) summary.append(biBadge("缺口 " + reds, "bad"));
+  if (flags.length - reds) summary.append(biBadge("警告 " + (flags.length - reds), "warn"));
+  summary.append(bh("span", "bi-meta", (section.rows || []).length + " 列"));
+  const body = bh("div", "bi-sec-body");
+  if (section.note) body.append(bh("p", "bi-sec-note", section.note));
+  const rows = section.rows || [];
+  if (!rows.length) body.append(bh("p", "bi-empty", "沒有資料。"));
+  else if (section.kind === "matrix") body.append(biMatrix(section));
+  else if (section.kind === "funnel") body.append(biFunnel(section));
+  else body.append(biTable(section));
+  box.append(summary, body);
+  return box;
+}
+
+function biTable(section) {
+  const columns = section.columns || [];
+  const table = bh("table", "bi-table bi-stack"), head = bh("tr", "");
+  for (const name of columns) head.append(bh("th", "", name));
+  table.append(bh("thead", "", head));
+  const body = bh("tbody", "");
+  (section.rows || []).forEach((row, index) => {
+    const tr = bh("tr", ""), flags = (section.flags || []).filter((flag) => flag.row === index);
+    if (flags.length) {
+      tr.className = flags.some((flag) => flag.level === "red") ? "bi-flag-red" : "bi-flag-warn";
+    }
+    row.forEach((value, at) => {
+      const td = bh("td", "", biCell(value));
+      if (columns[at]) td.dataset.label = columns[at];
+      if (at === 0 && flags.length) {
+        td.append(bh("div", "bi-flag-badges", ...flags.map((flag) =>
+          biBadge(flag.text, flag.level === "red" ? "bad" : "warn"))));
+      }
+      tr.append(td);
+    });
+    body.append(tr);
+  });
+  table.append(body);
+  return bh("div", "bi-scroll", table);
+}
+
+function biMatrix(section) {
+  const columns = section.columns || [];
+  const table = bh("table", "bi-table bi-matrix"), head = bh("tr", "");
+  for (const name of columns) head.append(bh("th", "", name));
+  table.append(bh("thead", "", head));
+  const body = bh("tbody", "");
+  let top = 0;
+  for (const row of section.rows || []) {
+    for (const value of row.slice(1)) if (typeof value === "number") top = Math.max(top, value);
+  }
+  for (const row of section.rows || []) {
+    const tr = bh("tr", "");
+    row.forEach((value, at) => {
+      const td = bh(at ? "td" : "th", "", biCell(value));
+      if (at && (value === 0 || value === "0")) td.className = "bi-zero";
+      else if (at && typeof value === "number" && top && value === top) td.className = "bi-hot";
+      if (at && columns[at]) td.title = row[0] + " × " + columns[at];
+      tr.append(td);
+    });
+    body.append(tr);
+  }
+  table.append(body);
+  const scroll = bh("div", "bi-scroll", table);
+  scroll.tabIndex = 0; scroll.setAttribute("role", "region");
+  scroll.setAttribute("aria-label", section.title || "矩陣");
+  return scroll;
+}
+
+function biFunnel(section) {
+  const rows = section.rows || [];
+  const top = Math.max(1, ...rows.map((row) => Number(row[1]) || 0));
+  const box = bh("div", "bi-funnel");
+  for (const row of rows) {
+    const count = Number(row[1]) || 0;
+    const bar = bh("div", "bi-funnel-bar"); bar.style.width = (count / top * 100) + "%";
+    const track = bh("div", "bi-funnel-track", bar);
+    track.setAttribute("role", "img");
+    track.setAttribute("aria-label", biValue(row[0]) + "：" + count);
+    box.append(bh("div", "bi-funnel-row", bh("span", "bi-funnel-label", biCell(row[0])), track,
+      bh("span", "bi-funnel-n", String(count))));
+    if (row.length > 2 && row[2] != null && !(Array.isArray(row[2]) && !row[2].length)) {
+      box.append(bh("div", "bi-funnel-items bi-meta", biCell(row[2])));
+    }
+  }
+  return box;
+}
+
+// -- card browser ------------------------------------------------------------
+async function biLoadCards() {
+  biStatus("bi-status-cards", "loading", "載入中…");
+  const query = "?dataset=" + encodeURIComponent(biDataset()) + "&type="
+    + encodeURIComponent(el("bi-type").value) + "&q=" + encodeURIComponent(el("bi-q").value.trim())
+    + "&domain=" + encodeURIComponent(biDomain());
+  let reply;
+  try { reply = await biCall("/api/bi/cards" + query); }
+  catch (failure) {
+    biStatus("bi-status-cards", "error", "卡片載入失敗：" + failure.message + "。", biLoadCards);
+    return;
+  }
+  biStatus("bi-status-cards", ""); bi.loaded.cards = true;
+  bi.cards = reply.cards || [];
+  biRenderCards();
+}
+
+function biRenderCards() {
+  const list = el("bi-cards"); list.replaceChildren();
+  el("bi-card-count").textContent = bi.cards.length + " 張卡片";
+  if (!bi.cards.length) {
+    list.append(bh("li", "bi-empty", el("bi-q").value.trim() || el("bi-type").value
+      ? "沒有符合的卡片。" : "這個資料集還沒有卡片。先「載入示範資料」或「匯入 CSV」。"));
+    return;
+  }
+  for (const card of bi.cards) {
+    const row = document.createElement("button");
+    row.type = "button"; row.className = "bi-card-row"; row.dataset.card = card.id;
+    row.setAttribute("aria-current", String(card.id === bi.cardId));
+    row.append(bh("span", "bi-card-top", biBadge(biTypeLabel(card.entity_type), "type"),
+      biReview(card.review_status, card.synthetic)),
+    bh("span", "bi-card-name", card.name || card.canonical_key),
+    bh("span", "bi-meta", (card.canonical_key || "") + " · " + (card.fields || 0) + " 個欄位 · "
+      + biTime(card.updated)));
+    row.addEventListener("click", () => biOpenCard(card.id));
+    list.append(bh("li", "", row));
+  }
+}
+
+el("bi-type").addEventListener("change", () => biLoadCards());
+el("bi-q").addEventListener("input", () => {
+  clearTimeout(bi.searchTimer); bi.searchTimer = setTimeout(() => biLoadCards(), 250);
+});
+el("bi-q").addEventListener("keydown", (event) => {
+  if (event.key === "Enter") { clearTimeout(bi.searchTimer); biLoadCards(); }
+});
+
+async function biOpenCard(id) {
+  bi.cardId = id;
+  if (bi.view !== "cards") await biShowView("cards");
+  for (const row of document.querySelectorAll("#bi-cards [data-card]")) {
+    row.setAttribute("aria-current", String(row.dataset.card === id));
+  }
+  await biLoadDetail(true);
+}
+
+async function biLoadDetail(focus) {
+  const id = bi.cardId;
+  if (!id) return;
+  biStatus("bi-status-detail", "loading", "開啟中…");
+  el("bi-detail-body").replaceChildren();
+  let reply;
+  try {
+    reply = await biCall("/api/bi/cards/" + encodeURIComponent(id) + "?dataset="
+      + encodeURIComponent(biDataset()));
+  } catch (failure) {
+    biStatus("bi-status-detail", "error", "卡片開不了：" + failure.message + "。",
+      () => biLoadDetail(focus));
+    return;
+  }
+  if (bi.cardId !== id) return;
+  biStatus("bi-status-detail", ""); bi.detail = reply;
+  biRenderDetail();
+  if (focus) {
+    const title = el("bi-detail-title");
+    title.focus({preventScroll: true});
+    if (window.matchMedia("(max-width: 900px)").matches) {
+      el("bi-detail").scrollIntoView({block: "start"});
+    }
+  }
+  biLoadHistory();
+}
+
+function biRenderDetail() {
+  const {card, fields = [], links = [], proposals = []} = bi.detail;
+  const body = el("bi-detail-body"); body.replaceChildren();
+  const title = bh("h3", "", card.name || card.canonical_key);
+  title.id = "bi-detail-title"; title.tabIndex = -1;
+  const head = bh("div", "bi-card-top", biBadge(biTypeLabel(card.entity_type), "type"),
+    biReview(card.review_status, card.synthetic),
+    bh("span", "bi-meta", card.canonical_key + " · 版本 " + card.version
+      + " · 更新於 " + biTime(card.updated)));
+  body.append(title, head);
+  if (card.domain != null) body.append(bh("p", "bi-meta", "領域：" + biValue(card.domain)));
+  body.append(bh("h4", "", "欄位"));
+  const list = bh("div", "bi-fields");
+  for (const item of fields) list.append(biFieldRow(card, item));
+  if (!fields.length) list.append(bh("p", "bi-empty", "沒有欄位。"));
+  body.append(list);
+  body.append(bh("h4", "", "關聯"));
+  if (!links.length) body.append(bh("p", "bi-meta", "沒有關聯。"));
+  else {
+    const ul = bh("ul", "bi-list");
+    for (const link of links) {
+      const label = (biSchemaField(card.entity_type, link.field) || {}).label || link.field;
+      const li = bh("li", "", bh("span", "bi-meta", label + "："));
+      if (link.missing || !link.target_id) {
+        li.append(bh("span", "", link.target_key || "—"), text(" "),
+          bh("span", "bi-missing", "⚠ 找不到目標卡片"));
+        li.dataset.missing = "true";
+      } else {
+        li.append(biButton(link.target_key || link.target_id, () => biOpenCard(link.target_id),
+          "bi-link"));
+      }
+      ul.append(li);
+    }
+    body.append(ul);
+  }
+  body.append(bh("h4", "", "待審提議（" + proposals.length + "）"));
+  if (!proposals.length) body.append(bh("p", "bi-meta", "沒有待審提議。"));
+  else {
+    body.append(bh("p", "bi-meta",
+      "匯入或 Agent 給的值與人工值不同時，不會覆蓋，會列在這裡等你決定。"));
+    const ul = bh("ul", "bi-list");
+    for (const item of proposals) {
+      const label = (fields.find((f) => f.field === item.field) || {}).label || item.field;
+      ul.append(bh("li", "", bh("strong", "", label), text("：" + biValue(item.value) + " "),
+        bh("span", "bi-meta", "（" + biSource(item.source) + "）")));
+    }
+    body.append(ul);
+  }
+  body.append(bh("h4", "", "欄位歷史"));
+  const history = bh("div", ""); history.id = "bi-history-box";
+  const status = bh("div", "mem-status"); status.id = "bi-status-history"; status.hidden = true;
+  status.setAttribute("role", "status");
+  const historyList = bh("div", ""); historyList.id = "bi-history";
+  history.append(status, historyList); body.append(history);
+}
+
+function biFieldRow(card, item) {
+  const row = bh("div", "bi-field"); row.dataset.field = item.field;
+  const head = bh("div", "bi-field-head", bh("strong", "", item.label || item.field));
+  const cls = BI_CLASS[item.class];
+  if (cls) head.append(biBadge(cls[0], cls[1]));
+  if (item.source && item.source.kind === "human" && item.class !== "human") {
+    head.append(biBadge("人工", "good"));
+  }
+  row.append(head, bh("div", "bi-field-value", biValue(item.value)));
+  const foot = bh("div", "bi-field-foot", bh("span", "bi-meta", biSource(item.source)
+    + (item.history ? " · 歷史 " + item.history + " 筆" : "")));
+  const edit = biButton("編輯", () => biEditField(card, item, row), "bi-btn",
+    "編輯「" + (item.label || item.field) + "」");
+  foot.append(edit); row.append(foot);
+  return row;
+}
+
+function biEditField(card, item, row) {
+  const old = row.querySelector(".bi-edit");
+  if (old) { old.remove(); return; }
+  const spec = biSchemaField(card.entity_type, item.field) || {};
+  const form = bh("form", "bi-edit"); form.noValidate = true;
+  const valueId = "bi-edit-" + item.field, reasonId = "bi-reason-" + item.field;
+  let input;
+  if (spec.enum && spec.enum.length && !spec.list) {
+    input = document.createElement("select");
+    for (const choice of spec.enum) {
+      const option = document.createElement("option"); option.value = choice;
+      option.textContent = choice; input.append(option);
+    }
+    input.value = item.value == null ? "" : String(item.value);
+  } else {
+    input = document.createElement("input"); input.className = "bi-input";
+    input.value = Array.isArray(item.value) ? item.value.join("、")
+      : item.value == null ? "" : String(item.value);
+  }
+  input.id = valueId;
+  const reason = document.createElement("textarea"); reason.id = reasonId; reason.required = true;
+  reason.placeholder = "為什麼改？例如：依據哪個訊號、客戶產品或商機";
+  const error = bh("div", "bi-err"); error.setAttribute("role", "alert");
+  const label = (text_, target) => { const node = bh("label", "bi-label", text_);
+    node.htmlFor = target; return node; };
+  const save = bh("button", "go", "儲存"); save.type = "submit";
+  form.append(label("新值" + (spec.list ? "（多個值用「、」或逗號分隔）" : ""), valueId), input,
+    label("理由（必填）", reasonId), reason, error,
+    bh("div", "bi-actions", save, biButton("取消", () => form.remove())));
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault(); error.textContent = "";
+    if (!reason.value.trim()) { error.textContent = "請寫下理由。"; reason.focus(); return; }
+    let value = input.value.trim();
+    if (spec.list) {
+      value = value ? value.split(/[、,，;；]/).map((v) => v.trim()).filter(Boolean) : [];
+    }
+    else if (spec.type === "int" && value !== "" && !isNaN(Number(value))) value = Number(value);
+    save.disabled = true; save.setAttribute("aria-busy", "true");
+    try {
+      const reply = await biCall("/api/bi/cards/" + encodeURIComponent(card.id) + "/field",
+        {dataset: biDataset(), field: item.field, value, base_version: card.version,
+         reason: reason.value.trim()});
+      biNotice(true, "已儲存「" + (item.label || item.field) + "」（版本 " + reply.version
+        + "）。");
+      await biLoadDetail(false);
+      biLoadCards();
+    } catch (failure) {
+      if (failure.code === "stale_edit") {
+        const payload = failure.payload || {};
+        const stale = bh("div", "bi-stale",
+          bh("p", "", "這張卡片已經被 " + (payload.by || "別人") + " 在 " + biTime(payload.at)
+            + " 改過，目前的值是「" + biValue(payload.current) + "」。你的修改還沒有儲存。"),
+          biButton("重新載入卡片", () => biLoadDetail(true), "go"));
+        stale.dataset.stale = "true";
+        error.replaceChildren(stale);
+      } else {
+        error.textContent = "沒有儲存：" + failure.message;
+      }
+    } finally { save.disabled = false; save.removeAttribute("aria-busy"); }
+  });
+  row.append(form); input.focus();
+}
+
+async function biLoadHistory() {
+  const id = bi.cardId;
+  if (!el("bi-status-history")) return;
+  biStatus("bi-status-history", "loading", "載入中…");
+  let reply;
+  try {
+    reply = await biCall("/api/bi/cards/" + encodeURIComponent(id) + "/history?dataset="
+      + encodeURIComponent(biDataset()));
+  } catch (failure) {
+    if (el("bi-status-history")) {
+      biStatus("bi-status-history", "error", "歷史載入失敗：" + failure.message + "。",
+        biLoadHistory);
+    }
+    return;
+  }
+  if (bi.cardId !== id || !el("bi-history")) return;
+  biStatus("bi-status-history", "");
+  const box = el("bi-history"); box.replaceChildren();
+  const items = reply.history || [];
+  if (!items.length) { box.append(bh("p", "bi-meta", "還沒有變更紀錄。")); return; }
+  const labels = Object.fromEntries((bi.detail.fields || []).map((f) => [f.field, f.label]));
+  const ul = bh("ul", "bi-list");
+  for (const item of items) {
+    ul.append(bh("li", "", bh("strong", "", labels[item.field] || item.field), text("："),
+      bh("span", "", biValue(item.old)), bh("span", "bi-arrow", "→"),
+      bh("span", "", biValue(item.new)), bh("div", "bi-meta", biTime(item.at) + " · "
+        + (item.by || "—") + " · " + biSource(item.source ? {...item.source, at: null} : null)
+        + (item.reason ? " · 理由：" + item.reason : ""))));
+  }
+  box.append(ul);
+}
+
+// -- import wizard (Case A) ---------------------------------------------------
+async function biReadCsv(file) {
+  const bytes = await file.arrayBuffer();
+  let decoded;
+  try { decoded = new TextDecoder("utf-8", {fatal: true}).decode(bytes); }
+  catch (e) {
+    throw new Error("這個檔案不是 UTF-8 編碼。請在 Excel 用「另存新檔 → CSV UTF-8」後再試。");
+  }
+  return decoded.replace(/^﻿/, "");
+}
+
+el("bi-file").addEventListener("change", () => {
+  el("bi-preview-go").disabled = !el("bi-file").files.length;
+  el("bi-preview").hidden = true; el("bi-result").hidden = true; bi.preview = null;
+});
+el("bi-preview-go").addEventListener("click", () => biPreview());
+
+async function biPreview() {
+  const file = el("bi-file").files[0];
+  if (!file) return;
+  el("bi-result").hidden = true; el("bi-preview").hidden = true;
+  biStatus("bi-status-import", "loading", "正在預覽 " + file.name + "…（不會寫入）");
+  try {
+    const csv = await biReadCsv(file);
+    bi.preview = await biCall("/api/bi/import/preview", {dataset: biDataset(),
+      entity_type: el("bi-entity").value || null, filename: file.name, csv_text: csv,
+      mapping: null});
+  } catch (failure) {
+    biStatus("bi-status-import", "error", "預覽失敗：" + failure.message, biPreview);
+    return;
+  }
+  biStatus("bi-status-import", "");
+  biRenderPreview();
+}
+
+function biRenderPreview() {
+  const preview = bi.preview, summary = preview.summary || {};
+  const chips = el("bi-summary-chips"); chips.replaceChildren();
+  const chip = (cls, label, count) => bh("span", "bi-chip " + cls, label,
+    bh("b", "", String(count || 0)));
+  chips.append(bh("span", "bi-chip accent", "類型", bh("b", "", biTypeLabel(preview.entity_type))),
+    chip("good", "新增", summary.create), chip("accent", "更新", summary.update),
+    chip("", "不變", summary.unchanged), chip("warn", "略過", summary.skip),
+    chip(summary.warnings ? "bad" : "", "警告", summary.warnings));
+  const body = el("bi-mapping").querySelector("tbody"); body.replaceChildren();
+  for (const column of preview.columns || []) {
+    const status = BI_MAPPING[column.status] || [column.status, "dim"];
+    const tr = bh("tr", "");
+    tr.dataset.status = column.status;
+    const cells = [
+      ["CSV 欄位", bh("strong", "", column.source)],
+      ["對應到", column.field ? column.field : bh("span", "bi-meta", "—")],
+      ["狀態", biBadge(status[0], status[1])],
+      ["說明", column.note || ""]];
+    for (const [label, value] of cells) {
+      const td = bh("td", "", value); td.dataset.label = label; tr.append(td);
+    }
+    body.append(tr);
+  }
+  const rows = el("bi-rows"); rows.replaceChildren();
+  for (const row of preview.rows || []) rows.append(biDiffRow(row));
+  el("bi-preview").hidden = false;
+  el("bi-apply").disabled = false;
+  biApplyNote();
+  el("bi-preview").querySelector("h3").scrollIntoView({block: "nearest"});
+}
+
+function biDiffRow(row) {
+  const box = bh("div", "bi-row"); box.dataset.row = row.row;
+  const selectable = row.action === "create" || row.action === "update";
+  const check = document.createElement("input"); check.type = "checkbox";
+  check.checked = selectable; check.disabled = !selectable; check.dataset.row = row.row;
+  check.setAttribute("aria-label", "寫入第 " + row.row + " 列");
+  check.addEventListener("change", biApplyNote);
+  const action = BI_ACTION[row.action] || [row.action, "dim"];
+  const toggle = bh("button", "bi-row-toggle", bh("span", "bi-meta", "第 " + row.row + " 列"),
+    bh("strong", "", row.canonical_key || "（無代碼）"), biBadge(action[0], action[1]));
+  toggle.type = "button"; toggle.setAttribute("aria-expanded", "false");
+  const kept = (row.fields || []).filter((f) => f.change === "human_kept").length;
+  if (kept) toggle.append(biBadge("人工值保留 " + kept, "warn"));
+  if ((row.warnings || []).length) toggle.append(biBadge("警告 " + row.warnings.length, "bad"));
+  const detail = bh("div", "bi-row-body"); detail.hidden = true;
+  detail.id = "bi-row-body-" + row.row; toggle.setAttribute("aria-controls", detail.id);
+  toggle.addEventListener("click", () => {
+    const open = toggle.getAttribute("aria-expanded") !== "true";
+    toggle.setAttribute("aria-expanded", String(open)); detail.hidden = !open;
+  });
+  const checkLabel = bh("label", "bi-row-check", check);
+  box.append(bh("div", "bi-row-head", checkLabel, toggle));
+  if ((row.fields || []).length) {
+    const table = bh("table", "bi-table bi-stack");
+    table.append(bh("thead", "", bh("tr", "", bh("th", "", "欄位"), bh("th", "", "原始值 → 正規化"),
+      bh("th", "", "目前 → 新值"), bh("th", "", "變更"))));
+    const body = bh("tbody", "");
+    for (const item of row.fields) {
+      const change = BI_CHANGE[item.change] || [item.change, "dim"];
+      const tr = bh("tr", item.change === "human_kept" ? "bi-kept" : "");
+      tr.dataset.change = item.change;
+      const cells = [
+        ["欄位", bh("strong", "", item.field)],
+        ["原始值 → 正規化", bh("span", "", bh("span", "", biValue(item.raw)),
+          bh("span", "bi-arrow", "→"), bh("span", "", biValue(item.normalized)))],
+        ["目前 → 新值", bh("span", "", bh("span", "", biValue(item.current)),
+          bh("span", "bi-arrow", "→"), bh("span", "", item.change === "human_kept"
+            ? biValue(item.current) + "（提議：" + biValue(item.normalized) + "）"
+            : biValue(item.normalized)))],
+        ["變更", biBadge(change[0], change[1])]];
+      for (const [label, value] of cells) {
+        const td = bh("td", "", value); td.dataset.label = label; tr.append(td);
+      }
+      body.append(tr);
+    }
+    table.append(body); detail.append(bh("div", "bi-scroll", table));
+  }
+  if ((row.warnings || []).length) {
+    detail.append(bh("ul", "bi-warnings", ...row.warnings.map((warning) =>
+      bh("li", "", "⚠ " + (warning.message || warning.code)))));
+  }
+  box.append(detail);
+  return box;
+}
+
+function biSelectedRows() {
+  const all = [...document.querySelectorAll("#bi-rows input[type=checkbox]:not(:disabled)")];
+  const picked = all.filter((box) => box.checked).map((box) => Number(box.dataset.row));
+  return {all: all.length, picked};
+}
+
+function biApplyNote() {
+  const {all, picked} = biSelectedRows();
+  el("bi-apply").textContent = "確認寫入（" + picked.length + " 列）";
+  el("bi-apply").disabled = !picked.length;
+  el("bi-apply-note").textContent = picked.length === all ? "寫入所有新增與更新的列。"
+    : "只寫入勾選的 " + picked.length + " 列（共 " + all + " 列可寫入）。";
+}
+
+for (const [id, value] of [["bi-select-all", true], ["bi-select-none", false]]) {
+  el(id).addEventListener("click", () => {
+    for (const box of document.querySelectorAll("#bi-rows input[type=checkbox]:not(:disabled)")) {
+      box.checked = value;
+    }
+    biApplyNote();
+  });
+}
+
+el("bi-apply").addEventListener("click", async () => {
+  if (!bi.preview) return;
+  const {all, picked} = biSelectedRows();
+  const button = el("bi-apply"); button.disabled = true; button.setAttribute("aria-busy", "true");
+  biStatus("bi-status-import", "loading", "寫入中…");
+  let reply;
+  try {
+    reply = await biCall("/api/bi/import/apply", {preview_id: bi.preview.preview_id,
+      rows: picked.length === all ? null : picked});
+  } catch (failure) {
+    button.disabled = false; button.removeAttribute("aria-busy");
+    biStatus("bi-status-import", "error", "沒有寫入：" + failure.message,
+      () => el("bi-apply").click());
+    return;
+  }
+  button.removeAttribute("aria-busy");
+  biStatus("bi-status-import", "");
+  bi.importId = reply.import_id; bi.importDataset = biDataset(); bi.preview = null;
+  el("bi-preview").hidden = true;
+  biRenderResult(reply.applied || {});
+  bi.loaded = {};
+  biRefreshCounts();
+});
+
+function biRenderResult(applied) {
+  const box = el("bi-result"); box.replaceChildren(); box.hidden = false;
+  box.style.borderColor = "";
+  const chip = (cls, label, count) => bh("span", "bi-chip " + cls, label,
+    bh("b", "", String(count || 0)));
+  box.append(bh("h3", "", "已寫入"), bh("div", "bi-chips", chip("good", "新增", applied.created),
+    chip("accent", "更新", applied.updated), chip("", "不變", applied.unchanged),
+    chip(applied.proposals ? "warn" : "", "提議", applied.proposals)));
+  if (applied.proposals) {
+    box.append(bh("p", "bi-meta", applied.proposals
+      + " 個欄位原本是人工設定的值，保留不變；匯入的值改成待審提議，可在卡片中查看。"));
+  }
+  box.append(bh("div", "bi-actions",
+    biButton("到卡片查看", () => { bi.loaded = {}; return biShowView("cards"); }, "go"),
+    biButton("復原這次匯入", biUndo, "bi-btn")));
+}
+
+async function biUndo() {
+  if (!bi.importId) return;
+  if (!confirm("復原這次匯入？新增的卡片會移除，更新的欄位回到匯入前的值。")) return;
+  biStatus("bi-status-import", "loading", "復原中…");
+  try { await biCall("/api/bi/import/undo", {import_id: bi.importId, dataset: bi.importDataset}); }
+  catch (failure) {
+    biStatus("bi-status-import", "error", "沒有復原：" + failure.message, biUndo);
+    return;
+  }
+  biStatus("bi-status-import", "");
+  bi.importId = null;
+  const box = el("bi-result"); box.replaceChildren(bh("h3", "", "已復原這次匯入。"),
+    bh("p", "bi-meta", "資料已回到匯入前的狀態。"));
+  bi.loaded = {};
+  biRefreshCounts();
+}
+
+async function biRefreshCounts() {
+  try {
+    const reply = await biCall("/api/bi/datasets");
+    bi.datasets = reply.datasets || []; biRenderBar();
+  } catch (failure) { biNotice(false, "卡片數沒有更新：" + failure.message); }
+}
+
 const panels = {ask: null, installed: loadCapabilities,
-  settings: loadSettings, schedules: loadSchedules, knowledge: loadKnowledge, tasks: loadTasks,
+  settings: loadSettings, schedules: loadSchedules, knowledge: loadKnowledgeTab, tasks: loadTasks,
   reviews: loadReviews, memory: loadMemory};
 
 function showBootError(failure) {

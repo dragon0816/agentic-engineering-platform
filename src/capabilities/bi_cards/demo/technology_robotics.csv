@@ -1,0 +1,11 @@
+﻿技術,領域,標準組織,標準時程,成熟度,影響節點,新增測試需求,備註
+EtherCAT,robotics,ETG,持續演進,mature,L2-Servo-Motor-Drive;L2-Controller-IPC,主站/從站一致性;週期抖動;同步精度,"機器人與伺服最常見的即時工業乙太網路之一。[範例資料,待業務/FAE 驗證]"
+TSN,robotics;AIDC,IEEE 802.1 / IEC/IEEE 60802,工業 profile 持續制定,growth,L2-Controller-IPC;L3-Cobot-Arm;L3-AMR-AGV,時間同步(802.1AS);排程流量(802.1Qbv);乙太網路實體層一致性,"與 AIDC 的乙太網路量測共用基礎能力。[範例資料,待業務/FAE 驗證]"
+5G-Private-Network,wireless;robotics,3GPP,Rel-16/17 工業 IoT 功能,growth,L2-Comms-Module;L3-AMR-AGV;L5-Factory-Deployment,URLLC 時延;切換與漫遊;工廠現場覆蓋,"沿用 Wireless KB 的 5G 概念,工廠場域另有時延與可靠度需求。[範例資料,待業務/FAE 驗證]"
+Wi-Fi-7,wireless;robotics,IEEE 802.11be / Wi-Fi Alliance,已商用,growth,L1-Robot-Chipset;L2-Comms-Module;L3-AMR-AGV,多連結(MLO)射頻與漫遊;共存;低時延,"AMR 車隊漫遊與共存是重點。[範例資料,待業務/FAE 驗證]"
+UWB,wireless;robotics,IEEE 802.15.4z / FiRa,已商用,growth,L1-Robot-Chipset;L2-Sensing-Module;L3-AMR-AGV,測距精度;脈衝波形與頻譜遮罩,"室內精準定位與人員安全區域。[範例資料,待業務/FAE 驗證]"
+mmWave-Radar,robotics,,,growth,L1-Robot-Chipset;L2-Sensing-Module;L3-AMR-AGV,FMCW 調變品質;目標模擬;靈敏度,"近距離人員偵測與避障。[範例資料,待業務/FAE 驗證]"
+Functional-Safety,robotics,ISO / IEC,ISO 10218 修訂版已發布(請查證施行日期),growth,L2-Controller-IPC;L3-Cobot-Arm;L3-Humanoid-Quadruped;X-Certification-Lab,安全迴路回應時間;安全 I/O 與通訊;EMC 抗擾度,"多為認證與法規驅動需求。[範例資料,待業務/FAE 驗證]"
+Edge-AI-SoC,robotics;AIDC,,,growth,L1-Robot-Chipset;L2-Controller-IPC,電源完整性;高速介面(MIPI/PCIe/乙太網路);熱與瞬態負載,"與 AIDC 的電源與高速介面量測共用。[範例資料,待業務/FAE 驗證]"
+BMS-Fast-Charging,robotics,,,growth,L2-Battery-Power-Module;L3-AMR-AGV,充放電曲線;電池模擬;保護電路時序,"AMR 稼動率與快充需求拉動。[範例資料,待業務/FAE 驗證]"
+Servo-Drive-SiC-GaN,robotics,,,emerging,L2-Servo-Motor-Drive,開關波形;共模雜訊與 EMI;死區時間,"寬能隙功率元件使 EMC 與波形量測更關鍵。[範例資料,待業務/FAE 驗證]"
