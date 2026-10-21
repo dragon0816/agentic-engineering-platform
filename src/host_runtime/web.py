@@ -150,6 +150,7 @@ from host_runtime.conversation_context import (
     ConversationContextStore,
     prepare_history,
 )
+from host_runtime.conversation_models import ConversationModels
 from host_runtime.conversations import (
     MAX_STORED_MESSAGES,
     ConversationBackendAuthenticationRequest,
@@ -158,6 +159,7 @@ from host_runtime.conversations import (
     ConversationDeleteRequest,
     ConversationFeedbackRequest,
     ConversationMessage,
+    ConversationModelSelectRequest,
     ConversationRecord,
     ConversationTurnRequest,
     MessageFeedback,
@@ -325,6 +327,7 @@ from llm_gateway import token_refresh as gateway_token
 from llm_gateway.config import GatewayConfigError
 from llm_gateway.config import load_settings as load_gateway_settings
 from models.contracts import ModelMessage
+from models.selection import NOT_APPROVED, TURN_MODEL, SelectableModelClient
 from models.wire import MethodTransport, UrllibTransport
 
 #: Anything larger than this is not a request to an Agent.
@@ -686,6 +689,16 @@ class AgentWeb:
             grants_file=runtime.layout.grants,
             settings_store=self.workflow_settings_store,
         )
+        # The composer's model choice (owner 2026-10-21): what the Gateway
+        # serves may be chosen per conversation, from the next message on.
+        self.conversation_models = ConversationModels(
+            runtime.layout.workspace_root,
+            listing=self.available_models,
+            configured=self._configured_model,
+        )
+        selectable = getattr(router.model, "client", None)
+        if isinstance(selectable, SelectableModelClient):
+            selectable.approved = self.conversation_models.approved
         # AI proposes, the person applies (owner 2026-10-15): the model gets
         # only `propose_change`; Apply runs this object's own writers.
         self.proposals = ChangeProposals(self)
@@ -1138,6 +1151,11 @@ class AgentWeb:
             # A guard stopped the turn (owner 2026-10-19): the steps so far
             # are kept, and 繼續 picks them up.
             return stopped
+        if result.failure is not None and result.failure.code == NOT_APPROVED:
+            return (
+                "The model chosen for this conversation is not one the LLM Gateway serves "
+                "now (model_not_approved). Choose another model under the message box."
+            )
         if result.failure is not None and result.failure.code == "empty_model_answer":
             return (
                 "The LLM Gateway returned an empty answer (empty_model_answer). "
@@ -1381,6 +1399,27 @@ class AgentWeb:
             }
         )
         return {"ok": True, "models": names[:500], "current": endpoint.model}
+
+    def _configured_model(self) -> str | None:
+        binding = self.runtime.config.models
+        endpoint = (
+            None
+            if binding is None or binding.routing_alias is None
+            else binding.catalog.endpoint(binding.routing_alias)
+        )
+        return None if endpoint is None else endpoint.model
+
+    def conversation_model_choices(self, session_id: str | None) -> dict[str, Any]:
+        """The models the composer offers for this conversation (owner
+        2026-10-21): what the configured Gateway serves, or the configured
+        model alone when its list cannot be read. Names only, never a key."""
+        return self.conversation_models.listed(self.runtime.actor, session_id)
+
+    def select_conversation_model(self, request: ConversationModelSelectRequest) -> dict[str, Any]:
+        item = ConversationModelSelectRequest.model_validate(request)
+        if self.runtime.state.conversation(item.session_id, self.runtime.actor) is None:
+            return {"ok": False, "code": "conversation_unknown"}
+        return self.conversation_models.choose(self.runtime.actor, item.session_id, item.model)
 
     def _gateway_configured(self) -> bool:
         binding = self.runtime.config.models
@@ -2402,6 +2441,7 @@ class AgentWeb:
             self.attachments.delete_session(item.session_id)
             # "For this conversation" ends with it; its working folder stays.
             self.agent_mode.forget(item.session_id)
+            self.conversation_models.forget(item.session_id)
         return {"ok": deleted, "code": None if deleted else "conversation_unknown"}
 
     def add_attachment(self, session_id: str, filename: str, data: bytes) -> dict[str, Any]:
@@ -2729,9 +2769,16 @@ class AgentWeb:
                 pass
         self.turn_progress.begin(progress)
         listening = TURN_PROGRESS.set(progress)
+        # The conversation's own model (owner 2026-10-21), for Gateway turns.
+        choosing = TURN_MODEL.set(
+            self.conversation_models.for_turn(self.runtime.actor, item.session_id)
+            if backend == "gateway"
+            else None
+        )
         try:
             return self._conversation_turn(item)
         finally:
+            TURN_MODEL.reset(choosing)
             TURN_PROGRESS.reset(listening)
             self.turn_progress.end(progress)
 
@@ -5972,6 +6019,9 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.workflow_settings())
         elif parsed.path == "/api/backends":
             self._json(200, web.conversation_backends())
+        elif parsed.path == "/api/conversations/models":
+            session_id = parse_qs(parsed.query).get("session_id", [None])[0]
+            self._json(200, web.conversation_model_choices(session_id))
         elif parsed.path == "/api/commands":
             self._json(200, web.slash_commands())
         elif parsed.path == "/api/conversations":
@@ -6059,6 +6109,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/conversations/turn",
             "/api/conversations/feedback",
             "/api/conversations/backend",
+            "/api/conversations/model",
             "/api/backends/authenticate",
             "/api/contributions",
             "/api/approvals/decide",
@@ -6451,6 +6502,15 @@ class _Handler(BaseHTTPRequestHandler):
                 self._json(400, {"error": "the request was not a valid backend selection"})
                 return
             result = self.server.web.select_conversation_backend(selection)
+            self._json(200 if result.get("ok") else 409, result)
+            return
+        if path == "/api/conversations/model":
+            try:
+                model_choice = ConversationModelSelectRequest.model_validate(body)
+            except (ValueError, TypeError):
+                self._json(400, {"error": "the request was not a valid model selection"})
+                return
+            result = self.server.web.select_conversation_model(model_choice)
             self._json(200 if result.get("ok") else 409, result)
             return
         if path == "/api/backends/authenticate":

@@ -378,6 +378,7 @@ from models.approved import ApprovedModelClient
 from models.clients import ModelClients
 from models.contracts import ModelClient
 from models.credentials import CredentialResolver, EnvironmentCredentials
+from models.selection import SelectableModelClient
 from models.wire import MethodTransport, Transport
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import InstalledWorkflows, WorkflowEngine
@@ -1613,9 +1614,14 @@ def build_router(
         # is a provider this build has no adapter for, which is a
         # configuration mistake and not something to discover at runtime.
         raise HostError("models_invalid")
+    endpoint = binding.catalog.endpoint(binding.routing_alias)
+    assert endpoint is not None  # the contract checked the routing alias
+    # A conversation may choose another model this Gateway serves (owner
+    # 2026-10-21, `models.selection`); the data approval still decides first.
+    selectable = SelectableModelClient(endpoint, client, clients.build)
     return RequestRouter(
         commands,
-        ApprovedModelClient(client, binding.data_approval),
+        ApprovedModelClient(selectable, binding.data_approval),
         binding.routing_alias,
         # Off unless this host asked for a model running on its own hardware.
         # The contract already refused the pair that cannot both be true.

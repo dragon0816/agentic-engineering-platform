@@ -81,6 +81,19 @@ class ModelClients:
         endpoint = self.catalog.endpoint(alias)
         if endpoint is None:
             return Failure(code="unknown_alias", message=f"no endpoint is named {alias}")
+        client = self.build(endpoint)
+        if isinstance(client, Failure):
+            return client
+        # Concurrent requests may build the same alias at once; every caller
+        # gets the one client that was stored first.
+        return self._built.setdefault(alias, client)
+
+    def build(self, endpoint: ModelEndpoint) -> ModelClient | Failure:
+        """A new client for one endpoint, with its alias's options and
+        nothing cached: `for_alias` keeps the catalog's clients, and a
+        conversation's own model at the same endpoint
+        (`models.selection`) is built from a copy of it."""
+        alias = endpoint.alias
         builder = self.providers.get(endpoint.provider)
         if builder is None:
             return Failure(
@@ -109,9 +122,7 @@ class ModelClients:
                 code="provider_build_failed",
                 message=f"{alias}: {type(error).__name__}: {error}"[:200],
             )
-        # Concurrent requests may build the same alias at once; every caller
-        # gets the one client that was stored first.
-        return self._built.setdefault(alias, client)
+        return client
 
     def for_route(self, name: str) -> tuple[Symbol, ModelClient] | Failure:
         alias = self.catalog.select_route(name)

@@ -172,6 +172,19 @@ class ConversationBackendSelectRequest(Contract):
         return self
 
 
+class ConversationModelSelectRequest(Contract):
+    """The composer's model for one conversation (owner 2026-10-21); the
+    Host checks it against what the configured Gateway serves."""
+
+    session_id: Symbol
+    model: Text = Field(max_length=200)
+
+    @model_validator(mode="after")
+    def no_credential_material(self) -> Self:
+        reject_embedded_secrets(self.model_dump(mode="json"))
+        return self
+
+
 class ConversationBackendAuthenticationRequest(Contract):
     backend: ConversationBackendName
 
