@@ -157,6 +157,56 @@ def test_check_now_cards_and_presses_with_undo(web: Web) -> None:  # noqa: F811
     assert removed in [p.text for p in prefs.listed()]
 
 
+def test_undo_of_a_fix_reopens_its_finding_at_once(web: Web) -> None:  # noqa: F811
+    """#233, §16: 復原 under a finding's fix undoes the change and the finding
+    is open again (state `open`), shown before any new check."""
+    agent_web, _ = web
+    seeded = _seed(agent_web)
+    agent_web.memory_health.model_source = lambda: (_Internal(), "company")
+    store = agent_web.memory_page.cards()
+    assert agent_web.memory_page.post("/api/memory/health/run", {})["ok"]
+    found = _findings(agent_web)
+    prefs = agent_web.personal_memory.preferences(agent_web.runtime.actor)
+    stale = next(i for i in found["stale"] if i["links"][0]["person_id"] == seeded["old"])
+    presses = (
+        (found["duplicate"][0], "merge"),
+        (stale, "left"),
+        (found["contradiction"][0], "remove_a"),
+    )
+    for item, action in presses:
+        done = _press(agent_web, item, action)
+        assert done["ok"] and done["undo"]["finding_id"] == item["finding_id"], done
+        open_ids = {i["finding_id"] for kind in _findings(agent_web).values() for i in kind}
+        assert item["finding_id"] not in open_ids
+        undone = agent_web.memory_page.post("/api/memory/health/undo", done["undo"])
+        assert undone["ok"] and undone["reopened"] is True, undone
+        again = {i["finding_id"]: i for kind in _findings(agent_web).values() for i in kind}
+        assert item["finding_id"] in again, action
+        assert [a["action"] for a in again[item["finding_id"]]["actions"]] == [
+            a["action"] for a in item["actions"]
+        ]
+        # Pressed again after the undo: a fresh fix of the reopened finding.
+        assert _press(agent_web, item, action)["ok"]
+    # The changes themselves were undone each time before the second press.
+    assert len(store.list_people(company="", source="", status="any", limit=50)[0]) == 2
+    assert store.view(seeded["old"]).status == "left"
+    assert len(prefs.listed()) == 1
+    # Refusals: an unknown finding, an unknown kind of change (the finding stays closed).
+    refused = agent_web.memory_page.post(
+        "/api/memory/health/undo", {"finding_id": "h-0000000000", "kind": "contacts"}
+    )
+    assert refused["code"] == "finding_unknown"
+    item, _ = presses[0]
+    unknown = agent_web.memory_page.post(
+        "/api/memory/health/undo",
+        {"finding_id": item["finding_id"], "kind": "nonsense", "change_id": "c-1"},
+    )
+    assert unknown["code"] == "change_unknown"
+    assert item["finding_id"] not in {
+        i["finding_id"] for kind in _findings(agent_web).values() for i in kind
+    }
+
+
 def test_settings_round_trip_off_means_no_model_call_and_actors_apart(web: Web) -> None:  # noqa: F811
     agent_web, _ = web
     _seed(agent_web)
@@ -327,6 +377,7 @@ def test_the_page_has_the_health_cards_settings_and_why() -> None:
         'id="mem-health-list"',
         '"/api/memory/health/run"',
         '"/api/memory/health/decide"',
+        '"/api/memory/health/undo"',
         '"/api/memory/health/settings"',
         "function whyButton(messageId)",
         '"/api/memory/why?session_id="',

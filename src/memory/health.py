@@ -257,6 +257,19 @@ class HealthFindings:
         if not done:
             raise HealthError("finding_closed")
 
+    def reopen(self, finding_id: str, *, at: str | None = None) -> bool:
+        """復原 of the fix that resolved a finding: the problem is back, so the
+        finding is open again at once, not at the next check (§16, #233).
+        Only a `resolved` finding reopens; returns whether it did."""
+        stamp = at or now_iso()
+        with self.service.connect(immediate=True) as con:
+            done = con.execute(
+                "UPDATE health_findings SET state = 'open', action = '', decided_at = '', "
+                "decided_by = '', updated_at = ? WHERE finding_id = ? AND state = 'resolved'",
+                (stamp, finding_id),
+            ).rowcount
+        return bool(done)
+
     def record(
         self,
         found: Iterable[Found],

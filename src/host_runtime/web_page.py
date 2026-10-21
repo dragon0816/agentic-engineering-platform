@@ -8976,15 +8976,10 @@ function memRenderHealth() {
 function memHealthDecide(item, choice) {
   if (choice.style === "danger" && !confirm(choice.label + "？可以復原。")) return;
   return memAct("/api/memory/health/decide", {finding_id: item.finding_id, action: choice.action},
-    (reply) => {
-      const undo = reply.undo;
-      if (!undo) return null;
-      if (undo.kind === "preference") {
-        return () => call("/api/memory/undo", {kind: "preference", change_id: undo.change_id});
-      }
-      return () => call("/api/memory/proposals/undo",
-        {space: "contacts/org", change_id: undo.change_id});
-    }, ["health", "proposals", "preferences", "spaces"]);
+    // 復原 undoes the fix and reopens the finding, so its card is back at
+    // once (#233); the notice reloads the same sections.
+    (reply) => reply.undo ? () => call("/api/memory/health/undo", reply.undo) : null,
+    ["health", "proposals", "preferences", "spaces"]);
 }
 
 // Go to one item on the memory page (a finding's link, an answer's 「為什麼」).
