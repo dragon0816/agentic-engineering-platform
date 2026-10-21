@@ -1,8 +1,52 @@
 # Handoff
 
-Updated: 2026-10-21 (Asia/Taipei), by Claude Code (accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-21 (Asia/Taipei), by Claude Code (BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## #233 Agent Web follow-ups (2026-10-21, Claude Code) — latest
+## BI Knowledge Case A backend (2026-10-21, Claude Code) — latest
+
+Owner approved Knowledge Strategy v1.3 for Case A only, with the robotics sample
+(`tests/fixtures/robotics_kb_sample/`, schema v4, 104 cards) as demo data (decision
+`docs/DECISIONS.md` 2026-10-21 "BI Knowledge Case A is approved and built on `bi.schema/v1.1`…";
+contract `docs/CONTRACTS.md` "BI cards API and capability"; row in `docs/TASKS.md`).
+Commits on main, not pushed, Agent Web not restarted, live data untouched. The backend files
+landed in the front-end agent's commit 136c5cca (shared index), then 5addaea4 and 227f911c.
+
+- Built: `src/capabilities/bi_cards/` (registry `bi_schema_v1_1.json` from
+  `scripts/build_bi_schema_v1_1.py`, SQLite store with field provenance at
+  `<workspace>/bi/<dataset>/bi.sqlite`, CSV preview/apply/undo, demo loader, dashboard, the
+  `bi-cards/query@1.0.0` capability and the `engineering/bi-knowledge@1.0.0` Skill shipped on),
+  `src/host_runtime/bi_cards_api.py` (`/api/bi/*`), `src/host_runtime/bi_cards_tools.py`
+  (`bi__query`). UI: Knowledge → BI 卡片 (front-end agent, `web_page.py`).
+- Demo (after restart on this code, when `/api/tasks` is idle): Knowledge → BI 卡片 → 載入示範資料
+  (104 cards) → Dashboard (robotics: §6 BMS and 下線測試 red; §10 快充 trend no solution; §19
+  BMS no opportunity; §18 5G private network no active opportunity; §16 大銀 no ecosystem;
+  §14 technologies without Concept) → import `tests/fixtures/robotics_kb_sample/tools/samples/
+  robotics/application_robotics.csv` to see 優先度 ignored and all rows unchanged → edit a field,
+  re-import to see human_kept → chat 「哪些應用對手有方案、我方沒有？」 (needs `assets
+  install-bundled` so the Skill is on; answers cite `[卡片 …]`).
+- Not done (deferred, see the decision): proposal accept/reject routes, mapping explode /
+  derive / compose, DQ-7 conflict records, vault adapter, PostgreSQL backend, Cases B–E.
+- Next: owner live demo check; then release.
+
+## BI 卡片 UI, Knowledge Strategy v1.3 Case A (2026-10-21, Claude Code) — latest
+
+The Agent Web side of Case A is in `src/host_runtime/web_page.py` (commit 136c5cca, not pushed,
+Agent Web not restarted): Knowledge tab → sub-tab 「BI 卡片」 (beside 「知識庫維護」, the vault
+pipeline): dataset / domain bar (robotics default) with 載入示範資料; Dashboard (`/api/bi/dashboard`,
+sections 6, 10, 19, 18 first and open; red / amber flag rows with text badges; matrix; funnel;
+cells naming a card open it); 卡片 (type filter, search, review badge 「範例資料／待驗證」, detail
+with field class 事實 / 判斷 / 衍生, source and time, links with missing targets, pending
+proposals, history; edit with `base_version` + 理由, 409 `stale_edit` shows who / when / current and
+offers a reload); 匯入 CSV (UTF-8 / BOM file → preview → mapping table and chips → per-row diff with
+`human_kept` → 確認寫入 for the ticked rows → 復原). The API is the backend agent's
+(`docs/CONTRACTS.md` "BI cards API"); the UI was checked once against it (demo load: 104 cards,
+dashboard and a card detail render). Test: `tests/test_bi_cards_ui.py` (stub of the contract
+behind a proxy to the real Agent Web; screenshots `.scratch/bi-ui/`).
+
+Owner check after a restart on this code: Knowledge → BI 卡片 → 載入示範資料 → Dashboard → click a
+red-gap application → edit a field with a reason → 匯入 CSV with a robotics CSV → 確認寫入 → 復原.
+
+## #233 Agent Web follow-ups (2026-10-21, Claude Code)
 
 Commits on main after a7f72e3c (89d8389a … the docs commit), not pushed, Agent Web not restarted,
 live data only read. All ten items of #233 fixed (row in `docs/TASKS.md`; decision

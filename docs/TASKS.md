@@ -3061,3 +3061,36 @@ s-k-20261011T102952` (not published).
   worktree with `C:/aepci-wk/venv` 3761 passed, 34 skipped; release script `--quick` (ruff, mypy);
   adds #233 and the workspace replace retry (1111ffe7, found when the first build's test run hit a
   Windows `PermissionError` on `os.replace`); no weekly-report asset; commented on #218; tag local.
+- [x] Agent Web 「BI 卡片」 for Knowledge Strategy v1.3 Case A (2026-10-21, Claude Code): a
+  Knowledge sub-tab beside the vault pipeline in `src/host_runtime/web_page.py` (136c5cca):
+  dataset / domain bar with 載入示範資料; Dashboard from `/api/bi/dashboard` (gap sections 6, 10,
+  19, 18 first and open, red / amber flags with text badges, matrix, funnel, card links, summary
+  strip); card browser (type, search, 「範例資料／待驗證」, field class / source / time, links with
+  missing targets, proposals, history, edit with `base_version` + 理由 and the 409 `stale_edit`
+  notice); CSV import wizard (preview only until 確認寫入, mapping table, chips, per-row diff with
+  `human_kept`, chosen rows, 復原). Loading and inline 重試 on every pane, 44 px targets, dark
+  mode, 390 px. Test `tests/test_bi_cards_ui.py` (stub of the `/api/bi` contract behind a proxy
+  to the real Agent Web; screenshots `.scratch/bi-ui/`); checked once against the backend
+  (demo 104 cards). Verification: ruff check, format --check,
+  mypy clean; `C:/aepci-wk/venv` (points at this repo, `--basetemp=C:/aepci-wk/bt-biui`) 3794
+  passed, 34 skipped, 1 failed (`test_weekly_report_workflow.py::test_doctor_reports_the_integrations_
+  without_contacting_anything`, from the parallel backend's new shipped Skill, passes alone). The
+  project-venv full run was stopped at 11% for time (two failures there pass alone).
+  Not pushed; Agent Web not restarted.
+- [x] BI Knowledge Case A backend (2026-10-21, Claude Code; owner approved v1.3 for Case A with
+  the robotics sample as demo data): registry `bi.schema/v1.1` generated from schema v4
+  (`scripts/build_bi_schema_v1_1.py`), SQLite store with field provenance, history, proposals,
+  stale-edit check and import undo, CSV preview (writes nothing; raw/normalised/current, unknown
+  columns, missing and mistyped links, type mismatches, ignored 優先度) and apply, the robotics
+  demo (104 cards) in the package, the dashboard (15 sections from `Dashboard-Robotics.md`),
+  `/api/bi/*`, `bi-cards/query@1.0.0` with `bi__query`, Skill `engineering/bi-knowledge@1.0.0`
+  shipped on. Decision `docs/DECISIONS.md` 2026-10-21 "BI Knowledge Case A is approved and built
+  on `bi.schema/v1.1`…"; contract `docs/CONTRACTS.md` "BI cards API and capability". Tests:
+  `tests/test_bi_cards.py` (32). Commits 136c5cca (backend files landed in the UI commit through
+  the shared index), 5addaea4, 227f911c, 4d8966fc and the docs commit.
+  Verification: ruff check, ruff format --check, mypy (743 files) clean; project `.venv` full run
+  3820 passed, 7 skipped, 2 failed (`test_weekly_report_workflow.py::test_doctor_reports_the_integrations_without_contacting_anything`,
+  an exhaustive list of exported assets, fixed in 4d8966fc and passing; `test_memory_why_ui.py`
+  browser test, passes alone); `C:/aepci-wk/venv` (points at this repo, `--basetemp=C:/aepci-wk/bt-bi`):
+  CI_RESULT. Not pushed; Agent Web not restarted.
+- [ ] Owner live demo check of BI cards (steps in HANDOFF.md).
