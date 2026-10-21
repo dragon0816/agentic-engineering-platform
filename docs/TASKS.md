@@ -3025,3 +3025,8 @@ s-k-20261011T102952` (not published).
   `aep-windows-preview-0.1.0-607a59ea3f03.zip`, SHA-256 `efece1d8…573b`; the release script's ruff,
   mypy and full pytest passed; CI green on 607a59ea; no weekly-report asset in the bundle; commented
   on #218. Tag local only.
+- [x] #219 Shared Platform autostart after a reboot of 141 (2026-10-21, owner rebooted, Claude Code
+  checked): booted 09:37:47, platform process started 09:37:59 by the boot trigger of the
+  scheduled task 「AEP Shared Platform」; 8775 `/v1/health` 200 and 8776 portal 200 from this PC;
+  certificate SHA-256 unchanged (`83:95:B0:90:…:BA:8B`). The 5-minute trigger's run reported
+  0x800710E0 (instance already running), as expected.
