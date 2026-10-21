@@ -177,6 +177,8 @@ def test_the_tabbed_portal_in_a_real_browser(tmp_path: Path) -> None:
         ).bearer
         browser = Browser(tmp_path / "browser", timeout_s=60)
         browser.start()
+        began = time.monotonic()
+        reload_at: float | None = None
 
         def js(code: str) -> Any:
             return browser._evaluate(code)
@@ -276,6 +278,7 @@ def test_the_tabbed_portal_in_a_real_browser(tmp_path: Path) -> None:
 
             # Reload and back keep the tab.
             js('showTab("registrations"); 0')
+            reload_at = time.monotonic()
             js("location.reload(); 0")
             until(lambda: "bridge-leo-pc" in text("bridge-rows"))
             assert visible_panels() == ["panel-registrations"]
@@ -390,6 +393,63 @@ def test_the_tabbed_portal_in_a_real_browser(tmp_path: Path) -> None:
             until(lambda: "Selected for this Bridge" in text("detail-status"))
             chosen = {item.asset.name for item in app.state.authorization.selections()}
             assert chosen == {"weekly-check", "weekly-skill"}
+        except Exception:
+            # #244: one failure-only snapshot, before close can abort HTTP requests.
+            # No extra polling or changed deadlines. This delays teardown and the
+            # page can advance during evaluation; it is not an atomic event trace.
+            failed_at = time.monotonic()
+            diagnostic: dict[str, Any] = {
+                "elapsed_s": round(failed_at - began, 3),
+                "since_reload_s": (None if reload_at is None else round(failed_at - reload_at, 3)),
+            }
+            try:
+                diagnostic["page"] = js("""(() => {
+                    const node = id => document.getElementById(id);
+                    const shown = id => {
+                        const n = node(id);
+                        return n ? !n.hidden && !n.classList.contains('hidden') : null;
+                    };
+                    // Classify only: error text may contain arbitrary server data.
+                    const error = id => {
+                        const t = node(id)?.textContent || '';
+                        if (!t) return 'empty';
+                        if (t.startsWith('Sign in failed:')) return 'sign_in_failed';
+                        if (t.startsWith('Bridges unavailable:')) return 'bridges_unavailable';
+                        return 'other_nonempty';
+                    };
+                    const paths = {
+                        '/v1/member/session': 'session',
+                        '/v1/member/me': 'me',
+                        '/v1/member/admin/bridges/list': 'bridges'
+                    };
+                    const completed = performance.getEntriesByType('resource')
+                        .filter(e => Object.hasOwn(paths, new URL(e.name).pathname))
+                        .slice(-12).map(e => ({
+                            stage: paths[new URL(e.name).pathname],
+                            start_ms: Math.round(e.startTime),
+                            end_ms: Math.round(e.responseEnd),
+                            duration_ms: Math.round(e.duration)
+                        }));
+                    return {
+                        ready: document.readyState,
+                        page_elapsed_ms: Math.round(performance.now()),
+                        session_present: typeof bearer === 'string' && bearer.length > 0,
+                        workspace_shown: shown('workspace'),
+                        sign_in_shown: shown('sign-in-panel'),
+                        registrations_shown: shown('panel-registrations'),
+                        bridge_rows_present: node('bridge-rows') !== null,
+                        expected_bridge_present: (node('bridge-rows')?.textContent || '')
+                            .includes('bridge-leo-pc'),
+                        sign_in_error: error('sign-in-status'),
+                        bridges_error: error('bridges-status'),
+                        completed
+                    };
+                })()""")
+            except Exception:
+                # Never replace the original failure or print exception payloads.
+                diagnostic["snapshot_error"] = "unavailable"
+            print("PORTAL_FAILURE_DIAGNOSTIC " + json.dumps(diagnostic, sort_keys=True))
+            raise
         finally:
             browser.close()
             browser.discard_profile()
