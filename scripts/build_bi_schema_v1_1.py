@@ -279,9 +279,7 @@ def build() -> dict[str, Any]:
         "source": {
             "primary": "tests/fixtures/robotics_kb_sample/tools/bi_schema.py",
             # LF-normalised, so a CRLF checkout gives the same digest.
-            "primary_sha256": hashlib.sha256(source.replace(b"
-", b"
-")).hexdigest(),
+            "primary_sha256": hashlib.sha256(source.replace(b"\r\n", b"\n")).hexdigest(),
             "read_without_executing": True,
             "generator": "scripts/build_bi_schema_v1_1.py",
             "kept_from": "bi.schema/v1 (id_rules, field_classes)",
