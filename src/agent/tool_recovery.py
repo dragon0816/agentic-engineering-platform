@@ -141,8 +141,9 @@ def classify(failure: Failure) -> ToolRecovery | None:
             hint=(
                 f"The input was refused at {named}"
                 + (f" ({where})" if where else "")
-                + ". Correct those fields (add a missing one, fix its type) and call the tool "
-                "again in this turn."
+                + ". Correct those fields (add a missing one, fix its type, keep it within the "
+                "bounds shown; leave out an optional field instead of sending null) and call "
+                "the tool again in this turn."
             ),
         )
     if code in _FIXABLE:
