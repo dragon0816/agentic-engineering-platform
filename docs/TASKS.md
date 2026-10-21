@@ -3104,6 +3104,19 @@ s-k-20261011T102952` (not published).
   Agent Web / knowledge / BI / chat / conversation / Skill tests (590 passed); release `--quick`.
   Live on this PC: demo load 104 cards (re-load 104 unchanged), dashboard 15 sections with the
   README's two red gaps; chat answers to the three demo questions cite cards (11–23 s).
+- [x] Release `release-20261021-1635-4b051234`, the namespace fix (2026-10-21, Claude Code): a
+  colleague who installed 20261021-1550-ee730407 with only `-Actor`, as the manual shows, got
+  "No namespace is configured" on every chat; 4b051234 makes install.ps1 set `namespace` to
+  `engineering` when none is given. Zip `aep-windows-preview-0.1.0-4b051234c3e5.zip`, SHA-256
+  `ccad8d0c0d35ba12dcdf538dcfacfdea153e249319e5f9c0fd676df5d2bfd888`, built from a pinned
+  worktree at 4b051234 and copied with `BI_DEMO.zh-TW.md` plus a `README-請先看.txt` (supersedes
+  1550-ee730407 and 1115-1111ffe7; workaround for existing installs) to
+  `S:\AE\leo\20261021-1635-4b051234\` (copied zip hash checked). Verification: release `--quick`
+  (ruff, mypy); `tests/test_windows_preview_bundle.py` and `tests/test_release_windows.py` on
+  4b051234 (17 passed); the full suite on 8305b57e and related tests on ee730407 as above. Zip
+  checked: no personal weekly-report asset (only Hermes `weekly-review-planning`), wheel has
+  `bi_schema_v1_1.json` and the 12 demo CSVs, bundled install.ps1 sets the engineering default.
+  Tag left local.
 
 ## BI dataset sharing through the Shared Platform: design proposal (2026-10-21)
 
