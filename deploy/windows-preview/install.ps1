@@ -17,6 +17,29 @@ param(
     [switch]$GatewayInstallOnly
 )
 $ErrorActionPreference = "Stop"
+# Windows PowerShell 5.1 started from a PowerShell 7 window inherits pwsh's
+# PSModulePath, finds pwsh's own Microsoft.PowerShell.Utility first and then
+# cannot autoload the 5.1 module (2026-10-21: "Get-FileHash is not
+# recognized"). install.cmd clears the variable; this covers a direct run.
+if ($PSVersionTable.PSEdition -ne "Core" -and $env:PSModulePath) {
+    $env:PSModulePath = (($env:PSModulePath -split ';') | Where-Object { $_ -and $_ -notmatch '\\PowerShell\\' }) -join ';'
+}
+# SHA-256 through .NET, not Get-FileHash: in 5.1 that cmdlet is a script
+# function of Microsoft.PowerShell.Utility and is missing whenever the module
+# does not autoload (see above).
+function Get-Sha256Hex([string]$LiteralPath) {
+    $Stream = [System.IO.File]::OpenRead($LiteralPath)
+    try {
+        $Sha = [System.Security.Cryptography.SHA256]::Create()
+        try { $Bytes = $Sha.ComputeHash($Stream) } finally { $Sha.Dispose() }
+    }
+    finally { $Stream.Dispose() }
+    return ([System.BitConverter]::ToString($Bytes) -replace '-', '').ToLowerInvariant()
+}
+# Traditional Chinese lines are written as \u escapes so this file stays
+# ASCII: Windows PowerShell 5.1 reads a .ps1 without a byte-order mark in the
+# computer's ANSI code page.
+function ConvertFrom-Escaped([string]$Text) { return [regex]::Unescape($Text) }
 $BundleRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ManifestPath = Join-Path $BundleRoot "manifest.json"
 $Manifest = Get-Content -LiteralPath $ManifestPath -Raw | ConvertFrom-Json
@@ -56,7 +79,7 @@ foreach ($File in $Manifest.files) {
         throw ("Bundle file is missing: $Relative. Extract the whole zip again, keeping " +
             "every file; an extraction that skipped one leaves the bundle unusable.")
     }
-    $Actual = (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
+    $Actual = Get-Sha256Hex -LiteralPath $Path
     if ($Actual -ne $File.sha256) {
         throw "Bundle integrity check failed: $Relative"
     }

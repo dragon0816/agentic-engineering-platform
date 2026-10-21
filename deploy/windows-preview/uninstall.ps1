@@ -3,6 +3,12 @@ param(
     [string]$InstallRoot = "$env:LOCALAPPDATA\AgenticEngineeringPlatform\preview-0.1.0"
 )
 $ErrorActionPreference = "Stop"
+# Windows PowerShell 5.1 started from a PowerShell 7 window inherits pwsh's
+# PSModulePath and then cannot autoload its own modules; the .cmd wrapper
+# clears the variable, and this covers a direct run.
+if ($PSVersionTable.PSEdition -ne "Core" -and $env:PSModulePath) {
+    $env:PSModulePath = (($env:PSModulePath -split ';') | Where-Object { $_ -and $_ -notmatch '\\PowerShell\\' }) -join ';'
+}
 $ExpectedParent = [IO.Path]::GetFullPath("$env:LOCALAPPDATA\AgenticEngineeringPlatform")
 $Target = [IO.Path]::GetFullPath($InstallRoot)
 if (-not $Target.StartsWith($ExpectedParent + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {

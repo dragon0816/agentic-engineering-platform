@@ -1,5 +1,8 @@
 @echo off
 setlocal
+rem Windows PowerShell 5.1 started from a PowerShell 7 window inherits pwsh's
+rem module path and cannot load its own modules; let it use its defaults.
+set "PSModulePath="
 set "INSTALL_ROOT=%LOCALAPPDATA%\AgenticEngineeringPlatform\shared-platform-preview-0.1.0"
 if not "%~1"=="" set "INSTALL_ROOT=%~1"
 if not exist "%INSTALL_ROOT%\.venv\Scripts\aep-platform.exe" (

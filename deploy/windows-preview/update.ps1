@@ -16,6 +16,12 @@ param(
 # never switched on again, a removed one is not brought back) and get this
 # bundle's content unless they were changed on this PC.
 $ErrorActionPreference = "Stop"
+# Windows PowerShell 5.1 started from a PowerShell 7 window inherits pwsh's
+# PSModulePath and then cannot autoload its own modules; the .cmd wrapper
+# clears the variable, and this covers a direct run.
+if ($PSVersionTable.PSEdition -ne "Core" -and $env:PSModulePath) {
+    $env:PSModulePath = (($env:PSModulePath -split ';') | Where-Object { $_ -and $_ -notmatch '\\PowerShell\\' }) -join ';'
+}
 $ConfigPath = Join-Path $InstallRoot "host.json"
 if (-not (Test-Path -LiteralPath $ConfigPath -PathType Leaf)) {
     throw ("AEP is not installed at $InstallRoot yet. For a first installation run " +

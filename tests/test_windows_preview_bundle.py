@@ -444,3 +444,49 @@ def test_the_installer_always_writes_the_engineering_namespace() -> None:
     manual = _template("INSTALL.zh-TW.md")
     assert "`-Namespace <團隊>` | **已不需要**" in manual
     assert "No namespace is configured" not in manual
+
+
+def test_the_bundle_scripts_hash_through_dotnet_not_get_filehash() -> None:
+    """2026-10-21: install.cmd from a PowerShell 7 window started 5.1 with
+    pwsh's PSModulePath and Get-FileHash was "not recognized". The scripts
+    hash with .NET, and every wrapper clears PSModulePath before
+    powershell.exe; the scripts also drop pwsh's module paths themselves."""
+    deploy = TEMPLATE.parent
+    scripts = sorted(deploy.glob("*/*.ps1"))
+    assert scripts
+    for script in scripts:
+        code = [
+            line
+            for line in script.read_text(encoding="utf-8").splitlines()
+            if not line.lstrip().startswith("#")
+        ]
+        assert not [line for line in code if "Get-FileHash" in line], script
+    for installer in (TEMPLATE / "install.ps1", deploy / "shared-platform-preview" / "install.ps1"):
+        text = installer.read_text(encoding="utf-8")
+        assert "[System.Security.Cryptography.SHA256]::Create()" in text
+        assert "$Actual = Get-Sha256Hex -LiteralPath $Path" in text
+    wrappers = [
+        wrapper
+        for wrapper in sorted(deploy.glob("*/*.cmd"))
+        if "powershell.exe" in wrapper.read_text(encoding="utf-8")
+    ]
+    assert {wrapper.name for wrapper in wrappers} >= {"install.cmd", "update.cmd", "uninstall.cmd"}
+    for wrapper in wrappers:
+        text = wrapper.read_text(encoding="utf-8")
+        assert 'set "PSModulePath="' in text, wrapper
+        assert (
+            text.index("setlocal")
+            < text.index('set "PSModulePath="')
+            < text.index("powershell.exe")
+        )
+        if "-File" in text:
+            assert "-ExecutionPolicy Bypass" in text, wrapper
+    for name in ("install.ps1", "update.ps1", "uninstall.ps1"):
+        assert r"-notmatch '\\PowerShell\\'" in _template(name), name
+
+
+def test_the_bundle_scripts_stay_ascii() -> None:
+    """Windows PowerShell 5.1 reads a .ps1 without a byte-order mark in the
+    ANSI code page, so Traditional Chinese lines are written as escapes."""
+    for script in sorted(TEMPLATE.parent.glob("*/*.ps1")) + sorted(TEMPLATE.parent.glob("*/*.cmd")):
+        script.read_bytes().decode("ascii")
