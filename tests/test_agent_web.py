@@ -381,7 +381,10 @@ def test_ask_uses_compact_composer_backend_control(served: AgentWebServer) -> No
     page = served.page().decode("utf-8")
     assert 'id="readiness"' not in page
     assert 'class="composer-footer"' in page
-    assert page.index('id="message"') < page.index('id="conversation-backend"')
+    # The backend selector is above the conversation, the model menu in the
+    # composer under the message box (owner 2026-10-21).
+    assert page.index('id="conversation-backend"') < page.index('id="log"')
+    assert page.index('id="message"') < page.index('id="conversation-model"')
     assert 'id="backend-auth-dialog"' in page
     assert 'id="backend-auth-start"' in page
     assert 'call("/api/backends/authenticate"' in page

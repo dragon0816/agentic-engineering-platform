@@ -454,9 +454,13 @@ pre.kp-removed { background: var(--bad-bg, #fdecea); white-space: pre-wrap; padd
 .session-row:hover .session-delete-button, .session-delete-button:focus { opacity: 1; }
 .session-delete-button:hover { color: var(--bad); background: var(--bg); }
 .workspace { min-width: 0; }
-.topbar { display: flex; justify-content: flex-end; padding: 10px 18px;
+.topbar { display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 6px 14px; padding: 10px 18px;
   border-bottom: 1px solid var(--line); background: var(--bg); }
-.topbar .who { color: var(--dim); font-size: 13px; }
+.topbar .who { color: var(--dim); font-size: 13px; margin-left: auto; min-width: 0;
+  overflow-wrap: anywhere; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 main { padding: 0 20px 40px; }
 section { display: none; padding-top: 18px; max-width: 1480px; margin: 0 auto; }
 section[data-open] { display: block; }
@@ -614,11 +618,19 @@ form.ask textarea:focus { outline: 0; }
 .composer-footer { display: flex; align-items: center; justify-content: space-between;
   gap: 12px; min-height: 52px; padding: 8px 10px; border-top: 1px solid var(--line);
   background: var(--panel); }
-.backend-control { display: flex; align-items: center; gap: 9px; min-width: 0; flex: 1; }
-.backend-control select { width: auto; min-width: 190px; max-width: 330px;
-  border: 0; background: transparent; font: inherit; font-weight: 600; padding: 7px 28px 7px 8px; }
-.backend-state { min-width: 0; color: var(--dim); font-size: 12px;
+/* The conversation backend sits at the top of the chat pane and the model
+   under the message box (owner 2026-10-21). */
+.backend-control { display: flex; align-items: center; gap: 9px; min-width: 0;
+  flex: 0 1 auto; }
+.backend-control[hidden] { display: none; }
+.backend-control select, .model-control select { width: auto; min-width: 190px;
+  max-width: 330px; min-height: 44px; border: 0; background: transparent; font: inherit;
+  font-weight: 600; padding: 7px 28px 7px 8px; }
+.backend-state, .model-state { min-width: 0; color: var(--dim); font-size: 12px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.model-control { display: flex; align-items: center; gap: 9px; min-width: 0; flex: 1; }
+.model-control select:disabled { opacity: .6; cursor: not-allowed; }
+.model-readonly { padding: 7px 8px; font-weight: 600; overflow-wrap: anywhere; }
 .link-button { border: 0; background: transparent; color: var(--accent); padding: 5px;
   cursor: pointer; font: inherit; font-size: 12px; }
 .send-button { min-width: 78px; }
@@ -898,8 +910,11 @@ tr:last-child td { border-bottom: none; }
   .cap-list { max-height: 260px; }
   .market-tools { grid-template-columns: 1fr; }
   .workspace-head { align-items: start; flex-direction: column; }
-  .composer-footer, .backend-control { align-items: stretch; flex-direction: column; }
-  .backend-control select { width: 100%; max-width: none; }
+  .composer-footer, .backend-control, .model-control { align-items: stretch;
+    flex-direction: column; }
+  .backend-control { flex: 1 1 100%; gap: 2px; }
+  .backend-control select, .model-control select { width: 100%; max-width: none; }
+  .topbar .who { margin-left: 0; }
   .send-button { width: 100%; }
 }
 .answer-image { margin: 8px 0 4px; }
@@ -1153,6 +1168,12 @@ tr:last-child td { border-bottom: none; }
 </aside>
 <div class="workspace">
 <header class="topbar">
+  <div id="chat-backend-bar" class="backend-control">
+    <select id="conversation-backend" aria-label="Conversation backend"></select>
+    <span id="backend-state" class="backend-state" role="status"></span>
+    <button id="backend-settings" class="link-button" type="button" hidden>
+      Open Settings</button>
+  </div>
   <span class="who" id="who">reading this machine&hellip;</span>
 </header>
 <div id="boot-error" class="boot-error" role="alert" hidden></div>
@@ -1177,11 +1198,11 @@ tr:last-child td { border-bottom: none; }
 （單檔 25 MB，最多 10 個）">📎</button>
         <input id="attach-input" type="file" multiple hidden
           accept=".png,.jpg,.jpeg,.gif,.webp,.bmp,.pdf,.csv,.html,.htm,.txt,.json,.yaml,.yml,.md,.zip">
-        <div class="backend-control">
-          <select id="conversation-backend" aria-label="Conversation backend"></select>
-          <span id="backend-state" class="backend-state" role="status"></span>
-          <button id="backend-settings" class="link-button" type="button" hidden>
-            Open Settings</button>
+        <div class="model-control" id="model-control">
+          <label class="visually-hidden" for="conversation-model">LLM model</label>
+          <select id="conversation-model" aria-describedby="model-state" hidden></select>
+          <span id="model-readonly" class="model-readonly">Reading models&hellip;</span>
+          <span id="model-state" class="model-state" role="status"></span>
         </div>
         <button class="go send-button" id="send" type="submit" disabled>Send</button>
       </div>
@@ -1312,6 +1333,9 @@ tr:last-child td { border-bottom: none; }
         <p id="model-choices-state" class="note" role="status"></p>
         <label for="model-name">Model name served by the Gateway</label>
         <input id="model-name" placeholder="Choose above, or type the exact name" required>
+        <p class="note" id="model-default-note">This is the default model. In a chat, the
+          model menu under the message box can choose another model this Gateway serves for
+          that conversation, from the next message and without a restart.</p>
         <label for="model-context-capacity">Declared model context capacity (tokens)</label>
         <input id="model-context-capacity" type="number" min="1" max="10000000" required>
         <p class="note">This value describes the model endpoint for routing. It does not
@@ -3747,7 +3771,89 @@ async function loadConversations(selectId) {
   backend.value = activeBackend; renderBackendState();
   send.disabled = false;
   loadAgentSession().catch(() => {});
+  loadConversationModels().catch(() => {});
 }
+
+// The composer's model (owner 2026-10-21): what the configured Gateway
+// serves, per conversation, applied from the next message.
+let modelChoices = null, modelChoicesFor = "";
+
+async function loadConversationModels() {
+  const session = activeConversation;
+  if (modelChoicesFor !== session) { modelChoices = null; renderModelControl(); }
+  const listed = await call("/api/conversations/models?session_id="
+    + encodeURIComponent(session || ""));
+  if (session !== activeConversation) return;
+  modelChoices = listed; modelChoicesFor = session; renderModelControl();
+}
+
+function modelStatusText(data) {
+  if (data.unavailable) return data.unavailable + " is not served now · choose another";
+  const from = {conversation: "This conversation", default: "Your default"}[data.selected_from]
+    || "Settings default";
+  return data.source === "gateway" ? from + " · from the next message"
+    : "Gateway list unavailable · Settings model";
+}
+
+function renderModelControl() {
+  const select = el("conversation-model"), fixed = el("model-readonly");
+  const state = el("model-state"), data = modelChoices;
+  const showFixed = (label, status) => {
+    select.hidden = true; fixed.hidden = false;
+    fixed.textContent = label; state.textContent = status;
+  };
+  if (activeBackend !== "gateway") {
+    const status = backendStatuses.get(activeBackend);
+    showFixed("Model: chosen by " + (status ? status.label : "this backend"), "");
+    return;
+  }
+  if (!data) { showFixed("Reading models…", ""); return; }
+  if (!data.ok) { showFixed("No model configured", "Set one in Settings"); return; }
+  if (data.models.length < 2 && !data.unavailable) {
+    showFixed(data.models[0].label, data.source === "gateway"
+      ? "The only model the Gateway serves" : "Gateway list unavailable · Settings model");
+    return;
+  }
+  const options = data.models.map(item => [item.id,
+    item.label + (item.id === data.configured ? " · " + item.status : "")]);
+  if (data.unavailable) options.unshift([data.unavailable, data.unavailable + " · not served now"]);
+  const signature = JSON.stringify(options);
+  if (select.dataset.signature !== signature) {
+    select.replaceChildren();
+    for (const [value, label] of options) {
+      const option = document.createElement("option");
+      option.value = value; option.textContent = label;
+      option.disabled = value === data.unavailable;
+      select.append(option);
+    }
+    select.dataset.signature = signature;
+  }
+  select.value = data.unavailable || data.selected;
+  select.hidden = false; fixed.hidden = true;
+  const busy = !!activeConversation && sessionBusy(activeConversation);
+  select.disabled = busy;
+  state.textContent = busy ? "Locked while the answer runs" : modelStatusText(data);
+}
+
+el("conversation-model").addEventListener("change", async () => {
+  const select = el("conversation-model"), chosen = select.value;
+  if (!activeConversation || !modelChoices || !modelChoices.ok) return;
+  const session = activeConversation;
+  select.disabled = true; el("model-state").textContent = "Saving…";
+  try {
+    const saved = await call("/api/conversations/model", {session_id: session, model: chosen});
+    if (!saved.ok) throw new Error(saved.code);
+    if (session === activeConversation) {
+      Object.assign(modelChoices, {selected: chosen, selected_from: "conversation",
+        unavailable: null});
+    }
+  } catch (failure) {
+    renderModelControl();
+    el("model-state").textContent = "Not changed: " + failure.message;
+    return;
+  }
+  renderModelControl();
+});
 
 async function loadBackends() {
   const data = await call("/api/backends"), select = el("conversation-backend");
@@ -3809,6 +3915,7 @@ async function chooseBackend(name) {
   activeBackend = name;
   activeConversationPublic = selected.conversation.data_classification === "PUBLIC";
   el("conversation-backend").value = name; renderBackendState(); renderAgentModeLine();
+  renderModelControl();
 }
 
 async function loadChat(selectId) {
@@ -3843,6 +3950,7 @@ el("backend-public-start").addEventListener("click", async () => {
     // Show the new backend at once; the backend list reload below is slow,
     // and a stale "Gateway" entry would swallow the user's switch back.
     el("conversation-backend").value = activeBackend; renderBackendState();
+    renderModelControl();
     el("backend-public-result").textContent = "";
     el("backend-public-dialog").close();
     await loadChat(activeConversation); field.focus();
@@ -4317,9 +4425,10 @@ form.addEventListener("submit", (event) => {
   queue.push(entry);
   entry.said = turn(entry.asked, entry.replyQuestion, entry.files);
   showPendingState(entry);
-  renderSessionList();
+  renderSessionList(); renderModelControl();
   const run = async () => {
     entry.state = "working"; showPendingState(entry); renderSessionList();
+    if (session === activeConversation) renderModelControl();
     let answer = null;
     avatarWorking(1);
     const watching = watchAgentCards(session, entry);
@@ -4336,6 +4445,7 @@ form.addEventListener("submit", (event) => {
       entry.state = "failed"; entry.error = failure.message;
       showPendingState(entry);
     } finally { avatarWorking(-1); }
+    if (session === activeConversation) renderModelControl();
     watching.stop(); progressing.stop();
     try {
       if (session === activeConversation) await loadConversations(session);
@@ -10765,6 +10875,7 @@ async function selectPrimaryTab(name) {
   el("nav-tasks").toggleAttribute("aria-current", name === "tasks");
   el("nav-reviews").toggleAttribute("aria-current", name === "reviews");
   el("nav-memory").toggleAttribute("aria-current", name === "memory");
+  el("chat-backend-bar").hidden = name !== "ask";
   if (name === "ask") { field.focus(); return; }
   try { await panels[name](); }
   catch (failure) { showBootError(failure); }
