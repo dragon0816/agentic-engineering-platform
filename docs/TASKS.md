@@ -3095,3 +3095,12 @@ s-k-20261011T102952` (not published).
   3794 passed, 34 skipped, 1 failed (the same exported-assets test: the run collected before
   4d8966fc; with it, that file and `test_bi_cards.py` pass in this venv, 46 passed, 2 skipped). Not pushed; Agent Web not restarted.
 - [ ] Owner live demo check of BI cards (steps in HANDOFF.md).
+- [x] Release `release-20261021-1550-ee730407` with BI Knowledge Case A (2026-10-21, Claude Code;
+  owner: release to his boss today): zip `aep-windows-preview-0.1.0-ee7304075629.zip`, SHA-256
+  `571d4227…29fd`, copied with `BI_DEMO.zh-TW.md` to `S:\AE\leo61021-1550-ee730407\`.
+  Verification: 8305b57e full suite in a clean worktree with `C:/aepci-wk/venv` 3795 passed;
+  ee730407 (two live fixes on top: `bi__query` `analysis` so the chat lists every dashboard gap,
+  3fcc3f43; BI questions kept off the direct vault route, d2f39bed/ee730407) ruff, mypy and the
+  Agent Web / knowledge / BI / chat / conversation / Skill tests (590 passed); release `--quick`.
+  Live on this PC: demo load 104 cards (re-load 104 unchanged), dashboard 15 sections with the
+  README's two red gaps; chat answers to the three demo questions cite cards (11–23 s).

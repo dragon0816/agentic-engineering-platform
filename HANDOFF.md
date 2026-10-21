@@ -2,7 +2,18 @@
 
 Updated: 2026-10-21 (Asia/Taipei), by Claude Code (BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## BI Knowledge Case A backend (2026-10-21, Claude Code) — latest
+## BI release for the owner's boss (2026-10-21 15:50, Claude Code) — latest
+
+- main ee730407 pushed; release `dist/releases/20261021-1550-ee730407/` and a copy with
+  `BI_DEMO.zh-TW.md` (demo steps) in `S:\AE\leo\`. Agent Web on this PC runs it; the `demo` BI
+  dataset is loaded. Verification: see `docs/TASKS.md` (the last full suite ran on 8305b57e; ee730407
+  ran lint, types and the related 590 tests). Watch CI on ee730407.
+- BI scope is v1.3 Case A on the robotics sample (schema v4 as `bi.schema/v1.1`); priority is not
+  stored (#222). Not built: K06 document extraction, K08 hybrid retrieval, K02/K10 benchmark,
+  K09 API, K15 Obsidian adapter, accepting/rejecting proposals in the UI, a mapping editor.
+- Next: CI result; owner feedback from the demo; then the v1.3 follow-ups in that order.
+
+## BI Knowledge Case A backend (2026-10-21, Claude Code)
 
 Owner approved Knowledge Strategy v1.3 for Case A only, with the robotics sample
 (`tests/fixtures/robotics_kb_sample/`, schema v4, 104 cards) as demo data (decision
@@ -28,7 +39,7 @@ landed in the front-end agent's commit 136c5cca (shared index), then 5addaea4 an
   derive / compose, DQ-7 conflict records, vault adapter, PostgreSQL backend, Cases B–E.
 - Next: owner live demo check; then release.
 
-## BI 卡片 UI, Knowledge Strategy v1.3 Case A (2026-10-21, Claude Code) — latest
+## BI 卡片 UI, Knowledge Strategy v1.3 Case A (2026-10-21, Claude Code)
 
 The Agent Web side of Case A is in `src/host_runtime/web_page.py` (commit 136c5cca, not pushed,
 Agent Web not restarted): Knowledge tab → sub-tab 「BI 卡片」 (beside 「知識庫維護」, the vault
