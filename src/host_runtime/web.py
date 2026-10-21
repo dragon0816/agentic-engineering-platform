@@ -101,7 +101,7 @@ from common.workflow_parameters import (
 from common.workflow_run_form import form_offer, offer_in, run_intent
 from extensions.package import PortableExtensionPackage
 from extensions.runtime import ExtensionLifecycleStore
-from host_runtime import agent_code, asset_shelf, gateway_link, telemetry_api
+from host_runtime import agent_code, asset_shelf, bi_cards_api, gateway_link, telemetry_api
 from host_runtime.agent_mail import AgentMail
 from host_runtime.agent_mode import AgentMode
 from host_runtime.answers import readable, run_cards, run_follow_up
@@ -5856,6 +5856,8 @@ class _Handler(BaseHTTPRequestHandler):
         if parsed.path.startswith("/api/schedules"):
             self._schedule_route("GET", parsed.path, parsed.query)
             return
+        if bi_cards_api.handle(self, "GET", parsed):  # BI cards (Case A)
+            return
         web = self.server.web
         if parsed.path == "/api/about":
             self._json(200, web.about())
@@ -5996,6 +5998,8 @@ class _Handler(BaseHTTPRequestHandler):
         path = urlparse(self.path).path
         if path.startswith("/api/schedules"):
             self._schedule_route("POST", path, "")
+            return
+        if bi_cards_api.handle(self, "POST", urlparse(self.path)):  # BI cards (Case A)
             return
         if path not in (
             "/api/ask",

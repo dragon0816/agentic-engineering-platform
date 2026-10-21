@@ -1,0 +1,649 @@
+"""BI knowledge cards, Case A (owner 2026-10-21; Knowledge Strategy v1.3 §4.7).
+
+The schema registry `bi.schema/v1.1` (from the robotics sample's schema v4),
+the store with field provenance, the CSV import preview and apply, the
+robotics demo set, the chat query and its Skill, the dashboard and the
+`/api/bi/*` contract. Every test uses a temporary workspace.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import json
+import urllib.error
+import urllib.request
+from pathlib import Path
+from typing import Any
+
+import pytest
+from test_draft_install_cards import served  # noqa: F401 - the real Agent Web fixture
+from test_host_wiring import ready
+
+from capabilities.bi_cards import dashboard, importer, service
+from capabilities.bi_cards.capability import QUERY_SPEC, QueryHandler, QueryRequest
+from capabilities.bi_cards.manifest import BI_SKILL, GAP_RULE, PROCEDURE, bi_knowledge_skill
+from capabilities.bi_cards.schema import SCHEMA_FILE, parse_date, registry, split_list
+from capabilities.bi_cards.store import BiStore, BiStoreError
+from common.execution import RequestContext, TraceIdentifiers
+from host_runtime import skill_packs
+from host_runtime.assets import shipped
+from host_runtime.bi_cards_api import route
+from host_runtime.bi_cards_tools import TOOL_NAME, bi_cards_tools
+from host_runtime.contracts import HostLayout
+from host_runtime.host import build_runtime
+from scripts.build_bi_schema_v1_1 import V4, build
+
+REPO = Path(__file__).resolve().parents[1]
+SAMPLE = REPO / "tests" / "fixtures" / "robotics_kb_sample"
+ACTOR = "tester"
+
+
+def _snapshot(root: Path) -> dict[str, bytes]:
+    return {
+        str(p.relative_to(root)): p.read_bytes() for p in sorted(root.rglob("*")) if p.is_file()
+    }
+
+
+def _loaded(tmp_path: Path) -> BiStore:
+    store = BiStore(tmp_path)
+    service.load_demo(store)
+    return store
+
+
+def _call(tmp_path: Path, method: str, path: str, body: Any = None, **query: str) -> Any:
+    return route(tmp_path, ACTOR, method, path, query, body)
+
+
+def _label(cell: Any) -> str:
+    return str(cell["label"]) if isinstance(cell, dict) else str(cell)
+
+
+def _section(answer: dict[str, Any], sid: str) -> dict[str, Any]:
+    return next(s for s in answer["sections"] if s["id"] == sid)
+
+
+def _flagged(section: dict[str, Any]) -> dict[str, tuple[str, str]]:
+    return {_label(section["rows"][f["row"]][0]): (f["level"], f["text"]) for f in section["flags"]}
+
+
+# -- schema registry ------------------------------------------------------
+
+
+def test_the_shipped_registry_is_generated_from_schema_v4_and_covers_it() -> None:
+    """The committed JSON is what the converter makes from v4 today, and every
+    v4 type and field is in it except the Application priority (#222)."""
+    assert json.loads(SCHEMA_FILE.read_text(encoding="utf-8")) == build()
+    reg = registry()
+    assert reg.schema_id == "bi.schema/v1.1"
+    assert len(reg.types) == 12
+    source = V4.read_text(encoding="utf-8")
+    for entity in reg.types.values():
+        for item in entity.fields:
+            if item.name not in ("domain", "confidence", "updated", "body"):
+                assert f'("{item.name}", F(' in source, (entity.name, item.name)
+    application = reg.type("Application")
+    assert application.get("priority") is None
+    assert application.ignored[0]["reason"] == "優先度由 Skill 依事實判斷，不存資料"
+    # v4 changes the owner listed.
+    assert reg.type("Technology").get("domain").is_list  # type: ignore[union-attr]
+    assert not reg.type("Application").get("domain").is_list  # type: ignore[union-attr]
+    for name in ("Account", "Ecosystem", "Competitor", "CustomerProduct"):
+        assert reg.type(name).get("nodes") is not None
+    customer = reg.type("CustomerProduct")
+    assert customer.get("ecosystem") and customer.get("launch_date")
+    assert "EMC" in (reg.type("TestSolution").get("test_type").enum or ())  # type: ignore[union-attr]
+    roles = reg.type("Ecosystem").get("role").enum or ()  # type: ignore[union-attr]
+    assert {"institute", "ipc"} <= set(roles)
+    assert reg.type("Opportunity").get("deal_stage") is not None
+    # Trend ratings are facts; the Trend priority is computed, not a field.
+    trend = reg.type("Trend")
+    for name in ("measurement_impact", "our_fit", "market_impact"):
+        assert trend.get(name).klass == "sourced"  # type: ignore[union-attr]
+    assert trend.get("priority") is None
+    assert reg.document["computed_fields"]["Trend"][0]["stored"] is False
+    # v1's id rules and field classes are kept.
+    v1 = json.loads(
+        (REPO / "docs/proposals/bi_schema_v1/bi_schema_v1.json").read_text(encoding="utf-8")
+    )
+    assert reg.document["id_rules"] == v1["id_rules"]
+    assert reg.document["field_classes"] == v1["field_classes"]
+
+
+def test_every_robotics_csv_maps_with_no_unknown_column(tmp_path: Path) -> None:
+    store = BiStore(tmp_path)
+    for entity_type, name in service.DEMO_FILES:
+        prepared = importer.preview(
+            store, entity_type=None, filename=name, csv_text=service.demo_text(name)
+        )
+        assert prepared.entity_type == entity_type, name  # guessed from the headers
+        statuses = {c["source"]: c["status"] for c in prepared.columns}
+        assert "unknown" not in statuses.values(), (name, statuses)
+        ignored = {k for k, v in statuses.items() if v == "ignored"}
+        assert ignored == ({"優先度"} if entity_type == "Application" else set())
+
+
+def test_the_demo_csvs_in_the_package_equal_the_sample() -> None:
+    for _, name in service.DEMO_FILES:
+        sample = SAMPLE / "tools" / "samples" / "robotics" / name
+        assert service.demo_text(name) == sample.read_text(encoding="utf-8-sig")
+
+
+def test_harness_and_storage_code_outside_the_package_do_not_import_bi_types() -> None:
+    """ADR-K10: only the BI package and the Host's BI wiring name it."""
+    allowed = {
+        "host_runtime/host.py",
+        "host_runtime/assets.py",
+        "host_runtime/bi_cards_api.py",
+        "host_runtime/bi_cards_tools.py",
+    }
+    for path in (REPO / "src").rglob("*.py"):
+        relative = path.relative_to(REPO / "src").as_posix()
+        if relative.startswith("capabilities/bi_cards/") or relative in allowed:
+            continue
+        assert "capabilities.bi_cards" not in path.read_text(encoding="utf-8"), relative
+
+
+def test_values_normalise_like_the_fixture_ingest() -> None:
+    assert parse_date("115/10/13") == "2026-10-13"
+    assert parse_date("2026年3月1日") == "2026-03-01"
+    assert parse_date("2027-03-31") == "2027-03-31"
+    assert parse_date("下季") is None
+    assert split_list("OTA;波束成型；EIRP、TRP") == ["OTA", "波束成型", "EIRP", "TRP"]
+    assert split_list("示波器(含解碼;選配);LISN") == ["示波器(含解碼;選配)", "LISN"]
+    reg = registry()
+    stage = reg.type("Application").get("lifecycle")
+    assert stage is not None and reg.normalize(stage, "研發") == ("RD", [])
+    domain = reg.type("Technology").get("domain")
+    assert domain is not None
+    value, warnings = reg.normalize(domain, "Robotics;機器人;wirless")
+    assert value == ["robotics"] and warnings[0][0] == "domain_unknown"
+
+
+# -- Case A acceptance (§4.7) ----------------------------------------------
+
+CSV = (
+    "應用名稱,領域,生命週期,節點,技術,量測主題,優先度,神秘欄,更新日期,備註\n"
+    "測試應用甲,robotics,研發,L2-Servo-Motor-Drive,EtherCAT;不存在的技術,OTA；EIRP,5,x,"
+    "115/10/13,\n"
+    "測試應用乙,Robotix,量產,Keysight,TSN,吞吐量,3-4,y,2026-10-01,\n"
+)
+
+
+def test_1_a_preview_writes_nothing(tmp_path: Path) -> None:
+    before = _snapshot(tmp_path)
+    importer.preview(BiStore(tmp_path), entity_type=None, filename="a.csv", csv_text=CSV)
+    assert _snapshot(tmp_path) == before == {}
+    store = _loaded(tmp_path)
+    before = _snapshot(tmp_path)
+    status, answer = _call(
+        tmp_path,
+        "POST",
+        "/api/bi/import/preview",
+        {"dataset": "demo", "entity_type": None, "filename": "a.csv", "csv_text": CSV},
+    )
+    assert status == 200 and answer["summary"]["create"] == 2
+    assert _snapshot(tmp_path) == before
+    assert len(store.card_rows()) == 104
+
+
+def test_2_raw_and_normalised_values_are_both_shown(tmp_path: Path) -> None:
+    prepared = importer.preview(
+        _loaded(tmp_path), entity_type="Application", filename="a.csv", csv_text=CSV
+    )
+    cells = {c["field"]: c for c in prepared.rows[0]["fields"]}
+    assert cells["lifecycle"]["raw"] == "研發" and cells["lifecycle"]["normalized"] == "RD"
+    assert cells["updated"]["raw"] == "115/10/13"
+    assert cells["updated"]["normalized"] == "2026-10-13"
+    assert cells["measurement_topics"]["normalized"] == ["OTA", "EIRP"]
+    assert cells["nodes"]["change"] == "add"
+
+
+def test_3_unknown_columns_missing_links_and_mismatches_are_warned(tmp_path: Path) -> None:
+    prepared = importer.preview(
+        _loaded(tmp_path), entity_type="Application", filename="a.csv", csv_text=CSV
+    )
+    columns = {c["source"]: c for c in prepared.columns}
+    assert columns["神秘欄"]["status"] == "unknown"
+    assert columns["優先度"]["status"] == "ignored"
+    assert columns["優先度"]["note"] == "優先度由 Skill 依事實判斷，不存資料"
+    assert columns["生命週期"]["status"] == "alias"
+    first = {w["code"] for w in prepared.rows[0]["warnings"]}
+    second = {w["code"] for w in prepared.rows[1]["warnings"]}
+    assert {"link_missing", "priority_ignored"} <= first
+    # Keysight is a Competitor card, not a Node (DQ-3); "Robotix" is no domain.
+    assert {"link_type_mismatch", "domain_unknown", "priority_ignored"} <= second
+    assert prepared.summary()["warnings"] >= 6
+    # A lenient integer is never adopted silently (DQ-9).
+    trend_csv = "趨勢,領域,量測影響\n某趨勢,robotics,3-4\n"
+    rows = importer.preview(
+        BiStore(tmp_path), entity_type="Trend", filename="t.csv", csv_text=trend_csv
+    ).rows
+    cell = next(c for c in rows[0]["fields"] if c["field"] == "measurement_impact")
+    assert cell["raw"] == "3-4" and cell["normalized"] is None
+    assert any(w["code"] == "type_mismatch" for w in rows[0]["warnings"])
+
+
+def test_4_a_rerun_creates_no_duplicates(tmp_path: Path) -> None:
+    store = _loaded(tmp_path)
+    assert service.load_demo(store) == {"created": 0, "updated": 0, "unchanged": 104}
+    first = importer.apply(
+        store,
+        importer.preview(store, entity_type="Application", filename="a.csv", csv_text=CSV),
+        None,
+        actor=ACTOR,
+    )
+    second = importer.apply(
+        store,
+        importer.preview(store, entity_type="Application", filename="a.csv", csv_text=CSV),
+        None,
+        actor=ACTOR,
+    )
+    assert (first.created, second.created, second.unchanged) == (2, 0, 2)
+    assert len(store.card_rows()) == 106
+
+
+def test_5_human_values_are_kept_and_imports_become_proposals(tmp_path: Path) -> None:
+    store = _loaded(tmp_path)
+    card = store.find("Application", "AMR 電池包 BMS 與充電驗證")
+    assert card is not None
+    version = store.set_field(
+        card["id"], "lifecycle", "Field", base_version=card["version"], actor=ACTOR
+    )
+    assert version == card["version"] + 1
+    text = service.demo_text("application_robotics.csv")
+    prepared = importer.preview(store, entity_type="Application", filename="b.csv", csv_text=text)
+    row = next(r for r in prepared.rows if r["canonical_key"] == card["canonical_key"])
+    cell = next(c for c in row["fields"] if c["field"] == "lifecycle")
+    assert cell["change"] == "human_kept" and cell["current"] == "Field"
+    result = importer.apply(store, prepared, None, actor=ACTOR)
+    assert result.proposals == 1
+    fields = store.fields(card["id"])
+    assert fields["lifecycle"]["value"] == "Field" and fields["lifecycle"]["kind"] == "human"
+    assert store.proposals(card["id"])[0]["field"] == "lifecycle"
+
+
+def test_6_previews_and_proposals_are_not_searchable(tmp_path: Path) -> None:
+    store = _loaded(tmp_path)
+    raw = "應用名稱,領域,量測主題\n機密草稿應用,robotics,獨特詞XYZ\n"
+    prepared = importer.preview(store, entity_type="Application", filename="r.csv", csv_text=raw)
+    importer.remember(prepared)
+    assert service.search(store, text="獨特詞XYZ") == []
+    assert service.search(store, text="機密草稿應用") == []
+    card = store.find("Trend", "快充與高稼動電池")
+    assert card is not None
+    store.set_field(card["id"], "stage", "peak", base_version=card["version"], actor=ACTOR)
+    csv_text = "趨勢,領域,階段\n快充與高稼動電池,robotics,觀察\n"
+    importer.apply(
+        store,
+        importer.preview(store, entity_type="Trend", filename="p.csv", csv_text=csv_text),
+        None,
+        actor=ACTOR,
+    )
+    assert store.proposals(card["id"])[0]["value"] == "watch"
+    assert [c["id"] for c, _ in service.search(store, entity_type="Trend", text="watch")] == []
+
+
+def test_7_fictional_or_verified_data_never_becomes_trusted(tmp_path: Path) -> None:
+    store = _loaded(tmp_path)
+    everything = store.all_fields()
+    assert all(c["synthetic"] for c in store.card_rows())
+    assert not any(service.trusted(c, everything.get(c["id"], {})) for c in store.card_rows())
+    verified = "產品名稱,領域,信心度,備註\n某產品,robotics,verified,(虛構範例)\n"
+    prepared = importer.preview(
+        store, entity_type="CustomerProduct", filename="v.csv", csv_text=verified
+    )
+    assert any(w["code"] == "fictional_not_trusted" for w in prepared.rows[0]["warnings"])
+    importer.apply(store, prepared, None, actor=ACTOR)
+    card = store.find("CustomerProduct", "某產品")
+    assert card is not None and card["synthetic"]
+    assert store.fields(card["id"])["confidence"]["value"] == "assumed"
+    # Even a person's verified does not make a synthetic card trusted.
+    store.set_field(card["id"], "confidence", "verified", base_version=card["version"], actor=ACTOR)
+    detail = service.card_detail(store, card["id"])
+    assert detail is not None and detail["card"]["review_status"] == "draft"
+
+
+def test_8_query_results_carry_sources(tmp_path: Path) -> None:
+    _loaded(tmp_path)
+    handler = QueryHandler(tmp_path)
+    context = RequestContext(
+        trace=TraceIdentifiers(trace_id="t1", request_id="r1", span_id="s1"),
+        actor=ACTOR,
+        namespace="engineering",
+        message="bi",
+        channel="local",
+        session_id="s-1",
+    )
+    result = asyncio.run(
+        handler(context, QueryRequest(entity_type="TestSolution", text="BMS", limit=10))
+    )
+    data = result.model_dump()
+    assert data["total"] >= 1 and GAP_RULE in data["scope_note"]
+    first = data["cards"][0]
+    assert first["card"].startswith("TestSolution:") and first["trusted"] is False
+    assert all(
+        v["source"].startswith("fixture:demo/test_solutions_robotics.csv#row")
+        for v in first["fields"].values()
+    )
+    assert any(link["field"] == "applications" for link in first["links"])
+    assert QUERY_SPEC.side_effect == "read"
+
+
+def test_9_the_procedure_scopes_gaps_cites_cards_and_judges_priority() -> None:
+    assert f"「{GAP_RULE}…」" in PROCEDURE
+    assert "[卡片 <type>:<key>]" in PROCEDURE
+    assert "推論" in PROCEDURE and "事實" in PROCEDURE
+    assert "priority is never stored" in PROCEDURE and "judge it yourself" in PROCEDURE
+    manifest = bi_knowledge_skill()
+    assert manifest.metadata.identity == BI_SKILL and manifest.instructions == PROCEDURE
+
+
+# -- edits, undo, demo -----------------------------------------------------
+
+
+def test_a_stale_edit_is_refused_with_the_current_value(tmp_path: Path) -> None:
+    store = _loaded(tmp_path)
+    card = store.find("Competitor", "Keysight")
+    assert card is not None
+    path = f"/api/bi/cards/{card['id']}/field"
+    body = {"dataset": "demo", "field": "ticker", "value": "KEYS2", "base_version": 1}
+    status, answer = _call(tmp_path, "POST", path, {**body, "reason": ""})
+    assert (status, answer) == (200, {"ok": True, "version": 2})
+    status, answer = _call(tmp_path, "POST", path, {**body, "value": "OTHER"})
+    assert status == 409
+    assert answer["ok"] is False and answer["code"] == "stale_edit"
+    assert answer["current"] == "KEYS2" and answer["by"] == f"{ACTOR} via web" and answer["at"]
+    # A judgement field needs a reason (ADR-K11).
+    status, answer = _call(
+        tmp_path,
+        "POST",
+        path,
+        {"dataset": "demo", "field": "pricing_position", "value": "par", "base_version": 2},
+    )
+    assert status == 400 and answer["code"] == "reason_required"
+    status, history = _call(tmp_path, "GET", f"/api/bi/cards/{card['id']}/history")
+    assert history["history"][-1]["new"] == "KEYS2"
+    assert set(history["history"][-1]) >= {"field", "old", "new", "source", "at", "by"}
+
+
+def test_an_import_is_undone_as_a_whole(tmp_path: Path) -> None:
+    store = _loaded(tmp_path)
+    card = store.find("Trend", "快充與高稼動電池")
+    assert card is not None
+    old = store.fields(card["id"])["stage"]["value"]
+    csv_text = "趨勢,領域,階段\n快充與高稼動電池,robotics,高峰\n全新趨勢,robotics,觀察\n"
+    status, preview = _call(
+        tmp_path,
+        "POST",
+        "/api/bi/import/preview",
+        {"dataset": "demo", "filename": "u.csv", "csv_text": csv_text, "entity_type": "Trend"},
+    )
+    assert [r["action"] for r in preview["rows"]] == ["update", "create"]
+    status, applied = _call(
+        tmp_path, "POST", "/api/bi/import/apply", {"preview_id": preview["preview_id"]}
+    )
+    assert applied["applied"] == {"created": 1, "updated": 1, "unchanged": 0, "proposals": 0}
+    assert store.fields(card["id"])["stage"]["value"] == "peak"
+    status, answer = _call(
+        tmp_path, "POST", "/api/bi/import/undo", {"import_id": applied["import_id"]}
+    )
+    assert (status, answer) == (200, {"ok": True})
+    assert store.fields(card["id"])["stage"]["value"] == old
+    assert store.fields(card["id"])["stage"]["kind"] == "fixture"
+    assert store.find("Trend", "全新趨勢") is None
+    assert len(store.card_rows()) == 104
+    status, again = _call(
+        tmp_path, "POST", "/api/bi/import/undo", {"import_id": applied["import_id"]}
+    )
+    assert status == 400 and again["code"] == "import_already_undone"
+    # The history keeps the import and its undo.
+    kinds = [h["source"]["kind"] for h in store.history(card["id"]) if h["field"] == "stage"]
+    assert kinds == ["fixture", "import", "undo"]
+
+
+def test_apply_takes_only_the_chosen_rows(tmp_path: Path) -> None:
+    status, preview = _call(
+        tmp_path,
+        "POST",
+        "/api/bi/import/preview",
+        {"dataset": "demo", "filename": "a.csv", "csv_text": CSV, "entity_type": None},
+    )
+    status, applied = _call(
+        tmp_path,
+        "POST",
+        "/api/bi/import/apply",
+        {"preview_id": preview["preview_id"], "rows": [2]},
+    )
+    assert applied["applied"]["created"] == 1
+    status, cards = _call(tmp_path, "GET", "/api/bi/cards", dataset="demo")
+    assert [c["name"] for c in cards["cards"]] == ["測試應用甲"]
+    status, answer = _call(tmp_path, "POST", "/api/bi/import/apply", {"preview_id": "nope"})
+    assert status == 404 and answer["code"] == "preview_unknown"
+
+
+def test_the_demo_load_is_idempotent_and_never_trusted(tmp_path: Path) -> None:
+    status, first = _call(tmp_path, "POST", "/api/bi/demo/load", {"dataset": "demo"})
+    assert (status, first) == (
+        200,
+        {"ok": True, "imported": {"created": 104, "updated": 0, "unchanged": 0}},
+    )
+    status, second = _call(tmp_path, "POST", "/api/bi/demo/load", {"dataset": "demo"})
+    assert second["imported"] == {"created": 0, "updated": 0, "unchanged": 104}
+    status, cards = _call(tmp_path, "GET", "/api/bi/cards")
+    assert len(cards["cards"]) == 104
+    assert {c["review_status"] for c in cards["cards"]} == {"draft"}
+    assert (tmp_path / "bi" / "demo" / "bi.sqlite").is_file()
+
+
+# -- the API contract ------------------------------------------------------
+
+
+def test_the_api_answers_the_contract_shapes(tmp_path: Path) -> None:
+    status, schema = _call(tmp_path, "GET", "/api/bi/schema")
+    assert status == 200 and len(schema["types"]) == 12
+    field = schema["types"][0]["fields"][0]
+    assert set(field) == {"name", "label", "type", "class", "enum", "link_to", "list"}
+    assert _call(tmp_path, "GET", "/api/bi/datasets") == (200, {"datasets": []})
+    _call(tmp_path, "POST", "/api/bi/demo/load", {"dataset": "demo"})
+    status, found = _call(tmp_path, "GET", "/api/bi/datasets")
+    assert found["datasets"][0]["name"] == "demo" and found["datasets"][0]["cards"] == 104
+    status, listed = _call(
+        tmp_path, "GET", "/api/bi/cards", dataset="demo", type="Application", q="BMS"
+    )
+    assert len(listed["cards"]) == 1
+    summary = listed["cards"][0]
+    assert {
+        "id",
+        "entity_type",
+        "canonical_key",
+        "name",
+        "review_status",
+        "updated",
+        "fields",
+    } <= set(summary)
+    status, robotics = _call(tmp_path, "GET", "/api/bi/cards", domain="robotics", type="Node")
+    status, wireless = _call(tmp_path, "GET", "/api/bi/cards", domain="wireless", type="Node")
+    assert len(robotics["cards"]) == 12 and len(wireless["cards"]) == 1  # X-Certification-Lab
+    status, detail = _call(tmp_path, "GET", f"/api/bi/cards/{summary['id']}")
+    assert status == 200 and detail["card"]["version"] == 1
+    assert detail["card"]["domain"] == "robotics"
+    field = detail["fields"][0]
+    assert set(field) == {"field", "label", "value", "class", "source", "history"}
+    assert set(field["source"]) == {"kind", "ref", "at", "by"}
+    assert detail["links"] and set(detail["links"][0]) == {
+        "field",
+        "target_id",
+        "target_key",
+        "missing",
+    }
+    assert detail["proposals"] == []
+    status, preview = _call(
+        tmp_path,
+        "POST",
+        "/api/bi/import/preview",
+        {"dataset": "demo", "filename": "a.csv", "csv_text": CSV, "entity_type": None},
+    )
+    assert set(preview) == {"preview_id", "entity_type", "columns", "rows", "summary"}
+    assert set(preview["columns"][0]) == {"source", "field", "status", "note"}
+    assert set(preview["rows"][0]) == {"row", "canonical_key", "action", "fields", "warnings"}
+    assert set(preview["rows"][0]["fields"][0]) == {
+        "field",
+        "raw",
+        "normalized",
+        "current",
+        "change",
+    }
+    assert set(preview["summary"]) == {"create", "update", "unchanged", "skip", "warnings"}
+    for bad in (
+        _call(tmp_path, "GET", "/api/bi/cards/nope"),
+        _call(tmp_path, "GET", "/api/bi/nothing"),
+        _call(tmp_path, "POST", "/api/bi/import/preview", {"csv_text": ""}),
+        _call(tmp_path, "GET", "/api/bi/cards", dataset="../x"),
+    ):
+        assert 400 <= bad[0] < 500 and bad[1]["ok"] is False
+        assert {"code", "message"} <= set(bad[1])
+
+
+def test_the_routes_are_served_behind_the_token(served: Any) -> None:  # noqa: F811
+    web, server, _recorder, _ = served
+    port = server.server_address[1]
+
+    def ask(path: str, token: str, body: dict[str, Any] | None = None) -> tuple[int, Any]:
+        request = urllib.request.Request(
+            f"http://127.0.0.1:{port}{path}",
+            data=None if body is None else json.dumps(body).encode(),
+            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=30) as reply:
+                return reply.status, json.loads(reply.read())
+        except urllib.error.HTTPError as error:
+            return error.code, json.loads(error.read())
+
+    assert ask("/api/bi/schema", "wrong")[0] == 401
+    assert ask("/api/bi/demo/load", "wrong", {})[0] == 401
+    status, loaded = ask("/api/bi/demo/load", server.token, {"dataset": "demo"})
+    assert status == 200 and loaded["imported"]["created"] == 104
+    status, board = ask("/api/bi/dashboard?dataset=demo&domain=robotics", server.token)
+    assert status == 200 and board["domain"] == "robotics"
+    assert (web.runtime.layout.workspace_root / "bi" / "demo" / "bi.sqlite").is_file()
+
+
+# -- dashboard: the sample's intentional gaps ------------------------------
+
+
+@pytest.fixture
+def board(tmp_path: Path) -> dict[str, Any]:
+    return dashboard.dashboard(_loaded(tmp_path), "robotics")
+
+
+def test_dashboard_shape(board: dict[str, Any]) -> None:
+    assert [s["id"] for s in board["sections"]][:6] == ["6", "10", "19", "18", "17", "14"]
+    for section in board["sections"]:
+        assert set(section) == {"id", "title", "kind", "columns", "rows", "flags", "note"}
+        assert section["kind"] in ("table", "matrix", "funnel")
+        assert all(len(row) == len(section["columns"]) for row in section["rows"])
+        assert all(f["level"] in ("red", "warn") for f in section["flags"])
+
+
+def test_dashboard_bms_and_eol_have_competitors_but_no_solution_of_ours(
+    board: dict[str, Any],
+) -> None:
+    flagged = _flagged(_section(board, "6"))
+    red = {k for k, (level, _) in flagged.items() if level == "red"}
+    assert red == {"AMR 電池包 BMS 與充電驗證", "機器人產線下線測試"}
+    assert flagged["AMR 電池包 BMS 與充電驗證"][1] == "對手有、我方無"
+    assert "優先度" not in _section(board, "6")["columns"]
+
+
+def test_dashboard_bms_has_demand_but_no_opportunity(board: dict[str, Any]) -> None:
+    flagged = _flagged(_section(board, "19"))
+    assert flagged == {"AMR 電池包 BMS 與充電驗證": ("warn", "有需求無商機")}
+
+
+def test_dashboard_the_fast_charging_trend_has_no_solution(board: dict[str, Any]) -> None:
+    flagged = _flagged(_section(board, "10"))
+    assert flagged == {"快充與高稼動電池": ("warn", "無對應方案")}
+
+
+def test_dashboard_the_hiwin_mikrosystem_product_has_no_ecosystem(board: dict[str, Any]) -> None:
+    flagged = _flagged(_section(board, "16"))
+    assert flagged == {"大銀 直驅馬達伺服模組": ("warn", "缺 生態系")}
+
+
+def test_dashboard_the_5g_private_network_solution_has_no_active_opportunity(
+    board: dict[str, Any],
+) -> None:
+    flagged = _flagged(_section(board, "18"))
+    assert flagged == {"R&S 5G 私有網路機器人連線驗證方案": ("warn", "無進行中商機")}
+
+
+def test_dashboard_lists_technologies_missing_a_concept(board: dict[str, Any]) -> None:
+    flagged = _flagged(_section(board, "14"))
+    missing = {k for k, (_, text) in flagged.items() if text == "缺 Concept"}
+    assert missing == {"5G-Private-Network", "BMS-Fast-Charging", "Edge-AI-SoC"}
+
+
+def test_dashboard_trend_priority_is_computed_and_the_funnel_counts_stages(
+    board: dict[str, Any],
+) -> None:
+    trends = _section(board, "1")
+    assert all(row[5] == row[3] * row[4] for row in trends["rows"])
+    assert [row[5] for row in trends["rows"]] == sorted(
+        (row[5] for row in trends["rows"]), reverse=True
+    )
+    funnel = _section(board, "17")
+    assert funnel["kind"] == "funnel" and sum(row[1] for row in funnel["rows"]) == 7
+    matrix = _section(board, "4")
+    assert matrix["kind"] == "matrix" and len(matrix["rows"]) == 13
+
+
+def test_the_stale_section_uses_ninety_days(tmp_path: Path) -> None:
+    from datetime import date, timedelta
+
+    store = _loaded(tmp_path)
+    cards = dashboard._cards(store)
+    later = date.today() + timedelta(days=91)
+    section = dashboard.stale(cards, "robotics", today=later)
+    assert len(section["rows"]) == 103  # X-Certification-Lab is wireless
+    assert dashboard.stale(cards, "robotics")["rows"] == []
+
+
+# -- default on ------------------------------------------------------------
+
+
+def test_the_skill_is_installed_switched_on_and_offers_the_tool(tmp_path: Path) -> None:
+    """An existing PC (installed before this Skill shipped) gets it switched
+    on by the next install-bundled; the Host then offers `bi__query`."""
+    config, layout = ready(tmp_path)
+    older = tuple(m for m in shipped() if m.metadata.identity != BI_SKILL)
+    skill_packs.install_bundle(layout, None, shipped=older)
+    name = f"{BI_SKILL.namespace}__{BI_SKILL.name}__{BI_SKILL.version}.json"
+    assert not (layout.skills / name).exists()
+    skill_packs.install_bundle(layout, None, shipped=shipped())
+    assert (layout.skills / name).exists()
+    runtime = build_runtime(config, layout=layout)
+    offered = {
+        m.metadata.identity for m in runtime.agent.gateway.router.commands.skills.manifests()
+    }
+    assert BI_SKILL in offered
+    tools = bi_cards_tools(runtime.agent.gateway)
+    assert [t.tool.name for t in tools] == [TOOL_NAME]
+    assert GAP_RULE in tools[0].tool.description
+
+
+def test_a_switched_off_skill_offers_no_tool(tmp_path: Path) -> None:
+    config, layout = ready(tmp_path)
+    skill_packs.install_bundle(layout, None, shipped=shipped())
+    from host_runtime import asset_shelf
+
+    asset_shelf.switch_off(layout, "skill", BI_SKILL)
+    runtime = build_runtime(config, layout=layout)
+    assert bi_cards_tools(runtime.agent.gateway) == []
+    assert isinstance(HostLayout.under(tmp_path / "x"), HostLayout)
+
+
+def test_set_field_on_an_unknown_card_is_refused(tmp_path: Path) -> None:
+    store = _loaded(tmp_path)
+    with pytest.raises(BiStoreError):
+        store.set_field("nope", "name", "x", base_version=1, actor=ACTOR)

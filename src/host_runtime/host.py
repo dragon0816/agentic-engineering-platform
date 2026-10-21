@@ -27,6 +27,8 @@ from agent.gateway import Gateway, KnowledgeVaultTool
 from agent.routing import CommandRouter, RequestRouter
 from agent.skills import SkillManifest, SkillRegistry
 from agent.task_execution import GatewayTaskExecutor
+from capabilities.bi_cards.capability import bindings as bi_cards_bindings
+from capabilities.bi_cards.manifest import BI_SKILL
 from capabilities.browser_session.handlers import SPEC as BROWSER_SPEC
 from capabilities.browser_session.handlers import (
     BrowserRequest,
@@ -299,6 +301,7 @@ from harness.restricted_runner import (
 )
 from host_runtime.agent import LocalAgent
 from host_runtime.attachments import AttachmentStore
+from host_runtime.bi_cards_tools import bi_cards_tools
 from host_runtime.bridge_tools import bridge_tools
 from host_runtime.business_cards_tools import business_cards_tools
 from host_runtime.chat_authoring import ChatAuthoring
@@ -1268,6 +1271,13 @@ def build_gateway(
             ),
             local_only=binding.require_local_model if binding is not None else False,
         )
+    # BI knowledge cards (owner 2026-10-21, Case A): the read-only chat query,
+    # installed when this host has the Skill, as for business cards.
+    if _has_skill(layout, BI_SKILL):
+        for spec, handler, request, response in bi_cards_bindings(layout.workspace_root):
+            installed.register(
+                spec, handler, request, response, ExecutionDependencies(central_required=False)
+            )
     if config.coding is not None and config.coding.workspace_roots:
         installed.register(
             CODING_RUN_SPEC,
@@ -2173,6 +2183,7 @@ def build_runtime(
         *chat_authoring.tools(),
         *bridge_tools(gateway.bridge),
         *business_cards_tools(gateway),
+        *bi_cards_tools(gateway),
         *mcp.tools(gateway.bridge),
         *workflow_form_tools(gateway.engine),
     )
@@ -2247,7 +2258,12 @@ def _membership_client(runtime: HostRuntime) -> Any:
 
 
 def _has_business_cards_skill(layout: HostLayout) -> bool:
-    pattern = f"{CARDS_SKILL.namespace}__{CARDS_SKILL.name}__*.json"
+    return _has_skill(layout, CARDS_SKILL)
+
+
+def _has_skill(layout: HostLayout, identity: AssetIdentity) -> bool:
+    """Some version of the Skill is installed here, switched on or off."""
+    pattern = f"{identity.namespace}__{identity.name}__*.json"
     return any(layout.skills.glob(pattern)) or any((layout.skills / "disabled").glob(pattern))
 
 

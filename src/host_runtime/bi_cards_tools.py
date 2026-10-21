@@ -1,0 +1,97 @@
+"""The `bi__query` conversation tool (BI Knowledge Case A, owner 2026-10-21).
+
+Offered only while some version of the `engineering/bi-knowledge` Skill is
+switched on and `bi-cards/query` is installed; the tool carries the Skill's
+procedure. Every call is a `CapabilityInvocation` through the Bridge with
+`origin: model`, under the actor's grants (read only, no approval).
+"""
+
+from __future__ import annotations
+
+from collections.abc import Sequence
+from typing import Any
+
+from agent.gateway import HostTool, HostToolOutcome
+from capabilities.bi_cards.capability import QUERY_SPEC
+from capabilities.bi_cards.manifest import BI_SKILL
+from capabilities.runtime import CapabilityInvocation
+from common.execution import Failure, RequestContext
+from models.contracts import ModelTool
+
+TOOL_NAME = "bi__query"
+FAILURE_TEXT = {
+    "dataset_invalid": "資料集名稱不正確",
+    "permission_denied": "BI 卡片查詢沒有授權給你（在 Agent Web 的 Capabilities 選取）",
+    "invalid_input": "工具參數不正確",
+    "timeout": "這次查詢逾時",
+}
+
+SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "dataset": {"type": "string", "description": "the dataset; demo by default"},
+        "entity_type": {
+            "type": "string",
+            "description": "Trend, Technology, Node, Ecosystem, Account, CustomerProduct, "
+            "Application, TestSolution, Competitor, Opportunity, Signal or Concept",
+        },
+        "text": {"type": "string", "description": "words to find in names and field values"},
+        "domain": {"type": "string", "description": "wireless, AIDC or robotics"},
+        "field": {"type": "string", "description": "only cards with this field set"},
+        "value": {"type": "string", "description": "with field: the field contains this"},
+        "follow_links": {"type": "boolean", "description": "include each card's links"},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 100},
+    },
+    "required": [],
+}
+
+
+def _switched_on(gateway: Any) -> list[Any]:
+    try:
+        manifests = gateway.router.commands.skills.manifests()
+    except AttributeError:
+        return []
+    return [
+        item
+        for item in manifests
+        if item.metadata.identity.namespace == BI_SKILL.namespace
+        and item.metadata.identity.name == BI_SKILL.name
+    ]
+
+
+def bi_cards_tools(gateway: Any) -> Sequence[HostTool]:
+    found = _switched_on(gateway)
+    if not found or gateway.bridge.installed.get(QUERY_SPEC.identity) is None:
+        return []
+
+    async def call(context: RequestContext, arguments: dict[str, Any]) -> HostToolOutcome:
+        result = await gateway.bridge.execute(
+            CapabilityInvocation(
+                context=context, origin="model", target=QUERY_SPEC.identity, arguments=arguments
+            )
+        )
+        if result.status == "succeeded":
+            return HostToolOutcome(status="succeeded", data=result.data)
+        failure = result.failure or Failure(code=result.status, message="")
+        text = FAILURE_TEXT.get(failure.code, "BI 卡片查詢沒有完成")
+        return HostToolOutcome(
+            status="failed",
+            data=result.data,
+            failure=failure.model_copy(update={"message": f"{text}（{failure.code}）"}),
+        )
+
+    description = (
+        "Search the BI knowledge cards (read only); each card returns its fields with "
+        f"their sources. PROCEDURE: {found[-1].instructions}"
+    )
+    return [
+        HostTool(
+            ModelTool(
+                name=TOOL_NAME,
+                description=description,
+                input_contract=f"host.{TOOL_NAME}.v1",
+                input_schema=SCHEMA,
+            ),
+            call,
+        )
+    ]
