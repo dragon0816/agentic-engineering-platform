@@ -2,13 +2,30 @@
 
 Updated: 2026-10-21 (Asia/Taipei), by Claude Code (accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## Release 20261021-0810-607a59ea and where work stands (2026-10-21, Claude Code) — latest
+## #233 Agent Web follow-ups (2026-10-21, Claude Code) — latest
+
+Commits on main after a7f72e3c (89d8389a … the docs commit), not pushed, Agent Web not restarted,
+live data only read. All ten items of #233 fixed (row in `docs/TASKS.md`; decision
+`docs/DECISIONS.md` "Pending changes leave out draft install cards; undoing a health fix reopens
+its finding at once (#233)"). Item 10's causes are inferred: the model's tool arguments are not
+stored anywhere (only names and codes), so the `cards__list` cause (most likely `limit` > 200) could
+not be confirmed; storing scrubbed arguments would make the next such case diagnosable.
+
+Owner re-check (after `/api/tasks` is idle and Agent Web restarted on this code): (1) New session,
+then type and press Enter at once: Send is disabled briefly, the message lands in the new session;
+(2) open 記憶 → 資料 → a person's 歷史, go to 對話, press 「為什麼？」 → 到記憶頁修改或刪除: 偏好 shows at
+once with 「開啟中…」/「更新中…」; (3) 待確認 → a health card's fix → 復原: the card is back at once;
+(4) propose a rule to ask (「以後都先問我…」): the card says 「照這條先問你」; (5) Settings → Teams
+on a platform-connected PC: field and Save disabled with "Not used…"; (6) a draft revised twice shows
+"draft edit 3"; (7) a coding Harness turn ends with 「整理回答中…」.
+
+## Release 20261021-0810-607a59ea and where work stands (2026-10-21, Claude Code)
 
 - main 607a59ea is pushed and CI green; Agent Web on this PC runs it. Release
   `dist/releases/20261021-0810-607a59ea/` (SHA-256 in `docs/TASKS.md`), commented on #218, tag local.
 - Live re-checks done: M2–M4, B1, M5, B3 timing (see `docs/TASKS.md`). Open: B2 live (needs new
   signature mail), Telegram `/why` live, loans 06/06b live (owner present for portal/C4C login).
-- Known UX issues not yet filed: 「為什麼？」 links show the old place for ~5 s with no indicator; a
+- (Now #233, fixed above.) Known UX issues: 「為什麼？」 links show the old place for ~5 s with no indicator; a
   health card disappears after 復原 until the next check; preference card effects text always says
   「不再詢問」; Outlook read failures are swallowed without a log (`OutlookMail._call`).
 - Next: #220 API-level trial (running), #219 141 reboot test at a quiet time (evening/weekend, not
