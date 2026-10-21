@@ -2,7 +2,19 @@
 
 Updated: 2026-10-21 (Asia/Taipei), by Claude Code (accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## Live-check fix B3: the slow 記憶 page (2026-10-21, Claude Code) — latest
+## Release 20261021-0810-607a59ea and where work stands (2026-10-21, Claude Code) — latest
+
+- main 607a59ea is pushed and CI green; Agent Web on this PC runs it. Release
+  `dist/releases/20261021-0810-607a59ea/` (SHA-256 in `docs/TASKS.md`), commented on #218, tag local.
+- Live re-checks done: M2–M4, B1, M5, B3 timing (see `docs/TASKS.md`). Open: B2 live (needs new
+  signature mail), Telegram `/why` live, loans 06/06b live (owner present for portal/C4C login).
+- Known UX issues not yet filed: 「為什麼？」 links show the old place for ~5 s with no indicator; a
+  health card disappears after 復原 until the next check; preference card effects text always says
+  「不再詢問」; Outlook read failures are swallowed without a log (`OutlookMail._call`).
+- Next: #220 API-level trial (running), #219 141 reboot test at a quiet time (evening/weekend, not
+  during office hours), then the remaining owner-decision issues (#212, #215, #216, #217).
+
+## Live-check fix B3: the slow 記憶 page (2026-10-21, Claude Code)
 
 Commits on main, not pushed, Agent Web not restarted, live data untouched. Decision
 `docs/DECISIONS.md` 2026-10-21 "The memory page reads the installed manifests and sets up a memory

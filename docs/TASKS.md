@@ -3011,4 +3011,17 @@ s-k-20261011T102952` (not published).
   Verification: ruff check, ruff format --check, mypy clean; project `.venv` 3766 passed,
   9 skipped, 0 failed; `C:/aepci-wk/venv` (points at this repo, `--basetemp=C:/aepci-wk/bt-b3`)
   3741 passed, 34 skipped, 0 failed.
-- [ ] Owner live re-check of B3 (steps in HANDOFF.md).
+- [x] Live re-check of B3 on the owner's PC (2026-10-21, Claude Code, Agent Web restarted on
+  607a59ea): `/api/memory/overview` 443 / 364 ms (was ~17 s), `?only=notes,spaces` 21 ms,
+  `/api/memory/people` 27 ms, `/api/memory/preferences` 17 ms. UI steps (5)–(7) not re-run.
+- [x] Nightly review once a night (2026-10-21, Claude Code, a8c22d19): `nightly_tick` compares
+  `last_review` (stored in UTC) by local date, so the review no longer runs several times between
+  02:00 and 08:00 Taipei. `tests/test_nightly_local_day.py`. Found by the M5 live re-check.
+- [x] Live re-check of B1 and M5 (2026-10-21, Claude Code, 423387b2): 資料 shows `contacts/org`
+  已開啟 with no 「無主」; business-card turns are offered `notes__search` (40 tools without a notes
+  keyword); 立即檢查, a contradiction press and 復原, 「為什麼？」 links, settings round-trip and the
+  nightly health task pass; data restored. Not seen live: B2 (no new mail to read), Telegram `/why`.
+- [x] Release `release-20261021-0810-607a59ea` (2026-10-21, Claude Code): zip
+  `aep-windows-preview-0.1.0-607a59ea3f03.zip`, SHA-256 `efece1d8…573b`; the release script's ruff,
+  mypy and full pytest passed; CI green on 607a59ea; no weekly-report asset in the bundle; commented
+  on #218. Tag local only.
