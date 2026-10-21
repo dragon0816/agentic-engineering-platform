@@ -364,7 +364,11 @@ class DraftCards:
             if revision
             else AGENT_LABELS.get(record.source, record.source.removeprefix("external:"))
         )
-        lines = [f"{record.name} · revision {record.revision} · drafted by {who}"]
+        # The draft's own edit count, not a version (#233): "draft edit 2"
+        # beside "Revision of X 1.0.0 → 1.0.1" must not read like one, and a
+        # first draft has no edit to count.
+        edit = f" · draft edit {record.revision}" if record.revision > 1 else ""
+        lines = [f"{record.name}{edit} · drafted by {who}"]
         if chat is not None and isinstance(item, ChatCandidate) and revision:
             lines.extend(self._revision_lines(chat, item))
         if chat is not None and isinstance(item, ChatCandidate):

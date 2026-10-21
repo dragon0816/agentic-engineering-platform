@@ -2283,8 +2283,15 @@ class AgentWeb:
         return None if found is None else found.model_dump(mode="json")
 
     def cards(self, session_id: str | None = None) -> dict[str, Any]:
-        """Every card still waiting, from any channel (Tasks > Pending changes);
-        with a session, that conversation's (agent mode polls it during a turn)."""
+        """The change, permission, mail, memory and loan-send cards still
+        waiting, from any channel (Tasks > Pending changes); with a session,
+        that conversation's (agent mode polls it during a turn).
+
+        Draft install cards (`dr-`) are left out on purpose (#233): one is
+        answered on the answer that drafted it, where Install opens the
+        Workflow's run form, and a draft not installed stays in Capabilities >
+        Drafts, the list that already waits for it. Telegram does not read
+        this list; it draws a draft's card with its own answer."""
         proposals = [
             item
             for item in self.proposals.open_cards()

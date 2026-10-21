@@ -2202,7 +2202,8 @@ One card for every "the Agent asks, the person decides" moment
   `message`. `ConversationMessage.action_card` keeps the last drawn card on the answer;
   a decision redraws it (`LocalState.set_message_card`) and appends
   `[card <id>] <status>: <outcome>` to that answer's `tool_summary`.
-- Agent Web: `GET /api/cards` (open cards, any channel), `GET /api/cards?card_id=`,
+- Agent Web: `GET /api/cards` (open cards, any channel; not draft install cards `dr-`,
+  which wait on their answer and in Capabilities > Drafts), `GET /api/cards?card_id=`,
   `POST /api/cards/decide` (`card_id`, `action`) answers `ok`, `code`, `message`,
   `card`. Codes: `card_unknown`, `card_action_unknown`, `proposal_<status>`,
   `proposal_stale`, `web_only`, `applied`, `apply_failed`, `cancelled`.
@@ -2740,10 +2741,13 @@ memory M1". Contracts in `common.memory`; service in `memory.service`, `memory.m
     Telemetry: run kind `memory_health`, event `memory.health_checked` with counts only.
   - Routes (page token, signed-in actor): `POST /api/memory/health/run` → {`counts`, `message`}
     (`health_off`); `POST /api/memory/health/decide` {`finding_id`, `action`} → {`message`,
-    `undo`? {`kind` `contacts` | `preference`, `change_id`}} (`finding_unknown`, `finding_closed`,
+    `undo`? {`kind` `contacts` | `preference`, `change_id`, `finding_id`}} (`finding_unknown`, `finding_closed`,
     `finding_action_unknown`; actions: duplicate `merge` | `dismiss`; stale `still_active` |
     `left`; contradiction `remove_a` | `remove_b` | `keep_both`; unused `remove` | `keep`; orphan
-    `keep`; stale_sync `dismiss`); `POST /api/memory/health/settings` {`enabled`?,
+    `keep`; stale_sync `dismiss`); `POST /api/memory/health/undo` (that `undo` object) → {`reverted`,
+    `reopened`, `message`}: the store's undo of the change, then a `resolved` finding is `open`
+    again at once (#233; `finding_unknown`, `change_unknown`, `undo_conflict`);
+    `POST /api/memory/health/settings` {`enabled`?,
     `freshness_months`?, `unused_days`?} → {`settings`}. The overview adds `health` {`settings`,
     `rule_periods`, `last_run`, `findings` [{`finding_id`, `kind`, `kind_label`, `space`, `title`,
     `pairs` [[label, value]], `links` [{`label`, `person_id` | `tab`+`id`}], `actions` [{`action`,

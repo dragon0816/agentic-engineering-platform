@@ -65,3 +65,24 @@ Those include Agent Web and shared HANDOFF/TASKS edits. This branch was not reba
 or merged; tests above apply to the pinned starting baseline plus this feature, not the newer
 main. Before review/merge, reconcile shared tracking documents with current main and rerun
 relevant checks. No runtime integration or compatibility with the newer main is asserted.
+
+## Authorized main synchronization (2026-10-21)
+
+The subsequent user instruction explicitly authorizes a non-destructive main-to-feature merge.
+Pre-merge: clean worktree; remote default main `20351c96e58fbc906879a94eb2f46eeae1312dac`;
+feature `385d7ea0`. `git merge-tree --write-tree HEAD origin/main` predicted only HANDOFF/TASKS
+conflicts; 77 related tests passed before merging. `git merge --no-ff --no-commit origin/main`
+then confirmed those two conflicts. Resolution keeps each upstream document byte-for-byte as
+its prefix, with feature records appended. Every src/.github file equals upstream main: no
+runtime behavior was modified to resolve conflicts. No rebase, force push or PR merge.
+
+Post-sync checks in `/tmp/aep-sync-venv` (`pip install -e '.[dev,office]'`):
+- 134 passed, 1 skipped (no Chromium), with voice/Telegram/Knowledge plus affected upstream tests.
+- Repository-wide ruff and format pass (992 files).
+- `python -m mypy --platform win32`: passes, 734 source files (CI platform).
+- Default Linux mypy: 26 Windows API/type errors in four unchanged upstream files; comparison
+  with detached main is recorded in the sync verification evidence, not repaired in runtime.
+- Focused strict mypy covers the isolated benchmark/test modules separately.
+
+No network authorization changed. Real inference remains blocked/NOT_RUN; see
+[exact hosts and required artifacts](VOICE_NETWORK_REQUIREMENTS.md).

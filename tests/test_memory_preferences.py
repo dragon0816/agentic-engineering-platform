@@ -395,3 +395,25 @@ async def _offered_search(memory: Any, skills: Any) -> bool:
     )
     found = await asyncio.to_thread(memory.turn, context, skills)
     return SEARCH_NOTES in {tool.tool.name for tool in found.tools}
+
+
+def test_the_effects_text_follows_the_rule_direction() -> None:
+    """#233: a rule to ask must not read 「不再詢問」."""
+    from host_runtime.personal_memory import preference_effect
+
+    assert preference_effect("名片／組織圖", RULE).endswith("不再詢問。")
+    to_ask = preference_effect("名片／組織圖", "每次都先問我是否包含在職人員")
+    assert "不再詢問" not in to_ask and to_ask.endswith("照這條先問你。")
+    assert preference_effect("Mail", "Always ask before sending").endswith("照這條先問你。")
+    plain = preference_effect("名片／組織圖", "一律包含在職人員")
+    assert plain == "之後使用『名片／組織圖』時會自動套用這條規則。"
+
+
+def test_a_card_for_a_rule_to_ask_says_it_will_ask(web: Web) -> None:  # noqa: F811
+    agent_web, model = web
+    session = _session(agent_web)
+    card = _propose(agent_web, model, session, "每次都先問我是否包含在職人員")
+    assert card["effects"] == ["之後使用『名片／組織圖』時會自動套用，照這條先問你。"]
+    saved = agent_web.decide_card(card["card_id"], "save")
+    assert "不再詢問" not in saved["card"]["outcome"]
+    assert "照這條先問你" in saved["card"]["outcome"]

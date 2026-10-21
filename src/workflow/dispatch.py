@@ -8,6 +8,7 @@ from contextlib import nullcontext
 from typing import Literal
 
 from pydantic import ValidationError
+from pydantic_core import ErrorDetails
 
 import telemetry.recorder as telemetry
 from capabilities.runtime import (
@@ -186,9 +187,21 @@ class BridgeExecutor:
         return self._finish(call, result)
 
 
+#: Constraint values pydantic puts in an error's context: the contract's own
+#: bounds and choices, never the value that was sent (#233: "limit:
+#: less_than_equal" alone made a model guess the bound twice).
+_RULES = ("ge", "gt", "le", "lt", "min_length", "max_length", "expected")
+
+
+def _rules(item: ErrorDetails) -> str:
+    context = item.get("ctx") or {}
+    shown = [f"{key}={context[key]}" for key in _RULES if key in context]
+    return f" ({', '.join(shown)})"[:160] if shown else ""
+
+
 def _where_invalid(error: ValidationError) -> str:
     places = [
-        f"{'.'.join(str(part) for part in item['loc']) or 'input'}: {item['type']}"
-        for item in error.errors()[:6]
+        f"{'.'.join(str(part) for part in item['loc']) or 'input'}: {item['type']}{_rules(item)}"
+        for item in error.errors(include_input=False)[:6]
     ]
     return "Invalid input at " + "; ".join(places)

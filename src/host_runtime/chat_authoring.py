@@ -454,12 +454,13 @@ class ChatAuthoring:
         major, minor, patch = max(taken) if taken else (1, 0, -1)
         identity["version"] = f"{major}.{minor}.{patch + 1}"
         problems: list[str] = []
+        unnamed = _unnamed_capabilities(raw)
+        if unnamed:
+            return None, unnamed
         try:
             manifest = WorkflowManifest.model_validate(assembled)
         except ValidationError as error:
-            return None, [
-                f"{'.'.join(str(p) for p in e['loc'])}: {e['msg']}" for e in error.errors()[:8]
-            ]
+            return None, _step_problems(error)
         for index, step in enumerate(manifest.steps):
             if not isinstance(step, WorkflowStep):
                 problems.append(f"step {index}: nested Workflows are not supported here")
@@ -1866,3 +1867,55 @@ def approval_text(item: ApprovalRequest) -> str:
             + f"\n{detail[:2500]}"
         )
     return "\n".join(lines)
+
+
+#: A step's union branch that a model's step never means (nested Workflows are
+#: refused anyway), and the validator wrapper pydantic names the step branch by.
+_NESTED_BRANCH = "AssetIdentity"
+_STEP_BRANCH = re.compile(r"^function-after\[.*WorkflowStep\]$")
+
+
+_INPUT_FORM = (
+    ' (each input is {"source": "fixed", "value": JSON}, {"source": "run", "path": '
+    '["<parameter>"]} or {"source": "step", "step_index": N, "path": [...]})'
+)
+
+
+def _unnamed_capabilities(raw: dict[str, Any]) -> list[str]:
+    """Steps whose capability is not `namespace/name@version` (#233): said
+    plainly, instead of the union errors pydantic gives for a missing one."""
+    problems = []
+    steps = [step for step in raw.get("steps") or [] if isinstance(step, dict)]
+    for index, step in enumerate(steps):
+        value = step.get("capability")
+        if isinstance(value, dict) or re.fullmatch(
+            r"[a-z0-9-]+/[a-z0-9-]+@[0-9][0-9A-Za-z.+-]*", str(value or "")
+        ):
+            continue
+        shown = str(value or "")[:80]
+        problems.append(
+            f"steps.{index}.capability: '{shown}' is not namespace/name@version of an installed "
+            "capability (for example coding/run-python@1.0.0; not a tool name like coding__run)"
+        )
+    return problems[:8]
+
+
+def _step_problems(error: ValidationError) -> list[str]:
+    """The draft's validation errors a model can act on (#233): a step is
+    validated as either a nested Workflow or a step, so every wrong step also
+    reports 'namespace/name/version: Field required' for the nested branch.
+    Those are dropped and the step branch's long name is left out, so the real
+    problem comes first. The rule itself is unchanged."""
+    shown: list[str] = []
+    for item in error.errors():
+        loc = [str(part) for part in item["loc"]]
+        if len(loc) > 2 and loc[0] == "steps" and loc[2] == _NESTED_BRANCH:
+            continue
+        loc = [part for part in loc if not _STEP_BRANCH.match(part)]
+        problem = f"{'.'.join(loc)}: {item['msg']}"
+        if loc[:1] == ["steps"] and "inputs" in loc and len(loc) <= 5 and not shown:
+            problem += _INPUT_FORM
+        shown.append(problem)
+    if not shown:  # only the nested branch failed: say it as it is
+        shown = [f"{'.'.join(str(p) for p in e['loc'])}: {e['msg']}" for e in error.errors()]
+    return shown[:8]

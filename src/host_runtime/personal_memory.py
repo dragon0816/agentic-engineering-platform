@@ -31,6 +31,7 @@ the memory page is M4.
 from __future__ import annotations
 
 import asyncio
+import re
 import unicodedata
 from collections.abc import Mapping
 from datetime import datetime, timedelta
@@ -48,7 +49,7 @@ from host_runtime.card_store import CardStore, PendingRecord, new_card_id
 from memory import personal
 from memory.notes import Notes, clean_entities, clean_tags, notes_asked
 from memory.preferences import MAX_TEXT as MAX_RULE
-from memory.preferences import Preference, PreferenceConflict, Preferences, normalise
+from memory.preferences import Preference, PreferenceConflict, Preferences, normalise, polarity
 from memory.service import MemoryService, MemoryServiceError
 from models.contracts import ModelTool
 
@@ -704,8 +705,8 @@ class PersonalMemory:
             else ""
         )
         outcome = (
-            f"已存成偏好（{saved.preference_id}）{replaced}。之後使用『{record.scope_label}』時會"
-            "自動套用，不再詢問。"
+            f"已存成偏好（{saved.preference_id}）{replaced}。"
+            f"{preference_effect(record.scope_label, record.text)}"
         )
         record = self._settle(
             record, "saved", outcome, True, saved_id=saved.preference_id, change_id=change
@@ -861,6 +862,21 @@ def _answer(record: MemoryCard, ok: bool, code: str, message: str) -> dict[str, 
     }
 
 
+#: A rule about asking: its polarity decides whether the Agent asks or stops asking.
+_ASKING = re.compile(r"問|確認|\bask\b|\bconfirm\b|\bcheck with\b", re.IGNORECASE)
+
+
+def preference_effect(scope_label: str, text: str) -> str:
+    """What saving the rule changes, in the rule's own direction (#233): a
+    rule to ask must not read 「不再詢問」."""
+    head = f"之後使用『{scope_label}』時會自動套用"
+    if not _ASKING.search(text):
+        return f"{head}這條規則。"
+    if polarity(text) == "negative":
+        return f"{head}，不再詢問。"
+    return f"{head}，照這條先問你。"
+
+
 def draw(record: MemoryCard) -> ActionCard:
     """The card of a memory proposal, as it is now."""
     if record.kind == "note":
@@ -904,7 +920,7 @@ def draw(record: MemoryCard) -> ActionCard:
         waiting = "等你按「存成偏好」"
         message = "要把這條記成偏好嗎？按「存成偏好」才會保存。"
         reason = ""
-        effects = (f"之後使用『{record.scope_label}』時會自動套用，不再詢問。",)
+        effects = (preference_effect(record.scope_label, record.text),)
     return ActionCard(
         card_id=record.card_id,
         kind=f"memory_{record.kind}",

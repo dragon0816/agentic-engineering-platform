@@ -167,7 +167,9 @@ def test_a_gateway_draft_shows_the_card_and_install_makes_it_usable_here(served:
     assert card["kind"] == "draft_install" and card["status"] == "pending"
     assert card["title"] == "Install the Workflow “Echo the month”?"
     preview = card["preview"]
-    assert "engineering/echo-month@1.0.0 · revision 1 · drafted by this conversation" in preview
+    # A first draft has no edit count (#233), and no "revision" that reads like a version.
+    assert "engineering/echo-month@1.0.0 · drafted by this conversation" in preview
+    assert "revision" not in preview and "draft edit" not in preview
     assert "What it does: Echo the month." in preview
     assert "1. lab/read-it@1.0.0 (read)" in preview
     assert "Will become a form with fields: Which month? (text, required)" in preview
@@ -240,7 +242,8 @@ def test_a_revision_replaces_the_card_and_one_turn_shows_one_card(served: Any) -
         {"text": "Revised."},
     )
     (new,) = _draft_cards(second["answer"])  # two revisions in one turn: one card
-    assert "revision 3" in new["preview"] and "Echo the month, final." in new["preview"]
+    assert "· draft edit 3 ·" in new["preview"] and "Echo the month, final." in new["preview"]
+    assert "revision 3" not in new["preview"]
     messages = _stored(web, session)
     shown = [
         card
@@ -280,6 +283,27 @@ def test_not_now_keeps_the_draft_in_capabilities(served: Any) -> None:
     assert _stored(web, session)[-1]["action_cards"][0]["status"] == "not_now"
     # Capabilities still installs it later.
     assert web.draft_action("install", draft["candidate_id"])["ok"]
+
+
+def test_pending_changes_leave_draft_cards_to_their_answer(served: Any) -> None:
+    """#233: `GET /api/cards` lists no `dr-` card, with or without a session;
+    the card waits on its answer and the draft in Capabilities > Drafts."""
+    web, _server, _recorder, _ = served
+    session = web.create_conversation()["conversation"]["session_id"]
+    replied = _gateway_turn(
+        web,
+        session,
+        "draft it",
+        {"tools": [(DRAFT, {"title": "Echo", "workflow": workflow("write-it")})]},
+        {"text": "Drafted."},
+    )
+    (card,) = _draft_cards(replied["answer"])
+    assert card["status"] == "pending"
+    for listed in (web.cards(), web.cards(session)):
+        assert not [item for item in listed["cards"] if item["card_id"].startswith("dr-")]
+    assert web.card(card["card_id"])["status"] == "pending"
+    assert _stored(web, session)[-1]["action_cards"][0]["card_id"] == card["card_id"]
+    assert [item["asset"] for item in web.drafts()["drafts"]] == ["engineering/echo-month@1.0.0"]
 
 
 def test_the_models_install_request_is_answered_on_the_card(served: Any) -> None:

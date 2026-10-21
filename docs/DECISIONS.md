@@ -4481,3 +4481,27 @@ caching `MemoryService` objects per actor (would hide changes made by the Bridge
 process); keeping one connection per actor for the whole process (a long-lived connection across
 threads and requests, and the nightly check works from another thread); moving the conversations'
 `preferences_used` into an index table (the parse is about 0.1 s here; not the cause).
+
+## 2026-10-21 — Pending changes leave out draft install cards; undoing a health fix reopens its finding at once (#233)
+
+Context: two follow-ups from the 2026-10-21 live checks (#233) had more than one reasonable fix.
+`GET /api/cards` said "every card still waiting" but never listed draft install cards (`dr-`).
+After 復原 under a health card's fix, the change was reverted but the finding stayed `resolved`
+until the next check, although §16 of `docs/phases/ACCUMULATED_MEMORY.md` says a fix that is
+undone reopens it.
+
+Decision:
+1. `GET /api/cards` keeps leaving out `dr-` cards; its docstring and `docs/CONTRACTS.md` now say
+   so. A draft's card is answered on the answer that drafted it (Install opens the Workflow's run
+   form there), a draft not installed already waits in Capabilities > Drafts, the agent-mode poll
+   draws only `pm-`/`ml-` cards, and Telegram never reads this list (it draws a draft's card with
+   its own answer).
+2. 復原 under a finding's fix goes through `POST /api/memory/health/undo` {`finding_id`, `kind`,
+   `change_id`}: the store's own undo (contacts or preference), then the `resolved` finding is
+   `open` again in the same request. A refused undo leaves it closed.
+
+Rejected alternatives: listing `dr-` cards under Tasks > Pending changes (the draft would show
+twice, and Install there would not open the run form); reopening the finding only at the next
+check (the card is missing in between, the reported problem); reopening it from the generic
+`/api/memory/undo` and `/api/memory/proposals/undo` with an optional `finding_id` (two routes to
+change for one page action, and a finding id on routes that are not about findings).

@@ -133,6 +133,8 @@ POST_ROUTES = (
     # M5: the memory health check (「立即檢查」, a finding's press, settings).
     "/api/memory/health/run",
     "/api/memory/health/decide",
+    # 復原 of a finding's fix, which reopens the finding (#233).
+    "/api/memory/health/undo",
     "/api/memory/health/settings",
 )
 
@@ -596,6 +598,7 @@ class MemoryPage:
             "/api/memory/health/decide": lambda body: self.web.memory_health.decide(
                 self.actor, body
             ),
+            "/api/memory/health/undo": lambda body: self.web.memory_health.undo(self.actor, body),
             "/api/memory/health/settings": lambda body: self.web.memory_health.update_settings(
                 self.actor, body
             ),

@@ -68,6 +68,7 @@ MESSAGES = {
     "finding_unknown": "找不到這個項目",
     "finding_closed": "這個項目已經處理過了",
     "finding_action_unknown": "這個項目沒有這個做法",
+    "change_unknown": "找不到這次變更",
     "health_settings_invalid": "設定的值不對：月數 0–120、天數 1–3650",
     "health_off": "健康檢查已關閉（在「紀錄」可以打開）",
     "person_unknown": "找不到這位聯絡人（可能已合併或刪除）",
@@ -559,7 +560,31 @@ class MemoryHealth:
         except MemoryServiceError as error:
             return _refused(error.code)
         findings.close(str(finding["finding_id"]), state, action=action, actor=who)
+        if isinstance(reply.get("undo"), dict):
+            reply["undo"]["finding_id"] = str(finding["finding_id"])
         return reply
+
+    def undo(self, actor: str, body: Mapping[str, Any]) -> dict[str, Any]:
+        """復原 under a finding's fix: the store's own undo of that change,
+        then the finding open again (its state returns to `open`, #233), so the
+        card shows at once instead of after the next check. A store refusal
+        (`undo_conflict`, `change_unknown`) propagates and leaves it closed."""
+        who = f"{actor} via web"
+        findings = HealthFindings(self.service(actor))
+        finding = findings.get(str(body.get("finding_id") or ""))
+        if finding is None:
+            return _refused("finding_unknown")
+        kind, change = str(body.get("kind") or ""), str(body.get("change_id") or "")
+        if not change:
+            return _refused("change_unknown")
+        if kind == "preference":
+            reverted, _ = self.web.personal_memory.preferences(actor).undo(change, actor=who)
+        elif kind == "contacts":
+            reverted = len(self._store(actor).undo(change, actor=who)[0])
+        else:
+            return _refused("change_unknown")
+        reopened = findings.reopen(str(finding["finding_id"]))
+        return {"ok": True, "reverted": reverted, "reopened": reopened, "message": "已復原。"}
 
     def _store(self, actor: str) -> CardStore:
         from host_runtime.memory_spaces import registry

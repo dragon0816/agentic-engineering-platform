@@ -137,6 +137,38 @@ def test_an_invalid_draft_returns_problems_and_keeps_nothing(tmp_path: Path) -> 
     assert chat.candidates("owner") == []
 
 
+def _problems(chat: ChatAuthoring, step: dict[str, Any]) -> list[str]:
+    raw = dict(workflow("read-it"), steps=[step])
+    outcome = call(chat, "authoring__draft_workflow", {"title": "x", "workflow": raw})
+    assert outcome.status == "failed" and outcome.failure.code == "workflow_invalid"
+    problems: list[str] = outcome.data["problems"]
+    return problems
+
+
+def test_a_wrong_step_names_its_real_problem_first(tmp_path: Path) -> None:
+    """#233: a wrong step was reported as 'steps.0.AssetIdentity.namespace:
+    Field required' (the nested-Workflow branch) five times before the real
+    cause, so the model fixed the wrong thing twice."""
+    chat, _ = studio(tmp_path)
+    run_month = {"value": {"source": "run", "path": ["month"]}}
+    for capability in ("lab/read-it", "lab__read-it", ""):
+        (problem,) = _problems(chat, {"capability": capability, "inputs": run_month})
+        assert problem.startswith("steps.0.capability: ") and "namespace/name@version" in problem
+        assert "coding/run-python@1.0.0" in problem
+    bare = _problems(chat, {"capability": "lab/read-it@1.0.0", "inputs": {"value": "May"}})
+    assert bare and bare[0].startswith("steps.0.inputs.value"), bare
+    assert "source" in bare[0], bare
+    flat = _problems(
+        chat,
+        {"capability": "lab/read-it@1.0.0", "inputs": {"value": {"source": "run", "path": "x"}}},
+    )
+    assert flat[0].startswith("steps.0.inputs.value.run.path"), flat
+    for problems in (bare, flat):
+        assert not any("AssetIdentity" in item or "function-after" in item for item in problems)
+    # The rules are unchanged: a corrected step drafts.
+    assert draft(chat, "read-it").status == "succeeded"
+
+
 def test_a_read_only_workflow_runs_directly(tmp_path: Path) -> None:
     chat, recorder = studio(tmp_path)
     drafted = draft(chat, "read-it")

@@ -3025,6 +3025,38 @@ s-k-20261011T102952` (not published).
   `aep-windows-preview-0.1.0-607a59ea3f03.zip`, SHA-256 `efece1d8…573b`; the release script's ruff,
   mypy and full pytest passed; CI green on 607a59ea; no weekly-report asset in the bundle; commented
   on #218. Tag local only.
+- [x] #219 Shared Platform autostart after a reboot of 141 (2026-10-21, owner rebooted, Claude Code
+  checked): booted 09:37:47, platform process started 09:37:59 by the boot trigger of the
+  scheduled task 「AEP Shared Platform」; 8775 `/v1/health` 200 and 8776 portal 200 from this PC;
+  certificate SHA-256 unchanged (`83:95:B0:90:…:BA:8B`). The 5-minute trigger's run reported
+  0x800710E0 (instance already running), as expected.
+- [x] Agent Web follow-ups from the 2026-10-21 live checks, #233 (2026-10-21, Claude Code):
+  (1) New session: Send disabled (aria-busy) until the new session loaded, the page bound to the new
+  id at once; (2) 「為什麼？」/finding links show the target pane with 「開啟中…」 at once, never the
+  previous tab or person; (3) 復原 under a health fix reopens the finding at once
+  (`POST /api/memory/health/undo`); (4) preference card effects follow the rule's direction (a rule
+  to ask no longer says 「不再詢問」); (5) `OutlookComMailbox._call` logs a warning with the stage,
+  exception class, HRESULT and scode, never mail text; (6) Settings > Teams: light example
+  placeholder, field and Save disabled with "Not used" while the platform decides; (7) install card
+  says "draft edit N" (nothing for a first draft) instead of "revision N"; (8) 「整理回答中…」 after
+  the Harness reached `validated`; (9) `GET /api/cards` keeps leaving out `dr-` cards, docstring and
+  contract fixed; (10) `cards__list` refusals: the cards tools' integer arguments carry the
+  contract's bounds and a refusal names the bound (likely a `limit` above 200; the model's
+  arguments are not stored, so this is inferred); `authoring__draft_workflow`: the nested-Workflow
+  union errors no longer hide a step's real problem, a bad capability id is said plainly.
+  Decision `docs/DECISIONS.md` 2026-10-21 "Pending changes leave out draft install cards; undoing a
+  health fix reopens its finding at once (#233)". Tests: `tests/test_agent_web_followups_ui.py`
+  (real browser, 1280/390 px, light/dark; screenshots `.scratch/followups-233/`),
+  `tests/test_tool_input_bounds.py`, additions in `test_memory_quality_web.py`,
+  `test_memory_preferences.py`, `test_outlook_com_threads.py`, `test_draft_install_cards.py`,
+  `test_chat_authoring.py`.
+  Verification: ruff check, ruff format --check, mypy clean; project `.venv` 3783 passed,
+  9 skipped, 1 failed (`test_telegram_turn_progress.py::test_a_long_turn_edits_one_status_message_a_few_times`,
+  timing; passes alone 3/3); `C:/aepci-wk/venv` (points at this repo, `--basetemp=C:/aepci-wk/bt-233`)
+  3758 passed, 34 skipped, 1 failed (`test_browser.py::test_a_signed_in_profile_is_what_carries_the_session`,
+  passes alone 2/2). Not pushed; Agent Web not restarted.
+- [ ] Owner live re-check of #233 (steps in HANDOFF.md).
+
 
 ## Voice-to-Knowledge Phase 0 — isolated feasibility (2026-10-21)
 

@@ -22,10 +22,19 @@ from typing import Any
 
 from agent.gateway import GatewayConversationResult, HostTool, HostToolOutcome
 from capabilities.business_cards import handlers as cards
-from capabilities.business_cards.contracts import FIELD_LABELS, FIELDS
+from capabilities.business_cards.contracts import (
+    FIELD_LABELS,
+    FIELDS,
+    FindRequest,
+    HarvestRequest,
+    HistoryRequest,
+    ListRequest,
+    ProposalsRequest,
+)
 from capabilities.business_cards.manifest import CARDS_SKILL
 from capabilities.contracts import CapabilitySpec
 from capabilities.runtime import CapabilityInvocation
+from common.base import Contract
 from common.execution import Failure, RequestContext
 from models.contracts import ModelTool
 
@@ -146,6 +155,24 @@ def _object(properties: dict[str, Any], required: Sequence[str] = ()) -> dict[st
     return {"type": "object", "properties": properties, "required": list(required)}
 
 
+def _bounded(model: type[Contract], field: str) -> dict[str, Any]:
+    """An integer argument with the contract's own bounds and default (#233):
+    `cards__list` was refused twice for a `limit` above 200 the schema did
+    not mention. Read from the contract, so the two cannot drift apart."""
+    info = model.model_fields[field]
+    schema: dict[str, Any] = {"type": "integer"}
+    for rule in info.metadata:
+        if getattr(rule, "ge", None) is not None:
+            schema["minimum"] = rule.ge
+        if getattr(rule, "le", None) is not None:
+            schema["maximum"] = rule.le
+    default = info.get_default()
+    schema["description"] = (
+        f"leave out for {default}" if default is not None else "leave out for the default"
+    )
+    return schema
+
+
 #: (tool name, capability, description, argument schema)
 TOOLS: tuple[tuple[str, CapabilitySpec, str, dict[str, Any]], ...] = (
     (
@@ -256,7 +283,7 @@ TOOLS: tuple[tuple[str, CapabilitySpec, str, dict[str, Any]], ...] = (
             {
                 "query": _S,
                 "status": {"type": "string", "enum": ["active", "left", "any"]},
-                "limit": {"type": "integer"},
+                "limit": _bounded(FindRequest, "limit"),
             },
             ("query",),
         ),
@@ -264,7 +291,8 @@ TOOLS: tuple[tuple[str, CapabilitySpec, str, dict[str, Any]], ...] = (
     (
         "cards__list",
         cards.LIST_SPEC,
-        "List contacts by company, by source (card, email_signature, user, import) and status.",
+        "List contacts by company, by source (card, email_signature, user, import) and status. "
+        "Leave out a filter you do not need (never null); limit is at most 200.",
         _object(
             {
                 "company": _COMPANY,
@@ -273,7 +301,7 @@ TOOLS: tuple[tuple[str, CapabilitySpec, str, dict[str, Any]], ...] = (
                     "enum": ["", "card", "email_signature", "user", "import"],
                 },
                 "status": {"type": "string", "enum": ["active", "left", "any"]},
-                "limit": {"type": "integer"},
+                "limit": _bounded(ListRequest, "limit"),
             }
         ),
     ),
@@ -281,7 +309,7 @@ TOOLS: tuple[tuple[str, CapabilitySpec, str, dict[str, Any]], ...] = (
         "cards__history",
         cards.HISTORY_SPEC,
         "One contact's changes (with change ids for cards__undo), sightings and open proposals.",
-        _object({"person": _PERSON, "limit": {"type": "integer"}}, ("person",)),
+        _object({"person": _PERSON, "limit": _bounded(HistoryRequest, "limit")}, ("person",)),
     ),
     (
         "cards__proposals",
@@ -289,7 +317,7 @@ TOOLS: tuple[tuple[str, CapabilitySpec, str, dict[str, Any]], ...] = (
         "Open proposals: readings that differ from a contact's confirmed value (or another "
         "email), each with the stored value, the value read and its source; one person's or "
         "everyone's. note is a sentence to tell the person.",
-        _object({"person": _PERSON, "limit": {"type": "integer"}}),
+        _object({"person": _PERSON, "limit": _bounded(ProposalsRequest, "limit")}),
     ),
     (
         "cards__set_status",
@@ -388,8 +416,8 @@ TOOLS: tuple[tuple[str, CapabilitySpec, str, dict[str, Any]], ...] = (
                     "type": "boolean",
                     "description": "重新整理: read the whole mail scope again, not only new mail",
                 },
-                "days": {"type": "integer"},
-                "limit": {"type": "integer"},
+                "days": _bounded(HarvestRequest, "days"),
+                "limit": _bounded(HarvestRequest, "limit"),
                 "folder": _S,
             }
         ),

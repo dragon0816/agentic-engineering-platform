@@ -715,6 +715,8 @@ Memory Service」的 Memory quality 一項。使用說明：`USER_GUIDE.zh-TW.md
   | orphan | `keep` | 保留（匯出或刪除在「紀錄」） | — |
   | stale_sync | `dismiss` | 知道了 | — |
   每個動作都記成 `<actor> via web`；別的 actor 的 finding id 在這裡找不到（`finding_unknown`）。
+  記憶頁在修正下方按「復原」走 `POST /api/memory/health/undo`（2026-10-21，#233）：先用上表的復原撤回那次變更，
+  再把這個 `resolved` 的項目改回 `open`（「修好又被復原的會重新打開」立即生效，不必等下一次檢查），卡片馬上回來。
 
 ### 16.3 「為什麼這樣做」（§8.5）
 
