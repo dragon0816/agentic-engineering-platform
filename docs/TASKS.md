@@ -3056,6 +3056,11 @@ s-k-20261011T102952` (not published).
   3758 passed, 34 skipped, 1 failed (`test_browser.py::test_a_signed_in_profile_is_what_carries_the_session`,
   passes alone 2/2). Not pushed; Agent Web not restarted.
 - [ ] Owner live re-check of #233 (steps in HANDOFF.md).
+- [x] Release `release-20261021-1115-1111ffe7` (2026-10-21, Claude Code): zip
+  `aep-windows-preview-0.1.0-1111ffe711d2.zip`, SHA-256 `36a27f55…89b9`; full suite in a clean
+  worktree with `C:/aepci-wk/venv` 3761 passed, 34 skipped; release script `--quick` (ruff, mypy);
+  adds #233 and the workspace replace retry (1111ffe7, found when the first build's test run hit a
+  Windows `PermissionError` on `os.replace`); no weekly-report asset; commented on #218; tag local.
 
 
 ## Voice-to-Knowledge Phase 0 — isolated feasibility (2026-10-21)
