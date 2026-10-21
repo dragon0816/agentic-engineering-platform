@@ -7,6 +7,8 @@ Shipped switched on (`host_runtime.assets.shipped`), like business cards.
 
 from __future__ import annotations
 
+import re
+
 from agent.skills import SkillManifest
 from common.assets import AssetIdentity
 
@@ -54,6 +56,21 @@ PROCEDURE = (
 )
 
 
+#: Words that make a question one for the BI cards rather than a knowledge
+#: vault: the Host's direct vault route steps aside for them while the BI
+#: Skill is on (a live 「哪些客戶產品有需求但還沒有商機？」 went to the vault).
+BI_QUESTION = re.compile(
+    r"客戶產品|商機|競品|對手|測試方案|我方方案|生態系|缺口|趨勢|價值鏈|節點|"
+    r"BI\s*(?:卡片|知識|dashboard)|Dashboard|opportunit|competitor|test solution|"
+    r"customer product",
+    re.IGNORECASE,
+)
+
+
+def bi_question(message: str) -> bool:
+    return BI_QUESTION.search(message) is not None
+
+
 def bi_knowledge_skill() -> SkillManifest:
     return SkillManifest.model_validate(
         {
@@ -66,7 +83,8 @@ def bi_knowledge_skill() -> SkillManifest:
             "alias": "bi",
             "selector_hint": (
                 "BI 知識卡片: trends 趨勢, applications 應用, test solutions 測試方案, "
-                "competitors 競品, customers 客戶, opportunities 商機, gaps 缺口"
+                "competitors 競品, customers 客戶, customer products 客戶產品, "
+                "opportunities 商機, technologies 技術, nodes 節點, ecosystem 生態系, gaps 缺口"
             ),
             "instructions": PROCEDURE,
         }

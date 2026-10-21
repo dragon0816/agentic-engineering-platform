@@ -672,3 +672,15 @@ def test_set_field_on_an_unknown_card_is_refused(tmp_path: Path) -> None:
     store = _loaded(tmp_path)
     with pytest.raises(BiStoreError):
         store.set_field("nope", "name", "x", base_version=1, actor=ACTOR)
+
+
+def test_a_bi_question_is_not_sent_to_the_knowledge_vault() -> None:
+    """Live: 「哪些客戶產品有需求但還沒有商機？」 matched the vault Skill's intent
+    words and went to the vault; BI words now keep it with bi__query."""
+    from capabilities.bi_cards.manifest import bi_question
+
+    assert bi_question("哪些客戶產品有需求但還沒有商機？")
+    assert bi_question("哪些應用是對手有方案、我方沒有的缺口？")
+    assert bi_question("Which competitor test solution covers Wi-Fi 7?")
+    assert not bi_question("RS 某型號的規格是什麼？")
+    assert not bi_question("幫我整理今天的郵件")

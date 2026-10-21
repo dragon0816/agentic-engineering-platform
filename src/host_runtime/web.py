@@ -60,6 +60,7 @@ from agent.gateway import GatewayConversationResult
 from agent.routing import DOT_COMMAND
 from agent.skills import SkillManifest
 from agent.turn_progress import TURN_PROGRESS, TurnProgress, TurnProgressBoard
+from capabilities.bi_cards.manifest import bi_question
 from capabilities.knowledge_pipeline.handlers import (
     ADOPT_SPEC,
     CONVERT_SPEC,
@@ -115,6 +116,7 @@ from host_runtime.attachments import (
 from host_runtime.attachments import summary as attachment_summary
 from host_runtime.authoring import AuthoringError, AuthoringSession, AuthoringStudio
 from host_runtime.avatars import UserPreferences, UserPreferencesStore, catalog
+from host_runtime.bi_cards_tools import bi_skill_on
 from host_runtime.business_cards_tools import chart_files, with_legend
 from host_runtime.change_proposals import ChangeProposals
 from host_runtime.chat_authoring import ChatAuthoringError, approval_text
@@ -3267,6 +3269,9 @@ class AgentWeb:
         sent coding_v1's web tasks to the Knowledge harness (defect D1,
         2026-10-06). Questions without such references route as before."""
         if names_local_work(message):
+            return None
+        if bi_question(message) and bi_skill_on(self.runtime.agent.gateway):
+            # A BI cards question goes to the model and bi__query, not the vault.
             return None
         eligible = [
             item for item in self.assets()["skills"] if item["knowledge_harness_selectable"]

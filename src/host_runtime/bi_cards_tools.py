@@ -68,6 +68,12 @@ def _switched_on(gateway: Any) -> list[Any]:
     ]
 
 
+def bi_skill_on(gateway: Any) -> bool:
+    """Whether some version of the BI Skill is switched on and its query installed."""
+    installed = gateway.bridge.installed.get(QUERY_SPEC.identity) is not None
+    return installed and bool(_switched_on(gateway))
+
+
 def bi_cards_tools(gateway: Any) -> Sequence[HostTool]:
     found = _switched_on(gateway)
     if not found or gateway.bridge.installed.get(QUERY_SPEC.identity) is None:
@@ -91,7 +97,10 @@ def bi_cards_tools(gateway: Any) -> Sequence[HostTool]:
 
     description = (
         "Search the BI knowledge cards (read only); each card returns its fields with "
-        f"their sources. PROCEDURE: {found[-1].instructions}"
+        "their sources. Use THIS tool, not a knowledge vault query, for questions about "
+        "客戶產品 customer products, 商機 opportunities, 客戶 accounts, 應用 applications, "
+        "測試方案 test solutions, 競品 competitors, 趨勢 trends, 技術, 節點, 生態系 and 缺口 "
+        f"gaps. PROCEDURE: {found[-1].instructions}"
     )
     return [
         HostTool(
