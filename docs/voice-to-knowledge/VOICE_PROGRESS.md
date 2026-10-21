@@ -94,3 +94,24 @@ focused strict mypy, ruff, format, build and pip check pass. Details/commands:
 `benchmarks/voice_to_knowledge/evidence/sync-verification.md`.
 CI run 39535239198 on merge head was in progress at pytest when evidence was collected;
 initial run 39533933211 was superseded/cancelled. No CI pass or completed failure asserted.
+
+## Offline extraction increment (#243, 2026-10-21)
+
+Starting head fd810f2c; parent verified its Windows run 39535790481 succeeded. That is historical
+CI for the preceding increment, not a claim about new code. Remote main advanced to 59f81baf
+(workspace retry/release, two commits beyond 20351c96); inspected and not merged for this isolated
+increment. Existing feature branch clean; no other work overwritten.
+
+Added injectable fake STT/extraction flow, local Skill descriptor, strict proposed JSON schema,
+source-linked Markdown through the existing Mock Draft, and two explicitly synthetic visit
+fixtures. Null customer stays null; no dates/contacts/owners invented. Typed immutable submission
+retains raw text separately from canonical extraction JSON. No src/runtime/consumer changes.
+
+Actual audio remains absent here: parent-reported 37.477s language unverified and 60.232563s
+user-labeled Chinese, both mono PCM16 16kHz. No reference gold, model access still proxy-blocked;
+no retries, audio copies, fabricated references, scores or winner. See VOICE_REVIEW_PROCEDURE.md.
+
+Verification of #243: **21 new / 51 total isolated tests pass**, **98 with existing regressions**;
+repo lint/format, Windows-target full mypy and focused strict mypy pass. Both fake demos return
+draft/same_draft=true/NOT_RUN. Exact commands: benchmark evidence/extraction-verification.md.
+New-head CI is separate from the previously successful fd810f2c run; no result assumed.

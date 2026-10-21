@@ -9,7 +9,7 @@ From the repository root, Python 3.11+:
 
 ```sh
 python -m venv /tmp/voice-tests
-/tmp/voice-tests/bin/pip install pytest
+/tmp/voice-tests/bin/pip install pytest 'pydantic>=2.10,<3'
 PYTHONPATH=.:src /tmp/voice-tests/bin/python -m pytest tests/test_voice_*.py -q
 ```
 
@@ -91,3 +91,41 @@ must come from the future approved adapter, never a transcript. This is not auth
 durable storage, a service, or a replacement for AEP's actor/maintainer/human gates.
 Current evidence references are character offsets; segment-to-claim time mapping and finalized
 OpenAPI/JSON Schema are pending #234, not claimed implemented.
+
+
+## Synthetic extraction-to-Draft increment (#243)
+
+```sh
+python -m benchmarks.voice_to_knowledge.demo --out /tmp/voice-demo-new
+python -m benchmarks.voice_to_knowledge.demo --out /tmp/voice-demo-missing-new \
+  --fixture visit_missing_customer
+```
+
+Both commands use fixed synthetic text and a temporary generated one-second silent WAV. The
+fake STT ignores its waveform content; the fake extractor returns scripted JSON. Neither claims
+STT accuracy, LLM reasoning, meaningful timestamps or real customer information. No audio or
+model download occurs. Never substitute these fixtures for the two user recordings.
+
+Outputs: `raw.json` (unchanged text/hash and explicit fake provenance), `extraction.json`,
+`draft.md` (existing Mock renderer's source-ID/character-offset citations), `receipts.json`.
+The existing Mock stores the schema-validated extraction JSON on `VisitSubmission`; its ordinary
+canonical payload hashing includes that JSON for replay/conflict checks. No alternate Draft store.
+
+`extraction.py` exposes `ExtractionProvider`, a local `ExtractionSkill` descriptor (no AEP Skill
+registration), and `prepare`. Callers inject providers, validate once, then retain the immutable
+prepared payload across submission retries. `prepare` does not submit or retry. Existing
+`MockSubmission.create/read` enforce caller scopes and ownership, including on replay.
+Errors identify STT/provider failure, schema rejection, bad sources, changed audio or invalid
+transcript; no partial result is submitted. Schema/source failures are non-retryable until input
+is corrected. Real transport timeout/backoff/persistence are outside this in-memory prototype.
+
+`extraction.schema.json` is generated from the Pydantic models; strict runtime validation rejects
+extra fields, unsupported categories/statuses and missing required nullable customer fields.
+Cross-field checks additionally verify source ID/hash, exact quote/offset, customer text and
+claim mapping. Non-inference statements must equal their quoted source. Inferences have an exact
+quoted basis and remain unverified. These checks prove provenance consistency, **not semantic
+truth or that a quoted name is really a customer**; human review remains necessary. Dates,
+contacts and follow-up owners are not guessed or added to this small schema.
+
+This proposed synthetic-only schema is not #234's approved production Submission API. See
+[real-scoring and human-review prerequisites](../../docs/voice-to-knowledge/VOICE_REVIEW_PROCEDURE.md).

@@ -2350,3 +2350,14 @@ build and pip check pass. Commands/evidence: benchmarks/voice_to_knowledge/evide
 CI for merge head (39535239198) still in progress at evidence collection; no claim of CI success.
 Network approval still pending; no model/corpus retry, real STT NOT_RUN. Next: check latest
 PR #240 Windows CI, then Leo artifact-source/corpus/threshold decisions.
+
+Voice isolated extraction follow-up (#243, 2026-10-21): fake STT + synthetic visit fixtures →
+replaceable extraction provider/local Skill descriptor → strict proposed JSON schema → existing
+Mock Draft with canonical extraction JSON and source-referenced Markdown. Raw transcript stays
+immutable; missing customer null. No src/Core/Harness/Bridge/Telegram changes. Main 59f81baf was
+inspected, not merged; base remains fd810f2c/20351c96. Tests: 51 isolated (21 new), 98 with existing
+regressions; repo ruff/format and Windows-target mypy pass. Two offline demos pass; all fake.
+Evidence: benchmarks/voice_to_knowledge/evidence/extraction-verification.md. Historical fd810f2c
+Windows CI succeeded; new-head CI must be checked separately. Real audio absent, gold missing,
+model access blocked; no score/model selection. Next: review #243, then Leo source/contract/data
+policy decisions and authorized local scoring inputs (VOICE_REVIEW_PROCEDURE.md).

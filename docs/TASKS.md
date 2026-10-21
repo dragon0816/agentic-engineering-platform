@@ -3075,3 +3075,8 @@ s-k-20261011T102952` (not published).
   3 failed, all three reproduced on pure main. Repo lint/format, Windows-target mypy, focused
   mypy, build/pip check pass. Linux mypy diagnostics identical to main. Evidence:
   `benchmarks/voice_to_knowledge/evidence/sync-verification.md`. GitHub CI pending at recording.
+- [x] #243 isolated synthetic extraction-to-Draft prototype (2026-10-21): injectable fake STT /
+  extractor and local Skill descriptor, strict JSON schema, source validation, null customer,
+  existing Mock replay/permissions/Markdown. No runtime integration. 51 isolated tests, 98 with
+  regressions; ruff/format/Windows-target mypy pass. Two fake demos succeed. Evidence:
+  `benchmarks/voice_to_knowledge/evidence/extraction-verification.md`. Actual STT NOT_RUN/BLOCKED.

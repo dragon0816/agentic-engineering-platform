@@ -23,3 +23,15 @@ Mock review/publish is deliberately absent: it cannot assert human approval or w
 No persistent multi-process authorization guarantee: the in-memory mock only demonstrates
 consumer contract behavior. Production durability, concurrency, retention/deletion, ceilings,
 byte/duration limits, actor mapping and approval audit ownership require Leo's decision.
+
+## Isolated extraction contract increment (#243)
+
+`benchmarks/voice_to_knowledge/extraction.schema.json` describes strict proposed
+`voice.extraction.mock.v0`, synthetic-only, with four claim kinds, required nullable customer,
+source ID/transcript hash, verbatim quotes/character offsets and unverified status. Runtime
+Pydantic validation plus source checks reject unsupported references. `ExtractionProvider` and
+local `ExtractionSkill` descriptor are injectable; no installed platform Skill/API is added.
+`VisitSubmission` extends the existing mock payload with canonical extraction JSON and validates
+its mapping to existing Claim objects; MockSubmission retains ownership/idempotency/Markdown.
+Raw transcript remains separate and unchanged. See README for demo and limitations. This does
+not freeze or approve a production schema, identify actual customers, or validate inference truth.
