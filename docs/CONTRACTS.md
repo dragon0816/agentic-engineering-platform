@@ -3986,6 +3986,67 @@ Skill), `src/host_runtime/bi_cards_api.py` (routes), `src/host_runtime/bi_cards_
   cards, cite `[卡片 <type>:<key>]`, mark 事實 vs 推論, say 待驗證 for untrusted cards, scope gaps
   as 「在這份資料集中沒有…」, judge priority itself from the facts and say so (#222).
 
+### Per-dataset schemas (owner 2026-10-21: 「只讓資料集換 schema」)
+
+Code: `src/capabilities/bi_cards/catalog.py` (sources, validation, install, resolve),
+`store.py` (binding), the routes above. Tests: `tests/test_bi_schemas.py`,
+`tests/test_bi_schemas_ui.py`. Every addition below is additive; a request without a dataset or
+schema behaves as before.
+
+- **Sources**: the shipped `bi.schema/v1.1` (`version` `1.1.0`, `source: "shipped"`) and installed
+  files at `<workspace>/bi/schemas/<schema_id>@<version>.json` (a `/` in the id is a sub-folder;
+  `source: "installed"`). A file whose content no longer validates, or whose place does not match
+  its id and version, is not offered.
+- **Schema file** (JSON, UTF-8, at most 1 MB; the shipped registry's format). Required:
+  `schema_id` (lowercase letters, digits, `.` `_` `-`, up to 3 `/`-separated parts; the
+  `bi.schema/` prefix is reserved), `version` (`MAJOR.MINOR.PATCH`), `title`, `types` (1–50). Each
+  type: `name` (`[A-Za-z][A-Za-z0-9_]*`, unique), `label`, `fields` (1–100). Each field: `name`
+  (`[a-z][a-z0-9_]*`, unique in the type), `label`, `kind` (`str`, `int`, `bool`, `date`,
+  `enum`, `list`, `link`, `linklist`), `class` (`sourced` / `judgement` / `derived`). Optional:
+  field `aliases` (CSV header aliases), `required`, `default`, `enum` (required for `enum`),
+  `range` ([min, max], `int` only), `link_to` (target types in this schema; required for
+  `link`/`linklist`), `list` (must match the kind); type `naming` (fields forming the card key,
+  default `["name"]`), `domain` (`one`/`multi`/`none`, default `none`), `has_confidence`,
+  `description`, `code_key`; top-level `description`, `domains`, `enum_aliases` ({field: {alias:
+  value}}), `ignored_fields`, `status`, `source`, `id_rules`, `field_classes`, `computed_fields`.
+  An unknown key is an error (catches typos). Example (shipped, not installed):
+  `src/capabilities/bi_cards/samples/product-spec@1.0.0.json` (「產品規格」: Supplier,
+  Component, Product, SpecItem) with four sample CSVs.
+- **Immutability**: an installed id@version never changes. Installing the same content again
+  (compared as parsed JSON, so formatting does not matter) is a no-op (`"already": true`);
+  different content for the same id@version is 409 `schema_version_exists`.
+- **Binding**: a dataset is bound to one `<schema_id>@<version>`, stored as `meta.schema` in its
+  `bi.sqlite`, chosen at creation and never changed. A dataset without the row (created before
+  this) is `bi.schema/v1.1@1.1.0`, and its next write records that; a dataset first written by an
+  import or the demo load (not created) is bound the same way. Cards, import, search, detail,
+  field edits and history use the dataset's schema. If its schema file is gone: 400
+  `schema_missing` (the message names the id@version).
+- `GET /api/bi/schemas` → `{"schemas": [{"id", "version", "ref": "<id>@<version>", "title",
+  "types": [{"name", "label"}], "source": "shipped" | "installed", "dashboard": bool}]}`, the
+  shipped schema first.
+- `GET /api/bi/schemas/example` → `{"schema": {"filename", "json_text"}, "csv": [{"entity_type",
+  "filename", "text"}]}` (the shipped example, CSVs in import order). Writes nothing.
+- `POST /api/bi/schemas/install {"filename", "json_text"}` → `{"ok": true, "id", "version",
+  "already": bool}`, or `{"ok": false, "code", "message", "errors": [{"path", "message"}]}`:
+  400 `schema_invalid` (every problem, `path` like `types[1]（Component）.fields[3]（supplier）
+  .link_to`), `schema_json_invalid` (`path` = the line), `schema_missing_text`,
+  `schema_too_large`, `schema_not_json` (filename not `.json`); 409 `schema_version_exists`.
+- `POST /api/bi/datasets {"name", "schema": "<id>@<version>" | "<id>"}` (a bare id takes its
+  newest version) → `{"ok": true, "dataset": {"name", "cards": 0, "updated": null, "schema",
+  "dashboard"}}`. Name: ASCII letters, digits, `-`, `_`, 1–40 characters, not `schemas`, unique
+  ignoring case. Errors: 400 `dataset_invalid`; 404 `schema_unknown`; 409 `dataset_exists` (with
+  `schema`: the existing binding; a schema cannot be changed).
+- `GET /api/bi/datasets` adds `"schema"` and `"dashboard"` (whether the schema is `bi.schema/*`)
+  per dataset.
+- `GET /api/bi/schema?dataset=<name>` returns that dataset's schema and adds `"version"`, `"ref"`,
+  `"title"`, `"bi"` (bool) and `"domains"`; without `dataset` it stays `bi.schema/v1.1`.
+- **BI-only**: `GET /api/bi/dashboard` for a dataset whose schema is not `bi.schema/*` answers 200
+  with the empty state `{"dashboard": false, "code": "no_dashboard", "message": "這個 schema 沒有
+  Dashboard", "schema", "domain": null, "sections": []}`. `POST /api/bi/demo/load` into such a
+  dataset is 400 `schema_not_bi`. `bi-cards/query` (chat `bi__query`) refuses it with
+  `schema_not_bi`, shown as 「這個資料集用的不是 BI schema…」. The `domain` filter of
+  `GET /api/bi/cards` is ignored for a schema without `domains`.
+
 ## Chat composer model choice (owner 2026-10-21)
 
 Code: `src/models/selection.py` (`TURN_MODEL`, `SelectableModelClient`),

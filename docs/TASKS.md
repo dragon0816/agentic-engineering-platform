@@ -3178,3 +3178,26 @@ s-k-20261011T102952` (not published).
 - Verification (working tree including other agents' uncommitted work): ruff check, ruff format
   --check, mypy clean; installer + release tests 21 passed; full suite 3842 passed, 7 skipped.
 - [ ] Release a new bundle with these scripts and send colleagues `update.cmd` (not run here).
+
+## BI cards: per-dataset schemas (2026-10-21)
+
+- [x] Each BI dataset is bound to one schema id@version at creation (`meta.schema` in its
+  `bi.sqlite`, never changed; legacy datasets read as `bi.schema/v1.1@1.1.0`). Import, card list,
+  detail, field edits and history follow it; Dashboard, demo load and `bi__query` stay BI-only
+  (owner 「只讓資料集換 schema」, `docs/DECISIONS.md` 2026-10-21 "BI cards: each dataset is bound
+  to one schema…"). Schemas: shipped `bi.schema/v1.1` plus installed files under
+  `<workspace>/bi/schemas/`, strict validation, immutable id@version; example 「產品規格」
+  (`example/product-spec@1.0.0`, 4 linked types, sample CSVs) shipped, not installed. Routes
+  `GET /api/bi/schemas`, `GET /api/bi/schemas/example`, `POST /api/bi/schemas/install`,
+  `POST /api/bi/datasets`; `schema` per dataset; `GET /api/bi/schema?dataset=`; dashboard empty
+  state `no_dashboard`; `schema_not_bi` (contract `docs/CONTRACTS.md` "Per-dataset schemas").
+  UI: 新增資料集 / 安裝 schema in the BI 卡片 bar. User guide §6.8.1. Continued from a stopped
+  agent's uncommitted draft (backend kept, see HANDOFF). (2026-10-21, Claude Code)
+- Tests: `tests/test_bi_schemas.py` (30), `tests/test_bi_schemas_ui.py` (1, real server and
+  browser, screenshots `.scratch/bi-schemas/`); `tests/test_bi_cards.py`,
+  `tests/test_bi_cards_ui.py` and the ADR-K10 import guard unchanged and green. Commits 7d245e19,
+  f0759c94. Verification: ruff check, ruff format --check, mypy (750 files) clean; full pytest
+  project venv 3873 passed, 7 skipped; `C:/aepci-wk/venv` 3846 passed, 34 skipped
+  (`--basetemp=C:/aepci-wk/bt-sch`).
+- [ ] Owner live check after a restart on this code (when `/api/tasks` is idle).
+- [ ] Deferred: a "schema pack" (declarative Dashboard and per-pack chat Skill).

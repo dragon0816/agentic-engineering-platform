@@ -2,7 +2,27 @@
 
 Updated: 2026-10-21 (Asia/Taipei), by Claude Code (BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## Chat composer model menu (2026-10-21, Claude Code) — latest
+## BI cards: per-dataset schemas (2026-10-21, Claude Code) — latest
+
+- Commits 7d245e19 (backend) and f0759c94 (page) on main, plus a docs commit; not pushed, Agent
+  Web not restarted, live data untouched. Row in `docs/TASKS.md` "BI cards: per-dataset
+  schemas"; decision `docs/DECISIONS.md`; contract `docs/CONTRACTS.md` "Per-dataset schemas";
+  user guide §6.8.1.
+- Continued from a stopped agent's uncommitted draft. Kept: `catalog.py` (validation, install,
+  resolve), the store binding, the per-dataset registry in import/search/detail/edit, the
+  `schema_not_bi` refusal. Changed: the Dashboard for a non-BI dataset is a 200 empty state
+  (`dashboard: false`, `code: no_dashboard`) instead of a 400; an immutable-version clash is 409;
+  `GET /api/bi/schemas` lists types as `{name, label}`; added `GET /api/bi/schemas/example`
+  and packaged `samples/` (`pyproject.toml`). UI, tests and docs were new.
+- Verification: ruff, format, mypy clean; full pytest 3873 passed (project venv), 3846 passed
+  (`C:/aepci-wk/venv`).
+- Owner check after a restart (when `/api/tasks` is idle): Knowledge → BI 卡片: `demo` still shows
+  its Dashboard; 安裝 schema → 安裝範例 schema（產品規格） → 用這個 schema 新增資料集 `spec` →
+  Dashboard shows 「這個 schema 沒有 Dashboard」, no chat hint → 匯入 CSV the four example CSVs in
+  order (suppliers, components, products, spec items) → open a 零組件 card; in chat, asking about
+  dataset `spec` gets the 「不是 BI schema」 refusal.
+
+## Chat composer model menu (2026-10-21, Claude Code)
 
 - Commits 9e4b67f5 (backend) and 6b572b7c (page) on main, not pushed, Agent Web not restarted,
   `host.json`, live data and the gateway on port 4000 untouched. Row in `docs/TASKS.md` "Chat

@@ -4644,3 +4644,31 @@ done when one does).
   classification is required, or data volume or query load outgrows SQLite.
 - **Rejected:** PostgreSQL on host 141 (LAN only, one more service to run); a cloud PostgreSQL (no
   server available).
+
+## 2026-10-21 — BI cards: each dataset is bound to one schema; Dashboard and chat stay BI-only
+
+- **Decision (owner, 2026-10-21):** 「只讓資料集換 schema」. A BI-cards dataset is created with a name
+  and one schema id@version, kept in its `bi.sqlite` (`meta.schema`) and never changed. Import,
+  the card list, card detail, field edits and history follow the dataset's schema. The Dashboard,
+  the demo load and the chat's `bi__query` stay BI-only: they work for `bi.schema/*` datasets; any
+  other dataset gets the 「這個 schema 沒有 Dashboard」 empty state, and `bi__query` refuses it with
+  `schema_not_bi`.
+- **Schema sources:** the shipped `bi.schema/v1.1` plus files a person installs under
+  `<workspace>/bi/schemas/<schema_id>@<version>.json`, in the shipped registry's JSON format,
+  validated strictly (every error names its place) and immutable per id@version (identical
+  content is a no-op; different content is refused). The `bi.schema/` prefix is reserved for
+  shipped schemas, so "BI" always means the tested types the Dashboard and the Skill are written
+  for. One non-BI example (「產品規格」, `example/product-spec@1.0.0`, four linked types) ships as a
+  sample and is not installed by default.
+- **Legacy:** a dataset written before this has no binding and is read as
+  `bi.schema/v1.1@1.1.0`; its next write records that. A dataset first written by an import or
+  the demo load, without being created, is bound the same way, so existing flows are unchanged.
+- **Why:** colleagues want to keep other structured data (product specs, suppliers) as cards
+  with sources and history, without waiting for a Dashboard and a Skill per schema. Binding at
+  creation keeps every stored card consistent with one schema; immutability means a binding
+  always resolves to the same types.
+- **Rejected / deferred:** a full "schema pack" (a declarative Dashboard and a per-pack chat Skill)
+  — considered and deferred; changing a dataset's schema in place (would need a migration of
+  every card); allowing installed schemas under `bi.schema/` (the Dashboard and the Skill assume
+  its types); comparing installs byte for byte (re-saving the same file with other formatting
+  would be refused for no reason).

@@ -902,6 +902,65 @@ Agent 會依卡片上的事實自己判斷，並說明這是它的判斷。這�
 趨勢 → 應用 → 方案覆蓋、有需求沒商機的應用、沒有進行中商機的我方方案、商機漏斗、缺概念說明的技術、
 客戶產品資料完整度，以及趨勢優先度（量測影響 × 我方契合度，即時計算，不儲存）等。
 
+#### 6.8.1 新增資料集、安裝 schema
+
+每個資料集在建立時選定**一個 schema**（卡片類型與欄位的定義），之後**不能更換**。內建的 BI schema
+是 `bi.schema/v1.1`（上面那 12 種卡片）；也可以安裝自己的 schema，例如產品規格、供應商清單。
+
+- **新增資料集**：在資料集列按「新增資料集」，填名稱（英文字母、數字、`-`、`_`，最多 40 字，
+  不能和現有的重複，不分大小寫），選 schema，按「建立」。資料集選單會顯示每個資料集用的 schema。
+- **安裝 schema**：按「安裝 schema」，選一個 `.json` 檔，按「驗證並安裝」。檔案有問題時不會安裝，
+  下方會逐條列出**哪個位置**錯了，例如 `types[1]（Component）.fields[3]（supplier）.link_to：
+  目標類型「Vendor」不在這份 schema 的 types`。安裝好的檔案放在
+  `workspace\bi\schemas\<schema_id>@<version>.json`。
+- **同一個 id@version 裝好後不能修改。** 內容完全相同再裝一次沒關係；內容不同會被拒絕，
+  請把 `version` 改成新版本（例如 `1.0.1`）再安裝，然後用新版本建立新的資料集。
+- **非 BI schema 的資料集**：可以匯入 CSV（預覽、寫入、復原）、瀏覽卡片、看來源與歷史、手動修改，
+  類型篩選、匯入類型與欄位都依該資料集的 schema。但**沒有 Dashboard**（會顯示「這個 schema 沒有
+  Dashboard」），**對話也不會查它**（Agent 會說這個資料集不是 BI schema），也不能「載入示範資料」。
+  只有 `bi.schema/*` 的資料集有 Dashboard 與對話查詢。
+- 以前就有的資料集（例如 `demo`）自動視為 `bi.schema/v1.1`，用法不變。
+
+**schema 檔的格式**（JSON，UTF-8，最大 1 MB）。最少要有：
+
+```json
+{
+  "schema_id": "team/product-spec",
+  "version": "1.0.0",
+  "title": "產品規格",
+  "types": [
+    {
+      "name": "Product",
+      "label": "產品",
+      "fields": [
+        {"name": "name", "label": "產品名稱", "kind": "str", "class": "sourced",
+         "aliases": ["產品名稱", "產品"]},
+        {"name": "status", "label": "狀態", "kind": "enum", "class": "sourced",
+         "enum": ["development", "mass_production"]}
+      ]
+    }
+  ]
+}
+```
+
+- `schema_id`：小寫英數字與 `.` `_` `-`，可用 `/` 分段；`bi.schema/` 開頭保留給內建 schema。
+  `version`：`主.次.修訂`。`title`：顯示名稱。
+- 每個類型：`name`（英文，例如 `Product`）、`label`（中文名稱）、`fields`。卡片名稱預設取
+  `name` 欄位；要用多個欄位組成，設 `"naming": ["product", "name"]`。
+- 每個欄位：`name`（小寫英文與 `_`）、`label`、`kind`（`str` 文字、`int` 整數、`bool` 是否、
+  `date` 日期、`enum` 選項、`list` 清單、`link` 連到另一張卡、`linklist` 連到多張卡）、
+  `class`（`sourced` 事實、`judgement` 判斷，手改要寫理由、`derived` 衍生，不能手改）。
+- 選填：`aliases`（CSV 欄名的別名，匯入時自動對應）、`enum`（`enum` 必填）、`link_to`
+  （`link`/`linklist` 必填，目標類型）、`range`（整數範圍 `[0, 100]`）、`default`、`required`；
+  最上層的 `enum_aliases` 讓 CSV 的中文值對到選項，例如 `{"status": {"量產": "mass_production"}}`。
+- 拼錯的欄位名稱也會被當成錯誤列出，避免設定悄悄沒生效。
+
+**範例 schema「產品規格」**：在「安裝 schema」按「安裝範例 schema（產品規格）」，會安裝
+`example/product-spec@1.0.0`（供應商、零組件、產品、規格項目四種類型，零組件連到供應商、產品連到零組件、
+規格項目連到產品），並提供四個範例 CSV 下載。接著「用這個 schema 新增資料集」，依序匯入
+供應商 → 零組件 → 產品 → 規格項目，連結才找得到對象（「主控 MCU」的供應商「恩智浦」故意不在
+供應商清單裡，預覽會出現「找不到對應卡片」的警告）。
+
 ---
 
 ## 7. Laya AI 決策加速
