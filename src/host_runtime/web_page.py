@@ -247,6 +247,10 @@ select.mem-field { width: auto; flex: 0 1 220px; min-width: 0; max-width: 100%; 
 #xp-card .kp-actions button { min-height: 44px; }
 #shared-signin input, #shared-signin button, #team-card input, #team-card button {
   min-height: 44px; }
+/* An example, not saved values (#233); not used while the platform decides. */
+#team-card input::placeholder { color: var(--dim); opacity: 0.6; font-style: italic; }
+#team-card input:disabled, #team-card button:disabled {
+  color: var(--dim); background: var(--panel); cursor: not-allowed; }
 #xp-suggest label { display: flex; align-items: center; gap: 8px; min-height: 44px; }
 #xp-sensitivity label { align-items: flex-start; padding: 6px 0; }
 #xp-sensitivity input { margin-top: 4px; min-width: 20px; min-height: 20px; }
@@ -1271,7 +1275,10 @@ tr:last-child td { border-bottom: none; }
     <div class="card settings" id="team-card">
       <form id="team-settings" autocomplete="off">
         <label for="team-declared">Teams I belong to on this PC</label>
-        <input id="team-declared" placeholder="engineering, qa">
+        <input id="team-declared" placeholder="for example: engineering, qa"
+          aria-describedby="team-unused">
+        <p id="team-unused" class="note" hidden>Not used: this PC is connected to the shared
+          platform, and the platform decides your teams.</p>
         <p class="note">Lets you revise a Workflow your team owns under its own name
           (1.0.0 → 1.0.1) instead of a copy named after you. When this PC is connected to
           the shared platform, the teams come from the platform and this list is not used.
@@ -1971,7 +1978,7 @@ tr:last-child td { border-bottom: none; }
       <div id="mem-confirm-list"></div>
     </div>
     <div class="mem-pane" id="mem-pane-preferences" role="tabpanel" aria-label="偏好" hidden>
-      <p class="mem-intro">你說過、按了「存成偏好」的規則。使用該 Skill 時 Agent 會照做、不再詢問。
+      <p class="mem-intro">你說過、按了「存成偏好」的規則。使用該 Skill 時 Agent 會自動照做。
         修改時會檢查是否和同一個 Skill 的其他偏好矛盾。</p>
       <div class="mem-status" id="mem-status-preferences" role="status" aria-live="polite"
            hidden></div>
@@ -3590,10 +3597,23 @@ el("backend-auth-check").addEventListener("click", async () => {
     el("backend-auth-result").textContent = status ? status.detail : "Backend status unavailable.";
   }
 });
+// New session: Send waits until the new session has loaded (#233); a message
+// sent meanwhile went into the previous one. Once the server has made it, the
+// page is bound to the new session id at once.
+let startingSession = false;
 el("new-conversation").addEventListener("click", async () => {
-  const created = await call("/api/conversations", {});
-  selectPrimaryTab("ask");
-  await loadChat(created.conversation.session_id); field.focus();
+  if (startingSession) return;
+  startingSession = true; send.disabled = true; send.setAttribute("aria-busy", "true");
+  try {
+    const created = await call("/api/conversations", {});
+    selectPrimaryTab("ask");
+    activeConversation = created.conversation.session_id; log.replaceChildren();
+    await loadChat(created.conversation.session_id); field.focus();
+  } catch (failure) { showBootError(failure); }
+  finally {
+    startingSession = false; send.removeAttribute("aria-busy");
+    send.disabled = uploadingFiles > 0 || !activeConversation;
+  }
 });
 
 el("reply-chip-clear").addEventListener("click", () => { clearReply(); field.focus(); });
@@ -3678,6 +3698,8 @@ function progressStatus(progress) {
     const last = running[running.length - 1];
     return (last.status === "waiting" ? "等待你確認：" : "執行中：") + last.name;
   }
+  // The Harness passed its checks: what is left is writing the answer (#233).
+  if (harness && harness.done && harness.phase === "validated") return "整理回答中…";
   return progress.tool_count ? "思考下一步…" : "working…";
 }
 
@@ -4001,7 +4023,7 @@ field.addEventListener("paste", (event) => {
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
-  if (uploadingFiles > 0) return;
+  if (uploadingFiles > 0 || startingSession) return;
   const files = readyFiles();
   const asked = field.value.trim() || (files.length ? "請看附件。" : "");
   if (!asked || !activeConversation) return;
@@ -5241,6 +5263,10 @@ const TEAM_SOURCES = {
 function showTeams(info) {
   const field = el("team-declared");
   if (document.activeElement !== field) field.value = (info.declared_teams || []).join(", ");
+  // The platform's teams win (#233): the local list is kept but not editable.
+  const unused = info.source === "platform" || info.source === "platform_cache";
+  field.disabled = unused; el("team-save").disabled = unused;
+  el("team-unused").hidden = !unused;
   const teams = (info.teams || []).join(", ") || "none";
   el("team-status").textContent = "Teams used for revisions: " + teams
     + (TEAM_SOURCES[info.source] ? " (" + TEAM_SOURCES[info.source] + ")" : "")
@@ -5267,7 +5293,7 @@ el("team-settings").addEventListener("submit", async (event) => {
     }
   } catch (failure) {
     status.classList.add("bad"); status.textContent = "Not saved: " + failure.message;
-  } finally { save.disabled = false; }
+  } finally { save.disabled = el("team-declared").disabled; }
 });
 
 async function loadSharedPlatform() {
@@ -8983,14 +9009,33 @@ function memHealthDecide(item, choice) {
 }
 
 // Go to one item on the memory page (a finding's link, an answer's 「為什麼」).
+// The target pane shows at once with 「開啟中…」 (#233): never the previous
+// tab or person while the page loads.
 async function memGoto(item) {
-  if (!el("panel-memory").hasAttribute("data-open")) await selectPrimaryTab("memory");
-  else if (!memData) await loadMemory();
-  if (item.kind === "person") { await memOpenPerson(item.id); return; }
   const panes = {preference: "preferences", preferences: "preferences", note: "notes",
-    notes: "notes", sync: "sync", records: "records", data: "data"};
+    notes: "notes", sync: "sync", records: "records", data: "data", person: "data"};
   const pane = panes[item.kind] || "confirm";
+  const status = el("mem-status-" + pane);
+  const opening = () => memStatus(pane, "loading", "開啟中…");
   memShow(pane);
+  for (const old of document.querySelectorAll(".mem-item.mem-target")) {
+    old.classList.remove("mem-target");
+  }
+  if (item.kind === "person") el("mem-person").replaceChildren();
+  opening();
+  try {
+    if (!el("panel-memory").hasAttribute("data-open")) await selectPrimaryTab("memory");
+    else if (!memData) await loadMemory();
+    if (status.classList.contains("error")) return;
+    memShow(pane);
+    if (item.kind === "person") { opening(); await memOpenPerson(item.id); return; }
+    memFind(item, pane);
+  } finally {
+    if (status.classList.contains("loading")) memStatus(pane, "");
+  }
+}
+
+function memFind(item, pane) {
   if (pane === "notes") {
     el("mem-note-search").value = ""; el("mem-note-tag").value = "";
     el("mem-note-entity").value = ""; memRenderNotes();
@@ -9003,9 +9048,6 @@ async function memGoto(item) {
       || node.dataset.sync || "";
     return value === item.id || value.endsWith("|" + item.id);
   });
-  for (const old of document.querySelectorAll(".mem-item.mem-target")) {
-    old.classList.remove("mem-target");
-  }
   if (found) {
     found.classList.add("mem-target"); found.scrollIntoView({block: "center"});
   } else if (item.kind === "preference" || item.kind === "note") {
