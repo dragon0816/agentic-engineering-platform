@@ -3092,5 +3092,6 @@ s-k-20261011T102952` (not published).
   3820 passed, 7 skipped, 2 failed (`test_weekly_report_workflow.py::test_doctor_reports_the_integrations_without_contacting_anything`,
   an exhaustive list of exported assets, fixed in 4d8966fc and passing; `test_memory_why_ui.py`
   browser test, passes alone); `C:/aepci-wk/venv` (points at this repo, `--basetemp=C:/aepci-wk/bt-bi`):
-  CI_RESULT. Not pushed; Agent Web not restarted.
+  3794 passed, 34 skipped, 1 failed (the same exported-assets test: the run collected before
+  4d8966fc; with it, that file and `test_bi_cards.py` pass in this venv, 46 passed, 2 skipped). Not pushed; Agent Web not restarted.
 - [ ] Owner live demo check of BI cards (steps in HANDOFF.md).

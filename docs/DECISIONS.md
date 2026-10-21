@@ -4505,3 +4505,59 @@ twice, and Install there would not open the run form); reopening the finding onl
 check (the card is missing in between, the reported problem); reopening it from the generic
 `/api/memory/undo` and `/api/memory/proposals/undo` with an optional `finding_id` (two routes to
 change for one page action, and a finding id on routes that are not about findings).
+
+## 2026-10-21 — BI Knowledge Case A is approved and built on `bi.schema/v1.1` with the robotics sample as demo data
+
+Context: Knowledge Strategy v1.3 §7 kept AEP-K02 and later waiting for owner approval. The owner
+wants a Case A demo for his boss today (release before ~15:30). During the work he changed the
+demo data: his boss's target sample is the robotics BI knowledge base (`files/robotics_kb_sample/`,
+schema v4 of the owner's BI tools, 12 types, 104 cards), not the small wireless fixture.
+
+Decision (owner, 2026-10-21):
+1. **Scope approved: Case A only** (v1.3 §4.7: CSV → mapping preview with warnings → per-card
+   diff → confirm → write → query → dataset-scoped gap answer). The §7 gate is lifted for this
+   scope only. The data is example data only (no real customer data).
+2. **Schema `bi.schema/v1.1`**, derived from the robotics sample's schema v4
+   (`tests/fixtures/robotics_kb_sample/tools/bi_schema.py`, committed verbatim as a fixture) by
+   the one-off converter `scripts/build_bi_schema_v1_1.py` (reads with `ast`, never imports or
+   runs it). The generated `src/capabilities/bi_cards/bi_schema_v1_1.json` ships inside the
+   package; a test checks it equals the converter's output and covers every v4 type and field.
+   It keeps v1's `id_rules` and `field_classes`, and ADR-K11's judgement list. v4 additions:
+   `domain` (list on the shared and company types, one value on the others; wireless / AIDC /
+   robotics), `nodes` on Account, Ecosystem, Competitor and CustomerProduct (`node` merged into
+   `nodes`), CustomerProduct `ecosystem` and `launch_date`, Opportunity with `deal_stage`,
+   `test_type` EMC, Ecosystem `role` institute and ipc, Chinese column aliases. Link targets
+   (untyped in v4) follow v1's relationship ranges plus `ecosystem` → Ecosystem or Account. The
+   proposal file `docs/proposals/bi_schema_v1/bi_schema_v1.json` is unchanged; it is not shipped.
+3. **Priority (#222 kept):** Application `priority` is not in the registry; an imported 優先度
+   column is shown as ignored with 「優先度由 Skill 依事實判斷，不存資料」 and each row with a value
+   gets a `priority_ignored` warning. Trend `measurement_impact`, `our_fit` and `market_impact` are
+   facts (`sourced`), stored. Trend priority is computed (measurement_impact × our_fit) for the
+   dashboard and never stored. v1's `priorities` (per market and period) is therefore not used.
+4. **Store:** one SQLite per dataset at `<workspace>/bi/<dataset>/bi.sqlite` (default `demo`),
+   cards keyed by `(entity_type, canonical_key)`, field-level provenance and append-only history
+   inside `capabilities.bi_cards` (ADR-K11 behaviour: human values never overwritten, imports
+   become proposals, `base_version` stale-edit check, whole-import undo). Every demo card is
+   synthetic and `confidence: assumed`; a card is trusted only when a person verified it and it
+   is not synthetic (DQ-1).
+5. **Demo:** the 12 robotics CSVs are copied into the package (`capabilities/bi_cards/demo/`,
+   package data) and loaded in link order. The older 3-sample wireless fixture is not part of the
+   demo (dropped to keep the demo to one dataset; its CSVs still import through the preview).
+6. **Chat:** Bridge capability `bi-cards/query@1.0.0` (read only) and Skill
+   `engineering/bi-knowledge@1.0.0`, shipped switched on like business cards.
+
+Deferred: v1.3's PostgreSQL backend and the Knowledge storage interface (ADR-K2), the Strategy
+Config reference and Schema Registry install/upcast (ADR-K10 steps 1–4), Graph candidates and
+the push gate (AEP-K05–K08), conflict records for two sources disagreeing (DQ-7), the vault
+adapter and snapshot import (DQ-2, DQ-6), mapping `explode` / `derive` / `compose` (Case B),
+Concept candidates (Case C), proposal accept/reject routes, Cases B–E, real customer data.
+
+Why: the demo needs working software today; the store is local, per dataset and internal
+(#214: BI data is INTERNAL, internal model routing is fine, access follows database sharing).
+Building inside one capability package keeps the Harness and storage type-agnostic (ADR-K10)
+and lets the later Knowledge storage backend replace the SQLite file without changing the API.
+
+Rejected alternatives: shipping `bi.schema/v1` (it lacks the robotics fields and types, so 9 of
+12 robotics CSVs would have unknown columns); importing the owner's `bi_ingest.py` (v1.3: the
+tools are a specification source, not code we run); storing Trend priority (owner: computed);
+keeping both demo sets (two datasets for one demo and more to test today).
