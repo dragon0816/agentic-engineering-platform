@@ -32,3 +32,8 @@ Next action: Leo resolves authorized artifact access and #237 benchmark threshol
 then run the documented local-only command on licensed public data. See
 `docs/voice-to-knowledge/VOICE_PROGRESS.md` for all blockers and acceptance status. Keep PR Draft;
 creating it is not Phase 0 acceptance. No related issue has been closed.
+
+Final remote drift: main advanced during this work to `20351c96e58fbc906879a94eb2f46eeae1312dac`.
+Fetched for inspection only. No rebase/merge/force push. Tests remain against starting baseline
+plus feature commits. Current main also changed HANDOFF/TASKS: reconcile them before integration;
+do not discard concurrent platform handoff entries. PR remains Draft, not merge-ready acceptance.

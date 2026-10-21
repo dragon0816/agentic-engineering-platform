@@ -55,3 +55,13 @@ mypy pass. CLI help works. Full repo suite NOT_RUN because shared runtime was no
 No formal OpenAPI/JSON Schema freeze, time-aligned claim mapping, production adapter, durable
 review queue, GPU/throughput support or integration is claimed delivered. GitHub gh API was
 Forbidden; connector issue reads and Draft PR creation succeeded. Git fetch/push succeeded.
+
+## Final remote check
+
+After implementation, `git ls-remote --symref origin HEAD refs/heads/feature/voice-to-knowledge`
+and `git fetch origin main` found default main advanced to
+`20351c96e58fbc906879a94eb2f46eeae1312dac` (10 concurrent commits since the pinned baseline).
+Those include Agent Web and shared HANDOFF/TASKS edits. This branch was not rebased, force-pushed
+or merged; tests above apply to the pinned starting baseline plus this feature, not the newer
+main. Before review/merge, reconcile shared tracking documents with current main and rerun
+relevant checks. No runtime integration or compatibility with the newer main is asserted.
