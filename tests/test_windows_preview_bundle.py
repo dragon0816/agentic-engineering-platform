@@ -490,3 +490,42 @@ def test_the_bundle_scripts_stay_ascii() -> None:
     ANSI code page, so Traditional Chinese lines are written as escapes."""
     for script in sorted(TEMPLATE.parent.glob("*/*.ps1")) + sorted(TEMPLATE.parent.glob("*/*.cmd")):
         script.read_bytes().decode("ascii")
+
+
+def test_the_installer_explains_and_falls_back_on_another_python() -> None:
+    """2026-10-21: a colleague's python was 3.14 and the wheels are cp312.
+    Without -PythonExe the installer uses the py launcher's 3.12 and says
+    so; otherwise the error names the version and path found, the 3.12
+    installations `py -0p` lists with the -PythonExe to use, or where to get
+    3.12, in English and Traditional Chinese."""
+    installer = _template("install.ps1")
+    for expected in (
+        "print(sys.executable)",
+        "& py -0p",
+        "(?:V:)?",
+        '$PSBoundParameters.ContainsKey("PythonExe")',
+        "using Python $Wanted from the py launcher instead",
+        "This bundle requires 64-bit Python $Wanted",
+        "Found Python $($Python.Version) at $($Python.Path)",
+        "Python $Wanted is installed here",
+        "Run install.cmd again with:  -PythonExe",
+        "https://www.python.org/downloads/windows/",
+        "$PythonExe = $Other.Path",
+    ):
+        assert expected in installer, expected
+    # The Chinese lines: "預設的 python 不是", "這個安裝包需要 64 位元的 Python".
+    assert r"\u9810\u8a2d\u7684 python \u4e0d\u662f" in installer
+    assert r"\u9019\u500b\u5b89\u88dd\u5305\u9700\u8981 64" in installer
+    # The check runs before anything is created.
+    assert installer.index("This bundle requires 64-bit Python") < installer.index(
+        "New-Item -ItemType Directory -Force -Path $InstallRoot"
+    )
+    update = _template("update.ps1")
+    assert (
+        'if ($PSBoundParameters.ContainsKey("PythonExe")) '
+        "{ $PythonArgument.PythonExe = $PythonExe }" in update
+    )
+    assert "@PythonArgument" in update
+    manual = _template("INSTALL.zh-TW.md")
+    assert "Python 3.12 is installed here" in manual and "py -3.12" in manual
+    assert "預設的 python 不是 3.12，改用 py 啟動器找到的 Python 3.12" in manual

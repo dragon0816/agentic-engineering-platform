@@ -58,7 +58,13 @@ if (Test-Path -LiteralPath $Previous) {
     $From = (Get-Content -LiteralPath $Previous -Raw | ConvertFrom-Json).source_revision
     Write-Host "Installed revision before the update: $From"
 }
+# -PythonExe is passed on only when given here, so the installer can fall back
+# to the py launcher's Python 3.12 when the default python is another version.
+# No -Namespace: the installer always writes engineering and corrects a
+# host.json that has another one (owner, 2026-10-21).
+$PythonArgument = @{}
+if ($PSBoundParameters.ContainsKey("PythonExe")) { $PythonArgument.PythonExe = $PythonExe }
 & (Join-Path $PSScriptRoot "install.ps1") -Actor $Actor -BridgeId $BridgeId `
-    -PythonExe $PythonExe -InstallRoot $InstallRoot -NoShortcut:$NoShortcut `
-    -NoAgentSkills:$NoAgentSkills -NoGateway:$NoGateway
+    -InstallRoot $InstallRoot -NoShortcut:$NoShortcut `
+    -NoAgentSkills:$NoAgentSkills -NoGateway:$NoGateway @PythonArgument
 Write-Host "Updated. Open Agent Web again with the 'AEP Agent' shortcut or start-web.cmd."

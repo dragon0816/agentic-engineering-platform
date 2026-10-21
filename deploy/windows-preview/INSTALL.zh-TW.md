@@ -44,6 +44,13 @@
    .\install.cmd -Actor alex.wang -PythonExe "C:\Python312\python.exe"
    ```
 
+   從 PowerShell 7（`pwsh`）視窗執行也可以：`install.cmd` 會讓它啟動的 Windows PowerShell
+   使用自己的預設模組路徑。
+
+   預設的 `python` 不是 3.12（例如 3.14）、又沒有加 `-PythonExe` 時，安裝程式會用 `py`
+   啟動器找 Python 3.12，找到就自動改用它，並印出
+   「預設的 python 不是 3.12，改用 py 啟動器找到的 Python 3.12：<路徑>」。
+
 4. 安裝程式會依序：
    - 檢查路徑長度，再檢查每個檔案的 SHA-256；
    - 建立獨立的 Python 環境，並從安裝包內的檔案**離線**安裝（不會連外下載）；
@@ -185,7 +192,7 @@
 | `would need …-character paths`（gateway） | 安裝路徑太深 | 用較短的 `-InstallRoot`（例如 `C:\aep\preview`），或加 `-NoGateway` |
 | `Bundle file is missing` | 解壓縮時漏了檔案 | 刪掉資料夾，重新完整解壓縮 |
 | `Bundle integrity check failed` | 檔案損毀或被修改 | 重新下載 zip，比對發佈資料夾裡 `SHA256SUMS.txt` 的值 |
-| `This bundle requires 64-bit Python 3.12` | Python 版本不對 | 安裝 Python 3.12（64 位元），或加 `-PythonExe` 指定路徑 |
+| `This bundle requires 64-bit Python 3.12`（這個安裝包需要 64 位元的 Python 3.12） | 預設的 `python` 是別的版本（例如 3.14）；安裝包的套件只適用 3.12 | 訊息會顯示找到的版本和 `python.exe` 路徑。若列出「Python 3.12 is installed here」，照訊息加 `-PythonExe "<那個路徑>"` 重新執行；沒有列出時，從 python.org 安裝 64 位元 Python 3.12（可以和其他版本並存）再執行。沒加 `-PythonExe` 時，安裝程式會先自動試 `py -3.12` |
 | `The term 'Get-FileHash' is not recognized` | 舊版安裝包從 PowerShell 7 視窗執行時，Windows PowerShell 找不到自己的模組 | 新版已修正。舊版請改從「Windows PowerShell」視窗或檔案總管雙擊 `install.cmd` 執行 |
 | `Offline wheel installation failed` | 檔案被占用或防毒軟體攔截 | 關閉 Agent Web 後重試；仍失敗時附上畫面截圖回報 |
 | `The LLM gateway's token could not be renewed now` | 安裝時沒有網域登入 | 不影響安裝。連上公司網路或 VPN 後，到 Settings → LLM gateway 按 **Refresh token** |

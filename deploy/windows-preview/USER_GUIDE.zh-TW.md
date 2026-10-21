@@ -1665,6 +1665,10 @@ Skill 在 Agent Web 重新啟動後才生效。關掉 Agent Web 再用捷徑打�
 **怎麼重新啟動 Agent Web？**
 關掉背景的 Agent Web 視窗（或在工作管理員結束 `aep-host`），再雙擊 **AEP Agent** 捷徑。
 
+**安裝時說 `This bundle requires 64-bit Python 3.12`？**
+你的 `python` 是別的版本（例如 3.14）。照訊息裡列出的 3.12 路徑加 `-PythonExe "<路徑>"` 重新執行
+`install.cmd`，或安裝 64 位元 Python 3.12；見安裝手冊第 9 節。
+
 **對話紀錄存在哪？會被別人看到嗎？**
 存在這台電腦的 `workspace\`，只有這台電腦能開 Agent Web。用 PUBLIC 後端的對話內容會送到那個
 外部服務。

@@ -85,13 +85,92 @@ foreach ($File in $Manifest.files) {
     }
 }
 
-$Version = (& $PythonExe -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')").Trim()
-if ($LASTEXITCODE -ne 0 -or $Version -ne $Manifest.python_minor) {
-    throw "This bundle requires 64-bit Python $($Manifest.python_minor)."
+# The bundle's wheels are built for one Python minor version (cp312), and a
+# newer default python cannot use them (2026-10-21: a colleague's 3.14). When
+# -PythonExe was not given and the default python is not that version, the
+# py launcher's copy of the right version is used, and the installer says so.
+function Get-PythonIdentity([string]$Exe) {
+    $Previous = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $Lines = @(& $Exe -c "import sys, platform; print(f'{sys.version_info.major}.{sys.version_info.minor}'); print(sys.executable); print(platform.machine().lower())" 2>$null)
+        if ($LASTEXITCODE -ne 0 -or $Lines.Count -lt 3) { return $null }
+        return [pscustomobject]@{
+            Version = ([string]$Lines[0]).Trim()
+            Path = ([string]$Lines[1]).Trim()
+            Machine = ([string]$Lines[2]).Trim()
+        }
+    }
+    catch { return $null }
+    finally { $ErrorActionPreference = $Previous }
 }
-$Architecture = (& $PythonExe -c "import platform; print(platform.machine().lower())").Trim()
-if ($LASTEXITCODE -ne 0 -or $Architecture -notin @("amd64", "x86_64")) {
-    throw "This bundle requires 64-bit x86 Windows Python."
+function Get-LauncherPython([string]$Minor) {
+    # `py -0p` lists " -V:3.12 *   C:\...\python.exe" (launcher 3.11 and
+    # later) or " -3.12-64 *  C:\...\python.exe" (older); 32-bit is left out.
+    $Found = @()
+    if (-not (Get-Command py -CommandType Application -ErrorAction SilentlyContinue)) { return $Found }
+    $Previous = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        foreach ($Line in @(& py -0p 2>$null)) {
+            if ([string]$Line -match '^\s*-(?:V:)?(\d+\.\d+)(-64|-32)?\s*\*?\s+(\S.*?)\s*$') {
+                if ($Matches[1] -eq $Minor -and $Matches[2] -ne "-32" -and (Test-Path -LiteralPath $Matches[3] -PathType Leaf)) {
+                    $Found += $Matches[3]
+                }
+            }
+        }
+    }
+    catch { $Found = @($Found) }
+    finally { $ErrorActionPreference = $Previous }
+    return $Found
+}
+$Wanted = [string]$Manifest.python_minor
+$Python = Get-PythonIdentity $PythonExe
+if (($null -eq $Python -or $Python.Version -ne $Wanted) -and -not $PSBoundParameters.ContainsKey("PythonExe")) {
+    foreach ($Candidate in @(Get-LauncherPython $Wanted)) {
+        $Other = Get-PythonIdentity $Candidate
+        if ($null -ne $Other -and $Other.Version -eq $Wanted -and $Other.Machine -in @("amd64", "x86_64")) {
+            $Default = if ($null -eq $Python) { "No usable '$PythonExe' was found" } else { "'$PythonExe' is Python $($Python.Version) ($($Python.Path))" }
+            Write-Host "$Default; using Python $Wanted from the py launcher instead: $($Other.Path)"
+            Write-Host ((ConvertFrom-Escaped "\u9810\u8a2d\u7684 python \u4e0d\u662f ") + $Wanted +
+                (ConvertFrom-Escaped "\uff0c\u6539\u7528 py \u555f\u52d5\u5668\u627e\u5230\u7684 Python ") + $Wanted +
+                (ConvertFrom-Escaped "\uff1a") + $Other.Path)
+            $PythonExe = $Other.Path
+            $Python = $Other
+            break
+        }
+    }
+}
+if ($null -eq $Python -or $Python.Version -ne $Wanted) {
+    $Launcher = @(Get-LauncherPython $Wanted)
+    $Lines = @("This bundle requires 64-bit Python $Wanted (its packages are built for $Wanted only).")
+    if ($null -eq $Python) {
+        $Lines += "'$PythonExe' did not run as Python."
+        $FoundText = "'$PythonExe' ?"
+    }
+    else {
+        $Lines += "Found Python $($Python.Version) at $($Python.Path) (from '$PythonExe')."
+        $FoundText = "$($Python.Version) ($($Python.Path))"
+    }
+    if ($Launcher.Count -gt 0) {
+        $Lines += "Python $Wanted is installed here: " + ($Launcher -join ", ")
+        $Lines += "Run install.cmd again with:  -PythonExe `"$($Launcher[0])`""
+        $Hint = ConvertFrom-Escaped "\u8acb\u7528 -PythonExe \u6307\u5b9a\u4e0a\u9762\u5217\u51fa\u7684 python.exe \u91cd\u65b0\u57f7\u884c install.cmd\u3002"
+    }
+    else {
+        $Lines += ("Install 64-bit Python $Wanted from https://www.python.org/downloads/windows/ " +
+            "(it can sit beside other versions), then run install.cmd again; add " +
+            "-PythonExe `"<path to its python.exe>`" if python still starts another version.")
+        $Hint = ((ConvertFrom-Escaped "\u8acb\u5b89\u88dd 64 \u4f4d\u5143\u7684 Python ") + $Wanted +
+            (ConvertFrom-Escaped "\uff08\u53ef\u4ee5\u548c\u5176\u4ed6\u7248\u672c\u4e26\u5b58\uff09\uff0c\u518d\u91cd\u65b0\u57f7\u884c install.cmd\u3002"))
+    }
+    $Lines += ((ConvertFrom-Escaped "\u9019\u500b\u5b89\u88dd\u5305\u9700\u8981 64 \u4f4d\u5143\u7684 Python ") + $Wanted +
+        (ConvertFrom-Escaped "\uff1b\u627e\u5230\u7684 python \u662f ") + $FoundText +
+        (ConvertFrom-Escaped "\u3002") + $Hint)
+    throw ($Lines -join [Environment]::NewLine)
+}
+if ($Python.Machine -notin @("amd64", "x86_64")) {
+    throw "This bundle requires 64-bit x86 Windows Python; $($Python.Path) reports $($Python.Machine)."
 }
 
 New-Item -ItemType Directory -Force -Path $InstallRoot | Out-Null
