@@ -3131,6 +3131,24 @@ s-k-20261011T102952` (not published).
   Q4: `organization` audience; Q5: admin review only for a new dataset name's first version).
   Depends on the per-dataset schema binding work landing first.
 
+## Chat composer: backend selector on top, LLM model menu (2026-10-21)
+
+- [x] Backend selector moved to the top bar of the chat; model menu under the message box,
+  per conversation and the person's default, applied from the next message without a restart,
+  only models the approved Gateway lists (2026-10-21, Claude Code; owner request). Code:
+  `src/models/selection.py`, `src/host_runtime/conversation_models.py`, `web.py` routes
+  `GET /api/conversations/models`, `POST /api/conversations/model`, `web_page.py` composer, a
+  Settings note. Contract `docs/CONTRACTS.md` "Chat composer model choice"; decision
+  `docs/DECISIONS.md` 2026-10-21 "The chat composer chooses the Gateway model per conversation…";
+  user guide 4.2 / 4.2.1. Tests: `tests/test_conversation_models.py` (10),
+  `tests/test_conversation_model_ui.py` (3, real browser, screenshots `.scratch/model-select/`).
+  Commits 9e4b67f5, 6b572b7c. Verification: ruff check, ruff format --check, mypy (748 files)
+  clean; full pytest project venv 3842 passed, 7 skipped;
+  `C:/aepci-wk/venv` 3815 passed, 34 skipped (`--basetemp=C:/aepci-wk/bt-model`).
+- [ ] Owner live check after a restart on this code (when `/api/tasks` is idle).
+- [ ] Optional: let the conversation's model reach Knowledge answers made through the drafting
+  client too (decision item 4), if the owner wants it.
+
 ## Windows installer fixes from a colleague's PC (2026-10-21)
 
 - [x] Namespace fixed to `engineering`: `install.ps1` always writes it and corrects an existing

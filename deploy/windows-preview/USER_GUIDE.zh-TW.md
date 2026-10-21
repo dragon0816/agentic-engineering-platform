@@ -339,7 +339,8 @@ MCP server 可以給 Agent 加新工具（例如 GitHub、檔案系統）。**�
 
 ### 4.2 選擇模型後端
 
-輸入框下方的下拉選單（**Conversation backend**）：
+對話上方左邊的下拉選單（**Conversation backend**，在「as … · on … · namespace …」那行左邊；
+只在對話頁出現）：
 
 | 選項 | 說明 |
 |---|---|
@@ -354,6 +355,24 @@ MCP server 可以給 Agent 加新工具（例如 GitHub、檔案系統）。**�
   session。
 - 想讓 Claude Code / Copilot 在對話裡讀寫檔案、執行指令，請開 Agent 模式（第 11 章）。
 - gateway 不可用時會出現 **Open Settings**，帶你到 Settings。
+
+### 4.2.1 選擇語言模型（LLM model）
+
+用 **Configured LLM Gateway** 時，輸入框下方左邊的下拉選單列出 gateway 目前提供的模型
+（Agent 用 Settings 裡的權杖對應讀 gateway 的模型清單，權杖不會送到網頁）：
+
+- 選一個模型，**下一則訊息起**就用它回答，不用重新啟動 Agent。旁邊顯示
+  `This conversation · from the next message`。
+- 選擇記在這個對話，也會變成你的預設：之後還沒選過模型的對話會用它（顯示 `Your default`）。
+  沒選過時用 Settings 的模型（後面標 `Settings default`）。
+- 回答進行中選單會鎖住（`Locked while the answer runs`），答完再換。
+- gateway 只提供一個模型時，只顯示模型名稱，不是選單；讀不到清單時只顯示 Settings 的模型，
+  並寫 `Gateway list unavailable · Settings model`。
+- 之前選的模型 gateway 不再提供時，選單顯示 `… · not served now`，那則訊息會被拒絕
+  （`model_not_approved`），請改選別的模型。
+- 換模型不改變資料規則：資料傳送核准（2.2 節）照樣先檢查，只能送到同一個已核准的 gateway。
+- Claude Code、Copilot、Codex 後端用它們自己的模型，這裡顯示 `Model: chosen by …`。
+- Settings 第 2 章仍然決定 gateway 網址和預設模型。
 
 ### 4.3 斜線指令
 

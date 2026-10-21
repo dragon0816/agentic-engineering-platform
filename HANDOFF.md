@@ -2,7 +2,23 @@
 
 Updated: 2026-10-21 (Asia/Taipei), by Claude Code (BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## Windows installer fixes from a colleague's PC (2026-10-21, Claude Code) — latest
+## Chat composer model menu (2026-10-21, Claude Code) — latest
+
+- Commits 9e4b67f5 (backend) and 6b572b7c (page) on main, not pushed, Agent Web not restarted,
+  `host.json`, live data and the gateway on port 4000 untouched. Row in `docs/TASKS.md` "Chat
+  composer: backend selector on top, LLM model menu"; contract `docs/CONTRACTS.md` "Chat composer
+  model choice"; decision `docs/DECISIONS.md` 2026-10-21; user guide 4.2 / 4.2.1.
+- The backend selector is in the chat's top bar; the composer has an LLM model menu with what the
+  approved Gateway lists, per conversation and remembered as the person's default, applied from
+  the next message (no restart) through `SelectableModelClient` inside `ApprovedModelClient`.
+- Verification: ruff, format, mypy clean; full pytest 3842 passed (project venv) and 3815 passed
+  (`C:/aepci-wk/venv`).
+- Owner check after a restart on this code (when `/api/tasks` is idle): the top bar shows
+  「Configured LLM Gateway · Configured and ready」 left of 「as … on …」; the menu under the box
+  lists the Gateway's models (`gpt-5.5 · Settings default` first); pick another, ask 「你是哪個
+  模型？」, then open a new session: it shows `Your default`; Settings shows the default-model note.
+
+## Windows installer fixes from a colleague's PC (2026-10-21, Claude Code)
 
 - Committed on main, not pushed, no release built, Agent Web not restarted; this PC's real
   install untouched. Row in `docs/TASKS.md` "Windows installer fixes from a colleague's PC";

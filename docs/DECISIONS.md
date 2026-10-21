@@ -4562,6 +4562,43 @@ Rejected alternatives: shipping `bi.schema/v1` (it lacks the robotics fields and
 tools are a specification source, not code we run); storing Trend priority (owner: computed);
 keeping both demo sets (two datasets for one demo and more to test today).
 
+## 2026-10-21 — The chat composer chooses the Gateway model per conversation, from the next message, without a restart
+
+Context: the owner asked to move the backend selector ("Configured LLM Gateway" / "Configured
+and ready") to the top of the chat and put an LLM model menu where it was. Before this, the
+conversation model was fixed per host: Settings → Natural-language model saves one endpoint and
+model in `host.json`, applied at the next Agent start. The built-in LiteLLM Gateway serves several
+models at one URL, and the data approval (`ModelBinding.data_approval`) names that URL, not a
+model id; Settings already keeps the approval when only the model name changes.
+
+Decision (owner request, scope as recommended in the request):
+1. **Scope**: per conversation, remembered as the person's default for conversations that have
+   not picked one, applied from the next message without restarting the Agent. Stored in
+   `<workspace>/conversation-models.json`, not in the conversation record, so a rollback to an
+   older build still reads its conversations.
+2. **Which models**: only what the configured, approved Gateway lists at `/models` (read by the
+   Host with its credential mapping), plus the configured model. Unreachable list: the configured
+   model alone.
+3. **How it is applied**: a per-turn context variable (`models.selection.TURN_MODEL`) read by a
+   `SelectableModelClient` placed *inside* `ApprovedModelClient` on the router: data policy first,
+   then the same endpoint with a different model id; anything not approved is refused with
+   `model_not_approved` and never sent. `ModelRequest` and the alias layer are unchanged; callers
+   still name the alias.
+4. **Reach**: Gateway-backend conversation turns (the router's model). Knowledge answers made by
+   capabilities through the drafting client, Workflow drafting, schedules and Telegram keep the
+   configured model. Settings still defines the Gateway, its URL and the default model.
+
+Why: the approval is tied to the URL and data classes, so a model at the same Gateway needs no
+new approval; a context variable keeps the choice to the one turn (asyncio.to_thread copies it)
+without threading a model id through every caller; data classification (BI is INTERNAL) is
+untouched because the destination and the policy check are the same.
+
+Rejected alternatives: saving the pick into `host.json` and restarting (the owner wants it per
+conversation and immediate); a `model` field on `ModelRequest` (changes a shared contract and
+every caller); a field on `ConversationRecord` (breaks reading conversations after a rollback);
+letting the page send any model id (the Gateway's list is the policy); switching the drafting
+client too (wider reach than the chat menu suggests; can follow if the owner wants it).
+
 ## 2026-10-21 — The Windows installer always writes the engineering namespace; -Namespace is accepted and ignored
 
 Context: commit 4b051234 (same day) gave a fresh install `"namespace": "engineering"` only when

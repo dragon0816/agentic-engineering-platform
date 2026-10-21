@@ -3985,3 +3985,43 @@ Skill), `src/host_runtime/bi_cards_api.py` (routes), `src/host_runtime/bi_cards_
   so `assets install-bundled` switches it on on an existing PC). Procedure: answer only from
   cards, cite `[卡片 <type>:<key>]`, mark 事實 vs 推論, say 待驗證 for untrusted cards, scope gaps
   as 「在這份資料集中沒有…」, judge priority itself from the facts and say so (#222).
+
+## Chat composer model choice (owner 2026-10-21)
+
+Code: `src/models/selection.py` (`TURN_MODEL`, `SelectableModelClient`),
+`src/host_runtime/conversation_models.py` (`ConversationModels`), routes in
+`src/host_runtime/web.py`, composer in `src/host_runtime/web_page.py`. Tests:
+`tests/test_conversation_models.py`, `tests/test_conversation_model_ui.py`.
+
+- **Which models**: the configured routing endpoint's model (Settings, `host.json` `models`) plus
+  what that endpoint lists (`GET <base_url>/models` for `openai_compatible`, `/api/tags` for
+  `ollama`), read by `AgentWeb.available_models` with the Host's credential mapping (the token
+  never reaches the page). The list is cached 300 s; when it cannot be read, the configured model
+  alone is offered (`source: "configured"`, `code` names why).
+- `GET /api/conversations/models?session_id=<id>` →
+  `{"ok": true, "source": "gateway" | "configured", "code": null | <reason>, "configured": <id>,
+  "selected": <id>, "selected_from": "conversation" | "default" | "settings",
+  "unavailable": <stored id the Gateway no longer serves> | null,
+  "models": [{"id", "label", "status": "Settings default" | "Gateway"}]}`; the configured model
+  is first, the others sorted. No model configured: `{"ok": false, "code":
+  "model_not_configured", "models": []}`. Names only: no URL, credential or variable name.
+- `POST /api/conversations/model {"session_id", "model"}` → `{"ok": true, "selected",
+  "configured"}`; 409 with `code` `model_not_approved` (not the configured model and not in the
+  Gateway's list, re-read once), `conversation_unknown` or `model_not_configured`.
+- **Stored** in `<workspace>/conversation-models.json`: `{"defaults": {actor: model},
+  "sessions": {session_id: model}}`. A pick is kept for the conversation and becomes the
+  person's default for conversations without their own pick. Deleting a conversation removes
+  its entry.
+- **Applied** to Gateway-backend turns only, from the next message, without a restart:
+  `AgentWeb.conversation_turn` sets `TURN_MODEL` to the conversation's model (None when it is
+  the configured one); the router's model is `ApprovedModelClient(SelectableModelClient(...))`,
+  so the data approval decides first; the switch then sends the chosen id to the same endpoint
+  (same alias, URL, credential, capabilities and options) or refuses a non-approved id with
+  `Failure(code="model_not_approved")` without sending anything. The chat shows "The model
+  chosen for this conversation is not one the LLM Gateway serves now (model_not_approved)…".
+  Requests outside a turn (schedules, Workflow drafting, the Knowledge and other capabilities
+  built with the drafting client) keep the configured model.
+- **Page**: the backend selector (`#conversation-backend`) is in the top bar above the
+  conversation, shown only on the chat tab; the composer has `#conversation-model` (label
+  "LLM model"), a read-only label when one model is served or a CLI backend is active, and a
+  status line; the menu is disabled while a turn of that conversation runs.
