@@ -3104,3 +3104,16 @@ s-k-20261011T102952` (not published).
   Agent Web / knowledge / BI / chat / conversation / Skill tests (590 passed); release `--quick`.
   Live on this PC: demo load 104 cards (re-load 104 unchanged), dashboard 15 sections with the
   README's two red gaps; chat answers to the three demo questions cite cards (11–23 s).
+
+## BI dataset sharing through the Shared Platform: design proposal (2026-10-21)
+
+- [x] Proposal `docs/proposals/BI_DATASET_SHARING.md` written (2026-10-21, Claude Code; docs only,
+  no code): compares immutable snapshots as a new platform asset kind `bi_dataset` (A), a live
+  read/write API on the platform (B) and owner-to-colleague export/import files (C); recommends A
+  for a first read-only slice (about 8–10 working days) with roles, versioning and pinning, schema
+  id@version travelling with the snapshot, what provenance/history is stripped, colleague proposals
+  as a later slice, INTERNAL handling, audit, size limits, UI and acceptance tests.
+- [ ] Owner decision on the proposal and its five open questions (Q1: real INTERNAL data on the
+  public test host 141; Q2: delete local copies when access is revoked; Q3: history in snapshots;
+  Q4: `organization` audience; Q5: admin review only for a new dataset name's first version).
+  Depends on the per-dataset schema binding work landing first.
