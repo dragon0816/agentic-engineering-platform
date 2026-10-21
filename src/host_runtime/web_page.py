@@ -1105,6 +1105,20 @@ tr:last-child td { border-bottom: none; }
 .bi-stale { margin: 6px 0; padding: 8px 12px; border: 1px solid var(--warn); border-radius: 8px;
   background: color-mix(in srgb, var(--warn) 10%, transparent); }
 .bi-err { color: var(--bad); font-size: 13px; }
+.bi-err:empty { display: none; }
+.bi-schema-note { flex: 1 1 100%; margin: 0; overflow-wrap: anywhere; }
+.bi-schema-note:empty { display: none; }
+.bi-errors { margin: 6px 0 0; padding-left: 18px; color: var(--bad); font-size: 13px; }
+.bi-errors li { overflow-wrap: anywhere; margin: 2px 0; }
+.bi-errors code { color: var(--ink); }
+.bi-ok { color: var(--good); font-size: 13px; margin: 6px 0 0; }
+.bi-files { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 6px; }
+.bi-files a { display: inline-flex; align-items: center; min-height: 44px; color: var(--accent); }
+.bi-none { padding: 24px 16px; text-align: center; border: 1px dashed var(--line);
+  border-radius: 10px; }
+.bi-none h3 { margin: 0 0 6px; font-size: 17px; }
+.bi-none p { color: var(--dim); margin: 0 0 12px; }
+.bi-none .bi-actions { justify-content: center; }
 .bi-kept, .bi-kept td { background: color-mix(in srgb, var(--warn) 15%, transparent); }
 .bi-row { margin: 0 0 6px; border: 1px solid var(--line); border-radius: 8px;
   background: var(--bg); }
@@ -2088,7 +2102,7 @@ tr:last-child td { border-bottom: none; }
         <div class="bi-bar-main">
           <div><label class="bi-label" for="bi-dataset">資料集</label>
             <select id="bi-dataset"><option value="demo">demo</option></select></div>
-          <div><label class="bi-label" for="bi-domain">領域</label>
+          <div id="bi-domain-box"><label class="bi-label" for="bi-domain">領域</label>
             <select id="bi-domain">
               <option value="robotics" selected>機器人 Robotics</option>
               <option value="wireless">無線通訊 Wireless</option>
@@ -2098,12 +2112,54 @@ tr:last-child td { border-bottom: none; }
         </div>
         <div class="bi-actions">
           <button class="go" id="bi-demo" type="button">載入示範資料</button>
+          <button class="bi-btn" id="bi-new" type="button" aria-expanded="false"
+            aria-controls="bi-new-panel">新增資料集</button>
+          <button class="bi-btn" id="bi-install" type="button" aria-expanded="false"
+            aria-controls="bi-install-panel">安裝 schema</button>
           <button class="bi-btn" id="bi-refresh" type="button">更新</button>
         </div>
+        <p class="bi-meta bi-schema-note" id="bi-schema-note"></p>
       </div>
+      <form class="card bi-step" id="bi-new-panel" aria-label="新增資料集" hidden novalidate>
+        <h3>新增資料集</h3>
+        <div class="bi-step-grid">
+          <div><label class="bi-label" for="bi-new-name">
+              名稱（英文字母、數字、- 或 _，最多 40 字）</label>
+            <input id="bi-new-name" class="bi-input" type="text" autocomplete="off"
+              maxlength="40" spellcheck="false" placeholder="例如 product-spec"
+              aria-describedby="bi-new-err"></div>
+          <div><label class="bi-label" for="bi-new-schema">Schema</label>
+            <select id="bi-new-schema"><option value="">載入中…</option></select></div>
+        </div>
+        <p class="bi-meta">建立後不能更換 schema。Dashboard 與對話查詢只支援 BI schema
+          （bi.schema/*）；其他 schema 的資料集可以匯入、瀏覽與編輯卡片。</p>
+        <p class="bi-err" id="bi-new-err" role="alert"></p>
+        <div class="bi-actions">
+          <button class="go" id="bi-new-go" type="submit">建立</button>
+          <button class="bi-btn" id="bi-new-cancel" type="button">取消</button>
+        </div>
+      </form>
+      <form class="card bi-step" id="bi-install-panel" aria-label="安裝 schema" hidden novalidate>
+        <h3>安裝 schema</h3>
+        <div class="bi-step-grid">
+          <div><label class="bi-label" for="bi-schema-file">Schema 檔（.json）</label>
+            <input id="bi-schema-file" type="file" accept=".json,application/json"
+              aria-describedby="bi-install-msg"></div>
+          <div><button class="go" id="bi-install-go" type="submit"
+              disabled>驗證並安裝</button></div>
+        </div>
+        <p class="bi-meta">同一個 id@version 安裝後不能修改；要改內容，請把 version
+          改成新版本再安裝。</p>
+        <div id="bi-install-msg" role="status" aria-live="polite"></div>
+        <div class="bi-actions">
+          <button class="bi-btn" id="bi-example" type="button">安裝範例 schema（產品規格）</button>
+          <button class="bi-btn" id="bi-install-cancel" type="button">關閉</button>
+        </div>
+        <div id="bi-example-files" class="bi-meta" hidden></div>
+      </form>
       <div class="mem-status" id="bi-status-bar" role="status" aria-live="polite" hidden></div>
       <div id="bi-notice" class="mem-notice" role="status" aria-live="polite"></div>
-      <aside class="bi-hint" aria-label="對話中使用卡片">
+      <aside class="bi-hint" id="bi-hint" aria-label="對話中使用卡片">
         <span class="bi-hint-text"><strong>對話也會用這些卡片回答。</strong>
           在對話中問：「哪些測試方案對應 WiFi 7？」回答會以「[卡片 …]」標出引用的卡片。</span>
         <button class="bi-btn" id="bi-ask" type="button">到對話中問</button>
@@ -10024,8 +10080,13 @@ const BI_MAPPING = {mapped: ["已對應", "good"], alias: ["別名對應", "acce
 const BI_CHANGE = {add: ["新增", "good"], change: ["變更", "accent"], same: ["不變", "dim"],
   human_kept: ["人工值保留，改成提議", "warn"]};
 
-const bi = {schema: null, datasets: [], view: "dashboard", loaded: {}, cards: [],
-  cardId: null, detail: null, preview: null, csv: null, importId: null, searchTimer: 0};
+// Each dataset follows the schema it was created with (owner 2026-10-21): the
+// type filter, import types, card detail and editors read `bi.schema`, loaded
+// for the selected dataset. Dashboard and the chat hint are BI-only.
+const bi = {schema: null, schemas: [], datasets: [], view: "dashboard", loaded: {}, cards: [],
+  cardId: null, detail: null, preview: null, csv: null, importId: null, searchTimer: 0,
+  want: null};
+const BI_NAME = /^[A-Za-z0-9_-]{1,40}$/;
 
 const bh = (tag, cls, ...children) => memEl(tag, cls, ...children);
 
@@ -10133,29 +10194,54 @@ async function biLoad() {
   biStatus("bi-status-bar", "loading", "載入中…");
   el("bi-counts").textContent = "…";
   try {
-    const [schema, datasets] = await Promise.all([
-      bi.schema ? Promise.resolve(bi.schema) : biCall("/api/bi/schema"),
-      biCall("/api/bi/datasets")]);
-    bi.schema = schema; bi.datasets = datasets.datasets || [];
+    const [datasets, schemas] = await Promise.all([biCall("/api/bi/datasets"),
+      biCall("/api/bi/schemas").catch(() => ({schemas: bi.schemas}))]);
+    bi.datasets = datasets.datasets || []; bi.schemas = schemas.schemas || [];
+    biRenderBar();
+    bi.schema = await biCall("/api/bi/schema?dataset=" + encodeURIComponent(biDataset()));
   } catch (failure) {
     el("bi-counts").textContent = "—";
     biStatus("bi-status-bar", "error", "載入失敗：" + failure.message + "。", biLoad);
     return;
   }
   biStatus("bi-status-bar", "");
-  biRenderBar(); biRenderTypes();
+  biRenderSchema(); biRenderTypes();
   bi.loaded = {};
   await biShowView(bi.view);
 }
 
+// A dataset whose schema is not bi.schema/* has no Dashboard and no chat query.
+function biIsBi() { return !bi.schema || bi.schema.bi !== false; }
+
+function biSchemaTitle(ref) {
+  const found = bi.schemas.find((item) => item.ref === ref
+    || item.id + "@" + item.version === ref);
+  return found ? found.title : ref;
+}
+
+function biRenderSchema() {
+  const isBi = biIsBi(), schema = bi.schema || {};
+  el("bi-demo").hidden = !isBi;
+  el("bi-hint").hidden = !isBi;
+  el("bi-domain-box").hidden = Array.isArray(schema.domains) && !schema.domains.length;
+  const note = el("bi-schema-note"); note.replaceChildren();
+  if (!schema.ref) return;
+  note.append(text("Schema："), bh("strong", "", schema.title || schema.ref),
+    text("（" + schema.ref + "）"));
+  if (!isBi) note.append(text(" · 沒有 Dashboard 與對話查詢；卡片、匯入與編輯照常可用"));
+}
+
 function biRenderBar() {
-  const select = el("bi-dataset"), keep = select.value || "demo";
+  const select = el("bi-dataset"), keep = bi.want || select.value || "demo";
+  bi.want = null;
   select.replaceChildren();
   const names = bi.datasets.map((item) => item.name);
   if (!names.includes(keep)) names.unshift(keep);
   for (const name of names) {
     const option = document.createElement("option"); option.value = name;
-    option.textContent = name; select.append(option);
+    const info = bi.datasets.find((item) => item.name === name);
+    option.textContent = info && info.schema ? name + " · " + biSchemaTitle(info.schema) : name;
+    select.append(option);
   }
   select.value = keep;
   const current = bi.datasets.find((item) => item.name === keep);
@@ -10198,7 +10284,13 @@ for (const button of document.querySelectorAll("#bi-views [data-bi-view]")) {
   button.addEventListener("click", () => biShowView(button.dataset.biView));
 }
 el("bi-refresh").addEventListener("click", () => biLoad());
-el("bi-dataset").addEventListener("change", () => { bi.cardId = null; biLoad(); });
+// A preview belongs to the dataset it was made for: switching drops it.
+function biLeaveDataset() {
+  bi.cardId = null; bi.preview = null;
+  el("bi-preview").hidden = true; el("bi-result").hidden = true;
+  biStatus("bi-status-import", "");
+}
+el("bi-dataset").addEventListener("change", () => { biLeaveDataset(); biLoad(); });
 el("bi-domain").addEventListener("change", () => {
   bi.loaded = {}; bi.cardId = null; biShowView(bi.view);
 });
@@ -10274,6 +10366,15 @@ async function biLoadDashboard() {
 function biRenderDashboard(reply) {
   const sections = (reply.sections || []).slice();
   const holder = el("bi-dash-sections"), strip = el("bi-dash-summary");
+  if (reply.dashboard === false) {  // a dataset of a non-BI schema
+    holder.append(bh("div", "bi-none", bh("h3", "", reply.message || "這個 schema 沒有 Dashboard"),
+      bh("p", "", "資料集「" + biDataset() + "」使用「" + biSchemaTitle(reply.schema || "")
+        + "」。Dashboard 與對話查詢只支援 BI schema（bi.schema/*）；這個資料集的卡片可以在"
+        + "「卡片」瀏覽與編輯，也可以「匯入 CSV」。"),
+      bh("div", "bi-actions", biButton("看卡片", () => biShowView("cards"), "go"),
+        biButton("匯入 CSV", () => biShowView("import"), "bi-btn"))));
+    return;
+  }
   if (!sections.length) {
     holder.append(bh("p", "bi-empty", "這個領域還沒有卡片。先「載入示範資料」或「匯入 CSV」。"));
     return;
@@ -10854,6 +10955,160 @@ async function biRefreshCounts() {
     bi.datasets = reply.datasets || []; biRenderBar();
   } catch (failure) { biNotice(false, "卡片數沒有更新：" + failure.message); }
 }
+
+// -- 新增資料集 and 安裝 schema ---------------------------------------------------
+// A dataset is created with a name and a schema, which it keeps. A schema file
+// is validated by the host; every problem is listed with the place it is at.
+function biPanel(which, open) {
+  const panel = el("bi-" + which + "-panel"), button = el("bi-" + which);
+  panel.hidden = !open; button.setAttribute("aria-expanded", String(open));
+  if (open) {
+    const other = which === "new" ? "install" : "new";
+    el("bi-" + other + "-panel").hidden = true;
+    el("bi-" + other).setAttribute("aria-expanded", "false");
+  }
+}
+
+async function biRefreshSchemas() {
+  const reply = await biCall("/api/bi/schemas");
+  bi.schemas = reply.schemas || [];
+}
+
+function biRenderSchemaChoices(chosen) {
+  const select = el("bi-new-schema"), keep = chosen || select.value;
+  select.replaceChildren();
+  for (const item of bi.schemas) {
+    const option = document.createElement("option");
+    option.value = item.ref || item.id + "@" + item.version;
+    const kinds = (item.types || []).map((type) => type.label || type.name);
+    option.textContent = item.title + "（" + option.value + "）"
+      + (item.source === "installed" ? " · 已安裝" : " · 內建 BI")
+      + (kinds.length ? " · " + kinds.length + " 種類型" : "");
+    select.append(option);
+  }
+  if (keep && bi.schemas.some((item) => (item.ref || item.id + "@" + item.version) === keep)) {
+    select.value = keep;
+  }
+}
+
+async function biOpenNew(chosen) {
+  biPanel("new", true);
+  el("bi-new-err").textContent = "";
+  const select = el("bi-new-schema"); select.disabled = true;
+  try { await biRefreshSchemas(); }
+  catch (failure) { el("bi-new-err").textContent = "Schema 清單沒有載入：" + failure.message; }
+  finally { select.disabled = false; }
+  biRenderSchemaChoices(chosen);
+  el("bi-new-name").focus();
+}
+
+el("bi-new").addEventListener("click", () => {
+  if (el("bi-new-panel").hidden) biOpenNew(); else biPanel("new", false);
+});
+el("bi-new-cancel").addEventListener("click", () => {
+  biPanel("new", false); el("bi-new").focus();
+});
+el("bi-new-panel").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const name = el("bi-new-name").value.trim(), schema = el("bi-new-schema").value;
+  const problem = el("bi-new-err"); problem.textContent = "";
+  if (!BI_NAME.test(name)) {
+    problem.textContent = "名稱只能用英文字母、數字、- 與 _，1–40 個字。";
+    el("bi-new-name").setAttribute("aria-invalid", "true"); el("bi-new-name").focus(); return;
+  }
+  el("bi-new-name").removeAttribute("aria-invalid");
+  if (!schema) { problem.textContent = "請選一個 schema。"; return; }
+  const button = el("bi-new-go"); button.disabled = true; button.setAttribute("aria-busy", "true");
+  try {
+    const reply = await biCall("/api/bi/datasets", {name, schema});
+    biPanel("new", false); el("bi-new-name").value = "";
+    bi.want = reply.dataset.name; biLeaveDataset();
+    biNotice(true, "已建立資料集「" + reply.dataset.name + "」（schema "
+      + reply.dataset.schema + "）。");
+    await biLoad();
+  } catch (failure) {
+    problem.textContent = "沒有建立：" + failure.message;
+    el("bi-new-name").focus();
+  } finally { button.disabled = false; button.removeAttribute("aria-busy"); }
+});
+
+el("bi-install").addEventListener("click", () => {
+  biPanel("install", el("bi-install-panel").hidden);
+  if (!el("bi-install-panel").hidden) el("bi-schema-file").focus();
+});
+el("bi-install-cancel").addEventListener("click", () => {
+  biPanel("install", false); el("bi-install").focus();
+});
+el("bi-schema-file").addEventListener("change", () => {
+  el("bi-install-go").disabled = !el("bi-schema-file").files.length;
+  el("bi-install-msg").replaceChildren();
+});
+
+function biInstallResult(reply, failure) {
+  const box = el("bi-install-msg"); box.replaceChildren();
+  if (failure) {
+    box.append(bh("p", "bi-err", "沒有安裝：" + failure.message));
+    const errors = (failure.payload && failure.payload.errors) || [];
+    if (errors.length) {
+      const list = bh("ul", "bi-errors"); list.setAttribute("aria-label", "schema 的問題");
+      for (const item of errors) {
+        list.append(bh("li", "", bh("code", "", item.path || "$"), text("：" + item.message)));
+      }
+      box.append(list);
+    }
+    return;
+  }
+  const ref = reply.id + "@" + reply.version;
+  box.append(bh("p", "bi-ok", (reply.already ? "已經安裝過（內容相同）：" : "已安裝：") + ref),
+    bh("div", "bi-actions", biButton("用這個 schema 新增資料集", () => biOpenNew(ref), "go")));
+}
+
+async function biInstall(filename, jsonText) {
+  const button = el("bi-install-go"); button.setAttribute("aria-busy", "true");
+  el("bi-install-msg").replaceChildren(bh("p", "bi-meta", "驗證中…"));
+  try {
+    const reply = await biCall("/api/bi/schemas/install", {filename, json_text: jsonText});
+    try { await biRefreshSchemas(); } catch (e) { /* the list refreshes on the next load */ }
+    biInstallResult(reply, null);
+    biRenderBar();
+  } catch (failure) {
+    biInstallResult(null, failure);
+  } finally { button.removeAttribute("aria-busy"); }
+}
+
+el("bi-install-panel").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const file = el("bi-schema-file").files[0];
+  if (!file) return;
+  let content;
+  try {
+    content = new TextDecoder("utf-8", {fatal: true}).decode(await file.arrayBuffer());
+  } catch (e) {
+    biInstallResult(null, new Error("這個檔案不是 UTF-8 編碼的 JSON。"));
+    return;
+  }
+  await biInstall(file.name, content.replace(/^﻿/, ""));
+});
+
+el("bi-example").addEventListener("click", async () => {
+  const button = el("bi-example"); button.disabled = true;
+  try {
+    const example = await biCall("/api/bi/schemas/example");
+    await biInstall(example.schema.filename, example.schema.json_text);
+    const files = el("bi-example-files"); files.replaceChildren(); files.hidden = false;
+    files.append(text("範例 CSV（依序匯入，連結才找得到對象）："));
+    const row = bh("div", "bi-files");
+    for (const item of example.csv || []) {
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(new Blob(["﻿" + item.text], {type: "text/csv"}));
+      link.download = item.filename; link.textContent = item.filename;
+      row.append(link);
+    }
+    files.append(row);
+  } catch (failure) {
+    biInstallResult(null, failure);
+  } finally { button.disabled = false; }
+});
 
 const panels = {ask: null, installed: loadCapabilities,
   settings: loadSettings, schedules: loadSchedules, knowledge: loadKnowledgeTab, tasks: loadTasks,
