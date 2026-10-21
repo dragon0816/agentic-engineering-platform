@@ -2,7 +2,23 @@
 
 Updated: 2026-10-21 (Asia/Taipei), by Claude Code (BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## BI release for the owner's boss (2026-10-21 15:50, Claude Code) — latest
+## Windows installer fixes from a colleague's PC (2026-10-21, Claude Code) — latest
+
+- Committed on main, not pushed, no release built, Agent Web not restarted; this PC's real
+  install untouched. Row in `docs/TASKS.md` "Windows installer fixes from a colleague's PC";
+  namespace decision appended to `docs/DECISIONS.md`.
+- `deploy/windows-preview/install.ps1`: namespace always `engineering` (`-Namespace` accepted,
+  ignored with one line; an existing `host.json` is corrected); SHA-256 via .NET instead of
+  `Get-FileHash`; `.cmd` wrappers clear `PSModulePath`; a default `python` that is not 3.12 falls
+  back to `py`'s 3.12, otherwise an actionable English + 中文 error; after install/update a
+  running Agent Web gets a printed restart reminder (nothing is stopped). Manual:
+  `INSTALL.zh-TW.md` §2, §4 「停止／重新啟動 Agent Web」, §9; `USER_GUIDE.zh-TW.md` §16.1.
+- Next: build a release with these scripts (`scripts/release_windows.py` as before) and send it;
+  colleagues already broken run the new bundle's `update.cmd` (or `install.cmd -Actor <id>`).
+  Note: `update.ps1` still stops a running Agent Web itself before updating (unchanged, documented
+  in INSTALL §5).
+
+## BI release for the owner's boss (2026-10-21 15:50, Claude Code)
 
 - main ee730407 pushed; release `dist/releases/20261021-1550-ee730407/` and a copy with
   `BI_DEMO.zh-TW.md` (demo steps) in `S:\AE\leo\`. Agent Web on this PC runs it; the `demo` BI

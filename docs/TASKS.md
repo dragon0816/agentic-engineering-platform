@@ -3130,3 +3130,33 @@ s-k-20261011T102952` (not published).
   public test host 141; Q2: delete local copies when access is revoked; Q3: history in snapshots;
   Q4: `organization` audience; Q5: admin review only for a new dataset name's first version).
   Depends on the per-dataset schema binding work landing first.
+
+## Windows installer fixes from a colleague's PC (2026-10-21)
+
+- [x] Namespace fixed to `engineering`: `install.ps1` always writes it and corrects an existing
+  `host.json`; `-Namespace` accepted and ignored with one line (owner decision, `docs/DECISIONS.md`
+  2026-10-21 "The Windows installer always writes the engineering namespace…"; replaces
+  4b051234's default-when-missing rule) (2026-10-21, Claude Code).
+- [x] `Get-FileHash` not recognised when `install.cmd` ran from a PowerShell 7 window: SHA-256
+  through .NET (`Get-Sha256Hex`) in `deploy/windows-preview/install.ps1` and
+  `deploy/shared-platform-preview/install.ps1`; every `.cmd` wrapper that starts `powershell.exe`
+  clears `PSModulePath` inside `setlocal`; `install.ps1`, `update.ps1`, `uninstall.ps1` also drop
+  pwsh's module paths when run directly under 5.1.
+- [x] Python not 3.12 (a colleague's 3.14): without `-PythonExe` the installer uses the py
+  launcher's 64-bit 3.12 and says so; otherwise the error names the version and path found, lists
+  `py -0p`'s 3.12 paths with the `-PythonExe` to use, or points to python.org, in English and
+  Traditional Chinese. `update.ps1` forwards `-PythonExe` only when given.
+- [x] After install or update, a running Agent Web (its `agent-web.json` port listening) gets the
+  printed reminder 「Agent Web 正在執行：請重新啟動才會用到新的設定」 and the stop one-liner;
+  nothing is stopped automatically. Manual: `INSTALL.zh-TW.md` §2 (pwsh, Python fallback), option
+  table, §4 「停止／重新啟動 Agent Web」, §9 rows; `USER_GUIDE.zh-TW.md` §16.1.
+- Tests: `tests/test_windows_preview_bundle.py` (namespace test from 4b051234 rewritten for the
+  new rule; new: .NET hash and `PSModulePath` in wrappers, scripts stay ASCII, Python fallback,
+  restart reminder). Real run: the ee730407 bundle with these scripts swapped in, installed and
+  updated from PowerShell 7 into a temp InstallRoot (`-NoGateway -NoAgentSkills -NoShortcut`)
+  with a 3.13 `python` first on PATH: fallback to the launcher's 3.12, namespace `sales` →
+  `engineering`, reminder printed for a listening port; explicit wrong `-PythonExe` gives the
+  error with the 3.12 path.
+- Verification (working tree including other agents' uncommitted work): ruff check, ruff format
+  --check, mypy clean; installer + release tests 21 passed; full suite 3842 passed, 7 skipped.
+- [ ] Release a new bundle with these scripts and send colleagues `update.cmd` (not run here).
