@@ -1,5 +1,29 @@
 # Tasks and progress
 
+## Voice-to-Knowledge Phase 0 — isolated feasibility (2026-10-21)
+
+- [x] On `feature/voice-to-knowledge`, baseline main `a7f72e3c`, docs-only initial commit
+  `64d3ba58` and Draft PR #240; then isolated provider/scoring/Mock Submission (`4fc79142`)
+  and offline benchmark runner (`5b5cf3f2`). No existing runtime behavior change.
+- [x] 30 new fake/contract tests pass, including pytest-only venv; 77 focused tests including
+  Telegram/Knowledge regressions pass; focused ruff/format/strict mypy pass. Exact commands:
+  `benchmarks/voice_to_knowledge/evidence/verification.md`.
+- [ ] Real STT NOT_RUN: model and public FLEURS metadata downloads denied by proxy 403;
+  no licensed audio/model artifact collected, no scores or selection. GPU count 0.
+- [ ] Leo #234/#236 integration contract and #237/#239 corpus/access/threshold decisions.
+  Details and remaining limits: `docs/voice-to-knowledge/VOICE_PROGRESS.md`. No issues closed.
+- [x] Authorized main-to-feature merge `0f4a78e3` (main `20351c96`), preserving all upstream
+  HANDOFF/TASKS content. Related tests 134 passed/1 skipped; full Linux 3690 passed/130 skipped/
+  3 failed, all three reproduced on pure main. Repo lint/format, Windows-target mypy, focused
+  mypy, build/pip check pass. Linux mypy diagnostics identical to main. Evidence:
+  `benchmarks/voice_to_knowledge/evidence/sync-verification.md`. GitHub CI pending at recording.
+- [x] #243 isolated synthetic extraction-to-Draft prototype (2026-10-21): injectable fake STT /
+  extractor and local Skill descriptor, strict JSON schema, source validation, null customer,
+  existing Mock replay/permissions/Markdown. No runtime integration. 51 isolated tests, 98 with
+  regressions; ruff/format/Windows-target mypy pass. Two fake demos succeed. Evidence:
+  `benchmarks/voice_to_knowledge/evidence/extraction-verification.md`. Actual STT NOT_RUN/BLOCKED.
+
+
 The single place that answers "what is done, and what is next". Completed rows
 are kept, never deleted, so the record accumulates rather than being replaced.
 

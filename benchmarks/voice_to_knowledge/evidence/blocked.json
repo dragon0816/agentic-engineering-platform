@@ -1,0 +1,37 @@
+{
+  "status": "blocked",
+  "real_inference": "NOT_RUN",
+  "scores": null,
+  "model_selection": "pending",
+  "attempts": [
+    {
+      "action": "GET metadata",
+      "target": "https://huggingface.co/api/models/Systran/faster-whisper-small",
+      "result": "denied",
+      "error": "URLError: Tunnel connection failed: 403 Forbidden",
+      "retry_attempted": false
+    },
+    {
+      "action": "GET metadata",
+      "target": "https://huggingface.co/api/datasets/google/fleurs",
+      "result": "denied",
+      "error": "URLError: Tunnel connection failed: 403 Forbidden",
+      "retry_attempted": false
+    }
+  ],
+  "corpus": {
+    "count": 0,
+    "license_verified_audio": 0,
+    "languages_tested": [],
+    "terms_tested": []
+  },
+  "remaining": [
+    "Authorized model/corpus delivery within this environment",
+    "Licensed human zh/en/mixed speech and five-term coverage",
+    "Speaker-disjoint reviewed dev/test",
+    "Leo thresholds and corpus scale",
+    "Leo #234/#236 integration approval",
+    "Company-PC benchmark"
+  ],
+  "no_external_stt_or_llm": true
+}
