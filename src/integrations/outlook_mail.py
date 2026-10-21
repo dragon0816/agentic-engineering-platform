@@ -18,6 +18,7 @@ pywin32, as `integrations.outlook_draft`); tests drive `MailReader` fakes.
 from __future__ import annotations
 
 import html
+import logging
 import re
 from collections.abc import Callable, Sequence
 from datetime import UTC, datetime, timedelta
@@ -30,6 +31,7 @@ from common.base import Contract
 from integrations.com import apartment, progid_is_registered
 
 _T = TypeVar("_T")
+_LOG = logging.getLogger(__name__)
 
 MailErrorCode = Literal[
     "library_missing", "outlook_missing", "folder_unknown", "message_unknown", "mail_failed"
@@ -50,6 +52,27 @@ class MailError(Exception):
     def __init__(self, code: MailErrorCode) -> None:
         self.code: MailErrorCode = code
         super().__init__(code)
+
+
+def _hresult(value: object) -> str | None:
+    return f"0x{value & 0xFFFFFFFF:08X}" if type(value) is int else None
+
+
+def log_failure(stage: str, error: BaseException) -> None:
+    """A swallowed COM failure, logged so a `mail_failed` can be diagnosed
+    (#233): the exception class and HRESULTs only. Never its message or
+    `excepinfo` text, which can quote a subject, a sender or a folder name."""
+    parts = [f"stage={stage}", f"error={type(error).__module__}.{type(error).__qualname__}"]
+    hresult = _hresult(getattr(error, "hresult", None))
+    if hresult is not None:
+        parts.append(f"hresult={hresult}")
+    args = getattr(error, "args", ())
+    excepinfo = args[2] if isinstance(args, tuple) and len(args) > 2 else None
+    if isinstance(excepinfo, tuple) and len(excepinfo) > 5:
+        scode = _hresult(excepinfo[5])
+        if scode is not None:
+            parts.append(f"scode={scode}")
+    _LOG.warning("Outlook mail call failed: %s", " ".join(parts))
 
 
 class MailScope(Contract):
@@ -278,9 +301,11 @@ class OutlookComMailbox:
                     return self._in_apartment(work)
                 except MailError as error:
                     code = error.code
-                except Exception:
+                except Exception as error:
+                    log_failure("call", error)
                     code = "mail_failed"
-        except Exception:  # CoInitialize itself failed
+        except Exception as error:  # CoInitialize itself failed
+            log_failure("apartment", error)
             code = "mail_failed"
         raise MailError(code)
 
@@ -290,7 +315,8 @@ class OutlookComMailbox:
             namespace = application.GetNamespace("MAPI")
         except MailError:
             raise
-        except Exception:
+        except Exception as error:
+            log_failure("connect", error)
             raise MailError("mail_failed") from None
         return work(namespace)
 

@@ -240,3 +240,47 @@ def test_the_excel_run_is_wrapped_in_an_apartment(apartments: Apartments) -> Non
     marker: Any = object()
     assert asyncio.run(asyncio.to_thread(Handler()._apply_in_apartment, marker)) is marker
     assert seen == [1] and apartments.depth() == 0
+
+
+class FakeComErrorWithText(Exception):
+    """As pywintypes.com_error: (hresult, strerror, excepinfo, argerror)."""
+
+    def __init__(self, hresult: int, scode: int) -> None:
+        self.hresult = hresult
+        excepinfo = (0, "Microsoft Outlook", "Subject: Q3 salary review", None, 0, scode)
+        super().__init__(hresult, "Exception occurred.", excepinfo, None)
+
+
+def test_a_swallowed_com_failure_is_logged_without_mail_content(
+    apartments: Apartments, caplog: pytest.LogCaptureFixture
+) -> None:
+    """#233: a transient `mail_failed` names the exception class and HRESULTs."""
+    namespace = _namespace()
+
+    def failing(_: Any) -> Any:
+        raise FakeComErrorWithText(-2147352567, -2147221233)
+
+    box = OutlookComMailbox(connect=_connect(namespace, apartments))
+    with caplog.at_level("WARNING", logger="integrations.outlook_mail"):
+        with pytest.raises(MailError) as refused:
+            box._call(failing)
+    assert refused.value.code == "mail_failed"
+    (record,) = [item for item in caplog.records if item.name == "integrations.outlook_mail"]
+    logged = record.getMessage()
+    assert record.levelname == "WARNING"
+    assert "FakeComErrorWithText" in logged and "stage=call" in logged
+    assert "hresult=0x80020009" in logged and "scode=0x8004010F" in logged
+    assert "salary" not in logged and "Subject" not in logged and "Exception occurred" not in logged
+
+
+def test_a_failed_connect_is_logged_once(
+    apartments: Apartments, caplog: pytest.LogCaptureFixture
+) -> None:
+    def broken() -> Any:
+        raise FakeComError(com.CO_E_NOTINITIALIZED)
+
+    with caplog.at_level("WARNING", logger="integrations.outlook_mail"):
+        with pytest.raises(MailError):
+            OutlookComMailbox(connect=broken).get("in-1")
+    logged = [item.getMessage() for item in caplog.records]
+    assert len(logged) == 1 and "stage=connect" in logged[0] and "FakeComError" in logged[0]
