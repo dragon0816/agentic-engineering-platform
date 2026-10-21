@@ -13,6 +13,7 @@ from typing import Any
 
 from agent.gateway import HostTool, HostToolOutcome
 from capabilities.bi_cards.capability import QUERY_SPEC
+from capabilities.bi_cards.dashboard import ANALYSES
 from capabilities.bi_cards.manifest import BI_SKILL
 from capabilities.runtime import CapabilityInvocation
 from common.execution import Failure, RequestContext
@@ -41,6 +42,14 @@ SCHEMA: dict[str, Any] = {
         "value": {"type": "string", "description": "with field: the field contains this"},
         "follow_links": {"type": "boolean", "description": "include each card's links"},
         "limit": {"type": "integer", "minimum": 1, "maximum": 100},
+        "analysis": {
+            "type": "string",
+            "enum": [*ANALYSES, "all"],
+            "description": "a whole-dataset analysis instead of a search: gaps (applications "
+            "where competitors have a solution and we do not), trend_coverage, "
+            "demand_without_opportunity, solutions_vs_opportunities, funnel, "
+            "technologies_without_concept, product_completeness, trend_priority, … or all",
+        },
     },
     "required": [],
 }

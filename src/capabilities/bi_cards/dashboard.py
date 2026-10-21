@@ -51,7 +51,11 @@ def _cards(store: BiStore) -> dict[str, list[Card]]:
 
 def _ref(card: Card) -> dict[str, str]:
     """A cell naming a card: the page links it to the card."""
-    return {"card_id": card["_id"], "label": card["_name"]}
+    return {
+        "card_id": card["_id"],
+        "label": card["_name"],
+        "cite": f"{card['_type']}:{card['_key']}",
+    }
 
 
 def _prio(trend: Card) -> int:
@@ -481,3 +485,15 @@ SECTIONS = (
 def dashboard(store: BiStore, domain: str = "robotics") -> dict[str, Any]:
     cards = _cards(store)
     return {"domain": domain, "sections": [build(cards, domain) for build in SECTIONS]}
+
+
+#: The analyses the chat can ask for by name (`bi__query` `analysis`); the
+#: same computation as the page's dashboard, so an answer and the page agree.
+ANALYSES = {build.__name__: build for build in SECTIONS}
+
+
+def analysis(store: BiStore, name: str, domain: str = "robotics") -> list[dict[str, Any]]:
+    """One named dashboard section, or every section for `all`."""
+    cards = _cards(store)
+    builds = SECTIONS if name == "all" else (ANALYSES[name],)
+    return [build(cards, domain) for build in builds]

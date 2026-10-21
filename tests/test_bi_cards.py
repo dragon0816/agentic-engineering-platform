@@ -24,6 +24,7 @@ from capabilities.bi_cards.capability import QUERY_SPEC, QueryHandler, QueryRequ
 from capabilities.bi_cards.manifest import BI_SKILL, GAP_RULE, PROCEDURE, bi_knowledge_skill
 from capabilities.bi_cards.schema import SCHEMA_FILE, parse_date, registry, split_list
 from capabilities.bi_cards.store import BiStore, BiStoreError
+from capabilities.runtime import CapabilityRefused
 from common.execution import RequestContext, TraceIdentifiers
 from host_runtime import skill_packs
 from host_runtime.assets import shipped
@@ -327,6 +328,30 @@ def test_8_query_results_carry_sources(tmp_path: Path) -> None:
     )
     assert any(link["field"] == "applications" for link in first["links"])
     assert QUERY_SPEC.side_effect == "read"
+
+
+def test_the_chat_gets_the_whole_gap_analysis_not_a_search_sample(tmp_path: Path) -> None:
+    """A live answer listed one of the two red gaps because a search missed the
+    other; `analysis` returns the dashboard's own computation."""
+    _loaded(tmp_path)
+    context = RequestContext(
+        trace=TraceIdentifiers(trace_id="t2", request_id="r2", span_id="s2"),
+        actor=ACTOR,
+        namespace="engineering",
+        message="bi",
+        channel="local",
+        session_id="s-2",
+    )
+    result = asyncio.run(
+        QueryHandler(tmp_path)(context, QueryRequest(analysis="gaps", domain="robotics"))
+    )
+    (section,) = result.model_dump()["analysis"]
+    red = [section["rows"][f["row"]][0] for f in section["flags"] if f["level"] == "red"]
+    assert {cell["label"] for cell in red} == {"AMR 電池包 BMS 與充電驗證", "機器人產線下線測試"}
+    assert all(cell["cite"].startswith("Application:") for cell in red)
+    assert "analysis" in PROCEDURE
+    with pytest.raises(CapabilityRefused):
+        asyncio.run(QueryHandler(tmp_path)(context, QueryRequest(analysis="nope")))
 
 
 def test_9_the_procedure_scopes_gaps_cites_cards_and_judges_priority() -> None:
