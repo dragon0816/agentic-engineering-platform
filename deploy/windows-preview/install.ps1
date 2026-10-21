@@ -391,3 +391,31 @@ if ($LASTEXITCODE -ne 0) { throw "The bundled Skills could not be installed; see
 Write-Host "Installed the local-only preview at $InstallRoot"
 Write-Host "Bundle source revision: $($Manifest.source_revision)"
 Write-Host "The resident Agent is bound to $Actor on $BridgeId. Capability grants remain separate."
+# A running Agent Web keeps the program and host.json it started with. It may
+# be running someone's task, and stopping it would end that task, so the
+# installer only says so and prints the stop command; it stops nothing.
+$AgentWebRecord = Join-Path $Workspace "agent-web.json"
+if (Test-Path -LiteralPath $AgentWebRecord -PathType Leaf) {
+    $AgentWebPort = 0
+    try {
+        $Record = Get-Content -LiteralPath $AgentWebRecord -Raw | ConvertFrom-Json
+        $AgentWebPort = [int]$Record.port
+        if ($AgentWebPort -le 0) { $AgentWebPort = ([uri]$Record.address).Port }
+    }
+    catch { $AgentWebPort = 0 }
+    $AgentWebListening = $false
+    if ($AgentWebPort -gt 0) {
+        $Listeners = [System.Net.NetworkInformation.IPGlobalProperties]::GetIPGlobalProperties().GetActiveTcpListeners()
+        $AgentWebListening = @($Listeners | Where-Object { $_.Port -eq $AgentWebPort }).Count -gt 0
+    }
+    if ($AgentWebListening) {
+        $StopCommand = ('$ws = "' + $Workspace + '"; $port = ([uri]((Get-Content "$ws\agent-web.json" -Raw | ConvertFrom-Json).address)).Port; ' +
+            'Get-NetTCPConnection -State Listen -LocalPort $port -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }')
+        Write-Host ""
+        Write-Host "Agent Web is running (port $AgentWebPort) with the previous program and settings; restart it to use the new ones." -ForegroundColor Yellow
+        Write-Host (ConvertFrom-Escaped "Agent Web \u6b63\u5728\u57f7\u884c\uff1a\u8acb\u91cd\u65b0\u555f\u52d5\u624d\u6703\u7528\u5230\u65b0\u7684\u8a2d\u5b9a") -ForegroundColor Yellow
+        Write-Host "Let its running tasks finish first (Agent Web > Tasks); stopping it ends them. Then stop it in PowerShell with:"
+        Write-Host "  $StopCommand"
+        Write-Host "and open it again with the 'AEP Agent' shortcut or start-web.cmd."
+    }
+}

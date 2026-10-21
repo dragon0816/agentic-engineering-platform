@@ -1663,7 +1663,10 @@ Skill 在 Agent Web 重新啟動後才生效。關掉 Agent Web 再用捷徑打�
 **Tasks** 確認沒有正在跑的工作，重啟會中斷它們。）
 
 **怎麼重新啟動 Agent Web？**
-關掉背景的 Agent Web 視窗（或在工作管理員結束 `aep-host`），再雙擊 **AEP Agent** 捷徑。
+先到 **Tasks** 確認沒有正在跑的工作，再停止 Agent Web，然後雙擊 **AEP Agent** 捷徑。捷徑只會
+打開已經在執行的 Agent Web，不會重新啟動它；停止的一行 PowerShell 指令見安裝手冊第 4 節
+「停止／重新啟動 Agent Web」（或在工作管理員結束 `aep-host`）。安裝或更新後畫面顯示
+「Agent Web 正在執行：請重新啟動才會用到新的設定」時，也是這樣做。
 
 **安裝時說 `This bundle requires 64-bit Python 3.12`？**
 你的 `python` 是別的版本（例如 3.14）。照訊息裡列出的 3.12 路徑加 `-PythonExe "<路徑>"` 重新執行

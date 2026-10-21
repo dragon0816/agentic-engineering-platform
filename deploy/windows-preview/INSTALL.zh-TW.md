@@ -106,6 +106,26 @@
 - 關掉瀏覽器分頁，Agent 仍在背景執行；下次點捷徑會直接打開。
 - 接下來請照使用指南第 0 章「快速開始」逐項完成設定。
 
+### 停止／重新啟動 Agent Web
+
+桌面的 **AEP Agent** 捷徑只會「打開」：Agent Web 已經在執行時，它直接打開那個正在執行的
+Agent Web，**不會**重新啟動它。所以重新安裝、更新或改了 `host.json` 之後，正在執行的
+Agent Web 仍用舊的程式和設定，要先停止它，再點捷徑才會用到新的。
+
+安裝或更新結束時，若 Agent Web 正在執行，畫面會顯示
+「Agent Web 正在執行：請重新啟動才會用到新的設定」和下面這行停止指令。安裝程式**不會**
+自動停止它，因為它可能正在跑你的工作。
+
+1. 先到 Agent Web 的 **Tasks** 確認沒有正在跑的工作（停止會中斷它們）。
+2. 在 PowerShell 執行（一行）：
+
+   ```powershell
+   $ws = "$env:LOCALAPPDATA\AgenticEngineeringPlatform\preview-0.1.0\workspace"; $port = ([uri]((Get-Content "$ws\agent-web.json" -Raw | ConvertFrom-Json).address)).Port; Get-NetTCPConnection -State Listen -LocalPort $port -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }
+   ```
+
+   找不到 `agent-web.json` 時表示 Agent Web 沒有在執行，不必停止。
+3. 雙擊 **AEP Agent** 捷徑（或 `start-web.cmd`）重新啟動。
+
 ## 5. 更新到新版本
 
 收到新版 zip 時：
@@ -194,6 +214,7 @@
 | `Bundle integrity check failed` | 檔案損毀或被修改 | 重新下載 zip，比對發佈資料夾裡 `SHA256SUMS.txt` 的值 |
 | `This bundle requires 64-bit Python 3.12`（這個安裝包需要 64 位元的 Python 3.12） | 預設的 `python` 是別的版本（例如 3.14）；安裝包的套件只適用 3.12 | 訊息會顯示找到的版本和 `python.exe` 路徑。若列出「Python 3.12 is installed here」，照訊息加 `-PythonExe "<那個路徑>"` 重新執行；沒有列出時，從 python.org 安裝 64 位元 Python 3.12（可以和其他版本並存）再執行。沒加 `-PythonExe` 時，安裝程式會先自動試 `py -3.12` |
 | `The term 'Get-FileHash' is not recognized` | 舊版安裝包從 PowerShell 7 視窗執行時，Windows PowerShell 找不到自己的模組 | 新版已修正。舊版請改從「Windows PowerShell」視窗或檔案總管雙擊 `install.cmd` 執行 |
+| 安裝完顯示「Agent Web 正在執行：請重新啟動才會用到新的設定」 | Agent Web 在安裝前就在執行，仍用舊的程式和設定 | 確認 **Tasks** 沒有工作在跑，照第 4 節「停止／重新啟動 Agent Web」停止後再點捷徑 |
 | `Offline wheel installation failed` | 檔案被占用或防毒軟體攔截 | 關閉 Agent Web 後重試；仍失敗時附上畫面截圖回報 |
 | `The LLM gateway's token could not be renewed now` | 安裝時沒有網域登入 | 不影響安裝。連上公司網路或 VPN 後，到 Settings → LLM gateway 按 **Refresh token** |
 | `AEP is not installed ... yet`（update.cmd） | 這台電腦還沒安裝過 | 改用 `install.cmd` |

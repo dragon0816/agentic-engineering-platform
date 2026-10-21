@@ -529,3 +529,34 @@ def test_the_installer_explains_and_falls_back_on_another_python() -> None:
     manual = _template("INSTALL.zh-TW.md")
     assert "Python 3.12 is installed here" in manual and "py -3.12" in manual
     assert "預設的 python 不是 3.12，改用 py 啟動器找到的 Python 3.12" in manual
+
+
+def test_the_installer_reminds_to_restart_a_running_agent_web() -> None:
+    """After install or update, a running Agent Web still has the old
+    program and host.json. It may be running a task, so the installer only
+    prints the reminder and the stop command; it stops nothing itself."""
+    installer = _template("install.ps1")
+    reminder = installer[
+        installer.index('$AgentWebRecord = Join-Path $Workspace "agent-web.json"') :
+    ]
+    assert "GetActiveTcpListeners()" in reminder
+    # "Agent Web 正在執行：請重新啟動才會用到新的設定"
+    assert (
+        r"Agent Web \u6b63\u5728\u57f7\u884c\uff1a\u8acb\u91cd\u65b0\u555f\u52d5"
+        r"\u624d\u6703\u7528\u5230\u65b0\u7684\u8a2d\u5b9a"
+    ) in reminder
+    assert "Get-NetTCPConnection -State Listen -LocalPort $port" in reminder
+    # Printed, never run: the only Stop-Process is inside the quoted command.
+    assert reminder.count("Stop-Process") == 1
+    assert "'Get-NetTCPConnection" in reminder
+    manual = _template("INSTALL.zh-TW.md")
+    assert "### 停止／重新啟動 Agent Web" in manual
+    assert "Agent Web 正在執行：請重新啟動才會用到新的設定" in manual
+    assert (
+        r'$ws = "$env:LOCALAPPDATA\AgenticEngineeringPlatform\preview-0.1.0\workspace"; '
+        r'$port = ([uri]((Get-Content "$ws\agent-web.json" -Raw | ConvertFrom-Json).address))'
+        ".Port; "
+        "Get-NetTCPConnection -State Listen -LocalPort $port -ErrorAction SilentlyContinue | "
+        "ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }"
+    ) in manual
+    assert "不會**重新啟動它" in manual
