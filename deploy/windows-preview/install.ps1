@@ -155,6 +155,13 @@ if (Test-Path -LiteralPath $ConfigPath -PathType Leaf) {
         Write-Host ("Kept from the existing host.json: " + ($Kept -join ", "))
     }
 }
+# Without a namespace every chat answers "No namespace is configured", and the
+# manual's command names only -Actor, so a host that has none gets the
+# company default (2026-10-21: a colleague's fresh install).
+if (-not $Config.Contains("namespace") -or [string]::IsNullOrWhiteSpace([string]$Config.namespace)) {
+    $Config.namespace = "engineering"
+    Write-Host "Set the namespace to engineering (change it with -Namespace)."
+}
 # The Natural-language model goes through the built-in gateway, but only when
 # this host has no model yet: a model someone configured is theirs, and an
 # update never replaces it. The credential mapping is added beside it when

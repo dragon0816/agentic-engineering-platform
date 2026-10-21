@@ -412,3 +412,17 @@ def test_the_installer_sets_up_the_gateway_unless_told_not_to() -> None:
     assert "gateway stop" in update
     uninstall = (template / "uninstall.ps1").read_text(encoding="utf-8")
     assert "gateway autostart --off" in uninstall and "gateway stop" in uninstall
+
+
+def test_the_installer_gives_a_host_without_a_namespace_the_default() -> None:
+    """A colleague installed with only -Actor (the manual's command) and every
+    chat answered "No namespace is configured" (2026-10-21). The default is
+    applied after the existing host.json is merged, so a namespace someone set
+    is kept, and -Namespace still wins."""
+    template = Path(__file__).resolve().parents[1] / "deploy" / "windows-preview"
+    installer = (template / "install.ps1").read_text(encoding="utf-8")
+    default = installer.index('$Config.namespace = "engineering"')
+    assert installer.index("Kept from the existing host.json") < default
+    assert installer.index("$Config.namespace = $Namespace") < default
+    manual = (template / "INSTALL.zh-TW.md").read_text(encoding="utf-8")
+    assert "`-Namespace <團隊>`" in manual and "No namespace is configured" in manual
