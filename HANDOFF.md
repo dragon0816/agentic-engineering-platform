@@ -2361,3 +2361,10 @@ Evidence: benchmarks/voice_to_knowledge/evidence/extraction-verification.md. His
 Windows CI succeeded; new-head CI must be checked separately. Real audio absent, gold missing,
 model access blocked; no score/model selection. Next: review #243, then Leo source/contract/data
 policy decisions and authorized local scoring inputs (VOICE_REVIEW_PROCEDURE.md).
+
+Voice CI correction: run 39555054382 failed on the new demo test's locale-default JSON reads
+and a known Telegram timing assertion. Only tests/test_voice_extraction.py changed: explicit UTF-8,
+forced-cp1252 regression and unchanged-transcript assertion. 59 focused tests pass; lint/format and
+strict mypy pass. Existing Telegram and shared ci_annotate.py failures are not altered.
+Evidence: benchmarks/voice_to_knowledge/evidence/ci-39555054382.md. Await new-head CI; do not infer
+success from preceding fd810f2c. No rerun/cancel/merge/force push; real STT still blocked.

@@ -154,13 +154,23 @@ def test_schema_artifact_matches_runtime_contract() -> None:
     from benchmarks.voice_to_knowledge.extraction import Extraction
 
     path = FIXTURES.parent / "extraction.schema.json"
-    assert json.loads(path.read_text()) == Extraction.model_json_schema()
+    assert json.loads(path.read_text(encoding="utf-8")) == Extraction.model_json_schema()
 
 
-def test_demo_is_explicitly_synthetic_and_writes_separate_artifacts(tmp_path: Path) -> None:
+@pytest.mark.parametrize("default_encoding", ["utf-8", "cp1252"])
+def test_demo_is_explicitly_synthetic_and_writes_separate_artifacts(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, default_encoding: str
+) -> None:
     import subprocess
     import sys
 
+    original_read_text = Path.read_text
+
+    def legacy_read_text(path: Path, encoding: str | None = None, errors: str | None = None) -> str:
+        return original_read_text(path, encoding=encoding or default_encoding, errors=errors)
+
+    # Reproduce the Windows default deterministically, even on UTF-8 Linux.
+    monkeypatch.setattr(Path, "read_text", legacy_read_text)
     output = tmp_path / "demo"
     result = subprocess.run(
         [
@@ -178,9 +188,11 @@ def test_demo_is_explicitly_synthetic_and_writes_separate_artifacts(tmp_path: Pa
         check=True,
     )
     assert json.loads(result.stdout)["actual_benchmark"] == "NOT_RUN"
-    assert json.loads((output / "raw.json").read_text())["synthetic"] is True
-    assert json.loads((output / "extraction.json").read_text())["customer"] is None
-    assert json.loads((output / "receipts.json").read_text())["same_draft"] is True
+    raw = json.loads((output / "raw.json").read_text(encoding="utf-8"))
+    assert raw["synthetic"] is True
+    assert raw["transcript"] == fixture("visit_missing_customer")["transcript"]
+    assert json.loads((output / "extraction.json").read_text(encoding="utf-8"))["customer"] is None
+    assert json.loads((output / "receipts.json").read_text(encoding="utf-8"))["same_draft"] is True
     assert "Mock draft" in (output / "draft.md").read_text(encoding="utf-8")
 
 

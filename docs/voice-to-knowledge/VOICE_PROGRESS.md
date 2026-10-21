@@ -115,3 +115,13 @@ Verification of #243: **21 new / 51 total isolated tests pass**, **98 with exist
 repo lint/format, Windows-target full mypy and focused strict mypy pass. Both fake demos return
 draft/same_draft=true/NOT_RUN. Exact commands: benchmark evidence/extraction-verification.md.
 New-head CI is separate from the previously successful fd810f2c run; no result assumed.
+
+## CI failure follow-up (39555054382)
+
+8f51982f Windows CI failed: 3795 passed/49 skipped/2 failed. One feature test read UTF-8 Chinese
+JSON using Windows cp1252 default; fixed by explicit UTF-8 reads plus a locale regression that
+fails before the fix and passes after. Existing Telegram edit-count timing failure (4 vs <=3)
+and shared annotation-script Unicode output failure left unchanged; evidence and minimal separate
+decision in `benchmarks/voice_to_knowledge/evidence/ci-39555054382.md`.
+Verification: 59 tests pass (52 Voice + 7 Telegram), focused lint/format and strict mypy pass.
+New CI remains separate; no claim of Windows success until terminal result. No actual STT scores.
