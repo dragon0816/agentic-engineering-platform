@@ -4721,3 +4721,9 @@ done when one does).
   to keep in sync); passing a model id through capability inputs (changes shared contracts);
   making schedules follow the person's default (a schedule has no session and should not change
   when someone picks a model in a chat).
+
+## 2026-10-22 — BI dataset sharing slice 1 scope trimmed
+
+- Owner (2026-10-22): 8–10 days is too long; agreed to a trimmed slice 1 built by three agents in
+  parallel, then a 141 deployment and a two-PC live test. Pinning, rollback and the Marketplace /
+  Overview listing move to slice 2. Scope in `docs/proposals/BI_DATASET_SHARING.md` §8.6.
