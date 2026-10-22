@@ -4047,6 +4047,219 @@ schema behaves as before.
   `schema_not_bi`, shown as 「這個資料集用的不是 BI schema…」. The `domain` filter of
   `GET /api/bi/cards` is ignored for a schema without `domains`.
 
+## BI dataset sharing (slice 1, owner 2026-10-22)
+
+Design: `docs/proposals/BI_DATASET_SHARING.md` (§4, §6, §8.5 owner answers, §8.6 trimmed slice 1:
+no pinning or rollback, no Marketplace/Overview listing). A BI dataset is published to the Shared
+Platform as an immutable snapshot of the new asset kind `bi_dataset`; a colleague selects one exact
+version for their Bridge and the Agent installs it as a **read-only** copy. All additions are
+additive: nothing existing changes shape.
+
+Code: `src/capabilities/bi_cards/snapshot.py` (format, build, read, install),
+`src/control_plane/bi_datasets.py` (publish, status, download, audit),
+`src/host_runtime/platform_publish.py` (`MemberPortalPublisher` client methods).
+
+### Snapshot format `aep-bi-dataset-snapshot/1`
+
+A gzip stream (mtime 0, no file name) of one UTF-8 JSON object, written with sorted keys and
+compact separators so the same dataset always gives the same bytes:
+
+```json
+{
+  "format": "aep-bi-dataset-snapshot/1",
+  "classification": "INTERNAL",
+  "dataset": "demo",
+  "schema": {
+    "ref": "bi.schema/v1.1@1.1.0", "id": "bi.schema/v1.1", "version": "1.1.0",
+    "source": "shipped",
+    "sha256": "<sha256 of catalog.canonical(document) as UTF-8>",
+    "document": { "...": "the schema JSON itself (installed: the file's content; shipped: bi_schema_v1_1.json)" }
+  },
+  "cards": [
+    {
+      "id": "3f2a9c1b0d4e", "entity_type": "Customer", "canonical_key": "acme",
+      "name": "ACME", "version": 3, "synthetic": false,
+      "created": "2026-10-21T08:00:00+00:00", "updated": "2026-10-21T09:00:00+00:00",
+      "created_by_import": "a1b2c3d4e5f6",
+      "fields": {
+        "region": {"value": "TW", "kind": "import", "ref": "customers.csv#row4",
+                   "by": "leo.chi", "at": "2026-10-21T08:00:00+00:00"}
+      },
+      "history": [
+        {"seq": 1, "field": "region", "old": null, "new": "TW", "kind": "import",
+         "ref": "customers.csv#row4", "by": "leo.chi", "at": "2026-10-21T08:00:00+00:00",
+         "import_id": "a1b2c3d4e5f6", "reason": null, "old_source": null}
+      ]
+    }
+  ],
+  "imports": [{"id": "a1b2c3d4e5f6", "filename": "customers.csv", "entity_type": "Customer",
+               "at": "2026-10-21T08:00:00+00:00", "by": "leo.chi", "undone": false}],
+  "meta": {"source_last_updated": "2026-10-21T09:00:00+00:00",
+           "stats": {"cards": 1, "cards_by_type": {"Customer": 1}, "fields": 1,
+                     "history": 1, "imports": 1}},
+  "digest": "<sha256>",
+  "publication": null
+}
+```
+
+- **Cards** are sorted by `(entity_type, canonical_key)`, history by `seq`, imports by `(at, id)`.
+  Field `value` and history `old`/`new` are the stored JSON values; `old_source` is the previous
+  source `{kind, ref, by, at}` or `null`.
+- **Digest**: SHA-256 (hex) of the canonical JSON (sorted keys, separators `,` `:`, UTF-8,
+  `ensure_ascii=False`) of the whole object **without** `digest` and `publication`. It identifies
+  the content: the same dataset gives the same digest, and stamping a publication does not change it.
+- **`publication`**: `null` in what the owner's Agent builds. The platform stamps it on publish
+  (`{"namespace", "name", "version", "base_version": str | null, "published_by", "published_at",
+  "note"}`) and re-gzips; that stored artifact's SHA-256 is the package's `PackageMetadata.sha256`.
+- **Stripped** (§4.5, owner Q3): pending proposals (the `proposals` table is never read);
+  folders in `ref` (the part before `#`, and refs without `#` that contain a path separator), in
+  `old_source.ref` and in `imports.filename` (only the file name stays); proposal-only imports
+  keep their `imports` row (id, file name, time, `by`, `undone`) so history `import_id` resolves.
+- **Actors** (`by`, the actor in an `agent-web:<actor>` ref): mapped through the optional
+  `accounts` mapping (local name → platform account); a name with no mapping is kept as it is. On
+  a PC whose Agent actor is the platform account (the usual case) nothing changes.
+- **Secrets**: every field name and every string (values, history, reasons, refs) is checked with
+  `common.assets.SECRET_PATTERN` / `SECRET_FIELD`. A hit fails the build with `secret_found`,
+  naming the card (`<entity_type>:<canonical_key>`) and the field, never the value.
+- **Limits**: gzip ≤ 20 MiB (`MAX_SNAPSHOT_BYTES`, the platform's limit is configurable), JSON
+  ≤ 256 MiB decompressed (`MAX_SNAPSHOT_JSON_BYTES`), ≤ 50 000 cards (`MAX_CARDS`); beyond:
+  `artifact_too_large`.
+
+### Python API (`capabilities.bi_cards.snapshot`)
+
+```python
+SNAPSHOT_FORMAT = "aep-bi-dataset-snapshot/1"
+class SnapshotError(Exception):        # .code, .message, .card: str | None, .field: str | None
+def build_snapshot(store: BiStore, *, accounts: Mapping[str, str] | None = None,
+                   max_bytes: int = MAX_SNAPSHOT_BYTES) -> bytes
+def read_snapshot(data: bytes, *, max_bytes: int = MAX_SNAPSHOT_BYTES) -> Snapshot
+def stamp_publication(snapshot: Snapshot, publication: Publication) -> bytes   # platform side
+def schema_state(snapshot: Snapshot, workspace: Path) -> SchemaState
+def install_schema(snapshot: Snapshot, workspace: Path) -> SchemaState
+def install_snapshot(snapshot: Snapshot, dest_dir: Path) -> InstalledSnapshot
+```
+
+- `Snapshot` (frozen): `document` (the parsed dict), `digest`, `dataset`, `schema_ref`,
+  `schema_id`, `schema_version`, `schema_source` (`shipped`/`installed`), `schema_sha256`,
+  `schema_document`, `publication: Publication | None`, `stats`, `cards` (count).
+- `Publication` (frozen): `namespace`, `name`, `version`, `base_version`, `published_by`,
+  `published_at`, `note`; `.reference` is `<namespace>/<name>@<version>`.
+- `read_snapshot` validates strictly (gzip, size, format, every key and type, unique cards, field
+  names, schema digest, publication) and checks the digest and secrets; errors:
+  `artifact_too_large`, `snapshot_invalid`, `digest_mismatch`, `secret_found`.
+- `schema_state`: `shipped` (the shipped schema with the same digest), `present` (installed with
+  the same canonical content), `missing` (not installed; `install_schema` installs it into
+  `<workspace>/bi/schemas/`), `conflict` (same id@version, different content → `install_schema`
+  raises `schema_conflict` and writes nothing), `unavailable` (a shipped id@version this AEP does
+  not ship, or with another digest → `schema_unavailable`).
+- `install_snapshot(snapshot, dest_dir)`: `dest_dir` must not exist (or be an empty folder),
+  else `install_target_exists`. Everything is validated first; the store is built in a temporary
+  sibling folder and renamed into place, so on any failure nothing is left at `dest_dir`. It
+  writes `dest_dir/bi.sqlite` (the BI store tables with cards, fields, history and imports;
+  `proposals` empty; `meta`: `schema`, `snapshot_format`, `snapshot_digest`, `read_only` = `1`,
+  and `published_version` when stamped) and `dest_dir/snapshot.json` (the document without
+  cards: format, dataset, schema ref/sha256/source, meta, digest, publication). Returns
+  `InstalledSnapshot(path, dataset, version, schema_ref, digest, publication)`; `version` is the
+  publication's (`None` for an unstamped snapshot). Read-only is enforced by `BiStore` for a
+  subscribed dataset (`dataset_read_only`), not by file attributes, so the Agent can replace or
+  delete the folder.
+
+### Platform: asset kind `bi_dataset`
+
+- `AssetKind` and `RunnableKind` gain `"bi_dataset"`; `DeviceAuthorization.installable()`
+  includes it. It is **not** offered by `available()` / `catalog` of the Member Portal (no
+  Marketplace listing in slice 1); the Bridge API `catalog` lists it to entitled members
+  (`{"kinds": ["bi_dataset"]}`).
+- Package: `kind: "bi_dataset"`, `metadata.identity` `<namespace>/<name>@<version>`, `owner` (the
+  team for a new name), `visibility` `team` or `organization`, `provenance[-1]` `{"source":
+  "bi-dataset-publish", "author": <publisher>, "revision": <content digest>}`, `package
+  {artifact_ref: "registry://<ns>/<name>/<version>", sha256}`, `description` the version note.
+- **Versions** (platform-assigned): the first is `1.0.0`; each later one is minor + 1, or major + 1
+  when the schema's major version differs from the previous highest version's.
+- **Access** (owner Q4): a new name is owned by the publisher's team (`team`, or their only group;
+  a member with no group owns it themselves); readers default to `team`; `organization` needs
+  `confirm_organization: true`; `public` (and `private`) are refused as `visibility_not_allowed`,
+  also by `assets/access/update` for a `bi_dataset` name. Entitlement is the existing `entitled_in`
+  (owner team, `NameAccess` members/groups).
+- **Selection** (Member Portal `select` / `replace` / `revoke`) accepts `bi_dataset` with the
+  existing rules: a non-entitled member gets 403 `asset_not_entitled`.
+- **Sync** (Bridge API `sync`): a selected `bi_dataset` is planned and its artifact carried like any
+  other package. A selection whose member is **no longer entitled** is not planned (owner Q2: the
+  copy stops updating; the Agent keeps it); this is audited as `sync_refused`.
+
+### Member Portal endpoints (POST, `Authorization: Bearer <session>`)
+
+`POST /v1/member/bi-datasets/publish` (own body limit: `max_bi_dataset_bytes` × 4/3 + 64 KiB;
+other routes keep 256 KiB):
+
+```json
+{"namespace": "engineering", "name": "robotics-bi", "base_version": null,
+ "note": "first publish", "readers": "team", "confirm_organization": false,
+ "team": null, "snapshot": "<base64 of the gzip snapshot>"}
+```
+
+- `base_version` must equal the highest published version (`null` for a new name), else 409
+  `version_superseded`. `readers` `null` keeps the previous version's (`team` for a new name).
+- The owner, an owning-team member or a co-editor publishes a later version **directly**; the
+  **first version of a new name** goes to the admin review queue (owner Q5), as an
+  `AssetSubmission` of kind `bi_dataset` approved with `admin/submissions/approve`. While it waits,
+  another publish of that name is 409 `review_pending`.
+- The platform re-reads the snapshot (`read_snapshot`: digest, strict shape, secret re-check),
+  stamps `publication` and stores the stamped bytes.
+- Reply 200: `{"status": "published" | "pending_review", "asset": {"namespace", "name",
+  "version"}, "sha256": "<stored artifact>", "digest": "<content digest>", "size": int,
+  "submission_id": str | null}`.
+- Errors: 400 `snapshot_invalid`, 400 `digest_mismatch`, 400 `secret_found` (body adds `card`,
+  `field`, `message`; never the value), 413 `artifact_too_large`, 409 `version_superseded`, 409
+  `review_pending`, 403 `publisher_not_authorized` (not owner/team/co-editor, or `team` not one of
+  the member's groups), 400 `visibility_not_allowed`, 400 `organization_unconfirmed`, 400
+  `team_required` (several groups and no `team`), 409 `kind_mismatch` (the name is another kind),
+  401 `session_expired`, 400 `invalid_request`.
+
+`POST /v1/member/bi-datasets/status` — the entitlement check (owner Q2):
+
+```json
+{"names": [{"namespace": "engineering", "name": "robotics-bi"}]}
+```
+→ `{"datasets": [{"namespace", "name", "entitled": bool, "latest_version": str | null,
+"published_by": str | null, "published_at": str | null, "note": str | null}]}` (1–100 names, in
+the request's order). A name the member may not use and an unknown name both answer `entitled:
+false` with the other fields `null` (nothing is disclosed). `entitled: false` from an answering
+platform means "stop updating, keep the copy"; an unreachable platform means nothing. The same
+fact is visible on the Bridge API: a held name absent from `catalog {"kinds": ["bi_dataset"]}`
+is no longer entitled (versions are never deleted).
+
+`POST /v1/member/bi-datasets/download {"asset": {"namespace", "name", "version"}}` →
+`{"asset", "sha256", "size", "snapshot": "<base64>"}` for an entitled member; 404
+`asset_not_published` (unknown, or not `bi_dataset`), 403 `asset_not_entitled`. Audited.
+
+`POST /v1/member/bi-datasets/audit {"namespace", "name"}` → `{"events": [{"at", "event",
+"actor", "namespace", "name", "version", "sha256", "size", "base_version", "note",
+"bridge_id"}]}`, oldest first, for the name's owner, owning team, co-editors and platform
+administrators; others 404 `name_missing`. Events: `submitted`, `approved`, `rejected`,
+`published`, `selected`, `replaced`, `revoked`, `synced` (the Bridge a version was delivered to),
+`sync_refused`, `downloaded`. Kept in the registry SQLite file (`bi_dataset_audit`) or in memory.
+
+### Agent client (`host_runtime.platform_publish.MemberPortalPublisher`)
+
+```python
+def publish_bi_dataset(self, namespace: str, name: str, snapshot: bytes, *, note: str,
+                       base_version: str | None, readers: str | None = None,
+                       confirm_organization: bool = False, team: str | None = None) -> dict
+def bi_dataset_status(self, names: list[tuple[str, str]]) -> list[dict]
+def bi_dataset_download(self, asset: dict[str, str]) -> bytes   # checks sha256, else bad_reply
+def bi_dataset_audit(self, namespace: str, name: str) -> list[dict]
+```
+
+Refusals raise `PublishError(code, status, message)`; `secret_found` carries the platform's
+message naming the card and field. `explain(code)` has wording for every code above.
+
+### Configuration
+
+`SharedPlatformConfiguration.max_bi_dataset_bytes` (default 20 MiB, 1 MiB–64 MiB): the largest
+stored snapshot (gzip). Deploying needs a platform built from this commit or later; no other
+setting.
+
 ## Chat composer model choice (owner 2026-10-21)
 
 Code: `src/models/selection.py` (`TURN_MODEL`, `SelectableModelClient`),
