@@ -204,6 +204,8 @@ select.mem-field { width: auto; flex: 0 1 220px; min-width: 0; max-width: 100%; 
 .why-box li { margin: 4px 0; overflow-wrap: anywhere; }
 .why-box .why-kind { color: var(--dim); }
 .why-box .why-gone { color: var(--bad); }
+/* Which model answered (owner 2026-10-22), quietly under the answer. */
+.answer-model { margin: 4px 0 0; color: var(--dim); font-size: 12px; overflow-wrap: anywhere; }
 .why-box button { border: 0; background: transparent; color: var(--accent); cursor: pointer;
   font: inherit; font-size: 13px; padding: 4px 6px; min-height: 32px; }
 .why-box button:hover { text-decoration: underline; }
@@ -3516,6 +3518,12 @@ function attachTurnControls(block, question, message) {
   keep.addEventListener("click", () => saveNote(block, message.message_id, ""));
   tools.append(keep);
   block.append(tools);
+  // Which model answered (owner 2026-10-22): the session's own choice.
+  if (message.model) {
+    const used = document.createElement("div"); used.className = "answer-model";
+    used.append(text("模型：" + message.model));
+    block.append(used);
+  }
   // 「為什麼」 (accumulated memory M5): what of the person's memory this answer
   // used, each linked to where it can be edited or deleted on the memory page.
   if ((message.preferences_used || []).length || (message.memory_used || []).length) {

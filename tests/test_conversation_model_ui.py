@@ -45,6 +45,9 @@ def test_the_page_has_the_backend_on_top_and_the_model_in_the_composer() -> None
         'el("chat-backend-bar").hidden = name !== "ask";',
         "select.disabled = busy;",
         'id="model-default-note"',
+        # Which model answered, quietly under each answer (owner 2026-10-22).
+        'used.className = "answer-model";',
+        'used.append(text("模型：" + message.model));',
     ):
         assert hook in PAGE, hook
 
@@ -177,6 +180,14 @@ def test_choosing_a_model_changes_the_next_request(page: Any) -> None:
     ui.wait("document.getElementById('log').textContent.includes('answered by claude-opus')")
     ui.wait("!document.getElementById('conversation-model').disabled")
     assert gateway.models[-1] == "claude-opus"
+    # The answer says which model answered it (owner 2026-10-22).
+    ui.wait(
+        "[...document.querySelectorAll('#log .answer-model')]"
+        ".some(n => n.textContent === '模型：claude-opus')"
+    )
+    shown = _rect(ui, "#log .answer-model")
+    assert shown["height"] > 0
+    ui.shoot("answer-model-light-1280")
     # Dark mode at 390 px: the top bar wraps, nothing scrolls sideways.
     ui.dark(True)
     ui.size(390, 844, mobile=True)
@@ -184,6 +195,7 @@ def test_choosing_a_model_changes_the_next_request(page: Any) -> None:
     assert _rect(ui, "#conversation-backend")["right"] <= 390
     assert _rect(ui, "#conversation-model")["right"] <= 390
     ui.shoot("model-menu-dark-390")
+    assert _rect(ui, "#log .answer-model")["right"] <= 390
     ui.run("window.scrollTo(0, document.body.scrollHeight)")
     ui.shoot("model-menu-dark-390-composer")
     # Other tabs do not show the chat's backend selector.
