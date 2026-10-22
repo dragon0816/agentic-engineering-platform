@@ -1142,6 +1142,30 @@ tr:last-child td { border-bottom: none; }
   gap: 10px 14px; align-items: end; }
 .bi-apply { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 10px; }
 .bi-result { padding: 12px 14px; border-color: var(--good); overflow: visible; }
+.bi-result.pending { border-color: var(--warn); }
+.bi-pub-state { flex: 1 1 100%; margin: 0; display: flex; flex-wrap: wrap; gap: 6px;
+  align-items: center; }
+.bi-pub-state:empty { display: none; }
+.bi-ro { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 0 0 10px;
+  padding: 10px 14px; border: 1px solid var(--accent); border-left-width: 4px; border-radius: 8px;
+  background: var(--accent-soft); color: var(--ink); overflow-wrap: anywhere; }
+.bi-ro.stopped { border-color: var(--warn); background: color-mix(in srgb, var(--warn) 10%,
+  transparent); }
+.bi-pub-readers { border: 0; margin: 0; padding: 0; min-width: 0; }
+.bi-pub-team { margin: 0 0 4px; font-weight: 600; }
+.bi-check { display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; }
+.bi-check input { width: 20px; height: 20px; margin: 0; flex: none; }
+.bi-pub-confirm { color: var(--warn); }
+.bi-pub-what { margin: 10px 0; }
+.bi-pub-what ul { margin: 4px 0 0; padding-left: 18px; }
+.bi-pub-first { margin: 10px 0 10px; padding: 8px 12px; border: 1px solid var(--warn);
+  border-radius: 8px; color: var(--ink); }
+.bi-subs > summary { min-height: 44px; padding: 8px 14px; cursor: pointer; list-style: none; }
+.bi-subs-list li { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.bi-sub-main { flex: 1 1 240px; min-width: 0; display: grid; gap: 2px; }
+.bi-sub-name { font-weight: 600; overflow-wrap: anywhere; }
+.bi-subs-list .bi-actions { flex: 0 1 auto; }
+.bi-subs-more { margin: 10px 0 6px; }
 @media (max-width: 900px) {
   .bi-browse { grid-template-columns: minmax(0, 1fr); }
   .bi-cards { max-height: none; }
@@ -2119,9 +2143,68 @@ tr:last-child td { border-bottom: none; }
           <button class="bi-btn" id="bi-install" type="button" aria-expanded="false"
             aria-controls="bi-install-panel">安裝 schema</button>
           <button class="bi-btn" id="bi-refresh" type="button">更新</button>
+          <button class="bi-btn" id="bi-publish" type="button" aria-expanded="false"
+            aria-controls="bi-publish-panel">發佈到 Shared Platform</button>
         </div>
         <p class="bi-meta bi-schema-note" id="bi-schema-note"></p>
+        <p class="bi-pub-state" id="bi-pub-state" role="status" aria-live="polite"></p>
       </div>
+      <div class="bi-ro" id="bi-ro" role="note" hidden>
+        <strong id="bi-ro-title"></strong>
+        <span class="bi-meta" id="bi-ro-note"></span>
+      </div>
+      <form class="card bi-step" id="bi-publish-panel" aria-labelledby="bi-pub-heading" hidden
+            novalidate>
+        <h3 id="bi-pub-heading">發佈到 Shared Platform</h3>
+        <p class="bi-meta" id="bi-pub-dataset"></p>
+        <div class="bi-step-grid">
+          <div id="bi-pub-name-box"><label class="bi-label" for="bi-pub-name">
+              平台名稱（第一次發佈時決定，之後不變）</label>
+            <input id="bi-pub-name" class="bi-input" type="text" autocomplete="off"
+              spellcheck="false" maxlength="81" placeholder="namespace/name"
+              aria-describedby="bi-pub-err"></div>
+          <div><label class="bi-label" for="bi-pub-note">版本說明（必填）</label>
+            <input id="bi-pub-note" class="bi-input" type="text" autocomplete="off"
+              maxlength="200" placeholder="例如 加入 10 月的客戶產品"
+              aria-describedby="bi-pub-err" required></div>
+          <fieldset class="bi-pub-readers">
+            <legend class="bi-label">讀者</legend>
+            <p class="bi-pub-team" id="bi-pub-team">我的團隊（預設）</p>
+            <label class="bi-check"><input id="bi-pub-org" type="checkbox">
+              開放給全公司</label>
+            <label class="bi-check bi-pub-confirm" id="bi-pub-confirm-box" hidden>
+              <input id="bi-pub-org-confirm" type="checkbox">
+              我確認：這是 INTERNAL 資料，會開放給平台上所有成員</label>
+          </fieldset>
+        </div>
+        <div class="bi-pub-what" id="bi-pub-what" aria-label="將分享的內容"></div>
+        <p class="bi-pub-first" id="bi-pub-first" hidden><strong>第一次發佈需要管理員審核</strong
+          >：管理員確認名稱、擁有團隊與讀者後，同事才看得到；之後的版本會直接發佈。</p>
+        <p class="bi-err" id="bi-pub-err" role="alert"></p>
+        <div class="bi-actions">
+          <button class="go" id="bi-pub-go" type="submit">發佈</button>
+          <button class="bi-btn" id="bi-pub-cancel" type="button">取消</button>
+        </div>
+      </form>
+      <div class="card bi-result" id="bi-pub-result" role="status" aria-live="polite" hidden></div>
+      <details class="card bi-sec bi-subs" id="bi-subs">
+        <summary><span class="bi-sec-title">已訂閱的資料集</span>
+          <span class="bi-badge dim" id="bi-subs-count">…</span></summary>
+        <div class="bi-sec-body">
+          <div class="mem-status" id="bi-status-subs" role="status" aria-live="polite"
+               hidden></div>
+          <ul class="bi-list bi-subs-list" id="bi-subs-list" aria-label="已訂閱的資料集"></ul>
+          <div class="bi-actions bi-subs-more">
+            <button class="bi-btn" id="bi-subs-browse" type="button">瀏覽平台上的資料集</button>
+          </div>
+          <div class="mem-status" id="bi-status-avail" role="status" aria-live="polite"
+               hidden></div>
+          <ul class="bi-list bi-subs-list" id="bi-subs-avail" aria-label="可以訂閱的資料集"
+              hidden></ul>
+          <p class="bi-meta" id="bi-subs-how">要讀同事分享的資料集：按「瀏覽平台上的資料集」
+            訂閱，或到 Shared Platform 選取資料集後在 Settings 同步。</p>
+        </div>
+      </details>
       <form class="card bi-step" id="bi-new-panel" aria-label="新增資料集" hidden novalidate>
         <h3>新增資料集</h3>
         <div class="bi-step-grid">
@@ -10093,7 +10176,7 @@ const BI_CHANGE = {add: ["新增", "good"], change: ["變更", "accent"], same: 
 // for the selected dataset. Dashboard and the chat hint are BI-only.
 const bi = {schema: null, schemas: [], datasets: [], view: "dashboard", loaded: {}, cards: [],
   cardId: null, detail: null, preview: null, csv: null, importId: null, searchTimer: 0,
-  want: null};
+  want: null, subs: [], subsState: null, publish: null};
 const BI_NAME = /^[A-Za-z0-9_-]{1,40}$/;
 
 const bh = (tag, cls, ...children) => memEl(tag, cls, ...children);
@@ -10213,7 +10296,8 @@ async function biLoad() {
     return;
   }
   biStatus("bi-status-bar", "");
-  biRenderSchema(); biRenderTypes();
+  biRenderSchema(); biRenderTypes(); biRenderReadOnly();
+  biLoadSubs(); biLoadPublishState();
   bi.loaded = {};
   await biShowView(bi.view);
 }
@@ -10245,12 +10329,23 @@ function biRenderBar() {
   select.replaceChildren();
   const names = bi.datasets.map((item) => item.name);
   if (!names.includes(keep)) names.unshift(keep);
+  // Two groups: the datasets this PC keeps, then read-only subscribed copies.
+  const mine = document.createElement("optgroup"); mine.label = "我的資料集";
+  const subscribed = document.createElement("optgroup"); subscribed.label = "已訂閱";
   for (const name of names) {
     const option = document.createElement("option"); option.value = name;
     const info = bi.datasets.find((item) => item.name === name);
-    option.textContent = info && info.schema ? name + " · " + biSchemaTitle(info.schema) : name;
-    select.append(option);
+    if (info && info.read_only) {
+      const sub = biSubOf(name);
+      option.textContent = biSubLabel(info, sub) + " · 唯讀";
+      subscribed.append(option);
+    } else {
+      option.textContent = info && info.schema ? name + " · " + biSchemaTitle(info.schema) : name;
+      mine.append(option);
+    }
   }
+  select.append(mine);
+  if (subscribed.children.length) select.append(subscribed);
   select.value = keep;
   const current = bi.datasets.find((item) => item.name === keep);
   const counts = el("bi-counts"); counts.replaceChildren();
@@ -10294,7 +10389,8 @@ for (const button of document.querySelectorAll("#bi-views [data-bi-view]")) {
 el("bi-refresh").addEventListener("click", () => biLoad());
 // A preview belongs to the dataset it was made for: switching drops it.
 function biLeaveDataset() {
-  bi.cardId = null; bi.preview = null;
+  bi.cardId = null; bi.preview = null; bi.publish = null;
+  biPanel("publish", false); el("bi-pub-result").hidden = true; el("bi-pub-state").replaceChildren();
   el("bi-preview").hidden = true; el("bi-result").hidden = true;
   biStatus("bi-status-import", "");
 }
@@ -10653,9 +10749,11 @@ function biFieldRow(card, item) {
   row.append(head, bh("div", "bi-field-value", biValue(item.value)));
   const foot = bh("div", "bi-field-foot", bh("span", "bi-meta", biSource(item.source)
     + (item.history ? " · 歷史 " + item.history + " 筆" : "")));
-  const edit = biButton("編輯", () => biEditField(card, item, row), "bi-btn",
-    "編輯「" + (item.label || item.field) + "」");
-  foot.append(edit); row.append(foot);
+  if (!biReadOnly()) {  // a subscribed copy is read-only: no editor at all
+    foot.append(biButton("編輯", () => biEditField(card, item, row), "bi-btn",
+      "編輯「" + (item.label || item.field) + "」"));
+  }
+  row.append(foot);
   return row;
 }
 
@@ -10964,6 +11062,337 @@ async function biRefreshCounts() {
   } catch (failure) { biNotice(false, "卡片數沒有更新：" + failure.message); }
 }
 
+// -- sharing through the Shared Platform (BI dataset sharing slice 1) ----------
+// An own dataset can be published as an immutable version; a subscribed copy
+// is read-only (no import, edit or demo load) and says whose version it is.
+const BI_SUB_STATUS = {
+  update_available: ["有新版本", "accent"], current: ["已是最新", "good"],
+  stopped_no_access: ["已停止更新（無權限）", "warn"], offline: ["無法連線", "dim"]};
+const BI_PUB_ERRORS = {
+  version_superseded: "平台上已有比你這份更新的版本，請先更新後再發佈。",
+  artifact_too_large: "資料集太大，超過平台的上限。",
+  publisher_not_authorized: "你沒有發佈這個名稱的權限；請名稱的負責人把你加為共同維護者。",
+  platform_unreachable: "Shared Platform 沒有回應，請稍後再試（資料沒有送出）。",
+  publishing_not_configured: "這台電腦還沒設定 Shared Platform：到 Settings → Shared platform"
+    + " 設定 Member Portal 與 Personal Agent code。",
+  dataset_read_only: "這是訂閱的資料集，不能發佈。",
+  organization_unconfirmed: "開放給全公司需要先勾選確認。",
+  note_required: "請寫版本說明。"};
+
+function biCurrent() { return bi.datasets.find((item) => item.name === biDataset()) || null; }
+function biReadOnly() { const info = biCurrent(); return !!(info && info.read_only); }
+function biSubOf(name) {
+  return bi.subs.find((item) => item.dataset === name || item.name === name) || null;
+}
+function biSubField(info, sub, key) {
+  const from = [sub, info && info.subscription, info && info.source, info];
+  for (const item of from) if (item && item[key] != null && item[key] !== "") return item[key];
+  return null;
+}
+function biSubLabel(info, sub) {
+  const name = (sub && sub.name) || biSubField(info, sub, "identity") || (info && info.name);
+  const version = biSubField(info, sub, "version");
+  return name + (version ? " v" + version : "");
+}
+
+function biRenderReadOnly() {
+  const info = biCurrent(), readOnly = biReadOnly();
+  el("bi-demo").hidden = readOnly || !biIsBi();
+  el("bi-publish").hidden = readOnly;
+  const importTab = document.querySelector("#bi-views [data-bi-view=import]");
+  importTab.hidden = readOnly;
+  if (readOnly && bi.view === "import") biShowView("dashboard");
+  const banner = el("bi-ro"); banner.hidden = !readOnly;
+  banner.classList.remove("stopped");
+  if (!readOnly) return;
+  const sub = biSubOf(info.name);
+  const by = biSubField(info, sub, "published_by") || "發佈者";
+  const version = biSubField(info, sub, "version") || "?";
+  el("bi-ro-title").textContent = "唯讀：" + by + " 發佈的 v" + version;
+  const status = biSubField(info, sub, "status");
+  const when = biSubField(info, sub, "published_at");
+  let note = ((sub && sub.name) || biSubField(info, sub, "identity") || info.name)
+    + (when ? " · 發佈於 " + biTime(when) : "") + " · 不能匯入或編輯";
+  if (status === "stopped_no_access") {
+    banner.classList.add("stopped");
+    note = "已停止更新（無權限）：你仍可讀這一版，但不會再收到新版本。 · " + note;
+  } else if (status === "offline") {
+    note = "無法連線平台，目前顯示 v" + version + " · " + note;
+  }
+  el("bi-ro-note").textContent = note;
+}
+
+// -- 已訂閱的資料集 ---------------------------------------------------------------
+async function biLoadSubs() {
+  biStatus("bi-status-subs", "loading", "正在讀取訂閱…");
+  try {
+    const reply = await biCall("/api/bi/subscriptions");
+    bi.subs = reply.subscriptions || []; bi.subsState = reply;
+  } catch (failure) {
+    el("bi-subs-count").textContent = "—";
+    biStatus("bi-status-subs", "error", "訂閱清單沒有載入：" + failure.message + "。", biLoadSubs);
+    return;
+  }
+  biStatus("bi-status-subs", "");
+  biRenderSubs(); biRenderBar(); biRenderReadOnly();
+}
+
+function biRenderSubs() {
+  const list = el("bi-subs-list"); list.replaceChildren();
+  el("bi-subs-count").textContent = String(bi.subs.length);
+  if (!bi.subs.length) list.append(bh("li", "bi-empty", "還沒有訂閱任何資料集。"));
+  for (const sub of bi.subs) {
+    const key = sub.dataset || sub.name;
+    const status = BI_SUB_STATUS[sub.status] || [sub.status || "未知", "dim"];
+    const li = bh("li", ""); li.dataset.sub = sub.name || key;
+    const main = bh("div", "bi-sub-main",
+      bh("span", "bi-sub-name", sub.name || key),
+      bh("span", "bi-meta", (sub.published_by || "—") + " 發佈 · v" + (sub.version || "?")
+        + (sub.published_at ? " · " + biTime(sub.published_at) : "")));
+    const badges = bh("div", "bi-card-top", biBadge(status[0], status[1]));
+    if (sub.status === "update_available" && sub.latest) {
+      badges.append(bh("span", "bi-meta", "最新 v" + sub.latest
+        + (sub.latest_note ? "：" + sub.latest_note : "")));
+    }
+    main.append(badges);
+    const actions = bh("div", "bi-actions");
+    actions.append(biButton("開啟", () => biOpenSub(key), "bi-btn",
+      "開啟「" + (sub.name || key) + "」（唯讀）"));
+    if (sub.status === "update_available") {
+      actions.append(biButton("更新", (event) => biUpdateSub(sub, event.currentTarget), "go",
+        "更新「" + (sub.name || key) + "」到最新版"));
+    }
+    actions.append(biButton("取消訂閱", (event) => biUnsubscribe(sub, event.currentTarget),
+      "bi-btn", "取消訂閱「" + (sub.name || key) + "」"));
+    li.append(main, actions); list.append(li);
+  }
+}
+
+// 瀏覽平台上的資料集: asks the platform (refresh=1) what this member may read.
+async function biBrowseAvailable() {
+  const list = el("bi-subs-avail"), button = el("bi-subs-browse");
+  button.disabled = true; button.setAttribute("aria-busy", "true");
+  biStatus("bi-status-avail", "loading", "正在詢問 Shared Platform…");
+  let reply;
+  try { reply = await biCall("/api/bi/subscriptions?refresh=1"); }
+  catch (failure) {
+    biStatus("bi-status-avail", "error", "沒有讀到平台上的資料集：" + failure.message + "。",
+      biBrowseAvailable);
+    return;
+  } finally { button.disabled = false; button.removeAttribute("aria-busy"); }
+  biStatus("bi-status-avail", "");
+  bi.subs = reply.subscriptions || bi.subs; biRenderSubs(); biRenderBar(); biRenderReadOnly();
+  list.replaceChildren(); list.hidden = false;
+  if (reply.configured === false) {
+    list.append(bh("li", "bi-empty", "這台電腦還沒設定 Shared Platform（Settings → Shared "
+      + "platform）。"));
+    return;
+  }
+  if (reply.connection === "unreachable") {
+    list.append(bh("li", "bi-empty", "無法連線 Shared Platform；已訂閱的資料集照常可讀。"));
+    return;
+  }
+  const found = reply.available || [];
+  if (!found.length) list.append(bh("li", "bi-empty", "目前沒有其他你可以訂閱的資料集。"));
+  for (const item of found) {
+    const li = bh("li", ""); li.dataset.avail = item.name;
+    li.append(bh("div", "bi-sub-main", bh("span", "bi-sub-name", item.name),
+      bh("span", "bi-meta", "v" + item.version + (item.description ? " · " + item.description : "")
+        + (item.owner ? " · " + String(item.owner).replace(/^\w+:/, "") : ""))));
+    li.append(bh("div", "bi-actions", biButton("訂閱",
+      (event) => biSubscribe(item, event.currentTarget), "go", "訂閱「" + item.name + "」")));
+    list.append(li);
+  }
+}
+el("bi-subs-browse").addEventListener("click", () => biBrowseAvailable());
+
+async function biSubscribe(item, button) {
+  button.disabled = true; button.setAttribute("aria-busy", "true");
+  try {
+    const reply = await biCall("/api/bi/subscriptions/subscribe", {dataset: item.name});
+    const now = reply.subscription || {};
+    biNotice(true, "已訂閱「" + item.name + "」v" + (now.version || item.version)
+      + "，可在資料集選單的「已訂閱」開啟（唯讀）。");
+    const row = button.closest("li"); if (row) row.remove();
+    await biLoad();
+  } catch (failure) {
+    biNotice(false, "沒有訂閱：" + failure.message);
+  } finally { button.disabled = false; button.removeAttribute("aria-busy"); }
+}
+
+async function biOpenSub(key) {
+  bi.want = key; biLeaveDataset(); await biLoad();
+  el("bi-dataset").focus();
+}
+
+async function biUpdateSub(sub, button) {
+  button.disabled = true; button.setAttribute("aria-busy", "true");
+  biNotice(true, "");
+  try {
+    const reply = await biCall("/api/bi/subscriptions/update", {dataset: sub.name});
+    const now = reply.subscription || {};
+    biNotice(true, reply.already ? "「" + sub.name + "」已是最新版本。"
+      : "已更新「" + sub.name + "」到 v" + (now.version || sub.latest || "") + "。");
+    await biLoad();
+  } catch (failure) {
+    biNotice(false, "沒有更新：" + failure.message);
+  } finally { button.disabled = false; button.removeAttribute("aria-busy"); }
+}
+
+async function biUnsubscribe(sub, button) {
+  if (!window.confirm("取消訂閱「" + sub.name + "」？這台電腦上的副本會被移除，"
+      + "之後要再到 Shared Platform 選取才能讀。")) return;
+  button.disabled = true; button.setAttribute("aria-busy", "true");
+  try {
+    await biCall("/api/bi/subscriptions/unsubscribe", {dataset: sub.name});
+    biNotice(true, "已取消訂閱「" + sub.name + "」。");
+    if (biSubOf(biDataset()) === sub) { bi.want = "demo"; biLeaveDataset(); }
+    await biLoad();
+  } catch (failure) {
+    biNotice(false, "沒有取消訂閱：" + failure.message);
+  } finally { button.disabled = false; button.removeAttribute("aria-busy"); }
+}
+
+// -- 發佈到 Shared Platform ------------------------------------------------------
+async function biLoadPublishState() {
+  const dataset = biDataset();
+  if (biReadOnly()) { el("bi-pub-state").replaceChildren(); bi.publish = null; return; }
+  try {
+    const reply = await biCall("/api/bi/publish/status?dataset=" + encodeURIComponent(dataset));
+    if (dataset !== biDataset()) return;
+    bi.publish = reply;
+  } catch (failure) {
+    bi.publish = null; el("bi-pub-state").replaceChildren(); return;
+  }
+  biRenderPublishState();
+}
+
+function biRenderPublishState() {
+  const box = el("bi-pub-state"); box.replaceChildren();
+  const last = bi.publish && bi.publish.last;
+  if (!last) return;
+  if (last.status === "pending_review") {
+    box.append(biBadge("待審核", "warn"), bh("span", "bi-meta", (last.name || "")
+      + " v" + last.version + " 送出於 " + biTime(last.at) + "，等待管理員審核"));
+  } else {
+    box.append(biBadge("已發佈 v" + last.version + "（" + biTime(last.at) + "）", "good"),
+      bh("span", "bi-meta", (last.name || "") + " · 讀者："
+        + (last.readers === "organization" ? "全公司" : "我的團隊")));
+  }
+}
+
+function biRenderPublishWhat() {
+  const info = biCurrent() || {}, state = bi.publish || {};
+  const box = el("bi-pub-what"); box.replaceChildren();
+  const cards = state.cards != null ? state.cards : info.cards || 0;
+  const ul = bh("ul", "",
+    bh("li", "", "卡片 " + cards + " 張，含每個欄位的來源"),
+    bh("li", "", "修改歷史（誰、何時、為什麼改）"),
+    bh("li", "", "不含待審提議" + (state.proposals ? "（" + state.proposals + " 筆不會分享）" : "")),
+    bh("li", "", "匯入檔只留檔名，不含你電腦上的資料夾路徑"));
+  box.append(bh("strong", "", "將分享："), ul);
+  const last = state.last;
+  el("bi-pub-first").hidden = !(!last || last.status === "pending_review");
+  // The platform name is chosen once, at the first publish.
+  el("bi-pub-name-box").hidden = !!(last && last.name);
+  if (!el("bi-pub-name").value && state.name) el("bi-pub-name").value = state.name;
+  el("bi-pub-dataset").textContent = "資料集「" + biDataset() + "」"
+    + (last && last.name ? " → " + last.name + "（上次 v" + last.version + "）"
+      : " → 第一次發佈，平台會指定名稱與版本號");
+}
+
+function biPubOrg() {
+  const org = el("bi-pub-org").checked;
+  el("bi-pub-confirm-box").hidden = !org;
+  if (!org) el("bi-pub-org-confirm").checked = false;
+  el("bi-pub-team").textContent = org ? "全公司（平台上所有成員）" : "我的團隊（預設）";
+}
+
+async function biOpenPublish() {
+  biPanel("publish", true);
+  el("bi-pub-result").hidden = true;
+  el("bi-pub-err").textContent = "";
+  el("bi-pub-org").checked = false; biPubOrg();
+  el("bi-pub-name").value = "";
+  biRenderPublishWhat();
+  el("bi-pub-note").focus();
+  await biLoadPublishState();
+  biRenderPublishWhat();
+}
+
+el("bi-publish").addEventListener("click", () => {
+  if (el("bi-publish-panel").hidden) biOpenPublish(); else biPanel("publish", false);
+});
+el("bi-pub-cancel").addEventListener("click", () => {
+  biPanel("publish", false); el("bi-publish").focus();
+});
+el("bi-pub-org").addEventListener("change", biPubOrg);
+
+function biPublishProblem(failure) {
+  const payload = failure.payload || {};
+  if (payload.code === "secret_found") {
+    // The host names the card and field; the value itself is never shown.
+    const where = [payload.card, payload.field].filter(Boolean).join(" 的 ");
+    return "沒有發佈：" + (where ? "「" + where + "」" : "有一個欄位")
+      + "看起來含有密碼或 token，請先修改那個欄位再發佈。";
+  }
+  return "沒有發佈：" + (BI_PUB_ERRORS[payload.code] || failure.message);
+}
+
+el("bi-publish-panel").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const problem = el("bi-pub-err"); problem.textContent = "";
+  const note = el("bi-pub-note").value.trim();
+  if (!note) {
+    problem.textContent = BI_PUB_ERRORS.note_required;
+    el("bi-pub-note").setAttribute("aria-invalid", "true"); el("bi-pub-note").focus(); return;
+  }
+  el("bi-pub-note").removeAttribute("aria-invalid");
+  const org = el("bi-pub-org").checked, confirmed = el("bi-pub-org-confirm").checked;
+  if (org && !confirmed) {
+    problem.textContent = BI_PUB_ERRORS.organization_unconfirmed;
+    el("bi-pub-org-confirm").focus(); return;
+  }
+  const payload = {dataset: biDataset(), note, readers: org ? "organization" : "team",
+    confirm_organization: org && confirmed};
+  const platformName = el("bi-pub-name-box").hidden ? "" : el("bi-pub-name").value.trim();
+  if (platformName) {
+    if (!/^[a-z0-9]+(-[a-z0-9]+)*\/[a-z0-9]+(-[a-z0-9]+)*$/.test(platformName)) {
+      problem.textContent = "平台名稱是 namespace/name，只能用小寫英文字母、數字與 -。";
+      el("bi-pub-name").focus(); return;
+    }
+    payload.name = platformName;
+  }
+  const button = el("bi-pub-go"); button.disabled = true; button.setAttribute("aria-busy", "true");
+  button.textContent = "發佈中…";
+  try {
+    const reply = await biCall("/api/bi/publish", payload);
+    biPanel("publish", false); el("bi-pub-note").value = "";
+    biRenderPublishResult(reply);
+    await biLoadPublishState();
+  } catch (failure) {
+    problem.textContent = biPublishProblem(failure);
+  } finally {
+    button.disabled = false; button.removeAttribute("aria-busy"); button.textContent = "發佈";
+  }
+});
+
+function biRenderPublishResult(reply) {
+  const box = el("bi-pub-result"); box.replaceChildren(); box.hidden = false;
+  const pending = reply.status === "pending_review";
+  box.classList.toggle("pending", pending);
+  const ref = (reply.name || "") + "@" + (reply.version || "");
+  if (pending) {
+    box.append(bh("h3", "", "已送出，待審核"),
+      bh("p", "", "第一次發佈需要管理員審核：" + ref + " 核准後，讀者才看得到。"));
+  } else {
+    box.append(bh("h3", "", "已發佈 " + ref),
+      bh("p", "", "訂閱的同事會看到「有新版本」，按「更新」後就讀得到這一版。"));
+  }
+  box.append(biButton("關閉", () => { box.hidden = true; el("bi-publish").focus(); }, "bi-btn"));
+  box.tabIndex = -1; box.focus();
+}
+
 // -- 新增資料集 and 安裝 schema ---------------------------------------------------
 // A dataset is created with a name and a schema, which it keeps. A schema file
 // is validated by the host; every problem is listed with the place it is at.
@@ -10971,9 +11400,11 @@ function biPanel(which, open) {
   const panel = el("bi-" + which + "-panel"), button = el("bi-" + which);
   panel.hidden = !open; button.setAttribute("aria-expanded", String(open));
   if (open) {
-    const other = which === "new" ? "install" : "new";
-    el("bi-" + other + "-panel").hidden = true;
-    el("bi-" + other).setAttribute("aria-expanded", "false");
+    for (const other of ["new", "install", "publish"]) {
+      if (other === which) continue;
+      el("bi-" + other + "-panel").hidden = true;
+      el("bi-" + other).setAttribute("aria-expanded", "false");
+    }
   }
 }
 
