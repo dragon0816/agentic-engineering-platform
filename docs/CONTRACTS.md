@@ -4151,7 +4151,8 @@ def install_snapshot(snapshot: Snapshot, dest_dir: Path) -> InstalledSnapshot
   the same canonical content), `missing` (not installed; `install_schema` installs it into
   `<workspace>/bi/schemas/`), `conflict` (same id@version, different content → `install_schema`
   raises `schema_conflict` and writes nothing), `unavailable` (a shipped id@version this AEP does
-  not ship, or with another digest → `schema_unavailable`).
+  not ship → `schema_unavailable`). A shipped schema is matched by id@version, not by digest, so
+  an AEP release that ships it is enough.
 - `install_snapshot(snapshot, dest_dir)`: `dest_dir` must not exist (or be an empty folder),
   else `install_target_exists`. Everything is validated first; the store is built in a temporary
   sibling folder and renamed into place, so on any failure nothing is left at `dest_dir`. It
@@ -4172,8 +4173,11 @@ def install_snapshot(snapshot: Snapshot, dest_dir: Path) -> InstalledSnapshot
   (`{"kinds": ["bi_dataset"]}`).
 - Package: `kind: "bi_dataset"`, `metadata.identity` `<namespace>/<name>@<version>`, `owner` (the
   team for a new name), `visibility` `team` or `organization`, `provenance[-1]` `{"source":
-  "bi-dataset-publish", "author": <publisher>, "revision": <content digest>}`, `package
-  {artifact_ref: "registry://<ns>/<name>/<version>", sha256}`, `description` the version note.
+  "bi-dataset-publish", "author": <publisher>, "revision": <published_at, ISO>}`,
+  `validation_refs` `["bi-snapshot-digest:<content digest>"]`, `package {artifact_ref:
+  "registry://<ns>/<name>/<version>", sha256}`, `description` the version note,
+  `technical_policy` `not_required` (data, not executable), `business_approval` approved by the
+  reviewer (first version) or `not_required` by the publisher (later versions).
 - **Versions** (platform-assigned): the first is `1.0.0`; each later one is minor + 1, or major + 1
   when the schema's major version differs from the previous highest version's.
 - **Access** (owner Q4): a new name is owned by the publisher's team (`team`, or their only group;
@@ -4202,8 +4206,11 @@ other routes keep 256 KiB):
   `version_superseded`. `readers` `null` keeps the previous version's (`team` for a new name).
 - The owner, an owning-team member or a co-editor publishes a later version **directly**; the
   **first version of a new name** goes to the admin review queue (owner Q5), as an
-  `AssetSubmission` of kind `bi_dataset` approved with `admin/submissions/approve`. While it waits,
-  another publish of that name is 409 `review_pending`.
+  `AssetSubmission` of kind `bi_dataset` approved with `admin/submissions/approve`
+  (`admin/submissions/get` shows a summary instead of a manifest: `kind`, `dataset`,
+  `classification`, `schema {ref, source}`, `stats`, `digest`, `publication`; no card values).
+  While it waits, another publish of that name is 409 `review_pending`. `assets/submit` still
+  takes only `skill` and `workflow`.
 - The platform re-reads the snapshot (`read_snapshot`: digest, strict shape, secret re-check),
   stamps `publication` and stores the stamped bytes.
 - Reply 200: `{"status": "published" | "pending_review", "asset": {"namespace", "name",
@@ -4237,7 +4244,7 @@ is no longer entitled (versions are never deleted).
 "actor", "namespace", "name", "version", "sha256", "size", "base_version", "note",
 "bridge_id"}]}`, oldest first, for the name's owner, owning team, co-editors and platform
 administrators; others 404 `name_missing`. Events: `submitted`, `approved`, `rejected`,
-`published`, `selected`, `replaced`, `revoked`, `synced` (the Bridge a version was delivered to),
+`withdrawn`, `published`, `selected`, `replaced`, `revoked`, `synced` (the Bridge a version was delivered to),
 `sync_refused`, `downloaded`. Kept in the registry SQLite file (`bi_dataset_audit`) or in memory.
 
 ### Agent client (`host_runtime.platform_publish.MemberPortalPublisher`)

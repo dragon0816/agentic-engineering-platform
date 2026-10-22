@@ -44,6 +44,13 @@ from common.member import (
     MemberRevokeRequest,
     MemberSelectRequest,
 )
+from control_plane.bi_datasets import (
+    BiDatasetAuditRequest,
+    BiDatasetDownloadRequest,
+    BiDatasetError,
+    BiDatasetPublishRequest,
+    BiDatasetStatusRequest,
+)
 from control_plane.enrollment import EnrollmentError
 from control_plane.http import finish_tls, tls_listener
 from control_plane.member import IssuedMemberSession, MemberError, MemberService
@@ -137,7 +144,16 @@ STATUS_FOR = {
     # A member revokes one of their own logins (owner 2026-10-19): a login
     # that is not theirs answers the same as one that does not exist.
     "login_missing": 404,
+    # BI dataset sharing (owner 2026-10-22).
+    "snapshot_invalid": 400,
+    "digest_mismatch": 400,
+    "secret_found": 400,
+    "review_pending": 409,
+    "visibility_not_allowed": 400,
+    "organization_unconfirmed": 400,
+    "team_required": 400,
 }
+BI_PUBLISH = "bi-datasets/publish"
 # The label of a login a member issues for their Personal Agent, so the
 # portal and an audit can tell it from the browser's own.
 AGENT_LOGIN_LABEL = "Personal Agent"
@@ -320,6 +336,10 @@ class _Handler(BaseHTTPRequestHandler):
             "admin/members/credentials",
             "browser-ticket",
             "sign-in/ticket",
+            BI_PUBLISH,
+            "bi-datasets/status",
+            "bi-datasets/download",
+            "bi-datasets/audit",
         ):
             self._json(404, {"code": "invalid_request"})
             return
@@ -344,13 +364,37 @@ class _Handler(BaseHTTPRequestHandler):
         except ValueError:
             self._json(400, {"code": "invalid_request"})
             return
-        if length < 0 or length > MAX_BODY_BYTES:
-            self._json(413, {"code": "invalid_request"})
+        # A BI dataset snapshot has its own, larger limit (owner 2026-10-22);
+        # every other route keeps 256 KiB.
+        limit = (
+            max(MAX_BODY_BYTES, self.server.service.bi_body_limit())
+            if operation == BI_PUBLISH
+            else MAX_BODY_BYTES
+        )
+        if length < 0 or length > limit:
+            code = "artifact_too_large" if operation == BI_PUBLISH else "invalid_request"
+            self._json(413, {"code": code})
             return
         try:
             raw: object = json.loads(self.rfile.read(length)) if length else {}
             reply: Contract
-            if operation == "me":
+            if operation == BI_PUBLISH:
+                reply = self.server.service.bi_publish(
+                    *credential, BiDatasetPublishRequest.model_validate(raw)
+                )
+            elif operation == "bi-datasets/status":
+                reply = self.server.service.bi_status(
+                    *credential, BiDatasetStatusRequest.model_validate(raw)
+                )
+            elif operation == "bi-datasets/download":
+                reply = self.server.service.bi_download(
+                    *credential, BiDatasetDownloadRequest.model_validate(raw)
+                )
+            elif operation == "bi-datasets/audit":
+                reply = self.server.service.bi_audit(
+                    *credential, BiDatasetAuditRequest.model_validate(raw)
+                )
+            elif operation == "me":
                 reply = self.server.service.identity(*credential)
             elif operation == "catalog":
                 reply = self.server.service.catalog(
@@ -700,6 +744,9 @@ class _Handler(BaseHTTPRequestHandler):
             return
         except (MemberError, SubmissionError) as error:
             self._json(STATUS_FOR[error.code], {"code": error.code})
+            return
+        except BiDatasetError as error:
+            self._json(STATUS_FOR[error.code], error.body())
             return
         except Exception:  # noqa: BLE001 - no traceback crosses the member boundary
             self._json(500, {"code": "internal_error"})

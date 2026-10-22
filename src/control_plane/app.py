@@ -22,6 +22,13 @@ from common.enrollment import Invitation
 from common.identity import IssuedInvitationProof
 from control_plane.activity import BridgeActivity
 from control_plane.authorization import InMemoryAuthorizationRegistry
+from control_plane.bi_datasets import (
+    DEFAULT_LIMIT,
+    MAX_LIMIT,
+    MIN_LIMIT,
+    BiDatasetAudit,
+    BiDatasetService,
+)
 from control_plane.distribution import (
     InMemoryPackageRegistry,
     InMemoryRemoteControl,
@@ -79,6 +86,11 @@ class SharedPlatformConfiguration(Contract):
     # Whether an administrator may approve their own submission (owner
     # 2026-10-15: allowed while publishing is verified, to be revisited).
     allow_self_review: bool = True
+    # The largest BI dataset snapshot (gzip) a member may publish (owner
+    # 2026-10-22, BI dataset sharing slice 1).
+    max_bi_dataset_bytes: int = Field(
+        default=DEFAULT_LIMIT, ge=MIN_LIMIT, le=MAX_LIMIT, strict=True
+    )
 
     @model_validator(mode="after")
     def coherent_listener(self) -> Self:
@@ -127,6 +139,8 @@ class SharedPlatformState:
     activity: BridgeActivity = field(default_factory=BridgeActivity)
     # Account and password sign-in (owner 2026-10-15).
     passwords: MemberPasswords = field(default_factory=MemberPasswords)
+    # BI dataset sharing audit (owner 2026-10-22).
+    bi_audit: BiDatasetAudit = field(default_factory=BiDatasetAudit)
 
     @classmethod
     def empty(cls, *, administrators: tuple[Symbol, ...]) -> Self:
@@ -172,6 +186,7 @@ class SharedPlatformState:
             submissions=SubmissionStore(path),
             activity=BridgeActivity(storage=storage),
             passwords=MemberPasswords(storage=storage),
+            bi_audit=BiDatasetAudit(path),
         )
 
 
@@ -207,11 +222,27 @@ class SharedPlatformApplication:
             clock=moment,
             feedback=state.feedback,
             activity=state.activity,
+            bi_audit=state.bi_audit,
         )
         ownership = AssetOwnershipService(
             state.enrollment,
             state.packages,
             artifacts=(state.artifacts if isinstance(state.artifacts, MutableMapping) else None),
+        )
+        submissions = SubmissionService(
+            ownership,
+            state.packages,
+            state.submissions,
+            artifacts=state.artifacts,
+            clock=moment,
+        )
+        submissions.bi_datasets = BiDatasetService(
+            ownership,
+            state.packages,
+            state.submissions,
+            state.bi_audit,
+            state.artifacts,
+            clock=moment,
         )
         self.member_service = MemberService(
             enrollment=state.enrollment,
@@ -219,17 +250,12 @@ class SharedPlatformApplication:
             sessions=sessions,
             applications=state.applications,
             ownership=ownership,
-            submissions=SubmissionService(
-                ownership,
-                state.packages,
-                state.submissions,
-                artifacts=state.artifacts,
-                clock=moment,
-            ),
+            submissions=submissions,
             tokens=state.tokens,
             clock=moment,
             activity=state.activity,
             artifacts=state.artifacts,
+            bi_datasets=submissions.bi_datasets,
         )
         self.control_server = ControlPlaneServer(
             self.control_service,
@@ -370,6 +396,8 @@ def application_from_config(
         seed_preview_catalog(application.state)
     if application.member_service.submissions is not None:
         application.member_service.submissions.allow_self_review = config.allow_self_review
+    if application.member_service.bi_datasets is not None:
+        application.member_service.bi_datasets.max_bytes = config.max_bi_dataset_bytes
     issued: list[IssuedInvitationProof] = []
     try:
         for bootstrap in config.invitations:

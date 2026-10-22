@@ -24,7 +24,7 @@ import threading
 from collections.abc import Callable, Mapping
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import ValidationError
 
@@ -53,6 +53,9 @@ from common.member import (
 from common.ownership import AssetNameOwnership, next_version, version_key
 from control_plane.distribution import PackageRegistry
 from control_plane.ownership import AssetOwnershipService, OwnershipError
+
+if TYPE_CHECKING:
+    from control_plane.bi_datasets import BiDatasetService
 
 # What the member portal's 256 KiB body leaves for the manifest itself once it
 # is JSON inside the request.
@@ -89,6 +92,10 @@ _SCHEMA = (
     " version TEXT NOT NULL, submitter TEXT NOT NULL, status TEXT NOT NULL,"
     " submitted_at TEXT NOT NULL, record TEXT NOT NULL, artifact BLOB NOT NULL)"
 )
+
+
+def new_submission_id() -> str:
+    return f"sub-{secrets.token_hex(8)}"
 
 
 class SubmissionError(Exception):
@@ -230,6 +237,48 @@ def _content(manifest: WorkflowManifest | SkillManifest) -> bytes:
     return manifest.model_dump_json(indent=2).encode("utf-8")
 
 
+def _reviewed_manifest(
+    item: AssetSubmission, content: bytes, actor: str, evidence: str
+) -> tuple[PublishedAssetPackage, bytes]:
+    """The package an approval publishes for a Skill or Workflow manifest."""
+    manifest = _parse(item.kind, json.loads(content))
+    policy = manifest.metadata.technical_policy
+    metadata = manifest.metadata.model_copy(
+        update={
+            "business_approval": BusinessApproval(
+                status="approved", reviewer=actor, evidence=evidence
+            ),
+            "technical_policy": policy.model_copy(
+                update={"status": "approved", "reviewer": actor, "evidence": evidence}
+            ),
+        }
+    )
+    published = _with_metadata(manifest, metadata)
+    artifact = _content(published)
+    identity = metadata.identity
+    package = PublishedAssetPackage.model_validate(
+        {
+            "kind": item.kind,
+            "metadata": metadata.model_copy(
+                update={
+                    "package": PackageMetadata(
+                        artifact_ref=(
+                            f"registry://{identity.namespace}/{identity.name}/{identity.version}"
+                        ),
+                        sha256=hashlib.sha256(artifact).hexdigest(),
+                    )
+                }
+            ),
+            "description": (
+                published.description
+                if isinstance(published, WorkflowManifest)
+                else published.instructions
+            ),
+        }
+    )
+    return package, artifact
+
+
 class SubmissionService:
     """Submit, review and publish, over one Registry and one queue."""
 
@@ -253,6 +302,10 @@ class SubmissionService:
         self._artifacts = artifacts
         self._clock = clock if clock is not None else lambda: datetime.now(UTC)
         self._lock = threading.Lock()
+        # The first version of a new BI dataset name waits in this queue
+        # (owner Q5, 2026-10-22); without the service such a submission
+        # cannot be approved.
+        self.bi_datasets: BiDatasetService | None = None
 
     def _member(self, who: AuthenticatedActor) -> tuple[str, tuple[str, ...]]:
         try:
@@ -336,7 +389,7 @@ class SubmissionService:
             if len(content) > MAX_ARTIFACT_BYTES:
                 raise SubmissionError("artifact_too_large")
             submission = AssetSubmission(
-                submission_id=f"sub-{secrets.token_hex(8)}",
+                submission_id=new_submission_id(),
                 kind=item.kind,
                 identity=identity,
                 submitter=actor,
@@ -373,6 +426,12 @@ class SubmissionService:
         if held is None:
             raise SubmissionError("submission_missing")
         item, content = held
+        if item.kind == "bi_dataset":
+            if self.bi_datasets is None:
+                raise SubmissionError("manifest_invalid")
+            return AssetSubmissionDetailReply(
+                submission=item, manifest=self.bi_datasets.review_summary(content)
+            )
         previous_version: str | None = None
         previous_manifest = None
         published = sorted(
@@ -406,43 +465,15 @@ class SubmissionService:
                 raise SubmissionError("submission_not_pending")
             if item.submitter == actor and not self.allow_self_review:
                 raise SubmissionError("self_review_refused")
-            manifest = _parse(item.kind, json.loads(content))
             evidence = f"submission:{item.submission_id}; {decision.evidence}"
-            policy = manifest.metadata.technical_policy
-            metadata = manifest.metadata.model_copy(
-                update={
-                    "business_approval": BusinessApproval(
-                        status="approved", reviewer=actor, evidence=evidence
-                    ),
-                    "technical_policy": policy.model_copy(
-                        update={"status": "approved", "reviewer": actor, "evidence": evidence}
-                    ),
-                }
-            )
-            published = _with_metadata(manifest, metadata)
-            artifact = _content(published)
-            identity = metadata.identity
-            package = PublishedAssetPackage.model_validate(
-                {
-                    "kind": item.kind,
-                    "metadata": metadata.model_copy(
-                        update={
-                            "package": PackageMetadata(
-                                artifact_ref=(
-                                    f"registry://{identity.namespace}/{identity.name}/"
-                                    f"{identity.version}"
-                                ),
-                                sha256=hashlib.sha256(artifact).hexdigest(),
-                            )
-                        }
-                    ),
-                    "description": (
-                        published.description
-                        if isinstance(published, WorkflowManifest)
-                        else published.instructions
-                    ),
-                }
-            )
+            if item.kind == "bi_dataset":
+                if self.bi_datasets is None:
+                    raise SubmissionError("manifest_invalid")
+                package, artifact = self.bi_datasets.reviewed_package(
+                    item, content, reviewer=actor, evidence=evidence
+                )
+            else:
+                package, artifact = _reviewed_manifest(item, content, actor, evidence)
             try:
                 self.ownership.publish_reviewed(item.submitter, package, artifact=artifact)
             except OwnershipError as error:
@@ -480,4 +511,6 @@ class SubmissionService:
         )
         if not self.store.update(decided, expected="pending"):
             raise SubmissionError("submission_not_pending")
+        if item.kind == "bi_dataset" and self.bi_datasets is not None:
+            self.bi_datasets.decided(decided, actor=reviewer or item.submitter, status=status)
         return decided

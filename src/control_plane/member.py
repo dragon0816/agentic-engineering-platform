@@ -20,7 +20,7 @@ from typing import Literal, Self, TypeVar
 from pydantic import AwareDatetime, model_validator
 
 from common.assets import AssetMetadata, RegistryContract
-from common.authorization import DeviceAssetSelection
+from common.authorization import INSTALLABLE_KINDS, DeviceAssetSelection
 from common.base import Sha256, Symbol
 from common.enrollment import BridgeBinding, BridgeExecutionSubject
 from common.identity import (
@@ -72,6 +72,17 @@ from common.member import (
 from common.ownership import AssetNameOwnership, version_key
 from control_plane.activity import BridgeActivity
 from control_plane.authorization import AuthorizationError, InMemoryAuthorizationRegistry
+from control_plane.bi_datasets import (
+    BiDatasetAuditReply,
+    BiDatasetAuditRequest,
+    BiDatasetDownloadReply,
+    BiDatasetDownloadRequest,
+    BiDatasetPublishReply,
+    BiDatasetPublishRequest,
+    BiDatasetService,
+    BiDatasetStatusReply,
+    BiDatasetStatusRequest,
+)
 from control_plane.distribution import entitled_in
 from control_plane.enrollment import EnrollmentError, InMemoryEnrollmentRegistry
 from control_plane.identity import AccessError, InMemoryAccessTokens, fingerprint
@@ -140,6 +151,8 @@ MemberErrorCode = Literal[
     "ticket_expired",
     # A member revokes one of their own logins (owner 2026-10-19).
     "login_missing",
+    # BI dataset sharing (owner 2026-10-22).
+    "visibility_not_allowed",
 ]
 
 T = TypeVar("T")
@@ -306,6 +319,7 @@ _OWNERSHIP_CODES: dict[str, MemberErrorCode] = {
     "version_missing": "version_missing",
     "version_deprecated": "version_deprecated",
     "access_member_unknown": "access_member_unknown",
+    "visibility_not_allowed": "visibility_not_allowed",
 }
 
 
@@ -325,9 +339,13 @@ class MemberService:
         clock: Callable[[], datetime] | None = None,
         activity: BridgeActivity | None = None,
         artifacts: Mapping[str, bytes] | None = None,
+        bi_datasets: BiDatasetService | None = None,
     ) -> None:
         # Published artifact bytes, for `assets/manifest`.
         self.artifacts = artifacts
+        # BI dataset sharing (owner 2026-10-22); without it the
+        # `bi-datasets/*` operations answer invalid_request.
+        self.bi_datasets = bi_datasets
         self.enrollment = enrollment
         # When each Bridge last called the Bridge API (Platform overview).
         self.activity = activity
@@ -447,7 +465,7 @@ class MemberService:
             package = self.authorization.packages.get(item.asset)
             if package is None:
                 raise MemberError("asset_not_published")
-            if package.kind not in ("workflow", "skill", "knowledge", "agent"):
+            if package.kind not in INSTALLABLE_KINDS:
                 raise MemberError("kind_mismatch")
             try:
                 selected = self.authorization.select(
@@ -463,7 +481,14 @@ class MemberService:
                 )
             except AuthorizationError as error:
                 raise MemberError(_AUTHORIZATION_CODES.get(error.code, "invalid_request")) from None
+        self._bi_event("selected", selected)
         return MemberSelectionReply(selection=selected)
+
+    def _bi_event(
+        self, event: Literal["selected", "replaced", "revoked"], item: DeviceAssetSelection
+    ) -> None:
+        if item.kind == "bi_dataset" and self.bi_datasets is not None:
+            self.bi_datasets.selection_event(event, item.actor, item.asset, item.bridge_id)
 
     def revoke(
         self, session_id: str, secret: str, request: MemberRevokeRequest
@@ -477,6 +502,7 @@ class MemberService:
                 revoked = self.authorization.revoke(who, item.bridge_id, item.asset, now=now)
             except AuthorizationError as error:
                 raise MemberError(_AUTHORIZATION_CODES.get(error.code, "invalid_request")) from None
+        self._bi_event("revoked", revoked)
         return MemberSelectionReply(selection=revoked)
 
     def replace(
@@ -496,6 +522,7 @@ class MemberService:
                 )
             except AuthorizationError as error:
                 raise MemberError(_AUTHORIZATION_CODES.get(error.code, "invalid_request")) from None
+        self._bi_event("replaced", selected)
         return MemberReplacementReply(previous=previous, selection=selected)
 
     # -- asset names: owner management (owner decisions 2026-10-07) -------
@@ -649,6 +676,41 @@ class MemberService:
             ),
         )
         return AssetAccessReply(entry=entry)
+
+    # -- BI dataset sharing (owner 2026-10-22) ------------------------------
+
+    def _bi(self) -> BiDatasetService:
+        if self.bi_datasets is None:
+            raise MemberError("invalid_request")
+        return self.bi_datasets
+
+    def bi_body_limit(self) -> int:
+        """The `bi-datasets/publish` body limit; other routes keep theirs."""
+        return 0 if self.bi_datasets is None else self.bi_datasets.body_limit()
+
+    def bi_publish(
+        self, session_id: str, secret: str, request: BiDatasetPublishRequest
+    ) -> BiDatasetPublishReply:
+        service = self._bi()
+        return service.publish(self._session(session_id, secret), request)
+
+    def bi_status(
+        self, session_id: str, secret: str, request: BiDatasetStatusRequest
+    ) -> BiDatasetStatusReply:
+        service = self._bi()
+        return service.status(self._session(session_id, secret), request)
+
+    def bi_download(
+        self, session_id: str, secret: str, request: BiDatasetDownloadRequest
+    ) -> BiDatasetDownloadReply:
+        service = self._bi()
+        return service.download(self._session(session_id, secret), request)
+
+    def bi_audit(
+        self, session_id: str, secret: str, request: BiDatasetAuditRequest
+    ) -> BiDatasetAuditReply:
+        service = self._bi()
+        return service.audit_events(self._session(session_id, secret), request)
 
     # -- member publish with a review queue (owner 2026-10-15) -------------
 

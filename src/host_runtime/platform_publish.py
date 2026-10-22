@@ -13,6 +13,9 @@ never goes to the Bridge API.
 
 from __future__ import annotations
 
+import base64
+import binascii
+import hashlib
 import json
 import os
 import re
@@ -278,6 +281,69 @@ class MemberPortalPublisher:
             return self._post("logins/revoke", f"Bearer {session}", body)
         return self._call("logins/revoke", body)
 
+    # -- BI dataset sharing (owner 2026-10-22, docs/CONTRACTS.md) -----------
+
+    def publish_bi_dataset(
+        self,
+        namespace: str,
+        name: str,
+        snapshot: bytes,
+        *,
+        note: str,
+        base_version: str | None,
+        readers: str | None = None,
+        confirm_organization: bool = False,
+        team: str | None = None,
+    ) -> dict[str, Any]:
+        """Publish a BI dataset snapshot (`bi-datasets/publish`). The reply's
+        `status` is `published`, or `pending_review` for the first version of
+        a new name (an administrator approves it)."""
+        body: dict[str, Any] = {
+            "namespace": namespace,
+            "name": name,
+            "base_version": base_version,
+            "note": note.strip(),
+            "confirm_organization": bool(confirm_organization),
+            "snapshot": base64.b64encode(snapshot).decode("ascii"),
+        }
+        if readers:
+            body["readers"] = readers
+        if team:
+            body["team"] = team
+        return self._call("bi-datasets/publish", body)
+
+    def bi_dataset_status(self, names: list[tuple[str, str]]) -> list[dict[str, Any]]:
+        """Whether this member may still use each `(namespace, name)` and its
+        latest version. `entitled: false` from an answering platform means
+        stop updating and keep the copy (owner Q2)."""
+        body = {"names": [{"namespace": ns, "name": nm} for ns, nm in names]}
+        datasets = self._call("bi-datasets/status", body).get("datasets")
+        if not isinstance(datasets, list):
+            raise PublishError("bad_reply")
+        return [item for item in datasets if isinstance(item, dict)]
+
+    def bi_dataset_download(self, asset: dict[str, str]) -> bytes:
+        """One exact version's snapshot bytes, checked against the digest the
+        platform states."""
+        reply = self._call("bi-datasets/download", {"asset": asset})
+        try:
+            content = base64.b64decode(str(reply["snapshot"]), validate=True)
+            expected = str(reply["sha256"])
+        except (KeyError, binascii.Error, ValueError):
+            raise PublishError("bad_reply") from None
+        if hashlib.sha256(content).hexdigest() != expected:
+            raise PublishError("bad_reply")
+        return content
+
+    def bi_dataset_audit(self, namespace: str, name: str) -> list[dict[str, Any]]:
+        """The name's audit events, for its owner, co-editors and administrators."""
+        events = self._call("bi-datasets/audit", {"namespace": namespace, "name": name}).get(
+            "events"
+        )
+        if not isinstance(events, list):
+            raise PublishError("bad_reply")
+        return [item for item in events if isinstance(item, dict)]
+
     def enroll(self, request: dict[str, Any]) -> dict[str, Any]:
         """Enroll this computer as the member (`bridges/enroll`, owner
         2026-10-15). The reply carries this computer's Bridge token once; the
@@ -339,6 +405,20 @@ EXPLANATIONS = {
     "longer published). Ask its owner to add you in the Member Portal ('Who can use it').",
     "sync_asset_conflict": "A different file with the same name and version is already on "
     "this PC, so nothing was installed. Remove the local copy first.",
+    # BI dataset sharing (owner 2026-10-22).
+    "snapshot_invalid": "The platform could not read this BI dataset snapshot.",
+    "digest_mismatch": "The BI dataset snapshot was damaged on the way; publish it again.",
+    "secret_found": "The dataset contains something that looks like a password or token; "
+    "remove it and publish again.",
+    "version_superseded": "The platform already has a newer version of this dataset; update "
+    "to it first.",
+    "review_pending": "The first version of this dataset is waiting for an administrator.",
+    "visibility_not_allowed": "A BI dataset can be shared with your team or the whole "
+    "organization, never publicly.",
+    "organization_unconfirmed": "Sharing with the whole organization needs your explicit "
+    "confirmation.",
+    "team_required": "You belong to several teams; choose which team owns this dataset.",
+    "name_missing": "That name does not exist or is not shared with you.",
 }
 
 

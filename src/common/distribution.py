@@ -21,7 +21,11 @@ from common.execution import (
     TraceIdentifiers,
 )
 
-AssetKind = Literal["task", "workflow", "skill", "knowledge", "agent", "bridge_extension"]
+# `bi_dataset` is an immutable BI dataset snapshot (BI dataset sharing slice 1,
+# owner 2026-10-22, `docs/CONTRACTS.md` "BI dataset sharing").
+AssetKind = Literal[
+    "task", "workflow", "skill", "knowledge", "agent", "bridge_extension", "bi_dataset"
+]
 
 
 class PublishedAssetPackage(RegistryContract):

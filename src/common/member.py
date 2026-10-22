@@ -11,7 +11,7 @@ from typing import Literal, Self
 from pydantic import AwareDatetime, Field, JsonValue, model_validator
 
 from common.assets import AssetIdentity, Owner
-from common.authorization import DeviceAssetSelection
+from common.authorization import INSTALLABLE_KINDS, DeviceAssetSelection
 from common.base import Contract, Sha256, Slug, Symbol, Text
 from common.distribution import PublishedAssetPackage
 from common.enrollment import BridgeDevice, Invitation, PlatformRole
@@ -147,7 +147,7 @@ class MemberSelectionReply(Contract):
 
     @model_validator(mode="after")
     def installable_add_on(self) -> Self:
-        if self.selection.kind not in ("workflow", "skill", "knowledge", "agent"):
+        if self.selection.kind not in INSTALLABLE_KINDS:
             raise ValueError("the member entry point changes only installable Agent Add-ons")
         return self
 
@@ -210,7 +210,11 @@ class AssetOwnershipReply(Contract):
 # `docs/phases/MEMBER_PUBLISH.md`. A submission is not a package: a package is
 # published by definition, so the queue keeps its own record until approval.
 
-SubmissionKind = Literal["skill", "workflow"]
+# A manifest a member submits; a `bi_dataset` submission is the first version
+# of a new BI dataset name, made by `bi-datasets/publish` (owner Q5,
+# 2026-10-22), never by `assets/submit`.
+ManifestKind = Literal["skill", "workflow"]
+SubmissionKind = Literal["skill", "workflow", "bi_dataset"]
 SubmissionStatus = Literal["pending", "approved", "rejected", "withdrawn"]
 SubmissionRisk = Literal["low", "medium", "high", "critical"]
 
@@ -222,7 +226,7 @@ class AssetSubmitRequest(Contract):
     `visibility` is who the publisher wants to use it (owner decision
     2026-10-15); absent, the manifest's own applies."""
 
-    kind: SubmissionKind
+    kind: ManifestKind
     change: VersionChange
     note: Text | None = None
     visibility: Visibility | None = None

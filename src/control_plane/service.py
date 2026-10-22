@@ -17,6 +17,7 @@ from datetime import UTC, datetime, timedelta
 
 from pydantic import ValidationError
 
+from common.assets import AssetIdentity
 from common.base import Contract
 from common.identity import AuthenticatedActor
 from common.sync import (
@@ -42,6 +43,8 @@ from common.sync import (
 )
 from control_plane.activity import BridgeActivity
 from control_plane.authorization import InMemoryAuthorizationRegistry
+from control_plane.bi_datasets import KIND as BI_DATASET
+from control_plane.bi_datasets import BiDatasetAudit, BiDatasetAuditRecord
 from control_plane.distribution import (
     ControlError,
     InMemoryRemoteControl,
@@ -115,7 +118,10 @@ class ControlPlaneService:
         clock: Callable[[], datetime] | None = None,
         feedback: FeedbackStore | None = None,
         activity: BridgeActivity | None = None,
+        bi_audit: BiDatasetAudit | None = None,
     ) -> None:
+        # Deliveries of BI dataset snapshots (owner 2026-10-22).
+        self.bi_audit = bi_audit
         # When each Bridge last called, for the administrator's overview.
         self.activity = activity if activity is not None else BridgeActivity()
         self.feedback_store = feedback if feedback is not None else FeedbackStore()
@@ -201,6 +207,9 @@ class ControlPlaneService:
                 selection.asset.key: selection.asset
                 for selection in bundle.installable()
                 if selection.asset.key not in present
+                and self._bi_dataset_entitled(
+                    selection.kind, selection.actor, selection.asset, device, now
+                )
             }
             wanted = tuple(wanted_by_key[key] for key in sorted(wanted_by_key))
             if not wanted:
@@ -216,7 +225,58 @@ class ControlPlaneService:
                 if artifact is None or content is None:
                     raise ServiceError("artifact_missing")
                 payloads.append(ArtifactPayload.of(artifact.artifact_ref, content))
+            for package in plan.packages:
+                if package.kind == BI_DATASET and self.bi_audit is not None:
+                    described = package.metadata.package
+                    identity = package.metadata.identity
+                    self.bi_audit.record(
+                        BiDatasetAuditRecord(
+                            at=now,
+                            event="synced",
+                            actor=who.actor,
+                            namespace=identity.namespace,
+                            name=identity.name,
+                            version=identity.version,
+                            sha256=None if described is None else described.sha256,
+                            bridge_id=device,
+                        )
+                    )
         return SyncReply(authorization=bundle, plan=plan, artifacts=tuple(payloads))
+
+    def _bi_dataset_entitled(
+        self, kind: str, actor: str, asset: AssetIdentity, device: str, now: datetime
+    ) -> bool:
+        """Whether a selected BI dataset may still be delivered: its member
+        must still be entitled (owner Q2, 2026-10-22: a revoked reader keeps
+        the copy they have and gets no new version). Other kinds are not
+        re-checked here, as before."""
+        if kind != BI_DATASET:
+            return True
+        package = self.packages.get(asset)
+        try:
+            member = self.enrollment.user(actor)
+        except EnrollmentError:
+            member = None
+        allowed = (
+            package is not None
+            and member is not None
+            and member.status == "active"
+            and entitled_in(self.packages, package.metadata, member.actor, member.groups)
+        )
+        if not allowed and self.bi_audit is not None:
+            self.bi_audit.record_once(
+                ("sync_refused", device, actor, *asset.key),
+                BiDatasetAuditRecord(
+                    at=now,
+                    event="sync_refused",
+                    actor=actor,
+                    namespace=asset.namespace,
+                    name=asset.name,
+                    version=asset.version,
+                    bridge_id=device,
+                ),
+            )
+        return allowed
 
     def report(self, token_id: str, secret: str, request: ReportRequest) -> ReportReply:
         item = ReportRequest.model_validate(request)

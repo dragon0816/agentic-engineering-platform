@@ -64,6 +64,8 @@ OwnershipErrorCode = Literal[
     "version_deprecated",
     # Who can use a name (owner decision 2026-10-15).
     "access_member_unknown",
+    # A BI dataset is never public (owner Q4, 2026-10-22).
+    "visibility_not_allowed",
 ]
 
 _REGISTRY_CODES: dict[str, OwnershipErrorCode] = {
@@ -525,6 +527,12 @@ class AssetOwnershipService:
             raise OwnershipError("name_missing")
         if not (record.manages(actor, member_groups) or self._administrator(actor)):
             raise OwnershipError("not_name_owner")
+        if visibility == "public" and any(
+            item.kind == "bi_dataset"
+            for item in self.packages.discover(namespace=ns)
+            if item.metadata.identity.name == nm
+        ):
+            raise OwnershipError("visibility_not_allowed")
         for member in members:
             try:
                 self.enrollment.user(TypeAdapter(Symbol).validate_python(member))
