@@ -2,7 +2,17 @@
 
 Updated: 2026-10-22 (Asia/Taipei), by Claude Code (session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## Session model scope (2026-10-22, Claude Code) — latest
+## BI dataset sharing slice 1, Agent side (2026-10-22, Claude Code, agent 2 of 3) — latest
+
+- Commit 58239639 on main (not pushed, Agent Web not restarted, 141 and live data untouched):
+  subscribed read-only copies, `bi_dataset` sync installer, update badge and manual 「更新」,
+  revoked access keeps the copy and marks it 已停止更新（無權限）, offline status, `/api/bi/subscriptions*`,
+  `bi__query` cites the version. Contract `docs/CONTRACTS.md` "Agent subscriptions"; row in
+  `docs/TASKS.md`. Agents 1 (platform, d39d0927, 25b2c640) and 3 (UI 97042163; publish route
+  in `bi_cards_api.py` still being finished) own the rest.
+- Next: the live two-PC test listed in `docs/TASKS.md` once 141 runs a platform from d39d0927+.
+
+## Session model scope (2026-10-22, Claude Code)
 
 - Commits d81fab8b (backend, Telegram, tests) and eee157fa (page) on main, plus a docs commit;
   not pushed, Agent Web not restarted, `host.json`, live data and the gateway on port 4000

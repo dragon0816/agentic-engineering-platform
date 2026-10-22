@@ -3239,3 +3239,20 @@ s-k-20261011T102952` (not published).
   answers show 「模型：…」; Telegram `/model`). Full suite on ec467edf in a clean worktree with
   `C:/aepci-wk/venv` 3859 passed, 34 skipped; release `--quick`. Live: an answer in a conversation
   set to claude-sonnet-5 recorded `model: claude-sonnet-5`; the conversation was set back to gpt-5.5.
+
+## BI dataset sharing slice 1: the Agent side (subscriptions) (2026-10-22)
+
+- [x] Read-only subscribed datasets, sync, badge, manual update, stopped access, routes and
+  `bi__query` version citing (2026-10-22, Claude Code, agent 2 of 3; design
+  `docs/proposals/BI_DATASET_SHARING.md` §4, §8.5 Q2/Q4, §8.6). `capabilities/bi_cards/
+  subscriptions.py` (verified all-or-nothing install, schema from the snapshot, `schema_conflict`,
+  status `current` / `update_available` / `stopped_no_access` / `offline`), store read-only mode
+  for `<namespace>/<name>` under `bi/subscribed/` (409 `dataset_read_only`), the `bi_dataset`
+  installer in `host_runtime/sync.py`, `host_runtime/bi_subscriptions.py` (`GET
+  /api/bi/subscriptions[?refresh=1]`, `POST …/subscribe`, `…/update`, `…/unsubscribe`), status
+  refreshed on every Agent Web catalog read, `bi__query` `source` + 「資料來源：… v…（發佈者 …）」.
+  Contract `docs/CONTRACTS.md` "BI dataset sharing" → "Agent subscriptions"; user guide §6.8.
+  Tests `tests/test_bi_subscriptions.py` (18, incl. the in-process platform sync). Commit
+  58239639. Verification: see the HANDOFF note of the same day.
+- [ ] Live two-PC test (owner present, GUI hours): publish → subscribe → chat cites version →
+  republish → badge → 更新 → remove from readers → 已停止更新 → offline → 取消訂閱.
