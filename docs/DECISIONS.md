@@ -4727,3 +4727,40 @@ done when one does).
 - Owner (2026-10-22): 8–10 days is too long; agreed to a trimmed slice 1 built by three agents in
   parallel, then a 141 deployment and a two-PC live test. Pinning, rollback and the Marketplace /
   Overview listing move to slice 2. Scope in `docs/proposals/BI_DATASET_SHARING.md` §8.6.
+
+## 2026-10-22 — BI dataset snapshots: format, size limit and platform rules (sharing slice 1)
+
+- **Snapshot** `aep-bi-dataset-snapshot/1`: gzip (mtime 0) of canonical JSON (sorted keys,
+  compact). The content digest covers everything except `digest` and `publication`, so the owner's
+  build is deterministic and the platform's publication stamp (version, publisher, time, note)
+  does not change it; the package SHA-256 is of the stamped bytes. Proposals are never read;
+  folders are cut from refs and import file names; actors map to platform accounts through an
+  optional mapping and are kept as they are otherwise (on a PC whose Agent actor is the platform
+  account nothing changes). A credential-like string (`common.assets.SECRET_PATTERN` /
+  `SECRET_FIELD`) fails build and publish, naming card and field only.
+- **Size limit**: 20 MiB gzip per snapshot (configurable on the platform as
+  `max_bi_dataset_bytes`, 1–64 MiB), 256 MiB decompressed, 50 000 cards. The proposal suggested
+  8 MiB; 20 MiB was chosen in the slice 1 brief so a real INTERNAL dataset (owner Q1) fits with
+  room, while the sync reply that embeds the artifact stays a single bounded response. The
+  publish route has its own body limit (limit × 4/3 + 64 KiB); every other Member Portal route
+  keeps 256 KiB.
+- **Platform**: new `AssetKind`/`RunnableKind` `bi_dataset`; versions minor + 1 (major + 1 when
+  the schema's major changes); `base_version` must equal the highest published version
+  (`version_superseded`); the first version of a new name reuses the review queue as an
+  `AssetSubmission` of kind `bi_dataset` (owner Q5); readers `team` by default, `organization`
+  only with `confirm_organization`, `public` refused also by `assets/access/update` (Q4).
+- **Revocation** (Q2): a `bi_dataset` selection whose member is no longer entitled is not planned
+  by sync (audited once as `sync_refused`); the Agent learns it from `bi-datasets/status`
+  (`entitled: false`) and keeps its copy. Other kinds keep the earlier rule (selections stand).
+- **Audit**: a dedicated append-only `bi_dataset_audit` table in the registry SQLite file
+  (memory when not durable): submitted, approved, rejected, withdrawn, published, selected,
+  replaced, revoked, synced (with the Bridge), sync_refused, downloaded.
+- **ADR-K10 exception**: `control_plane/bi_datasets.py` is the one module outside the BI package
+  and the Host's BI wiring that imports `capabilities.bi_cards` (the snapshot reader), because the
+  platform must validate every snapshot itself; the guard test lists it.
+- **Rejected alternatives**: storing the raw `bi.sqlite` (carries proposals, paths and SQLite
+  internals, cannot be scanned per value); a new field in `SyncReply` for the revoked signal
+  (closed contracts: an older Agent would refuse every reply); letting the platform rewrite the
+  content digest on stamping (the owner could no longer tell the published content is theirs);
+  widening the generic `assets/submit` route to data (its 192 KiB manifest rules and per-version
+  review do not fit).

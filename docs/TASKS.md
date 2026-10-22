@@ -3256,3 +3256,29 @@ s-k-20261011T102952` (not published).
   58239639. Verification: see the HANDOFF note of the same day.
 - [ ] Live two-PC test (owner present, GUI hours): publish → subscribe → chat cites version →
   republish → badge → 更新 → remove from readers → 已停止更新 → offline → 取消訂閱.
+
+## BI dataset sharing slice 1: snapshot format and Shared Platform side (2026-10-22)
+
+- [x] Agent 1 of 3 (Claude Code): snapshot format and platform server (owner answers Q1–Q5 and the
+  trimmed scope, `docs/proposals/BI_DATASET_SHARING.md` §8.5–§8.6). Contract first:
+  `docs/CONTRACTS.md` "BI dataset sharing" (8a995ee1). `src/capabilities/bi_cards/snapshot.py`:
+  `build_snapshot` / `read_snapshot` / `stamp_publication` / `schema_state` / `install_schema` /
+  `install_snapshot` (25b2c640). Platform (d39d0927): `bi_dataset` in `AssetKind`/`RunnableKind`;
+  `src/control_plane/bi_datasets.py` with Member Portal `bi-datasets/publish|status|download|audit`;
+  first version of a new name through the review queue; platform versions and `base_version`;
+  `max_bi_dataset_bytes` (20 MiB default) and its own body limit; secret and digest re-check;
+  team readers, organization only when confirmed, public refused (also in `assets/access/update`);
+  sync skips no-longer-entitled `bi_dataset` selections; append-only `bi_dataset_audit`; client
+  methods on `MemberPortalPublisher`. Decision `docs/DECISIONS.md` 2026-10-22 "BI dataset
+  snapshots: format, size limit and platform rules".
+  Tests: `tests/test_bi_dataset_snapshot.py` (13), `tests/test_bi_dataset_platform.py` (21, memory
+  and SQLite registries; §8.2 items 1, 2, 3, 8, determinism, strip rules, install failing with
+  nothing written, the entitlement-revoked signal). Verification (shared tree with agents 2 and 3
+  working): ruff check clean on these files (`.` reports two E501 in `web_page.py`, agent 3's),
+  ruff format --check and mypy (760 files) clean; full pytest project venv 3949 passed, 7 skipped,
+  2 failed, both mine and fixed after (ADR-K10 import guard, a 413 race in a test), re-run 35
+  passed (`--basetemp=C:/aepci-wk/bt-sh1`); `C:/aepci-wk/venv` 3923 passed, 34 skipped, 1 failed
+  (`test_bi_schemas_ui` browser timing, passes alone) (`--basetemp=C:/aepci-wk/bt-sh1c`).
+- [ ] Deploy the platform to 141 (a build from d39d0927 or later; optional
+  `max_bi_dataset_bytes` in the platform config; restart after checking nobody is using it).
+- [ ] Two-PC live test (§8.2, after agents 2 and 3).
