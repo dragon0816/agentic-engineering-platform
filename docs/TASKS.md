@@ -3232,3 +3232,10 @@ s-k-20261011T102952` (not published).
 - [ ] Owner live check after a restart on this code (when `/api/tasks` is idle).
 - [ ] Optional: say which model answered in Telegram replies too (today `/model` shows the chat's
   model).
+- [x] Release `release-20261022-0936-ec467edf` (2026-10-22, Claude Code; owner: package before the
+  dataset sharing work): zip `aep-windows-preview-0.1.0-ec467edf2557.zip`, SHA-256 `f3b150f1…8ceb`, on
+  `S:\AE\leo\20261022-0936-ec467edf\` with `BI_DEMO.zh-TW.md` and `README-請先看.txt` (supersedes 2237,
+  1635, 1550, 1115). Adds the session model scope (every model call in a session uses its model;
+  answers show 「模型：…」; Telegram `/model`). Full suite on ec467edf in a clean worktree with
+  `C:/aepci-wk/venv` 3859 passed, 34 skipped; release `--quick`. Live: an answer in a conversation
+  set to claude-sonnet-5 recorded `model: claude-sonnet-5`; the conversation was set back to gpt-5.5.
