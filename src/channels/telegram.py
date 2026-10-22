@@ -78,6 +78,7 @@ from host_runtime.workflow_uploads import (
 )
 from models.contracts import ModelMessage
 from models.credentials import CredentialMisconfigured, CredentialResolver
+from models.selection import session_model
 from models.wire import (
     Transport,
     UrllibTransport,
@@ -116,6 +117,7 @@ HELP = (
     "[arguments]. /run <number or name> asks a Workflow's fields one by one. /status "
     "shows this Bridge's state. /new starts a fresh conversation and forgets its files. "
     "/why lists the preferences and memory the last answer used. "
+    "/model lists the models this chat may use; /model <number or name> chooses one. "
     "Send files or photos with a caption to have the Agent work on them."
 )
 #: Telegram lets a bot download at most 20 MB a file (the Bot API's limit).
@@ -425,6 +427,11 @@ def _files(message: dict[str, Any], update_id: int) -> list[_File]:
                 _File(largest["file_id"], f"photo-{label}.jpg", _size(largest.get("file_size")))
             ]
     return []
+
+
+def _chat_session(chat_id: int) -> str:
+    """The session a Telegram chat's turns belong to (its model choice too)."""
+    return f"telegram-chat-{chat_id}"
 
 
 def _files_session(key: tuple[int, int]) -> str:
@@ -928,7 +935,11 @@ class TelegramIngress:
         raised is recorded on the delivery with its type and a redacted
         message, and the sender is told the request could not be handled."""
         try:
-            return await self._deliver(update)
+            # Everything this update does uses its chat's model (owner
+            # 2026-10-22): the chat's own choice, else the person's default,
+            # else the Settings model; the data approval decides first.
+            with session_model(self._chat_model(update)):
+                return await self._deliver(update)
         except Exception as error:  # noqa: BLE001 - recorded, not propagated
             return TelegramDelivery(
                 update_id=update.update_id,
@@ -988,7 +999,7 @@ class TelegramIngress:
             del self._flows[key]
             active = None
         if active is not None and not (
-            parsed is not None and parsed[0] in ("run", "start", "help", "status", "why")
+            parsed is not None and parsed[0] in ("run", "start", "help", "status", "why", "model")
         ):
             step = telegram_flow.answer(active, text)
             return await self._flow_step(base, key, active, step, actor, update)
@@ -1006,6 +1017,12 @@ class TelegramIngress:
         if parsed is not None and parsed[0] == "why":
             # 「為什麼」 (accumulated memory M5): what the chat's last answer used.
             reply = await asyncio.to_thread(self._why_reply, key)
+            return TelegramDelivery(**base, disposition="answered", reply=reply)
+        if parsed is not None and parsed[0] == "model":
+            # The chat's model, as the Agent Web composer menu (owner 2026-10-22).
+            parts = text.split(None, 1)
+            wanted = parts[1].strip() if len(parts) > 1 and parts[1].strip() else None
+            reply = await asyncio.to_thread(self._model_reply, actor, update.chat_id, wanted)
             return TelegramDelivery(**base, disposition="answered", reply=reply)
         if parsed is not None and parsed[0] == "status":
             # A durable read under the store's lock, so never on the event loop.
@@ -1059,6 +1076,54 @@ class TelegramIngress:
         if why is not None and preferences:
             why.remember(actor, preferences)
 
+    def _chat_model(self, update: _Update) -> str | None:
+        """The model id this chat's turn asks for; None keeps the Settings
+        model. A sender without an actor, or a host without Agent Web's
+        model choices, gets the Settings model."""
+        actor = self.config.actor_for(update.sender_id)
+        models = getattr(self.cards, "conversation_models", None)
+        if actor is None or models is None:
+            return None
+        chosen = models.for_turn(actor, _chat_session(update.chat_id))
+        return chosen if isinstance(chosen, str) else None
+
+    def _model_reply(self, actor: str, chat_id: int, wanted: str | None) -> str:
+        """/model: the models this chat may use, or choose one by number or id."""
+        models = getattr(self.cards, "conversation_models", None)
+        if models is None:
+            return "Choosing a model needs Agent Web on this Bridge."
+        session = _chat_session(chat_id)
+        listed = models.listed(actor, session)
+        if not listed.get("ok"):
+            return "No model is configured. Set one in Agent Web Settings."
+        ids = [str(item["id"]) for item in listed["models"]]
+        if wanted is not None:
+            target = (
+                ids[int(wanted) - 1]
+                if wanted.isdigit() and 1 <= int(wanted) <= len(ids)
+                else wanted
+            )
+            chosen = models.choose(actor, session, target)
+            if not chosen.get("ok"):
+                return f"Not changed ({chosen.get('code')}). Send /model to see the list."
+            return (
+                f"This chat now uses {target}, from the next message. "
+                "It is also your default for new conversations."
+            )
+        source = {"conversation": "this chat", "default": "your default"}.get(
+            str(listed.get("selected_from")), "Settings default"
+        )
+        lines = [f"Model for this chat: {listed['selected']} ({source})."]
+        if listed.get("unavailable"):
+            lines.append(f"{listed['unavailable']} is not served now; choose another.")
+        for number, name in enumerate(ids, start=1):
+            marks = " · Settings default" if name == listed.get("configured") else ""
+            marks += " ✓" if name == listed["selected"] else ""
+            lines.append(f"{number}. {name}{marks}")
+        if len(ids) > 1:
+            lines.append("Send /model <number or name> to choose.")
+        return "\n".join(lines)
+
     def _why_reply(self, key: tuple[int, int]) -> str:
         found = self._why.get(key)
         why = getattr(self.cards, "memory_why", None)
@@ -1088,7 +1153,7 @@ class TelegramIngress:
                     request_id=f"telegram-{update.update_id}",
                     span_id="telegram",
                 ),
-                session_id=f"telegram-chat-{update.chat_id}",
+                session_id=_chat_session(update.chat_id),
             )
         except ValueError:
             return None

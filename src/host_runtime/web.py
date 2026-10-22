@@ -327,7 +327,13 @@ from llm_gateway import token_refresh as gateway_token
 from llm_gateway.config import GatewayConfigError
 from llm_gateway.config import load_settings as load_gateway_settings
 from models.contracts import ModelMessage
-from models.selection import NOT_APPROVED, TURN_MODEL, SelectableModelClient
+from models.selection import (
+    NOT_APPROVED,
+    SelectableModelClient,
+    answered_by,
+    session_model,
+    settings_model,
+)
 from models.wire import MethodTransport, UrllibTransport
 
 #: Anything larger than this is not a request to an Agent.
@@ -1704,7 +1710,12 @@ class AgentWeb:
 
     def experience_review(self) -> dict[str, Any]:
         """Harvest, then review the open groups and look for repeated work;
-        report only (E2, SKILL_SUGGESTIONS S1)."""
+        report only (E2, SKILL_SUGGESTIONS S1). It belongs to no session, so
+        it uses the Settings model (owner 2026-10-22)."""
+        with settings_model():
+            return self._experience_review()
+
+    def _experience_review(self) -> dict[str, Any]:
         found = review_model(self.runtime)
         if found is None:
             return {"ok": False, "code": "experience_review_unavailable"}
@@ -2001,6 +2012,12 @@ class AgentWeb:
         threading.Thread(target=loop, name="experience-nightly", daemon=True).start()
 
     def nightly_tick(self, now: datetime | None = None) -> None:
+        # The nightly job belongs to no session: the Settings model (owner
+        # 2026-10-22).
+        with settings_model():
+            self._nightly_tick(now)
+
+    def _nightly_tick(self, now: datetime | None = None) -> None:
         """One look of the nightly job: after 02:00 local time, once a night,
         the memory health check of every actor (accumulated memory M5; each
         actor's own switch), then the experience review when it is switched
@@ -2769,16 +2786,18 @@ class AgentWeb:
                 pass
         self.turn_progress.begin(progress)
         listening = TURN_PROGRESS.set(progress)
-        # The conversation's own model (owner 2026-10-21), for Gateway turns.
-        choosing = TURN_MODEL.set(
-            self.conversation_models.for_turn(self.runtime.actor, item.session_id)
-            if backend == "gateway"
-            else None
-        )
+        # The conversation's own model (owner 2026-10-21) for everything the
+        # turn does (owner 2026-10-22): the conversation, a Knowledge answer,
+        # a Workflow draft. A CLI-backend session's model is the backend's
+        # own; what AEP itself asks for it uses the Settings model.
         try:
-            return self._conversation_turn(item)
+            with session_model(
+                self.conversation_models.for_turn(self.runtime.actor, item.session_id)
+                if backend == "gateway"
+                else None
+            ):
+                return self._conversation_turn(item)
         finally:
-            TURN_MODEL.reset(choosing)
             TURN_PROGRESS.reset(listening)
             self.turn_progress.end(progress)
 
@@ -3190,6 +3209,10 @@ class AgentWeb:
                                 action_cards=_listed_cards(answer),
                                 preferences_used=preferences_in(answer),
                                 memory_used=memory_in(answer),
+                                # The model this turn's requests went to
+                                # (owner 2026-10-22); None when none did,
+                                # and for a CLI backend, whose model is its own.
+                                model=answered_by() if record.backend == "gateway" else None,
                                 attachments=tuple(
                                     {key: str(item[key]) for key in ("filename", "kind", "path")}
                                     for item in _answer_files(answer)

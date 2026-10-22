@@ -1223,22 +1223,29 @@ def build_gateway(
     # is answered by a sentence rather than by a missing capability.
     binding = config.models
     drafting_model: ModelClient | None = None
+    session_selectable: SelectableModelClient | None = None
     if binding is not None and binding.routing_alias is not None:
         # The router creates a default environment resolver inside
         # build_router, but Knowledge and Workflow drafting are assembled
         # earlier. They must see the same host-owned credential mapping.
         model_resolver = resolver or EnvironmentCredentials(config.credential_environment())
-        chosen = ModelClients(
+        drafting_clients = ModelClients(
             binding.catalog,
             resolver=model_resolver,
             transport=model_transport,
             options=binding.options,
-        ).for_alias(binding.routing_alias)
-        drafting_model = (
-            None
-            if isinstance(chosen, Failure)
-            else ApprovedModelClient(chosen, binding.data_approval)
         )
+        chosen = drafting_clients.for_alias(binding.routing_alias)
+        drafting_endpoint = binding.catalog.endpoint(binding.routing_alias)
+        if not isinstance(chosen, Failure) and drafting_endpoint is not None:
+            # One switch for the router and every drafting client (owner
+            # 2026-10-22): a Knowledge answer, a Workflow draft or a card
+            # read made during a session turn uses that session's model;
+            # the data approval still decides each request first.
+            session_selectable = SelectableModelClient(
+                drafting_endpoint, chosen, drafting_clients.build
+            )
+            drafting_model = ApprovedModelClient(session_selectable, binding.data_approval)
     installed.register(
         DRAFT_SPEC,
         DraftWorkflowHandler(
@@ -1366,7 +1373,11 @@ def build_gateway(
             policy.confirm_writes(spec)
     bridge = BridgeExecutor(installed, policy, timeout_seconds=config.capability_timeout_seconds)
     router = build_router(
-        config, CommandRouter(skills), resolver=resolver, transport=model_transport
+        config,
+        CommandRouter(skills),
+        resolver=resolver,
+        transport=model_transport,
+        selectable=session_selectable,
     )
     # JEV Skill selection: absent unless configured, sends nothing without the
     # owner's egress approval, and in shadow mode only records its choices.
@@ -1579,8 +1590,14 @@ def build_router(
     *,
     resolver: CredentialResolver | None = None,
     transport: Transport | None = None,
+    selectable: SelectableModelClient | None = None,
 ) -> RequestRouter:
     """The router, with a model behind it when this host was given one.
+
+    `selectable` is the host's one session-model switch, already built for
+    the drafting clients from the same catalog, alias, credential mapping
+    and transport; the router shares it so every client honours the same
+    choice and the same approved list.
 
     A host with no `models` gets exactly what every host got before the field
     existed: deterministic command matching, and `needs_input` for anything
@@ -1602,23 +1619,24 @@ def build_router(
             if endpoint.credential.name not in mapped:
                 raise HostError("credential_unmapped")
         resolver = EnvironmentCredentials(mapped)
-    clients = ModelClients(
-        binding.catalog,
-        resolver=resolver,
-        transport=transport,
-        options=binding.options,
-    )
-    client = clients.for_alias(binding.routing_alias)
-    if isinstance(client, Failure):
-        # `unknown_alias` cannot happen -- the contract checked it -- so this
-        # is a provider this build has no adapter for, which is a
-        # configuration mistake and not something to discover at runtime.
-        raise HostError("models_invalid")
-    endpoint = binding.catalog.endpoint(binding.routing_alias)
-    assert endpoint is not None  # the contract checked the routing alias
-    # A conversation may choose another model this Gateway serves (owner
-    # 2026-10-21, `models.selection`); the data approval still decides first.
-    selectable = SelectableModelClient(endpoint, client, clients.build)
+    if selectable is None:
+        clients = ModelClients(
+            binding.catalog,
+            resolver=resolver,
+            transport=transport,
+            options=binding.options,
+        )
+        client = clients.for_alias(binding.routing_alias)
+        if isinstance(client, Failure):
+            # `unknown_alias` cannot happen -- the contract checked it -- so
+            # this is a provider this build has no adapter for, which is a
+            # configuration mistake and not something to discover at runtime.
+            raise HostError("models_invalid")
+        endpoint = binding.catalog.endpoint(binding.routing_alias)
+        assert endpoint is not None  # the contract checked the routing alias
+        # A conversation may choose another model this Gateway serves (owner
+        # 2026-10-21, `models.selection`); the data approval still decides first.
+        selectable = SelectableModelClient(endpoint, client, clients.build)
     return RequestRouter(
         commands,
         ApprovedModelClient(selectable, binding.data_approval),

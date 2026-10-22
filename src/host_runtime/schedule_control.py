@@ -39,6 +39,7 @@ from host_runtime.schedule_policy import ScheduleGrantAuthorizer, target_side_ef
 from host_runtime.schedule_worker import ScheduleWorker
 from host_runtime.schedules import ScheduleStoreError, SqliteScheduleStore
 from host_runtime.workspace import documents
+from models.selection import settings_model
 
 #: The policy reference a grant made through a local owner control carries.
 OWNER_GRANT_POLICY = "owner-schedule-grant"
@@ -312,13 +313,16 @@ class ScheduleControl:
     # -- occurrences ---------------------------------------------------------
 
     def tick(self, *, now: datetime | None = None) -> tuple[ScheduledRun, ...]:
-        """One poll: reconcile, claim due work and attempt it."""
-        with self._serial(), self._store() as store:
+        """One poll: reconcile, claim due work and attempt it. A schedule
+        belongs to no session, so it uses the Settings model (owner
+        2026-10-22), whichever thread polled."""
+        with settings_model(), self._serial(), self._store() as store:
             return asyncio.run(self.worker(store).poll_once(now=now or self._clock()))
 
     def approve(self, key: str, *, note: str | None = None) -> ScheduledRun:
-        """Approve one waiting run and dispatch it through every check again."""
-        with self._serial(), self._store() as store:
+        """Approve one waiting run and dispatch it through every check again,
+        with the Settings model as every scheduled run."""
+        with settings_model(), self._serial(), self._store() as store:
             return asyncio.run(
                 self.worker(store).run_approved(
                     key, decided_by=self.owner, now=self._clock(), note=note

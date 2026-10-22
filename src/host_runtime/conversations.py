@@ -62,6 +62,10 @@ class ConversationMessage(Contract):
     # The memory items the answer's tools read (M5, 「為什麼」): contacts,
     # sync states, cited notes, by reference only, never content.
     memory_used: tuple[MemoryRef, ...] = Field(default=(), max_length=40)
+    # The model id the answer's requests were sent to (owner 2026-10-22), so
+    # the page can show which model answered; None when no model was asked
+    # (a command, a run form) or for a record written before the field.
+    model: str | None = Field(default=None, min_length=1, max_length=200)
 
     @model_validator(mode="before")
     @classmethod
@@ -98,6 +102,8 @@ class ConversationMessage(Contract):
             raise ValueError("only an answer records the tools it used")
         if self.role == "user" and (self.preferences_used or self.memory_used):
             raise ValueError("only an answer records the preferences and memory it used")
+        if self.role == "user" and self.model is not None:
+            raise ValueError("only an answer records the model that answered")
         reject_embedded_secrets(self.model_dump(mode="json"))
         return self
 
