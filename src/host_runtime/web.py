@@ -3870,6 +3870,10 @@ class AgentWeb:
 
         discovered = asyncio.run(self.runtime.platform.catalog())
         self.last_catalog = {"at": utc_now().isoformat(), "status": discovered.status}
+        # Subscribed BI datasets: the update badge, stopped (no access) or offline.
+        from host_runtime.bi_subscriptions import observe_catalog
+
+        observe_catalog(self.runtime.layout.workspace_root, self.runtime.platform, discovered)
 
         try:
             installed_assets = self.runtime.state.installed()

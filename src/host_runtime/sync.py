@@ -71,6 +71,7 @@ from common.sync import (
     SyncRequest,
     WireFailure,
 )
+from host_runtime import bi_subscriptions
 from host_runtime.agent import LocalAgent, LocalAgentOutcome
 from host_runtime.contracts import HostLayout, PlatformBinding
 from host_runtime.memory_spaces import conflicts as memory_conflicts
@@ -106,7 +107,14 @@ REPORT_EVERY_SECONDS = 60.0
 
 SyncRefusalCode = (
     LocalStateErrorCode
-    | Literal["grants_conflict", "asset_invalid", "asset_conflict", "workspace_unwritable"]
+    | Literal[
+        "grants_conflict",
+        "asset_invalid",
+        "asset_conflict",
+        "workspace_unwritable",
+        "schema_conflict",
+        "schema_unavailable",
+    ]
 )
 
 
@@ -209,6 +217,8 @@ class _KnowledgeInstall:
 class _VerifiedInstall:
     files: tuple[tuple[Path, bytes], ...]
     knowledge: tuple[_KnowledgeInstall, ...]
+    # Subscribed BI datasets (BI dataset sharing slice 1), checked, not written.
+    bi_datasets: tuple[bi_subscriptions.PreparedInstall, ...] = ()
 
 
 def _identities_on_disk(directory: Path) -> dict[tuple[str, str, str], tuple[Path, bytes]]:
@@ -443,10 +453,20 @@ class PlatformClient:
                     if created and item.target.exists():
                         shutil.rmtree(item.target)
                     raise SyncRefused("workspace_unwritable") from None
+            committed: list[bi_subscriptions.PreparedInstall] = []
             try:
+                for prepared in verified.bi_datasets:
+                    prepared.commit()
+                    committed.append(prepared)
                 rows = state.install(reply.plan, artifacts)
             except LocalStateError as error:
+                for prepared in reversed(committed):
+                    prepared.rollback()
                 raise SyncRefused(error.code) from None
+            except (OSError, ValueError, bi_subscriptions.SubscriptionError):
+                for prepared in reversed(committed):
+                    prepared.rollback()
+                raise SyncRefused("workspace_unwritable") from None
             added = tuple(item.identity for item in rows)
         try:
             write_atomically(
@@ -479,8 +499,27 @@ class PlatformClient:
         }
         files: list[tuple[Path, bytes]] = []
         knowledge: list[_KnowledgeInstall] = []
+        bi_datasets: list[bi_subscriptions.PreparedInstall] = []
         for package in plan.packages:
             artifact = package.metadata.package
+            if package.kind == bi_subscriptions.KIND and artifact is not None:
+                # A read-only BI dataset copy: checked whole here, written
+                # after every other check passed (`PreparedInstall.commit`).
+                identity = package.metadata.identity
+                try:
+                    bi_datasets.append(
+                        bi_subscriptions.prepare(
+                            layout.workspace_root,
+                            identity.namespace,
+                            identity.name,
+                            identity.version,
+                            artifacts[artifact.artifact_ref],
+                            artifact.sha256,
+                        )
+                    )
+                except bi_subscriptions.SubscriptionError as error:
+                    raise SyncRefused(_bi_refusal(error.code)) from None
+                continue
             if artifact is None or package.kind not in on_disk:
                 # Other package kinds have no trusted installer on this host.
                 raise SyncRefused("asset_invalid")
@@ -566,7 +605,9 @@ class PlatformClient:
                 # was interrupted after writing them is finished, not refused.
                 continue
             files.append((path, content))
-        return _VerifiedInstall(files=tuple(files), knowledge=tuple(knowledge))
+        return _VerifiedInstall(
+            files=tuple(files), knowledge=tuple(knowledge), bi_datasets=tuple(bi_datasets)
+        )
 
     async def report(self, snapshot: BridgeStateSnapshot) -> ReportOutcome:
         answer = await asyncio.to_thread(self._call, "report", ReportRequest(snapshot=snapshot))
@@ -729,6 +770,19 @@ def _summary(request: RemoteWorkflowJob, snapshot: WorkflowRunSnapshot) -> Local
         status=snapshot.run.status,
         updated_at=datetime.now(UTC),
     )
+
+
+def _bi_refusal(code: str) -> SyncRefusalCode:
+    """A BI dataset install refusal as a sync refusal code."""
+    if code == "schema_conflict":
+        return "schema_conflict"
+    if code == "schema_unavailable":
+        return "schema_unavailable"
+    if code == "asset_conflict":
+        return "asset_conflict"
+    if code == "artifact_hash_mismatch":
+        return "artifact_hash_mismatch"
+    return "asset_invalid"
 
 
 def _bad_reply() -> Failure:

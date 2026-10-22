@@ -16,6 +16,12 @@ from before the binding existed has no `meta` row and is read as
 
 Reading never creates the database: a preview of an empty dataset leaves
 the workspace byte-for-byte unchanged.
+
+A dataset subscribed from the shared platform (BI dataset sharing slice 1,
+owner 2026-10-22) is named `<namespace>/<name>` and lives under
+`<workspace>/bi/subscribed/<namespace>__<name>/`; `subscription.json` there
+names the installed version, whose `<version>/bi.sqlite` is opened read
+only. Every write to it is refused as `dataset_read_only`.
 """
 
 from __future__ import annotations
@@ -37,8 +43,14 @@ DB_FILE = "bi.sqlite"
 #: The binding of a dataset created before per-dataset schemas, or implicitly
 #: by an import or the demo load: the shipped `bi.schema/v1.1`.
 LEGACY_SCHEMA = "bi.schema/v1.1@1.1.0"
-#: `<workspace>/bi/schemas/` holds installed schema files, so no dataset may use it.
-RESERVED_DATASETS = {"schemas"}
+#: `<workspace>/bi/schemas/` holds installed schema files and
+#: `<workspace>/bi/subscribed/` the subscribed datasets, so no dataset may use them.
+SUBSCRIBED_DIR = "subscribed"
+RESERVED_DATASETS = {"schemas", SUBSCRIBED_DIR}
+#: A subscribed dataset as the platform names it: `<namespace>/<name>`.
+SUBSCRIBED_RE = re.compile(r"^([a-z0-9]+(?:-[a-z0-9]+)*)/([a-z0-9]+(?:-[a-z0-9]+)*)$")
+SUBSCRIPTION_FILE = "subscription.json"
+READ_ONLY_MESSAGE = "這是從 Shared Platform 訂閱的資料集，唯讀；要修改請請發佈者更新"
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS cards (
@@ -115,7 +127,53 @@ def now() -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat()
 
 
+def is_subscribed(dataset: str) -> bool:
+    return SUBSCRIBED_RE.match(dataset) is not None
+
+
+def subscribed_root(workspace: Path, dataset: str) -> Path:
+    """`<workspace>/bi/subscribed/<namespace>__<name>/` of a `<namespace>/<name>`."""
+    match = SUBSCRIBED_RE.match(dataset)
+    if match is None:
+        raise BiStoreError("dataset_invalid", "訂閱的資料集名稱是 <namespace>/<name>")
+    namespace, name = match.groups()
+    return workspace / "bi" / SUBSCRIBED_DIR / f"{namespace}__{name}"
+
+
+def subscription_record(workspace: Path, dataset: str) -> dict[str, Any] | None:
+    """The subscription's `subscription.json`; None when not subscribed."""
+    path = subscribed_root(workspace, dataset) / SUBSCRIPTION_FILE
+    try:
+        record = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return record if isinstance(record, dict) else None
+
+
+def subscribed_datasets(workspace: Path) -> list[str]:
+    """Every subscribed `<namespace>/<name>` with an installed version."""
+    root = workspace / "bi" / SUBSCRIBED_DIR
+    if not root.is_dir():
+        return []
+    found = []
+    for folder in sorted(root.iterdir()):
+        namespace, separator, name = folder.name.partition("__")
+        dataset = f"{namespace}/{name}"
+        if not separator or not is_subscribed(dataset):
+            continue
+        record = subscription_record(workspace, dataset)
+        if record is not None and isinstance(record.get("version"), str):
+            found.append(dataset)
+    return found
+
+
 def dataset_dir(workspace: Path, dataset: str) -> Path:
+    if is_subscribed(dataset):
+        record = subscription_record(workspace, dataset) or {}
+        version = str(record.get("version") or "")
+        root = subscribed_root(workspace, dataset)
+        # An unknown version reads as an empty, missing dataset.
+        return root / version if re.fullmatch(r"\d+\.\d+\.\d+", version) else root / "none"
     if not DATASET_RE.match(dataset):
         raise BiStoreError("dataset_invalid", "資料集名稱只能用英數字、-、_，最多 40 個字")
     if dataset.lower() in RESERVED_DATASETS:
@@ -169,14 +227,21 @@ class BiStore:
         self.dataset = dataset
         self.dir = dataset_dir(workspace, dataset)
         self.path = self.dir / DB_FILE
+        #: A subscribed copy: readable, never written here.
+        self.read_only = is_subscribed(dataset)
 
     @property
     def exists(self) -> bool:
         return self.path.is_file()
 
+    def refuse_write(self) -> None:
+        if self.read_only:
+            raise BiStoreError("dataset_read_only", READ_ONLY_MESSAGE)
+
     @contextmanager
     def _db(self, *, write: bool = False) -> Iterator[sqlite3.Connection]:
         if write:
+            self.refuse_write()
             self.dir.mkdir(parents=True, exist_ok=True)
         connection = sqlite3.connect(
             self.path if write else f"file:{self.path}?mode=ro", uri=not write
@@ -212,6 +277,7 @@ class BiStore:
     def create(self, schema_ref: str) -> None:
         """A new, empty dataset bound to `schema_ref`; an existing one is refused
         (its schema cannot be changed after creation)."""
+        self.refuse_write()
         if self.exists:
             current = self.schema_ref()
             raise BiStoreError(
@@ -462,6 +528,7 @@ class BiStore:
     ) -> int:
         """A person's edit; refused as `stale_edit` when the card moved on."""
         at = now()
+        self.refuse_write()
         if not self.exists:
             raise BiStoreError("card_unknown", "找不到這張卡片")
         with self._db(write=True) as db:
@@ -528,6 +595,7 @@ class BiStore:
         """Undo a whole import: restore each field it changed (unless a person
         changed it since), drop its proposals, and remove the cards it created
         that nothing else has written."""
+        self.refuse_write()
         if not self.exists:
             raise BiStoreError("import_unknown", "找不到這次匯入")
         at = now()

@@ -24,6 +24,7 @@ __all__ = ["bi_cards_tools", "bi_question", "bi_skill_on"]
 TOOL_NAME = "bi__query"
 FAILURE_TEXT = {
     "dataset_invalid": "資料集名稱不正確",
+    "dataset_unknown": "這台電腦沒有訂閱這個資料集",
     "permission_denied": "BI 卡片查詢沒有授權給你（在 Agent Web 的 Capabilities 選取）",
     "invalid_input": "工具參數不正確",
     "timeout": "這次查詢逾時",
@@ -37,8 +38,10 @@ SCHEMA: dict[str, Any] = {
     "properties": {
         "dataset": {
             "type": "string",
-            "description": "the dataset; demo by default. Only datasets using a bi.schema/* "
-            "schema can be queried; any other is refused with schema_not_bi",
+            "description": "the dataset; demo by default, or a subscribed <namespace>/<name> "
+            "(a read-only copy from the Shared Platform; its result carries `source` with the "
+            "version to cite). Only datasets using a bi.schema/* schema can be queried; any "
+            "other is refused with schema_not_bi",
         },
         "entity_type": {
             "type": "string",

@@ -4261,6 +4261,84 @@ def bi_dataset_audit(self, namespace: str, name: str) -> list[dict]
 Refusals raise `PublishError(code, status, message)`; `secret_found` carries the platform's
 message naming the card and field. `explain(code)` has wording for every code above.
 
+### Agent subscriptions (read-only copies, sync, badge, update)
+
+Code: `src/capabilities/bi_cards/subscriptions.py` (install, status), `src/capabilities/bi_cards/
+store.py` (read-only mode), `src/host_runtime/bi_subscriptions.py` (routes, catalog check),
+`src/host_runtime/sync.py` (the `bi_dataset` installer), `src/capabilities/bi_cards/capability.py`
+(`bi__query` source).
+
+**Layout.** A subscribed dataset is named `<namespace>/<name>` (both platform slugs) everywhere a
+dataset name is taken (`dataset` of every `/api/bi/*` route and of `bi__query`). It lives at
+`<workspace>/bi/subscribed/<namespace>__<name>/`: `subscription.json` (`dataset`, `namespace`,
+`name`, `version`, `sha256` of the stored artifact, `digest`, `published_by`, `published_at`,
+`note`, `schema`, `installed_at`, `latest: null | {version, description}`, `reachable`,
+`stopped`, `stopped_at`, `checked_at`) and `<version>/` written by `install_snapshot`
+(`bi.sqlite`, `snapshot.json`). Only the installed version is kept (§8.6). `subscribed` and
+`schemas` are reserved local names (400 `dataset_invalid`); `datasets()` never lists them.
+
+**Read only.** `BiStore(workspace, "<ns>/<name>")` opens the installed `bi.sqlite` read only;
+every write (`create`, `apply`, `set_field`, `undo_import`, hence the demo load) raises
+`dataset_read_only`. The routes `POST /api/bi/import/preview`, `import/undo`, `demo/load` and
+`cards/<id>/field` with a subscribed `dataset` answer 409 `{"ok": false, "code":
+"dataset_read_only", "message"}` before anything is read.
+
+**Install (the sync).** A `bi_dataset` package in the Bridge API `sync` plan is installed by
+`subscriptions.prepare(...)` then `PreparedInstall.commit()`: the artifact SHA-256 equals the
+package's, `read_snapshot` accepts it, its `publication` names the same
+`<namespace>/<name>@<version>`, and `schema_state` is `shipped`, `present` or `missing` (missing
+→ `install_schema` with the snapshot); all of this before the first write. Refusals become the
+sync's refusal (`sync_<code>`, nothing written): `artifact_hash_mismatch`, `asset_invalid` (an
+unreadable snapshot or another identity), `asset_conflict` (the same version installed with other
+bytes), `schema_conflict`, `schema_unavailable`. The same version and digest again is a no-op.
+A failure after the first write takes back what was written.
+
+**Status.** Every Agent Web catalog read (Settings, sync) and `GET /api/bi/subscriptions?refresh=1`
+asks the Bridge API `catalog {"kinds": ["bi_dataset"]}` when something is subscribed:
+- answered, the name listed: `current`, or `update_available` with `latest` when a newer version
+  is listed (the badge; nothing is installed);
+- answered, the name absent: `stopped_no_access` (owner Q2: the copy is kept and readable, no
+  longer updated); it clears if the name is listed again;
+- not answered: `offline` (unless stopped); nothing else changes.
+
+Status precedence: `stopped_no_access` > `offline` > `update_available` > `current`.
+
+**Routes** (same guards and error shape as the other `/api/bi/*` routes):
+
+- `GET /api/bi/subscriptions[?refresh=1]` → `{"ok": true, "configured": bool, "subscriptions":
+  [<entry>], "connection": "answered" | "unreachable", "available": [{"name", "version",
+  "description", "owner"}]}`; `connection` and `available` (entitled names not subscribed, newest
+  version each) only with `refresh=1` on a configured platform. Without `refresh` nothing is
+  asked of the platform.
+- `<entry>`: `{"name": "<ns>/<name>", "subscribed": true, "read_only": true, "version",
+  "published_by", "published_at", "note", "schema", "status", "status_text", "latest",
+  "latest_note", "stopped_at", "checked_at", "cards", "updated"}`. `status_text`: 已是最新版本 /
+  有新版本 / 已停止更新（無權限） / 無法連線平台.
+- `POST /api/bi/subscriptions/subscribe {"dataset": "<ns>/<name>"}` and
+  `POST /api/bi/subscriptions/update {"dataset"}`: select the newest entitled version for this
+  Bridge with the member's Personal Agent login (`select`, which replaces the previous version's
+  selection), run the verified sync, answer `{"ok": true, "subscription": <entry>}` (or
+  `"already": true` when nothing newer exists). Refusals: 400 `dataset_invalid`; 404
+  `subscription_unknown` (update of a name not subscribed); 409 `platform_not_configured`; 503
+  `platform_unreachable`; 403 `dataset_no_access` (the copy is kept and marked stopped); 403/409
+  `asset_not_entitled`-style codes from `select`; 502 with the sync's code when the selected
+  version did not get installed (the old copy is untouched).
+- `POST /api/bi/subscriptions/unsubscribe {"dataset"}` (the page confirms first): takes back the
+  selection on the platform when it can (`deselected`), removes the local folder and the
+  installed-inventory row → `{"ok": true, "removed", "deselected": bool}`; 404
+  `subscription_unknown`.
+- `GET /api/bi/datasets` adds `"subscribed": false, "read_only": false` to each local dataset and
+  lists the subscribed ones after them as `<entry>` plus `"dashboard"`. `POST /api/bi/datasets`'s
+  `dataset` gains the same two fields.
+
+**Chat.** `bi__query` takes a subscribed `dataset` (up to 81 characters); its result adds
+`source: {"dataset", "version", "published_by", "published_at", "status", "stopped", "latest"}`
+(`null` for a local dataset) and the `scope_note` ends with 「資料來源：<ns>/<name> v<version>
+（發佈者 <account>）」 plus 「；這份副本已停止更新（無權限）…」 when stopped or 「；平台上有
+v<latest>，尚未更新」. A `<ns>/<name>` not subscribed is refused as `dataset_unknown`. The
+`engineering/bi-knowledge` procedure tells the model to end with that version line and to say
+「已停止更新」 when `source.stopped`.
+
 ### Configuration
 
 `SharedPlatformConfiguration.max_bi_dataset_bytes` (default 20 MiB, 1 MiB–64 MiB): the largest

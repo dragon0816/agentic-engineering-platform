@@ -7,6 +7,11 @@ can cite `[卡片 <type>:<key>]`; previews and proposals are never searched.
 
 The chat is BI-specific (owner 2026-10-21): a dataset bound to a schema that
 is not `bi.schema/*` is refused with `schema_not_bi`.
+
+A dataset subscribed from the Shared Platform (`<namespace>/<name>`, BI
+dataset sharing slice 1) is queried the same way; its result carries
+`source` (version, publisher, status) so the answer can name the version it
+came from, and say when that copy no longer updates (owner Q2).
 """
 
 from __future__ import annotations
@@ -17,7 +22,7 @@ from typing import Any
 
 from pydantic import Field
 
-from capabilities.bi_cards import dashboard, service
+from capabilities.bi_cards import dashboard, service, subscriptions
 from capabilities.bi_cards.catalog import for_store
 from capabilities.bi_cards.store import DEFAULT_DATASET, BiStore, BiStoreError
 from capabilities.contracts import CapabilitySpec
@@ -48,7 +53,8 @@ QUERY_SPEC = CapabilitySpec.model_validate(
 
 
 class QueryRequest(Contract):
-    dataset: str = Field(default=DEFAULT_DATASET, max_length=40)
+    #: A local dataset, or a subscribed `<namespace>/<name>`.
+    dataset: str = Field(default=DEFAULT_DATASET, max_length=81)
     entity_type: str = Field(default="", max_length=40)
     text: str = Field(default="", max_length=200)
     domain: str = Field(default="", max_length=20)
@@ -68,6 +74,20 @@ class QueryResult(Contract):
     cards: tuple[dict[str, Any], ...]
     scope_note: str
     analysis: tuple[dict[str, Any], ...] = ()
+    #: A subscribed dataset's version and publisher; None for a local one.
+    source: dict[str, Any] | None = None
+
+
+def _source_note(source: dict[str, Any] | None) -> str:
+    if source is None:
+        return ""
+    by = f"（發佈者 {source['published_by']}）" if source.get("published_by") else ""
+    note = f"資料來源：{source['dataset']} v{source['version']}{by}"
+    if source.get("stopped"):
+        note += "；這份副本已停止更新（無權限），內容停在這個版本"
+    elif source.get("latest"):
+        note += f"；平台上有 v{source['latest']}，尚未更新"
+    return note
 
 
 class QueryHandler:
@@ -82,8 +102,12 @@ class QueryHandler:
 
         def work() -> Contract:
             store = BiStore(self.workspace_root, request.dataset)
+            source = subscriptions.source(self.workspace_root, request.dataset)
+            if store.read_only and source is None:
+                raise BiStoreError("dataset_unknown")
             if not for_store(store).is_bi:
                 raise BiStoreError("schema_not_bi")
+            cited = _source_note(source)
             if request.analysis:
                 sections = dashboard.analysis(
                     store, request.analysis, (request.domain or "robotics").lower()
@@ -92,8 +116,10 @@ class QueryHandler:
                     dataset=request.dataset,
                     total=sum(len(section["rows"]) for section in sections),
                     cards=(),
-                    scope_note=f"在這份資料集（{request.dataset}）中計算",
+                    scope_note=f"在這份資料集（{request.dataset}）中計算"
+                    + (f"。{cited}" if cited else ""),
                     analysis=tuple(sections),
+                    source=source,
                 )
             answer = service.query_cards(
                 store,
@@ -109,7 +135,8 @@ class QueryHandler:
                 dataset=answer["dataset"],
                 total=answer["total"],
                 cards=tuple(answer["cards"]),
-                scope_note=answer["scope_note"],
+                scope_note=answer["scope_note"] + (cited and f"{cited}。"),
+                source=source,
             )
 
         try:

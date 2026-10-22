@@ -136,6 +136,8 @@ def test_harness_and_storage_code_outside_the_package_do_not_import_bi_types() -
         "host_runtime/assets.py",
         "host_runtime/bi_cards_api.py",
         "host_runtime/bi_cards_tools.py",
+        # BI dataset sharing: the subscription routes and the sync's installer.
+        "host_runtime/bi_subscriptions.py",
         # BI dataset sharing: the platform re-reads every published snapshot.
         "control_plane/bi_datasets.py",
     }

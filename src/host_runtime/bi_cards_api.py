@@ -22,10 +22,13 @@ from capabilities.bi_cards import catalog, dashboard, importer, service
 from capabilities.bi_cards.store import (
     DATASET_RE,
     DEFAULT_DATASET,
+    READ_ONLY_MESSAGE,
     BiStore,
     BiStoreError,
     datasets,
+    is_subscribed,
 )
+from host_runtime import bi_subscriptions
 
 #: A CSV travels in the JSON body; larger than an ordinary request.
 MAX_BI_BODY_BYTES = 8 * 1024 * 1024
@@ -54,9 +57,14 @@ def route(
     path: str,
     query: Mapping[str, str],
     body: Any,
+    platform: bi_subscriptions.SubscriptionPlatform | None = None,
 ) -> Answer:
-    """One request; pure apart from the dataset files."""
+    """One request; pure apart from the dataset files (and, for the
+    subscription routes, `platform`)."""
     try:
+        if path == "/api/bi/subscriptions" or path.startswith("/api/bi/subscriptions/"):
+            given = body if isinstance(body, dict) else {}
+            return bi_subscriptions.route(workspace, platform, method, path, query, given)
         return _route(workspace, actor, method, path, query, body)
     except catalog.SchemaInstallError as error:
         # An installed id@version is immutable: different content is a conflict.
@@ -68,6 +76,8 @@ def route(
         }
     except BiStoreError as error:
         status = 404 if error.code.endswith("_unknown") else 400
+        if error.code == "dataset_read_only":
+            return 409, {"ok": False, "code": error.code, "message": error.message}
         if error.code == "dataset_exists":
             return 409, {"ok": False, "code": error.code, "message": error.message, **error.detail}
         if error.code == "stale_edit":
@@ -92,6 +102,9 @@ def _route(
 ) -> Answer:
     given: dict[str, Any] = body if isinstance(body, dict) else {}
     who = f"{actor} via web"
+    if method == "POST" and is_subscribed(_dataset(given.get("dataset"))):
+        # A subscribed copy is read only: import, edit, undo and demo load.
+        return _error(409, "dataset_read_only", READ_ONLY_MESSAGE)
     if method == "GET":
         store = BiStore(workspace, _dataset(query.get("dataset")))
         if path == "/api/bi/schema":
@@ -216,6 +229,8 @@ def _create_dataset(workspace: Path, given: dict[str, Any]) -> Answer:
             "updated": None,
             "schema": reg.ref,
             "dashboard": reg.is_bi,
+            "subscribed": False,
+            "read_only": False,
         },
     }
 
@@ -282,10 +297,18 @@ def handle(handler: Any, method: str, parsed: ParseResult) -> bool:
             handler._json(400, {"ok": False, "code": "json_invalid", "message": "不是有效的 JSON"})
             return True
     query = {k: v[0] for k, v in parse_qs(parsed.query).items() if v}
-    runtime = handler.server.web.runtime
+    web = handler.server.web
+    runtime = web.runtime
+    platform = bi_subscriptions.WebPlatform(web) if runtime.platform is not None else None
     try:
         status, payload = route(
-            runtime.layout.workspace_root, str(runtime.actor), method, parsed.path, query, body
+            runtime.layout.workspace_root,
+            str(runtime.actor),
+            method,
+            parsed.path,
+            query,
+            body,
+            platform,
         )
     except Exception as failure:  # noqa: BLE001 - the page shows every failure
         status, payload = (

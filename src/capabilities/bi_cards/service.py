@@ -85,8 +85,15 @@ def dataset_list(workspace: Path) -> list[dict[str, Any]]:
                 "updated": store.last_updated(),
                 "schema": schema,
                 "dashboard": schema.startswith(BI_PREFIX),
+                "subscribed": False,
+                "read_only": False,
             }
         )
+    # Datasets subscribed from the Shared Platform: read only, after the local ones.
+    from capabilities.bi_cards import subscriptions
+
+    for item in subscriptions.listing(workspace):
+        found.append({**item, "dashboard": str(item["schema"]).startswith(BI_PREFIX)})
     return found
 
 

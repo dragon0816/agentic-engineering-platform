@@ -215,6 +215,8 @@ def test_a_dataset_is_created_with_a_schema_and_keeps_it(tmp_path: Path) -> None
         "updated": None,
         "schema": EXAMPLE,
         "dashboard": False,
+        "subscribed": False,
+        "read_only": False,
     }
     assert BiStore(tmp_path, "spec-2026").schema_ref() == EXAMPLE  # persisted in bi.sqlite
     with sqlite3.connect(tmp_path / "bi" / "spec-2026" / "bi.sqlite") as db:
