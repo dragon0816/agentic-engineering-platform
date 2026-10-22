@@ -13,9 +13,12 @@ the demo are BI-only and refuse a dataset whose schema is not `bi.schema/*`.
 from __future__ import annotations
 
 import json
+import re
+import uuid
 from collections.abc import Mapping
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 from urllib.parse import ParseResult, parse_qs
 
 from capabilities.bi_cards import catalog, dashboard, importer, service
@@ -274,6 +277,342 @@ def _set_field(workspace: Path, who: str, card_id: str, given: dict[str, Any]) -
     return 200, {"ok": True, "version": version}
 
 
+# -- publishing to the Shared Platform (BI dataset sharing slice 1) ----------
+# Owner 2026-10-22; `docs/proposals/BI_DATASET_SHARING.md` §7, §8.5, §8.6;
+# contract in `docs/CONTRACTS.md` "BI dataset sharing" → "Agent publish API".
+# The snapshot is built on this PC (`snapshot.build_snapshot`: no pending
+# proposals, file names without folders, refused when a value looks like a
+# secret) and sent with the member's own Personal Agent login
+# (`MemberPortalPublisher.publish_bi_dataset`). The platform assigns the
+# version; the first version of a new name waits for an administrator (owner
+# Q5). Readers are the owner's team unless 全公司 is chosen and confirmed (owner
+# Q4); there is no public option. The last publish of each dataset is kept in
+# `<workspace>/bi/<dataset>/published.json` for the dataset bar.
+
+PUBLISH_PREFIX = "/api/bi/publish"
+PUBLISH_RECORD = "published.json"
+PUBLISH_READERS = ("team", "organization")
+#: A platform name part: lower-case words joined by single hyphens.
+PLATFORM_SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+MAX_PUBLISH_NOTE = 200
+
+
+class BiPublisher(Protocol):
+    """The member-portal calls a publish needs (`MemberPortalPublisher`)."""
+
+    def publish_bi_dataset(
+        self,
+        namespace: str,
+        name: str,
+        snapshot: bytes,
+        *,
+        note: str,
+        base_version: str | None,
+        readers: str | None = None,
+        confirm_organization: bool = False,
+        team: str | None = None,
+    ) -> dict[str, Any]: ...
+
+    def bi_dataset_status(self, names: list[tuple[str, str]]) -> list[dict[str, Any]]: ...
+
+
+#: What the owner reads for each refusal; never a value from the dataset.
+PUBLISH_MESSAGES = {
+    "dataset_read_only": "這是訂閱的資料集，不能發佈；只有你自己的資料集可以發佈",
+    "dataset_unknown": "找不到這個資料集",
+    "dataset_empty": "資料集還沒有卡片，沒有東西可以發佈",
+    "note_required": "請寫版本說明",
+    "readers_invalid": "讀者只能是「我的團隊」或「全公司」",
+    "organization_unconfirmed": "開放給全公司需要先勾選確認",
+    "name_invalid": "平台名稱是 <namespace>/<name>，只能用小寫英文字母、數字與 -",
+    "namespace_required": "這台電腦沒有設定 namespace，請填平台名稱 <namespace>/<name>",
+    "publishing_not_configured": "這台電腦還沒設定 Shared Platform：到 Settings → Shared "
+    "platform 設定 Member Portal 網址與 Personal Agent code",
+    "artifact_too_large": "資料集太大，超過 Shared Platform 的上限",
+    "version_superseded": "平台上已有比你這份更新的版本，請先更新後再發佈",
+    "review_pending": "這個名稱的第一版還在等管理員審核，核准後才能發佈下一版",
+    "publisher_not_authorized": "你沒有發佈這個名稱的權限；請名稱的負責人把你加為共同維護者",
+    "team_required": "你屬於多個團隊，請選擇由哪個團隊擁有這個名稱",
+    "visibility_not_allowed": "讀者只能是你的團隊或全公司，不能公開",
+    "kind_mismatch": "平台上這個名稱已經是另一種資產，請換一個名稱",
+    "platform_unreachable": "Shared Platform 沒有回應，資料沒有送出；請稍後再試",
+    "certificate_untrusted": "這台電腦不信任 Shared Platform 的憑證；到 Settings → Shared "
+    "platform 確認指紋",
+    "login_missing": "這台電腦還沒有 Personal Agent code；到 Settings → Shared platform 設定",
+    "authentication_failed": "Shared Platform 不接受這台電腦的登入；請重新連接 Personal Agent",
+    "session_expired": "Shared Platform 的登入過期了，請再試一次",
+    "schema_unavailable": "這個資料集的 schema 無法打包",
+    "snapshot_invalid": "Shared Platform 讀不懂這份快照",
+}
+
+PUBLISH_STATUS = {
+    "dataset_read_only": 409,
+    "dataset_unknown": 404,
+    "artifact_too_large": 413,
+    "version_superseded": 409,
+    "review_pending": 409,
+    "kind_mismatch": 409,
+    "publisher_not_authorized": 403,
+    "publishing_not_configured": 409,
+    "platform_unreachable": 503,
+    "certificate_untrusted": 502,
+    "login_missing": 409,
+    "authentication_failed": 401,
+    "session_expired": 401,
+}
+
+
+def _publish_error(code: str, message: str | None = None, **extra: Any) -> Answer:
+    status = PUBLISH_STATUS.get(code, 400)
+    text = message or PUBLISH_MESSAGES.get(code) or f"Shared Platform 拒絕發佈（{code}）"
+    return status, {"ok": False, "code": code, "message": text, **extra}
+
+
+def _publish_now() -> str:
+    return datetime.now(UTC).replace(microsecond=0).isoformat()
+
+
+def default_platform_name(namespace: str | None, dataset: str) -> str | None:
+    """`<namespace>/<dataset as a slug>`, the platform name a first publish
+    suggests; None when this PC has no namespace."""
+    slug = re.sub(r"[^a-z0-9]+", "-", dataset.lower()).strip("-") or "dataset"
+    return f"{namespace}/{slug}" if namespace else None
+
+
+def _publish_record_path(workspace: Path, dataset: str) -> Path:
+    return BiStore(workspace, dataset).dir / PUBLISH_RECORD
+
+
+def read_publish_record(workspace: Path, dataset: str) -> dict[str, Any] | None:
+    try:
+        record = json.loads(_publish_record_path(workspace, dataset).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return record if isinstance(record, dict) else None
+
+
+def _write_publish_record(workspace: Path, dataset: str, record: dict[str, Any]) -> None:
+    path = _publish_record_path(workspace, dataset)
+    temporary = path.with_name(f".{path.name}.{uuid.uuid4().hex[:8]}.tmp")
+    temporary.write_text(
+        json.dumps(record, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    temporary.replace(path)
+
+
+def _publish_counts(store: BiStore) -> tuple[int, int]:
+    """Cards, and pending proposals (which are not shared)."""
+    if not store.exists:
+        return 0, 0
+    cards = len(store.card_rows())
+    with store._db() as db:  # noqa: SLF001 - one read-only count
+        proposals = int(db.execute("SELECT COUNT(*) FROM proposals").fetchone()[0])
+    return cards, proposals
+
+
+def _own_dataset(workspace: Path, dataset: str) -> tuple[BiStore | None, Answer | None]:
+    if is_subscribed(dataset):
+        return None, _publish_error("dataset_read_only")
+    if not DATASET_RE.match(dataset):
+        return None, _publish_error("dataset_unknown")
+    try:
+        store = BiStore(workspace, dataset)
+    except BiStoreError as error:
+        return None, _publish_error(error.code, error.message)
+    if not store.exists:
+        return None, _publish_error("dataset_unknown")
+    return store, None
+
+
+def _refresh_pending_review(
+    workspace: Path, dataset: str, record: dict[str, Any], publisher: BiPublisher | None
+) -> None:
+    """A first version waiting for review: ask the platform whether it was
+    approved. Any failure leaves the record as it is."""
+    last = record.get("last")
+    if publisher is None or not isinstance(last, dict) or last.get("status") != "pending_review":
+        return
+    namespace, _, name = str(last.get("name") or "").partition("/")
+    try:
+        answer = publisher.bi_dataset_status([(namespace, name)])
+    except Exception:  # noqa: BLE001 - the bar keeps saying 待審核
+        return
+    latest = answer[0].get("latest_version") if answer else None
+    if latest == last.get("version"):
+        last["status"] = "published"
+        if answer[0].get("published_at"):
+            last["at"] = answer[0]["published_at"]
+        _write_publish_record(workspace, dataset, record)
+
+
+def _publish_status(
+    workspace: Path, dataset: str, namespace: str | None, publisher: BiPublisher | None
+) -> Answer:
+    store, refused = _own_dataset(workspace, dataset)
+    if refused is not None:
+        if refused[1]["code"] == "dataset_unknown" and DATASET_RE.match(dataset):
+            # A dataset not created yet has never been published.
+            return 200, {
+                "ok": True,
+                "dataset": dataset,
+                "last": None,
+                "cards": 0,
+                "proposals": 0,
+                "name": default_platform_name(namespace, dataset),
+                "configured": publisher is not None,
+            }
+        return refused
+    assert store is not None
+    record = read_publish_record(workspace, dataset) or {}
+    _refresh_pending_review(workspace, dataset, record, publisher)
+    cards, proposals = _publish_counts(store)
+    last = record.get("last") if isinstance(record.get("last"), dict) else None
+    return 200, {
+        "ok": True,
+        "dataset": dataset,
+        "last": last,
+        "name": record.get("name") or default_platform_name(namespace, dataset),
+        "cards": cards,
+        "proposals": proposals,
+        "configured": publisher is not None,
+    }
+
+
+def _publish(
+    workspace: Path,
+    given: Mapping[str, Any],
+    namespace: str | None,
+    publisher: BiPublisher | None,
+) -> Answer:
+    from capabilities.bi_cards import snapshot as snapshots
+    from host_runtime.platform_publish import PublishError
+
+    dataset = str(given.get("dataset") or "")
+    store, refused = _own_dataset(workspace, dataset)
+    if refused is not None:
+        return refused
+    assert store is not None
+    note = str(given.get("note") or "").strip()
+    if not note:
+        return _publish_error("note_required")
+    if len(note) > MAX_PUBLISH_NOTE:
+        return _publish_error("note_required", f"版本說明最多 {MAX_PUBLISH_NOTE} 個字")
+    readers = str(given.get("readers") or "team")
+    if readers not in PUBLISH_READERS:
+        wrong = "visibility_not_allowed" if readers == "public" else "readers_invalid"
+        return _publish_error(wrong)
+    confirmed = given.get("confirm_organization") is True
+    if readers == "organization" and not confirmed:
+        return _publish_error("organization_unconfirmed")
+    record = read_publish_record(workspace, dataset) or {}
+    # The name is chosen at the first publish and kept after that.
+    chosen = record.get("name") or given.get("name")
+    full = str(chosen or default_platform_name(namespace, dataset) or "")
+    if not full:
+        return _publish_error("namespace_required")
+    space, _, name = full.partition("/")
+    if not (PLATFORM_SLUG_RE.match(space) and PLATFORM_SLUG_RE.match(name)):
+        return _publish_error("name_invalid")
+    team = given.get("team")
+    team = str(team) if isinstance(team, str) and team.strip() else None
+    cards, _ = _publish_counts(store)
+    if cards == 0:
+        return _publish_error("dataset_empty")
+    if publisher is None:
+        return _publish_error("publishing_not_configured")
+    try:
+        built = snapshots.build_snapshot(store)
+    except snapshots.SnapshotError as error:
+        if error.code == "secret_found":
+            # Where, never what: the value is not in the message.
+            return _publish_error(
+                "secret_found",
+                f"卡片「{error.card}」的欄位「{error.field}」看起來含有密碼或 token，"
+                "請先修改再發佈",
+                card=error.card,
+                field=error.field,
+            )
+        return _publish_error(error.code, PUBLISH_MESSAGES.get(error.code) or error.message)
+    try:
+        # The version this snapshot follows is the platform's newest one.
+        known = publisher.bi_dataset_status([(space, name)])
+        base = known[0].get("latest_version") if known else None
+        reply = publisher.publish_bi_dataset(
+            space,
+            name,
+            built,
+            note=note,
+            base_version=base if isinstance(base, str) else None,
+            readers=readers,
+            confirm_organization=confirmed,
+            team=team,
+        )
+    except PublishError as error:
+        if error.code == "secret_found":
+            found = error.message or "Shared Platform 在快照中發現疑似秘密"
+            return _publish_error("secret_found", found)
+        return _publish_error(error.code, PUBLISH_MESSAGES.get(error.code) or error.message)
+    given_asset = reply.get("asset")
+    asset: dict[str, Any] = given_asset if isinstance(given_asset, dict) else {}
+    state = "pending_review" if reply.get("status") == "pending_review" else "published"
+    last = {
+        "name": f"{space}/{name}",
+        "version": str(asset.get("version") or ""),
+        "status": state,
+        "at": _publish_now(),
+        "readers": readers,
+        "note": note,
+        "digest": reply.get("digest"),
+        "submission_id": reply.get("submission_id"),
+    }
+    _write_publish_record(workspace, dataset, {"name": f"{space}/{name}", "last": last})
+    return 200, {
+        "ok": True,
+        "dataset": dataset,
+        "name": f"{space}/{name}",
+        "version": last["version"],
+        "status": state,
+        "at": last["at"],
+        "readers": readers,
+    }
+
+
+def _publish_answer(
+    workspace: Path,
+    method: str,
+    path: str,
+    query: Mapping[str, str],
+    body: Any,
+    namespace: str | None,
+    publisher: BiPublisher | None,
+) -> Answer:
+    if method == "GET" and path == f"{PUBLISH_PREFIX}/status":
+        return _publish_status(workspace, str(query.get("dataset") or ""), namespace, publisher)
+    if method == "POST" and path == PUBLISH_PREFIX:
+        return _publish(workspace, body if isinstance(body, dict) else {}, namespace, publisher)
+    return 404, {"ok": False, "code": "route_unknown", "message": "沒有這個 BI 路徑"}
+
+
+def publish_route(web: Any, method: str, path: str, query: Mapping[str, str], body: Any) -> Answer:
+    """`/api/bi/publish*` (BI dataset sharing slice 1): publishing an own
+    dataset as this PC's member, and the last publish of a dataset."""
+    runtime = web.runtime
+    try:
+        return _publish_answer(
+            runtime.layout.workspace_root,
+            method,
+            path,
+            query,
+            body,
+            runtime.config.namespace,
+            web._publisher(),
+        )
+    except BiStoreError as error:
+        return _error(404 if error.code.endswith("_unknown") else 400, error.code, error.message)
+    except Exception as failure:  # noqa: BLE001 - the page shows every failure
+        return _error(500, "bi_error", f"BI 發佈內部錯誤（{type(failure).__name__}）")
+
+
 def handle(handler: Any, method: str, parsed: ParseResult) -> bool:
     """Serve a `/api/bi/` request on `handler` (already token-checked);
     False when the path is not ours."""
@@ -300,6 +639,9 @@ def handle(handler: Any, method: str, parsed: ParseResult) -> bool:
     web = handler.server.web
     runtime = web.runtime
     platform = bi_subscriptions.WebPlatform(web) if runtime.platform is not None else None
+    if parsed.path.startswith(PUBLISH_PREFIX):
+        handler._json(*publish_route(web, method, parsed.path, query, body))
+        return True
     try:
         status, payload = route(
             runtime.layout.workspace_root,
