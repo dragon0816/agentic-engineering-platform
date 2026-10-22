@@ -10390,7 +10390,8 @@ el("bi-refresh").addEventListener("click", () => biLoad());
 // A preview belongs to the dataset it was made for: switching drops it.
 function biLeaveDataset() {
   bi.cardId = null; bi.preview = null; bi.publish = null;
-  biPanel("publish", false); el("bi-pub-result").hidden = true; el("bi-pub-state").replaceChildren();
+  biPanel("publish", false); el("bi-pub-result").hidden = true;
+  el("bi-pub-state").replaceChildren();
   el("bi-preview").hidden = true; el("bi-result").hidden = true;
   biStatus("bi-status-import", "");
 }
@@ -11288,7 +11289,8 @@ function biRenderPublishWhat() {
   const ul = bh("ul", "",
     bh("li", "", "卡片 " + cards + " 張，含每個欄位的來源"),
     bh("li", "", "修改歷史（誰、何時、為什麼改）"),
-    bh("li", "", "不含待審提議" + (state.proposals ? "（" + state.proposals + " 筆不會分享）" : "")),
+    bh("li", "", "不含待審提議"
+      + (state.proposals ? "（" + state.proposals + " 筆不會分享）" : "")),
     bh("li", "", "匯入檔只留檔名，不含你電腦上的資料夾路徑"));
   box.append(bh("strong", "", "將分享："), ul);
   const last = state.last;
