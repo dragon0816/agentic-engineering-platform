@@ -4345,6 +4345,45 @@ v<latest>，尚未更新」. A `<ns>/<name>` not subscribed is refused as `datas
 stored snapshot (gzip). Deploying needs a platform built from this commit or later; no other
 setting.
 
+### Agent publish API (Agent Web)
+
+Code: `src/host_runtime/bi_cards_api.py` ("publishing to the Shared Platform" section,
+`publish_route`); page: 「BI 卡片」 → 「發佈到 Shared Platform」. Same guards and error shape as
+the other `/api/bi/*` routes (`{"ok": false, "code", "message"}`).
+
+`POST /api/bi/publish`
+
+```json
+{"dataset": "demo", "note": "十月更新", "readers": "team", "confirm_organization": false,
+ "name": "engineering/demo", "team": null}
+```
+
+- `dataset`: an own (local) dataset; a subscribed `<namespace>/<name>` is 409
+  `dataset_read_only`. `note` is required (≤ 200 characters). `readers`: `team` (default) or
+  `organization`, which needs `confirm_organization: true`; `public` is `visibility_not_allowed`.
+- `name` (optional, first publish only): the platform name `<namespace>/<name>`; default
+  `<host.json namespace>/<dataset as a slug>`. After the first publish the recorded name is used
+  and `name` is ignored. `team` is passed to the platform (for a member of several groups).
+- The Agent builds the snapshot (`build_snapshot`), asks `bi_dataset_status` for the newest
+  version and sends it as `base_version` with `publish_bi_dataset`.
+- 200: `{"ok": true, "dataset", "name": "<ns>/<name>", "version", "status": "published" |
+  "pending_review", "at", "readers"}`.
+- Refusals (status, code): 400 `note_required`, `readers_invalid`, `visibility_not_allowed`,
+  `organization_unconfirmed`, `name_invalid`, `namespace_required`, `dataset_empty`; 400
+  `secret_found` with `card` (`<entity_type>:<canonical_key>`) and `field`, never the value; 404
+  `dataset_unknown`; 409 `dataset_read_only`, `publishing_not_configured`, `version_superseded`,
+  `review_pending`, `kind_mismatch`; 403 `publisher_not_authorized`; 413 `artifact_too_large`;
+  503 `platform_unreachable`; other platform codes as 400 with the platform's code. Messages are
+  in Traditional Chinese.
+
+`GET /api/bi/publish/status?dataset=<name>` → `{"ok": true, "dataset", "last": null | {"name",
+"version", "status": "published" | "pending_review", "at", "readers", "note", "digest",
+"submission_id"}, "name": "<recorded or suggested platform name>", "cards", "proposals"
+(pending, not shared), "configured": bool}`. The last publish is kept in
+`<workspace>/bi/<dataset>/published.json`. While it is `pending_review` the status asks the
+platform (`bi_dataset_status`) and marks it `published` once that version is the newest; any
+failure leaves it as it is. A subscribed dataset is 409 `dataset_read_only`.
+
 ## Chat composer model choice (owner 2026-10-21)
 
 Code: `src/models/selection.py` (`TURN_MODEL`, `SelectableModelClient`),

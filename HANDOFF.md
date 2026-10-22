@@ -2,7 +2,19 @@
 
 Updated: 2026-10-22 (Asia/Taipei), by Claude Code (session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## BI dataset sharing slice 1, Agent side (2026-10-22, Claude Code, agent 2 of 3) — latest
+## BI dataset sharing slice 1, Agent Web UI and publish route (2026-10-22, Claude Code, agent 3 of 3) — latest
+
+- Commits 97042163 (page), 6c706ac3 (line wrap), e5531ba5 (publish route) on main, plus a docs
+  commit; not pushed, Agent Web not restarted, 141 and live data untouched. Row in
+  `docs/TASKS.md` "BI dataset sharing slice 1: Agent Web UI and the publish route"; contract
+  `docs/CONTRACTS.md` "Agent publish API"; user guide §6.8.2.
+- Owner check after a restart (when `/api/tasks` is idle): Knowledge → BI 卡片 → 發佈到 Shared
+  Platform on `demo` (team by default; 開放給全公司 needs the confirmation) → 「待審核」 until an
+  administrator approves the first version → publish again → 「已發佈 v1.1.0」; on the second PC
+  展開「已訂閱的資料集」 → 瀏覽平台上的資料集 → 訂閱 → open it: 「唯讀：… 發佈的 v…」, no import/edit.
+- Next: the two-PC live test in `docs/TASKS.md` once 141 runs a platform from d39d0927+.
+
+## BI dataset sharing slice 1, Agent side (2026-10-22, Claude Code, agent 2 of 3)
 
 - Commit 58239639 on main (not pushed, Agent Web not restarted, 141 and live data untouched):
   subscribed read-only copies, `bi_dataset` sync installer, update badge and manual 「更新」,

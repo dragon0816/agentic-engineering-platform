@@ -3282,3 +3282,30 @@ s-k-20261011T102952` (not published).
 - [ ] Deploy the platform to 141 (a build from d39d0927 or later; optional
   `max_bi_dataset_bytes` in the platform config; restart after checking nobody is using it).
 - [ ] Two-PC live test (§8.2, after agents 2 and 3).
+
+## BI dataset sharing slice 1: Agent Web UI and the publish route (2026-10-22)
+
+- [x] Owner's publish route and the BI 卡片 sharing UI (2026-10-22, Claude Code, agent 3 of 3;
+  design `docs/proposals/BI_DATASET_SHARING.md` §7, §8.2 item 10, §8.5 Q2/Q4/Q5, §8.6).
+  `POST /api/bi/publish` (builds the snapshot, newest platform version as `base_version`, team
+  readers by default, `organization` only with `confirm_organization`, no public; `secret_found`
+  names card and field, never the value; subscribed datasets 409 `dataset_read_only`) and
+  `GET /api/bi/publish/status` (last publish in `<workspace>/bi/<dataset>/published.json`; a
+  pending first version is checked with the platform) in `src/host_runtime/bi_cards_api.py`.
+  Page: 「發佈到 Shared Platform」 dialog (platform name on the first publish, version note,
+  我的團隊 / 開放給全公司 + confirmation, what is shared, 「第一次發佈需要管理員審核」, result card,
+  「已發佈 vX（時間）」 / 「待審核」 in the dataset bar); 「已訂閱的資料集」 (badges 有新版本 / 已是最新 /
+  已停止更新（無權限）/ 無法連線, 更新, 取消訂閱 with confirmation, 瀏覽平台上的資料集 → 訂閱); the dataset
+  select grouped 我的資料集 / 已訂閱; read-only banner 「唯讀：<發佈者> 發佈的 v<版本>」 with import,
+  edit, demo load and publish hidden. Contract `docs/CONTRACTS.md` "BI dataset sharing" → "Agent
+  publish API"; user guide §6.8.2.
+- Tests: `tests/test_bi_publish.py` (11: local refusals, secret without value, platform refusals,
+  pending → approved, and the route against the in-process platform: pending review,
+  `review_pending`, admin approval, 1.1.0 direct); `tests/test_bi_share_ui.py` (2: stub server and
+  a real browser, dark mode at 390 px, screenshots `.scratch/bi-share-ui/`); existing BI UI tests
+  unchanged and green. Commits 97042163, 6c706ac3, e5531ba5. Verification: ruff check, ruff
+  format --check, mypy (760 files) clean; full pytest project venv 3951 passed, 7 skipped
+  (`--basetemp=C:/aepci-wk/bt-sh3`); `C:/aepci-wk/venv` 3924 passed, 34 skipped
+  (`--basetemp=C:/aepci-wk/bt-sh3c`).
+- [ ] Owner check after a restart on this code (when `/api/tasks` is idle) and the two-PC live
+  test above, once 141 runs a platform from d39d0927 or later.
