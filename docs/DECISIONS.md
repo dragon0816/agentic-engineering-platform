@@ -4672,3 +4672,14 @@ done when one does).
   every card); allowing installed schemas under `bi.schema/` (the Dashboard and the Skill assume
   its types); comparing installs byte for byte (re-saving the same file with other formatting
   would be refused for no reason).
+
+## 2026-10-22 — BI dataset sharing: owner answers to the five questions
+
+- Proposal `docs/proposals/BI_DATASET_SHARING.md` (option A: immutable dataset snapshots as a Shared
+  Platform asset kind, read-only subscribed copies). Owner answers (2026-10-22), recorded in §8.5:
+  Q1 real INTERNAL BI data may be published to host 141; Q2 when access is revoked the colleague's
+  copy is **kept and stops updating** (not deleted); Q3 snapshots carry provenance and history
+  without pending proposals, file names only, platform accounts as names; Q4 readers default to the
+  owner's team, organization-wide needs an explicit confirmation, never public; Q5 only the first
+  version of a new name needs admin review.
+- Q1 and Q2 differ from the proposal's defaults; they are the owner's choice.
