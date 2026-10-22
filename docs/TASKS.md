@@ -3146,8 +3146,9 @@ s-k-20261011T102952` (not published).
   clean; full pytest project venv 3842 passed, 7 skipped;
   `C:/aepci-wk/venv` 3815 passed, 34 skipped (`--basetemp=C:/aepci-wk/bt-model`).
 - [ ] Owner live check after a restart on this code (when `/api/tasks` is idle).
-- [ ] Optional: let the conversation's model reach Knowledge answers made through the drafting
-  client too (decision item 4), if the owner wants it.
+- [x] Optional: let the conversation's model reach Knowledge answers made through the drafting
+  client too (decision item 4), if the owner wants it. Done 2026-10-22 on the owner's decision,
+  see "Session model scope" below.
 
 ## Windows installer fixes from a colleague's PC (2026-10-21)
 
@@ -3210,3 +3211,24 @@ s-k-20261011T102952` (not published).
   `bi.schema/v1.1@1.1.0` with 104 cards and 15 dashboard sections; the composer lists the gateway's
   models (default gpt-5.5); a conversation switched to claude-sonnet-5 and back (the answer cannot
   name its model, so the model used was not confirmed live).
+
+## Session model scope: everything in a session uses its model (2026-10-22)
+
+- [x] Owner decision 2026-10-22 「現在先根據處在那個session 就用那個模型」 (2026-10-22, Claude Code).
+  One shared `SelectableModelClient` for the router and every drafting client (`host.py`
+  `build_gateway` → `build_router(selectable=...)`); `models.selection.session_model` entered by
+  `AgentWeb.conversation_turn` (Gateway backend) and `TelegramIngress._deliver_guarded`;
+  `settings_model` for `ScheduleControl.tick` / `approve`, `AgentWeb.nightly_tick`,
+  `AgentWeb.experience_review`. Telegram: the chat is session `telegram-chat-<id>`, `/model`
+  lists and chooses. `ConversationMessage.model` records which model answered; the page shows
+  「模型：<id>」 under the answer. Decision `docs/DECISIONS.md` 2026-10-22 "Everything done inside
+  a session uses that session's model"; contract `docs/CONTRACTS.md` "Chat composer model
+  choice" (Session scope, Telegram, Which model answered); user guide §4.2.1.
+  Tests: `tests/test_session_model_scope.py` (13), `tests/test_conversation_model_ui.py`
+  extended (answer shows its model). Commits d81fab8b, eee157fa. Verification: ruff check,
+  ruff format --check, mypy (751 files) clean; full pytest project venv 3886 passed, 7 skipped
+  (`--basetemp=C:/aepci-wk/bt-sm-v`); `C:/aepci-wk/venv` 3859 passed, 34 skipped
+  (`--basetemp=C:/aepci-wk/bt-sm`).
+- [ ] Owner live check after a restart on this code (when `/api/tasks` is idle).
+- [ ] Optional: say which model answered in Telegram replies too (today `/model` shows the chat's
+  model).

@@ -371,6 +371,14 @@ MCP server 可以給 Agent 加新工具（例如 GitHub、檔案系統）。**�
 - 之前選的模型 gateway 不再提供時，選單顯示 `… · not served now`，那則訊息會被拒絕
   （`model_not_approved`），請改選別的模型。
 - 換模型不改變資料規則：資料傳送核准（2.2 節）照樣先檢查，只能送到同一個已核准的 gateway。
+- 這個對話裡做的所有事都用這個模型：一般回答、問 Knowledge 的回答、在對話中起草 Workflow 或
+  Skill、讀名片等，都用同一個模型。
+- 每則回答下方會用小字顯示 **模型：…**（例如 `模型：claude-sonnet-5`），可以確認是哪個模型回答的。
+  指令（例如 `/help`）或執行表單沒有用到模型，就不會顯示。
+- **Telegram**：每個 Telegram 對話各自記一個模型；沒選過就用你的預設，再沒有就用 Settings 的模型。
+  傳 `/model` 看目前的模型和清單，傳 `/model 2` 或 `/model <模型名稱>` 換模型（同時變成你的預設）。
+- 不屬於任何對話的工作一律用 Settings 的模型：排程（Schedules）、每晚的整理與經驗檢討、Knowledge
+  頁上的問答、基準測試、轉換與 Skill 助手。
 - Claude Code、Copilot、Codex 後端用它們自己的模型，這裡顯示 `Model: chosen by …`。
 - Settings 第 2 章仍然決定 gateway 網址和預設模型。
 

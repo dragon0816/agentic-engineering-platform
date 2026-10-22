@@ -4052,7 +4052,8 @@ schema behaves as before.
 Code: `src/models/selection.py` (`TURN_MODEL`, `SelectableModelClient`),
 `src/host_runtime/conversation_models.py` (`ConversationModels`), routes in
 `src/host_runtime/web.py`, composer in `src/host_runtime/web_page.py`. Tests:
-`tests/test_conversation_models.py`, `tests/test_conversation_model_ui.py`.
+`tests/test_conversation_models.py`, `tests/test_conversation_model_ui.py`,
+`tests/test_session_model_scope.py` (session scope, 2026-10-22).
 
 - **Which models**: the configured routing endpoint's model (Settings, `host.json` `models`) plus
   what that endpoint lists (`GET <base_url>/models` for `openai_compatible`, `/api/tags` for
@@ -4081,7 +4082,32 @@ Code: `src/models/selection.py` (`TURN_MODEL`, `SelectableModelClient`),
   `Failure(code="model_not_approved")` without sending anything. The chat shows "The model
   chosen for this conversation is not one the LLM Gateway serves now (model_not_approved)…".
   Requests outside a turn (schedules, Workflow drafting, the Knowledge and other capabilities
-  built with the drafting client) keep the configured model.
+  built with the drafting client) keep the configured model. *Superseded in part on 2026-10-22,
+  see "Session scope" below.*
+- **Session scope (owner 2026-10-22)**: every model call made on behalf of a session uses that
+  session's model. `models.selection.session_model(model)` is entered once per turn by
+  `AgentWeb.conversation_turn` (Gateway backend) and `TelegramIngress._deliver_guarded`; the host
+  builds **one** `SelectableModelClient` for the routing alias, shared by the router and every
+  drafting client (Knowledge query, `workflow_author.draft`, business cards, coding change,
+  Knowledge pipeline), each wrapped by `ApprovedModelClient`. `asyncio.run`,
+  `asyncio.to_thread` and new tasks carry the choice; a plain thread or executor does not and
+  must submit with `contextvars.copy_context().run` if it works for the turn.
+  `models.selection.settings_model()` marks work with no session, which uses the configured
+  model: `ScheduleControl.tick` / `approve`, `AgentWeb.nightly_tick`,
+  `AgentWeb.experience_review`; the Knowledge page's jobs run in their own threads and so also
+  use it. A CLI-backend session leaves the choice unset.
+- **Telegram**: a chat is the session `telegram-chat-<chat id>`; its turn asks for
+  `ConversationModels.for_turn(<sender's actor>, <session>)` (the chat's choice, else the
+  person's default, else None). `/model` replies with the chat's model and source and a numbered
+  list (`✓` on the current one, `· Settings default` on the configured one); `/model <number or
+  id>` chooses through `ConversationModels.choose` (also the person's default) or replies
+  `Not changed (model_not_approved)…`. Without Agent Web (`cards` unset) the Settings model is
+  used and `/model` says so.
+- **Which model answered**: `ConversationMessage.model: str | None` (1–200 characters, answers
+  only, additive; older records read as None) is the last model id the turn's requests were sent
+  to, recorded by `SelectableModelClient` in `TURN_MODELS_USED` after the approval and the
+  model check passed; None when no model was asked (a command, a run form), the request was
+  refused, or the session uses a CLI backend (its model is the backend's own). The page shows it under the answer as `.answer-model` 「模型：<id>」.
 - **Page**: the backend selector (`#conversation-backend`) is in the top bar above the
   conversation, shown only on the chat tab; the composer has `#conversation-model` (label
   "LLM model"), a read-only label when one model is served or a CLI backend is active, and a

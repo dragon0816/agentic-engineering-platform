@@ -1,8 +1,25 @@
 # Handoff
 
-Updated: 2026-10-21 (Asia/Taipei), by Claude Code (BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-22 (Asia/Taipei), by Claude Code (session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## BI cards: per-dataset schemas (2026-10-21, Claude Code) — latest
+## Session model scope (2026-10-22, Claude Code) — latest
+
+- Commits d81fab8b (backend, Telegram, tests) and eee157fa (page) on main, plus a docs commit;
+  not pushed, Agent Web not restarted, `host.json`, live data and the gateway on port 4000
+  untouched. Row in `docs/TASKS.md` "Session model scope"; decision `docs/DECISIONS.md`
+  2026-10-22; contract `docs/CONTRACTS.md` "Chat composer model choice"; user guide §4.2.1.
+- Whatever a session does uses its model (Knowledge answers, Workflow drafting, cards, the
+  conversation); Telegram chats use their own choice or the person's default (`/model`);
+  schedules, the nightly job, experience review and the Knowledge page's jobs keep the Settings
+  model. Each answer records and shows 「模型：<id>」.
+- Verification: ruff, format, mypy clean; full pytest 3886 passed (project venv), 3859 passed
+  (`C:/aepci-wk/venv`).
+- Owner check after a restart (when `/api/tasks` is idle): choose `claude-sonnet-5` in a chat, ask
+  something → 「模型：claude-sonnet-5」 under the answer; ask a Knowledge question in the same chat →
+  the same model line; open a new chat without a pick → your default; Telegram: `/model` lists,
+  `/model 2` chooses, the next answer uses it.
+
+## BI cards: per-dataset schemas (2026-10-21, Claude Code)
 
 - Commits 7d245e19 (backend) and f0759c94 (page) on main, plus a docs commit; not pushed, Agent
   Web not restarted, live data untouched. Row in `docs/TASKS.md` "BI cards: per-dataset

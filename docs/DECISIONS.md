@@ -4683,3 +4683,41 @@ done when one does).
   owner's team, organization-wide needs an explicit confirmation, never public; Q5 only the first
   version of a new name needs admin review.
 - Q1 and Q2 differ from the proposal's defaults; they are the owner's choice.
+
+## 2026-10-22 — Everything done inside a session uses that session's model
+
+- **Decision (owner, 2026-10-22):** 「現在先根據處在那個session 就用那個模型」. Whichever session a
+  request belongs to uses that session's selected model. This widens item 4 ("Reach") of the
+  2026-10-21 composer decision, which kept the drafting client on the configured model.
+- **Follows the session** (the session entry point enters `models.selection.session_model` once
+  per turn; every client of the turn reads `TURN_MODEL`):
+  - Agent Web Gateway-backend turns (`AgentWeb.conversation_turn`): the conversation, the
+    Knowledge Harness answer on the direct route and the tool route, Workflow drafting
+    (`workflow_author.draft`), business-card reading, the coding change capability and the
+    Knowledge pipeline capability when called in the turn, conversational Workflow/Skill drafting
+    (the conversation model writes the draft), memory proposals and preference checks (made by
+    the conversation model's tools).
+  - Telegram turns (`TelegramIngress._deliver_guarded`): the chat is the session
+    `telegram-chat-<chat id>`; its own choice, else the person's default, else the Settings
+    model. `/model` lists and chooses, consistent with the composer menu (a choice is also the
+    person's default).
+- **How:** the host builds **one** `SelectableModelClient` for the routing alias and shares it
+  between the router and every drafting client (`build_gateway` passes it to `build_router`);
+  each is still wrapped by `ApprovedModelClient`, so the data approval decides first and a model
+  the approved Gateway does not serve is refused (`model_not_approved`) with nothing sent. Data
+  classification and routing are unchanged. `asyncio.run`, `asyncio.to_thread` and new tasks copy
+  the context; no session-turn path hands a model call to a plain thread or executor today.
+- **Keeps the Settings model, explicitly** (`models.selection.settings_model`): schedule ticks
+  and approved scheduled runs (`ScheduleControl.tick` / `approve`), the nightly job
+  (`AgentWeb.nightly_tick`), the experience review, and the Knowledge page's own jobs (ask,
+  benchmark, convert, re-ingest, Skill assistant), which run in their own threads with no
+  session. CLI-backend sessions (Claude Code, Copilot, Codex) use their backend's model; what
+  AEP itself asks a model for during them uses the Settings model. The JEV Skill-selection
+  accelerator is a separate configured endpoint and is not switched.
+- **Visible:** each answer records `ConversationMessage.model`, the model id its requests were
+  sent to (None when no model was asked), shown under the answer as 「模型：<id>」, so the owner
+  can check which model answered.
+- **Rejected alternatives:** a separate switch per client with its own approved list (two places
+  to keep in sync); passing a model id through capability inputs (changes shared contracts);
+  making schedules follow the person's default (a schedule has no session and should not change
+  when someone picks a model in a chat).
