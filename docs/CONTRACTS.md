@@ -2115,6 +2115,18 @@ backup, `AEP_SHARED_PLATFORM_TOKEN` for the `shared_platform_token` secret,
 `/api/settings/shared-platform`. `MemberPortalPublisher.me()` and `.enroll()`
 call the portal. `PlatformProjection` carries `bridge_id` and `assets_only`.
 
+**Credential variable names (2026-10-24).** The Bridge token (`shared_platform_token`) and the
+Personal Agent code (`platform_member_login`) are saved for the Windows user, and read back,
+under the variable host.json `credentials` maps the secret to
+(`shared_platform.token_variable(config)` for the token); without a mapping the legacy names
+`AEP_SHARED_PLATFORM_TOKEN` / `AEP_PLATFORM_MEMBER_LOGIN` are used and mapped on enrolment.
+`deploy/windows-preview/install.ps1` maps both for an install outside the default folder
+(`%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0`) to `<legacy name>_<SUFFIX>`, where
+`SUFFIX` is the first 8 hexadecimal digits (upper case) of SHA-256 over the UTF-8 of the
+lower-cased full install path without a trailing `\`; an existing mapping is never changed and
+the default install gets none. `shared_platform_settings()["token_variable"]` reports the mapped
+name. Two installs of one Windows user therefore never share a credential variable.
+
 ### Platform overview and member administration (2026-10-15)
 
 `docs/phases/PLATFORM_OVERVIEW.md`. Administrator-only member portal operations
@@ -3955,13 +3967,21 @@ Skill), `src/host_runtime/bi_cards_api.py` (routes), `src/host_runtime/bi_cards_
     int}], "links": [{"field", "target_id": str | null, "target_key", "missing"}],
     "proposals": [{"field", "value", "source": {"kind", "ref", "at"}}]}`.
   - `POST /api/bi/cards/<id>/field {"dataset", "field", "value", "base_version", "reason"}` →
-    `{"ok": true, "version"}`, or 409 `{"ok": false, "code": "stale_edit", "message",
+    `{"ok": true, "version"}`, or `{"ok": true, "version": <unchanged>, "unchanged": true}` when
+    the field already has that value (2026-10-24: compared as normalised stored JSON, as an
+    import compares; nothing is written, no history entry, the version stays), or 409
+    `{"ok": false, "code": "stale_edit", "message",
     "current", "by", "at", "version"}`. 400 codes: `field_unknown`, `field_derived`,
     `base_version_missing`, `reason_required` (a `judgement` field needs `reason`),
     `value_invalid`. `value` is normalised like an import cell (a list is accepted for a list
     field; empty clears the field). The edit closes the field's pending proposals.
   - `GET /api/bi/cards/<id>/history?dataset=` → `{"history": [{"field", "old", "new",
     "source": {"kind", "ref"}, "at", "by", "reason"}]}`.
+  - Unknown dataset (2026-10-24): `GET /api/bi/cards`, `cards/<id>`, `cards/<id>/history`,
+    `dashboard` and `schema` (with `dataset`) for a name that is neither an own dataset nor a
+    subscribed `<ns>/<name>` answer 404 `{"ok": false, "code": "dataset_unknown", "message"}`,
+    as `bi__query` does. `demo` (named or by default) before anything is loaded still reads as an
+    empty dataset (200), and `GET /api/bi/schema` without `dataset` is the shipped schema.
   - `GET /api/bi/dashboard?dataset=&domain=robotics` → `{"domain", "sections": [{"id",
     "title", "kind": "table" | "matrix" | "funnel", "columns": [...], "rows": [[...]],
     "flags": [{"row": i, "level": "red" | "warn", "text"}], "note"}]}`. A cell naming a card is
@@ -4335,7 +4355,11 @@ Status precedence: `stopped_no_access` > `offline` > `update_available` > `curre
 `source: {"dataset", "version", "published_by", "published_at", "status", "stopped", "latest"}`
 (`null` for a local dataset) and the `scope_note` ends with 「資料來源：<ns>/<name> v<version>
 （發佈者 <account>）」 plus 「；這份副本已停止更新（無權限）…」 when stopped or 「；平台上有
-v<latest>，尚未更新」. A `<ns>/<name>` not subscribed is refused as `dataset_unknown`. The
+v<latest>，尚未更新」. A `<ns>/<name>` not subscribed is refused as `dataset_unknown`.
+After an answered turn, Agent Web and Telegram append that line (from the result's `source`,
+`host_runtime.bi_cards_tools.with_bi_sources`, 2026-10-24) for each subscribed dataset and
+version a succeeded `bi__query` call read, once each, unless one line of the answer already
+names that dataset and version; an own dataset adds nothing. The
 `engineering/bi-knowledge` procedure tells the model to end with that version line and to say
 「已停止更新」 when `source.stopped`.
 

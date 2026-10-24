@@ -3309,3 +3309,30 @@ s-k-20261011T102952` (not published).
   (`--basetemp=C:/aepci-wk/bt-sh3c`).
 - [ ] Owner check after a restart on this code (when `/api/tasks` is idle) and the two-PC live
   test above, once 141 runs a platform from d39d0927 or later.
+
+## BI dataset sharing slice 1: fixes from the live test (2026-10-24)
+
+- [x] The five bugs of the slice 1 live test (owner 2026-10-24: 「1-5幫忙全部修好」; Claude Code).
+  Decisions `docs/DECISIONS.md` 2026-10-24; contracts `docs/CONTRACTS.md` (credential variable
+  names under the enrolment section, BI cards API `unchanged` and the unknown-dataset 404s,
+  "Agent subscriptions" → Chat); user guide §6.8; install guide `-InstallRoot`.
+  1. Two installs of one Windows user overwrote each other's Bridge token: the Agent saves and
+     reads the host.json-mapped variable, and `install.ps1` maps `<legacy>_<hash of the install
+     folder>` for a non-default install root; the default install keeps the legacy names
+     (66210d2b).
+  2. A subscribed dataset's 「資料來源…」 line missing from some answers: Agent Web and Telegram
+     append the tool result's line once per dataset and version when the answer omits it
+     (d2c8ef56).
+  3. Saving a field with its current value: no version, no history, `unchanged: true`, page
+     「沒有變更」 (65de8cbe).
+  4. The BI page opens on the last chosen dataset (per browser) if it exists, else the first own,
+     else the first subscribed, else `demo` with an empty state (f03331fd).
+  5. Reads of an unknown own or subscribed dataset answer 404 `dataset_unknown`; `demo` before
+     loading stays empty (44c62231).
+- Tests: `tests/test_shared_platform_settings.py` (two installs, one fake user environment),
+  `tests/test_windows_preview_bundle.py` (the installer block run in Windows PowerShell with a
+  fake LOCALAPPDATA), `tests/test_bi_subscriptions.py` (source line: appended, not repeated,
+  status suffixes, own dataset, Agent Web and Telegram), `tests/test_bi_cards.py` (no-change
+  edits, store, 404s), `tests/test_bi_cards_ui.py` (「沒有變更」), `tests/test_bi_dataset_pick_ui.py`
+  (new, real browser). Verification: ruff check, ruff format --check, mypy (761 files) clean; full pytest project venv 3963 passed, 7 skipped (`--basetemp=C:/aepci-wk/bt-fx5`); `C:/aepci-wk/venv` 3935 passed, 34 skipped, 1 failed (`test_capability_shelf.py::test_removing_moves_the_file_to_a_dated_folder_and_refuses_shipped_assets`, untouched code; the file passed 9/9 when re-run alone, `--basetemp=C:/aepci-wk/bt-fx5c2`).
+- [ ] Owner check after a restart (when `/api/tasks` is idle) and the remaining two-PC live test.

@@ -4764,3 +4764,39 @@ done when one does).
   content digest on stamping (the owner could no longer tell the published content is theirs);
   widening the generic `assets/submit` route to data (its 192 KiB manifest rules and per-version
   review do not fit).
+
+## 2026-10-24 — Fixes from the BI dataset sharing slice 1 live test
+
+Owner (2026-10-24): fix all five bugs of the live test. Three of them needed a design decision.
+
+- **Platform credentials per install (bug 1).** Two Agent installs of one Windows user saved the
+  Bridge token under the fixed `AEP_SHARED_PLATFORM_TOKEN`, so enrolling one replaced the other's
+  token. Decision: the Agent always saves and reads the variable host.json maps the secret to
+  (`shared_platform_token`; the Personal Agent code `platform_member_login` already worked that
+  way), and `deploy/windows-preview/install.ps1` writes per-install mappings for an install
+  outside the default folder: `<legacy name>_<first 8 hex digits of SHA-256 of the lower-cased
+  full install path, upper case>`, e.g. `AEP_SHARED_PLATFORM_TOKEN_1A2B3C4D`. The default
+  install (`%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0`) gets no mapping from the
+  installer and keeps the legacy names; a mapping host.json already has is never changed, so the
+  owner's install and its saved values are untouched (migration-free). `update.ps1` runs the same
+  installer, so an existing non-default install gets its mapping on its next update; one that was
+  already enrolled with the legacy mapping keeps it (re-enrol after removing that mapping by hand
+  if two installs already collided). Rejected: deriving names in the Agent from the workspace path
+  (every hand-made or test workspace would change names and the "default" would be guessed at run
+  time); suffixing by the device bridge id (two installs of one PC usually share it); a marker
+  claiming the legacy name in the user environment (writes to the owner's environment).
+- **The Host appends a subscribed dataset's source line (bug 2).** In 2 of 9 live answers the
+  model left out 「資料來源：<ns>/<name> v<ver>（發佈者 …）」 although `bi__query` returned it.
+  After an answered turn, Agent Web and Telegram append the tool result's own line
+  (`host_runtime.bi_cards_tools.with_bi_sources`, the same post-answer pattern as an org chart's
+  legend) once per dataset and version, unless one line of the answer already names that dataset
+  and version; own datasets add nothing. This is the Host adding a factual citation copied from a
+  tool result, not a rewrite of the model's claims, so the Harness rules G1–G4 are unchanged.
+  Rejected: a stronger procedure instruction alone (already present, still missed); a Harness
+  verification that refuses or retries the turn (costs a model round for a fact the Host has).
+- **Saving a field with its current value is no change (bug 3, owner decision).** No version
+  bump, no history entry, nothing different in a snapshot; the route answers `unchanged: true`
+  and the page says 「沒有變更」. Values are compared as normalised stored JSON, as an import
+  compares (enum case and aliases, a domain list's canonical spelling, list whitespace).
+  Rejected: recording a no-op edit for audit (it would bump the version and change what is
+  published without a change in content).

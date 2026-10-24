@@ -1,8 +1,24 @@
 # Handoff
 
-Updated: 2026-10-22 (Asia/Taipei), by Claude Code (session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-24 (Asia/Taipei), by Claude Code (BI dataset sharing slice 1 live-test fixes; earlier: session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## BI dataset sharing slice 1, Agent Web UI and publish route (2026-10-22, Claude Code, agent 3 of 3) — latest
+## BI dataset sharing slice 1, live-test fixes 1–5 (2026-10-24, Claude Code) — latest
+
+- Commits 66210d2b (credentials per install), d2c8ef56 (source line), 65de8cbe (no-change edit),
+  44c62231 (unknown dataset 404), f03331fd (page opens on an existing dataset), plus a docs commit;
+  not pushed, Agent Web not restarted, live data, user environment, registry, 141 and the gateway
+  untouched. Row in `docs/TASKS.md` "BI dataset sharing slice 1: fixes from the live test";
+  decisions `docs/DECISIONS.md` 2026-10-24.
+- Verification: ruff check, ruff format --check, mypy (761 files) clean; full pytest project venv 3963 passed, 7 skipped (`--basetemp=C:/aepci-wk/bt-fx5`); `C:/aepci-wk/venv` 3935 passed, 34 skipped, 1 failed (`test_capability_shelf.py::test_removing_moves_the_file_to_a_dated_folder_and_refuses_shipped_assets`, untouched code; the file passed 9/9 when re-run alone, `--basetemp=C:/aepci-wk/bt-fx5c2`).
+- Owner check after a restart (when `/api/tasks` is idle): BI 卡片 opens on the dataset chosen
+  last; save a field with the same value → 「沒有變更」 and no new history line; a chat answer on
+  a subscribed dataset always ends with 「資料來源：…」 (also Telegram); a second install with
+  `-InstallRoot` (or `update.ps1` on one) prints 「This install keeps its shared_platform_token in
+  AEP_SHARED_PLATFORM_TOKEN_<hash>」 and its host.json gets that mapping; the default install's
+  host.json and saved values are unchanged. A non-default install that already enrolled under the
+  legacy name keeps it until that mapping is removed and it is enrolled again.
+
+## BI dataset sharing slice 1, Agent Web UI and publish route (2026-10-22, Claude Code, agent 3 of 3)
 
 - Commits 97042163 (page), 6c706ac3 (line wrap), e5531ba5 (publish route) on main, plus a docs
   commit; not pushed, Agent Web not restarted, 141 and live data untouched. Row in
