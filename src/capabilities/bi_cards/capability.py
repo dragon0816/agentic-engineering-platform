@@ -78,7 +78,7 @@ class QueryResult(Contract):
     source: dict[str, Any] | None = None
 
 
-def _source_note(source: dict[str, Any] | None) -> str:
+def source_note(source: dict[str, Any] | None) -> str:
     if source is None:
         return ""
     by = f"（發佈者 {source['published_by']}）" if source.get("published_by") else ""
@@ -107,7 +107,7 @@ class QueryHandler:
                 raise BiStoreError("dataset_unknown")
             if not for_store(store).is_bi:
                 raise BiStoreError("schema_not_bi")
-            cited = _source_note(source)
+            cited = source_note(source)
             if request.analysis:
                 sections = dashboard.analysis(
                     store, request.analysis, (request.domain or "robotics").lower()

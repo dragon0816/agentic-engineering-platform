@@ -63,6 +63,7 @@ from host_runtime.attachments import (
     for_model,
     safe_name,
 )
+from host_runtime.bi_cards_tools import with_bi_sources
 from host_runtime.business_cards_tools import chart_files, with_legend
 from host_runtime.chat_authoring import ChatAuthoring, ChatAuthoringError, approval_text
 from host_runtime.identity_presets import IdentityPresets
@@ -1454,7 +1455,12 @@ class TelegramIngress:
             if drafted:
                 return self._carded(base, reply, buttons, drafted)
             return TelegramDelivery(**base, disposition="answered", reply=reply, buttons=buttons)
-        answer = conversation.text if conversation.text.strip() else _no_answer_reply(record)
+        # A subscribed BI dataset's source line, when the model left it out.
+        answer = (
+            with_bi_sources(conversation.text, conversation)
+            if conversation.text.strip()
+            else _no_answer_reply(record)
+        )
         await asyncio.to_thread(self._remember_why, key, request.actor, conversation)
         remembered = answer if record is None else f"{answer}\n\n[工具紀錄]\n{record}"
         turn.append(ModelMessage(role="assistant", text=remembered))

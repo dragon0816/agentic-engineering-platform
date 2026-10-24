@@ -115,7 +115,7 @@ from host_runtime.attachments import (
 from host_runtime.attachments import summary as attachment_summary
 from host_runtime.authoring import AuthoringError, AuthoringSession, AuthoringStudio
 from host_runtime.avatars import UserPreferences, UserPreferencesStore, catalog
-from host_runtime.bi_cards_tools import bi_question, bi_skill_on
+from host_runtime.bi_cards_tools import bi_question, bi_skill_on, with_bi_sources
 from host_runtime.business_cards_tools import chart_files, with_legend
 from host_runtime.change_proposals import ChangeProposals
 from host_runtime.chat_authoring import ChatAuthoringError, approval_text
@@ -3118,7 +3118,10 @@ class AgentWeb:
                         "tool_summary": tool_summary(result),
                         "ok": result is not None and result.status == "answered",
                         "answer": (
-                            with_legend(self._gateway_conversation_text(result), charts)
+                            with_bi_sources(
+                                with_legend(self._gateway_conversation_text(result), charts),
+                                result,
+                            )
                             if result is not None
                             else f"The request was refused ({conversational.refusal})."
                         ),

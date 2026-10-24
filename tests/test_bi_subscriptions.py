@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from test_agent_web import served  # noqa: F401 - the server fixture
 
 from capabilities.bi_cards import catalog, service, subscriptions
 from capabilities.bi_cards.capability import QueryHandler, QueryRequest
@@ -677,3 +678,157 @@ def test_agent_web_adapter_selects_as_the_member_and_explains_refusals(tmp_path:
     _subscribe(reader, owner)
     observe_catalog(reader, None, SimpleNamespace(status="unreachable", reply=None))
     assert subscriptions.listing(reader)[0]["status"] == "offline"
+
+
+# -- the source line the Host adds when the model left it out (2026-10-24) ---
+
+
+def _turn(text: str, *results: Any, status: str = "answered") -> Any:
+    """A finished conversation whose `bi__query` calls returned `results`."""
+    from agent.gateway import (
+        ConversationToolExecution,
+        GatewayConversationResult,
+        HostToolOutcome,
+    )
+    from common.execution import Failure
+
+    return GatewayConversationResult(
+        trace=TraceIdentifiers(trace_id="t1", request_id="r1", span_id="s1"),
+        status=status,
+        text=text,
+        model_turns=2,
+        tools=tuple(
+            ConversationToolExecution(
+                call_id=f"call-{index}",
+                name="bi__query",
+                host=HostToolOutcome(status="succeeded", data=result.model_dump(mode="json")),
+            )
+            for index, result in enumerate(results)
+        ),
+        failure=None if status == "answered" else Failure(code="tool_loop_limit", message="x"),
+    )
+
+
+LINE = "資料來源：engineering/robotics-bi v1.0.0（發佈者 leo.chi）"
+
+
+def test_a_missing_source_line_is_appended_once(tmp_path: Path) -> None:
+    """Live test: 2 of 9 answers on a subscribed dataset had no source line
+    though `bi__query` carried it. The Host appends the tool result's line,
+    once per dataset however many calls read it."""
+    from host_runtime.bi_cards_tools import with_bi_sources
+
+    owner = _owner(tmp_path)
+    reader = tmp_path / "reader"
+    _subscribe(reader, owner)
+    first = _ask(reader, dataset=DATASET, text="BMS")
+    second = _ask(reader, dataset=DATASET, analysis="gaps", domain="robotics")
+    answer = "BMS 有三張客戶產品卡。\n"
+    shown = with_bi_sources(answer, _turn(answer, first, second))
+    assert shown == "BMS 有三張客戶產品卡。\n\n" + LINE
+    assert shown.count("資料來源") == 1
+
+
+def test_a_source_line_the_model_wrote_is_not_repeated(tmp_path: Path) -> None:
+    from host_runtime.bi_cards_tools import with_bi_sources
+
+    owner = _owner(tmp_path)
+    reader = tmp_path / "reader"
+    _subscribe(reader, owner)
+    result = _ask(reader, dataset=DATASET, text="BMS")
+    for written in (
+        f"答案。\n\n{LINE}",
+        "答案。\n（資料來源 engineering/robotics-bi，版本 1.0.0）",
+    ):
+        assert with_bi_sources(written, _turn(written, result)) == written
+    # Another version named does not count as this one.
+    other = "答案。\n資料來源：engineering/robotics-bi v0.9.0"
+    assert with_bi_sources(other, _turn(other, result)).endswith(LINE)
+    # A turn that did not finish, or an empty answer, is left as it is.
+    assert with_bi_sources("停了", _turn("停了", result, status="failed")) == "停了"
+
+
+def test_the_appended_line_carries_the_stopped_or_update_status(tmp_path: Path) -> None:
+    from host_runtime.bi_cards_tools import with_bi_sources
+
+    owner = _owner(tmp_path)
+    reader = tmp_path / "reader"
+    _subscribe(reader, owner)
+    subscriptions.observe(
+        reader, [Offer(namespace="engineering", name="robotics-bi", version="1.1.0")]
+    )
+    newer = _ask(reader, dataset=DATASET, text="BMS")
+    assert with_bi_sources("答案", _turn("答案", newer)) == (
+        f"答案\n\n{LINE}；平台上有 v1.1.0，尚未更新"
+    )
+    subscriptions.observe(reader, [])
+    stopped = _ask(reader, dataset=DATASET, text="BMS")
+    assert with_bi_sources("答案", _turn("答案", stopped)) == (
+        f"答案\n\n{LINE}；這份副本已停止更新（無權限），內容停在這個版本"
+    )
+
+
+def test_an_own_dataset_adds_no_source_line(tmp_path: Path) -> None:
+    from host_runtime.bi_cards_tools import with_bi_sources
+
+    owner = _owner(tmp_path)
+    local = _ask(owner.workspace, dataset="robotics", text="BMS")
+    assert with_bi_sources("答案", _turn("答案", local)) == "答案"
+
+
+def test_agent_web_adds_the_source_line_to_the_stored_answer(
+    tmp_path: Path,
+    served: Any,  # noqa: F811
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from test_agent_web import base, fetch
+
+    from host_runtime.agent import LocalConversationOutcome
+
+    owner = _owner(tmp_path)
+    reader = tmp_path / "reader"
+    _subscribe(reader, owner)
+    queried = _ask(reader, dataset=DATASET, text="BMS")
+    turn = _turn("BMS 有三張客戶產品卡。", queried)
+
+    async def converse(request: Any, history: Any, **_: Any) -> LocalConversationOutcome:
+        return LocalConversationOutcome(
+            trace=turn.trace, ingress="local", actor=request.actor, conversation=turn
+        )
+
+    monkeypatch.setattr(served.web.runtime.agent, "converse", converse)
+    url, token = base(served), served.token
+    session = fetch(url + "/api/conversations", token=token, body={}).json()
+    reply = fetch(
+        url + "/api/conversations/turn",
+        token=token,
+        body={"session_id": session["conversation"]["session_id"], "message": "BMS 有哪些？"},
+    ).json()
+    assert reply["answer"]["answer"] == "BMS 有三張客戶產品卡。\n\n" + LINE
+    assert reply["conversation"]["messages"][-1]["text"].endswith(LINE)
+
+
+def test_telegram_adds_the_source_line_to_the_reply(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from test_telegram_ingress import OWNER, FakeTransport, ingress, poll, update
+
+    from host_runtime.agent import LocalConversationOutcome
+
+    owner = _owner(tmp_path)
+    reader = tmp_path / "reader"
+    _subscribe(reader, owner)
+    queried = _ask(reader, dataset=DATASET, text="BMS")
+    turn = _turn("BMS 有三張客戶產品卡。", queried)
+
+    async def converse(request: Any, history: Any, **_: Any) -> LocalConversationOutcome:
+        return LocalConversationOutcome(
+            trace=turn.trace, ingress="telegram", actor=request.actor, conversation=turn
+        )
+
+    transport = FakeTransport([[update(1, OWNER, "BMS 有哪些？")]])
+    item, agent, _ = ingress(tmp_path / "telegram", transport)
+    monkeypatch.setattr(agent, "converse", converse)
+    delivery = poll(item).deliveries[0]
+    assert delivery.disposition == "answered"
+    assert transport.sent() == ["BMS 有三張客戶產品卡。\n\n" + LINE]

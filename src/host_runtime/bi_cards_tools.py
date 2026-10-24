@@ -4,6 +4,11 @@ Offered only while some version of the `engineering/bi-knowledge` Skill is
 switched on and `bi-cards/query` is installed; the tool carries the Skill's
 procedure. Every call is a `CapabilityInvocation` through the Bridge with
 `origin: model`, under the actor's grants (read only, no approval).
+
+After the turn, `with_bi_sources` adds the source line of each subscribed
+dataset the turn queried when the model's answer left it out (live test
+2026-10-24): a factual citation copied from the tool result, like a chart's
+legend, never a change to what the model said.
 """
 
 from __future__ import annotations
@@ -12,14 +17,14 @@ from collections.abc import Sequence
 from typing import Any
 
 from agent.gateway import HostTool, HostToolOutcome
-from capabilities.bi_cards.capability import QUERY_SPEC
+from capabilities.bi_cards.capability import QUERY_SPEC, source_note
 from capabilities.bi_cards.dashboard import ANALYSES
 from capabilities.bi_cards.manifest import BI_SKILL, bi_question
 from capabilities.runtime import CapabilityInvocation
 from common.execution import Failure, RequestContext
 from models.contracts import ModelTool
 
-__all__ = ["bi_cards_tools", "bi_question", "bi_skill_on"]
+__all__ = ["bi_cards_tools", "bi_question", "bi_skill_on", "bi_sources", "with_bi_sources"]
 
 TOOL_NAME = "bi__query"
 FAILURE_TEXT = {
@@ -125,3 +130,42 @@ def bi_cards_tools(gateway: Any) -> Sequence[HostTool]:
             call,
         )
     ]
+
+
+def bi_sources(result: Any) -> list[dict[str, Any]]:
+    """The `source` of each subscribed dataset a succeeded `bi__query` call
+    of this turn read, once per dataset and version, in the order first
+    used. A local dataset's result has no source and adds nothing."""
+    found: dict[tuple[str, str], dict[str, Any]] = {}
+    for item in getattr(result, "tools", None) or ():
+        host = getattr(item, "host", None)
+        if getattr(item, "name", "") != TOOL_NAME or host is None or host.status != "succeeded":
+            continue
+        source = host.data.get("source") if isinstance(host.data, dict) else None
+        if not isinstance(source, dict):
+            continue
+        dataset, version = source.get("dataset"), source.get("version")
+        if isinstance(dataset, str) and dataset and isinstance(version, str) and version:
+            found.setdefault((dataset, version), source)
+    return list(found.values())
+
+
+def _cited(answer: str, source: dict[str, Any]) -> bool:
+    """Whether one line of the answer names this dataset and its version."""
+    dataset, version = str(source["dataset"]), str(source["version"])
+    return any(dataset in line and version in line for line in answer.splitlines())
+
+
+def with_bi_sources(answer: str, result: Any) -> str:
+    """The answer with the source line of every subscribed dataset the turn
+    queried that the answer does not already name (dataset and version on
+    one line); only for an answered turn. The line is the tool result's own
+    (`資料來源：<ns>/<name> v<version>（發佈者 <account>）` plus the stopped
+    or update-available status), so nothing the model claimed is changed."""
+    if getattr(result, "status", None) != "answered" or not answer.strip():
+        return answer
+    missing = [source_note(item) for item in bi_sources(result) if not _cited(answer, item)]
+    if not missing:
+        return answer
+    lines = "\n".join(missing)
+    return f"{answer.rstrip()}\n\n{lines}"
