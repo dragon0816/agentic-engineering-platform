@@ -781,3 +781,38 @@ def test_a_bi_question_is_not_sent_to_the_knowledge_vault() -> None:
     assert bi_question("Which competitor test solution covers Wi-Fi 7?")
     assert not bi_question("RS 某型號的規格是什麼？")
     assert not bi_question("幫我整理今天的郵件")
+
+
+def test_a_dataset_that_does_not_exist_is_404_on_every_read(tmp_path: Path) -> None:
+    """Live test 2026-10-24: an unknown name read as an empty dataset (200, 0
+    cards). Every read of one dataset now answers 404 `dataset_unknown`, as
+    `bi__query` does, for an unknown own name and an unknown subscribed one;
+    `demo` before anything is loaded stays an empty dataset, which is how the
+    page first opens."""
+    # Nothing at all yet: demo (named or by default) reads as empty.
+    for query in ({}, {"dataset": "demo"}):
+        status, answer = _call(tmp_path, "GET", "/api/bi/cards", **query)
+        assert (status, answer) == (200, {"cards": []}), query
+        assert _call(tmp_path, "GET", "/api/bi/dashboard", **query)[0] == 200
+        assert _call(tmp_path, "GET", "/api/bi/schema", **query)[0] == 200
+    store = _loaded(tmp_path)
+    card = store.card_rows()[0]["id"]
+    reads = [
+        "/api/bi/cards",
+        f"/api/bi/cards/{card}",
+        f"/api/bi/cards/{card}/history",
+        "/api/bi/dashboard",
+        "/api/bi/schema",
+    ]
+    for name in ("nosuch", "engineering/not-subscribed"):
+        for path in reads:
+            status, answer = _call(tmp_path, "GET", path, dataset=name)
+            assert status == 404 and answer["ok"] is False, (name, path, answer)
+            assert answer["code"] == "dataset_unknown" and name in answer["message"]
+    # The shipped schema without a dataset, and the dataset list, still answer.
+    assert _call(tmp_path, "GET", "/api/bi/schema")[0] == 200
+    assert _call(tmp_path, "GET", "/api/bi/datasets")[0] == 200
+    # An existing dataset reads as before.
+    assert _call(tmp_path, "GET", f"/api/bi/cards/{card}", dataset="demo")[0] == 200
+    # A name that is not a dataset name at all stays 400.
+    assert _call(tmp_path, "GET", "/api/bi/cards", dataset="no such")[0] == 400

@@ -110,6 +110,13 @@ def _route(
         return _error(409, "dataset_read_only", READ_ONLY_MESSAGE)
     if method == "GET":
         store = BiStore(workspace, _dataset(query.get("dataset")))
+        if (path in DATASET_READS or path.startswith("/api/bi/cards/")) and _unknown_dataset(
+            store, path, query
+        ):
+            # A name that is neither an own dataset nor a subscribed one
+            # (live test 2026-10-24: it read as an empty dataset); `demo`
+            # before anything is loaded stays an empty dataset.
+            return _error(404, "dataset_unknown", f"沒有這個資料集「{store.dataset}」")
         if path == "/api/bi/schema":
             # No dataset: the shipped bi.schema/v1.1, as before per-dataset schemas.
             given_dataset = "dataset" in query
@@ -213,6 +220,18 @@ def _route(
     if len(parts) == 6 and parts[:4] == ["", "api", "bi", "cards"] and parts[5] == "field":
         return _set_field(workspace, who, parts[4], given)
     return _error(404, "route_unknown", "沒有這個 BI 路徑")
+
+
+#: The GET routes that read one dataset (besides `/api/bi/cards/<id>[/history]`).
+DATASET_READS = ("/api/bi/cards", "/api/bi/dashboard", "/api/bi/schema")
+
+
+def _unknown_dataset(store: BiStore, path: str, query: Mapping[str, str]) -> bool:
+    """Whether a read names a dataset this PC does not have. `/api/bi/schema`
+    without `dataset` reads the shipped schema; `demo` may not exist yet."""
+    if path == "/api/bi/schema" and "dataset" not in query:
+        return False
+    return not store.exists and store.dataset != DEFAULT_DATASET
 
 
 def _create_dataset(workspace: Path, given: dict[str, Any]) -> Answer:
