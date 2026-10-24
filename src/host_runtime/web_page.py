@@ -1110,6 +1110,10 @@ tr:last-child td { border-bottom: none; }
 .bi-err:empty { display: none; }
 .bi-schema-note { flex: 1 1 100%; margin: 0; overflow-wrap: anywhere; }
 .bi-schema-note:empty { display: none; }
+.bi-empty-state { flex: 1 1 100%; padding: 8px 12px; border: 1px dashed var(--line);
+  border-radius: 8px; overflow-wrap: anywhere; }
+.bi-empty-state[hidden] { display: none; }
+.bi-empty-state p { margin: 0 0 6px; }
 .bi-errors { margin: 6px 0 0; padding-left: 18px; color: var(--bad); font-size: 13px; }
 .bi-errors li { overflow-wrap: anywhere; margin: 2px 0; }
 .bi-errors code { color: var(--ink); }
@@ -2147,6 +2151,14 @@ tr:last-child td { border-bottom: none; }
             aria-controls="bi-publish-panel">發佈到 Shared Platform</button>
         </div>
         <p class="bi-meta bi-schema-note" id="bi-schema-note"></p>
+        <div class="bi-empty-state" id="bi-empty-state" role="note" hidden>
+          <p class="bi-meta">這台電腦還沒有 BI 資料集。載入示範資料來看看，
+            或新增一個資料集再匯入 CSV。</p>
+          <div class="bi-actions">
+            <button class="go" id="bi-empty-demo" type="button">載入示範資料</button>
+            <button class="bi-btn" id="bi-empty-new" type="button">新增資料集</button>
+          </div>
+        </div>
         <p class="bi-pub-state" id="bi-pub-state" role="status" aria-live="polite"></p>
       </div>
       <div class="bi-ro" id="bi-ro" role="note" hidden>
@@ -10176,7 +10188,7 @@ const BI_CHANGE = {add: ["新增", "good"], change: ["變更", "accent"], same: 
 // for the selected dataset. Dashboard and the chat hint are BI-only.
 const bi = {schema: null, schemas: [], datasets: [], view: "dashboard", loaded: {}, cards: [],
   cardId: null, detail: null, preview: null, csv: null, importId: null, searchTimer: 0,
-  want: null, subs: [], subsState: null, publish: null};
+  want: null, picked: false, subs: [], subsState: null, publish: null};
 const BI_NAME = /^[A-Za-z0-9_-]{1,40}$/;
 
 const bh = (tag, cls, ...children) => memEl(tag, cls, ...children);
@@ -10323,12 +10335,38 @@ function biRenderSchema() {
   if (!isBi) note.append(text(" · 沒有 Dashboard 與對話查詢；卡片、匯入與編輯照常可用"));
 }
 
+// Which dataset the page opens on (live test 2026-10-24: always `demo`, even
+// when it did not exist): the one asked for (just created or opened), the one
+// already shown, the last one chosen in this browser, then the first own
+// dataset, the first subscribed one, else `demo` with an empty state.
+const BI_LAST = "bi-dataset-last";
+
+function biPick(select) {
+  const names = bi.datasets.map((item) => item.name);
+  const has = (name) => Boolean(name) && names.includes(name);
+  if (has(bi.want)) return bi.want;
+  if (bi.picked && !bi.want && has(select.value)) return select.value;
+  let remembered = null;
+  try { remembered = localStorage.getItem(BI_LAST); } catch (e) { /* no storage */ }
+  if (has(remembered)) return remembered;
+  const own = bi.datasets.find((item) => !item.read_only);
+  if (own) return own.name;
+  const subscribed = bi.datasets.find((item) => item.read_only);
+  return subscribed ? subscribed.name : "demo";
+}
+
+function biRemember(name) {
+  try { localStorage.setItem(BI_LAST, name); } catch (e) { /* no storage */ }
+}
+
 function biRenderBar() {
-  const select = el("bi-dataset"), keep = bi.want || select.value || "demo";
-  bi.want = null;
+  const select = el("bi-dataset"), keep = biPick(select);
+  bi.want = null; bi.picked = true;
   select.replaceChildren();
   const names = bi.datasets.map((item) => item.name);
-  if (!names.includes(keep)) names.unshift(keep);
+  const empty = !names.includes(keep);
+  if (empty) names.unshift(keep); else biRemember(keep);
+  el("bi-empty-state").hidden = !(empty && !bi.datasets.length);
   // Two groups: the datasets this PC keeps, then read-only subscribed copies.
   const mine = document.createElement("optgroup"); mine.label = "我的資料集";
   const subscribed = document.createElement("optgroup"); subscribed.label = "已訂閱";
@@ -10395,7 +10433,11 @@ function biLeaveDataset() {
   el("bi-preview").hidden = true; el("bi-result").hidden = true;
   biStatus("bi-status-import", "");
 }
-el("bi-dataset").addEventListener("change", () => { biLeaveDataset(); biLoad(); });
+el("bi-dataset").addEventListener("change", () => {
+  biRemember(el("bi-dataset").value); biLeaveDataset(); biLoad();
+});
+el("bi-empty-demo").addEventListener("click", () => el("bi-demo").click());
+el("bi-empty-new").addEventListener("click", () => biOpenNew());
 el("bi-domain").addEventListener("change", () => {
   bi.loaded = {}; bi.cardId = null; biShowView(bi.view);
 });
