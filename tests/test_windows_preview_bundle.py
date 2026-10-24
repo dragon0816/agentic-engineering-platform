@@ -5,6 +5,7 @@ import json
 import shutil
 import zipfile
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -560,3 +561,86 @@ def test_the_installer_reminds_to_restart_a_running_agent_web() -> None:
         "ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }"
     ) in manual
     assert "不會**重新啟動它" in manual
+
+
+def _platform_credentials(
+    install_root: str, local_app_data: Path, config: dict[str, object]
+) -> dict[str, Any]:
+    """Run the installer's credential-naming block on its own, as Windows
+    PowerShell runs it, with a fake LOCALAPPDATA; nothing touches the user
+    environment or the registry (the block only edits `$Config`)."""
+    import subprocess
+
+    text = _template("install.ps1")
+    block = text[
+        text.index("# PLATFORM-CREDENTIALS-BEGIN") : text.index("# PLATFORM-CREDENTIALS-END")
+    ]
+    script = (
+        "$ErrorActionPreference = 'Stop'\n"
+        f"$env:LOCALAPPDATA = '{local_app_data}'\n"
+        f"$InstallRoot = '{install_root}'\n"
+        "$Config = [ordered]@{}\n"
+        f"$Given = '{json.dumps(config)}' | ConvertFrom-Json\n"
+        "foreach ($P in $Given.PSObject.Properties) { $Config[$P.Name] = $P.Value }\n"
+        f"{block}\n"
+        "Write-Output ('JSON:' + ($Config | ConvertTo-Json -Depth 10 -Compress))\n"
+    )
+    done = subprocess.run(
+        ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", "-"],
+        input=script,
+        capture_output=True,
+        text=True,
+        timeout=120,
+        check=True,
+    )
+    [line] = [item for item in done.stdout.splitlines() if item.startswith("JSON:")]
+    return dict(json.loads(line[len("JSON:") :]))
+
+
+@pytest.mark.skipif(shutil.which("powershell.exe") is None, reason="needs Windows PowerShell")
+def test_an_install_outside_the_default_folder_maps_its_own_platform_credentials(
+    tmp_path: Path,
+) -> None:
+    """Live test 2026-10-24: two installs of one Windows user overwrote each
+    other's Bridge token. The default install keeps the legacy names (no
+    mapping is added, so its host.json and saved values stay as they are);
+    another folder gets names suffixed by a stable hash of the folder; two
+    folders differ; a mapping host.json already has is kept."""
+    local = tmp_path / "local"
+    default = local / "AgenticEngineeringPlatform" / "preview-0.1.0"
+    assert "credentials" not in _platform_credentials(str(default), local, {})
+    assert "credentials" not in _platform_credentials(str(default) + "\\", local, {})
+
+    first = _platform_credentials(str(tmp_path / "A"), local, {})["credentials"]
+    names = {item["secret"]: item["environment_variable"] for item in first}
+    suffix = hashlib.sha256(str(tmp_path / "A").lower().encode("utf-8")).hexdigest()[:8]
+    assert names == {
+        "shared_platform_token": f"AEP_SHARED_PLATFORM_TOKEN_{suffix.upper()}",
+        "platform_member_login": f"AEP_PLATFORM_MEMBER_LOGIN_{suffix.upper()}",
+    }
+    again = _platform_credentials(str(tmp_path / "A"), local, {})["credentials"]
+    assert again == first  # stable
+    other = _platform_credentials(str(tmp_path / "B"), local, {})["credentials"]
+    assert {item["environment_variable"] for item in other}.isdisjoint(names.values())
+
+    kept = _platform_credentials(
+        str(tmp_path / "A"),
+        local,
+        {
+            "credentials": [
+                {"secret": "shared_platform_token", "environment_variable": "MY_TOKEN"},
+                {"secret": "llm_gateway", "environment_variable": "CHATRS_TOKEN"},
+            ]
+        },
+    )["credentials"]
+    mapped = {item["secret"]: item["environment_variable"] for item in kept}
+    assert mapped == {
+        "shared_platform_token": "MY_TOKEN",
+        "llm_gateway": "CHATRS_TOKEN",
+        "platform_member_login": f"AEP_PLATFORM_MEMBER_LOGIN_{suffix.upper()}",
+    }
+    # Written before host.json is saved.
+    text = _template("install.ps1")
+    assert text.index("# PLATFORM-CREDENTIALS-END") < text.index(
+        "$Config | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $ConfigPath"
+    )

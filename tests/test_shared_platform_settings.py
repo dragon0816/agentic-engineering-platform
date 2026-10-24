@@ -189,6 +189,84 @@ def test_a_new_process_finds_the_saved_token_without_the_environment(
         assert AgentWeb(restarted).platform()["connection"] == "answered"
 
 
+def test_two_installs_of_one_windows_user_keep_their_own_platform_credentials(
+    app: SharedPlatformApplication,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Live test 2026-10-24: install A (the default folder) and install B
+    (`-InstallRoot B`) for one Windows user both saved their Bridge token
+    under AEP_SHARED_PLATFORM_TOKEN, so B's enrolment replaced A's. The
+    installer maps per-install names for B; the Agent saves and reads what
+    host.json maps. A, with no mapping, keeps the legacy names unchanged.
+    One fake user-environment store stands for the one Windows user."""
+    from test_host_wiring import device, grant_record, membership_record, workspace
+
+    suffixed = {
+        "shared_platform_token": "AEP_SHARED_PLATFORM_TOKEN_1A2B3C4D",
+        "platform_member_login": "AEP_PLATFORM_MEMBER_LOGIN_1A2B3C4D",
+    }
+    for name in suffixed.values():
+        monkeypatch.delenv(name, raising=False)
+    config_a, layout_a = ready(tmp_path / "a")
+    path_a = host_json(tmp_path / "a", config_a)
+    config_b, layout_b = workspace(
+        tmp_path / "b",
+        membership=membership_record(device={"bridge_id": "bridge-company-b"}),
+        grants=grant_record(),
+        config_changes={
+            "device": device(bridge_id="bridge-company-b"),
+            "credentials": [
+                {"secret": secret, "environment_variable": variable}
+                for secret, variable in suffixed.items()
+            ],
+        },
+    )
+    path_b = host_json(tmp_path / "b", config_b)
+    user_environment: dict[str, str] = {}  # one Windows user
+    engineer = _signed_in(app, "engineer", "member")
+
+    with build_runtime(config_a, layout=layout_a) as runtime_a:
+        web_a = _web(runtime_a, path_a, user_environment)
+        assert web_a.update_shared_platform(_card(app, _agent_login(app, engineer)))["ok"]
+        assert web_a.shared_platform_settings()["token_variable"] == TOKEN_VARIABLE
+    token_a, login_a = user_environment[TOKEN_VARIABLE], user_environment[LOGIN_VARIABLE]
+
+    with build_runtime(config_b, layout=layout_b) as runtime_b:
+        web_b = _web(runtime_b, path_b, user_environment)
+        reply = web_b.update_shared_platform(_card(app, _agent_login(app, engineer)))
+        assert reply["ok"] and reply["probe"] == "answered", reply
+        assert reply["token_variable"] == suffixed["shared_platform_token"]
+        assert reply["login_variable"] == suffixed["platform_member_login"]
+
+    # B wrote only its own names; A's saved values are untouched.
+    assert user_environment[TOKEN_VARIABLE] == token_a
+    assert user_environment[LOGIN_VARIABLE] == login_a
+    token_b = user_environment[suffixed["shared_platform_token"]]
+    assert token_b != token_a
+    assert user_environment[suffixed["platform_member_login"]] != login_a
+    written_a = CompanyHostConfiguration.model_validate_json(path_a.read_text("utf-8"))
+    written_b = CompanyHostConfiguration.model_validate_json(path_b.read_text("utf-8"))
+    assert written_a.credential_environment() == {
+        "platform_member_login": LOGIN_VARIABLE,
+        "shared_platform_token": TOKEN_VARIABLE,
+    }
+    assert written_b.credential_environment() == suffixed
+
+    # Restarted from a shell that has neither value: each reads its own.
+    for name in (TOKEN_VARIABLE, LOGIN_VARIABLE, *suffixed.values()):
+        monkeypatch.delenv(name, raising=False)
+    from host_runtime import platform_publish
+
+    monkeypatch.setattr(platform_publish, "_saved_user_variable", user_environment.get)
+    with build_runtime(written_a, layout=layout_a) as restarted_a:
+        assert AgentWeb(restarted_a).platform()["connection"] == "answered"
+        assert restarted_a.platform is not None
+        assert restarted_a.platform.binding.token_id == written_a.platform.token_id  # type: ignore[union-attr]
+    with build_runtime(written_b, layout=layout_b) as restarted_b:
+        assert AgentWeb(restarted_b).platform()["connection"] == "answered"
+
+
 def test_the_card_refuses_what_it_cannot_use_and_never_echoes_a_secret(
     app: SharedPlatformApplication,
     tmp_path: Path,

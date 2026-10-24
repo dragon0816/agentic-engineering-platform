@@ -11,6 +11,10 @@ Credentials:
   Windows user only (and in this process's environment), never in a file;
 - the Bridge token gets its own variable, `AEP_SHARED_PLATFORM_TOKEN`, so the
   token of an older platform this PC used is left where it is;
+- both are saved under the variable host.json maps their secret to, when it
+  maps one (2026-10-24): the installer maps per-installation names for an
+  install outside the default folder, so two Agents of one Windows user keep
+  their own credentials; the default install keeps the names above;
 - neither value is logged, put in the task list or returned to the page.
 """
 
@@ -220,8 +224,16 @@ def with_enrollment(
         "certificate_sha256": publishing.certificate_sha256 if publishing else None,
         "ca_file": publishing.ca_file if publishing else None,
     }
-    _mapped(candidate, PLATFORM_SECRET, TOKEN_VARIABLE)
+    _mapped(candidate, PLATFORM_SECRET, token_variable(current))
     return CompanyHostConfiguration.model_validate(candidate)
+
+
+def token_variable(config: CompanyHostConfiguration) -> str:
+    """The variable this install keeps its Bridge token in: the one host.json
+    maps `shared_platform_token` to (an install outside the default folder
+    gets its own name from the installer, 2026-10-24), else the default
+    install's `AEP_SHARED_PLATFORM_TOKEN`."""
+    return config.credential_environment().get(PLATFORM_SECRET, TOKEN_VARIABLE)
 
 
 def save_config(path: Path, updated: CompanyHostConfiguration, *, now: datetime) -> Path:

@@ -287,6 +287,33 @@ if (-not $NoGateway -and -not $Config.Contains("models")) {
     $Config.credentials = $Credentials
     Write-Host "Set the Natural-language model to the built-in LLM gateway at 127.0.0.1:4000."
 }
+# PLATFORM-CREDENTIALS-BEGIN
+# Shared Platform credentials per installation (2026-10-24): the Bridge token
+# and the Personal Agent code are saved for this Windows user under the
+# variable host.json maps them to. The default install keeps the plain names
+# (AEP_SHARED_PLATFORM_TOKEN, AEP_PLATFORM_MEMBER_LOGIN); an install in another
+# folder gets names suffixed by a short hash of its folder, so two Agents of
+# one Windows user never overwrite each other's credentials. A mapping that
+# host.json already has is never changed.
+$DefaultInstallRoot = [IO.Path]::GetFullPath("$env:LOCALAPPDATA\AgenticEngineeringPlatform\preview-0.1.0").TrimEnd('\')
+$FullInstallRoot = [IO.Path]::GetFullPath($InstallRoot).TrimEnd('\')
+if (-not [string]::Equals($FullInstallRoot, $DefaultInstallRoot, [StringComparison]::OrdinalIgnoreCase)) {
+    $RootHasher = [Security.Cryptography.SHA256]::Create()
+    $RootDigest = $RootHasher.ComputeHash([Text.Encoding]::UTF8.GetBytes($FullInstallRoot.ToLowerInvariant()))
+    $RootSuffix = (($RootDigest[0..3] | ForEach-Object { $_.ToString("X2") }) -join "")
+    $Credentials = @()
+    if ($Config.Contains("credentials") -and $null -ne $Config.credentials) {
+        $Credentials = @($Config.credentials)
+    }
+    foreach ($Pair in @(@("shared_platform_token", "AEP_SHARED_PLATFORM_TOKEN"), @("platform_member_login", "AEP_PLATFORM_MEMBER_LOGIN"))) {
+        if (-not ($Credentials | Where-Object { $_.secret -eq $Pair[0] })) {
+            $Credentials += [ordered]@{ secret = $Pair[0]; environment_variable = "$($Pair[1])_$RootSuffix" }
+            Write-Host "This install keeps its $($Pair[0]) in $($Pair[1])_$RootSuffix (not the default install's name)."
+        }
+    }
+    $Config.credentials = $Credentials
+}
+# PLATFORM-CREDENTIALS-END
 $Config | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $ConfigPath -Encoding UTF8
 $Membership = [ordered]@{
     device = $Config.device

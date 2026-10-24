@@ -250,7 +250,6 @@ from host_runtime.review_routes import (
 from host_runtime.shared_platform import (
     KEEP,
     LOGIN_SHAPE,
-    TOKEN_VARIABLE,
     EnrollmentRecord,
     SharedPlatformError,
     bridge_url,
@@ -263,6 +262,7 @@ from host_runtime.shared_platform import (
     read_record,
     save_config,
     save_secret,
+    token_variable,
     with_enrollment,
     with_settings,
     write_record,
@@ -4086,7 +4086,7 @@ class AgentWeb:
             "registered_by": config.device.registered_by,
             "login_variable": login_variable,
             "login_saved": bool(login_variable and environment.get(login_variable)),
-            "token_variable": TOKEN_VARIABLE,
+            "token_variable": token_variable(config),
             "enrolled": record.model_dump(mode="json") if enrolled and record else None,
             "assets_only": self.runtime.layout.grants.is_file(),
             "last_catalog": getattr(self, "last_catalog", None),
@@ -4332,7 +4332,8 @@ class AgentWeb:
                 raise SharedPlatformError("device_owner_mismatch")
             answer = publisher.enroll(enrollment_request(config, _trace()).model_dump(mode="json"))
             token_id, secret, expires = enrolled_token(answer, config.device.bridge_id)
-            save_secret(self.user_environment, TOKEN_VARIABLE, secret)
+            # The mapped name (per install outside the default folder).
+            save_secret(self.user_environment, token_variable(config), secret)
         except (SharedPlatformError, PlatformPublishError) as error:
             self.tasks().finish(task, "failed", error.code)
             raise

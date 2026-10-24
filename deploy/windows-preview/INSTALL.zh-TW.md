@@ -81,7 +81,7 @@
 | `-Namespace <團隊>` | **已不需要**：namespace 固定是 `engineering`，安裝程式一律寫入。舊指令裡有這個參數也能照常執行，填別的值會被忽略並顯示一行說明；`host.json` 裡原本是別的值時，會改成 `engineering` 並顯示改了什麼 |
 | `-PythonExe "<路徑>"` | 指定 Python 3.12 的 `python.exe` |
 | `-BridgeId <名稱>` | 這台電腦在平台上的名稱；預設是 `bridge-<電腦名稱>`，兩台電腦同名時才需要。Bridge 跑在這台電腦上；「Bridge API」是平台上讓各台電腦的 Bridge 連過去的網址（註冊、同步、token），Settings 裡叫 **Platform sync URL (Bridge API)** |
-| `-InstallRoot "<資料夾>"` | 改安裝位置（例如路徑太深時用 `C:\aep\preview`） |
+| `-InstallRoot "<資料夾>"` | 改安裝位置（例如路徑太深時用 `C:\aep\preview`）。不在預設資料夾的安裝會把 Shared Platform 的 Bridge token 與 Personal Agent 代碼存在自己的變數名（例如 `AEP_SHARED_PLATFORM_TOKEN_1A2B3C4D`），同一個 Windows 使用者裝兩份也不會互相蓋掉 |
 | `-NoGateway` | 不安裝 LLM gateway（團隊有別的模型服務時）；之後在 Settings 填模型網址 |
 | `-NoAgentSkills` | 不動 Claude Code / Codex / Copilot 的設定 |
 | `-NoShortcut` | 不建立桌面和開始功能表捷徑 |
