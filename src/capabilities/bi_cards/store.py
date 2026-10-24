@@ -526,7 +526,11 @@ class BiStore:
         actor: str,
         reason: str = "",
     ) -> int:
-        """A person's edit; refused as `stale_edit` when the card moved on."""
+        """A person's edit; refused as `stale_edit` when the card moved on.
+
+        Returns the card's new version. The current value again (compared as
+        stored JSON, as an import compares) is no change (owner 2026-10-24):
+        nothing is written and the version returned is `base_version`."""
         at = now()
         self.refuse_write()
         if not self.exists:
@@ -552,6 +556,10 @@ class BiStore:
                     version=int(card["version"]),
                 )
             new = _dump(value)
+            if (stored is None and value is None) or (
+                stored is not None and value is not None and stored["value"] == new
+            ):
+                return int(card["version"])
             old_source = (
                 None
                 if stored is None

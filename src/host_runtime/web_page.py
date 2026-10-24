@@ -10800,8 +10800,11 @@ function biEditField(card, item, row) {
       const reply = await biCall("/api/bi/cards/" + encodeURIComponent(card.id) + "/field",
         {dataset: biDataset(), field: item.field, value, base_version: card.version,
          reason: reason.value.trim()});
-      biNotice(true, "已儲存「" + (item.label || item.field) + "」（版本 " + reply.version
-        + "）。");
+      // The value it already had: no new version, nothing in the history.
+      biNotice(true, reply.unchanged
+        ? "沒有變更：「" + (item.label || item.field) + "」本來就是這個值（版本 "
+          + reply.version + "）。"
+        : "已儲存「" + (item.label || item.field) + "」（版本 " + reply.version + "）。");
       await biLoadDetail(false);
       biLoadCards();
     } catch (failure) {

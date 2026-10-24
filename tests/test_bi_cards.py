@@ -395,6 +395,99 @@ def test_a_stale_edit_is_refused_with_the_current_value(tmp_path: Path) -> None:
     assert set(history["history"][-1]) >= {"field", "old", "new", "source", "at", "by"}
 
 
+def test_saving_a_field_with_the_value_it_has_is_no_change(tmp_path: Path) -> None:
+    """Live test 2026-10-24, owner decision: the current value again is no
+    edit: 200 with `unchanged: true`, the same version, no history entry, the
+    field's source kept and the published snapshot byte for byte the same.
+    Values are compared normalised (enum case and aliases, a domain list's
+    spelling, list whitespace), as an import compares them."""
+    from capabilities.bi_cards import catalog
+    from capabilities.bi_cards.snapshot import build_snapshot
+
+    store = _loaded(tmp_path)
+    reg = catalog.for_store(store)
+    trend = store.find("Trend", "快充與高稼動電池")
+    competitor = store.find("Competitor", "Keysight")
+    assert trend is not None and competitor is not None
+    before = build_snapshot(store)
+    sources = {cid: store.fields(cid) for cid in (trend["id"], competitor["id"])}
+    histories = {cid: store.history(cid) for cid in sources}
+    trend_fields = sources[trend["id"]]
+    alias = next(a for a, v in reg.enum_aliases["stage"].items() if v == "accelerating")
+    domains = sources[competitor["id"]]["domain"]["value"]
+    assert isinstance(domains, list) and domains
+    assert "recent_moves" not in sources[competitor["id"]]
+    same_values: list[tuple[Any, str, Any]] = [
+        (trend, "stage", alias),  # an alias of the stored enum value
+        (trend, "stage", "ACCELERATING"),  # another case
+        (trend, "domain", "Robotics"),
+        (trend, "market_impact", str(trend_fields["market_impact"]["value"])),
+        (trend, "related_tech", [f"  {v} " for v in trend_fields["related_tech"]["value"]]),
+        (trend, "related_tech", "；".join(trend_fields["related_tech"]["value"])),
+        (competitor, "domain", [v.upper() for v in domains]),
+        (competitor, "recent_moves", ""),  # empty for a field that has no value
+        (competitor, "recent_moves", []),
+    ]
+    for card, field, value in same_values:
+        status, answer = _call(
+            tmp_path,
+            "POST",
+            f"/api/bi/cards/{card['id']}/field",
+            {
+                "dataset": "demo",
+                "field": field,
+                "value": value,
+                "base_version": card["version"],
+                "reason": "same",
+            },
+        )
+        assert (status, answer) == (
+            200,
+            {"ok": True, "version": card["version"], "unchanged": True},
+        ), (field, value, answer)
+    for cid in sources:
+        assert store.fields(cid) == sources[cid]
+        assert store.history(cid) == histories[cid]
+        now = store.card(cid)
+        assert now is not None
+        assert now["version"] == (trend if cid == trend["id"] else competitor)["version"]
+    assert build_snapshot(store) == before
+
+    # A different value is still an edit, with a new version and history.
+    status, answer = _call(
+        tmp_path,
+        "POST",
+        f"/api/bi/cards/{trend['id']}/field",
+        {
+            "dataset": "demo",
+            "field": "stage",
+            "value": "peak",
+            "base_version": trend["version"],
+            "reason": "moved",
+        },
+    )
+    assert (status, answer) == (200, {"ok": True, "version": trend["version"] + 1})
+    assert len(store.history(trend["id"])) == len(histories[trend["id"]]) + 1
+
+
+def test_the_store_returns_the_base_version_for_an_unchanged_edit(tmp_path: Path) -> None:
+    store = _loaded(tmp_path)
+    card = store.find("Competitor", "Keysight")
+    assert card is not None
+    current = store.fields(card["id"])["ticker"]["value"]
+    version = card["version"]
+    assert store.set_field(card["id"], "ticker", current, base_version=version, actor=ACTOR) == (
+        version
+    )
+    assert store.set_field(card["id"], "ticker", "NEW", base_version=version, actor=ACTOR) == (
+        version + 1
+    )
+    # A stale base is still refused, even for the value the card has now.
+    with pytest.raises(BiStoreError) as stale:
+        store.set_field(card["id"], "ticker", "NEW", base_version=version, actor=ACTOR)
+    assert stale.value.code == "stale_edit"
+
+
 def test_an_import_is_undone_as_a_whole(tmp_path: Path) -> None:
     store = _loaded(tmp_path)
     card = store.find("Trend", "快充與高稼動電池")

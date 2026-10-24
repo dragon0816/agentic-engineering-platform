@@ -265,16 +265,37 @@ def _set_field(workspace: Path, who: str, card_id: str, given: dict[str, Any]) -
     if raw is None or raw == "" or raw == []:
         value = None
     elif isinstance(raw, list):
-        value = [str(v).strip() for v in raw if str(v).strip()] if item.is_list else None
-        if value is None:
+        if not item.is_list:
             return _error(400, "value_invalid", f"{item.label} 不是清單欄位")
+        value = _list_value(reg, item, raw)
     else:
         value, problems = reg.normalize(item, str(raw))
         if value is None:
             message = problems[0][1] if problems else f"{item.label} 的值無法採用"
             return _error(400, "value_invalid", message)
     version = store.set_field(card_id, name, value, base_version=base, actor=who, reason=reason)
+    if version == base:
+        # The value it already has (owner 2026-10-24): no new version, no history.
+        return 200, {"ok": True, "version": version, "unchanged": True}
     return 200, {"ok": True, "version": version}
+
+
+def _list_value(reg: Any, item: Any, raw: list[Any]) -> list[str] | None:
+    """A list edit's items, stripped; a domain item in its canonical spelling
+    (as an import stores it), so the same domains in other case or an alias
+    compare equal. An item the schema does not know is kept as typed."""
+    values: list[str] = []
+    for given in raw:
+        text = str(given).strip()
+        if not text:
+            continue
+        if item.name == "domain":
+            known, _ = reg.normalize(item, text)
+            if isinstance(known, list) and len(known) == 1:
+                text = str(known[0])
+        if text not in values or item.name != "domain":
+            values.append(text)
+    return values or None
 
 
 # -- publishing to the Shared Platform (BI dataset sharing slice 1) ----------

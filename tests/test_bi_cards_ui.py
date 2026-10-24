@@ -345,6 +345,12 @@ class Stub:
                         "by": "陳主任",
                         "at": NOW,
                     }
+                if any(
+                    entry["field"] == body["field"] and entry["value"] == body["value"]
+                    for entry in item["fields"]
+                ):
+                    # The value it already has: no change (owner 2026-10-24).
+                    return 200, {"ok": True, "version": card["version"], "unchanged": True}
                 card["version"] += 1
                 for entry in item["fields"]:
                     if entry["field"] == body["field"]:
@@ -725,6 +731,17 @@ def test_bi_cards_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None: 
             "reason": "依 Q4 訊號調整",
         }
         wait("document.querySelector('[data-field=priority] .bi-field-value').textContent === '3'")
+        # the same value again is no change: no new version (owner 2026-10-24)
+        run("document.querySelector('[data-field=priority] .bi-field-foot button').click()")
+        run(
+            "document.getElementById('bi-edit-priority').value = '3';"
+            "document.getElementById('bi-reason-priority').value = '再存一次';"
+        )
+        run("document.querySelector('[data-field=priority] form button[type=submit]').click()")
+        wait("document.getElementById('bi-notice').textContent.includes('沒有變更')")
+        notice = str(run("document.getElementById('bi-notice').textContent"))
+        assert "版本 4" in notice and "已儲存" not in notice
+        assert stub.cards[APP]["card"]["version"] == 4
         stub.cards[APP]["card"]["version"] = 9  # someone else saved meanwhile
         run("document.querySelector('[data-field=priority] .bi-field-foot button').click()")
         run(
