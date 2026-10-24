@@ -3336,3 +3336,11 @@ s-k-20261011T102952` (not published).
   edits, store, 404s), `tests/test_bi_cards_ui.py` (「沒有變更」), `tests/test_bi_dataset_pick_ui.py`
   (new, real browser). Verification: ruff check, ruff format --check, mypy (761 files) clean; full pytest project venv 3963 passed, 7 skipped (`--basetemp=C:/aepci-wk/bt-fx5`); `C:/aepci-wk/venv` 3935 passed, 34 skipped, 1 failed (`test_capability_shelf.py::test_removing_moves_the_file_to_a_dated_folder_and_refuses_shipped_assets`, untouched code; the file passed 9/9 when re-run alone, `--basetemp=C:/aepci-wk/bt-fx5c2`).
 - [ ] Owner check after a restart (when `/api/tasks` is idle) and the remaining two-PC live test.
+- [x] Release `release-20261024-1049-b89fdfad` (2026-10-24, Claude Code): zip
+  `aep-windows-preview-0.1.0-b89fdfad04c5.zip`, SHA-256 `d2e70c2e…d4f5`, on `S:\AE\leo\20261024-1049-b89fdfad\`
+  with `BI_DEMO.zh-TW.md` and `README-請先看.txt` (supersedes 0936 and older). Adds BI dataset sharing slice 1
+  and the five live-test fixes. Full suite on b89fdfad in a clean worktree with `C:/aepci-wk/venv` 3936
+  passed, 34 skipped; release `--quick`. Live on this PC after a restart: unknown dataset → 404
+  `dataset_unknown`; same-value field save → `unchanged`, version kept. Sharing itself was live-tested on a
+  throwaway local platform (all eight steps passed; see the slice 1 rows). Host 141 runs platform 0b778ffc;
+  its sharing flow with real accounts is not yet tried (admin access route blocked by the safety classifier).
