@@ -29,7 +29,8 @@ import hashlib
 import logging
 import re
 import threading
-from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
@@ -37,8 +38,20 @@ from typing import Any, Literal
 from pydantic import Field, JsonValue
 
 from agent.gateway import HostTool, HostToolOutcome
+from common.assets import WorkflowManifest
 from common.base import Contract, Text
 from common.execution import Failure, RequestContext
+from common.workflow_forms import boolean_labels
+from host_runtime.task_summaries import (
+    Condenser,
+    SummaryArtifact,
+    TaskSummaries,
+    TaskSummary,
+    condensed,
+    facts,
+    run_follow_ups,
+    task_label,
+)
 from host_runtime.workspace import write_atomically
 from models.contracts import ModelTool
 from workflow.engine import WorkflowRunSnapshot
@@ -66,6 +79,28 @@ _SHEET = frozenset({".xlsx", ".xlsm", ".xls", ".csv"})
 _DOCUMENT = frozenset({".docx", ".doc", ".pdf", ".pptx", ".md", ".html", ".htm", ".txt"})
 
 _LOG = logging.getLogger(__name__)
+#: A model turn gets its own task summary when it used this many tools
+#: successfully and started no Workflow (a run has its own summary).
+MIN_SUMMARY_TOOLS = 2
+
+
+@dataclass
+class FinishedRun:
+    """A finished run in a session: its history entry, its pictures to show
+    at the end of the run, and its task result summary."""
+
+    entry: str | None = None
+    images: tuple[str, ...] = ()
+    summary: TaskSummary | None = None
+
+
+@dataclass
+class FinishedTurn:
+    """What a model turn produced: run entries, files to show, summaries."""
+
+    entries: list[str] = field(default_factory=list)
+    files: list[str] = field(default_factory=list)
+    summaries: list[TaskSummary] = field(default_factory=list)
 
 
 def kind_of(path: str) -> ArtifactKind:
@@ -173,6 +208,13 @@ class SessionArtifacts:
         self.workspace_root = workspace_root.resolve()
         self.root = self.workspace_root / "session-artifacts"
         self._lock = threading.Lock()
+        # Task result summaries (owner 2026-10-25), kept beside the ledgers.
+        self.summaries = TaskSummaries(self.root)
+        # One bounded model call that condenses a run's preview when its
+        # outputs give fewer than two facts; set by the Host, None calls nothing.
+        self.condenser: Condenser | None = None
+        # The installed Workflow of a run, for its fields' labels; set by the Host.
+        self.manifest_for: Callable[[Any], WorkflowManifest | None] | None = None
 
     # -- storage ---------------------------------------------------------------
 
@@ -408,6 +450,18 @@ class SessionArtifacts:
         if not context.session_id:
             return ""
         ledger = self.ledger(context.session_id, context.actor)
+        summaries = self.summaries.for_session(context.session_id, context.actor)
+        if summaries:
+            done = [
+                "Task results of this session (kept on disk; newest last). Use them to answer "
+                "questions about what was done or found:"
+            ]
+            done.extend(f"- {item.line()}" for item in summaries)
+            listed = self._listed(ledger)
+            return "\n\n".join(part for part in (listed, "\n".join(done)) if part)
+        return self._listed(ledger)
+
+    def _listed(self, ledger: SessionLedger) -> str:
         if not ledger.runs and not ledger.artifacts:
             return ""
         by_id = {item.artifact_id: item for item in ledger.artifacts}
@@ -433,6 +487,152 @@ class SessionArtifacts:
         for item in loose[-max(0, MAX_SHOWN_FILES - shown) :] if shown < MAX_SHOWN_FILES else ():
             lines.append(f"- {item.artifact_id} {item.kind} (made by a tool): {item.filename}")
         return "\n".join(lines)
+
+    # -- a finished task: the ledger, the history entry, the summary ----------
+
+    def finish_run(
+        self,
+        session_id: str | None,
+        actor: str,
+        snapshot: WorkflowRunSnapshot | None,
+        arguments: Mapping[str, Any] | None = None,
+    ) -> FinishedRun:
+        """Keep a finished run, then compose its history entry, its pictures
+        to show and its task result summary (kept on disk)."""
+        run = self.record_run(session_id, actor, snapshot)
+        if run is None or snapshot is None or not session_id:
+            return FinishedRun()
+        entry = run_entry(self, session_id, actor, run)
+        images = tuple(item.path for item in self.run_images(session_id, actor, run.run_id))
+        summary = self._summarize_run(session_id, actor, run, snapshot, arguments)
+        if summary is not None:
+            entry = f"{entry}\n{summary.block()}"
+        return FinishedRun(entry=entry, images=images, summary=summary)
+
+    def _labels(self, snapshot: WorkflowRunSnapshot) -> dict[str, str]:
+        manifest = self.manifest_for(snapshot.run.workflow) if self.manifest_for else None
+        labels: dict[str, str] = {}
+        for item in manifest.parameters if manifest is not None else ():
+            labels[item.name] = item.label
+            if item.kind == "boolean":
+                true, false = boolean_labels(item)
+                labels[f"{item.name}=True"], labels[f"{item.name}=False"] = true, false
+        return labels
+
+    def _summarize_run(
+        self,
+        session_id: str,
+        actor: str,
+        run: SessionRun,
+        snapshot: WorkflowRunSnapshot,
+        arguments: Mapping[str, Any] | None,
+    ) -> TaskSummary | None:
+        datas = [result.data for result in reversed(snapshot.step_results)]
+        key: list[str] = []
+        if run.summary and not run.summary.endswith("step(s)") and "stopped:" not in run.summary:
+            key.append(run.summary)
+        key.extend(item for item in facts(datas) if item not in key)
+        if len(key) < 2:
+            preview = next(
+                (
+                    data["preview"]
+                    for data in datas
+                    if isinstance(data, dict) and isinstance(data.get("preview"), str)
+                ),
+                "",
+            )
+            key.extend(item for item in condensed(self.condenser, str(preview)) if item not in key)
+        by_id = {item.artifact_id: item for item in self.ledger(session_id, actor).artifacts}
+        made = [by_id[item] for item in run.artifact_ids if item in by_id]
+        failure = snapshot.run.failure.code if snapshot.run.failure is not None else None
+        try:
+            return self.summaries.new(
+                session_id,
+                actor,
+                task=task_label(run.workflow, arguments, self._labels(snapshot)),
+                status=run.status,
+                key_results=key,
+                artifacts=[
+                    SummaryArtifact(id=item.artifact_id, kind=item.kind, name=item.filename)
+                    for item in made
+                ],
+                follow_ups=run_follow_ups(run.status, failure, datas),
+                run_id=run.run_id,
+            )
+        except (OSError, ValueError) as error:
+            _LOG.warning("task summary not kept: %s", type(error).__name__)
+            return None
+
+    def finish_turn(
+        self, session_id: str | None, actor: str, message: str, result: Any
+    ) -> FinishedTurn:
+        """What a model turn produced: each Workflow it ran (entry, pictures,
+        summary), files a tool made, the files it attached again, and a
+        summary of the turn itself when it used several tools without a run."""
+        if not session_id or result is None:
+            return FinishedTurn()
+        done = FinishedTurn()
+        for item in getattr(result, "tools", ()):
+            if item.workflow is None:
+                continue
+            arguments = item.arguments if isinstance(item.arguments, dict) else None
+            finished = self.finish_run(session_id, actor, item.workflow, arguments)
+            if finished.entry:
+                done.entries.append(finished.entry)
+            done.files.extend(finished.images)
+            if finished.summary is not None:
+                done.summaries.append(finished.summary)
+        before = {item.artifact_id for item in self.ledger(session_id, actor).artifacts}
+        self.record_turn(session_id, actor, result)
+        done.files.extend(item["path"] for item in self.attached(session_id, actor, result))
+        done.files = list(dict.fromkeys(done.files))
+        if not done.summaries:
+            summary = self._summarize_turn(session_id, actor, message, result, before)
+            if summary is not None:
+                done.summaries.append(summary)
+        return done
+
+    def _summarize_turn(
+        self, session_id: str, actor: str, message: str, result: Any, before: set[str]
+    ) -> TaskSummary | None:
+        used = [
+            item
+            for item in getattr(result, "tools", ())
+            if item.name != ATTACH_TOOL
+            and not item.name.startswith(("memory__", "notes__", "workflow__"))
+            and item.failure is None
+            and (
+                (item.capability is not None and item.capability.status == "succeeded")
+                or (item.host is not None and item.host.status == "succeeded")
+            )
+        ]
+        if len(used) < MIN_SUMMARY_TOOLS or getattr(result, "status", "") != "answered":
+            return None
+        datas = [
+            item.capability.data if item.capability is not None else item.host.data
+            for item in reversed(used)
+        ]
+        made = [
+            item
+            for item in self.ledger(session_id, actor).artifacts
+            if item.artifact_id not in before
+        ]
+        try:
+            return self.summaries.new(
+                session_id,
+                actor,
+                task=" ".join(message.split())[:60] or "對話中的工作",
+                status="answered",
+                key_results=facts(datas),
+                artifacts=[
+                    SummaryArtifact(id=item.artifact_id, kind=item.kind, name=item.filename)
+                    for item in made
+                ],
+                follow_ups=[],
+            )
+        except (OSError, ValueError) as error:
+            _LOG.warning("task summary not kept: %s", type(error).__name__)
+            return None
 
     # -- the model's tool ------------------------------------------------------
 
@@ -460,6 +660,12 @@ class SessionArtifacts:
                 "note": "Attached to your reply; the person will see it under your answer.",
             },
         )
+
+
+def file_entry(path: str) -> dict[str, str]:
+    """A recorded file as Agent Web lists it on an answer."""
+    kind = "image" if kind_of(path) == "image" else _web_kind(path)
+    return {"filename": Path(path).name, "kind": kind, "path": path}
 
 
 def _web_kind(path: str) -> str:

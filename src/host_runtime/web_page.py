@@ -3210,6 +3210,9 @@ function renderConversation(record) {
         else if (kind === "html") said.parentNode.append(answerHtml(record.session_id, file));
       }
       if (answerFiles.length) said.parentNode.append(fileChips(record.session_id, answerFiles));
+      if (replied.task_summary_id) {
+        said.parentNode.append(summaryNoteButton(replied.task_summary_id));
+      }
       attachTurnControls(said.parentNode, asked.text, replied);
       const installForm = replied.workflow_form
         && replied.workflow_form.origin === "install";
@@ -3794,6 +3797,30 @@ function showTurnMenu(x, y, block, question, message) {
 // -- Notes (accumulated memory M3): an answer, or a selection of it, in one
 // click. The server takes the text from the stored answer; a selection must
 // be in it. Only this press saves; 「復原」 undoes it.
+
+// 「存成筆記」 under a 結果摘要 (task result summaries, owner 2026-10-25): the
+// summary's text becomes one note; only this press saves.
+function summaryNoteButton(summaryId) {
+  const row = document.createElement("div");
+  row.className = "summary-note";
+  const button = document.createElement("button");
+  button.type = "button"; button.className = "link-button summary-note-save";
+  button.append(text("結果摘要存成筆記"));
+  const said = document.createElement("span");
+  said.setAttribute("role", "status");
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+    try {
+      const saved = await call("/api/memory/task-summaries/note", {id: summaryId});
+      said.replaceChildren(text(" " + (saved.message || saved.code)));
+      if (!saved.ok) button.disabled = false;
+    } catch (failure) {
+      button.disabled = false; said.replaceChildren(text(" " + failure.message));
+    }
+  });
+  row.append(button, said);
+  return row;
+}
 
 async function saveNote(block, messageId, selection) {
   const area = block.querySelector(".turn-feedback-area") || block;
@@ -10112,6 +10139,55 @@ function memHealthSettings() {
   return section;
 }
 
+// 任務摘要 (task result summaries, owner 2026-10-25): the recent ones with
+// 刪除 and 存成筆記, and how many days they are kept (default 30).
+function memTaskSummaries() {
+  const section = memEl("div", "mem-sub"); section.id = "mem-task-summaries";
+  const list = memEl("div", "", memEl("p", "mem-meta", "載入中…"));
+  section.append(memEl("h3", "mem-group", "任務摘要"),
+    memEl("p", "mem-intro", "每次執行完的結果摘要（任務、重點、產出、後續），存在這台電腦，"
+      + "過了保留天數每晚自動刪除；不會自動存成筆記。"), list);
+  const draw = async () => {
+    let reply;
+    try { reply = await call("/api/memory/task-summaries"); }
+    catch (failure) { reply = {ok: false, message: failure.message}; }
+    list.replaceChildren();
+    if (!reply.ok) { list.append(memEl("p", "mem-meta", reply.message || reply.code)); return; }
+    const days = document.createElement("input"); days.type = "number"; days.min = "1";
+    days.max = "365"; days.value = reply.settings.retention_days;
+    days.className = "mem-field mem-days"; days.id = "mem-summary-days";
+    days.setAttribute("aria-label", "任務摘要保留天數");
+    list.append(memEl("div", "mem-inline", "保留", days, "天",
+      memButton("儲存", async () => {
+        memNotice(null);
+        const saved = await call("/api/memory/task-summaries/settings",
+          {retention_days: Number(days.value)});
+        memNotice(saved);
+      })));
+    if (!reply.summaries.length) { list.append(memEl("p", "empty", "還沒有任務摘要。")); return; }
+    for (const item of reply.summaries) {
+      const card = memEl("article", "mem-item"); card.dataset.summaryId = item.summary_id;
+      const body = memEl("pre", "mem-summary"); body.textContent = item.block;
+      card.append(memEl("div", "mem-item-head", memEl("strong", "", item.task),
+        memEl("span", "mem-meta", item.at_local)), body,
+      memEl("div", "mem-actions",
+        memButton("存成筆記", async () => {
+          memNotice(null);
+          memNotice(await call("/api/memory/task-summaries/note", {id: item.summary_id}));
+        }),
+        memButton("刪除", async () => {
+          memNotice(null);
+          const gone = await call("/api/memory/task-summaries/delete", {id: item.summary_id});
+          memNotice(gone);
+          if (gone.ok) await draw();
+        }, "danger")));
+      list.append(card);
+    }
+  };
+  draw();
+  return section;
+}
+
 function memRenderRecords() {
   const box = el("mem-records"); box.replaceChildren();
   const records = memData.records;
@@ -10141,6 +10217,7 @@ function memRenderRecords() {
       memEl("dd", "", space.retention_label + "（由管理的 Skill 決定，目前不能在這裡改）"));
   }
   box.append(memEl("h3", "mem-group", "保留期限"), keep);
+  box.append(memTaskSummaries());
   box.append(memHealthSettings());
   box.append(memEl("h3", "mem-group", "匯出與刪除記憶"),
     memEl("p", "mem-intro", "每個空間可以匯出成 JSON。刪除會永久清掉該空間的所有資料，不能復原，"

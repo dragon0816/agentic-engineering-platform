@@ -74,7 +74,7 @@ from host_runtime.identity_presets import IdentityPresets
 from host_runtime.memory_why import NOTHING as WHY_NOTHING
 from host_runtime.memory_why import memory_used_in
 from host_runtime.schedule_policy import target_side_effect
-from host_runtime.session_artifacts import SessionArtifacts, run_entry
+from host_runtime.session_artifacts import FinishedRun, FinishedTurn, SessionArtifacts
 from host_runtime.turn_summary import stop_reply, tool_summary
 from host_runtime.workflow_uploads import (
     MAX_UPLOAD_BYTES,
@@ -173,6 +173,16 @@ _ATTACHMENT_REPLIES = {
 #: The interactive org chart arrives as a file (owner 2026-10-20); one line
 #: says what to do with it.
 HTML_CHART_CAPTION = "互動式組織圖：請下載後用瀏覽器開啟（可搜尋、切換樹狀／分組檢視）。"
+
+
+#: 「存成筆記」 under a 結果摘要: the button's data, and the words typed.
+SUMMARY_NOTE_TAP = re.compile(r"^sumnote:(ts-[0-9a-f]{12})$")
+SUMMARY_NOTE_WORDS = frozenset({"存成筆記", "存成筆記。", "把結果摘要存成筆記"})
+NO_SUMMARY_REPLY = "這個對話還沒有可以存的結果摘要。"
+
+
+def _note_row(summary_id: str) -> tuple[tuple[str, str], ...]:
+    return (("存成筆記", f"sumnote:{summary_id}"),)
 
 
 #: Pictures Telegram shows as a photo, by suffix, with their media type.
@@ -1258,6 +1268,11 @@ class TelegramIngress:
             )
         text = update.text.strip()
         key = (update.chat_id, update.sender_id)
+        noted = SUMMARY_NOTE_TAP.match(text)
+        if noted is not None:
+            return await self._summary_note(base, actor, noted.group(1), update.chat_id)
+        if text in SUMMARY_NOTE_WORDS and key not in self._flows:
+            return await self._summary_note(base, actor, None, update.chat_id)
         card_tap = CARD_TAP.match(text)
         if card_tap is not None:
             return await self._decide_card(
@@ -1347,13 +1362,17 @@ class TelegramIngress:
                 reply=f"Refused: {outcome.refusal}.",
                 outcome=outcome,
             )
-        _, images = await self._record_run(request.session_id, request.actor, outcome.workflow)
+        finished = await self._record_run(request.session_id, request.actor, outcome.workflow)
+        described = _describe(outcome)
+        if finished.summary is not None:
+            described = f"{described}\n\n{finished.summary.block()}"
         return TelegramDelivery(
             **base,
             disposition="routed",
-            reply=scrub(_describe(outcome)),
+            reply=scrub(described),
             outcome=outcome,
-            attached=images,
+            buttons=(_note_row(finished.summary.summary_id),) if finished.summary else (),
+            attached=finished.images,
         )
 
     def _remember_why(self, key: tuple[int, int], actor: str, conversation: Any) -> None:
@@ -1768,10 +1787,16 @@ class TelegramIngress:
         await asyncio.to_thread(self._remember_why, key, request.actor, conversation)
         # What this turn produced joins the session's ledger; the pictures of
         # a run the model started and the files it attached go out last.
-        entries, produced = await self._record_turn(request, conversation)
+        finished = await self._record_turn(request, text, conversation)
+        produced = tuple(finished.files)
+        # The task result summary (owner 2026-10-25) ends the answer, with
+        # 「存成筆記」 under it; nothing is saved until it is pressed.
+        if finished.summaries:
+            answer = "\n\n".join([answer, *(item.block() for item in finished.summaries)])
+            buttons = (*buttons, _note_row(finished.summaries[-1].summary_id))
         remembered = answer if record is None else f"{answer}\n\n[工具紀錄]\n{record}"
-        if entries:
-            remembered = "\n\n".join([remembered, *entries])
+        if finished.entries:
+            remembered = "\n\n".join([remembered, *finished.entries])
         turn.append(ModelMessage(role="assistant", text=remembered))
         self._histories[key] = turn[-MAX_CHAT_HISTORY:]
         offer = offer_in(conversation.tools)
@@ -1816,32 +1841,22 @@ class TelegramIngress:
         )
 
     async def _record_turn(
-        self, request: LocalAgentRequest, conversation: Any
-    ) -> tuple[list[str], tuple[str, ...]]:
+        self, request: LocalAgentRequest, text: str, conversation: Any
+    ) -> FinishedTurn:
         """Keep what a model turn produced (the Workflows it ran, files a tool
-        made) and return the runs' history entries and the files to send:
-        each run's pictures, then what `session__attach_file` attached."""
+        made, a summary of the task) and return the runs' history entries,
+        the files to send (each run's pictures, then what
+        `session__attach_file` attached) and the summaries."""
         store = self.session_artifacts
         if store is None or not request.session_id:
-            return [], ()
-        session, actor = request.session_id, request.actor
-        entries: list[str] = []
-        files: list[str] = []
+            return FinishedTurn()
         try:
-            for item in conversation.tools:
-                if item.workflow is None:
-                    continue
-                entry, images = await self._record_run(session, actor, item.workflow)
-                if entry:
-                    entries.append(entry)
-                files.extend(images)
-            await asyncio.to_thread(store.record_turn, session, actor, conversation)
-            attached = await asyncio.to_thread(store.attached, session, actor, conversation)
+            return await asyncio.to_thread(
+                store.finish_turn, request.session_id, request.actor, text, conversation
+            )
         except (OSError, ValueError) as error:
             _LOG.warning("session artifacts not recorded: %s", type(error).__name__)
-            return entries, tuple(dict.fromkeys(files))
-        files.extend(item["path"] for item in attached)
-        return entries, tuple(dict.fromkeys(files))
+            return FinishedTurn()
 
     def _carded(
         self,
@@ -2103,39 +2118,67 @@ class TelegramIngress:
             )
         # The history keeps the run's result and what it made, by short id
         # (owner 2026-10-25: 「這個workflow 做完之後他都忘記了」).
-        entry, images = await self._record_run(
-            _chat_session(update.chat_id), acting, outcome.workflow
+        finished = await self._record_run(
+            _chat_session(update.chat_id), acting, outcome.workflow, step.arguments
         )
-        self._remember_turn(key, f"【執行】{state.workflow.name}", entry or reply)
+        self._remember_turn(key, f"【執行】{state.workflow.name}", finished.entry or reply)
         texts, buttons = self._run_extras(outcome)
+        if finished.summary is not None:
+            # The task result summary (owner 2026-10-25), 「存成筆記」 under it.
+            texts.append(finished.summary.block())
+            buttons = (*buttons, _note_row(finished.summary.summary_id))
         return TelegramDelivery(
             **base,
             disposition="routed",
             reply=scrub("\n\n".join([reply, *texts])),
             buttons=buttons,
             outcome=outcome,
-            attached=images,
+            attached=finished.images,
         )
 
     async def _record_run(
-        self, session_id: str | None, actor: str, snapshot: Any
-    ) -> tuple[str | None, tuple[str, ...]]:
-        """Keep a finished run in this session's ledger: its history entry
-        and the pictures it made, sent at the end of the run as the org chart
-        is. Nothing when no ledger is set or the run did not start."""
+        self,
+        session_id: str | None,
+        actor: str,
+        snapshot: Any,
+        arguments: Mapping[str, Any] | None = None,
+    ) -> FinishedRun:
+        """Keep a finished run in this session's ledger: its history entry,
+        the pictures it made (sent at the end of the run as the org chart is)
+        and its task result summary. Nothing when no ledger is set or the run
+        did not start."""
         store = self.session_artifacts
         if store is None or snapshot is None:
-            return None, ()
+            return FinishedRun()
         try:
-            run = await asyncio.to_thread(store.record_run, session_id, actor, snapshot)
-            if run is None:
-                return None, ()
-            entry = await asyncio.to_thread(run_entry, store, session_id, actor, run)
-            images = await asyncio.to_thread(store.run_images, session_id, actor, run.run_id)
+            return await asyncio.to_thread(store.finish_run, session_id, actor, snapshot, arguments)
         except (OSError, ValueError) as error:
             _LOG.warning("session artifacts not recorded: %s", type(error).__name__)
-            return None, ()
-        return entry, tuple(item.path for item in images)
+            return FinishedRun()
+
+    async def _summary_note(
+        self, base: dict[str, Any], actor: str, summary_id: str | None, chat_id: int
+    ) -> TelegramDelivery:
+        """「存成筆記」 under a 結果摘要 (a tap, or the words typed): the summary
+        becomes a note through Agent Web's one-click note save (accumulated
+        memory M3). Only this press saves anything."""
+        acting, _ = self._acting(actor)
+        store = self.session_artifacts
+        if summary_id is None and store is not None:
+            latest = await asyncio.to_thread(
+                store.summaries.for_session, _chat_session(chat_id), acting, 1
+            )
+            summary_id = latest[-1].summary_id if latest else None
+        saver = getattr(self.cards, "task_summary_note", None)
+        if summary_id is None:
+            return TelegramDelivery(**base, disposition="answered", reply=NO_SUMMARY_REPLY)
+        if saver is None:
+            return TelegramDelivery(
+                **base, disposition="answered", reply="存成筆記需要這台電腦的 Agent Web。"
+            )
+        saved = await asyncio.to_thread(saver, acting, summary_id, "telegram")
+        message = str(saved.get("message") or saved.get("code") or "沒有存。")
+        return TelegramDelivery(**base, disposition="answered", reply=scrub(message))
 
     def _run_extras(
         self, outcome: LocalAgentOutcome

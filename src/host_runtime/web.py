@@ -247,7 +247,7 @@ from host_runtime.review_routes import (
     resolve_rule,
     write_proposal,
 )
-from host_runtime.session_artifacts import run_entry
+from host_runtime.session_artifacts import FinishedRun, FinishedTurn, file_entry
 from host_runtime.shared_platform import (
     KEEP,
     LOGIN_SHAPE,
@@ -327,6 +327,7 @@ from llm_gateway import control as gateway_control
 from llm_gateway import token_refresh as gateway_token
 from llm_gateway.config import GatewayConfigError
 from llm_gateway.config import load_settings as load_gateway_settings
+from memory.service import MemoryServiceError
 from models.contracts import ModelMessage
 from models.selection import (
     NOT_APPROVED,
@@ -465,6 +466,11 @@ def _with_entries(summary: str | None, entries: Sequence[str]) -> str | None:
     if not entries:
         return summary
     return "\n\n".join([*([summary] if summary else []), *entries])[:4_000]
+
+
+def _with_blocks(text: str, blocks: Sequence[str]) -> str:
+    """An answer followed by its 結果摘要 blocks (owner 2026-10-25)."""
+    return "\n\n".join([text.rstrip(), *blocks]) if blocks else text
 
 
 def _answer_files(answer: Mapping[str, Any]) -> list[dict[str, Any]]:
@@ -2039,6 +2045,12 @@ class AgentWeb:
             return
         today = moment.date().isoformat()
         store = self._experience_store()
+        # Task result summaries past their retention (owner 2026-10-25: 「保留
+        # 30 天」): deleted once a night; no model is involved.
+        artifacts = self.runtime.session_artifacts
+        if artifacts is not None and (store.meta("last_summary_purge") or "")[:10] != today:
+            store.set_meta("last_summary_purge", moment.isoformat(timespec="seconds"))
+            artifacts.summaries.purge()
         if (store.meta("last_memory_health") or "")[:10] != today:
             store.set_meta("last_memory_health", moment.isoformat(timespec="seconds"))
             self.tasks().tracked(
@@ -3110,9 +3122,14 @@ class AgentWeb:
                     # What the turn produced joins the session's ledger; a
                     # run's pictures and attached files show like the chart
                     # (owner 2026-10-25).
-                    produced_entries, produced = self._record_turn_outputs(item.session_id, result)
+                    outputs = self._record_turn_outputs(item.session_id, item.message, result)
                     shown = {entry["path"] for entry in charts}
-                    charts = [*charts, *(f for f in produced if f["path"] not in shown)]
+                    charts = [
+                        *charts,
+                        *(file_entry(path) for path in outputs.files if path not in shown),
+                    ]
+                    # The task result summary ends the answer (owner 2026-10-25).
+                    blocks = [summary.block() for summary in outputs.summaries]
                     answer = {
                         **({"workflow_form": offered} if offered is not None else {}),
                         **({CARD_KEY: carded} if carded is not None else {}),
@@ -3130,12 +3147,20 @@ class AgentWeb:
                             and (used := memory_used_in(result.tools, result.text))
                             else {}
                         ),
-                        "tool_summary": _with_entries(tool_summary(result), produced_entries),
+                        **(
+                            {"task_summary_id": outputs.summaries[-1].summary_id}
+                            if outputs.summaries
+                            else {}
+                        ),
+                        "tool_summary": _with_entries(tool_summary(result), outputs.entries),
                         "ok": result is not None and result.status == "answered",
                         "answer": (
-                            with_bi_sources(
-                                with_legend(self._gateway_conversation_text(result), charts),
-                                result,
+                            _with_blocks(
+                                with_bi_sources(
+                                    with_legend(self._gateway_conversation_text(result), charts),
+                                    result,
+                                ),
+                                blocks,
                             )
                             if result is not None
                             else f"The request was refused ({conversational.refusal})."
@@ -3231,6 +3256,11 @@ class AgentWeb:
                                 # (owner 2026-10-22); None when none did,
                                 # and for a CLI backend, whose model is its own.
                                 model=answered_by() if record.backend == "gateway" else None,
+                                task_summary_id=(
+                                    answer.get("task_summary_id")
+                                    if isinstance(answer.get("task_summary_id"), str)
+                                    else None
+                                ),
                                 attachments=tuple(
                                     {key: str(item[key]) for key in ("filename", "kind", "path")}
                                     for item in _answer_files(answer)
@@ -4937,51 +4967,75 @@ class AgentWeb:
         }
 
     def _record_run_outputs(
-        self, session_id: str | None, snapshot: Any
-    ) -> tuple[str | None, list[dict[str, str]]]:
+        self, session_id: str | None, snapshot: Any, arguments: Mapping[str, Any] | None = None
+    ) -> FinishedRun:
         """Keep a finished run in this conversation's ledger (owner
-        2026-10-25): its history entry and its pictures, shown under the
-        run's answer with the chat's file viewer."""
+        2026-10-25): its history entry, its pictures (shown under the run's
+        answer with the chat's file viewer) and its task result summary."""
         store = self.runtime.session_artifacts
         if store is None or not session_id or snapshot is None:
-            return None, []
-        actor = self.runtime.actor
+            return FinishedRun()
         try:
-            run = store.record_run(session_id, actor, snapshot)
-            if run is None:
-                return None, []
-            entry = run_entry(store, session_id, actor, run)
-            images = store.run_images(session_id, actor, run.run_id)
+            return store.finish_run(session_id, self.runtime.actor, snapshot, arguments)
         except (OSError, ValueError):
-            return None, []
-        return entry, [
-            {"filename": item.filename, "kind": "image", "path": item.path} for item in images
-        ]
+            return FinishedRun()
 
     def _record_turn_outputs(
-        self, session_id: str | None, result: Any
-    ) -> tuple[list[str], list[dict[str, str]]]:
-        """What a model turn produced: each run it started (entry and
-        pictures), files a tool made, and the files it attached again."""
+        self, session_id: str | None, message: str, result: Any
+    ) -> FinishedTurn:
+        """What a model turn produced: each run it started (entry, pictures,
+        summary), files a tool made, the files it attached again, and a
+        summary of a turn that used several tools."""
         store = self.runtime.session_artifacts
         if store is None or not session_id or result is None:
-            return [], []
-        entries: list[str] = []
-        files: list[dict[str, str]] = []
-        for tool in result.tools:
-            if tool.workflow is None:
-                continue
-            entry, images = self._record_run_outputs(session_id, tool.workflow)
-            if entry:
-                entries.append(entry)
-            files.extend(images)
+            return FinishedTurn()
         try:
-            store.record_turn(session_id, self.runtime.actor, result)
-            files.extend(store.attached(session_id, self.runtime.actor, result))
+            return store.finish_turn(session_id, self.runtime.actor, message, result)
         except (OSError, ValueError):
-            pass
-        unique = {entry["path"]: entry for entry in files}
-        return entries, list(unique.values())
+            return FinishedTurn()
+
+    def task_summary_note(
+        self, actor: str, summary_id: str, channel: str = "local"
+    ) -> dict[str, Any]:
+        """「存成筆記」 under a 結果摘要 (Agent Web's button, Telegram's button
+        or words): the summary's text becomes one note of `actor` through
+        accumulated memory M3's note save; a second press finds it saved."""
+        store = self.runtime.session_artifacts
+        found = store.summaries.get(actor, summary_id) if store is not None else None
+        if found is None:
+            return {
+                "ok": False,
+                "code": "summary_unknown",
+                "message": "找不到這個結果摘要（可能已過保留期限）。",
+            }
+        notes = self.personal_memory.notes(actor)
+        text = found.block()
+        source = f"summary:{found.summary_id}"
+        try:
+            already = notes.from_source(found.session_id, source, text)
+            if already is not None:
+                return {
+                    "ok": True,
+                    "already": True,
+                    "message": f"已經存過了（{already.note_id}）。",
+                }
+            note, change = notes.save(
+                text,
+                actor=f"{actor} via {'telegram' if channel == 'telegram' else 'web'}",
+                source_kind="answer",
+                source_session=found.session_id,
+                source_message=source,
+                tags=("任務摘要",),
+            )
+        except MemoryServiceError as error:
+            return {"ok": False, "code": error.code, "message": f"沒有存（{error.code}）。"}
+        return {
+            "ok": True,
+            "already": False,
+            "note": note.as_dict(),
+            "change_id": change,
+            "message": f"已存成筆記（{note.note_id}）。",
+        }
 
     def _record_form_run(
         self,
@@ -4995,6 +5049,7 @@ class AgentWeb:
         follow_up: dict[str, Any] | None = None,
         cards: list[dict[str, Any]] | None = None,
         files: list[dict[str, str]] | None = None,
+        summary_id: str | None = None,
     ) -> dict[str, Any] | None:
         """A run from a conversation's inline form, kept in that conversation
         as a pair (what was run, then its result) so the Agent sees it later.
@@ -5031,6 +5086,7 @@ class AgentWeb:
                 workflow_form=follow_up,
                 action_cards=tuple(cards or ()),
                 attachments=tuple(files or ()),
+                task_summary_id=summary_id,
             )
             self.runtime.state.save_conversation(
                 record.model_copy(
@@ -5112,9 +5168,14 @@ class AgentWeb:
         answer = readable(outcome)
         # The run's result and what it made stay in the conversation, by
         # short id, and its pictures show under it (owner 2026-10-25).
-        entry, images = self._record_run_outputs(item.session_id, outcome.workflow)
-        if entry:
-            answer = f"{answer.strip()}\n\n{entry}"
+        finished = self._record_run_outputs(item.session_id, outcome.workflow, arguments)
+        if finished.summary is not None and finished.entry:
+            # The run's line, then its 結果摘要 (task, results, outputs by id).
+            head = finished.entry.splitlines()[0]
+            answer = f"{answer.strip()}\n\n{head}\n{finished.summary.block()}"
+        elif finished.entry:
+            answer = f"{answer.strip()}\n\n{finished.entry}"
+        images = [file_entry(path) for path in finished.images]
         recorded = (
             self._record_form_run(
                 item.session_id,
@@ -5128,6 +5189,7 @@ class AgentWeb:
                     card for card in (self.card(card_id) for card_id in run_cards(outcome)) if card
                 ],
                 files=images,
+                summary_id=finished.summary.summary_id if finished.summary else None,
             )
             if item.session_id is not None
             else None

@@ -2153,6 +2153,41 @@ def _use_now(
             policy.add(grant)
 
 
+def model_condenser(gateway: Any) -> Callable[[str], list[str]]:
+    """One bounded structured call that condenses a run's text preview into
+    at most five key results (task result summaries, owner 2026-10-25), on
+    the gateway's approved model client and whichever model the running
+    turn selected. Without a configured model it calls nothing."""
+    from common.execution import TraceIdentifiers
+    from host_runtime.task_summaries import (
+        CONDENSE_MAX_OUTPUT_TOKENS,
+        CONDENSE_PROMPT,
+        parse_condensed,
+    )
+    from models.contracts import ModelMessage, ModelRequest
+
+    def condense(text: str) -> list[str]:
+        model = gateway.router.model
+        if model is None or not text.strip():
+            return []
+        reply = model.generate(
+            ModelRequest(
+                trace=TraceIdentifiers(
+                    trace_id="task-summary", request_id="task-summary", span_id="condense"
+                ),
+                model_alias=gateway.router.model_alias,
+                messages=(
+                    ModelMessage(role="system", text=CONDENSE_PROMPT),
+                    ModelMessage(role="user", text=text),
+                ),
+                max_output_tokens=CONDENSE_MAX_OUTPUT_TOKENS,
+            )
+        )
+        return parse_condensed(reply.text or "")
+
+    return condense
+
+
 def build_runtime(
     config: CompanyHostConfiguration,
     *,
@@ -2210,6 +2245,11 @@ def build_runtime(
     # 2026-10-25): listed in every turn and attachable by its short id.
     session_artifacts = SessionArtifacts(place.workspace_root)
     gateway.session_context = session_artifacts.guidance
+    # Task result summaries: field labels from the installed Workflow, and one
+    # bounded call on the approved model client when a run's outputs give
+    # too few facts (none when no model is configured).
+    session_artifacts.manifest_for = gateway.engine.workflows.get
+    session_artifacts.condenser = model_condenser(gateway)
     gateway.host_tools = lambda: (
         *chat_authoring.tools(),
         *bridge_tools(gateway.bridge),

@@ -66,6 +66,9 @@ class ConversationMessage(Contract):
     # the page can show which model answered; None when no model was asked
     # (a command, a run form) or for a record written before the field.
     model: str | None = Field(default=None, min_length=1, max_length=200)
+    # The task result summary this answer ends with (owner 2026-10-25), so
+    # the page can offer 「存成筆記」 for it; None for every other answer.
+    task_summary_id: str | None = Field(default=None, pattern=r"^ts-[0-9a-f]{12}$")
 
     @model_validator(mode="before")
     @classmethod

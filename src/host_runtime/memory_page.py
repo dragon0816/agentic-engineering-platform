@@ -109,6 +109,8 @@ MESSAGES = {
     "change_already_undone": "這次變更已經復原過了",
     "undo_conflict": "之後還有其他變更動到同一筆，不能直接復原",
     "memory_route_unknown": "沒有這個功能",
+    "summary_unknown": "找不到這個結果摘要（可能已過保留期限）",
+    "summary_retention_invalid": "保留天數要在 1 到 365 之間",
 }
 
 #: GET and POST routes of the page (besides M3's notes and preferences lists,
@@ -121,6 +123,8 @@ GET_ROUTES = (
     "/api/memory/notes/export",
     # M5: what one answer used (「為什麼」).
     "/api/memory/why",
+    # Task result summaries (owner 2026-10-25): the actor's recent ones.
+    "/api/memory/task-summaries",
 )
 POST_ROUTES = (
     "/api/memory/proposals/decide",
@@ -136,6 +140,10 @@ POST_ROUTES = (
     # 復原 of a finding's fix, which reopens the finding (#233).
     "/api/memory/health/undo",
     "/api/memory/health/settings",
+    # Task result summaries: delete one, the retention, 「存成筆記」.
+    "/api/memory/task-summaries/delete",
+    "/api/memory/task-summaries/settings",
+    "/api/memory/task-summaries/note",
 )
 
 
@@ -220,6 +228,7 @@ class MemoryPage:
             "/api/memory/why": lambda: self.web.memory_why.for_message(
                 query.get("session_id", ""), query.get("message_id", "")
             ),
+            "/api/memory/task-summaries": self.task_summaries,
         }
         handler = handlers.get(path)
         if handler is None:
@@ -602,6 +611,11 @@ class MemoryPage:
             "/api/memory/health/settings": lambda body: self.web.memory_health.update_settings(
                 self.actor, body
             ),
+            "/api/memory/task-summaries/delete": self.delete_task_summary,
+            "/api/memory/task-summaries/settings": self.task_summary_settings,
+            "/api/memory/task-summaries/note": lambda body: self.web.task_summary_note(
+                self.actor, str(body.get("id") or ""), "local"
+            ),
         }
         handler = handlers.get(path)
         if handler is None:
@@ -621,6 +635,46 @@ class MemoryPage:
             return _refused(error.code)
         except MemoryServiceError as error:
             return _refused(error.code)
+
+    # -- task result summaries (owner 2026-10-25) ---------------------------
+
+    def _summaries(self) -> Any:
+        store = self.web.runtime.session_artifacts
+        return store.summaries if store is not None else None
+
+    def task_summaries(self) -> dict[str, Any]:
+        """The actor's summaries within the retention, newest first."""
+        summaries = self._summaries()
+        if summaries is None:
+            return {"ok": True, "summaries": [], "settings": {"retention_days": 30}}
+        return {
+            "ok": True,
+            "summaries": [
+                {**item.as_dict(), "at_local": local_time(item.at.isoformat())}
+                for item in summaries.recent(self.actor)
+            ],
+            "settings": summaries.settings().model_dump(mode="json"),
+        }
+
+    def delete_task_summary(self, body: Mapping[str, Any]) -> dict[str, Any]:
+        summaries = self._summaries()
+        if summaries is None or not summaries.delete(self.actor, str(body.get("id") or "")):
+            return _refused("summary_unknown")
+        return {"ok": True, "message": "已刪除這個結果摘要。"}
+
+    def task_summary_settings(self, body: Mapping[str, Any]) -> dict[str, Any]:
+        summaries = self._summaries()
+        if summaries is None:
+            return _refused("memory_route_unknown")
+        try:
+            saved = summaries.save_settings(body.get("retention_days"))
+        except ValueError:
+            return _refused("summary_retention_invalid")
+        return {
+            "ok": True,
+            "settings": saved.model_dump(mode="json"),
+            "message": f"已儲存：任務摘要保留 {saved.retention_days} 天。",
+        }
 
     def decide(self, body: Mapping[str, Any]) -> dict[str, Any]:
         """保留原值 (`keep`) or 改用新值 (`accept`) for one open proposal."""
