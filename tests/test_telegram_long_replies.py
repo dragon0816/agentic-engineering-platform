@@ -2,14 +2,17 @@
 SDE weekly report came back as "Telegram refused the message").
 
 Telegram measures its 4096 limit in UTF-16 code units, so an emoji counts as
-two. Pieces are cut by that measure. Over the fake Bot API of
-`test_telegram_ingress`; no socket is opened.
+two. Pieces are cut by that measure; a piece Telegram still refuses sends the
+whole answer as a Markdown file with a short notice, and every refusal is
+logged with Telegram's reason but never the text or the token. Over the fake
+Bot API of `test_telegram_ingress`; no socket is opened.
 """
 
 from __future__ import annotations
 
 import json
 import logging
+import tempfile
 from collections.abc import Mapping
 from pathlib import Path
 from types import SimpleNamespace
@@ -28,6 +31,7 @@ from test_telegram_ingress import (
 
 import channels.telegram as telegram_module
 from channels.telegram import (
+    FILE_REPLY_NOTICE,
     HELP,
     MAX_MESSAGE_CHARS,
     UNDELIVERED_REPLY,
@@ -121,6 +125,64 @@ def test_each_piece_sent_is_within_telegrams_limit(tmp_path: Path) -> None:
     assert transport.uploads == []
 
 
+def test_a_refused_piece_sends_the_whole_answer_as_a_file_with_a_notice(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    scratch = tmp_path / "temp"
+    scratch.mkdir()
+    monkeypatch.setattr(tempfile, "tempdir", str(scratch))
+    answer = "第一段\n" + SECRET_LINE + "\n" + "x" * 5000
+    # Telegram refuses the second piece only (as if it could not show it).
+    transport = RefusingTransport(refuse=lambda text: text.startswith("x"))
+    item, _, _ = ingress(tmp_path, transport)
+    buttons = ((("Next", "/run next"),),)
+
+    assert item._reply(OWNER, answer, buttons) is True
+
+    assert len(transport.uploads) == 1
+    url, body = transport.uploads[0]
+    assert url.endswith("/sendDocument")
+    assert b'name="document"; filename="answer-' in body and b'.md"' in body
+    assert b"Content-Type: text/markdown" in body
+    assert answer.encode("utf-8") in body  # the whole answer, not just the refused piece
+    notices = [
+        payload for url, payload in transport.calls if payload.get("text") == FILE_REPLY_NOTICE
+    ]
+    assert len(notices) == 1
+    assert notices[0]["reply_markup"]["inline_keyboard"][0][0]["text"] == "Next"
+    assert UNDELIVERED_REPLY not in transport.sent()
+    # The temporary file and its folder are gone.
+    assert list(scratch.iterdir()) == []
+
+
+def test_the_document_failing_too_ends_in_the_undelivered_reply(tmp_path: Path) -> None:
+    transport = RefusingTransport(
+        [[update(1, OWNER, "/help")]],
+        refuse=lambda text: text == HELP,
+        document_status=400,
+    )
+    item, _, _ = ingress(tmp_path, transport)
+
+    result = poll(item)
+
+    assert len(transport.uploads) == 1
+    assert result.deliveries[0].replied is False
+    assert transport.sent()[-1] == UNDELIVERED_REPLY
+    assert FILE_REPLY_NOTICE not in transport.sent()
+
+
+def test_a_refused_answer_delivered_as_a_file_counts_as_replied(tmp_path: Path) -> None:
+    transport = RefusingTransport([[update(1, OWNER, "/help")]], refuse=lambda text: text == HELP)
+    item, _, _ = ingress(tmp_path, transport)
+
+    result = poll(item)
+
+    assert result.deliveries[0].replied is True
+    assert HELP.encode("utf-8") in transport.uploads[0][1]
+    assert transport.sent()[-1] == FILE_REPLY_NOTICE
+    assert UNDELIVERED_REPLY not in transport.sent()
+
+
 def test_a_refusal_is_logged_with_status_and_reason_but_no_text_or_token(
     tmp_path: Path, caplog: pytest.LogCaptureFixture
 ) -> None:
@@ -144,6 +206,8 @@ def test_a_refusal_is_logged_with_status_and_reason_but_no_text_or_token(
     assert f"piece 1 of 1, {utf16_units(answer)} UTF-16 units" in log
     assert "Telegram editMessageText refused: HTTP 400" not in log  # the fake accepts edits
     assert "Telegram sendPhoto refused: HTTP 400 (Bad Request: file empty)" in log
+    # The answer was then tried as a file, refused too, and logged by size.
+    assert "Telegram sendDocument refused: HTTP 400 (Bad Request: file empty)" in log
     assert all(record.levelno == logging.WARNING for record in caplog.records)
     assert_clean(log)
 

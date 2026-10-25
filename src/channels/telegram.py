@@ -22,6 +22,7 @@ import asyncio
 import json
 import logging
 import re
+import tempfile
 import threading
 import time
 import uuid
@@ -130,6 +131,8 @@ UNDELIVERED_REPLY = (
     "The answer could not be delivered here (Telegram refused the message). "
     "Ask again, or open Agent Web."
 )
+#: Sent after a refused answer went out as a Markdown file instead.
+FILE_REPLY_NOTICE = "回答太長或格式無法顯示，已改用檔案傳送"
 #: How much of Telegram's own refusal description a warning keeps.
 MAX_REFUSAL_CHARS = 200
 SETTINGS_HINT = "Open Agent Web to set them, then send /run again."
@@ -1992,19 +1995,48 @@ class TelegramIngress:
     ) -> bool:
         """Plain text, in pieces Telegram accepts, with any inline keyboard on
         the last piece; a text with nothing to show sends `blank` (a
-        completion notice) instead of failing. A reply that cannot be sent is
-        reported on the delivery, never raised over the outcome."""
+        completion notice) instead of failing. When Telegram still refuses a
+        piece (400), the whole answer goes as a Markdown file with a short
+        notice instead. A reply that cannot be sent is reported on the
+        delivery, never raised over the outcome."""
         try:
             pieces = [piece for piece in chunks(text) if piece.strip()] or [blank]
             for position, piece in enumerate(pieces):
                 payload: dict[str, JsonValue] = {"chat_id": chat_id, "text": piece}
                 if buttons and position == len(pieces) - 1:
                     payload["reply_markup"] = _keyboard(buttons)
-                if self._send_piece(payload, f"piece {position + 1} of {len(pieces)}") != 200:
+                status = self._send_piece(payload, f"piece {position + 1} of {len(pieces)}")
+                if status == 400:
+                    return self._reply_as_file(chat_id, text, buttons)
+                if status != 200:
                     return False
         except Exception as error:  # noqa: BLE001 - the delivery records that the reply failed
             _LOG.warning("Telegram reply failed: %s", describe(error))
             return False
+        return True
+
+    def _reply_as_file(
+        self,
+        chat_id: int,
+        text: str,
+        buttons: tuple[tuple[tuple[str, str], ...], ...] = (),
+    ) -> bool:
+        """The whole answer as `answer-<time>.md` through `sendDocument`, then
+        the notice (with the keyboard). False only when the file did not go;
+        the temporary file is removed either way."""
+        stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        with tempfile.TemporaryDirectory(
+            prefix="aep-telegram-", ignore_cleanup_errors=True
+        ) as folder:
+            path = Path(folder) / f"answer-{stamp}.md"
+            path.write_bytes(text.encode("utf-8"))
+            sent = self._send_photo(chat_id, path, document=True)
+        if not sent:
+            return False
+        notice: dict[str, JsonValue] = {"chat_id": chat_id, "text": FILE_REPLY_NOTICE}
+        if buttons:
+            notice["reply_markup"] = _keyboard(buttons)
+        self._send_piece(notice, "file notice")
         return True
 
     def _send_piece(self, payload: dict[str, JsonValue], where: str = "piece 1 of 1") -> int:
