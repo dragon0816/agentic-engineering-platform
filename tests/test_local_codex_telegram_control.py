@@ -463,3 +463,16 @@ def test_worker_notification_is_fixed_best_effort_json(tmp_path: Path) -> None:
     assert message["state"] == "completed"
     assert message["hop"] == 0
     assert "command" not in message
+
+
+def test_a_long_notification_is_cut_by_utf16_units_without_a_broken_pair(
+    tmp_path: Path,
+) -> None:
+    transport = Transport(ok_sent())
+    control = plane(tmp_path, transport)
+
+    assert control._send("a" + "😀" * 2500)
+
+    sent = transport.calls[0][1]["text"]
+    assert len(sent.encode("utf-16-le")) // 2 <= 4000
+    assert sent == "a" + "😀" * 1999

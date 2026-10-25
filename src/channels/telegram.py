@@ -91,7 +91,9 @@ from models.wire import (
 
 # The channel this ingress consumes, as the durable cursor names it.
 TELEGRAM_CHANNEL = "telegram"
-# Telegram refuses a message over 4096 characters; the source split at 4000.
+# Telegram refuses a message over 4096 characters, counted in UTF-16 code
+# units (an emoji counts as two); pieces are cut at 4000 units, as the source
+# cut at 4000 characters.
 MAX_MESSAGE_CHARS = 4000
 # Telegram caps long polling at 50 seconds; the transport waits a little longer.
 POLL_MARGIN_SECONDS = 10
@@ -484,13 +486,32 @@ def command_to_message(text: str) -> str:
     return f"{head} {rest}" if rest else head
 
 
+def utf16_units(text: str) -> int:
+    """The length Telegram measures: UTF-16 code units, two per astral
+    character such as most emoji."""
+    return len(text.encode("utf-16-le", "surrogatepass")) // 2
+
+
+def _fitting(text: str, limit: int) -> int:
+    """How many characters from the start of `text` fit in `limit` UTF-16
+    units. A cut between Python characters never splits a surrogate pair."""
+    units = 0
+    for index, char in enumerate(text):
+        units += 2 if ord(char) > 0xFFFF else 1
+        if units > limit:
+            return index
+    return len(text)
+
+
 def chunks(text: str, limit: int = MAX_MESSAGE_CHARS) -> Iterator[str]:
-    """Split at a newline when one is near enough, as the source did."""
+    """Split at a newline when one is near enough, as the source did, into
+    pieces of at most `limit` UTF-16 units (Telegram's measure)."""
     remaining = text
-    while len(remaining) > limit:
-        cut = remaining.rfind("\n", 0, limit)
+    while utf16_units(remaining) > limit:
+        end = max(_fitting(remaining, limit), 1)
+        cut = remaining.rfind("\n", 0, end)
         if cut <= 0:
-            cut = limit
+            cut = end
         yield remaining[:cut]
         remaining = remaining[cut:].lstrip("\n")
     if remaining or not text:
@@ -1773,7 +1794,7 @@ class TelegramIngress:
         buttons: tuple[tuple[tuple[str, str], ...], ...] = (),
     ) -> bool:
         """Replace one message's text and keyboard (a multi-select toggle)."""
-        if len(text) > MAX_MESSAGE_CHARS:
+        if utf16_units(text) > MAX_MESSAGE_CHARS:
             return False
         try:
             status, _ = self._call(
@@ -1830,6 +1851,7 @@ class TelegramIngress:
     def _send_status(self, chat_id: int, text: str) -> int | None:
         """Send one plain message and return its id, or None when it could not
         be sent; progress is a courtesy and never fails the request."""
+        text = next(chunks(text))
         try:
             status, body = self._call("sendMessage", {"chat_id": chat_id, "text": text})
             if status != 200:
@@ -1843,6 +1865,7 @@ class TelegramIngress:
     def _edit_status(self, chat_id: int, message_id: int, text: str) -> float | None:
         """Edit a status message; after a 429, the seconds Telegram asked to
         wait (its `retry_after`), else None."""
+        text = next(chunks(text))
         try:
             status, body = self._call(
                 "editMessageText", {"chat_id": chat_id, "message_id": message_id, "text": text}

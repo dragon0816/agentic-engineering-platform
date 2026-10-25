@@ -316,7 +316,13 @@ class TelegramControlPlane:
         return reply.status, body
 
     def _send(self, text: str) -> bool:
-        safe = _scrub(text)[:MAX_MESSAGE_CHARS]
+        # Telegram counts UTF-16 code units (an emoji is two); a cut half pair
+        # is dropped by the decode.
+        safe = (
+            _scrub(text)
+            .encode("utf-16-le", "surrogatepass")[: 2 * MAX_MESSAGE_CHARS]
+            .decode("utf-16-le", "ignore")
+        )
         try:
             status, _ = self._call(
                 "sendMessage", {"chat_id": self.config.control_chat_id, "text": safe}
