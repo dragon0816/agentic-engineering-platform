@@ -4562,3 +4562,37 @@ what it produced"; rule: `AGENTS.md` 20.
   path once. Agent Web: the same files are the answer's `files` / stored `attachments`
   (`{filename, kind, path}`), served only through `/api/conversations/file` (listed on the
   conversation and inside the workspace). Telegram `/new` clears the chat's ledger.
+
+## Task result summaries (owner 2026-10-25)
+
+Code: `src/host_runtime/task_summaries.py`; `SessionArtifacts.finish_run`, `finish_turn` in
+`src/host_runtime/session_artifacts.py`; `model_condenser` in `src/host_runtime/host.py`;
+`task_summary_note` and the nightly purge in `src/host_runtime/web.py`; routes in
+`src/host_runtime/memory_page.py`; `_summary_note` in `src/channels/telegram.py`. Tests:
+`tests/test_task_summaries.py`. Decision: `docs/DECISIONS.md` 2026-10-25 "Task result summaries,
+kept 30 days"; rule: `AGENTS.md` 20.
+
+- **`TaskSummary`**: `summary_id` (`ts-<12 hex>`), `session_id`, `actor`, `at` (UTC), `task`,
+  `status` (`succeeded`, `failed`, `needs_input`, `unavailable`, `answered`), `key_results` (≤ 5,
+  ≤ 80 characters each), `artifacts` (`{id, kind, name}`, the ids of `session__attach_file`),
+  `follow_ups` (≤ 3), `run_id`.
+- **Block** (the reply's end, 3–5 lines): 「結果摘要」, 「- 任務：<task>（<status word>）」, then when
+  present 「- 重點：…」, 「- 產出：f1 effort-chart.png（圖）；…」, 「- 後續：…」.
+- **System prompt**: the session's latest 5 within retention, one line each
+  (`<UTC time> <task> (<status>) — results: … — artifacts: … — follow-ups: …`), after the ledger.
+- **Storage**: `<workspace>/session-artifacts/task-summaries.sqlite`, table `task_summaries
+  (summary_id TEXT PRIMARY KEY, actor, session_id, at, body JSON)`; settings
+  `task-summaries-settings.json` `{retention_days: 1..365}` (absent: 30). `purge()` deletes rows with
+  `at` before now − retention and ledger `*.json` files last modified before it.
+- **Routes** (Agent Web page token, the page's actor): `GET /api/memory/task-summaries` →
+  `{ok, summaries: [TaskSummary + block + at_local], settings}`;
+  `POST /api/memory/task-summaries/delete {id}`, `POST /api/memory/task-summaries/settings
+  {retention_days}` (refusal `summary_retention_invalid`), `POST /api/memory/task-summaries/note
+  {id}` → `{ok, already, note?, change_id?, message}` (refusal `summary_unknown`).
+- **Messages**: `ConversationMessage.task_summary_id` (optional, `ts-…`) on the answer that ends
+  with a block; the page shows 「結果摘要存成筆記」 under it. Telegram: the button
+  `("存成筆記", "sumnote:<id>")` under the reply; a typed 「存成筆記」 (no open flow) saves the chat's
+  latest summary; without Agent Web the reply says it is needed.
+- **Condensing call**: only when deterministic key results are fewer than two and a step's
+  `preview` exists; `ModelRequest` with two messages, `max_output_tokens` 200, input ≤ 3,000
+  characters; none without `gateway.router.model`.

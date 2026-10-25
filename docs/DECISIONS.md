@@ -4993,3 +4993,42 @@ session 嗎」 got "I have no image file, give me a path" — 「這個workflow 
   would still cut them); raising the window for everything (costs every turn's budget for one fact);
   sending a path to the model and letting it pass a path back (an arbitrary-path read); keeping the
   ledger in memory only (an Agent Web conversation outlives a restart).
+
+## 2026-10-25 — Task result summaries, kept 30 days
+
+Owner, 2026-10-25: 「每次跑完任務是不是應該要compose，把重要的結果結論記下來」; storage: 「存硬碟，保留 30 天」.
+Builds on "A session remembers what it produced" above.
+
+- **Decision:** when a task completes in a session — a Workflow run (Telegram flow, a directly
+  handled command, Agent Web's run form, or a run the model started) or a model turn with at least
+  two successful tool calls and no run — the Host composes a `TaskSummary`: `task` (the Workflow and
+  up to three of its values by label, booleans by their choice words; or the person's message),
+  `status`, up to five `key_results`, `artifacts` (the attach tool's ids), `follow_ups` (「郵件草稿已存在
+  Outlook，尚未寄出」, 「這次沒有寫入或起草郵件」, a failure with 「再跑一次」), `at`, `session_id`.
+- **Deterministic first:** key results are the run's one-line summary plus numbers and short words
+  from step data (files, ids, bodies and inputs skipped). Only when that gives fewer than two and the
+  run has a text `preview`, one bounded call condenses the preview (system prompt + preview ≤ 3,000
+  characters, `max_output_tokens` 200, JSON array answer) on the gateway's approved model client,
+  inside the channel's `session_model` context so it uses the session's model. No model configured:
+  nothing is called. A fault: the deterministic fields stand.
+- **Shown and remembered:** the 「結果摘要」 block (3–5 lines) ends the reply in Telegram and Agent
+  Web; the latest 5 summaries of the session are listed in each turn's system prompt with the
+  session's ledger (read from disk each turn, so they survive the window and a restart). Telegram's
+  history entry also carries the block.
+- **Storage:** one small SQLite file `<workspace>/session-artifacts/task-summaries.sqlite`, table
+  `task_summaries (summary_id, actor, session_id, at, body)`; every read filters by actor.
+  Rejected: `state.sqlite` (the Bridge's durable state with its own schema, cursor and locking; a
+  30-day log of task results does not belong in it and would couple its schema to a UI feature);
+  the actor's `memory.sqlite` (curated memory with provenance, undo and per-space retention rules;
+  a summary is a transient record, and becomes curated only when the person presses 存成筆記);
+  JSON files per session (a purge and a per-actor list across sessions would scan every file).
+- **Retention:** `retention_days` default 30 (1–365) in `task-summaries-settings.json` beside it,
+  set on the memory page's 紀錄 tab (additive file; absent means 30). Reads ignore older rows at once;
+  the nightly job (`_nightly_tick`, once a day, no model) deletes them, and the session ledgers
+  (`*.json`) last written before the cutoff.
+- **Notes:** 「存成筆記」 under the block (Agent Web button `/api/memory/task-summaries/note`;
+  Telegram button `sumnote:<id>` or the words 「存成筆記」 for the chat's latest summary) saves the
+  block as one M3 note (`source_kind` answer, `source_message` `summary:<id>`, tag 任務摘要); a
+  second press finds it saved. Nothing is saved automatically.
+- **Visibility:** the memory page's 紀錄 tab lists the recent summaries with 存成筆記 and 刪除, and the
+  retention. Rule: `AGENTS.md` 20.
