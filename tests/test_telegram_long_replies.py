@@ -12,12 +12,29 @@ import json
 import logging
 from collections.abc import Mapping
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
-from test_telegram_ingress import OWNER, TOKEN, FakeReply, FakeTransport, ingress
+from test_telegram_ingress import (
+    OWNER,
+    TOKEN,
+    FakeReply,
+    FakeTransport,
+    ingress,
+    poll,
+    update,
+)
 
-from channels.telegram import MAX_MESSAGE_CHARS, chunks, utf16_units
+import channels.telegram as telegram_module
+from channels.telegram import (
+    HELP,
+    MAX_MESSAGE_CHARS,
+    UNDELIVERED_REPLY,
+    TelegramDelivery,
+    chunks,
+    utf16_units,
+)
 
 TELEGRAM_LIMIT = 4096
 TOO_LONG = "Bad Request: message is too long"
@@ -172,3 +189,216 @@ def test_status_messages_and_edits_stay_within_the_limit(tmp_path: Path) -> None
     # the caller then sends a new message.
     assert item._edit_reply(OWNER, 1, emoji_answer(3000)) is False
     assert len([url for url, _ in transport.calls if url.endswith("/editMessageText")]) == 1
+
+
+class LimitedTransport(FakeTransport):
+    """Answers the first `limited` `sendMessage` calls with a 429 asking to
+    wait `retry_after` seconds, or raises on the first `faults` calls, then
+    accepts."""
+
+    def __init__(
+        self,
+        batches: list[list[dict[str, Any]]],
+        limited: int = 0,
+        retry_after: int = 1,
+        *,
+        faults: int = 0,
+    ) -> None:
+        super().__init__(batches)
+        self.limited = limited
+        self.retry_after = retry_after
+        self.faults = faults
+        self.uploads: list[bytes] = []
+
+    def send(
+        self, url: str, body: bytes, headers: Mapping[str, str], timeout_s: float
+    ) -> FakeReply:
+        if url.endswith(("/sendDocument", "/sendPhoto")):
+            self.uploads.append(body)
+            return FakeReply(200, {"ok": True, "result": {"message_id": 5}})
+        if url.endswith("/sendMessage") and self.faults > 0:
+            self.faults -= 1
+            raise TimeoutError("the read operation timed out")
+        if url.endswith("/sendMessage") and self.limited > 0:
+            self.limited -= 1
+            self.calls.append((url, json.loads(body)))
+            return FakeReply(
+                429,
+                {
+                    "ok": False,
+                    "error_code": 429,
+                    "description": f"Too Many Requests: retry after {self.retry_after}",
+                    "parameters": {"retry_after": self.retry_after},
+                },
+            )
+        return super().send(url, body, headers, timeout_s)
+
+
+def test_a_short_answer_waits_out_a_long_rate_limit_instead_of_failing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    """A long run's status edits can earn a `retry_after` above 5 s; the answer
+    used to retry once after at most 5 s and end in UNDELIVERED_REPLY."""
+    waits: list[float] = []
+    monkeypatch.setattr("channels.telegram.time.sleep", waits.append)
+    transport = LimitedTransport([[update(1, OWNER, "/help")]], limited=2, retry_after=12)
+    item, _, _ = ingress(tmp_path, transport)
+
+    with caplog.at_level(logging.WARNING, logger="channels.telegram"):
+        result = poll(item)
+
+    assert result.deliveries[0].replied is True
+    assert waits == [12, 12]
+    assert transport.sent()[-1] == HELP
+    assert UNDELIVERED_REPLY not in transport.sent()
+    assert transport.uploads == []  # a rate limit is not a reason to send a file
+    assert "sendMessage refused: HTTP 429 (Too Many Requests: retry after 12)" in caplog.text
+
+
+def test_a_rate_limit_that_does_not_end_gives_up_after_a_few_capped_waits(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    waits: list[float] = []
+    monkeypatch.setattr("channels.telegram.time.sleep", waits.append)
+    transport = LimitedTransport([], limited=100, retry_after=600)
+    item, _, _ = ingress(tmp_path, transport)
+
+    assert item._reply(OWNER, "短回答") is False
+
+    assert waits == [60.0, 60.0, 60.0]  # capped, and only a few attempts
+    assert transport.uploads == []
+
+
+def test_a_reply_whose_call_timed_out_is_tried_once_more(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    waits: list[float] = []
+    monkeypatch.setattr("channels.telegram.time.sleep", waits.append)
+    transport = LimitedTransport([[update(1, OWNER, "/help")]], faults=1)
+    item, _, _ = ingress(tmp_path, transport)
+
+    with caplog.at_level(logging.WARNING, logger="channels.telegram"):
+        result = poll(item)
+
+    assert result.deliveries[0].replied is True
+    assert transport.sent() == [HELP]
+    assert waits == [1.0]
+    assert "sendMessage failed (attempt 1): TimeoutError" in caplog.text
+    # Two faults in a row are a failed answer, and that is said once.
+    transport = LimitedTransport([[update(2, OWNER, "/help")]], faults=2)
+    item, _, _ = ingress(tmp_path / "again", transport)
+    result = poll(item)
+    assert result.deliveries[0].replied is False
+    assert transport.sent() == [UNDELIVERED_REPLY]
+
+
+def blank_delivery(photos: tuple[str, ...] = (), workflow: str | None = None) -> TelegramDelivery:
+    """A delivery whose text is blank, as the leading hypothesis of the owner
+    report had it. The contract refuses one anywhere (see the test after
+    these; the poll result validates its deliveries again), so it is built
+    without validation to show what `_reply` does as a second line."""
+    outcome: Any = (
+        None
+        if workflow is None
+        else SimpleNamespace(
+            workflow=SimpleNamespace(run=SimpleNamespace(workflow=SimpleNamespace(name=workflow)))
+        )
+    )
+    return TelegramDelivery.model_construct(
+        update_id=1,
+        chat_id=OWNER,
+        sender_id=OWNER,
+        disposition="routed",
+        reply="  \n ",
+        buttons=(),
+        edit_message_id=None,
+        photos=photos,
+        documents=(),
+        replied=False,
+        outcome=outcome,
+        failure=None,
+    )
+
+
+def test_an_answer_with_no_text_but_files_says_the_workflow_finished(
+    tmp_path: Path,
+) -> None:
+    chart = write_file(tmp_path, "chart.png")
+    delivery = blank_delivery((str(chart),), "sde-weekly-report")
+    transport = LimitedTransport([])
+    item, _, _ = ingress(tmp_path, transport)
+
+    notice = telegram_module._blank_notice(delivery)
+    assert item._reply(OWNER, delivery.reply or "", blank=notice) is True
+    assert item._send_photo(OWNER, chart) is True
+
+    assert transport.sent() == ["sde-weekly-report 已完成"]
+    assert len(transport.uploads) == 1
+    assert UNDELIVERED_REPLY not in transport.sent()
+    # Files without a Workflow name: just 「已完成」.
+    assert telegram_module._blank_notice(blank_delivery((str(chart),))) == "已完成"
+
+
+def test_an_answer_with_nothing_at_all_sends_a_short_completion_notice(
+    tmp_path: Path,
+) -> None:
+    transport = LimitedTransport([])
+    item, _, _ = ingress(tmp_path, transport)
+
+    assert item._reply(OWNER, "  \n ") is True
+    assert item._reply(OWNER, " ", blank=telegram_module._blank_notice(blank_delivery())) is True
+    named = telegram_module._blank_notice(blank_delivery(workflow="sde-weekly-report"))
+
+    assert transport.sent() == ["已完成（沒有文字結果）"] * 2
+    assert named == "sde-weekly-report 已完成（沒有文字結果）"
+    assert transport.uploads == []
+
+
+def test_a_blank_reply_never_reaches_telegram_as_an_undelivered_answer(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The delivery contract refuses a blank reply (`Text`: at least one
+    non-space character), so a turn whose text came out empty is a handling
+    failure with its own message, never UNDELIVERED_REPLY: that one means
+    Telegram itself refused a non-empty answer (owner report 2026-10-25)."""
+    monkeypatch.setattr(telegram_module, "_describe", lambda outcome: "  ")
+    transport = RefusingTransport([[update(7, OWNER, "shipment.run")]])
+    item, _, _ = ingress(tmp_path, transport)
+
+    result = poll(item)
+
+    delivery = result.deliveries[0]
+    assert delivery.disposition == "failed"
+    assert delivery.failure is not None and "string_pattern_mismatch" in delivery.failure.message
+    assert transport.sent() == ["That request could not be handled on this Bridge."]
+    assert UNDELIVERED_REPLY not in transport.sent()
+
+
+class EditRefusingTransport(FakeTransport):
+    def __init__(self, description: str) -> None:
+        super().__init__()
+        self.description = description
+
+    def send(
+        self, url: str, body: bytes, headers: Mapping[str, str], timeout_s: float
+    ) -> FakeReply:
+        if url.endswith("/editMessageText"):
+            self.calls.append((url, json.loads(body)))
+            return FakeReply(400, {"ok": False, "error_code": 400, "description": self.description})
+        return super().send(url, body, headers, timeout_s)
+
+
+def test_an_edit_that_changes_nothing_counts_as_delivered_and_others_fall_back(
+    tmp_path: Path,
+) -> None:
+    unchanged = EditRefusingTransport(
+        "Bad Request: message is not modified: specified new message content and reply "
+        "markup are exactly the same as a current content and reply markup of the message"
+    )
+    item, _, _ = ingress(tmp_path, unchanged)
+    assert item._edit_reply(OWNER, 4, "same text") is True
+    assert unchanged.sent() == []
+    # Any other refusal makes the poll loop send the answer as a new message.
+    gone = EditRefusingTransport("Bad Request: message to edit not found")
+    item, _, _ = ingress(tmp_path / "gone", gone)
+    assert item._edit_reply(OWNER, 4, "new text") is False

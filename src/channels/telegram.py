@@ -107,8 +107,23 @@ SLASH_COMMAND = re.compile(
     r"^/([a-zA-Z_][a-zA-Z0-9_]*)(?:@[A-Za-z0-9_]+)?(?:\s+([a-zA-Z_][a-zA-Z0-9_]*))?(?:\s+(.*))?$",
     re.DOTALL,
 )
-#: Longest wait honored after a rate-limited reply.
+#: Longest wait honored after a rate-limited status edit or final edit.
 MAX_RETRY_WAIT_S = 5.0
+#: Longest wait honored after a rate-limited answer, and how many times it is
+#: tried. A long run's status edits can earn a `retry_after` well over 5 s; an
+#: answer is worth waiting for (owner report 2026-10-25).
+MAX_REPLY_RETRY_WAIT_S = 60.0
+REPLY_ATTEMPTS = 4
+#: Pause before the one retry of an answer whose call raised (a timeout or a
+#: reset connection on the way to Telegram).
+TRANSPORT_RETRY_WAIT_S = 1.0
+#: Telegram's answer to an edit that would leave the message as it is: the
+#: message already shows the answer, so nothing is resent.
+NOT_MODIFIED = "message is not modified"
+#: Sent when the answer had no text at all (owner 2026-10-25): never the
+#: undelivered notice, which means Telegram refused a real answer.
+DONE_NOTICE = "已完成"
+DONE_WITHOUT_TEXT = "（沒有文字結果）"
 #: Sent when an answer could not be delivered, so the person is not left
 #: with only the "Done" status line (owner 2026-10-15).
 UNDELIVERED_REPLY = (
@@ -582,6 +597,21 @@ def _log_refused(method: str, status: int, body: bytes, detail: str = "") -> Non
     )
 
 
+def _done_notice(name: str | None, attachments: bool) -> str:
+    """What is sent in place of an answer with no text: 「<workflow> 已完成」
+    above its files, or a short completion notice when nothing came back."""
+    done = f"{name} {DONE_NOTICE}" if name else DONE_NOTICE
+    return done if attachments else f"{done}{DONE_WITHOUT_TEXT}"
+
+
+def _blank_notice(delivery: "TelegramDelivery") -> str:
+    """The completion notice for `delivery` if its text has nothing to show,
+    naming the Workflow that ran, when one did."""
+    run = delivery.outcome.workflow if delivery.outcome is not None else None
+    name = run.run.workflow.name if run is not None else None
+    return _done_notice(name, bool(delivery.photos or delivery.documents))
+
+
 def _keyboard(buttons: tuple[tuple[tuple[str, str], ...], ...]) -> dict[str, JsonValue]:
     return {
         "inline_keyboard": [
@@ -960,10 +990,15 @@ class TelegramIngress:
                     )
                 if not replied:
                     replied = await asyncio.to_thread(
-                        self._reply, update.chat_id, delivery.reply, delivery.buttons
+                        partial(self._reply, blank=_blank_notice(delivery)),
+                        update.chat_id,
+                        delivery.reply,
+                        delivery.buttons,
                     )
                 if not replied:
-                    # Never silent: say that the answer did not arrive.
+                    # Never silent: say that the answer did not arrive. Only
+                    # Telegram refusing (or never answering) gets here; an
+                    # answer with no text was sent as a completion notice.
                     await asyncio.to_thread(self._reply, update.chat_id, UNDELIVERED_REPLY)
                 for photo in delivery.photos:
                     await asyncio.to_thread(self._send_photo, update.chat_id, Path(photo))
@@ -1835,7 +1870,9 @@ class TelegramIngress:
         text: str,
         buttons: tuple[tuple[tuple[str, str], ...], ...] = (),
     ) -> bool:
-        """Replace one message's text and keyboard (a multi-select toggle)."""
+        """Replace one message's text and keyboard (a multi-select toggle).
+        False sends the reply as a new message instead (any refusal but
+        Telegram's "message is not modified")."""
         if utf16_units(text) > MAX_MESSAGE_CHARS:
             return False
         try:
@@ -1851,6 +1888,10 @@ class TelegramIngress:
         except Exception as error:  # noqa: BLE001 - the caller sends a new message instead
             _LOG.warning("Telegram editMessageText failed: %s", describe(error))
             return False
+        if status == 400 and NOT_MODIFIED in _refusal(body):
+            # A second tap that changes nothing: the message already shows
+            # this text and keyboard, so it counts as delivered.
+            return True
         if status != 200:
             _log_refused("editMessageText", status, body, f"{utf16_units(text)} UTF-16 units")
         return status == 200
@@ -1946,14 +1987,15 @@ class TelegramIngress:
         chat_id: int,
         text: str,
         buttons: tuple[tuple[tuple[str, str], ...], ...] = (),
+        *,
+        blank: str = DONE_NOTICE + DONE_WITHOUT_TEXT,
     ) -> bool:
         """Plain text, in pieces Telegram accepts, with any inline keyboard on
-        the last piece. A reply that cannot be sent is reported on the
-        delivery, never raised over the outcome."""
+        the last piece; a text with nothing to show sends `blank` (a
+        completion notice) instead of failing. A reply that cannot be sent is
+        reported on the delivery, never raised over the outcome."""
         try:
-            pieces = [piece for piece in chunks(text) if piece.strip()]
-            if not pieces:
-                return False
+            pieces = [piece for piece in chunks(text) if piece.strip()] or [blank]
             for position, piece in enumerate(pieces):
                 payload: dict[str, JsonValue] = {"chat_id": chat_id, "text": piece}
                 if buttons and position == len(pieces) - 1:
@@ -1966,27 +2008,49 @@ class TelegramIngress:
         return True
 
     def _send_piece(self, payload: dict[str, JsonValue], where: str = "piece 1 of 1") -> int:
-        """One `sendMessage`, retried once after a rate limit (the progress
-        edits just before it can trigger one) and once without its keyboard
-        when Telegram refuses the message, so an answer is not lost. Returns
-        the last HTTP status; every refusal is logged with Telegram's reason,
-        the piece's position and its UTF-16 length, never its text."""
+        """One `sendMessage`, so an answer is not lost: retried after a rate
+        limit for as long as Telegram asks (up to a minute, a few times; the
+        progress edits just before it can trigger one), once after a call
+        that raised, and once without its keyboard when Telegram refuses the
+        message. Returns the last HTTP status, 0 when no call got an answer;
+        every refusal is logged with Telegram's reason, the piece's position
+        and its UTF-16 length, never its text."""
         text = payload.get("text")
         detail = f"{where}, {utf16_units(text) if isinstance(text, str) else 0} UTF-16 units"
-        status, body = self._call("sendMessage", payload)
-        if status == 429:
+        status, body = self._send_once(payload, detail)
+        for _ in range(REPLY_ATTEMPTS - 1):
+            if status != 429:
+                break
             _log_refused("sendMessage", status, body, detail)
-            time.sleep(_retry_after(body))
-            status, body = self._call("sendMessage", payload)
+            time.sleep(_retry_after(body, MAX_REPLY_RETRY_WAIT_S))
+            status, body = self._send_once(payload, detail)
         if status == 400 and "reply_markup" in payload:
             _log_refused("sendMessage", status, body, f"{detail}, with keyboard")
-            status, body = self._call(
-                "sendMessage",
-                {key: value for key, value in payload.items() if key != "reply_markup"},
+            status, body = self._send_once(
+                {key: value for key, value in payload.items() if key != "reply_markup"}, detail
             )
-        if status != 200:
+        if status not in (0, 200):
             _log_refused("sendMessage", status, body, detail)
         return status
+
+    def _send_once(self, payload: dict[str, JsonValue], detail: str) -> tuple[int, bytes]:
+        """One `sendMessage`; a call that raises is logged and tried once
+        more after a short pause (a timeout or a reset connection), and is
+        status 0 when that fails too. A retry after a timeout may show the
+        piece twice, which beats losing the answer."""
+        for attempt in (1, 2):
+            try:
+                return self._call("sendMessage", payload)
+            except Exception as error:  # noqa: BLE001 - the caller reports it on the delivery
+                _LOG.warning(
+                    "Telegram sendMessage failed (attempt %s): %s; %s",
+                    attempt,
+                    describe(error),
+                    detail,
+                )
+                if attempt == 1:
+                    time.sleep(TRANSPORT_RETRY_WAIT_S)
+        return 0, b""
 
     def _send_photo(self, chat_id: int, path: Path, *, document: bool = False) -> bool:
         """One `sendPhoto` (with the chart's short note as its caption) or
