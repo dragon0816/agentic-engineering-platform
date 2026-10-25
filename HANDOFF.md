@@ -1,8 +1,29 @@
 # Handoff
 
-Updated: 2026-10-25 (Asia/Taipei), by Claude Code (Telegram delivery, reply context and claim-check fixes; earlier: BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-25 (Asia/Taipei), by Claude Code (fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## Telegram delivery, reply context and claim-check fixes (2026-10-25, Claude Code) — latest
+## Fewer questions in a Workflow run; activity before a restart (2026-10-25, Claude Code) — latest
+
+- Commits 397ea989 (prefill reading), 429e4b47 (Telegram card, stale taps/replies, Agent Web form),
+  94de93d6 (`/api/activity`, `launcher.restart_blockers`) plus a docs commit on main; not pushed, Agent
+  Web not restarted, no real bot message, no Workflow run. Row in `docs/TASKS.md`; decision
+  `docs/DECISIONS.md` 2026-10-25 "Fewer questions…"; contract `docs/CONTRACTS.md` "Agent Web activity".
+- Verification: ruff check, ruff format --check, mypy (768 files) clean; full pytest project venv 4024 passed, 7 skipped (`--basetemp=C:/aepci-wk/bt-pf`); `C:/aepci-wk/venv` (`host_runtime` from this repo) 3997 passed, 34 skipped (`--basetemp=C:/aepci-wk/bt-pfc`).
+- **Restart procedure:** the local helper `.scratch/restart_web.py` (gitignored) now calls
+  `launcher.restart_blockers` first and exits 2 listing the active items unless `--force`. The Agent Web
+  running now predates `/api/activity`, so the check reports "activity unknown" until the restart that
+  deploys this: for that one restart, check `/api/tasks` and that the owner is not in a Telegram flow,
+  then pass `--force`.
+- Owner check after that restart: 「幫我執行 43W SDE weekly report」 → no questions, one card with
+  「Report week：2026_43W（從你的訊息）」 and 「Save the weekly mail draft：是（預設）」, buttons 確認執行 / 修改;
+  type 「dry run 改成是」 → the card again with Dry run 是; tap an older message's Yes during a flow → 「這個
+  按鈕屬於較早的問題，沒有採用。」; Agent Web chat 「執行 sde-weekly-report 43W」 → the form says 「已從你的訊息
+  帶入：Report week = 2026_43W」 with optional fields folded; `GET /api/activity` with the page token shows
+  `telegram_flow` while a card is open and `busy: false` after.
+- Not done: values in a replied-to ordinary message (not a flow question) are read only by the model's
+  run form; flow state is not persisted (decision explains why).
+
+## Telegram delivery, reply context and claim-check fixes (2026-10-25, Claude Code)
 
 - Commits bbe7297f, 910bc686, 3b928bff, 506a70d4, 8aa4acf0, ae1d5e6e, 7c6689af plus a docs commit
   on main; not pushed, Agent Web not restarted, no real bot message sent, no Workflow run. Row in

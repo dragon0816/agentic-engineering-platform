@@ -4473,3 +4473,28 @@ Code: `src/models/selection.py` (`TURN_MODEL`, `SelectableModelClient`),
   conversation, shown only on the chat tab; the composer has `#conversation-model` (label
   "LLM model"), a read-only label when one model is served or a CLI backend is active, and a
   status line; the menu is disabled while a turn of that conversation runs.
+
+## Agent Web activity (`GET /api/activity`, owner 2026-10-25)
+
+Code: `AgentWeb.activity` and the route in `src/host_runtime/web.py`,
+`TelegramIngress.activity` in `src/channels/telegram.py`, `TurnProgressBoard.running` in
+`src/agent/turn_progress.py`, `activity` / `restart_blockers` in `src/host_runtime/launcher.py`.
+Tests: `tests/test_restart_activity.py`. Decision: `docs/DECISIONS.md` 2026-10-25; rule:
+`AGENTS.md` 19.
+
+- `GET /api/activity` (loopback, `Authorization: Bearer <page token>`, as every `/api/*` read) →
+  `{"ok": true, "busy": <bool>, "items": [...]}`; `busy` is true when `items` is not empty.
+- Items, each with `kind` and `started_at` (ISO 8601, UTC, seconds):
+  - `{"kind": "task", "started_at", "task": <task kind>}`: a running background task (the
+    `status: running` rows of `GET /api/tasks`);
+  - `{"kind": "chat_turn", "started_at"}`: an Agent Web conversation turn in progress;
+  - `{"kind": "telegram_flow", "started_at", "chat", "workflow": "<namespace>/<name>",
+    "stage": "question" | "card"}`: an open Telegram question flow (memory only; expired flows are
+    left out);
+  - `{"kind": "telegram_turn", "started_at", "chat"}`: a Telegram update being handled now.
+- No message content, no names, no chat or sender ids: `chat` is the first 12 hex characters of a
+  SHA-256 over a per-process random salt and `<chat>:<sender>`, stable within one Agent Web run.
+- `launcher.restart_blockers(address)` (the address file's `address`, with its token) returns one
+  line per item, `[]` when idle, and `["activity unknown: …"]` when the route does not answer (Agent
+  Web down, or a build without it): a restart helper never reads "unknown" as idle. A restart waits or
+  asks while it is not empty; forcing is the operator's explicit choice.

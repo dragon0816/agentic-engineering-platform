@@ -4884,3 +4884,52 @@ had been claimed, for an answer that only said 「如果是已安裝 Workflow，
   every value and its origin, editable in plain words; nothing consumed without input. Maintenance
   restarts check running tasks, in-progress turns and open flows or forms on every channel, and wait
   or ask.
+
+## 2026-10-25 — Fewer questions in a Workflow run; the activity read before a restart
+
+Implements `AGENTS.md` rules 18 and 19 for Workflow runs (owner, Telegram, 2026-10-25:
+「不是已經講了為什麼要再回一次」, 「有輸入過的參數能不能自己填啊？」).
+
+- **Values in the request are read deterministically, from the Workflow's declaration**
+  (`common/run_prefill.py`, through `workflow_run_form.prefill_from_text`, so Agent Web's run form and
+  Telegram's flow read the same values): a week (`43W`, `W43`, `第43週`, `2026_43W`) for the one text
+  field about a week whose label, description, help or examples show the format (`2026_40W`), in that
+  format, the ISO year of today when omitted; an explicit date for the only date field, or a from/to
+  range (`… 到 …`, `to`, `~`) for exactly two; a declared choice named once in one select; a dry-run
+  phrase (dry run, 只看計畫, 試跑 / 正式, 寫入) for the one dry-run switch, never when both or a negation
+  appear. Anything else is left for the form. Values go through `person_prefill` (the field rules and
+  the embedded-secret check), so an invalid one is dropped and asked; credentials are never parameters
+  (`SECRET_FIELD`). Rejected: a new model call to fill inputs. The model path already exists
+  (`workflows__run_form` with `agent_prefill`) and both channels use it the same way; a second model
+  call on every run request would add latency and a non-deterministic step to a rule that covers the
+  reported cases.
+- **Telegram asks only missing required inputs, then one card.** Given values, last time's identity
+  values and declared defaults are never asked; optional inputs are not asked one by one. The card
+  lists every value with 「（從你的訊息）」, 「（預設）」 or 「（上次的值）」 and 「未填（不使用）」, with
+  **確認執行** and **修改**; 修改 shows one button per input, and plain text such as 「Dry run 改成否」,
+  「From date 2026-10-19」 or `week=2026_44W` (label, label head or name, then the value; a switch's name
+  alone flips it) changes a value and shows the card again, checked like a typed answer. Every run now
+  shows the card, except a read-only Workflow with no inputs. The separate 「Same as last time?」 question
+  is gone; its values are on the card. Rejected: a `/skip` per optional input (the reported problem); a
+  cancel button on the card (`/cancel` and 「取消」 still cancel; the owner asked for two buttons).
+- **A button counts only on the question it was sent with.** The ingress keeps the message id Telegram
+  gave the current question (`FlowState.prompt_message_id`) and refuses a tap on any other message
+  with 「這個按鈕屬於較早的問題，沒有採用。」 and the current question. Live cause, 12:51: after the
+  restart a new flow was at 1/9 (Dry run) and 3/9 followed at once, then 「From date must be a
+  YYYY-MM-DD date」 with no answer; the logs are empty, and the most likely inputs are a tap on the old
+  flow's Yes button and the owner's next message, both taken as answers to whatever the new flow
+  asked. Rejected: a flow token in the callback data (every button's data and its 64-byte limit change).
+- **A Reply on a flow question.** On another question of the same open flow it sets that input; on a
+  question whose flow is gone (restart, time limit) the flow starts again with that value given and says
+  「那個流程已經結束，已用你的值重新開始。」. A tap under a gone flow's message says 「那個流程已經結束。…」
+  and is never sent to the model as text. A question is recognised by its first lines
+  (`<name> (2/9)` or `<name> (修改)`, then the label).
+- **`GET /api/activity` and `launcher.restart_blockers`.** Running background tasks, chat turns in
+  progress, open Telegram flows and Telegram updates being handled, with `busy`. No message content; a
+  Telegram chat is a 12-character hash salted per process. `restart_blockers` reports an Agent Web that
+  does not answer the route (or predates it) as unknown, never as idle. Agent Web's run form keeps no
+  server state (an open form survives a restart as long as the page does), so it is not listed.
+- **Flow state is not persisted.** A flow holds the manifest, a live choice provider and upload paths;
+  storing it would need a store, a schema and an expiry for little gain now that a run asks only missing
+  required inputs, a restart is refused while a flow is open, and a Reply on a lost question restarts it
+  with the value.

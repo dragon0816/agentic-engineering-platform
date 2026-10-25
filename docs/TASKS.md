@@ -3375,3 +3375,27 @@ s-k-20261011T102952` (not published).
   `C:/aepci-wk/venv` 3980 passed, 34 skipped, 1 failed (`test_bi_schemas_ui.py`, untouched browser
   test; passed alone, `--basetemp=C:/aepci-wk/bt-tg2cr`). Not pushed, Agent Web not restarted.
 - [ ] Owner check after a restart (when `/api/tasks` is idle): see `HANDOFF.md`.
+
+## Fewer questions in a Workflow run; activity read before a restart (2026-10-25)
+
+- [x] Owner reports 2026-10-25 (Telegram: 「幫我執行 43W SDE weekly report」 asked all 9 inputs including
+  the week; 「不是已經講了為什麼要再回一次」; after the 12:48 restart a new flow skipped Dry run and
+  refused From date with no answer; 「有輸入過的參數能不能自己填啊？」; the restart check saw only
+  `/api/tasks` and dropped the open flow). Claude Code. Implements `AGENTS.md` rules 18 and 19;
+  decision `docs/DECISIONS.md` 2026-10-25 "Fewer questions…"; contract `docs/CONTRACTS.md` "Agent Web
+  activity"; user guide §4.4, §4.6, §8.2.
+  1. Values in a run request are read from the Workflow's declaration when unambiguous (week in the
+     example's format, ISO year when omitted; date or from/to range; a declared choice; dry run / 正式),
+     validated like typed answers; Agent Web's form and Telegram share it (397ea989).
+  2. Telegram asks only missing required inputs, then one card with every value and its origin,
+     確認執行 / 修改, typed edits (「Dry run 改成否」, 「From date 2026-10-19」); presets on the card instead
+     of 「Same as last time?」; a button counts only on its own question; a Reply on a gone flow's
+     question restarts it with the value. Agent Web's chat form names the values it read and folds
+     untouched optional fields under 「其他選項（使用預設值）」 (429e4b47).
+  3. `GET /api/activity` (tasks, chat turns, Telegram flows and turns; hashed chat, no content) and
+     `launcher.restart_blockers`; flow state is not persisted (see the decision) (94de93d6).
+  Tests: `tests/test_run_prefill.py`, `tests/test_telegram_fewer_questions.py`,
+  `tests/test_restart_activity.py` (new); flow tests in nine files updated to the new order (optional
+  inputs reached through 修改, every run confirmed on the card).
+  Verification: ruff check, ruff format --check, mypy (768 files) clean; full pytest project venv 4024 passed, 7 skipped (`--basetemp=C:/aepci-wk/bt-pf`); `C:/aepci-wk/venv` (`host_runtime` from this repo) 3997 passed, 34 skipped (`--basetemp=C:/aepci-wk/bt-pfc`). Not pushed, Agent Web not restarted, no real bot message, no Workflow run.
+- [ ] Owner check after a restart (see `HANDOFF.md`).
