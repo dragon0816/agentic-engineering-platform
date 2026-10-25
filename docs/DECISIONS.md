@@ -4871,3 +4871,16 @@ had been claimed, for an answer that only said 「如果是已安裝 Workflow，
   the text is the same in both. The English reasons go to the model's retry and to a warning line
   (`agent.conversation_harness`); telemetry still records which check failed. Rejected: keeping the
   English reason in the answer (the owner read it as noise).
+
+## 2026-10-25 — Design principles: never re-ask given values; never interrupt mid-interaction
+
+- **Decision (owner, 2026-10-25):** 「這個部分應該要寫到設計原則裡面吧不然每次又遇到一樣問題」. Added
+  `AGENTS.md` rules 18 and 19 and `docs/PRODUCT_VISION.md` principle 10.
+- **Why:** live, 「幫我執行 43W SDE weekly report」 in Telegram asked for the report week again, asked
+  optional inputs one by one, moved on before a Yes/No was answered, and an Agent Web restart for an
+  update dropped the owner's open question flow because the restart check looked only at tasks.
+- **Rules:** prefill and validate given values (message, replied-to message, model run arguments); optional
+  inputs take defaults; ask only required missing values, one at a time; one confirmation card with
+  every value and its origin, editable in plain words; nothing consumed without input. Maintenance
+  restarts check running tasks, in-progress turns and open flows or forms on every channel, and wait
+  or ask.

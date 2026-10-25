@@ -25,6 +25,8 @@ Build a multi-user, contribution-driven agentic engineering platform without sac
 15. **Business approval and technical policy are distinct.** Department/domain owners validate business correctness; technical policy validates capability risk, data access, cross-scope use and side effects. Automate low-risk checks where practical.
 16. **Local-first behavior is contractual.** Tasks/Workflows declare local capability and central-service dependencies; do not guess connectivity requirements at runtime.
 17. **Secrets are references, never asset content.** Shared assets may declare `SecretRef` requirements, but resolution and authorization belong to the execution environment.
+18. **Never ask for what the person already gave.** When a Workflow, form or flow collects inputs (Agent Web, Telegram or any channel), values stated in the request, in a replied-to message or in the model's run arguments are prefilled and validated, never asked again. Optional inputs take their defaults without a question. Only required, missing values are asked, one at a time and waiting for each answer. Before running, one confirmation lists every value with its origin (from the message, default, answered) and lets the person confirm or change any value in plain words. Nothing is consumed as an answer without the person's input. (Owner, 2026-10-25.)
+19. **Never interrupt a person mid-interaction.** Restarts, updates and redeploys first check active work: running tasks, in-progress turns and open question flows or forms on every channel; they wait or ask while any exists. State a person is in the middle of is either persisted or the restart is refused. (Owner, 2026-10-25.)
 
 ## Migration rules
 

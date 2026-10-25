@@ -175,6 +175,10 @@ contribution.
    evaluation evidence.
 9. **Keep human judgment central.** Automation reduces implementation and
    coordination cost while humans retain ownership.
+10. **Respect the person's time.** Never ask again for what was already said;
+    ask only what is required and missing, and confirm once before acting
+    (`AGENTS.md` rule 18). Never interrupt someone mid-interaction for
+    maintenance (`AGENTS.md` rule 19).
 
 ## 11. Development priority
 
