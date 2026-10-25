@@ -1107,6 +1107,12 @@ Agent Web 要在執行中，Telegram 才會有回應。
 - `/status`：這台電腦的狀態。
 - `/<skill> <指令>`：直接執行某個 Skill 的指令。
 - 傳檔案或照片並加上說明文字，Agent 會處理那個檔案。
+- 對某則訊息按 **回覆（Reply）** 再打字（例如「再跑一次」），Agent 會一起看到被回覆的那則內容
+  （你自己的訊息或 bot 的回答都可以）。同一個對話也會記得之前的要求，包括沒有完成的那一輪和
+  Workflow 的執行；這份記憶只在 Agent Web 執行期間保留，重新啟動後會清空，`/new` 也會清空。
+- 回答沒有文字時（例如只有圖表），會顯示「<Workflow> 已完成」。
+- 很長的回答（例如週報）會分成好幾則訊息；如果 Telegram 仍然拒收（太長或格式無法顯示），
+  整份回答會改成一個 `answer-<時間>.md` 檔案傳來，並附上「回答太長或格式無法顯示，已改用檔案傳送」。
 - Agent 在對話中要求安裝或執行時，會出現 **核准執行 …** / **核准安裝 …** / **拒絕** 按鈕；
   只有這台電腦的擁有者能按。
 - AI 提案（第 12 章）：只有低風險的種類可以在 Telegram 直接按 **Apply**（Laya 設定、
@@ -1120,7 +1126,8 @@ Agent Web 要在執行中，Telegram 才會有回應。
 | 狀況 | 處理方式 |
 |---|---|
 | bot 不回應 | 卡片顯示 `The bot is running but allows nobody yet` 時，照 8.1 第 4 步 Allow 自己；也檢查 Agent Web 有在執行嗎？**Answer Telegram messages** 有勾嗎？你的 ID 在 **Allowed senders** 裡嗎？ |
-| 「The answer could not be delivered here …」 | Telegram 拒絕了那則訊息（太長或太頻繁）；到 Agent Web 看同一個結果 |
+| 「The answer could not be delivered here …」 | Telegram 連文字和檔案都拒收了，或連線一直失敗（Telegram 要求等待時，Agent 最多等 1 分鐘再送；連線中斷會再試一次）；到 Agent Web 看同一個結果。原因（不含回答內容）記在 `workspace\logs` 最新的 `agent-web-*.err.log`，以 `Telegram sendMessage refused: HTTP …` 或 `Telegram sendMessage failed …` 開頭 |
+| 回答後面出現「（系統檢查：…）」 | 這一輪 Agent 說已經做完某件事，但系統沒看到對應的工具成功執行，或提到的檔案不存在；請到 Agent Web 確認結果，或請它實際執行一次 |
 | 「The Agent gave no answer after using …」 | 模型沒有產生文字；換個說法再問一次 |
 | 上傳檔案被拒 | Telegram bot 只能下載 20 MB 以下的檔案；大檔請用 Agent Web |
 | 「… Open Agent Web to set them, then send /run again.」 | Workflow 的設定只能在 Agent Web 填（第 9 章） |

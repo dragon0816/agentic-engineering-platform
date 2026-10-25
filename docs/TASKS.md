@@ -3344,3 +3344,34 @@ s-k-20261011T102952` (not published).
   `dataset_unknown`; same-value field save → `unchanged`, version kept. Sharing itself was live-tested on a
   throwaway local platform (all eight steps passed; see the slice 1 rows). Host 141 runs platform 0b778ffc;
   its sharing flow with real accounts is not yet tried (admin access route blocked by the safety classifier).
+
+## Telegram delivery, reply context and claim-check fixes (2026-10-25)
+
+- [x] Owner report 2026-10-25 (09:34 「幫我執行 43W SDE weekly report」 → 「The answer could not be
+  delivered here」; 10:26 Reply 「再跑一次」 → no context and an English Host note). Claude Code,
+  continuing an uncommitted draft. Decisions `docs/DECISIONS.md` 2026-10-25; user guide §8.2 and
+  the Telegram troubleshooting table.
+  1. Cause: the code and the Host's records rule out length and a blank reply (the delivery contract
+     refuses blank text; 09:34 was the `sde-weekly-report` question flow, no model turn, no run);
+     what is left is a 429 beyond the single 5 s retry or a transport fault, now logged. Answers wait
+     out rate limits (60 s, 4 attempts), retry once after a raised call, a blank text sends a
+     completion notice, an edit "not modified" counts as delivered (3b928bff).
+  2. Every refused or failed Bot API call logs a warning with status, Telegram's description, piece
+     and UTF-16 length, never text or token (910bc686).
+  3. Pieces cut by UTF-16 units (4000), no split surrogate pair; Codex control channel too (bbe7297f).
+  4. A piece still refused (400) sends the whole answer as `answer-<time>.md` plus
+     「回答太長或格式無法顯示，已改用檔案傳送」; undelivered only if the file fails too (506a70d4).
+  5. A Telegram Reply carries the quoted text/caption/（附件）, redacted, 1000 characters (8aa4acf0).
+  6. Failed and refused turns, Workflow question flows and finished runs stay in the in-memory chat
+     history (ae1d5e6e). Persisting it is not built (see the decision).
+  7. The claim check skips conditions, offers and adjectival 「已…的」, still catches real claims
+     (now also 已完成, 已經幫你, "I have done"); the person reads a short Chinese note, English stays
+     in the log and the retry; same text in Agent Web (7c6689af).
+  Tests: `tests/test_telegram_long_replies.py`, `tests/test_telegram_reply_context.py`,
+  `tests/test_claim_check_wording.py` (new), note wording in five existing harness tests.
+  Verification: ruff check, ruff format --check, mypy (764 files) clean; full pytest project venv
+  4007 passed, 7 skipped, 1 failed (`test_bi_cards_ui.py::test_bi_cards_end_to_end_in_a_browser`,
+  untouched, both suites ran at once; 2/2 alone, `--basetemp=C:/aepci-wk/bt-tg2r`);
+  `C:/aepci-wk/venv` 3980 passed, 34 skipped, 1 failed (`test_bi_schemas_ui.py`, untouched browser
+  test; passed alone, `--basetemp=C:/aepci-wk/bt-tg2cr`). Not pushed, Agent Web not restarted.
+- [ ] Owner check after a restart (when `/api/tasks` is idle): see `HANDOFF.md`.

@@ -4800,3 +4800,74 @@ Owner (2026-10-24): fix all five bugs of the live test. Three of them needed a d
   compares (enum case and aliases, a domain list's canonical spelling, list whitespace).
   Rejected: recording a no-op edit for audit (it would bump the version and change what is
   published without a change in content).
+
+## 2026-10-25 — Telegram delivery, reply context, failed-turn history and the claim-check wording
+
+Owner report (live, Telegram): 09:34 「幫我執行 43W SDE weekly report」 got 「The answer could not be
+delivered here (Telegram refused the message)」 although the answer was short; at 10:26 a Reply on
+it with 「再跑一次」 got "what should I re-run?" plus an English Host note saying a completed action
+had been claimed, for an answer that only said 「如果是已安裝 Workflow，我會開它的執行表單」.
+
+- **What the code and the records support for 09:34.** Not length and not an empty reply.
+  `TelegramDelivery.reply` is `Text` (at least one non-space character) and `TelegramPollResult`
+  validates its deliveries again, so a blank reply can never reach `_reply`; it fails as
+  「That request could not be handled on this Bridge.」 instead. The message matched `run_intent`
+  for `engineering/sde-weekly-report`, so the reply was that Workflow's first question (about 200
+  plain characters, Yes/No buttons): the Host's telemetry has no conversation turn and no run at
+  09:34, only the 10:26 turn, and Agent Web had been running since 2026-10-24 10:45 (no restart). A
+  keyboard Telegram refuses was already retried without it, so a 400 is unlikely. What the code
+  leaves is a 429 outlasting the single retry after at most 5 s, or a call that raised (a timeout or a
+  reset connection on the way to Telegram); neither was logged, so which one is unconfirmed until the
+  new warning line shows it live.
+- **An answer waits out a rate limit and survives one transport fault**: up to 60 s per wait, up
+  to 4 attempts; a call that raised is tried once more after 1 s (a timeout after delivery may show
+  the piece twice, which beats losing it). A 429 never falls back to a file (the file would be
+  rate-limited too). Rejected: keeping the 5 s cap (loses the answer); unbounded waits (one poll
+  batch could stall for minutes).
+- **A text with nothing to show sends a completion notice, never `UNDELIVERED_REPLY`**:
+  「<workflow> 已完成」 above the files when there are files, 「已完成（沒有文字結果）」 (with the
+  Workflow's name when one ran) otherwise. This is a second line behind the contract above.
+  `UNDELIVERED_REPLY` now means Telegram refused (or never answered) a real answer and its file.
+- **An edit Telegram answers with "message is not modified" counts as delivered** (the message
+  already shows that text and keyboard); any other refused edit still sends a new message.
+  Rejected: falling back to a new message for it too (a duplicate of what is already on screen).
+- **Pieces are cut by Telegram's own measure.** Telegram's 4096 limit counts UTF-16 code units, so
+  an emoji is two; `channels.telegram.chunks` now cuts at 4000 units (was 4000 code points),
+  prefers a newline as before and never splits a surrogate pair. Status messages and the
+  multi-select edit use the same measure; the Codex control channel truncates by it too.
+- **A piece Telegram still refuses (400) after the rate-limit and keyboard retries sends the whole
+  answer as `answer-<time>.md`** through `sendDocument`, followed by 「回答太長或格式無法顯示，已改用檔案傳送」
+  (with the keyboard, if any); the temporary file is removed. `UNDELIVERED_REPLY` is sent only when
+  the file fails too. Rejected: re-splitting smaller and retrying (a 400 may not be about length, and
+  the earlier pieces have already gone); sending only the refused piece as a file (a fragment).
+- **Every refused or failed Bot API call is logged at warning** (`channels.telegram` logger; no
+  handler is configured, so Python writes it to stderr, which the launcher keeps in
+  `workspace\logs\agent-web-*.err.log`): method, HTTP status, Telegram's `description` (redacted,
+  200 characters), piece position and UTF-16 length, or the redacted transport error. Never the text,
+  the chat content or the token.
+- **A Telegram Reply carries what it replies to.** `_parse` keeps `reply_to_message`: its text, else
+  its caption, else 「（附件）」, redacted and trimmed to 1000 characters, for the person's own messages
+  and the bot's answers alike. The conversation turn reads 「（回覆先前的訊息：「…」）\n<words>」 and the
+  history keeps it; the routed request (`LocalAgentRequest.message`) and `run_intent` see only the
+  person's words. Rejected: matching `run_intent` on the quote too (a quoted Workflow name would
+  open its questions without the person naming it).
+- **Failed turns and Workflow flows stay in the chat history.** It kept a turn only when the model
+  answered or a guard stopped it. A failed or refused turn now keeps the request with
+  「（上一輪沒有完成：<code>）」; a run request answered by a Workflow's own questions keeps the request
+  with 「（交給 Workflow <namespace>/<name> 的執行問題）」 and the first question, and a finished run keeps
+  「【執行】<name>」 with its result line. The history is still in memory only (`MAX_CHAT_HISTORY` = 12
+  messages per chat and sender) and is lost when Agent Web restarts. Persisting it would be cheap (the
+  Bridge's `state.sqlite` already has a `conversations` table keyed by session) but not free of risk:
+  it would keep what people typed on disk with no retention rule yet, so it is not built here.
+- **The completed-action claim check reads conditions and offers.** 「已」 as an adjective
+  (「已安裝的」, 「已完成的」) is not a claim, and a match does not count after a condition, offer or
+  promise earlier in its sentence (如果, 若, 要是, 的話, 我可以, 我會, 是否; if, unless, once, can,
+  will, shall, should, would). Real claims are still caught, now also 「已完成」, 「已經幫你…」 and "I
+  have done / completed / finished". Rejected: dropping 安裝 from the verbs (「我已安裝」 is a real
+  claim); clause-level scope (a comma would excuse 「如果需要，我已經寄出」 less predictably).
+- **The person reads a short Traditional Chinese note per failed check**, e.g.
+  「（系統檢查：這一輪沒有成功執行任何工具，回答中『已完成』的說法未經驗證）」 (also for a lasting-change
+  claim, missing files and the reuse check). Agent Web and Telegram both show the Gateway's answer, so
+  the text is the same in both. The English reasons go to the model's retry and to a warning line
+  (`agent.conversation_harness`); telemetry still records which check failed. Rejected: keeping the
+  English reason in the answer (the owner read it as noise).

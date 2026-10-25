@@ -1,8 +1,25 @@
 # Handoff
 
-Updated: 2026-10-24 (Asia/Taipei), by Claude Code (BI dataset sharing slice 1 live-test fixes; earlier: session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-25 (Asia/Taipei), by Claude Code (Telegram delivery, reply context and claim-check fixes; earlier: BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## BI dataset sharing slice 1, live-test fixes 1–5 (2026-10-24, Claude Code) — latest
+## Telegram delivery, reply context and claim-check fixes (2026-10-25, Claude Code) — latest
+
+- Commits bbe7297f, 910bc686, 3b928bff, 506a70d4, 8aa4acf0, ae1d5e6e, 7c6689af plus a docs commit
+  on main; not pushed, Agent Web not restarted, no real bot message sent, no Workflow run. Row in
+  `docs/TASKS.md` "Telegram delivery, reply context and claim-check fixes"; decisions
+  `docs/DECISIONS.md` 2026-10-25; user guide §8.2.
+- The 09:34 cause is narrowed, not proven: a 429 beyond the old 5 s retry, or a transport fault
+  (the reply was the `sde-weekly-report` question flow; length and blank text are ruled out).
+- Owner check after a restart (when `/api/tasks` is idle): 「幫我執行 43W SDE weekly report」 → the
+  question flow arrives; if anything fails, `workspace\logs\agent-web-*.err.log` (newest) has a line
+  `Telegram sendMessage refused: HTTP …` or `Telegram sendMessage failed …`; Reply on any bot
+  message with 「再跑一次」 → the answer refers to that message; an answer like 「如果是已安裝
+  Workflow，我會…」 has no 「（系統檢查：…）」 line; a very long answer arrives as `answer-<time>.md`.
+- Verification: ruff, format, mypy clean; full pytest 4007 passed (project venv) and 3980 passed
+  (`C:/aepci-wk/venv`), each with one browser BI test that failed only under parallel load and
+  passed alone.
+
+## BI dataset sharing slice 1, live-test fixes 1–5 (2026-10-24, Claude Code)
 
 - Commits 66210d2b (credentials per install), d2c8ef56 (source line), 65de8cbe (no-change edit),
   44c62231 (unknown dataset 404), f03331fd (page opens on an existing dataset), plus a docs commit;
