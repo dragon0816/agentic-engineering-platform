@@ -326,8 +326,12 @@ class _Update:
         files: list[_File] | None = None,
         media_group_id: str | None = None,
         message_id: int | None = None,
+        quoted: str | None = None,
     ) -> None:
         self.update_id = update_id
+        # What the message replies to (Telegram's Reply), already trimmed and
+        # redacted: the conversation sees it with the person's words.
+        self.quoted = quoted
         # The message a tapped button sits on, so a toggle can edit it.
         self.message_id = message_id
         self.chat_id = chat_id
@@ -361,6 +365,10 @@ CREDENTIAL_REPLY = "That message was not forwarded: it looks like it contains a 
 #: Where a card Telegram may not decide is applied (owner 2026-10-15). No
 #: address: Agent Web's page key must never travel in a chat.
 CARD_WHERE = "Agent Web on this PC, Tasks > Pending changes"
+#: How much of a replied-to message a turn carries (owner 2026-10-25), and
+#: what stands for one without words.
+MAX_QUOTE_CHARS = 1000
+QUOTED_ATTACHMENT = "（附件）"
 #: A run summary (a Workflow's `preview`) in a Telegram reply.
 MAX_RUN_SUMMARY_CHARS = 3_000
 #: The data of an approval button (G4): `approve:<id>` or `reject:<id>`.
@@ -419,7 +427,28 @@ def _parse(raw: object) -> _Update | None:
         sender_name=_display_name(sender),
         files=_files(message, raw["update_id"]),
         media_group_id=group if isinstance(group, str) else None,
+        quoted=_quoted(message),
     )
+
+
+def _quoted(message: dict[str, Any]) -> str | None:
+    """The message this one replies to: its text, else its caption, else
+    「（附件）」; None when it replies to nothing. Trimmed and redacted, the
+    person's own earlier messages and the bot's answers alike."""
+    replied = message.get("reply_to_message")
+    if not isinstance(replied, dict):
+        return None
+    for key in ("text", "caption"):
+        value = replied.get(key)
+        if isinstance(value, str) and value.strip():
+            text = scrub(value.strip())
+            return text if len(text) <= MAX_QUOTE_CHARS else text[:MAX_QUOTE_CHARS] + "…"
+    return QUOTED_ATTACHMENT
+
+
+def _with_quote(text: str, quoted: str | None) -> str:
+    """The person's words with what they replied to, as the model reads them."""
+    return text if quoted is None else f"（回覆先前的訊息：「{quoted}」）\n{text}"
 
 
 def _size(value: object) -> int | None:
@@ -1484,7 +1513,10 @@ class TelegramIngress:
         update: _Update | None = None,
     ) -> TelegramDelivery:
         """`attached` is the files' note and pictures for the model, and the
-        short listing the stored history keeps in their place."""
+        short listing the stored history keeps in their place. A message
+        sent as a Reply carries what it replied to (owner 2026-10-25: 「再跑一次」
+        answered on an earlier message got "what should I re-run?")."""
+        text = _with_quote(text, update.quoted if update is not None else None)
         history = self._histories.get(key, [])
         if attached is None:
             turn = [*history, ModelMessage(role="user", text=text)]
