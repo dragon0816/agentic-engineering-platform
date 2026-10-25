@@ -44,7 +44,7 @@ import sys
 import threading
 import time
 import uuid
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from contextlib import ExitStack
 from datetime import UTC, datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -247,6 +247,7 @@ from host_runtime.review_routes import (
     resolve_rule,
     write_proposal,
 )
+from host_runtime.session_artifacts import run_entry
 from host_runtime.shared_platform import (
     KEEP,
     LOGIN_SHAPE,
@@ -456,6 +457,14 @@ def file_media_type(path: Path) -> str:
     if suffix in _TEXT_SUFFIXES:
         return "text/plain; charset=utf-8"
     return "application/octet-stream"
+
+
+def _with_entries(summary: str | None, entries: Sequence[str]) -> str | None:
+    """A turn's tool record plus the history entries of the runs it made,
+    which the model reads on later turns (owner 2026-10-25)."""
+    if not entries:
+        return summary
+    return "\n\n".join([*([summary] if summary else []), *entries])[:4_000]
 
 
 def _answer_files(answer: Mapping[str, Any]) -> list[dict[str, Any]]:
@@ -3098,6 +3107,12 @@ class AgentWeb:
                     # An org chart drawn in this turn (docs/phases/BUSINESS_CARDS.md):
                     # its PNG shows under the answer, its legend is in the text.
                     charts = chart_files(result)
+                    # What the turn produced joins the session's ledger; a
+                    # run's pictures and attached files show like the chart
+                    # (owner 2026-10-25).
+                    produced_entries, produced = self._record_turn_outputs(item.session_id, result)
+                    shown = {entry["path"] for entry in charts}
+                    charts = [*charts, *(f for f in produced if f["path"] not in shown)]
                     answer = {
                         **({"workflow_form": offered} if offered is not None else {}),
                         **({CARD_KEY: carded} if carded is not None else {}),
@@ -3115,7 +3130,7 @@ class AgentWeb:
                             and (used := memory_used_in(result.tools, result.text))
                             else {}
                         ),
-                        "tool_summary": tool_summary(result),
+                        "tool_summary": _with_entries(tool_summary(result), produced_entries),
                         "ok": result is not None and result.status == "answered",
                         "answer": (
                             with_bi_sources(
@@ -4921,6 +4936,53 @@ class AgentWeb:
             "workflow_form": offer,
         }
 
+    def _record_run_outputs(
+        self, session_id: str | None, snapshot: Any
+    ) -> tuple[str | None, list[dict[str, str]]]:
+        """Keep a finished run in this conversation's ledger (owner
+        2026-10-25): its history entry and its pictures, shown under the
+        run's answer with the chat's file viewer."""
+        store = self.runtime.session_artifacts
+        if store is None or not session_id or snapshot is None:
+            return None, []
+        actor = self.runtime.actor
+        try:
+            run = store.record_run(session_id, actor, snapshot)
+            if run is None:
+                return None, []
+            entry = run_entry(store, session_id, actor, run)
+            images = store.run_images(session_id, actor, run.run_id)
+        except (OSError, ValueError):
+            return None, []
+        return entry, [
+            {"filename": item.filename, "kind": "image", "path": item.path} for item in images
+        ]
+
+    def _record_turn_outputs(
+        self, session_id: str | None, result: Any
+    ) -> tuple[list[str], list[dict[str, str]]]:
+        """What a model turn produced: each run it started (entry and
+        pictures), files a tool made, and the files it attached again."""
+        store = self.runtime.session_artifacts
+        if store is None or not session_id or result is None:
+            return [], []
+        entries: list[str] = []
+        files: list[dict[str, str]] = []
+        for tool in result.tools:
+            if tool.workflow is None:
+                continue
+            entry, images = self._record_run_outputs(session_id, tool.workflow)
+            if entry:
+                entries.append(entry)
+            files.extend(images)
+        try:
+            store.record_turn(session_id, self.runtime.actor, result)
+            files.extend(store.attached(session_id, self.runtime.actor, result))
+        except (OSError, ValueError):
+            pass
+        unique = {entry["path"]: entry for entry in files}
+        return entries, list(unique.values())
+
     def _record_form_run(
         self,
         session_id: str,
@@ -4932,6 +4994,7 @@ class AgentWeb:
         *,
         follow_up: dict[str, Any] | None = None,
         cards: list[dict[str, Any]] | None = None,
+        files: list[dict[str, str]] | None = None,
     ) -> dict[str, Any] | None:
         """A run from a conversation's inline form, kept in that conversation
         as a pair (what was run, then its result) so the Agent sees it later.
@@ -4967,6 +5030,7 @@ class AgentWeb:
                 status="answered" if succeeded else "failed",
                 workflow_form=follow_up,
                 action_cards=tuple(cards or ()),
+                attachments=tuple(files or ()),
             )
             self.runtime.state.save_conversation(
                 record.model_copy(
@@ -5046,6 +5110,11 @@ class AgentWeb:
             and outcome.workflow.run.status == "succeeded"
         )
         answer = readable(outcome)
+        # The run's result and what it made stay in the conversation, by
+        # short id, and its pictures show under it (owner 2026-10-25).
+        entry, images = self._record_run_outputs(item.session_id, outcome.workflow)
+        if entry:
+            answer = f"{answer.strip()}\n\n{entry}"
         recorded = (
             self._record_form_run(
                 item.session_id,
@@ -5058,6 +5127,7 @@ class AgentWeb:
                 cards=[
                     card for card in (self.card(card_id) for card_id in run_cards(outcome)) if card
                 ],
+                files=images,
             )
             if item.session_id is not None
             else None

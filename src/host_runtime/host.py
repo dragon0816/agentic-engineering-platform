@@ -323,6 +323,7 @@ from host_runtime.mcp_servers import McpHub
 from host_runtime.profiles import ProfileError, load_active_profile
 from host_runtime.reference_sets import REFERENCE_SETS_FILE, ReferenceItem, ReferenceSetStore
 from host_runtime.runtime import inspect_host
+from host_runtime.session_artifacts import SessionArtifacts
 from host_runtime.state import SqliteLocalState
 from host_runtime.sync import PlatformClient
 from host_runtime.task_artifacts import LocalTaskArtifacts
@@ -505,6 +506,8 @@ class HostRuntime:
         # MCP servers the owner added in Agent Web (owner 2026-10-08); they
         # connect when a long-running command starts them.
         self.mcp: McpHub | None = None
+        # What each conversation produced (owner 2026-10-25); set by build_runtime.
+        self.session_artifacts: SessionArtifacts | None = None
         # Which teams this PC's person belongs to (owner 2026-10-19); set by
         # `build_runtime`. Decides only where a local revision is named.
         self.team_membership: TeamMembershipStore | None = None
@@ -2203,6 +2206,10 @@ def build_runtime(
         store_secret=windows_user_environment,
     )
     gateway.capability_approval = chat_authoring.capability_approval_tool_data
+    # What each session produced, so the agent can show it again (owner
+    # 2026-10-25): listed in every turn and attachable by its short id.
+    session_artifacts = SessionArtifacts(place.workspace_root)
+    gateway.session_context = session_artifacts.guidance
     gateway.host_tools = lambda: (
         *chat_authoring.tools(),
         *bridge_tools(gateway.bridge),
@@ -2210,6 +2217,7 @@ def build_runtime(
         *bi_cards_tools(gateway),
         *mcp.tools(gateway.bridge),
         *workflow_form_tools(gateway.engine),
+        *session_artifacts.tools(),
     )
     # Skills installed but switched off, by name, so the model never offers to
     # install one (live test 2026-10-20).
@@ -2241,12 +2249,14 @@ def build_runtime(
         telegram = build_telegram(checked, place, agent, resolver)
         if telegram is not None:
             telegram.approvals = chat_authoring
+            telegram.session_artifacts = session_artifacts
         platform = build_platform(checked, resolver)
     except BaseException:
         state.close()
         raise
     runtime = HostRuntime(checked, place, agent, state, telegram, platform, chat_authoring)
     runtime.mcp = mcp
+    runtime.session_artifacts = session_artifacts
     # The Knowledge tool route runs the shared Knowledge Harness (unification U5).
     from host_runtime.knowledge_harness import KnowledgeHarness
 

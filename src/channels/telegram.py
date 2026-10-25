@@ -74,6 +74,7 @@ from host_runtime.identity_presets import IdentityPresets
 from host_runtime.memory_why import NOTHING as WHY_NOTHING
 from host_runtime.memory_why import memory_used_in
 from host_runtime.schedule_policy import target_side_effect
+from host_runtime.session_artifacts import SessionArtifacts, run_entry
 from host_runtime.turn_summary import stop_reply, tool_summary
 from host_runtime.workflow_uploads import (
     MAX_UPLOAD_BYTES,
@@ -172,6 +173,33 @@ _ATTACHMENT_REPLIES = {
 #: The interactive org chart arrives as a file (owner 2026-10-20); one line
 #: says what to do with it.
 HTML_CHART_CAPTION = "互動式組織圖：請下載後用瀏覽器開啟（可搜尋、切換樹狀／分組檢視）。"
+
+
+#: Pictures Telegram shows as a photo, by suffix, with their media type.
+PHOTO_SUFFIXES = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg"}
+#: Telegram's caption limit is 1024 characters; a file name stays well under it.
+MAX_CAPTION_CHARS = 200
+_DOCUMENT_TYPES = {
+    ".html": "text/html",
+    ".htm": "text/html",
+    ".md": "text/markdown",
+    ".txt": "text/plain",
+    ".csv": "text/csv",
+    ".pdf": "application/pdf",
+    ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+}
+
+
+def _document_type(path: Path) -> str:
+    """The media type a document is sent with (Markdown, as the legend, by default)."""
+    suffix = path.suffix.lower()
+    if suffix in _DOCUMENT_TYPES:
+        return _DOCUMENT_TYPES[suffix]
+    if suffix in (".gif", ".webp", ".bmp"):
+        return f"image/{suffix.lstrip('.')}"
+    return "text/markdown" if not suffix else "application/octet-stream"
 
 
 def attachment_reply(code: str) -> str:
@@ -277,6 +305,11 @@ class TelegramDelivery(Contract):
     photos: tuple[str, ...] = ()
     # Files sent after the pictures (the chart's full Markdown legend).
     documents: tuple[str, ...] = ()
+    # Files this session produced, sent last (owner 2026-10-25): a run's
+    # pictures at its end, or what `session__attach_file` attached. A picture
+    # goes as a photo, anything else as a document; paths the Host recorded,
+    # never model text.
+    attached: tuple[str, ...] = ()
     replied: StrictBool = False
     outcome: LocalAgentOutcome | None = None
     failure: Failure | None = None
@@ -667,7 +700,7 @@ def _blank_notice(delivery: "TelegramDelivery") -> str:
     naming the Workflow that ran, when one did."""
     run = delivery.outcome.workflow if delivery.outcome is not None else None
     name = run.run.workflow.name if run is not None else None
-    return _done_notice(name, bool(delivery.photos or delivery.documents))
+    return _done_notice(name, bool(delivery.photos or delivery.documents or delivery.attached))
 
 
 def _keyboard(buttons: tuple[tuple[tuple[str, str], ...], ...]) -> dict[str, JsonValue]:
@@ -952,6 +985,9 @@ class TelegramIngress:
         self.presets = presets
         # Action cards (change proposals): Agent Web decides them; set by it.
         self.cards: Any = None
+        # What each session produced (owner 2026-10-25): runs, files and
+        # drafts, kept per chat and actor; set by the host, None keeps nothing.
+        self.session_artifacts: SessionArtifacts | None = None
         # A plain reason for a failed model turn (e.g. the LLM gateway is not
         # running or still starting); set by the host, None says nothing more.
         self.explain_failure: Callable[[Failure], str | None] | None = None
@@ -1093,6 +1129,17 @@ class TelegramIngress:
                 for document in delivery.documents:
                     await asyncio.to_thread(
                         partial(self._send_photo, document=True), update.chat_id, Path(document)
+                    )
+                for produced in delivery.attached:
+                    path = Path(produced)
+                    await asyncio.to_thread(
+                        partial(
+                            self._send_photo,
+                            document=path.suffix.lower() not in PHOTO_SUFFIXES,
+                            caption=path.name,
+                        ),
+                        update.chat_id,
+                        path,
                     )
                 delivery = delivery.model_copy(update={"replied": replied})
             deliveries.append(delivery)
@@ -1239,6 +1286,11 @@ class TelegramIngress:
             return TelegramDelivery(**base, disposition="answered", reply=HELP)
         if parsed is not None and parsed[0] == "new":
             self._histories.pop(key, None)
+            if self.session_artifacts is not None:
+                acting, _ = self._acting(actor)
+                await asyncio.to_thread(
+                    self.session_artifacts.clear, _chat_session(update.chat_id), acting
+                )
             if self.attachments is not None:
                 await asyncio.to_thread(self.attachments.delete_session, _files_session(key))
             return TelegramDelivery(
@@ -1295,8 +1347,13 @@ class TelegramIngress:
                 reply=f"Refused: {outcome.refusal}.",
                 outcome=outcome,
             )
+        _, images = await self._record_run(request.session_id, request.actor, outcome.workflow)
         return TelegramDelivery(
-            **base, disposition="routed", reply=scrub(_describe(outcome)), outcome=outcome
+            **base,
+            disposition="routed",
+            reply=scrub(_describe(outcome)),
+            outcome=outcome,
+            attached=images,
         )
 
     def _remember_why(self, key: tuple[int, int], actor: str, conversation: Any) -> None:
@@ -1709,7 +1766,12 @@ class TelegramIngress:
             else _no_answer_reply(record)
         )
         await asyncio.to_thread(self._remember_why, key, request.actor, conversation)
+        # What this turn produced joins the session's ledger; the pictures of
+        # a run the model started and the files it attached go out last.
+        entries, produced = await self._record_turn(request, conversation)
         remembered = answer if record is None else f"{answer}\n\n[工具紀錄]\n{record}"
+        if entries:
+            remembered = "\n\n".join([remembered, *entries])
         turn.append(ModelMessage(role="assistant", text=remembered))
         self._histories[key] = turn[-MAX_CHAT_HISTORY:]
         offer = offer_in(conversation.tools)
@@ -1733,12 +1795,15 @@ class TelegramIngress:
                     disposition="answered",
                     reply=scrub(drawn),
                     buttons=(*card_buttons, *buttons),
+                    attached=produced,
                 )
             # A memory proposal (accumulated memory M3) comes under the answer.
             answer = f"{answer}\n\n{drawn}"
             buttons = (*card_buttons, *buttons)
         if drafted:
-            return self._carded(base, answer, buttons, drafted)
+            return self._carded(base, answer, buttons, drafted).model_copy(
+                update={"attached": produced}
+            )
         charts = chart_files(conversation)
         return TelegramDelivery(
             **base,
@@ -1747,7 +1812,36 @@ class TelegramIngress:
             buttons=buttons,
             photos=tuple(item["path"] for item in charts if item["kind"] == "image"),
             documents=tuple(item["path"] for item in charts if item["kind"] != "image"),
+            attached=produced,
         )
+
+    async def _record_turn(
+        self, request: LocalAgentRequest, conversation: Any
+    ) -> tuple[list[str], tuple[str, ...]]:
+        """Keep what a model turn produced (the Workflows it ran, files a tool
+        made) and return the runs' history entries and the files to send:
+        each run's pictures, then what `session__attach_file` attached."""
+        store = self.session_artifacts
+        if store is None or not request.session_id:
+            return [], ()
+        session, actor = request.session_id, request.actor
+        entries: list[str] = []
+        files: list[str] = []
+        try:
+            for item in conversation.tools:
+                if item.workflow is None:
+                    continue
+                entry, images = await self._record_run(session, actor, item.workflow)
+                if entry:
+                    entries.append(entry)
+                files.extend(images)
+            await asyncio.to_thread(store.record_turn, session, actor, conversation)
+            attached = await asyncio.to_thread(store.attached, session, actor, conversation)
+        except (OSError, ValueError) as error:
+            _LOG.warning("session artifacts not recorded: %s", type(error).__name__)
+            return entries, tuple(dict.fromkeys(files))
+        files.extend(item["path"] for item in attached)
+        return entries, tuple(dict.fromkeys(files))
 
     def _carded(
         self,
@@ -2007,7 +2101,12 @@ class TelegramIngress:
                 f"{run.completed_steps} step(s)"
                 + (f" ({run.failure.code})" if run.failure is not None else "")
             )
-        self._remember_turn(key, f"【執行】{state.workflow.name}", reply)
+        # The history keeps the run's result and what it made, by short id
+        # (owner 2026-10-25: 「這個workflow 做完之後他都忘記了」).
+        entry, images = await self._record_run(
+            _chat_session(update.chat_id), acting, outcome.workflow
+        )
+        self._remember_turn(key, f"【執行】{state.workflow.name}", entry or reply)
         texts, buttons = self._run_extras(outcome)
         return TelegramDelivery(
             **base,
@@ -2015,7 +2114,28 @@ class TelegramIngress:
             reply=scrub("\n\n".join([reply, *texts])),
             buttons=buttons,
             outcome=outcome,
+            attached=images,
         )
+
+    async def _record_run(
+        self, session_id: str | None, actor: str, snapshot: Any
+    ) -> tuple[str | None, tuple[str, ...]]:
+        """Keep a finished run in this session's ledger: its history entry
+        and the pictures it made, sent at the end of the run as the org chart
+        is. Nothing when no ledger is set or the run did not start."""
+        store = self.session_artifacts
+        if store is None or snapshot is None:
+            return None, ()
+        try:
+            run = await asyncio.to_thread(store.record_run, session_id, actor, snapshot)
+            if run is None:
+                return None, ()
+            entry = await asyncio.to_thread(run_entry, store, session_id, actor, run)
+            images = await asyncio.to_thread(store.run_images, session_id, actor, run.run_id)
+        except (OSError, ValueError) as error:
+            _LOG.warning("session artifacts not recorded: %s", type(error).__name__)
+            return None, ()
+        return entry, tuple(item.path for item in images)
 
     def _run_extras(
         self, outcome: LocalAgentOutcome
@@ -2327,21 +2447,26 @@ class TelegramIngress:
                     time.sleep(TRANSPORT_RETRY_WAIT_S)
         return 0, b""
 
-    def _send_photo(self, chat_id: int, path: Path, *, document: bool = False) -> bool:
+    def _send_photo(
+        self, chat_id: int, path: Path, *, document: bool = False, caption: str | None = None
+    ) -> bool:
         """One `sendPhoto` (with the chart's short note as its caption) or
         `sendDocument`, the file as multipart form data, through the bot's own
-        transport; a file that cannot be sent is not retried."""
+        transport; a file that cannot be sent is not retried. `caption`
+        replaces the chart's note (a session file carries its own name)."""
         try:
             data = path.read_bytes()
             boundary = f"aep-{uuid.uuid4().hex}"
             name = re.sub(r"[^A-Za-z0-9._-]", "_", path.name) or "chart.png"
             page = path.suffix.lower() in (".html", ".htm")
             field, method, media = (
-                ("document", "sendDocument", "text/html" if page else "text/markdown")
+                ("document", "sendDocument", _document_type(path))
                 if document
-                else ("photo", "sendPhoto", "image/png")
+                else ("photo", "sendPhoto", PHOTO_SUFFIXES.get(path.suffix.lower(), "image/png"))
             )
-            caption = HTML_CHART_CAPTION if page else ("" if document else CHART_NOTE)
+            if caption is None:
+                caption = HTML_CHART_CAPTION if page else ("" if document else CHART_NOTE)
+            caption = caption[:MAX_CAPTION_CHARS]
             parts = [f"--{boundary}", 'Content-Disposition: form-data; name="chat_id"', ""]
             parts.append(str(chat_id))
             if caption:

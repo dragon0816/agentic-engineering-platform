@@ -91,6 +91,8 @@ MAX_CONVERSATION_HISTORY = 12
 MAX_CONVERSATION_MESSAGE_CHARS = 4_000
 # The person's newest message may carry attached files' text (owner 2026-10-08).
 MAX_CURRENT_MESSAGE_CHARS = 40_000
+#: How much of the system prompt the session's produced list may take.
+MAX_SESSION_CONTEXT_CHARS = 4_000
 MAX_TOOL_OBSERVATION_CHARS = 16_000
 # A tool call's recorded arguments (G2 logging, owner 2026-10-18).
 MAX_RECORDED_ARGUMENTS_CHARS = 4_000
@@ -538,6 +540,10 @@ class Gateway:
         # preferences for the Skills in use and the memory tools. Set by the
         # host; without it a turn carries no memory.
         self.turn_memory: TurnMemoryProvider | None = None
+        # What this session already produced (runs, files, drafts; owner
+        # 2026-10-25): a short list for the system prompt, so it outlives the
+        # history window. Set by the host; without it nothing is added.
+        self.session_context: Callable[[RequestContext], str] | None = None
 
     def _vault_tools(
         self,
@@ -649,6 +655,15 @@ class Gateway:
                 # Telemetry cannot change the answer a person receives.
                 pass
         return result
+
+    def _session_context(self, context: RequestContext) -> str:
+        """The session's produced list, bounded; a fault adds nothing."""
+        if self.session_context is None or context.session_id is None:
+            return ""
+        try:
+            return self.session_context(context)[:MAX_SESSION_CONTEXT_CHARS]
+        except Exception:  # noqa: BLE001 - the list is a help, never a reason to fail a turn
+            return ""
 
     async def _turn_memory(self, context: RequestContext, tools: Sequence[ModelTool]) -> TurnMemory:
         """What the person's memory adds to this pass: asked of the host with
@@ -970,6 +985,9 @@ class Gateway:
             messages[0] = ModelMessage(
                 role="system", text=f"{messages[0].text}\n\n{memory.guidance}"
             )
+        produced = self._session_context(context)
+        if produced:
+            messages[0] = ModelMessage(role="system", text=f"{messages[0].text}\n\n{produced}")
         if used is not None:
             used.update(memory.preferences_used)
         if offered is not None:
