@@ -179,6 +179,8 @@ def attachment_reply(code: str) -> str:
 
 #: Turns of a Telegram chat kept as context for the next one (memory only).
 MAX_CHAT_HISTORY = 12
+#: How much of a Workflow question the history keeps for that turn.
+MAX_FLOW_NOTE_CHARS = 300
 #: How often a "working on it" message refreshes its elapsed time when
 #: nothing else changed.
 PROGRESS_REFRESH_SECONDS = 5.0
@@ -667,6 +669,19 @@ def _no_answer_reply(record: str | None) -> str:
         f"The Agent gave no answer{used}. Ask again or say it differently; to run a "
         "Workflow, send /run <name>."
     )
+
+
+def _flow_note(manifest: WorkflowManifest, reply: str | None) -> str:
+    """The history's note for a run request answered by a Workflow's own
+    questions (or why it cannot run yet) instead of the model."""
+    identity = manifest.metadata.identity
+    shown = (reply or "").strip()[:MAX_FLOW_NOTE_CHARS]
+    return f"（交給 Workflow {identity.namespace}/{identity.name} 的執行問題）\n{shown}".rstrip()
+
+
+def _unfinished(code: str) -> str:
+    """The history's note for a turn that did not complete."""
+    return f"（上一輪沒有完成：{code}）"
 
 
 def _tool_label(name: str) -> str:
@@ -1169,9 +1184,11 @@ class TelegramIngress:
             # /run X is, never the model's prose (owner 2026-10-15).
             intent = run_intent(text, self.agent.gateway.engine.workflows.manifests())
             if intent is not None:
-                return await self._open_flow(
+                opened = await self._open_flow(
                     base, key, intent.manifest, actor, update, intent.prefill
                 )
+                self._remember_turn(key, text, _flow_note(intent.manifest, opened.reply))
+                return opened
         if (
             parsed is None
             and not DOT_COMMAND.match(text)
@@ -1542,6 +1559,9 @@ class TelegramIngress:
             TOOL_PROGRESS.reset(listening)
             await progress.finish(answered)
         if result.refusal is not None:
+            # Kept, so 「再跑一次」 knows what was asked (owner 2026-10-25).
+            turn.append(ModelMessage(role="assistant", text=_unfinished(result.refusal)))
+            self._histories[key] = turn[-MAX_CHAT_HISTORY:]
             return TelegramDelivery(
                 **base, disposition="answered", reply=f"Refused: {result.refusal}."
             )
@@ -1584,7 +1604,17 @@ class TelegramIngress:
                 reply = stopped
                 # Keep what was done so 繼續 can pick it up.
                 turn.append(ModelMessage(role="assistant", text=f"{reply}\n\n[工具紀錄]\n{record}"))
-                self._histories[key] = turn[-MAX_CHAT_HISTORY:]
+            else:
+                # Any other failure keeps the request and a short note, so
+                # 「再跑一次」 knows what was asked (owner 2026-10-25).
+                note = _unfinished(code)
+                turn.append(
+                    ModelMessage(
+                        role="assistant",
+                        text=note if record is None else f"{note}\n\n[工具紀錄]\n{record}",
+                    )
+                )
+            self._histories[key] = turn[-MAX_CHAT_HISTORY:]
             if drafted:
                 return self._carded(base, reply, buttons, drafted)
             return TelegramDelivery(**base, disposition="answered", reply=reply, buttons=buttons)
@@ -1712,7 +1742,20 @@ class TelegramIngress:
         manifest = self._resolve_workflow(target)
         if isinstance(manifest, str):
             return TelegramDelivery(**base, disposition="answered", reply=manifest)
-        return await self._open_flow(base, key, manifest, actor, update, {})
+        opened = await self._open_flow(base, key, manifest, actor, update, {})
+        self._remember_turn(key, f"/run {target}", _flow_note(manifest, opened.reply))
+        return opened
+
+    def _remember_turn(self, key: tuple[int, int], said: str, answer: str) -> None:
+        """A turn the model did not answer (a Workflow's questions, its run),
+        kept in the chat's history so a later 「再跑一次」 or 「剛剛那個」 knows
+        what was meant (owner report 2026-10-25)."""
+        history = [
+            *self._histories.get(key, []),
+            ModelMessage(role="user", text=said),
+            ModelMessage(role="assistant", text=answer),
+        ]
+        self._histories[key] = history[-MAX_CHAT_HISTORY:]
 
     def _offered_workflow(self, offer: Mapping[str, Any]) -> WorkflowManifest | None:
         try:
@@ -1809,6 +1852,7 @@ class TelegramIngress:
                 f"{run.completed_steps} step(s)"
                 + (f" ({run.failure.code})" if run.failure is not None else "")
             )
+        self._remember_turn(key, f"【執行】{state.workflow.name}", reply)
         texts, buttons = self._run_extras(outcome)
         return TelegramDelivery(
             **base,

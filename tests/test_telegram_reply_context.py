@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from test_telegram_ingress import OWNER, TOKEN, FakeTransport, ingress, poll, update
+from test_telegram_workflow_flow import _install, _tap
 
 from channels.telegram import MAX_QUOTE_CHARS, _parse
 from models.contracts import ModelRequest, ModelResponse, ModelStreamEvent
@@ -22,15 +23,24 @@ BOT_ANSWER = "sde-weekly-report (1/9)\nDry run: show the plan only"
 
 
 class Recording:
-    """A model that answers plainly and keeps every request it was sent."""
+    """A model that answers plainly and keeps every request it was sent; the
+    first `failures` calls raise instead (a model that is not reachable)."""
 
-    def __init__(self, text: str = "好的") -> None:
+    def __init__(self, text: str = "好的", failures: int = 0) -> None:
         self.text = text
+        self.failures = failures
         self.requests: list[ModelRequest] = []
 
     def generate(self, request: ModelRequest) -> ModelResponse:
         self.requests.append(request)
+        if self.failures > 0:
+            self.failures -= 1
+            raise ConnectionError("the gateway is not running")
         return ModelResponse(trace=request.trace, model_alias=request.model_alias, text=self.text)
+
+    def said(self) -> str:
+        """Everything the newest request carried."""
+        return "\n".join(m.text for m in self.requests[-1].messages)
 
     def stream(self, request: ModelRequest) -> Iterator[ModelStreamEvent]:
         raise NotImplementedError
@@ -98,3 +108,60 @@ def test_a_reply_to_the_persons_own_message_is_quoted_too(tmp_path: Path) -> Non
     poll(item)
 
     assert model.last_person() == "（回覆先前的訊息：「幫我執行 43W SDE weekly report」）\n再跑一次"
+
+
+def test_a_failed_turn_stays_in_history_so_run_again_has_the_request(tmp_path: Path) -> None:
+    transport = FakeTransport(
+        [[update(1, OWNER, "幫我整理這週的 GitHub 進度")], [update(2, OWNER, "再跑一次")]]
+    )
+    item, agent, _ = ingress(tmp_path, transport)
+    model = Recording(failures=1)
+    agent.gateway.router.model = model
+
+    failed = poll(item).deliveries[0]
+    assert failed.disposition == "answered" and "could not be answered" in (failed.reply or "")
+    (history,) = item._histories.values()
+    assert [message.role for message in history] == ["user", "assistant"]
+    assert history[0].text == "幫我整理這週的 GitHub 進度"
+    assert history[1].text.startswith("（上一輪沒有完成：")
+
+    poll(item)
+
+    said = model.said()
+    assert "幫我整理這週的 GitHub 進度" in said and "（上一輪沒有完成：" in said
+    assert model.last_person() == "再跑一次"
+
+
+def test_a_workflow_question_flow_stays_in_history_too(tmp_path: Path) -> None:
+    """The 09:34 request was a Workflow run request: it opened the Workflow's
+    questions and never reached the model, so nothing of it was kept."""
+    transport = FakeTransport([[update(1, OWNER, "幫我執行 release-validation-form")]])
+    item, agent, _ = ingress(tmp_path, transport)
+    _install(agent, [{"name": "package", "label": "Mode", "kind": "text", "required": True}])
+    model = Recording()
+    agent.gateway.router.model = model
+
+    opened = poll(item).deliveries[0]
+
+    assert "Mode *" in (opened.reply or "") and model.requests == []
+    (history,) = item._histories.values()
+    assert history[0].text == "幫我執行 release-validation-form"
+    assert history[1].text.startswith("（交給 Workflow engineering/release-validation-form")
+    assert "Mode *" in history[1].text
+    # The questions expire unanswered; 「再跑一次」 then reaches the model with them.
+    for state in item._flows.values():
+        state.started -= 3600
+    transport.batches.append([update(2, OWNER, "再跑一次")])
+    poll(item)
+    assert "幫我執行 release-validation-form" in model.said()
+    # A finished run is kept as well.
+    transport.batches += [[update(3, OWNER, "/run 7")], [update(4, OWNER, "quick")]]
+    poll(item)
+    final = poll(item).deliveries[0]
+    if final.disposition == "answered":  # an effectful Workflow waits for the tap
+        transport.batches.append([_tap(5, OWNER, "run:yes")])
+        final = poll(item).deliveries[0]
+    assert final.disposition == "routed"
+    (history,) = item._histories.values()
+    assert history[-2].text == "【執行】release-validation-form"
+    assert history[-1].text.startswith("release-validation-form run ")
