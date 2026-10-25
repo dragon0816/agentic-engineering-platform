@@ -19,6 +19,7 @@ from __future__ import annotations
 import re
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
+from datetime import date
 from typing import Any
 
 from common.assets import (
@@ -28,6 +29,7 @@ from common.assets import (
     parameter_value_problem,
     reject_embedded_secrets,
 )
+from common.run_prefill import infer_values
 from common.workflow_forms import agent_fields, ordered_fields
 from common.workflow_parameters import static_fields
 
@@ -104,7 +106,9 @@ def _spans(text: str, manifest: WorkflowManifest) -> list[tuple[int, int]]:
     return found
 
 
-def run_intent(text: str, manifests: Iterable[WorkflowManifest]) -> RunIntent | None:
+def run_intent(
+    text: str, manifests: Iterable[WorkflowManifest], *, today: date | None = None
+) -> RunIntent | None:
     """The one installed Workflow `text` asks to run, or None.
 
     Needs a run verb and exactly one named Workflow (a name inside a longer
@@ -137,7 +141,7 @@ def run_intent(text: str, manifests: Iterable[WorkflowManifest]) -> RunIntent | 
     if len(chosen) != 1:
         return None
     manifest = next(iter(chosen.values()))
-    return RunIntent(manifest, prefill_from_text(manifest, message))
+    return RunIntent(manifest, prefill_from_text(manifest, message, today=today))
 
 
 def _convert(field: WorkflowParameter, raw: str) -> Any:
@@ -172,11 +176,16 @@ def _choice(field: WorkflowParameter, value: str) -> str:
     return value
 
 
-def prefill_from_text(manifest: WorkflowManifest, text: str) -> dict[str, Any]:
-    """`name=value` / `name: value` pairs a person typed after the request.
+def prefill_from_text(
+    manifest: WorkflowManifest, text: str, *, today: date | None = None
+) -> dict[str, Any]:
+    """Run values a person gave with the request: `name=value` / `name: value`
+    pairs, then values stated in plain words (`run_prefill`: a report week,
+    a date, a declared choice, a dry-run phrase) for the fields still open.
 
     Field names match case-insensitively; anything that is not a valid value
-    of a runtime field is dropped rather than refused (the form asks again).
+    of a runtime field shown to a person is dropped rather than refused (the
+    form asks it), exactly as a typed answer would be checked.
     """
     fields = {item.name.casefold(): item for item in manifest.parameters}
     given: dict[str, Any] = {}
@@ -187,7 +196,29 @@ def prefill_from_text(manifest: WorkflowManifest, text: str) -> dict[str, Any]:
         converted = _convert(field, raw)
         if converted is not None and converted != []:
             given[field.name] = converted
-    return person_prefill(manifest, given)
+    # The Workflow's own name and the pairs are not values to read again.
+    rest = _PAIR.sub(" ", text)
+    for start, end in sorted(_spans(rest, manifest), reverse=True):
+        rest = rest[:start] + " " + rest[end:]
+    open_fields = [
+        field
+        for field in person_fields(manifest)
+        if field.name not in given and field.scope == "runtime"
+    ]
+    inferred = infer_values(manifest, rest, open_fields, today=today)
+    return person_prefill(manifest, {**inferred, **given})
+
+
+def person_fields(
+    manifest: WorkflowManifest,
+    channels: tuple[ParameterChannel, ...] = ("web", "telegram"),
+) -> list[WorkflowParameter]:
+    """The runtime fields a person's form shows on any of `channels`."""
+    seen: dict[str, WorkflowParameter] = {}
+    for channel in channels:
+        for field in ordered_fields(manifest, channel):
+            seen.setdefault(field.name, field)
+    return list(seen.values())
 
 
 def _kept(fields: Iterable[WorkflowParameter], values: Mapping[str, Any]) -> dict[str, Any]:
@@ -213,11 +244,7 @@ def person_prefill(
     channels: tuple[ParameterChannel, ...] = ("web", "telegram"),
 ) -> dict[str, Any]:
     """Values a person gave: runtime fields shown on a person's form, valid."""
-    seen: dict[str, WorkflowParameter] = {}
-    for channel in channels:
-        for field in ordered_fields(manifest, channel):
-            seen.setdefault(field.name, field)
-    return _kept(seen.values(), values)
+    return _kept(person_fields(manifest, channels), values)
 
 
 def agent_prefill(manifest: WorkflowManifest, values: Mapping[str, Any]) -> dict[str, Any]:
