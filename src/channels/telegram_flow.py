@@ -11,6 +11,14 @@ Forms v2 (owner 2026-10-15): a multi-select is a set of toggle buttons and a
 Done button; a pick-or-type list (`allow_other`) takes a typed value; an
 upload field takes documents one by one, then /done (when the ingress has an
 upload store); and identity fields may be filled from last time.
+
+Fewer questions (owner 2026-10-25, 「有輸入過的參數能不能自己填啊？」): values
+given with the request (or by the model's run form), last time's identity
+values and declared defaults are used and never asked; optional fields are
+not asked one by one. Only required fields still missing are asked, then
+one confirmation card lists every value with where it came from. The card
+has 確認執行 and 修改; 修改, or free text such as 「Dry run 改成否」 or
+「From date 2026-10-19」, changes a value and shows the card again.
 """
 
 from __future__ import annotations
@@ -43,7 +51,25 @@ _NO = {"no", "n", "false", "0", "否", "不", "不要", "取消"}
 _SPLIT = re.compile(r"[\n,，、;；]+")
 _PICK = re.compile(r"^pick:(\d{1,3})$")
 _POSITION = re.compile(r"^#(\d{1,3})$")
+_EDIT = re.compile(r"^edit:(\d{1,3})$")
 CHECK = "✓ "
+#: The confirmation card's buttons (owner 2026-10-25).
+RUN_BUTTON = ("確認執行", "run:yes")
+EDIT_BUTTON = ("修改", "run:edit")
+BACK_BUTTON = ("返回", "edit:back")
+_RUN_WORDS = {"run:yes", "確認執行", "執行", "run", *_YES}
+_EDIT_WORDS = {"run:edit", "修改", "改", "edit", "change"}
+_CANCEL_WORDS = {"/cancel", "run:no", "取消", "cancel"}
+#: Where a value on the card came from.
+FROM_MESSAGE = "（從你的訊息）"
+FROM_DEFAULT = "（預設）"
+FROM_LAST_TIME = "（上次的值）"
+# What joins a field and its new value in a typed edit.
+_EDIT_JOIN = re.compile(
+    r"^\s*(?:改成|改為|改为|設為|设为|設成|设成|換成|换成|用|=|:|：|->|→|to\b|is\b)?\s*",
+    re.IGNORECASE,
+)
+_LABEL_HEAD = re.compile(r"[:：,，(（;；]")
 
 Button = tuple[str, str]
 
@@ -67,21 +93,32 @@ class FlowState:
     fields: tuple[WorkflowParameter, ...]
     # Current `ref:` / `fn:` choices, from the same provider the engine checks.
     choices: ChoicesProvider | None = None
-    index: int = 0
+    # The field being asked (an index into `fields`), -1 before the first.
+    index: int = -1
     answers: dict[str, Any] = field(default_factory=dict)
     confirming: bool = False
     started: float = field(default_factory=time.monotonic)
-    # Identity values from last time, offered before the first question.
+    # Identity values from last time: used, marked on the card, never asked.
     preset: dict[str, Any] = field(default_factory=dict)
-    asking_preset: bool = False
     # Values ticked so far on the current multi-select.
     picked: list[str] = field(default_factory=list)
     # The upload set this flow stores documents in (set by the ingress).
     upload_set: str | None = None
-    # Run values given with the request ("run X company=Foxconn", or by the
-    # model for its own fields): answered already, never asked, always shown
-    # in a confirmation before the run (owner 2026-10-15).
+    # Run values given with the request ("run X company=Foxconn", 「43W」, or
+    # by the model for its own fields): answered already, never asked, always
+    # shown on the card before the run (owner 2026-10-15, 2026-10-25).
     prefilled: frozenset[str] = frozenset()
+    # Indexes of the fields asked one by one: required ones still missing.
+    queue: tuple[int, ...] = ()
+    # Position in `queue` of the field being asked.
+    position: int = 0
+    # Asking one field from the card (修改): the card comes back after it.
+    editing: bool = False
+    # The card's 修改 menu is showing.
+    choosing: bool = False
+    # The Telegram message the current question was sent as; a button tapped
+    # on any other message belongs to an earlier question (set by the ingress).
+    prompt_message_id: int | None = None
     _cache: dict[str, list[str] | None] = field(default_factory=dict)
 
     @property
@@ -111,7 +148,7 @@ def start(
     """A new flow, or why this Workflow cannot be filled in from Telegram.
 
     `uploads` says the ingress can store documents for `upload` fields; without
-    it a required upload is refused and an optional one skipped, as before.
+    it a required upload is refused and an optional one left out, as before.
     """
     fields = ordered_fields(manifest, "telegram")
     if not uploads:
@@ -135,9 +172,8 @@ def start(
         effect,
         fields,
         choices,
-        answers=dict(given),
+        answers={**remembered, **given},
         preset=remembered,
-        asking_preset=bool(remembered),
         prefilled=frozenset(given),
     )
 
@@ -167,8 +203,8 @@ def _choices(state: FlowState, item: WorkflowParameter) -> list[tuple[str, str]]
     return [(value, labels.get(value, value)) for value in item.choice_values]
 
 
-def _rows(buttons: list[Button]) -> list[list[Button]]:
-    return [buttons[i : i + BUTTONS_PER_ROW] for i in range(0, len(buttons), BUTTONS_PER_ROW)]
+def _rows(buttons: list[Button], width: int = BUTTONS_PER_ROW) -> list[list[Button]]:
+    return [buttons[i : i + width] for i in range(0, len(buttons), width)]
 
 
 def _choice_buttons(state: FlowState, item: WorkflowParameter) -> list[list[Button]]:
@@ -195,29 +231,51 @@ def _choice_buttons(state: FlowState, item: WorkflowParameter) -> list[list[Butt
     )
 
 
-def _preset_prompt(state: FlowState) -> FlowPrompt:
-    labels = {item.name: item.label for item in state.fields}
-    shown = [f"{_title(state)}: same as last time?"]
-    shown.extend(
-        f"- {labels.get(name, name)}: {_shown(value)}" for name, value in state.preset.items()
-    )
-    return FlowPrompt("\n".join(shown), [[("Yes", "preset:yes"), ("Change", "preset:no")]])
-
-
 def _shown(value: Any) -> str:
+    if isinstance(value, bool):
+        return "是" if value else "否"
     return ", ".join(str(item) for item in value) if isinstance(value, list) else str(value)
 
 
+def prefill_note(state: FlowState) -> str | None:
+    """「已從你的訊息帶入：…」 for the values given with the request."""
+    given = [item for item in state.fields if item.name in state.prefilled]
+    if not given:
+        return None
+    return "已從你的訊息帶入：" + "；".join(
+        f"{item.label} = {_shown(state.answers.get(item.name))}"
+        for item in given
+        if item.name in state.answers
+    )
+
+
+def _preset_note(state: FlowState) -> str | None:
+    """「沿用上次的值：…」 for the identity values taken from last time."""
+    kept = [item for item in state.fields if item.name in state.preset]
+    if not kept:
+        return None
+    return "沿用上次的值：" + "；".join(
+        f"{item.label} = {_shown(state.preset[item.name])}" for item in kept
+    )
+
+
+def _current(state: FlowState) -> WorkflowParameter | None:
+    if state.confirming or state.choosing or not 0 <= state.index < len(state.fields):
+        return None
+    return state.fields[state.index]
+
+
 def prompt(state: FlowState) -> FlowPrompt:
-    if state.asking_preset:
-        return _preset_prompt(state)
+    if state.choosing:
+        return _edit_menu(state)
     if state.confirming:
         return _confirmation(state)
     item = state.fields[state.index]
-    lines = [
-        f"{_title(state)} ({state.index + 1}/{len(state.fields)})",
-        item.label + (" *" if item.required else ""),
-    ]
+    if state.editing:
+        header = f"{_title(state)} (修改)"
+    else:
+        header = f"{_title(state)} ({state.position + 1}/{len(state.queue)})"
+    lines = [header, item.label + (" *" if item.required else "")]
     if item.help or item.description:
         lines.append(item.help or item.description or "")
     listed = _choices(state, item)
@@ -254,30 +312,83 @@ def prompt(state: FlowState) -> FlowPrompt:
         lines.append("This is a privileged setting; it is confirmed before the run.")
     lines.append("/skip uses the default" if not item.required else "Required.")
     lines.append("/cancel stops.")
+    if not state.editing and state.position == 0:
+        lines[:0] = [note for note in (prefill_note(state), _preset_note(state)) if note]
     return FlowPrompt("\n".join(lines), _choice_buttons(state, item))
 
 
+def _value_line(state: FlowState, item: WorkflowParameter) -> str | None:
+    mark = " (privileged)" if item.confirm else ""
+    if item.name in state.answers:
+        value = state.answers[item.name]
+        if item.kind == "upload":
+            files = value if isinstance(value, list) else [value]
+            value = [str(path).replace("\\", "/").rsplit("/", 1)[-1] for path in files]
+        source = (
+            FROM_MESSAGE
+            if item.name in state.prefilled
+            else FROM_LAST_TIME
+            if item.name in state.preset and state.preset.get(item.name) == value
+            else ""
+        )
+        return f"- {item.label}{mark}：{_shown(value)}{source}"
+    if item.default is not None:
+        return f"- {item.label}{mark}：{_shown(item.default)}{FROM_DEFAULT}"
+    return None
+
+
 def _confirmation(state: FlowState) -> FlowPrompt:
-    shown = [f"Run {_title(state)}" + (f" (effects: {state.effect})" if state.effect else "") + "?"]
+    shown = [
+        f"執行 {_title(state)}？"
+        + (f"（effects: {state.effect}）" if state.effect and state.effect != "read" else "")
+    ]
+    unset: list[str] = []
     for item in state.fields:
-        if item.name in state.answers:
-            mark = " (privileged)" if item.confirm else ""
-            value = state.answers[item.name]
-            if item.kind == "upload":
-                files = value if isinstance(value, list) else [value]
-                value = [str(path).replace("\\", "/").rsplit("/", 1)[-1] for path in files]
-            shown.append(f"- {item.label}{mark}: {_shown(value)}")
-    return FlowPrompt("\n".join(shown), [[("Run", "run:yes"), ("Cancel", "run:no")]])
+        line = _value_line(state, item)
+        if line is None:
+            unset.append(item.label)
+        else:
+            shown.append(line)
+    if unset:
+        shown.append("未填（不使用）：" + "、".join(unset))
+    if state.fields:
+        shown.append(f"要改值：點「修改」，或直接輸入，例如{_edit_examples(state)}。")
+    shown.append("/cancel 取消。")
+    buttons = [[RUN_BUTTON, EDIT_BUTTON]] if state.fields else [[RUN_BUTTON, ("取消", "run:no")]]
+    return FlowPrompt("\n".join(shown), buttons)
 
 
-def needs_confirmation(state: FlowState) -> bool:
-    """Owner decision 2026-10-05: a run that can change or send something, or
-    a privileged field the person set, is confirmed with a tap every time."""
-    privileged = any(
-        item.confirm and state.answers.get(item.name) not in (None, False, item.default)
-        for item in state.fields
+def _short_label(item: WorkflowParameter) -> str:
+    """The label's head: 「Dry run」 of 「Dry run: show the plan only」,
+    「只試跑」 of 「只試跑？」."""
+    head = _LABEL_HEAD.split(item.label, 1)[0].strip().rstrip("?？").strip()
+    return head or item.label
+
+
+def _edit_examples(state: FlowState) -> str:
+    switch = next((item for item in state.fields if item.kind == "boolean"), None)
+    other = next(
+        (item for item in state.fields if item.kind in ("date", "text", "integer", "select")),
+        None,
     )
-    return state.effect != "read" or privileged
+    examples = []
+    if switch is not None:
+        examples.append(f"「{_short_label(switch)} 改成否」")
+    if other is not None:
+        sample = {"date": "2026-10-19", "integer": "10"}.get(other.kind, "…")
+        examples.append(f"「{_short_label(other)} {sample}」")
+    return "、".join(examples) or "「欄位名稱 新的值」"
+
+
+def _edit_menu(state: FlowState) -> FlowPrompt:
+    buttons = [
+        (_short_label(item)[:40], f"edit:{position}")
+        for position, item in enumerate(state.fields[:MAX_BUTTONS])
+    ]
+    return FlowPrompt(
+        "要修改哪一項？也可以直接輸入，例如" + _edit_examples(state) + "。",
+        [*_rows(buttons, 2), [BACK_BUTTON]],
+    )
 
 
 def _convert(item: WorkflowParameter, text: str, dynamic: list[str] | None = None) -> Any:
@@ -339,54 +450,72 @@ def _match_choice(item: WorkflowParameter, value: str, dynamic: list[str] | None
     raise ValueError("choose one of the listed values")
 
 
-def _next(state: FlowState) -> FlowStep:
-    state.index += 1
+def _needs_asking(state: FlowState, item: WorkflowParameter) -> bool:
+    """Only a required field with no value and no default is asked."""
+    return item.required and item.name not in state.answers and item.default is None
+
+
+def _ask(state: FlowState, index: int, *, editing: bool = False) -> FlowStep:
+    state.index = index
+    state.editing = editing
+    state.confirming = False
+    state.choosing = False
     state.picked = []
-    while state.index < len(state.fields) and _given(state, state.fields[state.index].name):
-        state.index += 1
-    if state.index < len(state.fields):
-        return FlowStep("ask", prompt(state))
+    return FlowStep("ask", prompt(state))
+
+
+def _next(state: FlowState) -> FlowStep:
+    """After an answer: the next missing required field, else the card."""
+    state.picked = []
+    if state.editing:
+        state.editing = False
+        return _finish(state)
+    state.position += 1
+    while state.position < len(state.queue) and not _needs_asking(
+        state, state.fields[state.queue[state.position]]
+    ):
+        state.position += 1
+    if state.position < len(state.queue):
+        return _ask(state, state.queue[state.position])
     return _finish(state)
-
-
-def _given(state: FlowState, name: str) -> bool:
-    """Answered by last time's values or with the request: not asked."""
-    return name in state.answers and (name in state.preset or name in state.prefilled)
 
 
 def _finish(state: FlowState) -> FlowStep:
     try:
-        arguments = validate_run_parameters(state.manifest, state.answers)
+        validate_run_parameters(state.manifest, state.answers)
     except WorkflowParameterError as error:
-        # Ask again from the field the shared rules refused.
+        # Ask again the field the shared rules refused.
         name = str(error).split(" ", 1)[0]
-        state.index = next(
-            (index for index, item in enumerate(state.fields) if item.name == name), 0
-        )
+        index = next((index for index, item in enumerate(state.fields) if item.name == name), 0)
         state.answers.pop(name, None)
-        state.picked = []
-        reprompt = prompt(state)
-        return FlowStep("ask", FlowPrompt(f"{error}.\n\n{reprompt.text}", reprompt.buttons))
-    if (needs_confirmation(state) or state.prefilled) and not state.confirming:
-        state.confirming = True
-        return FlowStep("ask", prompt(state))
-    return FlowStep("ready", arguments=arguments)
+        state.prefilled = state.prefilled - {name}
+        asked = _ask(state, index, editing=True)
+        assert asked.prompt is not None
+        return FlowStep("ask", FlowPrompt(f"{error}.\n\n{asked.prompt.text}", asked.prompt.buttons))
+    if not state.fields and state.effect == "read":
+        # Nothing to show or change: a read-only run with no fields just runs.
+        return FlowStep("ready", arguments=validate_run_parameters(state.manifest, state.answers))
+    state.confirming = True
+    state.choosing = False
+    state.editing = False
+    return FlowStep("ask", prompt(state))
 
 
 def begin(state: FlowState) -> FlowStep:
-    """The first prompt, or straight to confirmation when nothing is asked."""
-    if state.asking_preset:
-        return FlowStep("ask", prompt(state))
-    state.index = -1
-    return _next(state)
+    """The first missing required question, or the card when none is missing."""
+    state.queue = tuple(
+        index for index, item in enumerate(state.fields) if _needs_asking(state, item)
+    )
+    state.position = 0
+    if state.queue:
+        return _ask(state, state.queue[0])
+    return _finish(state)
 
 
 def current_upload(state: FlowState) -> WorkflowParameter | None:
     """The upload field the flow is waiting on, if any."""
-    if state.asking_preset or state.confirming or state.index >= len(state.fields):
-        return None
-    item = state.fields[state.index]
-    return item if item.kind == "upload" else None
+    item = _current(state)
+    return item if item is not None and item.kind == "upload" else None
 
 
 def add_upload(state: FlowState, path: str) -> FlowStep:
@@ -406,20 +535,6 @@ def _again(state: FlowState, message: str, *, edit: bool = False) -> FlowStep:
     return FlowStep("ask", FlowPrompt(f"{message}\n\n{again.text}", again.buttons, edit))
 
 
-def _answer_preset(state: FlowState, reply: str) -> FlowStep:
-    lowered = reply.casefold()
-    if lowered in ("preset:yes", *_YES):
-        state.asking_preset = False
-        state.answers.update(state.preset)
-        state.index = -1
-        return _next(state)
-    if lowered in ("preset:no", "change", "改", "修改", *_NO):
-        state.asking_preset = False
-        state.preset = {}
-        return begin(state)
-    return _again(state, "Tap Yes or Change.")
-
-
 def _answer_pick(state: FlowState, item: WorkflowParameter, reply: str) -> FlowStep | None:
     """A tap on a multi-select: toggle one value, or Done. None: not a tap."""
     if reply == "pick:done":
@@ -432,7 +547,7 @@ def _answer_pick(state: FlowState, item: WorkflowParameter, reply: str) -> FlowS
         problem = parameter_value_problem(item, ticked)
         if problem:
             return _again(state, f"{item.label} {problem}.")
-        state.answers[item.name] = ticked
+        _set(state, item, ticked)
         return _next(state)
     tapped = _PICK.match(reply)
     if tapped is None:
@@ -450,20 +565,111 @@ def _answer_pick(state: FlowState, item: WorkflowParameter, reply: str) -> FlowS
     return FlowStep("ask", FlowPrompt(again.text, again.buttons, edit=True))
 
 
+def _set(state: FlowState, item: WorkflowParameter, value: Any) -> None:
+    """A value the person chose now: no longer marked as given or last time's."""
+    state.answers[item.name] = value
+    state.prefilled = state.prefilled - {item.name}
+    state.preset.pop(item.name, None)
+
+
+def _key_pattern(key: str) -> re.Pattern[str] | None:
+    parts = [re.escape(part) for part in re.split(r"[\s_\-]+", key.strip()) if part]
+    if not parts:
+        return None
+    return re.compile(r"^\s*" + r"[\s_\-]*".join(parts) + r"(?![A-Za-z0-9])", re.IGNORECASE)
+
+
+def _edit_target(state: FlowState, reply: str) -> tuple[WorkflowParameter, str] | None:
+    """The field a typed edit names at its start (its label, the label's head
+    or its name; spaces, `_` and `-` alike), and the rest of the text."""
+    best: tuple[int, WorkflowParameter] | None = None
+    for item in state.fields:
+        for key in (item.label, _short_label(item), item.name):
+            pattern = _key_pattern(key)
+            found = pattern.match(reply) if pattern is not None else None
+            if found is not None and (best is None or found.end() > best[0]):
+                best = (found.end(), item)
+    if best is None:
+        return None
+    return best[1], reply[best[0] :]
+
+
+def _typed_edit(state: FlowState, reply: str) -> FlowStep | None:
+    """「Dry run 改成否」, 「From date 2026-10-19」, 「week=2026_44W」, or a
+    switch's name alone (it flips): the card again, or None when the text
+    names no field."""
+    target = _edit_target(state, reply)
+    if target is None:
+        return None
+    item, rest = target
+    value_text = _EDIT_JOIN.sub("", rest, count=1).strip()
+    if item.kind == "upload":
+        return _ask(state, state.fields.index(item), editing=True)
+    if not value_text:
+        if item.kind == "boolean":
+            current = state.answers.get(item.name, item.default)
+            _set(state, item, not bool(current))
+            return _finish_with(state, f"已改：{item.label} = {_shown(not bool(current))}")
+        return _ask(state, state.fields.index(item), editing=True)
+    try:
+        value = _convert(item, value_text, _dynamic_values(state, item))
+    except ValueError as error:
+        problem: str | None = str(error)
+    else:
+        problem = parameter_value_problem(item, value)
+    if problem:
+        return _finish_with(state, f"{item.label} {problem}；沒有改。")
+    _set(state, item, value)
+    return _finish_with(state, f"已改：{item.label} = {_shown(value)}")
+
+
+def _finish_with(state: FlowState, message: str) -> FlowStep:
+    step = _finish(state)
+    if step.prompt is None:
+        return step
+    return FlowStep("ask", FlowPrompt(f"{message}\n\n{step.prompt.text}", step.prompt.buttons))
+
+
+def _answer_card(state: FlowState, reply: str) -> FlowStep:
+    lowered = reply.casefold()
+    if lowered in _RUN_WORDS:
+        try:
+            arguments = validate_run_parameters(state.manifest, state.answers)
+        except WorkflowParameterError:
+            return _finish(state)
+        state.confirming = False
+        return FlowStep("ready", arguments=arguments)
+    if lowered in _EDIT_WORDS and state.fields:
+        state.confirming = False
+        state.choosing = True
+        return FlowStep("ask", prompt(state))
+    edited = _typed_edit(state, reply)
+    if edited is not None:
+        return edited
+    return _again(state, "看不懂要改哪一項。")
+
+
+def _answer_menu(state: FlowState, reply: str) -> FlowStep:
+    if reply.casefold() in ("edit:back", "返回", "back"):
+        state.choosing = False
+        return _finish(state)
+    tapped = _EDIT.match(reply)
+    if tapped is not None and int(tapped.group(1)) < len(state.fields):
+        return _ask(state, int(tapped.group(1)), editing=True)
+    edited = _typed_edit(state, reply)
+    if edited is not None:
+        return edited
+    return _again(state, "點要修改的那一項，或點「返回」。")
+
+
 def answer(state: FlowState, text: str) -> FlowStep:
     reply = text.strip()
-    if reply.casefold() in ("/cancel", "run:no"):
+    if reply.casefold() in _CANCEL_WORDS:
         return FlowStep("cancelled")
-    if state.asking_preset:
-        return _answer_preset(state, reply)
+    if state.choosing:
+        return _answer_menu(state, reply)
     if state.confirming:
-        if reply.casefold() in ("run:yes", *_YES):
-            state.confirming = False
-            arguments = validate_run_parameters(state.manifest, state.answers)
-            return FlowStep("ready", arguments=arguments)
-        return FlowStep(
-            "ask", FlowPrompt("Tap Run or Cancel.\n\n" + prompt(state).text, prompt(state).buttons)
-        )
+        return _answer_card(state, reply)
     item = state.fields[state.index]
     if reply.casefold() == "/skip":
         if item.required:
@@ -474,6 +680,7 @@ def answer(state: FlowState, text: str) -> FlowStep:
                 ),
             )
         state.answers.pop(item.name, None)
+        state.prefilled = state.prefilled - {item.name}
         return _next(state)
     if item.kind == "upload":
         if reply.casefold() == "/done" and item.multiple:
@@ -493,5 +700,61 @@ def answer(state: FlowState, text: str) -> FlowStep:
         problem = parameter_value_problem(item, value)
     if problem:
         return _again(state, f"{item.label} {problem}.")
-    state.answers[item.name] = value
+    _set(state, item, value)
     return _next(state)
+
+
+def answer_field(state: FlowState, name: str, text: str) -> FlowStep:
+    """A reply to an earlier question of this flow (a Telegram Reply on it):
+    sets that field, checked like a typed answer, then carries on where the
+    flow was. An invalid value is said and the current question asked."""
+    item = next((entry for entry in state.fields if entry.name == name), None)
+    if item is None:
+        return _again(state, "That question is not part of this run any more.")
+    try:
+        value = _convert(item, text, _dynamic_values(state, item))
+    except ValueError as error:
+        problem: str | None = str(error)
+    else:
+        problem = parameter_value_problem(item, value)
+    if problem:
+        return _again(state, f"{item.label} {problem}.")
+    _set(state, item, value)
+    if state.confirming or state.choosing or state.editing or state.index == -1:
+        return _finish(state)
+    if state.fields[state.index].name == name:
+        return _next(state)
+    return FlowStep("ask", prompt(state))
+
+
+#: The first two lines of a question this flow sends: 「<name> (2/9)」 or
+#: 「<name> (修改)」, then the field's label (with 「 *」 when required).
+_QUESTION = re.compile(r"^(?P<workflow>\S+) \((?:\d+/\d+|修改)\)$")
+
+
+def quoted_question(quoted: str) -> tuple[str, str] | None:
+    """(Workflow name, field label) when `quoted` is one of this flow's
+    questions, as a Reply or a tapped button carries it; else None."""
+    lines = [line.strip() for line in quoted.splitlines() if line.strip()]
+    for position, line in enumerate(lines[:-1]):
+        found = _QUESTION.match(line)
+        if found is not None:
+            label = lines[position + 1]
+            label = label[:-2] if label.endswith(" *") else label
+            return found.group("workflow"), label
+    return None
+
+
+def current_field(state: FlowState) -> WorkflowParameter | None:
+    """The field the flow is asking now, None on the card or its menu."""
+    return _current(state)
+
+
+def convert_reply(item: WorkflowParameter, text: str) -> Any:
+    """`text` as a value of `item`, as a typed answer is read; None when it
+    is not one (the flow then asks the field normally)."""
+    try:
+        value = _convert(item, text)
+    except ValueError:
+        return None
+    return None if parameter_value_problem(item, value) else value

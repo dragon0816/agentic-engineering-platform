@@ -378,9 +378,13 @@ def test_one_declaration_generates_every_form() -> None:
     station = flow.begin(state)  # Telegram asks the required field first
     assert station.prompt is not None
     assert station.prompt.buttons == [[("公館站", "公館站"), ("四條溝站", "四條溝站")]]
-    following = flow.answer(state, "公館站")
-    assert following.prompt is not None
-    assert following.prompt.buttons == [[("Yes", "yes"), ("No", "no")]]  # dry run
+    card = flow.answer(state, "公館站")  # optional fields are on the card, not asked
+    assert card.prompt is not None and state.confirming
+    flow.answer(state, "run:edit")
+    names = [item.name for item in state.fields]
+    dry_run = flow.answer(state, f"edit:{names.index('dry_run')}")
+    assert dry_run.prompt is not None
+    assert dry_run.prompt.buttons == [[("Yes", "yes"), ("No", "no")]]  # dry run
 
 
 @pytest.mark.skipif(

@@ -108,6 +108,19 @@ def test_web_prefill_settings_and_a_workflow_without_parameters(web: Any) -> Non
     assert "workflow_form" not in unknown and "No single installed" in unknown["answer"]
 
 
+def test_web_reads_plain_values_from_the_request_as_telegram_does(web: Any) -> None:
+    """Owner 2026-10-25: a value named in the request is filled in, the same
+    shared reading as Telegram's flow (common/run_prefill.py)."""
+    agent_web, _runtime, transport = web
+    session = agent_web.create_conversation()["conversation"]["session_id"]
+    form = _turn(agent_web, session, "幫我執行 forms-chat deep")["answer"]["workflow_form"]
+    assert form["prefill"] == {"mode": "deep"}
+    assert "already gave are filled in" in form["message"]
+    unclear = _turn(agent_web, session, "run forms-chat quick deep")["answer"]["workflow_form"]
+    assert unclear["prefill"] == {}  # two choices named: nothing is guessed
+    assert transport.calls == []
+
+
 def test_a_run_from_the_chat_form_is_added_to_the_conversation(web: Any) -> None:
     from host_runtime.contracts import WorkflowLaunchRequest
 
@@ -227,6 +240,27 @@ def test_the_inline_chat_form_renders_and_runs_in_a_real_browser(tmp_path: Path)
             )
             assert browser._evaluate(
                 'document.querySelector(".chat-run-form[open] input[list]") !== null'
+            )
+            # The given value is named; optional fields nobody gave are folded away.
+            assert (
+                browser._evaluate(
+                    'document.querySelector(".chat-run-form[open] .chat-run-given").innerText'
+                )
+                == "已從你的訊息帶入：Company = Foxconn"
+            )
+            assert (
+                browser._evaluate(
+                    'document.querySelector(".chat-run-form[open] .optional-fields > summary")'
+                    ".innerText"
+                )
+                == "其他選項（使用預設值）"
+            )
+            assert browser._evaluate(
+                '!document.querySelector(".chat-run-form[open] .optional-fields").open'
+                ' && !!document.querySelector(".chat-run-form[open] .optional-fields'
+                ' input[id$=\\"-chipset\\"]")'
+                ' && !document.querySelector(".chat-run-form[open] .optional-fields'
+                ' [id$=\\"-mode\\"]")'
             )
             assert not browser._evaluate(
                 "document.documentElement.scrollWidth > document.documentElement.clientWidth"

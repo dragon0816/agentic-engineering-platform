@@ -762,6 +762,9 @@ tr:last-child td { border-bottom: none; }
   border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
 .chat-run-form > summary { min-height: 44px; display: flex; align-items: center;
   font-weight: 600; cursor: pointer; }
+.chat-run-form .optional-fields { margin: 8px 0; }
+.chat-run-form .optional-fields > summary { min-height: 44px; display: flex; align-items: center;
+  cursor: pointer; color: var(--dim); }
 .chat-run-form .chat-run-note { margin: 6px 0; font-size: 13px; color: var(--dim);
   white-space: pre-wrap; }
 .chat-run-form .chat-run-missing { margin: 8px 0; padding: 8px 10px; border-radius: 8px;
@@ -3315,9 +3318,18 @@ async function drawChatRunForm(body, offer, message, session) {
     none.append(text("This Workflow asks for nothing; press Run to start it."));
     body.append(none);
   }
+  const given = offer.prefill || {};
+  const named = fields.filter(field => Object.prototype.hasOwnProperty.call(given, field.name));
+  if (named.length) {
+    // Values read from the chat message (owner 2026-10-25), shown so they can be checked.
+    const note = document.createElement("p"); note.className = "chat-run-note chat-run-given";
+    note.append(text("已從你的訊息帶入：" + named.map(
+      field => field.label + " = " + formatGiven(given[field.name])).join("；")));
+    body.append(note);
+  }
   body.append(container);
   renderParameterForm(container, fields, prefix, {workflow: identity, uploads: true,
-    presets: true, values: offer.prefill || {}});
+    presets: true, values: given, collapseOptional: true});
   const actions = document.createElement("div"); actions.className = "chat-run-actions";
   const result = document.createElement("p"); result.className = "chat-run-result";
   result.setAttribute("aria-live", "polite");
@@ -6361,9 +6373,16 @@ function choiceDependencies(field) {
   return found;
 }
 
+function formatGiven(value) {
+  if (value === true) return "是";
+  if (value === false) return "否";
+  return Array.isArray(value) ? value.join(", ") : String(value);
+}
+
 function renderParameterForm(container, fields, prefix, context) {
   dynamicContext = context || null;
   container.replaceChildren();
+  const rows = {};
   let group = null;
   for (const field of fields) {
     if (field.group && field.group !== group) {
@@ -6387,8 +6406,23 @@ function renderParameterForm(container, fields, prefix, context) {
       error.textContent = ""; input.removeAttribute("aria-invalid");
     });
     row.append(label, input, ...(input.extras || []), help, error); container.append(row);
+    rows[field.name] = row;
     if (input.type === "file" && dynamicContext) {
       wireUpload(input, field, dynamicContext);
+    }
+  }
+  if (dynamicContext && dynamicContext.collapseOptional) {
+    // A form opened from a chat (owner 2026-10-25): optional fields nobody
+    // gave a value for keep their defaults, folded away under one heading.
+    const given = dynamicContext.values || {};
+    const folded = fields.filter(field => !field.required
+      && !Object.prototype.hasOwnProperty.call(given, field.name));
+    if (folded.length) {
+      const more = document.createElement("details"); more.className = "optional-fields";
+      const heading = document.createElement("summary");
+      heading.append(text("其他選項（使用預設值）"));
+      more.append(heading, ...folded.map(field => rows[field.name]));
+      container.append(more);
     }
   }
   // Values already given (a chat's "run X ..."), set before dynamic lists

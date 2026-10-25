@@ -155,7 +155,9 @@ def test_telegram_offers_function_choices_as_buttons(tmp_path: Path) -> None:
     station = flow.answer(state, "east")
     assert station.prompt is not None
     assert station.prompt.buttons == [[("公館站", "公館站"), ("東清站", "東清站")]]
-    done = flow.answer(state, "東清站")
+    card = flow.answer(state, "東清站")
+    assert card.kind == "ask" and state.confirming
+    done = flow.answer(state, "run:yes")
     assert done.kind == "ready" and done.arguments == {"region": "east", "station": "東清站"}
 
 

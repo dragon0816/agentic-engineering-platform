@@ -496,16 +496,20 @@ def test_the_scan_hands_off_to_the_reply_which_the_person_starts(tmp_path: Path)
 def test_the_telegram_flow_asks_the_reply_questions_and_confirms_the_run() -> None:
     state = flow.start(reply_workflow(), "write", lambda _m, _s, _a: [])
     assert isinstance(state, flow.FlowState)
-    asked = flow.begin(state)
+    # Nothing is required: the card comes first, with the defaults (owner 2026-10-25),
+    # and a write Workflow is confirmed with a tap every time (owner 2026-10-05).
+    card = flow.begin(state)
+    assert card.prompt is not None and state.confirming
+    assert "- 只試跑？：否（預設）" in card.prompt.text
+    assert "- 這次處理幾筆？：1（預設）" in card.prompt.text
+    assert card.prompt.buttons == [[("確認執行", "run:yes"), ("修改", "run:edit")]]
+    flow.answer(state, "修改")
+    asked = flow.answer(state, "edit:0")
     assert asked.prompt is not None and "只試跑" in asked.prompt.text
     assert asked.prompt.buttons == [[("Yes", "yes"), ("No", "no")]]
-    second = flow.answer(state, "no")
-    assert second.prompt is not None and "處理幾筆" in second.prompt.text
-    third = flow.answer(state, "2")
-    assert third.prompt is not None and "寄出" in third.prompt.text
-    confirm = flow.answer(state, "yes")
-    # A write Workflow is confirmed with a tap every time (owner 2026-10-05).
-    assert confirm.prompt is not None
-    assert confirm.prompt.buttons == [[("Run", "run:yes"), ("Cancel", "run:no")]]
+    assert "- 只試跑？：否\n" in (flow.answer(state, "no").prompt or flow.FlowPrompt("")).text
+    flow.answer(state, "這次處理幾筆 2")
+    confirm = flow.answer(state, "草稿建好後 是")
+    assert confirm.prompt is not None and "寄出" in confirm.prompt.text
     done = flow.answer(state, "run:yes")
     assert done.arguments == {"dry_run": False, "max_items": 2, "offer_send": True}

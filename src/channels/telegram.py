@@ -373,6 +373,12 @@ MAX_QUOTE_CHARS = 1000
 QUOTED_ATTACHMENT = "（附件）"
 #: A run summary (a Workflow's `preview`) in a Telegram reply.
 MAX_RUN_SUMMARY_CHARS = 3_000
+#: A button of an earlier question while a flow waits on another (owner
+#: 2026-10-25: a stale Yes answered the new Dry run question).
+STALE_TAP_REPLY = "這個按鈕屬於較早的問題，沒有採用。"
+#: A Reply or a tap on a question whose flow is gone (a restart, a timeout).
+RESTARTED_FLOW = "那個流程已經結束，已用你的值重新開始。"
+ENDED_FLOW = "那個流程已經結束。要再執行，請再說一次要執行哪個 Workflow。"
 #: The data of an approval button (G4): `approve:<id>` or `reject:<id>`.
 APPROVAL_TAP = re.compile(r"^(approve|reject):(ap-[A-Za-z0-9-]{1,64})$")
 
@@ -397,6 +403,7 @@ def _parse(raw: object) -> _Update | None:
             and isinstance(callback.get("id"), str)
         ):
             identifier = message.get("message_id") if isinstance(message, dict) else None
+            shown = message.get("text") if isinstance(message, dict) else None
             return _Update(
                 raw["update_id"],
                 chat["id"],
@@ -405,6 +412,10 @@ def _parse(raw: object) -> _Update | None:
                 callback["id"],
                 sender_name=_display_name(sender),
                 message_id=identifier if type(identifier) is int else None,
+                # The question the button belongs to, for a tap on a stale one.
+                quoted=scrub(shown.strip())[:MAX_QUOTE_CHARS]
+                if isinstance(shown, str) and shown.strip()
+                else None,
             )
         return None
     message = raw.get("message")
@@ -910,6 +921,11 @@ class TelegramIngress:
         self._seen: dict[int, None] = {}
         # Open Workflow question flows, by (chat, sender); they expire.
         self._flows: dict[tuple[int, int], telegram_flow.FlowState] = {}
+        # A flow whose question is being sent this update: the sent message's
+        # id becomes the flow's `prompt_message_id`.
+        self._prompting: dict[tuple[int, int], telegram_flow.FlowState] = {}
+        # The id of the last message sent to each chat (sendMessage's reply).
+        self._sent_ids: dict[int, int] = {}
         # Where attached files are kept; without it files are refused.
         self.attachments = attachments
         # Workflow `upload` fields (forms v2): documents sent while a flow
@@ -1022,10 +1038,12 @@ class TelegramIngress:
                 continue
             updates.append(update)
         for update in updates:
+            self._prompting.pop((update.chat_id, update.sender_id), None)
             delivery = await self._deliver_guarded(update)
             if update.callback_id is not None:
                 await asyncio.to_thread(self._acknowledge, update.callback_id)
             if delivery.reply is not None:
+                self._sent_ids.pop(update.chat_id, None)
                 replied = False
                 if delivery.edit_message_id is not None:
                     replied = await asyncio.to_thread(
@@ -1042,6 +1060,12 @@ class TelegramIngress:
                         delivery.reply,
                         delivery.buttons,
                     )
+                # A question sent as a new message (not an edit in place) is
+                # the only one whose buttons the flow takes from now on.
+                asking = self._prompting.pop((update.chat_id, update.sender_id), None)
+                sent_id = self._sent_ids.get(update.chat_id)
+                if asking is not None and replied and sent_id is not None:
+                    asking.prompt_message_id = sent_id
                 if not replied:
                     # Never silent: say that the answer did not arrive. Only
                     # Telegram refusing (or never answering) gets here; an
@@ -1144,6 +1168,10 @@ class TelegramIngress:
         if active is not None and active.expired():
             del self._flows[key]
             active = None
+        if parsed is None:
+            earlier = await self._earlier_question(base, key, active, text, actor, update)
+            if earlier is not None:
+                return earlier
         if active is not None and not (
             parsed is not None and parsed[0] in ("run", "start", "help", "status", "why", "model")
         ):
@@ -1730,6 +1758,76 @@ class TelegramIngress:
             )
         return found[0]
 
+    async def _earlier_question(
+        self,
+        base: dict[str, Any],
+        key: tuple[int, int],
+        active: telegram_flow.FlowState | None,
+        text: str,
+        actor: str,
+        update: _Update,
+    ) -> TelegramDelivery | None:
+        """A Reply on, or a button tapped under, a question other than the one
+        the flow waits on (owner 2026-10-25). None: handle the update as usual.
+
+        - a tap on an older message while a flow waits: not taken as an answer;
+        - a Reply on another question of the same flow: answers that field;
+        - a Reply or tap on a question whose flow is gone (a restart, the time
+          limit): the Workflow's flow starts again with that value given.
+        """
+        tapped = update.callback_id is not None
+        if (
+            tapped
+            and active is not None
+            and active.prompt_message_id is not None
+            and update.message_id != active.prompt_message_id
+        ):
+            again = telegram_flow.prompt(active)
+            self._prompting[key] = active
+            return TelegramDelivery(
+                **base,
+                disposition="answered",
+                reply=scrub(f"{STALE_TAP_REPLY}\n\n{again.text}"),
+                buttons=tuple(tuple(row) for row in again.buttons),
+            )
+        question = telegram_flow.quoted_question(update.quoted) if update.quoted else None
+        if question is None:
+            if tapped and active is None and not text.startswith("/"):
+                # A flow's button whose flow is gone: never an answer elsewhere.
+                return TelegramDelivery(**base, disposition="answered", reply=ENDED_FLOW)
+            return None
+        name, label = question
+        if active is not None and active.workflow.name == name:
+            field = next((item for item in active.fields if item.label == label), None)
+            current = telegram_flow.current_field(active)
+            if field is None or (current is not None and current.name == field.name):
+                return None
+            step = telegram_flow.answer_field(active, field.name, text)
+            return await self._flow_step(base, key, active, step, actor, update)
+        manifest = self._resolve_workflow(name)
+        if isinstance(manifest, str):
+            # Not an installed Workflow's question (any more): an ordinary turn.
+            return None
+        self._flows.pop(key, None)
+        prefill: dict[str, Any] = {}
+        field = next(
+            (
+                item
+                for item in manifest.parameters
+                if item.label == label and item.scope == "runtime"
+            ),
+            None,
+        )
+        if field is not None:
+            value = telegram_flow.convert_reply(field, text)
+            if value is not None:
+                prefill[field.name] = value
+        opened = await self._open_flow(base, key, manifest, actor, update, prefill)
+        self._remember_turn(key, text, _flow_note(manifest, opened.reply))
+        if opened.reply is None:
+            return opened
+        return opened.model_copy(update={"reply": f"{RESTARTED_FLOW}\n\n{opened.reply}"})
+
     async def _start_flow(
         self,
         base: dict[str, int],
@@ -1816,6 +1914,7 @@ class TelegramIngress:
     ) -> TelegramDelivery:
         if step.kind == "ask" and step.prompt is not None:
             self._flows[key] = state
+            self._prompting[key] = state
             return TelegramDelivery(
                 **base,
                 disposition="answered",
@@ -2139,7 +2238,19 @@ class TelegramIngress:
             )
         if status not in (0, 200):
             _log_refused("sendMessage", status, body, detail)
+        if status == 200:
+            self._note_sent(payload.get("chat_id"), body)
         return status
+
+    def _note_sent(self, chat_id: object, body: bytes) -> None:
+        """Remember the id Telegram gave the message just sent to `chat_id`."""
+        try:
+            sent = json.loads(body).get("result")
+        except (ValueError, AttributeError):
+            return
+        identifier = sent.get("message_id") if isinstance(sent, dict) else None
+        if type(chat_id) is int and type(identifier) is int:
+            self._sent_ids[chat_id] = identifier
 
     def _send_once(self, payload: dict[str, JsonValue], detail: str) -> tuple[int, bytes]:
         """One `sendMessage`; a call that raises is logged and tried once

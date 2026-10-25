@@ -158,9 +158,9 @@ def test_a_workflow_question_flow_stays_in_history_too(tmp_path: Path) -> None:
     transport.batches += [[update(3, OWNER, "/run 7")], [update(4, OWNER, "quick")]]
     poll(item)
     final = poll(item).deliveries[0]
-    if final.disposition == "answered":  # an effectful Workflow waits for the tap
-        transport.batches.append([_tap(5, OWNER, "run:yes")])
-        final = poll(item).deliveries[0]
+    assert final.disposition == "answered"  # the card waits for the tap
+    transport.batches.append([_tap(5, OWNER, "run:yes", transport)])
+    final = poll(item).deliveries[0]
     assert final.disposition == "routed"
     (history,) = item._histories.values()
     assert history[-2].text == "【執行】release-validation-form"

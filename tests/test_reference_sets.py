@@ -148,7 +148,9 @@ def test_telegram_offers_published_choices_as_buttons(tmp_path: Path) -> None:
     second = flow.answer(state, "kt326")
     assert second.prompt is not None
     assert second.prompt.buttons == [[("2.0.18", "2.0.18"), ("2.0.19", "2.0.19")]]
-    done = flow.answer(state, "2")  # by position
+    card = flow.answer(state, "2")  # by position
+    assert card.kind == "ask" and state.confirming
+    done = flow.answer(state, "run:yes")
     assert done.kind == "ready" and done.arguments == {"chipset": "kt326", "version": "2.0.19"}
 
 

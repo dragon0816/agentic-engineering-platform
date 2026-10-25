@@ -60,10 +60,10 @@ def test_telegram_prefill_is_answered_and_confirmed(tmp_path: Path) -> None:
     item, agent, _ = ingress(tmp_path, transport)
     _install(agent, [{"name": "package", "label": "Mode", "kind": "text", "required": True}])
     delivery = poll(item).deliveries[0]
-    # Nothing left to ask: straight to the confirmation, which shows the value.
-    assert delivery.buttons == ((("Run", "run:yes"), ("Cancel", "run:no")),)
-    assert "- Mode: quick" in (delivery.reply or "")
-    transport.batches.append([_tap(2, OWNER, "run:yes")])
+    # Nothing left to ask: straight to the card, which shows the value and its source.
+    assert delivery.buttons == ((("確認執行", "run:yes"), ("修改", "run:edit")),)
+    assert "- Mode：quick（從你的訊息）" in (delivery.reply or "")
+    transport.batches.append([_tap(2, OWNER, "run:yes", transport)])
     ran = poll(item).deliveries[0]
     assert ran.outcome is not None and ran.outcome.workflow is not None
 
@@ -74,7 +74,7 @@ def test_telegram_run_of_a_workflow_without_parameters(tmp_path: Path) -> None:
     _install(agent, [])
     delivery = poll(item).deliveries[0]
     if delivery.disposition == "answered":
-        assert delivery.buttons == ((("Run", "run:yes"), ("Cancel", "run:no")),)
+        assert delivery.buttons == ((("確認執行", "run:yes"), ("取消", "run:no")),)
     else:
         assert delivery.outcome is not None and delivery.outcome.workflow is not None
 
@@ -111,7 +111,7 @@ def test_telegram_follows_the_models_form_hand_off_into_the_flow(tmp_path: Path)
         agent,
         [
             {"name": "package", "label": "Mode", "kind": "text", "required": True},
-            {"name": "note", "label": "Note", "kind": "text"},
+            {"name": "note", "label": "Note", "kind": "text", "required": True},
         ],
     )
     agent.gateway.host_tools = lambda: workflow_form_tools(agent.gateway.engine)

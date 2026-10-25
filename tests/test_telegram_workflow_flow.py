@@ -22,13 +22,28 @@ def _install(agent: Any, parameters: list[dict[str, Any]], **extra: Any) -> Work
     return manifest
 
 
-def _tap(update_id: int, sender: int, data: str) -> dict[str, Any]:
+def _keyboard_message(transport: FakeTransport) -> int:
+    """The id the fake Bot API gave the newest message sent with buttons."""
+    newest = 1
+    sent = [payload for url, payload in transport.calls if url.endswith("/sendMessage")]
+    for position, payload in enumerate(sent, start=1):
+        if "reply_markup" in payload:
+            newest = position
+    return newest
+
+
+def _tap(
+    update_id: int, sender: int, data: str, transport: FakeTransport | None = None
+) -> dict[str, Any]:
+    """A button tap; with `transport`, on the newest message with buttons (a
+    question flow takes taps only on the question it waits on)."""
+    message_id = _keyboard_message(transport) if transport is not None else 1
     return {
         "update_id": update_id,
         "callback_query": {
             "id": f"cb-{update_id}",
             "from": {"id": sender, "is_bot": False},
-            "message": {"message_id": 1, "chat": {"id": sender, "type": "private"}},
+            "message": {"message_id": message_id, "chat": {"id": sender, "type": "private"}},
             "data": data,
         },
     }
@@ -63,12 +78,11 @@ def test_run_asks_each_field_then_executes_through_the_agent(tmp_path: Path) -> 
     assert "does not match" in (again.reply or "")
     final = poll(item)
     delivery = final.deliveries[0]
-    effect_confirmation = delivery.disposition == "answered"
-    if effect_confirmation:
-        # A Workflow that can change something waits for the tap.
-        assert delivery.buttons == ((("Run", "run:yes"), ("Cancel", "run:no")),)
-        transport.batches.append([_tap(4, OWNER, "run:yes")])
-        delivery = poll(item).deliveries[0]
+    # Every run waits for the card's tap (owner 2026-10-25).
+    assert delivery.disposition == "answered" and "- Mode：quick" in (delivery.reply or "")
+    assert delivery.buttons == ((("確認執行", "run:yes"), ("修改", "run:edit")),)
+    transport.batches.append([_tap(4, OWNER, "run:yes", transport)])
+    delivery = poll(item).deliveries[0]
     assert delivery.disposition == "routed" and delivery.outcome is not None
     assert delivery.outcome.ingress == "telegram"
     assert delivery.outcome.workflow is not None
@@ -88,6 +102,7 @@ def test_choice_fields_send_an_inline_keyboard_and_taps_are_acknowledged(
                 "name": "package",
                 "label": "Mode",
                 "kind": "select",
+                "required": True,
                 "choices": [
                     {"value": "quick", "label": "Quick"},
                     {"value": "deep", "label": "Deep"},
@@ -106,8 +121,9 @@ def test_choice_fields_send_an_inline_keyboard_and_taps_are_acknowledged(
             ]
         ]
     }
-    transport.batches.append([_tap(2, OWNER, "deep")])
-    poll(item)
+    transport.batches.append([_tap(2, OWNER, "deep", transport)])
+    card = poll(item).deliveries[0]
+    assert "- Mode：deep" in (card.reply or "")
     acknowledged = [
         payload for url, payload in transport.calls if url.endswith("/answerCallbackQuery")
     ]
@@ -136,19 +152,18 @@ def test_cancel_unknown_workflow_and_unmapped_sender(tmp_path: Path) -> None:
 def test_an_effectful_workflow_waits_for_the_run_tap(tmp_path: Path) -> None:
     from evaluation_runner import release_package_workflow
 
-    transport = FakeTransport([[update(1, OWNER, "/run 8")], [update(2, OWNER, "sample")]])
+    transport = FakeTransport([[update(1, OWNER, "/run 8")]])
     item, agent, runner = ingress(tmp_path, transport)
     data = release_package_workflow().model_dump(mode="json")
     data["metadata"]["identity"]["name"] = "release-package-form"
     data["run_alias"] = 8
     data["parameters"] = [{"name": "package", "label": "Package", "kind": "text"}]
     agent.gateway.engine.workflows.register(WorkflowManifest.model_validate(data))
-    poll(item)
-    waiting = poll(item).deliveries[0]
+    waiting = poll(item).deliveries[0]  # nothing required: straight to the card
     assert waiting.disposition == "answered"
     assert "effects: external_side_effect" in (waiting.reply or "")
-    assert waiting.buttons == ((("Run", "run:yes"), ("Cancel", "run:no")),)
+    assert waiting.buttons == ((("確認執行", "run:yes"), ("修改", "run:edit")),)
     assert runner.bridge.events == ()  # nothing ran before the tap
-    transport.batches.append([_tap(3, OWNER, "run:no")])
+    transport.batches.append([_tap(3, OWNER, "run:no", transport)])
     assert poll(item).deliveries[0].reply == "Cancelled."
     assert runner.bridge.events == ()
