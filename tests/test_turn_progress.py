@@ -207,7 +207,7 @@ def test_a_failed_retry_pass_ends_failed_and_an_answered_turn_validated() -> Non
     result, snapshot = _checked(claim, _outcome("failed", "model_output_truncated"))
     # The person gets the first answer with the Host note (bug 1), and the
     # progress says the turn did not pass its checks.
-    assert result.status == "answered" and "Host 檢查未通過" in result.text
+    assert result.status == "answered" and "（系統檢查：" in result.text
     harness = snapshot["harness"]
     assert harness["phase"] == "failed" and harness["retry"] == 1
     assert [step["state"] for step in harness["steps"]] == ["done", "failed", "waiting"]

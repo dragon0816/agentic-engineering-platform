@@ -288,7 +288,7 @@ def test_the_claim_check_and_the_guidance_lead_to_a_proposal(web: Web) -> None: 
     )
     replied = _turn(agent_web, session, RULE)
     answer = replied["answer"]
-    assert answer["answer"].startswith("這次不問了") and "Host 檢查未通過" not in answer["answer"]
+    assert answer["answer"].startswith("這次不問了") and "系統檢查" not in answer["answer"]
     assert answer[CARD_KEY]["title"] == "要把這條記成『名片／組織圖』的偏好嗎？"
     system = model.requests[0].messages[0].text
     assert "memory__propose_preference" in system and "never say it is saved" in system

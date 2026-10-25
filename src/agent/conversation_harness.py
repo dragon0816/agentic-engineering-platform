@@ -34,6 +34,7 @@ message, sent once, and the retry pair is text (live test 2026-10-20).
 from __future__ import annotations
 
 import hashlib
+import logging
 import re
 from collections.abc import Awaitable, Callable
 from pathlib import Path
@@ -46,6 +47,8 @@ from agent.skills import SkillHarnessGuidance
 from capabilities.coding_change.workspaces import containing_root
 from common.assets import AssetIdentity
 
+_LOG = logging.getLogger(__name__)
+
 CLAIM_CHECK = "no_unbacked_action_claim"
 OUTPUT_CHECK = "named_outputs_exist"
 REUSE_CHECK = "reusable_request_drafted"
@@ -56,13 +59,61 @@ DRAFT_TOOLS = frozenset({"authoring__draft_workflow", "authoring__revise_workflo
 PROPOSAL_ONLY_TOOLS = frozenset({"memory__propose_preference", "memory__propose_note"})
 TURN_SKILL = AssetIdentity(namespace="host", name="conversation-turn", version="1.0.0")
 
-# A completed action on something concrete, in Chinese or English.
+# A completed action on something concrete, in Chinese or English. 「已」 used
+# as an adjective (「已安裝的 Workflow」, 「已完成的步驟」) is not a claim.
 _CLAIM = re.compile(
-    r"(已經?|已)(成功)?(執行|跑完|產生|生成|建立|寫入|寫好|存檔|儲存|輸出|安裝|下載|送出|上傳|更新)"
-    r"|\b(I|I've|I have|we)\s+(have\s+)?(ran|run|executed|created|generated|wrote|written|"
-    r"saved|installed|downloaded|uploaded|submitted)\b",
+    r"(已經?|已)(成功)?(幫你|替你|為你)?(執行|跑完|產生|生成|建立|寫入|寫好|存檔|儲存|輸出|安裝|"
+    r"下載|送出|上傳|更新|完成|做好|處理好|處理完|寄出|發送|刪除)(?![的之])"
+    r"|已經(幫你|替你|為你)"
+    r"|\b(I|I've|I have|we|we've|we have)\s+(have\s+)?(ran|run|executed|created|generated|"
+    r"wrote|written|saved|installed|downloaded|uploaded|submitted|done|completed|finished)\b",
     re.IGNORECASE,
 )
+# What ends the part of an answer a claim is read in: a sentence or a clause
+# introduced by a colon.
+_SENTENCE_BREAK = re.compile(r"[。！!？?；;：:\n]")
+# A condition, an offer or something still to come before the claim in its
+# sentence: 「如果是已安裝 Workflow，我會開…」, 「我可以…」, 「要的話我會…」,
+# "I can…", "if …, I will…" say what would happen, not what did (owner
+# report 2026-10-25).
+_NOT_DONE = re.compile(
+    r"如果|假如|要是|倘若|若是|若|萬一|一旦|只要|如需|的話|等你|待你|"
+    r"我可以|可以幫|可以替|我能|我會|我將|將會|會幫|會替|是否|要不要"
+    r"|\b(?:if|unless|once|whether|can|could|may|might|shall|should|would|will|want\s+me)\b",
+    re.IGNORECASE,
+)
+#: Why a claim failed, as the model is told on the retry and the log keeps.
+CLAIM_REASON = (
+    "the answer says an action was completed, but no tool call succeeded "
+    "in this turn; do it with a tool, or do not say it was done"
+)
+PERSISTENT_REASON = (
+    "the answer says a lasting change was made (a rule, a setting, something "
+    "remembered for later), but no tool that changes anything succeeded in this "
+    "turn. You keep no rules between conversations unless a tool saves them: say it "
+    "applies to this conversation only, and propose it as a preference "
+    "(memory__propose_preference: saved only when the person presses 存成偏好), a "
+    "Workflow draft or a settings proposal for the person to apply instead"
+)
+MISSING_REASON = "files the answer names are not there: "
+REUSE_REASON = (
+    "the person asked for something reusable, but this turn only ran one-off code and "
+    "drafted no Workflow, so nothing reaches Capabilities. Draft it with "
+    "authoring__draft_workflow: a coding/run-python@1.0.0 step with the script as a fixed "
+    "input and the values that change as typed parameters; the person installs it from "
+    "the card"
+)
+#: What the person reads under an answer that still failed a check: short
+#: Traditional Chinese, the same in Agent Web and Telegram (both take the
+#: Gateway's answer). The English reasons stay in the log and the retry.
+NOTE_MARK = "（系統檢查："
+CLAIM_NOTE = NOTE_MARK + "這一輪沒有成功執行任何工具，回答中『已完成』的說法未經驗證）"
+PERSISTENT_NOTE = (
+    NOTE_MARK + "這一輪沒有儲存任何規則或設定，回答中『已改好』『以後都會』的說法未經驗證，"
+    "只適用於這次對話）"
+)
+MISSING_NOTE = NOTE_MARK + "回答提到的檔案不存在或是空的：{files}）"
+REUSE_NOTE = NOTE_MARK + "這一輪只執行了一次性的程式，沒有建立可重複使用的 Workflow 草稿）"
 # A lasting change: a rule, a setting or preference, something remembered for
 # later. First person or at a clause start, so a description of the person's
 # own settings (「資料夾已設定為…」) or of what a button will do is not one.
@@ -127,30 +178,59 @@ def named_files(text: str, roots: tuple[str, ...]) -> list[Path]:
     return found
 
 
+def claims_done(text: str) -> bool:
+    """Whether `text` says, as done, an action on something concrete. A
+    match inside a condition, an offer or a promise (a marker earlier in its
+    sentence) does not count."""
+    for match in _CLAIM.finditer(text):
+        start = max(
+            (found.end() for found in _SENTENCE_BREAK.finditer(text, 0, match.start())),
+            default=0,
+        )
+        if not _NOT_DONE.search(text, start, match.start()):
+            return True
+    return False
+
+
+def person_notes(reasons: list[str]) -> list[str]:
+    """The short Traditional Chinese note for each failed check's reason."""
+    notes: list[str] = []
+    for reason in reasons:
+        if reason == CLAIM_REASON:
+            note = CLAIM_NOTE
+        elif reason == PERSISTENT_REASON:
+            note = PERSISTENT_NOTE
+        elif reason == REUSE_REASON:
+            note = REUSE_NOTE
+        elif reason.startswith(MISSING_REASON):
+            files = (
+                reason.removeprefix(MISSING_REASON)
+                .replace(" does not exist", "（不存在）")
+                .replace(" is empty", "（是空的）")
+                .replace("; ", "、")
+            )
+            note = MISSING_NOTE.format(files=files)
+        else:
+            note = NOTE_MARK + "回答未通過檢查）"
+        if note not in notes:
+            notes.append(note)
+    return notes
+
+
 def check_answer(
     text: str, tools: tuple[Any, ...], roots: tuple[str, ...]
 ) -> tuple[list[HarnessCheckResult], list[str]]:
     """The two Host checks, with a plain reason for each one that failed."""
     reasons: list[str] = []
     succeeded = any(_succeeded(item) for item in tools)
-    claim_ok = succeeded or not _CLAIM.search(text or "")
+    claim_ok = succeeded or not claims_done(text or "")
     if not claim_ok:
-        reasons.append(
-            "the answer says an action was completed, but no tool call succeeded "
-            "in this turn; do it with a tool, or do not say it was done"
-        )
+        reasons.append(CLAIM_REASON)
     elif not any(_succeeded(item) and not _reads_only(item) for item in tools) and (
         _PERSISTENT.search(text or "")
     ):
         claim_ok = False
-        reasons.append(
-            "the answer says a lasting change was made (a rule, a setting, something "
-            "remembered for later), but no tool that changes anything succeeded in this "
-            "turn. You keep no rules between conversations unless a tool saves them: say it "
-            "applies to this conversation only, and propose it as a preference "
-            "(memory__propose_preference: saved only when the person presses 存成偏好), a "
-            "Workflow draft or a settings proposal for the person to apply instead"
-        )
+        reasons.append(PERSISTENT_REASON)
     missing = []
     for path in named_files(text, roots):
         if not path.is_file():
@@ -158,7 +238,7 @@ def check_answer(
         elif path.stat().st_size == 0:
             missing.append(f"{path} is empty")
     if missing:
-        reasons.append("files the answer names are not there: " + "; ".join(missing[:5]))
+        reasons.append(MISSING_REASON + "; ".join(missing[:5]))
     return [
         HarnessCheckResult(
             check_id=CLAIM_CHECK,
@@ -180,15 +260,7 @@ def check_reuse(
     one_off = any(_succeeded(item) and str(item.name).startswith("coding__") for item in tools)
     drafted = any(_succeeded(item) and item.name in DRAFT_TOOLS for item in tools)
     failed = can_draft and one_off and not drafted and bool(_REUSABLE.search(person or ""))
-    reason = (
-        "the person asked for something reusable, but this turn only ran one-off code and "
-        "drafted no Workflow, so nothing reaches Capabilities. Draft it with "
-        "authoring__draft_workflow: a coding/run-python@1.0.0 step with the script as a fixed "
-        "input and the values that change as typed parameters; the person installs it from "
-        "the card"
-        if failed
-        else None
-    )
+    reason = REUSE_REASON if failed else None
     return HarnessCheckResult(
         check_id=REUSE_CHECK,
         status="failed" if failed else "passed",
@@ -304,7 +376,7 @@ async def checked_turn(
     run = await run_harness_async(plan, actions)
     result = actions.result
     if run.phase != "validated" and actions.reasons and result is not None:
-        result = _with_note(result, actions.reasons)
+        result = _with_note(result, actions.reasons, request_id)
     elif (
         result is not None
         and result.status == "failed"
@@ -312,10 +384,13 @@ async def checked_turn(
         and actions.checked is not result
     ):
         # The retry pass failed outright: the first answer, marked by the Host.
-        result = _with_note(actions.checked, actions.checked_reasons)
+        result = _with_note(actions.checked, actions.checked_reasons, request_id)
     return result
 
 
-def _with_note(result: Any, reasons: list[str]) -> Any:
-    note = "\n\n（Host 檢查未通過：" + "；".join(reasons) + "）"
+def _with_note(result: Any, reasons: list[str], request_id: str = "") -> Any:
+    """The answer with the person's short note; the English reasons go to
+    the log (telemetry records which check failed)."""
+    _LOG.warning("Host check failed for %s: %s", request_id or "a turn", " | ".join(reasons))
+    note = "\n\n" + "\n".join(person_notes(reasons))
     return result.model_copy(update={"text": (result.text or "") + note})

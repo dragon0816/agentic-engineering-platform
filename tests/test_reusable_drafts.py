@@ -86,7 +86,7 @@ def test_a_reusable_request_answered_with_one_off_code_is_sent_back_to_draft() -
     )
     result = asyncio.run(built.converse(request(ASK), ()))
     assert result.text == "已起草 Workflow，請在卡片上按安裝。"
-    assert "Host 檢查未通過" not in result.text
+    assert "系統檢查" not in result.text
     assert len(model.calls) == 4
     feedback = model.calls[2].messages[-1].text
     assert feedback.startswith("[Host check failed]") and "reusable" in feedback

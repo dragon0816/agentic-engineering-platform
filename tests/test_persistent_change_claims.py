@@ -103,7 +103,7 @@ def test_the_claim_after_a_read_gets_one_retry_and_the_prompt_says_there_is_no_m
     )
     result = asyncio.run(built.converse(request("執行時不需要問是否包含在職人員"), ()))
     assert result.text.startswith("這次對話裡我不會再問")
-    assert "Host 檢查未通過" not in result.text
+    assert "系統檢查" not in result.text
     assert len(model.calls) == 3
     feedback = model.calls[2].messages[-1].text
     assert feedback.startswith("[Host check failed]") and "lasting change" in feedback

@@ -9,7 +9,7 @@ from typing import Any
 
 from test_gateway import _call, _cut, _host_gateway, _text, request
 
-from agent.conversation_harness import check_answer, named_files
+from agent.conversation_harness import CLAIM_NOTE, check_answer, named_files
 from agent.gateway import HostTool, HostToolOutcome
 from common.execution import RequestContext
 from models.contracts import ModelMessage, ModelTool
@@ -55,7 +55,8 @@ def test_a_named_output_that_is_missing_or_empty_is_caught(tmp_path: Path) -> No
     built._workspace_roots = (str(root),)
     result = asyncio.run(built.converse(request("做報表"), ()))
     assert len(model.calls) == 3  # one retry, then the Host's note
-    assert "Host 檢查未通過" in result.text and "does not exist" in result.text
+    assert "（系統檢查：回答提到的檔案不存在或是空的：" in result.text
+    assert "report.xlsx（不存在）" in result.text and "does not exist" not in result.text
     checks, reasons = check_answer(f"結果在 {root / 'out' / 'empty.csv'}", (), (str(root),))
     assert [c.status for c in checks] == ["passed", "failed"] and "is empty" in reasons[0]
 
@@ -105,4 +106,4 @@ def test_a_failed_retry_returns_the_first_answer_with_the_host_note() -> None:
     assert len(model.calls) == 4
     assert result.status == "answered" and result.failure is None
     assert result.text.startswith("名片內容：王小明。已經儲存到資料庫了。")
-    assert "Host 檢查未通過" in result.text and "no tool call succeeded" in result.text
+    assert CLAIM_NOTE in result.text and "no tool call succeeded" not in result.text
