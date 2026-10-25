@@ -33,6 +33,7 @@ import subprocess
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 import webbrowser
 from collections.abc import Callable, Mapping
@@ -259,6 +260,42 @@ def write_start_status(
         status["address"] = address
     script = f"window.aepStarting && window.aepStarting({json.dumps(status)});\n"
     write_atomically(workspace_root / STARTING_STATUS, script.encode("utf-8"))
+
+
+def activity(address: str, timeout: float = 5.0) -> dict[str, object] | None:
+    """`GET /api/activity` of the running Agent Web at `address` (the address
+    with its token, from the address file); None when it does not answer.
+    A restart helper calls this first and waits while `busy` is true."""
+    parsed = urllib.parse.urlparse(address)
+    token = urllib.parse.parse_qs(parsed.query).get("token", [""])[0]
+    request = urllib.request.Request(
+        f"{parsed.scheme}://{parsed.netloc}/api/activity",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:  # noqa: S310 - loopback
+            found = json.loads(response.read())
+    except (urllib.error.URLError, OSError, ValueError):
+        return None
+    return found if isinstance(found, dict) else None
+
+
+def restart_blockers(address: str) -> list[str]:
+    """Why Agent Web should not be restarted now, one line per active item;
+    [] when it is idle. An Agent Web that does not answer, or one from before
+    `/api/activity` existed, is reported as unknown, never as idle."""
+    found = activity(address)
+    items = found.get("items") if found is not None else None
+    if not isinstance(items, list):
+        return ["activity unknown: Agent Web did not answer GET /api/activity"]
+    lines = []
+    for item in items:
+        if isinstance(item, dict):
+            details = ", ".join(
+                f"{key}={value}" for key, value in item.items() if key not in ("kind",)
+            )
+            lines.append(f"{item.get('kind')}: {details}")
+    return lines
 
 
 def answers(address: str, timeout: float = 3.0) -> bool:

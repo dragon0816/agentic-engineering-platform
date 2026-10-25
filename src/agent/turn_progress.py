@@ -17,6 +17,7 @@ from collections import deque
 from collections.abc import Callable
 from contextvars import ContextVar
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from typing import Any
 
 #: Recent tool lines kept for display; the count covers every call.
@@ -287,16 +288,24 @@ class TurnProgressBoard:
     def __init__(self) -> None:
         self._lock = threading.Lock()
         self._turns: dict[str, TurnProgress] = {}
+        self._began: dict[str, datetime] = {}
 
     def begin(self, progress: TurnProgress) -> TurnProgress:
         with self._lock:
             self._turns[progress.session_id] = progress
+            self._began[progress.session_id] = datetime.now(UTC)
         return progress
 
     def end(self, progress: TurnProgress) -> None:
         with self._lock:
             if self._turns.get(progress.session_id) is progress:
                 del self._turns[progress.session_id]
+                self._began.pop(progress.session_id, None)
+
+    def running(self) -> list[datetime]:
+        """When each running turn began (the activity read; no content)."""
+        with self._lock:
+            return [self._began[session] for session in self._turns if session in self._began]
 
     def get(self, session_id: str) -> TurnProgress | None:
         with self._lock:

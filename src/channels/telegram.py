@@ -19,9 +19,11 @@ failure rules.
 """
 
 import asyncio
+import hashlib
 import json
 import logging
 import re
+import secrets
 import tempfile
 import threading
 import time
@@ -501,6 +503,17 @@ def _files(message: dict[str, Any], update_id: int) -> list[_File]:
     return []
 
 
+#: Salt for `chat_hash`: new with each process, so the hash names a chat
+#: within one run of Agent Web and can never be turned back into its id.
+_CHAT_SALT = secrets.token_bytes(16)
+
+
+def chat_hash(key: tuple[int, int]) -> str:
+    """A short name for a (chat, sender) pair that does not reveal either id."""
+    digest = hashlib.sha256(_CHAT_SALT + f"{key[0]}:{key[1]}".encode()).hexdigest()
+    return digest[:12]
+
+
 def _chat_session(chat_id: int) -> str:
     """The session a Telegram chat's turns belong to (its model choice too)."""
     return f"telegram-chat-{chat_id}"
@@ -926,6 +939,10 @@ class TelegramIngress:
         self._prompting: dict[tuple[int, int], telegram_flow.FlowState] = {}
         # The id of the last message sent to each chat (sendMessage's reply).
         self._sent_ids: dict[int, int] = {}
+        # Updates being handled now, by (chat, sender), with when each began:
+        # read by `activity` from another thread, so under a lock.
+        self._busy: dict[tuple[int, int], datetime] = {}
+        self._activity_lock = threading.Lock()
         # Where attached files are kept; without it files are refused.
         self.attachments = attachments
         # Workflow `upload` fields (forms v2): documents sent while a flow
@@ -1104,6 +1121,9 @@ class TelegramIngress:
         """Handling one update never takes the poll loop down with it. What
         raised is recorded on the delivery with its type and a redacted
         message, and the sender is told the request could not be handled."""
+        key = (update.chat_id, update.sender_id)
+        with self._activity_lock:
+            self._busy[key] = datetime.now(UTC)
         try:
             # Everything this update does uses its chat's model (owner
             # 2026-10-22): the chat's own choice, else the person's default,
@@ -1119,6 +1139,42 @@ class TelegramIngress:
                 reply="That request could not be handled on this Bridge.",
                 failure=Failure(code="telegram_delivery_failed", message=describe(error)),
             )
+        finally:
+            with self._activity_lock:
+                self._busy.pop(key, None)
+
+    def activity(self) -> list[dict[str, str]]:
+        """What a restart would cut off (owner 2026-10-25: a restart lost the
+        owner's question flow at 2/9): open question flows and updates being
+        handled now. No message content and no chat id, only a hash of the
+        chat that changes with each process."""
+        now = time.monotonic()
+        with self._activity_lock:
+            flows = list(self._flows.items())
+            busy = list(self._busy.items())
+        found: list[dict[str, str]] = []
+        for key, state in flows:
+            if state.expired(now):
+                continue
+            identity = state.workflow
+            found.append(
+                {
+                    "kind": "telegram_flow",
+                    "started_at": state.started_at.isoformat(timespec="seconds"),
+                    "chat": chat_hash(key),
+                    "workflow": f"{identity.namespace}/{identity.name}",
+                    "stage": "card" if state.confirming or state.choosing else "question",
+                }
+            )
+        for key, began in busy:
+            found.append(
+                {
+                    "kind": "telegram_turn",
+                    "started_at": began.isoformat(timespec="seconds"),
+                    "chat": chat_hash(key),
+                }
+            )
+        return found
 
     async def _deliver(self, update: _Update) -> TelegramDelivery:
         base = {

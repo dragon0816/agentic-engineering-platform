@@ -28,6 +28,7 @@ import re
 import time
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from typing import Any, Literal
 
 from common.assets import (
@@ -98,6 +99,8 @@ class FlowState:
     answers: dict[str, Any] = field(default_factory=dict)
     confirming: bool = False
     started: float = field(default_factory=time.monotonic)
+    # When it started, for the activity read (`/api/activity`).
+    started_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     # Identity values from last time: used, marked on the card, never asked.
     preset: dict[str, Any] = field(default_factory=dict)
     # Values ticked so far on the current multi-select.

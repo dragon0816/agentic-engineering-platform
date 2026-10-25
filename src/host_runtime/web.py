@@ -5415,6 +5415,25 @@ class AgentWeb:
         recorder = telemetry.recorder()
         return task_list(self.tasks(), recorder.store if recorder is not None else None)
 
+    def activity(self) -> dict[str, Any]:
+        """Work a restart of Agent Web would cut off (owner 2026-10-25): running
+        background tasks, chat turns in progress, and Telegram question flows
+        and turns, which live only in memory. `busy` says whether a restart
+        should wait. No message content; a Telegram chat is a hash."""
+        items: list[dict[str, Any]] = [
+            {"kind": "task", "started_at": task["started"], "task": task["kind"]}
+            for task in self.task_list()["tasks"]
+            if task.get("status") == "running"
+        ]
+        items += [
+            {"kind": "chat_turn", "started_at": began.isoformat(timespec="seconds")}
+            for began in self.turn_progress.running()
+        ]
+        loop = self.telegram_loop
+        if loop is not None and loop.running:
+            items += loop.ingress.activity()
+        return {"ok": True, "busy": bool(items), "items": items}
+
     def start_convert(self, sandbox_id: str, mode: str) -> dict[str, Any]:
         """Convert (or preview) every original in the sandbox's drop/ in the
         background, one at a time (owner 2026-10-13)."""
@@ -5965,6 +5984,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.review_proposal((query.get("sandbox_id") or [""])[0]))
         elif parsed.path == "/api/tasks":
             self._json(200, web.task_list())
+        elif parsed.path == "/api/activity":
+            self._json(200, web.activity())
         elif parsed.path == "/api/cards":
             wanted = parse_qs(parsed.query).get("card_id", [""])[0]
             session = parse_qs(parsed.query).get("session_id", [""])[0]
