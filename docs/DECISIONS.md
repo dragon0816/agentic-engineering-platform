@@ -4953,3 +4953,43 @@ Owner, Telegram, 2026-10-25: the question 「Dry run: show the plan only … Def
   a JSON boolean to text for every existing Workflow and schedule); a separate `card_label` field (the
   label already is what the card and the form show, so relabelling the switch is enough); changing the
   button callback data (old buttons and the stale-tap check keep working with `yes` / `no`).
+
+## 2026-10-25 — A session remembers what it produced
+
+Owner, Telegram, 2026-10-25: the SDE weekly report ran at about 15:15 (Outlook draft and
+`workspace\weekly-mail\2026_43W\effort-chart.png`); at 16:57 in the same chat 「那你可以把統計圖片貼在這個
+session 嗎」 got "I have no image file, give me a path" — 「這個workflow 做完之後他都忘記了…這個記憶也太短了吧」.
+
+- **Cause:** after a run from the Telegram question flow, the chat history (memory only,
+  `MAX_CHAT_HISTORY` = 12 messages) got one pair: 「【執行】sde-weekly-report」 and
+  「sde-weekly-report run <id>: succeeded, 3 step(s)」. No output was named (the mail step's
+  `chart_path` stayed in the run record), each later turn adds two messages, so six turns pushed even
+  that line out, and the Gateway trims to its own 12. No tool could attach an existing file, and the
+  flow never sent the chart (only the org chart tool's files were sent as photos). Agent Web's form
+  run kept the readable answer only, likewise without outputs, in a 12-message recent window.
+- **Decision:** a per-session, per-actor ledger (`src/host_runtime/session_artifacts.py`,
+  `<workspace>/session-artifacts/<hash>.json`) keeps each run (workflow, run id, status, one-line
+  summary) and what it made: files under known output fields (`chart_path`, `png_path`, `html_path`,
+  `output_path`, `attach` / `files` lists) that lie in the workspace, and mail drafts (Outlook
+  `entry_id` + subject, not attachable), each with a short id `f<n>`, a kind and a file name. Files a
+  host tool made for an answer (org chart) are recorded too. The history gets a compact
+  「【執行結果】…」 entry with that list (Telegram history; Agent Web's stored run answer or the
+  turn's tool record).
+- **Surviving the window:** the Gateway appends the ledger's last 8 runs and up to 24 files to each
+  turn's system prompt (`Gateway.session_context`, capped at 4,000 characters), instead of pinning
+  messages or raising `MAX_CHAT_HISTORY`. One place serves both channels and every trimming step
+  (Telegram's 12, Agent Web's recent window, the Gateway's own 12), the list is small and
+  content-free, and the conversation window keeps its size and budget.
+- **Attaching:** host tool `session__attach_file {artifact_id}` accepts only an id recorded for the
+  request's session and actor whose file still lies in the workspace; a path, another session's or
+  another actor's id, a mail draft, or a missing file is refused by code. The model's tool data
+  carries the id, kind and name only; the channel resolves the id again before sending (Telegram: a
+  photo for `.png`/`.jpg`, a document otherwise, captioned with the file name; Agent Web: a listed
+  attachment of the answer, opened by the existing sandboxed file route). Logs carry counts and codes.
+- **End of a run:** the pictures a run made are sent at its end (Telegram flow, `/`-commands handled
+  directly and runs the model started; Agent Web shows them under the run's answer). Telegram `/new`
+  clears the chat's ledger. Rule: `AGENTS.md` 20.
+- **Rejected:** pinning run entries in `_histories` beyond the window (Telegram only; the Gateway
+  would still cut them); raising the window for everything (costs every turn's budget for one fact);
+  sending a path to the model and letting it pass a path back (an arbitrary-path read); keeping the
+  ledger in memory only (an Agent Web conversation outlives a restart).

@@ -4524,3 +4524,41 @@ Code: `WorkflowParameter` in `src/common/assets.py`; `boolean_labels`, `boolean_
 - Agent Web: a boolean is two radio options in a `role="radiogroup"` (`#<id>-choices`, options
   `#<id>-true` / `#<id>-false`, named by the field's label); a hidden checkbox `#<id>` keeps the
   value, so the submitted run arguments are unchanged.
+
+## Session artifacts and `session__attach_file` (owner 2026-10-25)
+
+Code: `src/host_runtime/session_artifacts.py`; `Gateway.session_context` in `src/agent/gateway.py`;
+`TelegramDelivery.attached`, `_record_run`, `_record_turn` in `src/channels/telegram.py`;
+`_record_run_outputs`, `_record_turn_outputs` in `src/host_runtime/web.py`. Tests:
+`tests/test_session_artifacts.py`. Decision: `docs/DECISIONS.md` 2026-10-25 "A session remembers
+what it produced"; rule: `AGENTS.md` 20.
+
+- **Ledger.** One per (session id, actor): `<workspace>/session-artifacts/<sha256 prefix>.json`,
+  keeping the last 20 runs and 60 artifacts. A Telegram chat's session is `telegram-chat-<chat id>`
+  with the acting member; an Agent Web conversation's is its `session_id` with the page's actor.
+- **What a run records.** `SessionRun`: `run_id`, `workflow` (name), `status`, `summary` (the last
+  step's `summary` / `preview` / `message` first line, at most 160 characters, else the step count;
+  the failure code when it failed), `artifact_ids`. `SessionArtifact`: `artifact_id` (`f<n>`, per
+  ledger), `kind` (`image`, `spreadsheet`, `document`, `mail draft`, `file`, by suffix), `filename`,
+  the Host-side `path` (empty for a mail draft), `run_id`, `workflow`. Files come from step data
+  fields `chart_path`, `png_path`, `html_path`, `output_path` and `attach` / `files` lists of
+  `{path}`, only when the file exists inside the workspace; a mail draft from step data with a
+  non-empty `entry_id` and `subject` and not `skipped`. A host tool's `attach` list (the org chart)
+  is recorded without a run. The same run id is recorded once.
+- **History entry.** 「【執行結果】<workflow> · run <id> · <status>」, 「摘要：…」, then 「產出：」 and one
+  line per artifact 「- f1 image: effort-chart.png」; no paths, no contents.
+- **Each turn's system prompt** (when the request has a session) lists the last 8 runs with their
+  artifacts and up to 24 files in all, names only, at most 4,000 characters, with the instruction to
+  attach by id and never ask for a path.
+- **`session__attach_file`** input `{"artifact_id": "f<n>"}`. Success data: `artifact_id`, `kind`,
+  `filename`, `note` (no path). Refusal codes: `attach_no_session` (no session), `artifact_id_invalid`
+  (not `f<n>`, e.g. a path), `artifact_unknown` (not recorded for this session and actor),
+  `artifact_not_a_file` (a mail draft), `artifact_missing` (gone or outside the workspace). The
+  channel resolves the id again with the same check before sending.
+- **Delivery.** Telegram: `TelegramDelivery.attached` paths are sent after the reply, photos, and
+  documents — `sendPhoto` for `.png` / `.jpg` / `.jpeg`, `sendDocument` otherwise (media type by
+  suffix), caption the file name. A run's pictures are `attached` at the end of the run (question
+  flow, directly handled commands, runs the model started), then what the attach tool attached, each
+  path once. Agent Web: the same files are the answer's `files` / stored `attachments`
+  (`{filename, kind, path}`), served only through `/api/conversations/file` (listed on the
+  conversation and inside the workspace). Telegram `/new` clears the chat's ledger.
