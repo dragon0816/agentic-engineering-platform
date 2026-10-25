@@ -3423,3 +3423,34 @@ s-k-20261011T102952` (not published).
   repo) 4019 passed, 34 skipped, 1 failed (`test_bi_schemas_ui.py`, untouched browser test, passed
   alone, `--basetemp=C:/aepci-wk/bt-lbc2`). Not pushed, Agent Web not restarted, no real bot message.
 - [ ] Owner check after a restart (see `HANDOFF.md`).
+
+## A session remembers what it produced; task result summaries (2026-10-25)
+
+- [x] Owner report 2026-10-25 (Telegram: the SDE weekly report ran at 15:15 and made
+  `effort-chart.png`; at 16:57 「那你可以把統計圖片貼在這個 session 嗎」 got "no image file, give me a
+  path" — 「這個workflow 做完之後他都忘記了…這個記憶也太短了吧」), and the owner's follow-up decision
+  「每次跑完任務是不是應該要compose，把重要的結果結論記下來」 / 「存硬碟，保留 30 天」. Claude Code.
+  `AGENTS.md` rule 20 (new); decisions `docs/DECISIONS.md` 2026-10-25 "A session remembers what it
+  produced" and "Task result summaries, kept 30 days"; contracts `docs/CONTRACTS.md` "Session
+  artifacts and `session__attach_file`" and "Task result summaries"; user guide §4.6.
+  1. Cause: after a flow run the chat history got only 「run <id>: succeeded, 3 step(s)」 (no
+     outputs), inside a 12-message window (Telegram's, Agent Web's recent window and the Gateway's);
+     no tool could attach an existing file; the flow never sent the run's chart.
+  2. Per-session, per-actor ledger of runs and outputs (short id `f<n>`, kind, file name; files in
+     the workspace only; mail drafts by subject), listed in every turn's system prompt
+     (`Gateway.session_context`); compact 「【執行結果】」 history entry (a454ce8f).
+  3. `session__attach_file {artifact_id}`: only ids of this session and actor, files still in the
+     workspace; refusal codes; Telegram photo/document, Agent Web conversation file (a454ce8f).
+  4. A run's pictures are sent at its end (Telegram flow, direct commands, model-started runs; Agent
+     Web shows them under the run) (a454ce8f).
+  5. Task result summaries: deterministic key results (one bounded model call only when fewer than
+     two facts and a preview exists; none without a model), 「結果摘要」 block in both channels, latest
+     5 in each turn, `task-summaries.sqlite` per actor, retention 30 days (memory page 紀錄 tab),
+     nightly purge, 「存成筆記」 on press only (Agent Web button, Telegram button or words), memory page
+     list with delete (f3d934d7).
+  Tests: `tests/test_session_artifacts.py`, `tests/test_task_summaries.py` (new).
+  Verification: ruff check, ruff format --check, mypy (773 files) clean; full pytest project venv 4059
+  passed, 7 skipped (`--basetemp=C:/aepci-wk/bt-art5`); `C:/aepci-wk/venv` (`host_runtime` from this
+  repo) 4032 passed, 34 skipped (`--basetemp=C:/aepci-wk/bt-artc`). Not pushed, Agent Web not
+  restarted, no real bot message, no Outlook, no Workflow run.
+- [ ] Owner check after a restart (see `HANDOFF.md`).

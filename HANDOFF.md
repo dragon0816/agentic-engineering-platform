@@ -1,8 +1,28 @@
 # Handoff
 
-Updated: 2026-10-25 (Asia/Taipei), by Claude Code (yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-25 (Asia/Taipei), by Claude Code (session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## A yes/no input says what each choice does (2026-10-25, Claude Code) — latest
+## A session remembers what it produced; task result summaries (2026-10-25, Claude Code) — latest
+
+- Commits a454ce8f (ledger, attach tool, run pictures), d258ff4d (docs), f3d934d7 (task result
+  summaries), 21fed834 (docs) plus a TASKS/HANDOFF commit on main; not pushed, Agent Web not
+  restarted, no real bot message, no Outlook, no Workflow run. Row in `docs/TASKS.md`; decisions
+  `docs/DECISIONS.md` 2026-10-25 "A session remembers what it produced" and "Task result summaries,
+  kept 30 days"; contracts `docs/CONTRACTS.md`; `AGENTS.md` 20; user guide §4.6.
+- Verification: ruff, format, mypy (773 files) clean; full pytest project venv 4059 passed, 7 skipped;
+  `C:/aepci-wk/venv` 4032 passed, 34 skipped.
+- Owner check after the next restart (check `/api/activity` first): in Telegram 「幫我執行 43W SDE weekly
+  report」 → 確認執行 → the run's reply ends with 「結果摘要」 and a 存成筆記 button, and
+  `effort-chart.png` arrives as a photo; a few messages later 「把統計圖貼給我」 → the photo again (no
+  path asked); 「剛剛算了幾項？」 → answered from the summary; tap 存成筆記 → 「已存成筆記（…）」. Agent Web:
+  run it from the chat form → the chart shows under the result with 「結果摘要存成筆記」; 記憶 → 紀錄 →
+  任務摘要 lists it (保留 30 天, 刪除).
+- New files on the PC: `workspace\session-artifacts\*.json` (ledgers) and `task-summaries.sqlite`;
+  both purged nightly after the retention.
+- Not done: a summary is composed only for Workflow runs and turns with two or more successful tools;
+  the condensing model call is used only when the outputs give fewer than two facts.
+
+## A yes/no input says what each choice does (2026-10-25, Claude Code)
 
 - Commit fef4eb67 plus a docs commit on main; not pushed, Agent Web not restarted, no real bot
   message, no Workflow run. Row in `docs/TASKS.md`; decision `docs/DECISIONS.md` 2026-10-25 "A yes/no
