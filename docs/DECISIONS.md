@@ -4933,3 +4933,23 @@ Implements `AGENTS.md` rules 18 and 19 for Workflow runs (owner, Telegram, 2026-
   storing it would need a store, a schema and an expiry for little gain now that a run asks only missing
   required inputs, a restart is refused while a flow is open, and a Reply on a lost question restarts it
   with the value.
+
+## 2026-10-25 — A yes/no input says what each choice does
+
+Owner, Telegram, 2026-10-25: the question 「Dry run: show the plan only … Default: False」 with buttons
+**Yes / No** — 「這個yes, 和No讓人很confused, 是要dry run 還是不要呀」 — and a card line 「Dry run：否」.
+
+- **Decision:** a boolean input is presented by what each choice does, everywhere (Telegram buttons,
+  card lines, the Agent Web run form, the Agent tool schema). The Workflow declares the two choices in
+  optional `true_label` / `false_label` (boolean only, additive, omitted while unset so older manifest
+  digests do not change); without them the choices are the label and 「不要：<label>」. Typed answers and
+  edits accept the choice words as well as 是／否／yes／no (「只看計畫」, 「改成正式執行」). Agent Web shows
+  two labelled radio options instead of a checkbox. Added to `AGENTS.md` rule 18.
+- Every bundled boolean declares its two choices; the dry-run switches are relabelled 「執行方式」 (English
+  Workflows: "Run mode" where the label described one choice), and the weekly report reads 「只看計畫（不寫入、
+  不寄信）」 / 「正式執行（寫入週報、起草郵件）」.
+- **Rejected:** a generic 「是／否」 pair (the same ambiguity as Yes/No: it depends on how the question is
+  phrased); turning booleans into `select` fields with two values (changes the run argument type from
+  a JSON boolean to text for every existing Workflow and schedule); a separate `card_label` field (the
+  label already is what the card and the form show, so relabelling the switch is enough); changing the
+  button callback data (old buttons and the stale-tap check keep working with `yes` / `no`).

@@ -3399,3 +3399,27 @@ s-k-20261011T102952` (not published).
   inputs reached through 修改, every run confirmed on the card).
   Verification: ruff check, ruff format --check, mypy (768 files) clean; full pytest project venv 4024 passed, 7 skipped (`--basetemp=C:/aepci-wk/bt-pf`); `C:/aepci-wk/venv` (`host_runtime` from this repo) 3997 passed, 34 skipped (`--basetemp=C:/aepci-wk/bt-pfc`). Not pushed, Agent Web not restarted, no real bot message, no Workflow run.
 - [ ] Owner check after a restart (see `HANDOFF.md`).
+
+## A yes/no input says what each choice does (2026-10-25)
+
+- [x] Owner report 2026-10-25 (Telegram: 「Dry run: show the plan only … Default: False」 with Yes / No —
+  「這個yes, 和No讓人很confused, 是要dry run 還是不要呀」; card 「Dry run：否」). Claude Code. `AGENTS.md`
+  rule 18 extended; decision `docs/DECISIONS.md` 2026-10-25 "A yes/no input says what each choice
+  does"; contract `docs/CONTRACTS.md` "Boolean choice labels"; user guide §4.6 (fef4eb67).
+  1. `WorkflowParameter.true_label` / `false_label` (boolean only, distinct, omitted while unset);
+     derived fallback: the label and 「不要：<label>」.
+  2. Telegram: one button per choice (callback data still `yes` / `no`), the card, `Default:` and the
+     prefill note show the choice; typed answers and edits accept the choice words (「只看計畫」,
+     「改成正式執行」) as well as 是／否／yes／no.
+  3. Agent Web run form: two labelled radio options (`role="radiogroup"`) instead of a checkbox.
+  4. All bundled booleans declare their choices (weekly report, loan scan / reply, NCC plan, release
+     package, w90 bundle smoke); dry-run switches relabelled 「執行方式」 / "Run mode".
+  Tests: `tests/test_boolean_choice_labels.py` (new, includes a headless browser test); Yes/No
+  assertions updated in `test_telegram_flow.py`, `test_telegram_fewer_questions.py`,
+  `test_loan_reply_workflows.py`, `test_rs_w14_ncc_plan.py`; the `test_run_prefill.py` SDE fixture
+  mirrors the new weekly labels.
+  Verification: ruff check, ruff format --check, mypy (769 files) clean; full pytest project venv 4047
+  passed, 7 skipped (`--basetemp=C:/aepci-wk/bt-lb`); `C:/aepci-wk/venv` (`host_runtime` from this
+  repo) 4019 passed, 34 skipped, 1 failed (`test_bi_schemas_ui.py`, untouched browser test, passed
+  alone, `--basetemp=C:/aepci-wk/bt-lbc2`). Not pushed, Agent Web not restarted, no real bot message.
+- [ ] Owner check after a restart (see `HANDOFF.md`).
