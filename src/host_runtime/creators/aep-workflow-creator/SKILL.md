@@ -125,7 +125,7 @@ Kinds:
 | `text` | one line (`pattern`, `min_length`) | text box | typed |
 | `integer` / `number` | a number (`minimum`, `maximum`) | number box | typed |
 | `date` | `YYYY-MM-DD` | date picker | typed |
-| `boolean` | yes or no | checkbox | Yes / No buttons |
+| `boolean` | one of two choices | two labelled options | two buttons, each saying what it does |
 | `select` | one value, or a list with `multiple: true` | drop-down or list | buttons (tap to tick, then Done, when multiple) |
 | `text_list` / `emails` | several values | one per line | comma separated |
 | `file` / `folder` | a path on the Host | path box | typed |
@@ -155,6 +155,10 @@ Presentation fields (all optional):
   `agent`). `scope: "static"` makes it a per-install setting, never asked.
 - `confirm: true`: a privileged choice (sending mail, pushing); the person
   confirms it and a model never fills it.
+- `true_label` / `false_label` (`boolean` only): what each choice does, e.g.
+  `"只看計畫（不寫入、不寄信）"` and `"正式執行（寫入週報、起草郵件）"`, with a
+  `label` naming the choice ("執行方式"). Always give them: without them the
+  person sees the label and 「不要：<label>」. There are no bare Yes/No buttons.
 
 Short examples:
 

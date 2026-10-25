@@ -19,6 +19,11 @@ not asked one by one. Only required fields still missing are asked, then
 one confirmation card lists every value with where it came from. The card
 has 確認執行 and 修改; 修改, or free text such as 「Dry run 改成否」 or
 「From date 2026-10-19」, changes a value and shows the card again.
+
+Plain-language switches (owner 2026-10-25, 「這個yes, 和No讓人很confused」): a
+boolean's buttons and its card line say what each choice does (the
+declaration's `true_label` / `false_label`, else the label and 「不要：<label>」),
+and a typed answer or edit may use those words (「只看計畫」, 「改成正式執行」).
 """
 
 from __future__ import annotations
@@ -37,7 +42,13 @@ from common.assets import (
     WorkflowParameter,
     parameter_value_problem,
 )
-from common.workflow_forms import IDENTITY_GROUP, ordered_fields
+from common.workflow_forms import (
+    IDENTITY_GROUP,
+    boolean_from_label,
+    boolean_label,
+    boolean_labels,
+    ordered_fields,
+)
 from common.workflow_parameters import WorkflowParameterError, validate_run_parameters
 
 FLOW_TTL_SECONDS = 15 * 60
@@ -212,7 +223,9 @@ def _rows(buttons: list[Button], width: int = BUTTONS_PER_ROW) -> list[list[Butt
 
 def _choice_buttons(state: FlowState, item: WorkflowParameter) -> list[list[Button]]:
     if item.kind == "boolean":
-        return [[("Yes", "yes"), ("No", "no")]]
+        # One choice a row: each says what it does, so it is often long.
+        true, false = boolean_labels(item)
+        return [[(true, "yes")], [(false, "no")]]
     if item.kind == "upload":
         return [[("Done", "/done")]] if item.multiple else []
     listed = _choices(state, item)[:MAX_BUTTONS]
@@ -234,8 +247,10 @@ def _choice_buttons(state: FlowState, item: WorkflowParameter) -> list[list[Butt
     )
 
 
-def _shown(value: Any) -> str:
+def _shown(value: Any, item: WorkflowParameter | None = None) -> str:
     if isinstance(value, bool):
+        if item is not None and item.kind == "boolean":
+            return boolean_label(item, value)
         return "是" if value else "否"
     return ", ".join(str(item) for item in value) if isinstance(value, list) else str(value)
 
@@ -246,7 +261,7 @@ def prefill_note(state: FlowState) -> str | None:
     if not given:
         return None
     return "已從你的訊息帶入：" + "；".join(
-        f"{item.label} = {_shown(state.answers.get(item.name))}"
+        f"{item.label} = {_shown(state.answers.get(item.name), item)}"
         for item in given
         if item.name in state.answers
     )
@@ -258,7 +273,7 @@ def _preset_note(state: FlowState) -> str | None:
     if not kept:
         return None
     return "沿用上次的值：" + "；".join(
-        f"{item.label} = {_shown(state.preset[item.name])}" for item in kept
+        f"{item.label} = {_shown(state.preset[item.name], item)}" for item in kept
     )
 
 
@@ -310,7 +325,7 @@ def prompt(state: FlowState) -> FlowPrompt:
     elif item.allow_other:
         lines.append("Tap one, or type another value.")
     if item.default is not None:
-        lines.append(f"Default: {_shown(item.default)}")
+        lines.append(f"Default: {_shown(item.default, item)}")
     if item.confirm:
         lines.append("This is a privileged setting; it is confirmed before the run.")
     lines.append("/skip uses the default" if not item.required else "Required.")
@@ -334,9 +349,9 @@ def _value_line(state: FlowState, item: WorkflowParameter) -> str | None:
             if item.name in state.preset and state.preset.get(item.name) == value
             else ""
         )
-        return f"- {item.label}{mark}：{_shown(value)}{source}"
+        return f"- {item.label}{mark}：{_shown(value, item)}{source}"
     if item.default is not None:
-        return f"- {item.label}{mark}：{_shown(item.default)}{FROM_DEFAULT}"
+        return f"- {item.label}{mark}：{_shown(item.default, item)}{FROM_DEFAULT}"
     return None
 
 
@@ -376,7 +391,11 @@ def _edit_examples(state: FlowState) -> str:
     )
     examples = []
     if switch is not None:
-        examples.append(f"「{_short_label(switch)} 改成否」")
+        # The choice it does not have now, in its own words: 「改成正式執行」.
+        current = bool(state.answers.get(switch.name, switch.default))
+        other_choice = boolean_label(switch, not current)
+        head = re.sub(r"\s*[（(].*$", "", other_choice).strip() or other_choice
+        examples.append(f"「改成{head}」")
     if other is not None:
         sample = {"date": "2026-10-19", "integer": "10"}.get(other.kind, "…")
         examples.append(f"「{_short_label(other)} {sample}」")
@@ -402,7 +421,11 @@ def _convert(item: WorkflowParameter, text: str, dynamic: list[str] | None = Non
             return True
         if lowered in _NO:
             return False
-        raise ValueError("answer yes or no")
+        chosen = boolean_from_label(item, raw)
+        if chosen is not None:
+            return chosen
+        true, false = boolean_labels(item)
+        raise ValueError(f"choose 「{true}」 or 「{false}」")
     if item.kind == "integer":
         if not re.fullmatch(r"-?\d+", raw):
             raise ValueError("enter a whole number")
@@ -612,7 +635,7 @@ def _typed_edit(state: FlowState, reply: str) -> FlowStep | None:
         if item.kind == "boolean":
             current = state.answers.get(item.name, item.default)
             _set(state, item, not bool(current))
-            return _finish_with(state, f"已改：{item.label} = {_shown(not bool(current))}")
+            return _finish_with(state, _changed(item, not bool(current)))
         return _ask(state, state.fields.index(item), editing=True)
     try:
         value = _convert(item, value_text, _dynamic_values(state, item))
@@ -623,7 +646,34 @@ def _typed_edit(state: FlowState, reply: str) -> FlowStep | None:
     if problem:
         return _finish_with(state, f"{item.label} {problem}；沒有改。")
     _set(state, item, value)
-    return _finish_with(state, f"已改：{item.label} = {_shown(value)}")
+    return _finish_with(state, _changed(item, value))
+
+
+def _changed(item: WorkflowParameter, value: Any) -> str:
+    """「已改：CC = a@x」; a switch whose choice already names the field just
+    says the choice: 「已改：不要：Send mail」, not 「Send mail = 不要：Send mail」."""
+    shown = _shown(value, item)
+    if item.kind == "boolean" and _short_label(item).casefold() in shown.casefold():
+        return f"已改：{shown}"
+    return f"已改：{item.label} = {shown}"
+
+
+def _choice_edit(state: FlowState, reply: str) -> FlowStep | None:
+    """「改成正式執行」 or 「只看計畫」: a switch's choice named in its own
+    words, without the field; None unless exactly one switch has it."""
+    said = _EDIT_JOIN.sub("", reply, count=1).strip()
+    found = [
+        (item, value)
+        for item in state.fields
+        if item.kind == "boolean"
+        for value in [boolean_from_label(item, said)]
+        if value is not None
+    ]
+    if len(found) != 1:
+        return None
+    item, value = found[0]
+    _set(state, item, value)
+    return _finish_with(state, _changed(item, value))
 
 
 def _finish_with(state: FlowState, message: str) -> FlowStep:
@@ -646,7 +696,7 @@ def _answer_card(state: FlowState, reply: str) -> FlowStep:
         state.confirming = False
         state.choosing = True
         return FlowStep("ask", prompt(state))
-    edited = _typed_edit(state, reply)
+    edited = _choice_edit(state, reply) or _typed_edit(state, reply)
     if edited is not None:
         return edited
     return _again(state, "看不懂要改哪一項。")
@@ -659,7 +709,7 @@ def _answer_menu(state: FlowState, reply: str) -> FlowStep:
     tapped = _EDIT.match(reply)
     if tapped is not None and int(tapped.group(1)) < len(state.fields):
         return _ask(state, int(tapped.group(1)), editing=True)
-    edited = _typed_edit(state, reply)
+    edited = _choice_edit(state, reply) or _typed_edit(state, reply)
     if edited is not None:
         return edited
     return _again(state, "點要修改的那一項，或點「返回」。")

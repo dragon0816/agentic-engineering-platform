@@ -148,8 +148,10 @@ def _weekly_steps() -> list[dict[str, object]]:
 _WEEKLY_PARAMETERS: list[dict[str, Any]] = [
     {
         "name": "dry_run",
-        "label": "Dry run: show the plan only",
+        "label": "執行方式",
         "kind": "boolean",
+        "true_label": "只看計畫（不寫入、不寄信）",
+        "false_label": "正式執行（寫入週報、起草郵件）",
         "default": False,
         "order": 5,
         "help": "Plan the week and show it; the workbook and the mail are not touched.",
@@ -178,6 +180,8 @@ _WEEKLY_PARAMETERS: list[dict[str, Any]] = [
         "name": "draft_mail",
         "label": "Save the weekly mail draft",
         "kind": "boolean",
+        "true_label": "Save the mail as an Outlook draft (never sent)",
+        "false_label": "No mail draft",
         "default": True,
         "order": 70,
         "help": "After writing the workbook, save the week's mail as an Outlook draft "

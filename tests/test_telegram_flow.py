@@ -88,8 +88,11 @@ def test_the_card_changes_values_by_button_or_by_typed_text() -> None:
     assert "whole number；沒有改" in _text(flow.answer(state, "limit many"))
     assert "minimum" in _text(flow.answer(state, "Limit 0"))
     flow.answer(state, "limit = 5")
-    assert "Send mail = 是" in _text(flow.answer(state, "send mail"))  # a switch flips
-    assert "- Send mail (privileged)：否" in _text(flow.answer(state, "Send mail 改成否"))
+    # A switch's choice in its own words (derived: the label, 「不要：<label>」).
+    assert "已改：Send mail\n" in _text(flow.answer(state, "send mail"))
+    assert "- Send mail (privileged)：不要：Send mail" in _text(
+        flow.answer(state, "Send mail 改成否")
+    )
     assert "看不懂要改哪一項" in _text(flow.answer(state, "whatever this is"))
     done = flow.answer(state, "確認執行")
     assert done.kind == "ready"
@@ -128,11 +131,14 @@ def test_a_boolean_question_waits_for_yes_or_no() -> None:
     fields = [{"name": "go", "label": "Go ahead", "kind": "boolean", "required": True}]
     state = _state(fields=fields)
     asked = flow.begin(state)
-    assert asked.prompt is not None and asked.prompt.buttons == [[("Yes", "yes"), ("No", "no")]]
-    assert "answer yes or no" in _text(flow.answer(state, "有輸入過的參數能不能自己填啊？"))
+    assert asked.prompt is not None
+    assert asked.prompt.buttons == [[("Go ahead", "yes")], [("不要：Go ahead", "no")]]
+    assert "choose 「Go ahead」 or 「不要：Go ahead」" in _text(
+        flow.answer(state, "有輸入過的參數能不能自己填啊？")
+    )
     assert flow.current_field(state) is not None  # still waiting on the same question
     card = flow.answer(state, "yes")
-    assert card.prompt is not None and "- Go ahead：是" in card.prompt.text
+    assert card.prompt is not None and "- Go ahead：Go ahead\n" in card.prompt.text
     assert flow.answer(state, "run:yes").arguments == {"go": True}
 
 

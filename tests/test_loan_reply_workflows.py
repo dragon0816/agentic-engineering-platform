@@ -500,14 +500,21 @@ def test_the_telegram_flow_asks_the_reply_questions_and_confirms_the_run() -> No
     # and a write Workflow is confirmed with a tap every time (owner 2026-10-05).
     card = flow.begin(state)
     assert card.prompt is not None and state.confirming
-    assert "- 只試跑？：否（預設）" in card.prompt.text
+    assert "- 執行方式：正式執行（建 Outlook 草稿、更新佇列）（預設）" in card.prompt.text
     assert "- 這次處理幾筆？：1（預設）" in card.prompt.text
     assert card.prompt.buttons == [[("確認執行", "run:yes"), ("修改", "run:edit")]]
     flow.answer(state, "修改")
     asked = flow.answer(state, "edit:0")
-    assert asked.prompt is not None and "只試跑" in asked.prompt.text
-    assert asked.prompt.buttons == [[("Yes", "yes"), ("No", "no")]]
-    assert "- 只試跑？：否\n" in (flow.answer(state, "no").prompt or flow.FlowPrompt("")).text
+    assert asked.prompt is not None and "執行方式" in asked.prompt.text
+    # Each choice says what it does (owner 2026-10-25), never a bare Yes/No.
+    assert asked.prompt.buttons == [
+        [("只試跑（讀資料，不建草稿、不動佇列）", "yes")],
+        [("正式執行（建 Outlook 草稿、更新佇列）", "no")],
+    ]
+    assert (
+        "- 執行方式：正式執行（建 Outlook 草稿、更新佇列）\n"
+        in (flow.answer(state, "no").prompt or flow.FlowPrompt("")).text
+    )
     flow.answer(state, "這次處理幾筆 2")
     confirm = flow.answer(state, "草稿建好後 是")
     assert confirm.prompt is not None and "寄出" in confirm.prompt.text

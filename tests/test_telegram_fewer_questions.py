@@ -55,15 +55,18 @@ def test_the_owners_request_asks_nothing_and_shows_one_card(
     text = card.reply or ""
     assert text.startswith("執行 sde-weekly-report？")
     assert "- Report week：2026_43W（從你的訊息）" in text
-    assert "- Save the weekly mail draft：是（預設）" in text
-    assert "未填（不使用）：" in text and "Dry run: show the plan only、From date" in text
+    assert (
+        "- Save the weekly mail draft：Save the mail as an Outlook draft (never sent)（預設）"
+        in text
+    )
+    assert "未填（不使用）：" in text and "執行方式、From date" in text
     assert "(1/" not in text  # no question was asked
     assert card.buttons == ((("確認執行", "run:yes"), ("修改", "run:edit")),)
     # A typed change shows the card again.
     transport.batches.append([update(2, OWNER, "dry run 改成是")])
     changed = poll(item).deliveries[0].reply or ""
-    assert "已改：Dry run: show the plan only = 是" in changed
-    assert "- Dry run: show the plan only：是\n" in changed
+    assert "已改：執行方式 = 只看計畫（不寫入、不寄信）" in changed
+    assert "- 執行方式：只看計畫（不寫入、不寄信）\n" in changed
     transport.batches.append([update(3, OWNER, "From date 2026-10-19")])
     assert "- From date：2026-10-19" in (poll(item).deliveries[0].reply or "")
     # Confirming runs it, with the values on the card.
@@ -99,7 +102,8 @@ def test_a_button_of_an_earlier_question_is_not_taken_as_the_answer(tmp_path: Pa
     _install(agent, fields)
     first = poll(item).deliveries[0]
     assert "Go ahead *" in (first.reply or "") and first.buttons == (
-        (("Yes", "yes"), ("No", "no")),
+        (("Go ahead", "yes"),),
+        (("不要：Go ahead", "no"),),
     )
     question = next(iter(item._flows.values())).prompt_message_id
     assert question is not None

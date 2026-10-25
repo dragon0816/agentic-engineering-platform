@@ -384,7 +384,10 @@ def test_one_declaration_generates_every_form() -> None:
     names = [item.name for item in state.fields]
     dry_run = flow.answer(state, f"edit:{names.index('dry_run')}")
     assert dry_run.prompt is not None
-    assert dry_run.prompt.buttons == [[("Yes", "yes"), ("No", "no")]]  # dry run
+    assert dry_run.prompt.buttons == [  # dry run, each choice in plain words
+        [("只試跑（列出內容，不產生檔案、不建草稿）", "yes")],
+        [("正式執行（產生文件；有填信箱就建草稿）", "no")],
+    ]
 
 
 @pytest.mark.skipif(

@@ -92,6 +92,8 @@ def workflow_manifest() -> WorkflowManifest:
                     "name": "fail",
                     "label": "Fail on purpose",
                     "kind": "boolean",
+                    "true_label": "Fail on purpose",
+                    "false_label": "Run normally",
                     "order": 20,
                     "default": False,
                     "help": "Raise on purpose, to see how a failing run is reported end to end.",

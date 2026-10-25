@@ -68,7 +68,8 @@ WORKFLOW_FORMAT: dict[str, JsonValue] = {
         "integer": "a whole number; minimum and maximum apply",
         "number": "any number; minimum and maximum apply",
         "date": "YYYY-MM-DD; a date picker on the Web",
-        "boolean": "yes or no; a checkbox on the Web, Yes/No buttons on Telegram",
+        "boolean": "one of two choices; two labelled options on the Web and two buttons "
+        "on Telegram, each saying what it does (true_label / false_label)",
         "select": "one value (or several with multiple: true) from choices, options or "
         "choices_source; buttons on Telegram",
         "text_list": "several lines of text",
@@ -104,6 +105,9 @@ WORKFLOW_FORMAT: dict[str, JsonValue] = {
         "channels": "where it is shown: web, telegram, schedule, agent (default all)",
         "confirm": "true: a privileged choice (e.g. send mail); confirmed before the run and "
         "never filled by a model",
+        "true_label/false_label": "boolean only: what each choice does, e.g. 只看計畫（不寫入） "
+        "and 正式執行（寫入）; without them the label and 不要：<label> are shown, never "
+        "a bare Yes/No",
     },
     "parameter examples": [
         {

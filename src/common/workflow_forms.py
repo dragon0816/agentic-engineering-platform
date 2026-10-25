@@ -8,11 +8,64 @@ module is pure: it reads a manifest and returns plain data.
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from common.assets import ParameterChannel, WorkflowManifest, WorkflowParameter
 
 IDENTITY_GROUP = "identity"
+#: The derived false choice of a boolean without a declared one.
+FALSE_PREFIX = "不要："
+_QUESTION_END = re.compile(r"[\s?？]+$")
+_LABEL_HEAD = re.compile(r"\s*[（(].*$")
+_TRAILING = re.compile(r"[\s。.!！?？~～吧啦喔哦]+$")
+
+
+def boolean_labels(field: WorkflowParameter) -> tuple[str, str]:
+    """A boolean's (true, false) choices in plain words (owner 2026-10-25).
+
+    The declaration's `true_label` / `false_label` when present; otherwise the
+    true choice is the field's label (without a trailing question mark) and
+    the false one 「不要：<label>」. Never a bare Yes/No.
+    """
+    head = _QUESTION_END.sub("", field.label) or field.label
+    return (field.true_label or head, field.false_label or FALSE_PREFIX + head)
+
+
+def boolean_label(field: WorkflowParameter, value: bool) -> str:
+    true, false = boolean_labels(field)
+    return true if value else false
+
+
+def _label_keys(label: str) -> set[str]:
+    """A choice label and its head before a parenthesis: 「只看計畫（不寫入）」
+    is also 「只看計畫」."""
+    keys = {label.strip().casefold()}
+    head = _LABEL_HEAD.sub("", label).strip()
+    if head:
+        keys.add(head.casefold())
+    return keys
+
+
+def boolean_from_label(field: WorkflowParameter, text: str) -> bool | None:
+    """True or False when `text` names one of the field's two choices (the
+    whole label, its head before a parenthesis, or the start of only one of
+    them, at least two characters); else None."""
+    said = _TRAILING.sub("", text.strip()).strip().casefold()
+    if not said:
+        return None
+    true, false = boolean_labels(field)
+    for value, label in ((True, true), (False, false)):
+        if said in _label_keys(label):
+            return value
+    if len(said) < 2:
+        return None
+    starts = [
+        value
+        for value, label in ((True, true), (False, false))
+        if label.strip().casefold().startswith(said)
+    ]
+    return starts[0] if len(starts) == 1 else None
 
 
 def ordered_fields(
@@ -69,6 +122,9 @@ def form_field(field: WorkflowParameter) -> dict[str, Any]:
             "confirm": field.confirm,
         }
     )
+    if field.kind == "boolean":
+        # The two choices every interface shows (declared or derived).
+        data["true_label"], data["false_label"] = boolean_labels(field)
     return data
 
 
@@ -114,6 +170,9 @@ def _property_schema(field: WorkflowParameter) -> dict[str, Any]:
     description = field.label + (
         f": {field.help or field.description}" if field.help or field.description else ""
     )
+    if kind == "boolean" and (field.true_label or field.false_label):
+        true, false = boolean_labels(field)
+        description += f" (true: {true}; false: {false})"
     schema["description"] = description
     if field.default is not None:
         schema["default"] = field.default

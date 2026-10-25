@@ -750,6 +750,13 @@ tr:last-child td { border-bottom: none; }
   border-radius: 8px; font: inherit; }
 .workflow-field input[type="checkbox"] { width: 22px; min-height: 22px; }
 .workflow-field input[type="file"] { min-height: 44px; padding: 9px 0; border: 0; }
+.workflow-field input[hidden] { display: none; }
+/* A yes/no field as two choices that say what each does (owner 2026-10-25). */
+.boolean-choices { display: grid; gap: 6px; margin: 4px 0; }
+.boolean-choice { display: flex; align-items: center; gap: 8px; min-height: 36px;
+  padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
+.workflow-field .boolean-choice input[type="radio"] { width: 18px; min-height: 18px;
+  margin: 0; padding: 0; flex: none; }
 .workflow-field .field-refresh, .use-last { margin: 6px 0 0; min-height: 36px;
   padding: 6px 12px; color: var(--ink); background: var(--bg); border: 1px solid var(--line);
   border-radius: 8px; font: inherit; cursor: pointer; }
@@ -3324,7 +3331,7 @@ async function drawChatRunForm(body, offer, message, session) {
     // Values read from the chat message (owner 2026-10-25), shown so they can be checked.
     const note = document.createElement("p"); note.className = "chat-run-note chat-run-given";
     note.append(text("已從你的訊息帶入：" + named.map(
-      field => field.label + " = " + formatGiven(given[field.name])).join("；")));
+      field => field.label + " = " + formatGiven(given[field.name], field)).join("；")));
     body.append(note);
   }
   body.append(container);
@@ -6301,10 +6308,49 @@ function uploadControl(field, id) {
   return input;
 }
 
+function booleanLabels(field) {
+  // The two choices in plain words (owner 2026-10-25): declared, or the
+  // label and 「不要：<label>」; never a bare Yes/No.
+  const head = String(field.label || "").replace(/[\s?？]+$/, "") || field.label;
+  return [field.true_label || head, field.false_label || "不要：" + head];
+}
+
+function booleanControl(field, id) {
+  // Two labelled radio options; a hidden checkbox keeps the value, so every
+  // reader of `input.checked` (collect, fill, raw answers) is unchanged.
+  const input = document.createElement("input"); input.type = "checkbox";
+  input.hidden = true; input.tabIndex = -1; input.checked = field.default === true;
+  const group = document.createElement("div"); group.className = "boolean-choices";
+  group.setAttribute("role", "radiogroup"); group.id = id + "-choices";
+  const radios = booleanLabels(field).map((label, index) => {
+    const value = index === 0;
+    const option = document.createElement("label"); option.className = "boolean-choice";
+    const radio = document.createElement("input"); radio.type = "radio";
+    radio.name = id + "-choice"; radio.value = value ? "true" : "false";
+    radio.id = id + (value ? "-true" : "-false");
+    radio.addEventListener("change", () => {
+      if (!radio.checked) return;
+      input.checked = value;
+      input.dispatchEvent(new Event("input"));
+      input.dispatchEvent(new Event("change"));
+    });
+    option.append(radio, text(" " + label)); group.append(option);
+    return radio;
+  });
+  input.syncChoices = () => {
+    radios[0].checked = input.checked; radios[1].checked = !input.checked;
+  };
+  input.syncChoices();
+  input.extras = [group];
+  return input;
+}
+
 function parameterControl(field, id) {
   const kind = field.kind;
   let input;
-  if (kind === "select" && field.allow_other && !field.multiple) {
+  if (kind === "boolean") {
+    input = booleanControl(field, id);
+  } else if (kind === "select" && field.allow_other && !field.multiple) {
     input = comboControl(field, id);
   } else if (kind === "upload" && dynamicContext && dynamicContext.uploads) {
     input = uploadControl(field, id);
@@ -6373,7 +6419,10 @@ function choiceDependencies(field) {
   return found;
 }
 
-function formatGiven(value) {
+function formatGiven(value, field) {
+  if (typeof value === "boolean" && field && field.kind === "boolean") {
+    return booleanLabels(field)[value ? 0 : 1];
+  }
   if (value === true) return "是";
   if (value === false) return "否";
   return Array.isArray(value) ? value.join(", ") : String(value);
@@ -6393,11 +6442,17 @@ function renderParameterForm(container, fields, prefix, context) {
     group = field.group || null;
     const row = document.createElement("div"); row.className = "workflow-field";
     const id = prefix + field.name;
-    const label = document.createElement("label"); label.htmlFor = id;
+    const label = document.createElement("label");
     label.append(text(field.label + (field.required ? " *" : "")
       + (field.confirm ? " (needs confirmation)" : "")));
     const input = parameterControl(field, id);
     input.setAttribute("aria-describedby", id + "-help " + id + "-error");
+    if (field.kind === "boolean") {
+      // The label names the radio group; a label for the hidden box would flip it.
+      label.id = id + "-label"; label.className = "boolean-legend";
+      input.extras[0].setAttribute("aria-labelledby", label.id);
+      input.extras[0].setAttribute("aria-describedby", id + "-help " + id + "-error");
+    } else label.htmlFor = id;
     const help = document.createElement("p"); help.id = id + "-help";
     help.className = "hint"; help.append(text(field.help || ""));
     const error = document.createElement("p"); error.id = id + "-error";
@@ -6502,8 +6557,10 @@ function fillParameterValues(container, fields, prefix, values, announce) {
     const input = container.querySelector("#" + CSS.escape(prefix + field.name));
     if (!input || input.type === "file") continue;
     const value = values[field.name];
-    if (input.type === "checkbox") input.checked = value === true;
-    else if (input.tagName === "TEXTAREA") {
+    if (input.type === "checkbox") {
+      input.checked = value === true;
+      if (input.syncChoices) input.syncChoices();
+    } else if (input.tagName === "TEXTAREA") {
       input.value = Array.isArray(value) ? value.join("\n") : String(value);
     } else if (input.tagName === "SELECT" && input.multiple) {
       const wanted = Array.isArray(value) ? value.map(String) : [String(value)];

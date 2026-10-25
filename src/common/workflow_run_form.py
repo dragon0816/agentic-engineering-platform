@@ -30,7 +30,7 @@ from common.assets import (
     reject_embedded_secrets,
 )
 from common.run_prefill import infer_values
-from common.workflow_forms import agent_fields, ordered_fields
+from common.workflow_forms import agent_fields, boolean_from_label, ordered_fields
 from common.workflow_parameters import static_fields
 
 #: The data key a host tool outcome carries the offer under.
@@ -150,7 +150,11 @@ def _convert(field: WorkflowParameter, raw: str) -> Any:
         value = value[1:-1].strip()
     if field.kind == "boolean":
         lowered = value.casefold()
-        return True if lowered in _YES else False if lowered in _NO else None
+        if lowered in _YES:
+            return True
+        if lowered in _NO:
+            return False
+        return boolean_from_label(field, value)
     if field.kind == "integer":
         return int(value) if re.fullmatch(r"-?\d+", value) else None
     if field.kind == "number":

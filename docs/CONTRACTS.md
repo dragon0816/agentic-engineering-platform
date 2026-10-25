@@ -4498,3 +4498,29 @@ Tests: `tests/test_restart_activity.py`. Decision: `docs/DECISIONS.md` 2026-10-2
   line per item, `[]` when idle, and `["activity unknown: …"]` when the route does not answer (Agent
   Web down, or a build without it): a restart helper never reads "unknown" as idle. A restart waits or
   asks while it is not empty; forcing is the operator's explicit choice.
+
+## Boolean choice labels (`true_label` / `false_label`, owner 2026-10-25)
+
+Code: `WorkflowParameter` in `src/common/assets.py`; `boolean_labels`, `boolean_from_label` in
+`src/common/workflow_forms.py`; `src/channels/telegram_flow.py`; `booleanControl` in
+`src/host_runtime/web_page.py`. Tests: `tests/test_boolean_choice_labels.py`. Decision:
+`docs/DECISIONS.md` 2026-10-25 "A yes/no input says what each choice does"; rule: `AGENTS.md` 18.
+
+- `WorkflowParameter.true_label` / `false_label`: optional nonblank text, `kind: boolean` only (any
+  other kind is refused), and the two must differ (case and outer spaces ignored). Additive: both
+  are omitted from the serialized manifest while unset, so manifests published before them keep
+  their bytes and digests.
+- The two choices shown for a boolean are `(true_label, false_label)` when declared; otherwise the
+  label without a trailing `?` / `？`, and 「不要：」 + that label. No interface shows a bare Yes/No.
+- `form_field` (Agent Web, schedule, settings forms) carries the resolved `true_label` and
+  `false_label` for every boolean. The Agent tool schema adds `(true: …; false: …)` to the
+  description when the labels are declared.
+- Telegram: the question's buttons are the two choices, one per row, with callback data `yes` / `no`
+  (unchanged); the question's `Default:` line, the prefill note and the card show the choice
+  (「- 執行方式：正式執行（寫入週報、起草郵件）（預設）」). A typed answer or edit accepts 是／否／yes／no
+  as before and also a choice: the whole label, its head before 「（」 / `(`, or the start (two or
+  more characters) of only one of the two; on the card, 「改成<choice>」 or the choice alone changes
+  the one switch that has it (none changes when two switches have it).
+- Agent Web: a boolean is two radio options in a `role="radiogroup"` (`#<id>-choices`, options
+  `#<id>-true` / `#<id>-false`, named by the field's label); a hidden checkbox `#<id>` keeps the
+  value, so the submitted run arguments are unchanged.

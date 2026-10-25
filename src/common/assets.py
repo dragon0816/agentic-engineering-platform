@@ -310,6 +310,8 @@ _LATER_PARAMETER_FIELDS = frozenset(
         "channels",
         "confirm",
         "allow_other",
+        "true_label",
+        "false_label",
     }
 )
 CHOICES_SOURCE = re.compile(r"^(ref|fn):[A-Za-z0-9_.-]+(\?[^\s]*)?$")
@@ -384,6 +386,10 @@ class WorkflowParameter(RegistryContract):
     channels: tuple[ParameterChannel, ...] = ALL_PARAMETER_CHANNELS
     # A privileged field: changing it needs an explicit confirmation.
     confirm: StrictBool = False
+    # A boolean's two choices in plain words ("Only show the plan" / "Run for
+    # real"): every generated interface shows these, never a bare Yes/No.
+    true_label: Text | None = None
+    false_label: Text | None = None
 
     @property
     def choice_values(self) -> tuple[str, ...]:
@@ -436,6 +442,14 @@ class WorkflowParameter(RegistryContract):
             raise ValueError("only select, file and upload parameters may be multiple")
         if len(set(self.channels)) != len(self.channels):
             raise ValueError("parameter channels must be distinct")
+        if self.kind != "boolean" and (self.true_label is not None or self.false_label is not None):
+            raise ValueError("only boolean parameters may declare true_label or false_label")
+        if (
+            self.true_label is not None
+            and self.false_label is not None
+            and self.true_label.strip().casefold() == self.false_label.strip().casefold()
+        ):
+            raise ValueError("true_label and false_label must differ")
         if self.default is not None:
             problem = parameter_value_problem(self, self.default)
             if problem:

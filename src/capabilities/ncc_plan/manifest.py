@@ -109,8 +109,10 @@ _SETTINGS = [
 _RUN = [
     {
         "name": "dry_run",
-        "label": "只試跑，先看內容？",
+        "label": "執行方式",
         "kind": "boolean",
+        "true_label": "只試跑（列出內容，不產生檔案、不建草稿）",
+        "false_label": "正式執行（產生文件；有填信箱就建草稿）",
         "default": False,
         "order": 8,
         "help": "列出這份文件會寫什麼，不產生檔案、不建草稿。",
@@ -157,6 +159,8 @@ _RUN = [
             "name": name,
             "label": label,
             "kind": "boolean",
+            "true_label": "打勾",
+            "false_label": "不打勾",
             "default": False,
             "group": "systems",
             "order": 200 + 10 * index,
