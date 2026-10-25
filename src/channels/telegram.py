@@ -20,6 +20,7 @@ failure rules.
 
 import asyncio
 import json
+import logging
 import re
 import threading
 import time
@@ -114,6 +115,8 @@ UNDELIVERED_REPLY = (
     "The answer could not be delivered here (Telegram refused the message). "
     "Ask again, or open Agent Web."
 )
+#: How much of Telegram's own refusal description a warning keeps.
+MAX_REFUSAL_CHARS = 200
 SETTINGS_HINT = "Open Agent Web to set them, then send /run again."
 HELP = (
     "Talk to the Agent in words, or send a skill command as /<skill> <command> "
@@ -175,6 +178,12 @@ _STEP_MARKS: dict[ToolProgressState, str] = {
 Disposition = Literal[
     "unmapped_sender", "unsupported_content", "answered", "refused", "routed", "failed"
 ]
+
+
+#: Refused Bot API calls are logged here at warning; with no handler set up,
+#: Python writes them to stderr, which the launcher keeps in
+#: `workspace\logs\agent-web-*.err.log`.
+_LOG = logging.getLogger(__name__)
 
 
 def scrub(text: str) -> str:
@@ -546,6 +555,39 @@ def _retry_after(body: bytes, cap: float = MAX_RETRY_WAIT_S) -> float:
     except (ValueError, AttributeError):
         seconds = 1
     return float(min(max(seconds if isinstance(seconds, int | float) else 1, 0), cap))
+
+
+def _refusal(body: bytes) -> str:
+    """Telegram's own reason for refusing a call (its `description`),
+    redacted and short; never the message that was refused."""
+    try:
+        description = json.loads(body).get("description")
+    except (ValueError, AttributeError):
+        description = None
+    if not isinstance(description, str) or not description.strip():
+        return "no description"
+    return scrub(description)[:MAX_REFUSAL_CHARS]
+
+
+def _log_refused(method: str, status: int, body: bytes, detail: str = "") -> None:
+    """One warning per refused Bot API call: the method, the HTTP status,
+    Telegram's description and `detail` (sizes and positions only). The text,
+    the chat's content and the token never reach the log."""
+    _LOG.warning(
+        "Telegram %s refused: HTTP %s (%s)%s",
+        method,
+        status,
+        _refusal(body),
+        f"; {detail}" if detail else "",
+    )
+
+
+def _keyboard(buttons: tuple[tuple[tuple[str, str], ...], ...]) -> dict[str, JsonValue]:
+    return {
+        "inline_keyboard": [
+            [{"text": label, "callback_data": data} for label, data in row] for row in buttons
+        ]
+    }
 
 
 def _no_answer_reply(record: str | None) -> str:
@@ -1797,22 +1839,20 @@ class TelegramIngress:
         if utf16_units(text) > MAX_MESSAGE_CHARS:
             return False
         try:
-            status, _ = self._call(
+            status, body = self._call(
                 "editMessageText",
                 {
                     "chat_id": chat_id,
                     "message_id": message_id,
                     "text": text,
-                    "reply_markup": {
-                        "inline_keyboard": [
-                            [{"text": label, "callback_data": data} for label, data in row]
-                            for row in buttons
-                        ]
-                    },
+                    "reply_markup": _keyboard(buttons),
                 },
             )
-        except Exception:  # noqa: BLE001 - the caller sends a new message instead
+        except Exception as error:  # noqa: BLE001 - the caller sends a new message instead
+            _LOG.warning("Telegram editMessageText failed: %s", describe(error))
             return False
+        if status != 200:
+            _log_refused("editMessageText", status, body, f"{utf16_units(text)} UTF-16 units")
         return status == 200
 
     async def _execute_flow(
@@ -1855,11 +1895,13 @@ class TelegramIngress:
         try:
             status, body = self._call("sendMessage", {"chat_id": chat_id, "text": text})
             if status != 200:
+                _log_refused("sendMessage", status, body, "status message")
                 return None
             message = json.loads(body).get("result")
             identifier = message.get("message_id") if isinstance(message, dict) else None
             return identifier if type(identifier) is int else None
-        except Exception:  # noqa: BLE001 - see above
+        except Exception as error:  # noqa: BLE001 - see above
+            _LOG.warning("Telegram sendMessage failed: %s; status message", describe(error))
             return None
 
     def _edit_status(self, chat_id: int, message_id: int, text: str) -> float | None:
@@ -1870,8 +1912,11 @@ class TelegramIngress:
             status, body = self._call(
                 "editMessageText", {"chat_id": chat_id, "message_id": message_id, "text": text}
             )
-        except Exception:  # noqa: BLE001 - a stale status line is not worth a failure
+        except Exception as error:  # noqa: BLE001 - a stale status line is not worth a failure
+            _LOG.warning("Telegram editMessageText failed: %s; status message", describe(error))
             return None
+        if status != 200:
+            _log_refused("editMessageText", status, body, "status message")
         return _retry_after(body, MAX_STATUS_BACKOFF_S) if status == 429 else None
 
     def _status_wait(self, chat_id: int) -> float:
@@ -1912,32 +1957,36 @@ class TelegramIngress:
             for position, piece in enumerate(pieces):
                 payload: dict[str, JsonValue] = {"chat_id": chat_id, "text": piece}
                 if buttons and position == len(pieces) - 1:
-                    payload["reply_markup"] = {
-                        "inline_keyboard": [
-                            [{"text": label, "callback_data": data} for label, data in row]
-                            for row in buttons
-                        ]
-                    }
-                if not self._send_piece(payload):
+                    payload["reply_markup"] = _keyboard(buttons)
+                if self._send_piece(payload, f"piece {position + 1} of {len(pieces)}") != 200:
                     return False
-        except Exception:  # noqa: BLE001 - the delivery records that the reply failed
+        except Exception as error:  # noqa: BLE001 - the delivery records that the reply failed
+            _LOG.warning("Telegram reply failed: %s", describe(error))
             return False
         return True
 
-    def _send_piece(self, payload: dict[str, JsonValue]) -> bool:
+    def _send_piece(self, payload: dict[str, JsonValue], where: str = "piece 1 of 1") -> int:
         """One `sendMessage`, retried once after a rate limit (the progress
         edits just before it can trigger one) and once without its keyboard
-        when Telegram refuses the message, so an answer is not lost."""
+        when Telegram refuses the message, so an answer is not lost. Returns
+        the last HTTP status; every refusal is logged with Telegram's reason,
+        the piece's position and its UTF-16 length, never its text."""
+        text = payload.get("text")
+        detail = f"{where}, {utf16_units(text) if isinstance(text, str) else 0} UTF-16 units"
         status, body = self._call("sendMessage", payload)
         if status == 429:
+            _log_refused("sendMessage", status, body, detail)
             time.sleep(_retry_after(body))
             status, body = self._call("sendMessage", payload)
         if status == 400 and "reply_markup" in payload:
-            status, _ = self._call(
+            _log_refused("sendMessage", status, body, f"{detail}, with keyboard")
+            status, body = self._call(
                 "sendMessage",
                 {key: value for key, value in payload.items() if key != "reply_markup"},
             )
-        return status == 200
+        if status != 200:
+            _log_refused("sendMessage", status, body, detail)
+        return status
 
     def _send_photo(self, chat_id: int, path: Path, *, document: bool = False) -> bool:
         """One `sendPhoto` (with the chart's short note as its caption) or
@@ -1976,11 +2025,14 @@ class TelegramIngress:
                 float(self.config.poll_timeout_seconds + POLL_MARGIN_SECONDS),
             )
             try:
-                b"".join(reply.chunks())
+                answer = b"".join(reply.chunks())
             finally:
                 close_quietly(reply)
+            if reply.status != 200:
+                _log_refused(method, reply.status, answer, f"{len(data)} bytes")
             return reply.status == 200
-        except Exception:  # noqa: BLE001 - the text answer already went out
+        except Exception as error:  # noqa: BLE001 - the text answer already went out
+            _LOG.warning("Telegram file upload failed: %s", describe(error))
             return False
 
     def _acknowledge(self, callback_id: str) -> None:

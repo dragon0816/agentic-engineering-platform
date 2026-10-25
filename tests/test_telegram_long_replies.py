@@ -9,16 +9,20 @@ two. Pieces are cut by that measure. Over the fake Bot API of
 from __future__ import annotations
 
 import json
+import logging
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-from test_telegram_ingress import OWNER, FakeReply, FakeTransport, ingress
+import pytest
+from test_telegram_ingress import OWNER, TOKEN, FakeReply, FakeTransport, ingress
 
 from channels.telegram import MAX_MESSAGE_CHARS, chunks, utf16_units
 
 TELEGRAM_LIMIT = 4096
 TOO_LONG = "Bad Request: message is too long"
+#: A sentence that must never appear in the log.
+SECRET_LINE = "季度營收 12,345 萬 😀"
 
 
 def emoji_answer(length: int = 4000) -> str:
@@ -98,6 +102,61 @@ def test_each_piece_sent_is_within_telegrams_limit(tmp_path: Path) -> None:
     assert len(sent) > 1
     assert all(utf16_units(text) <= TELEGRAM_LIMIT for text in sent)
     assert transport.uploads == []
+
+
+def test_a_refusal_is_logged_with_status_and_reason_but_no_text_or_token(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    answer = SECRET_LINE + "\n" + "y" * 100
+    transport = RefusingTransport(
+        refuse=lambda text: True,
+        document_status=400,
+        # Telegram's reason carrying the token must still come out redacted.
+        description=f"{TOO_LONG} for bot{TOKEN}",
+    )
+    item, _, _ = ingress(tmp_path, transport)
+
+    with caplog.at_level(logging.WARNING, logger="channels.telegram"):
+        assert item._reply(OWNER, answer) is False
+        item._edit_reply(OWNER, 5, answer)
+        item._send_photo(OWNER, write_file(tmp_path, "chart.png"))
+
+    log = "\n".join(record.getMessage() for record in caplog.records)
+    assert "Telegram sendMessage refused: HTTP 400" in log
+    assert TOO_LONG in log
+    assert f"piece 1 of 1, {utf16_units(answer)} UTF-16 units" in log
+    assert "Telegram editMessageText refused: HTTP 400" not in log  # the fake accepts edits
+    assert "Telegram sendPhoto refused: HTTP 400 (Bad Request: file empty)" in log
+    assert all(record.levelno == logging.WARNING for record in caplog.records)
+    assert_clean(log)
+
+
+def test_a_transport_fault_is_logged_without_the_url_or_token(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    transport = FakeTransport(error=OSError(f"proxy reset https://api.telegram.org/bot{TOKEN}/x"))
+    item, _, _ = ingress(tmp_path, transport)
+
+    with caplog.at_level(logging.WARNING, logger="channels.telegram"):
+        assert item._reply(OWNER, SECRET_LINE) is False
+        assert item._send_status(OWNER, SECRET_LINE) is None
+        assert item._edit_status(OWNER, 3, SECRET_LINE) is None
+
+    log = "\n".join(record.getMessage() for record in caplog.records)
+    assert "OSError" in log and "status message" in log
+    assert_clean(log)
+
+
+def write_file(folder: Path, name: str) -> Path:
+    path = folder / name
+    path.write_bytes(b"\x89PNG fake")
+    return path
+
+
+def assert_clean(log: str) -> None:
+    """No answer text and no part of the token in a log."""
+    assert SECRET_LINE not in log and "季度營收" not in log and "y" * 20 not in log
+    assert TOKEN not in log and TOKEN.split(":")[1] not in log
 
 
 def test_status_messages_and_edits_stay_within_the_limit(tmp_path: Path) -> None:
