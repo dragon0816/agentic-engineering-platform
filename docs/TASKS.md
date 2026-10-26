@@ -3516,8 +3516,8 @@ s-k-20261011T102952` (not published).
   no ranker, no parallelism.
 - [ ] Owner Gate 0: approve or change ADR-MA1–MA5, the V1 scope and the open questions (§13 of the
   review); approved ADRs are then appended to `docs/DECISIONS.md`.
-- [ ] Phase 0.5 after Gate 0: G5 cross-domain negative suite, P0-2 per-turn idempotency cache,
-  mark G4 done (`docs/HARNESS_DESIGN.zh-TW.md:58`, the G4–G6 row above).
+- [x] Phase 0.5 after Gate 0: G5 cross-domain negative suite, P0-2 per-turn idempotency cache,
+  mark G4 done (`docs/HARNESS_DESIGN.zh-TW.md:58`, the G4–G6 row above). Done 2026-10-27 as parts A and B below.
 - [x] Phase 0.5 part A: G5 cross-domain negative suite and G4 bookkeeping (2026-10-27, Claude Code).
   `tests/test_harness_cross_domain.py` (55 tests, fakes only) runs the same deliberately wrong outputs
   through the conversation (`checked_turn`), Knowledge (`KnowledgeHarness`), Workflow
@@ -3534,3 +3534,17 @@ s-k-20261011T102952` (not published).
   §5.6, §6.4, §11.3, §12 (dev slice G4 done via U2/U3, the two meanings of "G4"), the stale 21/20
   limits in `docs/HARNESS_6_LAYER_STATUS.md` corrected to 151/150, the G4–G6 row above. P0-2 (part B)
   is a separate row.
+- [x] Phase 0.5 part B: P0-2, a side effect happens at most once per turn (2026-10-27, Claude Code).
+  `src/agent/turn_effects.py`: an in-memory per-turn record (a `ContextVar` opened by
+  `Gateway.converse`, shared by the Host check's retry pass and by conversation or Workflow runs nested
+  under the turn, ready for V1 `agent__delegate`) of succeeded side-effecting calls — Workflow runs,
+  capabilities whose `side_effect` is not `read`, `HostTool`s that declare a `side_effect` (new optional
+  field; the business-card tools carry their spec's) — keyed by a digest of tool name plus canonical
+  arguments. A repeat is not executed: the model gets the recorded outcome with `replayed: true` and
+  「這個動作在本回合已執行過，未重複執行」. Failed, refused, `awaiting_approval` and form-only outcomes are
+  not recorded; reads are untouched. `Gateway.execute_workflow` inside a turn (no engine idempotency key)
+  applies the same rule per Workflow, manifest, arguments and actor; `LocalAgent.converse` records each
+  run id once. Telemetry counts only: `tool.replayed`, `side_effects_recorded` / `side_effects_replayed`.
+  AGENTS.md rule 21; `docs/DECISIONS.md` 2026-10-27; `docs/CONTRACTS.md`; telemetry contract.
+  `tests/test_turn_effects.py` (12 tests). Open: `browser__operate`, `desktop__operate` and MCP tools
+  declare no side effect yet (not guarded).

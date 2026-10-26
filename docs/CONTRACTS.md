@@ -1893,6 +1893,23 @@ written through the existing local-run evidence path. Installed/published
 status and model text grant no authority. A known deterministic command keeps
 the existing non-model route.
 
+A side effect happens at most once per turn (P0-2, 2026-10-27). `Gateway.converse`
+opens an in-memory per-turn record (`agent/turn_effects.py`), shared by the Host
+check's retry pass and by any conversation or Workflow run nested under the same
+turn (a delegated sub-run). A call is side-effecting when it runs a Workflow, when
+its capability's `CapabilitySpec.side_effect` is not `read`, or when its
+`HostTool.side_effect` (optional, `None` by default: not guarded) says so. Only a
+call that really succeeded is recorded, keyed by a digest of the tool name and
+its canonical arguments: a failed, refused or `awaiting_approval` call, or a
+Workflow tool that only offered its form, runs again when asked. A repeat is not
+executed; its `ConversationToolExecution` is the recorded one with
+`replayed: true` (the field defaults to `false`), and the model's observation
+adds `host_note` 「這個動作在本回合已執行過，未重複執行」. `Gateway.execute_workflow`
+inside a turn and without an engine idempotency key applies the same rule to
+the same Workflow, manifest, arguments and actor. Telemetry gets counts only: a
+`tool.replayed` point event (`tool_id`, `loop_index`, `replayed`) and
+`side_effects_recorded` / `side_effects_replayed` on the turn's `run.completed`.
+
 ## Personal Agent contribution drafts (Productization 4, slice 5)
 
 `ContributionDraftCreateRequest` is the closed browser input. It either names

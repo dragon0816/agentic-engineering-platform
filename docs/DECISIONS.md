@@ -5162,3 +5162,32 @@ preview must not need Excel or touch an open workbook).
   stay serialized by the Bridge exclusive lock, because Excel, Outlook and instruments allow one writer at a time.
   The Workflow engine stays sequential.
 - **Deferred:** the ranker (no quality data yet), multi-gateway routing, cross-Bridge scheduling.
+
+## 2026-10-27 — A side effect happens at most once per turn (P0-2, multi-agent Phase 0.5 part B)
+
+- **Decision:** `Gateway.converse` keeps an in-memory, per-turn record of side-effecting calls that succeeded
+  (`src/agent/turn_effects.py`), keyed by a SHA-256 digest of the tool name plus its canonical JSON arguments (the
+  same identity as the repetition guard's `_call_key`). The record is held in a `ContextVar`: the Host check's retry
+  pass (`checked_turn`) and any conversation or Workflow run nested under the same turn (a V1 delegated sub-run)
+  share it; an outer turn opens it and drops it when the turn ends. A repeat of a recorded call is not executed: the
+  model gets the earlier `ConversationToolExecution` with `replayed: true` and the note 「這個動作在本回合已執行過，
+  未重複執行」. `Gateway.execute_workflow` inside a turn and without an engine idempotency key does the same for the
+  same Workflow, manifest, arguments and actor. AGENTS.md rule 21.
+- **What counts as side-effecting:** a Workflow run; a capability whose `CapabilitySpec.side_effect` is not `read`;
+  a `HostTool` whose new optional `side_effect` says so (the business-card tools now carry their spec's). Only real
+  success is recorded: failed, refused (`permission_denied`), `awaiting_approval` and form-only outcomes run again
+  when asked, so the existing failure and approval handling applies. Reads are untouched.
+- **Telemetry:** counts only — `tool.replayed` (`tool_id`, `loop_index`, `replayed`) and `side_effects_recorded` /
+  `side_effects_replayed` on the turn's `run.completed`; never arguments.
+- **Restart and resume:** the record is memory-only and lives exactly as long as the turn; rule 19 already refuses a
+  restart while a turn is in progress, so a turn never straddles one. `Gateway.resume` is not a Skill route (the
+  model cannot call it) and keeps the journal's durable "continued once" guard. Runs outside a turn (forms,
+  schedules, remote jobs) keep the engine's idempotency keys and are unaffected. Telegram and Agent Web both reach
+  the loop through `Gateway.converse`. A replayed Workflow call carries the run it replays, so
+  `LocalAgent.converse` records each run id once.
+- **Rejected:** feeding the first pass's tool results into the retry prompt only (the model may still call again);
+  a durable, cross-turn cache (a person asking again in a new turn means it); keying by tool name only (different
+  arguments are different actions); guarding every Host tool by default (many are reads or person-pressed cards).
+- **Open:** `browser__operate`, `desktop__operate` and MCP tools declare no `side_effect` yet, so they are not
+  guarded: identical GUI actions are also used to poll a window, and MCP tools carry no side-effect metadata. Decide
+  per tool before V1 delegation offers them to a sub-agent.

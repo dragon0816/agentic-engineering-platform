@@ -1,8 +1,25 @@
 # Handoff
 
-Updated: 2026-10-27 (Asia/Taipei), by Claude Code (multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-27 (Asia/Taipei), by Claude Code (multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## Multi-agent Phase 0.5 part A: G5 suite and G4 bookkeeping (2026-10-27, Claude Code) — latest
+## Multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn (2026-10-27, Claude Code) — latest
+
+- Commits on main (code+tests 825a5cff, then docs); not pushed, Agent Web not restarted. Row in
+  `docs/TASKS.md` (Multi-agent section); decision `docs/DECISIONS.md` 2026-10-27; AGENTS.md rule 21;
+  `docs/CONTRACTS.md` (`HostTool.side_effect`, `ConversationToolExecution.replayed`); telemetry contract.
+- `src/agent/turn_effects.py` + `Gateway.converse` / `_converse` / `execute_workflow`: a succeeded
+  side-effecting call is not executed again in the same turn (retry pass and nested runs included); the
+  model gets the earlier outcome marked `replayed`. Tests `tests/test_turn_effects.py` (12).
+- Verification: ruff check, ruff format --check, mypy (779 files) clean. Full pytest, project venv:
+  4133 passed, 7 skipped, 5 failed — 2 in `test_harness_cross_domain.py` against part A's then
+  uncommitted work (pass after its commit), 2 business-card store tests and the bi_cards browser test,
+  all passing when re-run alone. `C:/aepci-wk/venv` (host_runtime from the repo): 4110 passed, 34
+  skipped, 1 failed (`test_bi_cards_ui` browser test; passes re-run alone and in a clean worktree with
+  this change). The two full runs ran concurrently with part A's runs (about 65 min each).
+- Next: V1 Phase 1 (`AgentProfile` extension). Before `agent__delegate` offers GUI or MCP tools to a
+  sub-agent, decide their `side_effect` (today unguarded: identical GUI actions are also used to poll).
+
+## Multi-agent Phase 0.5 part A: G5 suite and G4 bookkeeping (2026-10-27, Claude Code)
 
 - Gate 0 was approved 2026-10-26 (`docs/DECISIONS.md` "Multi-agent Gate 0"). Part A is committed on
   main, not pushed, Agent Web not restarted. Row in `docs/TASKS.md` (Multi-agent section).
