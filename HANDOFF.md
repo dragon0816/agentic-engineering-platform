@@ -14,6 +14,12 @@ Updated: 2026-10-27 (Asia/Taipei), by Claude Code (multi-agent V1 presentation, 
   owner, mock CMP180).
 - The core wires the hook (2a8d5bda): `DelegationService` calls `delegation_started`, sets the line as the
   sub-run's `TURN_PROGRESS` and calls `finish(status)`; the 委派紀錄 and Telegram record read the tool's host data.
+- Verification on the committed code (72bde036, 1b2acce0): ruff check, ruff format --check, mypy (786 files)
+  clean. Full pytest, project venv: 4191 passed, 7 skipped. `C:/aepci-wk/venv`: 4163 passed, 34 skipped, 1 failed
+  (`test_bi_dataset_platform.py::test_the_publish_body_has_its_own_limit…`, ConnectionAbortedError while both
+  suites ran together; passes alone). Fake benchmark: 7/7. Browser screenshots: `.scratch/multi-agent-ui/`.
+- The Settings card names the docs as text (no links): the page must not contain any external URL
+  (`test_the_page_fetches_nothing_from_anywhere`).
 - Next: the owner's live baseline (README "Live mode": switch on in Settings, check `/api/activity`, restart,
   run `run.py --mode live`), then set thresholds. Before a restart, check `/api/activity`.
 
