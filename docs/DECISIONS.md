@@ -5191,3 +5191,34 @@ preview must not need Excel or touch an open workbook).
 - **Open:** `browser__operate`, `desktop__operate` and MCP tools declare no `side_effect` yet, so they are not
   guarded: identical GUI actions are also used to poll a window, and MCP tools carry no side-effect metadata. Decide
   per tool before V1 delegation offers them to a sub-agent.
+
+## 2026-10-27 — Multi-agent V1: what the person sees, the switch and the baseline benchmark
+
+- **Context:** Gate 0 (2026-10-26) and the V1 core ("Multi-agent V1 core delegation"). This slice is the
+  person-facing side and the review's §12 baseline. Contract: `docs/CONTRACTS.md` "Multi-agent delegation (V1)" →
+  "Delegation progress lines, 委派紀錄 and the Settings switch". Tests: `tests/test_multi_agent_ui.py`,
+  `tests/test_multi_agent_benchmark.py`.
+- **Progress source:** a hook in `turn_progress.py`, not a new event stream. `delegation_started` returns a
+  `SubAgentProgress` (a `TurnProgress`) that the sub-run sets as its `TURN_PROGRESS`, so the Gateway's existing
+  progress calls count on the sub-agent's line with no new reporting path. Rejected: reading telemetry events for
+  the live view (the progress board is memory-only and per session; telemetry is counts for Atlas, not a UI feed);
+  a separate per-delegation callback API (a second path for the same tool counts).
+- **The objective on the line** is the one exception to "progress shows names and numbers only": the person needs
+  to tell parallel sub-agents of the same profile apart. Bounded: 60 characters, one line, credential-shaped text
+  cut out, shown only to the turn's own actor (the progress route's owner check) and in that person's Telegram
+  chat. Tool arguments, results and answers stay out.
+- **委派紀錄 is stored on the answer** (`ConversationMessage.delegations`, ≤ 6, summaries ≤ 280 characters), built
+  from the tool's host data read as JSON, so the view never imports the core module and a record it cannot read is
+  skipped. Refusals are left out (no sub-agent ran). A sub-agent's files are resolved through the session ledger
+  for that session and actor and listed on the answer, so the existing path-confined viewer opens them; no new
+  file route. Rejected: re-reading the ledger when the page renders (later turns change it; the record should say
+  what this answer used).
+- **Settings switch** writes `host.json` `multi_agent.enabled` and reports saved vs running: the core reads the
+  flag when the Agent starts, so the switch never pretends to apply at once and never changes the running
+  configuration. A Host whose contract lacks the field refuses to save (`multi_agent_unsupported`).
+- **Benchmark `benchmarks/multi_agent_v1`:** the fake mode drives the product's own Gateway loop,
+  `DelegationService`, Bridge policy, Workflow engine, data policy and session ledger with a scripted model and
+  mock handlers, and reuses coding_v1 T15/T16 validators and business_workflow_lab data. It proves plumbing and
+  measurements, not a model's judgement; the live mode (the owner, never CI) measures that. The Bridge-safety
+  scenario uses a new mock CMP180-like instrument that refuses every address but `MOCK::CMP180`. No thresholds
+  until the live baseline (review §12).

@@ -1646,7 +1646,8 @@ trusted host state. Activation requires the exact profile selection, a
 published installed profile, every referenced Skill and Knowledge version to be
 selected and installed, every allowed capability to be separately selected,
 and the configured routing endpoint to satisfy `model_requirements`. Any
-`may_delegate_to` entry is refused in this milestone. A successful activation
+`may_delegate_to` entry is refused (`profile_delegation_unsupported`) unless
+`multi_agent.enabled`; then each target must validate ("Multi-agent delegation (V1)"). A successful activation
 atomically writes `ActiveAgentProfile` and reports that host restart is needed.
 
 On rebuild, the active profile filters the existing Skill registry, Knowledge
@@ -4513,7 +4514,8 @@ Tests: `tests/test_restart_activity.py`. Decision: `docs/DECISIONS.md` 2026-10-2
 - Items, each with `kind` and `started_at` (ISO 8601, UTC, seconds):
   - `{"kind": "task", "started_at", "task": <task kind>}`: a running background task (the
     `status: running` rows of `GET /api/tasks`);
-  - `{"kind": "chat_turn", "started_at"}`: an Agent Web conversation turn in progress;
+  - `{"kind": "chat_turn", "started_at"}`: an Agent Web conversation turn in progress; with
+    `"delegations": <n>` while n delegated sub-agents run under it (multi-agent V1, only when n > 0);
   - `{"kind": "telegram_flow", "started_at", "chat", "workflow": "<namespace>/<name>",
     "stage": "question" | "card"}`: an open Telegram question flow (memory only; expired flows are
     left out);

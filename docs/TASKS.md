@@ -3548,3 +3548,19 @@ s-k-20261011T102952` (not published).
   AGENTS.md rule 21; `docs/DECISIONS.md` 2026-10-27; `docs/CONTRACTS.md`; telemetry contract.
   `tests/test_turn_effects.py` (12 tests). Open: `browser__operate`, `desktop__operate` and MCP tools
   declare no side effect yet (not guarded).
+- [x] Multi-agent V1 core delegation (2026-10-27, Claude Code). Contract first (`docs/CONTRACTS.md`
+  "Multi-agent delegation (V1)", ef0c94a0), then the flag and profile fields (5d844036), then the code (2a8d5bda).
+  `host.json` `multi_agent.enabled` (default off = unchanged behaviour); `AgentProfile` gains `model_policy`
+  (`session`), `max_tool_calls`, `time_limit_s`, `selector_hint`, and `max_turns` is enforced for sub-runs;
+  `may_delegate_to` validates its targets with the flag on (`delegation_target`, owner mode included).
+  `src/agent/delegation.py`: the `agent__delegate` Host tool runs a bounded sub-conversation through
+  `Gateway.converse` (same guards, approved model client, claim check, turn side-effect record); effective tools =
+  parent's Skill tools ∩ profile ∩ actor grants ∩ requested, no Host tools; depth 1, ≤ 3 per turn; objective-only
+  context; `NEEDS_INPUT:` instead of questions; owner-mode writes become approval requests in the parent session;
+  typed results with G1 notes, G4 cap, artifacts in the parent ledger; read-only delegations of one reply run
+  concurrently (`HostTool.parallel`), write-capable ones alone; hard stop at `time_limit_s`. Telemetry run kind
+  `agent_delegation` (`parent_run_id`, tokens); `/api/activity` `delegations`; sub-runs report into the UI
+  agent's `SubAgentProgress` line. Examples `agents/engineering-0.2.0.json`,
+  `agents/examples/knowledge-researcher.json` (not installed). `tests/test_delegation.py` (30). Decision
+  2026-10-27 "Multi-agent V1 core delegation"; user guide §4.11; telemetry contract.
+- [ ] Owner: live check of V1 delegation with the read-only researcher (`HANDOFF.md`), then the baseline.

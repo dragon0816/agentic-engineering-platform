@@ -1,6 +1,24 @@
 # Handoff
 
-Updated: 2026-10-27 (Asia/Taipei), by Claude Code (multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-27 (Asia/Taipei), by Claude Code (multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+
+## Multi-agent V1 core delegation (2026-10-27, Claude Code)
+
+- Commits on main: ef0c94a0 (contract), 5d844036 (flag + profile fields), 2a8d5bda (code + tests), then docs; not
+  pushed, Agent Web not restarted, no real model, Bridge or hardware used. Row in `docs/TASKS.md`; decision
+  `docs/DECISIONS.md` 2026-10-27 "Multi-agent V1 core delegation"; user guide §4.11.
+- Verification: ruff, format, mypy clean (on the exact commit content in a clean worktree). Full pytest, project
+  venv: 4166 passed, 7 skipped, 2 failed (`test_bi_cards_end_to_end_in_a_browser`,
+  `test_health_and_bad_requests_over_http`), both pass alone; `C:/aepci-wk/venv` (host_runtime from the repo):
+  4140 passed, 34 skipped, 1 failed (the same browser test), passes alone. Runs were concurrent with the UI
+  agent's uncommitted work. `tests/test_delegation.py` 30 passed in both venvs.
+- Live check (owner, after checking `/api/activity`): `host.json` `"multi_agent": {"enabled": true}`; copy
+  `agents/examples/knowledge-researcher.json` to `<workspace>\assets\agents\platform__knowledge-researcher__0.1.0.json`
+  and put your vault's exact identity in `knowledge`; restart Agent Web; ask 「請用 knowledge-researcher 查
+  <vault 裡的問題>」. Expect one `agent__delegate` call, the answer from the result, `/api/activity`
+  `delegations: 1` while it runs, and an `agent_delegation` telemetry run under the turn.
+- Open: no cancel button; `max_retries` not read; sub-run Workflow runs go to the session ledger, not the local run
+  history; GUI / MCP tools are not offered to sub-agents until their `side_effect` is decided.
 
 ## Multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn (2026-10-27, Claude Code) — latest
 

@@ -638,6 +638,55 @@ Agent 不會自己記住規則或筆記；**一定要你按一下**才會保存�
 - 設定在「記憶」→「**紀錄**」→「健康檢查」：每晚檢查開／關（預設開）、聯絡人幾個月沒出現就問（0 = 依空間的規則，目前 12 個月）、偏好幾天沒用就提醒（預設 90 天）。關閉後「立即檢查」也不能按，也不會呼叫模型。
 - 沒有可用的內部模型時，矛盾檢查會略過（其他項目照樣檢查）。每位成員各自檢查、各自的結果；夜間報告（Reviews 頁的 review 報告）只寫各類的筆數，不寫內容。
 
+### 4.11 交給專家子代理（多代理委派，預設關閉）
+
+開啟後，Agent 在一個回合裡可以把**一件範圍明確的小工作**交給另一個「專家」Agent profile
+（子代理），拿回結構化的結果再繼續回答你。Agent 自己仍然對答案負責；子代理只是它的工具
+（`agent__delegate`）。
+
+**怎麼開**（預設關閉，關閉時和以前完全一樣）：
+
+1. 在 `host.json` 加上 `"multi_agent": {"enabled": true}`，然後重新啟動 Agent Web
+   （重新啟動前先確認沒有進行中的工作，見 Tasks 與 `/api/activity`）。
+2. 把專家 profile 放到 `<workspace>\assets\agents\<namespace>__<name>__<version>.json`。
+   安裝包附了一個**關閉中**的範例：`agents/examples/knowledge-researcher.json`（只讀的知識研究員）。
+   它的 `knowledge` 是空的：請填入你要讓它讀的知識庫（Knowledge vault）的確切名稱與版本，
+   否則它拿不到任何知識庫工具（缺資訊時一律不給，不會自己放寬）。
+3. 有 Shared Platform 授權的電腦：專家 profile、它用到的 Skill 與 Capability 都要先選取；
+   作用中的 profile 可以在 `may_delegate_to` 列出專家（新版範例 `agents/engineering-0.2.0.json`）。
+   沒有平台授權的個人電腦（owner mode）：已安裝、`published` 的 profile 就能當專家。
+
+**怎麼用**：
+
+- 作用中的 profile 在 `may_delegate_to` 列出的專家，Agent 會自己判斷要不要交給它（看 profile 的
+  說明與 `selector_hint`）。
+- 其他已安裝的專家，**要你在訊息裡說出它的名字**才會用，例如：「請用 knowledge-researcher
+  查一下 Wi-Fi 7 的 MLO 規格重點」。
+- 結果出現在 Agent 的回答裡；子代理的檔案與 Workflow 執行會記在**這個對話**的「產出」清單，
+  之後可以用編號請 Agent 附上（`session__attach_file`）。
+
+**它不會做的事**（規則）：
+
+- 子代理**看不到這段對話**：只拿到 Agent 寫給它的任務說明，和 Agent 指定的這個對話的產出。
+- 子代理**不會直接問你問題**：缺資訊時它回報「需要什麼」，由 Agent 問你一個問題。
+- 子代理只能用**你本來就能用、而且 profile 允許**的工具，兩者的交集；不會因為 profile 而多出權限。
+  畫面操作（瀏覽器、桌面）、MCP、表單、記憶、提案卡片等工具不會交給子代理。
+- 會改變東西的動作**一樣要你按核准**（同 4.5），核准按鈕出現在這個對話。
+- 同一回合裡，同一個寫入動作**最多執行一次**（子代理重做也一樣）。
+- 一回合最多 **3 個**子代理、子代理不能再交給別的子代理；每個子代理有自己的工具次數、輪數與
+  時間上限（profile 的 `max_tool_calls`、`max_turns`、`time_limit_s`），時間到就停，回報
+  `delegation_time_limit`。目前**沒有「取消」按鈕**。
+- 只讀的子代理（全部工具都只讀）在同一個回覆裡可以**同時跑**（最多 3 個）；有寫入能力的子代理
+  一次只跑一個。
+- 子代理的回答也經過 Host 檢查：沒有工具紀錄卻說「已完成」會被標註，Agent 的回答下方會出現
+  「Host 註記：…未通過 Host 檢查」，不會被改寫成通過。
+- 子代理用的是這個對話選的語言模型（同一個資料傳送核准）。**Claude Code / Codex / Copilot 後端
+  的對話不能委派**。
+
+**看得到什麼**：Agent Web 的進行中工作會標出正在跑的子代理數（`/api/activity` 的 `delegations`）；
+遙測（Telemetry）每個子代理是一個 `agent_delegation` run，連到這一回合，只記次數與 token 數，
+不記內容。
+
 ---
 
 ## 5. Capabilities：管理 Skill 與 Workflow
