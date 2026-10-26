@@ -108,10 +108,15 @@ def test_fixture_preview_writes_only_its_folder_and_keys_rows_by_github_issue(
     assert "GitHub Project example-board" in html
     assert "Effort below is a <b>ticket count</b>, not hours" in html
     assert "Tickets per team member" in html
-    assert "4 instrument-tickets from 3 tickets" in html
+    assert "Share uses 4 instrument-tickets as its denominator" in html
     assert "cid:" not in html
     if HAS_MATPLOTLIB:
+        # The pie's title is the picture's alt text; without matplotlib
+        # (CI installs only dev,office) the mail has no picture.
+        assert "4 instrument-tickets from 3 tickets" in html
         assert "src='effort-chart.png'" in html
+    else:
+        assert "No instrument chart this week." in html
 
 
 def test_the_configured_workbook_is_only_read(tmp_path: Path) -> None:
