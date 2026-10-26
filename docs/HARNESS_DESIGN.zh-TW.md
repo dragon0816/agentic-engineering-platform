@@ -55,7 +55,12 @@ owner 審閱本文件後決定**統一成一個 Harness 骨架**（`docs/phases/
 | 5 Execution | 透過 Bridge 執行能力 | 基礎穩固 | — |
 | 6 Validation / Feedback | 驗收與回饋 | 部分 | 沒有通用的語意驗收閘門；Knowledge 有證據驗證，Coding 有測試驗證 |
 
-六個開發切片（G1–G6）：G1 共用計畫契約、G2 有界狀態機、G3 Knowledge 垂直切片已完成（G3 第 5 步「線上覆蓋率量測」未完）；**G4 Workflow/Coding 接上共用狀態機、G5 跨領域驗收、G6 Agent Web 證明仍未完成**。
+六個開發切片（G1–G6，`docs/phases/HARNESS_6_LAYER_INCREMENTAL.md`）：G1 共用計畫契約、G2 有界狀態機、G3 Knowledge 垂直切片已完成（G3 第 5 步「線上覆蓋率量測」未完）。
+
+- **開發切片 G4（Workflow/Coding 接上共用狀態機）已完成**，由 Harness 統一 U2／U3（2026-10-09，`docs/phases/HARNESS_UNIFICATION.md:25-26`）實作：Coding 是 `src/harness/runtime.py:99-113`（`build_plan(domain="coding")` → `run_harness`），Workflow 是 `src/workflow/harness.py:99-147`（`run_harness_async`，重試預算 0）。2026-10-27 補記。
+- **開發切片 G5（跨領域驗收）已完成**（2026-10-27，多代理 Phase 0.5）：`tests/test_harness_cross_domain.py` 對 conversation、Knowledge、Workflow、Coding 四個領域跑同一組負向案例（見 §11）。
+- G6 Agent Web 證明仍未完成。
+- 注意：「G4」有兩個意思。上面是**開發切片 G4**；§5.6 的 **交接規則 G4** 是「輸出長度一致」（`agent/harness_handoff.py` `capped`）。兩者無關。
 
 ---
 
@@ -245,7 +250,8 @@ flowchart TD
 - Workflow 與 Coding 的 Harness 只產生狀態、沒有答案文字，所以都走上一條：模型負責說明，Host 附註記標明哪個結果未通過。適用的結果：
   - Workflow 工具：步驟失敗或宣告的輸出檢查失敗（`workflow_output_check_failed`）；
   - 草稿試跑：host 資料帶 `run_id` 且 `status: failed`；
-  - capability 結果是 Host validator 的判定：資料帶 `status: failed`，例如 Coding Harness、DUT 量測。
+  - capability 結果是 Host validator 的判定：資料帶 `status: failed`，例如 Coding Harness、DUT 量測；
+  - capability 跑了、但因 Host 檢查未通過而被拒絕：失敗碼 `repair_budget_exceeded`（Coding Harness 修復用完仍未通過宣告的指令）或 `host_check_failed`（`HOST_CHECK_FAILURE_CODES`）。G5 跨領域測試發現 coding capability 實際是以拒絕回報，原本不加註記，模型的「改好了、測試都過了」不會被標出（2026-10-27 修正）。在執行前就被拒絕（權限、找不到目標）仍不算 Harness 結果。
 - 同一回合中，同一個工具後來成功了（修復），註記就不加。
 - 不屬於 Harness 的工具，行為不變：一般 capability、authoring、browser、desktop、MCP。E2E-01 測試有兩個斷言：
   - 超出限制的 DUT 量測，經對話迴圈後仍是 failed，不論模型怎麼寫；
@@ -294,7 +300,7 @@ flowchart TD
 - 工具路徑（`for_tool`）、直接路徑（Agent Web `_knowledge_reply`）與 assistant 的 knowledge 工具，都用同一套綁定，兩條路徑選到同一個 Skill。
 - Workflow 與 Strategy Config 的 adapter 目前不選 Skill；kind 先定義好。
 
-**G4：輸出長度一致。**
+**G4：輸出長度一致。**（交接規則 G4，不是開發切片 G4，見 §2 末）
 
 - 迴圈回傳 Harness 結果的上限，等於該領域宣告的上限（`output_limit_chars`），取代原本固定的 12,000 字。
 - Knowledge 的上限 ＝ Skill procedure 的 `synthesis_max_output_tokens`（256–8,192，預設 4,000）× 4 字／token，再加上 Host 加在模型文字之後的部分（來源清單、缺口註記）。
@@ -338,7 +344,7 @@ stateDiagram-v2
 
 ### 6.4 現在的接線範圍
 
-（已處理，見 0.1）統一前只有 **Agent Web 的 Knowledge 直接路徑**（`web.py` `_ask_knowledge`）呼叫 `plan_task` / `run_harness`。而且該處 TaskContract 的 `max_retries=0`，所以**通用重試分支目前不會在 Knowledge 觸發**；Knowledge 真正的「再檢索」發生在 facet 評估內部（見 7.2）。Coding 與 Workflow 仍用各自的迴圈（G4 未完成）。
+（已處理，見 0.1）統一前只有 **Agent Web 的 Knowledge 直接路徑**（`web.py` `_ask_knowledge`）呼叫 `plan_task` / `run_harness`。而且該處 TaskContract 的 `max_retries=0`，所以**通用重試分支目前不會在 Knowledge 觸發**；Knowledge 真正的「再檢索」發生在 facet 評估內部（見 7.2）。Coding 與 Workflow 當時仍用各自的迴圈；之後由 U2／U3 接上（開發切片 G4 已完成，見 §2）。
 
 ---
 
@@ -492,14 +498,28 @@ flowchart LR
 
 階段閘門的完成條件是「lab 與 coding_v1 在同一個 build 上全部通過」，目前未達成，owner 暫停決策中。
 
+### 11.3 跨領域負向測試（開發切片 G5，2026-10-27）
+
+`tests/test_harness_cross_domain.py`（全部是 fake，沒有真模型、Bridge 或硬體）透過各領域真正的 adapter 跑同一組刻意錯誤的輸出：對話 `checked_turn`、Knowledge `KnowledgeHarness`、Workflow `run_workflow_checked`、Coding `CodingHarness`。每個領域都證明：
+
+- Host 檢查失敗永遠不會以 `validated` 結束，停止原因與遙測最後的 phase 一致；
+- 交接規則 G1：失敗的結果不會被改寫成成功（Host 註記保留）；
+- 交接規則 G2：錨點（使用者原句）與模型的宣稱都經過檢查，工具參數都有紀錄且不含密鑰；
+- `no_unbacked_action_claim` 擋下沒有工具支持的「已完成」；
+- 交接規則 G4：輸出截斷一定有註記；
+- 重試有上限（Skill 不能提高 Host 的預算；Workflow 不整體重跑）；
+- `needs_input` 只在真的需要使用者時出現，不會把檢查失敗變成提問。
+
+任何新增的領域 adapter 都要能通過這組測試。
+
 ---
 
 ## 12. 已知缺口、文件與程式不一致處
 
-1. （已處理）**共用狀態機只接到 Knowledge 直接路徑**；Coding（`src/harness`）與 Workflow 引擎各自一套迴圈（G4 未完成），因此「跨領域驗收（G5）」尚無法成立。
+1. （已處理）**共用狀態機只接到 Knowledge 直接路徑**；Coding（`src/harness`）與 Workflow 引擎各自一套迴圈，因此「跨領域驗收（G5）」尚無法成立。開發切片 G4 由 U2／U3（2026-10-09）完成：`src/harness/runtime.py:99-113`、`src/workflow/harness.py:99-147`；G5 由 `tests/test_harness_cross_domain.py`（2026-10-27）完成。
 2. （已處理）**Knowledge 的通用重試永遠不會觸發**：直接路徑的 TaskContract 寫死 `max_retries=0`；實際的補檢索在 facet 評估內部，不在共用狀態機裡。
 3. （已處理）**Knowledge 工具路徑繞過 Host checks**，答案由對話模型改寫，是 knowledge_v1 失敗的主因。
-4. （已處理）`HARNESS_6_LAYER_STATUS.md` 寫「最多 5 輪、4 次工具呼叫」，**程式已是 21 輪、20 次**（文件過時）。
+4. （已處理）`HARNESS_6_LAYER_STATUS.md` 寫「最多 5 輪、4 次工具呼叫」，後來改成 21 輪、20 次，**程式已是 151 輪、150 次**（`src/agent/backend_contracts.py:19-20`，owner 2026-10-19）；2026-10-27 已更正該文件。
 5. Gateway docstring 提到未知工具有「一次有界修復」，**程式沒有獨立計數**，未知工具只是消耗工具預算。
 6. HANDOFF 提到工具路徑合成上限 800 token，**程式已是 procedure 值或 4,000**（HANDOFF 過時）。
 7. （已處理）遙測沒有獨立的 `coding_change` run，coding 事件掛在所在的對話或 Workflow run 底下（契約 v0.2 列了這個 run_kind，但尚未單獨開 run）。

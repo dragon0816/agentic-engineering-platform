@@ -923,6 +923,13 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [ ] G4–G6: adapt exact Workflow/Task and Coding runs to the same state and
   validation envelope, then prove all three from Agent Web. Order and
   acceptance are in `docs/phases/HARNESS_6_LAYER_INCREMENTAL.md`.
+  - [x] Dev slice G4 (not handoff rule G4, consistent output length): done by
+    Harness unification U2/U3 on 2026-10-09 (`docs/phases/HARNESS_UNIFICATION.md:25-26`);
+    Coding `src/harness/runtime.py:99-113`, Workflow `src/workflow/harness.py:99-147`.
+    Recorded 2026-10-27.
+  - [x] G5 cross-domain acceptance: `tests/test_harness_cross_domain.py`
+    (2026-10-27, multi-agent Phase 0.5; see the Multi-agent section).
+  - [ ] G6 Agent Web proof.
 - [x] Convert an invalid configured Knowledge Vault into a Host startup error
   that names the configured Vault path instead of leaking a `VaultError`
   traceback. The owner's preview binding currently points to an existing Vault;
@@ -3511,3 +3518,19 @@ s-k-20261011T102952` (not published).
   review); approved ADRs are then appended to `docs/DECISIONS.md`.
 - [ ] Phase 0.5 after Gate 0: G5 cross-domain negative suite, P0-2 per-turn idempotency cache,
   mark G4 done (`docs/HARNESS_DESIGN.zh-TW.md:58`, the G4–G6 row above).
+- [x] Phase 0.5 part A: G5 cross-domain negative suite and G4 bookkeeping (2026-10-27, Claude Code).
+  `tests/test_harness_cross_domain.py` (55 tests, fakes only) runs the same deliberately wrong outputs
+  through the conversation (`checked_turn`), Knowledge (`KnowledgeHarness`), Workflow
+  (`run_workflow_checked`) and Coding (`CodingHarness`) adapters: a failed Host check never ends
+  `validated` and the telemetry's last phase matches the stop; G1 notes stay; G2 anchors and claimed
+  terms are checked and tool arguments recorded without credentials; `no_unbacked_action_claim` blocks
+  unbacked claims after each domain's failed tool; output cuts always carry a note; retries are bounded
+  (a Skill cannot raise the Host budget, a Workflow is never re-run whole); `needs_input` only where the
+  person is needed. Bug found and fixed (test first): a Coding Harness run that failed its declared
+  commands reaches the conversation as a refused capability (`repair_budget_exceeded`), so G1 added no
+  note and, when another tool succeeded, the model's "the change passed" went unmarked;
+  `agent/harness_handoff.py` now treats `HOST_CHECK_FAILURE_CODES` (`repair_budget_exceeded`,
+  `host_check_failed`) as a failed Harness verdict. No xfail. Docs: `docs/HARNESS_DESIGN.zh-TW.md` §2,
+  §5.6, §6.4, §11.3, §12 (dev slice G4 done via U2/U3, the two meanings of "G4"), the stale 21/20
+  limits in `docs/HARNESS_6_LAYER_STATUS.md` corrected to 151/150, the G4–G6 row above. P0-2 (part B)
+  is a separate row.

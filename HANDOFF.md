@@ -1,8 +1,27 @@
 # Handoff
 
-Updated: 2026-10-26 (Asia/Taipei), by Claude Code (multi-agent Phase 0 review, awaiting owner Gate 0; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-27 (Asia/Taipei), by Claude Code (multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## Multi-agent Phase 0 review, awaiting owner Gate 0 (2026-10-26, Claude Code) — latest
+## Multi-agent Phase 0.5 part A: G5 suite and G4 bookkeeping (2026-10-27, Claude Code) — latest
+
+- Gate 0 was approved 2026-10-26 (`docs/DECISIONS.md` "Multi-agent Gate 0"). Part A is committed on
+  main, not pushed, Agent Web not restarted. Row in `docs/TASKS.md` (Multi-agent section).
+- `tests/test_harness_cross_domain.py` (55 tests, fakes only): conversation, Knowledge, Workflow and
+  Coding through their real adapters; failed Host check never `validated`, G1, G2, claim check, G4
+  output cut notes, bounded retries, honest `needs_input`.
+- Bug fixed (test first, no xfail): a Coding Harness run that failed its declared commands arrives as a
+  refused capability (`repair_budget_exceeded`) and got no G1 note; `agent/harness_handoff.py`
+  `HOST_CHECK_FAILURE_CODES` now marks it. Docs: `docs/HARNESS_DESIGN.zh-TW.md` (dev slice G4 done via
+  U2/U3, the two meanings of "G4", §11.3), `docs/HARNESS_6_LAYER_STATUS.md` limits 151/150.
+- Verification: ruff check, ruff format --check, mypy (779 files) clean; full pytest project venv
+  4137 passed, 7 skipped, 1 failed; `C:/aepci-wk/venv` (host_runtime from the repo) 4110 passed,
+  34 skipped, 1 failed. The two failures (`test_bi_cards_end_to_end_in_a_browser`,
+  `test_powershell_fixture_uses_noninteractive_json_io` script timeout) ran under four concurrent full
+  suites and pass alone in both venvs. The runs included part B's uncommitted working-tree changes.
+- Next: part B (P0-2 idempotent side-effect retries, another agent), then Phase 1 (`AgentProfile`
+  extension behind a flag). G6 (Agent Web proof) stays open.
+
+## Multi-agent Phase 0 review, awaiting owner Gate 0 (2026-10-26, Claude Code)
 
 - Docs only, committed on main, not pushed; no code, contract, permission, config or issue change.
   Source plan `docs/proposals/MULTI_AGENT_AUTO_DISCOVERY_v0_source.md` (verbatim); review
