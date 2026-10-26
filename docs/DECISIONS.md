@@ -5127,3 +5127,38 @@ keyed `#n`); `owner/repo#n` for every key (the workbook and the source use `#n`)
 `GTM-n` rows by `jira_key` in the scratch sheet (the week's own sheet makes it unnecessary, and a
 re-key through the COM writer is a larger change); writing the preview workbook with Excel (the
 preview must not need Excel or touch an open workbook).
+
+## 2026-10-26 — Multi-agent Gate 0 approved (ADR-MA1–MA5)
+
+- **Decision (owner, 2026-10-26):** Gate 0 of `docs/proposals/MULTI_AGENT_PHASE0_REVIEW.md` is approved with
+  the review's recommended defaults (「其他建議執行」), one addition, and a target of about one week for
+  Phase 0.5 plus V1.
+- **Open questions, as decided:**
+  1. Verified work keeps going directly to `main`, with no PRs.
+  2. Phase 0.5 (G5 cross-domain negative suite, P0-2 idempotent side-effect retries, G4 bookkeeping) comes first.
+  3. Extend `AgentProfile`; no new AgentDefinition kind.
+  4. CLI-backend parents (Claude Code / Codex / Copilot) do not delegate in V1. They receive PUBLIC data only,
+     and the Host's guards, approvals and claim check do not run inside their loops. A later option is an MCP
+     delegate tool whose sub-agent still runs in the Host.
+  5. At most 3 sub-agents per turn, with token logging; no hard cost cap until a baseline exists.
+  6. Sub-agent writes still need the person's confirmation.
+  7. Hermes profiles are not in V1.
+  8. New telemetry run kind `agent_delegation`, in Phase 2.
+  9. `engineering.json` ships as a new version.
+  10. ADRs are recorded here on approval.
+- **ADR-MA1:** the parent delegates through the `agent__delegate` host tool; there is no up-front strategy router.
+- **ADR-MA2:** extend `AgentProfile` with a model-policy reference and per-instance limits; instances are ephemeral.
+- **ADR-MA3:** sub-agents use the session's model; an alias allowlist inside the approved Gateway comes later;
+  multi-gateway is deferred.
+- **ADR-MA4:** sub-agents act as the parent actor; the effective permission is parent grants ∩ profile allowlist ∩
+  delegated tools, and it fails closed. Agent identity is deferred.
+- **ADR-MA5:**
+  - minimal context; artifacts go to the parent session ledger;
+  - depth 1, ≤3 sub-agents per turn, the same guards;
+  - no direct questions to the person (rule 18);
+  - not persisted, and restarts are guarded (rule 19);
+  - results pass G1–G4 and the claim check.
+- **Addition (owner asked why there is no parallelism):** read-only sub-agents may run concurrently (≤3). Writes
+  stay serialized by the Bridge exclusive lock, because Excel, Outlook and instruments allow one writer at a time.
+  The Workflow engine stays sequential.
+- **Deferred:** the ranker (no quality data yet), multi-gateway routing, cross-Bridge scheduling.
