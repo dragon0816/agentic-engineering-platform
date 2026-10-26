@@ -3185,6 +3185,15 @@ updated, the field values by name, the comment thread, and whether that
 thread was longer than the client asked for. `ProjectComment` is when a
 comment was written, by whom, and its body.
 
+Since 2026-10-26 a row also carries the Issue's `repository` and `number` and
+`issue_assignee_names` (profile name, else login, parallel to the logins). The
+weekly report keys a `ReportItem` by its GitHub Issue (`ReportKey`: `#123`, or
+`owner/repo#123` outside the board's main repository; `GTM-n` still loads) and
+carries `repository`, `number`, an optional `jira_key` and `assignee_source`
+(`issue`, `project_field` for the `SDE Assignee` fallback, or `none`).
+`SheetState` and `WeeklyReportPlan` carry `target_sheet`, the week's own sheet
+by default (`WeeklyReportSettings.sheet_target`); None means the scratch sheet.
+
 `GitHubError` codes are `github_credential`, `github_auth`, `github_http`,
 `github_unavailable`, `github_bad_reply`, `github_scope_missing`,
 `github_not_found`, `github_rate_limited`, `github_project_missing` and

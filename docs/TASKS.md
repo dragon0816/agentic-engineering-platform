@@ -3454,3 +3454,32 @@ s-k-20261011T102952` (not published).
   repo) 4032 passed, 34 skipped (`--basetemp=C:/aepci-wk/bt-artc`). Not pushed, Agent Web not
   restarted, no real bot message, no Outlook, no Workflow run.
 - [ ] Owner check after a restart (see `HANDOFF.md`).
+
+## SDE weekly report: key every ticket by its GitHub Issue, as Hermes's source does (2026-10-26)
+
+- [x] Owner requests 2026-10-25 (「目前sde weekly report 不是最新的導致有bug，無法顯示某些有更新的github
+  issues…reference hermes agent 使用的sde weekly report workflow」) and 2026-10-26 (「幫忙修改」: all
+  tickets on GitHub, key by the GitHub Issue with a link, follow the workbook, the target mail, a
+  preview). Claude Code, continuing an uncommitted draft. Decision `docs/DECISIONS.md` 2026-10-26
+  "Workflow 11 keys every ticket by its GitHub Issue"; parity table `docs/PHASE_7_MIGRATION.md`
+  "Workflow 11: parity with the source revision Hermes runs (2026-10-26)".
+  1. Cause: selection and keys came from the old `[GTM-n]` title key, so Issues filed on GitHub
+     were dropped (15 of 22 in scope for 2026_43W).
+  2. Fix: key `#<number>` (`ReportKey`; `repository`, `number`, optional `jira_key` on
+     `ReportItem`); every open numbered Issue that moved or was commented in the window; the
+     week's own sheet (`sheet_target`, default `week`, never seeded, full header row); `SDE
+     Assignee` fallback with `assignee_source`; assignee names; source instrument separators;
+     Taiwan-time days (`rules.report_day`); pie title and axis always "instrument-tickets", bar
+     totals; field values 100.
+  3. Preview `python -m capabilities.weekly_report.preview --week <YYYY_NNW> --out <dir>`
+     (`--fixture` for synthetic data), new `integrations.excel_openpyxl` writer for the copy.
+     Checked once read-only for 2026_43W: 19 / 22, 23 instrument-tickets, 16 rows, matching the
+     owner's target picture.
+  Tests: `test_weekly_github_source_rules.py` (an Issue without a Jira id is included, other
+  repository key, Taiwan week), `test_weekly_github_fields.py` (fallback, names, separators),
+  `test_weekly_report_preview.py` (new), workflow tests on the scratch sheet with `#n` keys.
+  Verification: ruff check, ruff format --check and mypy (776 files) clean; full pytest project venv 4071 passed, 7 skipped; `C:/aepci-wk/venv` (host_runtime from the repo) 4043 passed, 34 skipped, 1 failed (the preview test asserted the chart title without matplotlib), fixed and re-run alone: 4 passed in both venvs.
+- [ ] Owner check: run the preview (commands in `HANDOFF.md`), then a dry run 「只看計畫」 for 43W
+  after the next restart.
+- [ ] Follow-up: the Workflow manifest still says "scratch sheet" in its description and apply
+  step title (needs a manifest version bump).

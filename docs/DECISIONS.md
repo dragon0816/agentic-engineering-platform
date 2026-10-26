@@ -5032,3 +5032,98 @@ Builds on "A session remembers what it produced" above.
   second press finds it saved. Nothing is saved automatically.
 - **Visibility:** the memory page's 紀錄 tab lists the recent summaries with 存成筆記 and 刪除, and the
   retention. Rule: `AGENTS.md` 20.
+
+## 2026-10-26 — Workflow 11 keys every ticket by its GitHub Issue, as the source Hermes runs does
+
+Owner requests 2026-10-25 and 2026-10-26: Jira had problems, so every ticket moved to the GitHub
+Project `rs-sde-projects`; the SDE weekly report missed updated GitHub Issues that the owner's
+Hermes agent showed. Key every ticket by its GitHub Issue, link the Key cell to it, follow the
+current workbook, match the owner's target mail, port the source job's behaviour, and give a
+read-only preview. Strategy ADAPT (one slice, capability package only).
+
+Source, read only: Hermes's skill `rs-workflow-jobs` (`%LOCALAPPDATA%\hermes\skills\productivity\
+rs-workflow-jobs`) calls the source Host Bridge jobs `github_weekly_report` and
+`github_weekly_email` (`n8n_workflow_system\host-bridge\jobs\`). Both, and
+`tests/test_github_weekly_report.py`, exist only in that repository's working tree (untracked; its
+HEAD 896046e does not contain them). Revisions read: report sha256
+6cdbd56f02bc02fa453a509bc7b8c9926de497cba586d9eed2f7b22871570326 (2026-10-16, not the 9293c7ef…
+pinned 2026-10-05), email 62c5220c8757f3596e55757d438e64efa03466e5bf5e5010326d821f08bf458d
+(unchanged).
+
+Root cause: AEP selected and keyed board items by the old Jira key in the title. Only titles
+carrying `[GTM-n]` were selected (`tracked_key_prefix`, named explicitly in the owner's Host
+settings), so an Issue filed on GitHub, which has no Jira key, was dropped before the window was
+checked. In the read-only preview of 2026_43W, 15 of the 22 Issues in scope had no Jira key.
+
+Ported (now equal to the source):
+
+- **Key**: every ticket is keyed by its GitHub Issue, `#<number>` (source `_github_ticket_id`);
+  an Issue from a repository other than the board's main one keeps `owner/repo#<number>` so two
+  Issues never share a key. `ReportItem` carries `repository`, `number` and an optional
+  `jira_key` (source `sourceKey`, found anywhere in the title; a leading `[GTM-n]` is cut from the
+  summary). `tracked_key_prefix` now only names that Jira prefix; `board_key_prefix` is inert and
+  kept so existing settings load. New contract type `ReportKey` accepts `#n`, `owner/repo#n` and
+  the older `GTM-n`/`GH-n` forms.
+- **Selection**: every numbered board Issue that is not in a closed Project status and whose
+  `updatedAt` or an active comment (edited inside the window counts at its edit time) is in the
+  window; the migrated body log is a fallback only without a real marker comment.
+- **Sheet**: new setting `sheet_target` (default `week`): the run writes the week's own sheet
+  (`2026_43W`), read as it stands when present and created empty at the end when missing, never
+  seeded from an older week (source `_report_sheet_name`, "do not seed"). That is how the current
+  workbook is kept (2026_42W and 2026_43W, `#n` keys). A new sheet gets its whole header row
+  first, `Comments` included. `temp` keeps the older scratch sheet as a way back. The plan and
+  the sheet state carry `target_sheet`, so the plan stays the whole instruction.
+- **Key cell link**: the real run keeps the `=HYPERLINK()` formula (COM rule 4); the preview's
+  openpyxl writer sets a real cell hyperlink and keeps the cell's fill, border and alignment.
+- **Assignee**: Issue assignees by profile name, falling back to the login (the query now reads
+  `name`); an Issue with none falls back to the Project field `SDE Assignee` (first non-empty of
+  `assignee_fields`), and `assignee_source` records `issue`, `project_field` or `none`. The
+  fallback names count in the mail too. This reverses the owner decisions of 2026-10-03 and
+  2026-10-05 ("no fallback") by the owner's own request of 2026-10-26.
+- **Instruments**: Production splits on the source's separators `[,;/&+]` plus the full-width
+  comma (was commas only), which is what makes the target mail's 23 instrument-tickets.
+- **Mail layout**: the owner's target (title, `本週有留言的 N / M 張`, the ticket-count callout,
+  tickets per member, the pie titled "N instrument-tickets from M tickets" with `name / count
+  (pct%)` labels, the stacked member bars with legend and x axis "instrument-tickets") was already
+  rendered; the pie title and axis now always name instrument-tickets and each bar ends with its
+  total.
+- **Query**: field values read 100 per item (source 80, AEP was 50).
+
+Time zone (an intentional difference, toward the source's own rule): a day is a Taiwan-time day.
+`rules.report_day` converts a timestamp to UTC+8 before taking its date, in the board window,
+comment selection, `M/D:` headers and the mail's activity count. The source compares GitHub's UTC
+timestamps by their UTC date, contradicting its own rule ("what a Taipei team means by this week —
+do not fix it to UTC") and its own `startTime`/`endTime`, whose dates are Taipei days. Now a named
+week and the same days given as `startTime`/`endTime` select the same comments; a comment on
+Monday 07:00 Taipei counts in the new week. Jira's `+0800` timestamps are unchanged by this.
+
+Kept different on purpose:
+
+- Several Issue assignees count once each in the mail (the source counts the joined string as one
+  member); recorded 2026-10-03.
+- New rows still need marker content in the window and rows already in the sheet are always
+  refreshed, where the source pre-filters on any comment in the window; the result is the same
+  set of written rows on 2026_43W (16).
+- In Progress fill `#F8AD3E` (configurable) against the source's `#FCE4D6`.
+- 100 assignees with a refusal when truncated (source 10); threads over 100 comments are named;
+  an Issue the token cannot read is refused. Both page items by cursor and neither reads archived
+  items; draft cards and pull requests are skipped by both.
+- The project is found by number (host settings), not by title.
+
+Preview: `python -m capabilities.weekly_report.preview --week <YYYY_NNW> --out <dir>` (real mode:
+the host's `host.json`, the same client, credential mapping and planning steps as the Workflow,
+read-only) or `--fixture` (synthetic, no credential). It writes only `<dir>`: `email.html` and
+`effort-chart.png` from the mail step's own `compose_draft`, `workbook-preview.xlsx` (a copy of the
+configured workbook written by `apply_plan` through `integrations.excel_openpyxl`), `plan.json`.
+Checked once read-only on 2026-10-26 for 2026_43W: 19 / 22 tickets, 23 instrument-tickets, member
+counts 5-4-4-2-2-1-1 and 16 rows, matching the owner's target picture and the sheet Hermes wrote.
+
+Not changed: the Workflow manifest (its description and progress title still say "scratch sheet";
+changing them is a manifest version bump, left for a separate slice), the Outlook writer, the
+COM writer.
+
+Rejected: keeping `GTM-n` keys (the Issues filed on GitHub have none, and the workbook is already
+keyed `#n`); `owner/repo#n` for every key (the workbook and the source use `#n`); matching older
+`GTM-n` rows by `jira_key` in the scratch sheet (the week's own sheet makes it unnecessary, and a
+re-key through the COM writer is a larger change); writing the preview workbook with Excel (the
+preview must not need Excel or touch an open workbook).

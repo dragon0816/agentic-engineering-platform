@@ -1,8 +1,27 @@
 # Handoff
 
-Updated: 2026-10-25 (Asia/Taipei), by Claude Code (session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-26 (Asia/Taipei), by Claude Code (SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## A session remembers what it produced; task result summaries (2026-10-25, Claude Code) — latest
+## SDE weekly report keys every ticket by its GitHub Issue (2026-10-26, Claude Code) — latest
+
+- Commits on main (code+tests, then docs); not pushed, Agent Web not restarted, no Workflow run, no
+  Outlook, the real workbook not written. Row in `docs/TASKS.md`; decision `docs/DECISIONS.md`
+  2026-10-26 "Workflow 11 keys every ticket by its GitHub Issue…"; parity table at the end of
+  `docs/PHASE_7_MIGRATION.md`.
+- Cause: selection and keys came from the old `[GTM-n]` title key, so Issues filed on GitHub were
+  dropped. Now keyed `#<number>`, the week's own sheet is the target (`sheet_target: week`), `SDE
+  Assignee` is the fallback, days are Taiwan days.
+- Verification: ruff check, ruff format --check and mypy (776 files) clean; full pytest project venv 4071 passed, 7 skipped; `C:/aepci-wk/venv` (host_runtime from the repo) 4043 passed, 34 skipped, 1 failed (the preview test asserted the chart title without matplotlib), fixed and re-run alone: 4 passed in both venvs.
+- Owner check, no restart needed (writes only into the folder given):
+  `.venv\Scripts\python.exe -m capabilities.weekly_report.preview --week 2026_43W --out $env:TEMP\aep-weekly-43W`
+  (real: reads host.json, GitHub read-only, copies the workbook) and the same with `--fixture`
+  (synthetic). Open `email.html`, `workbook-preview.xlsx` (sheet 2026_43W, Key links) and
+  `plan.json`. Then, after the next restart (check `/api/activity` first), Telegram 「幫我執行 43W SDE
+  weekly report」 → 「只看計畫」 → 確認執行.
+- Open: the Workflow manifest still says "scratch sheet" (version bump needed); an older scratch
+  sheet keyed `GTM-n` is not matched to `#n` (only with `sheet_target: temp`).
+
+## A session remembers what it produced; task result summaries (2026-10-25, Claude Code)
 
 - Commits a454ce8f (ledger, attach tool, run pictures), d258ff4d (docs), f3d934d7 (task result
   summaries), 21fed834 (docs) plus a TASKS/HANDOFF commit on main; not pushed, Agent Web not

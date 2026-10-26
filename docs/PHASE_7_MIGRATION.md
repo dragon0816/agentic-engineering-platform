@@ -683,3 +683,30 @@ test checkout and never commits, pushes or sends data. Full release parity
 still needs version lookup, branch/template handling, upload transfer and
 separate approved Git effects. Neither the preview nor an installed asset
 confers release authority.
+
+## Workflow 11: parity with the source revision Hermes runs (2026-10-26)
+
+Hermes's `rs-workflow-jobs` skill calls the source Host Bridge jobs `github_weekly_report` and
+`github_weekly_email` (working tree only, report sha256 6cdbd56f…, 2026-10-16; email 62c5220c…;
+the source's HEAD 896046e contains neither). Compared with AEP (`docs/DECISIONS.md` 2026-10-26
+"Workflow 11 keys every ticket by its GitHub Issue"):
+
+| Behaviour | Source | AEP |
+|---|---|---|
+| Which Issues | every numbered board Issue, not closed, `updatedAt` or a comment in the window | **ported** (was `[GTM-n]` titles only: the missing Issues) |
+| Key cell | `#<number>`, linked to the Issue | **ported**: `#<number>` (`owner/repo#n` for another repository); formula link in the real run, cell hyperlink in the preview |
+| Old Jira key | `sourceKey`, `[GTM-n]` anywhere in the title | **ported**: optional `jira_key`; a leading one is cut from the summary |
+| Sheet | the week's sheet (`2026_43W`), never seeded | **ported**: `sheet_target: week` (default); `temp` kept as a way back |
+| Empty Issue assignees | Project `SDE Assignee` | **ported**, with `assignee_source` |
+| Assignee display | profile name, else login | **ported** |
+| Production separators | `[,;/&+]` | **ported** (plus `，`) |
+| Comment timestamps, edits, body-log fallback, closed statuses | as recorded 2026-10-05 | equal |
+| `startTime`/`endTime` | inclusive, by moment, Taiwan time when no offset, a date alone is the whole day | equal |
+| Day window (named week) | the timestamp's own offset: UTC for GitHub | **Taiwan day** (the source's own stated rule; same as its date-only `startTime`/`endTime`) |
+| Field values per item | 80 | 100 |
+| Assignees per Issue | 10, silent | 100, refused when truncated |
+| Several Issue assignees in the mail | one member named by the joined string | one count per person (2026-10-03) |
+| Written rows | issues with any comment in the window, then marker content | marker content for new rows; existing rows refreshed (same 16 rows on 2026_43W) |
+| In Progress fill | `#FCE4D6` | `#F8AD3E` (configurable) |
+| Project lookup | by title among the owner's first 50 projects | by number (host settings) |
+| Preview | `dryRun` writes a JSON/HTML preview under `state/` | `python -m capabilities.weekly_report.preview` (real or `--fixture`), only into `--out` |
