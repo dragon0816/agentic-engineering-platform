@@ -1,8 +1,21 @@
 # Handoff
 
-Updated: 2026-10-26 (Asia/Taipei), by Claude Code (SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-26 (Asia/Taipei), by Claude Code (multi-agent Phase 0 review, awaiting owner Gate 0; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## SDE weekly report keys every ticket by its GitHub Issue (2026-10-26, Claude Code) — latest
+## Multi-agent Phase 0 review, awaiting owner Gate 0 (2026-10-26, Claude Code) — latest
+
+- Docs only, committed on main, not pushed; no code, contract, permission, config or issue change.
+  Source plan `docs/proposals/MULTI_AGENT_AUTO_DISCOVERY_v0_source.md` (verbatim); review
+  `docs/proposals/MULTI_AGENT_PHASE0_REVIEW.md`; row in `docs/TASKS.md`.
+- Stopped at Gate 0 as the plan requires. Next: the owner answers the review's §13 open questions
+  (defaults: keep direct-to-main with no PR; G5 and P0-2 first; extend `AgentProfile`; no CLI-backend
+  parents in V1; a sub-agent cap plus token logging, no cost cap before the baseline) and approves
+  ADR-MA1–MA5. Then append the approved ADRs to `docs/DECISIONS.md` and start Phase 0.5 (G5
+  `tests/test_harness_cross_domain.py`, P0-2 idempotency cache, G4 bookkeeping).
+- Do not lift `profile_delegation_unsupported` (`src/host_runtime/profiles.py:73`) or add
+  `agent__delegate` before Gate 0. Verification: none needed (docs only; no tests run).
+
+## SDE weekly report keys every ticket by its GitHub Issue (2026-10-26, Claude Code)
 
 - Commits on main (code+tests, then docs); not pushed, Agent Web not restarted, no Workflow run, no
   Outlook, the real workbook not written. Row in `docs/TASKS.md`; decision `docs/DECISIONS.md`

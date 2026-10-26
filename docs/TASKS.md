@@ -3491,3 +3491,23 @@ s-k-20261011T102952` (not published).
   weekly report GitHub port (personal workflow, not bundled). Full suite on e6492d09 in a clean worktree
   with `C:/aepci-wk/venv` 4044 passed, 34 skipped; release `--quick`. Owner ran the 43W weekly report
   from Telegram on this build: OK.
+
+## Multi-agent Phase 0 review (2026-10-26)
+
+- [x] Multi-agent Phase 0 review written; awaiting owner Gate 0 (2026-10-26, Claude Code; docs only,
+  no code, contract, permission or config change). Source plan recorded verbatim as
+  `docs/proposals/MULTI_AGENT_AUTO_DISCOVERY_v0_source.md`; review
+  `docs/proposals/MULTI_AGENT_PHASE0_REVIEW.md`: current-state map with file:line, reuse/gap
+  matrix, nine wrong assumptions in the plan (PR flow vs direct-to-main, tenants vs one member per
+  machine, a new registry vs the existing `AgentProfile` asset, parallel Workflow steps vs a
+  sequential engine, multi-gateway fallback vs per-URL data approval, cost budgets, a policy
+  service, Hermes parity, CLI backends as sub-agents), ADR-MA1–MA5, risk register, dependency graph,
+  estimate (about 20–32 working days for V1), proposed issues (not created) and baseline
+  definitions for the plan's 7 benchmark scenarios. Recommended V1: extend `AgentProfile`, lift the
+  `may_delegate_to` refusal behind a flag at depth 1, an `agent__delegate` host tool running a
+  bounded sub-conversation through the same Gateway loop, artifacts in the parent session ledger,
+  no ranker, no parallelism.
+- [ ] Owner Gate 0: approve or change ADR-MA1–MA5, the V1 scope and the open questions (§13 of the
+  review); approved ADRs are then appended to `docs/DECISIONS.md`.
+- [ ] Phase 0.5 after Gate 0: G5 cross-domain negative suite, P0-2 per-turn idempotency cache,
+  mark G4 done (`docs/HARNESS_DESIGN.zh-TW.md:58`, the G4–G6 row above).
