@@ -520,6 +520,14 @@ class KnowledgeHostBinding(Contract):
         return value
 
 
+class MultiAgentSettings(Contract):
+    """Multi-agent V1 delegation (owner Gate 0, 2026-10-26). Off unless the
+    owner opts in; off is the single-agent behaviour exactly: no
+    `agent__delegate` tool and `may_delegate_to` still refused."""
+
+    enabled: StrictBool = False
+
+
 class ScheduleHostSettings(Contract):
     """How this host runs its local schedules. Off unless the owner opts in.
 
@@ -649,6 +657,9 @@ class CompanyHostConfiguration(Contract):
     # Local scheduled tasks; the resident loop stays off unless enabled here
     # or by `aep-host web --schedules`.
     schedules: ScheduleHostSettings = ScheduleHostSettings()
+    # Delegation to sub-agent profiles (multi-agent V1); an older file
+    # without it means off.
+    multi_agent: MultiAgentSettings = MultiAgentSettings()
 
     @model_validator(mode="after")
     def company_profile_without_secrets(self) -> Self:
