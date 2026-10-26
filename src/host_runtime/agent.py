@@ -241,7 +241,13 @@ class LocalAgent:
         )
         runs: list[LocalRunSummary] = []
         unrecorded: list[LocalStateErrorCode] = []
+        recorded_runs: set[str] = set()
         for tool in result.tools:
+            if tool.workflow is not None:
+                # A replayed call (P0-2) carries the run it replays: once.
+                if tool.workflow.run.run_id in recorded_runs:
+                    continue
+                recorded_runs.add(tool.workflow.run.run_id)
             run, error = await self._record(item.actor, item.on_behalf_of, tool.workflow)
             if run is not None:
                 runs.append(run)

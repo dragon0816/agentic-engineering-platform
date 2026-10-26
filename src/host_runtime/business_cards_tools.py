@@ -499,6 +499,8 @@ def _tool(
             input_schema=schema,
         ),
         call,
+        # A write runs at most once per turn for the same arguments (P0-2).
+        side_effect=spec.side_effect,
     )
 
 

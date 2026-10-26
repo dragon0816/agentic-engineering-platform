@@ -7,14 +7,13 @@ deterministic ones, so a trigger's origin never changes what may execute.
 """
 
 import asyncio
-import hashlib
 import json
 import time
 from collections.abc import Awaitable, Callable, Sequence
 from contextlib import nullcontext
 from contextvars import ContextVar
 from dataclasses import dataclass
-from typing import Any, Literal, Self
+from typing import Any, Literal, Self, cast
 
 from pydantic import Field, JsonValue, TypeAdapter, model_validator
 
@@ -41,6 +40,8 @@ from agent.harness_handoff import capped, harness_reply, with_unverified_note
 from agent.routing import RequestRouter, RoutingOutcome
 from agent.skills import CommandBinding, SkillManifest
 from agent.tool_recovery import RECOVERY_GUIDANCE, ToolRecovery, recovery_for
+from agent.turn_effects import REPLAY_INSTRUCTION, REPLAY_NOTE, effect_key, turn_scope
+from agent.turn_effects import current as current_effects
 from capabilities.runtime import CapabilityInvocation
 from common.action_cards import CARD_KEY
 from common.assets import AssetIdentity, reject_embedded_secrets
@@ -55,6 +56,7 @@ from common.execution import (
     ResumePolicy,
     RouteDecision,
     RunId,
+    SideEffect,
     TraceIdentifiers,
 )
 from common.workflow_forms import agent_fields, agent_tool_schema
@@ -220,10 +222,23 @@ def _tool_progress(name: str, state: ToolProgressState) -> None:
 
 
 def _call_key(call: ModelToolCall) -> str:
-    """Identity of a call for the repetition guard: tool and exact arguments,
-    as a digest held in memory only."""
-    arguments = json.dumps(call.arguments, sort_keys=True, ensure_ascii=False, default=str)
-    return hashlib.sha256(f"{call.name}\0{arguments}".encode()).hexdigest()
+    """Identity of a call for the repetition guard and the turn's side-effect
+    record (P0-2): tool and exact arguments, as a digest held in memory only."""
+    return effect_key(call.name, call.arguments)
+
+
+def _effect_done(item: "ConversationToolExecution") -> bool:
+    """A side-effecting call that really happened: never one that failed, was
+    refused, waits for the person's approval or only offered a form."""
+    if item.failure is not None:
+        return False
+    if item.host is not None:
+        return item.host.status == "succeeded" and not (
+            isinstance(item.host.data, dict) and OFFER_KEY in item.host.data
+        )
+    if item.capability is not None:
+        return item.capability.status == "succeeded"
+    return item.workflow is not None and item.workflow.run.status == "succeeded"
 
 
 def _recorded_arguments(arguments: dict[str, JsonValue]) -> dict[str, JsonValue]:
@@ -318,6 +333,10 @@ class HostTool:
 
     tool: ModelTool
     handler: Callable[[RequestContext, dict[str, JsonValue]], Awaitable[HostToolOutcome]]
+    # What a call changes, as a CapabilitySpec says it (P0-2). A tool that
+    # declares anything but `read` runs at most once per turn for the same
+    # arguments; None declares nothing and is not guarded.
+    side_effect: SideEffect | None = None
 
 
 @dataclass(frozen=True)
@@ -354,6 +373,9 @@ class ConversationToolExecution(Contract):
     # On a failed call (owner 2026-10-20): whether the model can fix it itself
     # and how, decided by the Host from the failure code (`agent/tool_recovery`).
     recovery: ToolRecovery | None = None
+    # P0-2: this side-effecting call already succeeded earlier in the turn with
+    # the same arguments; the outcome is that earlier one, not executed again.
+    replayed: bool = False
 
     @model_validator(mode="after")
     def one_outcome(self) -> Self:
@@ -610,7 +632,9 @@ class Gateway:
         offered: set[str] = set()
         # The preferences a pass was given (M3).
         used: set[str] = set()
-        with opened:
+        # P0-2: the turn's succeeded side effects, shared by the Host check's
+        # retry pass and by any run nested under this turn.
+        with opened, turn_scope() as (effects, owns_effects):
 
             async def turn(
                 messages: tuple[ModelMessage, ...], retry: tuple[ModelMessage, ...]
@@ -647,6 +671,8 @@ class Gateway:
                 model_turns=result.model_turns,
                 status="failed" if result.status == "failed" else "succeeded",
                 failure_code=None if result.failure is None else result.failure.code,
+                # Counts only (P0-2); a nested run leaves them to its turn.
+                **(effects.counts() if owns_effects else {}),
             )
         if self._conversation_observer is not None:
             try:
@@ -1131,9 +1157,36 @@ class Gateway:
                     seen_calls.add(key)
                     since_new.clear()
                 since_new[key] = since_new.get(key, 0) + 1
-                item = await self._telemetered_tool(
-                    context, call, turn, host, bindings, bound, anchor
+                effects = (
+                    current_effects() if self._side_effecting(call.name, host, bindings) else None
                 )
+                earlier = effects.replay_call(key) if effects is not None else None
+                if earlier is not None:
+                    # P0-2: already done in this turn with the same arguments
+                    # (a Host-check retry, or a delegated sub-run): not again.
+                    item = earlier.model_copy(update={"call_id": call.call_id, "replayed": True})
+                    telemetry.emit(
+                        "tool.replayed",
+                        status="skipped",
+                        state="tool",
+                        attributes={
+                            "tool_id": call.name,
+                            "loop_index": turn,
+                            "replayed": effects.replayed if effects is not None else 0,
+                        },
+                    )
+                else:
+                    item = await self._telemetered_tool(
+                        context, call, turn, host, bindings, bound, anchor
+                    )
+                    if effects is not None and _effect_done(item):
+                        # A Workflow tool's run is counted once, as the run.
+                        effects.record_call(
+                            key,
+                            item,
+                            counted=bindings.get(call.name) is None
+                            or bindings[call.name].kind != "workflow",
+                        )
                 evidence.append(item)
                 if _tool_succeeded(item):
                     failure_streak = 0
@@ -1196,9 +1249,10 @@ class Gateway:
                     )
                 # The model already knows its arguments; the observation stays
                 # what it was before they were recorded.
-                observation = json.dumps(
-                    item.model_dump(mode="json", exclude={"arguments"}), ensure_ascii=False
-                )
+                observed_item = item.model_dump(mode="json", exclude={"arguments"})
+                if item.replayed:
+                    observed_item |= {"host_note": REPLAY_NOTE, "instruction": REPLAY_INSTRUCTION}
+                observation = json.dumps(observed_item, ensure_ascii=False)
                 if len(observation) > MAX_TOOL_OBSERVATION_CHARS:
                     observation = json.dumps(
                         {
@@ -1242,6 +1296,22 @@ class Gateway:
         return self._conversation_failure(
             context, "tool_loop_limit", min(max_turns, len(evidence)), tuple(evidence)
         )
+
+    def _side_effecting(
+        self, name: str, host: dict[str, HostTool], bindings: dict[str, Any]
+    ) -> bool:
+        """Whether a call changes something (P0-2): a Workflow run, a capability
+        whose spec says anything but `read`, or a Host tool that declares so."""
+        if name in host:
+            effect = host[name].side_effect
+            return effect is not None and effect != "read"
+        binding = bindings.get(name)
+        if binding is None:
+            return False
+        if binding.kind == "workflow":
+            return True
+        installed = self.bridge.installed.get(binding.target)
+        return installed is not None and installed.spec.side_effect != "read"
 
     async def _telemetered_tool(
         self,
@@ -1616,11 +1686,43 @@ class Gateway:
         No routing/model call and no added authority. The engine owns validation,
         execution policy, idempotency and the default caller-wait timeout.
         """
+        # P0-2: inside a conversation turn (a Host tool or a delegated sub-run
+        # starting a run), the same Workflow with the same arguments succeeds
+        # at most once; outside a turn (a form, a schedule, a remote job) the
+        # engine's own idempotency key is the guard.
+        effects = current_effects() if workflow_idempotency_key is None else None
+        manifest = self.engine.workflows.get(workflow) if effects is not None else None
+        key = (
+            effect_key(
+                "workflow-run",
+                {
+                    "workflow": workflow.model_dump(mode="json"),
+                    # A revised draft with the same identity is another run.
+                    "manifest": manifest.model_dump(mode="json") if manifest else None,
+                    "arguments": arguments or {},
+                    "actor": request.actor,
+                },
+            )
+            if effects is not None
+            else ""
+        )
+        earlier = effects.replay_run(key) if effects is not None else None
+        if earlier is not None:
+            telemetry.emit(
+                "tool.replayed",
+                status="skipped",
+                state="tool",
+                attributes={
+                    "tool_id": f"{workflow.namespace}/{workflow.name}",
+                    "replayed": effects.replayed if effects is not None else 0,
+                },
+            )
+            return cast(WorkflowRunSnapshot, earlier)
         # The engine's run table belongs to one event loop at a time, and a
         # workflow may change shared resources: serialize runs across threads.
         with self.bridge.exclusive:
             # Through the shared Harness: steps, then the Workflow's output checks.
-            return await run_workflow_checked(
+            snapshot = await run_workflow_checked(
                 self.engine,
                 request,
                 workflow,
@@ -1628,6 +1730,9 @@ class Gateway:
                 timeout_seconds=workflow_timeout_seconds,
                 idempotency_key=workflow_idempotency_key,
             )
+        if effects is not None and snapshot.run.status == "succeeded":
+            effects.record_run(key, snapshot)
+        return snapshot
 
     def inspect(self, request: RequestContext, run_id: RunId) -> RunControlResult:
         """Classify a run's steps for its owner; never executes anything.
