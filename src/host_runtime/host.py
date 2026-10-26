@@ -23,6 +23,7 @@ from pydantic import JsonValue, ValidationError
 from agent.backends.gateway import GatewayModelBackend
 from agent.contracts import AgentProfile
 from agent.data_policy import DataPolicy
+from agent.delegation import DelegationCatalog, DelegationService, DelegationTarget
 from agent.gateway import Gateway, KnowledgeVaultTool
 from agent.routing import CommandRouter, RequestRouter
 from agent.skills import SkillManifest, SkillRegistry
@@ -320,7 +321,12 @@ from host_runtime.gateway_link import explain_model_failure
 from host_runtime.identity_presets import IdentityPresets
 from host_runtime.jev_shadow import SHADOW_LOG_FILE, JevShadowLog, skill_accelerator
 from host_runtime.mcp_servers import McpHub
-from host_runtime.profiles import ProfileError, load_active_profile
+from host_runtime.profiles import (
+    ProfileError,
+    delegation_target,
+    installed_profiles,
+    load_active_profile,
+)
 from host_runtime.reference_sets import REFERENCE_SETS_FILE, ReferenceItem, ReferenceSetStore
 from host_runtime.runtime import inspect_host
 from host_runtime.session_artifacts import SessionArtifacts
@@ -2130,6 +2136,44 @@ def host_report(
     )
 
 
+def delegation_catalog(config: CompanyHostConfiguration, layout: HostLayout) -> DelegationCatalog:
+    """The profiles a parent turn may delegate to now (multi-agent V1): the
+    active profile's `may_delegate_to` that validate (listed), and every other
+    installed profile that validates (used only when the person names it).
+    Nothing with the flag off."""
+    if not config.multi_agent.enabled:
+        return DelegationCatalog()
+    authorization = load_authorization(config, layout)
+    try:
+        active = load_active_profile(
+            config, layout, authorization, actor=config.device.registered_by
+        )
+    except ProfileError:
+        active = None
+    listed = active.may_delegate_to if active is not None else ()
+    targets: list[DelegationTarget] = []
+    unavailable: list[AssetIdentity] = []
+    for identity in listed:
+        try:
+            profile = delegation_target(config, layout, authorization, identity)
+        except ProfileError:
+            unavailable.append(identity)
+            continue
+        targets.append(DelegationTarget(profile=profile, listed=True))
+    skipped = {item.key for item in listed}
+    if active is not None:
+        skipped.add(active.metadata.identity.key)
+    for identity in installed_profiles(layout):
+        if identity.key in skipped:
+            continue
+        try:
+            profile = delegation_target(config, layout, authorization, identity)
+        except ProfileError:
+            continue
+        targets.append(DelegationTarget(profile=profile, listed=False))
+    return DelegationCatalog(targets=tuple(targets), unavailable=tuple(unavailable))
+
+
 def _switched_off_skills(layout: HostLayout) -> list[str]:
     """`namespace/name` of each Skill on the Capabilities shelf (switched off)."""
     from host_runtime.asset_shelf import disabled_assets
@@ -2250,6 +2294,14 @@ def build_runtime(
     # too few facts (none when no model is configured).
     session_artifacts.manifest_for = gateway.engine.workflows.get
     session_artifacts.condenser = model_condenser(gateway)
+    # Multi-agent V1 (flag `multi_agent.enabled`, off by default): the parent
+    # turn's `agent__delegate` tool; nothing is offered with the flag off.
+    delegation = DelegationService(
+        gateway,
+        enabled=lambda: checked.multi_agent.enabled,
+        catalog=lambda: delegation_catalog(checked, place),
+        ledger=session_artifacts,
+    )
     gateway.host_tools = lambda: (
         *chat_authoring.tools(),
         *bridge_tools(gateway.bridge),
@@ -2258,6 +2310,7 @@ def build_runtime(
         *mcp.tools(gateway.bridge),
         *workflow_form_tools(gateway.engine),
         *session_artifacts.tools(),
+        *delegation.tools(),
     )
     # Skills installed but switched off, by name, so the model never offers to
     # install one (live test 2026-10-20).

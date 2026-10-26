@@ -5557,9 +5557,12 @@ class AgentWeb:
             for task in self.task_list()["tasks"]
             if task.get("status") == "running"
         ]
+        # A delegated sub-agent is part of its turn (multi-agent V1): the turn
+        # says how many run, only while some do.
         items += [
             {"kind": "chat_turn", "started_at": began.isoformat(timespec="seconds")}
-            for began in self.turn_progress.running()
+            | ({"delegations": running} if running else {})
+            for began, running in self.turn_progress.running_turns()
         ]
         loop = self.telegram_loop
         if loop is not None and loop.running:

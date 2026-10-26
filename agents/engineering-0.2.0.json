@@ -1,0 +1,21 @@
+{
+  "metadata": {
+    "identity": {"namespace": "platform", "name": "engineering", "version": "0.2.0"},
+    "owner": {"type": "team", "id": "platform-maintainers"},
+    "visibility": "team",
+    "lifecycle": "published"
+  },
+  "description": "Personal engineering coordinator; may delegate a bounded objective to the knowledge researcher (multi-agent V1, needs multi_agent.enabled).",
+  "skills": [{"namespace": "company-agent", "name": "knowledge-query", "version": "1.0.0"}],
+  "allowed_capabilities": [{"namespace": "knowledge-query", "name": "ask", "version": "1.0.0"}],
+  "knowledge": [],
+  "may_delegate_to": [{"namespace": "platform", "name": "knowledge-researcher", "version": "0.1.0"}],
+  "policy_constraints": ["Runtime authorization is required independently of publication."],
+  "model_requirements": {"reasoning": "medium", "tool_calling": true},
+  "max_turns": 8,
+  "max_retries": 1,
+  "model_policy": "session",
+  "max_tool_calls": 40,
+  "time_limit_s": 900,
+  "selector_hint": "General engineering requests that may need a specialist's bounded result."
+}

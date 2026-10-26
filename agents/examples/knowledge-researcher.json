@@ -1,0 +1,24 @@
+{
+  "metadata": {
+    "identity": {"namespace": "platform", "name": "knowledge-researcher", "version": "0.1.0"},
+    "owner": {"type": "team", "id": "platform-maintainers"},
+    "visibility": "team",
+    "lifecycle": "published"
+  },
+  "description": "Read-only knowledge researcher: answers one question from the installed Knowledge vaults, with citations, and changes nothing.",
+  "skills": [{"namespace": "company-agent", "name": "knowledge-query", "version": "1.0.0"}],
+  "allowed_capabilities": [{"namespace": "knowledge-query", "name": "ask", "version": "1.0.0"}],
+  "knowledge": [],
+  "may_delegate_to": [],
+  "policy_constraints": [
+    "Read only: never write, send or run anything.",
+    "Cite the vault evidence for every finding; say plainly when the vault has no answer."
+  ],
+  "model_requirements": {"tool_calling": true},
+  "max_turns": 6,
+  "max_retries": 1,
+  "model_policy": "session",
+  "max_tool_calls": 8,
+  "time_limit_s": 300,
+  "selector_hint": "Questions answered from the Knowledge vaults (specs, product facts, RF and Wi-Fi notes) that need cited evidence."
+}

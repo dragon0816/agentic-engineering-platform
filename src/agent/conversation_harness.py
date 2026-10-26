@@ -282,12 +282,21 @@ def _succeeded(item: Any) -> bool:
 
 
 def _reads_only(item: Any) -> bool:
-    """A Knowledge answer, a tool whose command is a read verb, or a memory
-    proposal (nothing is saved before the person's press)."""
+    """A Knowledge answer, a tool whose command is a read verb, a memory
+    proposal (nothing is saved before the person's press), or a delegation
+    whose sub-agent had read tools only."""
     if str(getattr(item, "name", "")) in PROPOSAL_ONLY_TOOLS:
         return True
     host = getattr(item, "host", None)
     if host is not None and isinstance(host.data, dict) and "knowledge_harness" in host.data:
+        return True
+    if (
+        host is not None
+        and isinstance(host.data, dict)
+        and "delegation" in host.data
+        and host.data.get("read_only") is True
+    ):
+        # A sub-agent with read tools only (multi-agent V1) changed nothing.
         return True
     command = str(getattr(item, "name", "")).rsplit("__", 1)[-1].lower()
     return command.startswith(_READ_COMMANDS)

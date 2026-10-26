@@ -26,7 +26,11 @@ an authoring tool, is ordinary conversation and is left alone):
 - a capability that ran and was refused because its Host checks failed: the
   Coding Harness refuses with `repair_budget_exceeded` when its declared
   commands still fail after every repair (G5, 2026-10-27: the model's "the
-  change passed" used to carry no note).
+  change passed" used to carry no note);
+- a delegated sub-agent's result (multi-agent V1) whose answer did not pass
+  its own Host checks: host data `delegation_verdict: not_validated`, with
+  its `host_note`. Such results are told apart by `harness_key` (one per
+  profile and objective), so another delegation's success does not clear it.
 
 G4, consistent output length: a Harness result leaves the loop at the limit
 its domain declares (`output_limit_chars`); a cut says so and where the full
@@ -66,6 +70,8 @@ def _failed_verdict(item: Any) -> str | None:
     host = getattr(item, "host", None)
     if host is not None:
         data = host.data if isinstance(host.data, dict) else {}
+        if data.get("delegation_verdict") == "not_validated" and host.status == "succeeded":
+            return str(data.get("host_note") or "the sub-agent's result was not validated")
         if data.get("harness_verdict") == "not_validated" and not data.get("harness_output"):
             return str(data.get("host_note") or data.get("failure_code") or "not validated")
         if data.get("run_id") and data.get("status") == "failed":
@@ -107,14 +113,24 @@ def _ran(item: Any) -> bool:
 def unverified(tools: Sequence[Any]) -> list[str]:
     """Each Harness result of the turn that failed its Host checks and that no
     later successful call of the same tool replaced."""
-    open_failures: dict[str, str] = {}
+    open_failures: dict[str, tuple[str, str]] = {}
     for item in tools:
+        key = _result_key(item)
         reason = _failed_verdict(item)
         if reason is not None:
-            open_failures[item.name] = reason
+            open_failures[key] = (item.name, reason)
         elif _ran(item):
-            open_failures.pop(item.name, None)
-    return [f"{name}：{reason}" for name, reason in open_failures.items()]
+            open_failures.pop(key, None)
+    return [f"{name}：{reason}" for name, reason in open_failures.values()]
+
+
+def _result_key(item: Any) -> str:
+    """Which earlier result a later one repairs: the tool, or the result's own
+    `harness_key` when it gives one (a delegation per profile and objective)."""
+    host = getattr(item, "host", None)
+    data = host.data if host is not None and isinstance(host.data, dict) else {}
+    key = data.get("harness_key")
+    return str(key) if isinstance(key, str) and key else str(item.name)
 
 
 def with_unverified_note(text: str, tools: Sequence[Any]) -> str:

@@ -30,6 +30,8 @@ RUN_KINDS = (
     "capability_call",
     "benchmark_run",
     "benchmark_grading",
+    # A delegated sub-agent's run under its parent turn (multi-agent V1).
+    "agent_delegation",
 )
 
 # Recommended state names per harness (contract v0.2 addition), so state graphs

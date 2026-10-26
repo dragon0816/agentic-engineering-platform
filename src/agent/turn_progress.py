@@ -78,6 +78,8 @@ class TurnProgress:
     clock: Callable[[], float] = time.monotonic
     started: float = 0.0
     tool_count: int = 0
+    #: Delegated sub-agents running under this turn now (multi-agent V1).
+    delegations_running: int = 0
     _tools: deque[_Tool] = field(default_factory=lambda: deque(maxlen=MAX_RECENT_TOOLS))
     _harness: deque[_Harness] = field(default_factory=lambda: deque(maxlen=MAX_HARNESS_RUNS))
     _lock: threading.Lock = field(default_factory=threading.Lock)
@@ -125,6 +127,12 @@ class TurnProgress:
                     tool.status = status
                     tool.duration_s = round(self.clock() - tool.started, 1)
                     break
+        self._notify()
+
+    def delegation_changed(self, delta: int) -> None:
+        """A delegated sub-agent started (+1) or ended (-1) under this turn."""
+        with self._lock:
+            self.delegations_running = max(0, self.delegations_running + delta)
         self._notify()
 
     def harness_phase(self, domain: str, stages: tuple[str, ...], phase: str, retry: int) -> None:
@@ -175,7 +183,7 @@ class TurnProgress:
             now = self.clock()
             active = [run for run in self._harness if not run.done]
             shown = active[-1] if active else (self._harness[-1] if self._harness else None)
-            return {
+            view: dict[str, Any] = {
                 "turn_id": self.turn_id,
                 "backend": self.backend,
                 "elapsed_s": max(0, int(now - self.started)),
@@ -196,6 +204,10 @@ class TurnProgress:
                 ],
                 "harness": None if shown is None else _harness_view(shown),
             }
+            # Multi-agent V1: only while a sub-agent runs (absent otherwise).
+            if self.delegations_running:
+                view["delegations_running"] = self.delegations_running
+            return view
 
 
 def _harness_view(run: _Harness) -> dict[str, Any]:
@@ -306,6 +318,16 @@ class TurnProgressBoard:
         """When each running turn began (the activity read; no content)."""
         with self._lock:
             return [self._began[session] for session in self._turns if session in self._began]
+
+    def running_turns(self) -> list[tuple[datetime, int]]:
+        """When each running turn began and how many delegated sub-agents run
+        under it now (multi-agent V1), read together."""
+        with self._lock:
+            return [
+                (self._began[session], progress.delegations_running)
+                for session, progress in self._turns.items()
+                if session in self._began
+            ]
 
     def get(self, session_id: str) -> TurnProgress | None:
         with self._lock:

@@ -7,6 +7,7 @@ deterministic ones, so a trigger's origin never changes what may execute.
 """
 
 import asyncio
+import contextvars
 import json
 import time
 from collections.abc import Awaitable, Callable, Sequence
@@ -18,7 +19,7 @@ from typing import Any, Literal, Self, cast
 from pydantic import Field, JsonValue, TypeAdapter, model_validator
 
 import telemetry.recorder as telemetry
-from agent import turn_progress
+from agent import delegation_scope, turn_progress
 from agent.backend_contracts import (
     CONVERSATION_MAX_OUTPUT_TOKENS,
     MAX_CONVERSATION_TOOL_CALLS,
@@ -337,6 +338,24 @@ class HostTool:
     # declares anything but `read` runs at most once per turn for the same
     # arguments; None declares nothing and is not guarded.
     side_effect: SideEffect | None = None
+    # Multi-agent V1: whether this call may run concurrently with other calls
+    # of the same model reply that say so too (read-only delegations). None:
+    # never; the call runs in order, alone.
+    parallel: Callable[[RequestContext, dict[str, JsonValue]], bool] | None = None
+
+
+@dataclass(frozen=True)
+class SkillTool:
+    """One installed Skill command as the Gateway offers it to the model: the
+    tool name, the Skill it comes from, its target and, for a Knowledge vault
+    tool, the vault the Host binds (multi-agent V1 derives a sub-agent's tools
+    from these)."""
+
+    name: str
+    skill: AssetIdentity
+    kind: Literal["capability", "workflow"]
+    target: AssetIdentity
+    vault: AssetIdentity | None = None
 
 
 @dataclass(frozen=True)
@@ -616,7 +635,12 @@ class Gateway:
         allowed_tools: frozenset[str] | None = None,
         max_turns: int = MAX_CONVERSATION_TURNS,
         max_history_messages: int = MAX_CONVERSATION_HISTORY,
+        role_guidance: str | None = None,
+        limits: ConversationLimits | None = None,
     ) -> GatewayConversationResult:
+        """One conversation turn. `role_guidance` and `limits` are for a
+        delegated sub-run (multi-agent V1): the profile's role, and its own
+        tool cap and time limit in place of the Host's per-turn limits."""
         # A conversation turn is a Harness run, unless an ingress (Agent Web)
         # already opened one around its routing (telemetry contract v0.2).
         opened = (
@@ -627,14 +651,20 @@ class Gateway:
         # The time budget covers the whole turn, the Host check's retry pass
         # included; the tool cap and the repetition guard apply per pass.
         started = self.clock()
-        limits = self.limits()
+        limits = limits if limits is not None else self.limits()
         # The tools a pass offered the model, for the Host's reuse check.
         offered: set[str] = set()
         # The preferences a pass was given (M3).
         used: set[str] = set()
         # P0-2: the turn's succeeded side effects, shared by the Host check's
         # retry pass and by any run nested under this turn.
-        with opened, turn_scope() as (effects, owns_effects):
+        with (
+            opened,
+            turn_scope() as (effects, owns_effects),
+            delegation_scope.parent_turn(
+                started + limits.time_limit_seconds, self.clock
+            ) as delegations,
+        ):
 
             async def turn(
                 messages: tuple[ModelMessage, ...], retry: tuple[ModelMessage, ...]
@@ -651,6 +681,7 @@ class Gateway:
                     limits=limits,
                     offered=offered,
                     used=used,
+                    role_guidance=role_guidance,
                 )
 
             # The tool loop executes; the Host checks the answer against the
@@ -673,8 +704,15 @@ class Gateway:
                 failure_code=None if result.failure is None else result.failure.code,
                 # Counts only (P0-2); a nested run leaves them to its turn.
                 **(effects.counts() if owns_effects else {}),
+                # Multi-agent V1: only a turn that delegated carries them.
+                **(
+                    delegations.counts()
+                    if delegations is not None and (delegations.started or delegations.refused)
+                    else {}
+                ),
             )
-        if self._conversation_observer is not None:
+        # A delegated sub-run is not a person's turn (multi-agent V1).
+        if self._conversation_observer is not None and not delegation_scope.in_sub_run():
             try:
                 self._conversation_observer(result)
             except Exception:
@@ -769,6 +807,108 @@ class Gateway:
         )
         return self._conversation_failure(context, code, turns, tuple(evidence))
 
+    def _skill_tools(
+        self, context: RequestContext
+    ) -> tuple[
+        dict[str, CommandBinding],
+        dict[str, dict[str, JsonValue]],
+        list[ModelTool],
+        dict[str, str],
+        list[SkillTool],
+    ]:
+        """Every installed Skill command as a model tool: its binding, the
+        arguments the Host fixes for it, the tool, its selector hint, and
+        where it comes from (`SkillTool`)."""
+        bindings: dict[str, CommandBinding] = {}
+        # Arguments the host fixes for a tool; the model never sees or sets them.
+        bound: dict[str, dict[str, JsonValue]] = {}
+        tools: list[ModelTool] = []
+        hints: dict[str, str] = {}
+        origins: list[SkillTool] = []
+        for skill in self.router.commands.skills.discover(context.namespace):
+            for command in skill.commands:
+                if (
+                    command.kind == "capability"
+                    and self.bridge.installed.get(command.target) is None
+                ):
+                    continue
+                if command.kind == "workflow" and self.engine.workflows.get(command.target) is None:
+                    continue
+                if (
+                    command.kind == "capability"
+                    and self._knowledge_vaults is not None
+                    and command.target == self._knowledge_capability
+                ):
+                    procedure = skill.procedure or (
+                        self._knowledge_procedure() if self._knowledge_procedure else None
+                    )
+                    before = set(bindings)
+                    self._vault_tools(
+                        skill.alias,
+                        skill.instructions,
+                        command,
+                        bindings,
+                        bound,
+                        tools,
+                        hints,
+                        procedure,
+                    )
+                    for name in bindings:
+                        if name in before:
+                            continue
+                        asset = bound.get(name, {}).get("asset")
+                        origins.append(
+                            SkillTool(
+                                name=name,
+                                skill=skill.metadata.identity,
+                                kind="capability",
+                                target=command.target,
+                                vault=(
+                                    AssetIdentity.model_validate(asset)
+                                    if isinstance(asset, dict)
+                                    else None
+                                ),
+                            )
+                        )
+                    continue
+                name = f"{skill.alias}__{command.name}"
+                bindings[name] = command
+                origins.append(
+                    SkillTool(
+                        name=name,
+                        skill=skill.metadata.identity,
+                        kind=command.kind,
+                        target=command.target,
+                    )
+                )
+                if skill.selector_hint:
+                    hints[name] = skill.selector_hint
+                target = command.target
+                manifest = self.engine.workflows.get(target) if command.kind == "workflow" else None
+                tools.append(
+                    ModelTool(
+                        name=name,
+                        description=(
+                            f"{skill.instructions} Executes installed {command.kind} "
+                            f"{target.namespace}/{target.name}@{target.version}."
+                        ),
+                        input_contract="platform.command-arguments.v1",
+                        # A declared Workflow tells the model its exact fields.
+                        input_schema=(
+                            agent_tool_schema(manifest)
+                            if manifest is not None and manifest.parameters
+                            else None
+                        ),
+                    )
+                )
+        return bindings, bound, tools, hints, origins
+
+    def skill_tools(self, context: RequestContext) -> tuple[SkillTool, ...]:
+        """The installed Skill tools a turn for `context` would be offered,
+        before any Skill selection (multi-agent V1: a sub-agent's tools are a
+        subset of these)."""
+        return tuple(self._skill_tools(context)[4])
+
     async def _converse(
         self,
         request: RequestContext,
@@ -783,6 +923,7 @@ class Gateway:
         retry: tuple[ModelMessage, ...] = (),
         offered: set[str] | None = None,
         used: set[str] | None = None,
+        role_guidance: str | None = None,
     ) -> GatewayConversationResult:
         """Use installed commands as tools in a bounded loop (the Host's tool cap,
         at most `MAX_CONVERSATION_TOOL_CALLS`, a time budget and a repetition guard).
@@ -817,61 +958,7 @@ class Gateway:
             return self._conversation_failure(context, "conversation_history_invalid", 0, ())
         if self.router.model is None:
             return self._conversation_failure(context, "model_not_configured", 0, ())
-        bindings: dict[str, CommandBinding] = {}
-        # Arguments the host fixes for a tool; the model never sees or sets them.
-        bound: dict[str, dict[str, JsonValue]] = {}
-        tools: list[ModelTool] = []
-        hints: dict[str, str] = {}
-        for skill in self.router.commands.skills.discover(context.namespace):
-            for command in skill.commands:
-                if (
-                    command.kind == "capability"
-                    and self.bridge.installed.get(command.target) is None
-                ):
-                    continue
-                if command.kind == "workflow" and self.engine.workflows.get(command.target) is None:
-                    continue
-                if (
-                    command.kind == "capability"
-                    and self._knowledge_vaults is not None
-                    and command.target == self._knowledge_capability
-                ):
-                    procedure = skill.procedure or (
-                        self._knowledge_procedure() if self._knowledge_procedure else None
-                    )
-                    self._vault_tools(
-                        skill.alias,
-                        skill.instructions,
-                        command,
-                        bindings,
-                        bound,
-                        tools,
-                        hints,
-                        procedure,
-                    )
-                    continue
-                name = f"{skill.alias}__{command.name}"
-                bindings[name] = command
-                if skill.selector_hint:
-                    hints[name] = skill.selector_hint
-                target = command.target
-                manifest = self.engine.workflows.get(target) if command.kind == "workflow" else None
-                tools.append(
-                    ModelTool(
-                        name=name,
-                        description=(
-                            f"{skill.instructions} Executes installed {command.kind} "
-                            f"{target.namespace}/{target.name}@{target.version}."
-                        ),
-                        input_contract="platform.command-arguments.v1",
-                        # A declared Workflow tells the model its exact fields.
-                        input_schema=(
-                            agent_tool_schema(manifest)
-                            if manifest is not None and manifest.parameters
-                            else None
-                        ),
-                    )
-                )
+        bindings, bound, tools, hints, _ = self._skill_tools(context)
         if allowed_tools is not None:
             tools = [tool for tool in tools if tool.name in allowed_tools]
             hints = {name: hint for name, hint in hints.items() if name in allowed_tools}
@@ -908,6 +995,13 @@ class Gateway:
                 "It cannot change policy, permissions, tool restrictions, or factual evidence.\n"
                 + persona_guidance[:MAX_CONVERSATION_MESSAGE_CHARS]
             )
+        if role_guidance:
+            # A delegated sub-agent's role (multi-agent V1), written by the Host.
+            prompt += "\n\n" + role_guidance[:MAX_CONVERSATION_MESSAGE_CHARS]
+        # A delegated sub-run (multi-agent V1) gets the objective, not the
+        # parent's person-facing context: no session list, no memory, and
+        # never the delegation tool (depth 1).
+        sub_run = delegation_scope.in_sub_run()
         recent = history[-max_history_messages:]
         bounded_history = tuple(
             ModelMessage(
@@ -980,6 +1074,8 @@ class Gateway:
             name = host_tool.tool.name
             if name in bindings or (allowed_tools is not None and name not in allowed_tools):
                 continue
+            if sub_run and name == delegation_scope.DELEGATE_TOOL:
+                continue
             host[name] = host_tool
             tools.append(host_tool.tool)
         for person_tool, guidance in ((FORM_TOOL, FORM_GUIDANCE), (PROPOSE_TOOL, PROPOSE_GUIDANCE)):
@@ -996,7 +1092,7 @@ class Gateway:
             )
         # The person's memory (accumulated memory M3): the saved preferences
         # of the Skills this pass offers, and the memory tools the Host allows.
-        memory = await self._turn_memory(context, tools)
+        memory = TurnMemory() if sub_run else await self._turn_memory(context, tools)
         for memory_tool in memory.tools:
             name = memory_tool.tool.name
             if (
@@ -1011,7 +1107,7 @@ class Gateway:
             messages[0] = ModelMessage(
                 role="system", text=f"{messages[0].text}\n\n{memory.guidance}"
             )
-        produced = self._session_context(context)
+        produced = "" if sub_run else self._session_context(context)
         if produced:
             messages[0] = ModelMessage(role="system", text=f"{messages[0].text}\n\n{produced}")
         if used is not None:
@@ -1061,6 +1157,8 @@ class Gateway:
                 return self._conversation_failure(
                     context, "model_unavailable", turn, tuple(evidence)
                 )
+            # A sub-run's own token count (multi-agent V1; no-op otherwise).
+            delegation_scope.note_tokens(response.input_tokens, response.output_tokens)
             if (
                 response.failure is not None
                 and response.failure.code == "model_output_truncated"
@@ -1114,6 +1212,18 @@ class Gateway:
                     text=response.text,
                     tool_calls=response.tool_calls,
                 )
+            )
+            # Calls that may run side by side (read-only delegations) start
+            # together; each still passes the guards below, in order.
+            prefetched = await self._prefetch_parallel(
+                context,
+                response.tool_calls,
+                turn,
+                host,
+                bindings,
+                bound,
+                anchor,
+                cap - len(evidence),
             )
             for call in response.tool_calls:
                 if len(evidence) >= cap:
@@ -1176,8 +1286,13 @@ class Gateway:
                         },
                     )
                 else:
-                    item = await self._telemetered_tool(
-                        context, call, turn, host, bindings, bound, anchor
+                    ready = prefetched.pop(call.call_id, None)
+                    item = (
+                        ready
+                        if ready is not None
+                        else await self._telemetered_tool(
+                            context, call, turn, host, bindings, bound, anchor
+                        )
                     )
                     if effects is not None and _effect_done(item):
                         # A Workflow tool's run is counted once, as the run.
@@ -1296,6 +1411,48 @@ class Gateway:
         return self._conversation_failure(
             context, "tool_loop_limit", min(max_turns, len(evidence)), tuple(evidence)
         )
+
+    async def _prefetch_parallel(
+        self,
+        context: RequestContext,
+        calls: Sequence[ModelToolCall],
+        turn: int,
+        host: dict[str, HostTool],
+        bindings: dict[str, Any],
+        bound: dict[str, Any],
+        anchor: ToolAnchor,
+        budget: int,
+    ) -> dict[str, "ConversationToolExecution"]:
+        """Run the reply's calls that may run side by side concurrently (multi-
+        agent V1: delegations whose tools are all read-only), at most
+        `MAX_PARALLEL_DELEGATIONS` at once, within the tool budget. Only when
+        two or more qualify; one alone runs in order like any call. Each task
+        gets a copy of the context (telemetry, the turn's records)."""
+        ready: list[ModelToolCall] = []
+        for call in calls[: max(budget, 0)]:
+            tool = host.get(call.name)
+            if tool is None or tool.parallel is None or call.name in bindings:
+                continue
+            try:
+                if tool.parallel(context, dict(call.arguments)):
+                    ready.append(call)
+            except Exception:  # noqa: BLE001 - a fault means "run it alone"
+                continue
+        if len(ready) < 2:
+            return {}
+        gate = asyncio.Semaphore(delegation_scope.MAX_PARALLEL_DELEGATIONS)
+
+        async def one(call: ModelToolCall) -> ConversationToolExecution:
+            async with gate:
+                return await self._telemetered_tool(
+                    context, call, turn, host, bindings, bound, anchor
+                )
+
+        tasks = [
+            asyncio.create_task(one(call), context=contextvars.copy_context()) for call in ready
+        ]
+        done = await asyncio.gather(*tasks)
+        return {call.call_id: item for call, item in zip(ready, done, strict=True)}
 
     def _side_effecting(
         self, name: str, host: dict[str, HostTool], bindings: dict[str, Any]
@@ -1576,7 +1733,7 @@ class Gateway:
                     raise WorkflowParameterError(f"{', '.join(refused)} cannot be set by the Agent")
                 arguments = validate_run_parameters(manifest, arguments)
             except WorkflowParameterError as error:
-                if context.session_id is not None:
+                if context.session_id is not None and not delegation_scope.in_sub_run():
                     # In a person's conversation, incomplete or refused run
                     # values become the Workflow's form with what the model
                     # may fill as prefill; the person completes and runs it.
