@@ -3483,3 +3483,11 @@ s-k-20261011T102952` (not published).
   after the next restart.
 - [ ] Follow-up: the Workflow manifest still says "scratch sheet" in its description and apply
   step title (needs a manifest version bump).
+- [x] Release `release-20261026-1151-e6492d09` (2026-10-26, Claude Code): zip
+  `aep-windows-preview-0.1.0-e6492d09e601.zip`, SHA-256 `8960ce31…43d9`, on `S:\AE\leo\20261026-1151-e6492d09\`
+  with `BI_DEMO.zh-TW.md` and `README-請先看.txt` (supersedes 1049 and older). Adds the Telegram delivery
+  and reply-context fixes, fewer Workflow questions with one confirmation card, plain-language yes/no
+  choices, session artifacts and task result summaries (30 days), the restart activity guard and the SDE
+  weekly report GitHub port (personal workflow, not bundled). Full suite on e6492d09 in a clean worktree
+  with `C:/aepci-wk/venv` 4044 passed, 34 skipped; release `--quick`. Owner ran the 43W weekly report
+  from Telegram on this build: OK.
