@@ -69,6 +69,10 @@ class ConversationMessage(Contract):
     # The task result summary this answer ends with (owner 2026-10-25), so
     # the page can offer 「存成筆記」 for it; None for every other answer.
     task_summary_id: str | None = Field(default=None, pattern=r"^ts-[0-9a-f]{12}$")
+    # The 委派紀錄 of an answer whose turn delegated to sub-agents
+    # (multi-agent V1, `host_runtime.delegation_record`): profile, status, a
+    # short summary, artifacts and tokens per sub-agent; never its full answer.
+    delegations: tuple[dict[str, JsonValue], ...] = Field(default=(), max_length=6)
 
     @model_validator(mode="before")
     @classmethod
@@ -107,6 +111,8 @@ class ConversationMessage(Contract):
             raise ValueError("only an answer records the preferences and memory it used")
         if self.role == "user" and self.model is not None:
             raise ValueError("only an answer records the model that answered")
+        if self.role == "user" and self.delegations:
+            raise ValueError("only an answer records its delegations")
         reject_embedded_secrets(self.model_dump(mode="json"))
         return self
 

@@ -70,6 +70,8 @@ from host_runtime.attachments import (
 from host_runtime.bi_cards_tools import with_bi_sources
 from host_runtime.business_cards_tools import chart_files, with_legend
 from host_runtime.chat_authoring import ChatAuthoring, ChatAuthoringError, approval_text
+from host_runtime.delegation_record import records_from as delegation_records
+from host_runtime.delegation_record import text_lines as delegation_text
 from host_runtime.identity_presets import IdentityPresets
 from host_runtime.memory_why import NOTHING as WHY_NOTHING
 from host_runtime.memory_why import memory_used_in
@@ -1789,6 +1791,10 @@ class TelegramIngress:
         # a run the model started and the files it attached go out last.
         finished = await self._record_turn(request, text, conversation)
         produced = tuple(finished.files)
+        # The 委派紀錄 (multi-agent V1): a summary line per sub-agent that ran.
+        delegated = delegation_text(delegation_records(conversation.tools))
+        if delegated:
+            answer = "\n\n".join([answer, "\n".join(delegated)])
         # The task result summary (owner 2026-10-25) ends the answer, with
         # 「存成筆記」 under it; nothing is saved until it is pressed.
         if finished.summaries:

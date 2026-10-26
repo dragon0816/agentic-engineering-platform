@@ -537,6 +537,58 @@ p.note { color: var(--dim); font-size: 13px; margin: 4px 0 12px; }
 .turn-progress .tp-tools .tp-mark.wait { color: var(--warn); }
 .turn-progress .tp-tools .tp-time { flex: none; color: var(--dim); }
 .turn-progress .tp-meter { margin: 0; color: var(--dim); font-variant-numeric: tabular-nums; }
+/* Delegated sub-agents (multi-agent V1): one line each under the turn, side by
+   side while there is room (parallel read-only ones), stacked on a phone. */
+.turn-progress .tp-agents { display: grid; gap: 6px; margin: 0 0 6px; padding: 0;
+  list-style: none; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.turn-progress .tp-agents[hidden] { display: none; }
+.turn-progress .tp-agent { min-width: 0; padding: 6px 8px; border: 1px solid var(--line);
+  border-left: 3px solid var(--accent); border-radius: 6px; background: var(--bg); }
+.turn-progress .tp-agent.done { border-left-color: var(--good); }
+.turn-progress .tp-agent.failed { border-left-color: var(--bad); }
+.turn-progress .tp-agent.needs_input,
+.turn-progress .tp-agent.awaiting_approval { border-left-color: var(--warn); }
+.turn-progress .tp-agent-head { display: flex; gap: 6px; align-items: baseline; min-width: 0; }
+.turn-progress .tp-agent-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; font-weight: 600; }
+.turn-progress .tp-agent-state { flex: none; font-size: 12px; color: var(--accent); }
+.turn-progress .tp-agent.done .tp-agent-state { color: var(--good); }
+.turn-progress .tp-agent.failed .tp-agent-state { color: var(--bad); }
+.turn-progress .tp-agent.needs_input .tp-agent-state,
+.turn-progress .tp-agent.awaiting_approval .tp-agent-state { color: var(--warn); }
+.turn-progress .tp-agent-goal { margin: 2px 0 0; color: var(--dim); overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; }
+.turn-progress .tp-agent-meter { margin: 2px 0 0; color: var(--dim); font-size: 12px;
+  font-variant-numeric: tabular-nums; }
+/* 委派紀錄 under an answer (multi-agent V1): collapsed by default. */
+.delegation-record { margin: 8px 0 0; max-width: 720px; border: 1px solid var(--line);
+  border-radius: 8px; background: var(--panel); font-size: 13px; }
+.delegation-record > summary { min-height: 44px; display: flex; align-items: center;
+  padding: 0 12px; cursor: pointer; color: var(--dim); font-weight: 600; }
+.delegation-record > summary:focus-visible { outline: 2px solid var(--accent);
+  outline-offset: 2px; }
+.delegation-record ol { margin: 0; padding: 0 12px 10px; list-style: none; }
+.delegation-record li.dr-item { padding: 8px 0; border-top: 1px solid var(--line);
+  min-width: 0; overflow-wrap: anywhere; }
+.delegation-record .dr-head { display: flex; flex-wrap: wrap; gap: 4px 8px;
+  align-items: baseline; }
+.delegation-record .dr-profile { font-weight: 600; color: var(--ink); }
+.delegation-record .dr-status { font-size: 12px; padding: 0 6px; border-radius: 999px;
+  border: 1px solid currentColor; }
+.delegation-record .dr-status.succeeded { color: var(--good); }
+.delegation-record .dr-status.failed { color: var(--bad); }
+.delegation-record .dr-status.needs_input,
+.delegation-record .dr-status.awaiting_approval { color: var(--warn); }
+.delegation-record .dr-meta { color: var(--dim); font-size: 12px;
+  font-variant-numeric: tabular-nums; }
+.delegation-record .dr-summary { margin: 4px 0 0; color: var(--ink); }
+.delegation-record .dr-note { margin: 4px 0 0; color: var(--warn); }
+.delegation-record .dr-artifacts { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 0; }
+.delegation-record .dr-run { color: var(--dim); font-family: var(--mono); font-size: 12px; }
+.settings .multi-agent-switch { display: flex; align-items: center; gap: 10px; min-height: 44px;
+  margin: 0; font-size: 15px; color: var(--ink); }
+.settings .multi-agent-switch input { width: 22px; height: 22px; margin: 0; flex: none; }
+.multi-agent-docs code { font-family: var(--mono); font-size: 12px; }
 .approval-card { margin: 12px 0; padding: 10px 12px; border: 1px solid var(--accent);
   border-radius: 8px; background: var(--accent-soft); }
 .approval-card p { margin: 6px 0 8px; white-space: pre-wrap; overflow-wrap: anywhere; }
@@ -1443,6 +1495,17 @@ tr:last-child td { border-bottom: none; }
       <select id="session-manage-target"></select>
       <p><button id="session-delete" type="button">Delete selected session</button></p>
       <p id="session-manage-result" class="note" role="status"></p>
+    </div>
+    <h2 id="multi-agent-heading">多 Agent 委派</h2>
+    <p class="note multi-agent-docs">開啟後，Agent 可以在一個回合裡把範圍明確的小工作
+      交給專家子代理（最多 3 個、不能再往下委派，寫入動作一樣要你確認）。
+      預設關閉；儲存後要重新啟動 Agent Web 才生效。
+      說明：安裝包的使用手冊 <code>USER_GUIDE.zh-TW.md</code> 第 4.11、4.12 節；
+      契約：<code>docs/CONTRACTS.md</code>「Multi-agent delegation (V1)」。</p>
+    <div class="card settings" id="multi-agent-card">
+      <label class="multi-agent-switch"><input type="checkbox" id="multi-agent-enabled"
+        role="switch" aria-describedby="multi-agent-result"> 允許委派給子代理</label>
+      <p id="multi-agent-result" class="note" role="status" aria-live="polite">讀取中…</p>
     </div>
     <h2>Telegram bot</h2>
     <p class="note">Let people you list here talk to this Agent through a Telegram bot.
@@ -3210,6 +3273,9 @@ function renderConversation(record) {
         else if (kind === "html") said.parentNode.append(answerHtml(record.session_id, file));
       }
       if (answerFiles.length) said.parentNode.append(fileChips(record.session_id, answerFiles));
+      if (replied.delegations && replied.delegations.length) {
+        said.parentNode.append(delegationRecord(record.session_id, replied.delegations));
+      }
       if (replied.task_summary_id) {
         said.parentNode.append(summaryNoteButton(replied.task_summary_id));
       }
@@ -3798,6 +3864,73 @@ function showTurnMenu(x, y, block, question, message) {
 // click. The server takes the text from the stored answer; a selection must
 // be in it. Only this press saves; 「復原」 undoes it.
 
+// 委派紀錄 (multi-agent V1): under an answer whose turn delegated, a closed
+// block with one entry per sub-agent: profile, status, a short summary, its
+// files (opened in the file viewer) and runs, and its tokens.
+const DELEGATION_LABELS = {succeeded: "完成", needs_input: "需要資訊",
+  awaiting_approval: "等待確認", failed: "失敗"};
+
+function delegationTokens(tokens) {
+  const calls = (tokens && tokens.model_calls) || 0;
+  if (!tokens || (tokens.input == null && tokens.output == null)) {
+    return calls + " 次模型呼叫";
+  }
+  return "tokens " + (tokens.input || 0).toLocaleString() + " / "
+    + (tokens.output || 0).toLocaleString() + "（" + calls + " 次呼叫）";
+}
+
+function delegationRecord(session, records) {
+  const box = document.createElement("details");
+  box.className = "delegation-record";
+  const head = document.createElement("summary");
+  head.append(text("委派紀錄（" + records.length + " 個子代理）"));
+  const list = document.createElement("ol");
+  for (const record of records) {
+    const item = document.createElement("li"); item.className = "dr-item";
+    const line = document.createElement("div"); line.className = "dr-head";
+    const profile = document.createElement("span"); profile.className = "dr-profile";
+    profile.append(text(record.profile || ""));
+    const status = document.createElement("span");
+    status.className = "dr-status " + record.status;
+    status.append(text(DELEGATION_LABELS[record.status] || record.status));
+    const meta = document.createElement("span"); meta.className = "dr-meta";
+    meta.append(text(Number(record.elapsed_s || 0).toFixed(1) + " s · "
+      + delegationTokens(record.tokens)
+      + (record.failure_code && record.status === "failed" ? " · " + record.failure_code : "")));
+    line.append(profile, status, meta);
+    item.append(line);
+    const said = record.question ? "需要：" + record.question : record.summary;
+    if (said) {
+      const summary = document.createElement("p"); summary.className = "dr-summary";
+      summary.append(text(said));
+      item.append(summary);
+    }
+    if (record.host_note) {
+      const note = document.createElement("p"); note.className = "dr-note";
+      note.append(text("Host 註記：" + record.host_note));
+      item.append(note);
+    }
+    const artifacts = record.artifacts || [];
+    if (artifacts.length) {
+      const row = document.createElement("div"); row.className = "dr-artifacts";
+      for (const artifact of artifacts) {
+        if (artifact.kind === "file" && artifact.path) {
+          row.append(fileChip(session, {filename: artifact.name, path: artifact.path}));
+        } else {
+          const run = document.createElement("span"); run.className = "dr-run";
+          run.append(text(artifact.id + " " + artifact.name
+            + (artifact.status ? "（" + artifact.status + "）" : "")));
+          row.append(run);
+        }
+      }
+      item.append(row);
+    }
+    list.append(item);
+  }
+  box.append(head, list);
+  return box;
+}
+
 // 「存成筆記」 under a 結果摘要 (task result summaries, owner 2026-10-25): the
 // summary's text becomes one note; only this press saves.
 function summaryNoteButton(summaryId) {
@@ -4266,14 +4399,44 @@ function turnProgressView() {
   status.setAttribute("role", "status"); status.setAttribute("aria-live", "polite");
   const steps = document.createElement("ol"); steps.className = "tp-steps";
   steps.setAttribute("aria-label", "Harness 階段");
+  const agents = document.createElement("ul"); agents.className = "tp-agents";
+  agents.setAttribute("aria-label", "子代理"); agents.hidden = true;
   const tools = document.createElement("ul"); tools.className = "tp-tools";
   tools.setAttribute("aria-label", "最近的工具");
   const meter = document.createElement("p"); meter.className = "tp-meter";
-  box.append(status, steps, tools, meter);
+  box.append(status, steps, agents, tools, meter);
   return box;
 }
 
+// Delegated sub-agents (multi-agent V1): one line each, with the profile, a
+// short objective, its status, tool count and time. Older pages without the
+// lines fall back to the running count.
+function showSubAgents(list, progress) {
+  const shown = progress.delegations || [];
+  list.hidden = !shown.length;
+  list.replaceChildren(...shown.map(agent => {
+    const item = document.createElement("li");
+    item.className = "tp-agent " + agent.status;
+    const head = document.createElement("div"); head.className = "tp-agent-head";
+    const name = document.createElement("span"); name.className = "tp-agent-name";
+    name.textContent = agent.profile; name.title = agent.profile;
+    const state = document.createElement("span"); state.className = "tp-agent-state";
+    state.textContent = (agent.status === "running" ? "… " : "") + agent.label;
+    head.append(name, state);
+    const goal = document.createElement("p"); goal.className = "tp-agent-goal";
+    goal.textContent = agent.objective || ""; goal.title = agent.objective || "";
+    const meter = document.createElement("p"); meter.className = "tp-agent-meter";
+    meter.textContent = "工具 " + agent.tool_count + (agent.tool_cap ? "/" + agent.tool_cap : "")
+      + " · " + clockText(agent.elapsed_s) + (agent.read_only ? " · 只讀" : "");
+    item.append(head, goal, meter);
+    return item;
+  }));
+}
+
 function progressStatus(progress) {
+  if (progress.delegations_running) {
+    return "子代理執行中（" + progress.delegations_running + " 個）…";
+  }
   const harness = progress.harness;
   if (harness && !harness.done) {
     const step = harness.steps.find(item => item.state === "active");
@@ -4309,6 +4472,7 @@ function showTurnProgress(box, progress) {
     item.textContent = label;
     return item;
   }) : []));
+  showSubAgents(box.querySelector(".tp-agents"), progress);
   const tools = box.querySelector(".tp-tools"), recent = (progress.tools || []).slice(-4);
   tools.hidden = !recent.length;
   tools.replaceChildren(...recent.map(tool => {
@@ -5528,6 +5692,7 @@ async function loadSettings() {
   loadLaya().catch(() => {});
   loadCodingAgents().catch(() => {});
   loadAgentModeSettings().catch(() => {});
+  loadMultiAgent().catch((failure) => { el("multi-agent-result").textContent = failure.message; });
   loadGateway().catch((failure) => { el("gateway-state").textContent = failure.message; });
   el("persona-result").textContent =
     "Saved locally. Changes apply to the next natural-language turn.";
@@ -5636,6 +5801,43 @@ function workflowSettingsCard(entry, index) {
 }
 
 // -- end Workflow settings
+
+// The multi-agent switch (V1): host.json `multi_agent.enabled`, read by the
+// Agent when it starts, so the card says when a restart is still needed.
+function showMultiAgent(state) {
+  const box = el("multi-agent-enabled"), result = el("multi-agent-result");
+  box.checked = !!state.enabled;
+  box.disabled = !state.writable;
+  box.setAttribute("aria-checked", String(!!state.enabled));
+  if (!state.supported) {
+    result.textContent = "這個 Agent 版本還沒有多 Agent 委派。";
+  } else if (!state.writable) {
+    result.textContent = "這次啟動的設定是唯讀的。目前"
+      + (state.running ? "已開啟" : "已關閉") + "。";
+  } else if (state.restart_needed) {
+    result.textContent = "已儲存為" + (state.enabled ? "開啟" : "關閉")
+      + "；重新啟動 Agent Web 後生效（目前仍" + (state.running ? "開啟" : "關閉")
+      + "）。重新啟動前先確認沒有進行中的工作。";
+  } else {
+    result.textContent = state.running ? "已開啟。" : "已關閉（預設）。";
+  }
+}
+
+async function loadMultiAgent() {
+  showMultiAgent(await call("/api/settings/multi-agent"));
+}
+
+el("multi-agent-enabled").addEventListener("change", async () => {
+  const box = el("multi-agent-enabled"), result = el("multi-agent-result");
+  box.disabled = true; result.textContent = "儲存中…";
+  try {
+    showMultiAgent(await call("/api/settings/multi-agent", {enabled: box.checked}));
+  } catch (failure) {
+    result.textContent = "沒有儲存："
+      + ((failure.payload && failure.payload.code) || failure.message);
+    loadMultiAgent().catch(() => {});
+  }
+});
 
 el("context-settings").addEventListener("submit", async (event) => {
   event.preventDefault();

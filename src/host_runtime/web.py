@@ -101,7 +101,14 @@ from common.workflow_parameters import (
 from common.workflow_run_form import form_offer, offer_in, run_intent
 from extensions.package import PortableExtensionPackage
 from extensions.runtime import ExtensionLifecycleStore
-from host_runtime import agent_code, asset_shelf, bi_cards_api, gateway_link, telemetry_api
+from host_runtime import (
+    agent_code,
+    asset_shelf,
+    bi_cards_api,
+    gateway_link,
+    multi_agent_switch,
+    telemetry_api,
+)
 from host_runtime.agent_mail import AgentMail
 from host_runtime.agent_mode import AgentMode
 from host_runtime.answers import readable, run_cards, run_follow_up
@@ -164,6 +171,9 @@ from host_runtime.conversations import (
     ConversationTurnRequest,
     MessageFeedback,
 )
+from host_runtime.delegation_record import MAX_RECORDS as MAX_DELEGATION_RECORDS
+from host_runtime.delegation_record import files as delegation_files
+from host_runtime.delegation_record import records_from as delegation_records
 from host_runtime.draft_cards import DraftCards
 from host_runtime.experience import (
     ExperienceSettings,
@@ -477,6 +487,14 @@ def _answer_files(answer: Mapping[str, Any]) -> list[dict[str, Any]]:
     """The files a turn's tools produced for its answer (an org chart)."""
     files = answer.get("files")
     return [item for item in files if isinstance(item, dict)] if isinstance(files, list) else []
+
+
+def _delegations(answer: Mapping[str, Any]) -> tuple[dict[str, Any], ...]:
+    """The 委派紀錄 a turn produced, for its stored answer (multi-agent V1)."""
+    listed = answer.get("delegations")
+    if not isinstance(listed, list):
+        return ()
+    return tuple(item for item in listed if isinstance(item, dict))[:MAX_DELEGATION_RECORDS]
 
 
 def _listed_cards(answer: Mapping[str, Any]) -> tuple[dict[str, Any], ...]:
@@ -3128,12 +3146,25 @@ class AgentWeb:
                         *charts,
                         *(file_entry(path) for path in outputs.files if path not in shown),
                     ]
+                    # The 委派紀錄 (multi-agent V1): its files join the
+                    # answer's, so the file viewer opens them.
+                    delegations = self._delegation_records(item.session_id, result)
+                    shown = {entry["path"] for entry in charts}
+                    charts = [
+                        *charts,
+                        *(
+                            file_entry(path)
+                            for path in delegation_files(delegations)
+                            if path not in shown
+                        ),
+                    ]
                     # The task result summary ends the answer (owner 2026-10-25).
                     blocks = [summary.block() for summary in outputs.summaries]
                     answer = {
                         **({"workflow_form": offered} if offered is not None else {}),
                         **({CARD_KEY: carded} if carded is not None else {}),
                         **({"files": charts} if charts else {}),
+                        **({"delegations": delegations} if delegations else {}),
                         # The person's preferences this turn was given (M3).
                         **(
                             {"preferences_used": list(result.preferences_used)}
@@ -3261,6 +3292,7 @@ class AgentWeb:
                                     if isinstance(answer.get("task_summary_id"), str)
                                     else None
                                 ),
+                                delegations=_delegations(answer),
                                 attachments=tuple(
                                     {key: str(item[key]) for key in ("filename", "kind", "path")}
                                     for item in _answer_files(answer)
@@ -4980,6 +5012,39 @@ class AgentWeb:
         except (OSError, ValueError):
             return FinishedRun()
 
+    def _delegation_records(self, session_id: str | None, result: Any) -> list[dict[str, Any]]:
+        """The 委派紀錄 of a model turn; a sub-agent's file is named by its
+        ledger id and resolved here, for this session and actor only."""
+        if result is None:
+            return []
+        store = self.runtime.session_artifacts
+
+        def resolve(artifact_id: str) -> str | None:
+            if store is None or not session_id:
+                return None
+            try:
+                return store.resolve(session_id, self.runtime.actor, artifact_id).path or None
+            except Exception:  # noqa: BLE001 - unknown or missing: shown without a link
+                return None
+
+        try:
+            return delegation_records(getattr(result, "tools", ()), resolve)
+        except Exception:  # noqa: BLE001 - the record is a view; never fails the turn
+            return []
+
+    def multi_agent_settings(self) -> dict[str, Any]:
+        """The Settings switch (multi-agent V1): saved, running, restart."""
+        return multi_agent_switch.state(self.config_path, self.runtime.config)
+
+    def update_multi_agent(self, body: dict[str, Any]) -> dict[str, Any]:
+        """Save `multi_agent.enabled` to host.json; it applies after a restart."""
+        try:
+            return multi_agent_switch.save(
+                self.config_path, self.runtime.config, body.get("enabled"), self._one_at_a_time
+            )
+        except (OSError, ValueError):
+            return {"ok": False, "code": "multi_agent_settings_invalid"}
+
     def _record_turn_outputs(
         self, session_id: str | None, message: str, result: Any
     ) -> FinishedTurn:
@@ -6175,6 +6240,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.team_settings())
         elif parsed.path == "/api/settings/gateway":
             self._json(200, web.gateway_settings())
+        elif parsed.path == "/api/settings/multi-agent":
+            self._json(200, web.multi_agent_settings())
         elif parsed.path == "/api/knowledge/reingest":
             query = parse_qs(parsed.query)
             self._json(200, web.reingest_status((query.get("sandbox_id") or [""])[0]))
@@ -6278,6 +6345,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/settings/shared-platform/sign-in",
             "/api/settings/gateway",
             "/api/settings/telegram",
+            "/api/settings/multi-agent",
             "/api/mcp/save",
             "/api/mcp/delete",
             "/api/mcp/reconnect",
@@ -6388,6 +6456,10 @@ class _Handler(BaseHTTPRequestHandler):
             return
         if path == "/api/settings/gateway":
             self._json(200, self.server.web.gateway_action(body if isinstance(body, dict) else {}))
+            return
+        if path == "/api/settings/multi-agent":
+            saved = self.server.web.update_multi_agent(body if isinstance(body, dict) else {})
+            self._json(200 if saved.get("ok") else 409, saved)
             return
         if path in ("/api/knowledge/convert/start", "/api/knowledge/convert/stop"):
             chosen = body if isinstance(body, dict) else {}
