@@ -22,7 +22,11 @@ an authoring tool, is ordinary conversation and is left alone):
 - a Workflow run started by a host tool (a draft's trial run): host data with
   a `run_id` and `status: failed`;
 - a capability whose result is a Host validator's verdict (the Coding Harness,
-  DUT validation evidence): data with `status: failed`.
+  DUT validation evidence): data with `status: failed`;
+- a capability that ran and was refused because its Host checks failed: the
+  Coding Harness refuses with `repair_budget_exceeded` when its declared
+  commands still fail after every repair (G5, 2026-10-27: the model's "the
+  change passed" used to carry no note).
 
 G4, consistent output length: a Harness result leaves the loop at the limit
 its domain declares (`output_limit_chars`); a cut says so and where the full
@@ -33,6 +37,11 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from typing import Any
+
+#: Failure codes that mean a domain Harness ran and its Host checks failed
+#: (the shared runner's default exhausted code and the Coding Harness's), as
+#: opposed to a refusal before anything ran.
+HOST_CHECK_FAILURE_CODES = frozenset({"host_check_failed", "repair_budget_exceeded"})
 
 UNVERIFIED_NOTE = (
     "\n\n（Host 註記：以下結果未通過 Host 檢查，上面的說明不能把它當成已通過或已驗證——"
@@ -76,6 +85,9 @@ def _failed_verdict(item: Any) -> str | None:
         data = capability.data
         if isinstance(data, dict) and data.get("status") == "failed":
             return "the Host's validator reported status failed"
+    elif capability is not None and capability.failure is not None:
+        if capability.failure.code in HOST_CHECK_FAILURE_CODES:
+            return f"Host checks failed ({capability.failure.code})"
     return None
 
 
