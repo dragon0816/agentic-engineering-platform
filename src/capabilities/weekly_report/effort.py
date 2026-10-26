@@ -22,6 +22,7 @@ from dataclasses import dataclass
 
 from capabilities.weekly_report.contracts import ReportItem
 from capabilities.weekly_report.rules import parse_jira_datetime as parse_datetime
+from capabilities.weekly_report.rules import report_day
 
 #: What a ticket nobody has assigned, or nothing could be worked out for,
 #: is counted under. Kept and shown rather than dropped, and always last so
@@ -64,9 +65,11 @@ DEFAULT_INSTRUMENTS: tuple[str, ...] = (
 #: One spelling wins where the team uses two.
 DEFAULT_INSTRUMENT_ALIASES: Mapping[str, str] = {"ZNB3K": "ZNB3000"}
 
-#: Production is a comma-delimited Project field. A slash or plus can belong
-#: to a product name and is not a separator here.
-INSTRUMENT_SPLIT = re.compile(r"[,，]")
+#: The separators the team writes between instruments in Production, as the
+#: source splits them (`_weekly_rules.INSTRUMENT_SPLIT`, `[,;/&+]`), plus the
+#: full-width comma. Ported 2026-10-26 to match the owner's target mail,
+#: where `WMT2.0` and `WMT` written with a slash are two instruments.
+INSTRUMENT_SPLIT = re.compile(r"[,，;/&+]")
 
 
 def derive_instrument(
@@ -145,11 +148,12 @@ def account_for(item: ReportItem) -> str:
 
 
 def members_for(item: ReportItem) -> tuple[str, ...]:
-    """GitHub Issue assignees own mail counts, not the Project's text field.
+    """The people a ticket counts for in the mail.
 
-    Older source fixtures have no Issue-assignee field and retain the prior
-    single-member behavior. An explicit empty Issue list is Unassigned, even
-    if Project Assignee text is populated for the workbook.
+    The GitHub Issue's assignees, or, when the Issue has none, the Project's
+    `SDE Assignee` names (the search puts those into `issue_assignees`,
+    source `_display_assignee`). Older source fixtures have no Issue-assignee
+    field and keep the single-member behaviour; an empty list is Unassigned.
     """
     if item.issue_assignees is None:
         return ((item.assignee or "").strip() or UNASSIGNED,)
@@ -284,7 +288,7 @@ def commented_in_week(item: ReportItem, since: _dt.date, until: _dt.date) -> boo
     """
     for comment in item.comments:
         written = parse_datetime(comment.created) if comment.created else None
-        if written is not None and since <= written.date() <= until:
+        if written is not None and since <= report_day(written) <= until:
             return True
     return False
 

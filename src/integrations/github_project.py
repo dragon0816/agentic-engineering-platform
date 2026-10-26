@@ -103,6 +103,10 @@ class ProjectItem(Contract):
     item_id: Text
     #: `owner/repo#number`, or nothing for a row that is not an issue.
     key: str = ""
+    #: The Issue's repository (`owner/repo`) and number; empty for a row that
+    #: is not an issue.
+    repository: str = ""
+    number: int | None = None
     title: str = ""
     url: str = ""
     state: str = ""
@@ -113,6 +117,10 @@ class ProjectItem(Contract):
     body: str = ""
     #: Logins on the underlying Issue, distinct from any Project text field.
     issue_assignees: tuple[str, ...] = ()
+    #: The same assignees as people read them: the profile name, or the login
+    #: when a profile has none (source `_display_assignee`). Parallel to
+    #: `issue_assignees`.
+    issue_assignee_names: tuple[str, ...] = ()
     fields: Mapping[str, str] = {}
     comments: tuple[ProjectComment, ...] = ()
     #: True when the thread was longer than this client asked for.
@@ -141,7 +149,7 @@ query($owner: String!, $number: Int!, $size: Int!, $comments: Int!, $after: Stri
         nodes {
           id
           type
-          fieldValues(first: 50) {
+          fieldValues(first: 100) {
             nodes {
               __typename
               ... on ProjectV2ItemFieldTextValue {
@@ -175,7 +183,7 @@ query($owner: String!, $number: Int!, $size: Int!, $comments: Int!, $after: Stri
               author { login }
               assignees(first: 100) {
                 pageInfo { hasNextPage }
-                nodes { login }
+                nodes { login name }
               }
               repository { nameWithOwner }
               comments(first: $comments) {
@@ -376,14 +384,20 @@ def _item(node: Mapping[str, Any]) -> ProjectItem:
             "github_bad_reply",
             "the Issue assignee list was truncated; refuse incomplete member counts",
         )
-    issue_assignees = tuple(
-        str(entry.get("login"))
+    people = [
+        entry
         for entry in assignees.get("nodes") or []
         if isinstance(entry, Mapping) and entry.get("login")
+    ]
+    issue_assignees = tuple(str(entry.get("login")) for entry in people)
+    issue_assignee_names = tuple(
+        str(entry.get("name") or "").strip() or str(entry.get("login")) for entry in people
     )
     return ProjectItem(
         item_id=item_id,
         key=f"{repository}#{number}" if repository and number is not None else "",
+        repository=str(repository) if repository and number is not None else "",
+        number=int(number) if repository and isinstance(number, int) else None,
         title=str(content.get("title") or ""),
         url=str(content.get("url") or ""),
         state=str(content.get("state") or ""),
@@ -392,6 +406,7 @@ def _item(node: Mapping[str, Any]) -> ProjectItem:
         author=str(((content.get("author") or {}) or {}).get("login") or ""),
         body=str(content.get("body") or ""),
         issue_assignees=issue_assignees,
+        issue_assignee_names=issue_assignee_names,
         fields=fields,
         comments=comments,
         comments_truncated=int(thread.get("totalCount") or 0) > len(comments),

@@ -208,6 +208,16 @@ def pie_for(totals: Mapping[str, int], **options: int) -> bytes | None:
     )
 
 
+def instrument_title(instrument_tickets: int, ticket_count: int) -> str:
+    """The pie's title in the owner's target layout: instrument-tickets and
+    the tickets they come from, which differ when a ticket names several."""
+    noun = "ticket" if ticket_count == 1 else "tickets"
+    return (
+        f"Tickets by instrument  ({instrument_tickets} instrument-tickets "
+        f"from {ticket_count} {noun})"
+    )
+
+
 def composite_for(items: Sequence[ReportItem], *, dpi: int = 160) -> bytes | None:
     """Adapt the source W2's one-image pie and member split to GitHub fields.
 
@@ -246,12 +256,8 @@ def composite_for(items: Sequence[ReportItem], *, dpi: int = 160) -> bytes | Non
     )
     instrument_tickets = sum(values)
     ticket_count = len(items)
-    title = (
-        f"Tickets by instrument  ({instrument_tickets} total)"
-        if instrument_tickets == ticket_count
-        else f"Tickets by instrument  ({instrument_tickets} instrument-tickets "
-        f"from {ticket_count} tickets)"
-    )
+    # The owner's target layout (2026-10-26) names both counts every week.
+    title = instrument_title(instrument_tickets, ticket_count)
     pie.set_title(title, fontsize=11, color="#0b0b0b", pad=16)
     pie.axis("equal")
 
@@ -284,14 +290,25 @@ def composite_for(items: Sequence[ReportItem], *, dpi: int = 160) -> bytes | Non
                     color="white" if colour in PALETTE[:4] else "#0b0b0b",
                 )
         left = [start + width for start, width in zip(left, widths, strict=True)]
+    # Each member's total at the end of the bar, so the length reads as a
+    # number without counting grid lines.
+    for position, total in enumerate(left):
+        if total:
+            bars.text(
+                total + 0.08,
+                position,
+                f"{total:g}",
+                ha="left",
+                va="center",
+                fontsize=8,
+                color="#12325b",
+                fontweight="bold",
+            )
     bars.set_yticks(positions)
     bars.set_yticklabels(names, fontsize=9, color="#52514e")
     bars.invert_yaxis()
-    bars.set_xlabel(
-        "tickets" if instrument_tickets == ticket_count else "instrument-tickets",
-        fontsize=9,
-        color="#898781",
-    )
+    bars.set_xlabel("instrument-tickets", fontsize=9, color="#898781")
+    bars.set_xlim(0, max(left, default=0) + 1)
     bars.xaxis.set_major_locator(MultipleLocator(1))
     bars.tick_params(axis="x", labelsize=8, colors="#898781", length=0)
     bars.tick_params(axis="y", length=0)

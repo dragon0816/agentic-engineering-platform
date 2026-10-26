@@ -1,4 +1,8 @@
-"""The weekly mail uses Issue assignees and Project Production, not board text.
+"""The weekly mail uses Issue assignees and Project Production.
+
+An Issue with no assignee falls back to the Project's `SDE Assignee` field,
+as the source job does (`github_weekly_report._display_assignee`; owner
+request 2026-10-26).
 
 These shapes are based on the GitHub ProjectV2 query contract. No live
 credential, network request, workbook or Outlook draft is used in these tests.
@@ -50,14 +54,18 @@ def test_project_query_and_mapping_keep_issue_assignees_separate_from_project_te
     assert row.issue_assignees == ("alice", "bob")
     assert row.fields["SDE Assignee"] == "Project-only person"
     report = _as_item(row, SETTINGS)
+    # Keyed by the GitHub Issue; the old Jira key is metadata only.
+    assert (report.key, report.repository, report.number) == ("#42", "team/repo", 42)
+    assert report.jira_key == "GTM-42"
     assert report.assignee == "alice, bob"
+    assert report.assignee_source == "issue"
     assert report.issue_assignees == ("alice", "bob")
     assert report.instrument == "CMP180, CMX500"
     assert effort.member_totals((report,)) == {"alice": 1, "bob": 1}
     assert effort.instrument_totals((report,)) == {"CMP180": 1, "CMX500": 1}
     assert effort.buckets((report,)) == {
-        "alice": {"CMP180": ["GTM-42"], "CMX500": ["GTM-42"]},
-        "bob": {"CMP180": ["GTM-42"], "CMX500": ["GTM-42"]},
+        "alice": {"CMP180": ["#42"], "CMX500": ["#42"]},
+        "bob": {"CMP180": ["#42"], "CMX500": ["#42"]},
     }
     window = ReportingWindow(
         week="2026_40W",
@@ -68,7 +76,7 @@ def test_project_query_and_mapping_keep_issue_assignees_separate_from_project_te
     )
     sheet = SheetState(
         headers=("Key", "Summary", "Company", "Status", "Assignee", "Sales", "Comments"),
-        existing={"GTM-42": ""},
+        existing={"#42": ""},
         scratch_present=True,
         source_sheet="weekly report temp",
         digest="0" * 64,
@@ -78,22 +86,54 @@ def test_project_query_and_mapping_keep_issue_assignees_separate_from_project_te
     assert planned.rows[0].url == "https://github.com/team/repo/issues/42"
 
 
-def test_empty_issue_assignees_and_production_are_unassigned_not_guessed() -> None:
+def test_an_issue_without_assignees_falls_back_to_the_sde_assignee_field() -> None:
     node = project_node(production="")
     content = node["content"]
     assert isinstance(content, dict)
     content["assignees"] = {"pageInfo": {"hasNextPage": False}, "nodes": []}
     report = _as_item(_item(node), SETTINGS)
     assert report.summary == "CMX500 weekly work"
-    assert report.assignee == ""
-    assert report.issue_assignees == ()
-    assert effort.member_totals((report,)) == {"Unassigned": 1}
+    assert report.assignee == "Project-only person"
+    assert report.assignee_source == "project_field"
+    assert report.issue_assignees == ("Project-only person",)
+    assert effort.member_totals((report,)) == {"Project-only person": 1}
+    # Production is never guessed from the title.
     assert effort.instrument_totals((report,)) == {"Unassigned": 1}
 
 
-def test_production_splits_commas_but_keeps_a_slash_inside_one_name() -> None:
-    report = _as_item(_item(project_node(production="CMP180, CMX500，WMT2.0/NR")), SETTINGS)
-    assert effort.instruments_for(report) == ["CMP180", "CMX500", "WMT2.0/NR"]
+def test_an_issue_with_neither_assignee_nor_sde_assignee_is_unassigned() -> None:
+    node = project_node()
+    content = node["content"]
+    assert isinstance(content, dict)
+    content["assignees"] = {"pageInfo": {"hasNextPage": False}, "nodes": []}
+    node["fieldValues"] = {"nodes": []}
+    report = _as_item(_item(node), SETTINGS)
+    assert (report.assignee, report.assignee_source, report.issue_assignees) == ("", "none", ())
+    assert effort.member_totals((report,)) == {"Unassigned": 1}
+
+
+def test_assignees_read_as_their_profile_name_or_login() -> None:
+    assert "nodes { login name }" in _query_for("user")
+    node = project_node()
+    content = node["content"]
+    assert isinstance(content, dict)
+    content["assignees"] = {
+        "pageInfo": {"hasNextPage": False},
+        "nodes": [{"login": "dlee", "name": "Dana Lee"}, {"login": "pat-k", "name": None}],
+    }
+    row = _item(node)
+    assert row.issue_assignees == ("dlee", "pat-k")
+    report = _as_item(row, SETTINGS)
+    assert report.assignee == "Dana Lee, pat-k"
+    assert effort.member_totals((report,)) == {"Dana Lee": 1, "pat-k": 1}
+
+
+def test_production_splits_on_the_source_separators() -> None:
+    report = _as_item(
+        _item(project_node(production="CMP180, CMX500，WMT2.0/WMT; RTO6 & MXO5 + CMP180")),
+        SETTINGS,
+    )
+    assert effort.instruments_for(report) == ["CMP180", "CMX500", "WMT2.0", "WMT", "RTO6", "MXO5"]
 
 
 def test_assignee_connection_must_not_silently_truncate_member_counts() -> None:

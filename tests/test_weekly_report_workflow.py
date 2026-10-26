@@ -72,16 +72,14 @@ def build_workbook(path: Path, *, scratch: bool) -> None:
     first.append(["GTM-100", "old ticket", "Acme", "Done", "Someone", "Wendy", "6/30:\n- shipped"])
     week30 = workbook.create_sheet("2026_30W")
     week30.append(HEADERS)
-    week30.append(
-        ["GTM-688", "[Acme] field edit", "Acme", "In Progress", "Ming", "Wendy", OLD_BLOCK]
-    )
+    week30.append(["#688", "[Acme] field edit", "Acme", "In Progress", "Ming", "Wendy", OLD_BLOCK])
     if scratch:
         temp = workbook.create_sheet("weekly report temp")
         temp.append(HEADERS)
         temp.append(
-            ["GTM-688", "[Acme] field edit", "Acme", "In Progress", "Ming", "Wendy", OLD_BLOCK]
+            ["#688", "[Acme] field edit", "Acme", "In Progress", "Ming", "Wendy", OLD_BLOCK]
         )
-        temp.append(["GTM-5", "hand added", "Beta", "To Do", "Ming", "Teresa", ""])
+        temp.append(["#5", "hand added", "Beta", "To Do", "Ming", "Teresa", ""])
     workbook.create_sheet("Tasks Summary-12-23")
     workbook.save(path)
 
@@ -200,6 +198,9 @@ def settings(workbook: Path, **changes: Any) -> dict[str, Any]:
 
 
 def host(tmp_path: Path, *, scratch: bool = True, **changes: Any) -> tuple[Any, Any, Path]:
+    # These runs exercise the older scratch sheet; the week's own sheet, the
+    # default since 2026-10-26, has its own test below.
+    changes.setdefault("sheet_target", "temp")
     workbook = tmp_path / "SDE_Weekly_Report.xlsx"
     build_workbook(workbook, scratch=scratch)
     config, layout = workspace(
@@ -293,19 +294,19 @@ def test_the_preview_runs_end_to_end_and_writes_nothing(tmp_path: Path) -> None:
     # The board answers the thread with the row, so there is no second
     # call; a thread longer than one page is named instead of refetched.
     assert search["url"].endswith("/graphql")
-    assert plan.issue_keys == ("GTM-1", "GTM-455", "GTM-688", "GTM-9")
+    assert plan.issue_keys == ("#1", "#455", "#688", "#9")
     # What reaches the sheet, and why the rest does not.
-    assert [row.key for row in plan.rows] == ["GTM-1", "GTM-688", "GTM-9"]
-    assert plan.new_keys == ("GTM-1", "GTM-9") and plan.updated_keys == ("GTM-688",)
+    assert [row.key for row in plan.rows] == ["#1", "#688", "#9"]
+    assert plan.new_keys == ("#1", "#9") and plan.updated_keys == ("#688",)
     reasons = {item.key: item.reason for item in plan.skipped}
-    assert reasons["GTM-455"] == "not in the sheet and no comment content this week"
-    assert reasons["GTM-688"] == "no marker-tagged comment content in window"
+    assert reasons["#455"] == "not in the sheet and no comment content this week"
+    assert reasons["#688"] == "no marker-tagged comment content in window"
     blocks = {op.key: op.text for op in plan.comment_operations}
-    assert blocks["GTM-1"] == "7/29:\n[Completed]\n- tx cal done\n"
-    assert blocks["GTM-9"] == (
+    assert blocks["#1"] == "7/29:\n[Completed]\n- tx cal done\n"
+    assert blocks["#9"] == (
         "7/30:\n[Completed]\n- rx power fixed\n7/28:\n[In-progress]\n- fix rx power\n"
     )
-    assert plan.highlight_keys == ("GTM-1", "GTM-9")
+    assert plan.highlight_keys == ("#1", "#9")
     assert plan.rows[0].company == "Acme" and plan.rows[0].sales == "Wendy/Teresa"
     assert not plan.capped and "CAPPED" not in plan.preview
     # The host's executor gives a step the time a Jira search needs, and a
@@ -416,7 +417,9 @@ def test_cli_exits_nonzero_and_preserves_failed_preview_evidence(tmp_path: Path)
 def test_the_scratch_sheet_is_read_as_it_stands_or_seeded_when_absent(tmp_path: Path) -> None:
     present = tmp_path / "present.xlsx"
     build_workbook(present, scratch=True)
-    handler = ReadScratchSheetHandler(WeeklyReportSettings(workbook_path=str(present)))
+    handler = ReadScratchSheetHandler(
+        WeeklyReportSettings(workbook_path=str(present), sheet_target="temp")
+    )
     context = RequestContext(
         trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"),
         actor="engineer",
@@ -433,7 +436,7 @@ def test_the_scratch_sheet_is_read_as_it_stands_or_seeded_when_absent(tmp_path: 
     state = read(handler, "2026_31W")
     assert state.scratch_present and state.source_sheet == "weekly report temp"
     assert state.seed_sheet == "2026_30W"
-    assert state.existing == {"GTM-688": OLD_BLOCK, "GTM-5": ""}
+    assert state.existing == {"#688": OLD_BLOCK, "#5": ""}
     assert state.headers == tuple(HEADERS)
     assert state.sheet_names[-1] == "Tasks Summary-12-23"
     again = read(handler, "2026_31W")
@@ -444,15 +447,21 @@ def test_the_scratch_sheet_is_read_as_it_stands_or_seeded_when_absent(tmp_path: 
     absent = tmp_path / "absent.xlsx"
     build_workbook(absent, scratch=False)
     seeded = read(
-        ReadScratchSheetHandler(WeeklyReportSettings(workbook_path=str(absent))), "2026_31W"
+        ReadScratchSheetHandler(
+            WeeklyReportSettings(workbook_path=str(absent), sheet_target="temp")
+        ),
+        "2026_31W",
     )
     assert not seeded.scratch_present and seeded.source_sheet == "2026_30W"
-    assert seeded.existing == {"GTM-688": OLD_BLOCK}
+    assert seeded.existing == {"#688": OLD_BLOCK}
     assert seeded.digest != state.digest and seeded.digest == handler_digest_of_nothing()
     # No weekly sheet at all: the column contract and nothing to compare.
     bare = tmp_path / "bare.xlsx"
     openpyxl.Workbook().save(bare)
-    empty = read(ReadScratchSheetHandler(WeeklyReportSettings(workbook_path=str(bare))), "2026_31W")
+    empty = read(
+        ReadScratchSheetHandler(WeeklyReportSettings(workbook_path=str(bare), sheet_target="temp")),
+        "2026_31W",
+    )
     assert empty.headers == rules.WEEKLY_COLUMNS and empty.existing == {}
     assert empty.seed_sheet is None and empty.source_sheet is None
     # A scratch sheet with a blank header row is digested as it stands; the
@@ -466,7 +475,10 @@ def test_the_scratch_sheet_is_read_as_it_stands_or_seeded_when_absent(tmp_path: 
     scratch.append(["GTM-1", "x", "", "", "", "", ""])
     book.save(blank)
     headless = read(
-        ReadScratchSheetHandler(WeeklyReportSettings(workbook_path=str(blank))), "2026_31W"
+        ReadScratchSheetHandler(
+            WeeklyReportSettings(workbook_path=str(blank), sheet_target="temp")
+        ),
+        "2026_31W",
     )
     assert headless.headers == rules.WEEKLY_COLUMNS
     assert headless.digest == digest_rows(("",) * 7, (("GTM-1", "x", "", "", "", "", ""),))
@@ -479,7 +491,12 @@ def test_the_scratch_sheet_is_read_as_it_stands_or_seeded_when_absent(tmp_path: 
     book.active.append(["GTM-1", "x", "y"])
     book.save(odd)
     with pytest.raises(ValueError, match="no Key and Comments columns"):
-        read(ReadScratchSheetHandler(WeeklyReportSettings(workbook_path=str(odd))), "2026_31W")
+        read(
+            ReadScratchSheetHandler(
+                WeeklyReportSettings(workbook_path=str(odd), sheet_target="temp")
+            ),
+            "2026_31W",
+        )
     with pytest.raises(excel.WorkbookError, match="workbook_missing"):
         excel.sheet_names(tmp_path / "nowhere.xlsx")
     (tmp_path / "junk.xlsx").write_bytes(b"not a workbook")
@@ -574,7 +591,7 @@ def test_the_whole_report_writes_the_plan_and_carries_the_evidence(tmp_path: Pat
 
     config, layout, workbook = host(tmp_path)
     before = workbook.read_bytes()
-    writer = RecordingWriter(existing_rows={"GTM-688": 2})
+    writer = RecordingWriter(existing_rows={"#688": 2})
     with build_runtime(
         config,
         layout=layout,
@@ -615,7 +632,7 @@ def test_one_run_writes_the_workbook_then_drafts_the_mail(tmp_path: Path) -> Non
     )
     before = workbook.read_bytes()
     drafter = RecordingDraftWriter()
-    writer = RecordingWriter(existing_rows={"GTM-688": 2})
+    writer = RecordingWriter(existing_rows={"#688": 2})
     with build_runtime(
         config,
         layout=layout,
@@ -648,12 +665,12 @@ def test_one_run_writes_the_workbook_then_drafts_the_mail(tmp_path: Path) -> Non
     # two moved without anybody working on them, and they are named.
     assert drafted.counted == 2
     assert drafted.counted + len(drafted.excluded) == drafted.matched
-    assert "GTM-688" in drafted.excluded and "GTM-455" in drafted.excluded
+    assert "#688" in drafted.excluded and "#455" in drafted.excluded
     assert drafted.activity_required is True
     # The picture is written where the draft refers to it.
     assert drafted.chart_path and Path(drafted.chart_path).read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
     assert f"cid:{saved.images[0].cid}" in saved.html_body
-    assert "GTM-1" in drafted.preview, "the plain text is what a person checks"
+    assert "#1" in drafted.preview, "the plain text is what a person checks"
 
 
 def test_drafting_the_mail_needs_an_approval(tmp_path: Path) -> None:
@@ -674,7 +691,7 @@ def test_drafting_the_mail_needs_an_approval(tmp_path: Path) -> None:
     ]
     layout.grants.write_text(json.dumps(unapproved), encoding="utf-8")
     drafter = RecordingDraftWriter()
-    writer = RecordingWriter(existing_rows={"GTM-688": 2})
+    writer = RecordingWriter(existing_rows={"#688": 2})
     with build_runtime(
         config,
         layout=layout,
@@ -704,7 +721,7 @@ def test_a_host_without_outlook_says_so_rather_than_failing_to_assemble(tmp_path
         raise DraftError("outlook_missing")
 
     config, layout, _ = host(tmp_path)
-    writer = RecordingWriter(existing_rows={"GTM-688": 2})
+    writer = RecordingWriter(existing_rows={"#688": 2})
     with build_runtime(
         config,
         layout=layout,
@@ -735,7 +752,7 @@ def test_writing_the_workbook_needs_an_approval(tmp_path: Path) -> None:
         for grant in grants()
     ]
     layout.grants.write_text(json.dumps(unapproved), encoding="utf-8")
-    writer = RecordingWriter(existing_rows={"GTM-688": 2})
+    writer = RecordingWriter(existing_rows={"#688": 2})
     with build_runtime(
         config,
         layout=layout,
@@ -759,7 +776,7 @@ def test_a_workbook_that_cannot_be_written_names_its_own_refusal(tmp_path: Path)
 
     config, layout, workbook = host(tmp_path)
     owner_file(workbook).write_bytes(b"")
-    writer = RecordingWriter(existing_rows={"GTM-688": 2})
+    writer = RecordingWriter(existing_rows={"#688": 2})
     with build_runtime(
         config,
         layout=layout,

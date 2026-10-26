@@ -111,7 +111,8 @@ def apply_plan(
     # backed up or opened, so a refusal really does leave nothing behind.
     # Presence counts as much as content: a plan made when the scratch sheet
     # was absent must not be written blind into one somebody has since made.
-    digest_before, present = scratch_digest(real, settings.temp_sheet)
+    sheet = plan.target_sheet or settings.temp_sheet
+    digest_before, present = scratch_digest(real, sheet)
     if present != plan.scratch_present or (present and digest_before != plan.sheet_digest):
         raise ApplyRefused("sheet_changed")
 
@@ -131,9 +132,9 @@ def apply_plan(
         # person looked at the tabs.
         before_sheets = writer.sheet_names(working)
         if not present:
-            writer.ensure_sheet(working, settings.temp_sheet, seed=plan.seed_sheet)
+            writer.ensure_sheet(working, sheet, seed=plan.seed_sheet)
         applied = _write(plan, settings, writer, working)
-        _no_sheet_was_lost(before_sheets, writer.sheet_names(working), settings.temp_sheet)
+        _no_sheet_was_lost(before_sheets, writer.sheet_names(working), sheet)
         finished = True
     finally:
         try:
@@ -159,12 +160,12 @@ def apply_plan(
             # Saying `workbook_open` here would read as "nothing happened",
             # and the next run would stage over the finished workbook.
             raise ApplyRefused("write_back_failed") from None
-    digest_after, _ = scratch_digest(real, settings.temp_sheet)
+    digest_after, _ = scratch_digest(real, sheet)
     return applied.model_copy(
         update={
             "week": plan.window.week,
             "workbook": str(real),
-            "sheet": settings.temp_sheet,
+            "sheet": sheet,
             "digest_before": digest_before,
             "digest_after": digest_after,
             "backup_path": str(backup) if backup is not None else None,
@@ -184,7 +185,7 @@ def _write(
     # preview was rendered against; the column contract only stands in for a
     # sheet that has none.
     layout = list(plan.sheet_headers) or list(rules.WEEKLY_COLUMNS)
-    sheet = settings.temp_sheet
+    sheet = plan.target_sheet or settings.temp_sheet
     try:
         key_column = rules.column_for_header(layout, "Key")
         comments_column = rules.column_for_header(layout, "Comments")
@@ -197,6 +198,13 @@ def _write(
         # a report to write, and only the pink has nowhere to go.
         status_column = None
     last_column = column_letter(len(layout))
+
+    if not plan.scratch_present and not plan.seed_sheet:
+        # A sheet made empty (the week's own sheet) gets the whole header
+        # row first, `Comments` included: the upsert below names only the
+        # managed columns, and a sheet without its `Comments` header could
+        # not be read back by the next run.
+        writer.upsert(workbook, sheet, headers=layout, key_header="Key", rows=[])
 
     upsert = writer.upsert(
         workbook,

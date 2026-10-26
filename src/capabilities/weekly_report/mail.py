@@ -282,12 +282,7 @@ def build_html(
             "<tr><td style='padding:16px 26px 0'><div style='background:#fdf6e3;"
             f"border-left:3px solid #d9a441;padding:11px 13px'>{reason}</div></td></tr>"
         )
-    instrument_title = (
-        f"Tickets by instrument ({instrument_count} total)"
-        if instrument_count == len(items)
-        else f"Tickets by instrument ({instrument_count} instrument-tickets "
-        f"from {len(items)} {ticket_noun})"
-    )
+    instrument_title = " ".join(chart.instrument_title(instrument_count, len(items)).split())
     image = (
         f"<img src='cid:{escape(chart_cid, quote=True)}' width='808' "
         f"alt='{escape(instrument_title, quote=True)} and Split per team member' "

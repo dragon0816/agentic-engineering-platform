@@ -1,12 +1,14 @@
 """Workflow 11's board selection follows source `github_weekly_report.py`.
 
-The source (rs_workflow_system host-bridge/jobs/github_weekly_report.py,
-untracked after 896046e; sha256 recorded in docs/DECISIONS.md 2026-10-05)
-reports only `[GTM-n]` issues that are not closed and that moved or were
-commented inside the window; a comment edited inside the window counts at
-its edit time; the migrated `## Weekly report comments` log in the body is a
-fallback when no real marker comment is in the window; and `startTime` /
-`endTime` select by moment, Taiwan time by default.
+The source (n8n_workflow_system host-bridge/jobs/github_weekly_report.py,
+untracked after 896046e; sha256 recorded in docs/DECISIONS.md 2026-10-05 and,
+for the revision Hermes runs now, 2026-10-26) reports every board Issue that
+is not closed and that moved or was commented inside the window, keyed by
+the GitHub Issue (`#n`) whether or not its title still carries an old Jira
+key; a comment edited inside the window counts at its edit time; the
+migrated `## Weekly report comments` log in the body is a fallback when no
+real marker comment is in the window; and `startTime` / `endTime` select by
+moment, Taiwan time by default. All data here is synthetic.
 """
 
 from __future__ import annotations
@@ -51,10 +53,11 @@ def _item(
     updated: str = "",
     comments: tuple[ProjectComment, ...] = (),
     body: str = "",
+    repository: str = "o/r",
 ) -> ProjectItem:
     return ProjectItem(
         item_id=f"PVTI_{number}",
-        key=f"o/r#{number}",
+        key=f"{repository}#{number}",
         title=title,
         updated=updated,
         fields={"Status": status},
@@ -90,21 +93,94 @@ IN_WEEK = "2026-09-23T03:00:00Z"
 BEFORE = "2026-09-10T03:00:00Z"
 
 
-def test_only_open_gtm_items_that_moved_in_the_window_are_reported(tmp_path: Path) -> None:
+ROWS = [
+    _item(1, "[GTM-1] tracked", updated=IN_WEEK),
+    _item(2, "board-only work", updated=IN_WEEK),  # no [GTM-n]
+    _item(3, "[ABC-3] other tracker", updated=IN_WEEK),  # not GTM
+    _item(4, "[GTM-4] finished", status="Done", updated=IN_WEEK),
+    _item(5, "[GTM-5] closed", status="closed", updated=IN_WEEK),
+    _item(6, "[GTM-6] quiet", updated=BEFORE),
+    _item(7, "[GTM-7] no timestamp"),  # source: not in window
+    _item(
+        8,
+        "filed on the board, commented this week",
+        updated=BEFORE,
+        comments=(ProjectComment(created=IN_WEEK, body="[Completed]\n- work"),),
+    ),
+]
+
+
+def test_a_github_issue_without_a_jira_id_is_included(tmp_path: Path) -> None:
+    """The owner's bug (2026-10-26): every ticket moved to GitHub, and an
+    Issue filed there has no `[GTM-n]` title. It is reported, keyed `#n`."""
+    found = _search(tmp_path, [_item(77, "New GitHub-only ticket", updated=IN_WEEK)])
+    (item,) = found.items
+    assert (item.key, item.repository, item.number, item.jira_key) == ("#77", "o/r", 77, "")
+    assert item.summary == "New GitHub-only ticket"
+
+
+def test_every_open_issue_that_moved_in_the_window_is_reported(tmp_path: Path) -> None:
+    found = _search(tmp_path, ROWS)
+    assert [item.key for item in found.items] == ["#1", "#2", "#3", "#8"]
+    assert [item.jira_key for item in found.items] == ["GTM-1", "", "", ""]
+    assert [item.summary for item in found.items] == [
+        "tracked",
+        "board-only work",
+        # Only the old Jira prefix is a carried key (source `_original_key`).
+        "[ABC-3] other tracker",
+        "filed on the board, commented this week",
+    ]
+
+
+def test_an_older_host_setting_naming_gtm_no_longer_hides_board_issues(tmp_path: Path) -> None:
+    """Host settings written before 2026-10-25 carry `tracked_key_prefix: GTM`
+    explicitly; that used to drop every Issue filed on the board without a
+    `[GTM-n]` title, which is the owner's "updated issues not shown"."""
+    settings = _settings(tmp_path, tracked_key_prefix="GTM")
+    handler = ProjectSearchHandler(Client(ROWS), settings)  # type: ignore[arg-type]
+    inputs = handler_input({"since": _dt.date(2026, 9, 21), "until": _dt.date(2026, 9, 27)})
+    found = asyncio.run(handler(request("search"), inputs))
+    assert isinstance(found, ProjectSearchOutput)
+    assert [item.key for item in found.items] == ["#1", "#2", "#3", "#8"]
+
+
+def test_without_a_tracked_prefix_any_leading_carried_key_is_the_jira_key(
+    tmp_path: Path,
+) -> None:
+    settings = _settings(tmp_path, tracked_key_prefix=None)
+    handler = ProjectSearchHandler(Client(ROWS[:3]), settings)  # type: ignore[arg-type]
+    inputs = handler_input({"since": _dt.date(2026, 9, 21), "until": _dt.date(2026, 9, 27)})
+    found = asyncio.run(handler(request("search"), inputs))
+    assert isinstance(found, ProjectSearchOutput)
+    assert [item.key for item in found.items] == ["#1", "#2", "#3"]
+    assert [item.jira_key for item in found.items] == ["GTM-1", "", "ABC-3"]
+
+
+def test_an_issue_from_another_repository_keeps_its_repository_in_the_key(
+    tmp_path: Path,
+) -> None:
     found = _search(
         tmp_path,
         [
-            _item(1, "[GTM-1] tracked", updated=IN_WEEK),
-            _item(2, "board-only work", updated=IN_WEEK),  # no [GTM-n]
-            _item(3, "[ABC-3] other tracker", updated=IN_WEEK),  # not GTM
-            _item(4, "[GTM-4] finished", status="Done", updated=IN_WEEK),
-            _item(5, "[GTM-5] closed", status="closed", updated=IN_WEEK),
-            _item(6, "[GTM-6] quiet", updated=BEFORE),
-            _item(7, "[GTM-7] no timestamp"),  # source: not in window
+            _item(5, "main board work", updated=IN_WEEK),
+            _item(6, "more main board work", updated=IN_WEEK),
+            _item(5, "same number elsewhere", updated=IN_WEEK, repository="o/other"),
         ],
     )
-    assert [item.key for item in found.items] == ["GTM-1"]
-    assert found.items[0].summary == "tracked"
+    assert [item.key for item in found.items] == ["#5", "#6", "o/other#5"]
+
+
+def test_a_week_is_the_taiwan_week_for_utc_timestamps(tmp_path: Path) -> None:
+    """GitHub answers in UTC. Monday 07:00 in Taipei is Sunday 23:00 UTC and
+    belongs to the new week, as the same days given as `startTime`/`endTime`
+    would select it."""
+    monday_morning = ProjectComment(created="2026-09-20T23:00:00Z", body="[Completed]\n- mon")
+    sunday_next = ProjectComment(created="2026-09-27T16:30:00Z", body="[Completed]\n- next")
+    found = _search(
+        tmp_path,
+        [_item(12, "board issue", updated=BEFORE, comments=(monday_morning, sunday_next))],
+    )
+    assert [c.body for c in found.items[0].comments] == ["[Completed]\n- mon"]
 
 
 def test_a_comment_in_the_window_brings_an_item_in_and_edits_count_at_edit_time(
@@ -222,3 +298,23 @@ def test_a_dry_run_writes_nothing_and_drafts_nothing(tmp_path: Path) -> None:
     assert drafted.skipped is True  # type: ignore[attr-defined]
     no_mail = window.model_copy(update={"dry_run": False, "draft_mail": False})
     assert asyncio.run(mailer(request("mail"), MailInput(window=no_mail))).skipped  # type: ignore[attr-defined]
+
+
+def test_a_precise_window_includes_both_ends(tmp_path: Path) -> None:
+    """Source `startTime`/`endTime` are inclusive: a comment at either bound counts."""
+    at_start = ProjectComment(created="2026-09-21T16:00:00Z", body="[Completed]\n- start")
+    at_end = ProjectComment(created="2026-09-28T15:59:59Z", body="[Completed]\n- end")
+    after = ProjectComment(created="2026-09-28T16:00:00Z", body="[Completed]\n- after")
+    request_ = WeeklyReportRequest.model_validate(
+        {"start_time": "2026-09-22", "end_time": "2026-09-28"}
+    )
+    found = _search(
+        tmp_path,
+        [_item(11, "board issue", updated=BEFORE, comments=(at_start, at_end, after))],
+        start_time=request_.start_time,
+        end_time=request_.end_time,
+    )
+    assert [c.body for c in found.items[0].comments] == [
+        "[Completed]\n- start",
+        "[Completed]\n- end",
+    ]

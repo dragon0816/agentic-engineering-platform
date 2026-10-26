@@ -13,6 +13,19 @@ from common.assets import reject_embedded_secrets
 from common.base import Contract, Sha256, Symbol, Text
 from integrations.excel_writer import BorderStyle, Colour
 
+#: A ticket's key in the workbook and the mail. Since the team moved every
+#: ticket to GitHub (2026-10) it is the GitHub Issue: `#123` for an Issue in
+#: the board's own repository, `owner/repo#123` for one from another, as the
+#: source job writes it (`github_weekly_report._github_ticket_id`). The older
+#: `GTM-123` / `GH-63` forms stay valid so plans and fixtures made before
+#: then still load.
+ReportKey = Annotated[
+    str,
+    StringConstraints(
+        pattern=r"^(?:(?:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?#[1-9][0-9]*|[a-zA-Z_][a-zA-Z0-9_.-]*)$"
+    ),
+]
+
 
 class WeeklyReportSettings(Contract):
     """What the source read from `config/workflow-w2.json`, minus everything
@@ -31,19 +44,28 @@ class WeeklyReportSettings(Contract):
     # columns, and that is not a code change. The defaults are the columns
     # the board carried when it was read on 2026-09-23.
     status_fields: tuple[Text, ...] = ("Status", "GTM Status")
-    # Kept to read older Host settings. GitHub Issue assignees now drive the
-    # workbook and mail; this Project free-text field cannot override them.
+    # GitHub Issue assignees drive the workbook and the mail. These Project
+    # fields, first non-empty winning, are the fallback for an Issue with no
+    # assignee (source `_display_assignee`, owner request 2026-10-26); they
+    # never override the Issue's own assignees.
     assignee_fields: tuple[Text, ...] = ("SDE Assignee", "Assignees")
     company_fields: tuple[Text, ...] = ("Company",)
     sales_fields: tuple[Text, ...] = ("Sales",)
     instrument_fields: tuple[Text, ...] = ("Production",)
-    # The key given to work that started on the board and never carried one
-    # of the workbook's own, as `GH-63`.
+    # Kept so older Host settings load. Since 2026-10-26 every ticket is keyed
+    # by its GitHub Issue (`#123`), so no key is composed from a prefix.
     board_key_prefix: Symbol = "GH"
-    # Only items whose title carries `[<prefix>-n]` are reported (source
-    # Workflow 11 reads `[GTM-123]`); None also reports board-only work
-    # under `board_key_prefix`.
+    # The old Jira key a migrated Issue's title may still carry, `[GTM-123]`.
+    # It is kept as the item's optional `jira_key` and stripped from the
+    # summary; it never selects and never keys a row (source
+    # `_original_key`). None accepts any `[ABC-n]` at the head of a title.
     tracked_key_prefix: Symbol | None = "GTM"
+    # Which sheet a run writes. `week` follows the workbook since the move to
+    # GitHub: the week's own sheet (`2026_43W`), made empty when missing and
+    # never seeded from an older week whose `GTM-n` keys no longer match
+    # (source `_report_sheet_name`). `temp` is the older scratch sheet seeded
+    # from the latest week, kept as a way back.
+    sheet_target: Literal["week", "temp"] = "week"
     # Project statuses that leave the report, compared case-insensitively.
     closed_statuses: tuple[Text, ...] = ("closed", "close", "done")
     # Canonical marker -> synonyms; None means the observed defaults.
@@ -223,10 +245,20 @@ class ReportItem(Contract):
     source moved from Jira to a GitHub Projects board in 2026-09, and
     nothing downstream of this contract had to know."""
 
-    key: Symbol
+    key: ReportKey
+    #: The GitHub Issue behind the key: `owner/repo` and its number. Empty
+    #: for an item from a source that is not GitHub.
+    repository: str = ""
+    number: int | None = Field(default=None, ge=1, strict=True)
+    #: The old Jira key a migrated title still carries, if any. Metadata only.
+    jira_key: str = ""
     summary: str = ""
     status: str = ""
     assignee: str = ""
+    #: Where `assignee` came from: the Issue's own assignees, the Project's
+    #: `SDE Assignee` field when the Issue has none (source
+    #: `_display_assignee`), or neither.
+    assignee_source: Literal["issue", "project_field", "none", ""] = ""
     #: None means a legacy source did not supply Issue assignees; () means
     #: GitHub explicitly reports none. Mail counts the latter as Unassigned.
     #: Kept separate from the Project Assignee text used by the workbook.
@@ -243,9 +275,10 @@ class ReportItem(Contract):
 
 
 class SheetState(Contract):
-    """The scratch sheet as it stands, or the seed sheet when the scratch
-    sheet is absent: what the plan needs to decide what to write. `digest`
-    is over the scratch sheet's own rows and is the evidence's "before"."""
+    """The sheet a run writes as it stands (the week's own sheet, or the
+    scratch sheet), or the seed sheet when the scratch sheet is absent: what
+    the plan needs to decide what to write. `digest` is over the target
+    sheet's own rows and is the evidence's "before"."""
 
     headers: tuple[str, ...]
     existing: dict[str, str] = {}
@@ -254,6 +287,9 @@ class SheetState(Contract):
     scratch_present: StrictBool
     source_sheet: str | None = None
     digest: Sha256
+    #: The sheet a writer writes. None is a state read before the week's own
+    #: sheet was the target, which means the configured scratch sheet.
+    target_sheet: Text | None = None
 
     @model_validator(mode="after")
     def a_source_when_read(self) -> Self:
@@ -266,7 +302,7 @@ class WeeklyRow(Contract):
     """A weekly-sheet row. `Comments` is deliberately absent: it is a
     hand-maintained log and is only ever prepended to."""
 
-    key: Symbol
+    key: ReportKey
     summary: str = ""
     company: str = ""
     status: str = ""
@@ -280,14 +316,14 @@ class WeeklyRow(Contract):
 
 
 class CommentOperation(Contract):
-    key: Symbol
+    key: ReportKey
     text: Text
     markers: tuple[str, ...]
     line_count: int = Field(ge=1, strict=True)
 
 
 class SkippedComment(Contract):
-    key: Symbol
+    key: ReportKey
     reason: Text
 
 
@@ -295,7 +331,7 @@ class Remark(Contract):
     """A block already at the top of the cell that only needs its colour
     back after the run's reset."""
 
-    key: Symbol
+    key: ReportKey
     text: Text
 
 
@@ -321,7 +357,7 @@ class WeeklyReportPlan(Contract):
     #: Items whose comment thread was longer than one page of the source's
     #: answer. Named on the plan, because a thread read short is a week
     #: reported wrong and the plan is what a reader checks.
-    truncated_threads: tuple[Symbol, ...] = ()
+    truncated_threads: tuple[ReportKey, ...] = ()
     # The scratch sheet as it stood when this was planned. A writer that finds
     # a different digest is looking at a sheet somebody has changed since.
     sheet_digest: Sha256
@@ -333,6 +369,8 @@ class WeeklyReportPlan(Contract):
     # The Jira site the key cells link to, taken from the issues themselves.
     #: Kept for a plan made before rows carried their own link.
     browse_base: Text | None = None
+    #: The sheet this plan writes; None is the configured scratch sheet.
+    target_sheet: Text | None = None
     preview: str
 
     @model_validator(mode="after")
@@ -364,7 +402,7 @@ class FailedComment(Contract):
     reported these rather than failing the week's report over one cell, and
     so does this; they are in the evidence either way."""
 
-    key: Symbol
+    key: ReportKey
     reason: Text
 
 
@@ -422,7 +460,7 @@ class WeeklyMailDrafted(Contract):
     counted: int = Field(ge=0, strict=True)
     # Named rather than counted: fifty-nine items vanishing from a week with
     # only a number to show for it is how a wrong week goes unnoticed.
-    excluded: tuple[Symbol, ...] = ()
+    excluded: tuple[ReportKey, ...] = ()
     # Whether the count was narrowed to items somebody worked on, so a reader
     # of the record knows which of two questions these numbers answer.
     activity_required: StrictBool = True

@@ -534,6 +534,22 @@ def parse_jira_datetime(value: str | None) -> _dt.datetime | None:
 REPORT_TIMEZONE = _dt.timezone(_dt.timedelta(hours=8))
 
 
+def report_day(moment: _dt.datetime) -> _dt.date:
+    """The day a moment falls on for the team: Taiwan time.
+
+    Jira sent `+0800`, so its own offset already was Taiwan time and this
+    changes nothing for it. GitHub sends UTC (`Z`), where Monday 07:00 in
+    Taipei is still Sunday; the source's own rule is that a Taipei team's
+    week is the Taipei week ("do not fix it to UTC"), and its date-only
+    `startTime`/`endTime` are Taipei days, so a named week and the same days
+    given as `startTime`/`endTime` select the same comments. A moment without
+    an offset is taken as written.
+    """
+    if moment.tzinfo is None:
+        return moment.date()
+    return moment.astimezone(REPORT_TIMEZONE).date()
+
+
 def parse_report_time(value: Any, *, end: bool = False) -> _dt.datetime | None:
     """A report window bound (source `github_weekly_report._parse_report_time`).
 
@@ -562,8 +578,8 @@ def select_comments_in_window(
     start: _dt.date | None = None,
     end: _dt.date | None = None,
 ) -> list[Mapping[str, Any]]:
-    """Comments created within `start`..`end` inclusive, oldest first, in the
-    timestamp's own offset. Comments without a parsable timestamp are kept:
+    """Comments created within `start`..`end` inclusive, oldest first, by
+    their Taiwan-time day (`report_day`). Comments without a parsable timestamp are kept:
     dropping content is worse than including a little extra in a sheet the
     user hand-edits anyway."""
     picked: list[tuple[_dt.datetime, Mapping[str, Any]]] = []
@@ -573,7 +589,7 @@ def select_comments_in_window(
         if created is None:
             undated.append(comment)
             continue
-        day = created.date()
+        day = report_day(created)
         if start is not None and day < start:
             continue
         if end is not None and day > end:
@@ -594,7 +610,7 @@ def extract_week_blocks(
     blocks: list[MarkerBlock] = []
     for comment in select_comments_in_window(comments, start, end):
         created = _comment_created(comment)
-        day = created.date() if created else None
+        day = report_day(created) if created else None
         for block in extract_marker_blocks(comment.get("body"), synonyms):
             blocks.append(MarkerBlock(block.marker, block.raw_marker, block.lines, day))
     return merge_marker_blocks(blocks)

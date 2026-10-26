@@ -185,6 +185,7 @@ def build_plan(
         seed_sheet=sheet.seed_sheet,
         sheet_headers=sheet.headers,
         browse_base=_browse_base(issues),
+        target_sheet=sheet.target_sheet,
         preview="pending",
     )
     return plan.model_copy(update={"preview": render_preview(settings, plan, sheet)})
@@ -218,10 +219,15 @@ def render_preview(
         status_col = None
     last_col = rules.column_letter(len(headers))
     window = plan.window
+    target = plan.target_sheet or settings.temp_sheet
+    if sheet.seed_sheet:
+        first = f"1) copy '{sheet.seed_sheet}' -> '{target}' (only if the sheet is missing)"
+    else:
+        first = f"1) create an empty '{target}' at the end (only if the sheet is missing)"
     lines = [
         "# Planned Excel operations -- DRY RUN, nothing was written",
         f"# workbook : {settings.workbook_path}",
-        f"# sheet    : {settings.temp_sheet}",
+        f"# sheet    : {target}",
         f"# week     : {window.week}  ({window.since} .. {window.until})",
         f"# seed     : {sheet.seed_sheet}",
         f"# before   : {plan.sheet_digest}",
@@ -234,7 +240,7 @@ def render_preview(
             else []
         ),
         "",
-        f"1) copy '{sheet.seed_sheet}' -> '{settings.temp_sheet}' (only if the sheet is missing)",
+        first,
         f"2) upsert by Key  rows={len(plan.rows)}"
         f"  (new={len(plan.new_keys)}, update={len(plan.updated_keys)})",
         f"3) read {status_col or '-'}1:{status_col or '-'}<last> fills"

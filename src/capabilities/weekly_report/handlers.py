@@ -13,6 +13,7 @@ import datetime as _dt
 import re
 from collections.abc import Callable, Sequence
 from pathlib import Path
+from typing import Literal
 
 from pydantic import Field
 
@@ -24,6 +25,7 @@ from capabilities.weekly_report.contracts import (
     ReportComment,
     ReportingWindow,
     ReportItem,
+    ReportKey,
     SheetState,
     WeeklyMailDrafted,
     WeeklyReportApplied,
@@ -32,7 +34,7 @@ from capabilities.weekly_report.contracts import (
     WeeklyReportSettings,
 )
 from capabilities.weekly_report.plan import build_plan, resolve_window
-from common.base import Contract, Symbol, Text
+from common.base import Contract, Text
 from common.execution import RequestContext
 from integrations import excel, outlook_draft
 from integrations.com import apartment
@@ -123,9 +125,9 @@ class ResolveWindowHandler:
         )
 
 
-#: A key the workbook already uses, carried in the item's title by the
-#: rebuild: `[GTM-833] ...`. It is what matches a row this report wrote in an
-#: earlier week, so it wins over anything this platform could invent.
+#: The old Jira key a migrated Issue's title carries: `[GTM-833] ...`. Kept
+#: as the item's `jira_key` and stripped from its summary; since every ticket
+#: moved to GitHub it no longer keys a row.
 CARRIED_KEY = re.compile(r"^\s*\[([A-Za-z][A-Za-z0-9_]*-\d+)\]\s*")
 
 
@@ -149,7 +151,7 @@ class ProjectSearchOutput(Contract):
     capped: bool = False
     # Items whose comment thread was longer than one page. Named rather than
     # counted, because a truncated thread is a week reported wrong.
-    truncated: tuple[Symbol, ...] = ()
+    truncated: tuple[ReportKey, ...] = ()
 
 
 class ProjectSearchHandler:
@@ -179,10 +181,14 @@ class ProjectSearchHandler:
         closed = {status.casefold() for status in self.settings.closed_statuses}
         chosen: list[tuple[ProjectItem, tuple[ReportComment, ...]]] = []
         capped = False
-        # Selection follows source Workflow 11 (`github_weekly_report.py`):
-        # a tracked key, not closed, and moved or commented inside the window.
+        primary = _primary_repository(rows)
+        # Selection follows source Workflow 11 (`github_weekly_report.py`, the
+        # revision Hermes runs): every board Issue, whether or not its title
+        # still carries an old Jira key, that is not closed and moved or was
+        # commented inside the window. A row with no issue number (a draft
+        # card, a pull request) is not read.
         for row in rows:
-            if not row.key or not _tracked(row, self.settings):
+            if not row.key:
                 continue
             status = _field(dict(row.fields), self.settings.status_fields)
             if status.strip().casefold() in closed:
@@ -194,7 +200,10 @@ class ProjectSearchHandler:
                 capped = True
                 break
             chosen.append((row, active))
-        found = tuple(_as_item(row, self.settings, active) for row, active in chosen)
+        found = tuple(
+            _as_item(row, self.settings, active, primary_repository=primary)
+            for row, active in chosen
+        )
         truncated = tuple(
             reported.key
             for reported, (row, _) in zip(found, chosen, strict=True)
@@ -223,14 +232,78 @@ class _Window:
                 return False
             return not (self.end_time is not None and moment > self.end_time)
         start = self.comment_since if comments else self.since
-        return start <= moment.date() <= self.until
+        # A day is a Taiwan-time day, as for the named week's own bounds.
+        return start <= rules.report_day(moment) <= self.until
 
 
-def _tracked(row: ProjectItem, settings: WeeklyReportSettings) -> bool:
-    if settings.tracked_key_prefix is None:
-        return True
-    carried = CARRIED_KEY.match(dict(row.fields).get("Title") or row.title)
-    return carried is not None and carried.group(1).startswith(f"{settings.tracked_key_prefix}-")
+def _identity(row: ProjectItem) -> tuple[str, int | None]:
+    """The Issue's repository and number, from the row or its `owner/repo#n`."""
+    if row.repository and row.number is not None:
+        return row.repository, row.number
+    repository, _, number = row.key.rpartition("#")
+    return repository, int(number) if number.isdigit() and int(number) > 0 else None
+
+
+def _primary_repository(rows: Sequence[ProjectItem]) -> str:
+    """The repository most of the board's Issues live in. Its Issues are
+    keyed `#n`, as the source writes them; an Issue from any other repository
+    keeps `owner/repo#n`, so two Issues never share a key."""
+    counts: dict[str, int] = {}
+    for row in rows:
+        repository, number = _identity(row)
+        if repository and number is not None:
+            counts[repository] = counts.get(repository, 0) + 1
+    if not counts:
+        return ""
+    return min(counts, key=lambda name: (-counts[name], name))
+
+
+def issue_key(repository: str, number: int, primary_repository: str) -> str:
+    """`#123` for the board's own repository, `owner/repo#123` otherwise
+    (source `_github_ticket_id`)."""
+    if not repository or repository == primary_repository:
+        return f"#{number}"
+    return f"{repository}#{number}"
+
+
+def _jira_key(title: str, settings: WeeklyReportSettings) -> str:
+    """The old Jira key a migrated title carries, or "" (source
+    `_original_key`, which finds `[GTM-n]` anywhere in the title)."""
+    prefix = settings.tracked_key_prefix
+    if prefix is None:
+        carried = CARRIED_KEY.match(title)
+        return carried.group(1) if carried else ""
+    found = re.search(rf"\[({re.escape(prefix)}-\d+)\]", title)
+    return found.group(1) if found else ""
+
+
+#: Several names in one Project text field.
+_NAME_SPLIT = re.compile(r"[,，;]")
+
+AssigneeSource = Literal["issue", "project_field", "none"]
+
+
+def _assignee(
+    row: ProjectItem, fields: dict[str, str], settings: WeeklyReportSettings
+) -> tuple[str, tuple[str, ...], AssigneeSource]:
+    """Who a ticket is assigned to, the people it counts for, and where that
+    came from: the Issue's assignees by name (the login when a profile has no
+    name), else the Project's `SDE Assignee` field (source
+    `_display_assignee`)."""
+    names = tuple(
+        name.strip()
+        for name in (row.issue_assignee_names or row.issue_assignees)
+        if name and name.strip()
+    )
+    if names:
+        return ", ".join(names), tuple(dict.fromkeys(names)), "issue"
+    written = _field(fields, settings.assignee_fields).strip()
+    if written:
+        people = tuple(
+            dict.fromkeys(part.strip() for part in _NAME_SPLIT.split(written) if part.strip())
+        )
+        return written, people, "project_field"
+    return "", (), "none"
 
 
 #: Migrated issues keep the old Excel weekly log under this heading, as
@@ -281,6 +354,8 @@ def _as_item(
     row: ProjectItem,
     settings: WeeklyReportSettings,
     comments: Sequence[ReportComment] | None = None,
+    *,
+    primary_repository: str | None = None,
 ) -> ReportItem:
     """One board row as the report reads it.
 
@@ -291,23 +366,27 @@ def _as_item(
     """
     fields = dict(row.fields)
     title = fields.get("Title") or row.title
-    carried = CARRIED_KEY.match(title)
-    if carried:
-        key = carried.group(1)
-        summary = title[carried.end() :].strip()
-    else:
-        # Work that started on the board and never had a key of its own. The
-        # issue number is what makes it one row rather than all of them:
-        # a row with no number at all is not read (see `tracked` above).
-        number = row.key.rsplit("#", 1)[-1]
-        key = f"{settings.board_key_prefix}-{number}"
-        summary = title.strip()
+    repository, number = _identity(row)
+    if number is None:
+        # Only an Issue is ever selected (see the search above).
+        raise CapabilityRefused("github_bad_reply")
+    primary = repository if primary_repository is None else primary_repository
+    jira_key = _jira_key(title, settings)
+    summary = title.strip()
+    if jira_key:
+        # Source `_summary_from_title`: only a leading `[GTM-n]` is cut.
+        summary = re.sub(rf"^\[{re.escape(jira_key)}\]\s*", "", summary).strip()
+    assignee, people, source = _assignee(row, fields, settings)
     return ReportItem(
-        key=key,
+        key=issue_key(repository, number, primary),
+        repository=repository,
+        number=number,
+        jira_key=jira_key,
         summary=summary,
         status=_field(fields, settings.status_fields),
-        assignee=", ".join(row.issue_assignees),
-        issue_assignees=row.issue_assignees,
+        assignee=assignee,
+        assignee_source=source,
+        issue_assignees=people,
         company=_field(fields, settings.company_fields),
         sales=_field(fields, settings.sales_fields),
         instrument=_field(fields, settings.instrument_fields),
@@ -349,14 +428,21 @@ class ReadScratchSheetHandler:
 
     def _read(self, week: str) -> SheetState:
         path = Path(self.settings.workbook_path)
-        scratch = self.settings.temp_sheet
+        week_sheet = self.settings.sheet_target == "week"
+        # The week's own sheet, as the workbook has been kept since the move
+        # to GitHub, or the older scratch sheet.
+        scratch = week if week_sheet else self.settings.temp_sheet
         before = rules.parse_week_name(week)
 
         def choose(names: tuple[str, ...]) -> str | None:
-            return scratch if scratch in names else rules.latest_weekly_sheet(names, before=before)
+            if scratch in names:
+                return scratch
+            # The week's sheet starts empty: an older week's rows carry keys
+            # that are not GitHub Issues (source `run`, "do not seed").
+            return None if week_sheet else rules.latest_weekly_sheet(names, before=before)
 
         names, source, read_headers, rows = excel.read_chosen_sheet(path, choose)
-        seed = rules.latest_weekly_sheet(names, before=before)
+        seed = None if week_sheet else rules.latest_weekly_sheet(names, before=before)
         present = scratch in names
         if source is None:
             return SheetState(
@@ -365,6 +451,7 @@ class ReadScratchSheetHandler:
                 seed_sheet=None,
                 scratch_present=False,
                 digest=digest_rows((), ()),
+                target_sheet=scratch,
             )
         # The digest is of the sheet as it stands, headers as read; the
         # column contract stands in only for the plan's own lookups.
@@ -394,6 +481,7 @@ class ReadScratchSheetHandler:
             # The digest is of the scratch sheet as it stands: when it is
             # absent there is nothing to have changed.
             digest=digest_rows(read_headers, rows) if present else digest_rows((), ()),
+            target_sheet=scratch,
         )
 
 
@@ -421,7 +509,7 @@ class PlanInput(Contract):
     window: ReportingWindow
     issues: tuple[ReportItem, ...] = ()
     capped: bool = False
-    truncated_threads: tuple[Symbol, ...] = ()
+    truncated_threads: tuple[ReportKey, ...] = ()
     sheet: SheetState
 
 
@@ -475,7 +563,7 @@ class ApplyHandler:
             return WeeklyReportApplied(
                 week=item.plan.window.week,
                 workbook=self.settings.workbook_path,
-                sheet=self.settings.temp_sheet,
+                sheet=item.plan.target_sheet or self.settings.temp_sheet,
                 digest_before=item.plan.sheet_digest,
                 digest_after=item.plan.sheet_digest,
                 inserted=0,
@@ -570,33 +658,11 @@ class MailHandler:
                 counted=0,
                 skipped=True,
             )
-        activity = effort.active_items(
-            issues,
-            window.since,
-            window.until,
-            required=self.settings.mail_requires_activity,
+        draft, activity = compose_draft(
+            self.settings, window, issues, self._chart_root / window.week
         )
         counted = activity.counted
-        # The picture is written beside the draft rather than into it: an
-        # attachment is a file on disk, and one this run wrote is one it can
-        # name in its evidence.
-        picture = chart.composite_for(counted)
-        images, cid = outlook_draft.images_for(picture, self._chart_root / window.week)
-        draft = MailDraft(
-            subject=mail.subject(window, prefix=self.settings.mail_subject_prefix),
-            html_body=mail.build_html(
-                window,
-                counted,
-                chart_cid=cid,
-                matched=len(issues),
-                project=self.settings.project,
-                activity_required=activity.required,
-                prefix=self.settings.mail_subject_prefix,
-            ),
-            to=outlook_draft.recipients(self.settings.mail_to),
-            cc=outlook_draft.recipients(self.settings.mail_cc),
-            images=images,
-        )
+        images = draft.images
         try:
             receipt = self._writer().save(draft)
         except DraftError as error:
@@ -621,6 +687,45 @@ class MailHandler:
                 prefix=self.settings.mail_subject_prefix,
             ),
         )
+
+
+def compose_draft(
+    settings: WeeklyReportSettings,
+    window: ReportingWindow,
+    issues: Sequence[ReportItem],
+    chart_dir: Path,
+) -> tuple[MailDraft, effort.Activity]:
+    """The week's mail as the draft carries it, its chart written into
+    `chart_dir`, and which tickets it counted. Shared by the mail step and
+    the offline preview, so the preview is the draft body and not a copy."""
+    activity = effort.active_items(
+        issues,
+        window.since,
+        window.until,
+        required=settings.mail_requires_activity,
+    )
+    counted = activity.counted
+    # The picture is written beside the draft rather than into it: an
+    # attachment is a file on disk, and one this run wrote is one it can
+    # name in its evidence.
+    picture = chart.composite_for(counted)
+    images, cid = outlook_draft.images_for(picture, chart_dir)
+    draft = MailDraft(
+        subject=mail.subject(window, prefix=settings.mail_subject_prefix),
+        html_body=mail.build_html(
+            window,
+            counted,
+            chart_cid=cid,
+            matched=len(issues),
+            project=settings.project,
+            activity_required=activity.required,
+            prefix=settings.mail_subject_prefix,
+        ),
+        to=outlook_draft.recipients(settings.mail_to),
+        cc=outlook_draft.recipients(settings.mail_cc),
+        images=images,
+    )
+    return draft, activity
 
 
 PLAN_OUTPUT = WeeklyReportPlan
