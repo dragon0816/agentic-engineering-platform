@@ -4743,3 +4743,44 @@ Code: `AgentProfile` in `src/agent/contracts.py`; `MultiAgentSettings` in
   carries `delegations: <running count>`, and the turn's progress snapshot carries
   `delegations_running` (both only when non-zero). Sub-runs are not persisted; rule 19's restart
   check already waits for the turn.
+
+### Delegation progress lines, 委派紀錄 and the Settings switch (V1, person-facing)
+
+Code: `src/agent/turn_progress.py` (`TurnProgress.delegation_started`, `SubAgentProgress`,
+`delegation_lines`); `src/host_runtime/delegation_record.py`; `src/host_runtime/multi_agent_switch.py`;
+`ConversationMessage.delegations` (`src/host_runtime/conversations.py`); the page
+(`src/host_runtime/web_page.py`); Telegram (`src/channels/telegram.py`). Tests:
+`tests/test_multi_agent_ui.py`. Additive: a turn without a delegation shows and stores exactly what
+it did before.
+
+- **Progress hook** (for the core's `DelegationService`): `TurnProgress.delegation_started(profile_key,
+  objective, *, read_only) -> SubAgentProgress` opens one sub-agent line under the running turn. The
+  sub-run sets the returned object as `TURN_PROGRESS` (instead of `None`), so its own `set_limits`,
+  `tool_started`, `tool_finished` count on its line, never on the parent's (`begin_pass` does not reset
+  it: the whole sub-run is counted); `finish(status)` takes a `DelegationResult.status` when it ends. A
+  `SubAgentProgress` cannot open a line itself (depth 1). `delegation_changed(±1)` keeps working; the
+  snapshot's `delegations_running` is the larger of that counter and the running lines, so a caller
+  reporting both is not counted twice.
+- **Snapshot** (`/api/conversations/progress`, only to the turn's own actor): `delegations` (absent when
+  the turn started none), at most 6, each `{index, profile: "namespace/name", objective, status:
+  "running" | "done" | "needs_input" | "awaiting_approval" | "failed", label, read_only, tool_count,
+  tool_cap, elapsed_s}`. `objective` is the one deliberate exception to "names and numbers only": the
+  first 60 characters of the objective the parent model wrote, on one line, credential-shaped text
+  cut out (`SECRET_PATTERN`). Telegram's status message adds `delegation_lines` (one line per
+  sub-agent and its objective) under the same throttle (at most one edit per second per chat).
+- **委派紀錄** (`delegation_record.records_from`): from the turn's `agent__delegate` executions (host
+  data `delegation`, read as JSON); a refusal (the contract's refusal codes: no sub-run) is left out;
+  at most 6. Each record: `{profile, status, summary (≤ 280 characters, one line), validated,
+  artifacts: [{kind, id, name, status?, path?}], tokens: {input, output, model_calls}, tool_calls
+  (count), elapsed_s, failure_code?, question?, host_note?}`. A `file` artifact's `path` is resolved
+  through the session ledger for this session and actor only; Agent Web lists those files on the
+  answer (`attachments`) so the existing token-checked file viewer opens them. Stored as
+  `ConversationMessage.delegations` (≤ 6, assistant messages only; default empty). Telegram appends
+  `text_lines(records)` ("委派紀錄", then per sub-agent its status, time, tokens, summary or question,
+  and artifact ids) before the task result summary; a long reply follows the existing file fallback.
+- **Settings switch**: `GET /api/settings/multi-agent` → `{ok, supported, writable, enabled (saved in
+  host.json), running (what the running Agent read at start), restart_needed}`; `POST` `{"enabled":
+  bool}` writes `multi_agent.enabled` through `CompanyHostConfiguration` (the rest of host.json
+  unchanged) and answers the same shape, or 409 with `multi_agent_settings_invalid`,
+  `settings_read_only` (no host.json in this launch mode) or `multi_agent_unsupported` (a contract
+  without the field). It never changes the running configuration: the flag applies after a restart.

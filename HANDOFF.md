@@ -1,6 +1,21 @@
 # Handoff
 
-Updated: 2026-10-27 (Asia/Taipei), by Claude Code (multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-27 (Asia/Taipei), by Claude Code (multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+
+## Multi-agent V1: Agent Web / Telegram presentation, Settings switch, baseline benchmark (2026-10-27, Claude Code) — latest
+
+- Commits on main (see `git log`); not pushed, Agent Web not restarted, no real bot or hardware, live benchmark
+  not run. Row in `docs/TASKS.md` (Multi-agent section); decision `docs/DECISIONS.md` 2026-10-27 "Multi-agent V1:
+  what the person sees…"; contract subsection at the end of `docs/CONTRACTS.md`; user guide §4.12.
+- Built: sub-agent lines in the live progress (`turn_progress.delegation_started` → `SubAgentProgress`), the
+  collapsible 委派紀錄 under answers (`host_runtime/delegation_record.py`, `ConversationMessage.delegations`),
+  Telegram status lines and reply record, Settings 「多 Agent 委派」 (`host_runtime/multi_agent_switch.py`,
+  `/api/settings/multi-agent`), `benchmarks/multi_agent_v1` (7 scenarios, fake mode in tests, live mode for the
+  owner, mock CMP180).
+- The core wires the hook (2a8d5bda): `DelegationService` calls `delegation_started`, sets the line as the
+  sub-run's `TURN_PROGRESS` and calls `finish(status)`; the 委派紀錄 and Telegram record read the tool's host data.
+- Next: the owner's live baseline (README "Live mode": switch on in Settings, check `/api/activity`, restart,
+  run `run.py --mode live`), then set thresholds. Before a restart, check `/api/activity`.
 
 ## Multi-agent V1 core delegation (2026-10-27, Claude Code)
 
@@ -20,7 +35,7 @@ Updated: 2026-10-27 (Asia/Taipei), by Claude Code (multi-agent V1 core delegatio
 - Open: no cancel button; `max_retries` not read; sub-run Workflow runs go to the session ledger, not the local run
   history; GUI / MCP tools are not offered to sub-agents until their `side_effect` is decided.
 
-## Multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn (2026-10-27, Claude Code) — latest
+## Multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn (2026-10-27, Claude Code)
 
 - Commits on main (code+tests 825a5cff, then docs); not pushed, Agent Web not restarted. Row in
   `docs/TASKS.md` (Multi-agent section); decision `docs/DECISIONS.md` 2026-10-27; AGENTS.md rule 21;

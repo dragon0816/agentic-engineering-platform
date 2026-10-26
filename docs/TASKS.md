@@ -3564,3 +3564,20 @@ s-k-20261011T102952` (not published).
   `agents/examples/knowledge-researcher.json` (not installed). `tests/test_delegation.py` (30). Decision
   2026-10-27 "Multi-agent V1 core delegation"; user guide §4.11; telemetry contract.
 - [ ] Owner: live check of V1 delegation with the read-only researcher (`HANDOFF.md`), then the baseline.
+- [x] Multi-agent V1: Agent Web and Telegram presentation, the Settings switch and the baseline benchmark
+  (2026-10-27, Claude Code; the core delegation is a separate row/agent). Live turn progress shows one line per
+  sub-agent (profile, short objective, status, its tool count and time; parallel read-only ones side by side,
+  stacked at 390 px) through a `turn_progress` hook (`delegation_started` → `SubAgentProgress`, set as the
+  sub-run's `TURN_PROGRESS`); the answer keeps a collapsible 「委派紀錄」 (`ConversationMessage.delegations`:
+  profile, status, summary, files opened in the existing viewer, runs, tokens); Telegram's one status message
+  lists the sub-agents (throttle unchanged, ≤ 1 edit/s) and the reply ends with the record lines (long replies use
+  the file fallback). Settings 「多 Agent 委派」 switch: `GET/POST /api/settings/multi-agent` writes host.json
+  `multi_agent.enabled`, says when a restart is still needed. `benchmarks/multi_agent_v1`: the review's 7
+  scenarios (knowledge only, two documents in parallel, coding_v1 T15/T16, business_workflow_lab failure
+  recovery, Bridge safety with a new mock CMP180, INTERNAL routing, multi-user isolation), fake-model mode in
+  `tests/test_multi_agent_benchmark.py`, live mode documented for the owner (not run). User guide §4.12; contract
+  subsection; decision 2026-10-27. Tests `tests/test_multi_agent_ui.py` (16, browser screenshots in
+  `.scratch/multi-agent-ui/`), `tests/test_multi_agent_benchmark.py` (7).
+- [x] Core follow-up: `DelegationService` calls `delegation_started`, sets the returned line as the sub-run's
+  `TURN_PROGRESS` and calls `finish(status)` (core commit 2a8d5bda, through `getattr`).
+- [ ] Owner: the live baseline (`benchmarks/multi_agent_v1/README.md` "Live mode"), then thresholds.
