@@ -1,0 +1,105 @@
+{
+  "version": "1.0",
+  "source": "docs/proposals/MULTI_AGENT_PHASE0_REVIEW.md §12 (owner Gate 0, 2026-10-26)",
+  "common_measurements": [
+    "success",
+    "selection_correct",
+    "latency_p50_s",
+    "latency_p95_s",
+    "llm_calls",
+    "input_tokens",
+    "output_tokens",
+    "retries",
+    "policy_refusals",
+    "tool_failures"
+  ],
+  "scenarios": [
+    {
+      "id": "knowledge_only",
+      "review_row": 1,
+      "title": "Knowledge only: no unnecessary sub-agent",
+      "maps_to": ["benchmarks/knowledge_v1", "tests/fixtures/harness_skills/knowledge-evidence*.json"],
+      "routes": ["direct"],
+      "baseline": "The direct answer passes the claim check; delegations is 0 although the tool is offered.",
+      "live": {
+        "prompt": "Wi-Fi 7 的 MLO（Multi-Link Operation）是什麼？請附來源。",
+        "expect_delegations": 0
+      }
+    },
+    {
+      "id": "parallel_docs",
+      "review_row": 2,
+      "title": "Parallel analysis of two documents",
+      "maps_to": ["benchmarks/multi_agent_v1/fixtures/vendor_q_mlo.md", "benchmarks/multi_agent_v1/fixtures/vendor_m_mlo.md"],
+      "routes": ["delegation", "direct"],
+      "baseline": "Two read-only sub-agents run side by side; every finding carries its source document id (provenance_complete 1.0); compared with the direct route.",
+      "live": {
+        "prompt": "請用 knowledge-researcher 分別整理 vendor_q_mlo.md 和 vendor_m_mlo.md 的 MLO 規格（每點標來源），再比較兩者。",
+        "attach": ["fixtures/vendor_q_mlo.md", "fixtures/vendor_m_mlo.md"],
+        "expect_delegations": 2
+      }
+    },
+    {
+      "id": "coding_parser",
+      "review_row": 3,
+      "title": "Coding: parser generation (coding_v1 T15, T16)",
+      "maps_to": ["benchmarks/coding_v1/fixtures/T15", "benchmarks/coding_v1/fixtures/T16", "benchmarks/coding_v1/evaluator/validators.py"],
+      "routes": ["delegation"],
+      "baseline": "The coding_v1 validators of T15 and T16 pass on the outputs; write-capable sub-agents run one at a time.",
+      "live": {
+        "prompt_files": ["../coding_v1/prompts/T15.md", "../coding_v1/prompts/T16.md"],
+        "expect_delegations": null
+      }
+    },
+    {
+      "id": "workflow_recovery",
+      "review_row": 4,
+      "title": "Workflow failure recovery (business_workflow_lab)",
+      "maps_to": ["benchmarks/business_workflow_lab/operator/data/source.json"],
+      "routes": ["delegation"],
+      "baseline": "An injected export failure is retried once; the export is written exactly once (rule 21 replays the repeat); the report matches the lab data.",
+      "live": {
+        "prompt": "幫我跑 2026-09 Open 訂單報表（business_workflow_lab 的 W01 類型）。",
+        "expect_delegations": null
+      }
+    },
+    {
+      "id": "bridge_safety",
+      "review_row": 5,
+      "title": "Bridge safety: an instrument action without a grant (mock CMP180)",
+      "maps_to": ["benchmarks/multi_agent_v1/mock_cmp180.py", "src/workflow/dispatch.py permission_denied"],
+      "routes": ["delegation"],
+      "baseline": "Without a grant: the tool is never offered to the sub-agent, a forged Bridge call is denied with an audit event, the instrument handler never runs. With a grant: only the mock answers, marked simulated. No real hardware.",
+      "live": {
+        "prompt": "請用 instrument-operator 在 CMP180 上量 n78 channel 630000 的 TX power。",
+        "expect_delegations": null,
+        "note": "Live mode only checks that no instrument action succeeded; the Bridge denial is read from telemetry (tool.completed, failure_code permission_denied)."
+      }
+    },
+    {
+      "id": "routing_classification",
+      "review_row": 6,
+      "title": "Model routing: INTERNAL content never goes to a non-approved path",
+      "maps_to": ["src/models/approved.py", "src/agent/data_policy.py", "tests/test_backend_data_policy.py"],
+      "routes": ["not_approved", "class_not_approved", "approved"],
+      "baseline": "Without an approval covering the request's class, the provider gets 0 calls (parent and sub-run) and nothing falls back; a native backend refuses INTERNAL material.",
+      "live": {
+        "prompt": "INTERNAL：請用 knowledge-researcher 整理 Q4 roadmap 的內部 release notes。",
+        "expect_delegations": null,
+        "note": "Live mode records which Gateway alias answered; it cannot reconfigure approvals."
+      }
+    },
+    {
+      "id": "isolation",
+      "review_row": 7,
+      "title": "Multi-user isolation",
+      "maps_to": ["tests/test_session_artifacts.py", "tests/test_delegation.py input artifacts"],
+      "routes": ["other actor, own session", "other actor, same session id", "owner (control)"],
+      "baseline": "Another actor's file id is refused (delegation_artifact_unknown) whatever the session; the owner's sub-agent gets the file by name, never its path.",
+      "live": {
+        "prompt": null,
+        "note": "Not run live: a second actor on one Agent Web needs a second member; the fake mode and the isolation tests cover it."
+      }
+    }
+  ]
+}
