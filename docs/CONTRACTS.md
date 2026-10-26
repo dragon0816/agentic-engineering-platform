@@ -4622,3 +4622,122 @@ kept 30 days"; rule: `AGENTS.md` 20.
 - **Condensing call**: only when deterministic key results are fewer than two and a step's
   `preview` exists; `ModelRequest` with two messages, `max_output_tokens` 200, input ≤ 3,000
   characters; none without `gateway.router.model`.
+
+## Multi-agent delegation (V1)
+
+Code: `AgentProfile` in `src/agent/contracts.py`; `MultiAgentSettings` in
+`src/host_runtime/contracts.py`; `validate_profile`, `delegation_target` in
+`src/host_runtime/profiles.py`; `src/agent/delegation.py` (contracts, `DelegationService`, the
+`agent__delegate` Host tool); `src/agent/delegation_scope.py` (per-turn state); the sub-run in
+`Gateway.converse` (`src/agent/gateway.py`). Tests: `tests/test_delegation.py`. Decisions:
+`docs/DECISIONS.md` 2026-10-26 "Multi-agent Gate 0 approved (ADR-MA1–MA5)" and 2026-10-27
+"Multi-agent V1 core delegation". Rules: `AGENTS.md` 13, 18, 19, 20, 21.
+
+- **Flag.** `host.json` `multi_agent: {"enabled": false}` (`MultiAgentSettings`, `StrictBool`,
+  default `false`; an older file without the field means off). Off is today's behaviour exactly:
+  no `agent__delegate` tool, `may_delegate_to` still refused with `profile_delegation_unsupported`,
+  no new telemetry, no new fields in `/api/activity`. Changing it needs an Agent Web restart.
+- **`AgentProfile` additions** (all optional; every existing profile file stays valid):
+  - `model_policy`: `"session"` (default, the only V1 value): a sub-agent uses the session's model
+    (`TURN_MODEL`) through the same approved model client. Later values (an alias allowlist inside
+    the approved Gateway, ADR-MA3) will be added as new literals; an unknown value makes the
+    profile invalid (fail closed).
+  - `max_tool_calls`: 1–150, default 20: the sub-run's tool cap (never above the parent turn's).
+  - `time_limit_s`: 1–1800, default 300: the sub-run's wall-clock limit (never beyond the parent
+    turn's remaining time).
+  - `selector_hint`: ≤ 240 characters, optional: what the profile is for, shown to the parent
+    model next to `description`.
+  - `max_turns` (existing, 1–151, default 8) is now enforced as the sub-run's model-turn limit.
+    `max_retries` is not read in V1 (the conversation check's one retry applies).
+- **Activation with the flag on.** `may_delegate_to` is accepted; each target must be installed,
+  `published`, selected (`authorization.allows("agent", …)`), with every Skill and Knowledge it
+  names selected and installed, every capability selected, and the routing endpoint satisfying its
+  `model_requirements` — else `profile_delegation_target_unavailable`. A target's own
+  `may_delegate_to` is ignored (depth 1). In owner mode (no Shared Platform authorization,
+  `local_owner_grants: true`) a delegation target needs no selection: an installed, `published`
+  profile whose Skills and Knowledge are installed qualifies (the owner holds every installed
+  asset); activating a parent profile still needs authorization, as before.
+  `RoutingOutcome` keeps refusing `kind: agent` (ADR-MA1: delegation is a tool call, not a route).
+- **When the tool is offered.** Only with the flag on, on the Gateway backend (CLI backends —
+  Claude Code, Codex, Copilot — never reach the Gateway loop, so they never get it), to a parent
+  turn and never inside a sub-run (depth 1), and only when at least one target is eligible.
+  Eligible targets: the active profile's `may_delegate_to` entries that validate (listed to the
+  model with `description` and `selector_hint`), and any other installed profile that validates
+  when the person's own message names it (`namespace/name` or `name`, case-insensitive; listed by
+  name only). There is no ranker.
+- **`agent__delegate` input** (`DelegationRequest`, JSON schema offered to the model,
+  `additionalProperties: false`):
+  - `profile` (required): `namespace/name` or `namespace/name@version`; without a version it must
+    match exactly one eligible target (`delegation_profile_ambiguous` otherwise);
+  - `objective` (required): 1–4,000 characters, self-contained: the sub-agent sees nothing else
+    from the parent conversation;
+  - `input_artifact_ids` (optional, ≤ 10): ids from this session's ledger (`f<n>` files, or run
+    ids); each must be recorded for this session and actor (`delegation_artifact_unknown`);
+  - `tools` (optional, ≤ 40): tool names to narrow the sub-agent to; never widens.
+- **Effective tools** = the parent turn's installed Skill tools (the Host's registry, already
+  narrowed by an active profile) whose Skill is in the target's `skills`, whose capability is in
+  its `allowed_capabilities` and authorized for the parent actor by `LocalPolicy.authorize` (a
+  Knowledge vault tool also needs its vault in the target's `knowledge`; a Workflow tool needs every
+  step capability allowed and authorized), ∩ `tools` when given. Host tools (authoring, GUI,
+  cards, MCP, forms, memory, attach, delegation) are never offered to a sub-agent in V1. A
+  sub-agent with no effective tools may still answer from the objective; the claim check applies.
+  Read-only: every effective tool is a capability with `side_effect: read` (Workflows are never
+  read-only).
+- **Sub-run.** `Gateway.converse` with the objective as the only message (plus input artifacts:
+  run id, workflow, status and summary; file id, kind and name, and the first 4,000 characters of a
+  text file — never a path), `allowed_tools` = effective tools, `max_turns` = the profile's, the
+  tool cap and time limit above, the profile's description as role guidance, no persona, no
+  memory, no session list, no form or proposal tools. The request keeps the parent's `actor`,
+  `namespace`, `channel` and `session_id` (so an approval card lands in the parent conversation)
+  and gets `trace.request_id` `<parent request id>.d<n>`. Same guards, same approved model client,
+  same claim check and Host-check retry. It shares the parent turn's side-effect record (rule 21).
+  The sub-agent never asks the person: when it needs input it answers with a first line
+  `NEEDS_INPUT: <question>`.
+- **Limits.** Depth 1; at most 3 delegations per parent turn (the 4th is refused,
+  `delegation_limit_reached`); a parent turn's time budget covers its sub-runs.
+- **Parallelism.** When one model reply carries several `agent__delegate` calls and each one's
+  effective tools are all read-only, up to 3 run concurrently (results kept in call order).
+  A delegation with any write-capable tool runs alone, in order, and its writes are serialized by
+  the Bridge exclusive lock as always. The Workflow engine stays sequential.
+- **Time limit and cancellation.** A sub-run stops at its limit (the loop's own check between
+  steps, and a hard stop at the deadline): status `failed`, code `delegation_time_limit`. There is
+  no cancel button in V1.
+- **Writes.** Unchanged policy: in owner mode a model-chosen write becomes an approval request for
+  the parent session (Agent Web approvals / Telegram buttons); the delegation reports
+  `awaiting_approval` with the approval ids; nothing is written before the person's press.
+- **Result** (`DelegationResult`, the tool's host data under `delegation`):
+  - `status`: `succeeded` | `needs_input` | `awaiting_approval` | `failed`;
+  - `profile`: `namespace/name@version`;
+  - `summary`: the sub-agent's answer, Host notes included, capped at 8,000 characters with a
+    visible note (G4);
+  - `findings`: ≤ 20 strings (≤ 500 characters each), the answer's bullet lines;
+  - `question`: set only for `needs_input`;
+  - `artifacts`: `{kind: "run" | "file", id, name, status?}` recorded in the parent session ledger;
+  - `approvals`: approval ids waiting for the person (only for `awaiting_approval`);
+  - `tool_calls`: `{name, status: "succeeded" | "failed" | "awaiting_approval", replayed}` per call;
+  - `tokens`: `{input, output, model_calls}` (`input` / `output` null when the provider reported
+    none);
+  - `read_only`, `validated` (the sub-run's answer passed its Host checks and carries no Host
+    note), `host_note` (why not), `elapsed_s`;
+  - `failure`: `{code, message}`, present exactly when `status` is `failed`.
+
+  Host outcome mapping: `succeeded` → `succeeded`; `awaiting_approval` → `awaiting_approval`;
+  `needs_input` → `failed` with code `delegation_needs_input` (so the parent's answer cannot claim
+  it done); `failed` → `failed` with the code. Host data also carries `delegation_verdict`
+  (`validated` / `not_validated`) and `harness_key`: a not-validated result keeps its text and the
+  parent's final answer gets the Host's G1 note naming it.
+- **Refusal codes** (no sub-run started): `delegation_disabled`, `delegation_depth_exceeded`,
+  `delegation_limit_reached`, `delegation_arguments_invalid`, `delegation_target_not_allowed`,
+  `delegation_target_unavailable`, `delegation_profile_ambiguous`, `delegation_artifact_unknown`,
+  `delegation_time_exhausted`. Run failures carry the sub-run's code (`model_unavailable`,
+  `tool_loop_limit`, `turn_time_limit`, …) or `delegation_time_limit`.
+- **Telemetry** (counts only): run kind `agent_delegation` with `parent_run_id` = the parent
+  turn's run; `run.started` attributes `agent`, `delegation_index`, `tools_effective`, `read_only`,
+  `time_limit_s`; `run.completed` adds `delegation_status`, `failure_code`, `model_turns`,
+  `artifacts`, `validated` and the usual `llm_calls`, `tool_calls`, `input_tokens`,
+  `output_tokens`. The parent turn's `run.completed` adds `delegations` and
+  `delegations_refused`.
+- **Activity.** While a delegation runs, its parent turn's `chat_turn` item in `/api/activity`
+  carries `delegations: <running count>`, and the turn's progress snapshot carries
+  `delegations_running` (both only when non-zero). Sub-runs are not persisted; rule 19's restart
+  check already waits for the turn.
