@@ -5192,6 +5192,65 @@ preview must not need Excel or touch an open workbook).
   guarded: identical GUI actions are also used to poll a window, and MCP tools carry no side-effect metadata. Decide
   per tool before V1 delegation offers them to a sub-agent.
 
+## 2026-10-27 — Multi-agent V1 core delegation (implementation choices)
+
+- **Context:** Gate 0 (2026-10-26, ADR-MA1–MA5 plus read-only parallelism). Contract: `docs/CONTRACTS.md`
+  "Multi-agent delegation (V1)". Code: `src/agent/delegation.py`, `src/agent/delegation_scope.py`, the sub-run in
+  `Gateway.converse`, `validate_profile` / `delegation_target` in `src/host_runtime/profiles.py`,
+  `delegation_catalog` in `src/host_runtime/host.py`. Tests: `tests/test_delegation.py`.
+- **Flag in `host.json`** (`multi_agent.enabled`, default false), read at build time like every other host setting;
+  off leaves the tool list, profile validation, telemetry and `/api/activity` exactly as before. Rejected: an Agent
+  Web settings store (a UI for it is another agent's slice; one place to look is simpler for V1).
+- **Targets without an active profile.** Profile activation needs Shared Platform authorization, so an owner-mode
+  host (no platform) could never have `may_delegate_to`. Decision: an installed profile that validates is a target
+  **only when the person's own message names it** (`namespace/name` or `name`); the active profile's
+  `may_delegate_to` entries are offered to the model with `description` and `selector_hint`. In owner mode a
+  target needs no selection (the owner holds every installed asset, as `LocalPolicy` owner mode already says);
+  its Skills and Knowledge must be installed. Rejected: offering every installed profile to the model (a ranker by
+  another name); refusing delegation on owner-mode hosts (no way to try it on the owner's machine).
+- **Strict activation with the flag on:** every `may_delegate_to` target must validate
+  (`profile_delegation_target_unavailable`), like a missing Skill already fails a profile. A target's own
+  `may_delegate_to` is ignored (depth 1). `RoutingOutcome` still refuses `kind: agent` (ADR-MA1): delegation is a
+  tool call, so the routing refusal did not need lifting.
+- **Effective tools** come from the Gateway's own Skill tool catalog (`Gateway.skill_tools`, the loop's catalog
+  factored out unchanged): Skill in the profile ∩ capability in the profile and authorized for the parent actor by
+  `LocalPolicy.authorize` ∩ vault in the profile's `knowledge` ∩ the requested subset. A Workflow tool is offered
+  when every step capability passes the same test and is never read-only. **No Host tools for sub-agents in V1**:
+  GUI and MCP tools have no `side_effect` yet (P0-2 open item), and forms, cards, memory and attach are
+  person-facing (rule 18). An empty `knowledge` means no vault tool (fail closed, as the active-profile filter).
+- **Minimal context:** the sub-run is `Gateway.converse` with only the objective (and listed artifacts as names,
+  run summaries and the first 4,000 characters of text files — never a path) and a Host-written role. The request
+  keeps the parent's actor, namespace, channel and **session id**, so an owner-mode write's approval request lands in
+  the parent conversation's approvals (Agent Web, Telegram buttons) without a new path; `in_sub_run()` keeps the
+  session list, memory, persona, forms, proposals, the conversation observer and the parent's live progress out.
+- **`needs_input` by text marker** (`NEEDS_INPUT: <question>` as the first line), mapped to a failed Host outcome
+  (`delegation_needs_input`) so the parent's claim check cannot count it as done. Rejected: a special Host tool for
+  the sub-agent (more surface for the same result in V1).
+- **G1 through the parent:** a sub-run answer that failed its own checks keeps its text and note; its Host data
+  carries `delegation_verdict: not_validated` and a `harness_key` (profile + objective digest), and
+  `harness_handoff.unverified` now keys repairs by `harness_key` when present, so another delegation's success does
+  not clear the note. A read-only delegation counts as a read for the "lasting change" claim check.
+- **Parallelism** is in the Gateway loop, not the Workflow engine: before running a reply's calls, the calls whose
+  `HostTool.parallel` predicate says so (read-only delegations) start together (`asyncio.create_task` with
+  `contextvars.copy_context()`, a semaphore of 3); the loop still applies the guards in call order and records
+  results in call order. A delegation with any write-capable tool is not prefetched, so it runs alone in order;
+  its writes are serialized by the Bridge exclusive lock as before.
+- **Time:** the sub-run's `ConversationLimits` carry the profile's tool cap (never above the Host's) and its time
+  limit (at least the contract's 60 s for the loop's own check), and `asyncio.wait_for` stops it at the exact
+  `time_limit_s`, bounded by the parent turn's remaining time. A stop at the deadline cancels the in-flight await;
+  a model call already sent finishes in its thread and is discarded. No cancel UI in V1.
+- **Telemetry:** run kind `agent_delegation` (child of the parent turn's run through the existing `parent_run_id`),
+  tokens per delegation both in the run totals and on the result (`Gateway` notes each sub-run response's usage).
+- **Artifacts:** a sub-run's Workflow runs are recorded in the parent session's ledger by the delegation itself
+  (the parent's `finish_turn` only sees the parent's own tool list); the parent turn's task summary follows the
+  existing rules (the delegation counts as one tool).
+- **Examples:** `agents/engineering-0.2.0.json` (new version with `may_delegate_to`; `engineering.json` 0.1.0
+  untouched) and `agents/examples/knowledge-researcher.json` (read-only; not installed or offered until copied
+  into `assets/agents/`, and its `knowledge` must name the vaults).
+- **Not done in V1:** `max_retries` is not read (the conversation check's single retry applies); sub-agent runs
+  are not added to the Agent's local run history (`state.record_run`), only to the session ledger; no cancel
+  button; Agent Web / Telegram presentation and benchmarks are another agent's slices.
+
 ## 2026-10-27 — Multi-agent V1: what the person sees, the switch and the baseline benchmark
 
 - **Context:** Gate 0 (2026-10-26) and the V1 core ("Multi-agent V1 core delegation"). This slice is the
