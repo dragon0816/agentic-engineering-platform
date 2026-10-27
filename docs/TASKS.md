@@ -3581,3 +3581,13 @@ s-k-20261011T102952` (not published).
 - [x] Core follow-up: `DelegationService` calls `delegation_started`, sets the returned line as the sub-run's
   `TURN_PROGRESS` and calls `finish(status)` (core commit 2a8d5bda, through `getattr`).
 - [ ] Owner: the live baseline (`benchmarks/multi_agent_v1/README.md` "Live mode"), then thresholds.
+- [x] Multi-agent follow-up (2026-10-27, Claude Code, commit 60224666): a read-only sub-agent is retried up to
+  its profile's `max_retries`, only for a failure the model layer marked `retryable`, only while 30 s of its time
+  limit remain; refusals, time-limit stops and write-capable sub-agents are never retried. Tests in
+  `tests/test_delegation.py` (3 new, 33 total).
+- [x] Gateway settings save (2026-10-27, Claude Code, commit 0054e92b): `llm_gateway/config.py` retries a replace
+  Windows refuses for a moment, as the host workspace writer does. Tests `tests/test_llm_gateway_replace_retry.py` (2).
+- [ ] Multi-agent: a cancel button for a running delegation (not built: needs a cancel contract for sub-runs and a
+  decision on partial results; there is no turn cancel in Agent Web either).
+- [ ] Weekly report Workflow manifest "scratch sheet" wording and version bump (not done: the Workflow is the
+  personal report, and CI's bundle guard (`.github/workflows/verify.yml`) names its file and version).
