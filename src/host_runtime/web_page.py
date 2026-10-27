@@ -11848,7 +11848,7 @@ async function biBuildSources() {
       bi.build.sourceId = source.id; el("bi-b-next1").disabled = false; biBuildSave();
       biBuildSteps();
     });
-    const parse = {table: "表格", text: "文字（AI 判讀，之後提供）", unsupported: "尚未支援"};
+    const parse = {table: "表格", text: "文字（AI 判讀）", unsupported: "尚未支援"};
     body.append(bh("tr", "", bh("td", "", radio), bh("td", "", source.name),
       bh("td", "", parse[source.parse] || source.parse),
       bh("td", "", Math.max(1, Math.round(source.size / 1024)) + " KB"),

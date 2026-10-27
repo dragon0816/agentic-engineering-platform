@@ -52,7 +52,9 @@ LEGACY_SCHEMA = "bi.schema/v1.1@1.1.0"
 #: `<workspace>/bi/schemas/` holds installed schema files and
 #: `<workspace>/bi/subscribed/` the subscribed datasets, so no dataset may use them.
 SUBSCRIBED_DIR = "subscribed"
-RESERVED_DATASETS = {"schemas", SUBSCRIBED_DIR}
+#: `schema-drafts` and `benchmarks` hold schema drafts and benchmark reports
+#: (BI ingest, 2026-10-28).
+RESERVED_DATASETS = {"schemas", SUBSCRIBED_DIR, "schema-drafts", "benchmarks"}
 #: A subscribed dataset as the platform names it: `<namespace>/<name>`.
 SUBSCRIBED_RE = re.compile(r"^([a-z0-9]+(?:-[a-z0-9]+)*)/([a-z0-9]+(?:-[a-z0-9]+)*)$")
 SUBSCRIPTION_FILE = "subscription.json"
