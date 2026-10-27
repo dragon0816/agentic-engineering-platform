@@ -1,8 +1,30 @@
 # Handoff
 
-Updated: 2026-10-27 (Asia/Taipei), by Claude Code (multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-27 (Asia/Taipei), by Claude Code (delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## Multi-agent V1: Agent Web / Telegram presentation, Settings switch, baseline benchmark (2026-10-27, Claude Code) — latest
+## Retries, #248, graphify and the push of verified main (2026-10-27, Claude Code) — latest
+
+- Pushed to `origin/main` after full verification of 4a245bc4 in a clean worktree (`C:/aepci-wk/vh-4a245bc4`):
+  ruff check, ruff format --check, mypy (787 files) clean; pytest 4169 passed, 34 skipped.
+- Commits: 0bce059f Atlas integration proposal v0 (docs only); 60224666 read-only sub-agent retried up to its
+  `max_retries` (`Failure.retryable` only, 30 s of the time limit left); 0054e92b gateway settings replace retried
+  on Windows `PermissionError`; 71fe9c7d graphify wiring (see below); 4a245bc4 #248 (stale-reply guard in
+  `biLoadCards` / `biLoadDashboard`, BI UI tests wait for the settled state). Rows in `docs/TASKS.md`.
+- Live state: the multi-agent switch is on in `host.json`, `platform/knowledge-researcher@0.1.0` is installed with
+  `engineering/rs-knowledge@1.0.3`, Agent Web was restarted with no active work (code before these commits).
+- graphify: `CLAUDE.md` `## graphify`, PreToolUse hooks in `.claude/settings.json` call `graphify` from `PATH`;
+  `graphify-out/` and `.claude/settings.local.json` are git-ignored (decision `docs/DECISIONS.md` 2026-10-27).
+  Each clone: `uv tool install graphifyy`, `graphify extract . --code-only` (about 12 minutes here),
+  `graphify hook install` (not run: this session was not permitted to add git hooks). Symbol queries
+  (`graphify explain "DelegationService"`) are precise; loose natural-language queries are not.
+- Open, not reproduced: browser `profile_in_use` on a second start (row in `docs/TASKS.md` with what to record).
+- Owner decisions waiting: delegation cancel contract; GUI/MCP `side_effect` classification; weekly report manifest
+  wording and version bump; Atlas `/v1` slice 1 (`docs/proposals/ATLAS_INTEGRATION_V0.md` §9); BI Knowledge Case
+  B–E (only Case A approved in Knowledge Strategy v1.3) and v1.3 §5.5, ADR-K11 rubric, §7.3.
+- Next: the owner's live delegation trial (「請用 knowledge-researcher 查 …」) after checking `/api/activity`, then
+  the live baseline; restart Agent Web on this code first (rule 19: check `/api/activity`).
+
+## Multi-agent V1: Agent Web / Telegram presentation, Settings switch, baseline benchmark (2026-10-27, Claude Code)
 
 - Commits on main (see `git log`); not pushed, Agent Web not restarted, no real bot or hardware, live benchmark
   not run. Row in `docs/TASKS.md` (Multi-agent section); decision `docs/DECISIONS.md` 2026-10-27 "Multi-agent V1:

@@ -3514,8 +3514,9 @@ s-k-20261011T102952` (not published).
   `may_delegate_to` refusal behind a flag at depth 1, an `agent__delegate` host tool running a
   bounded sub-conversation through the same Gateway loop, artifacts in the parent session ledger,
   no ranker, no parallelism.
-- [ ] Owner Gate 0: approve or change ADR-MA1–MA5, the V1 scope and the open questions (§13 of the
-  review); approved ADRs are then appended to `docs/DECISIONS.md`.
+- [x] Owner Gate 0: approve or change ADR-MA1–MA5, the V1 scope and the open questions (§13 of the
+  review); approved ADRs are then appended to `docs/DECISIONS.md`. Approved 2026-10-26 (`docs/DECISIONS.md`
+  "Multi-agent Gate 0 approved (ADR-MA1–MA5)").
 - [x] Phase 0.5 after Gate 0: G5 cross-domain negative suite, P0-2 per-turn idempotency cache,
   mark G4 done (`docs/HARNESS_DESIGN.zh-TW.md:58`, the G4–G6 row above). Done 2026-10-27 as parts A and B below.
 - [x] Phase 0.5 part A: G5 cross-domain negative suite and G4 bookkeeping (2026-10-27, Claude Code).
@@ -3597,3 +3598,17 @@ s-k-20261011T102952` (not published).
   (27,579 nodes). Decision in `docs/DECISIONS.md` (2026-10-27).
 - [ ] Each developer: `graphify hook install` once per clone (post-commit rebuild; not run here, the
   session was not permitted to add git hooks).
+- [x] #248 flaky BI browser tests (2026-10-27, Claude Code subagent, commit 4a245bc4): `biLoadCards` and
+  `biLoadDashboard` keep only the newest reply (a late unfiltered reply overwrote the `Component` filter);
+  `tests/test_bi_cards_ui.py` waits for the settled state in one step (same predicates, 60 s like the
+  Browser timeout); `tests/test_bi_schemas_ui.py` wait 20 s → 60 s. Under a 14-process CPU load: 5 of 5
+  runs passed (before: 5 of 7 failed).
+- [x] Full verification of main at 4a245bc4 in a clean worktree (2026-10-27): ruff check, ruff format
+  --check, mypy (787 files) clean; pytest 4169 passed, 34 skipped.
+- [ ] Browser `profile_in_use` on a second start (`tests/test_browser.py` signed-in profile,
+  `test_web_capabilities.py` practice site, `test_workflow_preview.py` practice SOP): failed on 2026-10-27,
+  also on base 82bd03f3, while an 11-day-old AEP workspace headless Edge and six orphaned Edge utility
+  processes were alive; passed (3 of 3, 53 s) once they had gone, and still passed with another headless
+  Edge held open. Not reproduced, so `src/integrations/browser.py` is unchanged. If it returns: list
+  `msedge.exe` processes with their `--user-data-dir` before killing anything, and record which lock
+  file (`lockfile` / `SingletonLock`) outlives `Browser.close`.
