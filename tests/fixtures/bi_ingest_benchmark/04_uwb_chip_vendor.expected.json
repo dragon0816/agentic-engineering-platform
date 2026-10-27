@@ -1,0 +1,54 @@
+{
+  "format": "aep.bi.benchmark.expected/v1",
+  "note": "04_uwb_chip_vendor.md",
+  "fictional": true,
+  "covers": ["fact", "inference", "unknown", "duplicate", "missing"],
+  "types": ["Ecosystem", "Technology", "Application", "Competitor", "Opportunity"],
+  "candidates": [
+    {
+      "entity_type": "Ecosystem",
+      "name": "星芯半導體",
+      "aliases": ["StarCore Semi"],
+      "fields": {
+        "role": {"basis": "fact", "evidence": "新的 UWB 晶片", "value": "chipset"},
+        "relationship_to_us": {"basis": "unknown", "why": "原文沒有說他們和我們的關係"}
+      }
+    },
+    {
+      "entity_type": "Technology",
+      "name": "UWB",
+      "aliases": ["Ultra-Wideband"],
+      "fields": {
+        "new_test_requirements": {"basis": "fact", "evidence": "10 公分以內的測距精度驗證"}
+      }
+    },
+    {
+      "entity_type": "Application",
+      "name": "AMR 室內定位",
+      "aliases": ["AMR 定位"],
+      "fields": {
+        "technologies": {"basis": "fact", "evidence": "UWB 晶片", "value": ["UWB"]},
+        "domain": {"basis": "inference", "value": "robotics", "why": "AMR 屬於機器人領域是判斷"}
+      }
+    }
+  ],
+  "duplicates": [
+    {
+      "entity_type": "Ecosystem",
+      "names": ["星芯半導體", "StarCore Semi"],
+      "why": "同一家晶片商的中文與英文名稱"
+    }
+  ],
+  "forbidden": [
+    {
+      "entity_type": "Competitor",
+      "names": ["星芯半導體", "StarCore Semi"],
+      "why": "星芯半導體不賣測試設備，不是競爭對手"
+    },
+    {
+      "entity_type": "Opportunity",
+      "names": [],
+      "why": "對方沒有詢問我們的方案"
+    }
+  ]
+}

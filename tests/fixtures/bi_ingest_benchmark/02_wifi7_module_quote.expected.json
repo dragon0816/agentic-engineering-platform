@@ -1,0 +1,55 @@
+{
+  "format": "aep.bi.benchmark.expected/v1",
+  "note": "02_wifi7_module_quote.md",
+  "fictional": true,
+  "covers": ["fact", "inference", "unknown", "duplicate"],
+  "types": ["Account", "Technology", "Application", "Opportunity"],
+  "candidates": [
+    {
+      "entity_type": "Account",
+      "name": "青嵐通訊",
+      "fields": {
+        "region": {"basis": "unknown", "why": "原文沒有寫客戶所在地區"}
+      }
+    },
+    {
+      "entity_type": "Technology",
+      "name": "Wi-Fi 7",
+      "aliases": ["WiFi 7", "802.11be"],
+      "fields": {
+        "new_test_requirements": {"basis": "fact", "evidence": "320 MHz 頻寬與 MLO"},
+        "standard_body": {"basis": "unknown", "why": "原文沒有寫標準組織；用常識補上 IEEE 是錯的事實"}
+      }
+    },
+    {
+      "entity_type": "Application",
+      "name": "Wi-Fi 7 模組產線測試",
+      "aliases": ["Wi-Fi 7 模組量產測試", "Wi-Fi 7 模組產線測試站"],
+      "fields": {
+        "technologies": {"basis": "fact", "evidence": "Wi-Fi 7 模組", "value": ["Wi-Fi 7"]},
+        "lifecycle": {"basis": "fact", "evidence": "產線測試站", "value": "Production"},
+        "measurement_topics": {"basis": "fact", "evidence": "320 MHz 頻寬與 MLO"}
+      }
+    },
+    {
+      "entity_type": "Opportunity",
+      "name": "青嵐通訊 Wi-Fi 7 產線測試站",
+      "aliases": ["青嵐通訊 Wi-Fi 7 模組產線測試", "青嵐通訊 Wi-Fi 7 模組詢價"],
+      "why": "客戶明確要求報價，有客戶也有需求，可以是商機",
+      "fields": {
+        "account": {"basis": "fact", "evidence": "青嵐通訊", "value": "青嵐通訊"},
+        "applications": {"basis": "fact", "evidence": "Wi-Fi 7 模組的產線測試站"},
+        "deal_stage": {"basis": "inference", "why": "要求報價對應哪個階段是判斷"},
+        "expected_close": {"basis": "unknown", "why": "2027 年第二季是客戶量產時間，不是成交日期"}
+      }
+    }
+  ],
+  "duplicates": [
+    {
+      "entity_type": "Technology",
+      "names": ["Wi-Fi 7", "WiFi 7"],
+      "why": "同一個標準的兩種寫法，必須是一張卡，或標成名稱相近"
+    }
+  ],
+  "forbidden": []
+}

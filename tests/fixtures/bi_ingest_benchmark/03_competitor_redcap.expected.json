@@ -1,0 +1,54 @@
+{
+  "format": "aep.bi.benchmark.expected/v1",
+  "note": "03_competitor_redcap.md",
+  "fictional": true,
+  "covers": ["fact", "inference", "unknown", "duplicate", "missing"],
+  "types": ["Signal", "Competitor", "Technology"],
+  "candidates": [
+    {
+      "entity_type": "Signal",
+      "name": null,
+      "fields": {
+        "date": {"basis": "fact", "evidence": "2026-10-12", "value": "2026-10-12"},
+        "summary": {"basis": "fact", "evidence": "發表新一代 5G NR RedCap 綜測儀"},
+        "so_what": {"basis": "inference"}
+      }
+    },
+    {
+      "entity_type": "Competitor",
+      "name": "衡測儀器",
+      "aliases": ["衡測"],
+      "fields": {
+        "product_lines": {"basis": "fact", "evidence": "HX-500"},
+        "pricing_position": {
+          "basis": "inference",
+          "value": "low",
+          "why": "價格只是業界傳聞，官方沒有公布，只能是推論"
+        },
+        "weaknesses": {"basis": "unknown", "why": "原文沒有談對手的弱點"}
+      }
+    },
+    {
+      "entity_type": "Technology",
+      "name": "5G NR RedCap",
+      "aliases": ["RedCap", "NR RedCap"],
+      "fields": {
+        "maturity": {"basis": "unknown"}
+      }
+    }
+  ],
+  "duplicates": [
+    {
+      "entity_type": "Competitor",
+      "names": ["衡測儀器", "衡測"],
+      "why": "同一家競爭對手的全名與簡稱"
+    }
+  ],
+  "forbidden": [
+    {
+      "entity_type": "Competitor",
+      "names": ["中舟科技"],
+      "why": "中舟科技是代理商、不生產測試儀器，不是競爭對手"
+    }
+  ]
+}

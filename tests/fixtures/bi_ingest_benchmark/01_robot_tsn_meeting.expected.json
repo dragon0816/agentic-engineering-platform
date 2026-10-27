@@ -1,0 +1,52 @@
+{
+  "format": "aep.bi.benchmark.expected/v1",
+  "note": "01_robot_tsn_meeting.md",
+  "fictional": true,
+  "covers": ["fact", "inference", "unknown", "missing"],
+  "types": ["Signal", "Technology", "Application", "Opportunity"],
+  "candidates": [
+    {
+      "entity_type": "Signal",
+      "name": null,
+      "why": "拜訪紀錄本身是一則客戶訊號；標題由模型決定，所以不比對名稱",
+      "fields": {
+        "date": {"basis": "fact", "evidence": "2026-09-15", "value": "2026-09-15"},
+        "summary": {"basis": "fact", "evidence": "正在評估 TSN"},
+        "so_what": {"basis": "inference", "why": "對我們的意義是推論，原文沒有寫"}
+      }
+    },
+    {
+      "entity_type": "Technology",
+      "name": "TSN",
+      "aliases": ["Time-Sensitive Networking"],
+      "fields": {
+        "standard_body": {"basis": "fact", "evidence": "IEEE 802.1"},
+        "maturity": {"basis": "unknown", "why": "原文沒有談技術成熟度"}
+      }
+    },
+    {
+      "entity_type": "Technology",
+      "name": "EtherCAT",
+      "fields": {
+        "standard_body": {"basis": "unknown", "why": "原文沒有寫 EtherCAT 的標準組織，不能用常識補成事實"}
+      }
+    },
+    {
+      "entity_type": "Application",
+      "name": "機械手臂同步",
+      "aliases": ["產線機械手臂同步", "多台機械手臂同步", "機械手臂同步控制"],
+      "fields": {
+        "technologies": {"basis": "fact", "evidence": "正在評估 TSN", "value": ["TSN"]},
+        "measurement_topics": {"basis": "inference", "why": "需要的量測項目是推論"}
+      }
+    }
+  ],
+  "duplicates": [],
+  "forbidden": [
+    {
+      "entity_type": "Opportunity",
+      "names": [],
+      "why": "對方沒有提出採購或測試需求，不能產生可寫入的商機"
+    }
+  ]
+}

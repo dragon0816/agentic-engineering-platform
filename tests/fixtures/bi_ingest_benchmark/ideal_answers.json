@@ -1,0 +1,180 @@
+{
+  "format": "aep.bi.benchmark.ideal/v1",
+  "about": "A scripted model's ideal answers (output contract aep.bi.extract.v1), one per fictional note; used by tests to show the pipeline and the scorer agree at 100%.",
+  "answers": {
+    "01_robot_tsn_meeting.md": {
+      "candidates": [
+        {
+          "entity_type": "Signal",
+          "name": "北辰機器人評估 TSN",
+          "fields": {
+            "date": {"value": "2026-09-15", "basis": "fact", "quote": "日期：2026-09-15"},
+            "summary": {
+              "value": "北辰機器人正在評估 TSN，讓多台機械手臂同步動作",
+              "basis": "fact",
+              "quote": "他們正在評估 TSN"
+            },
+            "so_what": {
+              "value": "未來可能需要 TSN 時間同步的測試",
+              "basis": "inference",
+              "reason": "評估 TSN 通常會帶出同步測試需求"
+            }
+          }
+        },
+        {
+          "entity_type": "Technology",
+          "name": "TSN",
+          "fields": {
+            "standard_body": {"value": "IEEE 802.1", "basis": "fact", "quote": "IEEE 802.1 工作組"}
+          }
+        },
+        {"entity_type": "Technology", "name": "EtherCAT", "fields": {}},
+        {
+          "entity_type": "Application",
+          "name": "機械手臂同步",
+          "fields": {
+            "technologies": {"value": ["TSN"], "basis": "fact", "quote": "正在評估 TSN"},
+            "measurement_topics": {
+              "value": ["時間同步精度"],
+              "basis": "inference",
+              "reason": "同步動作需要驗證時間同步"
+            }
+          }
+        }
+      ]
+    },
+    "02_wifi7_module_quote.md": {
+      "candidates": [
+        {"entity_type": "Account", "name": "青嵐通訊", "fields": {}},
+        {
+          "entity_type": "Technology",
+          "name": "Wi-Fi 7",
+          "fields": {
+            "new_test_requirements": {
+              "value": ["320 MHz 頻寬", "MLO"],
+              "basis": "fact",
+              "quote": "320 MHz 頻寬與 MLO"
+            }
+          }
+        },
+        {"entity_type": "Technology", "name": "WiFi 7", "fields": {}},
+        {
+          "entity_type": "Application",
+          "name": "Wi-Fi 7 模組產線測試",
+          "fields": {
+            "technologies": {"value": ["Wi-Fi 7"], "basis": "fact", "quote": "Wi-Fi 7 模組"},
+            "lifecycle": {"value": "Production", "basis": "fact", "quote": "產線測試站"},
+            "measurement_topics": {
+              "value": ["320 MHz 頻寬", "MLO"],
+              "basis": "fact",
+              "quote": "320 MHz 頻寬與 MLO"
+            }
+          }
+        },
+        {
+          "entity_type": "Opportunity",
+          "name": "青嵐通訊 Wi-Fi 7 產線測試站",
+          "fields": {
+            "account": {"value": "青嵐通訊", "basis": "fact", "quote": "青嵐通訊來信"},
+            "applications": {
+              "value": ["Wi-Fi 7 模組產線測試"],
+              "basis": "fact",
+              "quote": "Wi-Fi 7 模組的產線測試站"
+            },
+            "deal_stage": {"value": "proposal", "basis": "inference", "reason": "客戶要求報價"}
+          }
+        }
+      ]
+    },
+    "03_competitor_redcap.md": {
+      "candidates": [
+        {
+          "entity_type": "Signal",
+          "name": "衡測儀器發表 RedCap 綜測儀",
+          "fields": {
+            "date": {"value": "2026-10-12", "basis": "fact", "quote": "日期：2026-10-12"},
+            "summary": {
+              "value": "衡測儀器發表 5G NR RedCap 綜測儀 HX-500",
+              "basis": "fact",
+              "quote": "衡測儀器發表新一代 5G NR RedCap 綜測儀"
+            },
+            "so_what": {
+              "value": "RedCap 產線測試可能出現價格競爭",
+              "basis": "inference",
+              "reason": "新產品主打產線且傳聞較低價"
+            }
+          }
+        },
+        {
+          "entity_type": "Competitor",
+          "name": "衡測儀器",
+          "fields": {
+            "product_lines": {"value": ["HX-500"], "basis": "fact", "quote": "「HX-500」"},
+            "pricing_position": {"value": "low", "basis": "inference", "reason": "只是業界傳聞"}
+          }
+        },
+        {"entity_type": "Technology", "name": "5G NR RedCap", "fields": {}}
+      ]
+    },
+    "04_uwb_chip_vendor.md": {
+      "candidates": [
+        {
+          "entity_type": "Ecosystem",
+          "name": "星芯半導體",
+          "fields": {
+            "role": {"value": "chipset", "basis": "fact", "quote": "介紹新的 UWB 晶片"}
+          }
+        },
+        {
+          "entity_type": "Technology",
+          "name": "UWB",
+          "fields": {
+            "new_test_requirements": {
+              "value": ["10 公分以內的測距精度驗證"],
+              "basis": "fact",
+              "quote": "10 公分以內的測距精度驗證"
+            }
+          }
+        },
+        {
+          "entity_type": "Application",
+          "name": "AMR 室內定位",
+          "fields": {
+            "technologies": {"value": ["UWB"], "basis": "fact", "quote": "UWB 晶片，鎖定 AMR 室內定位"},
+            "domain": {"value": "robotics", "basis": "inference", "reason": "AMR 是機器人"}
+          }
+        }
+      ]
+    },
+    "05_amr_private5g_trend.md": {
+      "candidates": [
+        {
+          "entity_type": "Signal",
+          "name": "研究機構預估 AMR 出貨倍增",
+          "fields": {
+            "date": {"value": "2026-07-01", "basis": "fact", "quote": "日期：2026-07-01"},
+            "summary": {
+              "value": "研究機構預估 2028 年工廠用 AMR 出貨量比 2025 年成長一倍",
+              "basis": "fact",
+              "quote": "2028 年工廠用 AMR 的出貨量會比 2025 年成長一倍"
+            },
+            "so_what": {
+              "value": "5G 專網在廠區的漫遊測試需求可能增加",
+              "basis": "inference",
+              "reason": "AMR 漫遊依賴 5G 專網"
+            }
+          }
+        },
+        {
+          "entity_type": "Trend",
+          "name": "AMR 搭配 5G 專網",
+          "fields": {
+            "related_tech": {"value": ["5G 專網"], "basis": "fact", "quote": "5G 專網會是 AMR"},
+            "stage": {"value": "emerging", "basis": "inference", "reason": "仍是預估"}
+          }
+        },
+        {"entity_type": "Technology", "name": "5G 專網", "fields": {}}
+      ]
+    }
+  }
+}
