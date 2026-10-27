@@ -387,7 +387,7 @@ Each phase ends verified in a clean worktree and is pushed to `main` (owner 2026
 |---|---|---|
 | 1 | Contracts; staging store (sources, runs, candidates); commit with version check and key; evidence table; proposal accept/reject; Case A CSV produced as a run | done 2026-10-27 (API only; the page UI is phase 3) |
 | 2 | Schema drafts, diff, local BI versions, dataset upgrade (§5) | done 2026-10-27 (API only; the page UI is phase 3) |
-| 3 | Rule path: Case B recipes, Markdown/Excel readers; the shared stepper; review UI | not started |
+| 3 | Rule path: Case B recipes, Markdown/Excel readers; the shared stepper; review UI | done 2026-10-28 |
 | 4 | AI path: parsing, chunking, extraction, checks, jobs, retry (§7) | not started |
 | 5 | Session B (§9.2), trial comparison | not started |
 | 6 | Session A (§9.1) | not started |

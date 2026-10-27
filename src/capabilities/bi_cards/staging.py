@@ -36,7 +36,11 @@ SOURCES_DIR = "sources"
 #: The data classes a source may carry (`models.data_approval.approved_classes`).
 CLASSIFICATIONS = ("UNCLASSIFIED", "INTERNAL", "CONFIDENTIAL", "RESTRICTED")
 DEFAULT_CLASSIFICATION = "INTERNAL"
-TABLE_TYPES = {".csv": "text/csv", ".tsv": "text/tab-separated-values"}
+TABLE_TYPES = {
+    ".csv": "text/csv",
+    ".tsv": "text/tab-separated-values",
+    ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+}
 TEXT_TYPES = {".txt": "text/plain", ".md": "text/markdown"}
 MAX_RUNS_LISTED = 100
 RUN_KINDS = ("trial", "ingest")
@@ -75,11 +79,26 @@ CREATE TABLE IF NOT EXISTS candidates (
   body TEXT NOT NULL,
   PRIMARY KEY (run_id, id)
 );
+CREATE TABLE IF NOT EXISTS run_layouts (
+  run_id TEXT PRIMARY KEY,
+  body TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS recipes (
+  id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  version INTEGER NOT NULL,
+  body TEXT NOT NULL,
+  by TEXT NOT NULL,
+  at TEXT NOT NULL,
+  PRIMARY KEY (id, version)
+);
 """
 
 
 def parse_kind(name: str) -> str:
-    """How a source is read: `table`, `text` or `unsupported` (phase 1)."""
+    """How a source is read: `table`, `text` or `unsupported`. An Excel
+    workbook is a table source since phase 3 (read through a recipe); a
+    Markdown report stays text, which a recipe can also read for its tables."""
     suffix = PurePath(name).suffix.lower()
     if suffix in TABLE_TYPES:
         return "table"
@@ -333,3 +352,91 @@ class Staging:
                 "SELECT body FROM candidates WHERE run_id = ? ORDER BY seq", (run_id,)
             ).fetchall()
         return [json.loads(r["body"]) for r in rows]
+
+    # -- run layout (the rule path's tables and passes) -------------------
+
+    def put_layout(self, run_id: str, layout: dict[str, Any]) -> None:
+        with self._db(write=True) as db:
+            db.execute(
+                "INSERT OR REPLACE INTO run_layouts (run_id, body) VALUES (?, ?)",
+                (run_id, _dump(layout)),
+            )
+
+    def layout(self, run_id: str) -> dict[str, Any] | None:
+        if not self.exists:
+            return None
+        with self._db() as db:
+            if not _has_table(db, "run_layouts"):
+                return None
+            row = db.execute("SELECT body FROM run_layouts WHERE run_id = ?", (run_id,)).fetchone()
+        return None if row is None else dict(json.loads(row["body"]))
+
+    # -- recipes (BI ingest phase 3) ---------------------------------------
+
+    def save_recipe(self, body: dict[str, Any], *, actor: str) -> dict[str, Any]:
+        """Save a validated recipe: a new name gets an id, the same name the
+        next version. The same content as the latest version is not saved
+        again (`already`), so saving twice does not invent a version."""
+        name = str(body["name"])
+        with self._db(write=True) as db:
+            latest = db.execute(
+                "SELECT * FROM recipes WHERE name = ? ORDER BY version DESC LIMIT 1", (name,)
+            ).fetchone()
+            if latest is not None and json.loads(latest["body"]) == body:
+                return {**self._recipe(latest), "already": True}
+            recipe_id = uuid.uuid4().hex[:12] if latest is None else str(latest["id"])
+            version = 1 if latest is None else int(latest["version"]) + 1
+            db.execute(
+                "INSERT INTO recipes (id, name, version, body, by, at) VALUES (?, ?, ?, ?, ?, ?)",
+                (recipe_id, name, version, _dump(body), actor, now()),
+            )
+            row = db.execute(
+                "SELECT * FROM recipes WHERE id = ? AND version = ?", (recipe_id, version)
+            ).fetchone()
+        return {**self._recipe(row), "already": False}
+
+    @staticmethod
+    def _recipe(row: sqlite3.Row) -> dict[str, Any]:
+        return {
+            "id": row["id"],
+            "name": row["name"],
+            "version": int(row["version"]),
+            "recipe": json.loads(row["body"]),
+            "by": row["by"],
+            "at": row["at"],
+        }
+
+    def recipes(self) -> list[dict[str, Any]]:
+        """The latest version of every recipe, newest first."""
+        if not self.exists:
+            return []
+        with self._db() as db:
+            if not _has_table(db, "recipes"):
+                return []
+            rows = db.execute(
+                "SELECT r.* FROM recipes r WHERE r.version = "
+                "(SELECT MAX(version) FROM recipes WHERE id = r.id) "
+                "ORDER BY r.at DESC, r.rowid DESC"
+            ).fetchall()
+        return [self._recipe(r) for r in rows]
+
+    def recipe_versions(self, recipe_id: str) -> list[dict[str, Any]]:
+        """Every version of one recipe, newest first (empty: unknown)."""
+        if not self.exists:
+            return []
+        with self._db() as db:
+            if not _has_table(db, "recipes"):
+                return []
+            rows = db.execute(
+                "SELECT * FROM recipes WHERE id = ? ORDER BY version DESC", (recipe_id,)
+            ).fetchall()
+        return [self._recipe(r) for r in rows]
+
+
+def _has_table(db: sqlite3.Connection, name: str) -> bool:
+    """A staging store written before phase 3 lacks the newer tables until
+    its next write; reading it must not fail."""
+    found = db.execute(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?", (name,)
+    ).fetchone()
+    return found is not None

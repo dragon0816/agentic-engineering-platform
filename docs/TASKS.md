@@ -3634,7 +3634,7 @@ s-k-20261011T102952` (not published).
   `migration` history, removed fields stay as retired values not searched or shared, kind change / removed
   type / naming change blocked), runs from before an upgrade refused (`schema_changed`). API only.
   Tests: `tests/test_bi_schema_versions.py` (9).
-- [ ] BI ingest phase 3: rule path (Case B recipes, Markdown/Excel readers), shared stepper, review UI.
+- [x] BI ingest phase 3: rule path (Case B recipes, Markdown/Excel readers), shared stepper, review UI.
   - [x] UI part (2026-10-28, Claude Code): Knowledge → BI 卡片 → 「建立與匯入」, six steps on the Wiki's
     stepper (`stepperSet` now drives both): sources (upload, classification), schema (versions, impact
     preview and upgrade, drafts with revisions, revert, publish), method and trial run, review (evidence,
@@ -3642,6 +3642,14 @@ s-k-20261011T102952` (not published).
     result with undo. The older 「匯入 CSV」 tab stays. Browser test `tests/test_bi_build_ui.py`.
   - Note: `tests/test_bi_cards_ui.py` dashboard-order check failed once while a full suite ran in the
     background (wait passed, the next read was empty: the #248 race); passed twice alone right after.
+  - [x] Engine part (2026-10-28, Claude Code): contract "BI rule path: recipes and
+    multi-table sources"; `readers.py` (Markdown pipe tables with headings and line locators, `.xlsx` sheets
+    with ISO dates, CSV/TSV), `recipes.py` (`aep.bi.recipe/v1` strict validation: `mapping_key_unknown`,
+    capped and compiled regexes, `recipe_invalid` naming pass and key; selectors `all`/`0,2-3`/`has:`/`sheet:`;
+    upstream transforms reimplemented; `name_aliases` on names and link targets; merge by card key with list
+    union and per-row evidence; `alias_merged`, `role_conflict` (later pass defaults to skip, pending),
+    `table_unused`, `exploded_row`), versioned recipes per dataset (`/api/bi/recipes`), recipe runs with
+    `method_ref`, `tables[]`, `passes[]`. API only. Tests: `tests/test_bi_rule_path.py` (16, incl. VE-05/VE-06).
 - [ ] BI ingest phase 4: AI path (parsing, chunking, extraction, checks, jobs, retry).
   - [x] Core (2026-10-28, Claude Code): `capabilities/bi_cards/extract.py`: chunks along headings and
     paragraphs with line numbers, one structured model call per chunk with no tools and the source fenced as

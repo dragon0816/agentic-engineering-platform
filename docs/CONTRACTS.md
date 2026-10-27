@@ -4231,6 +4231,85 @@ schema is chosen at creation and never changed" (owner 2026-10-27): a dataset ma
   - A run made before the upgrade cannot be reviewed, rechecked or committed: 409 `schema_changed` (run
     again).
 
+## BI rule path: recipes and multi-table sources (BI ingest phase 3, owner 2026-10-27)
+
+Design: `docs/phases/BI_INGEST.md` §6 and §11 item 11; engine design `docs/phases/BI_CASE_B.md` §3–§5
+(except: a role conflict is decided by the person in review, the earlier pass is the default). Code:
+`src/capabilities/bi_cards/readers.py`, `recipes.py`, `runs.py`, `staging.py` (tables `recipes`,
+`run_layouts`), routes in `src/host_runtime/bi_cards_api.py`. Tests: `tests/test_bi_rule_path.py`. Additive
+to "BI ingest runs": a run without a recipe behaves exactly as in phase 1.
+
+- **Readers.** A source is read into tables `{"index", "title", "columns", "rows": [{"row", "cells"}],
+  "locator"}`, numbered from 0 in file order:
+  - Markdown (`.md`, `.markdown`): pipe tables whose second line is a separator; `title` = the nearest heading
+    above (the file name if none); `row` = the line number; cells lose link targets, bold and code marks, and
+    `<br>` becomes 「; 」.
+  - Excel (`.xlsx`, `.xlsm`; `openpyxl`, read-only, cached values): one sheet = one table, `title` = the sheet
+    name, header = the first non-empty row, `row` = the sheet row; dates become `YYYY-MM-DD`, whole numbers
+    lose `.0`. Sources upload as `content_base64`; `.xlsx` sources report `parse: "table"`.
+  - CSV/TSV: one table, `title` = the file name, `row` = the record number (header = 1).
+  - Anything else with a recipe: 400 `file_type_unsupported`.
+- **Recipe** `aep.bi.recipe/v1` (JSON object): `schema_version` (optional, must be `aep.bi.recipe/v1`),
+  `name` (1–80 characters), optional `description`, `dataset_schema` (`<id>` or `<id>@<version>`; the id must
+  be the dataset's), `name_aliases` ({alias: card name}), `passes` (1–50) of `{"id"
+  ([A-Za-z0-9_-]{1,40}, unique), "tables" (default `all`), "entity_type" (a type of the dataset's schema),
+  "mapping", "description"?}`.
+  - `tables`: `all`; indexes and ranges `0,2-3` (an index the source lacks is a pass warning
+    `table_missing`); `has:colA|colB` (any listed column); `sheet:<name>` (the table whose title is `name`).
+    A pass that selects nothing has the warning `pass_no_table`.
+  - `mapping` keys: Case A's `columns` ({header: field}), `entity_type` (must equal the pass's),
+    `enum_aliases`, `defaults` (new cards only), `skip_rows` ([{`column`, `contains`}]) and the advanced keys
+    `text_replace` ([{`column`, `pairs`: [[regex, replacement]], `into`?}]), `explode` ([{`column`, `into`,
+    `strip_after`?, `set`?}]), `exclude_names` ([name]), `derive` ({target: {`from`: [column], `map`: {regex:
+    value}, `all`?}}), `compose` ({target: template with `{column}`}), `name_aliases` (merged over the
+    recipe's for this pass).
+  - Checks, at save and at every run: an unknown key at any level is 400 `mapping_key_unknown` with
+    `pass_id` (null at the top level) and `key` (e.g. `mapping.explod`); everything else is 400
+    `recipe_invalid` with `pass_id` and `key`: a missing or repeated pass id, an unknown type, a `columns` or
+    `defaults` field the type lacks, a bad selector, a wrong shape, a regex longer than 300 characters or
+    that does not compile.
+- **Transforms** (per pass, upstream `bi_ingest.py` order): `skip_rows` → `text_replace` → `explode` →
+  `exclude_names` → `derive` → `compose`. `explode` splits on `; ； , ， 、 |` and newline outside brackets;
+  a trailing `(…)` becomes `__ticker` (four digits) or `__note`; the part is alias-resolved. `derive` fills an
+  empty target from the first matching pattern (all, joined with 「、」, when `all`). `compose` drops a line
+  whose placeholders are all empty. Then Case A maps and normalises the rows (`columns`, aliases,
+  `enum_aliases`, `defaults`); transform targets that are field names map to that field, `__ticker` maps to
+  `ticker` when the type has it, other `__` columns are not mapped. `name_aliases` resolve `name`,
+  `product_name` and every link target (after dropping a trailing `(…)`, as upstream) before the card key
+  is built. Link targets made by any pass of the recipe count as known.
+- **Recipes per dataset** (`staging.sqlite` table `recipes`: id, name, version, body, by, at):
+  - `POST /api/bi/recipes {"dataset", "recipe"}` → `{"ok": true, "recipe": {"id", "name", "version",
+    "recipe" (the checked body), "by", "at", "already"}}`. A new name gets a 12-hex id and version 1; the same
+    name gets the next version; the same body as the latest version saves nothing (`already: true`). A
+    subscribed dataset: 409 `dataset_read_only`.
+  - `GET /api/bi/recipes?dataset=` → `{"recipes": [<latest version of each>]}` newest first.
+  - `GET /api/bi/recipes/<id>?dataset=` → `{"recipe": <latest>, "versions": [{"version", "by", "at"}]}`
+    newest first; unknown 404 `recipe_unknown`.
+- **Runs with a recipe.** `POST /api/bi/runs` also accepts `"recipe": {...}` (inline) or `"recipe_id"` with an
+  optional `"recipe_version"` (default: latest; unknown 404 `recipe_unknown` / `recipe_version_unknown`). A
+  saved recipe is checked again against the dataset's schema when run. Without either, a CSV/TSV runs as in
+  phase 1, a Markdown source stays 400 `source_not_table`, and an Excel source is 400 `recipe_required`.
+  - `<run>.method_ref` = `recipe:<id>@<version>` or `recipe:inline`; the run view of a recipe run adds
+    `"tables": [{"index", "title", "columns", "rows" (count), "pass_id" (first pass reading it) | null,
+    "pass_ids"}]`, `"passes": [{"id", "entity_type", "tables", "rows_read", "rows_out", "columns" (Case A
+    column mapping), "warnings", "counts" (the run summary over its candidates, as reviewed now)}]` and
+    `"warnings"` (run level: `table_unused` with `table`). Pass warnings: `exploded_row` (`table`, `row`,
+    `count`, one per source row split into several), `table_missing`, `pass_no_table`.
+  - Candidates add `"pass_id"`. Evidence locators: Markdown `{"table", "line", "column"}`, Excel `{"sheet",
+    "row", "column"}`, CSV `{"table", "row", "column"}`; `column` names the source column(s) the value came
+    from (several joined with 「、」 for `derive` and `compose`), and the excerpt is their cell text (at most
+    500 characters). A default value has no evidence (`basis: "unknown"`).
+  - Rows naming the same `(entity_type, canonical_key)`, in one pass or several, are one candidate (its
+    `pass_id` is the first): lists are unioned, an empty field is filled, `body` texts are joined, every row's
+    cell is kept as evidence, and a different scalar keeps the first value with the warning
+    `value_conflict`.
+  - Candidate warnings added: `alias_merged` (a name resolved through `name_aliases`, on the merged
+    candidate), `role_conflict` (the same resolved name made as another type by an earlier pass: the later
+    candidate gets the warning and the default choice skip, `action: "skip"`, `review: "pending"`; the person
+    may still choose `match: {"action": "create"}`).
+  - Review, recheck, commit, cancel and undo are unchanged; one commit covers every pass, and undoing its
+    `import_id` undoes every pass.
+
 ## BI dataset sharing (slice 1, owner 2026-10-22)
 
 Design: `docs/proposals/BI_DATASET_SHARING.md` (§4, §6, §8.5 owner answers, §8.6 trimmed slice 1:

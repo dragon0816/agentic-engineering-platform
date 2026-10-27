@@ -17,6 +17,11 @@ Schema versions (BI ingest phase 2, owner 2026-10-27; contract "BI schema
 drafts and dataset upgrade"): `/api/bi/schema-drafts/*` keeps revisions of a
 draft and publishes one as a new version; `/api/bi/datasets/<name>/schema/*`
 previews and applies moving a dataset to another version of its schema.
+
+The rule path (BI ingest phase 3, owner 2026-10-27; contract "BI rule path:
+recipes and multi-table sources"): `/api/bi/recipes` keeps versioned recipes
+per dataset, and `POST /api/bi/runs` accepts a recipe for a Markdown, Excel
+or CSV/TSV source with several tables.
 """
 
 from __future__ import annotations
@@ -88,7 +93,9 @@ def route(
             "errors": error.errors,
         }
     except BiStoreError as error:
-        status = 404 if error.code.endswith("_unknown") else 400
+        # A recipe's unknown key is a bad request, not a missing resource.
+        missing = error.code.endswith("_unknown") and error.code != "mapping_key_unknown"
+        status = 404 if missing else 400
         if error.code == "dataset_read_only":
             return 409, {"ok": False, "code": error.code, "message": error.message}
         if error.code == "dataset_exists":
@@ -150,6 +157,10 @@ def _route(
             return 200, {"drafts": schema_versions.drafts(workspace)}
         if path.startswith("/api/bi/schema-drafts/"):
             return _draft_read(workspace, path.split("/")[4:], query)
+        if path == "/api/bi/recipes":
+            return 200, {"recipes": Staging(workspace, store.dataset).recipes()}
+        if path.startswith("/api/bi/recipes/") and path.count("/") == 4:
+            return 200, runs.recipe_detail(workspace, store.dataset, path.rsplit("/", 1)[1])
         if path == "/api/bi/runs":
             return 200, {"runs": runs.runs(workspace, store.dataset)}
         if path.startswith("/api/bi/runs/") and path.count("/") == 4:
@@ -243,6 +254,11 @@ def _route(
         return 200, {"ok": True, "source": source}
     if path == "/api/bi/runs":
         return _start_run(workspace, who, given)
+    if path == "/api/bi/recipes":
+        saved = runs.save_recipe(
+            workspace, _dataset(given.get("dataset")), given.get("recipe"), actor=who
+        )
+        return 200, {"ok": True, "recipe": saved}
     parts = path.split("/")
     if path == "/api/bi/schema-drafts":
         made = schema_versions.create_draft(
@@ -278,6 +294,12 @@ def _start_run(workspace: Path, who: str, given: dict[str, Any]) -> Answer:
     mapping = given.get("mapping")
     if mapping is not None and not isinstance(mapping, dict):
         return _error(400, "mapping_invalid", "mapping 必須是 JSON 物件")
+    recipe = given.get("recipe")
+    if recipe is not None and not isinstance(recipe, dict):
+        return _error(400, "recipe_invalid", "recipe 必須是 JSON 物件")
+    version = given.get("recipe_version")
+    if version is not None and (isinstance(version, bool) or not isinstance(version, int)):
+        return _error(400, "recipe_invalid", "recipe_version 必須是整數")
     run = runs.start_rule_run(
         workspace,
         _dataset(given.get("dataset")),
@@ -286,6 +308,9 @@ def _start_run(workspace: Path, who: str, given: dict[str, Any]) -> Answer:
         entity_type=given.get("entity_type") or None,
         mapping=mapping,
         actor=who,
+        recipe=recipe,
+        recipe_id=str(given.get("recipe_id") or "") or None,
+        recipe_version=version,
     )
     return 200, {"ok": True, "run": run}
 

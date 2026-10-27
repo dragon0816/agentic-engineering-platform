@@ -5,8 +5,10 @@ BI ingest phase 1 (`docs/phases/BI_INGEST.md` §4, §8; contract in
 cards in the staging store; nothing reaches the dataset's cards until the
 person accepts candidates and commits. Phase 1 has the rule path for a CSV or
 TSV source, built on the Case A importer, so every value carries its cell as
-evidence. Later phases add the other readers and the AI path; they produce the
-same candidates.
+evidence. Phase 3 adds recipes (`recipes.py`): one Markdown report, Excel
+workbook or CSV/TSV read as several tables (`readers.py`), several passes,
+and the run's tables and passes kept as its layout. The AI path comes later;
+every path produces the same candidates.
 
 Every candidate is evaluated against the cards as they are now: whether it
 matches a card (exactly, or only loosely, which needs the person's choice),
@@ -22,7 +24,7 @@ import io
 from pathlib import Path, PurePath
 from typing import Any
 
-from capabilities.bi_cards import catalog, importer
+from capabilities.bi_cards import catalog, importer, readers, recipes
 from capabilities.bi_cards.schema import FieldDef, Registry, TypeDef, norm_key
 from capabilities.bi_cards.staging import Staging, parse_kind
 from capabilities.bi_cards.store import BiStore, BiStoreError, PlannedRow, now
@@ -229,13 +231,34 @@ def start_rule_run(
     entity_type: str | None,
     mapping: dict[str, Any] | None,
     actor: str,
+    recipe: Any = None,
+    recipe_id: str | None = None,
+    recipe_version: int | None = None,
 ) -> dict[str, Any]:
-    """Run the rule path on a table source; the run ends in `review`."""
+    """Run the rule path on a table source; the run ends in `review`.
+
+    With a recipe (inline, or saved: `recipe_id` and optionally its version)
+    the source may be a Markdown report, an Excel workbook or a CSV/TSV, read
+    as several tables (BI ingest phase 3). Without one, a CSV/TSV is one
+    Case A pass, as in phase 1."""
+    if recipe is not None or recipe_id:
+        return _start_recipe_run(
+            workspace,
+            dataset,
+            kind=kind,
+            source_id=source_id,
+            recipe=recipe,
+            recipe_id=recipe_id,
+            recipe_version=recipe_version,
+            actor=actor,
+        )
     staging = Staging(workspace, dataset)
     staging.store.refuse_write()
     source = staging.source(source_id)
     if source is None:
         raise BiStoreError("source_unknown", "找不到這個來源")
+    if readers.suffix(source["name"]) in readers.EXCEL:
+        raise BiStoreError("recipe_required", "Excel 活頁簿要用配方（recipe）指定每個工作表的轉換")
     if parse_kind(source["name"]) != "table":
         raise BiStoreError("source_not_table", "規則轉換只能讀 CSV / TSV 表格；這個來源不是表格")
     reg = catalog.for_store(staging.store)
@@ -259,6 +282,103 @@ def start_rule_run(
     staging.put_candidates(run_id, found)
     staging.set_status(run_id, "review")
     return run_view(staging, run_id)
+
+
+def resolve_recipe(
+    staging: Staging,
+    reg: Registry,
+    *,
+    recipe: Any,
+    recipe_id: str | None,
+    recipe_version: int | None,
+) -> tuple[dict[str, Any], str]:
+    """(the checked recipe, the run's `method_ref`)."""
+    if recipe is not None:
+        return recipes.validate(recipe, reg), "recipe:inline"
+    versions = staging.recipe_versions(str(recipe_id))
+    if not versions:
+        raise BiStoreError("recipe_unknown", "找不到這個配方")
+    chosen = versions[0]
+    if recipe_version is not None:
+        found = next((v for v in versions if v["version"] == recipe_version), None)
+        if found is None:
+            raise BiStoreError("recipe_version_unknown", f"這個配方沒有第 {recipe_version} 版")
+        chosen = found
+    # Checked again: the dataset's schema may have moved since it was saved.
+    return recipes.validate(chosen["recipe"], reg), f"recipe:{chosen['id']}@{chosen['version']}"
+
+
+def _start_recipe_run(
+    workspace: Path,
+    dataset: str,
+    *,
+    kind: str,
+    source_id: str,
+    recipe: Any,
+    recipe_id: str | None,
+    recipe_version: int | None,
+    actor: str,
+) -> dict[str, Any]:
+    staging = Staging(workspace, dataset)
+    staging.store.refuse_write()
+    source = staging.source(source_id)
+    if source is None:
+        raise BiStoreError("source_unknown", "找不到這個來源")
+    if not readers.readable(source["name"]):
+        raise BiStoreError(
+            "file_type_unsupported", "規則轉換只能讀 Markdown（.md）、Excel（.xlsx）或 CSV/TSV"
+        )
+    reg = catalog.for_store(staging.store)
+    checked, method_ref = resolve_recipe(
+        staging, reg, recipe=recipe, recipe_id=recipe_id, recipe_version=recipe_version
+    )
+    run_id = staging.create_run(
+        kind=kind,
+        schema_ref=reg.ref,
+        source_ids=[source_id],
+        actor=actor,
+        method_ref=method_ref,
+    )
+    try:
+        tables = readers.read_tables(source["name"], staging.source_bytes(source_id))
+        built, layout = recipes.build(
+            staging.store,
+            reg,
+            checked,
+            tables,
+            source_id=source_id,
+            filename=source["name"],
+        )
+        found = [evaluate(staging.store, reg, c) for c in built]
+    except (BiStoreError, importer.ImportError_) as error:
+        staging.set_status(run_id, "failed", error=f"{error.code}: {error.message}")
+        raise
+    staging.put_candidates(run_id, found)
+    staging.put_layout(run_id, layout)
+    staging.set_status(run_id, "review")
+    return run_view(staging, run_id)
+
+
+# -- recipes ---------------------------------------------------------------
+
+
+def save_recipe(workspace: Path, dataset: str, recipe: Any, *, actor: str) -> dict[str, Any]:
+    """Check a recipe against the dataset's schema and save it as the next
+    version of its name."""
+    staging = Staging(workspace, dataset)
+    staging.store.refuse_write()
+    checked = recipes.validate(recipe, catalog.for_store(staging.store))
+    return staging.save_recipe(checked, actor=actor)
+
+
+def recipe_detail(workspace: Path, dataset: str, recipe_id: str) -> dict[str, Any]:
+    versions = Staging(workspace, dataset).recipe_versions(recipe_id)
+    if not versions:
+        raise BiStoreError("recipe_unknown", "找不到這個配方")
+    return {
+        "recipe": versions[0],
+        "versions": [{k: v[k] for k in ("version", "by", "at")} for v in versions],
+    }
 
 
 # -- reading ---------------------------------------------------------------
@@ -294,7 +414,19 @@ def run_view(staging: Staging, run_id: str) -> dict[str, Any]:
     run = staging.run_row(run_id)
     if run is None:
         raise BiStoreError("run_unknown", "找不到這次執行")
-    return {**run, "summary": summary(staging.candidates(run_id))}
+    found = staging.candidates(run_id)
+    view = {**run, "summary": summary(found)}
+    layout = staging.layout(run_id)
+    if layout is not None:
+        # A recipe run: its tables, passes (with counts as reviewed now) and
+        # run-level warnings such as `table_unused`.
+        passes = []
+        for item in layout["passes"]:
+            mine = [c for c in found if c.get("pass_id") == item["id"]]
+            counts = summary(mine)
+            passes.append({**item, "counts": counts})
+        view.update(tables=layout["tables"], passes=passes, warnings=layout["warnings"])
+    return view
 
 
 def runs(workspace: Path, dataset: str) -> list[dict[str, Any]]:
