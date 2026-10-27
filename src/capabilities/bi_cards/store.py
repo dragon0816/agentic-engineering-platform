@@ -17,6 +17,11 @@ from before the binding existed has no `meta` row and is read as
 Reading never creates the database: a preview of an empty dataset leaves
 the workspace byte-for-byte unchanged.
 
+A reviewed ingest run (BI ingest phase 1, owner 2026-10-27) is written by
+`commit_run`: all or nothing, refused when a matched card moved on since the
+review, keyed by the run id (`imports.run_id`) so a retried commit writes
+nothing twice, and with each value's evidence in `evidence`.
+
 A dataset subscribed from the shared platform (BI dataset sharing slice 1,
 owner 2026-10-22) is named `<namespace>/<name>` and lives under
 `<workspace>/bi/subscribed/<namespace>__<name>/`; `subscription.json` there
@@ -32,7 +37,7 @@ import sqlite3
 import uuid
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -111,6 +116,18 @@ CREATE TABLE IF NOT EXISTS imports (
   at TEXT NOT NULL,
   by TEXT NOT NULL,
   undone INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS evidence (
+  seq INTEGER PRIMARY KEY AUTOINCREMENT,
+  card_id TEXT NOT NULL,
+  field TEXT NOT NULL,
+  run_id TEXT NOT NULL,
+  source_id TEXT NOT NULL,
+  source_name TEXT NOT NULL,
+  locator TEXT NOT NULL,
+  excerpt TEXT NOT NULL,
+  basis TEXT NOT NULL,
+  at TEXT NOT NULL
 );
 """
 
@@ -210,6 +227,22 @@ class PlannedRow:
     name: str
     values: dict[str, Any]
     synthetic: bool
+    #: The source of every value; `<file>#row<n>` when empty (Case A).
+    ref: str = ""
+    #: Evidence per field: `{field: [{"source_id", "source_name", "locator",
+    #: "excerpt", "basis"}]}`, recorded for the values written.
+    evidence: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
+
+
+class CardsChanged(BiStoreError):
+    """A commit refused because cards moved on since the review."""
+
+    def __init__(self, cards: list[dict[str, Any]]) -> None:
+        super().__init__(
+            "cards_changed",
+            "有卡片在審核後被修改或新增，沒有寫入任何資料；請重新檢查後再確認",
+            cards=cards,
+        )
 
 
 @dataclass
@@ -250,6 +283,9 @@ class BiStore:
         try:
             if write:
                 connection.executescript(SCHEMA)
+                columns = {r[1] for r in connection.execute("PRAGMA table_info(imports)")}
+                if "run_id" not in columns:  # a dataset from before ingest runs
+                    connection.execute("ALTER TABLE imports ADD COLUMN run_id TEXT")
                 # A dataset written before the binding existed keeps v1.1.
                 connection.execute(
                     "INSERT OR IGNORE INTO meta (key, value) VALUES ('schema', ?)",
@@ -386,6 +422,7 @@ class BiStore:
         with self._db() as db:
             return [
                 {
+                    "id": r["id"],
                     "field": r["field"],
                     "value": _load(r["value"]),
                     "source": {"kind": r["kind"], "ref": r["ref"], "at": r["at"]},
@@ -422,99 +459,255 @@ class BiStore:
                 "INSERT INTO imports (id, filename, entity_type, at, by) VALUES (?, ?, ?, ?, ?)",
                 (result.import_id, filename, entity_type, at, actor),
             )
-            for planned in rows:
-                ref = f"{filename}#row{planned.row}"
-                existing = db.execute(
-                    "SELECT * FROM cards WHERE entity_type = ? AND canonical_key = ?",
+            self._write(db, rows, result, filename=filename, actor=actor, kind=kind, at=at)
+        return result
+
+    def committed_run(self, run_id: str) -> str | None:
+        """The import id an ingest run was committed as; None when it was not."""
+        if not self.exists:
+            return None
+        with self._db() as db:
+            columns = {r[1] for r in db.execute("PRAGMA table_info(imports)")}
+            if "run_id" not in columns:
+                return None
+            row = db.execute("SELECT id FROM imports WHERE run_id = ?", (run_id,)).fetchone()
+        return None if row is None else str(row[0])
+
+    def commit_run(
+        self,
+        run_id: str,
+        rows: Sequence[tuple[PlannedRow, str, int | None]],
+        *,
+        filename: str,
+        actor: str,
+    ) -> ApplyResult:
+        """Write a reviewed run in one transaction. Each row carries its
+        candidate id and the card version the review saw (None: no card then).
+        Any card that moved on refuses the whole commit as `cards_changed`;
+        nothing is written."""
+        at = now()
+        result = ApplyResult(import_id=uuid.uuid4().hex[:12])
+        with self._db(write=True) as db:
+            earlier = db.execute("SELECT id FROM imports WHERE run_id = ?", (run_id,)).fetchone()
+            if earlier is not None:
+                raise BiStoreError("run_committed", "這次執行已經寫入過了", import_id=earlier[0])
+            moved = []
+            for planned, candidate_id, version in rows:
+                card = db.execute(
+                    "SELECT id, version FROM cards WHERE entity_type = ? AND canonical_key = ?",
                     (planned.entity_type, planned.canonical_key),
                 ).fetchone()
-                if existing is None:
-                    card_id = uuid.uuid4().hex[:12]
-                    db.execute(
-                        "INSERT INTO cards (id, entity_type, canonical_key, name, version, "
-                        "synthetic, created, updated, created_by_import) "
-                        "VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?)",
-                        (
-                            card_id,
-                            planned.entity_type,
-                            planned.canonical_key,
-                            planned.name,
-                            int(planned.synthetic),
-                            at,
-                            at,
-                            result.import_id,
-                        ),
+                current = None if card is None else int(card["version"])
+                if current != version:
+                    moved.append(
+                        {
+                            "candidate_id": candidate_id,
+                            "card_id": None if card is None else card["id"],
+                            "name": planned.name,
+                            "expected": version,
+                            "current": current,
+                        }
                     )
-                    created = True
-                else:
-                    card_id = existing["id"]
-                    created = False
-                    if planned.synthetic and not existing["synthetic"]:
-                        db.execute("UPDATE cards SET synthetic = 1 WHERE id = ?", (card_id,))
-                changed = False
-                current = {
-                    r["field"]: r
-                    for r in db.execute("SELECT * FROM fields WHERE card_id = ?", (card_id,))
+            if moved:
+                raise CardsChanged(moved)
+            planned_rows = [planned for planned, _, _ in rows]
+            types = sorted({planned.entity_type for planned in planned_rows})
+            db.execute(
+                "INSERT INTO imports (id, filename, entity_type, at, by, run_id) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (result.import_id, filename, ",".join(types), at, actor, run_id),
+            )
+            self._write(
+                db, planned_rows, result, filename=filename, actor=actor, kind="import", at=at
+            )
+            for planned in planned_rows:
+                card = db.execute(
+                    "SELECT id FROM cards WHERE entity_type = ? AND canonical_key = ?",
+                    (planned.entity_type, planned.canonical_key),
+                ).fetchone()
+                stored = {
+                    r["field"]: r["value"]
+                    for r in db.execute("SELECT * FROM fields WHERE card_id = ?", (card["id"],))
                 }
-                for name, value in planned.values.items():
-                    if value is None:
-                        continue
-                    stored = current.get(name)
-                    new = _dump(value)
-                    if stored is not None and stored["value"] == new:
-                        continue
-                    if stored is not None and stored["kind"] == "human":
-                        pending = db.execute(
-                            "SELECT 1 FROM proposals WHERE card_id = ? AND field = ? AND "
-                            "value = ? AND status = 'pending'",
-                            (card_id, name, new),
-                        ).fetchone()
-                        if pending is None:
-                            db.execute(
-                                "INSERT INTO proposals (card_id, field, value, kind, ref, at, "
-                                "import_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                                (card_id, name, new, kind, ref, at, result.import_id),
-                            )
-                            result.proposals += 1
-                        continue
-                    old_source = (
-                        None
-                        if stored is None
-                        else _dump({k: stored[k] for k in ("kind", "ref", "by", "at")})
-                    )
-                    db.execute(
-                        "INSERT OR REPLACE INTO fields (card_id, field, value, kind, ref, by, at) "
-                        "VALUES (?, ?, ?, ?, ?, ?, ?)",
-                        (card_id, name, new, kind, ref, actor, at),
-                    )
-                    db.execute(
-                        "INSERT INTO history (card_id, field, old, new, kind, ref, by, at, "
-                        "import_id, old_source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                        (
-                            card_id,
-                            name,
-                            None if stored is None else stored["value"],
-                            new,
-                            kind,
-                            ref,
-                            actor,
-                            at,
-                            result.import_id,
-                            old_source,
-                        ),
-                    )
-                    changed = True
-                if created:
-                    result.created += 1
-                elif changed:
-                    db.execute(
-                        "UPDATE cards SET version = version + 1, updated = ? WHERE id = ?",
-                        (at, card_id),
-                    )
-                    result.updated += 1
-                else:
-                    result.unchanged += 1
+                for name, items in planned.evidence.items():
+                    if stored.get(name) != _dump(planned.values.get(name)):
+                        continue  # kept a person's value: the evidence is in the proposal
+                    for item in items:
+                        db.execute(
+                            "INSERT INTO evidence (card_id, field, run_id, source_id, "
+                            "source_name, locator, excerpt, basis, at) "
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            (
+                                card["id"],
+                                name,
+                                run_id,
+                                str(item.get("source_id") or ""),
+                                str(item.get("source_name") or ""),
+                                _dump(item.get("locator") or {}),
+                                str(item.get("excerpt") or ""),
+                                str(item.get("basis") or "fact"),
+                                at,
+                            ),
+                        )
         return result
+
+    def _write(
+        self,
+        db: sqlite3.Connection,
+        rows: Sequence[PlannedRow],
+        result: ApplyResult,
+        *,
+        filename: str,
+        actor: str,
+        kind: str,
+        at: str,
+    ) -> None:
+        """Upsert `rows` into an open write transaction (`apply`, `commit_run`)."""
+        for planned in rows:
+            ref = planned.ref or f"{filename}#row{planned.row}"
+            existing = db.execute(
+                "SELECT * FROM cards WHERE entity_type = ? AND canonical_key = ?",
+                (planned.entity_type, planned.canonical_key),
+            ).fetchone()
+            if existing is None:
+                card_id = uuid.uuid4().hex[:12]
+                db.execute(
+                    "INSERT INTO cards (id, entity_type, canonical_key, name, version, "
+                    "synthetic, created, updated, created_by_import) "
+                    "VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?)",
+                    (
+                        card_id,
+                        planned.entity_type,
+                        planned.canonical_key,
+                        planned.name,
+                        int(planned.synthetic),
+                        at,
+                        at,
+                        result.import_id,
+                    ),
+                )
+                created = True
+            else:
+                card_id = existing["id"]
+                created = False
+                if planned.synthetic and not existing["synthetic"]:
+                    db.execute("UPDATE cards SET synthetic = 1 WHERE id = ?", (card_id,))
+            changed = False
+            current = {
+                r["field"]: r
+                for r in db.execute("SELECT * FROM fields WHERE card_id = ?", (card_id,))
+            }
+            for name, value in planned.values.items():
+                if value is None:
+                    continue
+                stored = current.get(name)
+                new = _dump(value)
+                if stored is not None and stored["value"] == new:
+                    continue
+                if stored is not None and stored["kind"] == "human":
+                    pending = db.execute(
+                        "SELECT 1 FROM proposals WHERE card_id = ? AND field = ? AND "
+                        "value = ? AND status = 'pending'",
+                        (card_id, name, new),
+                    ).fetchone()
+                    if pending is None:
+                        db.execute(
+                            "INSERT INTO proposals (card_id, field, value, kind, ref, at, "
+                            "import_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                            (card_id, name, new, kind, ref, at, result.import_id),
+                        )
+                        result.proposals += 1
+                    continue
+                old_source = (
+                    None
+                    if stored is None
+                    else _dump({k: stored[k] for k in ("kind", "ref", "by", "at")})
+                )
+                db.execute(
+                    "INSERT OR REPLACE INTO fields (card_id, field, value, kind, ref, by, at) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (card_id, name, new, kind, ref, actor, at),
+                )
+                db.execute(
+                    "INSERT INTO history (card_id, field, old, new, kind, ref, by, at, "
+                    "import_id, old_source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    (
+                        card_id,
+                        name,
+                        None if stored is None else stored["value"],
+                        new,
+                        kind,
+                        ref,
+                        actor,
+                        at,
+                        result.import_id,
+                        old_source,
+                    ),
+                )
+                changed = True
+            if created:
+                result.created += 1
+            elif changed:
+                db.execute(
+                    "UPDATE cards SET version = version + 1, updated = ? WHERE id = ?",
+                    (at, card_id),
+                )
+                result.updated += 1
+            else:
+                result.unchanged += 1
+
+    def evidence(self, card_id: str) -> list[dict[str, Any]]:
+        """The evidence recorded for a card's values, newest first."""
+        if not self.exists:
+            return []
+        with self._db() as db:
+            try:
+                rows = list(
+                    db.execute(
+                        "SELECT * FROM evidence WHERE card_id = ? ORDER BY seq DESC", (card_id,)
+                    )
+                )
+            except sqlite3.OperationalError:  # a dataset from before ingest runs
+                return []
+        return [
+            {
+                "field": r["field"],
+                "run_id": r["run_id"],
+                "source_id": r["source_id"],
+                "source_name": r["source_name"],
+                "locator": _load(r["locator"]),
+                "excerpt": r["excerpt"],
+                "basis": r["basis"],
+                "at": r["at"],
+            }
+            for r in rows
+        ]
+
+    def proposal(self, card_id: str, proposal_id: int) -> dict[str, Any] | None:
+        """One pending proposal of a card; None when unknown or closed."""
+        if not self.exists:
+            return None
+        with self._db() as db:
+            row = db.execute(
+                "SELECT * FROM proposals WHERE id = ? AND card_id = ? AND status = 'pending'",
+                (proposal_id, card_id),
+            ).fetchone()
+        if row is None:
+            return None
+        return {"id": row["id"], "field": row["field"], "value": _load(row["value"])}
+
+    def reject_proposal(self, card_id: str, proposal_id: int) -> bool:
+        """Close one pending proposal without touching the card."""
+        self.refuse_write()
+        if not self.exists:
+            return False
+        with self._db(write=True) as db:
+            changed = db.execute(
+                "UPDATE proposals SET status = 'rejected' WHERE id = ? AND card_id = ? "
+                "AND status = 'pending'",
+                (proposal_id, card_id),
+            ).rowcount
+        return bool(changed)
 
     def set_field(
         self,

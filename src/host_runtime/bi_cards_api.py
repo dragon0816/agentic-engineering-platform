@@ -8,6 +8,10 @@ Imports and edits are recorded as `<actor> via web`.
 Each dataset follows the schema it was created with (owner 2026-10-21):
 cards, import, detail, edits and history use that schema; the Dashboard and
 the demo are BI-only and refuse a dataset whose schema is not `bi.schema/*`.
+
+Ingest runs (BI ingest phase 1, owner 2026-10-27; contract "BI ingest runs"):
+`/api/bi/sources` and `/api/bi/runs/*` keep sources, runs and candidates in
+the dataset's staging store; only a run's commit writes cards.
 """
 
 from __future__ import annotations
@@ -21,7 +25,8 @@ from pathlib import Path
 from typing import Any, Protocol
 from urllib.parse import ParseResult, parse_qs
 
-from capabilities.bi_cards import catalog, dashboard, importer, service
+from capabilities.bi_cards import catalog, dashboard, importer, runs, service
+from capabilities.bi_cards.staging import Staging
 from capabilities.bi_cards.store import (
     DATASET_RE,
     DEFAULT_DATASET,
@@ -83,14 +88,9 @@ def route(
             return 409, {"ok": False, "code": error.code, "message": error.message}
         if error.code == "dataset_exists":
             return 409, {"ok": False, "code": error.code, "message": error.message, **error.detail}
-        if error.code == "stale_edit":
-            return 409, {
-                "ok": False,
-                "code": "stale_edit",
-                "message": error.message,
-                **error.detail,
-            }
-        return _error(status, error.code, error.message)
+        if error.code in CONFLICTS:
+            status = 409
+        return status, {"ok": False, "code": error.code, "message": error.message, **error.detail}
     except importer.ImportError_ as error:
         return _error(400, error.code, error.message)
 
@@ -139,6 +139,12 @@ def _route(
                     "sections": [],
                 }
             return 200, dashboard.dashboard(store, str(query.get("domain") or "robotics"))
+        if path == "/api/bi/sources":
+            return 200, {"sources": Staging(workspace, store.dataset).sources()}
+        if path == "/api/bi/runs":
+            return 200, {"runs": runs.runs(workspace, store.dataset)}
+        if path.startswith("/api/bi/runs/") and path.count("/") == 4:
+            return 200, runs.run_detail(workspace, store.dataset, path.rsplit("/", 1)[1])
         if path == "/api/bi/cards":
             found = service.search(
                 store,
@@ -216,11 +222,104 @@ def _route(
         store = BiStore(workspace, _dataset(given.get("dataset")))
         store.undo_import(str(given.get("import_id") or ""), actor=who)
         return 200, {"ok": True}
+    if path == "/api/bi/sources":
+        source = Staging(workspace, _dataset(given.get("dataset"))).add_source(
+            given.get("name"),
+            text=given.get("text"),
+            content_base64=given.get("content_base64"),
+            media_type=given.get("media_type"),
+            classification=given.get("classification"),
+            actor=who,
+        )
+        return 200, {"ok": True, "source": source}
+    if path == "/api/bi/runs":
+        return _start_run(workspace, who, given)
     parts = path.split("/")
+    if len(parts) >= 6 and parts[:4] == ["", "api", "bi", "runs"]:
+        return _run_action(workspace, who, parts[4], parts[5:], given)
     if len(parts) == 6 and parts[:4] == ["", "api", "bi", "cards"] and parts[5] == "field":
         return _set_field(workspace, who, parts[4], given)
+    if len(parts) == 7 and parts[:4] == ["", "api", "bi", "cards"] and parts[5] == "proposals":
+        return _decide_proposal(workspace, who, parts[4], parts[6], given)
     return _error(404, "route_unknown", "沒有這個 BI 路徑")
 
+
+def _start_run(workspace: Path, who: str, given: dict[str, Any]) -> Answer:
+    kind = given.get("kind")
+    if kind not in ("trial", "ingest"):
+        return _error(400, "run_kind_invalid", "kind 只能是 trial 或 ingest")
+    mapping = given.get("mapping")
+    if mapping is not None and not isinstance(mapping, dict):
+        return _error(400, "mapping_invalid", "mapping 必須是 JSON 物件")
+    run = runs.start_rule_run(
+        workspace,
+        _dataset(given.get("dataset")),
+        kind=str(kind),
+        source_id=str(given.get("source_id") or ""),
+        entity_type=given.get("entity_type") or None,
+        mapping=mapping,
+        actor=who,
+    )
+    return 200, {"ok": True, "run": run}
+
+
+def _run_action(
+    workspace: Path, who: str, run_id: str, rest: list[str], given: dict[str, Any]
+) -> Answer:
+    dataset = _dataset(given.get("dataset"))
+    if len(rest) == 2 and rest[0] == "candidates":
+        answer = runs.review(
+            workspace,
+            dataset,
+            run_id,
+            rest[1],
+            decision=given.get("review"),
+            fields=given.get("fields"),
+            match=given.get("match"),
+            actor=who,
+        )
+        return 200, {"ok": True, **answer}
+    if rest == ["recheck"]:
+        return 200, {"ok": True, **runs.recheck(workspace, dataset, run_id)}
+    if rest == ["commit"]:
+        return 200, {"ok": True, **runs.commit(workspace, dataset, run_id, actor=who)}
+    if rest == ["cancel"]:
+        return 200, {"ok": True, "run": runs.cancel(workspace, dataset, run_id)}
+    return _error(404, "route_unknown", "沒有這個 BI 路徑")
+
+
+def _decide_proposal(
+    workspace: Path, who: str, card_id: str, proposal: str, given: dict[str, Any]
+) -> Answer:
+    store = BiStore(workspace, _dataset(given.get("dataset")))
+    if store.card(card_id) is None:
+        return _error(404, "card_unknown", "找不到這張卡片")
+    found = store.proposal(card_id, int(proposal)) if proposal.isdigit() else None
+    if found is None:
+        return _error(404, "proposal_unknown", "找不到這筆待審提議（可能已處理）")
+    action = given.get("action")
+    if action == "reject":
+        store.reject_proposal(card_id, int(found["id"]))
+        card = store.card(card_id)
+        return 200, {"ok": True, "version": int(card["version"]) if card is not None else 0}
+    if action != "accept":
+        return _error(400, "action_invalid", "action 只能是 accept 或 reject")
+    return _set_field(
+        workspace,
+        who,
+        card_id,
+        {
+            "dataset": store.dataset,
+            "field": found["field"],
+            "value": found["value"],
+            "base_version": given.get("base_version"),
+            "reason": given.get("reason"),
+        },
+    )
+
+
+#: Store refusals that are conflicts with the current state (409).
+CONFLICTS = {"stale_edit", "cards_changed", "run_trial", "run_closed", "run_committed"}
 
 #: The GET routes that read one dataset (besides `/api/bi/cards/<id>[/history]`).
 DATASET_READS = ("/api/bi/cards", "/api/bi/dashboard", "/api/bi/schema")

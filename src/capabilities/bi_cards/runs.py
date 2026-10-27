@@ -1,0 +1,553 @@
+"""Ingest runs of a BI dataset: candidates, review and commit.
+
+BI ingest phase 1 (`docs/phases/BI_INGEST.md` §4, §8; contract in
+`docs/CONTRACTS.md` "BI ingest runs"). A run turns one source into candidate
+cards in the staging store; nothing reaches the dataset's cards until the
+person accepts candidates and commits. Phase 1 has the rule path for a CSV or
+TSV source, built on the Case A importer, so every value carries its cell as
+evidence. Later phases add the other readers and the AI path; they produce the
+same candidates.
+
+Every candidate is evaluated against the cards as they are now: whether it
+matches a card (exactly, or only loosely, which needs the person's choice),
+the card version the review saw, the diff per field and the hard errors. A
+commit writes all accepted candidates at once or nothing, refused when a card
+moved on after the review (`cards_changed`), and a run commits only once.
+"""
+
+from __future__ import annotations
+
+import csv
+import io
+from pathlib import Path, PurePath
+from typing import Any
+
+from capabilities.bi_cards import catalog, importer
+from capabilities.bi_cards.schema import FieldDef, Registry, TypeDef, norm_key
+from capabilities.bi_cards.staging import Staging, parse_kind
+from capabilities.bi_cards.store import BiStore, BiStoreError, PlannedRow, now
+
+MAX_EXCERPT = 500
+INDEX_STATUS = {"status": "not_applicable", "message": "BI 卡片寫入後即可查詢，沒有額外索引"}
+WRITABLE = ("create", "update")
+
+
+def _decode(data: bytes) -> str:
+    try:
+        return data.decode("utf-8-sig")
+    except UnicodeDecodeError as error:
+        raise BiStoreError("source_decode_failed", "來源不是 UTF-8 文字，請另存為 UTF-8") from error
+
+
+def _as_csv(name: str, text: str) -> str:
+    """A TSV source as CSV text, so the Case A reader reads it."""
+    if PurePath(name).suffix.lower() != ".tsv":
+        return text
+    out = io.StringIO()
+    csv.writer(out, lineterminator="\n").writerows(csv.reader(io.StringIO(text), delimiter="\t"))
+    return out.getvalue()
+
+
+# -- evaluation ------------------------------------------------------------
+
+
+def _values(candidate: dict[str, Any]) -> dict[str, Any]:
+    return {f["field"]: f["value"] for f in candidate["fields"] if f["value"] is not None}
+
+
+def _similar(store: BiStore, entity_type: str, key: str) -> list[Any]:
+    """Cards of the type whose key equals `key` ignoring spaces, punctuation and case."""
+    wanted = norm_key(key)
+    return [
+        card
+        for card in store.card_rows()
+        if card["entity_type"] == entity_type
+        and card["canonical_key"] != key
+        and norm_key(card["canonical_key"]) == wanted
+    ]
+
+
+def evaluate(store: BiStore, reg: Registry, candidate: dict[str, Any]) -> dict[str, Any]:
+    """Recompute match, base version, per-field diff, action and errors
+    against the cards now; the review state and edits are kept."""
+    entity = reg.type(candidate["entity_type"])
+    values = _values(candidate)
+    choice = candidate.get("choice") or {}
+    errors: list[dict[str, Any]] = []
+    key = importer.canonical_key(entity, values)
+    card = None
+    match, match_ids = "new", []
+    if choice.get("action") == "update" and choice.get("card_id"):
+        card = store.card(str(choice["card_id"]))
+        if card is None or card["entity_type"] != entity.name:
+            errors.append(
+                {"code": "match_unresolved", "message": "選擇的卡片不存在", "field": None}
+            )
+            card = None
+        else:
+            key = str(card["canonical_key"])
+            match, match_ids = "existing", [card["id"]]
+    elif key:
+        card = store.find(entity.name, key)
+        if card is not None:
+            match, match_ids = "existing", [card["id"]]
+        elif choice.get("action") != "create":
+            similar = _similar(store, entity.name, key)
+            if similar:
+                match, match_ids = "ambiguous", [c["id"] for c in similar]
+                errors.append(
+                    {
+                        "code": "match_unresolved",
+                        "message": "有名稱相近的卡片，請選擇新建、合併到既有卡片或略過",
+                        "field": None,
+                    }
+                )
+    candidate["canonical_key"] = key
+    candidate["match"], candidate["match_ids"] = match, match_ids
+    candidate["base_version"] = None if card is None else int(card["version"])
+    current = store.fields(card["id"]) if card is not None else {}
+    changes = 0
+    for item in candidate["fields"]:
+        stored = current.get(item["field"])
+        item["current"] = None if stored is None else stored["value"]
+        if stored is None:
+            item["change"] = "add"
+            changes += 1
+        elif stored["value"] == item["value"]:
+            item["change"] = "same"
+        elif stored["kind"] == "human":
+            item["change"] = "human_kept"
+            changes += 1  # written as a proposal next to the person's value
+        else:
+            item["change"] = "change"
+            changes += 1
+    if choice.get("action") == "skip":
+        action = "skip"
+        errors = []  # the person chose to leave it out
+    elif not key:
+        action = "skip"
+        errors.append(
+            {"code": "name_missing", "message": f"沒有{entity.naming_field}", "field": None}
+        )
+    elif card is None:
+        action = "create"
+        for definition in entity.fields:
+            if definition.required and values.get(definition.name) in (None, "", []):
+                errors.append(
+                    {
+                        "code": "required_missing",
+                        "message": f"新卡片缺少必填欄位：{definition.label}",
+                        "field": definition.name,
+                    }
+                )
+    else:
+        action = "update" if changes else "unchanged"
+    candidate["action"] = action
+    candidate["errors"] = errors
+    return candidate
+
+
+def _diff_view(candidate: dict[str, Any]) -> Any:
+    return (
+        candidate["match"],
+        candidate["match_ids"],
+        candidate["base_version"],
+        candidate["action"],
+        [(f["field"], f["current"], f["change"]) for f in candidate["fields"]],
+    )
+
+
+# -- the rule path -----------------------------------------------------------
+
+
+def _candidates_from_preview(
+    prepared: importer.Preview, source: dict[str, Any]
+) -> list[dict[str, Any]]:
+    header_of = {c["field"]: c["source"] for c in prepared.columns if c["field"]}
+    found = []
+    for row in prepared.rows:
+        planned = prepared.planned.get(row["row"])
+        fields = []
+        for cell in row["fields"]:
+            if cell["normalized"] is None:
+                continue
+            raw = str(cell["raw"] or "")
+            from_source = bool(raw.strip()) and cell["field"] in header_of
+            fields.append(
+                {
+                    "field": cell["field"],
+                    "value": cell["normalized"],
+                    "basis": "fact" if from_source else "unknown",
+                    "evidence": (
+                        [
+                            {
+                                "source_id": source["id"],
+                                "locator": {"row": row["row"], "column": header_of[cell["field"]]},
+                                "excerpt": raw[:MAX_EXCERPT],
+                            }
+                        ]
+                        if from_source
+                        else []
+                    ),
+                    "current": None,
+                    "change": "add",
+                }
+            )
+        skipped = any(w["code"] == "row_skipped" for w in row["warnings"])
+        found.append(
+            {
+                "id": f"r{row['row']}",
+                "entity_type": prepared.entity_type,
+                "canonical_key": row["canonical_key"],
+                "name": planned.name if planned is not None else "",
+                "synthetic": bool(planned.synthetic) if planned is not None else False,
+                "match": "new",
+                "match_ids": [],
+                "action": "skip",
+                "review": "rejected" if skipped else "pending",
+                "choice": {"action": "skip"} if skipped else None,
+                "base_version": None,
+                "fields": fields,
+                "errors": [],
+                "warnings": [
+                    {"code": w["code"], "message": w["message"]}
+                    for w in row["warnings"]
+                    if w["code"] != "name_missing"
+                ],
+                "edits": [],
+            }
+        )
+    return found
+
+
+def start_rule_run(
+    workspace: Path,
+    dataset: str,
+    *,
+    kind: str,
+    source_id: str,
+    entity_type: str | None,
+    mapping: dict[str, Any] | None,
+    actor: str,
+) -> dict[str, Any]:
+    """Run the rule path on a table source; the run ends in `review`."""
+    staging = Staging(workspace, dataset)
+    staging.store.refuse_write()
+    source = staging.source(source_id)
+    if source is None:
+        raise BiStoreError("source_unknown", "找不到這個來源")
+    if parse_kind(source["name"]) != "table":
+        raise BiStoreError("source_not_table", "規則轉換只能讀 CSV / TSV 表格；這個來源不是表格")
+    reg = catalog.for_store(staging.store)
+    run_id = staging.create_run(kind=kind, schema_ref=reg.ref, source_ids=[source_id], actor=actor)
+    try:
+        text = _as_csv(source["name"], _decode(staging.source_bytes(source_id)))
+        prepared = importer.preview(
+            staging.store,
+            entity_type=entity_type,
+            filename=source["name"],
+            csv_text=text,
+            mapping=mapping,
+            schema=reg,
+        )
+        found = [
+            evaluate(staging.store, reg, c) for c in _candidates_from_preview(prepared, source)
+        ]
+    except (BiStoreError, importer.ImportError_) as error:
+        staging.set_status(run_id, "failed", error=f"{error.code}: {error.message}")
+        raise
+    staging.put_candidates(run_id, found)
+    staging.set_status(run_id, "review")
+    return run_view(staging, run_id)
+
+
+# -- reading ---------------------------------------------------------------
+
+
+def summary(candidates: list[dict[str, Any]]) -> dict[str, int]:
+    counts = {
+        "candidates": len(candidates),
+        "create": 0,
+        "update": 0,
+        "unchanged": 0,
+        "skip": 0,
+        "accepted": 0,
+        "rejected": 0,
+        "pending": 0,
+        "errors": 0,
+        "warnings": 0,
+    }
+    for candidate in candidates:
+        counts[candidate["action"]] += 1
+        counts[candidate["review"]] += 1
+        counts["errors"] += len(candidate["errors"])
+        counts["warnings"] += len(candidate["warnings"])
+    return counts
+
+
+def public(candidate: dict[str, Any]) -> dict[str, Any]:
+    """A candidate as the API shows it (without the stored internals)."""
+    return {k: v for k, v in candidate.items() if k not in ("choice", "synthetic")}
+
+
+def run_view(staging: Staging, run_id: str) -> dict[str, Any]:
+    run = staging.run_row(run_id)
+    if run is None:
+        raise BiStoreError("run_unknown", "找不到這次執行")
+    return {**run, "summary": summary(staging.candidates(run_id))}
+
+
+def runs(workspace: Path, dataset: str) -> list[dict[str, Any]]:
+    staging = Staging(workspace, dataset)
+    return [run_view(staging, run["id"]) for run in staging.run_rows()]
+
+
+def run_detail(workspace: Path, dataset: str, run_id: str) -> dict[str, Any]:
+    staging = Staging(workspace, dataset)
+    return {
+        "run": run_view(staging, run_id),
+        "candidates": [public(c) for c in staging.candidates(run_id)],
+    }
+
+
+# -- review ----------------------------------------------------------------
+
+
+def _open_run(staging: Staging, run_id: str) -> dict[str, Any]:
+    run = staging.run_row(run_id)
+    if run is None:
+        raise BiStoreError("run_unknown", "找不到這次執行")
+    if run["status"] != "review":
+        raise BiStoreError("run_closed", "這次執行已經結束，不能再修改")
+    return run
+
+
+def _normalize(reg: Registry, item: FieldDef, raw: Any) -> Any:
+    if raw is None or raw == "" or raw == []:
+        return None
+    if isinstance(raw, list):
+        if not item.is_list:
+            raise BiStoreError("value_invalid", f"{item.label} 不是清單欄位")
+        values = [str(v).strip() for v in raw if str(v).strip()]
+        return values or None
+    value, problems = reg.normalize(item, str(raw))
+    if value is None:
+        raise BiStoreError(
+            "value_invalid", problems[0][1] if problems else f"{item.label} 的值無法採用"
+        )
+    return value
+
+
+def _edit_fields(
+    reg: Registry, entity: TypeDef, candidate: dict[str, Any], edits: dict[str, Any], actor: str
+) -> None:
+    by_name = {f["field"]: f for f in candidate["fields"]}
+    for name, raw in edits.items():
+        item = entity.get(str(name))
+        if item is None:
+            raise BiStoreError("field_unknown", f"{entity.name} 沒有欄位 {name}")
+        if item.klass == "derived":
+            raise BiStoreError("field_derived", f"{item.label} 是推導欄位，不能直接修改")
+        value = _normalize(reg, item, raw)
+        entry = by_name.get(item.name)
+        old = None if entry is None else entry["value"]
+        if old == value:
+            continue
+        if entry is None:
+            entry = {
+                "field": item.name,
+                "value": None,
+                "basis": "human",
+                "evidence": [],
+                "current": None,
+                "change": "add",
+            }
+            candidate["fields"].append(entry)
+            by_name[item.name] = entry
+        if value is None:
+            candidate["fields"].remove(entry)
+            del by_name[item.name]
+        else:
+            entry["value"], entry["basis"] = value, "human"
+        candidate["edits"].append(
+            {"field": item.name, "old": old, "new": value, "by": actor, "at": now()}
+        )
+
+
+def review(
+    workspace: Path,
+    dataset: str,
+    run_id: str,
+    candidate_id: str,
+    *,
+    decision: Any,
+    fields: Any,
+    match: Any,
+    actor: str,
+) -> dict[str, Any]:
+    staging = Staging(workspace, dataset)
+    staging.store.refuse_write()
+    _open_run(staging, run_id)
+    candidate = next((c for c in staging.candidates(run_id) if c["id"] == candidate_id), None)
+    if candidate is None:
+        raise BiStoreError("candidate_unknown", "找不到這張候選卡")
+    reg = catalog.for_store(staging.store)
+    entity = reg.type(candidate["entity_type"])
+    if fields is not None:
+        if not isinstance(fields, dict):
+            raise BiStoreError("fields_invalid", "fields 必須是 {欄位: 值}")
+        _edit_fields(reg, entity, candidate, fields, actor)
+    if match is not None:
+        if not isinstance(match, dict) or match.get("action") not in ("create", "update", "skip"):
+            raise BiStoreError("match_invalid", "match.action 只能是 create、update 或 skip")
+        if match["action"] == "update" and not match.get("card_id"):
+            raise BiStoreError("match_invalid", "合併到既有卡片需要 card_id")
+        candidate["choice"] = {"action": match["action"], "card_id": match.get("card_id")}
+    evaluate(staging.store, reg, candidate)
+    if decision is not None:
+        if decision not in ("accepted", "rejected", "pending"):
+            raise BiStoreError("review_invalid", "review 只能是 accepted、rejected 或 pending")
+        if decision == "accepted" and candidate["errors"]:
+            raise BiStoreError(
+                "candidate_invalid",
+                "這張候選卡還有錯誤，修正後才能接受",
+                errors=candidate["errors"],
+            )
+        candidate["review"] = decision
+    elif candidate["review"] == "accepted" and candidate["errors"]:
+        candidate["review"] = "pending"
+    staging.put_candidates(run_id, [candidate])
+    return {"candidate": public(candidate), "run": run_view(staging, run_id)}
+
+
+def recheck(workspace: Path, dataset: str, run_id: str) -> dict[str, Any]:
+    """Evaluate every candidate again against the cards now."""
+    staging = Staging(workspace, dataset)
+    staging.store.refuse_write()
+    _open_run(staging, run_id)
+    reg = catalog.for_store(staging.store)
+    changed = []
+    found = staging.candidates(run_id)
+    for candidate in found:
+        before = _diff_view(candidate)
+        evaluate(staging.store, reg, candidate)
+        if _diff_view(candidate) != before:
+            changed.append(candidate["id"])
+            if candidate["review"] == "accepted":
+                candidate["review"] = "pending"
+    staging.put_candidates(run_id, found)
+    return {
+        "run": run_view(staging, run_id),
+        "candidates": [public(c) for c in found],
+        "changed": changed,
+    }
+
+
+def cancel(workspace: Path, dataset: str, run_id: str) -> dict[str, Any]:
+    staging = Staging(workspace, dataset)
+    staging.store.refuse_write()
+    run = staging.run_row(run_id)
+    if run is None:
+        raise BiStoreError("run_unknown", "找不到這次執行")
+    if run["status"] in ("committed", "cancelled", "failed"):
+        raise BiStoreError("run_closed", "這次執行已經結束")
+    staging.set_status(run_id, "cancelled")
+    return run_view(staging, run_id)
+
+
+# -- commit ----------------------------------------------------------------
+
+
+def commit(workspace: Path, dataset: str, run_id: str, *, actor: str) -> dict[str, Any]:
+    staging = Staging(workspace, dataset)
+    store = staging.store
+    store.refuse_write()
+    run = staging.run_row(run_id)
+    if run is None:
+        raise BiStoreError("run_unknown", "找不到這次執行")
+    found = staging.candidates(run_id)
+    counts = {
+        "skipped": sum(1 for c in found if c["review"] == "rejected" or c["action"] == "skip"),
+        "pending": sum(1 for c in found if c["review"] == "pending" and c["action"] != "skip"),
+    }
+    if run["status"] == "committed" and run["commit"] is not None:
+        return _committed(staging, run_id, run["commit"], counts, already=True)
+    if run["kind"] == "trial":
+        raise BiStoreError("run_trial", "試跑的結果不能寫入；請用同樣的來源開始正式匯入")
+    if run["status"] != "review":
+        raise BiStoreError("run_closed", "這次執行已經結束，不能寫入")
+    earlier = store.committed_run(run_id)
+    if earlier is not None:
+        # The write happened but its reply was lost: record it, write nothing.
+        found_earlier = {"import_id": earlier, "at": now(), "by": actor}
+        staging.set_status(run_id, "committed", commit_result=found_earlier)
+        return _committed(staging, run_id, found_earlier, counts, already=True)
+    chosen = [c for c in found if c["review"] == "accepted" and c["action"] in WRITABLE]
+    invalid = [c for c in chosen if c["errors"]]
+    if invalid:
+        raise BiStoreError(
+            "candidates_invalid",
+            "有已接受的候選卡還有錯誤",
+            candidates=[c["id"] for c in invalid],
+        )
+    if not chosen:
+        raise BiStoreError("nothing_accepted", "沒有已接受、需要寫入的候選卡")
+    names = {s: (staging.source(s) or {}).get("name", "") for s in run["source_ids"]}
+    rows = []
+    for number, candidate in enumerate(chosen, start=1):
+        values = _values(candidate)
+        planned = PlannedRow(
+            row=number,
+            entity_type=candidate["entity_type"],
+            canonical_key=candidate["canonical_key"],
+            name=str(candidate.get("name") or candidate["canonical_key"]),
+            values=values,
+            synthetic=bool(candidate.get("synthetic")),
+            ref=f"run:{run_id}/{candidate['id']}",
+            evidence={
+                f["field"]: [
+                    {
+                        **item,
+                        "source_name": names.get(item["source_id"], ""),
+                        "basis": f["basis"],
+                    }
+                    for item in f["evidence"]
+                ]
+                for f in candidate["fields"]
+                if f["evidence"]
+            },
+        )
+        rows.append((planned, candidate["id"], candidate["base_version"]))
+    applied = store.commit_run(
+        run_id, rows, filename=", ".join(n for n in names.values() if n), actor=actor
+    )
+    result: dict[str, Any] = {
+        "import_id": applied.import_id,
+        "created": applied.created,
+        "updated": applied.updated,
+        "unchanged": applied.unchanged,
+        "proposals": applied.proposals,
+        "at": now(),
+        "by": actor,
+    }
+    staging.set_status(run_id, "committed", commit_result=result)
+    return _committed(staging, run_id, result, counts, already=False)
+
+
+def _committed(
+    staging: Staging,
+    run_id: str,
+    result: dict[str, Any],
+    counts: dict[str, int],
+    *,
+    already: bool,
+) -> dict[str, Any]:
+    return {
+        "run": run_view(staging, run_id),
+        "import_id": result["import_id"],
+        "applied": {k: result.get(k, 0) for k in ("created", "updated", "unchanged", "proposals")},
+        "skipped": counts["skipped"],
+        "pending": counts["pending"],
+        "index": INDEX_STATUS,
+        "already": already,
+    }

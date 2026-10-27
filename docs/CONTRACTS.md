@@ -4094,6 +4094,81 @@ schema behaves as before.
   `schema_not_bi`, shown as 「這個資料集用的不是 BI schema…」. The `domain` filter of
   `GET /api/bi/cards` is ignored for a schema without `domains`.
 
+## BI ingest runs (BI ingest phase 1, owner 2026-10-27)
+
+Design: `docs/phases/BI_INGEST.md` §4 and §8. Code: `src/capabilities/bi_cards/staging.py` (sources,
+runs, candidates), `src/capabilities/bi_cards/runs.py` (rule-path run, review, commit), `store.py`
+(`commit_run`, evidence, proposals), routes in `src/host_runtime/bi_cards_api.py`. Tests:
+`tests/test_bi_ingest_runs.py`. Additive: the Case A `/api/bi/import/*` routes are unchanged.
+
+- **Staging store** `<workspace>/bi/<dataset>/staging.sqlite`, created by the first source or run.
+  Trial, extraction and review write only here and to `<dataset>/sources/`; `bi.sqlite` is written only
+  by commit (and by the existing Case A routes and edits). A subscribed dataset refuses every write
+  (409 `dataset_read_only`).
+- **Sources.** `POST /api/bi/sources {"dataset", "name", "text" | "content_base64", "media_type":
+  str | null, "classification": "INTERNAL" (default) | "UNCLASSIFIED" | "CONFIDENTIAL" | "RESTRICTED"}`
+  → `{"ok": true, "source": {"id", "name", "sha256", "media_type", "size", "origin": "upload",
+  "classification", "at", "by", "parse": "table" | "text" | "unsupported"}}`. The bytes are kept at
+  `<dataset>/sources/<sha256><ext>`; the same bytes are stored once (the same record is returned with
+  `"already": true`). `name` is a file name without folders (1–200 characters). Errors: 400
+  `source_missing`, `source_name_invalid`, `source_base64_invalid`, `classification_invalid`.
+  `GET /api/bi/sources?dataset=` → `{"sources": [...]}` newest first.
+- **Runs.** `POST /api/bi/runs {"dataset", "kind": "trial" | "ingest", "source_id", "entity_type":
+  str | null, "mapping": obj | null}` → `{"ok": true, "run": <run>}`. Phase 1 runs the rule path on a
+  CSV/TSV source synchronously; the run ends in `review`. A source that is not a table is 400
+  `source_not_table`; an unknown source 404 `source_unknown`. `<run>` = `{"id", "kind", "status":
+  "review" | "committed" | "cancelled" | "failed", "method_ref": null, "schema_ref", "model": null,
+  "source_ids", "by", "at", "finished", "summary": {"candidates", "create", "update", "skip",
+  "accepted", "rejected", "pending", "errors", "warnings"}, "error": null, "commit": null |
+  {"import_id", "created", "updated", "unchanged", "proposals", "at", "by"}}`.
+  `GET /api/bi/runs?dataset=` → `{"runs": [<run>...]}` newest first (at most 100).
+  `GET /api/bi/runs/<id>?dataset=` → `{"run": <run>, "candidates": [<candidate>...]}`; unknown 404
+  `run_unknown`.
+- **Candidate** = `{"id", "entity_type", "canonical_key", "name", "match": "new" | "existing" |
+  "ambiguous", "match_ids": [card id], "action": "create" | "update" | "unchanged" | "skip", "review":
+  "pending" | "accepted" | "rejected", "base_version": int | null, "fields": [{"field", "value",
+  "basis": "fact" | "inference" | "unknown" | "human", "evidence": [{"source_id", "locator": {"row",
+  "column"} | {"line_start", "line_end"} | ..., "excerpt"}], "current": value | null, "change": "add"
+  | "change" | "same" | "human_kept"}], "errors": [{"code", "message", "field": str | null}],
+  "warnings": [{"code", "message"}], "edits": [{"field", "old", "new", "by", "at"}]}`. Error codes:
+  `required_missing` (a new card without a required field), `name_missing`, `match_unresolved` (an
+  `ambiguous` candidate with no choice). `match: "ambiguous"` = no card with the same key, but cards of
+  the type whose key matches ignoring spaces, punctuation and case. Locators come from the parser,
+  never from a model. A rule-path field is `basis: "fact"` with its CSV cell as excerpt.
+- **Review.** `POST /api/bi/runs/<id>/candidates/<cid> {"dataset", "review": "accepted" | "rejected"
+  | "pending" | null, "fields": {name: value} | null, "match": {"action": "create" | "update" |
+  "skip", "card_id": str | null} | null}` → `{"ok": true, "candidate": <candidate>, "run": <run>}`.
+  An edited field is normalised as a card edit (`value_invalid` on a bad value), becomes `basis:
+  "human"`, and is recorded in `edits`. Accepting a candidate with errors is 400 `candidate_invalid`
+  (with `errors`). A run not in `review` is 409 `run_closed`.
+- **Recheck.** `POST /api/bi/runs/<id>/recheck {"dataset"}` recomputes match, `base_version`,
+  `current`, `change` and errors of every candidate against the store now (reviews and edits kept;
+  a candidate whose diff changed goes back to `pending`) → `{"ok": true, "run", "candidates",
+  "changed": [cid]}`.
+- **Commit.** `POST /api/bi/runs/<id>/commit {"dataset"}` writes the accepted candidates whose action
+  is `create` or `update`, in one SQLite transaction, as one import (`imports.run_id` = the run id)
+  → `{"ok": true, "run": <run>, "import_id", "applied": {"created", "updated", "unchanged",
+  "proposals"}, "skipped": int, "pending": int, "index": {"status": "not_applicable", "message":
+  "BI 卡片寫入後即可查詢，沒有額外索引"}}`. Before writing, each matched card's `version` must equal
+  the candidate's `base_version`, and a `create` candidate's key must still be free; otherwise nothing
+  is written: 409 `cards_changed` with `"cards": [{"candidate_id", "card_id", "name", "expected",
+  "current"}]` (recheck, review again, commit again). Refusals: 409 `run_trial` (a trial run), 400
+  `candidates_invalid` (an accepted candidate has errors), 400 `nothing_accepted`. A run already
+  committed answers 200 with its first result and `"already": true` and writes nothing (also when the
+  reply was lost after the write: `imports.run_id` is checked). Written fields have `kind: "import"`
+  and `ref: "run:<run id>/<candidate id>"`; a person's value is kept and becomes a proposal as in
+  Case A. Undo is `POST /api/bi/import/undo` with the `import_id`.
+  `POST /api/bi/runs/<id>/cancel {"dataset"}` → `{"ok": true, "run"}` (status `cancelled`; 409
+  `run_closed` after commit).
+- **Evidence** (`bi.sqlite` table `evidence`: card, field, run, source id and name, locator,
+  excerpt, basis, at). `GET /api/bi/cards/<id>` adds `"evidence": [{"field", "run_id", "source_id",
+  "source_name", "locator", "excerpt", "basis", "at"}]` (newest first) and an `"id"` on each proposal.
+- **Proposals.** `POST /api/bi/cards/<id>/proposals/<pid> {"dataset", "action": "accept" | "reject",
+  "base_version", "reason"}` → `{"ok": true, "version"}`. Accept writes the proposed value as the
+  person's edit (as `/field`, `stale_edit` 409 when the card moved on, `reason_required` for a
+  `judgement` field) and closes the field's pending proposals; reject marks only that proposal
+  `rejected` and does not change the card version. Unknown or closed: 404 `proposal_unknown`.
+
 ## BI dataset sharing (slice 1, owner 2026-10-22)
 
 Design: `docs/proposals/BI_DATASET_SHARING.md` (§4, §6, §8.5 owner answers, §8.6 trimmed slice 1:

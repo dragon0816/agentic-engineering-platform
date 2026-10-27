@@ -3622,8 +3622,11 @@ s-k-20261011T102952` (not published).
   staging store for sources, runs and candidates with per-field evidence, version-checked atomic commit, schema
   drafts and dataset schema upgrade, rule path (Case B) and AI path, Session A (schema) and Session B (ingest
   method) with no tools, a six-step flow, acceptance from the owner proposal §8.
-- [ ] BI ingest phase 1: contracts; staging store; commit with version check and commit key; evidence table;
-  proposal accept/reject; Case A CSV produced as a run.
+- [x] BI ingest phase 1 (2026-10-27, Claude Code): contract "BI ingest runs"; `staging.py` (sources kept once by
+  hash, runs, candidates) and `runs.py` (rule-path CSV/TSV run, review with edits and match choices, recheck,
+  cancel, commit); `BiStore.commit_run` (one transaction, card-version check `cards_changed`, run id as commit
+  key), `evidence` table shown on the card, proposal accept/reject. API only; the page comes in phase 3.
+  Tests: `tests/test_bi_ingest_runs.py` (15).
 - [ ] BI ingest phase 2: schema drafts, diff, local `bi.schema/v1.1` versions, dataset schema upgrade.
 - [ ] BI ingest phase 3: rule path (Case B recipes, Markdown/Excel readers), shared stepper, review UI.
 - [ ] BI ingest phase 4: AI path (parsing, chunking, extraction, checks, jobs, retry).

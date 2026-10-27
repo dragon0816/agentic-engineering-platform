@@ -284,6 +284,7 @@ def card_detail(store: BiStore, card_id: str) -> dict[str, Any] | None:
         "fields": shown,
         "links": links(store, card, fields),
         "proposals": store.proposals(card_id),
+        "evidence": store.evidence(card_id),
     }
 
 
