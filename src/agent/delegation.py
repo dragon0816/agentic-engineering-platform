@@ -66,6 +66,8 @@ from common.base import Contract, Symbol, Text
 from common.execution import Failure, RequestContext, TraceIdentifiers
 from models.contracts import ModelMessage, ModelTool
 
+#: A retry starts only with this much of the time limit left.
+MIN_RETRY_SECONDS = 30
 #: The sub-agent's answer as the parent sees it (G4: cut with a note).
 DELEGATION_OUTPUT_LIMIT_CHARS = 8_000
 MAX_FINDINGS = 20
@@ -236,6 +238,15 @@ def _role(target: DelegationTarget) -> str:
         "Never claim an action or a source that no tool call of yours backs."
         + (f"\nConstraints of this profile:{constraints}" if constraints else "")
     )
+
+
+def _retry_worthy(answer: GatewayConversationResult) -> bool:
+    """Whether a finished sub-run that did not answer should be tried again."""
+    # Only a failure the model layer marked retryable (a timeout, a dropped
+    # connection, a provider error); a refusal or a missing answer is final.
+    if answer.status == "answered" or answer.failure is None:
+        return False
+    return answer.failure.retryable
 
 
 def _findings(text: str) -> tuple[str, ...]:
@@ -593,14 +604,10 @@ class DelegationService:
             channel=context.channel,
             session_id=context.session_id,
         )
-        parent_cap = self.gateway.limits().tool_calls
-        limits = ConversationLimits(
-            tool_calls=min(profile.max_tool_calls, parent_cap),
-            # The loop's own check (at least a minute by contract); the hard
-            # stop below holds the exact limit.
-            time_limit_seconds=max(60, math.ceil(time_limit)),
-        )
         started = time.monotonic()
+        # Only a read-only sub-agent is retried: a retry of anything that may
+        # change state could repeat its effect.
+        attempts = 1 + (profile.max_retries if plan.read_only else 0)
         answer: GatewayConversationResult | None = None
         with delegation_scope.running_sub_run(plan.target.key) as marker:
             # The sub-run reports into its own line under the parent turn (its
@@ -617,22 +624,16 @@ class DelegationService:
                         "tools_effective": len(plan.tools),
                         "read_only": plan.read_only,
                         "time_limit_s": round(time_limit, 1),
+                        "max_attempts": attempts,
                     },
                 ):
-                    try:
-                        answer = await asyncio.wait_for(
-                            self.gateway.converse(
-                                sub_context,
-                                (ModelMessage(role="user", text=message),),
-                                allowed_tools=frozenset(plan.tools),
-                                max_turns=profile.max_turns,
-                                role_guidance=_role(plan.target),
-                                limits=limits,
-                            ),
-                            timeout=time_limit,
-                        )
-                    except TimeoutError:
-                        answer = None
+                    for attempt in range(1, attempts + 1):
+                        left = time_limit - (time.monotonic() - started)
+                        if attempt > 1 and left < MIN_RETRY_SECONDS:
+                            break
+                        answer = await self._attempt(sub_context, plan, message, left)
+                        if answer is None or not _retry_worthy(answer):
+                            break
                     result = self._result(answer, plan, marker, time.monotonic() - started)
                     result = self._record(context, answer, result)
                     telemetry.set_run(
@@ -646,6 +647,36 @@ class DelegationService:
                 TOOL_PROGRESS.reset(tools_token)
                 turn_progress.TURN_PROGRESS.reset(progress_token)
         return result
+
+    async def _attempt(
+        self,
+        sub_context: RequestContext,
+        plan: _Plan,
+        message: str,
+        left: float,
+    ) -> GatewayConversationResult | None:
+        """One sub-run within `left` seconds; None when the time limit stops it."""
+        parent_cap = self.gateway.limits().tool_calls
+        limits = ConversationLimits(
+            tool_calls=min(plan.target.profile.max_tool_calls, parent_cap),
+            # The loop's own check (at least a minute by contract); the hard
+            # stop below holds the exact limit.
+            time_limit_seconds=max(60, math.ceil(left)),
+        )
+        try:
+            return await asyncio.wait_for(
+                self.gateway.converse(
+                    sub_context,
+                    (ModelMessage(role="user", text=message),),
+                    allowed_tools=frozenset(plan.tools),
+                    max_turns=plan.target.profile.max_turns,
+                    role_guidance=_role(plan.target),
+                    limits=limits,
+                ),
+                timeout=left,
+            )
+        except TimeoutError:
+            return None
 
     def _result(
         self,

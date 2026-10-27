@@ -687,6 +687,61 @@ def test_a_failed_sub_run_is_reported_failed_and_cut_output_says_so() -> None:
     assert delegated(broken).failure is not None
 
 
+def failed_once(code: str, *, retryable: bool) -> ModelResponse:
+    return ModelResponse(
+        trace=TraceIdentifiers(trace_id="x", request_id="x", span_id="x"),
+        model_alias="routing",
+        failure=Failure(code=code, message="down", retryable=retryable),
+    )
+
+
+def test_a_read_only_sub_run_is_retried_within_its_max_retries() -> None:
+    flaky = agent_profile("flaky", max_retries=1)
+    scripts = {
+        "parent": [
+            reply(delegate("look it up", "engineering/flaky", ["release__check"])),
+            reply(text="好。"),
+        ],
+        "look it up": [failed_once("model_error", retryable=True), reply(text="找到了。")],
+    }
+    built, model, _, _ = wired(scripts, (flaky,))
+    result = converse(built)
+    assert len(model.by_key["look it up"]) == 2
+    found = delegated(result.tools[0])
+    assert found.status == "succeeded" and found.summary == "找到了。"
+
+
+def test_a_failure_that_is_not_retryable_is_not_retried() -> None:
+    flaky = agent_profile("flaky", max_retries=2)
+    scripts = {
+        "parent": [
+            reply(delegate("look it up", "engineering/flaky", ["release__check"])),
+            reply(text="好。"),
+        ],
+        "look it up": [failed_once("provider_error", retryable=False), reply(text="不會被用到。")],
+    }
+    built, model, _, _ = wired(scripts, (flaky,))
+    result = converse(built)
+    assert len(model.by_key["look it up"]) == 1
+    assert delegated(result.tools[0]).status == "failed"
+
+
+def test_a_write_capable_sub_run_is_never_retried() -> None:
+    writer = agent_profile("writer", skills=(NOTES_SKILL,), capabilities=(WRITE_ID,), max_retries=2)
+    scripts = {
+        "parent": [reply(delegate("publish the note", "engineering/writer")), reply(text="好。")],
+        "publish the note": [
+            failed_once("model_error", retryable=True),
+            reply(text="不會被用到。"),
+        ],
+    }
+    built, model, write, _ = wired(scripts, (writer,), owner_mode=True)
+    result = converse(built)
+    assert len(model.by_key["publish the note"]) == 1
+    assert write.calls == 0
+    assert delegated(result.tools[0]).status == "failed"
+
+
 # -- the parent ledger --------------------------------------------------------------
 
 
