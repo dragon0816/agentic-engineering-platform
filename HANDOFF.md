@@ -1,8 +1,46 @@
 # Handoff
 
-Updated: 2026-10-27 (Asia/Taipei), by Claude Code (delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-28 (Asia/Taipei), by Claude Code (BI ingest phases 1–4 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## Retries, #248, graphify and the push of verified main (2026-10-27, Claude Code) — latest
+## BI ingest from the owner's proposal, phases 1–4 (2026-10-28, Claude Code) — latest
+
+**Goal.** The owner's 「AEP BI 知識庫建立與 AI Ingest Proposal」 (2026-10-27), specified in
+`docs/phases/BI_INGEST.md` (supersedes `BI_CASE_B.md`); decisions in `docs/DECISIONS.md` 2026-10-27 "BI ingest:
+the owner's proposal becomes the plan" (dataset schema upgrade now; tool-less AI sessions; methods as dataset
+files; staging store; push verified phases to `main`, no PRs).
+
+**Done (contracts in `docs/CONTRACTS.md`: "BI ingest runs", "BI schema drafts and dataset upgrade", "BI rule
+path: recipes and multi-table sources", "BI AI path: extraction runs"):**
+- Phase 1 `b2777847`: staging store (sources, runs, candidates), review, version-checked atomic commit keyed
+  by run id, evidence table, proposal accept/reject. Pushed; clean full run 4183 passed (1 multi-agent UI
+  flake, passed alone).
+- Phase 2 `90c29d42`: schema drafts/revisions/diff/revert/publish, local `bi.schema/v1.1` superset versions,
+  dataset schema upgrade with impact preview. Phase 3: UI `3c6666f0` (「建立與匯入」 six steps, shared stepper)
+  and rule-path engine `5cadaa07` (recipes, Markdown/Excel readers, VE-05/VE-06; built by a subagent).
+  Extraction core `209f8a90`, `ce2404be`. Pushed up to `5cadaa07`; clean full run: ruff, format, mypy (798)
+  clean, pytest 4217 passed, 34 skipped.
+- Phase 4 `b55cc8db`: AI runs (`ai_runs.py`): Knowledge model from Settings, background `bi-ingest` task,
+  progress, `partial` runs, retry of failed chunks, `value_errors`. Clean full run in progress at the time of
+  writing (`C:/aepci-wk/verify-b55cc8db.log`); push only after it passes.
+
+**In progress.** Phases 5 (Session B, method conversation) and 6 (Session A, schema conversation) are being
+built by a subagent in a worktree from `b55cc8db`; to be cherry-picked, verified in a clean worktree, then
+pushed. Phase 7 (benchmark, user guide) not started.
+
+**Not done / risks.**
+- No real model provider has been run on the AI path; every test uses a scripted model. Run one live trial on
+  a fictional meeting note before trusting it (restart Agent Web first, after checking `/api/activity`).
+- PDF sources are not supported yet; scanned PDF/OCR, audio and web pages are out of scope.
+- `tests/test_bi_cards_ui.py` dashboard-order check and `tests/test_multi_agent_ui.py` each failed once under
+  full-suite load and passed alone (#248-type timing).
+- Local `mypy src tests` in the main checkout showed 5 errors in untouched files (stale `.mypy_cache`); the
+  clean worktree run is clean.
+
+**Next.** Collect the Session A/B subagent, cherry-pick, run BI tests, clean full run, push; then phase 7
+(domain benchmark per `BI_INGEST.md` §11.10 and a zh-TW user guide for the six steps); then ask the owner for a
+live trial with the real model.
+
+## Retries, #248, graphify and the push of verified main (2026-10-27, Claude Code)
 
 - Pushed to `origin/main` after full verification of 4a245bc4 in a clean worktree (`C:/aepci-wk/vh-4a245bc4`):
   ruff check, ruff format --check, mypy (787 files) clean; pytest 4169 passed, 34 skipped.
