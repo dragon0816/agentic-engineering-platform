@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import json
 import re
+import threading
 import uuid
 from collections.abc import Mapping
 from datetime import UTC, datetime
@@ -35,7 +36,15 @@ from pathlib import Path
 from typing import Any, Protocol
 from urllib.parse import ParseResult, parse_qs
 
-from capabilities.bi_cards import catalog, dashboard, importer, runs, schema_versions, service
+from capabilities.bi_cards import (
+    ai_runs,
+    catalog,
+    dashboard,
+    importer,
+    runs,
+    schema_versions,
+    service,
+)
 from capabilities.bi_cards.staging import Staging
 from capabilities.bi_cards.store import (
     DATASET_RE,
@@ -76,14 +85,15 @@ def route(
     query: Mapping[str, str],
     body: Any,
     platform: bi_subscriptions.SubscriptionPlatform | None = None,
+    ai: ai_runs.AiRuntime | None = None,
 ) -> Answer:
     """One request; pure apart from the dataset files (and, for the
-    subscription routes, `platform`)."""
+    subscription routes, `platform`; for AI runs, `ai`)."""
     try:
         if path == "/api/bi/subscriptions" or path.startswith("/api/bi/subscriptions/"):
             given = body if isinstance(body, dict) else {}
             return bi_subscriptions.route(workspace, platform, method, path, query, given)
-        return _route(workspace, actor, method, path, query, body)
+        return _route(workspace, actor, method, path, query, body, ai)
     except catalog.SchemaInstallError as error:
         # An installed id@version is immutable: different content is a conflict.
         return 409 if error.code == "schema_version_exists" else 400, {
@@ -114,6 +124,7 @@ def _route(
     path: str,
     query: Mapping[str, str],
     body: Any,
+    ai: ai_runs.AiRuntime | None = None,
 ) -> Answer:
     given: dict[str, Any] = body if isinstance(body, dict) else {}
     who = f"{actor} via web"
@@ -253,7 +264,7 @@ def _route(
         )
         return 200, {"ok": True, "source": source}
     if path == "/api/bi/runs":
-        return _start_run(workspace, who, given)
+        return _start_run(workspace, who, given, ai)
     if path == "/api/bi/recipes":
         saved = runs.save_recipe(
             workspace, _dataset(given.get("dataset")), given.get("recipe"), actor=who
@@ -279,7 +290,7 @@ def _route(
             )
             return 200, {"ok": True, **done}
     if len(parts) >= 6 and parts[:4] == ["", "api", "bi", "runs"]:
-        return _run_action(workspace, who, parts[4], parts[5:], given)
+        return _run_action(workspace, who, parts[4], parts[5:], given, ai)
     if len(parts) == 6 and parts[:4] == ["", "api", "bi", "cards"] and parts[5] == "field":
         return _set_field(workspace, who, parts[4], given)
     if len(parts) == 7 and parts[:4] == ["", "api", "bi", "cards"] and parts[5] == "proposals":
@@ -287,10 +298,29 @@ def _route(
     return _error(404, "route_unknown", "沒有這個 BI 路徑")
 
 
-def _start_run(workspace: Path, who: str, given: dict[str, Any]) -> Answer:
+def _start_run(
+    workspace: Path, who: str, given: dict[str, Any], ai: ai_runs.AiRuntime | None
+) -> Answer:
     kind = given.get("kind")
     if kind not in ("trial", "ingest"):
         return _error(400, "run_kind_invalid", "kind 只能是 trial 或 ingest")
+    dataset = _dataset(given.get("dataset"))
+    source_id = str(given.get("source_id") or "")
+    source = Staging(workspace, dataset).source(source_id)
+    no_recipe = given.get("recipe") is None and not given.get("recipe_id")
+    if source is not None and source["parse"] == "text" and no_recipe:
+        # A text source is read by the model (BI ingest phase 4).
+        run = ai_runs.start(
+            workspace,
+            dataset,
+            ai,
+            kind=str(kind),
+            source_id=source_id,
+            instructions=given.get("instructions"),
+            types=given.get("types"),
+            actor=who,
+        )
+        return 200, {"ok": True, "run": run}
     mapping = given.get("mapping")
     if mapping is not None and not isinstance(mapping, dict):
         return _error(400, "mapping_invalid", "mapping 必須是 JSON 物件")
@@ -316,7 +346,12 @@ def _start_run(workspace: Path, who: str, given: dict[str, Any]) -> Answer:
 
 
 def _run_action(
-    workspace: Path, who: str, run_id: str, rest: list[str], given: dict[str, Any]
+    workspace: Path,
+    who: str,
+    run_id: str,
+    rest: list[str],
+    given: dict[str, Any],
+    ai: ai_runs.AiRuntime | None = None,
 ) -> Answer:
     dataset = _dataset(given.get("dataset"))
     if len(rest) == 2 and rest[0] == "candidates":
@@ -337,6 +372,8 @@ def _run_action(
         return 200, {"ok": True, **runs.commit(workspace, dataset, run_id, actor=who)}
     if rest == ["cancel"]:
         return 200, {"ok": True, "run": runs.cancel(workspace, dataset, run_id)}
+    if rest == ["retry"]:
+        return 200, {"ok": True, "run": ai_runs.retry(workspace, dataset, ai, run_id)}
     return _error(404, "route_unknown", "沒有這個 BI 路徑")
 
 
@@ -850,6 +887,32 @@ def publish_route(web: Any, method: str, path: str, query: Mapping[str, str], bo
         return _error(500, "bi_error", f"BI 發佈內部錯誤（{type(failure).__name__}）")
 
 
+def web_ai_runtime(web: Any) -> ai_runs.AiRuntime:
+    """The Knowledge model (Settings, with its data approval) and the task
+    log for AI runs: a run is a background task, so `/api/activity` shows it
+    before an Agent Web restart."""
+    from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
+
+    def model() -> Any:
+        installed = web.runtime.agent.gateway.bridge.installed.get(KNOWLEDGE_QUERY_SPEC.identity)
+        handler = getattr(installed, "handler", None)
+        client, alias = getattr(handler, "model", None), getattr(handler, "alias", None)
+        return None if client is None or alias is None else (client, str(alias))
+
+    def background(title: str, work: Any) -> None:
+        def tracked() -> tuple[str, str]:
+            work()
+            return "succeeded", title
+
+        threading.Thread(
+            target=web.tasks().tracked("bi-ingest", title, "", tracked),
+            name="bi-ingest",
+            daemon=True,
+        ).start()
+
+    return ai_runs.AiRuntime(model=model, background=background)
+
+
 def handle(handler: Any, method: str, parsed: ParseResult) -> bool:
     """Serve a `/api/bi/` request on `handler` (already token-checked);
     False when the path is not ours."""
@@ -888,6 +951,7 @@ def handle(handler: Any, method: str, parsed: ParseResult) -> bool:
             query,
             body,
             platform,
+            web_ai_runtime(web),
         )
     except Exception as failure:  # noqa: BLE001 - the page shows every failure
         status, payload = (

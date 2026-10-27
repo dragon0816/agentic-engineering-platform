@@ -393,7 +393,7 @@ def candidate(
     return found
 
 
-def _merge(into: dict[str, Any], other: dict[str, Any]) -> None:
+def merge(into: dict[str, Any], other: dict[str, Any]) -> None:
     """Two proposals of one card from different chunks: lists are unioned,
     evidence is kept from both, and a different single value is a warning."""
     by_name = {f["field"]: f for f in into["fields"]}
@@ -550,9 +550,9 @@ def extract(
             result.failures.append(failure)
         result.warnings.extend(warnings)
         for item in found:
-            key = (item["entity_type"], norm_key(_card_name(reg, item)))
+            key = (item["entity_type"], norm_key(card_name(reg, item)))
             if key in merged:
-                _merge(merged[key], item)
+                merge(merged[key], item)
             else:
                 merged[key] = item
         if on_chunk is not None:
@@ -563,7 +563,7 @@ def extract(
     return result
 
 
-def _card_name(reg: Registry, item: dict[str, Any]) -> str:
+def card_name(reg: Registry, item: dict[str, Any]) -> str:
     entity = reg.types[item["entity_type"]]
     values = {f["field"]: f["value"] for f in item["fields"]}
     parts = [str(values.get(name) or "") for name in entity.naming]

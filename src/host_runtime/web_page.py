@@ -2492,7 +2492,12 @@ tr:last-child td { border-bottom: none; }
             配方 JSON（多表格報告用；單一表格可留空）</label>
           <textarea id="bi-b-recipe" class="bi-input" rows="6" spellcheck="false"
             placeholder='{"schema_version": "aep.bi.recipe/v1", "passes": [...]}'></textarea>
-          <p class="bi-meta">試跑只產生候選卡給你看，不會寫入卡片；試跑結果也不能直接寫入。</p>
+          <label class="bi-label" for="bi-b-instr">
+            判讀規則（文字或 Markdown 來源由 AI 判讀；留空使用預設規則）</label>
+          <textarea id="bi-b-instr" class="bi-input" rows="5"
+            placeholder="例如：沒有文件依據的需求標成推測；依應用而不是產品拆卡"></textarea>
+          <p class="bi-meta">試跑只產生候選卡給你看，不會寫入卡片；試跑結果也不能直接寫入。
+            AI 判讀時，原文只當資料，模型不能執行任何動作；出處由程式在原文中找到。</p>
           <div class="bi-actions">
             <button class="go" id="bi-b-trial" type="button">試跑</button></div>
           <div id="bi-b-trial-result" role="status" aria-live="polite"></div>
@@ -11685,7 +11690,7 @@ function biBuildStored() {
 
 function biBuildAllowed() {
   const run = bi.build.run, has = !!bi.build.sourceId;
-  const open = run && run.kind === "ingest" && run.status === "review";
+  const open = run && run.kind === "ingest" && ["review", "partial"].includes(run.status);
   const accepted = open && run.summary && run.summary.accepted > 0;
   return {source: true, schema: has, method: has, review: has,
     commit: !!accepted, result: !!(run && run.status === "committed")};
@@ -11949,6 +11954,8 @@ el("bi-b-draft-publish").addEventListener("click", async () => {
 function biRunBody(kind) {
   const body = {dataset: biDataset(), kind, source_id: bi.build.sourceId,
     entity_type: el("bi-b-entity").value || null};
+  const instructions = el("bi-b-instr").value.trim();
+  if (instructions) body.instructions = instructions;
   const recipe = el("bi-b-recipe").value.trim();
   if (recipe) {
     try { body.recipe = JSON.parse(recipe); }
@@ -11966,12 +11973,24 @@ function biRunChips(run) {
     biBadge("已接受 " + (s.accepted || 0), "good")];
 }
 
+// An AI run reads its source in the background: follow it until it ends.
+async function biBuildFollow(runId) {
+  for (;;) {
+    const detail = await call("/api/bi/runs/" + runId + "?dataset="
+      + encodeURIComponent(biDataset()));
+    if (detail.run.status !== "extracting") { biStatus("bi-status-build", ""); return detail; }
+    const p = detail.run.progress || {};
+    biStatus("bi-status-build", "loading", "AI 判讀中…（第 " + (p.done || 0) + "／"
+      + (p.chunks || "?") + " 段）");
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+}
+
 el("bi-b-trial").addEventListener("click", async () => {
   const box = el("bi-b-trial-result"); box.replaceChildren();
   try {
     const reply = await biCall("/api/bi/runs", biRunBody("trial"));
-    const detail = await call("/api/bi/runs/" + reply.run.id + "?dataset="
-      + encodeURIComponent(biDataset()));
+    const detail = await biBuildFollow(reply.run.id);
     box.append(bh("p", "bi-meta", "試跑完成（沒有寫入）："), bh("div", "bi-chips",
       ...biRunChips(detail.run)), bh("ul", "", ...detail.candidates.slice(0, 50).map((c) =>
       bh("li", "", biTypeLabel(c.entity_type) + "・" + (c.name || c.canonical_key || "（無名稱）")
@@ -11996,6 +12015,7 @@ el("bi-b-start").addEventListener("click", async () => {
   biStatus("bi-status-build", "loading", "正在產生候選卡…");
   try {
     const reply = await biCall("/api/bi/runs", biRunBody("ingest"));
+    await biBuildFollow(reply.run.id);
     await biBuildFetchRun(reply.run.id); bi.build.candidateId = null;
     biStatus("bi-status-build", ""); biBuildSave(); biBuildRenderRun();
   } catch (failure) {
@@ -12006,7 +12026,7 @@ el("bi-b-start").addEventListener("click", async () => {
 function biBuildRenderRun() {
   const run = bi.build.run, list = el("bi-b-cands");
   list.replaceChildren(); el("bi-b-chips").replaceChildren();
-  const open = run && run.kind === "ingest" && run.status === "review";
+  const open = run && run.kind === "ingest" && ["review", "partial"].includes(run.status);
   el("bi-b-accept-clean").disabled = !open;
   el("bi-b-next4").disabled = !biBuildAllowed().commit;
   biBuildSteps();
@@ -12016,6 +12036,14 @@ function biBuildRenderRun() {
   }
   el("bi-b-chips").append(biBadge("執行 " + run.id + "・" + run.status, "dim"),
     ...biRunChips(run));
+  if ((run.failures || []).length) {
+    el("bi-b-chips").append(bh("p", "bi-err", "有 " + run.failures.length + " 段沒有判讀成功（"
+      + run.failures.map((f) => "第 " + f.line_start + "–" + f.line_end + " 行：" + f.message)
+        .join("；") + "）。其他候選卡可以先審核。"), biButton("重試失敗的段落", async () => {
+      await biCall("/api/bi/runs/" + run.id + "/retry", {dataset: biDataset()});
+      await biBuildFollow(run.id); await biBuildFetchRun(run.id); biBuildRenderRun();
+    }, "bi-btn"));
+  }
   for (const candidate of bi.build.candidates) {
     const decision = BI_DECISION[candidate.review] || [candidate.review, "dim"];
     const button = biButton("", () => biBuildShowCandidate(candidate.id), "bi-card-btn");
@@ -12053,7 +12081,7 @@ function biBuildShowCandidate(candidateId) {
   const box = el("bi-b-cand"); box.replaceChildren();
   if (!candidate) return;
   bi.build.candidateId = candidateId;
-  const open = bi.build.run && bi.build.run.status === "review";
+  const open = bi.build.run && ["review", "partial"].includes(bi.build.run.status);
   const head = bh("h4", "", (candidate.name || candidate.canonical_key || "（無名稱）") + "・"
     + biTypeLabel(candidate.entity_type));
   const match = candidate.match === "existing" ? "對應到既有卡片（版本 "

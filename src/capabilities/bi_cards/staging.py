@@ -283,7 +283,9 @@ class Staging:
         error: str | None = None,
         commit_result: dict[str, Any] | None = None,
     ) -> None:
-        finished = now() if status in ("review", "committed", "cancelled", "failed") else None
+        finished = (
+            now() if status in ("review", "partial", "committed", "cancelled", "failed") else None
+        )
         with self._db(write=True) as db:
             db.execute(
                 "UPDATE runs SET status = ?, finished = COALESCE(?, finished), "

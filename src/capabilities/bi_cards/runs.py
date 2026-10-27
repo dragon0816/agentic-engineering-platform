@@ -145,6 +145,9 @@ def evaluate(store: BiStore, reg: Registry, candidate: dict[str, Any]) -> dict[s
     else:
         action = "update" if changes else "unchanged"
     candidate["action"] = action
+    # Values the model gave that do not fit the schema (AI path) stay errors
+    # until the person edits the field.
+    errors.extend(candidate.get("value_errors") or [])
     candidate["errors"] = errors
     return candidate
 
@@ -407,7 +410,7 @@ def summary(candidates: list[dict[str, Any]]) -> dict[str, int]:
 
 def public(candidate: dict[str, Any]) -> dict[str, Any]:
     """A candidate as the API shows it (without the stored internals)."""
-    return {k: v for k, v in candidate.items() if k not in ("choice", "synthetic")}
+    return {k: v for k, v in candidate.items() if k not in ("choice", "synthetic", "value_errors")}
 
 
 def run_view(staging: Staging, run_id: str) -> dict[str, Any]:
@@ -417,7 +420,15 @@ def run_view(staging: Staging, run_id: str) -> dict[str, Any]:
     found = staging.candidates(run_id)
     view = {**run, "summary": summary(found)}
     layout = staging.layout(run_id)
-    if layout is not None:
+    if layout is not None and layout.get("mode") == "llm":
+        # An AI run: its progress, failed chunks (retryable) and warnings.
+        view.update(
+            progress={"done": layout.get("done", 0), "chunks": layout.get("chunks", 0)},
+            failures=layout.get("failures") or [],
+            warnings=layout.get("warnings") or [],
+            types=layout.get("types") or [],
+        )
+    elif layout is not None:
         # A recipe run: its tables, passes (with counts as reviewed now) and
         # run-level warnings such as `table_unused`.
         passes = []
@@ -449,7 +460,7 @@ def _open_run(staging: Staging, run_id: str) -> dict[str, Any]:
     run = staging.run_row(run_id)
     if run is None:
         raise BiStoreError("run_unknown", "找不到這次執行")
-    if run["status"] != "review":
+    if run["status"] not in ("review", "partial"):
         raise BiStoreError("run_closed", "這次執行已經結束，不能再修改")
     _same_schema(staging, run)
     return run
@@ -493,6 +504,9 @@ def _edit_fields(
         if item.klass == "derived":
             raise BiStoreError("field_derived", f"{item.label} 是推導欄位，不能直接修改")
         value = _normalize(reg, item, raw)
+        candidate["value_errors"] = [
+            e for e in candidate.get("value_errors") or [] if e.get("field") != item.name
+        ]
         entry = by_name.get(item.name)
         old = None if entry is None else entry["value"]
         if old == value:
@@ -618,7 +632,7 @@ def commit(workspace: Path, dataset: str, run_id: str, *, actor: str) -> dict[st
         return _committed(staging, run_id, run["commit"], counts, already=True)
     if run["kind"] == "trial":
         raise BiStoreError("run_trial", "試跑的結果不能寫入；請用同樣的來源開始正式匯入")
-    if run["status"] != "review":
+    if run["status"] not in ("review", "partial"):
         raise BiStoreError("run_closed", "這次執行已經結束，不能寫入")
     _same_schema(staging, run)
     earlier = store.committed_run(run_id)

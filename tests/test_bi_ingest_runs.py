@@ -319,7 +319,8 @@ def test_tsv_sources_and_refusals(tmp_path: Path) -> None:
     status, payload = _call(
         tmp_path, "POST", "/api/bi/runs", {"dataset": "demo", "kind": "ingest", "source_id": note}
     )
-    assert (status, payload["code"]) == (400, "source_not_table")
+    # A text source goes to the AI path (phase 4); with no model set up it is refused.
+    assert (status, payload["code"]) == (400, "model_unavailable")
     status, payload = _call(
         tmp_path, "POST", "/api/bi/runs", {"dataset": "demo", "kind": "ingest", "source_id": "nope"}
     )

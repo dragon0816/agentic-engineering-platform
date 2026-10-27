@@ -3650,15 +3650,18 @@ s-k-20261011T102952` (not published).
     union and per-row evidence; `alias_merged`, `role_conflict` (later pass defaults to skip, pending),
     `table_unused`, `exploded_row`), versioned recipes per dataset (`/api/bi/recipes`), recipe runs with
     `method_ref`, `tables[]`, `passes[]`. API only. Tests: `tests/test_bi_rule_path.py` (16, incl. VE-05/VE-06).
-- [ ] BI ingest phase 4: AI path (parsing, chunking, extraction, checks, jobs, retry).
+- [x] BI ingest phase 4: AI path (parsing, chunking, extraction, checks, jobs, retry).
   - [x] Core (2026-10-28, Claude Code): `capabilities/bi_cards/extract.py`: chunks along headings and
     paragraphs with line numbers, one structured model call per chunk with no tools and the source fenced as
     data in the user message, shape check with up to 3 retries (`model_output_invalid`), model failure per
     chunk (`model_unavailable`, retry of failed chunks only), values normalised (`value_errors`), quotes
     located by code (`evidence_not_found` → basis unknown), inference warnings, Opportunity without stated
     account and applications rejected by default, merge across chunks. Tests `tests/test_bi_extract.py` (7,
-    scripted model). Open: wiring into runs (model from Settings, background job, progress, retry route) and
-    the page.
+    scripted model).
+  - [x] Runs and page (2026-10-28, Claude Code): contract "BI AI path: extraction runs"; `ai_runs.py`
+    (Knowledge model from Settings, `bi-ingest` background task, progress, `partial` runs, retry of failed
+    chunks), `value_errors` block acceptance until edited, 「判讀規則」 box and progress in 「建立與匯入」.
+    Tests `tests/test_bi_ai_runs.py` (6). Not run against a real provider yet; PDF not supported yet.
 - [ ] BI ingest phase 5: Session B (method conversation, trial comparison, revert).
 - [ ] BI ingest phase 6: Session A (schema conversation, draft diff, sample trial).
 - [ ] BI ingest phase 7: benchmark, user guide, handoff.

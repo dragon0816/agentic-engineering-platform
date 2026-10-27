@@ -4310,6 +4310,46 @@ to "BI ingest runs": a run without a recipe behaves exactly as in phase 1.
   - Review, recheck, commit, cancel and undo are unchanged; one commit covers every pass, and undoing its
     `import_id` undoes every pass.
 
+## BI AI path: extraction runs (BI ingest phase 4, owner 2026-10-27)
+
+Design: `docs/phases/BI_INGEST.md` §7. Code: `src/capabilities/bi_cards/extract.py` (chunks, request, answer
+checks, quote location), `ai_runs.py` (runs, background job, retry), `runs.py` (`evaluate` adds
+`value_errors`), routes in `src/host_runtime/bi_cards_api.py` (`web_ai_runtime`). Tests:
+`tests/test_bi_extract.py`, `tests/test_bi_ai_runs.py` (scripted model; no provider is called).
+
+- **When.** `POST /api/bi/runs` on a source whose `parse` is `text` (`.txt`, `.md`) and with no `recipe` /
+  `recipe_id` starts an AI run (before phase 4 this was 400 `source_not_table`). Extra body keys:
+  `instructions` (string, at most 8000 characters; empty = the shipped `DEFAULT_INSTRUCTIONS`, the owner
+  proposal §4 card rules), `types` (card type names; default Signal, Technology, Application). Refusals: 400
+  `model_unavailable` (no Knowledge model in Settings; nothing is started; the rule path still works), 400
+  `types_invalid`, `instructions_too_long`, `source_not_text`.
+- **The model.** The Knowledge query model and alias (Settings, with its data approval). One call per chunk,
+  `structured_output` with output contract `aep.bi.extract.v1`, no tools. The system message holds the rules,
+  the schema's types and fields and the instructions; the chunk is in a user message between
+  `DATA_FENCE` / `DATA_END` and is never in the system message. Known card names of the types in scope are
+  offered for matching. An unusable answer is retried up to 3 times with its problems; then the chunk fails
+  `model_output_invalid`; a provider failure is `model_unavailable` for that chunk.
+- **Chunks.** Along headings (a heading starts a chunk once a quarter of the limit is used), blank lines and
+  whole tables, at most about 6000 characters, never inside a line; line numbers start at 1.
+- **Answer checks.** Unknown types (`model_type_unknown`, run warning) and fields (`model_field_unknown`,
+  candidate warning) are dropped. Values are normalised as an import cell; one that does not fit is a
+  candidate error `value_invalid` with its `field` until the person edits that field. `basis: "fact"` needs a
+  `quote` found in the chunk (whitespace and case ignored); its evidence locator `{line_start, line_end}` is
+  computed from where it is found; a quote not found makes the value `basis: "unknown"` with warning
+  `evidence_not_found`. `basis: "inference"` carries the model's reason as warning `inference`. An Opportunity
+  without `account` and `applications` as facts gets `opportunity_unsupported` and `review: "rejected"`.
+  Proposals of one card from several chunks merge (lists unioned, evidence kept from each; a different single
+  value is `value_conflict`, the first kept).
+- **Run.** `status`: `extracting` (background task `bi-ingest` in the task log, so `/api/activity` shows it)
+  → `review`, `partial` (some chunks failed; candidates can be reviewed and committed) or `failed` (all
+  failed). `method_ref`: `llm:default` or `llm:inline`; `model`: the alias. The run view adds `progress`
+  `{done, chunks}`, `failures` `[{chunk, line_start, line_end, code, message, retryable}]`, `warnings`,
+  `types`. Review, recheck and commit accept `review` and `partial`; cancel during `extracting` keeps the run
+  `cancelled` when the job ends.
+- **Retry.** `POST /api/bi/runs/<id>/retry {"dataset"}` on a `partial` or `failed` AI run re-runs only the
+  failed chunks in the background; new candidates merge into the stored ones (reviews kept). 409
+  `run_closed` when there is nothing to retry; 400 `model_unavailable`.
+
 ## BI dataset sharing (slice 1, owner 2026-10-22)
 
 Design: `docs/proposals/BI_DATASET_SHARING.md` (§4, §6, §8.5 owner answers, §8.6 trimmed slice 1:
