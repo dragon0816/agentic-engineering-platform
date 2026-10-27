@@ -4350,6 +4350,81 @@ checks, quote location), `ai_runs.py` (runs, background job, retry), `runs.py` (
   failed chunks in the background; new candidates merge into the stored ones (reviews kept). 409
   `run_closed` when there is nothing to retry; 400 `model_unavailable`.
 
+## BI method sessions (Session B, phase 5)
+
+Design: `docs/phases/BI_INGEST.md` §9.2, §11 item 9. Code: `src/capabilities/bi_cards/methods.py` (methods,
+method runs, comparison, Session B), `sessions.py` (durable sessions, one model call per turn, excerpts),
+`staging.py` (table `sessions`), `runs.py` / `ai_runs.py` (`method_ref`, `checks`), routes in
+`src/host_runtime/bi_cards_api.py`; UI in step 3 of 「建立與匯入」. Tests: `tests/test_bi_methods.py`
+(scripted model), `tests/test_bi_sessions_ui.py`. Additive: runs without `method_id` are unchanged.
+
+- **Method** `aep.bi.method/v1`, one folder per method `<workspace>/bi/<dataset>/methods/<12 hex>/` with
+  `method.json` (`{"id", "name", "by", "at", "revisions": [{"rev", "at", "by", "note", "source": "base" |
+  "edit" | "ai" | "revert", "schema_ref", "copied_from"?}], "rechecks": [{"rev", "schema_ref", "run_id",
+  "at"}]}`) and immutable `rev-<n>.json`: `{"format": "aep.bi.method/v1", "name" (1–80), "description"?,
+  "schema_ref" (the dataset schema the revision was checked against), "mode": "rules" | "llm", "types",
+  "instructions" (llm: at most 8000 characters; empty = the shipped `DEFAULT_INSTRUCTIONS`), "recipe"
+  (rules: an `aep.bi.recipe/v1` body, checked as in "BI rule path"; llm: null), "checks": [{"entity_type",
+  "require": [field], "message"?}]}`. `types` default: the shipped three (llm) or the recipe's pass types
+  (rules). Any other key, an unknown type or field, or a bad recipe is 400 `method_invalid` with `key` (a
+  recipe's own refusals keep their codes). A subscribed dataset refuses every write (409
+  `dataset_read_only`).
+- **Routes.** `POST /api/bi/methods {"dataset", "method"}` → `{"ok": true, <method view>}` (revision 1).
+  `POST /api/bi/methods/<id>/revisions {"dataset", "method", "note"}` → a new revision. `POST
+  /api/bi/methods/<id>/revert {"dataset", "rev"}` → a new revision copying `rev` as it was, its
+  `schema_ref` included (`copied_from`). `GET /api/bi/methods/<id>?dataset=&rev=` → `<method view>` =
+  `{"method": <method.json>, "revision", "document", "diff": [{"key", "before", "after"}] (against the
+  previous revision), "status": {"schema_ref" (the dataset's now), "revision_schema_ref", "schema_changed",
+  "rechecked": <recheck> | null, "message"}}`. `GET /api/bi/methods?dataset=` → `{"methods": [{"id",
+  "name", "mode", "revisions", "updated", "status"}]}` newest first. Unknown: 404 `method_unknown`,
+  `revision_unknown`.
+- **Runs with a method.** `POST /api/bi/runs {"dataset", "kind", "source_id", "method_id", "method_rev"?}`
+  runs the revision (latest by default): `rules` through the recipe (as an inline recipe), `llm` through the
+  AI path with its instructions and types. `<run>.method_ref` = `method:<id>@<rev>`. A `checks` rule gives
+  every candidate of its type that lacks a required field the error `method_check` on that field (kept until
+  the person fills the field). Trial runs stay uncommittable (409 `run_trial`).
+- **Schema re-check.** A revision whose `schema_ref` differs from the dataset's schema is `schema_changed`
+  (「schema 已更新，請重新試跑確認」) unless a trial run of that revision under the current schema has reached
+  `review`; such a run is recorded in `rechecks` when the method is next read or run. An ingest run with a
+  `schema_changed` revision is 409 `schema_changed`; a trial run is allowed. A revision saved after the
+  upgrade is checked against the new schema and is not flagged.
+- **Compare.** `GET /api/bi/runs/compare?dataset=&left=<run>&right=<run>` → `{"left": <run>, "right": <run>,
+  "added": [<brief>], "removed": [<brief>], "changed": [{"entity_type", "name", "left_id", "right_id",
+  "fields": [{"field", "change": "added" | "removed" | "value" | "basis", "before": {"value", "basis"} |
+  null, "after": ..., "evidence"}], "warnings_added": [code], "warnings_removed": [code]}], "same": int,
+  "counts": {"left" | "right": {"candidates", "warnings" (candidate and run warnings), "inferences" (fields
+  with basis inference), "errors"}}}`. Candidates pair by `(entity_type, canonical_key or name)` ignoring
+  spaces, punctuation and case. `<brief>` = `{"id", "entity_type", "name", "canonical_key", "fields":
+  [{"field", "value", "basis"}], "warnings": [code], "errors", "inferences"}`. Runs of different sources:
+  400 `compare_sources_differ`; unknown 404 `run_unknown`. Writes nothing.
+- **Sessions** (`staging.sqlite` table `sessions(id, kind, target_ref, body, model, by, at, updated)`; the
+  turns survive a restart). `POST /api/bi/sessions {"dataset", "kind": "method", "target": <method id>}` →
+  `{"ok": true, "session": <session>}`; `<session>` = `{"id", "kind", "target_ref": "method:<id>", "model",
+  "by", "at", "updated", "goal", "source_ids", "turns": [<turn>]}`. `GET /api/bi/sessions?dataset=&target=`
+  → `{"sessions"}` newest first; `GET /api/bi/sessions/<id>?dataset=` → `{"session"}` (404
+  `session_unknown`). `GET /api/bi/ai` → `{"available", "model": alias | null, "message"}`.
+- **A turn.** `POST /api/bi/sessions/<id>/turns {"dataset", "message" (1–4000), "source_ids": [id]
+  (at most 5), "run_ids"?: [run id]}` → `{"ok": true, "session"}` with two new turns: `{"role": "user",
+  "text", "at", "by"}` and `{"role": "assistant", "at", "model", "attempts", "problems", "sent": {"model",
+  "sources": [{"id", "name", "classification", "chars", "of", "truncated"}], "excerpt_chars", "cap": 12000,
+  "runs": [run id], "method_rev"}, "suggestion": <suggestion> | null, "error": {"code":
+  "model_unavailable" | "model_output_invalid", "message"} | null, "applied": null}`. No model: 400
+  `model_unavailable` and nothing is stored. One `ModelClient.generate` per attempt, `structured_output`,
+  output contract `aep.bi.method_suggestion.v1`, **no tools**; the system message holds only the rules; the
+  method revision, the schema's types, the excerpts (the cap shared by the chosen sources) and the last two
+  trial runs of the method (or `run_ids`; candidates with values, bases and warnings, at most 4000
+  characters) go in a user message, excerpts and run text between `DATA_FENCE` / `DATA_END`. An answer
+  that is not an object, lacks `reply`, has `changes` keys other than `instructions`, `types`, `recipe`,
+  `mode`, `checks`, or whose changed method fails the method check is asked again with the problems (3
+  attempts), then the turn has `error.code` `model_output_invalid`.
+- **`<suggestion>`** `aep.bi.method_suggestion/v1` = `{"format", "reply", "changes": {key: complete new
+  value}, "reasons": [str], "limits": [str], "needs_engineering": [str] (what a method cannot express,
+  never applied or claimed as working), "result": {"base_rev", "diff": [{"key", "before", "after"}]}}`.
+- **Apply.** `POST /api/bi/sessions/<id>/apply {"dataset", "turn": <index of the assistant turn>}` →
+  `{"ok": true, "session", <method view>}`: the changes on the latest revision, checked, saved as a new
+  revision with `source: "ai"`; the turn gets `applied: {"rev", "at", "by"}`. A second apply is 409
+  `suggestion_applied`; a turn without a suggestion 404 `turn_unknown`.
+
 ## BI dataset sharing (slice 1, owner 2026-10-22)
 
 Design: `docs/proposals/BI_DATASET_SHARING.md` (§4, §6, §8.5 owner answers, §8.6 trimmed slice 1:

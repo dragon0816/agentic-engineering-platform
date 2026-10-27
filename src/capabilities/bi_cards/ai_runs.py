@@ -61,9 +61,14 @@ def start(
     instructions: Any,
     types: Any,
     actor: str,
+    method_ref: str | None = None,
+    schema: tuple[Registry, str] | None = None,
+    checks: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Start the AI path on a text source; the run is `extracting` until the
-    background job ends."""
+    background job ends. A method run (phase 5) gives its `method_ref` and
+    `checks`; a draft trial (phase 6) gives `schema` = (the draft's registry,
+    its `draft:` ref)."""
     staging = Staging(workspace, dataset)
     staging.store.refuse_write()
     source = staging.source(source_id)
@@ -71,7 +76,10 @@ def start(
         raise BiStoreError("source_unknown", "找不到這個來源")
     if parse_kind(source["name"]) != "text":
         raise BiStoreError("source_not_text", "AI 判讀只讀文字或 Markdown 來源")
-    reg = catalog.for_store(staging.store)
+    if schema is None:
+        reg = catalog.for_store(staging.store)
+        schema = (reg, reg.ref)
+    reg = schema[0]
     scope = _types(reg, types)
     edited = isinstance(instructions, str) and instructions.strip()
     text = str(instructions).strip() if edited else extract.DEFAULT_INSTRUCTIONS
@@ -86,10 +94,10 @@ def start(
     model, alias = chosen
     run_id = staging.create_run(
         kind=kind,
-        schema_ref=reg.ref,
+        schema_ref=schema[1],
         source_ids=[source_id],
         actor=actor,
-        method_ref="llm:inline" if edited else "llm:default",
+        method_ref=method_ref or ("llm:inline" if edited else "llm:default"),
         model=alias,
     )
     staging.put_layout(
@@ -98,6 +106,7 @@ def start(
             "mode": "llm",
             "types": scope,
             "instructions": text,
+            "checks": checks or [],
             "chunks": 0,
             "done": 0,
             "failures": [],
@@ -170,7 +179,7 @@ def _extract(
     run = staging.run_row(run_id)
     layout = staging.layout(run_id) or {}
     assert run is not None
-    reg = catalog.for_store(staging.store)
+    reg = runs.registry_for(staging, run)
     source = staging.source(run["source_ids"][0]) or {}
     text = staging.source_bytes(run["source_ids"][0]).decode("utf-8-sig", errors="replace")
 
@@ -200,7 +209,8 @@ def _extract(
         else:
             item["id"] = f"c{len(by_key) + 1}"
             by_key[key] = item
-    merged = [runs.evaluate(staging.store, reg, c) for c in by_key.values()]
+    checked = runs.apply_checks(list(by_key.values()), layout.get("checks"))
+    merged = [runs.evaluate(staging.store, reg, c) for c in checked]
     staging.put_candidates(run_id, merged)
     retried = set(only or [])
     kept = [f for f in layout.get("failures") or [] if int(f["chunk"]) not in retried]

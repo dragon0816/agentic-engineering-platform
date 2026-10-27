@@ -389,6 +389,6 @@ Each phase ends verified in a clean worktree and is pushed to `main` (owner 2026
 | 2 | Schema drafts, diff, local BI versions, dataset upgrade (§5) | done 2026-10-27 (API only; the page UI is phase 3) |
 | 3 | Rule path: Case B recipes, Markdown/Excel readers; the shared stepper; review UI | done 2026-10-28 |
 | 4 | AI path: parsing, chunking, extraction, checks, jobs, retry (§7) | done 2026-10-28 (text and Markdown; PDF not yet; tested with a scripted model, no real provider run) |
-| 5 | Session B (§9.2), trial comparison | not started |
+| 5 | Session B (§9.2), trial comparison | done 2026-10-28 (methods, method runs, compare, Session B API and step 3 panel; tested with a scripted model, no real provider run) |
 | 6 | Session A (§9.1) | not started |
 | 7 | Benchmark (§11.10), user guide, handoff | not started |

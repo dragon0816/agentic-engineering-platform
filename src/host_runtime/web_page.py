@@ -1206,6 +1206,16 @@ tr:last-child td { border-bottom: none; }
 .bi-step h3 { margin: 0 0 8px; font-size: 16px; }
 .bi-step-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 10px 14px; align-items: end; }
+.bi-warn { color: var(--warn); font-size: 13px; }
+.bi-ai { margin: 12px 0; padding: 10px 12px; border: 1px solid var(--line);
+  border-radius: 8px; min-width: 0; }
+.bi-ai h4 { margin: 0 0 6px; }
+.bi-log { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 8px; }
+.bi-log > li { padding: 8px 10px; border-radius: 8px; background: var(--panel);
+  border: 1px solid var(--line); overflow-wrap: anywhere; min-width: 0; }
+.bi-log > li.me { border-style: dashed; }
+.bi-pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 16em; overflow-y: auto;
+  margin: 4px 0; font-size: 12.5px; }
 .bi-apply { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 10px; }
 .bi-result { padding: 12px 14px; border-color: var(--good); overflow: visible; }
 .bi-result.pending { border-color: var(--warn); }
@@ -2484,6 +2494,35 @@ tr:last-child td { border-bottom: none; }
         <section class="kp-stage card bi-step" data-stage="method" aria-labelledby="bi-b-method"
           hidden>
           <h3 class="kp-stage-title" id="bi-b-method" tabindex="-1">步驟 3／6・方法與試跑</h3>
+          <p class="bi-meta">方法把下方的判讀規則或配方存成版次；每次修改、套用 AI 建議
+            或回復都是新的版次，
+            可以用同一份來源試跑兩個版次再比較。也可以不存方法，直接用下方設定試跑。</p>
+          <div class="bi-step-grid">
+            <div><label class="bi-label" for="bi-b-m-pick">使用的方法</label>
+              <select id="bi-b-m-pick"><option value="">不使用已存的方法（用下方設定）</option>
+              </select></div>
+            <div><label class="bi-label" for="bi-b-m-name">新方法名稱</label>
+              <input id="bi-b-m-name" class="bi-input" maxlength="80"
+                placeholder="例如：會議紀錄判讀"></div>
+            <div><button class="bi-btn" id="bi-b-m-new" type="button">
+              用下方設定建立方法</button></div>
+          </div>
+          <div id="bi-b-m-box" hidden>
+            <div id="bi-b-m-info" aria-live="polite"></div>
+            <section class="bi-ai" id="bi-b-sb" aria-labelledby="bi-b-sb-h">
+              <h4 id="bi-b-sb-h">和 AI 討論這個方法（Session B）</h4>
+              <p class="bi-meta" id="bi-b-sb-model"></p>
+              <ol id="bi-b-sb-log" class="bi-log" role="log" aria-live="polite"
+                aria-label="方法對話紀錄"></ol>
+              <label class="bi-label" for="bi-b-sb-msg">你想怎麼調整這個方法</label>
+              <textarea id="bi-b-sb-msg" class="bi-input" rows="3" maxlength="4000"
+                placeholder="例如：沒有文件依據的需求標成推測"></textarea>
+              <div class="bi-actions">
+                <button class="go" id="bi-b-sb-send" type="button">送出</button></div>
+              <div class="mem-status" id="bi-b-sb-status" role="status" aria-live="polite"
+                hidden></div>
+            </section>
+          </div>
           <div class="bi-step-grid">
             <div><label class="bi-label" for="bi-b-entity">卡片類型（單一表格）</label>
               <select id="bi-b-entity"><option value="">自動判斷</option></select></div>
@@ -2499,8 +2538,21 @@ tr:last-child td { border-bottom: none; }
           <p class="bi-meta">試跑只產生候選卡給你看，不會寫入卡片；試跑結果也不能直接寫入。
             AI 判讀時，原文只當資料，模型不能執行任何動作；出處由程式在原文中找到。</p>
           <div class="bi-actions">
-            <button class="go" id="bi-b-trial" type="button">試跑</button></div>
+            <button class="go" id="bi-b-trial" type="button">試跑</button>
+            <button class="bi-btn" id="bi-b-m-save" type="button" hidden>
+              把上面的設定存成方法的新版次</button></div>
           <div id="bi-b-trial-result" role="status" aria-live="polite"></div>
+          <h4>比較兩次試跑</h4>
+          <p class="bi-meta">選同一份來源的兩次試跑（例如方法的兩個版次），看候選卡的增減、
+            每個欄位的值與依據、警告與推論數的差異。比較不會寫入任何東西。</p>
+          <div class="bi-step-grid">
+            <div><label class="bi-label" for="bi-b-cmp-left">較早的試跑</label>
+              <select id="bi-b-cmp-left"></select></div>
+            <div><label class="bi-label" for="bi-b-cmp-right">較新的試跑</label>
+              <select id="bi-b-cmp-right"></select></div>
+            <div><button class="bi-btn" id="bi-b-cmp-go" type="button">比較</button></div>
+          </div>
+          <div id="bi-b-cmp" aria-live="polite"></div>
           <div class="bi-actions"><button class="bi-btn" type="button" data-bi-next="schema">
             上一步</button><button class="go" type="button" data-bi-next="review">
             下一步：逐卡審核</button></div>
@@ -11710,6 +11762,7 @@ function biBuildStage(name, focus = true) {
   }
   biBuildSave();
   if (stage === "schema") biBuildSchema();
+  if (stage === "method") biBuildMethodStage();
   if (stage === "review") biBuildRenderRun();
   if (stage === "commit") biBuildSummary();
   if (stage === "result") biBuildResult();
@@ -11954,6 +12007,8 @@ el("bi-b-draft-publish").addEventListener("click", async () => {
 function biRunBody(kind) {
   const body = {dataset: biDataset(), kind, source_id: bi.build.sourceId,
     entity_type: el("bi-b-entity").value || null};
+  const methodId = el("bi-b-m-pick").value;
+  if (methodId) { body.method_id = methodId; return body; }
   const instructions = el("bi-b-instr").value.trim();
   if (instructions) body.instructions = instructions;
   const recipe = el("bi-b-recipe").value.trim();
@@ -11997,8 +12052,305 @@ el("bi-b-trial").addEventListener("click", async () => {
         + "・" + (BI_RUN_ACTION[c.action] || c.action)
         + (c.errors.length ? "・錯誤 " + c.errors.length : "")
         + (c.warnings.length ? "・警告 " + c.warnings.length : "")))));
+    if (detail.run.method_ref) box.prepend(bh("p", "bi-meta", "方法：" + detail.run.method_ref));
   } catch (failure) {
     box.append(bh("p", "bi-err", "試跑失敗：" + failure.message + "。"));
+  }
+  try {
+    await biBuildTrials();
+    if (bi.build.method) await biBuildOpenMethod(bi.build.method.method.id);
+  } catch (failure) { biNotice(false, "試跑紀錄沒有更新：" + failure.message); }
+});
+
+// -- step 3: methods, Session B and comparison (BI ingest phase 5) -------------
+// A method is a versioned file in the dataset; Session B suggests changes (one
+// model call per turn, no tools) and only 「套用為新版次」 writes a revision.
+async function biBuildMethodStage() {
+  try {
+    await Promise.all([biBuildMethods(), biBuildTrials(), biBuildAiState("bi-b-sb-model",
+      "方法、最近兩次試跑的候選卡")]);
+  } catch (failure) { biNotice(false, "方法沒有載入：" + failure.message); }
+}
+
+async function biBuildAiState(target, extra) {
+  const state = await call("/api/bi/ai?dataset=" + encodeURIComponent(biDataset()));
+  bi.build.ai = state;
+  const line = el(target); line.replaceChildren(); line.className = "bi-meta";
+  if (!state.available) {
+    line.className = "bi-warn";
+    line.append("目前沒有可用的模型（model_unavailable）：" + state.message + "。");
+    return;
+  }
+  const source = bi.build.sources.find((s) => s.id === bi.build.sourceId);
+  line.append("模型：" + state.model + "。每次送出只呼叫一次模型（格式不對最多重試 3 次），"
+    + "模型沒有任何工具，不能改動資料。送出的資料：" + extra
+    + (source ? "，以及來源「" + source.name + "」（" + source.classification
+      + "）的前段（上限 12000 字）" : "（尚未選來源，不附來源內容）") + "。");
+}
+
+async function biBuildMethods(fill) {
+  const reply = await call("/api/bi/methods?dataset=" + encodeURIComponent(biDataset()));
+  const pick = el("bi-b-m-pick"), keep = pick.value || (bi.build.method
+    ? bi.build.method.method.id : "");
+  pick.replaceChildren(bh("option", "", "不使用已存的方法（用下方設定）"));
+  pick.firstChild.value = "";
+  for (const item of reply.methods || []) {
+    const option = bh("option", "", item.name + "・第 " + item.revisions + " 版・"
+      + (item.mode === "rules" ? "規則" : "AI") + (item.status.schema_changed
+        ? "・schema 已更新，請重新試跑" : ""));
+    option.value = item.id; pick.append(option);
+  }
+  pick.value = (reply.methods || []).some((m) => m.id === keep) ? keep : "";
+  if (pick.value) await biBuildOpenMethod(pick.value, fill);
+  else biBuildCloseMethod();
+}
+
+function biBuildCloseMethod() {
+  bi.build.method = null; el("bi-b-m-box").hidden = true; el("bi-b-m-save").hidden = true;
+}
+
+el("bi-b-m-pick").addEventListener("change", async () => {
+  const id = el("bi-b-m-pick").value;
+  if (!id) { biBuildCloseMethod(); return; }
+  try { await biBuildOpenMethod(id, true); }
+  catch (failure) { biNotice(false, "方法沒有載入：" + failure.message); }
+});
+
+// The settings boxes below as a method body (rules when there is a recipe).
+function biMethodBody(name) {
+  const method = {name, mode: "llm"};
+  const recipe = el("bi-b-recipe").value.trim(), instr = el("bi-b-instr").value.trim();
+  if (recipe) {
+    try { method.mode = "rules"; method.recipe = JSON.parse(recipe); }
+    catch (e) { throw new Error("配方不是有效的 JSON"); }
+  }
+  if (instr && !recipe) method.instructions = instr;
+  if (bi.build.method && bi.build.method.document.name === name) {
+    method.checks = bi.build.method.document.checks;
+    if (!recipe) method.types = bi.build.method.document.types;
+  }
+  return method;
+}
+
+el("bi-b-m-save").addEventListener("click", async () => {
+  const view = bi.build.method; if (!view) return;
+  try {
+    const saved = await biCall("/api/bi/methods/" + view.method.id + "/revisions",
+      {dataset: biDataset(), method: biMethodBody(view.document.name), note: "手動修改"});
+    await biBuildMethods(true);
+    biNotice(true, "已存成第 " + saved.revision + " 版。");
+  } catch (failure) { biNotice(false, "沒有存成新版次：" + failure.message); }
+});
+
+el("bi-b-m-new").addEventListener("click", async () => {
+  const name = el("bi-b-m-name").value.trim();
+  if (!name) { biNotice(false, "請先寫新方法的名稱。"); el("bi-b-m-name").focus(); return; }
+  let method;
+  try { method = biMethodBody(name); }
+  catch (failure) { biNotice(false, failure.message + "。"); return; }
+  try {
+    const view = await biCall("/api/bi/methods", {dataset: biDataset(), method});
+    el("bi-b-m-name").value = "";
+    bi.build.method = view; await biBuildMethods();
+    biNotice(true, "已建立方法「" + view.document.name + "」第 1 版。");
+  } catch (failure) { biNotice(false, "沒有建立方法：" + failure.message); }
+});
+
+function biMethodText(value) {
+  if (value == null || value === "") return "（無）";
+  return typeof value === "string" ? value : JSON.stringify(value, null, 1);
+}
+
+const BI_METHOD_KEY = {instructions: "判讀規則", types: "卡片類型", recipe: "配方",
+  mode: "方式", checks: "必要欄位檢查", name: "名稱", schema_ref: "schema"};
+
+function biMethodDiff(diff) {
+  if (!diff.length) return bh("p", "bi-meta", "內容沒有變化。");
+  return bh("ul", "", ...diff.map((d) => bh("li", "", bh("strong", "",
+    (BI_METHOD_KEY[d.key] || d.key) + "："), bh("div", "bi-meta", "原本："),
+    bh("pre", "bi-pre", biMethodText(d.before)), bh("div", "bi-meta", "之後："),
+    bh("pre", "bi-pre", biMethodText(d.after)))));
+}
+
+async function biBuildOpenMethod(id, fill) {
+  const view = await call("/api/bi/methods/" + id + "?dataset="
+    + encodeURIComponent(biDataset()));
+  bi.build.method = view;
+  el("bi-b-m-box").hidden = false; el("bi-b-m-save").hidden = false;
+  const doc = view.document, info = el("bi-b-m-info"); info.replaceChildren();
+  if (fill) {
+    // The boxes below show the chosen revision, so editing them is editing it.
+    el("bi-b-recipe").value = doc.mode === "rules" ? JSON.stringify(doc.recipe, null, 1) : "";
+    el("bi-b-instr").value = doc.mode === "llm" ? doc.instructions : "";
+  }
+  info.append(bh("p", "", bh("strong", "", doc.name), "・第 " + view.revision + " 版・"
+    + (doc.mode === "rules" ? "規則轉換（配方）" : "AI 判讀") + "・schema " + doc.schema_ref));
+  if (view.status.schema_changed) {
+    info.append(bh("p", "bi-warn", view.status.message + "：資料集現在使用 "
+      + view.status.schema_ref + "；用這個方法試跑一次（到可審核）後才能正式匯入。"));
+  } else if (view.status.rechecked && view.status.revision_schema_ref !== view.status.schema_ref) {
+    info.append(bh("p", "bi-meta", "已在 " + view.status.schema_ref + " 下試跑確認（執行 "
+      + view.status.rechecked.run_id + "）。"));
+  }
+  info.append(bh("p", "bi-meta", "卡片類型：" + doc.types.map(biTypeLabel).join("、")
+    + (doc.checks.length ? "・必要欄位檢查 " + doc.checks.length + " 條" : "")));
+  info.append(bh("details", "", bh("summary", "", doc.mode === "rules" ? "配方內容"
+    : "判讀規則"), bh("pre", "bi-pre", biMethodText(doc.mode === "rules" ? doc.recipe
+    : doc.instructions))));
+  if (view.revision > 1) {
+    info.append(bh("details", "", bh("summary", "", "和第 " + (view.revision - 1)
+      + " 版的差異"), biMethodDiff(view.diff)));
+  }
+  const revisions = view.method.revisions.slice().reverse();
+  const source = {base: "建立", edit: "修改", ai: "AI 建議", revert: "回復"};
+  info.append(bh("strong", "", "版次"), bh("ul", "", ...revisions.map((r) => bh("li", "",
+    "第 " + r.rev + " 版・" + (r.note || source[r.source] || r.source) + "・" + biTime(r.at)
+      + " ", r.rev === view.revision ? biBadge("目前", "good")
+      : biButton("回復到這一版", async () => {
+        await biCall("/api/bi/methods/" + id + "/revert", {dataset: biDataset(), rev: r.rev});
+        await biBuildMethods(true);
+        biNotice(true, "已回復：第 " + r.rev + " 版的內容成為新的版次。");
+      }, "bi-btn", "回復到第 " + r.rev + " 版")))));
+  const found = await call("/api/bi/sessions?dataset=" + encodeURIComponent(biDataset())
+    + "&target=" + encodeURIComponent("method:" + id));
+  bi.build.sessB = (found.sessions || [])[0] || null;
+  biBuildSessionLog("bi-b-sb-log", bi.build.sessB, biBuildApplyMethod);
+}
+
+function biSentLine(sent) {
+  const parts = (sent.sources || []).map((s) => "來源「" + s.name + "」（" + s.classification
+    + "，送出 " + s.chars + "／" + s.of + " 字" + (s.truncated ? "，已截斷" : "") + "）");
+  if ((sent.runs || []).length) parts.push("試跑 " + sent.runs.join("、") + " 的候選卡");
+  if (sent.method_rev) parts.push("方法第 " + sent.method_rev + " 版");
+  if (sent.draft_rev) parts.push("草稿第 " + sent.draft_rev + " 版");
+  if (sent.goal) parts.push("目標");
+  return "模型 " + (sent.model || "?") + "・送出：" + (parts.join("、") || "只有對話")
+    + "（來源上限 " + (sent.cap || 12000) + " 字）";
+}
+
+function biListBlock(title, items, cls) {
+  if (!items || !items.length) return "";
+  return bh("div", cls || "", bh("strong", "", title), bh("ul", "", ...items.map((x) =>
+    bh("li", "", x))));
+}
+
+function biBuildSessionLog(target, session, renderSuggestion) {
+  const log = el(target); log.replaceChildren();
+  const turns = session ? session.turns : [];
+  if (!turns.length) {
+    log.append(bh("li", "bi-meta", "還沒有對話。寫下你想要的調整，AI 只會提出建議，"
+      + "要你按「套用」才會改動。"));
+    return;
+  }
+  turns.forEach((turn, index) => {
+    if (turn.role === "user") {
+      log.append(bh("li", "me", bh("strong", "", "你："), turn.text));
+      return;
+    }
+    const item = bh("li", "", bh("p", "bi-meta", biSentLine(turn.sent || {})));
+    if (turn.error) item.append(bh("p", "bi-err", turn.error.message));
+    if (turn.suggestion) item.append(...renderSuggestion(session, turn, index));
+    log.append(item);
+  });
+}
+
+function biBuildApplyMethod(session, turn, index) {
+  const s = turn.suggestion;
+  const parts = [bh("p", "", bh("strong", "", "AI："), s.reply),
+    biListBlock("理由", s.reasons), biListBlock("限制", s.limits),
+    biListBlock("需要工程開發（方法做不到，沒有套用）", s.needs_engineering, "bi-warn"),
+    bh("strong", "", "套用後的變化"), biMethodDiff(s.result.diff)];
+  if (turn.applied) {
+    parts.push(bh("p", "bi-meta", "已套用為第 " + turn.applied.rev + " 版。"));
+  } else if (s.result.diff.length) {
+    parts.push(bh("div", "bi-actions", biButton("套用為新版次", async () => {
+      const reply = await biCall("/api/bi/sessions/" + session.id + "/apply",
+        {dataset: biDataset(), turn: index});
+      await biBuildMethods(true);
+      biNotice(true, "已套用為第 " + reply.revision + " 版；用同一份來源試跑後可以比較。");
+    }, "go", "把這個建議套用為方法的新版次")));
+  }
+  return parts;
+}
+
+el("bi-b-sb-send").addEventListener("click", async () => {
+  const method = bi.build.method, message = el("bi-b-sb-msg").value.trim();
+  if (!method) return;
+  if (!message) { el("bi-b-sb-msg").focus(); return; }
+  const button = el("bi-b-sb-send"); button.disabled = true;
+  biStatus("bi-b-sb-status", "loading", "AI 正在看方法與樣本…（一次模型呼叫）");
+  try {
+    let session = bi.build.sessB;
+    if (!session) {
+      session = (await biCall("/api/bi/sessions", {dataset: biDataset(), kind: "method",
+        target: method.method.id})).session;
+    }
+    const reply = await biCall("/api/bi/sessions/" + session.id + "/turns",
+      {dataset: biDataset(), message,
+        source_ids: bi.build.sourceId ? [bi.build.sourceId] : []});
+    bi.build.sessB = reply.session; el("bi-b-sb-msg").value = "";
+    biBuildSessionLog("bi-b-sb-log", reply.session, biBuildApplyMethod);
+    biStatus("bi-b-sb-status", "");
+  } catch (failure) {
+    biStatus("bi-b-sb-status", "error", (failure.code === "model_unavailable"
+      ? "沒有可用的模型：" : "沒有送出：") + failure.message + "。");
+  } finally { button.disabled = false; }
+});
+
+async function biBuildTrials() {
+  const reply = await call("/api/bi/runs?dataset=" + encodeURIComponent(biDataset()));
+  const trials = (reply.runs || []).filter((r) => r.kind === "trial"
+    && r.source_ids.includes(bi.build.sourceId) && ["review", "partial"].includes(r.status));
+  for (const [id, pick] of [["bi-b-cmp-left", 1], ["bi-b-cmp-right", 0]]) {
+    const select = el(id); select.replaceChildren();
+    for (const run of trials) {
+      const option = bh("option", "", biTime(run.at) + "・" + (run.method_ref || "未存方法")
+        + "・" + run.id);
+      option.value = run.id; select.append(option);
+    }
+    if (trials[pick]) select.value = trials[pick].id;
+  }
+  el("bi-b-cmp-go").disabled = trials.length < 2;
+}
+
+function biCompareField(f) {
+  const side = (x) => x ? biValue(x.value) + "（" + ((BI_BASIS[x.basis] || [x.basis])[0])
+    + "）" : "（無）";
+  const what = {added: "新增", removed: "移除", value: "值改變", basis: "依據改變"};
+  return bh("li", "", bh("strong", "", f.field), "：" + side(f.before) + " → "
+    + side(f.after) + "・" + (what[f.change] || f.change));
+}
+
+el("bi-b-cmp-go").addEventListener("click", async () => {
+  const box = el("bi-b-cmp"); box.replaceChildren();
+  try {
+    const c = await call("/api/bi/runs/compare?dataset=" + encodeURIComponent(biDataset())
+      + "&left=" + el("bi-b-cmp-left").value + "&right=" + el("bi-b-cmp-right").value);
+    const row = (label, key) => bh("tr", "", bh("td", "", label),
+      bh("td", "", String(c.counts.left[key])), bh("td", "", String(c.counts.right[key])));
+    const table = bh("table", "bi-table", bh("thead", "", bh("tr", "", bh("th", "", "數量"),
+      bh("th", "", "較早 " + c.left.id), bh("th", "", "較新 " + c.right.id))),
+      bh("tbody", "", row("候選卡", "candidates"), row("推論欄位", "inferences"),
+        row("警告", "warnings"), row("錯誤", "errors")));
+    const name = (x) => biTypeLabel(x.entity_type) + "・" + (x.name || x.canonical_key);
+    box.append(bh("p", "bi-meta", (c.left.method_ref || "未存方法") + " → "
+      + (c.right.method_ref || "未存方法") + "・相同 " + c.same + " 張"),
+      bh("div", "bi-scroll", table),
+      biListBlock("只在較新的試跑", c.added.map(name)),
+      biListBlock("只在較早的試跑", c.removed.map(name)));
+    for (const item of c.changed) {
+      box.append(bh("div", "card", bh("strong", "", biTypeLabel(item.entity_type) + "・"
+        + item.name), bh("ul", "", ...item.fields.map(biCompareField)),
+        item.warnings_added.length ? bh("p", "bi-warn", "新增警告：" + item.warnings_added
+          .join("、")) : "",
+        item.warnings_removed.length ? bh("p", "bi-meta", "少了警告：" + item.warnings_removed
+          .join("、")) : ""));
+    }
+    if (!c.changed.length && !c.added.length && !c.removed.length) {
+      box.append(bh("p", "bi-meta", "兩次試跑的候選卡完全相同。"));
+    }
+  } catch (failure) {
+    box.append(bh("p", "bi-err", "沒有比較：" + (failure.message || failure) + "。"));
   }
 });
 

@@ -22,6 +22,12 @@ The rule path (BI ingest phase 3, owner 2026-10-27; contract "BI rule path:
 recipes and multi-table sources"): `/api/bi/recipes` keeps versioned recipes
 per dataset, and `POST /api/bi/runs` accepts a recipe for a Markdown, Excel
 or CSV/TSV source with several tables.
+
+Methods and Session B (BI ingest phase 5; contract "BI method sessions"):
+`/api/bi/methods/*` keeps versioned ingest methods per dataset, `POST
+/api/bi/runs` accepts `method_id`, `/api/bi/runs/compare` sets two runs side
+by side, and `/api/bi/sessions/*` keeps the AI conversations (one model call
+per turn, no tools; `/api/bi/ai` says which model is available).
 """
 
 from __future__ import annotations
@@ -41,9 +47,11 @@ from capabilities.bi_cards import (
     catalog,
     dashboard,
     importer,
+    methods,
     runs,
     schema_versions,
     service,
+    sessions,
 )
 from capabilities.bi_cards.staging import Staging
 from capabilities.bi_cards.store import (
@@ -174,6 +182,23 @@ def _route(
             return 200, runs.recipe_detail(workspace, store.dataset, path.rsplit("/", 1)[1])
         if path == "/api/bi/runs":
             return 200, {"runs": runs.runs(workspace, store.dataset)}
+        if path == "/api/bi/runs/compare":
+            return 200, methods.compare(
+                workspace, store.dataset, query.get("left"), query.get("right")
+            )
+        if path == "/api/bi/ai":
+            return 200, sessions.model_state(ai)
+        if path == "/api/bi/methods":
+            return 200, {"methods": methods.listing(workspace, store.dataset)}
+        if path.startswith("/api/bi/methods/") and path.count("/") == 4:
+            method_id = path.rsplit("/", 1)[1]
+            return 200, methods.detail(workspace, store.dataset, method_id, query.get("rev"))
+        if path == "/api/bi/sessions":
+            listed = Staging(workspace, store.dataset).sessions(query.get("target") or None)
+            return 200, {"sessions": listed}
+        if path.startswith("/api/bi/sessions/") and path.count("/") == 4:
+            staging = Staging(workspace, store.dataset)
+            return 200, {"session": sessions.load(staging, path.rsplit("/", 1)[1])}
         if path.startswith("/api/bi/runs/") and path.count("/") == 4:
             return 200, runs.run_detail(workspace, store.dataset, path.rsplit("/", 1)[1])
         if path == "/api/bi/cards":
@@ -271,6 +296,15 @@ def _route(
         )
         return 200, {"ok": True, "recipe": saved}
     parts = path.split("/")
+    if path == "/api/bi/methods":
+        made = methods.create(workspace, _dataset(given.get("dataset")), given.get("method"), who)
+        return 200, {"ok": True, **made}
+    if len(parts) == 6 and parts[:4] == ["", "api", "bi", "methods"]:
+        return _method_write(workspace, who, parts[4], parts[5], given)
+    if path == "/api/bi/sessions":
+        return _session_create(workspace, who, given)
+    if len(parts) == 6 and parts[:4] == ["", "api", "bi", "sessions"]:
+        return _session_write(workspace, who, parts[4], parts[5], given, ai)
     if path == "/api/bi/schema-drafts":
         made = schema_versions.create_draft(
             workspace, str(given.get("base") or ""), given.get("title"), who
@@ -307,6 +341,19 @@ def _start_run(
     dataset = _dataset(given.get("dataset"))
     source_id = str(given.get("source_id") or "")
     source = Staging(workspace, dataset).source(source_id)
+    if given.get("method_id"):
+        # A saved method (BI ingest phase 5) decides the path.
+        run = methods.start_run(
+            workspace,
+            dataset,
+            ai,
+            kind=str(kind),
+            source_id=source_id,
+            method_id=str(given["method_id"]),
+            method_rev=given.get("method_rev"),
+            actor=who,
+        )
+        return 200, {"ok": True, "run": run}
     no_recipe = given.get("recipe") is None and not given.get("recipe_id")
     if source is not None and source["parse"] == "text" and no_recipe:
         # A text source is read by the model (BI ingest phase 4).
@@ -374,6 +421,59 @@ def _run_action(
         return 200, {"ok": True, "run": runs.cancel(workspace, dataset, run_id)}
     if rest == ["retry"]:
         return 200, {"ok": True, "run": ai_runs.retry(workspace, dataset, ai, run_id)}
+    return _error(404, "route_unknown", "沒有這個 BI 路徑")
+
+
+def _method_write(
+    workspace: Path, who: str, method_id: str, action: str, given: dict[str, Any]
+) -> Answer:
+    dataset = _dataset(given.get("dataset"))
+    if action == "revisions":
+        saved = methods.save(
+            workspace, dataset, method_id, given.get("method"), given.get("note"), who
+        )
+        return 200, {"ok": True, **saved}
+    if action == "revert":
+        return 200, {
+            "ok": True,
+            **methods.revert(workspace, dataset, method_id, given.get("rev"), who),
+        }
+    return _error(404, "route_unknown", "沒有這個 BI 路徑")
+
+
+def _session_create(workspace: Path, who: str, given: dict[str, Any]) -> Answer:
+    dataset = _dataset(given.get("dataset"))
+    kind, target = given.get("kind"), str(given.get("target") or "")
+    if kind == "method":
+        return 200, {"ok": True, "session": methods.create_session(workspace, dataset, target, who)}
+    return _error(400, "session_kind_invalid", "kind 只能是 method 或 schema")
+
+
+def _session_write(
+    workspace: Path,
+    who: str,
+    session_id: str,
+    action: str,
+    given: dict[str, Any],
+    ai: ai_runs.AiRuntime | None,
+) -> Answer:
+    dataset = _dataset(given.get("dataset"))
+    session = sessions.load(Staging(workspace, dataset), session_id)
+    if session["kind"] == "method" and action == "turns":
+        turned = methods.session_turn(
+            workspace,
+            dataset,
+            ai,
+            session_id,
+            message=given.get("message"),
+            source_ids=given.get("source_ids"),
+            run_ids=given.get("run_ids"),
+            actor=who,
+        )
+        return 200, {"ok": True, "session": turned}
+    if session["kind"] == "method" and action == "apply":
+        applied = methods.apply_suggestion(workspace, dataset, session_id, given.get("turn"), who)
+        return 200, {"ok": True, **applied}
     return _error(404, "route_unknown", "沒有這個 BI 路徑")
 
 
@@ -454,6 +554,7 @@ CONFLICTS = {
     "schema_upgrade_breaking",
     "schema_version_not_newer",
     "schema_changed",
+    "suggestion_applied",
 }
 
 #: The GET routes that read one dataset (besides `/api/bi/cards/<id>[/history]`).

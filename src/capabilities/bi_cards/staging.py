@@ -92,6 +92,16 @@ CREATE TABLE IF NOT EXISTS recipes (
   at TEXT NOT NULL,
   PRIMARY KEY (id, version)
 );
+CREATE TABLE IF NOT EXISTS sessions (
+  id TEXT PRIMARY KEY,
+  kind TEXT NOT NULL,
+  target_ref TEXT NOT NULL,
+  body TEXT NOT NULL,
+  model TEXT,
+  by TEXT NOT NULL,
+  at TEXT NOT NULL,
+  updated TEXT NOT NULL
+);
 """
 
 
@@ -433,6 +443,66 @@ class Staging:
                 "SELECT * FROM recipes WHERE id = ? ORDER BY version DESC", (recipe_id,)
             ).fetchall()
         return [self._recipe(r) for r in rows]
+
+    # -- AI design sessions (BI ingest phases 5 and 6) ---------------------
+
+    def create_session(self, *, kind: str, target_ref: str, actor: str) -> dict[str, Any]:
+        session_id = uuid.uuid4().hex[:12]
+        at = now()
+        body = {"turns": [], "goal": "", "source_ids": []}
+        with self._db(write=True) as db:
+            db.execute(
+                "INSERT INTO sessions (id, kind, target_ref, body, model, by, at, updated) "
+                "VALUES (?, ?, ?, ?, NULL, ?, ?, ?)",
+                (session_id, kind, target_ref, _dump(body), actor, at, at),
+            )
+        found = self.session(session_id)
+        assert found is not None
+        return found
+
+    def put_session(self, session: dict[str, Any]) -> None:
+        body = {k: session[k] for k in ("turns", "goal", "source_ids")}
+        with self._db(write=True) as db:
+            db.execute(
+                "UPDATE sessions SET body = ?, model = ?, updated = ? WHERE id = ?",
+                (_dump(body), session.get("model"), now(), session["id"]),
+            )
+
+    @staticmethod
+    def _session(row: sqlite3.Row) -> dict[str, Any]:
+        return {
+            "id": row["id"],
+            "kind": row["kind"],
+            "target_ref": row["target_ref"],
+            "model": row["model"],
+            "by": row["by"],
+            "at": row["at"],
+            "updated": row["updated"],
+            **json.loads(row["body"]),
+        }
+
+    def session(self, session_id: str) -> dict[str, Any] | None:
+        if not self.exists:
+            return None
+        with self._db() as db:
+            if not _has_table(db, "sessions"):
+                return None
+            row = db.execute("SELECT * FROM sessions WHERE id = ?", (session_id,)).fetchone()
+        return None if row is None else self._session(row)
+
+    def sessions(self, target_ref: str | None = None) -> list[dict[str, Any]]:
+        """Sessions newest first, optionally of one target."""
+        if not self.exists:
+            return []
+        with self._db() as db:
+            if not _has_table(db, "sessions"):
+                return []
+            rows = db.execute(
+                "SELECT * FROM sessions WHERE ? IS NULL OR target_ref = ? "
+                "ORDER BY updated DESC, rowid DESC",
+                (target_ref, target_ref),
+            ).fetchall()
+        return [self._session(r) for r in rows]
 
 
 def _has_table(db: sqlite3.Connection, name: str) -> bool:

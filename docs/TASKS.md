@@ -3662,6 +3662,18 @@ s-k-20261011T102952` (not published).
     (Knowledge model from Settings, `bi-ingest` background task, progress, `partial` runs, retry of failed
     chunks), `value_errors` block acceptance until edited, 「判讀規則」 box and progress in 「建立與匯入」.
     Tests `tests/test_bi_ai_runs.py` (6). Not run against a real provider yet; PDF not supported yet.
-- [ ] BI ingest phase 5: Session B (method conversation, trial comparison, revert).
+- [x] BI ingest phase 5: Session B (method conversation, trial comparison, revert).
+  - [x] 2026-10-28, Claude Code: contract "BI method sessions (Session B, phase 5)"; `methods.py`
+    (`aep.bi.method/v1` revisions under `<dataset>/methods/<id>/`, revert as a new revision, method runs
+    `method:<id>@<rev>` on the rule or AI path, `checks` → `method_check` errors, `schema_changed` after a
+    dataset upgrade until a trial of the revision under the new schema reaches review (`rechecks`), run
+    comparison `GET /api/bi/runs/compare`), `sessions.py` (durable turns in `staging.sqlite` `sessions`, one
+    structured model call per turn with no tools, excerpts fenced as data and recorded as sent, validate and
+    retry up to 3), `/api/bi/methods`, `/api/bi/sessions`, `/api/bi/ai`. Step 3 of 「建立與匯入」: method
+    picker and creation from the settings boxes, save as a revision, revisions with revert, the Session B
+    panel (model and data shown, `model_unavailable` stated), trial with a method, comparison of two trials.
+    Tests `tests/test_bi_methods.py` (3, scripted model; §11 item 9), `tests/test_bi_sessions_ui.py`
+    (browser, no model: unavailable state, rule-path revisions, compare, revert, 390 px). No real provider
+    run.
 - [ ] BI ingest phase 6: Session A (schema conversation, draft diff, sample trial).
 - [ ] BI ingest phase 7: benchmark, user guide, handoff.

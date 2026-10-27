@@ -38,6 +38,8 @@ DRAFT_FILE = "draft.json"
 DRAFT_RE = re.compile(r"^[0-9a-f]{12}$")
 MAX_NOTE = 200
 REVISION_SOURCES = ("edit", "ai", "revert", "base")
+DRAFT_REF_PREFIX = "draft:"
+DRAFT_REF_RE = re.compile(r"^draft:([0-9a-f]{12})@rev(\d+)$")
 
 
 # -- diffs -------------------------------------------------------------------
@@ -352,6 +354,40 @@ def save_revision(
         )
     number = _add_revision(workspace, draft_id, document, actor=actor, note=note, source=kind)
     return draft(workspace, draft_id, number)
+
+
+def draft_ref(draft_id: str, rev: int) -> str:
+    """How a run names the draft revision whose schema it used (phase 6)."""
+    return f"{DRAFT_REF_PREFIX}{draft_id}@rev{rev}"
+
+
+def parse_draft_ref(ref: str) -> tuple[str, int]:
+    found = DRAFT_REF_RE.match(ref)
+    if found is None:
+        raise BiStoreError("draft_unknown", "找不到這份 schema 草稿")
+    return found.group(1), int(found.group(2))
+
+
+def draft_registry(workspace: Path, draft_id: str, rev: Any = None) -> tuple[Registry, str]:
+    """(a draft revision as a registry, its `draft:` ref), to try the draft on
+    samples without installing it (BI ingest §9.1 「用樣本試跑」). Only a valid
+    revision can be tried."""
+    meta = _read_json(_draft_dir(workspace, draft_id) / DRAFT_FILE)
+    if rev in (None, ""):
+        number = len(meta["revisions"])
+    elif isinstance(rev, int) and not isinstance(rev, bool):
+        number = rev
+    else:
+        raise BiStoreError("revision_unknown", "draft_rev 必須是整數")
+    document = revision_document(workspace, draft_id, number)
+    normalised, problems = catalog.validate(document)
+    if problems or normalised is None:
+        raise BiStoreError(
+            "draft_invalid",
+            f"草稿第 {number} 版有 {len(problems)} 個問題，修正後才能試跑",
+            errors=problems,
+        )
+    return Registry(normalised, "draft"), draft_ref(draft_id, number)
 
 
 def revert(workspace: Path, draft_id: str, rev: Any, actor: str) -> dict[str, Any]:

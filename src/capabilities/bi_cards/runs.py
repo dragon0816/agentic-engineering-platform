@@ -24,7 +24,7 @@ import io
 from pathlib import Path, PurePath
 from typing import Any
 
-from capabilities.bi_cards import catalog, importer, readers, recipes
+from capabilities.bi_cards import catalog, importer, readers, recipes, schema_versions
 from capabilities.bi_cards.schema import FieldDef, Registry, TypeDef, norm_key
 from capabilities.bi_cards.staging import Staging, parse_kind
 from capabilities.bi_cards.store import BiStore, BiStoreError, PlannedRow, now
@@ -237,13 +237,19 @@ def start_rule_run(
     recipe: Any = None,
     recipe_id: str | None = None,
     recipe_version: int | None = None,
+    method_ref: str | None = None,
+    schema: tuple[Registry, str] | None = None,
+    checks: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Run the rule path on a table source; the run ends in `review`.
 
     With a recipe (inline, or saved: `recipe_id` and optionally its version)
     the source may be a Markdown report, an Excel workbook or a CSV/TSV, read
     as several tables (BI ingest phase 3). Without one, a CSV/TSV is one
-    Case A pass, as in phase 1."""
+    Case A pass, as in phase 1. A method run (phase 5) names itself in
+    `method_ref` and adds its `checks`; a draft trial (phase 6) gives
+    `schema` = (the draft's registry, its `draft:` ref) in place of the
+    dataset's schema."""
     if recipe is not None or recipe_id:
         return _start_recipe_run(
             workspace,
@@ -254,6 +260,9 @@ def start_rule_run(
             recipe_id=recipe_id,
             recipe_version=recipe_version,
             actor=actor,
+            method_ref=method_ref,
+            schema=schema,
+            checks=checks,
         )
     staging = Staging(workspace, dataset)
     staging.store.refuse_write()
@@ -264,8 +273,14 @@ def start_rule_run(
         raise BiStoreError("recipe_required", "Excel 活頁簿要用配方（recipe）指定每個工作表的轉換")
     if parse_kind(source["name"]) != "table":
         raise BiStoreError("source_not_table", "規則轉換只能讀 CSV / TSV 表格；這個來源不是表格")
-    reg = catalog.for_store(staging.store)
-    run_id = staging.create_run(kind=kind, schema_ref=reg.ref, source_ids=[source_id], actor=actor)
+    reg, schema_ref = schema or _dataset_schema(staging)
+    run_id = staging.create_run(
+        kind=kind,
+        schema_ref=schema_ref,
+        source_ids=[source_id],
+        actor=actor,
+        method_ref=method_ref,
+    )
     try:
         text = _as_csv(source["name"], _decode(staging.source_bytes(source_id)))
         prepared = importer.preview(
@@ -276,9 +291,8 @@ def start_rule_run(
             mapping=mapping,
             schema=reg,
         )
-        found = [
-            evaluate(staging.store, reg, c) for c in _candidates_from_preview(prepared, source)
-        ]
+        built = apply_checks(_candidates_from_preview(prepared, source), checks)
+        found = [evaluate(staging.store, reg, c) for c in built]
     except (BiStoreError, importer.ImportError_) as error:
         staging.set_status(run_id, "failed", error=f"{error.code}: {error.message}")
         raise
@@ -321,6 +335,9 @@ def _start_recipe_run(
     recipe_id: str | None,
     recipe_version: int | None,
     actor: str,
+    method_ref: str | None = None,
+    schema: tuple[Registry, str] | None = None,
+    checks: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     staging = Staging(workspace, dataset)
     staging.store.refuse_write()
@@ -331,16 +348,16 @@ def _start_recipe_run(
         raise BiStoreError(
             "file_type_unsupported", "規則轉換只能讀 Markdown（.md）、Excel（.xlsx）或 CSV/TSV"
         )
-    reg = catalog.for_store(staging.store)
-    checked, method_ref = resolve_recipe(
+    reg, schema_ref = schema or _dataset_schema(staging)
+    checked, recipe_ref = resolve_recipe(
         staging, reg, recipe=recipe, recipe_id=recipe_id, recipe_version=recipe_version
     )
     run_id = staging.create_run(
         kind=kind,
-        schema_ref=reg.ref,
+        schema_ref=schema_ref,
         source_ids=[source_id],
         actor=actor,
-        method_ref=method_ref,
+        method_ref=method_ref or recipe_ref,
     )
     try:
         tables = readers.read_tables(source["name"], staging.source_bytes(source_id))
@@ -352,7 +369,7 @@ def _start_recipe_run(
             source_id=source_id,
             filename=source["name"],
         )
-        found = [evaluate(staging.store, reg, c) for c in built]
+        found = [evaluate(staging.store, reg, c) for c in apply_checks(built, checks)]
     except (BiStoreError, importer.ImportError_) as error:
         staging.set_status(run_id, "failed", error=f"{error.code}: {error.message}")
         raise
@@ -360,6 +377,43 @@ def _start_recipe_run(
     staging.put_layout(run_id, layout)
     staging.set_status(run_id, "review")
     return run_view(staging, run_id)
+
+
+def _dataset_schema(staging: Staging) -> tuple[Registry, str]:
+    reg = catalog.for_store(staging.store)
+    return reg, reg.ref
+
+
+def registry_for(staging: Staging, run: dict[str, Any]) -> Registry:
+    """The schema a run's candidates follow: a schema draft's revision for a
+    draft trial (`draft:<id>@rev<n>`, BI ingest phase 6), else the dataset's."""
+    ref = str(run.get("schema_ref") or "")
+    if ref.startswith(schema_versions.DRAFT_REF_PREFIX):
+        draft_id, rev = schema_versions.parse_draft_ref(ref)
+        return schema_versions.draft_registry(staging.store.workspace, draft_id, rev)[0]
+    return catalog.for_store(staging.store)
+
+
+def apply_checks(
+    candidates: list[dict[str, Any]], checks: list[dict[str, Any]] | None
+) -> list[dict[str, Any]]:
+    """A method's extra hard rules (BI ingest phase 5): a candidate of the
+    rule's type lacking a required field gets the error `method_check` on that
+    field, kept (as a value error) until the person fills the field."""
+    for rule in checks or []:
+        for candidate in candidates:
+            if candidate["entity_type"] != rule["entity_type"]:
+                continue
+            values = _values(candidate)
+            known = candidate.setdefault("value_errors", [])
+            for name in rule["require"]:
+                if values.get(name) not in (None, "", []):
+                    continue
+                message = rule.get("message") or f"方法規定 {rule['entity_type']} 需要 {name}"
+                error = {"code": "method_check", "message": str(message), "field": name}
+                if error not in known:
+                    known.append(error)
+    return candidates
 
 
 # -- recipes ---------------------------------------------------------------
