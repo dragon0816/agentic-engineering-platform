@@ -3635,6 +3635,13 @@ s-k-20261011T102952` (not published).
   type / naming change blocked), runs from before an upgrade refused (`schema_changed`). API only.
   Tests: `tests/test_bi_schema_versions.py` (9).
 - [ ] BI ingest phase 3: rule path (Case B recipes, Markdown/Excel readers), shared stepper, review UI.
+  - [x] UI part (2026-10-28, Claude Code): Knowledge → BI 卡片 → 「建立與匯入」, six steps on the Wiki's
+    stepper (`stepperSet` now drives both): sources (upload, classification), schema (versions, impact
+    preview and upgrade, drafts with revisions, revert, publish), method and trial run, review (evidence,
+    basis, diff, field edits, match choices, accept all clean), 「確認匯入」 with `cards_changed` → recheck,
+    result with undo. The older 「匯入 CSV」 tab stays. Browser test `tests/test_bi_build_ui.py`.
+  - Note: `tests/test_bi_cards_ui.py` dashboard-order check failed once while a full suite ran in the
+    background (wait passed, the next read was empty: the #248 race); passed twice alone right after.
 - [ ] BI ingest phase 4: AI path (parsing, chunking, extraction, checks, jobs, retry).
 - [ ] BI ingest phase 5: Session B (method conversation, trial comparison, revert).
 - [ ] BI ingest phase 6: Session A (schema conversation, draft diff, sample trial).
