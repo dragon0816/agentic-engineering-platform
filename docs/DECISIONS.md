@@ -5313,3 +5313,28 @@ preview must not need Excel or touch an open workbook).
   in `docs/TASKS.md`: one adopt pass over its legacy-format Raw (as for the rs-k copy on 2026-10-12) and
   `host.json` pointing the project vault at it. The adopt pass writes into the real vault, so it runs with the
   owner present, after a backup, and after checking `/api/activity` before the Agent Web restart.
+
+## 2026-10-27 — BI ingest: the owner's proposal becomes the plan
+
+- **The owner's 「AEP BI 知識庫建立與 AI Ingest Proposal」 is the BI plan**, specified in
+  `docs/phases/BI_INGEST.md`. It supersedes `docs/phases/BI_CASE_B.md`: Case B's multi-table recipes become the
+  rule path, and role conflicts are decided by the person in review (earlier pass as the default) instead of a
+  silent drop. This also brings LLM extraction (v1.3 Case E's core) forward; the v1.3 §7 gate is lifted for
+  this plan. Cases C and D stay waiting.
+- **Dataset schema upgrade now, not later** (owner: 「目前還在開發中尚未啟用，為什麼不做，我想現在做」). This
+  replaces "a dataset's schema is chosen at creation and never changed" (2026-10-21): a dataset may move to
+  another version of the same schema id after an impact preview. Additive changes rewrite nothing, removed
+  fields keep their values (hidden), renames only through declared migrations, breaking changes are refused.
+  A different schema id is still a new dataset. Local `bi.schema/v1.1` versions are allowed when they keep
+  every shipped type and field (superset only), so an extended BI schema keeps the Dashboard and `bi__query`.
+  Rejected: copying cards into a new dataset on every schema change (loses history and the owner's edits).
+- **The two AI sessions call the model with no tools** (pattern of the Knowledge Skill assistant): structured
+  suggestions validated by code, applied by the person. Rejected: running them through the chat Gateway with
+  a tool allowlist (larger change, and source text could reach tools).
+- **The ingest method is a versioned file per dataset, not a registry Skill**, so Session B can revise and
+  revert freely. Publishing a method as an AEP Skill uses the existing approval flow later.
+- **Trial runs and review live in `staging.sqlite`**; only commit writes `bi.sqlite`. Commit is one SQLite
+  transaction, checks each matched card's version, and its key is the run id. Rejected: per-item commit with a
+  failure list (SQLite makes the whole batch atomic, so all-or-nothing is simpler to trust).
+- **Model use**: the model already approved in Settings for the source's data class; tests use scripted
+  models and real-provider runs are reported separately. **Delivery**: verified phases pushed to `main`, no PRs.

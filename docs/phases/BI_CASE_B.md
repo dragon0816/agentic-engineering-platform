@@ -1,6 +1,6 @@
 # BI Knowledge Case B: multi-table reports, with guided steps
 
-> **Status.** Spec draft, 2026-10-27 (Claude Code). Owner approved Case B as the next BI slice
+> **Status.** Superseded on 2026-10-27 by `docs/phases/BI_INGEST.md` (its rule path, §6). Spec draft, 2026-10-27 (Claude Code). Owner approved Case B as the next BI slice
 > (`docs/DECISIONS.md` 2026-10-27 "BI Knowledge Case B next; RS_Knowledge may go live"). Open choices are in §8;
 > nothing is implemented yet.
 >

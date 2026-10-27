@@ -3616,5 +3616,17 @@ s-k-20261011T102952` (not published).
   per kind of report (passes with table selectors, entity type and mapping), Markdown and Excel readers, the
   upstream advanced mapping keys reimplemented, role-conflict and alias warnings, and a four-step guided import
   (放入報告 → 檢查對應 → 確認寫入 → 檢查結果).
-- [ ] Owner: answer `docs/phases/BI_CASE_B.md` §8 (who writes recipes; role conflicts; scope), then implement
-  in the §9 order.
+- [x] Owner: answer `docs/phases/BI_CASE_B.md` §8 (2026-10-27): superseded by the owner's BI ingest proposal;
+  Case B becomes the rule path of `docs/phases/BI_INGEST.md` (§6), role conflicts are decided in review.
+- [x] BI ingest spec `docs/phases/BI_INGEST.md` (2026-10-27, Claude Code; docs only): review of what exists,
+  staging store for sources, runs and candidates with per-field evidence, version-checked atomic commit, schema
+  drafts and dataset schema upgrade, rule path (Case B) and AI path, Session A (schema) and Session B (ingest
+  method) with no tools, a six-step flow, acceptance from the owner proposal §8.
+- [ ] BI ingest phase 1: contracts; staging store; commit with version check and commit key; evidence table;
+  proposal accept/reject; Case A CSV produced as a run.
+- [ ] BI ingest phase 2: schema drafts, diff, local `bi.schema/v1.1` versions, dataset schema upgrade.
+- [ ] BI ingest phase 3: rule path (Case B recipes, Markdown/Excel readers), shared stepper, review UI.
+- [ ] BI ingest phase 4: AI path (parsing, chunking, extraction, checks, jobs, retry).
+- [ ] BI ingest phase 5: Session B (method conversation, trial comparison, revert).
+- [ ] BI ingest phase 6: Session A (schema conversation, draft diff, sample trial).
+- [ ] BI ingest phase 7: benchmark, user guide, handoff.
