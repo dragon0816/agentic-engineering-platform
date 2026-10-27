@@ -3643,6 +3643,14 @@ s-k-20261011T102952` (not published).
   - Note: `tests/test_bi_cards_ui.py` dashboard-order check failed once while a full suite ran in the
     background (wait passed, the next read was empty: the #248 race); passed twice alone right after.
 - [ ] BI ingest phase 4: AI path (parsing, chunking, extraction, checks, jobs, retry).
+  - [x] Core (2026-10-28, Claude Code): `capabilities/bi_cards/extract.py`: chunks along headings and
+    paragraphs with line numbers, one structured model call per chunk with no tools and the source fenced as
+    data in the user message, shape check with up to 3 retries (`model_output_invalid`), model failure per
+    chunk (`model_unavailable`, retry of failed chunks only), values normalised (`value_errors`), quotes
+    located by code (`evidence_not_found` → basis unknown), inference warnings, Opportunity without stated
+    account and applications rejected by default, merge across chunks. Tests `tests/test_bi_extract.py` (7,
+    scripted model). Open: wiring into runs (model from Settings, background job, progress, retry route) and
+    the page.
 - [ ] BI ingest phase 5: Session B (method conversation, trial comparison, revert).
 - [ ] BI ingest phase 6: Session A (schema conversation, draft diff, sample trial).
 - [ ] BI ingest phase 7: benchmark, user guide, handoff.
