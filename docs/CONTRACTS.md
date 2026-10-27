@@ -4425,6 +4425,52 @@ method runs, comparison, Session B), `sessions.py` (durable sessions, one model 
   revision with `source: "ai"`; the turn gets `applied: {"rev", "at", "by"}`. A second apply is 409
   `suggestion_applied`; a turn without a suggestion 404 `turn_unknown`.
 
+## BI schema sessions (Session A, phase 6)
+
+Design: `docs/phases/BI_INGEST.md` §9.1, §11 item 8. Code: `src/capabilities/bi_cards/schema_session.py`
+(operations, Session A), `sessions.py` (shared with Session B), `schema_versions.py` (`draft_registry`,
+`draft:` refs), `runs.py` (`registry_for`), routes in `src/host_runtime/bi_cards_api.py`; UI in step 2 of
+「建立與匯入」. Tests: `tests/test_bi_schema_session.py` (scripted model), `tests/test_bi_sessions_ui.py`.
+Additive to "BI schema drafts and dataset upgrade" and "BI method sessions": publishing and the dataset
+upgrade are unchanged and stay separate actions.
+
+- **Session.** `POST /api/bi/sessions {"dataset", "kind": "schema", "target": <draft id>}` → `{"ok": true,
+  "session"}` with `target_ref` `schema-draft:<draft id>`, kept in the dataset's staging store (the dataset
+  whose sources it reads); unknown draft 404 `draft_unknown`. Reading, listing and the session shape are as
+  in "BI method sessions".
+- **A turn.** `POST /api/bi/sessions/<id>/turns {"dataset", "message", "goal"?: str (at most 1000; kept on
+  the session), "source_ids": [id]}` → `{"ok": true, "session"}`. The user message holds the goal, the
+  dataset's card count and schema, the draft's latest revision as a compact list of types and fields
+  (kind, class, list, required, enum, `link_to`, aliases) and the excerpts between `DATA_FENCE` /
+  `DATA_END` (cap 12000 characters shared by the sources; a workbook is sent as its tables). Output
+  contract `aep.bi.schema_suggestion.v1`, no tools, 3 attempts. `sent` = `{"model", "sources", "excerpt_chars",
+  "cap", "draft_rev", "goal": bool}`. No model: 400 `model_unavailable`, nothing stored.
+- **`<suggestion>`** `aep.bi.schema_suggestion/v1` = `{"format", "reply", "verdict": "reuse" | "extend" |
+  "new", "reasons", "assumptions", "missing_information", "changes": [<op>], "examples": [{"entity_type",
+  "name", "fields"}] (at most 5), "result": {"base_rev", "diff": [<change>] (`schema_versions.diff`, the
+  revision → the result), "errors": [{"path", "message"}] (`catalog.validate` of the result), "problems":
+  [str] (operations that could not be applied), "valid": bool}}`.
+- **`<op>`**, applied in order to a copy of the revision (the stored revision never changes):
+  `{"op": "add_type", "type": {...}}` (a new name), `{"op": "add_field", "type", "field": {...}}` (a new
+  name), `{"op": "change_field", "type", "field", "set": {...}}` (any field key except `name`), `{"op":
+  "add_enum_value", "type", "field", "value"}`, `{"op": "add_alias", "type", "field", "alias"}` (no
+  duplicate), `{"op": "rename_field", "type", "field", "to"}` (also writes `migrations.renames["<Type>.<old>"]
+  = "<new>"`). At most 40. An answer without `reply` or a valid `verdict`, or with `changes` not a list, is
+  asked again and after 3 attempts the turn has `error.code` `model_output_invalid`; an answer whose
+  operations do not apply or whose result is invalid is also asked again with the problems, and after the
+  last attempt it is kept as the suggestion with `valid: false`.
+- **「套用到草稿」.** `POST /api/bi/sessions/<id>/apply {"dataset", "turn"}` → `{"ok": true, "session",
+  <draft view>}`: the operations on the draft's latest revision, saved as a new revision with `source:
+  "ai"` and the note naming the session and turn. Not valid there: 409 `suggestion_invalid` with `errors`
+  and `problems`, nothing written. 409 `suggestion_applied`, 404 `turn_unknown` as in Session B.
+- **「用樣本試跑」.** `POST /api/bi/runs {"dataset", "kind": "trial", "source_id", "draft_id", "draft_rev"?
+  (latest by default), ...}` runs any path (Case A CSV, recipe, method, AI) with the draft revision's schema,
+  not installed: candidates are built and evaluated against it, `<run>.schema_ref` =
+  `draft:<draft id>@rev<n>` (AI-path chunks and retries use the same registry). `kind: "ingest"` with a
+  draft: 400 `draft_trial_only`; an invalid revision: 400 `draft_invalid` with `errors`. Such a run cannot be
+  committed (409 `run_trial`), and review or recheck answer 409 `schema_changed` (its schema is not the
+  dataset's). It does not count as a method re-check. Nothing is installed and `bi.sqlite` is not written.
+
 ## BI dataset sharing (slice 1, owner 2026-10-22)
 
 Design: `docs/proposals/BI_DATASET_SHARING.md` (§4, §6, §8.5 owner answers, §8.6 trimmed slice 1:

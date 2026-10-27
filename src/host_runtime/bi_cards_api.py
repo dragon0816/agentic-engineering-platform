@@ -28,6 +28,11 @@ Methods and Session B (BI ingest phase 5; contract "BI method sessions"):
 /api/bi/runs` accepts `method_id`, `/api/bi/runs/compare` sets two runs side
 by side, and `/api/bi/sessions/*` keeps the AI conversations (one model call
 per turn, no tools; `/api/bi/ai` says which model is available).
+
+Session A (BI ingest phase 6; contract "BI schema sessions"): a `schema`
+session suggests operations on a schema draft, applied to a copy and
+validated before 「套用到草稿」; `POST /api/bi/runs` with `draft_id` tries a
+draft revision on samples without installing it (trial only).
 """
 
 from __future__ import annotations
@@ -49,6 +54,7 @@ from capabilities.bi_cards import (
     importer,
     methods,
     runs,
+    schema_session,
     schema_versions,
     service,
     sessions,
@@ -341,6 +347,16 @@ def _start_run(
     dataset = _dataset(given.get("dataset"))
     source_id = str(given.get("source_id") or "")
     source = Staging(workspace, dataset).source(source_id)
+    schema = None
+    if given.get("draft_id"):
+        # 「用樣本試跑」 (BI ingest phase 6): a draft revision's schema, not installed.
+        if kind != "trial":
+            return _error(
+                400, "draft_trial_only", "草稿的 schema 只能試跑；發布並升級後才能正式匯入"
+            )
+        schema = schema_versions.draft_registry(
+            workspace, str(given["draft_id"]), given.get("draft_rev")
+        )
     if given.get("method_id"):
         # A saved method (BI ingest phase 5) decides the path.
         run = methods.start_run(
@@ -352,6 +368,7 @@ def _start_run(
             method_id=str(given["method_id"]),
             method_rev=given.get("method_rev"),
             actor=who,
+            schema=schema,
         )
         return 200, {"ok": True, "run": run}
     no_recipe = given.get("recipe") is None and not given.get("recipe_id")
@@ -366,6 +383,7 @@ def _start_run(
             instructions=given.get("instructions"),
             types=given.get("types"),
             actor=who,
+            schema=schema,
         )
         return 200, {"ok": True, "run": run}
     mapping = given.get("mapping")
@@ -388,6 +406,7 @@ def _start_run(
         recipe=recipe,
         recipe_id=str(given.get("recipe_id") or "") or None,
         recipe_version=version,
+        schema=schema,
     )
     return 200, {"ok": True, "run": run}
 
@@ -446,6 +465,9 @@ def _session_create(workspace: Path, who: str, given: dict[str, Any]) -> Answer:
     kind, target = given.get("kind"), str(given.get("target") or "")
     if kind == "method":
         return 200, {"ok": True, "session": methods.create_session(workspace, dataset, target, who)}
+    if kind == "schema":
+        made = schema_session.create_session(workspace, dataset, target, who)
+        return 200, {"ok": True, "session": made}
     return _error(400, "session_kind_invalid", "kind 只能是 method 或 schema")
 
 
@@ -474,6 +496,23 @@ def _session_write(
     if session["kind"] == "method" and action == "apply":
         applied = methods.apply_suggestion(workspace, dataset, session_id, given.get("turn"), who)
         return 200, {"ok": True, **applied}
+    if session["kind"] == "schema" and action == "turns":
+        turned = schema_session.session_turn(
+            workspace,
+            dataset,
+            ai,
+            session_id,
+            message=given.get("message"),
+            source_ids=given.get("source_ids"),
+            goal=given.get("goal"),
+            actor=who,
+        )
+        return 200, {"ok": True, "session": turned}
+    if session["kind"] == "schema" and action == "apply":
+        done = schema_session.apply_suggestion(
+            workspace, dataset, session_id, given.get("turn"), who
+        )
+        return 200, {"ok": True, **done}
     return _error(404, "route_unknown", "沒有這個 BI 路徑")
 
 
@@ -555,6 +594,7 @@ CONFLICTS = {
     "schema_version_not_newer",
     "schema_changed",
     "suggestion_applied",
+    "suggestion_invalid",
 }
 
 #: The GET routes that read one dataset (besides `/api/bi/cards/<id>[/history]`).

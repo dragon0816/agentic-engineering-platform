@@ -3675,5 +3675,15 @@ s-k-20261011T102952` (not published).
     Tests `tests/test_bi_methods.py` (3, scripted model; §11 item 9), `tests/test_bi_sessions_ui.py`
     (browser, no model: unavailable state, rule-path revisions, compare, revert, 390 px). No real provider
     run.
-- [ ] BI ingest phase 6: Session A (schema conversation, draft diff, sample trial).
+- [x] BI ingest phase 6: Session A (schema conversation, draft diff, sample trial).
+  - [x] 2026-10-28, Claude Code: contract "BI schema sessions (Session A, phase 6)"; `schema_session.py`
+    (`aep.bi.schema_suggestion/v1` with verdict reuse/extend/new, operations add_type, add_field,
+    change_field, add_enum_value, add_alias, rename_field (+ `migrations.renames`) applied to a copy,
+    `catalog.validate`, `schema_versions.diff`, retry with the problems, 「套用到草稿」 as a revision with
+    source `ai`), draft trials `POST /api/bi/runs` with `draft_id` (`draft:<id>@rev<n>`, trial only, never
+    installed). Step 2 of 「建立與匯入」: the Session A panel (goal, sample sources, model and data sent,
+    verdict, diff, errors, examples, 套用到草稿) and 「用樣本試跑」. Tests `tests/test_bi_schema_session.py`
+    (2, scripted model; §11 item 8 with `bi.sqlite` bytes and installed schemas unchanged),
+    `tests/test_bi_sessions_ui.py` extended (draft trial without a model; Session A and B suggestions applied
+    with the AI runtime swapped for a scripted model). No real provider run.
 - [ ] BI ingest phase 7: benchmark, user guide, handoff.

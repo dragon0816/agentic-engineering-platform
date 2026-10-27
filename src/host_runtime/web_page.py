@@ -1207,6 +1207,10 @@ tr:last-child td { border-bottom: none; }
 .bi-step-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 10px 14px; align-items: end; }
 .bi-warn { color: var(--warn); font-size: 13px; }
+.bi-ai-sources { border: 0; margin: 8px 0; padding: 0; min-width: 0; display: flex;
+  flex-wrap: wrap; gap: 4px 14px; }
+.bi-ai-sources label { display: inline-flex; gap: 6px; align-items: center;
+  overflow-wrap: anywhere; }
 .bi-ai { margin: 12px 0; padding: 10px 12px; border: 1px solid var(--line);
   border-radius: 8px; min-width: 0; }
 .bi-ai h4 { margin: 0 0 6px; }
@@ -2484,8 +2488,30 @@ tr:last-child td { border-bottom: none; }
               <div><button class="go" id="bi-b-draft-save" type="button">儲存為新版次</button></div>
               <div><button class="bi-btn" id="bi-b-draft-publish" type="button">
                 發布為新版本</button></div>
+              <div><button class="bi-btn" id="bi-b-draft-trial" type="button">
+                用樣本試跑</button></div>
             </div>
+            <div id="bi-b-draft-trial-result" aria-live="polite"></div>
             <div id="bi-b-draft-info" role="status" aria-live="polite"></div>
+            <div class="bi-ai" id="bi-b-sa" role="region" aria-labelledby="bi-b-sa-h">
+              <h4 id="bi-b-sa-h">和 AI 討論這份草稿（Session A）</h4>
+              <p class="bi-meta" id="bi-b-sa-model"></p>
+              <label class="bi-label" for="bi-b-sa-goal">你的目標（用自己的話）</label>
+              <input id="bi-b-sa-goal" class="bi-input" maxlength="1000"
+                placeholder="例如：追蹤機器人產業的技術、應用與客戶訊號">
+              <fieldset class="bi-ai-sources" id="bi-b-sa-sources">
+                <legend class="bi-label">附上的樣本來源（最多 5 份，合計上限 12000 字）</legend>
+              </fieldset>
+              <ol id="bi-b-sa-log" class="bi-log" role="log" aria-live="polite"
+                aria-label="schema 對話紀錄"></ol>
+              <label class="bi-label" for="bi-b-sa-msg">你想怎麼調整 schema</label>
+              <textarea id="bi-b-sa-msg" class="bi-input" rows="3" maxlength="4000"
+                placeholder="例如：幫技術卡加一個價格帶欄位"></textarea>
+              <div class="bi-actions">
+                <button class="go" id="bi-b-sa-send" type="button">送出</button></div>
+              <div class="mem-status" id="bi-b-sa-status" role="status" aria-live="polite"
+                hidden></div>
+            </div>
           </div>
           <div class="bi-actions"><button class="bi-btn" type="button" data-bi-next="source">
             上一步</button><button class="go" type="button" data-bi-next="method">
@@ -2509,7 +2535,7 @@ tr:last-child td { border-bottom: none; }
           </div>
           <div id="bi-b-m-box" hidden>
             <div id="bi-b-m-info" aria-live="polite"></div>
-            <section class="bi-ai" id="bi-b-sb" aria-labelledby="bi-b-sb-h">
+            <div class="bi-ai" id="bi-b-sb" role="region" aria-labelledby="bi-b-sb-h">
               <h4 id="bi-b-sb-h">和 AI 討論這個方法（Session B）</h4>
               <p class="bi-meta" id="bi-b-sb-model"></p>
               <ol id="bi-b-sb-log" class="bi-log" role="log" aria-live="polite"
@@ -2521,7 +2547,7 @@ tr:last-child td { border-bottom: none; }
                 <button class="go" id="bi-b-sb-send" type="button">送出</button></div>
               <div class="mem-status" id="bi-b-sb-status" role="status" aria-live="polite"
                 hidden></div>
-            </section>
+            </div>
           </div>
           <div class="bi-step-grid">
             <div><label class="bi-label" for="bi-b-entity">卡片類型（單一表格）</label>
@@ -11963,12 +11989,129 @@ function biDraftInfo(view) {
 }
 
 function biBuildShowDraft(view) {
+  const other = !bi.build.draft || bi.build.draft.draft.id !== view.draft.id;
   bi.build.draft = view;
   el("bi-b-draft").hidden = false;
   el("bi-b-draft-text").value = JSON.stringify(view.document, null, 1);
   el("bi-b-draft-note").value = "";
   biDraftInfo(view);
+  if (other) el("bi-b-draft-trial-result").replaceChildren();
+  biBuildSessA(other).catch((failure) => biNotice(false, "對話沒有載入：" + failure.message));
 }
+
+// -- step 2: Session A, designing the draft by conversation (BI ingest phase 6) --
+// The model suggests operations; code applies them to a copy and shows the diff
+// and errors. Only 「套用到草稿」 writes a revision; 「用樣本試跑」 tries the draft
+// revision on a source without installing it.
+async function biBuildSessA(reload) {
+  const draft = bi.build.draft; if (!draft) return;
+  const box = el("bi-b-sa-sources");
+  const kept = new Set([...box.querySelectorAll("input:checked")].map((i) => i.value));
+  if (!kept.size && bi.build.sourceId) kept.add(bi.build.sourceId);
+  box.replaceChildren(bh("legend", "bi-label", "附上的樣本來源（最多 5 份，合計上限 12000 字）"));
+  for (const source of bi.build.sources.filter((s) => s.parse !== "unsupported")) {
+    const check = document.createElement("input");
+    check.type = "checkbox"; check.value = source.id; check.checked = kept.has(source.id);
+    box.append(bh("label", "", check, source.name + "（" + source.classification + "）"));
+  }
+  if (!bi.build.sources.length) box.append(bh("p", "bi-meta", "還沒有來源；只送草稿與目標。"));
+  await biBuildAiState("bi-b-sa-model", "草稿目前的類型與欄位、你的目標");
+  if (reload || !bi.build.sessA || bi.build.sessA.target_ref !== "schema-draft:"
+    + draft.draft.id) {
+    const found = await call("/api/bi/sessions?dataset=" + encodeURIComponent(biDataset())
+      + "&target=" + encodeURIComponent("schema-draft:" + draft.draft.id));
+    bi.build.sessA = (found.sessions || [])[0] || null;
+    el("bi-b-sa-goal").value = bi.build.sessA ? bi.build.sessA.goal || "" : "";
+  }
+  biBuildSessionLog("bi-b-sa-log", bi.build.sessA, biBuildApplySchema);
+}
+
+const BI_VERDICT = {reuse: ["照用目前的 schema", "good"], extend: ["擴充這份 schema", "accent"],
+  new: ["需要新的 schema（另建資料集）", "warn"]};
+
+function biBuildApplySchema(session, turn, index) {
+  const s = turn.suggestion, r = s.result, verdict = BI_VERDICT[s.verdict] || [s.verdict, "dim"];
+  const parts = [bh("p", "", bh("strong", "", "AI："), biBadge(verdict[0], verdict[1]), " ",
+    s.reply), biListBlock("理由", s.reasons), biListBlock("假設", s.assumptions),
+    biListBlock("缺少的資訊", s.missing_information)];
+  if (r.diff.length) {
+    parts.push(bh("strong", "", "套用後和第 " + r.base_rev + " 版的差異"), bh("ul", "",
+      ...r.diff.map((c) => bh("li", c.breaking ? "bi-err" : "", (c.breaking ? "⚠ " : "")
+        + c.type + (c.field ? "." + c.field : "") + "：" + c.detail))));
+  } else {
+    parts.push(bh("p", "bi-meta", "這個建議不改動草稿。"));
+  }
+  const problems = [...r.problems, ...r.errors.map((e) => e.path + "：" + e.message)];
+  if (problems.length) parts.push(biListBlock("不能套用的原因", problems, "bi-err"));
+  if ((s.examples || []).length) {
+    parts.push(biListBlock("範例卡片", s.examples.map((e) => biTypeLabel(e.entity_type) + "・"
+      + e.name + (Object.keys(e.fields).length ? "（" + Object.entries(e.fields).map(([k, v]) =>
+        k + "＝" + biValue(v)).join("；") + "）" : ""))));
+  }
+  if (turn.applied) {
+    parts.push(bh("p", "bi-meta", "已套用為草稿第 " + turn.applied.rev + " 版。"));
+  } else if (r.valid && r.diff.length) {
+    parts.push(bh("div", "bi-actions", biButton("套用到草稿", async () => {
+      const reply = await biCall("/api/bi/sessions/" + session.id + "/apply",
+        {dataset: biDataset(), turn: index});
+      bi.build.sessA = reply.session;
+      biBuildShowDraft(reply); await biBuildDrafts();
+      biNotice(true, "已存成草稿第 " + reply.revision + " 版；可以「用樣本試跑」看看。");
+    }, "go", "把這個建議套用為草稿的新版次")));
+  }
+  return parts;
+}
+
+el("bi-b-sa-send").addEventListener("click", async () => {
+  const draft = bi.build.draft, message = el("bi-b-sa-msg").value.trim();
+  if (!draft) return;
+  if (!message) { el("bi-b-sa-msg").focus(); return; }
+  const button = el("bi-b-sa-send"); button.disabled = true;
+  biStatus("bi-b-sa-status", "loading", "AI 正在看草稿與樣本…（一次模型呼叫）");
+  try {
+    let session = bi.build.sessA;
+    if (!session) {
+      session = (await biCall("/api/bi/sessions", {dataset: biDataset(), kind: "schema",
+        target: draft.draft.id})).session;
+    }
+    const sources = [...el("bi-b-sa-sources").querySelectorAll("input:checked")]
+      .map((i) => i.value).slice(0, 5);
+    const reply = await biCall("/api/bi/sessions/" + session.id + "/turns",
+      {dataset: biDataset(), message, goal: el("bi-b-sa-goal").value, source_ids: sources});
+    bi.build.sessA = reply.session; el("bi-b-sa-msg").value = "";
+    biBuildSessionLog("bi-b-sa-log", reply.session, biBuildApplySchema);
+    biStatus("bi-b-sa-status", "");
+  } catch (failure) {
+    biStatus("bi-b-sa-status", "error", (failure.code === "model_unavailable"
+      ? "沒有可用的模型：" : "沒有送出：") + failure.message + "。");
+  } finally { button.disabled = false; }
+});
+
+el("bi-b-draft-trial").addEventListener("click", async () => {
+  const draft = bi.build.draft, box = el("bi-b-draft-trial-result");
+  box.replaceChildren();
+  if (!draft) return;
+  if (!bi.build.sourceId) {
+    box.append(bh("p", "bi-err", "先在步驟 1 選一份來源。")); return;
+  }
+  try {
+    const reply = await biCall("/api/bi/runs", {dataset: biDataset(), kind: "trial",
+      source_id: bi.build.sourceId, entity_type: el("bi-b-entity").value || null,
+      draft_id: draft.draft.id, draft_rev: draft.revision});
+    const detail = await biBuildFollow(reply.run.id);
+    box.append(bh("p", "bi-meta", "用草稿第 " + draft.revision + " 版試跑完成（沒有安裝 schema，"
+      + "也沒有寫入；" + detail.run.schema_ref + "）："),
+      bh("div", "bi-chips", ...biRunChips(detail.run)),
+      bh("ul", "", ...detail.candidates.slice(0, 30).map((c) => bh("li", "",
+        (c.name || c.canonical_key || "（無名稱）") + "・" + c.entity_type + "："
+        + c.fields.map((f) => f.field + "＝" + biValue(f.value)).join("；")
+        + (c.errors.length ? "・錯誤：" + c.errors.map((e) => e.message).join("；") : "")))));
+  } catch (failure) {
+    const errors = (failure.payload && failure.payload.errors) || [];
+    box.append(bh("p", "bi-err", "試跑失敗：" + failure.message + (errors.length ? "（"
+      + errors.map((e) => e.path + "：" + e.message).join("；") + "）" : "") + "。"));
+  }
+});
 
 async function biBuildOpenDraft(id) {
   biBuildShowDraft(await call("/api/bi/schema-drafts/" + id));
