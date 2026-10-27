@@ -3591,3 +3591,9 @@ s-k-20261011T102952` (not published).
   decision on partial results; there is no turn cancel in Agent Web either).
 - [ ] Weekly report Workflow manifest "scratch sheet" wording and version bump (not done: the Workflow is the
   personal report, and CI's bundle guard (`.github/workflows/verify.yml`) names its file and version).
+- [x] graphify code graph for Claude Code (2026-10-27, Claude Code): `CLAUDE.md` section `## graphify`,
+  PreToolUse hooks in `.claude/settings.json` (call `graphify` from `PATH`), `graphify-out/` and personal
+  `.claude/settings.local.json` git-ignored. Graph built locally with `graphify extract . --code-only`
+  (27,579 nodes). Decision in `docs/DECISIONS.md` (2026-10-27).
+- [ ] Each developer: `graphify hook install` once per clone (post-commit rebuild; not run here, the
+  session was not permitted to add git hooks).

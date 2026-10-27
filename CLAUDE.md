@@ -57,3 +57,17 @@ When taking over: read the committed state, run verification, reconcile `HANDOFF
 When stopping: leave a reproducible state, commit completed coherent work, clearly document incomplete work, verification results and the next action in `HANDOFF.md`, and add the finished work to `docs/TASKS.md`.
 
 Do not claim tests passed unless they were actually run.
+
+## graphify
+
+This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+
+Rules:
+- When graphify-out/graph.json exists, run `graphify query "<question>"` before your first grep, search or source-file read for a codebase question, and put this rule in every subagent prompt that explores code. Read raw files only for lines the graph or an earlier read already located. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
+- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
+- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
+- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+- graphify-out/ is local and git-ignored: each developer builds their own graph and never commits it.
+- Setup on a new machine: `uv tool install graphifyy` (or `pip install graphifyy`), then
+  `graphify extract . --code-only` to build the graph and `graphify hook install` to rebuild it after
+  every commit. The PreToolUse hooks in `.claude/settings.json` call `graphify` from `PATH`.

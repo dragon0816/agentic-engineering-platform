@@ -5281,3 +5281,22 @@ preview must not need Excel or touch an open workbook).
   measurements, not a model's judgement; the live mode (the owner, never CI) measures that. The Bridge-safety
   scenario uses a new mock CMP180-like instrument that refuses every address but `MOCK::CMP180`. No thresholds
   until the live baseline (review §12).
+
+## 2026-10-27 — graphify code graph for Claude Code sessions
+
+- **Decision:** Claude Code sessions in this repository use a local graphify code graph (`graphify-out/`)
+  to find code before grepping or reading source. The owner chose to wire it into the shared `CLAUDE.md`
+  (section `## graphify`) and the committed `.claude/settings.json` PreToolUse hooks, because others will
+  develop here too.
+- **The graph is local, never committed.** `graphify-out/` is git-ignored. Each developer builds it with
+  `graphify extract . --code-only` (AST only: no model, no API key, no document or spreadsheet conversion)
+  and keeps it current with `graphify hook install` (post-commit rebuild). Rejected: committing
+  `graph.json` (rewritten whole on every build, so every branch conflicts on it); building with documents
+  (it converts spreadsheets and fixtures into `graphify-out/converted/`, which the code question does not
+  need and which must never reach a commit).
+- **Hooks call `graphify` from `PATH`**, not an absolute install path, so the committed settings work on
+  every machine. A machine without graphify sees the hook fail without blocking the tool call.
+- **Personal Claude Code permissions moved to `.claude/settings.local.json`** (git-ignored), so the shared
+  `.claude/settings.json` carries only the hooks.
+- **Not done here:** Codex reads `AGENTS.md`, not `CLAUDE.md`; `graphify codex install` would add the same
+  rule there if Codex sessions should use the graph too.
