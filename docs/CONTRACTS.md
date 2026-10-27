@@ -4046,7 +4046,7 @@ schema behaves as before.
   its id and version, is not offered.
 - **Schema file** (JSON, UTF-8, at most 1 MB; the shipped registry's format). Required:
   `schema_id` (lowercase letters, digits, `.` `_` `-`, up to 3 `/`-separated parts; the
-  `bi.schema/` prefix is reserved), `version` (`MAJOR.MINOR.PATCH`), `title`, `types` (1–50). Each
+  `bi.schema/` prefix is reserved, except for compatible local versions: see "BI schema drafts and dataset upgrade"), `version` (`MAJOR.MINOR.PATCH`), `title`, `types` (1–50). Each
   type: `name` (`[A-Za-z][A-Za-z0-9_]*`, unique), `label`, `fields` (1–100). Each field: `name`
   (`[a-z][a-z0-9_]*`, unique in the type), `label`, `kind` (`str`, `int`, `bool`, `date`,
   `enum`, `list`, `link`, `linklist`), `class` (`sourced` / `judgement` / `derived`). Optional:
@@ -4063,7 +4063,8 @@ schema behaves as before.
   (compared as parsed JSON, so formatting does not matter) is a no-op (`"already": true`);
   different content for the same id@version is 409 `schema_version_exists`.
 - **Binding**: a dataset is bound to one `<schema_id>@<version>`, stored as `meta.schema` in its
-  `bi.sqlite`, chosen at creation and never changed. A dataset without the row (created before
+  `bi.sqlite`, chosen at creation; since 2026-10-27 it changes only through a dataset upgrade to another
+  version of the same schema id ("BI schema drafts and dataset upgrade"). A dataset without the row (created before
   this) is `bi.schema/v1.1@1.1.0`, and its next write records that; a dataset first written by an
   import or the demo load (not created) is bound the same way. Cards, import, search, detail,
   field edits and history use the dataset's schema. If its schema file is gone: 400
@@ -4168,6 +4169,67 @@ runs, candidates), `src/capabilities/bi_cards/runs.py` (rule-path run, review, c
   person's edit (as `/field`, `stale_edit` 409 when the card moved on, `reason_required` for a
   `judgement` field) and closes the field's pending proposals; reject marks only that proposal
   `rejected` and does not change the card version. Unknown or closed: 404 `proposal_unknown`.
+
+## BI schema drafts and dataset upgrade (BI ingest phase 2, owner 2026-10-27)
+
+Design: `docs/phases/BI_INGEST.md` §5. Code: `src/capabilities/bi_cards/schema_versions.py`, `catalog.py`
+(`bi_problems`, `migrations`), `store.py` (`upgrade_schema`, `change_marker`), routes in
+`src/host_runtime/bi_cards_api.py`. Tests: `tests/test_bi_schema_versions.py`. This replaces "a dataset's
+schema is chosen at creation and never changed" (owner 2026-10-27): a dataset may move to another version of
+**the same schema id**; a different id is still a new dataset.
+
+- **Local BI versions.** A `bi.schema/*` id now installs only as `bi.schema/v1.1` with a version newer than
+  `1.1.0` that keeps every shipped type, its naming, every shipped field with the same `kind`, `class` and
+  `link_to`, every shipped enum value and every shipped domain; it may add types, fields, enum values,
+  aliases and domains. It may use the shipped forms `kind: "virtual"` and a link without `link_to`. Anything
+  else is 400 `schema_bi_not_compatible` with `errors` (each missing or changed item). It is a BI schema:
+  Dashboard, `bi__query`, and sharing (a subscriber installs it through the same check).
+- **`migrations`** (optional top-level key of any schema file): `{"renames": {"<Type>.<old field>": "<new
+  field>"}}`; the new field must be in the type, the old one must not.
+- **Drafts.** `<workspace>/bi/schema-drafts/<12 hex>/draft.json` and `rev-<n>.json` (immutable).
+  - `POST /api/bi/schema-drafts {"base": "<id>@<version>" | "<id>", "title"}` → `{"ok": true, <draft view>}`;
+    revision 1 is the base document with `version` set to the next minor version above every known version.
+  - `<draft view>` = `{"draft": {"id", "title", "base_ref", "schema_id", "by", "at", "revisions": [{"rev",
+    "at", "by", "note", "source": "base" | "edit" | "ai" | "revert", "valid", "copied_from"?}], "published":
+    [{"rev", "ref", "at", "by"}]}, "revision", "document", "errors": [{"path", "message"}], "diff": [<change>]}`
+    (`diff` is against the base).
+  - `<change>` = `{"type", "field": str | null, "change": "type_added" | "type_removed" | "naming" | "label" |
+    "field_added" | "field_removed" | "renamed" | "kind" | "class" | "required" | "enum_added" |
+    "enum_removed" | "link_to" | "aliases", "detail", "breaking": bool}`. Breaking: `type_removed`,
+    `naming`, `field_removed`, `kind`, `enum_removed`, `link_to`.
+  - `GET /api/bi/schema-drafts` → `{"drafts": [{"id", "title", "base_ref", "schema_id", "revisions", "valid",
+    "updated", "published"}]}` newest first. `GET /api/bi/schema-drafts/<id>` (latest) and
+    `GET /api/bi/schema-drafts/<id>/revisions/<n>` → `<draft view>`. `GET /api/bi/schema-drafts/<id>/diff?
+    from=<n> | base&to=<n>` → `{"diff": [...]}`.
+  - `POST /api/bi/schema-drafts/<id>/revisions {"document" | "json_text", "note", "source": "edit" | "ai"}` →
+    a new revision (`<draft view>`); an invalid document is saved with its `errors`. Refusals: 400
+    `schema_json_invalid`, `document_missing`, `schema_too_large`, `schema_id_changed` (a draft keeps its id).
+  - `POST /api/bi/schema-drafts/<id>/revert {"rev"}` → a new revision copying `rev` (`copied_from`).
+  - `POST /api/bi/schema-drafts/<id>/publish {"rev": n | null}` (latest by default) → `{"ok": true, "id",
+    "version", "ref", "already", "draft"}` through `catalog.install` (same refusals: `schema_invalid`,
+    `schema_bi_not_compatible`, 409 `schema_version_exists`), plus 409 `schema_version_not_newer`.
+  - Unknown: 404 `draft_unknown`, `revision_unknown`.
+- **Dataset upgrade.**
+  - `POST /api/bi/datasets/<name>/schema/preview {"to"}` → `{"ok": true, "from", "to", "diff",
+    "types": [{"type", "cards", "hidden": [{"field", "cards"}], "renamed": [{"from", "to", "cards"}],
+    "retired": [{"card_id", "name", "field", "value"}], "required_missing": [{"field", "cards"}]}],
+    "blocked": [{"code": "type_removed" | "naming_changed" | "kind_changed", "message"}], "totals":
+    {"hidden", "retired", "renamed", "required_missing"}, "preview_token"}`. Writes nothing.
+  - `POST /api/bi/datasets/<name>/schema/apply {"to", "preview_token"}` → `{"ok": true, "from", "to",
+    "moved", ...the preview's impact}`. One transaction. 409 `preview_stale` when the cards changed since the
+    preview (or the binding did); 409 `schema_upgrade_breaking` with `blocked` when anything is blocked.
+  - Refusals of both: 400 `schema_id_different`, `schema_same`; 404 `schema_unknown`, `dataset_unknown`;
+    409 `dataset_read_only`.
+  - Effects: `meta.schema` becomes `to`; `meta.schema_history` gains `{"from", "to", "by", "at", "moved",
+    ...totals}`. A declared rename moves the value with its source unchanged, adds two history rows
+    (`kind: "migration"`, `ref: "schema:<to>"`) and bumps the card version; a card that already has the new
+    field keeps both. Nothing else is written: a removed field's value stays, a retired enum value stays.
+  - A value whose field the current schema lacks is **retired**: `GET /api/bi/cards/<id>` shows it with
+    `"retired": true` (every field entry now has `retired`), and it is not searched (`/api/bi/cards?q=`,
+    `bi__query`) or shared (snapshots leave it out). Moving back to a version that has the field shows it
+    again.
+  - A run made before the upgrade cannot be reviewed, rechecked or committed: 409 `schema_changed` (run
+    again).
 
 ## BI dataset sharing (slice 1, owner 2026-10-22)
 

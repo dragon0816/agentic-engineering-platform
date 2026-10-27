@@ -590,7 +590,7 @@ def test_the_api_answers_the_contract_shapes(tmp_path: Path) -> None:
     assert status == 200 and detail["card"]["version"] == 1
     assert detail["card"]["domain"] == "robotics"
     field = detail["fields"][0]
-    assert set(field) == {"field", "label", "value", "class", "source", "history"}
+    assert set(field) == {"field", "label", "value", "class", "source", "history", "retired"}
     assert set(field["source"]) == {"kind", "ref", "at", "by"}
     assert detail["links"] and set(detail["links"][0]) == {
         "field",

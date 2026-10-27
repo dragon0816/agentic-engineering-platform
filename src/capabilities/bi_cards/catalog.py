@@ -10,9 +10,13 @@ document reaches the `Registry`. Install validates strictly and names the
 place and the problem of every error. An installed id@version is immutable:
 the same content again is a no-op, different content is refused.
 
-Only the shipped `bi.schema/*` ids are BI schemas (the Dashboard and the
-chat's `bi__query` work on them); installing an id under that prefix is
-refused, so "BI" always means the shipped, tested types.
+Only `bi.schema/*` ids are BI schemas (the Dashboard and the chat's
+`bi__query` work on them). Under that prefix only a newer version of the
+shipped `bi.schema/v1.1` installs, and only when it keeps every shipped type
+and field as it is (BI ingest §5.2, owner 2026-10-27): it may add types,
+fields, enum values and aliases, so "BI" always contains the shipped, tested
+types. A version may declare `migrations.renames` (`{"Type.old": "new"}`),
+which a dataset upgrade uses to move values (§5.3).
 """
 
 from __future__ import annotations
@@ -57,6 +61,7 @@ TOP_KEYS = {
     "enum_aliases",
     "ignored_fields",
     "computed_fields",
+    "migrations",
     "types",
 }
 TYPE_KEYS = {
@@ -101,6 +106,64 @@ def _strings(value: Any) -> bool:
     return isinstance(value, list) and all(_text(v) for v in value)
 
 
+def _version_tuple(text: str) -> tuple[int, ...]:
+    return tuple(int(p) for p in str(text).split(".") if p.isdigit())
+
+
+def bi_problems(document: dict[str, Any]) -> list[dict[str, str]]:
+    """Why a `bi.schema/*` document is not a compatible newer version of the
+    shipped one; empty when it is."""
+    shipped = registry()
+    problems: list[dict[str, str]] = []
+    if document.get("schema_id") != shipped.schema_id:
+        problems.append(
+            {
+                "path": "schema_id",
+                "message": f"「{BI_PREFIX}」開頭保留給內建的 BI schema，"
+                f"只能安裝 {shipped.schema_id} 的相容新版本；請換一個 id",
+            }
+        )
+        return problems
+    version = str(document.get("version") or "")
+    if VERSION_RE.match(version) and _version_tuple(version) <= _version_tuple(shipped.version):
+        problems.append(
+            {"path": "version", "message": f"必須比內建的 {shipped.version} 新，例如 1.2.0"}
+        )
+    types = {t.get("name"): t for t in document.get("types") or [] if isinstance(t, dict)}
+    domains = set(document.get("domains") or [])
+    for missing in [d for d in shipped.domains if d not in domains]:
+        problems.append({"path": "domains", "message": f"不能移除內建的領域「{missing}」"})
+    for entity in shipped.types.values():
+        raw = types.get(entity.name)
+        if raw is None:
+            problems.append({"path": "types", "message": f"不能移除內建類型「{entity.name}」"})
+            continue
+        where = f"types（{entity.name}）"
+        if list(raw.get("naming") or ["name"]) != list(entity.naming):
+            problems.append({"path": f"{where}.naming", "message": "不能改內建類型的命名欄位"})
+        fields = {f.get("name"): f for f in raw.get("fields") or [] if isinstance(f, dict)}
+        for item in entity.fields:
+            at = f"{where}.fields（{item.name}）"
+            given = fields.get(item.name)
+            if given is None:
+                problems.append({"path": at, "message": "不能移除內建欄位"})
+                continue
+            if given.get("kind") != item.kind:
+                problems.append({"path": f"{at}.kind", "message": f"內建欄位必須維持 {item.kind}"})
+            if given.get("class") != item.klass:
+                problems.append(
+                    {"path": f"{at}.class", "message": f"內建欄位必須維持 {item.klass}"}
+                )
+            link_to = given.get("link_to") or []
+            if list([link_to] if isinstance(link_to, str) else link_to) != list(item.link_to):
+                problems.append({"path": f"{at}.link_to", "message": "不能改內建欄位的連結目標"})
+            if item.enum and not set(item.enum) <= set(given.get("enum") or []):
+                problems.append(
+                    {"path": f"{at}.enum", "message": "可以新增允許值，但不能移除內建的允許值"}
+                )
+    return problems
+
+
 def validate(document: Any) -> tuple[dict[str, Any] | None, list[dict[str, str]]]:
     """(the document with every default filled in, errors). Each error is
     `{"path", "message"}`: where in the file, and what is wrong there."""
@@ -120,8 +183,8 @@ def validate(document: Any) -> tuple[dict[str, Any] | None, list[dict[str, str]]
             "schema_id",
             "必填；小寫英數字與 . _ -，可用 / 分段（最多 3 段），例如 example/product-spec",
         )
-    elif schema_id.startswith(BI_PREFIX):
-        error("schema_id", f"「{BI_PREFIX}」開頭保留給內建的 BI schema，請換一個 id")
+    bi = isinstance(schema_id, str) and schema_id.startswith(BI_PREFIX)
+    kinds = (*KINDS, "virtual") if bi else KINDS  # the shipped Signal title is virtual
     version = document.get("version")
     if not isinstance(version, str) or not VERSION_RE.match(version):
         error("version", "必填；格式是 主.次.修訂，例如 1.0.0")
@@ -188,7 +251,7 @@ def validate(document: Any) -> tuple[dict[str, Any] | None, list[dict[str, str]]
                 error(f"{at}.name", f"欄位「{fname}」在這個類型重複")
             at = f"{where}.fields[{j}]（{fname}）"
             kind = item.get("kind")
-            if kind not in KINDS:
+            if kind not in kinds:
                 error(f"{at}.kind", f"必填；只能是 {list(KINDS)}")
             seen_fields[fname] = str(kind)
             if not _text(item.get("label")):
@@ -232,7 +295,9 @@ def validate(document: Any) -> tuple[dict[str, Any] | None, list[dict[str, str]]
             if isinstance(link_to, str):
                 link_to = [link_to]
             if kind in ("link", "linklist"):
-                if not _strings(link_to) or not link_to:
+                if bi and link_to in (None, []):
+                    link_to = []  # the shipped Signal `related` links to any type
+                elif not _strings(link_to) or not link_to:
                     error(f"{at}.link_to", "連結欄位（link / linklist）需要目標類型清單")
                     link_to = []
                 for target in link_to:
@@ -312,6 +377,26 @@ def validate(document: Any) -> tuple[dict[str, Any] | None, list[dict[str, str]]
             for x in items
         ):
             error(at, "每一項需要 field、reason 與 aliases 清單")
+    migrations = document.get("migrations", {})
+    renames = migrations.get("renames", {}) if isinstance(migrations, dict) else None
+    if (
+        not isinstance(migrations, dict)
+        or set(migrations) - {"renames"}
+        or not isinstance(renames, dict)
+    ):
+        error("migrations", '格式是 {"renames": {"類型.舊欄位": "新欄位"}}')
+        renames = {}
+    by_type = {t["name"]: {f["name"] for f in t["fields"]} for t in types}
+    for old, new in renames.items():
+        type_name, _, old_field = str(old).partition(".")
+        if type_name not in by_type or not FIELD_RE.match(old_field):
+            error(f"migrations.renames.{old}", "鍵的格式是「類型.舊欄位」，類型要在 types 裡")
+        elif not isinstance(new, str) or new not in by_type[type_name]:
+            error(f"migrations.renames.{old}", f"新欄位「{new}」不在 {type_name} 的 fields")
+        elif old_field in by_type[type_name]:
+            error(f"migrations.renames.{old}", f"舊欄位「{old_field}」還在 {type_name} 裡")
+    if bi and not errors:
+        errors.extend(bi_problems(document))
     if errors:
         return None, errors
     normalised = {key: value for key, value in document.items() if key != "types"}
@@ -388,7 +473,7 @@ def available(workspace: Path) -> list[Registry]:
 
 
 def _version_key(reg: Registry) -> tuple[int, ...]:
-    return tuple(int(p) for p in reg.version.split(".") if p.isdigit())
+    return _version_tuple(reg.version)
 
 
 def resolve(workspace: Path, ref: str) -> Registry:
@@ -451,8 +536,17 @@ def install(workspace: Path, filename: str, json_text: Any) -> dict[str, Any]:
         ) from None
     normalised, problems = validate(document)
     if problems or normalised is None:
+        bi_only = str(document.get("schema_id") or "").startswith(BI_PREFIX) and problems == (
+            bi_problems(document) if isinstance(document, dict) else []
+        )
         raise SchemaInstallError(
-            "schema_invalid", f"schema 有 {len(problems)} 個問題，沒有安裝", problems
+            "schema_bi_not_compatible" if bi_only else "schema_invalid",
+            (
+                "這不是內建 BI schema 相容的新版本：只能新增，不能移除或修改內建的類型與欄位"
+                if bi_only
+                else f"schema 有 {len(problems)} 個問題，沒有安裝"
+            ),
+            problems,
         )
     schema_id, version = str(document["schema_id"]), str(document["version"])
     path = schema_path(workspace, schema_id, version)

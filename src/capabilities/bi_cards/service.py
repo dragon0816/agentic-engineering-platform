@@ -158,6 +158,17 @@ def card_summary(card: Any, fields: dict[str, dict[str, Any]]) -> dict[str, Any]
     }
 
 
+def current_fields(
+    reg: Registry, entity_type: str, fields: dict[str, dict[str, Any]]
+) -> dict[str, dict[str, Any]]:
+    """The values the schema has now: a field removed by a schema upgrade
+    keeps its value but is not searched (BI ingest §5.3)."""
+    entity = reg.types.get(entity_type)
+    if entity is None:
+        return fields
+    return {name: item for name, item in fields.items() if entity.get(name) is not None}
+
+
 def _in_domain(fields: dict[str, dict[str, Any]], domain: str, reg: Registry) -> bool:
     value = _value(fields, "domain")
     if value is None and reg.is_bi:
@@ -195,7 +206,7 @@ def search(
     for card in store.card_rows():
         if entity_type and card["entity_type"].lower() != entity_type.lower():
             continue
-        fields = everything.get(card["id"], {})
+        fields = current_fields(reg, card["entity_type"], everything.get(card["id"], {}))
         if domain and not _in_domain(fields, domain, reg):
             continue
         if text and not _matches(card, fields, text):
@@ -276,6 +287,8 @@ def card_detail(store: BiStore, card_id: str) -> dict[str, Any] | None:
                     "by": item["by"],
                 },
                 "history": counts.get(name, 0),
+                # Kept from before a schema upgrade; shown, not editable.
+                "retired": entity is not None and definition is None,
             }
         )
     summary = card_summary(card, fields)

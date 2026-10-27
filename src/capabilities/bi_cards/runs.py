@@ -319,7 +319,19 @@ def _open_run(staging: Staging, run_id: str) -> dict[str, Any]:
         raise BiStoreError("run_unknown", "找不到這次執行")
     if run["status"] != "review":
         raise BiStoreError("run_closed", "這次執行已經結束，不能再修改")
+    _same_schema(staging, run)
     return run
+
+
+def _same_schema(staging: Staging, run: dict[str, Any]) -> None:
+    """A run's candidates follow the schema it ran with; after a dataset
+    schema upgrade they need a new run (BI ingest §5.3)."""
+    current = staging.store.schema_ref()
+    if run["schema_ref"] != current:
+        raise BiStoreError(
+            "schema_changed",
+            f"資料集的 schema 已從 {run['schema_ref']} 改為 {current}；請用同樣的來源重新執行",
+        )
 
 
 def _normalize(reg: Registry, item: FieldDef, raw: Any) -> Any:
@@ -476,6 +488,7 @@ def commit(workspace: Path, dataset: str, run_id: str, *, actor: str) -> dict[st
         raise BiStoreError("run_trial", "試跑的結果不能寫入；請用同樣的來源開始正式匯入")
     if run["status"] != "review":
         raise BiStoreError("run_closed", "這次執行已經結束，不能寫入")
+    _same_schema(staging, run)
     earlier = store.committed_run(run_id)
     if earlier is not None:
         # The write happened but its reply was lost: record it, write nothing.

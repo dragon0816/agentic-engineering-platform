@@ -3627,7 +3627,13 @@ s-k-20261011T102952` (not published).
   cancel, commit); `BiStore.commit_run` (one transaction, card-version check `cards_changed`, run id as commit
   key), `evidence` table shown on the card, proposal accept/reject. API only; the page comes in phase 3.
   Tests: `tests/test_bi_ingest_runs.py` (15).
-- [ ] BI ingest phase 2: schema drafts, diff, local `bi.schema/v1.1` versions, dataset schema upgrade.
+- [x] BI ingest phase 2 (2026-10-27, Claude Code): contract "BI schema drafts and dataset upgrade";
+  `schema_versions.py` (draft revisions, diff, revert, publish), `catalog.bi_problems` (a local
+  `bi.schema/v1.1` version installs only as a superset of the shipped one), `migrations.renames`,
+  `BiStore.upgrade_schema` (impact preview with token, one transaction, declared renames move values with
+  `migration` history, removed fields stay as retired values not searched or shared, kind change / removed
+  type / naming change blocked), runs from before an upgrade refused (`schema_changed`). API only.
+  Tests: `tests/test_bi_schema_versions.py` (9).
 - [ ] BI ingest phase 3: rule path (Case B recipes, Markdown/Excel readers), shared stepper, review UI.
 - [ ] BI ingest phase 4: AI path (parsing, chunking, extraction, checks, jobs, retry).
 - [ ] BI ingest phase 5: Session B (method conversation, trial comparison, revert).

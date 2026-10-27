@@ -10,7 +10,8 @@ current value, who and when. A whole import can be undone; the undo is
 recorded as new history rows, never by deleting old ones.
 
 Each dataset is bound to one schema (`meta.schema`, `<schema_id>@<version>`),
-chosen when it is created and never changed (owner 2026-10-21). A dataset
+chosen when it is created (owner 2026-10-21); since 2026-10-27 it moves only
+to another version of the same schema id, through `upgrade_schema`. A dataset
 from before the binding existed has no `meta` row and is read as
 `LEGACY_SCHEMA`; its next write records that binding.
 
@@ -318,8 +319,8 @@ class BiStore:
             current = self.schema_ref()
             raise BiStoreError(
                 "dataset_exists",
-                f"資料集「{self.dataset}」已經存在（schema {current}）。建立後不能更換 schema；"
-                "要用別的 schema，請用新的名稱另建一個資料集",
+                f"資料集「{self.dataset}」已經存在（schema {current}），不能更換 schema 成別的；"
+                "同一個 schema 的新版本請用「升級 schema」，別的 schema 請用新的名稱另建資料集",
                 schema=current,
             )
         with self._db(write=True) as db:
@@ -708,6 +709,106 @@ class BiStore:
                 (proposal_id, card_id),
             ).rowcount
         return bool(changed)
+
+    def change_marker(self) -> str:
+        """Moves whenever the cards change: every write adds history or a card."""
+        if not self.exists:
+            return "empty"
+        with self._db() as db:
+            return self._marker(db)
+
+    @staticmethod
+    def _marker(db: sqlite3.Connection) -> str:
+        seq = db.execute("SELECT COALESCE(MAX(seq), 0) FROM history").fetchone()[0]
+        count, versions = db.execute(
+            "SELECT COUNT(*), COALESCE(SUM(version), 0) FROM cards"
+        ).fetchone()
+        return f"{seq}:{count}:{versions}"
+
+    def upgrade_schema(
+        self,
+        from_ref: str,
+        to_ref: str,
+        renames: dict[str, dict[str, str]],
+        *,
+        marker: str,
+        actor: str,
+        totals: dict[str, int],
+    ) -> int:
+        """Bind the dataset to another version of its schema in one
+        transaction (BI ingest §5.3): refused as `preview_stale` when the
+        cards changed since `marker`; values move only for the declared
+        renames (a `migration` history row each); every other value stays as
+        it is. Returns how many values moved."""
+        self.refuse_write()
+        at = now()
+        moved = 0
+        with self._db(write=True) as db:
+            # The meta write in `_db` already holds the write lock from here on.
+            if self._marker(db) != marker:
+                raise BiStoreError("preview_stale", "資料集在預覽後有變動，請重新預覽")
+            row = db.execute("SELECT value FROM meta WHERE key = 'schema'").fetchone()
+            if row is None or str(row[0]) != from_ref:
+                raise BiStoreError("preview_stale", "資料集的 schema 已經改變，請重新預覽")
+            for type_name, fields in renames.items():
+                for old, new in fields.items():
+                    rows = db.execute(
+                        "SELECT f.* FROM fields f JOIN cards c ON c.id = f.card_id "
+                        "WHERE c.entity_type = ? AND f.field = ?",
+                        (type_name, old),
+                    ).fetchall()
+                    for item in rows:
+                        taken = db.execute(
+                            "SELECT 1 FROM fields WHERE card_id = ? AND field = ?",
+                            (item["card_id"], new),
+                        ).fetchone()
+                        if taken is not None:
+                            continue  # the card already has the new field: keep both
+                        db.execute(
+                            "UPDATE fields SET field = ? WHERE card_id = ? AND field = ?",
+                            (new, item["card_id"], old),
+                        )
+                        for name, before, after in (
+                            (old, item["value"], None),
+                            (new, None, item["value"]),
+                        ):
+                            db.execute(
+                                "INSERT INTO history (card_id, field, old, new, kind, ref, by, at, "
+                                "reason) VALUES (?, ?, ?, ?, 'migration', ?, ?, ?, ?)",
+                                (
+                                    item["card_id"],
+                                    name,
+                                    before,
+                                    after,
+                                    f"schema:{to_ref}",
+                                    actor,
+                                    at,
+                                    f"schema 升級：{old} 改名為 {new}",
+                                ),
+                            )
+                        db.execute(
+                            "UPDATE cards SET version = version + 1, updated = ? WHERE id = ?",
+                            (at, item["card_id"]),
+                        )
+                        moved += 1
+            past = db.execute("SELECT value FROM meta WHERE key = 'schema_history'").fetchone()
+            log = json.loads(past[0]) if past else []
+            log.append(
+                {"from": from_ref, "to": to_ref, "by": actor, "at": at, "moved": moved, **totals}
+            )
+            db.execute(
+                "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_history', ?)",
+                (_dump(log),),
+            )
+            db.execute("UPDATE meta SET value = ? WHERE key = 'schema'", (to_ref,))
+        return moved
+
+    def schema_history(self) -> list[dict[str, Any]]:
+        if not self.exists:
+            return []
+        with self._db() as db:
+            row = db.execute("SELECT value FROM meta WHERE key = 'schema_history'").fetchone()
+        return list(json.loads(row[0])) if row else []
 
     def set_field(
         self,

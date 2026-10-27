@@ -2301,8 +2301,9 @@ tr:last-child td { border-bottom: none; }
           <div><label class="bi-label" for="bi-new-schema">Schema</label>
             <select id="bi-new-schema"><option value="">載入中…</option></select></div>
         </div>
-        <p class="bi-meta">建立後不能更換 schema。Dashboard 與對話查詢只支援 BI schema
-          （bi.schema/*）；其他 schema 的資料集可以匯入、瀏覽與編輯卡片。</p>
+        <p class="bi-meta">建立後只能升級到同一個 schema 的新版本，不能換成別的 schema。
+          Dashboard 與對話查詢只支援 BI schema（bi.schema/*）；
+          其他 schema 的資料集可以匯入、瀏覽與編輯卡片。</p>
         <p class="bi-err" id="bi-new-err" role="alert"></p>
         <div class="bi-actions">
           <button class="go" id="bi-new-go" type="submit">建立</button>

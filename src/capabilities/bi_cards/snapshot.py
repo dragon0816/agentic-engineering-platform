@@ -340,8 +340,15 @@ def build_snapshot(
         )
         if len(card_rows) > MAX_CARDS:
             raise SnapshotError("artifact_too_large", f"卡片超過 {MAX_CARDS} 張，不能發佈")
+        # A value the schema no longer has (a field removed by an upgrade)
+        # stays on this PC and is not shared (BI ingest §5.3).
+        reg = catalog.for_store(store)
+        card_types = {row["id"]: row["entity_type"] for row in card_rows}
         fields: dict[str, dict[str, Any]] = {}
         for row in connection.execute("SELECT * FROM fields ORDER BY card_id, field"):
+            entity = reg.types.get(card_types.get(row["card_id"], ""))
+            if entity is not None and entity.get(row["field"]) is None:
+                continue
             fields.setdefault(row["card_id"], {})[row["field"]] = {
                 "value": _loads(row["value"]),
                 "kind": row["kind"],
@@ -550,8 +557,8 @@ def _schema(value: Any) -> dict[str, Any]:
     if schema_sha256(document) != block["sha256"]:
         raise SnapshotError("digest_mismatch", "快照內的 schema 與它的 digest 不符")
     if block["source"] == "installed":
-        if schema_id.startswith(BI_PREFIX):
-            raise _invalid("schema.id")
+        # A local `bi.schema/*` version is valid only as a compatible superset
+        # of the shipped one (`catalog.bi_problems`, BI ingest §5.2).
         normalised, problems = catalog.validate(document)
         if problems or normalised is None:
             raise _invalid("schema.document")

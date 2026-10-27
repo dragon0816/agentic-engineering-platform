@@ -12,6 +12,11 @@ the demo are BI-only and refuse a dataset whose schema is not `bi.schema/*`.
 Ingest runs (BI ingest phase 1, owner 2026-10-27; contract "BI ingest runs"):
 `/api/bi/sources` and `/api/bi/runs/*` keep sources, runs and candidates in
 the dataset's staging store; only a run's commit writes cards.
+
+Schema versions (BI ingest phase 2, owner 2026-10-27; contract "BI schema
+drafts and dataset upgrade"): `/api/bi/schema-drafts/*` keeps revisions of a
+draft and publishes one as a new version; `/api/bi/datasets/<name>/schema/*`
+previews and applies moving a dataset to another version of its schema.
 """
 
 from __future__ import annotations
@@ -25,7 +30,7 @@ from pathlib import Path
 from typing import Any, Protocol
 from urllib.parse import ParseResult, parse_qs
 
-from capabilities.bi_cards import catalog, dashboard, importer, runs, service
+from capabilities.bi_cards import catalog, dashboard, importer, runs, schema_versions, service
 from capabilities.bi_cards.staging import Staging
 from capabilities.bi_cards.store import (
     DATASET_RE,
@@ -141,6 +146,10 @@ def _route(
             return 200, dashboard.dashboard(store, str(query.get("domain") or "robotics"))
         if path == "/api/bi/sources":
             return 200, {"sources": Staging(workspace, store.dataset).sources()}
+        if path == "/api/bi/schema-drafts":
+            return 200, {"drafts": schema_versions.drafts(workspace)}
+        if path.startswith("/api/bi/schema-drafts/"):
+            return _draft_read(workspace, path.split("/")[4:], query)
         if path == "/api/bi/runs":
             return 200, {"runs": runs.runs(workspace, store.dataset)}
         if path.startswith("/api/bi/runs/") and path.count("/") == 4:
@@ -235,6 +244,24 @@ def _route(
     if path == "/api/bi/runs":
         return _start_run(workspace, who, given)
     parts = path.split("/")
+    if path == "/api/bi/schema-drafts":
+        made = schema_versions.create_draft(
+            workspace, str(given.get("base") or ""), given.get("title"), who
+        )
+        return 200, {"ok": True, **made}
+    if len(parts) == 6 and parts[:4] == ["", "api", "bi", "schema-drafts"]:
+        return _draft_write(workspace, who, parts[4], parts[5], given)
+    if len(parts) == 7 and parts[:4] == ["", "api", "bi", "datasets"] and parts[5] == "schema":
+        if parts[6] == "preview":
+            return 200, {
+                "ok": True,
+                **schema_versions.upgrade_preview(workspace, parts[4], given.get("to")),
+            }
+        if parts[6] == "apply":
+            done = schema_versions.upgrade_apply(
+                workspace, parts[4], given.get("to"), given.get("preview_token"), who
+            )
+            return 200, {"ok": True, **done}
     if len(parts) >= 6 and parts[:4] == ["", "api", "bi", "runs"]:
         return _run_action(workspace, who, parts[4], parts[5:], given)
     if len(parts) == 6 and parts[:4] == ["", "api", "bi", "cards"] and parts[5] == "field":
@@ -288,6 +315,42 @@ def _run_action(
     return _error(404, "route_unknown", "沒有這個 BI 路徑")
 
 
+def _draft_read(workspace: Path, rest: list[str], query: Mapping[str, str]) -> Answer:
+    draft_id = rest[0]
+    if len(rest) == 1:
+        return 200, schema_versions.draft(workspace, draft_id)
+    if len(rest) == 3 and rest[1] == "revisions" and rest[2].isdigit():
+        return 200, schema_versions.draft(workspace, draft_id, int(rest[2]))
+    if rest[1:] == ["diff"]:
+        return 200, schema_versions.compare(workspace, draft_id, query.get("from"), query.get("to"))
+    return _error(404, "route_unknown", "沒有這個 BI 路徑")
+
+
+def _draft_write(
+    workspace: Path, who: str, draft_id: str, action: str, given: dict[str, Any]
+) -> Answer:
+    if action == "revisions":
+        saved = schema_versions.save_revision(
+            workspace,
+            draft_id,
+            document=given.get("document"),
+            json_text=given.get("json_text"),
+            note=given.get("note"),
+            source=given.get("source"),
+            actor=who,
+        )
+        return 200, {"ok": True, **saved}
+    if action == "revert":
+        return 200, {
+            "ok": True,
+            **schema_versions.revert(workspace, draft_id, given.get("rev"), who),
+        }
+    if action == "publish":
+        published = schema_versions.publish(workspace, draft_id, given.get("rev"), who)
+        return 200, {"ok": True, **published}
+    return _error(404, "route_unknown", "沒有這個 BI 路徑")
+
+
 def _decide_proposal(
     workspace: Path, who: str, card_id: str, proposal: str, given: dict[str, Any]
 ) -> Answer:
@@ -319,7 +382,17 @@ def _decide_proposal(
 
 
 #: Store refusals that are conflicts with the current state (409).
-CONFLICTS = {"stale_edit", "cards_changed", "run_trial", "run_closed", "run_committed"}
+CONFLICTS = {
+    "stale_edit",
+    "cards_changed",
+    "run_trial",
+    "run_closed",
+    "run_committed",
+    "preview_stale",
+    "schema_upgrade_breaking",
+    "schema_version_not_newer",
+    "schema_changed",
+}
 
 #: The GET routes that read one dataset (besides `/api/bi/cards/<id>[/history]`).
 DATASET_READS = ("/api/bi/cards", "/api/bi/dashboard", "/api/bi/schema")

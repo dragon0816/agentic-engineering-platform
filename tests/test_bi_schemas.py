@@ -178,7 +178,7 @@ def test_an_invalid_schema_is_refused_with_errors_naming_each_field(tmp_path: Pa
     [
         ("{not json", "schema_json_invalid"),
         ("", "schema_missing_text"),
-        (json.dumps(_minimal(schema_id="bi.schema/v9")), "schema_invalid"),
+        (json.dumps(_minimal(schema_id="bi.schema/v9")), "schema_bi_not_compatible"),
         (json.dumps(_minimal(version="1.0")), "schema_invalid"),
         (json.dumps(_minimal(types=[])), "schema_invalid"),
     ],

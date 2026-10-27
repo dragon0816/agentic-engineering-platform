@@ -28,6 +28,7 @@ from contextlib import contextmanager
 from pathlib import Path, PurePath
 from typing import Any
 
+from capabilities.bi_cards import schema_versions
 from capabilities.bi_cards.store import BiStore, BiStoreError, now
 
 STAGING_FILE = "staging.sqlite"
@@ -174,7 +175,7 @@ class Staging:
             target.parent.mkdir(parents=True, exist_ok=True)
             temporary = target.with_name(f".{target.name}.{uuid.uuid4().hex[:8]}.tmp")
             temporary.write_bytes(data)
-            temporary.replace(target)
+            schema_versions.replace(temporary, target)
             source_id = uuid.uuid4().hex[:12]
             db.execute(
                 "INSERT INTO sources (id, name, sha256, media_type, size, origin, stored, "
