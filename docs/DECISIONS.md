@@ -5300,3 +5300,16 @@ preview must not need Excel or touch an open workbook).
   `.claude/settings.json` carries only the hooks.
 - **Not done here:** Codex reads `AGENTS.md`, not `CLAUDE.md`; `graphify codex install` would add the same
   rule there if Codex sessions should use the graph too.
+
+## 2026-10-27 — BI Knowledge Case B next; RS_Knowledge may go live
+
+- **Case B is the next BI slice** (owner: 「BI的部份要先做多表格報告」). Knowledge Strategy v1.3 §4.7 Case B:
+  multi-table Markdown / Excel reports with advanced mapping (`explode`, `derive`, `compose`, `exclude_names`,
+  `name_aliases`), role split Account ≠ Competitor ≠ Ecosystem, alias merging (VE-05, VE-06). This lifts the
+  v1.3 §7 gate for Case B only; Cases C–E stay waiting. Rejected for now: Case E (slides → graph) first.
+- **The BI flow needs guided steps like the Wiki's** (owner: the BI strategy has no organizing steps as clear as
+  the LLM Wiki's). Case B's spec includes the Agent Web steps a maintainer follows, not only the import engine.
+- **RS_Knowledge may go live at any time** (owner: 「RS_Knowledge隨時都可以上線」). The open steps stay as recorded
+  in `docs/TASKS.md`: one adopt pass over its legacy-format Raw (as for the rs-k copy on 2026-10-12) and
+  `host.json` pointing the project vault at it. The adopt pass writes into the real vault, so it runs with the
+  owner present, after a backup, and after checking `/api/activity` before the Agent Web restart.

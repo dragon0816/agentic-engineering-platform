@@ -3612,3 +3612,9 @@ s-k-20261011T102952` (not published).
   Edge held open. Not reproduced, so `src/integrations/browser.py` is unchanged. If it returns: list
   `msedge.exe` processes with their `--user-data-dir` before killing anything, and record which lock
   file (`lockfile` / `SingletonLock`) outlives `Browser.close`.
+- [x] BI Knowledge Case B spec `docs/phases/BI_CASE_B.md` (2026-10-27, Claude Code; docs only): one recipe
+  per kind of report (passes with table selectors, entity type and mapping), Markdown and Excel readers, the
+  upstream advanced mapping keys reimplemented, role-conflict and alias warnings, and a four-step guided import
+  (放入報告 → 檢查對應 → 確認寫入 → 檢查結果).
+- [ ] Owner: answer `docs/phases/BI_CASE_B.md` §8 (who writes recipes; role conflicts; scope), then implement
+  in the §9 order.
