@@ -21,6 +21,7 @@ import json
 import os
 import re
 import sys
+import time
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -225,11 +226,23 @@ def save_settings(paths: GatewayPaths, settings: GatewaySettings) -> None:
     write_atomically(paths.settings, json.dumps(settings.to_json(), indent=2) + "\n")
 
 
+#: How often a replace is tried when Windows refuses it for a moment (a scanner
+#: or indexer holding the file), with a growing pause in between.
+REPLACE_ATTEMPTS = 6
+
+
 def write_atomically(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(path.name + ".tmp")
     temporary.write_text(text, encoding="utf-8", newline="\n")
-    os.replace(temporary, path)
+    for attempt in range(REPLACE_ATTEMPTS):
+        try:
+            os.replace(temporary, path)
+            return
+        except PermissionError:
+            if attempt == REPLACE_ATTEMPTS - 1:
+                raise
+            time.sleep(0.05 * (attempt + 1))
 
 
 def render_config(settings: GatewaySettings) -> str:
