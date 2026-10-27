@@ -10,6 +10,9 @@
 > (`docs/CONTRACTS.md` "BI cards API and capability", "Per-dataset schemas"), and the sample vaults
 > `tests/fixtures/robotics_kb_sample/` and `tests/fixtures/bi_vault_example/` (fictional data, never
 > treated as verified fact).
+>
+> **User guide.** For the BI domain maintainer (zh-TW, every button of 「建立與匯入」):
+> [`docs/guides/BI_BUILD.zh-TW.md`](../guides/BI_BUILD.zh-TW.md).
 
 ## 1. Goal
 
@@ -375,6 +378,11 @@ no `..`, no links out). A remote or shared deployment shows 「此部署不支�
    Revert works. Nothing is written. A schema upgrade flags the method for re-check.
 10. **Benchmark**: a short domain set (fact, inference, unknown, duplicate, missing) scored on the
     candidates. The domain owner reviews it. The report states the results and the gaps.
+    Built in phase 7: five fictional notes with `*.expected.json` in `tests/fixtures/bi_ingest_benchmark/`,
+    the pure scorer `src/capabilities/bi_cards/benchmark.py`, and `scripts/bi_ingest_benchmark.py` (`run`:
+    upload as UNCLASSIFIED, trial-run with the host's Knowledge model, score, report under
+    `<workspace>/bi/benchmarks/`; `score`: score existing runs by id). Tests `tests/test_bi_ingest_benchmark.py`
+    (scripted model).
 11. Case B's VE-05 (聯發科 and MediaTek as one card) and VE-06 (中磊 never a Competitor) on the rule path.
 
 Real-provider runs are listed separately as run or not run; tests use scripted models.
@@ -391,4 +399,4 @@ Each phase ends verified in a clean worktree and is pushed to `main` (owner 2026
 | 4 | AI path: parsing, chunking, extraction, checks, jobs, retry (§7) | done 2026-10-28 (text and Markdown; PDF not yet; tested with a scripted model, no real provider run) |
 | 5 | Session B (§9.2), trial comparison | done 2026-10-28 (methods, method runs, compare, Session B API and step 3 panel; tested with a scripted model, no real provider run) |
 | 6 | Session A (§9.1) | done 2026-10-28 (Session A API and step 2 panel, draft-schema sample trials; tested with a scripted model, no real provider run) |
-| 7 | Benchmark (§11.10), user guide, handoff | not started |
+| 7 | Benchmark (§11.10), user guide, handoff | done 2026-10-28 (benchmark fixture, scorer and `scripts/bi_ingest_benchmark.py`; guide [`docs/guides/BI_BUILD.zh-TW.md`](../guides/BI_BUILD.zh-TW.md); tested with a scripted model only. Not yet done: a real-provider benchmark run and the domain owner's review of the expected answers) |

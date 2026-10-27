@@ -3686,4 +3686,17 @@ s-k-20261011T102952` (not published).
     (2, scripted model; §11 item 8 with `bi.sqlite` bytes and installed schemas unchanged),
     `tests/test_bi_sessions_ui.py` extended (draft trial without a model; Session A and B suggestions applied
     with the AI runtime swapped for a scripted model). No real provider run.
-- [ ] BI ingest phase 7: benchmark, user guide, handoff.
+- [x] BI ingest phase 7: benchmark, user guide, handoff.
+  - [x] 2026-10-28, Claude Code: §11 item 10. Fixture `tests/fixtures/bi_ingest_benchmark/` (five fictional
+    zh-TW notes marked 虛構範例, each with `*.expected.json` `aep.bi.benchmark.expected/v1`: candidates by type
+    and name, per field `fact` with the evidence substring / `inference` / `unknown`, `duplicates`,
+    `forbidden`; `ideal_answers.json` for the scripted model); pure scorer `capabilities/bi_cards/benchmark.py`
+    (found/expected, wrong basis, evidence missing or not matching incl. locator lines, forbidden items
+    produced and not rejected by default, duplicates not merged or flagged ambiguous, score, failures in words,
+    Markdown report); `scripts/bi_ingest_benchmark.py` (`run`: upload as UNCLASSIFIED through `Staging`, trial
+    runs through `ai_runs.start` with the host config's Knowledge model and data approval, score, report under
+    `<workspace>/bi/benchmarks/`, `bi.sqlite` digest before and after; `score`: existing runs by id). Tests
+    `tests/test_bi_ingest_benchmark.py` (7: ideal 100%, planted flaws named, API pipeline and scorer agree,
+    script end to end; scripted model). User guide `docs/guides/BI_BUILD.zh-TW.md`, linked from
+    `docs/phases/BI_INGEST.md`. Not done: a real-provider benchmark run (owner runs
+    `scripts/bi_ingest_benchmark.py run`), the domain owner's review of the expected answers.
