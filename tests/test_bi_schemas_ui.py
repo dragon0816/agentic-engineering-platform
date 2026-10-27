@@ -48,7 +48,9 @@ def test_dataset_schemas_end_to_end_in_a_browser(served: Any, tmp_path: Path) ->
     def run(expression: str) -> Any:
         return browser._evaluate(expression)
 
-    def wait(expression: str, seconds: float = 20) -> Any:
+    # 60 s, the same as the Browser's own timeout (issue 248: a late render
+    # under full-suite CPU load is not a failure).
+    def wait(expression: str, seconds: float = 60) -> Any:
         deadline = time.monotonic() + seconds
         while time.monotonic() < deadline:
             try:

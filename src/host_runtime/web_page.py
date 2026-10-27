@@ -10865,6 +10865,9 @@ function biCell(value) {
 }
 
 async function biLoadDashboard() {
+  // Newest request only, as in biLoadCards: a late older reply must not
+  // repaint the Dashboard for a dataset or domain that is no longer shown.
+  const seq = bi.dashSeq = (bi.dashSeq || 0) + 1;
   biStatus("bi-status-dash", "loading", "載入中…");
   el("bi-dash-summary").replaceChildren(); el("bi-dash-sections").replaceChildren();
   let reply;
@@ -10872,10 +10875,12 @@ async function biLoadDashboard() {
     reply = await biCall("/api/bi/dashboard?dataset=" + encodeURIComponent(biDataset())
       + "&domain=" + encodeURIComponent(biDomain()));
   } catch (failure) {
+    if (seq !== bi.dashSeq) return;
     biStatus("bi-status-dash", "error", "Dashboard 載入失敗：" + failure.message + "。",
       biLoadDashboard);
     return;
   }
+  if (seq !== bi.dashSeq) return;
   biStatus("bi-status-dash", ""); bi.loaded.dashboard = true;
   biRenderDashboard(reply);
 }
@@ -11014,6 +11019,9 @@ function biFunnel(section) {
 
 // -- card browser ------------------------------------------------------------
 async function biLoadCards() {
+  // Only the newest request may paint: an older reply that arrives late must
+  // not overwrite the list for the filter the person has chosen since.
+  const seq = bi.cardsSeq = (bi.cardsSeq || 0) + 1;
   biStatus("bi-status-cards", "loading", "載入中…");
   const query = "?dataset=" + encodeURIComponent(biDataset()) + "&type="
     + encodeURIComponent(el("bi-type").value) + "&q=" + encodeURIComponent(el("bi-q").value.trim())
@@ -11021,9 +11029,11 @@ async function biLoadCards() {
   let reply;
   try { reply = await biCall("/api/bi/cards" + query); }
   catch (failure) {
+    if (seq !== bi.cardsSeq) return;
     biStatus("bi-status-cards", "error", "卡片載入失敗：" + failure.message + "。", biLoadCards);
     return;
   }
+  if (seq !== bi.cardsSeq) return;
   biStatus("bi-status-cards", ""); bi.loaded.cards = true;
   bi.cards = reply.cards || [];
   biRenderCards();

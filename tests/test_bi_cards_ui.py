@@ -525,7 +525,9 @@ def test_bi_cards_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None: 
     def run(expression: str) -> Any:
         return browser._evaluate(expression)
 
-    def wait(expression: str, seconds: float = 20) -> Any:
+    # 60 s, the same as the Browser's own timeout: under full-suite CPU load
+    # 20 s was too short for a render that is correct, just late (issue 248).
+    def wait(expression: str, seconds: float = 60) -> Any:
         deadline = time.monotonic() + seconds
         while time.monotonic() < deadline:
             try:
@@ -551,6 +553,24 @@ def test_bi_cards_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None: 
             f".find(n => n.textContent.trim() === {json.dumps(label)});"
             " if (!b) return false; b.click(); return true; })()"
         ), label
+
+    def open_priority_editor() -> None:
+        # Saving a field re-renders the card: the detail body is emptied and
+        # refilled after the notice has already appeared, so a click made as
+        # soon as the notice shows can land on an empty body. Wait for the
+        # editor button to be back (issue 248).
+        wait("!!document.querySelector('[data-field=priority] .bi-field-foot button')")
+        run("document.querySelector('[data-field=priority] .bi-field-foot button').click()")
+
+    def click_section(section: str) -> None:
+        # The Dashboard is emptied and refilled by any reload that overlaps
+        # this one. Find the summary and click it in the same step, retried
+        # until it is there, so no reload can come between the two (issue 248).
+        selector = json.dumps(f"#bi-dash-sections details[data-section='{section}'] summary")
+        wait(
+            f"(() => {{ const s = document.querySelector({selector}); if (!s) return false;"
+            " s.click(); return true; })()"
+        )
 
     def routes() -> list[str]:
         return [route for _method, route, _body in stub.calls]
@@ -608,45 +628,45 @@ def test_bi_cards_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None: 
         assert "示範資料已載入" in shown("bi-notice")
         assert ("POST", "/api/bi/demo/load", {"dataset": "demo"}) in stub.calls
         # -- Dashboard: gaps first, flags, matrix, funnel, collapse --------------------------
-        wait("document.querySelectorAll('#bi-dash-sections details').length === 4")
-        order = run(
+        # Wait for the whole state, not only the count: a reload that overlaps
+        # this one empties the sections for a moment (issue 248).
+        order_js = (
             "JSON.stringify([...document.querySelectorAll('#bi-dash-sections details')]"
             ".map(d => [d.dataset.section, d.open]))"
         )
-        assert json.loads(order) == [["6", True], ["4", False], ["17", False], ["8", False]]
-        stats = run(
+        expected_order = [["6", True], ["4", False], ["17", False], ["8", False]]
+        wait(f"{order_js} === JSON.stringify({json.dumps(expected_order)})")
+        order = run(order_js)
+        assert json.loads(order) == expected_order
+        stats_js = (
             "[...document.querySelectorAll('#bi-dash-summary .bi-stat b')]"
             ".map(b => b.textContent).join(',')"
         )
+        wait(f"({stats_js}) === '1,1,1'")
+        stats = run(stats_js)
         assert stats == "1,1,1", stats
         flagged = "#bi-dash-sections details[data-section='6'] tr.bi-flag-red"
-        assert run(f"document.querySelector(\"{flagged}\").textContent.includes('對手有、我方無')")
-        assert run(f'!!document.querySelector("{flagged} .bi-badge.bad")')
-        run(
-            "document.querySelector(\"#bi-dash-sections details[data-section='4'] summary\")"
-            ".click()"
+        # Each check below is a condition the Dashboard must reach, waited for
+        # in one step so a reload in progress cannot empty it between the read
+        # and the assertion (issue 248).
+        wait(
+            f"document.querySelector({json.dumps(flagged)})?.textContent.includes('對手有、我方無')"
         )
-        assert run("document.querySelectorAll('.bi-matrix td.bi-zero').length") == 2
-        run(
-            "document.querySelector(\"#bi-dash-sections details[data-section='17'] summary\")"
-            ".click()"
-        )
-        assert run("document.querySelectorAll('.bi-funnel-row').length") == 3
-        assert run("document.querySelector('.bi-funnel-items .bi-link').textContent") == (
-            "MLO 吞吐量方案"
+        wait(f"!!document.querySelector({json.dumps(flagged + ' .bi-badge.bad')})")
+        click_section("4")
+        wait("document.querySelectorAll('.bi-matrix td.bi-zero').length === 2")
+        click_section("17")
+        wait("document.querySelectorAll('.bi-funnel-row').length === 3")
+        wait(
+            "document.querySelector('.bi-funnel-items .bi-link')?.textContent === 'MLO 吞吐量方案'"
         )
         shoot("dashboard-light")
-        run(
-            "document.querySelector(\"#bi-dash-sections details[data-section='6'] summary\")"
-            ".click()"
+        click_section("6")
+        wait(
+            "document.querySelector(\"#bi-dash-sections details[data-section='6']\")"
+            "?.open === false"
         )
-        assert not run(
-            "document.querySelector(\"#bi-dash-sections details[data-section='6']\").open"
-        )
-        run(
-            "document.querySelector(\"#bi-dash-sections details[data-section='6'] summary\")"
-            ".click()"
-        )
+        click_section("6")
         # the domain switch queries again
         before = len(stub.calls)
         run(
@@ -715,7 +735,7 @@ def test_bi_cards_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None: 
         wait("(document.getElementById('bi-detail-title')?.textContent || '').includes('WiFi7')")
         wait(f"{detail}.includes('王經理')")
         # -- field edit: success, then a stale edit ----------------------------------------
-        run("document.querySelector('[data-field=priority] .bi-field-foot button').click()")
+        open_priority_editor()
         run(
             "document.getElementById('bi-edit-priority').value = '3';"
             "document.getElementById('bi-reason-priority').value = '依 Q4 訊號調整';"
@@ -732,7 +752,7 @@ def test_bi_cards_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None: 
         }
         wait("document.querySelector('[data-field=priority] .bi-field-value').textContent === '3'")
         # the same value again is no change: no new version (owner 2026-10-24)
-        run("document.querySelector('[data-field=priority] .bi-field-foot button').click()")
+        open_priority_editor()
         run(
             "document.getElementById('bi-edit-priority').value = '3';"
             "document.getElementById('bi-reason-priority').value = '再存一次';"
@@ -742,8 +762,11 @@ def test_bi_cards_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None: 
         notice = str(run("document.getElementById('bi-notice').textContent"))
         assert "版本 4" in notice and "已儲存" not in notice
         assert stub.cards[APP]["card"]["version"] == 4
+        # The card reloads after a no-change save; wait for that reload to
+        # show version 4, or it could read the version changed below (issue 248).
+        wait(f"{detail}.includes('版本 4')")
         stub.cards[APP]["card"]["version"] = 9  # someone else saved meanwhile
-        run("document.querySelector('[data-field=priority] .bi-field-foot button').click()")
+        open_priority_editor()
         run(
             "document.getElementById('bi-edit-priority').value = '2';"
             "document.getElementById('bi-reason-priority').value = '測試';"
