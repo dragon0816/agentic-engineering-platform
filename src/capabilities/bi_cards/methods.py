@@ -655,6 +655,8 @@ def session_turn(
     number, document = _document(staging, method_id)
     reg = _schema(staging)
     samples, sent_sources = sessions.excerpts(staging, source_ids)
+    for sent in sent_sources:
+        ai_runs.check_classification(ai, sent["classification"])
     trials, used_runs = _run_context(staging, method_id, run_ids)
     model, alias = sessions.model_or_refuse(ai)
     shown = {k: v for k, v in document.items() if k != "format"}

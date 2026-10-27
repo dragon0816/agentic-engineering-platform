@@ -5338,3 +5338,19 @@ preview must not need Excel or touch an open workbook).
   failure list (SQLite makes the whole batch atomic, so all-or-nothing is simpler to trust).
 - **Model use**: the model already approved in Settings for the source's data class; tests use scripted
   models and real-provider runs are reported separately. **Delivery**: verified phases pushed to `main`, no PRs.
+
+## 2026-10-28 — BI ingest phases 3–6: implementation choices
+
+- **A source's data class gates the model.** Every AI path that sends source text (extraction runs, Session A
+  and B excerpts) refuses a source whose classification is not in `models.data_approval.approved_classes`
+  (`classification_not_approved`). Rejected: recording the class only (the proposal requires respecting data
+  classes and allowed models).
+- **Text sources go to the AI path by default**; tables go to the rule path; a recipe forces the rule path.
+  Without a model the AI path is refused and nothing starts.
+- **Session turns are stored in the dataset's `staging.sqlite`**, beside the runs they compare, so a dataset
+  carries its own design history.
+- **Method files are simpler than the spec's `llm` block**: instructions, types, recipe, required-field
+  checks; chunking, fact policy and matching stay fixed in code for now.
+- **A run with failed chunks is `partial`** and can be reviewed and committed; only failed chunks are retried.
+- **The rule-path engine and Sessions A/B were built by subagents in worktrees** and cherry-picked after
+  review and verification.

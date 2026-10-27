@@ -1051,7 +1051,12 @@ def web_ai_runtime(web: Any) -> ai_runs.AiRuntime:
             daemon=True,
         ).start()
 
-    return ai_runs.AiRuntime(model=model, background=background)
+    def approved() -> tuple[str, ...]:
+        binding = web.runtime.config.models
+        approval = None if binding is None else binding.data_approval
+        return () if approval is None else tuple(approval.approved_classes)
+
+    return ai_runs.AiRuntime(model=model, background=background, approved=approved)
 
 
 def handle(handler: Any, method: str, parsed: ParseResult) -> bool:

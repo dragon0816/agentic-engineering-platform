@@ -4323,6 +4323,9 @@ checks, quote location), `ai_runs.py` (runs, background job, retry), `runs.py` (
   proposal §4 card rules), `types` (card type names; default Signal, Technology, Application). Refusals: 400
   `model_unavailable` (no Knowledge model in Settings; nothing is started; the rule path still works), 400
   `types_invalid`, `instructions_too_long`, `source_not_text`.
+- **Data class.** A source reaches the model (AI run, Session A or B excerpt) only when its `classification`
+  is in the host's `models.data_approval.approved_classes`; otherwise 400 `classification_not_approved` and
+  nothing is sent (added 2026-10-28).
 - **The model.** The Knowledge query model and alias (Settings, with its data approval). One call per chunk,
   `structured_output` with output contract `aep.bi.extract.v1`, no tools. The system message holds the rules,
   the schema's types and fields and the instructions; the chunk is in a user message between

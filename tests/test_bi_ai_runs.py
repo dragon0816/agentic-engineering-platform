@@ -216,3 +216,29 @@ def test_a_cancelled_extraction_stays_cancelled(tmp_path: Path) -> None:
     _ok(_call(tmp_path, "POST", f"/api/bi/runs/{run['id']}/cancel", {"dataset": "demo"}))
     jobs.run_all()
     assert _detail(tmp_path, run["id"])["run"]["status"] == "cancelled"
+
+
+def test_a_source_goes_to_the_model_only_in_an_approved_data_class(tmp_path: Path) -> None:
+    jobs = Jobs()
+    pair = (Scripted(MEETING_ANSWER), "test-model")
+    ai = AiRuntime(model=lambda: pair, background=jobs, approved=lambda: ("UNCLASSIFIED",))
+    internal = _note(tmp_path)  # INTERNAL by default
+    status, payload = _call(
+        tmp_path,
+        "POST",
+        "/api/bi/runs",
+        {"dataset": "demo", "kind": "trial", "source_id": internal},
+        ai,
+    )
+    assert (status, payload["code"]) == (400, "classification_not_approved")
+    assert jobs.pending == []
+    body = {
+        "dataset": "demo",
+        "name": "public.md",
+        "text": NOTE + "\n公開版。\n",
+        "classification": "UNCLASSIFIED",
+    }
+    public = _ok(_call(tmp_path, "POST", "/api/bi/sources", body))["source"]["id"]
+    run = _start(tmp_path, ai, public, kind="trial")
+    jobs.run_all()
+    assert _detail(tmp_path, run["id"])["run"]["status"] == "review"
