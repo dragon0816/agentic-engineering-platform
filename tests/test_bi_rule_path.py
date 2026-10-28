@@ -628,9 +628,12 @@ def test_excel_workbook_runs_by_sheet_name(tmp_path: Path) -> None:
     keysight = keys[("Competitor", "Keysight")]
     assert _value(keysight, "updated") == "2026-10-07"
     updated = next(f for f in keysight["fields"] if f["field"] == "updated")
+    # BI vault V2: the run reads the workbook's Markdown, so the evidence is
+    # the line in it (sheet row 3 is line 5: heading, blank, header, separator).
     assert updated["evidence"][0]["locator"] == {
         "sheet": "Competitors",
-        "row": 3,
+        "table": 0,
+        "line": 5,
         "column": "更新日期",
     }
     assert updated["evidence"][0]["excerpt"] == "2026-10-07"
@@ -714,4 +717,5 @@ def test_a_csv_with_a_recipe_runs_its_passes(tmp_path: Path) -> None:
     assert not any(w["code"] == "link_missing" for w in account["warnings"])
     chip = keys[("Ecosystem", "MediaTek")]
     proof = next(f for f in chip["fields"] if f["field"] == "name")["evidence"][0]
-    assert proof["locator"] == {"table": 0, "row": 2, "column": "主要供應商"}
+    # BI vault V2: CSV record 2 is line 3 of the source's Markdown table.
+    assert proof["locator"] == {"table": 0, "line": 3, "column": "主要供應商"}

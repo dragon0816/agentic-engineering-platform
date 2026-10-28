@@ -5414,3 +5414,24 @@ Implementation of `docs/phases/BI_VAULT.md` §3–§4 (backend and API, Claude C
   syncs it first. Rejected: a separate "which vault" tool (an extra model call per question).
 - **Snapshots do not carry evidence yet**: the reader validates exact keys, so adding one breaks older PCs.
   Needs a format `/2` with a version window; left to the owner.
+
+## 2026-10-28 — BI vault V2 and V3: implementation choices
+
+- **Markdown revisions are files per source** (`<dataset>/markdown/<source id>/rev-<n>.md`) with their record
+  in `staging.sqlite`, close to the vault folder layout of `BI_VAULT.md` §4 so V4 can map them; author and
+  note live in the record, not the file name. Rejected: storing the text in SQLite (not a readable file).
+- **Converted tables are read back exactly**, not through the phase 3 Markdown cleaning: cells escape `\`,
+  `|` and line breaks, so a CSV or Excel cell keeps its text when the rule path reads the Markdown. A Markdown
+  report a person wrote keeps the phase 3 reading.
+- **Evidence of a table source is now a Markdown line** (`{"table", "line", "column"}`, plus `"sheet"` for
+  Excel) because the run reads the Markdown revision it records. Rejected: keeping the original CSV row or
+  sheet row (it cannot be traced once a person edits the Markdown).
+- **A source that cannot be converted is kept with the reason** and converted again when needed; only a PDF
+  without text is refused (`source_no_text`), as the design says. A missing office library is
+  `converter_missing`.
+- **The search index syncs itself after every `BiStore` write** (a hook at the end of the write transaction)
+  and after every Markdown revision, comparing card versions and source revisions; a failure never fails the
+  write and shows as `behind`. Rejected: calling it from each API route (easy to miss one, such as undo or a
+  schema upgrade). The search route also syncs first, so a dataset from before V3 builds its index on the
+  first search. Snippets are computed in Python with `[start, end)` marks rather than FTS5 `snippet()`
+  markup, so the page never parses markup.

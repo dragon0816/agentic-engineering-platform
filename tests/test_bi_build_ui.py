@@ -167,7 +167,8 @@ def test_build_and_import_steps_in_a_browser(served: Any, tmp_path: Path) -> Non
         click("#bi-b-commit-go")
         wait(stage_shown("result"))
         wait("document.getElementById('bi-b-done').textContent.includes('已寫入')")
-        assert "沒有額外索引" in text_of("bi-b-done")
+        # BI vault V3: the commit reports the search index it kept current.
+        assert "搜尋索引已更新：2 張卡片" in text_of("bi-b-done")
         assert sorted(c["name"] for c in BiStore(workspace).card_rows()) == ["EtherCAT", "TSN"]
         shoot("6-result")
 

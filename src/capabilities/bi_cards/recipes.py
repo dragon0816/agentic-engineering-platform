@@ -590,7 +590,10 @@ def _prepare(
         table = by_index[index]
         for item in table["rows"]:
             locator: dict[str, Any]
-            if table["locator"] == "line":
+            if table["locator"] == "line" and table.get("sheet"):
+                # An Excel sheet read from its Markdown (BI vault V2).
+                locator = {"sheet": table["sheet"], "table": index, "line": item["row"]}
+            elif table["locator"] == "line":
                 locator = {"table": index, "line": item["row"]}
             elif table["locator"] == "sheet":
                 locator = {"sheet": table["title"], "row": item["row"]}

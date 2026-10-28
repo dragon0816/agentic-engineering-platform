@@ -4150,7 +4150,8 @@ runs, candidates), `src/capabilities/bi_cards/runs.py` (rule-path run, review, c
   is `create` or `update`, in one SQLite transaction, as one import (`imports.run_id` = the run id)
   → `{"ok": true, "run": <run>, "import_id", "applied": {"created", "updated", "unchanged",
   "proposals"}, "skipped": int, "pending": int, "index": {"status": "not_applicable", "message":
-  "BI 卡片寫入後即可查詢，沒有額外索引"}}`. Before writing, each matched card's `version` must equal
+  "BI 卡片寫入後即可查詢，沒有額外索引"}}` (since BI vault V3 `index` is the search index state, see "BI
+  search index"). Before writing, each matched card's `version` must equal
   the candidate's `base_version`, and a `create` candidate's key must still be free; otherwise nothing
   is written: 409 `cards_changed` with `"cards": [{"candidate_id", "card_id", "name", "expected",
   "current"}]` (recheck, review again, commit again). Refusals: 409 `run_trial` (a trial run), 400
@@ -4596,6 +4597,97 @@ dataset, 400 `coverage_matrix_invalid` for a bad matrix.
   placement fields excluded), `card_list` (up to 200 `{id, name, type}` to open the cards).
 - `schema_missing_fields` lists `segment_field`/`area_field` when no type of the dataset's schema has them (every
   card is then unplaced until a schema version adds them).
+
+## BI source Markdown (BI vault phase V2, owner 2026-10-28)
+
+Design: `docs/phases/BI_VAULT.md` §5. Code: `src/capabilities/bi_cards/convert.py` (conversion),
+`source_markdown.py` (current revision, conversion on first need, saving an edit), `staging.py` (tables
+`markdown`, `conversions`, column `runs.markdown_rev`), `readers.py` (exact table reading), routes in
+`src/host_runtime/bi_cards_api.py`. Tests: `tests/test_bi_source_markdown.py`. Additive to "BI ingest runs".
+
+- **Conversion** (`aep.bi.convert/1`, recorded as each conversion revision's `converter`):
+  - CSV/TSV: one pipe table, no heading (header on line 1); blank rows left out.
+  - Excel (`.xlsx`, `.xlsm`): per sheet `## <sheet name>`, a blank line and one table (header = the first
+    non-empty row, unnamed columns left out, as the phase 3 reader); an empty sheet is the line
+    「（這個工作表是空的）」.
+  - PDF with a text layer (`pypdf`): per page with text `## 第 <n> 頁` and its text. A PDF with no text on
+    any page is refused when added: 400 `source_no_text` (no OCR), nothing is kept.
+  - Word `.docx` (`python-docx`): body paragraphs and tables in order; `Title` → `#`, `Heading n` → `n` ×
+    `#`, `List*` styles → `- `; a table's first row is its header.
+  - PowerPoint `.pptx` (`python-pptx`): per slide `## 投影片 <n>：<title>`, then its text frames (a
+    paragraph of level ≥ 1 → `- ` indented by level), tables, and notes under `### 備註`.
+  - Markdown (`.md`, `.markdown`) and text (`.txt`): as is (UTF-8, CRLF → LF).
+  - Table cells (all formats): `\` → `\\`, `|` → `\|`, a line break → `<br>`; a converted table source is
+    read back exactly (the reverse), so a cell keeps its text. A Markdown report keeps the phase 3 reading.
+  - A missing library (the `office` extra) is `converter_missing`; an unreadable file `source_parse_failed`;
+    a CSV/TSV that is not UTF-8 `source_decode_failed`; another file type `file_type_unsupported`.
+- **Sources.** `POST /api/bi/sources` also accepts `.pdf`, `.docx`, `.pptx` (and `.xlsm`, `.markdown`) as
+  `content_base64`; the source is converted when added. `<source>` adds `"format": "table" | "document" |
+  "text" | null` (null: cannot be converted), `"markdown_rev"` (the current revision, 0 = none) and
+  `"convert_error": {"code", "message"} | null`. A conversion failure other than `source_no_text` keeps the
+  source with `convert_error` and is tried again when next needed. Documents report `parse: "text"`.
+  A source added before V2 is converted on first need (a run, a session sample, the Markdown view, an index
+  rebuild); that revision's `by` is the person who added the source.
+- **Revisions** are immutable files `<dataset>/markdown/<source id>/rev-<n>.md`; `<revision>` = `{"rev",
+  "origin": "conversion" | "edit", "note", "converter": str | null, "sha256", "chars", "lines", "by", "at"}`.
+  The original copy under `sources/` is never changed.
+  - `GET /api/bi/sources/<id>/markdown?dataset=` → `{"source": <source>, "current_rev", "revision":
+    <revision>, "markdown": str, "revisions": [<revision>...]}` (newest first).
+  - `GET /api/bi/sources/<id>/markdown/<rev>?dataset=` → the same with `revision` and `markdown` of `rev`.
+  - `POST /api/bi/sources/<id>/markdown {"dataset", "markdown", "base_rev", "note"?}` → `{"ok": true,
+    "source", "revision", "current_rev", "already"}`. The same text as the current revision saves nothing
+    (`already: true`). `base_rev` is the revision the edit was made from (0 for a source that could not be
+    converted: the person's text becomes revision 1).
+  - Refusals: 404 `source_unknown`, `markdown_rev_unknown`; 400 `markdown_rev_invalid`, `markdown_missing`
+    (empty), `markdown_too_large` (over 2,000,000 characters), `base_rev_missing`, `note_too_long` (over
+    300), and the conversion errors above; 409 `markdown_stale` with `current_rev` (someone saved first);
+    409 `dataset_read_only`.
+- **Runs read the current revision.** `<run>` adds `"markdown_rev"` (null for runs before V2). The rule
+  path (with or without a recipe) reads the tables of that revision; evidence of a CSV/TSV value is
+  `{"table": 0, "line", "column"}` and of an Excel value `{"sheet", "table", "line", "column"}`, where
+  `line` is the row's line in that revision (before V2: `{"row", "column"}` / `{"sheet", "row",
+  "column"}` of the original file). A Markdown report's locators are unchanged. The AI path sends that
+  revision's text, so `{"line_start", "line_end"}` point into it; a retry reads the same revision. Session
+  A and B samples are the current Markdown.
+- **Path.** `POST /api/bi/runs` takes `"path": "ai" | "rules" | null`. Null: documents and text → AI,
+  tables → rules (as before). `"ai"` on a table source runs the AI path on its Markdown (owner 2026-10-28:
+  a person may switch a table to 「AI 擷取」); `"rules"` on a document is 400 `source_not_table`; `"ai"`
+  with a recipe or another value is 400 `path_invalid`.
+
+## BI search index (BI vault phase V3, owner 2026-10-28)
+
+Design: `docs/phases/BI_VAULT.md` §6.1. Code: `src/capabilities/bi_cards/search_index.py`; the hook in
+`store.py` (`BiStore._db` after every write), `staging.py` (a source added) and `source_markdown.py`
+(conversion, edit); routes in `src/host_runtime/bi_cards_api.py`. Tests: `tests/test_bi_search_index.py`.
+
+- **File.** `<dataset>/search.sqlite`, separate from `bi.sqlite`; a cache that can be deleted and rebuilt.
+  SQLite FTS5 with `tokenize='trigram'` (case-insensitive). Reading a dataset that has nothing creates no
+  file.
+- **Content.** Cards: name, canonical key and the values (lists joined with 「、」) of the fields the
+  dataset's schema has now (a retired field is not indexed). Markdown: the current revision of every source
+  that has one, cut along headings and paragraphs into chunks of about 1200 characters, each with
+  `source_id`, `rev`, `line_start`, `line_end`.
+- **Kept current** after every card write (commit, field edit, accepted proposal, undo, schema upgrade,
+  demo load, Case A import): cards whose `version` moved are re-indexed, removed cards dropped, every card
+  when the schema ref changed; after every Markdown revision (added source, conversion, edit). A failure to
+  update never fails the write; the status then shows `behind`.
+- **Status.** `GET /api/bi/index?dataset=` → `{"index": {"exists", "tokenizer": "trigram", "cards",
+  "chunks", "sources", "built_at" (last full rebuild) | null, "updated_at" | null, "behind": bool,
+  "behind_cards", "behind_sources"}}` (cards or sources whose indexed version/revision differs from now).
+- **Rebuild.** `POST /api/bi/index/rebuild {"dataset"}` → `{"ok": true, "index": <status> +
+  "not_converted": [{"source_id", "name", "code"}]}`; sources without Markdown are converted first. 404
+  `dataset_unknown`; 409 `dataset_read_only` (a subscribed copy builds its index on the first search).
+- **Search.** `GET /api/bi/search?dataset=&q=&limit=` (limit 1–100, default 20, per list) → `{"query",
+  "terms", "mode": "index" | "scan" | "none", "cards": [{"id", "entity_type", "name", "canonical_key",
+  "version", "hits": [{"field" ("name" or a field name), "snippet", "marks"}]}], "passages": [{"source_id",
+  "source_name", "rev", "line_start", "line_end", "line" (first line with a match), "snippet", "marks"}],
+  "index": <status>}`. `q` is split on spaces (at most 8 words, 200 characters); every word must match in
+  the same card or chunk. All words of 3 or more characters use the index (`index`, ranked by bm25); any
+  shorter word makes the query scan the indexed rows (`scan`). `snippet` is at most about 160 characters
+  (`…` where cut); `marks` are `[start, end)` offsets of every word in it. The index is brought up to date
+  before searching. Unknown dataset: 404 `dataset_unknown`.
+- `GET /api/bi/cards?q=` (`service.search`) and `bi__query` are unchanged; the commit result's `index`
+  (contract "BI ingest runs") is now `{"status": "current" | "behind", "message", ...<status>}`.
 
 ## BI dataset sharing (slice 1, owner 2026-10-22)
 

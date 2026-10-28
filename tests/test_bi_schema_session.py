@@ -129,7 +129,11 @@ def test_session_a_reuse_new_and_a_new_field_tried_without_installing(tmp_path: 
     assert reply["suggestion"]["verdict"] == "reuse"
     assert reply["suggestion"]["result"]["diff"] == [] and reply["suggestion"]["result"]["valid"]
     assert reply["sent"]["sources"][0]["name"] == "tech.csv"
-    assert reply["sent"]["excerpt_chars"] == len(TECH_CSV) and reply["sent"]["goal"] is True
+    # BI vault V2: a sample is the source's Markdown, as a run reads it.
+    markdown = _ok(_call(tmp_path, "GET", f"/api/bi/sources/{tech}/markdown", dataset="demo"))
+    assert "| EtherCAT | robotics | mature |" in markdown["markdown"]
+    assert reply["sent"]["excerpt_chars"] == len(markdown["markdown"])
+    assert reply["sent"]["goal"] is True
     assert reused["goal"] == "追蹤機器人技術"
 
     second = _session(tmp_path, draft_id)

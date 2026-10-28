@@ -119,7 +119,10 @@ def test_a_run_and_its_review_never_write_the_cards(tmp_path: Path) -> None:
     tsn = next(c for c in detail["candidates"] if c["canonical_key"] == "TSN")
     maturity = next(f for f in tsn["fields"] if f["field"] == "maturity")
     assert maturity["basis"] == "fact"
-    assert maturity["evidence"][0]["locator"] == {"row": 3, "column": "成熟度"}
+    # BI vault V2: the run reads the source's Markdown (revision 1, the
+    # conversion), so the CSV's third record is line 4 of that table.
+    assert run["markdown_rev"] == 1
+    assert maturity["evidence"][0]["locator"] == {"table": 0, "line": 4, "column": "成熟度"}
     assert maturity["evidence"][0]["excerpt"] == "growth"
     _accept_all(tmp_path, run["id"])
     assert not (tmp_path / "bi" / "demo" / "bi.sqlite").exists()
@@ -136,13 +139,15 @@ def test_a_commit_writes_accepted_candidates_with_evidence_once(tmp_path: Path) 
     _ok(_review(tmp_path, run["id"], second["id"], review="rejected"))
     done = _ok(_commit(tmp_path, run["id"]))
     assert done["applied"]["created"] == 1 and done["skipped"] == 1 and done["pending"] == 0
-    assert done["index"]["status"] == "not_applicable" and done["already"] is False
+    # BI vault V3: the commit reports the search index, now kept current.
+    assert done["index"]["status"] == "current" and done["already"] is False
+    assert done["index"]["cards"] == 1 and done["index"]["behind"] is False
     assert done["run"]["status"] == "committed"
     card = _card(tmp_path, "EtherCAT")
     maturity = next(f for f in card["fields"] if f["field"] == "maturity")
     assert maturity["source"]["ref"] == f"run:{run['id']}/{first['id']}"
     evidence = [e for e in card["evidence"] if e["field"] == "maturity"]
-    assert evidence[0]["source_name"] == "tech.csv" and evidence[0]["locator"]["row"] == 2
+    assert evidence[0]["source_name"] == "tech.csv" and evidence[0]["locator"]["line"] == 3
     assert _ok(_call(tmp_path, "GET", "/api/bi/cards", dataset="demo", q="TSN"))["cards"] == []
     again = _ok(_commit(tmp_path, run["id"]))
     assert again["already"] is True and again["import_id"] == done["import_id"]

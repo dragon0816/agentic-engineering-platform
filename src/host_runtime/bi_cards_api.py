@@ -33,6 +33,12 @@ Session A (BI ingest phase 6; contract "BI schema sessions"): a `schema`
 session suggests operations on a schema draft, applied to a copy and
 validated before 「套用到草稿」; `POST /api/bi/runs` with `draft_id` tries a
 draft revision on samples without installing it (trial only).
+
+Source Markdown (BI vault V2; contract "BI source Markdown"):
+`/api/bi/sources/<id>/markdown[/<rev>]` reads a source's converted Markdown
+and its revisions and saves a person's edit as a new revision; `POST
+/api/bi/runs` takes `path: "ai" | "rules"`. The search index (BI vault V3;
+contract "BI search index"): `/api/bi/index` and `/api/bi/search`.
 """
 
 from __future__ import annotations
@@ -57,8 +63,10 @@ from capabilities.bi_cards import (
     runs,
     schema_session,
     schema_versions,
+    search_index,
     service,
     sessions,
+    source_markdown,
 )
 from capabilities.bi_cards.staging import Staging
 from capabilities.bi_cards.store import (
@@ -189,6 +197,16 @@ def _route(
             return 200, {**report, "matrix_source": origin, "dataset": store.dataset}
         if path == "/api/bi/sources":
             return 200, {"sources": Staging(workspace, store.dataset).sources()}
+        parts = path.split("/")
+        if len(parts) in (6, 7) and parts[:4] == ["", "api", "bi", "sources"]:
+            if parts[5] == "markdown":
+                rev = parts[6] if len(parts) == 7 else None
+                return 200, source_markdown.view(workspace, store.dataset, parts[4], rev)
+        if path == "/api/bi/index":
+            return 200, {"index": search_index.status(store)}
+        if path == "/api/bi/search":
+            hits = search_index.search(store, query.get("q"), limit=query.get("limit"))
+            return 200, {**hits, "index": search_index.status(store)}
         if path == "/api/bi/schema-drafts":
             return 200, {"drafts": schema_versions.drafts(workspace)}
         if path.startswith("/api/bi/schema-drafts/"):
@@ -226,7 +244,6 @@ def _route(
                 domain=query.get("domain") or None,
             )
             return 200, {"cards": [service.card_summary(c, f) for c, f in found]}
-        parts = path.split("/")
         if len(parts) in (5, 6) and parts[:4] == ["", "api", "bi", "cards"]:
             card_id = parts[4]
             if len(parts) == 6 and parts[5] == "history":
@@ -305,6 +322,23 @@ def _route(
             actor=who,
         )
         return 200, {"ok": True, "source": source}
+    parts = path.split("/")
+    if len(parts) == 6 and parts[:4] == ["", "api", "bi", "sources"] and parts[5] == "markdown":
+        saved = source_markdown.save(
+            workspace,
+            _dataset(given.get("dataset")),
+            parts[4],
+            markdown=given.get("markdown"),
+            base_rev=given.get("base_rev"),
+            note=given.get("note"),
+            actor=who,
+        )
+        return 200, {"ok": True, **saved}
+    if path == "/api/bi/index/rebuild":
+        dataset = _dataset(given.get("dataset"))
+        if not BiStore(workspace, dataset).exists and not Staging(workspace, dataset).exists:
+            return _error(404, "dataset_unknown", f"沒有這個資料集「{dataset}」")
+        return 200, {"ok": True, "index": search_index.rebuild(workspace, dataset)}
     if path == "/api/bi/runs":
         return _start_run(workspace, who, given, ai)
     if path == "/api/bi/recipes":
@@ -312,7 +346,6 @@ def _route(
             workspace, _dataset(given.get("dataset")), given.get("recipe"), actor=who
         )
         return 200, {"ok": True, "recipe": saved}
-    parts = path.split("/")
     if path == "/api/bi/methods":
         made = methods.create(workspace, _dataset(given.get("dataset")), given.get("method"), who)
         return 200, {"ok": True, **made}
@@ -383,8 +416,15 @@ def _start_run(
         )
         return 200, {"ok": True, "run": run}
     no_recipe = given.get("recipe") is None and not given.get("recipe_id")
-    if source is not None and source["parse"] == "text" and no_recipe:
-        # A text source is read by the model (BI ingest phase 4).
+    chosen_path = given.get("path")
+    if chosen_path not in (None, "ai", "rules"):
+        return _error(400, "path_invalid", "path 只能是 ai（AI 擷取）或 rules（表格規則）")
+    if chosen_path == "ai" and not no_recipe:
+        return _error(400, "path_invalid", "AI 擷取不用配方；要用配方請選 rules")
+    by_default = chosen_path is None and source is not None and source["parse"] == "text"
+    if no_recipe and (chosen_path == "ai" or by_default):
+        # Documents and text go to the model (BI ingest phase 4); a person may
+        # send a table there too (BI vault V2, owner 2026-10-28).
         run = ai_runs.start(
             workspace,
             dataset,
@@ -610,10 +650,18 @@ CONFLICTS = {
     "vault_unreachable",
     "author_taken",
     "change_exists",
+    "markdown_stale",
 }
 
 #: The GET routes that read one dataset (besides `/api/bi/cards/<id>[/history]`).
-DATASET_READS = ("/api/bi/cards", "/api/bi/dashboard", "/api/bi/schema", "/api/bi/coverage")
+DATASET_READS = (
+    "/api/bi/cards",
+    "/api/bi/dashboard",
+    "/api/bi/schema",
+    "/api/bi/coverage",
+    "/api/bi/index",
+    "/api/bi/search",
+)
 
 
 def _unknown_dataset(store: BiStore, path: str, query: Mapping[str, str]) -> bool:

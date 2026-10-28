@@ -23,6 +23,10 @@ A reviewed ingest run (BI ingest phase 1, owner 2026-10-27) is written by
 review, keyed by the run id (`imports.run_id`) so a retried commit writes
 nothing twice, and with each value's evidence in `evidence`.
 
+After every write the dataset's search index (`search_index.py`, BI vault
+V3, its own file `search.sqlite`) is brought up to date; it is a cache, so
+a failure there never fails the write.
+
 A dataset subscribed from the shared platform (BI dataset sharing slice 1,
 owner 2026-10-22) is named `<namespace>/<name>` and lives under
 `<workspace>/bi/subscribed/<namespace>__<name>/`; `subscription.json` there
@@ -352,6 +356,12 @@ class BiStore:
                 connection.commit()
         finally:
             connection.close()
+        if write:
+            # Keep the search index current (BI vault V3). It is a cache in
+            # its own file: a failure there never fails this write.
+            from capabilities.bi_cards import search_index
+
+            search_index.sync_quietly(self)
 
     # -- the schema binding ---------------------------------------------
 

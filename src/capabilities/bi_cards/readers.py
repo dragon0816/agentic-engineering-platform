@@ -16,6 +16,13 @@ Markdown parsing follows the fixture's `bi_ingest.py` (`parse_md_tables`,
 `clean_md`): pipe blocks whose second line is a separator, links reduced to
 their text, `<br>` to 「; 」, bold and code marks removed. It is
 reimplemented here, never imported.
+
+Since BI vault phase V2 (`docs/phases/BI_VAULT.md` §5) a run reads the
+source's current Markdown revision (`convert.py`). A CSV/TSV or Excel source
+is read from its converted tables in the exact mode (`markdown_tables(...,
+exact=True)`): cells are split on unescaped pipes and unescaped as
+`convert.table_cell` wrote them, so a cell reads back as the file had it,
+and `row` is the line in that revision.
 """
 
 from __future__ import annotations
@@ -36,6 +43,7 @@ SUPPORTED = (*MARKDOWN, *EXCEL, *DELIMITED)
 
 _SEPARATOR_CELL = re.compile(r":?-+:?")
 _HEADING = re.compile(r"^\s{0,3}(#{1,6})\s+(.*?)\s*#*\s*$")
+_BREAK = re.compile(r"<br\s*/?>", re.I)
 
 
 def suffix(name: str) -> str:
@@ -50,17 +58,17 @@ def read_tables(name: str, data: bytes) -> list[dict[str, Any]]:
     """Every table in the source, numbered from 0 in file order."""
     kind = suffix(name)
     if kind in MARKDOWN:
-        return markdown_tables(_decode(data), PurePath(name).name)
+        return markdown_tables(decode(data), PurePath(name).name)
     if kind in EXCEL:
         return excel_tables(data)
     if kind in DELIMITED:
-        return [delimited_table(name, _decode(data), "\t" if kind == ".tsv" else ",")]
+        return [delimited_table(name, decode(data), "\t" if kind == ".tsv" else ",")]
     raise BiStoreError(
         "file_type_unsupported", "規則轉換只能讀 Markdown（.md）、Excel（.xlsx）或 CSV/TSV"
     )
 
 
-def _decode(data: bytes) -> str:
+def decode(data: bytes) -> str:
     try:
         return data.decode("utf-8-sig")
     except UnicodeDecodeError as error:
@@ -80,9 +88,38 @@ def _cells(line: str) -> list[str]:
     return [clean_md(c) for c in line.strip().strip("|").split("|")]
 
 
-def markdown_tables(text: str, name: str = "") -> list[dict[str, Any]]:
+def split_row(line: str) -> list[str]:
+    """The cells of a converted table row, exactly: a backslash before a pipe
+    or a backslash escapes it, and `<br>` is a line break
+    (`convert.table_cell` writes them)."""
+    text = line.strip()
+    if text.startswith("|"):
+        text = text[1:]
+    cells: list[str] = []
+    current: list[str] = []
+    index = 0
+    while index < len(text):
+        char = text[index]
+        if char == "\\" and index + 1 < len(text) and text[index + 1] in ("\\", "|"):
+            current.append(text[index + 1])
+            index += 2
+            continue
+        if char == "|":
+            cells.append("".join(current))
+            current = []
+        else:
+            current.append(char)
+        index += 1
+    if "".join(current).strip():
+        cells.append("".join(current))
+    return [_BREAK.sub("\n", c).strip() for c in cells]
+
+
+def markdown_tables(text: str, name: str = "", *, exact: bool = False) -> list[dict[str, Any]]:
     """Pipe tables with the nearest heading above each as its title (the
-    file name when no heading comes before it)."""
+    file name when no heading comes before it). `exact` reads a converted
+    table (`split_row`) instead of cleaning a report's cells."""
+    cells_of = split_row if exact else _cells
     blocks: list[tuple[str, list[tuple[int, str]]]] = []
     heading = name
     current: list[tuple[int, str]] = []
@@ -98,20 +135,20 @@ def markdown_tables(text: str, name: str = "") -> list[dict[str, Any]]:
             current = []
         found = _HEADING.match(line)
         if found:
-            heading = clean_md(found.group(2))
+            heading = found.group(2).strip() if exact else clean_md(found.group(2))
     if current:
         blocks.append((current_heading, current))
     tables: list[dict[str, Any]] = []
     for title, lines in blocks:
         if len(lines) < 2:
             continue
-        separator = _cells(lines[1][1])
+        separator = cells_of(lines[1][1])
         if not all(_SEPARATOR_CELL.fullmatch(c.strip()) for c in separator if c.strip()):
             continue
-        columns = _cells(lines[0][1])
+        columns = cells_of(lines[0][1])
         rows = []
         for number, line in lines[2:]:
-            values = _cells(line)
+            values = cells_of(line)
             rows.append(
                 {
                     "row": number,

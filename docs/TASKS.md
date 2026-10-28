@@ -3741,3 +3741,21 @@ s-k-20261011T102952` (not published).
   to decide), 141 as backup and publisher (needs the owner and 141).
 - [ ] BI vault V4 follow-ups: show the `merge` flag on the card detail; sync on a timer or on page open;
   incremental scan (today every sync reads every change file); sources into the vault's folders.
+- [x] BI vault V2 backend: convert every source to Markdown, editable revisions, runs read the Markdown.
+  - [x] 2026-10-28, Claude Code (backend and API only; the page is a separate task): `convert.py`
+    (CSV/TSV/Excel → tables, PDF text layer/Word/PowerPoint → headings, paragraphs, tables; `source_no_text`,
+    `converter_missing`), `source_markdown.py`, `staging.py` tables `markdown`/`conversions` and
+    `runs.markdown_rev`, exact table reading in `readers.py`; routes `/api/bi/sources/<id>/markdown[/<rev>]`,
+    `POST /api/bi/runs` `path`. Contract "BI source Markdown". Tests `tests/test_bi_source_markdown.py` (14).
+    Changed expectations (the runs now read Markdown): CSV/Excel evidence locators are Markdown lines
+    (`tests/test_bi_ingest_runs.py`, `tests/test_bi_rule_path.py`); a Session A sample of a CSV is its
+    Markdown (`tests/test_bi_schema_session.py`). Not done: the page (Markdown view and editor, AI/rules
+    switch).
+- [x] BI vault V3 backend: FTS5 trigram search index and its status.
+  - [x] 2026-10-28, Claude Code (backend and API only): `search_index.py` (`<dataset>/search.sqlite`; cards and
+    Markdown chunks with line ranges; kept current by a hook after every `BiStore` write and every Markdown
+    revision; `rebuild`; short queries scan); routes `GET /api/bi/index`, `POST /api/bi/index/rebuild`,
+    `GET /api/bi/search`; the commit result's `index` is the real state. Contract "BI search index". Tests
+    `tests/test_bi_search_index.py` (7); `tests/test_bi_ingest_runs.py` and `tests/test_bi_build_ui.py` expect
+    the new commit message. Not done: the page (index state in the result step and vault header, search UI),
+    `bi__query` using the index (§6.1; V6 with vaults).

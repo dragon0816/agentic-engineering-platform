@@ -28,7 +28,7 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
-from capabilities.bi_cards import readers
+from capabilities.bi_cards import readers, source_markdown
 from capabilities.bi_cards.extract import DATA_END, DATA_FENCE
 from capabilities.bi_cards.staging import Staging, parse_kind
 from capabilities.bi_cards.store import BiStoreError, now
@@ -120,6 +120,9 @@ def mark_applied(staging: Staging, session: dict[str, Any], index: int, applied:
 
 
 def _source_text(staging: Staging, source: dict[str, Any]) -> str:
+    if source.get("format"):
+        # BI vault V2: a sample is the source's current Markdown, as a run reads it.
+        return source_markdown.current(staging, source["id"])[1]
     data = staging.source_bytes(source["id"])
     if parse_kind(source["name"]) == "text" or readers.suffix(source["name"]) in (".csv", ".tsv"):
         return data.decode("utf-8-sig", errors="replace")

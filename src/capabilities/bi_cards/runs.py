@@ -10,6 +10,13 @@ workbook or CSV/TSV read as several tables (`readers.py`), several passes,
 and the run's tables and passes kept as its layout. The AI path comes later;
 every path produces the same candidates.
 
+Since BI vault phase V2 (`docs/phases/BI_VAULT.md` §5) the rule path reads
+the source's current Markdown revision (`source_markdown.py`), not the
+original file, and the run records that revision (`markdown_rev`). Evidence
+of a CSV/TSV or Excel value therefore points at the line of its row in that
+revision (`{"table", "line", "column"}`, plus `"sheet"` for Excel), as a
+Markdown report's already did.
+
 Every candidate is evaluated against the cards as they are now: whether it
 matches a card (exactly, or only loosely, which needs the person's choice),
 the card version the review saw, the diff per field and the hard errors. A
@@ -21,33 +28,41 @@ from __future__ import annotations
 
 import csv
 import io
-from pathlib import Path, PurePath
+from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import catalog, importer, readers, recipes, schema_versions
+from capabilities.bi_cards import (
+    catalog,
+    importer,
+    readers,
+    recipes,
+    schema_versions,
+    source_markdown,
+)
 from capabilities.bi_cards.schema import FieldDef, Registry, TypeDef, norm_key
 from capabilities.bi_cards.staging import Staging, parse_kind
 from capabilities.bi_cards.store import BiStore, BiStoreError, PlannedRow, now
 
 MAX_EXCERPT = 500
-INDEX_STATUS = {"status": "not_applicable", "message": "BI 卡片寫入後即可查詢，沒有額外索引"}
 WRITABLE = ("create", "update")
 
 
-def _decode(data: bytes) -> str:
-    try:
-        return data.decode("utf-8-sig")
-    except UnicodeDecodeError as error:
-        raise BiStoreError("source_decode_failed", "來源不是 UTF-8 文字，請另存為 UTF-8") from error
-
-
-def _as_csv(name: str, text: str) -> str:
-    """A TSV source as CSV text, so the Case A reader reads it."""
-    if PurePath(name).suffix.lower() != ".tsv":
-        return text
+def _table_csv(table: dict[str, Any]) -> tuple[str, list[int]]:
+    """A Markdown table as CSV text for the Case A reader, and the Markdown
+    line of each data row it will number from 2 (blank rows are skipped, as
+    the reader skips them)."""
     out = io.StringIO()
-    csv.writer(out, lineterminator="\n").writerows(csv.reader(io.StringIO(text), delimiter="\t"))
-    return out.getvalue()
+    writer = csv.writer(out, lineterminator="\n")
+    columns = [str(c) for c in table["columns"]]
+    writer.writerow(columns)
+    lines = []
+    for row in table["rows"]:
+        values = [str(row["cells"].get(c, "")) for c in columns]
+        if not any(v.strip() for v in values):
+            continue
+        writer.writerow(values)
+        lines.append(int(row["row"]))
+    return out.getvalue(), lines
 
 
 # -- evaluation ------------------------------------------------------------
@@ -166,7 +181,7 @@ def _diff_view(candidate: dict[str, Any]) -> Any:
 
 
 def _candidates_from_preview(
-    prepared: importer.Preview, source: dict[str, Any]
+    prepared: importer.Preview, source: dict[str, Any], lines: list[int]
 ) -> list[dict[str, Any]]:
     header_of = {c["field"]: c["source"] for c in prepared.columns if c["field"]}
     found = []
@@ -187,7 +202,11 @@ def _candidates_from_preview(
                         [
                             {
                                 "source_id": source["id"],
-                                "locator": {"row": row["row"], "column": header_of[cell["field"]]},
+                                "locator": {
+                                    "table": 0,
+                                    "line": lines[row["row"] - 2],
+                                    "column": header_of[cell["field"]],
+                                },
                                 "excerpt": raw[:MAX_EXCERPT],
                             }
                         ]
@@ -274,15 +293,20 @@ def start_rule_run(
     if parse_kind(source["name"]) != "table":
         raise BiStoreError("source_not_table", "規則轉換只能讀 CSV / TSV 表格；這個來源不是表格")
     reg, schema_ref = schema or _dataset_schema(staging)
+    rev, markdown = source_markdown.current(staging, source_id)
+    found_tables = source_markdown.tables(source, markdown)
+    if not found_tables:
+        raise BiStoreError("source_not_table", "這個來源的 Markdown 裡沒有表格")
+    text, lines = _table_csv(found_tables[0])
     run_id = staging.create_run(
         kind=kind,
         schema_ref=schema_ref,
         source_ids=[source_id],
         actor=actor,
         method_ref=method_ref,
+        markdown_rev=rev,
     )
     try:
-        text = _as_csv(source["name"], _decode(staging.source_bytes(source_id)))
         prepared = importer.preview(
             staging.store,
             entity_type=entity_type,
@@ -291,7 +315,7 @@ def start_rule_run(
             mapping=mapping,
             schema=reg,
         )
-        built = apply_checks(_candidates_from_preview(prepared, source), checks)
+        built = apply_checks(_candidates_from_preview(prepared, source, lines), checks)
         found = [evaluate(staging.store, reg, c) for c in built]
     except (BiStoreError, importer.ImportError_) as error:
         staging.set_status(run_id, "failed", error=f"{error.code}: {error.message}")
@@ -352,15 +376,17 @@ def _start_recipe_run(
     checked, recipe_ref = resolve_recipe(
         staging, reg, recipe=recipe, recipe_id=recipe_id, recipe_version=recipe_version
     )
+    rev, markdown = source_markdown.current(staging, source_id)
     run_id = staging.create_run(
         kind=kind,
         schema_ref=schema_ref,
         source_ids=[source_id],
         actor=actor,
         method_ref=method_ref or recipe_ref,
+        markdown_rev=rev,
     )
     try:
-        tables = readers.read_tables(source["name"], staging.source_bytes(source_id))
+        tables = source_markdown.tables(source, markdown)
         built, layout = recipes.build(
             staging.store,
             reg,
@@ -747,6 +773,18 @@ def commit(workspace: Path, dataset: str, run_id: str, *, actor: str) -> dict[st
     return _committed(staging, run_id, result, counts, already=False)
 
 
+def index_state(store: BiStore) -> dict[str, Any]:
+    """The search index after a write (BI vault V3), for the result step."""
+    from capabilities.bi_cards import search_index
+
+    state = search_index.status(store)
+    if state["behind"]:
+        message = "搜尋索引還沒跟上，請到「結果」重建索引"
+    else:
+        message = f"搜尋索引已更新：{state['cards']} 張卡片、{state['chunks']} 段 Markdown"
+    return {"status": "behind" if state["behind"] else "current", "message": message, **state}
+
+
 def _committed(
     staging: Staging,
     run_id: str,
@@ -761,6 +799,6 @@ def _committed(
         "applied": {k: result.get(k, 0) for k in ("created", "updated", "unchanged", "proposals")},
         "skipped": counts["skipped"],
         "pending": counts["pending"],
-        "index": INDEX_STATUS,
+        "index": index_state(staging.store),
         "already": already,
     }

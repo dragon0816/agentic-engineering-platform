@@ -12,6 +12,12 @@ approval); without one the run is refused with `model_unavailable` and the
 rule path keeps working. The run records the model alias, the method
 (`llm:default` for the shipped instructions, `llm:inline` for edited ones)
 and the instructions and types it used.
+
+Since BI vault phase V2 (`docs/phases/BI_VAULT.md` §5) the model reads the
+source's current Markdown revision, recorded on the run (`markdown_rev`), so
+evidence line numbers point into that revision; a retry reads the same one.
+Documents (PDF, Word, PowerPoint) come here through their Markdown, and a
+person may send a table source here too (`path: "ai"`, owner 2026-10-28).
 """
 
 from __future__ import annotations
@@ -21,7 +27,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import catalog, extract, runs
+from capabilities.bi_cards import catalog, extract, runs, source_markdown
 from capabilities.bi_cards.schema import Registry, norm_key
 from capabilities.bi_cards.staging import Staging, parse_kind
 from capabilities.bi_cards.store import BiStoreError
@@ -93,8 +99,10 @@ def start(
     source = staging.source(source_id)
     if source is None:
         raise BiStoreError("source_unknown", "找不到這個來源")
-    if parse_kind(source["name"]) != "text":
-        raise BiStoreError("source_not_text", "AI 判讀只讀文字或 Markdown 來源")
+    if parse_kind(source["name"]) == "unsupported":
+        raise BiStoreError(
+            "source_not_text", "AI 判讀只讀能轉成 Markdown 的來源（文件、文字或表格）"
+        )
     if schema is None:
         reg = catalog.for_store(staging.store)
         schema = (reg, reg.ref)
@@ -112,6 +120,7 @@ def start(
             "沒有可用的模型：到 Settings 設定 Knowledge 使用的模型後再試；表格來源仍可用規則轉換",
         )
     model, alias = chosen
+    rev, _ = source_markdown.current(staging, source_id)
     run_id = staging.create_run(
         kind=kind,
         schema_ref=schema[1],
@@ -119,6 +128,7 @@ def start(
         actor=actor,
         method_ref=method_ref or ("llm:inline" if edited else "llm:default"),
         model=alias,
+        markdown_rev=rev,
     )
     staging.put_layout(
         run_id,
@@ -201,7 +211,10 @@ def _extract(
     assert run is not None
     reg = runs.registry_for(staging, run)
     source = staging.source(run["source_ids"][0]) or {}
-    text = staging.source_bytes(run["source_ids"][0]).decode("utf-8-sig", errors="replace")
+    if run.get("markdown_rev"):
+        text = staging.markdown_text(run["source_ids"][0], int(run["markdown_rev"]))
+    else:  # a run from before BI vault V2 read the original file
+        text = staging.source_bytes(run["source_ids"][0]).decode("utf-8-sig", errors="replace")
 
     def progress(done: int, total: int) -> None:
         layout.update(done=done, chunks=total)

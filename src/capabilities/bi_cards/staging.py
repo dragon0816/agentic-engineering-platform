@@ -12,6 +12,15 @@ once per content hash and the person's own file is never moved or changed.
 A run fixes what produced it (schema, method, model) so it can be traced
 later. Candidates are stored whole, as JSON, with their review state and the
 person's edits.
+
+Since BI vault phase V2 (`docs/phases/BI_VAULT.md` §5) every source also has
+Markdown revisions: revision 1 is the conversion made when the source is
+added (`convert.py`), each person's edit is a new revision, and a revision is
+never changed. The text is a file `markdown/<source id>/rev-<n>.md` beside
+the original copy; who, when, why and its hash are in the table `markdown`.
+A source that cannot be converted is still kept with the reason
+(`conversions`) and converted again when next needed; a PDF without any
+text is refused. A run records the revision it read (`runs.markdown_rev`).
 """
 
 from __future__ import annotations
@@ -28,7 +37,7 @@ from contextlib import contextmanager
 from pathlib import Path, PurePath
 from typing import Any
 
-from capabilities.bi_cards import schema_versions
+from capabilities.bi_cards import convert, schema_versions
 from capabilities.bi_cards.store import BiStore, BiStoreError, now
 
 STAGING_FILE = "staging.sqlite"
@@ -40,8 +49,18 @@ TABLE_TYPES = {
     ".csv": "text/csv",
     ".tsv": "text/tab-separated-values",
     ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ".xlsm": "application/vnd.ms-excel.sheet.macroEnabled.12",
 }
-TEXT_TYPES = {".txt": "text/plain", ".md": "text/markdown"}
+#: Read as text by the AI path (documents through their Markdown, BI vault V2).
+TEXT_TYPES = {
+    ".txt": "text/plain",
+    ".md": "text/markdown",
+    ".markdown": "text/markdown",
+    ".pdf": "application/pdf",
+    ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+}
+MARKDOWN_DIR = "markdown"
 MAX_RUNS_LISTED = 100
 RUN_KINDS = ("trial", "ingest")
 
@@ -91,6 +110,26 @@ CREATE TABLE IF NOT EXISTS recipes (
   by TEXT NOT NULL,
   at TEXT NOT NULL,
   PRIMARY KEY (id, version)
+);
+CREATE TABLE IF NOT EXISTS markdown (
+  source_id TEXT NOT NULL,
+  rev INTEGER NOT NULL,
+  origin TEXT NOT NULL,
+  note TEXT NOT NULL,
+  converter TEXT,
+  sha256 TEXT NOT NULL,
+  chars INTEGER NOT NULL,
+  lines INTEGER NOT NULL,
+  stored TEXT NOT NULL,
+  by TEXT NOT NULL,
+  at TEXT NOT NULL,
+  PRIMARY KEY (source_id, rev)
+);
+CREATE TABLE IF NOT EXISTS conversions (
+  source_id TEXT PRIMARY KEY,
+  code TEXT NOT NULL,
+  message TEXT NOT NULL,
+  at TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS sessions (
   id TEXT PRIMARY KEY,
@@ -153,6 +192,9 @@ class Staging:
         try:
             if write:
                 connection.executescript(SCHEMA)
+                columns = {r[1] for r in connection.execute("PRAGMA table_info(runs)")}
+                if "markdown_rev" not in columns:  # a store from before BI vault V2
+                    connection.execute("ALTER TABLE runs ADD COLUMN markdown_rev INTEGER")
             yield connection
             if write:
                 connection.commit()
@@ -192,10 +234,23 @@ class Staging:
             allowed = ", ".join(CLASSIFICATIONS)
             raise BiStoreError("classification_invalid", f"機密等級只能是 {allowed}")
         digest = hashlib.sha256(data).hexdigest()
+        known = self._source_by_digest(digest)
+        if known is not None:
+            return {**known, "already": True}
+        # Converted before anything is kept: a PDF without text is refused.
+        markdown: str | None = None
+        failure: BiStoreError | None = None
+        if convert.kind(label) is not None:
+            try:
+                markdown = convert.convert(label, data)
+            except BiStoreError as error:
+                if error.code == "source_no_text":
+                    raise
+                failure = error
         with self._db(write=True) as db:
-            found = db.execute("SELECT * FROM sources WHERE sha256 = ?", (digest,)).fetchone()
-            if found is not None:
-                return {**self._source(found), "already": True}
+            found = db.execute("SELECT id FROM sources WHERE sha256 = ?", (digest,)).fetchone()
+            if found is not None:  # the same bytes added at the same moment
+                return {**(self.source(str(found["id"])) or {}), "already": True}
             suffix = PurePath(label).suffix.lower()
             if not re.fullmatch(r"\.\w{1,8}", suffix):
                 suffix = ""
@@ -221,11 +276,46 @@ class Staging:
                     now(),
                 ),
             )
-            row = db.execute("SELECT * FROM sources WHERE id = ?", (source_id,)).fetchone()
-        return {**self._source(row), "already": False}
+            if markdown is not None:
+                self._insert_markdown(
+                    db,
+                    source_id,
+                    1,
+                    markdown,
+                    origin="conversion",
+                    note="轉檔",
+                    converter=convert.CONVERTER,
+                    actor=actor,
+                )
+            elif failure is not None:
+                self._record_failure(db, source_id, failure)
+        if markdown is not None:
+            from capabilities.bi_cards import search_index  # its passages (BI vault V3)
+
+            search_index.sync_quietly(self.store)
+        return {**(self.source(source_id) or {}), "already": False}
+
+    def _source_by_digest(self, digest: str) -> dict[str, Any] | None:
+        if not self.exists:
+            return None
+        with self._db() as db:
+            row = db.execute("SELECT id FROM sources WHERE sha256 = ?", (digest,)).fetchone()
+        return None if row is None else self.source(str(row["id"]))
 
     @staticmethod
-    def _source(row: sqlite3.Row) -> dict[str, Any]:
+    def _source(row: sqlite3.Row, db: sqlite3.Connection | None = None) -> dict[str, Any]:
+        rev, failure = 0, None
+        if db is not None and _has_table(db, "markdown"):
+            rev = int(
+                db.execute(
+                    "SELECT COALESCE(MAX(rev), 0) FROM markdown WHERE source_id = ?", (row["id"],)
+                ).fetchone()[0]
+            )
+            found = db.execute(
+                "SELECT code, message FROM conversions WHERE source_id = ?", (row["id"],)
+            ).fetchone()
+            if found is not None and not rev:
+                failure = {"code": found["code"], "message": found["message"]}
         return {
             "id": row["id"],
             "name": row["name"],
@@ -237,6 +327,11 @@ class Staging:
             "at": row["at"],
             "by": row["by"],
             "parse": parse_kind(row["name"]),
+            # BI vault V2: the current Markdown revision (0: not converted
+            # yet) and why the last conversion failed, if it did.
+            "format": convert.kind(row["name"]),
+            "markdown_rev": rev,
+            "convert_error": failure,
         }
 
     def sources(self) -> list[dict[str, Any]]:
@@ -244,14 +339,14 @@ class Staging:
             return []
         with self._db() as db:
             rows = db.execute("SELECT * FROM sources ORDER BY at DESC, rowid DESC").fetchall()
-        return [self._source(r) for r in rows]
+            return [self._source(r, db) for r in rows]
 
     def source(self, source_id: str) -> dict[str, Any] | None:
         if not self.exists:
             return None
         with self._db() as db:
             row = db.execute("SELECT * FROM sources WHERE id = ?", (source_id,)).fetchone()
-        return None if row is None else self._source(row)
+            return None if row is None else self._source(row, db)
 
     def source_bytes(self, source_id: str) -> bytes:
         if not self.exists:
@@ -261,6 +356,157 @@ class Staging:
         if row is None:
             raise BiStoreError("source_unknown", "找不到這個來源")
         return (self.dir / str(row["stored"])).read_bytes()
+
+    # -- Markdown revisions (BI vault V2) -----------------------------------
+
+    def _insert_markdown(
+        self,
+        db: sqlite3.Connection,
+        source_id: str,
+        rev: int,
+        text: str,
+        *,
+        origin: str,
+        note: str,
+        converter: str | None,
+        actor: str,
+    ) -> None:
+        stored = f"{MARKDOWN_DIR}/{source_id}/rev-{rev}.md"
+        target = self.dir / stored
+        target.parent.mkdir(parents=True, exist_ok=True)
+        data = text.encode("utf-8")
+        temporary = target.with_name(f".{target.name}.{uuid.uuid4().hex[:8]}.tmp")
+        temporary.write_bytes(data)
+        schema_versions.replace(temporary, target)
+        db.execute(
+            "INSERT INTO markdown (source_id, rev, origin, note, converter, sha256, chars, lines, "
+            "stored, by, at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                source_id,
+                rev,
+                origin,
+                note,
+                converter,
+                hashlib.sha256(data).hexdigest(),
+                len(text),
+                len(text.split("\n")) if text else 0,
+                stored,
+                actor,
+                now(),
+            ),
+        )
+        db.execute("DELETE FROM conversions WHERE source_id = ?", (source_id,))
+
+    @staticmethod
+    def _record_failure(db: sqlite3.Connection, source_id: str, error: BiStoreError) -> None:
+        db.execute(
+            "INSERT OR REPLACE INTO conversions (source_id, code, message, at) VALUES (?, ?, ?, ?)",
+            (source_id, error.code, error.message, now()),
+        )
+
+    def record_conversion_failure(self, source_id: str, error: BiStoreError) -> None:
+        with self._db(write=True) as db:
+            self._record_failure(db, source_id, error)
+
+    @staticmethod
+    def _revision(row: sqlite3.Row) -> dict[str, Any]:
+        return {
+            "rev": int(row["rev"]),
+            "origin": row["origin"],
+            "note": row["note"],
+            "converter": row["converter"],
+            "sha256": row["sha256"],
+            "chars": int(row["chars"]),
+            "lines": int(row["lines"]),
+            "by": row["by"],
+            "at": row["at"],
+        }
+
+    def markdown_revisions(self, source_id: str) -> list[dict[str, Any]]:
+        """Every Markdown revision of a source, newest first (empty: none yet)."""
+        if not self.exists:
+            return []
+        with self._db() as db:
+            if not _has_table(db, "markdown"):
+                return []
+            rows = db.execute(
+                "SELECT * FROM markdown WHERE source_id = ? ORDER BY rev DESC", (source_id,)
+            ).fetchall()
+        return [self._revision(r) for r in rows]
+
+    def markdown_text(self, source_id: str, rev: int) -> str:
+        if not self.exists:
+            raise BiStoreError("markdown_rev_unknown", "找不到這個 Markdown 版本")
+        with self._db() as db:
+            row = (
+                db.execute(
+                    "SELECT stored FROM markdown WHERE source_id = ? AND rev = ?",
+                    (source_id, rev),
+                ).fetchone()
+                if _has_table(db, "markdown")
+                else None
+            )
+        if row is None:
+            raise BiStoreError("markdown_rev_unknown", f"這個來源沒有第 {rev} 版 Markdown")
+        return (self.dir / str(row["stored"])).read_bytes().decode("utf-8")
+
+    def add_markdown(
+        self,
+        source_id: str,
+        text: str,
+        *,
+        origin: str,
+        note: str,
+        actor: str,
+        base_rev: int | None,
+        converter: str | None = None,
+    ) -> tuple[dict[str, Any], bool]:
+        """Save the next revision: (its record, False). The same text as the
+        current revision saves nothing: (the current record, True). A
+        `base_rev` that is not the current revision is `markdown_stale`."""
+        with self._db(write=True) as db:
+            db.execute("BEGIN IMMEDIATE")  # the check and the insert see one state
+            current = db.execute(
+                "SELECT * FROM markdown WHERE source_id = ? ORDER BY rev DESC LIMIT 1",
+                (source_id,),
+            ).fetchone()
+            current_rev = 0 if current is None else int(current["rev"])
+            if base_rev is not None and base_rev != current_rev:
+                raise BiStoreError(
+                    "markdown_stale",
+                    f"這份 Markdown 在你開啟後已存成第 {current_rev} 版，請重新載入後再修改",
+                    current_rev=current_rev,
+                )
+            digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
+            if current is not None and current["sha256"] == digest:
+                return self._revision(current), True
+            self._insert_markdown(
+                db,
+                source_id,
+                current_rev + 1,
+                text,
+                origin=origin,
+                note=note,
+                converter=converter,
+                actor=actor,
+            )
+            row = db.execute(
+                "SELECT * FROM markdown WHERE source_id = ? AND rev = ?",
+                (source_id, current_rev + 1),
+            ).fetchone()
+        return self._revision(row), False
+
+    def markdown_sources(self) -> list[tuple[str, int]]:
+        """(source id, current revision) of every source that has Markdown."""
+        if not self.exists:
+            return []
+        with self._db() as db:
+            if not _has_table(db, "markdown"):
+                return []
+            rows = db.execute(
+                "SELECT source_id, MAX(rev) AS rev FROM markdown GROUP BY source_id"
+            ).fetchall()
+        return [(str(r["source_id"]), int(r["rev"])) for r in rows]
 
     # -- runs -------------------------------------------------------------
 
@@ -273,6 +519,7 @@ class Staging:
         actor: str,
         method_ref: str | None = None,
         model: str | None = None,
+        markdown_rev: int | None = None,
     ) -> str:
         if kind not in RUN_KINDS:
             raise BiStoreError("run_kind_invalid", "kind 只能是 trial 或 ingest")
@@ -280,8 +527,18 @@ class Staging:
         with self._db(write=True) as db:
             db.execute(
                 "INSERT INTO runs (id, kind, status, method_ref, schema_ref, model, source_ids, "
-                "by, at) VALUES (?, ?, 'queued', ?, ?, ?, ?, ?, ?)",
-                (run_id, kind, method_ref, schema_ref, model, _dump(source_ids), actor, now()),
+                "by, at, markdown_rev) VALUES (?, ?, 'queued', ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    run_id,
+                    kind,
+                    method_ref,
+                    schema_ref,
+                    model,
+                    _dump(source_ids),
+                    actor,
+                    now(),
+                    markdown_rev,
+                ),
             )
         return run_id
 
@@ -341,6 +598,8 @@ class Staging:
             "finished": row["finished"],
             "error": row["error"],
             "commit": None if row["commit_result"] is None else json.loads(row["commit_result"]),
+            # The Markdown revision the run read (BI vault V2; None before V2).
+            "markdown_rev": row["markdown_rev"] if "markdown_rev" in row.keys() else None,
         }
 
     # -- candidates -------------------------------------------------------
