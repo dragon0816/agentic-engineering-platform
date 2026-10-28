@@ -143,8 +143,9 @@ opens its cards.
 AEP supplies the data; each person's own dashboards live in Atlas
 (`C:/Users/Chi_L/Documents/claude/atlas-analysis-dashboard`), reading the coverage API as a REST source.
 Later, an AI session in AEP writes an Atlas dashboard definition (declarative JSON, validated, no code
-run). The BI Dashboard gets an 「在 Atlas 開啟」 button; the Atlas address is a Setting (default
-`http://127.0.0.1:8127`), and the button says so when Atlas is not running. Atlas still needs its own
+run). The BI Dashboard gets an 「在 Atlas 開啟」 button; the Atlas address is a per-browser preference next
+to it (default `http://127.0.0.1:8127`; each person runs their own Atlas, so it is not a Host setting), and
+the button says so when Atlas is not running. Atlas still needs its own
 browser acceptance before it is relied on.
 
 ## 7. Pages
@@ -195,7 +196,7 @@ owner adds INTERNAL to the approval in Settings (no code change).
 
 | # | Content | Depends on |
 |---|---|---|
-| V1 | Page fixes: Session A and B always visible, 「擷取 Skill」 with built-ins, remove 「匯入 CSV」, Atlas button and Setting | — |
+| V1 | Page fixes: Session A and B always visible, 「擷取 Skill」 with built-ins, remove 「匯入 CSV」, Atlas button. **Done 2026-10-28** | — |
 | V2 | Convert to Markdown with editable revisions; extraction reads the Markdown | — |
 | V3 | FTS5 index and its status | V2 |
 | V4 | Vault folder, create/join, change files, ordered replay, conflicts as proposals, dataset-to-vault | V2 |

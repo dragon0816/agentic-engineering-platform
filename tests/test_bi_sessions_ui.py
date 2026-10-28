@@ -175,6 +175,15 @@ def test_session_panels_in_a_browser(
         click("#bi-stepper [data-stage=method]")
         wait(stage_shown("method"))
         wait("document.getElementById('bi-b-sb-model').textContent.includes('model_unavailable')")
+        # The built-ins are always listed; a table source starts on 「表格規則」, and
+        # Session B is shown before any Skill is saved (owner, 2026-10-28).
+        pick = "document.getElementById('bi-b-m-pick')"
+        assert run(f"[...{pick}.options].slice(0, 2).map(o => o.value).join()") == (
+            "builtin:llm,builtin:rules"
+        )
+        assert run(f"{pick}.value") == "builtin:rules"
+        assert "表格規則" in text_of("bi-b-sb-target")
+        assert run("document.getElementById('bi-b-sb-send').offsetHeight > 0")
         set_value("bi-b-recipe", json.dumps(RECIPE, ensure_ascii=False))
         set_value("bi-b-m-name", "技術表")
         click("#bi-b-m-new")
@@ -224,9 +233,18 @@ def test_session_panels_in_a_browser(
         # -- step 2: a draft tried on the sample, no model yet ------------------------------
         click("#bi-stepper [data-stage=schema]")
         wait(stage_shown("schema"))
+        # Session A is shown without a draft; with no model, sending makes nothing.
+        wait("document.getElementById('bi-b-sa-model').textContent.includes('model_unavailable')")
+        assert run("document.getElementById('bi-b-sa-send').offsetHeight > 0")
+        assert "還沒有開啟草稿" in text_of("bi-b-sa-target")
+        set_value("bi-b-sa-msg", "幫技術卡加一個價格帶欄位")
+        click("#bi-b-sa-send")
+        wait("document.getElementById('bi-b-sa-status').textContent.includes('沒有可用的模型')")
+        assert not (workspace / "bi" / "schema-drafts").exists()
+        set_value("bi-b-sa-msg", "")
         click("#bi-b-draft-new")
         wait("!document.getElementById('bi-b-draft').hidden")
-        wait("document.getElementById('bi-b-sa-model').textContent.includes('model_unavailable')")
+        wait("document.getElementById('bi-b-sa-target').textContent.includes('第 1 版')")
         assert run("document.querySelector('#bi-b-sa-sources input').checked")
         assert run("document.getElementById('bi-b-sa-send').offsetHeight > 0")  # visible
         click("#bi-b-draft-trial")
@@ -270,6 +288,19 @@ def test_session_panels_in_a_browser(
         assert "必要欄位檢查 1 條" in text_of("bi-b-m-info")
         run("document.getElementById('bi-b-sb-log').scrollIntoView()")
         shoot("3-session-b")
+        # A built-in is never changed: the first message saves a copy and talks about it.
+        run(
+            "{ const s = document.getElementById('bi-b-m-pick'); s.value = 'builtin:llm';"
+            " s.dispatchEvent(new Event('change')); }"
+        )
+        wait("document.getElementById('bi-b-sb-target').textContent.includes('AI 擷取')")
+        assert "沒有對話" in text_of("bi-b-sb-log")
+        set_value("bi-b-sb-msg", "技術卡一定要有標準組織")
+        click("#bi-b-sb-send")
+        wait("document.getElementById('bi-notice').textContent.includes('另存為你的 Skill')")
+        wait("document.getElementById('bi-b-sb-log').textContent.includes('需要工程開發')")
+        assert not str(run("document.getElementById('bi-b-m-pick').value")).startswith("builtin:")
+        assert "AI 擷取（我的版本" in text_of("bi-b-m-info")
         assert not cards_db.exists()
         assert not (workspace / "bi" / "schemas").exists()
     finally:

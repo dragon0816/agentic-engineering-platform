@@ -4,9 +4,8 @@ The real Agent Web page and server, behind a small proxy that answers the
 `/api/bi/*` contract from a stub (the backend is built separately) and passes
 every other request to the real server. Covered: the demo load refreshing the
 counts; the Dashboard (gaps first, red flag badges, matrix, funnel, card links,
-collapse, the domain switch); the import wizard (preview → per-card diff →
-確認寫入 → 復原, with only `preview` called before 確認); the `human_kept`
-highlight; the card browser (filter, search, sources, links, following a link);
+collapse, the domain switch); the 「在 Atlas 開啟」 button; the card browser
+(filter, search, sources, links, following a link);
 a field edit and a 409 `stale_edit`; loading and error states; dark mode at
 390 px. Screenshots in `.scratch/bi-ui/`.
 """
@@ -493,8 +492,11 @@ def test_the_bi_area_is_a_knowledge_sub_tab_with_every_pane_status() -> None:
         "</section>\n  <section", 1
     )[0]
     assert 'id="kn-tabs"' in knowledge and 'data-kn="bi"' in knowledge
-    for status in ("bar", "dash", "cards", "detail", "import"):
+    for status in ("bar", "dash", "cards", "detail", "build"):
         assert f'id="bi-status-{status}"' in knowledge, status
+    # The 2026-10-21 CSV import tab is gone: 「建立與匯入」 covers CSV (BI_VAULT.md §7.1).
+    assert 'data-bi-view="import"' not in knowledge and "匯入 CSV" not in knowledge
+    assert 'id="bi-atlas-open"' in knowledge
     assert "載入示範資料" in knowledge and "確認寫入" in knowledge
     assert "哪些測試方案對應 WiFi 7？" in knowledge and "[卡片 …]" in knowledge
     assert "人工值保留，改成提議" in PAGE and "stale_edit" in PAGE
@@ -782,59 +784,24 @@ def test_bi_cards_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None: 
             "!document.querySelector('[data-stale=true]')"
             " && document.getElementById('bi-detail-title') !== null"
         )
-        # -- import: preview → diff → confirm → undo ------------------------------------------
-        run("document.querySelector('#bi-views [data-bi-view=import]').click()")
-        start = len(stub.calls)
+        # -- 在 Atlas 開啟: a stopped Atlas is named, no dead tab ------------------------------
+        run("document.querySelector('#bi-views [data-bi-view=dashboard]').click()")
+        run("document.getElementById('bi-atlas-set').open = true")
         run(
-            "(() => { const dt = new DataTransfer();"
-            " dt.items.add(new File(['\\ufeff應用名稱,生命週期,優先度\\n衛星直連,研發,4\\n'],"
-            " 'application_sample.csv', {type: 'text/csv'}));"
-            " const f = document.getElementById('bi-file'); f.files = dt.files;"
-            " f.dispatchEvent(new Event('change')); })()"
+            "{ const u = document.getElementById('bi-atlas-url'); u.value = 'http://127.0.0.1:9';"
+            " document.getElementById('bi-atlas-save').click(); }"
         )
-        run("document.getElementById('bi-preview-go').click()")
-        wait("!document.getElementById('bi-preview').hidden")
-        preview = [body for _m, route, body in stub.calls[start:] if route.endswith("/preview")]
-        assert preview[0]["csv_text"].startswith("應用名稱")  # the BOM is gone
-        assert preview[0]["filename"] == "application_sample.csv"
-        assert preview[0]["entity_type"] is None
-        chips = shown("bi-summary-chips")
-        for label in ("新增1", "更新1", "不變1", "略過1", "警告2"):
-            assert label in chips.replace(" ", ""), label
-        assert run(
-            "document.querySelector('#bi-mapping tr[data-status=ignored]').textContent"
-            ".includes('判斷欄位')"
+        assert "http://127.0.0.1:9" in shown("bi-atlas-state")
+        run("document.getElementById('bi-atlas-open').click()")
+        wait("document.getElementById('bi-atlas-state').textContent.includes('Atlas 沒有回應')")
+        run(
+            "localStorage.removeItem('bi-atlas-url');"
+            " document.getElementById('bi-atlas-set').open = false"
         )
-        run("document.querySelector('.bi-row[data-row=\"3\"] .bi-row-toggle').click()")
-        kept = "document.querySelector('.bi-row[data-row=\"3\"] tr.bi-kept')"
-        assert run(f"{kept}.textContent.includes('人工值保留，改成提議')")
-        assert run(
-            "document.querySelector('.bi-row[data-row=\"3\"] .bi-warnings')"
-            ".textContent.includes('WiFi7普及')"
-        )
-        assert run("document.querySelector('.bi-row[data-row=\"4\"] input').disabled")
-        shoot("import-preview")
-        assert [route for route in routes()[start:] if "/import/" in route] == [
-            "/api/bi/import/preview"
-        ]
-        # only row 2 is written
-        run("document.querySelector('.bi-row[data-row=\"3\"] input').click()")
-        assert "1 列" in shown("bi-apply")
-        run("document.getElementById('bi-apply').click()")
-        wait("document.getElementById('bi-result').textContent.includes('已寫入')")
-        applied = [body for _m, route, body in stub.calls if route.endswith("/apply")]
-        assert applied == [{"preview_id": "pv-1", "rows": [2]}]
-        wait("document.getElementById('bi-counts').textContent.startsWith('3')")
-        shoot("import-applied")
-        click_text("#bi-result button", "復原這次匯入")
-        wait("document.getElementById('bi-result').textContent.includes('已復原')")
-        assert [body for _m, route, body in stub.calls if route.endswith("/undo")] == [
-            {"import_id": "imp-1", "dataset": "demo"}
-        ]
-        wait("document.getElementById('bi-counts').textContent.startsWith('2')")
         # -- a failing card list shows inline with 重試 ----------------------------------------
-        stub.fail.add("/api/bi/cards")
         run("document.querySelector('#bi-views [data-bi-view=cards]').click()")
+        stub.fail.add("/api/bi/cards")
+        run("document.getElementById('bi-refresh').click()")  # 更新 reloads the list
         wait("document.getElementById('bi-status-cards').textContent.includes('測試用的失敗')")
         stub.fail.clear()
         click_text("#bi-status-cards button", "重試")
@@ -863,13 +830,6 @@ def test_bi_cards_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None: 
         wait(f"{detail}.includes('王經理')")
         no_side_scroll()
         shoot("card-dark-390")
-        run("document.querySelector('#bi-views [data-bi-view=import]').click()")
-        run("document.getElementById('bi-preview-go').click()")
-        wait("!document.getElementById('bi-preview').hidden")
-        run("document.querySelector('.bi-row[data-row=\"3\"] .bi-row-toggle').click()")
-        run("document.querySelector('.bi-row[data-row=\"3\"]').scrollIntoView({block: 'start'})")
-        no_side_scroll()
-        shoot("import-dark-390")
         small = run(
             "[...document.querySelectorAll('#kn-pane-bi button')].filter(b => b.offsetParent"
             " && !b.classList.contains('bi-link') && b.getBoundingClientRect().height < 44)"

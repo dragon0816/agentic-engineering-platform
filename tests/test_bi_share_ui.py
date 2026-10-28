@@ -448,7 +448,7 @@ def test_bi_sharing_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None
         wait("!document.getElementById('bi-ro').hidden")
         assert content("bi-ro-title") == "唯讀：leo.chi 發佈的 v1.2.0"
         assert hidden("bi-demo") and hidden("bi-publish")
-        assert run("document.querySelector('#bi-views [data-bi-view=import]').hidden")
+        assert run("document.querySelector('#bi-views [data-bi-view=build]').hidden")
         assert content("bi-pub-state") == ""
         wait("document.getElementById('bi-dash-sections').textContent.includes('6. 缺口')")
         run("document.querySelector('#bi-views [data-bi-view=cards]').click()")
@@ -487,7 +487,7 @@ def test_bi_sharing_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None
         )
         wait("!document.getElementById('bi-publish').hidden")
         assert hidden("bi-ro")
-        assert not run("document.querySelector('#bi-views [data-bi-view=import]').hidden")
+        assert not run("document.querySelector('#bi-views [data-bi-view=build]').hidden")
         click("bi-publish")
         wait("!document.getElementById('bi-publish-panel').hidden")
         click("bi-pub-org")

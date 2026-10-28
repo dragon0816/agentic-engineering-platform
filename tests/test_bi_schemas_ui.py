@@ -5,8 +5,8 @@ server and the real `/api/bi/*` routes in a temporary workspace: 安裝 schema
 with inline validation errors, the shipped example 「產品規格」, 新增資料集
 with a name and a schema, switching datasets (the type filter, import types,
 card detail and chat hint follow the dataset), an import into the non-BI
-dataset and its Dashboard empty state; dark mode at 390 px. Screenshots in
-`.scratch/bi-schemas/`.
+dataset through 「建立與匯入」 (the rule path) and its Dashboard empty state;
+dark mode at 390 px. Screenshots in `.scratch/bi-schemas/`.
 """
 
 from __future__ import annotations
@@ -127,14 +127,36 @@ def test_dataset_schemas_end_to_end_in_a_browser(served: Any, tmp_path: Path) ->
             )
         )
 
-    def import_csv(entity: str) -> None:
+    def stage(name: str) -> None:
+        run(f"document.querySelector('#bi-stepper [data-stage={name}]').click()")
+        wait(f"!document.querySelector('#bi-view-build .kp-stage[data-stage={name}]').hidden")
+
+    def import_csv(entity: str, bom: bool = True) -> None:
+        # 「建立與匯入」: add the file, pick the card type, review, 確認匯入.
         item = csvs[entity]
-        run("document.querySelector('#bi-views [data-bi-view=import]').click()")
-        attach("bi-file", item["filename"], "﻿" + item["text"], "text/csv")
-        run("document.getElementById('bi-preview-go').click()")
-        wait("!document.getElementById('bi-preview').hidden")
-        run("document.getElementById('bi-apply').click()")
-        wait("document.getElementById('bi-result').textContent.includes('已寫入')")
+        run("document.querySelector('#bi-views [data-bi-view=build]').click()")
+        wait("!document.getElementById('bi-view-build').hidden")
+        stage("source")
+        attach("bi-b-file", item["filename"], ("\ufeff" if bom else "") + item["text"], "text/csv")
+        run("document.getElementById('bi-b-upload').click()")
+        wait(
+            "[...document.querySelectorAll('#bi-b-sources tbody tr')].some(r =>"
+            f" r.textContent.includes({json.dumps(item['filename'])})"
+            " && r.querySelector('input:checked'))"
+        )
+        stage("method")
+        assert options("bi-b-entity") == ["", "Supplier", "Component", "Product", "SpecItem"]
+        choose("bi-b-entity", entity)
+        stage("review")
+        run("document.getElementById('bi-b-start').click()")
+        first = item["text"].splitlines()[1].split(",")[0]  # this run's first card
+        wait(f"document.getElementById('bi-b-cands').textContent.includes({json.dumps(first)})")
+        run("document.getElementById('bi-notice').textContent = ''")
+        run("document.getElementById('bi-b-accept-clean').click()")
+        wait("document.getElementById('bi-notice').textContent.includes('張沒有錯誤的候選卡')")
+        run("document.getElementById('bi-b-next4').click()")
+        run("document.getElementById('bi-b-commit-go').click()")
+        wait("document.getElementById('bi-b-done').textContent.includes('已寫入')")
 
     try:
         metrics(1366, 1000)
@@ -204,22 +226,12 @@ def test_dataset_schemas_end_to_end_in_a_browser(served: Any, tmp_path: Path) ->
         assert "沒有 Dashboard 與對話查詢" in content("bi-schema-note")
         assert hidden("bi-hint") and hidden("bi-demo") and hidden("bi-domain-box")
         assert options("bi-type") == ["", "Supplier", "Component", "Product", "SpecItem"]
-        assert options("bi-entity") == ["", "Supplier", "Component", "Product", "SpecItem"]
         shoot("dashboard-none")
 
         # -- import into it: suppliers, then components linking to them -----------------------
         import_csv("Supplier")
         wait("document.getElementById('bi-counts').textContent.startsWith('3')")
-        item = csvs["Component"]
-        run("document.querySelector('#bi-views [data-bi-view=import]').click()")
-        attach("bi-file", item["filename"], item["text"], "text/csv")
-        run("document.getElementById('bi-preview-go').click()")
-        wait("!document.getElementById('bi-preview').hidden")
-        assert "零組件" in content("bi-summary-chips")
-        mapping = content("bi-mapping")
-        assert "unit_price" in mapping or "單價" in mapping
-        shoot("import-preview-spec")
-        run("document.getElementById('bi-apply').click()")
+        import_csv("Component", bom=False)
         wait("document.getElementById('bi-counts').textContent.startsWith('6')")
         shoot("import-applied-spec")
 

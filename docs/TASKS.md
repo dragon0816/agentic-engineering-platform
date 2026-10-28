@@ -3704,4 +3704,14 @@ s-k-20261011T102952` (not published).
   built flow, collaboration by change files in a shared folder, convert-to-Markdown, FTS5 index, coverage
   matrix, Atlas button, phases V1–V8. Decision `docs/DECISIONS.md` 2026-10-28 "BI vaults".
 - [x] Owner: answered `docs/phases/BI_VAULT.md` §8 (2026-10-28): SharePoint, cards later, `segments` OK.
-- [ ] BI vault V1: Sessions A and B always visible, 「擷取 Skill」 with built-ins, remove 「匯入 CSV」, Atlas button.
+- [x] BI vault V1: Sessions A and B always visible, 「擷取 Skill」 with built-ins, remove 「匯入 CSV」, Atlas button.
+  - [x] 2026-10-28, Claude Code: Session A moved out of the draft (the first message makes a draft from the
+    current version); step 3 renamed 「擷取 Skill 與試跑」 with built-ins 「AI 擷取」 and 「表格規則」 always
+    listed (a table source starts on 「表格規則」); Session B always shown, its first message on a built-in
+    saves a copy 「AI 擷取（我的版本 …）」 (表格規則 needs a recipe first); no model → nothing is created;
+    the 「匯入 CSV」 tab, panel and wizard JS removed (backend `/api/bi/import/*` kept: demo load and the
+    build result's undo use it); the bar's card counts refresh after 確認匯入 and its undo (was missing);
+    「在 Atlas 開啟個人 Dashboard」 with a per-browser address and a no-cors reachability check. Tests:
+    `test_bi_sessions_ui.py` extended, `test_bi_schemas_ui.py` imports through 「建立與匯入」,
+    `test_bi_cards_ui.py` import-wizard steps removed with the feature and an Atlas check added,
+    `test_bi_share_ui.py` read-only check on the build tab. Guide updated.
