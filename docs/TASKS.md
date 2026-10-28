@@ -3739,6 +3739,14 @@ s-k-20261011T102952` (not published).
   Test in `tests/test_bi_cards.py`. Not done: snapshots carrying evidence (needs
   `aep-bi-dataset-snapshot/2`: readers validate exact keys, so older PCs would refuse a new snapshot; owner
   to decide), 141 as backup and publisher (needs the owner and 141).
+- [x] BI vault V2/V3 page (2026-10-28, Claude Code): step 1 accepts PDF, Word, PowerPoint and `.xlsm`; the
+  source table shows the format (table / document / text, with the default Skill) and the Markdown revision or
+  the conversion error; 「看／改」 opens the Markdown with its revisions (an older one is read only), saves an
+  edit as a new revision, and names the newer revision on `markdown_stale`; the built-in Skill picks the run's
+  `path` (「AI 擷取」 on a table → `ai`, 「表格規則」 → `rules`); the cards view has 「全文搜尋（卡片與原文）」
+  with the index state, highlighted matches and 「重建索引」 (hidden for a subscribed copy). Also: the vault
+  panel and a Skill reload keep only the newest reply (stale replies repainted under load).
+  `tests/test_bi_markdown_ui.py` (browser). Guide §3.1 and §9.6.
 - [ ] BI vault V4 follow-ups: show the `merge` flag on the card detail; sync on a timer or on page open;
   incremental scan (today every sync reads every change file); sources into the vault's folders.
 - [x] BI vault V2 backend: convert every source to Markdown, editable revisions, runs read the Markdown.

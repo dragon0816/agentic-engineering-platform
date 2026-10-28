@@ -2395,6 +2395,19 @@ tr:last-child td { border-bottom: none; }
             <input id="bi-q" class="bi-input" type="search" autocomplete="off"
               placeholder="名稱或代碼"></div>
         </div>
+        <details class="card bi-fts" id="bi-fts">
+          <summary><strong>全文搜尋（卡片與原文）</strong>
+            <span class="bi-meta" id="bi-fts-index"></span></summary>
+          <form class="bi-step-grid" id="bi-fts-form" role="search">
+            <div><label class="bi-label" for="bi-fts-q">
+              找卡片的值與來源原文（Markdown）裡的字</label>
+              <input id="bi-fts-q" class="bi-input" type="search" maxlength="200"
+                autocomplete="off" placeholder="例如：800G 光模組"></div>
+            <div><button class="go" id="bi-fts-go" type="submit">搜尋</button></div>
+            <div><button class="bi-btn" id="bi-fts-rebuild" type="button">重建索引</button></div>
+          </form>
+          <div id="bi-fts-out" aria-live="polite"></div>
+        </details>
         <div class="bi-browse">
           <div>
             <div class="mem-status" id="bi-status-cards" role="status" aria-live="polite"
@@ -2479,9 +2492,9 @@ tr:last-child td { border-bottom: none; }
           </div>
           <div class="bi-step-grid">
             <div><label class="bi-label" for="bi-b-file">
-              來源檔（CSV、TSV、Markdown、文字、Excel）</label>
+              來源檔（CSV、TSV、Excel、PDF、Word、PowerPoint、Markdown、文字）</label>
               <input id="bi-b-file" type="file" multiple
-                accept=".csv,.tsv,.md,.txt,.xlsx,text/csv,text/markdown,text/plain"></div>
+                accept=".csv,.tsv,.xlsx,.xlsm,.pdf,.docx,.pptx,.md,.markdown,.txt,text/csv,text/markdown,text/plain"></div>
             <div><label class="bi-label" for="bi-b-class">機密等級</label>
               <select id="bi-b-class">
                 <option value="INTERNAL">INTERNAL（預設）</option>
@@ -2490,11 +2503,32 @@ tr:last-child td { border-bottom: none; }
                 <option value="RESTRICTED">RESTRICTED</option></select></div>
             <div><button class="go" id="bi-b-upload" type="button" disabled>加入來源</button></div>
           </div>
-          <p class="bi-meta">AEP 保留一份來源副本（同樣內容只存一次），不會移動或修改你的原始檔。
-            這一步不會寫入任何卡片。</p>
+          <p class="bi-meta">AEP 保留一份來源副本（同樣內容只存一次），不會移動或修改你的原始檔，
+            並把每份來源轉成 Markdown：之後的擷取都讀這份 Markdown，
+            你可以修改它（每次修改是新的版次）。
+            掃描的 PDF 沒有文字層，不支援。這一步不會寫入任何卡片。</p>
           <div class="bi-scroll"><table class="bi-table bi-stack" id="bi-b-sources">
-            <thead><tr><th>使用</th><th>來源</th><th>讀法</th><th>大小</th><th>機密等級</th>
-              <th>加入時間</th></tr></thead><tbody></tbody></table></div>
+            <thead><tr><th>使用</th><th>來源</th><th>格式</th><th>Markdown</th><th>大小</th>
+              <th>機密等級</th><th>加入時間</th></tr></thead><tbody></tbody></table></div>
+          <div class="bi-step" id="bi-b-md" role="region" aria-labelledby="bi-b-md-h" hidden>
+            <h4 id="bi-b-md-h"></h4>
+            <p class="bi-meta" id="bi-b-md-info"></p>
+            <div class="bi-step-grid">
+              <div><label class="bi-label" for="bi-b-md-rev">看哪一版</label>
+                <select id="bi-b-md-rev"></select></div>
+            </div>
+            <label class="bi-label" for="bi-b-md-text">
+              Markdown（修改後存成新的版次；原始檔不會改）</label>
+            <textarea id="bi-b-md-text" class="bi-input" rows="16" spellcheck="false"></textarea>
+            <div class="bi-step-grid">
+              <div><label class="bi-label" for="bi-b-md-note">這一版的說明</label>
+                <input id="bi-b-md-note" class="bi-input" maxlength="300"
+                  placeholder="例如：修正表格欄位名稱"></div>
+              <div><button class="go" id="bi-b-md-save" type="button">存成新版次</button></div>
+              <div><button class="bi-btn" id="bi-b-md-close" type="button">關閉</button></div>
+            </div>
+            <div id="bi-b-md-msg" role="status" aria-live="polite"></div>
+          </div>
           <div class="bi-actions"><button class="go" type="button" data-bi-next="schema"
             id="bi-b-next1" disabled>下一步：Schema</button></div>
         </section>
@@ -11046,7 +11080,7 @@ async function biShowView(name) {
   }
   if (bi.loaded[name]) return;
   if (name === "dashboard") await biLoadDashboard();
-  if (name === "cards") await biLoadCards();
+  if (name === "cards") { biFtsStatus(); await biLoadCards(); }
   if (name === "build") { bi.loaded.build = true; await biBuildLoad(); }
 }
 
@@ -11449,6 +11483,74 @@ el("bi-atlas-open").addEventListener("click", async () => {
   } finally { clearTimeout(timer); }
 });
 
+// -- full-text search over cards and source Markdown (BI vaults V3) -----------
+function biMarked(textValue, marks) {
+  const out = []; let at = 0;
+  for (const [start, end] of (marks || []).slice().sort((a, b) => a[0] - b[0])) {
+    if (start < at) continue;
+    out.push(textValue.slice(at, start), bh("mark", "", textValue.slice(start, end)));
+    at = end;
+  }
+  out.push(textValue.slice(at));
+  return bh("span", "", ...out);
+}
+
+function biIndexLine(index) {
+  if (!index || !index.exists) return "・還沒有索引（第一次搜尋時建立）";
+  return "・索引：" + index.cards + " 張卡片、" + index.chunks + " 段原文"
+    + (index.updated_at ? "・更新於 " + biTime(index.updated_at) : "")
+    + (index.behind ? "・落後，搜尋時會先更新" : "");
+}
+
+async function biFtsStatus() {
+  const info = bi.datasets.find((item) => item.name === biDataset());
+  el("bi-fts-rebuild").hidden = Boolean(info && info.read_only);
+  try {
+    const reply = await call("/api/bi/index?dataset=" + encodeURIComponent(biDataset()));
+    el("bi-fts-index").textContent = biIndexLine(reply.index);
+  } catch (failure) { el("bi-fts-index").textContent = "・索引狀態讀不到：" + failure.message; }
+}
+
+el("bi-fts-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const q = el("bi-fts-q").value.trim(), out = el("bi-fts-out"); out.replaceChildren();
+  if (!q) { el("bi-fts-q").focus(); return; }
+  out.append(bh("p", "bi-meta", "搜尋中…"));
+  let reply;
+  try {
+    reply = await call("/api/bi/search?dataset=" + encodeURIComponent(biDataset()) + "&q="
+      + encodeURIComponent(q) + "&limit=20");
+  } catch (failure) {
+    out.replaceChildren(bh("p", "bi-err", "沒有搜尋：" + failure.message + "。"));
+    return;
+  }
+  out.replaceChildren();
+  el("bi-fts-index").textContent = biIndexLine(reply.index);
+  if (reply.mode === "scan") out.append(bh("p", "bi-meta", "有少於 3 個字的詞，改用逐筆比對。"));
+  out.append(bh("h4", "", "卡片（" + reply.cards.length + "）"));
+  out.append(reply.cards.length ? bh("ul", "", ...reply.cards.map((c) => bh("li", "",
+    biButton(biTypeLabel(c.entity_type) + "・" + c.name, () => biOpenCard(c.id), "bi-link"),
+    ...c.hits.slice(0, 3).map((h) => bh("div", "bi-meta", h.field + "：",
+      biMarked(h.snippet, h.marks))))))
+    : bh("p", "bi-meta", "沒有卡片符合。"));
+  out.append(bh("h4", "", "來源原文（" + reply.passages.length + "）"));
+  out.append(reply.passages.length ? bh("ul", "", ...reply.passages.map((s) => bh("li", "",
+    bh("strong", "", s.source_name), " 第 " + s.rev + " 版・第 " + s.line_start + "–"
+      + s.line_end + " 行", bh("div", "bi-meta", biMarked(s.snippet, s.marks)))))
+    : bh("p", "bi-meta", "原文沒有符合的段落。"));
+});
+el("bi-fts-rebuild").addEventListener("click", async () => {
+  const button = el("bi-fts-rebuild"); button.disabled = true;
+  try {
+    const reply = await biCall("/api/bi/index/rebuild", {dataset: biDataset()});
+    el("bi-fts-index").textContent = biIndexLine(reply.index);
+    const missed = reply.index.not_converted || [];
+    biNotice(true, "索引已重建" + (missed.length ? "；" + missed.length
+      + " 份來源轉不出 Markdown，沒有收進索引" : "") + "。");
+  } catch (failure) { biNotice(false, "索引沒有重建：" + failure.message); }
+  finally { button.disabled = false; }
+});
+
 el("bi-type").addEventListener("change", () => biLoadCards());
 el("bi-q").addEventListener("input", () => {
   clearTimeout(bi.searchTimer); bi.searchTimer = setTimeout(() => biLoadCards(), 250);
@@ -11817,7 +11919,10 @@ function biVaultOf(name) {
 }
 
 async function biBuildVault() {
+  // Newest call only: a reload for the dataset shown before must not paint over this one.
+  const seq = bi.vaultSeq = (bi.vaultSeq || 0) + 1;
   const reply = await call("/api/bi/vaults");
+  if (seq !== bi.vaultSeq) return;
   bi.vaults = reply.vaults || [];
   const pick = el("bi-b-ds"); pick.replaceChildren();
   for (const item of bi.datasets.filter((d) => !d.read_only)) {
@@ -11841,7 +11946,9 @@ async function biBuildVault() {
   }
   try { await biCall("/api/bi/vaults/" + vault.id + "/sync", {}); }
   catch (failure) { box.append(bh("p", "bi-warn", "沒有同步：" + failure.message + "。")); }
-  biVaultState(await call("/api/bi/vaults/" + vault.id + "/status"));
+  const state = await call("/api/bi/vaults/" + vault.id + "/status");
+  if (seq !== bi.vaultSeq) return;
+  biVaultState(state);
 }
 
 function biVaultState(state) {
@@ -11952,14 +12059,21 @@ async function biBuildSources() {
     radio.type = "radio"; radio.name = "bi-b-source"; radio.value = source.id;
     radio.checked = source.id === bi.build.sourceId;
     radio.setAttribute("aria-label", "使用 " + source.name);
-    radio.disabled = source.parse === "unsupported";
+    radio.disabled = !source.format;
     radio.addEventListener("change", () => {
       bi.build.sourceId = source.id; el("bi-b-next1").disabled = false; biBuildSave();
       biBuildSteps();
     });
-    const parse = {table: "表格", text: "文字（AI 判讀）", unsupported: "尚未支援"};
+    const format = {table: "表格（預設表格規則）", document: "文件（預設 AI 擷取）",
+      text: "文字（預設 AI 擷取）"};
+    const md = source.convert_error
+      ? bh("span", "bi-err", "轉檔失敗：" + source.convert_error.message)
+      : source.markdown_rev ? "第 " + source.markdown_rev + " 版" : "尚未轉檔";
     body.append(bh("tr", "", bh("td", "", radio), bh("td", "", source.name),
-      bh("td", "", parse[source.parse] || source.parse),
+      bh("td", "", format[source.format] || "尚未支援"),
+      bh("td", "", md, " ", source.format
+        ? biButton("看／改", () => biBuildMarkdown(source.id), "bi-btn", "看或修改 "
+          + source.name + " 的 Markdown") : ""),
       bh("td", "", Math.max(1, Math.round(source.size / 1024)) + " KB"),
       bh("td", "", source.classification), bh("td", "", biTime(source.at))));
   }
@@ -11969,6 +12083,66 @@ async function biBuildSources() {
   el("bi-b-next1").disabled = !bi.build.sourceId;
   biBuildSteps();
 }
+
+// -- step 1: a source's Markdown (BI vaults V2, BI_VAULT.md §5) ----------------
+// Every source is read through its current Markdown revision; an edit saves a
+// new revision from the one shown (409 markdown_stale when someone saved first).
+async function biBuildMarkdown(sourceId, rev) {
+  const box = el("bi-b-md"), msg = el("bi-b-md-msg");
+  msg.replaceChildren();
+  const path = "/api/bi/sources/" + encodeURIComponent(sourceId) + "/markdown"
+    + (rev ? "/" + rev : "") + "?dataset=" + encodeURIComponent(biDataset());
+  let view;
+  try { view = await call(path); }
+  catch (failure) { biNotice(false, "Markdown 沒有載入：" + failure.message); return; }
+  bi.build.md = view; box.hidden = false;
+  el("bi-b-md-h").textContent = "「" + view.source.name + "」的 Markdown";
+  const r = view.revision || {};
+  el("bi-b-md-info").textContent = view.current_rev
+    ? "第 " + r.rev + " 版（目前是第 " + view.current_rev + " 版）・"
+      + (r.origin === "edit" ? "人工修改" : "轉檔") + (r.note ? "：" + r.note : "") + "・"
+      + (r.lines || 0) + " 行・" + (r.by || "") + "・" + biTime(r.at)
+    : "還沒有 Markdown（轉檔失敗）：可以自己貼上內容，存成第 1 版。";
+  const pick = el("bi-b-md-rev"); pick.replaceChildren();
+  for (const item of view.revisions || []) {
+    const option = bh("option", "", "第 " + item.rev + " 版・" + (item.origin === "edit"
+      ? "修改" : "轉檔") + (item.note ? "・" + item.note : ""));
+    option.value = String(item.rev); pick.append(option);
+  }
+  pick.value = String(r.rev || "");
+  el("bi-b-md-text").value = view.markdown || "";
+  el("bi-b-md-note").value = "";
+  const old = Boolean(view.current_rev) && r.rev !== view.current_rev;
+  el("bi-b-md-save").disabled = old;
+  if (old) msg.append(bh("p", "bi-meta", "這是舊版次，只能看；要改請先選目前的版次。"));
+}
+
+el("bi-b-md-rev").addEventListener("change", () => {
+  if (bi.build.md) biBuildMarkdown(bi.build.md.source.id, el("bi-b-md-rev").value);
+});
+el("bi-b-md-close").addEventListener("click", () => { el("bi-b-md").hidden = true; });
+el("bi-b-md-save").addEventListener("click", async () => {
+  const view = bi.build.md, msg = el("bi-b-md-msg"); if (!view) return;
+  msg.replaceChildren();
+  const button = el("bi-b-md-save"); button.disabled = true;
+  try {
+    const reply = await biCall("/api/bi/sources/" + encodeURIComponent(view.source.id)
+      + "/markdown", {dataset: biDataset(), markdown: el("bi-b-md-text").value,
+      base_rev: view.current_rev || 0, note: el("bi-b-md-note").value.trim()});
+    biNotice(true, reply.already ? "內容和目前的版次一樣，沒有存新版次。"
+      : "已存成第 " + reply.current_rev + " 版；之後的試跑與匯入都讀這一版。");
+    await biBuildSources(); await biBuildMarkdown(view.source.id);
+  } catch (failure) {
+    const stale = failure.code === "markdown_stale";
+    msg.append(bh("p", "bi-err", stale
+      ? "有人先存了新的版次（第 " + ((failure.payload || {}).current_rev || "?")
+        + " 版）；你的修改沒有存。請重新載入後再改。" : "沒有存：" + failure.message + "。"));
+    if (stale) {
+      msg.append(biButton("重新載入目前的版次", () => biBuildMarkdown(view.source.id), "go"));
+    }
+    button.disabled = false;
+  }
+});
 
 function biReadFile(file, binary) {
   return new Promise((resolve, reject) => {
@@ -11988,7 +12162,7 @@ el("bi-b-upload").addEventListener("click", async () => {
   biStatus("bi-status-build", "loading", "正在加入來源…");
   try {
     for (const file of el("bi-b-file").files) {
-      const binary = /\.xlsx$/i.test(file.name);
+      const binary = /\.(xlsx|xlsm|pdf|docx|pptx)$/i.test(file.name);
       const content = await biReadFile(file, binary);
       const body = {dataset: biDataset(), name: file.name,
         classification: el("bi-b-class").value};
@@ -12280,6 +12454,11 @@ function biRunBody(kind) {
     entity_type: el("bi-b-entity").value || null};
   const methodId = el("bi-b-m-pick").value;
   if (methodId && !methodId.startsWith("builtin:")) { body.method_id = methodId; return body; }
+  // 「AI 擷取」 on a table sends its Markdown to the model (owner 2026-10-28);
+  // 「表格規則」 reads the tables without a model.
+  const source = bi.build.sources.find((s) => s.id === bi.build.sourceId);
+  if (methodId === "builtin:llm" && source && source.format === "table") body.path = "ai";
+  if (methodId === "builtin:rules") body.path = "rules";
   const instructions = el("bi-b-instr").value.trim();
   if (instructions) body.instructions = instructions;
   const recipe = el("bi-b-recipe").value.trim();
