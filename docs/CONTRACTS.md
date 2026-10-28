@@ -4474,6 +4474,106 @@ upgrade are unchanged and stay separate actions.
   committed (409 `run_trial`), and review or recheck answer 409 `schema_changed` (its schema is not the
   dataset's). It does not count as a method re-check. Nothing is installed and `bi.sqlite` is not written.
 
+## BI vaults: folder, change files, sync (BI vaults phase V4, 2026-10-28)
+
+Design: `docs/phases/BI_VAULT.md` §3, §4; decision `docs/DECISIONS.md` 2026-10-28 "BI vault V4: writes
+are captured and replayed". Code: `src/capabilities/bi_cards/vault.py`, hooks in `store.py`
+(`vault_of`, `dataset_dir`, `datasets`, `BiStore._db`), routes in `src/host_runtime/bi_vaults_api.py`.
+Tests: `tests/test_bi_vault.py` (two or three PCs as separate workspaces with their own copy of the
+folder; a test helper plays OneDrive). Backend and API only; the page comes later.
+
+- **A vault is a dataset.** A vault registered on this PC is the dataset `vault-<vault id>` (fits
+  `[A-Za-z0-9_-]{1,40}`; vault id `[a-z0-9]+(-[a-z0-9]+)*`, at most 34 characters). Every existing
+  `/api/bi/*` route (cards, edits, proposals, sources, runs, review, commit, undo, schema upgrade)
+  takes it as `dataset` unchanged. Its local copy is `<workspace>/bi/vaults/<vault id>/` (`bi.sqlite`,
+  `staging.sqlite`, sources, `vault_sync.json`); `vaults` is a reserved dataset name and a new plain
+  dataset may not start with `vault-` (400 `dataset_invalid`). The registry
+  `<workspace>/bi/vaults/registry.json` = `{"vaults": [{"id", "path", "author", "joined"}]}` is per PC.
+  Trial runs, candidates, review and Sessions A and B stay local; only writes to `bi.sqlite` are shared.
+- **Folder** `<path>/<vault id>/`: `vault.json` = `{"format": "bi.vault/v1", "id", "title",
+  "purpose", "schema": "<id>@<version>", "created", "created_by", "folders": {"applications":
+  [{"folder", "label"}], "library": ["products", "competitors", "technologies"]}, "coverage": obj |
+  null}`; `VAULT.md` (purpose, when the Agent uses it, folders, how to maintain); folders
+  `applications/<segment>/sources/` (default the 11 segments of the owner's chart),
+  `library/{products,competitors,technologies}/sources/`, `schemas/` (installed schemas the vault uses,
+  as `<schema id with / as __>@<version>.json`, never replaced), `skills/`, `changes/<author>/`. No
+  database file is ever written to the folder.
+- **Change file** `changes/<author>/<seq>.json`, written once (temporary file + rename, never replaced
+  or edited; a PC writes only its own author folder):
+  `{"format": "bi.vault.change/v1", "vault", "author", "seq": int, "clock": int, "at", "action":
+  "create" | "convert" | "import" | "commit_run" | "edit" | "decide_proposal" | "undo_import" |
+  "upgrade_schema" | "change", "run_id": str | null, "ops": [...]}`. `seq` = 1 + the highest of the
+  author; `clock` (Lamport) = 1 + the highest clock applied on this PC. Operations, with values as
+  JSON values (`null` = no value):
+  - `meta {key, base, value}` (schema binding, schema history);
+  - `import {id, filename, entity_type, at, by, run_id}`; `import_undone {id}`;
+  - `card {type, key, name, synthetic, new, version, delta, created, updated, created_by_import}`;
+  - `field {type, key, field, base, value, source: {kind, ref, by, at} | null, history: {kind, ref,
+    by, at, import_id, reason, old_source}}`; `base` is the value the change was made from;
+  - `propose {pkey, type, key, field, value, kind, ref, at, import_id, status}`; `proposal {pkey,
+    status}` (closed by an edit: `superseded`; `rejected`; `withdrawn` by an undo);
+  - `evidence {type, key, field, value, run_id, source_id, source_name, locator, excerpt, basis, at}`;
+  - `card_delete {type, key}`; `snapshot {...}` (dataset to vault: every card with its id, values,
+    history, proposals, evidence, imports and meta).
+  A proposal is named across PCs by `pkey` (`<author>/<seq>#p<n>`, `#c<n>` for a conflict,
+  `convert:<dataset>#p<id>`).
+- **How a write becomes a file.** A write to a vault dataset first syncs, then runs the store's own
+  method on the local `bi.sqlite` inside a transaction that is always rolled back; what it changed
+  becomes the file's operations, the file is written, and it is applied like any other file. The
+  store's refusals (`stale_edit`, `cards_changed`, `run_committed`, `preview_stale`, ...) are unchanged
+  and write no file. A write with no effect writes no file. A schema upgrade also copies the new
+  schema into `schemas/`.
+- **Sync.** Every valid file is applied in the order (clock, author, seq). Card ids are
+  `sha256("<type>\0<key>")[:12]` (a converted dataset keeps its ids), so two PCs with the same files
+  have identical tables. A new file whose key sorts before one already applied, or an applied file
+  that changed or vanished, rebuilds `bi.sqlite` from all files in one transaction. A file that is not
+  valid JSON or cannot be read is `incomplete` and retried on every sync; a file that is valid JSON but
+  not a change file (wrong name, author or seq not matching its path, missing clock, unknown operation)
+  is `bad`, skipped and reported; a file that fails while applying is rolled back alone and recorded
+  `failed`. The vault's own tables in `bi.sqlite`: `vault_applied` (file, author, seq, clock, sha256,
+  outcome), `vault_pkeys`, `vault_conflicts`.
+- **Conflicts** (nothing is dropped silently; all are in `status`):
+  - a `field` whose `base` is not the field's value at that point: if the field already holds the new
+    value nothing happens; otherwise a **pending proposal** (`ref` `vault:<author>/<seq>#<n>`, kind of
+    the change) and a conflict `field` with base, current, value, author and any evidence; decided
+    with the existing proposal route;
+  - a card created (`new`) whose type and key exist: one card and a conflict `merge`;
+  - a file whose `run_id` (or import id) was applied already: not applied, outcome `duplicate_run`
+    (`duplicate_import`) and a conflict of that kind;
+  - a `meta` whose base differs: not applied, conflict `meta`; a proposal decided twice: the first
+    decision stays, conflict `proposal`; an undo that would delete a card still holding values: kept,
+    conflict `delete_kept`; a write to a card deleted elsewhere: the card is recreated, `recreated`.
+  A card's version moves by the change's `delta` only when one of its values was applied.
+- **Routes** (JSON; errors `{"ok": false, "code", "message"}`):
+  - `GET /api/bi/vaults` → `{"vaults": [{"id", "dataset", "title", "purpose", "schema", "path",
+    "author", "reachable", "cards"}]}`.
+  - `POST /api/bi/vaults {"path": <existing parent folder, absolute>, "title", "purpose", "schema",
+    "author": str | null, "id": str | null, "segments": [str | {"folder", "label"}] | null,
+    "coverage": obj | null}` → `{"ok": true, "vault": {...}, "sync": <sync>}`. Creates
+    `<path>/<id>/` (id from the title plus 6 hex when not given), registers it and writes
+    `changes/<author>/1.json` with the schema binding. `author` defaults from the person's name.
+  - `POST /api/bi/vaults/join {"path": <the vault folder>, "author", "resume": bool}` → as create.
+    The same vault at a new path updates the registry. An author folder that already has files is
+    409 `author_taken` unless `resume` (the same person on a new PC). Schemas in `schemas/` are
+    installed.
+  - `POST /api/bi/vaults/<id>/sync {}` → `{"ok": true, "sync": {"applied", "rebuilt", "outcomes":
+    {outcome: n}, "conflicts": <new>, "bad": [{"file", "reason"}], "incomplete": [{"file",
+    "reason"}], "schema_problems", "files", "at"}}`.
+  - `GET /api/bi/vaults/<id>/status` → `{"vault", "reachable", "files", "applied", "behind",
+    "skipped": [{"file", "outcome", "detail"}], "conflicts": [{"id", "kind", "file", "card_id",
+    "field", "proposal_id", "open", "detail", "at"}], "merges": [...], "bad", "incomplete", "cards",
+    "clock", "last_sync"}`. Reads only.
+  - `POST /api/bi/vaults/convert {"dataset", "path", "title": default the dataset name, "purpose",
+    "author", "id"}` → as create plus `"dataset"`: a new vault bound to the dataset's schema whose
+    first file (`action: "convert"`) is one `snapshot`; the dataset itself is not changed.
+  - Errors: 400 `path_missing`, `path_invalid`, `title_missing`, `vault_id_invalid`, `author_invalid`,
+    `segments_invalid`, `coverage_invalid`, `vault_invalid` (no or a bad `vault.json`),
+    `dataset_invalid`; 404 `vault_unknown`, `schema_unknown`, `dataset_unknown`; 409 `vault_exists`,
+    `author_taken`, `vault_unreachable` (the folder cannot be read: every write and sync is refused),
+    `change_exists`.
+- **When it syncs.** Before every write to the vault and on `POST .../sync`; reads do not sync.
+  Plain datasets, subscribed datasets and demo are written exactly as before and get no vault tables.
+
 ## BI dataset sharing (slice 1, owner 2026-10-22)
 
 Design: `docs/proposals/BI_DATASET_SHARING.md` (§4, §6, §8.5 owner answers, §8.6 trimmed slice 1:

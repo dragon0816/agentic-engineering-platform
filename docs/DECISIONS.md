@@ -5379,3 +5379,21 @@ Owner review of the built BI ingest flow and answers the same day; design in `do
   approves INTERNAL in Settings (option a), the existing data-class gate stays.
 - **The 「匯入 CSV」 tab is removed**; 「方法」 is renamed 「擷取 Skill」 with built-ins; Sessions A and B are
   always visible.
+
+## 2026-10-28 — BI vault V4: writes are captured and replayed
+
+Implementation of `docs/phases/BI_VAULT.md` §3–§4 (backend and API, Claude Code).
+
+- **A vault is the dataset `vault-<id>`**, so every existing route works on it unchanged; its local copy is
+  `<workspace>/bi/vaults/<id>/`, and `vaults` and the `vault-` prefix are reserved for new datasets.
+- **Every write is captured and replayed.** The store's write methods run unchanged on the local database in a
+  transaction that is always rolled back; the rows they added or changed become one change file, which is
+  then applied like any other. The local database is therefore only ever a function of the change files, and
+  the non-vault path is untouched (one branch in `BiStore._db`). Rejected: rewriting each write method to
+  emit operations (six methods duplicated, easy to drift); committing locally and writing the file beside it
+  (the author's PC would hold uuid card ids and local proposal ids no other PC has).
+- **Deterministic ids**: a vault card's id is a hash of type and key; proposals are named across PCs by a
+  `pkey` kept in `vault_pkeys`. A conflict compares the field's value with the change's `base` (the value it
+  was made from), not the card version, so edits of different fields never conflict.
+- **Rebuild in place** (delete all rows and replay, one transaction) instead of replacing the file, so a
+  reader holding the file open on Windows does not break it.
