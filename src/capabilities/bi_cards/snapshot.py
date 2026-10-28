@@ -36,7 +36,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Literal
 
-from capabilities.bi_cards import catalog
+from capabilities.bi_cards import catalog, schema_versions
 from capabilities.bi_cards.schema import BI_PREFIX, SCHEMA_FILE, registry
 from capabilities.bi_cards.store import DB_FILE, SCHEMA, BiStore
 from common.assets import SECRET_FIELD, SECRET_PATTERN
@@ -933,7 +933,9 @@ def install_snapshot(snapshot: Snapshot, dest_dir: Path) -> InstalledSnapshot:
         )
         if target.exists():
             target.rmdir()
-        staging.replace(target)
+        # Waits out a virus scanner or the indexer briefly holding the new folder
+        # (seen once in the full suite on Windows).
+        schema_versions.replace(staging, target)
     except BaseException:
         shutil.rmtree(staging, ignore_errors=True)
         raise

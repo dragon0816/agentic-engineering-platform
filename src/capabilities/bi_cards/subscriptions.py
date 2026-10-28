@@ -38,7 +38,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import catalog
+from capabilities.bi_cards import catalog, schema_versions
 from capabilities.bi_cards import snapshot as snapshots
 from capabilities.bi_cards.snapshot import Snapshot
 from capabilities.bi_cards.store import (
@@ -94,7 +94,7 @@ def _write_json(path: Path, value: Any) -> None:
     temporary.write_text(
         json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    temporary.replace(path)
+    schema_versions.replace(temporary, path)
 
 
 def write_record(workspace: Path, dataset: str, record: dict[str, Any]) -> None:
@@ -142,7 +142,7 @@ class PreparedInstall:
             snapshots.install_snapshot(self.snapshot, staging)
             if target.exists():
                 shutil.rmtree(target)
-            staging.replace(target)
+            schema_versions.replace(staging, target)
             self._written.append(target)
             write_record(self.workspace, self.dataset, self.record)
             self._committed = True
