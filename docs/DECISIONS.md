@@ -5354,3 +5354,28 @@ preview must not need Excel or touch an open workbook).
 - **A run with failed chunks is `partial`** and can be reviewed and committed; only failed chunks are retried.
 - **The rule-path engine and Sessions A/B were built by subagents in worktrees** and cherry-picked after
   review and verification.
+
+## 2026-10-28 — BI vaults
+
+Owner review of the built BI ingest flow and answers the same day; design in `docs/phases/BI_VAULT.md`.
+
+- **A BI knowledge base becomes a vault**: one stated purpose, folders for 11 market segments and a shared
+  library (products, competitors, technologies), `VAULT.md`/`vault.json` at the root so the Agent finds it by
+  purpose. Cards are stored once per vault and name their segments in fields; folders are views.
+- **Collaboration through change files in a shared folder** (owner chose option 1). No VM is available and
+  172.25.228.141 is reachable only on the office LAN (not over the company VPN), so it cannot be the server
+  everyone writes to. Each maintainer only adds their own change files; each PC rebuilds its SQLite from the
+  folder in a total order (Lamport clock, author, seq); a change made from a stale base becomes a proposal.
+  Rejected: SQLite in OneDrive (corrupts with two writers, sync locks are not atomic); 141 as server (not
+  reachable outside the office); a relay such as Tailscale or Cloudflare Tunnel on the dual-homed 141 (would
+  open a path next to the company LAN; needs IT/security first); a personal cloud host (company data);
+  SharePoint List (needs an Azure AD app registration); Git (merge conflicts for non-engineers).
+- **Every source is converted to Markdown first**, kept and editable as revisions; tables keep the rule path
+  by default, the person may switch to AI (owner: follow the recommendation; Markdown editable).
+- **A real search index** (SQLite FTS5, trigram) replaces "no extra index" from `BI_INGEST.md` §2.
+- **Dashboard split**: AEP serves a coverage API and the segment x technology-area matrix; personal dashboards
+  live in Atlas with an 「在 Atlas 開啟」 button (owner: OK for now, wants the button).
+- **Permissions last**: no per-folder classification or new permission until the end; for testing the owner
+  approves INTERNAL in Settings (option a), the existing data-class gate stays.
+- **The 「匯入 CSV」 tab is removed**; 「方法」 is renamed 「擷取 Skill」 with built-ins; Sessions A and B are
+  always visible.

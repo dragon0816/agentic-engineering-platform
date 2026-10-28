@@ -3700,3 +3700,8 @@ s-k-20261011T102952` (not published).
     script end to end; scripted model). User guide `docs/guides/BI_BUILD.zh-TW.md`, linked from
     `docs/phases/BI_INGEST.md`. Not done: a real-provider benchmark run (owner runs
     `scripts/bi_ingest_benchmark.py run`), the domain owner's review of the expected answers.
+- [x] BI vault design `docs/phases/BI_VAULT.md` (2026-10-28, Claude Code; docs only): owner review of the
+  built flow, collaboration by change files in a shared folder, convert-to-Markdown, FTS5 index, coverage
+  matrix, Atlas button, phases V1–V8. Decision `docs/DECISIONS.md` 2026-10-28 "BI vaults".
+- [ ] Owner: answer `docs/phases/BI_VAULT.md` §8 (shared folder location, cards, `segments` name).
+- [ ] BI vault V1: Sessions A and B always visible, 「擷取 Skill」 with built-ins, remove 「匯入 CSV」, Atlas button.
