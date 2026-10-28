@@ -4593,7 +4593,7 @@ dataset, 400 `coverage_matrix_invalid` for a bad matrix.
 - **Cells** (`cells[]`, every segment x area in matrix order): `cards`, `types` (count per type),
   `sourced_share` (filled non-derived fields with a source reference or fact evidence / filled fields; null when
   none), `newest` (latest card update), `empty` (up to 5 `{field: "Type.field", cards}` most often empty,
-  placement fields excluded).
+  placement fields excluded), `card_list` (up to 200 `{id, name, type}` to open the cards).
 - `schema_missing_fields` lists `segment_field`/`area_field` when no type of the dataset's schema has them (every
   card is then unplaced until a schema version adds them).
 

@@ -83,6 +83,7 @@ def test_cards_are_placed_in_every_cell_they_name(tmp_path: Path) -> None:
         for area in ("wireless-comm", "rf"):
             cell = _cell(report, segment, area)
             assert cell["cards"] == 1 and cell["types"] == {"Technology": 1}
+            assert [c["name"] for c in cell["card_list"]] == ["Wi-Fi 7"]
             assert cell["sourced_share"] == 1.0  # every value came from a table cell
             assert cell["newest"]
     optical = _cell(report, "aidc-computing", "high-speed-io")
@@ -93,7 +94,7 @@ def test_cards_are_placed_in_every_cell_they_name(tmp_path: Path) -> None:
     assert "Technology.segments" not in [e["field"] for e in optical["empty"]]
     empty = _cell(report, "osat", "emc")
     assert empty == {"segment": "osat", "area": "emc", "cards": 0, "types": {},
-                     "sourced_share": None, "newest": None, "empty": []}  # fmt: skip
+                     "sourced_share": None, "newest": None, "empty": [], "card_list": []}  # fmt: skip
     assert report["totals"] == {"cards": 4, "no_segment": 2, "no_area": 1}
     assert report["unknown_values"] == {"Mars Base": 1}
     priority = [

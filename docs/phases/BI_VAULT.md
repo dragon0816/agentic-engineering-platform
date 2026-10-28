@@ -199,8 +199,8 @@ owner adds INTERNAL to the approval in Settings (no code change).
 | V1 | Page fixes: Session A and B always visible, 「擷取 Skill」 with built-ins, remove 「匯入 CSV」, Atlas button. **Done 2026-10-28** | — |
 | V2 | Convert to Markdown with editable revisions; extraction reads the Markdown | — |
 | V3 | FTS5 index and its status | V2 |
-| V4 | Vault folder, create/join, change files, ordered replay, conflicts as proposals, dataset-to-vault | V2 |
-| V5 | `segments`/`tech_areas`, coverage API, matrix on the Dashboard | V4 |
+| V4 | Vault folder, create/join, change files, ordered replay, conflicts as proposals, dataset-to-vault. **Backend, routes and the 「知識庫」 panel done 2026-10-28** | V2 |
+| V5 | `segments`/`tech_areas`, coverage API, matrix on the Dashboard. **Coverage API and matrix done 2026-10-28; the two fields are added per vault schema through Session A** | V4 |
 | V6 | `bi__query` finds vaults by purpose; snapshots carry evidence; 141 as backup and publisher | V4 |
 | V7 | Card list and detail redesign | owner §8.2 |
 | V8 | Permissions and per-folder classification | last |

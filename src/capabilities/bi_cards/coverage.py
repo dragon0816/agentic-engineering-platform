@@ -31,6 +31,8 @@ SHIPPED = Path(__file__).with_name("coverage_matrix.json")
 DATASET_FILE = "coverage.json"
 #: How many of a cell's most often empty fields are listed.
 EMPTY_SHOWN = 5
+#: How many of a cell's cards are named (to open them from the matrix).
+CARDS_SHOWN = 200
 
 
 def _invalid(message: str) -> BiStoreError:
@@ -169,9 +171,13 @@ def compute(
                         "sourced": 0,
                         "newest": None,
                         "empty": {},
+                        "ids": [],
                     },
                 )
                 cell["cards"] += 1
+                if len(cell["ids"]) < CARDS_SHOWN:
+                    cell["ids"].append({"id": card["id"], "name": card["name"],
+                                        "type": card["entity_type"]})  # fmt: skip
                 cell["types"][card["entity_type"]] = cell["types"].get(card["entity_type"], 0) + 1
                 cell["filled"] += len(filled)
                 cell["sourced"] += len(sourced)
@@ -194,6 +200,7 @@ def compute(
                         "sourced_share": None,
                         "newest": None,
                         "empty": [],
+                        "card_list": [],
                     }
                 )
                 continue
@@ -209,6 +216,7 @@ def compute(
                     else None,
                     "newest": found["newest"],
                     "empty": [{"field": k, "cards": n} for k, n in top],
+                    "card_list": found["ids"],
                 }
             )
     missing = [

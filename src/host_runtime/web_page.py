@@ -1098,6 +1098,15 @@ tr:last-child td { border-bottom: none; }
   text-align: left; }
 .bi-link:hover { color: var(--ink); }
 .bi-summary { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+.bi-cov { margin: 0 0 12px; }
+.bi-cov summary { cursor: pointer; }
+.bi-cov table { border-collapse: collapse; font-size: 13px; }
+.bi-cov th, .bi-cov td { border: 1px solid var(--line); padding: 4px 6px; text-align: center; }
+.bi-cov th[scope=row] { text-align: left; white-space: nowrap; }
+.bi-cov td button { min-width: 44px; min-height: 44px; border: 0; background: none;
+  color: inherit; font: inherit; cursor: pointer; }
+.bi-cov td.has { background: color-mix(in srgb, var(--good) 14%, transparent); }
+.bi-cov .prio { color: var(--warn); font-weight: 600; }
 .bi-stat { flex: 1 1 150px; min-width: 0; padding: 10px 14px; border: 1px solid var(--line);
   border-left: 4px solid var(--line); border-radius: 8px; background: var(--panel); }
 .bi-stat b { display: block; font-size: 24px; line-height: 1.2;
@@ -2368,6 +2377,12 @@ tr:last-child td { border-bottom: none; }
           </details>
           <span class="bi-meta" id="bi-atlas-state" role="status" aria-live="polite"></span>
         </div>
+        <details class="card bi-cov" id="bi-cov" open>
+          <summary><strong>應用領域 × 技術領域</strong>
+            <span class="bi-meta" id="bi-cov-sub"></span></summary>
+          <div id="bi-cov-body" aria-live="polite"></div>
+          <div id="bi-cov-cell" aria-live="polite"></div>
+        </details>
         <div class="mem-status" id="bi-status-dash" role="status" aria-live="polite" hidden></div>
         <div id="bi-dash-summary" class="bi-summary"></div>
         <div id="bi-dash-sections"></div>
@@ -2414,8 +2429,54 @@ tr:last-child td { border-bottom: none; }
         </nav>
         <div class="mem-status" id="bi-status-build" role="status" aria-live="polite" hidden></div>
         <section class="kp-stage card bi-step" data-stage="source" aria-labelledby="bi-b-source">
-          <h3 class="kp-stage-title" id="bi-b-source" tabindex="-1">步驟 1／6・來源</h3>
-          <p class="bi-meta" id="bi-b-target"></p>
+          <h3 class="kp-stage-title" id="bi-b-source" tabindex="-1">步驟 1／6・知識庫與來源</h3>
+          <div class="bi-ai" id="bi-b-vault" role="region" aria-labelledby="bi-b-vault-h">
+            <h4 id="bi-b-vault-h">知識庫</h4>
+            <p class="bi-meta">共用知識庫（vault）放在 SharePoint／OneDrive 同步的資料夾，
+              大家各自寫入自己的變更檔，不會互相覆蓋；一般資料集只在這台電腦。</p>
+            <div class="bi-step-grid">
+              <div><label class="bi-label" for="bi-b-ds">寫入哪個知識庫</label>
+                <select id="bi-b-ds"></select></div>
+            </div>
+            <p class="bi-meta" id="bi-b-target"></p>
+            <div id="bi-b-v-state" role="status" aria-live="polite"></div>
+            <div class="bi-actions">
+              <button class="bi-btn" id="bi-b-v-sync" type="button" hidden>立即同步</button>
+              <button class="bi-btn" id="bi-b-v-new" type="button" data-mode="new"
+                aria-expanded="false" aria-controls="bi-b-v-form">建立共用知識庫（vault）</button>
+              <button class="bi-btn" id="bi-b-v-join" type="button" data-mode="join"
+                aria-expanded="false" aria-controls="bi-b-v-form">加入既有的 vault</button>
+              <button class="bi-btn" id="bi-b-v-convert" type="button" data-mode="convert"
+                aria-expanded="false" aria-controls="bi-b-v-form">把這個資料集轉成 vault</button>
+            </div>
+            <form id="bi-b-v-form" class="bi-step" hidden novalidate>
+              <h4 id="bi-b-v-form-h"></h4>
+              <div class="bi-step-grid">
+                <div data-for="new"><label class="bi-label" for="bi-b-v-title">知識庫名稱</label>
+                  <input id="bi-b-v-title" class="bi-input" maxlength="120"
+                    placeholder="例如：市場訊號與產品對應"></div>
+                <div data-for="new convert"><label class="bi-label" for="bi-b-v-purpose">
+                  目的（Agent 依這段話判斷什麼問題該查它）</label>
+                  <input id="bi-b-v-purpose" class="bi-input" maxlength="1000"
+                    placeholder="例如：看市場需求與訊號，對應我們的產品與業務策略"></div>
+                <div data-for="new"><label class="bi-label" for="bi-b-v-schema">Schema</label>
+                  <select id="bi-b-v-schema"></select></div>
+                <div data-for="new convert join"><label class="bi-label" for="bi-b-v-path"
+                  id="bi-b-v-path-label">資料夾</label>
+                  <input id="bi-b-v-path" class="bi-input" maxlength="1000" spellcheck="false"
+                    placeholder="C:\Users\你\OneDrive - 公司\…"></div>
+                <div data-for="new convert join"><label class="bi-label" for="bi-b-v-author">
+                  你的作者名稱（變更檔放在這個名稱的資料夾；留空用登入名稱）</label>
+                  <input id="bi-b-v-author" class="bi-input" maxlength="40"></div>
+                <div data-for="join"><label><input id="bi-b-v-resume" type="checkbox">
+                  接續（我本人換電腦，沿用同一個作者名稱）</label></div>
+              </div>
+              <div class="bi-actions">
+                <button class="go" id="bi-b-v-go" type="submit">建立</button>
+                <button class="bi-btn" id="bi-b-v-cancel" type="button">取消</button></div>
+              <div id="bi-b-v-err" role="alert"></div>
+            </form>
+          </div>
           <div class="bi-step-grid">
             <div><label class="bi-label" for="bi-b-file">
               來源檔（CSV、TSV、Markdown、文字、Excel）</label>
@@ -10860,9 +10921,11 @@ async function biLoad() {
   biStatus("bi-status-bar", "loading", "載入中…");
   el("bi-counts").textContent = "…";
   try {
-    const [datasets, schemas] = await Promise.all([biCall("/api/bi/datasets"),
-      biCall("/api/bi/schemas").catch(() => ({schemas: bi.schemas}))]);
+    const [datasets, schemas, vaults] = await Promise.all([biCall("/api/bi/datasets"),
+      biCall("/api/bi/schemas").catch(() => ({schemas: bi.schemas})),
+      biCall("/api/bi/vaults").catch(() => ({vaults: bi.vaults || []}))]);
     bi.datasets = datasets.datasets || []; bi.schemas = schemas.schemas || [];
+    bi.vaults = vaults.vaults || [];
     biRenderBar();
     bi.schema = await biCall("/api/bi/schema?dataset=" + encodeURIComponent(biDataset()));
   } catch (failure) {
@@ -10941,7 +11004,9 @@ function biRenderBar() {
       option.textContent = biSubLabel(info, sub) + " · 唯讀";
       subscribed.append(option);
     } else {
-      option.textContent = info && info.schema ? name + " · " + biSchemaTitle(info.schema) : name;
+      const vault = biVaultOf(name);
+      option.textContent = vault ? "共用：" + (vault.title || vault.id) + "（vault）"
+        : info && info.schema ? name + " · " + biSchemaTitle(info.schema) : name;
       mine.append(option);
     }
   }
@@ -11075,6 +11140,94 @@ async function biLoadDashboard() {
   if (seq !== bi.dashSeq) return;
   biStatus("bi-status-dash", ""); bi.loaded.dashboard = true;
   biRenderDashboard(reply);
+  biLoadCoverage(seq);
+}
+
+// -- coverage: segment x technology area (BI vaults V5, BI_VAULT.md §6.2) -----
+async function biLoadCoverage(seq) {
+  const body = el("bi-cov-body"); body.replaceChildren(); el("bi-cov-cell").replaceChildren();
+  el("bi-cov-sub").textContent = "";
+  let report;
+  try {
+    report = await biCall("/api/bi/coverage?dataset=" + encodeURIComponent(biDataset()));
+  } catch (failure) {
+    if (seq !== bi.dashSeq) return;
+    body.append(bh("p", "bi-err", "覆蓋矩陣沒有載入：" + failure.message + "。"));
+    return;
+  }
+  if (seq !== bi.dashSeq) return;
+  biRenderCoverage(report);
+}
+
+function biRenderCoverage(report) {
+  const body = el("bi-cov-body"), m = report.matrix, totals = report.totals;
+  const source = {vault: "vault 的矩陣", dataset: "資料集的矩陣",
+    shipped: "預設矩陣（市場應用圖）"};
+  el("bi-cov-sub").textContent = "・" + (source[report.matrix_source] || "") + "・"
+    + totals.cards + " 張卡片，" + totals.no_segment + " 張沒有應用領域";
+  if (report.schema_missing_fields.length) {
+    body.append(bh("p", "bi-warn", "這個資料集的 schema 沒有 " + report.schema_missing_fields
+      .join("、") + " 欄位，所以卡片還放不進矩陣。在「建立與匯入」的 Schema 步驟請 Session A "
+      + "加上「應用領域（segments）」與「技術領域（tech_areas）」，發布並升級後再補標。"));
+  }
+  const segments = m.markets.flatMap((market) => market.segments);
+  const byKey = new Map(report.cells.map((c) => [c.segment + "|" + c.area, c]));
+  const table = bh("table", "");
+  table.setAttribute("aria-label", "應用領域 × 技術領域的卡片數");
+  const top = bh("tr", "", bh("th", "", ""));
+  for (const market of m.markets) {
+    const th = bh("th", "", market.label); th.colSpan = market.segments.length;
+    th.scope = "colgroup"; top.append(th);
+  }
+  const second = bh("tr", "", bh("th", "", ""));
+  for (const seg of segments) {
+    const th = bh("th", seg.priority ? "prio" : "", seg.label + (seg.priority ? "（重點）" : ""));
+    th.scope = "col"; second.append(th);
+  }
+  const rows = [top, second];
+  for (const area of m.areas) {
+    const head = bh("th", "", area.label); head.scope = "row";
+    const tr = bh("tr", "", head);
+    for (const seg of segments) {
+      const cell = byKey.get(seg.id + "|" + area.id) || {cards: 0};
+      const td = bh("td", cell.cards ? "has" : "");
+      const share = cell.sourced_share == null ? "" : "・有出處 "
+        + Math.round(cell.sourced_share * 100) + "%";
+      const button = bh("button", "", String(cell.cards));
+      button.type = "button";
+      button.setAttribute("aria-label", seg.label + " × " + area.label + "：" + cell.cards
+        + " 張" + share);
+      button.title = cell.cards + " 張" + share;
+      button.addEventListener("click", () => biCoverageCell(seg, area, cell));
+      td.append(button); tr.append(td);
+    }
+    rows.push(tr);
+  }
+  table.append(...rows);
+  body.append(bh("div", "bi-scroll", table));
+  const unknown = Object.entries(report.unknown_values || {});
+  if (unknown.length) {
+    body.append(bh("p", "bi-meta", "對不上矩陣的值："
+      + unknown.map(([v, n]) => v + "（" + n + "）").join("、")));
+  }
+}
+
+function biCoverageCell(seg, area, cell) {
+  const box = el("bi-cov-cell"); box.replaceChildren();
+  box.append(bh("h4", "", seg.label + " × " + area.label + "：" + cell.cards + " 張卡片"));
+  if (!cell.cards) {
+    box.append(bh("p", "bi-meta", "這一格還沒有卡片。"));
+    return;
+  }
+  box.append(bh("p", "bi-meta", "有出處的欄位比例："
+    + (cell.sourced_share == null ? "—" : Math.round(cell.sourced_share * 100) + "%")
+    + "・最近更新 " + biTime(cell.newest)));
+  if (cell.empty.length) {
+    box.append(bh("p", "bi-meta", "最常空著的欄位：" + cell.empty.map((e) => e.field + "（"
+      + e.cards + " 張）").join("、")));
+  }
+  box.append(bh("ul", "", ...cell.card_list.map((c) => bh("li", "",
+    biButton(biTypeLabel(c.type) + "・" + c.name, () => biOpenCard(c.id), "bi-link")))));
 }
 
 function biRenderDashboard(reply) {
@@ -11623,7 +11776,8 @@ async function biBuildLoad() {
   bi.build.run = null; bi.build.candidates = []; bi.build.candidateId = null;
   const schema = bi.schema || {};
   el("bi-b-target").textContent = "寫入目的地：資料集「" + biDataset() + "」・schema "
-    + (schema.ref || schema.schema_id || "—") + "。換資料集請用上方的資料集選單。";
+    + (schema.ref || schema.schema_id || "—") + "。";
+  biBuildVault().catch((failure) => biNotice(false, "知識庫狀態沒有載入：" + failure.message));
   const select = el("bi-b-entity"), keep = select.value;
   select.replaceChildren(bh("option", "", "自動判斷"));
   select.firstChild.value = "";
@@ -11642,6 +11796,146 @@ async function biBuildLoad() {
   }
   biBuildStage(stored.stage || "source", false);
 }
+
+// -- step 1: the knowledge base (BI vaults V4, docs/phases/BI_VAULT.md §3, §7.1) --
+// A vault is the dataset `vault-<id>`, kept in a synced shared folder; every
+// write becomes one change file of this author. Opening the step syncs it, so
+// what others wrote is shown; status names conflicts and unreadable files.
+const BI_VAULT_PARENT = "放在哪個資料夾底下（SharePoint／OneDrive 同步的資料夾）";
+const BI_VAULT_MODES = {
+  new: ["建立共用知識庫（vault）", "建立", BI_VAULT_PARENT],
+  join: ["加入既有的 vault", "加入", "vault 資料夾（裡面有 vault.json）"],
+  convert: ["把這個資料集轉成 vault", "轉換", BI_VAULT_PARENT],
+};
+
+function biVaultOf(name) {
+  return (bi.vaults || []).find((v) => v.dataset === name) || null;
+}
+
+async function biBuildVault() {
+  const reply = await call("/api/bi/vaults");
+  bi.vaults = reply.vaults || [];
+  const pick = el("bi-b-ds"); pick.replaceChildren();
+  for (const item of bi.datasets.filter((d) => !d.read_only)) {
+    const vault = biVaultOf(item.name);
+    const option = bh("option", "", vault ? "共用：" + (vault.title || vault.id) + "（vault）"
+      : item.name + (item.schema ? " · " + biSchemaTitle(item.schema) : ""));
+    option.value = item.name; pick.append(option);
+  }
+  if (![...pick.options].some((o) => o.value === biDataset())) {
+    const option = bh("option", "", biDataset()); option.value = biDataset(); pick.append(option);
+  }
+  pick.value = biDataset();
+  const vault = biVaultOf(biDataset());
+  el("bi-b-v-sync").hidden = !vault;
+  el("bi-b-v-convert").hidden = Boolean(vault) || !bi.datasets.some((d) => d.name === biDataset());
+  const box = el("bi-b-v-state"); box.replaceChildren();
+  if (!vault) {
+    box.append(bh("p", "bi-meta", "這是只在這台電腦的資料集。要和同事一起維護，請建立或加入 vault，"
+      + "或把它轉成 vault。"));
+    return;
+  }
+  try { await biCall("/api/bi/vaults/" + vault.id + "/sync", {}); }
+  catch (failure) { box.append(bh("p", "bi-warn", "沒有同步：" + failure.message + "。")); }
+  biVaultState(await call("/api/bi/vaults/" + vault.id + "/status"));
+}
+
+function biVaultState(state) {
+  const box = el("bi-b-v-state"), v = state.vault || {};
+  box.replaceChildren();
+  const open = (state.conflicts || []).filter((c) => c.open).length;
+  box.append(bh("p", "", bh("strong", "", v.title || v.id), "・" + (v.purpose || "（沒有寫目的）")),
+    bh("p", "bi-meta", "共用資料夾：" + v.path + "・你的作者名稱：" + v.author),
+    bh("p", state.reachable ? "bi-meta" : "bi-warn", state.reachable
+      ? "已套用 " + state.applied + "／" + state.files + " 個變更檔"
+        + (state.behind ? "・還有 " + state.behind + " 個沒套用" : "")
+        + "・" + state.cards + " 張卡片・上次同步 "
+        + (state.last_sync ? biTime(state.last_sync) : "—")
+      : "現在讀不到共用資料夾（OneDrive 沒有同步或路徑不對）：可以看卡片，但不能寫入。"));
+  if ((state.conflicts || []).length) {
+    box.append(bh("p", open ? "bi-warn" : "bi-meta", "衝突 " + state.conflicts.length + " 筆（"
+      + open + " 筆待決定）：兩個人從同一個舊值改了同一個欄位，後送的變成卡片上的待審提議，"
+      + "請到卡片上決定。"));
+  }
+  if ((state.merges || []).length) {
+    box.append(bh("p", "bi-warn", "合併提示 " + state.merges.length + " 筆："
+      + "同一張卡被兩個人各建了一次，已合成一張；不同的值在卡片上變成待審提議。"));
+  }
+  const problems = [...(state.bad || []), ...(state.incomplete || [])];
+  if (problems.length) {
+    box.append(bh("p", "bi-warn", "有 " + problems.length + " 個變更檔還不能讀（可能還在同步）："
+      + problems.map((p) => p.file || p).slice(0, 5).join("、")));
+  }
+}
+
+el("bi-b-ds").addEventListener("change", () => {
+  const select = el("bi-dataset");
+  select.value = el("bi-b-ds").value; select.dispatchEvent(new Event("change"));
+});
+el("bi-b-v-sync").addEventListener("click", async () => {
+  const vault = biVaultOf(biDataset()); if (!vault) return;
+  try {
+    const report = (await biCall("/api/bi/vaults/" + vault.id + "/sync", {})).sync || {};
+    biVaultState(await call("/api/bi/vaults/" + vault.id + "/status"));
+    biNotice(true, "已同步" + (report.rebuilt ? "（依所有變更檔重建）" : "") + "。");
+    bi.loaded = {}; biRefreshCounts();
+  } catch (failure) { biNotice(false, "沒有同步：" + failure.message); }
+});
+
+function biVaultForm(mode) {
+  const form = el("bi-b-v-form"), same = !form.hidden && form.dataset.mode === mode;
+  for (const id of ["bi-b-v-new", "bi-b-v-join", "bi-b-v-convert"]) {
+    el(id).setAttribute("aria-expanded", String(!same && el(id).dataset.mode === mode));
+  }
+  if (same) { form.hidden = true; return; }
+  const [title, go, pathLabel] = BI_VAULT_MODES[mode];
+  form.dataset.mode = mode; form.hidden = false;
+  el("bi-b-v-form-h").textContent = title; el("bi-b-v-go").textContent = go;
+  el("bi-b-v-path-label").textContent = pathLabel; el("bi-b-v-err").replaceChildren();
+  for (const box of form.querySelectorAll("[data-for]")) {
+    box.hidden = !box.dataset.for.split(" ").includes(mode);
+  }
+  const schema = el("bi-b-v-schema"); schema.replaceChildren();
+  for (const item of bi.schemas || []) {
+    const option = bh("option", "", (item.title || item.id) + "（" + item.ref + "）");
+    option.value = item.ref; schema.append(option);
+  }
+  if ((bi.schema || {}).ref) schema.value = bi.schema.ref;
+  el(mode === "new" ? "bi-b-v-title" : "bi-b-v-path").focus();
+}
+
+for (const id of ["bi-b-v-new", "bi-b-v-join", "bi-b-v-convert"]) {
+  el(id).addEventListener("click", () => biVaultForm(el(id).dataset.mode));
+}
+el("bi-b-v-cancel").addEventListener("click", () => biVaultForm(el("bi-b-v-form").dataset.mode));
+el("bi-b-v-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const mode = el("bi-b-v-form").dataset.mode, err = el("bi-b-v-err"); err.replaceChildren();
+  const body = {path: el("bi-b-v-path").value.trim(), author: el("bi-b-v-author").value.trim()};
+  if (!body.path) { err.append(bh("p", "bi-err", "請填資料夾路徑。")); return; }
+  if (mode === "new") {
+    Object.assign(body, {title: el("bi-b-v-title").value.trim(),
+      purpose: el("bi-b-v-purpose").value.trim(), schema: el("bi-b-v-schema").value});
+    if (!body.title) { err.append(bh("p", "bi-err", "請填知識庫名稱。")); return; }
+  }
+  if (mode === "convert") {
+    Object.assign(body, {dataset: biDataset(), purpose: el("bi-b-v-purpose").value.trim()});
+  }
+  if (mode === "join") body.resume = el("bi-b-v-resume").checked;
+  const button = el("bi-b-v-go"); button.disabled = true;
+  try {
+    const path = {new: "/api/bi/vaults", join: "/api/bi/vaults/join",
+      convert: "/api/bi/vaults/convert"}[mode];
+    const reply = await biCall(path, body);
+    el("bi-b-v-form").hidden = true;
+    biNotice(true, {new: "已建立", join: "已加入", convert: "已轉成"}[mode] + "共用知識庫「"
+      + (reply.vault.title || reply.vault.id) + "」：" + reply.vault.path
+      + (mode === "convert" ? "（原本的資料集沒有改動）" : ""));
+    bi.want = reply.vault.dataset; await biLoad();
+  } catch (failure) {
+    err.append(bh("p", "bi-err", failure.message + "。"));
+  } finally { button.disabled = false; }
+});
 
 // -- step 1: sources ---------------------------------------------------------
 async function biBuildSources() {

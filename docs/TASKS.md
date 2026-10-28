@@ -3724,7 +3724,14 @@ s-k-20261011T102952` (not published).
 - [x] BI vault V5 backend (2026-10-28, Claude Code): contract "BI coverage: segment x technology area";
   `coverage.py` + shipped `coverage_matrix.json` (the owner's chart), `/api/bi/coverage`, store
   `fact_evidence()`; `tests/test_bi_coverage.py` (4). Dashboard matrix page not built yet.
-- [ ] BI vault V4 page: step 「知識庫」 (choose, create, join, convert, sync, status with conflicts and merge
+- [x] BI vault V4 page: step 「知識庫」 (choose, create, join, convert, sync, status with conflicts and merge
   flags) on the V4 routes.
+  - [x] 2026-10-28, Claude Code: a 「知識庫」 panel at the top of step 1 (renamed 「知識庫與來源」): pick the
+    target (vaults labelled 「共用：…（vault）」, also in the BI bar), create / join (with 「接續」) / convert
+    forms, sync on opening the step and 「立即同步」, status (applied/behind, cards, last sync, conflicts
+    with open count, merge flags, unreadable files, unreachable folder). Dashboard: the segment x area
+    matrix (`/api/bi/coverage`, cells open their summary and card list; a note when the schema has no
+    placement fields). `tests/test_bi_vault_ui.py` (browser, temporary folder as the shared folder). Guide
+    §3.0 and §9.5.
 - [ ] BI vault V4 follow-ups: show the `merge` flag on the card detail; sync on a timer or on page open;
   incremental scan (today every sync reads every change file); sources into the vault's folders.
