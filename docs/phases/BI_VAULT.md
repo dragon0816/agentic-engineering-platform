@@ -2,8 +2,8 @@
 
 > **Status.** Design for the owner's review, 2026-10-28 (Claude Code). Nothing below is implemented. It
 > follows the owner's review of the built BI ingest flow (`docs/phases/BI_INGEST.md`, phases 1–7) and the
-> owner's answers of 2026-10-28, recorded in `docs/DECISIONS.md` "2026-10-28 — BI vaults". Sections marked
-> **Open** wait for the owner.
+> owner's answers of 2026-10-28, recorded in `docs/DECISIONS.md` "2026-10-28 — BI vaults"; the owner's
+> answers to §8 are in §8.
 >
 > **Builds on.** `docs/phases/BI_INGEST.md` (runs, candidates, evidence, review, commit, Sessions A and B),
 > `docs/CONTRACTS.md` "BI cards API and capability", "BI dataset sharing", and the existing `bi__query` tool.
@@ -31,7 +31,7 @@ original file ──convert──▶ Markdown ──schema + extraction Skill─
 | No convert-to-Markdown step; no search index | Tables went to the rule path and text to the model directly; search scans the cards | Every source becomes Markdown first, kept and editable (§5); a real index (§6) |
 | No AI session for the schema | Session A existed only inside an opened draft | Session A is always visible in the schema step (§7.1) |
 | The extraction Skill cannot be chosen or adjusted | Called 「方法」, empty list until one is made, Session B hidden until then | Named 「擷取 Skill」, two built-ins always listed, Session B always visible (§7.1) |
-| A card shows nothing meaningful | The list shows type, name, key and a field count only | **Open**: waits for the owner's card discussion (§8) |
+| A card shows nothing meaningful | The list shows type, name, key and a field count only | Later, from the owner's ideas (§8.2, V7) |
 | What is 「匯入 CSV」 for | The 2026-10-21 import, now duplicated by 「建立與匯入」 | Removed (§7.1) |
 
 ## 3. Collaboration: change files in a shared folder (owner's choice, option 1)
@@ -165,18 +165,17 @@ The 「匯入 CSV」 tab is removed.
 
 ### 7.2 Cards
 
-**Open** until the owner's card discussion (§8). Proposed: each list row shows a one-line point (summary,
+Waits for the owner's ideas (§8.2). Proposed so far: each list row shows a one-line point (summary,
 so-what or one-liner by type) and two or three key fields; the detail shows the point, key fields, related
 cards as links, the evidence with quotes, then empty fields.
 
-## 8. Open questions for the owner
+## 8. Owner answers (2026-10-28)
 
-1. **Where is the shared folder?** A Teams/SharePoint library is preferred; a person's OneDrive folder
-   ties the vault to that person.
-2. **Cards**: what a card should show first, and whether "our product options" needs its own card type or
-   TestSolution (with `vendor`) is enough.
-3. `segments` as the name for the chart's 11 columns (UI: 「應用領域」), so they are not confused with
-   Application cards.
+1. **Shared folder: SharePoint**, where RS_Knowledge already lives, synced by the OneDrive client. The vault
+   path is a setting; tests use temporary folders. Writing into the real SharePoint folder follows the
+   standing rule: only with the owner present, after a backup and the owner's confirmation.
+2. **Cards: unchanged for now.** The owner will bring ideas later; V7 waits for them.
+3. **`segments`** (UI: 「應用領域」) is accepted.
 
 ## 9. Agent use and sharing
 
@@ -199,8 +198,8 @@ owner adds INTERNAL to the approval in Settings (no code change).
 | V1 | Page fixes: Session A and B always visible, 「擷取 Skill」 with built-ins, remove 「匯入 CSV」, Atlas button and Setting | — |
 | V2 | Convert to Markdown with editable revisions; extraction reads the Markdown | — |
 | V3 | FTS5 index and its status | V2 |
-| V4 | Vault folder, create/join, change files, ordered replay, conflicts as proposals, dataset-to-vault | V2, owner §8.1 |
-| V5 | `segments`/`tech_areas`, coverage API, matrix on the Dashboard | V4, owner §8.3 |
+| V4 | Vault folder, create/join, change files, ordered replay, conflicts as proposals, dataset-to-vault | V2 |
+| V5 | `segments`/`tech_areas`, coverage API, matrix on the Dashboard | V4 |
 | V6 | `bi__query` finds vaults by purpose; snapshots carry evidence; 141 as backup and publisher | V4 |
 | V7 | Card list and detail redesign | owner §8.2 |
 | V8 | Permissions and per-folder classification | last |
