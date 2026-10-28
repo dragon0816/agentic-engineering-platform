@@ -2371,8 +2371,8 @@ tr:last-child td { border-bottom: none; }
             在 Atlas 開啟個人 Dashboard</button>
           <details id="bi-atlas-set"><summary>Atlas 位址</summary>
             <label class="bi-label" for="bi-atlas-url">Atlas 的網址（只存在這個瀏覽器）</label>
-            <input id="bi-atlas-url" class="bi-input" type="url" maxlength="300"
-              placeholder="http://127.0.0.1:8127">
+            <input id="bi-atlas-url" class="bi-input" type="text" maxlength="300"
+              placeholder="127.0.0.1:8127">
             <button class="bi-btn" id="bi-atlas-save" type="button">儲存</button>
           </details>
           <span class="bi-meta" id="bi-atlas-state" role="status" aria-live="polite"></span>
@@ -11411,7 +11411,10 @@ function biRenderCards() {
 // Personal dashboards live in Atlas (docs/phases/BI_VAULT.md §6.3). Its address
 // is a per-browser preference; a no-cors request only tells whether something
 // answers there, so a stopped Atlas is named instead of opening a dead tab.
-const BI_ATLAS_KEY = "bi-atlas-url", BI_ATLAS_DEFAULT = "http://127.0.0.1:8127";
+// The default is the loopback Atlas on the page's own scheme; the page names
+// no outside address (test_the_page_fetches_nothing_from_anywhere).
+const BI_ATLAS_KEY = "bi-atlas-url";
+const BI_ATLAS_DEFAULT = location.protocol + "//127.0.0.1:8127";
 
 function biAtlasUrl() {
   let saved = "";
@@ -11421,9 +11424,10 @@ function biAtlasUrl() {
 
 el("bi-atlas-set").addEventListener("toggle", () => { el("bi-atlas-url").value = biAtlasUrl(); });
 el("bi-atlas-save").addEventListener("click", () => {
-  const value = el("bi-atlas-url").value.trim();
+  let value = el("bi-atlas-url").value.trim();
+  if (value && !/^[a-z]+:/i.test(value)) value = location.protocol + "//" + value;
   if (value && !/^https?:\/\/[^\s]+$/i.test(value)) {
-    el("bi-atlas-state").textContent = "網址要以 http:// 或 https:// 開頭。"; return;
+    el("bi-atlas-state").textContent = "網址要用 http 或 https。"; return;
   }
   try {
     if (value) localStorage.setItem(BI_ATLAS_KEY, value);
@@ -12474,8 +12478,12 @@ function biMethodDiff(diff) {
 }
 
 async function biBuildOpenMethod(id, fill) {
+  // Newest request only: a reload started before a save must not paint the
+  // older revision over the new one (seen under load in the full suite).
+  const seq = bi.build.methodSeq = (bi.build.methodSeq || 0) + 1;
   const view = await call("/api/bi/methods/" + id + "?dataset="
     + encodeURIComponent(biDataset()));
+  if (seq !== bi.build.methodSeq) return;
   bi.build.method = view;
   el("bi-b-m-box").hidden = false; el("bi-b-m-save").hidden = false;
   const doc = view.document, info = el("bi-b-m-info"); info.replaceChildren();
@@ -12514,6 +12522,7 @@ async function biBuildOpenMethod(id, fill) {
       }, "bi-btn", "回復到第 " + r.rev + " 版")))));
   const found = await call("/api/bi/sessions?dataset=" + encodeURIComponent(biDataset())
     + "&target=" + encodeURIComponent("method:" + id));
+  if (seq !== bi.build.methodSeq) return;
   bi.build.sessB = (found.sessions || [])[0] || null;
   biBuildSessionLog("bi-b-sb-log", bi.build.sessB, biBuildApplyMethod);
   biSessBTarget();
