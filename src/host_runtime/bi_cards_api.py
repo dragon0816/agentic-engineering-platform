@@ -50,6 +50,7 @@ from urllib.parse import ParseResult, parse_qs
 from capabilities.bi_cards import (
     ai_runs,
     catalog,
+    coverage,
     dashboard,
     importer,
     methods,
@@ -180,6 +181,12 @@ def _route(
                     "sections": [],
                 }
             return 200, dashboard.dashboard(store, str(query.get("domain") or "robotics"))
+        if path == "/api/bi/coverage":
+            # Segment x technology area (BI vaults §6.2), read only.
+            matrix, origin = coverage.matrix_for(workspace, store.dataset)
+            types = [t for t in str(query.get("types") or "").split(",") if t] or None
+            report = coverage.compute(store, catalog.for_store(store), matrix, types=types)
+            return 200, {**report, "matrix_source": origin, "dataset": store.dataset}
         if path == "/api/bi/sources":
             return 200, {"sources": Staging(workspace, store.dataset).sources()}
         if path == "/api/bi/schema-drafts":
@@ -606,7 +613,7 @@ CONFLICTS = {
 }
 
 #: The GET routes that read one dataset (besides `/api/bi/cards/<id>[/history]`).
-DATASET_READS = ("/api/bi/cards", "/api/bi/dashboard", "/api/bi/schema")
+DATASET_READS = ("/api/bi/cards", "/api/bi/dashboard", "/api/bi/schema", "/api/bi/coverage")
 
 
 def _unknown_dataset(store: BiStore, path: str, query: Mapping[str, str]) -> bool:

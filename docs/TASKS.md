@@ -3721,6 +3721,9 @@ s-k-20261011T102952` (not published).
   (`vault-<id>` datasets, every write captured and replayed), routes `/api/bi/vaults*`;
   `tests/test_bi_vault.py` (11 tests, two or three PCs). Decision `docs/DECISIONS.md` 2026-10-28 "BI vault
   V4: writes are captured and replayed". Page not built.
+- [x] BI vault V5 backend (2026-10-28, Claude Code): contract "BI coverage: segment x technology area";
+  `coverage.py` + shipped `coverage_matrix.json` (the owner's chart), `/api/bi/coverage`, store
+  `fact_evidence()`; `tests/test_bi_coverage.py` (4). Dashboard matrix page not built yet.
 - [ ] BI vault V4 page: step 「知識庫」 (choose, create, join, convert, sync, status with conflicts and merge
   flags) on the V4 routes.
 - [ ] BI vault V4 follow-ups: show the `merge` flag on the card detail; sync on a timer or on page open;

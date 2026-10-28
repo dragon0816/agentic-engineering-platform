@@ -712,6 +712,19 @@ class BiStore:
             else:
                 result.unchanged += 1
 
+    def fact_evidence(self) -> set[tuple[str, str]]:
+        """Every (card id, field) with evidence marked as fact (coverage)."""
+        if not self.exists:
+            return set()
+        with self._db() as db:
+            try:
+                rows = db.execute(
+                    "SELECT DISTINCT card_id, field FROM evidence WHERE basis = 'fact'"
+                )
+                return {(r["card_id"], r["field"]) for r in rows}
+            except sqlite3.OperationalError:  # a dataset from before ingest runs
+                return set()
+
     def evidence(self, card_id: str) -> list[dict[str, Any]]:
         """The evidence recorded for a card's values, newest first."""
         if not self.exists:

@@ -4574,6 +4574,29 @@ folder; a test helper plays OneDrive). Backend and API only; the page comes late
 - **When it syncs.** Before every write to the vault and on `POST .../sync`; reads do not sync.
   Plain datasets, subscribed datasets and demo are written exactly as before and get no vault tables.
 
+## BI coverage: segment x technology area (BI vaults phase V5, 2026-10-28)
+
+`GET /api/bi/coverage?dataset=<name>[&types=A,B]` reads a dataset (own, subscribed or vault) and answers how
+its cards cover a matrix (`docs/phases/BI_VAULT.md` §6.2). Read only; 404 `dataset_unknown` for an unknown
+dataset, 400 `coverage_matrix_invalid` for a bad matrix.
+
+- **Matrix** `aep.bi.coverage_matrix/v1`: `markets[]` (`id`, `label`, optional `emc`, `segments[]` with `id`,
+  `label`, optional `priority`, `aliases`), `areas[]` (`id`, `label`, optional `owner`), `segment_field`
+  (default `segments`), `area_field` (default `tech_areas`). Ids are unique; a segment belongs to one market.
+  Taken from the vault's `vault.json` `coverage` block, else `<dataset>/coverage.json`, else the shipped
+  `capabilities/bi_cards/coverage_matrix.json` (the owner's chart: 5 markets, 11 segments whose ids are the
+  vault's default folders, 6 of them priority, 5 areas). `matrix_source` says which.
+- **Placement**: a card's `segment_field` and `area_field` values match a segment or area by id, label or alias
+  (loosely: no spaces, punctuation or case). A card counts in every segment x area pair it names. Values that
+  name nothing are counted in `unknown_values`; cards with no segment or no area in `totals.no_segment` /
+  `totals.no_area`. Nothing is guessed.
+- **Cells** (`cells[]`, every segment x area in matrix order): `cards`, `types` (count per type),
+  `sourced_share` (filled non-derived fields with a source reference or fact evidence / filled fields; null when
+  none), `newest` (latest card update), `empty` (up to 5 `{field: "Type.field", cards}` most often empty,
+  placement fields excluded).
+- `schema_missing_fields` lists `segment_field`/`area_field` when no type of the dataset's schema has them (every
+  card is then unplaced until a schema version adds them).
+
 ## BI dataset sharing (slice 1, owner 2026-10-22)
 
 Design: `docs/proposals/BI_DATASET_SHARING.md` (§4, §6, §8.5 owner answers, §8.6 trimmed slice 1:
