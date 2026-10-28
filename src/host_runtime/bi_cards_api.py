@@ -64,12 +64,13 @@ from capabilities.bi_cards.store import (
     DATASET_RE,
     DEFAULT_DATASET,
     READ_ONLY_MESSAGE,
+    VAULT_PREFIX,
     BiStore,
     BiStoreError,
     datasets,
     is_subscribed,
 )
-from host_runtime import bi_subscriptions
+from host_runtime import bi_subscriptions, bi_vaults_api
 
 #: A CSV travels in the JSON body; larger than an ordinary request.
 MAX_BI_BODY_BYTES = 8 * 1024 * 1024
@@ -107,6 +108,9 @@ def route(
         if path == "/api/bi/subscriptions" or path.startswith("/api/bi/subscriptions/"):
             given = body if isinstance(body, dict) else {}
             return bi_subscriptions.route(workspace, platform, method, path, query, given)
+        if path == bi_vaults_api.PREFIX or path.startswith(bi_vaults_api.PREFIX + "/"):
+            given = body if isinstance(body, dict) else {}
+            return bi_vaults_api.route(workspace, actor, method, path, query, given)
         return _route(workspace, actor, method, path, query, body, ai)
     except catalog.SchemaInstallError as error:
         # An installed id@version is immutable: different content is a conflict.
@@ -595,6 +599,10 @@ CONFLICTS = {
     "schema_changed",
     "suggestion_applied",
     "suggestion_invalid",
+    "vault_exists",
+    "vault_unreachable",
+    "author_taken",
+    "change_exists",
 }
 
 #: The GET routes that read one dataset (besides `/api/bi/cards/<id>[/history]`).
@@ -613,6 +621,9 @@ def _create_dataset(workspace: Path, given: dict[str, Any]) -> Answer:
     name = str(given.get("name") or "").strip()
     if not DATASET_RE.match(name):
         return _error(400, "dataset_invalid", "資料集名稱只能用英文字母、數字、- 與 _，1–40 個字")
+    if name.lower().startswith(VAULT_PREFIX):
+        # `vault-<id>` names a shared vault (BI vaults V4); create one with /api/bi/vaults.
+        return _error(400, "dataset_invalid", f"「{VAULT_PREFIX}」開頭的名稱保留給知識庫，請換一個")
     store = BiStore(workspace, name)  # refuses a reserved name
     if any(other.lower() == name.lower() and other != name for other in datasets(workspace)):
         return _error(409, "dataset_exists", f"已經有名稱相同（只差大小寫）的資料集「{name}」")

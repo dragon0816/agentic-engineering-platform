@@ -28,6 +28,14 @@ owner 2026-10-22) is named `<namespace>/<name>` and lives under
 `<workspace>/bi/subscribed/<namespace>__<name>/`; `subscription.json` there
 names the installed version, whose `<version>/bi.sqlite` is opened read
 only. Every write to it is refused as `dataset_read_only`.
+
+A vault (BI vaults phase V4, `docs/phases/BI_VAULT.md` §3, §4) registered on
+this PC in `<workspace>/bi/vaults/registry.json` is the dataset
+`vault-<vault id>`, kept under `<workspace>/bi/vaults/<vault id>/`. Its
+`bi.sqlite` is rebuilt from the vault's shared change files: every write goes
+through `vault.capture`, which turns it into one change file and applies that
+file, so the local database is always a function of the files. Every other
+dataset is written exactly as before.
 """
 
 from __future__ import annotations
@@ -52,9 +60,14 @@ LEGACY_SCHEMA = "bi.schema/v1.1@1.1.0"
 #: `<workspace>/bi/schemas/` holds installed schema files and
 #: `<workspace>/bi/subscribed/` the subscribed datasets, so no dataset may use them.
 SUBSCRIBED_DIR = "subscribed"
+#: `<workspace>/bi/vaults/` holds the registry and each vault's local copy.
+VAULTS_DIR = "vaults"
+#: A registered vault is the dataset `vault-<vault id>`.
+VAULT_PREFIX = "vault-"
+VAULT_REGISTRY = "registry.json"
 #: `schema-drafts` and `benchmarks` hold schema drafts and benchmark reports
 #: (BI ingest, 2026-10-28).
-RESERVED_DATASETS = {"schemas", SUBSCRIBED_DIR, "schema-drafts", "benchmarks"}
+RESERVED_DATASETS = {"schemas", SUBSCRIBED_DIR, "schema-drafts", "benchmarks", VAULTS_DIR}
 #: A subscribed dataset as the platform names it: `<namespace>/<name>`.
 SUBSCRIBED_RE = re.compile(r"^([a-z0-9]+(?:-[a-z0-9]+)*)/([a-z0-9]+(?:-[a-z0-9]+)*)$")
 SUBSCRIPTION_FILE = "subscription.json"
@@ -187,6 +200,29 @@ def subscribed_datasets(workspace: Path) -> list[str]:
     return found
 
 
+def vault_registry(workspace: Path) -> list[dict[str, Any]]:
+    """The vaults this PC uses: `[{"id", "path", "author", ...}]` (empty when none)."""
+    path = workspace / "bi" / VAULTS_DIR / VAULT_REGISTRY
+    try:
+        record = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    items = record.get("vaults") if isinstance(record, dict) else None
+    if not isinstance(items, list):
+        return []
+    return [i for i in items if isinstance(i, dict) and isinstance(i.get("id"), str)]
+
+
+def vault_of(workspace: Path, dataset: str) -> str | None:
+    """The vault id of a `vault-<id>` dataset registered on this PC; None otherwise."""
+    if not dataset.startswith(VAULT_PREFIX):
+        return None
+    vault_id = dataset[len(VAULT_PREFIX) :]
+    if any(item["id"] == vault_id for item in vault_registry(workspace)):
+        return vault_id
+    return None
+
+
 def dataset_dir(workspace: Path, dataset: str) -> Path:
     if is_subscribed(dataset):
         record = subscription_record(workspace, dataset) or {}
@@ -196,6 +232,9 @@ def dataset_dir(workspace: Path, dataset: str) -> Path:
         return root / version if re.fullmatch(r"\d+\.\d+\.\d+", version) else root / "none"
     if not DATASET_RE.match(dataset):
         raise BiStoreError("dataset_invalid", "資料集名稱只能用英數字、-、_，最多 40 個字")
+    vault_id = vault_of(workspace, dataset)
+    if vault_id is not None:
+        return workspace / "bi" / VAULTS_DIR / vault_id
     if dataset.lower() in RESERVED_DATASETS:
         raise BiStoreError("dataset_invalid", f"「{dataset}」是保留名稱，請換一個資料集名稱")
     return workspace / "bi" / dataset
@@ -205,11 +244,15 @@ def datasets(workspace: Path) -> list[str]:
     root = workspace / "bi"
     if not root.is_dir():
         return []
-    return sorted(
+    found = [
         p.name
         for p in root.iterdir()
         if p.name.lower() not in RESERVED_DATASETS and (p / DB_FILE).is_file()
-    )
+    ]
+    for item in vault_registry(workspace):
+        if (root / VAULTS_DIR / item["id"] / DB_FILE).is_file():
+            found.append(VAULT_PREFIX + item["id"])
+    return sorted(found)
 
 
 def _dump(value: Any) -> str:
@@ -265,6 +308,8 @@ class BiStore:
         self.path = self.dir / DB_FILE
         #: A subscribed copy: readable, never written here.
         self.read_only = is_subscribed(dataset)
+        #: A vault's id: its writes become change files (`vault.capture`).
+        self.vault_id = None if self.read_only else vault_of(workspace, dataset)
 
     @property
     def exists(self) -> bool:
@@ -276,6 +321,14 @@ class BiStore:
 
     @contextmanager
     def _db(self, *, write: bool = False) -> Iterator[sqlite3.Connection]:
+        if write and self.vault_id is not None:
+            # A vault: the write is captured as one change file and applied
+            # from it; nothing is committed on this connection.
+            from capabilities.bi_cards import vault
+
+            with vault.capture(self) as captured:
+                yield captured
+            return
         if write:
             self.refuse_write()
             self.dir.mkdir(parents=True, exist_ok=True)
