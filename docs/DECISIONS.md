@@ -5397,3 +5397,20 @@ Implementation of `docs/phases/BI_VAULT.md` §3–§4 (backend and API, Claude C
   was made from), not the card version, so edits of different fields never conflict.
 - **Rebuild in place** (delete all rows and replay, one transaction) instead of replacing the file, so a
   reader holding the file open on Windows does not break it.
+
+## 2026-10-28 — BI vaults V1, V5, V6: implementation choices
+
+- **The 「匯入 CSV」 tab is removed from the page, its backend kept**: `/api/bi/import/*` still serves the demo
+  load and the build result's undo. Its browser tests were moved to 「建立與匯入」 or removed with the feature.
+- **Built-in extraction Skills are not files**: 「AI 擷取」 and 「表格規則」 are the shipped defaults; talking to
+  Session B about a built-in saves a copy first, so a built-in never changes. 「表格規則」 has nothing for AI to
+  adjust until a recipe is pasted (its automatic column mapping is code).
+- **The Atlas address is a per-browser preference**, not a Host setting: each person runs their own Atlas.
+- **Coverage is computed, never stored**: from the cards and a matrix (vault's `vault.json` block, else the
+  dataset's `coverage.json`, else the shipped owner chart). Cards are never guessed into a cell; unplaced cards
+  and unknown values are counted. The two placement fields come from a schema version made through Session A,
+  not from a change to the shipped schema (which would alter every BI dataset's Dashboard and tests).
+- **`bi__query` lists the PC's vaults with their purpose in its description** (per turn), and a query on a vault
+  syncs it first. Rejected: a separate "which vault" tool (an extra model call per question).
+- **Snapshots do not carry evidence yet**: the reader validates exact keys, so adding one breaks older PCs.
+  Needs a format `/2` with a version window; left to the owner.

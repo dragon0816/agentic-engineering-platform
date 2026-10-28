@@ -102,6 +102,15 @@ class QueryHandler:
 
         def work() -> Contract:
             store = BiStore(self.workspace_root, request.dataset)
+            if store.vault_id is not None:
+                # Read what the others wrote too: applying their change files
+                # writes no file of this PC's own (BI vaults V6).
+                from capabilities.bi_cards import vault
+
+                try:
+                    vault.sync(self.workspace_root, store.vault_id)
+                except BiStoreError:
+                    pass  # the shared folder is not reachable now: answer from this PC
             source = subscriptions.source(self.workspace_root, request.dataset)
             if store.read_only and source is None:
                 raise BiStoreError("dataset_unknown")

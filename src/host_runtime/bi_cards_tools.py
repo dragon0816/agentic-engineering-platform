@@ -2,8 +2,10 @@
 
 Offered only while some version of the `engineering/bi-knowledge` Skill is
 switched on and `bi-cards/query` is installed; the tool carries the Skill's
-procedure. Every call is a `CapabilityInvocation` through the Bridge with
-`origin: model`, under the actor's grants (read only, no approval).
+procedure, and names the vaults this PC uses with their stated purpose so the
+model picks the one that fits the question (BI vaults V6, `BI_VAULT.md` §9).
+Every call is a `CapabilityInvocation` through the Bridge with `origin:
+model`, under the actor's grants (read only, no approval).
 
 After the turn, `with_bi_sources` adds the source line of each subscribed
 dataset the turn queried when the model's answer left it out (live test
@@ -14,9 +16,11 @@ legend, never a change to what the model said.
 from __future__ import annotations
 
 from collections.abc import Sequence
+from pathlib import Path
 from typing import Any
 
 from agent.gateway import HostTool, HostToolOutcome
+from capabilities.bi_cards import vault
 from capabilities.bi_cards.capability import QUERY_SPEC, source_note
 from capabilities.bi_cards.dashboard import ANALYSES
 from capabilities.bi_cards.manifest import BI_SKILL, bi_question
@@ -118,7 +122,7 @@ def bi_cards_tools(gateway: Any) -> Sequence[HostTool]:
         "客戶產品 customer products, 商機 opportunities, 客戶 accounts, 應用 applications, "
         "測試方案 test solutions, 競品 competitors, 趨勢 trends, 技術, 節點, 生態系 and 缺口 "
         f"gaps. PROCEDURE: {found[-1].instructions}"
-    )
+    ) + _vaults_note(gateway)
     return [
         HostTool(
             ModelTool(
@@ -130,6 +134,25 @@ def bi_cards_tools(gateway: Any) -> Sequence[HostTool]:
             call,
         )
     ]
+
+
+def _vaults_note(gateway: Any) -> str:
+    """The shared knowledge bases (vaults) on this PC, by purpose; empty when none."""
+    installed = gateway.bridge.installed.get(QUERY_SPEC.identity)
+    workspace = getattr(getattr(installed, "handler", None), "workspace_root", None)
+    if workspace is None:
+        return ""
+    lines = [
+        f"- dataset {item['dataset']}: 「{item.get('title') or item['id']}」"
+        + (f" — {item['purpose']}" if item.get("purpose") else "")
+        for item in vault.listing(Path(workspace))
+    ]
+    if not lines:
+        return ""
+    return (
+        " SHARED KNOWLEDGE BASES on this PC (pass the dataset whose purpose fits the "
+        "question; say which one you used):\n" + "\n".join(lines)
+    )
 
 
 def bi_sources(result: Any) -> list[dict[str, Any]]:

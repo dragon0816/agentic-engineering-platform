@@ -3733,5 +3733,11 @@ s-k-20261011T102952` (not published).
     matrix (`/api/bi/coverage`, cells open their summary and card list; a note when the schema has no
     placement fields). `tests/test_bi_vault_ui.py` (browser, temporary folder as the shared folder). Guide
     §3.0 and §9.5.
+- [x] BI vault V6 (part, 2026-10-28, Claude Code): `bi__query`'s description names the vaults on this PC
+  (`dataset vault-<id>: 「title」 — purpose`) so the model picks one by purpose; a query on a vault syncs it
+  first (applying others' files writes no file of this PC; an unreachable folder answers from this PC).
+  Test in `tests/test_bi_cards.py`. Not done: snapshots carrying evidence (needs
+  `aep-bi-dataset-snapshot/2`: readers validate exact keys, so older PCs would refuse a new snapshot; owner
+  to decide), 141 as backup and publisher (needs the owner and 141).
 - [ ] BI vault V4 follow-ups: show the `merge` flag on the card detail; sync on a timer or on page open;
   incremental scan (today every sync reads every change file); sources into the vault's folders.

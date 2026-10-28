@@ -756,6 +756,46 @@ def test_the_skill_is_installed_switched_on_and_offers_the_tool(tmp_path: Path) 
     assert GAP_RULE in tools[0].tool.description
 
 
+def test_the_tool_names_the_vaults_by_purpose_and_queries_one(tmp_path: Path) -> None:
+    """BI vaults V6: the model picks a vault by its stated purpose and queries
+    it like any dataset; the query reads what the shared folder holds."""
+    from capabilities.bi_cards import vault
+
+    config, layout = ready(tmp_path)
+    skill_packs.install_bundle(layout, None, shipped=shipped())
+    runtime = build_runtime(config, layout=layout)
+    workspace = layout.workspace_root
+    assert "SHARED KNOWLEDGE BASES" not in bi_cards_tools(runtime.agent.gateway)[0].tool.description
+    _loaded(workspace)
+    shared = tmp_path / "shared"
+    shared.mkdir()
+    made = vault.convert(
+        workspace,
+        {
+            "dataset": "demo",
+            "path": str(shared),
+            "title": "市場訊號",
+            "purpose": "虛構範例：看市場需求與訊號，對應我們的產品",
+        },  # fmt: skip
+        ACTOR,
+    )
+    dataset = made["vault"]["dataset"]
+    description = bi_cards_tools(runtime.agent.gateway)[0].tool.description
+    assert f"dataset {dataset}: 「市場訊號」 — 虛構範例：看市場需求與訊號" in description
+    context = RequestContext(
+        trace=TraceIdentifiers(trace_id="t1", request_id="r1", span_id="s1"),
+        actor=ACTOR,
+        namespace="engineering",
+        message="bi",
+        channel="local",
+        session_id="s-1",
+    )
+    result = asyncio.run(
+        QueryHandler(workspace)(context, QueryRequest(dataset=dataset, text="BMS", limit=5))
+    )
+    assert result.model_dump()["total"] >= 1
+
+
 def test_a_switched_off_skill_offers_no_tool(tmp_path: Path) -> None:
     config, layout = ready(tmp_path)
     skill_packs.install_bundle(layout, None, shipped=shipped())
