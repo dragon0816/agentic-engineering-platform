@@ -94,7 +94,8 @@ def test_cards_are_placed_in_every_cell_they_name(tmp_path: Path) -> None:
     assert "Technology.segments" not in [e["field"] for e in optical["empty"]]
     empty = _cell(report, "osat", "emc")
     assert empty == {"segment": "osat", "area": "emc", "cards": 0, "types": {},
-                     "sourced_share": None, "newest": None, "empty": [], "card_list": []}  # fmt: skip
+                     "sourced_share": None, "newest": None, "empty": [],
+                     "card_list": []}  # fmt: skip
     assert report["totals"] == {"cards": 4, "no_segment": 2, "no_area": 1}
     assert report["unknown_values"] == {"Mars Base": 1}
     priority = [
