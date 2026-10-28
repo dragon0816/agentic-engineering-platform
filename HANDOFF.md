@@ -1,8 +1,62 @@
 # Handoff
 
-Updated: 2026-10-28 (Asia/Taipei), by Claude Code (BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-28 (Asia/Taipei), by Claude Code (BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## BI ingest from the owner's proposal, phases 1–7 (2026-10-28, Claude Code) — latest
+## BI vaults V1–V6 (2026-10-28, Claude Code) — latest
+
+**Goal.** The owner's review of the built BI flow (2026-10-28): a purpose-built knowledge base (a *vault*) that
+a team maintains together, the chain original → Markdown → schema + extraction Skill → cards + search index +
+originals shown on the page, Sessions A/B visible, an extraction Skill to choose, a coverage view per market
+segment and technology area, and the Agent finding the vault by purpose. Design `docs/phases/BI_VAULT.md`
+(§8 owner answers: SharePoint, cards later, `segments` OK); decisions `docs/DECISIONS.md` 2026-10-28 "BI
+vaults", "BI vault V4: writes are captured and replayed", "BI vaults V1, V5, V6: implementation choices",
+"BI vault V2 and V3: implementation choices". Guide `docs/guides/BI_BUILD.zh-TW.md` (§3.0, §3.1, §5, §9.5,
+§9.6). The owner asked to keep building what is clear and report the rest later.
+
+**Done on local `main` (commits `41074f14`..`c53771bd`):**
+- V1 page: Session A shown without a draft (first message makes one), step 3 「擷取 Skill 與試跑」 with built-ins
+  「AI 擷取」/「表格規則」 and Session B always shown (a built-in is copied before a change), 「匯入 CSV」 tab
+  removed (backend kept), bar counts refresh after a commit, 「在 Atlas 開啟個人 Dashboard」.
+- V2/V3 (subagent backend, merged; page by me): every source converted to Markdown with immutable revisions,
+  runs read the current revision (`path` ai/rules), PDF/Word/PowerPoint accepted; FTS5 trigram index
+  `<dataset>/search.sqlite`, `/api/bi/index`, `/api/bi/search`; page: source formats, 「看／改」 Markdown editor
+  with revisions and `markdown_stale`, full-text search in the cards view.
+- V4 (subagent backend, merged; page by me): vault = dataset `vault-<id>` in a synced shared folder; every
+  write captured as one change file `changes/<author>/<seq>.json`, replayed in (Lamport clock, author, seq)
+  order, conflicts become proposals, merge flags; `/api/bi/vaults*`; step 1 「知識庫」 panel (choose, create,
+  join, convert, sync, status).
+- V5: `/api/bi/coverage` + shipped owner chart `coverage_matrix.json` (11 segments, 5 areas); Dashboard matrix.
+- V6 (part): `bi__query` lists the vaults with their purpose and syncs a vault before reading it.
+- Fixes found by the full suite: no literal URL in the page (`test_the_page_fetches_nothing_from_anywhere`),
+  stale-reply guards for the Skill reload and the vault panel.
+
+**Verification.** Full clean-worktree run at `c53771bd`: ruff clean, 1087 files formatted, mypy clean (820
+files), pytest 4275 passed, 34 skipped, 1 failed: `test_bi_subscriptions.py::test_an_unreachable_platform_is_
+offline_and_changes_nothing_else`, a Windows `PermissionError` renaming the freshly installed snapshot folder
+(passed 3/3 alone). Fixed after the run by using the retrying `schema_versions.replace` for the snapshot and
+subscription renames (sharing, snapshot and vault tests 50 passed); not re-run as a full suite. Earlier
+full-run failures on the way (literal URLs in the page, two stale-reply races) were fixed and covered.
+
+**Not done / open (for the owner):**
+1. Cards (V7): the owner will bring ideas; the list still shows only type, name, key and field count.
+2. Snapshots carrying evidence: needs format `aep-bi-dataset-snapshot/2` (readers check exact keys, older PCs
+   would refuse); owner to decide.
+3. 141 as backup and publisher of a vault: needs the owner and 141.
+4. Permissions and per-folder classification (V8): last, by the owner's choice. For testing the owner approves
+   INTERNAL in Settings (no code change).
+5. The two placement fields (`segments`, `tech_areas`) are not in the shipped schema: a vault adds them through
+   Session A (draft → publish → upgrade). Until then the matrix shows every card as unplaced, and says so.
+6. Vault follow-ups: merge flag on the card detail; sources stored in the vault's `applications/`/`library/`
+   folders (today they stay in the PC's local vault directory, so colleagues see the cards and evidence but
+   not each other's source files); incremental sync scan.
+7. No real model and no real SharePoint folder have been used: all tests use scripted models and temporary
+   folders. Creating or joining the real SharePoint vault must be done with the owner present, after a backup.
+
+**Next actions.** (1) Owner: restart Agent Web after checking `/api/activity`, approve INTERNAL in Settings,
+try a vault on an empty test folder, then on SharePoint. (2) Decide items 2–3 above. (3) Owner's card ideas →
+V7. (4) Sources into the vault folders (item 6).
+
+## BI ingest from the owner's proposal, phases 1–7 (2026-10-28, Claude Code)
 
 **Goal.** The owner's 「AEP BI 知識庫建立與 AI Ingest Proposal」 (2026-10-27), specified in
 `docs/phases/BI_INGEST.md` (supersedes `BI_CASE_B.md`). Decisions: `docs/DECISIONS.md` 2026-10-27 "BI ingest:
