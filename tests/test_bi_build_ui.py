@@ -189,13 +189,17 @@ def test_build_and_import_steps_in_a_browser(served: Any, tmp_path: Path) -> Non
         wait("document.getElementById('bi-b-draft-info').textContent.includes('第 2 版')")
         assert "price_band" in text_of("bi-b-draft-info")
         click("#bi-b-draft-publish")
-        wait("document.getElementById('bi-notice').textContent.includes('bi.schema/v1.1@1.2.0')")
-        wait("document.getElementById('bi-b-versions').textContent.includes('1.2.0')")
-        click_text("#bi-b-versions", "預覽升級")
+        wait("document.getElementById('bi-notice').textContent.includes('bi.schema/v1.1@2.1.0')")
+        wait("document.getElementById('bi-b-versions').textContent.includes('2.1.0')")
+        # The published 2.1.0, not the shipped 2.0.0 listed beside it.
+        run(
+            "[...document.querySelectorAll('#bi-b-versions .bi-actions')]"
+            ".find(r => r.textContent.includes('@2.1.0')).querySelector('button').click()"
+        )
         wait("document.getElementById('bi-b-upgrade').textContent.includes('套用升級')")
         shoot("2-upgrade")
         click_text("#bi-b-upgrade", "套用升級")
         wait("document.getElementById('bi-notice').textContent.includes('已升級')")
-        assert BiStore(workspace).schema_ref() == "bi.schema/v1.1@1.2.0"
+        assert BiStore(workspace).schema_ref() == "bi.schema/v1.1@2.1.0"
     finally:
         browser.close()

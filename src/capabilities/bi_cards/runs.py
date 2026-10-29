@@ -563,6 +563,12 @@ def _normalize(reg: Registry, item: FieldDef, raw: Any) -> Any:
     if isinstance(raw, list):
         if not item.is_list:
             raise BiStoreError("value_invalid", f"{item.label} 不是清單欄位")
+        if item.enum:
+            # A list with allowed values (BI vault V9) takes only those values.
+            allowed, problems = reg.normalize(item, "；".join(str(v) for v in raw))
+            if problems:
+                raise BiStoreError("value_invalid", problems[0][1])
+            return allowed
         values = [str(v).strip() for v in raw if str(v).strip()]
         return values or None
     value, problems = reg.normalize(item, str(raw))

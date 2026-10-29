@@ -24,13 +24,14 @@ from collections import OrderedDict
 from dataclasses import dataclass, field
 from typing import Any
 
+from capabilities.bi_cards import domains
 from capabilities.bi_cards.catalog import for_store
 from capabilities.bi_cards.schema import Registry, TypeDef, norm_key
 from capabilities.bi_cards.store import ApplyResult, BiStore, PlannedRow
 
 #: The fixture marks example data in the text (「(虛構範例)」, 「[範例資料,待業務/FAE
 #: 驗證]」); such a card is synthetic and never trusted (DQ-1).
-FICTIONAL = re.compile(r"虛構|範例|示範|待[^,，。]{0,10}驗證|待查證")
+FICTIONAL = re.compile(r"虛構|範例|示範|待[^,，。]{0,10}驗證|待查證|^SAMPLE-")
 MAX_PREVIEWS = 50
 
 
@@ -122,6 +123,15 @@ def _skipped(row: dict[str, str], rules: list[dict[str, Any]]) -> bool:
     return False
 
 
+def _canonical_names(configured: Any, entity: TypeDef, item: Any, value: Any) -> Any:
+    """A card name or link target in its canonical spelling (`name_aliases`)."""
+    if not (item.is_link or item.name == entity.naming_field):
+        return value
+    if isinstance(value, list):
+        return list(dict.fromkeys(configured.canon(v) for v in value))
+    return configured.canon(value)
+
+
 def preview(
     store: BiStore,
     *,
@@ -141,7 +151,12 @@ def preview(
     explicit: dict[str, str] = {
         norm_key(k): str(v) for k, v in dict(mapping.get("columns") or {}).items()
     }
-    chosen = entity_type or mapping.get("entity_type") or reg.guess_type(headers)
+    chosen = (
+        entity_type
+        or mapping.get("entity_type")
+        or reg.type_in_filename(filename)
+        or reg.guess_type(headers)
+    )
     if not chosen:
         raise ImportError_("entity_type_unknown", "無法從欄名判斷卡片類型，請指定類型")
     try:
@@ -177,7 +192,13 @@ def preview(
         columns.append({"source": header, "field": name, "status": status, "note": note})
         if name is not None:
             by_header[header] = name
-    extra_aliases = dict(mapping.get("enum_aliases") or {})
+    # The dataset's per-domain configuration (BI vault V10): its enum aliases
+    # under the mapping's, and its name aliases for names and link targets.
+    configured = domains.read(store)
+    extra_aliases = {
+        **(configured.enum_aliases if configured is not None else {}),
+        **dict(mapping.get("enum_aliases") or {}),
+    }
     defaults = dict(mapping.get("defaults") or {})
     skip_rules = list(mapping.get("skip_rows") or [])
     ignored_priority = [
@@ -208,6 +229,8 @@ def preview(
             assert item is not None
             cell = raw.get(header, "")
             value, problems = reg.normalize(item, cell, extra_aliases)
+            if configured is not None and value is not None:
+                value = _canonical_names(configured, entity, item, value)
             raws[name] = cell
             warnings.extend({"code": c, "message": m} for c, m in problems)
             if value is not None:

@@ -5,6 +5,10 @@ section by section, for one domain. A card without `domain` counts as
 wireless (v4). Trend priority is computed (measurement_impact x our_fit) for
 display and never stored; Application priority is not shown at all (#222:
 the Skill judges it from the facts).
+
+BI vault V12: the manager's later sections (§20–§31, the chains A–A3) come
+from `market.py` when the dataset's schema has their types; cards named
+`SAMPLE-…` are left out unless `include_sample` (his dashboards' switch).
 """
 
 from __future__ import annotations
@@ -15,6 +19,8 @@ from typing import Any
 from capabilities.bi_cards.store import BiStore
 
 MINE = "R&S(我方)"
+#: The manager names fictional demonstration cards `SAMPLE-…`.
+SAMPLE_PREFIX = "SAMPLE-"
 STALE_DAYS = 90
 DEAL_STAGES = ("lead", "qualified", "proposal", "eval", "negotiation", "won", "lost")
 CLOSED = ("won", "lost")
@@ -35,10 +41,12 @@ def _in(card: Card, domain: str) -> bool:
     return domain.lower() in {str(v).lower() for v in values}
 
 
-def _cards(store: BiStore) -> dict[str, list[Card]]:
+def _cards(store: BiStore, include_sample: bool = True) -> dict[str, list[Card]]:
     everything = store.all_fields()
     result: dict[str, list[Card]] = {}
     for row in store.card_rows():
+        if not include_sample and str(row["name"]).startswith(SAMPLE_PREFIX):
+            continue
         card = Card({k: v["value"] for k, v in everything.get(row["id"], {}).items()})
         card["_name"] = row["canonical_key"] if row["entity_type"] == "Signal" else row["name"]
         card["_key"] = row["canonical_key"]
@@ -482,9 +490,37 @@ SECTIONS = (
 )
 
 
-def dashboard(store: BiStore, domain: str = "robotics") -> dict[str, Any]:
-    cards = _cards(store)
-    return {"domain": domain, "sections": [build(cards, domain) for build in SECTIONS]}
+def _context(store: BiStore) -> tuple[set[str], dict[str, dict[str, list[str]]], Any]:
+    """The schema's types, its link fields with their targets, and the
+    dataset's domain configuration (V10), for the market sections."""
+    from capabilities.bi_cards import catalog, domains
+
+    reg = catalog.for_store(store)
+    links = {
+        name: {f.name: list(f.link_to) for f in entity.fields if f.is_link}
+        for name, entity in reg.types.items()
+    }
+    return set(reg.types), links, domains.read(store)
+
+
+def dashboard(
+    store: BiStore, domain: str = "robotics", include_sample: bool = False
+) -> dict[str, Any]:
+    from capabilities.bi_cards import market
+
+    cards = _cards(store, include_sample)
+    types, links, config = _context(store)
+    built = market.sections(cards, domain, types=types, link_fields=links, config=config)
+    chains = [s for s in built if s["id"].startswith("A")]
+    later = [s for s in built if not s["id"].startswith("A")]
+    from capabilities.bi_cards import catalog, quality
+
+    checked = quality.section(quality.check(store, catalog.for_store(store)))
+    return {
+        "domain": domain,
+        "include_sample": include_sample,
+        "sections": [*chains, *(build(cards, domain) for build in SECTIONS), *later, checked],
+    }
 
 
 #: The analyses the chat can ask for by name (`bi__query` `analysis`); the
@@ -493,7 +529,25 @@ ANALYSES = {build.__name__: build for build in SECTIONS}
 
 
 def analysis(store: BiStore, name: str, domain: str = "robotics") -> list[dict[str, Any]]:
-    """One named dashboard section, or every section for `all`."""
-    cards = _cards(store)
-    builds = SECTIONS if name == "all" else (ANALYSES[name],)
-    return [build(cards, domain) for build in builds]
+    """One named dashboard section, or every section for `all` (sample cards
+    left out, as on the page by default)."""
+    if name == "all":
+        return list(dashboard(store, domain)["sections"])
+    if name in ANALYSES:
+        return [ANALYSES[name](_cards(store, False), domain)]
+    from capabilities.bi_cards import catalog, market, quality
+
+    if name == "quality":
+        return [quality.section(quality.check(store, catalog.for_store(store)))]
+
+    types, links, config = _context(store)
+    return market.sections(
+        _cards(store, False), domain, types=types, link_fields=links, config=config, only=name
+    )
+
+
+def analysis_names() -> list[str]:
+    """Every name `analysis` takes (the page's sections and the market ones)."""
+    from capabilities.bi_cards import market
+
+    return [*ANALYSES, *market.NAMES, "quality"]

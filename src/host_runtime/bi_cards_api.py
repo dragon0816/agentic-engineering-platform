@@ -58,8 +58,10 @@ from capabilities.bi_cards import (
     catalog,
     coverage,
     dashboard,
+    domains,
     importer,
     methods,
+    quality,
     runs,
     schema_session,
     schema_versions,
@@ -188,7 +190,16 @@ def _route(
                     "domain": None,
                     "sections": [],
                 }
-            return 200, dashboard.dashboard(store, str(query.get("domain") or "robotics"))
+            sample = str(query.get("include_sample") or "").lower() in ("1", "true", "yes")
+            return 200, dashboard.dashboard(
+                store, str(query.get("domain") or "robotics"), include_sample=sample
+            )
+        if path == "/api/bi/quality":
+            # Quality checks (BI vault V13), read only.
+            return 200, quality.check(store, catalog.for_store(store))
+        if path == "/api/bi/domains":
+            # Per-domain configuration (BI vault V10), read only here.
+            return 200, domains.describe(store, catalog.for_store(store))
         if path == "/api/bi/coverage":
             # Segment x technology area (BI vaults §6.2), read only.
             matrix, origin = coverage.matrix_for(workspace, store.dataset)
@@ -264,6 +275,12 @@ def _route(
         )
     if path == "/api/bi/datasets":
         return _create_dataset(workspace, given)
+    if path == "/api/bi/domains":
+        store = BiStore(workspace, _dataset(given.get("dataset")))
+        saved = domains.save(
+            store, catalog.for_store(store), given.get("config"), given.get("base_revision"), who
+        )
+        return 200, {"ok": True, **saved}
     if path == "/api/bi/demo/load":
         store = BiStore(workspace, _dataset(given.get("dataset")))
         if not catalog.for_store(store).is_bi:
@@ -651,6 +668,8 @@ CONFLICTS = {
     "author_taken",
     "change_exists",
     "markdown_stale",
+    "domains_stale",
+    "meta_stale",
 }
 
 #: The GET routes that read one dataset (besides `/api/bi/cards/<id>[/history]`).
@@ -659,6 +678,8 @@ DATASET_READS = (
     "/api/bi/dashboard",
     "/api/bi/schema",
     "/api/bi/coverage",
+    "/api/bi/domains",
+    "/api/bi/quality",
     "/api/bi/index",
     "/api/bi/search",
 )
@@ -727,7 +748,13 @@ def _set_field(workspace: Path, who: str, card_id: str, given: dict[str, Any]) -
     elif isinstance(raw, list):
         if not item.is_list:
             return _error(400, "value_invalid", f"{item.label} 不是清單欄位")
-        value = _list_value(reg, item, raw)
+        if item.enum:
+            # A list with allowed values (BI vault V9) takes only those values.
+            value, problems = reg.normalize(item, "；".join(str(x) for x in raw))
+            if problems:
+                return _error(400, "value_invalid", problems[0][1])
+        else:
+            value = _list_value(reg, item, raw)
     else:
         value, problems = reg.normalize(item, str(raw))
         if value is None:

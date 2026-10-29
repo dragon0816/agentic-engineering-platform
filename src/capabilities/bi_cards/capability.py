@@ -97,7 +97,7 @@ class QueryHandler:
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = QueryRequest.model_validate(inputs)
 
-        if request.analysis and request.analysis not in (*dashboard.ANALYSES, "all"):
+        if request.analysis and request.analysis not in (*dashboard.analysis_names(), "all"):
             raise CapabilityRefused("invalid_input")
 
         def work() -> Contract:

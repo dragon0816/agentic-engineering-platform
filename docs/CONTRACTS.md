@@ -4232,6 +4232,40 @@ schema is chosen at creation and never changed" (owner 2026-10-27): a dataset ma
   - A run made before the upgrade cannot be reviewed, rechecked or committed: 409 `schema_changed` (run
     again).
 
+## BI schema 2.0, new kinds and widening (BI vault V9, owner 2026-10-29)
+
+Design: `docs/phases/BI_VAULT.md` §12; decision `docs/DECISIONS.md` 2026-10-29 "BI vault V9". Code:
+`src/capabilities/bi_cards/schema.py` (`shipped`, `WIDENINGS`, `widen_value`, `type_in_filename`, float and
+allowed-list normalising), `catalog.py`, `schema_versions.py` (`widened`, `_widenings`), `store.py`
+(`upgrade_schema(widenings=...)`), `scripts/build_bi_schema_v2.py`. Tests: `tests/test_bi_schema_v2.py`.
+Additive to "BI cards API and capability" and "BI schema drafts and dataset upgrade".
+
+- **Two shipped versions.** `bi.schema/v1.1@1.1.0` (schema v4, unchanged) and `bi.schema/v1.1@2.0.0`
+  (`bi_schema_v2.json`, generated from the manager's schema v8 in `tests/fixtures/bi_schema_v8/`): 21 types
+  (adds WinLoss, RoadmapRequest, Pitch, DemoScript, Battlecard, Contact, VisitLog, SupplyLink, RevenueFact),
+  domains + mobile, aerospace; Node `domain` is a list. `GET /api/bi/schemas` lists both with `source:
+  "shipped"`. A bare `bi.schema/v1.1` resolves to the newest version (2.0.0, or a newer local one); a dataset
+  with no binding stays `1.1.0`. Local versions are still checked against `1.1.0`. A schema file with a
+  shipped `<id>@<version>` installs only when its content is the shipped one (`already: true`), else 409
+  `schema_version_exists`. Snapshots of a 2.0.0 dataset carry `source: "shipped"`; a subscriber whose AEP
+  ships 2.0.0 uses it as is.
+- **`float` kind.** A plain number, thousands separators and one trailing `%` allowed (`11,586`, `59%`);
+  `約20`, ranges (`75–80%`) and units are `type_mismatch` and the value stays empty. `range` is allowed on
+  `int` and `float` (`[min, max]`, numbers).
+- **Allowed values on a list.** A `list` field may have `enum`: each part matches like an enum value (also
+  through `enum_aliases`); unknown parts are dropped with `type_mismatch`. A field edit or a candidate edit
+  with an unknown part is 400 `value_invalid`.
+- **Widening.** `enum → list`, `str → list`, `link → linklist`, `int → float` are not breaking: `bi_problems`
+  accepts them (a list without `enum` may replace an enum), a diff `<change>` is `"change": "widened"` with
+  `breaking: false`, and a dataset upgrade is not blocked. The preview's `types[]` gain `"widened": [{"field",
+  "from", "to", "cards"}]` and `totals` gains `"widened"`. Apply turns each stored value into its list (or
+  decimal) form with a `migration` history row (`ref: "schema:<to>"`) and a card version bump, counted in
+  `moved`; in a vault this is captured like any write, so every PC gets it. Any other kind change is still
+  `kind` / `kind_changed`.
+- **Type from the file name.** An import preview without `entity_type` first takes the type a file is named
+  after (type name or the v8 `code_key`, loosely: `11_supply_link.csv` → SupplyLink; the longest match
+  wins), then guesses from the headers as before.
+
 ## BI rule path: recipes and multi-table sources (BI ingest phase 3, owner 2026-10-27)
 
 Design: `docs/phases/BI_INGEST.md` §6 and §11 item 11; engine design `docs/phases/BI_CASE_B.md` §3–§5
@@ -4597,6 +4631,110 @@ dataset, 400 `coverage_matrix_invalid` for a bad matrix.
   placement fields excluded), `card_list` (up to 200 `{id, name, type}` to open the cards).
 - `schema_missing_fields` lists `segment_field`/`area_field` when no type of the dataset's schema has them (every
   card is then unplaced until a schema version adds them).
+
+## BI domain configuration (BI vault V10, owner 2026-10-29)
+
+Design: `docs/phases/BI_VAULT.md` §12 (one market vault, domains as configuration). Code:
+`src/capabilities/bi_cards/domains.py`, `store.py` (`meta_value`, `set_meta_value`), uses in `coverage.py`,
+`importer.py`, `ai_runs.py`; routes in `src/host_runtime/bi_cards_api.py`; panel 「領域設定」 under the
+coverage matrix. Tests: `tests/test_bi_domains.py`, `tests/test_bi_vault_ui.py`.
+
+- **Document** `aep.bi.domains/v1`, kept in the dataset's `meta` table as `domains` (JSON); in a vault the save
+  is a change file (`meta` op), so every PC gets it and two saves from the same revision become a vault
+  conflict. Keys: `domains` (required): `[{"id", "label", "segments": [{"id", "label", "priority",
+  "aliases"}], "chains": [{"id", "label", "node_pattern" | "nodes"}], "nodes": [<name>]}]`; `areas`: `[{"id",
+  "label", "aliases"}]` (required when any domain has segments); `segment_field` (default `segments`),
+  `area_field` (default `tech_areas`); `name_aliases` `{alias: canonical name}`; `enum_aliases` `{field:
+  {alias: allowed value}}`. AEP adds `format`, `revision`, `updated`, `updated_by`.
+- **Checks** (400 `domains_invalid`, naming the problem): a domain id must be one of the schema's domains
+  (matched case-insensitively and stored in the schema's spelling); ids `[A-Za-z0-9][A-Za-z0-9_-]{0,39}`,
+  unique per list; a segment id in one domain only; a chain needs `node_pattern` (a valid regex, at most 200
+  characters) or `nodes`; an `enum_aliases` field must be an enum (or allowed-values list) field of the
+  schema and every target an allowed value; at most 256 KB.
+- **Warnings** (saved anyway): `field_missing` when no type has `segment_field` / `area_field`;
+  `value_not_allowed` when a segment or area id is not an allowed value of that field (add it with Session A).
+- `GET /api/bi/domains?dataset=` → `{"dataset", "configured", "revision", "config": <document> | null,
+  "warnings": [{"code", "message"}]}`.
+- `POST /api/bi/domains {"dataset", "config", "base_revision"}` → `{"ok": true, ...as GET}`; `base_revision` is
+  the revision read (0 for the first save). 409 `domains_stale` when it changed since; 400
+  `base_revision_missing`; 409 `dataset_read_only` for a subscribed copy.
+- **Uses.** Coverage: when any domain has segments, the matrix is one market per domain with its segments and
+  the configured areas and fields, `matrix_source: "domains"` (before vault, dataset and shipped). Imports
+  (CSV import, recipes and ingest runs through `importer.preview`): the configured `enum_aliases` apply under a
+  mapping's own; a card name and every link target are written in their canonical spelling. AI extraction:
+  candidates' names and link targets likewise, before merging. `Config.chains_of(node, domain)` gives a node's
+  chains (listed, or matched by `node_pattern`; a shared node may be in several) for the analyses (V12).
+
+## BI extraction evidence rules (BI vault V11, owner 2026-10-29)
+
+Design: `docs/phases/BI_VAULT.md` §12. Code: `src/capabilities/bi_cards/extract.py` (`EVIDENCE_RULES`,
+`GRADE_RULES`, `written_numbers`, `number_written`), `domains.py` (`notes`, `extraction_notes`), `ai_runs.py`.
+Tests: `tests/test_bi_extract_evidence.py`. Additive to "BI AI path: extraction runs".
+
+- **Fixed rules.** Every AI extraction's system message has 「Evidence rules (always apply)」 after the card
+  types and before the method's instructions: no value without the source; a number, date, ticker, model or
+  part number only when written (a written amount may be restated in the card's unit, quoting the original);
+  a range or a partial period leaves the number empty; a date is the source's, never today's; a contradiction
+  keeps both statements; no sample or fictional cards. A method (Session B) cannot remove them.
+- **Evidence grades.** When a requested type has `evidence_grade` (SupplyLink in 2.0.0) the A–D definitions
+  follow: A vendor / official / named confirmation; B credible report or company statement with a named
+  source; C product capability or public demo only; D unconfirmed, conflicting or no named source.
+- **Domain notes.** A domain in the configuration may have `notes` (text, at most 2,000 characters); every
+  domain's notes are appended as 「Domain notes」 after the method's instructions.
+- **Numbers are checked.** A candidate's `int` / `float` field with basis `fact` must be written in its quote:
+  as written (thousands separators, a trailing `%`) or as an amount in 億 (`1兆1,586億` → 11586, `2.53兆` →
+  25300). Otherwise its basis becomes `inference`, its evidence is dropped, and the candidate warns
+  `number_not_in_quote`.
+
+## BI market analyses (BI vault V12, owner 2026-10-29)
+
+Design: `docs/phases/BI_VAULT.md` §12. Code: `src/capabilities/bi_cards/market.py`, `dashboard.py`
+(`dashboard(..., include_sample)`, `analysis`, `analysis_names`), `capability.py`, `bi_cards_tools.py`, the
+Dashboard view (domain picker from the schema, 「含 SAMPLE 示範卡」). Tests: `tests/test_bi_market.py`.
+Additive to "BI cards API and capability".
+
+- `GET /api/bi/dashboard?dataset=&domain=&include_sample=1` → `{"domain", "include_sample", "sections"}`.
+  `include_sample` (default false) keeps cards named `SAMPLE-…`, which are otherwise left out of every section.
+- **Sections**, in order: `A`, `A2`, `A3` (the domain's chains from the domain configuration, V10; only when
+  the domain has chains), then §1–§19 as before, then the manager's sections offered when the schema has the
+  types they read: `20` trend × ecosystem × customer product (Trend, Ecosystem, CustomerProduct); `21`
+  win-loss by competitor and unreviewed closed deals (WinLoss, Opportunity); `22` roadmap gaps by impact ×
+  customers (RoadmapRequest); `23` sales enablement (Battlecard, Pitch, DemoScript, Competitor, TestSolution);
+  `24` contact: open deals without a visit in 60 days, overdue follow-ups (VisitLog, Opportunity); `25`
+  customer product × confirmed (A/B) suppliers × trends (SupplyLink, CustomerProduct, Trend); `26` timing:
+  demand before launch without our available solution (CustomerProduct, Trend, TestSolution); `27` evidence
+  grade × supply stage and A/B links missing `source` / `source_date` (SupplyLink); `28` revenue layers per
+  company and accounts without revenue facts (RevenueFact, Account); `29` integrity of our solution,
+  competitor vendor and opportunity links (Opportunity, TestSolution, Competitor); `30` one name in two types;
+  `31` link targets with no card yet, with the type the field suggests. Each section is `{"id", "title",
+  "kind", "columns", "rows", "flags", "note"}` as before; a card cell is `{"card_id", "label", "cite"}`.
+- `bi__query` `analysis` also takes `trend_links`, `win_loss`, `roadmap_gaps`, `enablement`,
+  `customer_contact`, `supply_evidence`, `timing_gaps`, `supply_grades`, `revenue_layers`, `chain_integrity`,
+  `same_names`, `pending_links`, `chain_summary`, `chain_view`, `chain_overlap` (sample cards left out).
+- The domain picker lists the dataset's schema domains (2.0.0: + mobile, aerospace), lower case.
+
+## BI quality checks (BI vault V13, owner 2026-10-29)
+
+Design: `docs/phases/BI_VAULT.md` §12 (the manager's `validate.py`, made general). Code:
+`src/capabilities/bi_cards/quality.py`, `store.py` (`fact_excerpts`), `importer.py` (`SAMPLE-` rows are
+samples), `dashboard.py` (section `Q`, analysis `quality`), `domains.py` (`node_name_pattern`). Tests:
+`tests/test_bi_quality.py`.
+
+- `GET /api/bi/quality?dataset=` → `{"dataset", "checks": [{"id", "title", "level": "issue" | "warn", "count",
+  "items": [{"card": {"card_id", "label", "cite"} | null, "message"}]}], "totals": {"issue", "warn"}}` (at most
+  200 items per check). Read only.
+- **Checks** (`issue` unless noted): `link_unresolved` (a link names no card); `link_wrong_type` (the card it
+  names is not of the field's `link_to` types); `same_name` (one name in two types); `sample_not_marked` (a
+  `SAMPLE-` card not flagged synthetic); `evidence_source` (an A/B `evidence_grade` without `source`, or
+  without `source_date` unless the body says 「來源日期待補」); `number_ungrounded` (an `int` / `float` value
+  whose fact excerpts do not write it, 兆/億 amounts read); `revenue_layer` (customer layer without customer,
+  another layer with one, or no `source`); `node_format` (a Node name not matching the configuration's
+  `node_name_pattern`); `node_not_listed` (`warn`: a Node outside its domain's `nodes` list, when the list is
+  given); `product_without_node` (`warn`).
+- The Dashboard ends with section `Q` 「資料品質檢查」 (`issue` rows flagged red, `warn` rows warn); `bi__query`
+  `analysis: "quality"` returns it.
+- An import row whose cell starts with `SAMPLE-` is a sample (`synthetic`), like 虛構 / 範例.
+- The domain configuration takes an optional top-level `node_name_pattern` (a regex, at most 200 characters).
 
 ## BI source Markdown (BI vault phase V2, owner 2026-10-28)
 

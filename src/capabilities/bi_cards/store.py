@@ -55,6 +55,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from capabilities.bi_cards.schema import widen_value
+
 DEFAULT_DATASET = "demo"
 DATASET_RE = re.compile(r"^[A-Za-z0-9_-]{1,40}$")
 DB_FILE = "bi.sqlite"
@@ -735,6 +737,22 @@ class BiStore:
             except sqlite3.OperationalError:  # a dataset from before ingest runs
                 return set()
 
+    def fact_excerpts(self) -> dict[tuple[str, str], list[str]]:
+        """Every fact excerpt per (card id, field), for the quality checks (V13)."""
+        if not self.exists:
+            return {}
+        found: dict[tuple[str, str], list[str]] = {}
+        with self._db() as db:
+            try:
+                rows = db.execute(
+                    "SELECT card_id, field, excerpt FROM evidence WHERE basis = 'fact' ORDER BY seq"
+                )
+                for r in rows:
+                    found.setdefault((r["card_id"], r["field"]), []).append(str(r["excerpt"]))
+            except sqlite3.OperationalError:  # a dataset from before ingest runs
+                return {}
+        return found
+
     def evidence(self, card_id: str) -> list[dict[str, Any]]:
         """The evidence recorded for a card's values, newest first."""
         if not self.exists:
@@ -812,12 +830,16 @@ class BiStore:
         marker: str,
         actor: str,
         totals: dict[str, int],
+        widenings: dict[str, dict[str, str]] | None = None,
     ) -> int:
         """Bind the dataset to another version of its schema in one
         transaction (BI ingest §5.3): refused as `preview_stale` when the
         cards changed since `marker`; values move only for the declared
-        renames (a `migration` history row each); every other value stays as
-        it is. Returns how many values moved."""
+        renames (a `migration` history row each), and a widened field's value
+        becomes its list or decimal form (`{type: {field: new kind}}`, BI vault
+        V9; a `migration` history row each); every other value stays as it is.
+        Returns how many values moved or were widened."""
+
         self.refuse_write()
         at = now()
         moved = 0
@@ -869,6 +891,40 @@ class BiStore:
                             (at, item["card_id"]),
                         )
                         moved += 1
+            for type_name, fields in (widenings or {}).items():
+                for name, new_kind in fields.items():
+                    rows = db.execute(
+                        "SELECT f.* FROM fields f JOIN cards c ON c.id = f.card_id "
+                        "WHERE c.entity_type = ? AND f.field = ?",
+                        (type_name, name),
+                    ).fetchall()
+                    for item in rows:
+                        after = _dump(widen_value(_load(item["value"]), new_kind))
+                        if after == item["value"]:
+                            continue
+                        db.execute(
+                            "UPDATE fields SET value = ? WHERE card_id = ? AND field = ?",
+                            (after, item["card_id"], name),
+                        )
+                        db.execute(
+                            "INSERT INTO history (card_id, field, old, new, kind, ref, by, at, "
+                            "reason) VALUES (?, ?, ?, ?, 'migration', ?, ?, ?, ?)",
+                            (
+                                item["card_id"],
+                                name,
+                                item["value"],
+                                after,
+                                f"schema:{to_ref}",
+                                actor,
+                                at,
+                                f"schema 升級：{name} 放寬為 {new_kind}",
+                            ),
+                        )
+                        db.execute(
+                            "UPDATE cards SET version = version + 1, updated = ? WHERE id = ?",
+                            (at, item["card_id"]),
+                        )
+                        moved += 1
             past = db.execute("SELECT value FROM meta WHERE key = 'schema_history'").fetchone()
             log = json.loads(past[0]) if past else []
             log.append(
@@ -880,6 +936,28 @@ class BiStore:
             )
             db.execute("UPDATE meta SET value = ? WHERE key = 'schema'", (to_ref,))
         return moved
+
+    def meta_value(self, key: str) -> str | None:
+        """One `meta` value as stored; None when absent or no database."""
+        if not self.exists:
+            return None
+        with self._db() as db:
+            try:
+                row = db.execute("SELECT value FROM meta WHERE key = ?", (key,)).fetchone()
+            except sqlite3.OperationalError:  # a dataset from before the schema binding
+                return None
+        return None if row is None else str(row[0])
+
+    def set_meta_value(self, key: str, value: str, *, base: str | None) -> None:
+        """Write one `meta` value made from `base` (what the caller read); in a
+        vault the write becomes a change file. A different current value is
+        409 `meta_stale`, nothing written."""
+        self.refuse_write()
+        with self._db(write=True) as db:
+            row = db.execute("SELECT value FROM meta WHERE key = ?", (key,)).fetchone()
+            if (None if row is None else str(row[0])) != base:
+                raise BiStoreError("meta_stale", "設定已被別人改過，請重新讀取後再改")
+            db.execute("INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)", (key, value))
 
     def schema_history(self) -> list[dict[str, Any]]:
         if not self.exists:

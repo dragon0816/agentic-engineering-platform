@@ -27,7 +27,7 @@ from importlib import resources
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards.schema import BI_PREFIX, Registry, registry
+from capabilities.bi_cards.schema import BI_PREFIX, Registry, registry, shipped, widens
 from capabilities.bi_cards.store import BiStore, BiStoreError
 
 SCHEMAS_DIR = "schemas"
@@ -45,7 +45,7 @@ ID_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{0,39}(/[a-z0-9][a-z0-9._-]{0,39}){0,2}
 VERSION_RE = re.compile(r"^(0|[1-9]\d{0,5})\.(0|[1-9]\d{0,5})\.(0|[1-9]\d{0,5})$")
 TYPE_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_]{0,39}$")
 FIELD_RE = re.compile(r"^[a-z][a-z0-9_]{0,59}$")
-KINDS = ("str", "int", "bool", "date", "enum", "list", "link", "linklist")
+KINDS = ("str", "int", "float", "bool", "date", "enum", "list", "link", "linklist")
 CLASSES = ("sourced", "judgement", "derived")
 TYPE_DOMAINS = ("one", "multi", "none")
 TOP_KEYS = {
@@ -113,27 +113,27 @@ def _version_tuple(text: str) -> tuple[int, ...]:
 def bi_problems(document: dict[str, Any]) -> list[dict[str, str]]:
     """Why a `bi.schema/*` document is not a compatible newer version of the
     shipped one; empty when it is."""
-    shipped = registry()
+    base = registry()
     problems: list[dict[str, str]] = []
-    if document.get("schema_id") != shipped.schema_id:
+    if document.get("schema_id") != base.schema_id:
         problems.append(
             {
                 "path": "schema_id",
                 "message": f"「{BI_PREFIX}」開頭保留給內建的 BI schema，"
-                f"只能安裝 {shipped.schema_id} 的相容新版本；請換一個 id",
+                f"只能安裝 {base.schema_id} 的相容新版本；請換一個 id",
             }
         )
         return problems
     version = str(document.get("version") or "")
-    if VERSION_RE.match(version) and _version_tuple(version) <= _version_tuple(shipped.version):
+    if VERSION_RE.match(version) and _version_tuple(version) <= _version_tuple(base.version):
         problems.append(
-            {"path": "version", "message": f"必須比內建的 {shipped.version} 新，例如 1.2.0"}
+            {"path": "version", "message": f"必須比內建的 {base.version} 新，例如 1.2.0"}
         )
     types = {t.get("name"): t for t in document.get("types") or [] if isinstance(t, dict)}
     domains = set(document.get("domains") or [])
-    for missing in [d for d in shipped.domains if d not in domains]:
+    for missing in [d for d in base.domains if d not in domains]:
         problems.append({"path": "domains", "message": f"不能移除內建的領域「{missing}」"})
-    for entity in shipped.types.values():
+    for entity in base.types.values():
         raw = types.get(entity.name)
         if raw is None:
             problems.append({"path": "types", "message": f"不能移除內建類型「{entity.name}」"})
@@ -148,8 +148,14 @@ def bi_problems(document: dict[str, Any]) -> list[dict[str, str]]:
             if given is None:
                 problems.append({"path": at, "message": "不能移除內建欄位"})
                 continue
-            if given.get("kind") != item.kind:
-                problems.append({"path": f"{at}.kind", "message": f"內建欄位必須維持 {item.kind}"})
+            kind = given.get("kind")
+            if kind != item.kind and not widens(item.kind, str(kind)):
+                problems.append(
+                    {
+                        "path": f"{at}.kind",
+                        "message": f"內建欄位必須維持 {item.kind}（只可放寬成清單或小數）",
+                    }
+                )
             if given.get("class") != item.klass:
                 problems.append(
                     {"path": f"{at}.class", "message": f"內建欄位必須維持 {item.klass}"}
@@ -157,7 +163,13 @@ def bi_problems(document: dict[str, Any]) -> list[dict[str, str]]:
             link_to = given.get("link_to") or []
             if list([link_to] if isinstance(link_to, str) else link_to) != list(item.link_to):
                 problems.append({"path": f"{at}.link_to", "message": "不能改內建欄位的連結目標"})
-            if item.enum and not set(item.enum) <= set(given.get("enum") or []):
+            # A list without allowed values loosens an enum (Node `domain` in 2.0.0).
+            unrestricted = kind == "list" and not given.get("enum")
+            if (
+                item.enum
+                and not unrestricted
+                and not set(item.enum) <= set(given.get("enum") or [])
+            ):
                 problems.append(
                     {"path": f"{at}.enum", "message": "可以新增允許值，但不能移除內建的允許值"}
                 )
@@ -262,14 +274,15 @@ def validate(document: Any) -> tuple[dict[str, Any] | None, list[dict[str, str]]
                     f"必填；只能是 {list(CLASSES)}（事實／判斷／衍生）",
                 )
             enum = item.get("enum")
-            if kind == "enum":
+            if kind == "enum" or (kind == "list" and enum not in (None, [])):
+                # A list may name its allowed values too (BI vault V9).
                 if not _strings(enum) or not enum or len(set(enum)) != len(enum):
                     error(f"{at}.enum", "列舉欄位（kind enum）需要不重複的允許值清單")
                     enum = None
                 else:
                     enum_fields.setdefault(fname, set()).update(enum)
             elif enum not in (None, []):
-                error(f"{at}.enum", "只有 kind 是 enum 的欄位可以有 enum")
+                error(f"{at}.enum", "只有 kind 是 enum 或 list 的欄位可以有 enum")
             aliases = item.get("aliases", [])
             if not isinstance(aliases, list) or not all(isinstance(a, str) for a in aliases):
                 error(f"{at}.aliases", "必須是文字清單（CSV 欄名的別名）")
@@ -282,15 +295,16 @@ def validate(document: Any) -> tuple[dict[str, Any] | None, list[dict[str, str]]
                 error(f"{at}.default", f"預設值「{default}」不在 enum 允許值裡")
             value_range = item.get("range")
             if value_range is not None:
+                numbers = (int, float) if kind == "float" else (int,)
                 ok = (
-                    kind == "int"
+                    kind in ("int", "float")
                     and isinstance(value_range, list)
                     and len(value_range) == 2
-                    and all(isinstance(v, int) and not isinstance(v, bool) for v in value_range)
+                    and all(isinstance(v, numbers) and not isinstance(v, bool) for v in value_range)
                     and value_range[0] <= value_range[1]
                 )
                 if not ok:
-                    error(f"{at}.range", "只有 int 欄位可以有 range，格式是 [最小, 最大]")
+                    error(f"{at}.range", "只有 int 或 float 欄位可以有 range，格式是 [最小, 最大]")
             link_to = item.get("link_to", [])
             if isinstance(link_to, str):
                 link_to = [link_to]
@@ -317,7 +331,7 @@ def validate(document: Any) -> tuple[dict[str, Any] | None, list[dict[str, str]]
                     "label": str(item.get("label") or fname),
                     "kind": kind,
                     "class": item.get("class"),
-                    "enum": list(enum) if kind == "enum" and enum else None,
+                    "enum": list(enum) if kind in ("enum", "list") and enum else None,
                     "aliases": [a for a in aliases if a.strip()],
                     "required": bool(required),
                     "default": default,
@@ -468,8 +482,11 @@ def installed(workspace: Path) -> list[Registry]:
 
 
 def available(workspace: Path) -> list[Registry]:
-    """The shipped schema first, then the installed ones by id and version."""
-    return [registry(), *installed(workspace)]
+    """The shipped versions first, then the installed ones by id and version
+    (an installed copy of a shipped version is not listed twice)."""
+    builtin = list(shipped())
+    refs = {reg.ref for reg in builtin}
+    return [*builtin, *(reg for reg in installed(workspace) if reg.ref not in refs)]
 
 
 def _version_key(reg: Registry) -> tuple[int, ...]:
@@ -551,6 +568,18 @@ def install(workspace: Path, filename: str, json_text: Any) -> dict[str, Any]:
     schema_id, version = str(document["schema_id"]), str(document["version"])
     path = schema_path(workspace, schema_id, version)
     text = canonical(document)
+    builtin = next(
+        (reg for reg in shipped() if (reg.schema_id, reg.version) == (schema_id, version)), None
+    )
+    if builtin is not None:
+        # A shipped version is never shadowed by a file (it would be ignored).
+        if canonical(builtin.document) == text:
+            return {"ok": True, "id": schema_id, "version": version, "already": True}
+        raise SchemaInstallError(
+            "schema_version_exists",
+            f"{schema_id}@{version} 是內建的版本，不能用另一份內容安裝；請改用新的版本號",
+            [{"path": "version", "message": f"{version} 是內建版本"}],
+        )
     if path.is_file():
         if path.read_text(encoding="utf-8") == text:
             return {"ok": True, "id": schema_id, "version": version, "already": True}

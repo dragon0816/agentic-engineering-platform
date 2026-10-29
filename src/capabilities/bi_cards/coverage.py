@@ -11,9 +11,11 @@ from, or fact evidence), the newest update, and which fields are still
 empty. A card with several segments or areas counts in each of its cells;
 cards with no segment or no area are counted apart, never guessed into one.
 
-The matrix comes from the vault's `vault.json` `coverage` block for a vault,
-else the dataset's `coverage.json`, else the shipped `coverage_matrix.json`
-(the owner's chart; its segment ids are the vault's default folders).
+The matrix comes from the dataset's domain configuration when its domains
+name segments (BI vault V10, `domains.py`: one market per domain), else the
+vault's `vault.json` `coverage` block for a vault, else the dataset's
+`coverage.json`, else the shipped `coverage_matrix.json` (the owner's chart;
+its segment ids are the vault's default folders).
 """
 
 from __future__ import annotations
@@ -22,6 +24,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from capabilities.bi_cards import domains
 from capabilities.bi_cards.schema import Registry, norm_key
 from capabilities.bi_cards.service import current_fields
 from capabilities.bi_cards.store import BiStore, BiStoreError, dataset_dir, vault_of
@@ -81,7 +84,12 @@ def validate(document: Any) -> dict[str, Any]:
 
 
 def matrix_for(workspace: Path, dataset: str) -> tuple[dict[str, Any], str]:
-    """The dataset's matrix and where it came from (`vault`, `dataset` or `shipped`)."""
+    """The dataset's matrix and where it came from (`domains`, `vault`,
+    `dataset` or `shipped`)."""
+    configured = domains.read(BiStore(workspace, dataset))
+    derived = configured.matrix() if configured is not None else None
+    if derived is not None:
+        return validate(derived), "domains"
     vault_id = vault_of(workspace, dataset)
     if vault_id is not None:
         from capabilities.bi_cards import vault

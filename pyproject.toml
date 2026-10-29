@@ -92,6 +92,8 @@ extend-exclude = [
     "tests/fixtures/bi_vault_example",
     # The robotics BI sample (schema v4), kept verbatim (owner 2026-10-21).
     "tests/fixtures/robotics_kb_sample",
+    # The manager's BI schema v8, kept verbatim (owner 2026-10-29, BI vault V9).
+    "tests/fixtures/bi_schema_v8",
     # The owner's untracked working folder.
     "files",
 ]
@@ -112,7 +114,11 @@ strict = true
 files = ["src", "tests"]
 plugins = ["pydantic.mypy"]
 # The owner's BI example tools are verbatim reference fixtures, not our code.
-exclude = ["tests/fixtures/bi_vault_example/", "tests/fixtures/robotics_kb_sample/"]
+exclude = [
+    "tests/fixtures/bi_vault_example/",
+    "tests/fixtures/robotics_kb_sample/",
+    "tests/fixtures/bi_schema_v8/",
+]
 
 # The source loan tests, vendored unchanged apart from their imports as the
 # oracle for capabilities.loan_reply (tests/loan_oracle.py); they carry no

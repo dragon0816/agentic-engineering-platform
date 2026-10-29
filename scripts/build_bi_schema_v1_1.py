@@ -139,12 +139,15 @@ def _field(
     enum: Any = None,
     default: Any = None,
     rng: Any = None,
+    allowed: Any = None,
 ) -> dict[str, Any]:
+    # v7+ names a list field's allowed values `allowed`; the registry keeps
+    # them as the field's `enum` (BI vault V9).
     return {
         "kind": kind,
         "aliases": list(aliases),
         "required": required,
-        "enum": enum,
+        "enum": enum if enum is not None else allowed,
         "default": default,
         "range": rng,
     }
@@ -195,7 +198,35 @@ def _label(name: str, aliases: list[str]) -> str:
 
 
 def build() -> dict[str, Any]:
-    source = V4.read_bytes()
+    return build_from(
+        V4,
+        labels=TYPE_LABELS,
+        links=LINK_TARGETS,
+        judgement=JUDGEMENT,
+        meta={
+            "schema_id": "bi.schema/v1.1",
+            "version": "1.1.0",
+            "status": "poc-contract",
+            "title": (
+                "BI Knowledge Schema v1.1 (schema v4 of the robotics sample; owner 2026-10-21)"
+            ),
+            "primary": "tests/fixtures/robotics_kb_sample/tools/bi_schema.py",
+            "generator": "scripts/build_bi_schema_v1_1.py",
+        },
+    )
+
+
+def build_from(
+    path: Path,
+    *,
+    labels: dict[str, str],
+    links: dict[str, list[str]],
+    judgement: set[str],
+    meta: dict[str, str],
+) -> dict[str, Any]:
+    """The registry document of one `bi_schema.py`. `links` is keyed by field
+    name, or by `Type.field` where one name links differently per type."""
+    source = path.read_bytes()
     tree = ast.parse(source.decode("utf-8"))
     reader = _Reader(tree)
     DOMAINS[:] = reader.value(reader.names["DOMAINS"])
@@ -221,13 +252,15 @@ def build() -> dict[str, Any]:
                 "derived"
                 if field_name in DERIVED
                 else "judgement"
-                if field_name in JUDGEMENT or f"{name}.{field_name}" in JUDGEMENT
+                if field_name in judgement or f"{name}.{field_name}" in judgement
                 else "sourced"
             )
             link = kind in ("link", "linklist")
-            targets = LINK_TARGETS.get(field_name, []) if link else []
-            if link and field_name not in LINK_TARGETS:
-                raise ValueError(f"no link target for {name}.{field_name}")
+            qualified = f"{name}.{field_name}"
+            known = qualified in links or field_name in links
+            targets = links.get(qualified, links.get(field_name, [])) if link else []
+            if link and not known:
+                raise ValueError(f"no link target for {qualified}")
             fields.append(
                 {
                     "name": field_name,
@@ -263,7 +296,7 @@ def build() -> dict[str, Any]:
         types.append(
             {
                 "name": name,
-                "label": TYPE_LABELS[name],
+                "label": labels[name],
                 "code_key": code_key,
                 "naming": spec["filename"],
                 "domain": spec["domain"],
@@ -272,16 +305,16 @@ def build() -> dict[str, Any]:
             }
         )
     return {
-        "schema_id": "bi.schema/v1.1",
-        "version": "1.1.0",
-        "status": "poc-contract",
-        "title": "BI Knowledge Schema v1.1 (schema v4 of the robotics sample; owner 2026-10-21)",
+        "schema_id": meta["schema_id"],
+        "version": meta["version"],
+        "status": meta["status"],
+        "title": meta["title"],
         "source": {
-            "primary": "tests/fixtures/robotics_kb_sample/tools/bi_schema.py",
+            "primary": meta["primary"],
             # LF-normalised, so a CRLF checkout gives the same digest.
             "primary_sha256": hashlib.sha256(source.replace(b"\r\n", b"\n")).hexdigest(),
             "read_without_executing": True,
-            "generator": "scripts/build_bi_schema_v1_1.py",
+            "generator": meta["generator"],
             "kept_from": "bi.schema/v1 (id_rules, field_classes)",
         },
         "id_rules": v1["id_rules"],

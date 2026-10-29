@@ -9,6 +9,13 @@ imports these types; the Harness stays type-agnostic.
 Application `priority` is not a field (#222): an imported 優先度 column is
 reported as ignored with `PRIORITY_REASON`. Trend priority is computed for
 display (measurement_impact x our_fit), never stored.
+
+BI vault V9 (`docs/phases/BI_VAULT.md` §12): a second shipped version,
+`bi.schema/v1.1@2.0.0` (`bi_schema_v2.json`, from the owner's manager's
+schema v8 by `scripts/build_bi_schema_v2.py`; 2.0.0 so it never meets a local
+Session A version, which are 1.x minor steps), adds `float` fields, allowed
+values on a list field (`enum` on kind `list`), and widens one-value fields to
+lists (Node `domain`); a widening is not a breaking change (`WIDENINGS`).
 """
 
 from __future__ import annotations
@@ -22,7 +29,14 @@ from pathlib import Path
 from typing import Any
 
 SCHEMA_FILE = Path(__file__).with_name("bi_schema_v1_1.json")
+#: Every shipped version of the BI schema, oldest first; the first is the base
+#: every installed `bi.schema/*` version must stay compatible with.
+SHIPPED_FILES = (SCHEMA_FILE, Path(__file__).with_name("bi_schema_v2.json"))
 SCHEMA_ID = "bi.schema/v1.1"
+#: Kind changes that keep every stored value meaningful (BI vault V9): a value
+#: becomes a one-item list, or an integer a decimal number.
+WIDENINGS = frozenset({("enum", "list"), ("str", "list"), ("link", "linklist"), ("int", "float")})
+NUMBER_RE = re.compile(r"[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?")
 #: Schema ids under this prefix are the shipped BI schemas: only their datasets
 #: get the Dashboard and the chat's `bi__query` (owner 2026-10-21).
 BI_PREFIX = "bi.schema/"
@@ -31,6 +45,22 @@ TRUE_SET = {"true", "yes", "y", "1", "是", "有", "t"}
 FALSE_SET = {"false", "no", "n", "0", "否", "無", "f"}
 SEPARATORS = set(";；、|\n")
 OPEN, CLOSE = set("(（"), set(")）")
+
+
+def widens(old: str, new: str) -> bool:
+    """Whether a field may change kind `old` → `new` without breaking (V9)."""
+    return (old, new) in WIDENINGS
+
+
+def widen_value(value: Any, new_kind: str) -> Any:
+    """A stored value under the widened kind: one-item list, or float."""
+    if value is None:
+        return None
+    if new_kind in ("list", "linklist"):
+        return value if isinstance(value, list) else [value]
+    if new_kind == "float" and isinstance(value, int) and not isinstance(value, bool):
+        return float(value)
+    return value
 
 
 def norm_key(text: object) -> str:
@@ -48,7 +78,7 @@ class FieldDef:
     aliases: tuple[str, ...]
     required: bool
     default: Any
-    range: tuple[int, int] | None
+    range: tuple[float, float] | None
     link_to: tuple[str, ...]
     is_list: bool
 
@@ -66,6 +96,7 @@ class TypeDef:
     has_confidence: bool
     fields: tuple[FieldDef, ...]
     ignored: tuple[dict[str, Any], ...] = field(default=())
+    code_key: str = ""
 
     def get(self, name: str) -> FieldDef | None:
         return next((f for f in self.fields if f.name == name), None)
@@ -114,6 +145,7 @@ class Registry:
                     has_confidence=bool(raw["has_confidence"]),
                     fields=fields,
                     ignored=tuple(ignored.get(raw["name"], ())),
+                    code_key=str(raw.get("code_key") or ""),
                 )
             )
         self.types: dict[str, TypeDef] = {t.name: t for t in types}
@@ -154,6 +186,19 @@ class Registry:
             if key in names:
                 return None, "ignored", str(skipped["reason"])
         return None, "unknown", "schema 沒有這個欄位，不匯入"
+
+    def type_in_filename(self, filename: str) -> str | None:
+        """The type a file is named after (`09_supply_link.csv`, `Node.xlsx`):
+        tables keyed by field names (`name,domain,body`) fit many types, so a
+        name that says which wins over the headers. The longest match decides."""
+        stem = norm_key(Path(str(filename or "")).stem)
+        found = [
+            (len(key), entity.name)
+            for entity in self.types.values()
+            for key in {norm_key(entity.name), norm_key(entity.code_key)}
+            if key and key in stem
+        ]
+        return max(found)[1] if found else None
 
     def guess_type(self, headers: list[str]) -> str | None:
         """The type whose naming field and most columns the headers match."""
@@ -218,6 +263,27 @@ class Registry:
             if item.is_list:
                 return (values or None), warnings
             return (values[0] if values else None), warnings
+        if item.kind == "list" and item.enum:
+            # Allowed values on a list (V9): each part like an enum value; an
+            # unknown part is dropped with a warning, never guessed.
+            kept, bad = [], []
+            for part in split_list(text):
+                hit = self._option(item.enum, aliases, part)
+                if hit is None:
+                    bad.append(part)
+                elif hit not in kept:
+                    kept.append(hit)
+            warnings = (
+                [
+                    (
+                        "type_mismatch",
+                        f"{item.label}：{'、'.join(bad)} 不在允許值 {list(item.enum)}，已略過",
+                    )
+                ]
+                if bad
+                else []
+            )
+            return (kept or None), warnings
         if item.kind in ("list", "linklist"):
             parts = split_list(text)
             return (parts or None), []
@@ -225,12 +291,15 @@ class Registry:
             return text, []
         if item.kind == "int":
             if re.fullmatch(r"-?\d+", text):
-                number = int(text)
-                if item.range and not item.range[0] <= number <= item.range[1]:
-                    low, high = item.range
-                    return None, [("type_mismatch", f"{item.label}：{number} 超出 {low}–{high}")]
-                return number, []
+                return self._in_range(item, int(text))
             return None, [("type_mismatch", f"{item.label}：「{text}」不是整數，未採用")]
+        if item.kind == "float":
+            # Digits with optional thousands separators and an optional trailing
+            # %; units, 約 and ranges are not read (the source text keeps them).
+            number = text[:-1].rstrip() if text[-1:] in ("%", "％") else text
+            if NUMBER_RE.fullmatch(number):
+                return self._in_range(item, float(number.replace(",", "")))
+            return None, [("type_mismatch", f"{item.label}：「{text}」不是數字，未採用")]
         if item.kind == "bool":
             if text.lower() in TRUE_SET:
                 return True, []
@@ -244,16 +313,30 @@ class Registry:
             return parsed, []
         if item.kind == "enum":
             assert item.enum is not None
-            for option in item.enum:
-                if text.lower() == option.lower():
-                    return option, []
-            for alias, option in aliases.items():
-                if norm_key(alias) == norm_key(text):
-                    return option, []
+            option = self._option(item.enum, aliases, text)
+            if option is not None:
+                return option, []
             return None, [
                 ("type_mismatch", f"{item.label}：「{text}」不在允許值 {list(item.enum)}")
             ]
         return text, []
+
+    @staticmethod
+    def _option(enum: tuple[str, ...], aliases: dict[str, str], text: str) -> str | None:
+        for option in enum:
+            if text.lower() == option.lower():
+                return option
+        for alias, option in aliases.items():
+            if norm_key(alias) == norm_key(text):
+                return option
+        return None
+
+    @staticmethod
+    def _in_range(item: FieldDef, number: float) -> tuple[Any, list[tuple[str, str]]]:
+        if item.range and not item.range[0] <= number <= item.range[1]:
+            low, high = item.range
+            return None, [("type_mismatch", f"{item.label}：{number:g} 超出 {low:g}–{high:g}")]
+        return number, []
 
 
 def split_list(text: str) -> list[str]:
@@ -302,5 +385,11 @@ def parse_date(text: str) -> str | None:
 
 
 @lru_cache(maxsize=1)
+def shipped() -> tuple[Registry, ...]:
+    """Every shipped version, oldest first (`SHIPPED_FILES`)."""
+    return tuple(Registry(json.loads(p.read_text(encoding="utf-8"))) for p in SHIPPED_FILES)
+
+
 def registry() -> Registry:
-    return Registry(json.loads(SCHEMA_FILE.read_text(encoding="utf-8")))
+    """The base shipped version, `bi.schema/v1.1@1.1.0`."""
+    return shipped()[0]

@@ -27,7 +27,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import catalog, extract, runs, source_markdown
+from capabilities.bi_cards import catalog, domains, extract, runs, source_markdown
 from capabilities.bi_cards.schema import Registry, norm_key
 from capabilities.bi_cards.staging import Staging, parse_kind
 from capabilities.bi_cards.store import BiStoreError
@@ -220,6 +220,7 @@ def _extract(
         layout.update(done=done, chunks=total)
         staging.put_layout(run_id, layout)
 
+    configured = domains.read(staging.store)
     result = extract.extract(
         model,
         alias,
@@ -232,10 +233,13 @@ def _extract(
         known=extract.known_names(staging.store.card_rows()),
         only=only,
         on_chunk=progress,
+        domain_notes=configured.extraction_notes() if configured is not None else "",
     )
     found = staging.candidates(run_id) if only else []
     by_key = {_key(reg, c): c for c in found}
     for item in result.candidates:
+        if configured is not None:
+            _canonical_names(configured, reg, item)
         key = _key(reg, item)
         if key in by_key:
             extract.merge(by_key[key], item)
@@ -262,3 +266,22 @@ def _extract(
         staging.set_status(run_id, "partial")
     else:
         staging.set_status(run_id, "failed", error="所有段落都沒有成功判讀")
+
+
+def _canonical_names(configured: domains.Config, reg: Registry, item: dict[str, Any]) -> None:
+    """A model candidate's name and link targets in their canonical spelling
+    (the dataset's `name_aliases`, BI vault V10), before merging by name."""
+    entity = reg.types.get(str(item.get("entity_type")))
+    if entity is None:
+        return
+    for entry in item.get("fields") or []:
+        definition = entity.get(str(entry.get("field")))
+        if definition is None or not (definition.is_link or definition.name == entity.naming_field):
+            continue
+        value = entry.get("value")
+        if isinstance(value, list):
+            entry["value"] = list(dict.fromkeys(configured.canon(v) for v in value))
+        elif isinstance(value, str):
+            entry["value"] = configured.canon(value)
+    if isinstance(item.get("name"), str):
+        item["name"] = configured.canon(item["name"])

@@ -37,7 +37,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 from capabilities.bi_cards import catalog, schema_versions
-from capabilities.bi_cards.schema import BI_PREFIX, SCHEMA_FILE, registry
+from capabilities.bi_cards.schema import BI_PREFIX, shipped
 from capabilities.bi_cards.store import DB_FILE, SCHEMA, BiStore
 from common.assets import SECRET_FIELD, SECRET_PATTERN
 
@@ -296,7 +296,7 @@ def _schema_block(store: BiStore) -> dict[str, Any]:
     ref = store.schema_ref()
     reg = catalog.resolve(store.workspace, ref)
     if reg.source == "shipped":
-        document = json.loads(SCHEMA_FILE.read_text(encoding="utf-8"))
+        document = json.loads(json.dumps(reg.document))
     else:
         path = catalog.schema_path(store.workspace, reg.schema_id, reg.version)
         document = json.loads(path.read_text(encoding="utf-8"))
@@ -748,8 +748,8 @@ def schema_state(snapshot: Snapshot, workspace: Path) -> SchemaState:
     shipped schema is matched by id@version (an AEP release that ships it
     is enough); an installed one by its canonical content."""
     if snapshot.schema_source == "shipped":
-        shipped = registry()
-        if (shipped.schema_id, shipped.version) == (snapshot.schema_id, snapshot.schema_version):
+        wanted = (snapshot.schema_id, snapshot.schema_version)
+        if any((reg.schema_id, reg.version) == wanted for reg in shipped()):
             return "shipped"
         return "unavailable"
     path = catalog.schema_path(workspace, snapshot.schema_id, snapshot.schema_version)

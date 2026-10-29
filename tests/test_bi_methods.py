@@ -138,8 +138,10 @@ def _cards(tmp_path: Path) -> bytes:
 
 
 def _upgrade(tmp_path: Path) -> None:
-    """Publish bi.schema/v1.1@1.2.0 with one more field and move demo to it."""
-    draft = _ok(_call(tmp_path, "POST", "/api/bi/schema-drafts", {"base": "bi.schema/v1.1"}))
+    """Publish a local version of 1.1.0 with one more field and move demo to it
+    (2.1.0: the next version above the shipped 2.0.0)."""
+    base = {"base": "bi.schema/v1.1@1.1.0"}
+    draft = _ok(_call(tmp_path, "POST", "/api/bi/schema-drafts", base))
     draft_id = draft["draft"]["id"]
     document = copy.deepcopy(draft["document"])
     tech = next(t for t in document["types"] if t["name"] == "Technology")
@@ -149,7 +151,7 @@ def _upgrade(tmp_path: Path) -> None:
     path = f"/api/bi/schema-drafts/{draft_id}/revisions"
     _ok(_call(tmp_path, "POST", path, {"document": document}))
     _ok(_call(tmp_path, "POST", f"/api/bi/schema-drafts/{draft_id}/publish", {}))
-    target = {"to": "bi.schema/v1.1@1.2.0"}
+    target = {"to": "bi.schema/v1.1@2.1.0"}
     preview = _ok(_call(tmp_path, "POST", "/api/bi/datasets/demo/schema/preview", target))
     token = {**target, "preview_token": preview["preview_token"]}
     _ok(_call(tmp_path, "POST", "/api/bi/datasets/demo/schema/apply", token))
@@ -290,7 +292,7 @@ def test_session_b_shows_the_difference_reverts_and_writes_nothing(tmp_path: Pat
     _run(tmp_path, ai, jobs, kind="trial", source_id=note, method_id=method_id)
     cleared = _detail(tmp_path, method_id)
     assert cleared["status"]["schema_changed"] is False
-    assert cleared["status"]["rechecked"]["schema_ref"] == "bi.schema/v1.1@1.2.0"
+    assert cleared["status"]["rechecked"]["schema_ref"] == "bi.schema/v1.1@2.1.0"
     ingest = _run(tmp_path, ai, jobs, kind="ingest", source_id=note, method_id=method_id)
     assert ingest["status"] == "review" and ingest["kind"] == "ingest"
 

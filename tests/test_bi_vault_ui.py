@@ -101,8 +101,11 @@ def test_vault_panel_and_coverage_in_a_browser(served: Any, tmp_path: Path) -> N
         for label in ("Wireless Devices & Chipsets", "Cell Phone（重點）", "OSAT", "EMC"):
             assert label in head, label
         click("#bi-cov-body td button")
-        wait("document.getElementById('bi-cov-cell').textContent.includes('還沒有卡片')")
-        assert "Cell Phone × Wireless & Comm." in text_of("bi-cov-cell")
+        # One wait for both: the cell panel re-renders, so a second read can land on it empty.
+        wait(
+            "(() => { const t = document.getElementById('bi-cov-cell').textContent;"
+            " return t.includes('還沒有卡片') && t.includes('Cell Phone × Wireless & Comm.'); })()"
+        )
         shoot("coverage")
         size(390, 844, True)
         assert not run(
@@ -110,6 +113,19 @@ def test_vault_panel_and_coverage_in_a_browser(served: Any, tmp_path: Path) -> N
         )
         shoot("coverage-phone")
         size(1366, 1000, False)
+
+        # -- per-domain configuration (BI vault V10) ------------------------------------------
+        wait("document.getElementById('bi-dom-sub').textContent.includes('尚未設定')")
+        click("#bi-dom summary")
+        click("#bi-dom-sample")
+        assert "aidc-computing" in str(run("document.getElementById('bi-dom-text').value"))
+        click("#bi-dom-save")
+        wait("document.getElementById('bi-notice').textContent.includes('領域設定已儲存')")
+        wait("document.getElementById('bi-cov-sub').textContent.includes('領域設定的矩陣')")
+        # Schema v4 has no `segments` field: said so, the configuration is kept.
+        wait("document.getElementById('bi-dom-warn').textContent.includes('schema 沒有欄位')")
+        assert "第 1 版" in text_of("bi-dom-sub")
+        shoot("domains")
 
         # -- step 1: the demo dataset becomes a vault ----------------------------------------
         click("#bi-views [data-bi-view=build]")

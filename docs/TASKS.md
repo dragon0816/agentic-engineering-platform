@@ -3769,9 +3769,27 @@ s-k-20261011T102952` (not published).
   folder renames use `schema_versions.replace` (a full-suite run hit `PermissionError` once).
 - [x] BI vault design §12 (2026-10-29, Claude Code): compared the manager's five hand-made knowledge bases;
   owner chose one market BI vault for every domain, domains as configuration (`docs/DECISIONS.md`).
-- [ ] BI vault V9–V13 (proposed, owner go-ahead each): schema shapes (one value → list, `float`, allowed list
-  values), per-domain `vault.json` configuration and coverage, extraction Skill evidence rules, built-in
-  analyses §1–§31, built-in quality checks. Plan `docs/phases/BI_VAULT.md` §12.
+- [x] BI vault V9 (2026-10-29, Claude Code): schema v8 shipped as `bi.schema/v1.1@2.0.0` (21 types), `float`,
+  allowed values on lists, widening kind changes migrated on upgrade (vault-shared), type from the file name,
+  `%` on floats. Contract "BI schema 2.0, new kinds and widening"; tests `tests/test_bi_schema_v2.py`.
+- [x] BI vault V10 (2026-10-29, Claude Code): per-domain configuration (`aep.bi.domains/v1`, dataset meta
+  `domains`, shared by change files) with revisions and warnings; coverage matrix from it; enum and name
+  aliases applied to imports and AI candidates; node chains. Contract "BI domain configuration"; tests
+  `tests/test_bi_domains.py`, panel check in `tests/test_bi_vault_ui.py`.
+- [x] BI vault V11 (2026-10-29, Claude Code): fixed evidence rules in every AI extraction (A–D grades when a
+  type grades evidence), domain `notes`, a fact number must be written in its quote (兆/億 amounts read) or
+  it becomes an inference. Contract "BI extraction evidence rules"; tests `tests/test_bi_extract_evidence.py`.
+- [x] BI vault V12 (2026-10-29, Claude Code): the manager's dashboard §20–§31 and chains A–A3 built in
+  (`market.py`), sample switch, domain picker from the schema, every section askable through `bi__query`.
+  Checked on his AIDC seeds (323 cards): the numbers match his README. Contract "BI market analyses"; tests
+  `tests/test_bi_market.py`.
+- [x] BI vault V13 (2026-10-29, Claude Code): ten quality checks from the manager's `validate.py`, general
+  (`quality.py`, `/api/bi/quality`, Dashboard section Q, `bi__query` `quality`); `SAMPLE-` rows import as
+  samples; `node_name_pattern` in the domain configuration. On his AIDC seeds: 0 issues, 3 deliberate gaps,
+  as his own check. Contract "BI quality checks"; tests `tests/test_bi_quality.py`.
+- [ ] BI vault V8 (permissions per domain): last; confirm with the owner before starting (testing without
+  permissions was his rule, 2026-10-28). Plan `docs/phases/BI_VAULT.md` §12. V8 (permissions per domain)
+  last, to confirm with the owner.
 - [ ] BI vault V4 follow-ups: show the `merge` flag on the card detail; sync on a timer or on page open;
   incremental scan (today every sync reads every change file); sources into the vault's folders.
 - [x] BI vault V2 backend: convert every source to Markdown, editable revisions, runs read the Markdown.

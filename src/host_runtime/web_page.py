@@ -2234,6 +2234,8 @@ tr:last-child td { border-bottom: none; }
               <option value="wireless">無線通訊 Wireless</option>
               <option value="aidc">AIDC</option>
             </select></div>
+          <div id="bi-sample-box"><label class="bi-check"><input type="checkbox" id="bi-sample">
+            含 SAMPLE 示範卡</label></div>
           <div class="bi-counts" id="bi-counts" role="status" aria-live="polite">&hellip;</div>
         </div>
         <div class="bi-actions">
@@ -2382,6 +2384,20 @@ tr:last-child td { border-bottom: none; }
             <span class="bi-meta" id="bi-cov-sub"></span></summary>
           <div id="bi-cov-body" aria-live="polite"></div>
           <div id="bi-cov-cell" aria-live="polite"></div>
+        </details>
+        <details class="card" id="bi-dom">
+          <summary><strong>領域設定</strong>
+            <span class="bi-meta" id="bi-dom-sub"></span></summary>
+          <p class="bi-meta">一個市場知識庫放所有領域；各領域的應用領域（segments）、價值鏈節點、
+            鏈別（由節點名稱或清單判斷）、技術領域與別名都在這裡設定，不必改 schema 或程式。
+            有 segments 時，上面的矩陣就依這份設定。</p>
+          <label class="bi-label" for="bi-dom-text">設定內容（JSON）</label>
+          <textarea id="bi-dom-text" class="bi-input" rows="14" spellcheck="false"></textarea>
+          <div id="bi-dom-warn" aria-live="polite"></div>
+          <div class="bi-actions">
+            <button class="bi-btn" id="bi-dom-save" type="button">儲存設定</button>
+            <button class="bi-btn" id="bi-dom-sample" type="button">填入範例</button>
+          </div>
         </details>
         <div class="mem-status" id="bi-status-dash" role="status" aria-live="polite" hidden></div>
         <div id="bi-dash-summary" class="bi-summary"></div>
@@ -10983,11 +10999,30 @@ function biSchemaTitle(ref) {
   return found ? found.title : ref;
 }
 
+// The schema's own domains (2.0.0 adds mobile and aerospace, BI vault V9/V12).
+const BI_DOMAIN_LABELS = {robotics: "機器人 Robotics", wireless: "無線通訊 Wireless",
+  aidc: "AIDC", mobile: "行動 Mobile", aerospace: "航太 Aerospace"};
+
+function biDomainOptions(domains) {
+  if (!domains.length) return;
+  const select = el("bi-domain"), current = select.value.toLowerCase();
+  select.replaceChildren(...domains.map((d) => {
+    const option = document.createElement("option");
+    // Lower case, as before: the host compares domains without case.
+    option.value = d.toLowerCase(); option.textContent = BI_DOMAIN_LABELS[d.toLowerCase()] || d;
+    return option;
+  }));
+  const values = domains.map((d) => d.toLowerCase());
+  select.value = values.includes(current) ? current
+    : (values.includes("robotics") ? "robotics" : values[0]);
+}
+
 function biRenderSchema() {
   const isBi = biIsBi(), schema = bi.schema || {};
   el("bi-demo").hidden = !isBi;
   el("bi-hint").hidden = !isBi;
   el("bi-domain-box").hidden = Array.isArray(schema.domains) && !schema.domains.length;
+  biDomainOptions(schema.domains || []);
   const note = el("bi-schema-note"); note.replaceChildren();
   if (!schema.ref) return;
   note.append(text("Schema："), bh("strong", "", schema.title || schema.ref),
@@ -11102,6 +11137,9 @@ el("bi-empty-new").addEventListener("click", () => biOpenNew());
 el("bi-domain").addEventListener("change", () => {
   bi.loaded = {}; bi.cardId = null; biShowView(bi.view);
 });
+el("bi-sample").addEventListener("change", () => {
+  bi.loaded = {}; biShowView(bi.view);
+});
 el("bi-demo").addEventListener("click", async () => {
   const button = el("bi-demo"); button.disabled = true; button.setAttribute("aria-busy", "true");
   biNotice(true, "");
@@ -11164,7 +11202,8 @@ async function biLoadDashboard() {
   let reply;
   try {
     reply = await biCall("/api/bi/dashboard?dataset=" + encodeURIComponent(biDataset())
-      + "&domain=" + encodeURIComponent(biDomain()));
+      + "&domain=" + encodeURIComponent(biDomain())
+      + (el("bi-sample").checked ? "&include_sample=1" : ""));
   } catch (failure) {
     if (seq !== bi.dashSeq) return;
     biStatus("bi-status-dash", "error", "Dashboard 載入失敗：" + failure.message + "。",
@@ -11175,6 +11214,53 @@ async function biLoadDashboard() {
   biStatus("bi-status-dash", ""); bi.loaded.dashboard = true;
   biRenderDashboard(reply);
   biLoadCoverage(seq);
+}
+
+// -- per-domain configuration (BI vault V10, BI_VAULT.md §12) --------------------
+const BI_DOM_SAMPLE = {
+  domains: [{id: "AIDC", label: "AI 資料中心",
+    segments: [{id: "aidc-computing", label: "AIDC Computing", priority: true},
+      {id: "aidc-power", label: "AIDC Power"}],
+    chains: [{id: "CMP", label: "運算鏈", node_pattern: "^L\\d-CMP-"},
+      {id: "PWR", label: "電力鏈", node_pattern: "^L\\d-PWR-"}],
+    nodes: []}],
+  areas: [{id: "wireless-comm", label: "Wireless & Comm."}, {id: "rf", label: "RF"}],
+  segment_field: "segments", area_field: "tech_areas",
+  name_aliases: {"聯發科": "MediaTek"}, enum_aliases: {}};
+
+async function biLoadDomains() {
+  const warn = el("bi-dom-warn"); warn.replaceChildren();
+  let reply;
+  try {
+    reply = await biCall("/api/bi/domains?dataset=" + encodeURIComponent(biDataset()));
+  } catch (failure) {
+    warn.append(bh("p", "bi-err", "領域設定沒有載入：" + failure.message + "。"));
+    return;
+  }
+  bi.domains = reply;
+  el("bi-dom-sub").textContent = reply.configured
+    ? "・第 " + reply.revision + " 版・" + reply.config.domains.length + " 個領域" : "・尚未設定";
+  el("bi-dom-text").value = reply.config ? JSON.stringify(reply.config, null, 1) : "";
+  biDomainWarnings(reply.warnings || []);
+}
+
+function biDomainWarnings(items) {
+  const warn = el("bi-dom-warn"); warn.replaceChildren();
+  if (items.length) {
+    warn.append(bh("ul", "bi-warn", ...items.map((w) => bh("li", "", w.message))));
+  }
+}
+
+async function biSaveDomains() {
+  let config;
+  try { config = JSON.parse(el("bi-dom-text").value); }
+  catch (failure) { biNotice(false, "設定不是有效的 JSON：" + failure.message); return; }
+  const reply = await biCall("/api/bi/domains", {dataset: biDataset(), config,
+    base_revision: (bi.domains && bi.domains.revision) || 0});
+  biNotice(true, "領域設定已儲存（第 " + reply.revision + " 版）。");
+  bi.domains = reply; biDomainWarnings(reply.warnings || []);
+  el("bi-dom-text").value = JSON.stringify(reply.config, null, 1);
+  biLoadCoverage(bi.dashSeq);
 }
 
 // -- coverage: segment x technology area (BI vaults V5, BI_VAULT.md §6.2) -----
@@ -11191,11 +11277,12 @@ async function biLoadCoverage(seq) {
   }
   if (seq !== bi.dashSeq) return;
   biRenderCoverage(report);
+  biLoadDomains();
 }
 
 function biRenderCoverage(report) {
   const body = el("bi-cov-body"), m = report.matrix, totals = report.totals;
-  const source = {vault: "vault 的矩陣", dataset: "資料集的矩陣",
+  const source = {domains: "領域設定的矩陣", vault: "vault 的矩陣", dataset: "資料集的矩陣",
     shipped: "預設矩陣（市場應用圖）"};
   el("bi-cov-sub").textContent = "・" + (source[report.matrix_source] || "") + "・"
     + totals.cards + " 張卡片，" + totals.no_segment + " 張沒有應用領域";
@@ -11456,6 +11543,13 @@ function biAtlasUrl() {
   return saved || BI_ATLAS_DEFAULT;
 }
 
+el("bi-dom-save").addEventListener("click", () => {
+  biSaveDomains().catch((failure) => biNotice(false, "領域設定沒有儲存：" + failure.message));
+});
+el("bi-dom-sample").addEventListener("click", () => {
+  if (el("bi-dom-text").value.trim()) return biNotice(false, "已經有內容；清空後才填入範例。");
+  el("bi-dom-text").value = JSON.stringify(BI_DOM_SAMPLE, null, 1);
+});
 el("bi-atlas-set").addEventListener("toggle", () => { el("bi-atlas-url").value = biAtlasUrl(); });
 el("bi-atlas-save").addEventListener("click", () => {
   let value = el("bi-atlas-url").value.trim();
@@ -11706,7 +11800,8 @@ function biEditField(card, item, row) {
     if (spec.list) {
       value = value ? value.split(/[、,，;；]/).map((v) => v.trim()).filter(Boolean) : [];
     }
-    else if (spec.type === "int" && value !== "" && !isNaN(Number(value))) value = Number(value);
+    else if ((spec.type === "int" || spec.type === "float") && value !== ""
+      && !isNaN(Number(value))) value = Number(value);
     save.disabled = true; save.setAttribute("aria-busy", "true");
     try {
       const reply = await biCall("/api/bi/cards/" + encodeURIComponent(card.id) + "/field",
@@ -12216,6 +12311,8 @@ async function biBuildUpgradePreview(to) {
     const lines = [
       biImpactList("改名後移動的值", type.renamed, (r) => r.from + " → " + r.to + "（"
         + r.cards + " 張）"),
+      biImpactList("放寬成清單或小數，既有值保留", type.widened || [], (w) => w.field + "："
+        + w.from + " → " + w.to + "（" + w.cards + " 張）"),
       biImpactList("保留但隱藏（新版本沒有這個欄位）", type.hidden, (h) => h.field + "（"
         + h.cards + " 張）"),
       biImpactList("值已不在允許值裡，保留待審", type.retired, (r) => r.name + "・"

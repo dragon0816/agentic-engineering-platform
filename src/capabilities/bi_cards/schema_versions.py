@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Any
 
 from capabilities.bi_cards import catalog
-from capabilities.bi_cards.schema import SCHEMA_FILE, Registry
+from capabilities.bi_cards.schema import Registry, widens
 from capabilities.bi_cards.store import BiStore, BiStoreError, now
 
 DRAFTS_DIR = "schema-drafts"
@@ -119,8 +119,12 @@ def diff(old: Any, new: Any) -> list[dict[str, Any]]:
                 continue
             else:
                 target = new_fields[field]
-            if item.get("kind") != target.get("kind"):
-                add(name, field, "kind", f"型別 {item.get('kind')} → {target.get('kind')}", True)
+            old_kind, new_kind = str(item.get("kind")), str(target.get("kind"))
+            if old_kind != new_kind:
+                if widens(old_kind, new_kind):
+                    add(name, field, "widened", f"放寬 {old_kind} → {new_kind}，既有值保留", False)
+                else:
+                    add(name, field, "kind", f"型別 {old_kind} → {new_kind}", True)
             if item.get("class") != target.get("class"):
                 add(
                     name, field, "class", f"類別 {item.get('class')} → {target.get('class')}", False
@@ -194,7 +198,7 @@ def base_document(workspace: Path, ref: str) -> tuple[Registry, dict[str, Any]]:
     """The schema a draft starts from, as its stored document."""
     reg = catalog.resolve(workspace, ref)
     if reg.source == "shipped":
-        return reg, json.loads(SCHEMA_FILE.read_text(encoding="utf-8"))
+        return reg, json.loads(json.dumps(reg.document))
     path = catalog.schema_path(workspace, reg.schema_id, reg.version)
     return reg, json.loads(path.read_text(encoding="utf-8"))
 
@@ -464,6 +468,20 @@ def _renames(target: Registry) -> dict[str, dict[str, str]]:
     return found
 
 
+def _widenings(current: Registry, target: Registry) -> dict[str, dict[str, str]]:
+    """`{type: {field: new kind}}` for every field `target` widens (V9)."""
+    found: dict[str, dict[str, str]] = {}
+    for name, new_type in target.types.items():
+        old_type = current.types.get(name)
+        if old_type is None:
+            continue
+        for definition in new_type.fields:
+            before = old_type.get(definition.name)
+            if before is not None and widens(before.kind, definition.kind):
+                found.setdefault(name, {})[definition.name] = definition.kind
+    return found
+
+
 def impact(store: BiStore, current: Registry, target: Registry) -> dict[str, Any]:
     """What moving `store` from `current` to `target` does to its cards."""
     cards = store.card_rows()
@@ -471,7 +489,7 @@ def impact(store: BiStore, current: Registry, target: Registry) -> dict[str, Any
     renames = _renames(target)
     types: list[dict[str, Any]] = []
     blocked: list[dict[str, str]] = []
-    totals = {"hidden": 0, "retired": 0, "renamed": 0, "required_missing": 0}
+    totals = {"hidden": 0, "retired": 0, "renamed": 0, "required_missing": 0, "widened": 0}
     for type_name in sorted({c["entity_type"] for c in cards} | set(target.types)):
         of_type = [c for c in cards if c["entity_type"] == type_name]
         old_type = current.types.get(type_name)
@@ -483,6 +501,7 @@ def impact(store: BiStore, current: Registry, target: Registry) -> dict[str, Any
             "renamed": [],
             "retired": [],
             "required_missing": [],
+            "widened": [],
         }
         if new_type is None:
             if of_type:
@@ -511,7 +530,17 @@ def impact(store: BiStore, current: Registry, target: Registry) -> dict[str, Any
                 totals["hidden"] += count
                 continue
             old_definition = old_type.get(name) if old_type is not None else None
-            if old_definition is not None and old_definition.kind != definition.kind:
+            if old_definition is not None and widens(old_definition.kind, definition.kind):
+                entry["widened"].append(
+                    {
+                        "field": name,
+                        "from": old_definition.kind,
+                        "to": definition.kind,
+                        "cards": count,
+                    }
+                )
+                totals["widened"] += count
+            elif old_definition is not None and old_definition.kind != definition.kind:
                 blocked.append(
                     {
                         "code": "kind_changed",
@@ -600,6 +629,7 @@ def upgrade_apply(workspace: Path, dataset: str, to: Any, token: Any, actor: str
         current.ref,
         target.ref,
         _renames(target),
+        widenings=_widenings(current, target),
         marker=marker,
         actor=actor,
         totals=found["totals"],

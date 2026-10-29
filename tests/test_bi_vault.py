@@ -171,7 +171,7 @@ def test_create_lays_out_the_folder_and_join_checks_it(tmp_path: Path) -> None:
     folder = drive.parent("a") / vault_id
     document = json.loads((folder / "vault.json").read_text(encoding="utf-8"))
     assert document["format"] == "bi.vault/v1" and document["id"] == vault_id
-    assert document["schema"] == "bi.schema/v1.1@1.1.0"
+    assert document["schema"] == "bi.schema/v1.1@2.0.0"  # the newest shipped version
     assert len(document["folders"]["applications"]) == 11
     assert (folder / "VAULT.md").read_text(encoding="utf-8").startswith("# Market Signals")
     for name in ("applications/robotics-amr/sources", "library/competitors/sources"):
@@ -181,7 +181,7 @@ def test_create_lays_out_the_folder_and_join_checks_it(tmp_path: Path) -> None:
     # No database is ever in the shared folder.
     assert not [p for p in folder.rglob("*") if p.suffix in (".sqlite", ".db")]
     assert dataset in datasets(a) and dataset in datasets(b)
-    assert BiStore(b, dataset).schema_ref() == "bi.schema/v1.1@1.1.0"
+    assert BiStore(b, dataset).schema_ref() == "bi.schema/v1.1@2.0.0"
     listed = _ok(_call(b, "GET", "/api/bi/vaults"))["vaults"]
     assert [(v["id"], v["author"], v["title"]) for v in listed] == [
         (vault_id, "bob", "Market Signals")

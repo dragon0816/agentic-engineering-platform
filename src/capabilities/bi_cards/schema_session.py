@@ -55,10 +55,13 @@ Rules:
   {"op": "add_enum_value", "type": "<Type>", "field": "<name>", "value": "..."}
   {"op": "add_alias", "type": "<Type>", "field": "<name>", "alias": "<column heading>"}
   {"op": "rename_field", "type": "<Type>", "field": "<old>", "to": "<new>"}
-  <field> = {"name": "snake_case", "label": "...", "kind": "str" | "int" | "bool" | "date" |
-  "enum" | "list" | "link" | "linklist", "class": "sourced" | "judgement" | "derived",
-  "enum": [...] (enum), "link_to": ["<Type>"] (links), "required": false, "aliases": [...]}
-- Prefer additive changes. Never remove a type or field that existing cards use.
+  <field> = {"name": "snake_case", "label": "...", "kind": "str" | "int" | "float" | "bool" |
+  "date" | "enum" | "list" | "link" | "linklist", "class": "sourced" | "judgement" | "derived",
+  "enum": [...] (enum; on a list: its allowed values), "link_to": ["<Type>"] (links),
+  "range": [min, max] (int, float), "required": false, "aliases": [...]}
+- Prefer additive changes. Never remove a type or field that existing cards use. A one-value
+  field may become a list (enum or str -> list, link -> linklist) and int may become float:
+  existing values are kept; any other kind change breaks existing cards.
 - Say what you assumed and what information is missing.
 - "examples": up to 3 sample cards from the samples: {"entity_type", "name", "fields": {}}.
 - Answer with JSON only:

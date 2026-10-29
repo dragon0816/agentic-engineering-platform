@@ -147,7 +147,8 @@ def test_source_markdown_and_search_in_a_browser(served: Any, tmp_path: Path) ->
         # -- the trial reads the edited Markdown --------------------------------------------
         click("#bi-stepper [data-stage=method]")
         wait("!document.querySelector('#bi-view-build .kp-stage[data-stage=method]').hidden")
-        assert run("document.getElementById('bi-b-m-pick').value") == "builtin:rules"
+        # The list of Skills arrives after the step opens; then the table source picks rules.
+        wait("document.getElementById('bi-b-m-pick').value === 'builtin:rules'")
         click("#bi-b-trial")
         wait("document.getElementById('bi-b-trial-result').textContent.includes('試跑完成')")
         assert "TSN-2026" in text_of("bi-b-trial-result")

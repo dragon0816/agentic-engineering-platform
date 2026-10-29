@@ -5502,3 +5502,38 @@ comparison is in `docs/phases/BI_VAULT.md` §12.
 - **Consequences**: proposed phases V9–V13 in §12 (schema shapes, per-domain `vault.json` configuration,
   extraction Skill evidence rules, built-in analyses, quality checks); V8 permissions become per domain.
   None started.
+
+## 2026-10-29: BI vaults V9–V13, implementation choices
+
+- **Schema v8 ships as `bi.schema/v1.1@2.0.0`, not 1.2.0.** Session A publishes local versions as the next
+  minor version (1.2.0, 1.3.0 …); a shipped 1.2.0 would take the place of a PC's own 1.2.0 and change the
+  schema of every dataset bound to it without a word. A local file can no longer install over a shipped
+  version. Rejected: replacing the shipped 1.1.0 (every existing dataset is bound to it).
+- **A bare `bi.schema/v1.1` now means 2.0.0** (the contract already said "newest version"), so a new vault
+  starts on v8; unbound datasets (demo) stay on 1.1.0. Tests that assumed the bare id meant 1.1.0 were
+  changed to name the version they meant.
+- **Widening is a kind change that keeps values** (`enum`/`str` → `list`, `link` → `linklist`, `int` →
+  `float`); the upgrade migrates values with history inside the same transaction, so vault capture shares
+  it. Other kind changes stay breaking (the test that used `str → list` as its breaking example now uses
+  `str → int`).
+- **`float` reads plain numbers and one trailing `%`**; 約, ranges and units are refused, as the manager's
+  rule keeps the original text instead of a guessed number.
+- **The file name names the type before the headers do**: the manager's CSVs use field keys
+  (`name,domain,body`), which fit many types; the header guess put `13_competitor.csv` in Opportunity.
+- **V10: the domain configuration lives in the dataset's `meta`, not in `vault.json`.** `vault.json` is
+  written once by the creating PC and no PC edits another's file (BI_VAULT.md §3); a configuration that
+  grows with each new domain must change many times, so it travels as `meta` change files, replayed in order
+  like every write, a concurrent save becoming a vault conflict. A segment the schema cannot hold yet is a
+  warning, not a refusal, so the configuration can be written before the schema step.
+- **V11: the evidence rules are part of the system prompt, not of the method.** The manager wrote them into
+  every seed script; a method edited in Session B could lose them, so they cannot be edited. Numbers are also
+  checked in code, because a prompt rule is not a guarantee: a fact number not written in its quote becomes
+  an inference (amounts in 兆/億 are read so the manager's unit conversion still passes).
+- **V12: the manager's sections are offered by type, not by version.** A section appears when the dataset's
+  schema has every type it reads, so v4 datasets gain only §20, §26 and §29–§31 and nothing breaks; the
+  chains come from the domain configuration, never from a field (his rule). Sample cards (`SAMPLE-…`) are
+  left out by default, as in his dashboards; the demo's cards do not use that prefix and are unaffected.
+- **V13: quality is read only and general.** The manager's checks named his folders and his AIDC node
+  format; here each check reads the schema (link targets, evidence grade, revenue layers) or the domain
+  configuration (`node_name_pattern`, a domain's `nodes`), so a new base needs settings, not a script.
+  Findings are `issue` (fix) or `warn` (an admitted gap), and nothing is changed by a check.

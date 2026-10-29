@@ -107,10 +107,12 @@ def _cards(root: Path, dataset: str, **query: str) -> list[dict[str, Any]]:
 def test_the_shipped_schema_is_listed_and_the_example_is_not_installed(tmp_path: Path) -> None:
     status, listed = _call(tmp_path, "GET", "/api/bi/schemas")
     assert status == 200
-    (shipped,) = listed["schemas"]
+    # Two shipped versions (BI vault V9): v4's 1.1.0, then v8's 2.0.0.
+    shipped, v8 = listed["schemas"]
     assert shipped["id"] == "bi.schema/v1.1" and shipped["version"] == "1.1.0"
     assert shipped["source"] == "shipped" and shipped["ref"] == LEGACY_SCHEMA
     assert len(shipped["types"]) == 12 and {"name", "label"} == set(shipped["types"][0])
+    assert (v8["ref"], v8["source"], len(v8["types"])) == ("bi.schema/v1.1@2.0.0", "shipped", 21)
     assert {"id", "version", "title", "types", "source"} <= set(shipped)
     assert not (tmp_path / "bi").exists()  # listing writes nothing
 
@@ -161,7 +163,7 @@ def test_an_invalid_schema_is_refused_with_errors_naming_each_field(tmp_path: Pa
     bad["types"][0]["fields"].append(
         {"name": "parent", "label": "上層", "kind": "link", "class": "sourced", "link_to": "Nope"}
     )
-    bad["types"][0]["fields"].append({"name": "size", "label": "大小", "kind": "float"})
+    bad["types"][0]["fields"].append({"name": "size", "label": "大小", "kind": "decimal"})
     status, refused = _install(tmp_path, json.dumps(bad, ensure_ascii=False))
     assert status == 400 and refused["ok"] is False and refused["code"] == "schema_invalid"
     paths = {e["path"]: e["message"] for e in refused["errors"]}
@@ -223,11 +225,11 @@ def test_a_dataset_is_created_with_a_schema_and_keeps_it(tmp_path: Path) -> None
         assert db.execute("SELECT value FROM meta WHERE key = 'schema'").fetchone() == (EXAMPLE,)
     status, listed = _call(tmp_path, "GET", "/api/bi/datasets")
     assert listed["datasets"] == [created["dataset"]]
-    # A BI dataset: the bare id picks its version.
+    # A BI dataset: the bare id picks its newest version (the shipped 2.0.0).
     status, bi = _call(
         tmp_path, "POST", "/api/bi/datasets", {"name": "market", "schema": "bi.schema/v1.1"}
     )
-    assert status == 200 and bi["dataset"]["schema"] == LEGACY_SCHEMA
+    assert status == 200 and bi["dataset"]["schema"] == "bi.schema/v1.1@2.0.0"
     assert bi["dataset"]["dashboard"] is True
 
 
