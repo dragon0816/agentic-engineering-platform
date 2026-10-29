@@ -4243,7 +4243,9 @@ Additive to "BI cards API and capability" and "BI schema drafts and dataset upgr
 - **Two shipped versions.** `bi.schema/v1.1@1.1.0` (schema v4, unchanged) and `bi.schema/v1.1@2.0.0`
   (`bi_schema_v2.json`, generated from the manager's schema v8 in `tests/fixtures/bi_schema_v8/`): 21 types
   (adds WinLoss, RoadmapRequest, Pitch, DemoScript, Battlecard, Contact, VisitLog, SupplyLink, RevenueFact),
-  domains + mobile, aerospace; Node `domain` is a list. `GET /api/bi/schemas` lists both with `source:
+  domains + mobile, aerospace; Node `domain` is a list; `segment` (CustomerProduct, Ecosystem, Account,
+  SupplyLink) allows aerospace's `space`, `gateway`, `ut`, `launch`, `mro` and the market chart's 11 segment ids
+  (`cell-phone` … `osat`, the vault's application folders), their labels as `enum_aliases`. `GET /api/bi/schemas` lists both with `source:
   "shipped"`. A bare `bi.schema/v1.1` resolves to the newest version (2.0.0, or a newer local one); a dataset
   with no binding stays `1.1.0`. Local versions are still checked against `1.1.0`. A schema file with a
   shipped `<id>@<version>` installs only when its content is the shipped one (`already: true`), else 409

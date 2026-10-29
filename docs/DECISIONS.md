@@ -5537,3 +5537,12 @@ comparison is in `docs/phases/BI_VAULT.md` §12.
   format; here each check reads the schema (link targets, evidence grade, revenue layers) or the domain
   configuration (`node_name_pattern`, a domain's `nodes`), so a new base needs settings, not a script.
   Findings are `issue` (fix) or `warn` (an admitted gap), and nothing is changed by a check.
+
+## 2026-10-29: BI vaults have no permission control; 2.0.0 `segment` takes the chart's segments (owner)
+
+- **No permission control in BI vaults.** V8 (permissions per domain, earlier per folder) is dropped; every
+  maintainer of a vault can write every domain. Rejected: per-domain permissions (§12 had proposed them).
+- **2.0.0's `segment` allows the market chart's 11 segment ids** (the vault's application folders) beside
+  aerospace's five, with the labels as aliases, so AIDC and the other domains place cards in the coverage
+  matrix without a schema upgrade. 2.0.0 was changed in place rather than shipping 2.1.0: it was published
+  the same day and no vault used it yet. Rejected: a per-domain segment field.

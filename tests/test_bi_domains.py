@@ -80,9 +80,7 @@ def test_a_configuration_is_checked_saved_with_a_revision_and_read(tmp_path: Pat
     }  # fmt: skip
     saved = _ok(_save(tmp_path, CONFIG, 0))
     assert saved["configured"] is True and saved["revision"] == 1
-    # v8's `segment` allows aerospace's values only: the AIDC segments are flagged, not refused.
-    flagged = [w["message"] for w in saved["warnings"] if w["code"] == "value_not_allowed"]
-    assert len(flagged) == 2 and "aidc-computing" in flagged[0]
+    assert saved["warnings"] == []  # every segment is an allowed value of 2.0.0's `segment`
     config = saved["config"]
     assert [d["id"] for d in config["domains"]] == ["AIDC", "aerospace"]
     assert config["format"] == domains.FORMAT and config["updated_by"] == "tester via web"
@@ -90,6 +88,11 @@ def test_a_configuration_is_checked_saved_with_a_revision_and_read(tmp_path: Pat
     assert read["config"] == config
     _refused(_save(tmp_path, CONFIG, 0), 409, "domains_stale")
     assert _ok(_save(tmp_path, CONFIG, 1))["revision"] == 2
+    # A segment the schema cannot hold is saved with a warning, not refused.
+    odd = {**CONFIG, "domains": [{"id": "AIDC", "segments": [{"id": "aidc-cooling"}]}]}
+    flagged = _ok(_save(tmp_path, odd, 2))["warnings"]
+    assert [w["code"] for w in flagged] == ["value_not_allowed"]
+    assert "aidc-cooling" in flagged[0]["message"]
 
 
 def test_an_invalid_configuration_names_what_is_wrong(tmp_path: Path) -> None:
@@ -139,15 +142,17 @@ def test_the_coverage_matrix_comes_from_the_domains(tmp_path: Path) -> None:
     preview = _ok(_call(tmp_path, "POST", "/api/bi/import/preview",
                         {"dataset": "market", "entity_type": "Ecosystem", "filename": "e.csv",
                          "csv_text": csv}))  # fmt: skip
-    # `segment` only allows aerospace's values in schema v8: AIDC segments need the field
-    # the configuration names; here the power maker stays unplaced, honestly reported.
-    assert any(w["code"] == "type_mismatch" for r in preview["rows"] for w in r["warnings"])
+    # 2.0.0's `segment` takes the market chart's segments (aidc-power) beside aerospace's.
+    assert not any(w["code"] == "type_mismatch" for r in preview["rows"] for w in r["warnings"])
     _ok(_call(tmp_path, "POST", "/api/bi/import/apply", {"preview_id": preview["preview_id"]}))
     report = _ok(_call(tmp_path, "GET", "/api/bi/coverage", dataset="market"))
     assert report["matrix_source"] == "domains"
     assert [m["id"] for m in report["matrix"]["markets"]] == ["AIDC", "aerospace"]
     assert len(report["cells"]) == 3 * 2
-    assert report["totals"]["cards"] == 2 and report["totals"]["no_segment"] == 2
+    assert report["totals"]["cards"] == 2 and report["totals"]["no_segment"] == 1
+    cells = {(c["segment"], c["area"]): c["cards"] for c in report["cells"]}
+    assert cells[("aidc-power", "power-system")] == 1  # area_field is role
+    assert sum(cells.values()) == 1
     assert store.card_rows()
 
 

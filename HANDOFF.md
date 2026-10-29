@@ -29,14 +29,15 @@ C/D 9; compute chain 49 supply links, power and cooling 2); quality gives 0 issu
 passed, 7 skipped, 1 failed: `test_bi_markdown_ui` read the Skill picker before its list arrived (a test race,
 worse under load); the test now waits for the value, and passes alone and among the browser tests.
 
-**Open (owner).**
-1. V8 permissions per domain: last; confirm before starting.
-2. Vault segments for AIDC need schema values: v8's `segment` allows aerospace's five only (the configuration
-   warns); add AIDC segments with Session A when the market vault is created.
-3. Live trial with the manager's seeds on the real vault (OneDrive folder; the owner present, backup first).
+**Owner decisions after the commit (2026-10-29).** No permission control (V8 dropped). 2.0.0's `segment` now
+also takes the market chart's 11 segments (labels as aliases), so AIDC needs no schema step. The kt101
+GitLab branch is the owner's to handle.
+
+**Open (owner).** Live trial with the manager's seeds on the real vault (OneDrive folder; the owner present,
+backup first).
 
 **Next actions.** (1) Owner: create the market vault on 2.0.0, paste a domain configuration, import the seed
-CSVs. (2) Decide V8.
+CSVs.
 
 ## Coding at scale S1–S4 (2026-10-29, Claude Code)
 

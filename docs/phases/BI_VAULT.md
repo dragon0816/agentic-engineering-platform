@@ -203,7 +203,7 @@ owner adds INTERNAL to the approval in Settings (no code change).
 | V5 | `segments`/`tech_areas`, coverage API, matrix on the Dashboard. **Coverage API and matrix done 2026-10-28; the two fields are added per vault schema through Session A** | V4 |
 | V6 | `bi__query` finds vaults by purpose (**done 2026-10-28**); snapshots carry evidence (needs snapshot format /2, owner decision); 141 as backup and publisher (needs the owner) | V4 |
 | V7 | Card list and detail redesign | owner §8.2 |
-| V8 | Permissions and per-folder classification (per domain, §12) | last |
+| V8 | Permissions and per-folder classification. **Dropped (owner 2026-10-29)**, see §12 | — |
 
 ## 12. One market vault, domains as configuration (owner, 2026-10-29)
 
@@ -257,4 +257,4 @@ different purposes (for example market BI vs product documentation), not for dom
 | V11 | Extraction Skill with the evidence rules built in (blank without source, source tags, grades A–D, unit conversion, ranges as text, no guessing); a domain adds only its own classification notes. **Done 2026-10-29**: fixed rules in the system prompt, a fact number checked against its quote, domain `notes`; contract "BI extraction evidence rules" | V2 |
 | V12 | Built-in analyses for §1–§31 with parameters (domain, chain, include samples) on the BI Dashboard, instead of generated Dataview pages. **Done 2026-10-29**: §20–§31 and A–A3 in `market.py`; on the manager's AIDC seeds the numbers match his README (B 42, C/D 9; compute chain 49 supply links, power and cooling 2); contract "BI market analyses" | V10 |
 | V13 | Built-in quality checks: unresolved links, same name in two types, sample marking (`SAMPLE-` too), A/B evidence without source or date, numbers not found in the source Markdown. **Done 2026-10-29**: ten checks, `/api/bi/quality`, Dashboard section Q; on the AIDC seeds 0 issues and the 3 deliberate product gaps, as his `validate.py`; contract "BI quality checks" | V2 |
-| V8 | Permissions per domain (was per folder) | last |
+| V8 | Permissions per domain (was per folder). **Dropped (owner 2026-10-29): no permission control in BI vaults** | — |

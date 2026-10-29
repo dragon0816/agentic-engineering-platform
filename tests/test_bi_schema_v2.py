@@ -100,7 +100,11 @@ def test_float_reads_plain_numbers_only() -> None:
 def test_a_list_with_allowed_values_drops_unknown_parts() -> None:
     v2 = shipped()[1]
     segment = v2.types["Account"].get("segment")
-    assert segment is not None and segment.enum == ("space", "gateway", "ut", "launch", "mro")
+    assert segment is not None and segment.enum is not None
+    # Aerospace's own values, then the owner's market chart segments (owner 2026-10-29).
+    assert segment.enum[:5] == ("space", "gateway", "ut", "launch", "mro")
+    assert {"aidc-computing", "aidc-power", "robotics-amr", "osat"} <= set(segment.enum)
+    assert v2.normalize(segment, "AIDC Power")[0] == ["aidc-power"]  # the label is an alias
     value, warnings = v2.normalize(segment, "space；UT；moon")
     assert value == ["space", "ut"]
     assert warnings and "moon" in warnings[0][1]

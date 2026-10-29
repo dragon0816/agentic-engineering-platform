@@ -4,7 +4,8 @@ BI vault V9 (docs/phases/BI_VAULT.md §12): the owner's manager's schema v8
 (`tests/fixtures/bi_schema_v8/bi_schema.py`, read with `ast`, never imported
 or run) becomes the second shipped version of `bi.schema/v1.1`, a compatible
 superset of 1.1.0 (2.0.0 so it never meets a local Session A version,
-which are 1.x minor steps): nine more types, `float` fields, allowed values on list
+which are 1.x minor steps): nine more types, `segment` taking the owner's
+market chart segments beside aerospace's own, `float` fields, allowed values on list
 fields, and Node `domain` widened to a list.
 
     python scripts/build_bi_schema_v2.py
@@ -19,9 +20,13 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-if str(REPO) not in sys.path:  # run as a script: `scripts` is then not importable
-    sys.path.insert(0, str(REPO))
+for path in (REPO, REPO / "src"):  # run as a script: neither is importable then
+    if str(path) not in sys.path:
+        sys.path.insert(0, str(path))
 
+from typing import Any  # noqa: E402
+
+from capabilities.bi_cards.vault import SEGMENTS  # noqa: E402
 from scripts import build_bi_schema_v1_1 as base  # noqa: E402
 
 V8 = REPO / "tests" / "fixtures" / "bi_schema_v8" / "bi_schema.py"
@@ -72,8 +77,8 @@ JUDGEMENT = {
 }
 
 
-def build() -> dict[str, object]:
-    return base.build_from(
+def build() -> dict[str, Any]:
+    document = base.build_from(
         V8,
         labels=TYPE_LABELS,
         links=LINK_TARGETS,
@@ -90,6 +95,23 @@ def build() -> dict[str, object]:
             "generator": "scripts/build_bi_schema_v2.py",
         },
     )
+    _add_chart_segments(document)
+    return document
+
+
+def _add_chart_segments(document: dict[str, Any]) -> None:
+    """The owner's market chart segments (the vault's 11 application folders)
+    as allowed values of `segment` beside aerospace's own, with their labels
+    as aliases (owner 2026-10-29: AIDC and every other domain place cards by
+    `segment` too, so no domain needs a schema upgrade for it)."""
+    added = [segment_id for segment_id, _ in SEGMENTS]
+    for entity in document["types"]:
+        for field in entity["fields"]:
+            if field["name"] == "segment" and field["enum"]:
+                field["enum"] = [*field["enum"], *(s for s in added if s not in field["enum"])]
+    aliases = document["enum_aliases"].setdefault("segment", {})
+    for segment_id, label in SEGMENTS:
+        aliases.setdefault(label, segment_id)
 
 
 def main() -> None:

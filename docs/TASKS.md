@@ -3787,8 +3787,9 @@ s-k-20261011T102952` (not published).
   (`quality.py`, `/api/bi/quality`, Dashboard section Q, `bi__query` `quality`); `SAMPLE-` rows import as
   samples; `node_name_pattern` in the domain configuration. On his AIDC seeds: 0 issues, 3 deliberate gaps,
   as his own check. Contract "BI quality checks"; tests `tests/test_bi_quality.py`.
-- [ ] BI vault V8 (permissions per domain): last; confirm with the owner before starting (testing without
-  permissions was his rule, 2026-10-28). Plan `docs/phases/BI_VAULT.md` §12. V8 (permissions per domain)
+- [x] BI vault V8 dropped (owner 2026-10-29): no permission control in BI vaults.
+- [x] BI vault 2.0.0 `segment` takes the market chart's 11 segments beside aerospace's five, labels as
+  aliases (owner 2026-10-29), so AIDC and every domain place cards without a schema upgrade. Plan `docs/phases/BI_VAULT.md` §12. V8 (permissions per domain)
   last, to confirm with the owner.
 - [ ] BI vault V4 follow-ups: show the `merge` flag on the card detail; sync on a timer or on page open;
   incremental scan (today every sync reads every change file); sources into the vault's folders.
