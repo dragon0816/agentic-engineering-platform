@@ -3788,6 +3788,15 @@ s-k-20261011T102952` (not published).
   samples; `node_name_pattern` in the domain configuration. On his AIDC seeds: 0 issues, 3 deliberate gaps,
   as his own check. Contract "BI quality checks"; tests `tests/test_bi_quality.py`.
 - [x] BI vault V8 dropped (owner 2026-10-29): no permission control in BI vaults.
+- [x] Market BI vault created (2026-10-29, Claude Code, owner present): `OneDrive - Rohde & Schwarz\BI_Knowledge  market-bi` (vault `market-bi`, dataset `vault-market-bi`, schema 2.0.0, author leo.chi) on the owner's
+  preview workspace. The manager's five bases merged (his `--fill-only` rule: lists joined, first name kept,
+  bodies kept per base, 7 scalar conflicts reported) and imported: 639 cards; domain configuration for
+  wireless, mobile, AIDC, robotics, aerospace (chains, segments, 148+4 name aliases); the two AIDC reports in
+  `applications/aidc-*/sources/`. 28 links written in another spelling of a merged card were pointed at its
+  name (field edits with a reason). Quality: 23 issues in the manager's data, 3 deliberate gaps.
+- [ ] Restart Agent Web so the running host knows schema 2.0.0 (the restart was not permitted to Claude Code);
+  until then the vault's page may say its schema is missing. Add a `tech_areas` field (Session A) to place
+  cards by technology area in the coverage matrix.
 - [x] BI vault 2.0.0 `segment` takes the market chart's 11 segments beside aerospace's five, labels as
   aliases (owner 2026-10-29), so AIDC and every domain place cards without a schema upgrade. Plan `docs/phases/BI_VAULT.md` §12. V8 (permissions per domain)
   last, to confirm with the owner.

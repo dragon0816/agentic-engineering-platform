@@ -33,11 +33,17 @@ worse under load); the test now waits for the value, and passes alone and among 
 also takes the market chart's 11 segments (labels as aliases), so AIDC needs no schema step. The kt101
 GitLab branch is the owner's to handle.
 
-**Open (owner).** Live trial with the manager's seeds on the real vault (OneDrive folder; the owner present,
-backup first).
+**Market vault created (2026-10-29, owner present).** `OneDrive - Rohde & Schwarz\BI_Knowledge\market-bi`,
+dataset `vault-market-bi` on the preview workspace, schema 2.0.0: the manager's five bases merged and imported
+(639 cards), domain configuration saved (revision 2), AIDC reports in `applications/aidc-*/sources/`. Details in
+`docs/TASKS.md`. Merge and build scripts were one-off (Claude Code scratchpad), not part of AEP.
 
-**Next actions.** (1) Owner: create the market vault on 2.0.0, paste a domain configuration, import the seed
-CSVs.
+**Open (owner).** (1) Restart Agent Web (`.scratch/restart_web.py`; it refuses while work is active): the
+running host predates 2.0.0. (2) The manager's data issues the quality check lists (8 links to cards nobody
+wrote, 致茂 and 鴻海 in two types, 7 revenue facts without source, 2 sample nodes off the name format, 1 A-grade
+link without a date). (3) A `tech_areas` field for the coverage matrix (Session A).
+
+**Next actions.** (1) Owner: restart Agent Web and open the vault. (2) Colleagues join the folder.
 
 ## Coding at scale S1–S4 (2026-10-29, Claude Code)
 
