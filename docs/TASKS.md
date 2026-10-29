@@ -3788,7 +3788,7 @@ s-k-20261011T102952` (not published).
   samples; `node_name_pattern` in the domain configuration. On his AIDC seeds: 0 issues, 3 deliberate gaps,
   as his own check. Contract "BI quality checks"; tests `tests/test_bi_quality.py`.
 - [x] BI vault V8 dropped (owner 2026-10-29): no permission control in BI vaults.
-- [x] Market BI vault created (2026-10-29, Claude Code, owner present): `OneDrive - Rohde & Schwarz\BI_Knowledgemarket-bi` (vault `market-bi`, dataset `vault-market-bi`, schema 2.0.0, author leo.chi) on the owner's
+- [x] Market BI vault created (2026-10-29, Claude Code, owner present): `OneDrive - Rohde & Schwarz\BI_Knowledge\market-bi` (vault `market-bi`, dataset `vault-market-bi`, schema 2.0.0, author leo.chi) on the owner's
   preview workspace. The manager's five bases merged (his `--fill-only` rule: lists joined, first name kept,
   bodies kept per base, 7 scalar conflicts reported) and imported: 639 cards; domain configuration for
   wireless, mobile, AIDC, robotics, aerospace (chains, segments, 148+4 name aliases); the two AIDC reports in
