@@ -1295,8 +1295,9 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   ("Dry run on the WMT repository"): a docstring line in `driver.py` trips the secret rule, the runner
   interpreter lacks pylint/mypy and the `rs-wmt` framework the suite imports, and the suite is all-or-nothing.
 - [ ] Coding at scale S5: first live run on a real repository (owner; after C7). Open owner decisions: code that
-  names credentials (`password: str`, a `password:` docstring line) is refused by the shared secret rule; the
-  suite judging only tests that passed before the change; one runner interpreter per host.
+  names credentials (`password: str`) is refused by the shared secret rule (kt101's docstring line reworded
+  instead); one runner interpreter per host. Suite: the development PC installs `rs-wmt` into its runner
+  (owner 2026-10-29, `docs/DECISIONS.md`).
 - [ ] Coding on the Bridge C8: native Claude Code author for PUBLIC-only tasks.
 - [x] SOP to Workflow W1 (plan `docs/phases/SOP_TO_WORKFLOW.md`, owner
   decisions and approval of harness designs A/B 2026-10-06): practice

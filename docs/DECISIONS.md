@@ -5468,3 +5468,19 @@ AEP; the owner chose to make `coding/change` itself capable (option B). Plan `do
   pattern, and `password: str` matches, so a driver with such lines cannot be changed (the run stops with
   `author_change_has_credential`).
 - Workflow `engineering/coding-change` 1.1.0 (`more_files`), Skill `engineering/coding` 1.9.0.
+
+## 2026-10-29: The WMT suite runs with the framework installed on the development PC (owner)
+
+After the `coding/change` dry run on `rs-wmt-kt101` (`docs/phases/CODING_AT_SCALE.md`, "Dry run on the WMT
+repository"):
+
+- **The harness is not changed for the suite.** The chipset development PC installs `rs-wmt` (and what the
+  repository pins with it: `rs-wmt-cminstrument`, numpy) plus pylint and mypy into its runner interpreter,
+  so `pytest-suite` runs the repository's whole `tests/` folder as it does elsewhere.
+- **Rejected: a per-repository suite selection** (`CodingRepository` naming the suite's tests), proposed so
+  the runner would not need the framework and a deliberately failing replica test would not block other
+  runs. Rejected for now: the PC that develops the driver has the framework anyway.
+- **Consequence kept**: the suite is all-or-nothing, so a test that fails on purpose in `tests/` makes every
+  run on that repository fail until it passes; replicas are added one stage test at a time.
+- **The credential rule is unchanged**; `driver.py`'s `password:` docstring line was reworded in kt101
+  (branch `aep/qcom-log-replica`, `8b4d127`) instead.
