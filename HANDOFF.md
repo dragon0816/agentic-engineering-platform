@@ -1,8 +1,36 @@
 # Handoff
 
-Updated: 2026-10-28 (Asia/Taipei), by Claude Code (BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-29 (Asia/Taipei), by Claude Code (coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## BI vaults V1–V6 (2026-10-28, Claude Code) — latest
+## Coding at scale S1–S4 (2026-10-29, Claude Code) — latest
+
+**Goal.** Team members must develop chipset-control programs (Qualcomm WMT, a 125 KB driver file) through
+AEP. A colleague found `coding/change` could not: the author saw the first 20,000 characters of one file and
+had to return it whole within 8,000 output tokens. The owner chose option B: make `coding/change` capable.
+Plan `docs/phases/CODING_AT_SCALE.md`; decision `docs/DECISIONS.md` 2026-10-29 "Coding at scale"; contract
+`docs/CONTRACTS.md` "Coding change at scale"; guide for team members `docs/guides/CODING_LARGE_REPO.zh-TW.md`.
+
+**Done (commit `c1d48181`):** explore-then-edit author (list, outline, read ranges, search; exact
+search/replace edits; CRLF and BOM kept), several declared files (`more_files`), host-declared module checks
+(`checks`), limits in `host.json`, Workflow `coding-change` 1.1.0, Skill `coding` 1.9.0; fix: `pytest-suite`
+ran declared checks' names as paths.
+
+**Verification.** Clean worktree at `c1d48181` with the CI interpreter (dev,office extras, no pywin32): ruff clean, 1095 files formatted, mypy clean (826 files), pytest 4292 passed, 35 skipped, 0 failed. The Windows restricted-execution tests (`test_coding_at_scale.py`, `test_coding_change_capability.py`, `test_coding_worktree_pytest.py`, `test_restricted_runner.py`) need pywin32 and were run separately with the project `.venv`: 110 passed together with the harness and E2E-03 tests.
+
+**Open (owner):**
+1. The shared credential rule refuses a change whose text matches the secret pattern; `password: str` matches.
+   A driver with such lines stops with `author_change_has_credential`. Decide whether code that names
+   credentials (without containing one) should pass.
+2. No live run: C7 (practice repository) first, then a real repository (S5). The colleague's PC needs its own
+   runner interpreter (64-bit if WMT's dependencies need it), the firewall rule, the WMT tests and fixtures
+   committed locally, and a `coding` block in `host.json` (guide §3).
+3. Tests that need child processes, the network or a DUT cannot pass in the restricted runner;
+   `change_max_processes` can be raised (residual risk in the plan).
+
+**Next actions.** (1) Owner: C7 live run. (2) Owner decision on item 1. (3) Colleague: configure WMT per the
+guide; consider extracting the OP2 table from the driver anyway (smaller files are easier to review).
+
+## BI vaults V1–V6 (2026-10-28, Claude Code)
 
 **Goal.** The owner's review of the built BI flow (2026-10-28): a purpose-built knowledge base (a *vault*) that
 a team maintains together, the chain original → Markdown → schema + extraction Skill → cards + search index +
