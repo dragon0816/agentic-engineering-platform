@@ -3767,6 +3767,11 @@ s-k-20261011T102952` (not published).
   `tests/test_bi_markdown_ui.py` (browser). Guide §3.1 and §9.6.
 - [x] BI snapshot and subscription installs wait out a brief Windows file lock (2026-10-28, Claude Code): the
   folder renames use `schema_versions.replace` (a full-suite run hit `PermissionError` once).
+- [x] BI vault design §12 (2026-10-29, Claude Code): compared the manager's five hand-made knowledge bases;
+  owner chose one market BI vault for every domain, domains as configuration (`docs/DECISIONS.md`).
+- [ ] BI vault V9–V13 (proposed, owner go-ahead each): schema shapes (one value → list, `float`, allowed list
+  values), per-domain `vault.json` configuration and coverage, extraction Skill evidence rules, built-in
+  analyses §1–§31, built-in quality checks. Plan `docs/phases/BI_VAULT.md` §12.
 - [ ] BI vault V4 follow-ups: show the `merge` flag on the card detail; sync on a timer or on page open;
   incremental scan (today every sync reads every change file); sources into the vault's folders.
 - [x] BI vault V2 backend: convert every source to Markdown, editable revisions, runs read the Markdown.

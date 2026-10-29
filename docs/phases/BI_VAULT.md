@@ -203,4 +203,58 @@ owner adds INTERNAL to the approval in Settings (no code change).
 | V5 | `segments`/`tech_areas`, coverage API, matrix on the Dashboard. **Coverage API and matrix done 2026-10-28; the two fields are added per vault schema through Session A** | V4 |
 | V6 | `bi__query` finds vaults by purpose (**done 2026-10-28**); snapshots carry evidence (needs snapshot format /2, owner decision); 141 as backup and publisher (needs the owner) | V4 |
 | V7 | Card list and detail redesign | owner §8.2 |
-| V8 | Permissions and per-folder classification | last |
+| V8 | Permissions and per-folder classification (per domain, §12) | last |
+
+## 12. One market vault, domains as configuration (owner, 2026-10-29)
+
+**Input.** Five knowledge bases the owner's manager made by hand with Claude Code (Obsidian + Dataview,
+`tools/bi_schema.py` + `bi_ingest.py`): the wireless example, robotics (schema v4), aerospace (v7), wireless
+module (v8) and AIDC (v8). Each new one needed Claude Code to change the tools again. They are local data,
+not in the repository.
+
+**What all five share** (the fixed core):
+- the 12 core card types, their names, naming and links, only ever extended;
+- the chain trend → application → our test solution → opportunity, and node ↔ ecosystem ↔ customer product;
+- report → seed CSV (English field keys) → idempotent ingest (preview, fill-only, domain default, name
+  aliases) → cards → validation → dashboard;
+- the data rules: no source, no value; no guessed numbers; `SAMPLE-` / 虛構 marking; `assumed` / `verified`;
+  source tags such as `[P§7.2]`; original text kept;
+- one schema for every domain, sliced by `domain`, new domains merged into the same vault (`--fill-only`);
+- dashboard analyses §1–§19 since robotics, extended to §31, never replaced.
+
+**What changes per knowledge base** (what Claude Code redid each time):
+
+| Change | Examples |
+|---|---|
+| Schema additions | domains robotics / mobile / aerospace; enum values (Ecosystem `role`, `test_type`); fields (`segment`, `related_ecosystem`, RevenueFact `yoy_pct`); types (v6: seven sales types, v7: SupplyLink, RevenueFact) |
+| Field shape | `domain` one value → list (Technology, TestSolution, Concept in v4; Node in v5); a `float` kind; `allowed=` values on a list |
+| Domain taxonomy | value-chain nodes L1–L5 per domain; aerospace segments; chains (AIDC CMP / PWR / THM, wireless SYS / MDL) taken from node names or `chain_config.py`, never fields |
+| Report → seed | hand-written seed modules per domain: Account vs Ecosystem calls, unit conversion (兆 / 億), ranges kept as text, evidence grades A–D |
+| Dashboard | domain switch, chain sections A–A3, per-section rewrites |
+| Validation | grows per base: numbers and tickers must appear in the sources; A/B evidence needs a source date |
+
+Across the five, 20 non-sample cards repeat with the same type and name in two to four bases (Keysight,
+Anritsu, NVIDIA, Broadcom, Qualcomm, `L1-Chipset`, `X-Certification-Lab`, …); names written in two languages
+(聯發科 / MediaTek) are not counted.
+
+**Choice.** Asked whether each domain should be its own vault, the owner chose (2026-10-29) **one market BI
+vault holding every domain**, with the per-domain differences as configuration. Separate vaults are for
+different purposes (for example market BI vs product documentation), not for domains. Reasons:
+- `bi__query` takes one dataset per call, picked from the vaults' purpose lines; questions that cross
+  domains ("where does Keysight compete with us") would query one vault and miss the rest;
+- a shared company, competitor or node would be kept in several copies that drift apart;
+- the manager's model is built for merging (multi-domain lists, `--fill-only`, cross-chain checks, mobile
+  and aerospace reusing wireless nodes);
+- what separate vaults would give (own extensions, own settings, own owners) is had inside one vault through
+  additive schema versions, per-domain configuration and, later, per-domain permissions (V8).
+
+**What this asks of AEP** (proposed phases, each for the owner's go-ahead):
+
+| # | Content | Depends on |
+|---|---|---|
+| V9 | Schema shapes the manager used: a one-value field may become a list (a widening, migrated in place, not breaking); `float`; allowed values on a list field. Schema v1.2 from the v8 file, read with `ast` as v1.1 was | V4 |
+| V10 | Per-domain configuration in `vault.json`: domains, their value-chain nodes, segments, chains (node-name patterns or lists), enum aliases, name aliases; the coverage matrix taken from it instead of the fixed 11 segments × 5 areas | V5 |
+| V11 | Extraction Skill with the evidence rules built in (blank without source, source tags, grades A–D, unit conversion, ranges as text, no guessing); a domain adds only its own classification notes | V2 |
+| V12 | Built-in analyses for §1–§31 with parameters (domain, chain, include samples) on the BI Dashboard, instead of generated Dataview pages | V10 |
+| V13 | Built-in quality checks: unresolved links, same name in two types, sample marking (`SAMPLE-` too), A/B evidence without source or date, numbers not found in the source Markdown | V2 |
+| V8 | Permissions per domain (was per folder) | last |

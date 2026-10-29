@@ -5484,3 +5484,21 @@ repository"):
   run on that repository fail until it passes; replicas are added one stage test at a time.
 - **The credential rule is unchanged**; `driver.py`'s `password:` docstring line was reworded in kt101
   (branch `aep/qcom-log-replica`, `8b4d127`) instead.
+
+## 2026-10-29: One market BI vault for every domain (owner)
+
+Context: the owner's manager built five BI knowledge bases by hand (wireless, robotics, aerospace, wireless
+module, AIDC), each needing Claude Code to change the schema, ingest, seed and dashboard tools again. The
+comparison is in `docs/phases/BI_VAULT.md` §12.
+
+- **Decision**: one market BI vault holds every domain; a card is stored once with `domain` as a list where
+  the type allows it; per-domain differences (nodes, segments, chains, aliases, coverage matrix) are vault
+  configuration. Separate vaults only for different purposes.
+- **Rejected: one vault per domain.** `bi__query` reads one dataset per call chosen from purpose lines, so
+  cross-domain questions would miss vaults; shared companies, competitors and nodes would be copied and
+  drift (20 shared cards already across the five bases); the manager's schema and ingest are built to merge.
+  Fixing that would need cross-vault search, a shared library vault and cross-vault names, more work than
+  per-domain configuration.
+- **Consequences**: proposed phases V9–V13 in §12 (schema shapes, per-domain `vault.json` configuration,
+  extraction Skill evidence rules, built-in analyses, quality checks); V8 permissions become per domain.
+  None started.
