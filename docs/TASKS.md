@@ -1289,8 +1289,14 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   `coding-change` 1.1.0, Skill `coding` 1.9.0; fix: `pytest-suite` ran declared checks' names as paths. Tests
   `test_coding_edits.py`, `test_coding_author_explore.py`, `test_coding_at_scale.py` (Windows, real restricted
   pytest on a 100 KB+ CRLF file). Guide `docs/guides/CODING_LARGE_REPO.zh-TW.md`.
-- [ ] Coding at scale S5: first live run on a real repository (owner; after C7). Open owner decision: code that
-  names credentials (`password: str`) is refused by the shared secret rule.
+- [x] Coding at scale S5 pre-check (2026-10-29, Claude Code): scripted-model dry run of `coding/change` with
+  production wiring on a clone of `rs-wmt-kt101` (golden test: the Qualcomm log replica). Explore, CRLF edits,
+  restricted pytest and the failure text work; three blockers found, recorded in `docs/phases/CODING_AT_SCALE.md`
+  ("Dry run on the WMT repository"): a docstring line in `driver.py` trips the secret rule, the runner
+  interpreter lacks pylint/mypy and the `rs-wmt` framework the suite imports, and the suite is all-or-nothing.
+- [ ] Coding at scale S5: first live run on a real repository (owner; after C7). Open owner decisions: code that
+  names credentials (`password: str`, a `password:` docstring line) is refused by the shared secret rule; the
+  suite judging only tests that passed before the change; one runner interpreter per host.
 - [ ] Coding on the Bridge C8: native Claude Code author for PUBLIC-only tasks.
 - [x] SOP to Workflow W1 (plan `docs/phases/SOP_TO_WORKFLOW.md`, owner
   decisions and approval of harness designs A/B 2026-10-06): practice

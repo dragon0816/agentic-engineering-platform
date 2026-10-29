@@ -83,6 +83,37 @@ the diff so far.
   tests need (locally) first.
 - No live run yet: C7 on the practice repository comes first.
 
+## Dry run on the WMT repository (2026-10-29)
+
+Production wiring (no extra environment, the host's runner interpreter, the
+real firewall-rule check) on a clone of `rs-wmt-kt101` at branch
+`aep/qcom-log-replica`, with only the model scripted (outline, search, read,
+one edit that fixes the rx/tx station swap in `driver.py`, done). The golden
+test is `tests/test_qcom_replica_tx_11a.py`, which replays a Qualcomm tool log
+against the QMSL driver without hardware.
+
+| Run | Result | Meaning |
+|---|---|---|
+| Repository as it is | `author_change_has_credential` after the edit | `driver.py` line 203 is a docstring line, `password: Login ...`; the rule checks the whole changed file, so no change to this file can pass |
+| Same, docstring reworded in the clone | `pytest-new` ran under low integrity and failed with the remaining differences (the swapped stations gone); refused `repair_budget_exceeded` at `max_repairs=0` | outline, search, read and CRLF edits on the 68 KB driver work; the failure the model sees holds one full copy of the difference list |
+| Same, with pylint and mypy declared | `pytest-new` passed (tools test); `check-pylint` failed: `No module named pylint` | the runner interpreter has pytest only |
+
+Limits found, beyond those above:
+
+- **The suite needs the framework.** `pytest-suite` runs the whole test
+  folder; `tests/test_testcase.py` imports `rswmt.testrunner` (the `rs-wmt`
+  package, 2.0.99, with `rs-wmt-cminstrument` 2.0.96 and numpy), which the
+  runner interpreter lacks, so collection stops and no kt101 run can validate.
+- **One runner interpreter per host.** `runner_python` serves every
+  repository; repositories that pin different framework versions cannot share
+  it.
+- **The suite is all-or-nothing.** A test that fails on purpose (a replica
+  stage not yet reproduced) fails every other run's `pytest-suite`, and a run
+  that fixes only part of its golden test is refused, its diff kept only as
+  evidence. Large replicas must be split into per-stage tests that are added
+  one at a time, or the suite would have to judge only tests that passed
+  before the change (an architecture change for the owner to decide).
+
 ## Slices
 
 | Id | Slice | Verification |
