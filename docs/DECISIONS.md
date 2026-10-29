@@ -5435,3 +5435,36 @@ Implementation of `docs/phases/BI_VAULT.md` §3–§4 (backend and API, Claude C
   schema upgrade). The search route also syncs first, so a dataset from before V3 builds its index on the
   first search. Snippets are computed in Python with `[start, end)` marks rather than FTS5 `snippet()`
   markup, so the page never parses markup.
+
+## 2026-10-29 — Coding at scale: explore-then-edit author, several files, declared checks
+
+Owner request: team members develop chipset-control programs (Qualcomm WMT, a 125 KB driver file) through
+AEP; the owner chose to make `coding/change` itself capable (option B). Plan `docs/phases/CODING_AT_SCALE.md`.
+
+- **The author stays the internal Gateway model.** The data rule gives external agents PUBLIC context only and
+  driver code is not PUBLIC, so C8 (native Claude Code author) does not apply. Rejected: completing C8 for this
+  (would need the owner to relax the data rule).
+- **Edits, not whole files.** The model reads through bounded read-only actions (list, outline, read a line
+  range, search) and changes files with search/replace edits AEP applies (`harness/edits.py`); `old` must match
+  exactly once, a failed batch changes nothing and the reason goes back to the model. A whole-file `content`
+  answer is still accepted for the primary file. Rejected: unified-diff patches (models produce bad hunks and
+  line numbers drift), native tool calling (the Gateway structured-output path is the one already proven).
+- **The `ChangeAuthor` protocol may return a tuple of candidates**; the harness writes each changed one and
+  records one `ChangeRecord` per file. E2E-01/03/04 authors still return one candidate and are unchanged.
+- **The model chooses what to read; the host caps it**: 400 lines / 30,000 characters per read, outlines cut
+  at the same size, 60 search hits, a 200,000-character transcript whose oldest action outputs are elided
+  first, `author_max_turns` per attempt. `.git`, `.env`, keys and certificates are never readable. A repair
+  starts a fresh exploration with the failure and the diff so far.
+- **Line endings and BOM are kept** (a CRLF driver must not become a whole-file diff); a non-UTF-8 or
+  mixed-newline file is refused for editing (`author_file_not_utf8`, `author_file_mixed_newlines`).
+- **Several declared files**: `more_files` (up to 9), each checked like `file` (writable pattern, never a test).
+- **Host-declared checks** (`checks` per repository, at most 5): `python -m <module> <args>` under the
+  restricted runner in the worktree, `{files}` expanded; order new tests → checks → suite. Still no general
+  shell: the host names the module. `pytest-suite` now runs only the `suite` case (found by the new test: it
+  had collected every regression case, so a check's name became a pytest path).
+- **Limits in `host.json`**: `author_max_turns` (30), `author_max_output_tokens` (8,000),
+  `change_max_processes` (1; raising it lets tests start tools that the firewall rule does not cover).
+- **Not changed, for the owner**: the shared credential rule refuses a candidate whose text matches the secret
+  pattern, and `password: str` matches, so a driver with such lines cannot be changed (the run stops with
+  `author_change_has_credential`).
+- Workflow `engineering/coding-change` 1.1.0 (`more_files`), Skill `engineering/coding` 1.9.0.

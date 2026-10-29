@@ -146,7 +146,7 @@ def test_an_update_keeps_what_the_person_chose(tmp_path: Path, bundle: Path) -> 
     asset_shelf.switch_on(layout, "skill", DOCX)
     removed = AssetIdentity(namespace="hermes", name="arxiv", version="1.0.0")
     asset_shelf.remove(layout, "skill", removed, now=datetime.now(UTC), actor="someone")
-    coding = layout.skills / "engineering__coding__1.8.0.json"
+    coding = layout.skills / "engineering__coding__1.9.0.json"
     coding.write_text(coding.read_text(encoding="utf-8") + " ", encoding="utf-8")
     edited = coding.read_text(encoding="utf-8")
 

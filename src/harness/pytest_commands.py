@@ -67,8 +67,12 @@ class PytestCommand:
     def __call__(
         self, workspace: BoundedWorkspace, request: CodingHarnessRequest
     ) -> tuple[ValidationFailure, ...]:
-        kind = "new" if self.which == "new" else "regression"
-        cases = [case for case in request.cases if case.kind == kind]
+        # Declared checks are regression cases too (`harness.check_commands`);
+        # the suite runs only its own.
+        if self.which == "new":
+            cases = [case for case in request.cases if case.kind == "new"]
+        else:
+            cases = [case for case in request.cases if case.name == SUITE_CASE]
         targets = [str(case.input) for case in cases]
         results = self.run_dir / "results"
         results.mkdir(parents=True, exist_ok=True)

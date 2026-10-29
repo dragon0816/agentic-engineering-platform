@@ -31,6 +31,7 @@ from capabilities.runtime import CapabilityRefused
 from common.base import Contract
 from common.execution import RequestContext, TraceIdentifiers
 from harness import git_worktree
+from harness.check_commands import ModuleCheck, check_case
 from harness.contracts import CodingHarnessRequest, HarnessBudget, WorkspaceSnapshot
 from harness.model_author import AuthorUnavailable, ModelChangeAuthor
 from harness.network_block import outbound_rule_present
@@ -41,6 +42,7 @@ from harness.pytest_commands import (
     new_cases,
     suite_case,
 )
+from harness.repo_reader import RepoReader
 from harness.restricted_runner import RestrictedRunner, RunnerError, RunnerLimits
 from harness.runtime import CodingHarness, DeclaredCommands
 from harness.workspace import BoundedWorkspace, WorkspaceRefused
@@ -105,6 +107,9 @@ class CodingChangeHandler:
             raise CapabilityRefused("coding_repository_unknown")
         root = Path(repository.path)
         file = self._writable(repository, request.file)
+        files = tuple(
+            dict.fromkeys((file, *(self._writable(repository, f) for f in request.more_files)))
+        )
         tests = tuple(self._golden(repository, root, test) for test in request.tests)
         if self.model is None:
             raise CapabilityRefused("coding_model_unavailable")
@@ -113,7 +118,9 @@ class CodingChangeHandler:
             runner = RestrictedRunner(
                 python,
                 RunnerLimits(
-                    timeout_seconds=self.binding.timeout_seconds, memory_mb=self.binding.memory_mb
+                    timeout_seconds=self.binding.timeout_seconds,
+                    memory_mb=self.binding.memory_mb,
+                    max_processes=self.binding.change_max_processes,
                 ),
             )
         except RunnerError as error:
@@ -127,30 +134,47 @@ class CodingChangeHandler:
             raise CapabilityRefused(f"coding_{error.code}") from None
         commands = DeclaredCommands()
         commands.register(NEW_COMMAND, PytestCommand("new", runner, run.run_dir, self.extra_env))
+        for check in repository.checks:
+            commands.register(
+                f"check-{check.name}",
+                ModuleCheck(
+                    check.name, check.module, check.args, runner, run.run_dir, self.extra_env
+                ),
+            )
         commands.register(
             SUITE_COMMAND, PytestCommand("suite", runner, run.run_dir, self.extra_env)
         )
+        checks = tuple(f"check-{check.name}" for check in repository.checks)
         harness_request = CodingHarnessRequest(
             workspace=WorkspaceSnapshot(
                 root=str(run.worktree),
-                starting_revision=BoundedWorkspace(str(run.worktree), (file,)).revision(),
+                starting_revision=BoundedWorkspace(str(run.worktree), files).revision(),
             ),
             requirement=request.requirement,
             artifact_path=file,
-            allowed_paths=(file,),
-            allowed_commands=(NEW_COMMAND, SUITE_COMMAND),
-            cases=(*new_cases(tests), suite_case(repository.test_folder)),
+            allowed_paths=files,
+            # Cheapest first: the change's own tests, the declared checks, the suite.
+            allowed_commands=(NEW_COMMAND, *checks, SUITE_COMMAND),
+            cases=(
+                *new_cases(tests),
+                *(check_case(check.name) for check in repository.checks),
+                suite_case(repository.test_folder),
+            ),
             skill_versions=(f"{SKILL.namespace}/{SKILL.name}@{SKILL.version}",),
             budget=HarnessBudget(
-                max_repair_attempts=request.max_repairs, max_commands=2 * (request.max_repairs + 1)
+                max_repair_attempts=request.max_repairs,
+                max_commands=min(20, (2 + len(checks)) * (request.max_repairs + 1)),
             ),
         )
         author = ModelChangeAuthor(
             self.model,
             self.model_alias,
             trace,
-            self._context(run.worktree, file, tests),
+            self._context(run.worktree, tests),
             local_only=self.local_only,
+            max_output_tokens=self.binding.author_max_output_tokens,
+            reader=RepoReader(run.worktree),
+            max_turns=self.binding.author_max_turns,
         )
         evidence = run.run_dir / "result.json"
         try:
@@ -208,8 +232,9 @@ class CodingChangeHandler:
         return node
 
     @staticmethod
-    def _context(worktree: Path, file: str, tests: tuple[str, ...]) -> dict[str, str]:
-        files = [file, *dict.fromkeys(test.split("::", 1)[0] for test in tests)]
+    def _context(worktree: Path, tests: tuple[str, ...]) -> dict[str, str]:
+        """The golden tests; the author reads the files it changes itself."""
+        files = list(dict.fromkeys(test.split("::", 1)[0] for test in tests))
         context: dict[str, str] = {}
         for path in files[:MAX_CONTEXT_FILES]:
             target = worktree / path

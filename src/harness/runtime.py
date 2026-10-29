@@ -31,14 +31,15 @@ from harness.workspace import BoundedWorkspace, WorkspaceRefused, sha256_bytes
 ValidationCommand = Callable[
     [BoundedWorkspace, CodingHarnessRequest], tuple[ValidationFailure, ...]
 ]
+# One file, or several declared files changed together
+# (`docs/phases/CODING_AT_SCALE.md`).
+Candidates = CandidateChange | tuple[CandidateChange, ...]
 
 
 class ChangeAuthor(Protocol):
     def plan(self, request: CodingHarnessRequest) -> HarnessPlan: ...
 
-    def initial_change(
-        self, request: CodingHarnessRequest, plan: HarnessPlan
-    ) -> CandidateChange: ...
+    def initial_change(self, request: CodingHarnessRequest, plan: HarnessPlan) -> Candidates: ...
 
     def repair(
         self,
@@ -46,7 +47,7 @@ class ChangeAuthor(Protocol):
         plan: HarnessPlan,
         failure: CommandOutcome,
         attempt: int,
-    ) -> CandidateChange: ...
+    ) -> Candidates: ...
 
 
 class DeclaredCommands:
@@ -144,17 +145,35 @@ class CodingHarness:
     def _apply(
         workspace: BoundedWorkspace,
         request: CodingHarnessRequest,
-        candidate: CandidateChange,
+        candidates: Candidates,
         changes: list[ChangeRecord],
     ) -> None:
-        if candidate.path not in request.allowed_paths:
+        batch = candidates if isinstance(candidates, tuple) else (candidates,)
+        paths = [candidate.path for candidate in batch]
+        if not batch or len(paths) != len(set(paths)):
+            raise WorkspaceRefused("change_paths_invalid")
+        if any(path not in request.allowed_paths for path in paths):
             raise WorkspaceRefused("change_path_not_allowed")
-        before = workspace.read(candidate.path)
-        encoded = candidate.content.encode("utf-8")
-        if before == encoded:
+        befores = [workspace.read(candidate.path) for candidate in batch]
+        if all(
+            before == candidate.content.encode("utf-8")
+            for before, candidate in zip(befores, batch, strict=True)
+        ):
             # A real author can hand back the file it was asked to repair;
             # that is a stop, not an empty change record.
             raise WorkspaceRefused("change_made_no_difference")
+        for before, candidate in zip(befores, batch, strict=True):
+            if before != candidate.content.encode("utf-8"):
+                CodingHarness._write(workspace, candidate, before, changes)
+
+    @staticmethod
+    def _write(
+        workspace: BoundedWorkspace,
+        candidate: CandidateChange,
+        before: bytes | None,
+        changes: list[ChangeRecord],
+    ) -> None:
+        encoded = candidate.content.encode("utf-8")
         workspace.write(candidate.path, candidate.content)
         before_text = before.decode("utf-8") if before is not None else ""
         patch = "".join(
@@ -238,7 +257,7 @@ class CodingActions:
         self.request = request
         self.plan: HarnessPlan | None = None
         self.workspace: BoundedWorkspace | None = None
-        self.candidate: CandidateChange | None = None
+        self.candidate: Candidates | None = None
         self.failure: CommandOutcome | None = None
         self.attempt = 0
         self.events: list[HarnessEvent] = []

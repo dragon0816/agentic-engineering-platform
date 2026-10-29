@@ -172,7 +172,7 @@ def test_test_paths_are_never_writable() -> None:
 def test_the_workflow_offers_typed_fields_and_the_skill_binds_to_it() -> None:
     workflow, skill = coding_workflow(), coding_skill()
     names = [field.name for field in workflow.parameters]
-    assert names == ["repository", "requirement", "file", "tests", "max_repairs"]
+    assert names == ["repository", "requirement", "file", "more_files", "tests", "max_repairs"]
     assert skill.commands[0].target == workflow.metadata.identity
 
 

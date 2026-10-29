@@ -5379,3 +5379,22 @@ it did before.
   unchanged) and answers the same shape, or 409 with `multi_agent_settings_invalid`,
   `settings_read_only` (no host.json in this launch mode) or `multi_agent_unsupported` (a contract
   without the field). It never changes the running configuration: the flag applies after a restart.
+
+
+## Coding change at scale
+
+`coding/change@1.0.0` (Workflow `engineering/coding-change@1.1.0`), `docs/phases/CODING_AT_SCALE.md`.
+
+- Request `coding.change.input.v1` adds `more_files: list[str]` (optional, at most 9): files the run may change
+  besides `file`, each refused like `file` (`coding_file_is_a_test`, `coding_file_not_writable`,
+  `coding_path_invalid`).
+- Host binding `coding` adds `author_max_turns` (4–100, default 30), `author_max_output_tokens` (1,000–64,000,
+  default 8,000), `change_max_processes` (1–16, default 1); each repository may add
+  `checks: [{"name", "module", "args"}]` (at most 5, unique names), run as `python -m <module> <args>` with
+  `{files}` expanded. Commands run in order `pytest-new`, `check-<name>`…, `pytest-suite`; a failed check is
+  `check_failed` (or `check_timeout`) with the tool's scrubbed output.
+- Author answers (`coding.change-author.v1`), one JSON object per turn: `{"action": "list"|"outline"|"read"|
+  "search"|"edit"|"done", ...}`; `edit` carries `edits: [{"path", "old", "new"}]`. A legacy
+  `{"content": ...}` replaces the primary file. New stop codes: `author_turns_exhausted`,
+  `author_change_has_credential`, `author_file_not_utf8`, `author_file_mixed_newlines`.
+- Result unchanged: `diff` covers every changed file; never committed.

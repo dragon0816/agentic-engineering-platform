@@ -89,14 +89,14 @@ def test_change_and_repair_return_whole_files_and_repair_sees_the_failure() -> N
         changes=(PlannedChange(path=REQUEST.artifact_path, purpose="p"),),
         validation_commands=REQUEST.allowed_commands,
     )
-    first = writer.initial_change(REQUEST, plan)
+    (first,) = writer.initial_change(REQUEST, plan)
     assert first.path == REQUEST.artifact_path and "v + 2" in first.content
     failure = CommandOutcome(
         command=NEW_COMMAND,
         status="failed",
         failures=(ValidationFailure(case="new-1", code="test_failed", message="assert 6 == 8"),),
     )
-    repaired = writer.repair(REQUEST, plan, failure, 1)
+    (repaired,) = writer.repair(REQUEST, plan, failure, 1)
     assert "v * 2" in repaired.content  # fenced JSON salvaged
     assert "assert 6 == 8" in model.requests[1].messages[1].text
     assert "return v + 2" in model.requests[1].messages[1].text  # repairs its own last version

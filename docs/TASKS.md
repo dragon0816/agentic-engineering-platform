@@ -1281,6 +1281,16 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [ ] Coding on the Bridge C7: owner creates the firewall rule (elevated, see
   HANDOFF), then the first live run implements `format_duration` in the
   practice repository through Agent Web or Telegram.
+- [x] Coding at scale S1–S4 (2026-10-29, Claude Code; plan `docs/phases/CODING_AT_SCALE.md`, owner chose
+  option B): the change author explores a repository (list, outline, read ranges, search; `harness/repo_reader.py`)
+  and changes files with exact search/replace edits (`harness/edits.py`), keeping CRLF and BOM; several declared
+  files per run (`more_files`); host-declared module checks (`harness/check_commands.py`, `checks` in
+  `host.json`); limits `author_max_turns`, `author_max_output_tokens`, `change_max_processes`; Workflow
+  `coding-change` 1.1.0, Skill `coding` 1.9.0; fix: `pytest-suite` ran declared checks' names as paths. Tests
+  `test_coding_edits.py`, `test_coding_author_explore.py`, `test_coding_at_scale.py` (Windows, real restricted
+  pytest on a 100 KB+ CRLF file). Guide `docs/guides/CODING_LARGE_REPO.zh-TW.md`.
+- [ ] Coding at scale S5: first live run on a real repository (owner; after C7). Open owner decision: code that
+  names credentials (`password: str`) is refused by the shared secret rule.
 - [ ] Coding on the Bridge C8: native Claude Code author for PUBLIC-only tasks.
 - [x] SOP to Workflow W1 (plan `docs/phases/SOP_TO_WORKFLOW.md`, owner
   decisions and approval of harness designs A/B 2026-10-06): practice

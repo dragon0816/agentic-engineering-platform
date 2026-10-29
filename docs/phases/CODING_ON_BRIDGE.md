@@ -53,3 +53,5 @@ without admin rights; the owner chose not to adopt it.
 | C6 | Install: runner interpreter + pytest, firewall rule (owner, elevated), practice repository, live config and grant | live doctor |
 | C7 | Live run on the practice repository through Agent Web and Telegram | plan -> change -> failing test -> repair -> suite passes, worktree left for review |
 | C8 | Later: native Claude Code author for PUBLIC tasks | separate decision |
+
+Large files, several files and declared checks: `docs/phases/CODING_AT_SCALE.md` (2026-10-29).

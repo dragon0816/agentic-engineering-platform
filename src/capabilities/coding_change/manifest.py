@@ -9,8 +9,8 @@ from agent.skills import SkillManifest
 from capabilities.contracts import CapabilitySpec
 from common.assets import AssetIdentity, WorkflowManifest
 
-WORKFLOW = AssetIdentity(namespace="engineering", name="coding-change", version="1.0.0")
-SKILL = AssetIdentity(namespace="engineering", name="coding", version="1.8.0")
+WORKFLOW = AssetIdentity(namespace="engineering", name="coding-change", version="1.1.0")
+SKILL = AssetIdentity(namespace="engineering", name="coding", version="1.9.0")
 RUN_WORKFLOW = AssetIdentity(namespace="engineering", name="run-python", version="1.0.0")
 REPOSITORIES_FUNCTION = "coding.repositories"
 
@@ -19,8 +19,8 @@ CHANGE_SPEC = CapabilitySpec.model_validate(
         "identity": {"namespace": "coding", "name": "change", "version": "1.0.0"},
         "name": "coding.change",
         "description": (
-            "Change one file in a configured repository until its tests pass, in a "
-            "separate git worktree; never commits"
+            "Change files in a configured repository until its tests and checks pass, in "
+            "a separate git worktree; never commits"
         ),
         "input_contract": "coding.change.input.v1",
         "output_contract": "coding.change.output.v1",
@@ -67,6 +67,16 @@ _PARAMETERS = [
         "help": "Path inside the repository. Test files can never be changed.",
     },
     {
+        "name": "more_files",
+        "label": "Other files it may change with it (optional)",
+        "kind": "text_list",
+        "required": False,
+        "order": 35,
+        "examples": ["src/practice/units.py"],
+        "help": "Up to nine more paths inside the repository, one per line. Large files are "
+        "fine: the model reads them in parts and edits exact passages.",
+    },
+    {
         "name": "tests",
         "label": "Which tests say it is done?",
         "kind": "text_list",
@@ -94,10 +104,12 @@ def coding_workflow() -> WorkflowManifest:
             "metadata": {"identity": WORKFLOW.model_dump(), **_METADATA},
             "kind": "workflow",
             "description": (
-                "Change one file in a configured repository with the Gateway model until the "
-                "named tests and the whole test folder pass. Generated code runs restricted "
-                "(low integrity, no network, one process); the change stays in a separate "
-                "git worktree for review and is never committed."
+                "Change one or more files in a configured repository with the Gateway model "
+                "until the named tests, the repository's declared checks and the whole test "
+                "folder pass. The model reads large files in parts and edits exact passages. "
+                "Generated code runs restricted (low integrity, no network, limited "
+                "processes); the change stays in a separate git worktree for review and is "
+                "never committed."
             ),
             "execution": {"mode": "local"},
             "dependencies": {
@@ -211,8 +223,11 @@ def coding_skill() -> SkillManifest:
                 "alone. A result made with these tools does not show the Workflow "
                 "works: before calling a Workflow ready for reuse, run the installed version "
                 "and check what it wrote. `change`: "
-                "change one file in a configured repository against existing pytest tests; "
-                "never committed."
+                "change code in a configured repository against existing pytest tests: the "
+                "file to change, any other files it must change with it (more_files, up to "
+                "nine; large files are fine), and the tests that say it is done; the "
+                "repository's declared checks (such as pylint or mypy) run too; never "
+                "committed."
             ),
             "commands": [
                 {"name": "change", "kind": "workflow", "target": WORKFLOW.model_dump()},
