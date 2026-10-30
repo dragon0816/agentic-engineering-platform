@@ -5838,3 +5838,20 @@ Owner decisions "Wiring the wiki type (R4)" (`docs/DECISIONS.md` 2026-10-30). Co
   manifest, or the template before the first `get`, without reading the folder. Agent Web shows the
   location as `knowledge repository <id>`. `knowledge_publish` refuses a `repo` binding
   (`knowledge_is_repository`).
+- **Working folder** (`knowledge.wiki_work`, R4a part 3): `open_work(repo)` → `<workspace>/knowledge-repos/<id>/
+  work-view/vault`, materialized from the working units (staged files read from the working copy) with an
+  empty `drop/`, rebuilt when the working units differ from `work-view/state.json`. `capture(repo)` stages
+  the folder's changes and returns `{"pages", "raw", "originals", "skills", "schema", "raw_changed"}`:
+  pages (CRLF read as LF; a missing page is removed), new `raw/<path>` → `sources/<folder>/<sha8>-<name>` +
+  `raw:<path>`, a changed or removed Raw file only listed in `raw_changed`, new `drop/<path>` →
+  `sources/<folder>/<sha8>-<name>` (once per content), `skills/<folder>/SKILL.md` → next revision (role
+  `ingest`, current schema, `folder` kept when it is not a valid name), `CLAUDE.md` → schema
+  `wiki.schema@x.y.(z+1)`. Hidden files and folders are never staged.
+- **Benchmark and push check** (`host_runtime.wiki_bench`): `run(workspace, id, ask, sets=, actor=,
+  skill=, questions_fallback=)` captures, then runs `knowledge_bench.run_benchmark` with the working folder
+  as `sandbox` and the pushed head (materialized at `work-view/head`) as `project`; the report (saved in
+  the working folder's `.benchmarks/`) carries `pages_sha256`, the digest of the working pages.
+  `gate(workspace, before, after)` is installed by `build_runtime` with `wiki.set_benchmark`: the newest
+  `finished` run whose `pages_sha256` equals the pushed pages' digest blocks with `測試退步：<question>
+  在 push 前答得對，現在答錯` per regression and notes `測試 <run>：<n>/<total> 題通過（push 前是 …）`;
+  with no such run the note is `這次 push 的內容沒有跑過測試（…）` and nothing blocks.

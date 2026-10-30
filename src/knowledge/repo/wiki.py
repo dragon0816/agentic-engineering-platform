@@ -419,7 +419,7 @@ def import_vault(repo: Repository, folder: Path) -> dict[str, Any]:
     staged_pages = 0
     skipped: list[str] = []
     staged: dict[str, Any] = {}
-    for path in sorted(_page_files(folder)):
+    for path in sorted(page_files(folder)):
         text = (folder / path).read_text(encoding="utf-8")
         if page_path_problem(path) is not None:
             skipped.append(path)
@@ -489,7 +489,8 @@ def import_vault(repo: Repository, folder: Path) -> dict[str, Any]:
     }
 
 
-def _page_files(folder: Path) -> list[str]:
+def page_files(folder: Path) -> list[str]:
+    """The wiki page files of a folder (repository paths)."""
     found = [name for name in ROOT_PAGES if (folder / name).is_file()]
     wiki = folder / "wiki"
     if wiki.is_dir():
@@ -519,7 +520,11 @@ def _note(units: Mapping[str, Any]) -> str:
 
 
 def materialize(
-    units: Mapping[str, Any], target: Path, *, repo_folder: Path | None = None
+    units: Mapping[str, Any],
+    target: Path,
+    *,
+    repo_folder: Path | None = None,
+    staged_files: Path | None = None,
 ) -> dict[str, Any]:
     """Write a state's pages into `target` as an Obsidian-readable wiki.
 
@@ -527,7 +532,8 @@ def materialize(
     must be empty or carry `README-AEP.md` (a folder AEP made), so a person's
     own vault is never replaced. With `repo_folder`, the current schema is
     copied as `CLAUDE.md` and each skill's current revision as
-    `skills/<name>/SKILL.md`."""
+    `skills/<name>/SKILL.md`; `staged_files` is a working copy's folder of files
+    not pushed yet, looked up first."""
     if target.exists() and any(target.iterdir()) and not (target / READ_ONLY_NOTE).is_file():
         raise RepoError("target_not_materialized", f"{target} 不是 AEP 重建的資料夾，不會覆蓋")
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -541,12 +547,17 @@ def materialize(
         for name in ("raw", "wiki"):
             (building / name).mkdir(parents=True, exist_ok=True)
         if repo_folder is not None:
+            roots = [r for r in (staged_files, repo_folder) if r is not None]
+
+            def find(rel: str) -> Path:
+                return next((r / rel for r in roots if (r / rel).is_file()), repo_folder / rel)
+
             schema = units.get(SCHEMA_UNIT)
-            if isinstance(schema, str) and (repo_folder / f"schemas/{schema}.md").is_file():
-                shutil.copyfile(repo_folder / f"schemas/{schema}.md", building / SCHEMA_FILE)
+            if isinstance(schema, str) and find(f"schemas/{schema}.md").is_file():
+                shutil.copyfile(find(f"schemas/{schema}.md"), building / SCHEMA_FILE)
             for key, value in units.items():
                 if key.startswith(SKILL_UNIT_PREFIX) and isinstance(value, dict):
-                    source = repo_folder / str(value.get("path") or "")
+                    source = find(str(value.get("path") or ""))
                     if source.is_file():
                         skill = skills.parse_skill(source.read_text(encoding="utf-8"))
                         folder = skill.extra.get("folder") or skill.name
@@ -554,7 +565,7 @@ def materialize(
                         out.parent.mkdir(parents=True, exist_ok=True)
                         out.write_text(skill.body + "\n", encoding="utf-8", newline="\n")
                 elif key.startswith(RAW_PREFIX) and isinstance(value, dict):
-                    source = repo_folder / str(value.get("file") or "")
+                    source = find(str(value.get("file") or ""))
                     if source.is_file():
                         out = building / "raw" / key[len(RAW_PREFIX) :]
                         out.parent.mkdir(parents=True, exist_ok=True)

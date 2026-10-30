@@ -5648,3 +5648,22 @@ Engineering choices (Claude Code), fixing the R4 core library before wiring it:
   changes; an unreachable folder keeps the last version built (the Agent never answers from nothing when
   OneDrive is offline). The legacy candidate publish and refresh refuse a repository binding
   (`knowledge_is_repository`).
+
+## 2026-10-31: The wiki working folder and the benchmark as a push check (R4a, Claude Code)
+
+- **Working folder instead of rewriting the pipeline.** The ingest pipeline (convert, plan, apply, rule
+  editor) keeps working on a folder: each wiki repository has `knowledge-repos/<id>/work-view/vault`,
+  built from its working units, and `wiki_work.capture` stages what a step changed back as units (pages,
+  new Raw as `raw:` units, new `drop/` files as originals, `SKILL.md` edits as skill revisions, a
+  `CLAUDE.md` edit as the next schema patch version). Rejected: making every pipeline step write units
+  directly (a rewrite of planning and apply with the same result). Raw stays immutable: a changed or
+  removed Raw file is reported, never staged.
+- **A `CLAUDE.md` edit is a new schema version**, so skills written for the old one show 「需要更新」
+  (decision 3) until saved again. This makes the rule editor's schema edits visible in history; it can be
+  revisited if it proves noisy.
+- **The benchmark is run by the person, checked by the push.** A run asks the model for minutes, so a push
+  never starts one. Each run records the digest of the pages it tested; the push check blocks on the
+  regressions of the newest finished run for exactly the pages being pushed, and otherwise pushes with the
+  note that the content was not tested. Rejected: blocking every untested push (a one-word fix would need
+  a full run) and running the benchmark inside push (the request would hang for minutes). A push whose
+  content changed by merging someone else's work counts as untested.

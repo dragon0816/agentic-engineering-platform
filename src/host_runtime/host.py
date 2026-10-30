@@ -301,6 +301,7 @@ from harness.restricted_runner import (
     RunnerLimits,
     is_venv_launcher,
 )
+from host_runtime import wiki_bench
 from host_runtime.agent import LocalAgent
 from host_runtime.attachments import AttachmentStore
 from host_runtime.bi_cards_tools import bi_cards_tools
@@ -381,6 +382,7 @@ from knowledge.pipeline import (
     SandboxFile,
     SkillGuide,
 )
+from knowledge.repo import wiki
 from knowledge.sandbox import Sandboxes
 from knowledge.vault import Vault, VaultError
 from models.approved import ApprovedModelClient
@@ -2260,6 +2262,8 @@ def build_runtime(
     """Assemble this company host, or say which file stopped it."""
     checked = CompanyHostConfiguration.model_validate(config)
     place = layout if layout is not None else HostLayout.under(checked.workspace_root)
+    # A wiki repository's push is checked against its recorded test runs (R4a).
+    wiki.set_benchmark(partial(wiki_bench.gate, place.workspace_root))
     membership = load_membership(checked, place)
     gateway = build_gateway(
         checked,

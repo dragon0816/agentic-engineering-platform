@@ -64,6 +64,9 @@ class BenchmarkReport(Contract):
     results: tuple[QuestionResult, ...] = ()
     ungraded: tuple[str, ...] = ()  # questions with no must / must-not terms
     error: str | None = None
+    #: The pages tested, for a knowledge repository's push check (R4a): a push
+    #: of exactly these pages is blocked when this run found a regression.
+    pages_sha256: str | None = None
 
     @property
     def sandbox_score(self) -> int:
@@ -135,6 +138,7 @@ def run_benchmark(
     skill: AssetIdentity | None,
     questions_fallback: Path | None = None,
     run_id: str | None = None,
+    pages_sha256: str | None = None,
 ) -> BenchmarkReport:
     """Run synchronously, saving the report after every question in
     `<sandbox>/.benchmarks/<run id>.json` so a page can follow it."""
@@ -147,6 +151,7 @@ def run_benchmark(
         started_at=datetime.now(UTC).isoformat(timespec="seconds"),
         total=len(questions),
         ungraded=ungraded,
+        pages_sha256=pages_sha256,
     )
     folder = sandbox.root / RESULTS
     folder.mkdir(exist_ok=True)

@@ -3868,3 +3868,14 @@ s-k-20261011T102952` (not published).
     vault (R3, BI part)", decision of the same day. Tests `tests/test_bi_vault_skills.py` (7),
     `test_bi_vault_ui` drives the skills block. Not done: Session B on a skill, the model choosing the
     folder, sources inside the repository folder.
+  - [x] 2026-10-30/31, Claude Code: R4a, wiki backend (owner decisions: registry in the workspace, the
+    Agent reads the published version live, a `host.json` binding names a repository once, three
+    slices). R4 core fixed (schema reference, shared skill form, `raw:` units restoring `raw/`).
+    `knowledge/wiki_repos.py` and `/api/knowledge/repos` (create, import a copy, join, the version
+    operations, the reading folder); the catalog's live entry for a `repo` binding; `knowledge/wiki_work.py`
+    (working folder built from the working copy, `capture` back to units); `host_runtime/wiki_bench.py`
+    (a test run records the pages it tested; the push check blocks on its regressions). Contract
+    "Knowledge repositories: wiki repositories on this PC (R4a)". Tests `test_knowledge_repos_api` (6),
+    `test_knowledge_repo_agent` (3), `test_knowledge_wiki_work` (5), `test_wiki_bench` (2). Not done: the
+    page (R4b), removing sandboxes, candidates, push and publish of the old path (R4c), question sets
+    inside the repository.
