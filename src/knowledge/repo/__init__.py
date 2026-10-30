@@ -16,6 +16,7 @@ from knowledge.repo.repository import (
     register_type,
     registered,
 )
+from knowledge.repo.wiki import WIKI, set_benchmark  # registers the `wiki` type
 
 __all__ = [
     "REPO_FILE",
@@ -28,4 +29,6 @@ __all__ = [
     "join",
     "register_type",
     "registered",
+    "set_benchmark",
+    "WIKI",
 ]
