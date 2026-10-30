@@ -39,6 +39,7 @@ import re
 import shutil
 import sqlite3
 import threading
+import time
 import uuid
 from collections.abc import Iterable, Mapping
 from contextlib import closing
@@ -114,6 +115,8 @@ CREATE TABLE IF NOT EXISTS file_hashes (
 );
 """
 
+# Tries before a replace that Windows keeps refusing is given up.
+_REPLACE_ATTEMPTS = 6
 _LOCKS: dict[str, threading.RLock] = {}
 _LOCKS_GUARD = threading.Lock()
 
@@ -206,7 +209,17 @@ def _write_atomic(path: Path, data: bytes) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.parent / f".{path.name}.{uuid.uuid4().hex[:8]}.tmp"
     temporary.write_bytes(data)
-    os.replace(temporary, path)
+    for attempt in range(_REPLACE_ATTEMPTS):
+        try:
+            os.replace(temporary, path)
+            return
+        except PermissionError:
+            # Windows refuses a replace while another process (a virus
+            # scanner, the search indexer, a drive client) briefly holds a file.
+            if attempt == _REPLACE_ATTEMPTS - 1:
+                temporary.unlink(missing_ok=True)
+                raise
+            time.sleep(0.05 * (attempt + 1))
 
 
 def _write_new(path: Path, data: bytes) -> None:
@@ -762,12 +775,40 @@ class Repository:
                     break
             return units
 
+    def log(self) -> list[dict[str, Any]]:
+        """Every applied commit in order with what each of its operations did:
+        `{"commit": <the commit>, "changes": [{"unit", "before", "after",
+        "applied"}]}`. A type derives its own history from it."""
+        with self.lock:
+            commits = {c.name: c for c in self.scan().commits}
+            units: dict[str, Any] = {}
+            entries = []
+            for name, _ in self._ordered():
+                commit = commits.get(name)
+                if commit is None:
+                    continue
+                changes = []
+                for op in commit.data["ops"]:
+                    before = units.get(op["unit"])
+                    applied = not apply_ops(units, [op])
+                    changes.append(
+                        {
+                            "unit": op["unit"],
+                            "before": before,
+                            "after": units.get(op["unit"]),
+                            "applied": applied,
+                        }
+                    )
+                entries.append({"commit": commit.data, "changes": changes})
+            return entries
+
     def conflicts(self, status: str = "open") -> list[dict[str, Any]]:
         with closing(self._connect()) as db:
             return [
                 {
                     "id": r["id"],
                     "commit": r["file"],
+                    "commit_id": r["commit_id"],
                     "unit": r["unit"],
                     "value": json.loads(r["value"]),
                     "current": json.loads(r["current"]),
@@ -867,14 +908,22 @@ class Repository:
 
     def stage(self, key: str, value: Any) -> None:
         """Change one unit in the working copy (None removes it)."""
-        problem = unit_key_problem(key)
-        if problem is None and value is not None:
-            problem = self.kind.unit_problem(key, value)
-        if problem:
-            raise RepoError("unit_invalid", f"{key}: {problem}")
+        self.stage_many({key: value})
+
+    def stage_many(self, changes: Mapping[str, Any]) -> None:
+        """Change several units with one write of the working copy; nothing is
+        staged when one of them is invalid (an import stages thousands)."""
+        for key, value in changes.items():
+            problem = unit_key_problem(key)
+            if problem is None and value is not None:
+                problem = self.kind.unit_problem(key, value)
+            if problem:
+                raise RepoError("unit_invalid", f"{key}: {problem}")
+        if not changes:
+            return
         with self.lock:
             pending = self._pending()
-            pending["sets"][key] = value
+            pending["sets"].update(changes)
             self._save_pending(pending)
 
     def stage_file(self, path: str, source: Path) -> dict[str, Any]:

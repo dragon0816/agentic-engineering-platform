@@ -260,6 +260,9 @@ def test_a_vault_upgrade_reaches_every_pc(tmp_path: Path) -> None:
     path = f"/api/bi/datasets/{dataset}/schema"
     preview = _ok(_call(a, "POST", f"{path}/preview", {"to": V2}))
     _ok(_call(a, "POST", f"{path}/apply", {"to": V2, "preview_token": preview["preview_token"]}))
+    # The upgrade is staged here; a commit and a push take it to every PC.
+    _ok(_call(a, "POST", f"/api/bi/vaults/{vault_id}/commit", {"purpose": "Upgrade to 2.0.0"}))
+    _ok(_call(a, "POST", f"/api/bi/vaults/{vault_id}/push", {}))
     shutil.copytree(parent_a / vault_id, parent_b / vault_id)
     _ok(_call(b, "POST", "/api/bi/vaults/join", {"path": str(parent_b / vault_id),
                                                   "author": "bob"}))  # fmt: skip

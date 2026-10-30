@@ -551,6 +551,20 @@ def install(workspace: Path, filename: str, json_text: Any) -> dict[str, Any]:
             "不是有效的 JSON",
             [{"path": where, "message": str(getattr(failure, "msg", failure))}],
         ) from None
+    if isinstance(document, dict):
+        # A vault carries even a shipped version's file (KNOWLEDGE_REPO
+        # decision 1); the same content is already installed, not "too old".
+        same = next(
+            (
+                reg
+                for reg in shipped()
+                if (reg.schema_id, reg.version)
+                == (document.get("schema_id"), document.get("version"))
+            ),
+            None,
+        )
+        if same is not None and canonical(same.document) == canonical(document):
+            return {"ok": True, "id": same.schema_id, "version": same.version, "already": True}
     normalised, problems = validate(document)
     if problems or normalised is None:
         bi_only = str(document.get("schema_id") or "").startswith(BI_PREFIX) and problems == (

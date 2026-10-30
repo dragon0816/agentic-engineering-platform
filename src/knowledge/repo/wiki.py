@@ -286,8 +286,7 @@ def stage_page(repo: Repository, path: str, text: str | None) -> int:
     """Stage one page's new text (None removes it) in the working copy;
     returns the number of units changed."""
     changes = page_changes(repo.working_units(), path, text)
-    for key, value in changes.items():
-        repo.stage(key, value)
+    repo.stage_many(changes)
     return len(changes)
 
 
@@ -390,14 +389,15 @@ def import_vault(repo: Repository, folder: Path) -> dict[str, Any]:
     current = repo.working_units()
     staged_pages = 0
     skipped: list[str] = []
+    staged: dict[str, Any] = {}
     for path in sorted(_page_files(folder)):
         text = (folder / path).read_text(encoding="utf-8")
         if page_path_problem(path) is not None:
             skipped.append(path)
             continue
-        for key, value in page_changes(current, path, text).items():
-            repo.stage(key, value)
+        staged.update(page_changes(current, path, text))
         staged_pages += 1
+    repo.stage_many(staged)
     originals = 0
     seen: set[str] = set()
     for area in ORIGINAL_AREAS:

@@ -182,8 +182,14 @@ def test_a_vault_shares_the_configuration_with_every_pc(tmp_path: Path) -> None:
     vault_id = made["vault"]["id"]
     dataset = vault.dataset_name(vault_id)
     _ok(_save(a, CONFIG, 0, dataset))
-    changes = sorted(p.name for p in (drive_a / vault_id / "changes" / "alice").glob("*.json"))
-    assert changes == ["1.json", "2.json"]
+    # Saved is staged on this PC; a commit with a purpose and a push share it.
+    shared_commits = drive_a / vault_id / "commits" / "alice"
+    before = len(list(shared_commits.glob("*.json")))
+    committed = _ok(_call(a, "POST", f"/api/bi/vaults/{vault_id}/commit",
+                          {"purpose": "Add the AIDC domain"}))  # fmt: skip
+    assert committed["commit"]["purpose"] == "Add the AIDC domain"
+    _ok(_call(a, "POST", f"/api/bi/vaults/{vault_id}/push", {}))
+    assert len(list(shared_commits.glob("*.json"))) == before + 1
     shutil.copytree(drive_a / vault_id, drive_b / vault_id)
     _ok(_call(b, "POST", "/api/bi/vaults/join",
               {"path": str(drive_b / vault_id), "author": "bob"}))  # fmt: skip

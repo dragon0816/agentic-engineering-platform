@@ -90,15 +90,10 @@ def matrix_for(workspace: Path, dataset: str) -> tuple[dict[str, Any], str]:
     derived = configured.matrix() if configured is not None else None
     if derived is not None:
         return validate(derived), "domains"
-    vault_id = vault_of(workspace, dataset)
-    if vault_id is not None:
-        from capabilities.bi_cards import vault
-
-        entry = vault.registry_entry(workspace, vault_id) or {}
-        try:
-            block = vault.read_vault_json(Path(str(entry.get("path")))).get("coverage")
-        except BiStoreError:
-            block = None  # the folder is not reachable now: fall back like a dataset
+    if vault_of(workspace, dataset) is not None:
+        # A vault's matrix given at creation travels as the meta `vault_coverage`.
+        text = BiStore(workspace, dataset).meta_value("vault_coverage")
+        block = json.loads(text) if text else None
         if isinstance(block, dict):
             return validate(block), "vault"
     own = dataset_dir(workspace, dataset) / DATASET_FILE

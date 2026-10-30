@@ -1,9 +1,9 @@
-"""BI vaults phase V4 (owner 2026-10-28; `docs/phases/BI_VAULT.md` §3, §4).
+"""BI vaults on knowledge repositories (R2; `docs/phases/KNOWLEDGE_REPO.md`).
 
 Every PC is its own temporary workspace with its own copy of the vault folder;
-`_Drive.deliver` plays OneDrive, copying change files between the copies, so a
-test decides exactly which files each PC has seen when it writes. The cards of
-two PCs with the same files must be identical, table by table. All data is
+`_Drive.deliver` plays OneDrive, copying the files a PC has not got yet, so a
+test decides exactly what each PC has seen when it pushes. The cards of two
+PCs with the same commits must be identical, table by table. All data is
 fictional.
 """
 
@@ -30,7 +30,6 @@ class _Drive:
 
     def __init__(self, root: Path) -> None:
         self.root = root
-        self.copies: dict[str, Path] = {}
 
     def workspace(self, pc: str) -> Path:
         path = self.root / pc / "workspace"
@@ -48,19 +47,15 @@ class _Drive:
         shutil.copytree(self.parent(source_pc) / vault_id, target)
         return target
 
-    def deliver(self, source_pc: str, pc: str, vault_id: str, only: str | None = None) -> None:
-        """Copy the change files (and schemas) `pc` has not got yet; `only`
-        delivers just one `<author>/<seq>.json`."""
+    def deliver(self, source_pc: str, pc: str, vault_id: str) -> None:
+        """Copy every file `pc` has not got yet (files are never changed)."""
         source = self.parent(source_pc) / vault_id
         target = self.parent(pc) / vault_id
-        for folder in ("changes", "schemas"):
-            for path in sorted((source / folder).rglob("*.json")):
-                relative = path.relative_to(source)
-                if only is not None and relative.as_posix() != f"changes/{only}":
-                    continue
-                if not (target / relative).exists():
-                    (target / relative).parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(path, target / relative)
+        for path in sorted(source.rglob("*")):
+            relative = path.relative_to(source)
+            if path.is_file() and relative.name != "REPO.md" and not (target / relative).exists():
+                (target / relative).parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(path, target / relative)
 
 
 def _call(
@@ -94,8 +89,7 @@ def _tables(ws: Path, dataset: str) -> dict[str, list[tuple[Any, ...]]]:
                 "evidence",
                 "imports",
                 "meta",
-                "vault_pkeys",
-                "vault_conflicts",
+                "vault_keys",
             )
         }
 
@@ -143,9 +137,17 @@ def _status(ws: Path, vault_id: str) -> dict[str, Any]:
     return _ok(_call(ws, "GET", f"/api/bi/vaults/{vault_id}/status"))
 
 
-def _card(ws: Path, dataset: str, key: str) -> dict[str, Any]:
+def _commit(ws: Path, vault_id: str, purpose: str) -> dict[str, Any]:
+    return _ok(_call(ws, "POST", f"/api/bi/vaults/{vault_id}/commit", {"purpose": purpose}))
+
+
+def _push(ws: Path, vault_id: str) -> dict[str, Any]:
+    return _ok(_call(ws, "POST", f"/api/bi/vaults/{vault_id}/push", {}))
+
+
+def _card(ws: Path, dataset: str, key: str, entity_type: str = "Technology") -> dict[str, Any]:
     store = BiStore(ws, dataset)
-    found = store.find("Technology", key)
+    found = store.find(entity_type, key)
     assert found is not None
     return {"id": found["id"], "version": found["version"], "fields": store.fields(found["id"])}
 
@@ -161,23 +163,39 @@ def _edit(ws: Path, dataset: str, key: str, field: str, value: Any, actor: str) 
     )
 
 
-def _changes(drive: _Drive, pc: str, vault_id: str) -> list[str]:
-    root = drive.parent(pc) / vault_id / "changes"
+def _commits(drive: _Drive, pc: str, vault_id: str) -> list[str]:
+    root = drive.parent(pc) / vault_id / "commits"
     return sorted(p.relative_to(root).as_posix() for p in root.rglob("*.json"))
+
+
+def _import(ws: Path, dataset: str, *rows: PlannedRow, filename: str = "t.csv") -> None:
+    BiStore(ws, dataset).apply(
+        list(rows), filename=filename, entity_type="Technology", actor="x via web"
+    )
 
 
 def test_create_lays_out_the_folder_and_join_checks_it(tmp_path: Path) -> None:
     drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
     folder = drive.parent("a") / vault_id
-    document = json.loads((folder / "vault.json").read_text(encoding="utf-8"))
-    assert document["format"] == "bi.vault/v1" and document["id"] == vault_id
-    assert document["schema"] == "bi.schema/v1.1@2.0.0"  # the newest shipped version
-    assert len(document["folders"]["applications"]) == 11
-    assert (folder / "VAULT.md").read_text(encoding="utf-8").startswith("# Market Signals")
-    for name in ("applications/robotics-amr/sources", "library/competitors/sources"):
+    document = json.loads((folder / "repo.json").read_text(encoding="utf-8"))
+    assert (document["format"], document["id"], document["type"]) == (
+        "aep.knowledge.repo/v1",
+        vault_id,
+        "bi",
+    )
+    assert (folder / "REPO.md").read_text(encoding="utf-8").startswith("# Market Signals")
+    for name in (
+        "sources/applications/robotics-amr",
+        "sources/library/competitors",
+        "skills",
+        "tags",
+    ):
         assert (folder / name).is_dir()
-    assert (folder / "schemas").is_dir() and (folder / "skills").is_dir()
-    assert _changes(drive, "a", vault_id) == ["alice/1.json"]
+    # The vault holds the schema it uses, built in or not (decision 1).
+    assert (folder / "schemas" / "bi.schema__v1.1@2.0.0.json").is_file()
+    assert _commits(drive, "a", vault_id) == ["alice/1.json"]
+    first = json.loads((folder / "commits/alice/1.json").read_text(encoding="utf-8"))
+    assert first["kind"] == "schema" and "bi.schema/v1.1@2.0.0" in first["purpose"]
     # No database is ever in the shared folder.
     assert not [p for p in folder.rglob("*") if p.suffix in (".sqlite", ".db")]
     assert dataset in datasets(a) and dataset in datasets(b)
@@ -186,29 +204,19 @@ def test_create_lays_out_the_folder_and_join_checks_it(tmp_path: Path) -> None:
     assert [(v["id"], v["author"], v["title"]) for v in listed] == [
         (vault_id, "bob", "Market Signals")
     ]
-    # Joining checks the folder and keeps authors apart.
-    _refused(_call(b, "POST", "/api/bi/vaults/join", {"path": str(tmp_path)}), 400, "vault_invalid")
+    _refused(_call(b, "POST", "/api/bi/vaults/join", {"path": str(tmp_path)}), 400, "repo_invalid")
     c = drive.workspace("c")
     other = drive.clone("a", "c", vault_id)
     body = {"path": str(other), "author": "alice"}
     _refused(_call(c, "POST", "/api/bi/vaults/join", body), 409, "author_taken")
     _ok(_call(c, "POST", "/api/bi/vaults/join", {**body, "resume": True}))
-    _refused(
-        _call(
-            a,
-            "POST",
-            "/api/bi/vaults",
-            {
-                "path": str(drive.parent("a")),
-                "title": "x",
-                "id": vault_id,
-                "schema": "bi.schema/v1.1",
-            },
-        ),
-        409,
-        "vault_exists",
-    )
-    # A plain dataset may not take a vault's name.
+    again = {
+        "path": str(drive.parent("a")),
+        "title": "x",
+        "id": vault_id,
+        "schema": "bi.schema/v1.1",
+    }
+    _refused(_call(a, "POST", "/api/bi/vaults", again), 409, "vault_exists")
     _refused(
         _call(a, "POST", "/api/bi/datasets", {"name": "vault-x", "schema": "bi.schema/v1.1"}),
         400,
@@ -216,144 +224,146 @@ def test_create_lays_out_the_folder_and_join_checks_it(tmp_path: Path) -> None:
     )
 
 
-def test_a_write_is_one_change_file_and_every_pc_builds_the_same_cards(tmp_path: Path) -> None:
+def test_an_import_commits_at_once_and_reaches_others_by_push(tmp_path: Path) -> None:
     drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
-    BiStore(a, dataset).apply(
-        [_row("TSN", standard_body="IEEE"), _row("EtherCAT")],
-        filename="tech.csv",
-        entity_type="Technology",
-        actor="alice via web",
-    )
-    assert _changes(drive, "a", vault_id) == ["alice/1.json", "alice/2.json"]
+    _import(a, dataset, _row("TSN", standard_body="IEEE"), _row("EtherCAT"), filename="tech.csv")
+    status = _status(a, vault_id)
+    assert (status["ahead"], status["uncommitted"]) == (1, 0)
+    assert _commits(drive, "a", vault_id) == ["alice/1.json"]  # local until pushed
+    assert _push(a, vault_id)["status"] == "pushed"
     written = json.loads(
-        (drive.parent("a") / vault_id / "changes/alice/2.json").read_text(encoding="utf-8")
+        (drive.parent("a") / vault_id / "commits/alice/2.json").read_text(encoding="utf-8")
     )
-    assert (written["author"], written["seq"], written["clock"]) == ("alice", 2, 2)
-    assert written["action"] == "import"
-    field = next(o for o in written["ops"] if o["op"] == "field" and o["field"] == "standard_body")
-    assert field["base"] is None and field["value"] == "IEEE"
-    assert field["source"]["ref"] == "tech.csv#row1"
+    assert written["purpose"].startswith("匯入 tech.csv")
+    unit = next(o for o in written["ops"] if o["unit"].endswith(":standard_body"))
+    assert unit["base"] is None and unit["value"]["value"] == "IEEE"
+    assert unit["value"]["source"]["ref"] == "tech.csv#row1"
     drive.deliver("a", "b", vault_id)
-    report = _sync(b, vault_id)
-    assert (report["applied"], report["rebuilt"]) == (1, False)
+    assert _sync(b, vault_id)["applied"] == 1
     assert _tables(a, dataset) == _tables(b, dataset)
-    status = _status(b, vault_id)
-    assert (status["files"], status["applied"], status["behind"]) == (2, 2, 0)
-    # A person's edit on b reaches a; a sync with nothing new changes nothing.
+    # A person's edit waits in b's working copy until b commits and pushes.
     _ok(_edit(b, dataset, "TSN", "standard_body", "IEEE 802.1", "bob"))
+    assert _status(b, vault_id)["uncommitted"] == 1
+    pending = _ok(_call(b, "GET", f"/api/bi/vaults/{vault_id}/pending"))
+    assert [c["after"]["value"] for c in pending["uncommitted"]] == ["IEEE 802.1"]
+    _refused(
+        _call(b, "POST", f"/api/bi/vaults/{vault_id}/commit", {"purpose": " "}),
+        400,
+        "purpose_missing",
+    )
+    _commit(b, vault_id, "標準組織寫成 IEEE 802.1")
+    assert _push(b, vault_id)["status"] == "pushed"
     drive.deliver("b", "a", vault_id)
     assert _sync(a, vault_id)["applied"] == 1
-    assert _card(a, dataset, "TSN")["fields"]["standard_body"]["kind"] == "human"
+    field = _card(a, dataset, "TSN")["fields"]["standard_body"]
+    assert (field["value"], field["kind"]) == ("IEEE 802.1", "human")
     assert _tables(a, dataset) == _tables(b, dataset)
+    history = BiStore(a, dataset).history(_card(a, dataset, "TSN")["id"])
+    assert [h["new"] for h in history if h["field"] == "standard_body"] == ["IEEE", "IEEE 802.1"]
     assert _sync(a, vault_id)["applied"] == 0
 
 
-def test_concurrent_edits_of_one_field_become_one_value_and_one_proposal(tmp_path: Path) -> None:
+def test_a_push_after_another_on_the_same_field_is_a_conflict_until_resolved(
+    tmp_path: Path,
+) -> None:
     drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
-    BiStore(a, dataset).apply(
-        [_row("TSN", standard_body="IEEE")], filename="t.csv", entity_type="Technology", actor="a"
-    )
+    _import(a, dataset, _row("TSN", standard_body="IEEE"))
+    _push(a, vault_id)
     drive.deliver("a", "b", vault_id)
     _sync(b, vault_id)
-    # Both edit before OneDrive brings the other's file.
     _ok(_edit(a, dataset, "TSN", "standard_body", "IEEE 802.1", "alice"))
+    _commit(a, vault_id, "a 的修改")
+    _push(a, vault_id)
     _ok(_edit(b, dataset, "TSN", "standard_body", "IETF", "bob"))
+    _commit(b, vault_id, "b 的修改")
     drive.deliver("a", "b", vault_id)
-    drive.deliver("b", "a", vault_id)
-    _sync(a, vault_id)
-    _sync(b, vault_id)
-    assert _tables(a, dataset) == _tables(b, dataset)
-    for ws in (a, b):
-        card = _card(ws, dataset, "TSN")
-        # Same clock: alice sorts first and wins; bob's value waits for a person.
-        assert card["fields"]["standard_body"]["value"] == "IEEE 802.1"
-        proposals = BiStore(ws, dataset).proposals(card["id"])
-        assert [(p["field"], p["value"]) for p in proposals] == [("standard_body", "IETF")]
-        conflicts = _status(ws, vault_id)["conflicts"]
-        assert [(c["kind"], c["field"], c["open"]) for c in conflicts] == [
-            ("field", "standard_body", True)
-        ]
-        assert conflicts[0]["detail"]["author"] == "bob"
-    # A person accepts bob's value on b: a new change file, closed for everyone.
-    card = _card(b, dataset, "TSN")
-    proposal = BiStore(b, dataset).proposals(card["id"])[0]
+    result = _push(b, vault_id)
+    assert result["status"] == "conflicts"
+    (conflict,) = result["conflicts"]
+    assert (conflict["mine"]["value"], conflict["theirs"]["value"]) == ("IETF", "IEEE 802.1")
+    assert _commits(drive, "b", vault_id) == ["alice/1.json", "alice/2.json", "alice/3.json"]
     _ok(
         _call(
             b,
             "POST",
-            f"/api/bi/cards/{card['id']}/proposals/{proposal['id']}",
-            {"dataset": dataset, "action": "accept", "base_version": card["version"]},
-            actor="bob",
+            f"/api/bi/vaults/{vault_id}/resolve",
+            {"unit": conflict["unit"], "choice": "mine"},
         )
     )
+    assert _push(b, vault_id)["status"] == "pushed"
     drive.deliver("b", "a", vault_id)
     _sync(a, vault_id)
     assert _card(a, dataset, "TSN")["fields"]["standard_body"]["value"] == "IETF"
-    assert BiStore(a, dataset).proposals(card["id"]) == []
-    assert _status(a, vault_id)["conflicts"][0]["open"] is False
     assert _tables(a, dataset) == _tables(b, dataset)
 
 
-def test_concurrent_edits_of_different_fields_are_both_applied(tmp_path: Path) -> None:
+def test_different_fields_merge_on_push(tmp_path: Path) -> None:
     drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
-    BiStore(a, dataset).apply(
-        [_row("TSN", standard_body="IEEE")], filename="t.csv", entity_type="Technology", actor="a"
-    )
+    _import(a, dataset, _row("TSN", standard_body="IEEE"))
+    _push(a, vault_id)
     drive.deliver("a", "b", vault_id)
     _sync(b, vault_id)
-    version = _card(a, dataset, "TSN")["version"]
     _ok(_edit(a, dataset, "TSN", "standard_body", "IEEE 802.1", "alice"))
-    _ok(_edit(b, dataset, "TSN", "body", "虛構備註", "bob"))
+    _commit(a, vault_id, "a")
+    _push(a, vault_id)
+    _ok(_edit(b, dataset, "TSN", "body", "時間敏感網路", "bob"))
+    _commit(b, vault_id, "b")
+    drive.deliver("a", "b", vault_id)
+    assert _push(b, vault_id)["status"] == "pushed"
+    drive.deliver("b", "a", vault_id)
+    _sync(a, vault_id)
+    fields = _card(a, dataset, "TSN")["fields"]
+    assert (fields["standard_body"]["value"], fields["body"]["value"]) == (
+        "IEEE 802.1",
+        "時間敏感網路",
+    )
+    assert _tables(a, dataset) == _tables(b, dataset)
+
+
+def test_a_race_on_replay_is_a_pending_proposal_on_every_pc(tmp_path: Path) -> None:
+    drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
+    _import(a, dataset, _row("TSN", standard_body="IEEE"))
+    _push(a, vault_id)
+    drive.deliver("a", "b", vault_id)
+    _sync(b, vault_id)
+    # Both push before OneDrive brings the other's commit.
+    for ws, value, actor in ((a, "IEEE 802.1", "alice"), (b, "IETF", "bob")):
+        _ok(_edit(ws, dataset, "TSN", "standard_body", value, actor))
+        _commit(ws, vault_id, f"{actor} edits")
+        assert _push(ws, vault_id)["status"] == "pushed"
     drive.deliver("a", "b", vault_id)
     drive.deliver("b", "a", vault_id)
     _sync(a, vault_id)
     _sync(b, vault_id)
     assert _tables(a, dataset) == _tables(b, dataset)
     card = _card(a, dataset, "TSN")
-    assert card["fields"]["standard_body"]["value"] == "IEEE 802.1"
-    assert card["fields"]["body"]["value"] == "虛構備註"
-    assert card["version"] == version + 2
-    assert _status(a, vault_id)["conflicts"] == []
-
-
-def test_a_late_file_with_an_earlier_key_rebuilds_and_every_pc_converges(tmp_path: Path) -> None:
-    drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
-    c = drive.workspace("c")
-    folder = drive.clone("a", "c", vault_id)
-    _ok(_call(c, "POST", "/api/bi/vaults/join", {"path": str(folder), "author": "carol"}))
-    BiStore(a, dataset).apply(
-        [_row("TSN", standard_body="IEEE")], filename="a.csv", entity_type="Technology", actor="a"
+    winner = card["fields"]["standard_body"]["value"]
+    (proposal,) = BiStore(a, dataset).proposals(card["id"])
+    assert proposal["source"]["kind"] == "conflict" and {winner, proposal["value"]} == {
+        "IEEE 802.1",
+        "IETF",
+    }
+    assert [c["open"] for c in _status(a, vault_id)["conflicts"]] == [True]
+    # A person accepts the other value on a: committed, pushed, closed everywhere.
+    _ok(
+        _call(
+            a,
+            "POST",
+            f"/api/bi/cards/{card['id']}/proposals/{proposal['id']}",
+            {"dataset": dataset, "action": "accept", "base_version": card["version"]},
+            actor="alice",
+        )
     )
-    BiStore(b, dataset).apply(
-        [_row("TSN", standard_body="IETF"), _row("PTP")],
-        filename="b.csv",
-        entity_type="Technology",
-        actor="b",
-    )
-    # c gets bob's file first, then alice's: (2, alice) sorts before (2, bob).
-    drive.deliver("b", "c", vault_id)
-    first = _sync(c, vault_id)
-    assert (first["applied"], first["rebuilt"]) == (1, False)
-    drive.deliver("a", "c", vault_id)
-    second = _sync(c, vault_id)
-    assert second["rebuilt"] is True
-    for pc in ("a", "b"):
-        for other in ("a", "b"):
-            if pc != other:
-                drive.deliver(pc, other, vault_id)
-    _sync(a, vault_id)
+    _commit(a, vault_id, "決定衝突")
+    _push(a, vault_id)
+    drive.deliver("a", "b", vault_id)
     _sync(b, vault_id)
-    assert _tables(a, dataset) == _tables(b, dataset) == _tables(c, dataset)
-    # Same type and key created twice: one card, flagged for a person.
-    assert len(BiStore(c, dataset).card_rows()) == 2
-    merges = _status(c, vault_id)["merges"]
-    assert [(m["detail"]["type"], m["detail"]["key"]) for m in merges] == [("Technology", "TSN")]
-    card = _card(c, dataset, "TSN")
-    assert card["fields"]["standard_body"]["value"] == "IEEE"
-    assert [p["value"] for p in BiStore(c, dataset).proposals(card["id"])] == ["IETF"]
+    assert _card(b, dataset, "TSN")["fields"]["standard_body"]["value"] == proposal["value"]
+    assert BiStore(b, dataset).proposals(card["id"]) == []
+    assert _tables(a, dataset) == _tables(b, dataset)
 
 
-def test_a_run_id_is_applied_once(tmp_path: Path) -> None:
+def test_a_reviewed_run_commits_once_with_its_evidence(tmp_path: Path) -> None:
     drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
     csv = "技術,標準組織\nTSN,IEEE\nPTP,IEEE\n"
     source = _ok(
@@ -386,53 +396,41 @@ def test_a_run_id_is_applied_once(tmp_path: Path) -> None:
     assert committed["applied"]["created"] == 2
     again = _ok(_call(a, "POST", f"/api/bi/runs/{run['id']}/commit", {"dataset": dataset}))
     assert again.get("already") is True
-    root = drive.parent("a") / vault_id / "changes" / "alice"
-    written = json.loads((root / "2.json").read_text(encoding="utf-8"))
-    assert written["action"] == "commit_run" and written["run_id"] == run["id"]
-    assert any(o["op"] == "evidence" for o in written["ops"])
-    # The same run arrives a second time (a copied file): applied once.
-    duplicate = {**copy.deepcopy(written), "seq": 3, "clock": written["clock"] + 1}
-    (root / "3.json").write_text(json.dumps(duplicate), encoding="utf-8")
-    report = _sync(a, vault_id)
-    assert report["outcomes"] == {"duplicate_run": 1}
-    assert len(BiStore(a, dataset).card_rows()) == 2
+    assert _status(a, vault_id)["ahead"] == 1
+    _push(a, vault_id)
     drive.deliver("a", "b", vault_id)
     _sync(b, vault_id)
     assert _tables(a, dataset) == _tables(b, dataset)
-    skipped = _status(b, vault_id)["skipped"]
-    assert [(s["file"], s["outcome"]) for s in skipped] == [("alice/3", "duplicate_run")]
     card = _card(b, dataset, "TSN")
     assert BiStore(b, dataset).evidence(card["id"])[0]["excerpt"]
 
 
-def test_a_half_written_file_waits_and_a_malformed_one_is_reported(tmp_path: Path) -> None:
+def test_a_commit_waiting_for_onedrive_and_a_tampered_one(tmp_path: Path) -> None:
     drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
-    BiStore(a, dataset).apply(
-        [_row("TSN", standard_body="IEEE")], filename="t.csv", entity_type="Technology", actor="a"
-    )
-    source = drive.parent("a") / vault_id / "changes" / "alice" / "2.json"
-    target = drive.parent("b") / vault_id / "changes" / "alice" / "2.json"
+    _import(a, dataset, _row("TSN", standard_body="IEEE"))
+    _push(a, vault_id)
+    source = drive.parent("a") / vault_id / "commits/alice/2.json"
+    target = drive.parent("b") / vault_id / "commits/alice/2.json"
     content = source.read_bytes()
     target.write_bytes(content[: len(content) // 2])  # OneDrive still downloading
-    bad_dir = drive.parent("b") / vault_id / "changes" / "mallory"
-    bad_dir.mkdir()
-    (bad_dir / "1.json").write_text(json.dumps({"format": "bi.vault.change/v1"}), encoding="utf-8")
-    (bad_dir / "notes.json").write_text("{}", encoding="utf-8")
     report = _sync(b, vault_id)
-    assert report["applied"] == 0
-    assert [i["file"] for i in report["incomplete"]] == ["alice/2.json"]
-    assert sorted(i["file"] for i in report["bad"]) == ["mallory/1.json", "mallory/notes.json"]
-    assert BiStore(b, dataset).find("Technology", "TSN") is None
-    status = _status(b, vault_id)
-    assert len(status["bad"]) == 2 and len(status["incomplete"]) == 1
-    # The download finishes: picked up on the next sync; the bad files stay reported.
+    assert report["applied"] == 0 and [i["file"] for i in report["incomplete"]] == [
+        "commits/alice/2.json"
+    ]
     target.write_bytes(content)
-    report = _sync(b, vault_id)
-    assert report["applied"] == 1 and len(report["bad"]) == 2
+    assert _sync(b, vault_id)["applied"] == 1
     assert _tables(a, dataset) == _tables(b, dataset)
+    forged = json.loads(content)
+    forged["ops"][0]["value"] = "forged"
+    target.write_text(json.dumps(forged), encoding="utf-8")
+    report = _sync(b, vault_id)
+    assert report["bad"] == [
+        {"file": "commits/alice/2.json", "reason": "id does not match the content"}
+    ]
+    assert BiStore(b, dataset).find("Technology", "TSN") is None
 
 
-def test_undo_and_a_schema_upgrade_travel_as_change_files(tmp_path: Path) -> None:
+def test_undo_and_a_schema_upgrade_travel_as_commits(tmp_path: Path) -> None:
     drive = _Drive(tmp_path)
     a, b = drive.workspace("a"), drive.workspace("b")
     example = catalog.example()
@@ -454,48 +452,30 @@ def test_undo_and_a_schema_upgrade_travel_as_change_files(tmp_path: Path) -> Non
     dataset = vault.dataset_name(vault_id)
     assert (drive.parent("a") / vault_id / "schemas" / "example__product-spec@1.0.0.json").is_file()
     store = BiStore(a, dataset)
-    store.apply(
-        [
-            PlannedRow(
-                row=1,
-                entity_type="Supplier",
-                canonical_key="虛構電子",
-                name="虛構電子",
-                values={"name": "虛構電子", "country": "TW"},
-                synthetic=True,
-            )
-        ],
-        filename="s.csv",
-        entity_type="Supplier",
-        actor="alice via web",
-    )
-    second = store.apply(
-        [
-            PlannedRow(
-                row=1,
-                entity_type="Supplier",
-                canonical_key="範例零件",
-                name="範例零件",
-                values={"name": "範例零件", "country": "JP"},
-                synthetic=True,
-            )
-        ],
-        filename="s2.csv",
-        entity_type="Supplier",
-        actor="alice via web",
-    )
+
+    def supplier(key: str, country: str, filename: str) -> Any:
+        row = PlannedRow(
+            row=1,
+            entity_type="Supplier",
+            canonical_key=key,
+            name=key,
+            values={"name": key, "country": country},
+            synthetic=True,
+        )
+        return store.apply([row], filename=filename, entity_type="Supplier", actor="alice via web")
+
+    supplier("虛構電子", "TW", "s.csv")
+    second = supplier("範例零件", "JP", "s2.csv")
     _ok(
         _call(a, "POST", "/api/bi/import/undo", {"dataset": dataset, "import_id": second.import_id})
     )
     assert store.find("Supplier", "範例零件") is None
-    # A new schema version with a declared rename, then the dataset upgrade.
+    _commit(a, vault_id, "撤銷 s2.csv")
     draft = _ok(_call(a, "POST", "/api/bi/schema-drafts", {"base": EXAMPLE, "title": "v2"}))
     document = copy.deepcopy(draft["document"])
-    supplier = next(t for t in document["types"] if t["name"] == "Supplier")
-    supplier["fields"] = [f for f in supplier["fields"] if f["name"] != "country"]
-    supplier["fields"].append(
-        {"name": "region", "label": "地區", "kind": "str", "class": "sourced"}
-    )
+    entity = next(t for t in document["types"] if t["name"] == "Supplier")
+    entity["fields"] = [f for f in entity["fields"] if f["name"] != "country"]
+    entity["fields"].append({"name": "region", "label": "地區", "kind": "str", "class": "sourced"})
     document["migrations"] = {"renames": {"Supplier.country": "region"}}
     draft_id = draft["draft"]["id"]
     _ok(_call(a, "POST", f"/api/bi/schema-drafts/{draft_id}/revisions", {"document": document}))
@@ -503,30 +483,81 @@ def test_undo_and_a_schema_upgrade_travel_as_change_files(tmp_path: Path) -> Non
     preview = _ok(_call(a, "POST", f"/api/bi/datasets/{dataset}/schema/preview", {"to": target}))
     body = {"to": target, "preview_token": preview["preview_token"]}
     _ok(_call(a, "POST", f"/api/bi/datasets/{dataset}/schema/apply", body))
-    actions = [
-        json.loads(p.read_text(encoding="utf-8"))["action"]
-        for p in sorted((drive.parent("a") / vault_id / "changes" / "alice").glob("*.json"))
+    _commit(a, vault_id, "升級 schema：country 改名 region")
+    assert _push(a, vault_id)["status"] == "pushed"
+    purposes = [
+        c["purpose"]
+        for c in reversed(_ok(_call(a, "GET", f"/api/bi/vaults/{vault_id}/history"))["commits"])
     ]
-    assert actions == ["create", "import", "import", "undo_import", "upgrade_schema"]
+    assert purposes[0].startswith("建立知識庫") and purposes[-2:] == [
+        "撤銷 s2.csv",
+        "升級 schema：country 改名 region",
+    ]
     # A PC without either schema joins: it installs them from the folder.
     folder = drive.clone("a", "b", vault_id)
     _ok(_call(b, "POST", "/api/bi/vaults/join", {"path": str(folder), "author": "bob"}))
     assert BiStore(b, dataset).schema_ref() == target
     assert catalog.for_store(BiStore(b, dataset)).ref == target
-    card = _card_of(b, dataset, "Supplier", "虛構電子")
+    card = _card(b, dataset, "虛構電子", "Supplier")
     assert card["fields"]["region"]["value"] == "TW" and "country" not in card["fields"]
     assert BiStore(b, dataset).find("Supplier", "範例零件") is None
     assert _tables(a, dataset) == _tables(b, dataset)
 
 
-def _card_of(ws: Path, dataset: str, entity_type: str, key: str) -> dict[str, Any]:
-    store = BiStore(ws, dataset)
-    found = store.find(entity_type, key)
-    assert found is not None
-    return {"id": found["id"], "fields": store.fields(found["id"])}
+def test_the_vaults_schema_file_is_authoritative(tmp_path: Path) -> None:
+    drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
+    path = drive.parent("b") / vault_id / "schemas" / "bi.schema__v1.1@2.0.0.json"
+    document = json.loads(path.read_text(encoding="utf-8"))
+    document["title"] = "changed elsewhere"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    refused = _refused(
+        _call(b, "POST", f"/api/bi/vaults/{vault_id}/sync", {}), 409, "schema_mismatch"
+    )
+    assert refused["file"] == "schemas/bi.schema__v1.1@2.0.0.json"
 
 
-def test_a_dataset_converts_to_a_vault_with_its_history(tmp_path: Path) -> None:
+def test_revert_tag_and_publish(tmp_path: Path) -> None:
+    drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
+    _import(a, dataset, _row("TSN", standard_body="IEEE"))
+    _push(a, vault_id)
+    _ok(_call(a, "POST", f"/api/bi/vaults/{vault_id}/tag", {"name": "v1", "purpose": "第一版"}))
+    _refused(
+        _call(a, "POST", f"/api/bi/vaults/{vault_id}/publish", {"tag": "v1"}),
+        400,
+        "confirm_required",
+    )
+    _ok(_call(a, "POST", f"/api/bi/vaults/{vault_id}/publish", {"tag": "v1", "confirm": True}))
+    _ok(_edit(a, dataset, "TSN", "standard_body", "wrong", "alice"))
+    _commit(a, vault_id, "錯的修改")
+    _push(a, vault_id)
+    _refused(
+        _call(a, "POST", f"/api/bi/vaults/{vault_id}/tag", {"name": "v1", "purpose": "again"}),
+        409,
+        "tag_exists",
+    )
+    _ok(
+        _call(
+            a,
+            "POST",
+            f"/api/bi/vaults/{vault_id}/revert",
+            {"version": "v1", "purpose": "改錯了，回到 v1"},
+        )
+    )
+    _push(a, vault_id)
+    assert _card(a, dataset, "TSN")["fields"]["standard_body"]["value"] == "IEEE"
+    history = _ok(_call(a, "GET", f"/api/bi/vaults/{vault_id}/history"))
+    assert history["commits"][0]["kind"] == "revert" and history["published"]["tag"] == "v1"
+    changed = _ok(
+        _call(a, "GET", f"/api/bi/vaults/{vault_id}/diff", commit=history["commits"][0]["id"])
+    )
+    assert [c["after"]["value"] for c in changed["changes"]] == ["IEEE"]
+    drive.deliver("a", "b", vault_id)
+    _sync(b, vault_id)
+    assert _status(b, vault_id)["published"]["tag"] == "v1"
+    assert _tables(a, dataset) == _tables(b, dataset)
+
+
+def test_a_dataset_converts_to_a_vault(tmp_path: Path) -> None:
     drive = _Drive(tmp_path)
     a, b = drive.workspace("a"), drive.workspace("b")
     _ok(_call(a, "POST", "/api/bi/datasets", {"name": "lab", "schema": "bi.schema/v1.1"}))
@@ -558,15 +589,13 @@ def test_a_dataset_converts_to_a_vault_with_its_history(tmp_path: Path) -> None:
     assert store.path.read_bytes() == lab_bytes  # the dataset itself is left as it was
     vault_id = made["vault"]["id"]
     dataset = vault.dataset_name(vault_id)
-    assert _changes(drive, "a", vault_id) == ["alice/1.json"]
+    assert _commits(drive, "a", vault_id) == ["alice/1.json"]
     converted = BiStore(a, dataset)
     assert converted.schema_ref() == store.schema_ref()
     original = store.find("Technology", "TSN")
     copied = converted.find("Technology", "TSN")
     assert original is not None and copied is not None
-    assert dict(copied) == dict(original)
     assert converted.fields(copied["id"]) == store.fields(original["id"])
-    assert converted.history(copied["id"]) == store.history(original["id"])
     assert [p["value"] for p in converted.proposals(copied["id"])] == ["IETF"]
     folder = drive.clone("a", "b", vault_id)
     _ok(_call(b, "POST", "/api/bi/vaults/join", {"path": str(folder), "author": "bob"}))
@@ -581,6 +610,8 @@ def test_a_dataset_converts_to_a_vault_with_its_history(tmp_path: Path) -> None:
             {"dataset": dataset, "action": "reject"},
         )
     )
+    _commit(b, vault_id, "拒絕 IETF")
+    _push(b, vault_id)
     drive.deliver("b", "a", vault_id)
     _sync(a, vault_id)
     assert converted.proposals(copied["id"]) == []

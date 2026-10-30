@@ -44,6 +44,7 @@ dataset is written exactly as before.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import sqlite3
@@ -217,6 +218,12 @@ def vault_registry(workspace: Path) -> list[dict[str, Any]]:
     if not isinstance(items, list):
         return []
     return [i for i in items if isinstance(i, dict) and isinstance(i.get("id"), str)]
+
+
+def card_id_for(entity_type: str, canonical_key: str) -> str:
+    """A vault card's id: the same on every PC."""
+    digest = hashlib.sha256(f"{entity_type}\0{canonical_key}".encode()).hexdigest()
+    return digest[:12]
 
 
 def vault_of(workspace: Path, dataset: str) -> str | None:
@@ -638,7 +645,12 @@ class BiStore:
                 (planned.entity_type, planned.canonical_key),
             ).fetchone()
             if existing is None:
-                card_id = uuid.uuid4().hex[:12]
+                # A vault's card has the same id on every PC (knowledge repositories R2).
+                card_id = (
+                    card_id_for(planned.entity_type, planned.canonical_key)
+                    if self.vault_id is not None
+                    else uuid.uuid4().hex[:12]
+                )
                 db.execute(
                     "INSERT INTO cards (id, entity_type, canonical_key, name, version, "
                     "synthetic, created, updated, created_by_import) "

@@ -4516,6 +4516,10 @@ upgrade are unchanged and stay separate actions.
 
 ## BI vaults: folder, change files, sync (BI vaults phase V4, 2026-10-28)
 
+> **Superseded 2026-10-30** by "Knowledge repositories: the BI type (R2)" below: the folder is a
+> knowledge repository (`repo.json`, `commits/`), not `vault.json` and `changes/`, and a write is staged
+> until a person commits and pushes it. Kept as the record of V4.
+
 Design: `docs/phases/BI_VAULT.md` §3, §4; decision `docs/DECISIONS.md` 2026-10-28 "BI vault V4: writes
 are captured and replayed". Code: `src/capabilities/bi_cards/vault.py`, hooks in `store.py`
 (`vault_of`, `dataset_dir`, `datasets`, `BiStore._db`), routes in `src/host_runtime/bi_vaults_api.py`.
@@ -5611,3 +5615,98 @@ wiki, R5 routes and page).
   "uncommitted", "conflicts", "waiting", "bad", "published", "schema"}`; `units()`, `state_at(commit)`,
   `history(limit)` (newest first: id, file, author, created, purpose, kind, restores, units, files),
   `diff(commit)` (unit, before, after), `conflicts(status)`, `tags()`, `published()`.
+
+## Knowledge repositories: the BI type (R2, 2026-10-30)
+
+Design: `docs/phases/KNOWLEDGE_REPO.md` §3, §5, §8. Code: `src/capabilities/bi_cards/vault.py` (type
+`bi`, registered on import), `store.py` (`card_id_for`, the vault hook in `BiStore._db`), routes in
+`src/host_runtime/bi_vaults_api.py`. Tests: `tests/test_bi_vault.py` (two PCs, a helper plays OneDrive).
+Supersedes "BI vaults: folder, change files, sync (V4)" with no compatibility (owner decision 10): a
+V4 folder (`vault.json`, `changes/`) is not read, is left untouched and is skipped in the list; the one
+V4 vault in use (`market-bi`) is rebuilt as a repository in slice R6 with the owner present.
+
+- **A vault is a dataset and a repository.** Dataset `vault-<id>` (registry
+  `<workspace>/bi/vaults/registry.json`, local `bi.sqlite` under `<workspace>/bi/vaults/<id>/`) and
+  repository `<id>` of type `bi` (R1 registry). Every `/api/bi/*` route takes the dataset unchanged.
+- **Folder** = the R1 folder: `repo.json` (`type: "bi"`), `REPO.md`, `schemas/<schema id with / as
+  __>@<version>.json` (every schema version the vault used, built in or installed; an installed one
+  is copied byte for byte, a built-in one as its canonical JSON), `skills/`,
+  `sources/applications/<segment>/` (default the 11 segments of the owner's chart),
+  `sources/library/{products,competitors,technologies}/`, `commits/`, `tags/`, `publish/`. No
+  database file is ever written to the folder.
+- **Units.** `schema` = `<id>@<version>`; `meta:<key>` (dataset meta: `vault_segments`,
+  `vault_coverage`, the domain configuration, ...); `card:<card id>` = `{"type", "key", "name",
+  "synthetic"}`; `field:<card id>:<field>` = `{"value", "source": {kind, ref, by, at} | null,
+  "history": {kind, ref, by, at, import_id, reason, old_source} | null}`; `evidence:<card id>:<field>`
+  = list of evidence rows; `proposal:<key>`; `import:<import id>` = `{"filename", "entity_type", "at",
+  "by", "run_id", "undone"}`; `decision:<sha16>` = a person's decision on a replay conflict. Card id =
+  `card_id_for(type, key)` = `sha256("<type> <key>")[:12]`, the same on every PC.
+- **Writes.** A store write to a vault dataset runs on `bi.sqlite` in a transaction that is always
+  rolled back; the units it changed are staged (`stage_many`, one write of the working copy) and
+  `bi.sqlite` is rebuilt from head + local commits + uncommitted changes. The store's refusals are
+  unchanged and stage nothing. A new import (「確認匯入」) commits at once (kind `import`, purpose
+  drafted as `匯入 <files>：<n> 張卡、<m> 個欄位` unless the caller gave one with `vault.purpose()`);
+  every other write waits for a person's commit. Field history is derived from the commit log, so it is
+  the same on every PC. A field op that lost a replay race becomes a pending proposal of kind
+  `conflict` (decided with the proposal route; the decision is the `decision:` unit).
+- **Schemas.** Before push and on join/sync every file in `schemas/` is installed; one whose content
+  differs from this PC's copy of the same version is 409 `schema_mismatch` (`file`, `reason`): the
+  vault's file is authoritative. A built-in version with the same content counts as installed. A
+  schema upgrade stages the new `schema` unit and its file.
+- **Routes** (errors `{"ok": false, "code", "message"}`):
+  - `GET /api/bi/vaults` → `{"vaults": [{"id", "dataset", "title", "purpose", "schema", "path",
+    "author", "reachable", "cards"}]}`.
+  - `POST /api/bi/vaults {"path", "title", "purpose", "schema", "author", "id"?, "segments"?,
+    "coverage"?}` → `{"ok", "vault", "push", "sync"}`: creates the folder and pushes one `schema`
+    commit `建立知識庫，使用 schema <ref>`.
+  - `POST /api/bi/vaults/join {"path", "author", "resume"}` → as create; an author with commits in
+    the folder is 409 `author_taken` unless `resume`.
+  - `POST /api/bi/vaults/convert {"dataset", "path", "purpose", "author", ...}` → as create plus
+    `"dataset"`: one pushed `import` commit holding every unit of the dataset; the dataset is not
+    changed.
+  - `GET .../<id>/status` (vault header + R1 `status()` + conflicts), `GET .../<id>/pending` →
+    `{"uncommitted": [{"unit", "before", "after"}], "files", "commits"}`, `GET .../<id>/history?limit`
+    → `{"commits", "tags", "published"}`, `GET .../<id>/diff?commit=<id>` → `{"changes"}`.
+  - `POST .../<id>/sync`, `commit {"purpose"}`, `push`, `resolve {"unit", "choice": "mine" | "theirs"
+    | "value", "value"?}`, `discard`, `revert {"version", "purpose"}`, `tag {"name", "purpose",
+    "version"?}`, `publish {"tag", "confirm": true}` (400 `confirm_required` otherwise; only a
+    person's click sends it, never the model).
+  - Errors: R1 codes (`purpose_missing`, `nothing_to_commit`, `version_unknown`, `tag_invalid`, ...)
+    as 400; 409 `record_exists`, `path_taken`, `tag_exists`, `work_not_clean`, `schema_mismatch`,
+    `author_taken`, `vault_exists`, `vault_unreachable`; 400 `repo_invalid` (not a BI repository).
+- **When it syncs.** Before every write, on push and on `POST .../sync`; reads do not sync.
+
+## Knowledge repositories: skills, REPO.md, the wiki type, the BI schema document (R3–R5 cores, 2026-10-30)
+
+Design: `docs/phases/KNOWLEDGE_REPO.md` §3, §8, §9, §11. Library layer only: no route or page calls these
+yet (R3 BI wiring, R4 rest, R5). Tests: `tests/test_knowledge_repo_skills.py`,
+`tests/test_knowledge_repo_readme.py`, `tests/test_knowledge_repo_wiki.py`, `tests/test_bi_schema_doc.py`.
+
+- **Skills** (`knowledge.repo.skills`, every type). A revision is the file
+  `skills/<name>/rev-<n>-<author>.md`, written once: frontmatter (`name`, `revision`, `schema`, `role`,
+  `applies_to`: list of folder prefixes, optional `card_types`, `table_recipes`; one `key: value` per
+  line, lists and objects as JSON) and the instructions as body. Unit `skill:<name>` = `{"path",
+  "revision", "schema", "role", "applies_to", ...}` makes a revision current, so skills are committed,
+  merged and reverted like everything else. `stage_skill` writes the next revision and stages the unit;
+  `current_skills` lists them with `needs_update` when a skill's `schema` is not the `schema` unit;
+  `runnable(name)` refuses such a skill (`skill_needs_update`); `skill_for(source, role)` picks the
+  current skill of that role with the longest `applies_to` prefix of the source path.
+- **REPO.md** (`knowledge.repo.readme`). `readme_text(repo)` is derived from the pushed commits, tags
+  and publish records only (no clock time; the same records give the same text): title, purpose, type,
+  schema, skills, published version, tags, recent commits with purposes, and how to maintain.
+  `write_readme(repo)` rewrites it; it is the only file in a folder that is ever rewritten and never
+  the source of truth.
+- **Wiki type `wiki`** (`knowledge.repo.wiki`, registered on import of `knowledge.repo`). Units:
+  `page:<path>#(preamble)` = `{"body"}`; `page:<path>#<section key>` = `{"pos", "heading", "body",
+  "correction"?: {"reason", "source"}}` (section keys as K3.2: heading text, duplicates `Heading (2)`);
+  `front:<path>:<field>` = `{"pos", "text"}`; `front:<path>:(other)`. Pages: `index.md`, `log.md`,
+  `decisions.md`, Markdown under `wiki/`; `wiki/paths/` is refused (people only, K3). `check` blocks a
+  push that drops a sourced line unless its section carries a correction with reason and source, and
+  runs the benchmark callable set with `set_benchmark` (without one the push notes it did not run).
+  `stage_page(repo, path, text | None)`, `import_vault(repo, folder)` (pages as units, `raw/` and
+  `drop/` under `sources/`, `CLAUDE.md` as the first schema, `skills/*/SKILL.md` as first skill
+  revisions; then `commit(purpose, kind="import")`), `materialize(units, target)` writes a state as a
+  read-only Obsidian-readable folder.
+- **BI schema document** (`capabilities.bi_cards.schema_doc.schema_markdown(reg)`): a schema as
+  Markdown for people (each type, its fields with kind, label, allowed values, link target and
+  required, and the links between types). Pure; meant to sit beside the JSON in `schemas/`.

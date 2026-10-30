@@ -1,45 +1,47 @@
-"""BI vaults: a shared folder of change files is the truth (BI vaults phase V4).
+"""BI vaults on the common knowledge repository engine (knowledge repositories R2).
 
-Design: `docs/phases/BI_VAULT.md` §3 and §4; contract: `docs/CONTRACTS.md`
-"BI vaults: folder, change files, sync".
+Design: `docs/phases/KNOWLEDGE_REPO.md` (the BI type, §3, §5, §8); contract:
+`docs/CONTRACTS.md` "Knowledge repositories: the BI type (R2)". The version
+mechanism itself (commits, push, revert, tags, publish) is
+`knowledge.repo.repository`; this module maps BI cards onto its units and keeps
+the local `bi.sqlite` a function of them.
 
-A vault is a folder (a SharePoint library synced by OneDrive) holding
-`vault.json`, `VAULT.md`, the segment and library folders, `schemas/`,
-`skills/` and `changes/<author>/<seq>.json`. No database is ever in the
-folder: each PC keeps `<workspace>/bi/vaults/<vault id>/bi.sqlite`, built by
-applying every change file in one total order, (Lamport clock, author, seq).
+A vault registered on this PC is the dataset `vault-<vault id>` (registry
+`<workspace>/bi/vaults/registry.json`) and the repository `<vault id>` of type
+`bi` (registry `<workspace>/knowledge-repos/registry.json`). Its units:
 
-A write to the vault's dataset (`vault-<id>`) runs the store's own write
-method on the local database inside a transaction that is always rolled back
-(`capture`): what the method changed (history rows, proposals, evidence,
-cards, imports, meta) becomes the operations of one new change file in this
-PC's own author folder, and that file is then applied like any other. So the
-local database is only ever a function of the files, and two PCs with the
-same files have the same cards.
+    schema                       the schema version (`<id>@<version>`)
+    meta:<key>                   any other dataset meta (domain configuration …)
+    card:<card id>               {"type", "key", "name", "synthetic"}
+    field:<card id>:<field>      {"value", "source", "history"}; value null = cleared
+    evidence:<card id>:<field>   [evidence rows]
+    proposal:<key>               {"card", "field", "value", "kind", "ref", "at", "import_id",
+                                  "status"}
+    import:<import id>           {"filename", "entity_type", "at", "by", "run_id", "undone"}
+    decision:<key>               {"status"}: a person's decision on a replay conflict
 
-Applying is deterministic. A field operation carries the value it was made
-from (`base`); when the field holds something else at that point of the order
-the operation becomes a pending proposal (as an import over a person's value
-does) and a conflict row. A card created twice with the same type and key is
-one card with a `merge` flag. A file whose run id was applied already is
-recorded and skipped. A file arriving late with an earlier order key, or an
-applied file that changed or vanished, rebuilds the database from all files.
-A malformed file is skipped and reported; a file that is not valid JSON yet
-(OneDrive still syncing it) is retried on the next sync.
+A card id is `card_id_for(type, key)`, the same on every PC. `bi.sqlite` holds
+the working state (the head, this PC's local commits and its uncommitted
+changes): every store write runs on it inside a transaction that is always
+rolled back (`capture`), the units it changed are staged in the working copy,
+and the database is rebuilt from the units. Field history is derived from the
+commits, so it is the same on every PC. 「確認匯入」 (a new import) commits at
+once with a drafted purpose; every other write waits for the person's commit.
+A field change that lost a race on replay is shown as a pending proposal of
+kind `conflict`.
 """
 
 from __future__ import annotations
 
+import contextvars
 import hashlib
 import json
-import os
 import re
 import sqlite3
-import threading
+import tempfile
 import uuid
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from contextlib import closing, contextmanager
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -54,23 +56,20 @@ from capabilities.bi_cards.store import (
     VAULTS_DIR,
     BiStore,
     BiStoreError,
+    card_id_for,
     is_subscribed,
     now,
     vault_registry,
 )
+from knowledge.repo import repository as repo_engine
+from knowledge.repo.repository import CheckReport, RepoError, Repository
 
-VAULT_FORMAT = "bi.vault/v1"
-CHANGE_FORMAT = "bi.vault.change/v1"
-VAULT_FILE = "vault.json"
-README_FILE = "VAULT.md"
-CHANGES_DIR = "changes"
-STATE_FILE = "vault_sync.json"
+REPO_TYPE = "bi"
 VAULT_ID_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 MAX_VAULT_ID = 40 - len(VAULT_PREFIX)
-AUTHOR_RE = re.compile(r"^[a-z0-9]+(?:[._-][a-z0-9]+)*$")
-MAX_AUTHOR = 40
-CHANGE_NAME_RE = re.compile(r"^([1-9][0-9]{0,8})\.json$")
-MAX_CHANGE_BYTES = 64 * 1024 * 1024
+AUTHOR_RE = repo_engine.AUTHOR_RE
+MAX_AUTHOR = repo_engine.MAX_AUTHOR
+STATE_FILE = "vault_sync.json"
 
 #: The 11 market segments of the owner's chart (BI_VAULT.md §4, §6.2):
 #: folder name and label. A vault may name its own at creation.
@@ -89,53 +88,32 @@ SEGMENTS: tuple[tuple[str, str], ...] = (
 )
 LIBRARY = ("products", "competitors", "technologies")
 
-#: The vault's own tables in the local `bi.sqlite` (never in the folder).
+#: The vault's own table in the local `bi.sqlite`: which unit each proposal
+#: row stands for (`conflict:<commit id>:<unit>` for a replay conflict).
 VAULT_SCHEMA = """
-CREATE TABLE IF NOT EXISTS vault_applied (
-  file TEXT PRIMARY KEY,
-  author TEXT NOT NULL,
-  seq INTEGER NOT NULL,
-  clock INTEGER NOT NULL,
-  sha256 TEXT NOT NULL,
-  outcome TEXT NOT NULL,
-  detail TEXT NOT NULL DEFAULT ''
-);
-CREATE TABLE IF NOT EXISTS vault_pkeys (
-  pkey TEXT PRIMARY KEY,
-  proposal_id INTEGER NOT NULL
-);
-CREATE TABLE IF NOT EXISTS vault_conflicts (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  file TEXT NOT NULL,
-  kind TEXT NOT NULL,
-  card_id TEXT,
-  field TEXT,
-  proposal_id INTEGER,
-  detail TEXT NOT NULL,
-  at TEXT NOT NULL
+CREATE TABLE IF NOT EXISTS vault_keys (
+  proposal_id INTEGER PRIMARY KEY,
+  key TEXT NOT NULL
 );
 """
-#: Every table a rebuild empties, in the store and the vault's own.
-TABLES = (
-    "cards",
-    "fields",
-    "history",
-    "proposals",
-    "meta",
-    "imports",
-    "evidence",
-    "vault_applied",
-    "vault_pkeys",
-    "vault_conflicts",
+TABLES = ("cards", "fields", "history", "proposals", "meta", "imports", "evidence", "vault_keys")
+UNIT_PREFIXES = ("meta:", "card:", "field:", "evidence:", "proposal:", "import:", "decision:")
+
+#: The purpose of the next commit made by a capture (「確認匯入」), when the
+#: caller has one; otherwise it is drafted.
+_PURPOSE: contextvars.ContextVar[str | None] = contextvars.ContextVar(
+    "bi_vault_purpose", default=None
 )
 
-_LOCKS: dict[str, threading.RLock] = {}
-_LOCKS_GUARD = threading.Lock()
 
-
-def _lock(key: str) -> threading.RLock:
-    with _LOCKS_GUARD:
-        return _LOCKS.setdefault(key, threading.RLock())
+@contextmanager
+def purpose(text: str | None) -> Iterator[None]:
+    """Give the commit a capture makes in this block its purpose."""
+    token = _PURPOSE.set(text.strip() if text and text.strip() else None)
+    try:
+        yield
+    finally:
+        _PURPOSE.reset(token)
 
 
 def _dump(value: Any) -> str:
@@ -143,18 +121,12 @@ def _dump(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, sort_keys=True)
 
 
-def _text(value: Any) -> str | None:
-    return None if value is None else _dump(value)
-
-
 def _load(text: str | None) -> Any:
     return None if text is None else json.loads(text)
 
 
-def card_id_for(entity_type: str, canonical_key: str) -> str:
-    """A card's id in a vault: the same on every PC."""
-    digest = hashlib.sha256(f"{entity_type}\0{canonical_key}".encode()).hexdigest()
-    return digest[:12]
+def _short(text: str) -> str:
+    return hashlib.sha256(text.encode()).hexdigest()[:16]
 
 
 def dataset_name(vault_id: str) -> str:
@@ -165,7 +137,410 @@ def local_dir(workspace: Path, vault_id: str) -> Path:
     return workspace / "bi" / VAULTS_DIR / vault_id
 
 
-# -- the registry (per PC) ---------------------------------------------------
+def _schema_file_name(schema_id: str, version: str) -> str:
+    return f"{schema_id.replace('/', '__')}@{version}.json"
+
+
+def _to_bi_error(failure: RepoError) -> BiStoreError:
+    return BiStoreError(failure.code, failure.message, **failure.detail)
+
+
+@contextmanager
+def _repo_errors() -> Iterator[None]:
+    try:
+        yield
+    except RepoError as failure:
+        raise _to_bi_error(failure) from None
+
+
+# -- the BI type -------------------------------------------------------------------
+
+
+class BiType:
+    """The `bi` repository type: card units and their checks."""
+
+    name = REPO_TYPE
+
+    def unit_problem(self, key: str, value: Any) -> str | None:
+        if key == repo_engine.SCHEMA_UNIT:
+            return (
+                None if isinstance(value, str) and "@" in value else "schema must be <id>@<version>"
+            )
+        if key.startswith(repo_engine.SKILL_UNIT_PREFIX):
+            return None
+        if not key.startswith(UNIT_PREFIXES):
+            return "not a BI unit"
+        if key.startswith("meta:"):
+            return None if isinstance(value, str) else "meta value must be text"
+        if key.startswith("evidence:"):
+            return None if isinstance(value, list) else "evidence must be a list"
+        if not isinstance(value, dict):
+            return "value must be an object"
+        if key.startswith("card:") and not all(
+            isinstance(value.get(k), str) for k in ("type", "key", "name")
+        ):
+            return "card needs type, key and name"
+        if key.startswith("field:") and "value" not in value:
+            return "field needs value"
+        return None
+
+    def check(self, before: Mapping[str, Any], after: Mapping[str, Any]) -> CheckReport:
+        cards = {k for k in after if k.startswith("card:")}
+        added = len(cards - set(before))
+        removed = len({k for k in before if k.startswith("card:")} - cards)
+        changed = sum(
+            1
+            for k in after
+            if k.startswith("field:")
+            and repo_engine.canonical(before.get(k)) != repo_engine.canonical(after.get(k))
+        )
+        notes = [f"新增 {added} 張卡、刪除 {removed} 張卡、改了 {changed} 個欄位"]
+        return CheckReport(blocking=[], notes=notes)
+
+
+repo_engine.register_type(BiType())
+
+
+# -- units <-> the BI tables ---------------------------------------------------------
+
+
+def _tables(db: sqlite3.Connection) -> set[str]:
+    return {r[0] for r in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+
+
+def _history_value(row: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        "kind": row["kind"],
+        "ref": row["ref"],
+        "by": row["by"],
+        "at": row["at"],
+        "import_id": row["import_id"],
+        "reason": row["reason"],
+    }
+
+
+def units_from_db(db: sqlite3.Connection) -> dict[str, Any]:
+    """The units a BI database holds (card ids normalised to `card_id_for`)."""
+    db.row_factory = sqlite3.Row
+    tables = _tables(db)
+    units: dict[str, Any] = {}
+    for r in db.execute("SELECT * FROM meta") if "meta" in tables else []:
+        units[repo_engine.SCHEMA_UNIT if r["key"] == "schema" else f"meta:{r['key']}"] = r["value"]
+    columns = {r[1] for r in db.execute("PRAGMA table_info(imports)")}
+    for r in db.execute("SELECT * FROM imports"):
+        units[f"import:{r['id']}"] = {
+            "filename": r["filename"],
+            "entity_type": r["entity_type"],
+            "at": r["at"],
+            "by": r["by"],
+            "run_id": r["run_id"] if "run_id" in columns else None,
+            "undone": bool(r["undone"]),
+        }
+    ids: dict[str, str] = {}
+    for r in db.execute("SELECT * FROM cards"):
+        cid = card_id_for(r["entity_type"], r["canonical_key"])
+        ids[r["id"]] = cid
+        units[f"card:{cid}"] = {
+            "type": r["entity_type"],
+            "key": r["canonical_key"],
+            "name": r["name"],
+            "synthetic": bool(r["synthetic"]),
+        }
+    latest = {
+        (r["card_id"], r["field"]): _history_value(r)
+        for r in db.execute(
+            "SELECT * FROM history WHERE seq IN "
+            "(SELECT MAX(seq) FROM history GROUP BY card_id, field)"
+        )
+    }
+    stored = set()
+    for r in db.execute("SELECT * FROM fields"):
+        if r["card_id"] not in ids:
+            continue
+        stored.add((r["card_id"], r["field"]))
+        units[f"field:{ids[r['card_id']]}:{r['field']}"] = {
+            "value": _load(r["value"]),
+            "source": {"kind": r["kind"], "ref": r["ref"], "by": r["by"], "at": r["at"]},
+            "history": latest.get((r["card_id"], r["field"])),
+        }
+    for (card_id, name), history in latest.items():
+        if card_id in ids and (card_id, name) not in stored:
+            units[f"field:{ids[card_id]}:{name}"] = {
+                "value": None,
+                "source": None,
+                "history": history,
+            }
+    if "evidence" in tables:
+        for r in db.execute("SELECT * FROM evidence ORDER BY seq"):
+            if r["card_id"] not in ids:
+                continue
+            units.setdefault(f"evidence:{ids[r['card_id']]}:{r['field']}", []).append(
+                {
+                    "run_id": r["run_id"],
+                    "source_id": r["source_id"],
+                    "source_name": r["source_name"],
+                    "locator": _load(r["locator"]),
+                    "excerpt": r["excerpt"],
+                    "basis": r["basis"],
+                    "at": r["at"],
+                }
+            )
+    keys = {}
+    if "vault_keys" in tables:
+        keys = {
+            int(r["proposal_id"]): str(r["key"]) for r in db.execute("SELECT * FROM vault_keys")
+        }
+    for r in db.execute("SELECT * FROM proposals ORDER BY id"):
+        if r["card_id"] not in ids:
+            continue
+        key = keys.get(int(r["id"]))
+        if key is not None and key.startswith("conflict:"):
+            if r["status"] != "pending":
+                units[f"decision:{_short(key)}"] = {"status": r["status"]}
+            continue
+        value = {
+            "card": ids[r["card_id"]],
+            "field": r["field"],
+            "value": _load(r["value"]),
+            "kind": r["kind"],
+            "ref": r["ref"],
+            "at": r["at"],
+            "import_id": r["import_id"],
+            "status": r["status"],
+        }
+        if key is None:
+            identity = {k: value[k] for k in ("card", "field", "value", "kind", "ref", "at")}
+            key = f"proposal:{_short(repo_engine.canonical(identity))}"
+        units[key] = value
+    return units
+
+
+def _field_history(
+    entries: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]]]:
+    """History rows from the changes of the commits (and the working copy),
+    and per card its first and last change: `created`, `updated`, `groups`."""
+    rows: list[dict[str, Any]] = []
+    cards: dict[str, dict[str, Any]] = {}
+    for entry in entries:
+        for change in entry["changes"]:
+            unit = str(change["unit"])
+            if not change["applied"]:
+                continue
+            if unit.startswith("card:") and change["after"] is not None:
+                cid = unit[5:]
+                info = cards.setdefault(
+                    cid, {"created": entry["at"], "updated": entry["at"], "groups": set()}
+                )
+                info.setdefault("created", entry["at"])
+            if not unit.startswith("field:"):
+                continue
+            _, cid, name = unit.split(":", 2)
+            after, before = change["after"], change["before"]
+            history = (after or {}).get("history") or {}
+            old = None if before is None else before.get("value")
+            new = None if after is None else after.get("value")
+            if not history:
+                continue  # a value without a history row (converted) keeps none
+            info = cards.setdefault(
+                cid, {"created": entry["at"], "updated": entry["at"], "groups": set()}
+            )
+            info["updated"] = history.get("at") or entry["at"]
+            info["groups"].add(entry["group"])
+            info.setdefault("first_import", history.get("import_id"))
+            rows.append(
+                {
+                    "card_id": cid,
+                    "field": name,
+                    "old": old,
+                    "new": new,
+                    "kind": history.get("kind") or "edit",
+                    "ref": history.get("ref") or entry["ref"],
+                    "by": history.get("by") or entry["author"],
+                    "at": history.get("at") or entry["at"],
+                    "import_id": history.get("import_id"),
+                    "reason": history.get("reason"),
+                    "old_source": None if before is None else before.get("source"),
+                }
+            )
+    return rows, cards
+
+
+def materialize(
+    db: sqlite3.Connection,
+    units: Mapping[str, Any],
+    entries: list[dict[str, Any]],
+    conflicts: list[dict[str, Any]],
+) -> None:
+    """Rebuild every BI table of `db` from `units` inside one transaction."""
+    db.executescript(SCHEMA)
+    columns = {r[1] for r in db.execute("PRAGMA table_info(imports)")}
+    if "run_id" not in columns:
+        db.execute("ALTER TABLE imports ADD COLUMN run_id TEXT")
+    db.executescript(VAULT_SCHEMA)
+    history, info = _field_history(entries)
+    db.execute("BEGIN IMMEDIATE")
+    try:
+        for table in TABLES:
+            db.execute(f"DELETE FROM {table}")  # noqa: S608
+        db.execute("DELETE FROM sqlite_sequence WHERE name IN ('history', 'proposals', 'evidence')")
+        for key, value in sorted(units.items()):
+            if key == repo_engine.SCHEMA_UNIT:
+                db.execute("INSERT INTO meta (key, value) VALUES ('schema', ?)", (value,))
+            elif key.startswith("meta:"):
+                db.execute("INSERT INTO meta (key, value) VALUES (?, ?)", (key[5:], value))
+            elif key.startswith("import:"):
+                db.execute(
+                    "INSERT INTO imports (id, filename, entity_type, at, by, undone, run_id) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (
+                        key[7:],
+                        value["filename"],
+                        value["entity_type"],
+                        value["at"],
+                        value["by"],
+                        int(bool(value.get("undone"))),
+                        value.get("run_id"),
+                    ),
+                )
+        stamp = now()
+        for key, value in sorted(units.items()):
+            if not key.startswith("card:"):
+                continue
+            cid = key[5:]
+            card = info.get(cid, {})
+            db.execute(
+                "INSERT INTO cards (id, entity_type, canonical_key, name, version, synthetic, "
+                "created, updated, created_by_import) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    cid,
+                    value["type"],
+                    value["key"],
+                    value["name"],
+                    1 + len(card.get("groups", ())),
+                    int(bool(value.get("synthetic"))),
+                    card.get("created", stamp),
+                    card.get("updated", card.get("created", stamp)),
+                    card.get("first_import"),
+                ),
+            )
+        present = {k[5:] for k in units if k.startswith("card:")}
+        for key, value in sorted(units.items()):
+            if key.startswith("field:") and value.get("value") is not None:
+                _, cid, name = key.split(":", 2)
+                if cid not in present:
+                    continue
+                source = value.get("source") or {}
+                db.execute(
+                    "INSERT INTO fields (card_id, field, value, kind, ref, by, at) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (
+                        cid,
+                        name,
+                        _dump(value["value"]),
+                        source.get("kind") or "edit",
+                        source.get("ref") or "",
+                        source.get("by") or "",
+                        source.get("at") or stamp,
+                    ),
+                )
+            elif key.startswith("evidence:"):
+                _, cid, name = key.split(":", 2)
+                if cid not in present:
+                    continue
+                for item in value:
+                    db.execute(
+                        "INSERT INTO evidence (card_id, field, run_id, source_id, source_name, "
+                        "locator, excerpt, basis, at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        (
+                            cid,
+                            name,
+                            item["run_id"],
+                            item["source_id"],
+                            item["source_name"],
+                            _dump(item["locator"]),
+                            item["excerpt"],
+                            item["basis"],
+                            item["at"],
+                        ),
+                    )
+        for row in history:
+            # Only fields that are units: a field a revert removed keeps no
+            # history, or the rows would read back as a cleared field.
+            if (
+                row["card_id"] not in present
+                or f"field:{row['card_id']}:{row['field']}" not in units
+            ):
+                continue
+            db.execute(
+                "INSERT INTO history (card_id, field, old, new, kind, ref, by, at, import_id, "
+                "reason, old_source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    row["card_id"],
+                    row["field"],
+                    None if row["old"] is None else _dump(row["old"]),
+                    None if row["new"] is None else _dump(row["new"]),
+                    row["kind"],
+                    row["ref"],
+                    row["by"],
+                    row["at"],
+                    row["import_id"],
+                    row["reason"],
+                    None if row["old_source"] is None else _dump(row["old_source"]),
+                ),
+            )
+        proposals = sorted(
+            ((k, v) for k, v in units.items() if k.startswith("proposal:")),
+            key=lambda item: (str(item[1]["at"]), item[0]),
+        )
+        for key, value in proposals:
+            if value["card"] not in present:
+                continue
+            cursor = db.execute(
+                "INSERT INTO proposals (card_id, field, value, kind, ref, at, import_id, status) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    value["card"],
+                    value["field"],
+                    _dump(value["value"]),
+                    value["kind"],
+                    value["ref"],
+                    value["at"],
+                    value.get("import_id"),
+                    value["status"],
+                ),
+            )
+            db.execute("INSERT INTO vault_keys VALUES (?, ?)", (cursor.lastrowid, key))
+        for conflict in conflicts:
+            unit = str(conflict["unit"])
+            if not unit.startswith("field:"):
+                continue
+            _, cid, name = unit.split(":", 2)
+            if cid not in present:
+                continue
+            key = f"conflict:{conflict['commit_id']}:{unit}"
+            decided = units.get(f"decision:{_short(key)}")
+            lost = conflict["value"] or {}
+            cursor = db.execute(
+                "INSERT INTO proposals (card_id, field, value, kind, ref, at, import_id, status) "
+                "VALUES (?, ?, ?, 'conflict', ?, ?, NULL, ?)",
+                (
+                    cid,
+                    name,
+                    _dump(lost.get("value")),
+                    conflict["commit"],
+                    (lost.get("history") or {}).get("at") or stamp,
+                    decided["status"] if decided else "pending",
+                ),
+            )
+            db.execute("INSERT INTO vault_keys VALUES (?, ?)", (cursor.lastrowid, key))
+        db.execute("COMMIT")
+    except BaseException:
+        db.execute("ROLLBACK")
+        raise
+
+
+# -- the local registry -----------------------------------------------------------------
 
 
 def _registry_path(workspace: Path) -> Path:
@@ -180,67 +555,16 @@ def _register(workspace: Path, item: dict[str, Any]) -> None:
     items = [i for i in vault_registry(workspace) if i["id"] != item["id"]]
     items.append(item)
     items.sort(key=lambda i: str(i["id"]))
-    _write_atomic(_registry_path(workspace), _pretty({"vaults": items}))
-
-
-def _pretty(document: Any) -> bytes:
-    return (json.dumps(document, ensure_ascii=False, sort_keys=True, indent=1) + "\n").encode()
-
-
-def _write_atomic(path: Path, data: bytes) -> None:
-    """Write `path` through a temporary file in the same folder and a rename."""
+    path = _registry_path(workspace)
     path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.parent / f".{path.name}.{uuid.uuid4().hex[:8]}.tmp"
-    temporary.write_bytes(data)
-    os.replace(temporary, path)
-
-
-# -- the folder ----------------------------------------------------------------
-
-
-def read_vault_json(folder: Path) -> dict[str, Any]:
-    """The folder's `vault.json`, checked; `vault_invalid` when it is not one."""
-    try:
-        document = json.loads((folder / VAULT_FILE).read_text(encoding="utf-8"))
-    except OSError:
-        raise BiStoreError(
-            "vault_invalid", f"資料夾裡沒有 {VAULT_FILE}，不是一個知識庫", path=str(folder)
-        ) from None
-    except ValueError:
-        raise BiStoreError("vault_invalid", f"{VAULT_FILE} 不是有效的 JSON") from None
-    problems = []
-    if not isinstance(document, dict):
-        raise BiStoreError("vault_invalid", f"{VAULT_FILE} 必須是 JSON 物件")
-    if document.get("format") != VAULT_FORMAT:
-        problems.append(f"format 必須是 {VAULT_FORMAT}")
-    vault_id = document.get("id")
-    if not isinstance(vault_id, str) or not _valid_vault_id(vault_id):
-        problems.append("id 無效")
-    for key in ("title", "schema"):
-        if not isinstance(document.get(key), str) or not document[key].strip():
-            problems.append(f"缺少 {key}")
-    if not isinstance(document.get("purpose", ""), str):
-        problems.append("purpose 必須是文字")
-    if problems:
-        raise BiStoreError("vault_invalid", f"{VAULT_FILE} 有問題：" + "；".join(problems))
-    return document
-
-
-def _valid_vault_id(vault_id: str) -> bool:
-    return len(vault_id) <= MAX_VAULT_ID and VAULT_ID_RE.match(vault_id) is not None
-
-
-def _slug(text: str, limit: int) -> str:
-    slug = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
-    return slug[:limit].strip("-")
+    path.write_text(
+        json.dumps({"vaults": items}, ensure_ascii=False, sort_keys=True, indent=1) + "\n",
+        encoding="utf-8",
+    )
 
 
 def default_author(actor: str) -> str:
-    """An author folder name from the person's name (`leo.chi via web` -> `leo.chi`)."""
-    person = actor.removesuffix(" via web").strip().lower()
-    slug = re.sub(r"[^a-z0-9._-]+", "-", person).strip("-._")
-    slug = re.sub(r"[._-]{2,}", "-", slug)
-    return slug[:MAX_AUTHOR].strip("-._") or "author"
+    return repo_engine.default_author(actor)
 
 
 def _checked_author(value: Any, actor: str) -> str:
@@ -264,29 +588,9 @@ def _folder(value: Any, *, must_exist: bool) -> Path:
     return path
 
 
-def _readme(document: dict[str, Any]) -> str:
-    segments = "\n".join(
-        f"- `applications/{item['folder']}/sources/` — {item['label']}"
-        for item in document["folders"]["applications"]
-    )
-    library = "\n".join(f"- `library/{name}/sources/`" for name in LIBRARY)
-    return (
-        f"# {document['title']}\n\n"
-        f"{document.get('purpose') or ''}\n\n"
-        "## When the AEP Agent should use this vault\n\n"
-        "When a question matches the purpose above. The cards are the vault's knowledge; "
-        "every value keeps its source and evidence.\n\n"
-        "## Folders\n\n"
-        f"{segments}\n{library}\n"
-        "- `schemas/` — published schema versions (never edited)\n"
-        "- `skills/` — extraction Skill revisions (never edited)\n"
-        "- `changes/<author>/<seq>.json` — every write, one new file each (never edited)\n\n"
-        "## How to maintain it\n\n"
-        "Write only through AEP. Each person adds files to their own `changes/<author>/` folder "
-        "and never edits or deletes another file. Keep this folder 「一律保留在此裝置上」 in "
-        "OneDrive so every file is on disk. Schema: "
-        f"`{document['schema']}`; vault id `{document['id']}`.\n"
-    )
+def _slug(text: str, limit: int) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+    return slug[:limit].strip("-")
 
 
 def _segments(value: Any) -> list[dict[str, str]]:
@@ -307,124 +611,20 @@ def _segments(value: Any) -> list[dict[str, str]]:
     return found
 
 
-def _lay_out(folder: Path, document: dict[str, Any]) -> None:
-    for item in document["folders"]["applications"]:
-        (folder / "applications" / item["folder"] / "sources").mkdir(parents=True, exist_ok=True)
-    for name in LIBRARY:
-        (folder / "library" / name / "sources").mkdir(parents=True, exist_ok=True)
-    for name in ("schemas", "skills", CHANGES_DIR):
-        (folder / name).mkdir(parents=True, exist_ok=True)
-    _write_atomic(folder / VAULT_FILE, _pretty(document))
-    _write_atomic(folder / README_FILE, _readme(document).encode())
+def read_vault_json(folder: Path) -> dict[str, Any]:
+    """The folder's `repo.json`, checked to be a BI repository."""
+    with _repo_errors():
+        document = repo_engine.read_repo_json(folder)
+    if document["type"] != REPO_TYPE:
+        raise BiStoreError("vault_invalid", f"這個知識庫的類型是 {document['type']}，不是 BI")
+    return document
 
 
-def _schema_file_name(schema_id: str, version: str) -> str:
-    return f"{schema_id.replace('/', '__')}@{version}.json"
-
-
-def _export_schema(workspace: Path, folder: Path, ref: str) -> None:
-    """Copy an installed schema into `schemas/` so every PC can install it;
-    the shipped schema is on every PC already. A published file is never
-    replaced."""
-    try:
-        reg = catalog.resolve(workspace, ref)
-    except BiStoreError:
-        return
-    if reg.source != "installed":
-        return
-    target = folder / "schemas" / _schema_file_name(reg.schema_id, reg.version)
-    if target.is_file():
-        return
-    source = catalog.schema_path(workspace, reg.schema_id, reg.version)
-    _write_atomic(target, source.read_bytes())
-
-
-# -- change files --------------------------------------------------------------
-
-
-@dataclass(frozen=True)
-class ChangeFile:
-    name: str  # `<author>/<seq>`
-    author: str
-    seq: int
-    clock: int
-    sha256: str
-    data: dict[str, Any]
-
-    @property
-    def key(self) -> tuple[int, str, int]:
-        return (self.clock, self.author, self.seq)
-
-
-def _problem(data: Any, author: str, seq: int, vault_id: str) -> str | None:
-    """Why a parsed change file cannot be applied; None when it can."""
-    if not isinstance(data, dict):
-        return "not a JSON object"
-    if data.get("format") != CHANGE_FORMAT:
-        return f"format is not {CHANGE_FORMAT}"
-    if data.get("vault") != vault_id:
-        return "vault id differs"
-    if data.get("author") != author:
-        return "author differs from its folder"
-    if data.get("seq") != seq:
-        return "seq differs from its file name"
-    clock = data.get("clock")
-    if not isinstance(clock, int) or isinstance(clock, bool) or clock < 1:
-        return "clock missing"
-    if not isinstance(data.get("at"), str):
-        return "at missing"
-    ops = data.get("ops")
-    if not isinstance(ops, list):
-        return "ops missing"
-    for index, op in enumerate(ops):
-        found = _op_problem(op)
-        if found:
-            return f"op {index}: {found}"
-    return None
-
-
-#: The keys every operation must carry, all strings.
-OP_KEYS: dict[str, tuple[str, ...]] = {
-    "meta": ("key",),
-    "import": ("id", "filename", "entity_type", "at", "by"),
-    "card": ("type", "key", "name"),
-    "field": ("type", "key", "field"),
-    "propose": ("pkey", "type", "key", "field", "kind", "ref", "at"),
-    "proposal": ("pkey", "status"),
-    "evidence": ("type", "key", "field", "run_id"),
-    "card_delete": ("type", "key"),
-    "import_undone": ("id",),
-    "snapshot": (),
-}
-
-
-def _op_problem(op: Any) -> str | None:
-    if not isinstance(op, dict) or op.get("op") not in OP_KEYS:
-        return "unknown op"
-    name = op["op"]
-    for key in OP_KEYS[name]:
-        if not isinstance(op.get(key), str):
-            return f"{name}.{key} missing"
-    if name == "field":
-        history = op.get("history")
-        if not isinstance(history, dict) or not all(
-            isinstance(history.get(k), str) for k in ("kind", "ref", "by", "at")
-        ):
-            return "field.history missing"
-    if name == "snapshot":
-        for key in ("cards", "history", "proposals", "evidence", "imports"):
-            if not isinstance(op.get(key), list):
-                return f"snapshot.{key} missing"
-        if not isinstance(op.get("meta"), dict):
-            return "snapshot.meta missing"
-    return None
-
-
-# -- the vault -----------------------------------------------------------------
+# -- the vault -------------------------------------------------------------------------------
 
 
 class Vault:
-    """One registered vault on this PC."""
+    """One registered BI vault on this PC."""
 
     def __init__(self, workspace: Path, vault_id: str) -> None:
         entry = registry_entry(workspace, vault_id)
@@ -437,13 +637,13 @@ class Vault:
         self.dataset = dataset_name(vault_id)
         self.local = local_dir(workspace, vault_id)
         self.db_path = self.local / DB_FILE
-        self.lock = _lock(str(self.local.resolve()))
-
-    # -- reading the folder ----------------------------------------------
+        with _repo_errors():
+            self.repo = Repository(workspace, vault_id)
+        self.lock = self.repo.lock
 
     @property
     def reachable(self) -> bool:
-        return (self.folder / VAULT_FILE).is_file()
+        return (self.folder / repo_engine.REPO_FILE).is_file()
 
     def _require_folder(self) -> None:
         if not self.reachable:
@@ -452,295 +652,186 @@ class Vault:
                 f"讀不到知識庫資料夾 {self.folder}（OneDrive 是否已同步、路徑是否改了？）",
             )
 
-    def scan(self) -> tuple[list[ChangeFile], list[dict[str, str]], list[dict[str, str]]]:
-        """Every change file of the folder: (valid ones, bad ones, incomplete
-        ones). Incomplete = unreadable or not valid JSON yet (still syncing)."""
-        valid: list[ChangeFile] = []
-        bad: list[dict[str, str]] = []
-        incomplete: list[dict[str, str]] = []
-        root = self.folder / CHANGES_DIR
-        if not root.is_dir():
-            return valid, bad, incomplete
-        for author_dir in sorted(root.iterdir()):
-            if author_dir.name.startswith("."):
-                continue
-            if not author_dir.is_dir():
-                bad.append({"file": author_dir.name, "reason": "not an author folder"})
-                continue
-            author = author_dir.name
-            if AUTHOR_RE.match(author) is None:
-                bad.append({"file": f"{author}/", "reason": "author folder name invalid"})
-                continue
-            for path in sorted(author_dir.iterdir()):
-                if path.name.startswith(".") or path.name.endswith(".tmp"):
-                    continue  # a file still being written
-                name = f"{author}/{path.name}"
-                matched = CHANGE_NAME_RE.match(path.name)
-                if matched is None:
-                    bad.append({"file": name, "reason": "file name is not <seq>.json"})
-                    continue
-                seq = int(matched.group(1))
-                try:
-                    if path.stat().st_size > MAX_CHANGE_BYTES:
-                        bad.append({"file": name, "reason": "file too large"})
-                        continue
-                    raw = path.read_bytes()
-                    data = json.loads(raw.decode("utf-8"))
-                except (OSError, ValueError) as failure:
-                    incomplete.append({"file": name, "reason": type(failure).__name__})
-                    continue
-                problem = _problem(data, author, seq, self.id)
-                if problem is not None:
-                    bad.append({"file": name, "reason": problem})
-                    continue
-                valid.append(
-                    ChangeFile(
-                        name=f"{author}/{seq}",
-                        author=author,
-                        seq=seq,
-                        clock=int(data["clock"]),
-                        sha256=hashlib.sha256(raw).hexdigest(),
-                        data=data,
-                    )
-                )
-        valid.sort(key=lambda f: f.key)
-        return valid, bad, incomplete
-
-    # -- the local database ------------------------------------------------
-
-    def _connect(self) -> sqlite3.Connection:
-        self.local.mkdir(parents=True, exist_ok=True)
-        connection = sqlite3.connect(self.db_path, isolation_level=None)
-        connection.row_factory = sqlite3.Row
-        connection.executescript(SCHEMA)
-        columns = {r[1] for r in connection.execute("PRAGMA table_info(imports)")}
-        if "run_id" not in columns:
-            connection.execute("ALTER TABLE imports ADD COLUMN run_id TEXT")
-        connection.executescript(VAULT_SCHEMA)
-        return connection
-
-    def _install_schemas(self) -> list[dict[str, str]]:
-        """Install the schemas the vault published (idempotent)."""
-        problems: list[dict[str, str]] = []
+    def _install_schemas(self) -> None:
+        """Install the schema files the vault holds; the vault's file is
+        authoritative, so one that differs from this PC's copy refuses."""
         root = self.folder / "schemas"
-        if not root.is_dir():
-            return problems
-        for path in sorted(root.glob("*.json")):
+        for path in sorted(root.glob("*.json")) if root.is_dir() else []:
             try:
                 catalog.install(self.workspace, path.name, path.read_text(encoding="utf-8"))
             except catalog.SchemaInstallError as failure:
-                problems.append({"file": f"schemas/{path.name}", "reason": failure.code})
-            except OSError as failure:
-                problems.append({"file": f"schemas/{path.name}", "reason": type(failure).__name__})
-        return problems
+                raise BiStoreError(
+                    "schema_mismatch",
+                    f"知識庫的 schema 檔 schemas/{path.name} 和這台電腦上的同一版本內容不同；"
+                    "以知識庫的檔案為準，請更新 AEP 或請維護者確認",
+                    file=f"schemas/{path.name}",
+                    reason=failure.code,
+                ) from None
+
+    def _entries(self) -> list[dict[str, Any]]:
+        """The commits' changes, then this PC's local commits and uncommitted changes."""
+        entries = []
+        for item in self.repo.log():
+            commit = item["commit"]
+            entries.append(
+                {
+                    "group": commit["id"],
+                    "at": commit["created"],
+                    "author": commit["author"],
+                    "ref": f"commit:{commit['id'][:12]}",
+                    "changes": item["changes"],
+                }
+            )
+        state = self.repo.units()
+        stages = [
+            (f"local:{r['number']}", r["created"], r["ops"]) for r in self.repo.local_commits()
+        ]
+        pending = self.repo._pending()["sets"]
+        stages.append(
+            (
+                "pending",
+                now(),
+                [{"unit": k, "value": v, "base": None} for k, v in sorted(pending.items())],
+            )
+        )
+        for group, at, ops in stages:
+            changes = []
+            for op in ops:
+                before = state.get(op["unit"])
+                if op["value"] is None:
+                    state.pop(op["unit"], None)
+                else:
+                    state[op["unit"]] = op["value"]
+                changes.append(
+                    {"unit": op["unit"], "before": before, "after": op["value"], "applied": True}
+                )
+            entries.append(
+                {"group": group, "at": at, "author": self.author, "ref": group, "changes": changes}
+            )
+        return entries
+
+    def rebuild(self) -> None:
+        """Rebuild `bi.sqlite` from the working units."""
+        with self.lock:
+            self.local.mkdir(parents=True, exist_ok=True)
+            with closing(sqlite3.connect(self.db_path, isolation_level=None)) as db:
+                db.row_factory = sqlite3.Row
+                materialize(db, self.repo.working_units(), self._entries(), self.repo.conflicts())
+        from capabilities.bi_cards import search_index
+
+        search_index.sync_quietly(BiStore(self.workspace, self.dataset))
 
     def sync(self) -> dict[str, Any]:
-        """Apply every change file not applied yet, in order; rebuild from all
-        files when one arrived late with an earlier key or an applied one
-        changed or vanished. Returns what happened."""
+        """Apply what the others pushed, then rebuild the local database."""
         with self.lock:
             self._require_folder()
-            schema_problems = self._install_schemas()
-            files, bad, incomplete = self.scan()
-            present = {f.name: f for f in files}
-            with closing(self._connect()) as db:
-                applied = {
-                    r["file"]: ((int(r["clock"]), str(r["author"]), int(r["seq"])), r["sha256"])
-                    for r in db.execute("SELECT * FROM vault_applied")
-                }
-                new = [f for f in files if f.name not in applied]
-                rebuild = any(
-                    name not in present or present[name].sha256 != sha
-                    for name, (_, sha) in applied.items()
-                )
-                if new and applied and not rebuild:
-                    rebuild = min(f.key for f in new) < max(key for key, _ in applied.values())
-                todo = files if rebuild else new
-                outcomes: dict[str, int] = {}
-                conflicts_before = 0 if rebuild else _count(db, "vault_conflicts")
-                if todo or rebuild:
-                    db.execute("BEGIN IMMEDIATE")
-                    try:
-                        if rebuild:
-                            for table in TABLES:
-                                db.execute(f"DELETE FROM {table}")  # noqa: S608 - fixed names
-                            db.execute("DELETE FROM sqlite_sequence")
-                        for item in todo:
-                            outcome = self._apply_file(db, item)
-                            outcomes[outcome] = outcomes.get(outcome, 0) + 1
-                        db.execute("COMMIT")
-                    except BaseException:
-                        db.execute("ROLLBACK")
-                        raise
-                conflicts = _count(db, "vault_conflicts") - conflicts_before
-            report = {
-                "ok": True,
-                "applied": len(todo),
-                "rebuilt": rebuild,
-                "outcomes": outcomes,
-                "conflicts": conflicts,
-                "bad": bad,
-                "incomplete": incomplete,
-                "schema_problems": schema_problems,
-                "files": len(files),
-                "at": now(),
-            }
-            _write_atomic(self.local / STATE_FILE, _pretty(report))
+            self._install_schemas()
+            with _repo_errors():
+                report = self.repo.sync()
+            self.rebuild()
+            (self.local / STATE_FILE).write_text(json.dumps({"at": now()}), encoding="utf-8")
             return report
-
-    def _apply_file(self, db: sqlite3.Connection, item: ChangeFile) -> str:
-        """Apply one file inside the open transaction; a file that fails part
-        way is rolled back alone and recorded as `failed`."""
-        db.execute("SAVEPOINT change_file")
-        try:
-            outcome, detail = _Applier(db, item).run()
-            db.execute("RELEASE change_file")
-        except (KeyError, TypeError, ValueError, AttributeError, sqlite3.Error) as failure:
-            db.execute("ROLLBACK TO change_file")
-            db.execute("RELEASE change_file")
-            outcome, detail = "failed", f"{type(failure).__name__}: {failure}"
-        db.execute(
-            "INSERT OR REPLACE INTO vault_applied (file, author, seq, clock, sha256, outcome, "
-            "detail) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (item.name, item.author, item.seq, item.clock, item.sha256, outcome, detail),
-        )
-        return outcome
-
-    # -- writing change files --------------------------------------------
-
-    def _next(self, db: sqlite3.Connection) -> tuple[int, int]:
-        """(seq, clock) of this PC's next change file."""
-        own = self.folder / CHANGES_DIR / self.author
-        seqs = [0]
-        if own.is_dir():
-            for path in own.iterdir():
-                matched = CHANGE_NAME_RE.match(path.name)
-                if matched:
-                    seqs.append(int(matched.group(1)))
-        row = db.execute(
-            "SELECT COALESCE(MAX(seq), 0) FROM vault_applied WHERE author = ?", (self.author,)
-        ).fetchone()
-        seqs.append(int(row[0]))
-        clock = int(db.execute("SELECT COALESCE(MAX(clock), 0) FROM vault_applied").fetchone()[0])
-        return max(seqs) + 1, clock + 1
-
-    def emit(
-        self,
-        ops: list[dict[str, Any]],
-        *,
-        action: str,
-        seq: int,
-        clock: int,
-    ) -> str:
-        """Write one change file (never replacing one) and return its name."""
-        if not self.author or AUTHOR_RE.match(self.author) is None:
-            raise BiStoreError("author_invalid", "這台電腦在這個知識庫沒有作者名稱，請重新加入")
-        run_ids = [op.get("run_id") for op in ops if op.get("op") == "import"]
-        document = {
-            "format": CHANGE_FORMAT,
-            "vault": self.id,
-            "author": self.author,
-            "seq": seq,
-            "clock": clock,
-            "at": now(),
-            "action": action,
-            "run_id": next((r for r in run_ids if r), None),
-            "ops": ops,
-        }
-        own = self.folder / CHANGES_DIR / self.author
-        own.mkdir(parents=True, exist_ok=True)
-        target = own / f"{seq}.json"
-        if target.exists():
-            raise BiStoreError("change_exists", f"變更檔 {self.author}/{seq}.json 已經存在")
-        _write_atomic(target, _pretty(document))
-        return f"{self.author}/{seq}"
 
     @contextmanager
     def capture(self, store: BiStore) -> Iterator[sqlite3.Connection]:
-        """Run a store write on the local database, turn its effect into one
-        change file, roll it back, and apply the file."""
+        """Run a store write on the local database, stage the units it changed,
+        roll it back and rebuild; a new import commits at once."""
         with self.lock:
-            self.sync()
+            self._require_folder()
+            if not self.db_path.is_file():
+                self.rebuild()
             connection = sqlite3.connect(self.db_path)
             connection.row_factory = sqlite3.Row
             try:
-                before = _State.read(connection)
+                before = units_from_db(connection)
                 yield connection
-                seq, clock = self._next(connection)
-                ops = _diff(connection, before, f"{self.author}/{seq}")
+                after = units_from_db(connection)
             finally:
                 connection.rollback()
                 connection.close()
-            if not ops:
+            changed = {
+                k: after.get(k)
+                for k in set(before) | set(after)
+                if repo_engine.canonical(before.get(k)) != repo_engine.canonical(after.get(k))
+            }
+            if not changed:
                 return
-            for op in ops:
-                if op["op"] == "meta" and op["key"] == "schema" and op.get("value"):
-                    # A schema upgrade: publish the new version before the change.
-                    _export_schema(self.workspace, self.folder, str(op["value"]))
-            self.emit(ops, action=_action(ops), seq=seq, clock=clock)
-            self.sync()
+            with _repo_errors():
+                self.repo.stage_many(dict(sorted(changed.items())))
+                if changed.get(repo_engine.SCHEMA_UNIT):
+                    self._stage_schema(str(changed[repo_engine.SCHEMA_UNIT]))
+                imports = [
+                    v
+                    for k, v in changed.items()
+                    if k.startswith("import:") and v and k not in before
+                ]
+                if imports:
+                    self.repo.commit(_PURPOSE.get() or _draft(imports, changed))
+            self.rebuild()
 
-    # -- status ------------------------------------------------------------
+    def _stage_schema(self, ref: str) -> None:
+        """Put the schema file into the working copy (decision 1: every
+        vault holds the schema it uses, built in or not)."""
+        reg = catalog.resolve(self.workspace, ref)
+        name = _schema_file_name(reg.schema_id, reg.version)
+        if (self.folder / "schemas" / name).is_file():
+            return
+        if reg.source == "installed":
+            # The installed file as it is, so every PC installs the same bytes.
+            self.repo.stage_file(
+                f"schemas/{name}", catalog.schema_path(self.workspace, reg.schema_id, reg.version)
+            )
+            return
+        with tempfile.TemporaryDirectory() as scratch:
+            path = Path(scratch) / name
+            path.write_text(catalog.canonical(reg.document), encoding="utf-8")
+            self.repo.stage_file(f"schemas/{name}", path)
 
     def status(self) -> dict[str, Any]:
-        """Applied, behind, conflicts and bad files, without applying anything."""
+        """The vault header (compatible with the V4 page) and the version state."""
         reachable = self.reachable
-        files: list[ChangeFile] = []
-        bad: list[dict[str, str]] = []
-        incomplete: list[dict[str, str]] = []
+        state: dict[str, Any] = {}
         if reachable:
-            files, bad, incomplete = self.scan()
-        applied: dict[str, dict[str, Any]] = {}
-        conflicts: list[dict[str, Any]] = []
+            with _repo_errors():
+                state = self.repo.status()
+        conflicts = []
         cards = 0
         if self.db_path.is_file():
             with closing(sqlite3.connect(f"file:{self.db_path}?mode=ro", uri=True)) as db:
                 db.row_factory = sqlite3.Row
-                applied = {r["file"]: dict(r) for r in db.execute("SELECT * FROM vault_applied")}
-                pending = {
-                    int(r[0])
-                    for r in db.execute("SELECT id FROM proposals WHERE status = 'pending'")
-                }
-                for r in db.execute("SELECT * FROM vault_conflicts ORDER BY id"):
-                    proposal = r["proposal_id"]
+                for r in db.execute("SELECT * FROM proposals WHERE kind = 'conflict' ORDER BY id"):
                     conflicts.append(
                         {
-                            "id": r["id"],
-                            "kind": r["kind"],
-                            "file": r["file"],
                             "card_id": r["card_id"],
                             "field": r["field"],
-                            "proposal_id": proposal,
-                            "open": proposal is not None and int(proposal) in pending,
-                            "detail": _load(r["detail"]),
-                            "at": r["at"],
+                            "proposal_id": r["id"],
+                            "file": r["ref"],
+                            "open": r["status"] == "pending",
                         }
                     )
-                cards = _count(db, "cards")
-        state: dict[str, Any] = {}
+                cards = int(db.execute("SELECT COUNT(*) FROM cards").fetchone()[0])
         try:
-            state = json.loads((self.local / STATE_FILE).read_text(encoding="utf-8"))
+            last = json.loads((self.local / STATE_FILE).read_text(encoding="utf-8")).get("at")
         except (OSError, ValueError):
-            state = {}
-        names = {f.name for f in files}
+            last = None
+        applied = len(self.repo.history(limit=10**9)) if reachable else 0
         return {
             "vault": self.describe(),
             "reachable": reachable,
-            "files": len(files),
-            "applied": sum(1 for name in applied if name in names),
-            "behind": sum(1 for name in names if name not in applied),
-            "skipped": [
-                {"file": name, "outcome": item["outcome"], "detail": item["detail"]}
-                for name, item in sorted(applied.items())
-                if item["outcome"] != "applied"
-            ],
-            "conflicts": [c for c in conflicts if c["kind"] != "merge"],
-            "merges": [c for c in conflicts if c["kind"] == "merge"],
-            "bad": bad,
-            "incomplete": incomplete,
+            "files": applied + int(state.get("behind") or 0),
+            "applied": applied,
+            "behind": int(state.get("behind") or 0),
+            "ahead": int(state.get("ahead") or 0),
+            "uncommitted": int(state.get("uncommitted") or 0),
+            "waiting": state.get("waiting") or [],
+            "published": state.get("published"),
+            "head": state.get("head"),
+            "conflicts": conflicts,
+            "merges": [],
+            "bad": state.get("bad") or [],
+            "incomplete": [],
             "cards": cards,
-            "clock": max((int(a["clock"]) for a in applied.values()), default=0),
-            "last_sync": state.get("at"),
+            "last_sync": last,
         }
 
     def describe(self) -> dict[str, Any]:
@@ -749,729 +840,32 @@ class Vault:
             document = read_vault_json(self.folder)
         except BiStoreError:
             document = {}
+        schema = None
+        if self.db_path.is_file():
+            with closing(sqlite3.connect(f"file:{self.db_path}?mode=ro", uri=True)) as db:
+                try:
+                    row = db.execute("SELECT value FROM meta WHERE key = 'schema'").fetchone()
+                except sqlite3.OperationalError:
+                    row = None
+                schema = None if row is None else str(row[0])
         return {
             "id": self.id,
             "dataset": self.dataset,
             "title": document.get("title"),
             "purpose": document.get("purpose"),
-            "schema": document.get("schema"),
+            "schema": schema,
             "path": str(self.folder),
             "author": self.author,
             "reachable": bool(document),
         }
 
 
-def _count(db: sqlite3.Connection, table: str) -> int:
-    return int(db.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0])  # noqa: S608
-
-
-# -- capturing a store write ---------------------------------------------------
-
-
-@dataclass
-class _State:
-    cards: dict[str, dict[str, Any]]
-    history: int
-    proposals: dict[int, str]
-    proposal_max: int
-    evidence: int
-    meta: dict[str, str]
-    imports: dict[str, dict[str, Any]]
-
-    @classmethod
-    def read(cls, db: sqlite3.Connection) -> _State:
-        return cls(
-            cards={r["id"]: dict(r) for r in db.execute("SELECT * FROM cards")},
-            history=int(db.execute("SELECT COALESCE(MAX(seq), 0) FROM history").fetchone()[0]),
-            proposals={int(r["id"]): r["status"] for r in db.execute("SELECT * FROM proposals")},
-            proposal_max=int(
-                db.execute("SELECT COALESCE(MAX(id), 0) FROM proposals").fetchone()[0]
-            ),
-            evidence=int(db.execute("SELECT COALESCE(MAX(seq), 0) FROM evidence").fetchone()[0]),
-            meta={r["key"]: r["value"] for r in db.execute("SELECT * FROM meta")},
-            imports={r["id"]: dict(r) for r in db.execute("SELECT * FROM imports")},
-        )
-
-
-def _source(row: Any) -> dict[str, Any]:
-    return {k: row[k] for k in ("kind", "ref", "by", "at")}
-
-
-def _diff(db: sqlite3.Connection, before: _State, name: str) -> list[dict[str, Any]]:
-    """The operations a write made, in the order they are applied."""
-    after = _State.read(db)
-
-    def ident(card_id: str) -> tuple[str, str]:
-        card = after.cards.get(card_id) or before.cards[card_id]
-        return str(card["entity_type"]), str(card["canonical_key"])
-
-    ops: list[dict[str, Any]] = []
-    for key in sorted(set(before.meta) | set(after.meta)):
-        if before.meta.get(key) != after.meta.get(key):
-            ops.append(
-                {
-                    "op": "meta",
-                    "key": key,
-                    "base": before.meta.get(key),
-                    "value": after.meta.get(key),
-                }
-            )
-    for import_id, row in after.imports.items():
-        if import_id not in before.imports:
-            ops.append(
-                {
-                    "op": "import",
-                    "id": import_id,
-                    "filename": row["filename"],
-                    "entity_type": row["entity_type"],
-                    "at": row["at"],
-                    "by": row["by"],
-                    "run_id": row.get("run_id"),
-                }
-            )
-    history = list(
-        db.execute("SELECT * FROM history WHERE seq > ? ORDER BY seq", (before.history,))
-    )
-    proposals = list(
-        db.execute("SELECT * FROM proposals WHERE id > ? ORDER BY id", (before.proposal_max,))
-    )
-    evidence = list(
-        db.execute("SELECT * FROM evidence WHERE seq > ? ORDER BY seq", (before.evidence,))
-    )
-    touched = {r["card_id"] for r in [*history, *proposals, *evidence]}
-    touched |= {i for i, c in after.cards.items() if before.cards.get(i) != c}
-    for card_id in sorted(touched & set(after.cards), key=ident):
-        card = after.cards[card_id]
-        earlier = before.cards.get(card_id)
-        ops.append(
-            {
-                "op": "card",
-                "type": card["entity_type"],
-                "key": card["canonical_key"],
-                "name": card["name"],
-                "synthetic": bool(card["synthetic"]),
-                "new": earlier is None,
-                "version": int(card["version"]),
-                "delta": int(card["version"]) - (0 if earlier is None else int(earlier["version"])),
-                "created": card["created"],
-                "updated": card["updated"],
-                "created_by_import": card["created_by_import"],
-            }
-        )
-    last = {(r["card_id"], r["field"]): r["seq"] for r in history}
-    for row in history:
-        entity_type, key = ident(row["card_id"])
-        source = None
-        if row["new"] is not None:
-            source = {"kind": row["kind"], "ref": row["ref"], "by": row["by"], "at": row["at"]}
-            if last[(row["card_id"], row["field"])] == row["seq"]:
-                stored = db.execute(
-                    "SELECT * FROM fields WHERE card_id = ? AND field = ?",
-                    (row["card_id"], row["field"]),
-                ).fetchone()
-                if stored is not None:
-                    source = _source(stored)
-        ops.append(
-            {
-                "op": "field",
-                "type": entity_type,
-                "key": key,
-                "field": row["field"],
-                "base": _load(row["old"]),
-                "value": _load(row["new"]),
-                "source": source,
-                "history": {
-                    "kind": row["kind"],
-                    "ref": row["ref"],
-                    "by": row["by"],
-                    "at": row["at"],
-                    "import_id": row["import_id"],
-                    "reason": row["reason"],
-                    "old_source": _load(row["old_source"]),
-                },
-            }
-        )
-    for index, row in enumerate(proposals):
-        entity_type, key = ident(row["card_id"])
-        ops.append(
-            {
-                "op": "propose",
-                "pkey": f"{name}#p{index}",
-                "type": entity_type,
-                "key": key,
-                "field": row["field"],
-                "value": _load(row["value"]),
-                "kind": row["kind"],
-                "ref": row["ref"],
-                "at": row["at"],
-                "import_id": row["import_id"],
-                "status": row["status"],
-            }
-        )
-    for proposal_id, status in sorted(before.proposals.items()):
-        if after.proposals.get(proposal_id) != status:
-            found = db.execute(
-                "SELECT pkey FROM vault_pkeys WHERE proposal_id = ? ORDER BY pkey LIMIT 1",
-                (proposal_id,),
-            ).fetchone()
-            ops.append(
-                {
-                    "op": "proposal",
-                    "pkey": "" if found is None else str(found[0]),
-                    "status": after.proposals.get(proposal_id) or "withdrawn",
-                }
-            )
-    for row in evidence:
-        entity_type, key = ident(row["card_id"])
-        stored = db.execute(
-            "SELECT value FROM fields WHERE card_id = ? AND field = ?",
-            (row["card_id"], row["field"]),
-        ).fetchone()
-        ops.append(
-            {
-                "op": "evidence",
-                "type": entity_type,
-                "key": key,
-                "field": row["field"],
-                "value": None if stored is None else _load(stored[0]),
-                "run_id": row["run_id"],
-                "source_id": row["source_id"],
-                "source_name": row["source_name"],
-                "locator": _load(row["locator"]),
-                "excerpt": row["excerpt"],
-                "basis": row["basis"],
-                "at": row["at"],
-            }
-        )
-    for card_id in sorted(set(before.cards) - set(after.cards), key=ident):
-        entity_type, key = ident(card_id)
-        ops.append({"op": "card_delete", "type": entity_type, "key": key})
-    for import_id, row in after.imports.items():
-        earlier = before.imports.get(import_id)
-        if earlier is not None and row["undone"] and not earlier["undone"]:
-            ops.append({"op": "import_undone", "id": import_id})
-    return ops
-
-
-def _action(ops: list[dict[str, Any]]) -> str:
-    """What a change file did, for people reading the folder."""
-    names = {op["op"] for op in ops}
-    if any(op["op"] == "import" and op.get("run_id") for op in ops):
-        return "commit_run"
-    if "import" in names:
-        return "import"
-    if "import_undone" in names:
-        return "undo_import"
-    if any(op["op"] == "meta" and op["key"] == "schema" for op in ops):
-        return "upgrade_schema"
-    if "field" in names:
-        return "edit"
-    if "proposal" in names:
-        return "decide_proposal"
-    return "change"
-
-
-# -- applying a change file ----------------------------------------------------
-
-
-class _Applier:
-    """Applies one change file's operations to the open transaction."""
-
-    def __init__(self, db: sqlite3.Connection, item: ChangeFile) -> None:
-        self.db = db
-        self.item = item
-        self.at = str(item.data["at"])
-        self.applied_cards: set[str] = set()
-        self.inserted: set[str] = set()
-
-    def run(self) -> tuple[str, str]:
-        ops: list[dict[str, Any]] = list(self.item.data["ops"])
-        for op in ops:
-            if op["op"] == "import":
-                run_id = op.get("run_id")
-                if (
-                    run_id
-                    and self.db.execute(
-                        "SELECT 1 FROM imports WHERE run_id = ?", (run_id,)
-                    ).fetchone()
-                ):
-                    self._conflict("duplicate_run", None, None, None, {"run_id": run_id})
-                    return "duplicate_run", str(run_id)
-                if self.db.execute("SELECT 1 FROM imports WHERE id = ?", (op["id"],)).fetchone():
-                    self._conflict("duplicate_import", None, None, None, {"import_id": op["id"]})
-                    return "duplicate_import", str(op["id"])
-        by_kind: dict[str, list[tuple[int, dict[str, Any]]]] = {}
-        for index, op in enumerate(ops):
-            by_kind.setdefault(op["op"], []).append((index, op))
-        for _, op in by_kind.get("meta", []):
-            self._meta(op)
-        for _, op in by_kind.get("import", []):
-            self._import(op)
-        for _, op in by_kind.get("snapshot", []):
-            self._snapshot(op)
-        for _, op in by_kind.get("card", []):
-            self._ensure(op)
-        field_cards = {(op["type"], op["key"]) for _, op in by_kind.get("field", [])}
-        for index, op in by_kind.get("field", []):
-            self._field(index, op)
-        for _, op in by_kind.get("propose", []):
-            self._propose(op)
-        for _, op in by_kind.get("proposal", []):
-            self._decide(op)
-        for _, op in by_kind.get("evidence", []):
-            self._evidence(op)
-        for _, op in by_kind.get("card_delete", []):
-            self._delete(op)
-        for _, op in by_kind.get("card", []):
-            self._bump(op, (op["type"], op["key"]) in field_cards)
-        for _, op in by_kind.get("import_undone", []):
-            self.db.execute("UPDATE imports SET undone = 1 WHERE id = ?", (op["id"],))
-        return "applied", ""
-
-    # -- helpers -----------------------------------------------------------
-
-    def _conflict(
-        self,
-        kind: str,
-        card_id: str | None,
-        field: str | None,
-        proposal_id: int | None,
-        detail: dict[str, Any],
-    ) -> None:
-        self.db.execute(
-            "INSERT INTO vault_conflicts (file, kind, card_id, field, proposal_id, detail, at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (self.item.name, kind, card_id, field, proposal_id, _dump(detail), self.at),
-        )
-
-    def _card_id(self, entity_type: str, key: str) -> str | None:
-        row = self.db.execute(
-            "SELECT id FROM cards WHERE entity_type = ? AND canonical_key = ?", (entity_type, key)
-        ).fetchone()
-        return None if row is None else str(row[0])
-
-    def _insert_card(self, card: dict[str, Any], wanted: str | None = None) -> str:
-        card_id = wanted or card_id_for(card["type"], card["key"])
-        if self.db.execute("SELECT 1 FROM cards WHERE id = ?", (card_id,)).fetchone():
-            card_id = card_id_for(card["type"], card["key"])
-        self.db.execute(
-            "INSERT INTO cards (id, entity_type, canonical_key, name, version, synthetic, "
-            "created, updated, created_by_import) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (
-                card_id,
-                card["type"],
-                card["key"],
-                card["name"],
-                int(card.get("version") or 1),
-                int(bool(card.get("synthetic"))),
-                str(card.get("created") or self.at),
-                str(card.get("updated") or self.at),
-                card.get("created_by_import"),
-            ),
-        )
-        self.inserted.add(card_id)
-        return card_id
-
-    def _ensure(self, op: dict[str, Any]) -> None:
-        card_id = self._card_id(op["type"], op["key"])
-        if card_id is None:
-            card_id = self._insert_card(op)
-            if not op.get("new"):
-                # Deleted here (an undo elsewhere) but written on from an older state.
-                self._conflict("recreated", card_id, None, None, {"name": op["name"]})
-        elif op.get("new"):
-            # Two PCs created the same type and key: one card, flagged for a person.
-            self._conflict(
-                "merge",
-                card_id,
-                None,
-                None,
-                {"type": op["type"], "key": op["key"], "name": op["name"]},
-            )
-
-    def _bump(self, op: dict[str, Any], has_fields: bool) -> None:
-        card_id = self._card_id(op["type"], op["key"])
-        if card_id is None or card_id in self.inserted:
-            return
-        if has_fields and card_id not in self.applied_cards:
-            return  # every value it carried became a proposal
-        delta = int(op.get("delta") or 0)
-        if delta:
-            self.db.execute(
-                "UPDATE cards SET version = version + ?, updated = ? WHERE id = ?",
-                (delta, str(op.get("updated") or self.at), card_id),
-            )
-        if op.get("synthetic"):
-            self.db.execute("UPDATE cards SET synthetic = 1 WHERE id = ?", (card_id,))
-
-    def _meta(self, op: dict[str, Any]) -> None:
-        row = self.db.execute("SELECT value FROM meta WHERE key = ?", (op["key"],)).fetchone()
-        current = None if row is None else str(row[0])
-        value = op.get("value")
-        if current == value:
-            return
-        if current != op.get("base"):
-            self._conflict(
-                "meta",
-                None,
-                op["key"],
-                None,
-                {"base": op.get("base"), "current": current, "value": value},
-            )
-            return
-        if value is None:
-            self.db.execute("DELETE FROM meta WHERE key = ?", (op["key"],))
-        else:
-            self.db.execute(
-                "INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)", (op["key"], str(value))
-            )
-
-    def _import(self, op: dict[str, Any]) -> None:
-        self.db.execute(
-            "INSERT OR IGNORE INTO imports (id, filename, entity_type, at, by, undone, run_id) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (
-                op["id"],
-                op["filename"],
-                op["entity_type"],
-                op["at"],
-                op["by"],
-                int(bool(op.get("undone"))),
-                op.get("run_id"),
-            ),
-        )
-
-    def _field(self, index: int, op: dict[str, Any]) -> None:
-        history: dict[str, Any] = op["history"]
-        value_text = _text(op.get("value"))
-        card_id = self._card_id(op["type"], op["key"])
-        if card_id is None:
-            if value_text is None:
-                return  # removing a value of a card that is gone already
-            card_id = self._insert_card({"type": op["type"], "key": op["key"], "name": op["key"]})
-            self._conflict("recreated", card_id, op["field"], None, {"name": op["key"]})
-        stored = self.db.execute(
-            "SELECT * FROM fields WHERE card_id = ? AND field = ?", (card_id, op["field"])
-        ).fetchone()
-        current = None if stored is None else str(stored["value"])
-        if current == value_text:
-            return  # the same value already: nothing to change
-        if current != _text(op.get("base")):
-            self._kept(index, card_id, op, current)
-            return
-        if value_text is None:
-            self.db.execute(
-                "DELETE FROM fields WHERE card_id = ? AND field = ?", (card_id, op["field"])
-            )
-        else:
-            source = op.get("source") or {k: history.get(k) for k in ("kind", "ref", "by", "at")}
-            self.db.execute(
-                "INSERT OR REPLACE INTO fields (card_id, field, value, kind, ref, by, at) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (
-                    card_id,
-                    op["field"],
-                    value_text,
-                    source["kind"],
-                    source["ref"],
-                    source["by"],
-                    source["at"],
-                ),
-            )
-        old_source = history.get("old_source")
-        self.db.execute(
-            "INSERT INTO history (card_id, field, old, new, kind, ref, by, at, import_id, "
-            "reason, old_source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (
-                card_id,
-                op["field"],
-                current,
-                value_text,
-                history["kind"],
-                history["ref"],
-                history["by"],
-                history["at"],
-                history.get("import_id"),
-                history.get("reason"),
-                None if old_source is None else _dump(old_source),
-            ),
-        )
-        self.applied_cards.add(card_id)
-
-    def _kept(self, index: int, card_id: str, op: dict[str, Any], current: str | None) -> None:
-        """A change made from another value than the field holds now: a
-        pending proposal for a person, never a silent overwrite."""
-        history: dict[str, Any] = op["history"]
-        value_text = _text(op.get("value")) or "null"
-        pending = self.db.execute(
-            "SELECT id FROM proposals WHERE card_id = ? AND field = ? AND value = ? AND "
-            "status = 'pending'",
-            (card_id, op["field"], value_text),
-        ).fetchone()
-        if pending is None:
-            cursor = self.db.execute(
-                "INSERT INTO proposals (card_id, field, value, kind, ref, at, import_id) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (
-                    card_id,
-                    op["field"],
-                    value_text,
-                    history["kind"],
-                    f"vault:{self.item.name}#{index}",
-                    history["at"],
-                    history.get("import_id"),
-                ),
-            )
-            proposal_id = int(cursor.lastrowid or 0)
-        else:
-            proposal_id = int(pending[0])
-        self.db.execute(
-            "INSERT OR REPLACE INTO vault_pkeys (pkey, proposal_id) VALUES (?, ?)",
-            (f"{self.item.name}#c{index}", proposal_id),
-        )
-        self._conflict(
-            "field",
-            card_id,
-            op["field"],
-            proposal_id,
-            {
-                "base": op.get("base"),
-                "current": _load(current),
-                "value": op.get("value"),
-                "by": history.get("by"),
-                "author": self.item.author,
-                "evidence": [],
-            },
-        )
-
-    def _propose(self, op: dict[str, Any]) -> None:
-        card_id = self._card_id(op["type"], op["key"])
-        if card_id is None:
-            card_id = self._insert_card({"type": op["type"], "key": op["key"], "name": op["key"]})
-            self._conflict("recreated", card_id, op["field"], None, {"name": op["key"]})
-        value_text = _dump(op.get("value"))
-        status = str(op.get("status") or "pending")
-        pending = self.db.execute(
-            "SELECT id FROM proposals WHERE card_id = ? AND field = ? AND value = ? AND "
-            "status = 'pending'",
-            (card_id, op["field"], value_text),
-        ).fetchone()
-        if pending is not None and status == "pending":
-            proposal_id = int(pending[0])
-        else:
-            cursor = self.db.execute(
-                "INSERT INTO proposals (card_id, field, value, kind, ref, at, import_id, status) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                (
-                    card_id,
-                    op["field"],
-                    value_text,
-                    op["kind"],
-                    op["ref"],
-                    op["at"],
-                    op.get("import_id"),
-                    status,
-                ),
-            )
-            proposal_id = int(cursor.lastrowid or 0)
-        self.db.execute(
-            "INSERT OR REPLACE INTO vault_pkeys (pkey, proposal_id) VALUES (?, ?)",
-            (op["pkey"], proposal_id),
-        )
-
-    def _decide(self, op: dict[str, Any]) -> None:
-        found = self.db.execute(
-            "SELECT p.id, p.status, p.card_id, p.field FROM vault_pkeys k "
-            "JOIN proposals p ON p.id = k.proposal_id WHERE k.pkey = ?",
-            (op["pkey"],),
-        ).fetchone()
-        if found is None:
-            self._conflict("proposal", None, None, None, {"pkey": op["pkey"], "missing": True})
-            return
-        if found["status"] == op["status"]:
-            return
-        if found["status"] != "pending":
-            # Decided elsewhere first: keep that decision, report this one.
-            self._conflict(
-                "proposal",
-                found["card_id"],
-                found["field"],
-                int(found["id"]),
-                {"pkey": op["pkey"], "status": op["status"], "current": found["status"]},
-            )
-            return
-        self.db.execute("UPDATE proposals SET status = ? WHERE id = ?", (op["status"], found["id"]))
-
-    def _evidence(self, op: dict[str, Any]) -> None:
-        card_id = self._card_id(op["type"], op["key"])
-        stored = (
-            None
-            if card_id is None
-            else self.db.execute(
-                "SELECT value FROM fields WHERE card_id = ? AND field = ?", (card_id, op["field"])
-            ).fetchone()
-        )
-        if card_id is None or stored is None or str(stored[0]) != _text(op.get("value")):
-            # The value it supports was not applied (it became a proposal).
-            row = self.db.execute(
-                "SELECT id, detail FROM vault_conflicts WHERE file = ? AND card_id IS ? AND "
-                "field = ? AND kind = 'field' ORDER BY id DESC LIMIT 1",
-                (self.item.name, card_id, op["field"]),
-            ).fetchone()
-            item = {k: op.get(k) for k in ("run_id", "source_id", "source_name", "locator")}
-            item.update({k: op.get(k) for k in ("excerpt", "basis", "at")})
-            if row is not None:
-                detail = _load(row["detail"]) or {}
-                detail.setdefault("evidence", []).append(item)
-                self.db.execute(
-                    "UPDATE vault_conflicts SET detail = ? WHERE id = ?", (_dump(detail), row["id"])
-                )
-            else:
-                self._conflict("evidence", card_id, op["field"], None, item)
-            return
-        self.db.execute(
-            "INSERT INTO evidence (card_id, field, run_id, source_id, source_name, locator, "
-            "excerpt, basis, at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (
-                card_id,
-                op["field"],
-                op["run_id"],
-                str(op.get("source_id") or ""),
-                str(op.get("source_name") or ""),
-                _dump(op.get("locator") or {}),
-                str(op.get("excerpt") or ""),
-                str(op.get("basis") or "fact"),
-                str(op.get("at") or self.at),
-            ),
-        )
-
-    def _delete(self, op: dict[str, Any]) -> None:
-        card_id = self._card_id(op["type"], op["key"])
-        if card_id is None:
-            return
-        left = self.db.execute(
-            "SELECT COUNT(*) FROM fields WHERE card_id = ?", (card_id,)
-        ).fetchone()[0]
-        if left:
-            self._conflict("delete_kept", card_id, None, None, {"fields": int(left)})
-            return
-        self.db.execute("DELETE FROM cards WHERE id = ?", (card_id,))
-
-    def _snapshot(self, op: dict[str, Any]) -> None:
-        """A whole dataset (dataset to vault): its cards with their ids,
-        values, history, proposals and evidence, inserted as they were. A card
-        that exists already is flagged `merge`; its differing values become
-        proposals."""
-        for key, value in sorted(op["meta"].items()):
-            self._meta({"op": "meta", "key": key, "base": None, "value": value})
-        for item in op["imports"]:
-            self._import(item)
-        ids: dict[str, str] = {}  # the snapshot's card id -> the id here (inserted ones)
-        for index, card in enumerate(op["cards"]):
-            existing = self._card_id(card["type"], card["key"])
-            if existing is not None:
-                self._conflict(
-                    "merge",
-                    existing,
-                    None,
-                    None,
-                    {"type": card["type"], "key": card["key"], "name": card["name"]},
-                )
-                for name, field in sorted(card.get("fields", {}).items()):
-                    self._field(
-                        index,
-                        {
-                            "type": card["type"],
-                            "key": card["key"],
-                            "field": name,
-                            "base": None,
-                            "value": field["value"],
-                            "source": field,
-                            "history": {**field, "import_id": None, "reason": None},
-                        },
-                    )
-                continue
-            card_id = self._insert_card(card, str(card.get("id") or "") or None)
-            ids[str(card.get("id") or card_id)] = card_id
-            for name, field in sorted(card.get("fields", {}).items()):
-                self.db.execute(
-                    "INSERT INTO fields (card_id, field, value, kind, ref, by, at) "
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)",
-                    (
-                        card_id,
-                        name,
-                        _dump(field["value"]),
-                        field["kind"],
-                        field["ref"],
-                        field["by"],
-                        field["at"],
-                    ),
-                )
-        for row in op["history"]:
-            target = ids.get(str(row["card"]))
-            if target is None:
-                continue
-            self.db.execute(
-                "INSERT INTO history (card_id, field, old, new, kind, ref, by, at, import_id, "
-                "reason, old_source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (
-                    target,
-                    row["field"],
-                    _text(row.get("old")),
-                    _text(row.get("new")),
-                    row["kind"],
-                    row["ref"],
-                    row["by"],
-                    row["at"],
-                    row.get("import_id"),
-                    row.get("reason"),
-                    _text(row.get("old_source")),
-                ),
-            )
-        for row in op["proposals"]:
-            target = ids.get(str(row["card"]))
-            if target is None:
-                continue
-            cursor = self.db.execute(
-                "INSERT INTO proposals (card_id, field, value, kind, ref, at, import_id, status) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                (
-                    target,
-                    row["field"],
-                    _dump(row.get("value")),
-                    row["kind"],
-                    row["ref"],
-                    row["at"],
-                    row.get("import_id"),
-                    row["status"],
-                ),
-            )
-            self.db.execute(
-                "INSERT OR REPLACE INTO vault_pkeys (pkey, proposal_id) VALUES (?, ?)",
-                (row["pkey"], int(cursor.lastrowid or 0)),
-            )
-        for row in op["evidence"]:
-            target = ids.get(str(row["card"]))
-            if target is None:
-                continue
-            self.db.execute(
-                "INSERT INTO evidence (card_id, field, run_id, source_id, source_name, locator, "
-                "excerpt, basis, at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (
-                    target,
-                    row["field"],
-                    row["run_id"],
-                    row["source_id"],
-                    row["source_name"],
-                    _dump(row.get("locator")),
-                    row["excerpt"],
-                    row["basis"],
-                    row["at"],
-                ),
-            )
-
-
-# -- the store hook ------------------------------------------------------------
+def _draft(imports: list[dict[str, Any]], changed: Mapping[str, Any]) -> str:
+    """A drafted purpose for an import commit (the person can give their own)."""
+    names = "、".join(sorted({str(i["filename"]) for i in imports}))
+    cards = sum(1 for k, v in changed.items() if k.startswith("card:") and v is not None)
+    fields = sum(1 for k in changed if k.startswith("field:"))
+    return f"匯入 {names}：{cards} 張卡、{fields} 個欄位"[: repo_engine.MAX_PURPOSE]
 
 
 @contextmanager
@@ -1483,7 +877,7 @@ def capture(store: BiStore) -> Iterator[sqlite3.Connection]:
         yield connection
 
 
-# -- create, join, convert, list -----------------------------------------------
+# -- create, join, convert, list ----------------------------------------------------------
 
 
 def _free_name(workspace: Path, vault_id: str) -> None:
@@ -1498,66 +892,70 @@ def _free_name(workspace: Path, vault_id: str) -> None:
 
 
 def _new_vault(
-    workspace: Path,
-    given: dict[str, Any],
-    actor: str,
-    schema_ref: str,
-) -> tuple[Vault, Path]:
+    workspace: Path, given: dict[str, Any], actor: str
+) -> tuple[Vault, list[dict[str, str]]]:
     parent = _folder(given.get("path"), must_exist=True)
     title = str(given.get("title") or "").strip()
     if not title:
         raise BiStoreError("title_missing", "需要知識庫名稱")
-    purpose = str(given.get("purpose") or "").strip()
     vault_id = str(given.get("id") or "").strip().lower()
     if not vault_id:
         base = _slug(title, MAX_VAULT_ID - 7) or "vault"
         vault_id = f"{base}-{uuid.uuid4().hex[:6]}"
-    if not _valid_vault_id(vault_id):
+    if len(vault_id) > MAX_VAULT_ID or not VAULT_ID_RE.match(vault_id):
         raise BiStoreError(
             "vault_id_invalid", f"知識庫 id 只能用小寫英數字與 -，最多 {MAX_VAULT_ID} 個字"
         )
     _free_name(workspace, vault_id)
     author = _checked_author(given.get("author"), actor)
-    coverage = given.get("coverage")
-    if coverage is not None and not isinstance(coverage, dict):
-        raise BiStoreError("coverage_invalid", "coverage 必須是 JSON 物件")
-    folder = parent / vault_id
-    if folder.exists():
-        raise BiStoreError("vault_exists", f"資料夾 {folder} 已經存在")
-    document = {
-        "format": VAULT_FORMAT,
-        "id": vault_id,
-        "title": title,
-        "purpose": purpose,
-        "schema": schema_ref,
-        "created": now(),
-        "created_by": author,
-        "folders": {
-            "applications": _segments(given.get("segments")),
-            "library": list(LIBRARY),
-        },
-        "coverage": coverage,
-    }
-    _lay_out(folder, document)
-    _export_schema(workspace, folder, schema_ref)
-    _register(workspace, {"id": vault_id, "path": str(folder), "author": author, "joined": now()})
-    return Vault(workspace, vault_id), folder
+    segments = _segments(given.get("segments"))
+    if (parent / vault_id).exists():
+        raise BiStoreError("vault_exists", f"資料夾 {parent / vault_id} 已經存在")
+    with _repo_errors():
+        repo = repo_engine.create(
+            workspace,
+            parent,
+            repo_id=vault_id,
+            title=title,
+            purpose=str(given.get("purpose") or ""),
+            kind=REPO_TYPE,
+            author=author,
+        )
+    for item in segments:
+        (repo.folder / "sources" / "applications" / item["folder"]).mkdir(
+            parents=True, exist_ok=True
+        )
+    for name in LIBRARY:
+        (repo.folder / "sources" / "library" / name).mkdir(parents=True, exist_ok=True)
+    _register(
+        workspace, {"id": vault_id, "path": str(repo.folder), "author": author, "joined": now()}
+    )
+    return Vault(workspace, vault_id), segments
+
+
+def _segments_meta(segments: list[dict[str, str]]) -> str:
+    return json.dumps(segments, ensure_ascii=False, sort_keys=True)
 
 
 def create(workspace: Path, given: dict[str, Any], actor: str) -> dict[str, Any]:
     """A new vault folder under `path`, bound to `schema`, and this PC joined."""
     reg = catalog.resolve(workspace, str(given.get("schema") or ""))
-    vault, _ = _new_vault(workspace, given, actor, reg.ref)
-    with vault.lock, closing(vault._connect()) as db:
-        seq, clock = vault._next(db)
-    vault.emit(
-        [{"op": "meta", "key": "schema", "base": None, "value": reg.ref}],
-        action="create",
-        seq=seq,
-        clock=clock,
-    )
+    vault, segments = _new_vault(workspace, given, actor)
+    with vault.lock, _repo_errors():
+        vault.repo.stage(repo_engine.SCHEMA_UNIT, reg.ref)
+        vault.repo.stage("meta:vault_segments", _segments_meta(segments))
+        coverage = given.get("coverage")
+        if coverage is not None:
+            if not isinstance(coverage, dict):
+                raise BiStoreError("coverage_invalid", "coverage 必須是 JSON 物件")
+            vault.repo.stage(
+                "meta:vault_coverage", json.dumps(coverage, ensure_ascii=False, sort_keys=True)
+            )
+        vault._stage_schema(reg.ref)
+        vault.repo.commit(f"建立知識庫，使用 schema {reg.ref}", kind="schema")
+        pushed = vault.repo.push()
     report = vault.sync()
-    return {"vault": vault.describe(), "sync": report}
+    return {"vault": vault.describe(), "push": pushed["status"], "sync": report}
 
 
 def join(workspace: Path, given: dict[str, Any], actor: str) -> dict[str, Any]:
@@ -1570,28 +968,33 @@ def join(workspace: Path, given: dict[str, Any], actor: str) -> dict[str, Any]:
     if known is not None and Path(str(known.get("path"))) != folder:
         # The same vault at a new place (the folder was moved or re-synced).
         _register(workspace, {**known, "path": str(folder)})
+        author = str(known.get("author") or author)
     elif known is None:
         _free_name(workspace, vault_id)
-        own = folder / CHANGES_DIR / author
+        own = folder / repo_engine.COMMITS_DIR / author
         if own.is_dir() and any(own.glob("*.json")) and not given.get("resume"):
             raise BiStoreError(
                 "author_taken",
-                f"知識庫裡已經有作者「{author}」的變更檔；若是你本人換電腦，請勾選「接續」"
+                f"知識庫裡已經有作者「{author}」的 commit；若是你本人換電腦，請勾選「接續」"
                 "（resume），否則請用別的作者名稱",
                 author=author,
             )
         _register(
             workspace, {"id": vault_id, "path": str(folder), "author": author, "joined": now()}
         )
+    else:
+        author = str(known.get("author") or author)
+    with _repo_errors():
+        repo_engine.join(workspace, folder, author=author)
     vault = Vault(workspace, vault_id)
     report = vault.sync()
     return {"vault": vault.describe(), "sync": report}
 
 
 def convert(workspace: Path, given: dict[str, Any], actor: str) -> dict[str, Any]:
-    """A new vault holding a local dataset: one initial change file with every
-    card, value, history row, proposal and piece of evidence. The dataset
-    itself is left as it was."""
+    """A new vault holding a local dataset as one `import` commit (every card,
+    value with its source and latest history, proposal and piece of
+    evidence). The dataset itself is left as it was."""
     name = str(given.get("dataset") or "").strip()
     if not DATASET_RE.match(name) or is_subscribed(name) or name == SUBSCRIBED_DIR:
         raise BiStoreError("dataset_invalid", "只能轉換這台電腦自己的資料集")
@@ -1600,127 +1003,31 @@ def convert(workspace: Path, given: dict[str, Any], actor: str) -> dict[str, Any
         raise BiStoreError("dataset_invalid", "這個資料集已經是知識庫")
     if not source.exists:
         raise BiStoreError("dataset_unknown", f"沒有這個資料集「{name}」")
-    snapshot = _snapshot(source)
-    vault, _ = _new_vault(workspace, {"title": name, **given}, actor, source.schema_ref())
-    with vault.lock, closing(vault._connect()) as db:
-        seq, clock = vault._next(db)
-    vault.emit([snapshot], action="convert", seq=seq, clock=clock)
+    with closing(sqlite3.connect(f"file:{source.path}?mode=ro", uri=True)) as db:
+        units = units_from_db(db)
+    units.setdefault(repo_engine.SCHEMA_UNIT, source.schema_ref())
+    vault, segments = _new_vault(workspace, {"title": name, **given}, actor)
+    with vault.lock, _repo_errors():
+        units["meta:vault_segments"] = _segments_meta(segments)
+        vault.repo.stage_many(dict(sorted(units.items())))
+        vault._stage_schema(str(units[repo_engine.SCHEMA_UNIT]))
+        vault.repo.commit(f"把資料集「{name}」轉成知識庫", kind="import")
+        pushed = vault.repo.push()
     report = vault.sync()
-    return {"vault": vault.describe(), "sync": report, "dataset": name}
-
-
-def _snapshot(store: BiStore) -> dict[str, Any]:
-    with closing(sqlite3.connect(f"file:{store.path}?mode=ro", uri=True)) as db:
-        db.row_factory = sqlite3.Row
-        cards = list(db.execute("SELECT * FROM cards ORDER BY entity_type, canonical_key"))
-        fields: dict[str, dict[str, Any]] = {}
-        for r in db.execute("SELECT * FROM fields ORDER BY card_id, field"):
-            fields.setdefault(r["card_id"], {})[r["field"]] = {
-                "value": _load(r["value"]),
-                **_source(r),
-            }
-        history = [
-            {
-                "card": r["card_id"],
-                "field": r["field"],
-                "old": _load(r["old"]),
-                "new": _load(r["new"]),
-                "kind": r["kind"],
-                "ref": r["ref"],
-                "by": r["by"],
-                "at": r["at"],
-                "import_id": r["import_id"],
-                "reason": r["reason"],
-                "old_source": _load(r["old_source"]),
-            }
-            for r in db.execute("SELECT * FROM history ORDER BY seq")
-        ]
-        proposals = [
-            {
-                "pkey": f"convert:{store.dataset}#p{r['id']}",
-                "card": r["card_id"],
-                "field": r["field"],
-                "value": _load(r["value"]),
-                "kind": r["kind"],
-                "ref": r["ref"],
-                "at": r["at"],
-                "import_id": r["import_id"],
-                "status": r["status"],
-            }
-            for r in db.execute("SELECT * FROM proposals ORDER BY id")
-        ]
-        tables = {r[0] for r in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-        evidence = (
-            [
-                {
-                    "card": r["card_id"],
-                    "field": r["field"],
-                    "run_id": r["run_id"],
-                    "source_id": r["source_id"],
-                    "source_name": r["source_name"],
-                    "locator": _load(r["locator"]),
-                    "excerpt": r["excerpt"],
-                    "basis": r["basis"],
-                    "at": r["at"],
-                }
-                for r in db.execute("SELECT * FROM evidence ORDER BY seq")
-            ]
-            if "evidence" in tables
-            else []
-        )
-        columns = {r[1] for r in db.execute("PRAGMA table_info(imports)")}
-        imports = [
-            {
-                "id": r["id"],
-                "filename": r["filename"],
-                "entity_type": r["entity_type"],
-                "at": r["at"],
-                "by": r["by"],
-                "undone": bool(r["undone"]),
-                "run_id": r["run_id"] if "run_id" in columns else None,
-            }
-            for r in db.execute("SELECT * FROM imports ORDER BY at, id")
-        ]
-        meta = (
-            {r["key"]: r["value"] for r in db.execute("SELECT * FROM meta")}
-            if "meta" in tables
-            else {}
-        )
-    meta.setdefault("schema", store.schema_ref())
-    return {
-        "op": "snapshot",
-        "dataset": store.dataset,
-        "meta": meta,
-        "imports": imports,
-        "cards": [
-            {
-                "id": c["id"],
-                "type": c["entity_type"],
-                "key": c["canonical_key"],
-                "name": c["name"],
-                "version": int(c["version"]),
-                "synthetic": bool(c["synthetic"]),
-                "created": c["created"],
-                "updated": c["updated"],
-                "created_by_import": c["created_by_import"],
-                "fields": fields.get(c["id"], {}),
-            }
-            for c in cards
-        ],
-        "history": history,
-        "proposals": proposals,
-        "evidence": evidence,
-    }
+    return {"vault": vault.describe(), "push": pushed["status"], "sync": report, "dataset": name}
 
 
 def listing(workspace: Path) -> list[dict[str, Any]]:
     """The vaults this PC uses, with their purpose and card count."""
     found = []
     for item in vault_registry(workspace):
-        vault = Vault(workspace, str(item["id"]))
+        try:
+            vault = Vault(workspace, str(item["id"]))
+        except BiStoreError:
+            continue
         described = vault.describe()
         store = BiStore(workspace, vault.dataset)
-        described["cards"] = len(store.card_rows())
+        described["cards"] = len(store.card_rows()) if store.exists else 0
         found.append(described)
     return found
 
@@ -1731,3 +1038,107 @@ def sync(workspace: Path, vault_id: str) -> dict[str, Any]:
 
 def status(workspace: Path, vault_id: str) -> dict[str, Any]:
     return Vault(workspace, vault_id).status()
+
+
+# -- version operations (design §5–§7) --------------------------------------------------------
+
+
+def _vault(workspace: Path, vault_id: str) -> Vault:
+    vault = Vault(workspace, vault_id)
+    vault._require_folder()
+    return vault
+
+
+def pending(workspace: Path, vault_id: str) -> dict[str, Any]:
+    """What this PC has not pushed: uncommitted changes and local commits."""
+    vault = _vault(workspace, vault_id)
+    with vault.lock:
+        head = vault.repo.units()
+        work = vault.repo._pending()
+        changes = [
+            {"unit": k, "before": head.get(k), "after": v} for k, v in sorted(work["sets"].items())
+        ]
+        return {
+            "uncommitted": changes,
+            "files": sorted(work["files"]),
+            "commits": vault.repo.local_commits(),
+        }
+
+
+def commit(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
+    vault = _vault(workspace, vault_id)
+    with vault.lock, _repo_errors():
+        record = vault.repo.commit(str(given.get("purpose") or ""))
+    vault.rebuild()
+    return {"commit": record}
+
+
+def discard(workspace: Path, vault_id: str) -> dict[str, Any]:
+    vault = _vault(workspace, vault_id)
+    with vault.lock, _repo_errors():
+        vault.repo.discard()
+    vault.rebuild()
+    return {"discarded": True}
+
+
+def push(workspace: Path, vault_id: str) -> dict[str, Any]:
+    vault = _vault(workspace, vault_id)
+    with vault.lock:
+        vault._install_schemas()
+        with _repo_errors():
+            result = vault.repo.push()
+        vault.rebuild()
+        return result
+
+
+def resolve(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
+    vault = _vault(workspace, vault_id)
+    with _repo_errors():
+        vault.repo.resolve(
+            str(given.get("unit") or ""), str(given.get("choice") or ""), given.get("value")
+        )
+    return {"resolved": True}
+
+
+def history(workspace: Path, vault_id: str, limit: int = 50) -> dict[str, Any]:
+    vault = _vault(workspace, vault_id)
+    with _repo_errors():
+        return {
+            "commits": vault.repo.history(limit),
+            "tags": vault.repo.tags(),
+            "published": vault.repo.published(),
+        }
+
+
+def diff(workspace: Path, vault_id: str, commit_id: str) -> dict[str, Any]:
+    vault = _vault(workspace, vault_id)
+    with _repo_errors():
+        return {"changes": vault.repo.diff(vault.repo.resolve_version(commit_id))}
+
+
+def revert(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
+    vault = _vault(workspace, vault_id)
+    with vault.lock, _repo_errors():
+        record = vault.repo.revert(str(given.get("version") or ""), str(given.get("purpose") or ""))
+    vault.rebuild()
+    return {"commit": record}
+
+
+def tag(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
+    vault = _vault(workspace, vault_id)
+    with _repo_errors():
+        version = str(given.get("version") or "") or None
+        return {
+            "tag": vault.repo.tag(
+                str(given.get("name") or ""), str(given.get("purpose") or ""), version=version
+            )
+        }
+
+
+def publish(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
+    """Publish a tag. Only a person's confirm click calls this (design §7)."""
+    if given.get("confirm") is not True:
+        raise BiStoreError("confirm_required", "發佈要由人按確認")
+    vault = _vault(workspace, vault_id)
+    with _repo_errors():
+        return {"published": vault.repo.publish(str(given.get("tag") or ""))}

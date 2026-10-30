@@ -3831,3 +3831,19 @@ s-k-20261011T102952` (not published).
     status, history, diff). Contract "Knowledge repositories: folder, commits, push, revert, tags".
     Tests `tests/test_knowledge_repo.py` (19, two PCs sharing one folder). Not used by BI or wiki yet
     (R2, R4); no route or page yet (R5).
+  - [x] 2026-10-30, Claude Code (subagents, merged): R3 common skills (`knowledge.repo.skills`), `REPO.md`
+    generator (`knowledge.repo.readme`), BI schema document (`bi_cards/schema_doc.py`), R4 core wiki type
+    (`knowledge.repo.wiki`: page/front units, deletion guard, benchmark hook, `import_vault`,
+    `materialize`). Library only. Contract "Knowledge repositories: skills, REPO.md, the wiki type, the
+    BI schema document". Tests: skills 13, readme 4, schema doc 3, wiki 14.
+  - [x] 2026-10-30, Claude Code: R2 BI type. `bi_cards/vault.py` rewritten on R1 (units `schema`,
+    `meta:`, `card:`, `field:`, `evidence:`, `proposal:`, `import:`, `decision:`; deterministic card ids;
+    `bi.sqlite` rebuilt from the units; history from the commit log; a new import commits with a drafted
+    purpose; replay conflicts as `conflict` proposals); routes for pending, commit, push, resolve,
+    discard, history, diff, revert, tag, publish (confirm). `stage_many` (a demo conversion went from
+    ~60 s to under 1 s), Windows replace retry in the engine, a built-in schema file in a vault counts
+    as installed. Contract "Knowledge repositories: the BI type (R2)"; V4 contract marked superseded.
+    Tests `tests/test_bi_vault.py` (13); `test_bi_domains`, `test_bi_schema_v2`, `test_bi_vault_ui`
+    moved to commit + push. The V4 `market-bi` folder is not read and not written (checked); R6
+    rebuilds it with the owner present. Not done: page panel for the version operations (R5), REPO.md
+    and the schema `.md` written on push, BI skills (R3 BI part).

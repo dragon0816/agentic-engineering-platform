@@ -150,8 +150,9 @@ def test_vault_panel_and_coverage_in_a_browser(served: Any, tmp_path: Path) -> N
         assert run("document.getElementById('bi-b-v-convert').hidden")
         assert hashlib.sha256(demo_db.read_bytes()).hexdigest() == before
         (folder,) = [p for p in shared.iterdir() if p.is_dir()]
-        assert (folder / "vault.json").is_file()
-        assert len(list((folder / "changes").rglob("*.json"))) == 1
+        assert (folder / "repo.json").is_file()
+        # The whole dataset travels as one import commit.
+        assert len(list((folder / "commits").rglob("*.json"))) == 1
         assert not list(folder.rglob("*.sqlite"))  # no database in the shared folder
         assert "共用：" in str(
             run("document.getElementById('bi-dataset').selectedOptions[0].textContent")
@@ -182,7 +183,7 @@ def test_vault_panel_and_coverage_in_a_browser(served: Any, tmp_path: Path) -> N
         click("#bi-b-v-join")
         set_value("bi-b-v-path", str(tmp_path))
         click("#bi-b-v-go")
-        wait("document.getElementById('bi-b-v-err').textContent.includes('vault.json')")
+        wait("document.getElementById('bi-b-v-err').textContent.includes('repo.json')")
         size(390, 844, True)
         assert not run(
             "document.documentElement.scrollWidth > document.documentElement.clientWidth"
