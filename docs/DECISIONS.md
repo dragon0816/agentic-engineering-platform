@@ -5578,7 +5578,8 @@ Plan `docs/phases/KNOWLEDGE_REPO.md` (design, for owner review; nothing implemen
 
 - HTTP 409 from `getUpdates` (another program polls the same bot) is retryable: the resident loop keeps
   polling with the doubling delay and reports `telegram.problem = "telegram_conflict"` in the settings,
-  which the page explains. Found live: Hermes' gateway started on the same bot, AEP's loop stopped for
-  good and the bot looked dead with nothing on screen. Rejected: keep stopping (silent until a person
+  which the page explains. Found live: a second poller held the bot for a while (no webhook; not
+  identified, and not Hermes, which uses another bot), AEP's loop stopped for good on the first 409
+  and the bot looked dead with nothing on screen, though the conflict had already ended. Rejected: keep stopping (silent until a person
   reads the code) and stopping the other program (it is the owner's).
 - This supersedes the Phase 7 adaptation note "HTTP 409 is `telegram_conflict` and stops the loop".

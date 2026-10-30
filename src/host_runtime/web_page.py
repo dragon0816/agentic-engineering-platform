@@ -6224,8 +6224,9 @@ function showTelegram(telegram) {
 // same bot made AEP silently stop answering).
 const TELEGRAM_WAITING = {
   telegram_conflict: "Not answering: another program is receiving this bot's messages "
-    + "(Telegram allows only one, for example Hermes on the same bot). Stop it or give it "
-    + "another bot; AEP keeps trying and takes over as soon as it stops.",
+    + "(Telegram allows only one; for example another AEP or bot program using the same "
+    + "token). Stop it or give it another bot; AEP keeps trying and takes over as soon as "
+    + "it stops.",
 };
 
 el("telegram-check").addEventListener("click", async () => {

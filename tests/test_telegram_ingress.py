@@ -419,7 +419,7 @@ def test_the_loop_stops_on_what_will_not_fix_itself_and_backs_off_otherwise(
     tmp_path: Path,
 ) -> None:
     # Another program polling the same bot is waited out, not the end (owner
-    # 2026-10-30: Hermes on the same bot made AEP stop answering for good).
+    # 2026-10-30: a brief second poller made AEP stop answering for good).
     transport = FakeTransport(status=409)
     item, _, _ = ingress(tmp_path, transport)
     result = poll(item)

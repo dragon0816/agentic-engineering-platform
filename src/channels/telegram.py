@@ -1061,9 +1061,9 @@ class TelegramIngress:
         except Exception as error:  # noqa: BLE001 - every transport fault is a typed answer
             return TelegramPollResult(failure=transport_failure(error, prefix="telegram"))
         if status == 409:
-            # Another program polls this bot (owner 2026-10-30: Hermes took it
-            # and AEP stopped for good). Waited out, so AEP takes over as soon
-            # as the other one stops; `problem` says so meanwhile.
+            # Another program polls this bot (owner 2026-10-30: a brief second
+            # poller stopped AEP for good). Waited out, so AEP takes over as
+            # soon as the other one stops; `problem` says so meanwhile.
             return TelegramPollResult(
                 failure=Failure(
                     code="telegram_conflict",
