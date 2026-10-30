@@ -18,6 +18,7 @@ from knowledge.repo.repository import (
     registered,
 )
 from knowledge.repo.skills import Skill, parse_skill, render_skill
+from knowledge.repo.wiki import WIKI, set_benchmark  # registers the `wiki` type
 
 __all__ = [
     "REPO_FILE",
@@ -34,5 +35,7 @@ __all__ = [
     "register_type",
     "registered",
     "render_skill",
+    "set_benchmark",
+    "WIKI",
     "write_readme",
 ]
