@@ -5546,3 +5546,30 @@ comparison is in `docs/phases/BI_VAULT.md` §12.
   aerospace's five, with the labels as aliases, so AIDC and the other domains place cards in the coverage
   matrix without a schema upgrade. 2.0.0 was changed in place rather than shipping 2.1.0: it was published
   the same day and no vault used it yet. Rejected: a per-domain segment field.
+
+## 2026-10-30: One version mechanism for every knowledge base (owner)
+
+Plan `docs/phases/KNOWLEDGE_REPO.md` (design, for owner review; nothing implemented yet).
+
+- **Wiki and BI knowledge bases are updated the same way: commit, push, revert, tag/publish**, by one person
+  or several. They differ only in how a knowledge base is built: its schema and its skills, which both live
+  inside the repository. The common engine merges *units* defined by the type (a card field for BI, a page
+  section for wiki), so one engine serves both. Rejected: git inside the shared folder (OneDrive corrupts
+  `.git`, sources are binary, maintainers are not git users); keeping two mechanisms (two sets of operations
+  to learn and code to keep).
+- **commit** is local and states its purpose (required); **push** merges own commits into the maintenance
+  repository, a unit changed differently on both sides being a conflict a person decides; **revert** restores
+  any commit or tag as a new commit, never deleting history; **tag** names a commit and never moves;
+  **publish** makes a tag the version the Agent reads, one person's confirm click, never the model.
+- **The repository's schema file is authoritative**; a PC whose built-in copy of that version differs
+  refuses to open it. Rejected: built-in schemas taking precedence (the folder would not say how its data is
+  classified).
+- **Skills name their schema version and are not run against another version.** Written classification
+  rules (BI domain `notes`) move into skills; structure (segments, chains, aliases) stays configuration.
+- **The Agent reads the published version only**; a repository never published is read at its head.
+- **Every change goes into a working copy first; any maintainer may revert, tag and publish** (no permission
+  control, as for BI vaults 2026-10-29).
+- **Both types move now, without compatibility** (no existing users): BI `changes/` and the wiki sandbox,
+  in-place push with `.ingest-backup/`, `pushes/` and candidate versions are replaced. Wiki pages are read
+  from a rebuilt read-only folder Obsidian can open; editing happens in the working copy. Rejected: keeping
+  in-place editing in Obsidian (concurrent edits overwrite each other and bypass commit purposes).

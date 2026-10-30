@@ -36,6 +36,10 @@ original file ──convert──▶ Markdown ──schema + extraction Skill─
 
 ## 3. Collaboration: change files in a shared folder (owner's choice, option 1)
 
+> **Being replaced (owner, 2026-10-30):** change files and the folder layout of §3–§4 give way to the common
+> version mechanism of `docs/phases/KNOWLEDGE_REPO.md` (commit, push, revert, tag/publish; schema and skills
+> inside the repository). The ordering and conflict rules below carry over into it.
+
 **Constraint.** No VM can be had. The shared PC 172.25.228.141 is reachable only on the office LAN (its
 Wi-Fi reaches the internet, but company VPN users cannot reach it), so it cannot be the server everyone
 writes to. A SQLite file synced by OneDrive breaks when two machines write it.

@@ -2,7 +2,21 @@
 
 Updated: 2026-10-29 (Asia/Taipei), by Claude Code (BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## BI vaults V9–V13 (2026-10-29, Claude Code) — latest
+## Knowledge repositories design (2026-10-30, Claude Code) — latest
+
+**Goal.** The owner wants every knowledge base, wiki and BI, single or multi-maintainer, updated by one
+mechanism: commit (purpose required), push, revert, tag/publish; schema and skills inside the repository so a
+maintainer sees how the data is classified. Owner decisions 1–11 are in `docs/phases/KNOWLEDGE_REPO.md` §1
+and `docs/DECISIONS.md` 2026-10-30.
+
+**Done.** Design only: `docs/phases/KNOWLEDGE_REPO.md`; pointers in `BI_VAULT.md` §3 and
+`KNOWLEDGE_COLLAB.md` §6; a row in `docs/TASKS.md`. No code changed, so no verification run.
+
+**Next actions.** (1) Owner reviews the design. (2) Then slice R1 (common version layer, type-agnostic,
+tested with a minimal test type), R2 … R6 in order (§12). R6 writes the OneDrive `BI_Knowledge` folder and
+needs the owner present.
+
+## BI vaults V9–V13 (2026-10-29, Claude Code)
 
 **Goal.** The owner's manager built five BI knowledge bases by hand (Obsidian + Dataview), each needing Claude
 Code to change the schema, ingest, seed and dashboard tools again. The owner chose one market BI vault for every

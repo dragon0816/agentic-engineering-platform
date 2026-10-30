@@ -167,6 +167,10 @@ supersedes the "one or more folders" pull of section 3 for new sandboxes.
 
 ## 6. Push: merge into the project vault and record it
 
+> **Being replaced (owner, 2026-10-30):** sandboxes, the in-place push with backups and push records give
+> way to the common version mechanism of `docs/phases/KNOWLEDGE_REPO.md`. The section merge, the deletion
+> guard and the benchmark gate carry over as the wiki type's merge unit and push checks.
+
 - **Who.** Any maintainer listed for the project may push; no second approval is needed
   (owner, 2026-10-11).
 - **No lock: first push wins (owner, 2026-10-11).** Like git, nobody holds files while

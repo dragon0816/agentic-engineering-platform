@@ -3820,3 +3820,8 @@ s-k-20261011T102952` (not published).
     `tests/test_bi_search_index.py` (7); `tests/test_bi_ingest_runs.py` and `tests/test_bi_build_ui.py` expect
     the new commit message. Not done: the page (index state in the result step and vault header, search UI),
     `bi__query` using the index (§6.1; V6 with vaults).
+- [ ] Knowledge repositories: one version mechanism (commit, push, revert, tag/publish) for wiki and BI
+  knowledge, schema and skills inside the repository. Plan `docs/phases/KNOWLEDGE_REPO.md`, decision
+  `docs/DECISIONS.md` 2026-10-30. Slices R1 common version layer → R2 BI type → R3 skills → R4 wiki type →
+  R5 Agent reads published, `REPO.md`, 「版本」 area → R6 rebuild `market-bi`, import an `rs-k` copy.
+  - [x] 2026-10-30, Claude Code: design written for owner review (owner decisions 1–11 in §1). No code.
