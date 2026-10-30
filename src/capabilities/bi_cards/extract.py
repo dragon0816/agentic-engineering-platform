@@ -262,7 +262,8 @@ def messages(
     )
     evidence = EVIDENCE_RULES + ("\n" + GRADE_RULES if graded else "")
     notes = (
-        f"\n\nDomain notes (the knowledge base's own classification rules):\n{domain_notes.strip()}"
+        "\n\nThe knowledge base's own rules (its domain notes, or in a vault its skills):\n"
+        + domain_notes.strip()
         if domain_notes.strip()
         else ""
     )

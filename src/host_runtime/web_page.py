@@ -2535,6 +2535,37 @@ tr:last-child td { border-bottom: none; }
               <div id="bi-b-ver-conflicts" role="alert"></div>
               <h5>歷史與發佈</h5>
               <div id="bi-b-ver-history"></div>
+              <h5>判讀規則（skills）</h5>
+              <p class="bi-meta">放在知識庫裡、跟著 commit 給大家的判讀規則：「分類」說明
+                有哪些卡片類型與資料夾，「擷取」是某些資料夾的來源要怎麼讀（領域設定的 notes
+                會搬到這裡）。AI 判讀時依來源所在的資料夾選用；固定的證據規則一律先套用，
+                不能被改掉。</p>
+              <div id="bi-b-sk-list"></div>
+              <div class="bi-actions">
+                <button class="bi-btn" id="bi-b-sk-new" type="button">新增擷取規則</button></div>
+              <form id="bi-b-sk-form" class="bi-step" hidden>
+                <div class="bi-step-grid">
+                  <div><label class="bi-label" for="bi-b-sk-name">名稱（小寫英數字與 -）</label>
+                    <input id="bi-b-sk-name" class="bi-input" maxlength="60" spellcheck="false"
+                      placeholder="例如：aidc-extract"></div>
+                  <div><label class="bi-label" for="bi-b-sk-role">種類</label>
+                    <select id="bi-b-sk-role"><option value="extract">擷取</option>
+                      <option value="classify">分類</option></select></div>
+                  <div><label class="bi-label" for="bi-b-sk-applies">
+                    套用到的資料夾（逗號分隔；留空＝所有來源）</label>
+                    <input id="bi-b-sk-applies" class="bi-input" spellcheck="false"
+                      placeholder="sources/applications/aidc-power"></div>
+                  <div><label class="bi-label" for="bi-b-sk-types">
+                    只產生這些卡片類型（逗號分隔；留空＝不限）</label>
+                    <input id="bi-b-sk-types" class="bi-input" spellcheck="false"></div>
+                </div>
+                <p class="bi-meta" id="bi-b-sk-folders"></p>
+                <label class="bi-label" for="bi-b-sk-body">規則內容</label>
+                <textarea id="bi-b-sk-body" class="bi-input" rows="6"></textarea>
+                <div class="bi-actions">
+                  <button class="go" type="submit">存成新版本</button>
+                  <button class="bi-btn" id="bi-b-sk-cancel" type="button">取消</button></div>
+              </form>
             </div>
           </div>
           <div class="bi-step-grid">
@@ -2644,6 +2675,9 @@ tr:last-child td { border-bottom: none; }
                 <option value="builtin:llm">AI 擷取（內建）</option>
                 <option value="builtin:rules">表格規則（內建，不用模型）</option>
               </select></div>
+            <div id="bi-b-folder-box" hidden><label class="bi-label" for="bi-b-folder">
+              來源在知識庫的哪個資料夾（決定 AI 用哪條擷取規則）</label>
+              <select id="bi-b-folder"></select></div>
             <div><label class="bi-label" for="bi-b-m-name">另存為新的 Skill（名稱）</label>
               <input id="bi-b-m-name" class="bi-input" maxlength="80"
                 placeholder="例如：會議紀錄擷取"></div>
@@ -11303,7 +11337,9 @@ async function biSaveDomains() {
   catch (failure) { biNotice(false, "設定不是有效的 JSON：" + failure.message); return; }
   const reply = await biCall("/api/bi/domains", {dataset: biDataset(), config,
     base_revision: (bi.domains && bi.domains.revision) || 0});
-  biNotice(true, "領域設定已儲存（第 " + reply.revision + " 版）。");
+  biNotice(true, "領域設定已儲存（第 " + reply.revision + " 版）。" + (bi.verVault
+    && biDataset() === "vault-" + bi.verVault ? "notes 已搬到「判讀規則（skills）」；"
+    + "記得 commit。" : ""));
   bi.domains = reply; biDomainWarnings(reply.warnings || []);
   el("bi-dom-text").value = JSON.stringify(reply.config, null, 1);
   biLoadCoverage(bi.dashSeq);
@@ -12199,6 +12235,7 @@ async function biVersions(vaultId) {
   el("bi-b-ver-discard").disabled = !changes.length;
   el("bi-b-ver-push").disabled = !commits.length;
   biVerHistory(vaultId, history);
+  biSkills(vaultId).catch((failure) => biNotice(false, "讀不到判讀規則：" + failure.message));
 }
 
 function biVerHistory(vaultId, history) {
@@ -12287,6 +12324,71 @@ function biVerConflicts(vaultId, conflicts) {
   }
   box.append(list);
 }
+
+// -- skills in the vault (knowledge repositories R3, KNOWLEDGE_REPO.md §8) -------
+async function biSkills(vaultId) {
+  const reply = await call("/api/bi/vaults/" + vaultId + "/skills");
+  bi.skills = reply;
+  const box = el("bi-b-sk-list"); box.replaceChildren();
+  const list = bh("ul", "bi-log");
+  for (const item of reply.skills || []) {
+    const where = (item.applies_to || []).length ? item.applies_to.join("、") : "所有來源";
+    const badges = [biBadge(item.role === "classify" ? "分類" : "擷取", "dim"),
+      biBadge("第 " + item.revision + " 版", "dim")];
+    if (item.generated) badges.push(biBadge("依 schema 產生", "dim"));
+    if (item.needs_update) badges.push(biBadge("需要更新", "warn"));
+    const edit = bh("button", "bi-btn", "修改");
+    edit.type = "button";
+    edit.addEventListener("click", () => biSkillForm(item));
+    const row = bh("li", "", bh("strong", "", item.name), " ", ...badges,
+      bh("p", "bi-meta", "套用到：" + where + "・schema " + (item.schema || "")
+        + (item.needs_update
+          ? "（知識庫現在用 " + reply.schema + "；修改並儲存後才會再使用）" : "")),
+      edit);
+    if (item.problem) row.append(bh("p", "bi-warn", item.problem));
+    list.append(row);
+  }
+  if (!(reply.skills || []).length) box.append(bh("p", "bi-meta", "還沒有判讀規則。"));
+  else box.append(list);
+  const pick = el("bi-b-folder"), kept = pick.value;
+  pick.replaceChildren(...(reply.folders || ["sources"]).map((f) => {
+    const option = bh("option", "", f === "sources" ? "（不指定資料夾）" : f);
+    option.value = f; return option;
+  }));
+  if ((reply.folders || []).includes(kept)) pick.value = kept;
+  el("bi-b-folder-box").hidden = false;
+}
+
+function biSkillForm(item) {
+  const form = el("bi-b-sk-form");
+  form.hidden = false;
+  el("bi-b-sk-name").value = item ? item.name : "";
+  el("bi-b-sk-name").readOnly = Boolean(item);
+  el("bi-b-sk-role").value = item ? item.role : "extract";
+  el("bi-b-sk-applies").value = item ? (item.applies_to || []).join(", ") : "";
+  el("bi-b-sk-types").value = item ? (item.card_types || []).join(", ") : "";
+  el("bi-b-sk-body").value = item ? item.body || "" : "";
+  el("bi-b-sk-folders").textContent = "可用的資料夾：" + ((bi.skills && bi.skills.folders) || [])
+    .filter((f) => f !== "sources").join("、");
+  el("bi-b-sk-body").focus();
+}
+
+const biList = (text) => text.split(/[,，、\n]/).map((s) => s.trim()).filter(Boolean);
+
+el("bi-b-sk-new").addEventListener("click", () => biSkillForm(null));
+el("bi-b-sk-cancel").addEventListener("click", () => { el("bi-b-sk-form").hidden = true; });
+el("bi-b-sk-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const body = {name: el("bi-b-sk-name").value.trim(), role: el("bi-b-sk-role").value,
+    applies_to: biList(el("bi-b-sk-applies").value), card_types: biList(el("bi-b-sk-types").value),
+    body: el("bi-b-sk-body").value};
+  try {
+    const reply = await biVerRun(bi.verVault, "skills", body);
+    el("bi-b-sk-form").hidden = true;
+    biNotice(true, "判讀規則「" + body.name + "」存成第 " + reply.skill.revision
+      + " 版；commit 並 push 後大家才會用到。");
+  } catch (failure) { biNotice(false, "沒有儲存：" + failure.message); }
+});
 
 el("bi-b-ver-commit").addEventListener("click", async () => {
   const input = el("bi-b-ver-purpose"), purpose = input.value.trim();
@@ -12804,6 +12906,9 @@ function biRunBody(kind) {
   const source = bi.build.sources.find((s) => s.id === bi.build.sourceId);
   if (methodId === "builtin:llm" && source && source.format === "table") body.path = "ai";
   if (methodId === "builtin:rules") body.path = "rules";
+  if (biDataset().startsWith("vault-") && el("bi-b-folder").value) {
+    body.folder = el("bi-b-folder").value;
+  }
   const instructions = el("bi-b-instr").value.trim();
   if (instructions) body.instructions = instructions;
   const recipe = el("bi-b-recipe").value.trim();

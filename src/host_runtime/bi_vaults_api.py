@@ -4,9 +4,9 @@ Contracts: `docs/CONTRACTS.md` "Knowledge repositories: the BI type (R2)". A
 vault is used through every other `/api/bi/*` route as the dataset
 `vault-<id>`; these routes list, create, join, convert and sync vaults and run
 the version operations: commit, push, resolve, discard, history, diff, revert,
-tag and publish. Publish needs `confirm: true` and is an Agent Web action,
-never a capability the model can call. Errors are raised as `BiStoreError`
-and answered by `bi_cards_api.route`.
+tag and publish; and list or save a skill revision (R3). Publish needs
+`confirm: true` and is an Agent Web action, never a capability the model can
+call. Errors are raised as `BiStoreError` and answered by `bi_cards_api.route`.
 """
 
 from __future__ import annotations
@@ -48,6 +48,8 @@ def route(
                 int(query.get("limit") or 50) if str(query.get("limit") or "50").isdigit() else 50
             )
             return 200, vault.history(workspace, parts[0], limit)
+        if len(parts) == 2 and parts[1] == "skills":
+            return 200, vault.skills(workspace, parts[0])
         if len(parts) == 2 and parts[1] == "diff":
             return 200, vault.diff(workspace, parts[0], str(query.get("commit") or ""))
         return _error(404, "route_unknown", "沒有這個 BI 路徑")
@@ -76,6 +78,8 @@ def route(
         return 200, {"ok": True, **vault.revert(workspace, vault_id, given)}
     if action == "tag":
         return 200, {"ok": True, **vault.tag(workspace, vault_id, given)}
+    if action == "skills":
+        return 200, {"ok": True, **vault.save_skill(workspace, vault_id, given)}
     if action == "publish":
         return 200, {"ok": True, **vault.publish(workspace, vault_id, given)}
     return _error(404, "route_unknown", "沒有這個 BI 路徑")

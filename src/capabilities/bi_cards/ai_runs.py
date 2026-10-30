@@ -89,11 +89,14 @@ def start(
     method_ref: str | None = None,
     schema: tuple[Registry, str] | None = None,
     checks: list[dict[str, Any]] | None = None,
+    folder: Any = None,
 ) -> dict[str, Any]:
     """Start the AI path on a text source; the run is `extracting` until the
     background job ends. A method run (phase 5) gives its `method_ref` and
     `checks`; a draft trial (phase 6) gives `schema` = (the draft's registry,
-    its `draft:` ref)."""
+    its `draft:` ref). In a vault the source's `folder` picks the extract
+    skill (knowledge repositories R3); the run keeps the skills' text, so a
+    retry reads the same rules."""
     staging = Staging(workspace, dataset)
     staging.store.refuse_write()
     source = staging.source(source_id)
@@ -107,6 +110,9 @@ def start(
         reg = catalog.for_store(staging.store)
         schema = (reg, reg.ref)
     reg = schema[0]
+    rules = _vault_rules(staging, folder)
+    if rules is not None and types in (None, []) and rules["card_types"]:
+        types = [t for t in rules["card_types"] if t in reg.types] or None
     scope = _types(reg, types)
     edited = isinstance(instructions, str) and instructions.strip()
     text = str(instructions).strip() if edited else extract.DEFAULT_INSTRUCTIONS
@@ -141,6 +147,7 @@ def start(
             "done": 0,
             "failures": [],
             "warnings": [],
+            **({"skills": rules} if rules is not None else {}),
         },
     )
     staging.set_status(run_id, "extracting")
@@ -150,6 +157,19 @@ def start(
         lambda: _work(workspace, dataset, run_id, model, alias, only=None),
     )
     return runs.run_view(staging, run_id)
+
+
+def _vault_rules(staging: Staging, folder: Any) -> dict[str, Any] | None:
+    """A vault's skills for a source in `folder`; None for a plain dataset,
+    which keeps its domain notes (BI vault V11)."""
+    vault_id = staging.store.vault_id
+    if vault_id is None:
+        return None
+    from capabilities.bi_cards import vault, vault_skills
+
+    return vault_skills.run_rules(
+        vault.Vault(staging.store.workspace, vault_id).repo, vault_skills.checked_folder(folder)
+    )
 
 
 def retry(workspace: Path, dataset: str, ai: AiRuntime | None, run_id: str) -> dict[str, Any]:
@@ -221,6 +241,10 @@ def _extract(
         staging.put_layout(run_id, layout)
 
     configured = domains.read(staging.store)
+    if isinstance(layout.get("skills"), dict):
+        notes = str(layout["skills"].get("text") or "")
+    else:
+        notes = configured.extraction_notes() if configured is not None else ""
     result = extract.extract(
         model,
         alias,
@@ -233,7 +257,7 @@ def _extract(
         known=extract.known_names(staging.store.card_rows()),
         only=only,
         on_chunk=progress,
-        domain_notes=configured.extraction_notes() if configured is not None else "",
+        domain_notes=notes,
     )
     found = staging.candidates(run_id) if only else []
     by_key = {_key(reg, c): c for c in found}

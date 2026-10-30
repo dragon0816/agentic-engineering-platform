@@ -45,7 +45,8 @@ from contextlib import closing, contextmanager
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import catalog, schema_doc
+from capabilities.bi_cards import catalog, schema_doc, vault_skills
+from capabilities.bi_cards.schema import Registry
 from capabilities.bi_cards.store import (
     DATASET_RE,
     DB_FILE,
@@ -63,6 +64,7 @@ from capabilities.bi_cards.store import (
 )
 from knowledge.repo import readme
 from knowledge.repo import repository as repo_engine
+from knowledge.repo import skills as repo_skills
 from knowledge.repo.repository import CheckReport, RepoError, Repository
 
 REPO_TYPE = "bi"
@@ -807,6 +809,14 @@ class Vault:
                 self.repo.stage_many(dict(sorted(changed.items())))
                 if changed.get(repo_engine.SCHEMA_UNIT):
                     self._stage_schema(str(changed[repo_engine.SCHEMA_UNIT]))
+                    old = before.get(repo_engine.SCHEMA_UNIT)
+                    if old:
+                        vault_skills.regenerate_classify(
+                            self.repo, self._registry(str(old)), self._registry()
+                        )
+                if vault_skills.DOMAINS_UNIT in changed:
+                    # A domain's notes live in its extract skill (design §8, decision 2).
+                    vault_skills.move_notes(self.repo, self._registry())
                 imports = [
                     v
                     for k, v in changed.items()
@@ -815,6 +825,12 @@ class Vault:
                 if imports:
                     self.repo.commit(_PURPOSE.get() or _draft(imports, changed))
             self.rebuild()
+
+    def _registry(self, ref: str | None = None) -> Registry:
+        """The schema `ref`, by default the working copy's."""
+        if ref is None:
+            ref = str(self.repo.working_units().get(repo_engine.SCHEMA_UNIT) or "")
+        return catalog.resolve(self.workspace, ref)
 
     def _stage_schema(self, ref: str) -> None:
         """Put the schema file into the working copy (decision 1: every
@@ -1003,6 +1019,7 @@ def create(workspace: Path, given: dict[str, Any], actor: str) -> dict[str, Any]
                 "meta:vault_coverage", json.dumps(coverage, ensure_ascii=False, sort_keys=True)
             )
         vault._stage_schema(reg.ref)
+        vault_skills.stage_classify(vault.repo, reg)
         vault.repo.commit(f"建立知識庫，使用 schema {reg.ref}", kind="schema")
         pushed = vault.repo.push()
         readme.write_readme(vault.repo)
@@ -1063,6 +1080,9 @@ def convert(workspace: Path, given: dict[str, Any], actor: str) -> dict[str, Any
         units["meta:vault_segments"] = _segments_meta(segments)
         vault.repo.stage_many(dict(sorted(units.items())))
         vault._stage_schema(str(units[repo_engine.SCHEMA_UNIT]))
+        reg = catalog.resolve(workspace, str(units[repo_engine.SCHEMA_UNIT]))
+        vault_skills.stage_classify(vault.repo, reg)
+        vault_skills.move_notes(vault.repo, reg)
         vault.repo.commit(f"把資料集「{name}」轉成知識庫", kind="import")
         pushed = vault.repo.push()
         readme.write_readme(vault.repo)
@@ -1123,6 +1143,8 @@ def unit_label(units: Mapping[str, Any], key: str) -> str:
         return {"domains": "領域設定"}.get(rest, f"設定 {rest}")
     if key == repo_engine.SCHEMA_UNIT:
         return "schema 版本"
+    if kind == "skill":
+        return f"skill「{rest}」"
     return {"proposal": "待審提議", "import": "匯入紀錄", "decision": "衝突決定"}.get(kind, key)
 
 
@@ -1233,6 +1255,86 @@ def publish(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[st
         readme.write_readme(vault.repo)
     vault.refresh_published()
     return {"published": record}
+
+
+def skills(workspace: Path, vault_id: str) -> dict[str, Any]:
+    """The vault's current skills (working copy) with their text, and the
+    source folders a skill may apply to (design §8)."""
+    vault = _vault(workspace, vault_id)
+    units = vault.repo.working_units()
+    found = []
+    with _repo_errors():
+        for item in repo_skills.current_skills(vault.repo, units):
+            try:
+                skill = repo_skills.read_skill(vault.repo, item["name"], units)
+            except RepoError as failure:
+                found.append({**item, "problem": failure.message})
+                continue
+            found.append(
+                {
+                    **item,
+                    "card_types": list(skill.card_types),
+                    "body": skill.body,
+                    "generated": skill.extra.get("generated") == "true",
+                }
+            )
+    folders = sorted(
+        p.relative_to(vault.folder).as_posix()
+        for p in (vault.folder / "sources").rglob("*")
+        if p.is_dir()
+    )
+    return {
+        "skills": found,
+        "schema": str(units.get(repo_engine.SCHEMA_UNIT) or ""),
+        "folders": ["sources", *folders],
+        "roles": ["classify", "extract"],
+    }
+
+
+def save_skill(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
+    """Stage a new revision of a skill, bound to the vault's current schema
+    (that is how a skill 「需要更新」 is updated); the person commits it."""
+    vault = _vault(workspace, vault_id)
+    with vault.lock, _repo_errors():
+        units = vault.repo.working_units()
+        name = str(given.get("name") or "").strip()
+        role = str(given.get("role") or "extract")
+        if role not in ("classify", "extract"):
+            raise BiStoreError("skill_invalid", "BI 的 skill 只有 classify 與 extract 兩種")
+        body = str(given.get("body") or "")
+        applies_to = given.get("applies_to") or []
+        card_types = given.get("card_types") or []
+        for value, key in ((applies_to, "applies_to"), (card_types, "card_types")):
+            if not isinstance(value, list) or not all(isinstance(v, str) for v in value):
+                raise BiStoreError("skill_invalid", f"{key} 必須是文字清單")
+        reg = vault._registry()
+        unknown = [t for t in card_types if t not in reg.types]
+        if unknown:
+            raise BiStoreError("skill_invalid", f"schema 沒有這些類型：{'、'.join(unknown)}")
+        extra: dict[str, str] = {}
+        if repo_skills.skill_unit(name) in units:
+            extra = {
+                k: v
+                for k, v in repo_skills.read_skill(vault.repo, name, units).extra.items()
+                if k != "generated"
+            }
+        # Parsing the rendered file checks name, role, folders and text.
+        skill = repo_skills.parse_skill(
+            repo_skills.render_skill(
+                repo_skills.Skill(
+                    name=name,
+                    revision=1,
+                    schema=reg.ref,
+                    role=role,
+                    applies_to=tuple(str(a).strip().rstrip("/") for a in applies_to),
+                    body=body,
+                    card_types=tuple(card_types),
+                    extra=extra,
+                )
+            )
+        )
+        value = repo_skills.stage_skill(vault.repo, skill)
+    return {"skill": {"name": name, **value}, "status": vault.status()}
 
 
 def reading_store(workspace: Path, dataset: str) -> BiStore:

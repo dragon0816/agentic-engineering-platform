@@ -5597,3 +5597,19 @@ Plan `docs/phases/KNOWLEDGE_REPO.md` (design, for owner review; nothing implemen
   see the effect of 「發佈」 until someone restarts Agent Web).
 - When the shared folder is unreachable the Agent answers from the last copy this PC built; a vault never
   built here is refused (`vault_unreachable`).
+
+## 2026-10-30: Skills of a BI vault: which source folder, and what an AI run reads (R3, Claude Code)
+
+- Sources of a BI vault stay in this PC's staging store (R2), so they have no repository path for
+  `applies_to` to match. The **person chooses the folder** when starting an AI run (a list of the vault's
+  `sources/` folders, `sources` when not chosen). Rejected for now: a model call that classifies the source
+  into a folder before extraction (one more model call per source and a guess the person must check anyway)
+  and copying sources into the shared folder (a size and confidentiality decision for the owner, R6).
+- The **classify skill is not a separate model step**: its text (types and folders) goes into the
+  extraction prompt beside the extract skill, after the fixed evidence rules. One call per chunk as before.
+- The generated classify skill follows a schema change by itself only while nobody edited it (its text
+  equals the generated one); an edited one shows 「需要更新」 (decision 3) instead of being overwritten.
+- Domain **notes move on every domain save** in a vault (not only once at conversion), so the domain
+  editor, which still has a `notes` key, cannot bring notes back into the configuration; the notes become a
+  new skill revision, reviewed and committed like any change. Local ingest methods (Session B, BI ingest
+  phase 5) keep working on top of the skills: a method's instructions come before the skills.

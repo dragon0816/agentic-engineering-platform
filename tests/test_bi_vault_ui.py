@@ -215,6 +215,25 @@ def test_vault_panel_and_coverage_in_a_browser(served: Any, tmp_path: Path) -> N
         shoot("vault-versions-phone")
         size(1366, 1000, False)
 
+        # -- skills in the vault (knowledge repositories R3) ------------------------------
+        wait("document.getElementById('bi-b-sk-list').textContent.includes('依 schema 產生')")
+        assert "classify" in text_of("bi-b-sk-list")
+        assert not run("document.getElementById('bi-b-folder-box').hidden")
+        assert run(
+            "[...document.getElementById('bi-b-folder').options]"
+            ".some((o) => o.value === 'sources/applications/aidc-power')"
+        )
+        click("#bi-b-sk-new")
+        set_value("bi-b-sk-name", "power-extract")
+        set_value("bi-b-sk-applies", "sources/applications/aidc-power")
+        set_value("bi-b-sk-body", "虛構電源廠是 Account。")
+        click("#bi-b-sk-form button.go")
+        wait("document.getElementById('bi-notice').textContent.includes('存成第 1 版')")
+        wait("document.getElementById('bi-b-ver-pending').textContent.includes('power-extract')")
+        wait("document.getElementById('bi-b-sk-list').textContent.includes('power-extract')")
+        assert run("document.getElementById('bi-b-sk-form').hidden")
+        shoot("vault-skills")
+
         # -- a new, empty vault ---------------------------------------------------------------
         click("#bi-b-v-new")
         assert not run("document.getElementById('bi-b-v-title').parentElement.hidden")

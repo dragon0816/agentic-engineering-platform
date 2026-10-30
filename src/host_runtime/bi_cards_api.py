@@ -452,6 +452,7 @@ def _start_run(
             types=given.get("types"),
             actor=who,
             schema=schema,
+            folder=given.get("folder"),
         )
         return 200, {"ok": True, "run": run}
     mapping = given.get("mapping")
@@ -661,6 +662,7 @@ CONFLICTS = {
     "schema_upgrade_breaking",
     "schema_version_not_newer",
     "schema_changed",
+    "skill_needs_update",
     "suggestion_applied",
     "suggestion_invalid",
     "vault_exists",

@@ -5744,3 +5744,45 @@ the page in `src/host_runtime/web_page.py`. Tests: `tests/test_bi_vault_publishe
   tag」 (name asked inline, the commit's purpose as the tag's) and 「發佈 <tag>」 (a `confirm()` click
   sends `confirm: true`); the published tag is marked 「發佈中」.
 
+
+## Knowledge repositories: skills of a BI vault (R3, BI part, 2026-10-30)
+
+Design `docs/phases/KNOWLEDGE_REPO.md` §8; owner decisions 2 and 3; decision "Skills of a BI vault: which
+source folder, and what an AI run reads (R3, Claude Code)". Code: `src/capabilities/bi_cards/vault_skills.py`,
+`vault.py` (`skills`, `save_skill`, the capture hook), `ai_runs.py` (`start(..., folder=)`), routes in
+`src/host_runtime/bi_vaults_api.py`, the page in `web_page.py`. Tests: `tests/test_bi_vault_skills.py`,
+`tests/test_bi_vault_ui.py`. Format, binding and 「需要更新」 are the shared skills contract above.
+
+- **Classify skill.** Creating or converting a vault stages `skills/classify/rev-1-<author>.md` (role
+  `classify`, no `applies_to`, frontmatter `generated: "true"`): the schema's card types with labels, the
+  vault's segment folders under `sources/applications/`, and `sources/library/`. After a schema change
+  staged on the vault, a classify skill whose text is still the one generated for the old schema gets a new
+  generated revision for the new one; an edited one is kept and is 「需要更新」.
+- **Domain notes become extract skills.** Whenever `meta:domains` changes in a vault (domain save, convert),
+  each domain's non-empty `notes` is staged as skill `<domain id slug>-extract` (role `extract`, `domain`
+  in the frontmatter, `applies_to` the vault folders matching the domain's segment ids or labels, else
+  `sources/applications/<domain id slug>`; an existing skill keeps its folders and card types), and the
+  configuration is staged with every `notes` empty. A plain dataset keeps its notes (V11 unchanged).
+- **AI run in a vault.** `POST /api/bi/runs` takes `folder` (`sources` by default; anything not under
+  `sources/` is `folder_invalid`, 400). The run uses the classify skill and the extract skill of that folder
+  (`skill_for`, longest `applies_to` prefix); either one written for another schema version refuses the
+  run with `skill_needs_update` (409, `skill`, `skill_schema`, `schema`). Their text follows the fixed
+  evidence rules in the system prompt under "The knowledge base's own rules (its domain notes, or in a vault
+  its skills)", each headed `Classification|Extraction (skill <name>, revision <n>):`. With no `types`
+  given, the extract skill's `card_types` (those in the schema) choose them. The run layout keeps
+  `skills: {"folder", "text", "skills": [{"name", "revision", "role"}], "card_types", "schema"}`; a retry
+  reads the same text.
+- **Routes.** `GET /api/bi/vaults/<id>/skills` → `{"skills": [{name, revision, path, schema, role,
+  applies_to, needs_update, card_types, body, generated} | {..., "problem"}], "schema", "folders" (every
+  folder under `sources/`, with `sources`), "roles": ["classify", "extract"]}`. `POST
+  /api/bi/vaults/<id>/skills` `{name, role (classify|extract), applies_to?, card_types?, body}` stages the
+  next revision bound to the vault's current schema (`skill_invalid` 400 for another role, a type the schema
+  lacks, a folder outside `sources/`, an empty body or a bad name) → `{"ok", "skill": {name, path, revision,
+  schema, role, applies_to}, "status"}`. The person commits and pushes it like any change. The unit's label
+  is `skill「<name>」`.
+- **Page.** 「版本」 lists the skills (分類／擷取, revision, 「依 schema 產生」, 「需要更新」 with the vault's
+  schema), 「修改」 and 「新增擷取規則」 open one form (name, kind, folders, card types, text) saved as a new
+  revision; step 3 shows 「來源在知識庫的哪個資料夾」 for a vault and sends it as `folder`. Saving domain
+  settings on a vault says the notes moved to the skills.
+- **Not done.** Session B editing a skill revision with the model (the person edits the text by hand), the
+  model choosing a folder (the person chooses), and sources stored in the repository folder.

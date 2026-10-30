@@ -1,8 +1,8 @@
 # Handoff
 
-Updated: 2026-10-30 (Asia/Taipei), by Claude Code (knowledge repositories R1, R2, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-30 (Asia/Taipei), by Claude Code (knowledge repositories R1, R2, R3 BI part, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## Knowledge repositories R1, R2 and R5 (BI side) (2026-10-30, Claude Code) — latest
+## Knowledge repositories R1, R2, R3 (BI part) and R5 (BI side) (2026-10-30, Claude Code) — latest
 
 **Goal.** Every knowledge base, wiki and BI, single or multi-maintainer, updated by one mechanism: commit
 (purpose required), push, revert, tag/publish; schema and skills inside the repository. Owner decisions 1–11:
@@ -16,19 +16,24 @@ Updated: 2026-10-30 (Asia/Taipei), by Claude Code (knowledge repositories R1, R2
   from `published/bi.sqlite`; `REPO.md` and the schema `.md` written on push/tag/publish; the 「版本」 area
   in 「建立與匯入」 step 1 (commit, push, conflicts, history, diff, revert, tag, publish confirm).
   Decision "How the Agent picks up a newly published BI version": live, at the next question.
+- R3 BI part: `src/capabilities/bi_cards/vault_skills.py`. Generated classify skill; domain notes moved
+  into `<domain>-extract` skills; an AI run in a vault takes `folder` and reads the classify skill and that
+  folder's extract skill (refused with `skill_needs_update` when a skill is for another schema); routes
+  `GET/POST /api/bi/vaults/<id>/skills`; skills list and editor in 「版本」, folder picker in step 3.
+  Decision "Skills of a BI vault: which source folder, and what an AI run reads".
 - Telegram: a 409 conflict is retried instead of stopping the loop (`ded9bfc0`, `ff4164fe`).
 
-**Verification.** ruff format/check and mypy clean (846 files). BI + knowledge test files after the R5
-changes: see the commit message. The browser test `test_bi_vault_ui` drives the 「版本」 area (screenshots
-`.scratch/bi-vault/vault-versions*.png`). The full suite was not run (it slows the owner's Agent Web; run it
+**Verification.** ruff format/check and mypy clean (848 files). BI + knowledge test files after the R3
+BI part: see the commit message. The browser test `test_bi_vault_ui` drives the 「版本」 area and the skills
+block (screenshots `.scratch/bi-vault/vault-versions*.png`, `vault-skills.png`). The full suite was not run (it slows the owner's Agent Web; run it
 when the PC is free). Local commits are not pushed yet.
 
 **Important.** The OneDrive `market-bi` vault is V4 format. The R2 code neither reads nor writes it. Once
 Agent Web restarts on this code, `market-bi` is read-only until R6 rebuilds it (owner present).
 
-**Next actions.** (1) Run the full suite when the PC is free, then push the local commits. (2) R3 BI part:
-classify skill, domain notes into extract skills. (3) R4 rest: wire the wiki type into the Knowledge page
-(replace sandbox/push/publish paths), then R5 wiki side (the same 「版本」 area, the Agent reading the wiki's
+**Next actions.** (1) Run the full suite when the PC is free, then push the local commits. (2) R3 BI
+follow-ups if the owner wants them: Session B on a skill, sources inside the repository folder. (3) R4
+rest: wire the wiki type into the Knowledge page (replace sandbox/push/publish paths), then R5 wiki side (the same 「版本」 area, the Agent reading the wiki's
 published folder). (4) R6 with the owner present: rebuild `market-bi` from raw data, import an `rs-k` copy.
 
 ## BI vaults V9–V13 (2026-10-29, Claude Code)

@@ -48,7 +48,7 @@ def test_the_evidence_rules_are_always_in_the_system_prompt() -> None:
     assert "never today's date" in system and "no SAMPLE- names" in system
     assert "方法自己的規則：只讀營收。" in system  # the method's rules follow, unchanged
     assert "evidence_grade: A =" not in system  # no type here grades evidence
-    assert "Domain notes" not in system
+    assert "The knowledge base's own rules" not in system
     _run(model, ("SupplyLink",), notes="- AIDC：ODM 是 Account，晶片廠是 Ecosystem。")
     graded = model.requests[1].messages[0].text
     assert "evidence_grade: A =" in graded and "Only A and B" in graded

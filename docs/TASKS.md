@@ -3858,3 +3858,13 @@ s-k-20261011T102952` (not published).
     "Knowledge repositories: the Agent reads the published version, the 「版本」 area (R5, BI)". Tests
     `tests/test_bi_vault_published.py` (4), `test_bi_vault_ui` drives the panel. Not done: the wiki side
     of R5 (needs R4 wired), R3 BI part, R6.
+  - [x] 2026-10-30, Claude Code: R3, BI part. `bi_cards/vault_skills.py`: a generated classify skill
+    (schema types and the vault's folders) staged on create and convert, regenerated on a schema change
+    while unedited; a domain's `notes` moved into the skill `<domain>-extract` for its folders on every
+    domain save and on convert; an AI run in a vault takes `folder` and reads the classify skill and that
+    folder's extract skill after the fixed evidence rules (a skill for another schema version refuses the
+    run, `skill_needs_update`); routes `GET/POST /api/bi/vaults/<id>/skills`; the page lists and edits
+    skills in 「版本」 and picks the folder in step 3. Contract "Knowledge repositories: skills of a BI
+    vault (R3, BI part)", decision of the same day. Tests `tests/test_bi_vault_skills.py` (7),
+    `test_bi_vault_ui` drives the skills block. Not done: Session B on a skill, the model choosing the
+    folder, sources inside the repository folder.
