@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import hashlib
 import shutil
+import threading
+from collections.abc import Callable
 from pathlib import Path
 from typing import Annotated, Any, Literal, Self
 
@@ -586,11 +588,32 @@ def publish_candidate(
     return candidate.manifest.model_copy(update={"metadata": metadata})
 
 
+#: A live entry's source: the folder to read now and a key naming the version
+#: built there (the same key means the same content).
+LiveSource = Callable[[], tuple[Path, str]]
+
+
+class _Live:
+    def __init__(self, template: KnowledgeManifest, source: LiveSource) -> None:
+        self.template = template
+        self.source = source
+        self.built: str | None = None
+        self.entry: tuple[KnowledgeManifest, Vault] | None = None
+        self.lock = threading.Lock()
+
+
 class KnowledgeCatalog:
-    """Exact published versions and local vaults; no production Registry/database."""
+    """Exact published versions and local vaults; no production Registry/database.
+
+    A live entry (knowledge repositories R4a) keeps one identity while its
+    content follows the repository's published version: `get` asks its source
+    for the folder to read and, when the version changed, checks the folder
+    and recomputes the manifest's digests from it; the rest of the manifest
+    (approval, purpose, evaluation set) is the registered template's."""
 
     def __init__(self) -> None:
         self._versions: dict[tuple[str, str, str], tuple[KnowledgeManifest, Vault]] = {}
+        self._live: dict[tuple[str, str, str], _Live] = {}
 
     def register(self, manifest: KnowledgeManifest, vault: Vault) -> None:
         checked = KnowledgeManifest.model_validate(manifest)
@@ -604,18 +627,62 @@ class KnowledgeCatalog:
             raise ValueError("Knowledge manifest does not match its content")
         if Path(checked.vault_ref).resolve() != vault.root.resolve():
             raise ValueError("Knowledge manifest must name the registered vault")
-        if checked.metadata.identity.key in self._versions:
+        key = checked.metadata.identity.key
+        if key in self._versions or key in self._live:
             raise ValueError("Knowledge version already registered")
-        self._versions[checked.metadata.identity.key] = (checked, vault)
+        self._versions[key] = (checked, vault)
+
+    def register_live(self, manifest: KnowledgeManifest, source: LiveSource) -> None:
+        """Serve `manifest`'s identity from the folder `source` names, rebuilt
+        by its owner; nothing is read until the first `get`."""
+        checked = KnowledgeManifest.model_validate(manifest)
+        if checked.metadata.lifecycle != "published":
+            raise ValueError("only published Knowledge enters the query catalog")
+        key = checked.metadata.identity.key
+        if key in self._versions or key in self._live:
+            raise ValueError("Knowledge version already registered")
+        self._live[key] = _Live(checked, source)
+
+    def _current(self, live: _Live) -> tuple[KnowledgeManifest, Vault] | None:
+        with live.lock:
+            try:
+                folder, built = live.source()
+                if built != live.built or live.entry is None:
+                    vault = Vault(folder)
+                    manifest = live.template.model_copy(
+                        update={
+                            "vault_ref": str(folder),
+                            "raw_sha256": raw_digest(vault),
+                            "decisions_sha256": decision_digest(vault),
+                            "content_sha256": knowledge_digest(vault),
+                        }
+                    )
+                    live.entry, live.built = (manifest, vault), built
+            except Exception:  # noqa: BLE001 - an unreachable source keeps the last version
+                pass
+            return live.entry
 
     def get(self, identity: AssetIdentity) -> tuple[KnowledgeManifest, Vault] | None:
-        return self._versions.get(identity.key)
+        found = self._versions.get(identity.key)
+        if found is not None:
+            return found
+        live = self._live.get(identity.key)
+        return self._current(live) if live is not None else None
 
     def manifests(self) -> tuple[KnowledgeManifest, ...]:
-        """Every registered version, in a stable order."""
-        return tuple(item[0] for _, item in sorted(self._versions.items()))
+        """Every registered version, in a stable order (a live entry by its
+        last built manifest, or its template before the first `get`)."""
+        return tuple(manifest for _, manifest in sorted(self._all().items()))
+
+    def _all(self) -> dict[tuple[str, str, str], KnowledgeManifest]:
+        found = {key: item[0] for key, item in self._versions.items()}
+        for key, live in self._live.items():
+            found[key] = live.entry[0] if live.entry is not None else live.template
+        return found
 
     def versions(self, namespace: str, name: str) -> tuple[KnowledgeManifest, ...]:
         return tuple(
-            item[0] for key, item in sorted(self._versions.items()) if key[:2] == (namespace, name)
+            manifest
+            for key, manifest in sorted(self._all().items())
+            if key[:2] == (namespace, name)
         )

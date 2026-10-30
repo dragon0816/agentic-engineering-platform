@@ -508,16 +508,29 @@ class KnowledgeHostBinding(Contract):
     """
 
     asset: AssetIdentity
-    vault_root: Text
+    vault_root: Text | None = None
+    # A wiki knowledge repository registered in the workspace (knowledge
+    # repositories R4a, owner 2026-10-30): the Agent reads its published
+    # version, rebuilt live; publishing never edits this binding. Exactly one
+    # of `vault_root` and `repo` is set.
+    repo: Symbol | None = None
     # The owner sets this for each Vault. Existing bindings remain private.
     privacy: Literal["private", "public"] = "private"
 
     @field_validator("vault_root")
     @classmethod
-    def absolute_vault_root(cls, value: str) -> str:
-        if not (PureWindowsPath(value).is_absolute() or Path(value).is_absolute()):
+    def absolute_vault_root(cls, value: str | None) -> str | None:
+        if value is not None and not (
+            PureWindowsPath(value).is_absolute() or Path(value).is_absolute()
+        ):
             raise ValueError("vault_root must be an absolute path")
         return value
+
+    @model_validator(mode="after")
+    def one_source(self) -> Self:
+        if (self.vault_root is None) == (self.repo is None):
+            raise ValueError("a Knowledge binding names exactly one of vault_root and repo")
+        return self
 
 
 class MultiAgentSettings(Contract):

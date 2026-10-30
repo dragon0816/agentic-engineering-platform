@@ -14,6 +14,7 @@ the engine decides every workflow, and the Agent decides who may ask.
 
 import os
 from collections.abc import Callable, Mapping
+from functools import partial
 from pathlib import Path
 from types import TracebackType
 from typing import Any, Literal, Self, TypeVar
@@ -352,6 +353,7 @@ from integrations.jira import JiraClient
 from integrations.outlook_draft import DraftError, DraftWriter, OutlookComDraft
 from integrations.outlook_draft import require_com as require_outlook
 from integrations.web_script import WebScript, WebScriptResult
+from knowledge import wiki_repos
 from knowledge.describe import ImageDescriber
 from knowledge.evolution import (
     KnowledgeAnswerRecord,
@@ -1575,7 +1577,9 @@ def build_knowledge_catalog(
             if manifest is None or Path(manifest.vault_ref).resolve() != expected:
                 raise HostError("knowledge_invalid", layout.knowledge)
             existing = bindings.get(selection.asset.key)
-            if existing is not None and Path(existing.vault_root).resolve() != expected:
+            if existing is not None and (
+                existing.vault_root is None or Path(existing.vault_root).resolve() != expected
+            ):
                 raise HostError("knowledge_invalid", layout.knowledge)
             bindings[selection.asset.key] = KnowledgeHostBinding(
                 asset=selection.asset, vault_root=str(expected)
@@ -1586,6 +1590,14 @@ def build_knowledge_catalog(
         manifest = available.get(binding.asset.key)
         if manifest is None:
             raise HostError("knowledge_invalid", layout.knowledge)
+        if binding.repo is not None:
+            # A wiki knowledge repository: its published version, rebuilt and
+            # picked up at the next question (knowledge repositories R4a).
+            catalog.register_live(
+                manifest, partial(wiki_repos.agent_source, layout.workspace_root, binding.repo)
+            )
+            continue
+        assert binding.vault_root is not None
         try:
             catalog.register(manifest, Vault(Path(binding.vault_root)))
         except (OSError, ValueError, VaultError):

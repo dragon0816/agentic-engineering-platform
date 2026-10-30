@@ -66,6 +66,7 @@ def test_publishing_a_candidate_switches_the_binding_and_keeps_the_old_version(
     assert not Path(candidate).exists() and _snapshot(base) == before
     updated = CompanyHostConfiguration.model_validate_json(path.read_text(encoding="utf-8"))
     assert updated.knowledge[0].asset.version == "1.1.0"
+    assert updated.knowledge[0].vault_root is not None
     assert Path(updated.knowledge[0].vault_root) == target
     assert updated.knowledge_pipeline is not None
     assert Path(updated.knowledge_pipeline.vaults[0].root) == target

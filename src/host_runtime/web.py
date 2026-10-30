@@ -3837,7 +3837,8 @@ class AgentWeb:
             for item in manifests(layout.workflows, WorkflowManifest)
         ]
         knowledge_locations = {
-            binding.asset.key: binding.vault_root for binding in self.runtime.config.knowledge
+            binding.asset.key: binding.vault_root or f"knowledge repository {binding.repo}"
+            for binding in self.runtime.config.knowledge
         }
         configured_knowledge = set(knowledge_locations)
         if authorization is not None:

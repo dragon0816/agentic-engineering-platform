@@ -5638,3 +5638,13 @@ Engineering choices (Claude Code), fixing the R4 core library before wiring it:
   role `ingest`); an imported `SKILL.md` becomes revision 1 with its text as the body.
 - Raw files are units `raw:<path under raw/>` → `{"file": "sources/…", "sha256"}`, so the published folder
   restores `raw/` under the names pages cite; originals from `drop/` stay files under `sources/` only.
+- **How a wiki repository becomes an Agent tool (owner, later the same day).** A `host.json` Knowledge
+  binding names it once, `{"asset": "<namespace>/<name>@<version>", "repo": "<repository id>"}`; the
+  identity, its governed manifest (approval, purpose, boundaries, evaluation set) and Agent-profile grants
+  stay as they are, and publishing changes only the content behind it, never `host.json`. Rejected:
+  offering every registered wiki repository automatically as `knowledge-repo/<id>@1.0.0` (test
+  repositories would reach the Agent and existing profile grants would need new names). The catalog keeps
+  such a binding as a live entry: its digests are recomputed from the published folder when the version
+  changes; an unreachable folder keeps the last version built (the Agent never answers from nothing when
+  OneDrive is offline). The legacy candidate publish and refresh refuse a repository binding
+  (`knowledge_is_repository`).

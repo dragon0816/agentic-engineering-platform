@@ -5828,3 +5828,13 @@ Owner decisions "Wiring the wiki type (R4)" (`docs/DECISIONS.md` 2026-10-30). Co
   differs from `published/version.json` (`{"tag", "commit"}`). The folder is a valid `knowledge.vault.Vault`
   (pages, `raw/`, `CLAUDE.md`, `skills/`, `README-AEP.md`). Unreachable shared folder: the last copy built
   here, else `repo_unreachable`.
+- **The Agent's binding** (`KnowledgeHostBinding`): exactly one of `vault_root` (as before) and `repo` (a
+  wiki repository id in this workspace's registry). `build_knowledge_catalog` registers a `repo` binding
+  with `KnowledgeCatalog.register_live(manifest, source)`, the manifest being the asset's governed one
+  from `assets/knowledge`; `source` is `wiki_repos.agent_source(workspace, repo)` → (the reading folder,
+  its `version.json` text). `get` rebuilds when that text changes and returns the manifest with
+  `vault_ref` and the three digests of the folder; on any failure it keeps the last entry (None before
+  the first success: `knowledge_version_not_found`). `manifests()` lists a live entry by its last built
+  manifest, or the template before the first `get`, without reading the folder. Agent Web shows the
+  location as `knowledge repository <id>`. `knowledge_publish` refuses a `repo` binding
+  (`knowledge_is_repository`).

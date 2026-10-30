@@ -79,7 +79,12 @@ def publish_candidate(
     old_root = Path(vault_entry.root).resolve()
     data = json.loads(config.model_dump_json())
     binding = next(
-        (item for item in data["knowledge"] if Path(item["vault_root"]).resolve() == old_root), None
+        (
+            item
+            for item in data["knowledge"]
+            if item.get("vault_root") and Path(item["vault_root"]).resolve() == old_root
+        ),
+        None,
     )
     version = _next_version(binding["asset"]["version"]) if binding else None
     stem = re.sub(r"-v\d[\w.-]*$", "", old_root.name)  # rs-k-v1.1.0 -> rs-k
@@ -159,6 +164,9 @@ def refresh_from_project(
     )
     if binding is None:
         raise PublishError("no_knowledge_binding")
+    if not binding.get("vault_root"):
+        # A binding to a knowledge repository follows its published version.
+        raise PublishError("knowledge_is_repository")
     asset = binding["asset"]
     version = _next_version(asset["version"])
     stamp = (now or datetime.now(UTC)).strftime("%Y%m%d-%H%M%S")
