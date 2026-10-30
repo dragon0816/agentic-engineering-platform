@@ -5613,3 +5613,28 @@ Plan `docs/phases/KNOWLEDGE_REPO.md` (design, for owner review; nothing implemen
   editor, which still has a `notes` key, cannot bring notes back into the configuration; the notes become a
   new skill revision, reviewed and committed like any change. Local ingest methods (Session B, BI ingest
   phase 5) keep working on top of the skills: a method's instructions come before the skills.
+
+## 2026-10-30: Wiring the wiki type (R4): registry, Agent reading, slices (owner)
+
+Owner answers before R4 wiring (`docs/phases/KNOWLEDGE_REPO.md` §10–§12):
+- **Registry in the workspace, as BI.** A wiki repository is created, joined or imported through AEP and
+  listed in the workspace's knowledge-repository registry; publishing no longer moves folders or rewrites
+  `host.json` (`knowledge_pipeline.vaults[].root`, `knowledge[].vault_root`). Maintainers and question
+  sets move with it. Rejected: keeping `host.json` as the registry (every publish would still edit it).
+- **The Agent reads the published version live**, as BI (decision of the same day for BI): a local
+  read-only folder rebuilt from the published commit (the pushed head when never published) with the
+  pages, `raw/` restored from `sources/` under its original paths (citations name `raw/...`), and a
+  manifest computed from it; picked up at the next question, no restart. Rejected: rebuild on publish and
+  switch at restart.
+- **Three slices**: R4a backend (registry, import of a copy, ingest and rules writing to the working copy,
+  benchmark as a push check, the Agent's read path); R4b page (repository chooser and the 「版本」 area
+  replace the sandbox chooser, push, refresh and candidate publish); R4c removal (sandboxes, candidates,
+  `knowledge_push`, `knowledge_publish`, their tests).
+
+Engineering choices (Claude Code), fixing the R4 core library before wiring it:
+- The wiki `schema` unit holds a reference `wiki.schema@<version>` (file `schemas/wiki.schema@<version>.md`)
+  instead of a file path, so the shared skill binding (「需要更新」) compares like with like.
+- Wiki skills use the shared skill format (`skills/<name>/rev-<n>-<author>.md`, unit value an object,
+  role `ingest`); an imported `SKILL.md` becomes revision 1 with its text as the body.
+- Raw files are units `raw:<path under raw/>` → `{"file": "sources/…", "sha256"}`, so the published folder
+  restores `raw/` under the names pages cite; originals from `drop/` stay files under `sources/` only.

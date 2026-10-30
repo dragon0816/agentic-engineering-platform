@@ -5706,7 +5706,12 @@ yet (R3 BI wiring, R4 rest, R5). Tests: `tests/test_knowledge_repo_skills.py`,
   `stage_page(repo, path, text | None)`, `import_vault(repo, folder)` (pages as units, `raw/` and
   `drop/` under `sources/`, `CLAUDE.md` as the first schema, `skills/*/SKILL.md` as first skill
   revisions; then `commit(purpose, kind="import")`), `materialize(units, target)` writes a state as a
-  read-only Obsidian-readable folder.
+  read-only Obsidian-readable folder. Since R4a (2026-10-30): `schema` = `wiki.schema@<version>`
+  (file `schemas/wiki.schema@<version>.md`, copied as `CLAUDE.md`); `skill:<name>` is the shared object
+  form (role `ingest`; an imported `SKILL.md`, frontmatter included, is revision 1's body and comes back
+  unchanged as `skills/<folder>/SKILL.md`); `raw:<path under raw/>` = `{"file": "sources/…",
+  "sha256"}` for each imported Raw file, restored by `materialize` as `raw/<path>` (`drop/` originals
+  stay in `sources/` only).
 - **BI schema document** (`capabilities.bi_cards.schema_doc.schema_markdown(reg)`): a schema as
   Markdown for people (each type, its fields with kind, label, allowed values, link target and
   required, and the links between types). Pure; meant to sit beside the JSON in `schemas/`.
@@ -5786,3 +5791,40 @@ source folder, and what an AI run reads (R3, Claude Code)". Code: `src/capabilit
   settings on a vault says the notes moved to the skills.
 - **Not done.** Session B editing a skill revision with the model (the person edits the text by hand), the
   model choosing a folder (the person chooses), and sources stored in the repository folder.
+
+## Knowledge repositories: wiki repositories on this PC (R4a, 2026-10-30)
+
+Owner decisions "Wiring the wiki type (R4)" (`docs/DECISIONS.md` 2026-10-30). Code:
+`src/knowledge/wiki_repos.py`, routes `src/host_runtime/knowledge_repos_api.py`. Tests
+`tests/test_knowledge_repos_api.py`. Not yet used by the Knowledge page (R4b) nor by the Agent's catalog
+(next R4a step); the sandbox, push and candidate publish paths are unchanged until R4c.
+
+- **Registry.** A wiki repository is registered in the workspace (`<workspace>/knowledge-repos/registry.json`,
+  type `wiki`), never in `host.json`.
+- **Routes** (token-checked; JSON; errors `{"ok": false, "code", "message", ...}`; `*_unknown` → 404 except
+  `commit_unknown`; `repo_exists`, `repo_registered`, `repo_unreachable`, `tag_exists`, `work_not_clean`,
+  `path_taken`, `record_exists`, `target_not_materialized` → 409; others 400):
+  - `GET /api/knowledge/repos` → `{"repos": [{id, path, author, title?, purpose?, reachable}]}`.
+  - `POST /api/knowledge/repos` `{path, title, purpose?, id?, author?}`: a new repository folder
+    `<path>/<id>` with the default schema `wiki.schema@1.0.0`, `index.md` (`# <title>`) and `log.md` in one
+    `schema` commit, pushed → `{"ok", "repo": {id, title, purpose, path, author}, "push"}`.
+  - `POST /api/knowledge/repos/import` `{source, path, title?, purpose?, id?, author?}`: a new repository
+    holding the wiki folder `source` as one `import` commit, pushed (`import_vault`; the default schema
+    when the folder has no `CLAUDE.md`) → adds `"imported": {pages, originals, raw, schema, skills,
+    skipped}`. `source` is only read (`source_not_wiki` without `index.md` or `wiki/`; `path_invalid` when
+    the new folder would be inside it).
+  - `POST /api/knowledge/repos/join` `{path, author?}` → `{"ok", "repo", "sync"}`.
+  - `GET …/<id>/status` → the engine status plus `repo`, `reachable: true`, `reads: {tag, commit}`; an
+    unreachable folder → `{"repo": {id, path}, "reachable": false}`. `GET …/<id>/pending`,
+    `…/<id>/history?limit=`, `…/<id>/diff?commit=` and `POST …/<id>/sync|commit|push|resolve|discard|
+    revert|tag|publish` have the bodies and answers of the BI vault routes (R2, R5), with `label` on
+    pending changes, push conflicts and diff changes: `<page> 的「<section>」`, `<page> 的開頭`, `<page> 的
+    frontmatter <field>`, `raw/<path>`, `skill「<name>」`, `schema 版本`. `publish` needs `confirm: true`
+    (`confirm_required`). `REPO.md` is rewritten after create, import, a push that wrote commits, tag and
+    publish.
+- **What the Agent reads** (`wiki_repos.reading_folder(workspace, id)`): syncs, then
+  `<workspace>/knowledge-repos/<id>/published/vault`, materialized from the published commit (the pushed
+  head when never published; never this PC's local commits or uncommitted changes) whenever that target
+  differs from `published/version.json` (`{"tag", "commit"}`). The folder is a valid `knowledge.vault.Vault`
+  (pages, `raw/`, `CLAUDE.md`, `skills/`, `README-AEP.md`). Unreachable shared folder: the last copy built
+  here, else `repo_unreachable`.

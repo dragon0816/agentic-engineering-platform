@@ -14,7 +14,7 @@ import pytest
 from knowledge.repo import CheckReport, RepoError, Repository, create, join
 from knowledge.repo.wiki import (
     READ_ONLY_NOTE,
-    SCHEMA_PATH,
+    SCHEMA_REF,
     WIKI,
     import_vault,
     materialize,
@@ -137,11 +137,18 @@ def test_import_and_materialize_round_trip(
             encoding="utf-8"
         )
     assert (view / "CLAUDE.md").read_text(encoding="utf-8") == "# Schema\n\nPages are entities.\n"
-    assert (view / "skills" / "ingest-market" / "SKILL.md").is_file()
+    # The skill comes back as the same SKILL.md; Raw under the name pages cite.
+    assert (view / "skills" / "ingest-market" / "SKILL.md").read_text(encoding="utf-8") == (
+        vault / "skills" / "ingest-market" / "SKILL.md"
+    ).read_text(encoding="utf-8")
+    assert (view / "raw" / "Market" / "report.pdf").read_bytes() == b"%PDF-1.4 report"
+    assert not (view / "raw" / "Productions").exists()  # drop/ originals stay in sources/
     assert (view / READ_ONLY_NOTE).is_file()
     units = b.units()
-    assert units["schema"] == SCHEMA_PATH
-    assert units["skill:ingest-market"] == "skills/ingest-market/rev-1-alice.md"
+    assert units["schema"] == SCHEMA_REF
+    assert units["skill:ingest-market"]["path"] == "skills/ingest-market/rev-1-alice.md"
+    assert units["skill:ingest-market"]["role"] == "ingest"
+    assert units["raw:Market/report.pdf"]["file"].startswith("sources/Market/")
     files = {
         p.relative_to(b.folder).as_posix() for p in (b.folder / "sources").rglob("*") if p.is_file()
     }
@@ -284,7 +291,11 @@ def test_unit_checks(pcs: tuple[Repository, Repository, Path]) -> None:
             stage_page(a, path, "# x\n")
         assert failure.value.code == "page_invalid"
     assert WIKI.unit_problem(f"page:{PAGE}#Overview", {"pos": 0, "heading": "Overview", "body": ""})
-    assert WIKI.unit_problem("schema", "wiki.md") == "value must be under schemas/"
+    assert WIKI.unit_problem("schema", "wiki.md") == "schema must be wiki.schema@<version>"
+    assert WIKI.unit_problem("schema", "wiki.schema@1.0.0") is None
+    assert WIKI.unit_problem("raw:../x.md", {"file": "sources/x", "sha256": "0"})
+    assert WIKI.unit_problem("raw:a/x.md", {"file": "raw/x", "sha256": "0"})
+    assert WIKI.unit_problem("skill:x", "skills/x/rev-1-a.md")  # the shared object form only
     assert WIKI.unit_problem("other", 1) == "unknown wiki unit"
     bad = {"pos": 0, "heading": "## X", "body": "", "correction": {"reason": "", "source": "s"}}
     assert WIKI.unit_problem(f"page:{PAGE}#X", bad) == "correction needs a reason and a source"

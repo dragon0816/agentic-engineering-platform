@@ -106,6 +106,7 @@ from host_runtime import (
     asset_shelf,
     bi_cards_api,
     gateway_link,
+    knowledge_repos_api,
     multi_agent_switch,
     telemetry_api,
 )
@@ -6162,6 +6163,8 @@ class _Handler(BaseHTTPRequestHandler):
             return
         if bi_cards_api.handle(self, "GET", parsed):  # BI cards (Case A)
             return
+        if knowledge_repos_api.handle(self, "GET", parsed):  # wiki repositories (R4a)
+            return
         web = self.server.web
         if parsed.path == "/api/about":
             self._json(200, web.about())
@@ -6311,6 +6314,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._schedule_route("POST", path, "")
             return
         if bi_cards_api.handle(self, "POST", urlparse(self.path)):  # BI cards (Case A)
+            return
+        if knowledge_repos_api.handle(self, "POST", urlparse(self.path)):  # R4a
             return
         if path not in (
             "/api/ask",

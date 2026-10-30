@@ -9,6 +9,10 @@ the common engine merges one by one:
     front:<path>:<field>          {"pos": n, "text": "field: …"}  one top-level frontmatter field,
                                                                   continuation lines included
     front:<path>:(other)          {"pos": -1, "text": …}          frontmatter lines before any field
+    raw:<path under raw/>         {"file": "sources/…", "sha256"} a Raw file pages cite, kept as an
+                                                                  original under `sources/`
+    schema                        `wiki.schema@<version>` (file `schemas/wiki.schema@<version>.md`)
+    skill:<name>                  the shared skill unit (`knowledge.repo.skills`), role `ingest`
 
 Section keys are K3.2's (heading text, duplicates numbered `Heading (2)`).
 `pos` orders a page's sections and fields; an edit keeps the positions of the
@@ -32,6 +36,7 @@ from collections.abc import Callable, Mapping
 from pathlib import Path, PurePosixPath
 from typing import Any
 
+from knowledge.repo import skills
 from knowledge.repo.repository import (
     SCHEMA_UNIT,
     SKILL_UNIT_PREFIX,
@@ -39,6 +44,7 @@ from knowledge.repo.repository import (
     RepoError,
     Repository,
     canonical,
+    path_problem,
     register_type,
 )
 from knowledge.sections import HUMAN_AREAS, correction_of, parse, sourced_lines
@@ -51,7 +57,10 @@ PREAMBLE = "(preamble)"
 OTHER = "(other)"
 SOURCES_AREA = "wiki/sources/"
 SCHEMA_FILE = "CLAUDE.md"
-SCHEMA_PATH = "schemas/wiki.schema@1.0.0.md"
+SCHEMA_REF = "wiki.schema@1.0.0"
+SCHEMA_PATH = f"schemas/{SCHEMA_REF}.md"
+SCHEMA_REF_RE = re.compile(r"^wiki\.schema@[0-9A-Za-z.+-]+$")
+RAW_PREFIX = "raw:"
 ORIGINAL_AREAS = ("raw", "drop")
 #: The marker a materialized folder carries; only such a folder is replaced.
 READ_ONLY_NOTE = "README-AEP.md"
@@ -117,6 +126,23 @@ def _value_problem(kind: str, name: str, value: Any) -> str | None:
         return "heading must be one `## ` line"
     if "correction" in value and correction_of(value) is None:
         return "correction needs a reason and a source"
+    return None
+
+
+def _raw_problem(path: str, value: Any) -> str | None:
+    parts = PurePosixPath(path).parts
+    if (
+        not path
+        or "\\" in path
+        or ":" in path
+        or any(p in ("", ".", "..") or p.startswith(".") for p in parts)
+    ):
+        return "raw path invalid"
+    if not isinstance(value, dict) or set(value) != {"file", "sha256"}:
+        return "raw value is {file, sha256}"
+    file = value["file"]
+    if not isinstance(file, str) or not file.startswith("sources/") or path_problem(file):
+        return "raw file must be under sources/"
     return None
 
 
@@ -302,15 +328,18 @@ class WikiType:
         self.benchmark: Benchmark | None = None
 
     def unit_problem(self, key: str, value: Any) -> str | None:
-        if key == SCHEMA_UNIT or key.startswith(SKILL_UNIT_PREFIX):
-            if not isinstance(value, str) or not value.strip():
-                return "value must be a repository file path"
-            if key.startswith(SKILL_UNIT_PREFIX) and not SKILL_NAME_RE.match(
-                key[len(SKILL_UNIT_PREFIX) :]
-            ):
+        if key == SCHEMA_UNIT:
+            ok = isinstance(value, str) and SCHEMA_REF_RE.match(value)
+            return None if ok else "schema must be wiki.schema@<version>"
+        if key.startswith(SKILL_UNIT_PREFIX):
+            if not skills.NAME_RE.match(key[len(SKILL_UNIT_PREFIX) :]):
                 return "skill name invalid"
-            area = "schemas/" if key == SCHEMA_UNIT else "skills/"
-            return None if value.startswith(area) else f"value must be under {area}"
+            path = value.get("path") if isinstance(value, dict) else None
+            if not isinstance(path, str) or not skills.REVISION_PATH_RE.match(path):
+                return "skill value names its revision file under skills/"
+            return None
+        if key.startswith(RAW_PREFIX):
+            return _raw_problem(key[len(RAW_PREFIX) :], value)
         parts = split_key(key)
         if parts is None:
             return "unknown wiki unit"
@@ -400,6 +429,7 @@ def import_vault(repo: Repository, folder: Path) -> dict[str, Any]:
     repo.stage_many(staged)
     originals = 0
     seen: set[str] = set()
+    raw_units: dict[str, Any] = {}
     for area in ORIGINAL_AREAS:
         root = folder / area
         if not root.is_dir():
@@ -408,35 +438,53 @@ def import_vault(repo: Repository, folder: Path) -> dict[str, Any]:
             rel = source.relative_to(root)
             if any(part.startswith(".") for part in rel.parts):
                 continue
-            sha8 = _sha(source)[:8]
+            digest = _sha(source)
             parent = rel.parent.as_posix()
             category = parent if parent != "." else "uncategorized"
-            target = f"sources/{category}/{sha8}-{rel.name}"
+            target = f"sources/{category}/{digest[:8]}-{rel.name}"
+            if area == "raw":
+                # Pages cite `raw/<path>`: the published folder restores that name.
+                raw_units[f"{RAW_PREFIX}{rel.as_posix()}"] = {"file": target, "sha256": digest}
             if target in seen:
                 continue
             seen.add(target)
             repo.stage_file(target, source)
             originals += 1
+    repo.stage_many(raw_units)
     schema = folder / SCHEMA_FILE
     if schema.is_file():
         repo.stage_file(SCHEMA_PATH, schema)
-        repo.stage(SCHEMA_UNIT, SCHEMA_PATH)
-    skills = []
+        repo.stage(SCHEMA_UNIT, SCHEMA_REF)
+    imported = []
     skills_root = folder / "skills"
     if skills_root.is_dir():
         for skill in sorted(p for p in skills_root.iterdir() if (p / "SKILL.md").is_file()):
-            if not SKILL_NAME_RE.match(skill.name):
+            name = skill.name.lower()
+            if not skills.NAME_RE.match(name) or len(name) > skills.MAX_NAME:
                 skipped.append(f"skills/{skill.name}")
                 continue
-            target = f"skills/{skill.name}/rev-1-{repo.author}.md"
-            repo.stage_file(target, skill / "SKILL.md")
-            repo.stage(f"{SKILL_UNIT_PREFIX}{skill.name}", target)
-            skills.append(skill.name)
+            # The original SKILL.md, frontmatter included, is the revision's body,
+            # so the published folder gives the ingest pipeline the same file.
+            text = (skill / "SKILL.md").read_text(encoding="utf-8").strip("\n")
+            skills.stage_skill(
+                repo,
+                skills.Skill(
+                    name=name,
+                    revision=1,
+                    schema=SCHEMA_REF,
+                    role="ingest",
+                    applies_to=(),
+                    body=text,
+                    extra={"folder": skill.name} if name != skill.name else {},
+                ),
+            )
+            imported.append(name)
     return {
         "pages": staged_pages,
         "originals": originals,
-        "schema": SCHEMA_PATH if schema.is_file() else None,
-        "skills": skills,
+        "raw": len(raw_units),
+        "schema": SCHEMA_REF if schema.is_file() else None,
+        "skills": imported,
         "skipped": skipped,
     }
 
@@ -494,13 +542,21 @@ def materialize(
             (building / name).mkdir(parents=True, exist_ok=True)
         if repo_folder is not None:
             schema = units.get(SCHEMA_UNIT)
-            if isinstance(schema, str) and (repo_folder / schema).is_file():
-                shutil.copyfile(repo_folder / schema, building / SCHEMA_FILE)
+            if isinstance(schema, str) and (repo_folder / f"schemas/{schema}.md").is_file():
+                shutil.copyfile(repo_folder / f"schemas/{schema}.md", building / SCHEMA_FILE)
             for key, value in units.items():
-                if key.startswith(SKILL_UNIT_PREFIX) and isinstance(value, str):
-                    source = repo_folder / value
+                if key.startswith(SKILL_UNIT_PREFIX) and isinstance(value, dict):
+                    source = repo_folder / str(value.get("path") or "")
                     if source.is_file():
-                        out = building / "skills" / key[len(SKILL_UNIT_PREFIX) :] / "SKILL.md"
+                        skill = skills.parse_skill(source.read_text(encoding="utf-8"))
+                        folder = skill.extra.get("folder") or skill.name
+                        out = building / "skills" / folder / "SKILL.md"
+                        out.parent.mkdir(parents=True, exist_ok=True)
+                        out.write_text(skill.body + "\n", encoding="utf-8", newline="\n")
+                elif key.startswith(RAW_PREFIX) and isinstance(value, dict):
+                    source = repo_folder / str(value.get("file") or "")
+                    if source.is_file():
+                        out = building / "raw" / key[len(RAW_PREFIX) :]
                         out.parent.mkdir(parents=True, exist_ok=True)
                         shutil.copyfile(source, out)
         (building / READ_ONLY_NOTE).write_text(_note(units), encoding="utf-8", newline="\n")
