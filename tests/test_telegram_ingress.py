@@ -418,13 +418,37 @@ def test_a_transport_error_is_reported_without_the_token_wherever_it_sits(tmp_pa
 def test_the_loop_stops_on_what_will_not_fix_itself_and_backs_off_otherwise(
     tmp_path: Path,
 ) -> None:
-    item, _, _ = ingress(tmp_path, FakeTransport(status=409))
+    # Another program polling the same bot is waited out, not the end (owner
+    # 2026-10-30: Hermes on the same bot made AEP stop answering for good).
+    transport = FakeTransport(status=409)
+    item, _, _ = ingress(tmp_path, transport)
     result = poll(item)
     assert result.failure is not None and result.failure.code == "telegram_conflict"
-    assert not result.failure.retryable
-    failure = asyncio.run(item.run(asyncio.Event(), interval_s=0.01))
-    assert failure is not None and failure.code == "telegram_conflict"
-    # A revoked token and a missing credential end the loop the same way.
+    assert result.failure.retryable
+
+    async def other_program_stops() -> None:
+        stop = asyncio.Event()
+
+        async def until(condition: Any) -> None:
+            for _ in range(500):
+                if condition():
+                    return
+                await asyncio.sleep(0.01)
+            raise AssertionError("condition not reached")
+
+        async def watch() -> None:
+            await until(lambda: item.problem is not None)
+            assert item.problem is not None and item.problem.code == "telegram_conflict"
+            transport.status = 200  # the other program stopped polling
+            await until(lambda: item.problem is None)
+            stop.set()
+
+        watcher = asyncio.create_task(watch())
+        assert await item.run(stop, interval_s=0.01) is None
+        await watcher
+
+    asyncio.run(other_program_stops())
+    # A revoked token and a missing credential end the loop.
     item, _, _ = ingress(tmp_path / "unauthorized", FakeTransport(status=401))
     failure = asyncio.run(item.run(asyncio.Event(), interval_s=0.01))
     assert failure is not None and failure.code == "telegram_http_error"

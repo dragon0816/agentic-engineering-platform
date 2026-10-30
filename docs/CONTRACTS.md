@@ -1344,7 +1344,10 @@ of the configured device and refuses another. `poll_once()` calls
 host's `CredentialResolver` on every call, using it in the URL and holding it
 nowhere. It returns a `TelegramPollResult`: `deliveries`, or a `Failure`
 (`telegram_credential_unavailable`, `telegram_timeout`,
-`telegram_unreachable`, `telegram_error`, `telegram_conflict` for HTTP 409,
+`telegram_unreachable`, `telegram_error`, `telegram_conflict` for HTTP 409 (retryable since
+2026-10-30: `run` waits it out with the doubling delay and keeps it in `TelegramIngress.problem`,
+shown by the settings as `telegram.problem` while the loop runs, so AEP takes the bot back once
+the other program stops),
 `telegram_http_error`, `telegram_bad_reply`) with the token already redacted,
 in which case the offset stays where it was. The failure rules are
 `models.wire.transport_failure` and `status_failure`, now parametrized by a

@@ -16,6 +16,7 @@ from typing import Any
 import pytest
 from test_host_wiring import host_json, ready
 
+from common.execution import Failure
 from host_runtime.host import build_runtime
 from host_runtime.telegram_loop import ResidentTelegram
 from host_runtime.telegram_settings import (
@@ -120,6 +121,18 @@ def test_agent_web_saves_and_starts_the_bot_without_echoing_the_token(
         assert TOKEN not in json.dumps(web.settings())
         refused = web.update_telegram_settings(_update(token="not-a-token"))
         assert refused == {"ok": False, "code": "telegram_token_invalid"}
+        # A running loop waiting out another program on the bot says so.
+        assert status["problem"] is None
+
+        class Waiting:
+            running = True
+            failure = None
+            ingress = runtime.telegram
+
+        runtime.telegram.problem = Failure(code="telegram_conflict", message="x", retryable=True)
+        web.telegram_loop = Waiting()  # type: ignore[assignment]
+        assert web.settings()["telegram"]["problem"] == "telegram_conflict"
+        assert "TELEGRAM_WAITING" in PAGE and "another program is receiving" in PAGE
 
 
 def test_the_resident_loop_starts_and_stops_on_request() -> None:

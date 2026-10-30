@@ -964,6 +964,9 @@ class TelegramIngress:
         self._resolver = resolver
         self._transport = transport if transport is not None else UrllibTransport()
         self.unmapped: dict[int, UnmappedSender] = {}
+        #: The retryable failure the running loop is waiting out (a conflict,
+        #: an unreachable Bot API); None once a poll succeeds.
+        self.problem: Failure | None = None
         self.progress_refresh_s = PROGRESS_REFRESH_SECONDS
         self.status_edit_interval_s = STATUS_EDIT_INTERVAL_SECONDS
         # When each chat may next have its status message edited (monotonic).
@@ -1058,10 +1061,14 @@ class TelegramIngress:
         except Exception as error:  # noqa: BLE001 - every transport fault is a typed answer
             return TelegramPollResult(failure=transport_failure(error, prefix="telegram"))
         if status == 409:
+            # Another program polls this bot (owner 2026-10-30: Hermes took it
+            # and AEP stopped for good). Waited out, so AEP takes over as soon
+            # as the other one stops; `problem` says so meanwhile.
             return TelegramPollResult(
                 failure=Failure(
                     code="telegram_conflict",
                     message="another process is polling this bot; only one may",
+                    retryable=True,
                 )
             )
         if status != 200:
@@ -2556,14 +2563,17 @@ class TelegramIngress:
 
     async def run(self, stop: asyncio.Event, *, interval_s: float = 1.0) -> Failure | None:
         """Poll until asked to stop. A failure that will not fix itself (a
-        conflict, a revoked token, a credential the host cannot produce) ends
-        the loop and is returned; a retryable one is waited out with a
-        doubling delay, so a dead endpoint is not hammered once a second."""
+        revoked token, a credential the host cannot produce) ends the loop and
+        is returned; a retryable one (another program polling the bot, a
+        dead endpoint) is waited out with a doubling delay and kept in
+        `problem`, so it is not hammered once a second and is shown."""
         delay = interval_s
         while not stop.is_set():
             result = await self.poll_once()
             if result.failure is not None and not result.failure.retryable:
+                self.problem = None
                 return result.failure
+            self.problem = result.failure
             if result.failure is None:
                 delay = interval_s
             try:

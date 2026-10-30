@@ -5573,3 +5573,12 @@ Plan `docs/phases/KNOWLEDGE_REPO.md` (design, for owner review; nothing implemen
   in-place push with `.ingest-backup/`, `pushes/` and candidate versions are replaced. Wiki pages are read
   from a rebuilt read-only folder Obsidian can open; editing happens in the working copy. Rejected: keeping
   in-place editing in Obsidian (concurrent edits overwrite each other and bypass commit purposes).
+
+## 2026-10-30: A Telegram conflict is waited out, not the end of the loop (owner)
+
+- HTTP 409 from `getUpdates` (another program polls the same bot) is retryable: the resident loop keeps
+  polling with the doubling delay and reports `telegram.problem = "telegram_conflict"` in the settings,
+  which the page explains. Found live: Hermes' gateway started on the same bot, AEP's loop stopped for
+  good and the bot looked dead with nothing on screen. Rejected: keep stopping (silent until a person
+  reads the code) and stopping the other program (it is the owner's).
+- This supersedes the Phase 7 adaptation note "HTTP 409 is `telegram_conflict` and stops the loop".

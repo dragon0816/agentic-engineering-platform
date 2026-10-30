@@ -6206,13 +6206,27 @@ function showTelegram(telegram) {
       ? " The bot is running but allows nobody yet: send it a message, then press"
         + " \u201cCheck who messaged the bot\u201d."
       : "")
-    + (telegram.enabled ? (telegram.running ? " Bot is answering." : " Bot is starting…")
+    + (telegram.enabled ? (telegram.running
+        ? (telegram.problem ? "" : " Bot is answering.")
+        : (telegram.failure ? " Bot stopped; save to start it again." : " Bot is starting…"))
       : (telegram.configured
         ? " Saved, but the bot is off: tick"
           + " \u201cAnswer Telegram messages\u201d and save to start it."
         : " Bot is off."))
+    + (telegram.running && telegram.problem
+      ? " " + (TELEGRAM_WAITING[telegram.problem] || "Not answering yet, retrying: "
+        + telegram.problem + ".")
+      : "")
     + (telegram.failure ? " Last stop: " + telegram.failure : "");
 }
+
+// What a running bot is waiting out (owner 2026-10-30: a second program on the
+// same bot made AEP silently stop answering).
+const TELEGRAM_WAITING = {
+  telegram_conflict: "Not answering: another program is receiving this bot's messages "
+    + "(Telegram allows only one, for example Hermes on the same bot). Stop it or give it "
+    + "another bot; AEP keeps trying and takes over as soon as it stops.",
+};
 
 el("telegram-check").addEventListener("click", async () => {
   try {
