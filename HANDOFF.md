@@ -9,12 +9,17 @@ mechanism: commit (purpose required), push, revert, tag/publish; schema and skil
 maintainer sees how the data is classified. Owner decisions 1–11 are in `docs/phases/KNOWLEDGE_REPO.md` §1
 and `docs/DECISIONS.md` 2026-10-30.
 
-**Done.** Design only: `docs/phases/KNOWLEDGE_REPO.md`; pointers in `BI_VAULT.md` §3 and
-`KNOWLEDGE_COLLAB.md` §6; a row in `docs/TASKS.md`. No code changed, so no verification run.
+**Done.** Design (`docs/phases/KNOWLEDGE_REPO.md`, commit `e76cb1fd`); the owner said to start. **R1 done**:
+`src/knowledge/repo/repository.py`, contract "Knowledge repositories: folder, commits, push, revert, tags",
+tests `tests/test_knowledge_repo.py` (19). The engine knows only units (key → JSON value); an op carries the
+hash of the value it changed, so conflicts do not depend on version numbers that shift on a rebuild.
 
-**Next actions.** (1) Owner reviews the design. (2) Then slice R1 (common version layer, type-agnostic,
-tested with a minimal test type), R2 … R6 in order (§12). R6 writes the OneDrive `BI_Knowledge` folder and
-needs the owner present.
+**Next actions.** R2: the BI type on R1. Map cards onto units (suggested: one unit per card field,
+`card:<type>:<key>:<field>`, value = the field value with its provenance and evidence; one per card
+existence; `config:<key>` for the domain configuration), keep `bi.sqlite` as a materialized view rebuilt
+from the units, make 「確認匯入」 a commit, quality checks as push notes, the schema file in `schemas/` with a
+generated `.md` and authoritative. Then remove the `changes/` vault path (no compatibility, owner decision
+10). Then R3 … R6 (§12). R6 writes the OneDrive `BI_Knowledge` folder and needs the owner present.
 
 ## BI vaults V9–V13 (2026-10-29, Claude Code)
 

@@ -3825,3 +3825,9 @@ s-k-20261011T102952` (not published).
   `docs/DECISIONS.md` 2026-10-30. Slices R1 common version layer → R2 BI type → R3 skills → R4 wiki type →
   R5 Agent reads published, `REPO.md`, 「版本」 area → R6 rebuild `market-bi`, import an `rs-k` copy.
   - [x] 2026-10-30, Claude Code: design written for owner review (owner decisions 1–11 in §1). No code.
+  - [x] 2026-10-30, Claude Code: R1 common version layer, `src/knowledge/repo/` (type-agnostic: units,
+    local commits with purpose, push with unit rebase and conflicts, ordered replay with rebuild,
+    waiting and changed files, revert to a tag or commit, tags, publish records, published units,
+    status, history, diff). Contract "Knowledge repositories: folder, commits, push, revert, tags".
+    Tests `tests/test_knowledge_repo.py` (19, two PCs sharing one folder). Not used by BI or wiki yet
+    (R2, R4); no route or page yet (R5).

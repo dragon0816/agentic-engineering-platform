@@ -5538,3 +5538,73 @@ it did before.
   `{"content": ...}` replaces the primary file. New stop codes: `author_turns_exhausted`,
   `author_change_has_credential`, `author_file_not_utf8`, `author_file_mixed_newlines`.
 - Result unchanged: `diff` covers every changed file; never committed.
+
+## Knowledge repositories: folder, commits, push, revert, tags (R1, 2026-10-30)
+
+Design: `docs/phases/KNOWLEDGE_REPO.md` §4–§7; decision `docs/DECISIONS.md` 2026-10-30 "One version
+mechanism for every knowledge base". Code: `src/knowledge/repo/repository.py` (package
+`knowledge.repo`). Tests: `tests/test_knowledge_repo.py` (two PCs as two workspaces sharing one folder,
+a minimal test type). R1 is the type-agnostic layer only: no type, route or page uses it yet (R2 BI, R4
+wiki, R5 routes and page).
+
+- **Types.** A type implements `RepoType`: `name`, `unit_problem(key, value) -> str | None` and
+  `check(before, after) -> CheckReport(blocking: list[str], notes: list[str])`, and is added with
+  `register_type`. `repo.json` names it; an unknown type is `repo_type_unknown`. The engine reads only
+  units: a key (1–300 characters, no control characters) and a JSON value. Reserved keys every type
+  shares: `schema` (the current schema version) and `skill:<name>` (a skill's current revision).
+- **Folder** `<parent>/<repo id>/` (id `[a-z0-9]+(-[a-z0-9]+)*`, at most 40): `repo.json` =
+  `{"format": "aep.knowledge.repo/v1", "id", "title", "purpose", "type", "created", "created_by"}`,
+  written once; `REPO.md` (derived, for people); `schemas/`, `skills/`, `sources/` (files, written
+  once); `commits/<author>/<seq>.json`; `tags/<name>.json`; `publish/<author>/<seq>.json`. Every record
+  is written once (temporary file + rename) and a record path that exists is refused (`record_exists`);
+  a PC writes only its own author folders. Author `[a-z0-9]+([._-][a-z0-9]+)*`, at most 40.
+- **Per PC** `<workspace>/knowledge-repos/`: `registry.json` = `{"repos": [{"id", "path", "author",
+  "type"}]}`; `<repo id>/repo.sqlite` (applied commits in order, units, conflicts, cached file hashes);
+  `<repo id>/work/` (`pending.json` = `{"sets": {unit: value | null}, "files": {path: {"sha256",
+  "bytes"}}}`, staged files under `files/<path>`, local commits `commits/<n>.json`,
+  `resolutions.json`). `create(workspace, parent, repo_id=, title=, purpose=, kind=, author=)` and
+  `join(workspace, folder, author=)` register a repository; `Repository(workspace, repo_id)` opens it.
+- **Commit** `commits/<author>/<seq>.json`: `{"format": "aep.knowledge.commit/v1", "id", "repo",
+  "author", "seq", "clock", "base": commit id | null, "created", "purpose", "kind": "change" | "import"
+  | "revert" | "schema", "restores"?: commit id (revert only), "files": [{"path", "sha256", "bytes"}],
+  "ops": [{"unit", "value": JSON | null, "base": sha256 | null}]}`. `id` = sha256 of the canonical JSON
+  (sorted keys, no spaces, UTF-8) without `id`; an op's `base` = sha256 of the canonical value it
+  changed (null: the unit was absent); `value` null removes the unit. `purpose` is required, 1–500
+  characters (`purpose_missing`, `purpose_too_long`). A file path is under `schemas/`, `skills/` or
+  `sources/`, POSIX, no `..` or hidden parts, at most 240 characters (`path_invalid`); a path that holds
+  other content is `path_taken` (files never change).
+- **Order and replay.** Commits apply in (clock, author, seq) order. On push, `seq` = 1 + the author's
+  highest file and `clock` = 1 + the highest clock of any commit or publish record. An op applies when
+  the unit's value hashes to `base` or already equals `value`; otherwise it is an open conflict (the
+  same on every PC) and the unit keeps its value; a later commit that sets the unit marks open
+  conflicts on it `superseded`. A commit with a missing file waits (`waiting`); one whose file content
+  differs is reported (`changed`) and not applied; an invalid one is reported (`bad`, for example "id
+  does not match the content"); unreadable JSON is `incomplete` and retried. A new commit with an
+  earlier key than the last applied, or an applied commit that changed or vanished, rebuilds the state.
+  `sync()` returns `{"applied", "rebuilt", "conflicts", "waiting", "changed", "bad", "incomplete"}`.
+- **Working copy.** `stage(unit, value)` (checked by the type, `unit_invalid`), `stage_file(path,
+  source)`, `discard()`, `commit(purpose)` (one local commit of every uncommitted change;
+  `nothing_to_commit`), `drop_local_commit(n)`. `working_units()` = head + local commits + pending.
+- **Push** `push()` → `{"status": "nothing"}`, `{"status": "conflicts", "conflicts": [{"unit", "mine",
+  "theirs", "purpose"}]}`, `{"status": "blocked", "blocking", "notes"}` or `{"status": "pushed",
+  "commits": [{"id", "seq", "purpose"}], "notes", "sync"}`. It syncs, rebases the local commits unit by
+  unit onto the head (a unit changed on both sides differently is a conflict unless `resolve(unit,
+  "mine" | "theirs" | "value", value)` decided it), runs the type's `check`, copies files into the
+  folder, then writes the commits. Nothing is written on `conflicts` or `blocked`.
+- **Revert** `revert(version, purpose)`: version = tag name, commit id or a unique id prefix of 8+
+  characters (`version_unknown`); needs no local commits or uncommitted changes (`work_not_clean`);
+  writes one local `revert` commit with `restores` that sets every unit differing from that version
+  (`nothing_to_revert` when none). History is never rewritten.
+- **Tags** `tags/<name>.json` = `{"format": "aep.knowledge.tag/v1", "name", "commit", "by", "at",
+  "purpose"}`, name `[a-z0-9]+([.-][a-z0-9]+)*` at most 60 (`tag_invalid`), never moved
+  (`tag_exists`); `tag(name, purpose, version=None)` tags the head by default.
+- **Publish** `publish(tag)` writes `publish/<author>/<seq>.json` = `{"format":
+  "aep.knowledge.publish/v1", "repo", "author", "seq", "clock", "tag", "commit", "at"}` (`tag_unknown`).
+  The published version is the newest valid record in (clock, author, seq) order whose tag still names
+  its commit; publishing an older tag again withdraws a newer one. Callers make sure a person confirmed
+  it; the model never publishes. `published_units()` is what the Agent reads: the published version, or
+  the head when never published (or while the published commit has not arrived here).
+- **Reading.** `status()` = `{"id", "title", "type", "author", "head", "behind", "ahead",
+  "uncommitted", "conflicts", "waiting", "bad", "published", "schema"}`; `units()`, `state_at(commit)`,
+  `history(limit)` (newest first: id, file, author, created, purpose, kind, restores, units, files),
+  `diff(commit)` (unit, before, after), `conflicts(status)`, `tags()`, `published()`.
