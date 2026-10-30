@@ -1223,6 +1223,15 @@ tr:last-child td { border-bottom: none; }
 .bi-ai { margin: 12px 0; padding: 10px 12px; border: 1px solid var(--line);
   border-radius: 8px; min-width: 0; }
 .bi-ai h4 { margin: 0 0 6px; }
+#bi-b-ver h5 { margin: 12px 0 4px; font-size: 13px; }
+.bi-ver-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px; margin: 6px 0; }
+.bi-ver-pair > div { padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px;
+  min-width: 0; overflow-wrap: anywhere; }
+.bi-ver-pair > div.chosen { border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent); }
+.bi-ver-ask { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; margin-top: 6px; }
+.bi-ver-ask .bi-input { flex: 1 1 200px; min-width: 0; }
 .bi-log { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 8px; }
 .bi-log > li { padding: 8px 10px; border-radius: 8px; background: var(--panel);
   border: 1px solid var(--line); overflow-wrap: anywhere; min-width: 0; }
@@ -2461,8 +2470,9 @@ tr:last-child td { border-bottom: none; }
           <h3 class="kp-stage-title" id="bi-b-source" tabindex="-1">步驟 1／6・知識庫與來源</h3>
           <div class="bi-ai" id="bi-b-vault" role="region" aria-labelledby="bi-b-vault-h">
             <h4 id="bi-b-vault-h">知識庫</h4>
-            <p class="bi-meta">共用知識庫（vault）放在 SharePoint／OneDrive 同步的資料夾，
-              大家各自寫入自己的變更檔，不會互相覆蓋；一般資料集只在這台電腦。</p>
+            <p class="bi-meta">共用知識庫（vault）放在 SharePoint／OneDrive 同步的資料夾。
+              你的改動先留在這台電腦，寫下目的 commit、再 push 才會給大家；Agent 只讀發佈的版本。
+              一般資料集只在這台電腦。</p>
             <div class="bi-step-grid">
               <div><label class="bi-label" for="bi-b-ds">寫入哪個知識庫</label>
                 <select id="bi-b-ds"></select></div>
@@ -2505,6 +2515,27 @@ tr:last-child td { border-bottom: none; }
                 <button class="bi-btn" id="bi-b-v-cancel" type="button">取消</button></div>
               <div id="bi-b-v-err" role="alert"></div>
             </form>
+            <div id="bi-b-ver" class="bi-step" role="region" aria-labelledby="bi-b-ver-h" hidden>
+              <h4 id="bi-b-ver-h">版本</h4>
+              <p class="bi-meta" id="bi-b-ver-reads"></p>
+              <h5>還沒給大家的改動</h5>
+              <div id="bi-b-ver-pending"></div>
+              <div class="bi-step-grid">
+                <div><label class="bi-label" for="bi-b-ver-purpose">
+                  這次改動的目的（commit 一定要寫，之後在歷史裡看得到）</label>
+                  <input id="bi-b-ver-purpose" class="bi-input" maxlength="500"
+                    placeholder="例如：補上 TSN 的標準組織"></div>
+              </div>
+              <div class="bi-actions">
+                <button class="go" id="bi-b-ver-commit" type="button">Commit</button>
+                <button class="bi-btn" id="bi-b-ver-push" type="button">Push 給大家</button>
+                <button class="bi-btn" id="bi-b-ver-discard" type="button">
+                  捨棄還沒 commit 的改動</button>
+              </div>
+              <div id="bi-b-ver-conflicts" role="alert"></div>
+              <h5>歷史與發佈</h5>
+              <div id="bi-b-ver-history"></div>
+            </div>
           </div>
           <div class="bi-step-grid">
             <div><label class="bi-label" for="bi-b-file">
@@ -12066,28 +12097,230 @@ function biVaultState(state) {
   box.replaceChildren();
   const open = (state.conflicts || []).filter((c) => c.open).length;
   box.append(bh("p", "", bh("strong", "", v.title || v.id), "・" + (v.purpose || "（沒有寫目的）")),
-    bh("p", "bi-meta", "共用資料夾：" + v.path + "・你的作者名稱：" + v.author),
-    bh("p", state.reachable ? "bi-meta" : "bi-warn", state.reachable
-      ? "已套用 " + state.applied + "／" + state.files + " 個變更檔"
-        + (state.behind ? "・還有 " + state.behind + " 個沒套用" : "")
-        + "・" + state.cards + " 張卡片・上次同步 "
-        + (state.last_sync ? biTime(state.last_sync) : "—")
-      : "現在讀不到共用資料夾（OneDrive 沒有同步或路徑不對）：可以看卡片，但不能寫入。"));
-  if ((state.conflicts || []).length) {
-    box.append(bh("p", open ? "bi-warn" : "bi-meta", "衝突 " + state.conflicts.length + " 筆（"
-      + open + " 筆待決定）：兩個人從同一個舊值改了同一個欄位，後送的變成卡片上的待審提議，"
-      + "請到卡片上決定。"));
+    bh("p", "bi-meta", "共用資料夾：" + v.path + "・你的作者名稱：" + v.author));
+  if (!state.reachable) {
+    box.append(bh("p", "bi-warn", "現在讀不到共用資料夾（OneDrive 沒有同步或路徑不對）："
+      + "可以看卡片，但不能寫入。"));
+    el("bi-b-ver").hidden = true;
+    return;
   }
-  if ((state.merges || []).length) {
-    box.append(bh("p", "bi-warn", "合併提示 " + state.merges.length + " 筆："
-      + "同一張卡被兩個人各建了一次，已合成一張；不同的值在卡片上變成待審提議。"));
+  box.append(bh("p", "bi-meta", state.cards + " 張卡片・別人 push 了還沒套用的 " + state.behind
+    + " 個・你還沒 push 的 commit " + state.ahead + " 個・還沒 commit 的改動 "
+    + state.uncommitted + " 個・上次同步 " + (state.last_sync ? biTime(state.last_sync) : "—")));
+  if ((state.waiting || []).length) {
+    box.append(bh("p", "bi-warn", state.waiting.length + " 個 commit 在等 OneDrive 把檔案同步完"
+      + "（同步完會自動套用）。"));
   }
-  const problems = [...(state.bad || []), ...(state.incomplete || [])];
-  if (problems.length) {
-    box.append(bh("p", "bi-warn", "有 " + problems.length + " 個變更檔還不能讀（可能還在同步）："
-      + problems.map((p) => p.file || p).slice(0, 5).join("、")));
+  if (open) {
+    box.append(bh("p", "bi-warn", "衝突 " + open + " 筆待決定：兩個人同時改了同一個欄位，"
+      + "後到的變成卡片上的待審提議，請到卡片上決定。"));
   }
+  if ((state.bad || []).length) {
+    box.append(bh("p", "bi-warn", "有 " + state.bad.length + " 個檔案讀不懂，已略過："
+      + state.bad.map((b) => b.file || b).slice(0, 5).join("、")));
+  }
+  const reads = state.reads || {};
+  el("bi-b-ver-reads").textContent = reads.tag
+    ? "Agent 讀的是發佈版本「" + reads.tag + "」；之後 push 的內容要再發佈，Agent 才會讀到。"
+    : "還沒有發佈過：Agent 讀的是大家已 push 的最新內容（不含你還沒 push 的改動）。";
+  el("bi-b-ver").hidden = false;
+  biVersions(v.id).catch((failure) => biNotice(false, "讀不到版本資訊：" + failure.message));
 }
+
+// -- the 「版本」 area (knowledge repositories R5, KNOWLEDGE_REPO.md §10) ----------
+function biVerValue(value) {
+  if (value === null || value === undefined) return "（沒有）";
+  if (typeof value === "object" && !Array.isArray(value) && "value" in value) value = value.value;
+  if (value === null || value === undefined || value === "") return "（空）";
+  const shown = typeof value === "string" ? value : JSON.stringify(value);
+  return shown.length > 200 ? shown.slice(0, 200) + "…" : shown;
+}
+
+function biVerChanges(changes) {
+  const list = bh("ul", "bi-log");
+  for (const change of changes.slice(0, 50)) {
+    list.append(bh("li", "", bh("strong", "", change.label || change.unit), "：",
+      biVerValue(change.before), " → ", biVerValue(change.after)));
+  }
+  if (changes.length > 50) {
+    list.append(bh("li", "bi-meta", "還有 " + (changes.length - 50) + " 項"));
+  }
+  return list;
+}
+
+function biVerAsk(where, label, value, go, run) {
+  // One inline question (a purpose, a tag name) under the row that asked it.
+  where.querySelector(".bi-ver-ask")?.remove();
+  const input = document.createElement("input");
+  input.className = "bi-input"; input.maxLength = 500; input.value = value || "";
+  input.setAttribute("aria-label", label);
+  const row = bh("div", "bi-ver-ask", bh("span", "bi-label", label), input);
+  row.append(biButton(go, async () => {
+    const answer = input.value.trim();
+    if (!answer) { input.focus(); return; }
+    await run(answer);
+  }, "go"), biButton("取消", () => row.remove()));
+  where.append(row); input.focus();
+}
+
+async function biVerRun(vaultId, action, body, done) {
+  const reply = await biCall("/api/bi/vaults/" + vaultId + "/" + action, body || {});
+  if (done) biNotice(true, done);
+  bi.loaded = {}; biRefreshCounts();
+  biVaultState(await call("/api/bi/vaults/" + vaultId + "/status"));
+  return reply;
+}
+
+async function biVersions(vaultId) {
+  const seq = bi.verSeq = (bi.verSeq || 0) + 1;
+  const [pending, history] = await Promise.all([
+    call("/api/bi/vaults/" + vaultId + "/pending"),
+    call("/api/bi/vaults/" + vaultId + "/history?limit=30")]);
+  if (seq !== bi.verSeq) return;
+  bi.verVault = vaultId;
+  const box = el("bi-b-ver-pending"); box.replaceChildren();
+  const changes = pending.uncommitted || [], commits = pending.commits || [];
+  if (!changes.length && !commits.length) {
+    box.append(bh("p", "bi-meta", "沒有：大家看到的就是你的內容。"));
+  }
+  if (changes.length) {
+    box.append(bh("p", "", "還沒 commit 的改動 " + changes.length + " 項："),
+      biVerChanges(changes));
+  }
+  if (commits.length) {
+    const list = bh("ul", "bi-log");
+    for (const item of commits) {
+      list.append(bh("li", "me", bh("strong", "", item.purpose), "・" + biTime(item.created)
+        + "・" + (item.ops || []).length + " 項（已 commit，還沒 push）"));
+    }
+    box.append(bh("p", "", "已 commit、還沒 push 的 " + commits.length + " 個："), list);
+  }
+  el("bi-b-ver-commit").disabled = !changes.length;
+  el("bi-b-ver-discard").disabled = !changes.length;
+  el("bi-b-ver-push").disabled = !commits.length;
+  biVerHistory(vaultId, history);
+}
+
+function biVerHistory(vaultId, history) {
+  const box = el("bi-b-ver-history"); box.replaceChildren();
+  const tags = history.tags || [], published = history.published;
+  const byCommit = {};
+  for (const tag of tags) (byCommit[tag.commit] = byCommit[tag.commit] || []).push(tag);
+  const live = (tag) => Boolean(published && published.tag === tag.name);
+  const list = bh("ul", "bi-log");
+  (history.commits || []).forEach((commit, index) => {
+    const row = bh("li", "");
+    const badges = (byCommit[commit.id] || []).map((tag) =>
+      biBadge("tag " + tag.name + (live(tag) ? "・發佈中" : ""), live(tag) ? "good" : ""));
+    row.append(bh("div", "", bh("strong", "", commit.purpose), " ", ...badges),
+      bh("div", "bi-meta", biTime(commit.created) + "・" + commit.author + "・" + commit.units
+        + " 項" + (commit.kind === "revert" ? "・回復版本" : "") + "・" + commit.id.slice(0, 10)));
+    const actions = bh("div", "bi-actions"), detail = bh("div", "");
+    actions.append(biButton("看改動", async () => {
+      if (detail.childNodes.length) { detail.replaceChildren(); return; }
+      const reply = await call("/api/bi/vaults/" + vaultId + "/diff?commit="
+        + encodeURIComponent(commit.id));
+      detail.replaceChildren(biVerChanges(reply.changes || []));
+    }, "bi-btn", "看「" + commit.purpose + "」的改動"));
+    if (index > 0) {
+      actions.append(biButton("回到這個版本", () => biVerAsk(row, "回復的目的",
+        "回到「" + commit.purpose + "」的版本", "回復（成為新的 commit）", (purpose) =>
+          biVerRun(vaultId, "revert", {version: commit.id, purpose},
+            "已回復成新的 commit；按「Push 給大家」送出。")),
+      "bi-btn", "回到「" + commit.purpose + "」的版本"));
+    }
+    actions.append(biButton("加 tag", () => biVerAsk(row,
+      "tag 名稱（小寫英數字與 . -，例如 2026q4）", "", "建立 tag", (name) =>
+        biVerRun(vaultId, "tag", {name, version: commit.id, purpose: commit.purpose},
+          "已建立 tag「" + name + "」；要讓 Agent 讀它，請按「發佈 " + name + "」。")),
+    "bi-btn", "幫「" + commit.purpose + "」加 tag"));
+    for (const tag of byCommit[commit.id] || []) {
+      if (live(tag)) continue;
+      actions.append(biButton("發佈 " + tag.name, async () => {
+        if (!confirm("發佈 tag「" + tag.name + "」？發佈後 Agent 只讀這個版本的內容；"
+          + "要撤回就再發佈另一個 tag。")) return;
+        await biVerRun(vaultId, "publish", {tag: tag.name, confirm: true},
+          "已發佈「" + tag.name + "」：Agent 現在讀這個版本。");
+      }, "bi-btn", "發佈 tag " + tag.name));
+    }
+    row.append(actions, detail); list.append(row);
+  });
+  if (!(history.commits || []).length) list.append(bh("li", "bi-meta", "還沒有 commit。"));
+  box.append(list);
+}
+
+function biVerConflicts(vaultId, conflicts) {
+  // Push conflicts side by side: nothing was written until each is decided.
+  const box = el("bi-b-ver-conflicts"); box.replaceChildren();
+  if (!conflicts.length) return;
+  const decided = {};
+  box.append(bh("p", "bi-warn", "沒有送出：有 " + conflicts.length + " 個地方別人也改了。"
+    + "每一項選一邊（或自己填），再按「Push 給大家」。"));
+  const list = bh("ul", "bi-log");
+  for (const conflict of conflicts) {
+    const label = conflict.label || conflict.unit;
+    const mine = bh("div", "", bh("div", "bi-meta", "你的（" + conflict.purpose + "）"),
+      biVerValue(conflict.mine));
+    const theirs = bh("div", "", bh("div", "bi-meta", "別人已 push 的"),
+      biVerValue(conflict.theirs));
+    const choose = async (choice, value) => {
+      await biCall("/api/bi/vaults/" + vaultId + "/resolve", {unit: conflict.unit, choice, value});
+      decided[conflict.unit] = choice;
+      mine.classList.toggle("chosen", choice === "mine");
+      theirs.classList.toggle("chosen", choice === "theirs");
+      const left = conflicts.filter((c) => !decided[c.unit]).length;
+      biNotice(true, left ? "已決定；還有 " + left + " 項。"
+        : "全部決定了，按「Push 給大家」送出。");
+    };
+    const row = bh("li", "", bh("strong", "", label), bh("div", "bi-ver-pair", mine, theirs));
+    const actions = bh("div", "bi-actions",
+      biButton("用我的", () => choose("mine"), "bi-btn", "用我的：" + label),
+      biButton("用別人的", () => choose("theirs"), "bi-btn", "用別人的：" + label));
+    const own = conflict.mine;
+    if (own && typeof own === "object" && "value" in own
+      && (own.value === null || typeof own.value !== "object")) {
+      // A field: keep my source and history, change only the value.
+      actions.append(biButton("自己填", () => biVerAsk(row, "新的值", "", "用這個值",
+        (typed) => choose("value", {...own, value: typed})), "bi-btn", "自己填：" + label));
+    }
+    row.append(actions); list.append(row);
+  }
+  box.append(list);
+}
+
+el("bi-b-ver-commit").addEventListener("click", async () => {
+  const input = el("bi-b-ver-purpose"), purpose = input.value.trim();
+  if (!purpose) { biNotice(false, "請先寫這次改動的目的。"); input.focus(); return; }
+  try {
+    await biVerRun(bi.verVault, "commit", {purpose}, "已 commit；按「Push 給大家」才會送出。");
+    input.value = "";
+  } catch (failure) { biNotice(false, "沒有 commit：" + failure.message); }
+});
+el("bi-b-ver-push").addEventListener("click", async () => {
+  const vaultId = bi.verVault, button = el("bi-b-ver-push");
+  button.disabled = true;
+  try {
+    const reply = await biVerRun(vaultId, "push", {});
+    biVerConflicts(vaultId, reply.status === "conflicts" ? reply.conflicts || [] : []);
+    if (reply.status === "pushed") {
+      const notes = (reply.notes || []).join("；");
+      biNotice(true, "已 push " + (reply.commits || []).length + " 個 commit；要讓 Agent 讀到，"
+        + "請加 tag 並發佈。" + (notes ? " " + notes : ""));
+    } else if (reply.status === "blocked") {
+      biNotice(false, "沒有送出：" + (reply.blocking || []).join("；"));
+    } else if (reply.status === "nothing") {
+      biNotice(true, "沒有要 push 的 commit。");
+    }
+  } catch (failure) {
+    biNotice(false, "沒有 push：" + failure.message);
+    button.disabled = false;
+  }
+});
+el("bi-b-ver-discard").addEventListener("click", async () => {
+  if (!confirm("捨棄這台電腦上還沒 commit 的改動？已 commit 的不受影響。")) return;
+  try { await biVerRun(bi.verVault, "discard", {}, "已捨棄還沒 commit 的改動。"); }
+  catch (failure) { biNotice(false, "沒有捨棄：" + failure.message); }
+});
 
 el("bi-b-ds").addEventListener("change", () => {
   const select = el("bi-dataset");

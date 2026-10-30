@@ -3847,3 +3847,14 @@ s-k-20261011T102952` (not published).
     moved to commit + push. The V4 `market-bi` folder is not read and not written (checked); R6
     rebuilds it with the owner present. Not done: page panel for the version operations (R5), REPO.md
     and the schema `.md` written on push, BI skills (R3 BI part).
+  - [x] 2026-10-30, Claude Code: R5, BI side. The Agent (`bi__query`) reads a vault's published version
+    through `vault.reading_store` (a read-only `published/bi.sqlite` rebuilt when the published tag or
+    pushed head changes; the pushed head when never published; never this PC's unpushed work) and its
+    answer says which version. `REPO.md` rewritten after create, convert, push, tag and publish; the
+    schema's readable `.md` committed beside its JSON. Units in words (`label`) in pending, push
+    conflicts and diff. Page: the 「版本」 area under 「知識庫」 (status line, what the Agent reads,
+    uncommitted changes, commit with purpose, push, conflicts side by side with mine/theirs/own value,
+    discard, history with diff, revert as a new commit, tag, publish with a confirm click). Contract
+    "Knowledge repositories: the Agent reads the published version, the 「版本」 area (R5, BI)". Tests
+    `tests/test_bi_vault_published.py` (4), `test_bi_vault_ui` drives the panel. Not done: the wiki side
+    of R5 (needs R4 wired), R3 BI part, R6.

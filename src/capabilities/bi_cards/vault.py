@@ -45,7 +45,7 @@ from contextlib import closing, contextmanager
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import catalog
+from capabilities.bi_cards import catalog, schema_doc
 from capabilities.bi_cards.store import (
     DATASET_RE,
     DB_FILE,
@@ -61,6 +61,7 @@ from capabilities.bi_cards.store import (
     now,
     vault_registry,
 )
+from knowledge.repo import readme
 from knowledge.repo import repository as repo_engine
 from knowledge.repo.repository import CheckReport, RepoError, Repository
 
@@ -70,6 +71,8 @@ MAX_VAULT_ID = 40 - len(VAULT_PREFIX)
 AUTHOR_RE = repo_engine.AUTHOR_RE
 MAX_AUTHOR = repo_engine.MAX_AUTHOR
 STATE_FILE = "vault_sync.json"
+#: The local copy of the version the Agent reads (design §7), with `version.json`.
+PUBLISHED_DIR = "published"
 
 #: The 11 market segments of the owner's chart (BI_VAULT.md §4, §6.2):
 #: folder name and label. A vault may name its own at creation.
@@ -668,8 +671,8 @@ class Vault:
                     reason=failure.code,
                 ) from None
 
-    def _entries(self) -> list[dict[str, Any]]:
-        """The commits' changes, then this PC's local commits and uncommitted changes."""
+    def _log_entries(self, until: str | None = None) -> list[dict[str, Any]]:
+        """The applied commits' changes in order, up to and including commit `until`."""
         entries = []
         for item in self.repo.log():
             commit = item["commit"]
@@ -682,6 +685,13 @@ class Vault:
                     "changes": item["changes"],
                 }
             )
+            if commit["id"] == until:
+                break
+        return entries
+
+    def _entries(self) -> list[dict[str, Any]]:
+        """The commits' changes, then this PC's local commits and uncommitted changes."""
+        entries = self._log_entries()
         state = self.repo.units()
         stages = [
             (f"local:{r['number']}", r["created"], r["ops"]) for r in self.repo.local_commits()
@@ -720,6 +730,43 @@ class Vault:
         from capabilities.bi_cards import search_index
 
         search_index.sync_quietly(BiStore(self.workspace, self.dataset))
+
+    def reads(self) -> dict[str, Any]:
+        """What the Agent reads (decision 8): the published tag, or the pushed
+        head of a vault never published (a published commit not applied here
+        yet is read as the head until it arrives)."""
+        record = self.repo.published()
+        applied = {c["id"] for c in self.repo.history(limit=10**9)}
+        if record is not None and record["commit"] in applied:
+            return {"tag": record["tag"], "commit": record["commit"]}
+        return {"tag": None, "commit": self.repo.head()}
+
+    def refresh_published(self) -> Path:
+        """Rebuild the Agent's copy when the version it reads has changed;
+        this PC's local commits and uncommitted changes never reach it."""
+        folder = self.local / PUBLISHED_DIR
+        marker = folder / "version.json"
+        with self.lock:
+            target = self.reads()
+            try:
+                built = json.loads(marker.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                built = None
+            if built == target and (folder / DB_FILE).is_file():
+                return folder
+            folder.mkdir(parents=True, exist_ok=True)
+            commit = target["commit"]
+            units = self.repo.state_at(commit) if commit else {}
+            entries = self._log_entries(until=commit) if commit else []
+            scratch = folder / f".{DB_FILE}.{uuid.uuid4().hex[:8]}.tmp"
+            try:
+                with closing(sqlite3.connect(scratch, isolation_level=None)) as db:
+                    materialize(db, units, entries, [])
+                repo_engine.replace_retrying(scratch, folder / DB_FILE)
+            finally:
+                scratch.unlink(missing_ok=True)
+            marker.write_text(json.dumps(target), encoding="utf-8")
+            return folder
 
     def sync(self) -> dict[str, Any]:
         """Apply what the others pushed, then rebuild the local database."""
@@ -774,18 +821,21 @@ class Vault:
         vault holds the schema it uses, built in or not)."""
         reg = catalog.resolve(self.workspace, ref)
         name = _schema_file_name(reg.schema_id, reg.version)
-        if (self.folder / "schemas" / name).is_file():
-            return
-        if reg.source == "installed":
-            # The installed file as it is, so every PC installs the same bytes.
-            self.repo.stage_file(
-                f"schemas/{name}", catalog.schema_path(self.workspace, reg.schema_id, reg.version)
-            )
-            return
+        readable = name[: -len(".json")] + ".md"
         with tempfile.TemporaryDirectory() as scratch:
-            path = Path(scratch) / name
-            path.write_text(catalog.canonical(reg.document), encoding="utf-8")
-            self.repo.stage_file(f"schemas/{name}", path)
+            if not (self.folder / "schemas" / name).is_file():
+                if reg.source == "installed":
+                    # The installed file as it is, so every PC installs the same bytes.
+                    source = catalog.schema_path(self.workspace, reg.schema_id, reg.version)
+                else:
+                    source = Path(scratch) / name
+                    source.write_text(catalog.canonical(reg.document), encoding="utf-8")
+                self.repo.stage_file(f"schemas/{name}", source)
+            if not (self.folder / "schemas" / readable).is_file():
+                # The readable document beside it (design §8), generated from the schema.
+                doc = Path(scratch) / readable
+                doc.write_text(schema_doc.schema_markdown(reg), encoding="utf-8")
+                self.repo.stage_file(f"schemas/{readable}", doc)
 
     def status(self) -> dict[str, Any]:
         """The vault header (compatible with the V4 page) and the version state."""
@@ -826,6 +876,7 @@ class Vault:
             "waiting": state.get("waiting") or [],
             "published": state.get("published"),
             "head": state.get("head"),
+            "reads": self.reads() if reachable else None,
             "conflicts": conflicts,
             "merges": [],
             "bad": state.get("bad") or [],
@@ -954,6 +1005,7 @@ def create(workspace: Path, given: dict[str, Any], actor: str) -> dict[str, Any]
         vault._stage_schema(reg.ref)
         vault.repo.commit(f"建立知識庫，使用 schema {reg.ref}", kind="schema")
         pushed = vault.repo.push()
+        readme.write_readme(vault.repo)
     report = vault.sync()
     return {"vault": vault.describe(), "push": pushed["status"], "sync": report}
 
@@ -1013,6 +1065,7 @@ def convert(workspace: Path, given: dict[str, Any], actor: str) -> dict[str, Any
         vault._stage_schema(str(units[repo_engine.SCHEMA_UNIT]))
         vault.repo.commit(f"把資料集「{name}」轉成知識庫", kind="import")
         pushed = vault.repo.push()
+        readme.write_readme(vault.repo)
     report = vault.sync()
     return {"vault": vault.describe(), "push": pushed["status"], "sync": report, "dataset": name}
 
@@ -1049,14 +1102,40 @@ def _vault(workspace: Path, vault_id: str) -> Vault:
     return vault
 
 
+def unit_label(units: Mapping[str, Any], key: str) -> str:
+    """A unit in words for the page: card name and field rather than ids."""
+    kind, _, rest = key.partition(":")
+    card_id, _, field = rest.partition(":")
+
+    def card() -> str:
+        value = units.get(f"card:{card_id}")
+        if isinstance(value, dict):
+            return f"{value.get('type')}「{value.get('name') or value.get('key')}」"
+        return f"卡片 {card_id}"
+
+    if kind == "card":
+        return card()
+    if kind == "field":
+        return f"{card()} 的 {field}"
+    if kind == "evidence":
+        return f"{card()} 的 {field} 證據"
+    if kind == "meta":
+        return {"domains": "領域設定"}.get(rest, f"設定 {rest}")
+    if key == repo_engine.SCHEMA_UNIT:
+        return "schema 版本"
+    return {"proposal": "待審提議", "import": "匯入紀錄", "decision": "衝突決定"}.get(kind, key)
+
+
 def pending(workspace: Path, vault_id: str) -> dict[str, Any]:
     """What this PC has not pushed: uncommitted changes and local commits."""
     vault = _vault(workspace, vault_id)
     with vault.lock:
         head = vault.repo.units()
         work = vault.repo._pending()
+        names = {**head, **work["sets"]}
         changes = [
-            {"unit": k, "before": head.get(k), "after": v} for k, v in sorted(work["sets"].items())
+            {"unit": k, "label": unit_label(names, k), "before": head.get(k), "after": v}
+            for k, v in sorted(work["sets"].items())
         ]
         return {
             "uncommitted": changes,
@@ -1087,6 +1166,12 @@ def push(workspace: Path, vault_id: str) -> dict[str, Any]:
         vault._install_schemas()
         with _repo_errors():
             result = vault.repo.push()
+            if result["status"] == "pushed":
+                readme.write_readme(vault.repo)
+        if result["status"] == "conflicts":
+            names = vault.repo.working_units()
+            for item in result["conflicts"]:
+                item["label"] = unit_label(names, item["unit"])
         vault.rebuild()
         return result
 
@@ -1113,7 +1198,10 @@ def history(workspace: Path, vault_id: str, limit: int = 50) -> dict[str, Any]:
 def diff(workspace: Path, vault_id: str, commit_id: str) -> dict[str, Any]:
     vault = _vault(workspace, vault_id)
     with _repo_errors():
-        return {"changes": vault.repo.diff(vault.repo.resolve_version(commit_id))}
+        target = vault.repo.resolve_version(commit_id)
+        changes = vault.repo.diff(target)
+        names = {**vault.repo.units(), **vault.repo.state_at(target)}
+    return {"changes": [{**c, "label": unit_label(names, c["unit"])} for c in changes]}
 
 
 def revert(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
@@ -1128,11 +1216,11 @@ def tag(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, A
     vault = _vault(workspace, vault_id)
     with _repo_errors():
         version = str(given.get("version") or "") or None
-        return {
-            "tag": vault.repo.tag(
-                str(given.get("name") or ""), str(given.get("purpose") or ""), version=version
-            )
-        }
+        record = vault.repo.tag(
+            str(given.get("name") or ""), str(given.get("purpose") or ""), version=version
+        )
+        readme.write_readme(vault.repo)
+    return {"tag": record}
 
 
 def publish(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
@@ -1141,4 +1229,25 @@ def publish(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[st
         raise BiStoreError("confirm_required", "發佈要由人按確認")
     vault = _vault(workspace, vault_id)
     with _repo_errors():
-        return {"published": vault.repo.publish(str(given.get("tag") or ""))}
+        record = vault.repo.publish(str(given.get("tag") or ""))
+        readme.write_readme(vault.repo)
+    vault.refresh_published()
+    return {"published": record}
+
+
+def reading_store(workspace: Path, dataset: str) -> BiStore:
+    """The store the Agent reads (design §7, decision 8): for a vault, a
+    read-only copy of its published version (the pushed head when never
+    published); any other dataset as it is."""
+    store = BiStore(workspace, dataset)
+    if store.vault_id is None:
+        return store
+    vault = Vault(workspace, store.vault_id)
+    if not vault.reachable and not (vault.local / PUBLISHED_DIR / DB_FILE).is_file():
+        raise BiStoreError("vault_unreachable", f"讀不到知識庫資料夾 {vault.folder}")
+    if vault.reachable:
+        with _repo_errors():
+            folder = vault.refresh_published()
+    else:
+        folder = vault.local / PUBLISHED_DIR  # the last copy this PC built
+    return BiStore(workspace, dataset, view=folder)

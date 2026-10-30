@@ -23,6 +23,8 @@ from typing import Any
 import pytest
 from test_draft_install_cards import served  # noqa: F401 - the real Agent Web fixture
 
+from capabilities.bi_cards.store import BiStore
+
 SHOTS = Path(__file__).resolve().parents[1] / ".scratch" / "bi-vault"
 
 
@@ -143,7 +145,9 @@ def test_vault_panel_and_coverage_in_a_browser(served: Any, tmp_path: Path) -> N
         click("#bi-b-v-go")
         wait("document.getElementById('bi-notice').textContent.includes('已轉成共用知識庫')")
         wait("document.getElementById('bi-dataset').value.startsWith('vault-')")
-        wait("document.getElementById('bi-b-v-state').textContent.includes('已套用 1／1')")
+        wait(
+            "document.getElementById('bi-b-v-state').textContent.includes('還沒 push 的 commit 0')"
+        )
         state = text_of("bi-b-v-state")
         assert "虛構範例" in state and str(shared) in state
         assert not run("document.getElementById('bi-b-v-sync').hidden")
@@ -160,6 +164,56 @@ def test_vault_panel_and_coverage_in_a_browser(served: Any, tmp_path: Path) -> N
         shoot("vault-converted")
         click("#bi-b-v-sync")
         wait("document.getElementById('bi-notice').textContent.includes('已同步')")
+
+        # -- the 「版本」 area (knowledge repositories R5) ---------------------------------
+        wait("document.getElementById('bi-b-ver-history').textContent.includes('轉成知識庫')")
+        assert "還沒有發佈過" in text_of("bi-b-ver-reads")
+        assert run("document.getElementById('bi-b-ver-commit').disabled")
+        dataset = str(run("document.getElementById('bi-dataset').value"))
+        store = BiStore(workspace, dataset)
+        card = store.card_rows()[0]
+        store.set_field(card["id"], "notes", "虛構備註", base_version=card["version"], actor="t")
+        click("#bi-b-v-sync")
+        wait("document.getElementById('bi-b-ver-pending').textContent.includes('notes')")
+        assert "虛構備註" in text_of("bi-b-ver-pending")
+        click("#bi-b-ver-commit")
+        wait("document.getElementById('bi-notice').textContent.includes('請先寫這次改動的目的')")
+        set_value("bi-b-ver-purpose", "補上虛構備註")
+        click("#bi-b-ver-commit")
+        wait("document.getElementById('bi-notice').textContent.includes('已 commit')")
+        wait("!document.getElementById('bi-b-ver-push').disabled")
+        click("#bi-b-ver-push")
+        wait("document.getElementById('bi-notice').textContent.includes('已 push 1 個 commit')")
+        wait("document.getElementById('bi-b-ver-history').textContent.includes('補上虛構備註')")
+        assert len(list((folder / "commits").rglob("*.json"))) == 2
+        assert "補上虛構備註" in (folder / "REPO.md").read_text(encoding="utf-8")
+        click("#bi-b-ver-history li .bi-actions button:nth-child(1)")
+        wait("document.querySelector('#bi-b-ver-history li').textContent.includes('虛構備註')")
+        run(
+            "[...document.querySelectorAll('#bi-b-ver-history li:first-child button')]"
+            ".find((b) => b.textContent === '加 tag').click()"
+        )
+        run("document.querySelector('#bi-b-ver-history .bi-ver-ask input').value = 'v1'")
+        click("#bi-b-ver-history .bi-ver-ask button.go")
+        wait("document.getElementById('bi-notice').textContent.includes('已建立 tag「v1」')")
+        run("window.confirm = () => true")
+        wait(
+            "[...document.querySelectorAll('#bi-b-ver-history button')]"
+            ".some((b) => b.textContent === '發佈 v1')"
+        )
+        run(
+            "[...document.querySelectorAll('#bi-b-ver-history button')]"
+            ".find((b) => b.textContent === '發佈 v1').click()"
+        )
+        wait("document.getElementById('bi-b-ver-reads').textContent.includes('發佈版本「v1」')")
+        wait("document.getElementById('bi-b-ver-history').textContent.includes('發佈中')")
+        shoot("vault-versions")
+        size(390, 844, True)
+        assert not run(
+            "document.documentElement.scrollWidth > document.documentElement.clientWidth"
+        )
+        shoot("vault-versions-phone")
+        size(1366, 1000, False)
 
         # -- a new, empty vault ---------------------------------------------------------------
         click("#bi-b-v-new")

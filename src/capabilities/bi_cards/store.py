@@ -314,14 +314,19 @@ class ApplyResult:
 
 
 class BiStore:
-    def __init__(self, workspace: Path, dataset: str = DEFAULT_DATASET) -> None:
+    def __init__(
+        self, workspace: Path, dataset: str = DEFAULT_DATASET, *, view: Path | None = None
+    ) -> None:
         self.workspace = workspace
         self.dataset = dataset
-        self.dir = dataset_dir(workspace, dataset)
+        #: A read-only copy of the dataset in folder `view` (a vault's
+        #: published version, `vault.reading_store`); never written.
+        self.view = view
+        self.dir = view if view is not None else dataset_dir(workspace, dataset)
         self.path = self.dir / DB_FILE
         #: A subscribed copy: readable, never written here.
-        self.read_only = is_subscribed(dataset)
-        #: A vault's id: its writes become change files (`vault.capture`).
+        self.read_only = is_subscribed(dataset) or view is not None
+        #: A vault's id: its writes become commits (`vault.capture`).
         self.vault_id = None if self.read_only else vault_of(workspace, dataset)
 
     @property

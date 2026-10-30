@@ -102,21 +102,32 @@ class QueryHandler:
 
         def work() -> Contract:
             store = BiStore(self.workspace_root, request.dataset)
+            source = subscriptions.source(self.workspace_root, request.dataset)
+            if store.read_only and source is None:
+                raise BiStoreError("dataset_unknown")
+            published = ""
             if store.vault_id is not None:
-                # Read what the others wrote too: applying their change files
-                # writes no file of this PC's own (BI vaults V6).
+                # A vault is answered from its published version only, never
+                # from this PC's unpushed work (knowledge repositories,
+                # decision 8). Syncing first picks up a new publication; it
+                # writes nothing to the shared folder.
                 from capabilities.bi_cards import vault
 
                 try:
                     vault.sync(self.workspace_root, store.vault_id)
                 except BiStoreError:
                     pass  # the shared folder is not reachable now: answer from this PC
-            source = subscriptions.source(self.workspace_root, request.dataset)
-            if store.read_only and source is None:
-                raise BiStoreError("dataset_unknown")
+                vault_id = store.vault_id
+                store = vault.reading_store(self.workspace_root, request.dataset)
+                reads = vault.Vault(self.workspace_root, vault_id).reads()
+                published = (
+                    f"內容來自發佈版本 {reads['tag']}"
+                    if reads["tag"]
+                    else "這個知識庫還沒有發佈過，內容來自已 push 的最新版本"
+                )
             if not for_store(store).is_bi:
                 raise BiStoreError("schema_not_bi")
-            cited = source_note(source)
+            cited = "；".join(n for n in (source_note(source), published) if n)
             if request.analysis:
                 sections = dashboard.analysis(
                     store, request.analysis, (request.domain or "robotics").lower()

@@ -5710,3 +5710,37 @@ yet (R3 BI wiring, R4 rest, R5). Tests: `tests/test_knowledge_repo_skills.py`,
 - **BI schema document** (`capabilities.bi_cards.schema_doc.schema_markdown(reg)`): a schema as
   Markdown for people (each type, its fields with kind, label, allowed values, link target and
   required, and the links between types). Pure; meant to sit beside the JSON in `schemas/`.
+
+## Knowledge repositories: the Agent reads the published version, the 「版本」 area (R5, BI, 2026-10-30)
+
+Design: `docs/phases/KNOWLEDGE_REPO.md` §7, §9, §10; decision `docs/DECISIONS.md` 2026-10-30 "How the Agent
+picks up a newly published BI version". Code: `src/capabilities/bi_cards/vault.py` (`Vault.reads`,
+`refresh_published`, `reading_store`, `unit_label`), `store.py` (`BiStore(..., view=)`), `capability.py`,
+the page in `src/host_runtime/web_page.py`. Tests: `tests/test_bi_vault_published.py`,
+`tests/test_bi_vault_ui.py`. The wiki side follows R4's wiring.
+
+- **What the Agent reads.** `bi__query` on a vault dataset syncs (as before), then reads
+  `vault.reading_store(workspace, dataset)`: `BiStore(workspace, dataset, view=<local>/published)`, a
+  read-only store (`read_only`, no `vault_id`) over `published/bi.sqlite`. That database is rebuilt from
+  the units of the published commit, or of the pushed head when no publish record is applied here, when
+  that target differs from `published/version.json` (`{"tag": str | null, "commit": str | null}`).
+  This PC's local commits and uncommitted changes never reach it. The answer's `scope_note` says
+  `內容來自發佈版本 <tag>` or that the vault was never published. Unreachable folder: the last copy built
+  here, or `vault_unreachable` when there is none. Every other dataset is read as before.
+- **Status** `GET /api/bi/vaults/<id>/status` adds `"reads": {"tag", "commit"}` (null when the folder is
+  unreachable).
+- **Words for units.** `pending` changes, push `conflicts` and `diff` changes carry `label`: a card as
+  `<type>「<name>」`, a field as `<card> 的 <field>`, evidence as `<card> 的 <field> 證據`, `meta:domains`
+  as 「領域設定」, `schema` as 「schema 版本」.
+- **Files written.** `REPO.md` is rewritten (`knowledge.repo.readme.write_readme`) after create, convert,
+  a push that wrote commits, a tag and a publish. Staging a schema also stages its readable
+  `schemas/<schema id with / as __>@<version>.md` (`schema_doc.schema_markdown`) when the folder has none.
+- **Page** (step 1 「知識庫」, a vault chosen): the status line (cards, behind, ahead, uncommitted, last
+  sync; waiting files, open replay conflicts and unreadable files as warnings), 「版本」: what the Agent
+  reads; uncommitted changes and unpushed commits; Commit (purpose required), 「Push 給大家」,
+  「捨棄還沒 commit 的改動」 (confirm); push conflicts side by side with 「用我的」, 「用別人的」 and, for a
+  field, 「自己填」 (`resolve` with `value`: my unit with the typed value), then push again; history (30
+  newest) with 「看改動」 (diff), 「回到這個版本」 (revert, purpose asked inline, a new local commit), 「加
+  tag」 (name asked inline, the commit's purpose as the tag's) and 「發佈 <tag>」 (a `confirm()` click
+  sends `confirm: true`); the published tag is marked 「發佈中」.
+

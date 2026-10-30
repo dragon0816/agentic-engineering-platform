@@ -5583,3 +5583,17 @@ Plan `docs/phases/KNOWLEDGE_REPO.md` (design, for owner review; nothing implemen
   and the bot looked dead with nothing on screen, though the conflict had already ended. Rejected: keep stopping (silent until a person
   reads the code) and stopping the other program (it is the owner's).
 - This supersedes the Phase 7 adaptation note "HTTP 409 is `telegram_conflict` and stops the loop".
+
+## 2026-10-30: How the Agent picks up a newly published BI version (R5, Claude Code)
+
+- Settles the open point of `docs/phases/KNOWLEDGE_REPO.md` §7: the Agent picks a new publication up
+  **live, at its next question**. `bi__query` syncs the vault (as before), then reads
+  `vault.reading_store`: a read-only copy `<workspace>/bi/vaults/<id>/published/bi.sqlite` rebuilt from
+  the units at the published commit (the pushed head when never published) whenever that target changes
+  (`version.json` marks what was built). No restart and no binding change.
+- A separate copy rather than reading `bi.sqlite`: `bi.sqlite` holds this PC's local commits and
+  uncommitted edits, which decision 8 keeps away from the Agent. Rejected: computing the published state
+  per question (a full rebuild each time), and switching at the Agent's restart (a maintainer would not
+  see the effect of 「發佈」 until someone restarts Agent Web).
+- When the shared folder is unreachable the Agent answers from the last copy this PC built; a vault never
+  built here is refused (`vault_unreachable`).

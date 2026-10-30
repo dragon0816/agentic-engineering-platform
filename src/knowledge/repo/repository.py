@@ -209,15 +209,20 @@ def _write_atomic(path: Path, data: bytes) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.parent / f".{path.name}.{uuid.uuid4().hex[:8]}.tmp"
     temporary.write_bytes(data)
+    replace_retrying(temporary, path)
+
+
+def replace_retrying(source: Path, target: Path) -> None:
+    """`os.replace`, retried briefly: Windows refuses a replace while another
+    process (a virus scanner, the search indexer, a drive client, a reader of
+    a database) briefly holds the file. The source is removed on failure."""
     for attempt in range(_REPLACE_ATTEMPTS):
         try:
-            os.replace(temporary, path)
+            os.replace(source, target)
             return
         except PermissionError:
-            # Windows refuses a replace while another process (a virus
-            # scanner, the search indexer, a drive client) briefly holds a file.
             if attempt == _REPLACE_ATTEMPTS - 1:
-                temporary.unlink(missing_ok=True)
+                source.unlink(missing_ok=True)
                 raise
             time.sleep(0.05 * (attempt + 1))
 
