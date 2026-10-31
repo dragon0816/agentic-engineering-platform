@@ -38,6 +38,8 @@ FAILURE_TEXT = {
     "dataset_unknown": "這台電腦沒有訂閱這個資料集",
     "permission_denied": "BI 卡片查詢沒有授權給你（在 Agent Web 的 Capabilities 選取）",
     "invalid_input": "工具參數不正確",
+    "analysis_unknown": "這個知識庫的發佈版本沒有這個分析",
+    "param_invalid": "分析的參數不正確",
     "timeout": "這次查詢逾時",
     "schema_not_bi": "這個資料集用的不是 BI schema（bi.schema/*），對話的 BI 查詢只支援 BI 資料集；"
     "請在 Agent Web 的 BI 卡片頁查看它的卡片",
@@ -67,11 +69,15 @@ SCHEMA: dict[str, Any] = {
         "limit": {"type": "integer", "minimum": 1, "maximum": 100},
         "analysis": {
             "type": "string",
-            "enum": [*analysis_names(), "all"],
-            "description": "a whole-dataset analysis instead of a search: gaps (applications "
-            "where competitors have a solution and we do not), trend_coverage, "
-            "demand_without_opportunity, solutions_vs_opportunities, funnel, "
-            "technologies_without_concept, product_completeness, trend_priority, … or all",
+            "description": "a whole-dataset analysis instead of a search. In a knowledge base "
+            "(vault-<id>): the slug of one of its saved analyses (its Dashboard; the published "
+            "version is read), e.g. gaps, trend-coverage, funnel, or all. Elsewhere one of: "
+            + ", ".join([*analysis_names(), "all"]),
+        },
+        "params": {
+            "type": "object",
+            "description": 'the analysis\'s parameters, e.g. {"domain": "AIDC", '
+            '"include_sample": false}',
         },
     },
     "required": [],

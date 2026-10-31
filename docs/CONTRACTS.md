@@ -6136,3 +6136,19 @@ Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §4.3. Code `capabilities/bi_cards
 - **Page.** The Dashboard keeps its own order for a vault (`ordered`), shows extra parameters in
   `#bi-dash-params` (a change redraws), draws bar/line/scatter analyses as charts and tables as before, opens a
   flagged analysis section. The separate 「分析」 card is gone (the Dashboard is the analyses).
+
+## `bi__query` reads a vault's saved analyses (P4, 2026-11-01)
+
+Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §4.3. Code `capabilities/bi_cards/capability.py`,
+`capabilities/bi_cards/board.py` (`published_sections`, `saved_name`), `host_runtime/bi_cards_tools.py`; test
+`tests/test_bi_query_analyses.py`.
+
+- `bi-cards.query` input: `analysis` up to 60 characters (a coded name, `all`, or an analysis slug) and
+  `params` (object, default `{}`); `domain` also fills a `domain` parameter not given in `params`.
+- In a vault (not a benchmark's chosen store): when the published version has the analysis (`name`, or a
+  coded name with `_` read as `-`, or `all` = every offered analysis in the Dashboard's order), it is run on
+  the published copy with the parameters (an enum value matched without case) and answered as sections like the
+  Dashboard's (`id`, `title`, `columns`, `rows`, `flags`, `chart`, `note`, `params`). Otherwise a coded name is
+  answered by the coded section until P5; anything else is refused `analysis_unknown`; a wrong parameter
+  `param_invalid`; a name that is neither a coded name nor a slug `invalid_input`.
+- The tool schema's `analysis` is free text (vault slugs vary) listing the coded names; `params` is new.

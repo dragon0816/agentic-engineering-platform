@@ -23,7 +23,7 @@ from typing import Any
 
 from pydantic import Field
 
-from capabilities.bi_cards import dashboard, service, subscriptions
+from capabilities.bi_cards import analyses, board, dashboard, service, subscriptions
 from capabilities.bi_cards.catalog import for_store
 from capabilities.bi_cards.store import DEFAULT_DATASET, BiStore, BiStoreError
 from capabilities.contracts import CapabilitySpec
@@ -66,7 +66,11 @@ class QueryRequest(Contract):
     #: A whole-dataset analysis computed like the page's dashboard (gaps,
     #: coverage, funnel …), so a "which applications lack …" answer covers
     #: every card instead of what a search happened to return.
-    analysis: str = Field(default="", max_length=40)
+    #: In a vault: a saved analysis of the published version (its slug) or `all`
+    #: (BI P4); the coded names keep working until they are removed.
+    analysis: str = Field(default="", max_length=60)
+    #: The analysis's parameters (`domain` may also come from `domain`).
+    params: dict[str, Any] = Field(default_factory=dict)
 
 
 class QueryResult(Contract):
@@ -106,8 +110,10 @@ class QueryHandler:
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = QueryRequest.model_validate(inputs)
 
-        if request.analysis and request.analysis not in (*dashboard.analysis_names(), "all"):
-            raise CapabilityRefused("invalid_input")
+        coded = (*dashboard.analysis_names(), "all")
+        if request.analysis and request.analysis not in coded:
+            if not analyses.NAME_RE.match(request.analysis):
+                raise CapabilityRefused("invalid_input")
 
         def work() -> Contract:
             store = BiStore(self.workspace_root, request.dataset)
@@ -115,6 +121,7 @@ class QueryHandler:
             if store.read_only and source is None:
                 raise BiStoreError("dataset_unknown")
             published = ""
+            vault_id = store.vault_id
             chosen = self.store_for(request.dataset) if self.store_for is not None else None
             if chosen is not None:
                 store, published = chosen
@@ -141,9 +148,24 @@ class QueryHandler:
                 raise BiStoreError("schema_not_bi")
             cited = "；".join(n for n in (source_note(source), published) if n)
             if request.analysis:
-                sections = dashboard.analysis(
-                    store, request.analysis, (request.domain or "robotics").lower()
+                saved = (
+                    board.saved_name(self.workspace_root, vault_id, request.analysis)
+                    if vault_id is not None and chosen is None
+                    else None
                 )
+                if saved is not None:
+                    given = {**request.params}
+                    if request.domain and "domain" not in given:
+                        given["domain"] = request.domain
+                    sections = board.published_sections(
+                        self.workspace_root, str(vault_id), saved, given
+                    )
+                elif request.analysis in coded:
+                    sections = dashboard.analysis(
+                        store, request.analysis, (request.domain or "robotics").lower()
+                    )
+                else:
+                    raise BiStoreError("analysis_unknown")
                 return QueryResult(
                     dataset=request.dataset,
                     total=sum(len(section["rows"]) for section in sections),

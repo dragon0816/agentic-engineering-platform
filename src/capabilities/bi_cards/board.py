@@ -195,3 +195,64 @@ def board(
         },
         "sections": [*chains, *drawn, checked],
     }
+
+
+def published_sections(
+    workspace: Path, vault_id: str, name: str, given: dict[str, Any]
+) -> list[dict[str, Any]]:
+    """A saved analysis of the version the Agent reads (`all`: every one in the
+    Dashboard's order), as sections; for `bi__query` `analysis` (BI P4)."""
+    from capabilities.bi_cards import feed, vault
+    from capabilities.bi_cards.store import DB_FILE
+
+    target = vault.Vault(workspace, vault_id)
+    try:
+        _version, units = feed._published(target)
+    except feed.FeedError as failure:
+        raise BiStoreError(failure.code, failure.message) from None
+    registry = feed._registry(units, workspace)
+    offered = feed._offered(units, registry)
+    slugs = analyses.order(units, list(offered)) if name == "all" else [name]
+    if any(s not in offered for s in slugs):
+        raise BiStoreError("analysis_unknown", f"發佈版本裡沒有分析「{name}」")
+    db = target.refresh_published() / DB_FILE
+    names = _names(vault.reading_store(workspace, vault.dataset_name(vault_id)))
+    today = date.today().isoformat()
+    found = []
+    for slug in slugs:
+        item = offered[slug]
+        declared = item.get("params") or {}
+        chosen = {k: v for k, v in given.items() if k in declared}
+        for key, spec in analyses.described_params(declared, registry).items():
+            # The model may write "aidc" for "AIDC": an enum value is matched without case.
+            if spec["type"] == "enum" and isinstance(chosen.get(key), str):
+                lower = {str(v).lower(): v for v in spec["values"]}
+                chosen[key] = lower.get(chosen[key].lower(), chosen[key])
+        try:
+            values = analyses.resolve_params(declared, chosen, registry, today=today)
+            section = _section(item, _run(db, item, values), "", names)
+            section["params"] = values
+        except BiStoreError as failure:
+            if name != "all":
+                raise
+            section = _section(item, None, failure.message)
+        found.append(section)
+    return found
+
+
+def saved_name(workspace: Path, vault_id: str, name: str) -> str | None:
+    """`name` as a published analysis's slug (a coded name like `trend_coverage`
+    finds `trend-coverage`), or None when the published version has neither."""
+    from capabilities.bi_cards import feed, vault
+
+    try:
+        _version, units = feed._published(vault.Vault(workspace, vault_id))
+    except (feed.FeedError, BiStoreError):
+        return None
+    offered = feed._offered(units, feed._registry(units, workspace))
+    if name == "all":
+        return "all" if offered else None
+    for slug in (name, name.replace("_", "-")):
+        if slug in offered:
+            return slug
+    return None

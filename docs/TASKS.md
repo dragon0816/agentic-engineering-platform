@@ -3977,3 +3977,7 @@ s-k-20261011T102952` (not published).
     (`param.<name>`), parallel guarded runs with a cache; chains and quality still coded; local datasets keep the
     coded Dashboard until P5. The separate 「分析」 card is gone. Tests `test_bi_board` (4), `test_bi_vault_ui`.
     Next: P4.
+  - [x] 2026-11-01, Claude Code: BI P4, `bi__query` `analysis` names a saved analysis of the published
+    version with `params` (`board.published_sections`); `all` runs every offered analysis in the Dashboard's
+    order; unpublished or unknown names are refused; coded names still answer until P5. Tests
+    `test_bi_query_analyses` (3). Next: D1 (schema 2.1.0 with `tech_areas`, `chain`).
