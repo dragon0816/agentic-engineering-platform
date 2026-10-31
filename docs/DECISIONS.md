@@ -5694,3 +5694,15 @@ Engineering choices (Claude Code), fixing the R4 core library before wiring it:
   capability is not read-only (`side_effect`), and before every version operation that reads or moves
   the working units; a person never has to "collect" changes. A question edited in a repository is
   written into this PC's question folder, never into the repository.
+
+## 2026-10-31: Wiki repositories on the Knowledge page (R4b part 2, Claude Code)
+
+- Repositories are listed beside the sandboxes on the same start screen until R4c removes sandboxes, so
+  nothing in progress in a sandbox is cut off; the three steps are the same page for both, and for a
+  repository step 3's 「版本」 area takes the place of the sandbox push card and the candidate
+  merge/publish (design §2: "push there becomes commit and push"). Rejected: a separate repository page
+  (two copies of the step UI until R4c).
+- The 「版本」 area is the BI one's behaviour (commit with purpose, push, conflicts side by side, history,
+  diff, revert, tag, publish after `confirm()`) written for the Knowledge page's own status line and
+  buttons; the BI functions are tied to the BI pane's elements and notices. Pulled originals are staged
+  files without unit changes, so the area lists staged files and offers a commit of files only.

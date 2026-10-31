@@ -374,6 +374,23 @@ select.mem-field { width: auto; flex: 0 1 220px; min-width: 0; max-width: 100%; 
 .kp-form label { display: block; font-size: 13px; margin: 10px 0 4px; }
 .kp-form select, .kp-form input { width: 100%; box-sizing: border-box; min-height: 36px; }
 .kp-form button { margin-top: 8px; min-height: 44px; }
+.kp-repos { margin-top: 12px; }
+.kp-repos .kp-list button { min-height: 44px; }
+.kp-ver h4 { margin: 14px 0 4px; font-size: 14px; }
+.kp-ver input { width: 100%; box-sizing: border-box; min-height: 36px; }
+.kp-ver ul { margin: 4px 0; padding-left: 20px; }
+.kp-ver li { margin: 6px 0; }
+.kp-ver .kp-ver-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px; margin: 4px 0; }
+.kp-ver .kp-ver-pair > div { border: 1px solid var(--line, #d0d4da); border-radius: 6px;
+  padding: 6px 8px; overflow-wrap: anywhere; }
+.kp-ver .kp-ver-pair > div.chosen { outline: 2px solid var(--accent, #2563eb); }
+.kp-ver .kp-ver-ask { display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  margin: 6px 0; }
+.kp-ver .kp-ver-ask input { flex: 1 1 220px; width: auto; }
+.kp-ver .kp-warn { color: var(--warn, #9a5b00); }
+#kp-repo-settings input { width: 100%; box-sizing: border-box; min-height: 36px; }
+#kp-repo-settings label { display: block; font-size: 13px; margin: 10px 0 4px; }
 .kp-coverage { padding: 8px 10px; border-radius: 6px; background: #e6f4ea; color: #137333; }
 .kp-coverage.kp-low { background: #fef7e0; color: #8a5a00; }
 .kp-q-editor textarea { width: 100%; box-sizing: border-box; font-family: ui-monospace, Consolas,
@@ -2001,6 +2018,34 @@ tr:last-child td { border-bottom: none; }
             <button class="go" type="submit">Create sandbox and pull</button>
           </form>
         </div>
+        <div class="card kp-repos" lang="zh-Hant"><h3>知識庫（有版本紀錄）</h3>
+          <p class="note">每個改動都寫目的並 commit，push 給大家，發佈後 Agent
+            才讀到；歷史裡可以改回任何版本。之後 sandbox 會被知識庫取代。</p>
+          <div id="kp-repos" class="kp-list">reading&hellip;</div>
+          <details class="kp-repo-new"><summary>新增知識庫</summary>
+            <form id="kp-repo-form" class="kp-form">
+              <label for="kp-repo-mode">方式</label>
+              <select id="kp-repo-mode">
+                <option value="import">匯入既有 wiki 資料夾的副本</option>
+                <option value="create">建立空的知識庫</option>
+                <option value="join">加入別人分享的知識庫資料夾</option>
+              </select>
+              <div id="kp-repo-source-box">
+                <label for="kp-repo-source">要匯入的 wiki 資料夾（只會讀，不會改）</label>
+                <input id="kp-repo-source" maxlength="400"
+                  placeholder="例如 C:\Users\me\Documents\my-wiki">
+              </div>
+              <label for="kp-repo-path" id="kp-repo-path-l">
+                放知識庫的資料夾（例如 OneDrive 上的共用資料夾）</label>
+              <input id="kp-repo-path" required maxlength="400">
+              <div id="kp-repo-title-box">
+                <label for="kp-repo-title">名稱</label>
+                <input id="kp-repo-title" maxlength="80" placeholder="例如 RS 產品知識">
+              </div>
+              <button class="go" type="submit">新增</button>
+            </form>
+          </details>
+        </div>
       </div>
       <div id="kp-box" hidden>
         <div class="kp-sandbox-bar">
@@ -2016,9 +2061,19 @@ tr:last-child td { border-bottom: none; }
             data</h2>
           <p class="note">Bring this folder's originals into the sandbox, add files from this
             computer if needed, then convert everything to Raw.</p>
-          <div class="card"><h3>From the project vault</h3>
-            <p class="note">Originals not yet ingested are copied into the sandbox. Ingested
-              ones are already here as Raw, so they are not pulled again.</p>
+          <div class="card" id="kp-repo-settings" lang="zh-Hant" hidden><h3>這台電腦的資料夾</h3>
+            <p class="note">只存在這台電腦：「拉資料」從收件資料夾拉原始檔，
+              測試題目放在題目資料夾。</p>
+            <label for="kp-intake">收件資料夾</label>
+            <input id="kp-intake" maxlength="400"
+              placeholder="例如 OneDrive 上大家放原始檔的資料夾">
+            <label for="kp-questions">題目資料夾</label>
+            <input id="kp-questions" maxlength="400">
+            <div class="kp-actions"><button id="kp-repo-save" type="button">儲存</button>
+              <span class="note" id="kp-repo-saved" role="status"></span></div></div>
+          <div class="card"><h3 id="kp-pull-h">From the project vault</h3>
+            <p class="note" id="kp-pull-note">Originals not yet ingested are copied into the
+              sandbox. Ingested ones are already here as Raw, so they are not pulled again.</p>
             <div id="kp-pull-folders" class="kp-list"></div>
             <div class="kp-actions"><button id="kp-pull" type="button">Pull</button>
               <span class="note" id="kp-pull-result"></span></div></div>
@@ -2191,7 +2246,26 @@ tr:last-child td { border-bottom: none; }
             <span class="note" id="kp-bench-state"></span></div>
           <div id="kp-bench-result"></div>
           </div>
-          <div class="card"><h3>Push to the vault</h3>
+          <div class="card kp-ver" id="kp-ver" lang="zh-Hant" hidden><h3>版本</h3>
+            <p class="note" id="kp-ver-reads"></p>
+            <p class="note" id="kp-ver-state"></p>
+            <h4>還沒給大家的改動</h4>
+            <div id="kp-ver-pending"></div>
+            <label for="kp-ver-purpose">
+              這次改動的目的（commit 一定要寫，之後在歷史裡看得到）</label>
+            <input id="kp-ver-purpose" maxlength="500" placeholder="例如：加入 Tester Y 的規格">
+            <div class="kp-actions">
+              <button class="go" id="kp-ver-commit" type="button">Commit</button>
+              <button id="kp-ver-push" type="button">Push 給大家</button>
+              <button id="kp-ver-discard" type="button">捨棄還沒 commit 的改動</button></div>
+            <p class="note">Push 前可以先跑上面的「Run test」：跑過的內容如果有
+              題目退步，push 會被擋下；沒跑過的照樣送出，但會註明沒有測試。</p>
+            <div id="kp-ver-result" role="status" aria-live="polite"></div>
+            <div id="kp-ver-conflicts" role="alert"></div>
+            <h4>歷史與發佈</h4>
+            <div id="kp-ver-history"></div>
+          </div>
+          <div class="card" id="kp-push-card"><h3>Push to the vault</h3>
             <p class="note">Check conflicts and choose a side for each. Push merges into the
               project vault as it is now, tests the merged result with the ticked sets, and
               writes only when no question regresses and the score is not lower.</p>
@@ -2210,13 +2284,14 @@ tr:last-child td { border-bottom: none; }
           <h3>Legacy Raw</h3>
           <div class="kp-actions"><button id="kp-adopt" type="button">Adopt legacy Raw</button>
             <span class="note" id="kp-adopt-result"></span></div>
+          <div id="kp-candidate">
           <h3>Local candidate</h3>
           <p class="note">Merge into a local candidate and publish it as the Agent's version
             without pushing to the project vault.</p>
           <div class="kp-actions">
             <button id="kp-merge" type="button">Merge into a candidate</button>
             <button id="kp-publish" type="button" disabled>Publish candidate</button>
-          </div>
+          </div></div>
           <h3>Layered index</h3>
           <p class="note">Bilingual summaries and category indexes for ingest planning on a
             large wiki; queries do not use them.</p>
@@ -8743,11 +8818,291 @@ async function loadKnowledge() {
       + item.base_name + ")",
       () => kpRun("Opening", () => kpOpen(item))));
   }
-  if (kpSandbox && !listed.sandboxes.some((s) => s.sandbox_id === kpSandbox.sandbox_id)) {
-    kpSandbox = null;
+  kpRepoPrefix = info.repo_prefix || "repo.";
+  const repos = el("kp-repos"); repos.replaceChildren();
+  if (!(info.repos || []).length) repos.append(text("還沒有知識庫。"));
+  for (const repo of info.repos || []) {
+    const item = kpRepoItem(repo);
+    repos.append(kpButton(item.label + (repo.reachable ? "" : "（讀不到共用資料夾）"),
+      () => kpRun("Opening", () => kpOpen(item))));
   }
+  const open = kpSandbox && (kpSandbox.repo
+    ? (info.repos || []).some((r) => r.id === kpSandbox.repo)
+    : listed.sandboxes.some((s) => s.sandbox_id === kpSandbox.sandbox_id));
+  if (!open) kpSandbox = null;
   if (!kpSandbox) kpStage("pull", false);
 }
+
+// -- Wiki knowledge repositories (knowledge repositories R4b) -----------------------
+// A repository opens like a sandbox under the id `repo.<id>`: every step runs on
+// its working folder and what a step writes becomes a change to commit. Its
+// 「版本」 area replaces push, refresh and the candidate in step 3.
+let kpRepoPrefix = "repo.";
+
+function kpRepoItem(repo) {
+  const id = kpRepoPrefix + repo.id;
+  return {sandbox_id: id, base_name: id, label: repo.title || repo.id, scope: null,
+          repo: repo.id};
+}
+
+function kpRepoMode() {
+  const mode = el("kp-repo-mode").value;
+  el("kp-repo-source-box").hidden = mode !== "import";
+  el("kp-repo-title-box").hidden = mode === "join";
+  el("kp-repo-path-l").textContent = mode === "join"
+    ? "知識庫資料夾（別人分享給你、裡面有 repo.json 的資料夾）"
+    : "放知識庫的資料夾（例如 OneDrive 上的共用資料夾）";
+}
+el("kp-repo-mode").addEventListener("change", kpRepoMode);
+kpRepoMode();
+
+async function kpRepoCall(path, body) {
+  // The repository routes answer {ok: false, message} in words; show those.
+  let reply;
+  try { reply = await call("/api/knowledge/repos" + path, body); }
+  catch (failure) {
+    throw new Error((failure.payload && failure.payload.message) || failure.message);
+  }
+  if (reply && reply.ok === false) throw new Error(reply.message || reply.code);
+  return reply;
+}
+
+function kpRepoPath(action) {
+  return "/" + encodeURIComponent(kpSandbox.repo) + "/" + action;
+}
+
+el("kp-repo-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  kpRun("新增知識庫", async () => {
+    const mode = el("kp-repo-mode").value, path = el("kp-repo-path").value.trim();
+    const body = mode === "join" ? {path}
+      : {path, title: el("kp-repo-title").value.trim(),
+         ...(mode === "import" ? {source: el("kp-repo-source").value.trim()} : {})};
+    if (mode === "create" && !body.title) throw new Error("請填名稱");
+    const made = await kpRepoCall(mode === "create" ? "" : "/" + mode, body);
+    for (const id of ["kp-repo-source", "kp-repo-path", "kp-repo-title"]) el(id).value = "";
+    await loadKnowledge();
+    await kpOpen(kpRepoItem({id: made.repo.id, title: made.repo.title}));
+  });
+});
+
+async function kpRepoSettings() {
+  const chosen = (await kpRepoCall(kpRepoPath("settings"))).settings;
+  el("kp-intake").value = chosen.intake || ""; el("kp-questions").value = chosen.questions || "";
+  el("kp-repo-saved").textContent = "";
+}
+el("kp-repo-save").addEventListener("click", () => kpRun("儲存資料夾", async () => {
+  await kpRepoCall(kpRepoPath("settings"), {intake: el("kp-intake").value.trim(),
+                                            questions: el("kp-questions").value.trim()});
+  await kpOpen(kpSandbox);
+  el("kp-repo-saved").textContent = "已儲存。";
+}));
+
+function kpVerValue(value) {
+  if (value === null || value === undefined) return "（沒有）";
+  let shown;
+  if (typeof value !== "object") shown = String(value);
+  else if ("heading" in value || "body" in value) {
+    shown = [value.heading, value.body].filter(Boolean).join(" ");
+  } else if ("text" in value) shown = value.text;
+  else if ("file" in value) shown = value.file;
+  else if ("revision" in value) shown = "第 " + value.revision + " 版";
+  else shown = JSON.stringify(value);
+  shown = String(shown).replace(/\s+/g, " ").trim();
+  if (!shown) return "（空）";
+  return shown.length > 160 ? shown.slice(0, 160) + "\u2026" : shown;
+}
+
+function kpVerChanges(changes) {
+  const list = bh("ul", "");
+  for (const change of changes.slice(0, 50)) {
+    list.append(bh("li", "", bh("strong", "", change.label || change.unit), "：",
+      kpVerValue(change.before), " \u2192 ", kpVerValue(change.after)));
+  }
+  if (changes.length > 50) list.append(bh("li", "note", "還有 " + (changes.length - 50) + " 項"));
+  return list;
+}
+
+function kpVerAsk(where, label, value, go, run) {
+  // One inline question (a purpose, a tag name) under the row that asked it.
+  where.querySelector(".kp-ver-ask")?.remove();
+  const input = document.createElement("input");
+  input.maxLength = 500; input.value = value || ""; input.setAttribute("aria-label", label);
+  const row = bh("div", "kp-ver-ask", bh("span", "", label), input);
+  const ok = kpButton(go, () => kpRun(go, async () => {
+    const answer = input.value.trim();
+    if (!answer) { input.focus(); return; }
+    await run(answer);
+  }));
+  ok.className = "go";
+  row.append(ok, kpButton("取消", () => row.remove()));
+  where.append(row); input.focus();
+}
+
+function kpVerSay(message, bad) {
+  const box = el("kp-ver-result"); box.replaceChildren();
+  if (message) box.append(bh("p", bad ? "kp-warn" : "note", message));
+}
+
+async function kpVerShow() {
+  const [state, pending, history] = await Promise.all([kpRepoCall(kpRepoPath("status")),
+    kpRepoCall(kpRepoPath("pending")), kpRepoCall(kpRepoPath("history?limit=30"))]);
+  const reads = state.reads || {};
+  el("kp-ver-reads").textContent = !state.reachable
+    ? "現在讀不到共用資料夾（OneDrive 沒有同步或路徑不對）：可以繼續判讀，但不能 push。"
+    : reads.tag ? "Agent 讀的是發佈版本「" + reads.tag
+      + "」；之後 push 的內容要再發佈，Agent 才會讀到。"
+    : "還沒有發佈過：Agent 讀的是大家已 push 的最新內容（不含你還沒 push 的改動）。";
+  el("kp-ver-state").textContent = state.reachable ? "別人 push 了還沒套用的 " + state.behind
+    + " 個・你還沒 push 的 commit " + state.ahead + " 個・還沒 commit 的改動 " + state.uncommitted
+    + " 個・上次同步 " + (state.last_sync ? biTime(state.last_sync) : "\u2014") : "";
+  const box = el("kp-ver-pending"); box.replaceChildren();
+  const changes = pending.uncommitted || [], commits = pending.commits || [];
+  const files = pending.files || [], uncommitted = changes.length + files.length;
+  if (!uncommitted && !commits.length) {
+    box.append(bh("p", "note", "沒有：大家看到的就是你的內容。"));
+  }
+  if (changes.length) {
+    box.append(bh("p", "", "還沒 commit 的改動 " + changes.length + " 項："),
+      kpVerChanges(changes));
+  }
+  if (files.length) {
+    // Originals pulled or added, Raw, schema and skill files staged with them.
+    const list = bh("ul", "");
+    for (const path of files.slice(0, 20)) list.append(bh("li", "", path));
+    if (files.length > 20) list.append(bh("li", "note", "還有 " + (files.length - 20) + " 個"));
+    box.append(bh("p", "", "還沒 commit 的檔案 " + files.length + " 個："), list);
+  }
+  if (commits.length) {
+    const list = bh("ul", "");
+    for (const item of commits) {
+      list.append(bh("li", "", bh("strong", "", item.purpose), "・" + biTime(item.created)
+        + "（已 commit，還沒 push）"));
+    }
+    box.append(bh("p", "", "已 commit、還沒 push 的 " + commits.length + " 個："), list);
+  }
+  el("kp-ver-commit").disabled = !uncommitted;
+  el("kp-ver-discard").disabled = !uncommitted;
+  el("kp-ver-push").disabled = !commits.length || !state.reachable;
+  kpVerHistory(history);
+}
+
+function kpVerHistory(history) {
+  const box = el("kp-ver-history"); box.replaceChildren();
+  const tags = history.tags || [], published = history.published;
+  const byCommit = {};
+  for (const tag of tags) (byCommit[tag.commit] = byCommit[tag.commit] || []).push(tag);
+  const live = (tag) => Boolean(published && published.tag === tag.name);
+  const list = bh("ul", "");
+  (history.commits || []).forEach((commit, index) => {
+    const row = bh("li", "");
+    const badges = (byCommit[commit.id] || []).map((tag) =>
+      biBadge("tag " + tag.name + (live(tag) ? "・發佈中" : ""), live(tag) ? "good" : ""));
+    row.append(bh("div", "", bh("strong", "", commit.purpose), " ", ...badges),
+      bh("div", "note", biTime(commit.created) + "・" + commit.author + "・" + commit.units
+        + " 項" + (commit.kind === "revert" ? "・回復版本" : "") + "・" + commit.id.slice(0, 10)));
+    const actions = bh("div", "kp-actions"), detail = bh("div", "");
+    const look = kpButton("看改動", () => kpRun("讀取改動", async () => {
+      if (detail.childNodes.length) { detail.replaceChildren(); return; }
+      const reply = await kpRepoCall(kpRepoPath("diff?commit=" + encodeURIComponent(commit.id)));
+      detail.replaceChildren(kpVerChanges(reply.changes || []));
+    }));
+    look.setAttribute("aria-label", "看「" + commit.purpose + "」的改動");
+    actions.append(look);
+    if (index > 0) {
+      actions.append(kpButton("回到這個版本", () => kpVerAsk(row, "回復的目的",
+        "回到「" + commit.purpose + "」的版本", "回復（成為新的 commit）", async (purpose) => {
+          await kpRepoCall(kpRepoPath("revert"), {version: commit.id, purpose});
+          kpVerSay("已回復成新的 commit；按「Push 給大家」送出。");
+          await kpOpen(kpSandbox);
+        })));
+    }
+    actions.append(kpButton("加 tag", () => kpVerAsk(row,
+      "tag 名稱（小寫英數字與 . -，例如 2026q4）", "", "建立 tag", async (name) => {
+        await kpRepoCall(kpRepoPath("tag"), {name, version: commit.id, purpose: commit.purpose});
+        kpVerSay("已建立 tag「" + name + "」；要讓 Agent 讀它，請按「發佈 " + name + "」。");
+        await kpVerShow();
+      })));
+    for (const tag of byCommit[commit.id] || []) {
+      if (live(tag)) continue;
+      actions.append(kpButton("發佈 " + tag.name, () => kpRun("發佈", async () => {
+        if (!confirm("發佈 tag「" + tag.name + "」？發佈後 Agent 只讀這個版本的內容；"
+          + "要撤回就再發佈另一個 tag。")) return;
+        await kpRepoCall(kpRepoPath("publish"), {tag: tag.name, confirm: true});
+        kpVerSay("已發佈「" + tag.name + "」：Agent 下一個問題就讀這個版本。");
+        await kpVerShow();
+      })));
+    }
+    row.append(actions, detail); list.append(row);
+  });
+  if (!(history.commits || []).length) list.append(bh("li", "note", "還沒有 commit。"));
+  box.append(list);
+}
+
+function kpVerConflicts(conflicts) {
+  // Push conflicts side by side: nothing was written until each is decided.
+  const box = el("kp-ver-conflicts"); box.replaceChildren();
+  if (!conflicts.length) return;
+  const decided = {};
+  box.append(bh("p", "kp-warn", "沒有送出：有 " + conflicts.length + " 個地方別人也改了。"
+    + "每一項選一邊，再按「Push 給大家」。"));
+  const list = bh("ul", "");
+  for (const conflict of conflicts) {
+    const label = conflict.label || conflict.unit;
+    const mine = bh("div", "", bh("div", "note", "你的（" + conflict.purpose + "）"),
+      kpVerValue(conflict.mine));
+    const theirs = bh("div", "", bh("div", "note", "別人已 push 的"), kpVerValue(conflict.theirs));
+    const choose = (choice) => kpRun("決定衝突", async () => {
+      await kpRepoCall(kpRepoPath("resolve"), {unit: conflict.unit, choice});
+      decided[conflict.unit] = choice;
+      mine.classList.toggle("chosen", choice === "mine");
+      theirs.classList.toggle("chosen", choice === "theirs");
+      const left = conflicts.filter((c) => !decided[c.unit]).length;
+      kpVerSay(left ? "已決定；還有 " + left + " 項。" : "全部決定了，按「Push 給大家」送出。");
+    });
+    const useMine = kpButton("用我的", () => choose("mine"));
+    useMine.setAttribute("aria-label", "用我的：" + label);
+    const useTheirs = kpButton("用別人的", () => choose("theirs"));
+    useTheirs.setAttribute("aria-label", "用別人的：" + label);
+    list.append(bh("li", "", bh("strong", "", label), bh("div", "kp-ver-pair", mine, theirs),
+      bh("div", "kp-actions", useMine, useTheirs)));
+  }
+  box.append(list);
+}
+
+el("kp-ver-commit").addEventListener("click", () => kpRun("Commit", async () => {
+  const input = el("kp-ver-purpose"), purpose = input.value.trim();
+  if (!purpose) { kpVerSay("請先寫這次改動的目的。", true); input.focus(); return; }
+  await kpRepoCall(kpRepoPath("commit"), {purpose});
+  input.value = ""; kpVerSay("已 commit；按「Push 給大家」才會送出。");
+  await kpVerShow();
+}));
+el("kp-ver-push").addEventListener("click", () => kpRun("Push", async () => {
+  const reply = await kpRepoCall(kpRepoPath("push"), {});
+  kpVerConflicts(reply.status === "conflicts" ? reply.conflicts || [] : []);
+  const notes = (reply.notes || []).join("；");
+  if (reply.status === "pushed") {
+    kpVerSay("已 push " + (reply.commits || []).length
+      + " 個 commit；要讓 Agent 讀到，請加 tag 並發佈。"
+      + (notes ? " " + notes : ""));
+  } else if (reply.status === "blocked") {
+    kpVerSay("沒有送出：" + (reply.blocking || []).join("；") + (notes ? " " + notes : ""), true);
+  } else if (reply.status === "nothing") {
+    kpVerSay("沒有要 push 的 commit。");
+  }
+  await kpOpen(kpSandbox);
+}));
+el("kp-ver-discard").addEventListener("click", () => {
+  if (!confirm("捨棄這台電腦上還沒 commit 的改動？工作資料夾會回到最近的版本；"
+      + "已 commit 的不受影響。")) {
+    return;
+  }
+  kpRun("捨棄", async () => {
+    await kpRepoCall(kpRepoPath("discard"), {});
+    kpVerSay("已捨棄還沒 commit 的改動。");
+    await kpOpen(kpSandbox);
+  });
+});
 
 async function kpReviewBanner(item) {
   // A sandbox opened from an accepted review proposal (owner 2026-10-13).
@@ -8916,14 +9271,28 @@ async function kpOpen(item) {
     el("kp-plan-one").hidden = true; el("kp-doc-back").hidden = true;
   }
   kpSandbox = item; el("kp-box").hidden = false;
-  el("kp-title").textContent = item.label + " \u2014 " + item.sandbox_id;
+  const repo = Boolean(item.repo);
+  el("kp-title").textContent = item.label + " \u2014 "
+    + (repo ? "知識庫 " + item.repo : item.sandbox_id);
+  el("kp-discard").hidden = repo;
+  el("kp-switch").textContent = repo ? "換一個" : "Switch sandbox";
+  el("kp-repo-settings").hidden = !repo;
+  el("kp-ver").hidden = !repo; el("kp-push-card").hidden = repo;
+  el("kp-candidate").hidden = repo;
+  el("kp-pull-h").textContent = repo ? "從收件資料夾" : "From the project vault";
+  el("kp-pull-note").textContent = repo
+    ? "還沒判讀過的原始檔會複製進來；已經判讀過的（內容相同）已經是 Raw，不會再拉。"
+    : "Originals not yet ingested are copied into the sandbox. Ingested ones are already "
+      + "here as Raw, so they are not pulled again.";
+  if (repo) await kpRepoSettings();
   kpStatus("Opening the sandbox: its files (1/5)\u2026");
   const contents = await pipeline("sandbox-contents", {sandbox_id: item.sandbox_id});
   el("kp-drop").replaceChildren(table(["Original in drop"], contents.drop, (row) => [row]));
   const raw = el("kp-raw"); raw.replaceChildren();
   const rawRefs = item.scope ? contents.raw.filter((ref) =>
     ref.startsWith("raw/" + item.scope + "/")) : contents.raw;
-  el("kp-scope-name").textContent = item.scope || "whole vault (older sandbox)";
+  el("kp-scope-name").textContent = item.scope
+    || (item.repo ? "整個知識庫" : "whole vault (older sandbox)");
   kpRawTotal = rawRefs.length;
   kpStage(kpCurrentStage, switched);
   await kpReviewBanner(item);
@@ -8959,7 +9328,8 @@ async function kpOpen(item) {
   kpStatus("Opening the sandbox: rules (2/5)\u2026"); await kpLoadRules();
   kpStatus("Opening the sandbox: drop folders (3/5)\u2026"); await kpLoadPull();
   kpStatus("Opening the sandbox: question sets (4/5)\u2026"); await kpLoadBench();
-  kpStatus("Opening the sandbox: push status (5/5)\u2026"); await kpPushShow();
+  kpStatus("Opening the sandbox: push status (5/5)\u2026");
+  if (item.repo) await kpVerShow(); else await kpPushShow();
   kpStatus("");
 }
 
@@ -9007,7 +9377,12 @@ function kpTicked(box) {
 }
 
 async function kpLoadPull() {
-  const folders = await pipeline("drop-folders", {base: kpSandbox.base_name});
+  let folders;
+  try { folders = await pipeline("drop-folders", {base: kpSandbox.base_name}); }
+  catch (failure) {
+    if (failure.code !== "intake_not_set") throw failure;
+    folders = {folders: [], unset: true};
+  }
   const pick = el("kp-category"); pick.replaceChildren();
   const categories = kpSandbox.scope ? [[kpSandbox.scope, kpSandbox.scope]]
     : [["", "(no category)"], ...folders.folders.filter((f) => !f.path.includes("/"))
@@ -9022,8 +9397,10 @@ async function kpLoadPull() {
   kpChecks(el("kp-pull-folders"), inScope.map((f) =>
     [f.path, f.path + " (" + f.files + " files)"]), scope ? [scope] : []);
   if (!inScope.length) {
-    el("kp-pull-folders").append(text(scope ? "The project vault's drop has no " + scope
-      + " folder yet." : "The project vault's drop is empty."));
+    el("kp-pull-folders").append(text(folders.unset ? "還沒設定收件資料夾（在上面設定）；"
+      + "也可以用下面的「Add files」從這台電腦加入。" : kpSandbox.repo ? "收件資料夾是空的。"
+      : scope ? "The project vault's drop has no " + scope + " folder yet."
+      : "The project vault's drop is empty."));
   }
 }
 
@@ -9035,6 +9412,9 @@ async function kpLoadBench() {
   if (sets.ungraded.length) {
     el("kp-bench-sets").append(text(" Not graded (no must-mention / must-not-say terms): "
       + sets.ungraded.join(", ")));
+  }
+  if (kpSandbox.repo && !Object.keys(sets.sets).length) {
+    el("kp-bench-sets").append(text("沒有題目：在步驟 1 設定這台電腦的題目資料夾。"));
   }
   await kpBenchShow();
 }

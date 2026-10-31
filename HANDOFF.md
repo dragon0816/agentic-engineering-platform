@@ -1,6 +1,6 @@
 # Handoff
 
-Updated: 2026-10-31 (Asia/Taipei), by Claude Code (knowledge repositories R1, R2, R3 BI part, R4a, R4b part 1, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-10-31 (Asia/Taipei), by Claude Code (knowledge repositories R1, R2, R3 BI part, R4a, R4b, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
 ## Knowledge repositories R1, R2, R3 (BI part), R4a and R5 (BI side) (2026-10-30/31, Claude Code) — latest
 
@@ -28,8 +28,11 @@ Updated: 2026-10-31 (Asia/Taipei), by Claude Code (knowledge repositories R1, R2
 - R4b part 1 (2026-10-31): every Knowledge tab step runs on a repository opened as `repo.<id>`
   (`Sandboxes.open`), what it wrote is staged at once; per-PC intake and question folders
   (`/api/knowledge/repos/<id>/settings`); 「測試」 on a repository runs `wiki_bench.run`. The working folder
-  captures against what it was built from. The page still shows only sandboxes (part 2 is next); the old
-  sandbox/push/publish path still works unchanged.
+  captures against what it was built from.
+- R4b part 2 (2026-10-31): the Knowledge page lists repositories beside sandboxes (import a copy, create,
+  join), runs the three steps on `repo.<id>`, shows this PC's folders in step 1 and the 「版本」 area in
+  step 3 (commit, push, conflicts, history, diff, revert, tag, publish). Browser test
+  `test_knowledge_repo_ui`. The old sandbox/push/publish path still works unchanged until R4c.
 - Telegram: a 409 conflict is retried instead of stopping the loop (`ded9bfc0`, `ff4164fe`).
 
 **Verification.** ruff format/check and mypy clean (848 files). BI + knowledge test files after the R3
@@ -41,12 +44,9 @@ when the PC is free). Local commits are not pushed yet.
 Agent Web restarts on this code, `market-bi` is read-only until R6 rebuilds it (owner present).
 
 **Next actions.** (1) Run the full suite when the PC is free, then push the local commits. (2) R3 BI
-follow-ups if the owner wants them: Session B on a skill, sources inside the repository folder. (3) R4b part 2:
-the Knowledge page (`web_page.py` `#kp-*`): a repository chooser (list, create, import a copy, join, the
-two per-PC folders) beside the sandbox list; for a repository, steps pass `repo.<id>`, step 1 pulls from
-the intake folder, and the 「版本」 area (modelled on BI's `#bi-b-ver`, routes `/api/knowledge/repos/<id>/*`)
-replaces push, refresh and the candidate merge/publish; a browser test. Then R4c (remove sandboxes, candidates, `knowledge_push`,
-`knowledge_publish`); R4b's 「版本」 area completes R5 for the wiki (the Agent already reads the
+follow-ups if the owner wants them: Session B on a skill, sources inside the repository folder. (3) R4c, after the owner has tried a repository on the page (Agent Web restart is the owner's): review
+proposals open a repository instead of a sandbox (`web.py` `_route`), then remove sandboxes, candidates, `knowledge_push`,
+`knowledge_publish` and their tests. R5 for the wiki is complete (the 「版本」 area of R4b; the Agent reads the
 published folder through a `repo` binding). (4) R6 with the owner present: rebuild `market-bi` from raw data, import an `rs-k` copy.
 
 ## BI vaults V9–V13 (2026-10-29, Claude Code)

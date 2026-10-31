@@ -3886,3 +3886,11 @@ s-k-20261011T102952` (not published).
     The working folder now captures against what it was built from (never undoes someone else's synced
     change) and keeps `drop/` and pipeline records across rebuilds. `GET/POST /api/knowledge/repos/<id>/
     settings`. Tests `test_knowledge_repo_pipeline` (5). Not done: the page (R4b part 2), R4c.
+  - [x] 2026-10-31, Claude Code: R4b part 2, wiki repositories on the Knowledge page. The start screen
+    lists repositories beside sandboxes and imports a copy, creates or joins one; a repository runs the
+    three steps under `repo.<id>`; step 1 has this PC's intake and question folders; step 3's 「版本」 area
+    (commit with purpose, push with conflicts and the test note, discard, history, diff, revert, tag,
+    publish after confirmation) replaces the sandbox push and the candidate for a repository; a commit of
+    only pulled files is offered. Browser test `test_knowledge_repo_ui` (screenshots
+    `.scratch/knowledge-repo/`). Not done: R4c (remove sandboxes, candidates, sandbox push and publish;
+    review proposals still open a sandbox), question sets inside the repository.

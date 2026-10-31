@@ -5796,9 +5796,9 @@ source folder, and what an AI run reads (R3, Claude Code)". Code: `src/capabilit
 
 Owner decisions "Wiring the wiki type (R4)" (`docs/DECISIONS.md` 2026-10-30). Code:
 `src/knowledge/wiki_repos.py`, routes `src/host_runtime/knowledge_repos_api.py`. Tests
-`tests/test_knowledge_repos_api.py`, `tests/test_knowledge_repo_pipeline.py`. The pipeline steps run on a
-repository since R4b part 1; the page still shows the sandbox flow until R4b part 2, and the sandbox, push
-and candidate publish paths stay until R4c.
+`tests/test_knowledge_repos_api.py`, `tests/test_knowledge_repo_pipeline.py`, `tests/test_knowledge_repo_ui.py`.
+The Knowledge page offers repositories beside sandboxes since R4b part 2; the sandbox, push and candidate
+publish paths stay until R4c.
 
 - **Registry.** A wiki repository is registered in the workspace (`<workspace>/knowledge-repos/registry.json`,
   type `wiki`), never in `host.json`.
@@ -5872,6 +5872,16 @@ and candidate publish paths stay until R4c.
   run captures when it ends. `/api/knowledge/benchmark/start` on a repository runs `wiki_bench.run`
   (`questions_not_set` without a question folder). `GET /api/knowledge/pipeline` adds `"repos"` (the
   listing above) and `"repo_prefix": "repo."`.
+- **The Knowledge page** (R4b part 2, `web_page.py`): the start screen lists the repositories («知識庫（有版本
+  紀錄）») beside the sandboxes, with a form to import a copy of a wiki folder, create an empty repository or
+  join a shared folder (`/api/knowledge/repos`, `/import`, `/join`). An opened repository is the item
+  `{sandbox_id: "repo.<id>", base_name: "repo.<id>", repo, scope: null}`, so every step passes `repo.<id>`.
+  For a repository: step 1 shows this PC's folders (`#kp-repo-settings`, `…/<id>/settings`) and pulls from
+  the intake folder; step 3 shows the 「版本」 area `#kp-ver` (reads, status counts, uncommitted changes with
+  labels and staged files, purpose + Commit, Push 給大家 with conflicts to decide and the push notes or
+  blocking reasons, discard; history with 看改動, 回到這個版本, 加 tag and 發佈 <tag> after `confirm()`)
+  and hides the sandbox push card (`#kp-push-card`), the candidate merge/publish (`#kp-candidate`) and
+  Discard sandbox.
 - **Benchmark and push check** (`host_runtime.wiki_bench`): `run(workspace, id, ask, sets=, actor=,
   skill=, questions_fallback=)` captures, then runs `knowledge_bench.run_benchmark` with the working folder
   as `sandbox` and the pushed head (materialized at `work-view/head`) as `project`; the report (saved in
