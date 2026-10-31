@@ -5821,3 +5821,23 @@ numbers).
 - **Golden answers come from the feed code itself** on a committed fixture vault built reproducibly (fixed
   clock, seeded ids); the manifest `golden/requests.json` gives the order and statuses, so Atlas and the F2
   live-route test replay the same requests. Rejected: hand-written golden files (they drift from the code).
+
+## 2026-11-01: The default analysis pack, implementation choices (P2, Claude Code)
+
+- **Scripts that carry the coded functions verbatim, not SQL.** Each section became a Python analysis whose code
+  is a shared prelude (the helpers of `dashboard.py`/`market.py`, cards read through `query()`) plus the
+  section's function copied unchanged. Parity is then by construction and checked per section on three
+  fixtures (robotics demo v4, the market fixture 2.0.0 with a sample card, the feed fixture vault) for every
+  domain, with and without samples, plus a run of every script in the guarded process. Rejected for now:
+  rewriting 27 sections in SQL (ordering ties, date and list logic make parity fragile); a person or the
+  analysis AI can still rewrite any of them in SQL later, the parity test showing the difference.
+- **Card links become names.** A result table holds plain values, so a card cell is its name; the coded
+  Dashboard's links to cards are lost in the analysis version (P3 may add links by name).
+- **What waits.** The chain sections (A–A3) and the coverage matrix read the domain configuration; they enter
+  the pack once the schema carries `chain` and `tech_areas` (D1, D3) and stay coded until then. The quality
+  section stays the quality check (`/api/bi/quality`), not an analysis.
+- **New vaults start with the pack** (create and convert, in the first commit), so the Dashboard is never empty
+  once P3 draws analyses; tests about vault mechanics and the frozen F1 fixture opt out (`default_pack: false`).
+- **Found on the way:** a guarded script's non-ASCII output was garbled on Windows (`-I` ignores
+  `PYTHONIOENCODING`); the runner now writes UTF-8. The Dashboard's 「分析」 card could interleave two drawings;
+  a newer drawing now stops an older one.

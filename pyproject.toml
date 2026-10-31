@@ -107,6 +107,9 @@ select = ["E", "F", "I", "UP", "B"]
 [tool.ruff.lint.per-file-ignores]
 "benchmarks/business_workflow_lab/operator/smoke.py" = ["E501"]
 "benchmarks/coding_v1/fixtures/build_fixtures.py" = ["E501"]
+# The default BI analysis pack's scripts: each runs after `_prelude.py` (BI P2), whose
+# names they use.
+"src/capabilities/bi_cards/pack_default/*.py" = ["F821"]
 
 [tool.mypy]
 python_version = "3.11"
@@ -118,6 +121,8 @@ exclude = [
     "tests/fixtures/bi_vault_example/",
     "tests/fixtures/robotics_kb_sample/",
     "tests/fixtures/bi_schema_v8/",
+    # Analysis scripts run in a guarded process after `_prelude.py`, not modules (BI P2).
+    "src/capabilities/bi_cards/pack_default/",
 ]
 
 # The source loan tests, vendored unchanged apart from their imports as the

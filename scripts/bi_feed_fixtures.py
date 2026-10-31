@@ -293,6 +293,7 @@ def build_vault(workspace: Path, parent: Path) -> Path:
                 "purpose": "虛構資料：BI analysis feed 的契約測試",
                 "schema": "bi.schema/v1.1",
                 "author": "fixture",
+                "default_pack": False,  # the fixture holds its own three analyses
             },
             "fixture",
         )

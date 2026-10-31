@@ -6088,3 +6088,30 @@ Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §4.1. Code `analyses.py` (`listin
   and says when the schema does not offer it. The Dashboard's 「分析」 card draws `order` (at most 12) with the same
   controls. Chosen values and the last result are kept per analysis across redraws; a change to the analyses
   redraws the Dashboard card the next time it opens.
+
+## BI analysis packs and the default pack (P2, 2026-11-01)
+
+Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §4.2–§4.3. Code `capabilities/bi_cards/packs.py`,
+`capabilities/bi_cards/pack_default/` (`_prelude.py` and one script per section); tests
+`tests/test_bi_default_pack.py`, `tests/test_bi_vault_ui.py`.
+
+- **Pack** `aep.bi.analysis_pack/v1` = `{"format", "id", "title", "version", "analyses": [<analysis unit value
+  with "slug">], "report"?}`; every analysis is checked like a saved one (`pack_invalid` 400 for the whole pack).
+- **`bi-market-default` 1.0.0**: the 27 sections of `dashboard.py` (§1–§19) and `market.py` (§20–§31,
+  `pending_links`) as Python analyses (`code` = the prelude + the section, the coded function moved verbatim),
+  `params` `domain` (enum, `values_from: Application.domain`, default `robotics`), `include_sample` (bool,
+  false) and, for `stale`, `customer-contact`, `timing-gaps`, `today` (date, default today); `requires.types` =
+  the types each section reads. Result table = the section's columns (+ `level` for sections that flag rows:
+  `gap` for a red flag, `warning` otherwise); a card cell becomes the card's name. `report.kept` lists what is
+  not in the pack: A, A2, A3 (chains, until D1/D3), the coverage matrix (until `tech_areas`), Q (quality stays
+  its own check). `pending-links` gets the schema's link fields written into its `LINK_FIELDS` line on import.
+- **Routes.** `GET /api/bi/vaults/<id>/packs` -> `{"packs": [{"id", "title", "version", "analyses", "usable":
+  [slug], "skipped": [{"slug", "title", "missing"}], "kept"}]}`. `POST .../packs {"import": "bi-market-default"
+  or <pack>}` stages the analyses the working schema satisfies (a vault without `meta:dashboard` takes the
+  pack's order) -> `{"ok", "staged", "skipped", ...analyses listing}`; `{"export": {"id"?, "title"?,
+  "version"?}}` -> `{"ok", "pack"}` (working analyses in the Dashboard's order; `pack_empty` 400).
+- **New vaults** (`POST /api/bi/vaults`, `.../convert`) stage the default pack in their first commit unless the
+  request says `"default_pack": false`.
+- **Page.** Step 3 「分析與圖表」: 匯入預設分析包, 匯入分析包檔案 (JSON), 匯出分析包 (downloads `<id>.json`).
+- **Scripts write UTF-8.** The runner reconfigures stdout/stderr to UTF-8 (`python -I` ignores
+  `PYTHONIOENCODING`; Windows otherwise garbled every non-ASCII result).

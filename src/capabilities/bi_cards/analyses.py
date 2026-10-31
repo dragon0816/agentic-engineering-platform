@@ -76,6 +76,10 @@ READ_ACTIONS = {
 # `python -I runner.py`; the script is `script.py` beside it.
 RUNNER = r'''
 import json, os, sqlite3, sys
+# -I ignores PYTHONIOENCODING: without this, Windows writes the result in its
+# ANSI code page and every non-ASCII text comes back garbled.
+sys.stdout.reconfigure(encoding="utf-8")
+sys.stderr.reconfigure(encoding="utf-8")
 SCRATCH = os.path.realpath(os.getcwd())
 DB = os.path.join(SCRATCH, "bi.sqlite")
 DENIED_IMPORTS = {"socket", "_socket", "ssl", "_ssl", "subprocess", "_posixsubprocess",

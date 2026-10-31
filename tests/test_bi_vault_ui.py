@@ -349,7 +349,8 @@ def test_vault_panel_and_coverage_in_a_browser(
 
         # -- 分析與圖表 in step 3, then on the Dashboard (BI T3) ---------------------------
         wait("!document.getElementById('bi-b-an').hidden")
-        assert "還沒有存起來的分析" in text_of("bi-b-an-list")
+        # A converted vault starts with the default analysis pack (BI P2).
+        assert "6. 缺口" in text_of("bi-b-an-list")
         click("#bi-b-an-new")
         wait("!document.getElementById('bi-b-ana').hidden")
         set_value("bi-b-ana-msg", "各類型各有幾張卡？畫長條圖")
@@ -374,6 +375,10 @@ def test_vault_panel_and_coverage_in_a_browser(
             "code": one_type + " GROUP BY 1", "chart": {"type": "table"},
             "params": {"t": {"type": "enum", "values": ["Technology", "TestSolution"],
                              "default": "Technology", "label": "類型"}}})  # fmt: skip
+        # Put the two first (the pack's analyses follow), then hide one on the page.
+        analyses.set_dashboard(
+            workspace, vault_id, {"order": ["by-type", "one-type"], "hidden": []}
+        )
         click("#bi-views [data-bi-view=build]")
         run("biAnalyses(bi.verVault)")
         wait("!!document.querySelector('#bi-b-an-list select[data-param=t]')")
@@ -390,10 +395,15 @@ def test_vault_panel_and_coverage_in_a_browser(
         wait("document.getElementById('bi-b-an-list').textContent.includes('Dashboard 不顯示')")
         wait("document.getElementById('bi-b-ver-pending').textContent.includes('Dashboard 的順序')")
         shoot("vault-analysis-params")
+        click("#bi-b-an-pack")  # again: changes nothing; the notice lists what v4 cannot use
+        wait("document.getElementById('bi-notice').textContent.includes('已加入')")
+        click("#bi-b-an-export")
+        wait("document.getElementById('bi-notice').textContent.includes('已匯出')")
         click("#bi-views [data-bi-view=dashboard]")
-        wait("document.getElementById('bi-an-dash-sub').textContent.startsWith('1 個')")
         wait("!!document.querySelector('#bi-an-dash-body select[data-param=t]')")
-        assert not run("!!document.querySelector('#bi-an-dash-body svg.bi-chart')")
+        first = "document.querySelector('#bi-an-dash-body .bi-step strong').textContent"
+        assert run(first) == "某類型的卡片數"
+        assert "各類型的卡片數" not in text_of("bi-an-dash-body")
         shoot("vault-analysis-dashboard-params")
         click("#bi-views [data-bi-view=build]")
         click("#bi-stepper [data-stage=source]")

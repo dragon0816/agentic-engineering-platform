@@ -2950,7 +2950,11 @@ tr:last-child td { border-bottom: none; }
               腳本不能連網、不能啟動程式，也不能寫入它的暫存資料夾以外的地方。</p>
             <div id="bi-b-an-list"></div>
             <div class="bi-actions">
-              <button class="bi-btn" id="bi-b-an-new" type="button">和 AI 做新分析</button></div>
+              <button class="bi-btn" id="bi-b-an-new" type="button">和 AI 做新分析</button>
+              <button class="bi-btn" id="bi-b-an-pack" type="button">匯入預設分析包</button>
+              <label class="bi-btn" for="bi-b-an-file">匯入分析包檔案</label>
+              <input type="file" id="bi-b-an-file" accept=".json,application/json" hidden>
+              <button class="bi-btn" id="bi-b-an-export" type="button">匯出分析包</button></div>
             <div class="bi-ai" id="bi-b-ana" role="region" aria-labelledby="bi-b-ana-h" hidden>
               <h5 id="bi-b-ana-h">和 AI 做分析</h5>
               <p class="bi-meta" id="bi-b-ana-target"></p>
@@ -13047,11 +13051,14 @@ async function biAnalyses(vaultId) {
 }
 
 async function biDashAnalyses() {
+  // A newer drawing replaces an older one still running (each analysis is awaited).
+  const seq = bi.anDashSeq = (bi.anDashSeq || 0) + 1;
   const box = el("bi-an-dash"), body = el("bi-an-dash-body");
   const vault = biVaultOf(biDataset());
   body.replaceChildren();
   if (!vault) { box.hidden = true; return; }
   const reply = await call("/api/bi/vaults/" + vault.id + "/analyses");
+  if (seq !== bi.anDashSeq) return;
   const bySlug = Object.fromEntries(reply.analyses.map((a) => [a.slug, a]));
   const shown = reply.order.map((slug) => bySlug[slug]).filter(Boolean);
   box.hidden = !shown.length;
@@ -13060,6 +13067,7 @@ async function biDashAnalyses() {
     const state = biAnState(vault.id, item.slug), out = biAnOut("dash", item, state);
     const rerun = () => biRunInto(vault.id, item, state, out).catch((failure) =>
       out.replaceChildren(bh("p", "bi-warn", "沒有畫出來：" + failure.message)));
+    if (seq !== bi.anDashSeq) return;
     body.append(bh("div", "bi-step", bh("strong", "", item.title),
       biParamInputs(item, state.values, rerun), out));
     await rerun();
@@ -13102,6 +13110,35 @@ async function biAnalysisAi(slug, title) {
   el("bi-b-ana-msg").focus();
 }
 
+async function biImportPack(pack) {
+  // A pack's analyses the schema satisfies are staged; the rest are listed (design §4.2).
+  const vaultId = bi.verVault;
+  const reply = await biCall("/api/bi/vaults/" + vaultId + "/packs", {import: pack});
+  biVaultState(await call("/api/bi/vaults/" + vaultId + "/status"));
+  const skipped = (reply.skipped || []).map((s) => s.title + "（缺 " + s.missing.join("、") + "）");
+  biNotice(true, "已加入 " + reply.staged.length + " 個分析（commit 並 push 後大家才會看到）"
+    + (skipped.length ? "；schema 不支援、沒有加入：" + skipped.join("、") : "") + "。");
+}
+
+el("bi-b-an-pack").addEventListener("click", () => biImportPack("bi-market-default")
+  .catch((failure) => biNotice(false, failure.message)));
+el("bi-b-an-file").addEventListener("change", async () => {
+  const file = el("bi-b-an-file").files[0]; el("bi-b-an-file").value = "";
+  if (!file) return;
+  try { await biImportPack(JSON.parse(await file.text())); }
+  catch (failure) { biNotice(false, "沒有匯入分析包：" + failure.message); }
+});
+el("bi-b-an-export").addEventListener("click", async () => {
+  try {
+    const reply = await biCall("/api/bi/vaults/" + bi.verVault + "/packs", {export: {}});
+    const blob = new Blob([JSON.stringify(reply.pack, null, 2)], {type: "application/json"});
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob); link.download = reply.pack.id + ".json";
+    document.body.append(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+    biNotice(true, "已匯出 " + reply.pack.analyses.length + " 個分析（" + link.download + "）。");
+  } catch (failure) { biNotice(false, "沒有匯出：" + failure.message); }
+});
 el("bi-b-an-new").addEventListener("click", () => biAnalysisAi(null, null)
   .catch((failure) => biNotice(false, failure.message)));
 el("bi-b-ana-close").addEventListener("click", () => {

@@ -3963,3 +3963,11 @@ s-k-20261011T102952` (not published).
     analysis AI may propose `params`/`requires`. Step 3 and the Dashboard's 「分析」 card show parameter controls,
     up/down and hide/show; values and results survive redraws. Tests `test_bi_analysis_params` (4),
     `test_bi_vault_ui` (parameter change reruns, hide, Dashboard shows the rest). Next: P2.
+  - [x] 2026-11-01, Claude Code: BI P2, the default analysis pack `bi-market-default` and pack import/export
+    (`docs/phases/BI_ANALYSIS_DASHBOARD.md` §4.2–§4.3). The 27 sections of `dashboard.py` and `market.py` moved
+    verbatim into guarded scripts (`pack_default/`, shared `_prelude.py`) with `domain`, `include_sample`,
+    `today` and `requires`; per-section parity on three fixtures for every domain and with/without samples
+    (`test_bi_default_pack`, 10 tests); A–A3, the coverage matrix (wait for D1/D3) and Q (stays the quality check)
+    listed in the pack's report. `/api/bi/vaults/<id>/packs` (list, import, export); new vaults start with the
+    pack; step 3 buttons import/export. Fixed: non-ASCII script output on Windows, interleaved Dashboard drawing.
+    Next: P3 (Dashboard tab renders analyses), P4 (`bi__query` reads saved analyses).

@@ -120,6 +120,7 @@ def _two_pcs(tmp_path: Path) -> tuple[_Drive, str, str, Path, Path]:
                 "purpose": "虛構測試：市場訊號與產品對應",
                 "schema": "bi.schema/v1.1",
                 "author": "alice",
+                "default_pack": False,  # these tests are about the vault, not its analyses
             },
         )
     )

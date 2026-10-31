@@ -110,7 +110,7 @@ def test_the_analysis_ai_queries_proposes_and_fixes_on_the_harness(tmp_path: Pat
     shared.mkdir()
     made = _ok(_call(ws, "POST", "/api/bi/vaults", {
         "path": str(shared), "title": "Market", "purpose": "虛構", "schema": "bi.schema/v1.1",
-        "author": "alice"}))  # fmt: skip
+        "author": "alice", "default_pack": False}))  # fmt: skip
     vault_id, dataset = made["vault"]["id"], made["vault"]["dataset"]
     _import(ws, dataset, _row("TSN", standard_body="IEEE"), _row("PROFINET", standard_body="IEEE"))
     opened = {"dataset": dataset, "kind": "analysis", "target": "new"}
@@ -176,3 +176,14 @@ def test_the_analysis_ai_queries_proposes_and_fixes_on_the_harness(tmp_path: Pat
     status, refused = route(ws, "alice", "POST", f"/api/bi/sessions/{session['id']}/turns",
                             {}, body)  # fmt: skip
     assert (status, refused["code"]) == (400, "harness_unavailable")
+
+
+def test_a_scripts_non_ascii_result_and_output_survive(tmp_path: Path) -> None:
+    # `python -I` ignores PYTHONIOENCODING: the runner must write UTF-8 itself.
+    drive, vault_id, dataset, a, b = _vault_with_cards(tmp_path)
+    db = vault.Vault(a, vault_id).db_path
+    done = analyses.run_python(
+        db, 'print("標準組織")\nresult = {"columns": ["組織"], "rows": [["電機"]]}'
+    )
+    assert done["columns"] == ["組織"] and done["rows"] == [["電機"]]
+    assert "標準組織" in done["printed"]

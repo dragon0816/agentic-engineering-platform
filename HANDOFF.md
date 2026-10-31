@@ -1,6 +1,6 @@
 # Handoff
 
-Updated: 2026-11-01 (Asia/Taipei), by Claude Code (BI analysis dashboard: F1, F2, F3, P1; earlier: knowledge repositories R1, R2, R3 BI part, R4a, R4b, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-11-01 (Asia/Taipei), by Claude Code (BI analysis dashboard: F1, F2, F3, P1, P2; earlier: knowledge repositories R1, R2, R3 BI part, R4a, R4b, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
 ## BI analysis dashboard and domain retirement (2026-11-01, Claude Code) — latest
 
@@ -24,20 +24,21 @@ restart the running Agent Web.
 - F3 (fixture server): `scripts/bi_feed_server.py --port 53611`; contract "... the fixture server (F3)".
   Codex is unblocked for A1/A2 (golden files) and I1 (fixture server). Pushed as `a6664acf`.
 - P1 (parameters, requirements, Dashboard order on the page): contract `docs/CONTRACTS.md` "BI analyses:
-  parameters, requirements and the Dashboard's order on the page (P1)".
+  parameters, requirements and the Dashboard's order on the page (P1)". Pushed as `43d60a56`.
+- P2 (default pack, import/export): contract "BI analysis packs and the default pack (P2)", decisions
+  `docs/DECISIONS.md` 2026-11-01 "The default analysis pack, implementation choices (P2)". New vaults now
+  start with the pack (`default_pack: false` opts out; the vault-mechanics tests and the F1 fixture do).
 
-**Verification (P1).** `ruff format --check .`, `ruff check .`, `mypy src tests` (876 files) clean; `pytest
-tests/test_bi_analysis_params.py tests/test_bi_feed_api.py tests/test_bi_feed_fixtures.py
-tests/test_bi_feed_server.py tests/test_bi_analyses.py tests/test_bi_vault.py` passed; the headless browser
-test `tests/test_bi_vault_ui.py` and `test_agent_web.py -k browser_script_parses` passed (screenshots
-`.scratch/bi-vault/vault-analysis-params.png`, `vault-analysis-dashboard-params.png`). The full suite was not run.
+**Verification (P2).** `ruff format --check .`, `ruff check .`, `mypy src tests` (878 files) clean;
+`scripts/bi_feed_fixtures.py --check` unchanged; every non-browser BI test file and the knowledge-repository
+tests (389 tests) passed after two expected test updates; the BI browser tests (`tests/test_bi_*_ui.py`, 10)
+passed. The full suite was not run.
 
-**Next actions.** P2: the default pack `bi-market-default` (`aep.bi.analysis_pack/v1`) converting every section
-of `dashboard.py` (1–19) and `market.py` (20–31, A–A3) into SQL or a guarded script with `params` (`domain`,
-`include_sample`, `today`) and `requires`; a parity test per section on the fixtures (robotics demo,
-`tests/fixtures/bi_schema_v8/`, the market fixture) for every domain and with/without samples; sections that
-cannot be expressed are listed in the pack's report and kept; pack import (stages what the schema satisfies,
-lists the rest) and export. Then P3/P4, D1 → D3, P5, D4.
+**Next actions.** (1) P3: the Dashboard tab draws the vault's analyses in `order` (parameters at the top, `level`
+badges, counts summed for the strip) instead of the coded sections; decide what a dataset only on this PC shows
+(proposal: the built-in pack run directly, read-only) and keep the chain sections, coverage matrix and quality
+coded until D1/D3. (2) P4: `bi__query` `analysis` names a saved analysis of the published version (and its
+params). Then D1 → D3, the chain sections and coverage matrix into the pack, P5, D4.
 
 ## Knowledge repositories R1, R2, R3 (BI part), R4a and R5 (BI side) (2026-10-30/31, Claude Code)
 

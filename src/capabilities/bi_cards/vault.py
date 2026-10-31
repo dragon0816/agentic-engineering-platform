@@ -1018,6 +1018,16 @@ def _new_vault(
     return Vault(workspace, vault_id), segments
 
 
+def _stage_default_pack(vault: Vault, reg: Registry, given: Mapping[str, Any]) -> None:
+    """A new vault's Dashboard: the built-in analyses its schema satisfies
+    (design BI_ANALYSIS_DASHBOARD.md §4.2), unless `default_pack` is false."""
+    if given.get("default_pack") is False:
+        return
+    from capabilities.bi_cards import packs
+
+    packs.stage_pack(vault, reg, packs.default_pack())
+
+
 def _segments_meta(segments: list[dict[str, str]]) -> str:
     return json.dumps(segments, ensure_ascii=False, sort_keys=True)
 
@@ -1038,6 +1048,7 @@ def create(workspace: Path, given: dict[str, Any], actor: str) -> dict[str, Any]
             )
         vault._stage_schema(reg.ref)
         vault_skills.stage_classify(vault.repo, reg)
+        _stage_default_pack(vault, reg, given)
         vault.repo.commit(f"建立知識庫，使用 schema {reg.ref}", kind="schema")
         pushed = vault.repo.push()
         readme.write_readme(vault.repo)
@@ -1101,6 +1112,7 @@ def convert(workspace: Path, given: dict[str, Any], actor: str) -> dict[str, Any
         reg = catalog.resolve(workspace, str(units[repo_engine.SCHEMA_UNIT]))
         vault_skills.stage_classify(vault.repo, reg)
         vault_skills.move_notes(vault.repo, reg)
+        _stage_default_pack(vault, reg, given)
         vault.repo.commit(f"把資料集「{name}」轉成知識庫", kind="import")
         pushed = vault.repo.push()
         readme.write_readme(vault.repo)
