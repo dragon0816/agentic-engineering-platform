@@ -15,7 +15,7 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import analyses, packs, vault, vault_checks
+from capabilities.bi_cards import analyses, migrate, packs, vault, vault_checks
 from capabilities.bi_cards.store import BiStoreError
 from host_runtime import bi_bench, bi_feed_api
 
@@ -135,6 +135,9 @@ def route(
         return 200, {"ok": True, **vault_checks.save_question(workspace, vault_id, given)}
     if action == "bench":
         return 200, {"ok": True, **_start_bench(workspace, actor, vault_id, bench)}
+    if action == "migrate-domains":
+        # BI D3: a dry run unless `apply` with the dry run's token.
+        return 200, {"ok": True, **migrate.migrate_domains(workspace, vault_id, given, actor)}
     if action == "packs":
         if isinstance(given.get("export"), dict):
             return 200, {

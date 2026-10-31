@@ -167,7 +167,7 @@ def run_sql(
         raise BiStoreError("analysis_invalid", "請寫 SQL")
     if len(text) > MAX_CODE:
         raise BiStoreError("analysis_invalid", f"SQL 最多 {MAX_CODE} 字")
-    with tempfile.TemporaryDirectory(prefix="aep-bi-sql-") as scratch:
+    with tempfile.TemporaryDirectory(prefix="aep-bi-sql-", ignore_cleanup_errors=True) as scratch:
         copy = _copy(db_path, Path(scratch))
         db = sqlite3.connect(f"file:{copy.as_posix()}?mode=ro", uri=True)
         try:
@@ -222,7 +222,7 @@ def run_python(
         raise BiStoreError("analysis_invalid", "請寫腳本")
     if len(text) > MAX_CODE:
         raise BiStoreError("analysis_invalid", f"腳本最多 {MAX_CODE} 字")
-    with tempfile.TemporaryDirectory(prefix="aep-bi-py-") as scratch:
+    with tempfile.TemporaryDirectory(prefix="aep-bi-py-", ignore_cleanup_errors=True) as scratch:
         folder = Path(scratch)
         _copy(db_path, folder)
         (folder / "script.py").write_text(text, encoding="utf-8")

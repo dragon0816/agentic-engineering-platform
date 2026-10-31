@@ -2496,7 +2496,10 @@ tr:last-child td { border-bottom: none; }
           <div class="bi-actions">
             <button class="bi-btn" id="bi-dom-save" type="button">儲存設定</button>
             <button class="bi-btn" id="bi-dom-sample" type="button">填入範例</button>
+            <button class="bi-btn" id="bi-dom-migrate" type="button" hidden>
+              預覽：搬進 schema 與卡片</button>
           </div>
+          <div id="bi-dom-plan" aria-live="polite"></div>
         </details>
         <div id="bi-dash-params" class="bi-actions" hidden></div>
         <div class="mem-status" id="bi-status-dash" role="status" aria-live="polite" hidden></div>
@@ -11853,6 +11856,48 @@ async function biLoadDomains() {
     ? "・第 " + reply.revision + " 版・" + reply.config.domains.length + " 個領域" : "・尚未設定";
   el("bi-dom-text").value = reply.config ? JSON.stringify(reply.config, null, 1) : "";
   biDomainWarnings(reply.warnings || []);
+  // A vault's configuration moves into its schema and cards (BI D3).
+  el("bi-dom-migrate").hidden = !(reply.configured && biVaultOf(biDataset()));
+  el("bi-dom-plan").replaceChildren();
+}
+
+async function biMigrateDomains() {
+  const vault = biVaultOf(biDataset()); if (!vault) return;
+  const url = "/api/bi/vaults/" + vault.id + "/migrate-domains";
+  const plan = await biCall(url, {});
+  const box = el("bi-dom-plan"); box.replaceChildren();
+  const list = bh("ul", "");
+  if (plan.schema) {
+    list.append(bh("li", "", "schema 從 " + plan.schema.from + " 升到 " + plan.schema.to));
+  }
+  for (const item of plan.aliases) {
+    list.append(bh("li", "", item.type + "「" + item.card + "」加上別名：" + item.add.join("、")));
+  }
+  for (const item of plan.chains) {
+    list.append(bh("li", "", "節點「" + item.node + "」的鏈別：" + item.chain.join("、")));
+  }
+  list.append(bh("li", "", "移除領域設定（區段與技術領域改由 schema 的允許值提供）"));
+  const notes = [];
+  if (plan.missing.length) {
+    notes.push("找不到卡片、不會建立的別名：" + plan.missing.map((m) => m.alias + " → "
+      + m.name).join("、"));
+  }
+  if (plan.dropped_chains.length) {
+    notes.push("schema 不允許的鏈：" + plan.dropped_chains.join("、"));
+  }
+  if (plan.unknown_areas.length) {
+    notes.push("schema 不允許的技術領域：" + plan.unknown_areas.join("、"));
+  }
+  box.append(bh("p", "", "會寫成一個 commit「" + plan.purpose + "」："), list,
+    ...notes.map((n) => bh("p", "bi-warn", n)),
+    bh("div", "bi-actions", biButton("確認搬移（寫入一個 commit）", async () => {
+      await biCall(url, {apply: true, token: plan.token});
+      box.replaceChildren();
+      biNotice(true, "已把領域設定搬進 schema 與卡片（push 後大家才會看到）。");
+      bi.loaded = {}; biShowView(bi.view);
+      await biLoadDomains();
+    }, "go", "確認把領域設定搬進 schema 與卡片"),
+    biButton("取消（不寫入）", () => box.replaceChildren(), "bi-btn")));
 }
 
 function biDomainWarnings(items) {
@@ -12176,6 +12221,8 @@ function biAtlasUrl() {
   return saved || BI_ATLAS_DEFAULT;
 }
 
+el("bi-dom-migrate").addEventListener("click", () => biMigrateDomains()
+  .catch((failure) => biNotice(false, "沒有預覽：" + failure.message)));
 el("bi-dom-save").addEventListener("click", () => {
   biSaveDomains().catch((failure) => biNotice(false, "領域設定沒有儲存：" + failure.message));
 });

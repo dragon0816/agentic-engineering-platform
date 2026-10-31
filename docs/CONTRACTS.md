@@ -6176,3 +6176,22 @@ Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §3. Code `capabilities/bi_cards/n
   name, compared loosely (`norm_key`), over the domain configuration's `name_aliases` (kept until D4; a card's
   alias wins). An import (card names and link targets) and an AI candidate (name, link fields) are resolved
   through it before keys are built or candidates merged.
+
+## BI domain configuration migration (D3, 2026-11-01)
+
+Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §3. Code `capabilities/bi_cards/migrate.py`,
+`bi_vaults_api.py`, `web_page.py`; test `tests/test_bi_migrate_domains.py`.
+
+- `POST /api/bi/vaults/<id>/migrate-domains {}` (dry run) -> `{"ok", "dry_run": true, "vault", "schema":
+  null|{"from", "to"}, "aliases": [{"card_id", "card", "type", "add": [alias]}], "missing": [{"alias",
+  "name"}], "chains": [{"card_id", "node", "chain": [code]}], "dropped_chains": [code], "unknown_areas": [id],
+  "removes": "meta:domains", "purpose", "token"}`; `domains_missing` 400 when there is no configuration.
+  `{"apply": true, "token"}` -> one change commit 「把領域設定搬進 schema 與卡片」 (local, to push): the schema
+  upgraded to the newest `bi.schema/v1.1` when it lacks Node `chain` or `aliases`, each alias added to its card's
+  `aliases` (a card found by name, loosely; a missing one listed, never created), Node `chain` set from the old
+  patterns and lists (codes the schema allows), `meta:domains` removed -> `{"dry_run": false, ..., "commit"}`; a
+  changed vault since the dry run is `preview_stale` 409.
+- **Page.** 「領域設定」 of a vault with a configuration: 「預覽：搬進 schema 與卡片」 lists the changes and what is
+  not moved, then 「確認搬移（寫入一個 commit）」 or 「取消（不寫入）」.
+- The guarded runner's temporary folder is removed with `ignore_cleanup_errors` (a Windows file still held
+  briefly no longer fails an analysis).

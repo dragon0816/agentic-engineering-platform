@@ -3989,3 +3989,8 @@ s-k-20261011T102952` (not published).
   - [x] 2026-11-01, Claude Code: BI D2, matching by name reads the cards' `aliases` (`names.py`): imports
     and AI candidates resolve names and link targets through a lookup built from the store, the domain
     configuration's `name_aliases` beneath until D4. Tests `test_bi_card_aliases` (3). Next: D3.
+  - [x] 2026-11-01, Claude Code: BI D3, `migrate.migrate_domains` and `POST /api/bi/vaults/<id>/migrate-domains`:
+    a dry run lists the changes (aliases onto cards, Node `chain` from the old patterns, schema upgrade, missing
+    cards, chains and areas the schema does not allow); applying with its token makes one commit
+    「把領域設定搬進 schema 與卡片」 and removes `meta:domains`. 「領域設定」 shows preview and confirm. Tests
+    `test_bi_migrate_domains` (2). Next: the chain sections and the coverage matrix into the pack, then P5.
