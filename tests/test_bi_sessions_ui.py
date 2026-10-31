@@ -172,7 +172,7 @@ def test_session_panels_in_a_browser(
         wait("document.querySelectorAll('#bi-b-sources tbody input:checked').length === 1")
 
         # -- step 3: no model → the panel says so; a rules method with revisions ------------
-        click("#bi-stepper [data-stage=method]")
+        click("#bi-build-steps [data-stage=method]")
         wait(stage_shown("method"))
         wait("document.getElementById('bi-b-sb-model').textContent.includes('model_unavailable')")
         # The built-ins are always listed; a table source starts on 「表格規則」, and
@@ -231,7 +231,7 @@ def test_session_panels_in_a_browser(
         size(1366, 1000, False)
 
         # -- step 2: a draft tried on the sample, no model yet ------------------------------
-        click("#bi-stepper [data-stage=schema]")
+        click("#bi-build-steps [data-stage=schema]")
         wait(stage_shown("schema"))
         # Session A is shown without a draft; with no model, sending makes nothing.
         wait("document.getElementById('bi-b-sa-model').textContent.includes('model_unavailable')")
@@ -277,7 +277,7 @@ def test_session_panels_in_a_browser(
         size(1366, 1000, False)
 
         # -- Session B with the model: a suggested check saved as a revision ----------------
-        click("#bi-stepper [data-stage=method]")
+        click("#bi-build-steps [data-stage=method]")
         wait(stage_shown("method"))
         wait("document.getElementById('bi-b-sb-model').textContent.includes('test-model')")
         set_value("bi-b-sb-msg", "技術卡一定要有標準組織")

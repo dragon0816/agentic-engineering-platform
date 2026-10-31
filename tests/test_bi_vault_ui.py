@@ -185,7 +185,10 @@ def test_vault_panel_and_coverage_in_a_browser(
         click("#bi-b-v-sync")
         wait("document.getElementById('bi-notice').textContent.includes('已同步')")
 
-        # -- the 「版本」 area (knowledge repositories R5) ---------------------------------
+        # -- the 「版本」 area (knowledge repositories R5), in step 3 ------------------------
+        click("#bi-stepper [data-stage=test]")
+        wait("!document.querySelector('#bi-view-build .kp-stage[data-stage=test]').hidden")
+        assert run("document.getElementById('bi-b-ver-none').hidden")
         wait("document.getElementById('bi-b-ver-history').textContent.includes('轉成知識庫')")
         assert "還沒有發佈過" in text_of("bi-b-ver-reads")
         assert run("document.getElementById('bi-b-ver-commit').disabled")
@@ -235,7 +238,10 @@ def test_vault_panel_and_coverage_in_a_browser(
         shoot("vault-versions-phone")
         size(1366, 1000, False)
 
-        # -- skills in the vault (knowledge repositories R3) ------------------------------
+        # -- skills in the vault (knowledge repositories R3), in step 2 ---------------------
+        click("#bi-stepper [data-stage=ingest]")
+        wait("!document.querySelector('#bi-view-build .kp-stage[data-stage=schema]').hidden")
+        assert not run("document.getElementById('bi-b-skills').hidden")
         wait("document.getElementById('bi-b-sk-list').textContent.includes('依 schema 產生')")
         assert "classify" in text_of("bi-b-sk-list")
         assert not run("document.getElementById('bi-b-folder-box').hidden")
@@ -273,6 +279,10 @@ def test_vault_panel_and_coverage_in_a_browser(
         wait("document.getElementById('bi-b-sk-list').textContent.includes('第 2 版')")
         assert "第 2 版" in text_of("bi-b-ska-target")
         shoot("vault-skill-ai")
+        click("#bi-stepper [data-stage=test]")  # the applied revision waits for a commit
+        wait("document.getElementById('bi-b-ver-pending').textContent.includes('power-extract')")
+        shoot("vault-step3")
+        click("#bi-stepper [data-stage=source]")
 
         # -- a new, empty vault ---------------------------------------------------------------
         click("#bi-b-v-new")

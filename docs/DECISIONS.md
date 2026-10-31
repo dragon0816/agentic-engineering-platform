@@ -5717,3 +5717,15 @@ checked exactly as a hand-saved skill (`vault.checked_skill`); applying stages t
 the vault's current schema, so a 「需要更新」 skill is updated this way and reaches others only by commit and
 push. Rejected: letting the model write the skill revision directly (the person decides, design §8), and a
 separate session store for vault skills (two conversation formats for one panel pattern).
+
+## 2026-10-31: BI 「建立與匯入」 as three steps (owner request, Claude Code)
+
+The owner found the six-step flow too complex and named three steps plus push: input and convert; schema,
+skills and ingest; dashboards, question benchmark and testing, then push. The page now has those three steps;
+the five ingest parts (schema and skills, trial, review, write, result) stay as parts of step 2 in a second
+row, so their code, checks and stored stage did not change. The 「版本」 area (commit, push, history, publish)
+moved from step 1 to step 3, as on the Knowledge page; the vault skills moved to step 2 beside the schema.
+The schema part opens without a chosen source (editing the schema or a skill needs none; trial, review and
+write still do). Rejected: merging the five parts into one long section (larger change to the run flow, and
+the program moves between them after an import and a write), and leaving 「版本」 in step 1 (push is the end
+of the flow).

@@ -145,7 +145,7 @@ def test_source_markdown_and_search_in_a_browser(served: Any, tmp_path: Path) ->
         )
 
         # -- the trial reads the edited Markdown --------------------------------------------
-        click("#bi-stepper [data-stage=method]")
+        click("#bi-build-steps [data-stage=method]")
         wait("!document.querySelector('#bi-view-build .kp-stage[data-stage=method]').hidden")
         # The list of Skills arrives after the step opens; then the table source picks rules.
         wait("document.getElementById('bi-b-m-pick').value === 'builtin:rules'")

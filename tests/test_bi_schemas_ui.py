@@ -128,7 +128,7 @@ def test_dataset_schemas_end_to_end_in_a_browser(served: Any, tmp_path: Path) ->
         )
 
     def stage(name: str) -> None:
-        run(f"document.querySelector('#bi-stepper [data-stage={name}]').click()")
+        run(f"document.querySelector('#bi-build-steps [data-stage={name}]').click()")
         wait(f"!document.querySelector('#bi-view-build .kp-stage[data-stage={name}]').hidden")
 
     def import_csv(entity: str, bom: bool = True) -> None:

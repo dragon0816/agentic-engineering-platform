@@ -1241,6 +1241,8 @@ tr:last-child td { border-bottom: none; }
   border-radius: 8px; min-width: 0; }
 .bi-ai h4 { margin: 0 0 6px; }
 #bi-b-ver h5 { margin: 12px 0 4px; font-size: 13px; }
+.bi-substeps ol { margin-top: 0; }
+.bi-substeps button { min-height: 44px; }
 .bi-ver-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 8px; margin: 6px 0; }
 .bi-ver-pair > div { padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px;
@@ -2524,25 +2526,38 @@ tr:last-child td { border-bottom: none; }
         </div>
       </div>
       <div id="bi-view-build" role="tabpanel" aria-label="建立與匯入" hidden>
+        <div id="bi-build-steps">
         <nav id="bi-stepper" class="kp-stepper" aria-label="建立與匯入步驟">
           <ol>
             <li><button type="button" data-stage="source"><span class="kp-step-n">1</span>
-              <span><strong>來源</strong><small>知識庫與檔案</small></span></button></li>
-            <li><button type="button" data-stage="schema"><span class="kp-step-n">2</span>
-              <span><strong>Schema</strong><small>版本、草稿、升級</small></span></button></li>
-            <li><button type="button" data-stage="method"><span class="kp-step-n">3</span>
-              <span><strong>擷取 Skill 與試跑</strong><small>不寫入</small></span></button></li>
-            <li><button type="button" data-stage="review"><span class="kp-step-n">4</span>
-              <span><strong>逐卡審核</strong><small>證據與差異</small></span></button></li>
-            <li><button type="button" data-stage="commit"><span class="kp-step-n">5</span>
-              <span><strong>確認寫入</strong><small>手動確認</small></span></button></li>
-            <li><button type="button" data-stage="result"><span class="kp-step-n">6</span>
-              <span><strong>結果</strong><small>追蹤與復原</small></span></button></li>
+              <span><strong>資料輸入與轉換</strong><small>知識庫、來源、Markdown</small></span>
+              </button></li>
+            <li><button type="button" data-stage="ingest"><span class="kp-step-n">2</span>
+              <span><strong>Schema 與 Ingest</strong><small>判讀規則、試跑、審核、寫入</small>
+              </span></button></li>
+            <li><button type="button" data-stage="test"><span class="kp-step-n">3</span>
+              <span><strong>測試與 Push</strong><small>Dashboard、commit、push</small></span>
+              </button></li>
           </ol>
         </nav>
+        <nav id="bi-substeps" class="kp-stepper bi-substeps" aria-label="步驟 2 的細項" hidden>
+          <ol>
+            <li><button type="button" data-stage="schema"><span class="kp-step-n">a</span>
+              <span><strong>Schema 與判讀規則</strong></span></button></li>
+            <li><button type="button" data-stage="method"><span class="kp-step-n">b</span>
+              <span><strong>試跑</strong></span></button></li>
+            <li><button type="button" data-stage="review"><span class="kp-step-n">c</span>
+              <span><strong>逐卡審核</strong></span></button></li>
+            <li><button type="button" data-stage="commit"><span class="kp-step-n">d</span>
+              <span><strong>確認寫入</strong></span></button></li>
+            <li><button type="button" data-stage="result"><span class="kp-step-n">e</span>
+              <span><strong>結果</strong></span></button></li>
+          </ol>
+        </nav>
+        </div>
         <div class="mem-status" id="bi-status-build" role="status" aria-live="polite" hidden></div>
         <section class="kp-stage card bi-step" data-stage="source" aria-labelledby="bi-b-source">
-          <h3 class="kp-stage-title" id="bi-b-source" tabindex="-1">步驟 1／6・知識庫與來源</h3>
+          <h3 class="kp-stage-title" id="bi-b-source" tabindex="-1">步驟 1／3・資料輸入與轉換</h3>
           <div class="bi-ai" id="bi-b-vault" role="region" aria-labelledby="bi-b-vault-h">
             <h4 id="bi-b-vault-h">知識庫</h4>
             <p class="bi-meta">共用知識庫（vault）放在 SharePoint／OneDrive 同步的資料夾。
@@ -2590,73 +2605,6 @@ tr:last-child td { border-bottom: none; }
                 <button class="bi-btn" id="bi-b-v-cancel" type="button">取消</button></div>
               <div id="bi-b-v-err" role="alert"></div>
             </form>
-            <div id="bi-b-ver" class="bi-step" role="region" aria-labelledby="bi-b-ver-h" hidden>
-              <h4 id="bi-b-ver-h">版本</h4>
-              <p class="bi-meta" id="bi-b-ver-reads"></p>
-              <h5>還沒給大家的改動</h5>
-              <div id="bi-b-ver-pending"></div>
-              <div class="bi-step-grid">
-                <div><label class="bi-label" for="bi-b-ver-purpose">
-                  這次改動的目的（commit 一定要寫，之後在歷史裡看得到）</label>
-                  <input id="bi-b-ver-purpose" class="bi-input" maxlength="500"
-                    placeholder="例如：補上 TSN 的標準組織"></div>
-              </div>
-              <div class="bi-actions">
-                <button class="go" id="bi-b-ver-commit" type="button">Commit</button>
-                <button class="bi-btn" id="bi-b-ver-push" type="button">Push 給大家</button>
-                <button class="bi-btn" id="bi-b-ver-discard" type="button">
-                  捨棄還沒 commit 的改動</button>
-              </div>
-              <div id="bi-b-ver-conflicts" role="alert"></div>
-              <h5>歷史與發佈</h5>
-              <div id="bi-b-ver-history"></div>
-              <h5>判讀規則（skills）</h5>
-              <p class="bi-meta">放在知識庫裡、跟著 commit 給大家的判讀規則：「分類」說明
-                有哪些卡片類型與資料夾，「擷取」是某些資料夾的來源要怎麼讀（領域設定的 notes
-                會搬到這裡）。AI 判讀時依來源所在的資料夾選用；固定的證據規則一律先套用，
-                不能被改掉。</p>
-              <div id="bi-b-sk-list"></div>
-              <div class="bi-actions">
-                <button class="bi-btn" id="bi-b-sk-new" type="button">新增擷取規則</button></div>
-              <form id="bi-b-sk-form" class="bi-step" hidden>
-                <div class="bi-step-grid">
-                  <div><label class="bi-label" for="bi-b-sk-name">名稱（小寫英數字與 -）</label>
-                    <input id="bi-b-sk-name" class="bi-input" maxlength="60" spellcheck="false"
-                      placeholder="例如：aidc-extract"></div>
-                  <div><label class="bi-label" for="bi-b-sk-role">種類</label>
-                    <select id="bi-b-sk-role"><option value="extract">擷取</option>
-                      <option value="classify">分類</option></select></div>
-                  <div><label class="bi-label" for="bi-b-sk-applies">
-                    套用到的資料夾（逗號分隔；留空＝所有來源）</label>
-                    <input id="bi-b-sk-applies" class="bi-input" spellcheck="false"
-                      placeholder="sources/applications/aidc-power"></div>
-                  <div><label class="bi-label" for="bi-b-sk-types">
-                    只產生這些卡片類型（逗號分隔；留空＝不限）</label>
-                    <input id="bi-b-sk-types" class="bi-input" spellcheck="false"></div>
-                </div>
-                <p class="bi-meta" id="bi-b-sk-folders"></p>
-                <label class="bi-label" for="bi-b-sk-body">規則內容</label>
-                <textarea id="bi-b-sk-body" class="bi-input" rows="6"></textarea>
-                <div class="bi-actions">
-                  <button class="go" type="submit">存成新版本</button>
-                  <button class="bi-btn" id="bi-b-sk-cancel" type="button">取消</button></div>
-              </form>
-              <div class="bi-ai" id="bi-b-ska" role="region" aria-labelledby="bi-b-ska-h" hidden>
-                <h4 id="bi-b-ska-h">和 AI 一起修改判讀規則（Session B）</h4>
-                <p class="bi-meta" id="bi-b-ska-target"></p>
-                <p class="bi-meta" id="bi-b-ska-model"></p>
-                <ol id="bi-b-ska-log" class="bi-log" role="log" aria-live="polite"
-                  aria-label="判讀規則對話紀錄"></ol>
-                <label class="bi-label" for="bi-b-ska-msg">你想怎麼調整這條規則</label>
-                <textarea id="bi-b-ska-msg" class="bi-input" rows="3" maxlength="4000"
-                  placeholder="例如：電源相關的規格表，額定功率一律放在 specs 欄位"></textarea>
-                <div class="bi-actions">
-                  <button class="go" id="bi-b-ska-send" type="button">送出</button>
-                  <button class="bi-btn" id="bi-b-ska-close" type="button">關閉</button></div>
-                <div class="mem-status" id="bi-b-ska-status" role="status" aria-live="polite"
-                  hidden></div>
-              </div>
-            </div>
           </div>
           <div class="bi-step-grid">
             <div><label class="bi-label" for="bi-b-file">
@@ -2698,11 +2646,12 @@ tr:last-child td { border-bottom: none; }
             <div id="bi-b-md-msg" role="status" aria-live="polite"></div>
           </div>
           <div class="bi-actions"><button class="go" type="button" data-bi-next="schema"
-            id="bi-b-next1" disabled>下一步：Schema</button></div>
+            id="bi-b-next1" disabled>下一步：Schema 與 Ingest</button></div>
         </section>
         <section class="kp-stage card bi-step" data-stage="schema" aria-labelledby="bi-b-schema"
           hidden>
-          <h3 class="kp-stage-title" id="bi-b-schema" tabindex="-1">步驟 2／6・Schema</h3>
+          <h3 class="kp-stage-title" id="bi-b-schema" tabindex="-1">
+            步驟 2／3・Schema 與判讀規則</h3>
           <p class="bi-meta" id="bi-b-schema-now"></p>
           <div id="bi-b-versions"></div>
           <div id="bi-b-upgrade" hidden></div>
@@ -2747,14 +2696,63 @@ tr:last-child td { border-bottom: none; }
             <div id="bi-b-draft-trial-result" aria-live="polite"></div>
             <div id="bi-b-draft-info" role="status" aria-live="polite"></div>
           </div>
+          <div class="bi-ai" id="bi-b-skills" role="region" aria-labelledby="bi-b-skills-h"
+            hidden>
+            <h4 id="bi-b-skills-h">判讀規則（skills）</h4>
+            <p class="bi-meta">放在知識庫裡、跟著 commit 給大家的判讀規則：「分類」說明
+              有哪些卡片類型與資料夾，「擷取」是某些資料夾的來源要怎麼讀（領域設定的 notes
+              會搬到這裡）。AI 判讀時依來源所在的資料夾選用；固定的證據規則一律先套用，
+              不能被改掉。</p>
+            <div id="bi-b-sk-list"></div>
+            <div class="bi-actions">
+              <button class="bi-btn" id="bi-b-sk-new" type="button">新增擷取規則</button></div>
+            <form id="bi-b-sk-form" class="bi-step" hidden>
+              <div class="bi-step-grid">
+                <div><label class="bi-label" for="bi-b-sk-name">名稱（小寫英數字與 -）</label>
+                  <input id="bi-b-sk-name" class="bi-input" maxlength="60" spellcheck="false"
+                    placeholder="例如：aidc-extract"></div>
+                <div><label class="bi-label" for="bi-b-sk-role">種類</label>
+                  <select id="bi-b-sk-role"><option value="extract">擷取</option>
+                    <option value="classify">分類</option></select></div>
+                <div><label class="bi-label" for="bi-b-sk-applies">
+                  套用到的資料夾（逗號分隔；留空＝所有來源）</label>
+                  <input id="bi-b-sk-applies" class="bi-input" spellcheck="false"
+                    placeholder="sources/applications/aidc-power"></div>
+                <div><label class="bi-label" for="bi-b-sk-types">
+                  只產生這些卡片類型（逗號分隔；留空＝不限）</label>
+                  <input id="bi-b-sk-types" class="bi-input" spellcheck="false"></div>
+              </div>
+              <p class="bi-meta" id="bi-b-sk-folders"></p>
+              <label class="bi-label" for="bi-b-sk-body">規則內容</label>
+              <textarea id="bi-b-sk-body" class="bi-input" rows="6"></textarea>
+              <div class="bi-actions">
+                <button class="go" type="submit">存成新版本</button>
+                <button class="bi-btn" id="bi-b-sk-cancel" type="button">取消</button></div>
+            </form>
+            <div class="bi-ai" id="bi-b-ska" role="region" aria-labelledby="bi-b-ska-h" hidden>
+              <h4 id="bi-b-ska-h">和 AI 一起修改判讀規則（Session B）</h4>
+              <p class="bi-meta" id="bi-b-ska-target"></p>
+              <p class="bi-meta" id="bi-b-ska-model"></p>
+              <ol id="bi-b-ska-log" class="bi-log" role="log" aria-live="polite"
+                aria-label="判讀規則對話紀錄"></ol>
+              <label class="bi-label" for="bi-b-ska-msg">你想怎麼調整這條規則</label>
+              <textarea id="bi-b-ska-msg" class="bi-input" rows="3" maxlength="4000"
+                placeholder="例如：電源相關的規格表，額定功率一律放在 specs 欄位"></textarea>
+              <div class="bi-actions">
+                <button class="go" id="bi-b-ska-send" type="button">送出</button>
+                <button class="bi-btn" id="bi-b-ska-close" type="button">關閉</button></div>
+              <div class="mem-status" id="bi-b-ska-status" role="status" aria-live="polite"
+                hidden></div>
+            </div>
+          </div>
           <div class="bi-actions"><button class="bi-btn" type="button" data-bi-next="source">
             上一步</button><button class="go" type="button" data-bi-next="method">
-            下一步：擷取 Skill 與試跑</button></div>
+            下一步：試跑</button></div>
         </section>
         <section class="kp-stage card bi-step" data-stage="method" aria-labelledby="bi-b-method"
           hidden>
           <h3 class="kp-stage-title" id="bi-b-method" tabindex="-1">
-            步驟 3／6・擷取 Skill 與試跑</h3>
+            步驟 2／3・試跑</h3>
           <p class="bi-meta">擷取 Skill 決定來源怎麼變成候選卡。內建兩個：「AI 擷取」讀文字與
             Markdown，「表格規則」不用模型、照欄位轉換表格。和 AI 討論或修改內建 Skill 時，
             會另存一份你自己的 Skill；每次修改、套用 AI 建議或回復都是新的版次，
@@ -2827,7 +2825,7 @@ tr:last-child td { border-bottom: none; }
         </section>
         <section class="kp-stage card bi-step" data-stage="review" aria-labelledby="bi-b-review"
           hidden>
-          <h3 class="kp-stage-title" id="bi-b-review" tabindex="-1">步驟 4／6・逐卡審核</h3>
+          <h3 class="kp-stage-title" id="bi-b-review" tabindex="-1">步驟 2／3・逐卡審核</h3>
           <p class="bi-meta">每張候選卡都要你決定接受或拒絕。紅色錯誤要先修正才能接受；
             黃色警告只是提醒。人工設定過的值不會被覆蓋，會成為待審提議。</p>
           <div class="bi-actions">
@@ -2846,7 +2844,7 @@ tr:last-child td { border-bottom: none; }
         </section>
         <section class="kp-stage card bi-step" data-stage="commit" aria-labelledby="bi-b-commit"
           hidden>
-          <h3 class="kp-stage-title" id="bi-b-commit" tabindex="-1">步驟 5／6・確認寫入</h3>
+          <h3 class="kp-stage-title" id="bi-b-commit" tabindex="-1">步驟 2／3・確認寫入</h3>
           <div id="bi-b-summary"></div>
           <div class="bi-actions">
             <button class="bi-btn" type="button" data-bi-next="review">上一步</button>
@@ -2855,8 +2853,45 @@ tr:last-child td { border-bottom: none; }
         </section>
         <section class="kp-stage card bi-step" data-stage="result" aria-labelledby="bi-b-result"
           hidden>
-          <h3 class="kp-stage-title" id="bi-b-result" tabindex="-1">步驟 6／6・結果</h3>
+          <h3 class="kp-stage-title" id="bi-b-result" tabindex="-1">步驟 2／3・結果</h3>
           <div id="bi-b-done"></div>
+          <div class="bi-actions"><button class="go" type="button" data-bi-next="test">
+            下一步：測試與 Push</button></div>
+        </section>
+        <section class="kp-stage card bi-step" data-stage="test" aria-labelledby="bi-b-test"
+          hidden>
+          <h3 class="kp-stage-title" id="bi-b-test" tabindex="-1">步驟 3／3・測試與 Push</h3>
+          <p class="bi-meta">先看寫入後的卡片與 Dashboard，再把改動寫下目的 commit、push 給大家。
+            題目 benchmark 與編輯 Dashboard 還在開發。</p>
+          <div class="bi-actions">
+            <button class="bi-btn" id="bi-b-to-dash" type="button">看 Dashboard</button>
+            <button class="bi-btn" id="bi-b-to-cards" type="button">看卡片</button></div>
+          <p class="bi-meta" id="bi-b-ver-none" hidden>這是只在這台電腦的資料集：
+            確認寫入後就生效，沒有 commit 與 push。
+            要和同事一起維護，請在步驟 1 建立或加入 vault。</p>
+          <div id="bi-b-ver" class="bi-step" role="region" aria-labelledby="bi-b-ver-h" hidden>
+            <h4 id="bi-b-ver-h">版本</h4>
+            <p class="bi-meta" id="bi-b-ver-reads"></p>
+            <h5>還沒給大家的改動</h5>
+            <div id="bi-b-ver-pending"></div>
+            <div class="bi-step-grid">
+              <div><label class="bi-label" for="bi-b-ver-purpose">
+                這次改動的目的（commit 一定要寫，之後在歷史裡看得到）</label>
+                <input id="bi-b-ver-purpose" class="bi-input" maxlength="500"
+                  placeholder="例如：補上 TSN 的標準組織"></div>
+            </div>
+            <div class="bi-actions">
+              <button class="go" id="bi-b-ver-commit" type="button">Commit</button>
+              <button class="bi-btn" id="bi-b-ver-push" type="button">Push 給大家</button>
+              <button class="bi-btn" id="bi-b-ver-discard" type="button">
+                捨棄還沒 commit 的改動</button>
+            </div>
+            <div id="bi-b-ver-conflicts" role="alert"></div>
+            <h5>歷史與發佈</h5>
+            <div id="bi-b-ver-history"></div>
+          </div>
+          <div class="bi-actions"><button class="bi-btn" type="button" data-bi-next="ingest">
+            上一步</button></div>
         </section>
       </div>
     </div>
@@ -12386,7 +12421,9 @@ function biSubLabel(info, sub) {
 // upgrade), method and trial run, review of every candidate with its evidence,
 // the person's 「確認匯入」, and the result. Trial runs and review write only the
 // dataset's staging store; only the commit writes cards.
-const BI_STAGES = ["source", "schema", "method", "review", "commit", "result"];
+const BI_STAGES = ["source", "schema", "method", "review", "commit", "result", "test"];
+// Step 2 of three (Schema 與 Ingest) holds these parts, shown in `#bi-substeps`.
+const BI_INGEST = ["schema", "method", "review", "commit", "result"];
 const BI_BASIS = {fact: ["有出處", "good"], inference: ["推論", "warn"],
   unknown: ["無出處", "dim"], human: ["人工", "dim"]};
 const BI_RUN_ACTION = {create: "新建", update: "更新", unchanged: "不變", skip: "略過"};
@@ -12412,19 +12449,28 @@ function biBuildAllowed() {
   const run = bi.build.run, has = !!bi.build.sourceId;
   const open = run && run.kind === "ingest" && ["review", "partial"].includes(run.status);
   const accepted = open && run.summary && run.summary.accepted > 0;
-  return {source: true, schema: has, method: has, review: has,
-    commit: !!accepted, result: !!(run && run.status === "committed")};
+  return {source: true, schema: true, method: has, review: has,
+    commit: !!accepted, result: !!(run && run.status === "committed"), test: true};
 }
 
-function biBuildSteps() {
-  stepperSet(el("bi-stepper"), bi.build.stage, biBuildAllowed(), "先完成前面的步驟");
+function biBuildStepper(stage, allowed) {
+  const ingest = BI_INGEST.includes(stage);
+  stepperSet(el("bi-stepper"), ingest ? "ingest" : stage,
+    {source: true, ingest: true, test: true}, "");
+  stepperSet(el("bi-substeps"), stage, allowed, "先完成前面的步驟");
+  el("bi-substeps").hidden = !ingest;
 }
+
+function biBuildSteps() { biBuildStepper(bi.build.stage, biBuildAllowed()); }
 
 function biBuildStage(name, focus = true) {
   const allowed = biBuildAllowed();
+  // Step 2 opens where it was left, or at its first part.
+  if (name === "ingest") name = allowed[bi.build.ingestAt] ? bi.build.ingestAt : "schema";
   const stage = BI_STAGES.includes(name) && allowed[name] ? name : "source";
   bi.build.stage = stage;
-  stepperSet(el("bi-stepper"), stage, allowed, "先完成前面的步驟");
+  if (BI_INGEST.includes(stage)) bi.build.ingestAt = stage;
+  biBuildStepper(stage, allowed);
   for (const section of document.querySelectorAll("#bi-view-build .kp-stage")) {
     section.hidden = section.dataset.stage !== stage;
   }
@@ -12441,11 +12487,15 @@ function biBuildStage(name, focus = true) {
   }
 }
 
-for (const button of document.querySelectorAll("#bi-stepper [data-stage]")) {
+for (const button of document.querySelectorAll("#bi-build-steps [data-stage]")) {
   button.addEventListener("click", () => biBuildStage(button.dataset.stage));
 }
 for (const button of document.querySelectorAll("#bi-view-build [data-bi-next]")) {
   button.addEventListener("click", () => biBuildStage(button.dataset.biNext));
+}
+for (const [id, view] of [["bi-b-to-dash", "dashboard"], ["bi-b-to-cards", "cards"]]) {
+  el(id).addEventListener("click",
+    () => document.querySelector('#bi-views [data-bi-view="' + view + '"]').click());
 }
 
 async function biBuildLoad() {
@@ -12511,7 +12561,9 @@ async function biBuildVault() {
   el("bi-b-v-sync").hidden = !vault;
   el("bi-b-v-convert").hidden = Boolean(vault) || !bi.datasets.some((d) => d.name === biDataset());
   const box = el("bi-b-v-state"); box.replaceChildren();
+  el("bi-b-ver-none").hidden = Boolean(vault);
   if (!vault) {
+    el("bi-b-ver").hidden = true; el("bi-b-skills").hidden = true;
     box.append(bh("p", "bi-meta", "這是只在這台電腦的資料集。要和同事一起維護，請建立或加入 vault，"
       + "或把它轉成 vault。"));
     return;
@@ -12532,7 +12584,7 @@ function biVaultState(state) {
   if (!state.reachable) {
     box.append(bh("p", "bi-warn", "現在讀不到共用資料夾（OneDrive 沒有同步或路徑不對）："
       + "可以看卡片，但不能寫入。"));
-    el("bi-b-ver").hidden = true;
+    el("bi-b-ver").hidden = true; el("bi-b-skills").hidden = true;
     return;
   }
   box.append(bh("p", "bi-meta", state.cards + " 張卡片・別人 push 了還沒套用的 " + state.behind
@@ -12554,7 +12606,7 @@ function biVaultState(state) {
   el("bi-b-ver-reads").textContent = reads.tag
     ? "Agent 讀的是發佈版本「" + reads.tag + "」；之後 push 的內容要再發佈，Agent 才會讀到。"
     : "還沒有發佈過：Agent 讀的是大家已 push 的最新內容（不含你還沒 push 的改動）。";
-  el("bi-b-ver").hidden = false;
+  el("bi-b-ver").hidden = false; el("bi-b-skills").hidden = false;
   biVersions(v.id).catch((failure) => biNotice(false, "讀不到版本資訊：" + failure.message));
 }
 

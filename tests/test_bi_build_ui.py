@@ -76,7 +76,7 @@ def test_build_and_import_steps_in_a_browser(served: Any, tmp_path: Path) -> Non
         return f"!document.querySelector('#bi-view-build .kp-stage[data-stage={name}]').hidden"
 
     def locked(name: str) -> bool:
-        return bool(run(f"document.querySelector('#bi-stepper [data-stage={name}]').disabled"))
+        return bool(run(f"document.querySelector('#bi-build-steps [data-stage={name}]').disabled"))
 
     def text_of(element_id: str) -> str:
         return str(run(f"document.getElementById('{element_id}').textContent"))
@@ -103,7 +103,12 @@ def test_build_and_import_steps_in_a_browser(served: Any, tmp_path: Path) -> Non
         click("#bi-views [data-bi-view=build]")
         wait(stage_shown("source"))
         wait("document.getElementById('bi-status-build').hidden")
-        assert all(locked(s) for s in ("schema", "method", "review", "commit", "result"))
+        # Three steps; step 2's parts show only in step 2. The schema and the skills need no
+        # source; trying, reviewing and writing do.
+        assert run("document.querySelectorAll('#bi-stepper [data-stage]').length") == 3
+        assert run("document.getElementById('bi-substeps').hidden")
+        assert all(locked(s) for s in ("method", "review", "commit", "result"))
+        assert not locked("schema") and not locked("test")
         assert "資料集「demo」" in text_of("bi-b-target")
 
         # -- 1 來源 ---------------------------------------------------------------------
@@ -121,7 +126,7 @@ def test_build_and_import_steps_in_a_browser(served: Any, tmp_path: Path) -> Non
         shoot("1-source")
 
         # -- 3 方法與試跑: candidates shown, nothing written -------------------------------
-        click("#bi-stepper [data-stage=method]")
+        click("#bi-build-steps [data-stage=method]")
         wait(stage_shown("method"))
         click("#bi-b-trial")
         wait("document.getElementById('bi-b-trial-result').textContent.includes('試跑完成')")
@@ -172,8 +177,20 @@ def test_build_and_import_steps_in_a_browser(served: Any, tmp_path: Path) -> Non
         assert sorted(c["name"] for c in BiStore(workspace).card_rows()) == ["EtherCAT", "TSN"]
         shoot("6-result")
 
+        # -- 3 測試與 Push: a dataset on this PC only has nothing to commit -------------------
+        click("[data-stage=result] [data-bi-next=test]")
+        wait(stage_shown("test"))
+        assert run("document.getElementById('bi-substeps').hidden")
+        assert run("document.getElementById('bi-stepper').querySelector('[aria-current]')"
+                   ".dataset.stage") == "test"  # fmt: skip
+        assert not run("document.getElementById('bi-b-ver-none').hidden")
+        assert run("document.getElementById('bi-b-ver').hidden")
+        click("#bi-stepper [data-stage=ingest]")  # back to where step 2 was left
+        wait(stage_shown("result"))
+        assert not run("document.getElementById('bi-substeps').hidden")
+
         # -- 2 Schema: a draft published as a local BI version, then the upgrade ------------
-        click("#bi-stepper [data-stage=schema]")
+        click("#bi-build-steps [data-stage=schema]")
         wait(stage_shown("schema"))
         click("#bi-b-draft-new")
         wait("!document.getElementById('bi-b-draft').hidden")

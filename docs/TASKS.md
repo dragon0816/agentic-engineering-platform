@@ -3900,3 +3900,11 @@ s-k-20261011T102952` (not published).
     (`vault.checked_skill`); 「套用」 stages the next revision, committed and pushed in 「版本」. Page: 「和
     AI 一起修改」 per skill, panel `#bi-b-ska`. Tests `test_bi_skill_session` (2, scripted model),
     `test_bi_vault_ui` (suggest and apply in the browser). Agent Web restarted on R4b (09:38).
+  - [x] 2026-10-31, Claude Code: BI 「建立與匯入」 in three steps (owner request: input and convert;
+    schema, skills and ingest; testing and push). Layout only, no data handling changed: step 1 資料輸入與轉換
+    (knowledge base, sources, Markdown); step 2 Schema 與 Ingest with its parts in `#bi-substeps` (schema and
+    skills, trial, review, write, result); step 3 測試與 Push (links to Dashboard and cards, the 「版本」 area
+    moved from step 1). The vault skills moved from 「版本」 to step 2 (`#bi-b-skills`); the schema part no
+    longer needs a chosen source. Tests: the BI browser tests click `#bi-build-steps`; `test_bi_build_ui` and
+    `test_bi_vault_ui` check the three steps. Not done: question benchmark and editable dashboards in step 3,
+    the skill AI with tools (owner to decide).
