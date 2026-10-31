@@ -363,8 +363,9 @@ def test_vault_panel_and_coverage_in_a_browser(
         wait("document.getElementById('bi-b-an-list').textContent.includes('各類型的卡片數')")
         wait("document.getElementById('bi-b-ver-pending').textContent.includes('分析')")
         click("#bi-views [data-bi-view=dashboard]")
-        wait("!document.getElementById('bi-an-dash').hidden")
-        wait("!!document.querySelector('#bi-an-dash-body svg.bi-chart')")
+        # A vault's Dashboard is its analyses (BI P3): the saved bar chart is a section.
+        wait("!!document.querySelector(\"#bi-dash-sections details[data-section='by-type'] svg\")")
+        assert "6. 缺口" in text_of("bi-dash-sections")  # the default pack's analyses
         shoot("vault-analysis-dashboard")
 
         # -- parameters and the Dashboard's order (BI P1) ----------------------------------
@@ -400,10 +401,18 @@ def test_vault_panel_and_coverage_in_a_browser(
         click("#bi-b-an-export")
         wait("document.getElementById('bi-notice').textContent.includes('已匯出')")
         click("#bi-views [data-bi-view=dashboard]")
-        wait("!!document.querySelector('#bi-an-dash-body select[data-param=t]')")
-        first = "document.querySelector('#bi-an-dash-body .bi-step strong').textContent"
-        assert run(first) == "某類型的卡片數"
-        assert "各類型的卡片數" not in text_of("bi-an-dash-body")
+        # Its parameter is at the top; the hidden analysis is not drawn.
+        wait("!!document.querySelector('#bi-dash-params select[data-param=t]')")
+        one = "#bi-dash-sections details[data-section='one-type']"
+        wait(f"!!document.querySelector({json.dumps(one)})")
+        assert not run("!!document.querySelector(\"#bi-dash-sections [data-section='by-type']\")")
+        wait(f"document.querySelector({json.dumps(one)}).textContent.includes('Technology')")
+        run(
+            "(() => { const s = document.querySelector('#bi-dash-params select[data-param=t]');"
+            " s.value = 'TestSolution'; s.dispatchEvent(new Event('change')); })()"
+        )
+        wait(f"document.querySelector({json.dumps(one)}).textContent.includes('TestSolution')")
+        assert run("document.querySelectorAll('#bi-dash-summary .bi-stat').length") == 3
         shoot("vault-analysis-dashboard-params")
         click("#bi-views [data-bi-view=build]")
         click("#bi-stepper [data-stage=source]")

@@ -3971,3 +3971,9 @@ s-k-20261011T102952` (not published).
     listed in the pack's report. `/api/bi/vaults/<id>/packs` (list, import, export); new vaults start with the
     pack; step 3 buttons import/export. Fixed: non-ASCII script output on Windows, interleaved Dashboard drawing.
     Next: P3 (Dashboard tab renders analyses), P4 (`bi__query` reads saved analyses).
+  - [x] 2026-11-01, Claude Code: BI P3, a vault's Dashboard tab draws its analyses
+    (`docs/phases/BI_ANALYSIS_DASHBOARD.md` §4.3). `board.py`: the analyses in `meta:dashboard` order as sections
+    (`level` -> badges, counts summed for the strip, card names linked), extra parameters at the top
+    (`param.<name>`), parallel guarded runs with a cache; chains and quality still coded; local datasets keep the
+    coded Dashboard until P5. The separate 「分析」 card is gone. Tests `test_bi_board` (4), `test_bi_vault_ui`.
+    Next: P4.

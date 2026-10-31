@@ -6115,3 +6115,24 @@ Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §4.2–§4.3. Code `capabilities/
 - **Page.** Step 3 「分析與圖表」: 匯入預設分析包, 匯入分析包檔案 (JSON), 匯出分析包 (downloads `<id>.json`).
 - **Scripts write UTF-8.** The runner reconfigures stdout/stderr to UTF-8 (`python -I` ignores
   `PYTHONIOENCODING`; Windows otherwise garbled every non-ASCII result).
+
+## BI Dashboard tab draws a vault's analyses (P3, 2026-11-01)
+
+Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §4.3. Code `capabilities/bi_cards/board.py`, `bi_cards_api.py`
+(`/api/bi/dashboard`), `web_page.py`; tests `tests/test_bi_board.py`, `tests/test_bi_vault_ui.py`.
+
+- `GET /api/bi/dashboard?dataset=vault-<id>&domain=&include_sample=&param.<name>=...` -> `{"domain",
+  "include_sample", "source": "vault", "ordered": true, "params": <parameters some analysis declares beyond
+  domain, include_sample and today, enum values resolved>, "summary": {"red", "warn", "stale"}, "sections":
+  [<A, A2, A3 when the domain has chains>, <one per analysis in the Dashboard's order>, <Q quality>]}`. An
+  analysis section = `{"id": slug, "title", "kind": "table", "chart", "columns" (without `level`), "rows",
+  "flags" (from `level`: `gap` -> red 「缺口」, `warning` -> warn 「警告」), "note" (the question, or 「沒有畫出來：…」
+  when it failed), "analysis": true, "truncated"}`; a text cell that names exactly one card becomes a link cell
+  `{"card_id", "label", "cite"}`. Shared parameters (`domain`, `include_sample`, others given) go to every
+  analysis that declares them; `today` is today. The working copy is drawn (like the rest of the page).
+- Scripts run in their guarded processes, up to 6 at once; results are cached in memory (600) by (analysis
+  digest, database file path/mtime/size, parameters).
+- A dataset only on this PC (not a vault) keeps the coded Dashboard until P5.
+- **Page.** The Dashboard keeps its own order for a vault (`ordered`), shows extra parameters in
+  `#bi-dash-params` (a change redraws), draws bar/line/scatter analyses as charts and tables as before, opens a
+  flagged analysis section. The separate 「分析」 card is gone (the Dashboard is the analyses).

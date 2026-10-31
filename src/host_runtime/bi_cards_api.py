@@ -56,6 +56,7 @@ from urllib.parse import ParseResult, parse_qs
 from capabilities.bi_cards import (
     ai_runs,
     analysis_session,
+    board,
     catalog,
     coverage,
     dashboard,
@@ -196,9 +197,14 @@ def _route(
                     "sections": [],
                 }
             sample = str(query.get("include_sample") or "").lower() in ("1", "true", "yes")
-            return 200, dashboard.dashboard(
-                store, str(query.get("domain") or "robotics"), include_sample=sample
-            )
+            domain = str(query.get("domain") or "robotics")
+            if store.vault_id is not None:
+                # A vault's Dashboard is its analyses (BI P3); other parameters as `param.<name>`.
+                given = {
+                    k[len("param.") :]: str(v) for k, v in query.items() if k.startswith("param.")
+                }
+                return 200, board.board(workspace, store, domain, sample, given)
+            return 200, dashboard.dashboard(store, domain, include_sample=sample)
         if path == "/api/bi/quality":
             # Quality checks (BI vault V13), read only.
             return 200, quality.check(store, catalog.for_store(store))

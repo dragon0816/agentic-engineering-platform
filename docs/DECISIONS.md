@@ -5841,3 +5841,17 @@ numbers).
 - **Found on the way:** a guarded script's non-ASCII output was garbled on Windows (`-I` ignores
   `PYTHONIOENCODING`); the runner now writes UTF-8. The Dashboard's 「分析」 card could interleave two drawings;
   a newer drawing now stops an older one.
+
+## 2026-11-01: The Dashboard as analyses, implementation choices (P3, Claude Code)
+
+- **Analyses become sections in the page's existing shape** (columns, rows, flags from `level`), so the
+  Dashboard's badges, strip, tables and phone layout stay one renderer. Card links survive by name: a cell equal
+  to exactly one card's name links to that card.
+- **Vaults first, local datasets at P5.** The design's Dashboard is the vault's analyses; a dataset only on
+  this PC keeps the coded Dashboard until P5 removes it, when it draws the built-in pack through the same
+  `board.py` (already written for it). Rejected now: switching local datasets in P3 (the coded sections are
+  still the reference the parity tests compare with).
+- **Speed.** The page draws 20+ scripts at once: parallel guarded processes (6) and an in-memory cache keyed by
+  the database file's state keep a repeat draw instant. The chain sections and quality are still coded here.
+- **Parameters at the top.** 領域 and 範例卡 stay the existing controls; any other parameter an analysis declares
+  appears beside them and applies to every analysis that declares it.

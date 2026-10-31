@@ -2498,11 +2498,7 @@ tr:last-child td { border-bottom: none; }
             <button class="bi-btn" id="bi-dom-sample" type="button">填入範例</button>
           </div>
         </details>
-        <details class="card" id="bi-an-dash" open hidden>
-          <summary><strong>分析</strong>
-            <span class="bi-meta" id="bi-an-dash-sub"></span></summary>
-          <div id="bi-an-dash-body" aria-live="polite"></div>
-        </details>
+        <div id="bi-dash-params" class="bi-actions" hidden></div>
         <div class="mem-status" id="bi-status-dash" role="status" aria-live="polite" hidden></div>
         <div id="bi-dash-summary" class="bi-summary"></div>
         <div id="bi-dash-sections"></div>
@@ -11813,10 +11809,12 @@ async function biLoadDashboard() {
   biStatus("bi-status-dash", "loading", "載入中…");
   el("bi-dash-summary").replaceChildren(); el("bi-dash-sections").replaceChildren();
   let reply;
+  const extra = Object.entries(bi.dashParams || {}).map(([name, value]) =>
+    "&param." + encodeURIComponent(name) + "=" + encodeURIComponent(String(value))).join("");
   try {
     reply = await biCall("/api/bi/dashboard?dataset=" + encodeURIComponent(biDataset())
       + "&domain=" + encodeURIComponent(biDomain())
-      + (el("bi-sample").checked ? "&include_sample=1" : ""));
+      + (el("bi-sample").checked ? "&include_sample=1" : "") + extra);
   } catch (failure) {
     if (seq !== bi.dashSeq) return;
     biStatus("bi-status-dash", "error", "Dashboard 載入失敗：" + failure.message + "。",
@@ -11826,7 +11824,6 @@ async function biLoadDashboard() {
   if (seq !== bi.dashSeq) return;
   biStatus("bi-status-dash", ""); bi.loaded.dashboard = true;
   biRenderDashboard(reply);
-  biDashAnalyses().catch((failure) => biNotice(false, "分析沒有載入：" + failure.message));
   biLoadCoverage(seq);
 }
 
@@ -11988,7 +11985,9 @@ function biRenderDashboard(reply) {
     const at = BI_GAP_SECTIONS.indexOf(biSectionKey(section.id));
     return at < 0 ? BI_GAP_SECTIONS.length : at;
   };
-  sections.sort((a, b) => rank(a) - rank(b));  // stable: gaps first, the rest as sent
+  // A vault's analyses come in its own order (BI P3); the coded ones put gaps first.
+  if (!reply.ordered) sections.sort((a, b) => rank(a) - rank(b));
+  biDashParams(reply.params || {});
   let red = 0, warn = 0, stale = 0;
   for (const section of sections) {
     for (const flag of section.flags || []) {
@@ -12006,11 +12005,24 @@ function biRenderDashboard(reply) {
   for (const section of sections) holder.append(biSection(section));
 }
 
+function biDashParams(specs) {
+  // Parameters some analysis declares beyond 領域 and 範例卡, shown at the top.
+  const box = el("bi-dash-params"); box.replaceChildren();
+  bi.dashParams = bi.dashParams || {};
+  const row = biParamInputs({title: "Dashboard", inputs: specs}, bi.dashParams,
+    () => biLoadDashboard());
+  box.hidden = !row;
+  if (row) box.append(...row.childNodes);
+}
+
 function biSection(section) {
   const box = document.createElement("details");
-  box.className = "card bi-sec"; box.dataset.section = biSectionKey(section.id);
+  box.className = "card bi-sec";
+  box.dataset.section = section.analysis ? section.id : biSectionKey(section.id);
   const flags = section.flags || [];
-  if (BI_GAP_SECTIONS.includes(box.dataset.section)) box.open = true;
+  if (BI_GAP_SECTIONS.includes(box.dataset.section) || (section.analysis && flags.length)) {
+    box.open = true;
+  }
   const summary = bh("summary", "", bh("span", "bi-sec-title", section.title || section.id));
   const reds = flags.filter((flag) => flag.level === "red").length;
   if (reds) summary.append(biBadge("缺口 " + reds, "bad"));
@@ -12019,8 +12031,13 @@ function biSection(section) {
   const body = bh("div", "bi-sec-body");
   if (section.note) body.append(bh("p", "bi-sec-note", section.note));
   const rows = section.rows || [];
+  const chart = section.chart || {type: "table"};
   if (!rows.length) body.append(bh("p", "bi-empty", "沒有資料。"));
-  else if (section.kind === "matrix") body.append(biMatrix(section));
+  else if (chart.type !== "table") {
+    const plain = rows.map((row) => row.map((cell) =>
+      cell && typeof cell === "object" ? cell.label : cell));
+    body.append(biChart({columns: section.columns || [], rows: plain}, chart));
+  } else if (section.kind === "matrix") body.append(biMatrix(section));
   else if (section.kind === "funnel") body.append(biFunnel(section));
   else body.append(biTable(section));
   box.append(summary, body);
@@ -13047,30 +13064,6 @@ async function biAnalyses(vaultId) {
           biVaultState(await call("/api/bi/vaults/" + vaultId + "/status"));
           biNotice(true, "已刪除分析（commit 並 push 後大家才會少這個分析）。");
         }, "bi-btn", "刪除分析 " + item.title)), out));
-  }
-}
-
-async function biDashAnalyses() {
-  // A newer drawing replaces an older one still running (each analysis is awaited).
-  const seq = bi.anDashSeq = (bi.anDashSeq || 0) + 1;
-  const box = el("bi-an-dash"), body = el("bi-an-dash-body");
-  const vault = biVaultOf(biDataset());
-  body.replaceChildren();
-  if (!vault) { box.hidden = true; return; }
-  const reply = await call("/api/bi/vaults/" + vault.id + "/analyses");
-  if (seq !== bi.anDashSeq) return;
-  const bySlug = Object.fromEntries(reply.analyses.map((a) => [a.slug, a]));
-  const shown = reply.order.map((slug) => bySlug[slug]).filter(Boolean);
-  box.hidden = !shown.length;
-  el("bi-an-dash-sub").textContent = shown.length + " 個（用目前的資料重畫）";
-  for (const item of shown.slice(0, 12)) {
-    const state = biAnState(vault.id, item.slug), out = biAnOut("dash", item, state);
-    const rerun = () => biRunInto(vault.id, item, state, out).catch((failure) =>
-      out.replaceChildren(bh("p", "bi-warn", "沒有畫出來：" + failure.message)));
-    if (seq !== bi.anDashSeq) return;
-    body.append(bh("div", "bi-step", bh("strong", "", item.title),
-      biParamInputs(item, state.values, rerun), out));
-    await rerun();
   }
 }
 
