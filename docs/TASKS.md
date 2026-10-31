@@ -3894,3 +3894,9 @@ s-k-20261011T102952` (not published).
     only pulled files is offered. Browser test `test_knowledge_repo_ui` (screenshots
     `.scratch/knowledge-repo/`). Not done: R4c (remove sandboxes, candidates, sandbox push and publish;
     review proposals still open a sandbox), question sets inside the repository.
+  - [x] 2026-10-31, Claude Code: Session B on a skill of a BI vault (owner request; R3 BI follow-up).
+    `capabilities/bi_cards/skill_session.py`: session kind `skill` on the existing sessions; a suggestion
+    changes only the skill's text, folders and card types, checked as a hand-saved skill
+    (`vault.checked_skill`); 「套用」 stages the next revision, committed and pushed in 「版本」. Page: 「和
+    AI 一起修改」 per skill, panel `#bi-b-ska`. Tests `test_bi_skill_session` (2, scripted model),
+    `test_bi_vault_ui` (suggest and apply in the browser). Agent Web restarted on R4b (09:38).

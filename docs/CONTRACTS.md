@@ -5755,8 +5755,10 @@ the page in `src/host_runtime/web_page.py`. Tests: `tests/test_bi_vault_publishe
 Design `docs/phases/KNOWLEDGE_REPO.md` §8; owner decisions 2 and 3; decision "Skills of a BI vault: which
 source folder, and what an AI run reads (R3, Claude Code)". Code: `src/capabilities/bi_cards/vault_skills.py`,
 `vault.py` (`skills`, `save_skill`, the capture hook), `ai_runs.py` (`start(..., folder=)`), routes in
-`src/host_runtime/bi_vaults_api.py`, the page in `web_page.py`. Tests: `tests/test_bi_vault_skills.py`,
-`tests/test_bi_vault_ui.py`. Format, binding and 「需要更新」 are the shared skills contract above.
+`src/host_runtime/bi_vaults_api.py`, the page in `web_page.py`; Session B on a skill
+`src/capabilities/bi_cards/skill_session.py` (2026-10-31). Tests: `tests/test_bi_vault_skills.py`,
+`tests/test_bi_skill_session.py`, `tests/test_bi_vault_ui.py`. Format, binding and 「需要更新」 are the shared
+skills contract above.
 
 - **Classify skill.** Creating or converting a vault stages `skills/classify/rev-1-<author>.md` (role
   `classify`, no `applies_to`, frontmatter `generated: "true"`): the schema's card types with labels, the
@@ -5789,8 +5791,26 @@ source folder, and what an AI run reads (R3, Claude Code)". Code: `src/capabilit
   schema), 「修改」 and 「新增擷取規則」 open one form (name, kind, folders, card types, text) saved as a new
   revision; step 3 shows 「來源在知識庫的哪個資料夾」 for a vault and sends it as `folder`. Saving domain
   settings on a vault says the notes moved to the skills.
-- **Not done.** Session B editing a skill revision with the model (the person edits the text by hand), the
-  model choosing a folder (the person chooses), and sources stored in the repository folder.
+- **Session B on a skill** (2026-10-31). The sessions of "BI method sessions" with `kind: "skill"`:
+  `POST /api/bi/sessions {"dataset": "vault-<id>", "kind": "skill", "target": <skill name>}` → `{"ok",
+  "session"}` (`target_ref` `skill:<name>`; `not_a_vault` 400 for another dataset, `skill_unknown` 404).
+  `POST /api/bi/sessions/<id>/turns {"dataset", "message", "source_ids"?, "run_ids"?}`: one model call per
+  attempt, structured output, no tools, output contract `aep.bi.skill_suggestion.v1`; the system message
+  holds only the rules; the schema ref, card types with fields, the source folders, the skill now (name,
+  role, revision, schema, applies_to, card_types, body; a 「需要更新」 skill is asked to be brought to the
+  current schema), sample excerpts and the dataset's last two trial runs (or `run_ids`) go in a user
+  message, excerpts and run text between `DATA_FENCE`/`DATA_END`. `changes` may hold only `body`,
+  `applies_to`, `card_types` (complete values); the changed skill is checked as `save_skill` checks it
+  (`vault.checked_skill`, nothing written); otherwise asked again (3 attempts), then `model_output_invalid`.
+  `<suggestion>` = `{"format": "aep.bi.skill_suggestion/v1", "reply", "changes", "reasons", "limits",
+  "needs_engineering", "result": {"base_revision", "diff": [{"key", "before", "after"}]}}`; the assistant
+  turn's `sent` has `skill_revision`. `POST /api/bi/sessions/<id>/apply {"dataset", "turn"}` stages the
+  changes on the skill as it is now as its next revision (`save_skill`) → `{"ok", "session", "skill",
+  "status"}`; the turn gets `applied: {"revision", "at", "by"}` (`suggestion_applied` 409 the second time).
+  Page: each skill in 「版本」 has 「和 AI 一起修改」, opening the panel `#bi-b-ska` (target and model lines,
+  the conversation, 「套用為新版本」).
+- **Not done.** The model choosing a folder (the person chooses), and sources stored in the repository
+  folder.
 
 ## Knowledge repositories: wiki repositories on this PC (R4a, 2026-10-30)
 

@@ -1296,45 +1296,57 @@ def save_skill(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict
     (that is how a skill 「需要更新」 is updated); the person commits it."""
     vault = _vault(workspace, vault_id)
     with vault.lock, _repo_errors():
-        units = vault.repo.working_units()
-        name = str(given.get("name") or "").strip()
-        role = str(given.get("role") or "extract")
-        if role not in ("classify", "extract"):
-            raise BiStoreError("skill_invalid", "BI 的 skill 只有 classify 與 extract 兩種")
-        body = str(given.get("body") or "")
-        applies_to = given.get("applies_to") or []
-        card_types = given.get("card_types") or []
-        for value, key in ((applies_to, "applies_to"), (card_types, "card_types")):
-            if not isinstance(value, list) or not all(isinstance(v, str) for v in value):
-                raise BiStoreError("skill_invalid", f"{key} 必須是文字清單")
-        reg = vault._registry()
-        unknown = [t for t in card_types if t not in reg.types]
-        if unknown:
-            raise BiStoreError("skill_invalid", f"schema 沒有這些類型：{'、'.join(unknown)}")
-        extra: dict[str, str] = {}
-        if repo_skills.skill_unit(name) in units:
-            extra = {
-                k: v
-                for k, v in repo_skills.read_skill(vault.repo, name, units).extra.items()
-                if k != "generated"
-            }
-        # Parsing the rendered file checks name, role, folders and text.
-        skill = repo_skills.parse_skill(
-            repo_skills.render_skill(
-                repo_skills.Skill(
-                    name=name,
-                    revision=1,
-                    schema=reg.ref,
-                    role=role,
-                    applies_to=tuple(str(a).strip().rstrip("/") for a in applies_to),
-                    body=body,
-                    card_types=tuple(card_types),
-                    extra=extra,
-                )
+        skill = _checked_skill(vault, given)
+        value = repo_skills.stage_skill(vault.repo, skill)
+    return {"skill": {"name": skill.name, **value}, "status": vault.status()}
+
+
+def checked_skill(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> repo_skills.Skill:
+    """The skill `save_skill` would stage, checked the same way; nothing is
+    written (an AI suggestion is checked with it before it is shown)."""
+    vault = _vault(workspace, vault_id)
+    with vault.lock, _repo_errors():
+        return _checked_skill(vault, given)
+
+
+def _checked_skill(vault: Vault, given: Mapping[str, Any]) -> repo_skills.Skill:
+    units = vault.repo.working_units()
+    name = str(given.get("name") or "").strip()
+    role = str(given.get("role") or "extract")
+    if role not in ("classify", "extract"):
+        raise BiStoreError("skill_invalid", "BI 的 skill 只有 classify 與 extract 兩種")
+    body = str(given.get("body") or "")
+    applies_to = given.get("applies_to") or []
+    card_types = given.get("card_types") or []
+    for value, key in ((applies_to, "applies_to"), (card_types, "card_types")):
+        if not isinstance(value, list) or not all(isinstance(v, str) for v in value):
+            raise BiStoreError("skill_invalid", f"{key} 必須是文字清單")
+    reg = vault._registry()
+    unknown = [t for t in card_types if t not in reg.types]
+    if unknown:
+        raise BiStoreError("skill_invalid", f"schema 沒有這些類型：{'、'.join(unknown)}")
+    extra: dict[str, str] = {}
+    if repo_skills.skill_unit(name) in units:
+        extra = {
+            k: v
+            for k, v in repo_skills.read_skill(vault.repo, name, units).extra.items()
+            if k != "generated"
+        }
+    # Parsing the rendered file checks name, role, folders and text.
+    return repo_skills.parse_skill(
+        repo_skills.render_skill(
+            repo_skills.Skill(
+                name=name,
+                revision=1,
+                schema=reg.ref,
+                role=role,
+                applies_to=tuple(str(a).strip().rstrip("/") for a in applies_to),
+                body=body,
+                card_types=tuple(card_types),
+                extra=extra,
             )
         )
-        value = repo_skills.stage_skill(vault.repo, skill)
-    return {"skill": {"name": name, **value}, "status": vault.status()}
+    )
 
 
 def reading_store(workspace: Path, dataset: str) -> BiStore:

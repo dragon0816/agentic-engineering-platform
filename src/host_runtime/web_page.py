@@ -2641,6 +2641,21 @@ tr:last-child td { border-bottom: none; }
                   <button class="go" type="submit">存成新版本</button>
                   <button class="bi-btn" id="bi-b-sk-cancel" type="button">取消</button></div>
               </form>
+              <div class="bi-ai" id="bi-b-ska" role="region" aria-labelledby="bi-b-ska-h" hidden>
+                <h4 id="bi-b-ska-h">和 AI 一起修改判讀規則（Session B）</h4>
+                <p class="bi-meta" id="bi-b-ska-target"></p>
+                <p class="bi-meta" id="bi-b-ska-model"></p>
+                <ol id="bi-b-ska-log" class="bi-log" role="log" aria-live="polite"
+                  aria-label="判讀規則對話紀錄"></ol>
+                <label class="bi-label" for="bi-b-ska-msg">你想怎麼調整這條規則</label>
+                <textarea id="bi-b-ska-msg" class="bi-input" rows="3" maxlength="4000"
+                  placeholder="例如：電源相關的規格表，額定功率一律放在 specs 欄位"></textarea>
+                <div class="bi-actions">
+                  <button class="go" id="bi-b-ska-send" type="button">送出</button>
+                  <button class="bi-btn" id="bi-b-ska-close" type="button">關閉</button></div>
+                <div class="mem-status" id="bi-b-ska-status" role="status" aria-live="polite"
+                  hidden></div>
+              </div>
             </div>
           </div>
           <div class="bi-step-grid">
@@ -12720,11 +12735,13 @@ async function biSkills(vaultId) {
     const edit = bh("button", "bi-btn", "修改");
     edit.type = "button";
     edit.addEventListener("click", () => biSkillForm(item));
+    const talk = biButton("和 AI 一起修改", () => biSkillAi(item), "bi-btn",
+      "和 AI 一起修改判讀規則 " + item.name);
     const row = bh("li", "", bh("strong", "", item.name), " ", ...badges,
       bh("p", "bi-meta", "套用到：" + where + "・schema " + (item.schema || "")
         + (item.needs_update
           ? "（知識庫現在用 " + reply.schema + "；修改並儲存後才會再使用）" : "")),
-      edit);
+      bh("div", "bi-actions", edit, talk));
     if (item.problem) row.append(bh("p", "bi-warn", item.problem));
     list.append(row);
   }
@@ -12756,6 +12773,81 @@ function biSkillForm(item) {
 const biList = (text) => text.split(/[,，、\n]/).map((s) => s.trim()).filter(Boolean);
 
 el("bi-b-sk-new").addEventListener("click", () => biSkillForm(null));
+
+// Session B on a vault skill (knowledge repositories R3): the AI suggests a new
+// text; 「套用」 stages the next revision, which is committed and pushed in 「版本」.
+async function biSkillAi(item) {
+  const dataset = "vault-" + bi.verVault;
+  bi.skillAi = {name: item.name, dataset, session: null};
+  el("bi-b-ska").hidden = false;
+  el("bi-b-ska-target").textContent = "對話的對象：判讀規則「" + item.name + "」第 "
+    + item.revision + " 版" + (item.needs_update ? "（需要更新：寫給 " + item.schema
+      + "，AI 會一起把它更新到知識庫現在的 schema）" : "") + "。";
+  await biBuildAiState("bi-b-ska-model",
+    "這條規則、知識庫的卡片類型與資料夾、最近兩次試跑的候選卡");
+  const found = await call("/api/bi/sessions?dataset=" + encodeURIComponent(dataset)
+    + "&target=" + encodeURIComponent("skill:" + item.name));
+  bi.skillAi.session = (found.sessions || [])[0] || null;
+  biBuildSessionLog("bi-b-ska-log", bi.skillAi.session, biApplySkill);
+  el("bi-b-ska-msg").focus();
+}
+
+function biApplySkill(session, turn, index) {
+  const s = turn.suggestion;
+  const parts = [bh("p", "", bh("strong", "", "AI："), s.reply),
+    biListBlock("理由", s.reasons), biListBlock("限制", s.limits),
+    biListBlock("需要工程開發（判讀規則做不到，沒有套用）", s.needs_engineering, "bi-warn"),
+    bh("strong", "", "套用後的變化"), biMethodDiff(s.result.diff)];
+  if (turn.applied) {
+    parts.push(bh("p", "bi-meta", "已套用為第 " + turn.applied.revision
+      + " 版（commit 並 push 後大家才會用到）。"));
+  } else if (s.result.diff.length) {
+    parts.push(bh("div", "bi-actions", biButton("套用為新版本", async () => {
+      const reply = await biCall("/api/bi/sessions/" + session.id + "/apply",
+        {dataset: bi.skillAi.dataset, turn: index});
+      bi.skillAi.session = reply.session;
+      el("bi-b-ska-target").textContent = "對話的對象：判讀規則「" + bi.skillAi.name
+        + "」第 " + reply.skill.revision + " 版（剛套用，還沒 commit）。";
+      biBuildSessionLog("bi-b-ska-log", reply.session, biApplySkill);
+      biVaultState(await call("/api/bi/vaults/" + bi.verVault + "/status"));
+      biNotice(true, "判讀規則「" + bi.skillAi.name + "」存成第 " + reply.skill.revision
+        + " 版；commit 並 push 後大家才會用到。");
+    }, "go", "把這個建議套用為判讀規則的新版本")));
+  }
+  return parts;
+}
+
+el("bi-b-ska-close").addEventListener("click", () => {
+  el("bi-b-ska").hidden = true; bi.skillAi = null;
+});
+el("bi-b-ska-send").addEventListener("click", async () => {
+  const chosen = bi.skillAi; if (!chosen) return;
+  const message = el("bi-b-ska-msg").value.trim();
+  if (!message) { el("bi-b-ska-msg").focus(); return; }
+  const button = el("bi-b-ska-send"); button.disabled = true;
+  biStatus("bi-b-ska-status", "loading", "AI 正在看這條判讀規則與樣本…（一次模型呼叫）");
+  try {
+    if (!bi.build.ai || !bi.build.ai.available) {
+      biStatus("bi-b-ska-status", "error", "沒有可用的模型："
+        + ((bi.build.ai && bi.build.ai.message) || "") + "。");
+      return;
+    }
+    if (!chosen.session) {
+      chosen.session = (await biCall("/api/bi/sessions", {dataset: chosen.dataset,
+        kind: "skill", target: chosen.name})).session;
+    }
+    const reply = await biCall("/api/bi/sessions/" + chosen.session.id + "/turns",
+      {dataset: chosen.dataset, message,
+        source_ids: bi.build.sourceId && biDataset() === chosen.dataset
+          ? [bi.build.sourceId] : []});
+    chosen.session = reply.session; el("bi-b-ska-msg").value = "";
+    biBuildSessionLog("bi-b-ska-log", reply.session, biApplySkill);
+    biStatus("bi-b-ska-status", "");
+  } catch (failure) {
+    biStatus("bi-b-ska-status", "error", (failure.code === "model_unavailable"
+      ? "沒有可用的模型：" : "沒有送出：") + failure.message + "。");
+  } finally { button.disabled = false; }
+});
 el("bi-b-sk-cancel").addEventListener("click", () => { el("bi-b-sk-form").hidden = true; });
 el("bi-b-sk-form").addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -13476,7 +13568,8 @@ function biMethodText(value) {
 }
 
 const BI_METHOD_KEY = {instructions: "判讀規則", types: "卡片類型", recipe: "配方",
-  mode: "方式", checks: "必要欄位檢查", name: "名稱", schema_ref: "schema"};
+  mode: "方式", checks: "必要欄位檢查", name: "名稱", schema_ref: "schema",
+  body: "規則內容", applies_to: "套用到的資料夾", card_types: "卡片類型"};
 
 function biMethodDiff(diff) {
   if (!diff.length) return bh("p", "bi-meta", "內容沒有變化。");
@@ -13542,6 +13635,7 @@ function biSentLine(sent) {
     + "，送出 " + s.chars + "／" + s.of + " 字" + (s.truncated ? "，已截斷" : "") + "）");
   if ((sent.runs || []).length) parts.push("試跑 " + sent.runs.join("、") + " 的候選卡");
   if (sent.method_rev) parts.push("Skill 第 " + sent.method_rev + " 版");
+  if (sent.skill_revision) parts.push("判讀規則第 " + sent.skill_revision + " 版");
   if (sent.draft_rev) parts.push("草稿第 " + sent.draft_rev + " 版");
   if (sent.goal) parts.push("目標");
   return "模型 " + (sent.model || "?") + "・送出：" + (parts.join("、") || "只有對話")

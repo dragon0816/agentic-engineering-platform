@@ -5706,3 +5706,14 @@ Engineering choices (Claude Code), fixing the R4 core library before wiring it:
   diff, revert, tag, publish after `confirm()`) written for the Knowledge page's own status line and
   buttons; the BI functions are tied to the BI pane's elements and notices. Pulled originals are staged
   files without unit changes, so the area lists staged files and offers a commit of files only.
+
+## 2026-10-31: Session B on a skill of a BI vault (owner request, Claude Code)
+
+The owner asked for editing a skill with the AI. It is the existing Session B (local ingest methods,
+`methods.py`) pointed at one skill: same storage (the dataset's `sessions` table, kind `skill`), one model
+call per turn with structured output and no tools, code checks with problems fed back, nothing changes
+until the person applies. A suggestion may change only the skill's text, folders and card types, and is
+checked exactly as a hand-saved skill (`vault.checked_skill`); applying stages the next revision bound to
+the vault's current schema, so a 「需要更新」 skill is updated this way and reaches others only by commit and
+push. Rejected: letting the model write the skill revision directly (the person decides, design §8), and a
+separate session store for vault skills (two conversation formats for one panel pattern).

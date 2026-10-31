@@ -21,9 +21,12 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from test_bi_extract import Scripted
 from test_draft_install_cards import served  # noqa: F401 - the real Agent Web fixture
 
+from capabilities.bi_cards.ai_runs import AiRuntime
 from capabilities.bi_cards.store import BiStore
+from host_runtime import bi_cards_api
 
 SHOTS = Path(__file__).resolve().parents[1] / ".scratch" / "bi-vault"
 
@@ -35,9 +38,26 @@ def _browser_missing() -> bool:
 
 
 @pytest.mark.skipif(_browser_missing(), reason="no Chromium browser is installed")
-def test_vault_panel_and_coverage_in_a_browser(served: Any, tmp_path: Path) -> None:  # noqa: F811
+def test_vault_panel_and_coverage_in_a_browser(
+    served: Any,  # noqa: F811
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     from integrations.browser import Browser, BrowserError
 
+    # The skill's Session B is answered by a scripted model (no tools, one call).
+    model = Scripted(
+        {
+            "reply": "把虛構電源廠的規則寫清楚。",
+            "changes": {"body": "虛構電源廠是 Account；額定功率放在 specs。"},
+            "reasons": ["規格表常寫額定功率"],
+        }
+    )
+    monkeypatch.setattr(
+        bi_cards_api,
+        "web_ai_runtime",
+        lambda _web: AiRuntime(model=lambda: (model, "test-model"), background=lambda t, w: w()),
+    )
     web, server, _recorder, _ = served
     workspace = web.runtime.layout.workspace_root
     shared = tmp_path / "sharepoint"  # stands in for the synced SharePoint folder
@@ -233,6 +253,26 @@ def test_vault_panel_and_coverage_in_a_browser(served: Any, tmp_path: Path) -> N
         wait("document.getElementById('bi-b-sk-list').textContent.includes('power-extract')")
         assert run("document.getElementById('bi-b-sk-form').hidden")
         shoot("vault-skills")
+
+        # -- Session B on a skill: suggest, apply as the next revision ------------------------
+        run(
+            "[...document.querySelectorAll('#bi-b-sk-list li')]"
+            ".find((li) => li.textContent.includes('power-extract'))"
+            ".querySelector('button[aria-label*=\"AI\"]').click()"
+        )
+        wait("!document.getElementById('bi-b-ska').hidden")
+        assert "power-extract" in text_of("bi-b-ska-target")
+        wait("document.getElementById('bi-b-ska-model').textContent.includes('test-model')")
+        set_value("bi-b-ska-msg", "額定功率放在 specs")
+        click("#bi-b-ska-send")
+        wait("document.getElementById('bi-b-ska-log').textContent.includes('套用後的變化')")
+        assert "判讀規則第 1 版" in text_of("bi-b-ska-log")
+        click("#bi-b-ska-log button.go")
+        wait("document.getElementById('bi-notice').textContent.includes('存成第 2 版')")
+        wait("document.getElementById('bi-b-ska-log').textContent.includes('已套用為第 2 版')")
+        wait("document.getElementById('bi-b-sk-list').textContent.includes('第 2 版')")
+        assert "第 2 版" in text_of("bi-b-ska-target")
+        shoot("vault-skill-ai")
 
         # -- a new, empty vault ---------------------------------------------------------------
         click("#bi-b-v-new")

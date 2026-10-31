@@ -1,7 +1,8 @@
 """The two page-embedded AI design sessions of a BI dataset (BI ingest §9).
 
-Session B (phase 5, `methods.py`) designs an ingest method; Session A (phase
-6, `schema_session.py`) designs a schema draft. Both are built like the
+Session B (phase 5, `methods.py`) designs an ingest method, and on a vault's
+skill (`skill_session.py`, knowledge repositories R3) the skill; Session A
+(phase 6, `schema_session.py`) designs a schema draft. Both are built like the
 Knowledge page's Skill assistant (`host_runtime/skill_assist.py`): one model
 call per turn with structured output and no tools, checked by code with the
 problems fed back (up to 3 attempts, as `workflow_author.conversation`), and
@@ -35,7 +36,7 @@ from capabilities.bi_cards.store import BiStoreError, now
 from common.execution import TraceIdentifiers
 from models.contracts import ModelClient, ModelMessage, ModelRequest, ModelRequirements
 
-KINDS = ("method", "schema")
+KINDS = ("method", "schema", "skill")
 #: Characters of source excerpts per turn (§9.1: capped, default 12000).
 EXCERPT_CAP = 12_000
 MAX_MESSAGE = 4000
@@ -85,7 +86,7 @@ def model_state(ai: Any) -> dict[str, Any]:
 
 def create(staging: Staging, *, kind: str, target_ref: str, actor: str) -> dict[str, Any]:
     if kind not in KINDS:
-        raise BiStoreError("session_kind_invalid", "kind 只能是 method 或 schema")
+        raise BiStoreError("session_kind_invalid", "kind 只能是 method、schema 或 skill")
     staging.store.refuse_write()
     return staging.create_session(kind=kind, target_ref=target_ref, actor=actor)
 
