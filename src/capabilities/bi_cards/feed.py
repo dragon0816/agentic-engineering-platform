@@ -31,7 +31,7 @@ from capabilities.bi_cards.store import DB_FILE, BiStoreError, vault_registry
 from knowledge.repo import repository as repo_engine
 
 FORMAT = "aep.bi.analysis_feed/v1"
-DASHBOARD_UNIT = "meta:dashboard"
+DASHBOARD_UNIT = analyses.DASHBOARD_UNIT
 RESULTS_DIR = "feed_results"
 MAX_BYTES = 8 * 1024 * 1024
 MAX_QUEUE = 200
@@ -111,27 +111,8 @@ def _offered(units: Mapping[str, Any], registry: Any | None) -> dict[str, dict[s
     return found
 
 
-def dashboard_layout(units: Mapping[str, Any]) -> dict[str, list[str]]:
-    """`meta:dashboard` = `{"order": [slug], "hidden": [slug]}` (JSON text)."""
-    raw = units.get(DASHBOARD_UNIT)
-    try:
-        value = json.loads(raw) if isinstance(raw, str) else {}
-    except ValueError:
-        value = {}
-    if not isinstance(value, dict):
-        value = {}
-    return {
-        key: [str(s) for s in value.get(key) or [] if isinstance(s, str)]
-        for key in ("order", "hidden")
-    }
-
-
-def order(units: Mapping[str, Any], slugs: list[str]) -> list[str]:
-    """The Dashboard's order: the vault's order, then the rest by slug; hidden left out."""
-    layout = dashboard_layout(units)
-    hidden = set(layout["hidden"])
-    listed = [s for s in dict.fromkeys(layout["order"]) if s in slugs and s not in hidden]
-    return listed + sorted(s for s in slugs if s not in hidden and s not in listed)
+dashboard_layout = analyses.dashboard_layout
+order = analyses.order
 
 
 def _value(item: Mapping[str, Any]) -> dict[str, Any]:

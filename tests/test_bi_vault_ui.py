@@ -365,6 +365,36 @@ def test_vault_panel_and_coverage_in_a_browser(
         wait("!document.getElementById('bi-an-dash').hidden")
         wait("!!document.querySelector('#bi-an-dash-body svg.bi-chart')")
         shoot("vault-analysis-dashboard")
+
+        # -- parameters and the Dashboard's order (BI P1) ----------------------------------
+        vault_id = str(run("bi.verVault"))
+        one_type = "SELECT entity_type AS type, count(*) AS n FROM cards WHERE entity_type = :t"
+        analyses.save(workspace, vault_id, {
+            "title": "某類型的卡片數", "slug": "one-type", "kind": "sql",
+            "code": one_type + " GROUP BY 1", "chart": {"type": "table"},
+            "params": {"t": {"type": "enum", "values": ["Technology", "TestSolution"],
+                             "default": "Technology", "label": "類型"}}})  # fmt: skip
+        click("#bi-views [data-bi-view=build]")
+        run("biAnalyses(bi.verVault)")
+        wait("!!document.querySelector('#bi-b-an-list select[data-param=t]')")
+        click("#bi-b-an-list button[aria-label='執行分析 某類型的卡片數']")
+        wait("document.getElementById('bi-b-an-list').textContent.includes('Technology')")
+        run(
+            "(() => { const s = document.querySelector('#bi-b-an-list select[data-param=t]');"
+            " s.value = 'TestSolution'; s.dispatchEvent(new Event('change')); })()"
+        )
+        wait("[...document.querySelectorAll('#bi-b-an-list td')]"
+             ".some((td) => td.textContent === 'TestSolution')")  # fmt: skip
+        click("#bi-b-an-list button[aria-label='在 Dashboard 隱藏分析 各類型的卡片數']")
+        wait("document.getElementById('bi-notice').textContent.includes('Dashboard 的順序')")
+        wait("document.getElementById('bi-b-an-list').textContent.includes('Dashboard 不顯示')")
+        wait("document.getElementById('bi-b-ver-pending').textContent.includes('Dashboard 的順序')")
+        shoot("vault-analysis-params")
+        click("#bi-views [data-bi-view=dashboard]")
+        wait("document.getElementById('bi-an-dash-sub').textContent.startsWith('1 個')")
+        wait("!!document.querySelector('#bi-an-dash-body select[data-param=t]')")
+        assert not run("!!document.querySelector('#bi-an-dash-body svg.bi-chart')")
+        shoot("vault-analysis-dashboard-params")
         click("#bi-views [data-bi-view=build]")
         click("#bi-stepper [data-stage=source]")
 

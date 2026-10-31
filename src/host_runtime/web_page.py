@@ -12929,24 +12929,115 @@ function biChart(table, chart) {
   return wrap;
 }
 
+function biParamInputs(item, values, onChange) {
+  // The analysis's parameters as controls (design §4.1); a change reruns it.
+  const inputs = item.inputs || {}, names = Object.keys(inputs);
+  if (!names.length) return null;
+  const row = bh("div", "bi-actions bi-params");
+  for (const name of names) {
+    const spec = inputs[name], label = spec.label || name;
+    let control;
+    if (spec.type === "enum") {
+      control = document.createElement("select");
+      for (const value of spec.values || []) {
+        const option = document.createElement("option");
+        option.value = value; option.textContent = value; control.append(option);
+      }
+      control.value = values[name] ?? spec.default ?? "";
+    } else if (spec.type === "bool") {
+      control = document.createElement("input"); control.type = "checkbox";
+      control.checked = values[name] ?? Boolean(spec.default);
+    } else {
+      control = document.createElement("input");
+      control.type = spec.type === "date" ? "date" : "text";
+      control.value = values[name] ?? (spec.default === "today" ? "" : (spec.default || ""));
+    }
+    control.dataset.param = name;
+    control.setAttribute("aria-label", item.title + "：" + label);
+    control.addEventListener("change", () => {
+      values[name] = spec.type === "bool" ? control.checked : control.value;
+      if (values[name] === "") delete values[name];
+      onChange();
+    });
+    row.append(bh("label", "bi-meta", label + " ", control));
+  }
+  return row;
+}
+
+function biAnState(vaultId, slug) {
+  // Chosen values and the last result per analysis, kept across re-renders.
+  bi.anState = bi.anState || {};
+  const key = vaultId + "/" + slug;
+  bi.anState[key] = bi.anState[key] || {values: {}, table: null};
+  return bi.anState[key];
+}
+
+function biAnOut(where, item, state) {
+  const out = bh("div", "");
+  out.dataset.anOut = where + ":" + item.slug;
+  if (state.table && where === "list") out.append(biChart(state.table, item.chart));
+  return out;
+}
+
+async function biRunInto(vaultId, item, state, out) {
+  const ran = await biCall("/api/bi/vaults/" + vaultId + "/analyses",
+    {run: item.slug, params: state.values});
+  state.table = ran.table;
+  // The list may have been drawn again meanwhile: draw into the one shown now.
+  const shown = out.isConnected ? out
+    : document.querySelector('[data-an-out="' + CSS.escape(out.dataset.anOut) + '"]') || out;
+  shown.replaceChildren(biChart(ran.table, item.chart));
+}
+
+async function biSaveDashboard(vaultId, layout) {
+  await biCall("/api/bi/vaults/" + vaultId + "/analyses", {dashboard: layout});
+  biVaultState(await call("/api/bi/vaults/" + vaultId + "/status"));
+  await biAnalyses(vaultId);
+  biNotice(true, "已改 Dashboard 的順序（commit 並 push 後大家才會看到）。");
+}
+
 async function biAnalyses(vaultId) {
   const reply = await call("/api/bi/vaults/" + vaultId + "/analyses");
   if (vaultId !== bi.verVault) return;
+  if (bi.loaded) bi.loaded.dashboard = false;  // its 「分析」 card is drawn again when opened
   el("bi-b-an").hidden = false;
   const box = el("bi-b-an-list"); box.replaceChildren();
   if (!reply.analyses.length) box.append(bh("p", "bi-meta", "還沒有存起來的分析。"));
-  for (const item of reply.analyses) {
-    const out = bh("div", "");
+  // Shown in the Dashboard's order, then hidden and not offered ones.
+  const rank = (a) => { const i = reply.order.indexOf(a.slug); return i < 0 ? 1e6 : i; };
+  const items = [...reply.analyses].sort((a, b) => rank(a) - rank(b));
+  const hidden = new Set(reply.dashboard.hidden || []);
+  const move = (slug, step) => {
+    const order = [...reply.order], at = order.indexOf(slug);
+    if (at < 0 || at + step < 0 || at + step >= order.length) return null;
+    [order[at], order[at + step]] = [order[at + step], order[at]];
+    return biSaveDashboard(vaultId, {order, hidden: [...hidden]});
+  };
+  for (const item of items) {
+    const state = biAnState(vaultId, item.slug), out = biAnOut("list", item, state);
+    const where = !item.offered ? "schema 沒有它需要的類型或欄位，Dashboard 不顯示"
+      : hidden.has(item.slug) ? "Dashboard 不顯示" : "Dashboard 第 " + (rank(item) + 1) + " 個";
+    const shown = hidden.has(item.slug)
+      ? biButton("在 Dashboard 顯示", () => biSaveDashboard(vaultId, {order: reply.order,
+        hidden: [...hidden].filter((s) => s !== item.slug)}), "bi-btn",
+        "在 Dashboard 顯示分析 " + item.title)
+      : biButton("在 Dashboard 隱藏", () => biSaveDashboard(vaultId, {order: reply.order,
+        hidden: [...hidden, item.slug]}), "bi-btn", "在 Dashboard 隱藏分析 " + item.title);
     box.append(bh("div", "bi-step", bh("strong", "", item.title),
       bh("p", "bi-meta", (item.question ? item.question + "・" : "")
-        + (item.kind === "sql" ? "SQL" : "Python 腳本") + "・" + item.chart.type),
+        + (item.kind === "sql" ? "SQL" : "Python 腳本") + "・" + item.chart.type + "・" + where),
+      biParamInputs(item, state.values, () => biRunInto(vaultId, item, state, out)
+        .catch((failure) => biNotice(false, failure.message))),
       bh("div", "bi-actions",
-        biButton("執行", async () => {
-          const ran = await biCall("/api/bi/vaults/" + vaultId + "/analyses", {run: item.slug});
-          out.replaceChildren(biChart(ran.table, item.chart));
-        }, "bi-btn", "執行分析 " + item.title),
+        biButton("執行", () => biRunInto(vaultId, item, state, out), "bi-btn",
+          "執行分析 " + item.title),
         biButton("和 AI 一起修改", () => biAnalysisAi(item.slug, item.title), "bi-btn",
           "和 AI 一起修改分析 " + item.title),
+        reply.order.includes(item.slug) ? biButton("上移", () => move(item.slug, -1), "bi-btn",
+          "在 Dashboard 上移分析 " + item.title) : null,
+        reply.order.includes(item.slug) ? biButton("下移", () => move(item.slug, 1), "bi-btn",
+          "在 Dashboard 下移分析 " + item.title) : null,
+        item.offered ? shown : null,
         biButton("刪除", async () => {
           await biCall("/api/bi/vaults/" + vaultId + "/analyses", {delete: item.unit});
           biVaultState(await call("/api/bi/vaults/" + vaultId + "/status"));
@@ -12961,17 +13052,17 @@ async function biDashAnalyses() {
   body.replaceChildren();
   if (!vault) { box.hidden = true; return; }
   const reply = await call("/api/bi/vaults/" + vault.id + "/analyses");
-  box.hidden = !reply.analyses.length;
-  el("bi-an-dash-sub").textContent = reply.analyses.length + " 個（用目前的資料重畫）";
-  for (const item of reply.analyses.slice(0, 12)) {
-    const section = bh("div", "bi-step", bh("strong", "", item.title));
-    body.append(section);
-    try {
-      const ran = await biCall("/api/bi/vaults/" + vault.id + "/analyses", {run: item.slug});
-      section.append(biChart(ran.table, item.chart));
-    } catch (failure) {
-      section.append(bh("p", "bi-warn", "沒有畫出來：" + failure.message));
-    }
+  const bySlug = Object.fromEntries(reply.analyses.map((a) => [a.slug, a]));
+  const shown = reply.order.map((slug) => bySlug[slug]).filter(Boolean);
+  box.hidden = !shown.length;
+  el("bi-an-dash-sub").textContent = shown.length + " 個（用目前的資料重畫）";
+  for (const item of shown.slice(0, 12)) {
+    const state = biAnState(vault.id, item.slug), out = biAnOut("dash", item, state);
+    const rerun = () => biRunInto(vault.id, item, state, out).catch((failure) =>
+      out.replaceChildren(bh("p", "bi-warn", "沒有畫出來：" + failure.message)));
+    body.append(bh("div", "bi-step", bh("strong", "", item.title),
+      biParamInputs(item, state.values, rerun), out));
+    await rerun();
   }
 }
 

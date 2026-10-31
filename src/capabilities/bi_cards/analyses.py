@@ -44,6 +44,7 @@ from typing import Any
 from capabilities.bi_cards.store import BiStoreError
 
 PREFIX = "analysis:"
+DASHBOARD_UNIT = "meta:dashboard"
 NAME_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,59}$")
 KINDS = ("sql", "python")
 CHARTS = ("table", "bar", "line", "scatter")
@@ -548,10 +549,68 @@ def _db(workspace: Path, vault_id: str) -> Path:
     return vault.Vault(workspace, vault_id).db_path
 
 
+def dashboard_layout(units: Mapping[str, Any]) -> dict[str, list[str]]:
+    """`meta:dashboard` = `{"order": [slug], "hidden": [slug]}` (JSON text)."""
+    raw = units.get(DASHBOARD_UNIT)
+    try:
+        value = json.loads(raw) if isinstance(raw, str) else {}
+    except ValueError:
+        value = {}
+    if not isinstance(value, dict):
+        value = {}
+    return {
+        key: [str(s) for s in value.get(key) or [] if isinstance(s, str)]
+        for key in ("order", "hidden")
+    }
+
+
+def order(units: Mapping[str, Any], slugs: list[str]) -> list[str]:
+    """The Dashboard's order: the vault's order, then the rest by slug; hidden left out."""
+    layout = dashboard_layout(units)
+    hidden = set(layout["hidden"])
+    listed = [s for s in dict.fromkeys(layout["order"]) if s in slugs and s not in hidden]
+    return listed + sorted(s for s in slugs if s not in hidden and s not in listed)
+
+
 def listing(workspace: Path, vault_id: str) -> dict[str, Any]:
+    """The working copy's analyses, each with its parameter `inputs` (enum
+    values resolved) and whether the schema `offered` it; `order` is the
+    Dashboard's (offered, not hidden) and `dashboard` the stored layout."""
     from capabilities.bi_cards import vault
 
-    return {"analyses": saved(vault.Vault(workspace, vault_id).repo.working_units())}
+    units = vault.Vault(workspace, vault_id).repo.working_units()
+    registry = _registry(workspace, vault_id)
+    found = []
+    for item in saved(units):
+        found.append(
+            {
+                **item,
+                "inputs": described_params(item.get("params"), registry),
+                "offered": requires_met(item.get("requires"), registry),
+            }
+        )
+    offered = [a["slug"] for a in found if a["offered"]]
+    return {"analyses": found, "order": order(units, offered), "dashboard": dashboard_layout(units)}
+
+
+def set_dashboard(workspace: Path, vault_id: str, given: Any) -> dict[str, Any]:
+    """Stage the Dashboard's order and hidden analyses (`meta:dashboard`)."""
+    from capabilities.bi_cards import vault
+
+    if not isinstance(given, dict):
+        raise BiStoreError("dashboard_invalid", "dashboard 必須是 {order, hidden}")
+    layout = {}
+    for key in ("order", "hidden"):
+        slugs = given.get(key) or []
+        if not isinstance(slugs, list) or not all(
+            isinstance(s, str) and NAME_RE.match(s) for s in slugs
+        ):
+            raise BiStoreError("dashboard_invalid", f"{key} 必須是分析代號的清單")
+        layout[key] = list(dict.fromkeys(slugs))
+    target = vault._vault(workspace, vault_id)
+    with target.lock, vault._repo_errors():
+        target.repo.stage(DASHBOARD_UNIT, json.dumps(layout, ensure_ascii=False))
+    return listing(workspace, vault_id)
 
 
 def _registry(workspace: Path, vault_id: str) -> Any | None:

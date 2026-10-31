@@ -6068,3 +6068,23 @@ http://127.0.0.1:<port>/api/v1/bi` (flushed) and serves only the feed routes thr
 path: `404 route_unknown`; non-loopback Host: `403 host_refused`). A new script parameter answers `409
 result_not_ready` and its result after `--queue-delay` seconds; every start begins with an empty cache (port 0
 picks a free port). Test `tests/test_bi_feed_server.py` runs it as a separate process.
+
+## BI analyses: parameters, requirements and the Dashboard's order on the page (P1, 2026-11-01)
+
+Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §4.1. Code `analyses.py` (`listing`, `set_dashboard`,
+`dashboard_layout`, `order`), `bi_vaults_api.py`, `bi_analysis_agent.py`, `web_page.py`; tests
+`tests/test_bi_analysis_params.py`, `tests/test_bi_vault_ui.py`.
+
+- `GET /api/bi/vaults/<id>/analyses` -> `{"analyses": [{"unit", "slug", ...stored value, "inputs": <params
+  with enum values resolved from the working schema and the default filled>, "offered": <the schema meets
+  requires>}], "order": [slug] (offered, not hidden, the Dashboard's order), "dashboard": {"order", "hidden"}}`.
+- `POST .../analyses {"run": <slug>, "params"?: {...}}` -> `{"ok", "analysis", "params": <resolved>, "table"}`
+  (`param_invalid` 400). `{"dashboard": {"order": [slug], "hidden": [slug]}}` stages `meta:dashboard` (JSON text,
+  labelled 「Dashboard 的順序」 in pending changes) -> `{"ok", ...listing}`; `dashboard_invalid` 400.
+  `{"save": {...}}` accepts `params` and `requires` and runs once with the defaults.
+- The analysis AI's `bi_analysis__propose` takes optional `params` and `requires` (run with the defaults).
+- **Page.** Step 3 「分析與圖表」 lists analyses in the Dashboard's order, each with parameter controls (`select`,
+  checkbox, date or text input, `data-param=<name>`; a change reruns it), 上移 / 下移, 在 Dashboard 隱藏 / 顯示,
+  and says when the schema does not offer it. The Dashboard's 「分析」 card draws `order` (at most 12) with the same
+  controls. Chosen values and the last result are kept per analysis across redraws; a change to the analyses
+  redraws the Dashboard card the next time it opens.

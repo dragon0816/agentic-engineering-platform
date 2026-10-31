@@ -1158,7 +1158,7 @@ def unit_label(units: Mapping[str, Any], key: str) -> str:
     if kind == "evidence":
         return f"{card()} 的 {field} 證據"
     if kind == "meta":
-        return {"domains": "領域設定"}.get(rest, f"設定 {rest}")
+        return {"domains": "領域設定", "dashboard": "Dashboard 的順序"}.get(rest, f"設定 {rest}")
     if key == repo_engine.SCHEMA_UNIT:
         return "schema 版本"
     if kind == "skill":

@@ -138,7 +138,13 @@ def route(
             return 200, {"ok": True, **analyses.delete(workspace, vault_id, given["delete"])}
         if isinstance(given.get("save"), dict):
             return 200, {"ok": True, **analyses.save(workspace, vault_id, given["save"])}
-        ran = analyses.run_saved(workspace, vault_id, given.get("run"))
+        if "dashboard" in given:
+            return 200, {
+                "ok": True,
+                **analyses.set_dashboard(workspace, vault_id, given["dashboard"]),
+            }
+        params = given.get("params") if isinstance(given.get("params"), dict) else {}
+        ran = analyses.run_saved(workspace, vault_id, given.get("run"), params)
         bi_feed_api.refresh(workspace, vault_id)
         return 200, {"ok": True, **ran}
     return _error(404, "route_unknown", "沒有這個 BI 路徑")

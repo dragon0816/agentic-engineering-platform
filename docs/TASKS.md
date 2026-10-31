@@ -3957,3 +3957,9 @@ s-k-20261011T102952` (not published).
     `computed_at`, prints `ready <url>`, a queued script result arrives after `--queue-delay`. Test
     `test_bi_feed_server` (separate process: golden answers, 409 then the result, foreign origin, other routes).
     Codex can run I1 against it. Next: P1.
+  - [x] 2026-11-01, Claude Code: BI P1, analysis parameters, requirements and the Dashboard's order
+    (`docs/phases/BI_ANALYSIS_DASHBOARD.md` §4.1). The page routes list each analysis's parameter inputs and
+    whether the schema offers it, run with chosen values and stage `meta:dashboard` (order, hidden); the
+    analysis AI may propose `params`/`requires`. Step 3 and the Dashboard's 「分析」 card show parameter controls,
+    up/down and hide/show; values and results survive redraws. Tests `test_bi_analysis_params` (4),
+    `test_bi_vault_ui` (parameter change reruns, hide, Dashboard shows the rest). Next: P2.
