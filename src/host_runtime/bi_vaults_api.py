@@ -17,7 +17,7 @@ from typing import Any
 
 from capabilities.bi_cards import analyses, vault, vault_checks
 from capabilities.bi_cards.store import BiStoreError
-from host_runtime import bi_bench
+from host_runtime import bi_bench, bi_feed_api
 
 Answer = tuple[int, dict[str, Any]]
 
@@ -95,14 +95,18 @@ def route(
     if not parts:
         return 200, {"ok": True, **vault.create(workspace, given, actor)}
     if parts == ["join"]:
-        return 200, {"ok": True, **vault.join(workspace, given, actor)}
+        joined = vault.join(workspace, given, actor)
+        bi_feed_api.refresh(workspace, joined["vault"]["id"])
+        return 200, {"ok": True, **joined}
     if parts == ["convert"]:
         return 200, {"ok": True, **vault.convert(workspace, given, actor)}
     if len(parts) != 2:
         return _error(404, "route_unknown", "沒有這個 BI 路徑")
     vault_id, action = parts
     if action == "sync":
-        return 200, {"ok": True, "sync": vault.sync(workspace, vault_id)}
+        synced = vault.sync(workspace, vault_id)
+        bi_feed_api.refresh(workspace, vault_id)  # the published version may have changed
+        return 200, {"ok": True, "sync": synced}
     if action == "commit":
         return 200, {"ok": True, **vault.commit(workspace, vault_id, given)}
     if action == "push":
@@ -118,7 +122,9 @@ def route(
     if action == "skills":
         return 200, {"ok": True, **vault.save_skill(workspace, vault_id, given)}
     if action == "publish":
-        return 200, {"ok": True, **vault.publish(workspace, vault_id, given)}
+        published = vault.publish(workspace, vault_id, given)
+        bi_feed_api.refresh(workspace, vault_id)
+        return 200, {"ok": True, **published}
     if action == "checks":
         if given.get("delete"):
             return 200, {"ok": True, **vault_checks.delete(workspace, vault_id, given["delete"])}
@@ -132,5 +138,7 @@ def route(
             return 200, {"ok": True, **analyses.delete(workspace, vault_id, given["delete"])}
         if isinstance(given.get("save"), dict):
             return 200, {"ok": True, **analyses.save(workspace, vault_id, given["save"])}
-        return 200, {"ok": True, **analyses.run_saved(workspace, vault_id, given.get("run"))}
+        ran = analyses.run_saved(workspace, vault_id, given.get("run"))
+        bi_feed_api.refresh(workspace, vault_id)
+        return 200, {"ok": True, **ran}
     return _error(404, "route_unknown", "沒有這個 BI 路徑")

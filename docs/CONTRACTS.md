@@ -6042,3 +6042,19 @@ Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §4.1, §5, §6.1. Code `capabilit
   that joined it to `golden/*.json` (two-space JSON, LF) with the requests, statuses and order in
   `golden/requests.json` (`after_queue`: the queue was drained before that request). `--check` fails when a
   rebuild differs byte for byte. `.gitattributes` keeps `tests/fixtures/bi_feed/**` unconverted.
+
+## BI analysis feed for Atlas: the routes in Agent Web (F2, 2026-11-01)
+
+Code `host_runtime/bi_feed_api.py`, wired in `web.py` beside the telemetry reads; test
+`tests/test_bi_feed_api.py` (replays `golden/requests.json` over real HTTP and compares every answer).
+
+- `GET /api/v1/bi/*` is answered by `feed.answer` before the token check: no token; the loopback Host guard
+  still applies (403); a request with an `Origin` that is not `http(s)://127.0.0.1|localhost|[::1][:port]`
+  is `403 origin_refused`; a local origin gets `Access-Control-Allow-Origin: <origin>` and `Vary: Origin`.
+  `POST` on the prefix is `405 method_not_allowed` without a token. Headers: `application/json;
+  charset=utf-8`, `Cache-Control: no-store`, `X-Content-Type-Options: nosniff`.
+- **Worker.** One daemon thread (`bi_feed_api.ensure_worker`, started by the first feed request or refresh)
+  runs `feed.drain` when `feed.on_queued` fires, after `bi_feed_api.QUEUE_DELAY` seconds (0 in Agent Web).
+- **Refresh.** `bi_feed_api.refresh(workspace, vault_id)` queues the published version's default results not
+  cached yet (`feed.enqueue_defaults`); called after `POST /api/bi/vaults/join`, `.../sync`, `.../publish` and a
+  person's `.../analyses {"run"}`. It never fails the person's request.

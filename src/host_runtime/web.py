@@ -105,6 +105,7 @@ from host_runtime import (
     agent_code,
     asset_shelf,
     bi_cards_api,
+    bi_feed_api,
     gateway_link,
     knowledge_repos_api,
     multi_agent_switch,
@@ -6192,6 +6193,12 @@ class _Handler(BaseHTTPRequestHandler):
         # (owner 2026-10-08); see host_runtime/telemetry_api.py.
         if telemetry_api.handle(self, parsed.path, parsed.query):
             return
+        # The BI analysis feed, read by Atlas without the page token (owner
+        # 2026-11-01); see host_runtime/bi_feed_api.py.
+        if bi_feed_api.handle(
+            self, "GET", parsed.path, parsed.query, self.server.web.runtime.layout.workspace_root
+        ):
+            return
         if parsed.path == "/view/file":
             # The sandboxed HTML viewer: let in by a short-lived nonce the
             # page obtained with its token, never by the token itself.
@@ -6354,6 +6361,10 @@ class _Handler(BaseHTTPRequestHandler):
             return
         if urlparse(self.path).path in ("/mcp", "/mcp/authoring", "/mcp/agent"):
             self._assistant_mcp()
+            return
+        if bi_feed_api.is_feed(urlparse(self.path).path):
+            self._refuse_unread(405, {"ok": False, "code": "method_not_allowed",
+                                      "message": "the feed answers GET only"})  # fmt: skip
             return
         if not self._authorized():
             self._refuse_unread(401, {"error": "this request carried no usable token"})

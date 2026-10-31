@@ -71,8 +71,11 @@ def test_only_the_published_version_is_served(tmp_path: Path) -> None:
     assert "EU" not in {r[0] for r in rows}  # the card pushed after v1
 
 
-def test_a_feed_request_never_runs_a_script(tmp_path: Path) -> None:
+def test_a_feed_request_never_runs_a_script(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     workspace = _joined(tmp_path)
+    monkeypatch.setattr(feed, "on_queued", None)  # no worker: this test drains the queue itself
     ran: list[str] = []
     real = analyses.run
 

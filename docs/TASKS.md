@@ -3946,3 +3946,9 @@ s-k-20261011T102952` (not published).
     `capabilities/bi_cards/feed.py` (published version only, result cache, SQL on request, scripts queued,
     `result_not_ready`). Tests `test_bi_feed_fixtures` (10). Codex can start A1 on the golden files.
     Next: F2 (HTTP routes and the contract test against the golden files).
+  - [x] 2026-11-01, Claude Code: BI feed F2, the routes `/api/v1/bi/*` in Agent Web
+    (`docs/phases/BI_ANALYSIS_DASHBOARD.md` §5). `host_runtime/bi_feed_api.py`: GET only without the token,
+    loopback Host guard, local page origins only (`403 origin_refused`), `405` for other methods; a worker
+    thread computes queued results; `refresh` queues the published defaults after join, sync, publish and a
+    person's run. Contract test `test_bi_feed_api` replays `golden/requests.json` over real HTTP (3 tests).
+    Next: F3 fixture server.

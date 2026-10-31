@@ -19,6 +19,7 @@ import hashlib
 import json
 import re
 import threading
+import uuid
 from collections.abc import Callable, Mapping
 from datetime import datetime
 from pathlib import Path
@@ -253,7 +254,7 @@ class _Request:
         except BiStoreError as failure:
             record = {"error": {"code": "result_failed", "message": failure.message}}
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        scratch = self.path.with_suffix(".tmp")
+        scratch = self.path.with_suffix(f".{uuid.uuid4().hex[:8]}.tmp")
         scratch.write_text(json.dumps(record, ensure_ascii=False, default=str), encoding="utf-8")
         repo_engine.replace_retrying(scratch, self.path)
         return record
@@ -297,6 +298,18 @@ def compute_defaults(workspace: Path, vault_id: str) -> int:
             request.compute()
             done += 1
     return done
+
+
+def enqueue_defaults(workspace: Path, vault_id: str) -> int:
+    """Queue every published analysis's default result not cached yet (for
+    the worker, so a publish or sync does not wait for scripts)."""
+    queued_now = 0
+    for item in listing(workspace, vault_id)["analyses"]:
+        request = _Request(workspace, vault_id, item["slug"], {})
+        if request.cached() is None:
+            enqueue(workspace, vault_id, item["slug"], request.values)
+            queued_now += 1
+    return queued_now
 
 
 # -- the routes ------------------------------------------------------------------------
@@ -368,7 +381,7 @@ def drain(limit: int | None = None) -> int:
             workspace, vault_id, slug, values = _QUEUE.pop(0)
         try:
             compute(workspace, vault_id, slug, values)
-        except FeedError:
+        except (FeedError, BiStoreError, repo_engine.RepoError, OSError):
             pass  # the vault or analysis changed since; the next request asks again
         done += 1
     return done
