@@ -5973,3 +5973,39 @@ stored session shape.
   of its name, or is the extract skill of a folder it applies to; the run's `skills` list marks it
   `"draft": true`.
 - Page: the panel's model line says the Agent handles it with tools; each answer lists the tools used.
+
+## BI analyses by AI conversation (BI T3, 2026-10-31)
+
+Design `docs/phases/BI_TEST_AND_TOOLS.md` §5. Code `capabilities/bi_cards/analyses.py`,
+`capabilities/bi_cards/analysis_session.py`, `host_runtime/bi_analysis_agent.py`, `host_runtime/bi_harness.py`;
+tests `tests/test_bi_analyses.py`, `tests/test_bi_vault_ui.py`.
+
+- **Running.** Both run on a copy of the vault's working `bi.sqlite` with the view `card_values(card_id,
+  entity_type, card, field, value)`. `run_sql`: one statement, read-only connection, an authorizer allowing
+  only SELECT/READ/FUNCTION/RECURSIVE, 10 s, at most 2000 rows -> `{"columns", "rows", "truncated"}`.
+  `run_python`: `python -I runner.py` in a scratch folder (empty environment, 30 s, output capped); the script
+  gets `query(sql)` (rows as dicts) and `DB`, and sets `result` (`{"columns", "rows"}` or a list of dicts) ->
+  the table plus `printed`. An audit hook refuses importing network, process and native modules (`socket`,
+  `subprocess`, `ctypes`, `_winapi`, `multiprocessing`, `urllib.request`, ...), the events `os.system`,
+  `os.exec*`, `os.spawn*`, `subprocess.*`, `socket.*`, `ctypes.*`, and writes, removes or renames outside the
+  scratch folder. Failures are `analysis_failed` / `analysis_invalid` (400). Not a security boundary against a
+  determined attacker (decision 2026-10-31 "AI analyses, implementation choices").
+- **Unit** `analysis:<slug>` = `{"title", "question", "kind": "sql"|"python", "code", "chart": {"type":
+  "table"|"bar"|"line"|"scatter", "x"?, "y"?, "series"?}}` (bar, line and scatter need x and y). Labelled
+  「分析「<title>」」 in pending changes; committed and pushed like cards.
+- `GET /api/bi/vaults/<id>/analyses` -> `{"analyses": [{"unit", "slug", ...}]}`. `POST .../analyses`:
+  `{"save": {...}}` runs it once, checks the chart's columns against the result and stages it -> `{"ok", "unit",
+  "table", "analyses"}`; `{"run": <slug>}` -> `{"ok", "analysis", "table"}` (`analysis_unknown` 404);
+  `{"delete": <unit>}` -> `{"ok", "analyses"}`.
+- **Sessions** of kind `analysis` (`POST /api/bi/sessions {"dataset": "vault-<id>", "kind": "analysis",
+  "target": "new"|<slug>}`): each turn is a Gateway sub-run (`bi_harness.converse`, profile `bi-analysis`, 30
+  tool calls, 600 s) with turn-scoped tools `bi_analysis__sql {sql}`, `bi_analysis__python {code}` (results
+  capped at 60 rows for the model) and `bi_analysis__propose {reply?, title, slug, question?, kind, code,
+  chart}` (run and checked; a problem is a failed tool result to fix). Without the Agent Web runtime:
+  `harness_unavailable` 400. `<suggestion>` = `{"format": "aep.bi.analysis_suggestion/v1", "reply",
+  "analysis": {...}|null, "preview": <table, 500 rows>|null, "result"}`; `sent` = `{"model", "harness": true,
+  "tools", "analysis"}`. `POST /api/bi/sessions/<id>/apply {"dataset", "turn"}` saves it (`analyses.save`) ->
+  `{"ok", "session", "unit", "table", "analyses"}`; the turn gets `applied: {"unit", "at", "by"}`.
+- **Page.** Step 3 「分析與圖表」 (`#bi-b-an`): saved analyses with 執行 / 和 AI 一起修改 / 刪除 and the panel
+  `#bi-b-ana` (conversation, SQL or script, chart preview, 「存成分析」). The Dashboard's 「分析」 card (`#bi-an-dash`)
+  reruns up to 12 saved analyses on the current data. Charts are inline SVG drawn by the page.

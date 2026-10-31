@@ -5766,3 +5766,20 @@ skill AI on the harness, then AI analyses. Design: `docs/phases/BI_TEST_AND_TOOL
   change and could be pushed by accident).
 - **The suggestion is a tool call.** `bi_skill__suggest` is checked like a hand-saved skill and a problem is a
   failed tool result the model fixes in the same turn (the old three attempts become this loop).
+
+## 2026-10-31: AI analyses, implementation choices (BI T3, Claude Code)
+
+- **Python is guarded, not sandboxed.** A script runs in its own `python -I` process, in an empty scratch folder
+  holding a copy of the data, with an empty environment, a 30 s limit and capped output; an audit hook refuses
+  network, process and native-library modules and events and writes outside the folder. Audit hooks are a
+  guard against mistakes and stray model output, not a boundary against a determined attacker (CPython's
+  documentation says so): the scripts come from the host's approved model, run only on a copy, and the person
+  sees each script with its output. A real boundary (a container or a Windows AppContainer/job object) can
+  replace `run_python` later without changing its contract. Memory is not limited on Windows yet.
+- **SQL is enforced by SQLite.** A read-only connection on a copy plus an authorizer that allows reading only;
+  one statement per call.
+- **Charts are drawn by the page** (inline SVG; bar, line, scatter, table), so nothing is loaded from outside
+  and a saved analysis is just its code and a chart spec rerun on the current data.
+- **Vault only.** Saved analyses are vault units (committed and pushed); a dataset only on this PC has none.
+- **Shared harness helper.** `host_runtime/bi_harness.converse` runs every BI sub-run (benchmark questions,
+  skill AI, analysis AI) with turn-scoped tools.

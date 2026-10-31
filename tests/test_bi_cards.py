@@ -144,6 +144,8 @@ def test_harness_and_storage_code_outside_the_package_do_not_import_bi_types() -
         "host_runtime/bi_bench.py",
         # BI T2: the skill AI on the Agent harness.
         "host_runtime/bi_skill_agent.py",
+        # BI T3: the analysis AI on the Agent harness.
+        "host_runtime/bi_analysis_agent.py",
         # BI dataset sharing: the platform re-reads every published snapshot.
         "control_plane/bi_datasets.py",
     }

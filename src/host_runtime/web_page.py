@@ -1242,6 +1242,13 @@ tr:last-child td { border-bottom: none; }
 .bi-ai h4 { margin: 0 0 6px; }
 #bi-b-ver h5 { margin: 12px 0 4px; font-size: 13px; }
 .bi-substeps ol { margin-top: 0; }
+.bi-chart { width: 100%; max-width: 760px; height: auto; display: block; margin: 8px 0; }
+.bi-chart text { fill: var(--dim, #666); font-size: 12px; }
+.bi-chart .bar, .bi-chart .dot { fill: var(--accent, #2f6db5); }
+.bi-chart .line { fill: none; stroke: var(--accent, #2f6db5); stroke-width: 2; }
+.bi-chart .axis { stroke: var(--dim, #666); stroke-width: 1; }
+.bi-code { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; margin: 6px 0;
+  padding: 8px; border: 1px solid var(--line, #ddd); border-radius: 6px; }
 .bi-substeps button { min-height: 44px; }
 .bi-ver-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 8px; margin: 6px 0; }
@@ -2485,6 +2492,11 @@ tr:last-child td { border-bottom: none; }
             <button class="bi-btn" id="bi-dom-sample" type="button">填入範例</button>
           </div>
         </details>
+        <details class="card" id="bi-an-dash" open hidden>
+          <summary><strong>分析</strong>
+            <span class="bi-meta" id="bi-an-dash-sub"></span></summary>
+          <div id="bi-an-dash-body" aria-live="polite"></div>
+        </details>
         <div class="mem-status" id="bi-status-dash" role="status" aria-live="polite" hidden></div>
         <div id="bi-dash-summary" class="bi-summary"></div>
         <div id="bi-dash-sections"></div>
@@ -2536,7 +2548,7 @@ tr:last-child td { border-bottom: none; }
               <span><strong>Schema 與 Ingest</strong><small>判讀規則、試跑、審核、寫入</small>
               </span></button></li>
             <li><button type="button" data-stage="test"><span class="kp-step-n">3</span>
-              <span><strong>測試與 Push</strong><small>測試題、擷取測試、push</small></span>
+              <span><strong>測試與 Push</strong><small>測試、分析圖表、push</small></span>
               </button></li>
           </ol>
         </nav>
@@ -2862,7 +2874,7 @@ tr:last-child td { border-bottom: none; }
           hidden>
           <h3 class="kp-stage-title" id="bi-b-test" tabindex="-1">步驟 3／3・測試與 Push</h3>
           <p class="bi-meta">先看寫入後的卡片與 Dashboard，再把改動寫下目的 commit、push 給大家。
-            用 AI 對話做圖表分析還在開發。</p>
+            也可以用 AI 對話做圖表分析。</p>
           <div class="bi-actions">
             <button class="bi-btn" id="bi-b-to-dash" type="button">看 Dashboard</button>
             <button class="bi-btn" id="bi-b-to-cards" type="button">看卡片</button></div>
@@ -2923,6 +2935,30 @@ tr:last-child td { border-bottom: none; }
             <div class="bi-actions">
               <button class="go" id="bi-b-bench-run" type="button">跑測試</button></div>
             <div id="bi-b-bench-report" aria-live="polite"></div>
+          </div>
+          <div id="bi-b-an" class="bi-step" role="region" aria-labelledby="bi-b-an-h" hidden>
+            <h4 id="bi-b-an-h">分析與圖表</h4>
+            <p class="bi-meta">用對話請 AI 寫 SQL 或 Python 腳本，畫出你想看的圖表或表格，
+              確認某種關係或現象（例如：哪個標準組織的技術最多）。存起來的分析跟著知識庫
+              commit、push，Dashboard 會用最新資料重畫。AI 只能讀資料：SQL 是唯讀的；
+              腳本不能連網、不能啟動程式，也不能寫入它的暫存資料夾以外的地方。</p>
+            <div id="bi-b-an-list"></div>
+            <div class="bi-actions">
+              <button class="bi-btn" id="bi-b-an-new" type="button">和 AI 做新分析</button></div>
+            <div class="bi-ai" id="bi-b-ana" role="region" aria-labelledby="bi-b-ana-h" hidden>
+              <h5 id="bi-b-ana-h">和 AI 做分析</h5>
+              <p class="bi-meta" id="bi-b-ana-target"></p>
+              <ol id="bi-b-ana-log" class="bi-log" role="log" aria-live="polite"
+                aria-label="分析對話紀錄"></ol>
+              <label class="bi-label" for="bi-b-ana-msg">你想看什麼</label>
+              <textarea id="bi-b-ana-msg" class="bi-input" rows="3" maxlength="4000"
+                placeholder="例如：各應用領域各有幾個商機？畫長條圖"></textarea>
+              <div class="bi-actions">
+                <button class="go" id="bi-b-ana-send" type="button">送出</button>
+                <button class="bi-btn" id="bi-b-ana-close" type="button">關閉</button></div>
+              <div class="mem-status" id="bi-b-ana-status" role="status" aria-live="polite"
+                hidden></div>
+            </div>
           </div>
           <div id="bi-b-ver" class="bi-step" role="region" aria-labelledby="bi-b-ver-h" hidden>
             <h4 id="bi-b-ver-h">版本</h4>
@@ -11778,6 +11814,7 @@ async function biLoadDashboard() {
   if (seq !== bi.dashSeq) return;
   biStatus("bi-status-dash", ""); bi.loaded.dashboard = true;
   biRenderDashboard(reply);
+  biDashAnalyses().catch((failure) => biNotice(false, "分析沒有載入：" + failure.message));
   biLoadCoverage(seq);
 }
 
@@ -12619,7 +12656,7 @@ async function biBuildVault() {
   el("bi-b-ver-none").hidden = Boolean(vault);
   if (!vault) {
     el("bi-b-ver").hidden = true; el("bi-b-skills").hidden = true;
-    el("bi-b-bench").hidden = true;
+    el("bi-b-bench").hidden = true; el("bi-b-an").hidden = true;
     box.append(bh("p", "bi-meta", "這是只在這台電腦的資料集。要和同事一起維護，請建立或加入 vault，"
       + "或把它轉成 vault。"));
     return;
@@ -12641,7 +12678,7 @@ function biVaultState(state) {
     box.append(bh("p", "bi-warn", "現在讀不到共用資料夾（OneDrive 沒有同步或路徑不對）："
       + "可以看卡片，但不能寫入。"));
     el("bi-b-ver").hidden = true; el("bi-b-skills").hidden = true;
-    el("bi-b-bench").hidden = true;
+    el("bi-b-bench").hidden = true; el("bi-b-an").hidden = true;
     return;
   }
   box.append(bh("p", "bi-meta", state.cards + " 張卡片・別人 push 了還沒套用的 " + state.behind
@@ -12665,6 +12702,7 @@ function biVaultState(state) {
     : "還沒有發佈過：Agent 讀的是大家已 push 的最新內容（不含你還沒 push 的改動）。";
   el("bi-b-ver").hidden = false; el("bi-b-skills").hidden = false;
   bi.verVault = v.id;
+  biAnalyses(v.id).catch((failure) => biNotice(false, "讀不到分析：" + failure.message));
   biBench(v.id).catch((failure) => biNotice(false, "讀不到測試：" + failure.message));
   biVersions(v.id).catch((failure) => biNotice(false, "讀不到版本資訊：" + failure.message));
 }
@@ -12798,6 +12836,197 @@ el("bi-b-bench-run").addEventListener("click", async () => {
     button.disabled = false;
     biNotice(false, "沒有開始：" + failure.message);
   }
+});
+
+// -- 分析與圖表 (BI T3, docs/phases/BI_TEST_AND_TOOLS.md §5) -----------------------------
+// The SVG namespace as the HTML parser gives it (the page holds no addresses).
+const SVG_NS = (() => {
+  const holder = document.createElement("template"); holder.innerHTML = "<svg></svg>";
+  return holder.content.firstChild.namespaceURI;
+})();
+
+function biSvg(tag, attrs, label) {
+  const node = document.createElementNS(SVG_NS, tag);
+  for (const [k, v] of Object.entries(attrs || {})) node.setAttribute(k, v);
+  if (label !== undefined) node.textContent = label;
+  return node;
+}
+
+function biTableOf(table) {
+  const head = bh("tr", "", ...table.columns.map((c) => bh("th", "", String(c))));
+  const rows = table.rows.slice(0, 200).map((r) => bh("tr", "", ...r.map((v) =>
+    bh("td", "", v === null || v === undefined ? "" : String(v)))));
+  const box = bh("div", "bi-scroll", bh("table", "bi-table", bh("thead", "", head),
+    bh("tbody", "", ...rows)));
+  if (table.rows.length > 200 || table.truncated) {
+    box.append(bh("p", "bi-meta", "只顯示前 200 列（共 " + table.rows.length + " 列"
+      + (table.truncated ? "以上" : "") + "）。"));
+  }
+  return box;
+}
+
+function biChart(table, chart) {
+  // A table, or a plain SVG bar / line / scatter chart drawn from two columns.
+  chart = chart || {type: "table"};
+  const xi = table.columns.indexOf(chart.x), yi = table.columns.indexOf(chart.y);
+  if (chart.type === "table" || xi < 0 || yi < 0) return biTableOf(table);
+  const points = table.rows.map((r) => ({x: r[xi], y: Number(r[yi])}))
+    .filter((p) => Number.isFinite(p.y)).slice(0, chart.type === "bar" ? 40 : 1000);
+  const wrap = bh("figure", "");
+  if (!points.length) { wrap.append(bh("p", "bi-meta", "結果沒有可以畫的數字。")); return wrap; }
+  const max = Math.max(...points.map((p) => p.y), 0) || 1;
+  const min = Math.min(...points.map((p) => p.y), 0);
+  const label = chart.y + "（依 " + chart.x + "）";
+  if (chart.type === "bar") {
+    const rowH = 26, left = 180, width = 720, height = points.length * rowH + 30;
+    const svg = biSvg("svg", {class: "bi-chart", viewBox: "0 0 " + width + " " + height,
+      role: "img", "aria-label": label});
+    points.forEach((p, i) => {
+      const base = Math.min(min, 0);
+      const w = Math.max(1, (p.y - base) / (max - base) * (width - left - 60));
+      const y = 10 + i * rowH;
+      svg.append(biSvg("text", {x: left - 8, y: y + 15, "text-anchor": "end"},
+        String(p.x).slice(0, 24)));
+      svg.append(biSvg("rect", {class: "bar", x: left, y: y + 3, width: w, height: rowH - 8}));
+      svg.append(biSvg("text", {x: left + w + 6, y: y + 15}, String(p.y)));
+    });
+    wrap.append(svg);
+  } else {
+    const width = 720, height = 320, pad = 44;
+    const numeric = points.every((p) => Number.isFinite(Number(p.x)));
+    const xs = numeric ? points.map((p) => Number(p.x)) : points.map((_, i) => i);
+    const x0 = Math.min(...xs), x1 = Math.max(...xs) === x0 ? x0 + 1 : Math.max(...xs);
+    const sx = (v) => pad + (v - x0) / (x1 - x0) * (width - 2 * pad);
+    const sy = (v) => height - pad - (v - min) / ((max - min) || 1) * (height - 2 * pad);
+    const svg = biSvg("svg", {class: "bi-chart", viewBox: "0 0 " + width + " " + height,
+      role: "img", "aria-label": label});
+    svg.append(biSvg("line", {class: "axis", x1: pad, y1: height - pad, x2: width - pad,
+      y2: height - pad}), biSvg("line", {class: "axis", x1: pad, y1: pad, x2: pad,
+      y2: height - pad}));
+    svg.append(biSvg("text", {x: pad - 6, y: pad, "text-anchor": "end"}, String(max)),
+      biSvg("text", {x: pad - 6, y: height - pad, "text-anchor": "end"}, String(min)),
+      biSvg("text", {x: pad, y: height - 14}, String(points[0].x).slice(0, 20)),
+      biSvg("text", {x: width - pad, y: height - 14, "text-anchor": "end"},
+        String(points[points.length - 1].x).slice(0, 20)));
+    if (chart.type === "line") {
+      svg.append(biSvg("polyline", {class: "line", points: points.map((p, i) =>
+        sx(xs[i]) + "," + sy(p.y)).join(" ")}));
+    }
+    points.forEach((p, i) => svg.append(biSvg("circle", {class: "dot", cx: sx(xs[i]),
+      cy: sy(p.y), r: chart.type === "line" ? 3 : 4}, undefined)));
+    wrap.append(svg);
+  }
+  const more = bh("details", "", bh("summary", "", "看資料表"), biTableOf(table));
+  wrap.append(bh("figcaption", "bi-meta", label), more);
+  return wrap;
+}
+
+async function biAnalyses(vaultId) {
+  const reply = await call("/api/bi/vaults/" + vaultId + "/analyses");
+  if (vaultId !== bi.verVault) return;
+  el("bi-b-an").hidden = false;
+  const box = el("bi-b-an-list"); box.replaceChildren();
+  if (!reply.analyses.length) box.append(bh("p", "bi-meta", "還沒有存起來的分析。"));
+  for (const item of reply.analyses) {
+    const out = bh("div", "");
+    box.append(bh("div", "bi-step", bh("strong", "", item.title),
+      bh("p", "bi-meta", (item.question ? item.question + "・" : "")
+        + (item.kind === "sql" ? "SQL" : "Python 腳本") + "・" + item.chart.type),
+      bh("div", "bi-actions",
+        biButton("執行", async () => {
+          const ran = await biCall("/api/bi/vaults/" + vaultId + "/analyses", {run: item.slug});
+          out.replaceChildren(biChart(ran.table, item.chart));
+        }, "bi-btn", "執行分析 " + item.title),
+        biButton("和 AI 一起修改", () => biAnalysisAi(item.slug, item.title), "bi-btn",
+          "和 AI 一起修改分析 " + item.title),
+        biButton("刪除", async () => {
+          await biCall("/api/bi/vaults/" + vaultId + "/analyses", {delete: item.unit});
+          biVaultState(await call("/api/bi/vaults/" + vaultId + "/status"));
+          biNotice(true, "已刪除分析（commit 並 push 後大家才會少這個分析）。");
+        }, "bi-btn", "刪除分析 " + item.title)), out));
+  }
+}
+
+async function biDashAnalyses() {
+  const box = el("bi-an-dash"), body = el("bi-an-dash-body");
+  const vault = biVaultOf(biDataset());
+  body.replaceChildren();
+  if (!vault) { box.hidden = true; return; }
+  const reply = await call("/api/bi/vaults/" + vault.id + "/analyses");
+  box.hidden = !reply.analyses.length;
+  el("bi-an-dash-sub").textContent = reply.analyses.length + " 個（用目前的資料重畫）";
+  for (const item of reply.analyses.slice(0, 12)) {
+    const section = bh("div", "bi-step", bh("strong", "", item.title));
+    body.append(section);
+    try {
+      const ran = await biCall("/api/bi/vaults/" + vault.id + "/analyses", {run: item.slug});
+      section.append(biChart(ran.table, item.chart));
+    } catch (failure) {
+      section.append(bh("p", "bi-warn", "沒有畫出來：" + failure.message));
+    }
+  }
+}
+
+function biAnalysisSuggestion(session, turn, index) {
+  const s = turn.suggestion;
+  const parts = [bh("p", "", bh("strong", "", "AI："), s.reply)];
+  if (!s.analysis) return parts;
+  parts.push(bh("p", "", bh("strong", "", s.analysis.title)),
+    bh("details", "", bh("summary", "", s.analysis.kind === "sql" ? "看 SQL" : "看腳本"),
+      bh("pre", "bi-code", s.analysis.code)));
+  if (s.preview) parts.push(biChart(s.preview, s.analysis.chart));
+  if (turn.applied) {
+    parts.push(bh("p", "bi-meta", "已存成分析（commit 並 push 後大家才會看到）。"));
+  } else {
+    parts.push(bh("div", "bi-actions", biButton("存成分析", async () => {
+      const reply = await biCall("/api/bi/sessions/" + session.id + "/apply",
+        {dataset: bi.analysisAi.dataset, turn: index});
+      bi.analysisAi.session = reply.session;
+      biBuildSessionLog("bi-b-ana-log", reply.session, biAnalysisSuggestion);
+      biVaultState(await call("/api/bi/vaults/" + bi.verVault + "/status"));
+      biNotice(true, "已存成分析「" + s.analysis.title + "」；commit 並 push 後大家才會看到。");
+    }, "go", "把這個分析存進知識庫")));
+  }
+  return parts;
+}
+
+async function biAnalysisAi(slug, title) {
+  const dataset = "vault-" + bi.verVault, target = slug || "new";
+  bi.analysisAi = {dataset, target, session: null};
+  el("bi-b-ana").hidden = false;
+  el("bi-b-ana-target").textContent = slug ? "修改分析「" + title + "」。"
+    : "新的分析：說出你想確認的關係或現象。Agent 會自己查資料、寫 SQL 或腳本，再畫給你看。";
+  const found = await call("/api/bi/sessions?dataset=" + encodeURIComponent(dataset)
+    + "&target=" + encodeURIComponent("analysis:" + target));
+  bi.analysisAi.session = (found.sessions || [])[0] || null;
+  biBuildSessionLog("bi-b-ana-log", bi.analysisAi.session, biAnalysisSuggestion);
+  el("bi-b-ana-msg").focus();
+}
+
+el("bi-b-an-new").addEventListener("click", () => biAnalysisAi(null, null)
+  .catch((failure) => biNotice(false, failure.message)));
+el("bi-b-ana-close").addEventListener("click", () => {
+  el("bi-b-ana").hidden = true; bi.analysisAi = null;
+});
+el("bi-b-ana-send").addEventListener("click", async () => {
+  const chosen = bi.analysisAi; if (!chosen) return;
+  const message = el("bi-b-ana-msg").value.trim();
+  if (!message) { el("bi-b-ana-msg").focus(); return; }
+  const button = el("bi-b-ana-send"); button.disabled = true;
+  biStatus("bi-b-ana-status", "loading", "Agent 正在查資料、畫圖…（可能要一兩分鐘）");
+  try {
+    if (!chosen.session) {
+      chosen.session = (await biCall("/api/bi/sessions", {dataset: chosen.dataset,
+        kind: "analysis", target: chosen.target})).session;
+    }
+    const reply = await biCall("/api/bi/sessions/" + chosen.session.id + "/turns",
+      {dataset: chosen.dataset, message});
+    chosen.session = reply.session; el("bi-b-ana-msg").value = "";
+    biBuildSessionLog("bi-b-ana-log", reply.session, biAnalysisSuggestion);
+    biStatus("bi-b-ana-status", "");
+  } catch (failure) {
+    biStatus("bi-b-ana-status", "error", "沒有送出：" + failure.message + "。");
+  } finally { button.disabled = false; }
 });
 
 // -- the 「版本」 area (knowledge repositories R5, KNOWLEDGE_REPO.md §10) ----------
@@ -13882,7 +14111,8 @@ async function biBuildOpenMethod(id, fill) {
 
 const BI_TOOL_NAME = {bi_skill__sources: "列出來源", bi_skill__read_source: "讀來源",
   bi_skill__try: "草稿試跑", bi_skill__compare: "比較試跑", bi_skill__test_cases: "擷取測試",
-  bi__query: "查卡片", bi_skill__suggest: "提出建議"};
+  bi__query: "查卡片", bi_skill__suggest: "提出建議", bi_analysis__sql: "SQL",
+  bi_analysis__python: "Python 腳本", bi_analysis__propose: "提出分析"};
 
 function biSentLine(sent) {
   const parts = (sent.sources || []).map((s) => "來源「" + s.name + "」（" + s.classification
@@ -13899,8 +14129,9 @@ function biSentLine(sent) {
     used = "・Agent 用了：" + (Object.entries(counts).map(([n, c]) => (BI_TOOL_NAME[n] || n)
       + (c > 1 ? " ×" + c : "")).join("、") || "沒有用工具");
   }
+  if (sent.analysis) parts.push("資料表與欄位的說明");
   return "模型 " + (sent.model || "?") + "・送出：" + (parts.join("、") || "只有對話")
-    + "（來源上限 " + (sent.cap || 12000) + " 字）" + used;
+    + (sent.harness ? "" : "（來源上限 " + (sent.cap || 12000) + " 字）") + used;
 }
 
 function biListBlock(title, items, cls) {

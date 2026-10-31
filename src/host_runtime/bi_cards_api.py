@@ -55,6 +55,7 @@ from urllib.parse import ParseResult, parse_qs
 
 from capabilities.bi_cards import (
     ai_runs,
+    analysis_session,
     catalog,
     coverage,
     dashboard,
@@ -544,7 +545,10 @@ def _session_create(workspace: Path, who: str, given: dict[str, Any]) -> Answer:
     if kind == "skill":
         made = skill_session.create_session(workspace, dataset, target, who)
         return 200, {"ok": True, "session": made}
-    return _error(400, "session_kind_invalid", "kind 只能是 method、schema 或 skill")
+    if kind == "analysis":
+        made = analysis_session.create_session(workspace, dataset, target, who)
+        return 200, {"ok": True, "session": made}
+    return _error(400, "session_kind_invalid", "kind 只能是 method、schema、skill 或 analysis")
 
 
 def _session_write(
@@ -586,6 +590,22 @@ def _session_write(
             actor=who,
         )
         return 200, {"ok": True, "session": turned}
+    if session["kind"] == "analysis" and action == "turns":
+        analysis_for = getattr(bench, "analysis_asker_for", None)
+        turned = analysis_session.session_turn(
+            workspace,
+            dataset,
+            session_id,
+            message=given.get("message"),
+            actor=who,
+            asker=analysis_for(dataset, actor) if analysis_for is not None else None,
+        )
+        return 200, {"ok": True, "session": turned}
+    if session["kind"] == "analysis" and action == "apply":
+        saved = analysis_session.apply_suggestion(
+            workspace, dataset, session_id, given.get("turn"), who
+        )
+        return 200, {"ok": True, **saved}
     if session["kind"] == "skill" and action == "turns":
         # On the Agent harness with tools where Agent Web offers it (BI T2).
         asker_for = getattr(bench, "skill_asker_for", None)
@@ -1208,7 +1228,7 @@ def web_bench_runtime(web: Any) -> Any:
             daemon=True,
         ).start()
 
-    from host_runtime import bi_skill_agent
+    from host_runtime import bi_analysis_agent, bi_skill_agent
 
     gateway = web.runtime.agent.gateway
     namespace = web.namespace or "engineering"
@@ -1220,6 +1240,9 @@ def web_bench_runtime(web: Any) -> Any:
         background=background,
         skill_asker_for=lambda dataset, skill, actor: bi_skill_agent.harness_asker(
             gateway, workspace, dataset, skill, ai, actor, namespace
+        ),
+        analysis_asker_for=lambda dataset, actor: bi_analysis_agent.harness_asker(
+            gateway, workspace, dataset, actor, namespace
         ),
     )
 

@@ -3921,3 +3921,10 @@ s-k-20261011T102952` (not published).
     (sources, read, try a draft rule, compare, extraction cases, `bi__query` on the working copy, suggest);
     trial runs take `skill_draft` (never staged). Test `test_bi_skill_agent` (scripted Agent and extractor:
     tries the draft, an invalid suggestion is fixed, nothing staged or written). Next: T3.
+  - [x] 2026-10-31, Claude Code: BI T3, analyses by AI conversation (`docs/phases/BI_TEST_AND_TOOLS.md` §5).
+    `capabilities/bi_cards/analyses.py` (read-only SQL on a copy; guarded Python process; `analysis:<slug>`
+    units), `analysis_session.py` (session kind `analysis`), `host_runtime/bi_analysis_agent.py` (Gateway
+    sub-run with `bi_analysis__sql`, `__python`, `__propose`), `host_runtime/bi_harness.py` (shared). Page: step 3
+    「分析與圖表」 and the Dashboard's 「分析」 card (inline SVG charts). Tests `test_bi_analyses` (guards, saved and
+    pushed, AI on the harness), `test_bi_vault_ui` (propose, save, Dashboard). Not done: a real sandbox for
+    scripts (see the decision), memory limits on Windows, analyses for non-vault datasets.

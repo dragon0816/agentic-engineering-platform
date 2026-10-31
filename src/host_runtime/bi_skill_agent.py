@@ -21,14 +21,12 @@ from __future__ import annotations
 
 import asyncio
 import json
-import uuid
 from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import Any
 
 from agent.backend_contracts import ConversationLimits
-from agent.delegation_scope import running_sub_run
-from agent.gateway import HostTool, HostToolOutcome, turn_host_tools
+from agent.gateway import HostTool, HostToolOutcome
 from capabilities.bi_cards import (
     ai_runs,
     benchmark,
@@ -41,8 +39,8 @@ from capabilities.bi_cards import (
 from capabilities.bi_cards.capability import QueryHandler
 from capabilities.bi_cards.staging import Staging
 from capabilities.bi_cards.store import VAULT_PREFIX, BiStore, BiStoreError
-from common.execution import Failure, RequestContext, TraceIdentifiers
-from host_runtime import bi_bench, bi_cards_tools
+from common.execution import Failure, RequestContext
+from host_runtime import bi_bench, bi_cards_tools, bi_harness
 from models.contracts import ModelMessage, ModelTool
 
 MAX_SOURCE_PIECE = 6000
@@ -348,32 +346,17 @@ def harness_asker(
                 text=f"{context}\n\nThe person's request:\n{turns[-1]['text']}",
             ),
         ]
-        value = uuid.uuid4().hex
-        request = RequestContext(
-            trace=TraceIdentifiers(
-                trace_id=f"trace-{value}", request_id=f"request-{value}", span_id=f"span-{value}"
-            ),
+        result = bi_harness.converse(
+            gateway,
+            profile="bi-skill",
             actor=actor,
             namespace=namespace,
-            message=str(turns[-1]["text"]),
-            channel="local",
+            history=history,
+            tools=tools,
+            role=ROLE,
+            limits=ConversationLimits(tool_calls=TOOL_CALLS, time_limit_seconds=TURN_SECONDS),
         )
-        with running_sub_run("bi-skill"), turn_host_tools(tools):
-            result = asyncio.run(
-                gateway.converse(
-                    request,
-                    tuple(history),
-                    allowed_tools=frozenset(t.tool.name for t in tools),
-                    role_guidance=ROLE,
-                    limits=ConversationLimits(
-                        tool_calls=TOOL_CALLS, time_limit_seconds=TURN_SECONDS
-                    ),
-                )
-            )
-        used = [
-            {"name": item.name, "ok": item.host is not None and item.host.status == "succeeded"}
-            for item in result.tools
-        ]
+        used = bi_harness.tools_used(result)
         answer = captured.get("answer")
         if answer is None and result.status == "answered" and result.text.strip():
             # A question answered without a suggestion: a reply with no changes.

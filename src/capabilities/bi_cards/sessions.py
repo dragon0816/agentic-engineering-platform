@@ -36,7 +36,7 @@ from capabilities.bi_cards.store import BiStoreError, now
 from common.execution import TraceIdentifiers
 from models.contracts import ModelClient, ModelMessage, ModelRequest, ModelRequirements
 
-KINDS = ("method", "schema", "skill")
+KINDS = ("method", "schema", "skill", "analysis")
 #: Characters of source excerpts per turn (§9.1: capped, default 12000).
 EXCERPT_CAP = 12_000
 MAX_MESSAGE = 4000
@@ -86,7 +86,7 @@ def model_state(ai: Any) -> dict[str, Any]:
 
 def create(staging: Staging, *, kind: str, target_ref: str, actor: str) -> dict[str, Any]:
     if kind not in KINDS:
-        raise BiStoreError("session_kind_invalid", "kind 只能是 method、schema 或 skill")
+        raise BiStoreError("session_kind_invalid", "kind 只能是 method、schema、skill 或 analysis")
     staging.store.refuse_write()
     return staging.create_session(kind=kind, target_ref=target_ref, actor=actor)
 

@@ -45,7 +45,7 @@ from contextlib import closing, contextmanager
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import catalog, schema_doc, vault_checks, vault_skills
+from capabilities.bi_cards import analyses, catalog, schema_doc, vault_checks, vault_skills
 from capabilities.bi_cards.schema import Registry
 from capabilities.bi_cards.store import (
     DATASET_RE,
@@ -172,6 +172,8 @@ class BiType:
     def unit_problem(self, key: str, value: Any) -> str | None:
         if key.startswith(vault_checks.PREFIX):
             return vault_checks.unit_problem(key, value)
+        if key.startswith(analyses.PREFIX):
+            return analyses.unit_problem(key, value)
         if key == repo_engine.SCHEMA_UNIT:
             return (
                 None if isinstance(value, str) and "@" in value else "schema must be <id>@<version>"
@@ -1163,6 +1165,9 @@ def unit_label(units: Mapping[str, Any], key: str) -> str:
         return f"skill「{rest}」"
     if kind == "check":
         return vault_checks.label(key, units)
+    if kind == "analysis":
+        value = units.get(key)
+        return f"分析「{value.get('title') if isinstance(value, dict) else rest}」"
     return {"proposal": "待審提議", "import": "匯入紀錄", "decision": "衝突決定"}.get(kind, key)
 
 

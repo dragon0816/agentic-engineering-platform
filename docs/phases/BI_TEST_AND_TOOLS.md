@@ -1,6 +1,6 @@
 # BI step 3 and the skill AI on the harness
 
-Status: T1 and T2 done (2026-10-31); T3 next. Owner decisions: `docs/DECISIONS.md` 2026-10-31 "BI step 3 and the
+Status: T1, T2 and T3 done (2026-10-31); not yet tried with real models. Owner decisions: `docs/DECISIONS.md` 2026-10-31 "BI step 3 and the
 skill AI: owner decisions". Builds on knowledge repositories (`KNOWLEDGE_REPO.md`, BI vault type R2/R3) and
 the three-step BI page (`docs/DECISIONS.md` 2026-10-31 "BI 「建立與匯入」 as three steps").
 

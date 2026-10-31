@@ -15,7 +15,7 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import vault, vault_checks
+from capabilities.bi_cards import analyses, vault, vault_checks
 from capabilities.bi_cards.store import BiStoreError
 from host_runtime import bi_bench
 
@@ -79,6 +79,8 @@ def route(
                 **vault_checks.listing(workspace, parts[0]),
                 "latest": bi_bench.latest(workspace, parts[0]),
             }
+        if len(parts) == 2 and parts[1] == "analyses":
+            return 200, analyses.listing(workspace, parts[0])
         if len(parts) == 2 and parts[1] == "bench":
             wanted = str(query.get("run") or "")
             found = [r for r in bi_bench.reports(workspace, parts[0]) if r["run_id"] == wanted]
@@ -125,4 +127,10 @@ def route(
         return 200, {"ok": True, **vault_checks.save_question(workspace, vault_id, given)}
     if action == "bench":
         return 200, {"ok": True, **_start_bench(workspace, actor, vault_id, bench)}
+    if action == "analyses":
+        if given.get("delete"):
+            return 200, {"ok": True, **analyses.delete(workspace, vault_id, given["delete"])}
+        if isinstance(given.get("save"), dict):
+            return 200, {"ok": True, **analyses.save(workspace, vault_id, given["save"])}
+        return 200, {"ok": True, **analyses.run_saved(workspace, vault_id, given.get("run"))}
     return _error(404, "route_unknown", "沒有這個 BI 路徑")

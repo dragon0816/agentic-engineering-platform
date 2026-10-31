@@ -19,7 +19,6 @@ minutes, so a push never starts one).
 
 from __future__ import annotations
 
-import asyncio
 import hashlib
 import json
 import uuid
@@ -29,15 +28,12 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 
-from agent.delegation_scope import running_sub_run
-from agent.gateway import turn_host_tools
 from capabilities.bi_cards import ai_runs, benchmark, vault, vault_checks
 from capabilities.bi_cards.ai_runs import AiRuntime
 from capabilities.bi_cards.capability import QueryHandler
 from capabilities.bi_cards.staging import Staging
 from capabilities.bi_cards.store import VAULT_PREFIX, BiStore, BiStoreError
-from common.execution import RequestContext, TraceIdentifiers
-from host_runtime import bi_cards_tools
+from host_runtime import bi_cards_tools, bi_harness
 from knowledge.questions import Question, grade
 from knowledge.repo.repository import CheckReport, canonical
 from models.contracts import ModelMessage
@@ -234,6 +230,8 @@ class BenchRuntime:
     #: (vault dataset, skill name, actor) -> the skill AI's turn on the harness
     #: (BI T2, `host_runtime.bi_skill_agent`); None: one model call.
     skill_asker_for: Callable[[str, str, str], Any] | None = None
+    #: (vault dataset, actor) -> the analysis AI's turn on the harness (BI T3).
+    analysis_asker_for: Callable[[str, str], Any] | None = None
 
 
 def agent_ask(gateway: Any, workspace: Path, vault_id: str, actor: str, namespace: str) -> Ask:
@@ -255,25 +253,15 @@ def agent_ask(gateway: Any, workspace: Path, vault_id: str, actor: str, namespac
         tool = bi_cards_tools.reading_tool(gateway, handler)
         if tool is None:
             raise BiStoreError("bi_skill_off", "BI Skill 沒有開啟：到 Capabilities 開啟後再測試")
-        value = uuid.uuid4().hex
-        context = RequestContext(
-            trace=TraceIdentifiers(
-                trace_id=f"trace-{value}", request_id=f"request-{value}", span_id=f"span-{value}"
-            ),
+        result = bi_harness.converse(
+            gateway,
+            profile="bi-benchmark",
             actor=actor,
             namespace=namespace,
-            message=question,
-            channel="local",
+            history=[ModelMessage(role="user", text=question)],
+            tools=[tool],
+            role=ROLE.format(dataset=dataset),
         )
-        with running_sub_run("bi-benchmark"), turn_host_tools([tool]):
-            result = asyncio.run(
-                gateway.converse(
-                    context,
-                    (ModelMessage(role="user", text=question),),
-                    allowed_tools=frozenset({bi_cards_tools.TOOL_NAME}),
-                    role_guidance=ROLE.format(dataset=dataset),
-                )
-            )
         return {"ok": result.status == "answered", "answer": result.text}
 
     return ask

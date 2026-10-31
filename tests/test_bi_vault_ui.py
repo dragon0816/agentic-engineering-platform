@@ -24,6 +24,7 @@ import pytest
 from test_bi_extract import Scripted
 from test_draft_install_cards import served  # noqa: F401 - the real Agent Web fixture
 
+from capabilities.bi_cards import analyses, sessions, vault
 from capabilities.bi_cards.ai_runs import AiRuntime
 from capabilities.bi_cards.store import BiStore
 from host_runtime import bi_bench, bi_cards_api
@@ -58,6 +59,24 @@ def test_vault_panel_and_coverage_in_a_browser(
         "web_ai_runtime",
         lambda _web: AiRuntime(model=lambda: (model, "test-model"), background=lambda t, w: w()),
     )
+    by_type = "SELECT entity_type AS type, count(*) AS n FROM cards GROUP BY 1 ORDER BY 2 DESC"
+
+    def analysis_asker(dataset: str, _actor: str) -> Any:
+        # The analysis AI (BI T3): a scripted Agent that ran the SQL and proposes it.
+        def asker(_context: str, _turns: Any, _check: Any) -> Any:
+            db = vault.Vault(workspace, dataset[len("vault-") :]).db_path
+            answer = {
+                "reply": "TestSolution 的卡片最多。",
+                "analysis": {"title": "各類型的卡片數", "slug": "by-type", "kind": "sql",
+                             "code": by_type, "chart": {"type": "bar", "x": "type", "y": "n"}},
+                "preview": analyses.run_sql(db, by_type),
+            }  # fmt: skip
+            used = [{"name": "bi_analysis__sql", "ok": True},
+                    {"name": "bi_analysis__propose", "ok": True}]  # fmt: skip
+            return sessions.Asked(answer=answer, attempts=1), "test-agent", used
+
+        return asker
+
     # The benchmark asks a scripted Agent: the working copy answers worse (BI T1).
     monkeypatch.setattr(
         bi_cards_api,
@@ -71,6 +90,7 @@ def test_vault_panel_and_coverage_in_a_browser(
             ),
             extract_for=lambda _v, _a: lambda case: [],
             background=lambda _title, work: work(),
+            analysis_asker_for=analysis_asker,
         ),
     )
     web, server, _recorder, _ = served
@@ -319,6 +339,26 @@ def test_vault_panel_and_coverage_in_a_browser(
         )
         shoot("vault-bench-phone")
         size(1366, 1000, False)
+
+        # -- 分析與圖表 in step 3, then on the Dashboard (BI T3) ---------------------------
+        wait("!document.getElementById('bi-b-an').hidden")
+        assert "還沒有存起來的分析" in text_of("bi-b-an-list")
+        click("#bi-b-an-new")
+        wait("!document.getElementById('bi-b-ana').hidden")
+        set_value("bi-b-ana-msg", "各類型各有幾張卡？畫長條圖")
+        click("#bi-b-ana-send")
+        wait("document.getElementById('bi-b-ana-log').textContent.includes('存成分析')")
+        assert run("!!document.querySelector('#bi-b-ana-log svg.bi-chart')")
+        assert "Agent 用了：SQL、提出分析" in text_of("bi-b-ana-log")
+        shoot("vault-analysis-ai")
+        click("#bi-b-ana-log button.go")
+        wait("document.getElementById('bi-b-an-list').textContent.includes('各類型的卡片數')")
+        wait("document.getElementById('bi-b-ver-pending').textContent.includes('分析')")
+        click("#bi-views [data-bi-view=dashboard]")
+        wait("!document.getElementById('bi-an-dash').hidden")
+        wait("!!document.querySelector('#bi-an-dash-body svg.bi-chart')")
+        shoot("vault-analysis-dashboard")
+        click("#bi-views [data-bi-view=build]")
         click("#bi-stepper [data-stage=source]")
 
         # -- a new, empty vault ---------------------------------------------------------------
