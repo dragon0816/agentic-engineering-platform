@@ -10,8 +10,8 @@ import asyncio
 import contextvars
 import json
 import time
-from collections.abc import Awaitable, Callable, Sequence
-from contextlib import nullcontext
+from collections.abc import Awaitable, Callable, Iterator, Sequence
+from contextlib import contextmanager, nullcontext
 from contextvars import ContextVar
 from dataclasses import dataclass
 from typing import Any, Literal, Self, cast
@@ -342,6 +342,22 @@ class HostTool:
     # of the same model reply that say so too (read-only delegations). None:
     # never; the call runs in order, alone.
     parallel: Callable[[RequestContext, dict[str, JsonValue]], bool] | None = None
+
+
+#: Host tools added for one turn only (BI benchmarks and the skill AI,
+#: `docs/phases/BI_TEST_AND_TOOLS.md`): they come before the Host's own and
+#: replace one of the same name, for this turn and nothing else.
+_TURN_HOST_TOOLS: ContextVar[tuple[HostTool, ...]] = ContextVar("aep_turn_host_tools", default=())
+
+
+@contextmanager
+def turn_host_tools(tools: Sequence[HostTool]) -> Iterator[None]:
+    """Offer `tools` in the turns run inside this block."""
+    token = _TURN_HOST_TOOLS.set(tuple(tools))
+    try:
+        yield
+    finally:
+        _TURN_HOST_TOOLS.reset(token)
 
 
 @dataclass(frozen=True)
@@ -1070,9 +1086,14 @@ class Gateway:
         # Host tools join after any narrowing: a selector ranks installed
         # Skills, and authoring is not one of them.
         host: dict[str, HostTool] = {}
-        for host_tool in self.host_tools() if self.host_tools is not None else ():
+        own = self.host_tools() if self.host_tools is not None else ()
+        for host_tool in (*_TURN_HOST_TOOLS.get(), *own):
             name = host_tool.tool.name
-            if name in bindings or (allowed_tools is not None and name not in allowed_tools):
+            if (
+                name in host
+                or name in bindings
+                or (allowed_tools is not None and name not in allowed_tools)
+            ):
                 continue
             if sub_run and name == delegation_scope.DELEGATE_TOOL:
                 continue

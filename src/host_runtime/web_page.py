@@ -2536,7 +2536,7 @@ tr:last-child td { border-bottom: none; }
               <span><strong>Schema 與 Ingest</strong><small>判讀規則、試跑、審核、寫入</small>
               </span></button></li>
             <li><button type="button" data-stage="test"><span class="kp-step-n">3</span>
-              <span><strong>測試與 Push</strong><small>Dashboard、commit、push</small></span>
+              <span><strong>測試與 Push</strong><small>測試題、擷取測試、push</small></span>
               </button></li>
           </ol>
         </nav>
@@ -2862,13 +2862,68 @@ tr:last-child td { border-bottom: none; }
           hidden>
           <h3 class="kp-stage-title" id="bi-b-test" tabindex="-1">步驟 3／3・測試與 Push</h3>
           <p class="bi-meta">先看寫入後的卡片與 Dashboard，再把改動寫下目的 commit、push 給大家。
-            題目 benchmark 與編輯 Dashboard 還在開發。</p>
+            用 AI 對話做圖表分析還在開發。</p>
           <div class="bi-actions">
             <button class="bi-btn" id="bi-b-to-dash" type="button">看 Dashboard</button>
             <button class="bi-btn" id="bi-b-to-cards" type="button">看卡片</button></div>
           <p class="bi-meta" id="bi-b-ver-none" hidden>這是只在這台電腦的資料集：
             確認寫入後就生效，沒有 commit 與 push。
             要和同事一起維護，請在步驟 1 建立或加入 vault。</p>
+          <div id="bi-b-bench" class="bi-step" role="region" aria-labelledby="bi-b-bench-h"
+            hidden>
+            <h4 id="bi-b-bench-h">題目與擷取測試</h4>
+            <p class="bi-meta">測試題用使用者的問法，透過 Agent 分別問「這台電腦的工作版本」與
+              「發佈版本」，用「必須提到」與「不可以說」評分；擷取測試用工作版本的判讀規則試跑一段原文，
+              檢查找到的卡片與出處。測試跟著知識庫 commit、push。
+              push 時，若最近一次測試（測的正是這次要 push 的內容）有題目退步，就不能 push。</p>
+            <div class="mem-status" id="bi-b-bench-status" role="status" aria-live="polite"
+              hidden></div>
+            <h5>測試題</h5>
+            <div id="bi-b-bq-list"></div>
+            <form id="bi-b-bq-form" class="bi-step" novalidate>
+              <div class="bi-step-grid">
+                <div><label class="bi-label" for="bi-b-bq-q">題目（使用者會怎麼問）</label>
+                  <input id="bi-b-bq-q" class="bi-input" maxlength="1000"
+                    placeholder="例如：哪些客戶在評估 TSN？"></div>
+                <div><label class="bi-label" for="bi-b-bq-must">必須提到（逗號分隔）</label>
+                  <input id="bi-b-bq-must" class="bi-input" maxlength="2000"
+                    placeholder="例如：IEEE 802.1"></div>
+                <div><label class="bi-label" for="bi-b-bq-not">不可以說（逗號分隔）</label>
+                  <input id="bi-b-bq-not" class="bi-input" maxlength="2000"></div>
+                <div><label class="bi-label" for="bi-b-bq-set">題組</label>
+                  <input id="bi-b-bq-set" class="bi-input" maxlength="60" spellcheck="false"
+                    value="main"></div>
+              </div>
+              <div class="bi-actions"><button class="bi-btn" type="submit">新增測試題</button></div>
+            </form>
+            <h5>擷取測試</h5>
+            <div id="bi-b-bc-list"></div>
+            <details id="bi-b-bc-box"><summary>新增擷取測試</summary>
+              <form id="bi-b-bc-form" class="bi-step" novalidate>
+                <div class="bi-step-grid">
+                  <div><label class="bi-label" for="bi-b-bc-slug">代號（小寫英數字與 -）</label>
+                    <input id="bi-b-bc-slug" class="bi-input" maxlength="60" spellcheck="false"
+                      placeholder="例如：tsn-visit"></div>
+                  <div><label class="bi-label" for="bi-b-bc-folder">
+                    來源資料夾（決定用哪條擷取規則；留空＝sources）</label>
+                    <input id="bi-b-bc-folder" class="bi-input" maxlength="200" spellcheck="false"
+                      placeholder="sources/applications/aidc-power"></div>
+                </div>
+                <label class="bi-label" for="bi-b-bc-note">原文</label>
+                <textarea id="bi-b-bc-note" class="bi-input" rows="5" maxlength="20000"></textarea>
+                <label class="bi-label" for="bi-b-bc-expected">
+                  應找到什麼（aep.bi.benchmark.expected/v1 JSON）</label>
+                <textarea id="bi-b-bc-expected" class="bi-input" rows="8" spellcheck="false"
+                  placeholder='{"format": "aep.bi.benchmark.expected/v1", "candidates": [...]}'
+                  ></textarea>
+                <div class="bi-actions"><button class="bi-btn" type="submit">新增擷取測試</button>
+                </div>
+              </form>
+            </details>
+            <div class="bi-actions">
+              <button class="go" id="bi-b-bench-run" type="button">跑測試</button></div>
+            <div id="bi-b-bench-report" aria-live="polite"></div>
+          </div>
           <div id="bi-b-ver" class="bi-step" role="region" aria-labelledby="bi-b-ver-h" hidden>
             <h4 id="bi-b-ver-h">版本</h4>
             <p class="bi-meta" id="bi-b-ver-reads"></p>
@@ -12564,6 +12619,7 @@ async function biBuildVault() {
   el("bi-b-ver-none").hidden = Boolean(vault);
   if (!vault) {
     el("bi-b-ver").hidden = true; el("bi-b-skills").hidden = true;
+    el("bi-b-bench").hidden = true;
     box.append(bh("p", "bi-meta", "這是只在這台電腦的資料集。要和同事一起維護，請建立或加入 vault，"
       + "或把它轉成 vault。"));
     return;
@@ -12585,6 +12641,7 @@ function biVaultState(state) {
     box.append(bh("p", "bi-warn", "現在讀不到共用資料夾（OneDrive 沒有同步或路徑不對）："
       + "可以看卡片，但不能寫入。"));
     el("bi-b-ver").hidden = true; el("bi-b-skills").hidden = true;
+    el("bi-b-bench").hidden = true;
     return;
   }
   box.append(bh("p", "bi-meta", state.cards + " 張卡片・別人 push 了還沒套用的 " + state.behind
@@ -12607,8 +12664,141 @@ function biVaultState(state) {
     ? "Agent 讀的是發佈版本「" + reads.tag + "」；之後 push 的內容要再發佈，Agent 才會讀到。"
     : "還沒有發佈過：Agent 讀的是大家已 push 的最新內容（不含你還沒 push 的改動）。";
   el("bi-b-ver").hidden = false; el("bi-b-skills").hidden = false;
+  bi.verVault = v.id;
+  biBench(v.id).catch((failure) => biNotice(false, "讀不到測試：" + failure.message));
   biVersions(v.id).catch((failure) => biNotice(false, "讀不到版本資訊：" + failure.message));
 }
+
+// -- 題目與擷取測試 (BI T1, docs/phases/BI_TEST_AND_TOOLS.md §3) ------------------------
+function biBenchGrade(side) {
+  const g = side.grade || {};
+  if (!side.ok) return "沒有回答";
+  if (g.passed) return "通過";
+  const why = [];
+  if ((g.missing || []).length) why.push("沒提到 " + g.missing.join("、"));
+  if ((g.forbidden || []).length) why.push("說了 " + g.forbidden.join("、"));
+  return "沒通過（" + why.join("；") + "）";
+}
+
+function biBenchReport(report) {
+  const box = el("bi-b-bench-report"); box.replaceChildren();
+  if (!report) { box.append(bh("p", "bi-meta", "還沒有跑過測試。")); return; }
+  const state = {running: "測試中…", finished: "完成", failed: "沒有跑完"}[report.status]
+    || report.status;
+  const head = "最近一次測試（" + biTime(report.started_at) + "，" + state + "）";
+  box.append(bh("h5", "", head));
+  if (report.error) box.append(bh("p", "bi-warn", "停在：" + report.error));
+  if (report.status !== "running") {
+    const parts = ["題目：工作版本 " + report.working_score + "/" + report.total
+      + "、發佈版本 " + report.published_score + "/" + report.total];
+    if ((report.regressions || []).length) parts.push("退步 " + report.regressions.length + " 題");
+    if (report.extract) parts.push("擷取 " + report.extract.score + " 分");
+    box.append(bh("p", "", parts.join("；")));
+  }
+  const regressed = new Set(report.regressions || []);
+  const rows = [...(report.results || [])].sort((x, y) =>
+    Number(regressed.has(y.unit)) - Number(regressed.has(x.unit)));
+  const list = bh("ul", "bi-log");
+  for (const row of rows) {
+    const answers = bh("details", "", bh("summary", "", "看兩邊的回答"),
+      bh("p", "", bh("strong", "", "工作版本："), row.working.answer || "（沒有）"),
+      bh("p", "", bh("strong", "", "發佈版本："), row.published.answer || "（沒有）"));
+    list.append(bh("li", regressed.has(row.unit) ? "bi-warn" : "",
+      bh("strong", "", row.question), bh("br"),
+      "工作版本：" + biBenchGrade(row.working) + "・發佈版本：" + biBenchGrade(row.published)
+        + (regressed.has(row.unit) ? "・退步" : ""), answers));
+  }
+  for (const item of report.cases || []) {
+    const result = item.result;
+    const line = result ? "擷取「" + item.slug + "」：" + result.score + " 分（找到 "
+      + result.counts.found + "／" + result.counts.expected + "）"
+      : "擷取「" + item.slug + "」：沒有跑完（" + item.error + "）";
+    const failures = result ? result.failures.map((f) => f.message) : [];
+    list.append(bh("li", failures.length || !result ? "bi-warn" : "", line,
+      biListBlock("沒過的檢查", failures.slice(0, 10))));
+  }
+  if ((report.ungraded || []).length) {
+    list.append(bh("li", "bi-meta", report.ungraded.length + " 題沒有「必須提到」或「不可以說」，"
+      + "沒有評分。"));
+  }
+  box.append(list);
+}
+
+async function biBench(vaultId) {
+  const reply = await call("/api/bi/vaults/" + vaultId + "/checks");
+  if (vaultId !== bi.verVault) return;
+  el("bi-b-bench").hidden = false;
+  const questions = el("bi-b-bq-list"); questions.replaceChildren();
+  if (!reply.questions.length) questions.append(bh("p", "bi-meta", "還沒有測試題。"));
+  for (const q of reply.questions) {
+    const terms = (q.must.length ? "必須提到：" + q.must.join("、") : "")
+      + (q.must_not.length ? "　不可以說：" + q.must_not.join("、") : "");
+    questions.append(bh("div", "bi-step", bh("strong", "", q.question),
+      bh("p", "bi-meta", "題組 " + q.set + (terms ? "・" + terms : "・沒有評分條件")),
+      bh("div", "bi-actions", biButton("刪除", () => biBenchSave({delete: q.unit}), "bi-btn",
+        "刪除測試題 " + q.question))));
+  }
+  const cases = el("bi-b-bc-list"); cases.replaceChildren();
+  if (!reply.cases.length) cases.append(bh("p", "bi-meta", "還沒有擷取測試。"));
+  for (const c of reply.cases) {
+    const count = ((c.expected || {}).candidates || []).length;
+    cases.append(bh("div", "bi-step", bh("strong", "", c.slug),
+      bh("p", "bi-meta", (c.folder || "sources") + "・應找到 " + count + " 張候選卡"),
+      bh("div", "bi-actions", biButton("刪除", () => biBenchSave({delete: c.unit}), "bi-btn",
+        "刪除擷取測試 " + c.slug))));
+  }
+  biBenchReport(reply.latest);
+  el("bi-b-bench-run").disabled = !(reply.questions.length || reply.cases.length)
+    || (reply.latest && reply.latest.status === "running");
+  clearTimeout(bi.benchTimer);
+  if (reply.latest && reply.latest.status === "running") {
+    bi.benchTimer = setTimeout(() => biBench(vaultId).catch(() => {}), 2000);
+  } else if (bi.benchWatch === reply.latest?.run_id) {
+    bi.benchWatch = null;
+    biNotice(reply.latest.status === "finished", reply.latest.status === "finished"
+      ? "測試跑完了。" : "測試沒有跑完：" + (reply.latest.error || ""));
+  }
+}
+
+async function biBenchSave(body) {
+  await biCall("/api/bi/vaults/" + bi.verVault + "/checks", body);
+  biVaultState(await call("/api/bi/vaults/" + bi.verVault + "/status"));
+  biNotice(true, body.delete ? "已刪除（commit 並 push 後大家才會少這個測試）。"
+    : "已加入（commit 並 push 後大家才會有這個測試）。");
+  return true;
+}
+
+el("bi-b-bq-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  try {
+    await biBenchSave({question: el("bi-b-bq-q").value, must: el("bi-b-bq-must").value,
+      must_not: el("bi-b-bq-not").value, set: el("bi-b-bq-set").value});
+    el("bi-b-bq-q").value = ""; el("bi-b-bq-must").value = ""; el("bi-b-bq-not").value = "";
+  } catch (failure) { biNotice(false, "沒有加入：" + failure.message); }
+});
+el("bi-b-bc-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  let expected;
+  try { expected = JSON.parse(el("bi-b-bc-expected").value || "null"); }
+  catch (e) { biNotice(false, "「應找到什麼」不是正確的 JSON。"); return; }
+  try {
+    await biBenchSave({kind: "case", slug: el("bi-b-bc-slug").value,
+      folder: el("bi-b-bc-folder").value, note: el("bi-b-bc-note").value, expected});
+    for (const id of ["bi-b-bc-slug", "bi-b-bc-note", "bi-b-bc-expected"]) el(id).value = "";
+  } catch (failure) { biNotice(false, "沒有加入：" + failure.message); }
+});
+el("bi-b-bench-run").addEventListener("click", async () => {
+  const button = el("bi-b-bench-run"); button.disabled = true;
+  try {
+    const reply = await biCall("/api/bi/vaults/" + bi.verVault + "/bench", {});
+    bi.benchWatch = reply.run_id;
+    biNotice(true, "測試開始了：每題會問 Agent 兩次，需要幾分鐘。");
+    await biBench(bi.verVault);
+  } catch (failure) {
+    button.disabled = false;
+    biNotice(false, "沒有開始：" + failure.message);
+  }
+});
 
 // -- the 「版本」 area (knowledge repositories R5, KNOWLEDGE_REPO.md §10) ----------
 function biVerValue(value) {

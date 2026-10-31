@@ -5729,3 +5729,26 @@ The schema part opens without a chosen source (editing the schema or a skill nee
 write still do). Rejected: merging the five parts into one long section (larger change to the run flow, and
 the program moves between them after an import and a write), and leaving 「版本」 in step 1 (push is the end
 of the flow).
+
+## 2026-10-31: BI step 3 and the skill AI: owner decisions (owner, recorded by Claude Code)
+
+The owner answered the open questions of the three-step BI page:
+
+1. **The skill AI runs with tools, on the Agent's own harness** (`Gateway.converse`). Reason given by the
+   owner: without it there is no way to confirm that a suggested rule matches the effect of the knowledge
+   base that is finally built and the effect users will later get. Its tools read sources, try a rule in
+   staging, compare runs and run the benchmarks; applying a suggestion, committing and pushing stay the
+   person's. Rejected: the one-call Session B (it suggests without seeing any effect) and a separate loop in
+   the BI module (a second loop, guard set and trace beside the Agent's).
+2. **Analyses by AI conversation, with SQL and Python scripts.** The owner's manager's example: simple
+   scripts or SQL queries that draw the charts and tables a knowledge expert wants, to establish a
+   relationship or phenomenon; the owner wants these made through an AI conversation. Both read-only SQL on
+   a copy of the knowledge base and Python scripts are allowed; scripts need a constrained runner (own
+   process, time and output limits, no network, no writes outside its scratch folder). Rejected by the owner:
+   SQL only.
+3. **The BI benchmark tests both** chat answers (questions asked the way a user asks, through the Agent with
+   `bi__query`, on the working and on the published version) **and** extracted cards (the extraction scorer
+   `capabilities/bi_cards/benchmark.py` on cases kept in the knowledge base).
+
+Order chosen by the owner: benchmarks first (the skill AI's tools need them to verify a suggestion), then the
+skill AI on the harness, then AI analyses. Design: `docs/phases/BI_TEST_AND_TOOLS.md`.

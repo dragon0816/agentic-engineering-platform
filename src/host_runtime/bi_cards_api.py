@@ -113,16 +113,18 @@ def route(
     body: Any,
     platform: bi_subscriptions.SubscriptionPlatform | None = None,
     ai: ai_runs.AiRuntime | None = None,
+    bench: Any = None,
 ) -> Answer:
     """One request; pure apart from the dataset files (and, for the
-    subscription routes, `platform`; for AI runs, `ai`)."""
+    subscription routes, `platform`; for AI runs, `ai`; for a vault benchmark,
+    `bench`, a `bi_bench.BenchRuntime`)."""
     try:
         if path == "/api/bi/subscriptions" or path.startswith("/api/bi/subscriptions/"):
             given = body if isinstance(body, dict) else {}
             return bi_subscriptions.route(workspace, platform, method, path, query, given)
         if path == bi_vaults_api.PREFIX or path.startswith(bi_vaults_api.PREFIX + "/"):
             given = body if isinstance(body, dict) else {}
-            return bi_vaults_api.route(workspace, actor, method, path, query, given)
+            return bi_vaults_api.route(workspace, actor, method, path, query, given, bench)
         return _route(workspace, actor, method, path, query, body, ai)
     except catalog.SchemaInstallError as error:
         # An installed id@version is immutable: different content is a conflict.
@@ -1180,6 +1182,34 @@ def web_ai_runtime(web: Any) -> ai_runs.AiRuntime:
     return ai_runs.AiRuntime(model=model, background=background, approved=approved)
 
 
+def web_bench_runtime(web: Any) -> Any:
+    """How a vault benchmark asks (the Agent with `bi__query`) and extracts (a
+    trial run with the Knowledge model) in Agent Web, as a background task."""
+    from host_runtime import bi_bench
+
+    workspace = web.runtime.layout.workspace_root
+    ai = web_ai_runtime(web)
+
+    def background(title: str, work: Any) -> None:
+        def tracked() -> tuple[str, str]:
+            work()
+            return "succeeded", title
+
+        threading.Thread(
+            target=web.tasks().tracked("bi-benchmark", title, "", tracked),
+            name="bi-benchmark",
+            daemon=True,
+        ).start()
+
+    return bi_bench.BenchRuntime(
+        ask_for=lambda vault_id, actor: bi_bench.agent_ask(
+            web.runtime.agent.gateway, workspace, vault_id, actor, web.namespace or "engineering"
+        ),
+        extract_for=lambda vault_id, actor: bi_bench.trial_extract(workspace, vault_id, actor, ai),
+        background=background,
+    )
+
+
 def handle(handler: Any, method: str, parsed: ParseResult) -> bool:
     """Serve a `/api/bi/` request on `handler` (already token-checked);
     False when the path is not ours."""
@@ -1219,6 +1249,7 @@ def handle(handler: Any, method: str, parsed: ParseResult) -> bool:
             body,
             platform,
             web_ai_runtime(web),
+            web_bench_runtime(web),
         )
     except Exception as failure:  # noqa: BLE001 - the page shows every failure
         status, payload = (

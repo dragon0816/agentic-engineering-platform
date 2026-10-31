@@ -19,12 +19,14 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
+from pydantic import ValidationError
+
 from agent.gateway import HostTool, HostToolOutcome
 from capabilities.bi_cards import vault
-from capabilities.bi_cards.capability import QUERY_SPEC, source_note
+from capabilities.bi_cards.capability import QUERY_SPEC, QueryHandler, QueryRequest, source_note
 from capabilities.bi_cards.dashboard import analysis_names
 from capabilities.bi_cards.manifest import BI_SKILL, bi_question
-from capabilities.runtime import CapabilityInvocation
+from capabilities.runtime import CapabilityInvocation, CapabilityRefused
 from common.execution import Failure, RequestContext
 from models.contracts import ModelTool
 
@@ -116,6 +118,10 @@ def bi_cards_tools(gateway: Any) -> Sequence[HostTool]:
             failure=failure.model_copy(update={"message": f"{text}（{failure.code}）"}),
         )
 
+    return [HostTool(_model_tool(gateway, found), call)]
+
+
+def _model_tool(gateway: Any, found: list[Any]) -> ModelTool:
     description = (
         "Search the BI knowledge cards (read only); each card returns its fields with "
         "their sources. Use THIS tool, not a knowledge vault query, for questions about "
@@ -123,17 +129,39 @@ def bi_cards_tools(gateway: Any) -> Sequence[HostTool]:
         "測試方案 test solutions, 競品 competitors, 趨勢 trends, 技術, 節點, 生態系 and 缺口 "
         f"gaps. PROCEDURE: {found[-1].instructions}"
     ) + _vaults_note(gateway)
-    return [
-        HostTool(
-            ModelTool(
-                name=TOOL_NAME,
-                description=description,
-                input_contract=f"host.{TOOL_NAME}.v1",
-                input_schema=SCHEMA,
-            ),
-            call,
+    return ModelTool(
+        name=TOOL_NAME,
+        description=description,
+        input_contract=f"host.{TOOL_NAME}.v1",
+        input_schema=SCHEMA,
+    )
+
+
+def reading_tool(gateway: Any, handler: QueryHandler) -> HostTool | None:
+    """`bi__query` as the Agent knows it, answered by `handler` (one that reads
+    a chosen version, BI T1) for one turn (`agent.gateway.turn_host_tools`).
+    None when the BI Skill is off, as the Agent would have no such tool."""
+    found = _switched_on(gateway)
+    if not found or gateway.bridge.installed.get(QUERY_SPEC.identity) is None:
+        return None
+
+    async def call(context: RequestContext, arguments: dict[str, Any]) -> HostToolOutcome:
+        try:
+            request = QueryRequest.model_validate(arguments)
+            result = await handler(context, request)
+        except ValidationError:
+            failure = Failure(code="invalid_input", message="")
+        except CapabilityRefused as refused:
+            failure = Failure(code=refused.code, message="")
+        else:
+            return HostToolOutcome(status="succeeded", data=result.model_dump(mode="json"))
+        text = FAILURE_TEXT.get(failure.code, "BI 卡片查詢沒有完成")
+        return HostToolOutcome(
+            status="failed",
+            failure=failure.model_copy(update={"message": f"{text}（{failure.code}）"}),
         )
-    ]
+
+    return HostTool(_model_tool(gateway, found), call)
 
 
 def _vaults_note(gateway: Any) -> str:

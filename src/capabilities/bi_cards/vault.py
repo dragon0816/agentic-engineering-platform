@@ -40,12 +40,12 @@ import re
 import sqlite3
 import tempfile
 import uuid
-from collections.abc import Iterator, Mapping
+from collections.abc import Callable, Iterator, Mapping
 from contextlib import closing, contextmanager
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import catalog, schema_doc, vault_skills
+from capabilities.bi_cards import catalog, schema_doc, vault_checks, vault_skills
 from capabilities.bi_cards.schema import Registry
 from capabilities.bi_cards.store import (
     DATASET_RE,
@@ -165,8 +165,13 @@ class BiType:
     """The `bi` repository type: card units and their checks."""
 
     name = REPO_TYPE
+    #: The benchmark push check (`set_benchmark`, BI T1): (units before, units
+    #: after) -> a report whose `blocking` lists the questions that regressed.
+    benchmark: Callable[[Mapping[str, Any], Mapping[str, Any]], CheckReport] | None = None
 
     def unit_problem(self, key: str, value: Any) -> str | None:
+        if key.startswith(vault_checks.PREFIX):
+            return vault_checks.unit_problem(key, value)
         if key == repo_engine.SCHEMA_UNIT:
             return (
                 None if isinstance(value, str) and "@" in value else "schema must be <id>@<version>"
@@ -200,10 +205,21 @@ class BiType:
             and repo_engine.canonical(before.get(k)) != repo_engine.canonical(after.get(k))
         )
         notes = [f"新增 {added} 張卡、刪除 {removed} 張卡、改了 {changed} 個欄位"]
-        return CheckReport(blocking=[], notes=notes)
+        if self.benchmark is None:
+            return CheckReport(blocking=[], notes=notes)
+        gate = self.benchmark(before, after)
+        return CheckReport(blocking=list(gate.blocking), notes=[*notes, *gate.notes])
 
 
-repo_engine.register_type(BiType())
+BI_TYPE = BiType()
+repo_engine.register_type(BI_TYPE)
+
+
+def set_benchmark(
+    benchmark: Callable[[Mapping[str, Any], Mapping[str, Any]], CheckReport] | None,
+) -> None:
+    """Set (or clear) the benchmark check run on every BI vault push."""
+    BI_TYPE.benchmark = benchmark
 
 
 # -- units <-> the BI tables ---------------------------------------------------------
@@ -1145,6 +1161,8 @@ def unit_label(units: Mapping[str, Any], key: str) -> str:
         return "schema 版本"
     if kind == "skill":
         return f"skill「{rest}」"
+    if kind == "check":
+        return vault_checks.label(key, units)
     return {"proposal": "待審提議", "import": "匯入紀錄", "decision": "衝突決定"}.get(kind, key)
 
 

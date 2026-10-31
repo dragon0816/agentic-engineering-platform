@@ -26,7 +26,7 @@ from test_draft_install_cards import served  # noqa: F401 - the real Agent Web f
 
 from capabilities.bi_cards.ai_runs import AiRuntime
 from capabilities.bi_cards.store import BiStore
-from host_runtime import bi_cards_api
+from host_runtime import bi_bench, bi_cards_api
 
 SHOTS = Path(__file__).resolve().parents[1] / ".scratch" / "bi-vault"
 
@@ -57,6 +57,21 @@ def test_vault_panel_and_coverage_in_a_browser(
         bi_cards_api,
         "web_ai_runtime",
         lambda _web: AiRuntime(model=lambda: (model, "test-model"), background=lambda t, w: w()),
+    )
+    # The benchmark asks a scripted Agent: the working copy answers worse (BI T1).
+    monkeypatch.setattr(
+        bi_cards_api,
+        "web_bench_runtime",
+        lambda _web: bi_bench.BenchRuntime(
+            ask_for=lambda _v, _a: (
+                lambda q, side: {
+                    "ok": True,
+                    "answer": "虛構答案 IEEE" if side == "published" else "虛構答案",
+                }
+            ),
+            extract_for=lambda _v, _a: lambda case: [],
+            background=lambda _title, work: work(),
+        ),
     )
     web, server, _recorder, _ = served
     workspace = web.runtime.layout.workspace_root
@@ -282,6 +297,28 @@ def test_vault_panel_and_coverage_in_a_browser(
         click("#bi-stepper [data-stage=test]")  # the applied revision waits for a commit
         wait("document.getElementById('bi-b-ver-pending').textContent.includes('power-extract')")
         shoot("vault-step3")
+
+        # -- 題目與擷取測試 in step 3 (BI T1) ---------------------------------------------
+        wait("!document.getElementById('bi-b-bench').hidden")
+        assert "還沒有跑過測試" in text_of("bi-b-bench-report")
+        assert run("document.getElementById('bi-b-bench-run').disabled")
+        set_value("bi-b-bq-q", "TSN 的標準組織是誰？")
+        set_value("bi-b-bq-must", "IEEE")
+        click("#bi-b-bq-form button[type=submit]")
+        wait("document.getElementById('bi-b-bq-list').textContent.includes('TSN 的標準組織')")
+        wait("document.getElementById('bi-b-ver-pending').textContent.includes('測試題')")
+        click("#bi-b-bench-run")
+        wait("document.getElementById('bi-b-bench-report').textContent.includes('完成')")
+        report = text_of("bi-b-bench-report")
+        assert "工作版本 0/1、發佈版本 1/1" in report and "退步 1 題" in report
+        assert "沒提到 IEEE" in report
+        shoot("vault-bench")
+        size(390, 844, True)
+        assert not run(
+            "document.documentElement.scrollWidth > document.documentElement.clientWidth"
+        )
+        shoot("vault-bench-phone")
+        size(1366, 1000, False)
         click("#bi-stepper [data-stage=source]")
 
         # -- a new, empty vault ---------------------------------------------------------------

@@ -17,6 +17,7 @@ came from, and say when that copy no longer updates (owner Q2).
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -91,8 +92,16 @@ def source_note(source: dict[str, Any] | None) -> str:
 
 
 class QueryHandler:
-    def __init__(self, workspace_root: Path) -> None:
+    def __init__(
+        self,
+        workspace_root: Path,
+        store_for: Callable[[str], tuple[BiStore, str] | None] | None = None,
+    ) -> None:
         self.workspace_root = workspace_root
+        #: For a benchmark (BI T1): the store a dataset is read from and the
+        #: note saying which version that is, in place of the published one;
+        #: None for a dataset it does not cover. Nothing is synced then.
+        self.store_for = store_for
 
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = QueryRequest.model_validate(inputs)
@@ -106,7 +115,10 @@ class QueryHandler:
             if store.read_only and source is None:
                 raise BiStoreError("dataset_unknown")
             published = ""
-            if store.vault_id is not None:
+            chosen = self.store_for(request.dataset) if self.store_for is not None else None
+            if chosen is not None:
+                store, published = chosen
+            elif store.vault_id is not None:
                 # A vault is answered from its published version only, never
                 # from this PC's unpushed work (knowledge repositories,
                 # decision 8). Syncing first picks up a new publication; it

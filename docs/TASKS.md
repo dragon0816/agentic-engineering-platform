@@ -3907,4 +3907,12 @@ s-k-20261011T102952` (not published).
     moved from step 1). The vault skills moved from 「版本」 to step 2 (`#bi-b-skills`); the schema part no
     longer needs a chosen source. Tests: the BI browser tests click `#bi-build-steps`; `test_bi_build_ui` and
     `test_bi_vault_ui` check the three steps. Not done: question benchmark and editable dashboards in step 3,
-    the skill AI with tools (owner to decide).
+    the skill AI with tools (owner decided 2026-10-31: on the Agent harness; see the next rows).
+  - [x] 2026-10-31, Claude Code: BI T1, benchmarks of a BI vault (`docs/phases/BI_TEST_AND_TOOLS.md` §3).
+    Question sets and extraction cases are vault units (`capabilities/bi_cards/vault_checks.py`); a run
+    (`host_runtime/bi_bench.py`) asks each question through the Agent harness with `bi__query` reading the
+    working and the published version (turn-scoped Host tool `agent.gateway.turn_host_tools`,
+    `QueryHandler(store_for=...)`), scores each case by a trial run; regressions block the push
+    (`vault.set_benchmark`). Step 3 「題目與擷取測試」. Tests `test_bi_vault_bench` (4, one through a real
+    Gateway with a scripted model), `test_bi_vault_ui` (add, run, report). Next: T2 (skill AI on the
+    harness), T3 (AI analyses with SQL and Python).

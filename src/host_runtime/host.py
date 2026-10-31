@@ -29,6 +29,7 @@ from agent.gateway import Gateway, KnowledgeVaultTool
 from agent.routing import CommandRouter, RequestRouter
 from agent.skills import SkillManifest, SkillRegistry
 from agent.task_execution import GatewayTaskExecutor
+from capabilities.bi_cards import vault as bi_vault
 from capabilities.bi_cards.capability import bindings as bi_cards_bindings
 from capabilities.bi_cards.manifest import BI_SKILL
 from capabilities.browser_session.handlers import SPEC as BROWSER_SPEC
@@ -301,7 +302,7 @@ from harness.restricted_runner import (
     RunnerLimits,
     is_venv_launcher,
 )
-from host_runtime import wiki_bench
+from host_runtime import bi_bench, wiki_bench
 from host_runtime.agent import LocalAgent
 from host_runtime.attachments import AttachmentStore
 from host_runtime.bi_cards_tools import bi_cards_tools
@@ -2264,6 +2265,8 @@ def build_runtime(
     place = layout if layout is not None else HostLayout.under(checked.workspace_root)
     # A wiki repository's push is checked against its recorded test runs (R4a).
     wiki.set_benchmark(partial(wiki_bench.gate, place.workspace_root))
+    # So is a BI vault's push (BI T1).
+    bi_vault.set_benchmark(partial(bi_bench.gate, place.workspace_root))
     membership = load_membership(checked, place)
     gateway = build_gateway(
         checked,

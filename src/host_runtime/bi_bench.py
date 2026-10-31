@@ -1,0 +1,309 @@
+"""The benchmark of a BI vault and its push check (BI T1).
+
+`docs/phases/BI_TEST_AND_TOOLS.md` §3.2–§3.3. One run tests what the vault
+keeps (`capabilities.bi_cards.vault_checks`):
+
+- every question is asked twice the way a user asks it, through the Agent
+  (`ask`), once reading the working database and once the published one, and
+  graded by its terms (`knowledge.questions.grade`); a regression is a question
+  that passes on published and fails on working;
+- every extraction case is read by a trial AI run with the working skills of
+  its folder (`extract`) and scored (`capabilities.bi_cards.benchmark`).
+
+The report is saved after every step in `<vault local dir>/benchmarks/<run>.json`
+with the digest of the working units it tested. On push, `gate` finds the
+newest finished run for exactly the units being pushed: its regressions block
+the push; without one the push goes ahead with a note (a run asks the model for
+minutes, so a push never starts one).
+"""
+
+from __future__ import annotations
+
+import asyncio
+import hashlib
+import json
+import uuid
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any, Literal
+
+from agent.delegation_scope import running_sub_run
+from agent.gateway import turn_host_tools
+from capabilities.bi_cards import benchmark, vault, vault_checks
+from capabilities.bi_cards.ai_runs import AiRuntime
+from capabilities.bi_cards.capability import QueryHandler
+from capabilities.bi_cards.store import VAULT_PREFIX, BiStore, BiStoreError
+from common.execution import RequestContext, TraceIdentifiers
+from host_runtime import bi_cards_tools
+from knowledge.questions import Question, grade
+from knowledge.repo.repository import CheckReport, canonical
+from models.contracts import ModelMessage
+
+REPORT_FORMAT = "aep.bi.bench_report/v1"
+BENCH_DIR = "benchmarks"
+MAX_ANSWER = 4000
+Side = Literal["working", "published"]
+#: (question text, side) -> {"ok": the turn answered, "answer": its text}.
+Ask = Callable[[str, Side], Mapping[str, Any]]
+#: (an extraction case) -> the candidates a trial run produced.
+Extract = Callable[[Mapping[str, Any]], list[dict[str, Any]]]
+
+
+def units_digest(units: Mapping[str, Any]) -> str:
+    return hashlib.sha256(canonical(dict(units)).encode("utf-8")).hexdigest()
+
+
+def _folder(workspace: Path, vault_id: str) -> Path:
+    return vault.local_dir(workspace, vault_id) / BENCH_DIR
+
+
+def _now() -> str:
+    return datetime.now(UTC).isoformat(timespec="seconds")
+
+
+def new_run_id() -> str:
+    return f"bibench-{datetime.now(UTC).strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:4]}"
+
+
+def _save(workspace: Path, vault_id: str, report: dict[str, Any]) -> None:
+    folder = _folder(workspace, vault_id)
+    folder.mkdir(parents=True, exist_ok=True)
+    target = folder / f"{report['run_id']}.json"
+    temporary = target.with_suffix(".tmp")
+    temporary.write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
+    temporary.replace(target)
+
+
+def _side(question: Question, reply: Mapping[str, Any]) -> dict[str, Any]:
+    text = str(reply.get("answer") or "")
+    return {
+        "ok": bool(reply.get("ok")),
+        "grade": grade(question, text).model_dump(mode="json"),
+        "answer": text[:MAX_ANSWER],
+    }
+
+
+def _finish(report: dict[str, Any]) -> None:
+    results = report["results"]
+    report["working_score"] = sum(1 for r in results if r["working"]["grade"]["passed"])
+    report["published_score"] = sum(1 for r in results if r["published"]["grade"]["passed"])
+    report["regressions"] = [
+        r["unit"]
+        for r in results
+        if r["published"]["grade"]["passed"] and not r["working"]["grade"]["passed"]
+    ]
+    scored = [c["result"] for c in report["cases"] if c.get("result")]
+    report["extract"] = (
+        {k: v for k, v in benchmark.summarize(scored).items() if k != "notes"} if scored else None
+    )
+
+
+def run(
+    workspace: Path,
+    vault_id: str,
+    *,
+    ask: Ask,
+    extract: Extract,
+    actor: str,
+    run_id: str | None = None,
+) -> dict[str, Any]:
+    """Run the vault's questions and cases on its working copy (synchronous)."""
+    units = vault.Vault(workspace, vault_id).repo.working_units()
+    questions = vault_checks.questions(units)
+    cases = vault_checks.cases(units)
+    graded = [q for q in questions if q["must"] or q["must_not"]]
+    report: dict[str, Any] = {
+        "format": REPORT_FORMAT,
+        "run_id": run_id or new_run_id(),
+        "vault_id": vault_id,
+        "status": "running",
+        "started_at": _now(),
+        "finished_at": None,
+        "by": actor,
+        "units_sha256": units_digest(units),
+        "total": len(graded),
+        "ungraded": [q["unit"] for q in questions if not (q["must"] or q["must_not"])],
+        "results": [],
+        "cases": [],
+        "error": None,
+    }
+    _save(workspace, vault_id, report)
+    try:
+        for item in graded:
+            question = Question(
+                set=item["set"],
+                path=item["unit"],
+                text=item["question"],
+                must=tuple(item["must"]),
+                must_not=tuple(item["must_not"]),
+            )
+            result = {"unit": item["unit"], "set": item["set"], "question": item["question"]}
+            for side in ("working", "published"):
+                result[side] = _side(question, ask(item["question"], side))
+            report["results"].append(result)
+            _save(workspace, vault_id, report)
+        for case in cases:
+            entry: dict[str, Any] = {"unit": case["unit"], "slug": case["slug"]}
+            try:
+                candidates = extract(case)
+                entry["result"] = benchmark.score(candidates, case["expected"], text=case["note"])
+            except Exception as failure:  # noqa: BLE001 (one case failing is reported)
+                entry["error"] = str(failure)[:500] or type(failure).__name__
+            report["cases"].append(entry)
+            _save(workspace, vault_id, report)
+        _finish(report)
+        report["status"] = "finished"
+    except Exception as failure:  # noqa: BLE001 (the report says what stopped it)
+        _finish(report)
+        report["status"] = "failed"
+        report["error"] = str(failure)[:500] or type(failure).__name__
+    report["finished_at"] = _now()
+    _save(workspace, vault_id, report)
+    return report
+
+
+def reports(workspace: Path, vault_id: str) -> list[dict[str, Any]]:
+    """The vault's runs, newest first."""
+    folder = _folder(workspace, vault_id)
+    found = []
+    for path in folder.glob("*.json") if folder.is_dir() else ():
+        try:
+            found.append(json.loads(path.read_text(encoding="utf-8")))
+        except (OSError, ValueError):
+            continue
+    return sorted(found, key=lambda r: str(r.get("started_at") or ""), reverse=True)
+
+
+def latest(workspace: Path, vault_id: str) -> dict[str, Any] | None:
+    found = reports(workspace, vault_id)
+    return found[0] if found else None
+
+
+def gate(workspace: Path, before: Mapping[str, Any], after: Mapping[str, Any]) -> CheckReport:
+    """The BI vault push check (`vault.set_benchmark`)."""
+    del before  # a run compared the working copy with the published version
+    digest = units_digest(after)
+    runs = [
+        r
+        for path in sorted((workspace / "bi" / "vaults").glob(f"*/{BENCH_DIR}"))
+        for r in reports(workspace, path.parent.name)
+        if r.get("units_sha256") == digest and r.get("status") == "finished"
+    ]
+    if not runs:
+        return CheckReport(
+            blocking=[],
+            notes=["這次 push 的內容沒有跑過測試（可以先在步驟 3 跑一次再 push）"],
+        )
+    newest = max(runs, key=lambda r: str(r.get("finished_at") or ""))
+    note = (
+        f"測試 {newest.get('run_id')}：{newest.get('working_score')}/{newest.get('total')} 題通過"
+        f"（發佈版本是 {newest.get('published_score')}/{newest.get('total')}）"
+    )
+    extract = newest.get("extract")
+    if extract:
+        note += f"；擷取 {extract.get('score')} 分"
+    units = {r["unit"]: r["question"] for r in newest.get("results") or []}
+    blocking = [
+        f"測試退步：「{units.get(unit, unit)}」發佈版本答得對，這次的內容答錯"
+        for unit in newest.get("regressions") or []
+    ]
+    return CheckReport(blocking=blocking, notes=[note])
+
+
+# -- how a run asks and extracts in Agent Web ------------------------------------------------
+
+ROLE = (
+    "You are answering a benchmark question about the shared BI knowledge base dataset "
+    "{dataset}. Use bi__query with dataset {dataset} and answer from what it returns, as you "
+    "would answer the person."
+)
+
+
+@dataclass(frozen=True)
+class BenchRuntime:
+    """What a benchmark run needs from Agent Web: how to ask a question as the
+    Agent, how to run an extraction case, and a way to run work in the background."""
+
+    ask_for: Callable[[str, str], Ask]  # (vault id, actor) -> Ask
+    extract_for: Callable[[str, str], Extract]  # (vault id, actor) -> Extract
+    background: Callable[[str, Callable[[], None]], None]
+
+
+def agent_ask(gateway: Any, workspace: Path, vault_id: str, actor: str, namespace: str) -> Ask:
+    """Ask through the Agent harness as a Host sub-run (no memory, no session),
+    offering only `bi__query`, read for this turn from the chosen version."""
+    dataset = f"{VAULT_PREFIX}{vault_id}"
+
+    def chosen(side: Side) -> tuple[BiStore, str]:
+        if side == "working":
+            view = BiStore(workspace, dataset, view=vault.local_dir(workspace, vault_id))
+            return view, "內容來自這台電腦的工作版本（還沒 push 的改動也在內）"
+        reads = vault.Vault(workspace, vault_id).reads()
+        note = f"內容來自發佈版本 {reads['tag']}" if reads["tag"] else "內容來自已 push 的最新版本"
+        return vault.reading_store(workspace, dataset), note
+
+    def ask(question: str, side: Side) -> Mapping[str, Any]:
+        picked = chosen(side)
+        handler = QueryHandler(workspace, store_for=lambda d: picked if d == dataset else None)
+        tool = bi_cards_tools.reading_tool(gateway, handler)
+        if tool is None:
+            raise BiStoreError("bi_skill_off", "BI Skill 沒有開啟：到 Capabilities 開啟後再測試")
+        value = uuid.uuid4().hex
+        context = RequestContext(
+            trace=TraceIdentifiers(
+                trace_id=f"trace-{value}", request_id=f"request-{value}", span_id=f"span-{value}"
+            ),
+            actor=actor,
+            namespace=namespace,
+            message=question,
+            channel="local",
+        )
+        with running_sub_run("bi-benchmark"), turn_host_tools([tool]):
+            result = asyncio.run(
+                gateway.converse(
+                    context,
+                    (ModelMessage(role="user", text=question),),
+                    allowed_tools=frozenset({bi_cards_tools.TOOL_NAME}),
+                    role_guidance=ROLE.format(dataset=dataset),
+                )
+            )
+        return {"ok": result.status == "answered", "answer": result.text}
+
+    return ask
+
+
+def trial_extract(workspace: Path, vault_id: str, actor: str, ai: AiRuntime) -> Extract:
+    """Read a case the way ingest reads a source: add it as a source of the
+    vault dataset and run a trial (nothing is written to cards) with the
+    working skills of its folder; the candidates come back."""
+    from host_runtime import bi_cards_api
+
+    dataset = f"{VAULT_PREFIX}{vault_id}"
+    now = AiRuntime(model=ai.model, background=lambda _title, work: work(), approved=ai.approved)
+
+    def call(method: str, path: str, body: Any = None, **query: str) -> dict[str, Any]:
+        status, payload = bi_cards_api.route(workspace, actor, method, path, query, body, None, now)
+        if status != 200:
+            raise BiStoreError(str(payload.get("code")), str(payload.get("message")))
+        return dict(payload)
+
+    def extract(case: Mapping[str, Any]) -> list[dict[str, Any]]:
+        source = call(
+            "POST",
+            "/api/bi/sources",
+            {"dataset": dataset, "name": f"{case['slug']}.md", "text": case["note"]},
+        )["source"]["id"]
+        body = {"dataset": dataset, "kind": "trial", "source_id": source}
+        if case.get("folder"):
+            body["folder"] = case["folder"]
+        if case["expected"].get("types"):
+            body["types"] = case["expected"]["types"]
+        run_id = call("POST", "/api/bi/runs", body)["run"]["id"]
+        detail = call("GET", f"/api/bi/runs/{run_id}", dataset=dataset)
+        if detail["run"]["status"] == "failed":
+            raise BiStoreError("run_failed", str(detail["run"].get("error") or "試跑失敗"))
+        return list(detail["candidates"])
+
+    return extract

@@ -5910,3 +5910,42 @@ publish paths stay until R4c.
   `finished` run whose `pages_sha256` equals the pushed pages' digest blocks with `測試退步：<question>
   在 push 前答得對，現在答錯` per regression and notes `測試 <run>：<n>/<total> 題通過（push 前是 …）`;
   with no such run the note is `這次 push 的內容沒有跑過測試（…）` and nothing blocks.
+
+## BI vault benchmarks (BI T1, 2026-10-31)
+
+Design `docs/phases/BI_TEST_AND_TOOLS.md` §3; owner decisions `docs/DECISIONS.md` 2026-10-31 "BI step 3 and the
+skill AI: owner decisions". Code `capabilities/bi_cards/vault_checks.py`, `host_runtime/bi_bench.py`; tests
+`tests/test_bi_vault_bench.py`, `tests/test_bi_vault_ui.py`.
+
+- **Units** (BI type, committed and pushed like cards; never rows of `bi.sqlite`):
+  `check:question:<set>/<slug>` = `{"question", "must": [str], "must_not": [str]}` (set and slug `[a-z0-9-]`, at
+  most 20 terms of 200 characters); `check:extract:<slug>` = `{"note", "folder": str|null, "expected":
+  aep.bi.benchmark.expected/v1}` (refused when `benchmark.check_expected` finds a problem, e.g. a fact whose
+  evidence is not in the note). Pending changes label them 「測試題「…」」 and 「擷取測試「…」」.
+- `GET /api/bi/vaults/<id>/checks` → `{"questions": [{"unit", "set", "slug", "question", "must", "must_not"}],
+  "cases": [{"unit", "slug", "note", "folder", "expected"}], "latest": <report>|null}`.
+- `POST /api/bi/vaults/<id>/checks`: `{"question", "must"?, "must_not"? (list or comma text), "set"? ("main"),
+  "slug"?}` stages a question (`question_invalid` 400); `{"kind": "case", "slug", "note", "expected",
+  "folder"?}` stages a case (`case_invalid` 400); `{"delete": <unit>}` removes one (`check_unknown` 404). Answer
+  `{"ok", "unit"?, "questions", "cases"}`.
+- `POST /api/bi/vaults/<id>/bench` starts a run as an Agent Web background task (`bi-benchmark`) → `{"ok",
+  "run_id"}`; `bench_empty` 400 (no checks), `bench_running` 400, `bench_unavailable` 400 (no runtime).
+  `GET /api/bi/vaults/<id>/bench?run=<run id>` → `{"report"}` (`run_unknown` 404).
+- **A run.** Each graded question is asked twice through `Gateway.converse` as a Host sub-run
+  (`running_sub_run("bi-benchmark")`: no memory, no session), `allowed_tools={"bi__query"}`, a role naming the
+  vault dataset; `bi__query` is a turn-scoped Host tool (`agent.gateway.turn_host_tools`) whose
+  `QueryHandler(store_for=...)` reads the working database (read-only view of `bi/vaults/<id>/bi.sqlite`) or
+  the published one (`vault.reading_store`). Graded by `knowledge.questions.grade`. Each case is added as a
+  source of the vault dataset and read by a trial AI run (`folder` picks the extract skill), scored by
+  `benchmark.score`; a failing case is reported, the run goes on.
+- **Report** `aep.bi.bench_report/v1` in `bi/vaults/<id>/benchmarks/<run id>.json`, saved after every step:
+  `{"format", "run_id", "vault_id", "status": running|finished|failed, "started_at", "finished_at", "by",
+  "units_sha256" (digest of the working units), "total", "ungraded": [unit], "results": [{"unit", "set",
+  "question", "working": {"ok", "grade": {"passed", "missing", "forbidden"}, "answer"}, "published": {...}}],
+  "cases": [{"unit", "slug", "result"?: <benchmark.score>, "error"?}], "working_score", "published_score",
+  "regressions": [unit], "extract": <benchmark.summarize without notes>|null, "error"}`.
+- **Push check** (`vault.set_benchmark(partial(bi_bench.gate, workspace))`, set in `build_runtime`): the newest
+  finished run whose `units_sha256` equals the units being pushed; each regression is a blocking line
+  (push `status: "blocked"`); without such a run the push goes ahead with the note 「這次 push 的內容沒有跑過測試」.
+- **Page**: step 3 「題目與擷取測試」 (`#bi-b-bench`): the questions and cases with 刪除, the two add forms, 「跑測試」
+  and the latest report (scores, regressions first, both answers, case scores and failed checks).

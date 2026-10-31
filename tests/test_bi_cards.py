@@ -140,6 +140,8 @@ def test_harness_and_storage_code_outside_the_package_do_not_import_bi_types() -
         "host_runtime/bi_subscriptions.py",
         # BI vaults V4: the vault routes.
         "host_runtime/bi_vaults_api.py",
+        # BI T1: a vault's benchmark runs and its push check.
+        "host_runtime/bi_bench.py",
         # BI dataset sharing: the platform re-reads every published snapshot.
         "control_plane/bi_datasets.py",
     }
