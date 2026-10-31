@@ -3986,3 +3986,6 @@ s-k-20261011T102952` (not published).
     every type named by `name`. 3.0.0 instead of the design's 2.1.0 to avoid Session A's local 2.1.0 (decision
     2026-11-01). Bare `bi.schema/v1.1` now means 3.0.0; tests that assumed 2.0.0 updated. Tests
     `test_bi_schema_v3` (3). Next: D2 (name matching from the cards' aliases).
+  - [x] 2026-11-01, Claude Code: BI D2, matching by name reads the cards' `aliases` (`names.py`): imports
+    and AI candidates resolve names and link targets through a lookup built from the store, the domain
+    configuration's `name_aliases` beneath until D4. Tests `test_bi_card_aliases` (3). Next: D3.

@@ -27,7 +27,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import catalog, domains, extract, runs, source_markdown
+from capabilities.bi_cards import catalog, domains, extract, names, runs, source_markdown
 from capabilities.bi_cards.schema import Registry, norm_key
 from capabilities.bi_cards.staging import Staging, parse_kind
 from capabilities.bi_cards.store import BiStoreError
@@ -245,6 +245,7 @@ def _extract(
         staging.put_layout(run_id, layout)
 
     configured = domains.read(staging.store)
+    canonical = names.from_store(staging.store, configured)  # the cards' aliases (BI D2)
     if isinstance(layout.get("skills"), dict):
         notes = str(layout["skills"].get("text") or "")
     else:
@@ -266,8 +267,8 @@ def _extract(
     found = staging.candidates(run_id) if only else []
     by_key = {_key(reg, c): c for c in found}
     for item in result.candidates:
-        if configured is not None:
-            _canonical_names(configured, reg, item)
+        if canonical:
+            _canonical_names(canonical, reg, item)
         key = _key(reg, item)
         if key in by_key:
             extract.merge(by_key[key], item)
@@ -296,9 +297,10 @@ def _extract(
         staging.set_status(run_id, "failed", error="所有段落都沒有成功判讀")
 
 
-def _canonical_names(configured: domains.Config, reg: Registry, item: dict[str, Any]) -> None:
+def _canonical_names(configured: names.Names, reg: Registry, item: dict[str, Any]) -> None:
     """A model candidate's name and link targets in their canonical spelling
-    (the dataset's `name_aliases`, BI vault V10), before merging by name."""
+    (the cards' `aliases`, then the configuration's `name_aliases`), before
+    merging by name."""
     entity = reg.types.get(str(item.get("entity_type")))
     if entity is None:
         return

@@ -1,6 +1,6 @@
 # Handoff
 
-Updated: 2026-11-01 (Asia/Taipei), by Claude Code (BI analysis dashboard: F1, F2, F3, P1, P2, P3, P4, D1; earlier: knowledge repositories R1, R2, R3 BI part, R4a, R4b, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-11-01 (Asia/Taipei), by Claude Code (BI analysis dashboard: F1, F2, F3, P1, P2, P3, P4, D1, D2; earlier: knowledge repositories R1, R2, R3 BI part, R4a, R4b, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
 ## BI analysis dashboard and domain retirement (2026-11-01, Claude Code) — latest
 
@@ -37,18 +37,19 @@ restart the running Agent Web.
   as `8760dbf9`.
 - D1 (schema 3.0.0 with `tech_areas`, `chain`, `aliases`): contract "BI schema 3.0.0 ..." and the decision
   "The schema with technology areas and chains is 3.0.0, not 2.1.0 (D1)" (deviation from the design: the owner
-  should know).
+  should know). Pushed as `a802da56`.
 
-**Verification (D1).** `ruff format --check .`, `ruff check .`, `mypy src tests` clean; the whole BI test set
-(`tests/test_bi_*.py`, knowledge repositories) was run: 11 tests assumed the newest shipped version was 2.0.0 and
-were updated; rerun of those files: 76 passed, `test_bi_schemas_ui` failed once under load on a wait and passed
-alone. The full suite was not run.
+- D2 (name matching from card aliases): contract "BI name matching from the cards' aliases (D2)".
 
-**Next actions.** (1) D2: matching by name reads the cards' `aliases` (a lookup built from the store) in
-`importer._canonical_names` and `ai_runs._canonical_names`, falling back to the domain configuration's
-`name_aliases` until D4. (2) D3 `vault.migrate_domains` (dry run, one commit: upgrade to 3.0.0, aliases onto
-cards, `chain` on Node from the old patterns, `tech_areas`?, remove `meta:domains`). (3) The chain sections
-(A–A3) and the coverage matrix into the pack; P5; D4.
+**Verification (D2).** `ruff format --check .`, `ruff check .`, `mypy src tests` (884 files) clean; `pytest
+tests/test_bi_card_aliases.py tests/test_bi_domains.py tests/test_bi_ai_runs.py tests/test_bi_cards.py
+tests/test_bi_rule_path.py tests/test_bi_ingest_runs.py` passed. The full suite was not run.
+
+**Next actions.** (1) D3 `vault.migrate_domains(vault)` with a dry run (the person confirms): one change commit
+(purpose 「把領域設定搬進 schema 與卡片」) upgrading the schema to 3.0.0, writing each `name_aliases` entry onto its
+card's `aliases` (a missing card listed, never invented), setting Node `chain` from the old chain patterns/lists,
+and removing `meta:domains`. (2) The chain sections (A–A3) and the coverage matrix into the pack, reading
+`chain` and `tech_areas`. (3) P5, D4.
 
 ## Knowledge repositories R1, R2, R3 (BI part), R4a and R5 (BI side) (2026-10-30/31, Claude Code)
 

@@ -6166,3 +6166,13 @@ Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §3 (D1, and the schema part of D2
   (list of other names, no allowed values) after `name` on every type named by `name` (not Signal).
 - A bare `bi.schema/v1.1` now means 3.0.0 (new datasets and vaults); a 2.0.0 dataset or vault upgrades without
   moving a value. Session A's next local version is 3.1.0. The F1 fixture stays on 2.0.0.
+
+## BI name matching from the cards' aliases (D2, 2026-11-01)
+
+Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §3. Code `capabilities/bi_cards/names.py`, `importer.py`,
+`ai_runs.py`; test `tests/test_bi_card_aliases.py`.
+
+- `names.from_store(store, configured)` -> `Names`: every card's `aliases` value (schema 3.0.0) -> that card's
+  name, compared loosely (`norm_key`), over the domain configuration's `name_aliases` (kept until D4; a card's
+  alias wins). An import (card names and link targets) and an AI candidate (name, link fields) are resolved
+  through it before keys are built or candidates merged.

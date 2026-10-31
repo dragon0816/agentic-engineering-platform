@@ -24,7 +24,7 @@ from collections import OrderedDict
 from dataclasses import dataclass, field
 from typing import Any
 
-from capabilities.bi_cards import domains
+from capabilities.bi_cards import domains, names
 from capabilities.bi_cards.catalog import for_store
 from capabilities.bi_cards.schema import Registry, TypeDef, norm_key
 from capabilities.bi_cards.store import ApplyResult, BiStore, PlannedRow
@@ -124,7 +124,8 @@ def _skipped(row: dict[str, str], rules: list[dict[str, Any]]) -> bool:
 
 
 def _canonical_names(configured: Any, entity: TypeDef, item: Any, value: Any) -> Any:
-    """A card name or link target in its canonical spelling (`name_aliases`)."""
+    """A card name or link target in its canonical spelling (the cards'
+    `aliases`, then the configuration's `name_aliases`; `names.Names`)."""
     if not (item.is_link or item.name == entity.naming_field):
         return value
     if isinstance(value, list):
@@ -195,6 +196,7 @@ def preview(
     # The dataset's per-domain configuration (BI vault V10): its enum aliases
     # under the mapping's, and its name aliases for names and link targets.
     configured = domains.read(store)
+    canonical = names.from_store(store, configured)  # the cards' aliases (BI D2)
     extra_aliases = {
         **(configured.enum_aliases if configured is not None else {}),
         **dict(mapping.get("enum_aliases") or {}),
@@ -229,8 +231,8 @@ def preview(
             assert item is not None
             cell = raw.get(header, "")
             value, problems = reg.normalize(item, cell, extra_aliases)
-            if configured is not None and value is not None:
-                value = _canonical_names(configured, entity, item, value)
+            if canonical and value is not None:
+                value = _canonical_names(canonical, entity, item, value)
             raws[name] = cell
             warnings.extend({"code": c, "message": m} for c, m in problems)
             if value is not None:
