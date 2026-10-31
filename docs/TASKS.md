@@ -3931,3 +3931,10 @@ s-k-20261011T102952` (not published).
   - [x] 2026-11-01, Claude Code: the BI page opens on 「建立與匯入」 (read-only datasets on the Dashboard);
     「資料集管理」 folds new dataset, install schema and demo; 「發佈到 Shared Platform」 hidden for a vault. Browser
     tests that start on the Dashboard click it first; `test_bi_vault_ui` checks the new defaults.
+  - [ ] BI analysis dashboard and domain retirement (`docs/phases/BI_ANALYSIS_DASHBOARD.md` §7; owner 2026-11-01).
+    AEP (Claude Code): F1 fixture vault and golden files; F2 feed `/api/v1/bi/*`; F3 fixture server; P1 analysis
+    params/requires/order; P2 default pack with per-section parity; P3 Dashboard renders analyses; P4
+    `bi__query` reads analyses; D1 schema 2.1.0 (`tech_areas`, `chain`); D2 card aliases; D3 domain migration;
+    P5 remove coded sections; D4 remove domain configuration. Atlas (Codex, brief
+    `BI_ANALYSIS_DASHBOARD_ATLAS_BRIEF.md`): A1 provider, A2 AEP BI application. Both: I1 end-to-end test.
+    Owner: I2 live acceptance, then R6.

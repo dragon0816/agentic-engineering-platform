@@ -5791,3 +5791,17 @@ first); a dataset read from the platform still opens on the Dashboard (it cannot
 schema」 and 「載入示範資料」 are folded into 「資料集管理」. 「發佈到 Shared Platform」 (the platform copy of a dataset on
 this PC) is hidden for a vault, whose changes reach others by commit, push and publish in step 3. Rejected:
 removing the platform copy (datasets on one PC still use it).
+
+## 2026-11-01: BI: retire the domain configuration and the coded Dashboard (owner)
+
+The owner agreed (2026-11-01) that a BI knowledge base should have four concepts only: schema (including allowed
+values with labels and aliases), skills, cards (including each entity's aliases) and analyses. The domain
+configuration (`aep.bi.domains/v1`) is split into the schema and the cards and then removed; the coded Dashboard
+sections (`dashboard.py`, `market.py`) become a default analysis pack, removed only after a parity test passes
+for every section. Atlas becomes a viewer of the vault's published analyses through a read-only feed
+(`aep.bi.analysis_feed/v1`: GET only, loopback, no token, local origins, no code run by a feed request) and
+owns only its own layout. Design `docs/phases/BI_ANALYSIS_DASHBOARD.md`; the Atlas side is built by Codex from
+`docs/phases/BI_ANALYSIS_DASHBOARD_ATLAS_BRIEF.md`, the two meeting at golden fixture files AEP writes first.
+Rejected: keeping the domain configuration beside the schema (two places for one taxonomy), keeping coded
+sections beside analyses (three dashboard mechanisms), and Atlas defining its own analyses (two copies of the
+numbers).
