@@ -31,9 +31,10 @@ from typing import Any, Literal
 
 from agent.delegation_scope import running_sub_run
 from agent.gateway import turn_host_tools
-from capabilities.bi_cards import benchmark, vault, vault_checks
+from capabilities.bi_cards import ai_runs, benchmark, vault, vault_checks
 from capabilities.bi_cards.ai_runs import AiRuntime
 from capabilities.bi_cards.capability import QueryHandler
+from capabilities.bi_cards.staging import Staging
 from capabilities.bi_cards.store import VAULT_PREFIX, BiStore, BiStoreError
 from common.execution import RequestContext, TraceIdentifiers
 from host_runtime import bi_cards_tools
@@ -223,12 +224,16 @@ ROLE = (
 
 @dataclass(frozen=True)
 class BenchRuntime:
-    """What a benchmark run needs from Agent Web: how to ask a question as the
-    Agent, how to run an extraction case, and a way to run work in the background."""
+    """What BI work on the Agent harness needs from Agent Web: how a benchmark
+    asks a question as the Agent and runs an extraction case, a way to run work
+    in the background, and the skill AI's harness turn."""
 
     ask_for: Callable[[str, str], Ask]  # (vault id, actor) -> Ask
     extract_for: Callable[[str, str], Extract]  # (vault id, actor) -> Extract
     background: Callable[[str, Callable[[], None]], None]
+    #: (vault dataset, skill name, actor) -> the skill AI's turn on the harness
+    #: (BI T2, `host_runtime.bi_skill_agent`); None: one model call.
+    skill_asker_for: Callable[[str, str, str], Any] | None = None
 
 
 def agent_ask(gateway: Any, workspace: Path, vault_id: str, actor: str, namespace: str) -> Ask:
@@ -274,36 +279,70 @@ def agent_ask(gateway: Any, workspace: Path, vault_id: str, actor: str, namespac
     return ask
 
 
-def trial_extract(workspace: Path, vault_id: str, actor: str, ai: AiRuntime) -> Extract:
-    """Read a case the way ingest reads a source: add it as a source of the
-    vault dataset and run a trial (nothing is written to cards) with the
-    working skills of its folder; the candidates come back."""
+def trial_candidates(
+    workspace: Path,
+    dataset: str,
+    actor: str,
+    ai: AiRuntime,
+    *,
+    name: str,
+    text: str,
+    folder: Any,
+    types: Any,
+    skill_draft: Any = None,
+) -> list[dict[str, Any]]:
+    """Read `text` the way ingest reads a source: add it as a source of the
+    dataset and run a trial (nothing is written to cards) with the working
+    skills of `folder`, or `skill_draft` in place of one (BI T2); the
+    candidates come back. `ai` runs the work at once."""
     from host_runtime import bi_cards_api
 
+    status, payload = bi_cards_api.route(
+        workspace,
+        actor,
+        "POST",
+        "/api/bi/sources",
+        {},
+        {"dataset": dataset, "name": name, "text": text},
+        None,
+        ai,
+    )
+    if status != 200:
+        raise BiStoreError(str(payload.get("code")), str(payload.get("message")))
+    run = ai_runs.start(
+        workspace,
+        dataset,
+        ai,
+        kind="trial",
+        source_id=payload["source"]["id"],
+        instructions=None,
+        types=types or None,
+        actor=actor,
+        folder=folder or None,
+        skill_draft=skill_draft,
+    )
+    staging = Staging(workspace, dataset)
+    row = staging.run_row(run["id"]) or {}
+    if row.get("status") == "failed":
+        raise BiStoreError("run_failed", str(row.get("error") or "試跑失敗"))
+    return list(staging.candidates(run["id"]))
+
+
+def trial_extract(workspace: Path, vault_id: str, actor: str, ai: AiRuntime) -> Extract:
+    """An extraction case read by a trial run with the working skills."""
     dataset = f"{VAULT_PREFIX}{vault_id}"
     now = AiRuntime(model=ai.model, background=lambda _title, work: work(), approved=ai.approved)
 
-    def call(method: str, path: str, body: Any = None, **query: str) -> dict[str, Any]:
-        status, payload = bi_cards_api.route(workspace, actor, method, path, query, body, None, now)
-        if status != 200:
-            raise BiStoreError(str(payload.get("code")), str(payload.get("message")))
-        return dict(payload)
-
     def extract(case: Mapping[str, Any]) -> list[dict[str, Any]]:
-        source = call(
-            "POST",
-            "/api/bi/sources",
-            {"dataset": dataset, "name": f"{case['slug']}.md", "text": case["note"]},
-        )["source"]["id"]
-        body = {"dataset": dataset, "kind": "trial", "source_id": source}
-        if case.get("folder"):
-            body["folder"] = case["folder"]
-        if case["expected"].get("types"):
-            body["types"] = case["expected"]["types"]
-        run_id = call("POST", "/api/bi/runs", body)["run"]["id"]
-        detail = call("GET", f"/api/bi/runs/{run_id}", dataset=dataset)
-        if detail["run"]["status"] == "failed":
-            raise BiStoreError("run_failed", str(detail["run"].get("error") or "試跑失敗"))
-        return list(detail["candidates"])
+        return trial_candidates(
+            workspace,
+            dataset,
+            actor,
+            now,
+            name=f"{case['slug']}.md",
+            text=case["note"],
+            folder=case.get("folder"),
+            types=case["expected"].get("types"),
+        )
 
     return extract

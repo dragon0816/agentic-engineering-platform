@@ -13026,7 +13026,7 @@ async function biSkillAi(item) {
     + item.revision + " 版" + (item.needs_update ? "（需要更新：寫給 " + item.schema
       + "，AI 會一起把它更新到知識庫現在的 schema）" : "") + "。";
   await biBuildAiState("bi-b-ska-model",
-    "這條規則、知識庫的卡片類型與資料夾、最近兩次試跑的候選卡");
+    "這條規則、知識庫的卡片類型與資料夾、最近兩次試跑的候選卡", true);
   const found = await call("/api/bi/sessions?dataset=" + encodeURIComponent(dataset)
     + "&target=" + encodeURIComponent("skill:" + item.name));
   bi.skillAi.session = (found.sessions || [])[0] || null;
@@ -13067,7 +13067,8 @@ el("bi-b-ska-send").addEventListener("click", async () => {
   const message = el("bi-b-ska-msg").value.trim();
   if (!message) { el("bi-b-ska-msg").focus(); return; }
   const button = el("bi-b-ska-send"); button.disabled = true;
-  biStatus("bi-b-ska-status", "loading", "AI 正在看這條判讀規則與樣本…（一次模型呼叫）");
+  biStatus("bi-b-ska-status", "loading",
+    "Agent 正在讀來源、用草稿試跑、看測試結果…（可能要幾分鐘）");
   try {
     if (!bi.build.ai || !bi.build.ai.available) {
       biStatus("bi-b-ska-status", "error", "沒有可用的模型："
@@ -13688,13 +13689,20 @@ async function biBuildMethodStage() {
   } catch (failure) { biNotice(false, "擷取 Skill 沒有載入：" + failure.message); }
 }
 
-async function biBuildAiState(target, extra) {
+async function biBuildAiState(target, extra, harness) {
   const state = await call("/api/bi/ai?dataset=" + encodeURIComponent(biDataset()));
   bi.build.ai = state;
   const line = el(target); line.replaceChildren(); line.className = "bi-meta";
   if (!state.available) {
     line.className = "bi-warn";
     line.append("目前沒有可用的模型（model_unavailable）：" + state.message + "。");
+    return;
+  }
+  if (harness) {
+    // BI T2: the skill AI runs on the Agent's harness with tools.
+    line.append("由 Agent（和對話同一套 harness）處理：它會自己讀來源、用草稿規則試跑"
+      + "（試跑用模型 " + state.model + "，不寫入卡片）、比較試跑、跑擷取測試、查目前的卡片，"
+      + "再提出建議。它不能存檔、commit 或 push；送出的資料：" + extra + "。");
     return;
   }
   const source = bi.build.sources.find((s) => s.id === bi.build.sourceId);
@@ -13872,6 +13880,10 @@ async function biBuildOpenMethod(id, fill) {
   biSessBTarget();
 }
 
+const BI_TOOL_NAME = {bi_skill__sources: "列出來源", bi_skill__read_source: "讀來源",
+  bi_skill__try: "草稿試跑", bi_skill__compare: "比較試跑", bi_skill__test_cases: "擷取測試",
+  bi__query: "查卡片", bi_skill__suggest: "提出建議"};
+
 function biSentLine(sent) {
   const parts = (sent.sources || []).map((s) => "來源「" + s.name + "」（" + s.classification
     + "，送出 " + s.chars + "／" + s.of + " 字" + (s.truncated ? "，已截斷" : "") + "）");
@@ -13880,8 +13892,15 @@ function biSentLine(sent) {
   if (sent.skill_revision) parts.push("判讀規則第 " + sent.skill_revision + " 版");
   if (sent.draft_rev) parts.push("草稿第 " + sent.draft_rev + " 版");
   if (sent.goal) parts.push("目標");
+  let used = "";
+  if (sent.harness) {
+    const counts = {};
+    for (const t of sent.tools || []) counts[t.name] = (counts[t.name] || 0) + 1;
+    used = "・Agent 用了：" + (Object.entries(counts).map(([n, c]) => (BI_TOOL_NAME[n] || n)
+      + (c > 1 ? " ×" + c : "")).join("、") || "沒有用工具");
+  }
   return "模型 " + (sent.model || "?") + "・送出：" + (parts.join("、") || "只有對話")
-    + "（來源上限 " + (sent.cap || 12000) + " 字）";
+    + "（來源上限 " + (sent.cap || 12000) + " 字）" + used;
 }
 
 function biListBlock(title, items, cls) {

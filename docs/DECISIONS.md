@@ -5752,3 +5752,17 @@ The owner answered the open questions of the three-step BI page:
 
 Order chosen by the owner: benchmarks first (the skill AI's tools need them to verify a suggestion), then the
 skill AI on the harness, then AI analyses. Design: `docs/phases/BI_TEST_AND_TOOLS.md`.
+
+## 2026-10-31: The skill AI on the harness, implementation choices (BI T2, Claude Code)
+
+- **Seam.** The skill session keeps its storage, checks and routes; the model call is behind an `asker`
+  (`skill_session.Asker`). Agent Web supplies one that runs `Gateway.converse` as a Host sub-run with
+  turn-scoped Host tools (`agent.gateway.turn_host_tools`, added for T1); elsewhere (tests, no Agent Web) the
+  one call remains. Rejected: a second session kind (two panels and histories for one skill).
+- **Models.** The turn uses the Agent's model (it is the Agent harness); trial runs inside it use the
+  Knowledge model, as every ingest trial does, so a tried rule behaves as it will in ingest.
+- **Draft rules are tried, never staged.** A trial takes `skill_draft`, which stands in for the skill only in
+  that run's rules (marked `draft`). Rejected: staging a revision to try it (it would show as an uncommitted
+  change and could be pushed by accident).
+- **The suggestion is a tool call.** `bi_skill__suggest` is checked like a hand-saved skill and a problem is a
+  failed tool result the model fixes in the same turn (the old three attempts become this loop).

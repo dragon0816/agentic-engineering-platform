@@ -125,7 +125,7 @@ def route(
         if path == bi_vaults_api.PREFIX or path.startswith(bi_vaults_api.PREFIX + "/"):
             given = body if isinstance(body, dict) else {}
             return bi_vaults_api.route(workspace, actor, method, path, query, given, bench)
-        return _route(workspace, actor, method, path, query, body, ai)
+        return _route(workspace, actor, method, path, query, body, ai, bench)
     except catalog.SchemaInstallError as error:
         # An installed id@version is immutable: different content is a conflict.
         return 409 if error.code == "schema_version_exists" else 400, {
@@ -157,6 +157,7 @@ def _route(
     query: Mapping[str, str],
     body: Any,
     ai: ai_runs.AiRuntime | None = None,
+    bench: Any = None,
 ) -> Answer:
     given: dict[str, Any] = body if isinstance(body, dict) else {}
     who = f"{actor} via web"
@@ -374,7 +375,7 @@ def _route(
     if path == "/api/bi/sessions":
         return _session_create(workspace, who, given)
     if len(parts) == 6 and parts[:4] == ["", "api", "bi", "sessions"]:
-        return _session_write(workspace, who, parts[4], parts[5], given, ai)
+        return _session_write(workspace, who, parts[4], parts[5], given, ai, bench, actor)
     if path == "/api/bi/schema-drafts":
         made = schema_versions.create_draft(
             workspace, str(given.get("base") or ""), given.get("title"), who
@@ -553,6 +554,8 @@ def _session_write(
     action: str,
     given: dict[str, Any],
     ai: ai_runs.AiRuntime | None,
+    bench: Any = None,
+    actor: str = "",
 ) -> Answer:
     dataset = _dataset(given.get("dataset"))
     session = sessions.load(Staging(workspace, dataset), session_id)
@@ -584,6 +587,9 @@ def _session_write(
         )
         return 200, {"ok": True, "session": turned}
     if session["kind"] == "skill" and action == "turns":
+        # On the Agent harness with tools where Agent Web offers it (BI T2).
+        asker_for = getattr(bench, "skill_asker_for", None)
+        name = session["target_ref"][len(skill_session.TARGET_PREFIX) :]
         turned = skill_session.session_turn(
             workspace,
             dataset,
@@ -593,6 +599,7 @@ def _session_write(
             source_ids=given.get("source_ids"),
             run_ids=given.get("run_ids"),
             actor=who,
+            asker=asker_for(dataset, name, actor) if asker_for is not None else None,
         )
         return 200, {"ok": True, "session": turned}
     if session["kind"] == "skill" and action == "apply":
@@ -1201,12 +1208,19 @@ def web_bench_runtime(web: Any) -> Any:
             daemon=True,
         ).start()
 
+    from host_runtime import bi_skill_agent
+
+    gateway = web.runtime.agent.gateway
+    namespace = web.namespace or "engineering"
     return bi_bench.BenchRuntime(
         ask_for=lambda vault_id, actor: bi_bench.agent_ask(
-            web.runtime.agent.gateway, workspace, vault_id, actor, web.namespace or "engineering"
+            gateway, workspace, vault_id, actor, namespace
         ),
         extract_for=lambda vault_id, actor: bi_bench.trial_extract(workspace, vault_id, actor, ai),
         background=background,
+        skill_asker_for=lambda dataset, skill, actor: bi_skill_agent.harness_asker(
+            gateway, workspace, dataset, skill, ai, actor, namespace
+        ),
     )
 
 

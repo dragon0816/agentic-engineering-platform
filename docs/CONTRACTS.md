@@ -5949,3 +5949,27 @@ skill AI: owner decisions". Code `capabilities/bi_cards/vault_checks.py`, `host_
   (push `status: "blocked"`); without such a run the push goes ahead with the note 「這次 push 的內容沒有跑過測試」.
 - **Page**: step 3 「題目與擷取測試」 (`#bi-b-bench`): the questions and cases with 刪除, the two add forms, 「跑測試」
   and the latest report (scores, regressions first, both answers, case scores and failed checks).
+
+## BI skill AI on the Agent harness (BI T2, 2026-10-31)
+
+Design `docs/phases/BI_TEST_AND_TOOLS.md` §4. Code `host_runtime/bi_skill_agent.py`; test
+`tests/test_bi_skill_agent.py`. Extends "Session B on a skill" (R3 BI part) without changing its routes or
+stored session shape.
+
+- `POST /api/bi/sessions/<id>/turns` on a `skill` session in Agent Web runs the turn on the Agent harness:
+  `Gateway.converse` as a Host sub-run (`running_sub_run("bi-skill")`), the Agent's model, role guidance with
+  the rules, `ConversationLimits(tool_calls=40, time_limit_seconds=900)`, and only these turn-scoped Host
+  tools (`turn_host_tools`): `bi_skill__sources`, `bi_skill__read_source {source_id, start?}` (6000
+  characters, fenced, data class checked), `bi_skill__try {source_id, folder?, changes?}` (a trial run with the
+  draft skill, `ai_runs.start(..., skill_draft=)`: nothing staged, no card written; returns the run id and its
+  candidates), `bi_skill__compare {left, right}` (`methods.compare`), `bi_skill__test_cases {changes?}` (the
+  vault's extraction cases read with the draft, scored), `bi__query` (the working copy, read-only), and
+  `bi_skill__suggest {reply, changes?, reasons?, limits?, needs_engineering?}` (checked as before: unknown
+  keys and an invalid skill come back to the model as a failed tool call to fix).
+- A turn without a submitted suggestion but with an answer is a reply with no changes. The assistant turn's
+  `attempts` counts suggest calls; `sent` adds `"harness": true` and `"tools": [{"name", "ok"}]`.
+- Without the Agent Web runtime (`bench.skill_asker_for` absent) the turn is the one model call as before.
+- **Draft skill in a trial run.** `vault_skills.run_rules(repo, folder, draft)`: the draft replaces the skill
+  of its name, or is the extract skill of a folder it applies to; the run's `skills` list marks it
+  `"draft": true`.
+- Page: the panel's model line says the Agent handles it with tools; each answer lists the tools used.

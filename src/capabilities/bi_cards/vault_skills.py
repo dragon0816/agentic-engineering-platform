@@ -209,9 +209,11 @@ def _runnable(repo: Repository, name: str, units: Mapping[str, Any]) -> skills.S
         raise BiStoreError(failure.code, failure.message, **failure.detail) from None
 
 
-def run_rules(repo: Repository, folder: str) -> dict[str, Any]:
+def run_rules(repo: Repository, folder: str, draft: skills.Skill | None = None) -> dict[str, Any]:
     """The skills an AI run of a source in `folder` uses: their text for the
-    prompt, which revisions they are, and the extract skill's card types."""
+    prompt, which revisions they are, and the extract skill's card types.
+    `draft` (the skill AI trying a rule, BI T2) stands in for the skill of its
+    name, or is the extract skill of a folder it applies to; nothing is staged."""
     units = repo.working_units()
     used: list[skills.Skill] = []
     if skills.skill_unit(CLASSIFY) in units:
@@ -219,6 +221,15 @@ def run_rules(repo: Repository, folder: str) -> dict[str, Any]:
     found = skills.skill_for(repo, folder, "extract", units)
     if found is not None:
         used.append(_runnable(repo, str(found["name"]), units))
+    if draft is not None:
+        named = [s for s in used if s.name == draft.name]
+        applies = draft.role == "extract" and any(
+            folder == a or folder.startswith(a + "/") for a in draft.applies_to
+        )
+        if named:
+            used = [draft if s.name == draft.name else s for s in used]
+        elif applies:
+            used = [s for s in used if s.role != "extract"] + [draft]
     parts = [
         f"{'Classification' if s.role == 'classify' else 'Extraction'} "
         f"(skill {s.name}, revision {s.revision}):\n{s.body.strip()}"
@@ -228,7 +239,11 @@ def run_rules(repo: Repository, folder: str) -> dict[str, Any]:
     return {
         "folder": folder,
         "text": "\n\n".join(parts),
-        "skills": [{"name": s.name, "revision": s.revision, "role": s.role} for s in used],
+        "skills": [
+            {"name": s.name, "revision": s.revision, "role": s.role}
+            | ({"draft": True} if s is draft else {})
+            for s in used
+        ],
         "card_types": card_types,
         "schema": _schema_ref(units),
     }

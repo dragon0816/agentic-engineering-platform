@@ -40,6 +40,8 @@ Updated: 2026-10-31 (Asia/Taipei), by Claude Code (knowledge repositories R1, R2
 - BI T1 (2026-10-31): benchmarks of a BI vault, question sets and extraction cases kept in the vault, run on
   the working and published version through the Agent harness, regressions block the push; step 3 shows them.
   Design `docs/phases/BI_TEST_AND_TOOLS.md`; owner decisions in `docs/DECISIONS.md` 2026-10-31.
+- BI T2 (2026-10-31): the skill AI runs on the Agent harness with tools (try a draft rule, compare,
+  extraction cases, query); `host_runtime/bi_skill_agent.py`.
 - Telegram: a 409 conflict is retried instead of stopping the loop (`ded9bfc0`, `ff4164fe`).
 
 **Verification.** ruff format/check and mypy clean (848 files). BI + knowledge test files after the R3
@@ -50,7 +52,7 @@ when the PC is free). Local commits are not pushed yet.
 **Important.** The OneDrive `market-bi` vault is V4 format. The R2 code neither reads nor writes it. Once
 Agent Web restarts on this code, `market-bi` is read-only until R6 rebuilds it (owner present).
 
-**Next actions.** (1) Run the full suite when the PC is free, then push the local commits. (1b) BI T2 next: the skill AI as a Gateway sub-run with BI tools (`docs/phases/BI_TEST_AND_TOOLS.md` §4), then T3 analyses (SQL and constrained Python scripts, §5). (2) R3 BI
+**Next actions.** (1) Run the full suite when the PC is free, then push the local commits. (1b) BI T3 next: analyses by AI conversation with read-only SQL and constrained Python scripts (`docs/phases/BI_TEST_AND_TOOLS.md` §5); T1/T2 not yet tried with a real model. (2) R3 BI
 follow-up if the owner wants it: sources inside the repository folder (Session B on a skill is done). (3) R4c, after the owner has tried a repository on the page (Agent Web was restarted on R4b at 09:38 on 2026-10-31; restart again for Session B on skills): review
 proposals open a repository instead of a sandbox (`web.py` `_route`), then remove sandboxes, candidates, `knowledge_push`,
 `knowledge_publish` and their tests. R5 for the wiki is complete (the 「版本」 area of R4b; the Agent reads the

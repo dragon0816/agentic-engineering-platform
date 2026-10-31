@@ -90,13 +90,15 @@ def start(
     schema: tuple[Registry, str] | None = None,
     checks: list[dict[str, Any]] | None = None,
     folder: Any = None,
+    skill_draft: Any = None,
 ) -> dict[str, Any]:
     """Start the AI path on a text source; the run is `extracting` until the
     background job ends. A method run (phase 5) gives its `method_ref` and
     `checks`; a draft trial (phase 6) gives `schema` = (the draft's registry,
     its `draft:` ref). In a vault the source's `folder` picks the extract
     skill (knowledge repositories R3); the run keeps the skills' text, so a
-    retry reads the same rules."""
+    retry reads the same rules. `skill_draft` (a `knowledge.repo.skills.Skill`,
+    BI T2) is a rule being tried, used in place of the vault's for this run."""
     staging = Staging(workspace, dataset)
     staging.store.refuse_write()
     source = staging.source(source_id)
@@ -110,7 +112,7 @@ def start(
         reg = catalog.for_store(staging.store)
         schema = (reg, reg.ref)
     reg = schema[0]
-    rules = _vault_rules(staging, folder)
+    rules = _vault_rules(staging, folder, skill_draft)
     if rules is not None and types in (None, []) and rules["card_types"]:
         types = [t for t in rules["card_types"] if t in reg.types] or None
     scope = _types(reg, types)
@@ -159,7 +161,7 @@ def start(
     return runs.run_view(staging, run_id)
 
 
-def _vault_rules(staging: Staging, folder: Any) -> dict[str, Any] | None:
+def _vault_rules(staging: Staging, folder: Any, draft: Any = None) -> dict[str, Any] | None:
     """A vault's skills for a source in `folder`; None for a plain dataset,
     which keeps its domain notes (BI vault V11)."""
     vault_id = staging.store.vault_id
@@ -168,7 +170,9 @@ def _vault_rules(staging: Staging, folder: Any) -> dict[str, Any] | None:
     from capabilities.bi_cards import vault, vault_skills
 
     return vault_skills.run_rules(
-        vault.Vault(staging.store.workspace, vault_id).repo, vault_skills.checked_folder(folder)
+        vault.Vault(staging.store.workspace, vault_id).repo,
+        vault_skills.checked_folder(folder),
+        draft,
     )
 
 

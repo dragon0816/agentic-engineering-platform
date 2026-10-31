@@ -19,6 +19,7 @@ trial runs travel as fenced data.
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -29,6 +30,13 @@ from capabilities.bi_cards.store import VAULT_PREFIX, BiStoreError, now
 SUGGESTION_CONTRACT = "aep.bi.skill_suggestion.v1"
 CHANGE_KEYS = ("body", "applies_to", "card_types")
 TARGET_PREFIX = "skill:"
+#: A turn on the Agent harness (BI T2, `docs/phases/BI_TEST_AND_TOOLS.md` §4):
+#: (the context, the turns so far, the check of a suggestion) -> (what came
+#: back, the model alias, the tool calls made as `{"name", "ok"}`).
+Asker = Callable[
+    [str, list[dict[str, Any]], Callable[[dict[str, Any]], list[str]]],
+    tuple[sessions.Asked, str, list[dict[str, Any]]],
+]
 
 SYSTEM = """You help a BI knowledge maintainer adjust one skill of a shared BI knowledge base.
 A skill is plain-language rules the AI extractor reads when it turns source documents into
@@ -126,8 +134,10 @@ def session_turn(
     source_ids: Any,
     run_ids: Any,
     actor: str,
+    asker: Asker | None = None,
 ) -> dict[str, Any]:
-    """One turn; returns the session with the new turns."""
+    """One turn; returns the session with the new turns. With `asker` the turn
+    runs on the Agent harness with tools (BI T2); without it, one model call."""
     vault_id = _vault_id(dataset)
     staging = Staging(workspace, dataset)
     staging.store.refuse_write()
@@ -141,7 +151,6 @@ def session_turn(
         ai_runs.check_classification(ai, sent["classification"])
     chosen_runs = run_ids if isinstance(run_ids, list) and run_ids else _recent_trials(staging)
     trials, used_runs = methods._run_context(staging, "", chosen_runs) if chosen_runs else ("", [])
-    model, alias = sessions.model_or_refuse(ai)
     types = list(skill.get("card_types") or []) or list(reg.types)
     shown = {
         k: skill.get(k)
@@ -177,15 +186,20 @@ def session_turn(
         return []
 
     turns = [*session["turns"], {"role": "user", "text": text}]
-    asked = sessions.ask(
-        model,
-        alias,
-        system=SYSTEM,
-        context=context,
-        turns=turns,
-        contract=SUGGESTION_CONTRACT,
-        check=problems,
-    )
+    tools: list[dict[str, Any]] = []
+    if asker is not None:
+        asked, alias, tools = asker(context, turns, problems)
+    else:
+        model, alias = sessions.model_or_refuse(ai)
+        asked = sessions.ask(
+            model,
+            alias,
+            system=SYSTEM,
+            context=context,
+            turns=turns,
+            contract=SUGGESTION_CONTRACT,
+            check=problems,
+        )
     suggestion = None
     if asked.answer is not None and not asked.problems and asked.failure is None:
         changes, _ = _changes(asked.answer)
@@ -205,6 +219,7 @@ def session_turn(
         "cap": sessions.EXCERPT_CAP,
         "runs": used_runs,
         "skill_revision": skill.get("revision"),
+        **({"tools": tools, "harness": True} if asker is not None else {}),
     }
     session["source_ids"] = [s["id"] for s in sent_sources]
     return sessions.record(

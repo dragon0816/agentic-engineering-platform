@@ -3916,3 +3916,8 @@ s-k-20261011T102952` (not published).
     (`vault.set_benchmark`). Step 3 「題目與擷取測試」. Tests `test_bi_vault_bench` (4, one through a real
     Gateway with a scripted model), `test_bi_vault_ui` (add, run, report). Next: T2 (skill AI on the
     harness), T3 (AI analyses with SQL and Python).
+  - [x] 2026-10-31, Claude Code: BI T2, the skill AI on the Agent harness (`docs/phases/BI_TEST_AND_TOOLS.md`
+    §4). `host_runtime/bi_skill_agent.py`: a skill session turn is a Gateway sub-run with turn-scoped tools
+    (sources, read, try a draft rule, compare, extraction cases, `bi__query` on the working copy, suggest);
+    trial runs take `skill_draft` (never staged). Test `test_bi_skill_agent` (scripted Agent and extractor:
+    tries the draft, an invalid suggestion is fixed, nothing staged or written). Next: T3.
