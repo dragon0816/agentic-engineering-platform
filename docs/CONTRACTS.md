@@ -6009,3 +6009,36 @@ tests `tests/test_bi_analyses.py`, `tests/test_bi_vault_ui.py`.
 - **Page.** Step 3 「分析與圖表」 (`#bi-b-an`): saved analyses with 執行 / 和 AI 一起修改 / 刪除 and the panel
   `#bi-b-ana` (conversation, SQL or script, chart preview, 「存成分析」). The Dashboard's 「分析」 card (`#bi-an-dash`)
   reruns up to 12 saved analyses on the current data. Charts are inline SVG drawn by the page.
+
+## BI analysis feed for Atlas: parameters, fixture and golden answers (F1, 2026-11-01)
+
+Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §4.1, §5, §6.1. Code `capabilities/bi_cards/analyses.py`
+(parameters), `capabilities/bi_cards/feed.py` (the answers); fixture `scripts/bi_feed_fixtures.py`,
+`tests/fixtures/bi_feed/`; tests `tests/test_bi_feed_fixtures.py`.
+
+- **Analysis unit, additive keys.** `params`: `{"<name>": {"type": "enum"|"bool"|"date"|"text", "default"?,
+  "values"?: [str], "values_from"?: "<Type>.<field>", "label"?}}` (names `[a-z][a-z0-9_]*`, at most 10; an
+  enum needs `values` or `values_from`; a date default is `YYYY-MM-DD` or `today`). `requires`: `{"types":
+  [...], "fields": ["<Type>.<field>"]}`. Both are stored only when given, so older analyses keep their value.
+  An enum's values: its own `values`, else the schema field's allowed values, else (a field named `domain`
+  without them) the schema's `domains`; an enum without a default takes the first value. Bound as SQL named
+  parameters (`:domain`); a script reads `PARAMS["domain"]`. Wrong or unknown parameters: `param_invalid`.
+  `analyses.digest(value)` = first 16 hex of sha256 of the canonical unit value.
+- **`meta:dashboard`** (JSON text) `{"order": [slug], "hidden": [slug]}`: the feed's `order` is the listed
+  slugs that exist, then the rest by slug, hidden ones left out (they stay in `analyses`).
+- **Feed answers** (`feed.answer(workspace, method, path, query, origin) -> (status, body)`), as design §5,
+  on the version `Vault.reads()` names: an analysis is listed when its unit is valid and the published schema
+  meets `requires`; `params` are listed with enum `values` resolved and the default filled. Results are cached
+  under `<vault local>/feed_results/<digest>/<commit[:16]>/<params hash>.json`. A SQL result not cached is
+  computed on request; a script result is queued (`feed.enqueue`, run by `feed.drain`) and answered `409
+  result_not_ready`. A failed analysis is cached as a failure and answered `409 result_failed`. Additive error
+  codes beside the design's: `403 origin_refused`, `405 method_not_allowed`, `404 route_unknown`, `404
+  vault_unknown`, `404 analysis_unknown`, `409 not_published` (never pushed), `409 vault_unreadable`.
+  `feed.clock` gives `computed_at` (fixed by the fixture server and the contract tests).
+- **Fixture and golden answers.** `python scripts/bi_feed_fixtures.py` rebuilds the fictional vault
+  `feed-fixture` (35 cards; analyses `node-coverage` SQL table with `level`, `accounts-by-region` SQL bar,
+  `tech-updates` script line, each with `domain`; tag `v1` published; a later pushed card and analysis
+  `draft-only` that the feed never shows) with a fixed clock and seeded ids, and writes the answers on a fresh PC
+  that joined it to `golden/*.json` (two-space JSON, LF) with the requests, statuses and order in
+  `golden/requests.json` (`after_queue`: the queue was drained before that request). `--check` fails when a
+  rebuild differs byte for byte. `.gitattributes` keeps `tests/fixtures/bi_feed/**` unconverted.

@@ -17,10 +17,16 @@ Both see the copy with a view `card_values(card_id, entity_type, card, field,
 value)` beside the BI tables. A saved analysis is the vault unit
 `analysis:<slug>` = `{"title", "question", "kind", "code", "chart"}`,
 committed and pushed like cards and rerun on the current data.
+
+An analysis may declare `params` and `requires`
+(`docs/phases/BI_ANALYSIS_DASHBOARD.md` §4.1): SQL receives the parameters as
+named parameters (`:domain`), a script reads `PARAMS["domain"]`; `requires`
+names the types and fields the schema must have for the analysis to be offered.
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -31,6 +37,7 @@ import sys
 import tempfile
 import time
 from collections.abc import Mapping
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -40,6 +47,12 @@ PREFIX = "analysis:"
 NAME_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,59}$")
 KINDS = ("sql", "python")
 CHARTS = ("table", "bar", "line", "scatter")
+PARAM_TYPES = ("enum", "bool", "date", "text")
+PARAM_NAME_RE = re.compile(r"^[a-z][a-z0-9_]{0,39}$")
+FIELD_REF_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_]*\.[a-z][a-z0-9_]*$")
+DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+MAX_PARAMS = 10
+MAX_TEXT_PARAM = 200
 MAX_ROWS = 2000
 MAX_CODE = 20000
 MAX_OUTPUT = 400_000
@@ -107,10 +120,11 @@ def query(sql, params=()):
     finally:
         db.close()
 
+PARAMS = json.load(open(os.path.join(SCRATCH, "params.json"), encoding="utf-8"))
 sys.addaudithook(_guard)
 code = open(os.path.join(SCRATCH, "script.py"), encoding="utf-8").read()
 _ready = True
-space = {"__name__": "__analysis__", "query": query, "DB": DB}
+space = {"__name__": "__analysis__", "query": query, "DB": DB, "PARAMS": PARAMS}
 exec(compile(code, "script.py", "exec"), space)
 result = space.get("result")
 print("\n" + "@@AEP_RESULT@@" + json.dumps(result, ensure_ascii=False, default=str))
@@ -134,8 +148,15 @@ def _table(columns: list[str], rows: list[Any], truncated: bool) -> dict[str, An
     return {"columns": columns, "rows": rows, "truncated": truncated}
 
 
-def run_sql(db_path: Path, sql: str, *, seconds: float = SQL_SECONDS) -> dict[str, Any]:
-    """One read-only statement on a copy; at most `MAX_ROWS` rows."""
+def run_sql(
+    db_path: Path,
+    sql: str,
+    *,
+    seconds: float = SQL_SECONDS,
+    params: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """One read-only statement on a copy; at most `MAX_ROWS` rows. `params`
+    are bound as named parameters (`:name`)."""
     text = str(sql or "").strip().rstrip(";").strip()
     if not text:
         raise BiStoreError("analysis_invalid", "請寫 SQL")
@@ -153,7 +174,7 @@ def run_sql(db_path: Path, sql: str, *, seconds: float = SQL_SECONDS) -> dict[st
                 )
             )
             try:
-                cursor = db.execute(text)
+                cursor = db.execute(text, dict(params or {}))
                 rows = cursor.fetchmany(MAX_ROWS + 1)
             except sqlite3.Error as error:
                 message = str(error)
@@ -182,8 +203,15 @@ def _shape(result: Any) -> dict[str, Any]:
     return _table(columns, rows[:MAX_ROWS], len(rows) > MAX_ROWS)
 
 
-def run_python(db_path: Path, code: str, *, seconds: float = PYTHON_SECONDS) -> dict[str, Any]:
-    """A script in its own guarded process; returns its table and printed output."""
+def run_python(
+    db_path: Path,
+    code: str,
+    *,
+    seconds: float = PYTHON_SECONDS,
+    params: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """A script in its own guarded process; returns its table and printed
+    output. The script reads `params` as `PARAMS`."""
     text = str(code or "")
     if not text.strip():
         raise BiStoreError("analysis_invalid", "請寫腳本")
@@ -193,6 +221,9 @@ def run_python(db_path: Path, code: str, *, seconds: float = PYTHON_SECONDS) -> 
         folder = Path(scratch)
         _copy(db_path, folder)
         (folder / "script.py").write_text(text, encoding="utf-8")
+        (folder / "params.json").write_text(
+            json.dumps(dict(params or {}), ensure_ascii=False), encoding="utf-8"
+        )
         (folder / "runner.py").write_text(RUNNER, encoding="utf-8")
         try:
             done = subprocess.run(  # noqa: S603 (our interpreter, our runner, fixed arguments)
@@ -220,12 +251,179 @@ def _system_root() -> str:
     return os.environ.get("SYSTEMROOT", "")
 
 
-def run(db_path: Path, kind: str, code: str) -> dict[str, Any]:
+def run(
+    db_path: Path, kind: str, code: str, params: Mapping[str, Any] | None = None
+) -> dict[str, Any]:
     if kind == "sql":
-        return run_sql(db_path, code)
+        return run_sql(db_path, code, params=params)
     if kind == "python":
-        return run_python(db_path, code)
+        return run_python(db_path, code, params=params)
     raise BiStoreError("analysis_invalid", "kind 必須是 sql 或 python")
+
+
+# -- parameters and requirements (design §4.1) -------------------------------------------
+
+
+def _param_problem(name: Any, spec: Any) -> str | None:
+    if not isinstance(name, str) or PARAM_NAME_RE.match(name) is None:
+        return "parameter names use lowercase letters, digits and _"
+    if not isinstance(spec, dict) or spec.get("type") not in PARAM_TYPES:
+        return f"parameter {name}: type must be one of {', '.join(PARAM_TYPES)}"
+    kind, default = spec["type"], spec.get("default")
+    source = spec.get("values_from")
+    if source is not None and (not isinstance(source, str) or not FIELD_REF_RE.match(source)):
+        return f"parameter {name}: values_from must be <Type>.<field>"
+    values = spec.get("values")
+    if values is not None and (
+        not isinstance(values, list) or not all(isinstance(v, str) for v in values)
+    ):
+        return f"parameter {name}: values must be a list of text"
+    if kind == "enum":
+        if not values and source is None:
+            return f"parameter {name}: an enum needs values or values_from"
+        if default is not None and not isinstance(default, str):
+            return f"parameter {name}: the default must be text"
+        if default is not None and values and default not in values:
+            return f"parameter {name}: the default must be one of its values"
+    elif kind == "bool":
+        if default is not None and not isinstance(default, bool):
+            return f"parameter {name}: the default must be true or false"
+    elif kind == "date":
+        if (
+            default is not None
+            and default != "today"
+            and not (isinstance(default, str) and DATE_RE.match(default))
+        ):
+            return f"parameter {name}: the default must be YYYY-MM-DD or today"
+    elif default is not None and (not isinstance(default, str) or len(default) > MAX_TEXT_PARAM):
+        return f"parameter {name}: the default must be text of at most {MAX_TEXT_PARAM}"
+    unknown = set(spec) - {"type", "default", "values_from", "values", "label"}
+    if unknown:
+        return f"parameter {name}: unknown keys {', '.join(sorted(unknown))}"
+    return None
+
+
+def params_problem(params: Any) -> str | None:
+    if params is None:
+        return None
+    if not isinstance(params, dict) or len(params) > MAX_PARAMS:
+        return f"params must be an object of at most {MAX_PARAMS} parameters"
+    for name, spec in params.items():
+        problem = _param_problem(name, spec)
+        if problem:
+            return problem
+    return None
+
+
+def requires_problem(requires: Any) -> str | None:
+    if requires is None:
+        return None
+    if not isinstance(requires, dict) or set(requires) - {"types", "fields"}:
+        return "requires must be {types: [...], fields: [<Type>.<field>, ...]}"
+    types, fields = requires.get("types") or [], requires.get("fields") or []
+    if not isinstance(types, list) or not all(isinstance(t, str) and t for t in types):
+        return "requires.types must be a list of type names"
+    if not isinstance(fields, list) or not all(
+        isinstance(f, str) and FIELD_REF_RE.match(f) for f in fields
+    ):
+        return "requires.fields must be a list of <Type>.<field>"
+    return None
+
+
+def enum_values(spec: Mapping[str, Any], registry: Any | None) -> list[str]:
+    """An enum parameter's values: its own `values`, else the schema field
+    `values_from` names (its allowed values; a `domain` field without them
+    takes the schema's domains)."""
+    if spec.get("values"):
+        return [str(v) for v in spec["values"]]
+    source = str(spec.get("values_from") or "")
+    if registry is None or "." not in source:
+        return []
+    type_name, _, field_name = source.partition(".")
+    try:
+        found = registry.type(type_name).get(field_name)
+    except KeyError:
+        return []
+    if found is not None and found.enum:
+        return list(found.enum)
+    if found is not None and field_name == "domain":
+        return list(registry.domains)
+    return []
+
+
+def requires_met(requires: Mapping[str, Any] | None, registry: Any | None) -> bool:
+    """Whether the schema has every type and field the analysis requires."""
+    if not requires:
+        return True
+    if registry is None:
+        return False
+    for type_name in requires.get("types") or []:
+        if type_name not in registry.types:
+            return False
+    for ref in requires.get("fields") or []:
+        type_name, _, field_name = str(ref).partition(".")
+        entity = registry.types.get(type_name)
+        if entity is None or entity.get(field_name) is None:
+            return False
+    return True
+
+
+def described_params(params: Mapping[str, Any] | None, registry: Any | None) -> dict[str, Any]:
+    """The declared parameters with each enum's values resolved (for a page or the feed)."""
+    shown = {}
+    for name, spec in sorted((params or {}).items()):
+        item = dict(spec)
+        if spec.get("type") == "enum":
+            item["values"] = enum_values(spec, registry)
+            if item.get("default") is None and item["values"]:
+                item["default"] = item["values"][0]
+        shown[name] = item
+    return shown
+
+
+def resolve_params(
+    params: Mapping[str, Any] | None,
+    given: Mapping[str, Any],
+    registry: Any | None,
+    *,
+    today: str,
+) -> dict[str, Any]:
+    """Every declared parameter's value: the given one (checked; text from a
+    query string is converted) or its default. Unknown names are refused."""
+    declared = described_params(params, registry)
+    unknown = sorted(set(given) - set(declared))
+    if unknown:
+        raise BiStoreError("param_invalid", f"沒有這個參數：{', '.join(unknown)}")
+    values: dict[str, Any] = {}
+    for name, spec in declared.items():
+        kind, value = spec["type"], given.get(name, spec.get("default"))
+        if kind == "enum":
+            if value is None or str(value) not in spec["values"]:
+                raise BiStoreError(
+                    "param_invalid", f"參數 {name} 必須是 {'、'.join(spec['values'])} 之一"
+                )
+            values[name] = str(value)
+        elif kind == "bool":
+            if isinstance(value, str) and value.lower() in ("true", "1", "false", "0"):
+                value = value.lower() in ("true", "1")
+            if value is None:
+                value = False
+            if not isinstance(value, bool):
+                raise BiStoreError("param_invalid", f"參數 {name} 必須是 true 或 false")
+            values[name] = value
+        elif kind == "date":
+            value = today if value in (None, "", "today") else value
+            if not isinstance(value, str) or not DATE_RE.match(value):
+                raise BiStoreError("param_invalid", f"參數 {name} 必須是 YYYY-MM-DD 的日期")
+            values[name] = value
+        else:
+            value = "" if value is None else value
+            if not isinstance(value, str) or len(value) > MAX_TEXT_PARAM:
+                raise BiStoreError(
+                    "param_invalid", f"參數 {name} 必須是最多 {MAX_TEXT_PARAM} 字的文字"
+                )
+            values[name] = value
+    return values
 
 
 # -- saved analyses (vault units) --------------------------------------------------------
@@ -262,7 +460,7 @@ def unit_problem(key: str, value: Any) -> str | None:
         checked_chart(value.get("chart") or {"type": "table"})
     except BiStoreError as error:
         return error.message
-    return None
+    return params_problem(value.get("params")) or requires_problem(value.get("requires"))
 
 
 def checked(given: Mapping[str, Any]) -> tuple[str, dict[str, Any]]:
@@ -285,7 +483,29 @@ def checked(given: Mapping[str, Any]) -> tuple[str, dict[str, Any]]:
         "code": code,
         "chart": checked_chart(given.get("chart") or {"type": "table"}),
     }
+    # `params` and `requires` are kept only when given, so an analysis without
+    # them keeps the value (and digest) it had before they existed.
+    problem = params_problem(given.get("params")) or requires_problem(given.get("requires"))
+    if problem:
+        raise BiStoreError("analysis_invalid", problem)
+    if given.get("params"):
+        value["params"] = dict(given["params"])
+    if given.get("requires"):
+        value["requires"] = {
+            "types": list(given["requires"].get("types") or []),
+            "fields": list(given["requires"].get("fields") or []),
+        }
     return PREFIX + slug, value
+
+
+def digest(value: Mapping[str, Any]) -> str:
+    """The analysis's content id: what a cached result was computed from."""
+    text = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+
+
+def default_params(value: Mapping[str, Any], registry: Any | None, today: str) -> dict[str, Any]:
+    return resolve_params(value.get("params"), {}, registry, today=today)
 
 
 def saved(units: Mapping[str, Any]) -> list[dict[str, Any]]:
@@ -334,19 +554,39 @@ def listing(workspace: Path, vault_id: str) -> dict[str, Any]:
     return {"analyses": saved(vault.Vault(workspace, vault_id).repo.working_units())}
 
 
-def run_saved(workspace: Path, vault_id: str, slug: Any) -> dict[str, Any]:
+def _registry(workspace: Path, vault_id: str) -> Any | None:
+    from capabilities.bi_cards import vault
+
+    try:
+        return vault.Vault(workspace, vault_id)._registry()
+    except Exception:  # noqa: BLE001 - no schema: enums without values, nothing required met
+        return None
+
+
+def run_saved(
+    workspace: Path, vault_id: str, slug: Any, given: Mapping[str, Any] | None = None
+) -> dict[str, Any]:
     found = next((a for a in listing(workspace, vault_id)["analyses"] if a["slug"] == slug), None)
     if found is None:
         raise BiStoreError("analysis_unknown", "沒有這個分析")
-    return {"analysis": found, "table": run(_db(workspace, vault_id), found["kind"], found["code"])}
+    values = resolve_params(
+        found.get("params"),
+        given or {},
+        _registry(workspace, vault_id),
+        today=date.today().isoformat(),
+    )
+    table = run(_db(workspace, vault_id), found["kind"], found["code"], values)
+    return {"analysis": found, "params": values, "table": table}
 
 
 def save(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
-    """Run it once (its chart must name columns of its result), then stage it."""
+    """Run it once with its default parameters (its chart must name columns
+    of its result), then stage it."""
     from capabilities.bi_cards import vault
 
     key, value = checked(given)
-    table = run(_db(workspace, vault_id), value["kind"], value["code"])
+    values = default_params(value, _registry(workspace, vault_id), date.today().isoformat())
+    table = run(_db(workspace, vault_id), value["kind"], value["code"], values)
     checked_chart(value["chart"], table["columns"])
     target = vault._vault(workspace, vault_id)
     with target.lock, vault._repo_errors():

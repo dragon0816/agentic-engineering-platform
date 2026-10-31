@@ -3938,3 +3938,11 @@ s-k-20261011T102952` (not published).
     P5 remove coded sections; D4 remove domain configuration. Atlas (Codex, brief
     `BI_ANALYSIS_DASHBOARD_ATLAS_BRIEF.md`): A1 provider, A2 AEP BI application. Both: I1 end-to-end test.
     Owner: I2 live acceptance, then R6.
+  - [x] 2026-11-01, Claude Code: BI feed F1, fixture vault and golden answers
+    (`docs/phases/BI_ANALYSIS_DASHBOARD.md` §6.1). `scripts/bi_feed_fixtures.py` builds the fictional vault
+    `tests/fixtures/bi_feed/vault/` reproducibly and writes the feed's answers to `tests/fixtures/bi_feed/golden/`
+    (`requests.json` lists the requests in order); `--check` compares a rebuild byte for byte. With it: analysis
+    `params`/`requires` (check, resolve, bind to SQL and scripts) in `analyses.py`, the feed's answers in
+    `capabilities/bi_cards/feed.py` (published version only, result cache, SQL on request, scripts queued,
+    `result_not_ready`). Tests `test_bi_feed_fixtures` (10). Codex can start A1 on the golden files.
+    Next: F2 (HTTP routes and the contract test against the golden files).

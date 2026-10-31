@@ -1,8 +1,36 @@
 # Handoff
 
-Updated: 2026-10-31 (Asia/Taipei), by Claude Code (knowledge repositories R1, R2, R3 BI part, R4a, R4b, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-11-01 (Asia/Taipei), by Claude Code (BI analysis dashboard: F1; earlier: knowledge repositories R1, R2, R3 BI part, R4a, R4b, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## Knowledge repositories R1, R2, R3 (BI part), R4a and R5 (BI side) (2026-10-30/31, Claude Code) — latest
+## BI analysis dashboard and domain retirement (2026-11-01, Claude Code) — latest
+
+**Goal.** `docs/phases/BI_ANALYSIS_DASHBOARD.md` §7, AEP side, in the owner's order: F1 → F2 → F3, then P1 → P2 →
+P3/P4, D1 → D3, P5, D4. Codex builds the Atlas side (A1, A2, I1) in its own repository from the golden files;
+the AEP agent never touches the Atlas repository. Each finished task: checks, commit, rebase on `origin/main`,
+`git push origin HEAD:main` (no pull requests), TASKS and this file updated. Work happens in the Paseo worktree
+`sudden-mayfly` with its own `.venv` (`py -3.12 -m venv .venv`, `pip install -e ".[dev,office]"`). Do not
+restart the running Agent Web.
+
+**Done.**
+- F1 (fixture vault, golden answers, `scripts/bi_feed_fixtures.py`): see `docs/TASKS.md`, contract
+  `docs/CONTRACTS.md` "BI analysis feed for Atlas: parameters, fixture and golden answers (F1)", decisions
+  `docs/DECISIONS.md` 2026-11-01 "BI analysis feed, implementation choices (F1)". Analysis `params`/`requires`
+  are in `analyses.py` already (needed by the golden answers); `capabilities/bi_cards/feed.py` builds every
+  answer (`feed.answer`), including the result cache, the script queue and `result_not_ready`.
+
+**Verification (F1).** `ruff format --check .`, `ruff check .`, `mypy src tests` (872 files) clean;
+`pytest tests/test_bi_feed_fixtures.py tests/test_bi_analyses.py tests/test_bi_vault.py
+tests/test_bi_vault_published.py tests/test_bi_vault_bench.py`: 34 passed. The full suite was not run.
+
+**Next actions.** (1) F2: serve `feed.answer` from Agent Web under `/api/v1/bi/` without the token (wire beside
+`telemetry_api.handle` in `web.py` `do_GET`; other methods on the prefix answer 405), a worker thread that runs
+`feed.drain` when `feed.on_queued` fires, `feed.compute_defaults` after publish, sync and a person's run, and a
+contract test over real HTTP that replays `golden/requests.json` with `feed.clock` fixed. (2) F3
+`scripts/bi_feed_server.py --port 53611` (only the feed routes, temporary workspace joined to a copy of the
+fixture vault, fixed clock, prints `ready <url>`; the queue drained after a short delay so Atlas sees 409 first).
+(3) P1 → P2 → P3/P4, D1 → D3, P5, D4 per the design.
+
+## Knowledge repositories R1, R2, R3 (BI part), R4a and R5 (BI side) (2026-10-30/31, Claude Code)
 
 **Goal.** Every knowledge base, wiki and BI, single or multi-maintainer, updated by one mechanism: commit
 (purpose required), push, revert, tag/publish; schema and skills inside the repository. Owner decisions 1–11:

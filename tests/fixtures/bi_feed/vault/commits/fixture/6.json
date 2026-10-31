@@ -1,0 +1,108 @@
+{
+ "author": "fixture",
+ "base": "000f4a013897b51b22fd9de4f4b8f40db14a204ea6d97c8c6caa83c950a10067",
+ "clock": 6,
+ "created": "2026-11-01T09:00:00+08:00",
+ "files": [],
+ "format": "aep.knowledge.commit/v1",
+ "id": "d12ba36d9b4d64c5d844ea3dde0ca80cdae305bb0129885d5fa94ab7147fe03c",
+ "kind": "change",
+ "ops": [
+  {
+   "base": null,
+   "unit": "analysis:accounts-by-region",
+   "value": {
+    "chart": {
+     "type": "bar",
+     "x": "region",
+     "y": "accounts"
+    },
+    "code": "SELECT r.value AS region, count(*) AS accounts\nFROM card_values r\nWHERE r.entity_type = 'Account' AND r.field = 'region'\n  AND EXISTS (SELECT 1 FROM card_values d, json_each(d.value) j WHERE d.card_id = r.card_id AND d.field = 'domain' AND j.value = :domain)\nGROUP BY r.value\nORDER BY accounts DESC, region",
+    "kind": "sql",
+    "params": {
+     "domain": {
+      "default": "robotics",
+      "type": "enum",
+      "values_from": "Account.domain"
+     }
+    },
+    "question": "這個領域的客戶分布在哪些地區？",
+    "requires": {
+     "fields": [
+      "Account.region",
+      "Account.domain"
+     ],
+     "types": [
+      "Account"
+     ]
+    },
+    "title": "各地區的客戶數"
+   }
+  },
+  {
+   "base": null,
+   "unit": "analysis:node-coverage",
+   "value": {
+    "chart": {
+     "type": "table"
+    },
+    "code": "WITH nodes AS (\n  SELECT n.card_id, n.card AS node FROM card_values n\n  WHERE n.entity_type = 'Node' AND n.field = 'name'\n    AND EXISTS (SELECT 1 FROM card_values d, json_each(d.value) j WHERE d.card_id = n.card_id AND d.field = 'domain' AND j.value = :domain)\n), counted AS (\n  SELECT nodes.node, (\n    SELECT count(*) FROM card_values s, json_each(s.value) j\n    WHERE s.entity_type = 'TestSolution' AND s.field = 'nodes'\n      AND j.value = nodes.node\n  ) AS solutions FROM nodes\n)\nSELECT node, solutions,\n  CASE solutions WHEN 0 THEN 'gap' WHEN 1 THEN 'warning' END AS level\nFROM counted\nORDER BY solutions, node",
+    "kind": "sql",
+    "params": {
+     "domain": {
+      "default": "robotics",
+      "type": "enum",
+      "values_from": "Account.domain"
+     }
+    },
+    "question": "這個領域的哪些節點還沒有或只有一個測試方案？",
+    "requires": {
+     "fields": [
+      "TestSolution.nodes"
+     ],
+     "types": [
+      "Node",
+      "TestSolution"
+     ]
+    },
+    "title": "節點的測試方案覆蓋"
+   }
+  },
+  {
+   "base": null,
+   "unit": "analysis:tech-updates",
+   "value": {
+    "chart": {
+     "type": "line",
+     "x": "month",
+     "y": "technologies"
+    },
+    "code": "rows = query(\n    \"SELECT t.value AS updated FROM card_values t \"\n    \"WHERE t.entity_type = 'Technology' AND t.field = 'updated' AND \"\n    \"EXISTS (SELECT 1 FROM card_values d, json_each(d.value) j WHERE d.card_id = t.card_id AND d.field = 'domain' AND j.value = ?)\",\n    (PARAMS[\"domain\"],),\n)\ncounts = {}\nfor row in rows:\n    month = str(row[\"updated\"])[:7]\n    counts[month] = counts.get(month, 0) + 1\nresult = {\"columns\": [\"month\", \"technologies\"],\n          \"rows\": [[m, n] for m, n in sorted(counts.items())]}\n",
+    "kind": "python",
+    "params": {
+     "domain": {
+      "default": "robotics",
+      "type": "enum",
+      "values_from": "Account.domain"
+     }
+    },
+    "question": "這個領域每個月有幾項技術更新？",
+    "requires": {
+     "fields": [],
+     "types": [
+      "Technology"
+     ]
+    },
+    "title": "每月更新的技術數"
+   }
+  },
+  {
+   "base": null,
+   "unit": "meta:dashboard",
+   "value": "{\"order\": [\"node-coverage\", \"accounts-by-region\", \"tech-updates\"], \"hidden\": []}"
+  }
+ ],
+ "purpose": "加上三個分析與 Dashboard 順序",
+ "repo": "feed-fixture",
+ "seq": 6
+}

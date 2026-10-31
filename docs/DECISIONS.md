@@ -5805,3 +5805,19 @@ owns only its own layout. Design `docs/phases/BI_ANALYSIS_DASHBOARD.md`; the Atl
 Rejected: keeping the domain configuration beside the schema (two places for one taxonomy), keeping coded
 sections beside analyses (three dashboard mechanisms), and Atlas defining its own analyses (two copies of the
 numbers).
+
+## 2026-11-01: BI analysis feed, implementation choices (F1, Claude Code)
+
+- **Parameters land with F1.** The feed's golden answers need `params` (`domain`), so analysis `params` and
+  `requires` (checking, resolving, binding to SQL and scripts) are built in F1; P1 adds what is left (the page's
+  parameter controls, `meta:dashboard` editing, offering by `requires` on the page).
+- **SQL on request, scripts never.** The design keeps a tokenless GET from starting code. A read-only SQL
+  statement on a read-only copy, under the authorizer and a 10 s limit, is computed on request and cached; a
+  script result not cached is queued and answered `409 result_not_ready`. Rejected: computing every parameter
+  combination ahead (unbounded), and refusing uncached SQL too (Atlas would wait for nothing).
+- **Enum values resolved by AEP.** The feed lists an enum's values (from the published schema), so Atlas needs
+  no schema. `values_from` on a `domain` field without allowed values takes the schema's `domains` (2.0.0's
+  `domain` fields carry none).
+- **Golden answers come from the feed code itself** on a committed fixture vault built reproducibly (fixed
+  clock, seeded ids); the manifest `golden/requests.json` gives the order and statuses, so Atlas and the F2
+  live-route test replay the same requests. Rejected: hand-written golden files (they drift from the code).
