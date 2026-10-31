@@ -1,6 +1,6 @@
 # Handoff
 
-Updated: 2026-11-01 (Asia/Taipei), by Claude Code (BI analysis dashboard: F1, F2; earlier: knowledge repositories R1, R2, R3 BI part, R4a, R4b, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-11-01 (Asia/Taipei), by Claude Code (BI analysis dashboard: F1, F2, F3; earlier: knowledge repositories R1, R2, R3 BI part, R4a, R4b, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
 ## BI analysis dashboard and domain retirement (2026-11-01, Claude Code) — latest
 
@@ -20,19 +20,18 @@ restart the running Agent Web.
   as `8efbb3a4`.
 - F2 (routes in Agent Web): `host_runtime/bi_feed_api.py`, wired in `web.py` `do_GET` (and 405 in `do_POST`);
   worker thread for the queue; `refresh` after join/sync/publish/run in `bi_vaults_api.py`. Contract
-  `docs/CONTRACTS.md` "BI analysis feed for Atlas: the routes in Agent Web (F2)".
+  `docs/CONTRACTS.md` "BI analysis feed for Atlas: the routes in Agent Web (F2)". Pushed as `b103c857`.
+- F3 (fixture server): `scripts/bi_feed_server.py --port 53611`; contract "... the fixture server (F3)".
+  Codex is unblocked for A1/A2 (golden files) and I1 (fixture server).
 
-**Verification (F2).** `ruff format --check .`, `ruff check .`, `mypy src tests` (874 files) clean;
-`pytest tests/test_bi_feed_api.py tests/test_bi_feed_fixtures.py tests/test_bi_analyses.py
-tests/test_bi_vault.py tests/test_bi_vault_published.py tests/test_bi_vault_skills.py tests/test_telemetry.py`
-passed (the one isolation failure seen, a test draining the queue while the shared worker also did, was fixed
-by switching the wake-up off in that test). The full suite and the BI browser tests were not run (owner's PC
-busy hours).
+**Verification (F3).** `ruff format --check .`, `ruff check .`, `mypy src tests` (875 files) clean;
+`pytest tests/test_bi_feed_server.py` passed (F1/F2 runs: see `docs/TASKS.md`). The full suite and the BI
+browser tests were not run.
 
-**Next actions.** (1) F3 `scripts/bi_feed_server.py --port 53611`: only the feed routes, a temporary workspace
-joined to a copy of the fixture vault, `feed.clock` fixed to the fixture's `computed_at`, defaults computed
-before `ready <url>` is printed, `bi_feed_api.QUEUE_DELAY` a few seconds so Atlas sees `409` first. (2) P1 →
-P2 → P3/P4, D1 → D3, P5, D4 per the design.
+**Next actions.** P1 (analysis parameters on the page: parameter controls in step 3 「分析與圖表」 and the
+Dashboard's 「分析」 card, `meta:dashboard` order/hidden editing, offering by `requires`), then P2 (the default pack
+`bi-market-default` from `dashboard.py`/`market.py` with per-section parity tests, pack import/export) → P3/P4,
+D1 → D3, P5, D4 per the design. Params/requires checking and binding already exist in `analyses.py` (F1).
 
 ## Knowledge repositories R1, R2, R3 (BI part), R4a and R5 (BI side) (2026-10-30/31, Claude Code)
 

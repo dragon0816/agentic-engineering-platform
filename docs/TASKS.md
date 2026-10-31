@@ -3952,3 +3952,8 @@ s-k-20261011T102952` (not published).
     thread computes queued results; `refresh` queues the published defaults after join, sync, publish and a
     person's run. Contract test `test_bi_feed_api` replays `golden/requests.json` over real HTTP (3 tests).
     Next: F3 fixture server.
+  - [x] 2026-11-01, Claude Code: BI feed F3, the fixture server `scripts/bi_feed_server.py --port 53611`
+    (`docs/phases/BI_ANALYSIS_DASHBOARD.md` §6.2): only the feed routes on a copy of the fixture vault, fixed
+    `computed_at`, prints `ready <url>`, a queued script result arrives after `--queue-delay`. Test
+    `test_bi_feed_server` (separate process: golden answers, 409 then the result, foreign origin, other routes).
+    Codex can run I1 against it. Next: P1.

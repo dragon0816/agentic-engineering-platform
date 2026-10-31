@@ -6058,3 +6058,13 @@ Code `host_runtime/bi_feed_api.py`, wired in `web.py` beside the telemetry reads
 - **Refresh.** `bi_feed_api.refresh(workspace, vault_id)` queues the published version's default results not
   cached yet (`feed.enqueue_defaults`); called after `POST /api/bi/vaults/join`, `.../sync`, `.../publish` and a
   person's `.../analyses {"run"}`. It never fails the person's request.
+
+## BI analysis feed for Atlas: the fixture server (F3, 2026-11-01)
+
+`python scripts/bi_feed_server.py --port 53611 [--queue-delay 2]` (run with AEP's own `.venv`, from the AEP
+repository): a temporary workspace joins a copy of `tests/fixtures/bi_feed/vault/`, `feed.clock` is fixed to the
+fixture's `computed_at`, the default results are computed, then it prints `ready
+http://127.0.0.1:<port>/api/v1/bi` (flushed) and serves only the feed routes through `bi_feed_api` (any other
+path: `404 route_unknown`; non-loopback Host: `403 host_refused`). A new script parameter answers `409
+result_not_ready` and its result after `--queue-delay` seconds; every start begins with an empty cache (port 0
+picks a free port). Test `tests/test_bi_feed_server.py` runs it as a separate process.
