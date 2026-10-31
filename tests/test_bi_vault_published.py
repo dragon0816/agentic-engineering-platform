@@ -92,12 +92,12 @@ def test_the_agent_answers_from_the_published_tag_while_the_head_moves_on(
 def test_repo_md_and_the_schema_document_are_written(tmp_path: Path) -> None:
     drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
     folder = drive.parent("a") / vault_id
-    readable = folder / "schemas" / "bi.schema__v1.1@2.0.0.md"
+    readable = folder / "schemas" / "bi.schema__v1.1@3.0.0.md"
     assert readable.read_text(encoding="utf-8").startswith("# ")
     _import(a, dataset, _row("TSN", standard_body="IEEE"), filename="tech.csv")
     _push(a, vault_id)
     text = (folder / "REPO.md").read_text(encoding="utf-8")
-    assert "匯入 tech.csv" in text and "bi.schema__v1.1@2.0.0.md" in text
+    assert "匯入 tech.csv" in text and "bi.schema__v1.1@3.0.0.md" in text
     _ok(_call(a, "POST", f"/api/bi/vaults/{vault_id}/tag", {"name": "v1", "purpose": "第一版"}))
     _ok(_call(a, "POST", f"/api/bi/vaults/{vault_id}/publish", {"tag": "v1", "confirm": True}))
     assert "v1" in (folder / "REPO.md").read_text(encoding="utf-8")

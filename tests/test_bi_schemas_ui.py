@@ -256,8 +256,8 @@ def test_dataset_schemas_end_to_end_in_a_browser(served: Any, tmp_path: Path) ->
         # -- switching: a BI dataset gets its types, Dashboard and hint back -----------------
         run("document.getElementById('bi-new').click()")
         wait("!document.getElementById('bi-new-panel').hidden")
-        # The example and the two shipped BI versions (1.1.0, 2.0.0; BI vault V9).
-        wait("document.getElementById('bi-new-schema').options.length === 3")
+        # The example and the three shipped BI versions (1.1.0, 2.0.0, 3.0.0).
+        wait("document.getElementById('bi-new-schema').options.length === 4")
         choose("bi-new-schema", "bi.schema/v1.1@1.1.0")
         run("document.getElementById('bi-new-name').value = 'market';")
         run("document.getElementById('bi-new-go').click()")

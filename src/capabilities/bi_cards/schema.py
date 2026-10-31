@@ -31,7 +31,11 @@ from typing import Any
 SCHEMA_FILE = Path(__file__).with_name("bi_schema_v1_1.json")
 #: Every shipped version of the BI schema, oldest first; the first is the base
 #: every installed `bi.schema/*` version must stay compatible with.
-SHIPPED_FILES = (SCHEMA_FILE, Path(__file__).with_name("bi_schema_v2.json"))
+SHIPPED_FILES = (
+    SCHEMA_FILE,
+    Path(__file__).with_name("bi_schema_v2.json"),
+    Path(__file__).with_name("bi_schema_v3.json"),
+)
 SCHEMA_ID = "bi.schema/v1.1"
 #: Kind changes that keep every stored value meaningful (BI vault V9): a value
 #: becomes a one-item list, or an integer a decimal number.

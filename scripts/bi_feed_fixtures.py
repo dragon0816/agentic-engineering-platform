@@ -291,7 +291,7 @@ def build_vault(workspace: Path, parent: Path) -> Path:
                 "path": str(parent),
                 "title": "Feed Fixture Market (fictional)",
                 "purpose": "虛構資料：BI analysis feed 的契約測試",
-                "schema": "bi.schema/v1.1",
+                "schema": "bi.schema/v1.1@2.0.0",  # frozen: the golden answers name it
                 "author": "fixture",
                 "default_pack": False,  # the fixture holds its own three analyses
             },

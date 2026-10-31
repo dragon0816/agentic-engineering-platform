@@ -3981,3 +3981,8 @@ s-k-20261011T102952` (not published).
     version with `params` (`board.published_sections`); `all` runs every offered analysis in the Dashboard's
     order; unpublished or unknown names are refused; coded names still answer until P5. Tests
     `test_bi_query_analyses` (3). Next: D1 (schema 2.1.0 with `tech_areas`, `chain`).
+  - [x] 2026-11-01, Claude Code: BI D1, schema `bi.schema/v1.1@3.0.0` (`scripts/build_bi_schema_v3.py`):
+    `tech_areas` (coverage areas, labels as aliases), Node `chain` (CMP, PWR, THM) and, for D2, `aliases` on
+    every type named by `name`. 3.0.0 instead of the design's 2.1.0 to avoid Session A's local 2.1.0 (decision
+    2026-11-01). Bare `bi.schema/v1.1` now means 3.0.0; tests that assumed 2.0.0 updated. Tests
+    `test_bi_schema_v3` (3). Next: D2 (name matching from the cards' aliases).

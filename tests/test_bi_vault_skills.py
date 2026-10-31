@@ -25,6 +25,7 @@ from host_runtime.bi_cards_api import route
 
 V1 = "bi.schema/v1.1@1.1.0"
 V2 = "bi.schema/v1.1@2.0.0"
+V3 = "bi.schema/v1.1@3.0.0"  # a new vault's (the newest shipped)
 NOTES = "ODM 是 Account；晶片廠是 Ecosystem。"
 CONFIG: dict[str, Any] = {
     "domains": [
@@ -69,7 +70,7 @@ def test_a_new_vault_holds_a_generated_classify_skill(tmp_path: Path) -> None:
     drive, vault_id, dataset, a, b = _two_pcs(tmp_path)
     found = _skills(a, vault_id)
     classify = found["classify"]
-    assert classify["role"] == "classify" and classify["schema"] == V2
+    assert classify["role"] == "classify" and classify["schema"] == V3
     assert classify["generated"] and not classify["needs_update"]
     assert "- SupplyLink：" in classify["body"] and "- aidc-power：AIDC Power" in classify["body"]
     # It is a file in the shared folder, listed in REPO.md, and on the other PC.

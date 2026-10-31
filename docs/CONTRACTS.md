@@ -6152,3 +6152,17 @@ Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §4.3. Code `capabilities/bi_cards
   answered by the coded section until P5; anything else is refused `analysis_unknown`; a wrong parameter
   `param_invalid`; a name that is neither a coded name nor a slug `invalid_input`.
 - The tool schema's `analysis` is free text (vault slugs vary) listing the coded names; `params` is new.
+
+## BI schema 3.0.0: technology areas, chains and card aliases (D1, 2026-11-01)
+
+Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §3 (D1, and the schema part of D2). Generator
+`scripts/build_bi_schema_v3.py` -> `src/capabilities/bi_cards/bi_schema_v3.json` (shipped after 2.0.0); test
+`tests/test_bi_schema_v3.py`.
+
+- `bi.schema/v1.1@3.0.0` = 2.0.0 plus fields only: `tech_areas` (list; allowed values = the shipped coverage
+  matrix's areas `wireless-comm`, `rf`, `high-speed-io`, `power-generic-io`, `emc`; their labels as
+  `enum_aliases`) on Account, CustomerProduct, Ecosystem and SupplyLink (the types placed by `segment`);
+  `chain` (list; `CMP`, `PWR`, `THM` with 運算鏈 / 電力鏈 / 散熱鏈 as aliases) on Node after `layer`; `aliases`
+  (list of other names, no allowed values) after `name` on every type named by `name` (not Signal).
+- A bare `bi.schema/v1.1` now means 3.0.0 (new datasets and vaults); a 2.0.0 dataset or vault upgrades without
+  moving a value. Session A's next local version is 3.1.0. The F1 fixture stays on 2.0.0.

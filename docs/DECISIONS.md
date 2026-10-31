@@ -5855,3 +5855,13 @@ numbers).
   the database file's state keep a repeat draw instant. The chain sections and quality are still coded here.
 - **Parameters at the top.** 領域 and 範例卡 stay the existing controls; any other parameter an analysis declares
   appears beside them and applies to every analysis that declares it.
+
+## 2026-11-01: The schema with technology areas and chains is 3.0.0, not 2.1.0 (D1, Claude Code)
+
+The design names `bi.schema/v1.1@2.1.0`, but Session A makes a local version as the next minor step above every
+known version (`schema_versions._next_version`): on a PC with 2.0.0 that is exactly 2.1.0, and the owner had an
+open item to add `tech_areas` through Session A. A shipped 2.1.0 with other content would then be refused
+beside that PC's or vault's own 2.1.0 (the vault's schema file is authoritative, `schema_mismatch`), stopping
+its sync. As V9 chose 2.0.0 so the shipped version never meets a local one, this one is 3.0.0 (fields added
+only; a 2.0.0 dataset upgrades without moving a value). The `aliases` field of D2 is in the same version so the
+migration (D3) needs one upgrade. Rejected: 2.1.0 as written (collision), 2.0.1 (a patch number for new fields).

@@ -62,7 +62,7 @@ def test_the_shipped_v2_is_generated_from_schema_v8_and_extends_1_1_0() -> None:
     assert V8.is_file()
     normalised, problems = catalog.validate(committed)
     assert problems == [] and normalised is not None
-    base, v2 = shipped()
+    base, v2, *_later = shipped()
     assert (base.ref, v2.ref) == (V1, V2)
     assert set(base.types) < set(v2.types) and len(v2.types) == 21
     for added in ("SupplyLink", "RevenueFact", "WinLoss", "Battlecard", "VisitLog"):
