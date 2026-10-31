@@ -3928,3 +3928,6 @@ s-k-20261011T102952` (not published).
     「分析與圖表」 and the Dashboard's 「分析」 card (inline SVG charts). Tests `test_bi_analyses` (guards, saved and
     pushed, AI on the harness), `test_bi_vault_ui` (propose, save, Dashboard). Not done: a real sandbox for
     scripts (see the decision), memory limits on Windows, analyses for non-vault datasets.
+  - [x] 2026-11-01, Claude Code: the BI page opens on 「建立與匯入」 (read-only datasets on the Dashboard);
+    「資料集管理」 folds new dataset, install schema and demo; 「發佈到 Shared Platform」 hidden for a vault. Browser
+    tests that start on the Dashboard click it first; `test_bi_vault_ui` checks the new defaults.

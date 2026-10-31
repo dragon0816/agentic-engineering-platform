@@ -622,6 +622,8 @@ def test_bi_cards_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None: 
         stub.fail.clear()
         click_text("#bi-status-bar button", "重試")
         wait("document.getElementById('bi-status-bar').hidden")
+        # The page opens on 「建立與匯入」; this test starts on the Dashboard.
+        run("document.querySelector('#bi-views [data-bi-view=dashboard]').click()")
         assert "0張卡片" in shown("bi-counts").replace(" ", "")
         wait("document.getElementById('bi-dash-sections').textContent.includes('6. 缺口')")
         # -- demo load refreshes the counts ----------------------------------------------

@@ -5783,3 +5783,11 @@ skill AI on the harness, then AI analyses. Design: `docs/phases/BI_TEST_AND_TOOL
 - **Vault only.** Saved analyses are vault units (committed and pushed); a dataset only on this PC has none.
 - **Shared harness helper.** `host_runtime/bi_harness.converse` runs every BI sub-run (benchmark questions,
   skill AI, analysis AI) with turn-scoped tools.
+
+## 2026-11-01: The BI page opens on 「建立與匯入」 (owner request, Claude Code)
+
+The owner looked for the three steps and found the toolbar instead. The BI page now opens on 「建立與匯入」 (tab
+first); a dataset read from the platform still opens on the Dashboard (it cannot be built). 「新增資料集」, 「安裝
+schema」 and 「載入示範資料」 are folded into 「資料集管理」. 「發佈到 Shared Platform」 (the platform copy of a dataset on
+this PC) is hidden for a vault, whose changes reach others by commit, push and publish in step 3. Rejected:
+removing the platform copy (datasets on one PC still use it).

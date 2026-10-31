@@ -166,6 +166,8 @@ def test_dataset_schemas_end_to_end_in_a_browser(served: Any, tmp_path: Path) ->
         run("document.getElementById('nav-knowledge').click()")
         run("document.querySelector('#kn-tabs [data-kn=bi]').click()")
         wait("document.getElementById('bi-status-bar').hidden")
+        # The page opens on 「建立與匯入」; this test starts on the Dashboard.
+        run("document.querySelector('#bi-views [data-bi-view=dashboard]').click()")
         # A fresh workspace: the shipped BI schema, with its Dashboard and chat hint.
         wait("document.getElementById('bi-schema-note').textContent.includes('bi.schema/v1.1')")
         assert not hidden("bi-hint") and not hidden("bi-demo") and not hidden("bi-domain-box")

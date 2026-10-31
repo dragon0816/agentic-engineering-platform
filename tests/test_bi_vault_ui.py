@@ -147,6 +147,11 @@ def test_vault_panel_and_coverage_in_a_browser(
         click("#nav-knowledge")
         click("#kn-tabs [data-kn=bi]")
         wait("document.getElementById('bi-status-bar').hidden")
+        # The page opens on 「建立與匯入」, dataset management folded away; this test
+        # starts on the Dashboard.
+        assert not run("document.getElementById('bi-view-build').hidden")
+        assert not run("document.getElementById('bi-manage').open")
+        run("document.querySelector('#bi-views [data-bi-view=dashboard]').click()")
         click("#bi-demo")
         wait("document.getElementById('bi-notice').textContent.includes('示範資料已載入')")
 
@@ -207,6 +212,8 @@ def test_vault_panel_and_coverage_in_a_browser(
         assert "虛構範例" in state and str(shared) in state
         assert not run("document.getElementById('bi-b-v-sync').hidden")
         assert run("document.getElementById('bi-b-v-convert').hidden")
+        # A vault is shared by commit and push in step 3, not by the platform copy.
+        assert run("document.getElementById('bi-publish').hidden")
         assert hashlib.sha256(demo_db.read_bytes()).hexdigest() == before
         (folder,) = [p for p in shared.iterdir() if p.is_dir()]
         assert (folder / "repo.json").is_file()

@@ -267,6 +267,8 @@ def test_bi_sharing_end_to_end_in_a_browser(served: Any, tmp_path: Path) -> None
         click("nav-knowledge")
         run("document.querySelector('#kn-tabs [data-kn=bi]').click()")
         wait("document.getElementById('bi-status-bar').hidden")
+        # The page opens on 「建立與匯入」; this test starts on the Dashboard.
+        run("document.querySelector('#bi-views [data-bi-view=dashboard]').click()")
         wait("document.getElementById('bi-subs-count').textContent === '2'")
 
         # -- the dataset select: 我的資料集, then 已訂閱 -----------------------------------

@@ -1242,6 +1242,8 @@ tr:last-child td { border-bottom: none; }
 .bi-ai h4 { margin: 0 0 6px; }
 #bi-b-ver h5 { margin: 12px 0 4px; font-size: 13px; }
 .bi-substeps ol { margin-top: 0; }
+.bi-manage > summary { cursor: pointer; min-height: 44px; display: inline-flex;
+  align-items: center; padding: 0 12px; }
 .bi-chart { width: 100%; max-width: 760px; height: auto; display: block; margin: 8px 0; }
 .bi-chart text { fill: var(--dim, #666); font-size: 12px; }
 .bi-chart .bar, .bi-chart .dot { fill: var(--accent, #2f6db5); }
@@ -2332,14 +2334,18 @@ tr:last-child td { border-bottom: none; }
           <div class="bi-counts" id="bi-counts" role="status" aria-live="polite">&hellip;</div>
         </div>
         <div class="bi-actions">
-          <button class="go" id="bi-demo" type="button">載入示範資料</button>
-          <button class="bi-btn" id="bi-new" type="button" aria-expanded="false"
-            aria-controls="bi-new-panel">新增資料集</button>
-          <button class="bi-btn" id="bi-install" type="button" aria-expanded="false"
-            aria-controls="bi-install-panel">安裝 schema</button>
           <button class="bi-btn" id="bi-refresh" type="button">更新</button>
           <button class="bi-btn" id="bi-publish" type="button" aria-expanded="false"
             aria-controls="bi-publish-panel">發佈到 Shared Platform</button>
+          <details class="bi-manage" id="bi-manage"><summary>資料集管理</summary>
+            <div class="bi-actions">
+              <button class="bi-btn" id="bi-new" type="button" aria-expanded="false"
+                aria-controls="bi-new-panel">新增資料集</button>
+              <button class="bi-btn" id="bi-install" type="button" aria-expanded="false"
+                aria-controls="bi-install-panel">安裝 schema</button>
+              <button class="bi-btn" id="bi-demo" type="button">載入示範資料</button>
+            </div>
+          </details>
         </div>
         <p class="bi-meta bi-schema-note" id="bi-schema-note"></p>
         <div class="bi-empty-state" id="bi-empty-state" role="note" hidden>
@@ -2454,13 +2460,13 @@ tr:last-child td { border-bottom: none; }
         <button class="bi-btn" id="bi-ask" type="button">到對話中問</button>
       </aside>
       <div class="mem-tabs" id="bi-views" role="tablist" aria-label="BI 卡片檢視">
-        <button type="button" role="tab" data-bi-view="dashboard"
-          aria-selected="true">Dashboard</button>
-        <button type="button" role="tab" data-bi-view="cards" aria-selected="false">卡片</button>
         <button type="button" role="tab" data-bi-view="build"
-          aria-selected="false">建立與匯入</button>
+          aria-selected="true">建立與匯入</button>
+        <button type="button" role="tab" data-bi-view="dashboard"
+          aria-selected="false">Dashboard</button>
+        <button type="button" role="tab" data-bi-view="cards" aria-selected="false">卡片</button>
       </div>
-      <div id="bi-view-dashboard" role="tabpanel" aria-label="Dashboard">
+      <div id="bi-view-dashboard" role="tabpanel" aria-label="Dashboard" hidden>
         <div class="bi-actions bi-atlas">
           <button class="bi-btn" id="bi-atlas-open" type="button">
             在 Atlas 開啟個人 Dashboard</button>
@@ -2537,7 +2543,7 @@ tr:last-child td { border-bottom: none; }
           </div>
         </div>
       </div>
-      <div id="bi-view-build" role="tabpanel" aria-label="建立與匯入" hidden>
+      <div id="bi-view-build" role="tabpanel" aria-label="建立與匯入">
         <div id="bi-build-steps">
         <nav id="bi-stepper" class="kp-stepper" aria-label="建立與匯入步驟">
           <ol>
@@ -11461,7 +11467,7 @@ const BI_CHANGE = {add: ["新增", "good"], change: ["變更", "accent"], same: 
 // Each dataset follows the schema it was created with (owner 2026-10-21): the
 // type filter, import types, card detail and editors read `bi.schema`, loaded
 // for the selected dataset. Dashboard and the chat hint are BI-only.
-const bi = {schema: null, schemas: [], datasets: [], view: "dashboard", loaded: {}, cards: [],
+const bi = {schema: null, schemas: [], datasets: [], view: "build", loaded: {}, cards: [],
   cardId: null, detail: null, preview: null, csv: null, importId: null, searchTimer: 0,
   want: null, picked: false, subs: [], subsState: null, publish: null};
 const BI_NAME = /^[A-Za-z0-9_-]{1,40}$/;
@@ -11707,6 +11713,8 @@ function biRenderTypes() {
 }
 
 async function biShowView(name) {
+  // A dataset read from the platform cannot be built: it opens on the Dashboard.
+  if (name === "build" && biReadOnly()) name = "dashboard";
   bi.view = name;
   for (const button of document.querySelectorAll("#bi-views [data-bi-view]")) {
     button.setAttribute("aria-selected", String(button.dataset.biView === name));
@@ -14493,7 +14501,9 @@ function biBuildResult() {
 function biRenderReadOnly() {
   const info = biCurrent(), readOnly = biReadOnly();
   el("bi-demo").hidden = readOnly || !biIsBi();
-  el("bi-publish").hidden = readOnly;
+  // A shared knowledge base (vault) is shared by commit, push and publish in
+  // step 3; the platform copy is for a dataset on this PC only.
+  el("bi-publish").hidden = readOnly || biDataset().startsWith("vault-");
   document.querySelector("#bi-views [data-bi-view=build]").hidden = readOnly;
   if (readOnly && bi.view === "build") biShowView("dashboard");
   const banner = el("bi-ro"); banner.hidden = !readOnly;
