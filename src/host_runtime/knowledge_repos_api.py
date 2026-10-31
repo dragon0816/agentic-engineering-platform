@@ -3,7 +3,8 @@
 Contract: `docs/CONTRACTS.md` "Knowledge repositories: wiki repositories on this
 PC (R4a)". These routes list, create, import (a copy of a wiki folder) and join
 wiki repositories and run the version operations: sync, status, pending,
-commit, push, resolve, discard, history, diff, revert, tag and publish.
+commit, push, resolve, discard, history, diff, revert, tag and publish, and
+this PC's intake and question folders of a repository (`settings`, R4b).
 Publish needs `confirm: true` and is an Agent Web action, never a capability
 the model can call. `route` is pure apart from the repository files; `handle`
 serves it on the web handler (already token-checked).
@@ -90,6 +91,8 @@ def _route(
                 return 200, wiki_repos.history(workspace, repo_id, _limit(query))
             if what == "diff":
                 return 200, wiki_repos.diff(workspace, repo_id, str(query.get("commit") or ""))
+            if what == "settings":
+                return 200, wiki_repos.work_settings(workspace, repo_id)
         return _error(404, "route_unknown", "沒有這個知識庫路徑")
     if method != "POST":
         return _error(405, "method_not_allowed", "只接受 GET 與 POST")
@@ -118,6 +121,8 @@ def _route(
         return 200, {"ok": True, **wiki_repos.tag(workspace, repo_id, given)}
     if action == "publish":
         return 200, {"ok": True, **wiki_repos.publish(workspace, repo_id, given)}
+    if action == "settings":
+        return 200, {"ok": True, **wiki_repos.save_work_settings(workspace, repo_id, given)}
     return _error(404, "route_unknown", "沒有這個知識庫路徑")
 
 

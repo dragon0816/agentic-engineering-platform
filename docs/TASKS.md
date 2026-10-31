@@ -3879,3 +3879,10 @@ s-k-20261011T102952` (not published).
     `test_knowledge_repo_agent` (3), `test_knowledge_wiki_work` (5), `test_wiki_bench` (2). Not done: the
     page (R4b), removing sandboxes, candidates, push and publish of the old path (R4c), question sets
     inside the repository.
+  - [x] 2026-10-31, Claude Code: R4b part 1, the Knowledge tab's steps on a wiki repository (owner: intake
+    and question folders set per PC). `Sandboxes.open("repo.<id>")` gives the working folder, so every
+    pipeline step runs on a repository; what a writing step produced is staged at once (`captured` in the
+    step's answer); 「測試」 on a repository runs `wiki_bench.run`; merge and the sandbox push refuse it.
+    The working folder now captures against what it was built from (never undoes someone else's synced
+    change) and keeps `drop/` and pipeline records across rebuilds. `GET/POST /api/knowledge/repos/<id>/
+    settings`. Tests `test_knowledge_repo_pipeline` (5). Not done: the page (R4b part 2), R4c.

@@ -60,6 +60,8 @@ def test_the_tab_lists_bases_and_runs_steps_in_a_sandbox(
     info = json.loads(fetch(base(server) + "/api/knowledge/pipeline", token=server.token).body)
     assert info == {
         "enabled": True,
+        "repos": [],
+        "repo_prefix": "repo.",
         "bases": ["k-test"],
         "vaults": [{"name": "k-test", "project": False, "asset": None}],
     }

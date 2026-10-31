@@ -109,6 +109,7 @@ from host_runtime import (
     knowledge_repos_api,
     multi_agent_switch,
     telemetry_api,
+    wiki_bench,
 )
 from host_runtime.agent_mail import AgentMail
 from host_runtime.agent_mode import AgentMode
@@ -317,7 +318,7 @@ from host_runtime.workflow_settings import (
 )
 from host_runtime.workflow_uploads import WorkflowUploadError, WorkflowUploadStore
 from host_runtime.workspace import documents, write_atomically
-from knowledge.evolution import KnowledgeAnswerRecord, KnowledgeManifest
+from knowledge.evolution import KnowledgeAnswerRecord, KnowledgeCatalog, KnowledgeManifest
 from knowledge.market_matrix import (
     MARKET_QUESTIONS,
     PRODUCT_FAMILIES,
@@ -331,9 +332,11 @@ from knowledge.pipeline import KnowledgePipeline, PipelineError
 from knowledge.procedure import KnowledgeProcedure
 from knowledge.progress import read as knowledge_progress
 from knowledge.query import cited_numbers
-from knowledge.sandbox import SandboxError, Sandboxes
+from knowledge.sandbox import REPO_PREFIX, SandboxError, Sandboxes
 from knowledge.schema import answer_rules_text
 from knowledge.vault import Vault
+from knowledge.wiki_repos import listing as wiki_repo_listing
+from knowledge.wiki_work import capture as capture_work
 from llm_gateway import control as gateway_control
 from llm_gateway import token_refresh as gateway_token
 from llm_gateway.config import GatewayConfigError
@@ -5280,6 +5283,9 @@ class AgentWeb:
         vaults.sort(key=lambda item: item.knowledge_asset is None)
         return {
             "enabled": binding is not None,
+            # Wiki repositories on this PC (R4b), opened as `repo.<id>`.
+            "repos": wiki_repo_listing(self.runtime.layout.workspace_root),
+            "repo_prefix": REPO_PREFIX,
             "bases": [item.name for item in vaults],
             "vaults": [
                 {
@@ -5313,7 +5319,24 @@ class AgentWeb:
         if capability is None or capability.status != "succeeded":
             failure = capability.failure if capability is not None else None
             return {"ok": False, "code": failure.code if failure else "pipeline_step_failed"}
+        if spec.side_effect != "read":
+            # What a step wrote into a wiki repository's working folder is
+            # staged in its working copy (R4b).
+            captured = self._capture_repo(str(arguments.get("sandbox_id") or ""))
+            if captured is not None:
+                return {"ok": True, "data": capability.data, "captured": captured}
         return {"ok": True, "data": capability.data}
+
+    def _capture_repo(self, sandbox_id: str) -> dict[str, Any] | None:
+        """Stage what a step wrote into a wiki repository's working folder;
+        None for a sandbox."""
+        boxes = self._sandboxes()
+        if boxes is None or not sandbox_id.startswith(REPO_PREFIX):
+            return None
+        try:
+            return capture_work(boxes.repository(sandbox_id))
+        except SandboxError:
+            return None
 
     def publish_knowledge(self, base: str, candidate_root: str) -> dict[str, Any]:
         """Publish a merged candidate as the base's new version (K3.4). Only a
@@ -5350,27 +5373,48 @@ class AgentWeb:
             return {"ok": False, "code": error.code}
         if not sets or not all(isinstance(name, str) for name in sets):
             return {"ok": False, "code": "no_question_sets"}
+        if info.repo is not None and not info.questions_root:
+            return {"ok": False, "code": "questions_not_set"}
         entry = next((v for v in binding.vaults if v.name == info.base_name), None)
         fallback = (
-            Path(entry.questions_root)
+            Path(info.questions_root)
+            if info.questions_root
+            else Path(entry.questions_root)
             if entry and entry.questions_root
             else Path(info.base_root) / "checks" / "questions"
         )
         skill = harness_skill(self.runtime.agent.gateway.router.commands.skills)
         run_id = f"bench-{datetime.now(UTC).strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:4]}"
 
+        def ask(request: KnowledgeAskRequest, catalog: KnowledgeCatalog) -> dict[str, Any]:
+            return self.knowledge_harness.ask(request, catalog=catalog)
+
         def work() -> tuple[TaskStatus, str]:
-            report = run_benchmark(
-                lambda request, catalog: self.knowledge_harness.ask(request, catalog=catalog),
-                sandbox_id=sandbox_id,
-                sandbox=sandbox,
-                project=Vault(Path(info.base_root)),
-                sets=tuple(sets),
-                actor=self.runtime.actor,
-                skill=skill,
-                questions_fallback=fallback,
-                run_id=run_id,
-            )
+            if info.repo is not None:
+                # A repository's working folder against its pushed head; the
+                # report is what its push check reads (R4a).
+                report = wiki_bench.run(
+                    self.runtime.layout.workspace_root,
+                    info.repo,
+                    ask,
+                    sets=tuple(sets),
+                    actor=self.runtime.actor,
+                    skill=skill,
+                    questions_fallback=fallback,
+                    run_id=run_id,
+                )
+            else:
+                report = run_benchmark(
+                    ask,
+                    sandbox_id=sandbox_id,
+                    sandbox=sandbox,
+                    project=Vault(Path(info.base_root)),
+                    sets=tuple(sets),
+                    actor=self.runtime.actor,
+                    skill=skill,
+                    questions_fallback=fallback,
+                    run_id=run_id,
+                )
             return (
                 "succeeded" if report.status == "finished" else "failed",
                 f"sandbox {report.sandbox_score} / project vault {report.project_score} "
@@ -5410,6 +5454,8 @@ class AgentWeb:
         pipeline = self._pipeline()
         if pipeline is None:
             return {"ok": False, "code": "knowledge_pipeline_disabled"}
+        if sandbox_id.startswith(REPO_PREFIX):
+            return {"ok": False, "code": "repository_uses_versions"}
         try:
             info, _ = pipeline.sandboxes.open(sandbox_id)
         except SandboxError as error:
@@ -5688,6 +5734,8 @@ class AgentWeb:
                 raise
             finally:
                 self._convert_stops.pop(sandbox_id, None)
+                if run.mode == "apply":
+                    self._capture_repo(sandbox_id)  # converted Raw, even when stopped
             results: dict[str, int] = {}
             for item in done.items:
                 results[item.status] = results.get(item.status, 0) + 1

@@ -5796,8 +5796,9 @@ source folder, and what an AI run reads (R3, Claude Code)". Code: `src/capabilit
 
 Owner decisions "Wiring the wiki type (R4)" (`docs/DECISIONS.md` 2026-10-30). Code:
 `src/knowledge/wiki_repos.py`, routes `src/host_runtime/knowledge_repos_api.py`. Tests
-`tests/test_knowledge_repos_api.py`. Not yet used by the Knowledge page (R4b) nor by the Agent's catalog
-(next R4a step); the sandbox, push and candidate publish paths are unchanged until R4c.
+`tests/test_knowledge_repos_api.py`, `tests/test_knowledge_repo_pipeline.py`. The pipeline steps run on a
+repository since R4b part 1; the page still shows the sandbox flow until R4b part 2, and the sandbox, push
+and candidate publish paths stay until R4c.
 
 - **Registry.** A wiki repository is registered in the workspace (`<workspace>/knowledge-repos/registry.json`,
   type `wiki`), never in `host.json`.
@@ -5847,6 +5848,30 @@ Owner decisions "Wiring the wiki type (R4)" (`docs/DECISIONS.md` 2026-10-30). Co
   `sources/<folder>/<sha8>-<name>` (once per content), `skills/<folder>/SKILL.md` → next revision (role
   `ingest`, current schema, `folder` kept when it is not a valid name), `CLAUDE.md` → schema
   `wiki.schema@x.y.(z+1)`. Hidden files and folders are never staged.
+- **Working folder against what it was built from** (R4b part 1): a build also writes the built pages to
+  `work-view/base/` and the built Raw digests, skill-body digests and `CLAUDE.md` digest to `state.json`.
+  `capture` stages only what differs from that base (for a page, the unit changes from the built page to
+  the folder's page that differ from the working units), so a sync that brought someone else's change into
+  the working units is never undone; it updates the base, and keeps `state.json`'s `units` only when the
+  folder showed the working units before. `open_work` captures before every rebuild; a rebuild carries
+  `drop/` and every hidden entry (`.plans/`, `.ingest-state.json`, `.benchmarks/`, `.reingest/` …) into
+  the new folder. `reset(repo)` rebuilds without capturing. `wiki_repos` captures before `status`,
+  `pending`, `commit`, `push`, `resolve` and `revert`; `discard` drops the staged changes and resets.
+- **Per-PC settings** (owner 2026-10-31): `<workspace>/knowledge-repos/<id>/settings.json` `{intake,
+  questions, pulled}`; `GET …/<id>/settings` → `{"settings"}`; `POST …/<id>/settings` `{intake?,
+  questions?}` (absolute existing folders; empty clears; `path_missing`) → `{"ok", "settings"}`.
+- **Pipeline steps on a repository** (R4b part 1): `Sandboxes.open("repo.<id>")` opens `open_work` with a
+  `SandboxInfo` whose `repo`, `drop_root` (intake) and `questions_root` are set, `scope` None (every rule
+  editable), `base_name` = the id; `record` saves `pulled` in the settings; `list` does not include it;
+  `discard` → `repository_not_discarded`; an unknown repository → its `*_unknown` code. `drop-folders` with
+  `base: "repo.<id>"` and `pull` read the intake folder (`intake_not_set`); `question-sets` reads the
+  question folder (none set → no sets); `rule-write` of `checks/questions/<set>/<file>.md` writes into the
+  question folder (`questions_not_set`), never into the repository; `merge` and the sandbox push
+  (`/api/knowledge/push/start`) → `repository_uses_versions`. `/api/knowledge/pipeline/call` adds
+  `"captured": <capture summary>` after a step whose `side_effect` is not `read` on a repository; a convert
+  run captures when it ends. `/api/knowledge/benchmark/start` on a repository runs `wiki_bench.run`
+  (`questions_not_set` without a question folder). `GET /api/knowledge/pipeline` adds `"repos"` (the
+  listing above) and `"repo_prefix": "repo."`.
 - **Benchmark and push check** (`host_runtime.wiki_bench`): `run(workspace, id, ask, sets=, actor=,
   skill=, questions_fallback=)` captures, then runs `knowledge_bench.run_benchmark` with the working folder
   as `sandbox` and the pushed head (materialized at `work-view/head`) as `project`; the report (saved in

@@ -50,7 +50,7 @@ from knowledge.raw import (
     RawIndex,
     load_document,
 )
-from knowledge.sandbox import BASE, Sandboxes, SandboxInfo
+from knowledge.sandbox import BASE, REPO_PREFIX, SandboxError, Sandboxes, SandboxInfo
 from knowledge.schema import front_fields, ingest_conventions
 from knowledge.sections import like_endings, lost_lines
 from knowledge.vault import Vault, WritePlan, normalize
@@ -224,6 +224,28 @@ class KnowledgePipeline:
             raise PipelineError("unknown_scope")
         return rel
 
+    def _drop_root(self, base: str) -> Path:
+        """Where originals are pulled from: the project vault's drop/, or a wiki
+        repository's intake folder on this PC (`intake_not_set` until set)."""
+        if base.startswith(REPO_PREFIX):
+            try:
+                intake = self.sandboxes.repo_info(base).drop_root
+            except SandboxError as error:
+                raise PipelineError(error.code) from None
+            if intake is None:
+                raise PipelineError("intake_not_set")
+            return Path(intake)
+        if base not in self.bases:
+            raise PipelineError("unknown_base_vault")
+        return self.drop_roots[base]
+
+    @staticmethod
+    def _not_repository(info: SandboxInfo) -> None:
+        """Merge and the in-place push are sandbox steps; a repository commits
+        and pushes in its 「版本」 area."""
+        if info.repo is not None:
+            raise PipelineError("repository_uses_versions")
+
     def _open(self, sandbox_id: str) -> Vault:
         return self.sandboxes.open(sandbox_id)[1]
 
@@ -233,10 +255,9 @@ class KnowledgePipeline:
     # -- pull (collaboration design section 3) --------------------------------
 
     def drop_folders(self, base: str, depth: int = 3) -> DropFolders:
-        """The project vault's drop/ folders a sandbox may pull, with file counts."""
-        if base not in self.bases:
-            raise PipelineError("unknown_base_vault")
-        root = self.drop_roots[base]
+        """The project vault's drop/ folders a sandbox may pull, with file counts
+        (for a wiki repository `repo.<id>`, this PC's intake folder's)."""
+        root = self._drop_root(base)
         found = []
         if root.is_dir():
             for folder in sorted(p for p in root.rglob("*") if p.is_dir()):
@@ -255,7 +276,7 @@ class KnowledgePipeline:
         documents of skipped originals are named, since a rule change is tried
         by ingesting them again, not by pulling."""
         info, vault = self.sandboxes.open(sandbox_id)
-        root = self.drop_roots[info.base_name].resolve()
+        root = self._drop_root(info.base_name).resolve()
         if (early := reporter(progress_key)) is not None:
             early("reading", 0, 0, "the sandbox's Raw index")
         known = {entry.source.sha256: entry.raw_ref for entry in RawIndex.scan(vault).entries}
@@ -393,6 +414,9 @@ class KnowledgePipeline:
             # other folders' sets are not, so no one weakens another's gate.
             if _question_access(info.scope, rel) != "edit":
                 raise PipelineError("rule_outside_scope")
+            if info.repo is not None:
+                # A repository's questions stay in this PC's question folder.
+                target = self._repo_questions(info) / rel[len(QUESTIONS_PREFIX) :]
             target.parent.mkdir(parents=True, exist_ok=True)
             original = target.read_bytes().decode("utf-8") if target.is_file() else ""
             target.write_bytes(like_endings(text, original).encode("utf-8"))
@@ -437,7 +461,10 @@ class KnowledgePipeline:
         selects by default, and questions that have no terms to grade."""
         info, vault = self.sandboxes.open(sandbox_id)
         root = vault.root / "checks" / "questions"
-        found = load_questions(root if root.is_dir() else self.questions_roots[info.base_name])
+        if info.repo is not None:
+            found = load_questions(Path(info.questions_root)) if info.questions_root else ()
+        else:
+            found = load_questions(root if root.is_dir() else self.questions_roots[info.base_name])
         counts = question_set_counts(found)
         scope = (info.scope,) if info.scope else info.pulled
         return QuestionSets(
@@ -457,6 +484,12 @@ class KnowledgePipeline:
                 for q in found
             ),
         )
+
+    @staticmethod
+    def _repo_questions(info: SandboxInfo) -> Path:
+        if not info.questions_root:
+            raise PipelineError("questions_not_set")
+        return Path(info.questions_root)
 
     def add_drop(self, sandbox_id: str, name: str, data: bytes) -> str:
         """Put one original into the sandbox's drop/; never replaces a file."""
@@ -686,6 +719,7 @@ class KnowledgePipeline:
         nothing; apply writes a new candidate vault beside the sandboxes, never
         the published vault, and refuses while a conflict is unresolved."""
         info, vault = self.sandboxes.open(sandbox_id)
+        self._not_repository(info)
         published = Vault(Path(info.base_root))
         snapshot = vault.root / BASE
         if snapshot.is_dir():
@@ -759,6 +793,7 @@ class KnowledgePipeline:
         root files, so work continues from the pushed state and a later merge
         never mistakes others' pushes for edits the sandbox undid."""
         info, vault = self.sandboxes.open(sandbox_id)
+        self._not_repository(info)
         project = self.bases[info.base_name]
         for target in (vault.root, vault.root / BASE):
             for area in TEXT_AREAS:
@@ -894,6 +929,7 @@ class PullResult(Contract):
 SCHEMA = "CLAUDE.md"
 MAX_PREVIEW_BYTES = 1024 * 1024
 _SKILL_FILE = re.compile(r"skills/[A-Za-z0-9][A-Za-z0-9._-]*/SKILL\.md")
+QUESTIONS_PREFIX = "checks/questions/"
 _QUESTION_FILE = re.compile(r"checks/questions/(?:[^/]+/)?[^/]+\.md")
 _READABLE_AREAS = ("wiki/", "raw/", "skills/", "checks/")
 _READABLE_FILES = (SCHEMA, "index.md", "log.md", "decisions.md")

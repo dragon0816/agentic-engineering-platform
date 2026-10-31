@@ -28,6 +28,7 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
+from knowledge import wiki_work
 from knowledge.repo import readme, wiki
 from knowledge.repo import repository as engine
 from knowledge.repo.repository import RepoError, Repository
@@ -251,8 +252,16 @@ def unit_label(units: Mapping[str, Any], key: str) -> str:
     return f"{path} 的「{name}」"
 
 
-def status(workspace: Path, repo_id: str) -> dict[str, Any]:
+def _captured(workspace: Path, repo_id: str) -> Repository:
+    """The repository, with what was changed in its working folder staged
+    (before anything that reads or moves the working units)."""
     repo = repository(workspace, repo_id)
+    wiki_work.capture(repo)
+    return repo
+
+
+def status(workspace: Path, repo_id: str) -> dict[str, Any]:
+    repo = _captured(workspace, repo_id)
     try:
         repo.sync()
         state = repo.status()
@@ -264,7 +273,7 @@ def status(workspace: Path, repo_id: str) -> dict[str, Any]:
 
 
 def pending(workspace: Path, repo_id: str) -> dict[str, Any]:
-    repo = repository(workspace, repo_id)
+    repo = _captured(workspace, repo_id)
     with repo.lock:
         head = repo.units()
         work = repo._pending()
@@ -281,17 +290,22 @@ def pending(workspace: Path, repo_id: str) -> dict[str, Any]:
 
 
 def commit(workspace: Path, repo_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
-    repo = repository(workspace, repo_id)
+    repo = _captured(workspace, repo_id)
     return {"commit": repo.commit(str(given.get("purpose") or ""))}
 
 
 def discard(workspace: Path, repo_id: str) -> dict[str, Any]:
-    repository(workspace, repo_id).discard()
+    """Drop the uncommitted changes, including what was edited in the working
+    folder and not captured yet."""
+    repo = repository(workspace, repo_id)
+    with repo.lock:
+        repo.discard()
+        wiki_work.reset(repo)
     return {"discarded": True}
 
 
 def push(workspace: Path, repo_id: str) -> dict[str, Any]:
-    repo = repository(workspace, repo_id)
+    repo = _captured(workspace, repo_id)
     with repo.lock:
         result = repo.push()
         if result["status"] == "pushed":
@@ -304,7 +318,7 @@ def push(workspace: Path, repo_id: str) -> dict[str, Any]:
 
 
 def resolve(workspace: Path, repo_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
-    repository(workspace, repo_id).resolve(
+    _captured(workspace, repo_id).resolve(
         str(given.get("unit") or ""), str(given.get("choice") or ""), given.get("value")
     )
     return {"resolved": True}
@@ -324,7 +338,7 @@ def diff(workspace: Path, repo_id: str, commit_id: str) -> dict[str, Any]:
 
 
 def revert(workspace: Path, repo_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
-    repo = repository(workspace, repo_id)
+    repo = _captured(workspace, repo_id)
     record = repo.revert(str(given.get("version") or ""), str(given.get("purpose") or ""))
     return {"commit": record}
 
@@ -348,3 +362,13 @@ def publish(workspace: Path, repo_id: str, given: Mapping[str, Any]) -> dict[str
     readme.write_readme(repo)
     reading_folder(workspace, repo_id)
     return {"published": record}
+
+
+def work_settings(workspace: Path, repo_id: str) -> dict[str, Any]:
+    """This PC's intake and question folders for the repository."""
+    return {"settings": wiki_work.settings(repository(workspace, repo_id))}
+
+
+def save_work_settings(workspace: Path, repo_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
+    chosen = {k: given[k] for k in ("intake", "questions") if k in given}
+    return {"settings": wiki_work.save_settings(repository(workspace, repo_id), chosen)}

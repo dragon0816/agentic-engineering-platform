@@ -5667,3 +5667,30 @@ Engineering choices (Claude Code), fixing the R4 core library before wiring it:
   note that the content was not tested. Rejected: blocking every untested push (a one-word fix would need
   a full run) and running the benchmark inside push (the request would hang for minutes). A push whose
   content changed by merging someone else's work counts as untested.
+
+## 2026-10-31: The Knowledge tab's steps on a wiki repository (R4b part 1, owner + Claude Code)
+
+- **Intake and question folders are set per PC** (owner answer to "知識庫的「拉資料」來源和測試題目要放哪裡？"):
+  each PC sets, per repository, the folder 「拉資料」 pulls originals from and the folder the question sets
+  are in (`<workspace>/knowledge-repos/<id>/settings.json`). Uploading files keeps working without an
+  intake folder. Questions move into the repository later. Rejected: questions inside the repository now
+  (larger slice), and reusing `host.json`'s pipeline vault `drop_root`/`questions_root` (it would bind the
+  repository back to `host.json`, against decision "registry in the workspace").
+- **Engineering (Claude Code): the pipeline steps open a repository as a sandbox id.** `Sandboxes.open`
+  takes `repo.<id>` and returns the repository's working folder with a `SandboxInfo` carrying the
+  repository, intake and question folders, so convert, plan, apply, the rule editor, lint, re-ingest and
+  the benchmark run on it without being rewritten; merge and the sandbox push refuse it
+  (`repository_uses_versions`). R4c replaces `SandboxInfo` when the sandboxes go. Rejected: a second set
+  of pipeline capabilities for repositories (every step duplicated until R4c).
+- **Engineering (Claude Code): a capture compares with what the folder was built from, not with the
+  working units.** Found while wiring: anything that syncs (the Agent reading, a status) can bring
+  someone else's change into the working units while the folder still shows the old text, and comparing
+  the folder with the working units would stage that old text back. The folder now keeps its built pages
+  (`work-view/base/`) and digests (`state.json`); a capture stages only the units the person changed,
+  and every rebuild captures first and carries `drop/` and the hidden pipeline records over. Rejected:
+  rebuilding on every sync (loses edits in the folder) and refusing to sync while the folder has edits
+  (the Agent's reading would stall).
+- **Engineering (Claude Code): what a step wrote is staged right after it**, for every step whose
+  capability is not read-only (`side_effect`), and before every version operation that reads or moves
+  the working units; a person never has to "collect" changes. A question edited in a repository is
+  written into this PC's question folder, never into the repository.
