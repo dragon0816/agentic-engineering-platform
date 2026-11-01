@@ -4006,3 +4006,11 @@ s-k-20261011T102952` (not published).
     (`test_bi_default_pack`, `test_bi_pack_chains`) compare the pack with the golden files instead of calling
     the coded sections; `test_bi_pack_golden` (4) checks the files against the coded sections until P5 removes
     both. Next: P5.
+  - [x] 2026-11-01, Claude Code: BI P5, the coded Dashboard removed (`docs/phases/BI_ANALYSIS_DASHBOARD.md` §4.3):
+    every BI dataset's Dashboard is its analyses (a dataset only on this PC and a subscribed copy: the built-in
+    pack) plus the quality check; `bi__query` on such a dataset runs the pack (`board.pack_sections`; old coded
+    names find their slugs; `quality`). Removed `dashboard.py`, `market.py`, `coverage.py`, `/api/bi/coverage`,
+    the matrix panel, a vault's `coverage` block, and `test_bi_market`, `test_bi_coverage`, `test_bi_pack_golden`;
+    the robotics Dashboard checks in `test_bi_cards` and the quality, board, query and vault browser tests now
+    read the pack. Also fixed `test_bi_methods` (left on 2.1.0 by D1; the next local version is 3.1.0).
+    Next: D4.

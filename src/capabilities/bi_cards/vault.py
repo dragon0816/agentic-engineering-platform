@@ -1039,13 +1039,6 @@ def create(workspace: Path, given: dict[str, Any], actor: str) -> dict[str, Any]
     with vault.lock, _repo_errors():
         vault.repo.stage(repo_engine.SCHEMA_UNIT, reg.ref)
         vault.repo.stage("meta:vault_segments", _segments_meta(segments))
-        coverage = given.get("coverage")
-        if coverage is not None:
-            if not isinstance(coverage, dict):
-                raise BiStoreError("coverage_invalid", "coverage 必須是 JSON 物件")
-            vault.repo.stage(
-                "meta:vault_coverage", json.dumps(coverage, ensure_ascii=False, sort_keys=True)
-            )
         vault._stage_schema(reg.ref)
         vault_skills.stage_classify(vault.repo, reg)
         _stage_default_pack(vault, reg, given)

@@ -24,8 +24,8 @@ from pydantic import ValidationError
 from agent.gateway import HostTool, HostToolOutcome
 from capabilities.bi_cards import vault
 from capabilities.bi_cards.capability import QUERY_SPEC, QueryHandler, QueryRequest, source_note
-from capabilities.bi_cards.dashboard import analysis_names
 from capabilities.bi_cards.manifest import BI_SKILL, bi_question
+from capabilities.bi_cards.packs import SECTIONS as PACK_SECTIONS
 from capabilities.runtime import CapabilityInvocation, CapabilityRefused
 from common.execution import Failure, RequestContext
 from models.contracts import ModelTool
@@ -71,8 +71,9 @@ SCHEMA: dict[str, Any] = {
             "type": "string",
             "description": "a whole-dataset analysis instead of a search. In a knowledge base "
             "(vault-<id>): the slug of one of its saved analyses (its Dashboard; the published "
-            "version is read), e.g. gaps, trend-coverage, funnel, or all. Elsewhere one of: "
-            + ", ".join([*analysis_names(), "all"]),
+            "version is read), e.g. gaps, trend-coverage, funnel, or all. Elsewhere one of the "
+            "built-in analyses: "
+            + ", ".join([*(slug for slug, *_ in PACK_SECTIONS), "quality", "all"]),
         },
         "params": {
             "type": "object",

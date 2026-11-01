@@ -19,7 +19,8 @@ import pytest
 from test_draft_install_cards import served  # noqa: F401 - the real Agent Web fixture
 from test_host_wiring import ready
 
-from capabilities.bi_cards import dashboard, importer, service
+from capabilities.bi_cards import board as bi_board
+from capabilities.bi_cards import importer, service
 from capabilities.bi_cards.capability import QUERY_SPEC, QueryHandler, QueryRequest
 from capabilities.bi_cards.manifest import BI_SKILL, GAP_RULE, PROCEDURE, bi_knowledge_skill
 from capabilities.bi_cards.schema import SCHEMA_FILE, parse_date, registry, split_list
@@ -61,10 +62,6 @@ def _label(cell: Any) -> str:
 
 def _section(answer: dict[str, Any], sid: str) -> dict[str, Any]:
     return next(s for s in answer["sections"] if s["id"] == sid)
-
-
-def _flagged(section: dict[str, Any]) -> dict[str, tuple[str, str]]:
-    return {_label(section["rows"][f["row"]][0]): (f["level"], f["text"]) for f in section["flags"]}
 
 
 # -- schema registry ------------------------------------------------------
@@ -661,19 +658,30 @@ def test_the_routes_are_served_behind_the_token(served: Any) -> None:  # noqa: F
     assert (web.runtime.layout.workspace_root / "bi" / "demo" / "bi.sqlite").is_file()
 
 
-# -- dashboard: the sample's intentional gaps ------------------------------
+# -- dashboard: the sample's intentional gaps (the built-in pack's analyses, BI P5) --
 
 
 @pytest.fixture
 def board(tmp_path: Path) -> dict[str, Any]:
-    return dashboard.dashboard(_loaded(tmp_path), "robotics")
+    return bi_board.board(tmp_path, _loaded(tmp_path), "robotics", False, {})
+
+
+def _levels(section: dict[str, Any]) -> dict[str, str]:
+    return {_label(section["rows"][f["row"]][0]): f["level"] for f in section["flags"]}
+
+
+def _row(section: dict[str, Any], name: str) -> list[Any]:
+    return next(r for r in section["rows"] if _label(r[0]) == name)
 
 
 def test_dashboard_shape(board: dict[str, Any]) -> None:
-    assert [s["id"] for s in board["sections"]][:6] == ["6", "10", "19", "18", "17", "14"]
+    assert board["source"] == "pack"
+    assert [s["id"] for s in board["sections"]][:6] == [
+        "gaps", "trend-coverage", "demand-without-opportunity", "solutions-vs-opportunities",
+        "funnel", "technologies-without-concept"]  # fmt: skip
+    assert board["sections"][-1]["id"] == "Q"
     for section in board["sections"]:
-        assert set(section) == {"id", "title", "kind", "columns", "rows", "flags", "note"}
-        assert section["kind"] in ("table", "matrix", "funnel")
+        assert section["kind"] == "table"
         assert all(len(row) == len(section["columns"]) for row in section["rows"])
         assert all(f["level"] in ("red", "warn") for f in section["flags"])
 
@@ -681,64 +689,60 @@ def test_dashboard_shape(board: dict[str, Any]) -> None:
 def test_dashboard_bms_and_eol_have_competitors_but_no_solution_of_ours(
     board: dict[str, Any],
 ) -> None:
-    flagged = _flagged(_section(board, "6"))
-    red = {k for k, (level, _) in flagged.items() if level == "red"}
+    gaps = _section(board, "gaps")
+    red = {k for k, level in _levels(gaps).items() if level == "red"}
     assert red == {"AMR 電池包 BMS 與充電驗證", "機器人產線下線測試"}
-    assert flagged["AMR 電池包 BMS 與充電驗證"][1] == "對手有、我方無"
-    assert "優先度" not in _section(board, "6")["columns"]
+    assert "對手有、我方無" in _row(gaps, "AMR 電池包 BMS 與充電驗證")
+    assert "優先度" not in gaps["columns"]
 
 
 def test_dashboard_bms_has_demand_but_no_opportunity(board: dict[str, Any]) -> None:
-    flagged = _flagged(_section(board, "19"))
-    assert flagged == {"AMR 電池包 BMS 與充電驗證": ("warn", "有需求無商機")}
+    section = _section(board, "demand-without-opportunity")
+    assert _levels(section) == {"AMR 電池包 BMS 與充電驗證": "warn"}
 
 
 def test_dashboard_the_fast_charging_trend_has_no_solution(board: dict[str, Any]) -> None:
-    flagged = _flagged(_section(board, "10"))
-    assert flagged == {"快充與高稼動電池": ("warn", "無對應方案")}
+    assert _levels(_section(board, "trend-coverage")) == {"快充與高稼動電池": "warn"}
 
 
 def test_dashboard_the_hiwin_mikrosystem_product_has_no_ecosystem(board: dict[str, Any]) -> None:
-    flagged = _flagged(_section(board, "16"))
-    assert flagged == {"大銀 直驅馬達伺服模組": ("warn", "缺 生態系")}
+    assert _levels(_section(board, "product-completeness")) == {"大銀 直驅馬達伺服模組": "warn"}
 
 
 def test_dashboard_the_5g_private_network_solution_has_no_active_opportunity(
     board: dict[str, Any],
 ) -> None:
-    flagged = _flagged(_section(board, "18"))
-    assert flagged == {"R&S 5G 私有網路機器人連線驗證方案": ("warn", "無進行中商機")}
+    section = _section(board, "solutions-vs-opportunities")
+    assert _levels(section) == {"R&S 5G 私有網路機器人連線驗證方案": "warn"}
 
 
 def test_dashboard_lists_technologies_missing_a_concept(board: dict[str, Any]) -> None:
-    flagged = _flagged(_section(board, "14"))
-    missing = {k for k, (_, text) in flagged.items() if text == "缺 Concept"}
+    section = _section(board, "technologies-without-concept")
+    missing = {_label(r[0]) for r in section["rows"] if "缺 Concept" in r}
     assert missing == {"5G-Private-Network", "BMS-Fast-Charging", "Edge-AI-SoC"}
 
 
 def test_dashboard_trend_priority_is_computed_and_the_funnel_counts_stages(
     board: dict[str, Any],
 ) -> None:
-    trends = _section(board, "1")
+    trends = _section(board, "trend-priority")
     assert all(row[5] == row[3] * row[4] for row in trends["rows"])
     assert [row[5] for row in trends["rows"]] == sorted(
         (row[5] for row in trends["rows"]), reverse=True
     )
-    funnel = _section(board, "17")
-    assert funnel["kind"] == "funnel" and sum(row[1] for row in funnel["rows"]) == 7
-    matrix = _section(board, "4")
-    assert matrix["kind"] == "matrix" and len(matrix["rows"]) == 13
+    funnel = _section(board, "funnel")
+    assert funnel["chart"]["type"] == "bar" and sum(row[1] for row in funnel["rows"]) == 7
+    assert len(_section(board, "node-technology")["rows"]) == 13
 
 
 def test_the_stale_section_uses_ninety_days(tmp_path: Path) -> None:
     from datetime import date, timedelta
 
     store = _loaded(tmp_path)
-    cards = dashboard._cards(store)
-    later = date.today() + timedelta(days=91)
-    section = dashboard.stale(cards, "robotics", today=later)
+    later = (date.today() + timedelta(days=91)).isoformat()
+    (section,) = bi_board.pack_sections(tmp_path, store, "stale", {"today": later})
     assert len(section["rows"]) == 103  # X-Certification-Lab is wireless
-    assert dashboard.stale(cards, "robotics")["rows"] == []
+    assert bi_board.pack_sections(tmp_path, store, "stale", {})[0]["rows"] == []
 
 
 # -- default on ------------------------------------------------------------

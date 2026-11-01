@@ -5,8 +5,8 @@ analyses in the vault's order (`meta:dashboard`), with the parameters at the
 top (`domain`, `include_sample` and any other parameter an analysis declares),
 `level` badges and the counts summed for the strip. A vault shows its own
 analyses (working copy, like the rest of the page); a dataset only on this PC
-shows the built-in pack (`packs.default_pack`). Sections the pack does not hold
-yet (the chains A–A3, quality) are still computed by the coded Dashboard.
+shows the built-in pack (`packs.default_pack`), what its schema satisfies. The
+quality check (`quality.py`) is the last section; nothing else is coded (P5).
 
 Each analysis becomes a section in the page's shape (`id`, `title`, `kind`,
 `chart`, `columns`, `rows`, `flags`, `note`). Scripts run in their guarded
@@ -30,8 +30,6 @@ from capabilities.bi_cards.store import BiStore, BiStoreError
 WORKERS = 6
 CACHE_SIZE = 600
 SHARED = ("domain", "include_sample")
-CODED_KEPT = ("A", "A2", "A3")
-CHAIN_SLUGS = ("chain-summary", "chain-view", "chain-overlap")
 
 _cache: OrderedDict[tuple[str, str, str], dict[str, Any]] = OrderedDict()
 _cache_lock = threading.Lock()
@@ -152,7 +150,7 @@ def board(
     given: dict[str, str],
 ) -> dict[str, Any]:
     """The Dashboard of a BI dataset, drawn from its analyses."""
-    from capabilities.bi_cards import dashboard, market, quality
+    from capabilities.bi_cards import quality
 
     registry = catalog.for_store(store)
     items, db, source = _items(workspace, store, registry)
@@ -172,17 +170,8 @@ def board(
 
     with ThreadPoolExecutor(max_workers=WORKERS) as pool:
         drawn = list(pool.map(draw, items)) if db.is_file() else []
-    cards = dashboard._cards(store, include_sample)
-    types, links, config = dashboard._context(store)
-    # A dataset whose analyses draw the chains (Node `chain`, BI D3) no longer
-    # gets the coded ones from its domain configuration.
-    chains = [
-        s
-        for s in market.sections(cards, domain, types=types, link_fields=links, config=config)
-        if s["id"] in CODED_KEPT and not any(i["slug"] in CHAIN_SLUGS for i in items)
-    ]
     checked = quality.section(quality.check(store, registry))
-    flags = [f for s in [*chains, *drawn, checked] for f in s["flags"]]
+    flags = [f for s in [*drawn, checked] for f in s["flags"]]
     stale = next((len(s["rows"]) for s in drawn if s["id"] == "stale"), 0)
     return {
         "domain": domain,
@@ -195,8 +184,59 @@ def board(
             "warn": sum(1 for f in flags if f["level"] != "red"),
             "stale": stale,
         },
-        "sections": [*chains, *drawn, checked],
+        "sections": [*drawn, checked],
     }
+
+
+def _named(
+    items: dict[str, dict[str, Any]],
+    slugs: list[str],
+    db: Path,
+    registry: Any,
+    given: dict[str, Any],
+    names: dict[str, dict[str, str]],
+    *,
+    strict: bool,
+) -> list[dict[str, Any]]:
+    """The analyses `slugs` as sections with the parameters they ran with; a
+    failure refuses when `strict` (one analysis asked for), else is shown."""
+    today = date.today().isoformat()
+    found = []
+    for slug in slugs:
+        item = items[slug]
+        declared = item.get("params") or {}
+        chosen = {k: v for k, v in given.items() if k in declared}
+        for key, spec in analyses.described_params(declared, registry).items():
+            # The model may write "aidc" for "AIDC": an enum value is matched without case.
+            if spec["type"] == "enum" and isinstance(chosen.get(key), str):
+                lower = {str(v).lower(): v for v in spec["values"]}
+                chosen[key] = lower.get(chosen[key].lower(), chosen[key])
+        try:
+            values = analyses.resolve_params(declared, chosen, registry, today=today)
+            section = _section(item, _run(db, item, values), "", names)
+            section["params"] = values
+        except BiStoreError as failure:
+            if strict:
+                raise
+            section = _section(item, None, failure.message)
+        found.append(section)
+    return found
+
+
+def pack_sections(
+    workspace: Path, store: BiStore, name: str, given: dict[str, Any]
+) -> list[dict[str, Any]]:
+    """A dataset's analysis by name (`all`: every one in order), for `bi__query`
+    on a dataset only on this PC: the built-in pack's analyses its schema
+    satisfies. A coded section's old name (`trend_coverage`) finds its slug."""
+    registry = catalog.for_store(store)
+    listed, db, _source = _items(workspace, store, registry)
+    items = {i["slug"]: i for i in listed}
+    slug = name.replace("_", "-")
+    slugs = list(items) if slug == "all" else [slug]
+    if not items or any(s not in items for s in slugs):
+        raise BiStoreError("analysis_unknown", f"這個資料集沒有分析「{name}」")
+    return _named(items, slugs, db, registry, given, _names(store), strict=slug != "all")
 
 
 def published_sections(
@@ -219,27 +259,7 @@ def published_sections(
         raise BiStoreError("analysis_unknown", f"發佈版本裡沒有分析「{name}」")
     db = target.refresh_published() / DB_FILE
     names = _names(vault.reading_store(workspace, vault.dataset_name(vault_id)))
-    today = date.today().isoformat()
-    found = []
-    for slug in slugs:
-        item = offered[slug]
-        declared = item.get("params") or {}
-        chosen = {k: v for k, v in given.items() if k in declared}
-        for key, spec in analyses.described_params(declared, registry).items():
-            # The model may write "aidc" for "AIDC": an enum value is matched without case.
-            if spec["type"] == "enum" and isinstance(chosen.get(key), str):
-                lower = {str(v).lower(): v for v in spec["values"]}
-                chosen[key] = lower.get(chosen[key].lower(), chosen[key])
-        try:
-            values = analyses.resolve_params(declared, chosen, registry, today=today)
-            section = _section(item, _run(db, item, values), "", names)
-            section["params"] = values
-        except BiStoreError as failure:
-            if name != "all":
-                raise
-            section = _section(item, None, failure.message)
-        found.append(section)
-    return found
+    return _named(offered, slugs, db, registry, given, names, strict=name != "all")
 
 
 def saved_name(workspace: Path, vault_id: str, name: str) -> str | None:

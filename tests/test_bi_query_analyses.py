@@ -2,7 +2,8 @@
 
 `docs/phases/BI_ANALYSIS_DASHBOARD.md` §4.3: in a vault the chat asks for one
 of its saved analyses (or `all`) with parameters and reads the published
-version, never this PC's unpushed work; the coded names keep working until P5.
+version, never this PC's unpushed work. Since P5 a dataset only on this PC answers
+from the built-in pack, and a coded section's old name finds its slug.
 All data is fictional.
 """
 
@@ -16,8 +17,9 @@ from typing import Any
 import pytest
 from test_bi_vault_published import CONTEXT
 
-from capabilities.bi_cards import vault
+from capabilities.bi_cards import service, vault
 from capabilities.bi_cards.capability import QueryHandler, QueryRequest
+from capabilities.bi_cards.store import BiStore
 from capabilities.runtime import CapabilityRefused
 from scripts import bi_feed_fixtures as fixtures
 
@@ -69,7 +71,13 @@ def test_an_unpublished_or_unknown_analysis_is_refused(tmp_path: Path) -> None:
     assert refused.value.code == "invalid_input"
 
 
-def test_the_coded_names_still_answer_until_they_are_removed(tmp_path: Path) -> None:
+def test_a_local_dataset_answers_from_the_built_in_pack(tmp_path: Path) -> None:
     ws = _joined(tmp_path)
-    (section,) = _ask(ws, analysis="funnel", domain="robotics")["analysis"]
-    assert section["id"] == "17"  # the coded funnel: the fixture vault has no `funnel` analysis
+    with pytest.raises(CapabilityRefused) as refused:
+        _ask(ws, analysis="funnel", domain="robotics")  # the vault has no `funnel` analysis
+    assert refused.value.code == "analysis_unknown"
+    service.load_demo(BiStore(ws, "demo"))
+    request = QueryRequest(dataset="demo", analysis="trend_coverage", domain="robotics")
+    (section,) = asyncio.run(QueryHandler(ws)(CONTEXT, request)).model_dump()["analysis"]
+    assert section["id"] == "trend-coverage" and section["params"]["domain"] == "robotics"
+    assert section["flags"]

@@ -8,11 +8,14 @@ it, and an import marks `SAMPLE-` rows as samples. All data is fictional.
 
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import catalog, dashboard, quality
+from capabilities.bi_cards import board, catalog, quality
+from capabilities.bi_cards.capability import QueryHandler, QueryRequest
 from capabilities.bi_cards.store import BiStore, PlannedRow
+from common.execution import RequestContext, TraceIdentifiers
 from host_runtime.bi_cards_api import route
 
 V2 = "bi.schema/v1.1@2.0.0"
@@ -123,11 +126,15 @@ def test_a_number_must_be_written_in_its_fact_quote(tmp_path: Path) -> None:
 
 def test_the_dashboard_and_the_chat_show_the_report(tmp_path: Path) -> None:
     store = _faulty(tmp_path)
-    sections = dashboard.dashboard(store, "AIDC")["sections"]
+    sections = board.board(tmp_path, store, "AIDC", False, {})["sections"]
     assert sections[-1]["id"] == "Q" and sections[-1]["rows"]
     assert {f["level"] for f in sections[-1]["flags"]} == {"red", "warn"}
-    assert "quality" in dashboard.analysis_names()
-    (asked,) = dashboard.analysis(store, "quality", "AIDC")
+    context = RequestContext(
+        trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"), actor="tester",
+        namespace="engineering", message="bi", channel="local", session_id="s")  # fmt: skip
+    asking = QueryRequest(dataset=store.dataset, analysis="quality")
+    answer = QueryHandler(tmp_path)(context, asking)
+    (asked,) = asyncio.run(answer).model_dump()["analysis"]
     assert asked["id"] == "Q" and asked["rows"] == sections[-1]["rows"]
 
 

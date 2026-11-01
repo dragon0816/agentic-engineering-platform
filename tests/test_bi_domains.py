@@ -3,7 +3,7 @@ configuration of one market vault.
 
 The configuration is checked against the dataset's schema, saved with a
 revision (a stale save is refused), shared through a vault's change files,
-and used: chains are read from node names or lists, the coverage matrix comes
+and used: chains are read from node names or lists, the coverage matrix came
 from the domains' segments, and imports take its enum and name aliases. All
 data is fictional.
 """
@@ -16,7 +16,6 @@ from typing import Any
 
 from capabilities.bi_cards import domains, vault
 from capabilities.bi_cards.schema import shipped
-from capabilities.bi_cards.store import BiStore
 from host_runtime.bi_cards_api import route
 
 V2 = "bi.schema/v1.1@2.0.0"
@@ -128,34 +127,6 @@ def test_chains_come_from_node_names_or_lists() -> None:
     assert config.canon("聯發科") == "MediaTek" and config.canon(" Keysight ") == "Keysight"
 
 
-def test_the_coverage_matrix_comes_from_the_domains(tmp_path: Path) -> None:
-    _dataset(tmp_path)
-    before = _ok(_call(tmp_path, "GET", "/api/bi/coverage", dataset="market"))
-    assert before["matrix_source"] == "shipped"
-    _ok(_save(tmp_path, CONFIG, 0))
-    store = BiStore(tmp_path, "market")
-    csv = (
-        "name,role,segment\n"
-        "Fictional Power Co,power-system,aidc-power\n"
-        "Fictional Chip Co,chipset,\n"
-    )
-    preview = _ok(_call(tmp_path, "POST", "/api/bi/import/preview",
-                        {"dataset": "market", "entity_type": "Ecosystem", "filename": "e.csv",
-                         "csv_text": csv}))  # fmt: skip
-    # 2.0.0's `segment` takes the market chart's segments (aidc-power) beside aerospace's.
-    assert not any(w["code"] == "type_mismatch" for r in preview["rows"] for w in r["warnings"])
-    _ok(_call(tmp_path, "POST", "/api/bi/import/apply", {"preview_id": preview["preview_id"]}))
-    report = _ok(_call(tmp_path, "GET", "/api/bi/coverage", dataset="market"))
-    assert report["matrix_source"] == "domains"
-    assert [m["id"] for m in report["matrix"]["markets"]] == ["AIDC", "aerospace"]
-    assert len(report["cells"]) == 3 * 2
-    assert report["totals"]["cards"] == 2 and report["totals"]["no_segment"] == 1
-    cells = {(c["segment"], c["area"]): c["cards"] for c in report["cells"]}
-    assert cells[("aidc-power", "power-system")] == 1  # area_field is role
-    assert sum(cells.values()) == 1
-    assert store.card_rows()
-
-
 def test_imports_take_the_configured_name_and_enum_aliases(tmp_path: Path) -> None:
     _dataset(tmp_path)
     _ok(_save(tmp_path, CONFIG, 0))
@@ -195,4 +166,3 @@ def test_a_vault_shares_the_configuration_with_every_pc(tmp_path: Path) -> None:
               {"path": str(drive_b / vault_id), "author": "bob"}))  # fmt: skip
     shared = _ok(_call(b, "GET", "/api/bi/domains", dataset=dataset))
     assert shared["revision"] == 1 and shared["config"]["domains"][0]["id"] == "AIDC"
-    assert _ok(_call(b, "GET", "/api/bi/coverage", dataset=dataset))["matrix_source"] == "domains"

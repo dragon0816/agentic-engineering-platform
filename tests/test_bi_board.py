@@ -3,7 +3,7 @@
 `docs/phases/BI_ANALYSIS_DASHBOARD.md` §4.3: the analyses in the vault's order
 with the parameters at the top, `level` badges, the counts summed for the
 strip, card names linked; quality stays a coded section. A dataset only on this
-PC keeps the coded Dashboard until P5. All data is fictional.
+PC draws the built-in pack (P5). All data is fictional.
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ from typing import Any
 
 from test_bi_vault import _call, _ok
 
-from capabilities.bi_cards import analyses, board, vault
+from capabilities.bi_cards import analyses, vault
 from scripts import bi_feed_fixtures as fixtures
 
 DATASET = vault.dataset_name(fixtures.VAULT_ID)
@@ -95,11 +95,12 @@ def test_results_are_cached_and_a_failure_is_a_note(tmp_path: Path, monkeypatch:
     assert failed["rows"] == [] and failed["note"].startswith("沒有畫出來")
 
 
-def test_a_dataset_only_on_this_pc_keeps_the_coded_dashboard(tmp_path: Path) -> None:
+def test_a_dataset_only_on_this_pc_draws_the_built_in_pack(tmp_path: Path) -> None:
     from capabilities.bi_cards import service
     from capabilities.bi_cards.store import BiStore
 
     service.load_demo(BiStore(tmp_path))
     found = _ok(_call(tmp_path, "GET", "/api/bi/dashboard", dataset="demo", domain="robotics"))
-    assert "source" not in found and any(s["id"] == "6" for s in found["sections"])
-    assert board.CODED_KEPT == ("A", "A2", "A3")
+    assert found["source"] == "pack" and found["sections"][0]["id"] == "gaps"
+    assert found["sections"][-1]["id"] == "Q"
+    assert not {"6", "A", "A2", "A3"} & {s["id"] for s in found["sections"]}

@@ -7,7 +7,7 @@ and their labels as aliases:
 
 - `tech_areas` (a list) on the types placed by `segment` (the coverage matrix is
   segment × technology area); allowed values = the shipped coverage matrix's
-  areas (`coverage_matrix.json`);
+  areas (`scripts/bi_coverage_matrix.json`, the owner's chart, kept as input);
 - `chain` (a list: a shared node is in several chains) on Node; allowed values =
   the AIDC chains of the manager's knowledge bases (CMP, PWR, THM);
 - `aliases` (a list of other names) on every type named by `name`: matching by
@@ -40,7 +40,7 @@ from typing import Any  # noqa: E402
 from scripts import build_bi_schema_v2 as v2  # noqa: E402
 
 OUT = REPO / "src" / "capabilities" / "bi_cards" / "bi_schema_v3.json"
-MATRIX = REPO / "src" / "capabilities" / "bi_cards" / "coverage_matrix.json"
+MATRIX = REPO / "scripts" / "bi_coverage_matrix.json"
 #: The manager's AIDC chains (his chain sections A–A3: 運算鏈, 電力鏈, 散熱鏈).
 CHAINS = (("CMP", "運算鏈"), ("PWR", "電力鏈"), ("THM", "散熱鏈"))
 

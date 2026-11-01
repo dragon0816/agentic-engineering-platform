@@ -5885,3 +5885,21 @@ migration (D3) needs one upgrade. Rejected: 2.1.0 as written (collision), 2.0.1 
 - **The schema reaches a script as filled values**, like the link fields of P2: `SCHEMA_VALUES` is set on
   import from the vault's schema. Rejected: giving scripts the schema at run time (a new runner input for one
   pack) and reading labels from cards (labels are the schema's).
+
+## 2026-11-01: Removing the coded Dashboard, implementation choices (P5, Claude Code)
+
+- **Golden files before deletion.** Before removing `dashboard.py`/`market.py`/`coverage.py`, their answers on
+  four fixtures were written to `tests/fixtures/bi_default_pack/golden/` (fixed clock, seeded ids, a rebuild
+  compared equal) and the parity tests switched to them (owner instruction 2026-11-01). The files are frozen: a
+  deliberate change of an analysis's answer edits its golden file in the same commit with the reason.
+- **Every dataset draws analyses.** A dataset only on this PC (and a subscribed copy) draws the built-in pack
+  through `board.py`, like a vault; only the quality section stays coded (it is a check, not an analysis). The
+  chat on such a dataset runs the same pack analyses (`board.pack_sections`), so the page and the answer agree.
+  A benchmark's chosen version of a vault also runs the built-in pack, as it ran the coded sections before
+  (a vault's own analyses are read from its published version only).
+- **The coverage panel goes; the analysis stays.** The page's matrix grid (cards per cell, a cell's card list,
+  totals and unknown values) is removed with `/api/bi/coverage`; the `coverage` analysis carries the per-cell
+  numbers. Rejected: keeping the panel on `coverage.py` (a second, coded way to answer the same question, which
+  the design removes). A vault's `coverage` block at creation is no longer stored (nothing reads it).
+- **Old names keep working in the chat.** `bi__query` maps a coded section name (`trend_coverage`) to its slug,
+  so a Skill or a person using the old names is not refused.

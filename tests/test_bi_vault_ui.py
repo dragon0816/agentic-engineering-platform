@@ -1,10 +1,9 @@
-"""The 「知識庫」 panel of 「建立與匯入」 and the coverage matrix, in a real browser.
+"""The 「知識庫」 panel of 「建立與匯入」 and the Dashboard, in a real browser.
 
 BI vaults V4/V5 pages (`docs/phases/BI_VAULT.md` §6.2, §7.1): the real Agent
 Web server and routes in a temporary workspace, with a temporary folder
-standing in for the SharePoint folder. The Dashboard shows the segment x
-technology-area matrix (the owner's chart) and says when the schema has no
-field to place cards with; a cell opens its summary. In step 1 the demo
+standing in for the SharePoint folder. The Dashboard of a dataset only on this
+PC draws the built-in pack (BI P5; the coded coverage matrix is gone). In step 1 the demo
 dataset is converted into a vault (the original dataset is left as it was),
 the vault's status and 「立即同步」 work, a new vault is created and chosen,
 and joining a folder that is not a vault is refused inline. Screenshots in
@@ -39,7 +38,7 @@ def _browser_missing() -> bool:
 
 
 @pytest.mark.skipif(_browser_missing(), reason="no Chromium browser is installed")
-def test_vault_panel_and_coverage_in_a_browser(
+def test_vault_panel_and_dashboard_in_a_browser(
     served: Any,  # noqa: F811
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -155,25 +154,16 @@ def test_vault_panel_and_coverage_in_a_browser(
         click("#bi-demo")
         wait("document.getElementById('bi-notice').textContent.includes('示範資料已載入')")
 
-        # -- the coverage matrix on the Dashboard -----------------------------------------
-        wait("document.querySelectorAll('#bi-cov-body td button').length === 55")
-        assert "schema 沒有 segments、tech_areas" in text_of("bi-cov-body")
-        assert "預設矩陣" in text_of("bi-cov-sub")
-        head = text_of("bi-cov-body")
-        for label in ("Wireless Devices & Chipsets", "Cell Phone（重點）", "OSAT", "EMC"):
-            assert label in head, label
-        click("#bi-cov-body td button")
-        # One wait for both: the cell panel re-renders, so a second read can land on it empty.
-        wait(
-            "(() => { const t = document.getElementById('bi-cov-cell').textContent;"
-            " return t.includes('還沒有卡片') && t.includes('Cell Phone × Wireless & Comm.'); })()"
-        )
-        shoot("coverage")
+        # -- a dataset only on this PC draws the built-in pack (BI P5) ----------------------
+        wait("!!document.querySelector(\"#bi-dash-sections details[data-section='gaps']\")")
+        assert not run("!!document.getElementById('bi-cov')")  # the coded matrix panel is gone
+        assert "6. 缺口" in text_of("bi-dash-sections")
+        shoot("dashboard-pack")
         size(390, 844, True)
         assert not run(
             "document.documentElement.scrollWidth > document.documentElement.clientWidth"
         )
-        shoot("coverage-phone")
+        shoot("dashboard-pack-phone")
         size(1366, 1000, False)
 
         # -- per-domain configuration (BI vault V10) ------------------------------------------
@@ -183,7 +173,6 @@ def test_vault_panel_and_coverage_in_a_browser(
         assert "aidc-computing" in str(run("document.getElementById('bi-dom-text').value"))
         click("#bi-dom-save")
         wait("document.getElementById('bi-notice').textContent.includes('領域設定已儲存')")
-        wait("document.getElementById('bi-cov-sub').textContent.includes('領域設定的矩陣')")
         # Schema v4 has no `segments` field: said so, the configuration is kept.
         wait("document.getElementById('bi-dom-warn').textContent.includes('schema 沒有欄位')")
         assert "第 1 版" in text_of("bi-dom-sub")

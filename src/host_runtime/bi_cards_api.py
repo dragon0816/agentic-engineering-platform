@@ -58,8 +58,6 @@ from capabilities.bi_cards import (
     analysis_session,
     board,
     catalog,
-    coverage,
-    dashboard,
     domains,
     importer,
     methods,
@@ -198,25 +196,16 @@ def _route(
                 }
             sample = str(query.get("include_sample") or "").lower() in ("1", "true", "yes")
             domain = str(query.get("domain") or "robotics")
-            if store.vault_id is not None:
-                # A vault's Dashboard is its analyses (BI P3); other parameters as `param.<name>`.
-                given = {
-                    k[len("param.") :]: str(v) for k, v in query.items() if k.startswith("param.")
-                }
-                return 200, board.board(workspace, store, domain, sample, given)
-            return 200, dashboard.dashboard(store, domain, include_sample=sample)
+            # The Dashboard is the analyses: a vault's own, else the built-in pack (BI P3, P5);
+            # other parameters as `param.<name>`.
+            given = {k[len("param.") :]: str(v) for k, v in query.items() if k.startswith("param.")}
+            return 200, board.board(workspace, store, domain, sample, given)
         if path == "/api/bi/quality":
             # Quality checks (BI vault V13), read only.
             return 200, quality.check(store, catalog.for_store(store))
         if path == "/api/bi/domains":
             # Per-domain configuration (BI vault V10), read only here.
             return 200, domains.describe(store, catalog.for_store(store))
-        if path == "/api/bi/coverage":
-            # Segment x technology area (BI vaults §6.2), read only.
-            matrix, origin = coverage.matrix_for(workspace, store.dataset)
-            types = [t for t in str(query.get("types") or "").split(",") if t] or None
-            report = coverage.compute(store, catalog.for_store(store), matrix, types=types)
-            return 200, {**report, "matrix_source": origin, "dataset": store.dataset}
         if path == "/api/bi/sources":
             return 200, {"sources": Staging(workspace, store.dataset).sources()}
         parts = path.split("/")
@@ -740,7 +729,6 @@ DATASET_READS = (
     "/api/bi/cards",
     "/api/bi/dashboard",
     "/api/bi/schema",
-    "/api/bi/coverage",
     "/api/bi/domains",
     "/api/bi/quality",
     "/api/bi/index",

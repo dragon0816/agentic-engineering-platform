@@ -23,7 +23,7 @@ from typing import Any
 
 from pydantic import Field
 
-from capabilities.bi_cards import analyses, board, dashboard, service, subscriptions
+from capabilities.bi_cards import analyses, board, quality, service, subscriptions
 from capabilities.bi_cards.catalog import for_store
 from capabilities.bi_cards.store import DEFAULT_DATASET, BiStore, BiStoreError
 from capabilities.contracts import CapabilitySpec
@@ -110,10 +110,9 @@ class QueryHandler:
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = QueryRequest.model_validate(inputs)
 
-        coded = (*dashboard.analysis_names(), "all")
-        if request.analysis and request.analysis not in coded:
-            if not analyses.NAME_RE.match(request.analysis):
-                raise CapabilityRefused("invalid_input")
+        # A slug, `all`, `quality`, or a coded section's old name (`trend_coverage`).
+        if request.analysis and not analyses.NAME_RE.match(request.analysis.replace("_", "-")):
+            raise CapabilityRefused("invalid_input")
 
         def work() -> Contract:
             store = BiStore(self.workspace_root, request.dataset)
@@ -148,24 +147,22 @@ class QueryHandler:
                 raise BiStoreError("schema_not_bi")
             cited = "；".join(n for n in (source_note(source), published) if n)
             if request.analysis:
-                saved = (
-                    board.saved_name(self.workspace_root, vault_id, request.analysis)
-                    if vault_id is not None and chosen is None
-                    else None
-                )
-                if saved is not None:
-                    given = {**request.params}
-                    if request.domain and "domain" not in given:
-                        given["domain"] = request.domain
+                given = {**request.params}
+                if request.domain and "domain" not in given:
+                    given["domain"] = request.domain
+                if request.analysis == "quality":
+                    sections = [quality.section(quality.check(store, for_store(store)))]
+                elif vault_id is not None and chosen is None:
+                    saved = board.saved_name(self.workspace_root, vault_id, request.analysis)
+                    if saved is None:
+                        raise BiStoreError("analysis_unknown")
                     sections = board.published_sections(
                         self.workspace_root, str(vault_id), saved, given
                     )
-                elif request.analysis in coded:
-                    sections = dashboard.analysis(
-                        store, request.analysis, (request.domain or "robotics").lower()
-                    )
                 else:
-                    raise BiStoreError("analysis_unknown")
+                    sections = board.pack_sections(
+                        self.workspace_root, store, request.analysis, given
+                    )
                 return QueryResult(
                     dataset=request.dataset,
                     total=sum(len(section["rows"]) for section in sections),

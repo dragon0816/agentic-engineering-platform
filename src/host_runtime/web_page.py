@@ -1115,15 +1115,6 @@ tr:last-child td { border-bottom: none; }
   text-align: left; }
 .bi-link:hover { color: var(--ink); }
 .bi-summary { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
-.bi-cov { margin: 0 0 12px; }
-.bi-cov summary { cursor: pointer; }
-.bi-cov table { border-collapse: collapse; font-size: 13px; }
-.bi-cov th, .bi-cov td { border: 1px solid var(--line); padding: 4px 6px; text-align: center; }
-.bi-cov th[scope=row] { text-align: left; white-space: nowrap; }
-.bi-cov td button { min-width: 44px; min-height: 44px; border: 0; background: none;
-  color: inherit; font: inherit; cursor: pointer; }
-.bi-cov td.has { background: color-mix(in srgb, var(--good) 14%, transparent); }
-.bi-cov .prio { color: var(--warn); font-weight: 600; }
 .bi-stat { flex: 1 1 150px; min-width: 0; padding: 10px 14px; border: 1px solid var(--line);
   border-left: 4px solid var(--line); border-radius: 8px; background: var(--panel); }
 .bi-stat b { display: block; font-size: 24px; line-height: 1.2;
@@ -2478,18 +2469,12 @@ tr:last-child td { border-bottom: none; }
           </details>
           <span class="bi-meta" id="bi-atlas-state" role="status" aria-live="polite"></span>
         </div>
-        <details class="card bi-cov" id="bi-cov" open>
-          <summary><strong>應用領域 × 技術領域</strong>
-            <span class="bi-meta" id="bi-cov-sub"></span></summary>
-          <div id="bi-cov-body" aria-live="polite"></div>
-          <div id="bi-cov-cell" aria-live="polite"></div>
-        </details>
         <details class="card" id="bi-dom">
           <summary><strong>領域設定</strong>
             <span class="bi-meta" id="bi-dom-sub"></span></summary>
-          <p class="bi-meta">一個市場知識庫放所有領域；各領域的應用領域（segments）、價值鏈節點、
-            鏈別（由節點名稱或清單判斷）、技術領域與別名都在這裡設定，不必改 schema 或程式。
-            有 segments 時，上面的矩陣就依這份設定。</p>
+          <p class="bi-meta">舊的領域設定（應用領域、鏈別、技術領域與別名）。這些已改由
+            schema 的允許值與卡片的 chain、aliases 欄位表達；
+            知識庫請用「預覽：搬進 schema 與卡片」搬過去。</p>
           <label class="bi-label" for="bi-dom-text">設定內容（JSON）</label>
           <textarea id="bi-dom-text" class="bi-input" rows="14" spellcheck="false"></textarea>
           <div id="bi-dom-warn" aria-live="polite"></div>
@@ -11827,7 +11812,7 @@ async function biLoadDashboard() {
   if (seq !== bi.dashSeq) return;
   biStatus("bi-status-dash", ""); bi.loaded.dashboard = true;
   biRenderDashboard(reply);
-  biLoadCoverage(seq);
+  biLoadDomains();
 }
 
 // -- per-domain configuration (BI vault V10, BI_VAULT.md §12) --------------------
@@ -11916,97 +11901,7 @@ async function biSaveDomains() {
   biNotice(true, "領域設定已儲存（第 " + reply.revision + " 版）。" + (bi.verVault
     && biDataset() === "vault-" + bi.verVault ? "notes 已搬到「判讀規則（skills）」；"
     + "記得 commit。" : ""));
-  bi.domains = reply; biDomainWarnings(reply.warnings || []);
-  el("bi-dom-text").value = JSON.stringify(reply.config, null, 1);
-  biLoadCoverage(bi.dashSeq);
-}
-
-// -- coverage: segment x technology area (BI vaults V5, BI_VAULT.md §6.2) -----
-async function biLoadCoverage(seq) {
-  const body = el("bi-cov-body"); body.replaceChildren(); el("bi-cov-cell").replaceChildren();
-  el("bi-cov-sub").textContent = "";
-  let report;
-  try {
-    report = await biCall("/api/bi/coverage?dataset=" + encodeURIComponent(biDataset()));
-  } catch (failure) {
-    if (seq !== bi.dashSeq) return;
-    body.append(bh("p", "bi-err", "覆蓋矩陣沒有載入：" + failure.message + "。"));
-    return;
-  }
-  if (seq !== bi.dashSeq) return;
-  biRenderCoverage(report);
-  biLoadDomains();
-}
-
-function biRenderCoverage(report) {
-  const body = el("bi-cov-body"), m = report.matrix, totals = report.totals;
-  const source = {domains: "領域設定的矩陣", vault: "vault 的矩陣", dataset: "資料集的矩陣",
-    shipped: "預設矩陣（市場應用圖）"};
-  el("bi-cov-sub").textContent = "・" + (source[report.matrix_source] || "") + "・"
-    + totals.cards + " 張卡片，" + totals.no_segment + " 張沒有應用領域";
-  if (report.schema_missing_fields.length) {
-    body.append(bh("p", "bi-warn", "這個資料集的 schema 沒有 " + report.schema_missing_fields
-      .join("、") + " 欄位，所以卡片還放不進矩陣。在「建立與匯入」的 Schema 步驟請 Session A "
-      + "加上「應用領域（segments）」與「技術領域（tech_areas）」，發布並升級後再補標。"));
-  }
-  const segments = m.markets.flatMap((market) => market.segments);
-  const byKey = new Map(report.cells.map((c) => [c.segment + "|" + c.area, c]));
-  const table = bh("table", "");
-  table.setAttribute("aria-label", "應用領域 × 技術領域的卡片數");
-  const top = bh("tr", "", bh("th", "", ""));
-  for (const market of m.markets) {
-    const th = bh("th", "", market.label); th.colSpan = market.segments.length;
-    th.scope = "colgroup"; top.append(th);
-  }
-  const second = bh("tr", "", bh("th", "", ""));
-  for (const seg of segments) {
-    const th = bh("th", seg.priority ? "prio" : "", seg.label + (seg.priority ? "（重點）" : ""));
-    th.scope = "col"; second.append(th);
-  }
-  const rows = [top, second];
-  for (const area of m.areas) {
-    const head = bh("th", "", area.label); head.scope = "row";
-    const tr = bh("tr", "", head);
-    for (const seg of segments) {
-      const cell = byKey.get(seg.id + "|" + area.id) || {cards: 0};
-      const td = bh("td", cell.cards ? "has" : "");
-      const share = cell.sourced_share == null ? "" : "・有出處 "
-        + Math.round(cell.sourced_share * 100) + "%";
-      const button = bh("button", "", String(cell.cards));
-      button.type = "button";
-      button.setAttribute("aria-label", seg.label + " × " + area.label + "：" + cell.cards
-        + " 張" + share);
-      button.title = cell.cards + " 張" + share;
-      button.addEventListener("click", () => biCoverageCell(seg, area, cell));
-      td.append(button); tr.append(td);
-    }
-    rows.push(tr);
-  }
-  table.append(...rows);
-  body.append(bh("div", "bi-scroll", table));
-  const unknown = Object.entries(report.unknown_values || {});
-  if (unknown.length) {
-    body.append(bh("p", "bi-meta", "對不上矩陣的值："
-      + unknown.map(([v, n]) => v + "（" + n + "）").join("、")));
-  }
-}
-
-function biCoverageCell(seg, area, cell) {
-  const box = el("bi-cov-cell"); box.replaceChildren();
-  box.append(bh("h4", "", seg.label + " × " + area.label + "：" + cell.cards + " 張卡片"));
-  if (!cell.cards) {
-    box.append(bh("p", "bi-meta", "這一格還沒有卡片。"));
-    return;
-  }
-  box.append(bh("p", "bi-meta", "有出處的欄位比例："
-    + (cell.sourced_share == null ? "—" : Math.round(cell.sourced_share * 100) + "%")
-    + "・最近更新 " + biTime(cell.newest)));
-  if (cell.empty.length) {
-    box.append(bh("p", "bi-meta", "最常空著的欄位：" + cell.empty.map((e) => e.field + "（"
-      + e.cards + " 張）").join("、")));
-  }
-  box.append(bh("ul", "", ...cell.card_list.map((c) => bh("li", "",
-    biButton(biTypeLabel(c.type) + "・" + c.name, () => biOpenCard(c.id), "bi-link")))));
+  await biLoadDomains();
 }
 
 function biRenderDashboard(reply) {

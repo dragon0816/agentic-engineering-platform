@@ -4620,6 +4620,9 @@ folder; a test helper plays OneDrive). Backend and API only; the page comes late
 
 ## BI coverage: segment x technology area (BI vaults phase V5, 2026-10-28)
 
+Superseded by P5 (2026-11-01): `/api/bi/coverage`, `coverage.py` and the matrix panel are removed; the
+coverage matrix is the pack analysis `coverage` (see "BI chains and coverage matrix as analyses").
+
 `GET /api/bi/coverage?dataset=<name>[&types=A,B]` reads a dataset (own, subscribed or vault) and answers how
 its cards cover a matrix (`docs/phases/BI_VAULT.md` §6.2). Read only; 404 `dataset_unknown` for an unknown
 dataset, 400 `coverage_matrix_invalid` for a bad matrix.
@@ -6228,3 +6231,23 @@ Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §3–§4.3. Code `capabilities/bi
   them, so they outlive the coded sections; `tests/test_bi_pack_golden.py` rebuilt them from the coded sections
   (`AEP_WRITE_PACK_GOLDEN=1` writes) and is removed with those sections in P5. After P5 the files are frozen: a
   deliberate change of an analysis's answer edits the golden file in the same commit, with the reason.
+
+## BI coded Dashboard removed (P5, 2026-11-01)
+
+Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §4.3. Code `board.py`, `capability.py`, `bi_cards_api.py`,
+`bi_cards_tools.py`, `vault.py`, `web_page.py`; tests `tests/test_bi_board.py`, `tests/test_bi_cards.py`,
+`tests/test_bi_quality.py`, `tests/test_bi_default_pack.py`, `tests/test_bi_pack_chains.py`.
+
+- **Removed:** `capabilities/bi_cards/dashboard.py`, `market.py`, `coverage.py` (the owner's chart
+  `coverage_matrix.json` moved to `scripts/bi_coverage_matrix.json`, only the 3.0.0 generator's input),
+  `GET /api/bi/coverage`, the page's 「應用領域 × 技術領域」 panel, and a vault's `coverage` block at creation (no
+  longer read; `meta:vault_coverage` of older vaults is ignored). Their tests went with them
+  (`test_bi_market.py`, `test_bi_coverage.py`, `test_bi_pack_golden.py`).
+- `GET /api/bi/dashboard` of every BI dataset is `board.board`: a vault's own analyses, a dataset only on this PC
+  (and a subscribed copy) the built-in pack's analyses its schema satisfies (`"source": "pack"`), then the
+  quality section `Q`. Section ids are analysis slugs (`gaps`, ...); nothing is coded but `Q`.
+- **`bi__query` `analysis`:** `quality` -> the quality section; a vault -> a saved analysis of its published
+  version (as P4); a dataset only on this PC, or a benchmark's chosen version -> `board.pack_sections`: the
+  built-in pack's analyses on that store, `all` or one slug; a coded section's old name (`trend_coverage`)
+  finds its slug; unknown -> `analysis_unknown`. The tool description lists the pack's slugs, `quality`, `all`.
+- The golden answers (`tests/fixtures/bi_default_pack/golden/`) are frozen; they keep the coded sections' answers.

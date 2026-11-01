@@ -13,8 +13,8 @@ The document (`aep.bi.domains/v1`) is kept in the dataset's `meta` table under
 (a concurrent edit becomes a vault conflict, never a silent overwrite). Every
 save bumps `revision`; a save must name the revision it was made from.
 
-When a dataset has domain segments, its coverage matrix is derived from them
-(`coverage.matrix_for`); without a configuration nothing changes.
+Being retired (`docs/phases/BI_ANALYSIS_DASHBOARD.md` §3): the migration (D3)
+moves it into the schema and cards; nothing draws from it any more (P5).
 """
 
 from __future__ import annotations
@@ -230,25 +230,6 @@ class Config:
                 ):
                     found.append(chain["id"])
         return found
-
-    def matrix(self) -> dict[str, Any] | None:
-        """The coverage matrix (`aep.bi.coverage_matrix/v1`) the domains define:
-        one market per domain with segments; None when none has segments."""
-        markets = [
-            {"id": d["id"], "label": d["label"], "segments": d["segments"]}
-            for d in self.document["domains"]
-            if d["segments"]
-        ]
-        if not markets:
-            return None
-        return {
-            "format": "aep.bi.coverage_matrix/v1",
-            "title": "領域設定",
-            "segment_field": self.document["segment_field"],
-            "area_field": self.document["area_field"],
-            "markets": markets,
-            "areas": self.document["areas"],
-        }
 
 
 def read(store: BiStore) -> Config | None:
