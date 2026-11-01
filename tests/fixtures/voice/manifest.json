@@ -1,0 +1,122 @@
+{
+ "schema": "aep.voice.fixtures/v1",
+ "fixtures": [
+  {
+   "name": "zh_ask",
+   "file": "zh_ask.wav",
+   "kind": "speech",
+   "text": "幫我查 CMX500 的 Wi-Fi 8 選項",
+   "language": "zh",
+   "generator": "System.Speech (Windows, offline)",
+   "voice": "Microsoft Hanhan Desktop",
+   "format": "wav/pcm_s16le/16000/mono",
+   "duration_seconds": 4.425,
+   "sha256": "cdb9fc6217bbf7dfe63e810a53888813a0f2ad193d9cf9816ee8d0befc80585d"
+  },
+  {
+   "name": "zh_workflow",
+   "file": "zh_workflow.wav",
+   "kind": "speech",
+   "text": "執行週報 Workflow",
+   "language": "zh",
+   "generator": "System.Speech (Windows, offline)",
+   "voice": "Microsoft Hanhan Desktop",
+   "format": "wav/pcm_s16le/16000/mono",
+   "duration_seconds": 2.297,
+   "sha256": "afcbe9d369bc73d7bcf50523852d918f3fcfac1c32c4f60903e078aa07c81ee6"
+  },
+  {
+   "name": "zh_coding",
+   "file": "zh_coding.wav",
+   "kind": "speech",
+   "text": "把 parser 的 CSV 欄位改成 UTF-8",
+   "language": "zh",
+   "generator": "System.Speech (Windows, offline)",
+   "voice": "Microsoft Hanhan Desktop",
+   "format": "wav/pcm_s16le/16000/mono",
+   "duration_seconds": 4.893,
+   "sha256": "2b6e9435e18f5939846b028468e88e7a12db712bdfd6f4c999fb6d184e1e6865"
+  },
+  {
+   "name": "zh_confirm",
+   "file": "zh_confirm.wav",
+   "kind": "speech",
+   "text": "好",
+   "language": "zh",
+   "generator": "System.Speech (Windows, offline)",
+   "voice": "Microsoft Hanhan Desktop",
+   "format": "wav/pcm_s16le/16000/mono",
+   "duration_seconds": 1.006,
+   "sha256": "9107d3000ba96ac618cb7e180ab7c216d099e1599b6b9caf95422d8b127bc729"
+  },
+  {
+   "name": "zh_cancel",
+   "file": "zh_cancel.wav",
+   "kind": "speech",
+   "text": "取消",
+   "language": "zh",
+   "generator": "System.Speech (Windows, offline)",
+   "voice": "Microsoft Hanhan Desktop",
+   "format": "wav/pcm_s16le/16000/mono",
+   "duration_seconds": 1.311,
+   "sha256": "cb1210ca8de920d17458fbe047642add8515414bb1a01e4b95dae25d0ab69680"
+  },
+  {
+   "name": "en_ask",
+   "file": "en_ask.wav",
+   "kind": "speech",
+   "text": "What options does the CMX500 support for Wi-Fi 8?",
+   "language": "en",
+   "generator": "System.Speech (Windows, offline)",
+   "voice": "Microsoft Zira Desktop",
+   "format": "wav/pcm_s16le/16000/mono",
+   "duration_seconds": 4.78,
+   "sha256": "1d036d58b7de04df54adb9164af518dcec7aabf345453b590d275ffaf3805dec"
+  },
+  {
+   "name": "silence_2s",
+   "file": "silence_2s.wav",
+   "kind": "non_speech",
+   "generator": "stdlib wave",
+   "duration_seconds": 2.0,
+   "sha256": "20eaebffe1816e0ffa6f7f854f5ef4ea80d5349faaf0ce1fec1b713e7fde58fa"
+  },
+  {
+   "name": "tone_1khz_1s",
+   "file": "tone_1khz_1s.wav",
+   "kind": "non_speech",
+   "generator": "stdlib wave",
+   "duration_seconds": 1.0,
+   "sha256": "c526feff79ffad6c25e77861beabaceef936bfe80bc0e79b87dc6fb4c17546ef"
+  },
+  {
+   "name": "noise_1s",
+   "file": "noise_1s.wav",
+   "kind": "non_speech",
+   "generator": "stdlib wave, seed 20261101",
+   "duration_seconds": 1.0,
+   "sha256": "04156e42206d54525183e11fd1649145911ea752f9704821faf26bd78b862456"
+  },
+  {
+   "name": "empty",
+   "file": "empty.wav",
+   "kind": "invalid",
+   "generator": "zero bytes",
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+   "name": "truncated",
+   "file": "truncated.wav",
+   "kind": "invalid",
+   "generator": "first 60 bytes of zh_ask.wav",
+   "sha256": "42540bc1cd715299067d5389b531628af48b2f13ae05d0de1d22b1e86219780d"
+  },
+  {
+   "name": "not_audio",
+   "file": "not_audio.ogg",
+   "kind": "invalid",
+   "generator": "text renamed .ogg",
+   "sha256": "8f4b47417364249c5fa5d4da43c0b803b69fef6288f46ffa3b6e2145ae393181"
+  }
+ ]
+}
