@@ -4022,3 +4022,13 @@ s-k-20261011T102952` (not published).
     `node_not_listed` check; the Dashboard shows 「這個資料集還有舊的領域設定」 while one is left. Tests
     `test_bi_migrate_domains` (3) and the updated quality, skills, aliases and vault browser tests; all 334 BI
     tests pass. AEP side of `BI_ANALYSIS_DASHBOARD.md` §7 done; next: Atlas A1/A2 and I1 (Codex), I2 (owner).
+  - [x] 2026-11-01, Claude Code: BI full-suite verification and Atlas I1. Full AEP suite on `b6a139c5` (worktree
+    `.venv`): 4450 passed, 35 skipped (all environment extras: 23 pywin32, 3 matplotlib, Outlook, symlink/link
+    privileges, IPv6, litellm, expense mock), 55 min; `ruff format --check`, `ruff check`, `mypy src tests` clean.
+    `b6a139c5` added to design §5 that enum params carry `params.<name>.values`. Local AEP `main` fast-forwarded
+    to `b6a139c5` (not pushed). Atlas side (Codex, branch `bi-analysis-dashboard-atlas-brief-a1-a2-i1`, commits
+    `81c86e1`, `ef20cd0`, `bc8efda`): 17 golden files vendored byte-identical from AEP `b6a139c5`, npm test 141
+    passed, build pass, Python server tests 35 OK / 7 skipped, drift check pass; I1 against
+    `scripts/bi_feed_server.py --port 53611` passed all six cases (vault list, three panels' golden values, param
+    refetch, 409 then result, stale data with a warning after the server stops, foreign Origin 403). No contract
+    mismatch. Next: I2 (owner, §6.5), then R6.

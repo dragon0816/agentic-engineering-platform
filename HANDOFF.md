@@ -25,8 +25,8 @@ choices were made, a decision in `docs/DECISIONS.md` (2026-11-01):
   everything it can for vaults and local datasets (owner answers 2026-11-01).
 
 **Verification (D4, final state).** `ruff format --check .`, `ruff check .`, `mypy src tests` (881 files) clean;
-`pytest tests/test_bi_*.py` (every BI test, browser tests included): 334 passed. The full suite was not run (it
-slows the owner's Agent Web; run it when the PC is free). No graphify graph in this worktree, so `graphify update`
+`pytest tests/test_bi_*.py` (every BI test, browser tests included): 334 passed. The full suite was run afterwards
+on `b6a139c5` (below). No graphify graph in this worktree, so `graphify update`
 was not run.
 
 **Known points for the owner.**
@@ -37,9 +37,19 @@ was not run.
   still has a domain configuration shows the migration prompt on its Dashboard. `market-bi` (V4 format) is
   rebuilt at R6 anyway.
 
-**Next actions.** (1) Run the full suite when the PC is free. (2) Codex: A1/A2 and I1 on the Atlas side against
-the golden files and `scripts/bi_feed_server.py`. (3) Owner: I2 live acceptance (§6.5), then R6 rebuilds
-`market-bi` on this structure.
+**Full suite (done).** On `b6a139c5` (worktree `.venv`, 2026-11-01): 4450 passed, 35 skipped (all environment
+extras: 23 pywin32, 3 matplotlib, Outlook, symlink/link privileges, IPv6, litellm, expense mock), 55 min;
+`ruff format --check`, `ruff check`, `mypy src tests` clean. `b6a139c5` added to design §5 that enum params carry
+`params.<name>.values`. Local AEP `main` fast-forwarded to `b6a139c5` (not pushed).
+
+**Atlas side (done, Codex).** Branch `bi-analysis-dashboard-atlas-brief-a1-a2-i1` (commits `81c86e1`,
+`ef20cd0`, `bc8efda`) in the Atlas repository: 17 golden files vendored byte-identical from AEP `b6a139c5`; npm
+test 141 passed; build pass; Python server tests 35 OK / 7 skipped; drift check pass. I1 against
+`scripts/bi_feed_server.py --port 53611` passed all six cases (vault list, three panels' golden values, param
+refetch, 409 then result, stale data with a warning after the server stops, foreign Origin 403). No contract
+mismatch.
+
+**Next actions.** (1) Owner: I2 live acceptance (§6.5), then R6 rebuilds `market-bi` on this structure.
 
 ## Knowledge repositories R1, R2, R3 (BI part), R4a and R5 (BI side) (2026-10-30/31, Claude Code)
 
