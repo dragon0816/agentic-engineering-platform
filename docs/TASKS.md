@@ -4078,3 +4078,12 @@ Design `docs/phases/VOICE_INPUT.md` (owner decisions 2026-11-01 in `docs/DECISIO
   re-checked (doc-reading tests, ruff, mypy). Local `main` had not moved, so no rebase; fast-forwarded.
 - [ ] Owner: install an approved Whisper small int8 package, pin its hash, run V0's laptop measurement and the
   real-engine test (`AEP_VOICE_MODEL_DIR`), set the CER limit; then the live checks of `VOICE_INPUT.md` §4.6.
+- [x] 2026-11-01, Claude Code: V0 with the owner's model (`Systran/faster-whisper-small`, revision `536b0662`,
+  int8; package hash `8d64e4da…`) and recordings (kept outside the repository). Synthetic fixtures: CER at most
+  0.105 with hints, 0.368 without; real-engine test passes the configured hints, limit 0.20 (`d659dfeb`). Short
+  messages about 5 s on a Core Ultra 7 165U (Whisper's fixed 30 s window), long audio RTF about 0.3. Engine
+  punctuation such as 「好﹐」 now trimmed around card words (`b2cb8550`). Recorded in `VOICE_INPUT.md` §6.2
+  (`7bedf08f`); guide names the model and recommends `voice.hints` (`602bfbc1`). Verification: `.venv`
+  voice tests pass or skip (no PyAV, no model); with the voice venv and `AEP_VOICE_MODEL_DIR` the real-engine
+  test passes; ruff and `mypy src tests` clean.
+- [ ] Owner: the live checks of `VOICE_INPUT.md` §4.6 with voice enabled and `voice.hints` filled.
