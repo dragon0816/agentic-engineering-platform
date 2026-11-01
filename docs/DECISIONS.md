@@ -5974,3 +5974,30 @@ The owner accepted every recommendation in `docs/phases/VOICE_INPUT.md` §7.2:
   ingress).
 - **Fake Bot API test seam:** `api_base` stays HTTPS-only; tests redirect through an injected `Transport`.
   Rejected: allowing `http://127.0.0.1` in the production validator.
+
+## 2026-11-01: BI: charts inline in the chat; Dashboards from the analysis AI or an Atlas import (owner, Claude Code)
+
+Owner decisions relayed by the BI orchestrator; design in `docs/phases/BI_CHAT_CHARTS_AND_DASHBOARD_SOURCES.md`.
+
+- **A chart in the general AI chat is a self-contained HTML file shown inline** in the existing chat file
+  viewer (sandboxed iframe, `FILE_VIEW_CSP`, no network), drawn by the BI Dashboard tab's own renderer moved
+  into one shared constant (`host_runtime/bi_chart_html.py`). Rejected: a link to Atlas opened in the agent
+  browser (the agent browser is driven by the agent, not the person; Atlas has no deep link to a panel and
+  answers with `X-Frame-Options: DENY`, so it cannot be framed); a third-party charting package (not without
+  the owner's say; the existing DOM/SVG renderer covers table, bar, line and scatter).
+- **The chart spec is the feed's** (`{type: table|bar|line|scatter, x?, y?, series?}`); a result without one
+  gets a bar for exactly one label and one number column, else a table. Rejected: a richer chat-only spec.
+- **Saving a chat chart as an analysis is a `propose_change` kind (`bi_analysis`), web only**: the AI
+  proposes, the owner applies in Agent Web, the apply only stages `analysis:<slug>`; commit, push and publish
+  stay manual. Rejected: a Bridge capability with `approval_required` (meant for capability runs, not for a
+  change to this PC's state with a fingerprint); saving directly from the chat; allowing the apply from
+  Telegram.
+- **A vault's Dashboard comes from the analysis AI (several analyses plus an order, one apply) or from an
+  Atlas dashboard import that takes only the order** (panels of this vault sorted by `layout.y`, `layout.x`;
+  the first occurrence of each slug kept, later duplicates listed); `hidden` = the vault's analyses not in the
+  order; unmatched panels are listed, never invented; a dry run is confirmed before anything is staged.
+  Rejected: importing Atlas positions or sizes (Atlas layouts are personal,
+  `BI_ANALYSIS_DASHBOARD.md` §8); importing panel parameters or titles; deleting analyses missing from the
+  import (they are hidden).
+- **The general chat gets no ad-hoc SQL tool.** Rejected for now: letting `bi__query` run model-written SQL
+  (new charts are made in the analysis AI, or proposed through `bi_analysis` and run only on approval).

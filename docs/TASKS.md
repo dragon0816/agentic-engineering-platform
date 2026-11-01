@@ -4032,6 +4032,12 @@ s-k-20261011T102952` (not published).
     `scripts/bi_feed_server.py --port 53611` passed all six cases (vault list, three panels' golden values, param
     refetch, 409 then result, stale data with a warning after the server stops, foreign Origin 403). No contract
     mismatch. Next: I2 (owner, §6.5), then R6.
+  - [x] 2026-11-01, Claude Code: BI chat charts and Dashboard sources, design
+    (`docs/phases/BI_CHAT_CHARTS_AND_DASHBOARD_SOURCES.md`; owner decisions relayed by the BI orchestrator,
+    decision record 2026-11-01): charts inline in the chat as a self-contained HTML in the file viewer, drawn by
+    the Dashboard tab's renderer (C1, C2); saving a chat chart as an analysis through `propose_change` kind
+    `bi_analysis` (C3); a dashboard proposed by the analysis AI (K1); the order imported from an Atlas dashboard
+    (K2, after Atlas's golden files). Next: C1.
 
 ## Voice input: Telegram voice and the Agent Web microphone (2026-11-01)
 
