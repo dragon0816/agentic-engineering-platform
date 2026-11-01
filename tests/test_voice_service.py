@@ -5,8 +5,10 @@ read with the standard library, and the engine is `FakeSttProvider`."""
 from __future__ import annotations
 
 import asyncio
+import io
 import json
 import threading
+import wave
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -113,8 +115,51 @@ def test_decode_refuses_too_many_bytes_and_seconds() -> None:
 def test_compressed_audio_without_the_voice_extra(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(audio, "_import_av", lambda: None)
     with pytest.raises(SttError) as raised:
-        audio.decode(fixture("not_audio"), "audio/ogg", VoiceConfig())
+        audio.decode(b"OggS" + bytes(60), "audio/ogg", VoiceConfig())
     assert raised.value.code == "stt_unavailable"
+
+
+def _wav(rate: int, channels: int, width: int, seconds: float) -> bytes:
+    buffer = io.BytesIO()
+    with wave.open(buffer, "wb") as out:
+        out.setnchannels(channels)
+        out.setsampwidth(width)
+        out.setframerate(rate)
+        out.writeframes(bytes(int(rate * seconds) * channels * width))
+    return buffer.getvalue()
+
+
+def test_any_16_bit_wav_decodes_without_the_extra(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(audio, "_import_av", lambda: None)
+    pcm = audio.decode(_wav(44_100, 2, 2, 1.5), "audio/wav", VoiceConfig())
+    assert pcm.duration_seconds == pytest.approx(1.5, abs=0.01)
+    pcm = audio.decode(_wav(8_000, 1, 2, 2.0), "audio/x-wav", VoiceConfig())
+    assert pcm.duration_seconds == pytest.approx(2.0, abs=0.01)
+
+
+def test_decode_precedence_without_the_extra(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Not audio -> decode failed; an unusual WAV -> unsupported format; a
+    real compressed container -> the decoder is unavailable (§3.6)."""
+    monkeypatch.setattr(audio, "_import_av", lambda: None)
+    cases = [
+        (fixture("not_audio"), "audio/wav", "audio_decode_failed"),
+        (fixture("truncated"), "audio/wav", "audio_decode_failed"),
+        (_wav(16_000, 1, 1, 1.0), "audio/wav", "audio_unsupported_format"),
+        (b"OggS" + bytes(60), "audio/ogg", "stt_unavailable"),
+    ]
+    for data, mime, code in cases:
+        with pytest.raises(SttError) as raised:
+            audio.decode(data, mime, VoiceConfig())
+        assert raised.value.code == code, (mime, code)
+
+
+def test_content_that_is_not_audio_fails_to_decode_without_the_extra(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(audio, "_import_av", lambda: None)
+    with pytest.raises(SttError) as raised:
+        audio.decode(fixture("not_audio"), "audio/ogg", VoiceConfig())
+    assert raised.value.code == "audio_decode_failed"
 
 
 # -- the service ----------------------------------------------------------------

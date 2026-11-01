@@ -1,7 +1,7 @@
 """Audio bytes to 16 kHz mono PCM, in memory (docs/phases/VOICE_INPUT.md §2.2).
 
 Nothing is written to disk: the owner keeps the transcript only (2026-11-01).
-WAV that is already 16 kHz mono 16-bit is read with the standard library, so
+16-bit PCM WAV is read, down-mixed and resampled with the standard library, so
 tests and a host without the optional `voice` extra can use it; everything
 else (Telegram's OGG/Opus, the browser's WebM/Opus, MP3, M4A) goes through
 PyAV, whose wheels bundle the FFmpeg decoders. The declared type is checked
@@ -10,8 +10,10 @@ against the accepted list; the content decides how it is decoded.
 
 from __future__ import annotations
 
+import array
 import importlib
 import io
+import sys
 import wave
 from types import ModuleType
 from typing import Any
@@ -37,8 +39,20 @@ def decode(data: bytes, mime_type: str | None, config: VoiceConfig) -> Pcm16k:
         raise SttError("audio_unsupported_format")
     if not data:
         raise SttError("audio_decode_failed")
-    pcm = _plain_wav(data)
-    if pcm is None:
+    # Precedence (§3.6): bytes that are not audio are `audio_decode_failed`;
+    # 16-bit PCM WAV never needs PyAV; only a real compressed container (or an
+    # unusual WAV) on a host without PyAV is `audio_unsupported_format` /
+    # `stt_unavailable`.
+    if _is_wav(data):
+        pcm = _plain_wav(data, config.max_seconds)
+        if pcm is None:
+            av = _import_av()
+            if av is None:
+                raise SttError("audio_unsupported_format")
+            pcm = _with_av(av, data, config.max_seconds)
+    elif not _looks_like_audio(data):
+        raise SttError("audio_decode_failed")
+    else:
         av = _import_av()
         if av is None:
             raise SttError("stt_unavailable")
@@ -50,22 +64,84 @@ def decode(data: bytes, mime_type: str | None, config: VoiceConfig) -> Pcm16k:
     return pcm
 
 
-def _plain_wav(data: bytes) -> Pcm16k | None:
-    """16 kHz mono 16-bit WAV as is; None for any other content."""
-    if not (data[:4] == b"RIFF" and data[8:12] == b"WAVE"):
-        return None
+def _is_wav(data: bytes) -> bool:
+    return data[:4] == b"RIFF" and data[8:12] == b"WAVE"
+
+
+def _looks_like_audio(data: bytes) -> bool:
+    """Whether the bytes start like an accepted compressed container (OGG,
+    WebM, MP3, MP4/M4A), so content that is not audio fails to decode even on
+    a host without PyAV, and only real audio needs the `voice` extra."""
+    return (
+        data[:4] in (b"OggS", b"\x1aE\xdf\xa3")
+        or data[:3] == b"ID3"
+        or data[4:8] == b"ftyp"
+        or (len(data) > 1 and data[0] == 0xFF and data[1] & 0xE0 == 0xE0)
+    )
+
+
+def _plain_wav(data: bytes, max_seconds: int) -> Pcm16k | None:
+    """16-bit PCM WAV of any rate and channel count, down-mixed and resampled
+    with the standard library; None for another sample format (8/24/32-bit,
+    float), which needs PyAV."""
     try:
         with wave.open(io.BytesIO(data), "rb") as audio:
-            shape = (audio.getnchannels(), audio.getsampwidth(), audio.getframerate())
-            if shape != (1, 2, _RATE):
+            channels, width, rate = (
+                audio.getnchannels(),
+                audio.getsampwidth(),
+                audio.getframerate(),
+            )
+            if width != 2:
                 return None
-            frames = audio.readframes(audio.getnframes())
-            expected = audio.getnframes() * 2
-    except (wave.Error, EOFError, ValueError) as error:
+            count = audio.getnframes()
+            if count > (max_seconds + 1) * rate:
+                raise SttError("audio_too_long")
+            frames = audio.readframes(count)
+    except wave.Error as error:
+        if "unknown format" in str(error):
+            return None  # not integer PCM, e.g. float samples
         raise SttError("audio_decode_failed") from error
-    if len(frames) != expected or not frames:
+    except (EOFError, ValueError) as error:
+        raise SttError("audio_decode_failed") from error
+    if not frames or len(frames) != count * 2 * channels or rate <= 0:
         raise SttError("audio_decode_failed")
-    return Pcm16k(frames)
+    if (channels, rate) == (1, _RATE):
+        return Pcm16k(frames)
+    samples = array.array("h")
+    samples.frombytes(frames)
+    if sys.byteorder == "big":
+        samples.byteswap()
+    mono = (
+        samples
+        if channels == 1
+        else array.array(
+            "h",
+            (sum(samples[i : i + channels]) // channels for i in range(0, len(samples), channels)),
+        )
+    )
+    out = _resample(mono, rate)
+    if sys.byteorder == "big":
+        out.byteswap()  # PCM is little-endian
+    return Pcm16k(out.tobytes())
+
+
+def _resample(samples: array.array[int], rate: int) -> array.array[int]:
+    """Linear interpolation to 16 kHz; enough for speech recognition."""
+    if rate == _RATE or len(samples) < 2:
+        return samples
+    step = rate / _RATE
+    count = int(len(samples) / step)
+    last = len(samples) - 1
+    out = array.array("h", bytes(2 * count))
+    for i in range(count):
+        position = i * step
+        j = int(position)
+        if j >= last:
+            out[i] = samples[last]
+            continue
+        fraction = position - j
+        out[i] = int(samples[j] + (samples[j + 1] - samples[j]) * fraction)
+    return out
 
 
 def _with_av(av: Any, data: bytes, max_seconds: int) -> Pcm16k:

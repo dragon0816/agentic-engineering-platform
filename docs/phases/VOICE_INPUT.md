@@ -301,6 +301,12 @@ class SttError(Exception):
 Every failure writes a transcript record with its code: `transcript_empty` has `status: empty`, every other
 code `status: failed`; nothing reaches `LocalAgent`.
 
+Decoding precedence (orchestrator, 2026-11-01): bytes that are not valid audio for their declared type are
+`audio_decode_failed`; 16-bit PCM WAV always decodes with the standard library (any rate or channel count), so
+it never needs PyAV; only a real compressed container (OGG/Opus, WebM, MP3, M4A, recognised by a magic-bytes check
+first) on a host without PyAV is `stt_unavailable`, and an unusual WAV (8/24/32-bit, float) there is
+`audio_unsupported_format`. `stt_unavailable` otherwise means a missing or mismatched model or engine.
+
 ## 4. Test plan
 
 All automated tests are CI-inert: no real microphone, no Telegram, no network, no model download.
