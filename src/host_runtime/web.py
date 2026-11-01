@@ -2886,6 +2886,12 @@ class AgentWeb:
 
     # -- voice input (docs/phases/VOICE_INPUT.md) ---------------------------------
 
+    def voice_status(self) -> dict[str, Any]:
+        """Whether the page shows the microphone, and its recording limit."""
+        if self.voice is None:
+            return {"ok": True, "enabled": False}
+        return {"ok": True, "enabled": True, "max_seconds": self.voice.config.max_seconds}
+
     def transcribe_voice(self, body: object) -> tuple[int, dict[str, Any]]:
         """`POST /api/voice/transcribe`: the transcript for the message box.
         Nothing is sent to the Agent; the person reads, edits and sends."""
@@ -6428,6 +6434,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.avatars())
         elif parsed.path == "/api/preferences":
             self._json(200, web.user_preferences())
+        elif parsed.path == "/api/voice":
+            self._json(200, web.voice_status())
         elif parsed.path == "/api/settings/models":
             self._json(200, web.available_models())
         elif parsed.path == "/api/authoring":

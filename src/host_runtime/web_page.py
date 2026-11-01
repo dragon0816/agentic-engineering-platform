@@ -80,6 +80,8 @@ body {
 .attachment-chip.bad { border-color: var(--bad); color: var(--bad); }
 .attachment-chip button { border: 0; background: none; cursor: pointer; padding: 0 2px; }
 .attach-button { font-size: 18px; padding: 0 6px; }
+.mic-button[aria-pressed="true"] { color: #b42318; }
+.mic-status { font-size: 13px; color: #475467; }
 #ask.dropping { outline: 2px dashed var(--accent); }
 .asked-files { font-size: 12px; color: var(--dim); margin: 2px 0 0 12px; }
 .side-actions { display: grid; gap: 4px; padding: 12px 0; }
@@ -1355,6 +1357,10 @@ tr:last-child td { border-bottom: none; }
 （單檔 25 MB，最多 10 個）">📎</button>
         <input id="attach-input" type="file" multiple hidden
           accept=".png,.jpg,.jpeg,.gif,.webp,.bmp,.pdf,.csv,.html,.htm,.txt,.json,.yaml,.yml,.md,.zip">
+        <button id="mic" class="link-button attach-button mic-button" type="button" hidden
+          aria-label="語音輸入" aria-pressed="false"
+          title="語音輸入：錄音後轉成文字放進輸入框，確認後再送出">🎤</button>
+        <span id="mic-status" class="mic-status" role="status" hidden></span>
         <div class="model-control" id="model-control">
           <label class="visually-hidden" for="conversation-model">LLM model</label>
           <select id="conversation-model" aria-describedby="model-state" hidden></select>
@@ -5338,6 +5344,91 @@ field.addEventListener("paste", (event) => {
       {type: file.type || "image/png"})));
 });
 
+// -- Voice input (docs/phases/VOICE_INPUT.md) -------------------------------
+// The microphone records here; the host turns the recording into text, which
+// goes into the message box to read, edit and send. Speaking sends nothing.
+
+let voiceSettings = null, voiceRecorder = null, voiceChunks = [], voiceStarted = 0;
+let voiceTimer = null, voiceTranscript = null;
+
+function voiceStatus(text) {
+  const status = el("mic-status");
+  status.textContent = text; status.hidden = !text;
+}
+
+async function loadVoice() {
+  try { voiceSettings = await call("/api/voice"); } catch (failure) { voiceSettings = null; }
+  el("mic").hidden = !(voiceSettings && voiceSettings.enabled
+    && navigator.mediaDevices && window.MediaRecorder);
+}
+
+function voiceClock() {
+  const seconds = Math.floor((Date.now() - voiceStarted) / 1000);
+  const limit = voiceSettings.max_seconds;
+  const shown = (n) => Math.floor(n / 60) + ":" + String(n % 60).padStart(2, "0");
+  voiceStatus("錄音中 " + shown(seconds) + " / " + shown(limit) + "（再按一次停止）");
+  if (seconds >= limit) stopVoice();
+}
+
+async function startVoice() {
+  if (!activeConversation) return;
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({audio: true}); }
+  catch (failure) { voiceStatus("無法使用麥克風：請允許這個網頁使用麥克風。"); return; }
+  const type = ["audio/webm;codecs=opus", "audio/ogg;codecs=opus", "audio/webm"]
+    .find(candidate => MediaRecorder.isTypeSupported(candidate)) || "";
+  const recorder = new MediaRecorder(stream, type ? {mimeType: type} : {});
+  const session = activeConversation;
+  voiceRecorder = recorder; voiceChunks = [];
+  recorder.addEventListener("dataavailable", (event) => {
+    if (event.data && event.data.size) voiceChunks.push(event.data);
+  });
+  recorder.addEventListener("stop", () => {
+    stream.getTracks().forEach(track => track.stop());
+    sendVoice(session, (recorder.mimeType || type || "audio/webm").split(";")[0]);
+  });
+  voiceStarted = Date.now();
+  recorder.start(250);
+  el("mic").setAttribute("aria-pressed", "true"); el("mic").textContent = "■";
+  voiceClock(); voiceTimer = setInterval(voiceClock, 500);
+}
+
+function stopVoice() {
+  clearInterval(voiceTimer); voiceTimer = null;
+  el("mic").setAttribute("aria-pressed", "false"); el("mic").textContent = "🎤";
+  if (voiceRecorder && voiceRecorder.state !== "inactive") voiceRecorder.stop();
+}
+
+async function sendVoice(session, mimeType) {
+  const blob = new Blob(voiceChunks, {type: mimeType}); voiceChunks = [];
+  const duration = Date.now() - voiceStarted;
+  voiceStatus("🎤 轉文字中…"); el("mic").disabled = true;
+  try {
+    const heard = await call("/api/voice/transcribe", {
+      session_id: session, mime_type: mimeType, duration_ms: duration,
+      data: await readAsBase64(blob),
+    });
+    if (!heard.ok) {
+      voiceStatus(heard.message || "語音轉文字失敗，請再試一次或改用文字。");
+      return;
+    }
+    if (session !== activeConversation) { voiceStatus(""); return; }
+    const text = heard.transcript.text;
+    field.value = field.value.trim() ? field.value.trimEnd() + " " + text : text;
+    field.dispatchEvent(new Event("input"));
+    voiceTranscript = {id: heard.transcript.id, session: session};
+    voiceStatus("語音轉文字，請確認內容後送出。");
+    field.focus();
+  } catch (failure) {
+    voiceStatus((failure.payload && failure.payload.message) || failure.message);
+  } finally { el("mic").disabled = false; }
+}
+
+el("mic").addEventListener("click", () => {
+  if (voiceRecorder && voiceRecorder.state === "recording") stopVoice(); else startVoice();
+});
+loadVoice();
+
 form.addEventListener("submit", (event) => {
   event.preventDefault();
   if (uploadingFiles > 0 || startingSession) return;
@@ -5345,6 +5436,10 @@ form.addEventListener("submit", (event) => {
   const asked = field.value.trim() || (files.length ? "請看附件。" : "");
   if (!asked || !activeConversation) return;
   field.value = "";
+  // A message that came from the microphone names its transcript (§3.2).
+  const spoken = voiceTranscript && voiceTranscript.session === activeConversation
+    ? voiceTranscript.id : null;
+  voiceTranscript = null; voiceStatus("");
   el("command-palette").hidden = true;
   const session = activeConversation, replying = replyTarget;
   clearReply();
@@ -5372,6 +5467,7 @@ form.addEventListener("submit", (event) => {
         session_id: session, message: asked,
         ...(entry.replyTo ? {reply_to: entry.replyTo} : {}),
         ...(entry.files.length ? {attachments: entry.files.map(file => file.file_id)} : {}),
+        ...(spoken ? {voice_transcript: spoken} : {}),
       });
       answer = completed.answer;
       queue.splice(queue.indexOf(entry), 1);
