@@ -229,32 +229,44 @@ Ported and extended from `benchmarks/voice_to_knowledge/provider.py` on `origin/
 
 ```python
 @dataclass(frozen=True)
+class Pcm16k:  # mono, 16 kHz, signed 16-bit little-endian
+    samples: bytes
+
+
+@dataclass(frozen=True)
 class Segment:
     start: float
     end: float
     text: str
 
+
 @dataclass(frozen=True)
 class SttResult:
     segments: tuple[Segment, ...]
-    language: str | None          # detected
-    duration_seconds: float       # audio length
+    language: str | None  # detected
+    duration_seconds: float  # audio length
     elapsed_seconds: float
-    engine: str                   # "faster-whisper", "fake", …
+    engine: str  # "faster-whisper", "fake", ...
     model: str
     model_revision: str
+
     @property
     def text(self) -> str: ...
 
+
 class SttProvider(Protocol):
-    def transcribe(self, pcm: Pcm16k, *, language: str | None, hints: tuple[str, ...]) -> SttResult: ...
+    def transcribe(
+        self, pcm: Pcm16k, *, language: str | None, hints: tuple[str, ...]
+    ) -> SttResult: ...
+
 
 class SttError(Exception):
-    code: str                     # one of §3.6
+    code: ErrorCode  # one of section 3.6
 ```
 
-- `Pcm16k` is decoded mono 16 kHz PCM produced by `voice.audio.decode(path, limits)`, so providers never see
-  container formats (the branch's provider accepted WAV only).
+- `Pcm16k` is decoded mono 16 kHz PCM produced from the audio bytes in memory by `voice.audio`, so providers
+  never see container formats (the branch's provider accepted WAV only). Code: `src/voice/stt.py`,
+  `src/voice/contracts.py`, `src/voice/transcript.py`.
 - `hints`: product terms (e.g. from an owner-editable glossary in the host data directory) passed to Whisper as
   `initial_prompt`/hotwords to bias spelling of terms such as CMX500; empty by default.
 - Implementations: `FakeSttProvider` (tests: maps audio sha256 or a fixture name to a fixed result; can raise any
@@ -298,7 +310,7 @@ All automated tests are CI-inert: no real microphone, no Telegram, no network, n
 - **Format variants** encoded from the same PCM with PyAV: OGG/Opus (Telegram voice), WebM/Opus (MediaRecorder),
   MP3, WAV; plus a truncated file, a zero-byte file, a text file renamed `.ogg`, and an over-limit duration file
   generated on the fly in tests (not committed).
-- Fixtures stay small (each under ~100 KB). No recording of any real person, no company or customer content.
+- Fixtures stay small (each under ~200 KB). No recording of any real person, no company or customer content.
 
 ### 4.2 Unit (always run)
 
