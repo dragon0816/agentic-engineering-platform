@@ -115,6 +115,9 @@ charset=utf-8`), at most 8 MiB; errors are `{"ok": false, "code", "message"}` wi
 | `GET /vaults/{id}/analyses` | `{"vault": id, "version": {"tag", "commit"}, "order": [slug], "analyses": [{"slug", "title", "question", "kind", "chart": {"type", "x"?, "y"?, "series"?}, "params": {...}, "requires": {...}, "digest"}]}` — the **published** version's analyses (what the Agent reads) |
 | `GET /vaults/{id}/analyses/{slug}/result?<param>=<value>...` | `{"slug", "digest", "version": {"tag", "commit"}, "params": {...}, "columns": [str], "rows": [[...]], "truncated": bool, "computed_at"}`; `409 result_not_ready` for a script result not computed yet (see below); `400 param_invalid` |
 
+- **Enum choices**: in `/analyses`, every `enum` parameter carries `params.<name>.values` — the allowed
+  choices (strings) resolved by AEP, next to the `values_from` they came from. Atlas offers exactly these and
+  never resolves `values_from` itself.
 - **Only the published version** is served (the Agent's version); unpushed work never leaves Agent Web.
 - **No code runs because of a feed request**: SQL results and script results are computed by AEP — on
   publish, on sync when the published version changes, and when the person runs an analysis in Agent Web — and
