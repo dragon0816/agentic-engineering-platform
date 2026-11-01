@@ -1,8 +1,50 @@
 # Handoff
 
-Updated: 2026-11-01 (Asia/Taipei), by Claude Code (BI analysis dashboard: F1, F2, F3, P1, P2, P3, P4, D1, D2, D3, chains and coverage as analyses, golden answers, P5, D4; earlier: knowledge repositories R1, R2, R3 BI part, R4a, R4b, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-11-01 (Asia/Taipei), by Claude Code (voice input for Telegram and Agent Web: V1–V8; earlier: BI analysis dashboard: F1, F2, F3, P1, P2, P3, P4, D1, D2, D3, chains and coverage as analyses, golden answers, P5, D4; earlier: knowledge repositories R1, R2, R3 BI part, R4a, R4b, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## BI analysis dashboard and domain retirement (2026-11-01, Claude Code) — latest
+## Voice input for Telegram and Agent Web (2026-11-01, Claude Code) — latest
+
+**Goal.** Owner 2026-11-01: a person speaks instead of typing, on Telegram (voice messages) and Agent Web
+(microphone), for coding, asking and Workflow runs; speech becomes text on this PC, the person sees it, and the
+text then follows exactly the typed path, rules and confirmations. Design and status:
+`docs/phases/VOICE_INPUT.md` (§6.1 lists every slice with its commits); decisions: `docs/DECISIONS.md`
+2026-11-01 (local STT only, no extra voice confirmation and none removed, transcript kept and audio never, plus
+the accepted §7 points); contracts: `docs/CONTRACTS.md` "Voice input"; guide: `docs/guides/VOICE_INPUT.zh-TW.md`.
+
+**Where.** Branch `voice-input-integration` in the Paseo worktree `C:\Users\Chi_L\.paseo\worktrees\2qnenase\
+voice-input-integration`, from local `main` at `923bd641`; nothing pushed, no PR. The voice orchestrator
+coordinates; Claude Code built the slices; Codex wrote the independent integration tests (`4bf57da4`).
+Worktree `.venv` has only the CI extras (`dev,office`); a separate venv with the `voice` extra
+(`%LOCALAPPDATA%\aep-voice-venv`, outside the repository) ran the PyAV/OpenCC tests.
+
+**Done.** V1–V8 (`docs/phases/VOICE_INPUT.md` §6.1; rows in `docs/TASKS.md`): `src/voice/` (contracts, STT
+interface, in-memory decoding, `VoiceService`, transcript record and store, local `FasterWhisperProvider`),
+Telegram voice/audio in `channels/telegram.py`, `POST /api/voice/transcribe`, `GET /api/voice` and
+`ConversationTurnRequest.voice_transcript` in `host_runtime/web.py`, the 🎤 button in `web_page.py`, host wiring
+(`HostRuntime.voice`, `build_telegram(voice=)`, `AgentWebServer(voice=)`, CLI). Voice is off unless `host.json`
+has `voice.enabled`; without it every channel behaves as before.
+
+**Verification so far.** All voice test files, the touched Telegram/host/Agent Web/conversation/CLI/page tests,
+the 52 integration tests (Telegram 27, Agent Web 25) on `a3b160db`: pass. `ruff format --check .`, `ruff check
+.`, `mypy src tests` (902 files): clean. With the `voice` extra: the codec and OpenCC tests pass. Skipped: the
+real-engine test (no model on the build PC). **The full suite has not been run on this branch.**
+
+**Known points.**
+- Concurrent pytest sessions on one PC share `%TEMP%\pytest-of-<user>` and prune each other's base folders;
+  one knowledge integration test failed once that way and never reproduced. Use `--basetemp=<own folder>` per
+  agent when runs overlap.
+- A spoken credential is refused like typed text (`transcript_credential`); a spoken 「好」 never confirms a
+  Telegram card or an Agent Web form; spoken 「取消」/「修改」 work as typed.
+
+**Open owner items.** (1) Install an approved Whisper small int8 package (CTranslate2), pin its hash
+(`python -m voice.whisper <folder>`) in `host.json`, run V0's laptop measurement and the real-engine test with
+`AEP_VOICE_MODEL_DIR`, set the CER limit (provisional 0.35). (2) The live checks of `VOICE_INPUT.md` §4.6, after
+hours. Enabling voice needs an Agent Web restart: check `/api/tasks` first.
+
+**Next actions.** (1) Orchestrator: run the full suite on this branch (with its own `--basetemp`), rebase on
+local `main`, fast-forward. (2) Owner: the open items above.
+
+## BI analysis dashboard and domain retirement (2026-11-01, Claude Code)
 
 **Goal.** `docs/phases/BI_ANALYSIS_DASHBOARD.md` §7, AEP side, in the owner's order: F1 → F2 → F3, P1 → P2 →
 P3/P4, D1 → D3, chains and coverage into the pack, golden answers, P5, D4. Codex builds the Atlas side (A1, A2,
