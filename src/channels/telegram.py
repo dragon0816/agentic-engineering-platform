@@ -1486,10 +1486,16 @@ class TelegramIngress:
             declared_seconds=media.duration_seconds,
         )
         del data
+        if record.error_code == "transcript_credential":
+            # Exactly as the typed text would be refused; nothing is echoed.
+            await show(VOICE_NOT_HEARD)
+            return TelegramDelivery(
+                **base, disposition="unsupported_content", reply=CREDENTIAL_REPLY
+            )
         if record.status != "ok" or record.text is None:
             await show(VOICE_NOT_HEARD)
             return refused(record.error_code or "stt_failed")
-        await show(VOICE_HEARD.format(text=scrub(record.text)))
+        await show(VOICE_HEARD.format(text=record.text))
         caption = (update.text or "").strip()
         text = f"{caption}\n\n{record.text}" if caption else record.text
         use = TranscriptUse(

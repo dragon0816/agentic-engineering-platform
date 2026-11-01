@@ -293,6 +293,7 @@ class SttError(Exception):
 | `audio_decode_failed` | corrupt or truncated | 無法讀取這段音訊… | no |
 | `download_failed` | existing `AttachmentError` from `_download` | existing `attachment_reply` text | no |
 | `transcript_empty` | silence/no speech, or only filler | 沒有聽到內容，請再說一次。 | no |
+| `transcript_credential` | the transcript looks like it contains a credential (owner 2026-11-01: as typed text) | the typed-text credential reply, `That message was not forwarded: it looks like it contains a credential.`; the transcript is not shown and no text is kept | no |
 | `stt_unavailable` | model missing or hash mismatch | 語音轉文字目前無法使用（模型未安裝）。 | no |
 | `stt_busy` | queue full | 語音處理忙碌中，請稍後再試。 | no |
 | `stt_timeout` / `stt_failed` | engine timeout or exception | 語音轉文字失敗，請再試一次或改用文字。 | no |

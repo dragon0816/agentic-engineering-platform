@@ -26,6 +26,7 @@ ErrorCode = Literal[
     "audio_decode_failed",
     "download_failed",
     "transcript_empty",
+    "transcript_credential",
     "stt_unavailable",
     "stt_busy",
     "stt_timeout",
@@ -43,6 +44,11 @@ REPLIES: dict[ErrorCode, str] = {
     "audio_decode_failed": "無法讀取這段音訊，請再錄一次。",
     "download_failed": "無法下載這段語音，請再傳一次。",
     "transcript_empty": "沒有聽到內容，請再說一次。",
+    # Typed text with a credential gets this exact reply (channels.telegram
+    # CREDENTIAL_REPLY); voice follows the typed rule (owner 2026-11-01).
+    "transcript_credential": (
+        "That message was not forwarded: it looks like it contains a credential."
+    ),
     "stt_unavailable": "語音轉文字目前無法使用（模型未安裝），請改用文字。",
     "stt_busy": "語音處理忙碌中，請稍後再試。",
     "stt_timeout": "語音轉文字逾時，請再試一次或改用文字。",

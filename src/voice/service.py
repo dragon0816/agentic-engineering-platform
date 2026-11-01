@@ -27,10 +27,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Literal
 
-from common.assets import REDACTED, SECRET_PATTERN
+from common.assets import SECRET_PATTERN
 from voice import audio
 from voice.contracts import ErrorCode, VoiceConfig, declared_limit_error
-from voice.stt import Pcm16k, Segment, SttError, SttProvider, SttResult
+from voice.stt import Pcm16k, SttError, SttProvider, SttResult
 from voice.transcript import TranscriptAudio, TranscriptRecord, TranscriptStore, TranscriptStt
 
 _LOG = logging.getLogger(__name__)
@@ -48,10 +48,6 @@ def _opencc() -> Callable[[str], str] | None:
         return None
     converter = opencc.OpenCC("s2twp")
     return lambda text: str(converter.convert(text))
-
-
-def _redact(text: str) -> str:
-    return SECRET_PATTERN.sub(REDACTED, text)
 
 
 def sweep_temporary_audio(workspace_root: Path) -> None:
@@ -215,9 +211,12 @@ class VoiceService:
             settings={"hints": len(self.config.hints)},
             elapsed_seconds=result.elapsed_seconds,
         )
-        # Credential-looking words are never stored, shown or forwarded.
-        raw = _redact(result.text)
-        steps: list[str] = ["redact"] if raw != result.text else []
+        raw = result.text
+        # As typed text: a transcript with a credential is not forwarded, and
+        # nothing of it is kept (owner 2026-11-01).
+        if any(SECRET_PATTERN.search(item) for item in (raw, *(s.text for s in result.segments))):
+            return failed("transcript_credential", stt)
+        steps: list[str] = []
         text = raw
         if self._to_traditional is not None:
             text = self._to_traditional(text)
@@ -238,9 +237,7 @@ class VoiceService:
                 text_raw=raw,
                 text=text,
                 post_processing=tuple(steps),
-                segments=tuple(
-                    Segment(item.start, item.end, _redact(item.text)) for item in result.segments
-                ),
+                segments=result.segments,
                 status="ok",
             )
         )

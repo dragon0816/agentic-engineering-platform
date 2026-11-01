@@ -200,6 +200,16 @@ def test_nothing_heard_is_an_empty_transcript(tmp_path: Path, heard: str) -> Non
     assert (record.status, record.error_code, record.text) == ("empty", "transcript_empty", None)
 
 
+def test_a_transcript_with_a_credential_is_refused_and_not_kept(tmp_path: Path) -> None:
+    secret = "123456789:" + "A" * 35
+    record = service(tmp_path, FakeSttProvider(default=answer(f"token {secret}"))).transcribe(
+        fixture("zh_ask"), "audio/wav", channel="web", actor="o", session_id="c"
+    )
+    assert (record.status, record.error_code) == ("failed", "transcript_credential")
+    assert record.text is None and record.text_raw is None and record.segments == ()
+    assert all(secret not in path.read_text(encoding="utf-8") for path in tmp_path.rglob("*.json"))
+
+
 def test_engine_errors_become_failed_records(tmp_path: Path) -> None:
     class Broken:
         def transcribe(

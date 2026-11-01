@@ -11,7 +11,7 @@ from test_telegram_attachments import FileTransport
 from test_telegram_ingress import OWNER, STRANGER, TOKEN, CountingCredentials, config, poll, update
 from test_telegram_workflow_flow import _install, _tap
 
-from channels.telegram import TelegramIngress
+from channels.telegram import CREDENTIAL_REPLY, TelegramIngress
 from host_runtime.agent import LocalAgent
 from voice.contracts import REPLIES, VoiceConfig
 from voice.service import VoiceService
@@ -198,10 +198,28 @@ def test_typed_yes_still_confirms_with_voice_on(tmp_path: Path) -> None:
     assert poll(item).deliveries[0].outcome is not None
 
 
-def test_the_transcript_shown_is_redacted(tmp_path: Path) -> None:
+def test_spoken_credentials_are_refused_like_typed_ones(tmp_path: Path) -> None:
+    """Owner 2026-11-01: voice follows the typed rule; nothing is forwarded,
+    shown or stored."""
     secret = "123456789:" + "A" * 35
     transport = FileTransport([[voice_message(1)]], {"speech": SPEECH})
-    item, *_ = build(tmp_path, transport, f"token {secret}")
-    poll(item)
-    assert all(secret not in text for text in sent(transport))
-    assert [text for text in sent(transport) if "你說" in text] == ["🎤 你說：「token [redacted]」"]
+    item, _, runner, _ = build(tmp_path / "voice", transport, f"token {secret}")
+    spoken = poll(item).deliveries[0]
+    typed_transport = FileTransport([[update(1, OWNER, f"token {secret}")]], {})
+    typed, *_ = build(tmp_path / "typed", typed_transport, None, enabled=False)
+    expected = poll(typed).deliveries[0]
+    assert (spoken.disposition, spoken.reply) == (expected.disposition, expected.reply)
+    assert spoken.reply == CREDENTIAL_REPLY == REPLIES["transcript_credential"]
+    assert runner.bridge.events == ()
+    assert all(secret not in text and "你說" not in text for text in sent(transport))
+    [record] = records(tmp_path / "voice")
+    assert (record.status, record.error_code, record.text) == (
+        "failed",
+        "transcript_credential",
+        None,
+    )
+    stored = "".join(
+        path.read_text(encoding="utf-8")
+        for path in (tmp_path / "voice" / "workspace").rglob("*.json")
+    )
+    assert secret not in stored
