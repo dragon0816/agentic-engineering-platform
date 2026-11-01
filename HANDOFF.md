@@ -38,10 +38,13 @@ keep); fixed in `0acad6bd` with the owner's OK, BI tests pass after it.
 - A spoken credential is refused like typed text (`transcript_credential`); a spoken 「好」 never confirms a
   Telegram card or an Agent Web form; spoken 「取消」/「修改」 work as typed.
 
-**Open owner items.** (1) Install an approved Whisper small int8 package (CTranslate2), pin its hash
-(`python -m voice.whisper <folder>`) in `host.json`, run V0's laptop measurement and the real-engine test with
-`AEP_VOICE_MODEL_DIR`, set the CER limit (provisional 0.35). (2) The live checks of `VOICE_INPUT.md` §4.6, after
-hours. Enabling voice needs an Agent Web restart: check `/api/tasks` first.
+**V0 done (2026-11-01).** The owner supplied `Systran/faster-whisper-small` (revision `536b0662`, int8) and
+two recordings (outside the repository). Package hash `8d64e4da7ad18a60c68a4616ddc7c5ffb3ea4a405ed2c003a2222016952db2c9`;
+CER limit 0.20 from the measurement; findings, speed and the dropped-clause risk in `VOICE_INPUT.md` §6.2.
+
+**Open owner items.** The live checks of `VOICE_INPUT.md` §4.6, after hours: enable voice in `host.json`
+(model path, the hash above, and `voice.hints` with the product and tool names the owner says; without
+hints English names are unreliable). Enabling voice needs an Agent Web restart: check `/api/tasks` first.
 
 **Next actions.** (1) Done: local `main` fast-forwarded to this branch (not pushed). (2) Owner: the open
 items above; pushing `main` is the owner's call.
