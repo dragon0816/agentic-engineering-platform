@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import unicodedata
 from collections.abc import Mapping
 from typing import Any, Literal, Self, get_args
 
@@ -72,9 +73,23 @@ BOT_API_DOWNLOAD_BYTES = 20 * 1024 * 1024
 
 
 def bare_word(text: str) -> str:
-    """`text` without the punctuation and spaces a speech engine adds around a
-    short answer (「好。」 is 「好」), for recognising card words."""
-    return text.strip().strip("。．.，,！!？?、；;：:…~～ \u3000")
+    """`text` without the punctuation, quotes and spaces a speech engine adds
+    around a short answer (「好。」, 「好﹐」 and 「「好」」 are 「好」), for
+    recognising card words."""
+
+    def loose(character: str) -> bool:
+        return (
+            character.isspace()
+            or character in "~～"
+            or unicodedata.category(character).startswith("P")
+        )
+
+    start, end = 0, len(text)
+    while start < end and loose(text[start]):
+        start += 1
+    while end > start and loose(text[end - 1]):
+        end -= 1
+    return text[start:end]
 
 
 def base_mime(mime_type: str) -> str:

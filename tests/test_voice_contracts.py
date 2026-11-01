@@ -24,6 +24,7 @@ from voice.contracts import (
     VoiceTranscribeRequest,
     VoiceTranscribeSuccess,
     accepted_mime,
+    bare_word,
     declared_limit_error,
 )
 from voice.stt import FakeSttProvider, Pcm16k, Segment, SttError, SttProvider, SttResult
@@ -374,3 +375,20 @@ def test_new_ids_are_unique(tmp_path: Path) -> None:
     ids = {store.new_id() for _ in range(50)}
     assert len(ids) == 50
     assert all(TranscriptStore.ID.fullmatch(item) for item in ids)
+
+
+# -- card words in a transcript -------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "heard",
+    ["好", "好。", "好!", "好﹐", "  好，", "「好」", "好…", "好～"],
+)
+def test_bare_word_drops_any_punctuation_the_engine_adds(heard: str) -> None:
+    """V0: the real engine wrote 「好﹐」 (a small form comma) and 「好!」."""
+    assert bare_word(heard) == "好"
+
+
+def test_bare_word_keeps_inner_text() -> None:
+    assert bare_word("執行週報 Workflow。") == "執行週報 Workflow"
+    assert bare_word("UTF-8") == "UTF-8"
