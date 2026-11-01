@@ -11,28 +11,45 @@ After the turn, `with_bi_sources` adds the source line of each subscribed
 dataset the turn queried when the model's answer left it out (live test
 2026-10-24): a factual citation copied from the tool result, like a chart's
 legend, never a change to what the model said.
+
+Each answered call also writes one self-contained chart page (the sections
+drawn by the Dashboard tab's renderer, or the cards as a table) and attaches
+it, so Agent Web shows the chart in the conversation (`bi_chart_files`;
+`docs/phases/BI_CHAT_CHARTS_AND_DASHBOARD_SOURCES.md` C2).
 """
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+import secrets
+from collections.abc import Mapping, Sequence
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 from pydantic import ValidationError
 
 from agent.gateway import HostTool, HostToolOutcome
-from capabilities.bi_cards import vault
+from capabilities.bi_cards import analyses, vault
 from capabilities.bi_cards.capability import QUERY_SPEC, QueryHandler, QueryRequest, source_note
 from capabilities.bi_cards.manifest import BI_SKILL, bi_question
 from capabilities.bi_cards.packs import SECTIONS as PACK_SECTIONS
 from capabilities.runtime import CapabilityInvocation, CapabilityRefused
 from common.execution import Failure, RequestContext
+from host_runtime import bi_chart_html
 from models.contracts import ModelTool
 
-__all__ = ["bi_cards_tools", "bi_question", "bi_skill_on", "bi_sources", "with_bi_sources"]
+__all__ = [
+    "bi_cards_tools",
+    "bi_chart_files",
+    "bi_question",
+    "bi_skill_on",
+    "bi_sources",
+    "with_bi_sources",
+]
 
 TOOL_NAME = "bi__query"
+#: Where the chat's chart pages are written, under the workspace.
+CHARTS_DIR = "bi-chat-charts"
 FAILURE_TEXT = {
     "dataset_invalid": "資料集名稱不正確",
     "dataset_unknown": "這台電腦沒有訂閱這個資料集",
@@ -116,7 +133,13 @@ def bi_cards_tools(gateway: Any) -> Sequence[HostTool]:
             )
         )
         if result.status == "succeeded":
-            return HostToolOutcome(status="succeeded", data=result.data)
+            data = result.data
+            workspace = _workspace(gateway)
+            if isinstance(data, dict) and workspace is not None:
+                written = chart_page(workspace, data, arguments)
+                if written is not None:
+                    data = {**data, "chart_file": written["filename"], "attach": [written]}
+            return HostToolOutcome(status="succeeded", data=data)
         failure = result.failure or Failure(code=result.status, message="")
         text = FAILURE_TEXT.get(failure.code, "BI 卡片查詢沒有完成")
         return HostToolOutcome(
@@ -126,6 +149,74 @@ def bi_cards_tools(gateway: Any) -> Sequence[HostTool]:
         )
 
     return [HostTool(_model_tool(gateway, found), call)]
+
+
+def _workspace(gateway: Any) -> Path | None:
+    installed = gateway.bridge.installed.get(QUERY_SPEC.identity)
+    workspace = getattr(getattr(installed, "handler", None), "workspace_root", None)
+    return Path(workspace) if workspace is not None else None
+
+
+def chart_page(
+    workspace: Path, data: Mapping[str, Any], arguments: Mapping[str, Any]
+) -> dict[str, str] | None:
+    """Write the chart page of one answered `bi__query` call under the
+    workspace; None when it answered nothing to draw."""
+    sections = [
+        {
+            **s,
+            "chart": analyses.chart_for(
+                s.get("chart"), s.get("columns") or [], s.get("rows") or []
+            ),
+        }
+        for s in data.get("analysis") or ()
+        if isinstance(s, dict)
+    ]
+    dataset = str(data.get("dataset") or arguments.get("dataset") or "demo")
+    if sections:
+        name = sections[0]["id"] if len(sections) == 1 else "all"
+        title = sections[0]["title"] if len(sections) == 1 else f"BI 分析：{dataset}"
+    else:
+        cards = [c for c in data.get("cards") or () if isinstance(c, dict)]
+        if not cards:
+            return None
+        name, title = "cards", f"BI 卡片：{dataset}（{len(cards)} 張）"
+        sections = [{"title": title, **bi_chart_html.cards_table(cards)}]
+    about = " · ".join(
+        part
+        for part in (dataset, str(data.get("scope_note") or "").strip(), _params(sections))
+        if part
+    )
+    folder = workspace / CHARTS_DIR
+    folder.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    path = folder / f"bi-{name}-{stamp}-{secrets.token_hex(2)}.html"
+    path.write_text(bi_chart_html.page(str(title), sections, about), encoding="utf-8")
+    return {"path": str(path), "filename": path.name, "media_type": "text/html"}
+
+
+def _params(sections: list[dict[str, Any]]) -> str:
+    given = sections[0].get("params") if len(sections) == 1 else None
+    if not isinstance(given, dict) or not given:
+        return ""
+    return "參數 " + "、".join(f"{k}={v}" for k, v in given.items())
+
+
+def bi_chart_files(result: Any) -> list[dict[str, str]]:
+    """The chart pages the turn's answered `bi__query` calls wrote, in order,
+    as Agent Web shows files in an answer (an HTML page in a sandboxed frame)."""
+    files: list[dict[str, str]] = []
+    for item in getattr(result, "tools", None) or ():
+        host = getattr(item, "host", None)
+        if getattr(item, "name", "") != TOOL_NAME or host is None or host.status != "succeeded":
+            continue
+        data = host.data if isinstance(host.data, dict) else {}
+        for entry in data.get("attach") or ():
+            path = entry.get("path") if isinstance(entry, dict) else None
+            if isinstance(path, str) and Path(path).is_file():
+                files.append({"filename": str(entry.get("filename") or Path(path).name),
+                              "kind": "html", "path": path})  # fmt: skip
+    return files
 
 
 def _model_tool(gateway: Any, found: list[Any]) -> ModelTool:
@@ -173,14 +264,13 @@ def reading_tool(gateway: Any, handler: QueryHandler) -> HostTool | None:
 
 def _vaults_note(gateway: Any) -> str:
     """The shared knowledge bases (vaults) on this PC, by purpose; empty when none."""
-    installed = gateway.bridge.installed.get(QUERY_SPEC.identity)
-    workspace = getattr(getattr(installed, "handler", None), "workspace_root", None)
+    workspace = _workspace(gateway)
     if workspace is None:
         return ""
     lines = [
         f"- dataset {item['dataset']}: 「{item.get('title') or item['id']}」"
         + (f" — {item['purpose']}" if item.get("purpose") else "")
-        for item in vault.listing(Path(workspace))
+        for item in vault.listing(workspace)
     ]
     if not lines:
         return ""

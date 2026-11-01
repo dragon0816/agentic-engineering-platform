@@ -4038,6 +4038,13 @@ s-k-20261011T102952` (not published).
     the Dashboard tab's renderer (C1, C2); saving a chat chart as an analysis through `propose_change` kind
     `bi_analysis` (C3); a dashboard proposed by the analysis AI (K1); the order imported from an Atlas dashboard
     (K2, after Atlas's golden files). Next: C1.
+  - [x] 2026-11-01, Claude Code: BI C1 and C2, charts inline in the chat. `bi__query` sections carry a
+    chart spec that names their columns (`analyses.chart_for`: the saved spec, else a bar for one label and
+    one number column, else a table); each answered call writes one self-contained HTML page
+    (`bi-chat-charts/` in the workspace; data in a JSON block, own CSP, no network) drawn by the Dashboard
+    tab's renderer, now one shared constant (`host_runtime/bi_chart_html.py`, spliced into `web_page.PAGE`);
+    Agent Web shows it in the sandboxed file viewer (`bi_chart_files`; Telegram unchanged). Tests
+    `test_bi_chat_charts` (8, one in a real browser through a scripted turn).
 
 ## Voice input: Telegram voice and the Agent Web microphone (2026-11-01)
 

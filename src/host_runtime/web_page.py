@@ -17,6 +17,8 @@ it is installed.
 
 from __future__ import annotations
 
+from host_runtime.bi_chart_html import BI_CHART_CSS, BI_CHART_JS
+
 # Keep JavaScript escape sequences intact.  A normal Python string turns such
 # sequences as ``\n`` into literal line breaks inside JavaScript quoted strings,
 # which makes the whole inline script fail to parse and leaves the page inert.
@@ -1237,11 +1239,7 @@ tr:last-child td { border-bottom: none; }
 .bi-substeps ol { margin-top: 0; }
 .bi-manage > summary { cursor: pointer; min-height: 44px; display: inline-flex;
   align-items: center; padding: 0 12px; }
-.bi-chart { width: 100%; max-width: 760px; height: auto; display: block; margin: 8px 0; }
-.bi-chart text { fill: var(--dim, #666); font-size: 12px; }
-.bi-chart .bar, .bi-chart .dot { fill: var(--accent, #2f6db5); }
-.bi-chart .line { fill: none; stroke: var(--accent, #2f6db5); stroke-width: 2; }
-.bi-chart .axis { stroke: var(--dim, #666); stroke-width: 1; }
+/* BI_CHART_CSS */
 .bi-code { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; margin: 6px 0;
   padding: 8px; border: 1px solid var(--line, #ddd); border-radius: 6px; }
 .bi-substeps button { min-height: 44px; }
@@ -12867,87 +12865,7 @@ el("bi-b-bench-run").addEventListener("click", async () => {
 });
 
 // -- 分析與圖表 (BI T3, docs/phases/BI_TEST_AND_TOOLS.md §5) -----------------------------
-// The SVG namespace as the HTML parser gives it (the page holds no addresses).
-const SVG_NS = (() => {
-  const holder = document.createElement("template"); holder.innerHTML = "<svg></svg>";
-  return holder.content.firstChild.namespaceURI;
-})();
-
-function biSvg(tag, attrs, label) {
-  const node = document.createElementNS(SVG_NS, tag);
-  for (const [k, v] of Object.entries(attrs || {})) node.setAttribute(k, v);
-  if (label !== undefined) node.textContent = label;
-  return node;
-}
-
-function biTableOf(table) {
-  const head = bh("tr", "", ...table.columns.map((c) => bh("th", "", String(c))));
-  const rows = table.rows.slice(0, 200).map((r) => bh("tr", "", ...r.map((v) =>
-    bh("td", "", v === null || v === undefined ? "" : String(v)))));
-  const box = bh("div", "bi-scroll", bh("table", "bi-table", bh("thead", "", head),
-    bh("tbody", "", ...rows)));
-  if (table.rows.length > 200 || table.truncated) {
-    box.append(bh("p", "bi-meta", "只顯示前 200 列（共 " + table.rows.length + " 列"
-      + (table.truncated ? "以上" : "") + "）。"));
-  }
-  return box;
-}
-
-function biChart(table, chart) {
-  // A table, or a plain SVG bar / line / scatter chart drawn from two columns.
-  chart = chart || {type: "table"};
-  const xi = table.columns.indexOf(chart.x), yi = table.columns.indexOf(chart.y);
-  if (chart.type === "table" || xi < 0 || yi < 0) return biTableOf(table);
-  const points = table.rows.map((r) => ({x: r[xi], y: Number(r[yi])}))
-    .filter((p) => Number.isFinite(p.y)).slice(0, chart.type === "bar" ? 40 : 1000);
-  const wrap = bh("figure", "");
-  if (!points.length) { wrap.append(bh("p", "bi-meta", "結果沒有可以畫的數字。")); return wrap; }
-  const max = Math.max(...points.map((p) => p.y), 0) || 1;
-  const min = Math.min(...points.map((p) => p.y), 0);
-  const label = chart.y + "（依 " + chart.x + "）";
-  if (chart.type === "bar") {
-    const rowH = 26, left = 180, width = 720, height = points.length * rowH + 30;
-    const svg = biSvg("svg", {class: "bi-chart", viewBox: "0 0 " + width + " " + height,
-      role: "img", "aria-label": label});
-    points.forEach((p, i) => {
-      const base = Math.min(min, 0);
-      const w = Math.max(1, (p.y - base) / (max - base) * (width - left - 60));
-      const y = 10 + i * rowH;
-      svg.append(biSvg("text", {x: left - 8, y: y + 15, "text-anchor": "end"},
-        String(p.x).slice(0, 24)));
-      svg.append(biSvg("rect", {class: "bar", x: left, y: y + 3, width: w, height: rowH - 8}));
-      svg.append(biSvg("text", {x: left + w + 6, y: y + 15}, String(p.y)));
-    });
-    wrap.append(svg);
-  } else {
-    const width = 720, height = 320, pad = 44;
-    const numeric = points.every((p) => Number.isFinite(Number(p.x)));
-    const xs = numeric ? points.map((p) => Number(p.x)) : points.map((_, i) => i);
-    const x0 = Math.min(...xs), x1 = Math.max(...xs) === x0 ? x0 + 1 : Math.max(...xs);
-    const sx = (v) => pad + (v - x0) / (x1 - x0) * (width - 2 * pad);
-    const sy = (v) => height - pad - (v - min) / ((max - min) || 1) * (height - 2 * pad);
-    const svg = biSvg("svg", {class: "bi-chart", viewBox: "0 0 " + width + " " + height,
-      role: "img", "aria-label": label});
-    svg.append(biSvg("line", {class: "axis", x1: pad, y1: height - pad, x2: width - pad,
-      y2: height - pad}), biSvg("line", {class: "axis", x1: pad, y1: pad, x2: pad,
-      y2: height - pad}));
-    svg.append(biSvg("text", {x: pad - 6, y: pad, "text-anchor": "end"}, String(max)),
-      biSvg("text", {x: pad - 6, y: height - pad, "text-anchor": "end"}, String(min)),
-      biSvg("text", {x: pad, y: height - 14}, String(points[0].x).slice(0, 20)),
-      biSvg("text", {x: width - pad, y: height - 14, "text-anchor": "end"},
-        String(points[points.length - 1].x).slice(0, 20)));
-    if (chart.type === "line") {
-      svg.append(biSvg("polyline", {class: "line", points: points.map((p, i) =>
-        sx(xs[i]) + "," + sy(p.y)).join(" ")}));
-    }
-    points.forEach((p, i) => svg.append(biSvg("circle", {class: "dot", cx: sx(xs[i]),
-      cy: sy(p.y), r: chart.type === "line" ? 3 : 4}, undefined)));
-    wrap.append(svg);
-  }
-  const more = bh("details", "", bh("summary", "", "看資料表"), biTableOf(table));
-  wrap.append(bh("figcaption", "bi-meta", label), more);
-  return wrap;
-}
+/* BI_CHART_JS */
 
 function biParamInputs(item, values, onChange) {
   // The analysis's parameters as controls (design §4.1); a change reruns it.
@@ -15116,3 +15034,8 @@ field.focus();
 </body>
 </html>
 """
+
+# The BI chart renderer is shared with the chat's chart files (one source, no drift).
+PAGE = PAGE.replace("/* BI_CHART_CSS */", BI_CHART_CSS, 1).replace(
+    "/* BI_CHART_JS */", BI_CHART_JS.rstrip(), 1
+)

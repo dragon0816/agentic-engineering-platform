@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import numbers
 import os
 import re
 import shutil
@@ -36,7 +37,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -448,6 +449,35 @@ def checked_chart(chart: Any, columns: list[str] | None = None) -> dict[str, Any
     if shown["type"] != "table" and not ("x" in shown and "y" in shown):
         raise BiStoreError("analysis_invalid", "長條、折線與散佈圖要指定 x 與 y 欄位")
     return shown
+
+
+def is_number(value: Any) -> bool:
+    return isinstance(value, numbers.Real) and not isinstance(value, bool)
+
+
+def default_chart(columns: Sequence[str], rows: Sequence[Sequence[Any]]) -> dict[str, Any]:
+    """A bar for exactly one label and one number column, else a table."""
+    if len(columns) != 2 or not rows:
+        return {"type": "table"}
+    kinds = []
+    for index in range(2):
+        values = [r[index] for r in rows if len(r) > index and r[index] is not None]
+        kinds.append("number" if values and all(is_number(v) for v in values) else "label")
+    if sorted(kinds) != ["label", "number"]:
+        return {"type": "table"}
+    label = columns[kinds.index("label")]
+    number = columns[kinds.index("number")]
+    return {"type": "bar", "x": label, "y": number}
+
+
+def chart_for(chart: Any, columns: Sequence[str], rows: Sequence[Sequence[Any]]) -> dict[str, Any]:
+    """The spec when it names the result's columns, else the default."""
+    if chart:
+        try:
+            return checked_chart(chart, list(columns))
+        except BiStoreError:
+            pass
+    return default_chart(columns, rows)
 
 
 def unit_problem(key: str, value: Any) -> str | None:

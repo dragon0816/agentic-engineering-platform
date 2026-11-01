@@ -128,7 +128,7 @@ from host_runtime.attachments import (
 from host_runtime.attachments import summary as attachment_summary
 from host_runtime.authoring import AuthoringError, AuthoringSession, AuthoringStudio
 from host_runtime.avatars import UserPreferences, UserPreferencesStore, catalog
-from host_runtime.bi_cards_tools import bi_question, bi_skill_on, with_bi_sources
+from host_runtime.bi_cards_tools import bi_chart_files, bi_question, bi_skill_on, with_bi_sources
 from host_runtime.business_cards_tools import chart_files, with_legend
 from host_runtime.change_proposals import ChangeProposals
 from host_runtime.chat_authoring import ChatAuthoringError, approval_text
@@ -3263,6 +3263,8 @@ class AgentWeb:
                     # An org chart drawn in this turn (docs/phases/BUSINESS_CARDS.md):
                     # its PNG shows under the answer, its legend is in the text.
                     charts = chart_files(result)
+                    # A BI query's chart page (BI C2) shows in a sandboxed frame.
+                    charts = [*charts, *bi_chart_files(result)]
                     # What the turn produced joins the session's ledger; a
                     # run's pictures and attached files show like the chart
                     # (owner 2026-10-25).

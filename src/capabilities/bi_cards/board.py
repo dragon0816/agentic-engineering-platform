@@ -117,7 +117,8 @@ def _section(
     note = str(item.get("question") or "")
     if error:
         note = f"沒有畫出來：{error}"
-    chart = dict(item.get("chart") or {"type": "table"})
+    # A spec that names no column of the result gets the default (bar or table).
+    chart = analyses.chart_for(item.get("chart"), columns, rows)
     return {
         "id": item["slug"],
         "title": item["title"],
