@@ -4045,6 +4045,12 @@ s-k-20261011T102952` (not published).
     tab's renderer, now one shared constant (`host_runtime/bi_chart_html.py`, spliced into `web_page.PAGE`);
     Agent Web shows it in the sandboxed file viewer (`bi_chart_files`; Telegram unchanged). Tests
     `test_bi_chat_charts` (8, one in a real browser through a scripted turn).
+  - [x] 2026-11-01, Claude Code: BI C1b, guarded read-only ad-hoc SQL in the chat (owner decision
+    2026-11-01): `bi__query` `sql` (+ `chart`) runs one statement through `analyses.run_sql` (read-only copy,
+    read-only authorizer) on the published data the chat reads, 10 s (`SQL_SECONDS`), at most 200 rows
+    (`truncated`), charted like C1; refusals as codes (`sql_not_allowed`, `sql_one_statement`, `timeout`,
+    `sql_failed`). Tests `test_bi_chat_sql` (6: writes, ATTACH, PRAGMA, two statements, time limit, row cap,
+    unpublished work unseen, the chart page).
 
 ## Voice input: Telegram voice and the Agent Web microphone (2026-11-01)
 

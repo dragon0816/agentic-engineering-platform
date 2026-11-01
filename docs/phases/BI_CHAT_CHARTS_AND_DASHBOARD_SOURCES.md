@@ -41,8 +41,8 @@ the change list, and the owner confirms before anything is staged. Unmatched pan
 What the general chat has today (read 2026-11-01): `bi__query` (`capabilities/bi_cards/capability.py`, read)
 answers either the sections of saved analyses (`analysis` = a slug, `all` or `quality`; on a vault the
 **published** version) as `{title, chart, columns, rows, truncated, params, ...}`, or, without `analysis`, the
-matching **cards** with their fields. There is no ad-hoc SQL in the general chat, and this design adds none.
-The data reaches only the model; the person sees text.
+matching **cards** with their fields. There was no ad-hoc SQL in the general chat; C1b adds guarded read-only
+SQL (owner decision 2026-11-01). The data reaches only the model; the person sees text.
 
 ### C1 `bi__query` results carry a chart
 
@@ -71,6 +71,28 @@ same-origin). The file:
 
 The model's tool result gets `chart_file` (the file name) so it can mention the chart; the numbers it states
 must come from the rows (unchanged rule).
+
+### C1b Guarded read-only ad-hoc SQL in the chat (owner decision 2026-11-01)
+
+The owner reversed this design's first choice ("no ad-hoc SQL in the chat"): the general chat may run its own
+SQL, guarded and read-only.
+
+- **SQL only**, never a script from the chat. `bi__query` gains `sql` (one statement) and `chart` (the model's
+  optional spec); `sql` excludes `analysis` and the card search arguments.
+- **Same capability, same path**: `bi-cards/query@1.0.0` (read, no approval) through the Bridge as a
+  `CapabilityInvocation` with `origin: model`, under the actor's existing BI grants and audit, like every other
+  `bi__query` call. No new capability, no new permission.
+- **The published data only**: the statement runs on the store `bi__query` already reads (a vault's
+  published version through `vault.reading_store`, a subscribed dataset's read-only copy, a local dataset's
+  own data); never on a vault's working copy or unpublished work.
+- **The existing guard, not a second one**: `analyses.run_sql` (one statement on a copy opened read-only, an
+  authorizer allowing only read actions, so writes, `ATTACH`, `PRAGMA` writes and the like are denied; a
+  progress-handler deadline). Its view `card_values` is there as for analyses.
+- **Limits**: the analyses' time limit, `SQL_SECONDS` = 10 s; a row cap of **200 rows** for the chat (the
+  rows the Dashboard tab's table shows; `run_sql` gets `max_rows`), the result marked `truncated` when cut.
+- **Charted like C1**: the model's `chart` when `checked_chart` accepts it for the result's columns, else the
+  default of §2; the section (`id` `query`, the SQL in `sql`) goes into C2's page. **Nothing is saved**:
+  saving goes through C3 with the owner's approval.
 
 ### C3 Save a chart from the chat as an analysis (owner's approval)
 
@@ -138,6 +160,7 @@ after they are committed.
 |---|---|---|
 | C1 | `bi__query` carries `chart` (saved spec, model's checked spec, or the default) | — |
 | C2 | The turn attaches the self-contained chart HTML (shared renderer); browser test: renders in the chat file viewer | C1 |
+| C1b | Guarded read-only ad-hoc SQL in `bi__query` (published data, 10 s, 200 rows, charted like C1) | C1, C2 |
 | C3 | Save a chat chart as an analysis: proposal → owner's approval → `analyses.save` (staged) | C1 |
 | K1 | The analysis AI proposes a dashboard (analyses + order) applied in one step | — |
 | K2 | Import the order from an Atlas dashboard (dry run, confirm, unmatched and duplicates listed) | Atlas golden files |
@@ -151,8 +174,7 @@ a row in `docs/TASKS.md`. The full suite once at the end (not overlapping Atlas'
   the draft-install card: `propose_change` is the pattern for "the AI proposes a change to this PC's state,
   the owner applies it in Agent Web", with fingerprint, expiry and a web-only switch.
 - **One HTML per `bi__query` call**, not one per section: `analysis="all"` would otherwise flood the answer.
-- **The general chat gets no ad-hoc SQL tool**: a new chart from data the chat cannot reach through saved
-  analyses is made in the analysis AI (T3), or proposed with C3's `kind`+`code`, which runs only on approval.
+- ~~The general chat gets no ad-hoc SQL tool~~: reversed by the owner (2026-11-01), see C1b.
 - **K2 order from geometry** (`layout.y`, then `layout.x`): what the person sees in Atlas, independent of the
   document's panel array order.
 

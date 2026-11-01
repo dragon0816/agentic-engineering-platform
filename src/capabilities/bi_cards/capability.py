@@ -71,6 +71,53 @@ class QueryRequest(Contract):
     analysis: str = Field(default="", max_length=60)
     #: The analysis's parameters (`domain` may also come from `domain`).
     params: dict[str, Any] = Field(default_factory=dict)
+    #: Guarded read-only ad-hoc SQL (BI C1b, owner 2026-11-01): one statement on
+    #: the data `analysis` reads (a vault's published version), never a script.
+    sql: str = Field(default="", max_length=analyses.MAX_CODE)
+    #: The chart the model wants for `sql`'s result; checked against its columns.
+    chart: dict[str, Any] | None = None
+
+
+#: Rows a chat query returns (the rows the Dashboard tab's table shows); the
+#: time limit is the analyses' `SQL_SECONDS`.
+CHAT_SQL_ROWS = 200
+
+
+def _sql_refusal(error: BiStoreError) -> CapabilityRefused:
+    """A failed chat query as a code the model can act on (a refusal carries
+    no message off the Bridge: SQLite's text may quote the data)."""
+    message = error.message
+    if "not authorized" in message:
+        return CapabilityRefused("sql_not_allowed")
+    if "one statement" in message:
+        return CapabilityRefused("sql_one_statement")
+    if "超過" in message or "interrupted" in message:
+        return CapabilityRefused("timeout")
+    return CapabilityRefused("sql_failed")
+
+
+def _sql_section(store: BiStore, request: QueryRequest) -> dict[str, Any]:
+    try:
+        table = analyses.run_sql(
+            store.path, request.sql, seconds=analyses.SQL_SECONDS, max_rows=CHAT_SQL_ROWS
+        )
+    except BiStoreError as error:
+        if error.code == "analysis_failed":
+            raise _sql_refusal(error) from None
+        raise
+    return {
+        "id": "query",
+        "title": "查詢結果",
+        "kind": "table",
+        "chart": analyses.chart_for(request.chart, table["columns"], table["rows"]),
+        "columns": table["columns"],
+        "rows": table["rows"],
+        "flags": [],
+        "note": "",
+        "analysis": False,
+        "truncated": table["truncated"],
+        "sql": request.sql,
+    }
 
 
 class QueryResult(Contract):
@@ -113,6 +160,8 @@ class QueryHandler:
         # A slug, `all`, `quality`, or a coded section's old name (`trend_coverage`).
         if request.analysis and not analyses.NAME_RE.match(request.analysis.replace("_", "-")):
             raise CapabilityRefused("invalid_input")
+        if request.sql.strip() and request.analysis:
+            raise CapabilityRefused("invalid_input")  # either SQL or a saved analysis
 
         def work() -> Contract:
             store = BiStore(self.workspace_root, request.dataset)
@@ -146,6 +195,17 @@ class QueryHandler:
             if not for_store(store).is_bi:
                 raise BiStoreError("schema_not_bi")
             cited = "；".join(n for n in (source_note(source), published) if n)
+            if request.sql.strip():
+                section = _sql_section(store, request)
+                return QueryResult(
+                    dataset=request.dataset,
+                    total=len(section["rows"]),
+                    cards=(),
+                    scope_note=f"在這份資料集（{request.dataset}）中查詢"
+                    + (f"。{cited}" if cited else ""),
+                    analysis=(section,),
+                    source=source,
+                )
             if request.analysis:
                 given = {**request.params}
                 if request.domain and "domain" not in given:

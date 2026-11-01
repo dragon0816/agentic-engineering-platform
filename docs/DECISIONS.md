@@ -6001,3 +6001,9 @@ Owner decisions relayed by the BI orchestrator; design in `docs/phases/BI_CHAT_C
   import (they are hidden).
 - **The general chat gets no ad-hoc SQL tool.** Rejected for now: letting `bi__query` run model-written SQL
   (new charts are made in the analysis AI, or proposed through `bi_analysis` and run only on approval).
+- **Addendum (owner, 2026-11-01): the general chat supports guarded read-only ad-hoc SQL** (C1b), reversing the
+  bullet above. SQL only (never a script), through `bi__query` (same capability, `CapabilityInvocation`, grants
+  and audit; read, no approval), on the published data `bi__query` already reads (never working or unpublished
+  data), guarded by the existing `analyses.run_sql` (read-only copy, read-only authorizer, deadline), with the
+  analyses' 10 s limit and a 200-row cap marked `truncated`, charted like C1; nothing is saved (saving is C3,
+  with approval). Rejected: a second SQL guard; running on the working copy; scripts from the chat.

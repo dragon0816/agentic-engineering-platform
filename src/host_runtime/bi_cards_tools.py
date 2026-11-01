@@ -61,6 +61,10 @@ FAILURE_TEXT = {
     "schema_not_bi": "這個資料集用的不是 BI schema（bi.schema/*），對話的 BI 查詢只支援 BI 資料集；"
     "請在 Agent Web 的 BI 卡片頁查看它的卡片",
     "schema_missing": "這個資料集的 schema 不在這台電腦上",
+    "sql_not_allowed": "SQL 只能讀取（SELECT 或 WITH）；寫入、ATTACH、PRAGMA 之類都不允許",
+    "sql_one_statement": "SQL 一次只能一個敘述",
+    "sql_failed": "SQL 沒有成功；檢查表與欄位名稱（card_values 的欄位：card_id、entity_type、"
+    "card、field、value）",
 }
 
 SCHEMA: dict[str, Any] = {
@@ -96,6 +100,21 @@ SCHEMA: dict[str, Any] = {
             "type": "object",
             "description": 'the analysis\'s parameters, e.g. {"domain": "AIDC", '
             '"include_sample": false}',
+        },
+        "sql": {
+            "type": "string",
+            "description": "instead of analysis or a search: ONE read-only SQLite statement "
+            "(SELECT or WITH) on the dataset's published data, for a question no saved "
+            "analysis answers. Read the view card_values(card_id, entity_type, card, field, "
+            "value): one row per card field; a list value is JSON text, read it with "
+            "json_each(value). At most 200 rows and 10 seconds; the result is shown to the "
+            "person as a chart. Nothing is saved",
+        },
+        "chart": {
+            "type": "object",
+            "description": 'with sql: how to draw the result, {"type": "table"|"bar"|"line"|'
+            '"scatter", "x": column, "y": column}; omitted, one label and one number column '
+            "become a bar, anything else a table",
         },
     },
     "required": [],

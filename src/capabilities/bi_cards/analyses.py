@@ -160,9 +160,10 @@ def run_sql(
     *,
     seconds: float = SQL_SECONDS,
     params: Mapping[str, Any] | None = None,
+    max_rows: int = MAX_ROWS,
 ) -> dict[str, Any]:
-    """One read-only statement on a copy; at most `MAX_ROWS` rows. `params`
-    are bound as named parameters (`:name`)."""
+    """One read-only statement on a copy; at most `max_rows` rows (marked
+    `truncated` when cut). `params` are bound as named parameters (`:name`)."""
     text = str(sql or "").strip().rstrip(";").strip()
     if not text:
         raise BiStoreError("analysis_invalid", "請寫 SQL")
@@ -181,7 +182,7 @@ def run_sql(
             )
             try:
                 cursor = db.execute(text, dict(params or {}))
-                rows = cursor.fetchmany(MAX_ROWS + 1)
+                rows = cursor.fetchmany(max_rows + 1)
             except sqlite3.Error as error:
                 message = str(error)
                 if "interrupted" in message:
@@ -190,7 +191,7 @@ def run_sql(
             columns = [d[0] for d in cursor.description or ()]
         finally:
             db.close()
-    return _table(columns, [list(r) for r in rows[:MAX_ROWS]], len(rows) > MAX_ROWS)
+    return _table(columns, [list(r) for r in rows[:max_rows]], len(rows) > max_rows)
 
 
 def _shape(result: Any) -> dict[str, Any]:
