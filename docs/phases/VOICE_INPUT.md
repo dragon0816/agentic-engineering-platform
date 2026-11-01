@@ -498,6 +498,7 @@ host without voice installs nothing new. Optional extra package: `opencc` (Apach
 7. **Model delivery.** Hugging Face downloads were blocked through the proxy on the earlier branch. Options: ask IT
    to allow the exact model URLs, or install an owner-approved model package (files plus sha256) into the host data
    directory. Recommended: the approved package with the sha256 pinned in `host.json`; the host never downloads a
-   model by itself.
+   model by itself. `python -m voice.whisper <model folder>` prints the hash to pin (one sha256 over every
+   file's relative path and content).
 8. **Which hosts enable voice.** Recommended: off by default; the owner enables it per host (the Personal Agent PC
    running the resident Telegram ingress). Bridges without a person-facing channel never need it.
