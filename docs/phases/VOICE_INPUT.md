@@ -1,6 +1,7 @@
 # Voice input: speak instead of type (Telegram and Agent Web)
 
-Status: design settled by the owner on 2026-11-01 (§7; `docs/DECISIONS.md` 2026-11-01); implementation follows §6. Owner goal (2026-11-01): a person can
+Status: design settled by the owner on 2026-11-01 (§7; `docs/DECISIONS.md` 2026-11-01); V1–V8 built on branch
+`voice-input-integration` (§6.1); open: the owner's V0 measurement and live checks. Owner goal (2026-11-01): a person can
 speak instead of type, through **Telegram** (voice messages) and **Agent Web** (microphone), to do the three things
 AEP already does by text: **coding**, **asking** (knowledge questions) and **Workflow/task execution**. Voice becomes
 text through speech-to-text (STT); the person sees the transcript; from there the request follows exactly the same
@@ -422,6 +423,34 @@ The branch is a Phase 0 prototype: no real STT inference was ever run (model dow
 | V8 | Contracts into `docs/CONTRACTS.md`, user guide section (zh-TW), `ARCHITECTURE.md` channel note; full suite | full suite, ruff, mypy clean; owner live checks §4.6 listed in `HANDOFF.md` |
 
 V1–V3 can be built and tested before any channel work; V4–V5 and V6–V7 are independent of each other.
+
+### 6.1 Status (2026-11-01, branch `voice-input-integration`)
+
+| # | State | Commits |
+|---|---|---|
+| V0 | **Open (owner).** No Whisper model on the build PC and none is downloaded, so the laptop measurement was not run; the opt-in real-engine test (`AEP_VOICE_MODEL_DIR`) uses a provisional CER limit of 0.35 until it is | — |
+| V1 | Done: contracts, transcript store, synthetic test audio | `51357a93`, `69b39359` |
+| V2 | Done: decoding, `VoiceService`, `voice` extra, `host.json` `voice`; later the decoding precedence | `99e5f276`, `8b2e14ae` |
+| V3 | Done: `FasterWhisperProvider`, pinned model package, `python -m voice.whisper` | `557218ab` |
+| V4 | Done: Telegram voice and audio; spoken credential refused as typed | `3af4befa`, `79ccf531` |
+| V5 | Done: fake Bot API over HTTP | `40e47d8f` |
+| V6 | Done: `POST /api/voice/transcribe`, `voice_transcript` on turns | `b4fc7f87` |
+| V7 | Done: the Agent Web microphone, headless browser tests with a fake audio device | `a3b160db` |
+| V8 | Done: `docs/CONTRACTS.md`, guide `docs/guides/VOICE_INPUT.zh-TW.md`, `ARCHITECTURE.md` note, this table | this commit series |
+
+Independent integration tests (Codex test worker, `4bf57da4`): `tests/test_voice_integration_telegram.py` and
+`tests/test_voice_integration_agent_web.py`, 52 tests, all passing on `a3b160db`. The full suite has not been run
+on this branch yet.
+
+**Open owner items.** (1) Install an approved model package (Whisper small int8, CTranslate2), pin its hash and
+run V0's measurement and the real-engine test on the company laptop; set the CER limit from it. (2) The live
+checks of §4.6, after hours. Neither blocks merging: voice is off unless `host.json` enables it.
+
+**Test-run note (shared `%TEMP%`).** Several agents running pytest at once on one PC share
+`%TEMP%\pytest-of-<user>`; pytest keeps only the three newest `pytest-N` folders, so a burst of short sessions can
+delete a longer session's live `tmp_path`. One Agent Web knowledge test failed once that way (`model_unavailable`)
+and never reproduced in nine runs alone. Give each agent or worker its own `--basetemp=<folder>` when sessions
+overlap.
 
 ## 7. Owner decisions
 
