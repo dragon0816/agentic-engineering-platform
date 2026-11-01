@@ -9,6 +9,10 @@ is deliberately not carried over: the token in a configuration file (it is a
 allowlist admits everyone (an empty map admits nobody) and HTML presentation.
 Files and photos are accepted (owner 2026-10-08) through the shared
 `host_runtime.attachments` store, downloaded only after the sender is checked.
+Voice and audio messages are spoken requests when the host has a
+`VoiceService` (docs/phases/VOICE_INPUT.md): transcribed on this PC, shown to
+the person, then handled as the same typed text would be; without one they get
+the text-only reply as before.
 
 The adapter adds no authority. It maps a sender to exactly one platform actor
 and hands the Agent a `LocalAgentRequest`; the Agent admits or refuses by the
@@ -95,6 +99,9 @@ from models.wire import (
     status_failure,
     transport_failure,
 )
+from voice.contracts import REPLIES, ErrorCode, TelegramVoice, declared_limit_error
+from voice.service import VoiceService
+from voice.transcript import TranscriptUse
 
 # The channel this ingress consumes, as the durable cursor names it.
 TELEGRAM_CHANNEL = "telegram"
@@ -376,8 +383,13 @@ class _Update:
         media_group_id: str | None = None,
         message_id: int | None = None,
         quoted: str | None = None,
+        voice: TelegramVoice | None = None,
     ) -> None:
         self.update_id = update_id
+        # A voice note or audio file; its transcript becomes `text`, and
+        # `spoken` marks the text as heard rather than typed.
+        self.voice = voice
+        self.spoken = False
         # What the message replies to (Telegram's Reply), already trimmed and
         # redacted: the conversation sees it with the person's words.
         self.quoted = quoted
@@ -428,6 +440,13 @@ RESTARTED_FLOW = "那個流程已經結束，已用你的值重新開始。"
 ENDED_FLOW = "那個流程已經結束。要再執行，請再說一次要執行哪個 Workflow。"
 #: The data of an approval button (G4): `approve:<id>` or `reject:<id>`.
 APPROVAL_TAP = re.compile(r"^(approve|reject):(ap-[A-Za-z0-9-]{1,64})$")
+#: The data of any inline button (`run:yes`, `edit:2`, `approve:ap-1`, ...);
+#: a voice transcript never acts as one.
+_BUTTON_DATA = re.compile(r"^[a-z][a-z_-]*:[^\s:]+$")
+#: While a voice message is transcribed, then what was heard (VOICE_INPUT §2.4).
+VOICE_LISTENING = "🎤 轉文字中…"
+VOICE_HEARD = "🎤 你說：「{text}」"
+VOICE_NOT_HEARD = "🎤 語音沒有轉成文字。"
 
 
 def _parse(raw: object) -> _Update | None:
@@ -488,6 +507,7 @@ def _parse(raw: object) -> _Update | None:
         files=_files(message, raw["update_id"]),
         media_group_id=group if isinstance(group, str) else None,
         quoted=_quoted(message),
+        voice=TelegramVoice.from_message(message),
     )
 
 
@@ -557,6 +577,11 @@ def chat_hash(key: tuple[int, int]) -> str:
     """A short name for a (chat, sender) pair that does not reveal either id."""
     digest = hashlib.sha256(_CHAT_SALT + f"{key[0]}:{key[1]}".encode()).hexdigest()
     return digest[:12]
+
+
+def _bare_word(text: str) -> str:
+    """`text` without the punctuation and spaces around it (「好。」 is 「好」)."""
+    return text.strip().strip("。．.，,！!？?、；;：:…~～ \u3000")
 
 
 def _chat_session(chat_id: int) -> str:
@@ -956,6 +981,7 @@ class TelegramIngress:
         attachments: AttachmentStore | None = None,
         uploads: WorkflowUploadStore | None = None,
         presets: IdentityPresets | None = None,
+        voice: VoiceService | None = None,
     ) -> None:
         self.config = TelegramIngressConfig.model_validate(config)
         if self.config.bridge_id != agent.membership.device.bridge_id:
@@ -998,6 +1024,9 @@ class TelegramIngress:
         self.uploads = uploads
         # The member's identity answers from last time ("same as last time?").
         self.presets = presets
+        # Speech to text on this PC; None: voice is off and a voice message
+        # gets the text-only reply (docs/phases/VOICE_INPUT.md).
+        self.voice = voice
         # Action cards (change proposals): Agent Web decides them; set by it.
         self.cards: Any = None
         # What each session produced (owner 2026-10-25): runs, files and
@@ -1260,6 +1289,11 @@ class TelegramIngress:
                 oldest = min(self.unmapped.values(), key=lambda item: item.seen)
                 del self.unmapped[oldest.sender_id]
             return TelegramDelivery(**base, disposition="unmapped_sender")
+        if update.voice is not None and self.voice is not None and not update.files:
+            heard = await self._hear(base, actor, update)
+            if isinstance(heard, TelegramDelivery):
+                return heard
+            update.text = heard
         if update.files:
             waiting = self._flows.get((update.chat_id, update.sender_id))
             if (
@@ -1277,6 +1311,11 @@ class TelegramIngress:
             )
         text = update.text.strip()
         key = (update.chat_id, update.sender_id)
+        if update.spoken:
+            spoken = self._spoken(base, key, text)
+            if isinstance(spoken, TelegramDelivery):
+                return spoken
+            text = spoken
         noted = SUMMARY_NOTE_TAP.match(text)
         if noted is not None:
             return await self._summary_note(base, actor, noted.group(1), update.chat_id)
@@ -1383,6 +1422,106 @@ class TelegramIngress:
             buttons=(_note_row(finished.summary.summary_id),) if finished.summary else (),
             attached=finished.images,
         )
+
+    async def _hear(
+        self, base: dict[str, Any], actor: str, update: _Update
+    ) -> "TelegramDelivery | str":
+        """A voice message's text (its caption first, when it has one), or
+        the refusal the person gets. Limits the sender declared are checked
+        before any download; the audio is only ever in memory and every
+        outcome leaves a transcript record (owner 2026-11-01)."""
+        voice, media = self.voice, update.voice
+        assert voice is not None and media is not None
+        session = _chat_session(update.chat_id)
+
+        def refused(code: ErrorCode, reply: str | None = None) -> TelegramDelivery:
+            # Nothing reached the Agent: answered, as an attachment refusal is.
+            return TelegramDelivery(**base, disposition="answered", reply=reply or REPLIES[code])
+
+        async def failed(code: ErrorCode) -> None:
+            await asyncio.to_thread(
+                partial(
+                    voice.fail,
+                    code,
+                    channel="telegram",
+                    actor=actor,
+                    session_id=session,
+                    mime_type=media.mime_type,
+                    size=media.file_size,
+                    declared_seconds=media.duration_seconds,
+                )
+            )
+
+        declared = declared_limit_error(
+            media.duration_seconds, media.file_size, media.mime_type, voice.config
+        )
+        if declared is not None:
+            await failed(declared)
+            return refused(declared)
+        status_id = await asyncio.to_thread(self._send_status, update.chat_id, VOICE_LISTENING)
+
+        async def show(text: str) -> None:
+            if status_id is not None:
+                await asyncio.to_thread(self._edit_status, update.chat_id, status_id, text)
+            else:
+                await asyncio.to_thread(self._send_status, update.chat_id, text)
+
+        try:
+            data = await asyncio.to_thread(self._download, media.file_id)
+        except AttachmentError as error:
+            code: ErrorCode = (
+                "audio_too_large" if error.code == "attachment_too_large" else "download_failed"
+            )
+            await failed(code)
+            await show(VOICE_NOT_HEARD)
+            return refused(
+                code, None if code == "audio_too_large" else attachment_reply(error.code)
+            )
+        record = await voice.transcribe_async(
+            data,
+            media.mime_type,
+            channel="telegram",
+            actor=actor,
+            session_id=session,
+            declared_seconds=media.duration_seconds,
+        )
+        del data
+        if record.status != "ok" or record.text is None:
+            await show(VOICE_NOT_HEARD)
+            return refused(record.error_code or "stt_failed")
+        await show(VOICE_HEARD.format(text=scrub(record.text)))
+        caption = (update.text or "").strip()
+        text = f"{caption}\n\n{record.text}" if caption else record.text
+        use = TranscriptUse(
+            turn=f"telegram-update-{update.update_id}",
+            edited=False,
+            sent_text_sha256=hashlib.sha256(text.encode("utf-8")).hexdigest(),
+        )
+        await asyncio.to_thread(voice.store.mark_used, actor, session, record.id, use)
+        update.spoken = True
+        return text
+
+    def _spoken(
+        self, base: dict[str, Any], key: tuple[int, int], text: str
+    ) -> "TelegramDelivery | str":
+        """Heard text is handled as typed text, except that it never presses a
+        button and never confirms a card (VOICE_INPUT §2.4, owner decision
+        d2): spoken 「好」 at a card is refused and the card stays open, while
+        spoken 「取消」 or 「修改」 work as typed. Punctuation the speech engine
+        adds around a card word is dropped so the word is recognised."""
+        bare = _bare_word(text)
+        waiting = self._flows.get(key)
+        if waiting is not None and waiting.expired():
+            waiting = None
+        if _BUTTON_DATA.match(text) or (
+            waiting is not None and telegram_flow.would_run(waiting, bare)
+        ):
+            return TelegramDelivery(
+                **base, disposition="answered", reply=REPLIES["voice_not_confirmation"]
+            )
+        if waiting is not None and telegram_flow.is_control_word(bare):
+            return bare
+        return text
 
     def _remember_why(self, key: tuple[int, int], actor: str, conversation: Any) -> None:
         """What this answer used of the person's memory, for /why, and when

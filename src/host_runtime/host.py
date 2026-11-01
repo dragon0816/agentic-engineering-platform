@@ -392,6 +392,8 @@ from models.contracts import ModelClient
 from models.credentials import CredentialResolver, EnvironmentCredentials
 from models.selection import SelectableModelClient
 from models.wire import MethodTransport, Transport
+from voice.service import VoiceService
+from voice.whisper import build_voice
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import InstalledWorkflows, WorkflowEngine
 from workflow.host_bridge import BridgeRegistration, LocalResource
@@ -519,6 +521,8 @@ class HostRuntime:
         self.mcp: McpHub | None = None
         # What each conversation produced (owner 2026-10-25); set by build_runtime.
         self.session_artifacts: SessionArtifacts | None = None
+        # Speech to text for Telegram and Agent Web; None: voice is off.
+        self.voice: VoiceService | None = None
         # Which teams this PC's person belongs to (owner 2026-10-19); set by
         # `build_runtime`. Decides only where a local revision is named.
         self.team_membership: TeamMembershipStore | None = None
@@ -541,6 +545,8 @@ class HostRuntime:
                     pass
         if self.mcp is not None:
             self.mcp.close()
+        if self.voice is not None:
+            self.voice.close()
         self.state.close()
 
     def __enter__(self) -> Self:
@@ -1677,6 +1683,8 @@ def build_telegram(
     layout: HostLayout,
     agent: LocalAgent,
     resolver: CredentialResolver | None,
+    *,
+    voice: VoiceService | None = None,
 ) -> TelegramIngress | None:
     """The Telegram ingress, if this host was given one. The token is never
     in the file: the host maps its name to an environment variable, and an
@@ -1697,6 +1705,7 @@ def build_telegram(
             attachments=AttachmentStore(layout.workspace_root),
             uploads=WorkflowUploadStore(layout.workspace_root),
             presets=IdentityPresets(layout.workspace_root),
+            voice=voice,
         )
     except ValueError as error:
         raise HostError("telegram_invalid", layout.telegram) from error
@@ -2358,7 +2367,10 @@ def build_runtime(
                 LocalTaskArtifacts(place.workspace_root),
             ),
         )
-        telegram = build_telegram(checked, place, agent, resolver)
+        # Voice input (docs/phases/VOICE_INPUT.md): one service for Telegram
+        # and Agent Web, built only when host.json enables it.
+        voice = build_voice(checked.voice, place.workspace_root)
+        telegram = build_telegram(checked, place, agent, resolver, voice=voice)
         if telegram is not None:
             telegram.approvals = chat_authoring
             telegram.session_artifacts = session_artifacts
@@ -2367,6 +2379,7 @@ def build_runtime(
         state.close()
         raise
     runtime = HostRuntime(checked, place, agent, state, telegram, platform, chat_authoring)
+    runtime.voice = voice
     runtime.mcp = mcp
     runtime.session_artifacts = session_artifacts
     # The Knowledge tool route runs the shared Knowledge Harness (unification U5).

@@ -27,9 +27,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Literal
 
+from common.assets import REDACTED, SECRET_PATTERN
 from voice import audio
 from voice.contracts import ErrorCode, VoiceConfig, declared_limit_error
-from voice.stt import Pcm16k, SttError, SttProvider, SttResult
+from voice.stt import Pcm16k, Segment, SttError, SttProvider, SttResult
 from voice.transcript import TranscriptAudio, TranscriptRecord, TranscriptStore, TranscriptStt
 
 _LOG = logging.getLogger(__name__)
@@ -47,6 +48,10 @@ def _opencc() -> Callable[[str], str] | None:
         return None
     converter = opencc.OpenCC("s2twp")
     return lambda text: str(converter.convert(text))
+
+
+def _redact(text: str) -> str:
+    return SECRET_PATTERN.sub(REDACTED, text)
 
 
 def sweep_temporary_audio(workspace_root: Path) -> None:
@@ -119,6 +124,35 @@ class VoiceService:
             self._pending -= 1
         self._schedule_unload()
 
+    def fail(
+        self,
+        code: ErrorCode,
+        *,
+        channel: Channel,
+        actor: str,
+        session_id: str,
+        mime_type: str | None = None,
+        size: int | None = None,
+        declared_seconds: float | None = None,
+    ) -> TranscriptRecord:
+        """Record a failure found before any audio reached the service (a
+        declared limit, a failed download)."""
+        return self.store.save(
+            TranscriptRecord.failed(
+                id=self.store.new_id(),
+                channel=channel,
+                actor=actor,
+                session_id=session_id,
+                created_at=self.clock(),
+                code=code,
+                audio=TranscriptAudio(
+                    mime_type=(mime_type or None) and mime_type[:100],
+                    bytes=size,
+                    duration_seconds=declared_seconds,
+                ),
+            )
+        )
+
     def transcribe(
         self,
         data: bytes,
@@ -181,8 +215,9 @@ class VoiceService:
             settings={"hints": len(self.config.hints)},
             elapsed_seconds=result.elapsed_seconds,
         )
-        raw = result.text
-        steps: list[str] = []
+        # Credential-looking words are never stored, shown or forwarded.
+        raw = _redact(result.text)
+        steps: list[str] = ["redact"] if raw != result.text else []
         text = raw
         if self._to_traditional is not None:
             text = self._to_traditional(text)
@@ -203,7 +238,9 @@ class VoiceService:
                 text_raw=raw,
                 text=text,
                 post_processing=tuple(steps),
-                segments=result.segments,
+                segments=tuple(
+                    Segment(item.start, item.end, _redact(item.text)) for item in result.segments
+                ),
                 status="ok",
             )
         )

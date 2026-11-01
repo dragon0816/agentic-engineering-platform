@@ -2144,7 +2144,13 @@ class AgentWeb:
                     request,
                     store=self.user_environment,
                 )
-                ingress = build_telegram(config, self.runtime.layout, self.runtime.agent, None)
+                ingress = build_telegram(
+                    config,
+                    self.runtime.layout,
+                    self.runtime.agent,
+                    None,
+                    voice=self.runtime.voice,
+                )
             except TelegramSettingsError as error:
                 return {"ok": False, "code": str(error)}
             except (OSError, ValueError):

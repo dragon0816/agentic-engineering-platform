@@ -715,6 +715,17 @@ def _answer_menu(state: FlowState, reply: str) -> FlowStep:
     return _again(state, "點要修改的那一項，或點「返回」。")
 
 
+def is_control_word(text: str) -> bool:
+    """A word that runs, edits or cancels a card (as typed or tapped)."""
+    return text.strip().casefold() in _RUN_WORDS | _EDIT_WORDS | _CANCEL_WORDS
+
+
+def would_run(state: FlowState, text: str) -> bool:
+    """Whether `text` would confirm the open card and start the run. A voice
+    transcript never does (docs/phases/VOICE_INPUT.md §2.4, owner 2026-11-01)."""
+    return state.confirming and text.strip().casefold() in _RUN_WORDS
+
+
 def answer(state: FlowState, text: str) -> FlowStep:
     reply = text.strip()
     if reply.casefold() in _CANCEL_WORDS:
