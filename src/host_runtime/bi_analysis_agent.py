@@ -8,6 +8,9 @@
   (`capabilities.bi_cards.analyses.run_python`);
 - `bi_analysis__propose`: the analysis to show the person; it is run and its
   chart checked against the result first, and a problem goes back to the model.
+- `bi_analysis__propose_dashboard`: several analyses and the Dashboard's
+  order (BI K1, `docs/phases/BI_CHAT_CHARTS_AND_DASHBOARD_SOURCES.md`), each run
+  and checked like one proposal; the person applies them in one step.
 
 Saving the analysis, committing and pushing stay the person's.
 """
@@ -32,6 +35,10 @@ TURN_SECONDS = 10 * 60
 TOOL_CALLS = 30
 SHOWN_ROWS = 60
 PREVIEW_ROWS = 500
+#: A proposed dashboard: at most this many new analyses, each previewed with
+#: at most `DASHBOARD_PREVIEW_ROWS` rows.
+DASHBOARD_ANALYSES = 12
+DASHBOARD_PREVIEW_ROWS = 200
 
 ROLE = """You help a knowledge expert answer a question about a BI knowledge base with a chart or a
 table, the way an analyst writes a short SQL query or script to show a relationship or a pattern.
@@ -56,7 +63,11 @@ Rules:
 - Reply in the person's language. Say what the chart shows and its limits (missing fields, few
   cards) plainly; never invent numbers that the result does not contain.
 - If the person only asks a question about the data, answer it from your queries and do not
-  propose an analysis."""
+  propose an analysis.
+- When the person asks for a dashboard (several charts and their order), call
+  bi_analysis__propose_dashboard instead: the new analyses (each as for bi_analysis__propose) and
+  `order`, the slugs top to bottom, which may also name analyses the knowledge base already has.
+  Analyses not in the order are hidden from the Dashboard, never deleted."""
 
 CHART = {
     "type": "object",
@@ -125,21 +136,29 @@ def harness_asker(
                 return _failed(error)
             return HostToolOutcome(status="succeeded", data=_shown(table))
 
-        async def propose(_c: RequestContext, args: dict[str, Any]) -> HostToolOutcome:
-            attempts[0] += 1
+        def proposed_from(args: dict[str, Any]) -> dict[str, Any]:
             proposed = {k: args.get(k) for k in ("title", "slug", "question", "kind", "code")}
             proposed["chart"] = args.get("chart") or {"type": "table"}
             for key in ("params", "requires"):
                 if args.get(key):
                     proposed[key] = args[key]
+            return proposed
+
+        async def tried(proposed: dict[str, Any]) -> dict[str, Any]:
+            _, value = analyses.checked(proposed)
+            values = analyses.default_params(
+                value, analyses._registry(workspace, vault_id), date.today().isoformat()
+            )
+            table: dict[str, Any] = await asyncio.to_thread(
+                analyses.run, db_path, str(proposed["kind"]), str(proposed["code"]), values
+            )
+            return table
+
+        async def propose(_c: RequestContext, args: dict[str, Any]) -> HostToolOutcome:
+            attempts[0] += 1
+            proposed = proposed_from(args)
             try:
-                _, value = analyses.checked(proposed)
-                values = analyses.default_params(
-                    value, analyses._registry(workspace, vault_id), date.today().isoformat()
-                )
-                table = await asyncio.to_thread(
-                    analyses.run, db_path, str(proposed["kind"]), str(proposed["code"]), values
-                )
+                table = await tried(proposed)
             except BiStoreError as error:
                 problems[:] = [error.message]
                 return _failed(error)
@@ -162,6 +181,75 @@ def harness_asker(
                 },  # fmt: skip
             )
 
+        async def propose_dashboard(_c: RequestContext, args: dict[str, Any]) -> HostToolOutcome:
+            attempts[0] += 1
+            given = args.get("analyses") or []
+            order = args.get("order") or []
+            if not isinstance(given, list) or not all(isinstance(a, dict) for a in given):
+                given = []
+            try:
+                if len(given) > DASHBOARD_ANALYSES:
+                    raise BiStoreError(
+                        "dashboard_invalid", f"一次最多提出 {DASHBOARD_ANALYSES} 個新分析"
+                    )
+                proposed, previews, shown = [], {}, {}
+                for item in given:
+                    one = proposed_from(item)
+                    try:
+                        table = await tried(one)
+                    except BiStoreError as error:
+                        raise BiStoreError(
+                            error.code, f"分析「{one.get('slug')}」：{error.message}"
+                        ) from None
+                    proposed.append(one)
+                    previews[str(one["slug"])] = {
+                        **table,
+                        "rows": table["rows"][:DASHBOARD_PREVIEW_ROWS],
+                    }
+                    shown[str(one["slug"])] = _shown(table)
+                saved = [a["slug"] for a in analyses.listing(workspace, vault_id)["analyses"]]
+                problem = analysis_session.order_problem(
+                    order, [str(a["slug"]) for a in proposed], saved
+                )
+                if problem:
+                    raise BiStoreError("dashboard_invalid", problem)
+            except BiStoreError as error:
+                problems[:] = [error.message]
+                return _failed(error)
+            answer = {
+                "reply": str(args.get("reply") or "Dashboard"),
+                "dashboard": {"analyses": proposed, "order": order, "previews": previews},
+            }
+            found = check(answer)
+            if found:
+                problems[:] = found
+                return HostToolOutcome(
+                    status="failed",
+                    failure=Failure(code="analysis_invalid", message="；".join(found)),
+                )
+            captured["answer"] = answer
+            return HostToolOutcome(
+                status="succeeded",
+                data={
+                    "note": "Dashboard 已交給使用者看；請用一兩句話說明它回答了什麼。",
+                    "analyses": shown,
+                },  # fmt: skip
+            )
+
+        analysis_schema = {
+            "type": "object",
+            "properties": {
+                "title": {"type": "string"},
+                "slug": {"type": "string"},
+                "question": {"type": "string"},
+                "kind": {"type": "string", "enum": list(analyses.KINDS)},
+                "code": {"type": "string"},
+                "chart": CHART,
+                "params": {"type": "object"},
+                "requires": {"type": "object"},
+            },
+            "required": ["title", "slug", "kind", "code", "chart"],
+        }
         tools = [
             HostTool(
                 _tool(
@@ -200,6 +288,20 @@ def harness_asker(
                     ["title", "slug", "kind", "code", "chart"],
                 ),
                 propose,
+            ),
+            HostTool(
+                _tool(
+                    "bi_analysis__propose_dashboard",
+                    "Show the person a dashboard: new analyses (each run first) and the order "
+                    "of the Dashboard, top to bottom; analyses not in the order are hidden.",
+                    {
+                        "reply": {"type": "string"},
+                        "analyses": {"type": "array", "items": analysis_schema},
+                        "order": {"type": "array", "items": {"type": "string"}},
+                    },
+                    ["analyses", "order"],
+                ),
+                propose_dashboard,
             ),
         ]
         history = [

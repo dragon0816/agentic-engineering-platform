@@ -7,6 +7,11 @@ Agent harness (`host_runtime.bi_analysis_agent`): the Agent queries the data
 with read-only SQL or a guarded Python script and proposes an analysis, which
 is run and checked before the person sees it. 「存成分析」 stages it as the
 vault unit `analysis:<slug>`; it reaches others only by commit and push.
+
+A turn may instead propose a dashboard (BI K1,
+`docs/phases/BI_CHAT_CHARTS_AND_DASHBOARD_SOURCES.md`): several new analyses and
+the Dashboard's order. 「套用」 stages them all and the new `meta:dashboard` in
+one step; the vault's analyses not in the order are hidden, never deleted.
 """
 
 from __future__ import annotations
@@ -51,10 +56,48 @@ def create_session(workspace: Path, dataset: str, target: str, actor: str) -> di
     )
 
 
+def order_problem(order: Any, proposed: list[str], saved: list[str]) -> str | None:
+    """A dashboard's order: distinct slugs, each proposed or already saved."""
+    if not isinstance(order, list) or not order:
+        return "order 必須是分析代號的清單（由上到下）"
+    if not all(isinstance(s, str) and analyses.NAME_RE.match(s) for s in order):
+        return "order 必須是分析代號的清單（由上到下）"
+    if len(set(order)) != len(order):
+        return "order 裡的分析代號重複了"
+    if len(set(proposed)) != len(proposed):
+        return "提出的分析代號重複了"
+    unknown = [s for s in order if s not in proposed and s not in saved]
+    if unknown:
+        return "order 裡有知識庫沒有、也沒有提出的分析：" + "、".join(unknown)
+    return None
+
+
+def _dashboard_problems(dashboard: Any) -> list[str]:
+    if not isinstance(dashboard, dict) or not isinstance(dashboard.get("analyses"), list):
+        return ["`dashboard` must hold analyses and an order"]
+    previews = dashboard.get("previews") or {}
+    for proposed in dashboard["analyses"]:
+        try:
+            _, value = analyses.checked(proposed)
+            columns = (previews.get(proposed.get("slug")) or {}).get("columns")
+            analyses.checked_chart(value["chart"], columns)
+        except (BiStoreError, AttributeError) as error:
+            message = getattr(error, "message", "每個分析都要是 {title, slug, kind, code, chart}")
+            return [
+                f"分析「{proposed.get('slug') if isinstance(proposed, dict) else '?'}」：{message}"
+            ]
+    order = dashboard.get("order")
+    if not isinstance(order, list) or not order:
+        return ["order 必須是分析代號的清單（由上到下）"]
+    return []
+
+
 def check(answer: dict[str, Any]) -> list[str]:
     """A proposal must be a valid analysis whose chart names its result's columns."""
     if not isinstance(answer.get("reply"), str) or not answer["reply"].strip():
         return ["`reply` must be a non-empty text"]
+    if answer.get("dashboard") is not None:
+        return _dashboard_problems(answer["dashboard"])
     proposed = answer.get("analysis")
     if proposed is None:
         return []
@@ -100,7 +143,10 @@ def session_turn(
     turns = [*session["turns"], {"role": "user", "text": text}]
     asked, alias, tools = asker(context, turns, check)
     suggestion = None
-    if asked.answer is not None and asked.failure is None and not check(asked.answer):
+    usable = asked.answer is not None and asked.failure is None and not check(asked.answer)
+    if usable and asked.answer is not None and asked.answer.get("dashboard") is not None:
+        suggestion = _dashboard_suggestion(asked.answer)
+    elif usable and asked.answer is not None:
         proposed = asked.answer.get("analysis")
         suggestion = {
             "format": "aep.bi.analysis_suggestion/v1",
@@ -124,14 +170,62 @@ def session_turn(
     )
 
 
+def _dashboard_suggestion(answer: dict[str, Any]) -> dict[str, Any]:
+    dashboard = answer["dashboard"]
+    proposed = [
+        dict(analyses.checked(item)[1]) | {"slug": item["slug"]} for item in dashboard["analyses"]
+    ]
+    return {
+        "format": "aep.bi.analysis_suggestion/v1",
+        "reply": answer["reply"].strip(),
+        "analysis": None,
+        "dashboard": {"analyses": proposed, "order": list(dashboard["order"])},
+        "previews": dashboard.get("previews") or {},
+        "result": {
+            "diff": [{"key": analyses.PREFIX + a["slug"]} for a in proposed]
+            + [{"key": analyses.DASHBOARD_UNIT}]
+        },
+    }
+
+
+def _apply_dashboard(
+    workspace: Path, vault_id: str, dashboard: dict[str, Any]
+) -> tuple[list[str], dict[str, Any]]:
+    """Stage every proposed analysis, then `meta:dashboard`: the order, and
+    the vault's other analyses hidden. Checked before anything is staged."""
+    proposed = list(dashboard.get("analyses") or [])
+    order = list(dashboard.get("order") or [])
+    saved = [a["slug"] for a in analyses.listing(workspace, vault_id)["analyses"]]
+    fresh = [str(a.get("slug")) for a in proposed]
+    problem = order_problem(order, fresh, saved)
+    if problem:
+        raise BiStoreError("dashboard_invalid", problem)
+    taken = [s for s in fresh if s in saved]
+    if taken:
+        raise BiStoreError(
+            "analysis_exists", "知識庫裡已經有這些分析，請請 AI 換一個代號：" + "、".join(taken)
+        )
+    units = [analyses.save(workspace, vault_id, item)["unit"] for item in proposed]
+    every = [*saved, *fresh]
+    hidden = [s for s in every if s not in order]
+    listed = analyses.set_dashboard(workspace, vault_id, {"order": order, "hidden": hidden})
+    return [*units, analyses.DASHBOARD_UNIT], listed
+
+
 def apply_suggestion(
     workspace: Path, dataset: str, session_id: str, turn: Any, actor: str
 ) -> dict[str, Any]:
-    """「存成分析」: stage the proposed analysis (run again on the data now)."""
+    """「存成分析」: stage the proposed analysis (run again on the data now);
+    for a dashboard, 「套用」 stages its analyses and the order in one step."""
     vault_id = _vault_id(dataset)
     staging = Staging(workspace, dataset)
     session = sessions.load(staging, session_id, "analysis")
     found, index = sessions.assistant_turn(staging, session, turn)
+    dashboard = found["suggestion"].get("dashboard")
+    if dashboard is not None:
+        units, listed = _apply_dashboard(workspace, vault_id, dashboard)
+        sessions.mark_applied(staging, session, index, {"units": units, "at": now(), "by": actor})
+        return {"session": session, "units": units, **listed}
     proposed = found["suggestion"].get("analysis")
     if proposed is None:
         raise BiStoreError("turn_unknown", "這一輪沒有可以存的分析")

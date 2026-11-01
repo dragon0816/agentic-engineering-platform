@@ -130,13 +130,16 @@ the new `order`. Nothing is deleted.
 
 ### K1 The analysis AI proposes a dashboard
 
-The analysis AI (T3, `bi_analysis_agent`) gets a tool `bi_analysis__propose_dashboard`: `{reply, analyses:
-[<analysis as for bi_analysis__propose>...], order: [slug, ...]}`. Each proposed analysis is run with its
-defaults and its chart checked (as `bi_analysis__propose` does); `order` may name proposed slugs and slugs
-already saved in the vault, and nothing else (a problem goes back to the model). The suggestion
-(`aep.bi.analysis_suggestion/v1`, additive key `dashboard: {order, hidden}` beside `analyses: [...]`) shows the
-analyses with previews and the resulting order; 「套用」 stages every analysis and the new `meta:dashboard` in
-one apply (`analysis_session.apply_suggestion`), marked applied like other suggestions.
+The analysis AI (T3, `bi_analysis_agent`) gets a tool `bi_analysis__propose_dashboard`: `{reply?, analyses:
+[<analysis as for bi_analysis__propose>...], order: [slug, ...]}`, at most 12 new analyses. Each is run
+with its defaults and its chart checked (as `bi_analysis__propose` does); `order` lists distinct slugs,
+each proposed or already in the vault's working copy (`analysis_session.order_problem`). A problem goes
+back to the model, naming the analysis. The suggestion (`aep.bi.analysis_suggestion/v1`, additive keys
+`dashboard: {analyses, order}` and `previews: {slug: table}` (200 rows each), `analysis: null`) shows the
+order, each new analysis with its preview chart, and 「套用 Dashboard」. Apply
+(`analysis_session.apply_suggestion`) checks first and stages nothing if the order no longer holds or a
+proposed slug was saved meanwhile (`analysis_exists`); otherwise it stages every analysis and
+`meta:dashboard` with `hidden` = the vault's other analyses, and marks the turn applied with the units.
 
 ### K2 Import the order from an Atlas dashboard
 

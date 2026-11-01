@@ -4055,6 +4055,12 @@ s-k-20261011T102952` (not published).
     `propose_change` kind `bi_analysis` (web only; SQL, or a published SQL analysis copied); the card runs
     it on the working copy; Apply stages `analysis:<slug>` (`host_runtime/bi_chat_save.py`, on the ADR-K10
     list). Tests `test_bi_chat_save` (13). Next: K1.
+  - [x] 2026-11-01, Claude Code: BI K1, the analysis AI proposes a dashboard: harness tool
+    `bi_analysis__propose_dashboard` (new analyses run and checked, order of proposed or saved slugs); the
+    suggestion shows the order and previews; 「套用 Dashboard」 stages the analyses and `meta:dashboard` in
+    one step (others hidden, never deleted; nothing staged if a slug was saved meanwhile). Tests
+    `test_bi_dashboard_proposal` (8); `test_bi_analyses` lists the new tool. The page part is checked by the
+    script parse test only (no browser step yet). Next: K2 (Atlas golden files at Atlas `49600737`).
 
 ## Voice input: Telegram voice and the Agent Web microphone (2026-11-01)
 

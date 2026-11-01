@@ -12987,6 +12987,7 @@ async function biAnalyses(vaultId) {
 function biAnalysisSuggestion(session, turn, index) {
   const s = turn.suggestion;
   const parts = [bh("p", "", bh("strong", "", "AI："), s.reply)];
+  if (s.dashboard) return parts.concat(biDashboardSuggestion(session, turn, index));
   if (!s.analysis) return parts;
   parts.push(bh("p", "", bh("strong", "", s.analysis.title)),
     bh("details", "", bh("summary", "", s.analysis.kind === "sql" ? "看 SQL" : "看腳本"),
@@ -13004,6 +13005,37 @@ function biAnalysisSuggestion(session, turn, index) {
       biNotice(true, "已存成分析「" + s.analysis.title + "」；commit 並 push 後大家才會看到。");
     }, "go", "把這個分析存進知識庫")));
   }
+  return parts;
+}
+
+function biDashboardSuggestion(session, turn, index) {
+  // A dashboard the analysis AI proposed (BI K1): the order, each new analysis with its
+  // preview, and one 「套用 Dashboard」 that stages them and the order together.
+  const d = turn.suggestion.dashboard, previews = turn.suggestion.previews || {};
+  const fresh = new Map(d.analyses.map((a) => [a.slug, a]));
+  const parts = [bh("p", "", bh("strong", "", "Dashboard（由上到下）")),
+    bh("ol", "bi-dash-order", ...d.order.map((slug) => bh("li", "",
+      fresh.has(slug) ? fresh.get(slug).title + "（新）" : slug + "（知識庫已有）")))];
+  for (const a of d.analyses) {
+    parts.push(bh("p", "", bh("strong", "", a.title)),
+      bh("details", "", bh("summary", "", a.kind === "sql" ? "看 SQL" : "看腳本"),
+        bh("pre", "bi-code", a.code)));
+    if (previews[a.slug]) parts.push(biChart(previews[a.slug], a.chart));
+  }
+  parts.push(bh("p", "bi-meta", "不在順序裡的分析會在 Dashboard 隱藏，不會刪除。"));
+  if (turn.applied) {
+    parts.push(bh("p", "bi-meta", "已套用 Dashboard（commit 並 push 後大家才會看到）。"));
+    return parts;
+  }
+  parts.push(bh("div", "bi-actions", biButton("套用 Dashboard", async () => {
+    const reply = await biCall("/api/bi/sessions/" + session.id + "/apply",
+      {dataset: bi.analysisAi.dataset, turn: index});
+    bi.analysisAi.session = reply.session;
+    biBuildSessionLog("bi-b-ana-log", reply.session, biAnalysisSuggestion);
+    biVaultState(await call("/api/bi/vaults/" + bi.verVault + "/status"));
+    biNotice(true, "已套用 Dashboard：" + d.analyses.length + " 個新分析與順序；"
+      + "commit 並 push 後大家才會看到。");
+  }, "go", "把這些分析與 Dashboard 順序存進知識庫")));
   return parts;
 }
 
