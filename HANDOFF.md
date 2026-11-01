@@ -46,8 +46,10 @@ CER limit 0.20 from the measurement; findings, speed and the dropped-clause risk
 (model path, the hash above, and `voice.hints` with the product and tool names the owner says; without
 hints English names are unreliable). Enabling voice needs an Agent Web restart: check `/api/tasks` first.
 
-**Next actions.** (1) Done: local `main` fast-forwarded to this branch (not pushed). (2) Owner: the open
-items above; pushing `main` is the owner's call.
+**Next actions.** (1) Done: `main` pushed with the owner's OK (`8d743324`, after a pre-push full suite of 4622
+passed); GitHub Platform verification run 41307727192 green, including the Windows preview bundle (fixed in
+`8d743324`: python-dateutil 4 dropped six). (2) Owner: the open items above. (3) Optional, owner's call: an A/B of
+`voice.hints` on the owner's own recordings with reference transcripts; telling the Agent that a turn was spoken.
 
 ## BI analysis dashboard and domain retirement (2026-11-01, Claude Code)
 
