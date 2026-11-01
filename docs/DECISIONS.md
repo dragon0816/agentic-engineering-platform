@@ -5944,3 +5944,33 @@ The owner answered the three questions the voice input design (`docs/phases/VOIC
   fails; the transcript is stored where the equivalent typed text would be. Rejected: keeping the audio (allows
   re-transcription and benchmarks, but stores recordings of people's voices) and deleting both (loses the record
   of what the person asked).
+
+## 2026-11-01: Voice input, remaining design choices (Voice Phase 1, owner accepted the recommendations)
+
+The owner accepted every recommendation in `docs/phases/VOICE_INPUT.md` §7.2:
+
+- **STT package: `faster-whisper` with Whisper small int8**, large-v3-turbo as a configurable upgrade, in an
+  optional `voice` extra so a host without voice installs nothing new. Rejected: `sherpa-onnx` + SenseVoice-Small
+  (faster, but the model licence needs review and output is Simplified Chinese) and `pywhispercpp` (smaller,
+  less active binding project).
+- **A spoken reply never confirms an open card.** A spoken 「好」 does not approve an already shown confirmation
+  card; the person taps the button. A spoken 「取消」 cancels (it only removes a side effect) and 「修改」 opens
+  editing. This keeps an existing confirmation from being passed by a mis-transcription; it adds no new step.
+  Rejected: treating spoken words like typed ones at a card, and ignoring voice entirely while a card is open.
+- **A separate transcript record is kept** under `voice/transcripts/` for traceability, purged like task result
+  summaries (default 30 days), besides the sent text in the conversation history. Rejected: conversation history
+  only.
+- **Telegram media:** `voice` messages always; `audio` files only within the same limits; `video_note` refused.
+  Rejected: `voice` only.
+- **Traditional Chinese output** through OpenCC `s2twp` (`opencc`, Apache-2.0) plus a Traditional initial prompt.
+  Rejected: initial prompt only (less reliable).
+- **Limits:** 180 s and 10 MB per message on both channels; the Agent Web recorder stops itself at the limit.
+- **Test fixtures** are generated with Windows' built-in TTS voices and committed. Rejected: eSpeak NG (less
+  natural) and generating fixtures at test time (not reproducible on CI).
+- **Model delivery:** an owner-approved model package (files plus sha256 pinned in `host.json`) installed into
+  the host data directory; the host never downloads a model by itself. Rejected: asking IT to allow Hugging Face
+  URLs through the proxy.
+- **Voice is off by default** and enabled per host by the owner (the Personal Agent PC running the Telegram
+  ingress).
+- **Fake Bot API test seam:** `api_base` stays HTTPS-only; tests redirect through an injected `Transport`.
+  Rejected: allowing `http://127.0.0.1` in the production validator.
