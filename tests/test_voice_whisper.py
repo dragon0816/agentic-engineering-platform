@@ -15,7 +15,7 @@ from typing import Any
 import pytest
 
 from voice import whisper
-from voice.contracts import VoiceConfig
+from voice.contracts import VoiceConfig, bare_word
 from voice.metrics import cer
 from voice.service import _opencc
 from voice.stt import Pcm16k, SttError
@@ -187,8 +187,10 @@ def test_cer_normalises_case_width_and_punctuation() -> None:
 
 
 MODEL_DIR = os.environ.get("AEP_VOICE_MODEL_DIR", "")
-#: Until the V0 laptop measurement sets it (docs/phases/VOICE_INPUT.md §6).
-CER_LIMIT = 0.35
+#: V0 (docs/phases/VOICE_INPUT.md §6.2): Whisper small int8 with these hints scored at most 0.105
+#: on these fixtures (zh_coding: the synthetic voice reads "UTF-8" as 「UTF 橫線 8」); about twice
+#: that leaves room for CPU and library differences. Without hints it was 0.368.
+CER_LIMIT = 0.20
 
 
 @pytest.mark.skipif(not MODEL_DIR, reason="AEP_VOICE_MODEL_DIR names no installed model")
@@ -207,11 +209,18 @@ def test_real_engine_on_the_synthetic_speech(monkeypatch: pytest.MonkeyPatch) ->
         )
     )
     manifest = json.loads((FIXTURES / "manifest.json").read_text(encoding="utf-8"))
+    convert = _opencc()
     for entry in manifest["fixtures"]:
-        if entry["kind"] != "speech" or len(entry["text"]) < 6:
+        if entry["kind"] != "speech":
             continue
         decoded = audio.decode((FIXTURES / entry["file"]).read_bytes(), "audio/wav", VoiceConfig())
-        heard = provider.transcribe(decoded, language=entry["language"], hints=()).text
-        convert = _opencc()
+        # The hints reach the engine as they do through VoiceService.
+        heard = provider.transcribe(
+            decoded, language=entry["language"], hints=provider.config.hints
+        ).text
         heard = convert(heard) if convert is not None else heard
-        assert cer(entry["text"], heard) <= CER_LIMIT, (entry["name"], heard)
+        if len(entry["text"]) < 6:
+            # A card word must come out as the word itself (「好」, 「取消」).
+            assert bare_word(heard) == entry["text"], (entry["name"], heard)
+        else:
+            assert cer(entry["text"], heard) <= CER_LIMIT, (entry["name"], heard)
