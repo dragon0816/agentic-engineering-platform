@@ -5925,3 +5925,22 @@ slim migration prompt on the page. What D3 did not move, and where it goes now:
   configuration (`domains_left`), with the same preview and confirm as D3; local datasets are written directly.
   The old reader lives in `migrate.py` only. Rejected: migrating on open without a preview (D3's rule is
   preview, then the person confirms).
+
+## 2026-11-01: Voice input for Telegram and Agent Web, owner answers (Voice Phase 1)
+
+The owner answered the three questions the voice input design (`docs/phases/VOICE_INPUT.md`) left open:
+
+- **Speech-to-text runs locally.** Audio is transcribed on the Host PC; no cloud STT API is used, so spoken
+  company content never leaves the PC. Rejected: a cloud STT API (better accuracy and no local CPU cost, but the
+  audio leaves the PC). The concrete local package and model are still to be approved by the owner before they
+  are added as a dependency (new third-party package rule).
+- **A voice instruction may start work directly.** Once the person sees the transcript, a voice request for
+  coding, a knowledge question or a workflow starts like the same typed text would, with no extra
+  voice-specific confirm step. Voice adds no confirmation and removes none: every confirmation or approval the
+  text path already has (for example the owner's approval of a workflow run that changes something) still
+  applies unchanged. Rejected: always asking the person to confirm the transcript before acting (safer against
+  mis-transcription, but slower than typing for every request).
+- **Only the transcript is kept.** The audio is deleted after transcription, including when transcription
+  fails; the transcript is stored where the equivalent typed text would be. Rejected: keeping the audio (allows
+  re-transcription and benchmarks, but stores recordings of people's voices) and deleting both (loses the record
+  of what the person asked).
