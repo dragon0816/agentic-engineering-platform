@@ -14,8 +14,10 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+from bi_pack_fixtures import market as _market
+
 from capabilities.bi_cards import dashboard, market
-from capabilities.bi_cards.store import BiStore, PlannedRow
+from capabilities.bi_cards.store import BiStore
 from host_runtime.bi_cards_api import route
 
 V2 = "bi.schema/v1.1@2.0.0"
@@ -26,105 +28,6 @@ def _call(ws: Path, method: str, path: str, body: Any = None, **query: str) -> d
     status, reply = route(ws, "tester", method, path, query, body)
     assert status == 200, reply
     return dict(reply)
-
-
-def _put(store: BiStore, entity_type: str, *rows: dict[str, Any]) -> None:
-    planned = [
-        PlannedRow(
-            row=n,
-            entity_type=entity_type,
-            canonical_key=values["name"],
-            name=values["name"],
-            values={"domain": ["AIDC"], **values},
-            synthetic=False,
-        )
-        for n, values in enumerate(rows, start=1)
-    ]
-    store.apply(planned, filename="fixture.csv", entity_type=entity_type, actor="tester")
-
-
-def _market(ws: Path) -> BiStore:
-    _call(ws, "POST", "/api/bi/datasets", {"name": "m", "schema": V2})
-    store = BiStore(ws, "m")
-    _put(
-        store,
-        "Node",
-        {"name": "L1-CMP-Accelerator", "layer": "L1"},
-        {"name": "L3-PWR-Rack", "layer": "L3"},
-        {"name": "X-Shared-Lab", "layer": "X"},
-    )
-    _put(store, "Technology", {"name": "800VDC"})
-    _put(
-        store,
-        "Ecosystem",
-        {
-            "name": "Power Co",
-            "node": "L3-PWR-Rack",
-            "technologies": ["800VDC"],
-            "role": "power-system",
-        },
-        {"name": "Lab Co", "nodes": ["L1-CMP-Accelerator", "L3-PWR-Rack"], "role": "chipset"},
-    )
-    _put(store, "Account", {"name": "ODM Co"}, {"name": "Quiet Co"})
-    _put(store, "Competitor", {"name": "Rival"})
-    _put(store, "Application", {"name": "Rack power test"})
-    _put(
-        store,
-        "TestSolution",
-        {"name": "Our power suite", "applications": ["Rack power test"], "status": "planning"},
-        {"name": "Rival suite", "vendor": "Rival", "applications": ["Rack power test"]},
-        {"name": "Odd suite", "vendor": "R&S"},
-    )
-    _put(
-        store,
-        "Trend",
-        {"name": "800V racks", "affected_nodes": ["L3-PWR-Rack"], "related_tech": ["800VDC"],
-         "related_ecosystem": ["Power Co"], "time_to_demand": "0-6m", "measurement_impact": 3,
-         "our_fit": 2},
-    )  # fmt: skip
-    _put(
-        store,
-        "CustomerProduct",
-        {"name": "AI Rack 1", "account": "ODM Co", "node": "L3-PWR-Rack",
-         "technologies": ["800VDC"],
-         "launch_date": "2027-01-15", "inferred_applications": ["Rack power test"],
-         "ecosystem": ["Power Co", "Ghost Co"]},
-    )  # fmt: skip
-    _put(
-        store,
-        "SupplyLink",
-        {"name": "Power Co → ODM Co", "supplier": "Power Co", "customer": "ODM Co",
-         "customer_products": ["AI Rack 1"], "evidence_grade": "B", "supply_stage": "pilot",
-         "source": "報告 §7"},
-        {"name": "Lab Co → ODM Co", "supplier": "Lab Co", "customer": "ODM Co",
-         "evidence_grade": "D", "nodes": ["L1-CMP-Accelerator"]},
-    )  # fmt: skip
-    _put(
-        store,
-        "RevenueFact",
-        {"name": "ODM Co 2025", "company": "ODM Co", "rev_layer": "company", "amount": 100.0,
-         "basis": "reported", "period": "2025"},
-    )  # fmt: skip
-    _put(
-        store,
-        "Opportunity",
-        {"name": "Deal open", "deal_stage": "proposal", "our_solutions": ["Rival suite"],
-         "applications": ["Rack power test"]},
-        {"name": "Deal lost", "deal_stage": "lost", "our_solutions": ["Our power suite"],
-         "applications": ["Rack power test"], "competitors": ["Rival"]},
-    )  # fmt: skip
-    _put(store, "WinLoss", {"name": "Lost to Rival", "competitors": ["Rival"], "outcome": "lost",
-                            "primary_reason": "price"})  # fmt: skip
-    _put(store, "RoadmapRequest", {"name": "Faster sweep", "impact": 4, "customer_count": 3,
-                                   "request_status": "submitted"})  # fmt: skip
-    _put(store, "VisitLog", {"name": "", "date": "2026-07-01", "title": "Kick-off",
-                             "opportunity": "Deal open",
-                             "follow_up_date": "2026-08-01"})  # fmt: skip
-    _put(
-        store, "Battlecard", {"name": "vs Rival", "competitor": "Rival", "content_status": "draft"}
-    )
-    _put(store, "Ecosystem", {"name": "SAMPLE-Fake Co", "node": "L3-PWR-Rack"})
-    return store
 
 
 def _sections(store: BiStore, **options: Any) -> dict[str, dict[str, Any]]:

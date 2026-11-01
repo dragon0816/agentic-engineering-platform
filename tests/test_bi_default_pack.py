@@ -1,126 +1,43 @@
-"""The default analysis pack equals the coded Dashboard, section by section (BI P2).
+"""The default analysis pack gives the coded Dashboard's answers, section by section (BI P2).
 
 `docs/phases/BI_ANALYSIS_DASHBOARD.md` §4.2–§4.3. Every section of
 `dashboard.py` (§1–§19) and `market.py` (§20–§31) became a pack script; on the
-fixtures (the robotics demo on schema v4, the market fixture on schema 2.0.0
-with a sample card, the feed fixture vault) each returns the Python section's
-rows for every domain, with and without sample cards. A card cell becomes its
-name and a flagged row gets `level` (`gap` for red, `warning` otherwise).
-Sections not in the pack are listed in its report. Packs import (what the
-schema satisfies) and export. All data is fictional.
+fixtures of `bi_pack_fixtures` (the robotics demo on schema v4, the market
+fixture on schema 2.0.0 with a sample card, the feed fixture vault) each returns
+the coded section's answer kept in `tests/fixtures/bi_default_pack/golden/` for
+every domain, with and without sample cards (the chains and the coverage matrix:
+`test_bi_pack_chains`). The pack lists what it does not hold. Packs import (what
+the schema satisfies) and export. All data is fictional.
 """
 
 from __future__ import annotations
 
 import json
-import shutil
-import sqlite3
-import tempfile
-from collections.abc import Callable, Iterator
-from datetime import date
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Any
 
 import pytest
-from test_bi_market import _market
+from bi_pack_fixtures import (
+    CHAINS,
+    TODAY,
+    Runner,
+    build,
+    golden,
+    new_vault,
+    pack_results,
+)
 from test_bi_vault import _call, _ok, _refused
 
-from capabilities.bi_cards import analyses, catalog, dashboard, market, packs, service, vault
+from capabilities.bi_cards import analyses, catalog, packs, service, vault
 from capabilities.bi_cards.store import BiStore
-from scripts import bi_feed_fixtures as fixtures
 
-TODAY = date(2026, 10, 29)
-#: Sections whose parity is checked on a migrated vault (`test_bi_pack_chains`).
-LATER = {"chain-summary", "chain-view", "chain-overlap", "coverage"}
-#: slug -> (the coded section, whether it flags rows, what else it takes).
-CODED: dict[str, tuple[Callable[..., dict[str, Any]], bool, str]] = {
-    "gaps": (dashboard.gaps, True, ""),
-    "trend-coverage": (dashboard.trend_coverage, True, ""),
-    "demand-without-opportunity": (dashboard.demand_without_opportunity, True, ""),
-    "solutions-vs-opportunities": (dashboard.solutions_vs_opportunities, True, ""),
-    "funnel": (dashboard.funnel, False, ""),
-    "technologies-without-concept": (dashboard.technologies_without_concept, True, ""),
-    "product-completeness": (dashboard.product_completeness, True, ""),
-    "trend-priority": (dashboard.trend_priority, False, ""),
-    "launch-timeline": (dashboard.launch_timeline, False, ""),
-    "node-technology": (dashboard.node_technology, False, ""),
-    "recent-signals": (dashboard.recent_signals, False, ""),
-    "competitor-coverage": (dashboard.competitor_coverage, False, ""),
-    "assumed-share": (dashboard.assumed_share, False, ""),
-    "stale": (dashboard.stale, False, "today"),
-    "supplier-dependency": (dashboard.supplier_dependency, False, ""),
-    "trend-links": (market.trend_links, True, ""),
-    "win-loss": (market.win_loss, True, ""),
-    "roadmap-gaps": (market.roadmap_gaps, True, ""),
-    "enablement": (market.enablement, True, ""),
-    "customer-contact": (market.customer_contact, True, "today"),
-    "supply-evidence": (market.supply_evidence, True, ""),
-    "timing-gaps": (market.timing_gaps, True, "today"),
-    "supply-grades": (market.supply_grades, True, ""),
-    "revenue-layers": (market.revenue_layers, True, ""),
-    "chain-integrity": (market.chain_integrity, True, ""),
-    "same-names": (market.same_names, True, ""),
-    "pending-links": (market.pending_links, False, "links"),
-}
-
-
-def _coded_table(section: dict[str, Any], level: bool) -> dict[str, Any]:
-    """The oracle: a coded section as the table its analysis must return."""
-    levels = {f["row"]: "gap" if f["level"] == "red" else "warning" for f in section["flags"]}
-    rows = []
-    for number, row in enumerate(section["rows"]):
-        cells = [c["label"] if isinstance(c, dict) else c for c in row]
-        rows.append([*cells, levels.get(number)] if level else cells)
-    assert level or not section["flags"], section["id"]
-    return {"columns": [*section["columns"], *(["level"] if level else [])], "rows": rows}
-
-
-class _Runner:
-    """Runs pack scripts in this process on a read-only copy (the same code the
-    guarded process runs; the guard is checked separately)."""
-
-    def __init__(self, store: BiStore) -> None:
-        self.folder = Path(tempfile.mkdtemp(prefix="aep-pack-parity-"))
-        self.db = analyses._copy(store.path, self.folder)
-
-    def __call__(self, code: str, params: dict[str, Any]) -> dict[str, Any]:
-        db = sqlite3.connect(f"file:{self.db.as_posix()}?mode=ro", uri=True)
-        db.row_factory = sqlite3.Row
-
-        def query(sql: str, values: Any = ()) -> list[dict[str, Any]]:
-            return [dict(r) for r in db.execute(sql, values)]
-
-        space: dict[str, Any] = {"__name__": "__analysis__", "query": query, "PARAMS": params}
-        try:
-            exec(compile(code, "script.py", "exec"), space)  # noqa: S102 - the pack's own scripts
-        finally:
-            db.close()
-        return {"columns": list(space["result"]["columns"]), "rows": space["result"]["rows"]}
-
-    def close(self) -> None:
-        shutil.rmtree(self.folder, ignore_errors=True)
-
-
-def _robotics(tmp_path: Path) -> BiStore:
-    store = BiStore(tmp_path / "robotics")
-    service.load_demo(store)
-    return store
-
-
-def _feed_vault(tmp_path: Path) -> BiStore:
-    ws = tmp_path / "feed"
-    ws.mkdir()
-    copy = tmp_path / "feed-shared" / "vault"
-    shutil.copytree(fixtures.VAULT_DIR, copy)
-    fixtures.join(ws, copy)
-    return BiStore(ws, vault.dataset_name(fixtures.VAULT_ID))
+#: Sections whose answers come from the `chains` fixture (`test_bi_pack_chains`).
+LATER = {*CHAINS, "coverage"}
 
 
 @pytest.fixture(params=["robotics", "market", "feed"])
-def fixture_store(request: pytest.FixtureRequest, tmp_path: Path) -> Iterator[BiStore]:
-    build = {"robotics": _robotics, "market": lambda p: _market(p / "market"),
-             "feed": _feed_vault}[request.param]  # fmt: skip
-    yield build(tmp_path)
+def fixture_name(request: pytest.FixtureRequest) -> Iterator[str]:
+    yield str(request.param)
 
 
 def _pack_code(store: BiStore) -> dict[str, str]:
@@ -128,57 +45,37 @@ def _pack_code(store: BiStore) -> dict[str, str]:
     return {a["slug"]: packs.fill(a["code"], registry) for a in packs.default_pack()["analyses"]}
 
 
-def test_every_section_returns_the_coded_rows(fixture_store: BiStore) -> None:
-    store = fixture_store
-    registry = catalog.for_store(store)
-    links = packs.link_fields(registry)
-    code = _pack_code(store)
-    assert set(code) == set(CODED) | LATER
-    domains = sorted({*registry.domains, "robotics", "wireless", "AIDC"})
-    run = _Runner(store)
-    compared = 0
-    try:
-        for include_sample in (False, True):
-            cards = dashboard._cards(store, include_sample)
-            for domain in domains:
-                params = {"domain": domain, "include_sample": include_sample,
-                          "today": TODAY.isoformat()}  # fmt: skip
-                for slug, (build, level, extra) in CODED.items():
-                    args: tuple[Any, ...] = (cards, domain)
-                    if extra == "today":
-                        args = (*args, TODAY)
-                    elif extra == "links":
-                        args = (*args, links)
-                    expected = _coded_table(build(*args), level)
-                    found = run(code[slug], params)
-                    assert found == expected, (slug, domain, include_sample)
-                    compared += 1
-    finally:
-        run.close()
-    assert compared == len(CODED) * len(domains) * 2
+def test_every_section_returns_the_golden_answer(fixture_name: str, tmp_path: Path) -> None:
+    expected = golden(fixture_name)
+    store = build(fixture_name, tmp_path)
+    assert expected["domains"] == sorted(
+        {*catalog.for_store(store).domains, "robotics", "wireless", "AIDC"}
+    )
+    assert set(_pack_code(store)) == set(expected["results"]) | LATER
+    found = pack_results(store, expected["results"])
+    for slug, tables in expected["results"].items():
+        assert len(tables) == len(expected["domains"]) * 2, slug
+        for where, table in tables.items():
+            assert found[slug][where] == table, (slug, where)
 
 
-def test_the_market_fixture_is_not_empty_where_it_matters(tmp_path: Path) -> None:
+def test_the_market_fixture_is_not_empty_where_it_matters() -> None:
     """The parity above compares real rows, not empty tables, on the market fixture."""
-    store = _market(tmp_path)
-    run = _Runner(store)
-    try:
-        code = _pack_code(store)
-        params = {"domain": "AIDC", "include_sample": False, "today": TODAY.isoformat()}
-        filled = {s for s in CODED if run(code[s], params)["rows"]}
-        flagged = {
-            s for s in CODED if any(r[-1] for r in run(code[s], params)["rows"]) and CODED[s][1]
-        }
-    finally:
-        run.close()
+    results = golden("market")["results"]
+    filled = {s for s, t in results.items() if t["AIDC|real"]["rows"]}
+    flagged = {
+        s
+        for s, t in results.items()
+        if t["AIDC|real"]["columns"][-1] == "level" and any(r[-1] for r in t["AIDC|real"]["rows"])
+    }
     assert {"trend-links", "win-loss", "supply-evidence", "timing-gaps", "chain-integrity",
             "supply-grades", "revenue-layers", "pending-links", "gaps"} <= filled  # fmt: skip
     assert {"timing-gaps", "chain-integrity", "supply-evidence"} <= flagged
 
 
 def test_pack_scripts_run_in_the_guarded_process(tmp_path: Path) -> None:
-    store = _market(tmp_path)
-    run = _Runner(store)
+    store = build("market", tmp_path)
+    run = Runner(store)
     params = {"domain": "AIDC", "include_sample": True, "today": TODAY.isoformat()}
     try:
         for slug, code in _pack_code(store).items():
@@ -190,7 +87,7 @@ def test_pack_scripts_run_in_the_guarded_process(tmp_path: Path) -> None:
         run.close()
 
 
-def test_the_pack_lists_what_it_does_not_hold_yet() -> None:
+def test_the_pack_lists_what_it_does_not_hold() -> None:
     pack = packs.default_pack()
     assert pack["format"] == packs.FORMAT and pack["id"] == "bi-market-default"
     kept = {k["section"] for k in pack["report"]["kept"]}
@@ -198,25 +95,16 @@ def test_the_pack_lists_what_it_does_not_hold_yet() -> None:
     for item in pack["analyses"]:
         assert analyses.unit_problem(f"analysis:{item['slug']}", item) is None, item["slug"]
         assert len(item["code"]) <= analyses.MAX_CODE
-    # Every coded section is either in the pack or listed as kept.
-    coded = {b.__name__ for b in dashboard.SECTIONS} | {b.__name__ for b, _ in market.SECTIONS}
-    coded |= {"pending_links"} | {b.__name__ for b in market.CHAIN_SECTIONS}
-    held = {source for _, source, *_ in packs.SECTIONS}
-    assert coded <= held and "coverage" in held
+    # Every coded section with a golden answer is in the pack.
+    held = {slug for slug, *_ in packs.SECTIONS}
+    for name in ("robotics", "market", "feed", "chains"):
+        assert set(golden(name)["results"]) <= held, name
 
 
 # -- import and export ----------------------------------------------------------------
 
 
-def _vault(tmp_path: Path, schema: str, name: str, *, pack: bool = False) -> tuple[Path, str]:
-    ws = tmp_path / f"ws-{name}"
-    ws.mkdir()
-    shared = tmp_path / f"shared-{name}"
-    shared.mkdir()
-    made = _ok(_call(ws, "POST", "/api/bi/vaults", {
-        "path": str(shared), "title": f"Pack {name}", "purpose": "虛構", "schema": schema,
-        "author": "alice", "id": f"pack-{name}", "default_pack": pack}))  # fmt: skip
-    return ws, str(made["vault"]["id"])
+_vault = new_vault
 
 
 def test_a_new_vault_starts_with_the_default_pack_committed(tmp_path: Path) -> None:

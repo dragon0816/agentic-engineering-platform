@@ -4000,3 +4000,9 @@ s-k-20261011T102952` (not published).
     drops the coded chains when the chain analyses are drawn. Parity on a vault with a configuration: coded
     sections before the D3 migration equal the analyses after it (`test_bi_pack_chains`, 2). Next: golden files
     of the coded sections, then P5.
+  - [x] 2026-11-01, Claude Code: golden answers of the coded Dashboard before P5:
+    `tests/fixtures/bi_default_pack/golden/{robotics,market,feed,chains}.json` from the coded sections on the
+    fixtures of `tests/bi_pack_fixtures.py` (fixed clock, seeded ids; rebuild compared equal). The parity tests
+    (`test_bi_default_pack`, `test_bi_pack_chains`) compare the pack with the golden files instead of calling
+    the coded sections; `test_bi_pack_golden` (4) checks the files against the coded sections until P5 removes
+    both. Next: P5.

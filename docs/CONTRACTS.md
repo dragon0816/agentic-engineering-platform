@@ -6221,3 +6221,10 @@ Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §3–§4.3. Code `capabilities/bi
   A schema upgrade after import does not refresh it (re-import the pack), as for `LINK_FIELDS`.
 - **Board.** A Dashboard whose analyses include a chain analysis no longer draws the coded A–A3 from a domain
   configuration. Vaults created before this change get the new analyses by importing the pack again.
+- **Golden answers.** `tests/fixtures/bi_default_pack/golden/<fixture>.json` (`aep.bi.pack_golden/v1`: `fixture`,
+  `today`, `domains`, `made_from`, `results: {slug: {"<domain>|real"|"<domain>|sample"|"*": {"columns",
+  "rows"}}}`) hold the coded Dashboard's answers on the fixtures of `tests/bi_pack_fixtures.py` (robotics, market,
+  feed, chains; built under the feed fixture's fixed clock and seeded ids). The pack's parity tests compare with
+  them, so they outlive the coded sections; `tests/test_bi_pack_golden.py` rebuilt them from the coded sections
+  (`AEP_WRITE_PACK_GOLDEN=1` writes) and is removed with those sections in P5. After P5 the files are frozen: a
+  deliberate change of an analysis's answer edits the golden file in the same commit, with the reason.
