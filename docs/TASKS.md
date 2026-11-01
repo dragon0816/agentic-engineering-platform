@@ -4051,6 +4051,10 @@ s-k-20261011T102952` (not published).
     (`truncated`), charted like C1; refusals as codes (`sql_not_allowed`, `sql_one_statement`, `timeout`,
     `sql_failed`). Tests `test_bi_chat_sql` (6: writes, ATTACH, PRAGMA, two statements, time limit, row cap,
     unpublished work unseen, the chart page).
+  - [x] 2026-11-01, Claude Code: BI C3, a chat chart saved as a vault analysis with the owner's approval:
+    `propose_change` kind `bi_analysis` (web only; SQL, or a published SQL analysis copied); the card runs
+    it on the working copy; Apply stages `analysis:<slug>` (`host_runtime/bi_chat_save.py`, on the ADR-K10
+    list). Tests `test_bi_chat_save` (13). Next: K1.
 
 ## Voice input: Telegram voice and the Agent Web microphone (2026-11-01)
 

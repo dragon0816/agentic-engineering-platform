@@ -240,6 +240,18 @@ def pack_sections(
     return _named(items, slugs, db, registry, given, _names(store), strict=slug != "all")
 
 
+def published_analysis(workspace: Path, vault_id: str, slug: str) -> dict[str, Any] | None:
+    """A saved analysis of the version the Agent reads (its unit value and
+    slug), or None; what the chat showed through `bi__query` (BI C3)."""
+    from capabilities.bi_cards import feed, vault
+
+    try:
+        _version, units = feed._published(vault.Vault(workspace, vault_id))
+    except (feed.FeedError, BiStoreError):
+        return None
+    return next((item for item in analyses.saved(units) if item["slug"] == slug), None)
+
+
 def published_sections(
     workspace: Path, vault_id: str, name: str, given: dict[str, Any]
 ) -> list[dict[str, Any]]:

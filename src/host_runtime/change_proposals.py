@@ -53,6 +53,7 @@ ProposalKind = Literal[
     "capability",
     "platform_add",
     "publish",
+    "bi_analysis",
 ]
 PROPOSALS_FILE = Path("proposals") / "change-proposals.json"
 #: Values that are permissions or approvals: never from chat.
@@ -85,6 +86,7 @@ PASTE_WHERE = {
     "capability": "Capabilities",
     "platform_add": "Settings > Shared platform",
     "publish": "Settings > Shared platform",
+    "bi_analysis": "the Knowledge page",
 }
 
 
@@ -231,8 +233,14 @@ class ChangeProposals:
                         "skill|workflow, asset: namespace/name@version or name; install takes "
                         "draft: the draft's name}; platform_add {kind, asset: "
                         "namespace/name@version}; publish {kind, asset, change: patch|minor|major, "
-                        "visibility: private|team|organization|public, note}. Never a secret "
-                        "value, a permission or an approval."
+                        "visibility: private|team|organization|public, note}; "
+                        "bi_analysis {vault (vault-<id>), slug (new: lowercase letters, "
+                        "digits, -), title, question, chart {type: table|bar|line|scatter, "
+                        "x, y}, and either sql (one read-only statement, as you ran it with "
+                        "bi__query) or from_analysis {vault, slug} (a saved SQL analysis you "
+                        "showed)}: it is only staged in that vault; commit, push and publish "
+                        "stay the person's. Never a secret value, a permission or an "
+                        "approval."
                     ),
                     input_contract="host.change-proposal.v1",
                     input_schema={
@@ -1239,6 +1247,37 @@ class ChangeProposals:
         if not reply.get("ok"):
             return False, str(reply.get("message") or reply.get("code"))
         return True, "Submitted; it is waiting for review."
+
+    # bi_analysis (BI C3; the BI side is host_runtime.bi_chat_save) ------------
+
+    def _bi_workspace(self) -> Path:
+        return Path(self.web.runtime.layout.workspace_root)
+
+    def _now_bi_analysis(self, values: Mapping[str, Any]) -> dict[str, Any]:
+        from host_runtime import bi_chat_save
+
+        return bi_chat_save.now(self._bi_workspace(), values)
+
+    def _plan_bi_analysis(self, values: Mapping[str, Any], snapshot: dict[str, Any]) -> Plan:
+        from host_runtime import bi_chat_save
+
+        given = _only("bi_analysis", values, bi_chat_save.FIELDS)
+        try:
+            planned = bi_chat_save.plan(self._bi_workspace(), given, snapshot)
+        except bi_chat_save.Refused as refused:
+            raise ProposalRefused(refused.message) from None
+        return Plan(
+            title=planned.title[:160],
+            values=planned.values,
+            rows=[CardRow(label=label, after=after[:400]) for label, after in planned.rows],
+            effects=planned.effects,
+            telegram_ok=False,
+        )
+
+    def _apply_bi_analysis(self, proposal: ChangeProposal) -> tuple[bool, str]:
+        from host_runtime import bi_chat_save
+
+        return bi_chat_save.apply(self._bi_workspace(), proposal.values)
 
 
 def diff_summary(rows: tuple[CardRow, ...] | list[CardRow]) -> str:

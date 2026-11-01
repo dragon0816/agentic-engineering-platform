@@ -102,17 +102,22 @@ proposes; Agent Web shows the change card (Apply/Cancel); the owner's press is t
 (`POST /api/cards/decide`); a stale fingerprint is refused; the card expires after the pattern's 30 minutes.
 **Web only** (not in `TELEGRAM_KINDS`): the owner approves in Agent Web.
 
-Values: `vault` (a vault on this PC), `slug` (must not exist in the vault's working copy), `title`,
-`question`, the chart spec, and the analysis itself, either
-- `from_analysis`: a saved analysis of a vault (what the chat showed through `bi__query`), copied with its
-  kind, code, params and requires; or
-- `kind` + `code` (+ `params`, `requires`): SQL or a guarded script the model wrote for what it showed.
+Values: `vault` (`vault-<id>`, a vault on this PC), `slug` (must not exist in the vault's working copy),
+`title`, `question`, the chart spec, and the analysis itself, **SQL only** (as C1b: never a script from
+the chat), either
+- `sql`: the statement the model ran with `bi__query`; or
+- `from_analysis` `{vault, slug}`: a saved **SQL** analysis of a vault's published version (what the chat
+  showed through `bi__query`), copied with its code, params and requires; a script analysis is refused
+  (copy it with an analysis pack on the Knowledge page).
 
-Plan (`_plan_bi_analysis`): `analyses.checked`, then run on the target vault's **working** data with the
-default parameters, `checked_chart` against the result's columns; the card's rows show vault, slug, title,
-chart and the first rows of the result. A problem refuses the proposal (back to the model). Apply
-(`_apply_bi_analysis`): `analyses.save` (runs and checks again, then **stages** `analysis:<slug>`). Commit, push
-and publish stay the person's manual steps on the Knowledge page; once published, Atlas shows it.
+The BI side is `host_runtime/bi_chat_save.py` (`now`, `plan`, `apply`), so the generic
+`change_proposals.py` names no BI type (ADR-K10). Plan: `analyses.checked`, then `analyses.run_sql` on the
+target vault's **working** data with the default parameters, `checked_chart` against the result's columns;
+the card's rows show vault, analysis, chart, SQL and the first rows of the result. A problem refuses the
+proposal (back to the model). Apply: `analyses.save` (runs and checks again, then **stages**
+`analysis:<slug>`). The fingerprint is the working copy's unit under the slug: a save meanwhile makes the
+card stale. Commit, push and publish stay the person's manual steps on the Knowledge page; once
+published, Atlas shows it.
 
 ## 4. Part K: where a vault's Dashboard comes from
 
@@ -161,7 +166,7 @@ after they are committed.
 | C1 | `bi__query` carries `chart` (saved spec, model's checked spec, or the default) | — |
 | C2 | The turn attaches the self-contained chart HTML (shared renderer); browser test: renders in the chat file viewer | C1 |
 | C1b | Guarded read-only ad-hoc SQL in `bi__query` (published data, 10 s, 200 rows, charted like C1) | C1, C2 |
-| C3 | Save a chat chart as an analysis: proposal → owner's approval → `analyses.save` (staged) | C1 |
+| C3 | Save a chat chart as an analysis (SQL only): proposal → owner's approval → `analyses.save` (staged) | C1, C1b |
 | K1 | The analysis AI proposes a dashboard (analyses + order) applied in one step | — |
 | K2 | Import the order from an Atlas dashboard (dry run, confirm, unmatched and duplicates listed) | Atlas golden files |
 
