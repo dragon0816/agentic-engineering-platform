@@ -4070,6 +4070,11 @@ Design `docs/phases/VOICE_INPUT.md` (owner decisions 2026-11-01 in `docs/DECISIO
   Verification on this branch: every voice test file and the touched Telegram, host, Agent Web, conversation,
   CLI and page tests pass; `ruff format --check`, `ruff check`, `mypy src tests` (902 files) clean. The full
   suite has not been run on this branch.
-- [ ] Orchestrator: full suite on this branch, rebase on local `main`, fast-forward.
+- [x] 2026-11-01, voice orchestrator: full suite on `a3b160db` (worktree `.venv`, own `--basetemp`): 4611
+  passed, 37 skipped (environment), 1 failed: `test_the_fixture_and_golden_files_rebuild_byte_for_byte`, also
+  failing on local `main` `923bd641` because a rebuild makes an empty `vault/sources` folder git cannot keep.
+  Fixed with the owner's OK (`0acad6bd`, check ignores empty folders, with a test); BI tests then pass
+  (`test_bi_build_ui`/`test_bi_sessions_ui` failed once under load in a batch and pass on rerun). V8 docs
+  re-checked (doc-reading tests, ruff, mypy). Local `main` had not moved, so no rebase; fast-forwarded.
 - [ ] Owner: install an approved Whisper small int8 package, pin its hash, run V0's laptop measurement and the
   real-engine test (`AEP_VOICE_MODEL_DIR`), set the CER limit; then the live checks of `VOICE_INPUT.md` §4.6.

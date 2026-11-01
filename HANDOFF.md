@@ -27,7 +27,9 @@ has `voice.enabled`; without it every channel behaves as before.
 **Verification so far.** All voice test files, the touched Telegram/host/Agent Web/conversation/CLI/page tests,
 the 52 integration tests (Telegram 27, Agent Web 25) on `a3b160db`: pass. `ruff format --check .`, `ruff check
 .`, `mypy src tests` (902 files): clean. With the `voice` extra: the codec and OpenCC tests pass. Skipped: the
-real-engine test (no model on the build PC). **The full suite has not been run on this branch.**
+real-engine test (no model on the build PC). **Full suite** on `a3b160db` (own `--basetemp`): 4611 passed,
+37 skipped, 1 failed, a BI fixture check that also failed on `main` (empty `vault/sources` folder git cannot
+keep); fixed in `0acad6bd` with the owner's OK, BI tests pass after it.
 
 **Known points.**
 - Concurrent pytest sessions on one PC share `%TEMP%\pytest-of-<user>` and prune each other's base folders;
@@ -41,8 +43,8 @@ real-engine test (no model on the build PC). **The full suite has not been run o
 `AEP_VOICE_MODEL_DIR`, set the CER limit (provisional 0.35). (2) The live checks of `VOICE_INPUT.md` §4.6, after
 hours. Enabling voice needs an Agent Web restart: check `/api/tasks` first.
 
-**Next actions.** (1) Orchestrator: run the full suite on this branch (with its own `--basetemp`), rebase on
-local `main`, fast-forward. (2) Owner: the open items above.
+**Next actions.** (1) Done: local `main` fast-forwarded to this branch (not pushed). (2) Owner: the open
+items above; pushing `main` is the owner's call.
 
 ## BI analysis dashboard and domain retirement (2026-11-01, Claude Code)
 
