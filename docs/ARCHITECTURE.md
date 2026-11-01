@@ -294,6 +294,14 @@ Engineering / Execution Plane. It projects local Bridge state and calls the
 same Agent used by CLI and Telegram; it does not own routing, policy,
 installation or execution logic.
 
+Voice input (`docs/phases/VOICE_INPUT.md`, owner 2026-11-01) is an input adapter in front of
+the unchanged text path of Telegram and Agent Web, not a new path to the Agent. A Telegram voice
+message or an Agent Web recording is transcribed on this PC by one host `VoiceService` (local
+faster-whisper; no cloud speech service), shown to the person, and then handled exactly as the same
+typed text: the same routing, Workflow forms, approvals and data-trust rules. It adds no confirmation
+and removes none; a transcript never confirms a card. Only the transcript is kept, never the audio.
+Voice is off unless `host.json` enables it, and a host without it behaves as before.
+
 Natural-language conversation uses a bounded Agent loop. Only commands from
 installed Skill manifests are exposed as model tools, and each provider tool
 name resolves back to the manifest's exact capability or Workflow identity.
