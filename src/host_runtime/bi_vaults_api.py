@@ -4,7 +4,8 @@ Contracts: `docs/CONTRACTS.md` "Knowledge repositories: the BI type (R2)". A
 vault is used through every other `/api/bi/*` route as the dataset
 `vault-<id>`; these routes list, create, join, convert and sync vaults and run
 the version operations: commit, push, resolve, discard, history, diff, revert,
-tag and publish; and list or save a skill revision (R3). Publish needs
+tag and publish; and list or save a skill revision (R3); and import a
+Dashboard order from Atlas (BI K2, a dry run first). Publish needs
 `confirm: true` and is an Agent Web action, never a capability the model can
 call. Errors are raised as `BiStoreError` and answered by `bi_cards_api.route`.
 """
@@ -17,7 +18,7 @@ from typing import Any
 
 from capabilities.bi_cards import analyses, migrate, packs, vault, vault_checks
 from capabilities.bi_cards.store import BiStoreError
-from host_runtime import bi_bench, bi_feed_api
+from host_runtime import bi_atlas_import, bi_bench, bi_feed_api
 
 Answer = tuple[int, dict[str, Any]]
 
@@ -83,6 +84,10 @@ def route(
             return 200, analyses.listing(workspace, parts[0])
         if len(parts) == 2 and parts[1] == "packs":
             return 200, packs.summary(workspace, parts[0])
+        if len(parts) == 2 and parts[1] == "atlas-dashboards":
+            # BI K2: the names of Atlas's dashboards (read server-side, loopback).
+            port = bi_atlas_import.port_of(query.get("port"))
+            return 200, {"port": port, "names": bi_atlas_import.names(port)}
         if len(parts) == 2 and parts[1] == "bench":
             wanted = str(query.get("run") or "")
             found = [r for r in bi_bench.reports(workspace, parts[0]) if r["run_id"] == wanted]
@@ -139,6 +144,9 @@ def route(
         # BI D3/D4: a dry run unless `apply` with the dry run's token.
         dataset = vault.dataset_name(vault_id)
         return 200, {"ok": True, **migrate.migrate_domains(workspace, dataset, given, actor)}
+    if action == "atlas-import":
+        # BI K2: a dry run of an Atlas dashboard's order, or `apply` with its token.
+        return 200, {"ok": True, **bi_atlas_import.import_order(workspace, vault_id, given)}
     if action == "packs":
         if isinstance(given.get("export"), dict):
             return 200, {

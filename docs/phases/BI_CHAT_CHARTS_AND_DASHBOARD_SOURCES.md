@@ -143,24 +143,32 @@ proposed slug was saved meanwhile (`analysis_exists`); otherwise it stages every
 
 ### K2 Import the order from an Atlas dashboard
 
-Contract fixed by Atlas's golden files (Codex; vendored read-only into
-`tests/fixtures/atlas_dashboard_golden/` with a drift check like Atlas's `check:aep-bi`). K2 is built only
-after they are committed.
+Contract: Atlas's `docs/AEP_DASHBOARD_READ_CONTRACT.md` (revision 2026-11-01). Its goldens (`list.json`,
+`dashboard-mixed.json`, `dashboard-legacy.json`) are vendored byte for byte from Atlas commit `49600737` into
+`tests/fixtures/atlas_dashboard_golden/` (`SOURCE.md`, `-text` in `.gitattributes`);
+`scripts/check_atlas_dashboard_golden.py --atlas <Atlas repo>` fails on any drift, like Atlas's
+`check:aep-bi` (the test runs it when `AEP_ATLAS_REPO` is set).
 
-- **Read**: Agent Web reads Atlas's loopback API **server-side**: `GET http://127.0.0.1:<port>/dashboards`
-  (names) and `GET /dashboards/{name}` (a schemaVersion 2 document). Port from settings, default 8127; no
-  Origin header (Atlas accepts loopback callers without one); short timeout; at most 2 MB.
-- **Match**: panels whose datasource is the AEP BI one and whose `query.vault` is this vault; `query.slug`
-  names the analysis. Order = the panels sorted by geometry (`layout.y`, then `layout.x`); **for each
-  (vault, slug) keep the first occurrence and ignore later duplicates** (Atlas's "Duplicate panel" keeps the
-  slug), listing them in the preview.
-- **Never imported**: positions, sizes, panel titles, parameters, transforms (Atlas layouts are personal,
-  `BI_ANALYSIS_DASHBOARD.md` §8).
-- **Preview first**: a dry run lists the new order, the analyses that become hidden, and the unmatched panels
-  (another vault, a slug the vault does not have, a non-AEP panel) and duplicates. Nothing is invented: an
-  unmatched panel is only listed. The owner confirms with the dry run's token; the confirm stages
-  `meta:dashboard` (same token pattern as the domain migration, D3).
-- Atlas not running or the document invalid: a plain error in the panel; nothing staged.
+- **Read** (`host_runtime/bi_atlas_import.py`): Agent Web reads Atlas's loopback API **server-side**, GET
+  only: `GET http://127.0.0.1:<port>/dashboards` (names) and `GET /dashboards/{name}` (the name
+  percent-encoded as one path segment). Port per request from the Knowledge page (default 8127); no Origin
+  header (Atlas accepts loopback callers without one); 5 s timeout; at most 2,000,000 bytes. Atlas's
+  400/403/404/413/422 and a refused connection become `atlas_invalid`, `atlas_refused`,
+  `atlas_not_found`, `atlas_too_large`, `atlas_unreachable`. Nothing is ever written to Atlas.
+- **Match** (`capabilities/bi_cards/atlas_import.plan`, pure): a panel of the vault has `datasource.id`
+  `aep.bi.result`, `query.vault` = the vault's id and a nonempty `query.slug`. Sorted by the stored
+  `(layout.y, layout.x, id)`; **each (vault, slug) keeps its first panel, later duplicates are listed**.
+  A slug the vault has no analysis for is listed (`unknown_analysis`), as are other vaults' and non-AEP
+  panels; nothing is invented. `hidden` = the vault's other analyses (working copy).
+- **Never imported**: positions, sizes, titles, parameters, transforms, chart specs (Atlas layouts are
+  personal, `BI_ANALYSIS_DASHBOARD.md` §8).
+- **Routes**: `GET /api/bi/vaults/<id>/atlas-dashboards?port=` (names); `POST
+  /api/bi/vaults/<id>/atlas-import {name, port}` is the dry run (order, hidden, the current order, every
+  panel with its status, duplicates, unmatched, a token); with `apply: true` and that token it re-reads,
+  refuses a changed preview (`preview_stale`) or an empty order (`atlas_nothing`), and stages only
+  `meta:dashboard`.
+- **Page**: 「從 Atlas 匯入 Dashboard 順序」 under 「分析與圖表」: port, 「讀取 Atlas 的 Dashboard」, a
+  picker, 「預覽匯入」 (the order, what becomes hidden, each panel's fate) and 「確認匯入順序」.
 
 ## 5. Tasks and order
 

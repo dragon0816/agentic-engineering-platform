@@ -4061,6 +4061,15 @@ s-k-20261011T102952` (not published).
     one step (others hidden, never deleted; nothing staged if a slug was saved meanwhile). Tests
     `test_bi_dashboard_proposal` (8); `test_bi_analyses` lists the new tool. The page part is checked by the
     script parse test only (no browser step yet). Next: K2 (Atlas golden files at Atlas `49600737`).
+  - [x] 2026-11-01, Claude Code: BI K2, the Dashboard order imported from an Atlas dashboard: Atlas's three
+    read goldens vendored byte for byte from Atlas `49600737` (`tests/fixtures/atlas_dashboard_golden/`,
+    `SOURCE.md`) with `scripts/check_atlas_dashboard_golden.py --atlas <repo>` (passes against the Atlas
+    checkout); `atlas_import.plan` (the contract's rules: `aep.bi.result` panels of the vault sorted by
+    `(y, x, id)`, first (vault, slug) kept, `bi-coverage-copy` listed as the duplicate, unmatched listed,
+    hidden computed); the server-side read without Origin (`host_runtime/bi_atlas_import.py`, on the ADR-K10
+    list); routes `atlas-dashboards` and `atlas-import` (dry run with token, then stage `meta:dashboard`);
+    the Knowledge-page section. Tests `test_bi_atlas_import` (9, against a stand-in Atlas serving the golden
+    bytes). The page part is checked by the script parse test only (no browser step).
 
 ## Voice input: Telegram voice and the Agent Web microphone (2026-11-01)
 

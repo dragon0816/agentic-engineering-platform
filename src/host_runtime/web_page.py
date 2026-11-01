@@ -2937,6 +2937,24 @@ tr:last-child td { border-bottom: none; }
               <label class="bi-btn" for="bi-b-an-file">匯入分析包檔案</label>
               <input type="file" id="bi-b-an-file" accept=".json,application/json" hidden>
               <button class="bi-btn" id="bi-b-an-export" type="button">匯出分析包</button></div>
+            <details class="bi-manage" id="bi-b-atl">
+              <summary>從 Atlas 匯入 Dashboard 順序</summary>
+              <p class="bi-meta">讀這台電腦上 Atlas 存的 Dashboard，
+                只匯入這個知識庫的分析由上到下的順序；不在順序裡的分析會在
+                Dashboard 隱藏，不會刪除。Atlas 的位置、大小與參數不會匯入，
+                也不會改動 Atlas。</p>
+              <label class="bi-label" for="bi-b-atl-port">Atlas 的 port</label>
+              <input id="bi-b-atl-port" class="bi-input" inputmode="numeric" maxlength="5"
+                value="8127">
+              <div class="bi-actions">
+                <button class="bi-btn" id="bi-b-atl-load" type="button">
+                  讀取 Atlas 的 Dashboard</button></div>
+              <label class="bi-label" for="bi-b-atl-name">Atlas Dashboard</label>
+              <select id="bi-b-atl-name" class="bi-input"></select>
+              <div class="bi-actions">
+                <button class="bi-btn" id="bi-b-atl-preview" type="button">預覽匯入</button></div>
+              <div id="bi-b-atl-plan" role="region" aria-live="polite" aria-label="匯入預覽"></div>
+            </details>
             <div class="bi-ai" id="bi-b-ana" role="region" aria-labelledby="bi-b-ana-h" hidden>
               <h5 id="bi-b-ana-h">和 AI 做分析</h5>
               <p class="bi-meta" id="bi-b-ana-target"></p>
@@ -13080,6 +13098,62 @@ el("bi-b-an-export").addEventListener("click", async () => {
     setTimeout(() => URL.revokeObjectURL(link.href), 1000);
     biNotice(true, "已匯出 " + reply.pack.analyses.length + " 個分析（" + link.download + "）。");
   } catch (failure) { biNotice(false, "沒有匯出：" + failure.message); }
+});
+// -- 從 Atlas 匯入 Dashboard 順序 (BI K2, docs/phases/BI_CHAT_CHARTS_AND_DASHBOARD_SOURCES.md) --
+const BI_ATLAS_STATUS = {kept: "匯入", duplicate: "重複，略過", unknown_analysis:
+  "知識庫沒有這個分析，略過", other_vault: "別的知識庫，略過", not_aep: "不是 AEP 的分析，略過",
+  not_a_panel: "略過"};
+
+function biAtlasAsked() {
+  return {name: el("bi-b-atl-name").value, port: el("bi-b-atl-port").value.trim()};
+}
+
+function biAtlasPlan(asked, plan) {
+  // The dry run: the new order, what becomes hidden, and what became of every panel.
+  const box = el("bi-b-atl-plan");
+  const parts = [bh("p", "", bh("strong", "", "「" + plan.dashboard + "」的順序（由上到下）")),
+    bh("ol", "bi-dash-order", ...plan.order.map((slug) => bh("li", "", slug)))];
+  if (plan.hidden.length) {
+    parts.push(bh("p", "bi-meta", "會在 Dashboard 隱藏（不刪除）：" + plan.hidden.join("、")));
+  }
+  parts.push(bh("details", "", bh("summary", "", "Atlas 的 panel（" + plan.panels.length + "）"),
+    bh("ul", "", ...plan.panels.map((p) => bh("li", "", p.id + (p.slug ? "（" + p.slug + "）" : "")
+      + "：" + (BI_ATLAS_STATUS[p.status] || p.status))))));
+  if (!plan.order.length) {
+    parts.push(bh("p", "bi-meta", "這個 Atlas Dashboard 沒有這個知識庫的分析，沒有可匯入的順序。"));
+  } else {
+    parts.push(bh("div", "bi-actions", biButton("確認匯入順序", async () => {
+      await biCall("/api/bi/vaults/" + bi.verVault + "/atlas-import",
+        Object.assign({}, asked, {apply: true, token: plan.token}));
+      box.replaceChildren();
+      biVaultState(await call("/api/bi/vaults/" + bi.verVault + "/status"));
+      await biAnalyses(bi.verVault);
+      biNotice(true, "已匯入 Atlas「" + plan.dashboard + "」的順序"
+        + "（commit 並 push 後大家才會看到）。");
+    }, "go", "把這個順序存進知識庫")));
+  }
+  box.replaceChildren(...parts);
+}
+
+el("bi-b-atl-load").addEventListener("click", async () => {
+  try {
+    const port = el("bi-b-atl-port").value.trim();
+    const reply = await biCall("/api/bi/vaults/" + bi.verVault + "/atlas-dashboards?port="
+      + encodeURIComponent(port));
+    el("bi-b-atl-name").replaceChildren(...reply.names.map((name) => {
+      const option = document.createElement("option");
+      option.value = name; option.textContent = name; return option;
+    }));
+    el("bi-b-atl-plan").replaceChildren();
+    biNotice(true, reply.names.length ? "Atlas 有 " + reply.names.length + " 個 Dashboard。"
+      : "Atlas 還沒有存任何 Dashboard。");
+  } catch (failure) { biNotice(false, "沒有讀到 Atlas：" + failure.message); }
+});
+el("bi-b-atl-preview").addEventListener("click", async () => {
+  try {
+    const asked = biAtlasAsked();
+    biAtlasPlan(asked, await biCall("/api/bi/vaults/" + bi.verVault + "/atlas-import", asked));
+  } catch (failure) { biNotice(false, "沒有預覽：" + failure.message); }
 });
 el("bi-b-an-new").addEventListener("click", () => biAnalysisAi(null, null)
   .catch((failure) => biNotice(false, failure.message)));

@@ -15,5 +15,7 @@ benchmarks/knowledge_v1/questions/source.md -text
 examples/default-marketplace/candidates/*.json -text
 # The BI feed fixture vault is hash-verified and its golden answers are compared byte for byte (Atlas vendors them).
 tests/fixtures/bi_feed/** -text
+# Atlas's dashboard read goldens (BI K2) are vendored byte for byte and drift-checked.
+tests/fixtures/atlas_dashboard_golden/** -text
 # Voice test audio is hash-verified by its manifest; never line-ending converted.
 tests/fixtures/voice/** binary

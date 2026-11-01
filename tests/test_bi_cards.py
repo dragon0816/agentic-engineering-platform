@@ -147,6 +147,8 @@ def test_harness_and_storage_code_outside_the_package_do_not_import_bi_types() -
         "host_runtime/bi_feed_api.py",
         # BI C3: a chat chart saved as a vault analysis (propose_change).
         "host_runtime/bi_chat_save.py",
+        # BI K2: the Dashboard order imported from an Atlas dashboard.
+        "host_runtime/bi_atlas_import.py",
         # BI dataset sharing: the platform re-reads every published snapshot.
         "control_plane/bi_datasets.py",
     }
