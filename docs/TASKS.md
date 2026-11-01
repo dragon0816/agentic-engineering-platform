@@ -4032,3 +4032,44 @@ s-k-20261011T102952` (not published).
     `scripts/bi_feed_server.py --port 53611` passed all six cases (vault list, three panels' golden values, param
     refetch, 409 then result, stale data with a warning after the server stops, foreign Origin 403). No contract
     mismatch. Next: I2 (owner, §6.5), then R6.
+
+## Voice input: Telegram voice and the Agent Web microphone (2026-11-01)
+
+Design `docs/phases/VOICE_INPUT.md` (owner decisions 2026-11-01 in `docs/DECISIONS.md`); branch
+`voice-input-integration`; Claude Code (worker) under the voice orchestrator, Codex as the independent test worker.
+
+- [x] 2026-11-01, Claude Code: design `docs/phases/VOICE_INPUT.md` (`9ff07f8b`), owner answers recorded as
+  settled (`d7ae06a1`, `58440c0a`); the STT sketch aligned with ruff format (`23f54085`).
+- [x] 2026-11-01, Claude Code: V1 contracts (`51357a93`): `src/voice/` STT provider interface and
+  `FakeSttProvider`, `VoiceConfig`, the Agent Web request/responses, `TelegramVoice`, error codes with replies,
+  transcript record `aep.voice.transcript/v1` with a per-person store and purge; `scripts/voice_fixtures.py` and 12
+  synthetic fixtures (Windows offline voices, generated sounds; no real person); fixtures kept byte-exact
+  (`69b39359`). `test_voice_contracts`, `test_voice_fixtures`.
+- [x] 2026-11-01, Claude Code: V2 (`99e5f276`): in-memory decoding, `VoiceService(config, provider, store)`
+  (one at a time, queue, timeout, idle unload, OpenCC), optional extra `voice` (faster-whisper, av, opencc),
+  `host.json` `voice`; decoding precedence (`8b2e14ae`): non-audio bytes `audio_decode_failed`, any 16-bit WAV
+  without PyAV. `test_voice_service`, `test_voice_codecs` (needs the extra; skipped in CI).
+- [x] 2026-11-01, Claude Code: V3 (`557218ab`): `FasterWhisperProvider` from an owner-approved model folder
+  pinned by `model_sha256` (`python -m voice.whisper`), never downloading; `build_voice`; CER metric.
+  `test_voice_whisper` (real engine only with `AEP_VOICE_MODEL_DIR`; skipped: no model on the build PC).
+- [x] 2026-11-01, Claude Code: V4 (`3af4befa`): Telegram voice and audio messages as spoken requests
+  (limits before download, 「🎤 你說：「…」」, then the typed path); a transcript never confirms a card; host
+  wiring shares one service. Spoken credential refused exactly as typed, `transcript_credential` (`79ccf531`).
+  `test_telegram_voice`.
+- [x] 2026-11-01, Claude Code: V5 (`40e47d8f`): fake Bot API over HTTP with a forwarding transport; production
+  `api_base` stays HTTPS-only. `test_telegram_voice_bot_api`.
+- [x] 2026-11-01, Claude Code: V6 (`b4fc7f87`): `POST /api/voice/transcribe`, `voice_transcript` on turns,
+  spoken yes refused at an open form; `AgentWebServer(voice=...)`, CLI passes the host's. `test_web_voice`.
+- [x] 2026-11-01, Claude Code: V7 (`a3b160db`): the Agent Web 🎤 button (`GET /api/voice`, MediaRecorder,
+  transcript into the box, Send names it). `test_web_voice_ui` in headless Chromium with a fake audio device.
+- [x] 2026-11-01, Codex (test worker): integration tests from the design (`4bf57da4`):
+  `test_voice_integration_telegram` (27) and `test_voice_integration_agent_web` (25); all 52 pass on `a3b160db`.
+- [x] 2026-11-01, Claude Code: V8 docs: `docs/CONTRACTS.md` "Voice input" (`fd78e752`), guide
+  `docs/guides/VOICE_INPUT.zh-TW.md` (`1be95a9c`), `ARCHITECTURE.md` note (`3fc955df`), status in the design
+  (`bf39cb88`).
+  Verification on this branch: every voice test file and the touched Telegram, host, Agent Web, conversation,
+  CLI and page tests pass; `ruff format --check`, `ruff check`, `mypy src tests` (902 files) clean. The full
+  suite has not been run on this branch.
+- [ ] Orchestrator: full suite on this branch, rebase on local `main`, fast-forward.
+- [ ] Owner: install an approved Whisper small int8 package, pin its hash, run V0's laptop measurement and the
+  real-engine test (`AEP_VOICE_MODEL_DIR`), set the CER limit; then the live checks of `VOICE_INPUT.md` §4.6.
