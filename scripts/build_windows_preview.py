@@ -86,7 +86,7 @@ REQUIRED_DEPENDENCIES = (
     "packaging-",
     "pyparsing-",
     "python_dateutil-",
-    "six-",
+    # No "six-": python-dateutil 4 dropped it, so a fresh download has no six wheel.
 )
 #: What `install.ps1` installs the platform wheel with.
 BUNDLED_EXTRAS = ("excel", "windows", "weekly-mail")

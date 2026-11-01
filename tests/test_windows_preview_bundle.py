@@ -42,8 +42,7 @@ BUNDLED_WHEELS = (
     "kiwisolver-1.4.9-cp312-cp312-win_amd64.whl",
     "packaging-25.0-py3-none-any.whl",
     "pyparsing-3.2.5-py3-none-any.whl",
-    "python_dateutil-2.9.0-py2.py3-none-any.whl",
-    "six-1.17.0-py2.py3-none-any.whl",
+    "python_dateutil-4.0.0-py3-none-any.whl",
 )
 
 
