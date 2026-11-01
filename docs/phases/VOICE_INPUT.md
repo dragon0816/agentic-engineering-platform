@@ -1,20 +1,21 @@
 # Voice input: speak instead of type (Telegram and Agent Web)
 
-Status: design for the owner's review (2026-11-01). No `src/` change yet. Owner goal (2026-11-01): a person can
+Status: design; the owner settled engine (local), confirmation and retention on 2026-11-01 (§7.1); the STT
+package and the points in §7.2 remain open. No `src/` change yet. Owner goal (2026-11-01): a person can
 speak instead of type, through **Telegram** (voice messages) and **Agent Web** (microphone), to do the three things
 AEP already does by text: **coding**, **asking** (knowledge questions) and **Workflow/task execution**. Voice becomes
 text through speech-to-text (STT); the person sees the transcript; from there the request follows exactly the same
 path, rules and confirmations as typed text. Integration-tested end to end.
 
-Nothing here is built until the owner answers §7. Decisions, once taken, go to `docs/DECISIONS.md`; progress rows
-go to `docs/TASKS.md`.
+Building starts after the owner's OK on the STT package (§7.2 a). Decisions go to `docs/DECISIONS.md`; progress
+rows go to `docs/TASKS.md`.
 
 ## 1. Requirements
 
 ### 1.1 Functional
 
 - **F1 Telegram voice.** A mapped sender's Telegram `voice` message (and an `audio` message within the limits, see
-  §7 d4) is downloaded, transcribed on the host that runs `TelegramIngress`, shown back to the person as text and
+  §7.2 d4) is downloaded, transcribed on the host that runs `TelegramIngress`, shown back to the person as text and
   then handled exactly as if the person had typed that text in the same chat (same session, same reply context).
 - **F2 Agent Web microphone.** The chat composer gets a microphone button. The person records, the recording is
   uploaded to the local Agent Web, transcribed, and the transcript is placed in the message box. The person reads
@@ -23,7 +24,8 @@ go to `docs/TASKS.md`.
   the existing text entry points (§2.3). No voice-specific routing, prompt, intent model or shortcut.
 - **F4 Transcript visible before action.** The person always sees what AEP heard before anything acts on it
   (Agent Web: in the box before sending; Telegram: as the first line of AEP's answer, before any card or result).
-- **F5 Same confirmations.** Every confirmation, approval and question a typed request gets, a spoken request gets.
+- **F5 Same confirmations (owner, §7.1 b).** Voice adds no confirmation step and removes none: every confirmation,
+  approval and question a typed request gets, a spoken request gets.
   In addition, a transcript is never accepted as a confirmation or approval tap (§2.4).
 - **F6 Traceable.** Each transcription leaves a transcript record (§3.4) linking channel, person, session, audio
   hash, STT engine and model version, and the text that was used.
@@ -33,7 +35,7 @@ go to `docs/TASKS.md`.
   `voice` package extra). A host without it behaves exactly as today, including Telegram's current refusal of
   voice messages.
 - **F9 Mixed language.** Taiwanese Mandarin with English product terms (e.g. "CMX500", "Wi-Fi 8") is the target;
-  Chinese output is in Traditional characters (§7 d3).
+  Chinese output is in Traditional characters (§7.2 d3).
 
 ### 1.2 Non-goals
 
@@ -94,8 +96,8 @@ On the Personal Agent host itself (the PC running Agent Web and the resident Tel
 - Decoding uses PyAV (already a dependency of faster-whisper; its wheels bundle FFmpeg libraries, so no system
   `ffmpeg` install). OGG/Opus (Telegram voice), WebM/Opus (MediaRecorder), MP3/M4A/WAV are decoded to 16 kHz mono
   PCM before STT.
-- Which engine runs is an owner decision (§7 a). The default proposal is local; a cloud or company-gateway
-  provider plugs in behind the same interface only after the owner approves the data flow.
+- The engine is local (owner, §7.1 a); no cloud or company-gateway STT, so audio never leaves the PC. Which local
+  package is §7.2 a.
 
 ### 2.3 How the transcript joins the existing text path
 
@@ -128,14 +130,16 @@ unchanged (UNCLASSIFIED to the approved Gateway; PUBLIC-only for the restricted 
   Forms, approvals and cards follow as for text.
 - **Telegram:** `🎤 你說：「…」` first, then the normal answer, question, form card or approval button. While the
   transcription runs, the status line shows 「🎤 轉文字中…」 (existing `_Progress`).
-- **Voice never confirms.** `telegram_flow` accepts typed words such as 「好」「是」「確認」「執行」"yes" as
+- **Proposed: voice never confirms an open card (§7.2 d2).** `telegram_flow` accepts typed words such as 「好」「是」「確認」「執行」"yes" as
   「確認執行」 (`_RUN_WORDS`), and some cancel/edit words. A misheard or casual 「好」 must not start a run. Rule: when
   a transcript arrives while a confirmation card is open, a transcript that matches a run/approve word is not
   consumed as a confirmation; AEP answers 「請按「確認執行」按鈕確認，語音不能代替確認。」 and the card stays open.
   Transcripts never match callback-data patterns (`run:yes`, `approve:`, `edit:N`, card taps) because those are
   only accepted from button callbacks. A spoken answer to an open *question* (a missing value) is accepted, since the
-  final confirmation card lists it with its origin before anything runs. Typed text keeps today's behaviour. Whether
-  spoken *cancel* is allowed is §7 d2.
+  final confirmation card lists it with its origin before anything runs. Typed text keeps today's behaviour. This
+  rule and spoken *cancel* are §7.2 d2.
+- **No transcript confirmation step (owner, §7.1 b).** Telegram does not ask 「送出／修改」 for the transcript; after
+  「🎤 你說」 the request proceeds exactly as typed text would.
 
 ## 3. Contracts
 
@@ -182,9 +186,9 @@ that blocks the turn. The text of the turn is always `message`, never the stored
   `max_bytes` (proposed 10 MB; Bot API `getFile` itself is limited to 20 MB, `TELEGRAM_DOWNLOAD_BYTES`). Checked
   again after decoding (the measured length wins).
 - **Download:** the existing `_download(file_id)` (`getFile`, `file_path` validation, streamed GET from
-  `{api_base}/file/bot<token>/<path>` with a byte cap, `AttachmentError` codes). The audio is written to a
-  per-session temporary file under the workspace voice store, never to `attachments/`, so a voice message is not
-  an attachment the Agent can read.
+  `{api_base}/file/bot<token>/<path>` with a byte cap, `AttachmentError` codes). The audio stays in memory and is
+  never written to `attachments/` or kept on disk (owner, §7.1 c), so a voice message is not an attachment the
+  Agent can read.
 - **Accepted formats** (both channels): `audio/ogg` (Opus), `audio/webm` (Opus), `audio/mpeg`, `audio/mp4`/`m4a`,
   `audio/wav`, `audio/x-wav`. Anything else, or a file PyAV cannot decode → `audio_unsupported_format` /
   `audio_decode_failed`.
@@ -193,8 +197,9 @@ that blocks the turn. The text of the turn is always `message`, never the stored
 
 ### 3.4 Transcript record (`aep.voice.transcript/v1`)
 
-Stored per person under `<workspace>/voice/<sha256(session)[:24]>/<id>.json` (same hashing idea as
-`AttachmentStore`), written atomically; listed only for that person and session.
+Stored per person under `<workspace>/voice/transcripts/<sha256(session)[:24]>/<id>.json` (same hashing idea as
+`AttachmentStore`), written atomically; listed only for that person and session; purged after the task-summary
+retention (default 30 days, §7.1 c). There is no audio store.
 
 ```json
 {
@@ -204,8 +209,7 @@ Stored per person under `<workspace>/voice/<sha256(session)[:24]>/<id>.json` (sa
   "actor": "<mapped actor>",
   "session_id": "<chat or conversation session>",
   "created_at": "2026-11-01T12:00:00+08:00",
-  "audio": {"sha256": "…", "mime_type": "audio/ogg", "bytes": 48213, "duration_seconds": 7.9,
-            "retained": false, "path": null},
+  "audio": {"sha256": "…", "mime_type": "audio/ogg", "bytes": 48213, "duration_seconds": 7.9},
   "stt": {"provider": "faster-whisper", "model": "whisper-small", "model_revision": "<sha256 of model files>",
           "compute": "cpu-int8", "language_requested": "zh", "language_detected": "zh",
           "settings": {"beam_size": 5, "vad_filter": true, "initial_prompt_sha256": "…"},
@@ -217,8 +221,9 @@ Stored per person under `<workspace>/voice/<sha256(session)[:24]>/<id>.json` (sa
 }
 ```
 
-No credential, token or Telegram file URL is ever stored (the file URL contains the bot token). `text_raw`/`text`
-are kept or removed according to §7 c.
+No credential, token or Telegram file URL is ever stored (the file URL contains the bot token). The `audio` block
+holds only metadata; the audio itself is never persisted (§7.1 c). A failed transcription has `text_raw`/`text`
+null.
 
 ### 3.5 STT provider interface (`src/voice/stt.py`)
 
@@ -255,10 +260,10 @@ class SttError(Exception):
 - `hints`: product terms (e.g. from an owner-editable glossary in the host data directory) passed to Whisper as
   `initial_prompt`/hotwords to bias spelling of terms such as CMX500; empty by default.
 - Implementations: `FakeSttProvider` (tests: maps audio sha256 or a fixture name to a fixed result; can raise any
-  code), `FasterWhisperProvider` (default local engine, §7 a), and later a gateway provider only if §7 a approves.
+  code), the chosen local engine (recommended `FasterWhisperProvider`, §7.2 a). No cloud or gateway provider (§7.1 a).
 - Host configuration (`host.json`, no secrets): `voice: {enabled, provider, model_path, model_sha256, language,
-  max_seconds, max_bytes, timeout_seconds, idle_unload_seconds, retention}`. A cloud provider's key would be a
-  `SecretRef`, never a value.
+  max_seconds, max_bytes, timeout_seconds, idle_unload_seconds, transcript_retention_days}`. A local engine needs
+  no credential.
 
 ### 3.6 Error cases
 
@@ -290,7 +295,7 @@ All automated tests are CI-inert: no real microphone, no Telegram, no network, n
 - **Synthetic speech** from text-to-speech (default: Windows' built-in offline SAPI voices via `System.Speech`;
   zh-TW and en-US sentences such as 「幫我查 CMX500 的 Wi-Fi 8 選項」, 「執行週報 Workflow」,
   「把 parser 的 CSV 欄位改成 UTF-8」). The reference transcript is the TTS input text. Licence of committing TTS
-  output is §7 d6.
+  output is §7.2 d6.
 - **Non-speech** from the standard library `wave` module: 2 s silence, a 1 kHz tone, seeded white noise.
 - **Format variants** encoded from the same PCM with PyAV: OGG/Opus (Telegram voice), WebM/Opus (MediaRecorder),
   MP3, WAV; plus a truncated file, a zero-byte file, a text file renamed `.ogg`, and an over-limit duration file
@@ -303,6 +308,8 @@ All automated tests are CI-inert: no real microphone, no Telegram, no network, n
 - `VoiceService`: single slot, queue full → `stt_busy`, timeout, idle unload, model hash mismatch →
   `stt_unavailable`, post-processing (Traditional conversion, trimming), empty transcript.
 - Transcript store: schema, per-person/session isolation, retention purge, no token/URL in any record.
+- No audio persisted: after success, every failure code and a timeout, no audio bytes exist under the workspace
+  (`voice/tmp/` empty, nothing in `attachments/`); the startup sweep empties a leftover `voice/tmp/`.
 - Contracts: `VoiceTranscribeRequest` validation, secrets rejected, `ConversationTurnRequest` without
   `voice_transcript` serialises exactly as today.
 
@@ -343,7 +350,7 @@ Two layers:
   `getFile`, file download, `sendMessage`, `editMessageText`, `answerCallbackQuery`. Because
   `TelegramIngressConfig.api_base` only accepts `https://` (and must stay that way for production), the ingress keeps
   the default `https://api.telegram.org` and the test injects a `Transport` that forwards that origin to the fake
-  server's `http://127.0.0.1:<port>`. No production config change (§7 d5). The test drives a full conversation: voice
+  server's `http://127.0.0.1:<port>`. No production config change (§7.2 d5). The test drives a full conversation: voice
   → 「🎤 你說」 → card → callback 「確認執行」 → run result.
 
 ### 4.6 Live checks (owner-run, not CI, after hours per the GUI-test rule)
@@ -355,8 +362,9 @@ Two layers:
 3. Agent Web on the company laptop, real microphone in Edge: a coding request that reaches the `coding-change`
    approval; nothing changes before approval.
 4. Mixed Chinese/English with product terms, in a normal office noise level; note misheard terms for the glossary.
-5. Latency on the company laptop for 5 s, 30 s and 120 s messages with the chosen model (feeds §7 a).
-6. Retention: after the retention period the audio/transcript are gone as decided in §7 c.
+5. Latency on the company laptop for 5 s, 30 s and 120 s messages with the chosen model (feeds §7.2 a).
+6. Retention: no audio file exists after a voice message; the transcript record is gone after the retention period
+   (§7.1 c).
 
 ## 5. Reuse from `origin/feature/voice-to-knowledge` (not merged)
 
@@ -370,7 +378,7 @@ The branch is a Phase 0 prototype: no real STT inference was ever run (model dow
 | `metrics.py` (CER/WER/MER, NFKC normalisation, term recall) | yes | for the opt-in real-engine tests and the V0 measurement |
 | `runner.py`/`worker.py` (process-isolated CPU benchmark: latency, RTF, peak RSS) | yes, as a script | `benchmarks/voice_input/` for the V0 laptop measurement; corpus = §4.1 fixtures instead of FLEURS |
 | `requirements.lock` (faster-whisper 1.2.1, ctranslate2 4.8.3, av) | reference | versions as a starting point for the `voice` extra; re-lock on Windows |
-| `docs/voice-to-knowledge/VOICE_NETWORK_REQUIREMENTS.md` | reference | Hugging Face downloads were blocked (403 through the proxy) → model delivery is §7 d7 |
+| `docs/voice-to-knowledge/VOICE_NETWORK_REQUIREMENTS.md` | reference | Hugging Face downloads were blocked (403 through the proxy) → model delivery is §7.2 d7 |
 | `extraction.py`, `submission.py`, schemas, demo | no | voice-to-knowledge drafts are out of scope (§1.2); #234 stays open for that track |
 | `HANDOFF.md`/`TASKS.md` edits, unrelated test file | no | stale |
 
@@ -378,7 +386,7 @@ The branch is a Phase 0 prototype: no real STT inference was ever run (model dow
 
 | # | Slice | Done when |
 |---|---|---|
-| V0 | Owner decisions §7; owner-run engine measurement on the company laptop with the ported benchmark and §4.1 fixtures | decisions in `DECISIONS.md`; CER/latency table recorded; CER threshold chosen |
+| V0 | Owner's OK on the STT package (§7.2 a) and answers to §7.2 d; owner-run engine measurement on the company laptop with the ported benchmark and §4.1 fixtures | decisions in `DECISIONS.md`; CER/latency table recorded; CER threshold chosen |
 | V1 | `src/voice/` contracts: `SttProvider`, `SttResult`, `SttError` codes, `FakeSttProvider`, transcript record + store + retention; fixtures script and committed fixtures | unit tests §4.2 (store, contracts); ruff/mypy |
 | V2 | Decoding (PyAV) and `VoiceService` (single slot, timeout, idle unload); `voice` optional extra; `host.json` `voice` section | unit tests §4.2; host without `voice` unchanged (existing suite) |
 | V3 | `FasterWhisperProvider` (or the engine chosen in V0), model path + sha256 check, glossary hints, Traditional post-processing | opt-in real-engine tests pass on the owner's laptop; skipped in CI |
@@ -390,62 +398,68 @@ The branch is a Phase 0 prototype: no real STT inference was ever run (model dow
 
 V1–V3 can be built and tested before any channel work; V4–V5 and V6–V7 are independent of each other.
 
-## 7. Open owner decisions
+## 7. Owner decisions
 
-### a. STT engine: local or cloud
+### 7.1 Settled (owner, 2026-11-01)
 
-Local candidates (CPU only; sizes are approximate for int8 weights; speeds must be measured in V0 on the company
-laptop, the branch never measured any):
+#### a. STT engine: local
 
-| Engine / model | Licence (code / model) | Size | CPU cost (estimate) | Mixed zh/en |
-|---|---|---|---|---|
-| faster-whisper + Whisper **small** | MIT / MIT | ~250 MB int8, ~1 GB RAM | faster-whisper's published CPU figure: small int8, 8 threads, 13 min audio in ~1 min 42 s (≈0.13× real time); a 4-core laptop likely 0.2–0.4×, i.e. a 15 s message in ~3–6 s | good, some term errors |
-| faster-whisper + Whisper **large-v3-turbo** | MIT / MIT | ~800 MB int8, ~2 GB RAM | roughly 3–4× small on CPU; 15 s in ~10–20 s | better |
-| faster-whisper + Whisper **medium** | MIT / MIT | ~800 MB int8 | similar to or slower than turbo | better than small |
-| sherpa-onnx + SenseVoice-Small | Apache-2.0 / FunASR model licence (needs review) | ~230 MB int8 | non-autoregressive, much faster than Whisper small | strong Mandarin; English terms weaker; outputs Simplified |
-| Vosk (small-cn / en) | Apache-2.0 / Apache-2.0 | 40–50 MB per language | very low | weak: one language per model, no punctuation |
-| Breeze-ASR-25 (Whisper large-v2 fine-tuned for Taiwanese Mandarin + code-switching) | Apache-2.0 (verify) | ~1.5 GB int8 | too slow for interactive use on a laptop CPU | best fit for zh-TW, but heavy |
+Speech-to-text runs **locally** on the Personal Agent host. **No cloud STT** of any kind: not a public cloud
+service, and not a transcription model behind the company LLM Gateway. Audio never leaves the PC. The
+`SttProvider` interface stays (it is what the tests' `FakeSttProvider` plugs into), but only local engines are
+implemented. Which local package is added as a dependency is still open (§7.2 a).
 
-New third-party packages need the owner's OK: `faster-whisper` (MIT), `ctranslate2` (MIT), `av` (BSD-3; wheels
-bundle FFmpeg under LGPL), and their transitive `tokenizers`/`huggingface-hub` (Apache-2.0) and `onnxruntime` (MIT,
-for the built-in VAD); optionally `opencc` (Apache-2.0, d3). All would sit in an optional `voice` extra, so hosts
-without voice install nothing new.
+#### b. Confirmation: voice adds none and removes none
 
-Cloud options:
-- **Company LLM Gateway** (the approved LiteLLM route) if company IT exposes a transcription model at
-  `/v1/audio/transcriptions`: audio leaves the PC but stays on the company's governed route (through Zscaler, which
-  is company IT's legitimate proxy); needs a gateway deployment and an explicit `models.data_approval`-style
-  approval that covers audio, which the current approval (model text requests) does not.
-- **Public cloud STT** (OpenAI, Azure Speech, Google): best accuracy and no local CPU cost, but company speech
-  leaves the company; conflicts with the 2026-10-02 rule that UNCLASSIFIED data uses only an approved internal
-  Gateway, and needs a credential (`SecretRef`) and egress approval.
+A voice instruction may **start** coding, a Workflow or a question directly once the transcript has been shown;
+there is **no extra voice-specific confirmation step** (no 「送出」/「修改」 card for the transcript in Telegram).
 
-**Recommended default:** local faster-whisper with Whisper **small** int8 as the default and large-v3-turbo as a
-configurable upgrade, chosen after the V0 laptop measurement; keep the provider interface so a company-Gateway
-provider can be added later under its own approval. No public cloud STT.
+Interpretation written down with the decision: voice adds no new confirmation, but it **does not remove any
+existing text-path confirmation or approval**. Everything a typed request goes through, a spoken one goes through
+unchanged: the Workflow question flow and its confirmation card (「確認執行」/「修改」), the Agent Web inline form
+that the person submits, the owner's approval of side-effecting Workflow runs and of `coding.change` in Agent Web
+(`ApprovalRequest`, `/api/approvals/decide`), Telegram approval buttons and the cards that defer to Agent Web. In
+Agent Web the transcript sits in the message box and the person presses Send, which is the same act as sending a
+typed message, not an added step.
 
-### b. May a voice instruction start coding or a Workflow directly after the transcript is shown?
+How a transcript is treated *at* an already open confirmation card (spoken 「好」) is §7.2 d2.
 
-- **Option 1 (recommended default):** the same confirmations as text, plus the transcript shown first; voice is
-  never accepted as a confirmation or approval (§2.4). Telegram: read-only asks answer immediately after
-  「🎤 你說」; anything that runs goes through its card/form/approval exactly like text. Agent Web: the person
-  always presses Send.
-  Trade-off: one tap more than speaking 「好」, no new risk.
-- Option 2: an extra transcript confirmation for every Telegram voice message (「送出」/「修改」/「取消」 before
-  routing). Safer against misheard asks, but slower and redundant for side-effecting requests that already get a card.
-- Option 3: allow spoken confirmation. Hands-free, but a misheard 「好」 can start a run; not recommended.
+#### c. Retention: transcript only, never the audio
 
-### c. Audio retention
+- **Audio is not persisted.** The audio is held in memory (at most `max_bytes`, §7.2 d4) and decoded from memory
+  by PyAV. If a decoder or engine ever needs a file, it is written to `<workspace>/voice/tmp/` and removed in a
+  `finally` block right after transcription — on success, on every failure code of §3.6, and on timeout. On host
+  start the `voice/tmp/` directory is emptied, so a crash leaves nothing behind. Telegram's download goes to
+  memory, never to `attachments/`. The transcript record's `audio` block keeps only `sha256`, `mime_type`,
+  `bytes` and `duration_seconds`; there is no `retained` flag and no `path`.
+- **The transcript is kept.** One record per transcription (`aep.voice.transcript/v1`, §3.4), including failed
+  ones (status and code, no text), at
+  `<workspace>/voice/transcripts/<sha256(session)[:24]>/<id>.json`, written atomically, readable only for that
+  person and session. It is kept for the same retention as task result summaries (default 30 days, set on the
+  memory page) and then purged by the same retention sweep. The text actually sent remains in the conversation
+  history as for typed text.
 
-- Option 1: keep audio and transcript for the session-memory retention (default 30 days). Lets the owner re-check
-  a misheard command; stores company speech on disk.
-- **Option 2 (recommended default):** delete the audio as soon as transcription ends (success or failure); keep
-  the transcript record (text, hashes, engine, model) for the same retention as task result summaries (default 30
-  days, set on the memory page), then purge.
-- Option 3: keep nothing beyond the turn (audio and transcript deleted; only the turn text remains in the
-  conversation as for typed text). Smallest footprint, but no record of what STT heard versus what was sent.
+### 7.2 Still open
 
-### d. Other decisions this document cannot settle
+#### a. Which local STT package (owner's OK needed before it becomes a dependency)
+
+Candidates on a CPU-only Windows laptop. Sizes are approximate int8 weights; speeds are estimates to be measured in
+V0 on the company laptop (the voice-to-knowledge branch never measured any):
+
+| # | Package | Model and size | Licence (code / model) | CPU cost on a Windows laptop (estimate) | Maintenance |
+|---|---|---|---|---|---|
+| 1 | `faster-whisper` (+ `ctranslate2`, `av`; pulls `tokenizers`, `huggingface-hub`, `onnxruntime` for VAD) | Whisper small ~250 MB, ~1 GB RAM; large-v3-turbo ~800 MB, ~2 GB RAM | MIT / MIT (deps MIT, Apache-2.0, BSD-3; `av` wheels bundle FFmpeg under LGPL) | small int8: the project's published CPU figure is 13 min of audio in ~1 min 42 s on 8 threads (≈0.13× real time); a 4-core laptop likely 0.2–0.4×, a 15 s message in ~3–6 s. Turbo roughly 3–4× slower | maintained by SYSTRAN, Windows wheels on PyPI, regular releases; the earlier branch already wrote a provider for it |
+| 2 | `sherpa-onnx` (+ `onnxruntime`) | SenseVoice-Small ~230 MB int8 (or Whisper/Paraformer ONNX exports) | Apache-2.0 / SenseVoice under the FunASR model licence (needs review) | non-autoregressive; much faster than Whisper small (well under 0.1× real time expected) | very active (k2-fsa), Windows wheels; Chinese output is Simplified; English product terms weaker |
+| 3 | `pywhispercpp` (bindings to whisper.cpp) | same Whisper models in GGML, small ~190 MB q5 / ~480 MB f16 | MIT / MIT | similar to or slightly faster than faster-whisper small on CPU | whisper.cpp itself very active; the Python binding is a smaller community project with less frequent releases |
+
+Not proposed: Vosk (Apache-2.0, 40–50 MB, fast, but one language per model and no punctuation, weak for mixed
+Chinese/English) and Breeze-ASR-25 (Whisper large-v2 fine-tuned for Taiwanese Mandarin; heavy for a laptop CPU).
+
+**Recommendation:** candidate 1, `faster-whisper` with Whisper **small** int8 as the default and large-v3-turbo as
+a configurable upgrade, confirmed by the V0 laptop measurement. Packages go into an optional `voice` extra, so a
+host without voice installs nothing new. Optional extra package: `opencc` (Apache-2.0) for d3.
+
+#### d. Other decisions this document cannot settle
 
 1. **Which Telegram media count as instructions.** Recommended: `voice` always; `audio` files only within the same
    limits (a longer audio file is refused with a pointer to the voice-to-knowledge track); `video_note` refused.
