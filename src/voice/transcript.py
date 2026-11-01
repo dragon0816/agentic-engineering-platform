@@ -22,7 +22,7 @@ from pydantic import ConfigDict, Field, JsonValue, model_validator
 from common.assets import reject_embedded_secrets
 from common.base import Contract, Sha256
 from host_runtime.workspace import write_atomically
-from voice.contracts import ErrorCode
+from voice.contracts import ErrorCode, TranscriptView
 from voice.stt import Segment
 
 SCHEMA: Final = "aep.voice.transcript/v1"
@@ -95,6 +95,20 @@ class TranscriptRecord(Contract):
     def dump(self) -> dict[str, Any]:
         return self.model_dump(mode="json", by_alias=True)
 
+    def view(self) -> TranscriptView:
+        """What the person is shown; only an ok transcript has one."""
+        if self.status != "ok" or self.text is None or self.stt is None:
+            raise ValueError("only an ok transcript has a view")
+        return TranscriptView(
+            id=self.id,
+            text=self.text,
+            language=self.stt.language_detected,
+            duration_seconds=self.audio.duration_seconds or 0.0,
+            engine=self.stt.provider,
+            model=self.stt.model,
+            elapsed_seconds=self.stt.elapsed_seconds,
+        )
+
     @classmethod
     def failed(
         cls,
@@ -127,6 +141,7 @@ class TranscriptStore:
     def __init__(
         self, workspace_root: Path, *, clock: Callable[[], datetime] | None = None
     ) -> None:
+        self.workspace_root = workspace_root
         self.root = workspace_root / "voice" / "transcripts"
         self.clock = clock or (lambda: datetime.now(UTC))
 

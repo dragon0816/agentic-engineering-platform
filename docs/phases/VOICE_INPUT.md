@@ -271,6 +271,13 @@ class SttError(Exception):
   `initial_prompt`/hotwords to bias spelling of terms such as CMX500; empty by default.
 - Implementations: `FakeSttProvider` (tests: maps audio sha256 or a fixture name to a fixed result; can raise any
   code), `FasterWhisperProvider` (owner, §7.1 a2). No cloud or gateway provider (§7.1 a).
+- **Injection seam (orchestrator, 2026-11-01).** `VoiceService(config: VoiceConfig, provider: SttProvider,
+  store: TranscriptStore, ...)` in `src/voice/service.py` owns decoding, the single slot, the queue, the timeout,
+  post-processing and the record. The provider loads its model on first use; the service calls the provider's
+  `unload()` (when it has one) after `idle_unload_seconds` without work. `AgentWebServer` and `TelegramIngress` each
+  take an optional keyword `voice: VoiceService | None = None`; `None` (the default) means voice is off on this
+  host: the transcribe route answers `voice_disabled`, Telegram voice/audio messages get the disabled reply, and
+  text behaviour is unchanged. Host startup builds a `VoiceService` only when `host.json` `voice.enabled` is true.
 - Host configuration (`host.json`, no secrets): `voice: {enabled, provider, model_path, model_sha256, language,
   max_seconds, max_bytes, timeout_seconds, idle_unload_seconds, transcript_retention_days}`. A local engine needs
   no credential.
@@ -291,7 +298,8 @@ class SttError(Exception):
 | `stt_timeout` / `stt_failed` | engine timeout or exception | 語音轉文字失敗，請再試一次或改用文字。 | no |
 | `voice_not_confirmation` | transcript matches a run/approve word while a card is open | 請按「確認執行」按鈕… | no (card stays) |
 
-Every failure writes a transcript record with `status: failed` and the code; nothing reaches `LocalAgent`.
+Every failure writes a transcript record with its code: `transcript_empty` has `status: empty`, every other
+code `status: failed`; nothing reaches `LocalAgent`.
 
 ## 4. Test plan
 

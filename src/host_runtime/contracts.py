@@ -33,6 +33,7 @@ from dut.contracts import DutTarget, InstrumentTarget
 from integrations.github_project import GitHubProjectConnection
 from integrations.jira import JiraConnection
 from models.catalog import ModelCatalog
+from voice.contracts import VoiceConfig
 from workflow.host_bridge import BridgeRegistration
 
 # The name of an environment variable, which is not a credential and cannot
@@ -673,6 +674,9 @@ class CompanyHostConfiguration(Contract):
     # Delegation to sub-agent profiles (multi-agent V1); an older file
     # without it means off.
     multi_agent: MultiAgentSettings = MultiAgentSettings()
+    # Voice input (docs/phases/VOICE_INPUT.md): off unless this section says
+    # `enabled`; an older file without it behaves exactly as before.
+    voice: VoiceConfig | None = None
 
     @model_validator(mode="after")
     def company_profile_without_secrets(self) -> Self:

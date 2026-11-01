@@ -89,7 +89,7 @@ class VoiceConfig(Contract):
     hints: tuple[str, ...] = Field(default=(), max_length=200)
     max_seconds: int = Field(default=180, ge=1, le=600)
     max_bytes: int = Field(default=10 * 1024 * 1024, ge=1, le=BOT_API_DOWNLOAD_BYTES)
-    timeout_seconds: int = Field(default=120, ge=5, le=900)
+    timeout_seconds: int = Field(default=120, ge=1, le=900)
     idle_unload_seconds: int = Field(default=600, ge=0, le=86_400)
     # Waiting transcriptions beyond the one running; more answer `stt_busy`.
     queue: int = Field(default=2, ge=0, le=20)
