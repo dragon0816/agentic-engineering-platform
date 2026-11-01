@@ -4087,3 +4087,6 @@ Design `docs/phases/VOICE_INPUT.md` (owner decisions 2026-11-01 in `docs/DECISIO
   voice tests pass or skip (no PyAV, no model); with the voice venv and `AEP_VOICE_MODEL_DIR` the real-engine
   test passes; ruff and `mypy src tests` clean.
 - [ ] Owner: the live checks of `VOICE_INPUT.md` §4.6 with voice enabled and `voice.hints` filled.
+- [x] 2026-11-01, voice orchestrator: pre-push full suite on `6b1e8daf` (V0, the spoken-word punctuation fix,
+  hints evidence note; worktree `.venv`, own `--basetemp`): 4622 passed, 37 skipped (environment), 0 failed; ruff
+  format, ruff check, mypy src tests (902 files) clean. Local `main` fast-forwarded and pushed with the owner's OK.
