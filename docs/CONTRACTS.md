@@ -6282,3 +6282,82 @@ automatically; keep a slim migration prompt). Code `migrate.py`, `catalog.py`, `
   the configuration removed (`meta:domains` unstaged in one commit, or deleted from the local dataset).
 - `GET /api/bi/dashboard` adds `"domains_left": bool`; the page shows the prompt 「這個資料集還有舊的領域設定」
   with 「預覽：搬進 schema 與卡片」, the plan, then 「確認搬移（寫入一個 commit）」 or 「確認搬移（寫入）」 / 「取消（不寫入）」.
+
+## Voice input: Telegram voice and the Agent Web microphone (owner 2026-11-01)
+
+Design `docs/phases/VOICE_INPUT.md`; decisions `docs/DECISIONS.md` 2026-11-01. Voice is an input adapter: a
+recording becomes text on this PC (local faster-whisper, no cloud), the person sees it, and the text then takes
+the unchanged typed path with the same confirmations. Code `src/voice/` (`contracts.py`, `stt.py`, `audio.py`,
+`service.py`, `transcript.py`, `whisper.py`). Only the transcript is kept; no audio is ever written.
+
+- **host.json `voice`** (`VoiceConfig`, optional; absent or `enabled: false` = voice off, every channel behaves as
+  before): `enabled` (false), `provider` `"faster-whisper"`, `model_path` and `model_sha256` (both required when
+  enabled; an owner-approved model folder on this PC, never downloaded), `model` (`"whisper-small"`), `compute`
+  `int8` | `int8_float32` | `float32` (`int8`), `language` (`"zh"`), `hints` (product terms for the initial
+  prompt, at most 200), `max_seconds` 180 (1–600), `max_bytes` 10 MB (at most the Bot API's 20 MB),
+  `timeout_seconds` 120 (1–900), `idle_unload_seconds` 600 (0: never unload), `queue` 2 (0–20 waiting behind the
+  one running). No secrets. `model_sha256` is `python -m voice.whisper <model folder>`: SHA-256 over every file's
+  `relative/path\0<sha256 of content>\n`, in path order. The optional package extra `voice` holds
+  `faster-whisper`, `av`, `opencc`; CI does not install it.
+- **Injection seam**: `VoiceService(config, provider: SttProvider, store: TranscriptStore, ...)`;
+  `TelegramIngress(..., voice=None)` and `AgentWebServer(..., voice=None)`; None is voice off. The host builds one
+  service (`voice.whisper.build_voice`) only when `voice.enabled`, shares it between both channels
+  (`HostRuntime.voice`) and closes it with the host.
+- **STT provider** (`voice/stt.py`): `SttProvider.transcribe(pcm: Pcm16k, *, language, hints) -> SttResult`;
+  `Pcm16k(samples)` is mono 16 kHz signed 16-bit little-endian; `SttResult(segments: tuple[Segment(start, end,
+  text)], language, duration_seconds, elapsed_seconds, engine, model, model_revision)`, `.text` the joined, trimmed
+  segments; failures raise `SttError(code)` with a code below. `FakeSttProvider` answers by PCM SHA-256 (tests).
+  `FasterWhisperProvider` loads on first use after the package hash matches (`local_files_only`), decodes with
+  beam 5, temperature 0, VAD on, no previous-text conditioning and a Traditional Chinese initial prompt plus the
+  hints; `unload()` releases the model.
+- **Decoding** (`voice/audio.py`, in memory): bytes over `max_bytes` → `audio_too_large`; a declared type not in
+  `audio/ogg`, `audio/webm`, `audio/mpeg`, `audio/mp4`, `audio/m4a`, `audio/x-m4a`, `audio/wav`, `audio/x-wav`
+  (parameters ignored) → `audio_unsupported_format`. Then: bytes that are not audio → `audio_decode_failed`;
+  16-bit PCM WAV of any rate or channels → standard library (down-mix, resample); other WAV without PyAV →
+  `audio_unsupported_format`; a compressed container (OGG, WebM, MP3, MP4, by magic bytes) without PyAV →
+  `stt_unavailable`; decoded length over `max_seconds` → `audio_too_long`.
+- **Service rules**: one transcription at a time; more than `queue` waiting → `stt_busy`; `timeout_seconds` →
+  `stt_timeout`; an engine exception → `stt_failed`; text with no letter or digit → `transcript_empty`; text that
+  matches the credential pattern → `transcript_credential` (nothing kept, nothing forwarded); otherwise OpenCC
+  `s2twp` (when installed) and trimming. Every call writes one record; `fail(code, ...)` records a failure found
+  before any audio (a declared limit, a failed download).
+- **Transcript record** `aep.voice.transcript/v1` at
+  `<workspace>/voice/transcripts/<sha256(session)[:24]>/<id>.json`, readable only by its actor and session, purged
+  after the task-summary retention (default 30 days): `schema`, `id` (`vt-<yyyymmddhhmmss>-<8 hex>`), `channel`
+  `telegram` | `web`, `actor`, `session_id`, `created_at`, `audio` (`sha256`, `mime_type`, `bytes`,
+  `duration_seconds`; metadata only), `stt` (`provider`, `model`, `model_revision`, `compute`,
+  `language_requested`, `language_detected`, `settings`, `elapsed_seconds`), `text_raw`, `text`,
+  `post_processing`, `segments`, `status` `ok` | `empty` | `failed`, `error_code`, `used_as` (`turn`, `edited`,
+  `sent_text_sha256`). `ok` has text and no code; `empty` is `transcript_empty` without text; `failed` has a code
+  and no text. A record never holds a credential or a Bot API URL.
+- **Telegram**: `message.voice` and `message.audio` (`TelegramVoice`: `file_id`, `duration`, `mime_type`,
+  `file_size`, `file_name`); `video_note` and video stay refused. With voice on, for a mapped sender only: the
+  declared duration, size and type are checked before any download (a refusal records the failure); then
+  `getFile` and the GET download into memory; 「🎤 轉文字中…」 is sent and edited into 「🎤 你說：「…」」; the
+  text (a caption first, then a blank line, then the transcript) continues through the unchanged handling of
+  typed text in the same chat session (`telegram-chat-<chat>`), and the record's `used_as.turn` is
+  `telegram-update-<update id>`. Refusals are disposition `answered` with the code's reply;
+  `transcript_credential` is `unsupported_content` with the typed credential reply. A transcript never acts as
+  button data, and a run word (「好」, 「確認執行」, "yes", … with the engine's punctuation trimmed) at an open
+  card is refused with `voice_not_confirmation` while the card stays open; spoken 「取消」 and 「修改」 work as
+  typed. With voice off a voice message gets the unchanged "Only text messages are accepted here.".
+- **`GET /api/voice`** (token): `{"ok": true, "enabled": false}` or `{"ok": true, "enabled": true,
+  "max_seconds": n}`; the page shows the microphone only when enabled.
+- **`POST /api/voice/transcribe`** (loopback Host, bearer token, JSON body at most 14 MiB; a body up to twice that
+  is read and dropped so the 413 reaches the browser): `VoiceTranscribeRequest` `{session_id, mime_type (1–100
+  chars), duration_ms (optional, advisory), data (base64, not empty)}`. Answers: 200 `{"ok": true, "transcript":
+  {id, text, language, duration_seconds, engine, model, elapsed_seconds}}`; 200 `{"ok": false, "code",
+  "message"}` for every error code below (voice off: `voice_disabled`); 503 for `stt_busy`; 400
+  `voice_request_invalid` (bad JSON fields, bad base64, empty recording); 404 `conversation_unknown` (not this
+  actor's conversation); 401/403 the existing guards. Nothing is sent to the Agent; the transcript only fills the
+  message box.
+- **Turn link**: `ConversationTurnRequest.voice_transcript: Symbol | None = None`. The turn is always `message`.
+  When the id names this actor's transcript in this conversation, `used_as` records the turn, whether `message`
+  differs from the transcript and its SHA-256; an unknown or foreign id is ignored and never blocks the turn. A
+  turn with a valid transcript id whose message is a run word, while the conversation's last answer offered a run
+  form or an action card, is answered `voice_not_confirmation` (`needs_input`); the form's button confirms.
+- **Error codes** (`voice.contracts.REPLIES` has each reply, Traditional Chinese except the credential one):
+  `voice_disabled`, `audio_too_long`, `audio_too_large`, `audio_unsupported_format`, `audio_decode_failed`,
+  `download_failed` (Telegram shows the attachment refusal), `transcript_empty`, `transcript_credential`,
+  `stt_unavailable`, `stt_busy`, `stt_timeout`, `stt_failed`, `voice_not_confirmation`. None of them reaches the
+  Agent.
