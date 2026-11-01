@@ -42,13 +42,20 @@ def _put(store: BiStore, entity_type: str, *rows: dict[str, Any], synthetic: boo
     store.apply(planned, filename="fixture.csv", entity_type=entity_type, actor="tester")
 
 
+def _with_node_rule(ws: Path) -> str:
+    """A local version of 2.0.0 whose Node has a `name_pattern` (BI D4)."""
+    made = _call(ws, "POST", "/api/bi/schema-drafts", {"base": V2})
+    document = made["document"]
+    for item in document["types"]:
+        if item["name"] == "Node":
+            item["name_pattern"] = r"^(L[1-5]|X)-"
+    draft = made["draft"]["id"]
+    _call(ws, "POST", f"/api/bi/schema-drafts/{draft}/revisions", {"document": document})
+    return str(_call(ws, "POST", f"/api/bi/schema-drafts/{draft}/publish", {})["ref"])
+
+
 def _faulty(ws: Path) -> BiStore:
-    _call(ws, "POST", "/api/bi/datasets", {"name": "m", "schema": V2})
-    config = {
-        "node_name_pattern": r"^(L[1-5]|X)-",
-        "domains": [{"id": "AIDC", "nodes": ["L1-CMP-Chip"]}],
-    }
-    _call(ws, "POST", "/api/bi/domains", {"dataset": "m", "config": config, "base_revision": 0})
+    _call(ws, "POST", "/api/bi/datasets", {"name": "m", "schema": _with_node_rule(ws)})
     store = BiStore(ws, "m")
     _put(store, "Node", {"name": "L1-CMP-Chip"}, {"name": "L2-CMP-Board"}, {"name": "Rack"})
     _put(store, "Account", {"name": "ODM Co"}, {"name": "Twin Co"})
@@ -88,11 +95,11 @@ def test_each_check_finds_its_fault_and_names_the_card(tmp_path: Path) -> None:
     ]  # the B link explains its blank date
     assert sorted(found["revenue_layer"]) == ["company 層不該填客戶", "客戶層卻沒有填客戶"]
     assert found["node_format"] == ["名稱不符合 ^(L[1-5]|X)-"]
-    assert len(found["node_not_listed"]) == 2  # L2-CMP-Board and Rack were proposed
+    assert "node_not_listed" not in found  # a Node card is the list now (BI D4)
     assert found["product_without_node"]
     item = next(c for c in report["checks"] if c["id"] == "node_format")["items"][0]
     assert item["card"]["label"] == "Rack" and item["card"]["cite"] == "Node:Rack"
-    assert report["totals"]["warn"] == 3 and report["totals"]["issue"] >= 10
+    assert report["totals"]["warn"] == 1 and report["totals"]["issue"] >= 10  # the product gap
     assert store.card_rows()  # read only: the cards are as they were
 
 

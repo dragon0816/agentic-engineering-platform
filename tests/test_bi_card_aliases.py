@@ -3,8 +3,8 @@
 `docs/phases/BI_ANALYSIS_DASHBOARD.md` §3: an Account's other names are on the
 card (`aliases`, schema 3.0.0), so an import or an AI candidate that writes
 another name lands on that card, and a pushed card brings its aliases to every
-PC. The domain configuration's `name_aliases` still answer what no card does,
-until D4. All data is fictional.
+PC. Since D4 nothing else answers (the domain configuration's `name_aliases`
+move onto the cards). All data is fictional.
 """
 
 from __future__ import annotations
@@ -45,15 +45,10 @@ def test_an_import_names_the_card_its_alias_stands_for(tmp_path: Path) -> None:
     assert other.values["name"] == "Quay Co"
 
 
-def test_the_cards_aliases_come_before_the_configurations(tmp_path: Path) -> None:
+def test_only_the_cards_aliases_answer(tmp_path: Path) -> None:
     store = _market(tmp_path)
-
-    class Configured:
-        document = {"name_aliases": {"港灣": "Old Harbor", "Pier": "Pier Co"}}
-
-    found = names.from_store(store, Configured())
-    assert found.canon("港灣") == "Harbor Co"  # the card's alias wins
-    assert found.canon("pier") == "Pier Co"  # the configuration still answers the rest
+    found = names.from_store(store)
+    assert found.canon("港灣") == "Harbor Co"
     assert found.canon("Nobody") == "Nobody"
 
 

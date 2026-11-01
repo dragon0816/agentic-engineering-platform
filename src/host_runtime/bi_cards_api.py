@@ -58,9 +58,9 @@ from capabilities.bi_cards import (
     analysis_session,
     board,
     catalog,
-    domains,
     importer,
     methods,
+    migrate,
     quality,
     runs,
     schema_session,
@@ -199,13 +199,12 @@ def _route(
             # The Dashboard is the analyses: a vault's own, else the built-in pack (BI P3, P5);
             # other parameters as `param.<name>`.
             given = {k[len("param.") :]: str(v) for k, v in query.items() if k.startswith("param.")}
-            return 200, board.board(workspace, store, domain, sample, given)
+            drawn = board.board(workspace, store, domain, sample, given)
+            # An old domain configuration still to move (BI D4): the page offers the migration.
+            return 200, {**drawn, "domains_left": migrate.has_legacy(store)}
         if path == "/api/bi/quality":
             # Quality checks (BI vault V13), read only.
             return 200, quality.check(store, catalog.for_store(store))
-        if path == "/api/bi/domains":
-            # Per-domain configuration (BI vault V10), read only here.
-            return 200, domains.describe(store, catalog.for_store(store))
         if path == "/api/bi/sources":
             return 200, {"sources": Staging(workspace, store.dataset).sources()}
         parts = path.split("/")
@@ -275,12 +274,11 @@ def _route(
         )
     if path == "/api/bi/datasets":
         return _create_dataset(workspace, given)
-    if path == "/api/bi/domains":
-        store = BiStore(workspace, _dataset(given.get("dataset")))
-        saved = domains.save(
-            store, catalog.for_store(store), given.get("config"), given.get("base_revision"), who
-        )
-        return 200, {"ok": True, **saved}
+    if path == "/api/bi/migrate-domains":
+        # BI D4: a dataset's old domain configuration into schema, cards and skills or a
+        # method; a dry run unless `apply` with the dry run's token.
+        dataset = _dataset(given.get("dataset"))
+        return 200, {"ok": True, **migrate.migrate_domains(workspace, dataset, given, who)}
     if path == "/api/bi/demo/load":
         store = BiStore(workspace, _dataset(given.get("dataset")))
         if not catalog.for_store(store).is_bi:
@@ -729,7 +727,6 @@ DATASET_READS = (
     "/api/bi/cards",
     "/api/bi/dashboard",
     "/api/bi/schema",
-    "/api/bi/domains",
     "/api/bi/quality",
     "/api/bi/index",
     "/api/bi/search",

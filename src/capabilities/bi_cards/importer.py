@@ -24,7 +24,7 @@ from collections import OrderedDict
 from dataclasses import dataclass, field
 from typing import Any
 
-from capabilities.bi_cards import domains, names
+from capabilities.bi_cards import names
 from capabilities.bi_cards.catalog import for_store
 from capabilities.bi_cards.schema import Registry, TypeDef, norm_key
 from capabilities.bi_cards.store import ApplyResult, BiStore, PlannedRow
@@ -193,14 +193,10 @@ def preview(
         columns.append({"source": header, "field": name, "status": status, "note": note})
         if name is not None:
             by_header[header] = name
-    # The dataset's per-domain configuration (BI vault V10): its enum aliases
-    # under the mapping's, and its name aliases for names and link targets.
-    configured = domains.read(store)
-    canonical = names.from_store(store, configured)  # the cards' aliases (BI D2)
-    extra_aliases = {
-        **(configured.enum_aliases if configured is not None else {}),
-        **dict(mapping.get("enum_aliases") or {}),
-    }
+    # Names and link targets through the cards' aliases (BI D2); value aliases
+    # are the schema's, and the mapping's on top.
+    canonical = names.from_store(store)
+    extra_aliases = dict(mapping.get("enum_aliases") or {})
     defaults = dict(mapping.get("defaults") or {})
     skip_rules = list(mapping.get("skip_rows") or [])
     ignored_priority = [

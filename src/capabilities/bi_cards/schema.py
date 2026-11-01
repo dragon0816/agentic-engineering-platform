@@ -101,6 +101,8 @@ class TypeDef:
     fields: tuple[FieldDef, ...]
     ignored: tuple[dict[str, Any], ...] = field(default=())
     code_key: str = ""
+    #: A card name should match it (quality check `node_format`; BI D4).
+    name_pattern: str = ""
 
     def get(self, name: str) -> FieldDef | None:
         return next((f for f in self.fields if f.name == name), None)
@@ -150,6 +152,7 @@ class Registry:
                     fields=fields,
                     ignored=tuple(ignored.get(raw["name"], ())),
                     code_key=str(raw.get("code_key") or ""),
+                    name_pattern=str(raw.get("name_pattern") or ""),
                 )
             )
         self.types: dict[str, TypeDef] = {t.name: t for t in types}

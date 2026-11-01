@@ -27,7 +27,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import catalog, domains, extract, names, runs, source_markdown
+from capabilities.bi_cards import catalog, extract, names, runs, source_markdown
 from capabilities.bi_cards.schema import Registry, norm_key
 from capabilities.bi_cards.staging import Staging, parse_kind
 from capabilities.bi_cards.store import BiStoreError
@@ -244,12 +244,11 @@ def _extract(
         layout.update(done=done, chunks=total)
         staging.put_layout(run_id, layout)
 
-    configured = domains.read(staging.store)
-    canonical = names.from_store(staging.store, configured)  # the cards' aliases (BI D2)
-    if isinstance(layout.get("skills"), dict):
-        notes = str(layout["skills"].get("text") or "")
-    else:
-        notes = configured.extraction_notes() if configured is not None else ""
+    canonical = names.from_store(staging.store)  # the cards' aliases (BI D2)
+    # A vault's run reads its skills; elsewhere the method's instructions carry the rules.
+    notes = (
+        str(layout["skills"].get("text") or "") if isinstance(layout.get("skills"), dict) else ""
+    )
     result = extract.extract(
         model,
         alias,

@@ -1,6 +1,7 @@
 # BI: schema, skills, cards and analyses only (Dashboard as analyses, Atlas as a viewer)
 
-Status: design approved in direction by the owner (2026-11-01); no code yet. Builds on
+Status: design approved in direction by the owner (2026-11-01); AEP side built 2026-11-01 (F1–F3, P1–P5,
+D1–D4; see `docs/TASKS.md`); Atlas A1/A2, I1 and the owner's I2 remain. Builds on
 `docs/phases/BI_TEST_AND_TOOLS.md` (T1–T3: benchmarks, the skill AI and analyses on the Agent harness) and
 `docs/phases/KNOWLEDGE_REPO.md` (vaults: commit, push, publish). Decision record: `docs/DECISIONS.md`
 2026-11-01 "BI: retire the domain configuration and the coded Dashboard".

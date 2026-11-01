@@ -976,6 +976,15 @@ class BiStore:
                 raise BiStoreError("meta_stale", "設定已被別人改過，請重新讀取後再改")
             db.execute("INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)", (key, value))
 
+    def delete_meta_value(self, key: str, *, base: str) -> None:
+        """Remove one `meta` value the caller read as `base` (else 409 `meta_stale`)."""
+        self.refuse_write()
+        with self._db(write=True) as db:
+            row = db.execute("SELECT value FROM meta WHERE key = ?", (key,)).fetchone()
+            if (None if row is None else str(row[0])) != base:
+                raise BiStoreError("meta_stale", "設定已被別人改過，請重新讀取後再改")
+            db.execute("DELETE FROM meta WHERE key = ?", (key,))
+
     def schema_history(self) -> list[dict[str, Any]]:
         if not self.exists:
             return []

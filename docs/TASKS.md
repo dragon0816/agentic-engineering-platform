@@ -4014,3 +4014,11 @@ s-k-20261011T102952` (not published).
     the robotics Dashboard checks in `test_bi_cards` and the quality, board, query and vault browser tests now
     read the pack. Also fixed `test_bi_methods` (left on 2.1.0 by D1; the next local version is 3.1.0).
     Next: D4.
+  - [x] 2026-11-01, Claude Code: BI D4, the domain configuration removed (owner answers 2026-11-01: move as much
+    as possible automatically, keep a slim prompt). The migration covers vaults (one commit) and datasets only on
+    this PC (written directly, `POST /api/bi/migrate-domains`): value aliases and the node name rule into a new
+    local schema version (schema types gained `name_pattern`), notes into skills or an `llm` method, listed nodes
+    without a card reported. Removed `domains.py`, `/api/bi/domains`, the 「領域設定」 editor and the
+    `node_not_listed` check; the Dashboard shows 「這個資料集還有舊的領域設定」 while one is left. Tests
+    `test_bi_migrate_domains` (3) and the updated quality, skills, aliases and vault browser tests; all 334 BI
+    tests pass. AEP side of `BI_ANALYSIS_DASHBOARD.md` §7 done; next: Atlas A1/A2 and I1 (Codex), I2 (owner).

@@ -136,8 +136,9 @@ def route(
     if action == "bench":
         return 200, {"ok": True, **_start_bench(workspace, actor, vault_id, bench)}
     if action == "migrate-domains":
-        # BI D3: a dry run unless `apply` with the dry run's token.
-        return 200, {"ok": True, **migrate.migrate_domains(workspace, vault_id, given, actor)}
+        # BI D3/D4: a dry run unless `apply` with the dry run's token.
+        dataset = vault.dataset_name(vault_id)
+        return 200, {"ok": True, **migrate.migrate_domains(workspace, dataset, given, actor)}
     if action == "packs":
         if isinstance(given.get("export"), dict):
             return 200, {

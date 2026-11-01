@@ -30,7 +30,7 @@ from typing import Any
 
 from test_bi_vault import _call, _commit, _ok
 
-from capabilities.bi_cards import analyses, catalog, domains, packs, service, vault, vault_skills
+from capabilities.bi_cards import analyses, catalog, packs, service, vault, vault_skills
 from capabilities.bi_cards.store import BiStore, PlannedRow
 from host_runtime.bi_cards_api import route
 from scripts import bi_feed_fixtures as feed_fixtures
@@ -261,8 +261,8 @@ def chains(tmp_path: Path, *, migrated: bool) -> tuple[BiStore, str]:
     registry = catalog.for_store(store)
     target = vault.Vault(ws, vault_id)
     with target.lock:
-        saved = domains.validate(chain_config(registry), registry)
-        target.repo.stage(vault_skills.DOMAINS_UNIT, json.dumps(saved, ensure_ascii=False))
+        old = json.dumps(chain_config(registry), ensure_ascii=False)  # as 「領域設定」 kept it
+        target.repo.stage(vault_skills.DOMAINS_UNIT, old)
     _commit(ws, vault_id, "領域設定")
     if migrated:
         url = f"/api/bi/vaults/{vault_id}/migrate-domains"

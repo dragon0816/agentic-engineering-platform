@@ -16,7 +16,7 @@ from pathlib import Path
 from bi_pack_fixtures import build, chain_cards, golden, new_vault, pack_results
 from test_bi_vault import _call, _ok
 
-from capabilities.bi_cards import board, domains, vault
+from capabilities.bi_cards import board, migrate, vault
 from capabilities.bi_cards.store import BiStore
 
 
@@ -26,7 +26,7 @@ def test_chains_and_coverage_after_the_migration_give_the_golden_answers(
     expected = golden("chains")["results"]
     assert set(expected) == {"chain-summary", "chain-view", "chain-overlap", "coverage"}
     store = build("chains", tmp_path)
-    assert domains.read(store) is None  # migrated
+    assert not migrate.has_legacy(store)  # migrated
     nodes = {r["name"]: r["id"] for r in store.card_rows() if r["entity_type"] == "Node"}
     chain = {n: store.fields(i).get("chain", {}).get("value") for n, i in nodes.items()}
     assert chain == {"L1-CMP-Accelerator": ["CMP"], "L3-PWR-Rack": ["PWR"],

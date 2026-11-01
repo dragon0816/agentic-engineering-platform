@@ -2469,23 +2469,17 @@ tr:last-child td { border-bottom: none; }
           </details>
           <span class="bi-meta" id="bi-atlas-state" role="status" aria-live="polite"></span>
         </div>
-        <details class="card" id="bi-dom">
-          <summary><strong>領域設定</strong>
-            <span class="bi-meta" id="bi-dom-sub"></span></summary>
-          <p class="bi-meta">舊的領域設定（應用領域、鏈別、技術領域與別名）。這些已改由
-            schema 的允許值與卡片的 chain、aliases 欄位表達；
-            知識庫請用「預覽：搬進 schema 與卡片」搬過去。</p>
-          <label class="bi-label" for="bi-dom-text">設定內容（JSON）</label>
-          <textarea id="bi-dom-text" class="bi-input" rows="14" spellcheck="false"></textarea>
-          <div id="bi-dom-warn" aria-live="polite"></div>
+        <div class="card" id="bi-dom" hidden>
+          <p><strong>這個資料集還有舊的領域設定</strong></p>
+          <p class="bi-meta">領域設定已退役：應用領域、技術領域與鏈別改由 schema 的允許值表達，
+            別名與鏈別寫進卡片，判讀規則搬進 skills（知識庫）或擷取方法（只在這台電腦的資料集）。
+            先預覽，確認後才寫入。</p>
           <div class="bi-actions">
-            <button class="bi-btn" id="bi-dom-save" type="button">儲存設定</button>
-            <button class="bi-btn" id="bi-dom-sample" type="button">填入範例</button>
-            <button class="bi-btn" id="bi-dom-migrate" type="button" hidden>
+            <button class="bi-btn" id="bi-dom-migrate" type="button">
               預覽：搬進 schema 與卡片</button>
           </div>
           <div id="bi-dom-plan" aria-live="polite"></div>
-        </details>
+        </div>
         <div id="bi-dash-params" class="bi-actions" hidden></div>
         <div class="mem-status" id="bi-status-dash" role="status" aria-live="polite" hidden></div>
         <div id="bi-dash-summary" class="bi-summary"></div>
@@ -11812,48 +11806,27 @@ async function biLoadDashboard() {
   if (seq !== bi.dashSeq) return;
   biStatus("bi-status-dash", ""); bi.loaded.dashboard = true;
   biRenderDashboard(reply);
-  biLoadDomains();
+  // An old domain configuration still to move (BI D4).
+  el("bi-dom").hidden = !reply.domains_left; el("bi-dom-plan").replaceChildren();
 }
 
-// -- per-domain configuration (BI vault V10, BI_VAULT.md §12) --------------------
-const BI_DOM_SAMPLE = {
-  domains: [{id: "AIDC", label: "AI 資料中心",
-    segments: [{id: "aidc-computing", label: "AIDC Computing", priority: true},
-      {id: "aidc-power", label: "AIDC Power"}],
-    chains: [{id: "CMP", label: "運算鏈", node_pattern: "^L\\d-CMP-"},
-      {id: "PWR", label: "電力鏈", node_pattern: "^L\\d-PWR-"}],
-    nodes: []}],
-  areas: [{id: "wireless-comm", label: "Wireless & Comm."}, {id: "rf", label: "RF"}],
-  segment_field: "segments", area_field: "tech_areas",
-  name_aliases: {"聯發科": "MediaTek"}, enum_aliases: {}};
-
-async function biLoadDomains() {
-  const warn = el("bi-dom-warn"); warn.replaceChildren();
-  let reply;
-  try {
-    reply = await biCall("/api/bi/domains?dataset=" + encodeURIComponent(biDataset()));
-  } catch (failure) {
-    warn.append(bh("p", "bi-err", "領域設定沒有載入：" + failure.message + "。"));
-    return;
-  }
-  bi.domains = reply;
-  el("bi-dom-sub").textContent = reply.configured
-    ? "・第 " + reply.revision + " 版・" + reply.config.domains.length + " 個領域" : "・尚未設定";
-  el("bi-dom-text").value = reply.config ? JSON.stringify(reply.config, null, 1) : "";
-  biDomainWarnings(reply.warnings || []);
-  // A vault's configuration moves into its schema and cards (BI D3).
-  el("bi-dom-migrate").hidden = !(reply.configured && biVaultOf(biDataset()));
-  el("bi-dom-plan").replaceChildren();
-}
-
+// -- the old domain configuration: preview and move it (BI D3, D4) ---------------
 async function biMigrateDomains() {
-  const vault = biVaultOf(biDataset()); if (!vault) return;
-  const url = "/api/bi/vaults/" + vault.id + "/migrate-domains";
-  const plan = await biCall(url, {});
+  const vault = biVaultOf(biDataset());
+  const url = vault ? "/api/bi/vaults/" + vault.id + "/migrate-domains" : "/api/bi/migrate-domains";
+  const body = vault ? {} : {dataset: biDataset()};
+  const plan = await biCall(url, body);
   const box = el("bi-dom-plan"); box.replaceChildren();
   const list = bh("ul", "");
   if (plan.schema) {
     list.append(bh("li", "", "schema 從 " + plan.schema.from + " 升到 " + plan.schema.to));
+  }
+  if (plan.schema_adds) {
+    const adds = Object.entries(plan.schema_adds.enum_aliases || {}).map(([f, t]) =>
+      f + "：" + Object.entries(t).map(([a, v]) => a + " → " + v).join("、"));
+    list.append(bh("li", "", "建立新的本地 schema 版本：" + [...adds,
+      ...(plan.schema_adds.name_pattern ? ["節點名稱規則 " + plan.schema_adds.name_pattern] : [])]
+      .join("；")));
   }
   for (const item of plan.aliases) {
     list.append(bh("li", "", item.type + "「" + item.card + "」加上別名：" + item.add.join("、")));
@@ -11861,11 +11834,19 @@ async function biMigrateDomains() {
   for (const item of plan.chains) {
     list.append(bh("li", "", "節點「" + item.node + "」的鏈別：" + item.chain.join("、")));
   }
+  if (plan.notes.length) {
+    list.append(bh("li", "", plan.notes.map((n) => n.label).join("、") + " 的判讀規則搬進"
+      + (plan.notes_to === "skills" ? "各自的 extract skill"
+        : "擷取方法「領域判讀規則（從領域設定搬來）」")));
+  }
   list.append(bh("li", "", "移除領域設定（區段與技術領域改由 schema 的允許值提供）"));
   const notes = [];
   if (plan.missing.length) {
     notes.push("找不到卡片、不會建立的別名：" + plan.missing.map((m) => m.alias + " → "
       + m.name).join("、"));
+  }
+  if (plan.missing_nodes.length) {
+    notes.push("節點清單上還沒有卡片的節點（不會建立）：" + plan.missing_nodes.join("、"));
   }
   if (plan.dropped_chains.length) {
     notes.push("schema 不允許的鏈：" + plan.dropped_chains.join("、"));
@@ -11873,35 +11854,22 @@ async function biMigrateDomains() {
   if (plan.unknown_areas.length) {
     notes.push("schema 不允許的技術領域：" + plan.unknown_areas.join("、"));
   }
-  box.append(bh("p", "", "會寫成一個 commit「" + plan.purpose + "」："), list,
-    ...notes.map((n) => bh("p", "bi-warn", n)),
-    bh("div", "bi-actions", biButton("確認搬移（寫入一個 commit）", async () => {
-      await biCall(url, {apply: true, token: plan.token});
-      box.replaceChildren();
-      biNotice(true, "已把領域設定搬進 schema 與卡片（push 後大家才會看到）。");
-      bi.loaded = {}; biShowView(bi.view);
-      await biLoadDomains();
-    }, "go", "確認把領域設定搬進 schema 與卡片"),
-    biButton("取消（不寫入）", () => box.replaceChildren(), "bi-btn")));
-}
-
-function biDomainWarnings(items) {
-  const warn = el("bi-dom-warn"); warn.replaceChildren();
-  if (items.length) {
-    warn.append(bh("ul", "bi-warn", ...items.map((w) => bh("li", "", w.message))));
+  if (plan.enum_aliases_dropped.length) {
+    notes.push("指向 schema 不允許的值、不會搬的別名：" + plan.enum_aliases_dropped.map((e) =>
+      e.field + " " + e.alias + " → " + e.value).join("、"));
   }
-}
-
-async function biSaveDomains() {
-  let config;
-  try { config = JSON.parse(el("bi-dom-text").value); }
-  catch (failure) { biNotice(false, "設定不是有效的 JSON：" + failure.message); return; }
-  const reply = await biCall("/api/bi/domains", {dataset: biDataset(), config,
-    base_revision: (bi.domains && bi.domains.revision) || 0});
-  biNotice(true, "領域設定已儲存（第 " + reply.revision + " 版）。" + (bi.verVault
-    && biDataset() === "vault-" + bi.verVault ? "notes 已搬到「判讀規則（skills）」；"
-    + "記得 commit。" : ""));
-  await biLoadDomains();
+  const committed = plan.writes === "commit";
+  box.append(bh("p", "", committed ? "會寫成一個 commit「" + plan.purpose + "」："
+    : "會直接寫進這台電腦的資料集："), list, ...notes.map((n) => bh("p", "bi-warn", n)),
+    bh("div", "bi-actions", biButton(committed ? "確認搬移（寫入一個 commit）" : "確認搬移（寫入）",
+      async () => {
+        await biCall(url, {...body, apply: true, token: plan.token});
+        box.replaceChildren();
+        biNotice(true, "已把領域設定搬進 schema 與卡片"
+          + (committed ? "（push 後大家才會看到）。" : "。"));
+        bi.loaded = {}; biShowView(bi.view);
+      }, "go", "確認把領域設定搬進 schema 與卡片"),
+    biButton("取消（不寫入）", () => box.replaceChildren(), "bi-btn")));
 }
 
 function biRenderDashboard(reply) {
@@ -12118,13 +12086,6 @@ function biAtlasUrl() {
 
 el("bi-dom-migrate").addEventListener("click", () => biMigrateDomains()
   .catch((failure) => biNotice(false, "沒有預覽：" + failure.message)));
-el("bi-dom-save").addEventListener("click", () => {
-  biSaveDomains().catch((failure) => biNotice(false, "領域設定沒有儲存：" + failure.message));
-});
-el("bi-dom-sample").addEventListener("click", () => {
-  if (el("bi-dom-text").value.trim()) return biNotice(false, "已經有內容；清空後才填入範例。");
-  el("bi-dom-text").value = JSON.stringify(BI_DOM_SAMPLE, null, 1);
-});
 el("bi-atlas-set").addEventListener("toggle", () => { el("bi-atlas-url").value = biAtlasUrl(); });
 el("bi-atlas-save").addEventListener("click", () => {
   let value = el("bi-atlas-url").value.trim();

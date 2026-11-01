@@ -25,7 +25,6 @@ from collections.abc import Mapping
 from pathlib import PurePosixPath
 from typing import Any
 
-from capabilities.bi_cards import domains
 from capabilities.bi_cards.schema import Registry
 from capabilities.bi_cards.store import BiStoreError
 from knowledge.repo import skills
@@ -35,7 +34,7 @@ CLASSIFY = "classify"
 SOURCES = "sources"
 APPLICATIONS = "sources/applications"
 LIBRARY = "sources/library"
-DOMAINS_UNIT = "meta:" + domains.META_KEY
+DOMAINS_UNIT = "meta:domains"  # the old domain configuration (retired, BI D4)
 SEGMENTS_UNIT = "meta:vault_segments"
 
 

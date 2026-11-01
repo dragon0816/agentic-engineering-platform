@@ -5903,3 +5903,25 @@ migration (D3) needs one upgrade. Rejected: 2.1.0 as written (collision), 2.0.1 
   the design removes). A vault's `coverage` block at creation is no longer stored (nothing reads it).
 - **Old names keep working in the chat.** `bi__query` maps a coded section name (`trend_coverage`) to its slug,
   so a Skill or a person using the old names is not refused.
+
+## 2026-11-01: Removing the domain configuration, implementation choices (D4, owner answers, Claude Code)
+
+The owner chose (2026-11-01) to move as much of the old configuration as possible automatically and to keep a
+slim migration prompt on the page. What D3 did not move, and where it goes now:
+
+- **Value aliases (`enum_aliases`) and the node name rule (`node_name_pattern`)** go into a new local schema
+  version made from the dataset's current one (a draft, published, the dataset upgraded; in a vault the schema
+  document goes with the commit, so other PCs get it). For the rule, a schema type gained an optional
+  `name_pattern`, which the quality check `node_format` reads. Aliases pointing at a value the schema does not
+  allow are listed, not moved. Rejected: a shipped schema change (the aliases are one team's vocabulary).
+- **Node lists** (`domains[].nodes`, chain `nodes`): their only use was the warning `node_not_listed`. A Node
+  card is the list now; listed names without a card are reported, never created, and the warning is gone.
+  Rejected: a schema field holding the list (that is the configuration again).
+- **Extraction notes** go into the vault's `<domain>-extract` skills (as saving did since R3) or, for a dataset
+  only on this PC (no skills), into one `llm` ingest method whose instructions are the default ones plus the
+  notes. Difference: a local dataset's AI run uses the notes only when that method is chosen, not on every run.
+  Rejected: keeping notes in `meta` (the configuration again).
+- **The migration entry point** is a prompt on the Dashboard shown only while a dataset still has an old
+  configuration (`domains_left`), with the same preview and confirm as D3; local datasets are written directly.
+  The old reader lives in `migrate.py` only. Rejected: migrating on open without a preview (D3's rule is
+  preview, then the person confirms).

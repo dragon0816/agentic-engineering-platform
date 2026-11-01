@@ -1,72 +1,45 @@
 # Handoff
 
-Updated: 2026-11-01 (Asia/Taipei), by Claude Code (BI analysis dashboard: F1, F2, F3, P1, P2, P3, P4, D1, D2, D3, chains and coverage as analyses, golden answers, P5; earlier: knowledge repositories R1, R2, R3 BI part, R4a, R4b, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-11-01 (Asia/Taipei), by Claude Code (BI analysis dashboard: F1, F2, F3, P1, P2, P3, P4, D1, D2, D3, chains and coverage as analyses, golden answers, P5, D4; earlier: knowledge repositories R1, R2, R3 BI part, R4a, R4b, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
 ## BI analysis dashboard and domain retirement (2026-11-01, Claude Code) — latest
 
-**Goal.** `docs/phases/BI_ANALYSIS_DASHBOARD.md` §7, AEP side, in the owner's order: F1 → F2 → F3, then P1 → P2 →
-P3/P4, D1 → D3, P5, D4. Codex builds the Atlas side (A1, A2, I1) in its own repository from the golden files;
-the AEP agent never touches the Atlas repository. Each finished task: checks, commit, rebase on `origin/main`,
-`git push origin HEAD:main` (no pull requests), TASKS and this file updated. Work happens in the Paseo worktree
-`sudden-mayfly` with its own `.venv` (`py -3.12 -m venv .venv`, `pip install -e ".[dev,office]"`). Do not
-restart the running Agent Web.
+**Goal.** `docs/phases/BI_ANALYSIS_DASHBOARD.md` §7, AEP side, in the owner's order: F1 → F2 → F3, P1 → P2 →
+P3/P4, D1 → D3, chains and coverage into the pack, golden answers, P5, D4. Codex builds the Atlas side (A1, A2,
+I1) in its own repository from the golden files; the AEP agent never touches the Atlas repository. Each finished
+task: checks, commit, rebase on `origin/main`, `git push origin HEAD:main` (no pull requests), TASKS and this
+file updated. Work happens in the Paseo worktree `sudden-mayfly` with its own `.venv`. Do not restart the running
+Agent Web.
 
-**Done.**
-- F1 (fixture vault, golden answers, `scripts/bi_feed_fixtures.py`): see `docs/TASKS.md`, contract
-  `docs/CONTRACTS.md` "BI analysis feed for Atlas: parameters, fixture and golden answers (F1)", decisions
-  `docs/DECISIONS.md` 2026-11-01 "BI analysis feed, implementation choices (F1)". Analysis `params`/`requires`
-  are in `analyses.py` already (needed by the golden answers); `capabilities/bi_cards/feed.py` builds every
-  answer (`feed.answer`), including the result cache, the script queue and `result_not_ready`. Pushed to main
-  as `8efbb3a4`.
-- F2 (routes in Agent Web): `host_runtime/bi_feed_api.py`, wired in `web.py` `do_GET` (and 405 in `do_POST`);
-  worker thread for the queue; `refresh` after join/sync/publish/run in `bi_vaults_api.py`. Contract
-  `docs/CONTRACTS.md` "BI analysis feed for Atlas: the routes in Agent Web (F2)". Pushed as `b103c857`.
-- F3 (fixture server): `scripts/bi_feed_server.py --port 53611`; contract "... the fixture server (F3)".
-  Codex is unblocked for A1/A2 (golden files) and I1 (fixture server). Pushed as `a6664acf`.
-- P1 (parameters, requirements, Dashboard order on the page): contract `docs/CONTRACTS.md` "BI analyses:
-  parameters, requirements and the Dashboard's order on the page (P1)". Pushed as `43d60a56`.
-- P2 (default pack, import/export): contract "BI analysis packs and the default pack (P2)", decisions
-  `docs/DECISIONS.md` 2026-11-01 "The default analysis pack, implementation choices (P2)". New vaults now
-  start with the pack (`default_pack: false` opts out; the vault-mechanics tests and the F1 fixture do).
-  Pushed as `29dbc4b4`.
+**Done (all AEP tasks of §7).** Each has a row in `docs/TASKS.md`, a contract in `docs/CONTRACTS.md` and, where
+choices were made, a decision in `docs/DECISIONS.md` (2026-11-01):
+- F1–F3 feed for Atlas (`feed.py`, `bi_feed_api.py`, `scripts/bi_feed_fixtures.py`, `scripts/bi_feed_server.py`).
+- P1–P4: analysis params/requires and the Dashboard order; the default pack `bi-market-default`; the Dashboard
+  tab draws analyses (`board.py`); `bi__query` reads saved analyses.
+- D1–D3: schema 3.0.0 (`tech_areas`, `chain`, `aliases`; 3.0.0 not 2.1.0, see the decision); name matching from
+  card aliases; the domain migration.
+- Chains A–A3 and the coverage matrix as pack analyses (`ea27af7f`); golden answers of the coded sections in
+  `tests/fixtures/bi_default_pack/golden/` (`e18ec7c8`, frozen: a deliberate change of an answer edits the file
+  with the reason); P5 removed `dashboard.py`/`market.py`/`coverage.py`, `/api/bi/coverage` and the matrix panel
+  (`71574dc1`); D4 removed `domains.py`, `/api/bi/domains` and the 「領域設定」 editor, the migration now moving
+  everything it can for vaults and local datasets (owner answers 2026-11-01).
 
-- P3 (Dashboard tab draws a vault's analyses): contract "BI Dashboard tab draws a vault's analyses (P3)",
-  decisions 2026-11-01 "The Dashboard as analyses, implementation choices (P3)". Pushed as `ca35497c`.
+**Verification (D4, final state).** `ruff format --check .`, `ruff check .`, `mypy src tests` (881 files) clean;
+`pytest tests/test_bi_*.py` (every BI test, browser tests included): 334 passed. The full suite was not run (it
+slows the owner's Agent Web; run it when the PC is free). No graphify graph in this worktree, so `graphify update`
+was not run.
 
-- P4 (`bi__query` reads saved analyses): contract "`bi__query` reads a vault's saved analyses (P4)". Pushed
-  as `8760dbf9`.
-- D1 (schema 3.0.0 with `tech_areas`, `chain`, `aliases`): contract "BI schema 3.0.0 ..." and the decision
-  "The schema with technology areas and chains is 3.0.0, not 2.1.0 (D1)" (deviation from the design: the owner
-  should know). Pushed as `a802da56`.
+**Known points for the owner.**
+- Vaults made before the chain/coverage analyses get them by importing the pack again (「建立與匯入」 step 3).
+- A local dataset's migrated notes are an ingest method that must be chosen for an AI run (before, they were
+  added to every run).
+- The running Agent Web predates this code; after a restart (check `/api/tasks` first), a dataset or vault that
+  still has a domain configuration shows the migration prompt on its Dashboard. `market-bi` (V4 format) is
+  rebuilt at R6 anyway.
 
-- D2 (name matching from card aliases): contract "BI name matching from the cards' aliases (D2)".
-  Pushed as `6fa33292`.
-
-- D3 (domain migration): contract "BI domain configuration migration (D3)". A dataset only on this PC with a
-  configuration is not migrated yet (design D4 says it gets the same migration; do it with D4).
-
-- Chains A–A3 and the coverage matrix as analyses of the pack (2026-11-01): contract "BI chains and coverage
-  matrix as analyses", decision "The chains and the coverage matrix as analyses, implementation choices". Vaults
-  made before it get them by importing the pack again.
-
-- Golden answers of the coded sections (2026-11-01): `tests/fixtures/bi_default_pack/golden/*.json`, fixtures in
-  `tests/bi_pack_fixtures.py`; contract "BI chains and coverage matrix as analyses" (last item). The parity tests
-  read the golden files; `tests/test_bi_pack_golden.py` (coded vs golden) goes with the coded sections in P5.
-
-- P5 (2026-11-01): contract "BI coded Dashboard removed (P5)", decision "Removing the coded Dashboard,
-  implementation choices (P5)".
-
-**Verification (P5).** `ruff format --check .`, `ruff check .`, `mypy src tests` (883 files) clean. `pytest
-tests/test_bi_*.py` (every BI test, browser tests included): 335 passed, 4 failed on the first run; the four
-(`test_bi_methods` left on 2.1.0 by D1, `test_bi_query_analyses` coded-name test, `test_bi_schema_v3` generator
-input moved, `test_bi_vault_ui` coverage panel) were fixed and pass on rerun. The full suite was not run.
-
-**Next actions.** D4 with the owner's answers of 2026-11-01: migrate as much as possible automatically
-(`enum_aliases` and `node_name_pattern` into a new local schema version, `notes` into skills for a vault and
-into an `llm` method for a dataset only on this PC, listed nodes without a card reported), keep a slim migration
-prompt on the page for a dataset that still has a configuration (vault: commit; local: written directly), fold
-the legacy reader into `migrate.py`, then remove `domains.py`, the 「領域設定」 editor, `/api/bi/domains` and their
-tests.
+**Next actions.** (1) Run the full suite when the PC is free. (2) Codex: A1/A2 and I1 on the Atlas side against
+the golden files and `scripts/bi_feed_server.py`. (3) Owner: I2 live acceptance (§6.5), then R6 rebuilds
+`market-bi` on this structure.
 
 ## Knowledge repositories R1, R2, R3 (BI part), R4a and R5 (BI side) (2026-10-30/31, Claude Code)
 

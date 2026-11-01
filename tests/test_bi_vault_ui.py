@@ -166,17 +166,25 @@ def test_vault_panel_and_dashboard_in_a_browser(
         shoot("dashboard-pack-phone")
         size(1366, 1000, False)
 
-        # -- per-domain configuration (BI vault V10) ------------------------------------------
-        wait("document.getElementById('bi-dom-sub').textContent.includes('尚未設定')")
-        click("#bi-dom summary")
-        click("#bi-dom-sample")
-        assert "aidc-computing" in str(run("document.getElementById('bi-dom-text').value"))
-        click("#bi-dom-save")
-        wait("document.getElementById('bi-notice').textContent.includes('領域設定已儲存')")
-        # Schema v4 has no `segments` field: said so, the configuration is kept.
-        wait("document.getElementById('bi-dom-warn').textContent.includes('schema 沒有欄位')")
-        assert "第 1 版" in text_of("bi-dom-sub")
-        shoot("domains")
+        # -- an old domain configuration: the slim migration prompt (BI D4) ------------------
+        assert run("document.getElementById('bi-dom').hidden")
+        old = {"domains": [{"id": "robotics", "label": "機器人", "notes": "虛構的判讀規則。"}]}
+        BiStore(workspace, "demo").set_meta_value(
+            "domains", json.dumps(old, ensure_ascii=False), base=None
+        )
+        run("biLoadDashboard()")
+        wait("!document.getElementById('bi-dom').hidden")
+        click("#bi-dom-migrate")
+        wait("document.getElementById('bi-dom-plan').textContent.includes('擷取方法')")
+        assert "會直接寫進這台電腦的資料集" in text_of("bi-dom-plan")
+        shoot("domains-migrate")
+        run(
+            "[...document.querySelectorAll('#bi-dom-plan button')]"
+            ".find(b => b.textContent.includes('確認搬移')).click()"
+        )
+        wait("document.getElementById('bi-notice').textContent.includes('已把領域設定搬進')")
+        wait("document.getElementById('bi-dom').hidden")
+        assert BiStore(workspace, "demo").meta_value("domains") is None
 
         # -- step 1: the demo dataset becomes a vault ----------------------------------------
         click("#bi-views [data-bi-view=build]")

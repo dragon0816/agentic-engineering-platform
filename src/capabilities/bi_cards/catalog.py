@@ -73,7 +73,10 @@ TYPE_KEYS = {
     "domain",
     "has_confidence",
     "fields",
+    "name_pattern",
 }
+#: A type's `name_pattern`: a card name should match it (a quality check, BI D4).
+MAX_NAME_PATTERN = 200
 FIELD_KEYS = {
     "name",
     "label",
@@ -240,6 +243,16 @@ def validate(document: Any) -> tuple[dict[str, Any] | None, list[dict[str, str]]
         has_confidence = raw.get("has_confidence", False)
         if not isinstance(has_confidence, bool):
             error(f"{where}.has_confidence", "必須是 true 或 false")
+        name_pattern = raw.get("name_pattern") or ""
+        if not isinstance(name_pattern, str) or len(name_pattern) > MAX_NAME_PATTERN:
+            error(f"{where}.name_pattern", f"必須是文字（最多 {MAX_NAME_PATTERN} 字）")
+            name_pattern = ""
+        else:
+            try:
+                re.compile(name_pattern)
+            except re.error as failure:
+                error(f"{where}.name_pattern", f"不是有效的規則：{failure}")
+                name_pattern = ""
         raw_fields = raw.get("fields")
         if not isinstance(raw_fields, list) or not raw_fields:
             error(f"{where}.fields", "必填；至少一個欄位的清單")
@@ -357,6 +370,7 @@ def validate(document: Any) -> tuple[dict[str, Any] | None, list[dict[str, str]]
                 "domain": domain_mode,
                 "has_confidence": bool(has_confidence),
                 "fields": fields,
+                **({"name_pattern": name_pattern} if name_pattern else {}),
             }
         )
     enum_aliases = document.get("enum_aliases", {})

@@ -6182,6 +6182,9 @@ Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §3. Code `capabilities/bi_cards/n
 
 ## BI domain configuration migration (D3, 2026-11-01)
 
+Extended by D4 (see "BI domain configuration removed (D4)"): the migration now covers local datasets and
+every part of the configuration; the 「領域設定」 editor is gone.
+
 Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §3. Code `capabilities/bi_cards/migrate.py`,
 `bi_vaults_api.py`, `web_page.py`; test `tests/test_bi_migrate_domains.py`.
 
@@ -6251,3 +6254,31 @@ Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §4.3. Code `board.py`, `capabilit
   built-in pack's analyses on that store, `all` or one slug; a coded section's old name (`trend_coverage`)
   finds its slug; unknown -> `analysis_unknown`. The tool description lists the pack's slugs, `quality`, `all`.
 - The golden answers (`tests/fixtures/bi_default_pack/golden/`) are frozen; they keep the coded sections' answers.
+
+## BI domain configuration removed (D4, 2026-11-01)
+
+Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §3; owner answers 2026-11-01 (move as much as possible
+automatically; keep a slim migration prompt). Code `migrate.py`, `catalog.py`, `schema.py`, `quality.py`,
+`importer.py`, `names.py`, `ai_runs.py`, `store.py`, `bi_cards_api.py`, `bi_vaults_api.py`, `web_page.py`; tests
+`tests/test_bi_migrate_domains.py` (3), `tests/test_bi_quality.py`, `tests/test_bi_vault_skills.py`,
+`tests/test_bi_card_aliases.py`, `tests/test_bi_vault_ui.py`.
+
+- **Removed:** `capabilities/bi_cards/domains.py`, `GET`/`POST /api/bi/domains`, the 「領域設定」 editor, the
+  configuration's part in imports (value and name aliases), AI extraction notes and quality checks
+  (`node_not_listed` is gone: a Node card is the list). The old document is read only by `migrate.legacy`.
+- **Schema:** a type may carry `name_pattern` (a regular expression, at most 200 characters, checked on install);
+  quality `node_format` reads the Node type's.
+- **Migration**, for a vault (`POST /api/bi/vaults/<id>/migrate-domains`) or a dataset only on this PC
+  (`POST /api/bi/migrate-domains {"dataset"}`); `{}` is the dry run, `{"apply": true, "token"}` applies:
+  `{"ok", "dry_run", "dataset", "vault", "writes": "commit"|"direct", "schema": null|{"from", "to"},
+  "schema_adds": null|{"enum_aliases": {field: {alias: value}}, "name_pattern": str|null}, "aliases",
+  "missing", "chains", "dropped_chains", "unknown_areas", "enum_aliases_dropped": [{"field", "alias",
+  "value"}], "missing_nodes": [name], "notes": [{"domain", "label"}], "notes_to": null|"skills"|"method",
+  "removes", "purpose", "token"}` (+ `"commit"` when applied). Order: upgrade to the newest `bi.schema/v1.1`
+  when `aliases`/`chain` are missing and the schema id allows; `schema_adds` as a new local schema version
+  (a draft of the current version, published, the dataset upgraded; in a vault the document travels with the
+  commit); card aliases and Node chains; notes into `<domain>-extract` skills (vault) or one `llm` ingest method
+  「領域判讀規則（從領域設定搬來）」 whose instructions are the default ones plus every domain's notes (local);
+  the configuration removed (`meta:domains` unstaged in one commit, or deleted from the local dataset).
+- `GET /api/bi/dashboard` adds `"domains_left": bool`; the page shows the prompt 「這個資料集還有舊的領域設定」
+  with 「預覽：搬進 schema 與卡片」, the plan, then 「確認搬移（寫入一個 commit）」 or 「確認搬移（寫入）」 / 「取消（不寫入）」.

@@ -14,7 +14,7 @@ from typing import Any
 
 from test_bi_extract import Scripted
 
-from capabilities.bi_cards import domains, extract
+from capabilities.bi_cards import extract
 from capabilities.bi_cards.schema import shipped
 
 V2 = shipped()[1]
@@ -94,18 +94,3 @@ def test_written_numbers_reads_scale_amounts() -> None:
     assert extract.number_written(25300, "2.53兆元") and extract.number_written(2.53, "2.53兆元")
     assert extract.number_written(1234, "營收 1,234 億") and extract.number_written(59, "占 59%")
     assert not extract.number_written(77.5, "75–80%")
-
-
-def test_domain_notes_come_from_the_configuration() -> None:
-    config = domains.Config(
-        domains.validate(
-            {
-                "domains": [
-                    {"id": "AIDC", "label": "AI 資料中心", "notes": "ODM 是 Account。"},
-                    {"id": "aerospace", "label": "航太"},
-                ]
-            },
-            V2,
-        )
-    )
-    assert config.extraction_notes() == "- AI 資料中心（AIDC）：ODM 是 Account。"

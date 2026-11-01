@@ -53,8 +53,10 @@ def _skills(ws: Path, vault_id: str) -> dict[str, dict[str, Any]]:
 
 
 def _save_domains(ws: Path, dataset: str) -> dict[str, Any]:
-    body = {"dataset": dataset, "config": CONFIG, "base_revision": 0}
-    return _ok(_call(ws, "POST", "/api/bi/domains", body))
+    """An old domain configuration (written as 「領域設定」 did before BI D4)."""
+    store = BiStore(ws, dataset)
+    store.set_meta_value("domains", json.dumps(CONFIG, ensure_ascii=False), base=None)
+    return {"config": json.loads(store.meta_value("domains") or "{}")}
 
 
 def _ai_run(ws: Path, dataset: str, folder: str, model: Scripted) -> tuple[Any, Jobs]:
@@ -213,8 +215,7 @@ def test_converting_a_dataset_moves_its_notes(tmp_path: Path) -> None:
     ws.mkdir()
     parent.mkdir()
     _ok(_call(ws, "POST", "/api/bi/datasets", {"name": "market", "schema": V2}))
-    body = {"dataset": "market", "config": CONFIG, "base_revision": 0}
-    _ok(_call(ws, "POST", "/api/bi/domains", body))
+    _save_domains(ws, "market")
     made = _ok(_call(ws, "POST", "/api/bi/vaults/convert",
                      {"dataset": "market", "path": str(parent), "author": "alice"}))  # fmt: skip
     vault_id = made["vault"]["id"]

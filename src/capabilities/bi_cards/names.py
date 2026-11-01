@@ -33,12 +33,9 @@ class Names:
         return self.table.get(norm_key(text), text)
 
 
-def from_store(store: BiStore, configured: Any | None = None) -> Names:
-    """Every card's aliases -> its name; the configuration's `name_aliases` beneath."""
+def from_store(store: BiStore) -> Names:
+    """Every card's aliases -> its name."""
     table: dict[str, str] = {}
-    if configured is not None:
-        for alias, name in (configured.document.get("name_aliases") or {}).items():
-            table[norm_key(alias)] = str(name)
     if not store.exists:
         return Names(table)
     names = {r["id"]: str(r["name"]) for r in store.card_rows()}

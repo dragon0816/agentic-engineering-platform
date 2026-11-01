@@ -3,12 +3,13 @@ owner 2026-10-29).
 
 The manager's `validate.py` grew with every knowledge base; these are its
 checks made general: from the schema (links, names, samples, evidence grades,
-numbers against their quotes, revenue layers) and from the dataset's domain
-configuration (node name format, nodes outside a domain's node list). Read
-only: nothing is changed, every finding names the card to open.
+numbers against their quotes, revenue layers, the Node `name_pattern`). Read
+only: nothing is changed, every finding names the card to open. (The domain
+configuration's node list check went with the configuration, BI D4: a Node card
+is the list.)
 
 `issue` is something wrong that a person must fix; `warn` is a gap the data
-admits (a product without a node, a node proposed but not on the list).
+admits (a product without a node).
 """
 
 from __future__ import annotations
@@ -16,7 +17,6 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from capabilities.bi_cards import domains
 from capabilities.bi_cards.extract import number_written
 from capabilities.bi_cards.schema import Registry
 from capabilities.bi_cards.store import BiStore
@@ -35,7 +35,6 @@ CHECKS = (
     ("number_ungrounded", "數字不在引用的原文裡", "issue"),
     ("revenue_layer", "收入事實的層級與客戶不一致或缺來源", "issue"),
     ("node_format", "節點名稱不符合格式", "issue"),
-    ("node_not_listed", "節點不在領域的節點清單", "warn"),
     ("product_without_node", "客戶產品沒有節點", "warn"),
 )
 
@@ -63,7 +62,6 @@ def check(store: BiStore, reg: Registry) -> dict[str, Any]:
         for card_id, fields in store.all_fields().items()
     }
     excerpts = store.fact_excerpts()
-    config = domains.read(store)
     found: dict[str, list[dict[str, Any]]] = {cid: [] for cid, _, _ in CHECKS}
 
     def add(check_id: str, card: Any, message: str) -> None:
@@ -80,7 +78,8 @@ def check(store: BiStore, reg: Registry) -> dict[str, Any]:
         if len(types) > 1:
             add("same_name", None, f"「{name}」同時是 {'、'.join(sorted(types))}；請合併或改名")
 
-    node_pattern = (config.document.get("node_name_pattern") if config else None) or None
+    node_type = reg.types.get("Node")
+    node_pattern = node_type.name_pattern if node_type is not None else ""
     for card in rows:
         entity = reg.types.get(card["entity_type"])
         mine = values.get(card["id"], {})
@@ -137,17 +136,6 @@ def check(store: BiStore, reg: Registry) -> dict[str, Any]:
         if card["entity_type"] == "Node":
             if node_pattern and not re.search(node_pattern, card["name"]):
                 add("node_format", card, f"名稱不符合 {node_pattern}")
-            if config is not None:
-                for domain_id in _list(mine.get("domain")):
-                    domain = config.domain(str(domain_id))
-                    listed = [n.lower() for n in (domain or {}).get("nodes") or []]
-                    if listed and card["name"].lower() not in listed:
-                        add(
-                            "node_not_listed",
-                            card,
-                            f"不在「{domain['label'] if domain else domain_id}」"
-                            "的節點清單（提案的節點？）",
-                        )
     checks = []
     totals = {"issue": 0, "warn": 0}
     for check_id, title, level in CHECKS:
