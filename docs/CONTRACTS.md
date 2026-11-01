@@ -6283,6 +6283,56 @@ automatically; keep a slim migration prompt). Code `migrate.py`, `catalog.py`, `
 - `GET /api/bi/dashboard` adds `"domains_left": bool`; the page shows the prompt 「這個資料集還有舊的領域設定」
   with 「預覽：搬進 schema 與卡片」, the plan, then 「確認搬移（寫入一個 commit）」 or 「確認搬移（寫入）」 / 「取消（不寫入）」.
 
+## BI charts in the chat and the Dashboard's sources (C1, C2, C1b, C3, K1, K2, 2026-11-01)
+
+Design `docs/phases/BI_CHAT_CHARTS_AND_DASHBOARD_SOURCES.md`; decisions `docs/DECISIONS.md` 2026-11-01 "BI:
+charts inline in the chat; Dashboards from the analysis AI or an Atlas import" (with the C1b addendum).
+
+- **Chart spec** (feed §5): `{"type": "table"|"bar"|"line"|"scatter", "x"?, "y"?, "series"?}`.
+  `analyses.chart_for(spec, columns, rows)`: the spec when `checked_chart` accepts it for the columns, else
+  `default_chart`: `{"type": "bar", "x": <label column>, "y": <number column>}` for exactly two columns, one
+  all-numbers (no bool) and one not, else `{"type": "table"}`. `bi__query` sections always carry a resolved
+  `chart` (C1). Card answers are drawn as a table `name, type, <up to 8 fields>`.
+- **Chart page** (C2): each succeeded `bi__query` call of the general chat adds `"chart_file": <file name>` and
+  `"attach": [{"path", "filename", "media_type": "text/html"}]` to its tool data; the file is
+  `<workspace>/bi-chat-charts/bi-<slug|all|query|cards>-<YYYYmmdd-HHMMSS>-<4 hex>.html`, self-contained (own
+  meta CSP `default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:`; data in
+  `<script type="application/json" id="bi-chart-data">` = `{"title", "about", "sections": [{"title", "note",
+  "chart", "table": {"columns", "rows", "truncated"}}]}` with `& < > U+2028 U+2029` escaped; drawn by
+  `bi_chart_html.BI_CHART_JS`, the same source `web_page.PAGE` embeds). Agent Web's answer `files` gains
+  `{"filename", "kind": "html", "path"}` per page (`bi_chart_files`), shown through the existing sandboxed viewer.
+- **Ad-hoc SQL** (C1b): `bi-cards.query` input `sql` (string, at most 20,000 characters; excludes `analysis`:
+  `invalid_input`) and `chart` (object or null). One statement through `analyses.run_sql` on the store the
+  chat reads (a vault's published copy), `SQL_SECONDS` = 10, `CHAT_SQL_ROWS` = 200 (`run_sql(max_rows=)`), as one
+  section `{"id": "query", "title": "查詢結果", "kind": "table", "chart", "columns", "rows", "flags": [],
+  "note": "", "analysis": false, "truncated", "sql"}`; `total` = its rows; `scope_note` 「在這份資料集（…）中查詢」.
+  Refusals (codes only): `sql_not_allowed` (the authorizer denied: writes, ATTACH, PRAGMA, …),
+  `sql_one_statement`, `timeout`, `sql_failed`; the tool's `FAILURE_TEXT` explains each.
+- **Save as analysis** (C3): `propose_change` kind `bi_analysis` (in `KINDS`, not in `TELEGRAM_KINDS`; Apply in
+  Telegram answers `web_only`). Values (aliases `dataset` → `vault`): `vault`, `slug`, `title`, `question`,
+  `chart`, and exactly one of `sql` or `from_analysis: {vault, slug}` (a published SQL analysis). The plan runs
+  it on the working copy; card rows `Knowledge base`, `Analysis`, `Chart`, `SQL`, `Result on the working copy`;
+  stored values `{"vault", "slug", "analysis": <unit value + slug>}`; fingerprint = the working unit under the
+  slug. Apply = `analyses.save` (staged). Code `host_runtime/bi_chat_save.py`.
+- **Dashboard from the analysis AI** (K1): harness tool `bi_analysis__propose_dashboard {reply?, analyses:
+  [<as bi_analysis__propose>] (≤ 12), order: [slug]}`. The suggestion
+  (`aep.bi.analysis_suggestion/v1`) then has `"analysis": null`, `"dashboard": {"analyses": [<unit value +
+  slug>], "order"}`, `"previews": {slug: {"columns", "rows" (≤ 200), "truncated"}}`, `"result": {"diff":
+  [{"key": "analysis:<slug>"}..., {"key": "meta:dashboard"}]}`. `POST /api/bi/sessions/<id>/apply` on it answers
+  `{"ok", "session", "units": ["analysis:<slug>"..., "meta:dashboard"], "analyses", "order", "dashboard"}`;
+  refused before staging anything: `dashboard_invalid` (the order), `analysis_exists` (a proposed slug saved
+  meanwhile); `suggestion_applied` (409) the second time.
+- **Dashboard order from Atlas** (K2): `GET /api/bi/vaults/<id>/atlas-dashboards?port=` → `{"port", "names"}`;
+  `POST /api/bi/vaults/<id>/atlas-import {"name", "port"?}` → `{"ok", "dry_run": true, "dashboard", "order",
+  "hidden", "before": {"order", "hidden"}, "panels": [{"id", "slug", "status": "kept"|"duplicate"|
+  "unknown_analysis"|"other_vault"|"not_aep"|"not_a_panel"}], "duplicates": [panel id], "unmatched": [panel],
+  "token"}`; with `"apply": true, "token"` → the same with `"dry_run": false, "staged": "meta:dashboard",
+  "analyses"`. Errors: `atlas_port_invalid`, `atlas_name_missing`, `atlas_unreachable`, `atlas_refused`,
+  `atlas_not_found`, `atlas_too_large`, `atlas_invalid`, `atlas_failed`, `atlas_nothing` (400) and
+  `preview_stale` (409). Atlas is read `GET http://127.0.0.1:<port>/dashboards[/<name>]`, no Origin, 5 s,
+  ≤ 2,000,000 bytes. Atlas's goldens: `tests/fixtures/atlas_dashboard_golden/` (Atlas `49600737`), drift check
+  `scripts/check_atlas_dashboard_golden.py --atlas <repo>`.
+
 ## Voice input: Telegram voice and the Agent Web microphone (owner 2026-11-01)
 
 Design `docs/phases/VOICE_INPUT.md`; decisions `docs/DECISIONS.md` 2026-11-01. Voice is an input adapter: a

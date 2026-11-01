@@ -1,8 +1,55 @@
 # Handoff
 
-Updated: 2026-11-01 (Asia/Taipei), by Claude Code (voice input for Telegram and Agent Web: V1–V8; earlier: BI analysis dashboard: F1, F2, F3, P1, P2, P3, P4, D1, D2, D3, chains and coverage as analyses, golden answers, P5, D4; earlier: knowledge repositories R1, R2, R3 BI part, R4a, R4b, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
+Updated: 2026-11-01 (Asia/Taipei), by Claude Code (BI charts in the chat and the Dashboard's sources: C1, C2, C1b, C3, K1, K2; earlier: voice input for Telegram and Agent Web: V1–V8; earlier: BI analysis dashboard: F1, F2, F3, P1, P2, P3, P4, D1, D2, D3, chains and coverage as analyses, golden answers, P5, D4; earlier: knowledge repositories R1, R2, R3 BI part, R4a, R4b, R5 BI side; earlier: BI vaults V9–V13; earlier: coding at scale S1–S4; earlier: BI vaults V1–V6; earlier: BI ingest phases 1–7 from the owner's proposal; earlier: delegation and gateway retries, #248 BI browser tests, graphify code graph, push of verified main; earlier: multi-agent V1 presentation, Settings switch and baseline benchmark; earlier: multi-agent V1 core delegation; earlier: multi-agent Phase 0.5 part B: P0-2, a side effect at most once per turn; earlier: multi-agent Phase 0.5 part A: G5 cross-domain suite and G4 bookkeeping; earlier: multi-agent Phase 0 review; earlier: SDE weekly report keys every ticket by its GitHub Issue; earlier: session memory of what was produced and task result summaries; earlier: yes/no inputs in plain words; earlier: fewer questions in a Workflow run and the activity read before a restart; earlier: Telegram delivery, reply context and claim-check fixes; BI dataset sharing slice 1 live-test fixes; session model scope; BI Knowledge Case A backend; accumulated memory M5: memory quality tools; accumulated memory M4: the Agent Web memory page; accumulated memory M3: preferences and notes; loan replies 06 / 06b as two Workflows; owner rule: new evidence updates organisational fields, email stays a proposal; accumulated memory M2: sync state and incremental org chart; accumulated memory M1: Memory Service and business-cards migration; interactive HTML org chart and files in the chat; agent recovery and reuse fixes; business-cards third-round fixes; business-cards second-round re-test fixes; business-cards live-test fixes; native business cards and org chart; three live-test fixes: image retry, progress end state, switched-off Skills; 2026-10-19: owner decisions on Knowledge Strategy v1.3 applied: competing_vendors, scoped priority, Opportunity, speaker notes in office.py, ADR-K9; earlier the same day: Knowledge Strategy v1.3, Telegram status on change, team-member revisions, Platform sync URL label, Personal Agent code sign-in and renewal)
 
-## Voice input for Telegram and Agent Web (2026-11-01, Claude Code) — latest
+## BI charts in the chat and the Dashboard's sources (2026-11-01, Claude Code) — latest
+
+**Goal.** Owner decisions 2026-11-01, relayed by the BI orchestrator: (a) charts in the general AI chat inline
+as a self-contained HTML in the chat file viewer; (b) a chat chart saved as a vault analysis with the owner's
+approval; (c) a vault's Dashboard from the analysis AI or imported (order only) from an Atlas dashboard; plus
+guarded read-only ad-hoc SQL in the chat (owner, C1b). Design `docs/phases/BI_CHAT_CHARTS_AND_DASHBOARD_SOURCES.md`;
+decision `docs/DECISIONS.md` 2026-11-01 (with the C1b addendum); contract `docs/CONTRACTS.md` "BI charts in the
+chat and the Dashboard's sources".
+
+**Where.** Branch `bi-analysis-dashboard-f1-f3` in the Paseo worktree `sudden-mayfly` (own `.venv`), first
+fast-forwarded to local `main` `2ea05220`; not pushed, not merged (the orchestrator fast-forwards `main` after
+review). The Atlas repository was only read (its goldens at `49600737`).
+
+**Done.** Commits `8fbea1dd` (design), `2ea5bd0b` (C1+C2), `5bcad315` (C1b), `f72b7f37` (C3), `e4be62e1` (K1),
+`6b093e9f` (K2), and this handoff/contract commit; a row per slice in `docs/TASKS.md`.
+- C1/C2: `analyses.chart_for`/`default_chart`; `host_runtime/bi_chart_html.py` (the Dashboard tab's renderer,
+  spliced into `web_page.PAGE`, and the chat page); `bi_cards_tools.chart_page`/`bi_chart_files`; Agent Web
+  shows the page in the answer (Telegram unchanged).
+- C1b: `bi__query` `sql`/`chart` through `analyses.run_sql` on the published data, 10 s, 200 rows.
+- C3: `propose_change` kind `bi_analysis` (web only); BI side `host_runtime/bi_chat_save.py`.
+- K1: `bi_analysis__propose_dashboard`; `analysis_session` suggestion/apply; page 「套用 Dashboard」.
+- K2: `capabilities/bi_cards/atlas_import.py`, `host_runtime/bi_atlas_import.py`, routes `atlas-dashboards` and
+  `atlas-import`, page 「從 Atlas 匯入 Dashboard 順序」, goldens in `tests/fixtures/atlas_dashboard_golden/`,
+  `scripts/check_atlas_dashboard_golden.py`.
+
+**Verification.** Each slice before its commit: `ruff format --check .`, `ruff check .`, `mypy src tests` (911
+files at K2) clean, and its tests (`test_bi_chat_charts` 8 incl. a real-browser turn, `test_bi_chat_sql` 6,
+`test_bi_chat_save` 13, `test_bi_dashboard_proposal` 8, `test_bi_atlas_import` 9 incl. the drift check against
+the Atlas checkout with `AEP_ATLAS_REPO`), plus `test_ai_proposed_changes`, `test_bi_analyses`,
+`test_bi_vault_ui`, the page-script parse test; C1/C2 and C1b were also checked as exported slices. Full suite:
+see "Full suite" below.
+
+**Known points.**
+- K1's and K2's page parts are covered by the script parse test only, not by a browser step.
+- The chat's chart pages accumulate in `<workspace>/bi-chat-charts/` (small HTML files; no purge yet).
+- C3 runs the SQL on the vault's working copy, so the card's numbers can differ from the chat's (published).
+- The running Agent Web predates this code; the owner sees it after a restart (check `/api/tasks` first).
+
+**Full suite.** On `6b093e9f` (worktree `.venv`, own `--basetemp`, 2026-11-01 23:11–23:53, after the
+orchestrator's go; Atlas idle): 4664 passed, 38 skipped, 0 failed, 42 min. Skips are environment extras (pywin32,
+matplotlib, Outlook, symlink/link privileges, IPv6, litellm, `av`, no voice model, expense mock) and the opt-in
+Atlas drift test (`AEP_ATLAS_REPO` not set; it passed when set).
+
+**Next actions.** (1) Orchestrator: review, fast-forward `main`. (2) Owner, after a restart: try a chart in the
+chat, an ad-hoc SQL question, 「存成分析」 through the card, an AI dashboard, and an Atlas import (Atlas running
+on 8127). (3) Optional: browser steps for K1/K2 on the Knowledge page; a purge of old chat chart pages.
+
+## Voice input for Telegram and Agent Web (2026-11-01, Claude Code)
 
 **Goal.** Owner 2026-11-01: a person speaks instead of typing, on Telegram (voice messages) and Agent Web
 (microphone), for coding, asking and Workflow runs; speech becomes text on this PC, the person sees it, and the
