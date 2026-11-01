@@ -156,6 +156,9 @@ class ConversationTurnRequest(Contract):
     reply_to: Symbol | None = None
     # Files uploaded to this conversation for this turn (owner 2026-10-08).
     attachments: tuple[Symbol, ...] = Field(default=(), max_length=10)
+    # The transcript this message came from when the person spoke it
+    # (docs/phases/VOICE_INPUT.md §3.2); the text is always `message`.
+    voice_transcript: Symbol | None = None
 
     @model_validator(mode="after")
     def no_credential_material(self) -> Self:

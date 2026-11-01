@@ -720,10 +720,15 @@ def is_control_word(text: str) -> bool:
     return text.strip().casefold() in _RUN_WORDS | _EDIT_WORDS | _CANCEL_WORDS
 
 
+def is_run_word(text: str) -> bool:
+    """A word that confirms a card (「確認執行」, 「好」, "yes", ...)."""
+    return text.strip().casefold() in _RUN_WORDS
+
+
 def would_run(state: FlowState, text: str) -> bool:
     """Whether `text` would confirm the open card and start the run. A voice
     transcript never does (docs/phases/VOICE_INPUT.md §2.4, owner 2026-11-01)."""
-    return state.confirming and text.strip().casefold() in _RUN_WORDS
+    return state.confirming and is_run_word(text)
 
 
 def answer(state: FlowState, text: str) -> FlowStep:

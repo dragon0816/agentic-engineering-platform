@@ -71,6 +71,12 @@ ACCEPTED_MIME_TYPES: dict[str, str] = {
 BOT_API_DOWNLOAD_BYTES = 20 * 1024 * 1024
 
 
+def bare_word(text: str) -> str:
+    """`text` without the punctuation and spaces a speech engine adds around a
+    short answer (「好。」 is 「好」), for recognising card words."""
+    return text.strip().strip("。．.，,！!？?、；;：:…~～ \u3000")
+
+
 def base_mime(mime_type: str) -> str:
     return mime_type.split(";", 1)[0].strip().lower()
 

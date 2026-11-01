@@ -35,8 +35,10 @@ from __future__ import annotations
 
 import base64
 import binascii
+import hashlib
 import hmac
 import json
+import logging
 import os
 import re
 import secrets
@@ -86,6 +88,7 @@ from capabilities.knowledge_pipeline.handlers import (
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC, MARKET_MATRIX_SPEC
 from capabilities.script_tools import load_script_tools
 from capabilities.workflow_author.review import rendered as review_rendered
+from channels.telegram_flow import is_run_word
 from common.action_cards import CARD_KEY, card_in
 from common.assets import AssetIdentity, Owner, WorkflowManifest
 from common.distribution import LocalStateError
@@ -352,6 +355,26 @@ from models.selection import (
     settings_model,
 )
 from models.wire import MethodTransport, UrllibTransport
+from voice.contracts import (
+    REPLIES,
+    VoiceTranscribeFailure,
+    VoiceTranscribeRequest,
+    VoiceTranscribeSuccess,
+    bare_word,
+)
+from voice.service import VoiceService
+from voice.transcript import TranscriptRecord, TranscriptUse
+
+_LOG = logging.getLogger(__name__)
+
+
+def _discard(stream: Any, length: int) -> None:
+    while length > 0:
+        chunk = stream.read(min(length, 1 << 20))
+        if not chunk:
+            return
+        length -= len(chunk)
+
 
 #: Anything larger than this is not a request to an Agent.
 MAX_BODY_BYTES = 256 * 1024
@@ -359,6 +382,8 @@ MAX_BODY_BYTES = 256 * 1024
 MAX_SOP_UPLOAD_BYTES = 28 * 1024 * 1024
 #: One attached file (25 MB) as base64 in JSON, with room for its name.
 MAX_ATTACHMENT_REQUEST_BYTES = 36 * 1024 * 1024
+#: One recording (10 MB) as base64 in JSON, with room for its fields.
+MAX_VOICE_REQUEST_BYTES = 14 * 1024 * 1024
 # The Knowledge tab's pipeline steps (docs/phases/KNOWLEDGE_K1.md), by the short
 # name the page sends; nothing else can be called through its route.
 PIPELINE_STEPS = {
@@ -665,6 +690,9 @@ class AgentWeb:
         self.persona = AgentPersonaStore(runtime.layout.workspace_root)
         self.preferences = UserPreferencesStore(runtime.layout.workspace_root)
         self.attachments = AttachmentStore(runtime.layout.workspace_root)
+        # Speech to text (docs/phases/VOICE_INPUT.md); set by AgentWebServer,
+        # None: voice is off and the transcribe route says so.
+        self.voice: VoiceService | None = None
         self.workflow_uploads = WorkflowUploadStore(runtime.layout.workspace_root)
         self.identity_presets = IdentityPresets(runtime.layout.workspace_root)
         self.conversation_context = ConversationContextStore(runtime.layout.workspace_root)
@@ -2849,10 +2877,80 @@ class AgentWeb:
                 if backend == "gateway"
                 else None
             ):
-                return self._conversation_turn(item)
+                result = self._conversation_turn(item)
+            self._voice_used(item, progress.turn_id)
+            return result
         finally:
             TURN_PROGRESS.reset(listening)
             self.turn_progress.end(progress)
+
+    # -- voice input (docs/phases/VOICE_INPUT.md) ---------------------------------
+
+    def transcribe_voice(self, body: object) -> tuple[int, dict[str, Any]]:
+        """`POST /api/voice/transcribe`: the transcript for the message box.
+        Nothing is sent to the Agent; the person reads, edits and sends."""
+        if self.voice is None:
+            return 200, VoiceTranscribeFailure.for_code("voice_disabled").model_dump(mode="json")
+        try:
+            request = VoiceTranscribeRequest.model_validate(body)
+            data = base64.b64decode(request.data, validate=True)
+        except (ValueError, TypeError, binascii.Error):
+            return 400, {"ok": False, "code": "voice_request_invalid"}
+        if not data:
+            return 400, {"ok": False, "code": "voice_request_invalid"}
+        if self.runtime.state.conversation(request.session_id, self.runtime.actor) is None:
+            return 404, {"ok": False, "code": "conversation_unknown"}
+        record = self.voice.transcribe(
+            data,
+            request.mime_type,
+            channel="web",
+            actor=self.runtime.actor,
+            session_id=request.session_id,
+            declared_seconds=(None if request.duration_ms is None else request.duration_ms / 1000),
+        )
+        del data
+        if record.status == "ok":
+            return 200, VoiceTranscribeSuccess(transcript=record.view()).model_dump(mode="json")
+        code = record.error_code or "stt_failed"
+        failure = VoiceTranscribeFailure.for_code(code).model_dump(mode="json")
+        return (503 if code == "stt_busy" else 200), failure
+
+    def _voice_record(self, item: ConversationTurnRequest) -> TranscriptRecord | None:
+        """The turn's transcript, only this person's in this conversation;
+        an unknown or foreign id is ignored, never an error."""
+        if self.voice is None or item.voice_transcript is None:
+            return None
+        return self.voice.store.get(self.runtime.actor, item.session_id, item.voice_transcript)
+
+    @staticmethod
+    def _form_is_open(record: Any) -> bool:
+        """Whether the conversation's last answer handed the person a run
+        form or an action card that is decided with a button."""
+        for message in reversed(record.messages):
+            if message.role == "assistant":
+                return bool(message.workflow_form or message.action_card)
+        return False
+
+    def _spoken_confirmation(self, item: ConversationTurnRequest, record: Any) -> bool:
+        return (
+            self._voice_record(item) is not None
+            and is_run_word(bare_word(item.message))
+            and self._form_is_open(record)
+        )
+
+    def _voice_used(self, item: ConversationTurnRequest, turn: str) -> None:
+        found = self._voice_record(item)
+        if found is None or self.voice is None:
+            return
+        use = TranscriptUse(
+            turn=turn,
+            edited=item.message != found.text,
+            sent_text_sha256=hashlib.sha256(item.message.encode("utf-8")).hexdigest(),
+        )
+        try:
+            self.voice.store.mark_used(self.runtime.actor, item.session_id, found.id, use)
+        except OSError:
+            _LOG.warning("voice: could not record how a transcript was used")
 
     def _conversation_turn(self, request: ConversationTurnRequest) -> dict[str, Any]:
         item = ConversationTurnRequest.model_validate(request)
@@ -2901,6 +2999,14 @@ class AgentWeb:
                 answer = {
                     "ok": False,
                     "answer": "找不到要回覆的那段對話，請重新選擇。",
+                    "status": "needs_input",
+                }
+            if not answer and self._spoken_confirmation(item, record):
+                # A spoken yes never confirms an open form or card (owner
+                # 2026-11-01, VOICE_INPUT §2.4); the form's button does.
+                answer = {
+                    "ok": False,
+                    "answer": REPLIES["voice_not_confirmation"],
                     "status": "needs_input",
                 }
             recent = tuple(
@@ -6433,6 +6539,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/settings/context",
             "/api/preferences",
             "/api/attachments",
+            "/api/voice/transcribe",
             "/api/conversations",
             "/api/conversations/delete",
             "/api/conversations/turn",
@@ -6463,9 +6570,15 @@ class _Handler(BaseHTTPRequestHandler):
             if path == "/api/authoring/start"
             else MAX_ATTACHMENT_REQUEST_BYTES
             if path in ("/api/attachments", "/api/knowledge/pipeline/call", "/api/workflow-uploads")
+            else MAX_VOICE_REQUEST_BYTES
+            if path == "/api/voice/transcribe"
             else MAX_BODY_BYTES
         )
         if length > limit:
+            if path == "/api/voice/transcribe" and length <= 2 * limit:
+                # A recording just over the limit is read and dropped first,
+                # so the browser gets the 413 instead of a reset connection.
+                _discard(self.rfile, length)
             self._json(413, {"error": "that is larger than a request to an Agent"})
             return
         try:
@@ -6766,6 +6879,10 @@ class _Handler(BaseHTTPRequestHandler):
             )
             self._json(200 if result["ok"] else 400, result)
             return
+        if path == "/api/voice/transcribe":
+            status, result = self.server.web.transcribe_voice(body)
+            self._json(status, result)
+            return
         if path == "/api/preferences":
             try:
                 preferences = UserPreferences.model_validate(body)
@@ -7050,8 +7167,11 @@ class AgentWebServer(ThreadingHTTPServer):
         port: int = 0,
         token: str | None = None,
         page: Callable[[], bytes] | None = None,
+        voice: VoiceService | None = None,
     ) -> None:
         self.web = web
+        # Speech to text for this page; None: voice is off on this host.
+        web.voice = voice
         # Made afresh each run: a token that outlived the process would be a
         # standing key to this machine's Agent lying in somebody's history.
         self.token = token if token is not None else secrets.token_urlsafe(32)

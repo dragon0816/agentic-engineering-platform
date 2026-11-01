@@ -856,7 +856,7 @@ def _web(
     from host_runtime.web import AgentWeb, AgentWebServer
 
     web = AgentWeb(runtime, namespace=namespace, config_path=config_path)
-    server = AgentWebServer(web, port=port)
+    server = AgentWebServer(web, port=port, voice=runtime.voice)
     loop = resident_schedule_loop(runtime, lock=web.request_lock, requested=schedules)
     web.schedule_loop = loop
     from host_runtime.launcher import clear_record, write_record

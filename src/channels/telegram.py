@@ -99,7 +99,13 @@ from models.wire import (
     status_failure,
     transport_failure,
 )
-from voice.contracts import REPLIES, ErrorCode, TelegramVoice, declared_limit_error
+from voice.contracts import (
+    REPLIES,
+    ErrorCode,
+    TelegramVoice,
+    bare_word,
+    declared_limit_error,
+)
 from voice.service import VoiceService
 from voice.transcript import TranscriptUse
 
@@ -577,11 +583,6 @@ def chat_hash(key: tuple[int, int]) -> str:
     """A short name for a (chat, sender) pair that does not reveal either id."""
     digest = hashlib.sha256(_CHAT_SALT + f"{key[0]}:{key[1]}".encode()).hexdigest()
     return digest[:12]
-
-
-def _bare_word(text: str) -> str:
-    """`text` without the punctuation and spaces around it (「好。」 is 「好」)."""
-    return text.strip().strip("。．.，,！!？?、；;：:…~～ \u3000")
 
 
 def _chat_session(chat_id: int) -> str:
@@ -1515,7 +1516,7 @@ class TelegramIngress:
         d2): spoken 「好」 at a card is refused and the card stays open, while
         spoken 「取消」 or 「修改」 work as typed. Punctuation the speech engine
         adds around a card word is dropped so the word is recognised."""
-        bare = _bare_word(text)
+        bare = bare_word(text)
         waiting = self._flows.get(key)
         if waiting is not None and waiting.expired():
             waiting = None
