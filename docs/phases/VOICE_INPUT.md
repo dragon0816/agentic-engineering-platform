@@ -484,7 +484,9 @@ right, but one clause of the recording was dropped from the transcript.
 
 **Findings and actions.**
 - Fill `voice.hints` with the product and tool names the owner says (the guide recommends it); without them
-  mixed-language requests are unreliable.
+  mixed-language requests are unreliable. The evidence is small (three synthetic fixtures, one real recording,
+  where hints also dropped a clause): hints bias decoding and guarantee nothing. Open: an A/B run with and without
+  hints on the owner's own recordings with reference transcripts (CER, term accuracy, dropped or inserted text).
 - A dropped clause is a real risk: the transcript is always shown first (Telegram 「🎤 你說」, the Agent Web box),
   and anything that changes something still needs its card, form or approval, so a missing clause cannot act by
   itself; for long instructions the Agent Web box, where the text can be checked and edited before sending, is the
