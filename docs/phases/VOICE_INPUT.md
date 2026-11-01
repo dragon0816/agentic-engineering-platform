@@ -1,7 +1,7 @@
 # Voice input: speak instead of type (Telegram and Agent Web)
 
-Status: design settled by the owner on 2026-11-01 (§7; `docs/DECISIONS.md` 2026-11-01); V1–V8 built on branch
-`voice-input-integration` (§6.1); open: the owner's V0 measurement and live checks. Owner goal (2026-11-01): a person can
+Status: design settled by the owner on 2026-11-01 (§7; `docs/DECISIONS.md` 2026-11-01); V0–V8 done (§6.1, V0 in §6.2) and merged into
+local `main`; open: the owner's live checks (§4.6). Owner goal (2026-11-01): a person can
 speak instead of type, through **Telegram** (voice messages) and **Agent Web** (microphone), to do the three things
 AEP already does by text: **coding**, **asking** (knowledge questions) and **Workflow/task execution**. Voice becomes
 text through speech-to-text (STT); the person sees the transcript; from there the request follows exactly the same
@@ -428,7 +428,7 @@ V1–V3 can be built and tested before any channel work; V4–V5 and V6–V7 are
 
 | # | State | Commits |
 |---|---|---|
-| V0 | **Open (owner).** No Whisper model on the build PC and none is downloaded, so the laptop measurement was not run; the opt-in real-engine test (`AEP_VOICE_MODEL_DIR`) uses a provisional CER limit of 0.35 until it is | — |
+| V0 | Done (§6.2): owner-supplied model and audio measured; CER limit 0.20; card words trimmed of any punctuation | `b2cb8550`, `d659dfeb` |
 | V1 | Done: contracts, transcript store, synthetic test audio | `51357a93`, `69b39359` |
 | V2 | Done: decoding, `VoiceService`, `voice` extra, `host.json` `voice`; later the decoding precedence | `99e5f276`, `8b2e14ae` |
 | V3 | Done: `FasterWhisperProvider`, pinned model package, `python -m voice.whisper` | `557218ab` |
@@ -442,9 +442,58 @@ Independent integration tests (Codex test worker, `4bf57da4`): `tests/test_voice
 `tests/test_voice_integration_agent_web.py`, 52 tests, all passing on `a3b160db`. The full suite has not been run
 on this branch yet.
 
-**Open owner items.** (1) Install an approved model package (Whisper small int8, CTranslate2), pin its hash and
-run V0's measurement and the real-engine test on the company laptop; set the CER limit from it. (2) The live
-checks of §4.6, after hours. Neither blocks merging: voice is off unless `host.json` enables it.
+**Open owner items.** The live checks of §4.6, after hours, with voice enabled in `host.json` (§6.2 gives the
+model values) and `voice.hints` filled with the product terms the owner uses. It does not block anything: voice is
+off unless `host.json` enables it.
+
+### 6.2 V0: the engine measured (2026-11-01)
+
+**Model.** `Systran/faster-whisper-small` at Hugging Face revision `536b0662742c02347bc0e980a01041f333bce120`
+(MIT; CTranslate2 float16 weights, loaded as `int8`), supplied by the owner and kept outside the repository.
+`model.bin` SHA-256 `3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671` (matches the Hugging Face
+LFS hash); package hash (`python -m voice.whisper <folder>`, the `model_sha256` to pin)
+`8d64e4da7ad18a60c68a4616ddc7c5ffb3ea4a405ed2c003a2222016952db2c9`. Engine: faster-whisper 1.2.1,
+CTranslate2 4.8.4, CPU only.
+
+**PC.** Intel Core Ultra 7 165U (12 cores, 14 logical), 31 GB RAM, Windows 11; shared with other agents' test
+runs (about 70 % CPU load during the fixture runs), so the times are upper bounds.
+
+**Speed.** Model load 4–5 s on first use. Whisper encodes a 30 s window whatever the length, so every message of
+up to 30 s costs a fixed 4–6 s here (a 1 s 「好」 took about 3.8 s, with or without the VAD filter); longer audio
+runs at about a third of real time: the owner's two recordings through `VoiceService` (language `zh`, `int8`)
+took 30.6 s for 37.5 s including the first model load (RTF 0.82) and 18.9 s for 60.2 s (RTF 0.31).
+
+**Accuracy on the committed synthetic fixtures** (CER after OpenCC and normalisation, `tests/fixtures/voice`):
+
+| Fixture | Without hints | With hints (`CMX500`, `Wi-Fi 8`, `Workflow`, `parser`, `CSV`, `UTF-8`) |
+|---|---|---|
+| zh_ask | 0.294 (「查」→「插」, "Wi-Fi 8"→"Y58") | 0.059 (only 「查」→「插」) |
+| zh_workflow | 0.000 | 0.000 |
+| zh_coding | 0.368 ("parser"→"Parcer", "CSV 欄"→"CS VLAN") | 0.105 (the synthetic voice says 「UTF 橫線 8」) |
+| zh_confirm / zh_cancel | exact | exact |
+| en_ask | 0.000 | 0.000 |
+
+Language auto-detection gave the same text as `zh`/`en` but took longer. The opt-in real-engine test now passes the
+configured hints, as `VoiceService` does, with a CER limit of **0.20** (about twice the worst 0.105) and checks that
+the card words come out as themselves (`d659dfeb`).
+
+**Owner recordings** (37.5 s Mandarin with English product terms; 60.2 s Mandarin; kept outside the repository, no
+transcript recorded here): Mandarin is transcribed well. English product names are weak without hints (a code
+host and a coding tool came out as unrelated Chinese or English words); with those names in `hints` they were
+right, but one clause of the recording was dropped from the transcript.
+
+**Findings and actions.**
+- Fill `voice.hints` with the product and tool names the owner says (the guide recommends it); without them
+  mixed-language requests are unreliable.
+- A dropped clause is a real risk: the transcript is always shown first (Telegram 「🎤 你說」, the Agent Web box),
+  and anything that changes something still needs its card, form or approval, so a missing clause cannot act by
+  itself; for long instructions the Agent Web box, where the text can be checked and edited before sending, is the
+  safer channel.
+- The engine adds punctuation such as 「好﹐」 or 「好!」 to a one-word answer; `bare_word` now drops any Unicode
+  punctuation around a card word (`b2cb8550`), so a spoken yes at a card always gets the
+  `voice_not_confirmation` reply.
+- A short message takes about 5 s on this laptop; a larger model (large-v3-turbo) would be several times slower
+  on CPU and is not recommended here.
 
 **Test-run note (shared `%TEMP%`).** Several agents running pytest at once on one PC share
 `%TEMP%\pytest-of-<user>`; pytest keeps only the three newest `pytest-N` folders, so a burst of short sessions can
