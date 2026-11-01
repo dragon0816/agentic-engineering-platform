@@ -412,11 +412,18 @@ def golden_from(vault_folder: Path, out_golden: Path, workspace: Path) -> None:
     write_golden(out_golden, answers(workspace))
 
 
+def _holds_files(path: Path) -> bool:
+    return not path.is_dir() or any(p.is_file() for p in path.rglob("*"))
+
+
 def _differences(left: Path, right: Path) -> list[str]:
+    """Paths that differ; an empty folder on one side is not a difference, since git
+    cannot keep one and a fresh checkout never has it."""
     found: list[str] = []
 
     def walk(compare: filecmp.dircmp[str], prefix: str) -> None:
-        found.extend(prefix + n for n in compare.left_only + compare.right_only)
+        found.extend(prefix + n for n in compare.left_only if _holds_files(Path(compare.left, n)))
+        found.extend(prefix + n for n in compare.right_only if _holds_files(Path(compare.right, n)))
         found.extend(prefix + n for n in compare.diff_files + compare.funny_files)
         for name, sub in compare.subdirs.items():
             walk(sub, f"{prefix}{name}/")

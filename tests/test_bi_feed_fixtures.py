@@ -59,6 +59,17 @@ def test_the_fixture_and_golden_files_rebuild_byte_for_byte() -> None:
     assert fixtures.main(["--check"]) == 0
 
 
+def test_the_rebuild_check_ignores_empty_folders_git_cannot_keep(tmp_path: Path) -> None:
+    left, right = tmp_path / "committed", tmp_path / "rebuilt"
+    for side in (left, right):
+        side.mkdir()
+        (side / "repo.json").write_text("{}", encoding="utf-8")
+    (right / "sources" / "nested").mkdir(parents=True)  # a fresh checkout never has these
+    assert fixtures._differences(left, right) == []
+    (right / "sources" / "nested" / "card.md").write_text("x", encoding="utf-8")
+    assert fixtures._differences(left, right) == ["sources"]
+
+
 def test_only_the_published_version_is_served(tmp_path: Path) -> None:
     workspace = _joined(tmp_path)
     head = vault.Vault(workspace, fixtures.VAULT_ID).repo.head()
