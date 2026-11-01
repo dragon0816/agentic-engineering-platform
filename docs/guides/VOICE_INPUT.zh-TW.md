@@ -45,28 +45,38 @@
 1. **安裝語音套件**（owner 已核准：faster-whisper、PyAV、OpenCC）：
    `python -m pip install "agentic-engineering-platform[voice]"`（在 AEP 的 Python 環境中；開發環境用
    `pip install -e ".[voice]"`）。
-2. **放好模型**：AEP **不會自己下載模型**。把核准的 faster-whisper 模型資料夾（預設 Whisper small int8，
-   CTranslate2 格式：`model.bin`、`config.json`、`tokenizer.json`、`vocabulary.*`）放到這台電腦，例如
-   `C:\aep\models\whisper-small`。
+2. **放好模型**：AEP **不會自己下載模型**。owner 核准的模型是 `Systran/faster-whisper-small`
+   （MIT，Hugging Face revision `536b0662742c02347bc0e980a01041f333bce120`，CTranslate2 格式），資料夾裡有
+   `config.json`、`model.bin`、`tokenizer.json`、`vocabulary.txt` 四個檔案。把整個資料夾放到這台電腦，
+   例如 `C:\aep\models\faster-whisper-small`。`model.bin` 的 SHA-256 應為
+   `3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671`。
 3. **算出模型的 hash**：
-   `python -m voice.whisper C:\aep\models\whisper-small`
-   印出的 64 個字元就是要寫進 `model_sha256` 的值。之後模型資料夾只要有任何檔案變動，語音就會停用
+   `python -m voice.whisper C:\aep\models\faster-whisper-small`
+   印出的 64 個字元就是要寫進 `model_sha256` 的值；上面這份模型應該印出
+   `8d64e4da7ad18a60c68a4616ddc7c5ffb3ea4a405ed2c003a2222016952db2c9`。之後模型資料夾只要有任何檔案變動，語音就會停用
    （回覆「語音轉文字目前無法使用（模型未安裝）」），需要重算。
 4. **寫進 `host.json`**：
 
    ```json
    "voice": {
      "enabled": true,
-     "model_path": "C:\\aep\\models\\whisper-small",
+     "model_path": "C:\\aep\\models\\faster-whisper-small",
      "model_sha256": "<上一步印出的 hash>",
-     "hints": ["CMX500", "Wi-Fi 8"]
+     "hints": ["CMX500", "Wi-Fi 8", "GitHub", "Workflow", "Claude Code", "Codex"]
    }
    ```
 
-   `hints` 是常講的產品名稱，幫助辨識拼法；可以不寫。其他可調整的值（上限、逾時、語言）見
+   **強烈建議填 `hints`**：寫上你常講的產品、工具與專有名詞。實測時沒有 hints 的英文名稱常被聽成不相干的
+   字；加上之後就正確了（`docs/phases/VOICE_INPUT.md` §6.2）。其他可調整的值（上限、逾時、語言）見
    `docs/CONTRACTS.md`「Voice input」。
 5. **重新啟動 Agent Web**（先確認沒有進行中的工作：`/api/tasks`、Telegram 的問答）。之後 Telegram 與
    Agent Web 共用同一個模型，第一次轉文字時才載入，閒置 10 分鐘後釋放記憶體。
+
+**速度**：在一般筆電（只用 CPU）上，30 秒以內的語音大約要 5 秒才轉好；更長的語音大約是錄音長度的三分之一。
+第一次使用時要多幾秒載入模型。
+
+**長的指令請多看一眼**：實測中長段錄音偶爾會漏掉一小句。轉出的文字一定會先給你看，而且會改變東西的動作
+仍要按卡片、表單或核准，所以漏掉的內容不會自己執行；但長的指令建議用 Agent Web，在輸入框裡確認、修改後再送出。
 
 關閉語音：把 `enabled` 改成 `false` 或拿掉整段 `voice`，重新啟動即可，文字功能完全不受影響。
 
