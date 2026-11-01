@@ -3994,3 +3994,9 @@ s-k-20261011T102952` (not published).
     cards, chains and areas the schema does not allow); applying with its token makes one commit
     「把領域設定搬進 schema 與卡片」 and removes `meta:domains`. 「領域設定」 shows preview and confirm. Tests
     `test_bi_migrate_domains` (2). Next: the chain sections and the coverage matrix into the pack, then P5.
+  - [x] 2026-11-01, Claude Code: BI chains A–A3 and the coverage matrix as analyses of `bi-market-default`
+    (`chain-summary`, `chain-view`, `chain-overlap` read Node `chain`, labels from the schema's aliases;
+    `coverage` reads `segment` x `tech_areas`); `packs.fill` sets `SCHEMA_VALUES` with `LINK_FIELDS`; the board
+    drops the coded chains when the chain analyses are drawn. Parity on a vault with a configuration: coded
+    sections before the D3 migration equal the analyses after it (`test_bi_pack_chains`, 2). Next: golden files
+    of the coded sections, then P5.

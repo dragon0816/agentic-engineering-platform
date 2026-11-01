@@ -5,9 +5,10 @@
 optional `report`). AEP ships one pack, `bi-market-default`: every section of
 the coded Dashboard (`dashboard.py` §1–§19, `market.py` §20–§31) moved into a
 guarded script under `pack_default/` (the shared `_prelude.py` before each), so a
-vault's Dashboard is its analyses. The chain sections (A–A3) and the coverage
-matrix read the domain configuration and are listed in the report until the
-schema carries `chain` and `tech_areas` (design §3, D1–D3).
+vault's Dashboard is its analyses. The chain sections (A–A3) read Node `chain`
+and the coverage matrix reads `segment` x `tech_areas` (schema 3.0.0, D1–D3);
+the schema's allowed values and their labels are filled into those scripts on
+import (`SCHEMA_VALUES`), like the link fields (`LINK_FIELDS`).
 
 Importing a pack stages the analyses the vault's schema satisfies (`requires`)
 and lists the rest; exporting writes the vault's analyses as a pack another
@@ -32,6 +33,9 @@ DEFAULT_VERSION = "1.0.0"
 SOURCE = Path(__file__).with_name("pack_default")
 MAX_ANALYSES = 200
 LINK_LINE = re.compile(r"^LINK_FIELDS: dict\[str, dict\[str, list\[str\]\]\] = \{.*\}.*$", re.M)
+VALUES_LINE = re.compile(r"^SCHEMA_VALUES: dict\[str, Any\] = \{.*\}.*$", re.M)
+#: Fields whose allowed values (with labels and aliases) a script may read.
+ALLOWED_FIELDS = ("chain", "segment", "tech_areas")
 
 DOMAIN = {"type": "enum", "values_from": "Application.domain", "default": "robotics",
           "label": "領域"}  # fmt: skip
@@ -39,8 +43,15 @@ SAMPLE = {"type": "bool", "default": False, "label": "含範例卡（SAMPLE-）"
 TODAY = {"type": "date", "default": "today", "label": "今天"}
 
 #: (slug, source file, title, question, chart, types required, takes `today`).
-#: In the Dashboard's order: §1–§19 as the page showed them, then §20–§31.
+#: In the Dashboard's order: the chains A–A3 first (as in the manager's
+#: dashboards), §1–§19 as the page showed them, §20–§31, then the coverage matrix.
 SECTIONS: tuple[tuple[str, str, str, str, dict[str, Any], tuple[str, ...], bool], ...] = (
+    ("chain-summary", "chain_summary", "A. 分鏈總表",
+     "各條鏈有多少節點、公司、產品與供貨證據？", {"type": "table"}, ("Node",), False),
+    ("chain-view", "chain_view", "A2. 分鏈視圖：節點 × Ecosystem × 客戶產品 × 趨勢",
+     "每條鏈的節點缺 Ecosystem 或趨勢嗎？", {"type": "table"}, ("Node",), False),
+    ("chain-overlap", "chain_overlap", "A3. 跨鏈檢查（只列共用節點與共用公司）",
+     "哪些節點與公司橫跨兩條以上的鏈？", {"type": "table"}, ("Node",), False),
     ("gaps", "gaps", "6. 缺口：Application × 我方方案 / 對手方案",
      "哪些應用我方沒有方案、對手卻有？", {"type": "table"}, ("Application", "TestSolution"), False),
     ("trend-coverage", "trend_coverage", "10. 趨勢 → 應用 → 方案 覆蓋檢查",
@@ -111,17 +122,22 @@ SECTIONS: tuple[tuple[str, str, str, str, dict[str, Any], tuple[str, ...], bool]
      "哪些名字在不同類型重複？", {"type": "table"}, (), False),
     ("pending-links", "pending_links", "31. 待補的連結目標（後補清單）",
      "哪些連結指向還沒建立的卡？", {"type": "table"}, (), False),
+    ("coverage", "coverage", "覆蓋矩陣：市場區段 × 技術領域",
+     "每個區段 × 技術領域有幾張卡、來源齊不齊？", {"type": "table"}, (), False),
 )  # fmt: skip
+#: Fields an analysis reads beyond its types (`requires.fields`).
+FIELDS: dict[str, tuple[str, ...]] = {
+    "chain-summary": ("Node.chain",),
+    "chain-view": ("Node.chain",),
+    "chain-overlap": ("Node.chain",),
+    "coverage": ("CustomerProduct.segment", "CustomerProduct.tech_areas"),
+}
+#: Analyses over every card, not one domain's (no `domain`, no `include_sample`).
+UNSCOPED = ("coverage",)
 
-#: Sections of the coded Dashboard not in the pack yet, and why (design §4.3:
-#: none is dropped silently; each stays coded until it can be expressed).
-_CHAINS = "讀領域設定的鏈；等 Node 卡的 chain 欄位（D1、D3）"
+#: Sections of the coded Dashboard not in the pack, and why (design §4.3: none
+#: is dropped silently).
 KEPT = (
-    {"section": "A", "name": "chain_summary", "reason": _CHAINS},
-    {"section": "A2", "name": "chain_view", "reason": _CHAINS},
-    {"section": "A3", "name": "chain_overlap", "reason": _CHAINS},
-    {"section": "coverage", "name": "coverage matrix",
-     "reason": "讀領域設定的區段與技術領域；等 schema 的 tech_areas（D1、D3）"},
     {"section": "Q", "name": "quality",
      "reason": "品質檢查留在它自己的檢查（/api/bi/quality），不是分析"},
 )  # fmt: skip
@@ -140,7 +156,9 @@ def section_code(source: str) -> str:
 def default_pack() -> dict[str, Any]:
     found = []
     for slug, source, title, question, chart, types, dated in SECTIONS:
-        params: dict[str, Any] = {"domain": dict(DOMAIN), "include_sample": dict(SAMPLE)}
+        params: dict[str, Any] = {}
+        if slug not in UNSCOPED:
+            params = {"domain": dict(DOMAIN), "include_sample": dict(SAMPLE)}
         if dated:
             params["today"] = dict(TODAY)
         found.append(
@@ -152,7 +170,7 @@ def default_pack() -> dict[str, Any]:
                 "code": section_code(source),
                 "chart": dict(chart),
                 "params": params,
-                "requires": {"types": list(types), "fields": []},
+                "requires": {"types": list(types), "fields": list(FIELDS.get(slug, ()))},
             }
         )
     return {
@@ -197,12 +215,43 @@ def link_fields(registry: Any | None) -> dict[str, dict[str, list[str]]]:
     }
 
 
-def _filled(code: str, links: Mapping[str, Any]) -> str:
-    """A pack script's `LINK_FIELDS` line set to this schema's link fields."""
-    line = "LINK_FIELDS: dict[str, dict[str, list[str]]] = " + json.dumps(
-        links, ensure_ascii=False, sort_keys=True
+def schema_values(registry: Any | None) -> dict[str, Any]:
+    """What a pack script may read of the schema: the allowed values of
+    `ALLOWED_FIELDS` in the schema's order, each `[value, label, *aliases]` (the
+    label is the value's first alias, else the value), and each type's own
+    (not derived) field names."""
+    if registry is None:
+        return {"allowed": {}, "fields": {}}
+    allowed: dict[str, list[list[str]]] = {}
+    for name in ALLOWED_FIELDS:
+        values: list[str] = []
+        for entity in registry.types.values():
+            item = entity.get(name)
+            for value in (item.enum or ()) if item is not None else ():
+                if value not in values:
+                    values.append(value)
+        table = registry.enum_aliases.get(name, {})
+        for value in values:
+            aliases = [a for a, v in table.items() if v == value]
+            allowed.setdefault(name, []).append([value, aliases[0] if aliases else value, *aliases])
+    fields = {
+        n: [f.name for f in t.fields if f.klass != "derived"] for n, t in registry.types.items()
+    }
+    return {"allowed": allowed, "fields": fields}
+
+
+def fill(code: str, registry: Any | None) -> str:
+    """A pack script with its `LINK_FIELDS` (and `SCHEMA_VALUES`) line set from this schema."""
+    links = "LINK_FIELDS: dict[str, dict[str, list[str]]] = " + json.dumps(
+        link_fields(registry), ensure_ascii=False, sort_keys=True
     )
-    return LINK_LINE.sub(lambda _m: line, code, count=1)
+    code = LINK_LINE.sub(lambda _m: links, code, count=1)
+    if VALUES_LINE.search(code):
+        values = "SCHEMA_VALUES: dict[str, Any] = " + json.dumps(
+            schema_values(registry), ensure_ascii=False, sort_keys=True
+        )
+        code = VALUES_LINE.sub(lambda _m: values, code, count=1)
+    return code
 
 
 def offer(registry: Any | None, pack: Mapping[str, Any]) -> dict[str, Any]:
@@ -230,11 +279,10 @@ def stage_pack(target: Any, registry: Any | None, pack: Mapping[str, Any]) -> di
     caller); a vault without a Dashboard order takes the pack's order."""
     offered = offer(registry, pack)
     usable = set(offered["usable"])
-    links = link_fields(registry)
     changes: dict[str, Any] = {}
     for key, value in checked_pack(pack):
         if key[len(analyses.PREFIX) :] in usable:
-            changes[key] = {**value, "code": _filled(value["code"], links)}
+            changes[key] = {**value, "code": fill(value["code"], registry)}
     units = target.repo.working_units()
     if analyses.DASHBOARD_UNIT not in units and offered["usable"]:
         layout = {"order": offered["usable"], "hidden": []}

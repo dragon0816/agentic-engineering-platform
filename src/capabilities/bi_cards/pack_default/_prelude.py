@@ -165,3 +165,33 @@ def _supply(c: dict[str, list[Card]], d: str, product: Card, grades: tuple[str, 
 
 def _is_mine(name: str) -> bool:
     return any(word in name.lower() for word in MINE_RE)
+
+
+# -- chains (A-A3): a Node card's `chain`, labels from the schema (BI D1-D3) -------------
+# A chain script sets SCHEMA_VALUES (filled on import) before these are called.
+
+
+def _chain_labels() -> list[tuple[str, str]]:
+    """The schema's chains in its order, as (code, label)."""
+    allowed = globals().get("SCHEMA_VALUES", {}).get("allowed", {})
+    return [(entry[0], entry[1]) for entry in allowed.get("chain", [])]
+
+
+def _chain_index(c: dict[str, list[Card]]) -> dict[str, list[str]]:
+    """A node's name or key (lower case) -> its chains, in the schema's order."""
+    order = [code for code, _label in _chain_labels()]
+    index: dict[str, list[str]] = {}
+    for node in c.get("Node", []):
+        own = {str(v) for v in _list(node.get("chain"))}
+        codes = [code for code in order if code in own]
+        for name in (node["_key"], node["_name"]):
+            index[str(name).lower()] = codes
+    return index
+
+
+def _domain_chains(
+    c: dict[str, list[Card]], d: str, index: dict[str, list[str]]
+) -> list[dict[str, str]]:
+    """The chains a node of domain `d` is in, in the schema's order."""
+    used = {code for node in _of(c, "Node", d) for code in index.get(node["_key"].lower(), [])}
+    return [{"id": code, "label": label} for code, label in _chain_labels() if code in used]

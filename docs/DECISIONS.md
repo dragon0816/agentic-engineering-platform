@@ -5865,3 +5865,23 @@ beside that PC's or vault's own 2.1.0 (the vault's schema file is authoritative,
 its sync. As V9 chose 2.0.0 so the shipped version never meets a local one, this one is 3.0.0 (fields added
 only; a 2.0.0 dataset upgrades without moving a value). The `aliases` field of D2 is in the same version so the
 migration (D3) needs one upgrade. Rejected: 2.1.0 as written (collision), 2.0.1 (a patch number for new fields).
+
+## 2026-11-01: The chains and the coverage matrix as analyses, implementation choices (Claude Code)
+
+- **A domain's chains are the schema's chain values its nodes carry.** The domain configuration listed chains
+  per domain (a chain with no node still showed a row of zeros); after the migration a chain exists only as an
+  allowed value of Node `chain`, so the analysis lists, in the schema's order, the values some Node of the
+  domain carries. Labels come from the schema's aliases (the first alias of each value). Shared-node and
+  shared-company spans are in the schema's order (the configuration's order before). Parity was checked on a
+  vault with a configuration: the coded A–A3 before the migration equal the analyses after it, for every domain,
+  with and without sample cards. Rejected: keeping a chain list per domain somewhere (that is the configuration
+  the owner retired).
+- **The coverage matrix is a long table, all cells, every card.** One row per segment x area with the coded
+  report's numbers (cards, types, sourced share, newest, emptiest fields), equal to `coverage.compute` on the
+  same cards with the configuration's matrix. Not carried into the analysis: the totals of cards without a
+  segment or an area, the unknown values and the per-cell card list (the page's matrix view keeps them until
+  P5). No domain parameter, as the coded matrix had none. Rejected: a pivot (segment rows x area columns) that
+  would drop every number but the count.
+- **The schema reaches a script as filled values**, like the link fields of P2: `SCHEMA_VALUES` is set on
+  import from the vault's schema. Rejected: giving scripts the schema at run time (a new runner input for one
+  pack) and reading labels from cards (labels are the schema's).

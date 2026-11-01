@@ -6195,3 +6195,29 @@ Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §3. Code `capabilities/bi_cards/m
   not moved, then 「確認搬移（寫入一個 commit）」 or 「取消（不寫入）」.
 - The guarded runner's temporary folder is removed with `ignore_cleanup_errors` (a Windows file still held
   briefly no longer fails an analysis).
+
+## BI chains and coverage matrix as analyses (2026-11-01)
+
+Design `docs/phases/BI_ANALYSIS_DASHBOARD.md` §3–§4.3. Code `capabilities/bi_cards/packs.py`,
+`pack_default/chain_summary.py`, `chain_view.py`, `chain_overlap.py`, `coverage.py`, `board.py`; tests
+`tests/test_bi_pack_chains.py`, `tests/test_bi_default_pack.py`.
+
+- The default pack `bi-market-default` holds 31 analyses: `chain-summary` (A), `chain-view` (A2),
+  `chain-overlap` (A3) first, the 27 sections of P2, then `coverage`. Its report lists only Q (quality stays a
+  check).
+- **Chains.** A Node card's chains are its `chain` values (schema order); a domain's chains are the schema's
+  allowed `chain` values some Node of that domain carries; a chain's label is the value's first alias in the
+  schema's `enum_aliases.chain` (else the code). Other cards reach a chain through the nodes they name
+  (`node`, `nodes`, a Trend's `affected_nodes`), matched by the node card's name or key, without case.
+  `requires`: type `Node`, field `Node.chain`; params `domain`, `include_sample`.
+- **Coverage matrix.** One row per schema `segment` value x `tech_areas` value (schema order), every card of
+  every domain (sample cards too), a card counted in each of its cells; a card value names an entry by value,
+  label or alias, loosely. Columns `區段`, `技術領域`, `卡片數`, `類型` (`Type n、...`), `有來源比例` (sourced
+  share of the filled own fields: a `ref` or fact evidence), `最新更新`, `最常空白的欄位（前 5）`. No params;
+  `requires` fields `CustomerProduct.segment`, `CustomerProduct.tech_areas`.
+- **Schema values in a script.** A pack script may hold the line `SCHEMA_VALUES: dict[str, Any] = {...}`;
+  `packs.fill(code, registry)` sets it (with `LINK_FIELDS`) on import and when the built-in pack is drawn:
+  `{"allowed": {"chain"|"segment"|"tech_areas": [[value, label, *aliases]]}, "fields": {Type: [own field]}}`.
+  A schema upgrade after import does not refresh it (re-import the pack), as for `LINK_FIELDS`.
+- **Board.** A Dashboard whose analyses include a chain analysis no longer draws the coded A–A3 from a domain
+  configuration. Vaults created before this change get the new analyses by importing the pack again.

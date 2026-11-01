@@ -30,6 +30,8 @@ from capabilities.bi_cards.store import BiStore
 from scripts import bi_feed_fixtures as fixtures
 
 TODAY = date(2026, 10, 29)
+#: Sections whose parity is checked on a migrated vault (`test_bi_pack_chains`).
+LATER = {"chain-summary", "chain-view", "chain-overlap", "coverage"}
 #: slug -> (the coded section, whether it flags rows, what else it takes).
 CODED: dict[str, tuple[Callable[..., dict[str, Any]], bool, str]] = {
     "gaps": (dashboard.gaps, True, ""),
@@ -122,8 +124,8 @@ def fixture_store(request: pytest.FixtureRequest, tmp_path: Path) -> Iterator[Bi
 
 
 def _pack_code(store: BiStore) -> dict[str, str]:
-    links = packs.link_fields(catalog.for_store(store))
-    return {a["slug"]: packs._filled(a["code"], links) for a in packs.default_pack()["analyses"]}
+    registry = catalog.for_store(store)
+    return {a["slug"]: packs.fill(a["code"], registry) for a in packs.default_pack()["analyses"]}
 
 
 def test_every_section_returns_the_coded_rows(fixture_store: BiStore) -> None:
@@ -131,7 +133,7 @@ def test_every_section_returns_the_coded_rows(fixture_store: BiStore) -> None:
     registry = catalog.for_store(store)
     links = packs.link_fields(registry)
     code = _pack_code(store)
-    assert set(code) == set(CODED)
+    assert set(code) == set(CODED) | LATER
     domains = sorted({*registry.domains, "robotics", "wireless", "AIDC"})
     run = _Runner(store)
     compared = 0
@@ -192,7 +194,7 @@ def test_the_pack_lists_what_it_does_not_hold_yet() -> None:
     pack = packs.default_pack()
     assert pack["format"] == packs.FORMAT and pack["id"] == "bi-market-default"
     kept = {k["section"] for k in pack["report"]["kept"]}
-    assert kept == {"A", "A2", "A3", "coverage", "Q"}
+    assert kept == {"Q"}
     for item in pack["analyses"]:
         assert analyses.unit_problem(f"analysis:{item['slug']}", item) is None, item["slug"]
         assert len(item["code"]) <= analyses.MAX_CODE
@@ -200,7 +202,7 @@ def test_the_pack_lists_what_it_does_not_hold_yet() -> None:
     coded = {b.__name__ for b in dashboard.SECTIONS} | {b.__name__ for b, _ in market.SECTIONS}
     coded |= {"pending_links"} | {b.__name__ for b in market.CHAIN_SECTIONS}
     held = {source for _, source, *_ in packs.SECTIONS}
-    assert coded - held == {b.__name__ for b in market.CHAIN_SECTIONS}
+    assert coded <= held and "coverage" in held
 
 
 # -- import and export ----------------------------------------------------------------
@@ -224,7 +226,8 @@ def test_a_new_vault_starts_with_the_default_pack_committed(tmp_path: Path) -> N
     assert {k for k in units if k.startswith("analysis:")} == {
         f"analysis:{s}" for s, *_ in packs.SECTIONS
     }
-    assert json.loads(units["meta:dashboard"])["order"][:2] == ["gaps", "trend-coverage"]
+    assert json.loads(units["meta:dashboard"])["order"][:4] == [
+        "chain-summary", "chain-view", "chain-overlap", "gaps"]  # fmt: skip
     assert _ok(_call(ws, "GET", f"/api/bi/vaults/{vault_id}/pending"))["uncommitted"] == []
     # A converted dataset gets it too.
     service.load_demo(BiStore(ws, "demo"))
@@ -238,9 +241,9 @@ def test_importing_stages_what_the_schema_satisfies(tmp_path: Path) -> None:
     ws, vault_id = _vault(tmp_path, "bi.schema/v1.1", "new")
     url = f"/api/bi/vaults/{vault_id}/packs"
     listed = _ok(_call(ws, "GET", url))["packs"][0]
-    assert listed["id"] == "bi-market-default" and len(listed["usable"]) == len(CODED)
+    assert listed["id"] == "bi-market-default" and len(listed["usable"]) == len(packs.SECTIONS)
     done = _ok(_call(ws, "POST", url, {"import": "bi-market-default"}))
-    assert len(done["staged"]) == len(CODED) and done["skipped"] == []
+    assert len(done["staged"]) == len(packs.SECTIONS) and done["skipped"] == []
     assert done["order"] == [s for s, *_ in packs.SECTIONS]  # the pack's order
     saved = {a["slug"]: a for a in done["analyses"]}
     assert '"Account": {' in saved["pending-links"]["code"]  # the schema's link fields filled in

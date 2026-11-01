@@ -31,6 +31,7 @@ WORKERS = 6
 CACHE_SIZE = 600
 SHARED = ("domain", "include_sample")
 CODED_KEPT = ("A", "A2", "A3")
+CHAIN_SLUGS = ("chain-summary", "chain-view", "chain-overlap")
 
 _cache: OrderedDict[tuple[str, str, str], dict[str, Any]] = OrderedDict()
 _cache_lock = threading.Lock()
@@ -74,11 +75,10 @@ def _items(
         found = [by_slug[s] for s in listed["order"]]
         return found, vault.Vault(workspace, store.vault_id).db_path, "vault"
     pack = packs.default_pack()
-    links = packs.link_fields(registry)
     found = []
     for item in pack["analyses"]:
         if analyses.requires_met(item.get("requires"), registry):
-            found.append({**item, "code": packs._filled(item["code"], links)})
+            found.append({**item, "code": packs.fill(item["code"], registry)})
     return found, store.path, "pack"
 
 
@@ -174,10 +174,12 @@ def board(
         drawn = list(pool.map(draw, items)) if db.is_file() else []
     cards = dashboard._cards(store, include_sample)
     types, links, config = dashboard._context(store)
+    # A dataset whose analyses draw the chains (Node `chain`, BI D3) no longer
+    # gets the coded ones from its domain configuration.
     chains = [
         s
         for s in market.sections(cards, domain, types=types, link_fields=links, config=config)
-        if s["id"] in CODED_KEPT
+        if s["id"] in CODED_KEPT and not any(i["slug"] in CHAIN_SLUGS for i in items)
     ]
     checked = quality.section(quality.check(store, registry))
     flags = [f for s in [*chains, *drawn, checked] for f in s["flags"]]
