@@ -22,8 +22,8 @@ a run reached published `v1`. Evidence: `docs/phases/BI_BUILD_FLOW.md` §13. BI'
 **Open.**
 - **BI-only host, a decision.** `web_ai_runtime` takes BI's model from the Knowledge handler, which `build_runtime` makes
   only when a wiki Knowledge asset is bound. A host with a model but no such asset gets 「沒有可用的模型」 in BI, so AI
-  ingest and the panels are refused. The owner's host binds one, so this has not been seen there. Not changed here: it
-  concerns which model and data approval BI uses.
+  ingest and the panels are refused. Whether the owner's host binds one was not checked (its `host.json` is off limits). Not
+  changed here: it concerns which model and data approval BI uses.
 - **Unexplained.** One `test_bi_vault_ui` run with a very long `--basetemp` failed waiting for 'TestSolution' in
   `#bi-b-an-list`, and passed on the rerun. Cause unknown.
 - The new `must_not` guidance for the question AI was not re-tested with the real model.
