@@ -1685,6 +1685,8 @@ def build_telegram(
     resolver: CredentialResolver | None,
     *,
     voice: VoiceService | None = None,
+    approvals: ChatAuthoring | None = None,
+    session_artifacts: SessionArtifacts | None = None,
 ) -> TelegramIngress | None:
     """The Telegram ingress, if this host was given one. The token is never
     in the file: the host maps its name to an environment variable, and an
@@ -1712,6 +1714,8 @@ def build_telegram(
     # A failed turn says when the LLM gateway is down, starting or rejecting
     # the token (docs/phases/LLM_GATEWAY.md), as Agent Web does.
     ingress.explain_failure = lambda failure: explain_model_failure(config, failure)
+    ingress.approvals = approvals
+    ingress.session_artifacts = session_artifacts
     return ingress
 
 
@@ -2370,10 +2374,15 @@ def build_runtime(
         # Voice input (docs/phases/VOICE_INPUT.md): one service for Telegram
         # and Agent Web, built only when host.json enables it.
         voice = build_voice(checked.voice, place.workspace_root)
-        telegram = build_telegram(checked, place, agent, resolver, voice=voice)
-        if telegram is not None:
-            telegram.approvals = chat_authoring
-            telegram.session_artifacts = session_artifacts
+        telegram = build_telegram(
+            checked,
+            place,
+            agent,
+            resolver,
+            voice=voice,
+            approvals=chat_authoring,
+            session_artifacts=session_artifacts,
+        )
         platform = build_platform(checked, resolver)
     except BaseException:
         state.close()

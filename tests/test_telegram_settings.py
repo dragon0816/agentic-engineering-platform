@@ -135,6 +135,37 @@ def test_agent_web_saves_and_starts_the_bot_without_echoing_the_token(
         assert "TELEGRAM_WAITING" in PAGE and "another program is receiving" in PAGE
 
 
+def test_saving_the_settings_keeps_approvals_and_the_session_ledger(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The save rebuilds the ingress: without these the approval buttons went
+    away, and a tap got 「not available」, until the next restart."""
+    monkeypatch.delenv(TOKEN_VARIABLE, raising=False)
+    config, layout = ready(tmp_path)
+    path = host_json(tmp_path, config)
+    with build_runtime(config, layout=layout) as runtime:
+        web = AgentWeb(runtime, config_path=path)
+        web.user_environment = Store()
+        monkeypatch.setattr(web, "start_telegram", lambda: None)  # no network in tests
+        assert web.update_telegram_settings(_update())["ok"] is True
+        ingress = runtime.telegram
+        assert ingress is not None
+        assert runtime.chat_authoring is not None and ingress.approvals is runtime.chat_authoring
+        assert runtime.session_artifacts is not None
+        assert ingress.session_artifacts is runtime.session_artifacts
+        # An approve tap reaches the decision, which knows no such request.
+        tap = asyncio.run(
+            ingress._decide(
+                {"update_id": 1, "chat_id": 42, "sender_id": 42},
+                (42, 42),
+                "engineer",
+                "approve",
+                "approval-unknown",
+            )
+        )
+        assert tap.reply is not None and tap.reply.startswith("That request was already decided")
+
+
 def test_the_resident_loop_starts_and_stops_on_request() -> None:
     class Ingress:
         def __init__(self) -> None:

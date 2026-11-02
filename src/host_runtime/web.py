@@ -2215,6 +2215,8 @@ class AgentWeb:
                     self.runtime.agent,
                     None,
                     voice=self.runtime.voice,
+                    approvals=self.runtime.chat_authoring,
+                    session_artifacts=self.runtime.session_artifacts,
                 )
             except TelegramSettingsError as error:
                 return {"ok": False, "code": str(error)}
