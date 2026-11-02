@@ -62,6 +62,7 @@ from capabilities.bi_cards import (
     methods,
     migrate,
     quality,
+    questions_session,
     runs,
     schema_session,
     schema_versions,
@@ -545,7 +546,12 @@ def _session_create(workspace: Path, who: str, given: dict[str, Any]) -> Answer:
     if kind == "analysis":
         made = analysis_session.create_session(workspace, dataset, target, who)
         return 200, {"ok": True, "session": made}
-    return _error(400, "session_kind_invalid", "kind 只能是 method、schema、skill 或 analysis")
+    if kind == "questions":
+        made = questions_session.create_session(workspace, dataset, target, who)
+        return 200, {"ok": True, "session": made}
+    return _error(
+        400, "session_kind_invalid", "kind 只能是 method、schema、skill、analysis 或 questions"
+    )
 
 
 def _session_write(
@@ -607,6 +613,22 @@ def _session_write(
             workspace, dataset, session_id, given.get("turn"), who
         )
         return 200, {"ok": True, **saved}
+    if session["kind"] == "questions" and action == "turns":
+        questions_for = getattr(bench, "questions_asker_for", None)
+        turned = questions_session.session_turn(
+            workspace,
+            dataset,
+            session_id,
+            message=given.get("message"),
+            actor=who,
+            asker=questions_for(dataset, actor) if questions_for is not None else None,
+        )
+        return 200, {"ok": True, "session": turned}
+    if session["kind"] == "questions" and action == "apply":
+        added = questions_session.apply_suggestion(
+            workspace, dataset, session_id, given.get("turn"), given.get("picks"), who
+        )
+        return 200, {"ok": True, **added}
     if session["kind"] == "skill" and action == "turns":
         # On the Agent harness with tools where Agent Web offers it (BI T2).
         asker_for = getattr(bench, "skill_asker_for", None)
@@ -1228,7 +1250,12 @@ def web_bench_runtime(web: Any) -> Any:
             daemon=True,
         ).start()
 
-    from host_runtime import bi_analysis_agent, bi_schema_agent, bi_skill_agent
+    from host_runtime import (
+        bi_analysis_agent,
+        bi_questions_agent,
+        bi_schema_agent,
+        bi_skill_agent,
+    )
 
     gateway = web.runtime.agent.gateway
     namespace = web.namespace or "engineering"
@@ -1246,6 +1273,9 @@ def web_bench_runtime(web: Any) -> Any:
         ),
         schema_asker_for=lambda dataset, draft_id, actor: bi_schema_agent.harness_asker(
             gateway, workspace, dataset, draft_id, ai, actor, namespace
+        ),
+        questions_asker_for=lambda dataset, actor: bi_questions_agent.harness_asker(
+            gateway, workspace, dataset, actor, namespace
         ),
     )
 

@@ -2899,8 +2899,23 @@ tr:last-child td { border-bottom: none; }
                   <input id="bi-b-bq-set" class="bi-input" maxlength="60" spellcheck="false"
                     value="main"></div>
               </div>
-              <div class="bi-actions"><button class="bi-btn" type="submit">新增測試題</button></div>
+              <div class="bi-actions"><button class="bi-btn" type="submit">新增測試題</button>
+                <button class="bi-btn" id="bi-b-qa-open" type="button">和 AI 一起出題</button></div>
             </form>
+            <div class="bi-ai" id="bi-b-qa" role="region" aria-labelledby="bi-b-qa-h" hidden>
+              <h5 id="bi-b-qa-h">和 AI 一起出測試題</h5>
+              <p class="bi-meta" id="bi-b-qa-target"></p>
+              <ol id="bi-b-qa-log" class="bi-log" role="log" aria-live="polite"
+                aria-label="出題對話紀錄"></ol>
+              <label class="bi-label" for="bi-b-qa-msg">你想測什麼</label>
+              <textarea id="bi-b-qa-msg" class="bi-input" rows="3" maxlength="4000"
+                placeholder="例如：出五題，涵蓋客戶訊號與產品對應"></textarea>
+              <div class="bi-actions">
+                <button class="go" id="bi-b-qa-send" type="button">送出</button>
+                <button class="bi-btn" id="bi-b-qa-close" type="button">關閉</button></div>
+              <div class="mem-status" id="bi-b-qa-status" role="status" aria-live="polite"
+                hidden></div>
+            </div>
             <h5>擷取測試</h5>
             <div id="bi-b-bc-list"></div>
             <details id="bi-b-bc-box"><summary>新增擷取測試</summary>
@@ -13049,6 +13064,80 @@ el("bi-b-bc-form").addEventListener("submit", async (event) => {
     for (const id of ["bi-b-bc-slug", "bi-b-bc-note", "bi-b-bc-expected"]) el(id).value = "";
   } catch (failure) { biNotice(false, "沒有加入：" + failure.message); }
 });
+// -- 和 AI 一起出測試題 (docs/phases/BI_BUILD_FLOW.md §7) ------------------------------
+function biQuestionsSuggestion(session, turn, index) {
+  const s = turn.suggestion;
+  const parts = [bh("p", "", bh("strong", "", "AI："), s.reply), biListBlock("理由", s.reasons)];
+  if (!s.questions.length) return parts;
+  const ticks = s.questions.map((q) => {
+    const tick = document.createElement("input");
+    tick.type = "checkbox"; tick.checked = true; tick.disabled = !!turn.applied;
+    tick.setAttribute("aria-label", "加入：" + q.question);
+    return tick;
+  });
+  parts.push(bh("ul", "bi-qa-list", ...s.questions.map((q, i) => bh("li", "",
+    bh("label", "", ticks[i], " " + q.question),
+    bh("p", "bi-meta", "必須提到：" + (q.must.join("、") || "（沒有）")
+      + "・不可以說：" + (q.must_not.join("、") || "（沒有）"))))));
+  if (turn.applied) {
+    parts.push(bh("p", "bi-meta", "已加入 " + turn.applied.units.length
+      + " 題（commit 並 push 後才會跟著知識庫）。"));
+  } else {
+    parts.push(bh("div", "bi-actions", biButton("加入測試題", async () => {
+      const picks = ticks.flatMap((tick, i) => tick.checked ? [i] : []);
+      const reply = await biCall("/api/bi/sessions/" + session.id + "/apply",
+        {dataset: bi.questionsAi.dataset, turn: index, picks});
+      bi.questionsAi.session = reply.session;
+      biBuildSessionLog("bi-b-qa-log", reply.session, biQuestionsSuggestion);
+      await biBench(bi.verVault);
+      biVaultState(await call("/api/bi/vaults/" + bi.verVault + "/status"));
+      biNotice(true, "已加入 " + reply.units.length
+        + " 題測試題；commit 並 push 後才會跟著知識庫。");
+    }, "go", "把勾選的題目加入測試題")));
+  }
+  return parts;
+}
+
+async function biQuestionsAi() {
+  const dataset = "vault-" + bi.verVault;
+  const target = el("bi-b-bq-set").value.trim() || "main";
+  bi.questionsAi = {dataset, target, session: null};
+  el("bi-b-qa").hidden = false;
+  el("bi-b-qa-target").textContent = "題組「" + target + "」。Agent 會自己查卡片與分析、"
+    + "必要時試問，再提出題目與評分用的詞；你勾選並按「加入測試題」才會加入。";
+  const found = await call("/api/bi/sessions?dataset=" + encodeURIComponent(dataset)
+    + "&target=" + encodeURIComponent("questions:" + target));
+  bi.questionsAi.session = (found.sessions || [])[0] || null;
+  biBuildSessionLog("bi-b-qa-log", bi.questionsAi.session, biQuestionsSuggestion);
+  el("bi-b-qa-msg").focus();
+}
+
+el("bi-b-qa-open").addEventListener("click", () => biQuestionsAi()
+  .catch((failure) => biNotice(false, failure.message)));
+el("bi-b-qa-close").addEventListener("click", () => {
+  el("bi-b-qa").hidden = true; bi.questionsAi = null;
+});
+el("bi-b-qa-send").addEventListener("click", async () => {
+  const chosen = bi.questionsAi; if (!chosen) return;
+  const message = el("bi-b-qa-msg").value.trim();
+  if (!message) { el("bi-b-qa-msg").focus(); return; }
+  const button = el("bi-b-qa-send"); button.disabled = true;
+  biStatus("bi-b-qa-status", "loading", "Agent 正在查卡片與分析、試問題目…（可能要幾分鐘）");
+  try {
+    if (!chosen.session) {
+      chosen.session = (await biCall("/api/bi/sessions", {dataset: chosen.dataset,
+        kind: "questions", target: chosen.target})).session;
+    }
+    const reply = await biCall("/api/bi/sessions/" + chosen.session.id + "/turns",
+      {dataset: chosen.dataset, message});
+    chosen.session = reply.session; el("bi-b-qa-msg").value = "";
+    biBuildSessionLog("bi-b-qa-log", reply.session, biQuestionsSuggestion);
+    biStatus("bi-b-qa-status", "");
+  } catch (failure) {
+    biStatus("bi-b-qa-status", "error", "沒有送出：" + failure.message + "。");
+  } finally { button.disabled = false; }
+});
+
 el("bi-b-bench-run").addEventListener("click", async () => {
   const button = el("bi-b-bench-run"); button.disabled = true;
   try {
@@ -14505,7 +14594,8 @@ const BI_TOOL_NAME = {bi_skill__sources: "列出來源", bi_skill__read_source: 
   bi_analysis__python: "Python 腳本", bi_analysis__propose: "提出分析",
   bi_analysis__read: "讀取分析", bi_analysis__propose_dashboard: "提出 Dashboard",
   bi_schema__sources: "列出來源", bi_schema__read_source: "讀來源", bi_schema__cards: "看卡片",
-  bi_schema__try: "試草稿", bi_schema__suggest: "提出建議"};
+  bi_schema__try: "試草稿", bi_schema__suggest: "提出建議",
+  bi_questions__analyses: "看分析", bi_questions__try: "試問", bi_questions__propose: "提出題目"};
 
 function biSentLine(sent) {
   const parts = (sent.sources || []).map((s) => "來源「" + s.name + "」（" + s.classification

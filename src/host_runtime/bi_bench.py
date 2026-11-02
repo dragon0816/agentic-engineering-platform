@@ -235,6 +235,9 @@ class BenchRuntime:
     #: (dataset, schema draft id, actor) -> Session A's turn on the harness
     #: (`docs/phases/BI_BUILD_FLOW.md` §5, `host_runtime.bi_schema_agent`).
     schema_asker_for: Callable[[str, str, str], Any] | None = None
+    #: (vault dataset, actor) -> the question AI's turn on the harness
+    #: (`docs/phases/BI_BUILD_FLOW.md` §7, `host_runtime.bi_questions_agent`).
+    questions_asker_for: Callable[[str, str], Any] | None = None
 
 
 def ask_on(

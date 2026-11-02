@@ -36,7 +36,7 @@ from capabilities.bi_cards.store import BiStoreError, now
 from common.execution import TraceIdentifiers
 from models.contracts import ModelClient, ModelMessage, ModelRequest, ModelRequirements
 
-KINDS = ("method", "schema", "skill", "analysis")
+KINDS = ("method", "schema", "skill", "analysis", "questions")
 #: Characters of source excerpts per turn (§9.1: capped, default 12000).
 EXCERPT_CAP = 12_000
 MAX_MESSAGE = 4000
