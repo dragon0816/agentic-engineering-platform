@@ -1,6 +1,6 @@
 # The BI knowledge-base build flow, end to end
 
-Status: B1–B7 done (2026-11-02); §12 has the commits and §9's live acceptance. Owner goal 2026-11-02: the BI build flow works end to
+Status: B1–B8 done (2026-11-02); §12 has the commits, §13 the live acceptance. Owner goal 2026-11-02: the BI build flow works end to
 end in Agent Web, with an AI session in each step that calls for one:
 
 ```text
@@ -155,7 +155,45 @@ OneDrive/SharePoint folders. Evidence goes into `docs/TASKS.md`; no secret is pr
 | B5 | `5559c9f4`, `fe6a5c02` | `test_bi_questions_session.py` |
 | B6 | `41157891` | `test_bi_vault_steps_ui.py` |
 | B7 | `947e78a1` | `test_bi_build_flow_ui.py` |
-| B8 | live acceptance not run: no reachable model endpoint yet (`HANDOFF.md`) | |
+| B8 | live acceptance: §13 | |
 
 A dataset still needs its `bi.sqlite` before it can be converted (`vault.convert` refuses `dataset_unknown`
 otherwise, and the page hides the button): someone starting from nothing creates the dataset or the vault first.
+
+## 13. Live acceptance with the real model (2026-11-02)
+
+Gateway `127.0.0.1:4000`, alias `company`, model `gpt-5.5`, key by name only (`LITELLM_MASTER_KEY`), each run in its own
+`%TEMP%\bi-live-*` workspace with its own Agent Web on a free loopback port, in headless Chromium, on invented data.
+About 115 model calls in all, every run under a stated cap.
+
+**One deviation.** BI's model normally comes from the Knowledge handler, which exists only when a wiki Knowledge asset is
+bound. These hosts had none, so the runs gave BI the same real client and alias directly (see "BI-only host" in
+`HANDOFF.md`).
+
+| Run | Cap, actual | Result |
+|---|---|---|
+| 1, a note labelled 虛構範例 | 120, 58 | Sessions, questions, dashboard, bench, push and publish ran; ingest made 0 cards |
+| Six extraction calls on run 1's workspace | no counter, 6 | Why: with the skills the model refused to make fictional cards, without them 4 candidates each time |
+| 2, the same note unlabelled | 80, 42 | Every step passed; ingest wrote 1 of 4 accepted cards |
+| 3, ingest to publish | 12, 4 | Ingest wrote 4 of 4; stopped at the commit, a fault of this reduced script |
+| 4, the same, entering step 3 | 12, 5 | Passed: 4 cards in published `v1` |
+
+Run 2, step by step:
+
+- Session A: sources, cards, read, `bi_schema__try` with a trial, suggest; `budget_band` applied, published, the vault
+  moved to `@3.1.0`. The field was filled from the source on ingest (`中等`).
+- Session B: trial, cases and `bi_skill__benchmark`; the model reported 「哪家客戶在評估 TSN？」 going from failing to
+  passing with no regression. Applied as a new revision.
+- AI questions: two, both with supported `must` terms, added after the tick.
+- Dashboard: `bi_analysis__propose_dashboard`, applied.
+- Bench: working 2/3, published 0/3, no regression. The third question failed on a `must_not` the model itself chose.
+- Commit, push, tag, publish: the push note named the run for exactly those units; `v1` read back.
+
+**What the scripted models had hidden, all found here:**
+
+- The model's reason for making nothing was dropped, so an empty run explained nothing, even to Session B. It now
+  reaches the page and the AI sessions.
+- The accept-all race wrote only the cards accepted before moving on (run 2). 「下一步」 now waits.
+- The question AI put a true term in `must_not`. Its role now forbids that; not re-tested live.
+
+Not covered live: the phone layout, Atlas import (K2), and BI's model through the Knowledge handler itself.

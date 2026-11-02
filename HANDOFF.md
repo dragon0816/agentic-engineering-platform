@@ -16,11 +16,17 @@ pushed, not merged. The BI orchestrator integrates it with the parallel branches
 `ruff check .`, `mypy src tests` clean, with one exception recorded in `docs/TASKS.md` (`5559c9f4`, fixed in `fe6a5c02`).
 Targeted tests pass; **the full suite has not been run on this branch** (the orchestrator's call).
 
-**Not done.** B8's live acceptance with real models has not run: see the blocker below.
+**Live acceptance (B8).** Done on the orchestrator's go, about 115 model calls, four capped runs: every AI step ran and
+a run reached published `v1`. Evidence: `docs/phases/BI_BUILD_FLOW.md` §13. BI's model was wired directly in these runs.
 
-**Blocker.** `deploy/windows-preview/gateway-default.json` points at a LiteLLM gateway on `127.0.0.1:4000` with the key
-in `LITELLM_MASTER_KEY`. The variable is set, but nothing listens on that port. This worker did not read the owner's
-`host.json`, which is the only place the real endpoint is recorded. Needed: a reachable endpoint for a temp workspace.
+**Open.**
+- **BI-only host, a decision.** `web_ai_runtime` takes BI's model from the Knowledge handler, which `build_runtime` makes
+  only when a wiki Knowledge asset is bound. A host with a model but no such asset gets 「沒有可用的模型」 in BI, so AI
+  ingest and the panels are refused. The owner's host binds one, so this has not been seen there. Not changed here: it
+  concerns which model and data approval BI uses.
+- **Unexplained.** One `test_bi_vault_ui` run with a very long `--basetemp` failed waiting for 'TestSolution' in
+  `#bi-b-an-list`, and passed on the rerun. Cause unknown.
+- The new `must_not` guidance for the question AI was not re-tested with the real model.
 
 **Known points.**
 - A dataset needs its `bi.sqlite` before it converts, so someone starting from nothing creates the dataset or vault first.
@@ -31,8 +37,8 @@ in `LITELLM_MASTER_KEY`. The variable is set, but nothing listens on that port. 
 
 **Found by repeating the browser tests, all fixed** (`docs/phases/BI_BUILD_FLOW.md` §11): a bench run dying when Windows refused to replace a report being read; a bench report that stopped polling; the question AI's slow read of every analysis. After them, the vault-steps and whole-flow tests passed 4 repeats together.
 
-**Next actions.** (1) Orchestrator: say where a real model is reachable, then "go" for B8. (2) Integrate and run the full
-suite. (3) Record the live evidence in `docs/TASKS.md`.
+**Next actions.** (1) Orchestrator: after D and C are combined, ask for the rebase of this branch onto that result. (2)
+Integrate and run the one full suite. (3) Decide the BI-only host.
 
 ## BI chat embedding and AI panel edits (2026-11-02, Claude Code)
 
