@@ -6411,3 +6411,27 @@ the unchanged typed path with the same confirmations. Code `src/voice/` (`contra
   `download_failed` (Telegram shows the attachment refusal), `transcript_empty`, `transcript_credential`,
   `stt_unavailable`, `stt_busy`, `stt_timeout`, `stt_failed`, `voice_not_confirmation`. None of them reaches the
   Agent.
+
+## Asking a vault from the general chat (2026-11-02)
+
+Design `docs/phases/BI_VAULT_ASKING.md`. Code: `src/host_runtime/knowledge_binding.py`,
+`host_runtime/bi_cards_tools.py`, `host_runtime/knowledge_harness.py`. Tests `tests/test_vault_asking_e2e.py`,
+`tests/test_vault_asking_binding.py`.
+
+- **Source line.** `knowledge.repo.repository.source_line(name, {tag, commit})`: `資料來源：知識庫 <name> 發佈版本 <tag>`,
+  `資料來源：知識庫 <name>（尚未發佈，已 push 的最新版本 <8 hex>）` or `資料來源：知識庫 <name>（還沒有已 push 的內容）`.
+  Added by the host under an answer from a repository binding (`KnowledgeHarness.ask`) and a BI vault
+  (`with_bi_sources`, when no line already holds it). `QueryResult.vault`: additive `{dataset, tag, commit}`, a vault's
+  answer only. `KnowledgeCatalog.live_version(asset)`: the version text a live entry last read, else None.
+- **`GET /api/knowledge/askable`** (token-checked) → `{"ok": true, "repos": [entry], "vaults": [entry], "notes":
+  [reason]}`; entry `{kind: wiki|bi, id, title, askable, reads: {tag, commit}|null, reasons: [reason]}`; reason `{code,
+  message, fix, blocks}`. Codes: `not_bound`, `restart_pending`, `no_model`, `capability_missing`, `skill_off`,
+  `not_granted`, `profile_excludes`, `nothing_pushed`, `unreachable`, `unreadable_format`; not blocking:
+  `never_published`, `several_vaults`. It writes nothing to a shared folder.
+- **`POST /api/knowledge/askable/propose`** `{repo, action?: bind|unbind, purpose?, boundaries?}` → `{"ok": true,
+  "card": <ActionCard>}`, or 409 `proposal_refused` with the reason.
+- **`propose_change` kind `knowledge_binding`** (Agent Web only) takes the same values. Apply on bind writes
+  `assets/knowledge/<namespace>__<repo>__1.0.0.json` first (`validation_refs` starts `knowledge-repo-binding-`, approved
+  by the person who pressed Apply), then appends `{asset, repo}` to `host.json` after a backup
+  `host.json.bak-<stamp>-knowledge`; on unbind it removes the binding and leaves the manifest. A manifest this flow did
+  not write is never overwritten. It takes effect at the next restart; it never restarts Agent Web.

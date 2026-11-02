@@ -21,7 +21,8 @@ PROPOSE_GUIDANCE = (
     "When the person asks to change this Agent's settings or Capabilities (Laya, the shared "
     "platform, the model, Telegram, a Workflow's settings, switching, removing, installing, "
     "adding or publishing a Skill or Workflow) or to save a BI chart from this chat as an "
-    "analysis of a knowledge base (vault), call " + PROPOSE_TOOL + " with only the "
+    "analysis of a knowledge base (vault), or to let this Agent read a wiki knowledge "
+    "repository, call " + PROPOSE_TOOL + " with only the "
     "values they want changed; the person sees a card and presses Apply. Never ask for or "
     "pass a secret value (token, password, Personal Agent code, API key): say where in "
     "Settings to paste it."
@@ -39,6 +40,9 @@ KINDS = (
     # BI C3 (docs/phases/BI_CHAT_CHARTS_AND_DASHBOARD_SOURCES.md): a chat chart
     # saved as a vault analysis; Agent Web only.
     "bi_analysis",
+    # Asking a vault (docs/phases/BI_VAULT_ASKING.md V2): a wiki repository bound
+    # to this Agent or unbound; Agent Web only.
+    "knowledge_binding",
 )
 #: Kinds Telegram may apply (owner decision 2026-10-15); capability only for
 #: switching on or off.

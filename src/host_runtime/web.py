@@ -110,6 +110,7 @@ from host_runtime import (
     bi_cards_api,
     bi_feed_api,
     gateway_link,
+    knowledge_binding,
     knowledge_repos_api,
     multi_agent_switch,
     telemetry_api,
@@ -6341,6 +6342,8 @@ class _Handler(BaseHTTPRequestHandler):
             return
         if knowledge_repos_api.handle(self, "GET", parsed):  # wiki repositories (R4a)
             return
+        if knowledge_binding.handle(self, "GET", parsed):  # asking a vault (V2)
+            return
         web = self.server.web
         if parsed.path == "/api/about":
             self._json(200, web.about())
@@ -6498,6 +6501,8 @@ class _Handler(BaseHTTPRequestHandler):
         if bi_cards_api.handle(self, "POST", urlparse(self.path)):  # BI cards (Case A)
             return
         if knowledge_repos_api.handle(self, "POST", urlparse(self.path)):  # R4a
+            return
+        if knowledge_binding.handle(self, "POST", urlparse(self.path)):  # asking a vault (V2)
             return
         if path not in (
             "/api/ask",

@@ -54,6 +54,7 @@ ProposalKind = Literal[
     "platform_add",
     "publish",
     "bi_analysis",
+    "knowledge_binding",
 ]
 PROPOSALS_FILE = Path("proposals") / "change-proposals.json"
 #: Values that are permissions or approvals: never from chat.
@@ -87,6 +88,7 @@ PASTE_WHERE = {
     "platform_add": "Settings > Shared platform",
     "publish": "Settings > Shared platform",
     "bi_analysis": "the Knowledge page",
+    "knowledge_binding": "the Knowledge page",
 }
 
 
@@ -239,8 +241,11 @@ class ChangeProposals:
                         "x, y}, and either sql (one read-only statement, as you ran it with "
                         "bi__query) or from_analysis {vault, slug} (a saved SQL analysis you "
                         "showed)}: it is only staged in that vault; commit, push and publish "
-                        "stay the person's. Never a secret value, a permission or an "
-                        "approval."
+                        "stay the person's. "
+                        "knowledge_binding {action: bind|unbind, repo (a wiki knowledge "
+                        "repository on this PC), purpose, boundaries}: this Agent reads the "
+                        "repository's published version, after a restart of Agent Web. "
+                        "Never a secret value, a permission or an approval."
                     ),
                     input_contract="host.change-proposal.v1",
                     input_schema={
@@ -292,6 +297,7 @@ class ChangeProposals:
                 "shared_platform",
                 "model",
                 "telegram",
+                "knowledge_binding",
             ):
                 raise ProposalRefused(
                     "This Agent Web was started without a writable "
@@ -1278,6 +1284,52 @@ class ChangeProposals:
         from host_runtime import bi_chat_save
 
         return bi_chat_save.apply(self._bi_workspace(), proposal.values)
+
+    # knowledge_binding ----------------------------------------------------------
+
+    def _now_knowledge_binding(self, values: Mapping[str, Any]) -> dict[str, Any]:
+        from host_runtime import knowledge_binding
+
+        return knowledge_binding.now(
+            Path(self.web.config_path), self.web.runtime.layout.knowledge, values
+        )
+
+    def _plan_knowledge_binding(self, values: Mapping[str, Any], snapshot: dict[str, Any]) -> Plan:
+        from host_runtime import knowledge_binding
+
+        del snapshot  # the plan reads the same host.json; Apply compares the fingerprint
+        given = _only("knowledge_binding", values, knowledge_binding.FIELDS)
+        try:
+            planned = knowledge_binding.plan(
+                self._bi_workspace(),
+                Path(self.web.config_path),
+                self.web.runtime.layout.knowledge,
+                given,
+            )
+        except knowledge_binding.Refused as refused:
+            raise ProposalRefused(refused.message) from None
+        return Plan(
+            title=planned.title[:160],
+            values=planned.values,
+            rows=[
+                CardRow(label=label, before=before, after=after[:400])
+                for label, before, after in planned.rows
+            ],
+            effects=planned.effects,
+            telegram_ok=False,
+        )
+
+    def _apply_knowledge_binding(self, proposal: ChangeProposal) -> tuple[bool, str]:
+        from host_runtime import knowledge_binding
+
+        with self.web._one_at_a_time:
+            return knowledge_binding.apply(
+                self._bi_workspace(),
+                Path(self.web.config_path),
+                self.web.runtime.layout.knowledge,
+                proposal.values,
+                proposal.actor or str(self.web.runtime.actor),
+            )
 
 
 def diff_summary(rows: tuple[CardRow, ...] | list[CardRow]) -> str:

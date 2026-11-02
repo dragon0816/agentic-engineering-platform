@@ -153,9 +153,11 @@ def _ask(server: AgentWebServer) -> str:
 # -- wiki repository ------------------------------------------------------------------------
 
 
-def _wiki_host(tmp_path: Path, repo_id: str, *, granted: bool = True) -> tuple[Any, Any]:
+def _wiki_host(
+    tmp_path: Path, repo_id: str, *, granted: bool = True, **changes: Any
+) -> tuple[Any, Any]:
     bound = {"asset": WIKI_ASSET.model_dump(mode="json"), "repo": repo_id}
-    config, layout = _config(tmp_path, KNOWLEDGE_QUERY_SPEC, granted, knowledge=[bound])
+    config, layout = _config(tmp_path, KNOWLEDGE_QUERY_SPEC, granted, knowledge=[bound], **changes)
     layout.knowledge.mkdir(parents=True, exist_ok=True)
     (layout.knowledge / "tester-knowledge.json").write_text(
         _template().model_dump_json(), encoding="utf-8"

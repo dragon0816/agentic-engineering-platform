@@ -2028,6 +2028,7 @@ tr:last-child td { border-bottom: none; }
           <p class="note">每個改動都寫目的並 commit，push 給大家，發佈後 Agent
             才讀到；歷史裡可以改回任何版本。之後 sandbox 會被知識庫取代。</p>
           <div id="kp-repos" class="kp-list">reading&hellip;</div>
+          <div id="kp-askable" aria-live="polite"></div>
           <details class="kp-repo-new"><summary>新增知識庫</summary>
             <form id="kp-repo-form" class="kp-form">
               <label for="kp-repo-mode">方式</label>
@@ -2569,6 +2570,7 @@ tr:last-child td { border-bottom: none; }
             </div>
             <p class="bi-meta" id="bi-b-target"></p>
             <div id="bi-b-v-state" role="status" aria-live="polite"></div>
+            <div id="bi-b-askable" aria-live="polite"></div>
             <div class="bi-actions">
               <button class="bi-btn" id="bi-b-v-sync" type="button" hidden>立即同步</button>
               <button class="bi-btn" id="bi-b-v-new" type="button" data-mode="new"
@@ -9044,6 +9046,8 @@ async function loadKnowledge() {
   el("kp-disabled").hidden = info.enabled; el("kp-main").hidden = !info.enabled;
   el("kp-stepper").hidden = !info.enabled;
   if (!info.enabled) return;
+  // Before the steps' own reads: a person without the pipeline's grants still sees this.
+  askableLoad().catch((failure) => { el("kp-askable").textContent = failure.message; });
   const base = el("kp-base"); base.replaceChildren();
   for (const vault of info.vaults || info.bases.map((name) => ({name}))) {
     const option = document.createElement("option"); option.value = vault.name;
@@ -9079,6 +9083,53 @@ async function loadKnowledge() {
 // its working folder and what a step writes becomes a change to commit. Its
 // 「版本」 area replaces push, refresh and the candidate in step 3.
 let kpRepoPrefix = "repo.";
+
+// Whether the general chat can ask each vault, and why not (BI_VAULT_ASKING V2).
+function askableRow(entry, reload) {
+  const row = document.createElement("div"); row.className = "note";
+  row.dataset.askable = entry.id;
+  const head = document.createElement("strong");
+  head.append(text(entry.title + "：" + (entry.askable ? "可以在對話裡問" : "還不能在對話裡問")));
+  row.append(head);
+  if (entry.reads && entry.reads.tag) row.append(text("（發佈版本 " + entry.reads.tag + "）"));
+  if (entry.reasons.length) {
+    const list = document.createElement("ul");
+    for (const reason of entry.reasons) {
+      const item = document.createElement("li");
+      item.append(text(reason.message + (reason.fix ? "：" + reason.fix : "")));
+      list.append(item);
+    }
+    row.append(list);
+  }
+  const propose = (action) => async () => {
+    try {
+      const made = await call("/api/knowledge/askable/propose", {repo: entry.id, action});
+      row.append(renderActionCard(made.card, reload));
+    } catch (failure) { row.append(text(failure.message)); }
+  };
+  if (entry.reasons.some((reason) => reason.code === "not_bound")) {
+    row.append(kpButton("讓 Agent 可以問這個知識庫", propose("bind")));
+  } else if (entry.kind === "wiki") {
+    row.append(kpButton("解除 Agent 的綁定", propose("unbind")));
+  }
+  return row;
+}
+
+async function askableLoad() {
+  const report = await call("/api/knowledge/askable");
+  const repos = el("kp-askable"), vaults = el("bi-b-askable");
+  repos.replaceChildren(); vaults.replaceChildren();
+  for (const note of report.notes || []) {
+    const line = document.createElement("p"); line.className = "note";
+    line.append(text(note.message)); repos.append(line);
+  }
+  const again = () => askableLoad().catch(() => {});
+  for (const entry of report.repos || []) repos.append(askableRow(entry, again));
+  const shown = biVaultOf(biDataset());
+  for (const entry of report.vaults || []) {
+    if (shown && shown.id === entry.id) vaults.append(askableRow(entry, again));
+  }
+}
 
 function kpRepoItem(repo) {
   const id = kpRepoPrefix + repo.id;
@@ -12710,6 +12761,7 @@ async function biBuildVault() {
   const state = await call("/api/bi/vaults/" + vault.id + "/status");
   if (seq !== bi.vaultSeq) return;
   biVaultState(state);
+  askableLoad().catch((failure) => { el("bi-b-askable").textContent = failure.message; });
 }
 
 function biVaultState(state) {
