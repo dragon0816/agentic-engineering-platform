@@ -6305,9 +6305,37 @@ el("mcp-form").addEventListener("submit", async (event) => {
   } finally { button.disabled = false; }
 });
 
+function renderBiQuerySwitch(state) {
+  const card = document.createElement("div"); card.id = "bi-query-switch";
+  card.lang = "zh-Hant";
+  const label = document.createElement("label");
+  const box = document.createElement("input"); box.type = "checkbox"; box.id = "bi-query-on";
+  box.checked = !!(state && state.enabled);
+  label.append(box, text(" 讓外部 coding agent 讀取 BI 知識卡片（aep_bi_query）"));
+  const note = document.createElement("p"); note.className = "note";
+  note.append(text("開啟後，這台電腦上連到 AEP 的 Claude Code、Codex 和 GitHub Copilot 可以讀取"
+    + " BI 知識庫已發佈版本的卡片與已存的分析，內容會送到這些 agent 使用的模型服務。"
+    + "沒有發佈過的知識庫讀的是已 push 的最新版本，結果會標明。它們不能寫入，也不能自己下 SQL。"
+    + "預設關閉；關閉後立刻停止。"));
+  const result = document.createElement("p"); result.className = "note"; result.role = "status";
+  box.addEventListener("change", async () => {
+    box.disabled = true;
+    try {
+      const saved = await call("/api/coding-agents/bi-query", {enabled: box.checked});
+      box.checked = saved.bi_query.enabled;
+      result.textContent = saved.bi_query.enabled ? "已開啟。" : "已關閉。";
+    } catch (failure) {
+      box.checked = !box.checked; result.textContent = failure.message;
+    } finally { box.disabled = false; }
+  });
+  card.append(label, note, result);
+  return card;
+}
+
 function renderCodingAgents(listed) {
   const box = el("coding-agents");
   box.className = ""; box.replaceChildren();
+  box.append(renderBiQuerySwitch(listed.bi_query));
   for (const agent of listed.agents) {
     const card = document.createElement("div"); card.className = "approval-card";
     card.dataset.agent = agent.agent;

@@ -14,6 +14,7 @@ the owner approved sending all data to Copilot (2026-10-12).
 
 from __future__ import annotations
 
+import asyncio
 import json
 import secrets
 import uuid
@@ -21,17 +22,32 @@ from pathlib import Path
 from typing import Any
 
 from common.assets import AssetIdentity, WorkflowManifest
+from common.execution import TraceIdentifiers
 from knowledge.query import RetrievalSnapshot
 from knowledge.vault import normalize
 
 TOKEN_FILE = "assistant-mcp-token"
+#: What `aep_bi_query` passes on to `bi-cards/query`; never `sql` or `chart`.
+BI_QUERY_FIELDS = (
+    "dataset",
+    "analysis",
+    "params",
+    "entity_type",
+    "text",
+    "field",
+    "value",
+    "domain",
+    "follow_links",
+    "limit",
+)
 MAX_PAGE_CHARS = 40_000
 PROTOCOL_VERSIONS = ("2025-06-18", "2025-03-26", "2024-11-05")
 INSTRUCTIONS = (
     "AEP assistant tools. For company knowledge (R&S products, options, standards, "
     "markets, competitors), search with aep_knowledge_search, read pages with "
     "aep_knowledge_read and cite the page paths you used; aep_knowledge_ask returns "
-    "AEP's validated, cited answer. aep_workflows lists installed Workflows; "
+    "AEP's validated, cited answer. aep_bi_query reads BI cards and saved analyses of a "
+    "knowledge base when the owner turned it on. aep_workflows lists installed Workflows; "
     "aep_run_workflow runs one that only reads. Never claim to have run a Workflow "
     "that the tool said must be run by the person."
 )
@@ -54,6 +70,29 @@ TOOLS: dict[str, tuple[str, dict[str, Any]]] = {
     "aep_knowledge_ask": (
         "Ask AEP's Knowledge Harness: a validated answer with its cited sources.",
         {"type": "object", "properties": {"question": _Q}, "required": ["question"]},
+    ),
+    "aep_bi_query": (
+        "Read BI knowledge cards (customers, opportunities, competitors, trends) or a saved "
+        "analysis of a knowledge base (vault), from its published version; quote the `source` "
+        "line it returns. Give dataset (vault-<id>) and either analysis (a slug, `all` or "
+        "`quality`) or a search (entity_type, text, field, value, domain). No SQL. It is off "
+        "until the owner turns it on in Agent Web, Settings > Coding agents: a call then "
+        "answers bi_query_off; tell the person and do not guess an answer.",
+        {
+            "type": "object",
+            "properties": {
+                "dataset": _Q,
+                "analysis": _Q,
+                "params": {"type": "object"},
+                "entity_type": _Q,
+                "text": _Q,
+                "field": _Q,
+                "value": _Q,
+                "domain": _Q,
+                "follow_links": {"type": "boolean"},
+                "limit": {"type": "integer"},
+            },
+        },
     ),
     "aep_workflows": (
         "List the installed Workflows: id, description, parameters, and whether it only reads.",
@@ -83,6 +122,13 @@ def assistant_token(workspace: Path) -> str:
         token = secrets.token_urlsafe(32)
         path.write_text(token, encoding="utf-8")
     return token
+
+
+def _trace() -> TraceIdentifiers:
+    value = uuid.uuid4().hex
+    return TraceIdentifiers(
+        trace_id=f"trace-{value}", request_id=f"request-{value}", span_id=f"span-{value}"
+    )
 
 
 def _identity(text: str) -> AssetIdentity:
@@ -169,6 +215,84 @@ class AssistantTools:
             "sources": knowledge_source_lines(record) if record else [],
         }
 
+    # -- BI cards ----------------------------------------------------------
+
+    def bi_query_on(self) -> bool:
+        return bool(getattr(getattr(self.web.runtime, "config", None), "assistant_bi_query", False))
+
+    def listed(self) -> tuple[str, ...]:
+        """The tools this Agent Web offers now; `aep_bi_query` only while on."""
+        return tuple(n for n in TOOLS if n != "aep_bi_query" or self.bi_query_on())
+
+    def bi_query(self, args: dict[str, Any]) -> dict[str, Any]:
+        """A vault's published version through the Bridge and its grant, as
+        `bi__query`, without SQL (`docs/phases/BI_VAULT_ASKING.md` §5)."""
+        from capabilities.bi_cards import vault
+        from capabilities.bi_cards.capability import QUERY_SPEC
+        from capabilities.bi_cards.store import VAULT_PREFIX
+        from common.local_agent import LocalCapabilityRequest
+        from host_runtime.bi_cards_tools import bi_skill_on
+        from knowledge.repo.repository import source_line
+
+        if not self.bi_query_on():
+            return {
+                "ok": False,
+                "code": "bi_query_off",
+                "message": "The owner has not turned this on (Agent Web, Settings > Coding "
+                "agents). Say so; do not guess an answer.",
+            }
+        if "sql" in args:
+            return {"ok": False, "code": "sql_not_allowed"}
+        runtime = self.web.runtime
+        if not bi_skill_on(runtime.agent.gateway):
+            return {"ok": False, "code": "bi_unavailable"}
+        workspace = Path(runtime.layout.workspace_root)
+        vaults = [
+            {
+                "dataset": vault.dataset_name(str(item["id"])),
+                "title": item.get("title"),
+                "purpose": item.get("purpose"),
+            }
+            for item in vault.listing(workspace)
+        ]
+        dataset = str(args.get("dataset") or "")
+        if not dataset:
+            return {"ok": False, "code": "dataset_missing", "vaults": vaults}
+        known = dataset.startswith(VAULT_PREFIX) and vault.registry_entry(
+            workspace, dataset[len(VAULT_PREFIX) :]
+        )
+        if not known:
+            return {"ok": False, "code": "not_a_vault", "vaults": vaults}
+        outcome = asyncio.run(
+            runtime.agent.execute_capability(
+                LocalCapabilityRequest(
+                    ingress="local",
+                    actor=runtime.actor,
+                    bridge_id=runtime.config.device.bridge_id,
+                    target=QUERY_SPEC.identity,
+                    arguments={k: args[k] for k in BI_QUERY_FIELDS if k in args},
+                    trace=_trace(),
+                )
+            )
+        )
+        result = outcome.capability
+        if result is None or result.status != "succeeded":
+            failure = None if result is None else result.failure
+            code = failure.code if failure is not None else str(outcome.refusal or "failed")
+            return {"ok": False, "code": code}
+        data = dict(result.data or {})
+        read = data.get("vault") or {}
+        return {
+            "ok": True,
+            "dataset": data.get("dataset"),
+            "total": data.get("total"),
+            "cards": data.get("cards") or [],
+            "analysis": data.get("analysis") or [],
+            "scope_note": data.get("scope_note"),
+            "source": source_line(dataset, read),
+            "reads": {"tag": read.get("tag"), "commit": read.get("commit")},
+        }
+
     # -- workflows ---------------------------------------------------------
 
     def _installed(self) -> list[WorkflowManifest]:
@@ -238,6 +362,8 @@ class AssistantTools:
                 return self.knowledge_read(str(args.get("path") or ""))
             if name == "aep_knowledge_ask":
                 return self.knowledge_ask(str(args.get("question") or ""))
+            if name == "aep_bi_query":
+                return self.bi_query(args)
             if name == "aep_workflows":
                 return self.workflows()
             if name == "aep_run_workflow":
@@ -279,6 +405,7 @@ def handle(tools: AssistantTools, message: dict[str, Any]) -> dict[str, Any] | N
                 "tools": [
                     {"name": name, "description": text, "inputSchema": schema}
                     for name, (text, schema) in TOOLS.items()
+                    if name in tools.listed()
                 ]
             },
         )

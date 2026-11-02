@@ -6435,3 +6435,11 @@ Design `docs/phases/BI_VAULT_ASKING.md`. Code: `src/host_runtime/knowledge_bindi
   by the person who pressed Apply), then appends `{asset, repo}` to `host.json` after a backup
   `host.json.bak-<stamp>-knowledge`; on unbind it removes the binding and leaves the manifest. A manifest this flow did
   not write is never overwritten. It takes effect at the next restart; it never restarts Agent Web.
+- **MCP tool `aep_bi_query`** (assistant tools, `POST /mcp`): `{dataset: vault-<id>, analysis?: slug|all|quality,
+  params?, entity_type?, text?, field?, value?, domain?, follow_links?, limit?}` → `{ok: true, dataset, total, cards,
+  analysis, scope_note, source: <source line>, reads: {tag, commit}}`. Refusals `{ok: false, code}`: `bi_query_off`,
+  `sql_not_allowed` (any `sql` argument), `bi_unavailable`, `dataset_missing` and `not_a_vault` (with `vaults:
+  [{dataset, title, purpose}]`), and the capability's own (`permission_denied`, `analysis_unknown`, ...).
+- **`host.json` `assistant_bi_query`**, bool, default false. `GET /api/coding-agents` adds `bi_query: {enabled}`; `POST
+  /api/coding-agents/bi-query {enabled: bool}` (session token) → `{ok, bi_query}`, 409 on `bi_query_request_invalid` or
+  `settings_read_only`. Live at once. While off, `/mcp` `tools/list` omits the tool; the stdio bridge's list does not.

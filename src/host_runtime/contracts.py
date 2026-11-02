@@ -646,6 +646,9 @@ class CompanyHostConfiguration(Contract):
     # Sandboxed Knowledge convert/ingest/lint (docs/phases/KNOWLEDGE_K1.md):
     # the base vaults people may copy into a personal sandbox.
     knowledge_pipeline: KnowledgePipelineHostBinding | None = None
+    # `aep_bi_query` for external agents (docs/phases/BI_VAULT_ASKING.md §5): off
+    # until the owner turns it on in Settings; the only per-tool switch here.
+    assistant_bi_query: bool = False
     # Owner mode (owner 2026-10-11): on a host without the shared platform's
     # member decisions, the device owner holds every installed capability, a
     # person's own request needs no recorded approval, and a side effect the

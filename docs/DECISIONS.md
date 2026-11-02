@@ -6034,8 +6034,11 @@ Owner goal relayed by the BI orchestrator; design in `docs/phases/BI_VAULT_ASKIN
 Answers V3 of `docs/phases/BI_VAULT_ASKING.md` (§5).
 
 - **Option B: a new MCP tool `aep_bi_query`.** The owner widens the 2026-10-12 external-agent data boundary to BI cards
-  for this tool. The widening applies when the tool ships; **it has not shipped**: the defaults require it off until the
-  owner turns it on, and the assistant MCP has no per-tool switch (open question to the orchestrator).
+  for this tool. The widening applies only while the owner has it turned on: `host.json` `assistant_bi_query`, off by
+  default, set in Settings > Coding agents. The assistant MCP had no per-tool switch; the orchestrator chose adding this
+  one over gating only on the BI Skill and the grant (the boundary would widen at merge wherever BI chat works) and over
+  a separate MCP server (a new endpoint and installer changes for all three coding agents). A stdio client still lists
+  the tool while off and is refused on the call; forwarding `tools/list` is left out of this version.
   Rejected: leaving the assistant tools wiki-only (external agents could not ask BI); routing BI through
   `aep_knowledge_ask` (breaks what `validated` means, and adds a routing guess inside a tool).
 - **Defaults (orchestrator):** published version only (pushed head, labelled, when never published); saved analyses and

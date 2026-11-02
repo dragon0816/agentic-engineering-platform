@@ -17,6 +17,7 @@ through the person's own AEP Agent Web.
 | `aep_knowledge_search` | find pages: returns paths (`wiki/...` or `raw/...`), titles and the best matching section |
 | `aep_knowledge_read` | read one page in full by its path |
 | `aep_knowledge_ask` | get AEP's own validated answer with its cited sources |
+| `aep_bi_query` | read BI cards and saved analyses of a knowledge base; off until the owner turns it on (`bi_query_off`: say so, do not guess) |
 | `aep_workflows` | list the installed Workflows, their parameters, and whether each only reads |
 | `aep_run_workflow` | run an installed Workflow that only reads |
 

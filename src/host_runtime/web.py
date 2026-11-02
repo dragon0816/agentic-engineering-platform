@@ -1629,6 +1629,27 @@ class AgentWeb:
 
         return getattr(self, "agent_environment", None) or Environment.current()
 
+    def update_assistant_bi_query(self, body: dict[str, Any]) -> dict[str, Any]:
+        """The owner's switch for `aep_bi_query`: saved to host.json and live at
+        once, with no restart (`docs/phases/BI_VAULT_ASKING.md` §5)."""
+        enabled = body.get("enabled")
+        if not isinstance(enabled, bool):
+            return {"ok": False, "code": "bi_query_request_invalid"}
+        if self.config_path is None:
+            return {"ok": False, "code": "settings_read_only"}
+        with self._one_at_a_time:
+            current = CompanyHostConfiguration.model_validate_json(
+                self.config_path.read_text(encoding="utf-8-sig")
+            )
+            updated = current.model_copy(update={"assistant_bi_query": enabled})
+            write_atomically(
+                self.config_path, updated.model_dump_json(indent=2).encode("utf-8") + b"\n"
+            )
+            self.runtime.config = self.runtime.config.model_copy(
+                update={"assistant_bi_query": enabled}
+            )
+        return {"ok": True, "bi_query": {"enabled": enabled}}
+
     def coding_agents(self) -> dict[str, Any]:
         """For each coding agent: found here, AEP skills (version) and MCP servers."""
         from host_runtime.agent_setup import AGENT_NAMES, SERVERS, SKILLS, bundle_version, status
@@ -1637,6 +1658,7 @@ class AgentWeb:
         return {
             "ok": True,
             "version": bundle_version(),
+            "bi_query": {"enabled": self.runtime.config.assistant_bi_query},
             "skills": list(SKILLS),
             "servers": list(SERVERS),
             "writable": self.config_path is not None,
@@ -6546,6 +6568,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/mcp/reconnect",
             "/api/coding-agents/install",
             "/api/coding-agents/remove",
+            "/api/coding-agents/bi-query",
             "/api/settings/workflows",
             "/api/workflow-options",
             "/api/workflow-uploads",
@@ -6810,6 +6833,12 @@ class _Handler(BaseHTTPRequestHandler):
             except (OSError, ValueError, TypeError):
                 self._json(400, {"error": "the request was not valid model settings"})
                 return
+            self._json(200 if result.get("ok") else 409, result)
+            return
+        if path == "/api/coding-agents/bi-query":
+            result = self.server.web.update_assistant_bi_query(
+                body if isinstance(body, dict) else {}
+            )
             self._json(200 if result.get("ok") else 409, result)
             return
         if path in ("/api/coding-agents/install", "/api/coding-agents/remove"):

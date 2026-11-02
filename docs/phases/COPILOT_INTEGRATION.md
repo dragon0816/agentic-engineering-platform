@@ -38,6 +38,7 @@ User (Agent Web conversation, or VS Code)
 | `aep_knowledge_search` | Pages of the published Knowledge that match a query: path, title, best section text |
 | `aep_knowledge_read` | One wiki or Raw page of the published Knowledge, up to 40,000 characters |
 | `aep_knowledge_ask` | The AEP Knowledge Harness's answer: validated, with its sources |
+| `aep_bi_query` | BI cards and saved analyses of a vault's published version; off until the owner turns it on (`BI_VAULT_ASKING.md` §5) |
 | `aep_workflows` | Installed Workflows: id, description, parameters |
 | `aep_run_workflow_installed` | Runs an installed Workflow. A read-only one runs now; one that changes something waits for the person's approval in Agent Web, as in the AEP conversation |
 

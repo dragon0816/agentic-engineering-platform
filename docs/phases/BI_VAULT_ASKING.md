@@ -43,7 +43,7 @@ pushed after the published tag are never answered.
 | V2a | `GET /api/knowledge/askable`: for each vault and repository, whether the chat can ask it and each reason why not | — |
 | V2b | `propose_change` kind `knowledge_binding` (bind or unbind a wiki repository; web only) | V2a |
 | V2c | Knowledge page: state, reasons and a button that opens the proposal card | V2a, V2b |
-| V3 | `aep_bi_query` (owner chose option B, §5): **blocked**, the assistant MCP has no per-tool switch | — |
+| V3 | `aep_bi_query` (owner chose option B, §5), behind a host-level switch, off by default | — |
 | V4 | `docs/runbooks/R6_MARKET_BI.md` and `scripts/r6_precheck.py` (read only) | — |
 | V5 | Live acceptance with real models in a temp workspace, after the orchestrator's go | V1–V2 |
 
@@ -119,15 +119,29 @@ through `renderActionCard`. Page changes stay in these sections (other workers e
 
 ## 5. V3: should `aep_knowledge_ask` cover BI vaults?
 
-**Decided (owner, 2026-11-02): option B, a separate MCP tool `aep_bi_query`. Not implemented: blocked on a question
-to the orchestrator.** Defaults set by the orchestrator: published version only (pushed head, labelled, when never
-published); saved analyses and built-in queries only, no ad-hoc SQL over MCP in this version; the assistant-MCP token
-and grant pattern; the result carries the same host-written source line; shipped off until the owner turns it on in
-Settings, if the pattern has a per-tool switch, otherwise stop and ask.
+**Decided (owner, 2026-11-02): option B, a separate MCP tool `aep_bi_query`.** Defaults set by the orchestrator:
 
-**The pattern has no per-tool switch** (read at `a7629341`): the assistant token opens every tool in
-`assistant_tools.TOOLS`; Settings > Coding agents registers or removes the whole `aep-assistant` server; the stdio
-bridge answers `tools/list` from that constant without reaching Agent Web. So the question is open.
+- **Published version only**: a vault's published version, or its pushed head, labelled, when never published. A local
+  dataset or a subscribed one is refused (`not_a_vault`); this tool reads vaults only.
+- **Saved analyses and built-in queries only** (a slug, `all`, `quality`, or a card search). **No ad-hoc SQL over MCP**
+  in this version: an argument named `sql` is refused (`sql_not_allowed`), and only `BI_QUERY_FIELDS` are passed on.
+- **The assistant-MCP token and the grant**: the call goes through `LocalAgent.execute_capability` to `bi-cards/query`,
+  so `permission_denied` without the grant; `bi_unavailable` while the BI Skill is off.
+- **The same host-written source line** in `source`, plus `reads: {tag, commit}`.
+
+**A host-level switch, off by default** (orchestrator's choice, since the pattern had no per-tool switch): the token
+opened every tool, and Settings > Coding agents registers or removes the whole `aep-assistant` server.
+`host.json` `assistant_bi_query: bool = false`, set by a checkbox in Settings > Coding agents through `POST
+/api/coding-agents/bi-query` (the session token only: the token external agents hold is refused; not a
+`propose_change` kind, so the chat cannot turn it on). It takes effect at once, with no restart. While off,
+`/mcp` does not list the tool and a call answers `bi_query_off`.
+
+The checkbox's words: 「讓外部 coding agent 讀取 BI 知識卡片（aep_bi_query）」, 「開啟後，這台電腦上連到 AEP 的 Claude
+Code、Codex 和 GitHub Copilot 可以讀取 BI 知識庫已發佈版本的卡片與已存的分析，內容會送到這些 agent 使用的模型服務。沒有發佈過的知識庫讀的是已 push 的最新版本，結果會標明。它們不能寫入，也不能自己下 SQL。預設關閉；關閉後立刻停止。」
+
+**Known limit (accepted by the orchestrator).** The stdio bridge (`assistant_bridge`) answers `tools/list` from the
+`TOOLS` constant without reaching Agent Web, so a stdio client lists the tool while it is off; its description says it
+may be off, and the call is refused. Making the list accurate means forwarding `tools/list`; not done in this version.
 
 The options as they stood before the owner's choice:
 

@@ -12,7 +12,8 @@ cited answers. Design `docs/phases/BI_VAULT_ASKING.md`; decision `docs/DECISIONS
 `a7629341`; `main` had not moved at this writing. Nothing pushed or merged; the BI orchestrator merges.
 
 **Done.** `e1084359` design; `cc72c420` V1 (host-written source line, whole-chain test); `faab9904` V2 (`/api/knowledge/
-askable`, `propose_change` kind `knowledge_binding`, page button); `7f255dbf` V4 (runbook, `scripts/r6_precheck.py`).
+askable`, `propose_change` kind `knowledge_binding`, page button); `7f255dbf` V4 (runbook, `scripts/r6_precheck.py`);
+V3 `aep_bi_query` behind `assistant_bi_query`, off by default (see `docs/TASKS.md`).
 
 **Verification (last run on `7f255dbf`).** `ruff format --check .`, `ruff check .`, `mypy src tests` (915 files) clean.
 `test_vault_asking_e2e`, `test_vault_asking_binding` (incl. a headless browser step), `test_knowledge_repo_ui`,
@@ -21,9 +22,7 @@ askable`, `propose_change` kind `knowledge_binding`, page button); `7f255dbf` V4
 `test_assistant_tools`, `test_harness_output_limit_g4` passed on the V1 and V2 states. **The full suite has not run.**
 `r6_precheck` has not been run on the real OneDrive folder, and must not be by an agent.
 
-**Not done.** V3: the owner chose a separate `aep_bi_query` (design §5), shipped off behind a per-tool switch; the
-assistant MCP has no such switch, so it is stopped with that question to the orchestrator. V5 live acceptance with real
-models: not go yet, the model gateway did not answer its health route; the orchestrator sends the go and the credential
+**Not done.** V5 live acceptance with real models: not go yet, the model gateway did not answer its health route; the orchestrator sends the go and the credential
 variable's name. Only under `%TEMP%`, its own Agent Web on a free loopback port, never 53583, the owner's workspace or
 OneDrive; do not read the owner's `host.json`. The full suite is the orchestrator's, on the integrated branches: do not
 run it here.
@@ -35,7 +34,7 @@ run it here.
 - A host without `knowledge_pipeline` shows no wiki repository card, so no button; the route and the chat proposal work.
 - R6 cannot reuse the id `market-bi` on the owner's PC (`vault_exists`): runbook D1. Other R6 decisions: D2–D5.
 
-**Next action.** The orchestrator's answer on the switch decides V3; then V5 after its go.
+**Next action.** Orchestrator: integrate with A and C and run the one full suite. V5 after its go.
 
 ## BI charts in the chat and the Dashboard's sources (2026-11-01, Claude Code)
 
