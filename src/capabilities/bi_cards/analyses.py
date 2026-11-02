@@ -481,6 +481,10 @@ def chart_for(chart: Any, columns: Sequence[str], rows: Sequence[Sequence[Any]])
     return default_chart(columns, rows)
 
 
+#: The fields of an analysis's content, in the order a person reads them.
+CONTENT = ("title", "question", "kind", "code", "chart", "params", "requires")
+
+
 def unit_problem(key: str, value: Any) -> str | None:
     if not NAME_RE.match(key[len(PREFIX) :]):
         return "analysis key must be analysis:<slug>"
@@ -538,6 +542,21 @@ def digest(value: Mapping[str, Any]) -> str:
     """The analysis's content id: what a cached result was computed from."""
     text = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+
+
+def content(value: Mapping[str, Any]) -> dict[str, Any]:
+    """What an analysis is made of: an edit compares these and its base is their digest."""
+    return {key: value[key] for key in CONTENT if value.get(key) not in (None, "", {})}
+
+
+def changes(before: Mapping[str, Any], after: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """The fields that differ, in `CONTENT`'s order."""
+    old, new = content(before), content(after)
+    return [
+        {"field": key, "before": old.get(key), "after": new.get(key)}
+        for key in CONTENT
+        if old.get(key) != new.get(key)
+    ]
 
 
 def default_params(value: Mapping[str, Any], registry: Any | None, today: str) -> dict[str, Any]:

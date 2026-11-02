@@ -272,7 +272,17 @@ def published_sections(
         raise BiStoreError("analysis_unknown", f"發佈版本裡沒有分析「{name}」")
     db = target.refresh_published() / DB_FILE
     names = _names(vault.reading_store(workspace, vault.dataset_name(vault_id)))
-    return _named(offered, slugs, db, registry, given, names, strict=name != "all")
+    sections = _named(offered, slugs, db, registry, given, names, strict=name != "all")
+    if name != "all":
+        # What the chat needs to propose a change to it (BI P1); not for `all`,
+        # which would flood the answer with code.
+        item = offered[name]
+        sections[0]["definition"] = {
+            key: item[key]
+            for key in ("kind", "code", "question", "params", "requires")
+            if item.get(key)
+        }
+    return sections
 
 
 def saved_name(workspace: Path, vault_id: str, name: str) -> str | None:

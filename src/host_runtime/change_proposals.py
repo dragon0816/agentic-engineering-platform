@@ -55,6 +55,7 @@ ProposalKind = Literal[
     "publish",
     "bi_analysis",
     "knowledge_binding",
+    "bi_analysis_edit",
 ]
 PROPOSALS_FILE = Path("proposals") / "change-proposals.json"
 #: Values that are permissions or approvals: never from chat.
@@ -89,6 +90,7 @@ PASTE_WHERE = {
     "publish": "Settings > Shared platform",
     "bi_analysis": "the Knowledge page",
     "knowledge_binding": "the Knowledge page",
+    "bi_analysis_edit": "the Knowledge page",
 }
 
 
@@ -108,6 +110,7 @@ class ChangeProposal(PendingRecord):
     # What Apply hands the writer, besides the current values it merges with.
     values: dict[str, JsonValue] = Field(default_factory=dict)
     rows: tuple[CardRow, ...] = ()
+    preview: str = Field(default="", max_length=20_000)
     reason: str = Field(default="", max_length=1_000)
     effects: tuple[str, ...] = ()
     link: CardLink | None = None
@@ -131,6 +134,7 @@ class Plan:
     effects: list[str] = field(default_factory=list)
     link: CardLink | None = None
     telegram_ok: bool = False
+    preview: str = ""
 
 
 def fingerprint(snapshot: Mapping[str, Any]) -> str:
@@ -241,7 +245,12 @@ class ChangeProposals:
                         "x, y}, and either sql (one read-only statement, as you ran it with "
                         "bi__query) or from_analysis {vault, slug} (a saved SQL analysis you "
                         "showed)}: it is only staged in that vault; commit, push and publish "
-                        "stay the person's. "
+                        "stay the person's; "
+                        "bi_analysis_edit {vault, slug (a saved analysis; bi__query with its "
+                        "slug shows its definition), and only what changes: title, question, "
+                        "chart, sql or script (the whole new code), params, requires ({} clears "
+                        "them)}: the card shows the before and after, a script runs only after "
+                        "Apply, and it is only staged; "
                         "knowledge_binding {action: bind|unbind, repo (a wiki knowledge "
                         "repository on this PC), purpose, boundaries}: this Agent reads the "
                         "repository's published version, after a restart of Agent Web. "
@@ -321,6 +330,7 @@ class ChangeProposals:
             title=plan.title,
             values=plan.values,
             rows=tuple(plan.rows),
+            preview=plan.preview,
             reason=reason.strip()[:1_000],
             effects=tuple(plan.effects),
             link=plan.link,
@@ -1272,18 +1282,42 @@ class ChangeProposals:
             planned = bi_chat_save.plan(self._bi_workspace(), given, snapshot)
         except bi_chat_save.Refused as refused:
             raise ProposalRefused(refused.message) from None
-        return Plan(
-            title=planned.title[:160],
-            values=planned.values,
-            rows=[CardRow(label=label, after=after[:400]) for label, after in planned.rows],
-            effects=planned.effects,
-            telegram_ok=False,
-        )
+        return self._bi_plan(planned)
 
     def _apply_bi_analysis(self, proposal: ChangeProposal) -> tuple[bool, str]:
         from host_runtime import bi_chat_save
 
         return bi_chat_save.apply(self._bi_workspace(), proposal.values)
+
+    def _now_bi_analysis_edit(self, values: Mapping[str, Any]) -> dict[str, Any]:
+        return self._now_bi_analysis(values)
+
+    def _plan_bi_analysis_edit(self, values: Mapping[str, Any], snapshot: dict[str, Any]) -> Plan:
+        from host_runtime import bi_chat_save
+
+        given = _only("bi_analysis_edit", values, bi_chat_save.EDIT_FIELDS)
+        try:
+            planned = bi_chat_save.plan_edit(self._bi_workspace(), given, snapshot)
+        except bi_chat_save.Refused as refused:
+            raise ProposalRefused(refused.message) from None
+        return self._bi_plan(planned)
+
+    def _apply_bi_analysis_edit(self, proposal: ChangeProposal) -> tuple[bool, str]:
+        return self._apply_bi_analysis(proposal)
+
+    @staticmethod
+    def _bi_plan(planned: Any) -> Plan:
+        return Plan(
+            title=planned.title[:160],
+            values=planned.values,
+            rows=[
+                CardRow(label=label, before=before, after=after)
+                for label, before, after in planned.rows
+            ],
+            effects=planned.effects,
+            telegram_ok=False,
+            preview=planned.preview,
+        )
 
     # knowledge_binding ----------------------------------------------------------
 
@@ -1346,6 +1380,7 @@ def draw(proposal: ChangeProposal) -> ActionCard:
         kind="change_proposal",
         title=proposal.title,
         rows=proposal.rows,
+        preview=proposal.preview,
         reason=proposal.reason,
         effects=proposal.effects,
         buttons=(
