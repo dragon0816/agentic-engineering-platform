@@ -8,6 +8,10 @@
   (`capabilities.bi_cards.analyses.run_python`);
 - `bi_analysis__propose`: the analysis to show the person; it is run and its
   chart checked against the result first, and a problem goes back to the model.
+  On a saved slug it is an edit (BI P2,
+  `docs/phases/BI_CHAT_EMBED_AND_PANEL_EDIT.md`), and what the model leaves out of
+  `question`, `params` and `requires` stays.
+- `bi_analysis__read`: one saved analysis in full.
 - `bi_analysis__propose_dashboard`: several analyses and the Dashboard's
   order (BI K1, `docs/phases/BI_CHAT_CHARTS_AND_DASHBOARD_SOURCES.md`), each run
   and checked like one proposal; the person applies them in one step.
@@ -67,7 +71,11 @@ Rules:
 - When the person asks for a dashboard (several charts and their order), call
   bi_analysis__propose_dashboard instead: the new analyses (each as for bi_analysis__propose) and
   `order`, the slugs top to bottom, which may also name analyses the knowledge base already has.
-  Analyses not in the order are hidden from the Dashboard, never deleted."""
+  Analyses not in the order are hidden from the Dashboard, never deleted.
+- To change a saved analysis (what it reads, how it computes, its parameters, its chart or title),
+  read it with bi_analysis__read and propose it under the same slug with the whole new code; a
+  dashboard's analyses may be saved ones too. question, params and requires you leave out stay;
+  {} clears params or requires. The person sees before and after, and applies it."""
 
 CHART = {
     "type": "object",
@@ -136,13 +144,28 @@ def harness_asker(
                 return _failed(error)
             return HostToolOutcome(status="succeeded", data=_shown(table))
 
+        def saved_one(slug: Any) -> dict[str, Any] | None:
+            found = analyses.listing(workspace, vault_id)["analyses"]
+            return next((a for a in found if a["slug"] == slug), None)
+
         def proposed_from(args: dict[str, Any]) -> dict[str, Any]:
-            proposed = {k: args.get(k) for k in ("title", "slug", "question", "kind", "code")}
+            proposed = {k: args.get(k) for k in ("title", "slug", "kind", "code")}
             proposed["chart"] = args.get("chart") or {"type": "table"}
-            for key in ("params", "requires"):
-                if args.get(key):
-                    proposed[key] = args[key]
+            current = saved_one(args.get("slug")) or {}
+            for key in ("question", "params", "requires"):
+                given = args[key] if key in args else current.get(key)
+                if given:
+                    proposed[key] = given
             return proposed
+
+        async def read(_c: RequestContext, args: dict[str, Any]) -> HostToolOutcome:
+            try:
+                current = saved_one(args.get("slug"))
+            except BiStoreError as error:
+                return _failed(error)
+            if current is None:
+                return _failed(BiStoreError("analysis_unknown", "沒有這個分析"))
+            return HostToolOutcome(status="succeeded", data=analyses.content(current))
 
         async def tried(proposed: dict[str, Any]) -> dict[str, Any]:
             _, value = analyses.checked(proposed)
@@ -156,8 +179,8 @@ def harness_asker(
 
         async def propose(_c: RequestContext, args: dict[str, Any]) -> HostToolOutcome:
             attempts[0] += 1
-            proposed = proposed_from(args)
             try:
+                proposed = proposed_from(args)
                 table = await tried(proposed)
             except BiStoreError as error:
                 problems[:] = [error.message]
@@ -253,6 +276,15 @@ def harness_asker(
         tools = [
             HostTool(
                 _tool(
+                    "bi_analysis__read",
+                    "Read one saved analysis in full: its code, chart, params and requires.",
+                    {"slug": {"type": "string"}},
+                    ["slug"],
+                ),
+                read,
+            ),
+            HostTool(
+                _tool(
                     "bi_analysis__sql",
                     "Run one read-only SQLite statement on the data.",
                     {"sql": {"type": "string"}},
@@ -273,7 +305,8 @@ def harness_asker(
             HostTool(
                 _tool(
                     "bi_analysis__propose",
-                    "Show the person an analysis (it is run first).",
+                    "Show the person an analysis (it is run first); on a saved slug, a change "
+                    "to that analysis, shown before and after.",
                     {
                         "reply": {"type": "string"},
                         "title": {"type": "string"},
@@ -292,8 +325,9 @@ def harness_asker(
             HostTool(
                 _tool(
                     "bi_analysis__propose_dashboard",
-                    "Show the person a dashboard: new analyses (each run first) and the order "
-                    "of the Dashboard, top to bottom; analyses not in the order are hidden.",
+                    "Show the person a dashboard: analyses, new or changes to saved ones (each "
+                    "run first), and the order of the Dashboard, top to bottom; analyses not in "
+                    "the order are hidden.",
                     {
                         "reply": {"type": "string"},
                         "analyses": {"type": "array", "items": analysis_schema},

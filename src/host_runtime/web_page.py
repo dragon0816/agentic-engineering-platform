@@ -13087,40 +13087,77 @@ async function biAnalyses(vaultId) {
   }
 }
 
+const BI_ANALYSIS_FIELDS = {title: "標題", question: "問題", kind: "類型", code: "SQL 或腳本",
+  chart: "圖表", params: "參數", requires: "需要的卡片類型與欄位"};
+
+function biChangedValue(value) {
+  if (value === null || value === undefined) return "（無）";
+  return typeof value === "string" ? value : JSON.stringify(value, null, 2);
+}
+
+function biAnalysisChanges(edit) {
+  // What an edit changes (BI P2): each field before and after.
+  return bh("div", "bi-analysis-changes", ...edit.changes.map((change) => bh("div", "",
+    bh("p", "bi-meta", BI_ANALYSIS_FIELDS[change.field] || change.field),
+    bh("div", "bi-ver-pair",
+      bh("div", "", bh("p", "bi-meta", "修改前"),
+        bh("pre", "bi-code", biChangedValue(change.before))),
+      bh("div", "", bh("p", "bi-meta", "修改後"),
+        bh("pre", "bi-code", biChangedValue(change.after)))))));
+}
+
 function biAnalysisSuggestion(session, turn, index) {
   const s = turn.suggestion;
   const parts = [bh("p", "", bh("strong", "", "AI："), s.reply)];
   if (s.dashboard) return parts.concat(biDashboardSuggestion(session, turn, index));
   if (!s.analysis) return parts;
-  parts.push(bh("p", "", bh("strong", "", s.analysis.title)),
-    bh("details", "", bh("summary", "", s.analysis.kind === "sql" ? "看 SQL" : "看腳本"),
-      bh("pre", "bi-code", s.analysis.code)));
-  if (s.preview) parts.push(biChart(s.preview, s.analysis.chart));
+  const edit = s.edit || null;
+  parts.push(bh("p", "", bh("strong", "", s.analysis.title),
+    edit ? "（修改現有分析 " + s.analysis.slug + "）" : ""));
+  if (edit) parts.push(biAnalysisChanges(edit));
+  parts.push(bh("details", "", bh("summary", "", s.analysis.kind === "sql" ? "看 SQL" : "看腳本"),
+    bh("pre", "bi-code", s.analysis.code)));
+  if (edit && edit.preview) {
+    parts.push(bh("div", "bi-ver-pair",
+      bh("div", "", bh("p", "bi-meta", "修改前的結果"), biChart(edit.preview, edit.before.chart)),
+      bh("div", "", bh("p", "bi-meta", "修改後的結果"),
+        s.preview ? biChart(s.preview, s.analysis.chart) : "")));
+  } else if (s.preview) {
+    parts.push(biChart(s.preview, s.analysis.chart));
+  }
   if (turn.applied) {
-    parts.push(bh("p", "bi-meta", "已存成分析（commit 並 push 後大家才會看到）。"));
+    parts.push(bh("p", "bi-meta", (edit ? "已套用修改" : "已存成分析")
+      + "（commit 並 push 後大家才會看到）。"));
+  } else if (edit && !edit.changes.length) {
+    parts.push(bh("p", "bi-meta", "這個提案和現有的分析一樣，沒有要改的。"));
   } else {
-    parts.push(bh("div", "bi-actions", biButton("存成分析", async () => {
+    parts.push(bh("div", "bi-actions", biButton(edit ? "套用修改" : "存成分析", async () => {
       const reply = await biCall("/api/bi/sessions/" + session.id + "/apply",
         {dataset: bi.analysisAi.dataset, turn: index});
       bi.analysisAi.session = reply.session;
       biBuildSessionLog("bi-b-ana-log", reply.session, biAnalysisSuggestion);
       biVaultState(await call("/api/bi/vaults/" + bi.verVault + "/status"));
-      biNotice(true, "已存成分析「" + s.analysis.title + "」；commit 並 push 後大家才會看到。");
-    }, "go", "把這個分析存進知識庫")));
+      biNotice(true, (edit ? "已套用修改「" : "已存成分析「") + s.analysis.title
+        + "」；commit 並 push 後大家才會看到。");
+    }, "go", edit ? "把這個修改存進知識庫" : "把這個分析存進知識庫")));
   }
   return parts;
 }
 
 function biDashboardSuggestion(session, turn, index) {
-  // A dashboard the analysis AI proposed (BI K1): the order, each new analysis with its
-  // preview, and one 「套用 Dashboard」 that stages them and the order together.
+  // A dashboard the analysis AI proposed (BI K1): the order, each analysis, new or changed
+  // (BI P3), with its preview, and one 「套用 Dashboard」 that stages them and the order together.
   const d = turn.suggestion.dashboard, previews = turn.suggestion.previews || {};
+  const edits = d.edits || {};
   const fresh = new Map(d.analyses.map((a) => [a.slug, a]));
   const parts = [bh("p", "", bh("strong", "", "Dashboard（由上到下）")),
     bh("ol", "bi-dash-order", ...d.order.map((slug) => bh("li", "",
-      fresh.has(slug) ? fresh.get(slug).title + "（新）" : slug + "（知識庫已有）")))];
+      fresh.has(slug) ? fresh.get(slug).title + (edits[slug] ? "（修改）" : "（新）")
+        : slug + "（知識庫已有）")))];
   for (const a of d.analyses) {
-    parts.push(bh("p", "", bh("strong", "", a.title)),
+    parts.push(bh("p", "", bh("strong", "", a.title), edits[a.slug] ? "（修改）" : ""));
+    if (edits[a.slug]) parts.push(biAnalysisChanges(edits[a.slug]));
+    parts.push(
       bh("details", "", bh("summary", "", a.kind === "sql" ? "看 SQL" : "看腳本"),
         bh("pre", "bi-code", a.code)));
     if (previews[a.slug]) parts.push(biChart(previews[a.slug], a.chart));
@@ -13136,7 +13173,7 @@ function biDashboardSuggestion(session, turn, index) {
     bi.analysisAi.session = reply.session;
     biBuildSessionLog("bi-b-ana-log", reply.session, biAnalysisSuggestion);
     biVaultState(await call("/api/bi/vaults/" + bi.verVault + "/status"));
-    biNotice(true, "已套用 Dashboard：" + d.analyses.length + " 個新分析與順序；"
+    biNotice(true, "已套用 Dashboard：" + d.analyses.length + " 個分析與順序；"
       + "commit 並 push 後大家才會看到。");
   }, "go", "把這些分析與 Dashboard 順序存進知識庫")));
   return parts;
@@ -14359,7 +14396,8 @@ async function biBuildOpenMethod(id, fill) {
 const BI_TOOL_NAME = {bi_skill__sources: "列出來源", bi_skill__read_source: "讀來源",
   bi_skill__try: "草稿試跑", bi_skill__compare: "比較試跑", bi_skill__test_cases: "擷取測試",
   bi__query: "查卡片", bi_skill__suggest: "提出建議", bi_analysis__sql: "SQL",
-  bi_analysis__python: "Python 腳本", bi_analysis__propose: "提出分析"};
+  bi_analysis__python: "Python 腳本", bi_analysis__propose: "提出分析",
+  bi_analysis__read: "讀取分析", bi_analysis__propose_dashboard: "提出 Dashboard"};
 
 function biSentLine(sent) {
   const parts = (sent.sources || []).map((s) => "來源「" + s.name + "」（" + s.classification

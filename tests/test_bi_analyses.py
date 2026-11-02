@@ -164,7 +164,7 @@ def test_the_analysis_ai_queries_proposes_and_fixes_on_the_harness(tmp_path: Pat
     ]  # fmt: skip
     assert {t.name for t in agent.requests[0].tools} == {
         "bi_analysis__sql", "bi_analysis__python", "bi_analysis__propose",
-        "bi_analysis__propose_dashboard",
+        "bi_analysis__propose_dashboard", "bi_analysis__read",
     }  # fmt: skip
     told = "\n".join(m.text for m in agent.requests[2].messages if m.role == "tool")
     assert "y" in told and "欄位" in told

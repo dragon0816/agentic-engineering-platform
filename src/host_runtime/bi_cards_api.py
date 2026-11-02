@@ -697,6 +697,7 @@ def _decide_proposal(
 #: Store refusals that are conflicts with the current state (409).
 CONFLICTS = {
     "stale_edit",
+    "analysis_stale",
     "cards_changed",
     "run_trial",
     "run_closed",
