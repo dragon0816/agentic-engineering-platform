@@ -38,8 +38,9 @@ from contextlib import contextmanager
 from pathlib import Path, PurePath
 from typing import Any
 
-from capabilities.bi_cards import convert, schema_versions
+from capabilities.bi_cards import convert, schema_versions, vault_sources
 from capabilities.bi_cards.store import BiStore, BiStoreError, now
+from knowledge.repo.repository import RepoError
 
 STAGING_FILE = "staging.sqlite"
 SOURCES_DIR = "sources"
@@ -212,9 +213,11 @@ class Staging:
         content_base64: Any = None,
         media_type: Any = None,
         classification: Any = None,
+        folder: Any = None,
         actor: str,
     ) -> dict[str, Any]:
-        """Keep a copy of an uploaded source; the same bytes are kept once."""
+        """Keep a copy of an uploaded source; the same bytes are kept once. In a
+        vault it is also staged for the shared folder, in `folder`."""
         self.store.refuse_write()
         label = str(name or "").strip()
         if not label or len(label) > 200 or PurePath(label).name != label or "\\" in label:
@@ -238,6 +241,7 @@ class Staging:
         known = self._source_by_digest(digest)
         if known is not None:
             return {**known, "already": True}
+        self._refuse_size(len(data))
         # Converted before anything is kept: a PDF without text is refused.
         markdown: str | None = None
         failure: BiStoreError | None = None
@@ -261,7 +265,11 @@ class Staging:
             temporary = target.with_name(f".{target.name}.{uuid.uuid4().hex[:8]}.tmp")
             temporary.write_bytes(data)
             schema_versions.replace(temporary, target)
-            source_id = uuid.uuid4().hex[:12]
+            source_id = (
+                vault_sources.stable_id(digest)
+                if self.store.vault_id is not None
+                else uuid.uuid4().hex[:12]
+            )
             db.execute(
                 "INSERT INTO sources (id, name, sha256, media_type, size, origin, stored, "
                 "classification, by, at) VALUES (?, ?, ?, ?, ?, 'upload', ?, ?, ?, ?)",
@@ -294,7 +302,52 @@ class Staging:
             from capabilities.bi_cards import search_index  # its passages (BI vault V3)
 
             search_index.sync_quietly(self.store)
+        self._share(source_id, folder)
         return {**(self.source(source_id) or {}), "already": False}
+
+    def _vault_repo(self) -> Any:
+        """This vault's repository; None for a dataset only on this PC, or while
+        its shared folder is out of reach (the source stays here until `share`)."""
+        if self.store.vault_id is None:
+            return None
+        from capabilities.bi_cards import vault  # it imports this module's readers
+
+        try:
+            target = vault.Vault(self.store.workspace, self.store.vault_id)
+        except BiStoreError:
+            return None
+        return target.repo if target.reachable else None
+
+    def _refuse_size(self, size: int) -> None:
+        repo = self._vault_repo()
+        if repo is not None:
+            vault_sources.refuse_over_limit(repo.working_units(), size)
+
+    def _share(self, source_id: str, folder: Any) -> None:
+        repo = self._vault_repo()
+        if repo is None:
+            return
+        try:
+            with repo.lock:
+                vault_sources.stage_source(repo, self, source_id, folder)
+        except RepoError as failure:
+            raise BiStoreError(failure.code, failure.message) from None
+
+    def stored_file(self, source_id: str) -> Path:
+        with self._db() as db:
+            row = db.execute("SELECT stored FROM sources WHERE id = ?", (source_id,)).fetchone()
+        if row is None:
+            raise BiStoreError("source_unknown", "找不到這個來源")
+        return self.dir / str(row["stored"])
+
+    def markdown_file(self, source_id: str, rev: int) -> Path:
+        with self._db() as db:
+            row = db.execute(
+                "SELECT stored FROM markdown WHERE source_id = ? AND rev = ?", (source_id, rev)
+            ).fetchone()
+        if row is None:
+            raise BiStoreError("markdown_rev_unknown", f"這個來源沒有第 {rev} 版 Markdown")
+        return self.dir / str(row["stored"])
 
     def copy_sources_from(self, other: Staging) -> dict[str, int]:
         """Copy `other`'s sources here with their files, Markdown revisions and
@@ -551,6 +604,13 @@ class Staging:
                 "SELECT * FROM markdown WHERE source_id = ? AND rev = ?",
                 (source_id, current_rev + 1),
             ).fetchone()
+        repo = self._vault_repo()
+        if repo is not None:
+            try:
+                with repo.lock:
+                    vault_sources.stage_revision(repo, self, source_id, current_rev + 1)
+            except RepoError as failure:
+                raise BiStoreError(failure.code, failure.message) from None
         return self._revision(row), False
 
     def markdown_sources(self) -> list[tuple[str, int]]:

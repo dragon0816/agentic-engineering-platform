@@ -398,7 +398,10 @@ def test_a_reviewed_run_commits_once_with_its_evidence(tmp_path: Path) -> None:
     assert committed["applied"]["created"] == 2
     again = _ok(_call(a, "POST", f"/api/bi/runs/{run['id']}/commit", {"dataset": dataset}))
     assert again.get("already") is True
-    assert _status(a, vault_id)["ahead"] == 1
+    # The source travels in a commit of its own, the run in exactly one more.
+    local = vault.Vault(a, vault_id).repo.local_commits()
+    assert [item["purpose"] for item in local][0] == "加入來源：t.csv"
+    assert _status(a, vault_id)["ahead"] == 2
     _push(a, vault_id)
     drive.deliver("a", "b", vault_id)
     _sync(b, vault_id)

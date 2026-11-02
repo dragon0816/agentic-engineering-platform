@@ -45,7 +45,14 @@ from contextlib import closing, contextmanager
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import analyses, catalog, schema_doc, vault_checks, vault_skills
+from capabilities.bi_cards import (
+    analyses,
+    catalog,
+    schema_doc,
+    vault_checks,
+    vault_skills,
+    vault_sources,
+)
 from capabilities.bi_cards.schema import Registry
 from capabilities.bi_cards.store import (
     DATASET_RE,
@@ -102,7 +109,16 @@ CREATE TABLE IF NOT EXISTS vault_keys (
 );
 """
 TABLES = ("cards", "fields", "history", "proposals", "meta", "imports", "evidence", "vault_keys")
-UNIT_PREFIXES = ("meta:", "card:", "field:", "evidence:", "proposal:", "import:", "decision:")
+UNIT_PREFIXES = (
+    "meta:",
+    "card:",
+    "field:",
+    "evidence:",
+    "proposal:",
+    "import:",
+    "decision:",
+    vault_sources.PREFIX,
+)
 
 #: The purpose of the next commit made by a capture (「確認匯入」), when the
 #: caller has one; otherwise it is drafted.
@@ -182,6 +198,8 @@ class BiType:
             return None
         if not key.startswith(UNIT_PREFIXES):
             return "not a BI unit"
+        if key.startswith(vault_sources.PREFIX):
+            return vault_sources.unit_problem(value)
         if key.startswith("meta:"):
             return None if isinstance(value, str) else "meta value must be text"
         if key.startswith("evidence:"):
@@ -207,10 +225,11 @@ class BiType:
             and repo_engine.canonical(before.get(k)) != repo_engine.canonical(after.get(k))
         )
         notes = [f"新增 {added} 張卡、刪除 {removed} 張卡、改了 {changed} 個欄位"]
+        too_large = vault_sources.over_limit(before, after)
         if self.benchmark is None:
-            return CheckReport(blocking=[], notes=notes)
+            return CheckReport(blocking=too_large, notes=notes)
         gate = self.benchmark(before, after)
-        return CheckReport(blocking=list(gate.blocking), notes=[*notes, *gate.notes])
+        return CheckReport(blocking=[*too_large, *gate.blocking], notes=[*notes, *gate.notes])
 
 
 BI_TYPE = BiType()
@@ -841,7 +860,9 @@ class Vault:
                     if k.startswith("import:") and v and k not in before
                 ]
                 if imports:
-                    self.repo.commit(_PURPOSE.get() or _draft(imports, changed))
+                    vault_sources.commit_split(
+                        self.repo, _PURPOSE.get() or _draft(imports, changed)
+                    )
             self.rebuild()
 
     def _registry(self, ref: str | None = None) -> Registry:
@@ -1186,6 +1207,9 @@ def unit_label(units: Mapping[str, Any], key: str) -> str:
         return "schema 版本"
     if kind == "skill":
         return f"skill「{rest}」"
+    if kind == "source":
+        value = units.get(key)
+        return f"來源「{value.get('name') if isinstance(value, dict) else rest[:8]}」"
     if kind == "check":
         return vault_checks.label(key, units)
     if kind == "analysis":
@@ -1215,7 +1239,7 @@ def pending(workspace: Path, vault_id: str) -> dict[str, Any]:
 def commit(workspace: Path, vault_id: str, given: Mapping[str, Any]) -> dict[str, Any]:
     vault = _vault(workspace, vault_id)
     with vault.lock, _repo_errors():
-        record = vault.repo.commit(str(given.get("purpose") or ""))
+        record = vault_sources.commit_split(vault.repo, str(given.get("purpose") or ""))
     vault.rebuild()
     return {"commit": record}
 
@@ -1327,7 +1351,7 @@ def skills(workspace: Path, vault_id: str) -> dict[str, Any]:
     folders = sorted(
         p.relative_to(vault.folder).as_posix()
         for p in (vault.folder / "sources").rglob("*")
-        if p.is_dir()
+        if p.is_dir() and vault_sources.MARKDOWN_DIR not in p.relative_to(vault.folder).parts
     )
     return {
         "skills": found,

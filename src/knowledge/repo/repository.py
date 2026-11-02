@@ -41,7 +41,7 @@ import sqlite3
 import threading
 import time
 import uuid
-from collections.abc import Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from contextlib import closing
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -995,9 +995,15 @@ class Repository:
             path.unlink()
 
     def commit(
-        self, purpose: str, *, kind: str = "change", restores: str | None = None
+        self,
+        purpose: str,
+        *,
+        kind: str = "change",
+        restores: str | None = None,
+        only: Callable[[str], bool] | None = None,
     ) -> dict[str, Any]:
-        """Turn the uncommitted changes into one local commit with its purpose."""
+        """Turn the uncommitted changes into one local commit with its purpose;
+        with `only`, just the units and files it picks, the rest stay uncommitted."""
         purpose = _checked_purpose(purpose)
         if kind not in KINDS:
             raise RepoError("kind_invalid", "kind 無效")
@@ -1007,13 +1013,24 @@ class Repository:
             ops = [
                 {"unit": key, "value": value, "base": value_hash(before.get(key))}
                 for key, value in sorted(pending["sets"].items())
-                if canonical(before.get(key)) != canonical(value)
+                if canonical(before.get(key)) != canonical(value) and (only is None or only(key))
             ]
-            files = [{"path": p, **item} for p, item in sorted(pending["files"].items())]
+            files = [
+                {"path": p, **item}
+                for p, item in sorted(pending["files"].items())
+                if only is None or only(p)
+            ]
             if not ops and not files:
                 raise RepoError("nothing_to_commit", "沒有尚未 commit 的改動")
             record = self._new_local(purpose, kind, ops, files, restores)
-            self._save_pending({"sets": {}, "files": {}})
+            self._save_pending(
+                {"sets": {}, "files": {}}
+                if only is None
+                else {
+                    "sets": {k: v for k, v in pending["sets"].items() if not only(k)},
+                    "files": {k: v for k, v in pending["files"].items() if not only(k)},
+                }
+            )
             return record
 
     def _new_local(

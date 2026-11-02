@@ -27,7 +27,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from capabilities.bi_cards import catalog, extract, names, runs, source_markdown
+from capabilities.bi_cards import catalog, extract, names, runs, source_markdown, vault_sources
 from capabilities.bi_cards.schema import Registry, norm_key
 from capabilities.bi_cards.staging import Staging, parse_kind
 from capabilities.bi_cards.store import BiStoreError
@@ -115,7 +115,7 @@ def start(
         reg = catalog.for_store(staging.store)
         schema = (reg, reg.ref)
     reg = schema[0]
-    rules = _vault_rules(staging, folder, skill_draft)
+    rules = _vault_rules(staging, folder or _folder_of(staging, source), skill_draft)
     if rules is not None and types in (None, []) and rules["card_types"]:
         types = [t for t in rules["card_types"] if t in reg.types] or None
     scope = _types(reg, types)
@@ -163,6 +163,12 @@ def start(
         lambda: _work(workspace, dataset, run_id, model, alias, only=None),
     )
     return runs.run_view(staging, run_id)
+
+
+def _folder_of(staging: Staging, source: dict[str, Any]) -> str | None:
+    """The folder a vault's source was added to (the skills apply by it)."""
+    repo = staging._vault_repo()
+    return None if repo is None else vault_sources.folder_of(repo.working_units(), source["sha256"])
 
 
 def _vault_rules(staging: Staging, folder: Any, draft: Any = None) -> dict[str, Any] | None:

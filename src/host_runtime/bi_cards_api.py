@@ -339,6 +339,7 @@ def _route(
             content_base64=given.get("content_base64"),
             media_type=given.get("media_type"),
             classification=given.get("classification"),
+            folder=given.get("folder"),
             actor=who,
         )
         return 200, {"ok": True, "source": source}
