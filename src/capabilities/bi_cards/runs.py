@@ -415,6 +415,10 @@ def registry_for(staging: Staging, run: dict[str, Any]) -> Registry:
     draft trial (`draft:<id>@rev<n>`, BI ingest phase 6), else the dataset's."""
     ref = str(run.get("schema_ref") or "")
     if ref.startswith(schema_versions.DRAFT_REF_PREFIX):
+        # Session A's unsaved draft, tried on the harness (`BI_BUILD_FLOW.md` §5).
+        tried = (staging.layout(run["id"]) or {}).get("trial_schema")
+        if tried is not None:
+            return Registry(tried, "draft")
         draft_id, rev = schema_versions.parse_draft_ref(ref)
         return schema_versions.draft_registry(staging.store.workspace, draft_id, rev)[0]
     return catalog.for_store(staging.store)

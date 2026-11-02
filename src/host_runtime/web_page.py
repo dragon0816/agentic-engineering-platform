@@ -14078,7 +14078,7 @@ async function biBuildSessA(reload) {
     box.append(bh("label", "", check, source.name + "（" + source.classification + "）"));
   }
   if (!bi.build.sources.length) box.append(bh("p", "bi-meta", "還沒有來源；只送草稿與目標。"));
-  await biBuildAiState("bi-b-sa-model", "草稿目前的類型與欄位、你的目標");
+  await biBuildAiState("bi-b-sa-model", "草稿目前的類型與欄位、你的目標", "schema");
   if (!draft) {
     bi.build.sessA = null;
   } else if (reload || !bi.build.sessA || bi.build.sessA.target_ref !== "schema-draft:"
@@ -14092,7 +14092,7 @@ async function biBuildSessA(reload) {
 }
 
 const BI_VERDICT = {reuse: ["照用目前的 schema", "good"], extend: ["擴充這份 schema", "accent"],
-  new: ["需要新的 schema（另建資料集）", "warn"]};
+  new: ["需要新的 schema（另建資料集）", "warn"], answer: ["回答問題，沒有建議", "dim"]};
 
 function biBuildApplySchema(session, turn, index) {
   const s = turn.suggestion, r = s.result, verdict = BI_VERDICT[s.verdict] || [s.verdict, "dim"];
@@ -14131,10 +14131,10 @@ el("bi-b-sa-send").addEventListener("click", async () => {
   const message = el("bi-b-sa-msg").value.trim();
   if (!message) { el("bi-b-sa-msg").focus(); return; }
   const button = el("bi-b-sa-send"); button.disabled = true;
-  biStatus("bi-b-sa-status", "loading", "AI 正在看草稿與樣本…（一次模型呼叫）");
+  biStatus("bi-b-sa-status", "loading", "Agent 正在看來源與卡片、試草稿…（可能要幾分鐘）");
   try {
     // Without a model nothing is made: no draft is created for a message that cannot be sent.
-    await biBuildAiState("bi-b-sa-model", "草稿目前的類型與欄位、你的目標");
+    await biBuildAiState("bi-b-sa-model", "草稿目前的類型與欄位、你的目標", "schema");
     if (!bi.build.ai.available) {
       biStatus("bi-b-sa-status", "error", "沒有可用的模型：" + bi.build.ai.message + "。");
       return;
@@ -14307,6 +14307,13 @@ async function biBuildAiState(target, extra, harness) {
   if (!state.available) {
     line.className = "bi-warn";
     line.append("目前沒有可用的模型（model_unavailable）：" + state.message + "。");
+    return;
+  }
+  if (harness === "schema") {
+    // Session A on the Agent's harness (docs/phases/BI_BUILD_FLOW.md §5).
+    line.append("由 Agent（和對話同一套 harness）處理：它會自己讀來源、看卡片、在草稿的副本上試改動"
+      + "（看差異、驗證錯誤、對既有卡片的影響，試跑用模型 " + state.model + "，不寫入卡片），"
+      + "再提出建議。它不能改草稿、發布或升級；送出的資料：" + extra + "。");
     return;
   }
   if (harness) {
@@ -14495,7 +14502,9 @@ const BI_TOOL_NAME = {bi_skill__sources: "列出來源", bi_skill__read_source: 
   bi_skill__try: "草稿試跑", bi_skill__compare: "比較試跑", bi_skill__test_cases: "擷取測試",
   bi__query: "查卡片", bi_skill__suggest: "提出建議", bi_analysis__sql: "SQL",
   bi_analysis__python: "Python 腳本", bi_analysis__propose: "提出分析",
-  bi_analysis__read: "讀取分析", bi_analysis__propose_dashboard: "提出 Dashboard"};
+  bi_analysis__read: "讀取分析", bi_analysis__propose_dashboard: "提出 Dashboard",
+  bi_schema__sources: "列出來源", bi_schema__read_source: "讀來源", bi_schema__cards: "看卡片",
+  bi_schema__try: "試草稿", bi_schema__suggest: "提出建議"};
 
 function biSentLine(sent) {
   const parts = (sent.sources || []).map((s) => "來源「" + s.name + "」（" + s.classification

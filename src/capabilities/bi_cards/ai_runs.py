@@ -91,6 +91,7 @@ def start(
     checks: list[dict[str, Any]] | None = None,
     folder: Any = None,
     skill_draft: Any = None,
+    trial_schema: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Start the AI path on a text source; the run is `extracting` until the
     background job ends. A method run (phase 5) gives its `method_ref` and
@@ -98,7 +99,9 @@ def start(
     its `draft:` ref). In a vault the source's `folder` picks the extract
     skill (knowledge repositories R3); the run keeps the skills' text, so a
     retry reads the same rules. `skill_draft` (a `knowledge.repo.skills.Skill`,
-    BI T2) is a rule being tried, used in place of the vault's for this run."""
+    BI T2) is a rule being tried, used in place of the vault's for this run.
+    `trial_schema` is an unsaved schema being tried by Session A on the harness,
+    kept with the run so a retry reads the same (`BI_BUILD_FLOW.md` §5)."""
     staging = Staging(workspace, dataset)
     staging.store.refuse_write()
     source = staging.source(source_id)
@@ -150,6 +153,7 @@ def start(
             "failures": [],
             "warnings": [],
             **({"skills": rules} if rules is not None else {}),
+            **({"trial_schema": trial_schema} if trial_schema is not None else {}),
         },
     )
     staging.set_status(run_id, "extracting")

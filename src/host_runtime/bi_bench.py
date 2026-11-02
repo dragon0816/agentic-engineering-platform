@@ -232,6 +232,9 @@ class BenchRuntime:
     skill_asker_for: Callable[[str, str, str], Any] | None = None
     #: (vault dataset, actor) -> the analysis AI's turn on the harness (BI T3).
     analysis_asker_for: Callable[[str, str], Any] | None = None
+    #: (dataset, schema draft id, actor) -> Session A's turn on the harness
+    #: (`docs/phases/BI_BUILD_FLOW.md` §5, `host_runtime.bi_schema_agent`).
+    schema_asker_for: Callable[[str, str, str], Any] | None = None
 
 
 def agent_ask(gateway: Any, workspace: Path, vault_id: str, actor: str, namespace: str) -> Ask:

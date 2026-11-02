@@ -39,11 +39,10 @@ from capabilities.bi_cards import (
 from capabilities.bi_cards.capability import QueryHandler
 from capabilities.bi_cards.staging import Staging
 from capabilities.bi_cards.store import VAULT_PREFIX, BiStore, BiStoreError
-from common.execution import Failure, RequestContext
+from common.execution import RequestContext
 from host_runtime import bi_bench, bi_cards_tools, bi_harness
-from models.contracts import ModelMessage, ModelTool
+from models.contracts import ModelMessage
 
-MAX_SOURCE_PIECE = 6000
 MAX_TRIAL_TEXT = 6000
 TURN_SECONDS = 15 * 60
 TOOL_CALLS = 40
@@ -84,24 +83,8 @@ CHANGES_SCHEMA = {
 }
 
 
-def _tool(
-    name: str, description: str, properties: dict[str, Any], required: list[str]
-) -> ModelTool:
-    return ModelTool(
-        name=name,
-        description=description,
-        input_contract=f"host.{name}.v1",
-        input_schema={
-            "type": "object",
-            "properties": properties,
-            "required": required,
-            "additionalProperties": False,
-        },
-    )
-
-
-def _failed(code: str, message: str) -> HostToolOutcome:
-    return HostToolOutcome(status="failed", failure=Failure(code=code, message=message))
+_tool = bi_harness.tool
+_failed = bi_harness.failed
 
 
 def _summary(staging: Staging, run_id: str) -> str:
@@ -142,36 +125,6 @@ def harness_asker(
         captured: dict[str, Any] = {}
         attempts = [0]
         problems: list[str] = []
-
-        async def list_sources(_c: RequestContext, _a: dict[str, Any]) -> HostToolOutcome:
-            staging = Staging(workspace, dataset)
-            rows = [
-                {"id": s["id"], "name": s["name"], "classification": s["classification"]}
-                for s in staging.sources()[:40]
-            ]
-            return HostToolOutcome(status="succeeded", data={"sources": rows})
-
-        async def read_source(_c: RequestContext, args: dict[str, Any]) -> HostToolOutcome:
-            staging = Staging(workspace, dataset)
-            source = staging.source(str(args.get("source_id") or ""))
-            if source is None:
-                return _failed("source_unknown", "沒有這個來源")
-            try:
-                ai_runs.check_classification(ai, source["classification"])
-            except BiStoreError as error:
-                return _failed(error.code, error.message)
-            text = sessions._source_text(staging, source)
-            start = max(0, int(args.get("start") or 0))
-            piece = text[start : start + MAX_SOURCE_PIECE]
-            return HostToolOutcome(
-                status="succeeded",
-                data={
-                    "name": source["name"],
-                    "chars": len(text),
-                    "start": start,
-                    "text": sessions.fenced("Source text:", piece),
-                },
-            )
 
         def trial(args: Mapping[str, Any]) -> tuple[str, str]:
             source_id = str(args.get("source_id") or "")
@@ -278,19 +231,7 @@ def harness_asker(
             ),
         )
         tools = [
-            HostTool(
-                _tool("bi_skill__sources", "List the knowledge base's sources.", {}, []),
-                list_sources,
-            ),  # fmt: skip
-            HostTool(
-                _tool(
-                    "bi_skill__read_source",
-                    "Read part of a source's Markdown (6000 characters from `start`).",
-                    {"source_id": {"type": "string"}, "start": {"type": "integer"}},
-                    ["source_id"],
-                ),
-                read_source,
-            ),
+            *bi_harness.source_tools("bi_skill", workspace, dataset, ai),
             HostTool(
                 _tool(
                     "bi_skill__try",

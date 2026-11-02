@@ -98,6 +98,8 @@ def test_session_panels_in_a_browser(
         "web_ai_runtime",
         lambda _web: AiRuntime(model=lambda: model["pair"], background=background),
     )
+    # The one-call path of the sessions (the harness turn: test_bi_schema_agent).
+    monkeypatch.setattr(bi_cards_api, "web_bench_runtime", lambda _web: None)
     web, server, _recorder, _ = served
     workspace = web.runtime.layout.workspace_root
     shots = Path(os.environ.get("AEP_UI_SHOTS") or SHOTS)

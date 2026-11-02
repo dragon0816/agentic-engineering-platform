@@ -14,6 +14,10 @@ applied. 「套用到草稿」 writes a new revision with source `ai`. A schema 
 JSON and model-written code is never run. Publishing and moving a dataset to
 the new version stay the separate buttons of phase 2.
 
+In Agent Web the turn runs on the Agent harness with read-only tools instead of
+one model call (`asker`, `host_runtime.bi_schema_agent`,
+`docs/phases/BI_BUILD_FLOW.md` §5); the answer is checked the same way.
+
 The session is kept with the dataset whose sources it reads (`sessions.py`),
 targeting `schema-draft:<draft id>`.
 """
@@ -21,21 +25,31 @@ targeting `schema-draft:<draft id>`.
 from __future__ import annotations
 
 import copy
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
 from capabilities.bi_cards import ai_runs, catalog, schema_versions, sessions
+from capabilities.bi_cards.schema import Registry
 from capabilities.bi_cards.staging import Staging
-from capabilities.bi_cards.store import BiStoreError, now
+from capabilities.bi_cards.store import BiStore, BiStoreError, now
 
 SUGGESTION_CONTRACT = "aep.bi.schema_suggestion.v1"
 TARGET_PREFIX = "schema-draft:"
-VERDICTS = ("reuse", "extend", "new")
+#: `answer`: the person only asked a question (the harness turn; no changes).
+VERDICTS = ("reuse", "extend", "new", "answer")
 OPS = ("add_type", "add_field", "change_field", "add_enum_value", "add_alias", "rename_field")
 #: What `change_field` may set (the field's name changes only by `rename_field`).
 CHANGEABLE = set(catalog.FIELD_KEYS) - {"name"}
 MAX_OPS = 40
 MAX_EXAMPLES = 5
+MAX_SAMPLES = 10
+#: A turn on the Agent harness: (the context, the turns so far, the check of a
+#: suggestion) -> (what came back, the model alias, the tool calls made).
+Asker = Callable[
+    [str, list[dict[str, Any]], Callable[[dict[str, Any]], list[str]]],
+    tuple[sessions.Asked, str, list[dict[str, Any]]],
+]
 
 SYSTEM = """You help a knowledge maintainer design the schema of a BI knowledge base: the
 card types and their fields. You have no tools and change nothing; the person reads your
@@ -182,6 +196,53 @@ def outcome(document: Any, ops: Any) -> dict[str, Any]:
     }
 
 
+def _sample_problems(reg: Registry, sample: Any) -> list[str]:
+    named = sample.get("entity_type") if isinstance(sample, dict) else sample
+    if not isinstance(sample, dict) or named not in reg.types:
+        return [f"there is no type {named!r}"]
+    entity = reg.types[named]
+    given = sample.get("fields")
+    fields: dict[str, Any] = given if isinstance(given, dict) else {}
+    found = []
+    for name, value in fields.items():
+        item = entity.get(name)
+        if item is None:
+            found.append(f"{entity.name} has no field {name}")
+            continue
+        text = "; ".join(str(v) for v in value) if isinstance(value, list) else str(value)
+        found.extend(f"{name}: {message}" for _, message in reg.normalize(item, text)[1])
+    found.extend(
+        f"{item.name} is required"
+        for item in entity.fields
+        if item.required and item.name not in fields and item.name not in entity.naming
+    )
+    return found
+
+
+def tried(store: BiStore, document: Any, ops: Any, samples: Any) -> dict[str, Any]:
+    """What the operations would do, written nowhere: the result's diff and
+    errors, the impact on the dataset's cards and example cards checked against
+    it. `document` is the tried schema, for a trial run."""
+    result = outcome(document, ops)
+    found = {key: result[key] for key in ("document", "diff", "errors", "problems", "valid")}
+    if not result["valid"]:
+        return found
+    normalised, _ = catalog.validate(result["document"])
+    assert normalised is not None
+    reg = Registry(normalised, "draft")
+    if store.exists:
+        found["impact"] = schema_versions.impact(store, catalog.for_store(store), reg)
+    found["samples"] = [
+        {
+            "entity_type": s.get("entity_type") if isinstance(s, dict) else None,
+            "name": s.get("name") if isinstance(s, dict) else None,
+            "problems": _sample_problems(reg, s),
+        }
+        for s in (samples if isinstance(samples, list) else [])[:MAX_SAMPLES]
+    ]
+    return found
+
+
 # -- what the model sees -----------------------------------------------------------
 
 
@@ -229,6 +290,8 @@ def _shape(answer: dict[str, Any]) -> list[str]:
         problems.append(f"`verdict` must be one of {', '.join(VERDICTS)}")
     if answer.get("changes") is not None and not isinstance(answer.get("changes"), list):
         problems.append("`changes` must be a list of operations")
+    if answer.get("verdict") == "answer" and answer.get("changes"):
+        problems.append("`changes` must stay empty when the verdict is answer")
     return problems
 
 
@@ -274,8 +337,11 @@ def session_turn(
     source_ids: Any,
     goal: Any,
     actor: str,
+    asker: Asker | None = None,
 ) -> dict[str, Any]:
-    """One turn of Session A; returns the session with the new turns."""
+    """One turn of Session A; returns the session with the new turns. With
+    `asker` the turn runs on the Agent harness with tools; without it, one model
+    call."""
     staging = Staging(workspace, dataset)
     staging.store.refuse_write()
     session = sessions.load(staging, session_id, "schema")
@@ -287,7 +353,6 @@ def session_turn(
     samples, sent_sources = sessions.excerpts(staging, source_ids)
     for sent in sent_sources:
         ai_runs.check_classification(ai, sent["classification"])
-    model, alias = sessions.model_or_refuse(ai)
     cards = len(staging.store.card_rows()) if staging.store.exists else 0
     context = (
         f"The person's goal: {session['goal'] or '(not given)'}\n"
@@ -310,15 +375,20 @@ def session_turn(
         ]
 
     turns = [*session["turns"], {"role": "user", "text": text}]
-    asked = sessions.ask(
-        model,
-        alias,
-        system=SYSTEM,
-        context=context,
-        turns=turns,
-        contract=SUGGESTION_CONTRACT,
-        check=problems,
-    )
+    tools: list[dict[str, Any]] = []
+    if asker is not None:
+        asked, alias, tools = asker(context, turns, problems)
+    else:
+        model, alias = sessions.model_or_refuse(ai)
+        asked = sessions.ask(
+            model,
+            alias,
+            system=SYSTEM,
+            context=context,
+            turns=turns,
+            contract=SUGGESTION_CONTRACT,
+            check=problems,
+        )
     suggestion = None
     if asked.answer is not None and asked.failure is None and not _shape(asked.answer):
         # Shown even when problems are left after the last attempt: the panel
@@ -350,6 +420,7 @@ def session_turn(
         "cap": sessions.EXCERPT_CAP,
         "draft_rev": number,
         "goal": bool(session["goal"]),
+        **({"tools": tools, "harness": True} if asker is not None else {}),
     }
     session["source_ids"] = [s["id"] for s in sent_sources]
     return sessions.record(

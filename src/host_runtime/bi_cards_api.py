@@ -576,6 +576,9 @@ def _session_write(
         applied = methods.apply_suggestion(workspace, dataset, session_id, given.get("turn"), who)
         return 200, {"ok": True, **applied}
     if session["kind"] == "schema" and action == "turns":
+        # On the Agent harness with read-only tools where Agent Web offers it.
+        schema_for = getattr(bench, "schema_asker_for", None)
+        draft_id = session["target_ref"][len(schema_session.TARGET_PREFIX) :]
         turned = schema_session.session_turn(
             workspace,
             dataset,
@@ -585,6 +588,7 @@ def _session_write(
             source_ids=given.get("source_ids"),
             goal=given.get("goal"),
             actor=who,
+            asker=schema_for(dataset, draft_id, actor) if schema_for is not None else None,
         )
         return 200, {"ok": True, "session": turned}
     if session["kind"] == "analysis" and action == "turns":
@@ -1224,7 +1228,7 @@ def web_bench_runtime(web: Any) -> Any:
             daemon=True,
         ).start()
 
-    from host_runtime import bi_analysis_agent, bi_skill_agent
+    from host_runtime import bi_analysis_agent, bi_schema_agent, bi_skill_agent
 
     gateway = web.runtime.agent.gateway
     namespace = web.namespace or "engineering"
@@ -1239,6 +1243,9 @@ def web_bench_runtime(web: Any) -> Any:
         ),
         analysis_asker_for=lambda dataset, actor: bi_analysis_agent.harness_asker(
             gateway, workspace, dataset, actor, namespace
+        ),
+        schema_asker_for=lambda dataset, draft_id, actor: bi_schema_agent.harness_asker(
+            gateway, workspace, dataset, draft_id, ai, actor, namespace
         ),
     )
 
