@@ -9,11 +9,11 @@ each step that calls for one: data import + convert → schema and skills (AI) +
 testing. Design `docs/phases/BI_BUILD_FLOW.md` (its §12 lists tasks, commits and tests); decision `docs/DECISIONS.md`
 2026-11-02; contract `docs/CONTRACTS.md` "The BI build flow"; rows in `docs/TASKS.md`.
 
-**Where.** Branch `bi-build-flow` in the Paseo worktree `bi-build-flow` (own `.venv`), on local `main` `a7629341`; not
-pushed, not merged. The BI orchestrator integrates it with the parallel branches and runs the one full suite.
+**Where.** Branch `bi-build-flow` in the Paseo worktree `bi-build-flow` (own `.venv`), rebased onto `bi-chat-embed-edit`
+`80c28c25` (workers D and C); not pushed, not merged. The BI orchestrator integrates it with the parallel branches and runs the one full suite.
 
 **Done and verified.** B1–B7, plus the overflow in `test_bi_vault_ui`. Before each commit: `ruff format --check .`,
-`ruff check .`, `mypy src tests` clean, with one exception recorded in `docs/TASKS.md` (`5559c9f4`, fixed in `fe6a5c02`).
+`ruff check .`, `mypy src tests` clean, with one exception recorded in `docs/TASKS.md` (`97cf00fe`, fixed in `5055018f`).
 Targeted tests pass; **the full suite has not been run on this branch** (the orchestrator's call).
 
 **Live acceptance (B8).** Done on the orchestrator's go, about 115 model calls, four capped runs: every AI step ran and
@@ -22,8 +22,9 @@ a run reached published `v1`. Evidence: `docs/phases/BI_BUILD_FLOW.md` §13. BI'
 **Open.**
 - **BI-only host, a decision.** `web_ai_runtime` takes BI's model from the Knowledge handler, which `build_runtime` makes
   only when a wiki Knowledge asset is bound. A host with a model but no such asset gets 「沒有可用的模型」 in BI, so AI
-  ingest and the panels are refused. Whether the owner's host binds one was not checked (its `host.json` is off limits). Not
-  changed here: it concerns which model and data approval BI uses.
+  ingest and the panels are refused. The owner's host does bind one (the orchestrator reports `restart_web` showing
+  `knowledge[0]` version 1.0.3), so BI has its model there. The case stays open for hosts with no wiki asset: the
+  orchestrator is taking it to the owner. Not changed here.
 - **Unexplained.** One `test_bi_vault_ui` run with a very long `--basetemp` failed waiting for 'TestSolution' in
   `#bi-b-an-list`, and passed on the rerun. Cause unknown.
 - The new `must_not` guidance for the question AI was not re-tested with the real model.
@@ -33,12 +34,12 @@ a run reached published `v1`. Evidence: `docs/phases/BI_BUILD_FLOW.md` §13. BI'
 - After a convert the person ticks the source to work on; nothing is picked for them.
 - Sources stay on one PC: the open R6 owner decision, unchanged.
 - `test_bi_vault_ui::test_vault_panel_and_dashboard_in_a_browser` overflowed only for a `--basetemp` with no hyphen near
-  the end: the notice's path had nowhere to break. Page fixed (`2db5a22b`); the test now uses such a folder name itself.
+  the end: the notice's path had nowhere to break. Page fixed (`384a74e9`); the test now uses such a folder name itself.
 
 **Found by repeating the browser tests, all fixed** (`docs/phases/BI_BUILD_FLOW.md` §11): a bench run dying when Windows refused to replace a report being read; a bench report that stopped polling; the question AI's slow read of every analysis. After them, the vault-steps and whole-flow tests passed 4 repeats together.
 
-**Next actions.** (1) Orchestrator: after D and C are combined, ask for the rebase of this branch onto that result. (2)
-Integrate and run the one full suite. (3) Decide the BI-only host.
+**Next actions.** (1) Orchestrator: the one full suite on the integrated result. (2) Owner: decide the host with no wiki
+asset.
 
 ## BI chat embedding and AI panel edits (2026-11-02, Claude Code)
 

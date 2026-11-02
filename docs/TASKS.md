@@ -4179,25 +4179,25 @@ Design `docs/phases/VOICE_INPUT.md` (owner decisions 2026-11-01 in `docs/DECISIO
 Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; branch `bi-build-flow`; Claude Code
 (worker A) under the BI orchestrator.
 
-- [x] 2026-11-02, Claude Code: B1 design and decision (`103d937c`).
-- [x] 2026-11-02, Claude Code: B2 (`d8861b5d`): converting a dataset to a vault copies its sources to the vault's local
+- [x] 2026-11-02, Claude Code: B1 design and decision (`bc35f84c`).
+- [x] 2026-11-02, Claude Code: B2 (`ac900646`): converting a dataset to a vault copies its sources to the vault's local
   staging (a gap found here); step 1 says 轉檔 and 轉成 vault apart. `test_bi_vault` convert tests.
-- [x] 2026-11-02, Claude Code: B3 (`866db953`): Session A on the Agent harness with read-only tools, trying an unsaved
+- [x] 2026-11-02, Claude Code: B3 (`f0a71cf6`): Session A on the Agent harness with read-only tools, trying an unsaved
   draft (`trial_schema`). `test_bi_schema_agent` (4); `test_bi_sessions_ui` now names the one-call path it tests.
-- [x] 2026-11-02, Claude Code: B4 (`dd6deb2c`): `bi_skill__benchmark`, working vs a scratch copy with the draft's trial
+- [x] 2026-11-02, Claude Code: B4 (`c84ca577`): `bi_skill__benchmark`, working vs a scratch copy with the draft's trial
   candidates. `test_bi_skill_benchmark` (2).
-- [x] 2026-11-02, Claude Code: B5 (`5559c9f4`, `fe6a5c02`): session kind `questions`, proposals checked against the cards
-  and analyses, ticked questions staged. `test_bi_questions_session` (4). `5559c9f4` was committed with one mypy error
-  (an unused ignore), fixed in `fe6a5c02`.
-- [x] 2026-11-02, Claude Code: B6 (`41157891`): browser test of ingest into a vault, K1 and K2,
+- [x] 2026-11-02, Claude Code: B5 (`97cf00fe`, `5055018f`): session kind `questions`, proposals checked against the cards
+  and analyses, ticked questions staged. `test_bi_questions_session` (4). `97cf00fe` was committed with one mypy error
+  (an unused ignore), fixed in `5055018f`.
+- [x] 2026-11-02, Claude Code: B6 (`a0ba92f9`): browser test of ingest into a vault, K1 and K2,
   `test_bi_vault_steps_ui`. It found two page bugs, both fixed: an error notice on a vault with no benchmark run, and
   step 3 not reading the vault again after an ingest.
-- [x] 2026-11-02, Claude Code: B7 (`947e78a1`): the whole flow in one browser run with scripted models,
+- [x] 2026-11-02, Claude Code: B7 (`4439cb39`): the whole flow in one browser run with scripted models,
   `test_bi_build_flow_ui`.
-- [x] 2026-11-02, Claude Code: the overflow in `test_bi_vault_ui` (`2db5a22b`). Cause: the notice with the folder path
+- [x] 2026-11-02, Claude Code: the overflow in `test_bi_vault_ui` (`384a74e9`). Cause: the notice with the folder path
   had nowhere to break, so the page passed or failed on the spelling of `--basetemp` (a hyphen near the end gave a break).
   The page now wraps it, and the test uses a folder name with no breaks, so it no longer depends on the temp path.
 - [x] 2026-11-02, Claude Code: a bench report stuck after a finished run, found by repeating the flow test, fixed in the page (`biBench`), with a test in `test_bi_vault_steps_ui`. Nine flow runs in a row pass after it; two earlier failures before the fix were not captured in detail.
 - [x] 2026-11-02, Claude Code: a bench run dying for good when Windows refused to replace a report being read (a T1 bug), fixed with a test in `test_bi_vault_bench`; the question AI's read of every analysis cut from about 51 s to about 12 s, kept until something changes.
-- [x] 2026-11-02, Claude Code: B8 live acceptance with the real model, four capped runs, about 115 calls, on the orchestrator's go (`docs/phases/BI_BUILD_FLOW.md` §13). Every AI step ran and a run reached published `v1`. BI's model was wired directly, as these hosts had no wiki Knowledge asset. It found: an empty run gave no reason (fixed, `Say why an AI run made no candidates`) and the accept-all race wrote 1 of 4 cards (fixed, `d0ab75a6`).
+- [x] 2026-11-02, Claude Code: B8 live acceptance with the real model, four capped runs, about 115 calls, on the orchestrator's go (`docs/phases/BI_BUILD_FLOW.md` §13). Every AI step ran and a run reached published `v1`. BI's model was wired directly, as these hosts had no wiki Knowledge asset. It found: an empty run gave no reason (fixed, `Say why an AI run made no candidates`) and the accept-all race wrote 1 of 4 cards (fixed, `0f2be3ea`).
 - [ ] Orchestrator or owner: decide the BI-only host (a model but no wiki Knowledge asset gives BI no model).

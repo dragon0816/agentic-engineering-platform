@@ -148,13 +148,13 @@ OneDrive/SharePoint folders. Evidence goes into `docs/TASKS.md`; no secret is pr
 
 | Task | Commit | Test |
 |---|---|---|
-| B1 | `103d937c` | |
-| B2 | `d8861b5d` | `test_bi_vault.py::test_converting_a_dataset_takes_its_sources_along` |
-| B3 | `866db953` | `test_bi_schema_agent.py` |
-| B4 | `dd6deb2c` | `test_bi_skill_benchmark.py` |
-| B5 | `5559c9f4`, `fe6a5c02` | `test_bi_questions_session.py` |
-| B6 | `41157891` | `test_bi_vault_steps_ui.py` |
-| B7 | `947e78a1` | `test_bi_build_flow_ui.py` |
+| B1 | `bc35f84c` | |
+| B2 | `ac900646` | `test_bi_vault.py::test_converting_a_dataset_takes_its_sources_along` |
+| B3 | `f0a71cf6` | `test_bi_schema_agent.py` |
+| B4 | `c84ca577` | `test_bi_skill_benchmark.py` |
+| B5 | `97cf00fe`, `5055018f` | `test_bi_questions_session.py` |
+| B6 | `a0ba92f9` | `test_bi_vault_steps_ui.py` |
+| B7 | `4439cb39` | `test_bi_build_flow_ui.py` |
 | B8 | live acceptance: §13 | |
 
 A dataset still needs its `bi.sqlite` before it can be converted (`vault.convert` refuses `dataset_unknown`
