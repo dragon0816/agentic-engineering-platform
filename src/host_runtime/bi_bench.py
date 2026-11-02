@@ -28,7 +28,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 
-from capabilities.bi_cards import ai_runs, benchmark, vault, vault_checks
+from capabilities.bi_cards import ai_runs, benchmark, schema_versions, vault, vault_checks
 from capabilities.bi_cards.ai_runs import AiRuntime
 from capabilities.bi_cards.capability import QueryHandler
 from capabilities.bi_cards.staging import Staging
@@ -70,7 +70,8 @@ def _save(workspace: Path, vault_id: str, report: dict[str, Any]) -> None:
     target = folder / f"{report['run_id']}.json"
     temporary = target.with_suffix(".tmp")
     temporary.write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
-    temporary.replace(target)
+    # The page polls this file; Windows refuses a replace while it is open.
+    schema_versions.replace(temporary, target)
 
 
 def _side(question: Question, reply: Mapping[str, Any]) -> dict[str, Any]:

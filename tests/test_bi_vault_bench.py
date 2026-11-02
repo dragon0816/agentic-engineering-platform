@@ -154,6 +154,36 @@ def test_a_run_needs_checks_and_one_failing_case_is_reported(tmp_path: Path) -> 
     assert report["extract"] is None
 
 
+def test_a_report_being_read_does_not_stop_the_run(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Windows refuses to replace a file the page's polling has open. A run that died
+    # on that stayed 「測試中」 for ever and refused every later run as `bench_running`.
+    _drive, vault_id, _dataset, a, _b = _two_pcs(tmp_path)
+    _ok(_save(a, vault_id, QUESTION))
+    real = Path.replace
+    refused: list[Path] = []
+
+    def busy(self: Path, target: Any) -> Path:
+        if self.suffix == ".tmp" and len(refused) < 2:
+            refused.append(self)
+            raise PermissionError(5, "being read", str(target))
+        return real(self, target)
+
+    monkeypatch.setattr(Path, "replace", busy)
+    report = bi_bench.run(
+        a,
+        vault_id,
+        ask=lambda _q, _s: {"ok": True, "answer": "IEEE"},
+        extract=lambda _c: [],
+        actor="alice",
+    )
+    assert len(refused) == 2
+    assert report["status"] == "finished"
+    latest = bi_bench.latest(a, vault_id)
+    assert latest is not None and latest["status"] == "finished"
+
+
 def test_a_question_is_asked_through_the_agent_on_the_chosen_version(tmp_path: Path) -> None:
     config, layout = ready(tmp_path)
     skill_packs.install_bundle(layout, None, shipped=shipped())
