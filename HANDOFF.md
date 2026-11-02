@@ -16,6 +16,8 @@ askable`, `propose_change` kind `knowledge_binding`, page button); `7f255dbf` V4
 V3 `aep_bi_query` behind `assistant_bi_query`, off by default (see `docs/TASKS.md`).
 K2 from a chosen file, with no Atlas running (see `docs/TASKS.md`).
 
+**Verification (final, on `2c537bf5`).** `ruff format --check .`, `ruff check .`, `mypy src tests` (917 files) clean; `test_bi_atlas_file_import`, `test_bi_atlas_import`, `test_assistant_bi_query`, `test_vault_asking_binding`, `test_vault_asking_e2e`, `test_r6_precheck`, `test_coding_agents_web`: 70 passed, 1 skipped (`AEP_ATLAS_REPO` not set).
+
 **Verification (on `b8fe7f61`).** `ruff format --check .`, `ruff check .`, `mypy src tests` (916 files) clean. On the V3
 code: `test_assistant_bi_query` (with a headless browser step), `test_assistant_tools`, `test_coding_agents_web`,
 `test_coding_agent_setup`, `test_conversation_backends`, `test_host_wiring`, `test_host_models`,
