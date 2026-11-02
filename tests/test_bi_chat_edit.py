@@ -117,6 +117,16 @@ def test_what_is_not_given_stays(web: AgentWeb) -> None:
     assert _working(web)[f"analysis:{SLUG}"] == {**unit, "title": "新標題"}
 
 
+def test_a_chart_changes_only_the_keys_given(web: AgentWeb) -> None:
+    # Live acceptance 2026-11-02: asked for a line chart with x and y unchanged, the real
+    # model gave {"type": "line"}, and replacing the whole chart refused it.
+    card = _card(_propose(web, "bi_analysis_edit", _edit(chart={"type": "line"})))
+    assert _rows(card)["Chart"]["after"] == '{"type": "line", "x": "region", "y": "accounts"}'
+    assert web.decide_card(card["card_id"], "apply")["ok"] is True
+    chart = _working(web)[f"analysis:{SLUG}"]["chart"]
+    assert chart == {"type": "line", "x": "region", "y": "accounts"}
+
+
 def test_long_code_is_clipped_in_its_cell_and_whole_in_the_preview(web: AgentWeb) -> None:
     long_sql = (
         "SELECT json_extract(value, '$') AS domain, count(*) AS accounts FROM card_values "

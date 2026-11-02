@@ -229,9 +229,15 @@ def plan_edit(workspace: Path, given: Mapping[str, Any], snapshot: Mapping[str, 
     if sql and script:
         raise Refused("Give either sql or script, not both.")
     edited: dict[str, Any] = {**unit, "slug": slug}
-    for key in ("title", "question", "chart", "params", "requires"):
+    for key in ("title", "question", "params", "requires"):
         if given.get(key) is not None:
             edited[key] = given[key]
+    # Only what changes, also inside the chart: `{"type": "line"}` keeps its x and y.
+    chart = given.get("chart")
+    if isinstance(chart, Mapping):
+        edited["chart"] = {**(unit.get("chart") or {}), **chart}
+    elif chart is not None:
+        edited["chart"] = chart
     if sql:
         edited |= {"kind": "sql", "code": str(sql)}
     elif script:
