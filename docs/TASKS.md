@@ -4070,6 +4070,21 @@ s-k-20261011T102952` (not published).
     list); routes `atlas-dashboards` and `atlas-import` (dry run with token, then stage `meta:dashboard`);
     the Knowledge-page section. Tests `test_bi_atlas_import` (9, against a stand-in Atlas serving the golden
     bytes). The page part is checked by the script parse test only (no browser step).
+  - [x] 2026-11-02, Claude Code: BI design `docs/phases/BI_CHAT_EMBED_AND_PANEL_EDIT.md` and the owner's decisions
+    (`docs/DECISIONS.md` 2026-11-02): the chat embeds Atlas; the AI edits existing panels; AEP never writes Atlas
+    dashboards. Gaps read and listed in its §2.
+  - [x] 2026-11-02, Claude Code: BI P1 and P4, the general chat edits a saved analysis: `propose_change` kind
+    `bi_analysis_edit` (web only; only what changes; each field Now and After; the whole code in the card's
+    preview, also for `bi_analysis`; a script the chat wrote runs only after Apply), `bi__query` gives one
+    analysis's `definition`. A published edit moves only that analysis's feed digest. Tests `test_bi_chat_edit`.
+  - [x] 2026-11-02, Claude Code: BI P2 and P3, the analysis AI edits for real: `bi_analysis__read`, what the model
+    leaves out stays, the session's slug enforced, before and after on the page with both charts, 「套用修改」,
+    apply refused when the analysis moved on (`analysis_stale`) or a new slug was saved meanwhile
+    (`analysis_exists`; T3 overwrote it silently before); a dashboard may hold edits. Tests
+    `test_bi_analysis_edit` (9).
+  - [x] 2026-11-02, Claude Code: BI P5, a real-browser test of the approval card (and the Knowledge page's changes
+    drawn without markup injection), in `test_bi_chat_edit`.
+  - [ ] BI E1-E5: Atlas embedded in the chat; waits for the Atlas embed contract (branch `atlas-embed`).
 
 ## Voice input: Telegram voice and the Agent Web microphone (2026-11-01)
 

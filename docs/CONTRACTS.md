@@ -6333,6 +6333,38 @@ charts inline in the chat; Dashboards from the analysis AI or an Atlas import" (
   ≤ 2,000,000 bytes. Atlas's goldens: `tests/fixtures/atlas_dashboard_golden/` (Atlas `49600737`), drift check
   `scripts/check_atlas_dashboard_golden.py --atlas <repo>`.
 
+## BI edits of a saved analysis (P1, P2, P3, 2026-11-02)
+
+Design `docs/phases/BI_CHAT_EMBED_AND_PANEL_EDIT.md`; decisions `docs/DECISIONS.md` 2026-11-02 "BI: the chat embeds
+Atlas; the AI edits existing panels; AEP never writes Atlas dashboards".
+
+- **Comparison**: `analyses.CONTENT` = `title, question, kind, code, chart, params, requires`;
+  `analyses.content(value)` drops those that are empty; `analyses.changes(before, after)` =
+  `[{"field", "before", "after"}]` in that order; an edit's `base` = `analyses.digest(analyses.content(unit))`.
+- **Chat edit**: `propose_change` kind `bi_analysis_edit` (in `KINDS`, not in `TELEGRAM_KINDS`; Apply in Telegram
+  answers `web_only`). Values (alias `dataset` → `vault`): `vault`, `slug` (saved in the working copy), then only
+  what changes: `title`, `question`, `chart`, `sql` or `script` (the whole code; `kind` follows), `params`,
+  `requires` (`{}` clears). Refused back to the model: an unknown slug or vault, both `sql` and `script`, no change,
+  SQL that the guard denies, a chart naming columns the result lacks. Card rows `Knowledge base`, then each changed
+  field (`Title`, `Question`, `Kind`, `SQL` or `Script`, `Chart`, `Parameters`, `Requires`; Now and After, clipped to
+  400 characters ending `…`), then `Result on the working copy` (`<n> rows: <first three>`; Now may be `Does not run
+  now: …`; After is `Not run yet: the script runs when you press Apply` for a script the chat wrote). `preview` = a
+  unified diff of the code (`--- now`, `+++ after`), empty when the code stays. Stored values, fingerprint and Apply
+  as `bi_analysis`.
+- **`ChangeProposal.preview`** (string, at most 20,000 characters, default empty; additive): passed to the card's
+  existing `preview`. `bi_analysis` fills it with the whole SQL when it is longer than a cell.
+- **`bi__query` `analysis=<slug>`** (not `all`): the section gains `definition` `{kind, code, question?, params?,
+  requires?}` of the published version.
+- **Analysis AI**: harness tool `bi_analysis__read {slug}` → the analysis's `content`. `bi_analysis__propose` and
+  `bi_analysis__propose_dashboard` on a saved slug are edits; `question`, `params`, `requires` left out keep their
+  value (`{}` clears). In a session on `analysis:<slug>` another slug goes back to the model. The suggestion
+  (`aep.bi.analysis_suggestion/v1`, additive) gains `edit: {before: <content>, base, changes, preview: <table of
+  the saved version, ≤ 200 rows, or null>}`; absent means new. A dashboard suggestion's `dashboard` gains `edits:
+  {slug: {before, base, changes}}`.
+- **Apply** (`POST /api/bi/sessions/<id>/apply`), checked before anything is staged: `analysis_stale` (409, the saved
+  analysis is no longer `base`, or is gone), `analysis_exists` (400, the suggestion said new and the slug is saved
+  now), `analysis_unchanged` (400, one analysis with no changes).
+
 ## Voice input: Telegram voice and the Agent Web microphone (owner 2026-11-01)
 
 Design `docs/phases/VOICE_INPUT.md`; decisions `docs/DECISIONS.md` 2026-11-01. Voice is an input adapter: a
