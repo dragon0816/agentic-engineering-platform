@@ -4194,3 +4194,7 @@ Design `docs/phases/BI_BUILD_FLOW.md`, decision `docs/DECISIONS.md` 2026-11-02; 
   step 3 not reading the vault again after an ingest.
 - [x] 2026-11-02, Claude Code: B7 (`947e78a1`): the whole flow in one browser run with scripted models,
   `test_bi_build_flow_ui`.
+- [x] 2026-11-02, Claude Code: the overflow in `test_bi_vault_ui` (`2db5a22b`). Cause: the notice with the folder path
+  had nowhere to break, so the page passed or failed on the spelling of `--basetemp` (a hyphen near the end gave a break).
+  The page now wraps it, and the test uses a folder name with no breaks, so it no longer depends on the temp path.
+- [ ] B8 live acceptance with real models: blocked, nothing listens on the template's `127.0.0.1:4000` gateway.

@@ -145,6 +145,7 @@ OneDrive/SharePoint folders. Evidence goes into `docs/TASKS.md`; no secret is pr
 | B5 | `5559c9f4`, `fe6a5c02` | `test_bi_questions_session.py` |
 | B6 | `41157891` | `test_bi_vault_steps_ui.py` |
 | B7 | `947e78a1` | `test_bi_build_flow_ui.py` |
+| B8 | live acceptance not run: no reachable model endpoint yet (`HANDOFF.md`) | |
 
 A dataset still needs its `bi.sqlite` before it can be converted (`vault.convert` refuses `dataset_unknown`
 otherwise, and the page hides the button): someone starting from nothing creates the dataset or the vault first.
