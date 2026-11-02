@@ -6140,3 +6140,24 @@ Addendum to the same day's "BI: the chat embeds Atlas". Follows Atlas's `docs/AE
   a stored answer can outlive Atlas. Rejected: asking once when the tool runs.
 - **The page frames loopback addresses only, and never its own origin.** Rejected: any address the preference holds
   (a same-origin frame with these sandbox flags could remove its sandbox).
+
+## 2026-11-02: The BI build flow, end to end (owner goal; implementation choices, Claude Code)
+
+Owner goal relayed by the BI orchestrator; design in `docs/phases/BI_BUILD_FLOW.md`. Owner decisions: real models
+are allowed for the final live acceptance, only in a temp workspace with its own Agent Web; "sources on one PC" stays
+an open R6 question and is not changed here. The choices below are the implementer's:
+
+- **Converting a dataset to a vault copies its sources** (files, Markdown revisions, classification) into the vault's
+  local staging on this PC. Without it, upload → Markdown → convert leaves steps 2 and 3 with nothing to read. Nothing
+  reaches the shared folder, so R6 stays open. Rejected: asking the person to upload again; moving the sources (the
+  dataset must stay as it was); copying runs and sessions (they refer to the dataset's own cards and drafts).
+- **Session A moves to the harness as T2 and T3 did, read-only.** Rejected: more context in the one model call (it
+  still could not try its draft). The one-call path stays where no harness exists.
+- **`bi_skill__benchmark` compares the working copy with a scratch copy holding the draft's trial candidates**,
+  because a draft skill changes only what is extracted next. The scratch copy is deleted after the call, and the result
+  goes to the model only: it never satisfies the push check. Rejected: running T1 unchanged (the working cards do not
+  depend on the draft, so it would show no effect); saving a T1 report (it could unlock a push on a run that did not
+  test the pushed units).
+- **Benchmark questions from AI are a session kind `questions`, applied per ticked question**, and a `must` term that
+  no working card or saved analysis result contains is refused back to the model. Rejected: staging on proposal
+  (nothing changes before the person applies); allowing unsupported terms (a question nothing can pass).
