@@ -153,6 +153,10 @@ def test_harness_and_storage_code_outside_the_package_do_not_import_bi_types() -
         "host_runtime/bi_atlas_import.py",
         # BI E2: Atlas panels and dashboards framed in the chat.
         "host_runtime/bi_atlas_embed.py",
+        # The BI build flow: the harness turn, Session A and the question AI.
+        "host_runtime/bi_harness.py",
+        "host_runtime/bi_schema_agent.py",
+        "host_runtime/bi_questions_agent.py",
         # BI dataset sharing: the platform re-reads every published snapshot.
         "control_plane/bi_datasets.py",
     }
