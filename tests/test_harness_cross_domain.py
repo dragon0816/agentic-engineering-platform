@@ -689,6 +689,55 @@ def test_g1_a_refusal_before_anything_ran_is_not_a_harness_verdict() -> None:
 # --------------------------------------------------------------------------
 
 
+class _BrokenCatalog:
+    def __init__(self, version: Any) -> None:
+        self.version = version
+
+    def live_version(self, _asset: Any) -> Any:
+        if isinstance(self.version, Exception):
+            raise self.version
+        return self.version
+
+
+def _with_catalog(harness: KnowledgeHarness, version: Any) -> KnowledgeHarness:
+    """The harness's gateway with a Bridge whose Knowledge handler reads `version`."""
+    handler = SimpleNamespace(catalog=_BrokenCatalog(version))
+    installed = SimpleNamespace(get=lambda _identity: SimpleNamespace(handler=handler))
+    harness.runtime.agent.gateway.bridge = SimpleNamespace(installed=installed)
+    return harness
+
+
+def test_the_repository_line_is_added_only_when_it_can_be_read() -> None:
+    good = record("The CMP180 supports the 5G NR standard [1].")
+
+    def answer(harness: KnowledgeHarness) -> dict[str, Any]:
+        result = ask(harness)
+        assert result["ok"] is True, result
+        assert result["harness"]["phase"] == "validated"
+        assert "5G NR" in result["answer"]
+        return result
+
+    # A harness with no Bridge in reach, and one with nothing installed, still answer.
+    bare = answer(knowledge_harness(FakeBridge(good)))
+    assert "資料來源：知識庫" not in bare["answer"]
+    empty = knowledge_harness(FakeBridge(good))
+    empty.runtime.agent.gateway.bridge = SimpleNamespace(
+        installed=SimpleNamespace(get=lambda _identity: None)
+    )
+    assert "資料來源：知識庫" not in answer(empty)["answer"]
+    # An unreadable version adds nothing and fails nothing.
+    for broken in (OSError("gone"), "not json", '["not", "an object"]', 7):
+        result = answer(_with_catalog(knowledge_harness(FakeBridge(good)), broken))
+        assert "資料來源：知識庫" not in result["answer"], broken
+    # A fixed version has no line; a live one names what was read.
+    fixed = answer(_with_catalog(knowledge_harness(FakeBridge(good)), None))
+    assert "資料來源：知識庫" not in fixed["answer"]
+    live = answer(
+        _with_catalog(knowledge_harness(FakeBridge(good)), '{"tag": "v1", "commit": "abc"}')
+    )
+    assert f"資料來源：知識庫 {RS.name} 發佈版本 v1" in live["answer"]
+
+
 def test_g2_knowledge_answers_the_persons_sentence_not_the_models() -> None:
     bridge = FakeBridge(record("The CMP180 supports the 5G NR standard [1]."))
     harness = knowledge_harness(bridge)

@@ -411,13 +411,20 @@ class KnowledgeHarness:
 
     def _repository_line(self, asset: Any) -> str:
         """Under an answer from a knowledge repository, the repository and the
-        version read: the asset's own version never moves when one is published."""
-        installed = self.runtime.agent.gateway.bridge.installed.get(KNOWLEDGE_QUERY_SPEC.identity)
-        catalog = getattr(getattr(installed, "handler", None), "catalog", None)
-        version = None if catalog is None else catalog.live_version(asset)
-        if version is None:
+        version read: the asset's own version never moves when one is published.
+        Only a citation: when it cannot be read, the answer stands without it."""
+        try:
+            bridge = getattr(self.runtime.agent.gateway, "bridge", None)
+            installed = (
+                None if bridge is None else bridge.installed.get(KNOWLEDGE_QUERY_SPEC.identity)
+            )
+            catalog = getattr(getattr(installed, "handler", None), "catalog", None)
+            version = None if catalog is None else catalog.live_version(asset)
+            if version is None:
+                return ""
+            return "\n\n" + repo_engine.source_line(asset.name, json.loads(version))
+        except Exception:  # noqa: BLE001 - a citation line never fails a validated answer
             return ""
-        return "\n\n" + repo_engine.source_line(asset.name, json.loads(version))
 
     @staticmethod
     def _knowledge_partial_preview(record: dict[str, Any], assessment: dict[str, Any]) -> str:
