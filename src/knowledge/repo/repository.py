@@ -238,6 +238,19 @@ def replace_retrying(source: Path, target: Path) -> None:
             time.sleep(0.05 * (attempt + 1))
 
 
+def _copy_atomic(source: Path, path: Path) -> None:
+    """Copy a file by stream through a temporary file and a rename: an original
+    may be too large to hold in memory."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.parent / f".{path.name}.{uuid.uuid4().hex[:8]}.tmp"
+    try:
+        shutil.copyfile(source, temporary)
+    except OSError:
+        temporary.unlink(missing_ok=True)
+        raise
+    replace_retrying(temporary, path)
+
+
 def _write_new(path: Path, data: bytes) -> None:
     """Write a file that must not exist yet (records are never replaced)."""
     if path.exists():
@@ -623,7 +636,9 @@ class Repository:
         return connection
 
     def _stored_sha(self, db: sqlite3.Connection, rel: str) -> str | None:
-        """The hash of a repository file, cached by size and modification time."""
+        """The hash of a repository file, cached by size and modification time;
+        None while it is missing or cannot be read (a cloud-only file OneDrive
+        cannot bring down now, or one a drive client holds): its commit waits."""
         path = self.folder / rel
         try:
             stat = path.stat()
@@ -632,7 +647,10 @@ class Repository:
         row = db.execute("SELECT * FROM file_hashes WHERE path = ?", (rel,)).fetchone()
         if row and row["size"] == stat.st_size and row["mtime_ns"] == stat.st_mtime_ns:
             return str(row["sha256"])
-        sha = _file_sha(path)
+        try:
+            sha = _file_sha(path)
+        except OSError:
+            return None
         db.execute(
             "INSERT OR REPLACE INTO file_hashes VALUES (?, ?, ?, ?)",
             (rel, stat.st_size, stat.st_mtime_ns, sha),
@@ -950,7 +968,7 @@ class Repository:
         with self.lock:
             sha = _file_sha(source)
             existing = self.folder / path
-            if existing.is_file() and _file_sha(existing) != sha:
+            if existing.is_file() and self._sha_or_refuse(existing, path) != sha:
                 raise RepoError(
                     "path_taken", f"{path} 已經有另一份內容；檔案寫入後不能修改，請換檔名"
                 )
@@ -1108,13 +1126,25 @@ class Repository:
         """Copy a staged file into the folder (before any commit names it)."""
         target = self.folder / item["path"]
         if target.is_file():
-            if _file_sha(target) != item["sha256"]:
+            if self._sha_or_refuse(target, item["path"]) != item["sha256"]:
                 raise RepoError("path_taken", f"{item['path']} 已經有另一份內容")
             return
         source = self.work / "files" / item["path"]
         if not source.is_file() or _file_sha(source) != item["sha256"]:
             raise RepoError("file_missing", f"工作區裡的 {item['path']} 不見了或被改過")
-        _write_atomic(target, source.read_bytes())
+        _copy_atomic(source, target)
+
+    @staticmethod
+    def _sha_or_refuse(path: Path, rel: str) -> str:
+        """The hash of a repository file about to be relied on; one that cannot
+        be read now is said in words, never as a crash."""
+        try:
+            return _file_sha(path)
+        except OSError:
+            raise RepoError(
+                "file_unreadable",
+                f"現在讀不到 {rel}；確認 OneDrive 已同步，並設為一律保留在此裝置上",
+            ) from None
 
     def _max_clock(self) -> int:
         clocks = [c.clock for c in self.scan().commits]

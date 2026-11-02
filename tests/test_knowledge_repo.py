@@ -15,6 +15,7 @@ from typing import Any
 import pytest
 
 from knowledge.repo import CheckReport, RepoError, Repository, create, join, register_type
+from knowledge.repo import repository as engine
 
 
 class NoteType:
@@ -223,6 +224,62 @@ def test_tags_never_move(pcs: tuple[Repository, Repository]) -> None:
     with pytest.raises(RepoError) as failure:
         a.publish("nope")
     assert failure.value.code == "tag_unknown"
+
+
+def test_a_file_that_cannot_be_read_waits_and_is_applied_once_it_can(
+    pcs: tuple[Repository, Repository], tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A cloud-only file OneDrive cannot bring down: the sync does not fail."""
+    alice, bob = pcs
+    source = tmp_path / "report.pdf"
+    source.write_bytes(b"fictional report")
+    alice.stage_file("sources/report.pdf", source)
+    alice.stage("doc", "1")
+    alice.commit("加入報告")
+    alice.push()
+    real = engine._file_sha
+
+    def unreadable(path: Path) -> str:
+        if path.name == "report.pdf":
+            raise OSError("the cloud file provider is not running")
+        return real(path)
+
+    monkeypatch.setattr(engine, "_file_sha", unreadable)
+    result = bob.sync()
+    assert result["waiting"][0]["files"] == ["sources/report.pdf"]
+    assert bob.status()["waiting"][0]["files"] == ["sources/report.pdf"]
+    assert bob.units() == {}
+    # Relying on it says so in words.
+    other = tmp_path / "other.pdf"
+    other.write_bytes(b"other bytes")
+    with pytest.raises(RepoError) as refused:
+        bob.stage_file("sources/report.pdf", other)
+    assert refused.value.code == "file_unreadable"
+    monkeypatch.setattr(engine, "_file_sha", real)
+    assert bob.sync()["waiting"] == []
+    assert bob.units() == {"doc": "1"}
+
+
+def test_a_pushed_file_is_copied_by_stream_not_held_in_memory(
+    pcs: tuple[Repository, Repository], tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    alice, _ = pcs
+    source = tmp_path / "large.pdf"
+    source.write_bytes(b"x" * (3 << 20))
+    alice.stage_file("sources/large.pdf", source)
+    alice.stage("doc", "1")
+    alice.commit("加入大檔")
+    real = Path.read_bytes
+
+    def no_whole_file(path: Path) -> bytes:
+        assert path.name != "large.pdf", "read whole into memory"
+        return real(path)
+
+    monkeypatch.setattr(Path, "read_bytes", no_whole_file)
+    assert alice.push()["status"] == "pushed"
+    monkeypatch.undo()
+    assert (alice.folder / "sources" / "large.pdf").read_bytes() == source.read_bytes()
+    assert [p.name for p in (alice.folder / "sources").iterdir() if p.suffix == ".tmp"] == []
 
 
 def test_files_wait_for_sync_and_are_checked(
