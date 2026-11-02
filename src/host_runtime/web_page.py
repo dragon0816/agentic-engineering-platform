@@ -3642,8 +3642,9 @@ function answerAtlasEmbed(session, embed, files) {
   const fallBack = () => {
     const note = document.createElement("p");
     note.className = "atlas-embed-note";
-    note.append(text("Atlas 沒有執行，這裡顯示 AEP 的圖表；開啟 Atlas 可看到完整版本。"));
     const file = files.find((item) => item.path === embed.fallback);
+    note.append(text(file ? "Atlas 沒有執行，這裡顯示 AEP 的圖表；開啟 Atlas 可看到完整版本。"
+      : "Atlas 沒有執行；開啟 Atlas 可看到「" + String(embed.title || "") + "」。"));
     box.replaceChildren(note, ...(file ? [answerHtml(session, file)] : []));
   };
   const path = String(embed.path || "");

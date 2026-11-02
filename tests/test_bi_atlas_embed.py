@@ -456,6 +456,13 @@ def test_the_frame_shows_atlas_and_falls_back_when_it_cannot(tmp_path: Path, atl
             )
             assert not browser._evaluate("!!document.querySelector('iframe[data-atlas-origin]')")
 
+            # A dashboard none of whose panels this PC can read has no chart to fall back to
+            # (an imported file's other vault), and the note does not promise one.
+            assert "看到「別處的」" in browser._evaluate(
+                "answerAtlasEmbed('s', {kind: 'dashboard', path: 'nope', title: '別處的'}, [])"
+                ".textContent"
+            )
+
             # An address that is not this PC is never framed.
             atlas.head_status = 200
             load("http://atlas.example:8127")
