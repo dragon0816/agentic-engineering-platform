@@ -1191,6 +1191,8 @@ tr:last-child td { border-bottom: none; }
 .bi-stale { margin: 6px 0; padding: 8px 12px; border: 1px solid var(--warn); border-radius: 8px;
   background: color-mix(in srgb, var(--warn) 10%, transparent); }
 .bi-err { color: var(--bad); font-size: 13px; }
+/* A folder path has nowhere to break; it wraps instead of widening the page on a phone. */
+#bi-notice, #bi-b-v-state, .bi-err { overflow-wrap: anywhere; }
 .bi-err:empty { display: none; }
 .bi-schema-note { flex: 1 1 100%; margin: 0; overflow-wrap: anywhere; }
 .bi-schema-note:empty { display: none; }

@@ -94,7 +94,9 @@ def test_vault_panel_and_dashboard_in_a_browser(
     )
     web, server, _recorder, _ = served
     workspace = web.runtime.layout.workspace_root
-    shared = tmp_path / "sharepoint"  # stands in for the synced SharePoint folder
+    # Stands in for the synced SharePoint folder. A long name with nowhere to break,
+    # as a real OneDrive path has: the notice that shows it must still wrap on a phone.
+    shared = tmp_path / "SharePointFolderWithNoBreaksInIt"
     shared.mkdir()
     shots = Path(os.environ.get("AEP_UI_SHOTS") or SHOTS)
     shots.mkdir(parents=True, exist_ok=True)
@@ -438,9 +440,15 @@ def test_vault_panel_and_dashboard_in_a_browser(
         click("#bi-b-v-go")
         wait("document.getElementById('bi-b-v-err').textContent.includes('repo.json')")
         size(390, 844, True)
+        wide = run(
+            "[...document.querySelectorAll('body *')].filter((e) => e.offsetParent !== null"
+            " && e.getBoundingClientRect().right > document.documentElement.clientWidth + 1)"
+            ".slice(0, 8).map((e) => e.tagName + '#' + e.id + '.' + e.className + ' '"
+            " + Math.round(e.getBoundingClientRect().right) + ' ' + e.textContent.slice(0, 60))"
+        )
         assert not run(
             "document.documentElement.scrollWidth > document.documentElement.clientWidth"
-        )
+        ), wide
         shoot("vault-join-error-phone")
     finally:
         browser.close()
